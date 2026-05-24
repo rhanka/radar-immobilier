@@ -13,7 +13,7 @@ jobs:
   quality:
     name: Quality gates
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,29 +24,21 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.test.yml config -q
           docker compose -f docker-compose.yml -f docker-compose.e2e.yml config -q
 
+      - name: Install workspace deps
+        run: make install ENV=ci
+
       - name: Typecheck
-        env:
-          ENV: ci
         run: make typecheck ENV=ci
 
       - name: Lint
-        env:
-          ENV: ci
         run: make lint ENV=ci
 
-      - name: Test
-        env:
-          ENV: test-ci
-        run: make test ENV=test-ci
-
       - name: Build
-        env:
-          ENV: ci
         run: make build ENV=ci
 
-# NOTE: Booting the full docker-compose stack (postgres + minio + obscura +
-# maildev) is intentionally deferred to BR-02 and beyond, when actual code
-# requires it. BR-00 quality gates are placeholders that don't need any
-# runtime service. Adding stack boot here would only introduce flakiness
-# (Obscura binary CLI is not yet wired correctly — fixed in BR-04 when
-# the K8s tenant goes live).
+      - name: Test (unit + integration, boots postgres + minio)
+        run: make test ENV=test-ci
+
+      - name: Tear down
+        if: always()
+        run: make clean ENV=test-ci
