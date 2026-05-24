@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-24 — BR-01 `feat/spec-evol-scaffolding-design` IN PROGRESS (docs-only branch). Already merged: BR-00 (PR #1, merge commit `f139ee8`). Next after BR-01 merge: BR-02 `feat/api-skeleton-hono-postgres-s3` (real code starts here), parallelizable with BR-03 (UI skeleton) and BR-05 (source spikes).
+Status: Updated 2026-05-24 — BR-00 and BR-01 both MERGED. BR-00 = PR #1 (`f139ee8`, scaffolding). BR-01 = PR #2 (`9f3447a`, spec/plan format polish). Foundational phase complete; next action is BR-02 `feat/api-skeleton-hono-postgres-s3` (real code starts here), parallelizable with BR-03 (UI skeleton) and BR-05 (source spikes).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -15,9 +15,10 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 
 **Completed branches (merged):**
 - BR-00 `chore/scaffolding-base` — merged 2026-05-24 (PR #1, `f139ee8`). Archived at `plan/done/00-BRANCH_chore-scaffolding-base.md`.
+- BR-01 `feat/spec-evol-scaffolding-design` — merged 2026-05-24 (PR #2, `9f3447a`). Archived at `plan/done/01-BRANCH_feat-spec-evol-scaffolding-design.md`.
 
 **Active execution:**
-- BR-01 `feat/spec-evol-scaffolding-design` — docs-only; reformatting BR-00 archived plan + polishing SPEC_EVOL_SCAFFOLDING headers. Worktree `tmp/feat-spec-evol-scaffolding-design/`.
+- _none_ — next branch is BR-02.
 
 **Pending branches (ordered execution):**
 - BR-02 `feat/api-skeleton-hono-postgres-s3`
