@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapHealthPayload } from "./health";
+import { mapHealthPayload, resolveHealthUrl } from "./health";
 
 describe("mapHealthPayload", () => {
   it("maps a healthy API payload to an ok UI state", () => {
@@ -28,5 +28,9 @@ describe("mapHealthPayload", () => {
       label: "API degradee",
       detail: "connection refused",
     });
+  });
+
+  it("uses a same-origin health URL when no API base URL is configured", () => {
+    expect(resolveHealthUrl()).toBe("/health");
   });
 });

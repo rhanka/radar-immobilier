@@ -45,11 +45,19 @@ export function mapHealthPayload(payload: HealthPayload): HealthView {
   };
 }
 
+export function resolveHealthUrl(baseUrl = import.meta.env.VITE_API_BASE_URL): string {
+  if (!baseUrl) {
+    return "/health";
+  }
+
+  return `${baseUrl.replace(/\/$/, "")}/health`;
+}
+
 export async function readHealth(
   baseUrl = import.meta.env.VITE_API_BASE_URL,
 ): Promise<HealthView> {
   try {
-    const response = await fetch(`${baseUrl}/health`);
+    const response = await fetch(resolveHealthUrl(baseUrl));
     const payload = (await response.json()) as HealthPayload;
     return mapHealthPayload(payload);
   } catch (error) {

@@ -49,9 +49,9 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - Reason: BR-03 creates the first `ui` workspace, so root workspace metadata, lockfile, Makefile targets, and ESLint config may need updates.
   - Impact: root `package.json` gains `ui`; `package-lock.json` updates through make-only install; `Makefile` runs UI build/typecheck/test; `eslint.config.js` handles Svelte/TS lint boundaries.
   - Rollback: remove `ui` from workspaces and restore previous gate target bodies/config.
-- [ ] `deferred` BR03-EX3 - Compose UI changes.
-  - Reason: `docker-compose.dev.yml` already defines a `ui` service. Only touch compose files if UI gates or dev server cannot run with the existing service.
-  - Impact: limited to UI service commands/volumes/test node_modules if required.
+- [x] `acknowledge` BR03-EX3 - Compose UI changes.
+  - Reason: the existing `ui` service did not run the Vite dev server, and the API health badge needs a same-origin Vite proxy to avoid browser CORS changes in the API.
+  - Impact: limited to the dev `ui` service command and UI environment variables in `docker-compose.dev.yml`.
   - Rollback: restore BR-02 compose files.
 - [ ] `deferred` BR03-EX4 - CI workflow changes.
   - Reason: existing CI calls `make typecheck`, `make lint`, `make build`, and `make test`; if Makefile integration is enough, no CI edit is needed.
@@ -65,14 +65,14 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
 
 ## UAT Management (in orchestration context)
 - **Mono-branch**: UAT after the integrated UI can run locally through `make dev`.
-- UAT target: `make dev API_PORT=8804 UI_PORT=5304 MAILDEV_UI_PORT=1104 ENV=feat-ui-skeleton`.
+- UAT target: `make dev API_PORT=8804 UI_PORT=5304 MAILDEV_UI_PORT=1104 OBSCURA_HOST_PORT=9324 ENV=feat-ui-skeleton`.
 - UAT URL: `http://localhost:5304`.
 - UAT checks:
-  - [ ] first viewport is the usable radar workspace, not a marketing landing page.
-  - [ ] desktop layout shows signal list, opportunity detail, map/status area, and chat shell without overlap.
-  - [ ] mobile layout remains usable and text fits controls/cards.
-  - [ ] API health state reads from the BR-02 `/health` endpoint when the API is running and degrades clearly when it is not.
-  - [ ] Chat shell visibly uses the package boundary from `@sentropic/chat-ui` or a documented adapter if package installation is blocked.
+  - [x] first viewport is the usable radar workspace, not a marketing landing page.
+  - [x] desktop layout shows signal list, opportunity detail, map/status area, and chat shell without overlap.
+  - [x] mobile layout remains usable and text fits controls/cards.
+  - [x] API health state reads from the BR-02 `/health` endpoint when the API is running and degrades clearly when it is not.
+  - [x] Chat shell visibly uses the package boundary from `@sentropic/chat-ui` or a documented adapter if package installation is blocked.
 
 ## Plan / Todo (lot-based)
 - [ ] **Lot 0 - Baseline, worktree, and rule clarity**
@@ -82,7 +82,7 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Confirm port mapping: `API_PORT=8804`, `UI_PORT=5304`, `MAILDEV_UI_PORT=1104`.
   - [x] Apply BR03-EX1 wording clarification for repository-local worktrees if needed.
   - [x] Lot gate: `git status --short --branch`.
-  - [ ] Commit: branch plan + optional BR03-EX1 wording.
+  - [x] Commit: branch plan + optional BR03-EX1 wording.
 
 - [x] **Lot 1 - UI workspace and dependency wiring**
   - [x] Remove `ui/.gitkeep`.
@@ -122,18 +122,18 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Keep component boundaries small and app-owned; do not fork Sentropic package internals.
   - [x] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make lint ENV=feat-ui-skeleton`.
 
-- [ ] **Lot 5 - Responsive polish and local UAT**
-  - [ ] Ensure desktop, tablet, and mobile layouts have stable dimensions and no text overlap.
-  - [ ] Start the stack with `make dev API_PORT=8804 UI_PORT=5304 MAILDEV_UI_PORT=1104 ENV=feat-ui-skeleton`.
-  - [ ] Verify `http://localhost:5304` manually.
-  - [ ] Capture Playwright screenshots if a browser runner is available in the make workflow; otherwise document manual viewport checks.
-  - [ ] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make lint ENV=feat-ui-skeleton`, `make build ENV=feat-ui-skeleton`, `make test ENV=test-feat-ui-skeleton`.
+- [x] **Lot 5 - Responsive polish and local UAT**
+  - [x] Ensure desktop, tablet, and mobile layouts have stable dimensions and no text overlap.
+  - [x] Start the stack with `make dev API_PORT=8804 UI_PORT=5304 MAILDEV_UI_PORT=1104 OBSCURA_HOST_PORT=9324 ENV=feat-ui-skeleton`.
+  - [x] Verify `http://localhost:5304` manually.
+  - [x] Capture Playwright screenshots if a browser runner is available in the make workflow; otherwise document manual viewport checks.
+  - [x] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make lint ENV=feat-ui-skeleton`, `make build ENV=feat-ui-skeleton`, `make test ENV=test-feat-ui-skeleton`.
 
-- [ ] **Lot 6 - GitHub Pages deployment**
-  - [ ] Create `.github/workflows/deploy-gh-pages.yml`.
-  - [ ] Configure Vite base path for GitHub Pages without breaking local dev.
-  - [ ] Ensure the workflow uses make targets where applicable.
-  - [ ] Lot gate: `make build ENV=feat-ui-skeleton`.
+- [x] **Lot 6 - GitHub Pages deployment**
+  - [x] Create `.github/workflows/deploy-gh-pages.yml`.
+  - [x] Configure Vite base path for GitHub Pages without breaking local dev.
+  - [x] Ensure the workflow uses make targets where applicable.
+  - [x] Lot gate: `make build GITHUB_PAGES=true ENV=feat-ui-skeleton`.
 
 - [ ] **Lot 7 - Push, PR, merge, and close**
   - [ ] Run full scope check against Allowed/Conditional/Forbidden paths.

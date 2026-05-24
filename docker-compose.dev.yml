@@ -39,7 +39,7 @@ services:
 
   ui:
     image: node:24-bookworm-slim
-    command: sleep infinity
+    command: sh -c "npm run dev --workspace=ui"
     working_dir: /workspace
     depends_on:
       api: { condition: service_started }
@@ -50,7 +50,8 @@ services:
       - radar-root-node-modules:/workspace/node_modules
       - radar-ui-node-modules:/workspace/ui/node_modules
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8803}
+      API_PROXY_TARGET: ${API_PROXY_TARGET:-http://api:3000}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
     networks: [radar]
 
 volumes:
