@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-24 — BR-00 and BR-01 both MERGED. BR-00 = PR #1 (`f139ee8`, scaffolding). BR-01 = PR #2 (`9f3447a`, spec/plan format polish). Foundational phase complete; next action is BR-02 `feat/api-skeleton-hono-postgres-s3` (real code starts here), parallelizable with BR-03 (UI skeleton) and BR-05 (source spikes).
+Status: Updated 2026-05-24 — BR-02 `feat/api-skeleton-hono-postgres-s3` MERGED (PR #3, `6814d8b`). First real code: @radar/domain (Zod v1 schemas + scoring), Hono API with DI /health, Postgres+Drizzle 7-table schema + migration, S3 ObjectStore abstraction, real make gates + CI (19 tests green). Also merged: BR-00 (PR #1), BR-01 (PR #2). Next candidates (parallelizable): BR-03 (UI skeleton + design system), BR-05 (source spikes). BR-04 (K8s tenant + S3 bucket) depends on BR-02/BR-03.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -16,12 +16,12 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 **Completed branches (merged):**
 - BR-00 `chore/scaffolding-base` — merged 2026-05-24 (PR #1, `f139ee8`). Archived at `plan/done/00-BRANCH_chore-scaffolding-base.md`.
 - BR-01 `feat/spec-evol-scaffolding-design` — merged 2026-05-24 (PR #2, `9f3447a`). Archived at `plan/done/01-BRANCH_feat-spec-evol-scaffolding-design.md`.
+- BR-02 `feat/api-skeleton-hono-postgres-s3` — merged 2026-05-24 (PR #3, `6814d8b`). Archived at `plan/done/02-BRANCH_feat-api-skeleton-hono-postgres-s3.md`.
 
 **Active execution:**
-- _none_ — next branch is BR-02.
+- _none_ — next branch is BR-03 (or BR-05, parallelizable).
 
 **Pending branches (ordered execution):**
-- BR-02 `feat/api-skeleton-hono-postgres-s3`
 - BR-03 `feat/ui-skeleton-svelte-ds`
 - BR-04 `feat/k8s-tenant-radar-and-infra`
 - BR-05 `feat/source-investigation-spikes`
