@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-24 — BR-00 `chore/scaffolding-base` MERGED via PR #1 (merge commit `f139ee8`). 12 atomic commits delivered: repo bootstrap, multi-agent rules (`MASTER.md` + 5 sub-rules + 3 neutral pointers), 7 skills, npm workspace, docker-compose stack with custom Obscura wrapper, Makefile (~250 lines), CI baseline (compose validation + placeholder gates green), README, LICENSE. Repo policy: merge-commit only, branches preserved. Next action: BR-01 `feat/spec-evol-scaffolding-design` to commit `SPEC_INTENT_SCAFFOLDING.md` + `SPEC_EVOL_SCAFFOLDING.md` into a dedicated branch (currently both files are on `main` carried over from the scaffolding stage — BR-01 will formalize them and convert the BR-00 branch file format from `###` sub-headings to checkbox-only per template).
+Status: Updated 2026-05-24 — BR-01 `feat/spec-evol-scaffolding-design` IN PROGRESS (docs-only branch). Already merged: BR-00 (PR #1, merge commit `f139ee8`). Next after BR-01 merge: BR-02 `feat/api-skeleton-hono-postgres-s3` (real code starts here), parallelizable with BR-03 (UI skeleton) and BR-05 (source spikes).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -17,10 +17,9 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-00 `chore/scaffolding-base` — merged 2026-05-24 (PR #1, `f139ee8`). Archived at `plan/done/00-BRANCH_chore-scaffolding-base.md`.
 
 **Active execution:**
-- _none_ — next branch is BR-01.
+- BR-01 `feat/spec-evol-scaffolding-design` — docs-only; reformatting BR-00 archived plan + polishing SPEC_EVOL_SCAFFOLDING headers. Worktree `tmp/feat-spec-evol-scaffolding-design/`.
 
 **Pending branches (ordered execution):**
-- BR-01 `feat/spec-evol-scaffolding-design`
 - BR-02 `feat/api-skeleton-hono-postgres-s3`
 - BR-03 `feat/ui-skeleton-svelte-ds`
 - BR-04 `feat/k8s-tenant-radar-and-infra`
