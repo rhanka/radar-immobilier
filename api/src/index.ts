@@ -2,14 +2,16 @@ import { serve } from "@hono/node-server";
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
 import { createLogger } from "./logger.js";
+import { createDb, makeDbProbe } from "./db/client.js";
 
 const config = loadConfig();
 const logger = createLogger(config.LOG_LEVEL);
 
-// Dependency probes. Real DB and object-store probes are wired in Lots 3/4;
-// until then they report ok so the server is bootable end-to-end.
+const dbHandle = createDb(config);
+
+// Object-store probe is wired in Lot 4; until then it reports ok.
 const app = createApp({
-  checkDb: async () => ({ ok: true, detail: "stub (wired in Lot 3)" }),
+  checkDb: makeDbProbe(dbHandle),
   checkObjectStore: async () => ({ ok: true, detail: "stub (wired in Lot 4)" }),
 });
 
