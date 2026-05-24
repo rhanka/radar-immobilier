@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Initialized 2026-05-23 — scaffolding spec `docs/spec/SPEC_EVOL_SCAFFOLDING.md` approved by user. Next action: execute BR-00 `chore/scaffolding-base` in a `tmp/chore-scaffolding-base` worktree. Repository is not yet a git repo; `git init` is the first task of BR-00.
+Status: Updated 2026-05-23 — BR-00 `chore/scaffolding-base` execution complete on local branch (8 commits): repo bootstrap (git init, gitignore, gitattributes), multi-agent rules (`MASTER.md` + 5 sub-rules + 3 pointers), 7 skills, npm workspace + `tsconfig.base.json` + `.env.example`, docker-compose stack (api placeholder + postgres-postgis + obscura + maildev + minio + 3 surcharges), Makefile (~250 lines), CI baseline (2 workflows), README, LICENSE. Pending: PR + merge (no remote yet). Next action: open the remote, push, merge BR-00, then start BR-01.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -17,7 +17,7 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - _none yet_ — repo just initialized.
 
 **Active execution:**
-- BR-00 `chore/scaffolding-base` — pending start.
+- BR-00 `chore/scaffolding-base` — executed locally, awaiting remote push + merge.
 
 **Pending branches (ordered execution):**
 - BR-01 `feat/spec-evol-scaffolding-design`
