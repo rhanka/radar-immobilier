@@ -8,5 +8,16 @@
 
 services:
   api:
+    image: node:24-bookworm-slim
+    working_dir: /workspace
+    command: sh -c "npm run test --workspace=api"
+    volumes:
+      - .:/workspace
+      - radar-test-root-node-modules:/workspace/node_modules
+      - radar-test-api-node-modules:/workspace/api/node_modules
     environment:
       NODE_ENV: test
+
+volumes:
+  radar-test-root-node-modules:
+  radar-test-api-node-modules:
