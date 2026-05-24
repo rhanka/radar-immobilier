@@ -4,6 +4,9 @@
 
 services:
   api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
     image: radar-immobilier-api:${API_VERSION:-local}
     command: []                   # use Dockerfile CMD
     environment:
