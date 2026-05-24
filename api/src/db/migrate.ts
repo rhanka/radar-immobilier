@@ -7,7 +7,7 @@ const config = loadConfig();
 const logger = createLogger(config.LOG_LEVEL);
 const { db, pool } = createDb(config);
 
-migrate(db, { migrationsFolder: "api/drizzle" })
+migrate(db, { migrationsFolder: "drizzle" })
   .then(() => {
     logger.info("migrations applied");
     return pool.end();
