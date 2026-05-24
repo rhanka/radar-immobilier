@@ -103,16 +103,16 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Create unit tests for score/status formatting and health response mapping.
   - [x] Lot gate: `make test-ui ENV=test-feat-ui-skeleton`.
 
-- [ ] **Lot 3 - Radar workspace components**
-  - [ ] Create `ui/src/lib/components/AppShell.svelte`.
-  - [ ] Create `ui/src/lib/components/TopBar.svelte`.
-  - [ ] Create `ui/src/lib/components/MetricStrip.svelte`.
-  - [ ] Create `ui/src/lib/components/SignalQueue.svelte`.
-  - [ ] Create `ui/src/lib/components/OpportunityPanel.svelte`.
-  - [ ] Create `ui/src/lib/components/MapPreview.svelte` as a non-interactive BR-03 preview for BR-10 map work.
-  - [ ] Create `ui/src/lib/components/ApiStatusBadge.svelte`.
-  - [ ] Compose the first screen in `App.svelte` as the actual operational dashboard.
-  - [ ] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make build ENV=feat-ui-skeleton`.
+- [x] **Lot 3 - Radar workspace components**
+  - [x] Create `ui/src/lib/components/AppShell.svelte`.
+  - [x] Create `ui/src/lib/components/TopBar.svelte`.
+  - [x] Create `ui/src/lib/components/MetricStrip.svelte`.
+  - [x] Create `ui/src/lib/components/SignalQueue.svelte`.
+  - [x] Create `ui/src/lib/components/OpportunityPanel.svelte`.
+  - [x] Create `ui/src/lib/components/MapPreview.svelte` as a non-interactive BR-03 preview for BR-10 map work.
+  - [x] Create `ui/src/lib/components/ApiStatusBadge.svelte`.
+  - [x] Compose the first screen in `App.svelte` as the actual operational dashboard.
+  - [x] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make build ENV=feat-ui-skeleton`.
 
 - [ ] **Lot 4 - Sentropic chat/design-system shell**
   - [ ] Add a thin local adapter component around `@sentropic/chat-ui/components/ChatPanel.svelte`.
