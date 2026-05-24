@@ -23,13 +23,17 @@ services:
       - "${MAILDEV_SMTP_HOST_PORT:-1025}:1025"
 
   api:
+    # Dev runs the full repo mounted (so npm install writes the lockfile
+    # back to host) while node_modules live in named volumes off-host
+    # (rules: no node_modules on host). Hot reload via tsx watch.
+    image: node:24-bookworm-slim
+    command: sh -c "npm run dev --workspace=api"
     ports:
-      - "${API_PORT:-8801}:3000"
+      - "${API_PORT:-8803}:3000"
     volumes:
-      - ./api:/workspace/api
-      - ./packages:/workspace/packages
-      - ./tsconfig.base.json:/workspace/tsconfig.base.json:ro
-      - ./package.json:/workspace/package.json:ro
+      - .:/workspace
+      - radar-root-node-modules:/workspace/node_modules
+      - radar-api-node-modules:/workspace/api/node_modules
     environment:
       NODE_ENV: development
 
@@ -40,12 +44,16 @@ services:
     depends_on:
       api: { condition: service_started }
     ports:
-      - "${UI_PORT:-5301}:5173"
+      - "${UI_PORT:-5303}:5173"
     volumes:
-      - ./ui:/workspace/ui
-      - ./packages:/workspace/packages
-      - ./tsconfig.base.json:/workspace/tsconfig.base.json:ro
-      - ./package.json:/workspace/package.json:ro
+      - .:/workspace
+      - radar-root-node-modules:/workspace/node_modules
+      - radar-ui-node-modules:/workspace/ui/node_modules
     environment:
-      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8801}
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8803}
     networks: [radar]
+
+volumes:
+  radar-root-node-modules:
+  radar-api-node-modules:
+  radar-ui-node-modules:
