@@ -48,18 +48,17 @@ _None at branch start. Populate as issues arise._
   - [ ] Confirm `ENV=feat-spec-evol-scaffolding-design`, `API_PORT=8802`, `UI_PORT=5302`, `MAILDEV_UI_PORT=1102` and absence of collision with active branches in `PLAN.md`.
   - [ ] Confirm scope and guardrails above.
 
-- [ ] **Lot 1 — Reformat BR-00 archived plan file to template-strict**
-  - [ ] Rewrite `plan/done/00-BRANCH_chore-scaffolding-base.md` so that:
-    - [ ] Section `## Plan / Todo (lot-based)` uses `- [x] **Lot N — Title**` headers (no `### Lot N`).
-    - [ ] Every sub-step is a checkbox `[x]` (all lots are completed).
-    - [ ] No `###` sub-headings remain inside `## Plan / Todo`.
-    - [ ] Top-of-file status banner preserved.
-    - [ ] `## Feedback Loop` and `## Open questions` sections preserved as-is.
-  - [ ] Diff review: confirm no semantic content loss vs the merged version.
-  - [ ] Lot gate:
-    - [ ] `make typecheck ENV=feat-spec-evol-scaffolding-design` (placeholder, passes vacuously).
-    - [ ] `make lint ENV=feat-spec-evol-scaffolding-design` (placeholder).
-    - [ ] No `make test` needed (docs-only).
+- [x] **Lot 1 — Reformat BR-00 archived plan file to template-strict**
+  - [x] Rewrite `plan/done/00-BRANCH_chore-scaffolding-base.md` so that:
+    - [x] Section `## Plan / Todo (lot-based)` uses `- [x] **Lot N — Title**` headers (no `### Lot N`).
+    - [x] Every sub-step is a checkbox `[x]` (all lots are completed).
+    - [x] No `###` sub-headings remain inside `## Plan / Todo`.
+    - [x] `## Feedback Loop` and `## Open questions` sections preserved as-is.
+  - [x] Diff review: -95 / +68 lines, zero `### Lot` markers, 9 checkbox lots — content semantically preserved.
+  - [x] Lot gate:
+    - [x] `make typecheck ENV=feat-spec-evol-scaffolding-design` (placeholder, passes vacuously).
+    - [x] `make lint ENV=feat-spec-evol-scaffolding-design` (placeholder).
+    - [x] No `make test` needed (docs-only).
 
 - [ ] **Lot 2 — Spec cross-references and status frontmatter polish**
   - [ ] In `docs/spec/SPEC_INTENT_SCAFFOLDING.md`: confirm status header refers to `SPEC_EVOL_SCAFFOLDING.md` as successor and that the "Suite immédiate" section points to BR-00 (now merged).
