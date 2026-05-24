@@ -39,7 +39,12 @@ Bootstrap the `radar-immobilier` repository conventions: git init, Makefile, doc
   - Declare `BR00-EXn` in `## Feedback Loop` if any forbidden path must be touched. None expected.
 
 ## Feedback Loop
-_None at branch start. Populate as issues arise._
+
+### BR00-EX1 — Bootstrap exception: work directly on branch (no worktree)
+- **Reason**: BR-00 establishes the worktree discipline itself. Creating a `tmp/chore-scaffolding-base` worktree before the Makefile / rules / skills exist would be a chicken-and-egg situation (no `make` target to manage worktrees, no rules to enforce the policy).
+- **Impact**: only BR-00. From BR-01 onward, work is strictly in `tmp/<slug>`.
+- **Rollback**: none needed. The exception is non-destructive.
+- **Status**: acknowledged.
 
 ## Orchestration Mode
 - [x] **Mono-branch + cherry-pick** — single delivery, no parallel work yet.
@@ -50,6 +55,8 @@ _None at branch start. Populate as issues arise._
 - **Mono-branch**: minimal manual UAT (only `make dev` smoke-check) before merge. No UI surface yet.
 
 ## Plan / Todo (lot-based)
+
+**Status (2026-05-23)** : Lots 0–7 executed locally on `chore/scaffolding-base`. Lot 8 (push + PR + merge) pending — no remote configured yet. Future BRANCH files MUST use the checkbox format from `plan/BRANCH_TEMPLATE.md` (this file deviated to `###` headings ; corrected in BR-01).
 
 ### Lot 0 — Bootstrap repo & git
 - [ ] `git init` at repo root.
@@ -144,7 +151,11 @@ _None at branch start. Populate as issues arise._
 - [ ] Preserve branch.
 - [ ] Move this file to `plan/done/00-BRANCH_chore-scaffolding-base.md`.
 
-## Open questions (to resolve during execution)
-- [ ] License : proprietary (All Rights Reserved) ou autre ? À confirmer avec utilisateur avant Lot 7.
-- [ ] Image obscura disponible publiquement sur ghcr.io ou doit-on builder localement ? Vérifier en Lot 4.
-- [ ] Politique CI sur branche `main` vs PR feature : enforcer protection branche `main` dès BR-00 ou attendre ?
+## Open questions (resolved during execution)
+- [x] License : proprietary (All Rights Reserved) retained for the demo phase ; revisited at client transition. See `LICENSE`.
+- [x] Obscura : no public docker image, only release tarballs. Custom `obscura/Dockerfile` wraps the upstream Linux x86_64 binary (v0.1.5).
+- [x] Branch protection on `main` : deferred until a remote is set up. `branch-policy.yml` workflow already documents the policy (merge-commit only).
+
+## Resolved during execution
+- **Commit identity**: `rhanka <fabien.antoine@m4x.org>` (saved in memory). All 8 BR-00 commits use this identity after a one-time `git filter-branch`.
+- **No co-author trailer** in commits (user preference, saved in memory). Removed from messages and the `make commit` target.

@@ -1,0 +1,12 @@
+# Test surcharge: same services as base, no host ports exposed, no UI
+# dev container, no maildev UI. Test isolation comes from the per-branch
+# `ENV=test-<slug>` compose project name (each branch gets its own
+# namespaced volumes). `make clean ENV=test-<slug>` removes them.
+#
+# Apply with:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml ...
+
+services:
+  api:
+    environment:
+      NODE_ENV: test

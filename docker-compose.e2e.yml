@@ -1,0 +1,26 @@
+# E2E surcharge: build production images, run Playwright suite against
+# them. No source mounts. Apply with:
+#   docker compose -f docker-compose.yml -f docker-compose.e2e.yml ...
+
+services:
+  api:
+    image: radar-immobilier-api:${API_VERSION:-local}
+    command: []                   # use Dockerfile CMD
+    environment:
+      NODE_ENV: production
+
+  ui:
+    image: radar-immobilier-ui:${UI_VERSION:-local}
+    command: []
+    networks: [radar]
+
+  e2e:
+    image: radar-immobilier-e2e:${E2E_VERSION:-local}
+    depends_on:
+      api: { condition: service_started }
+      ui:  { condition: service_started }
+    environment:
+      PLAYWRIGHT_UI_BASE_URL: http://ui:5173
+      PLAYWRIGHT_API_BASE_URL: http://api:3000
+      PLAYWRIGHT_MAILDEV_API_URL: http://maildev:1080
+    networks: [radar]

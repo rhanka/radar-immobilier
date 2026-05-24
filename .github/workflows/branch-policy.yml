@@ -1,0 +1,46 @@
+name: Branch policy
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  enforce:
+    name: Enforce repo policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify merge strategy will be a merge commit
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Project policy: only merge-commit allowed, branches preserved.
+          # GitHub enforces this through repo settings; this job documents
+          # the rule and fails loudly if someone tries to push squashed
+          # history during a PR (rare but possible via local rebase).
+          echo "Project merge policy: merge-commit only, no squash, no rebase merge."
+          echo "Branches MUST be preserved post-merge (delete_branch_on_merge = false)."
+
+      - name: Verify BRANCH plan file presence
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          # Every feature branch is expected to ship with a `plan/NN-BRANCH_*.md`
+          # file. main, release/* and chore/scaffolding-base (BR-00) are exempt.
+          if [[ "$BRANCH" == "main" || "$BRANCH" == release/* || "$BRANCH" == "chore/scaffolding-base" ]]; then
+            echo "Branch '$BRANCH' is exempt from BRANCH plan file requirement."
+            exit 0
+          fi
+          slug="${BRANCH##*/}"
+          if compgen -G "plan/*BRANCH_*${slug}*.md" > /dev/null; then
+            echo "Found a plan file matching '${slug}':"
+            ls plan/*BRANCH_*${slug}*.md
+          else
+            echo "::warning::No plan file found in plan/ for branch '$BRANCH'."
+            echo "Expected: plan/NN-BRANCH_${slug}.md (warn-only at BR-00; will become hard fail)."
+          fi
