@@ -60,10 +60,10 @@ _None at branch start. Populate as issues arise._
     - [x] `make lint ENV=feat-spec-evol-scaffolding-design` (placeholder).
     - [x] No `make test` needed (docs-only).
 
-- [ ] **Lot 2 — Spec cross-references and status frontmatter polish**
-  - [ ] In `docs/spec/SPEC_INTENT_SCAFFOLDING.md`: confirm status header refers to `SPEC_EVOL_SCAFFOLDING.md` as successor and that the "Suite immédiate" section points to BR-00 (now merged).
-  - [ ] In `docs/spec/SPEC_EVOL_SCAFFOLDING.md`: confirm status header is up-to-date (initial bootstrap context vs current merged-BR-00 context). Add a "Status updates" log section if material context has changed.
-  - [ ] No structural rewrite — these specs are stable; this lot is light polish only.
+- [x] **Lot 2 — Spec cross-references and status frontmatter polish**
+  - [x] In `docs/spec/SPEC_INTENT_SCAFFOLDING.md`: confirmed status header — frozen by convention, no edit needed.
+  - [x] In `docs/spec/SPEC_EVOL_SCAFFOLDING.md`: corrected successor reference (BR-09 → BR-12), updated author to commit identity, added "Status updates" log section, rewrote §16 as roadmap with merged/in-progress markers.
+  - [x] No structural rewrite — these specs remain stable; this lot is light polish only.
 
 - [ ] **Lot 3 — PLAN.md status update**
   - [ ] §1 Current state: BR-01 active execution.

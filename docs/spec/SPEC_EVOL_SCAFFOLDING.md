@@ -2,9 +2,14 @@
 
 > **Statut** : EVOL (design validé issu du brainstorming 2026-05-23, vivant jusqu'à la fin du scaffolding)
 > **Prédécesseur** : `SPEC_INTENT_SCAFFOLDING.md`
-> **Successeur** : `SPEC_SCAFFOLDING.md` (sera produit à la clôture de BR-09)
-> **Date** : 2026-05-23
-> **Auteur** : utilisateur (fabien.antoine@gmail.com) — co-conçu avec Claude
+> **Successeur** : `SPEC_SCAFFOLDING.md` (sera produit à la clôture de BR-12)
+> **Date initiale** : 2026-05-23
+> **Auteur** : rhanka <fabien.antoine@m4x.org>
+
+## Status updates
+
+- **2026-05-23** : design validé après brainstorming (Sections 1–16).
+- **2026-05-24** : BR-00 `chore/scaffolding-base` merged (PR #1, merge commit `f139ee8`). BR-01 actif pour formaliser cette spec dans une vraie branche docs et reformater le plan archivé de BR-00.
 
 ## 1. Objectif
 
@@ -509,8 +514,8 @@ Ne jamais modifier ces fichiers : tout enrichissement passe par `SPEC_INTENT_*` 
 - Internationalisation (l'UI est en français pour la démo).
 - Workflow `@sentropic/flow` côté pipeline (impl simple BR-07, refactor ultérieur si publié).
 
-## 16. Suite immédiate après validation de cette spec
+## 16. Roadmap d'exécution
 
-1. **BR-00 (`chore/scaffolding-base`)** : poser Makefile, docker-compose, rules, pointers multi-agent, workspace npm, CI baseline, PLAN.md, template branche.
-2. Création de `plan/00-BRANCH_chore-scaffolding-base.md` détaillant les lots de BR-00.
-3. Démarrage du dev dans un worktree `tmp/chore-scaffolding-base`.
+1. **BR-00 (`chore/scaffolding-base`)** — MERGED 2026-05-24 (PR #1). Makefile, docker-compose, rules, pointers multi-agent, workspace npm, CI baseline, PLAN.md, template branche.
+2. **BR-01 (`feat/spec-evol-scaffolding-design`)** — IN PROGRESS. Formalise les specs scaffolding dans une vraie branche docs, reformate le BR-00 archivé au format checkbox-only.
+3. **BR-02 → BR-12** — voir §10 pour le découpage détaillé et §11 `PLAN.md` pour le scheduling.
