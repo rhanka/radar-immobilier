@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
 
-export interface AppDeps extends HealthDeps {}
+export type AppDeps = HealthDeps;
 
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
