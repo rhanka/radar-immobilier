@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.npm
+.yarn-integrity
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+.turbo
+.cache
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Worktrees (work in tmp/<slug>)
+tmp/
+
+# Test artifacts
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Generated
+*.generated.ts
+.svelte-kit/
+.vite/
+
+# Local data
+data/
+*.sqlite
+*.db
+*.dump
+*.pid
+
+# Scaleway / cloud creds
+.scw/
+.aws/
+*.kubeconfig
+kubeconfig*
+
+# Compiled obscura binary cache (we use docker)
+obscura-bin/
