@@ -1,8 +1,8 @@
 /** A stored object's metadata returned by head/put. */
 export interface ObjectInfo {
   key: string;
-  size?: number;
-  contentType?: string;
+  size?: number | undefined;
+  contentType?: string | undefined;
 }
 
 /**
