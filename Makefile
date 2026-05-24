@@ -112,10 +112,13 @@ build: ## Build all workspaces
 # Tests
 # ─────────────────────────────────────────────────────────────────────
 
+# The test stack uses its own node_modules volumes (isolated from dev), so
+# it installs deps itself via `npm ci` before migrating and running tests.
 .PHONY: test
 test: ## Run unit + integration tests (boots postgres + minio)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres minio
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api sh -c "\
+	  npm ci && \
 	  npm run db:migrate --workspace=api && \
 	  npm run test --workspaces --if-present"
 
@@ -123,6 +126,7 @@ test: ## Run unit + integration tests (boots postgres + minio)
 test-api: ## Run API tests (SCOPE=<file> for scoped runs)
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres minio
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api sh -c "\
+	  npm ci && \
 	  npm run db:migrate --workspace=api && \
 	  npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)"
 
