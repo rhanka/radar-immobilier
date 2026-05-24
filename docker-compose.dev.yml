@@ -1,0 +1,51 @@
+# Dev surcharge: expose ports on host, mount sources for hot reload,
+# expose Maildev and MinIO consoles. Apply with:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml ...
+# (the Makefile wraps this).
+
+services:
+  postgres:
+    ports:
+      - "${POSTGRES_HOST_PORT:-5532}:5432"
+
+  minio:
+    ports:
+      - "${S3_HOST_PORT:-9100}:9000"
+      - "${S3_CONSOLE_HOST_PORT:-9101}:9001"
+
+  obscura:
+    ports:
+      - "${OBSCURA_HOST_PORT:-9222}:9222"
+
+  maildev:
+    ports:
+      - "${MAILDEV_UI_PORT:-1080}:1080"
+      - "${MAILDEV_SMTP_HOST_PORT:-1025}:1025"
+
+  api:
+    ports:
+      - "${API_PORT:-8801}:3000"
+    volumes:
+      - ./api:/workspace/api
+      - ./packages:/workspace/packages
+      - ./tsconfig.base.json:/workspace/tsconfig.base.json:ro
+      - ./package.json:/workspace/package.json:ro
+    environment:
+      NODE_ENV: development
+
+  ui:
+    image: node:24-bookworm-slim
+    command: sleep infinity
+    working_dir: /workspace
+    depends_on:
+      api: { condition: service_started }
+    ports:
+      - "${UI_PORT:-5301}:5173"
+    volumes:
+      - ./ui:/workspace/ui
+      - ./packages:/workspace/packages
+      - ./tsconfig.base.json:/workspace/tsconfig.base.json:ro
+      - ./package.json:/workspace/package.json:ro
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8801}
+    networks: [radar]
