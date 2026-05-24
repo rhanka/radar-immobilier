@@ -59,12 +59,14 @@ Stand up the first real code of the radar: a Hono API on Node 24 with a Drizzle/
 
 ## Plan / Todo (lot-based)
 
-- [ ] **Lot 0 — Baseline & compose/dep groundwork**
+**Status (2026-05-24)** : Lots 0–6 done. Full gate green in worktree — typecheck + lint + build pass; `make test` = 19 tests green (14 @radar/domain unit, 5 api integration against real postgres + MinIO); `/health` smoke returns 200 `{db:ok, objectStore:ok}`. Lot 7 (push/PR/merge) in progress.
+
+- [x] **Lot 0 — Baseline & compose/dep groundwork**
   - [ ] Confirm worktree, ENV slug, ports (8803/5303/1103); no collision in `PLAN.md`.
   - [ ] BR02-EX2: relax `api.depends_on` to postgres+minio; give `api` a real build context (`api/Dockerfile`); keep dev/test surcharges consistent.
   - [ ] Use `--no-deps` for build-time make targets (install/typecheck/lint/build) so they don't boot services.
 
-- [ ] **Lot 1 — `@radar/domain` package (types + Zod v1)**
+- [x] **Lot 1 — `@radar/domain` package (types + Zod v1)**
   - [ ] `packages/radar-domain/package.json`, `tsconfig.json`.
   - [ ] `src/entities/`: `Signal`, `Lot`, `Opportunity`, `Score`, `SourceDocument`, `Constraint` types.
   - [ ] `src/schemas/`: `extracted-doc.v1.ts`, `signal-payload.v1.ts`, `opportunity-fiche.v1.ts` (Zod), each with a `parse`/`safeParse` export and a `SCHEMA_VERSION`.
@@ -72,7 +74,7 @@ Stand up the first real code of the radar: a Hono API on Node 24 with a Drizzle/
   - [ ] Unit tests `tests/schemas.spec.ts` (valid + invalid payloads).
   - [ ] Lot gate: `make typecheck`, `make lint`, `make test-api SCOPE=packages/radar-domain ENV=test-feat-api-skeleton` (or workspace-scoped vitest).
 
-- [ ] **Lot 2 — Hono API skeleton**
+- [x] **Lot 2 — Hono API skeleton**
   - [ ] `api/package.json` (hono, @hono/node-server, pino, drizzle-orm, pg, @aws-sdk/client-s3, zod, @radar/domain; dev: vitest, typescript, drizzle-kit).
   - [ ] `api/tsconfig.json` extends `tsconfig.base.json`.
   - [ ] `api/src/config.ts` (env parsing with zod).
@@ -82,7 +84,7 @@ Stand up the first real code of the radar: a Hono API on Node 24 with a Drizzle/
   - [ ] `api/Dockerfile` (multi-stage, Node 24, non-root).
   - [ ] Lot gate: `make typecheck`, `make lint`.
 
-- [ ] **Lot 3 — Postgres + Drizzle schema (§7.3)**
+- [x] **Lot 3 — Postgres + Drizzle schema (§7.3)**
   - [ ] `api/src/db/schema.ts` — tables: `sources`, `ingestions`, `documents`, `signals`, `opportunities`, `scores`, `links` (jsonb where unstable, per §7).
   - [ ] `api/drizzle.config.ts`.
   - [ ] `api/drizzle/0000_init.sql` — generated initial migration (single file).
@@ -90,7 +92,7 @@ Stand up the first real code of the radar: a Hono API on Node 24 with a Drizzle/
   - [ ] `make db-migrate` wired to drizzle-kit.
   - [ ] Lot gate: `make typecheck`, `make db-migrate ENV=test-feat-api-skeleton` applies cleanly.
 
-- [ ] **Lot 4 — `ObjectStore` S3 abstraction**
+- [x] **Lot 4 — `ObjectStore` S3 abstraction**
   - [ ] `api/src/storage/object-store.ts` — `ObjectStore` interface (`put`, `get`, `head`, `keyFor`).
   - [ ] `api/src/storage/s3-object-store.ts` — `@aws-sdk/client-s3` impl (works against MinIO + Scaleway).
   - [ ] `keyFor(source, date, sha256, ext)` implementing the `raw/<source>/<YYYY>/<MM>/<DD>/<sha256>.<ext>` pattern (rules/sources.md).
@@ -98,7 +100,7 @@ Stand up the first real code of the radar: a Hono API on Node 24 with a Drizzle/
   - [ ] Wire both health checks into `/health`.
   - [ ] Lot gate: `make typecheck`, `make lint`.
 
-- [ ] **Lot 5 — Makefile real gates + CI (BR02-EX1, EX3)**
+- [x] **Lot 5 — Makefile real gates + CI (BR02-EX1, EX3)**
   - [ ] `make typecheck` → `tsc --noEmit` per workspace (api + radar-domain) via `--no-deps` container.
   - [ ] `make lint` → eslint (flat config) or `tsc` strict; pick lightweight (eslint with @typescript-eslint).
   - [ ] `make test` → vitest unit + integration (boots postgres+minio for integration).
@@ -106,7 +108,7 @@ Stand up the first real code of the radar: a Hono API on Node 24 with a Drizzle/
   - [ ] `make build-api-image` → docker build of `api/Dockerfile`.
   - [ ] `.github/workflows/ci.yml` → boot postgres+minio, run `make test ENV=test-ci`.
 
-- [ ] **Lot 6 — Tests green**
+- [x] **Lot 6 — Tests green**
   - [ ] Unit: `packages/radar-domain/tests/schemas.spec.ts`.
   - [ ] Integration: `api/tests/integration/health.spec.ts` (real PG + MinIO), `api/tests/integration/object-store.spec.ts` (put/get/head round-trip), `api/tests/integration/db.spec.ts` (migration applied, basic insert/select on `sources`).
   - [ ] Lot gate (full): `make typecheck`, `make lint`, `make test ENV=test-feat-api-skeleton` all green.
