@@ -96,12 +96,12 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] BR03-EX2: update `Makefile` so `make typecheck`, `make build`, `make test`, and `make test-ui` include the UI workspace through make targets only.
   - [x] Lot gate: `make install ENV=feat-ui-skeleton`, `make typecheck ENV=feat-ui-skeleton`.
 
-- [ ] **Lot 2 - Demo data, API health client, and pure tests**
-  - [ ] Create `ui/src/lib/demo/radar-demo-data.ts` with stable demo signals, opportunity summary, score factors, and municipal source labels.
-  - [ ] Create `ui/src/lib/api/health.ts` with a small typed client for `/health`.
-  - [ ] Create `ui/src/lib/state/dashboard.ts` for selected signal/opportunity state without global framework complexity.
-  - [ ] Create unit tests for score/status formatting and health response mapping.
-  - [ ] Lot gate: `make test-ui ENV=test-feat-ui-skeleton`.
+- [x] **Lot 2 - Demo data, API health client, and pure tests**
+  - [x] Create `ui/src/lib/demo/radar-demo-data.ts` with stable demo signals, opportunity summary, score factors, and municipal source labels.
+  - [x] Create `ui/src/lib/api/health.ts` with a small typed client for `/health`.
+  - [x] Create `ui/src/lib/state/dashboard.ts` for selected signal/opportunity state without global framework complexity.
+  - [x] Create unit tests for score/status formatting and health response mapping.
+  - [x] Lot gate: `make test-ui ENV=test-feat-ui-skeleton`.
 
 - [ ] **Lot 3 - Radar workspace components**
   - [ ] Create `ui/src/lib/components/AppShell.svelte`.
