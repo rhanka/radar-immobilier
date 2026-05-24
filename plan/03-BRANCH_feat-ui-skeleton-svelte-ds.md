@@ -45,7 +45,7 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - Reason: user explicitly requested worktrees to be documented as `./tmp/feat-*` with `.gitignore`, not system `/tmp`.
   - Impact: wording-only updates in `AGENTS.md`, `rules/MASTER.md`, `rules/workflow.md`, `plan/BRANCH_TEMPLATE.md`, and possibly `.gitignore`.
   - Rollback: revert the wording to `tmp/<slug>` if the team later chooses a different convention.
-- [ ] `acknowledge` BR03-EX2 - Wire UI workspace and gates.
+- [x] `acknowledge` BR03-EX2 - Wire UI workspace and gates.
   - Reason: BR-03 creates the first `ui` workspace, so root workspace metadata, lockfile, Makefile targets, and ESLint config may need updates.
   - Impact: root `package.json` gains `ui`; `package-lock.json` updates through make-only install; `Makefile` runs UI build/typecheck/test; `eslint.config.js` handles Svelte/TS lint boundaries.
   - Rollback: remove `ui` from workspaces and restore previous gate target bodies/config.
@@ -84,17 +84,17 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Lot gate: `git status --short --branch`.
   - [ ] Commit: branch plan + optional BR03-EX1 wording.
 
-- [ ] **Lot 1 - UI workspace and dependency wiring**
-  - [ ] Remove `ui/.gitkeep`.
-  - [ ] Create `ui/package.json` with scripts: `dev`, `build`, `preview`, `typecheck`, `test`.
-  - [ ] Create Vite/Svelte config files: `ui/vite.config.ts`, `ui/tsconfig.json`, `ui/tsconfig.node.json`.
-  - [ ] Create Tailwind files: `ui/tailwind.config.cjs`, `ui/postcss.config.cjs`.
-  - [ ] Create app entry files: `ui/index.html`, `ui/src/main.ts`, `ui/src/App.svelte`, `ui/src/app.css`, `ui/src/vite-env.d.ts`.
-  - [ ] Add `ui` to root workspaces and update `package-lock.json` through make-only install.
-  - [ ] Add target packages: Svelte 5, Vite 5, Tailwind 3, `@lucide/svelte`, `svelte-streamdown`, Sentropic design system packages, and `@sentropic/chat-ui`.
-  - [ ] If a Sentropic package is unavailable from the configured registry, stop and report the exact package/version failure before substituting.
-  - [ ] BR03-EX2: update `Makefile` so `make typecheck`, `make build`, `make test`, and `make test-ui` include the UI workspace through make targets only.
-  - [ ] Lot gate: `make install ENV=feat-ui-skeleton`, `make typecheck ENV=feat-ui-skeleton`.
+- [x] **Lot 1 - UI workspace and dependency wiring**
+  - [x] Remove `ui/.gitkeep`.
+  - [x] Create `ui/package.json` with scripts: `dev`, `build`, `preview`, `typecheck`, `test`.
+  - [x] Create Vite/Svelte config files: `ui/vite.config.ts`, `ui/tsconfig.json`, `ui/tsconfig.node.json`.
+  - [x] Create Tailwind files: `ui/tailwind.config.cjs`, `ui/postcss.config.cjs`.
+  - [x] Create app entry files: `ui/index.html`, `ui/src/main.ts`, `ui/src/App.svelte`, `ui/src/app.css`, `ui/src/vite-env.d.ts`.
+  - [x] Add `ui` to root workspaces and update `package-lock.json` through make-only install.
+  - [x] Add target packages: Svelte 5, Vite 5, Tailwind 3, `@lucide/svelte`, `svelte-streamdown`, Sentropic design system packages, and `@sentropic/chat-ui`.
+  - [x] If a Sentropic package is unavailable from the configured registry, stop and report the exact package/version failure before substituting.
+  - [x] BR03-EX2: update `Makefile` so `make typecheck`, `make build`, `make test`, and `make test-ui` include the UI workspace through make targets only.
+  - [x] Lot gate: `make install ENV=feat-ui-skeleton`, `make typecheck ENV=feat-ui-skeleton`.
 
 - [ ] **Lot 2 - Demo data, API health client, and pure tests**
   - [ ] Create `ui/src/lib/demo/radar-demo-data.ts` with stable demo signals, opportunity summary, score factors, and municipal source labels.

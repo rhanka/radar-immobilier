@@ -107,6 +107,7 @@ format: ## Auto-format (prettier / dprint, defined later)
 .PHONY: build
 build: ## Build all workspaces
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=api
+	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui
 
 # ─────────────────────────────────────────────────────────────────────
 # Tests
@@ -132,7 +133,7 @@ test-api: ## Run API tests (SCOPE=<file> for scoped runs)
 
 .PHONY: test-ui
 test-ui: ## Run UI unit tests (SCOPE=<file> for scoped runs)
-	@echo "[test-ui] no UI yet — placeholder for BR-03+"
+	$(COMPOSE_RUN_API_NODEPS) npm run test --workspace=ui $(if $(SCOPE),-- $(SCOPE),)
 
 .PHONY: test-e2e
 test-e2e: ## Run Playwright e2e tests (E2E_SPEC=<file> for scoped runs)
