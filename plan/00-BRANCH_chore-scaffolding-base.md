@@ -39,7 +39,12 @@ Bootstrap the `radar-immobilier` repository conventions: git init, Makefile, doc
   - Declare `BR00-EXn` in `## Feedback Loop` if any forbidden path must be touched. None expected.
 
 ## Feedback Loop
-_None at branch start. Populate as issues arise._
+
+### BR00-EX1 — Bootstrap exception: work directly on branch (no worktree)
+- **Reason**: BR-00 establishes the worktree discipline itself. Creating a `tmp/chore-scaffolding-base` worktree before the Makefile / rules / skills exist would be a chicken-and-egg situation (no `make` target to manage worktrees, no rules to enforce the policy).
+- **Impact**: only BR-00. From BR-01 onward, work is strictly in `tmp/<slug>`.
+- **Rollback**: none needed. The exception is non-destructive.
+- **Status**: acknowledged.
 
 ## Orchestration Mode
 - [x] **Mono-branch + cherry-pick** — single delivery, no parallel work yet.
