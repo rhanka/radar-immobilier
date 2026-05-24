@@ -88,33 +88,43 @@ exec-%: ## Exec arbitrary CMD="..." inside a service container
 # Quality gates
 # ─────────────────────────────────────────────────────────────────────
 
+# Run a one-off command in the api workspace container, no service deps
+# started (used for build-time gates: install / typecheck / lint / build).
+COMPOSE_RUN_API_NODEPS := $(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm --no-deps -T api
+
 .PHONY: typecheck
 typecheck: ## TypeScript typecheck across the workspace
-	@echo "[typecheck] no workspaces yet — placeholder for BR-02+"
+	$(COMPOSE_RUN_API_NODEPS) npm run typecheck --workspaces --if-present
 
 .PHONY: lint
-lint: ## Lint across the workspace
-	@echo "[lint] no workspaces yet — placeholder for BR-02+"
+lint: ## Lint across the workspace (ESLint flat config)
+	$(COMPOSE_RUN_API_NODEPS) npx eslint .
 
 .PHONY: format
 format: ## Auto-format (prettier / dprint, defined later)
-	@echo "[format] no formatter wired yet — placeholder for BR-02+"
+	@echo "[format] no formatter wired yet — placeholder for a later branch"
 
 .PHONY: build
 build: ## Build all workspaces
-	@echo "[build] no workspaces yet — placeholder for BR-02+"
+	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=api
 
 # ─────────────────────────────────────────────────────────────────────
 # Tests
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: test
-test: ## Run unit + integration tests
-	@echo "[test] no test suite yet — placeholder for BR-02+"
+test: ## Run unit + integration tests (boots postgres + minio)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres minio
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api sh -c "\
+	  npm run db:migrate --workspace=api && \
+	  npm run test --workspaces --if-present"
 
 .PHONY: test-api
 test-api: ## Run API tests (SCOPE=<file> for scoped runs)
-	@echo "[test-api] no API yet — placeholder for BR-02+"
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) up -d postgres minio
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api sh -c "\
+	  npm run db:migrate --workspace=api && \
+	  npm run test --workspace=api $(if $(SCOPE),-- $(SCOPE),)"
 
 .PHONY: test-ui
 test-ui: ## Run UI unit tests (SCOPE=<file> for scoped runs)
@@ -133,12 +143,17 @@ test-smoke: ## Smoke test against deployed env
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: db-init
-db-init: ## Initialize the dev database
-	@echo "[db-init] placeholder for BR-02"
+db-init: ## Bring up postgres and apply migrations
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) up -d postgres
+	@$(MAKE) db-migrate ENV=$(ENV)
+
+.PHONY: db-generate
+db-generate: ## Generate a Drizzle migration from the schema
+	$(COMPOSE_RUN_API_NODEPS) npm run db:generate --workspace=api
 
 .PHONY: db-migrate
-db-migrate: ## Run Drizzle migrations
-	@echo "[db-migrate] placeholder for BR-02"
+db-migrate: ## Run Drizzle migrations against the running postgres
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T api npm run db:migrate --workspace=api
 
 .PHONY: db-backup
 db-backup: ## pg_dump backup
@@ -196,23 +211,27 @@ s3-ls: ## List keys under PREFIX=<prefix>
 # ─────────────────────────────────────────────────────────────────────
 
 .PHONY: install
-install: ## Install root workspace deps
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm api npm install
+install: ## Install root workspace deps (no service deps started)
+	$(COMPOSE_RUN_API_NODEPS) npm install
 
 .PHONY: install-api
-install-api: ## Add a dep to api: make install-api LIB=foo (LIB+=-dev for devDeps via VAR=)
+install-api: ## Add a dep to api: make install-api LIB=foo (VAR=-D for devDeps)
 	@test -n "$$LIB" || (echo "Pass LIB=<name>"; exit 1)
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm api npm --workspace=api install $$VAR $$LIB
+	$(COMPOSE_RUN_API_NODEPS) npm --workspace=api install $$VAR $$LIB
 
 .PHONY: install-ui
 install-ui: ## Add a dep to ui: make install-ui LIB=foo
 	@test -n "$$LIB" || (echo "Pass LIB=<name>"; exit 1)
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm api npm --workspace=ui install $$VAR $$LIB
+	$(COMPOSE_RUN_API_NODEPS) npm --workspace=ui install $$VAR $$LIB
 
 .PHONY: install-dev
 install-dev: ## Add a devDep at workspace root: make install-dev LIB=foo
 	@test -n "$$LIB" || (echo "Pass LIB=<name>"; exit 1)
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm api npm install -D $$LIB
+	$(COMPOSE_RUN_API_NODEPS) npm install -D $$LIB
+
+.PHONY: build-api-image
+build-api-image: ## Build the production api image from api/Dockerfile
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_E2E) build api
 
 # ─────────────────────────────────────────────────────────────────────
 # Commit helper
