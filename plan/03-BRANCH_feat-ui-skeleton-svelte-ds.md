@@ -114,13 +114,13 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Compose the first screen in `App.svelte` as the actual operational dashboard.
   - [x] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make build ENV=feat-ui-skeleton`.
 
-- [ ] **Lot 4 - Sentropic chat/design-system shell**
-  - [ ] Add a thin local adapter component around `@sentropic/chat-ui/components/ChatPanel.svelte`.
-  - [ ] Provide BR-03 placeholder header/timeline/composer snippets that describe radar tools without implementing chat back-end calls.
-  - [ ] Apply Sentropic design tokens/themes if the packages expose CSS/theme entrypoints compatible with Vite.
-  - [ ] Use lucide icons for action buttons and status affordances.
-  - [ ] Keep component boundaries small and app-owned; do not fork Sentropic package internals.
-  - [ ] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make lint ENV=feat-ui-skeleton`.
+- [x] **Lot 4 - Sentropic chat/design-system shell**
+  - [x] Add a thin local adapter component around `@sentropic/chat-ui/components/ChatPanel.svelte`.
+  - [x] Provide BR-03 placeholder header/timeline/composer snippets that describe radar tools without implementing chat back-end calls.
+  - [x] Apply Sentropic design tokens/themes if the packages expose CSS/theme entrypoints compatible with Vite.
+  - [x] Use lucide icons for action buttons and status affordances.
+  - [x] Keep component boundaries small and app-owned; do not fork Sentropic package internals.
+  - [x] Lot gate: `make typecheck ENV=feat-ui-skeleton`, `make lint ENV=feat-ui-skeleton`.
 
 - [ ] **Lot 5 - Responsive polish and local UAT**
   - [ ] Ensure desktop, tablet, and mobile layouts have stable dimensions and no text overlap.

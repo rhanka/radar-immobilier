@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { ThemeProvider } from "@sentropic/design-system-svelte";
+  import { sentTechTheme } from "@sentropic/design-system-themes";
   import { readHealth, type HealthView } from "$lib/api/health";
   import AppShell from "$lib/components/AppShell.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
@@ -23,10 +25,12 @@
   });
 </script>
 
-<AppShell
-  {dashboard}
-  {health}
-  onSelectSignal={(signalId) => {
-    selectedSignalId = signalId;
-  }}
-/>
+<ThemeProvider theme={sentTechTheme}>
+  <AppShell
+    {dashboard}
+    {health}
+    onSelectSignal={(signalId) => {
+      selectedSignalId = signalId;
+    }}
+  />
+</ThemeProvider>
