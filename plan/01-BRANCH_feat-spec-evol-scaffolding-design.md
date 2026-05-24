@@ -65,10 +65,11 @@ _None at branch start. Populate as issues arise._
   - [x] In `docs/spec/SPEC_EVOL_SCAFFOLDING.md`: corrected successor reference (BR-09 → BR-12), updated author to commit identity, added "Status updates" log section, rewrote §16 as roadmap with merged/in-progress markers.
   - [x] No structural rewrite — these specs remain stable; this lot is light polish only.
 
-- [ ] **Lot 3 — PLAN.md status update**
-  - [ ] §1 Current state: BR-01 active execution.
-  - [ ] §3 Branch catalog: confirm BR-01 entry accurate (description, allowed paths, dependencies).
-  - [ ] §5 Scheduling: confirm BR-02 / BR-03 / BR-05 are the next parallel candidates after BR-01.
+- [x] **Lot 3 — PLAN.md status update**
+  - [x] §1 Current state: BR-01 marked active execution.
+  - [x] §3 Branch catalog already accurate (no edit needed for BR-01 entry).
+  - [x] §5 Scheduling already shows BR-02 / BR-03 / BR-05 as the next parallel candidates after BR-01.
+  - [x] Status banner updated to reflect BR-01 IN PROGRESS.
 
 - [ ] **Lot 4 — Push, PR, merge**
   - [ ] `git push -u origin feat/spec-evol-scaffolding-design`.
