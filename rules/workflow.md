@@ -20,7 +20,8 @@ tags: [workflow]
 ## Branch lifecycle
 
 1. Conductor (human or agent) picks the next branch from `PLAN.md` §5 scheduling.
-2. Create worktree: `git worktree add tmp/<slug> -b <type>/<slug> main`.
+2. Create repository-local worktree: `git worktree add ./tmp/<slug> -b <type>/<slug> main`.
+   Do not use system `/tmp` for branch worktrees.
 3. Author / refine `plan/NN-BRANCH_<slug>.md` from `plan/BRANCH_TEMPLATE.md`.
 4. Execute lots in order; each lot ends with its lot gate (`typecheck`, `lint`, `test`, optional `test-e2e`).
 5. UAT when the branch impacts UI (see UAT Management in the branch file).

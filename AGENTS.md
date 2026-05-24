@@ -39,7 +39,8 @@ project rules.
 
 - All commands via `make` targets only (no direct `npm` / `node` / `docker`).
 - `ENV=<env>` always last argument in `make` commands.
-- Branch work in `tmp/<slug>` worktrees, never on the root checkout.
+- Branch work in repository-local `./tmp/<slug>` worktrees, never in system
+  `/tmp` and never on the root checkout.
 - Tests on `ENV=test-*` or `ENV=e2e-*`, never `ENV=dev`.
 - Atomic commits (~150 lines max between commits), selective staging.
 - Merge commits only — no squash, no rebase merge.
