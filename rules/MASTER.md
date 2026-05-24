@@ -44,7 +44,8 @@ this file and only add tooling glue on top of it.
 - For complex branches, add a `docs/spec/SPEC_EVOL_<topic>.md` (consolidate before tests, then finalize as `SPEC_<topic>.md`).
 
 ## Worktree Discipline (MANDATORY from BR-01 onward)
-- Branch development happens in `tmp/<slug>/` worktrees, never on the root checkout.
+- Branch development happens in repository-local `./tmp/<slug>/` worktrees,
+  never in system `/tmp` and never on the root checkout.
 - The root checkout is reserved for the user's dev / UAT (`ENV=dev`) and must remain stable.
 - BR-00 (this branch) is exempt: bootstrap exception `BR00-EX1`.
 
