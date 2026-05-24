@@ -5,6 +5,7 @@
   import MapPreview from "./MapPreview.svelte";
   import MetricStrip from "./MetricStrip.svelte";
   import OpportunityPanel from "./OpportunityPanel.svelte";
+  import RadarChatPanel from "./RadarChatPanel.svelte";
   import SignalQueue from "./SignalQueue.svelte";
   import TopBar from "./TopBar.svelte";
 
@@ -40,12 +41,7 @@
         <ApiStatusBadge {health} />
       </div>
       <MapPreview selectedSignal={dashboard.selectedSignal} />
-      <section class="rounded-md border border-slate-200 bg-white p-4">
-        <h2 class="text-sm font-semibold text-slate-950">Radar chat</h2>
-        <p class="mt-2 text-sm leading-6 text-slate-600">
-          Shell chat branche au Lot 4 avec les composants Sentropic.
-        </p>
-      </section>
+      <RadarChatPanel />
     </div>
   </main>
 </div>
