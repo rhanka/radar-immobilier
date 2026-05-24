@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-23 — BR-00 `chore/scaffolding-base` execution complete on local branch (8 commits): repo bootstrap (git init, gitignore, gitattributes), multi-agent rules (`MASTER.md` + 5 sub-rules + 3 pointers), 7 skills, npm workspace + `tsconfig.base.json` + `.env.example`, docker-compose stack (api placeholder + postgres-postgis + obscura + maildev + minio + 3 surcharges), Makefile (~250 lines), CI baseline (2 workflows), README, LICENSE. Pending: PR + merge (no remote yet). Next action: open the remote, push, merge BR-00, then start BR-01.
+Status: Updated 2026-05-24 — BR-00 `chore/scaffolding-base` MERGED via PR #1 (merge commit `f139ee8`). 12 atomic commits delivered: repo bootstrap, multi-agent rules (`MASTER.md` + 5 sub-rules + 3 neutral pointers), 7 skills, npm workspace, docker-compose stack with custom Obscura wrapper, Makefile (~250 lines), CI baseline (compose validation + placeholder gates green), README, LICENSE. Repo policy: merge-commit only, branches preserved. Next action: BR-01 `feat/spec-evol-scaffolding-design` to commit `SPEC_INTENT_SCAFFOLDING.md` + `SPEC_EVOL_SCAFFOLDING.md` into a dedicated branch (currently both files are on `main` carried over from the scaffolding stage — BR-01 will formalize them and convert the BR-00 branch file format from `###` sub-headings to checkbox-only per template).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -14,10 +14,10 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 ## 1) Current state
 
 **Completed branches (merged):**
-- _none yet_ — repo just initialized.
+- BR-00 `chore/scaffolding-base` — merged 2026-05-24 (PR #1, `f139ee8`). Archived at `plan/done/00-BRANCH_chore-scaffolding-base.md`.
 
 **Active execution:**
-- BR-00 `chore/scaffolding-base` — executed locally, awaiting remote push + merge.
+- _none_ — next branch is BR-01.
 
 **Pending branches (ordered execution):**
 - BR-01 `feat/spec-evol-scaffolding-design`
