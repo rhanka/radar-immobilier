@@ -136,9 +136,10 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Lot gate: `make build GITHUB_PAGES=true ENV=feat-ui-skeleton`.
 
 - [ ] **Lot 7 - Push, PR, merge, and close**
-  - [ ] Run full scope check against Allowed/Conditional/Forbidden paths.
-  - [ ] Push branch `feat/ui-skeleton-svelte-ds`.
+  - [x] Run full scope check against Allowed/Conditional/Forbidden paths.
+  - [x] Push branch `feat/ui-skeleton-svelte-ds`.
   - [ ] Open PR with BR-03 scope, exceptions, UAT notes, and gate results.
+    - Blocked locally: GitHub connector usage limit; local `gh` token is invalid.
   - [ ] Verify CI green.
   - [ ] Merge via merge commit only; do not squash or rebase.
   - [ ] Preserve source branch.
