@@ -56,6 +56,8 @@ Bootstrap the `radar-immobilier` repository conventions: git init, Makefile, doc
 
 ## Plan / Todo (lot-based)
 
+**Status (2026-05-23)** : Lots 0–7 executed locally on `chore/scaffolding-base`. Lot 8 (push + PR + merge) pending — no remote configured yet. Future BRANCH files MUST use the checkbox format from `plan/BRANCH_TEMPLATE.md` (this file deviated to `###` headings ; corrected in BR-01).
+
 ### Lot 0 — Bootstrap repo & git
 - [ ] `git init` at repo root.
 - [ ] Create `.gitignore` (node_modules, dist, build, .env, .DS_Store, tmp/, *.log, .turbo, .cache).
@@ -149,7 +151,11 @@ Bootstrap the `radar-immobilier` repository conventions: git init, Makefile, doc
 - [ ] Preserve branch.
 - [ ] Move this file to `plan/done/00-BRANCH_chore-scaffolding-base.md`.
 
-## Open questions (to resolve during execution)
-- [ ] License : proprietary (All Rights Reserved) ou autre ? À confirmer avec utilisateur avant Lot 7.
-- [ ] Image obscura disponible publiquement sur ghcr.io ou doit-on builder localement ? Vérifier en Lot 4.
-- [ ] Politique CI sur branche `main` vs PR feature : enforcer protection branche `main` dès BR-00 ou attendre ?
+## Open questions (resolved during execution)
+- [x] License : proprietary (All Rights Reserved) retained for the demo phase ; revisited at client transition. See `LICENSE`.
+- [x] Obscura : no public docker image, only release tarballs. Custom `obscura/Dockerfile` wraps the upstream Linux x86_64 binary (v0.1.5).
+- [x] Branch protection on `main` : deferred until a remote is set up. `branch-policy.yml` workflow already documents the policy (merge-commit only).
+
+## Resolved during execution
+- **Commit identity**: `rhanka <fabien.antoine@m4x.org>` (saved in memory). All 8 BR-00 commits use this identity after a one-time `git filter-branch`.
+- **No co-author trailer** in commits (user preference, saved in memory). Removed from messages and the `make commit` target.
