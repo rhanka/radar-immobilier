@@ -71,13 +71,13 @@ _None at branch start. Populate as issues arise._
   - [x] §5 Scheduling already shows BR-02 / BR-03 / BR-05 as the next parallel candidates after BR-01.
   - [x] Status banner updated to reflect BR-01 IN PROGRESS.
 
-- [ ] **Lot 4 — Push, PR, merge**
-  - [ ] `git push -u origin feat/spec-evol-scaffolding-design`.
-  - [ ] `gh pr create` with body referencing the lots.
-  - [ ] CI green (compose validation + placeholders).
-  - [ ] `gh pr merge --merge` (no squash, no rebase merge).
-  - [ ] Local main pulled.
-  - [ ] Move `plan/01-BRANCH_feat-spec-evol-scaffolding-design.md` to `plan/done/`.
+- [x] **Lot 4 — Push, PR, merge**
+  - [x] `git push -u origin feat/spec-evol-scaffolding-design`.
+  - [x] PR #2 opened against `main`.
+  - [x] CI green (compose validation + placeholders).
+  - [x] Merged via merge commit `9f3447a` (no squash, no rebase merge).
+  - [x] Local main pulled.
+  - [x] This file moved to `plan/done/`.
 
 ## Open questions
 _None._
