@@ -1,0 +1,18 @@
+# Test surcharge: ephemeral storage, no host ports exposed, no UI dev
+# container, no maildev UI. Apply with:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml ...
+
+services:
+  postgres:
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes: []
+
+  minio:
+    tmpfs:
+      - /data
+    volumes: []
+
+  api:
+    environment:
+      NODE_ENV: test

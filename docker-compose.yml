@@ -1,0 +1,94 @@
+# Base compose stack for `radar-immobilier`.
+# Surcharged by docker-compose.dev.yml / .test.yml / .e2e.yml.
+# All commands flow through `make` — see Makefile.
+
+name: ${COMPOSE_PROJECT_NAME:-radar-dev}
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-radar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme-dev-only}
+      POSTGRES_DB: ${POSTGRES_DB:-radar}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-radar} -d ${POSTGRES_DB:-radar}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [radar]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - minio-data:/data
+    networks: [radar]
+
+  obscura:
+    build:
+      context: ./obscura
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9222/json/version || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [radar]
+
+  maildev:
+    image: maildev/maildev:latest
+    environment:
+      MAILDEV_SMTP_PORT: 1025
+      MAILDEV_WEB_PORT: 1080
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:1080/healthz || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [radar]
+
+  api:
+    # Replaced by the real Dockerfile in BR-02. For BR-00 we use a
+    # placeholder so `make dev` brings up the rest of the stack
+    # without failing on a missing image.
+    image: node:24-bookworm-slim
+    command: sleep infinity
+    working_dir: /workspace
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio:    { condition: service_healthy }
+      obscura:  { condition: service_healthy }
+      maildev:  { condition: service_healthy }
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-radar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme-dev-only}
+      POSTGRES_DB: ${POSTGRES_DB:-radar}
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: ${S3_REGION:-fr-par}
+      S3_BUCKET: ${S3_BUCKET:-radar-immobilier-raw}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-minioadmin}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-minioadmin}
+      OBSCURA_CDP_URL: http://obscura:9222
+      MAILDEV_SMTP_HOST: maildev
+      MAILDEV_SMTP_PORT: 1025
+    networks: [radar]
+
+networks:
+  radar:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  minio-data:
