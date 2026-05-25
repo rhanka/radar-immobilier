@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CI-FIX2 `fix/gh-pages-unsupported` MERGED (PR #10, `88f31bd`). The Pages deployment workflow now skips cleanly when the repository plan does not support GitHub Pages. BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — BR-05R `feat/source-value-review-ui` ACTIVE in `tmp/feat-source-value-review-ui`. It turns BR05 source spikes into a client-proposal review UI with value, cost/access, contradiction, and recommendation framing. BR-04 remains in review on PR #8, with companion k8s-ops PR #12.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -25,6 +25,8 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 **Active execution:**
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
+- BR-05R `feat/source-value-review-ui` — active in
+  `tmp/feat-source-value-review-ui`.
 
 **Pending branches (ordered execution):**
 - BR-06 `feat/data-model-investigation`
@@ -85,10 +87,16 @@ Three parallel tracks become possible afterwards: API skeleton (`BR-02`), UI ske
 - **Allowed**: `packages/radar-sources/src/sources/_spikes/**`, `docs/spec/SPEC_EVOL_SOURCE_FEASIBILITY.md`.
 - **Dependencies**: BR-01 (parallelizable with BR-02 / BR-03 / BR-04).
 
+### BR-05R `feat/source-value-review-ui`
+- **Goal**: convert source feasibility into a proposal-grade value review UI: criteria, acronym hovers, 2x2 quadrant, source recommendations, concrete examples, access/cost assessment, and contradictory audits.
+- **Allowed**: `ui/src/**`, `docs/spec/SPEC_INTENT_SOURCE_VALUE_REVIEW.md`, `docs/spec/SPEC_EVOL_SOURCE_VALUE_REVIEW.md`, `plan/05R-BRANCH_feat-source-value-review-ui.md`, `PLAN.md`.
+- **Dependencies**: BR-03 (UI shell), BR-05 (source spikes).
+- **UAT**: visual review at `http://localhost:5306`; corrections expected before merge.
+
 ### BR-06 `feat/data-model-investigation`
 - **Goal**: confront real municipal data; produce `docs/spec/SPEC_EVOL_DATA_MODEL.md` distinguishing universal vs local fields; update Postgres schema and Zod schemas (v2 if needed).
 - **Allowed**: `docs/spec/SPEC_EVOL_DATA_MODEL.md`, `packages/radar-domain/src/schemas/**`, `api/drizzle/**` (limited additive migrations).
-- **Dependencies**: BR-04 (need API+DB+S3 running to ingest sample docs), BR-05 (spikes inform).
+- **Dependencies**: BR-04 (need API+DB+S3 running to ingest sample docs), BR-05 (spikes inform), BR-05R (value review informs source prioritization).
 
 ### BR-07 `feat/vertical-slice-avis-publics`
 - **Goal**: end-to-end avis publics Valleyfield (scrape with playwright+obscura → S3 → LLM extract → score → opportunity).
@@ -132,7 +140,7 @@ Three parallel tracks become possible afterwards: API skeleton (`BR-02`), UI ske
 ```
 BR-00 ──▶ BR-01 ──┬─▶ BR-02 ──┐
                   ├─▶ BR-03 ──┤
-                  └─▶ BR-05 ──┤
+                  └─▶ BR-05 ──▶ BR-05R ─┐
                               ├──▶ BR-04 ──▶ BR-06 ──▶ BR-07 ──┬─▶ BR-08 ──┐
                               │                                ├─▶ BR-09 ──┤
                               │                                └─▶ BR-10 ──┤
