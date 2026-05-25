@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — BR-05 `feat/source-investigation-spikes` MERGED (PR #9, `74c5ead`). BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — CI-FIX2 `fix/gh-pages-unsupported` ACTIVE to make the Pages deployment workflow skip cleanly when the repository plan does not support GitHub Pages. BR-05 `feat/source-investigation-spikes` is merged (PR #9, `74c5ead`); BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -22,6 +22,8 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-05 `feat/source-investigation-spikes` — merged 2026-05-25 (PR #9, `74c5ead`). Archived at `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
 
 **Active execution:**
+- CI-FIX2 `fix/gh-pages-unsupported` — active in
+  `tmp/fix-gh-pages-unsupported`.
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
 
