@@ -139,7 +139,8 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Run full scope check against Allowed/Conditional/Forbidden paths.
   - [x] Push branch `feat/ui-skeleton-svelte-ds`.
   - [x] Open PR with BR-03 scope, exceptions, UAT notes, and gate results.
-    - Draft PR: https://github.com/rhanka/radar-immobilier/pull/5
+    - PR: https://github.com/rhanka/radar-immobilier/pull/5
+    - Ready for review after local BR-03 gates and Playwright UAT passed.
   - [ ] Verify CI green.
   - [ ] Merge via merge commit only; do not squash or rebase.
   - [ ] Preserve source branch.
