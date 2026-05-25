@@ -136,6 +136,35 @@ Canonical scored set = H1, A2, C2, G2.
 
 ## 9. Status
 
-- 2026-05-25: tracks launched (opus A1 done in default mode → A1b max re-run
-  pending; GPT-5.5 ChatGPT scraped H1; codex C1 relaunch 10:50; gemini G1 via
-  agy+tmux completed — output to verify). Metrics (§5) frozen before scoring.
+- 2026-05-25: iteration-1 isolated re-runs done. **A2** (opus max, web-only) and
+  **G2** (gemini) completed; **C2** (codex) produced **no synthesized report**
+  (only ~12.7k lines of raw HTML log) and was stopped — not scored. Scoring done
+  by an independent agent (§10).
+
+## 10. Results — independent scoring (iteration 1)
+
+Scored by an independent neutral agent against a verified reference set; full
+report in `docs/spec/SPEC_EVOL_DEMO_FINDINGS_SCORING.md`.
+
+| Track | Mode | M1 | M2 | M3 | M4 | M5 | M6 | M7 | **/35** |
+| ----- | ---- | -- | -- | -- | -- | -- | -- | -- | ------- |
+| **A2** Claude Opus | max, web-only, isolated | 5 | 5 | 5 | 5 | 4 | 5 | 5 | **34** 🏆 |
+| **H1** Human/ChatGPT GPT-5.5 | manual | 5 | 5 | 4 | 5 | 3 | 4 | 4 | **30** |
+| **G2** Gemini 3.5 Flash | high, isolated | 2 | 2 | 2 | 1 | 4 | 2 | 2 | **14** |
+| **C2** Codex GPT-5.5 | xhigh, isolated | — | — | — | — | — | — | — | no report |
+
+**Verdict (honest):** A2 beat the human baseline (34 vs 30) **with zero
+fabrication**, winning on traceability, completeness (Phases 4-6), false-positive
+control, and VISION weighting. It did **not** crush the human on substance — H1
+**tied A2 on the regulatory core (M1/M2/M4)**: both reproduced the 150-49 density
+thresholds (0.5→2→15→50 log/ha by conservation %) and the 150-51 zone list/dates
+verbatim against the official avis PDFs. H1 lost only on completeness (transcript
+truncated at Phase 3). This is **not** a blanket "AI beats human": G2 fabricated,
+C2 produced nothing — the win is A2-specific and partly due to H1 truncation.
+
+**Fabrication audit:** H1 none · A2 none · **G2 multiple** (non-existent PPCMOI
+2024-0145, uncorroborable lot/resolution numbers + a $1.35 M price, a location
+misattribution, "risque nul" asserted as fact) → **G2 disqualified for the demo.**
+
+**Demo input:** only the verified reference set (R1-R11 in the scoring report) and
+the non-fabricated findings of **A2 + H1** may be wired into the demo UI (§6).
