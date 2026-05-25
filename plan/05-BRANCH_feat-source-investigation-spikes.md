@@ -115,8 +115,9 @@ No exceptions declared at branch start.
   - [x] Mark recommended BR07 vertical-slice sources and deferred sources.
   - [x] Update this plan with final evidence: 34 spike notes under
     `packages/radar-sources/src/sources/_spikes/**`.
-  - [ ] Lot gate: `make typecheck ENV=test-source-spikes`,
-    `make lint ENV=test-source-spikes`, `make test ENV=test-source-spikes`.
+  - [x] Lot gate: `make typecheck ENV=test-source-spikes`,
+    `make lint ENV=test-source-spikes`, `make test ENV=test-source-spikes`,
+    and `make build ENV=test-source-spikes`.
 
 - [ ] **Lot 6 — PR and merge**
   - [ ] Push branch.
