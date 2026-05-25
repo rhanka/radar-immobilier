@@ -33,7 +33,16 @@ export UI_VERSION  ?= dev
 export E2E_VERSION ?= dev
 
 export K8S_MANIFEST_DIR ?= deploy/k8s
+export K8S_NAMESPACE    ?= radar-immobilier
+export K8S_REGISTRY_SERVER ?= rg.fr-par.scw.cloud
+export K8S_REGISTRY     ?= rg.fr-par.scw.cloud/radar-immobilier
+export K8S_IMAGE_TAG    ?= latest
+export K8S_API_IMAGE    ?= $(K8S_REGISTRY)/radar-api:$(K8S_IMAGE_TAG)
+export K8S_OBSCURA_IMAGE ?= $(K8S_REGISTRY)/radar-obscura:$(K8S_IMAGE_TAG)
+export K8S_POSTGRES_USER ?= radar
+export K8S_POSTGRES_DB   ?= radar
 export KUBECTL ?= kubectl
+export TRIVY   ?= trivy
 
 .DEFAULT_GOAL := help
 
@@ -243,6 +252,16 @@ install-dev: ## Add a devDep at workspace root: make install-dev LIB=foo
 build-api-image: ## Build the production api image from api/Dockerfile
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_E2E) build api
 
+.PHONY: build-k8s-images
+build-k8s-images: ## Build K8s deployable API and Obscura images
+	docker build -t $(K8S_API_IMAGE) -f api/Dockerfile .
+	docker build -t $(K8S_OBSCURA_IMAGE) -f obscura/Dockerfile obscura
+
+.PHONY: push-k8s-images
+push-k8s-images: ## Push K8s images to the configured registry
+	docker push $(K8S_API_IMAGE)
+	docker push $(K8S_OBSCURA_IMAGE)
+
 # ─────────────────────────────────────────────────────────────────────
 # Commit helper
 # ─────────────────────────────────────────────────────────────────────
@@ -272,13 +291,51 @@ deploy-gh-pages: ## Deploy the SPA to GitHub Pages
 
 .PHONY: deploy-k8s
 deploy-k8s: ## Deploy api+postgres+obscura+maildev to K8s poc tenant
-	@echo "[deploy-k8s] wired in BR-04"
-	@exit 1
+	@$(MAKE) k8s-validate ENV=$(ENV)
+	$(KUBECTL) -n $(K8S_NAMESPACE) apply -k $(K8S_MANIFEST_DIR)
 
 .PHONY: k8s-validate
 k8s-validate: ## Validate K8s manifests client-side
 	$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) >/dev/null
 	$(KUBECTL) apply --dry-run=client -k $(K8S_MANIFEST_DIR)
+
+.PHONY: k8s-create-secrets
+k8s-create-secrets: ## Create/update K8s secrets from local env values
+	@test -n "$$K8S_POSTGRES_PASSWORD" || (echo "Pass K8S_POSTGRES_PASSWORD"; exit 1)
+	@test -n "$$S3_ACCESS_KEY" || (echo "Pass S3_ACCESS_KEY"; exit 1)
+	@test -n "$$S3_SECRET_KEY" || (echo "Pass S3_SECRET_KEY"; exit 1)
+	@test -n "$$K8S_REGISTRY_USERNAME" || (echo "Pass K8S_REGISTRY_USERNAME"; exit 1)
+	@test -n "$$K8S_REGISTRY_PASSWORD" || (echo "Pass K8S_REGISTRY_PASSWORD"; exit 1)
+	@$(KUBECTL) -n $(K8S_NAMESPACE) create secret generic radar-db-credentials \
+	  --from-literal=POSTGRES_USER="$(K8S_POSTGRES_USER)" \
+	  --from-literal=POSTGRES_PASSWORD="$$K8S_POSTGRES_PASSWORD" \
+	  --from-literal=POSTGRES_DB="$(K8S_POSTGRES_DB)" \
+	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	@$(KUBECTL) -n $(K8S_NAMESPACE) create secret generic radar-s3-credentials \
+	  --from-literal=S3_ACCESS_KEY="$$S3_ACCESS_KEY" \
+	  --from-literal=S3_SECRET_KEY="$$S3_SECRET_KEY" \
+	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	@$(KUBECTL) -n $(K8S_NAMESPACE) create secret generic radar-llm-credentials \
+	  --from-literal=OPENAI_API_KEY="$${OPENAI_API_KEY:-}" \
+	  --from-literal=ANTHROPIC_API_KEY="$${ANTHROPIC_API_KEY:-}" \
+	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
+	@$(KUBECTL) -n $(K8S_NAMESPACE) create secret docker-registry radar-registry-pull \
+	  --docker-server="$(K8S_REGISTRY_SERVER)" \
+	  --docker-username="$$K8S_REGISTRY_USERNAME" \
+	  --docker-password="$$K8S_REGISTRY_PASSWORD" \
+	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
+
+.PHONY: s3-status-poc
+s3-status-poc: ## Show Scaleway POC bucket status
+	scw object bucket get $(S3_BUCKET) region=$(S3_REGION)
+
+.PHONY: s3-init-poc
+s3-init-poc: ## Create the Scaleway POC bucket if missing
+	@if scw object bucket get $(S3_BUCKET) region=$(S3_REGION) >/dev/null 2>&1; then \
+	  echo "[s3-init-poc] bucket already exists: $(S3_BUCKET) ($(S3_REGION))"; \
+	else \
+	  scw object bucket create $(S3_BUCKET) region=$(S3_REGION); \
+	fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Security
@@ -286,4 +343,6 @@ k8s-validate: ## Validate K8s manifests client-side
 
 .PHONY: security-scan
 security-scan: ## Run Trivy on built images
-	@echo "[security-scan] wired in BR-04"
+	@command -v $(TRIVY) >/dev/null || (echo "Install Trivy or set TRIVY=<path>"; exit 127)
+	$(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_API_IMAGE)
+	$(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_OBSCURA_IMAGE)
