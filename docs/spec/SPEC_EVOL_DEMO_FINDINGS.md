@@ -105,16 +105,34 @@ runs (§2). Each run MUST appear here before its output is scored.
 | --- | ----- | ----- | ---- | ------- | ---------- | ------ | ---- | ------ | ------ |
 | H1 | Human/ChatGPT | GPT-5.5 | web (manual) | ChatGPT web | yes | PROMPT.md (phased, manual) | 1 (manual) | done | `docs/spec/input/PROMPT_RESULT_GPT5.5.md` |
 | A1 | Claude Opus | claude-opus-4-7 | **default** ⚠️ | `claude -p` | WebSearch+WebFetch | `prompt.txt` (= PROMPT.md + wrapper) | 1 | done — **must re-run in `max`** | `tmp/analyst-run-valleyfield/opus.md` |
-| A1b | Claude Opus | claude-opus-4-7 | **max** | `claude -p` | WebSearch+WebFetch | `prompt.txt` | 1 | pending re-run | `tmp/analyst-run-valleyfield/opus-max.md` |
-| C1 | Codex | gpt-5.5 | **xhigh** | `codex exec` | bypass-sandbox (net) | `prompt.txt` | 1 | scheduled 10:50 | `tmp/analyst-run-valleyfield/gpt.md` |
-| G1 | Gemini | Gemini 3.5 Flash | **high** | `agy` + tmux driver (3 nudges) | skip-permissions | `prompt.txt` (read by agy) | 1 | done | `tmp/analyst-run-valleyfield/gemini.md` |
+| A1b | Claude Opus | claude-opus-4-7 | **max** | `claude -p` | WebSearch+WebFetch | `prompt.txt` | 1 | ❌ CONTAMINATED — read sibling outputs ("les trois agents…") | `tmp/analyst-run-valleyfield/opus-max.md` |
+| C1 | Codex | gpt-5.5 | **xhigh** | `codex exec -C scratch` | bypass-sandbox (net) | `prompt.txt` | 1 | ❌ CONTAMINATED — grepped `opus.md`/`gemini.md` | `tmp/analyst-run-valleyfield/gpt.md` |
+| G1 | Gemini | Gemini 3.5 Flash | **high** | `agy` + tmux driver | skip-permissions | `prompt.txt` | 1 | ⚠️ suspect — sibling files present in cwd | `tmp/analyst-run-valleyfield/gemini.md` |
 
-Iteration-2 runs (independent-agent framed value-add) will be appended here with
-`Iter = 2`, same column discipline. Mode names map to: Opus `max` thinking budget,
-GPT-5.5 `xhigh` reasoning effort, Gemini `high` thinking.
+### ⚠️ Integrity incident (2026-05-25) — disclosed per §2
 
-> ⚠️ Run A1 used Opus default mode; per the execution-mode spec it is re-run as
-> A1b in `max` before scoring, with the **same prompt**.
+All CLI tracks ran with their working directory set to the **shared scratch dir**,
+which already contained the other agents' output files. A1b (opus max) and C1
+(codex) **read sibling outputs** (A1b explicitly: "Les trois agents ont rapporté…";
+C1 grepped `opus.md`/`gemini.md`). This is a hidden-advantage / non-independent
+breach of §2 — the runs are **not comparable** to the human's solo work and MUST NOT
+be scored as-is. Honest call: opus-max's superior "reconciliation" came from reading
+the others, not from solo capability.
+
+**Correction — isolated re-runs (canonical iteration 1):** each agent re-runs in a
+per-agent directory containing **only `prompt.txt`** (no sibling outputs), same
+prompt, same fixed mode. Web access allowed (the human had it); cross-agent file
+access forbidden.
+
+| Run | Track | Model | Mode | Isolation | Status | Output |
+| --- | ----- | ----- | ---- | --------- | ------ | ------ |
+| A2 | Claude Opus | claude-opus-4-7 | **max** | `iso/opus/` (only prompt.txt) | re-run | `iso/opus/report.md` |
+| C2 | Codex | gpt-5.5 | **xhigh** | `iso/codex/` (only prompt.txt) | re-run | `iso/codex/report.md` |
+| G2 | Gemini | Gemini 3.5 Flash | **high** | `iso/gemini/` (only prompt.txt) | re-run | `iso/gemini/report.md` |
+
+Clean tracks kept: **H1** (human, solo by construction) and **A1** (opus default,
+ran first when scratch held only `prompt.txt`) as a default-mode reference.
+Canonical scored set = H1, A2, C2, G2.
 
 ## 9. Status
 
