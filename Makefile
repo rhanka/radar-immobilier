@@ -21,6 +21,8 @@ export S3_HOST_PORT        ?= 9100
 export S3_CONSOLE_HOST_PORT ?= 9101
 export OBSCURA_HOST_PORT   ?= 9222
 export MAILDEV_SMTP_HOST_PORT ?= 1025
+export S3_REGION ?= fr-par
+export S3_BUCKET ?= radar-immobilier-raw
 
 # URLs surfaced to the UI build. Empty by default so the Vite dev server can
 # proxy same-origin API checks without browser CORS requirements.
