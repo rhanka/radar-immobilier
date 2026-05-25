@@ -1,0 +1,10 @@
+# lane|agent|dir   — see .agents/README.md
+# agent ∈ {gpt = GPT-5.5 xhigh, opus = Claude Opus 4.7, gemini = Gemini 3.5 high, - = unassigned}
+# Keep ACTIVE lanes only; remove once the branch is merged and the worktree torn down.
+#
+# Assignments below are the CONDUCTOR's PROPOSAL (rationale in plan/STATUS.md).
+# The user decides/redirects; edit the agent column to override.
+
+CONDUCTOR|opus|tmp/chore-uat-env-conductor
+BR05R|opus|tmp/feat-source-value-review-ui
+BR04|gpt|tmp/feat-k8s-tenant-radar-and-infra
