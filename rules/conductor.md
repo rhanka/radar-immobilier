@@ -59,6 +59,9 @@ tags: [orchestration]
   ACTIVE/STALL heartbeat from the plan file mtime.
 - Use it as the canonical answer to "which agent is on which branch and how far
   along".
+- `plan/STATUS.md` complements it with a **purpose (finalité) × branch** view and
+  the active demand trackers; the conductor keeps it in sync at each branch
+  open/close.
 
 ## User question / answer protocol
 - Batch questions; never one-by-one interruptions. Max one batch per lot unless
