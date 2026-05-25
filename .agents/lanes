@@ -1,0 +1,7 @@
+# lane|agent|dir   — see .agents/README.md
+# agent ∈ {gpt = GPT-5.5 xhigh, opus = Claude Opus 4.7, gemini = Gemini 3.5 high, - = unassigned}
+# Keep ACTIVE lanes only; remove once the branch is merged and the worktree torn down.
+
+CONDUCTOR|opus|tmp/chore-uat-env-conductor
+BR04|-|tmp/feat-k8s-tenant-radar-and-infra
+BR05R|-|tmp/feat-source-value-review-ui
