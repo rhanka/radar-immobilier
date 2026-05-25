@@ -126,9 +126,13 @@ access forbidden.
 
 | Run | Track | Model | Mode | Isolation | Status | Output |
 | --- | ----- | ----- | ---- | --------- | ------ | ------ |
-| A2 | Claude Opus | claude-opus-4-7 | **max** | `iso/opus/` (only prompt.txt) | re-run | `iso/opus/report.md` |
-| C2 | Codex | gpt-5.5 | **xhigh** | `iso/codex/` (only prompt.txt) | re-run | `iso/codex/report.md` |
-| G2 | Gemini | Gemini 3.5 Flash | **high** | `iso/gemini/` (only prompt.txt) | re-run | `iso/gemini/report.md` |
+| A2 | Claude Opus | claude-opus-4-7 | **max** | `iso-vf-opus/` (only prompt.txt) | done — 34/35 | `iso-vf-opus/report.md` |
+| C2 | Codex | gpt-5.5 | **xhigh** | `iso-vf-codex2/` (PTY/tmux, no premature kill) | done — 31/35 | `iso-vf-codex2/report.md` |
+| G2 | Gemini | Gemini 3.5 Flash | **high** | `iso-vf-gemini/` (only prompt.txt) | done — 14/35 | `iso-vf-gemini/report.md` |
+
+> C2 note: the first isolated codex attempt was **killed prematurely by the
+> conductor** (mistaken for a hang); re-run in a tmux PTY with no premature kill,
+> it completed in ~31 min with a clean, fabrication-free report.
 
 Clean tracks kept: **H1** (human, solo by construction) and **A1** (opus default,
 ran first when scratch held only `prompt.txt`) as a default-mode reference.
@@ -136,10 +140,12 @@ Canonical scored set = H1, A2, C2, G2.
 
 ## 9. Status
 
-- 2026-05-25: iteration-1 isolated re-runs done. **A2** (opus max, web-only) and
-  **G2** (gemini) completed; **C2** (codex) produced **no synthesized report**
-  (only ~12.7k lines of raw HTML log) and was stopped — not scored. Scoring done
-  by an independent agent (§10).
+- 2026-05-25: iteration-1 isolated re-runs complete and scored by independent
+  agents. **A2** (opus max) 34, **C2** (codex xhigh, PTY re-run) 31, **H1** (human)
+  30, **G2** (gemini) 14. Two automated agents beat the human, no fabrication; G2
+  fabricated. Verified findings wired into the demo UI (`§6`). C2's first attempt
+  was killed prematurely by the conductor, not a credits/tool failure — re-run in a
+  tmux PTY succeeded. Reference R3 corrected per the C2 audit.
 
 ## 10. Results — independent scoring (iteration 1)
 
@@ -148,19 +154,33 @@ report in `docs/spec/SPEC_EVOL_DEMO_FINDINGS_SCORING.md`.
 
 | Track | Mode | M1 | M2 | M3 | M4 | M5 | M6 | M7 | **/35** |
 | ----- | ---- | -- | -- | -- | -- | -- | -- | -- | ------- |
-| **A2** Claude Opus | max, web-only, isolated | 5 | 5 | 5 | 5 | 4 | 5 | 5 | **34** 🏆 |
-| **H1** Human/ChatGPT GPT-5.5 | manual | 5 | 5 | 4 | 5 | 3 | 4 | 4 | **30** |
+| **A2** Claude Opus | max, web-only, isolated | 5 | 5 | 5 | 5 | 4 | 5 | 5 | **34** 🥇 |
+| **C2** Codex GPT-5.5 | xhigh, isolated (PTY re-run) | 3 | 5 | 5 | 5 | 5 | 4 | 4 | **31** 🥈 |
+| **H1** Human/ChatGPT GPT-5.5 | manual | 5 | 5 | 4 | 5 | 3 | 4 | 4 | **30** 🥉 |
 | **G2** Gemini 3.5 Flash | high, isolated | 2 | 2 | 2 | 1 | 4 | 2 | 2 | **14** |
-| **C2** Codex GPT-5.5 | xhigh, isolated | — | — | — | — | — | — | — | no report |
 
-**Verdict (honest):** A2 beat the human baseline (34 vs 30) **with zero
-fabrication**, winning on traceability, completeness (Phases 4-6), false-positive
-control, and VISION weighting. It did **not** crush the human on substance — H1
-**tied A2 on the regulatory core (M1/M2/M4)**: both reproduced the 150-49 density
-thresholds (0.5→2→15→50 log/ha by conservation %) and the 150-51 zone list/dates
-verbatim against the official avis PDFs. H1 lost only on completeness (transcript
-truncated at Phase 3). This is **not** a blanket "AI beats human": G2 fabricated,
-C2 produced nothing — the win is A2-specific and partly due to H1 truncation.
+Full per-metric detail: `SPEC_EVOL_DEMO_FINDINGS_SCORING.md` (H1/A2/G2) +
+`SPEC_EVOL_DEMO_FINDINGS_SCORING_C2.md` (C2).
+
+**Verdict (honest):** **two automated agents beat the human baseline with zero
+fabrication** — A2 (34) and C2 (31) vs H1 (30). A2 wins on breadth + traceability +
+completeness + VISION weighting. C2 is narrower (misses PPCMOI/CPTAQ/Plan 450 → M1=3)
+but uniquely reaches **verified lot-level data** (real cadastral attributes parsed
+from the open-data role `RL70052_2026.xml`, donneesouvertes.affmunqc.net — NOT the
+Cloudflare-blocked online role). On the regulatory core (M2/M4) A2, C2 and H1 are
+tied at the top. This is **not** a blanket "AI beats human": G2 fabricated and ranks
+last; the wins are A2/C2-specific, and H1 lost partly because its transcript was
+truncated at Phase 3.
+
+**Reference correction (C2 was right, ref was incomplete):** per the C2 audit, update
+R3 — the 150-49/150-50 consultation was postponed to **23 Mar 2026** (2nd project
+**24 Mar 2026**); and **U-521→H-521** is a confirmed rename. The reference set, not
+C2, is corrected. (No track is penalized for being more accurate than the draft ref.)
+
+**New verified opportunity (from C2, reproducible):** lot-level data IS obtainable
+via the **open-data role XML** (bypasses the Cloudflare block) — a concrete next
+step to enrich the demo with real lots, with lot↔zone polygon membership still to be
+confirmed via SIG (C2 honestly flagged it as hypothesis).
 
 **Fabrication audit:** H1 none · A2 none · **G2 multiple** (non-existent PPCMOI
 2024-0145, uncorroborable lot/resolution numbers + a $1.35 M price, a location
