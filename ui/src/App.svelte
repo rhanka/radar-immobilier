@@ -4,12 +4,15 @@
   import { sentTechTheme } from "@sentropic/design-system-themes";
   import { readHealth, type HealthView } from "$lib/api/health";
   import AppShell from "$lib/components/AppShell.svelte";
+  import NavMenu from "$lib/components/NavMenu.svelte";
+  import type { DemoView } from "$lib/demo/views";
+  import BenchmarkComparison from "$lib/components/comparison/BenchmarkComparison.svelte";
   import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
   import { createDashboardState } from "$lib/state/dashboard";
 
+  let activeView: DemoView = "radar";
   let selectedSignalId = demoSignals[0]?.id;
-  let activeView: "source-review" | "radar" = "source-review";
   let health: HealthView = {
     kind: "offline",
     label: "API en attente",
@@ -28,30 +31,22 @@
 </script>
 
 <ThemeProvider theme={sentTechTheme}>
-  {#if activeView === "source-review"}
-    <SourceReviewShell
-      onBackToRadar={() => {
-        activeView = "radar";
-      }}
-    />
-  {:else}
-    <div class="fixed right-4 top-4 z-50">
-      <button
-        type="button"
-        class="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:border-teal-500"
-        on:click={() => {
-          activeView = "source-review";
-        }}
-      >
-        Revue sources
-      </button>
+  <div class="flex h-screen flex-col">
+    <NavMenu {activeView} onSelect={(view) => (activeView = view)} />
+    <div class="min-h-0 flex-1 overflow-auto">
+      {#if activeView === "radar"}
+        <AppShell
+          {dashboard}
+          {health}
+          onSelectSignal={(signalId) => {
+            selectedSignalId = signalId;
+          }}
+        />
+      {:else if activeView === "comparison"}
+        <BenchmarkComparison />
+      {:else}
+        <SourceReviewShell onBackToRadar={() => (activeView = "radar")} />
+      {/if}
     </div>
-    <AppShell
-      {dashboard}
-      {health}
-      onSelectSignal={(signalId) => {
-        selectedSignalId = signalId;
-      }}
-    />
-  {/if}
+  </div>
 </ThemeProvider>
