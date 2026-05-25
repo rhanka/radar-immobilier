@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — BR-05R `feat/source-value-review-ui` ACTIVE in `tmp/feat-source-value-review-ui`. It turns BR05 source spikes into a client-proposal review UI with value, cost/access, contradiction, and recommendation framing. BR-04 remains in review on PR #8, with companion k8s-ops PR #12.
+Status: Updated 2026-05-25 — BR-05R `feat/source-value-review-ui` ACTIVE in `tmp/feat-source-value-review-ui`. Source-review UI and challenge-agent presentation are implemented with local typecheck/lint/test/build gates passing; UAT visual review is next. BR-04 remains in review on PR #8, with companion k8s-ops PR #12.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -92,6 +92,8 @@ Three parallel tracks become possible afterwards: API skeleton (`BR-02`), UI ske
 - **Allowed**: `ui/src/**`, `docs/spec/SPEC_INTENT_SOURCE_VALUE_REVIEW.md`, `docs/spec/SPEC_EVOL_SOURCE_VALUE_REVIEW.md`, `plan/05R-BRANCH_feat-source-value-review-ui.md`, `PLAN.md`.
 - **Dependencies**: BR-03 (UI shell), BR-05 (source spikes).
 - **UAT**: visual review at `http://localhost:5306`; corrections expected before merge.
+- **Validation**: local `typecheck`, `lint`, `test-ui`, `build`, and
+  `git diff --check` pass before UAT visual review.
 
 ### BR-06 `feat/data-model-investigation`
 - **Goal**: confront real municipal data; produce `docs/spec/SPEC_EVOL_DATA_MODEL.md` distinguishing universal vs local fields; update Postgres schema and Zod schemas (v2 if needed).
