@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — BR-05 `feat/source-investigation-spikes` ACTIVE in `tmp/feat-source-investigation-spikes`. BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — BR-05 `feat/source-investigation-spikes` MERGED (PR #9, `74c5ead`). BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -19,12 +19,11 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-02 `feat/api-skeleton-hono-postgres-s3` — merged 2026-05-24 (PR #3, `6814d8b`). Archived at `plan/done/02-BRANCH_feat-api-skeleton-hono-postgres-s3.md`.
 - BR-03 `feat/ui-skeleton-svelte-ds` — merged 2026-05-25 (PR #5, `27ace35`). Archived at `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
 - CI-FIX `fix/ci-pr-actions-trigger` — merged 2026-05-25 (PR #7, `c86d699`). Archived at `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
+- BR-05 `feat/source-investigation-spikes` — merged 2026-05-25 (PR #9, `74c5ead`). Archived at `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
 
 **Active execution:**
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
-- BR-05 `feat/source-investigation-spikes` — active in
-  `tmp/feat-source-investigation-spikes`.
 
 **Pending branches (ordered execution):**
 - BR-06 `feat/data-model-investigation`

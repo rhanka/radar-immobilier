@@ -109,7 +109,7 @@ No exceptions declared at branch start.
     estimates.
   - [x] Lot gate: `git diff --check`.
 
-- [ ] **Lot 5 — Consolidation**
+- [x] **Lot 5 — Consolidation**
   - [x] Consolidate all source rows in
     `docs/spec/SPEC_EVOL_SOURCE_FEASIBILITY.md`.
   - [x] Mark recommended BR07 vertical-slice sources and deferred sources.
@@ -119,10 +119,11 @@ No exceptions declared at branch start.
     `make lint ENV=test-source-spikes`, `make test ENV=test-source-spikes`,
     and `make build ENV=test-source-spikes`.
 
-- [ ] **Lot 6 — PR and merge**
+- [x] **Lot 6 — PR and merge**
   - [x] Push branch.
   - [x] Open PR: <https://github.com/rhanka/radar-immobilier/pull/9>.
   - [x] Verify CI green: Branch policy and Quality gates passed on PR #9.
-  - [ ] Merge via merge commit only.
-  - [ ] Preserve source branch.
-  - [ ] Move this file to `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
+  - [x] Merge via merge commit only.
+    - Merge commit: `74c5ead`.
+  - [x] Preserve source branch.
+  - [x] Move this file to `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
