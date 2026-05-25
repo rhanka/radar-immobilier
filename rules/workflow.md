@@ -24,7 +24,9 @@ tags: [workflow]
    Do not use system `/tmp` for branch worktrees.
 3. Author / refine `plan/NN-BRANCH_<slug>.md` from `plan/BRANCH_TEMPLATE.md`.
 4. Execute lots in order; each lot ends with its lot gate (`typecheck`, `lint`, `test`, optional `test-e2e`).
-5. UAT when the branch impacts UI (see UAT Management in the branch file).
+5. UAT when the branch impacts UI: present it on the **root checkout** at the
+   fixed dev ports (stable URL `http://localhost:5301`), never on a per-branch
+   worktree port. See `rules/MASTER.md` → *UAT Environment* and `rules/conductor.md`.
 6. Push branch; verify CI green.
 7. Merge via **merge commit** (no squash, no rebase merge); leave the branch alive.
 8. Move `plan/NN-BRANCH_<slug>.md` to `plan/done/`.

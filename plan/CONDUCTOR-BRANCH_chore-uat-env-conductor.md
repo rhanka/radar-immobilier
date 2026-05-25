@@ -63,15 +63,15 @@ agent works on which branch.
     ignored; confirm `cloc` available on host.
   - [x] Record decisions (env hygiene first, then registry + report).
 
-- [ ] **Lot 1 — Fixed-UAT-ports rule + conductor rules**
-  - [ ] `rules/MASTER.md`: make the UAT-on-root fixed-ports contract explicit
+- [x] **Lot 1 — Fixed-UAT-ports rule + conductor rules**
+  - [x] `rules/MASTER.md`: make the UAT-on-root fixed-ports contract explicit
     (root `ENV=dev`: API 8801 / UI 5301 / Maildev 1101, stable data; worktrees
     use test/branch ports only; sub-agents never use root UAT ports).
-  - [ ] Add `rules/conductor.md` (radar-adapted): conductor role, port
+  - [x] Add `rules/conductor.md` (radar-adapted): conductor role, port
     non-concurrency, lane registry, 3-agent model (gpt-5.5 xhigh / opus 4.7 /
     gemini 3.5 high), launch packet, escalation format.
-  - [ ] `rules/workflow.md`: UAT step points to root checkout fixed ports.
-  - [ ] Lot gate: `git diff --check`; rules cross-references resolve.
+  - [x] `rules/workflow.md`: UAT step points to root checkout fixed ports.
+  - [x] Lot gate: `git diff --check`; rules cross-references resolve.
 
 - [ ] **Lot 2 — BRANCH_TEMPLATE.md alignment**
   - [ ] Remove per-branch UAT ports; UAT section points to the root fixed-port
