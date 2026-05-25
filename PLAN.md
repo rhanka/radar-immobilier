@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CONDUCTOR `chore/uat-env-conductor` in progress: pins UAT to the root checkout at fixed dev ports (stable URL `http://localhost:5301`), adds `make conductor-report` + `.agents/` lane registry + `make down-stale`, and tears down merged-branch stacks. BR-05R `feat/source-value-review-ui` is in visual UAT (round 1 corrections captured in its SPEC_EVOL §6). BR-04 remains in review on PR #8 with companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — CONDUCTOR `chore/uat-env-conductor` MERGED (PR #11, `4e8256b`): UAT now pinned to the root checkout at fixed dev ports (stable URL `http://localhost:5301`), with `make conductor-report` + `.agents/` lane registry + `make down-stale` + `plan/STATUS.md` (purpose × branch). BR-05R `feat/source-value-review-ui` is in visual UAT (round 1 corrections in its SPEC_EVOL §6); next UAT runs on root 5301. BR-04 remains in review on PR #8 with companion `poc-k8s` tenant PR #12.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -21,10 +21,9 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - CI-FIX `fix/ci-pr-actions-trigger` — merged 2026-05-25 (PR #7, `c86d699`). Archived at `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
 - BR-05 `feat/source-investigation-spikes` — merged 2026-05-25 (PR #9, `74c5ead`). Archived at `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
 - CI-FIX2 `fix/gh-pages-unsupported` — merged 2026-05-25 (PR #10, `88f31bd`). Archived at `plan/done/CIFIX2-BRANCH_fix-gh-pages-unsupported.md`.
+- CONDUCTOR `chore/uat-env-conductor` — merged 2026-05-25 (PR #11, `4e8256b`). Archived at `plan/done/CONDUCTOR-BRANCH_chore-uat-env-conductor.md`.
 
 **Active execution:**
-- CONDUCTOR `chore/uat-env-conductor` — UAT env stability + `conductor-report`
-  + `.agents/` lane registry. Plan: `plan/CONDUCTOR-BRANCH_chore-uat-env-conductor.md`.
 - BR-05R `feat/source-value-review-ui` — visual UAT (round 1). Plan:
   `plan/05R-BRANCH_feat-source-value-review-ui.md`.
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
