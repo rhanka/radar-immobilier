@@ -112,11 +112,15 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
   - [x] Lot gate: `make k8s-validate ENV=test-k8s-tenant` and
     `make typecheck ENV=test-k8s-tenant`.
 
-- [ ] **Lot 3 — Make deploy, S3, and scan wiring**
-  - [ ] Implement `deploy-k8s`, `k8s-validate`, `k8s-create-secrets`,
+- [x] **Lot 3 — Make deploy, S3, and scan wiring**
+  - [x] Implement `deploy-k8s`, `k8s-validate`, `k8s-create-secrets`,
     `s3-init-poc`, `s3-status-poc`, image build/push, and `security-scan`.
-  - [ ] Lot gate: `make build ENV=test-k8s-tenant` and
-    `make security-scan ENV=test-k8s-tenant` when images are available.
+  - [x] Lot gate: `make k8s-validate ENV=test-k8s-tenant`,
+    `make build ENV=test-k8s-tenant`, `make -n security-scan
+    ENV=test-k8s-tenant`, and `make k8s-create-secrets
+    ENV=test-k8s-tenant` fail-fast without printing secrets when required
+    variables are missing. Full scan deferred until images and Trivy are
+    available in CI.
 
 - [ ] **Lot 4 — CI/CD workflow**
   - [ ] Add manual K8s deploy workflow using GitHub Secrets.

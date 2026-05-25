@@ -16,6 +16,10 @@
 - **2026-05-25**: radar-owned K8s manifests added under `deploy/k8s/**`.
   `make k8s-validate`, `make typecheck`, and `make lint` pass on
   `ENV=test-k8s-tenant`.
+- **2026-05-25**: BR04 Make targets wired for deploy, K8s secret creation,
+  Scaleway bucket status/init, image build/push, and Trivy scan. `make build`
+  passes on `ENV=test-k8s-tenant`; local Trivy execution is deferred to CI
+  because Trivy is not installed on this host.
 
 ## 1. Goal
 
