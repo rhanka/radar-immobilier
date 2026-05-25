@@ -273,6 +273,101 @@ deploy-k8s: ## Deploy api+postgres+obscura+maildev to K8s poc tenant
 	@exit 1
 
 # ─────────────────────────────────────────────────────────────────────
+# Orchestration / conductor reporting
+# ─────────────────────────────────────────────────────────────────────
+# Lane registry: one `lane|agent|dir` entry per line in .agents/lanes
+# (agent in {gpt, opus, gemini, -}). Override with CONDUCTOR_LANES="a|b|c;..."
+# or CONDUCTOR_LANES_FILE=<path>; else auto-glob worktrees.
+CONDUCTOR_LANES ?=
+CONDUCTOR_LANES_FILE ?= .agents/lanes
+CONDUCTOR_AUTO_GLOB ?= tmp/feat-* tmp/fix-* tmp/chore-*
+CONDUCTOR_STALL_SECS ?= 900
+
+.PHONY: conductor-report agent-conductor-report conductor-status
+conductor-report agent-conductor-report conductor-status: ## Multi-agent status per lane: done/treated % (UAT-excluded), dirty, head, sloc, heartbeat
+	@set -euo pipefail; \
+	now="$$(date +%s)"; \
+	ts="$$(date '+%Y-%m-%d %H:%M:%S %z')"; \
+	total_done=0; total_treated=0; total_all=0; \
+	lanes=(); \
+	if [ -n "$(CONDUCTOR_LANES)" ]; then \
+		IFS=';' read -r -a lanes <<< "$(CONDUCTOR_LANES)"; \
+	elif [ -n "$(CONDUCTOR_LANES_FILE)" ] && [ -f "$(CONDUCTOR_LANES_FILE)" ]; then \
+		while IFS= read -r raw_line; do \
+			line="$${raw_line%%#*}"; \
+			line="$$(echo "$$line" | xargs)"; \
+			if [ -z "$$line" ]; then continue; fi; \
+			lanes+=("$$line"); \
+		done < "$(CONDUCTOR_LANES_FILE)"; \
+	else \
+		auto_i=1; \
+		for dir in $(CONDUCTOR_AUTO_GLOB); do \
+			if [ ! -d "$$dir" ]; then continue; fi; \
+			if [ -z "$$(ls -t "$$dir"/plan/*-BRANCH_*.md 2>/dev/null | head -1)" ]; then continue; fi; \
+			lanes+=("$$(printf 'AUTO%02d|-|%s' "$$auto_i" "$$dir")"); \
+			auto_i="$$((auto_i + 1))"; \
+		done; \
+	fi; \
+	if [ "$${#lanes[@]}" -eq 0 ]; then \
+		echo "No conductor lanes. Seed .agents/lanes ('lane|agent|dir') or pass CONDUCTOR_LANES='BR05R|opus|tmp/feat-source-value-review-ui'."; \
+		exit 0; \
+	fi; \
+	echo "Conductor report ($$ts)"; \
+	echo "lane | agent | branch | done | treated | dirty | head | sloc | heartbeat"; \
+	echo "-----|-------|--------|------|---------|-------|------|------|----------"; \
+	for lane_row in "$${lanes[@]}"; do \
+		IFS='|' read -r lane agent dir <<< "$$lane_row"; \
+		branch="$$(git -C "$$dir" branch --show-current 2>/dev/null || echo '?')"; \
+		head="$$(git -C "$$dir" rev-parse --short HEAD 2>/dev/null || echo '?')"; \
+		dirty="$$(git -C "$$dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')"; \
+		file="$$(ls -t "$$dir"/plan/*-BRANCH_*.md 2>/dev/null | head -1)"; \
+		if [ -n "$$file" ] && [ -f "$$file" ]; then \
+			counts="$$(awk '\
+				BEGIN { in_uat=0; done=0; defer=0; total=0 } \
+				function is_checkbox(s) { return s ~ /^[[:space:]]*-[[:space:]]*\[( |x|!)\]/ } \
+				function is_lot_header(s) { return s ~ /^[[:space:]]*-[[:space:]]*\[( |x|!)\][[:space:]]*\*\*Lot/ } \
+				{ \
+					line=$$0; \
+					if (is_lot_header(line)) { if (line ~ /UAT/) in_uat=1; else in_uat=0; } \
+					if (!is_checkbox(line)) next; \
+					if (in_uat) next; \
+					if (line ~ /UAT/) next; \
+					total++; \
+					if (line ~ /\[x\]/) done++; \
+					else if (line ~ /\[!\]/) defer++; \
+				} \
+				END { printf "%d|%d|%d", done, defer, total } \
+			' "$$file")"; \
+			IFS='|' read -r done_count defer_count total_count <<< "$$counts"; \
+			mtime="$$(stat -c %Y "$$file" 2>/dev/null || echo 0)"; \
+		else \
+			done_count=0; defer_count=0; total_count=0; mtime=0; \
+		fi; \
+		treated_count="$$((done_count + defer_count))"; \
+		done_pct="$$(awk -v a="$$done_count" -v b="$$total_count" 'BEGIN{if(b==0){printf "0.0"}else{printf "%.1f",(100*a)/b}}')"; \
+		treated_pct="$$(awk -v a="$$treated_count" -v b="$$total_count" 'BEGIN{if(b==0){printf "0.0"}else{printf "%.1f",(100*a)/b}}')"; \
+		age="$$((now - mtime))"; \
+		if [ "$$age" -gt $(CONDUCTOR_STALL_SECS) ]; then hb="STALL($${age}s)"; else hb="ACTIVE($${age}s)"; fi; \
+		sloc="$$( (cd "$$dir" 2>/dev/null && cloc --vcs=git --quiet --not-match-f='(package.*\.json|.*-lock\.json|.*_snapshot\.json)$$' . 2>/dev/null | awk '/^SUM:/{print $$5}' | tail -n1) || true)"; \
+		if [ -z "$$sloc" ]; then sloc="n/a"; fi; \
+		echo "$$lane | $$agent | $$branch | $$done_count/$$total_count ($$done_pct%) | $$treated_count/$$total_count ($$treated_pct%) | $$dirty | $$head | $$sloc | $$hb"; \
+		total_done="$$((total_done + done_count))"; \
+		total_treated="$$((total_treated + treated_count))"; \
+		total_all="$$((total_all + total_count))"; \
+	done; \
+	total_done_pct="$$(awk -v a="$$total_done" -v b="$$total_all" 'BEGIN{if(b==0){printf "0.0"}else{printf "%.1f",(100*a)/b}}')"; \
+	total_treated_pct="$$(awk -v a="$$total_treated" -v b="$$total_all" 'BEGIN{if(b==0){printf "0.0"}else{printf "%.1f",(100*a)/b}}')"; \
+	echo "TOTAL | - | - | $$total_done/$$total_all ($$total_done_pct%) | $$total_treated/$$total_all ($$total_treated_pct%) | - | - | - | -"
+
+.PHONY: down-stale
+down-stale: ## Stop stale stacks by ENV list: make down-stale STALE="feat-ui-skeleton test-source-spikes"
+	@test -n "$$STALE" || (echo 'Pass STALE="env1 env2 ..."'; exit 1)
+	@for e in $$STALE; do \
+	  echo "[down-stale] stopping radar-$$e"; \
+	  $(DOCKER_COMPOSE) $(COMPOSE_FILES_BASE) -p radar-$$e down --remove-orphans 2>/dev/null || true; \
+	done
+
+# ─────────────────────────────────────────────────────────────────────
 # Security
 # ─────────────────────────────────────────────────────────────────────
 
