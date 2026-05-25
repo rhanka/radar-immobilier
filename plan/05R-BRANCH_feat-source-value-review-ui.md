@@ -114,8 +114,8 @@ No exceptions declared at branch start.
   - [x] Lot gate: `git diff --check`.
 
 - [ ] **Lot 4 — Visual UAT**
-  - [ ] Start the branch stack on `UI_PORT=5306`.
-  - [ ] Verify the UI loads at `http://localhost:5306`.
+  - [x] Start the branch stack on `UI_PORT=5306`.
+  - [x] Verify the UI loads at `http://localhost:5306`.
   - [ ] Capture desktop and mobile screenshots.
   - [ ] Apply user corrections from screen review.
   - [ ] Lot gate: `make test-ui ENV=test-source-value-review` and
