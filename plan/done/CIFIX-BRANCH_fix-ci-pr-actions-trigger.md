@@ -62,12 +62,16 @@ Resolve the CI-FIX follow-up created after BR-03 by determining why GitHub Actio
   - [x] Update `PLAN.md` so CI-FIX records the actual root cause.
   - [x] Lot gate: documentation-only diff review.
 
-- [ ] **Lot 2 - Push, PR, merge, and close**
-  - [ ] Push branch `fix/ci-pr-actions-trigger`.
-  - [ ] Open PR with root-cause evidence.
-  - [ ] Verify CI green using the full 40-character head SHA.
-  - [ ] Merge via merge commit only; do not squash or rebase.
-  - [ ] Preserve source branch.
-  - [ ] Pull/update local main.
-  - [ ] Move this file to `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
-  - [ ] Update `PLAN.md` status.
+- [x] **Lot 2 - Push, PR, merge, and close**
+  - [x] Push branch `fix/ci-pr-actions-trigger`.
+  - [x] Open PR with root-cause evidence.
+    - PR: https://github.com/rhanka/radar-immobilier/pull/7
+  - [x] Verify CI green using the full 40-character head SHA.
+    - Branch policy run `26380792183`: success.
+    - CI run `26380792196`: success.
+  - [x] Merge via merge commit only; do not squash or rebase.
+    - Merge commit: `c86d699`.
+  - [x] Preserve source branch.
+  - [x] Pull/update local main.
+  - [x] Move this file to `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
+  - [x] Update `PLAN.md` status.
