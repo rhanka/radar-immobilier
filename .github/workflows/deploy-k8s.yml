@@ -1,0 +1,63 @@
+name: Deploy K8s POC
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Image tag to build, push, and deploy
+        default: latest
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-k8s-poc
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, scan, and deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      K8S_IMAGE_TAG: ${{ inputs.image_tag }}
+      KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      K8S_POSTGRES_PASSWORD: ${{ secrets.K8S_POSTGRES_PASSWORD }}
+      K8S_REGISTRY_USERNAME: ${{ secrets.K8S_REGISTRY_USERNAME }}
+      K8S_REGISTRY_PASSWORD: ${{ secrets.K8S_REGISTRY_PASSWORD }}
+      S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+      S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Login to Scaleway registry
+        uses: docker/login-action@v3
+        with:
+          registry: rg.fr-par.scw.cloud
+          username: ${{ secrets.K8S_REGISTRY_USERNAME }}
+          password: ${{ secrets.K8S_REGISTRY_PASSWORD }}
+
+      - name: Build images
+        run: make build-k8s-images ENV=poc
+
+      - name: Scan images
+        run: make security-scan ENV=poc
+
+      - name: Push images
+        run: make push-k8s-images ENV=poc
+
+      - name: Write kubeconfig
+        run: make k8s-write-kubeconfig ENV=poc
+
+      - name: Create K8s secrets
+        run: make k8s-create-secrets ENV=poc
+
+      - name: Deploy manifests
+        run: make deploy-k8s ENV=poc

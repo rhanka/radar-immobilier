@@ -132,8 +132,8 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
     available in CI.
 
 - [ ] **Lot 4 — CI/CD workflow**
-  - [ ] Add manual K8s deploy workflow using GitHub Secrets.
-  - [ ] Add non-secret manifest validation and SCA coverage to CI.
+  - [x] Add manual K8s deploy workflow using GitHub Secrets.
+  - [x] Add non-secret manifest validation and SCA coverage to CI.
   - [ ] Lot gate: open PR and verify CI with the full 40-character head SHA.
 
 - [ ] **Lot 5 — POC deployment smoke**

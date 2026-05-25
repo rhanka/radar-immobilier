@@ -41,8 +41,10 @@ export K8S_API_IMAGE    ?= $(K8S_REGISTRY)/radar-api:$(K8S_IMAGE_TAG)
 export K8S_OBSCURA_IMAGE ?= $(K8S_REGISTRY)/radar-obscura:$(K8S_IMAGE_TAG)
 export K8S_POSTGRES_USER ?= radar
 export K8S_POSTGRES_DB   ?= radar
+export KUBECONFIG ?= $(HOME)/.kube/poc.yaml
 export KUBECTL ?= kubectl
 export TRIVY   ?= trivy
+export TRIVY_IMAGE ?= aquasec/trivy:0.67.2
 
 .DEFAULT_GOAL := help
 
@@ -325,6 +327,13 @@ k8s-create-secrets: ## Create/update K8s secrets from local env values
 	  --docker-password="$$K8S_REGISTRY_PASSWORD" \
 	  --dry-run=client -o yaml | $(KUBECTL) apply -f -
 
+.PHONY: k8s-write-kubeconfig
+k8s-write-kubeconfig: ## Write KUBE_CONFIG_DATA to KUBECONFIG
+	@test -n "$$KUBE_CONFIG_DATA" || (echo "Pass KUBE_CONFIG_DATA"; exit 1)
+	@mkdir -p "$$(dirname "$(KUBECONFIG)")"
+	@printf "%s" "$$KUBE_CONFIG_DATA" > "$(KUBECONFIG)"
+	@chmod 600 "$(KUBECONFIG)"
+
 .PHONY: s3-status-poc
 s3-status-poc: ## Show Scaleway POC bucket status
 	scw object bucket get $(S3_BUCKET) region=$(S3_REGION)
@@ -343,9 +352,13 @@ s3-init-poc: ## Create the Scaleway POC bucket if missing
 
 .PHONY: security-scan
 security-scan: ## Run Trivy on built images
-	@command -v $(TRIVY) >/dev/null || (echo "Install Trivy or set TRIVY=<path>"; exit 127)
-	$(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_API_IMAGE)
-	$(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_OBSCURA_IMAGE)
+	@if command -v $(TRIVY) >/dev/null; then \
+	  $(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_API_IMAGE); \
+	  $(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_OBSCURA_IMAGE); \
+	else \
+	  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock $(TRIVY_IMAGE) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_API_IMAGE); \
+	  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock $(TRIVY_IMAGE) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_OBSCURA_IMAGE); \
+	fi
 
 .PHONY: security-audit
 security-audit: ## Run npm audit for high/critical vulnerabilities

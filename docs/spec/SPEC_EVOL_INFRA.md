@@ -20,6 +20,9 @@
   Scaleway bucket status/init, image build/push, and Trivy scan. `make build`
   passes on `ENV=test-k8s-tenant`; local Trivy execution is deferred to CI
   because Trivy is not installed on this host.
+- **2026-05-25**: CI now validates K8s manifests and runs high/critical npm
+  audit. Manual `deploy-k8s` workflow builds, scans, pushes, writes
+  kubeconfig, creates secrets, and applies manifests from GitHub Actions.
 
 ## 1. Goal
 

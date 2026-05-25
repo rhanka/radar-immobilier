@@ -24,8 +24,17 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.test.yml config -q
           docker compose -f docker-compose.yml -f docker-compose.e2e.yml config -q
 
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Validate K8s manifests
+        run: make k8s-validate ENV=ci
+
       - name: Install workspace deps
         run: make install ENV=ci
+
+      - name: Security audit
+        run: make security-audit ENV=ci
 
       - name: Typecheck
         run: make typecheck ENV=ci
