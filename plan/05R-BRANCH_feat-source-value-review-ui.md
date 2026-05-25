@@ -123,7 +123,9 @@ No exceptions declared at branch start.
     - [ ] UAT1-02 inline acronym tooltips on the word + dotted underline +
       bottom glossary recap.
     - [ ] UAT1-03 all user-facing copy in French (bilingual deferred).
-    - [ ] UAT1-04 reference links inside each acronym description.
+      (glossary/criteria definitions translated; other components pending.)
+    - [x] UAT1-04 reference links inside each acronym description
+      (glossary tooltips now show clickable official-source links).
     - [ ] UAT1-05 1→5 rubric per axis + VISION traceability + per-score
       rubric-meaning and justification (sentropic matrix model).
     - [ ] UAT1-06 real insights/findings per source as proof of value.

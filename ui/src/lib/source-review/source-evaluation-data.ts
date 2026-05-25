@@ -77,10 +77,16 @@ export interface RecommendationSummary {
   dropPhase1: number;
 }
 
+export interface CriteriaReference {
+  label: string;
+  href: string;
+}
+
 export interface CriteriaDefinition {
   id: string;
   label: string;
   explanation: string;
+  references?: CriteriaReference[];
 }
 
 export const criteriaDefinitions: CriteriaDefinition[] = [
@@ -88,103 +94,141 @@ export const criteriaDefinitions: CriteriaDefinition[] = [
     id: "PPCMOI",
     label: "PPCMOI",
     explanation:
-      "Projet particulier de construction, de modification ou d'occupation d'un immeuble: a negotiated exception path that can reveal densification before zoning catches up.",
+      "Projet particulier de construction, de modification ou d'occupation d'un immeuble : une voie dérogatoire négociée qui peut révéler une densification avant même que le zonage ne soit modifié.",
+    references: [
+      {
+        label: "MAMH — guide PPCMOI",
+        href: "https://www.mamh.gouv.qc.ca/amenagement-du-territoire/guide-la-prise-de-decision-en-urbanisme/reglementation/projet-particulier-de-construction-de-modification-ou-doccupation-dun-immeuble-ppcmoi/",
+      },
+    ],
   },
   {
     id: "signal-faible",
     label: "Signal faible",
     explanation:
-      "Early cue that a regulatory or market asymmetry may be forming before it is obvious to the market.",
+      "Indice précoce qu'une asymétrie réglementaire ou de marché est en train de se former, avant qu'elle ne devienne évidente pour le marché.",
   },
   {
     id: "precision",
-    label: "Precision",
+    label: "Précision",
     explanation:
-      "Ability to point to a concrete sector, address, lot, bylaw number, dossier, or project instead of a vague trend.",
+      "Capacité à pointer un secteur, une adresse, un lot, un numéro de règlement, un dossier ou un projet concret plutôt qu'une tendance vague.",
   },
   {
     id: "rappel",
     label: "Rappel",
     explanation:
-      "Ability to avoid missing relevant signals across archives, variants, synonyms, videos, PDFs, and follow-up documents.",
+      "Capacité à ne pas manquer de signaux pertinents à travers les archives, variantes, synonymes, vidéos, PDF et documents de suivi.",
   },
   {
     id: "faux-positif",
     label: "Faux positif",
     explanation:
-      "Source value for downgrading attractive-looking opportunities that are blocked, too noisy, or not actually densification-related.",
+      "Valeur d'une source pour rétrograder des opportunités séduisantes mais bloquées, trop bruitées ou sans lien réel avec la densification.",
   },
   {
     id: "friction-acces",
-    label: "Friction acces",
+    label: "Friction d'accès",
     explanation:
-      "Account setup, API quotas, paywalls, provider contracts, municipal exports, or manual workflows required before automation.",
+      "Création de compte, quotas d'API, paywalls, contrats fournisseurs, exports municipaux ou démarches manuelles requis avant toute automatisation.",
   },
   {
     id: "risque-legal",
-    label: "Risque legal",
+    label: "Risque légal",
     explanation:
-      "Terms-of-use, licence, privacy, payment automation, evidence reuse, and legal interpretation constraints.",
+      "Contraintes de conditions d'utilisation, de licence, de vie privée, d'automatisation de paiement, de réutilisation de preuves et d'interprétation juridique.",
   },
   {
     id: "complexite-cout",
-    label: "Complexite cout",
+    label: "Complexité coût",
     explanation:
-      "Subscription, manual document fees, transcription, storage, OCR/LLM, and provider negotiation effort.",
+      "Abonnements, frais de documents manuels, transcription, stockage, OCR/LLM et effort de négociation fournisseur.",
   },
   {
     id: "CPTAQ",
     label: "CPTAQ",
     explanation:
-      "Commission de protection du territoire agricole du Quebec: a constraint and de-risking layer for agricultural-zone impacts.",
+      "Commission de protection du territoire agricole du Québec : couche de contrainte et de réduction de risque pour les impacts en zone agricole.",
+    references: [
+      { label: "CPTAQ — site officiel", href: "https://www.cptaq.gouv.qc.ca/" },
+    ],
   },
   {
     id: "MAMH",
     label: "MAMH",
     explanation:
-      "Ministere des Affaires municipales et de l'Habitation: publishes role-assessment files and municipal reference datasets.",
+      "Ministère des Affaires municipales et de l'Habitation : publie les fichiers du rôle d'évaluation et des jeux de données de référence municipaux.",
+    references: [
+      { label: "MAMH — site officiel", href: "https://www.mamh.gouv.qc.ca/" },
+    ],
   },
   {
     id: "MRC",
     label: "MRC",
     explanation:
-      "Municipalite regionale de comte: regional planning documents can explain expansion, constraints, and long-term sector direction.",
+      "Municipalité régionale de comté : les documents de planification régionale expliquent l'expansion, les contraintes et l'orientation à long terme d'un secteur.",
+    references: [
+      {
+        label: "MRC de Beauharnois-Salaberry",
+        href: "https://www.mrc-beauharnois-salaberry.com/",
+      },
+    ],
   },
   {
     id: "BDZI",
     label: "BDZI",
     explanation:
-      "Base de donnees des zones inondables: flood-risk context used to prevent false positives on otherwise attractive sites.",
+      "Base de données des zones inondables : contexte de risque d'inondation utilisé pour éviter les faux positifs sur des sites par ailleurs attractifs.",
+    references: [
+      {
+        label: "Québec — zones inondables",
+        href: "https://www.quebec.ca/securite-situations-urgence/urgences-sinistres-risques-naturels/inondation/zones-inondables",
+      },
+    ],
   },
   {
     id: "GRHQ",
     label: "GRHQ",
     explanation:
-      "Geobase du reseau hydrographique du Quebec: hydrography context for environmental setbacks and local bylaw checks.",
+      "Géobase du réseau hydrographique du Québec : contexte hydrographique pour les bandes riveraines et les vérifications réglementaires locales.",
+    references: [
+      {
+        label: "Données Québec — GRHQ",
+        href: "https://www.donneesquebec.ca/recherche/dataset/grhq",
+      },
+    ],
   },
   {
     id: "CKAN",
     label: "CKAN",
     explanation:
-      "Open-data catalog API pattern used by Donnees Quebec for dataset discovery and resource resolution.",
+      "Modèle d'API de catalogue de données ouvertes utilisé par Données Québec pour découvrir des jeux de données et résoudre leurs ressources.",
+    references: [
+      { label: "Données Québec", href: "https://www.donneesquebec.ca/" },
+    ],
   },
   {
     id: "WMS/WFS",
     label: "WMS/WFS",
     explanation:
-      "Geospatial web services for map layers and features; useful for constraints without downloading large bulk files.",
+      "Services web géospatiaux (couches cartographiques et entités) ; utiles pour les contraintes sans télécharger de gros fichiers.",
+    references: [
+      { label: "OGC — standards WMS/WFS", href: "https://www.ogc.org/standards/" },
+    ],
   },
   {
     id: "GTFS",
     label: "GTFS",
     explanation:
-      "General Transit Feed Specification: transit service data useful for accessibility context, not a regulatory signal.",
+      "General Transit Feed Specification : données de transport en commun utiles pour le contexte d'accessibilité, pas un signal réglementaire.",
+    references: [{ label: "GTFS — spécification", href: "https://gtfs.org/" }],
   },
   {
     id: "MLS",
-    label: "MLS",
+    label: "MLS / SIA",
     explanation:
-      "Multiple Listing Service: high market value if licensed, but public-listing scraping is not an acceptable Phase 1 path.",
+      "Multiple Listing Service (Système inter-agences) : forte valeur marché si licencié, mais le scraping des inscriptions publiques n'est pas une voie acceptable en Phase 1.",
+    references: [{ label: "Centris", href: "https://www.centris.ca/" }],
   },
 ];
 
