@@ -73,10 +73,10 @@ agent works on which branch.
   - [x] `rules/workflow.md`: UAT step points to root checkout fixed ports.
   - [x] Lot gate: `git diff --check`; rules cross-references resolve.
 
-- [ ] **Lot 2 — BRANCH_TEMPLATE.md alignment**
-  - [ ] Remove per-branch UAT ports; UAT section points to the root fixed-port
+- [x] **Lot 2 — BRANCH_TEMPLATE.md alignment**
+  - [x] Remove per-branch UAT ports; UAT section points to the root fixed-port
     contract; keep per-branch test/branch ports only.
-  - [ ] Lot gate: `git diff --check`.
+  - [x] Lot gate: `git diff --check`.
 
 - [ ] **Lot 3 — Makefile: conductor-report + cloc + teardown**
   - [ ] Add `cloc` target (graceful if binary missing).
