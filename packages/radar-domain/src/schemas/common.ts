@@ -29,5 +29,5 @@ export const evidenceSchema = z.object({
   capturedAt: isoDateTimeSchema,
 });
 
-export type Confidence = z.infer<typeof confidenceSchema>;
+export type ConfidenceScore = z.infer<typeof confidenceSchema>;
 export type Evidence = z.infer<typeof evidenceSchema>;
