@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CONDUCTOR `chore/uat-env-conductor` MERGED (PR #11, `4e8256b`): UAT now pinned to the root checkout at fixed dev ports (stable URL `http://localhost:5301`), with `make conductor-report` + `.agents/` lane registry + `make down-stale` + `plan/STATUS.md` (purpose × branch). BR-05R `feat/source-value-review-ui` is in visual UAT (round 1 corrections in its SPEC_EVOL §6); next UAT runs on root 5301. BR-04 remains in review on PR #8 with companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — DEMOFIND `feat/demo-findings-valleyfield` MERGED (PR #13): 4-agent PROMPT benchmark (A2 Opus 34 🥇 > C2 Codex 31 > H1 human 30 > G2 Gemini 14, two agents beat the human with no fabrication) + verified findings wired into the Radar demo. FAIRBENCH `chore/fair-benchmark-rule` MERGED (PR #12, absolute no-cheating rule). Next: DEMO-3-VIEWS — make the 3 deliverables navigable (Radar demo / agent comparison / source review). BR-05R `feat/source-value-review-ui` to be merged into the 3-views demo (UAT round-1 copy backlog still open). BR-04 in review (PR #8 + poc-k8s #12).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -22,6 +22,8 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-05 `feat/source-investigation-spikes` — merged 2026-05-25 (PR #9, `74c5ead`). Archived at `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
 - CI-FIX2 `fix/gh-pages-unsupported` — merged 2026-05-25 (PR #10, `88f31bd`). Archived at `plan/done/CIFIX2-BRANCH_fix-gh-pages-unsupported.md`.
 - CONDUCTOR `chore/uat-env-conductor` — merged 2026-05-25 (PR #11, `4e8256b`). Archived at `plan/done/CONDUCTOR-BRANCH_chore-uat-env-conductor.md`.
+- FAIRBENCH `chore/fair-benchmark-rule` — merged 2026-05-25 (PR #12). Archived at `plan/done/FAIRBENCH-BRANCH_chore-fair-benchmark-rule.md`.
+- DEMOFIND `feat/demo-findings-valleyfield` — merged 2026-05-25 (PR #13). Archived at `plan/done/DEMOFIND-BRANCH_feat-demo-findings-valleyfield.md`.
 
 **Active execution:**
 - BR-05R `feat/source-value-review-ui` — visual UAT (round 1). Plan:
