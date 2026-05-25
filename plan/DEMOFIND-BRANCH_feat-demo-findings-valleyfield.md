@@ -67,17 +67,22 @@ review screen) to already illustrate results.
   - [x] Create worktree `./tmp/feat-demo-findings-valleyfield`.
   - [x] Record the 4-track intention (this file).
 
-- [ ] **Lot 1 — Four-track analyst execution**
-  - [x] Track 1 Claude Opus — `opus.md` produced.
-  - [x] Track 3 GPT-5.5 (ChatGPT) — scraped to `PROMPT_RESULT_GPT5.5.md`.
-  - [ ] Track 2 Codex GPT-5.5 xhigh — auto-relaunch 10:50 → `gpt.md`.
-  - [ ] Track 4 Gemini 3.5 via agy + tmux driver → `gemini.md`.
+- [ ] **Lot 1 — Iteration-1 execution (same prompt, traced modes — see SPEC §8)**
+  - [x] H1 Human/ChatGPT GPT-5.5 — scraped to `PROMPT_RESULT_GPT5.5.md`.
+  - [x] A1 Claude Opus (default mode) — `opus.md` (⚠️ to re-run in `max`).
+  - [ ] A1b Claude Opus **max** (same prompt) → `opus-max.md`.
+  - [ ] C1 Codex GPT-5.5 **xhigh** — auto-relaunch 10:50 → `gpt.md`.
+  - [x] G1 Gemini 3.5 Flash **high** via agy + tmux driver → `gemini.md`.
 
-- [ ] **Lot 2 — Comparison of the 4 outputs**
-  - [ ] `docs/spec/SPEC_EVOL_DEMO_FINDINGS.md`: differences + consolidated findings
-    (coverage, sources, accuracy, divergences; e.g. Opus = plan d'urbanisme 450 /
-    stratégie habitation vs GPT-5.5 = zoning amendments 150-49..51 zone-level).
-  - [ ] Pick the consolidated finding set to surface in the demo.
+- [ ] **Lot 2 — Frozen metrics + neutral scoring (SPEC §2/§5)**
+  - [x] Freeze VISION-aligned success metrics M1–M7 in `SPEC_EVOL_DEMO_FINDINGS.md`.
+  - [x] Record the strict no-cheating rule + execution-mode ledger.
+  - [ ] Build the shared verifiable reference set via an **independent agent**.
+  - [ ] Score every iteration-1 track identically (human included); report honestly.
+
+- [ ] **Lot 2b — Iteration 2 (independent-agent-framed value-add 0-shot)**
+  - [ ] Independent agent writes the iteration-2 brief from iteration-1 findings.
+  - [ ] Run the value-add 0-shot; score with the same frozen metrics.
 
 - [ ] **Lot 3 — Wire findings into the demo UI**
   - [ ] Surface the consolidated Valleyfield findings in the original "Radar demo"
