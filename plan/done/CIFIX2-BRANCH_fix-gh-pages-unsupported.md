@@ -65,10 +65,11 @@ once Pages is enabled.
   - [x] Preserve deployment behavior when Pages becomes available.
   - [x] Lot gate: `git diff --check`.
 
-- [ ] **Lot 2 — PR and merge**
+- [x] **Lot 2 — PR and merge**
   - [x] Push branch.
   - [x] Open PR: <https://github.com/rhanka/radar-immobilier/pull/10>.
-  - [ ] Verify CI green.
-  - [ ] Merge via merge commit only.
-  - [ ] Preserve source branch.
-  - [ ] Move this file to `plan/done/CIFIX2-BRANCH_fix-gh-pages-unsupported.md`.
+  - [x] Verify CI green.
+  - [x] Merge via merge commit only.
+    - Merge commit: `88f31bd`.
+  - [x] Preserve source branch.
+  - [x] Move this file to `plan/done/CIFIX2-BRANCH_fix-gh-pages-unsupported.md`.

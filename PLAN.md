@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CI-FIX2 `fix/gh-pages-unsupported` ACTIVE to make the Pages deployment workflow skip cleanly when the repository plan does not support GitHub Pages. BR-05 `feat/source-investigation-spikes` is merged (PR #9, `74c5ead`); BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — CI-FIX2 `fix/gh-pages-unsupported` MERGED (PR #10, `88f31bd`). The Pages deployment workflow now skips cleanly when the repository plan does not support GitHub Pages. BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -20,10 +20,9 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-03 `feat/ui-skeleton-svelte-ds` — merged 2026-05-25 (PR #5, `27ace35`). Archived at `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
 - CI-FIX `fix/ci-pr-actions-trigger` — merged 2026-05-25 (PR #7, `c86d699`). Archived at `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
 - BR-05 `feat/source-investigation-spikes` — merged 2026-05-25 (PR #9, `74c5ead`). Archived at `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
+- CI-FIX2 `fix/gh-pages-unsupported` — merged 2026-05-25 (PR #10, `88f31bd`). Archived at `plan/done/CIFIX2-BRANCH_fix-gh-pages-unsupported.md`.
 
 **Active execution:**
-- CI-FIX2 `fix/gh-pages-unsupported` — active in
-  `tmp/fix-gh-pages-unsupported` (PR #10).
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
 
