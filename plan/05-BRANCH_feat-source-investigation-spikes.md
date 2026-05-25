@@ -122,7 +122,7 @@ No exceptions declared at branch start.
 - [ ] **Lot 6 — PR and merge**
   - [x] Push branch.
   - [x] Open PR: <https://github.com/rhanka/radar-immobilier/pull/9>.
-  - [ ] Verify CI green.
+  - [x] Verify CI green: Branch policy and Quality gates passed on PR #9.
   - [ ] Merge via merge commit only.
   - [ ] Preserve source branch.
   - [ ] Move this file to `plan/done/05-BRANCH_feat-source-investigation-spikes.md`.
