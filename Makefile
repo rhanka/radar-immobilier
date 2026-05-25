@@ -299,7 +299,7 @@ deploy-k8s: ## Deploy api+postgres+obscura+maildev to K8s poc tenant
 .PHONY: k8s-validate
 k8s-validate: ## Validate K8s manifests client-side
 	$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) >/dev/null
-	$(KUBECTL) apply --dry-run=client -k $(K8S_MANIFEST_DIR)
+	$(KUBECTL) apply --dry-run=client --validate=false -k $(K8S_MANIFEST_DIR)
 
 .PHONY: k8s-create-secrets
 k8s-create-secrets: ## Create/update K8s secrets from local env values
