@@ -23,7 +23,7 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 
 **Active execution:**
 - CI-FIX2 `fix/gh-pages-unsupported` — active in
-  `tmp/fix-gh-pages-unsupported`.
+  `tmp/fix-gh-pages-unsupported` (PR #10).
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
 

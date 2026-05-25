@@ -66,8 +66,8 @@ once Pages is enabled.
   - [x] Lot gate: `git diff --check`.
 
 - [ ] **Lot 2 — PR and merge**
-  - [ ] Push branch.
-  - [ ] Open PR.
+  - [x] Push branch.
+  - [x] Open PR: <https://github.com/rhanka/radar-immobilier/pull/10>.
   - [ ] Verify CI green.
   - [ ] Merge via merge commit only.
   - [ ] Preserve source branch.
