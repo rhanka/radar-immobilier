@@ -44,7 +44,11 @@ Actions with the following status should be included around tasks only if really
 - Rationale: <Why this mode is selected>
 
 ## UAT Management (in orchestration context)
-- **Mono-branch**: UAT after each lot if UI surface impacted; performed on the integrated branch.
+- UAT is always presented on the **root checkout**, `ENV=dev`, at the fixed
+  ports (stable URL `http://localhost:5301`). Do NOT define a per-branch UAT
+  port. See `rules/MASTER.md` → *UAT Environment* and `rules/conductor.md`.
+- **Mono-branch**: UAT after each lot if UI surface impacted; present it by
+  pointing the root checkout at this branch, then return root to its prior state.
 - **Multi-branch**: no UAT on sub-branches; UAT happens only after integration.
 - UAT checkpoints listed as checkboxes inside each relevant lot.
 
@@ -53,7 +57,10 @@ Actions with the following status should be included around tasks only if really
   - [ ] Read `rules/MASTER.md` and pointers (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`).
   - [ ] Create/confirm isolated repository-local worktree `./tmp/<slug>` and run development there.
   - [ ] Capture Makefile targets needed for debug/testing.
-  - [ ] Define environment mapping (`dev`, `test-<slug>`, `e2e-<slug>`) and ports for this branch.
+  - [ ] Define environment mapping for **test/branch stacks only**
+    (`test-<slug>`, `e2e-<slug>`, optional `feat-<slug>` dev stack) with a unique
+    port block per `rules/conductor.md`. UAT uses the fixed root `dev` ports, not
+    a per-branch port.
   - [ ] Confirm command style: `make ... <vars> ENV=<env>` with `ENV` last.
   - [ ] Confirm scope and guardrails; declare `BRxx-EXn` exceptions if needed.
 
