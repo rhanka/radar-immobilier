@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: radar-immobilier
 resources:
   - api.yaml
+  - postgres-postgis.yaml
