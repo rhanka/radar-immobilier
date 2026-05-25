@@ -94,11 +94,14 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
   - [x] Declare BR04 scope exceptions.
 
 - [ ] **Lot 1 — Infra spec and tenant contract**
-  - [ ] Create/update `docs/spec/SPEC_EVOL_INFRA.md`.
-  - [ ] Create clean `poc-k8s` worktree at `tmp/feat-poc-k8s-radar-tenant/`.
-  - [ ] Add `tenants/radar-immobilier/{00-namespace,30-netpol,README}.yaml`
+  - [x] Create/update `docs/spec/SPEC_EVOL_INFRA.md`.
+  - [x] Create clean `poc-k8s` worktree at `tmp/feat-poc-k8s-radar-tenant/`.
+  - [x] Add `tenants/radar-immobilier/{00-namespace,30-netpol,README}.yaml`
     or `.md` in the `poc-k8s` branch.
-  - [ ] Update `poc-k8s/contracts/README.md` capacity table if cleanly based.
+  - [x] Update `poc-k8s/contracts/README.md` capacity table if cleanly based.
+  - [x] Commit `poc-k8s` branch:
+    `bbfe899 feat: add radar immobilier tenant contract` and
+    `c58aa53 docs: document radar immobilier tenant handoff`.
   - [ ] Lot gate: radar lint plus K8s validation after Lot 2 adds the target.
 
 - [ ] **Lot 2 — Radar-owned K8s manifests**

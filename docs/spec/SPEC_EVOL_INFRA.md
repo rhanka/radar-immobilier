@@ -10,6 +10,9 @@
   manifests under `../poc-k8s/tenants/radar-immobilier/`; the active
   `poc-k8s` contract keeps cluster-owner resources in `poc-k8s` and
   tenant-owned workloads in the application repo. BR04 follows that split.
+- **2026-05-25**: local `poc-k8s` branch `feat/radar-immobilier-tenant`
+  created in `tmp/feat-poc-k8s-radar-tenant/` with tenant contract commits
+  `bbfe899` and `c58aa53`.
 
 ## 1. Goal
 
