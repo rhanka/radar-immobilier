@@ -117,7 +117,16 @@ No exceptions declared at branch start.
   - [x] Start the branch stack on `UI_PORT=5306`.
   - [x] Verify the UI loads at `http://localhost:5306`.
   - [ ] Capture desktop and mobile screenshots.
-  - [ ] Apply user corrections from screen review.
+  - [ ] Apply user corrections from screen review (UAT round 1 —
+    see SPEC_EVOL §6):
+    - [ ] UAT1-01 visual quality polish (impeccable check).
+    - [ ] UAT1-02 inline acronym tooltips on the word + dotted underline +
+      bottom glossary recap.
+    - [ ] UAT1-03 all user-facing copy in French (bilingual deferred).
+    - [ ] UAT1-04 reference links inside each acronym description.
+    - [ ] UAT1-05 1→5 rubric per axis + VISION traceability + per-score
+      rubric-meaning and justification (sentropic matrix model).
+    - [ ] UAT1-06 real insights/findings per source as proof of value.
   - [ ] Lot gate: `make test-ui ENV=test-source-value-review` and
     `make build ENV=test-source-value-review`.
 
