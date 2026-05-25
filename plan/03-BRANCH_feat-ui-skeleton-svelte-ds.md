@@ -142,6 +142,7 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
     - PR: https://github.com/rhanka/radar-immobilier/pull/5
     - Ready for review after local BR-03 gates and Playwright UAT passed.
   - [ ] Verify CI green.
+    - Blocked: GitHub reports no workflow runs and no commit statuses for the PR head after ready-for-review and a synchronize push.
   - [ ] Merge via merge commit only; do not squash or rebase.
   - [ ] Preserve source branch.
   - [ ] Pull/update local main.
