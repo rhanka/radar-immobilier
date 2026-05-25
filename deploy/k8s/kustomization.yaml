@@ -6,3 +6,4 @@ resources:
   - postgres-postgis.yaml
   - obscura.yaml
   - maildev.yaml
+  - ingress.yaml
