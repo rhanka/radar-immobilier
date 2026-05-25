@@ -120,8 +120,8 @@ No exceptions declared at branch start.
     and `make build ENV=test-source-spikes`.
 
 - [ ] **Lot 6 — PR and merge**
-  - [ ] Push branch.
-  - [ ] Open PR.
+  - [x] Push branch.
+  - [x] Open PR: <https://github.com/rhanka/radar-immobilier/pull/9>.
   - [ ] Verify CI green.
   - [ ] Merge via merge commit only.
   - [ ] Preserve source branch.
