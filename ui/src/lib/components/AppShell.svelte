@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { HealthView } from "$lib/api/health";
   import type { DashboardState } from "$lib/state/dashboard";
+  import { dashboardLayout } from "$lib/layout/dashboard-layout";
   import ApiStatusBadge from "./ApiStatusBadge.svelte";
   import MapPreview from "./MapPreview.svelte";
   import MetricStrip from "./MetricStrip.svelte";
@@ -14,11 +15,11 @@
   export let onSelectSignal: (signalId: string) => void;
 </script>
 
-<div class="flex min-h-screen flex-col bg-slate-100 text-slate-950">
+<div class={dashboardLayout.shell}>
   <TopBar {health} />
 
-  <main class="grid min-h-0 flex-1 gap-4 p-4 xl:grid-cols-[320px_minmax(0,1fr)_340px]">
-    <div class="min-h-[420px] xl:min-h-0">
+  <main class={dashboardLayout.topGrid}>
+    <div class={dashboardLayout.signalColumn}>
       <SignalQueue
         signals={dashboard.signals}
         selectedSignalId={dashboard.selectedSignal.id}
@@ -26,9 +27,9 @@
       />
     </div>
 
-    <div class="min-w-0 space-y-4">
+    <div class={dashboardLayout.workColumn}>
       <MetricStrip metrics={dashboard.metrics} />
-      <div class="min-h-[520px]">
+      <div class={dashboardLayout.opportunitySlot}>
         <OpportunityPanel
           opportunity={dashboard.opportunity}
           selectedSignal={dashboard.selectedSignal}
@@ -36,12 +37,16 @@
       </div>
     </div>
 
-    <div class="space-y-4">
-      <div class="lg:hidden">
-        <ApiStatusBadge {health} />
-      </div>
-      <MapPreview selectedSignal={dashboard.selectedSignal} />
+    <div class={dashboardLayout.chatColumn}>
       <RadarChatPanel />
+    </div>
+
+    <div class={dashboardLayout.mobileStatus}>
+      <ApiStatusBadge {health} />
+    </div>
+
+    <div class={dashboardLayout.mapRow}>
+      <MapPreview selectedSignal={dashboard.selectedSignal} />
     </div>
   </main>
 </div>

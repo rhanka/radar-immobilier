@@ -6,7 +6,7 @@
   export let selectedSignal: RadarSignal;
 </script>
 
-<section class="flex min-h-0 flex-col rounded-md border border-slate-200 bg-white">
+<section class="flex h-full min-h-0 flex-col rounded-md border border-slate-200 bg-white">
   <div class="border-b border-slate-200 p-5">
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
