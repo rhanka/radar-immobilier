@@ -52,6 +52,7 @@ export interface SourceEvaluation {
   costNotes: string;
   weakSignalValue: number;
   precisionValue: number;
+  recallValue: number;
   falsePositiveControl: number;
   historyLearningValue: number;
   businessValue: number;
@@ -88,6 +89,48 @@ export const criteriaDefinitions: CriteriaDefinition[] = [
     label: "PPCMOI",
     explanation:
       "Projet particulier de construction, de modification ou d'occupation d'un immeuble: a negotiated exception path that can reveal densification before zoning catches up.",
+  },
+  {
+    id: "signal-faible",
+    label: "Signal faible",
+    explanation:
+      "Early cue that a regulatory or market asymmetry may be forming before it is obvious to the market.",
+  },
+  {
+    id: "precision",
+    label: "Precision",
+    explanation:
+      "Ability to point to a concrete sector, address, lot, bylaw number, dossier, or project instead of a vague trend.",
+  },
+  {
+    id: "rappel",
+    label: "Rappel",
+    explanation:
+      "Ability to avoid missing relevant signals across archives, variants, synonyms, videos, PDFs, and follow-up documents.",
+  },
+  {
+    id: "faux-positif",
+    label: "Faux positif",
+    explanation:
+      "Source value for downgrading attractive-looking opportunities that are blocked, too noisy, or not actually densification-related.",
+  },
+  {
+    id: "friction-acces",
+    label: "Friction acces",
+    explanation:
+      "Account setup, API quotas, paywalls, provider contracts, municipal exports, or manual workflows required before automation.",
+  },
+  {
+    id: "risque-legal",
+    label: "Risque legal",
+    explanation:
+      "Terms-of-use, licence, privacy, payment automation, evidence reuse, and legal interpretation constraints.",
+  },
+  {
+    id: "complexite-cout",
+    label: "Complexite cout",
+    explanation:
+      "Subscription, manual document fees, transcription, storage, OCR/LLM, and provider negotiation effort.",
   },
   {
     id: "CPTAQ",
@@ -158,6 +201,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public municipal page; storage/OCR/LLM costs only.",
     weakSignalValue: 5,
     precisionValue: 4,
+    recallValue: 5,
     falsePositiveControl: 2,
     historyLearningValue: 5,
     businessValue: 5,
@@ -174,6 +218,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     ],
     clientExpected: [
       "Confirm that early municipal notice detection is the first proposal proof point.",
+      "Set tolerance for alert noise so minor derogations such as sheds, fences, and small accessory items do not flood the radar.",
     ],
     concreteEvidence: [
       {
@@ -198,6 +243,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public pages and PDFs; extraction cost only.",
     weakSignalValue: 4,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 4,
     businessValue: 5,
@@ -242,6 +288,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public pages/PDFs; linking and extraction cost only.",
     weakSignalValue: 5,
     precisionValue: 5,
+    recallValue: 4,
     falsePositiveControl: 3,
     historyLearningValue: 5,
     businessValue: 5,
@@ -282,6 +329,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public agendas/minutes; parsing and historical indexing cost only.",
     weakSignalValue: 4,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 5,
     businessValue: 4,
@@ -319,9 +367,10 @@ export const sourceEvaluations: SourceEvaluation[] = [
     accessMode: "public-api",
     costLevel: "medium-variable",
     costNotes:
-      "YouTube pages/API may be free; transcription cost depends on captions or speech-to-text volume and must be estimated per meeting length.",
+      "YouTube pages/API are often free; transcript availability and speech-to-text cost still need explicit qualification by source language, channel policy, and monthly alert volume.",
     weakSignalValue: 5,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 3,
     historyLearningValue: 5,
     businessValue: 5,
@@ -334,10 +383,11 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "BR05 marked council videos as high-potential but deferred because captions, API path, and transcription cost were not qualified.",
     ],
     next: [
-      "Run a YouTube-specific access audit: channel/feed discovery, caption availability, API quota, transcript quality, and per-hour transcription cost.",
+      "Run a YouTube-specific access audit: channel/feed discovery, caption availability, API quota, transcript quality, and per-hour transcription cost before deciding on transcription provider.",
     ],
     clientExpected: [
-      "Decide whether faster-than-PV detection justifies transcription cost in Phase 1.",
+      "Decide whether faster-than-PV detection justifies transcription cost in Phase 1, and define the acceptable alert latency.",
+      "Confirm budget appetite for YouTube API/captions/Whisper qualification before production transcription.",
     ],
     concreteEvidence: [
       {
@@ -362,6 +412,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public MRC pages/PDFs; possible Cloudflare handling cost.",
     weakSignalValue: 3,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 3,
     historyLearningValue: 4,
     businessValue: 3,
@@ -399,6 +450,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public PDFs/maps; extraction cost only.",
     weakSignalValue: 2,
     precisionValue: 2,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 3,
     businessValue: 3,
@@ -436,6 +488,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public documents; extraction cost only.",
     weakSignalValue: 2,
     precisionValue: 2,
+    recallValue: 3,
     falsePositiveControl: 3,
     historyLearningValue: 4,
     businessValue: 3,
@@ -468,17 +521,19 @@ export const sourceEvaluations: SourceEvaluation[] = [
     visionAlignment: ["parcel-anchor", "constraint-filter", "strategic-context"],
     accessMode: "public-api",
     costLevel: "none",
-    costNotes: "Public CKAN API; compute/storage costs only.",
+    costNotes:
+      "Internal CKAN discovery plumbing for catalog, package, and resource lookup; keep this as shared infrastructure rather than a direct value source.",
     weakSignalValue: 2,
     precisionValue: 4,
-    falsePositiveControl: 4,
-    historyLearningValue: 3,
-    businessValue: 4,
+    recallValue: 3,
+    falsePositiveControl: 2,
+    historyLearningValue: 2,
+    businessValue: 2,
     technicalComplexity: 2,
     accessComplexity: 1,
     legalComplexity: 1,
     costComplexity: 1,
-    recommendation: "build-now",
+    recommendation: "build-later",
     done: ["BR05 identified CKAN package_search/package_show API endpoints."],
     next: [
       "Build a resource resolver used by MAMH roles, CPTAQ, BDZI, and other public datasets.",
@@ -496,7 +551,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     auditFor:
       "Low-cost infrastructure for multiple public sources and reduces one-off adapter work.",
     auditAgainst:
-      "It is not itself a weak signal; value appears only through downstream datasets.",
+      "It is internal plumbing, not a client-visible opportunity source; it should not be presented at the same business level as avis publics or PPCMOI.",
   },
   {
     id: "roles-evaluation-fonciere-mamh",
@@ -508,6 +563,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public caviarded files; storage/streaming cost for large files.",
     weakSignalValue: 2,
     precisionValue: 5,
+    recallValue: 3,
     falsePositiveControl: 5,
     historyLearningValue: 4,
     businessValue: 5,
@@ -544,17 +600,19 @@ export const sourceEvaluations: SourceEvaluation[] = [
     visionAlignment: ["parcel-anchor", "false-positive-control"],
     accessMode: "public-api",
     costLevel: "none",
-    costNotes: "Public geocoder/API; cache aggressively to control usage.",
+    costNotes:
+      "Public API but not a direct value source; use as a supportive normalization input and keep it in a build-later phase.",
     weakSignalValue: 1,
-    precisionValue: 5,
-    falsePositiveControl: 5,
-    historyLearningValue: 2,
-    businessValue: 4,
+    precisionValue: 2,
+    recallValue: 2,
+    falsePositiveControl: 4,
+    historyLearningValue: 1,
+    businessValue: 2,
     technicalComplexity: 2,
     accessComplexity: 1,
     legalComplexity: 1,
     costComplexity: 1,
-    recommendation: "build-now",
+    recommendation: "build-later",
     done: ["BR05 identified ArcGIS GeocodeServer and downloadable formats."],
     next: [
       "Use for address normalization and sector matching in avis/PPCMOI extraction.",
@@ -572,7 +630,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     auditFor:
       "Cheap and important precision layer: converts textual notices into map-ready entities.",
     auditAgainst:
-      "It creates no opportunity on its own and needs caching/rate discipline.",
+      "It creates no opportunity on its own, does not prove lot identity or constructibility, and needs caching/rate discipline.",
   },
   {
     id: "cptaq-zone-agricole",
@@ -584,6 +642,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public geospatial layer; storage/geoprocessing cost only.",
     weakSignalValue: 1,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 5,
     historyLearningValue: 3,
     businessValue: 4,
@@ -615,26 +674,28 @@ export const sourceEvaluations: SourceEvaluation[] = [
     id: "cptaq-decisions",
     name: "CPTAQ decisions",
     family: "Constraint",
-    visionAlignment: ["constraint-filter", "history-learning"],
+    visionAlignment: ["constraint-filter", "false-positive-control", "history-learning"],
     accessMode: "public-free",
     costLevel: "none",
-    costNotes: "Public decision/search material; PDF/text linking cost.",
-    weakSignalValue: 3,
-    precisionValue: 3,
-    falsePositiveControl: 4,
-    historyLearningValue: 4,
-    businessValue: 4,
+    costNotes:
+      "Public decision/search material; high-value for phase-1 anti-blocking checks where municipal change intent is visible.",
+    weakSignalValue: 4,
+    precisionValue: 5,
+    recallValue: 5,
+    falsePositiveControl: 5,
+    historyLearningValue: 5,
+    businessValue: 5,
     technicalComplexity: 4,
     accessComplexity: 1,
     legalComplexity: 2,
     costComplexity: 2,
-    recommendation: "build-later",
+    recommendation: "build-now",
     done: ["BR05 identified decision data as unlock/de-risk signal after zone filtering."],
     next: [
-      "Build after agricultural-zone filter; link shapes to decision details where possible.",
+      "Link notice dossiers to decision summaries and status history so denials and authorizations can qualify opportunity ranking immediately.",
     ],
     clientExpected: [
-      "Confirm how much agricultural-edge opportunity hunting matters for Phase 1.",
+      "Confirm how much agricultural-edge opportunity hunting matters for Phase 1 because VISION treats CPTAQ requests as early expansion signals.",
     ],
     concreteEvidence: [
       {
@@ -658,6 +719,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public REST/WMS or bulk GIS; bulk storage can grow.",
     weakSignalValue: 1,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 5,
     historyLearningValue: 2,
     businessValue: 3,
@@ -695,6 +757,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public WMS/FGDB resources; geoprocessing cost only.",
     weakSignalValue: 1,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 2,
     businessValue: 3,
@@ -732,6 +795,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public where available; multi-city schema normalization cost.",
     weakSignalValue: 3,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 3,
     businessValue: 3,
@@ -769,9 +833,10 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public PDF maps/grids; OCR/table extraction can be costly in time.",
     weakSignalValue: 3,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 5,
     historyLearningValue: 4,
-    businessValue: 4,
+    businessValue: 5,
     technicalComplexity: 5,
     accessComplexity: 1,
     legalComplexity: 2,
@@ -779,10 +844,10 @@ export const sourceEvaluations: SourceEvaluation[] = [
     recommendation: "build-later",
     done: ["BR05 identified plans/grids as important but extraction-heavy."],
     next: [
-      "Use bylaw references first; add plan/grid extraction after BR07 proves the alert pipeline.",
+      "Use bylaw references first; add targeted/manual extraction for top dossiers in Phase 1, then automate full plan/grid extraction later.",
     ],
     clientExpected: [
-      "Confirm whether stronger zoning scoring is needed for proposal Phase 1 or a later map phase.",
+      "Confirm whether the proposal needs targeted before/after zoning-plan evidence for the strongest dossiers.",
     ],
     concreteEvidence: [
       {
@@ -804,9 +869,10 @@ export const sourceEvaluations: SourceEvaluation[] = [
     accessMode: "paid-access",
     costLevel: "quote-required",
     costNotes:
-      "Official extracts or licensed access must be qualified; avoid live-map scraping as default path.",
+      "Public consultation is typically free/manual for targeted lot checks; official extracts or licensed bulk feeds are paid and require qualification before automation.",
     weakSignalValue: 1,
     precisionValue: 5,
+    recallValue: 3,
     falsePositiveControl: 5,
     historyLearningValue: 3,
     businessValue: 5,
@@ -819,10 +885,10 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "BR05 separated parcel geometry value from ownership proof and warned against live map scraping.",
     ],
     next: [
-      "Qualify official extract access, licensing, update cadence, and cost before automating.",
+      "Separate manual consultation from official paid extracts; qualify licensing, update cadence, and cost before automating.",
     ],
     clientExpected: [
-      "Decide whether official lot geometry is required in Phase 1, and whether to fund extracts.",
+      "Decide whether manual cadastral checks are enough for proposal-stage lots or whether official extracts should be funded.",
     ],
     concreteEvidence: [
       {
@@ -844,11 +910,12 @@ export const sourceEvaluations: SourceEvaluation[] = [
     accessMode: "manual-paid",
     costLevel: "manual-fee",
     costNotes:
-      "Paid per consultation/document workflow; exact tariff and reuse rights must be confirmed from the official portal.",
+      "Paid per consultation/document workflow. PROCESS cites CAD 1.50/document from 2026-04-01; verify current tariff and reuse/storage rights before use.",
     weakSignalValue: 1,
     precisionValue: 5,
+    recallValue: 3,
     falsePositiveControl: 5,
-    historyLearningValue: 4,
+    historyLearningValue: 3,
     businessValue: 5,
     technicalComplexity: 5,
     accessComplexity: 5,
@@ -862,7 +929,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "Keep manual evidence links for demo parcels; do not automate browser/payment workflows in Phase 1.",
     ],
     clientExpected: [
-      "Confirm whether manual registry checks are acceptable for proposal-stage opportunities.",
+      "Confirm whether manual registry checks on final candidate lots are acceptable for the proposal instead of daily registry automation.",
     ],
     concreteEvidence: [
       {
@@ -887,6 +954,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "Commercial subscription/feed quote required; likely material monthly cost and reuse constraints.",
     weakSignalValue: 2,
     precisionValue: 5,
+    recallValue: 3,
     falsePositiveControl: 5,
     historyLearningValue: 5,
     businessValue: 5,
@@ -925,6 +993,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "Formal feed or partnership required; public listing scraping should be excluded.",
     weakSignalValue: 2,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 4,
     businessValue: 4,
@@ -963,6 +1032,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "Aggregate public context may be free; parcel-level transaction feeds require paid/provider access.",
     weakSignalValue: 2,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 5,
     businessValue: 4,
@@ -998,9 +1068,10 @@ export const sourceEvaluations: SourceEvaluation[] = [
     accessMode: "client-or-municipal-access",
     costLevel: "quote-required",
     costNotes:
-      "No public enumerable feed observed; cost is mainly data-sharing negotiation or municipal export work.",
+      "No public enumerable feed observed; access is contingent on municipal export or client-supported data-sharing work.",
     weakSignalValue: 3,
     precisionValue: 5,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 5,
     businessValue: 4,
@@ -1014,7 +1085,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "Ask whether a public/municipal export or client-supported data request is possible.",
     ],
     clientExpected: [
-      "If permits are essential, help request or authorize access to detailed permit records.",
+      "If permits are essential, help request or authorize access/export to detailed municipal permit records and define acceptable lead time.",
     ],
     concreteEvidence: [
       {
@@ -1036,9 +1107,11 @@ export const sourceEvaluations: SourceEvaluation[] = [
     visionAlignment: ["market-validation", "history-learning"],
     accessMode: "public-api",
     costLevel: "none",
-    costNotes: "Free where a city publishes it; multi-city normalization cost.",
+    costNotes:
+      "Free where a city publishes it; Salaberry has no confirmed open feed. Multi-city normalization cost applies later.",
     weakSignalValue: 2,
     precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 4,
     historyLearningValue: 4,
     businessValue: 2,
@@ -1076,8 +1149,9 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public bulk/API data; slice to avoid large unnecessary downloads.",
     weakSignalValue: 1,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 2,
-    historyLearningValue: 3,
+    historyLearningValue: 1,
     businessValue: 4,
     technicalComplexity: 2,
     accessComplexity: 1,
@@ -1115,8 +1189,9 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public WDS; metadata management cost by table.",
     weakSignalValue: 1,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 2,
-    historyLearningValue: 3,
+    historyLearningValue: 1,
     businessValue: 3,
     technicalComplexity: 3,
     accessComplexity: 1,
@@ -1150,6 +1225,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public data; low technical cost but low opportunity value.",
     weakSignalValue: 1,
     precisionValue: 1,
+    recallValue: 3,
     falsePositiveControl: 1,
     historyLearningValue: 1,
     businessValue: 1,
@@ -1185,20 +1261,21 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public CSV/JSON/XLSX style data; normalization cost only.",
     weakSignalValue: 3,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 2,
     historyLearningValue: 4,
-    businessValue: 4,
+    businessValue: 3,
     technicalComplexity: 2,
     accessComplexity: 1,
     legalComplexity: 1,
     costComplexity: 1,
-    recommendation: "build-now",
+    recommendation: "build-later",
     done: ["BR05 identified official federal public-investment context."],
     next: [
-      "Normalize municipality names and surface nearby projects as timing/context catalysts.",
+      "Defer unless a concrete Salaberry project is linked to hot sectors; otherwise keep as strategic context.",
     ],
     clientExpected: [
-      "Confirm whether public investment catalysts should appear in proposal opportunity cards.",
+      "Confirm whether public investment catalysts should appear in proposal cards after municipal signals are proven.",
     ],
     concreteEvidence: [
       {
@@ -1222,7 +1299,8 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public GIS feed; snapshot storage needed for history.",
     weakSignalValue: 2,
     precisionValue: 3,
-    falsePositiveControl: 2,
+    recallValue: 3,
+    falsePositiveControl: 1,
     historyLearningValue: 3,
     businessValue: 3,
     technicalComplexity: 2,
@@ -1251,13 +1329,14 @@ export const sourceEvaluations: SourceEvaluation[] = [
     id: "mtmd-reseau-routier-rtss",
     name: "MTMD reseau routier RTSS",
     family: "Transport context",
-    visionAlignment: ["strategic-context", "false-positive-control"],
+    visionAlignment: ["strategic-context"],
     accessMode: "public-api",
     costLevel: "none",
     costNotes: "Public GIS; province-wide fetches should be scoped.",
     weakSignalValue: 1,
     precisionValue: 3,
-    falsePositiveControl: 2,
+    recallValue: 3,
+    falsePositiveControl: 1,
     historyLearningValue: 2,
     businessValue: 2,
     technicalComplexity: 2,
@@ -1294,6 +1373,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public GTFS feed; update handling and route filtering cost.",
     weakSignalValue: 1,
     precisionValue: 3,
+    recallValue: 3,
     falsePositiveControl: 2,
     historyLearningValue: 2,
     businessValue: 3,
@@ -1305,7 +1385,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     done: ["BR05 identified GTFS as accessibility context, not project alerts."],
     next: ["Add only after opportunity scoring needs transit accessibility."],
     clientExpected: [
-      "Confirm whether accessibility context is a proposal differentiator.",
+      "Confirm whether Exo accessibility is materially relevant to Valleyfield before adding it to Phase 1.",
     ],
     concreteEvidence: [
       {
@@ -1328,7 +1408,8 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costLevel: "none",
     costNotes: "Public HTML; geocoding and NLP extraction cost.",
     weakSignalValue: 3,
-    precisionValue: 3,
+    precisionValue: 4,
+    recallValue: 3,
     falsePositiveControl: 2,
     historyLearningValue: 4,
     businessValue: 3,
@@ -1366,6 +1447,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
     costNotes: "Public pages; low direct pilot value.",
     weakSignalValue: 1,
     precisionValue: 1,
+    recallValue: 3,
     falsePositiveControl: 1,
     historyLearningValue: 2,
     businessValue: 1,
@@ -1402,7 +1484,8 @@ export const sourceEvaluations: SourceEvaluation[] = [
       "Public WMS/index use is low cost; bulk imagery storage and computer vision are separate costs.",
     weakSignalValue: 1,
     precisionValue: 3,
-    falsePositiveControl: 3,
+    recallValue: 3,
+    falsePositiveControl: 5,
     historyLearningValue: 3,
     businessValue: 3,
     technicalComplexity: 4,
@@ -1425,7 +1508,7 @@ export const sourceEvaluations: SourceEvaluation[] = [
       },
     ],
     auditFor:
-      "Useful to visually validate underused parcels and improve proposal credibility.",
+      "Useful to visually validate friches, parking lots, vacant or underused sites, and improve proposal credibility without heavy computer vision.",
     auditAgainst:
       "Large imagery and computer vision can become a separate product before core radar value is proven.",
   },
@@ -1461,16 +1544,25 @@ export function getQuadrant(source: SourceEvaluation): Quadrant {
 export function getAccessPrioritySources(
   sources: SourceEvaluation[],
 ): SourceEvaluation[] {
+  const accessPriorityModes = new Set([
+    "paid-access",
+    "partner-feed",
+    "manual-paid",
+    "client-or-municipal-access",
+  ]);
+
   return sources
-    .filter((source) =>
-      [
-        "paid-access",
-        "partner-feed",
-        "manual-paid",
-        "client-or-municipal-access",
-      ].includes(source.accessMode),
+    .filter(
+      (source) =>
+        source.recommendation === "qualify-access-now" ||
+        source.recommendation === "manual-check" ||
+        source.costLevel === "quote-required" ||
+        source.costLevel === "manual-fee" ||
+        accessPriorityModes.has(source.accessMode),
     )
-    .sort((left, right) => right.businessValue - left.businessValue);
+    .sort((left, right) =>
+      right.businessValue - left.businessValue || right.costComplexity - left.costComplexity,
+    );
 }
 
 export function getRecommendationSummary(
@@ -1494,16 +1586,16 @@ export function getRecommendationSummary(
 export function getSourcesByQuadrant(
   sources: SourceEvaluation[],
 ): Record<Quadrant, SourceEvaluation[]> {
-  return sources.reduce(
-    (groups, source) => {
-      groups[getQuadrant(source)].push(source);
-      return groups;
-    },
-    {
-      "high-value-low-complexity": [],
-      "high-value-high-complexity": [],
-      "low-value-low-complexity": [],
-      "low-value-high-complexity": [],
-    } satisfies Record<Quadrant, SourceEvaluation[]>,
-  );
+  const groups: Record<Quadrant, SourceEvaluation[]> = {
+    "high-value-low-complexity": [],
+    "high-value-high-complexity": [],
+    "low-value-low-complexity": [],
+    "low-value-high-complexity": [],
+  };
+
+  for (const source of sources) {
+    groups[getQuadrant(source)].push(source);
+  }
+
+  return groups;
 }
