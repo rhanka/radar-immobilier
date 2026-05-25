@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CI-FIX `fix/ci-pr-actions-trigger` MERGED (PR #7, `c86d699`). GitHub Actions was not broken after BR-03; the apparent no-CI state was a verification false negative caused by checking abbreviated SHAs through connector tooling. `rules/workflow.md` now requires full 40-character head SHAs when verifying Actions through connector/API tools. Next candidates: BR-04 (infra) or BR-05 (source investigation spikes).
+Status: Updated 2026-05-25 — BR-04 `feat/k8s-tenant-radar-and-infra` ACTIVE in `tmp/feat-k8s-tenant-radar-and-infra`. CI-FIX `fix/ci-pr-actions-trigger` is merged (PR #7, `c86d699`); Actions verification now uses full 40-character head SHAs.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -21,10 +21,9 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - CI-FIX `fix/ci-pr-actions-trigger` — merged 2026-05-25 (PR #7, `c86d699`). Archived at `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
 
 **Active execution:**
-- _none_ — next branch is BR-04 or BR-05 depending on whether infra or source evaluation is prioritized.
+- BR-04 `feat/k8s-tenant-radar-and-infra` — active 2026-05-25 in repository-local worktree `tmp/feat-k8s-tenant-radar-and-infra`.
 
 **Pending branches (ordered execution):**
-- BR-04 `feat/k8s-tenant-radar-and-infra`
 - BR-05 `feat/source-investigation-spikes`
 - BR-06 `feat/data-model-investigation`
 - BR-07 `feat/vertical-slice-avis-publics`
