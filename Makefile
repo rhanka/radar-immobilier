@@ -346,3 +346,7 @@ security-scan: ## Run Trivy on built images
 	@command -v $(TRIVY) >/dev/null || (echo "Install Trivy or set TRIVY=<path>"; exit 127)
 	$(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_API_IMAGE)
 	$(TRIVY) image --exit-code 1 --severity HIGH,CRITICAL $(K8S_OBSCURA_IMAGE)
+
+.PHONY: security-audit
+security-audit: ## Run npm audit for high/critical vulnerabilities
+	$(COMPOSE_RUN_API_NODEPS) npm audit --audit-level=high

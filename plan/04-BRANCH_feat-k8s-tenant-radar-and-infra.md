@@ -35,6 +35,7 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
   - `api/**` -> BR04-EX4
   - `obscura/**` -> BR04-EX5
   - `.env.example` -> BR04-EX6
+  - `package.json`, `package-lock.json`, `api/package.json` -> BR04-EX7
 - **Exception process**: declare reason, impact, and rollback here before
   touching a conditional path.
 
@@ -70,6 +71,14 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
 - **Reason**: operators need non-secret deployment variable names.
 - **Impact**: `.env.example` may gain placeholder-only K8s/S3 variables.
 - **Rollback**: remove the added examples.
+
+### BR04-EX7 — Security audit dependency bump
+- **Reason**: `make security-audit` found high severity advisory
+  `GHSA-gpj5-g38j-94v9` in `drizzle-orm <0.45.2`.
+- **Impact**: update `api/package.json` and `package-lock.json` only as needed
+  to move `drizzle-orm` to a patched version.
+- **Rollback**: revert the dependency bump and keep `security-audit` out of CI
+  until a dedicated security branch handles the advisory.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cross-repo PR**
