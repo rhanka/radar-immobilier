@@ -41,6 +41,7 @@ export K8S_API_IMAGE    ?= $(K8S_REGISTRY)/radar-api:$(K8S_IMAGE_TAG)
 export K8S_OBSCURA_IMAGE ?= $(K8S_REGISTRY)/radar-obscura:$(K8S_IMAGE_TAG)
 export K8S_POSTGRES_USER ?= radar
 export K8S_POSTGRES_DB   ?= radar
+export K8S_VALIDATE_WITH_CLUSTER ?= 0
 export KUBECONFIG ?= $(HOME)/.kube/poc.yaml
 export KUBECTL ?= kubectl
 export TRIVY   ?= trivy
@@ -299,7 +300,11 @@ deploy-k8s: ## Deploy api+postgres+obscura+maildev to K8s poc tenant
 .PHONY: k8s-validate
 k8s-validate: ## Validate K8s manifests client-side
 	$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) >/dev/null
-	$(KUBECTL) apply --dry-run=client --validate=false -k $(K8S_MANIFEST_DIR)
+	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
+	  $(KUBECTL) apply --dry-run=client --validate=false -k $(K8S_MANIFEST_DIR); \
+	else \
+	  echo "[k8s-validate] offline render ok; set K8S_VALIDATE_WITH_CLUSTER=1 for kubectl dry-run"; \
+	fi
 
 .PHONY: k8s-create-secrets
 k8s-create-secrets: ## Create/update K8s secrets from local env values
