@@ -11,7 +11,7 @@
   const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 </script>
 
-<section class="flex h-full min-h-0 flex-col overflow-auto bg-slate-50 p-6">
+<section class="min-h-full bg-slate-50 p-6">
   <header class="mb-5">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
       Restitution — benchmark multi-agents
