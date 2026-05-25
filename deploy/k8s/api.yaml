@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radar-api
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: api
+    spec:
+      imagePullSecrets:
+        - name: radar-registry-pull
+      containers:
+        - name: api
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: POSTGRES_HOST
+              value: radar-postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: S3_ENDPOINT
+              value: https://s3.fr-par.scw.cloud
+            - name: S3_REGION
+              value: fr-par
+            - name: S3_BUCKET
+              value: radar-immobilier-raw
+            - name: S3_FORCE_PATH_STYLE
+              value: "false"
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            - name: OBSCURA_CDP_URL
+              value: http://radar-obscura:9222
+            - name: MAILDEV_SMTP_HOST
+              value: radar-maildev
+            - name: MAILDEV_SMTP_PORT
+              value: "1025"
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 75m, memory: 160Mi }
+            limits: { cpu: 300m, memory: 384Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-api
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: api
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

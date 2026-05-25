@@ -32,6 +32,9 @@ export API_VERSION ?= dev
 export UI_VERSION  ?= dev
 export E2E_VERSION ?= dev
 
+export K8S_MANIFEST_DIR ?= deploy/k8s
+export KUBECTL ?= kubectl
+
 .DEFAULT_GOAL := help
 
 # ─────────────────────────────────────────────────────────────────────
@@ -271,6 +274,11 @@ deploy-gh-pages: ## Deploy the SPA to GitHub Pages
 deploy-k8s: ## Deploy api+postgres+obscura+maildev to K8s poc tenant
 	@echo "[deploy-k8s] wired in BR-04"
 	@exit 1
+
+.PHONY: k8s-validate
+k8s-validate: ## Validate K8s manifests client-side
+	$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) >/dev/null
+	$(KUBECTL) apply --dry-run=client -k $(K8S_MANIFEST_DIR)
 
 # ─────────────────────────────────────────────────────────────────────
 # Security
