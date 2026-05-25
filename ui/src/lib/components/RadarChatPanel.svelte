@@ -68,7 +68,7 @@
   </footer>
 {/snippet}
 
-<section class="min-h-[320px] overflow-hidden rounded-md border border-slate-200 bg-white">
+<section class="flex h-full min-h-[420px] overflow-hidden rounded-md border border-slate-200 bg-white">
   <PackageChatPanel
     labels={resolveLabel}
     featureFlags={{ radarTools: true }}

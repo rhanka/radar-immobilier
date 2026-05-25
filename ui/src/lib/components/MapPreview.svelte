@@ -14,7 +14,7 @@
     <MapPin class="h-5 w-5 text-teal-700" aria-hidden="true" />
   </div>
 
-  <div class="mt-4 aspect-[4/3] overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+  <div class="mt-4 h-[260px] overflow-hidden rounded-md border border-slate-200 bg-slate-100 md:h-[340px] xl:h-[360px]">
     <div class="relative h-full w-full bg-[linear-gradient(90deg,#e2e8f0_1px,transparent_1px),linear-gradient(#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px]">
       <div class="absolute left-[12%] top-[20%] h-[64%] w-3 rotate-12 rounded-md bg-slate-300"></div>
       <div class="absolute left-[8%] top-[52%] h-3 w-[82%] -rotate-6 rounded-md bg-slate-300"></div>
