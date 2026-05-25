@@ -33,8 +33,25 @@ this file and only add tooling glue on top of it.
 - Use `ENV=<branch-slug>` as a short alias for the compose project name.
 - Always pass `ENV=...` as the **LAST** argument to any `make` command. `ENV=... make ...` is FORBIDDEN.
 - Before starting services, verify ports are free or owned by the same project.
-- Override ports per branch: `API_PORT`, `UI_PORT`, `MAILDEV_UI_PORT` — keep `VITE_API_BASE_URL` aligned.
+- Override ports per branch **for test / branch stacks only** (`ENV=test-*`,
+  `ENV=feat-*`, …): `API_PORT`, `UI_PORT`, `MAILDEV_UI_PORT` — keep
+  `VITE_API_BASE_URL` aligned. These per-branch ports MUST NOT collide with the
+  fixed root UAT ports below, and sub-agents MUST NOT use the root UAT ports.
 - Example: `make dev API_PORT=8802 UI_PORT=5302 MAILDEV_UI_PORT=1102 ENV=feat-vertical-slice`.
+
+## UAT Environment (MANDATORY — fixed ports, stable data)
+- UAT always happens on the **root checkout** with `ENV=dev` at **fixed ports**:
+  API `8801`, UI `5301`, Maildev UI `1101`, Postgres `5532`, S3 `9100/9101`,
+  Obscura `9222` (the Makefile defaults). The UAT **URL is stable**:
+  `http://localhost:5301`. Do not invent a new UAT port per branch.
+- Data is **stable** across UAT sessions: never run `make clean` / `-v` on the
+  `dev` volumes without explicit user confirmation.
+- To UAT a branch: push the branch, then point the root checkout at it
+  (`git -C <root> checkout <branch>` or merge), run `make dev … ENV=dev` on the
+  fixed ports, UAT, then return the root to its prior state. The *code* under
+  UAT changes; the *ports and data* never do.
+- Worktrees are for development and automated test/branch stacks only; they
+  never host the UAT the user reviews.
 
 ## Branch Scope Control (MANDATORY)
 - Every branch declares `Allowed Paths`, `Forbidden Paths`, `Conditional Paths` in its `plan/NN-BRANCH_<slug>.md`.
@@ -99,6 +116,7 @@ this file and only add tooling glue on top of it.
 
 ## Other Rules Files
 - `rules/workflow.md` — branching, commits, PR, orchestration.
+- `rules/conductor.md` — conductor orchestration, fixed UAT ports, multi-agent lane registry, `conductor-report`.
 - `rules/subagents.md` — sub-agent contract, execution, reporting.
 - `rules/testing.md` — test pyramid, CI, environment isolation.
 - `rules/security.md` — secrets, SAST, container scanning, vulnerability register.
