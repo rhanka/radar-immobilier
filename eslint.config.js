@@ -7,6 +7,7 @@ export default tseslint.config(
       "**/dist/**",
       "**/node_modules/**",
       "**/*.config.js",
+      "**/*.config.cjs",
       "**/*.config.ts",
       "**/drizzle/**",
     ],
