@@ -47,6 +47,7 @@ tags: [workflow]
 
 - Open PR with the branch name as title; body describes what changed and which lot is closed.
 - CI green is mandatory before merge.
+- When verifying GitHub Actions through connector/API tooling, use the full 40-character head SHA, not an abbreviated SHA. The workflow-run helper may return no runs for short SHAs and is scoped to pull-request-triggered runs; an empty result is not proof that Actions did not run. Cross-check the GitHub Actions UI or `gh` before bypassing CI.
 - Merge commit is the only allowed strategy (sentropic policy inherited).
 - After merge, do NOT delete the source branch.
 

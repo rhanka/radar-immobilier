@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — BR-03 `feat/ui-skeleton-svelte-ds` MERGED (PR #5, `27ace35`). First usable Svelte 5 + Vite radar dashboard: signal queue, metrics, opportunity preview, API health, full-width map preview, Sentropic chat shell, UI workspace gates, and GitHub Pages workflow. CI was explicitly bypassed for PR #5 because GitHub produced no workflow runs/statuses; a CI follow-up is now required before the next CI-dependent merge. Previously merged: BR-00 (PR #1), BR-01 (PR #2), BR-02 (PR #3).
+Status: Updated 2026-05-25 — CI-FIX `fix/ci-pr-actions-trigger` ACTIVE. BR-03 `feat/ui-skeleton-svelte-ds` was merged in PR #5 (`27ace35`) after a CI verification false negative. GitHub Actions did run for PR #5; the false negative came from checking abbreviated SHAs through connector tooling. CI-FIX documents the full-SHA verification rule before the next CI-dependent merge.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -20,7 +20,7 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-03 `feat/ui-skeleton-svelte-ds` — merged 2026-05-25 (PR #5, `27ace35`). Archived at `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
 
 **Active execution:**
-- _none_ — next branch should include the CI follow-up below before any merge that depends on GitHub Actions status.
+- CI-FIX `fix/ci-pr-actions-trigger` — active; root cause identified as verification tooling misuse, not broken workflows.
 
 **Pending branches (ordered execution):**
 - CI-FIX `fix/ci-pr-actions-trigger`
@@ -68,10 +68,11 @@ Three parallel tracks become possible afterwards: API skeleton (`BR-02`), UI ske
 - **Dependencies**: BR-01.
 
 ### CI-FIX `fix/ci-pr-actions-trigger`
-- **Goal**: determine why GitHub Actions did not create PR workflow runs/statuses for PR #5, then restore observable CI before the next CI-dependent merge.
-- **Allowed**: `.github/workflows/**`, `rules/workflow.md`, `PLAN.md`, `plan/**` if a dedicated branch plan is created.
+- **Goal**: document the correct CI verification path after PR #5 appeared to have no runs/statuses.
+- **Allowed**: `rules/workflow.md`, `PLAN.md`, `plan/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`; `.github/workflows/**` only if root-cause evidence later shows workflow definitions are broken.
 - **Dependencies**: BR-03 merge revealed the issue.
-- **Validation**: open a test PR or synchronize a branch and confirm GitHub exposes workflow runs/statuses through the PR checks UI/API.
+- **Root cause**: GitHub Actions did run for PR #5. Connector verification used short SHAs and returned empty results; using the full 40-character head SHA returns the CI and Branch policy PR runs.
+- **Validation**: this branch's PR must verify workflow runs with the full 40-character head SHA before merge.
 
 ### BR-04 `feat/k8s-tenant-radar-and-infra`
 - **Goal**: K8s tenant + S3 bucket creation + maildev + DNS `immo.sent-tech.ca`.
