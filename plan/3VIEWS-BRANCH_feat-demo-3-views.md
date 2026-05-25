@@ -35,5 +35,6 @@ Make the three deliverables navigable in one app behind a nav menu:
     matrix + verdict + anti-cheating method).
   - [x] Lot gate: typecheck (0 err), lint, test-ui (16/16), build (ok) `ENV=dev`.
 - [ ] **Lot 3 — UAT + PR + close**
-  - [ ] UAT: 3 views navigate on `http://localhost:5301`.
-  - [ ] Push; PR; CI green; merge commit; archive this file.
+  - [x] UAT: 3 views navigate on `http://localhost:5301` (verified via Playwright:
+    nav menu + radar / comparison matrix / source-review all render).
+  - [ ] Push; PR; CI green; merge commit; archive this file. [awaiting go-ahead]
