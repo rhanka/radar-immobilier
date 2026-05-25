@@ -13,6 +13,9 @@
 - **2026-05-25**: local `poc-k8s` branch `feat/radar-immobilier-tenant`
   created in `tmp/feat-poc-k8s-radar-tenant/` with tenant contract commits
   `bbfe899` and `c58aa53`.
+- **2026-05-25**: radar-owned K8s manifests added under `deploy/k8s/**`.
+  `make k8s-validate`, `make typecheck`, and `make lint` pass on
+  `ENV=test-k8s-tenant`.
 
 ## 1. Goal
 

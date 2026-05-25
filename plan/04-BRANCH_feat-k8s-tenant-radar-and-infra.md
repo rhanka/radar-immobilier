@@ -93,7 +93,7 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
   - [x] Define `ENV=test-k8s-tenant`, `ENV=e2e-k8s-tenant`, `ENV=poc`.
   - [x] Declare BR04 scope exceptions.
 
-- [ ] **Lot 1 — Infra spec and tenant contract**
+- [x] **Lot 1 — Infra spec and tenant contract**
   - [x] Create/update `docs/spec/SPEC_EVOL_INFRA.md`.
   - [x] Create clean `poc-k8s` worktree at `tmp/feat-poc-k8s-radar-tenant/`.
   - [x] Add `tenants/radar-immobilier/{00-namespace,30-netpol,README}.yaml`
@@ -102,13 +102,14 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
   - [x] Commit `poc-k8s` branch:
     `bbfe899 feat: add radar immobilier tenant contract` and
     `c58aa53 docs: document radar immobilier tenant handoff`.
-  - [ ] Lot gate: radar lint plus K8s validation after Lot 2 adds the target.
+  - [x] Lot gate: `make k8s-validate ENV=test-k8s-tenant` and
+    `make lint ENV=test-k8s-tenant` pass after Lot 2 adds the target.
 
-- [ ] **Lot 2 — Radar-owned K8s manifests**
-  - [ ] Add `deploy/k8s/{kustomization,api,postgres-postgis,obscura,maildev,ingress,secrets.example}.yaml`.
-  - [ ] Include probes, requests/limits, PVC `5Gi`, internal Maildev, and
+- [x] **Lot 2 — Radar-owned K8s manifests**
+  - [x] Add `deploy/k8s/{kustomization,api,postgres-postgis,obscura,maildev,ingress,secrets.example}.yaml`.
+  - [x] Include probes, requests/limits, PVC `5Gi`, internal Maildev, and
     `immo.sent-tech.ca` API ingress.
-  - [ ] Lot gate: `make k8s-validate ENV=test-k8s-tenant` and
+  - [x] Lot gate: `make k8s-validate ENV=test-k8s-tenant` and
     `make typecheck ENV=test-k8s-tenant`.
 
 - [ ] **Lot 3 — Make deploy, S3, and scan wiring**
