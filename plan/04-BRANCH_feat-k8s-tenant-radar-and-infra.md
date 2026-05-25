@@ -123,7 +123,8 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
 
 - [x] **Lot 3 — Make deploy, S3, and scan wiring**
   - [x] Implement `deploy-k8s`, `k8s-validate`, `k8s-create-secrets`,
-    `s3-init-poc`, `s3-status-poc`, image build/push, and `security-scan`.
+    `s3-init-poc`, `s3-create-poc`, `s3-status-poc`, image build/push, and
+    `security-scan`.
   - [x] Lot gate: `make k8s-validate ENV=test-k8s-tenant`,
     `make build ENV=test-k8s-tenant`, `make -n security-scan
     ENV=test-k8s-tenant`, and `make k8s-create-secrets
@@ -138,7 +139,7 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
     `da7ec45cf427ec9831828c39b24c1abcc3295739`.
 
 - [ ] **Lot 5 — POC deployment smoke**
-  - [ ] Ensure bucket `radar-immobilier-raw` exists in Scaleway project
+  - [x] Ensure bucket `radar-immobilier-raw` exists in Scaleway project
     `09ac728a-e3b9-4a5b-9749-664b0f147c70`.
   - [ ] Create/rotate K8s secrets out-of-band.
   - [ ] Apply tenant contract, deploy radar manifests, and smoke `/health`.

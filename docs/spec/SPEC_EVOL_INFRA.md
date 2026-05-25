@@ -25,6 +25,9 @@
   kubeconfig, creates secrets, and applies manifests from GitHub Actions.
 - **2026-05-25**: radar PR #8 CI passed (`26382703842`) for head SHA
   `da7ec45cf427ec9831828c39b24c1abcc3295739`.
+- **2026-05-25**: Scaleway Object Storage bucket `radar-immobilier-raw`
+  created in `fr-par` with endpoint
+  `https://radar-immobilier-raw.s3.fr-par.scw.cloud`.
 
 ## 1. Goal
 

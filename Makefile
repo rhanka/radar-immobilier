@@ -353,6 +353,9 @@ s3-init-poc: ## Create the Scaleway POC bucket if missing
 	  scw object bucket create $(S3_BUCKET) region=$(S3_REGION); \
 	fi
 
+.PHONY: s3-create-poc
+s3-create-poc: s3-init-poc ## Alias: create the Scaleway POC bucket if missing
+
 # ─────────────────────────────────────────────────────────────────────
 # Security
 # ─────────────────────────────────────────────────────────────────────
