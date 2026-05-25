@@ -242,9 +242,11 @@ data, imported from domain types), `ui/src/lib/components/opportunity/Opportunit
   `ENV=test-vertical-slice`.
 
 ## Lot 8 — UAT + PR + close
-- [ ] UAT on root: present the 4th view on http://localhost:5301; verify the 3
-  dossiers render the 6 phases + traced evidence + score (Playwright snapshot).
-- [ ] Update `PLAN.md` §1.
+- [x] UAT on root: 4th view "Opportunité" on http://localhost:5301 renders the 3
+  dossiers (H-609-4/H-521/H-143), 6 phases, real lots, **7 clickable source links**
+  (cloudfront avis, rôle RL70052_2026.xml…), fait/non-disponible tags, weighted
+  scores (3.15/3.30/2.65). Verified via Playwright.
+- [x] Update `PLAN.md` §1.
 - [ ] Push; open PR; CI green (full 40-char SHA).
 - [ ] Merge commit only; preserve branch; move this file to `plan/done/`.
 </content>
