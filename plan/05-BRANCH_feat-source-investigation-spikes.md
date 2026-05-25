@@ -77,43 +77,44 @@ No exceptions declared at branch start.
   - [x] Define environment mapping: `ENV=test-source-spikes`.
   - [x] Confirm scope and guardrails.
 
-- [ ] **Lot 1 — Feasibility spec scaffold**
-  - [ ] Create `docs/spec/SPEC_EVOL_SOURCE_FEASIBILITY.md` with the canonical
+- [x] **Lot 1 — Feasibility spec scaffold**
+  - [x] Create `docs/spec/SPEC_EVOL_SOURCE_FEASIBILITY.md` with the canonical
     evaluation rubric.
-  - [ ] Create `_spikes/**` directory structure and README template.
-  - [ ] Lot gate: `git diff --check`.
+  - [x] Create `_spikes/**` directory structure and README template.
+  - [x] Lot gate: `git diff --check`.
 
-- [ ] **Lot 2 — Municipal web and media source spikes**
-  - [ ] Investigate avis publics, proces-verbaux, and council videos for the
+- [x] **Lot 2 — Municipal web and media source spikes**
+  - [x] Investigate avis publics, proces-verbaux, and council videos for the
     Valleyfield pilot.
-  - [ ] Investigate PPCMOI, zoning bylaws, zoning plans/grids, construction
+  - [x] Investigate PPCMOI, zoning bylaws, zoning plans/grids, construction
     permits, and MRC planning schemes.
-  - [ ] Record source URLs, observed formats, sample inventory, automation
+  - [x] Record source URLs, observed formats, sample inventory, automation
     level, risks, and effort estimates.
-  - [ ] Lot gate: `git diff --check`.
+  - [x] Lot gate: `git diff --check`.
 
-- [ ] **Lot 3 — Public geospatial and provincial open data spikes**
-  - [ ] Investigate Donnees Quebec discovery/access paths.
-  - [ ] Investigate roles d'evaluation, zoning open data, CPTAQ zones and
+- [x] **Lot 3 — Public geospatial and provincial open data spikes**
+  - [x] Investigate Donnees Quebec discovery/access paths.
+  - [x] Investigate roles d'evaluation, zoning open data, CPTAQ zones and
     decisions, BDZI, GRHQ, Adresses Quebec, and orthophotos.
-  - [ ] Record API/file formats, refresh cadence where visible, geospatial
+  - [x] Record API/file formats, refresh cadence where visible, geospatial
     tooling needs, risks, and effort estimates.
-  - [ ] Lot gate: `git diff --check`.
+  - [x] Lot gate: `git diff --check`.
 
-- [ ] **Lot 4 — Property, ownership, market, and context spikes**
-  - [ ] Investigate Cadastre/Infolot and Registre foncier access/cost path.
-  - [ ] Investigate transactions immobilieres, JLR, and Centris/MLS feasibility
+- [x] **Lot 4 — Property, ownership, market, and context spikes**
+  - [x] Investigate Cadastre/Infolot and Registre foncier access/cost path.
+  - [x] Investigate transactions immobilieres, JLR, and Centris/MLS feasibility
     and licensing blockers.
-  - [ ] Investigate StatCan and transport/infrastructure context sources.
-  - [ ] Record automation limits, legal/commercial blockers, and effort
+  - [x] Investigate StatCan and transport/infrastructure context sources.
+  - [x] Record automation limits, legal/commercial blockers, and effort
     estimates.
-  - [ ] Lot gate: `git diff --check`.
+  - [x] Lot gate: `git diff --check`.
 
 - [ ] **Lot 5 — Consolidation**
-  - [ ] Consolidate all source rows in
+  - [x] Consolidate all source rows in
     `docs/spec/SPEC_EVOL_SOURCE_FEASIBILITY.md`.
-  - [ ] Mark recommended BR07 vertical-slice sources and deferred sources.
-  - [ ] Update this plan with final evidence and commit list.
+  - [x] Mark recommended BR07 vertical-slice sources and deferred sources.
+  - [x] Update this plan with final evidence: 34 spike notes under
+    `packages/radar-sources/src/sources/_spikes/**`.
   - [ ] Lot gate: `make typecheck ENV=test-source-spikes`,
     `make lint ENV=test-source-spikes`, `make test ENV=test-source-spikes`.
 
