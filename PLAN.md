@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-24 — BR-02 `feat/api-skeleton-hono-postgres-s3` MERGED (PR #3, `6814d8b`). First real code: @radar/domain (Zod v1 schemas + scoring), Hono API with DI /health, Postgres+Drizzle 7-table schema + migration, S3 ObjectStore abstraction, real make gates + CI (19 tests green). Also merged: BR-00 (PR #1), BR-01 (PR #2). Next candidates (parallelizable): BR-03 (UI skeleton + design system), BR-05 (source spikes). BR-04 (K8s tenant + S3 bucket) depends on BR-02/BR-03.
+Status: Updated 2026-05-25 — BR-03 `feat/ui-skeleton-svelte-ds` MERGED (PR #5, `27ace35`). First usable Svelte 5 + Vite radar dashboard: signal queue, metrics, opportunity preview, API health, full-width map preview, Sentropic chat shell, UI workspace gates, and GitHub Pages workflow. CI was explicitly bypassed for PR #5 because GitHub produced no workflow runs/statuses; a CI follow-up is now required before the next CI-dependent merge. Previously merged: BR-00 (PR #1), BR-01 (PR #2), BR-02 (PR #3).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -17,12 +17,13 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-00 `chore/scaffolding-base` — merged 2026-05-24 (PR #1, `f139ee8`). Archived at `plan/done/00-BRANCH_chore-scaffolding-base.md`.
 - BR-01 `feat/spec-evol-scaffolding-design` — merged 2026-05-24 (PR #2, `9f3447a`). Archived at `plan/done/01-BRANCH_feat-spec-evol-scaffolding-design.md`.
 - BR-02 `feat/api-skeleton-hono-postgres-s3` — merged 2026-05-24 (PR #3, `6814d8b`). Archived at `plan/done/02-BRANCH_feat-api-skeleton-hono-postgres-s3.md`.
+- BR-03 `feat/ui-skeleton-svelte-ds` — merged 2026-05-25 (PR #5, `27ace35`). Archived at `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
 
 **Active execution:**
-- _none_ — next branch is BR-03 (or BR-05, parallelizable).
+- _none_ — next branch should include the CI follow-up below before any merge that depends on GitHub Actions status.
 
 **Pending branches (ordered execution):**
-- BR-03 `feat/ui-skeleton-svelte-ds`
+- CI-FIX `fix/ci-pr-actions-trigger`
 - BR-04 `feat/k8s-tenant-radar-and-infra`
 - BR-05 `feat/source-investigation-spikes`
 - BR-06 `feat/data-model-investigation`
@@ -65,6 +66,12 @@ Three parallel tracks become possible afterwards: API skeleton (`BR-02`), UI ske
 - **Goal**: Svelte 5 SPA + design system sentropic + chat-ui shell + gh-pages workflow.
 - **Allowed**: `ui/**`, `.github/workflows/deploy-gh-pages.yml`.
 - **Dependencies**: BR-01.
+
+### CI-FIX `fix/ci-pr-actions-trigger`
+- **Goal**: determine why GitHub Actions did not create PR workflow runs/statuses for PR #5, then restore observable CI before the next CI-dependent merge.
+- **Allowed**: `.github/workflows/**`, `rules/workflow.md`, `PLAN.md`, `plan/**` if a dedicated branch plan is created.
+- **Dependencies**: BR-03 merge revealed the issue.
+- **Validation**: open a test PR or synchronize a branch and confirm GitHub exposes workflow runs/statuses through the PR checks UI/API.
 
 ### BR-04 `feat/k8s-tenant-radar-and-infra`
 - **Goal**: K8s tenant + S3 bucket creation + maildev + DNS `immo.sent-tech.ca`.
