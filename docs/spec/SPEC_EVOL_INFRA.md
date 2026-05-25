@@ -28,6 +28,11 @@
 - **2026-05-25**: Scaleway Object Storage bucket `radar-immobilier-raw`
   created in `fr-par` with endpoint
   `https://radar-immobilier-raw.s3.fr-par.scw.cloud`.
+- **2026-05-25**: live POC smoke is blocked on cluster-owner provisioning:
+  `rhanka/k8s-ops` PR #12 must be merged/applied, `KUBE_CONFIG_DATA` must be
+  minted from the `radar-immobilier` ServiceAccount, and tenant GitHub Secrets
+  must be populated before `make k8s-create-secrets ENV=poc` and
+  `make deploy-k8s ENV=poc` can run.
 
 ## 1. Goal
 
@@ -148,6 +153,17 @@ make test-smoke ENV=poc
 Manual deployment requires GitHub Secrets for `KUBE_CONFIG_DATA`, Scaleway
 credentials, DB password, and S3 IAM credentials scoped to the raw bucket.
 
+Current live-smoke blocker:
+
+1. Merge and apply `rhanka/k8s-ops` PR #12.
+2. Cluster owner runs `make apply-radar-immobilier`.
+3. Cluster owner runs `make tenant-kubeconfig TENANT=radar-immobilier` and
+   stores the generated YAML as radar repo secret `KUBE_CONFIG_DATA`.
+4. Tenant sets `K8S_POSTGRES_PASSWORD`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`,
+   `K8S_REGISTRY_USERNAME`, and `K8S_REGISTRY_PASSWORD` in the radar repo.
+5. Run `make k8s-create-secrets ENV=poc`, `make deploy-k8s ENV=poc`, then
+   smoke `GET https://immo.sent-tech.ca/health`.
+
 ## 8. Open Risks
 
 | Risk | Mitigation |
@@ -157,3 +173,4 @@ credentials, DB password, and S3 IAM credentials scoped to the raw bucket.
 | Obscura runtime mismatch | Keep Obscura independently deployable and internal-only. |
 | `immo.sent-tech.ca` TLS unavailable | Record blocker and smoke by temporary route or port-forward. |
 | S3 credential leak | Create Secrets out-of-band; scan staged diffs before push. |
+| Tenant not provisioned yet | Keep PR #8 draft until `k8s-ops` PR #12 is merged/applied and `KUBE_CONFIG_DATA` is installed. |

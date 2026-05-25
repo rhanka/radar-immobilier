@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CI-FIX2 `fix/gh-pages-unsupported` MERGED (PR #10, `88f31bd`). The Pages deployment workflow now skips cleanly when the repository plan does not support GitHub Pages. BR-04 remains in review on PR #8, with the companion `poc-k8s` tenant PR #12.
+Status: Updated 2026-05-25 — BR-04 `feat/k8s-tenant-radar-and-infra` remains in review on PR #8. Live POC smoke is blocked on `rhanka/k8s-ops` PR #12 merge/application plus `KUBE_CONFIG_DATA` and tenant GitHub Secrets. CI-FIX2 `fix/gh-pages-unsupported` is merged (PR #10, `88f31bd`).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 

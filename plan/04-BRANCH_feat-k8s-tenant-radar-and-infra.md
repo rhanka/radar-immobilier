@@ -143,10 +143,12 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
     `09ac728a-e3b9-4a5b-9749-664b0f147c70`.
   - [ ] Create/rotate K8s secrets out-of-band.
   - [ ] Apply tenant contract, deploy radar manifests, and smoke `/health`.
-  - [ ] Record accepted risk/blocker in `.security/findings/**` or the spec.
+  - [x] Record accepted risk/blocker in `.security/findings/**` or the spec.
+    - Blocked on `rhanka/k8s-ops` PR #12 merge/application,
+      `KUBE_CONFIG_DATA`, and tenant GitHub Secrets.
 
 - [ ] **Lot 6 — Docs consolidation**
-  - [ ] Update spec with final decisions, PR links, and smoke evidence.
+  - [x] Update spec with final decisions, PR links, and smoke evidence/blocker.
   - [ ] Update `PLAN.md` and this branch file with merge-ready state.
 
 - [ ] **Lot 7 — Merge & close**
