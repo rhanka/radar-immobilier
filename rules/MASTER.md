@@ -114,6 +114,19 @@ this file and only add tooling glue on top of it.
 - Never introduce agent-specific terminology in `rules/`; refer to "the agent".
 - Skill packs (`superpowers`, `impeccable`, `graphifyy`) are multi-agent by design; rely on their cross-agent metadata.
 
+## Fair Benchmarking — No Cheating vs Human (ABSOLUTE)
+This is a non-negotiable rule whenever our agents/automation are compared against a
+human baseline (e.g. a manual ChatGPT run) — for the demo or anywhere else.
+- The comparison MUST be neutral and reproducible. NEVER rig it to make our agents look better.
+- Success metrics are DEFINED AND FROZEN before scoring, and applied **identically** to every track, the human's included.
+- **No fabrication**: a finding counts only if backed by a verifiable public source (exact link). Inventing a fact/bylaw/zone/date/lot is an automatic fail (mirrors `PROMPT.md`: "Ne rien inventer").
+- **No hidden advantage**: same prompt, same target, disclosed access constraints; never feed our agents data the human could not have obtained unless that path is disclosed and reproducible.
+- **No metric gaming / cherry-picking**: metrics are not tuned post-hoc; we do not report only the wins.
+- **Independent framing**: any iteration-2 / value-add pass is scoped by an INDEPENDENT agent, not hand-tuned by the conductor to win.
+- **Full execution-mode traceability**: every run is logged (model, reasoning mode, tooling, web access, prompt version, iteration, timestamp). An untraceable run does not count.
+- **Honest reporting**: "we do better" must be proven by the frozen metrics + sources; if the human is better on a metric, say so.
+- Reference methodology: `docs/spec/SPEC_EVOL_DEMO_FINDINGS.md`.
+
 ## Other Rules Files
 - `rules/workflow.md` — branching, commits, PR, orchestration.
 - `rules/conductor.md` — conductor orchestration, fixed UAT ports, multi-agent lane registry, `conductor-report`.
