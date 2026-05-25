@@ -36,7 +36,7 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Worktrees (work in tmp/<slug>)
+# Worktrees (repository-local ./tmp/<slug>, never system /tmp)
 tmp/
 
 # Test artifacts

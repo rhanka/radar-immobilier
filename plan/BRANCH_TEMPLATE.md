@@ -8,7 +8,7 @@
 - One migration max in `api/drizzle/*.sql` (if applicable).
 - Make-only workflow, no direct Docker commands.
 - Root workspace `~/src/radar-immobilier` is reserved for user dev/UAT (`ENV=dev`) and must remain stable.
-- Branch development must happen in isolated worktree `tmp/<slug>` (even for one active branch).
+- Branch development must happen in repository-local isolated worktree `./tmp/<slug>` (even for one active branch). Do not use system `/tmp`.
 - Automated test campaigns must run on dedicated environments (`ENV=test-*` / `ENV=e2e-*`), never on root `dev`.
 - UAT qualification branch/worktree must be commit-identical to the branch under qualification (same HEAD SHA).
 - In every `make` command, `ENV=<env>` must be passed as the last argument.
@@ -51,7 +51,7 @@ Actions with the following status should be included around tasks only if really
 ## Plan / Todo (lot-based)
 - [ ] **Lot 0 — Baseline & constraints**
   - [ ] Read `rules/MASTER.md` and pointers (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`).
-  - [ ] Create/confirm isolated worktree `tmp/<slug>` and run development there.
+  - [ ] Create/confirm isolated repository-local worktree `./tmp/<slug>` and run development there.
   - [ ] Capture Makefile targets needed for debug/testing.
   - [ ] Define environment mapping (`dev`, `test-<slug>`, `e2e-<slug>`) and ports for this branch.
   - [ ] Confirm command style: `make ... <vars> ENV=<env>` with `ENV` last.
