@@ -6,17 +6,17 @@ describe("createDashboardState", () => {
   it("selects the first signal by default", () => {
     const state = createDashboardState(demoSignals, demoOpportunity);
 
-    expect(state.selectedSignal.id).toBe("sig-ppcmoi-2026-04");
-    expect(state.opportunity.score).toBe(82);
+    expect(state.selectedSignal.id).toBe("sig-zoning-150-49");
+    expect(state.opportunity.score).toBe(90);
   });
 
   it("selects the requested signal when it exists", () => {
     const state = createDashboardState(
       demoSignals,
       demoOpportunity,
-      "sig-cptaq-2026-02",
+      "sig-cptaq-a118",
     );
 
-    expect(state.selectedSignal.title).toBe("Demande CPTAQ adjacente");
+    expect(state.selectedSignal.title).toBe("Proximité zone agricole A-118 (CPTAQ)");
   });
 });

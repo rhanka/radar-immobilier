@@ -86,10 +86,15 @@ review screen) to already illustrate results.
   - [ ] Independent agent writes the iteration-2 brief from iteration-1 findings.
   - [ ] Run the value-add 0-shot; score with the same frozen metrics.
 
-- [ ] **Lot 3 — Wire findings into the demo UI**
-  - [ ] Surface the consolidated Valleyfield findings in the original "Radar demo"
-    screen (opportunities/signals with source links), in French.
-  - [ ] Lot gate: `make typecheck`, `make lint`, `make build`, `make test-ui ENV=test-demo-findings`.
+- [x] **Lot 3 — Wire findings into the demo UI**
+  - [x] Replaced placeholder demo data with VERIFIED findings (A2+H1, ref set
+    R1-R11): règl. 150-49 (densité conditionnelle H-609-4), 150-51 (conversions),
+    PPCMOI 2026-0066, Plan 450, CPTAQ A-118. Fabricated G2 items excluded.
+    Each signal carries an official source link + fait/hypothèse tag.
+  - [x] Rendered source links (SignalQueue badge, OpportunityPanel source link +
+    clickable evidence). Updated demo/dashboard tests.
+  - [x] Lot gate: typecheck (0 err), test-ui (pass), lint (clean), build (ok),
+    `ENV=test-demo-findings`.
 
 - [ ] **Lot 4 — UAT, PR & close**
   - [ ] UAT on root fixed ports `http://localhost:5301`.
