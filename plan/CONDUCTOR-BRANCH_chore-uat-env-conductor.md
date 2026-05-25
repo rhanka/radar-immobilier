@@ -95,15 +95,18 @@ agent works on which branch.
   - [x] Lot gate: `make conductor-report CONDUCTOR_LANES_FILE=.agents/lanes`
     (verified from root: scopes to active lanes).
 
-- [ ] **Lot 5 — Teardown stale stacks + verify**
-  - [ ] `make down ENV=feat-ui-skeleton` (BR-03 merged, stale on 5304).
-  - [ ] Stop stale test stacks (`test-source-spikes`, `test-k8s-tenant`).
-  - [ ] Confirm only intended stacks remain via `make ps-all`.
-  - [ ] Confirm BR-05R UAT is presentable on root fixed ports.
+- [x] **Lot 5 — Teardown stale stacks + verify**
+  - [x] `make down-stale STALE="feat-ui-skeleton ..."` (BR-03 merged, was on 5304).
+  - [x] Stop stale merged test stack (`test-source-spikes`).
+  - [!] `test-k8s-tenant` left UP on purpose: BR-04 still in review (not orphan).
+  - [x] Confirm only intended stacks remain via `make ps-all` (BR-05R UAT +
+    BR-04 test stack only).
+  - [!] BR-05R UAT migration to root fixed ports happens when BR-05R corrections
+    resume (its 5306 stack left up for now so the user can still review).
 
 - [ ] **Lot 6 — PLAN.md + merge & close**
-  - [ ] Record this branch + BR-05R in `PLAN.md` §1.
-  - [ ] Push branch; open PR; verify CI green (full 40-char SHA).
+  - [x] Record this branch + BR-05R in `PLAN.md` §1.
+  - [ ] Push branch; open PR; verify CI green (full 40-char SHA). [awaiting user go-ahead]
   - [ ] Merge commit only; preserve branch.
   - [ ] Move this file to `plan/done/`.
 </content>
