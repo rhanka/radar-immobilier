@@ -82,14 +82,14 @@ No exceptions declared at branch start.
   - [x] Capture user intent in `SPEC_INTENT_SOURCE_VALUE_REVIEW.md`.
   - [x] Draft `SPEC_EVOL_SOURCE_VALUE_REVIEW.md` for the source value model.
 
-- [ ] **Lot 1 — Evaluation model and data**
-  - [ ] Create typed static evaluation data for the 34 BR05 sources.
-  - [ ] Include estimated subscription/access cost category and cost notes.
-  - [ ] Include `fait`, `a faire (reco)`, and `attendus` for each source.
-  - [ ] Include contradiction notes: case for value, case against/noise.
-  - [ ] Add unit tests for quadrant placement, access-priority extraction, and
+- [x] **Lot 1 — Evaluation model and data**
+  - [x] Create typed static evaluation data for the 34 BR05 sources.
+  - [x] Include estimated subscription/access cost category and cost notes.
+  - [x] Include `fait`, `a faire (reco)`, and `attendus` for each source.
+  - [x] Include contradiction notes: case for value, case against/noise.
+  - [x] Add unit tests for quadrant placement, access-priority extraction, and
     VISION-aligned recommendation completeness.
-  - [ ] Lot gate: `make test-ui SCOPE=src/lib/source-review/source-evaluation-data.test.ts ENV=test-source-value-review`.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/source-review/source-evaluation-data.test.ts ENV=test-source-value-review`.
 
 - [ ] **Lot 2 — Source-review UI**
   - [ ] Add a source-review screen reachable from the Svelte app.

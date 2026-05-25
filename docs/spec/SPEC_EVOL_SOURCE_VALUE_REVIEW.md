@@ -10,6 +10,10 @@
   proposal and review UI. This branch does not change source adapters; it
   evaluates source value, cost/access friction, anti-false-positive utility,
   and client expectations.
+- **2026-05-25**: initial typed evaluation dataset covers all 34 BR05 sources,
+  including value/complexity scoring, access/cost categories, contradiction
+  notes, concrete evidence links, and the `fait` / `a faire (reco)` /
+  `attendus` recommendation contract.
 
 ## 1. Goal
 
