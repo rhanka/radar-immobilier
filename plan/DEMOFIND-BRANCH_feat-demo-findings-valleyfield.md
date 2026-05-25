@@ -74,11 +74,13 @@ review screen) to already illustrate results.
   - [ ] C1 Codex GPT-5.5 **xhigh** — auto-relaunch 10:50 → `gpt.md`.
   - [x] G1 Gemini 3.5 Flash **high** via agy + tmux driver → `gemini.md`.
 
-- [ ] **Lot 2 — Frozen metrics + neutral scoring (SPEC §2/§5)**
+- [x] **Lot 2 — Frozen metrics + neutral scoring (SPEC §2/§5)**
   - [x] Freeze VISION-aligned success metrics M1–M7 in `SPEC_EVOL_DEMO_FINDINGS.md`.
   - [x] Record the strict no-cheating rule + execution-mode ledger.
-  - [ ] Build the shared verifiable reference set via an **independent agent**.
-  - [ ] Score every iteration-1 track identically (human included); report honestly.
+  - [x] Independent agent built the verifiable reference set (R1-R11).
+  - [x] Scored every iteration-1 track identically; honest verdict (§10 + SCORING).
+    Result: A2=34 🏆 > H1=30 > G2=14 (fabrications) ; C2 no report. Caught + fixed
+    cross-agent contamination before scoring.
 
 - [ ] **Lot 2b — Iteration 2 (independent-agent-framed value-add 0-shot)**
   - [ ] Independent agent writes the iteration-2 brief from iteration-1 findings.
