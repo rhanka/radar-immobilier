@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — CI-FIX `fix/ci-pr-actions-trigger` ACTIVE. BR-03 `feat/ui-skeleton-svelte-ds` was merged in PR #5 (`27ace35`) after a CI verification false negative. GitHub Actions did run for PR #5; the false negative came from checking abbreviated SHAs through connector tooling. CI-FIX documents the full-SHA verification rule before the next CI-dependent merge.
+Status: Updated 2026-05-25 — CI-FIX `fix/ci-pr-actions-trigger` MERGED (PR #7, `c86d699`). GitHub Actions was not broken after BR-03; the apparent no-CI state was a verification false negative caused by checking abbreviated SHAs through connector tooling. `rules/workflow.md` now requires full 40-character head SHAs when verifying Actions through connector/API tools. Next candidates: BR-04 (infra) or BR-05 (source investigation spikes).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -18,12 +18,12 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - BR-01 `feat/spec-evol-scaffolding-design` — merged 2026-05-24 (PR #2, `9f3447a`). Archived at `plan/done/01-BRANCH_feat-spec-evol-scaffolding-design.md`.
 - BR-02 `feat/api-skeleton-hono-postgres-s3` — merged 2026-05-24 (PR #3, `6814d8b`). Archived at `plan/done/02-BRANCH_feat-api-skeleton-hono-postgres-s3.md`.
 - BR-03 `feat/ui-skeleton-svelte-ds` — merged 2026-05-25 (PR #5, `27ace35`). Archived at `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
+- CI-FIX `fix/ci-pr-actions-trigger` — merged 2026-05-25 (PR #7, `c86d699`). Archived at `plan/done/CIFIX-BRANCH_fix-ci-pr-actions-trigger.md`.
 
 **Active execution:**
-- CI-FIX `fix/ci-pr-actions-trigger` — active; root cause identified as verification tooling misuse, not broken workflows.
+- _none_ — next branch is BR-04 or BR-05 depending on whether infra or source evaluation is prioritized.
 
 **Pending branches (ordered execution):**
-- CI-FIX `fix/ci-pr-actions-trigger`
 - BR-04 `feat/k8s-tenant-radar-and-infra`
 - BR-05 `feat/source-investigation-spikes`
 - BR-06 `feat/data-model-investigation`
