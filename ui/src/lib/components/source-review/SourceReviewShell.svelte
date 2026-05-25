@@ -19,7 +19,7 @@
 
 <div class="min-h-screen bg-slate-100 text-slate-950">
   <header class="border-b border-slate-200 bg-white">
-    <div class="mx-auto flex max-w-[1680px] flex-wrap items-center justify-between gap-4 px-5 py-4">
+    <div class="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-teal-700">
           Proposition client - sources
@@ -76,7 +76,7 @@
   </header>
 
   {#if activePanel === "sources"}
-    <main class="mx-auto grid max-w-[1680px] gap-4 px-5 py-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <main class="grid gap-4 px-5 py-5 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div class="space-y-4">
         <CriteriaGlossary />
         <SourceQuadrant
@@ -113,7 +113,7 @@
       </div>
     </main>
   {:else}
-    <main class="mx-auto max-w-[1680px] px-5 py-5">
+    <main class="px-5 py-5">
       <ChallengeResultsPanel />
     </main>
   {/if}
