@@ -14,7 +14,7 @@
   };
 </script>
 
-<aside class="flex min-h-0 flex-col rounded-md border border-slate-200 bg-white">
+<aside class="flex h-full min-h-0 flex-col rounded-md border border-slate-200 bg-white">
   <div class="border-b border-slate-200 px-4 py-3">
     <h2 class="text-sm font-semibold text-slate-950">File de signaux</h2>
     <p class="mt-1 text-xs text-slate-500">Priorisee par score, timing et confiance</p>
