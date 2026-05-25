@@ -135,16 +135,19 @@ Stand up the first usable demo surface for `radar-immobilier`: a Svelte 5 + Vite
   - [x] Ensure the workflow uses make targets where applicable.
   - [x] Lot gate: `make build GITHUB_PAGES=true ENV=feat-ui-skeleton`.
 
-- [ ] **Lot 7 - Push, PR, merge, and close**
+- [x] **Lot 7 - Push, PR, merge, and close**
   - [x] Run full scope check against Allowed/Conditional/Forbidden paths.
   - [x] Push branch `feat/ui-skeleton-svelte-ds`.
   - [x] Open PR with BR-03 scope, exceptions, UAT notes, and gate results.
     - PR: https://github.com/rhanka/radar-immobilier/pull/5
     - Ready for review after local BR-03 gates and Playwright UAT passed.
-  - [ ] Verify CI green.
+  - [x] Record CI gate disposition.
     - Blocked: GitHub reports no workflow runs and no commit statuses for the PR head after ready-for-review and a synchronize push.
-  - [ ] Merge via merge commit only; do not squash or rebase.
-  - [ ] Preserve source branch.
-  - [ ] Pull/update local main.
-  - [ ] Move this file to `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
-  - [ ] Update `PLAN.md` status.
+    - Bypassed only after explicit user approval: "merge sans CI".
+    - Follow-up tracked in `PLAN.md`: fix/verify GitHub Actions PR run creation before the next CI-dependent merge.
+  - [x] Merge via merge commit only; do not squash or rebase.
+    - Merge commit: `27ace35`.
+  - [x] Preserve source branch.
+  - [x] Pull/update local main.
+  - [x] Move this file to `plan/done/03-BRANCH_feat-ui-skeleton-svelte-ds.md`.
+  - [x] Update `PLAN.md` status.
