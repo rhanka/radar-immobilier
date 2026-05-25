@@ -104,9 +104,9 @@ agent works on which branch.
   - [!] BR-05R UAT migration to root fixed ports happens when BR-05R corrections
     resume (its 5306 stack left up for now so the user can still review).
 
-- [ ] **Lot 6 — PLAN.md + merge & close**
+- [x] **Lot 6 — PLAN.md + merge & close**
   - [x] Record this branch + BR-05R in `PLAN.md` §1.
-  - [ ] Push branch; open PR; verify CI green (full 40-char SHA). [awaiting user go-ahead]
-  - [ ] Merge commit only; preserve branch.
-  - [ ] Move this file to `plan/done/`.
+  - [x] Push branch; open PR #11; CI green (Branch policy + Quality gates).
+  - [x] Merge commit only (`4e8256b`); branch preserved.
+  - [x] Move this file to `plan/done/`.
 </content>
