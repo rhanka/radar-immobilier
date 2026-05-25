@@ -131,10 +131,11 @@ Obscura + Maildev, and document S3/DNS/secrets for `immo.sent-tech.ca`.
     variables are missing. Full scan deferred until images and Trivy are
     available in CI.
 
-- [ ] **Lot 4 — CI/CD workflow**
+- [x] **Lot 4 — CI/CD workflow**
   - [x] Add manual K8s deploy workflow using GitHub Secrets.
   - [x] Add non-secret manifest validation and SCA coverage to CI.
-  - [ ] Lot gate: open PR and verify CI with the full 40-character head SHA.
+  - [x] Lot gate: PR #8 opened; CI run `26382703842` passed for full head SHA
+    `da7ec45cf427ec9831828c39b24c1abcc3295739`.
 
 - [ ] **Lot 5 — POC deployment smoke**
   - [ ] Ensure bucket `radar-immobilier-raw` exists in Scaleway project

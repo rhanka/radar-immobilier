@@ -23,6 +23,8 @@
 - **2026-05-25**: CI now validates K8s manifests and runs high/critical npm
   audit. Manual `deploy-k8s` workflow builds, scans, pushes, writes
   kubeconfig, creates secrets, and applies manifests from GitHub Actions.
+- **2026-05-25**: radar PR #8 CI passed (`26382703842`) for head SHA
+  `da7ec45cf427ec9831828c39b24c1abcc3295739`.
 
 ## 1. Goal
 
