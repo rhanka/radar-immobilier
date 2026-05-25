@@ -78,14 +78,15 @@ agent works on which branch.
     contract; keep per-branch test/branch ports only.
   - [x] Lot gate: `git diff --check`.
 
-- [ ] **Lot 3 — Makefile: conductor-report + cloc + teardown**
-  - [ ] Add `cloc` target (graceful if binary missing).
-  - [ ] Add `conductor-report` (+ aliases) adapted to radar's plan-file layout
+- [x] **Lot 3 — Makefile: conductor-report + cloc + teardown**
+  - [x] SLOC via inline `cloc` (graceful `n/a` if binary missing).
+  - [x] Add `conductor-report` (+ aliases) adapted to radar's plan-file layout
     (`tmp/<slug>/plan/*-BRANCH_*.md`), UAT-lot-excluded done/treated %, dirty,
     head, sloc, heartbeat. Lanes via `CONDUCTOR_LANES` / `CONDUCTOR_LANES_FILE`
     (default `.agents/lanes`) / auto-glob `tmp/feat-* tmp/fix-* tmp/chore-*`.
-  - [ ] Add `down-stale` helper to stop a list of ENV stacks.
-  - [ ] Lot gate: `make conductor-report` renders without error.
+  - [x] Add `down-stale` helper to stop a list of ENV stacks.
+  - [x] Lot gate: `make conductor-report` renders (tested explicit lanes +
+    auto-glob; correctly reports done%, dirty, head, sloc, heartbeat).
 
 - [ ] **Lot 4 — `.agents/` registry**
   - [ ] `.agents/README.md` (format `lane|agent|dir`, the 3 agents, how report reads it).
