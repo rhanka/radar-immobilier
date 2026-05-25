@@ -46,7 +46,18 @@
                   {signal.score}
                 </span>
               </div>
-              <p class="mt-1 text-xs text-slate-500">{signal.sourceLabel}</p>
+              <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                <p class="text-xs text-slate-500">{signal.sourceLabel}</p>
+                <span
+                  class={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                    signal.verification === "fait"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {signal.verification === "fait" ? "Fait" : "Hypothèse"}
+                </span>
+              </div>
               <p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">
                 {signal.summary}
               </p>

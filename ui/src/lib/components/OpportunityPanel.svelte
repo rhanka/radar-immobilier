@@ -40,6 +40,25 @@
             </span>
           </div>
           <p class="mt-3 text-sm leading-6 text-slate-700">{selectedSignal.summary}</p>
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <span
+              class={`rounded-md px-2 py-0.5 font-semibold ${
+                selectedSignal.verification === "fait"
+                  ? "bg-emerald-100 text-emerald-800"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {selectedSignal.verification === "fait" ? "Fait vérifié" : "Hypothèse"}
+            </span>
+            <a
+              href={selectedSignal.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-medium text-teal-700 underline decoration-dotted underline-offset-2 hover:text-teal-900"
+            >
+              Source : {selectedSignal.sourceLabel}
+            </a>
+          </div>
         </div>
       </div>
 
@@ -68,10 +87,15 @@
       </div>
       <div class="mt-4 space-y-2">
         {#each opportunity.evidence as evidence}
-          <div class="flex items-center justify-between gap-3 rounded-md bg-white px-3 py-2 text-sm text-slate-700">
-            <span>{evidence}</span>
+          <a
+            href={evidence.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center justify-between gap-3 rounded-md bg-white px-3 py-2 text-sm text-slate-700 transition hover:bg-teal-50 hover:text-teal-800"
+          >
+            <span>{evidence.label}</span>
             <ArrowUpRight class="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-          </div>
+          </a>
         {/each}
       </div>
       <p class="mt-4 text-xs leading-5 text-slate-500">{selectedSignal.timingLabel}</p>
