@@ -14,6 +14,11 @@
   including value/complexity scoring, access/cost categories, contradiction
   notes, concrete evidence links, and the `fait` / `a faire (reco)` /
   `attendus` recommendation contract.
+- **2026-05-25**: review UI added with criteria tooltips, a value/complexity
+  quadrant, source deep dives, selected-source recommendations, and a separate
+  challenge-agent presentation. Contradictory audits shifted the framing toward
+  a low-cost public-source spine, with paid/partner sources treated as optional
+  client-funded enrichments unless access is explicitly provided.
 
 ## 1. Goal
 
@@ -30,6 +35,7 @@ Each source receives a value profile:
 | --------- | ------- |
 | Weak-signal value | Ability to detect densification opportunities before the market. |
 | Precision | Ability to identify a sector, address, lot, bylaw, dossier, or project. |
+| Recall | Ability to avoid missing relevant variants across archives, PDFs, videos, and follow-up documents. |
 | Anti-false-positive value | Ability to reject, downgrade, or qualify over-optimistic signals. |
 | Historical learning value | Ability to reconstruct past event chains and learn patterns. |
 | Business value | Aggregated proposal value for the client vision. |
@@ -40,6 +46,13 @@ The UI quadrant uses:
 
 - Y axis: business value potential.
 - X axis: potential complexity, including subscription/access costs.
+
+The challenge-agent view adds a proposal-control layer. It separates:
+
+- observed feasibility from production connectors.
+- source chains from isolated source scores.
+- public/free Phase 1 proof paths from paid or partner-funded enrichment.
+- pattern hypotheses from validated historical patterns.
 
 ## 3. Recommendation Contract
 

@@ -65,7 +65,7 @@ No exceptions declared at branch start.
 
 ## UAT Management
 - UAT target:
-  `make dev API_PORT=8806 UI_PORT=5306 MAILDEV_UI_PORT=1106 OBSCURA_HOST_PORT=9326 ENV=feat-source-value-review`
+  `make dev API_PORT=8806 UI_PORT=5306 MAILDEV_UI_PORT=1106 POSTGRES_HOST_PORT=5536 S3_HOST_PORT=9106 S3_CONSOLE_HOST_PORT=9107 OBSCURA_HOST_PORT=9326 MAILDEV_SMTP_HOST_PORT=1026 ENV=feat-source-value-review`
 - UAT URL: `http://localhost:5306`.
 - Review expectation: user looks at the source-review screen, asks for copy,
   layout, scoring, and recommendation corrections, then the branch iterates.
@@ -91,27 +91,27 @@ No exceptions declared at branch start.
     VISION-aligned recommendation completeness.
   - [x] Lot gate: `make test-ui SCOPE=src/lib/source-review/source-evaluation-data.test.ts ENV=test-source-value-review`.
 
-- [ ] **Lot 2 — Source-review UI**
-  - [ ] Add a source-review screen reachable from the Svelte app.
-  - [ ] Render evaluation criteria with hover explanations for acronyms.
-  - [ ] Render a 2x2 quadrant: value potential vs complexity including costs.
-  - [ ] Render recommendations next to the quadrant using
+- [x] **Lot 2 — Source-review UI**
+  - [x] Add a source-review screen reachable from the Svelte app.
+  - [x] Render evaluation criteria with hover explanations for acronyms.
+  - [x] Render a 2x2 quadrant: value potential vs complexity including costs.
+  - [x] Render recommendations next to the quadrant using
     `fait` / `a faire (reco)` / `attendus`.
-  - [ ] Render clickable deep dive by source with real concrete evidence links.
-  - [ ] Keep layout dense, review-oriented, and responsive.
-  - [ ] Lot gate: `make typecheck ENV=test-source-value-review`,
+  - [x] Render clickable deep dive by source with real concrete evidence links.
+  - [x] Keep layout dense, review-oriented, and responsive.
+  - [x] Lot gate: `make typecheck ENV=test-source-value-review`,
     `make lint ENV=test-source-value-review`, and
     `make build ENV=test-source-value-review`.
 
-- [ ] **Lot 3 — Contradictory audit pass**
-  - [ ] Run source-family audits that challenge value, access, cost, and legal
+- [x] **Lot 3 — Contradictory audit pass**
+  - [x] Run source-family audits that challenge value, access, cost, and legal
     assumptions.
-  - [ ] Add corrections to the data/spec where the audit changes a decision.
-  - [ ] Explicitly qualify YouTube as early-signal source, including
+  - [x] Add corrections to the data/spec where the audit changes a decision.
+  - [x] Explicitly qualify YouTube as early-signal source, including
     API/captions/transcription cost paths.
-  - [ ] Explicitly qualify paid/partner access priorities: JLR, Registre
+  - [x] Explicitly qualify paid/partner access priorities: JLR, Registre
     foncier, Centris/MLS, Cadastre/Infolot, permit feeds.
-  - [ ] Lot gate: `git diff --check`.
+  - [x] Lot gate: `git diff --check`.
 
 - [ ] **Lot 4 — Visual UAT**
   - [ ] Start the branch stack on `UI_PORT=5306`.
