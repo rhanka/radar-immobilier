@@ -79,8 +79,9 @@ review screen) to already illustrate results.
   - [x] Record the strict no-cheating rule + execution-mode ledger.
   - [x] Independent agent built the verifiable reference set (R1-R11).
   - [x] Scored every iteration-1 track identically; honest verdict (§10 + SCORING).
-    Result: A2=34 🏆 > H1=30 > G2=14 (fabrications) ; C2 no report. Caught + fixed
-    cross-agent contamination before scoring.
+    Final: A2=34 🥇 > C2=31 🥈 > H1=30 🥉 > G2=14 (fabrications). Two agents beat
+    the human, no fabrication. Caught+fixed cross-agent contamination before scoring;
+    C2 reintegrated after a tmux PTY re-run (first attempt killed prematurely).
 
 - [ ] **Lot 2b — Iteration 2 (independent-agent-framed value-add 0-shot)**
   - [ ] Independent agent writes the iteration-2 brief from iteration-1 findings.
