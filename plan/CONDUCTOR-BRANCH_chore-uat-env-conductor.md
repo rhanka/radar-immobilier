@@ -88,10 +88,12 @@ agent works on which branch.
   - [x] Lot gate: `make conductor-report` renders (tested explicit lanes +
     auto-glob; correctly reports done%, dirty, head, sloc, heartbeat).
 
-- [ ] **Lot 4 — `.agents/` registry**
-  - [ ] `.agents/README.md` (format `lane|agent|dir`, the 3 agents, how report reads it).
-  - [ ] `.agents/lanes` seeded with current live lanes (BR-04, BR-05R).
-  - [ ] Lot gate: `make conductor-report CONDUCTOR_LANES_FILE=.agents/lanes`.
+- [x] **Lot 4 — `.agents/` registry**
+  - [x] `.agents/README.md` (format `lane|agent|dir`, the 3 agents, how report reads it).
+  - [x] `.agents/lanes` seeded with current live lanes (CONDUCTOR, BR-04, BR-05R);
+    agent left `-` where the real assignment is not known (filled at launch).
+  - [x] Lot gate: `make conductor-report CONDUCTOR_LANES_FILE=.agents/lanes`
+    (verified from root: scopes to active lanes).
 
 - [ ] **Lot 5 — Teardown stale stacks + verify**
   - [ ] `make down ENV=feat-ui-skeleton` (BR-03 merged, stale on 5304).
