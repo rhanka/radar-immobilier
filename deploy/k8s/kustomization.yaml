@@ -4,3 +4,5 @@ namespace: radar-immobilier
 resources:
   - api.yaml
   - postgres-postgis.yaml
+  - obscura.yaml
+  - maildev.yaml

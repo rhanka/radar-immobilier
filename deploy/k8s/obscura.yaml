@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radar-obscura
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: obscura
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: obscura
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: obscura
+    spec:
+      imagePullSecrets:
+        - name: radar-registry-pull
+      containers:
+        - name: obscura
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-obscura:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: cdp
+              containerPort: 9222
+          readinessProbe:
+            httpGet: { path: /json/version, port: cdp }
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 400m, memory: 512Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-obscura
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: obscura
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: obscura
+  ports:
+    - name: cdp
+      port: 9222
+      targetPort: cdp
