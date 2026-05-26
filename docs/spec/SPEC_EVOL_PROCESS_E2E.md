@@ -1,162 +1,183 @@
-# SPEC_EVOL — Process e2e, états, scoring & matérialisation (SOCLE)
+# SPEC_EVOL — Process e2e, états, scoring & matérialisation (SOCLE v2)
 
-> **Status**: EVOL — socle des intentions, à raffiner puis replanifier en évolutions.
-> **Issu du brainstorming** 2026-05-26.
-> **Inputs**: `docs/spec/input/{VISION,PROMPT,PROCESS}.md` ; acquis : benchmark
-> multi-agents (`SPEC_EVOL_DEMO_FINDINGS*`), vertical-slice réel
-> (`SPEC_EVOL_VERTICAL_SLICE_VALLEYFIELD.md`, `SPEC_EVOL_DATA_MODEL.md`).
-> **But de ce doc**: figer la logique continue (états + traitements + scoring) et
-> la stratégie « démo = préfiguration fidèle », puis servir de base à la
-> replanification du `PLAN.md`.
+> **Status**: EVOL v2 — intègre les relectures-challenge **agy (Gemini)** + **Claude
+> Opus 4.7** (2026-05-26, critiques dans `tmp/socle-reviews/`).
+> **Inputs**: `docs/spec/input/{VISION,PROMPT,PROCESS}.md`. **Acquis réels**:
+> `SPEC_EVOL_VERTICAL_SLICE_VALLEYFIELD.md`, `SPEC_EVOL_DATA_MODEL.md`,
+> `SPEC_EVOL_DEMO_FINDINGS.md`.
+> **But**: figer la logique continue (états + traitements + scoring **confronté au
+> réel**) et la stratégie « démo = préfiguration fidèle », base de replanification.
 
-## 1. Principe : une logique continue, démo fidèle
+## 1. Principe
+Détecter la densification **avant le marché** (VISION §1/§3). Flux continu :
+amorçage → veille → approfondissement. La démo **simule fidèlement** le process,
+avec un **mode global Réel ↔ Simulation** (§6) et un étiquetage honnête des
+hypothèses (règle anti-triche, `rules/MASTER.md`). **Rien d'inventé.**
 
-Le radar détecte la densification **avant le marché** (VISION §1/§3). La donnée
-circule en continu : amorçage → veille récurrente → approfondissement à la demande.
-La **démo** ne mélange plus les états : elle **simule fidèlement** ce que produira
-le vrai process, avec un **toggle Réel ↔ Simulation par vue** et un étiquetage
-honnête des hypothèses.
+## 2. Traitements T0→T4 ↔ 6 phases PROCESS
 
-## 2. Traitements T0→T4 (chacun = un écran)
+| T | Traitement | Phases PROCESS couvertes | Cadence | Écran(s) |
+| - | ---------- | ------------------------ | ------- | -------- |
+| T0 | Onboarding ville + proposition de sources (template Tier-A fixe + découverte site) + rétroanalyse 2 ans | amont (sourcing) | 1×/ville | Assistant onboarding |
+| T1 | Veille : détection signaux | **Ph.1 Signal** | quotidien | Radar |
+| T2 | Approfondissement : signal → N opportunités | **Ph.2 Ancrage · 3 Contraintes · 4 Marché · 5 Contexte stratégique · 6 Scoring** | à la demande + auto | Opportunités |
+| T3 | Gestion & qualification des sources (cadence, nouvelles sources, réconciliation, config jobs) | transverse sourcing | récurrent | Sources (2 sous-vues) |
+| T4 | Monitoring des jobs | transverse exécution | continu | Jobs |
 
-| T | Traitement | Cadence | Écran | Sortie |
-| - | ---------- | ------- | ----- | ------ |
-| **T0** | Onboarding ville + **proposition de sources** + rétroanalyse 2 ans | 1×/ville | Assistant onboarding | config ville, corpus initial, 1ᵉʳˢ signaux |
-| **T1** | Veille : détection des signaux | quotidien | **Radar** | signal + **score brut** + **statut** + date |
-| **T2** | Approfondissement : signal → **N opportunités** | à la demande + auto | **Opportunités** | dossiers (lots) + score pondéré (incrémental) |
-| **T3** | **Gestion & qualification des sources** : cadence veille, nouvelles sources, réconciliation, **config jobs scraping** — 2 sous-vues (catalogue · config veille/jobs) | récurrent | **Sources (console)** | sources actives, jobs configurés |
-| **T4** | **Monitoring des jobs** | continu | **Jobs** | état run / échec / planifié |
+> Le mapping « T ↔ écran » est indicatif (T3 a 2 sous-vues ; le cycle de vie §3
+> chevauche T1+T2). **Phase 5 « Contexte stratégique » (StatCan/transport/MRC,
+> catalyseurs)** est portée par T2 — explicitée ici car diluée en v1.
 
-La « Revue des sources » actuelle (cadran) devient le socle de **T3**.
+## 3. Modèle d'états (enrichi)
 
-## 3. Cycle de vie d'une opportunité
+- **Cardinalité** : 1 **signal** (amont, T1) → **N opportunités/dossiers** (aval, T2).
+  Pour éviter la saturation (un rezonage = des centaines de lots), **pré-filtres
+  physiques avant création des dossiers T2** : superficie lot ≥ seuil (déf. 350 m²),
+  ratio valeur bâtiment/terrain < seuil (déf. 80 %), exclure les micro-lots bâtis
+  récents. Seuils configurables.
+- **Lots** : ajouter `confirmed: boolean` (lot lié par proximité d'adresse = `false`
+  / intersection géométrique validée = `true`) et `zonePolygonSource:
+  open-data-ckan | wms-municipal | vectorised-pdf | hypothese-street-name`.
+- **Statut de signal (T1)** : `nouveau · à approfondir · écarté · surveillance`, horodaté.
+- **Taxonomie d'actions (PROCESS §6, complète)** : `rejeter · surveiller ·
+  qualifier-avec-expert · approcher-propriétaire · monter-dossier-acquisition`.
+- **Mémoire temporelle (VISION §4.2/§4.5/§7)** : un dossier **évolue sur plusieurs
+  séances** (timeline d'événements horodatés) ; la rétroanalyse 2 ans alimente cette
+  timeline, pas seulement T0.
+- **Liaison de documents (VISION §4.4/§7)** : relier avis ↔ règlement ↔ PV ↔ vidéo
+  par **n° de règlement / zone**, pour reconstruire le contexte.
+- **Provenance par donnée** : enum `fait · hypothese · non-disponible · simulé`
+  (le `simulé` = « instruit par l'humain · hypothèse simulée », cf. §6).
 
-`Signal détecté (T1, statut + score brut)` → *[auto-enrichissement]* →
-**N opportunités (T2)** → *qualif manuelle/assistée* → `Approfondi (score pondéré final)`
-→ action. (États terminaux possibles : `Écarté`, `Surveillance`.)
+## 4. Scoring — DEUX mesures distinctes, confrontées au réel
 
-- **Upstream/downstream** : 1 signal (upstream) → **N opportunités/dossiers** (downstream).
-- **Statut de signal (T1)** : `nouveau` · `à approfondir` · `écarté` · `surveillance`, horodaté.
-- **Score affiché à chaque étape**, qui se précise : `brut` → `provisoire (auto)` → `final (qualifié)`.
+### 4.1 Sémantique (correction n°1 des relectures)
+Il y a **deux scores différents, pas un seul qui se raffine** :
+- **Tri de signal (T1)** = *prior de triage par type* (VISION §6). Échelle /10.
+- **Score d'opportunité (T2)** = *composite multi-axes* (PROCESS §3). Échelle 0-5 (→ /100).
 
-## 4. Scoring — deux couches + grilles configurables
+⚠️ **Abandon du récit trompeur « 90 → 63 / brut→provisoire→final comme un seul
+score »**. La vraie histoire : le tri T1 remonte un signal « chaud par type » ; la
+qualification T2 produit un score d'opportunité **ancré au réel**, souvent plus
+modeste une fois contraintes/faisabilité/marché intégrés. Deux mesures, deux usages.
 
-### 4.1 Constat
-Aujourd'hui le score est produit **par le LLM sans grille explicite** (pifométrique).
-PROCESS §3 définit les **axes + poids + lecture opérationnelle**, mais **PAS la
-grille 1→5 par axe** → **gap à combler**. On définit donc des grilles explicites,
-**configurables**, tracées VISION/PROCESS.
+### 4.2 Tri de signal (T1) — VISION §6
+- **Valeur** (type) **et confiance affichées séparément** (NE PAS multiplier — sinon
+  on enterre les signaux « haute valeur / incertaine » qu'on veut justement remonter).
+- Table type → valeur : zonage résidentiel 10 · CPTAQ 8 · PPCMOI 7 · dérogation
+  pertinente 5 · dérogation non pertinente 1 (à filtrer). **Types à ajouter** :
+  intention politique (PV), consultation publique annoncée, refonte/plan d'urbanisme,
+  modif. grille/COS, requalification/TOD, investissement public. (Résout l'ambiguïté
+  interne VISION §6 « Priorité 2 PPCMOI 7 » vs « Priorité 4 CPTAQ 8 » : **on tranche
+  par le score**, CPTAQ 8 > PPCMOI 7.)
 
-### 4.2 Couche A — Score brut de signal (T1) — VISION §6 (par type)
-| Type de signal | Score brut |
-| --- | --- |
-| Changement de zonage résidentiel (densité/hauteur/conversion/multifamilial) | 10/10 |
-| Demande CPTAQ (dézonage agricole) | 8/10 |
-| PPCMOI | 7/10 |
-| Dérogation mineure pertinente (densité/hauteur/marges/stationnement/usages) | 5/10 |
-| Dérogation mineure non pertinente (cabanon, clôture) — à filtrer | 1/10 |
-Multiplié par la **confiance de détection** (0–1). → score brut affiché en T1.
+### 4.3 Score d'opportunité (T2) — PROCESS §3, échelle **0-5**, poids 30/20/20/15/15
+*(0-5 et non 1-5 : le 0 = blocage/absence absolus, PROCESS §3/§6.)* Grilles
+configurables ; chaque score porte **niveau + confiance + preuve + version de grille**.
 
-### 4.3 Couche B — Score pondéré d'opportunité (T2) — PROCESS §3
-Pondérations : **potentiel 30 % · risque 20 % · timing 20 % · faisabilité 15 % · marché 15 %**.
-Grille 1→5 **proposée** par axe (configurable, chaque score = niveau + preuve) :
+- **Potentiel (30 %) — AMPLEUR seule** (pas la maturité légale, qui est dans Timing →
+  fin du double-comptage) : 0 aucune ouverture · 2 ouverture mineure · 3 ouverture
+  résidentielle modérée · 4 forte (densité/usage nettement accrus) · 5 majeure +
+  alignée aux intentions municipales. **« en vigueur » retiré du niveau 5** (anti-
+  asymétrie VISION : la meilleure perle est encore peu visible).
+- **Risque de contrainte (20 %, inversé)** : 0 **bloquant absolu** (zone agricole
+  **protégée pérenne sans demande** / inondable 0-20 ans / contamination) · 2 coûteux
+  majeur · 3 négociable/mitigation · 4 mineur · 5 aucune contrainte. **CPTAQ
+  désambiguïsé** : zone protégée *sans demande* = bas ; **demande/décision de
+  dézonage en cours = risque moindre + signal positif** (réconcilie le paradoxe avec
+  §4.2). **« non-intersecté / indéterminé » ≠ 5** → marqué **non-disponible** (§4.4).
+- **Timing (20 %)** : séparer **horizon** (long ≠ mauvais — VISION §9 vise le
+  structurel long terme) et **visibilité concurrentielle**. 0 aucun catalyseur ·
+  3 processus en cours (consultation/référendaire) · 5 fenêtre ouverte **+ visibilité
+  faible mesurée** (proxy : aucune transaction notariée récente depuis le 1ᵉʳ projet
+  — **Tier C → souvent non-disponible**, marqué hypothèse).
+- **Faisabilité foncière (15 %)** : forme/accès/superficie/assemblage. Niveaux liés au
+  **propriétaire = hypothèse** (caviardé, LFM art. 72 — `confirmed:false`) ; « services
+  aqueduc/égout » = à sourcer (pas garanti en open-data).
+- **Valeur marché (15 %)** : comparables/permis/absorption = **Tier C → non-disponible
+  par défaut** ; **ne pas fabriquer** ; à défaut, **plafonner la recommandation à
+  « surveillance »** (PROCESS §3).
 
-**Potentiel réglementaire** (30 %)
-- 1 aucun changement favorable / usage figé · 2 signal indirect / intention floue ·
-  3 changement en cours (en attente) ouvrant le résidentiel · 4 changement adopté
-  ouvrant densité/usage (conditionnel) · 5 densité résidentielle fortement accrue,
-  en vigueur, alignée aux intentions municipales.
+### 4.4 Traitement « non-disponible » (le trou comblé)
+Un axe non-disponible : **renormaliser les poids sur les axes disponibles**, marquer
+le score **partiel**, et **plafonner la recommandation à « surveillance »** si une
+preuve clé manque (PROCESS §3 « score élevé sans preuve récente → surveillance »).
+**Jamais** de valeur neutre fabriquée. Inconnu ≠ favorable.
 
-**Risque de contrainte** (20 %, *inversé : 5 = peu de risque*)
-- 1 bloquant (CPTAQ active / inondable 0–20 ans / contamination) · 2 contrainte
-  coûteuse majeure (bande riveraine, servitude lourde) · 3 négociable / mitigation ·
-  4 mineure / informative · 5 aucune contrainte majeure.
+### 4.5 Vue « Grilles de score » (configurable) + hover
+Écran : par axe → poids + descriptions 0-5 **éditables**, tracés VISION/PROCESS,
+**versionnés**. Chaque score (vues opportunité) affiche au survol une **mini-grille**
+(0-5, niveau courant surligné) + **justification + preuve + confiance + version**.
+**Versioning** : scores passés **gelés** sous leur version de grille ; recalcul **à la
+demande** (pas rétroactif automatique).
 
-**Timing** (20 %)
-- 1 aucun catalyseur / horizon >10 ans · 2 horizon long, signal faible ·
-  3 processus en cours (consultation/référendaire) · 4 fenêtre proche (adoption
-  imminente / investissement annoncé) · 5 fenêtre ouverte + marché pas au courant.
+### 4.6 Calibration sur les 3 pilotes réels (avant de figer)
+Valider les grilles contre **H-609-4 / U-521→H-521 / H-143** (dossiers existants) :
+beaucoup d'axes seront **non-disponibles** (Marché Tier C, propriétaire LFM 72, Risque
+gap polygone) → scores **partiels + plafond surveillance**, ce qui est le résultat
+honnête attendu. Tableau de calibration à produire dans l'évolution 1.
 
-**Faisabilité foncière** (15 %)
-- 1 inexploitable (trop petit/enclavé/multipropriété) · 2 assemblage lourd requis ·
-  3 développable avec assemblage modéré · 4 lot développable, accès/services OK ·
-  5 grand lot vacant/sous-utilisé, services en place, propriétaire unique.
+## 5. Auto/humain + assistant + flow agentique
+- **Split par phase** `{auto-only | assisté | décision-humaine}` : auto-only
+  (intersections géo, parsing rôle 27 Mo, scan PDF/vidéos) ; assisté (ancrage,
+  extraction réglementaire, marché) ; décision-humaine (interprétation réglementaire,
+  servitudes/juridique, registre foncier payant, go/no-go).
+- **Assistant** contextuel proactif (suit les actions, propose l'aide, prépare la
+  tâche humaine, signale les manques).
+- **`@sentropic/flow`** = **couche agentique cible** (assistant, agents de veille T1,
+  auto-enrichissement, orchestration T2). **Spike de validation d'abord** ; **le socle
+  (modèle + grilles + Radar + Opportunités) n'en dépend PAS** (un agent 0-shot suffit,
+  cf. DEMO_FINDINGS).
+- **Chat UI** : panneau latéral/popup **global persistant** (modèle `../sentropic`) —
+  retenu, mais **séquencé après le socle**.
 
-**Valeur marché** (15 %)
-- 1 marché atone · 2 demande faible · 3 marché actif, comparables corrects ·
-  4 forte demande, faible vacance, écart valeur favorable · 5 pénurie + écart fort
-  + absorption rapide.
+## 6. Réel ↔ Simulation — mode GLOBAL (révisé)
+- **Mode global** (header) `Réel ↔ Simulation`, **pas un toggle par vue** (les 2
+  relecteurs : sur-ingénierie, risque de datasets divergents).
+- La simulation est un **état de la donnée** (provenance par item `simulé`, §3), pas
+  un swap de datasets. Le réel s'appuie sur ce qui a été réellement collecté
+  (vertical-slice).
+- **Honnêteté** : tout item simulé porte le label « instruit par l'humain · hypothèse
+  simulée ». Aucun simulé présenté comme fait.
 
-`score pondéré = Σ(niveau_axe × poids)` (résultat /5, affichable /100). L'écart
-brut→pondéré (ex. 90→63) **s'explique par les contraintes/faisabilité/marché**
-intégrées.
-
-### 4.4 Vue « Grilles de score » (configurable) + hover
-- Un écran **Grilles de score** : par axe → poids (éditable) + descriptions 1→5
-  (éditables) + traçabilité VISION/PROCESS. Versionné.
-- Dans les vues opportunité : **chaque score affiche au survol une mini-grille
-  jolie** (les 5 niveaux, niveau courant surligné) + la **justification + preuve**
-  de ce niveau (anti-pifométrie : on voit pourquoi 3/5).
-
-## 5. Auto vs humain + assistant (flow agentique)
-
-- **Split par phase** (à matérialiser, tag `{auto-only | assisté | décision-humaine}`) :
-  - *auto-only* (non opérable par l'humain à l'échelle) : intersections géospatiales,
-    parsing rôle 27 Mo, scan massif PDF/vidéos.
-  - *assisté* : ancrage foncier, extraction réglementaire, marché.
-  - *décision-humaine* : interprétation réglementaire fine, servitudes/juridique,
-    registre foncier payant, go/no-go.
-- **Assistant par étape** : contextuel, **proactif** — suit les actions, propose
-  l'aide, prépare la tâche humaine, signale ce qui manque.
-- **Flow agentique = `@sentropic/flow`** : l'assistant, les agents de veille (T1),
-  l'auto-enrichissement et l'orchestration de l'approfondissement (T2) reposent sur
-  `@sentropic/flow` (réutilisation écosystème, comme `@sentropic/chat-core`/`llm-mesh`).
-- **Chat UI** : **panneau latéral / popup global persistant** entre les vues (modèle
-  `../sentropic` chat-ui), pas un panneau par vue → sessions conservées.
-
-## 6. Réel ↔ Simulation (démo fidèle)
-
-- **Toggle par vue** : `données réelles collectées` ↔ `simulation`. Le réel s'appuie
-  sur ce qui a été réellement collecté (vertical-slice : rôle, géospatial, avis…).
-- **Honnêteté** : toute étape simulée porte le label **« instruit par l'humain ·
-  hypothèse simulée »**. Aucune donnée inventée présentée comme un fait (règle
-  absolue anti-triche, `rules/MASTER.md`).
-
-## 7. Automatisation (par phases)
-
-| Voie | Maintenant | Cible |
+## 7. Automatisation (par phases) + clarification cron vs agent
+| Voie | Maintenant | Mécanisme |
 | --- | --- | --- |
-| (a) Refresh piloté par prompt (agent rejoue le prompt par source) | **oui, prouvé** | sources « dures » (PDF/PV/YouTube) |
-| (b) Jobs planifiés + ETL (configurés en T3, monitorés T4) | sources stables (Données Québec/permis/géo) | open-data robuste |
-| (c) Connecteurs MCP par source + agents de veille (`@sentropic/flow`) | moyen terme | interface agent-native |
+| (a) Replay par prompt (agent rejoue PROMPT.md/source) | **prouvé** (DEMO_FINDINGS) | agent `@sentropic/flow` à terme ; pour sources « dures » (PDF/PV/YouTube) |
+| (b) Jobs planifiés + ETL | sources stables (Données Québec/CKAN/permis/géo) | **cron/scraping classique** ; c'est ce que **T4 monitore** |
+| (c) Connecteurs MCP par source | différé (YAGNI) | interface agent-native long terme |
+> Frontière : (b) = tâches planifiées déterministes (T4) ; (a) = exécution d'agent sur
+> sources non structurées. YouTube (VISION §4.3) reste fragile (captions/whisper) →
+> Tier-B, à intégrer en T3, non bloquant.
 
-## 8. Benchmark des prompts ↔ étapes (point conservé)
+## 8. Benchmark des prompts ↔ étapes (conservé)
+Décliner le benchmark **par étape** (détection T1 / extraction-ancrage T2 / scoring)
+plutôt qu'un score global ; **documenter la méthode** (scorer indépendant, M1-M7
+gelées, référentiel vérifié) + **takeaway par prompt** (Opus large/traçable ; Codex
+étroit mais lots réels ; Humain exhaustif mais tronqué ; Gemini fabrique). À intégrer
+à la vue Comparaison.
 
-- Décliner le benchmark **par étape** : quel modèle pour la détection (T1),
-  l'extraction/ancrage (T2), le scoring — plutôt qu'un score global unique.
-- **Approfondir le résultat du benchmark** : documenter *comment* la comparaison a
-  été faite (agent scorer indépendant, métriques M1–M7 gelées, référentiel vérifié)
-  + **le takeaway par prompt** (Opus large/traçable ; Codex étroit mais lots réels ;
-  Humain exhaustif mais tronqué ; Gemini fabrique). À intégrer à la vue Comparaison.
+## 9. Décomposition révisée (socle réduit) — entrée de replanification
+> Les 3 pilotes ont **déjà de la donnée réelle** (vertical-slice) → Radar/Opportunités
+> testables en réel **sans** construire T0 d'abord (lève la contradiction d'ordre).
 
-## 9. Décomposition en évolutions (entrée de replanification)
-
-Trop large pour un seul lot → sous-specs/branches candidates (ordre indicatif) :
-1. **Socle modèle + scoring** : modèle d'états (signal→N opp, statuts, score
-   incrémental) en `@radar/domain` + **grilles 1→5 configurables** + vue Grilles +
-   hover détail. *(fondation, tout en dépend)*
-2. **Radar T1** : feed de signaux + statuts + score brut + lien « Approfondir ».
+1. **Socle (évolution 1, fondation)** : modèle d'états (signal→N opp + `confirmed` +
+   `zonePolygonSource` + pré-filtres) + **grilles 0-5 corrigées + traitement
+   non-disponible** + vue Grilles + hover + **calibration sur les 3 pilotes**.
+2. **Radar T1** : feed signaux + statuts + tri (valeur/confiance séparés) + « Approfondir ».
 3. **Opportunités T2** : signal→N opportunités, funnel progressif (tags auto/humain),
-   score incrémental, réel/simulation.
-4. **Chat global `@sentropic/flow`** : assistant latéral persistant + proactif.
-5. **Sources console T3** (2 sous-vues) + **Jobs T4**.
-6. **Onboarding T0** (proposition de sources, rétroanalyse).
-7. **Automatisation** (a→b→c) + **benchmark par étape**.
+   score d'opportunité, **mode global réel/simulé**, mémoire multi-séances.
+4. **T0 onboarding** (proposition de sources, rétroanalyse) — productise l'ingestion.
+5. **Chat global `@sentropic/flow`** — après **spike** de validation.
+6. **T3 console sources** (2 sous-vues) + **T4 jobs** — quand l'automatisation continue arrive.
+7. **Automatisation (a→b)** + **benchmark par étape**.
 
-## 10. Défini vs gap (pour lever les ambiguïtés)
-
-- **Défini** (inputs) : mission/types/priorités (VISION), pipeline 6 phases +
-  axes/poids de scoring + gouvernance (PROCESS).
-- **Gap à définir ici** : grille 1→5 par axe (§4.3, proposée) ; split auto/humain
-  par phase ; rôle de l'assistant ; modèle d'états signal↔opportunités ; toggle
-  réel/simulation ; archi d'automatisation.
+## 10. Défini vs gap
+- **Défini (inputs)** : mission/types/priorités (VISION) ; pipeline 6 phases +
+  axes/poids + gouvernance (PROCESS).
+- **Défini ici (v2)** : sémantique des 2 scores ; grilles 0-5 corrigées + traitement
+  non-disponible ; ancrage réalité données (`confirmed`, `zonePolygonSource`, gaps
+  Tier C/LFM 72) ; mode global réel/sim ; mémoire temporelle + liaison docs + actions ;
+  socle réduit + ordre.
+- **À produire (évolution 1)** : la **calibration chiffrée des grilles sur les 3
+  pilotes** ; le spike `@sentropic/flow`.
