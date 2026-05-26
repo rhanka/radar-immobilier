@@ -25,9 +25,9 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - FAIRBENCH `chore/fair-benchmark-rule` — merged 2026-05-25 (PR #12). Archived at `plan/done/FAIRBENCH-BRANCH_chore-fair-benchmark-rule.md`.
 - DEMOFIND `feat/demo-findings-valleyfield` — merged 2026-05-25 (PR #13). Archived at `plan/done/DEMOFIND-BRANCH_feat-demo-findings-valleyfield.md`.
 - 3VIEWS `feat/demo-3-views` — merged 2026-05-25 (PR #14). Archived at `plan/done/3VIEWS-BRANCH_feat-demo-3-views.md`. (Absorbed BR-05R source-review code into main.)
+- 06V `feat/vertical-slice-valleyfield` — merged 2026-05-25 (PR #15). Archived at `plan/done/06V-BRANCH_feat-vertical-slice-valleyfield.md`. Real end-to-end slice (3 opps, real sources, "Opportunité" view). Materializes core of BR-06 + BR-07.
 
 **Active execution:**
-- 06V `feat/vertical-slice-valleyfield` — real end-to-end vertical slice (3 opps, real sources, "Opportunité" view). Advances BR-06 + BR-07. Plan: `plan/06V-BRANCH_feat-vertical-slice-valleyfield.md`.
 - BR-05R `feat/source-value-review-ui` — code absorbed via PR #14; UAT round-1 copy backlog still open (acronyms inline, matrix↔VISION, real insights). Plan: `plan/05R-BRANCH_feat-source-value-review-ui.md`.
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
