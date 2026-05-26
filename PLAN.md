@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-25 — DEMOFIND `feat/demo-findings-valleyfield` MERGED (PR #13): 4-agent PROMPT benchmark (A2 Opus 34 🥇 > C2 Codex 31 > H1 human 30 > G2 Gemini 14, two agents beat the human with no fabrication) + verified findings wired into the Radar demo. FAIRBENCH `chore/fair-benchmark-rule` MERGED (PR #12, absolute no-cheating rule). Next: DEMO-3-VIEWS — make the 3 deliverables navigable (Radar demo / agent comparison / source review). BR-05R `feat/source-value-review-ui` to be merged into the 3-views demo (UAT round-1 copy backlog still open). BR-04 in review (PR #8 + poc-k8s #12).
+Status: Updated 2026-05-25 — 3VIEWS `feat/demo-3-views` MERGED (PR #14): 3 navigable demo views (Radar / Comparaison agents / Revue sources), absorbing BR-05R source-review code. Now 06V `feat/vertical-slice-valleyfield` — REAL end-to-end materialization on 3 opportunities (H-609-4, U-521→H-521, H-143-1) through the PROCESS 6-phase funnel with real available-source investigation (rôle open-data, cadastre, BDZI/GRHQ/CPTAQ, avis PDF, StatCan, YouTube), surfaced as a 4th "Opportunité" demo view; anti-invention enforced. Advances BR-06 (data model on real data) + BR-07 (vertical slice). BR-05R UAT round-1 copy backlog still open. BR-04 in review (PR #8 + poc-k8s #12).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -24,10 +24,11 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - CONDUCTOR `chore/uat-env-conductor` — merged 2026-05-25 (PR #11, `4e8256b`). Archived at `plan/done/CONDUCTOR-BRANCH_chore-uat-env-conductor.md`.
 - FAIRBENCH `chore/fair-benchmark-rule` — merged 2026-05-25 (PR #12). Archived at `plan/done/FAIRBENCH-BRANCH_chore-fair-benchmark-rule.md`.
 - DEMOFIND `feat/demo-findings-valleyfield` — merged 2026-05-25 (PR #13). Archived at `plan/done/DEMOFIND-BRANCH_feat-demo-findings-valleyfield.md`.
+- 3VIEWS `feat/demo-3-views` — merged 2026-05-25 (PR #14). Archived at `plan/done/3VIEWS-BRANCH_feat-demo-3-views.md`. (Absorbed BR-05R source-review code into main.)
 
 **Active execution:**
-- BR-05R `feat/source-value-review-ui` — visual UAT (round 1). Plan:
-  `plan/05R-BRANCH_feat-source-value-review-ui.md`.
+- 06V `feat/vertical-slice-valleyfield` — real end-to-end vertical slice (3 opps, real sources, "Opportunité" view). Advances BR-06 + BR-07. Plan: `plan/06V-BRANCH_feat-vertical-slice-valleyfield.md`.
+- BR-05R `feat/source-value-review-ui` — code absorbed via PR #14; UAT round-1 copy backlog still open (acronyms inline, matrix↔VISION, real insights). Plan: `plan/05R-BRANCH_feat-source-value-review-ui.md`.
 - BR-04 `feat/k8s-tenant-radar-and-infra` — in review on radar PR #8 and
   companion k8s-ops PR #12.
 
