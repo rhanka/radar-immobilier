@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Radar, BarChart3, Layers, Building2, SlidersHorizontal } from "@lucide/svelte";
+  import { Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
 
   export let activeView: DemoView;
@@ -7,6 +7,7 @@
 
   const items: { id: DemoView; label: string; icon: typeof Radar }[] = [
     { id: "radar", label: "Radar (démo)", icon: Radar },
+    { id: "signaux", label: "Signaux (T1)", icon: Radio },
     { id: "comparison", label: "Comparaison des agents", icon: BarChart3 },
     { id: "source-review", label: "Revue des sources", icon: Layers },
     { id: "opportunity", label: "Opportunité", icon: Building2 },
