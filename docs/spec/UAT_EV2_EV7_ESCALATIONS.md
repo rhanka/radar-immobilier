@@ -91,3 +91,12 @@
   + scheduler deferred to a server-side build (UAT decision).
 
 ### ÉV7 — automation + benchmark
+- **D18** One new DemoView **"automatisation"** (last). Three **treatment cadence cards** — initial
+  (rétro-analyse 2 ans, one-shot), récurrent (scan quotidien), approfondissement (à la demande par
+  opportunité) — descriptive, illustrative cadences.
+- **D19** A **connectors** list = **stub** (sources/MCP connectors as "à venir / non connecté") — no
+  real connection. ESCALATION: real automation scheduler + connectors deferred to a server-side build
+  (ties to D11/D17).
+- **D20** A **per-stage agent benchmark recap** reusing the existing `ui/src/lib/demo/benchmark-data.ts`
+  (the honest 4-track agent comparison) — a compact recap (per agent/stage), not a re-implementation;
+  link/refer to the existing Comparaison view. Fair-benchmarking rule respected (no fabricated wins).
