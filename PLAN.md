@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-27 — **ÉV1 `feat/socle-states-scoring` MERGED (PR #18)**: the socle — states model + new `@radar/scoring` package (v1 grids 0-5 + availability-aware `aggregate` with renormalization/floor/cap) + calibration on the 3 real pilots (3.18/3.35/2.59) + the "Grilles de score" demo view. Quadruple agent-reviewed. SQL journal/score migration deferred to ÉV3. Now driving the **evolution track ÉV1–ÉV7** (spec §9) autonomously toward a full ÉV1–ÉV7 UAT; **ÉV2 (Radar T1) is next**. Earlier socle spec PR #17. BR-06/BR-07 materialized by 06V (PR #15). BR-05R UAT copy backlog open. BR-04 in review (PR #8 + poc-k8s #12). Follow-up: route `OpportunityFunnel` through `aggregate()` (legacy `scoreGlobal` coexistence).
+Status: Updated 2026-05-27 — autonomous drumbeat building the evolution track ÉV1–ÉV7 toward a full UAT. **ÉV1 MERGED (PR #18)** (socle: states model + `@radar/scoring` grids/aggregate + calibration 3.18/3.35/2.59 + Grilles view). **ÉV2 MERGED (PR #19)** (Radar T1 signals feed: value/confidence separate sort, status + real/sim filter, Approfondir→Grilles). **ÉV3 (Opportunités T2) is next.** Default decisions + escalations for the intermediate UAT in `docs/spec/UAT_EV2_EV7_ESCALATIONS.md`. Earlier socle spec PR #17; BR-06/BR-07 materialized by 06V (PR #15). Follow-ups (non-blocking): route `OpportunityFunnel` through `aggregate()` (legacy `scoreGlobal` coexistence); ÉV3 picks up the deferred SQL journal/score migration.
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -35,8 +35,8 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 
 **Evolution track — product process e2e (post-SOCLE, ordered).** Replaces the old speculative BR-08→BR-12 demo path; reconciliation in §3.
 - **ÉV1** `feat/socle-states-scoring` — **MERGED 2026-05-27 (PR #18).** States model + `@radar/scoring` (grids 0-5 + availability-aware `aggregate`) + calibration (3.18/3.35/2.59) + Grilles view. SQL journal/score migration deferred to ÉV3. Archived `plan/done/`.
-- **ÉV2** `feat/radar-t1-signals` — signal feed + statuses + value/confidence sort + "Approfondir". **Next.**
-- **ÉV3** `feat/opportunites-t2-funnel` — signal→N opportunities, progressive funnel, opportunity score, global réel/sim toggle, multi-session memory.
+- **ÉV2** `feat/radar-t1-signals` — **MERGED 2026-05-27 (PR #19).** Signals feed (value/confidence separate sortable columns, status + real/sim filter, Approfondir→Grilles), demo-seeded from pilots + synthetic. Archived `plan/done/`.
+- **ÉV3** `feat/opportunites-t2-funnel` — signal→N opportunities, progressive funnel, opportunity score, global réel/sim toggle, multi-session memory. **Next.**
 - **ÉV4** `feat/t0-onboarding-sources` — source proposal + 2-year retro-analysis (productizes ingestion).
 - **ÉV5** `feat/h2a-spike-chat` — `@sentropic/h2a` spike → V1 POLICY + role label + simple journal (decoupled behind an interface); global chat on `@sentropic/flow` (after its spike). Absorbs BR-08 (graphify) + BR-11 (chat-demo).
 - **ÉV6** `feat/t3-t4-consoles` — T3 sources console (2 sub-views, absorbs BR-05R) + T4 jobs monitoring.
