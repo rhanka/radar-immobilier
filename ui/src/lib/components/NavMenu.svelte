@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Rocket, Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal } from "@lucide/svelte";
+  import { Rocket, Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal, MessagesSquare } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
   import { appMode, toggleMode } from "$lib/state/mode.js";
 
@@ -16,6 +16,7 @@
     { id: "source-review", label: "Revue des sources", icon: Layers },
     { id: "opportunity", label: "Opportunité", icon: Building2 },
     { id: "grilles", label: "Grilles de score", icon: SlidersHorizontal },
+    { id: "coordination", label: "Coordination", icon: MessagesSquare },
   ];
 </script>
 
