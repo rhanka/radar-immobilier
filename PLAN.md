@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-27 — autonomous drumbeat building the evolution track ÉV1–ÉV7 toward a full UAT. **ÉV1 MERGED (PR #18)** (socle: states + `@radar/scoring` grids/aggregate + calibration 3.18/3.35/2.59 + Grilles view). **ÉV2 MERGED (PR #19)** (Radar T1 signals feed). **ÉV3 MERGED (PR #20)** (Opportunités T2 funnel). **ÉV4 MERGED (PR #21)** (T0 Onboarding/Sources). **ÉV5 MERGED (PR #22)** (Coordination view — decoupled h2a-concept interface: Role/POLICY/append-only journal + stub chat; real h2a adapter deferred). Demo now spans T0 → T1 → T2 → Grilles → Coordination (+ comparison/source-review). **ÉV6 (T3/T4 consoles) is next; then ÉV7 (automation+benchmark) closes the track.** Default decisions D1–D14 + escalations (incl. deferred real-h2a + SQL journal) in `docs/spec/UAT_EV2_EV7_ESCALATIONS.md`. Earlier socle spec PR #17; BR-06/BR-07 materialized by 06V (PR #15).
+Status: Updated 2026-05-27 — autonomous drumbeat building the evolution track ÉV1–ÉV7 toward a full UAT. **ÉV1 MERGED (PR #18)** (socle: states + `@radar/scoring` grids/aggregate + calibration 3.18/3.35/2.59 + Grilles view). **ÉV2 MERGED (PR #19)** (Radar T1 signals feed). **ÉV3 MERGED (PR #20)** (Opportunités T2 funnel). **ÉV4 MERGED (PR #21)** (T0 Onboarding/Sources). **ÉV5 MERGED (PR #22)** (Coordination view). **ÉV6 MERGED (PR #23)** (Console T3/T4: qualification + deep-dive + jobs board). Demo spans T0 Onboarding → T1 Signaux → T2 Opportunités → Grilles → Coordination → Console (+ comparison/source-review). **ÉV7 (automation + benchmark) is the last évolution — closes the track.** Default decisions D1–D17 + escalations (deferred real-h2a, SQL journal, real job orchestration) in `docs/spec/UAT_EV2_EV7_ESCALATIONS.md`. Earlier socle spec PR #17; BR-06/BR-07 materialized by 06V (PR #15).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -39,8 +39,8 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
 - **ÉV3** `feat/opportunites-t2-funnel` — **MERGED 2026-05-27 (PR #20).** T2 funnel: 6-phase faisceau from evidence[] + honest `aggregate` score (3.18/3.35/2.59, partial/cap, ScoreHover) dropping legacy scoreGlobal; global réel/sim toggle; signal→N (Approfondir→signalId filter). Archived `plan/done/`.
 - **ÉV4** `feat/t0-onboarding-sources` — **MERGED 2026-05-27 (PR #21).** T0 Onboarding view: source-catalogue checklist (grouped by recommendation, build-now pre-checked) + 2-year retro-analysis panel (illustrative estimate) + demo "Lancer l'onboarding" CTA. First demo view. Archived `plan/done/`.
 - **ÉV5** `feat/h2a-spike-chat` — **MERGED 2026-05-27 (PR #22).** Spike: h2a 0.8.0/flow 0.1.1 exist but Node/crypto-oriented → decoupled coordination interface (Role/POLICY/in-memory append-only journal) + stub chat "Coordination" view; real h2a adapter deferred (escalation). Archived `plan/done/`.
-- **ÉV6** `feat/t3-t4-consoles` — T3 sources console (2 sub-views, absorbs BR-05R) + T4 jobs monitoring. **Next.**
-- **ÉV7** `feat/automation-benchmark` — continuous automation (initial→recurrent) + per-stage agent benchmark.
+- **ÉV6** `feat/t3-t4-consoles` — **MERGED 2026-05-27 (PR #23).** "Console" view (3 tabs): T3 qualification (sources grouped by recommendation) + T3 deep-dive (reuses SourceDeepDive) + T4 jobs board (status chips + table, global réel/sim aware, demo stub). Archived `plan/done/`.
+- **ÉV7** `feat/automation-benchmark` — continuous automation (initial→recurrent→deepening) + per-stage agent benchmark. **Next (closes the track).**
 
 **Infra branches (parallelizable, plug into the track):**
 - BR-09 `feat/auth-passkey-magic-link`
