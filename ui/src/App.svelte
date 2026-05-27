@@ -10,6 +10,7 @@
   import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
+  import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
   import { createDashboardState } from "$lib/state/dashboard";
 
@@ -44,6 +45,8 @@
             selectedSignalId = signalId;
           }}
         />
+      {:else if activeView === "signaux"}
+        <SignalsT1View onApprofondir={() => (activeView = "grilles")} />
       {:else if activeView === "comparison"}
         <BenchmarkComparison />
       {:else if activeView === "opportunity"}
