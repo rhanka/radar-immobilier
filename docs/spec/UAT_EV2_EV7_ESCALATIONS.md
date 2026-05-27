@@ -61,5 +61,22 @@
   `build-now` sources pre-checked.
 
 ### ÉV5 — h2a spike + chat
+- **SPIKE RESULT**: `@sentropic/h2a` (npm **0.8.0**, source `../a2a-cli/packages/h2a`) and
+  `@sentropic/flow` (**0.1.1**) exist and are installable. BUT h2a is **Node-oriented** (ed25519
+  signing, append-only journal, key handling) — not a clean browser/SPA dependency, and socle §11
+  explicitly **defers crypto for V1**. So a hard dependency in the demo UI is not warranted now.
+- **D13 (default, per socle §11)** ÉV5 V1 = a **decoupled coordination interface** in the UI that
+  mirrors h2a's *concepts* without the dep: `Role` (PRINCIPAL = human, CONDUCTOR/AGENT = AI), a
+  `POLICY` (anti-cheat / disclaimer summary), and a **simple in-memory append-only journal** of
+  decisions (no crypto, no persistence). Modeled so a real `@sentropic/h2a` adapter can slot behind
+  the interface later (server-side).
+- **ESCALATION (ÉV5 → UAT)**: real `@sentropic/h2a`/`@sentropic/flow` integration (signed
+  ENGAGEMENT/MANDATE artifacts, ed25519, persistent journal) is **deferred** — it needs a
+  **server-side coordination service**, not the browser demo. Confirm at UAT whether/when to build it.
+- **D14** The "Coordination / Chat" demo view: a side-panel chat where the human (PRINCIPAL) issues
+  instructions; each decision/message **appends to the journal** (who/role/action/at). The chat is a
+  **stub** (no real LLM call) — canned/echo assistant turns labelled clearly. Reuse the existing
+  `@sentropic/chat-ui` ChatPanel pattern (see `RadarChatPanel.svelte`) if clean; else a simple panel.
+
 ### ÉV6 — T3/T4 consoles
 ### ÉV7 — automation + benchmark
