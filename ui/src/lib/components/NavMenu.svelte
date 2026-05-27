@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Rocket, Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal, MessagesSquare, MonitorDot } from "@lucide/svelte";
+  import { Rocket, Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal, MessagesSquare, MonitorDot, Zap } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
   import { appMode, toggleMode } from "$lib/state/mode.js";
 
@@ -18,6 +18,7 @@
     { id: "grilles", label: "Grilles de score", icon: SlidersHorizontal },
     { id: "coordination", label: "Coordination", icon: MessagesSquare },
     { id: "console", label: "Console (T3/T4)", icon: MonitorDot },
+    { id: "automation", label: "Automatisation", icon: Zap },
   ];
 </script>
 
