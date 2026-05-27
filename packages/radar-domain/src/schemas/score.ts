@@ -20,6 +20,15 @@ export const AxisScore = z.object({
 );
 export type AxisScoreT = z.infer<typeof AxisScore>;
 
+export const AxesMap = z.object({
+  potentiel: AxisScore,
+  risque: AxisScore,
+  timing: AxisScore,
+  faisabilite: AxisScore,
+  marche: AxisScore,
+});
+export type AxesMapT = z.infer<typeof AxesMap>;
+
 export const RecommendationCap = Action.extract(["surveiller", "qualifier-avec-expert", "monter-dossier-acquisition"]);
 export type RecommendationCapT = z.infer<typeof RecommendationCap>;
 
