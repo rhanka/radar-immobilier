@@ -54,3 +54,23 @@ export function appendDecision(
 export function summarizePolicy(policy: Policy): string {
   return `${policy.rules.length} règles`;
 }
+
+/** Simulates a user submit in the stub chat: appends a PRINCIPAL entry then a
+ *  canned CONDUCTOR entry. Returns the two new entries. No LLM call is made. */
+export function submitInstruction(
+  journal: CoordinationJournal,
+  text: string,
+): [CoordinationJournalEntry, CoordinationJournalEntry] {
+  const principal = appendDecision(journal, {
+    who: "Vous",
+    role: "principal",
+    action: text,
+  });
+  const conductor = appendDecision(journal, {
+    who: "Assistant",
+    role: "conductor",
+    action: "Pris en compte (réponse simulée — pas de LLM)",
+    note: "Démo : aucune génération réelle.",
+  });
+  return [principal, conductor];
+}
