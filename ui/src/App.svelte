@@ -11,6 +11,7 @@
   import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
+  import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
   import { createDashboardState } from "$lib/state/dashboard";
@@ -67,6 +68,8 @@
         />
       {:else if activeView === "grilles"}
         <GrillesView />
+      {:else if activeView === "coordination"}
+        <CoordinationView />
       {:else}
         <SourceReviewShell onBackToRadar={() => (activeView = "radar")} />
       {/if}
