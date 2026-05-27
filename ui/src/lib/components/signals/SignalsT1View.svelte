@@ -2,7 +2,8 @@
   import { AlertCircle, SortAsc, SortDesc, Filter } from "@lucide/svelte";
   import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
   import { filterRealMode } from "@radar/scoring";
-  import { filterByStatus, sortSignals } from "$lib/signals/feed.js";
+  import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
+  import type { SortKey, SortDir } from "$lib/signals/feed.js";
   import type { SignalT, SignalStatusT } from "@radar/domain";
   import SignalRow from "./SignalRow.svelte";
 
@@ -13,9 +14,6 @@
   let signals: SignalT[] = demoSignalsT1.map((s) => ({ ...s }));
 
   // ── Controls ─────────────────────────────────────────────────────────────────
-  type SortKey = "value" | "confidence";
-  type SortDir = "asc" | "desc";
-
   let sortKey: SortKey = "value";
   let sortDir: SortDir = "desc";
   let statusFilter: SignalStatusT | "tous" = "tous";
@@ -30,10 +28,7 @@
   let lastApprofondie: string | null = null;
 
   function handleApprofondir(signal: SignalT) {
-    // Mutate local copy
-    signals = signals.map((s) =>
-      s.id === signal.id ? { ...s, status: "à-approfondir" as SignalStatusT } : s,
-    );
+    signals = markApprofondir(signals, signal.id);
     lastApprofondie = signal.id;
     onApprofondir({ ...signal, status: "à-approfondir" });
   }
