@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Mode } from "./common.js";
 
 export const Phase = z.enum([
   "signal",
@@ -52,6 +53,15 @@ export const SourceRole = z.object({
   ]),
 });
 
+export const ZonePolygonSource = z.enum([
+  "open-data-ckan",
+  "wms-municipal",
+  "vectorised-pdf",
+  "hypothese-street-name",
+  "other",
+]);
+export type ZonePolygonSourceT = z.infer<typeof ZonePolygonSource>;
+
 export const ScoreSet = z.object({
   potentiel: z.number().min(0).max(5),
   risque: z.number().min(0).max(5),
@@ -66,6 +76,8 @@ export const OpportunityDossier = z.object({
   bylaw: z.string(),
   zone: z.string(),
   address: z.string(),
+  signalId: z.string().min(1),
+  mode: Mode.default("real"),
   lots: z.array(
     z.object({
       noLot: z.string(),
@@ -73,6 +85,10 @@ export const OpportunityDossier = z.object({
       superficie: z.string().optional(),
       usage: z.string().optional(),
       valeur: z.string().optional(),
+      confirmed: z.boolean().default(false),
+      zonePolygonSource: ZonePolygonSource.default("hypothese-street-name"),
+      assemblyClusterId: z.string().optional(),
+      metadata: z.record(z.unknown()).optional(),
     })
   ),
   evidence: z.array(EvidenceItem),

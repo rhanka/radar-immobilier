@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   EvidenceItem,
+  OpportunityDossier,
   PROCESS_WEIGHTS,
   Verification,
   weightedScore,
@@ -97,5 +98,33 @@ describe("weightedScore", () => {
     // 5*0.30 + 4*0.20 + 5*0.20 + 3*0.15 + 2*0.15
     // = 1.50 + 0.80 + 1.00 + 0.45 + 0.30 = 4.05
     expect(score).toBeCloseTo(4.05, 10);
+  });
+});
+
+describe("OpportunityDossier ÉV1 enrichment", () => {
+  const minimal = {
+    id: "d1", title: "t", bylaw: "150-49", zone: "H-609-4", address: "a",
+    signalId: "sig-1",
+    lots: [{ noLot: "1" }],
+    evidence: [], scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
+    scoreGlobal: 3.15, recommendation: "Surveiller",
+  };
+  it("requires signalId, applies lot + mode defaults", () => {
+    const r = OpportunityDossier.safeParse(minimal);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.mode).toBe("real");
+      const lot0 = r.data.lots[0]!;
+      expect(lot0.confirmed).toBe(false);
+      expect(lot0.zonePolygonSource).toBe("hypothese-street-name");
+    }
+  });
+  it("rejects a dossier missing signalId", () => {
+    const { signalId: _signalId, ...noSig } = minimal;
+    expect(OpportunityDossier.safeParse(noSig).success).toBe(false);
+  });
+  it("rejects an unknown zonePolygonSource", () => {
+    const bad = { ...minimal, lots: [{ noLot: "1", zonePolygonSource: "satellite" }] };
+    expect(OpportunityDossier.safeParse(bad).success).toBe(false);
   });
 });
