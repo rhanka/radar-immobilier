@@ -13,6 +13,7 @@
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
+  import AutomationView from "$lib/components/automation/AutomationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
   import { createDashboardState } from "$lib/state/dashboard";
@@ -73,6 +74,8 @@
         <CoordinationView />
       {:else if activeView === "console"}
         <ConsoleView />
+      {:else if activeView === "automation"}
+        <AutomationView />
       {:else}
         <SourceReviewShell onBackToRadar={() => (activeView = "radar")} />
       {/if}
