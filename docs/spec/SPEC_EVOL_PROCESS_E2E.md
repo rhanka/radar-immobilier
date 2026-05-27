@@ -1,8 +1,10 @@
-# SPEC_EVOL — Process e2e, états, scoring & matérialisation (SOCLE v3)
+# SPEC_EVOL — Process e2e, états, scoring & matérialisation (SOCLE v4)
 
-> **Status**: EVOL v3 — intègre les relectures-challenge **agy (Gemini)** + **Claude
-> Opus 4.7** (2026-05-26) **et la coordination humain↔agent `@sentropic/h2a`** (v0.3.1,
-> §11). Modèle opérationnel détaillé dans `docs/spec/SPEC_EVOL_OPERATING_MODEL.md`.
+> **Status**: EVOL v4 — **h2a right-sizé V1** suite aux double-relectures (agy + Opus
+> xhigh, archivées `docs/spec/reviews/`). `@sentropic/h2a` reste la **cible de
+> gouvernance** (§11) mais la **V1 est minimale** (POLICY + label de rôle + journal
+> simple ; spike d'abord, découplé — comme `flow`). La topologie multi-tenant + le
+> modèle de support sont une **hypothèse business hors V1** (`SPEC_EVOL_OPERATING_MODEL.md`).
 > **Inputs**: `docs/spec/input/{VISION,PROMPT,PROCESS}.md`. **Acquis réels**:
 > `SPEC_EVOL_VERTICAL_SLICE_VALLEYFIELD.md`, `SPEC_EVOL_DATA_MODEL.md`,
 > `SPEC_EVOL_DEMO_FINDINGS.md`.
@@ -41,9 +43,11 @@ hypothèses (règle anti-triche, `rules/MASTER.md`). **Rien d'inventé.**
   open-data-ckan | wms-municipal | vectorised-pdf | hypothese-street-name`.
 - **Statut de signal (T1)** : `nouveau · à approfondir · écarté · surveillance`, horodaté.
 - **Taxonomie d'actions (PROCESS §6, complète)** : `rejeter · surveiller ·
-  qualifier-avec-expert · approcher-propriétaire · monter-dossier-acquisition`. Les
-  décisions humaines (qualification, go/no-go) = artefacts h2a **`ENGAGEMENT`/`MANDATE`
-  signés** + journalisés (§11).
+  qualifier-avec-expert · approcher-propriétaire · monter-dossier-acquisition`. En V1
+  les décisions humaines (qualification, go/no-go) sont **journalisées simplement**
+  (qui/quoi/quand/rôle) ; **signer les décisions, jamais chaque item de donnée**
+  (explosion combinatoire avec N opportunités). Artefacts `ENGAGEMENT` signés = futur
+  (§11).
 - **Mémoire temporelle (VISION §4.2/§4.5/§7)** : un dossier **évolue sur plusieurs
   séances** (timeline d'événements horodatés) ; la rétroanalyse 2 ans alimente cette
   timeline, pas seulement T0.
@@ -131,10 +135,11 @@ honnête attendu. Tableau de calibration à produire dans l'évolution 1.
   *font* : veille T1, auto-enrichissement, scoring). **Spike de validation d'abord** ;
   **le socle (modèle + grilles + Radar + Opportunités) n'en dépend PAS** (un agent
   0-shot suffit, cf. DEMO_FINDINGS).
-- **`@sentropic/h2a`** = **couche de coordination humain↔agent AU-DESSUS de flow** :
-  *qui* (rôle/autorité) agit/décide, escalade, signature, journal. Définit les rôles
-  (PRINCIPAL / CONDUCTOR / agents), route le split « décision-humaine » vers le bon
-  rôle. **Package publié à adopter** (pas un spike-à-créer). Détail en **§11**.
+- **`@sentropic/h2a`** = **couche de coordination humain↔agent cible** (rôles, qui
+  décide/atteste, escalade). **Même traitement que flow : spike d'abord, découplé
+  derrière une interface** (v0.3.1 pré-1.0, surface incertaine). **V1 minimale** =
+  `POLICY` anti-triche + label de rôle + journal simple (§6/§11) ; crypto/modes/ABC
+  **différés**. Détail + right-sizing en **§11**.
 - **Chat UI** : panneau latéral/popup **global persistant** (modèle `../sentropic`),
   **canal h2a** (enveloppes signées) — retenu, **séquencé après le socle**.
 
@@ -144,11 +149,13 @@ honnête attendu. Tableau de calibration à produire dans l'évolution 1.
 - La simulation est un **état de la donnée** (provenance par item `simulé`, §3), pas
   un swap de datasets. Le réel s'appuie sur ce qui a été réellement collecté
   (vertical-slice).
-- **Honnêteté (renforcée par h2a, §11)** : tout item porte « instruit/validé par
-  *<rôle>* » et sa provenance devient **signée + journalisée** (journal h2a append-only,
-  ed25519, chaîne vérifiable). La **règle anti-triche devient cryptographiquement
-  auditable** : un simulé/hypothèse ne peut être présenté comme fait sans une signature
-  d'autorité correspondante.
+- **Honnêteté — V1 (sans crypto)** : la provenance par item (`fait · hypothèse ·
+  non-disponible · simulé`, §3) **résout déjà** la règle anti-triche ; on ajoute un
+  **label de rôle** « instruit/validé par *<rôle>* » et un **journal append-only
+  simple** (table d'événements, déjà nécessaire pour la mémoire multi-séances). **Pas
+  de signature ed25519 sur les items de donnée** (sur-ingénierie en démo mono-opérateur,
+  + conflit Loi 25 droit à l'effacement). Signature cryptographique **différée** aux
+  seules **décisions d'affaires** quand il y aura des porteurs de clés distincts (§11).
 
 ## 7. Automatisation (par phases) + clarification cron vs agent
 | Voie | Maintenant | Mécanisme |
@@ -178,9 +185,11 @@ gelées, référentiel vérifié) + **takeaway par prompt** (Opus large/traçabl
 3. **Opportunités T2** : signal→N opportunités, funnel progressif (tags auto/humain),
    score d'opportunité, **mode global réel/simulé**, mémoire multi-séances.
 4. **T0 onboarding** (proposition de sources, rétroanalyse) — productise l'ingestion.
-5. **Coordination h2a + chat global** : adopter **`@sentropic/h2a`** (rôles/autorité/
-   escalade/journal signé, §11) → branche la **provenance signée** sur §6 ; chat global
-   sur `@sentropic/flow` (après spike). Voir `SPEC_EVOL_OPERATING_MODEL.md`.
+5. **Spike h2a (minimal) + chat global** : spike `@sentropic/h2a` (compat runtime,
+   surface) → V1 = `POLICY` anti-triche + label de rôle + journal simple (§6/§11),
+   **découplé derrière une interface** ; chat global sur `@sentropic/flow` (après son
+   spike). Crypto signée / modes / ABC / B2B2C = **différés** (hypothèse business,
+   `SPEC_EVOL_OPERATING_MODEL.md`).
 6. **T3 console sources** (2 sous-vues) + **T4 jobs** — quand l'automatisation continue arrive.
 7. **Automatisation (a→b)** + **benchmark par étape**.
 
@@ -194,43 +203,46 @@ gelées, référentiel vérifié) + **takeaway par prompt** (Opus large/traçabl
 - **À produire (évolution 1)** : la **calibration chiffrée des grilles sur les 3
   pilotes** ; le spike `@sentropic/flow`.
 
-## 11. Coordination humain↔agent — `@sentropic/h2a` (v0.3.1)
+## 11. Coordination humain↔agent — `@sentropic/h2a` (cible ; V1 minimale)
 
-Protocole de coordination & gouvernance humain↔agent : **artefacts contractuels
-signés, matrice d'autorité, escalade, journal append-only (ed25519, chaîne
-vérifiable)**. Adopté (package publié) **au-dessus de `flow`**.
+`@sentropic/h2a` (v0.3.1) = protocole de coordination/gouvernance humain↔agent. **Cible**
+saine : gouverner *qui décide/atteste* au-dessus de *qui exécute* (`flow`). **Spike
+d'abord, découplé derrière une interface** (comme `flow` ; v0.3.1 pré-1.0).
 
-**Rôles (vocabulaire h2a)** : **PRINCIPAL** (humain qui pilote sa mini-org) ·
-**CONDUCTOR** (supervise une meute d'agents, exécution déléguée sous responsabilité) ·
-**AGENTS**.
+**Rôles (corrigés post-relecture)** :
+- **PRINCIPAL = un humain/org** qui pilote sa mini-org et porte la responsabilité.
+  **Toi (expert Sentropic) = PRINCIPAL plateforme.** **L'IA n'est jamais PRINCIPAL.**
+- **CONDUCTOR** = supervise une meute d'agents sous mandat (peut être l'orchestrateur
+  IA `flow`). **AGENTS** = exécutants.
 
-**Mapping radar** :
-- **Sentropic (toi)** = PRINCIPAL plateforme + CONDUCTOR des agents dev/ops ; **recours
-  `public-authority`/`consortium`** en dernier ressort.
-- **Responsable produit (client)** = PRINCIPAL de son tenant + CONDUCTOR de ses agents
-  de support ; en **`federation`** avec la plateforme.
-- **Client final** = interagit avec les agents du produit (meute supervisée) dans l'org
-  du responsable produit.
+**V1 minimale (ce qu'on implémente)** :
+1. **`POLICY` anti-triche checkable** : provenance honnête + score plafonné à
+   « surveillance » si preuve clé manque (§4.4) + **disclaimer « décision-support, pas
+   conseil »**.
+2. **Label de rôle** sur la provenance (« validé par *<rôle>* »), **sans clé**.
+3. **Journal append-only simple** (table d'événements, sert aussi la mémoire
+   multi-séances §3). **Signer les décisions d'affaires, jamais les items de donnée.**
 
-**Escalade = support multi-tiers (routes d'`ENFORCEMENT_PLAN`)** : client final →
-responsable produit (PRINCIPAL) + ses agents → agents de dev (CONDUCTOR plateforme) →
-**toi (PRINCIPAL/recours)**. **Coût marginal** : les agents agissent sous
-`MANDATE`/`POLICY` ; l'humain n'intervient que sur escalade ; tout signé + journalisé.
+**Différé (besoins futurs réels)** : `ed25519`/`SIGNATURE`/`AUTHORITY` (utile seulement
+avec des **porteurs de clés distincts** — ex. prouver à un investisseur qu'une contrainte
+a été validée par un pro agréé) ; modes multi-humains ;
+`CONTRACT`/`ENFORCEMENT_PLAN`/`AMENDMENT` ; profils ABC complets.
 
-**Artefacts** : `CONTRACT` (cadre client) · `POLICY` (règles : anti-triche, périmètre) ·
-`ENGAGEMENT`/`AMENDMENT` (feedback/spec/décisions) · `MANDATE` (délégation à un
-CONDUCTOR/agent) · `AUTHORITY`/`SIGNATURE` (matrice d'autorité, ed25519) ·
-`ENFORCEMENT_PLAN` (routes d'escalade). Journal chaîné = audit.
+**Loi 25 (QC)** : un journal **immuable signé contredit le droit à l'effacement/
+rectification** → dès qu'on signera, **PII (propriétaire issu du registre foncier)
+hors-chaîne** (hash/référence). À cadrer avant toute crypto.
 
-**Profil ABC** : radar = **A enterprise** (contrat SaaS B2B avec le responsable produit)
-sur un **C government-citizen** (données municipales/publiques, recours), dimension
-**B ecosystem** (pros immo, fournisseurs de données) ; instancier disclosure / recours /
-obligations récurrentes / juridiction / préséance.
+**Intégration (au spike)** : signature **côté serveur uniquement** (clés jamais dans la
+SPA ; navigateur vérifie/affiche) ; **journal en Postgres `jsonb`** ; compat runtime
+h2a v0.3.1 (Node vs edge) ; version pinnée + isolée derrière interface.
 
-**Dev-time** : feedback responsable-produit = `ENGAGEMENT`/`AMENDMENT` signés (peer
-entre PRINCIPALs) → corrections de spec journalisées ; tu émets des `MANDATE` à tes
-agents dev/ops sous une `POLICY` (détail : `SPEC_EVOL_OPERATING_MODEL.md`).
+**Dev-time ≠ run-time** : *dev-time* = toi (PRINCIPAL) mandates tes agents dev/ops
+(gouvernance de fabrication) ; *run-time* = gouvernance produit (go/no-go opportunités).
+Deux usages h2a distincts.
 
-**À confirmer à l'intégration** : mapping exact des modes multi-humains
-(`peer/delegated/shared-engagement/federated/consortium/public-authority`) contre le
-SPEC de `../a2a-cli` ; instanciation des profils ABC.
+> **Hors V1 — hypothèse business** : la topologie multi-tenant (responsable produit →
+> clients finaux), les modes `delegated/federated/consortium/public-authority`, les
+> profils ABC et les **tiers de support** sont une **hypothèse à valider** (VISION =
+> radar **mono-opérateur**, utilisateur V1 = toi) → `SPEC_EVOL_OPERATING_MODEL.md`, **non
+> construite en V1**. Pour les litiges client↔plateforme : **nœud d'escalade externe**
+> (médiation / OACIQ / tribunaux), jamais Sentropic juge-et-partie.
