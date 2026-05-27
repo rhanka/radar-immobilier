@@ -1,13 +1,6 @@
 <script lang="ts">
   import { Layers } from "@lucide/svelte";
-  import type { SourceEvaluation } from "$lib/source-review/source-evaluation-data";
   import { sourceEvaluations } from "$lib/source-review/source-evaluation-data.js";
-  import {
-    accessLabels,
-    costLabels,
-    recommendationLabels,
-    visionLabels,
-  } from "$lib/source-review/source-review-labels.js";
   import SourceDeepDive from "$lib/components/source-review/SourceDeepDive.svelte";
 
   let selectedId: string = sourceEvaluations[0]?.id ?? "";
