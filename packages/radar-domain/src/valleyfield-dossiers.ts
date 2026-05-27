@@ -73,6 +73,7 @@ const dossier1: OpportunityDossierT = OpportunityDossier.parse({
   bylaw: "150-49",
   zone: "H-609-4",
   address: "Secteur Champlain / Saint-Jean-Baptiste / Salaberry, Salaberry-de-Valleyfield",
+  signalId: "sig-h609-4",
 
   lots: [
     {
@@ -349,6 +350,7 @@ const dossier2: OpportunityDossierT = OpportunityDossier.parse({
   bylaw: "150-51",
   zone: "H-521",
   address: "Secteur Lanctôt / Cossette / Larocque / Sainte-Marie, Salaberry-de-Valleyfield",
+  signalId: "sig-u521-h521",
 
   lots: [
     {
@@ -626,6 +628,7 @@ const dossier3: OpportunityDossierT = OpportunityDossier.parse({
   bylaw: "150-49-1",
   zone: "H-143 / H-143-1",
   address: "Secteur Grande-Île / Mgr-Langlois / Ovide / Patriotes, Salaberry-de-Valleyfield",
+  signalId: "sig-h143",
 
   lots: [
     {
