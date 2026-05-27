@@ -1,6 +1,6 @@
 # PLAN — Orchestrated Roadmap `radar-immobilier`
 
-Status: Updated 2026-05-26 — SOCLE `docs/process-e2e-socle` MERGED (PR #17): foundational process-e2e spec (`SPEC_EVOL_PROCESS_E2E.md` v4) + scoring grids + right-sized `@sentropic/h2a`, quadruple-reviewed by agents (Opus 4.7 xhigh + agy Gemini 3.5, v3 then v4, verdict GO). The roadmap is now **replanned around the socle's evolution track ÉV1–ÉV7** (spec §9): the product process build (states model + scoring grids → Radar T1 → Opportunités T2 → T0 onboarding → h2a spike + chat → T3/T4 consoles → automation + per-stage benchmark). BR-06 (data model) + BR-07 (vertical slice) are materialized by 06V (PR #15). BR-05R UAT round-1 copy backlog still open. BR-04 in review (PR #8 + poc-k8s #12). `feat/demo-guided-tour` (24-step tour + radar↔opportunités UX) unmerged.
+Status: Updated 2026-05-27 — **ÉV1 `feat/socle-states-scoring` MERGED (PR #18)**: the socle — states model + new `@radar/scoring` package (v1 grids 0-5 + availability-aware `aggregate` with renormalization/floor/cap) + calibration on the 3 real pilots (3.18/3.35/2.59) + the "Grilles de score" demo view. Quadruple agent-reviewed. SQL journal/score migration deferred to ÉV3. Now driving the **evolution track ÉV1–ÉV7** (spec §9) autonomously toward a full ÉV1–ÉV7 UAT; **ÉV2 (Radar T1) is next**. Earlier socle spec PR #17. BR-06/BR-07 materialized by 06V (PR #15). BR-05R UAT copy backlog open. BR-04 in review (PR #8 + poc-k8s #12). Follow-up: route `OpportunityFunnel` through `aggregate()` (legacy `scoreGlobal` coexistence).
 
 ## 0) Repo merge policy (inherited from sentropic, effective from BR-00)
 
@@ -34,8 +34,8 @@ Reference: sentropic incident on PR #141 (2026-05-13). Every PR is merged via a 
   companion k8s-ops PR #12.
 
 **Evolution track — product process e2e (post-SOCLE, ordered).** Replaces the old speculative BR-08→BR-12 demo path; reconciliation in §3.
-- **ÉV1** `feat/socle-states-scoring` — states model + scoring grids 0-5 + non-disponible + Grilles view + calibration on the 3 pilots. **Next.**
-- **ÉV2** `feat/radar-t1-signals` — signal feed + statuses + value/confidence sort + "Approfondir".
+- **ÉV1** `feat/socle-states-scoring` — **MERGED 2026-05-27 (PR #18).** States model + `@radar/scoring` (grids 0-5 + availability-aware `aggregate`) + calibration (3.18/3.35/2.59) + Grilles view. SQL journal/score migration deferred to ÉV3. Archived `plan/done/`.
+- **ÉV2** `feat/radar-t1-signals` — signal feed + statuses + value/confidence sort + "Approfondir". **Next.**
 - **ÉV3** `feat/opportunites-t2-funnel` — signal→N opportunities, progressive funnel, opportunity score, global réel/sim toggle, multi-session memory.
 - **ÉV4** `feat/t0-onboarding-sources` — source proposal + 2-year retro-analysis (productizes ingestion).
 - **ÉV5** `feat/h2a-spike-chat` — `@sentropic/h2a` spike → V1 POLICY + role label + simple journal (decoupled behind an interface); global chat on `@sentropic/flow` (after its spike). Absorbs BR-08 (graphify) + BR-11 (chat-demo).
@@ -140,7 +140,7 @@ Three parallel tracks become possible afterwards: API skeleton (`BR-02`), UI ske
 
 Forward roadmap. Each evolution declares its own `plan/ÉVn-BRANCH_*.md` at `branch-init` time (Allowed/Forbidden finalized there). Paths below are indicative. Reference: `docs/spec/SPEC_EVOL_PROCESS_E2E.md`.
 
-### ÉV1 `feat/socle-states-scoring` — foundation (NEXT)
+### ÉV1 `feat/socle-states-scoring` — foundation — MERGED (PR #18, plan/done/)
 - **Goal**: states model (signal→N opportunities + `confirmed` + `zonePolygonSource` + pré-filtres) + scoring grids 0-5 corrected + non-disponible handling (renormalization + surveillance cap) + Grilles view with hover rationale + **numeric calibration on the 3 real pilots**.
 - **Allowed**: `packages/radar-domain/src/schemas/**`, `packages/radar-scoring/**`, `ui/src/lib/components/scoring/**`, `docs/spec/SPEC_EVOL_DATA_MODEL.md`, `docs/superpowers/{specs,plans}/**`.
 - **Dependencies**: SOCLE (PR #17), 06V (3 pilots). **Spec**: §3, §4, §10.
