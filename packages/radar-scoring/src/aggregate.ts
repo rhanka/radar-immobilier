@@ -1,5 +1,5 @@
 import { Axis } from "@radar/domain";
-import type { AxisT, AxisScoreT } from "@radar/domain";
+import type { AxisT, AxisScoreT, RecommendationCapT } from "@radar/domain";
 
 const AXES = Axis.options;
 const WEIGHT_FLOOR = 0.50;
@@ -8,8 +8,9 @@ export interface AggregateResult {
   score: number | null;
   partial: boolean;
   availableWeightSum: number;
+  /** true only when partial is also true (a too-thin dossier is always partial) */
   tooThin: boolean;
-  recommendationCap: "surveiller" | "qualifier-avec-expert" | "monter-dossier-acquisition";
+  recommendationCap: RecommendationCapT;
 }
 
 export function aggregate(
