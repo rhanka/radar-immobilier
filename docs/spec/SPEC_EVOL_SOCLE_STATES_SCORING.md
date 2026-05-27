@@ -439,8 +439,10 @@ Notes:
   enriched model (axis envelopes; market non-disponible; `mode: "real"`) — the
   calibration fixture.
 - New UI: `ui/src/lib/components/scoring/**` (Grilles view §4) + hover mini-grid.
-- `api/drizzle/*.sql`: max 1 additive migration (journal table with `mode` + `supersedes`
-  + per-axis envelope columns). **Grant-hardening NOT in this migration** (deferred §6).
+- `api/drizzle/*.sql`: **DEFERRED to ÉV3.** The journal/score *shapes* (Zod) ship in ÉV1
+  (§2.4, §3.5); the SQL persistence (journal table with `mode`/`supersedes` + opportunity
+  score storage) lands in ÉV3 **with its first writer/reader** — creating an unused table
+  now is premature DB work (both v1 reviews flagged it). Grant-hardening defers with it (§6).
 
 ## 8. Acceptance criteria
 1. `aggregate()` renormalizes over available axes, **guards `wSum`/floor 0.50** (no NaN,
@@ -461,7 +463,9 @@ Notes:
 7. The Grilles view renders the v1 grids + hover envelope; UAT on root `dev` ports.
 8. Lot pre-filters drop sub-threshold lots **except** contiguous assembly clusters
    (shared `assemblyClusterId`).
-9. The journal append-only *shape* rejects in-app edits; corrections use `supersedes`.
+9. The `JournalEntry` *shape* supports append-only corrections via the optional
+   `supersedes` reference (repository-level append-only enforcement + the SQL table land
+   in ÉV3 with the first writer — §7).
 
 ## 9. Open questions / deferred
 - Exact contiguity adjacency test (shared edge vs buffer distance) — needs confirmed
