@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { Mode } from "./common.js";
+import { Mode, Confidence } from "./common.js";
+import { Axis, AxisScore } from "./score.js";
 
 export const Phase = z.enum([
   "signal",
@@ -11,8 +12,6 @@ export const Phase = z.enum([
 ]);
 
 export const Verification = z.enum(["fait", "hypothese", "non-disponible", "simulé"]);
-
-export const Confidence = z.enum(["high", "medium", "low"]);
 
 export const EvidenceItem = z
   .object({
@@ -95,6 +94,7 @@ export const OpportunityDossier = z.object({
   scores: ScoreSet,
   scoreGlobal: z.number(),
   recommendation: z.string(),
+  axes: z.record(Axis, AxisScore),
 });
 
 /**

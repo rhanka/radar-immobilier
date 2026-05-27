@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Confidence } from "./opportunity.js";   // reuse existing Confidence enum
+import { Confidence } from "./common.js";
 import { Mode } from "./common.js";
 
 export const SignalType = z.enum([
