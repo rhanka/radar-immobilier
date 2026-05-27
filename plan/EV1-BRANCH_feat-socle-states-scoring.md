@@ -28,7 +28,10 @@ and the numeric calibration on the 3 real Valleyfield pilots.
   - `packages/radar-scoring/**`
   - `packages/radar-scoring/**`
   - `ui/src/lib/components/scoring/**`
-  - `ui/src/lib/demo/**` (calibration fixture wiring only)
+  - `ui/src/lib/scoring/**`
+  - `ui/src/lib/demo/**` (views enum + calibration fixture wiring)
+  - `ui/src/App.svelte`, `ui/src/lib/components/NavMenu.svelte` (wire the Grilles view into the switcher)
+  - `ui/package.json` (add `@radar/scoring` dependency)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -86,11 +89,12 @@ and the numeric calibration on the 3 real Valleyfield pilots.
   - [ ] Lot gate: `make typecheck` + `make lint` + `make test ENV=test-socle-states-scoring` + `make build ENV=test-socle-states-scoring`.
   - [ ] UAT on root `dev` (point root checkout at this branch, then restore): Grilles view renders v1 grids + the calibrated pilot scores with correct partial/cap badges.
 
-- [ ] **Lot 5 — Append-only journal migration (conditional path)**
-  - [ ] Declare `EV1-EX1` (reason: persist decision journal + per-axis score columns; impact: 1 additive migration; rollback: drop table/columns).
-  - [ ] `api/drizzle/*.sql`: append-only journal table (no `UPDATE`/`DELETE` at app role; `supersedes` column) + per-axis score columns.
-  - [ ] Test the journal rejects `UPDATE`/`DELETE` at the app role.
-  - [ ] Lot gate (same checklist as Lot 1).
+- [x] **Lot 5 — Append-only journal migration — DEFERRED to ÉV3**
+  - Decision (post double-review): the journal/score *shapes* (Zod) ship in ÉV1; the SQL
+    table + grant-hardening land in ÉV3 **with the first writer/reader**. Creating an
+    unused table now is premature DB work (both v1 reviews flagged it). No `api/drizzle`
+    change in this branch → the `api/drizzle` conditional path is NOT exercised; no
+    `EV1-EX1` exception needed. See `SPEC_EVOL_SOCLE_STATES_SCORING.md` §7.
 
 - [ ] **Lot 6 — Docs consolidation**
   - [ ] Update `docs/spec/SPEC_EVOL_SOCLE_STATES_SCORING.md` with any final decisions (open questions §9 resolved).
