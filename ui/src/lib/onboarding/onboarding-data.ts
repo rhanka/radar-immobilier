@@ -86,7 +86,7 @@ export function defaultSelection(
 
 export interface OnboardingSummary {
   total: number;
-  byTier: Record<string, number>;
+  byRecommendation: Record<string, number>;
 }
 
 export function summarize(
@@ -96,11 +96,11 @@ export function summarize(
   const idSet = new Set(selectedIds);
   const selected = sources.filter((s) => idSet.has(s.id));
 
-  const byTier: Record<string, number> = {};
+  const byRecommendation: Record<string, number> = {};
   for (const s of selected) {
     const key = s.recommendation;
-    byTier[key] = (byTier[key] ?? 0) + 1;
+    byRecommendation[key] = (byRecommendation[key] ?? 0) + 1;
   }
 
-  return { total: selected.length, byTier };
+  return { total: selected.length, byRecommendation };
 }
