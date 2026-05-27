@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** Discriminator for real vs. simulation runs. */
+/** Real vs simulation discriminator (pipeline-internal flag; English for infra/config interop). */
 export const Mode = z.enum(["real", "simulation"]);
 export type ModeT = z.infer<typeof Mode>;
 
