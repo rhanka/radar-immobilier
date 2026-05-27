@@ -9,7 +9,7 @@ export const Phase = z.enum([
   "scoring",
 ]);
 
-export const Verification = z.enum(["fait", "hypothese", "non-disponible"]);
+export const Verification = z.enum(["fait", "hypothese", "non-disponible", "simulé"]);
 
 export const Confidence = z.enum(["high", "medium", "low"]);
 
