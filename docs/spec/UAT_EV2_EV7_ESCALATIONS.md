@@ -30,6 +30,23 @@
   signals** flagged `mode: "simulation"` to populate the feed and exercise the real/sim filter.
 
 ### ÉV3 — Opportunités T2
+- **D5** **Supersede** the existing `OpportunityFunnel` (the `"opportunity"` demo view) rather
+  than add a 7th view: rework that view to render the dossier through the 6 phases AND show the
+  `aggregate(d.axes, WEIGHTS)` honest score (partial/cap/ScoreHover). This resolves the legacy
+  `scoreGlobal` contradiction (final-review follow-up) in one move. → confirm at UAT we're happy
+  dropping the old raw `scoreGlobal` display.
+- **D6** **Global réel/sim toggle** lives in a shared store (`ui/src/lib/state/mode.ts`) + a
+  switch in the top bar/NavMenu; views (Signaux, Opportunités) read it and apply `filterRealMode`.
+  Default = "réel" (simulations hidden) so the demo opens honest; toggling shows simulated rows.
+- **D7** **signal→N linking**: Approfondir (from Signaux) navigates to Opportunités with a
+  `selectedSignalId` filter; the view shows the dossiers whose `signalId` matches (1 per pilot
+  today). Synthetic/simulation signals → "aucun dossier qualifié pour l'instant".
+- **D8** **6-phase funnel** rendered from the existing `evidence[]` phases
+  (signal→ancrage→contraintes→marché→contexte→scoring) with per-item provenance badges
+  (fait/hypothèse/non-disponible/simulé). **Multi-session memory/timeline**: rendered as an
+  evidence-date-ordered timeline (no persistent journal — DB deferred to the ÉV3 migration or later);
+  log if a real timeline field is needed.
+
 ### ÉV4 — T0 onboarding
 ### ÉV5 — h2a spike + chat
 ### ÉV6 — T3/T4 consoles

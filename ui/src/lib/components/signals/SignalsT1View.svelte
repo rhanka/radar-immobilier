@@ -5,6 +5,7 @@
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
   import type { SignalT, SignalStatusT } from "@radar/domain";
+  import { appMode } from "$lib/state/mode.js";
   import SignalRow from "./SignalRow.svelte";
 
   // ── Props ────────────────────────────────────────────────────────────────────
@@ -17,10 +18,9 @@
   let sortKey: SortKey = "value";
   let sortDir: SortDir = "desc";
   let statusFilter: SignalStatusT | "tous" = "tous";
-  let hideSimulations = false;
 
-  // ── Derived feed ─────────────────────────────────────────────────────────────
-  $: pool = hideSimulations ? filterRealMode(signals) : signals;
+  // ── Derived feed — mode réel masque les simulations via le store global ────────
+  $: pool = $appMode === "real" ? filterRealMode(signals) : signals;
   $: statusFiltered = filterByStatus(pool, statusFilter);
   $: visible = sortSignals(statusFiltered, sortKey, sortDir);
 
@@ -119,16 +119,6 @@
       </select>
     </div>
 
-    <!-- Real/sim toggle -->
-    <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-      <input
-        type="checkbox"
-        bind:checked={hideSimulations}
-        class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-400"
-      />
-      Masquer les simulations
-    </label>
-
     <!-- Count -->
     <span class="ml-auto text-xs text-slate-400">
       {visible.length} signal{visible.length !== 1 ? "s" : ""}
@@ -153,7 +143,7 @@
     <div class="mt-4 flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
       <AlertCircle class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" aria-hidden="true" />
       <p class="text-xs leading-5 text-blue-700">
-        Action <span class="font-semibold">Approfondir</span> enregistrée en mémoire locale uniquement — la persistance est hors-périmètre ÉV2 (prévue ÉV3).
+        Action <span class="font-semibold">Approfondir</span> enregistrée en mémoire locale uniquement — la persistance est hors-périmètre ÉV3.
       </p>
     </div>
   {/if}
