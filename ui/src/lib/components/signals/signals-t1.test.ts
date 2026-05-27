@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
 import { filterRealMode } from "@radar/scoring";
-import { filterByStatus, sortSignals, buildFeed } from "$lib/signals/feed.js";
+import { filterByStatus, sortSignals, buildFeed, markApprofondir } from "$lib/signals/feed.js";
 
 describe("feed.ts — pure sort/filter helpers", () => {
   // (a) sort-by-value desc puts the highest-value signal first
@@ -67,5 +67,14 @@ describe("feed.ts — pure sort/filter helpers", () => {
     for (let i = 1; i < result.length; i++) {
       expect(result[i - 1].value).toBeGreaterThanOrEqual(result[i].value);
     }
+  });
+
+  // (e) Approfondir in-memory mutation — AC#4
+  // demoSignalsT1[3] starts as "nouveau" — safe anchor for the immutability check.
+  it("markApprofondir sets à-approfondir immutably", () => {
+    const target = demoSignalsT1[3]; // status: "nouveau"
+    const out = markApprofondir(demoSignalsT1, target.id);
+    expect(out.find((s) => s.id === target.id)?.status).toBe("à-approfondir");
+    expect(demoSignalsT1[3].status).not.toBe("à-approfondir"); // original untouched
   });
 });

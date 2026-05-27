@@ -47,6 +47,13 @@ export function sortSignals(
   return sorted;
 }
 
+/** Immutably set the status of one signal to "à-approfondir". */
+export function markApprofondir(signals: SignalT[], id: string): SignalT[] {
+  return signals.map((s) =>
+    s.id === id ? { ...s, status: "à-approfondir" as SignalStatusT } : s,
+  );
+}
+
 /** Apply status filter then sort — pure composition. */
 export function buildFeed(
   signals: SignalT[],
