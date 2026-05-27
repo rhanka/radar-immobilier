@@ -1,9 +1,12 @@
 <script lang="ts">
   import { Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
+  import { appMode, toggleMode } from "$lib/state/mode.js";
 
   export let activeView: DemoView;
   export let onSelect: (view: DemoView) => void;
+
+  $: mode = $appMode;
 
   const items: { id: DemoView; label: string; icon: typeof Radar }[] = [
     { id: "radar", label: "Radar (démo)", icon: Radar },
@@ -34,5 +37,25 @@
         {item.label}
       </button>
     {/each}
+  </div>
+
+  <!-- Réel/Simulation pill toggle — global mode (visible sur toutes les vues) -->
+  <div class="ml-auto flex shrink-0 items-center">
+    <button
+      type="button"
+      aria-label={mode === "real" ? "Passer en mode simulation" : "Passer en mode réel"}
+      title={mode === "real" ? "Passer en mode simulation" : "Passer en mode réel"}
+      on:click={toggleMode}
+      class={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+        mode === "real"
+          ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 focus:ring-teal-400"
+          : "border-violet-300 bg-violet-50 text-violet-800 hover:bg-violet-100 focus:ring-violet-400"
+      }`}
+    >
+      <span
+        class={`h-2 w-2 rounded-full ${mode === "real" ? "bg-teal-500" : "bg-violet-500"}`}
+      ></span>
+      {mode === "real" ? "Réel" : "Simulation"}
+    </button>
   </div>
 </nav>
