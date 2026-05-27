@@ -79,6 +79,10 @@ describe("Verification simulé", () => {
     for (const v of ["fait", "hypothese", "non-disponible", "simulé"])
       expect(Verification.safeParse(v).success).toBe(true);
   });
+
+  it("rejects an invalid value", () => {
+    expect(Verification.safeParse("foo").success).toBe(false);
+  });
 });
 
 describe("weightedScore", () => {
