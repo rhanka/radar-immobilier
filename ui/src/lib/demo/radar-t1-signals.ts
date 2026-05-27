@@ -3,7 +3,7 @@
 // The 3 real pilot signals (mode:"real") are derived from verified public consultation
 // notices for bylaws 150-49, 150-49-1, and 150-51.
 
-import { Signal, SignalT, SIGNAL_TYPE_VALUES } from "@radar/domain";
+import { Signal, SIGNAL_TYPE_VALUES, type SignalT } from "@radar/domain";
 
 export const demoSignalsT1: SignalT[] = [
   // --- Real pilot signals (mode: "real") ---
