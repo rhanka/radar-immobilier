@@ -1,1 +1,1 @@
-export type DemoView = "radar" | "comparison" | "source-review" | "opportunity" | "grilles";
+export type DemoView = "radar" | "signaux" | "comparison" | "source-review" | "opportunity" | "grilles";
