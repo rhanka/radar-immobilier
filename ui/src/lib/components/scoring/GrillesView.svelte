@@ -13,16 +13,12 @@
     localVersion: r.version,
   }));
 
-  function onLevelEdit(rowIndex: number, lvl: 0 | 1 | 2 | 3 | 4 | 5, value: string) {
-    rows = rows.map((r, i) => {
-      if (i !== rowIndex) return r;
-      return {
-        ...r,
-        levels: { ...r.levels, [lvl]: value },
-        modified: true,
-        localVersion: r.localVersion.includes("*") ? r.localVersion : r.localVersion + "*",
-      };
-    });
+  function onLevelEdit(row: (typeof rows)[number]) {
+    if (!row.modified) {
+      row.modified = true;
+      row.localVersion = row.localVersion.includes("*") ? row.localVersion : row.localVersion + "*";
+      rows = rows; // trigger Svelte reactivity
+    }
   }
 
   // ── Dossier aggregation ─────────────────────────────────────────────────────
@@ -112,8 +108,8 @@
               <textarea
                 class="flex-1 resize-none rounded border border-slate-200 bg-white px-2 py-1 text-xs leading-5 text-slate-700 focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
                 rows={2}
-                value={row.levels[lvl as 0 | 1 | 2 | 3 | 4 | 5]}
-                on:input={(e) => onLevelEdit(rowIndex, lvl as 0 | 1 | 2 | 3 | 4 | 5, (e.target as HTMLTextAreaElement).value)}
+                bind:value={row.levels[lvl as 0 | 1 | 2 | 3 | 4 | 5]}
+                on:input={() => onLevelEdit(row)}
               ></textarea>
             </div>
           {/each}
@@ -138,6 +134,7 @@
         <button
           type="button"
           class="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition"
+          aria-expanded={expandedDossier === dossier.id}
           on:click={() => toggleDossier(dossier.id)}
         >
           <div class="flex-1 min-w-0">
