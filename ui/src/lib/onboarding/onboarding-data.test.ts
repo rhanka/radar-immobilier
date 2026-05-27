@@ -74,17 +74,17 @@ describe("summarize", () => {
     expect(summary.total).toBe(ids.length);
   });
 
-  it("byTier values sum to total", () => {
+  it("byRecommendation values sum to total", () => {
     const ids = defaultSelection();
     const summary = summarize(ids);
-    const tierSum = Object.values(summary.byTier).reduce((a, b) => a + b, 0);
-    expect(tierSum).toBe(summary.total);
+    const recSum = Object.values(summary.byRecommendation).reduce((a, b) => a + b, 0);
+    expect(recSum).toBe(summary.total);
   });
 
   it("handles empty selection", () => {
     const summary = summarize([]);
     expect(summary.total).toBe(0);
-    expect(Object.keys(summary.byTier)).toHaveLength(0);
+    expect(Object.keys(summary.byRecommendation)).toHaveLength(0);
   });
 
   it("ignores ids not found in sources", () => {
