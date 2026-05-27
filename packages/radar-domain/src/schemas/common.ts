@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+/** Discriminator for real vs. simulation runs. */
+export const Mode = z.enum(["real", "simulation"]);
+export type ModeT = z.infer<typeof Mode>;
+
 /** Extraction / detection confidence, 0 (none) to 1 (certain). */
 export const confidenceSchema = z.number().min(0).max(1);
 

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   EvidenceItem,
   PROCESS_WEIGHTS,
+  Verification,
   weightedScore,
 } from "./opportunity.js";
 
@@ -70,6 +71,13 @@ describe("PROCESS_WEIGHTS", () => {
   it("weights sum to 1", () => {
     const total = Object.values(PROCESS_WEIGHTS).reduce((a, b) => a + b, 0);
     expect(total).toBeCloseTo(1.0, 10);
+  });
+});
+
+describe("Verification simulé", () => {
+  it("accepts the 4 values incl. simulé", () => {
+    for (const v of ["fait", "hypothese", "non-disponible", "simulé"])
+      expect(Verification.safeParse(v).success).toBe(true);
   });
 });
 
