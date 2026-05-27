@@ -22,7 +22,10 @@ and the numeric calibration on the 3 real Valleyfield pilots.
 - **Allowed Paths (implementation scope)**:
   - `docs/spec/SPEC_EVOL_SOCLE_STATES_SCORING.md`
   - `docs/spec/reviews/SPEC_EVOL_SOCLE_STATES_SCORING_*` (archived agent critiques)
+  - `docs/superpowers/plans/**` (implementation plan)
   - `packages/radar-domain/src/**`
+  - `packages/radar-domain/package.json` (add `@radar/scoring` dep if needed)
+  - `packages/radar-scoring/**`
   - `packages/radar-scoring/**`
   - `ui/src/lib/components/scoring/**`
   - `ui/src/lib/demo/**` (calibration fixture wiring only)
