@@ -13,9 +13,12 @@
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
   import { createDashboardState } from "$lib/state/dashboard";
+  import type { SignalT } from "@radar/domain";
 
   let activeView: DemoView = "radar";
   let selectedSignalId = demoSignals[0]?.id;
+  /** Signal id transmis par Approfondir → filtre OpportunityFunnel (T2). */
+  let opportuniteSignalId: string | undefined = undefined;
   let health: HealthView = {
     kind: "offline",
     label: "API en attente",
@@ -27,6 +30,11 @@
     demoOpportunity,
     selectedSignalId,
   );
+
+  function handleApprofondir(signal: SignalT): void {
+    opportuniteSignalId = signal.id;
+    activeView = "opportunity";
+  }
 
   onMount(async () => {
     health = await readHealth();
@@ -46,11 +54,14 @@
           }}
         />
       {:else if activeView === "signaux"}
-        <SignalsT1View onApprofondir={() => (activeView = "grilles")} />
+        <SignalsT1View onApprofondir={handleApprofondir} />
       {:else if activeView === "comparison"}
         <BenchmarkComparison />
       {:else if activeView === "opportunity"}
-        <OpportunityFunnel />
+        <OpportunityFunnel
+          selectedSignalId={opportuniteSignalId}
+          onClearFilter={() => (opportuniteSignalId = undefined)}
+        />
       {:else if activeView === "grilles"}
         <GrillesView />
       {:else}
