@@ -6,6 +6,7 @@ import {
   Verification,
   weightedScore,
 } from "./opportunity.js";
+import { Signal } from "./signal.js";
 
 describe("EvidenceItem", () => {
   it("accepts a fully-traced item", () => {
@@ -135,6 +136,47 @@ describe("OpportunityDossier ÉV1 enrichment", () => {
   it("rejects an unknown zonePolygonSource", () => {
     const bad = { ...minimal, lots: [{ noLot: "1", zonePolygonSource: "satellite" }] };
     expect(OpportunityDossier.safeParse(bad).success).toBe(false);
+  });
+});
+
+describe("Signal → N opportunities (1→N link, AC#4)", () => {
+  const sharedSignalId = "sig-shared";
+  const dossiersBase = {
+    lots: [{ noLot: "1" }],
+    evidence: [],
+    scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
+    scoreGlobal: 3.15,
+    recommendation: "Surveiller",
+    axes: minimalAxes,
+    signalId: sharedSignalId,
+  };
+
+  it("two dossiers with different ids/zones share the same signalId", () => {
+    const r1 = OpportunityDossier.safeParse({
+      ...dossiersBase,
+      id: "d-fan-1", title: "Dossier A", bylaw: "150-49", zone: "H-609-4", address: "addr-a",
+    });
+    const r2 = OpportunityDossier.safeParse({
+      ...dossiersBase,
+      id: "d-fan-2", title: "Dossier B", bylaw: "150-49", zone: "H-609-5", address: "addr-b",
+    });
+
+    expect(r1.success).toBe(true);
+    expect(r2.success).toBe(true);
+    if (r1.success && r2.success) {
+      expect(r1.data.signalId).toBe(sharedSignalId);
+      expect(r2.data.signalId).toBe(sharedSignalId);
+      expect(r1.data.id).not.toBe(r2.data.id);
+    }
+  });
+
+  it("the upstream Signal with that id parses (one signal → many dossiers)", () => {
+    const r = Signal.safeParse({
+      id: sharedSignalId, type: "residential-rezoning", value: 8, confidence: "high",
+      status: "nouveau", sourceRefs: ["avis-shared"], detectedAt: "2026-03-01",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.id).toBe(sharedSignalId);
   });
 });
 
