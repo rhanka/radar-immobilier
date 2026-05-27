@@ -1,12 +1,17 @@
-# SPEC_EVOL — ÉV1 Socle: states model + scoring grids (detailed) — v2
+# SPEC_EVOL — ÉV1 Socle: states model + scoring grids (detailed) — v2.1
 
 > **Status**: EVOL — detailed spec for **evolution ÉV1** (`feat/socle-states-scoring`),
 > the foundation of the post-SOCLE evolution track (`PLAN.md` §3bis).
-> **v2**: revised after a double agent review (Opus 4.7 xhigh + agy Gemini 3.5),
-> both **NO-GO→addressed in one revision**. Blockers resolved: availability doctrine
-> (§3.4.0), `Signal` entity + `signalId` (§2.0), real/simulation `mode` discriminator
-> (§2.7), `aggregate()` robustness (§3.4). Critiques archived in
-> `docs/spec/reviews/SPEC_EVOL_SOCLE_STATES_SCORING_review-{opus,agy}.md`.
+> **v2**: revised after a 1st double review (Opus 4.7 xhigh + agy Gemini 3.5), both
+> **NO-GO→addressed**. Blockers resolved: availability doctrine (§3.4.0), `Signal`
+> entity + `signalId` (§2.0), real/simulation `mode` (§2.7), `aggregate()` robustness (§3.4).
+> **v2.1**: confirmation double review (codex gpt-5.5 xhigh = NO-GO ciblé + agy = GO).
+> Closed codex's two targeted asks: `aggregate()` **input validation** (level∈[0,5],
+> weights finite/≥0/present, unknown axis rejected — §3.4) and **simulation boundary**
+> extended to `Signal.mode` + `simulé`-evidence export filtering (§2.0/§2.7). Cleanups:
+> five axes (not "six grids"), `SignalType` as a schema enum (§7).
+> Critiques archived in
+> `docs/spec/reviews/SPEC_EVOL_SOCLE_STATES_SCORING_review-{opus,agy,codex-v2,agy-v2}.md`.
 > **Parent**: `SPEC_EVOL_PROCESS_E2E.md` (§3 states, §4 scoring, §9.1, §10).
 > **Calibrated against** the 3 real pilots in `packages/radar-domain/src/valleyfield-dossiers.ts`
 > (06V, PR #15). All new code/text in English.
@@ -20,7 +25,8 @@
    signal status, action taxonomy + simple decision journal, **real/simulation `mode`
    discriminator**, temporal memory, per-datum provenance.
 2. **Scoring model** — the two distinct measures (T1 sort /10, T2 opportunity 0-5),
-   the six T2 grids fully specified 0-5, the **availability doctrine** + **non-disponible
+   the **five** T2 axis grids (potentiel/risque/timing/faisabilité/marché) fully
+   specified 0-5, the **availability doctrine** + **non-disponible
    renormalization + recommendation cap** algorithm (robust), the **per-axis score
    envelope**, and a grid **version stamp**.
 3. A configurable **"Grilles de score" view** with hover rationale.
@@ -62,9 +68,12 @@ interface Signal {
   detectedAt: string;        // ISO timestamp
   bylaw?: string;            // linking key (§2.6)
   zone?: string;             // linking key
+  mode: "real" | "simulation"; // §2.7 — a simulated signal never enters the real flow
 }
 ```
-`OpportunityDossier` gains **`signalId: string`** — the downstream side of the 1→N link.
+`SignalType` is a **Zod enum** in the schema (not a free string), so ÉV2's Radar feed
+sorts on a closed set. `OpportunityDossier` gains **`signalId: string`** — the
+downstream side of the 1→N link.
 
 ### 2.1 Cardinality signal → N opportunities + physical pre-filters
 One **signal** (T1, upstream) yields **N opportunities/dossiers** (T2, downstream).
@@ -154,11 +163,13 @@ the dossier/journal-level `mode` (§2.7). This addition is listed in the migrati
 
 ### 2.7 Real/simulation `mode` discriminator
 The global réel/sim **toggle UI** is ÉV3, but the **substrate must exist in ÉV1** so a
-simulated decision never pollutes the real append-only journal (agy review). Both
-`OpportunityDossier` and `JournalEntry` carry **`mode: "real" | "simulation"`**
-(default `"real"`). Queries and the journal partition on `mode`; real exports never
-include simulation rows. This is the dossier/journal complement of the per-datum
-`simulé` (§2.6).
+simulated decision never pollutes the real append-only journal (agy review). `Signal`
+(§2.0), `OpportunityDossier`, and `JournalEntry` all carry **`mode: "real" |
+"simulation"`** (default `"real"`). **Real-mode boundary (codex v2):** a real-mode
+query/export excludes (a) every row whose `mode === "simulation"` **and** (b) every
+evidence item whose `verification === "simulé"` (§2.6) — so a simulated datum embedded
+in a real dossier is filtered too. Simulated signals/dossiers/evidence never cross into
+the real flow. This is the dossier/journal complement of the per-datum `simulé` (§2.6).
 
 ## 3. Scoring model
 
@@ -307,29 +318,45 @@ This resolves the apparent §3.3↔§5 contradiction **without asymmetry**:
 
 ```ts
 // radar-scoring (new package): replaces the naive weightedScore in opportunity.ts
+const AXES = ["potentiel", "risque", "timing", "faisabilite", "marche"] as const;
+type Axis = typeof AXES[number];
 type Availability = "available" | "non-disponible";
 interface AxisScore { level: number | null; availability: Availability; /* + envelope §3.5 */ }
 
 const WEIGHT_FLOOR = 0.50;
 
 function aggregate(axes: Record<Axis, AxisScore>, weights: Record<Axis, number>) {
-  // invariant: available ⇔ level !== null  (assert, else throw — no silent 0)
-  for (const [k, a] of Object.entries(axes)) {
-    const ok = (a.availability === "available") === (a.level !== null);
-    if (!ok) throw new Error(`axis ${k}: availability/level mismatch`);
+  // --- input validation (codex v2): no silent NaN / out-of-domain ---
+  for (const k of Object.keys(axes)) {                 // reject unknown axis
+    if (!(AXES as readonly string[]).includes(k)) throw new Error(`unknown axis ${k}`);
   }
-  const avail = Object.entries(axes).filter(([, a]) => a.availability === "available");
-  const wSum  = avail.reduce((s, [k]) => s + weights[k as Axis], 0);
-  const partial = avail.length < Object.keys(axes).length;
-  if (wSum < WEIGHT_FLOOR) {                       // floor + division-by-zero guard
+  for (const k of AXES) {
+    const a = axes[k], w = weights[k];
+    if (!a) throw new Error(`missing axis ${k}`);
+    if (!Number.isFinite(w) || w < 0) throw new Error(`bad weight ${k}`);   // no undefined→NaN, no negative
+    const available = a.availability === "available";
+    if (available !== (a.level !== null))                                   // invariant available ⇔ level≠null
+      throw new Error(`axis ${k}: availability/level mismatch`);
+    if (available && !(Number.isFinite(a.level!) && a.level! >= 0 && a.level! <= 5))
+      throw new Error(`axis ${k}: level out of [0,5]`);                     // bounds
+  }
+  // --- aggregate ---
+  const avail = AXES.filter((k) => axes[k].availability === "available");
+  const wSum  = avail.reduce((s, k) => s + weights[k], 0);
+  const partial = avail.length < AXES.length;
+  if (wSum < WEIGHT_FLOOR) {                            // floor + division-by-zero guard
     return { score: null, partial, availableWeightSum: wSum,
              tooThin: true, recommendationCap: "surveiller" as const };
   }
-  const score = avail.reduce((s, [k, a]) => s + (a.level! * weights[k as Axis]) / wSum, 0);
+  const score = avail.reduce((s, k) => s + (axes[k].level! * weights[k]) / wSum, 0);
   const cap = partial ? "qualifier-avec-expert" : "monter-dossier-acquisition";
   return { score, partial, availableWeightSum: wSum, tooThin: false, recommendationCap: cap };
 }
 ```
+The `AXES`-driven loops replace the unsafe `weights[k as Axis]` cast (codex v2): an
+unknown axis, a missing/negative/NaN weight, a level outside `[0,5]`, or an
+availability/level mismatch all **throw** rather than silently yielding `NaN` with
+`tooThin: false`. The Zod `AxisScore` schema mirrors the invariant via a `refine`.
 
 ### 3.5 Per-axis score envelope
 ```ts
@@ -399,10 +426,12 @@ Notes:
    exclusion (§2.1).
 
 ## 7. Schema/code migration summary
-- `packages/radar-domain/src/schemas/`: new `Signal` (§2.0) + `signalId` on dossier;
-  lot `confirmed`/`zonePolygonSource`(+`other`)/`assemblyClusterId`/`metadata`;
-  `SignalStatus`; `mode` on dossier + journal; `Verification` += `simulé` (3→4);
-  `AxisScore` envelope (§3.5); `OpportunityScore` aggregate; timeline + journal-entry shapes.
+- `packages/radar-domain/src/schemas/`: new `Signal` (§2.0, with `SignalType` **Zod
+  enum** + `mode`) + `signalId` on dossier; lot
+  `confirmed`/`zonePolygonSource`(+`other`)/`assemblyClusterId`/`metadata`;
+  `SignalStatus`; `mode` on Signal + dossier + journal; `Verification` += `simulé` (3→4);
+  `AxisScore` envelope (§3.5, with a `refine` for the `available ⇔ level≠null` invariant);
+  `OpportunityScore` aggregate; timeline + journal-entry shapes.
 - New **`packages/radar-scoring`** package: grids (v1 defaults §3.3), `aggregate()` with
   the availability doctrine + renormalization + floor + cap + invariant guards (§3.4),
   grid version stamp (§3.6), pre-filter + contiguity helpers (§2.1).
@@ -417,14 +446,16 @@ Notes:
 1. `aggregate()` renormalizes over available axes, **guards `wSum`/floor 0.50** (no NaN,
    `tooThin` path), enforces the `available ⇔ level≠null` invariant, and never invents a
    neutral level; unit tests cover all-available, one-non-disponible, market-non-disponible,
-   all-non-disponible (tooThin), and the invariant violation (throws).
+   all-non-disponible (tooThin), and **invalid-input throws** (level outside `[0,5]`,
+   missing/negative/NaN weight, unknown axis, availability/level mismatch).
 2. A partial score caps the recommendation to `qualifier-avec-expert`; engagement actions
    are unreachable while any axis is non-disponible.
 3. The calibration test reproduces §5 (3.18 / 3.35 / 2.59, all partial, all capped) from
    the migrated pilot fixtures.
 4. `Signal` + `signalId` exist and a signal can fan out to N dossiers (1→N link tested).
-5. Real and simulation decisions are **partitioned by `mode`**: a simulation decision
-   never appears in a real-mode journal query (tested).
+5. Real and simulation decisions are **partitioned by `mode`**: a real-mode query/export
+   excludes both `mode === "simulation"` rows (signal/dossier/journal) **and**
+   `verification === "simulé"` evidence (tested — §2.7 boundary).
 6. Editing a grid bumps the version stamp; scores keep their stamped version (no silent
    retroactive rewrite — recompute engine is ÉV3).
 7. The Grilles view renders the v1 grids + hover envelope; UAT on root `dev` ports.
@@ -439,3 +470,6 @@ Notes:
 - T1 sub-type values (5–7 band) for the added signal types — confirm with VISION owner.
 - (Resolved in v2: availability doctrine §3.4.0, weight floor 0.50 wired §3.4, Signal
   entity §2.0, real/sim `mode` §2.7, cap supersession §3.4, `simulé` migration §7.)
+- (Resolved in v2.1 — codex confirmation: `aggregate()` input validation §3.4,
+  simulation boundary covers `Signal.mode` + `simulé` evidence §2.7, `SignalType` as a
+  schema enum §7, five-axes wording §1. Weight-blind cap kept as an explicit V1 limit (§3.4).)

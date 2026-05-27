@@ -66,7 +66,8 @@ and the numeric calibration on the 3 real Valleyfield pilots.
   - [ ] Lot gate: `make typecheck` + `make lint` + `make test ENV=test-socle-states-scoring`.
 
 - [ ] **Lot 2 — `radar-scoring` package: grids + aggregate (TDD)**
-  - [ ] Failing tests for `aggregate()`: all-available; one-non-disponible renormalization; market-non-disponible; **all-non-disponible → `tooThin` (no NaN)**; **`availableWeightSum < 0.50` floor**; **`available ⇔ level≠null` invariant throws**; partial→cap `qualifier-avec-expert`; never-fabricate-neutral.
+  - [ ] Failing tests for `aggregate()`: all-available; one-non-disponible renormalization; market-non-disponible; **all-non-disponible → `tooThin` (no NaN)**; **`availableWeightSum < 0.50` floor**; **invalid input throws** (level out of `[0,5]`, missing/negative/NaN weight, unknown axis, `available ⇔ level≠null` mismatch); partial→cap `qualifier-avec-expert`; never-fabricate-neutral.
+  - [ ] `mode`/`simulé` boundary test: a real-mode query/export excludes `mode === "simulation"` rows AND `verification === "simulé"` evidence (§2.7).
   - [ ] Implement v1 grids (§3.3), the availability doctrine (§3.4.0) + `aggregate()` with renormalization + floor + cap + invariant guards (§3.4), grid version stamp (§3.6), `AxisScore`/`OpportunityScore` envelopes (§3.5).
   - [ ] Implement pre-filter + micro-lot contiguity (`assemblyClusterId`) helpers (§2.1) with unit tests.
   - [ ] Lot gate (same checklist as Lot 1).
