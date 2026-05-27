@@ -13,6 +13,10 @@ describe("AxisScore invariant (available ⇔ level≠null)", () => {
     expect(AxisScore.safeParse({ level: null, availability: "available",
       confidence: "low", evidenceRefs: [], rationale: "r", gridVersion: "v1" }).success).toBe(false);
   });
+  it("rejects non-disponible with a non-null level", () => {
+    expect(AxisScore.safeParse({ level: 2, availability: "non-disponible",
+      confidence: "low", evidenceRefs: [], rationale: "r", gridVersion: "v1" }).success).toBe(false);
+  });
   it("rejects a level out of [0,5]", () => {
     expect(AxisScore.safeParse({ level: 6, availability: "available",
       confidence: "high", evidenceRefs: [], rationale: "r", gridVersion: "v1" }).success).toBe(false);
