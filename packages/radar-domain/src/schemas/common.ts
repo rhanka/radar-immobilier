@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+/** Real vs simulation discriminator (pipeline-internal flag; English for infra/config interop). */
+export const Mode = z.enum(["real", "simulation"]);
+
+/** Qualitative confidence level used across evidence, scoring, and axis assessments. */
+export const Confidence = z.enum(["high", "medium", "low"]);
+export type ConfidenceT = z.infer<typeof Confidence>;
+export type ModeT = z.infer<typeof Mode>;
+
 /** Extraction / detection confidence, 0 (none) to 1 (certain). */
 export const confidenceSchema = z.number().min(0).max(1);
 

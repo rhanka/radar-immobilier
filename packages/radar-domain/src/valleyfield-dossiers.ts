@@ -73,6 +73,7 @@ const dossier1: OpportunityDossierT = OpportunityDossier.parse({
   bylaw: "150-49",
   zone: "H-609-4",
   address: "Secteur Champlain / Saint-Jean-Baptiste / Salaberry, Salaberry-de-Valleyfield",
+  signalId: "sig-h609-4",
 
   lots: [
     {
@@ -293,6 +294,48 @@ const dossier1: OpportunityDossierT = OpportunityDossier.parse({
   scoreGlobal: weightedScore(scores1),
   recommendation:
     "Surveiller — fort potentiel réglementaire (50 log/ha avec PIIA) mais la zone est entièrement bâtie (0 terrain libre au rôle 2026), l'assemblage est coûteux, et l'issue référendaire du règl. 150-49 n'est pas confirmée. À qualifier avec expert foncier une fois le règlement adopté définitivement et un lot d'assemblage identifié.",
+  axes: {
+    potentiel: {
+      level: 4,
+      availability: "available",
+      confidence: "high",
+      evidenceRefs: ["avis-consultation-150-49", "avis-referendum-150-49", "regl-150-49-texte"],
+      rationale: "règl. 150-49 creates H-609-4 ex-novo with conditional density up to 50 log/ha (≥30 % boisé conservé + PIIA règl.153); strong regulatory lift.",
+      gridVersion: "v1",
+    },
+    risque: {
+      level: 3,
+      availability: "available",
+      confidence: "low",
+      evidenceRefs: ["bdzi-rest-h609-4", "cptaq-a939-h609-4"],
+      rationale: "No BDZI flood zone; CPTAQ A-939 adjacency is an unconfirmed hypothesis; boisé-conservation constraint is the dominant risk.",
+      gridVersion: "v1",
+    },
+    timing: {
+      level: 3,
+      availability: "available",
+      confidence: "medium",
+      evidenceRefs: ["avis-referendum-150-49"],
+      rationale: "2nd project adopted 2026-03-24; référendaire period opened ~2026-04-01; outcome unknown at investigation date.",
+      gridVersion: "v1",
+    },
+    faisabilite: {
+      level: 2,
+      availability: "available",
+      confidence: "low",
+      evidenceRefs: ["role-70052-2026", "lot-zone-correspondance-h609-4"],
+      rationale: "1308 rôle records on target streets, 0 TE (terrain libre); zone appears fully built; lot-to-zone assignment is a street-name hypothesis.",
+      gridVersion: "v1",
+    },
+    marche: {
+      level: null,
+      availability: "non-disponible",
+      confidence: "low",
+      evidenceRefs: ["jlr-centris-transactions"],
+      rationale: "zone-level comparables non-disponible (Tier C); MRC/CMHC are regional-grain (§3.4.0)",
+      gridVersion: "v1",
+    },
+  },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -349,6 +392,7 @@ const dossier2: OpportunityDossierT = OpportunityDossier.parse({
   bylaw: "150-51",
   zone: "H-521",
   address: "Secteur Lanctôt / Cossette / Larocque / Sainte-Marie, Salaberry-de-Valleyfield",
+  signalId: "sig-u521-h521",
 
   lots: [
     {
@@ -569,6 +613,48 @@ const dossier2: OpportunityDossierT = OpportunityDossier.parse({
   scoreGlobal: weightedScore(scores2),
   recommendation:
     "Qualifier avec expert — conversion U→H dans un secteur urbain central avec lot BO large (17 866 m²) disponible, rezonage le plus avancé des trois (procédure référendaire ~terminée avr. 2026). Vérifier en priorité: (1) lot 4516554 appartient-il effectivement à U-521 (plan cadastral)? (2) bandes riveraines canal 159 ha applicables? (3) A-912 CPTAQ: lot côté Lanctôt/Cossette vs côté Est Larocque.",
+  axes: {
+    potentiel: {
+      level: 4,
+      availability: "available",
+      confidence: "high",
+      evidenceRefs: ["avis-referendum-150-51", "regl-150-51-texte"],
+      rationale: "Conversion from utilité publique (U-521) to résidentiel (H-521) adding multifamilial 8 log.; strongest conversion type from zero residential.",
+      gridVersion: "v1",
+    },
+    risque: {
+      level: 2,
+      availability: "available",
+      confidence: "low",
+      evidenceRefs: ["grhq-rest-u521", "cptaq-a912-u521"],
+      rationale: "Plan d'eau 159 ha detected (probable canal, PPRLPI bands hypothetical) + CPTAQ A-912 adjacency unconfirmed; double costly constraint.",
+      gridVersion: "v1",
+    },
+    timing: {
+      level: 4,
+      availability: "available",
+      confidence: "high",
+      evidenceRefs: ["avis-referendum-150-51"],
+      rationale: "2nd project adopted 2026-04-14; référendaire notice published 2026-04-22; timing window most advanced of the three dossiers.",
+      gridVersion: "v1",
+    },
+    faisabilite: {
+      level: 3,
+      availability: "available",
+      confidence: "low",
+      evidenceRefs: ["role-70052-2026", "lot-zone-correspondance-u521"],
+      rationale: "Lot 4516554 (SAINTE-MARIE, 17 866 m², BO) is a large candidate; zone attribution to U-521 is a street-name hypothesis.",
+      gridVersion: "v1",
+    },
+    marche: {
+      level: null,
+      availability: "non-disponible",
+      confidence: "low",
+      evidenceRefs: ["jlr-centris-transactions"],
+      rationale: "zone-level comparables non-disponible (Tier C); MRC/CMHC are regional-grain (§3.4.0)",
+      gridVersion: "v1",
+    },
+  },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -626,6 +712,7 @@ const dossier3: OpportunityDossierT = OpportunityDossier.parse({
   bylaw: "150-49-1",
   zone: "H-143 / H-143-1",
   address: "Secteur Grande-Île / Mgr-Langlois / Ovide / Patriotes, Salaberry-de-Valleyfield",
+  signalId: "sig-h143",
 
   lots: [
     {
@@ -835,6 +922,48 @@ const dossier3: OpportunityDossierT = OpportunityDossier.parse({
   scoreGlobal: weightedScore(scores3),
   recommendation:
     "Surveiller avec prudence — le règlement 150-49-1 est le plus juridiquement avancé (PHV complété) et offre un potentiel de densification réel en H-143 core (50 log/ha). Cependant: la double contrainte GRHQ (512 éléments, Saint-Laurent) + CPTAQ (A-118 directement adjacent, confirmé officiellement) en fait la zone la plus contrainte des trois. Nécessite une expertise géotechnique et CPTAQ préalable avant tout engagement foncier. Lots intérieurs (hors riverain + hors limite A-118) sont les seules positions défendables à court terme.",
+  axes: {
+    potentiel: {
+      level: 3,
+      availability: "available",
+      confidence: "high",
+      evidenceRefs: ["avis-referendum-150-49", "avis-registre-150-49-1"],
+      rationale: "règl. 150-49-1 creates H-143-1 within H-143 (50 log/ha at ≥30 % conservation for H-143 core; H-143-1 more restrictive at 2–15 log/ha).",
+      gridVersion: "v1",
+    },
+    risque: {
+      level: 1,
+      availability: "available",
+      confidence: "high",
+      evidenceRefs: ["grhq-rest-h143-grande-ile", "cptaq-a118-h143-direct"],
+      rationale: "Double blocker: GRHQ 512 hydrographic elements (Saint-Laurent, PPRLPI bands) + CPTAQ A-118 directly adjacent (confirmed officially in registre notice).",
+      gridVersion: "v1",
+    },
+    timing: {
+      level: 4,
+      availability: "available",
+      confidence: "high",
+      evidenceRefs: ["avis-registre-150-49-1"],
+      rationale: "règl. 150-49-1 adopted 2026-04-14; PHV certificate filed — the most legally advanced procedure of the three bylaws.",
+      gridVersion: "v1",
+    },
+    faisabilite: {
+      level: 2,
+      availability: "available",
+      confidence: "low",
+      evidenceRefs: ["role-70052-2026", "lot-zone-correspondance-h143"],
+      rationale: "Large lots exist (19 680 m² BO, 12 612 m² AV) but CPTAQ + GRHQ riverain constraints severely limit buildable area; zone attribution is a hypothesis.",
+      gridVersion: "v1",
+    },
+    marche: {
+      level: null,
+      availability: "non-disponible",
+      confidence: "low",
+      evidenceRefs: ["jlr-centris-transactions"],
+      rationale: "zone-level comparables non-disponible (Tier C); MRC/CMHC are regional-grain (§3.4.0)",
+      gridVersion: "v1",
+    },
+  },
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
