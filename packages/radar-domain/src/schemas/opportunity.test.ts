@@ -151,10 +151,9 @@ describe("OpportunityDossier axes envelope (Task 10)", () => {
     const r = OpportunityDossier.safeParse({ ...base, axes: minimalAxes });
     expect(r.success).toBe(true);
     if (r.success) {
-      // z.record infers Partial<Record<...>> — use non-null assertions (axes populated in full)
-      expect(r.data.axes!.marche!.availability).toBe("non-disponible");
-      expect(r.data.axes!.marche!.level).toBeNull();
-      expect(r.data.axes!.potentiel!.level).toBe(4);
+      expect(r.data.axes.marche.availability).toBe("non-disponible");
+      expect(r.data.axes.marche.level).toBeNull();
+      expect(r.data.axes.potentiel.level).toBe(4);
     }
   });
 

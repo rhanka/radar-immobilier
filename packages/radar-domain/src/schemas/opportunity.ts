@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Mode, Confidence } from "./common.js";
-import { Axis, AxisScore } from "./score.js";
+import { AxesMap } from "./score.js";
 
 export const Phase = z.enum([
   "signal",
@@ -94,7 +94,7 @@ export const OpportunityDossier = z.object({
   scores: ScoreSet,
   scoreGlobal: z.number(),
   recommendation: z.string(),
-  axes: z.record(Axis, AxisScore),
+  axes: AxesMap,
 });
 
 /**
