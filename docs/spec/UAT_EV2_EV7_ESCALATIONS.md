@@ -79,4 +79,15 @@
   `@sentropic/chat-ui` ChatPanel pattern (see `RadarChatPanel.svelte`) if clean; else a simple panel.
 
 ### ÉV6 — T3/T4 consoles
+- **D15** ONE new DemoView **"console"** with **tabs** (Qualification T3 · Deep-dive T3 · Jobs T4)
+  rather than 2-3 separate nav items — the nav already has 8 entries. → confirm at UAT.
+- **D16** T3 reuses `sourceEvaluations` (read-only): the **Qualification** tab is a status board
+  grouped by `recommendation` (counts + per-source access/cost chips); the **Deep-dive** tab reuses
+  the existing `SourceDeepDive`/`RecommendationBoard` source-review components if they plug in cleanly,
+  else a thin local rendering.
+- **D17** T4 **Jobs** are **demo stubs** — `ui/src/lib/jobs/jobs-data.ts` fixtures (type
+  ingestion|scan|scoring|backfill, status queued|running|done|failed, source ref, startedAt, duration,
+  mode real/sim). No real orchestration/scheduler (ties to ÉV4 D11). ESCALATION: real job orchestration
+  + scheduler deferred to a server-side build (UAT decision).
+
 ### ÉV7 — automation + benchmark
