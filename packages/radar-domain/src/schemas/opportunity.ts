@@ -104,3 +104,4 @@ export const weightedScore = (s: z.infer<typeof ScoreSet>): number =>
 
 export type EvidenceItemT = z.infer<typeof EvidenceItem>;
 export type OpportunityDossierT = z.infer<typeof OpportunityDossier>;
+export type VerificationT = z.infer<typeof Verification>;
