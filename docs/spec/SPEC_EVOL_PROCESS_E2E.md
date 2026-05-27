@@ -141,7 +141,7 @@ honnête attendu. Tableau de calibration à produire dans l'évolution 1.
   `POLICY` anti-triche + label de rôle + journal simple (§6/§11) ; crypto/modes/ABC
   **différés**. Détail + right-sizing en **§11**.
 - **Chat UI** : panneau latéral/popup **global persistant** (modèle `../sentropic`),
-  **canal h2a** (enveloppes signées) — retenu, **séquencé après le socle**.
+  **canal h2a** (signature différée, §11) — retenu, **séquencé après le socle**.
 
 ## 6. Réel ↔ Simulation — mode GLOBAL (révisé)
 - **Mode global** (header) `Réel ↔ Simulation`, **pas un toggle par vue** (les 2
@@ -188,8 +188,8 @@ gelées, référentiel vérifié) + **takeaway par prompt** (Opus large/traçabl
 5. **Spike h2a (minimal) + chat global** : spike `@sentropic/h2a` (compat runtime,
    surface) → V1 = `POLICY` anti-triche + label de rôle + journal simple (§6/§11),
    **découplé derrière une interface** ; chat global sur `@sentropic/flow` (après son
-   spike). Crypto signée / modes / ABC / B2B2C = **différés** (hypothèse business,
-   `SPEC_EVOL_OPERATING_MODEL.md`).
+   spike). **Crypto signée = report technique** (porteurs de clés distincts) ; **modes /
+   ABC / B2B2C = hypothèse business** (`SPEC_EVOL_OPERATING_MODEL.md`).
 6. **T3 console sources** (2 sous-vues) + **T4 jobs** — quand l'automatisation continue arrive.
 7. **Automatisation (a→b)** + **benchmark par étape**.
 
@@ -201,7 +201,11 @@ gelées, référentiel vérifié) + **takeaway par prompt** (Opus large/traçabl
   Tier C/LFM 72) ; mode global réel/sim ; mémoire temporelle + liaison docs + actions ;
   socle réduit + ordre.
 - **À produire (évolution 1)** : la **calibration chiffrée des grilles sur les 3
-  pilotes** ; le spike `@sentropic/flow`.
+  pilotes** ; le spike `@sentropic/flow`. **Micro-règles (relecture v4)** : journal V1
+  **append-only logiciel** (table Postgres sans `UPDATE`/`DELETE`) ; **masquage PII par
+  défaut** à l'affichage (Loi 25, accès journalisé) ; **détection de contiguïté de
+  micro-lots sous-exploités** (potentiel d'assemblage) au lieu d'exclure aveuglément
+  via le pré-filtre superficie.
 
 ## 11. Coordination humain↔agent — `@sentropic/h2a` (cible ; V1 minimale)
 
@@ -225,8 +229,10 @@ d'abord, découplé derrière une interface** (comme `flow` ; v0.3.1 pré-1.0).
 
 **Différé (besoins futurs réels)** : `ed25519`/`SIGNATURE`/`AUTHORITY` (utile seulement
 avec des **porteurs de clés distincts** — ex. prouver à un investisseur qu'une contrainte
-a été validée par un pro agréé) ; modes multi-humains ;
-`CONTRACT`/`ENFORCEMENT_PLAN`/`AMENDMENT` ; profils ABC complets.
+a été validée par un pro agréé) ; **encodage formel** des modes multi-humains ;
+`CONTRACT`/`ENFORCEMENT_PLAN`/`AMENDMENT` ; profils ABC complets. *(La relation
+plateforme↔client reste conceptuellement `CONTRACT`/`delegated`, cf. OPERATING_MODEL ;
+c'est seulement son encodage h2a formel qui est reporté.)*
 
 **Loi 25 (QC)** : un journal **immuable signé contredit le droit à l'effacement/
 rectification** → dès qu'on signera, **PII (propriétaire issu du registre foncier)
