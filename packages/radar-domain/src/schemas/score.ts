@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Confidence } from "./opportunity.js";
+import { Action } from "./journal.js";
 
 export const Axis = z.enum(["potentiel", "risque", "timing", "faisabilite", "marche"]);
 export type AxisT = z.infer<typeof Axis>;
@@ -19,6 +20,9 @@ export const AxisScore = z.object({
 );
 export type AxisScoreT = z.infer<typeof AxisScore>;
 
+export const RecommendationCap = Action.extract(["surveiller", "qualifier-avec-expert", "monter-dossier-acquisition"]);
+export type RecommendationCapT = z.infer<typeof RecommendationCap>;
+
 export const OpportunityScore = z.object({
   axes: z.record(Axis, AxisScore),
   weightsVersion: z.string(),
@@ -26,6 +30,6 @@ export const OpportunityScore = z.object({
   tooThin: z.boolean(),
   score: z.number().min(0).max(5).nullable(),
   availableWeightSum: z.number(),
-  recommendationCap: z.enum(["surveiller", "qualifier-avec-expert", "monter-dossier-acquisition"]),
+  recommendationCap: RecommendationCap,
 });
 export type OpportunityScoreT = z.infer<typeof OpportunityScore>;
