@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Confidence } from "./opportunity.js";
+import { Confidence } from "./common.js";
 import { Action } from "./journal.js";
 
 export const Axis = z.enum(["potentiel", "risque", "timing", "faisabilite", "marche"]);
