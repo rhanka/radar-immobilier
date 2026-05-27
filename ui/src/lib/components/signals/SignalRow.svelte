@@ -48,7 +48,8 @@
   }
 
   function formatDate(iso: string): string {
-    // Expects YYYY-MM-DD
+    // Only format strings that strictly match YYYY-MM-DD; render raw otherwise.
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
     const [y, m, d] = iso.split("-");
     const months = ["janv.", "févr.", "mars", "avr.", "mai", "juin",
                     "juil.", "août", "sept.", "oct.", "nov.", "déc."];
