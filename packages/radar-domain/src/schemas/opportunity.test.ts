@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
   EvidenceItem,
+  OpportunityDossier,
   PROCESS_WEIGHTS,
+  Verification,
   weightedScore,
 } from "./opportunity.js";
+import { Signal } from "./signal.js";
 
 describe("EvidenceItem", () => {
   it("accepts a fully-traced item", () => {
@@ -73,6 +76,17 @@ describe("PROCESS_WEIGHTS", () => {
   });
 });
 
+describe("Verification simulé", () => {
+  it("accepts the 4 values incl. simulé", () => {
+    for (const v of ["fait", "hypothese", "non-disponible", "simulé"])
+      expect(Verification.safeParse(v).success).toBe(true);
+  });
+
+  it("rejects an invalid value", () => {
+    expect(Verification.safeParse("foo").success).toBe(false);
+  });
+});
+
 describe("weightedScore", () => {
   it("computes the correct weighted score ≈ 4.05", () => {
     const score = weightedScore({
@@ -85,5 +99,118 @@ describe("weightedScore", () => {
     // 5*0.30 + 4*0.20 + 5*0.20 + 3*0.15 + 2*0.15
     // = 1.50 + 0.80 + 1.00 + 0.45 + 0.30 = 4.05
     expect(score).toBeCloseTo(4.05, 10);
+  });
+});
+
+const minimalAxes = {
+  potentiel: { level: 4, availability: "available", confidence: "high", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  risque:    { level: 3, availability: "available", confidence: "low",  evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  timing:    { level: 3, availability: "available", confidence: "medium", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  faisabilite: { level: 2, availability: "available", confidence: "low", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  marche:    { level: null, availability: "non-disponible", confidence: "low", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+};
+
+describe("OpportunityDossier ÉV1 enrichment", () => {
+  const minimal = {
+    id: "d1", title: "t", bylaw: "150-49", zone: "H-609-4", address: "a",
+    signalId: "sig-1",
+    lots: [{ noLot: "1" }],
+    evidence: [], scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
+    scoreGlobal: 3.15, recommendation: "Surveiller",
+    axes: minimalAxes,
+  };
+  it("requires signalId, applies lot + mode defaults", () => {
+    const r = OpportunityDossier.safeParse(minimal);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.mode).toBe("real");
+      const lot0 = r.data.lots[0]!;
+      expect(lot0.confirmed).toBe(false);
+      expect(lot0.zonePolygonSource).toBe("hypothese-street-name");
+    }
+  });
+  it("rejects a dossier missing signalId", () => {
+    const { signalId: _signalId, ...noSig } = minimal;
+    expect(OpportunityDossier.safeParse(noSig).success).toBe(false);
+  });
+  it("rejects an unknown zonePolygonSource", () => {
+    const bad = { ...minimal, lots: [{ noLot: "1", zonePolygonSource: "satellite" }] };
+    expect(OpportunityDossier.safeParse(bad).success).toBe(false);
+  });
+});
+
+describe("Signal → N opportunities (1→N link, AC#4)", () => {
+  const sharedSignalId = "sig-shared";
+  const dossiersBase = {
+    lots: [{ noLot: "1" }],
+    evidence: [],
+    scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
+    scoreGlobal: 3.15,
+    recommendation: "Surveiller",
+    axes: minimalAxes,
+    signalId: sharedSignalId,
+  };
+
+  it("two dossiers with different ids/zones share the same signalId", () => {
+    const r1 = OpportunityDossier.safeParse({
+      ...dossiersBase,
+      id: "d-fan-1", title: "Dossier A", bylaw: "150-49", zone: "H-609-4", address: "addr-a",
+    });
+    const r2 = OpportunityDossier.safeParse({
+      ...dossiersBase,
+      id: "d-fan-2", title: "Dossier B", bylaw: "150-49", zone: "H-609-5", address: "addr-b",
+    });
+
+    expect(r1.success).toBe(true);
+    expect(r2.success).toBe(true);
+    if (r1.success && r2.success) {
+      expect(r1.data.signalId).toBe(sharedSignalId);
+      expect(r2.data.signalId).toBe(sharedSignalId);
+      expect(r1.data.id).not.toBe(r2.data.id);
+    }
+  });
+
+  it("the upstream Signal with that id parses (one signal → many dossiers)", () => {
+    const r = Signal.safeParse({
+      id: sharedSignalId, type: "residential-rezoning", value: 8, confidence: "high",
+      status: "nouveau", sourceRefs: ["avis-shared"], detectedAt: "2026-03-01",
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.id).toBe(sharedSignalId);
+  });
+});
+
+describe("OpportunityDossier axes envelope (Task 10)", () => {
+  const base = {
+    id: "d1", title: "t", bylaw: "150-49", zone: "H-609-4", address: "a",
+    signalId: "sig-1",
+    lots: [{ noLot: "1" }],
+    evidence: [], scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
+    scoreGlobal: 3.15, recommendation: "Surveiller",
+  };
+
+  it("parses a dossier with a valid axes map", () => {
+    const r = OpportunityDossier.safeParse({ ...base, axes: minimalAxes });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.axes.marche.availability).toBe("non-disponible");
+      expect(r.data.axes.marche.level).toBeNull();
+      expect(r.data.axes.potentiel.level).toBe(4);
+    }
+  });
+
+  it("rejects an axes map where available=true but level=null (invariant violation)", () => {
+    const bad = {
+      ...base,
+      axes: {
+        ...minimalAxes,
+        potentiel: { level: null, availability: "available", confidence: "high", evidenceRefs: [], rationale: "bad", gridVersion: "v1" },
+      },
+    };
+    const r = OpportunityDossier.safeParse(bad);
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.errors.some((e) => e.message.includes("invariant"))).toBe(true);
+    }
   });
 });
