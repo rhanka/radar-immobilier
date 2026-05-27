@@ -5,7 +5,7 @@ export const Action = z.enum([
 export type ActionT = z.infer<typeof Action>;
 export const JournalEntry = z.object({
   id: z.string(), who: z.string(), role: z.string(),
-  action: z.string(), target: z.string(), at: z.string(),
+  action: Action, target: z.string(), at: z.string(),
   rationale: z.string().optional(), mode: Mode, supersedes: z.string().optional(),
 });
 export type JournalEntryT = z.infer<typeof JournalEntry>;
