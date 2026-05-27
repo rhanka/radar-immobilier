@@ -101,6 +101,14 @@ describe("weightedScore", () => {
   });
 });
 
+const minimalAxes = {
+  potentiel: { level: 4, availability: "available", confidence: "high", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  risque:    { level: 3, availability: "available", confidence: "low",  evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  timing:    { level: 3, availability: "available", confidence: "medium", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  faisabilite: { level: 2, availability: "available", confidence: "low", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+  marche:    { level: null, availability: "non-disponible", confidence: "low", evidenceRefs: [], rationale: "test", gridVersion: "v1" },
+};
+
 describe("OpportunityDossier ÉV1 enrichment", () => {
   const minimal = {
     id: "d1", title: "t", bylaw: "150-49", zone: "H-609-4", address: "a",
@@ -108,6 +116,7 @@ describe("OpportunityDossier ÉV1 enrichment", () => {
     lots: [{ noLot: "1" }],
     evidence: [], scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
     scoreGlobal: 3.15, recommendation: "Surveiller",
+    axes: minimalAxes,
   };
   it("requires signalId, applies lot + mode defaults", () => {
     const r = OpportunityDossier.safeParse(minimal);
@@ -126,5 +135,41 @@ describe("OpportunityDossier ÉV1 enrichment", () => {
   it("rejects an unknown zonePolygonSource", () => {
     const bad = { ...minimal, lots: [{ noLot: "1", zonePolygonSource: "satellite" }] };
     expect(OpportunityDossier.safeParse(bad).success).toBe(false);
+  });
+});
+
+describe("OpportunityDossier axes envelope (Task 10)", () => {
+  const base = {
+    id: "d1", title: "t", bylaw: "150-49", zone: "H-609-4", address: "a",
+    signalId: "sig-1",
+    lots: [{ noLot: "1" }],
+    evidence: [], scores: { potentiel: 4, risque: 3, timing: 3, faisabilite: 2, marche: 3 },
+    scoreGlobal: 3.15, recommendation: "Surveiller",
+  };
+
+  it("parses a dossier with a valid axes map", () => {
+    const r = OpportunityDossier.safeParse({ ...base, axes: minimalAxes });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      // z.record infers Partial<Record<...>> — use non-null assertions (axes populated in full)
+      expect(r.data.axes!.marche!.availability).toBe("non-disponible");
+      expect(r.data.axes!.marche!.level).toBeNull();
+      expect(r.data.axes!.potentiel!.level).toBe(4);
+    }
+  });
+
+  it("rejects an axes map where available=true but level=null (invariant violation)", () => {
+    const bad = {
+      ...base,
+      axes: {
+        ...minimalAxes,
+        potentiel: { level: null, availability: "available", confidence: "high", evidenceRefs: [], rationale: "bad", gridVersion: "v1" },
+      },
+    };
+    const r = OpportunityDossier.safeParse(bad);
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.errors.some((e) => e.message.includes("invariant"))).toBe(true);
+    }
   });
 });
