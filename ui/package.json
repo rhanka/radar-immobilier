@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@radar/domain": "*",
+    "@radar/scoring": "*",
     "@lucide/svelte": "^0.562.0",
     "@sentropic/chat-ui": "^0.1.1",
     "@sentropic/design-system-svelte": "^0.7.0",

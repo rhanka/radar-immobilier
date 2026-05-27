@@ -9,6 +9,7 @@
   import BenchmarkComparison from "$lib/components/comparison/BenchmarkComparison.svelte";
   import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
+  import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import { demoOpportunity, demoSignals } from "$lib/demo/radar-demo-data";
   import { createDashboardState } from "$lib/state/dashboard";
 
@@ -47,6 +48,8 @@
         <BenchmarkComparison />
       {:else if activeView === "opportunity"}
         <OpportunityFunnel />
+      {:else if activeView === "grilles"}
+        <GrillesView />
       {:else}
         <SourceReviewShell onBackToRadar={() => (activeView = "radar")} />
       {/if}
