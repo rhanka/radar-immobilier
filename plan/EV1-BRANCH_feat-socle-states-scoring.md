@@ -21,6 +21,7 @@ and the numeric calibration on the 3 real Valleyfield pilots.
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `docs/spec/SPEC_EVOL_SOCLE_STATES_SCORING.md`
+  - `docs/spec/reviews/SPEC_EVOL_SOCLE_STATES_SCORING_*` (archived agent critiques)
   - `packages/radar-domain/src/**`
   - `packages/radar-scoring/**`
   - `ui/src/lib/components/scoring/**`
@@ -60,14 +61,14 @@ and the numeric calibration on the 3 real Valleyfield pilots.
   - [ ] Confirm scope/guardrails; declare `EV1-EXn` for the `api/drizzle` migration.
 
 - [ ] **Lot 1 — States model in `radar-domain` (TDD)**
-  - [ ] Failing tests: lot `confirmed`/`zonePolygonSource`/`assemblyCandidate`; signal status enum; timeline + journal-entry shapes; per-datum provenance unchanged.
-  - [ ] Implement the Zod schema extensions in `packages/radar-domain/src/schemas/opportunity.ts` (+ new `signal.ts`/`journal.ts` if cleaner).
+  - [ ] Failing tests: `Signal` entity (§2.0) + `signalId` 1→N link; lot `confirmed`/`zonePolygonSource`(+`other`)/`assemblyClusterId`/`metadata`; `SignalStatus`; `mode` on dossier + journal (§2.7); `Verification` += `simulé` (§2.6); timeline + journal-entry shapes (with `supersedes`).
+  - [ ] Implement the Zod schema extensions (`packages/radar-domain/src/schemas/`: new `signal.ts`/`journal.ts`, extend `opportunity.ts`).
   - [ ] Lot gate: `make typecheck` + `make lint` + `make test ENV=test-socle-states-scoring`.
 
 - [ ] **Lot 2 — `radar-scoring` package: grids + aggregate (TDD)**
-  - [ ] Failing tests for `aggregate()`: all-available; one-non-disponible renormalization; market-non-disponible; partial→cap `qualifier-avec-expert`; never-fabricate-neutral.
-  - [ ] Implement v1 grids (§3.3), `aggregate()` with renormalization + cap (§3.4), grid versioning (§3.6), `AxisScore`/`OpportunityScore` envelopes (§3.5).
-  - [ ] Implement pre-filter + micro-lot contiguity helpers (§2.1) with unit tests.
+  - [ ] Failing tests for `aggregate()`: all-available; one-non-disponible renormalization; market-non-disponible; **all-non-disponible → `tooThin` (no NaN)**; **`availableWeightSum < 0.50` floor**; **`available ⇔ level≠null` invariant throws**; partial→cap `qualifier-avec-expert`; never-fabricate-neutral.
+  - [ ] Implement v1 grids (§3.3), the availability doctrine (§3.4.0) + `aggregate()` with renormalization + floor + cap + invariant guards (§3.4), grid version stamp (§3.6), `AxisScore`/`OpportunityScore` envelopes (§3.5).
+  - [ ] Implement pre-filter + micro-lot contiguity (`assemblyClusterId`) helpers (§2.1) with unit tests.
   - [ ] Lot gate (same checklist as Lot 1).
 
 - [ ] **Lot 3 — Migrate the 3 pilots + calibration test**
