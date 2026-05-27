@@ -118,6 +118,7 @@ export const weightedScore = (s: z.infer<typeof ScoreSet>): number =>
   s.faisabilite * PROCESS_WEIGHTS.faisabilite +
   s.marche * PROCESS_WEIGHTS.marche;
 
+export type PhaseT = z.infer<typeof Phase>;
 export type EvidenceItemT = z.infer<typeof EvidenceItem>;
 export type OpportunityDossierT = z.infer<typeof OpportunityDossier>;
 export type VerificationT = z.infer<typeof Verification>;
