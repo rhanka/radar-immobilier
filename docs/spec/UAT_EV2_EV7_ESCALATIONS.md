@@ -48,6 +48,18 @@
   log if a real timeline field is needed.
 
 ### ÉV4 — T0 onboarding
+- **D9** The onboarding **source catalogue reuses `ui/src/lib/source-review/sourceEvaluations`**
+  (88-row inventory, tiers/access/cost/recommendation) rather than a new dataset — single source
+  of truth. Presented as a **selectable onboarding checklist** grouped by recommendation
+  (build-now / qualify-access-now / build-later / manual). → confirm grouping at UAT.
+- **D10** **Initial vs recurrent treatment** = explanatory panel: initial = **2-year retro-analysis**
+  (backfill window default 24 months + illustrative expected-signal estimate); recurrent = daily scan.
+  Numbers are **illustrative defaults**, flagged in-UI (not a forecast).
+- **D11** **"Lancer l'onboarding" CTA is a demo stub** (no real ingestion/job) — shows a confirmation
+  summary of selected sources + window. Real ingestion/job orchestration is ÉV6/ÉV7. Main ÉV4 escalation.
+- **D12** New `DemoView "onboarding"`, placed FIRST in the nav (T0 precedes T1). Default = all
+  `build-now` sources pre-checked.
+
 ### ÉV5 — h2a spike + chat
 ### ÉV6 — T3/T4 consoles
 ### ÉV7 — automation + benchmark

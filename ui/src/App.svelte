@@ -6,6 +6,7 @@
   import AppShell from "$lib/components/AppShell.svelte";
   import NavMenu from "$lib/components/NavMenu.svelte";
   import type { DemoView } from "$lib/demo/views";
+  import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import BenchmarkComparison from "$lib/components/comparison/BenchmarkComparison.svelte";
   import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
@@ -45,7 +46,9 @@
   <div class="flex h-screen flex-col">
     <NavMenu {activeView} onSelect={(view) => (activeView = view)} />
     <div class="min-h-0 flex-1 overflow-auto">
-      {#if activeView === "radar"}
+      {#if activeView === "onboarding"}
+        <OnboardingView />
+      {:else if activeView === "radar"}
         <AppShell
           {dashboard}
           {health}
