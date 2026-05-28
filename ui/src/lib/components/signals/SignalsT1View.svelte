@@ -24,7 +24,7 @@
   function closeHelp() { helpOpen = false; }
 
   // ── Clé de tri dérivée du mode ───────────────────────────────────────────────
-  $: sortKey = (sortMode === "vision" ? "vision-priority" : "value") satisfies SortKey;
+  $: sortKey = (sortMode === "vision" ? "vision-priority" : "value") as SortKey;
 
   // ── SI1 : pool = toutes les 6 lignes (simulation jamais masquée dans ce feed) ──
   $: statusFiltered = filterByStatus(signals, statusFilter);
