@@ -93,3 +93,26 @@
 ## 8. Hors périmètre (inchangé — escalades D1–D20)
 Les différés serveur restent : adapter `@sentropic/h2a` réel (crypto/journal signé), persistance SQL
 journal/timeline, orchestration jobs/scheduler/connecteurs réels. Voir `UAT_EV2_EV7_ESCALATIONS.md`.
+
+## 9. Décisions S1 — alignement scoring ↔ VISION (figées 2026-05-27)
+Séance tenue avec `VISION.md` §6 + `PROCESS.md` Étape 5. **Le modèle à 2 mesures est confirmé fidèle**
+(signal /10 = VISION §6 ; opportunité 0-5 = PROCESS Étape 5). Décisions validées par le client :
+- **S1.1** On garde **2 mesures distinctes**, clairement séparées dans l'UI, chacune tracée à sa source
+  (Signaux = valeur /10 + confiance, VISION §6 ; Opportunités = score composite, PROCESS Étape 5).
+- **S1.2 Dérogations = filtre pur** (VISION) : une dérogation pertinente (densité/hauteur/marges/
+  logements/usages) **entre en analyse** ; non pertinente (cabanon/clôture) **écartée**. **Pas de
+  pseudo-score /10 inventé** → retirer `derogation-relevant=5`/`irrelevant=1` du barème de tri.
+- **S1.3 Types de signaux** : garder les catégories VISION §6 (zonage 10 · CPTAQ 8 · PPCMOI 7) +
+  celles couvertes par §4.1 (**consultation publique, plan d'urbanisme, modification de grille/COS**).
+  **Retirer** intention-politique / requalification-TOD / investissement-public (trop interprétatifs V1).
+- **S1.4 Tri des signaux = LES DEUX** : bascule **« par score /10 »** et **« par priorité VISION »**
+  (ordre Priorité 1→4), car la VISION est contradictoire (CPTAQ « Priorité 4 » mais 8/10 > PPCMOI 7).
+  **Bulle jaune** d'aide (parcours guidé) expliquant la nuance. Défaut = tri par score.
+- **S1.5 Échelle UI** : Signaux → **valeur /10 + confiance** ; Opportunités → **score radar /100**
+  (= 0-5 × 20) en tête **+ détail 0-5 par axe**. Pas de changement de modèle (mêmes nombres rescalés) ;
+  pilotes : **64 / 67 / 52 /100** (partiels, plafonnés « surveillance »).
+- **S1.6 Poids 30/20/20/15/15 conservés** (PROCESS) pour la V1. La VISION (« avant le marché »,
+  long terme structurel) justifie : Marché 15% souvent non-disponible = normal ; Timing valorise la
+  **faible visibilité concurrentielle** (règle « perle rare »). À rediscuter si surpondération voulue.
+- **Débloque** : la refonte des Grilles (GR1) s'adosse à cette grille validée + tracé VISION/PROCESS.
+- **Reste gaté** : h2a/Coordination (séance S2 — brainstorm).
