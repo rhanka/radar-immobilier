@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Rocket, Radar, Radio, BarChart3, Layers, Building2, SlidersHorizontal, MessagesSquare, MonitorDot, Zap } from "@lucide/svelte";
+  import { Rocket, Radio, BarChart3, Layers, Building2, SlidersHorizontal, MessagesSquare, MonitorDot, Zap } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
   import { appMode, toggleMode } from "$lib/state/mode.js";
 
@@ -8,16 +8,15 @@
 
   $: mode = $appMode;
 
-  const items: { id: DemoView; label: string; icon: typeof Radar }[] = [
-    { id: "onboarding", label: "Onboarding (T0)", icon: Rocket },
-    { id: "radar", label: "Radar (démo)", icon: Radar },
-    { id: "signaux", label: "Signaux (T1)", icon: Radio },
+  const items: { id: DemoView; label: string; icon: typeof Rocket }[] = [
+    { id: "onboarding", label: "Onboarding", icon: Rocket },
+    { id: "signaux", label: "Signaux", icon: Radio },
     { id: "comparison", label: "Comparaison des agents", icon: BarChart3 },
     { id: "source-review", label: "Revue des sources", icon: Layers },
     { id: "opportunity", label: "Opportunité", icon: Building2 },
     { id: "grilles", label: "Grilles de score", icon: SlidersHorizontal },
     { id: "coordination", label: "Coordination", icon: MessagesSquare },
-    { id: "console", label: "Console (T3/T4)", icon: MonitorDot },
+    { id: "console", label: "Console", icon: MonitorDot },
     { id: "automation", label: "Automatisation", icon: Zap },
   ];
 </script>
