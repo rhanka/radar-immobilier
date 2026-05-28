@@ -2,6 +2,9 @@
 // Rows marked mode:"simulation" are synthetic fixtures — see escalations log D4.
 // The 3 real pilot signals (mode:"real") are derived from verified public consultation
 // notices for bylaws 150-49, 150-49-1, and 150-51.
+//
+// S1.2: dérogation-relevant conservé pour la démo (6ᵉ signal, écarté) mais sa valeur est
+//   fixée en dur (5) — SIGNAL_TYPE_VALUES["derogation-relevant"] vaut 0 (filtre pur VISION).
 
 import { Signal, SIGNAL_TYPE_VALUES, type SignalT } from "@radar/domain";
 
@@ -71,7 +74,8 @@ export const demoSignalsT1: SignalT[] = [
   Signal.parse({
     id: "sig-sim-derog-h516",
     type: "derogation-relevant",
-    value: SIGNAL_TYPE_VALUES["derogation-relevant"],
+    // S1.2: valeur fixée en dur — dérogation = filtre pur (SIGNAL_TYPE_VALUES vaut 0).
+    value: 5,
     confidence: "medium",
     status: "écarté",
     sourceRefs: [],
