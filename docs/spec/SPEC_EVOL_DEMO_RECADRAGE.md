@@ -115,4 +115,35 @@ Séance tenue avec `VISION.md` §6 + `PROCESS.md` Étape 5. **Le modèle à 2 me
   long terme structurel) justifie : Marché 15% souvent non-disponible = normal ; Timing valorise la
   **faible visibilité concurrentielle** (règle « perle rare »). À rediscuter si surpondération voulue.
 - **Débloque** : la refonte des Grilles (GR1) s'adosse à cette grille validée + tracé VISION/PROCESS.
-- **Reste gaté** : h2a/Coordination (séance S2 — brainstorm).
+
+## 10. Décisions S2 — chat + h2a réels (figées 2026-05-28)
+Après lecture de `../sentropic`. **Constat clé : sentropic n'utilise PAS `@sentropic/h2a` à l'exécution**
+(0 import) — donc « utiliser h2a » est un **ajout net-new**, pas une recopie. Le pattern chat, lui,
+est directement réutilisable.
+- **Pattern layout (sentropic)** : `ChatWidget` monté dans le **layout racine**, présent sur toutes les
+  vues ; mode `docked | floating` via le store `@sentropic/chat-ui/stores/chatWidgetLayout` (+ `isOpen`,
+  `dockWidthCss`, préférence en `localStorage`). En docked le layout réserve un `padding-right`. →
+  radar copie ça dans `App.svelte`. **Dissout l'onglet Coordination.**
+- **Stack chat (réel, rien de simulé)** : UI `@sentropic/chat-ui` (Svelte 5, browser-safe) ;
+  serveur Hono `@sentropic/chat-core` (ChatRuntime) + `@sentropic/llm-mesh`. Stream SSE inline via
+  Hono `c.stream()` (pas besoin de la file PG NOTIFY). `@sentropic/skills` **écarté** (isolated-vm
+  Node-only) → on déclare les outils radar directement.
+- **LLM (S2.a)** : **tous les providers dont une clé existe** (OpenAI/Gemini/Anthropic/Mistral/Cohere)
+  + **sélecteur provider/modèle in-chat**, **aucun défaut imposé** (neutre — cf. mémoire no-claude-favoritism).
+- **Outils radar (S2.b)** : `query_signals`, `open_opportunity`, `explain_score`, `approfondir`
+  (signal→opportunités), `navigate`, `toggle_real_sim`, `read_journal`.
+- **h2a (S2.c)** : **vrai** — `@sentropic/h2a` 0.12.0 importé côté **API Node** : chaque décision
+  (qualifier/surveiller/approcher) prise via le chat ou l'UI est journalisée en **enveloppe signée**
+  (rôle PRINCIPAL/CONDUCTOR + POLICY + horodatage). Crypto Node OK côté serveur.
+
+## 11. Découpage en évolutions (toutes parallélisables)
+- **ÉV8 — Recadrage vues/UX** : consolidation §3 + registre §4 (hors chat/h2a) + Grilles (débloqué S1).
+  Supprime ancien Radar, fusionne Signaux, Onboarding (ville), réel/sim Opportunités, Console (+sources),
+  Automatisation (+comparaison), retrait jargon, score /100, dual-tri Signaux + bulle.
+- **ÉV9 — Chat réel** : `@sentropic/chat-ui` + `chat-core` + `llm-mesh`, `ChatWidget` dans le layout
+  (docked/floating), endpoints Hono + SSE, tous providers + sélecteur, outils radar.
+- **ÉV10 — h2a réel** : `@sentropic/h2a` côté API, journal signé + rôles + POLICY autour des décisions.
+- **Coordination** entre branches : ÉV8 et ÉV9 touchent tous deux `App.svelte` (nav vues + dock chat)
+  → coordonner le layout. ÉV10 est surtout serveur + se branche sur les points de décision d'ÉV9.
+- Ces ÉV8–ÉV10 **annulent/dépassent** l'ancien stub ÉV5 (Coordination/chat) et la D13 « découplé sans
+  dep » — désormais on vise le réel (chat-ui + h2a).
