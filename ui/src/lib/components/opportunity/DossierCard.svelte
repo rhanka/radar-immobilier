@@ -1,11 +1,11 @@
 <script lang="ts">
   import { TrendingUp, Clock } from "@lucide/svelte";
-  import type { OpportunityDossierT } from "@radar/domain";
+  import type { AxisScoreT, OpportunityDossierT } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
   import { toGrilleRows } from "$lib/scoring/grilles-data.js";
   import ScoreHover from "$lib/components/scoring/ScoreHover.svelte";
   import PhaseColumn from "./PhaseColumn.svelte";
-  import { groupEvidenceByPhase, deriveTimeline, applyMode } from "$lib/opportunites/funnel.js";
+  import { groupEvidenceByPhase, deriveTimeline, applyMode, axesForMode, isHypothesisAxis } from "$lib/opportunites/funnel.js";
   import type { AppMode } from "$lib/state/mode.js";
 
   export let dossier: OpportunityDossierT;
@@ -14,7 +14,9 @@
   const grilleRows = toGrilleRows();
   const axisOrder = ["potentiel", "risque", "timing", "faisabilite", "marche"] as const;
 
-  $: result = aggregate(dossier.axes, WEIGHTS);
+  $: effectiveAxes = axesForMode(dossier.axes, mode);
+  $: result = aggregate(effectiveAxes, WEIGHTS);
+  $: scoreOver100 = result.score !== null ? Math.round(result.score * 20) : null;
   $: phases = groupEvidenceByPhase({
     ...dossier,
     evidence: applyMode(dossier.evidence, mode),
@@ -27,6 +29,13 @@
     if (score === null) return "text-slate-400";
     if (score >= 3.5) return "text-emerald-700";
     if (score >= 2.5) return "text-amber-700";
+    return "text-red-700";
+  }
+
+  function score100Color(s: number | null): string {
+    if (s === null) return "text-slate-400";
+    if (s >= 70) return "text-emerald-700";
+    if (s >= 50) return "text-amber-700";
     return "text-red-700";
   }
 
@@ -57,6 +66,13 @@
       scoring: "Scoring",
     };
     return map[phase] ?? phase;
+  }
+
+  /** True if the axis was available with low confidence in the original dossier
+   *  (= hypothesis axis that gets excluded in real mode). */
+  function isHypothesis(axis: string): boolean {
+    const orig = dossier.axes[axis as keyof typeof dossier.axes] as AxisScoreT | undefined;
+    return orig !== undefined && isHypothesisAxis(orig);
   }
 </script>
 
@@ -105,15 +121,28 @@
         </h3>
       </div>
 
-      <!-- Score + partial + cap -->
+      <!-- Mode banner -->
+      {#if mode === "real"}
+        <div class="mb-3 rounded border border-slate-300 bg-white px-3 py-2 text-xs text-slate-600">
+          <span class="font-semibold text-slate-800">Mode réel :</span>
+          seules les preuves confirmées comptent (hypothèses exclues, dossier plafonné).
+        </div>
+      {:else}
+        <div class="mb-3 rounded border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-800">
+          <span class="font-semibold">Mode simulation :</span>
+          hypothèses incluses — score cible.
+        </div>
+      {/if}
+
+      <!-- Score /100 headline + partial + cap -->
       <div class="mb-4 flex flex-wrap items-center gap-3">
         {#if result.tooThin}
           <span class="rounded bg-slate-200 px-3 py-1 text-lg font-bold text-slate-500">
-            Trop mince
+            Trop mince — surveillance
           </span>
         {:else}
-          <span class={`text-3xl font-bold ${scoreColor(result.score)}`}>
-            {result.score?.toFixed(2)}<span class="text-base font-normal text-slate-400">/5</span>
+          <span class={`text-3xl font-bold ${score100Color(scoreOver100)}`}>
+            Score radar {scoreOver100}<span class="text-base font-normal text-slate-400">/100</span>
           </span>
         {/if}
         {#if result.partial}
@@ -129,9 +158,12 @@
       <!-- Per-axis breakdown with ScoreHover -->
       <div class="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {#each axisOrder as axis}
-          {@const axisScore = dossier.axes[axis]}
+          {@const origAxisScore = dossier.axes[axis]}
+          {@const effectiveAxisScore = effectiveAxes[axis]}
           {@const gridRow = grilleRows.find((r) => r.axis === axis)}
-          {#if axisScore && gridRow}
+          {#if origAxisScore && effectiveAxisScore && gridRow}
+            {@const hypothesis = isHypothesis(axis)}
+            {@const excludedInReal = mode === "real" && hypothesis}
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div
               class="relative"
@@ -142,20 +174,36 @@
             >
               <div
                 class={`cursor-default rounded border px-3 py-2 transition ${
-                  axisScore.availability === "non-disponible"
-                    ? "border-slate-200 bg-white"
+                  effectiveAxisScore.availability === "non-disponible"
+                    ? excludedInReal
+                      ? "border-slate-200 bg-slate-100 opacity-60"
+                      : "border-slate-200 bg-white"
                     : "border-teal-100 bg-teal-50"
                 }`}
               >
                 <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                   {gridRow.label}
                 </p>
-                {#if axisScore.availability === "non-disponible"}
-                  <p class="mt-0.5 text-xs font-semibold text-slate-400">Non disponible</p>
+                {#if effectiveAxisScore.availability === "non-disponible"}
+                  {#if excludedInReal}
+                    <p class="mt-0.5 text-[10px] font-semibold text-slate-400">
+                      À confirmer — exclu en mode réel
+                    </p>
+                    <p class="mt-0.5 text-[10px] text-slate-400 line-through">
+                      {origAxisScore.level}/5 (hypothèse)
+                    </p>
+                  {:else}
+                    <p class="mt-0.5 text-xs font-semibold text-slate-400">Non disponible</p>
+                  {/if}
                 {:else}
                   <p class="mt-0.5 text-base font-bold text-teal-700">
-                    {axisScore.level}/5
+                    {effectiveAxisScore.level}/5
                   </p>
+                  {#if hypothesis && mode === "simulation"}
+                    <p class="mt-0.5 text-[10px] font-medium text-violet-600">
+                      hypothèse (simulation)
+                    </p>
+                  {/if}
                 {/if}
                 <p class="mt-0.5 text-[10px] text-slate-400">
                   Poids {gridRow.weightPct.toFixed(0)} %
@@ -166,7 +214,7 @@
               {#if hoveredAxis === axis}
                 <div class="absolute bottom-full left-0 z-10 mb-1">
                   <ScoreHover
-                    {axisScore}
+                    axisScore={effectiveAxisScore}
                     grid={gridRow}
                     axisLabel={gridRow.label}
                   />
