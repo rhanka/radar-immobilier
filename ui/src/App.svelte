@@ -1,11 +1,9 @@
 <script lang="ts">
   import { ThemeProvider } from "@sentropic/design-system-svelte";
   import { sentTechTheme } from "@sentropic/design-system-themes";
-  import NavMenu from "$lib/components/NavMenu.svelte";
+  import AppSidebar from "$lib/components/AppSidebar.svelte";
   import type { DemoView } from "$lib/demo/views";
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
-  import BenchmarkComparison from "$lib/components/comparison/BenchmarkComparison.svelte";
-  import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
@@ -15,7 +13,7 @@
   import type { SignalT } from "@radar/domain";
 
   let activeView: DemoView = "signaux";
-  /** Signal id transmis par Approfondir → filtre OpportunityFunnel (T2). */
+  /** Signal id transmis par Approfondir → filtre OpportunityFunnel. */
   let opportuniteSignalId: string | undefined = undefined;
 
   function handleApprofondir(signal: SignalT): void {
@@ -25,15 +23,13 @@
 </script>
 
 <ThemeProvider theme={sentTechTheme}>
-  <div class="flex h-screen flex-col">
-    <NavMenu {activeView} onSelect={(view) => (activeView = view)} />
-    <div class="min-h-0 flex-1 overflow-auto">
+  <div class="flex h-screen overflow-hidden">
+    <AppSidebar {activeView} onSelect={(view) => (activeView = view)} />
+    <main class="flex-1 min-w-0 overflow-auto">
       {#if activeView === "onboarding"}
         <OnboardingView />
       {:else if activeView === "signaux"}
         <SignalsT1View onApprofondir={handleApprofondir} />
-      {:else if activeView === "comparison"}
-        <BenchmarkComparison />
       {:else if activeView === "opportunity"}
         <OpportunityFunnel
           selectedSignalId={opportuniteSignalId}
@@ -45,11 +41,9 @@
         <CoordinationView />
       {:else if activeView === "console"}
         <ConsoleView />
-      {:else if activeView === "automation"}
-        <AutomationView />
       {:else}
-        <SourceReviewShell onBackToRadar={() => (activeView = "signaux")} />
+        <AutomationView />
       {/if}
-    </div>
+    </main>
   </div>
 </ThemeProvider>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Rocket, Radio, BarChart3, Layers, Building2, SlidersHorizontal, MessagesSquare, MonitorDot, Zap } from "@lucide/svelte";
+  import { Rocket, Radio, Building2, SlidersHorizontal, MessagesSquare, MonitorDot, Zap } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
   import { appMode, toggleMode } from "$lib/state/mode.js";
 
@@ -11,13 +11,11 @@
   const items: { id: DemoView; label: string; icon: typeof Rocket }[] = [
     { id: "onboarding", label: "Onboarding", icon: Rocket },
     { id: "signaux", label: "Signaux", icon: Radio },
-    { id: "comparison", label: "Comparaison des agents", icon: BarChart3 },
-    { id: "source-review", label: "Revue des sources", icon: Layers },
-    { id: "opportunity", label: "Opportunité", icon: Building2 },
+    { id: "opportunity", label: "Opportunités", icon: Building2 },
+    { id: "console", label: "Sources", icon: MonitorDot },
+    { id: "automation", label: "Automatisation", icon: Zap },
     { id: "grilles", label: "Grilles de score", icon: SlidersHorizontal },
     { id: "coordination", label: "Coordination", icon: MessagesSquare },
-    { id: "console", label: "Console", icon: MonitorDot },
-    { id: "automation", label: "Automatisation", icon: Zap },
   ];
 </script>
 
