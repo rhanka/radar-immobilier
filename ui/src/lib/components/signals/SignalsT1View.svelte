@@ -68,12 +68,12 @@
       Fil de signaux
     </h1>
     <!-- SI4 — note courte : valeur /10 + confiance ≠ score d'opportunité -->
-    <p class="mt-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-600">
+    <p class="mt-2 max-w-prose rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-600">
       <span class="font-semibold text-slate-800">Score de signal = valeur /10</span>
       (priorité par type, VISION §6)
       <span class="mx-1 text-slate-400">+</span>
       <span class="font-semibold text-slate-800">confiance</span>
-      (Haute / Moyenne / Faible) — distinct du
+      (Haute / Moyenne / Faible), distinct du
       <span class="font-semibold text-slate-800">score d'opportunité (/100)</span>.
       Ces deux axes ne sont jamais multipliés.
     </p>
@@ -84,7 +84,7 @@
     <div class="mb-4 flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2.5">
       <span class="h-2 w-2 shrink-0 rounded-full bg-teal-500"></span>
       <p class="text-sm text-teal-800">
-        <span class="font-semibold">Mode réel</span> —
+        <span class="font-semibold">Mode réel :</span>
         {countReal} signal{countReal !== 1 ? "s" : ""} confirmé{countReal !== 1 ? "s" : ""}.
         Basculez en simulation pour voir les exemples de calibration.
       </p>
@@ -93,7 +93,7 @@
     <div class="mb-4 flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5">
       <span class="h-2 w-2 shrink-0 rounded-full bg-violet-500"></span>
       <p class="text-sm text-violet-800">
-        <span class="font-semibold">Mode simulation</span> —
+        <span class="font-semibold">Mode simulation :</span>
         {countPool} signal{countPool !== 1 ? "s" : ""}
         ({countReal} réel{countReal !== 1 ? "s" : ""} + {countSim} exemple{countSim !== 1 ? "s" : ""} synthétique{countSim !== 1 ? "s" : ""} badgé{countSim !== 1 ? "s" : ""}).
       </p>
@@ -212,7 +212,7 @@
     <div class="mt-4 flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
       <AlertCircle class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" aria-hidden="true" />
       <p class="text-xs leading-5 text-blue-700">
-        Action <span class="font-semibold">Approfondir</span> enregistrée en mémoire locale uniquement — la persistance est hors-périmètre ÉV3.
+        Action <span class="font-semibold">Approfondir</span> enregistrée en mémoire locale uniquement (la persistance est hors-périmètre ÉV3).
       </p>
     </div>
   {/if}
@@ -221,10 +221,10 @@
   <div class="mt-6 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
     <AlertCircle class="mt-0.5 h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
     <div>
-      <h3 class="text-sm font-semibold text-slate-950">Provenance des signaux</h3>
-      <p class="mt-1 text-sm leading-6 text-slate-700">
+      <h2 class="text-sm font-semibold text-slate-950">Provenance des signaux</h2>
+      <p class="mt-1 text-sm leading-6 text-slate-700" style="max-width: 65ch">
         {countReal} signal{countReal !== 1 ? "s" : ""} réel{countReal !== 1 ? "s" : ""}
-        (avis de consultation publique vérifiés — règlements 150-49, 150-49-1, 150-51)
+        (avis de consultation publique vérifiés, règlements 150-49, 150-49-1, 150-51)
         et {countSim} exemple{countSim !== 1 ? "s" : ""}
         (marqués <span class="font-medium text-amber-700">Exemple (simulation)</span>).
         Les exemples illustrent des types de signaux non encore détectés dans les données réelles

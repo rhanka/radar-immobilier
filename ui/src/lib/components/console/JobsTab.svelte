@@ -53,7 +53,7 @@
   }
 
   function formatDuration(ms?: number): string {
-    if (ms === undefined) return "—";
+    if (ms === undefined) return "";
     if (ms < 1000) return `${ms} ms`;
     return `${(ms / 1000).toFixed(1)} s`;
   }
@@ -75,7 +75,7 @@
     <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
     <p class="text-sm text-amber-900">
       <span class="font-semibold">Données de démo.</span>
-      Les jobs affichés sont des stubs statiques — aucune orchestration réelle n'est connectée pour ÉV6. Le mode actif filtre les jobs de simulation.
+      Les jobs affichés sont des stubs statiques ; aucune orchestration réelle n'est connectée pour ÉV6. Le mode actif filtre les jobs de simulation.
     </p>
   </div>
 

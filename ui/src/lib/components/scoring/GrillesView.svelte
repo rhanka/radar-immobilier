@@ -67,13 +67,13 @@
   <!-- Header ---------------------------------------------------------------->
   <header class="mb-6">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
-      Configuration — grilles de score
+      Configuration : grilles de score
     </p>
     <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
       Grilles de score PROCESS
     </h1>
     <p class="mt-1 text-sm text-slate-500">
-      5 axes pondérés — édition locale des descripteurs (persistance hors-périmètre ÉV3). Les scores partiels (axes non disponibles) déclenchent automatiquement un plafond <span class="font-medium text-amber-700">qualifier-avec-expert</span>.
+      5 axes pondérés ; édition locale des descripteurs (persistance hors-périmètre ÉV3). Les scores partiels (axes non disponibles) déclenchent automatiquement un plafond <span class="font-medium text-amber-700">qualifier-avec-expert</span>.
     </p>
   </header>
 
@@ -121,7 +121,7 @@
   <!-- Dossiers calibrés ---------------------------------------------------->
   <div class="mb-4 flex items-center gap-2">
     <Info class="h-4 w-4 text-teal-600" aria-hidden="true" />
-    <h2 class="text-base font-semibold text-slate-950">Dossiers calibrés — Valleyfield</h2>
+    <h2 class="text-base font-semibold text-slate-950">Dossiers calibrés, Valleyfield</h2>
   </div>
   <p class="mb-5 text-sm text-slate-500">
     3 dossiers réels scorés sur ces grilles. Les axes marqués <span class="font-medium text-slate-600">non disponible</span> (données payantes Tier C) déclenchent un score <em>partiel</em> et plafonnent la recommandation à <span class="font-medium text-amber-700">qualifier-avec-expert</span>.
@@ -139,7 +139,7 @@
         >
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-slate-950 truncate">{dossier.title}</p>
-            <p class="text-xs text-slate-500">Règl. {dossier.bylaw} — Zone {dossier.zone}</p>
+            <p class="text-xs text-slate-500">Règl. {dossier.bylaw}, Zone {dossier.zone}</p>
           </div>
 
           <!-- Score or tooThin -->
@@ -246,7 +246,7 @@
     <div>
       <h3 class="text-sm font-semibold text-slate-950">Persistance des modifications</h3>
       <p class="mt-1 text-sm leading-6 text-slate-700">
-        Les modifications des descripteurs de niveaux sont en mémoire locale uniquement (ÉV3 hors-périmètre). Elles ne sont pas sauvegardées entre sessions. Les poids sont fixes (v1) — ÉV4 pour la calibration interactive.
+        Les modifications des descripteurs de niveaux sont en mémoire locale uniquement (ÉV3 hors-périmètre). Elles ne sont pas sauvegardées entre sessions. Les poids sont fixes (v1) ; ÉV4 couvre la calibration interactive.
       </p>
     </div>
   </div>

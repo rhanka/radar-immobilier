@@ -23,14 +23,14 @@
     <div class="flex items-center gap-2">
       <Terminal class="h-5 w-5 text-teal-700" aria-hidden="true" />
       <p class="text-xs font-semibold uppercase tracking-wide text-teal-700">
-        Console opérations — Radar Immobilier
+        Console opérations, Radar Immobilier
       </p>
     </div>
     <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
       Console sources & jobs
     </h1>
     <p class="mt-1 text-sm text-slate-500">
-      Qualification des sources — évaluation, approfondissement et priorisation du catalogue — et supervision des jobs d'ingestion et de scoring.
+      Qualification des sources (évaluation, approfondissement et priorisation du catalogue) et supervision des jobs d'ingestion et de scoring.
     </p>
   </header>
 
