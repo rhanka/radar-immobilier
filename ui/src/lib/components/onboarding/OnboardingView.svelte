@@ -59,7 +59,7 @@
     </h1>
     <p class="mt-1 text-sm text-slate-500">
       Sélectionnez les sources à activer pour la municipalité, puis lancez la
-      rétro-analyse initiale — cela peuplera le radar avec les signaux historiques
+      rétro-analyse initiale : cela peuplera le radar avec les signaux historiques
       avant que les scans quotidiens ne prennent le relais.
     </p>
   </header>
@@ -177,7 +177,7 @@
       </p>
       <p class="mt-0.5 text-xs text-slate-500">
         {selectedIds.length} source{selectedIds.length !== 1 ? "s" : ""} ×
-        {retroWindow} mois — estimation illustrative uniquement, non garantie.
+        {retroWindow} mois, estimation illustrative uniquement, non garantie.
         Le volume réel dépend de l'activité de chaque source.
       </p>
     </div>
@@ -213,7 +213,7 @@
       <div class="mb-4 flex items-start gap-2">
         <AlertCircle class="mt-0.5 h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
         <p class="text-sm font-semibold text-amber-800">
-          Démo — aucune ingestion réelle n'est déclenchée (orchestration des jobs : ÉV6/ÉV7).
+          Démo : aucune ingestion réelle n'est déclenchée (orchestration des jobs : ÉV6/ÉV7).
         </p>
       </div>
 
