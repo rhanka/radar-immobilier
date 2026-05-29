@@ -110,7 +110,7 @@
     <div class="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
       <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
       <p class="text-xs leading-5 text-amber-800">
-        <span class="font-semibold">Démo</span> — connecteurs non branchés ; orchestration réelle à venir (côté serveur).
+        <span class="font-semibold">Démo :</span> connecteurs non branchés ; orchestration réelle à venir (côté serveur).
       </p>
     </div>
 
@@ -132,7 +132,7 @@
                   {STATUS_LABELS_FR[connector.status]}
                 </span>
               </td>
-              <td class="p-3 text-xs text-slate-500">{connector.note ?? "—"}</td>
+              <td class="p-3 text-xs text-slate-500">{connector.note ?? ""}</td>
             </tr>
           {/each}
         </tbody>
@@ -142,7 +142,7 @@
     <!-- Benchmark recap ---------------------------------------------------->
     <div class="mb-3 flex items-center gap-2">
       <BarChart3 class="h-4 w-4 text-teal-600" aria-hidden="true" />
-      <h2 class="text-base font-semibold text-slate-950">Récapitulatif benchmark — 4 agents</h2>
+      <h2 class="text-base font-semibold text-slate-950">Récapitulatif benchmark : 4 agents</h2>
     </div>
     <p class="mb-4 text-sm text-slate-500">
       Classement honnête issu du benchmark Salaberry-de-Valleyfield. Aucune valeur inventée.

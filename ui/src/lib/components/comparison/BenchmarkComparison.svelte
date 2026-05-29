@@ -14,13 +14,13 @@
 <section class="min-h-full bg-slate-50 p-6">
   <header class="mb-5">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
-      Restitution — benchmark multi-agents
+      Restitution : benchmark multi-agents
     </p>
     <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
-      Comparaison des 4 analyses du PROMPT — Salaberry-de-Valleyfield
+      Comparaison des 4 analyses du PROMPT, Salaberry-de-Valleyfield
     </h1>
     <p class="mt-1 text-sm text-slate-500">
-      Même prompt, modes d'exécution tracés, runs isolés, scoring neutre — sans tricher vs l'humain.
+      Même prompt, modes d'exécution tracés, runs isolés, scoring neutre, sans tricher vs l'humain.
     </p>
   </header>
 
