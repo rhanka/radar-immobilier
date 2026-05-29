@@ -55,7 +55,7 @@
       Onboarding
     </p>
     <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
-      Onboarding d'une municipalité (T0)
+      Onboarding d'une municipalité
     </h1>
     <p class="mt-1 text-sm text-slate-500">
       Sélectionnez les sources à activer pour la municipalité, puis lancez la
