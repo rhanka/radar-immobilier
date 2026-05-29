@@ -4,6 +4,7 @@
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
   import type { SignalT, SignalStatusT } from "@radar/domain";
+  import { appMode } from "$lib/state/mode.js";
   import SignalRow from "./SignalRow.svelte";
 
   // ── Props ────────────────────────────────────────────────────────────────────
@@ -47,9 +48,14 @@
     { value: "écarté", label: "Écarté" },
   ];
 
+  // Mode global
+  $: mode = $appMode;
+
   // Compteurs affichés dans l'en-tête
   $: countReal = signals.filter((s) => s.mode === "real").length;
   $: countSim = signals.filter((s) => s.mode === "simulation").length;
+  // Nombre de signaux visibles dans le fil courant (avant filtre statut mais après mode)
+  $: countPool = mode === "real" ? countReal : signals.length;
 </script>
 
 <section class="min-h-full bg-slate-50 p-6">
@@ -72,6 +78,27 @@
       Ces deux axes ne sont jamais multipliés.
     </p>
   </header>
+
+  <!-- Bandeau mode réel / simulation -->
+  {#if mode === "real"}
+    <div class="mb-4 flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2.5">
+      <span class="h-2 w-2 shrink-0 rounded-full bg-teal-500"></span>
+      <p class="text-sm text-teal-800">
+        <span class="font-semibold">Mode réel</span> —
+        {countReal} signal{countReal !== 1 ? "s" : ""} confirmé{countReal !== 1 ? "s" : ""}.
+        Basculez en simulation pour voir les exemples de calibration.
+      </p>
+    </div>
+  {:else}
+    <div class="mb-4 flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5">
+      <span class="h-2 w-2 shrink-0 rounded-full bg-violet-500"></span>
+      <p class="text-sm text-violet-800">
+        <span class="font-semibold">Mode simulation</span> —
+        {countPool} signal{countPool !== 1 ? "s" : ""}
+        ({countReal} réel{countReal !== 1 ? "s" : ""} + {countSim} exemple{countSim !== 1 ? "s" : ""} synthétique{countSim !== 1 ? "s" : ""} badgé{countSim !== 1 ? "s" : ""}).
+      </p>
+    </div>
+  {/if}
 
   <!-- Contrôles tri + filtre -->
   <div class="mb-5 flex flex-wrap items-center gap-3">

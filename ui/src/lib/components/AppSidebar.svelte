@@ -22,7 +22,7 @@
     { id: "opportunity", label: "Opportunités", icon: Building2 },
     { id: "console", label: "Sources", icon: MonitorDot },
     { id: "automation", label: "Automatisation", icon: Zap },
-    { id: "grilles", label: "Grilles de score", icon: SlidersHorizontal },
+    { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
     { id: "coordination", label: "Coordination", icon: MessagesSquare },
   ];
 </script>
