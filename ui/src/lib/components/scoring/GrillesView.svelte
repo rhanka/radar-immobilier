@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Info, ChevronDown, ChevronUp } from "@lucide/svelte";
   import { Card, Badge, Alert } from "@sentropic/design-system-svelte";
+  import Acronym from "$lib/components/Acronym.svelte";
   import { SIGNAL_TYPE_VALUES } from "@radar/domain";
   import { valleyfieldDossiers } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
@@ -139,7 +140,13 @@
       <div class="divide-y divide-slate-100">
         {#each signalRows as row}
           <div class="grid grid-cols-12 items-center gap-2 px-4 py-3">
-            <span class="col-span-7 text-sm text-slate-800">{row.label}</span>
+            <span class="col-span-7 text-sm text-slate-800">
+              {#if row.type === "cptaq" || row.type === "ppcmoi"}
+                <Acronym term={row.label} />
+              {:else}
+                {row.label}
+              {/if}
+            </span>
             <span class="col-span-3">
               {#if row.value !== null}
                 <span class="text-lg font-bold text-teal-700">{row.value}</span>
