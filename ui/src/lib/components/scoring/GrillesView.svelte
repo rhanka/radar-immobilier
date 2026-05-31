@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Info, ChevronDown, ChevronUp } from "@lucide/svelte";
   import { Card, Badge, Alert } from "@sentropic/design-system-svelte";
+  import Acronym from "$lib/components/Acronym.svelte";
   import { SIGNAL_TYPE_VALUES } from "@radar/domain";
   import { valleyfieldDossiers } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
@@ -139,7 +140,13 @@
       <div class="divide-y divide-slate-100">
         {#each signalRows as row}
           <div class="grid grid-cols-12 items-center gap-2 px-4 py-3">
-            <span class="col-span-7 text-sm text-slate-800">{row.label}</span>
+            <span class="col-span-7 text-sm text-slate-800">
+              {#if row.type === "cptaq" || row.type === "ppcmoi"}
+                <Acronym term={row.label} />
+              {:else}
+                {row.label}
+              {/if}
+            </span>
             <span class="col-span-3">
               {#if row.value !== null}
                 <span class="text-lg font-bold text-teal-700">{row.value}</span>
@@ -166,6 +173,9 @@
         Un signal de type "Zonage residentiel" a une valeur de priorite de 10/10 independamment de sa confiance.
         La confiance (haute / moyenne / faible) est affichee separement dans la vue Signaux.
         Elle ne modifie pas la valeur du signal ; elle indique la solidite de la preuve.
+      </p>
+      <p class="mt-2 text-xs text-slate-400">
+        Reference : VISION.md §6 (priorites par type)
       </p>
     </div>
   {/if}
@@ -230,6 +240,9 @@
       </div>
       <p class="mt-3 text-xs text-slate-500">
         Les poids sont fixes en V1 (PROCESS). La renormalisation sur axes disponibles conserve les rapports de poids entre axes presents.
+      </p>
+      <p class="mt-2 text-xs text-slate-400">
+        Reference : PROCESS.md Etape 5 (5 axes ponderes)
       </p>
     </div>
 

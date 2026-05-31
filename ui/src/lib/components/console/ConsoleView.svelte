@@ -3,15 +3,14 @@
   import QualificationTab from "./QualificationTab.svelte";
   import DeepDiveTab from "./DeepDiveTab.svelte";
   import JobsTab from "./JobsTab.svelte";
-  import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
 
-  type TabId = "qualification" | "deepdive" | "jobs" | "cadran";
+  // S3-B1 : onglet "Cadran sources" supprimé — cadran fusionné dans QualificationTab
+  type TabId = "qualification" | "deepdive" | "jobs";
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "qualification", label: "Qualification" },
     { id: "deepdive", label: "Approfondissement" },
     { id: "jobs", label: "Jobs" },
-    { id: "cadran", label: "Cadran sources" },
   ];
 
   let activeTab: TabId = "qualification";
@@ -57,9 +56,7 @@
     <QualificationTab />
   {:else if activeTab === "deepdive"}
     <DeepDiveTab />
-  {:else if activeTab === "jobs"}
-    <JobsTab />
   {:else}
-    <SourceReviewShell onBackToRadar={() => { activeTab = "qualification"; }} />
+    <JobsTab />
   {/if}
 </section>
