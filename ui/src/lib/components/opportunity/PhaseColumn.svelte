@@ -1,14 +1,22 @@
 <script lang="ts">
   import { ExternalLink } from "@lucide/svelte";
+  import { Badge, Card } from "@sentropic/design-system-svelte";
   import type { PhaseGroup } from "$lib/opportunites/funnel.js";
 
   export let group: PhaseGroup;
+  /**
+   * In simulation mode, items that are not "fait" are shown with a demotion
+   * tag ("hypothèse"/"simulation"/"non confirmé") but are NOT hidden.
+   * In real mode, only "fait" items are passed in (filtered upstream),
+   * so every item here is confirmed — no demotion needed.
+   */
+  export let simulationMode: boolean = false;
 
-  function verificationClass(v: string): string {
-    if (v === "fait") return "bg-emerald-100 text-emerald-700";
-    if (v === "hypothese") return "bg-amber-100 text-amber-700";
-    if (v === "simulé") return "bg-violet-100 text-violet-700";
-    return "bg-slate-100 text-slate-500";
+  function badgeTone(v: string): "success" | "warning" | "error" | "neutral" | "info" {
+    if (v === "fait") return "success";
+    if (v === "hypothese") return "warning";
+    if (v === "simulé") return "info";
+    return "neutral";
   }
 
   function verificationLabel(v: string): string {
@@ -18,10 +26,10 @@
     return "N/D";
   }
 
-  function confidenceClass(c: string): string {
-    if (c === "high") return "bg-emerald-100 text-emerald-700";
-    if (c === "medium") return "bg-amber-100 text-amber-700";
-    return "bg-slate-100 text-slate-500";
+  function confidenceTone(c: string): "success" | "warning" | "neutral" {
+    if (c === "high") return "success";
+    if (c === "medium") return "warning";
+    return "neutral";
   }
 
   function confidenceLabel(c: string): string {
@@ -31,22 +39,23 @@
   }
 </script>
 
-<div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+<Card class="overflow-hidden">
   <!-- Phase header -->
   <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
     <span class="h-2 w-2 shrink-0 rounded-full bg-teal-500"></span>
     <h1 class="text-sm font-semibold uppercase tracking-wide text-slate-700">
       {group.label}
     </h1>
-    <span class="ml-auto rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-600">
+    <Badge tone="neutral" class="ml-auto">
       {group.items.length} indice{group.items.length > 1 ? "s" : ""}
-    </span>
+    </Badge>
   </div>
 
   <!-- Evidence items -->
   <div class="divide-y divide-slate-100">
     {#each group.items as item}
-      <div class="px-4 py-3">
+      {@const isDemoted = simulationMode && item.verification !== "fait"}
+      <div class={`px-4 py-3 ${isDemoted ? "opacity-60" : ""}`}>
         <div class="flex flex-wrap items-start gap-2">
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5">
@@ -71,19 +80,15 @@
             </p>
           </div>
           <div class="flex shrink-0 flex-col items-end gap-1">
-            <span
-              class={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${verificationClass(item.verification)}`}
-            >
+            <Badge tone={badgeTone(item.verification)}>
               {verificationLabel(item.verification)}
-            </span>
-            <span
-              class={`rounded px-1.5 py-0.5 text-[10px] font-medium ${confidenceClass(item.confidence)}`}
-            >
-              {confidenceLabel(item.confidence)}
-            </span>
+            </Badge>
+            <Badge tone={confidenceTone(item.confidence)}>
+              confiance {confidenceLabel(item.confidence)}
+            </Badge>
           </div>
         </div>
       </div>
     {/each}
   </div>
-</div>
+</Card>
