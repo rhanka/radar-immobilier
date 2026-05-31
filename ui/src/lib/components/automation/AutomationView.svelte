@@ -10,6 +10,7 @@
     ShieldCheck,
     BarChart3,
   } from "@lucide/svelte";
+  import { Badge, Button } from "@sentropic/design-system-svelte";
   import {
     TREATMENTS,
     CONNECTORS,
@@ -17,6 +18,8 @@
     benchmarkRecap,
   } from "$lib/automation/automation-data.js";
   import type { TreatmentKind } from "$lib/automation/automation-data.js";
+  import Acronym from "$lib/components/Acronym.svelte";
+  import { getAcronym } from "$lib/glossary/acronyms.js";
   import BenchmarkComparison from "$lib/components/comparison/BenchmarkComparison.svelte";
 
   type AutoTabId = "cadences" | "comparaison";
@@ -41,6 +44,32 @@
     manuel: "bg-amber-100 text-amber-700",
     connecte: "bg-teal-100 text-teal-700",
   };
+
+  function statusBadgeTone(status: string): "neutral" | "warning" | "success" {
+    if (status === "connecte") return "success";
+    if (status === "manuel") return "warning";
+    return "neutral";
+  }
+
+  /**
+   * Extract acronym tokens from a connector label for wrapping.
+   * Only wraps discrete tokens that are known acronyms (e.g. "BDZI", "GRHQ").
+   * Returns array of parts: { text, isAcronym }.
+   */
+  function splitLabelAcronyms(label: string): Array<{ text: string; isAcronym: boolean }> {
+    const parts: Array<{ text: string; isAcronym: boolean }> = [];
+    // Tokenize by spaces and common separators, preserving them
+    const tokens = label.split(/(\s*\/\s*|\s+)/);
+    for (const token of tokens) {
+      const trimmed = token.trim();
+      if (trimmed && getAcronym(trimmed)) {
+        parts.push({ text: trimmed, isAcronym: true });
+      } else {
+        parts.push({ text: token, isAcronym: false });
+      }
+    }
+    return parts;
+  }
 </script>
 
 <section class="min-h-full bg-slate-50 p-6">
@@ -57,18 +86,14 @@
   <!-- Barre de tabs --------------------------------------------------------->
   <div class="mb-6 flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm w-fit">
     {#each autoTabs as tab}
-      <button
+      <Button
+        variant={activeTab === tab.id ? "primary" : "ghost"}
+        size="sm"
         type="button"
-        class={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-          activeTab === tab.id
-            ? "bg-teal-600 text-white shadow-sm"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-        }`}
-        aria-pressed={activeTab === tab.id}
-        on:click={() => { activeTab = tab.id; }}
+        onclick={() => { activeTab = tab.id; }}
       >
         {tab.label}
-      </button>
+      </Button>
     {/each}
   </div>
 
@@ -85,10 +110,10 @@
             </span>
             <div class="min-w-0">
               <h3 class="text-sm font-semibold text-slate-950">{treatment.title}</h3>
-              <span class="mt-1 inline-flex items-center gap-1 rounded bg-teal-100 px-2 py-0.5 text-[11px] font-semibold text-teal-700">
+              <Badge tone="success">
                 <Clock class="h-3 w-3" aria-hidden="true" />
                 {treatment.cadence}
-              </span>
+              </Badge>
             </div>
           </div>
           <p class="text-xs leading-5 text-slate-600">{treatment.description}</p>
@@ -126,11 +151,15 @@
         <tbody>
           {#each CONNECTORS as connector}
             <tr class="border-b border-slate-100 last:border-0">
-              <td class="p-3 font-medium text-slate-800">{connector.label}</td>
+              <td class="p-3 font-medium text-slate-800">
+                {#each splitLabelAcronyms(connector.label) as part}
+                  {#if part.isAcronym}<Acronym term={part.text} />{:else}{part.text}{/if}
+                {/each}
+              </td>
               <td class="p-3">
-                <span class={`rounded px-2 py-0.5 text-[11px] font-semibold ${statusColors[connector.status] ?? "bg-slate-100 text-slate-600"}`}>
+                <Badge tone={statusBadgeTone(connector.status)}>
                   {STATUS_LABELS_FR[connector.status]}
-                </span>
+                </Badge>
               </td>
               <td class="p-3 text-xs text-slate-500">{connector.note ?? ""}</td>
             </tr>
@@ -168,13 +197,13 @@
               <td class="p-3 text-center text-base font-semibold text-slate-950">{entry.total}</td>
               <td class="p-3">
                 {#if entry.fabrication === "multiple"}
-                  <span class="inline-flex items-center gap-1 rounded bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+                  <Badge tone="error">
                     <ShieldAlert class="h-3 w-3" aria-hidden="true" /> Fabrications détectées
-                  </span>
+                  </Badge>
                 {:else}
-                  <span class="inline-flex items-center gap-1 rounded bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                  <Badge tone="success">
                     <ShieldCheck class="h-3 w-3" aria-hidden="true" /> Aucune
-                  </span>
+                  </Badge>
                 {/if}
               </td>
             </tr>
@@ -185,13 +214,14 @@
 
     <p class="text-xs text-slate-500">
       Pour le détail métrique (M1-M7), les notes par piste et le verdict complet →
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
-        class="font-medium text-teal-700 underline underline-offset-2 hover:text-teal-900"
-        on:click={() => { activeTab = "comparaison"; }}
+        onclick={() => { activeTab = "comparaison"; }}
       >
         Voir la comparaison détaillée
-      </button>.
+      </Button>.
     </p>
   {:else}
     <!-- Comparaison détaillée (BenchmarkComparison intégrée) --------------->

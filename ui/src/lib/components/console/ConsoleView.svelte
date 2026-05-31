@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Terminal } from "@lucide/svelte";
+  import { Button } from "@sentropic/design-system-svelte";
   import QualificationTab from "./QualificationTab.svelte";
   import DeepDiveTab from "./DeepDiveTab.svelte";
   import JobsTab from "./JobsTab.svelte";
@@ -36,18 +37,14 @@
   <!-- Barre de tabs -->
   <div class="mb-6 flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm w-fit">
     {#each tabs as tab}
-      <button
+      <Button
+        variant={activeTab === tab.id ? "primary" : "ghost"}
+        size="sm"
         type="button"
-        class={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-          activeTab === tab.id
-            ? "bg-teal-600 text-white shadow-sm"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-        }`}
-        aria-pressed={activeTab === tab.id}
-        on:click={() => { activeTab = tab.id; }}
+        onclick={() => { activeTab = tab.id; }}
       >
         {tab.label}
-      </button>
+      </Button>
     {/each}
   </div>
 

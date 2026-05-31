@@ -5,8 +5,11 @@
     Switch,
     Badge,
     Alert,
+    Button,
     Card,
   } from "@sentropic/design-system-svelte";
+  import Acronym from "$lib/components/Acronym.svelte";
+  import { getAcronym } from "$lib/glossary/acronyms.js";
   import type { RecommendationKind } from "$lib/source-review/source-evaluation-data.js";
   import {
     groupByRecommendation,
@@ -134,7 +137,13 @@
 
                 <!-- Infos source -->
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-slate-950">{source.name}</p>
+                  <p class="text-sm font-semibold text-slate-950">
+                    {#if getAcronym(source.name.split(/\s/)[0])}
+                      <Acronym term={source.name.split(/\s/)[0]} />{source.name.slice(source.name.split(/\s/)[0].length)}
+                    {:else}
+                      {source.name}
+                    {/if}
+                  </p>
                   <p class="mt-1 text-xs text-slate-600">
                     {SOURCE_BENEFIT_FR[source.id] ?? "Source de donnees pour la detection de signaux."}
                   </p>
@@ -172,18 +181,15 @@
 
     <!-- Selecteur de fenetre -->
     <div class="mb-4 flex flex-wrap items-center gap-3">
-      <label for="retro-window" class="text-sm font-medium text-slate-700">
-        Fenetre retro-analyse :
-      </label>
-      <select
+      <Select
         id="retro-window"
+        label="Fenetre retro-analyse"
         bind:value={retroWindow}
-        class="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
       >
         {#each windowOptions as months}
           <option value={months}>{months} mois</option>
         {/each}
-      </select>
+      </Select>
       <span class="text-xs text-slate-500">
         (defaut : {RETRO_WINDOW_MONTHS_DEFAULT} mois)
       </span>
@@ -236,15 +242,16 @@
 
   <!-- CTA ------------------------------------------------------------------->
   <div class="mb-6">
-    <button
+    <Button
+      variant="primary"
+      size="md"
       type="button"
-      class="flex items-center gap-2 rounded-lg bg-teal-700 px-6 py-3 text-sm font-semibold text-white shadow transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-400 disabled:opacity-50"
       disabled={selectedIds.length === 0}
-      on:click={() => { showSummary = !showSummary; }}
+      onclick={() => { showSummary = !showSummary; }}
     >
       <PlayCircle class="h-4 w-4" aria-hidden="true" />
       Lancer l'onboarding
-    </button>
+    </Button>
   </div>
 
   <!-- Recapitulatif de confirmation (demo stub) ------------------------------>
