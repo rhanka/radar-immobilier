@@ -3,13 +3,15 @@
   import QualificationTab from "./QualificationTab.svelte";
   import DeepDiveTab from "./DeepDiveTab.svelte";
   import JobsTab from "./JobsTab.svelte";
+  import SourceReviewShell from "$lib/components/source-review/SourceReviewShell.svelte";
 
-  type TabId = "qualification" | "deepdive" | "jobs";
+  type TabId = "qualification" | "deepdive" | "jobs" | "cadran";
 
   const tabs: { id: TabId; label: string }[] = [
-    { id: "qualification", label: "Qualification (T3)" },
-    { id: "deepdive", label: "Approfondissement (T3)" },
-    { id: "jobs", label: "Jobs (T4)" },
+    { id: "qualification", label: "Qualification" },
+    { id: "deepdive", label: "Approfondissement" },
+    { id: "jobs", label: "Jobs" },
+    { id: "cadran", label: "Cadran sources" },
   ];
 
   let activeTab: TabId = "qualification";
@@ -21,14 +23,14 @@
     <div class="flex items-center gap-2">
       <Terminal class="h-5 w-5 text-teal-700" aria-hidden="true" />
       <p class="text-xs font-semibold uppercase tracking-wide text-teal-700">
-        Console opérations — Radar Immobilier
+        Console opérations, Radar Immobilier
       </p>
     </div>
     <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
-      Console T3 / T4
+      Console sources & jobs
     </h1>
     <p class="mt-1 text-sm text-slate-500">
-      Qualification des sources de données (T3) — évaluation, approfondissement et priorisation du catalogue — et supervision des jobs d'ingestion et de scoring (T4).
+      Qualification des sources (évaluation, approfondissement et priorisation du catalogue) et supervision des jobs d'ingestion et de scoring.
     </p>
   </header>
 
@@ -55,7 +57,9 @@
     <QualificationTab />
   {:else if activeTab === "deepdive"}
     <DeepDiveTab />
-  {:else}
+  {:else if activeTab === "jobs"}
     <JobsTab />
+  {:else}
+    <SourceReviewShell onBackToRadar={() => { activeTab = "qualification"; }} />
   {/if}
 </section>

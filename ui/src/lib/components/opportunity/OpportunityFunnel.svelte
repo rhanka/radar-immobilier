@@ -30,13 +30,13 @@
   <!-- ── Header ─────────────────────────────────────────────────────── -->
   <header class="mb-5">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
-      Analyse d'opportunité — Valleyfield
+      Analyse d'opportunité : Valleyfield
     </p>
     <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
       Dossiers d'opportunité foncière
     </h1>
     <p class="mt-1 text-sm text-slate-500">
-      3 dossiers réels — entonnoir PROCESS 6 phases, preuves tracées, score agrégé honnête.
+      3 dossiers réels ; entonnoir PROCESS 6 phases, preuves tracées, score agrégé honnête.
     </p>
   </header>
 
@@ -57,10 +57,20 @@
   {/if}
 
   <!-- ── Mode badge ─────────────────────────────────────────────────── -->
-  {#if mode === "simulation"}
-    <div class="mb-5 inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1">
-      <span class="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
-      <p class="text-xs font-semibold text-violet-700">Mode simulation — preuves simulées incluses</p>
+  {#if mode === "real"}
+    <div class="mb-5 flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5">
+      <span class="h-2 w-2 shrink-0 rounded-full bg-slate-500"></span>
+      <p class="text-sm text-slate-700">
+        <span class="font-semibold">Mode réel :</span> seules les preuves confirmées comptent.
+        Les axes dont le niveau repose sur une hypothèse (confiance faible) sont exclus du calcul et grisés.
+      </p>
+    </div>
+  {:else}
+    <div class="mb-5 flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5">
+      <span class="h-2 w-2 shrink-0 rounded-full bg-violet-500"></span>
+      <p class="text-sm text-violet-800">
+        <span class="font-semibold">Mode simulation :</span> hypothèses incluses. Le score affiché est la cible optimiste.
+      </p>
     </div>
   {/if}
 

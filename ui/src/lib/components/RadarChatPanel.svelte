@@ -18,7 +18,7 @@
         <Bot class="h-4 w-4" aria-hidden="true" />
       </div>
       <div>
-        <h2 class="text-sm font-semibold text-slate-950">Assistant radar</h2>
+        <h1 class="text-sm font-semibold text-slate-950">Assistant radar</h1>
         <p class="text-xs text-slate-500">Shell chat Sentropic, outils radar a venir</p>
       </div>
     </div>

@@ -147,3 +147,26 @@ est directement réutilisable.
   → coordonner le layout. ÉV10 est surtout serveur + se branche sur les points de décision d'ÉV9.
 - Ces ÉV8–ÉV10 **annulent/dépassent** l'ancien stub ÉV5 (Coordination/chat) et la D13 « découplé sans
   dep » — désormais on vise le réel (chat-ui + h2a).
+
+## 12. Décisions S3 — UAT #2 (app-shell, redondances, live) — figées 2026-05-28
+- **S3.1 Design flat → app-shell dense.** `@sentropic/design-system-skills` = **linter CLI** (jsdom),
+  PAS un levier UI (utile en CI plus tard). Vrai levier = **`@sentropic/design-system-svelte`** (déjà dep) :
+  `SideNav`, `Table`, `Drawer`, `Tabs`, `Card`, `Popover`, `Modal`. Radar n'en utilise rien → mono-colonne
+  plat. **ÉV8 reciblé** : app-shell dense (SideNav gauche persistante + contenu `grid-cols-12` + `Table`
+  pour les feeds + `Drawer` détails), puis re-polir les vues dedans.
+- **S3.2 Redondances → consolidation.** (a) cadran `SourceQuadrant` (Revue-sources) ↔ Console
+  `QualificationTab` = mêmes `sourceEvaluations` → **une surface Sources** (cadran = viz dans Console ;
+  retirer l'entrée Revue-sources). (b) `BenchmarkComparison` (Comparaison) ↔ `benchmarkRecap`
+  (Automatisation) = mêmes données → **un seul endroit** (dans Automatisation ; retirer Comparaison).
+  Nav 9 → ~6.
+- **S3.3 Live = agent PROMPT.md, pas ETL.** `@sentropic/remote` **n'existe pas** (404). `@sentropic/flow`
+  0.1.1 = runtime d'orchestration en **ports + fonctions pures** (`runJob`/`runProcessingLoop`/`FlowRuntime`),
+  **sans adapter de stockage** (table queue = ~150 LOC Drizzle applicatif). **ÉV11 redéfini** : un **agent
+  LLM exécute les 6 phases de `PROMPT.md`** pour une municipalité, outils = **web_search/extract Tavily**
+  (comme sentropic ; `../sentech-forge` n'a pas de provider) + helpers REST radar (rôle/cadastre/BDZI/GRHQ)
+  + obscura. Lancé comme **job de fond** (boucle `flow` + table Drizzle) → UI « Lancer l'analyse → job en
+  cours → progression SSE → dossiers ». Rend réel le CTA onboarding (lève D11/D17/D19). Dépend de la couche
+  LLM d'ÉV9 (provider neutre). Orchestration d'agents-CLI = couche **h2a** ultérieure.
+- **Séquence** : ÉV8 (app-shell + consolidation + re-polish) → ÉV9 (chat + llm-mesh + outils) → ÉV11
+  (agent PROMPT.md live) ; ÉV10 (h2a) en parallèle. Prérequis ÉV11 : `TAVILY_API_KEY` + clé LLM (présents
+  côté sentropic).

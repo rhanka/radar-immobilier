@@ -1,11 +1,25 @@
 <script lang="ts">
   import { Info, Clock, CheckCircle, AlertTriangle, Loader } from "@lucide/svelte";
-  import type { JobStatus, JobType } from "$lib/jobs/jobs-data";
+  import { Drawer, Button, Badge } from "@sentropic/design-system-svelte";
+  import type { Job, JobStatus, JobType } from "$lib/jobs/jobs-data";
   import { demoJobs, countsByStatus, filterJobsByMode } from "$lib/jobs/jobs-data.js";
   import { appMode } from "$lib/state/mode.js";
 
   $: jobs = filterJobsByMode(demoJobs, $appMode);
   $: counts = countsByStatus(jobs);
+
+  let drawerOpen = false;
+  let selectedJob: Job | null = null;
+
+  function openJob(job: Job): void {
+    selectedJob = job;
+    drawerOpen = true;
+  }
+
+  function closeDrawer(): void {
+    drawerOpen = false;
+    selectedJob = null;
+  }
 
   function statusBadgeClass(status: JobStatus): string {
     switch (status) {
@@ -53,7 +67,7 @@
   }
 
   function formatDuration(ms?: number): string {
-    if (ms === undefined) return "—";
+    if (ms === undefined) return "";
     if (ms < 1000) return `${ms} ms`;
     return `${(ms / 1000).toFixed(1)} s`;
   }
@@ -75,7 +89,7 @@
     <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
     <p class="text-sm text-amber-900">
       <span class="font-semibold">Données de démo.</span>
-      Les jobs affichés sont des stubs statiques — aucune orchestration réelle n'est connectée pour ÉV6. Le mode actif filtre les jobs de simulation.
+      Les jobs affichés sont des stubs statiques (aucune orchestration réelle connectée). Le mode actif filtre les jobs de simulation.
     </p>
   </div>
 
@@ -124,11 +138,15 @@
             <th class="px-3 py-2.5">Démarré</th>
             <th class="px-3 py-2.5">Durée</th>
             <th class="px-3 py-2.5">Mode</th>
+            <th class="px-3 py-2.5 sr-only">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           {#each jobs as job}
-            <tr class="hover:bg-slate-50">
+            <tr
+              class="cursor-pointer hover:bg-slate-50"
+              on:click={() => openJob(job)}
+            >
               <td class="px-4 py-2.5 font-medium text-slate-950">
                 {typeLabel(job.type)}
               </td>
@@ -145,11 +163,21 @@
                   {job.mode === 'real' ? 'Réel' : 'Simulation'}
                 </span>
               </td>
+              <td class="px-3 py-2.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onclick={(e) => { e.stopPropagation(); openJob(job); }}
+                >
+                  Détails
+                </Button>
+              </td>
             </tr>
           {/each}
           {#if jobs.length === 0}
             <tr>
-              <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-400">
+              <td colspan="7" class="px-4 py-6 text-center text-sm text-slate-400">
                 Aucun job pour ce mode.
               </td>
             </tr>
@@ -159,3 +187,67 @@
     </div>
   </div>
 </div>
+
+<!-- Drawer détail job -->
+<Drawer
+  open={drawerOpen}
+  title="Détail job"
+  description={selectedJob ? `${typeLabel(selectedJob.type)} : ${selectedJob.sourceRef}` : ""}
+  side="right"
+  onclose={closeDrawer}
+>
+  {#if selectedJob}
+    <div class="space-y-4 p-4">
+      <!-- Note stub démo -->
+      <div class="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+        <p class="text-sm text-amber-900">
+          <span class="font-semibold">Stub de démo.</span>
+          Ce job est une donnée statique. L'orchestration réelle sera connectée à l'étape ÉV11.
+        </p>
+      </div>
+
+      <!-- Champs du job -->
+      <dl class="rounded-lg border border-slate-200 bg-white divide-y divide-slate-100">
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">ID</dt>
+          <dd class="text-sm font-mono text-slate-800">{selectedJob.id}</dd>
+        </div>
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Type</dt>
+          <dd class="text-sm text-slate-800">{typeLabel(selectedJob.type)}</dd>
+        </div>
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</dt>
+          <dd>
+            <span class={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadgeClass(selectedJob.status)}`}>
+              {statusLabel(selectedJob.status)}
+            </span>
+          </dd>
+        </div>
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Source</dt>
+          <dd class="text-sm font-mono text-slate-800">{selectedJob.sourceRef}</dd>
+        </div>
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Démarré</dt>
+          <dd class="text-sm text-slate-800">{formatDate(selectedJob.startedAt)}</dd>
+        </div>
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Durée</dt>
+          <dd class="text-sm text-slate-800">
+            {selectedJob.durationMs !== undefined ? formatDuration(selectedJob.durationMs) : "En cours"}
+          </dd>
+        </div>
+        <div class="grid grid-cols-2 px-4 py-3">
+          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Mode</dt>
+          <dd>
+            <span class={`inline-block rounded px-1.5 py-0.5 text-xs font-semibold ${selectedJob.mode === 'real' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'}`}>
+              {selectedJob.mode === 'real' ? 'Réel' : 'Simulation'}
+            </span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  {/if}
+</Drawer>
