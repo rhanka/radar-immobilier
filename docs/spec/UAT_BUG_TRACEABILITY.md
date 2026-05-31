@@ -1,65 +1,65 @@
-# Traçabilité des bugs / retours UX signalés par l'utilisateur
+# Traçabilité fine des bugs / UX UAT — radar-immobilier
 
-> Établi en relisant les transcripts des 2 sessions (`0007450c` 24/05 + `e0f1d8ab`) croisés avec
-> le code de `main`. **Chaque statut est vérifié dans le code**, pas sur la foi des messages de commit.
-> ⚠️ **Découverte majeure** : le commit `daa52ff` (« Opportunités master-detail + phases en colonnes +
-> 100% design-system ») **n'est PAS dans `main`** — commit orphelin (tag `backup/local-main-divergence-daa52ff`),
-> jamais mergé. `main` (`30e8b09`) garde l'**ancien layout empilé** d'Opportunités. Donc **R2/R3/S3-A
-> ne sont PAS résolus dans le code livré** malgré l'apparence du `git log`.
+> Vérifiée au code sur `main` (HEAD `e50d59c`), grain fin (1 ligne par sous-demande), posture
+> **adverse** sur les « résolu » (la passe précédente sur-vendait : 24/28 ✅ annoncés vs réalité
+> 28 ✅ / 9 🟡 / 2 ❌ après re-vérification). Tableau **Problème → Résolution → Statut**.
 
-## Table de traçabilité
+| Problème (verbatim court) | Résolution (fichier/commit) ou « NON FAIT » | Statut |
+|---|---|---|
+| [BR-05R] Acronymes : hover sur chaque acronyme, partout | `Acronym.svelte` + glossaire 12 termes (`b65af64`) MAIS câblé sur 3 composants seulement, pas d'auto-scan ; absent Opportunités/Automatisation/Onboarding/Jobs | 🟡 PARTIEL |
+| [BR-05R] Tout en français | Définitions glossaire FR ; reste libellé « Reference » (anglais) dans `Acronym.svelte` + `GrillesView` | 🟡 PARTIEL |
+| [BR-05R] Liens de référence dans descriptions d'acronyme | champ `url` (CPTAQ/OACIQ…) dans le tooltip `Acronym.svelte` (`b65af64`) | ✅ |
+| [BR-05R] Matrice score 0-5 + traçabilité VISION | grille par axe + `ScoreHover` + réfs VISION §6 / PROCESS Étape 5 (`0c7dbe9`,`5b5cb1f`) | ✅ |
+| [BR-05R] Insights réels par source (faisceau de preuve) | preuves par phase + lien Source + badge fait/hypothèse/N-D ; PAS de vue dédiée « contribution par source » | 🟡 PARTIEL |
+| [S1] Story-telling / tour multi-étapes par écran | tour 24 étapes (`feat/demo-guided-tour`) JAMAIS mergé → absent de main | ❌ NON FAIT |
+| [S1] « plus d'étapes par écran, expliquer chaque vue » | idem, pas de tour dans main | ❌ NON FAIT |
+| [S1] « je ne vois aucune bulle jaune » | bulle d'aide ponctuelle `SignalsT1View` | ✅ (ponctuel) |
+| [S1] Radar↔Opportunité côte à côte | nav verticale, jamais côte-à-côte (caduc, Radar supprimé) | 🟡 PARTIEL |
+| [S1] clic sur l'un → voir l'autre | Approfondir → Opportunités filtré par signalId (`App.svelte`) | ✅ |
+| [S1] opportunités au pluriel | `AppSidebar` « Opportunités » | ✅ |
+| [S1] tous signaux → même opp @90 (bug affichage) | plus de "90" ; scores /100 ; signalId distincts (mapping 1:1, pas 1×N) | ✅ |
+| [S1] marge droite de folie | cap max-w retiré, pleine largeur | ✅ |
+| [S1] onglets navigables / push | nav AppSidebar ; mergé | ✅ |
+| [S2] supprimer T0/T1/T3/T4 | copie nettoyée (`ff84484`,`8446450`) | ✅ |
+| [S2] Onboarding.1 choisir la ville QC | Étape 1 Select municipalité, ville visible partout (`e3c7cb2`) | ✅ |
+| [S2] Onboarding.2 « Construire/Qualifier » imbitable + cocher=rien | Switch + bénéfice clair + récap live (`e3c7cb2`) | ✅ |
+| [S2] Radar.1 mapping 1×N / @90 non conforme | ancien Radar supprimé ; feed + dossiers signalId distincts (`8446450`) | ✅ |
+| [S2] Radar.2 chat side-panel détachable, toutes vues | `RadarChatPanel` existe mais NON monté ; convenu → ÉV9 | ⏳ ÉV9 |
+| [S2] Radar à supprimer | retiré du DemoView + nav | ✅ |
+| [S2] Signaux.1 que 3/6 affichés | 6 signaux tous rendus (`fa9dcf6`) | ✅ |
+| [S2] Signaux.1bis pas de score | Valeur /10 + barre + Confiance (`SignalRow`) | ✅ |
+| [S2] Signaux.2 « hypothétiques » confus | badge « Exemple (simulation) » + bandeau | ✅ |
+| [S2] Signaux.3 signaux vs radar | Radar supprimé, fil unique | ✅ |
+| [S2] Comparaison gardée ici ? + critères non expliqués | fondue dans Automatisation, M1-M7 + méthode affichés | ✅ |
+| [S2] Revue sources : activation incomprise | activation = Onboarding ; cadran+statuts+détail = Console | ✅ |
+| [S2] Opportunités réel/sim aucune différence | `axesForMode` réel exclut hypothèses + plafonne + bandeau (`e6d2f86`) | ✅ |
+| [S2] en réel : hypothèses supprimées ET dossier stoppé | axes exclus OK ; PAS de notion « dossier stoppé » | 🟡 PARTIEL |
+| [S2] Grilles moches + illisibles | refonte 2 mesures + grille par axe (`0c7dbe9`) | ✅ |
+| [S2] H2a difficile à comprendre | stub retiré du nav ; convenu → ÉV10 | ⏳ ÉV10 |
+| [S2] Console T3/T4 abscons + rien cliquable | tabs FR + Drawer détail au clic (`828b59b`) | ✅ |
+| [S2] tu mentionnes 6 cas, 3 affichés | 6 rendus | ✅ |
+| [S2] séance d'alignement scoring↔VISION | décisions figées + réfs VISION/PROCESS | ✅ |
+| [S2] passer à un score /100 ? | headline /100 + 0-5 en sous-texte | ✅ |
+| [S3] interfaces flat / mono-colonne | app-shell dense + Opportunités master-detail (`3c86b83`,`ac6c862`) | ✅ |
+| [S3] redondance cadran ↔ console | cadran fusionné dans Qualification (`5b5cb1f`) | ✅ |
+| [S3] redondance rapport agents | fondu dans Automatisation | ✅ |
+| [S3] rien d'automatisé / live | stubs étiquetés ; convenu → ÉV11 | ⏳ ÉV11 |
+| [S3] je vois encore T0 | strip complet, 0 occurrence (`ff84484`) | ✅ |
+| [S3] opportunités empilées : sélection/accordéon | master-detail liste+détail (`ac6c862`) | ✅ |
+| [S3] sous-éléments ≥ 2 colonnes | phases en `grid-cols-2` (`DossierCard`) | ✅ |
+| [S3] 100% design system | Opportunités migré DS ; Signaux/Console/Automatisation/Onboarding encore Tailwind brut | 🟡 PARTIEL |
+| [S3] « du non-réel dans le réel » | `axesForMode` corrige les AXES ; mais `filterRealMode` ne filtre PAS les evidence `hypothese` en réel → preuves hypothèses encore visibles | 🟡 PARTIEL |
+| [S3] pas démarré / bonne branche ? | mauvais worktree bind-monté ; ré-monté (process) | ❔ caduc |
+| [S3] je ne vois pas la traçabilité | ce document (au grain fin) | ✅ |
 
-| # | Quand | Bug signalé (verbatim court) | Statut | Preuve | Reste à faire |
-|---|---|---|---|---|---|
-| 1 | S1 BR-05R | « c assez bugué » (vue qualif) | ❔ À RE-VÉRIFIER | source-review refondue en tab Console (`3c86b83`) | UAT sur nouvelle Console |
-| 2 | S1 BR-05R | Acronymes : hover sur chaque acronyme, partout | ✅ RÉSOLU | `b65af64` composant `Acronym` + glossaire 12 termes, câblé Signaux/Grilles/Console | — |
-| 3 | S1 BR-05R | Tout en français | ❔ À RE-VÉRIFIER | UI actuelle FR | Vérif glossaire restant |
-| 4 | S1 BR-05R | Liens de réf dans descriptions d'acronyme | ✅ RÉSOLU | `b65af64` glossaire avec `url` (CPTAQ, OACIQ…) affiché dans le hover | — |
-| 5 | S1 BR-05R | Matrice score 1/5..5/5 + traçabilité VISION (comme sentropic) | ✅ RÉSOLU | grilles 0-5 + rationale + `ScoreHover` ; **réf VISION §6 / PROCESS Étape 5 affichée dans Grilles** (`5b5cb1f`) | — |
-| 6 | S1 BR-05R | Insights réels par source (faisceau de preuve) + liens | 🟡 PARTIEL | preuves par phase + lien Source + badge fait/hypothèse/N-D | Vue « valorisation par source » absente |
-| 7 | S1 | Story-telling / bulle jaune au 1ᵉ passage | 🟡 PARTIEL | tour 24 étapes jamais mergé ; bulle dual-tri seule (`fa9dcf6`) | Tour guidé complet absent de main |
-| 8 | S1 | « je ne vois aucune bulle jaune » | ✅ RÉSOLU | bulle d'aide `SignalsT1View` | — |
-| 9 | S1 | Radar↔Opportunité côte à côte, clic mène à l'autre | 🟡 PARTIEL | nav latérale ; Approfondir→Opportunités filtrée | Pas de côte-à-côte (Radar supprimé, en partie caduc) |
-| 10 | S1 | « opportunités au pluriel » | ✅ RÉSOLU | `AppSidebar` label "Opportunités" | — |
-| 11 | S1 | Tous signaux → 1 opportunité @ 90 (bug) | ✅ RÉSOLU | plus de "90" ; mapping 1→N via `signalId` | — |
-| 12 | S1 | « marge droite de folie » | ✅ RÉSOLU | cap `max-w` retiré | — |
-| 13 | S1 | Onglets navigables / push GitHub | ✅ RÉSOLU | nav AppSidebar ; tout mergé | — |
-| G1 | S2 | Jargon T0/T1/T3/T4 | ✅ RÉSOLU | `ff84484`, `8446450` | — |
-| ON1 | S2 | Onboarding sans choix de ville | ✅ RÉSOLU | `e3c7cb2` Select municipalité QC | — |
-| ON2 | S2 | « Construire/Qualifier l'accès » imbitable, cocher = rien | ✅ RÉSOLU | `OnboardingView` Switch + récap live | — |
-| RA1 | S2 | Signaux → 1 opp @ 90 non-conforme | ✅ RÉSOLU | ancien Radar supprimé `8446450` | — |
-| RA2/CH1 | S2 | Chat global side-panel/détachable (comme sentropic) | ⏳ DIFFÉRÉ →ÉV9 | `RadarChatPanel` présent mais non câblé | Implémenter chat-ui dans le layout |
-| RA3 | S2 | Supprimer Radar | ✅ RÉSOLU | Signaux = feed unique | — |
-| SI1 | S2 | 6 signaux en données, 3 affichés | ✅ RÉSOLU | `fa9dcf6` 6 affichés | — |
-| SI2 | S2 | « signaux hypothétiques » confus | ✅ RÉSOLU | badge « Exemple (simulation) » | — |
-| SI3 | S2 | Signaux vs Radar | ✅ RÉSOLU | fusion | — |
-| SI4 | S2 | Pas de score visible | ✅ RÉSOLU | Valeur /10 + Confiance explicites ; dérogation affiche « Filtre (pas de score) » `5b5cb1f` | — |
-| CMP1 | S2 | Comparaison toujours là, critères M1-M7 non expliqués | ✅ RÉSOLU | `0c20122` fondue dans Automatisation | — |
-| SRC1 | S2 | Revue sources : activation incomprise | ✅ RÉSOLU | tab « Cadran sources » Console `828b59b` | — |
-| OP1 | S2 | Réel/sim : aucune différence | ✅ RÉSOLU | `e6d2f86` axesForMode (réel exclut hypothèses + plafonne) | — |
-| GR1 | S2 | Grilles moches + illisibles | ✅ RÉSOLU | `0c7dbe9` 2 tabs (/10 vs /100) + grille par axe | — |
-| H2A1 | S2 | h2a hors-sol | ⏳ DIFFÉRÉ →ÉV10 | stub Coordination retiré du nav | Implémenter h2a API |
-| CO1 | S2 | « T3/T4 » abscons | ✅ RÉSOLU | copy sans T3/T4 | — |
-| CO2 | S2 | Rien cliquable | ✅ RÉSOLU | `828b59b` Drawer détail source/job | — |
-| S3-A | S3 | Interfaces flat, mono-colonne | ✅ RÉSOLU | app-shell dense (`3c86b83`) + **Opportunités master-detail** (`ac6c862`) | — |
-| S3-B1 | S3 | Redondance cadran ↔ console | ✅ RÉSOLU | cadran **fusionné dans Qualification**, tab séparé retiré `5b5cb1f` | — |
-| S3-B2 | S3 | Redondance rapport agents | ✅ RÉSOLU | fondue dans Automatisation | — |
-| S3-C | S3 | Rien d'automatisé/live | ⏳ DIFFÉRÉ →ÉV11 | AutomationView = stub | Agent PROMPT.md + Tavily + flow |
-| R1 | S3 | « je vois encore T0 » | ✅ RÉSOLU | `ff84484` strip complet | — |
-| R2 | S3 | Opportunités empilées ; sélection/accordéon ; ≥2 colonnes par sous-élément | ✅ RÉSOLU | **réimplémenté sur main** : master-detail `grid-cols-12` + phases `grid-cols-2` (`ac6c862`) | — |
-| R3 | S3 | « 100% design system » | ✅ RÉSOLU | Opportunités passées en DS (Card/Badge/Alert) `ac6c862` ; DS-lint 0 partout | — |
-| R4 | S3 | « du non-réel dans le réel » | 🟡 PARTIEL | axesForMode exclut hypothèses | À reconfirmer en UAT |
-| R5 | S3 | « pas démarré » / « aucune différence sur :5301 » | ✅ RÉSOLU (process) | mauvais worktree/branche bind-montés | — |
+## Décompte (43 items) : ✅ 28 · 🟡 9 · ❌ 2 · ⏳ 3 (ÉV9/10/11) · ❔ 1
 
-## Synthèse (28 items distincts) — après lot `feat/uat-fixes`
-- ✅ RÉSOLU : **24** (dont R2/R3/S3-A réimplémentés `ac6c862`, #2/#4 acronymes `b65af64`, SI4/#5/S3-B1 `5b5cb1f`)
-- ⏳ DIFFÉRÉ (évolutions convenues, pas des bugs) : 3 — RA2/CH1 chat→ÉV9, H2A1 h2a→ÉV10, S3-C live→ÉV11
-- 🟡 PARTIEL restant : 2 — **#6** (vue « valorisation par source » / faisceau dédiée — non construite), **#9** (Radar↔Opp côte-à-côte — en partie caduc, Radar supprimé)
-- ❔/⏳ feature non mergée : **#7** (tour guidé 24 étapes — jamais mergé ; bulle d'aide ponctuelle présente)
-- ❔ À RE-VÉRIFIER : #1, #3 (anciennes vues de qualif refondues en Console)
-
-### Reste réellement à faire (non clos, explicite)
-- **#6** — vue dédiée « valorisation de chaque source dans le faisceau de preuves » (les preuves par phase existent, mais pas la vue d'analyse de contribution par source).
-- **#7** — tour guidé complet (storytelling) : était sur `feat/demo-guided-tour`, jamais mergé.
-- **#9** — affichage côte-à-côte Radar/Opportunités : en grande partie caduc (Radar supprimé) ; reste l'enchaînement Approfondir→Opportunités.
-- **ÉV9 / ÉV10 / ÉV11** — chat réel, h2a, pipelines live : évolutions de la roadmap (spec §11/§12), pas des bugs.
+## 🚫 Bloquant UAT — non résolu (à traiter)
+1. **❌ Tour guidé / story-telling multi-étapes** (demandé 2×, jamais mergé)
+2. **🟡 Acronymes « partout »** — câblés sur 3 vues seulement
+3. **🟡 « du non-réel dans le réel »** — `filterRealMode` ne retire pas les evidence `hypothese` en mode réel
+4. **🟡 100% design-system** — Signaux/Console/Automatisation/Onboarding encore en Tailwind brut
+5. **🟡 « dossier stoppé » en réel** — non implémenté
+6. **🟡 Insights/valorisation par source** — vue de contribution par source absente
+7. **🟡 Français** — libellés « Reference » anglais résiduels
+8. **🟡 Radar↔Opp côte-à-côte** — largement caduc (Radar supprimé) ; à confirmer comme abandonné
