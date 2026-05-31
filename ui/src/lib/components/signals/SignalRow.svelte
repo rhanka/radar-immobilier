@@ -58,6 +58,8 @@
   $: typeLabel = TYPE_LABELS[signal.type] ?? signal.type;
   $: isEcarte = signal.status === "écarté";
   $: isSimulation = signal.mode === "simulation";
+  // S1.2: dérogations = filtre pur, pas de score /10
+  $: isDerogation = signal.type === "derogation-relevant" || signal.type === "derogation-irrelevant";
 </script>
 
 <!-- SI1 : simulation = légèrement atténuée (opacity-80) mais toujours visible -->
@@ -88,18 +90,22 @@
     {/if}
   </div>
 
-  <!-- SI4 — Valeur /10 avec libellé explicite -->
-  <div class="flex shrink-0 flex-col items-center gap-0.5" title="Valeur de triage /10 (priorité par type, VISION §6)">
+  <!-- SI4 — Valeur /10 avec libellé explicite ; dérogations = filtre pur (S1.2) -->
+  <div class="flex shrink-0 flex-col items-center gap-0.5" title={isDerogation ? "Dérogation : filtre pur, pas de score /10 (VISION §6)" : "Valeur de triage /10 (priorité par type, VISION §6)"}>
     <span class="text-[10px] font-medium uppercase tracking-wide text-slate-400">Valeur</span>
-    <span class="text-base font-bold text-slate-900">
-      {signal.value}<span class="text-[11px] font-normal text-slate-400">/10</span>
-    </span>
-    <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
-      <div
-        class="h-full rounded-full bg-teal-500"
-        style="width: {(signal.value / 10) * 100}%"
-      ></div>
-    </div>
+    {#if isDerogation}
+      <span class="text-[11px] font-semibold text-slate-400 italic">Filtre (pas de score)</span>
+    {:else}
+      <span class="text-base font-bold text-slate-900">
+        {signal.value}<span class="text-[11px] font-normal text-slate-400">/10</span>
+      </span>
+      <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+        <div
+          class="h-full rounded-full bg-teal-500"
+          style="width: {(signal.value / 10) * 100}%"
+        ></div>
+      </div>
+    {/if}
   </div>
 
   <!-- SI4 — Confiance avec libellé explicite -->

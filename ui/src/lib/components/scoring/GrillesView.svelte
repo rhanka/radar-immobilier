@@ -174,6 +174,9 @@
         La confiance (haute / moyenne / faible) est affichee separement dans la vue Signaux.
         Elle ne modifie pas la valeur du signal ; elle indique la solidite de la preuve.
       </p>
+      <p class="mt-2 text-xs text-slate-400">
+        Reference : VISION.md §6 (priorites par type)
+      </p>
     </div>
   {/if}
 
@@ -237,6 +240,9 @@
       </div>
       <p class="mt-3 text-xs text-slate-500">
         Les poids sont fixes en V1 (PROCESS). La renormalisation sur axes disponibles conserve les rapports de poids entre axes presents.
+      </p>
+      <p class="mt-2 text-xs text-slate-400">
+        Reference : PROCESS.md Etape 5 (5 axes ponderes)
       </p>
     </div>
 
