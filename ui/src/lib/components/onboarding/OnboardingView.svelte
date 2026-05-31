@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { Info, PlayCircle, AlertCircle } from "@lucide/svelte";
+  import { Info, PlayCircle } from "@lucide/svelte";
   import {
     Select,
     Switch,
     Badge,
-    Button,
     Alert,
     Card,
   } from "@sentropic/design-system-svelte";

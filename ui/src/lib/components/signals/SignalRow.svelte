@@ -74,7 +74,7 @@
     </div>
     {#if signal.bylaw || signal.zone}
       <p class="mt-0.5 text-xs text-slate-500">
-        {#if signal.bylaw}Règl. {signal.bylaw}{/if}{#if signal.bylaw && signal.zone} — {/if}{#if signal.zone}Zone {signal.zone}{/if}
+        {#if signal.bylaw}Règl. {signal.bylaw}{/if}{#if signal.bylaw && signal.zone}, {/if}{#if signal.zone}Zone {signal.zone}{/if}
       </p>
     {/if}
   </div>

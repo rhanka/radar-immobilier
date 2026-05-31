@@ -55,7 +55,7 @@
   <!-- ── 1. Header ──────────────────────────────────────────────────────────-->
   <header class="mb-2">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
-      Socle ÉV5 — coordination
+      Socle ÉV5 : coordination
     </p>
     <div class="mt-1 flex flex-wrap items-center gap-3">
       <h1 class="text-2xl font-semibold tracking-normal text-slate-950">
@@ -67,7 +67,7 @@
       </span>
     </div>
     <p class="mt-2 text-sm text-slate-500 leading-6">
-      L'IA n'est jamais <span class="font-semibold text-slate-700">PRINCIPAL</span> — elle orchestre
+      L'IA n'est jamais <span class="font-semibold text-slate-700">PRINCIPAL</span> : elle orchestre
       (<span class="font-medium">chef d'orchestre / agents</span>) sous une
       <span class="font-medium text-violet-700">POLICY</span>. (socle §11)
     </p>
@@ -98,7 +98,7 @@
       <BookOpen class="h-4 w-4 shrink-0 text-teal-600" aria-hidden="true" />
       <div class="flex-1 min-w-0">
         <p class="text-sm font-semibold text-slate-950">Journal des décisions</p>
-        <p class="text-xs text-slate-500">Append-only — {entries.length} entrée{entries.length !== 1 ? "s" : ""}</p>
+        <p class="text-xs text-slate-500">Append-only : {entries.length} entrée{entries.length !== 1 ? "s" : ""}</p>
       </div>
     </div>
 
@@ -135,7 +135,7 @@
 
     <div class="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-4 py-2">
       <Info class="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
-      <p class="text-[11px] text-slate-400">Journal append-only — aucune suppression ni modification.</p>
+      <p class="text-[11px] text-slate-400">Journal append-only : aucune suppression ni modification.</p>
     </div>
   </div>
 
@@ -169,7 +169,7 @@
     <div class="flex items-start gap-2 border-t border-amber-100 bg-amber-50 px-4 py-2.5">
       <AlertCircle class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" aria-hidden="true" />
       <p class="text-[11px] text-amber-700">
-        Chat de démonstration — aucun appel LLM réel. Les réponses sont simulées localement.
+        Chat de démonstration : aucun appel LLM réel. Les réponses sont simulées localement.
       </p>
     </div>
   </div>
