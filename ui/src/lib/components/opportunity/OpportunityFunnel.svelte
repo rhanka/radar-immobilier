@@ -1,9 +1,10 @@
 <script lang="ts">
   import { valleyfieldDossiers } from "@radar/domain";
+  import { WEIGHTS, aggregate } from "@radar/scoring";
+  import { Alert, Badge, Button, Card, EmptyState } from "@sentropic/design-system-svelte";
+  import type { OpportunityDossierT } from "@radar/domain";
   import { appMode } from "$lib/state/mode.js";
-  import {
-    filterDossiersBySignalId,
-  } from "$lib/opportunites/funnel.js";
+  import { filterDossiersBySignalId } from "$lib/opportunites/funnel.js";
   import DossierCard from "./DossierCard.svelte";
 
   /** Optional: render only the dossier linked to this signal. */
@@ -16,17 +17,54 @@
 
   $: filtered = filterDossiersBySignalId(valleyfieldDossiers, selectedSignalId);
 
+  /** Selected dossier — defaults to first in the list. */
+  let selectedId: string | undefined = undefined;
+  $: selectedDossier = filtered.find((d) => d.id === selectedId) ?? filtered[0] ?? undefined;
+
+  function handleSelect(dossier: OpportunityDossierT): void {
+    selectedId = dossier.id;
+  }
+
   function handleClearFilter(): void {
     if (onClearFilter) {
       onClearFilter();
     } else {
-      // Local reset when no parent callback is wired
       selectedSignalId = undefined;
     }
   }
+
+  function scoreHundred(dossier: OpportunityDossierT): number | null {
+    const res = aggregate(dossier.axes, WEIGHTS);
+    if (res.tooThin || res.score === null) return null;
+    return Math.round(res.score * 20);
+  }
+
+  function capLabel(cap: string): string {
+    if (cap === "monter-dossier-acquisition") return "Acquérir";
+    if (cap === "qualifier-avec-expert") return "Qualifier";
+    if (cap === "approcher-proprietaire") return "Approcher";
+    if (cap === "surveiller") return "Surveiller";
+    if (cap === "rejeter") return "Rejeter";
+    return cap;
+  }
+
+  function capTone(cap: string): "success" | "warning" | "info" | "neutral" | "error" {
+    if (cap === "monter-dossier-acquisition") return "success";
+    if (cap === "qualifier-avec-expert") return "warning";
+    if (cap === "approcher-proprietaire") return "info";
+    if (cap === "surveiller") return "neutral";
+    return "error";
+  }
+
+  function scoreTone(s: number | null): "success" | "warning" | "error" | "neutral" {
+    if (s === null) return "neutral";
+    if (s >= 70) return "success";
+    if (s >= 50) return "warning";
+    return "error";
+  }
 </script>
 
-<section class="min-h-full bg-slate-50 p-6">
+<section class="flex min-h-full flex-col bg-slate-50 p-6">
   <!-- ── Header ─────────────────────────────────────────────────────── -->
   <header class="mb-5">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
@@ -36,63 +74,88 @@
       Dossiers d'opportunité foncière
     </h1>
     <p class="mt-1 text-sm text-slate-500">
-      3 dossiers réels ; entonnoir PROCESS 6 phases, preuves tracées, score agrégé honnête.
+      3 dossiers réels, entonnoir PROCESS 6 phases, preuves tracées, score agrégé honnête.
     </p>
   </header>
 
   <!-- ── Signal filter banner ───────────────────────────────────────── -->
   {#if selectedSignalId !== undefined}
-    <div class="mb-5 flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2.5">
-      <p class="flex-1 text-sm text-teal-800">
-        Filtré par signal <span class="font-mono font-semibold">{selectedSignalId}</span>
-      </p>
-      <button
-        type="button"
-        class="shrink-0 text-xs font-medium text-teal-700 underline hover:text-teal-900"
-        on:click={handleClearFilter}
-      >
-        Tout afficher
-      </button>
+    <div class="mb-5">
+      <Alert tone="info" title="Filtré par signal {selectedSignalId}">
+        {#snippet actions()}
+          <Button variant="ghost" size="sm" onclick={handleClearFilter}>
+            Tout afficher
+          </Button>
+        {/snippet}
+      </Alert>
     </div>
   {/if}
 
-  <!-- ── Mode badge ─────────────────────────────────────────────────── -->
-  {#if mode === "real"}
-    <div class="mb-5 flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5">
-      <span class="h-2 w-2 shrink-0 rounded-full bg-slate-500"></span>
-      <p class="text-sm text-slate-700">
-        <span class="font-semibold">Mode réel :</span> seules les preuves confirmées comptent.
-        Les axes dont le niveau repose sur une hypothèse (confiance faible) sont exclus du calcul et grisés.
-      </p>
-    </div>
-  {:else}
-    <div class="mb-5 flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5">
-      <span class="h-2 w-2 shrink-0 rounded-full bg-violet-500"></span>
-      <p class="text-sm text-violet-800">
-        <span class="font-semibold">Mode simulation :</span> hypothèses incluses. Le score affiché est la cible optimiste.
-      </p>
-    </div>
-  {/if}
-
-  <!-- ── Dossier list or empty state ────────────────────────────────── -->
+  <!-- ── Empty state ─────────────────────────────────────────────────── -->
   {#if filtered.length === 0}
-    <div class="flex min-h-[12rem] flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-      <p class="text-sm font-semibold text-slate-700">Aucun dossier qualifié pour ce signal pour l'instant.</p>
-      {#if selectedSignalId !== undefined}
-        <button
-          type="button"
-          class="mt-3 text-xs font-medium text-teal-700 underline hover:text-teal-900"
-          on:click={handleClearFilter}
-        >
-          Afficher tous les dossiers
-        </button>
-      {/if}
-    </div>
+    <EmptyState
+      title="Aucun dossier qualifié pour ce signal"
+      message="Aucun dossier d'opportunité ne correspond au signal sélectionné pour l'instant."
+    >
+      {#snippet action()}
+        {#if selectedSignalId !== undefined}
+          <Button variant="secondary" size="sm" onclick={handleClearFilter}>
+            Afficher tous les dossiers
+          </Button>
+        {/if}
+      {/snippet}
+    </EmptyState>
   {:else}
-    <div class="space-y-8">
-      {#each filtered as dossier (dossier.id)}
-        <DossierCard {dossier} {mode} />
-      {/each}
+    <!-- ── Master-detail layout ─────────────────────────────────────── -->
+    <div class="grid min-h-0 flex-1 grid-cols-12 gap-5">
+
+      <!-- ── LEFT: selectable dossier list (col-span-4) ──────────────── -->
+      <div class="col-span-4 flex flex-col gap-2">
+        <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {filtered.length} dossier{filtered.length > 1 ? "s" : ""}
+        </p>
+        {#each filtered as dossier (dossier.id)}
+          {@const res = aggregate(dossier.axes, WEIGHTS)}
+          {@const s100 = scoreHundred(dossier)}
+          {@const isSelected = (selectedDossier?.id ?? filtered[0]?.id) === dossier.id}
+          <button
+            type="button"
+            class="w-full text-left"
+            on:click={() => handleSelect(dossier)}
+          >
+            <Card interactive class={isSelected ? "ring-2 ring-teal-500" : ""}>
+              <div class="p-3">
+                <p class="text-sm font-semibold leading-5 text-slate-900">
+                  {dossier.title}
+                </p>
+                <p class="mt-0.5 text-xs text-slate-500">{dossier.address}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                  <Badge tone="neutral">{dossier.zone}</Badge>
+                  {#if s100 === null}
+                    <Badge tone="neutral">– /100</Badge>
+                  {:else}
+                    <Badge tone={scoreTone(s100)}>{s100}/100</Badge>
+                  {/if}
+                  <Badge tone={capTone(res.recommendationCap)}>
+                    {capLabel(res.recommendationCap)}
+                  </Badge>
+                  {#if res.partial}
+                    <Badge tone="warning">Partiel</Badge>
+                  {/if}
+                </div>
+              </div>
+            </Card>
+          </button>
+        {/each}
+      </div>
+
+      <!-- ── RIGHT: detail pane (col-span-8) ────────────────────────── -->
+      <div class="col-span-8 min-h-0 overflow-hidden">
+        {#if selectedDossier}
+          <DossierCard dossier={selectedDossier} {mode} />
+        {/if}
+      </div>
+
     </div>
   {/if}
 </section>
