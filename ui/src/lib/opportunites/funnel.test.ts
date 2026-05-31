@@ -143,3 +143,44 @@ describe("applyMode", () => {
     expect(result).toHaveLength(2);
   });
 });
+
+describe("applyMode — real mode: hypothese and non-disponible evidence kept but NOT fait (#41)", () => {
+  it("real mode keeps hypothese and non-disponible items (demotion is visual only, not a filter)", () => {
+    const items = [
+      { verification: "fait" as const },
+      { verification: "hypothese" as const },
+      { verification: "non-disponible" as const },
+    ];
+    const result = applyMode(items, "real");
+    // All three pass through applyMode; visual demotion is handled in PhaseColumn
+    expect(result).toHaveLength(3);
+  });
+
+  it("real mode: only fait items are established facts; hypothese/non-disponible must be demoted in view", () => {
+    const items = [
+      { verification: "fait" as const },
+      { verification: "hypothese" as const },
+      { verification: "non-disponible" as const },
+    ];
+    const result = applyMode(items, "real");
+    const established = result.filter((i) => i.verification === "fait");
+    const unverified = result.filter((i) => i.verification !== "fait");
+    // Only fait items should be presented as established facts
+    expect(established).toHaveLength(1);
+    // Non-fait items are present but must be visually demoted (greyed, "non vérifié en mode réel")
+    expect(unverified).toHaveLength(2);
+    for (const item of unverified) {
+      expect(item.verification).not.toBe("fait");
+    }
+  });
+
+  it("simulation mode keeps hypothese and non-disponible items without special treatment", () => {
+    const items = [
+      { verification: "fait" as const },
+      { verification: "hypothese" as const },
+      { verification: "non-disponible" as const },
+    ];
+    const result = applyMode(items, "simulation");
+    expect(result).toHaveLength(3);
+  });
+});

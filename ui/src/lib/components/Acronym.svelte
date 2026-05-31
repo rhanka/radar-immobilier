@@ -62,7 +62,7 @@
             class="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-teal-600 hover:text-teal-800 hover:underline"
           >
             <ExternalLink class="h-3 w-3" aria-hidden="true" />
-            Reference
+            Référence
           </a>
         {/if}
       </div>
