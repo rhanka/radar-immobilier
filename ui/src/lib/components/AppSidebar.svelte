@@ -4,7 +4,6 @@
     Radio,
     Building2,
     SlidersHorizontal,
-    MessagesSquare,
     MonitorDot,
     Zap,
   } from "@lucide/svelte";
@@ -23,7 +22,6 @@
     { id: "console", label: "Sources", icon: MonitorDot },
     { id: "automation", label: "Automatisation", icon: Zap },
     { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
-    { id: "coordination", label: "Coordination", icon: MessagesSquare },
   ];
 </script>
 
