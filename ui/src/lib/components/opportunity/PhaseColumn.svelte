@@ -35,9 +35,9 @@
   <!-- Phase header -->
   <div class="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
     <span class="h-2 w-2 shrink-0 rounded-full bg-teal-500"></span>
-    <h4 class="text-sm font-semibold uppercase tracking-wide text-slate-700">
+    <h1 class="text-sm font-semibold uppercase tracking-wide text-slate-700">
       {group.label}
-    </h4>
+    </h1>
     <span class="ml-auto rounded bg-slate-200 px-1.5 py-0.5 text-xs text-slate-600">
       {group.items.length} indice{group.items.length > 1 ? "s" : ""}
     </span>

@@ -18,7 +18,7 @@
 <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
   <div class="mb-3 flex items-center gap-2">
     <Info class="h-4 w-4 text-teal-700" aria-hidden="true" />
-    <h2 class="text-sm font-semibold text-slate-950">Critères et acronymes</h2>
+    <h1 class="text-sm font-semibold text-slate-950">Critères et acronymes</h1>
   </div>
 
   <div class="flex flex-wrap gap-2">
