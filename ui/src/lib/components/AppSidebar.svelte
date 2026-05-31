@@ -6,12 +6,15 @@
     SlidersHorizontal,
     MonitorDot,
     Zap,
+    MapPin,
   } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views";
   import { appMode, toggleMode } from "$lib/state/mode.js";
 
   export let activeView: DemoView;
   export let onSelect: (view: DemoView) => void;
+  /** Callback pour lancer / relancer la visite guidee. */
+  export let onStartTour: (() => void) | undefined = undefined;
 
   $: mode = $appMode;
 
@@ -51,8 +54,23 @@
     {/each}
   </nav>
 
-  <!-- Réel/Simulation toggle -->
-  <div class="border-t border-slate-200 px-4 py-3">
+  <!-- Bas de sidebar : visite guidee + toggle mode -->
+  <div class="border-t border-slate-200 px-4 py-3 space-y-2">
+    <!-- Bouton Visite guidee -->
+    {#if onStartTour}
+      <button
+        type="button"
+        aria-label="Lancer la visite guidee"
+        title="Lancer la visite guidee"
+        on:click={onStartTour}
+        class="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-1"
+      >
+        <MapPin class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        Visite guidee
+      </button>
+    {/if}
+
+    <!-- Reel/Simulation toggle -->
     <button
       type="button"
       aria-label={mode === "real" ? "Passer en mode simulation" : "Passer en mode réel"}
