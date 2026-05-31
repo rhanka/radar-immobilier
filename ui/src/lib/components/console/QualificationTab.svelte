@@ -12,6 +12,9 @@
     recommendationLabels,
   } from "$lib/source-review/source-review-labels.js";
   import SourceDeepDive from "$lib/components/source-review/SourceDeepDive.svelte";
+  import SourceQuadrant from "$lib/components/source-review/SourceQuadrant.svelte";
+
+  let selectedSourceId = "avis-publics-valleyfield";
 
   $: statusRows = qualificationStatus();
 
@@ -64,6 +67,13 @@
 </script>
 
 <div class="space-y-6">
+  <!-- S3-B1 : cadran sources integre ici (fusion onglet Cadran) -->
+  <SourceQuadrant
+    sources={sourceEvaluations}
+    {selectedSourceId}
+    onSelectSource={(sourceId) => { selectedSourceId = sourceId; }}
+  />
+
   <!-- Compteurs par groupe -->
   <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
     {#each statusRows as row}
