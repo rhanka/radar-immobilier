@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { AlertCircle, Filter, HelpCircle } from "@lucide/svelte";
+  import { Filter, HelpCircle } from "@lucide/svelte";
+  import { Alert, Button, Select } from "@sentropic/design-system-svelte";
   import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
@@ -81,22 +82,19 @@
 
   <!-- Bandeau mode réel / simulation -->
   {#if mode === "real"}
-    <div class="mb-4 flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-2.5">
-      <span class="h-2 w-2 shrink-0 rounded-full bg-teal-500"></span>
-      <p class="text-sm text-teal-800">
-        <span class="font-semibold">Mode réel :</span>
-        {countReal} signal{countReal !== 1 ? "s" : ""} confirmé{countReal !== 1 ? "s" : ""}.
-        Basculez en simulation pour voir les exemples de calibration.
-      </p>
+    <div class="mb-4">
+      <Alert
+        tone="success"
+        title="Mode réel : {countReal} signal{countReal !== 1 ? 's' : ''} confirmé{countReal !== 1 ? 's' : ''}."
+        message="Basculez en simulation pour voir les exemples de calibration."
+      />
     </div>
   {:else}
-    <div class="mb-4 flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5">
-      <span class="h-2 w-2 shrink-0 rounded-full bg-violet-500"></span>
-      <p class="text-sm text-violet-800">
-        <span class="font-semibold">Mode simulation :</span>
-        {countPool} signal{countPool !== 1 ? "s" : ""}
-        ({countReal} réel{countReal !== 1 ? "s" : ""} + {countSim} exemple{countSim !== 1 ? "s" : ""} synthétique{countSim !== 1 ? "s" : ""} badgé{countSim !== 1 ? "s" : ""}).
-      </p>
+    <div class="mb-4">
+      <Alert
+        tone="info"
+        title="Mode simulation : {countPool} signal{countPool !== 1 ? 's' : ''} ({countReal} réel{countReal !== 1 ? 's' : ''} + {countSim} exemple{countSim !== 1 ? 's' : ''} synthétique{countSim !== 1 ? 's' : ''} badgé{countSim !== 1 ? 's' : ''})."
+      />
     </div>
   {/if}
 
@@ -104,35 +102,29 @@
   <div class="mb-5 flex flex-wrap items-center gap-3">
 
     <!-- S1.4 — tri par score /10 (défaut) -->
-    <button
+    <Button
+      variant={sortMode === "score" ? "primary" : "secondary"}
+      size="sm"
       type="button"
-      class={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-teal-400 ${
-        sortMode === "score"
-          ? "border-teal-600 bg-teal-600 text-white"
-          : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-      }`}
-      on:click={() => { sortMode = "score"; sortDir = "desc"; }}
       title="Trier par valeur /10 (score de type calibré)"
+      onclick={() => { sortMode = "score"; sortDir = "desc"; }}
     >
       Par score /10
-    </button>
+    </Button>
 
     <!-- S1.4 — tri par priorité VISION + bulle d'aide -->
     <div class="relative flex items-center gap-1">
-      <button
+      <Button
+        variant={sortMode === "vision" ? "primary" : "secondary"}
+        size="sm"
         type="button"
-        class={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-teal-400 ${
-          sortMode === "vision"
-            ? "border-teal-600 bg-teal-600 text-white"
-            : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-        }`}
-        on:click={() => { sortMode = "vision"; sortDir = "desc"; }}
         title="Trier par priorité VISION (Priorité 1→4)"
+        onclick={() => { sortMode = "vision"; sortDir = "desc"; }}
       >
         Par priorité VISION
-      </button>
+      </Button>
 
-      <!-- Bulle jaune d'aide (S1.4) -->
+      <!-- Bulle jaune d'aide (S1.4) — conservée custom (pas de fit DS) -->
       <button
         type="button"
         class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-yellow-400 bg-yellow-50 text-yellow-700 transition hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400"
@@ -176,15 +168,15 @@
     <!-- Filtre par statut -->
     <div class="flex items-center gap-1.5">
       <Filter class="h-4 w-4 text-slate-500" aria-hidden="true" />
-      <select
+      <Select
+        id="signals-status-filter"
+        label="Filtrer par statut"
         bind:value={statusFilter}
-        class="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
-        aria-label="Filtrer par statut"
       >
         {#each STATUS_OPTIONS as opt}
           <option value={opt.value}>{opt.label}</option>
         {/each}
-      </select>
+      </Select>
     </div>
 
     <!-- Compteur -->
@@ -209,27 +201,20 @@
 
   <!-- Note action Approfondir -->
   {#if lastApprofondie}
-    <div class="mt-4 flex gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
-      <AlertCircle class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" aria-hidden="true" />
-      <p class="text-xs leading-5 text-blue-700">
-        Action <span class="font-semibold">Approfondir</span> enregistrée en mémoire locale uniquement (la persistance est hors-périmètre ÉV3).
-      </p>
+    <div class="mt-4">
+      <Alert
+        tone="info"
+        title="Action Approfondir enregistrée en mémoire locale uniquement (la persistance est hors-périmètre ÉV3)."
+      />
     </div>
   {/if}
 
   <!-- Note de provenance -->
-  <div class="mt-6 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4">
-    <AlertCircle class="mt-0.5 h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
-    <div>
-      <h2 class="text-sm font-semibold text-slate-950">Provenance des signaux</h2>
-      <p class="mt-1 text-sm leading-6 text-slate-700" style="max-width: 65ch">
-        {countReal} signal{countReal !== 1 ? "s" : ""} réel{countReal !== 1 ? "s" : ""}
-        (avis de consultation publique vérifiés, règlements 150-49, 150-49-1, 150-51)
-        et {countSim} exemple{countSim !== 1 ? "s" : ""}
-        (marqués <span class="font-medium text-amber-700">Exemple (simulation)</span>).
-        Les exemples illustrent des types de signaux non encore détectés dans les données réelles
-        et restent visibles dans tous les modes.
-      </p>
-    </div>
+  <div class="mt-6">
+    <Alert
+      tone="warning"
+      title="Provenance des signaux"
+      message="{countReal} signal{countReal !== 1 ? 's' : ''} réel{countReal !== 1 ? 's' : ''} (avis de consultation publique vérifiés, règlements 150-49, 150-49-1, 150-51) et {countSim} exemple{countSim !== 1 ? 's' : ''} (marqués Exemple (simulation)). Les exemples illustrent des types de signaux non encore détectés dans les données réelles et restent visibles dans tous les modes."
+    />
   </div>
 </section>
