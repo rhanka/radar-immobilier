@@ -109,7 +109,7 @@
       <p class="text-xs font-semibold uppercase tracking-wide text-teal-700">
         Deep dive source
       </p>
-      <h2 class="mt-1 text-xl font-bold text-slate-950">{source.name}</h2>
+      <h1 class="mt-1 text-xl font-bold text-slate-950">{source.name}</h1>
       <p class="mt-1 text-sm text-slate-600">{source.family}</p>
     </div>
     <div class="rounded-md bg-slate-950 px-3 py-2 text-right text-white">
@@ -143,7 +143,7 @@
 
   <div class="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
     <div class="rounded-md border border-slate-200 p-3">
-      <h3 class="text-sm font-semibold text-slate-950">Pourquoi ce placement</h3>
+      <h2 class="text-sm font-semibold text-slate-950">Pourquoi ce placement</h2>
       <div class="mt-3 grid gap-4 md:grid-cols-2">
         {#each valueRows as row}
           {@render ScoreBar(row)}
@@ -152,7 +152,7 @@
     </div>
 
     <div class="rounded-md border border-amber-200 bg-amber-50/50 p-3">
-      <h3 class="text-sm font-semibold text-amber-950">Complexite a lever</h3>
+      <h2 class="text-sm font-semibold text-amber-950">Complexite a lever</h2>
       <div class="mt-3 space-y-4">
         {#each complexityRows as row}
           {@render ScoreBar(row)}
@@ -171,7 +171,7 @@
 
   <div class="mt-5 grid gap-4 lg:grid-cols-3">
     <div class="rounded-md border border-slate-200 p-3">
-      <h3 class="text-sm font-semibold text-slate-950">Fait</h3>
+      <h2 class="text-sm font-semibold text-slate-950">Fait</h2>
       <ul class="mt-2 space-y-2 text-sm text-slate-700">
         {#each source.done as item}
           <li>{item}</li>
@@ -179,7 +179,7 @@
       </ul>
     </div>
     <div class="rounded-md border border-teal-200 bg-teal-50/60 p-3">
-      <h3 class="text-sm font-semibold text-teal-950">A faire (reco)</h3>
+      <h2 class="text-sm font-semibold text-teal-950">A faire (reco)</h2>
       <ul class="mt-2 space-y-2 text-sm text-slate-700">
         {#each source.next as item}
           <li>{item}</li>
@@ -187,7 +187,7 @@
       </ul>
     </div>
     <div class="rounded-md border border-amber-200 bg-amber-50/70 p-3">
-      <h3 class="text-sm font-semibold text-amber-950">Attendus client</h3>
+      <h2 class="text-sm font-semibold text-amber-950">Attendus client</h2>
       <ul class="mt-2 space-y-2 text-sm text-slate-700">
         {#each source.clientExpected as item}
           <li>{item}</li>
@@ -200,21 +200,21 @@
     <div class="rounded-md border border-slate-200 p-3">
       <div class="mb-2 flex items-center gap-2">
         <SearchCheck class="h-4 w-4 text-teal-700" aria-hidden="true" />
-        <h3 class="text-sm font-semibold text-slate-950">Argument valeur</h3>
+        <h2 class="text-sm font-semibold text-slate-950">Argument valeur</h2>
       </div>
       <p class="text-sm leading-6 text-slate-700">{source.auditFor}</p>
     </div>
     <div class="rounded-md border border-slate-200 p-3">
       <div class="mb-2 flex items-center gap-2">
         <ShieldAlert class="h-4 w-4 text-amber-700" aria-hidden="true" />
-        <h3 class="text-sm font-semibold text-slate-950">Audit contradictoire</h3>
+        <h2 class="text-sm font-semibold text-slate-950">Audit contradictoire</h2>
       </div>
       <p class="text-sm leading-6 text-slate-700">{source.auditAgainst}</p>
     </div>
   </div>
 
   <div class="mt-5">
-    <h3 class="text-sm font-semibold text-slate-950">Illustrations concretes</h3>
+    <h2 class="text-sm font-semibold text-slate-950">Illustrations concretes</h2>
     <div class="mt-2 grid gap-2 md:grid-cols-2">
       {#each source.concreteEvidence as evidence}
         <a

@@ -63,9 +63,9 @@
   <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
     <div class="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
       <Search class="h-4 w-4 text-teal-600" aria-hidden="true" />
-      <h2 class="text-sm font-semibold text-slate-950">
+      <h1 class="text-sm font-semibold text-slate-950">
         Catalogue sources ({sourceEvaluations.length})
-      </h2>
+      </h1>
     </div>
 
     <div class="overflow-x-auto">

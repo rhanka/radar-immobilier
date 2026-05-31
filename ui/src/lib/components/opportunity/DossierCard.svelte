@@ -79,7 +79,7 @@
 <article class="rounded-xl border border-slate-200 bg-white shadow-sm">
   <!-- ── Dossier header ──────────────────────────────────────────────── -->
   <header class="border-b border-slate-100 px-5 py-4">
-    <h2 class="text-lg font-semibold text-slate-950">{dossier.title}</h2>
+    <h1 class="text-lg font-semibold text-slate-950">{dossier.title}</h1>
     <p class="mt-0.5 text-sm text-slate-500">{dossier.address}</p>
     <div class="mt-2 flex flex-wrap gap-2">
       <span class="rounded bg-teal-100 px-2 py-0.5 text-xs font-semibold text-teal-700">
@@ -97,9 +97,9 @@
   <div class="p-5 space-y-6">
     <!-- ── 6-phase funnel ──────────────────────────────────────────────── -->
     <section>
-      <h3 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        Faisceau de preuves — 6 phases
-      </h3>
+      <h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Faisceau de preuves : 6 phases
+      </h2>
       <div class="space-y-3">
         {#each phases as group (group.phase)}
           <PhaseColumn {group} />
@@ -116,9 +116,9 @@
     <section class="rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div class="mb-3 flex items-center gap-2">
         <TrendingUp class="h-4 w-4 text-teal-600" aria-hidden="true" />
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-700">
           Score agrégé PROCESS
-        </h3>
+        </h2>
       </div>
 
       <!-- Mode banner -->
@@ -130,7 +130,7 @@
       {:else}
         <div class="mb-3 rounded border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-800">
           <span class="font-semibold">Mode simulation :</span>
-          hypothèses incluses — score cible.
+          hypothèses incluses (score cible).
         </div>
       {/if}
 
@@ -138,7 +138,7 @@
       <div class="mb-4 flex flex-wrap items-center gap-3">
         {#if result.tooThin}
           <span class="rounded bg-slate-200 px-3 py-1 text-lg font-bold text-slate-500">
-            Trop mince — surveillance
+            Trop mince (surveillance)
           </span>
         {:else}
           <span class={`text-3xl font-bold ${score100Color(scoreOver100)}`}>
@@ -147,7 +147,7 @@
         {/if}
         {#if result.partial}
           <span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
-            Partiel — marché non disponible
+            Partiel (marché non disponible)
           </span>
         {/if}
         <span class={`rounded px-2 py-1 text-xs font-semibold ${capBadgeClass(result.recommendationCap)}`}>
@@ -187,7 +187,7 @@
                 {#if effectiveAxisScore.availability === "non-disponible"}
                   {#if excludedInReal}
                     <p class="mt-0.5 text-[10px] font-semibold text-slate-400">
-                      À confirmer — exclu en mode réel
+                      À confirmer, exclu en mode réel
                     </p>
                     <p class="mt-0.5 text-[10px] text-slate-400 line-through">
                       {origAxisScore.level}/5 (hypothèse)
@@ -236,9 +236,9 @@
     <section>
       <div class="mb-2 flex items-center gap-2">
         <Clock class="h-4 w-4 text-slate-400" aria-hidden="true" />
-        <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Chronologie des preuves
-        </h3>
+        </h2>
       </div>
       <ol class="relative border-l border-slate-200 pl-4 space-y-3">
         {#each timeline as item, i}

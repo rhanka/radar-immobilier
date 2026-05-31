@@ -75,7 +75,7 @@
 <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
   <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
     <div>
-      <h2 class="text-sm font-semibold text-slate-950">Cadran sources</h2>
+      <h1 class="text-sm font-semibold text-slate-950">Cadran sources</h1>
       <p class="mt-1 text-xs text-slate-600">
         Valeur potentielle vs complexite incluant acces, risque legal et cout.
       </p>
