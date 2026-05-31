@@ -6,7 +6,6 @@
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
-  import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import AutomationView from "$lib/components/automation/AutomationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
@@ -37,8 +36,6 @@
         />
       {:else if activeView === "grilles"}
         <GrillesView />
-      {:else if activeView === "coordination"}
-        <CoordinationView />
       {:else if activeView === "console"}
         <ConsoleView />
       {:else}
