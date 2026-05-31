@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Zap, BookOpen } from "@lucide/svelte";
   import type { SignalT } from "@radar/domain";
+  import Acronym from "$lib/components/Acronym.svelte";
 
   export let signal: SignalT;
   export let onApprofondir: (s: SignalT) => void;
@@ -64,7 +65,15 @@
   <!-- Type + bylaw/zone -->
   <div class="min-w-0 flex-1">
     <div class="flex flex-wrap items-center gap-2">
-      <p class="text-sm font-semibold text-slate-950">{typeLabel}</p>
+      <p class="text-sm font-semibold text-slate-950">
+        {#if signal.type === "cptaq" || signal.type === "ppcmoi"}
+          <Acronym term={typeLabel} />
+        {:else if signal.type === "grid-cos-modification"}
+          Modification grille/<Acronym term="COS" />
+        {:else}
+          {typeLabel}
+        {/if}
+      </p>
       {#if isSimulation}
         <!-- SI1 + SI2 : badge explicite "Exemple (simulation)" -->
         <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
