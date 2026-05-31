@@ -74,8 +74,8 @@ export const demoSignalsT1: SignalT[] = [
   Signal.parse({
     id: "sig-sim-derog-h516",
     type: "derogation-relevant",
-    // S1.2: valeur fixée en dur — dérogation = filtre pur (SIGNAL_TYPE_VALUES vaut 0).
-    value: 5,
+    // S1.2: dérogation = filtre pur ; valeur 0 (SIGNAL_TYPE_VALUES["derogation-relevant"] = 0).
+    value: SIGNAL_TYPE_VALUES["derogation-relevant"],
     confidence: "medium",
     status: "écarté",
     sourceRefs: [],
