@@ -79,6 +79,9 @@
       <Badge tone="success">Zone {dossier.zone}</Badge>
       <Badge tone="neutral">Règl. {dossier.bylaw}</Badge>
       <Badge tone="neutral">{dossier.lots.length} lot{dossier.lots.length > 1 ? "s" : ""}</Badge>
+      {#if mode === "real" && (result.partial || result.tooThin)}
+        <Badge tone="warning">En attente de preuve (surveillance)</Badge>
+      {/if}
     </div>
   </div>
 
