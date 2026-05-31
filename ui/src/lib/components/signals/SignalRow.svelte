@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Zap, BookOpen } from "@lucide/svelte";
   import type { SignalT } from "@radar/domain";
+  import Acronym from "$lib/components/Acronym.svelte";
 
   export let signal: SignalT;
   export let onApprofondir: (s: SignalT) => void;
@@ -57,6 +58,8 @@
   $: typeLabel = TYPE_LABELS[signal.type] ?? signal.type;
   $: isEcarte = signal.status === "écarté";
   $: isSimulation = signal.mode === "simulation";
+  // S1.2: dérogations = filtre pur, pas de score /10
+  $: isDerogation = signal.type === "derogation-relevant" || signal.type === "derogation-irrelevant";
 </script>
 
 <!-- SI1 : simulation = légèrement atténuée (opacity-80) mais toujours visible -->
@@ -64,7 +67,15 @@
   <!-- Type + bylaw/zone -->
   <div class="min-w-0 flex-1">
     <div class="flex flex-wrap items-center gap-2">
-      <p class="text-sm font-semibold text-slate-950">{typeLabel}</p>
+      <p class="text-sm font-semibold text-slate-950">
+        {#if signal.type === "cptaq" || signal.type === "ppcmoi"}
+          <Acronym term={typeLabel} />
+        {:else if signal.type === "grid-cos-modification"}
+          Modification grille/<Acronym term="COS" />
+        {:else}
+          {typeLabel}
+        {/if}
+      </p>
       {#if isSimulation}
         <!-- SI1 + SI2 : badge explicite "Exemple (simulation)" -->
         <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
@@ -79,18 +90,22 @@
     {/if}
   </div>
 
-  <!-- SI4 — Valeur /10 avec libellé explicite -->
-  <div class="flex shrink-0 flex-col items-center gap-0.5" title="Valeur de triage /10 (priorité par type, VISION §6)">
+  <!-- SI4 — Valeur /10 avec libellé explicite ; dérogations = filtre pur (S1.2) -->
+  <div class="flex shrink-0 flex-col items-center gap-0.5" title={isDerogation ? "Dérogation : filtre pur, pas de score /10 (VISION §6)" : "Valeur de triage /10 (priorité par type, VISION §6)"}>
     <span class="text-[10px] font-medium uppercase tracking-wide text-slate-400">Valeur</span>
-    <span class="text-base font-bold text-slate-900">
-      {signal.value}<span class="text-[11px] font-normal text-slate-400">/10</span>
-    </span>
-    <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
-      <div
-        class="h-full rounded-full bg-teal-500"
-        style="width: {(signal.value / 10) * 100}%"
-      ></div>
-    </div>
+    {#if isDerogation}
+      <span class="text-[11px] font-semibold text-slate-400 italic">Filtre (pas de score)</span>
+    {:else}
+      <span class="text-base font-bold text-slate-900">
+        {signal.value}<span class="text-[11px] font-normal text-slate-400">/10</span>
+      </span>
+      <div class="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+        <div
+          class="h-full rounded-full bg-teal-500"
+          style="width: {(signal.value / 10) * 100}%"
+        ></div>
+      </div>
+    {/if}
   </div>
 
   <!-- SI4 — Confiance avec libellé explicite -->

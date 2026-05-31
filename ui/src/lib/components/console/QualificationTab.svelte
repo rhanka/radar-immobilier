@@ -2,6 +2,8 @@
   import { Search } from "@lucide/svelte";
   import { Drawer, Button, Badge } from "@sentropic/design-system-svelte";
   import type { SourceEvaluation, RecommendationKind } from "$lib/source-review/source-evaluation-data";
+  import Acronym from "$lib/components/Acronym.svelte";
+  import { getAcronym } from "$lib/glossary/acronyms.js";
   import { sourceEvaluations } from "$lib/source-review/source-evaluation-data.js";
   import { qualificationStatus } from "$lib/console/console-data.js";
   import {
@@ -10,6 +12,9 @@
     recommendationLabels,
   } from "$lib/source-review/source-review-labels.js";
   import SourceDeepDive from "$lib/components/source-review/SourceDeepDive.svelte";
+  import SourceQuadrant from "$lib/components/source-review/SourceQuadrant.svelte";
+
+  let selectedSourceId = "avis-publics-valleyfield";
 
   $: statusRows = qualificationStatus();
 
@@ -62,6 +67,13 @@
 </script>
 
 <div class="space-y-6">
+  <!-- S3-B1 : cadran sources integre ici (fusion onglet Cadran) -->
+  <SourceQuadrant
+    sources={sourceEvaluations}
+    {selectedSourceId}
+    onSelectSource={(sourceId) => { selectedSourceId = sourceId; }}
+  />
+
   <!-- Compteurs par groupe -->
   <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
     {#each statusRows as row}
@@ -102,7 +114,13 @@
               on:click={() => openSource(source)}
             >
               <td class="px-4 py-2.5">
-                <p class="font-medium text-slate-950">{source.name}</p>
+                <p class="font-medium text-slate-950">
+                  {#if getAcronym(source.name)}
+                    <Acronym term={source.name} />
+                  {:else}
+                    {source.name}
+                  {/if}
+                </p>
               </td>
               <td class="px-3 py-2.5 text-xs text-slate-500">{source.family}</td>
               <td class="px-3 py-2.5">
