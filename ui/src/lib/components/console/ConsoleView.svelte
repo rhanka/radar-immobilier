@@ -4,13 +4,15 @@
   import QualificationTab from "./QualificationTab.svelte";
   import DeepDiveTab from "./DeepDiveTab.svelte";
   import JobsTab from "./JobsTab.svelte";
+  import SourceContributionTab from "./SourceContributionTab.svelte";
 
   // S3-B1 : onglet "Cadran sources" supprimé — cadran fusionné dans QualificationTab
-  type TabId = "qualification" | "deepdive" | "jobs";
+  type TabId = "qualification" | "deepdive" | "contribution" | "jobs";
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "qualification", label: "Qualification" },
     { id: "deepdive", label: "Approfondissement" },
+    { id: "contribution", label: "Contribution" },
     { id: "jobs", label: "Jobs" },
   ];
 
@@ -53,6 +55,8 @@
     <QualificationTab />
   {:else if activeTab === "deepdive"}
     <DeepDiveTab />
+  {:else if activeTab === "contribution"}
+    <SourceContributionTab />
   {:else}
     <JobsTab />
   {/if}
