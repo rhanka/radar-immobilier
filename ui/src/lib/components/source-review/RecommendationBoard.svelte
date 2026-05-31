@@ -30,9 +30,9 @@
           <p class="text-[11px] font-semibold uppercase text-teal-700">
             Source selectionnee
           </p>
-          <h2 class="mt-1 text-sm font-semibold text-slate-950">
+          <h1 class="mt-1 text-sm font-semibold text-slate-950">
             {selectedSource.name}
-          </h2>
+          </h1>
         </div>
         <span class="rounded-md bg-slate-950 px-2 py-1 text-[11px] font-semibold text-white">
           {selectedSource.businessValue}/5
@@ -41,15 +41,15 @@
 
       <div class="space-y-3 text-xs leading-5">
         <div>
-          <h3 class="font-semibold text-slate-950">Fait</h3>
+          <h2 class="font-semibold text-slate-950">Fait</h2>
           <p class="mt-1 text-slate-600">{selectedSource.done[0]}</p>
         </div>
         <div class="rounded-md bg-teal-50 p-2">
-          <h3 class="font-semibold text-teal-950">A faire (reco)</h3>
+          <h2 class="font-semibold text-teal-950">A faire (reco)</h2>
           <p class="mt-1 text-slate-700">{selectedSource.next[0]}</p>
         </div>
         <div class="rounded-md bg-amber-50 p-2">
-          <h3 class="font-semibold text-amber-950">Attendus client</h3>
+          <h2 class="font-semibold text-amber-950">Attendus client</h2>
           <p class="mt-1 text-slate-700">{selectedSource.clientExpected[0]}</p>
         </div>
       </div>
