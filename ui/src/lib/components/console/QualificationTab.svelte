@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { CheckCircle, Clock, AlertTriangle, XCircle, Search } from "@lucide/svelte";
-  import type { RecommendationKind } from "$lib/source-review/source-evaluation-data";
+  import { Search } from "@lucide/svelte";
+  import { Drawer, Button, Badge } from "@sentropic/design-system-svelte";
+  import type { SourceEvaluation, RecommendationKind } from "$lib/source-review/source-evaluation-data";
   import { sourceEvaluations } from "$lib/source-review/source-evaluation-data.js";
   import { qualificationStatus } from "$lib/console/console-data.js";
   import {
@@ -8,8 +9,22 @@
     costLabels,
     recommendationLabels,
   } from "$lib/source-review/source-review-labels.js";
+  import SourceDeepDive from "$lib/components/source-review/SourceDeepDive.svelte";
 
   $: statusRows = qualificationStatus();
+
+  let drawerOpen = false;
+  let selectedSource: SourceEvaluation | null = null;
+
+  function openSource(source: SourceEvaluation): void {
+    selectedSource = source;
+    drawerOpen = true;
+  }
+
+  function closeDrawer(): void {
+    drawerOpen = false;
+    selectedSource = null;
+  }
 
   function recoBadgeClass(rec: RecommendationKind): string {
     switch (rec) {
@@ -63,9 +78,9 @@
   <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
     <div class="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
       <Search class="h-4 w-4 text-teal-600" aria-hidden="true" />
-      <h2 class="text-sm font-semibold text-slate-950">
+      <h1 class="text-sm font-semibold text-slate-950">
         Catalogue sources ({sourceEvaluations.length})
-      </h2>
+      </h1>
     </div>
 
     <div class="overflow-x-auto">
@@ -77,11 +92,15 @@
             <th class="px-3 py-2.5">Recommandation</th>
             <th class="px-3 py-2.5">Accès</th>
             <th class="px-3 py-2.5">Coût</th>
+            <th class="px-3 py-2.5 sr-only">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           {#each sourceEvaluations as source}
-            <tr class="hover:bg-slate-50">
+            <tr
+              class="cursor-pointer hover:bg-slate-50"
+              on:click={() => openSource(source)}
+            >
               <td class="px-4 py-2.5">
                 <p class="font-medium text-slate-950">{source.name}</p>
               </td>
@@ -101,6 +120,16 @@
                   {costLabels[source.costLevel]}
                 </span>
               </td>
+              <td class="px-3 py-2.5">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onclick={(e) => { e.stopPropagation(); openSource(source); }}
+                >
+                  Détails
+                </Button>
+              </td>
             </tr>
           {/each}
         </tbody>
@@ -108,3 +137,18 @@
     </div>
   </div>
 </div>
+
+<!-- Drawer détail source -->
+<Drawer
+  open={drawerOpen}
+  title={selectedSource?.name ?? ""}
+  description={selectedSource?.family ?? ""}
+  side="right"
+  onclose={closeDrawer}
+>
+  {#if selectedSource}
+    <div class="p-4">
+      <SourceDeepDive source={selectedSource} />
+    </div>
+  {/if}
+</Drawer>

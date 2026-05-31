@@ -3,6 +3,8 @@ import { sourceEvaluations } from "../source-review/source-evaluation-data";
 import {
   RECOMMENDATION_LABELS_FR,
   VISION_ALIGNMENT_LABELS_FR,
+  QUEBEC_MUNICIPALITIES,
+  DEFAULT_MUNICIPALITY_ID,
   defaultSelection,
   groupByRecommendation,
   summarize,
@@ -112,6 +114,39 @@ describe("RECOMMENDATION_LABELS_FR", () => {
     for (const kind of kinds) {
       expect(RECOMMENDATION_LABELS_FR[kind]).toBeDefined();
       expect(RECOMMENDATION_LABELS_FR[kind].length).toBeGreaterThan(0);
+    }
+  });
+
+  it("uses plain-French labels (no raw enum jargon)", () => {
+    expect(RECOMMENDATION_LABELS_FR["build-now"]).toContain("Prioritaire");
+    expect(RECOMMENDATION_LABELS_FR["qualify-access-now"]).toContain("qualifier");
+    expect(RECOMMENDATION_LABELS_FR["build-later"]).toContain("Plus tard");
+    expect(RECOMMENDATION_LABELS_FR["drop-phase-1"]).toContain("perimetre");
+  });
+});
+
+describe("QUEBEC_MUNICIPALITIES", () => {
+  it("is non-empty", () => {
+    expect(QUEBEC_MUNICIPALITIES.length).toBeGreaterThan(0);
+  });
+
+  it("includes Salaberry-de-Valleyfield", () => {
+    const names = QUEBEC_MUNICIPALITIES.map((m) => m.name);
+    expect(names.some((n) => n.toLowerCase().includes("valleyfield"))).toBe(true);
+  });
+
+  it("DEFAULT_MUNICIPALITY_ID maps to Salaberry", () => {
+    const defaultMunicipality = QUEBEC_MUNICIPALITIES.find(
+      (m) => m.id === DEFAULT_MUNICIPALITY_ID,
+    );
+    expect(defaultMunicipality).toBeDefined();
+    expect(defaultMunicipality!.name.toLowerCase()).toContain("valleyfield");
+  });
+
+  it("all municipalities have non-empty id and name", () => {
+    for (const m of QUEBEC_MUNICIPALITIES) {
+      expect(m.id.length).toBeGreaterThan(0);
+      expect(m.name.length).toBeGreaterThan(0);
     }
   });
 });
