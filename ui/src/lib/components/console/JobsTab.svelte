@@ -4,6 +4,8 @@
   import type { Job, JobStatus, JobType } from "$lib/jobs/jobs-data";
   import { demoJobs, countsByStatus, filterJobsByMode } from "$lib/jobs/jobs-data.js";
   import { appMode } from "$lib/state/mode.js";
+  import Acronym from "$lib/components/Acronym.svelte";
+  import { getAcronym } from "$lib/glossary/acronyms.js";
 
   $: jobs = filterJobsByMode(demoJobs, $appMode);
   $: counts = countsByStatus(jobs);
@@ -21,19 +23,21 @@
     selectedJob = null;
   }
 
-  function statusBadgeClass(status: JobStatus): string {
+  function statusBadgeTone(status: JobStatus): "neutral" | "info" | "success" | "error" {
     switch (status) {
-      case "queued":
-        return "bg-slate-100 text-slate-600";
-      case "running":
-        return "bg-blue-100 text-blue-700";
-      case "done":
-        return "bg-teal-100 text-teal-700";
-      case "failed":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-slate-100 text-slate-600";
+      case "queued": return "neutral";
+      case "running": return "info";
+      case "done": return "success";
+      case "failed": return "error";
+      default: return "neutral";
     }
+  }
+
+  /** Extract the first token of a sourceRef slug and check if it's a known acronym.
+   *  e.g. "cptaq-decisions" -> "CPTAQ", "ppcmoi-valleyfield" -> "PPCMOI" */
+  function sourceRefAcronym(ref: string): string | null {
+    const token = ref.split("-")[0].toUpperCase();
+    return getAcronym(token) ? token : null;
   }
 
   function statusLabel(status: JobStatus): string {
@@ -150,18 +154,25 @@
               <td class="px-4 py-2.5 font-medium text-slate-950">
                 {typeLabel(job.type)}
               </td>
-              <td class="px-3 py-2.5 text-xs text-slate-600 font-mono">{job.sourceRef}</td>
+              <td class="px-3 py-2.5 text-xs text-slate-600 font-mono">
+                {#if sourceRefAcronym(job.sourceRef)}
+                  <Acronym term={sourceRefAcronym(job.sourceRef) ?? job.sourceRef} />
+                  {job.sourceRef.slice((sourceRefAcronym(job.sourceRef) ?? "").length).replace(/^-/, " ")}
+                {:else}
+                  {job.sourceRef}
+                {/if}
+              </td>
               <td class="px-3 py-2.5">
-                <span class={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadgeClass(job.status)}`}>
+                <Badge tone={statusBadgeTone(job.status)}>
                   {statusLabel(job.status)}
-                </span>
+                </Badge>
               </td>
               <td class="px-3 py-2.5 text-xs text-slate-500">{formatDate(job.startedAt)}</td>
               <td class="px-3 py-2.5 text-xs text-slate-500">{formatDuration(job.durationMs)}</td>
               <td class="px-3 py-2.5">
-                <span class={`inline-block rounded px-1.5 py-0.5 text-xs font-semibold ${job.mode === 'real' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'}`}>
+                <Badge tone={job.mode === 'real' ? 'success' : 'warning'}>
                   {job.mode === 'real' ? 'Réel' : 'Simulation'}
-                </span>
+                </Badge>
               </td>
               <td class="px-3 py-2.5">
                 <Button
@@ -220,9 +231,9 @@
         <div class="grid grid-cols-2 px-4 py-3">
           <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</dt>
           <dd>
-            <span class={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusBadgeClass(selectedJob.status)}`}>
+            <Badge tone={statusBadgeTone(selectedJob.status)}>
               {statusLabel(selectedJob.status)}
-            </span>
+            </Badge>
           </dd>
         </div>
         <div class="grid grid-cols-2 px-4 py-3">
@@ -242,9 +253,9 @@
         <div class="grid grid-cols-2 px-4 py-3">
           <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Mode</dt>
           <dd>
-            <span class={`inline-block rounded px-1.5 py-0.5 text-xs font-semibold ${selectedJob.mode === 'real' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'}`}>
+            <Badge tone={selectedJob.mode === 'real' ? 'success' : 'warning'}>
               {selectedJob.mode === 'real' ? 'Réel' : 'Simulation'}
-            </span>
+            </Badge>
           </dd>
         </div>
       </dl>

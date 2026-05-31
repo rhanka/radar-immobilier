@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Zap, BookOpen } from "@lucide/svelte";
+  import { Badge, Button } from "@sentropic/design-system-svelte";
   import type { SignalT } from "@radar/domain";
   import Acronym from "$lib/components/Acronym.svelte";
 
@@ -32,18 +33,18 @@
     "surveillance": "Surveillance",
   };
 
-  function confidenceBadgeClass(confidence: string): string {
-    if (confidence === "high") return "bg-emerald-100 text-emerald-700";
-    if (confidence === "medium") return "bg-amber-100 text-amber-700";
-    return "bg-slate-100 text-slate-500";
+  function confidenceTone(confidence: string): "success" | "warning" | "neutral" {
+    if (confidence === "high") return "success";
+    if (confidence === "medium") return "warning";
+    return "neutral";
   }
 
-  function statusChipClass(status: string): string {
-    if (status === "nouveau") return "bg-teal-100 text-teal-700";
-    if (status === "à-approfondir") return "bg-blue-100 text-blue-700";
-    if (status === "écarté") return "bg-slate-100 text-slate-400";
-    if (status === "surveillance") return "bg-amber-100 text-amber-700";
-    return "bg-slate-100 text-slate-500";
+  function statusTone(status: string): "success" | "info" | "neutral" | "warning" | "error" {
+    if (status === "nouveau") return "success";
+    if (status === "à-approfondir") return "info";
+    if (status === "écarté") return "neutral";
+    if (status === "surveillance") return "warning";
+    return "neutral";
   }
 
   function formatDate(iso: string): string {
@@ -78,9 +79,7 @@
       </p>
       {#if isSimulation}
         <!-- SI1 + SI2 : badge explicite "Exemple (simulation)" -->
-        <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
-          Exemple (simulation)
-        </span>
+        <Badge tone="warning">Exemple (simulation)</Badge>
       {/if}
     </div>
     {#if signal.bylaw || signal.zone}
@@ -111,16 +110,16 @@
   <!-- SI4 — Confiance avec libellé explicite -->
   <div class="flex shrink-0 flex-col items-center gap-0.5" title="Confiance (qualité de la détection)">
     <span class="text-[10px] font-medium uppercase tracking-wide text-slate-400">Confiance</span>
-    <span class={`rounded px-2 py-0.5 text-[11px] font-semibold ${confidenceBadgeClass(signal.confidence)}`}>
+    <Badge tone={confidenceTone(signal.confidence)}>
       {CONFIDENCE_LABELS[signal.confidence] ?? signal.confidence}
-    </span>
+    </Badge>
   </div>
 
   <!-- Status chip -->
   <div class="shrink-0">
-    <span class={`rounded px-2 py-0.5 text-[11px] font-semibold ${statusChipClass(signal.status)}`}>
+    <Badge tone={statusTone(signal.status)}>
       {STATUS_LABELS[signal.status] ?? signal.status}
-    </span>
+    </Badge>
   </div>
 
   <!-- DetectedAt -->
@@ -131,19 +130,20 @@
   <!-- Approfondir button -->
   <div class="shrink-0">
     {#if !isEcarte}
-      <button
+      <Button
+        variant="primary"
+        size="sm"
         type="button"
-        class="inline-flex items-center gap-1.5 rounded bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
-        on:click={() => onApprofondir(signal)}
+        onclick={() => onApprofondir(signal)}
       >
         <BookOpen class="h-3.5 w-3.5" aria-hidden="true" />
         Approfondir
-      </button>
+      </Button>
     {:else}
-      <span class="inline-flex items-center gap-1.5 rounded bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-400">
+      <Badge tone="neutral">
         <Zap class="h-3.5 w-3.5" aria-hidden="true" />
         Écarté
-      </span>
+      </Badge>
     {/if}
   </div>
 </div>

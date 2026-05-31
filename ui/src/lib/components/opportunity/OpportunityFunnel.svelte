@@ -4,7 +4,7 @@
   import { Alert, Badge, Button, Card, EmptyState } from "@sentropic/design-system-svelte";
   import type { OpportunityDossierT } from "@radar/domain";
   import { appMode } from "$lib/state/mode.js";
-  import { filterDossiersBySignalId } from "$lib/opportunites/funnel.js";
+  import { filterDossiersBySignalId, axesForMode } from "$lib/opportunites/funnel.js";
   import DossierCard from "./DossierCard.svelte";
 
   /** Optional: render only the dossier linked to this signal. */
@@ -34,9 +34,15 @@
   }
 
   function scoreHundred(dossier: OpportunityDossierT): number | null {
-    const res = aggregate(dossier.axes, WEIGHTS);
+    const res = aggregate(axesForMode(dossier.axes, mode), WEIGHTS);
     if (res.tooThin || res.score === null) return null;
     return Math.round(res.score * 20);
+  }
+
+  function isEnAttenteDePreuve(dossier: OpportunityDossierT): boolean {
+    if (mode !== "real") return false;
+    const res = aggregate(axesForMode(dossier.axes, mode), WEIGHTS);
+    return res.partial || res.tooThin;
   }
 
   function capLabel(cap: string): string {
@@ -115,9 +121,10 @@
           {filtered.length} dossier{filtered.length > 1 ? "s" : ""}
         </p>
         {#each filtered as dossier (dossier.id)}
-          {@const res = aggregate(dossier.axes, WEIGHTS)}
+          {@const res = aggregate(axesForMode(dossier.axes, mode), WEIGHTS)}
           {@const s100 = scoreHundred(dossier)}
           {@const isSelected = (selectedDossier?.id ?? filtered[0]?.id) === dossier.id}
+          {@const enAttente = isEnAttenteDePreuve(dossier)}
           <button
             type="button"
             class="w-full text-left"
@@ -139,7 +146,9 @@
                   <Badge tone={capTone(res.recommendationCap)}>
                     {capLabel(res.recommendationCap)}
                   </Badge>
-                  {#if res.partial}
+                  {#if enAttente}
+                    <Badge tone="warning">En attente de preuve (surveillance)</Badge>
+                  {:else if res.partial}
                     <Badge tone="warning">Partiel</Badge>
                   {/if}
                 </div>
