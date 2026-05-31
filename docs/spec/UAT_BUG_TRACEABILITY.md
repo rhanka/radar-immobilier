@@ -12,10 +12,10 @@
 | # | Quand | Bug signalé (verbatim court) | Statut | Preuve | Reste à faire |
 |---|---|---|---|---|---|
 | 1 | S1 BR-05R | « c assez bugué » (vue qualif) | ❔ À RE-VÉRIFIER | source-review refondue en tab Console (`3c86b83`) | UAT sur nouvelle Console |
-| 2 | S1 BR-05R | Acronymes : hover sur chaque acronyme, partout | ❌ NON TRAITÉ | seul `CriteriaGlossary` (glossaire critères, partiel) | Composant acronyme hover page-wide |
+| 2 | S1 BR-05R | Acronymes : hover sur chaque acronyme, partout | ✅ RÉSOLU | `b65af64` composant `Acronym` + glossaire 12 termes, câblé Signaux/Grilles/Console | — |
 | 3 | S1 BR-05R | Tout en français | ❔ À RE-VÉRIFIER | UI actuelle FR | Vérif glossaire restant |
-| 4 | S1 BR-05R | Liens de réf dans descriptions d'acronyme | ❌ NON TRAITÉ | absent | Ajouter liens sources |
-| 5 | S1 BR-05R | Matrice score 1/5..5/5 + traçabilité VISION (comme sentropic) | 🟡 PARTIEL | grilles 0-5 + rationale + `ScoreHover` (`0c7dbe9`) ; VISION tracée en doc §9 | Pas de backlink VISION dans le hover UI |
+| 4 | S1 BR-05R | Liens de réf dans descriptions d'acronyme | ✅ RÉSOLU | `b65af64` glossaire avec `url` (CPTAQ, OACIQ…) affiché dans le hover | — |
+| 5 | S1 BR-05R | Matrice score 1/5..5/5 + traçabilité VISION (comme sentropic) | ✅ RÉSOLU | grilles 0-5 + rationale + `ScoreHover` ; **réf VISION §6 / PROCESS Étape 5 affichée dans Grilles** (`5b5cb1f`) | — |
 | 6 | S1 BR-05R | Insights réels par source (faisceau de preuve) + liens | 🟡 PARTIEL | preuves par phase + lien Source + badge fait/hypothèse/N-D | Vue « valorisation par source » absente |
 | 7 | S1 | Story-telling / bulle jaune au 1ᵉ passage | 🟡 PARTIEL | tour 24 étapes jamais mergé ; bulle dual-tri seule (`fa9dcf6`) | Tour guidé complet absent de main |
 | 8 | S1 | « je ne vois aucune bulle jaune » | ✅ RÉSOLU | bulle d'aide `SignalsT1View` | — |
@@ -33,7 +33,7 @@
 | SI1 | S2 | 6 signaux en données, 3 affichés | ✅ RÉSOLU | `fa9dcf6` 6 affichés | — |
 | SI2 | S2 | « signaux hypothétiques » confus | ✅ RÉSOLU | badge « Exemple (simulation) » | — |
 | SI3 | S2 | Signaux vs Radar | ✅ RÉSOLU | fusion | — |
-| SI4 | S2 | Pas de score visible | ✅ RÉSOLU | Valeur /10 + Confiance explicites | Résiduel : signal dérogation porte encore `value:5` (vs S1.2 « filtre pur ») |
+| SI4 | S2 | Pas de score visible | ✅ RÉSOLU | Valeur /10 + Confiance explicites ; dérogation affiche « Filtre (pas de score) » `5b5cb1f` | — |
 | CMP1 | S2 | Comparaison toujours là, critères M1-M7 non expliqués | ✅ RÉSOLU | `0c20122` fondue dans Automatisation | — |
 | SRC1 | S2 | Revue sources : activation incomprise | ✅ RÉSOLU | tab « Cadran sources » Console `828b59b` | — |
 | OP1 | S2 | Réel/sim : aucune différence | ✅ RÉSOLU | `e6d2f86` axesForMode (réel exclut hypothèses + plafonne) | — |
@@ -41,23 +41,25 @@
 | H2A1 | S2 | h2a hors-sol | ⏳ DIFFÉRÉ →ÉV10 | stub Coordination retiré du nav | Implémenter h2a API |
 | CO1 | S2 | « T3/T4 » abscons | ✅ RÉSOLU | copy sans T3/T4 | — |
 | CO2 | S2 | Rien cliquable | ✅ RÉSOLU | `828b59b` Drawer détail source/job | — |
-| S3-A | S3 | Interfaces flat, mono-colonne | 🟡 PARTIEL | app-shell dense (`3c86b83`) + DS ailleurs | **Opportunités reste mono-colonne** (R2 non mergé) |
-| S3-B1 | S3 | Redondance cadran ↔ console | 🟡 PARTIEL | cadran déplacé en tab Console | Cadran + Qualification cohabitent (mêmes données) |
+| S3-A | S3 | Interfaces flat, mono-colonne | ✅ RÉSOLU | app-shell dense (`3c86b83`) + **Opportunités master-detail** (`ac6c862`) | — |
+| S3-B1 | S3 | Redondance cadran ↔ console | ✅ RÉSOLU | cadran **fusionné dans Qualification**, tab séparé retiré `5b5cb1f` | — |
 | S3-B2 | S3 | Redondance rapport agents | ✅ RÉSOLU | fondue dans Automatisation | — |
 | S3-C | S3 | Rien d'automatisé/live | ⏳ DIFFÉRÉ →ÉV11 | AutomationView = stub | Agent PROMPT.md + Tavily + flow |
 | R1 | S3 | « je vois encore T0 » | ✅ RÉSOLU | `ff84484` strip complet | — |
-| R2 | S3 | Opportunités empilées ; sélection/accordéon ; ≥2 colonnes par sous-élément | ❌ NON TRAITÉ (dans main) | `OpportunityFunnel` `space-y-8` ; phases `space-y-3` ; master-detail seulement dans `daa52ff` orphelin | **Réimplémenter master-detail + colonnes sur main** |
-| R3 | S3 | « 100% design system » | 🟡 PARTIEL | DS répandu ailleurs | DossierCard/OpportunityFunnel encore Tailwind brut |
+| R2 | S3 | Opportunités empilées ; sélection/accordéon ; ≥2 colonnes par sous-élément | ✅ RÉSOLU | **réimplémenté sur main** : master-detail `grid-cols-12` + phases `grid-cols-2` (`ac6c862`) | — |
+| R3 | S3 | « 100% design system » | ✅ RÉSOLU | Opportunités passées en DS (Card/Badge/Alert) `ac6c862` ; DS-lint 0 partout | — |
 | R4 | S3 | « du non-réel dans le réel » | 🟡 PARTIEL | axesForMode exclut hypothèses | À reconfirmer en UAT |
 | R5 | S3 | « pas démarré » / « aucune différence sur :5301 » | ✅ RÉSOLU (process) | mauvais worktree/branche bind-montés | — |
 
-## Synthèse (28 items distincts)
-- ✅ RÉSOLU : 17
-- 🟡 PARTIEL : 8 (#5, #6, #7, #9, S3-A, S3-B1, R3, R4 ; + résiduel SI4)
-- ⏳ DIFFÉRÉ (assumé spec) : 3 — RA2/CH1→ÉV9, H2A1→ÉV10, S3-C→ÉV11
-- ❌ NON TRAITÉ : 3 — #2 (acronymes hover), #4 (liens réf), **R2 (Opportunités master-detail/colonnes)**
-- ❔ À RE-VÉRIFIER : 2 — #1, #3 (vues refondues)
+## Synthèse (28 items distincts) — après lot `feat/uat-fixes`
+- ✅ RÉSOLU : **24** (dont R2/R3/S3-A réimplémentés `ac6c862`, #2/#4 acronymes `b65af64`, SI4/#5/S3-B1 `5b5cb1f`)
+- ⏳ DIFFÉRÉ (évolutions convenues, pas des bugs) : 3 — RA2/CH1 chat→ÉV9, H2A1 h2a→ÉV10, S3-C live→ÉV11
+- 🟡 PARTIEL restant : 2 — **#6** (vue « valorisation par source » / faisceau dédiée — non construite), **#9** (Radar↔Opp côte-à-côte — en partie caduc, Radar supprimé)
+- ❔/⏳ feature non mergée : **#7** (tour guidé 24 étapes — jamais mergé ; bulle d'aide ponctuelle présente)
+- ❔ À RE-VÉRIFIER : #1, #3 (anciennes vues de qualif refondues en Console)
 
-**Action n°1** : réimplémenter sur `main` le master-detail Opportunités + phases multi-colonnes + DS
-(clôt R2 + S3-A + R3). Le travail existe dans `daa52ff` (tag `backup/local-main-divergence-daa52ff`)
-mais basé sur un état ancien → réimplémenter sur le `main` courant plutôt que cherry-pick.
+### Reste réellement à faire (non clos, explicite)
+- **#6** — vue dédiée « valorisation de chaque source dans le faisceau de preuves » (les preuves par phase existent, mais pas la vue d'analyse de contribution par source).
+- **#7** — tour guidé complet (storytelling) : était sur `feat/demo-guided-tour`, jamais mergé.
+- **#9** — affichage côte-à-côte Radar/Opportunités : en grande partie caduc (Radar supprimé) ; reste l'enchaînement Approfondir→Opportunités.
+- **ÉV9 / ÉV10 / ÉV11** — chat réel, h2a, pipelines live : évolutions de la roadmap (spec §11/§12), pas des bugs.
