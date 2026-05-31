@@ -7,8 +7,8 @@
   /**
    * In simulation mode, items that are not "fait" are shown with a demotion
    * tag ("hypothèse"/"simulation"/"non confirmé") but are NOT hidden.
-   * In real mode, only "fait" items are passed in (filtered upstream),
-   * so every item here is confirmed — no demotion needed.
+   * In real mode, non-"fait" items (hypothese, non-disponible) are greyed
+   * with a "non vérifié en mode réel" badge — they must not appear as facts.
    */
   export let simulationMode: boolean = false;
 
@@ -54,8 +54,10 @@
   <!-- Evidence items -->
   <div class="divide-y divide-slate-100">
     {#each group.items as item}
-      {@const isDemoted = simulationMode && item.verification !== "fait"}
-      <div class={`px-4 py-3 ${isDemoted ? "opacity-60" : ""}`}>
+      {@const isSimDemoted = simulationMode && item.verification !== "fait"}
+      {@const isRealDemoted = !simulationMode && item.verification !== "fait"}
+      {@const isDemoted = isSimDemoted || isRealDemoted}
+      <div class={`px-4 py-3 ${isDemoted ? "opacity-50" : ""}`}>
         <div class="flex flex-wrap items-start gap-2">
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-1.5">
@@ -78,6 +80,11 @@
             <p class="mt-1 text-[10px] text-slate-400">
               {item.date} · {item.obtentionMode}
             </p>
+            {#if isRealDemoted}
+              <p class="mt-1 text-[10px] font-semibold text-amber-600">
+                non vérifié en mode réel
+              </p>
+            {/if}
           </div>
           <div class="flex shrink-0 flex-col items-end gap-1">
             <Badge tone={badgeTone(item.verification)}>
