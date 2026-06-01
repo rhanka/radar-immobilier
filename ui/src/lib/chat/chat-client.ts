@@ -12,10 +12,16 @@
 import { createStreamHub } from "@sentropic/chat-ui/client/streamHub";
 import type { StreamHubClient } from "@sentropic/chat-ui/client/streamTypes";
 
+export type ChatModelChoice = {
+  modelId: string;
+  label: string;
+};
+
 export type ChatProvider = {
   id: string;
   label: string;
   defaultModel: string;
+  models: ChatModelChoice[];
 };
 
 export type ProvidersResponse = {
