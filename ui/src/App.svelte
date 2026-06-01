@@ -121,9 +121,7 @@
     {:else if activeView === "signaux"}
       <SignalsT1View onApprofondir={handleApprofondir} />
     {:else if activeView === "grilles"}
-      <ViewLayout>
-        <GrillesView />
-      </ViewLayout>
+      <GrillesView />
     {:else if activeView === "console"}
       <ViewLayout>
         <ConsoleView />
