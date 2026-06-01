@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TrendingUp, Clock } from "@lucide/svelte";
+  import { TrendingUp, Clock, ChevronRight } from "@lucide/svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
   import type { AxisScoreT, OpportunityDossierT } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
@@ -71,9 +71,14 @@
 </script>
 
 <div class="flex h-full min-h-0 flex-col gap-5 overflow-y-auto px-1 py-1">
-  <!-- ── Dossier header ──────────────────────────────────────────────── -->
+  <!-- ── En-tête du panneau de détail : fil d'ariane + titre de l'opportunité sélectionnée ── -->
   <div>
-    <h1 class="text-xl font-semibold text-slate-950">{dossier.title}</h1>
+    <nav class="flex items-center gap-1.5 text-xs text-slate-400" aria-label="Fil d'ariane">
+      <span class="font-medium">Opportunités</span>
+      <ChevronRight class="h-3 w-3 shrink-0" aria-hidden="true" />
+      <span class="truncate font-semibold text-slate-600">{dossier.title}</span>
+    </nav>
+    <h1 class="mt-1 text-xl font-semibold text-slate-950">{dossier.title}</h1>
     <p class="mt-0.5 text-sm text-slate-500">{dossier.address}</p>
     <div class="mt-2 flex flex-wrap gap-2">
       <Badge tone="success">Zone {dossier.zone}</Badge>

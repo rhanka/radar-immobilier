@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { Search } from "@lucide/svelte";
-  import { Drawer, Button, Badge } from "@sentropic/design-system-svelte";
+  import { Search, ChevronDown, ChevronRight } from "@lucide/svelte";
   import type { SourceEvaluation, RecommendationKind } from "$lib/source-review/source-evaluation-data";
   import Acronym from "$lib/components/Acronym.svelte";
   import { getAcronym } from "$lib/glossary/acronyms.js";
@@ -18,17 +17,12 @@
 
   $: statusRows = qualificationStatus();
 
-  let drawerOpen = false;
-  let selectedSource: SourceEvaluation | null = null;
+  /** Id de la source dépliée dans l'accordéon (null = toutes repliées). */
+  let expandedSourceId: string | null = null;
 
-  function openSource(source: SourceEvaluation): void {
-    selectedSource = source;
-    drawerOpen = true;
-  }
-
-  function closeDrawer(): void {
-    drawerOpen = false;
-    selectedSource = null;
+  /** Bascule l'accordéon : clic sur une ligne déplie le détail en place (ou le replie). */
+  function toggleSource(source: SourceEvaluation): void {
+    expandedSourceId = expandedSourceId === source.id ? null : source.id;
   }
 
   function recoBadgeClass(rec: RecommendationKind): string {
@@ -86,87 +80,65 @@
     {/each}
   </div>
 
-  <!-- Table des sources -->
+  <!-- Catalogue sources : cartes accordéon (clic = déplie le détail en place) -->
   <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
     <div class="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
       <Search class="h-4 w-4 text-teal-600" aria-hidden="true" />
       <h1 class="text-sm font-semibold text-slate-950">
         Catalogue sources ({sourceEvaluations.length})
       </h1>
+      <span class="ml-auto text-xs text-slate-400">
+        Cliquer une source pour déplier son détail
+      </span>
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <th class="px-4 py-2.5">Source</th>
-            <th class="px-3 py-2.5">Famille</th>
-            <th class="px-3 py-2.5">Recommandation</th>
-            <th class="px-3 py-2.5">Accès</th>
-            <th class="px-3 py-2.5">Coût</th>
-            <th class="px-3 py-2.5 sr-only">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          {#each sourceEvaluations as source}
-            <tr
-              class="cursor-pointer hover:bg-slate-50"
-              on:click={() => openSource(source)}
-            >
-              <td class="px-4 py-2.5">
-                <p class="font-medium text-slate-950">
-                  {#if getAcronym(source.name)}
-                    <Acronym term={source.name} />
-                  {:else}
-                    {source.name}
-                  {/if}
-                </p>
-              </td>
-              <td class="px-3 py-2.5 text-xs text-slate-500">{source.family}</td>
-              <td class="px-3 py-2.5">
-                <span class={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${recoBadgeClass(source.recommendation)}`}>
-                  {recommendationLabels[source.recommendation]}
-                </span>
-              </td>
-              <td class="px-3 py-2.5">
-                <span class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
-                  {accessLabels[source.accessMode]}
-                </span>
-              </td>
-              <td class="px-3 py-2.5">
-                <span class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
-                  {costLabels[source.costLevel]}
-                </span>
-              </td>
-              <td class="px-3 py-2.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  onclick={(e) => { e.stopPropagation(); openSource(source); }}
-                >
-                  Détails
-                </Button>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+    <div class="divide-y divide-slate-100">
+      {#each sourceEvaluations as source (source.id)}
+        {@const isExpanded = expandedSourceId === source.id}
+        <div>
+          <!-- En-tête de carte : clic déplie / replie le détail en place -->
+          <button
+            type="button"
+            class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
+            aria-expanded={isExpanded}
+            on:click={() => toggleSource(source)}
+          >
+            <span class="shrink-0 text-slate-400">
+              {#if isExpanded}
+                <ChevronDown class="h-4 w-4" aria-hidden="true" />
+              {:else}
+                <ChevronRight class="h-4 w-4" aria-hidden="true" />
+              {/if}
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block font-medium text-slate-950">
+                {#if getAcronym(source.name)}
+                  <Acronym term={source.name} />
+                {:else}
+                  {source.name}
+                {/if}
+              </span>
+              <span class="mt-0.5 block text-xs text-slate-500">{source.family}</span>
+            </span>
+            <span class={`hidden shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold sm:inline-block ${recoBadgeClass(source.recommendation)}`}>
+              {recommendationLabels[source.recommendation]}
+            </span>
+            <span class="hidden shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 md:inline-block">
+              {accessLabels[source.accessMode]}
+            </span>
+            <span class="hidden shrink-0 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 md:inline-block">
+              {costLabels[source.costLevel]}
+            </span>
+          </button>
+
+          <!-- Détail déplié en place (remplace l'ancien drawer slide-over) -->
+          {#if isExpanded}
+            <div class="border-t border-slate-100 bg-slate-50 p-4">
+              <SourceDeepDive {source} />
+            </div>
+          {/if}
+        </div>
+      {/each}
     </div>
   </div>
 </div>
-
-<!-- Drawer détail source -->
-<Drawer
-  open={drawerOpen}
-  title={selectedSource?.name ?? ""}
-  description={selectedSource?.family ?? ""}
-  side="right"
-  onclose={closeDrawer}
->
-  {#if selectedSource}
-    <div class="p-4">
-      <SourceDeepDive source={selectedSource} />
-    </div>
-  {/if}
-</Drawer>
