@@ -49,27 +49,35 @@ export const TREATMENTS: Treatment[] = [
 // Source/MCP connectors (stub — demo, nothing really connected)
 // ---------------------------------------------------------------------------
 
-export type ConnectorStatus = "connecte" | "a-venir" | "manuel";
+export type ConnectorStatus = "connecte" | "a-venir" | "manuel" | "reel";
 
 export interface Connector {
   id: string;
   label: string;
   status: ConnectorStatus;
   note?: string;
+  /**
+   * When set, this connector is REALLY wired: the id of the server-side
+   * collector exposed at POST /api/automation/collect/:source. The UI shows a
+   * « Lancer la collecte » action that fetches the live public source.
+   */
+  realCollectSource?: string;
 }
 
 export const STATUS_LABELS_FR: Record<ConnectorStatus, string> = {
   connecte: "Connecté",
   "a-venir": "À venir",
   manuel: "Manuel",
+  reel: "Réel",
 };
 
 export const CONNECTORS: Connector[] = [
   {
     id: "avis-publics",
     label: "Avis publics municipaux",
-    status: "a-venir",
-    note: "Flux RSS / scraping des ordres du jour des conseils municipaux",
+    status: "reel",
+    note: "Collecte LIVE : page publique des avis publics de Salaberry-de-Valleyfield (HTML, sans clé). Extraction titre + date + lien PDF côté serveur.",
+    realCollectSource: "avis-publics-valleyfield",
   },
   {
     id: "role-evaluation",
