@@ -5,6 +5,7 @@
     Building2,
     SlidersHorizontal,
     MonitorDot,
+    KanbanSquare,
     MapPin,
   } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views.js";
@@ -23,6 +24,7 @@
     { id: "opportunity", label: "Opportunités", icon: Building2 },
     { id: "console", label: "Sources", icon: MonitorDot },
     { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
+    { id: "backlog", label: "Backlog", icon: KanbanSquare },
   ];
 </script>
 
@@ -32,7 +34,7 @@
     <span class="text-sm font-bold tracking-tight text-slate-950">Radar immobilier</span>
   </div>
 
-  <!-- Nav items (5 vues) -->
+  <!-- Nav items (6 vues) -->
   <nav class="flex flex-1 items-center gap-1" aria-label="Navigation principale">
     {#each items as item}
       {@const Icon = item.icon}
