@@ -2,7 +2,8 @@
   import { onMount } from "svelte";
   import { ThemeProvider } from "@sentropic/design-system-svelte";
   import { sentTechTheme } from "@sentropic/design-system-themes";
-  import AppSidebar from "$lib/components/AppSidebar.svelte";
+  import TopNav from "$lib/components/TopNav.svelte";
+  import ViewLayout from "$lib/components/ViewLayout.svelte";
   import TourOverlay from "$lib/components/tour/TourOverlay.svelte";
   import type { DemoView } from "$lib/demo/views";
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
@@ -20,9 +21,32 @@
   let activeView: DemoView = "signaux";
   /** Signal id transmis par Approfondir -> filtre OpportunityFunnel. */
   let opportuniteSignalId: string | undefined = undefined;
+  /** Label humain du signal sélectionné (signal-2 : libellé lisible dans le chip de filtre). */
+  let opportuniteSignalLabel: string | undefined = undefined;
+
+  // Libellés lisibles par type de signal
+  const TYPE_LABELS_SHORT: Record<string, string> = {
+    "residential-rezoning": "Rezonage résidentiel",
+    "cptaq": "CPTAQ",
+    "ppcmoi": "PPCMOI",
+    "public-consultation": "Consultation publique",
+    "plan-urbanisme": "Plan d'urbanisme",
+    "grid-cos-modification": "Modification grille/COS",
+    "derogation-relevant": "Dérogation pertinente",
+    "derogation-irrelevant": "Dérogation non pertinente",
+  };
+
+  function buildSignalLabel(signal: SignalT): string {
+    const type = TYPE_LABELS_SHORT[signal.type] ?? signal.type;
+    const parts: string[] = [type];
+    if (signal.bylaw) parts.push(`Règl. ${signal.bylaw}`);
+    if (signal.zone) parts.push(signal.zone);
+    return parts.join(" · ");
+  }
 
   function handleApprofondir(signal: SignalT): void {
     opportuniteSignalId = signal.id;
+    opportuniteSignalLabel = buildSignalLabel(signal);
     activeView = "opportunity";
   }
 
@@ -85,32 +109,42 @@
 
 <ThemeProvider theme={sentTechTheme}>
   <div
-    class="flex h-screen overflow-hidden transition-[padding] duration-200"
+    class="flex h-screen flex-col overflow-hidden transition-[padding] duration-200"
     style={`padding-right: ${dockPaddingCss};`}
   >
-    <AppSidebar
+    <!-- Barre de navigation horizontale -->
+    <TopNav
       {activeView}
       onSelect={(view) => (activeView = view)}
       onStartTour={startTour}
     />
-    <main class="flex-1 min-w-0 overflow-auto">
-      {#if activeView === "onboarding"}
-        <OnboardingView />
-      {:else if activeView === "signaux"}
-        <SignalsT1View onApprofondir={handleApprofondir} />
-      {:else if activeView === "opportunity"}
+
+    <!-- Zone de contenu : OpportunityFunnel garde son propre layout full-width -->
+    {#if activeView === "opportunity"}
+      <ViewLayout fullWidth={true}>
         <OpportunityFunnel
           selectedSignalId={opportuniteSignalId}
-          onClearFilter={() => (opportuniteSignalId = undefined)}
+          selectedSignalLabel={opportuniteSignalLabel}
+          onClearFilter={() => { opportuniteSignalId = undefined; opportuniteSignalLabel = undefined; }}
         />
-      {:else if activeView === "grilles"}
-        <GrillesView />
-      {:else if activeView === "console"}
+      </ViewLayout>
+    {:else if activeView === "onboarding"}
+      <ViewLayout>
+        <OnboardingView />
+      </ViewLayout>
+    {:else if activeView === "signaux"}
+      <SignalsT1View onApprofondir={handleApprofondir} />
+    {:else if activeView === "grilles"}
+      <GrillesView />
+    {:else if activeView === "console"}
+      <ViewLayout>
         <ConsoleView />
-      {:else}
+      </ViewLayout>
+    {:else}
+      <ViewLayout>
         <AutomationView />
-      {/if}
-    </main>
+      </ViewLayout>
+    {/if}
   </div>
 
   <!-- Assistant radar (chat reel @sentropic/chat-ui, ancre par defaut) -->
