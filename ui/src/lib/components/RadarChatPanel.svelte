@@ -23,8 +23,12 @@
   let providers: ChatProvider[] = [];
   let providersLoaded = false;
   let providersError = "";
-  // Neutral default: first configured provider in alphabetical order.
-  let selectedProviderId = "";
+  // Selection combinee "providerId::modelId" (design sentropic, groupe par
+  // fournisseur). Defaut neutre : 1er fournisseur (ordre alphabetique) + son
+  // modele par defaut.
+  let selectedModelKey = "";
+  $: selectedProviderId = selectedModelKey.split("::")[0] ?? "";
+  $: selectedModel = selectedModelKey.split("::")[1] ?? "";
   let draft = "";
   let sending = false;
   let turns: Turn[] = [];
@@ -48,9 +52,11 @@
     try {
       const payload = await fetchProviders();
       providers = payload.providers;
-      if (providers.length > 0 && !selectedProviderId) {
-        // First configured provider alphabetically (server already sorts).
-        selectedProviderId = providers[0].id;
+      if (providers.length > 0 && !selectedModelKey) {
+        // First configured provider alphabetically (server already sorts)
+        // + its default model.
+        const first = providers[0];
+        selectedModelKey = `${first.id}::${first.defaultModel}`;
       }
       providersError = "";
     } catch (error) {
@@ -95,6 +101,7 @@
       ];
       const started = await startMessage({
         providerId: selectedProviderId,
+        model: selectedModel || undefined,
         messages,
       });
       turns = [
@@ -154,14 +161,16 @@
       </p>
     </div>
     {#if configured}
-      <div class="w-44 shrink-0">
-        <Select
-          id="chat-provider"
-          label="Fournisseur"
-          bind:value={selectedProviderId}
-        >
+      <div class="w-52 shrink-0">
+        <Select id="chat-model" label="Modele" bind:value={selectedModelKey}>
           {#each providers as provider}
-            <option value={provider.id}>{provider.label}</option>
+            <optgroup label={provider.label}>
+              {#each provider.models as model}
+                <option value={`${provider.id}::${model.modelId}`}>
+                  {model.label}
+                </option>
+              {/each}
+            </optgroup>
           {/each}
         </Select>
       </div>
