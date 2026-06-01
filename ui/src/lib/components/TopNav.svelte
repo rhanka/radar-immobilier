@@ -5,7 +5,6 @@
     Building2,
     SlidersHorizontal,
     MonitorDot,
-    Zap,
     MapPin,
   } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views.js";
@@ -23,7 +22,6 @@
     { id: "signaux", label: "Signaux", icon: Radio },
     { id: "opportunity", label: "Opportunités", icon: Building2 },
     { id: "console", label: "Sources", icon: MonitorDot },
-    { id: "automation", label: "Automatisation", icon: Zap },
     { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
   ];
 </script>
@@ -34,7 +32,7 @@
     <span class="text-sm font-bold tracking-tight text-slate-950">Radar immobilier</span>
   </div>
 
-  <!-- Nav items (6 vues) -->
+  <!-- Nav items (5 vues) -->
   <nav class="flex flex-1 items-center gap-1" aria-label="Navigation principale">
     {#each items as item}
       {@const Icon = item.icon}
