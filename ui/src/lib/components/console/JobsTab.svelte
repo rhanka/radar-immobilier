@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Info, Clock, CheckCircle, AlertTriangle, Loader } from "@lucide/svelte";
-  import { Drawer, Button, Badge } from "@sentropic/design-system-svelte";
+  import { Info, Clock, CheckCircle, AlertTriangle, Loader, ChevronDown, ChevronRight } from "@lucide/svelte";
+  import { Badge } from "@sentropic/design-system-svelte";
   import type { Job, JobStatus, JobType } from "$lib/jobs/jobs-data";
   import { demoJobs, countsByStatus, filterJobsByMode } from "$lib/jobs/jobs-data.js";
   import { appMode } from "$lib/state/mode.js";
@@ -10,17 +10,11 @@
   $: jobs = filterJobsByMode(demoJobs, $appMode);
   $: counts = countsByStatus(jobs);
 
-  let drawerOpen = false;
-  let selectedJob: Job | null = null;
+  /** Id du job deplie dans l'accordeon (null = tous replies). */
+  let expandedJobId: string | null = null;
 
-  function openJob(job: Job): void {
-    selectedJob = job;
-    drawerOpen = true;
-  }
-
-  function closeDrawer(): void {
-    drawerOpen = false;
-    selectedJob = null;
+  function toggleJob(job: Job): void {
+    expandedJobId = expandedJobId === job.id ? null : job.id;
   }
 
   function statusBadgeTone(status: JobStatus): "neutral" | "info" | "success" | "error" {
@@ -47,9 +41,9 @@
       case "running":
         return "En cours";
       case "done":
-        return "Terminé";
+        return "Termine";
       case "failed":
-        return "Échoué";
+        return "Echoue";
       default:
         return status;
     }
@@ -71,7 +65,7 @@
   }
 
   function formatDuration(ms?: number): string {
-    if (ms === undefined) return "";
+    if (ms === undefined) return "En cours";
     if (ms < 1000) return `${ms} ms`;
     return `${(ms / 1000).toFixed(1)} s`;
   }
@@ -85,15 +79,25 @@
       minute: "2-digit",
     });
   }
+
+  function statusDotClass(status: JobStatus): string {
+    switch (status) {
+      case "queued": return "bg-slate-400";
+      case "running": return "bg-blue-500 animate-pulse";
+      case "done": return "bg-teal-500";
+      case "failed": return "bg-red-500";
+      default: return "bg-slate-400";
+    }
+  }
 </script>
 
 <div class="space-y-5">
-  <!-- Note de démo -->
+  <!-- Note de demo -->
   <div class="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
     <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
     <p class="text-sm text-amber-900">
-      <span class="font-semibold">Données de démo.</span>
-      Les jobs affichés sont des stubs statiques (aucune orchestration réelle connectée). Le mode actif filtre les jobs de simulation.
+      <span class="font-semibold">Donnees de demo.</span>
+      Les jobs affiches sont des stubs statiques (aucune orchestration reelle connectee). Le mode actif filtre les jobs de simulation.
     </p>
   </div>
 
@@ -112,12 +116,12 @@
     <div class="flex items-center gap-2 rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 shadow-sm">
       <CheckCircle class="h-3.5 w-3.5 text-teal-600" aria-hidden="true" />
       <span class="text-sm font-semibold text-teal-950">{counts.done}</span>
-      <span class="text-xs text-teal-700">Terminés</span>
+      <span class="text-xs text-teal-700">Termines</span>
     </div>
     <div class="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 shadow-sm">
       <AlertTriangle class="h-3.5 w-3.5 text-red-600" aria-hidden="true" />
       <span class="text-sm font-semibold text-red-950">{counts.failed}</span>
-      <span class="text-xs text-red-700">Échoués</span>
+      <span class="text-xs text-red-700">Echoues</span>
     </div>
 
     <!-- Badge mode actif -->
@@ -125,140 +129,128 @@
       {$appMode === 'real' ? 'border-teal-200 bg-teal-50' : 'border-amber-200 bg-amber-50'}">
       <Clock class="h-3.5 w-3.5 {$appMode === 'real' ? 'text-teal-600' : 'text-amber-600'}" aria-hidden="true" />
       <span class="text-xs font-semibold {$appMode === 'real' ? 'text-teal-800' : 'text-amber-800'}">
-        Mode : {$appMode === 'real' ? 'Réel' : 'Simulation'}
+        Mode : {$appMode === 'real' ? 'Reel' : 'Simulation'}
       </span>
     </div>
   </div>
 
-  <!-- Table des jobs -->
-  <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <th class="px-4 py-2.5">Type</th>
-            <th class="px-3 py-2.5">Source</th>
-            <th class="px-3 py-2.5">Statut</th>
-            <th class="px-3 py-2.5">Démarré</th>
-            <th class="px-3 py-2.5">Durée</th>
-            <th class="px-3 py-2.5">Mode</th>
-            <th class="px-3 py-2.5 sr-only">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          {#each jobs as job}
-            <tr
-              class="cursor-pointer hover:bg-slate-50"
-              on:click={() => openJob(job)}
-            >
-              <td class="px-4 py-2.5 font-medium text-slate-950">
-                {typeLabel(job.type)}
-              </td>
-              <td class="px-3 py-2.5 text-xs text-slate-600 font-mono">
-                {#if sourceRefAcronym(job.sourceRef)}
-                  <Acronym term={sourceRefAcronym(job.sourceRef) ?? job.sourceRef} />
-                  {job.sourceRef.slice((sourceRefAcronym(job.sourceRef) ?? "").length).replace(/^-/, " ")}
-                {:else}
-                  {job.sourceRef}
-                {/if}
-              </td>
-              <td class="px-3 py-2.5">
-                <Badge tone={statusBadgeTone(job.status)}>
-                  {statusLabel(job.status)}
-                </Badge>
-              </td>
-              <td class="px-3 py-2.5 text-xs text-slate-500">{formatDate(job.startedAt)}</td>
-              <td class="px-3 py-2.5 text-xs text-slate-500">{formatDuration(job.durationMs)}</td>
-              <td class="px-3 py-2.5">
-                <Badge tone={job.mode === 'real' ? 'success' : 'warning'}>
-                  {job.mode === 'real' ? 'Réel' : 'Simulation'}
-                </Badge>
-              </td>
-              <td class="px-3 py-2.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  onclick={(e) => { e.stopPropagation(); openJob(job); }}
-                >
-                  Détails
-                </Button>
-              </td>
-            </tr>
-          {/each}
-          {#if jobs.length === 0}
-            <tr>
-              <td colspan="7" class="px-4 py-6 text-center text-sm text-slate-400">
-                Aucun job pour ce mode.
-              </td>
-            </tr>
-          {/if}
-        </tbody>
-      </table>
+  <!-- Liste des jobs en accordeon (clic = deplie le detail en place) -->
+  {#if jobs.length === 0}
+    <div class="rounded-lg border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-400 shadow-sm">
+      Aucun job pour ce mode.
     </div>
-  </div>
-</div>
+  {:else}
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="divide-y divide-slate-100">
+        {#each jobs as job (job.id)}
+          {@const isExpanded = expandedJobId === job.id}
+          <div>
+            <!-- En-tete de carte : resume replie -->
+            <button
+              type="button"
+              class="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
+              aria-expanded={isExpanded}
+              on:click={() => toggleJob(job)}
+            >
+              <span class="shrink-0 text-slate-400">
+                {#if isExpanded}
+                  <ChevronDown class="h-4 w-4" aria-hidden="true" />
+                {:else}
+                  <ChevronRight class="h-4 w-4" aria-hidden="true" />
+                {/if}
+              </span>
 
-<!-- Drawer détail job -->
-<Drawer
-  open={drawerOpen}
-  title="Détail job"
-  description={selectedJob ? `${typeLabel(selectedJob.type)} : ${selectedJob.sourceRef}` : ""}
-  side="right"
-  onclose={closeDrawer}
->
-  {#if selectedJob}
-    <div class="space-y-4 p-4">
-      <!-- Note stub démo -->
-      <div class="flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
-        <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
-        <p class="text-sm text-amber-900">
-          <span class="font-semibold">Stub de démo.</span>
-          Ce job est une donnée statique. L'orchestration réelle sera connectée à l'étape ÉV11.
-        </p>
+              <!-- Indicateur de statut (point colore) -->
+              <span class={`h-2.5 w-2.5 shrink-0 rounded-full ${statusDotClass(job.status)}`} aria-hidden="true"></span>
+
+              <!-- Type + source -->
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-medium text-slate-950">
+                  {typeLabel(job.type)}
+                </span>
+                <span class="mt-0.5 block text-xs text-slate-500 font-mono">
+                  {#if sourceRefAcronym(job.sourceRef)}
+                    <Acronym term={sourceRefAcronym(job.sourceRef) ?? job.sourceRef} />
+                    {job.sourceRef.slice((sourceRefAcronym(job.sourceRef) ?? "").length).replace(/^-/, " ")}
+                  {:else}
+                    {job.sourceRef}
+                  {/if}
+                </span>
+              </span>
+
+              <!-- Statut -->
+              <Badge tone={statusBadgeTone(job.status)}>
+                {statusLabel(job.status)}
+              </Badge>
+
+              <!-- Date de demarrage -->
+              <span class="hidden text-xs text-slate-400 sm:block">{formatDate(job.startedAt)}</span>
+
+              <!-- Duree -->
+              <span class="hidden text-xs text-slate-500 md:block">{formatDuration(job.durationMs)}</span>
+
+              <!-- Mode -->
+              <Badge tone={job.mode === 'real' ? 'success' : 'warning'}>
+                {job.mode === 'real' ? 'Reel' : 'Simulation'}
+              </Badge>
+            </button>
+
+            <!-- Detail deplie en place -->
+            {#if isExpanded}
+              <div class="border-t border-slate-100 bg-slate-50 p-4">
+                <!-- Note stub demo -->
+                <div class="mb-4 flex gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <Info class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
+                  <p class="text-sm text-amber-900">
+                    <span class="font-semibold">Stub de demo.</span>
+                    Ce job est une donnee statique. L'orchestration reelle sera connectee a l'etape EV11.
+                  </p>
+                </div>
+
+                <!-- Champs du job -->
+                <dl class="rounded-lg border border-slate-200 bg-white divide-y divide-slate-100">
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">ID</dt>
+                    <dd class="text-sm font-mono text-slate-800">{job.id}</dd>
+                  </div>
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Type</dt>
+                    <dd class="text-sm text-slate-800">{typeLabel(job.type)}</dd>
+                  </div>
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</dt>
+                    <dd>
+                      <Badge tone={statusBadgeTone(job.status)}>
+                        {statusLabel(job.status)}
+                      </Badge>
+                    </dd>
+                  </div>
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Source</dt>
+                    <dd class="text-sm font-mono text-slate-800">{job.sourceRef}</dd>
+                  </div>
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Demarre</dt>
+                    <dd class="text-sm text-slate-800">{formatDate(job.startedAt)}</dd>
+                  </div>
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Duree</dt>
+                    <dd class="text-sm text-slate-800">{formatDuration(job.durationMs)}</dd>
+                  </div>
+                  <div class="grid grid-cols-2 px-4 py-3">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Mode</dt>
+                    <dd>
+                      <Badge tone={job.mode === 'real' ? 'success' : 'warning'}>
+                        {job.mode === 'real' ? 'Reel' : 'Simulation'}
+                      </Badge>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            {/if}
+          </div>
+        {/each}
       </div>
-
-      <!-- Champs du job -->
-      <dl class="rounded-lg border border-slate-200 bg-white divide-y divide-slate-100">
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">ID</dt>
-          <dd class="text-sm font-mono text-slate-800">{selectedJob.id}</dd>
-        </div>
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Type</dt>
-          <dd class="text-sm text-slate-800">{typeLabel(selectedJob.type)}</dd>
-        </div>
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Statut</dt>
-          <dd>
-            <Badge tone={statusBadgeTone(selectedJob.status)}>
-              {statusLabel(selectedJob.status)}
-            </Badge>
-          </dd>
-        </div>
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Source</dt>
-          <dd class="text-sm font-mono text-slate-800">{selectedJob.sourceRef}</dd>
-        </div>
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Démarré</dt>
-          <dd class="text-sm text-slate-800">{formatDate(selectedJob.startedAt)}</dd>
-        </div>
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Durée</dt>
-          <dd class="text-sm text-slate-800">
-            {selectedJob.durationMs !== undefined ? formatDuration(selectedJob.durationMs) : "En cours"}
-          </dd>
-        </div>
-        <div class="grid grid-cols-2 px-4 py-3">
-          <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Mode</dt>
-          <dd>
-            <Badge tone={selectedJob.mode === 'real' ? 'success' : 'warning'}>
-              {selectedJob.mode === 'real' ? 'Réel' : 'Simulation'}
-            </Badge>
-          </dd>
-        </div>
-      </dl>
     </div>
   {/if}
-</Drawer>
+</div>
