@@ -32,13 +32,18 @@ describe("AutomationView — data layer (Lot 1 helpers)", () => {
 
   // ── CONNECTORS ────────────────────────────────────────────────────────────
 
-  it("aucun connecteur n'a le statut 'connecte' (démo — rien de réellement branché)", () => {
+  it("aucun connecteur n'a le statut 'connecte' (les autres restent simulés)", () => {
     const connected = CONNECTORS.filter((c) => c.status === "connecte");
     expect(connected).toHaveLength(0);
   });
 
-  it("STATUS_LABELS_FR couvre les 3 statuts possibles", () => {
-    const statuts: ConnectorStatus[] = ["connecte", "a-venir", "manuel"];
+  it("au moins un connecteur est RÉEL (amorce ÉV11)", () => {
+    const real = CONNECTORS.filter((c) => c.status === "reel");
+    expect(real.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("STATUS_LABELS_FR couvre les statuts possibles", () => {
+    const statuts: ConnectorStatus[] = ["connecte", "a-venir", "manuel", "reel"];
     for (const s of statuts) {
       expect(STATUS_LABELS_FR[s]).toBeTruthy();
     }

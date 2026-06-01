@@ -9,6 +9,10 @@
     ShieldAlert,
     ShieldCheck,
     BarChart3,
+    Play,
+    Loader2,
+    ExternalLink,
+    FileText,
   } from "@lucide/svelte";
   import { Badge, Button } from "@sentropic/design-system-svelte";
   import {
@@ -17,7 +21,9 @@
     STATUS_LABELS_FR,
     benchmarkRecap,
   } from "$lib/automation/automation-data.js";
-  import type { TreatmentKind } from "$lib/automation/automation-data.js";
+  import type { TreatmentKind, Connector } from "$lib/automation/automation-data.js";
+  import { runCollect, avisTypeLabel } from "$lib/automation/collect.js";
+  import type { CollectView } from "$lib/automation/collect.js";
   import Acronym from "$lib/components/Acronym.svelte";
   import { getAcronym } from "$lib/glossary/acronyms.js";
   import BenchmarkComparison from "$lib/components/comparison/BenchmarkComparison.svelte";
@@ -43,12 +49,40 @@
     "a-venir": "bg-slate-100 text-slate-600",
     manuel: "bg-amber-100 text-amber-700",
     connecte: "bg-teal-100 text-teal-700",
+    reel: "bg-emerald-100 text-emerald-700",
   };
 
-  function statusBadgeTone(status: string): "neutral" | "warning" | "success" {
+  function statusBadgeTone(
+    status: string,
+  ): "neutral" | "warning" | "success" | "info" {
+    if (status === "reel") return "success";
     if (status === "connecte") return "success";
     if (status === "manuel") return "warning";
     return "neutral";
+  }
+
+  // EV11: REAL collection state, keyed by connector id.
+  let collecting: Record<string, boolean> = {};
+  let results: Record<string, CollectView> = {};
+
+  async function launchCollect(connector: Connector): Promise<void> {
+    if (!connector.realCollectSource) return;
+    collecting = { ...collecting, [connector.id]: true };
+    try {
+      const view = await runCollect(connector.realCollectSource);
+      results = { ...results, [connector.id]: view };
+    } finally {
+      collecting = { ...collecting, [connector.id]: false };
+    }
+  }
+
+  function formatFetchedAt(iso: string): string {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString("fr-CA", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
   }
 
   /**
@@ -131,21 +165,26 @@
       <h2 class="text-base font-semibold text-slate-950">Sources & connecteurs</h2>
     </div>
 
-    <!-- Demo disclaimer -->
-    <div class="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-      <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
-      <p class="text-xs leading-5 text-amber-800">
-        <span class="font-semibold">Démo :</span> connecteurs non branchés ; orchestration réelle à venir (côté serveur).
+    <!-- Status disclaimer : one connector is REAL, the rest are still simulated -->
+    <div class="mb-4 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
+      <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+      <p class="text-xs leading-5 text-emerald-800">
+        <span class="font-semibold">Amorce réelle (ÉV11) :</span> le connecteur
+        <span class="font-semibold">« Avis publics municipaux »</span> est désormais
+        <span class="font-semibold">RÉEL</span> : il interroge la page publique de
+        Salaberry-de-Valleyfield côté serveur, sans clé, et affiche les avis réellement publiés.
+        Les autres connecteurs restent <span class="font-semibold">simulés</span>.
       </p>
     </div>
 
-    <div class="mb-8 overflow-x-auto rounded-lg border border-slate-200 bg-white">
+    <div class="mb-4 overflow-x-auto rounded-lg border border-slate-200 bg-white">
       <table class="w-full border-collapse text-sm">
         <thead>
           <tr class="border-b border-slate-200 bg-slate-50 text-left">
             <th class="p-3 font-semibold text-slate-950">Source</th>
             <th class="p-3 font-semibold text-slate-950">Statut</th>
             <th class="p-3 font-medium text-slate-600">Note</th>
+            <th class="p-3 font-medium text-slate-600">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -162,11 +201,98 @@
                 </Badge>
               </td>
               <td class="p-3 text-xs text-slate-500">{connector.note ?? ""}</td>
+              <td class="p-3">
+                {#if connector.realCollectSource}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    type="button"
+                    disabled={collecting[connector.id]}
+                    onclick={() => launchCollect(connector)}
+                  >
+                    {#if collecting[connector.id]}
+                      <Loader2 class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                      Collecte en cours…
+                    {:else}
+                      <Play class="h-3.5 w-3.5" aria-hidden="true" />
+                      Lancer la collecte
+                    {/if}
+                  </Button>
+                {:else}
+                  <span class="text-xs italic text-slate-400">simulé</span>
+                {/if}
+              </td>
             </tr>
           {/each}
         </tbody>
       </table>
     </div>
+
+    <!-- REAL collection results (ÉV11) ------------------------------------->
+    {#each CONNECTORS as connector}
+      {#if connector.realCollectSource && results[connector.id]}
+        {@const view = results[connector.id]}
+        <div class="mb-8 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          {#if view.kind === "error"}
+            <div class="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-4 py-3">
+              <AlertTriangle class="mt-0.5 h-4 w-4 shrink-0 text-rose-600" aria-hidden="true" />
+              <div>
+                <p class="text-sm font-semibold text-rose-800">{view.label}</p>
+                <p class="mt-0.5 text-xs text-rose-700">{view.detail}</p>
+              </div>
+            </div>
+          {:else}
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <Badge tone="success">
+                  <ShieldCheck class="h-3 w-3" aria-hidden="true" /> RÉEL
+                </Badge>
+                <h3 class="text-sm font-semibold text-slate-950">
+                  {view.result.count} avis collectés en direct
+                </h3>
+              </div>
+              <a
+                class="inline-flex items-center gap-1 text-xs text-teal-700 hover:underline"
+                href={view.result.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink class="h-3 w-3" aria-hidden="true" /> Source publique
+              </a>
+            </div>
+            <p class="mb-4 text-xs text-slate-500">
+              Collecté le {formatFetchedAt(view.result.fetchedAt)} · données issues de la source,
+              aucune valeur inventée.
+            </p>
+            <ul class="divide-y divide-slate-100">
+              {#each view.result.items as item}
+                <li class="flex items-start gap-3 py-2.5">
+                  <FileText class="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                  <div class="min-w-0 flex-1">
+                    <a
+                      class="block truncate text-sm font-medium text-slate-800 hover:text-teal-700 hover:underline"
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={item.title}
+                    >
+                      {item.title}
+                    </a>
+                    <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                      <Badge tone="neutral">{avisTypeLabel(item.type)}</Badge>
+                      <span>{item.dateLabel}</span>
+                      {#each item.bylaws as bylaw}
+                        <Badge tone="info">Règl. {bylaw}</Badge>
+                      {/each}
+                    </div>
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </div>
+      {/if}
+    {/each}
 
     <!-- Benchmark recap ---------------------------------------------------->
     <div class="mb-3 flex items-center gap-2">
