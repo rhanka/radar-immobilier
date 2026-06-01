@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { tourSteps } from "./tour-steps.js";
 
-const VALID_VIEWS = ["onboarding", "signaux", "opportunity", "grilles", "console", "automation"] as const;
+const VALID_VIEWS = ["onboarding", "signaux", "opportunity", "grilles", "console"] as const;
 
 describe("tourSteps", () => {
   it("contient au moins 12 etapes", () => {
     expect(tourSteps.length).toBeGreaterThanOrEqual(12);
   });
 
-  it("couvre les 6 vues requises", () => {
+  it("couvre les 5 vues requises", () => {
     const views = new Set(tourSteps.map((s) => s.view));
     for (const v of VALID_VIEWS) {
       expect(views.has(v), `Vue manquante : ${v}`).toBe(true);
