@@ -36,16 +36,24 @@ describe("CONNECTORS", () => {
   });
 
   it("all have valid statuses", () => {
-    const valid: ConnectorStatus[] = ["connecte", "a-venir", "manuel"];
+    const valid: ConnectorStatus[] = ["connecte", "a-venir", "manuel", "reel"];
     for (const c of CONNECTORS) {
       expect(valid).toContain(c.status);
     }
   });
 
-  it("none is 'connecte' (demo stub)", () => {
+  it("a 'reel' connector exposes a server-side collector source (ÉV11)", () => {
     for (const c of CONNECTORS) {
-      expect(c.status).not.toBe("connecte");
+      if (c.status === "reel") {
+        expect(c.realCollectSource).toBeTruthy();
+      } else {
+        expect(c.realCollectSource).toBeUndefined();
+      }
     }
+  });
+
+  it("exactly one connector is wired to a real collector", () => {
+    expect(CONNECTORS.filter((c) => c.realCollectSource).length).toBe(1);
   });
 
   it("each connector has a non-empty id and label", () => {
@@ -58,7 +66,7 @@ describe("CONNECTORS", () => {
 
 describe("STATUS_LABELS_FR", () => {
   it("has an entry for each ConnectorStatus", () => {
-    const statuses: ConnectorStatus[] = ["connecte", "a-venir", "manuel"];
+    const statuses: ConnectorStatus[] = ["connecte", "a-venir", "manuel", "reel"];
     for (const s of statuses) {
       expect(STATUS_LABELS_FR[s]).toBeDefined();
       expect(STATUS_LABELS_FR[s].length).toBeGreaterThan(0);
