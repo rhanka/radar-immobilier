@@ -84,6 +84,15 @@ services:
       OBSCURA_CDP_URL: http://obscura:9222
       MAILDEV_SMTP_HOST: maildev
       MAILDEV_SMTP_PORT: 1025
+      # LLM provider keys for the ÉV9 chat (read from the host env / .env).
+      # Empty by default: the chat mounts and reports "no provider configured"
+      # until at least one key is supplied. Never commit real keys.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+      COHERE_API_KEY: ${COHERE_API_KEY:-}
     networks: [radar]
 
 networks:
