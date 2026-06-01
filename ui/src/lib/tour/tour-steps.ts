@@ -9,8 +9,9 @@ export interface TourStep {
 }
 
 /**
- * Parcours guide de la demo en 15 etapes couvrant les 6 vues.
- * Ordre : Onboarding > Signaux > Opportunites > Grilles > Sources > Automatisation.
+ * Parcours guide de la demo couvrant les 5 vues.
+ * Ordre : Onboarding > Signaux > Opportunites > Grilles > Sources.
+ * L'Automatisation est desormais un onglet de la vue Sources (ÉV14).
  *
  * Les ancres data-tour sont posees directement dans les composants views
  * (null => bulle centree).
@@ -110,11 +111,10 @@ export const tourSteps: TourStep[] = [
     body: "Chaque source est positionnee selon sa valeur metier (Y) et sa complexite d'acces (X). Les sources en haut a gauche sont les priorites immediates de connecteur.",
   },
 
-  // ── 6. Automatisation ──────────────────────────────────────────────────────
   {
-    id: "automatisation-intro",
-    view: "automation",
-    title: "Automatisation : cadences et benchmark",
-    body: "L'ecran Automatisation presente les cadences de traitement (initial, recurrent, approfondissement) et le benchmark des agents IA sur les analyses reelles.",
+    id: "console-automatisation",
+    view: "console",
+    title: "Onglet Automatisation : cadences et benchmark",
+    body: "Dans Sources, l'onglet Automatisation presente les cadences de traitement (initial, recurrent, approfondissement) et le benchmark des agents IA. Jobs = executions unitaires ; Automatisation = cadences qui planifient ces jobs.",
   },
 ];

@@ -8,6 +8,7 @@
     Button,
     Card,
   } from "@sentropic/design-system-svelte";
+  import ViewLayout from "$lib/components/ViewLayout.svelte";
   import Acronym from "$lib/components/Acronym.svelte";
   import { getAcronym } from "$lib/glossary/acronyms.js";
   import type { RecommendationKind } from "$lib/source-review/source-evaluation-data.js";
@@ -65,7 +66,58 @@
   }
 </script>
 
-<section class="min-h-full bg-slate-50 p-6">
+<ViewLayout>
+  <!-- ── Bande laterale gauche : municipalite + contexte pilote ──────────── -->
+  <svelte:fragment slot="controls">
+    <div class="space-y-5 p-4">
+      <div>
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Municipalite cible
+        </p>
+        <Select
+          id="municipality-select"
+          label="Municipalite cible"
+          bind:value={selectedMunicipalityId}
+        >
+          {#each QUEBEC_MUNICIPALITIES as municipality}
+            <option value={municipality.id}>{municipality.name}</option>
+          {/each}
+        </Select>
+        <p class="mt-2 text-xs text-slate-500">
+          Ville selectionnee : <strong class="text-teal-800">{selectedMunicipality.name}</strong>
+        </p>
+      </div>
+
+      <div class="rounded-md border border-teal-200 bg-teal-50 p-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-teal-700">
+          Contexte pilote
+        </p>
+        <p class="mt-1.5 text-sm leading-6 text-slate-600">
+          Chaque ville a son propre corpus de sources et de signaux historiques.
+          La retro-analyse initiale peuple le radar avant le relais par les scans quotidiens.
+        </p>
+      </div>
+
+      <div class="rounded-md border border-slate-200 bg-slate-50 p-3">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Recap rapide
+        </p>
+        <dl class="mt-2 space-y-1.5 text-sm">
+          <div class="flex items-center justify-between gap-2">
+            <dt class="text-slate-500">Sources activees</dt>
+            <dd class="font-bold text-teal-800">{selectedIds.length}</dd>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <dt class="text-slate-500">Fenetre retro-analyse</dt>
+            <dd class="font-bold text-teal-800">{retroWindow} mois</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </svelte:fragment>
+
+  <!-- ── Contenu principal ──────────────────────────────────────────────── -->
+  <section class="min-h-full bg-slate-50 p-6">
   <!-- En-tete ---------------------------------------------------------------->
   <header class="mb-6">
     <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
@@ -81,31 +133,10 @@
     </p>
   </header>
 
-  <!-- Etape 1 : choix de la municipalite -------------------------------------->
-  <div class="mb-8 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-    <h2 class="mb-4 text-base font-semibold text-slate-950">
-      Etape 1 : choisir la municipalite
-    </h2>
-    <div class="max-w-xs">
-      <Select
-        id="municipality-select"
-        label="Municipalite cible"
-        bind:value={selectedMunicipalityId}
-      >
-        {#each QUEBEC_MUNICIPALITIES as municipality}
-          <option value={municipality.id}>{municipality.name}</option>
-        {/each}
-      </Select>
-    </div>
-    <p class="mt-2 text-xs text-slate-500">
-      Ville selectionnee : <strong>{selectedMunicipality.name}</strong>
-    </p>
-  </div>
-
-  <!-- Etape 2 : sources a activer -------------------------------------------->
+  <!-- Etape 1 : sources a activer -------------------------------------------->
   <div class="mb-8">
     <h2 class="mb-4 text-base font-semibold text-slate-950">
-      Etape 2 : sources a activer pour {selectedMunicipality.name}
+      Etape 1 : sources a activer pour {selectedMunicipality.name}
     </h2>
     <div class="space-y-5">
       {#each groups as group}
@@ -309,4 +340,5 @@
       </ul>
     </div>
   {/if}
-</section>
+  </section>
+</ViewLayout>
