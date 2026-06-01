@@ -21,6 +21,8 @@ export default defineConfig({
         target: apiProxyTarget,
         changeOrigin: true,
       },
+      // /api couvre l'automatisation (ÉV11) et le chat + son flux SSE (ÉV9) ;
+      // same-origin en dev donc pas de CORS cote navigateur.
       "/api": {
         target: apiProxyTarget,
         changeOrigin: true,
