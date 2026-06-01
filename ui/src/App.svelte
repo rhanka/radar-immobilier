@@ -3,14 +3,12 @@
   import { ThemeProvider } from "@sentropic/design-system-svelte";
   import { sentTechTheme } from "@sentropic/design-system-themes";
   import TopNav from "$lib/components/TopNav.svelte";
-  import ViewLayout from "$lib/components/ViewLayout.svelte";
   import TourOverlay from "$lib/components/tour/TourOverlay.svelte";
   import type { DemoView } from "$lib/demo/views";
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
-  import AutomationView from "$lib/components/automation/AutomationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
@@ -119,31 +117,21 @@
       onStartTour={startTour}
     />
 
-    <!-- Zone de contenu : OpportunityFunnel garde son propre layout full-width -->
+    <!-- Zone de contenu -->
     {#if activeView === "opportunity"}
-      <ViewLayout fullWidth={true}>
-        <OpportunityFunnel
-          selectedSignalId={opportuniteSignalId}
-          selectedSignalLabel={opportuniteSignalLabel}
-          onClearFilter={() => { opportuniteSignalId = undefined; opportuniteSignalLabel = undefined; }}
-        />
-      </ViewLayout>
+      <OpportunityFunnel
+        selectedSignalId={opportuniteSignalId}
+        selectedSignalLabel={opportuniteSignalLabel}
+        onClearFilter={() => { opportuniteSignalId = undefined; opportuniteSignalLabel = undefined; }}
+      />
     {:else if activeView === "onboarding"}
-      <ViewLayout>
-        <OnboardingView />
-      </ViewLayout>
+      <OnboardingView />
     {:else if activeView === "signaux"}
       <SignalsT1View onApprofondir={handleApprofondir} />
     {:else if activeView === "grilles"}
       <GrillesView />
-    {:else if activeView === "console"}
-      <ViewLayout>
-        <ConsoleView />
-      </ViewLayout>
     {:else}
-      <ViewLayout>
-        <AutomationView />
-      </ViewLayout>
+      <ConsoleView />
     {/if}
   </div>
 

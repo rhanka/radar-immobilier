@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { Check } from "@lucide/svelte";
   import { valleyfieldDossiers } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
-  import { Alert, Badge, Button, Card, EmptyState } from "@sentropic/design-system-svelte";
+  import { Badge, Button, Card, EmptyState } from "@sentropic/design-system-svelte";
   import type { OpportunityDossierT } from "@radar/domain";
   import { appMode } from "$lib/state/mode.js";
   import { filterDossiersBySignalId, axesForMode } from "$lib/opportunites/funnel.js";
+  import ViewLayout from "$lib/components/ViewLayout.svelte";
   import DossierCard from "./DossierCard.svelte";
 
   /** Optional: render only the dossier linked to this signal. */
@@ -73,60 +75,38 @@
   }
 </script>
 
-<section class="flex min-h-full flex-col bg-slate-50 p-6">
-  <!-- ── Header ─────────────────────────────────────────────────────── -->
-  <header class="mb-5">
-    <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
-      Analyse d'opportunité : Valleyfield
-    </p>
-    <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
-      Dossiers d'opportunité foncière
-    </h1>
-    <p class="mt-1 text-sm text-slate-500">
-      3 dossiers réels, entonnoir PROCESS 6 phases, preuves tracées, score agrégé honnête.
-    </p>
-  </header>
+<ViewLayout>
+  <!-- ── Bande laterale gauche : liste maitre des opportunites ──────────── -->
+  <svelte:fragment slot="controls">
+    <div class="flex flex-col gap-2 p-4">
+      <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Opportunités · {filtered.length} dossier{filtered.length > 1 ? "s" : ""}
+      </p>
 
-  <!-- ── Signal filter banner ───────────────────────────────────────── -->
-  {#if selectedSignalId !== undefined}
-    <div class="mb-5">
-      <Alert tone="info" title="Filtré par signal : {selectedSignalLabel ?? selectedSignalId}">
-        {#snippet actions()}
-          <Button variant="ghost" size="sm" onclick={handleClearFilter}>
+      {#if selectedSignalId !== undefined}
+        <div class="mb-1 flex items-center justify-between gap-2 rounded-md border border-teal-200 bg-teal-50 px-2.5 py-1.5">
+          <span class="min-w-0 flex-1 truncate text-xs text-teal-800" title={selectedSignalLabel ?? selectedSignalId}>
+            Filtré : {selectedSignalLabel ?? selectedSignalId}
+          </span>
+          <button
+            type="button"
+            class="shrink-0 text-xs font-semibold text-teal-700 underline hover:text-teal-900"
+            on:click={handleClearFilter}
+          >
             Tout afficher
-          </Button>
-        {/snippet}
-      </Alert>
-    </div>
-  {/if}
+          </button>
+        </div>
+      {/if}
 
-  <!-- ── Empty state ─────────────────────────────────────────────────── -->
-  {#if filtered.length === 0}
-    <EmptyState
-      title="Aucun dossier qualifié pour ce signal"
-      message="Aucun dossier d'opportunité ne correspond au signal sélectionné pour l'instant."
-    >
-      {#snippet action()}
-        {#if selectedSignalId !== undefined}
-          <Button variant="secondary" size="sm" onclick={handleClearFilter}>
-            Afficher tous les dossiers
-          </Button>
-        {/if}
-      {/snippet}
-    </EmptyState>
-  {:else}
-    <!-- ── Master-detail layout ─────────────────────────────────────── -->
-    <div class="grid min-h-0 flex-1 grid-cols-12 gap-5">
-
-      <!-- ── LEFT: liste maître des opportunités (col-span-4) ────────── -->
-      <div class="col-span-4 flex flex-col gap-2">
-        <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Opportunités · {filtered.length} dossier{filtered.length > 1 ? "s" : ""}
+      {#if filtered.length === 0}
+        <p class="rounded-md border border-slate-200 bg-white px-3 py-3 text-xs text-slate-500">
+          Aucun dossier pour ce signal.
         </p>
+      {:else}
         {#each filtered as dossier (dossier.id)}
           {@const res = aggregate(axesForMode(dossier.axes, mode), WEIGHTS)}
           {@const s100 = scoreHundred(dossier)}
-          {@const isSelected = (selectedDossier?.id ?? filtered[0]?.id) === dossier.id}
+          {@const isSelected = selectedDossier?.id === dossier.id}
           {@const enAttente = isEnAttenteDePreuve(dossier)}
           <button
             type="button"
@@ -136,20 +116,27 @@
           >
             <Card
               interactive
-              class={isSelected ? "ring-2 ring-teal-500 ring-offset-1 bg-teal-50" : ""}
+              class={isSelected
+                ? "ring-2 ring-teal-600 ring-offset-1 bg-teal-600"
+                : "hover:border-teal-300"}
             >
-              <div class={`p-3 ${isSelected ? "border-l-4 border-teal-500 pl-2.5" : ""}`}>
-                <div class="flex items-center gap-1.5">
-                  {#if isSelected}
-                    <span class="rounded bg-teal-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+              <div class={`p-3 ${isSelected ? "border-l-4 border-teal-300 pl-2.5" : ""}`}>
+                {#if isSelected}
+                  <div class="mb-1.5 flex items-center gap-1.5">
+                    <span class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white">
+                      <Check class="h-3 w-3 text-teal-700" aria-hidden="true" />
+                    </span>
+                    <span class="text-[10px] font-bold uppercase tracking-wide text-white">
                       Sélectionnée
                     </span>
-                  {/if}
-                  <p class="text-sm font-semibold leading-5 text-slate-900">
-                    {dossier.title}
-                  </p>
-                </div>
-                <p class="mt-0.5 text-xs text-slate-500">{dossier.address}</p>
+                  </div>
+                {/if}
+                <p class={`text-sm font-semibold leading-5 ${isSelected ? "text-white" : "text-slate-900"}`}>
+                  {dossier.title}
+                </p>
+                <p class={`mt-0.5 text-xs ${isSelected ? "text-teal-50" : "text-slate-500"}`}>
+                  {dossier.address}
+                </p>
                 <div class="mt-2 flex flex-wrap items-center gap-1.5">
                   <Badge tone="neutral">{dossier.zone}</Badge>
                   {#if s100 === null}
@@ -170,15 +157,50 @@
             </Card>
           </button>
         {/each}
-      </div>
-
-      <!-- ── RIGHT: panneau de détail ancré (col-span-8) ─────────────── -->
-      <div class="col-span-8 min-h-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
-        {#if selectedDossier}
-          <DossierCard dossier={selectedDossier} {mode} />
-        {/if}
-      </div>
-
+      {/if}
     </div>
-  {/if}
-</section>
+  </svelte:fragment>
+
+  <!-- ── Contenu principal : detail ancre du dossier selectionne ────────── -->
+  <section class="flex min-h-full flex-col bg-slate-50 p-6">
+    <!-- En-tete unique : fil d'Ariane + titre (dossier selectionne, sinon vue) -->
+    <header class="mb-5">
+      <nav class="text-xs text-slate-400" aria-label="Fil d'Ariane">
+        <span>Opportunités</span>
+        <span class="mx-1.5 text-slate-300">/</span>
+        <span class="text-teal-700">Valleyfield</span>
+        {#if selectedDossier}
+          <span class="mx-1.5 text-slate-300">/</span>
+          <span class="font-medium text-slate-600">{selectedDossier.title}</span>
+        {/if}
+      </nav>
+      <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
+        {selectedDossier ? selectedDossier.title : "Dossiers d'opportunité foncière"}
+      </h1>
+      {#if selectedDossier}
+        <p class="mt-1 text-sm text-slate-500">
+          {selectedDossier.address} · Dossier d'opportunité foncière, entonnoir PROCESS 6 phases, preuves tracées.
+        </p>
+      {/if}
+    </header>
+
+    {#if !selectedDossier}
+      <EmptyState
+        title="Aucun dossier qualifié pour ce signal"
+        message="Aucun dossier d'opportunité ne correspond au signal sélectionné pour l'instant."
+      >
+        {#snippet action()}
+          {#if selectedSignalId !== undefined}
+            <Button variant="secondary" size="sm" onclick={handleClearFilter}>
+              Afficher tous les dossiers
+            </Button>
+          {/if}
+        {/snippet}
+      </EmptyState>
+    {:else}
+      <div class="min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
+        <DossierCard dossier={selectedDossier} {mode} />
+      </div>
+    {/if}
+  </section>
+</ViewLayout>
