@@ -62,6 +62,7 @@ export function chatRoute(): Hono {
         id: provider.providerId,
         label: provider.label,
         defaultModel: provider.defaultModel,
+        models: provider.models,
       })),
       configured: providers.length > 0,
     });
