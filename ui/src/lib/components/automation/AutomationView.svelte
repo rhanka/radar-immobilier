@@ -13,6 +13,7 @@
     Loader2,
     ExternalLink,
     FileText,
+    Zap,
   } from "@lucide/svelte";
   import { Badge, Button } from "@sentropic/design-system-svelte";
   import {
@@ -106,16 +107,19 @@
   }
 </script>
 
-<section class="min-h-full bg-slate-50 p-6">
-  <!-- Header ---------------------------------------------------------------->
-  <header class="mb-6">
-    <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
-      Automatisation & traitements continus
-    </h1>
-    <p class="mt-1 text-sm text-slate-500">
+<div>
+  <!-- Titre de section (H1 du contenu de l'onglet) -->
+  <h1 class="sr-only">Automatisation et traitements continus</h1>
+
+  <!-- Clarification Jobs vs Automatisation (ÉV14) --------------------------->
+  <div class="mb-6 flex items-start gap-2 rounded-lg border border-teal-200 bg-teal-50 px-4 py-3">
+    <Zap class="mt-0.5 h-4 w-4 shrink-0 text-teal-600" aria-hidden="true" />
+    <p class="text-xs leading-5 text-teal-800">
+      <span class="font-semibold">Jobs</span> = exécutions unitaires (historique des runs d'ingestion et de scoring, onglet « Jobs »).
+      <span class="font-semibold">Automatisation</span> = cadences et connecteurs qui <span class="font-semibold">planifient</span> ces jobs.
       Le radar tourne en continu : traitement initial au démarrage, enrichissement récurrent quotidien et approfondissement à la demande.
     </p>
-  </header>
+  </div>
 
   <!-- Barre de tabs --------------------------------------------------------->
   <div class="mb-6 flex gap-1 rounded-lg border border-slate-200 bg-white p-1 shadow-sm w-fit">
@@ -353,4 +357,4 @@
     <!-- Comparaison détaillée (BenchmarkComparison intégrée) --------------->
     <BenchmarkComparison />
   {/if}
-</section>
+</div>
