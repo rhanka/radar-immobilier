@@ -10,6 +10,9 @@
   /** Optional: render only the dossier linked to this signal. */
   export let selectedSignalId: string | undefined = undefined;
 
+  /** Human-readable label for the signal filter chip (signal-2). */
+  export let selectedSignalLabel: string | undefined = undefined;
+
   /** Callback to clear the signal filter (parent may also clear it via prop). */
   export let onClearFilter: (() => void) | undefined = undefined;
 
@@ -87,7 +90,7 @@
   <!-- ── Signal filter banner ───────────────────────────────────────── -->
   {#if selectedSignalId !== undefined}
     <div class="mb-5">
-      <Alert tone="info" title="Filtré par signal {selectedSignalId}">
+      <Alert tone="info" title="Filtré par signal : {selectedSignalLabel ?? selectedSignalId}">
         {#snippet actions()}
           <Button variant="ghost" size="sm" onclick={handleClearFilter}>
             Tout afficher
@@ -115,10 +118,10 @@
     <!-- ── Master-detail layout ─────────────────────────────────────── -->
     <div class="grid min-h-0 flex-1 grid-cols-12 gap-5">
 
-      <!-- ── LEFT: selectable dossier list (col-span-4) ──────────────── -->
+      <!-- ── LEFT: liste maître des opportunités (col-span-4) ────────── -->
       <div class="col-span-4 flex flex-col gap-2">
         <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          {filtered.length} dossier{filtered.length > 1 ? "s" : ""}
+          Opportunités · {filtered.length} dossier{filtered.length > 1 ? "s" : ""}
         </p>
         {#each filtered as dossier (dossier.id)}
           {@const res = aggregate(axesForMode(dossier.axes, mode), WEIGHTS)}
@@ -128,13 +131,24 @@
           <button
             type="button"
             class="w-full text-left"
+            aria-current={isSelected ? "true" : undefined}
             on:click={() => handleSelect(dossier)}
           >
-            <Card interactive class={isSelected ? "ring-2 ring-teal-500" : ""}>
-              <div class="p-3">
-                <p class="text-sm font-semibold leading-5 text-slate-900">
-                  {dossier.title}
-                </p>
+            <Card
+              interactive
+              class={isSelected ? "ring-2 ring-teal-500 ring-offset-1 bg-teal-50" : ""}
+            >
+              <div class={`p-3 ${isSelected ? "border-l-4 border-teal-500 pl-2.5" : ""}`}>
+                <div class="flex items-center gap-1.5">
+                  {#if isSelected}
+                    <span class="rounded bg-teal-600 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+                      Sélectionnée
+                    </span>
+                  {/if}
+                  <p class="text-sm font-semibold leading-5 text-slate-900">
+                    {dossier.title}
+                  </p>
+                </div>
                 <p class="mt-0.5 text-xs text-slate-500">{dossier.address}</p>
                 <div class="mt-2 flex flex-wrap items-center gap-1.5">
                   <Badge tone="neutral">{dossier.zone}</Badge>
@@ -158,8 +172,8 @@
         {/each}
       </div>
 
-      <!-- ── RIGHT: detail pane (col-span-8) ────────────────────────── -->
-      <div class="col-span-8 min-h-0 overflow-hidden">
+      <!-- ── RIGHT: panneau de détail ancré (col-span-8) ─────────────── -->
+      <div class="col-span-8 min-h-0 overflow-hidden rounded-lg border border-slate-200 bg-white p-4">
         {#if selectedDossier}
           <DossierCard dossier={selectedDossier} {mode} />
         {/if}
