@@ -10,6 +10,9 @@
   /** Optional: render only the dossier linked to this signal. */
   export let selectedSignalId: string | undefined = undefined;
 
+  /** Human-readable label for the signal filter chip (signal-2). */
+  export let selectedSignalLabel: string | undefined = undefined;
+
   /** Callback to clear the signal filter (parent may also clear it via prop). */
   export let onClearFilter: (() => void) | undefined = undefined;
 
@@ -87,7 +90,7 @@
   <!-- ── Signal filter banner ───────────────────────────────────────── -->
   {#if selectedSignalId !== undefined}
     <div class="mb-5">
-      <Alert tone="info" title="Filtré par signal {selectedSignalId}">
+      <Alert tone="info" title="Filtré par signal : {selectedSignalLabel ?? selectedSignalId}">
         {#snippet actions()}
           <Button variant="ghost" size="sm" onclick={handleClearFilter}>
             Tout afficher
