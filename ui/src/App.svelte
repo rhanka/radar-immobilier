@@ -9,6 +9,7 @@
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
+  import BacklogView from "$lib/components/backlog/BacklogView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
@@ -130,6 +131,8 @@
       <SignalsT1View onApprofondir={handleApprofondir} />
     {:else if activeView === "grilles"}
       <GrillesView />
+    {:else if activeView === "backlog"}
+      <BacklogView />
     {:else}
       <ConsoleView />
     {/if}
