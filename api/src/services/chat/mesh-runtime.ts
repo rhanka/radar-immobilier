@@ -37,6 +37,7 @@ import {
   type StreamEvent,
   type StreamRequest,
   type StreamResult,
+  type ToolDefinition,
 } from "@sentropic/llm-mesh";
 
 type ModelChoice = { modelId: string; label: string };
@@ -183,17 +184,55 @@ const messageText = (content: LlmMeshMessage["content"]): string => {
     .join("");
 };
 
-type ChatTurn = { role: "system" | "user" | "assistant"; content: string };
+/** One tool call requested by the assistant in a turn. */
+export type ToolCallTurn = {
+  id: string;
+  name: string;
+  /** Raw JSON arguments text the model produced. */
+  argumentsText: string;
+};
+
+/** Result of executing a tool call, fed back into the conversation. */
+export type ToolResultTurn = {
+  id: string;
+  name: string;
+  /** JSON-serializable content returned to the model. */
+  content: string;
+};
+
+/**
+ * A conversation turn. Beyond plain text roles, the loop appends:
+ * - an `assistant` turn carrying `toolCalls` (the model asked to call tools),
+ * - one `tool` turn per executed call carrying its `result`.
+ * Each provider serializer maps these to its native wire shape.
+ */
+type ChatTurn =
+  | { role: "system" | "user" | "assistant"; content: string }
+  | { role: "assistant"; content: string; toolCalls: ToolCallTurn[] }
+  | { role: "tool"; result: ToolResultTurn };
+
+const hasToolCalls = (
+  turn: ChatTurn,
+): turn is { role: "assistant"; content: string; toolCalls: ToolCallTurn[] } =>
+  turn.role === "assistant" && "toolCalls" in turn && turn.toolCalls.length > 0;
+
+const isToolTurn = (
+  turn: ChatTurn,
+): turn is { role: "tool"; result: ToolResultTurn } => turn.role === "tool";
 
 const toTurns = (messages: readonly LlmMeshMessage[]): ChatTurn[] =>
-  messages.map((message) => {
+  messages.map((raw): ChatTurn => {
+    // `buildStreamRequest` carries our rich `ChatTurn` union as the mesh
+    // `messages` (the radar client is the only consumer), so preserve tool
+    // turns instead of flattening them to `{ role, content }`.
+    const message = raw as unknown as ChatTurn;
+    if (isToolTurn(message)) return message;
+    if (hasToolCalls(message)) return message;
     const role =
-      message.role === "system" ||
-      message.role === "assistant" ||
-      message.role === "user"
-        ? message.role
+      raw.role === "system" || raw.role === "assistant" || raw.role === "user"
+        ? raw.role
         : "user";
-    return { role, content: messageText(message.content) };
+    return { role, content: messageText(raw.content) };
   });
 
 const contentDelta = (delta: string): StreamEvent => ({
@@ -201,9 +240,27 @@ const contentDelta = (delta: string): StreamEvent => ({
   data: { delta },
 });
 
-const doneEvent = (providerId: ProviderId, modelId: string): StreamEvent => ({
+const toolCallStart = (call: ToolCallTurn): StreamEvent => ({
+  type: "tool_call_start",
+  data: {
+    toolCallId: call.id,
+    name: call.name,
+    argumentsText: call.argumentsText,
+  },
+});
+
+const toolCallDelta = (id: string, delta: string): StreamEvent => ({
+  type: "tool_call_delta",
+  data: { toolCallId: id, delta },
+});
+
+const doneEvent = (
+  providerId: ProviderId,
+  modelId: string,
+  finishReason: "stop" | "tool_calls" = "stop",
+): StreamEvent => ({
   type: "done",
-  data: { finishReason: "stop", providerId, modelId },
+  data: { finishReason, providerId, modelId },
 });
 
 /**
@@ -250,10 +307,13 @@ class RadarProviderMeshClient implements ProviderAdapterClient {
     }
     const turns = toTurns(request.messages);
     const signal = request.signal;
+    // Only the two providers the user named carry tools (OpenAI + Anthropic).
+    // Other providers stream text-only and gracefully ignore tools.
+    const tools = supportsTools(providerId) ? request.tools : undefined;
 
     switch (providerId) {
       case "anthropic":
-        return streamAnthropic(modelId, credential, turns, signal);
+        return streamAnthropic(modelId, credential, turns, tools, signal);
       case "gemini":
         return streamGemini(modelId, credential, turns, signal);
       case "cohere":
@@ -265,6 +325,7 @@ class RadarProviderMeshClient implements ProviderAdapterClient {
           modelId,
           credential,
           turns,
+          providerId === "openai" ? tools : undefined,
           signal,
         );
       default:
@@ -273,17 +334,120 @@ class RadarProviderMeshClient implements ProviderAdapterClient {
   }
 }
 
+/**
+ * Providers wired for tool-calling. The user named OpenAI + Anthropic; both
+ * have native streaming tool-call protocols implemented below. Other providers
+ * keep text-only chat (no crash) and silently ignore any tool definitions.
+ */
+const TOOL_CAPABLE_PROVIDERS = new Set<ProviderId>(["anthropic", "openai"]);
+
+export const supportsTools = (providerId: ProviderId): boolean =>
+  TOOL_CAPABLE_PROVIDERS.has(providerId);
+
 /** Split system turns from chat turns (Anthropic/Gemini want them apart). */
+/** Plain text of a turn (tool turns have none). */
+const turnText = (turn: ChatTurn): string =>
+  "content" in turn ? turn.content : "";
+
 const splitSystem = (
   turns: readonly ChatTurn[],
 ): { system: string; chat: ChatTurn[] } => {
   const system = turns
     .filter((turn) => turn.role === "system")
-    .map((turn) => turn.content)
+    .map((turn) => turnText(turn))
     .join("\n\n");
   const chat = turns.filter((turn) => turn.role !== "system");
   return { system, chat };
 };
+
+/** Map our `ToolDefinition`s to the OpenAI `tools` array shape. */
+const toOpenAiTools = (
+  tools: readonly ToolDefinition[],
+): unknown[] =>
+  tools.map((tool) => ({
+    type: "function",
+    function: {
+      name: tool.name,
+      description: tool.description,
+      parameters: tool.inputSchema,
+    },
+  }));
+
+/** Map our `ToolDefinition`s to the Anthropic `tools` array shape. */
+const toAnthropicTools = (
+  tools: readonly ToolDefinition[],
+): unknown[] =>
+  tools.map((tool) => ({
+    name: tool.name,
+    description: tool.description,
+    input_schema: tool.inputSchema,
+  }));
+
+/** Serialize our turn union to the OpenAI chat-completions message shape. */
+const toOpenAiMessages = (turns: readonly ChatTurn[]): unknown[] =>
+  turns.map((turn) => {
+    if (isToolTurn(turn)) {
+      return {
+        role: "tool",
+        tool_call_id: turn.result.id,
+        content: turn.result.content,
+      };
+    }
+    if (hasToolCalls(turn)) {
+      return {
+        role: "assistant",
+        content: turn.content || null,
+        tool_calls: turn.toolCalls.map((call) => ({
+          id: call.id,
+          type: "function",
+          function: { name: call.name, arguments: call.argumentsText },
+        })),
+      };
+    }
+    return { role: turn.role, content: turnText(turn) };
+  });
+
+/** Serialize our turn union to the Anthropic messages shape. */
+const toAnthropicMessages = (turns: readonly ChatTurn[]): unknown[] =>
+  turns.map((turn) => {
+    if (isToolTurn(turn)) {
+      return {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: turn.result.id,
+            content: turn.result.content,
+          },
+        ],
+      };
+    }
+    if (hasToolCalls(turn)) {
+      const blocks: unknown[] = [];
+      if (turn.content) blocks.push({ type: "text", text: turn.content });
+      for (const call of turn.toolCalls) {
+        let parsedInput: unknown = {};
+        try {
+          parsedInput = call.argumentsText.trim().length
+            ? JSON.parse(call.argumentsText)
+            : {};
+        } catch {
+          parsedInput = {};
+        }
+        blocks.push({
+          type: "tool_use",
+          id: call.id,
+          name: call.name,
+          input: parsedInput,
+        });
+      }
+      return { role: "assistant", content: blocks };
+    }
+    return {
+      role: turn.role === "assistant" ? "assistant" : "user",
+      content: turnText(turn),
+    };
+  });
 
 /**
  * Generic SSE line reader: yields each `data:` payload string of a
@@ -328,17 +492,22 @@ const ensureOk = async (
   );
 };
 
+/** Accumulator for an OpenAI streamed tool call (indexed by delta `index`). */
+type OpenAiToolCallAcc = { id: string; name: string; args: string };
+
 async function* streamOpenAiCompatible(
   providerId: ProviderId,
   modelId: string,
   apiKey: string,
   turns: readonly ChatTurn[],
+  tools: readonly ToolDefinition[] | undefined,
   signal?: AbortSignal,
 ): AsyncGenerator<StreamEvent, void, unknown> {
   const baseUrl =
     providerId === "mistral"
       ? "https://api.mistral.ai/v1/chat/completions"
       : "https://api.openai.com/v1/chat/completions";
+  const useTools = tools && tools.length > 0;
   const response = await fetch(baseUrl, {
     method: "POST",
     headers: {
@@ -348,36 +517,92 @@ async function* streamOpenAiCompatible(
     body: JSON.stringify({
       model: modelId,
       stream: true,
-      messages: turns.map((turn) => ({
-        role: turn.role,
-        content: turn.content,
-      })),
+      messages: toOpenAiMessages(turns),
+      ...(useTools ? { tools: toOpenAiTools(tools), tool_choice: "auto" } : {}),
     }),
     ...(signal ? { signal } : {}),
   });
   await ensureOk(response, providerId);
+
+  const pending = new Map<number, OpenAiToolCallAcc>();
+  const started = new Set<number>();
+  let sawToolCall = false;
+
   for await (const payload of readSse(response)) {
     if (payload === "[DONE]") break;
     try {
       const parsed = JSON.parse(payload) as {
-        choices?: Array<{ delta?: { content?: string } }>;
+        choices?: Array<{
+          delta?: {
+            content?: string;
+            tool_calls?: Array<{
+              index?: number;
+              id?: string;
+              function?: { name?: string; arguments?: string };
+            }>;
+          };
+          finish_reason?: string;
+        }>;
       };
-      const delta = parsed.choices?.[0]?.delta?.content;
+      const choice = parsed.choices?.[0];
+      const delta = choice?.delta?.content;
       if (delta) yield contentDelta(delta);
+
+      for (const tc of choice?.delta?.tool_calls ?? []) {
+        sawToolCall = true;
+        const index = tc.index ?? 0;
+        const acc = pending.get(index) ?? { id: "", name: "", args: "" };
+        if (tc.id) acc.id = tc.id;
+        if (tc.function?.name) acc.name = tc.function.name;
+        const argsDelta = tc.function?.arguments ?? "";
+        if (argsDelta) acc.args += argsDelta;
+        pending.set(index, acc);
+        // Emit a start the first time we know the name; deltas afterwards.
+        if (!started.has(index) && acc.name) {
+          started.add(index);
+          yield toolCallStart({
+            id: acc.id || `call_${index}`,
+            name: acc.name,
+            argumentsText: "",
+          });
+        }
+        if (started.has(index) && argsDelta) {
+          yield toolCallDelta(acc.id || `call_${index}`, argsDelta);
+        }
+      }
     } catch {
       // ignore keep-alive / non-JSON frames
     }
   }
+
+  if (sawToolCall) {
+    // Re-emit final accumulated tool calls (start carries full args) so the
+    // orchestration loop can collect them deterministically from the stream.
+    for (const [index, acc] of pending) {
+      yield toolCallStart({
+        id: acc.id || `call_${index}`,
+        name: acc.name,
+        argumentsText: acc.args,
+      });
+    }
+    yield doneEvent(providerId, modelId, "tool_calls");
+    return;
+  }
   yield doneEvent(providerId, modelId);
 }
+
+/** Accumulator for an Anthropic `tool_use` content block (indexed by block). */
+type AnthropicToolUseAcc = { id: string; name: string; args: string };
 
 async function* streamAnthropic(
   modelId: string,
   apiKey: string,
   turns: readonly ChatTurn[],
+  tools: readonly ToolDefinition[] | undefined,
   signal?: AbortSignal,
 ): AsyncGenerator<StreamEvent, void, unknown> {
   const { system, chat } = splitSystem(turns);
+  const useTools = tools && tools.length > 0;
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -390,30 +615,77 @@ async function* streamAnthropic(
       max_tokens: 1024,
       stream: true,
       ...(system ? { system } : {}),
-      messages: chat.map((turn) => ({
-        role: turn.role === "assistant" ? "assistant" : "user",
-        content: turn.content,
-      })),
+      ...(useTools ? { tools: toAnthropicTools(tools) } : {}),
+      messages: toAnthropicMessages(chat),
     }),
     ...(signal ? { signal } : {}),
   });
   await ensureOk(response, "anthropic");
+
+  const toolBlocks = new Map<number, AnthropicToolUseAcc>();
+  let stopReason: string | undefined;
+
   for await (const payload of readSse(response)) {
     try {
       const parsed = JSON.parse(payload) as {
         type?: string;
-        delta?: { type?: string; text?: string };
+        index?: number;
+        content_block?: { type?: string; id?: string; name?: string };
+        delta?: {
+          type?: string;
+          text?: string;
+          partial_json?: string;
+          stop_reason?: string;
+        };
       };
       if (
+        parsed.type === "content_block_start" &&
+        parsed.content_block?.type === "tool_use"
+      ) {
+        const index = parsed.index ?? 0;
+        const acc = {
+          id: parsed.content_block.id ?? `toolu_${index}`,
+          name: parsed.content_block.name ?? "",
+          args: "",
+        };
+        toolBlocks.set(index, acc);
+        yield toolCallStart({ id: acc.id, name: acc.name, argumentsText: "" });
+      } else if (
         parsed.type === "content_block_delta" &&
         parsed.delta?.type === "text_delta" &&
         parsed.delta.text
       ) {
         yield contentDelta(parsed.delta.text);
+      } else if (
+        parsed.type === "content_block_delta" &&
+        parsed.delta?.type === "input_json_delta" &&
+        typeof parsed.delta.partial_json === "string"
+      ) {
+        const index = parsed.index ?? 0;
+        const acc = toolBlocks.get(index);
+        if (acc) {
+          acc.args += parsed.delta.partial_json;
+          yield toolCallDelta(acc.id, parsed.delta.partial_json);
+        }
+      } else if (parsed.type === "message_delta" && parsed.delta?.stop_reason) {
+        stopReason = parsed.delta.stop_reason;
       }
     } catch {
       // ignore non-JSON frames
     }
+  }
+
+  if (stopReason === "tool_use" && toolBlocks.size > 0) {
+    // Re-emit final tool calls with complete args for deterministic collection.
+    for (const acc of toolBlocks.values()) {
+      yield toolCallStart({
+        id: acc.id,
+        name: acc.name,
+        argumentsText: acc.args,
+      });
+    }
+    yield doneEvent("anthropic", modelId, "tool_calls");
+    return;
   }
   yield doneEvent("anthropic", modelId);
 }
@@ -437,7 +709,7 @@ async function* streamGemini(
         : {}),
       contents: chat.map((turn) => ({
         role: turn.role === "assistant" ? "model" : "user",
-        parts: [{ text: turn.content }],
+        parts: [{ text: turnText(turn) }],
       })),
     }),
     ...(signal ? { signal } : {}),
@@ -478,7 +750,7 @@ async function* streamCohere(
       stream: true,
       messages: turns.map((turn) => ({
         role: turn.role,
-        content: turn.content,
+        content: turnText(turn),
       })),
     }),
     ...(signal ? { signal } : {}),
@@ -560,12 +832,16 @@ export const buildStreamRequest = (input: {
   model: string;
   apiKey: string;
   messages: readonly ChatTurn[];
+  tools?: readonly ToolDefinition[];
   signal?: AbortSignal;
 }): StreamRequest => ({
   providerId: input.providerId,
   modelId: input.model,
-  messages: input.messages,
+  // The radar client is the only consumer of these messages and understands
+  // our rich `ChatTurn` union (tool turns included), so the cast is safe.
+  messages: input.messages as unknown as readonly LlmMeshMessage[],
   auth: { type: "direct-token", token: input.apiKey, label: "environment" },
+  ...(input.tools && input.tools.length > 0 ? { tools: input.tools } : {}),
   ...(input.signal ? { signal: input.signal } : {}),
 });
 
@@ -573,5 +849,116 @@ export const apiKeyFor = (
   providerId: ProviderId,
   env: NodeJS.ProcessEnv = process.env,
 ): string | undefined => readApiKey(providerId, env);
+
+/** Max tool rounds in a single turn (guards against runaway loops). */
+const MAX_TOOL_ROUNDS = 4;
+
+/** Outcome of executing one tool call, supplied by the caller. */
+export type ToolExecution = {
+  /** JSON-serializable content fed back to the model. */
+  content: string;
+  /** Opaque result object surfaced to the UI via `tool_call_result`. */
+  result: unknown;
+};
+
+/**
+ * Stream one chat turn with tool-calling support, mirroring sentropic's
+ * tool-execution loop: stream a model turn; if it finishes with tool calls,
+ * execute each via `executeTool`, append the assistant tool-call turn + the
+ * tool-result turns to the conversation, and stream the next round. Yields
+ * normalized `StreamEvent`s throughout (content + tool_call_start/delta +
+ * tool_call_result) plus a final `done`. The loop is bounded by
+ * `MAX_TOOL_ROUNDS`.
+ */
+export async function* streamChatTurns(input: {
+  providerId: ProviderId;
+  model: string;
+  apiKey: string;
+  messages: readonly ChatTurn[];
+  tools?: readonly ToolDefinition[];
+  executeTool: (call: ToolCallTurn) => Promise<ToolExecution>;
+  signal?: AbortSignal;
+}): AsyncGenerator<StreamEvent, void, unknown> {
+  const conversation: ChatTurn[] = [...input.messages];
+  const useTools =
+    supportsTools(input.providerId) &&
+    input.tools !== undefined &&
+    input.tools.length > 0;
+
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round += 1) {
+    const stream = await radarLlmMesh.stream(
+      buildStreamRequest({
+        providerId: input.providerId,
+        model: input.model,
+        apiKey: input.apiKey,
+        messages: conversation,
+        ...(useTools ? { tools: input.tools } : {}),
+        ...(input.signal ? { signal: input.signal } : {}),
+      }),
+    );
+
+    // Collect tool calls from the stream; forward every event except the
+    // intermediate `done(tool_calls)` (a single terminal `done` is emitted
+    // by the loop). De-duplicate tool calls by id (streamers re-emit a final
+    // start carrying the complete args).
+    const calls = new Map<string, ToolCallTurn>();
+    let assistantText = "";
+    let finishedWithTools = false;
+
+    for await (const event of stream as AsyncIterable<StreamEvent>) {
+      if (event.type === "content_delta") {
+        assistantText += event.data.delta;
+        yield event;
+      } else if (event.type === "tool_call_start") {
+        const data = event.data;
+        const id = data.toolCallId;
+        const existing = calls.get(id);
+        // Keep the variant carrying the longest argumentsText (final re-emit).
+        if (!existing || data.argumentsText.length >= existing.argumentsText.length) {
+          calls.set(id, {
+            id,
+            name: data.name,
+            argumentsText: data.argumentsText,
+          });
+        }
+        yield event;
+      } else if (event.type === "tool_call_delta") {
+        yield event;
+      } else if (event.type === "done") {
+        finishedWithTools = event.data.finishReason === "tool_calls";
+        if (!finishedWithTools) {
+          yield event;
+        }
+      } else {
+        yield event;
+      }
+    }
+
+    if (!finishedWithTools || calls.size === 0) {
+      return;
+    }
+
+    // Append the assistant tool-call turn, then execute + append results.
+    const toolCalls = [...calls.values()];
+    conversation.push({ role: "assistant", content: assistantText, toolCalls });
+    for (const call of toolCalls) {
+      const execution = await input.executeTool(call);
+      conversation.push({
+        role: "tool",
+        result: { id: call.id, name: call.name, content: execution.content },
+      });
+      yield {
+        type: "tool_call_result",
+        data: { toolCallId: call.id, name: call.name, output: execution.result },
+      };
+    }
+    // Loop to let the model react to the tool results.
+  }
+
+  // Exhausted the tool rounds: close the stream cleanly.
+  yield doneEvent(input.providerId, input.model);
+}
+
+export { BACKLOG_TOOLS } from "./backlog-tools.js";
 
 export type { ChatTurn };

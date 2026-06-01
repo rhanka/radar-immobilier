@@ -15,12 +15,17 @@
 import { Hono } from "hono";
 import { z } from "zod";
 
-import { meshDispatchAdapter } from "../services/chat/mesh-dispatch-adapter.js";
 import {
+  apiKeyFor,
+  BACKLOG_TOOLS,
   defaultModelFor,
   isConfiguredProvider,
   listConfiguredProviders,
+  streamChatTurns,
+  supportsTools,
+  type ChatTurn,
 } from "../services/chat/mesh-runtime.js";
+import { executeBacklogTool } from "../services/chat/backlog-tools.js";
 import {
   publish,
   replayAll,
@@ -43,7 +48,48 @@ const SYSTEM_PROMPT =
   "Tu es l'assistant du radar immobilier de Salaberry-de-Valleyfield. " +
   "Reponds en francais, de maniere concise et factuelle, en t'appuyant " +
   "uniquement sur les informations fournies. N'invente jamais de fait, " +
-  "de reglement, de zone ni de lot.";
+  "de reglement, de zone ni de lot. " +
+  "Tu disposes de deux outils pour piloter le backlog des evolutions : " +
+  "appelle ajouter_demande(titre, description) des que l'utilisateur souhaite " +
+  "une nouvelle fonctionnalite, amelioration ou correction ; appelle " +
+  "traiter_demande(id) quand il demande de demarrer le traitement d'une " +
+  "demande deja ajoutee. Confirme ensuite a l'utilisateur ce qui a ete fait.";
+
+/**
+ * Translate a mesh `StreamEvent` to the wire shape the browser `StreamMessage`
+ * component expects (snake_case `tool_call_id`, `name`, `args`, `result`),
+ * mirroring sentropic's `writeStreamEvent` payloads. Returns the event type +
+ * the UI-shaped data to publish.
+ */
+const toUiFrame = (
+  type: string,
+  data: unknown,
+): { type: string; data: unknown } => {
+  const record = (data ?? {}) as Record<string, unknown>;
+  if (type === "tool_call_start") {
+    return {
+      type,
+      data: {
+        tool_call_id: record.toolCallId,
+        name: record.name,
+        args: record.argumentsText ?? "",
+      },
+    };
+  }
+  if (type === "tool_call_delta") {
+    return {
+      type,
+      data: { tool_call_id: record.toolCallId, delta: record.delta ?? "" },
+    };
+  }
+  if (type === "tool_call_result") {
+    return {
+      type,
+      data: { tool_call_id: record.toolCallId, result: record.output },
+    };
+  }
+  return { type, data };
+};
 
 const sseFrame = (event: string, payload: unknown): string =>
   `event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`;
@@ -139,17 +185,37 @@ export function chatRoute(): Hono {
       : [{ role: "system" as const, content: SYSTEM_PROMPT }, ...messages];
 
     // Run the assistant turn in the background; the browser subscribes to
-    // the SSE feed and renders frames as they arrive.
+    // the SSE feed and renders frames as they arrive. Tool-capable providers
+    // (OpenAI + Anthropic) get the backlog tools so the chat can add/process
+    // backlog items; other providers stream text only.
     void (async () => {
       await publish(streamId, "status", { status: "started", providerId, modelId: resolvedModel });
       try {
-        const events = meshDispatchAdapter.invokeStream({
+        const apiKey = apiKeyFor(providerId);
+        if (!apiKey) {
+          throw new Error(`No API key configured for provider "${providerId}"`);
+        }
+        const events = streamChatTurns({
           providerId,
           model: resolvedModel,
-          messages: turns,
+          apiKey,
+          messages: turns as ChatTurn[],
+          ...(supportsTools(providerId) ? { tools: BACKLOG_TOOLS } : {}),
+          executeTool: async (call) => {
+            const result = await executeBacklogTool({
+              name: call.name,
+              argumentsText: call.argumentsText,
+            });
+            // The model needs a compact textual summary to react to.
+            const content = result.error
+              ? `Erreur : ${result.error}`
+              : result.summary;
+            return { content, result };
+          },
         });
         for await (const event of events) {
-          await publish(streamId, event.type, event.data);
+          const frame = toUiFrame(event.type, event.data);
+          await publish(streamId, frame.type, frame.data);
         }
       } catch (error) {
         const message =
