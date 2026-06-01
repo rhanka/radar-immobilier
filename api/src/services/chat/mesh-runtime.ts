@@ -39,9 +39,12 @@ import {
   type StreamResult,
 } from "@sentropic/llm-mesh";
 
+type ModelChoice = { modelId: string; label: string };
+
 type ProviderMeta = {
   label: string;
   defaultModel: string;
+  models: readonly ModelChoice[];
   envVars: readonly string[];
 };
 
@@ -52,30 +55,54 @@ type ProviderMeta = {
  * `GEMINI_API_KEY`, the radar `.env.example` ships `GOOGLE_API_KEY`).
  * The `satisfies` clause keeps every key present so lookups are total.
  */
+// Shortlist de modèles reprise telle quelle du catalogue sentropic
+// (`../sentropic/packages/llm-mesh/src/catalog.ts`) : ne rien inventer.
+// `defaultModel` = un modèle léger/rapide de la liste, adapté à la démo.
 const PROVIDER_META = {
   anthropic: {
     label: "Anthropic Claude",
-    defaultModel: "claude-3-5-haiku-latest",
+    defaultModel: "claude-sonnet-4-6",
+    models: [
+      { modelId: "claude-sonnet-4-6", label: "Sonnet 4.6" },
+      { modelId: "claude-opus-4-7", label: "Opus 4.7" },
+    ],
     envVars: ["ANTHROPIC_API_KEY"],
   },
   cohere: {
     label: "Cohere",
-    defaultModel: "command-r",
+    defaultModel: "command-a-03-2025",
+    models: [
+      { modelId: "command-a-03-2025", label: "Command A" },
+      { modelId: "command-a-reasoning-08-2025", label: "Command A R." },
+    ],
     envVars: ["COHERE_API_KEY"],
   },
   gemini: {
     label: "Google Gemini",
-    defaultModel: "gemini-1.5-flash",
+    defaultModel: "gemini-3.1-flash-lite",
+    models: [
+      { modelId: "gemini-3.5-flash", label: "Gemini 3.5 Flash" },
+      { modelId: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash Lite" },
+    ],
     envVars: ["GEMINI_API_KEY", "GOOGLE_API_KEY"],
   },
   mistral: {
     label: "Mistral AI",
-    defaultModel: "mistral-small-latest",
+    defaultModel: "mistral-small-2603",
+    models: [
+      { modelId: "mistral-small-2603", label: "Mistral Small 4" },
+      { modelId: "magistral-medium-2509", label: "Magistral Medium" },
+    ],
     envVars: ["MISTRAL_API_KEY"],
   },
   openai: {
     label: "OpenAI",
-    defaultModel: "gpt-4o-mini",
+    defaultModel: "gpt-4.1-nano",
+    models: [
+      { modelId: "gpt-5.5", label: "GPT-5.5" },
+      { modelId: "gpt-5.4-nano", label: "GPT-5.4 Nano" },
+      { modelId: "gpt-4.1-nano", label: "GPT-4.1 Nano" },
+    ],
     envVars: ["OPENAI_API_KEY"],
   },
 } satisfies Record<ProviderId, ProviderMeta>;
@@ -93,6 +120,7 @@ export type ProviderConfig = {
   providerId: ProviderId;
   label: string;
   defaultModel: string;
+  models: readonly ModelChoice[];
 };
 
 const readApiKey = (
@@ -117,6 +145,7 @@ export const listConfiguredProviders = (
       providerId,
       label: PROVIDER_META[providerId].label,
       defaultModel: PROVIDER_META[providerId].defaultModel,
+      models: PROVIDER_META[providerId].models,
     }),
   );
 
@@ -480,15 +509,18 @@ const radarProviderClient = new RadarProviderMeshClient();
  * the provider's capability matrix from the catalog. `reasoningTier` is
  * conservative ("none") since the demo chat does not drive reasoning.
  */
-const modelProfileFor = (providerId: ProviderId): ModelProfile =>
-  ({
-    providerId,
-    modelId: PROVIDER_META[providerId].defaultModel,
-    label: PROVIDER_META[providerId].label,
-    reasoningTier: "none",
-    defaultTaskHints: ["chat"],
-    capabilities: providerProfiles[providerId].capabilities,
-  }) as ModelProfile;
+const modelProfilesFor = (providerId: ProviderId): ModelProfile[] =>
+  PROVIDER_META[providerId].models.map(
+    (choice) =>
+      ({
+        providerId,
+        modelId: choice.modelId,
+        label: choice.label,
+        reasoningTier: "none",
+        defaultTaskHints: ["chat"],
+        capabilities: providerProfiles[providerId].capabilities,
+      }) as ModelProfile,
+  );
 
 /**
  * Application-wide mesh. Mirrors sentropic's `applicationLlmMesh`: a single
@@ -498,23 +530,23 @@ const modelProfileFor = (providerId: ProviderId): ModelProfile =>
 const adapters: readonly ProviderAdapter[] = [
   new AnthropicAdapter({
     client: radarProviderClient,
-    models: [modelProfileFor("anthropic")],
+    models: modelProfilesFor("anthropic"),
   }),
   new CohereAdapter({
     client: radarProviderClient,
-    models: [modelProfileFor("cohere")],
+    models: modelProfilesFor("cohere"),
   }),
   new GeminiAdapter({
     client: radarProviderClient,
-    models: [modelProfileFor("gemini")],
+    models: modelProfilesFor("gemini"),
   }),
   new MistralAdapter({
     client: radarProviderClient,
-    models: [modelProfileFor("mistral")],
+    models: modelProfilesFor("mistral"),
   }),
   new OpenAIAdapter({
     client: radarProviderClient,
-    models: [modelProfileFor("openai")],
+    models: modelProfilesFor("openai"),
   }),
 ];
 
