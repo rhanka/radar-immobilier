@@ -11,6 +11,8 @@
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import AutomationView from "$lib/components/automation/AutomationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
+  import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
+  import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import type { SignalT } from "@radar/domain";
   import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
   import { tourSteps } from "$lib/tour/tour-steps.js";
@@ -64,6 +66,15 @@
     closeTour();
   }
 
+  // ── Chat dock layout ───────────────────────────────────────────────────────
+  // When the chat is docked + open, reserve space on the right so the demo
+  // content is never hidden behind the panel.
+  $: chatLayout = $chatWidgetLayout;
+  $: dockPaddingCss =
+    chatLayout.mode === "docked" && chatLayout.isOpen
+      ? chatLayout.dockWidthCss
+      : "0px";
+
   // ── Auto-start 1re visite ─────────────────────────────────────────────────
   onMount(() => {
     if (isFirstVisit()) {
@@ -73,7 +84,10 @@
 </script>
 
 <ThemeProvider theme={sentTechTheme}>
-  <div class="flex h-screen overflow-hidden">
+  <div
+    class="flex h-screen overflow-hidden transition-[padding] duration-200"
+    style={`padding-right: ${dockPaddingCss};`}
+  >
     <AppSidebar
       {activeView}
       onSelect={(view) => (activeView = view)}
@@ -98,6 +112,9 @@
       {/if}
     </main>
   </div>
+
+  <!-- Assistant radar (chat reel @sentropic/chat-ui, ancre par defaut) -->
+  <ChatWidgetHost />
 
   <!-- Visite guidee (overlay bulle jaune) -->
   <TourOverlay
