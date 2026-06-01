@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { SendHorizontal } from "@lucide/svelte";
+  import { SendHorizontal, Sparkles } from "@lucide/svelte";
   import { Alert, Button, Select } from "@sentropic/design-system-svelte";
   import StreamMessage from "@sentropic/chat-ui/components/StreamMessage.svelte";
   import {
@@ -36,12 +36,26 @@
 
   const streamClient = getStreamHub();
 
-  const labels = (key: string): string => {
+  // Resolver consumed by `StreamMessage` (mirror of sentropic's signature:
+  // `(key, { values })`). Tool keys surface the backlog tool activity in
+  // French ("Outil ajouter_demande ...").
+  const labels = (
+    key: string,
+    options?: { values?: Record<string, unknown> },
+  ): string => {
+    const name = String(options?.values?.name ?? "");
     const dictionary: Record<string, string> = {
       "stream.inProgress": "Reponse en cours",
       "stream.done": "Termine",
       "stream.error": "Erreur",
       "stream.unknownError": "Erreur inconnue",
+      "stream.response": "Reponse",
+      "stream.status": "Statut",
+      "stream.preparing": "Preparation",
+      "stream.tool": `Outil ${name}`,
+      "stream.toolArgs": `Arguments de ${name}`,
+      "stream.toolArgsFallback": "Arguments de l'outil",
+      "stream.toolCalls": "Appels d'outils",
     };
     return dictionary[key] ?? key;
   };
@@ -157,7 +171,7 @@
         Assistant radar
       </p>
       <p class="truncate text-xs text-slate-500">
-        Questionner les signaux municipaux
+        Questionner les signaux et piloter le backlog
       </p>
     </div>
     {#if configured}
@@ -195,32 +209,42 @@
       <div class="flex h-full items-center justify-center">
         <p class="max-w-xs text-center text-sm text-slate-500">
           Posez une question sur les signaux, les contraintes reglementaires ou
-          une fiche d'opportunite.
+          une fiche d'opportunite. Vous pouvez aussi demander d'ajouter une
+          demande au backlog (ex. « Ajoute une demande : carte interactive »).
         </p>
       </div>
     {:else}
-      <div class="space-y-4">
+      <div class="space-y-5">
         {#each turns as turn (turn.kind === "user" ? `u-${turn.content}-${turns.indexOf(turn)}` : turn.streamId)}
           {#if turn.kind === "user"}
-            <div class="flex justify-end">
-              <div class="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-blue-700 px-3 py-2 text-sm text-white">
+            <div class="flex flex-col items-end">
+              <div class="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-sm bg-blue-700 px-3 py-2 text-sm text-white">
                 {turn.content}
               </div>
             </div>
           {:else}
-            <div class="flex justify-start">
-              <div class="max-w-[90%] rounded-2xl rounded-bl-sm bg-slate-100 px-3 py-2 text-sm text-slate-900">
-                <StreamMessage
-                  {streamClient}
-                  {labels}
-                  streamId={turn.streamId}
-                  status={turn.status}
-                  variant="chat"
-                  subscriptionMode="live"
-                  finalContent={turn.finalContent}
-                  onTerminal={handleTerminal}
-                  onStreamEvent={handleStreamEvent}
-                />
+            <div class="flex items-start gap-2">
+              <div
+                class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-600"
+                aria-hidden="true"
+              >
+                <Sparkles class="h-3.5 w-3.5" />
+              </div>
+              <div class="min-w-0 max-w-[88%]">
+                <p class="mb-1 text-[11px] text-slate-500">Assistant radar</p>
+                <div class="rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900">
+                  <StreamMessage
+                    {streamClient}
+                    {labels}
+                    streamId={turn.streamId}
+                    status={turn.status}
+                    variant="chat"
+                    subscriptionMode="live"
+                    finalContent={turn.finalContent}
+                    onTerminal={handleTerminal}
+                    onStreamEvent={handleStreamEvent}
+                  />
+                </div>
               </div>
             </div>
           {/if}
