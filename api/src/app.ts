@@ -3,6 +3,7 @@ import { healthRoute, type HealthDeps } from "./routes/health.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { backlogRoute } from "./routes/backlog.js";
+import { h2aRoute } from "./routes/h2a.js";
 
 export type AppDeps = HealthDeps;
 
@@ -14,6 +15,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", chatRoute());
   app.route("/", automationRoute());
   app.route("/", backlogRoute());
+  app.route("/", h2aRoute());
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 
