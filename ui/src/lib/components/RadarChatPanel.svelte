@@ -1,15 +1,28 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { SendHorizontal, Sparkles, Copy, Check, Pencil, RotateCcw } from "@lucide/svelte";
-  import { Alert, Button, Select } from "@sentropic/design-system-svelte";
+  import { SendHorizontal, Sparkles, RotateCcw } from "@lucide/svelte";
+  import { Alert, Button } from "@sentropic/design-system-svelte";
   import StreamMessage from "@sentropic/chat-ui/components/StreamMessage.svelte";
+  import ModelSelector from "@sentropic/chat-ui/components/ModelSelector.svelte";
+  import MessageActions from "@sentropic/chat-ui/components/MessageActions.svelte";
+  import ContextChips from "@sentropic/chat-ui/components/ContextChips.svelte";
+  import {
+    computeModelSelectorWidthCh,
+    groupModelsByProvider,
+    parseModelSelectionKey,
+    type ModelCatalogGroup,
+    type ModelCatalogModel,
+    type ModelProviderId,
+  } from "@sentropic/chat-ui/utils/model-selection";
   import {
     fetchProviders,
     getStreamHub,
     startMessage,
+    toModelCatalog,
     type ChatProvider,
     type ChatTurn,
   } from "$lib/chat/chat-client";
+  import { radarChatContextProvider } from "$lib/chat/chat-context";
 
   type Turn =
     | { kind: "user"; content: string }
@@ -49,6 +62,20 @@
 
   const streamClient = getStreamHub();
 
+  // ── Catalogue ModelSelector (mapping ChatProvider[] -> formes chat-ui) ──────
+  $: catalog = toModelCatalog(providers);
+  $: modelGroups = groupModelsByProvider(
+    catalog.providers,
+    catalog.models,
+  ) as ModelCatalogGroup[];
+  $: catalogModels = catalog.models as ModelCatalogModel[];
+  $: selectorWidthCh = computeModelSelectorWidthCh(
+    modelGroups,
+    catalogModels,
+    (selectedProviderId || "openai") as ModelProviderId,
+    selectedModel,
+  );
+
   /** Action : enregistre le noeud de la bulle assistant pour copie/capture. */
   const registerBubble = (node: HTMLElement, streamId: string) => {
     bubbleEls[streamId] = node;
@@ -61,7 +88,8 @@
 
   // Resolver consumed by `StreamMessage` (mirror of sentropic's signature:
   // `(key, { values })`). Tool keys surface the backlog tool activity in
-  // French ("Outil ajouter_demande ...").
+  // French ("Outil ajouter_demande ..."). Also feeds `ModelSelector`,
+  // `MessageActions` and `ContextChips` user-visible strings.
   const labels = (
     key: string,
     options?: { values?: Record<string, unknown> },
@@ -79,6 +107,14 @@
       "stream.toolArgs": `Arguments de ${name}`,
       "stream.toolArgsFallback": "Arguments de l'outil",
       "stream.toolCalls": "Appels d'outils",
+      "chat.model.selector.label": "Modele",
+      "common.copy": "Copier",
+      "common.retry": "Regenerer",
+      "chat.message.edit": "Modifier",
+      "chat.context.chips.label": "Contexte de la conversation",
+      "chat.context.chip.signal": "Signal",
+      "chat.context.chip.opportunite": "Opportunite",
+      "chat.context.chip.remove": "Retirer du contexte",
     };
     return dictionary[key] ?? key;
   };
@@ -102,6 +138,14 @@
     } finally {
       providersLoaded = true;
     }
+  };
+
+  /** ModelSelector onChange : recompose la cle "providerId::modelId". */
+  const handleModelChange = (payload: {
+    providerId: ModelProviderId;
+    modelId: string;
+  }): void => {
+    selectedModelKey = `${payload.providerId}::${payload.modelId}`;
   };
 
   const scrollToBottom = async (): Promise<void> => {
@@ -215,6 +259,22 @@
     await sendContent(turn.retryContent);
   };
 
+  /**
+   * Regenere une reponse assistant terminee : retire le tour assistant + son
+   * tour user, puis renvoie le meme prompt utilisateur.
+   */
+  const regenerate = async (
+    turn: Extract<Turn, { kind: "assistant" }>,
+  ): Promise<void> => {
+    if (sending) return;
+    const idx = turns.indexOf(turn);
+    const previous = turns[idx - 1];
+    if (idx < 1 || !previous || previous.kind !== "user") return;
+    const prompt = previous.content;
+    turns = turns.slice(0, idx - 1);
+    await sendContent(prompt);
+  };
+
   /** Edite un message utilisateur : repositionne le texte + tronque la suite. */
   const editMessage = async (turn: Extract<Turn, { kind: "user" }>): Promise<void> => {
     if (sending) return;
@@ -225,6 +285,20 @@
     persistTurns();
     await tick();
     textareaEl?.focus();
+  };
+
+  /** Copie le texte d'un message utilisateur (capture clipboard). */
+  const copyUser = async (content: string, key: string): Promise<void> => {
+    if (!content.trim()) return;
+    try {
+      await navigator.clipboard.writeText(content.trim());
+      copiedStreamId = key;
+      setTimeout(() => {
+        if (copiedStreamId === key) copiedStreamId = "";
+      }, 1500);
+    } catch {
+      // clipboard indisponible : on ignore.
+    }
   };
 
   const copyMessage = async (
@@ -287,18 +361,15 @@
       </p>
     </div>
     {#if configured}
-      <div class="w-52 shrink-0">
-        <Select id="chat-model" label="Modele" bind:value={selectedModelKey}>
-          {#each providers as provider}
-            <optgroup label={provider.label}>
-              {#each provider.models as model}
-                <option value={`${provider.id}::${model.modelId}`}>
-                  {model.label}
-                </option>
-              {/each}
-            </optgroup>
-          {/each}
-        </Select>
+      <div class="shrink-0">
+        <ModelSelector
+          bind:value={selectedModelKey}
+          groups={modelGroups}
+          models={catalogModels}
+          widthCh={selectorWidthCh}
+          {labels}
+          onChange={handleModelChange}
+        />
       </div>
     {/if}
   </header>
@@ -329,20 +400,19 @@
       <div class="space-y-5">
         {#each turns as turn (turn.kind === "user" ? `u-${turn.content}-${turns.indexOf(turn)}` : turn.streamId)}
           {#if turn.kind === "user"}
+            {@const userKey = `u-${turns.indexOf(turn)}`}
             <div class="group flex flex-col items-end">
               <div class="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-sm bg-blue-700 px-3 py-2 text-sm text-white">
                 {turn.content}
               </div>
-              <button
-                class="mt-1 flex items-center gap-1 text-[11px] text-slate-400 opacity-0 transition hover:text-slate-700 focus:opacity-100 group-hover:opacity-100"
-                type="button"
-                disabled={sending}
-                title="Modifier et renvoyer"
-                on:click={() => editMessage(turn)}
-              >
-                <Pencil class="h-3 w-3" aria-hidden="true" />
-                Modifier
-              </button>
+              <MessageActions
+                role="user"
+                streamStatus="completed"
+                isCopied={copiedStreamId === userKey}
+                {labels}
+                onCopy={() => copyUser(turn.content, userKey)}
+                onEdit={() => editMessage(turn)}
+              />
             </div>
           {:else}
             <div class="group flex items-start gap-2">
@@ -384,26 +454,24 @@
                         status={turn.status}
                         variant="chat"
                         subscriptionMode="live"
+                        smoothContentStreaming={true}
                         finalContent={turn.finalContent}
                         onTerminal={() => handleTerminal(turn.streamId)}
                         onStreamEvent={handleStreamEvent}
                       />
                     {/if}
                   </div>
-                  <button
-                    class="mt-1 flex items-center gap-1 text-[11px] text-slate-400 opacity-0 transition hover:text-slate-700 focus:opacity-100 group-hover:opacity-100"
-                    type="button"
-                    title="Copier la reponse"
-                    on:click={() => copyMessage(turn)}
-                  >
-                    {#if copiedStreamId === turn.streamId}
-                      <Check class="h-3 w-3" aria-hidden="true" />
-                      Copie
-                    {:else}
-                      <Copy class="h-3 w-3" aria-hidden="true" />
-                      Copier
-                    {/if}
-                  </button>
+                  <MessageActions
+                    role="assistant"
+                    streamStatus={turn.status === "in_progress"
+                      ? "processing"
+                      : "completed"}
+                    isLastAssistantSegment={true}
+                    isCopied={copiedStreamId === turn.streamId}
+                    {labels}
+                    onCopy={() => copyMessage(turn)}
+                    onRegenerate={() => regenerate(turn)}
+                  />
                 {/if}
               </div>
             </div>
@@ -414,6 +482,11 @@
   </div>
 
   <footer class="border-t border-slate-200 p-3">
+    {#if configured}
+      <div class="mb-2">
+        <ContextChips provider={radarChatContextProvider} {labels} />
+      </div>
+    {/if}
     <div class="flex items-end gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
       <textarea
         bind:this={textareaEl}
