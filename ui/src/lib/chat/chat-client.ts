@@ -11,6 +11,11 @@
 
 import { createStreamHub } from "@sentropic/chat-ui/client/streamHub";
 import type { StreamHubClient } from "@sentropic/chat-ui/client/streamTypes";
+import type {
+  ModelCatalogModel,
+  ModelCatalogProvider,
+  ModelProviderId,
+} from "@sentropic/chat-ui/utils/model-selection";
 
 export type ChatModelChoice = {
   modelId: string;
@@ -73,6 +78,33 @@ export const startMessage = async (input: {
     throw new Error(detail?.error ?? `messages HTTP ${response.status}`);
   }
   return (await response.json()) as StartMessageResult;
+};
+
+/**
+ * Map radar's `ChatProvider[]` (only env-configured providers, neutral
+ * alphabetical order from the API) to the `@sentropic/chat-ui` catalog shapes
+ * consumed by `ModelSelector`. Radar's provider ids already match the lib's
+ * `ModelProviderId` union ('anthropic' | 'cohere' | 'gemini' | 'mistral' |
+ * 'openai'); every returned provider is `status: 'ready'` because the API only
+ * lists providers that have an API key configured.
+ */
+export const toModelCatalog = (
+  providers: ChatProvider[],
+): { providers: ModelCatalogProvider[]; models: ModelCatalogModel[] } => {
+  const catalogProviders: ModelCatalogProvider[] = providers.map((provider) => ({
+    provider_id: provider.id as ModelProviderId,
+    label: provider.label,
+    status: "ready",
+  }));
+  const catalogModels: ModelCatalogModel[] = providers.flatMap((provider) =>
+    provider.models.map((model) => ({
+      provider_id: provider.id as ModelProviderId,
+      model_id: model.modelId,
+      label: model.label,
+      default_contexts: [],
+    })),
+  );
+  return { providers: catalogProviders, models: catalogModels };
 };
 
 let hub: StreamHubClient | null = null;

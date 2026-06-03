@@ -14,7 +14,7 @@
     "@radar/domain": "*",
     "@radar/scoring": "*",
     "@lucide/svelte": "^0.562.0",
-    "@sentropic/chat-ui": "^0.1.1",
+    "@sentropic/chat-ui": "^0.5.0",
     "@sentropic/design-system-svelte": "^0.7.0",
     "@sentropic/design-system-themes": "^0.7.0",
     "@sentropic/design-system-tokens": "^0.7.0",
