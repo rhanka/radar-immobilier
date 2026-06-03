@@ -14,6 +14,7 @@
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
+  import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
   import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
   import { tourSteps } from "$lib/tour/tour-steps.js";
@@ -48,6 +49,22 @@
     opportuniteSignalId = signal.id;
     opportuniteSignalLabel = buildSignalLabel(signal);
     activeView = "opportunity";
+    // P3 — expose the selected signal as an already-resolved chat context chip.
+    setChatContext([
+      {
+        type: "signal",
+        id: signal.id,
+        label: opportuniteSignalLabel,
+        active: true,
+      },
+    ]);
+  }
+
+  /** Efface le filtre d'opportunite et le chip de contexte du chat (P3). */
+  function clearOpportuniteFilter(): void {
+    opportuniteSignalId = undefined;
+    opportuniteSignalLabel = undefined;
+    setChatContext([]);
   }
 
   // ── Tour ─────────────────────────────────────────────────────────────────
@@ -124,7 +141,7 @@
       <OpportunityFunnel
         selectedSignalId={opportuniteSignalId}
         selectedSignalLabel={opportuniteSignalLabel}
-        onClearFilter={() => { opportuniteSignalId = undefined; opportuniteSignalLabel = undefined; }}
+        onClearFilter={clearOpportuniteFilter}
       />
     {:else if activeView === "onboarding"}
       <OnboardingView />
