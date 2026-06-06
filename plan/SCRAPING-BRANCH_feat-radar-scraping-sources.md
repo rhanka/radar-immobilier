@@ -45,15 +45,15 @@ Create the source ingestion contract required by `SPEC_PLAN_SCRAPING.md` J0, the
   - [x] Confirm command style: `make ... ENV=test-radar-scraping-sources`.
   - [x] Confirm scope and guardrails.
 
-- [ ] **Lot 1 — J0 SourceAdapter contract**
+- [x] **Lot 1 — J0 SourceAdapter contract**
   - [x] Add `@radar/sources` package shell.
-  - [ ] Add a failing contract test for `SourceAdapter`.
-  - [ ] Implement `SourceAdapter`, `RawDocumentRef`, `RawDocument`, and `ListOptions`.
-  - [ ] Export the contract from the package entrypoint.
-  - [ ] Lot gate:
-    - [ ] `make test ENV=test-radar-scraping-sources`
-    - [ ] `make typecheck ENV=test-radar-scraping-sources`
-    - [ ] `make lint ENV=test-radar-scraping-sources`
+  - [x] Add a failing contract test for `SourceAdapter`.
+  - [x] Implement `SourceAdapter`, `RawDocumentRef`, `RawDocument`, and `ListOptions`.
+  - [x] Export the contract from the package entrypoint.
+  - [x] Lot gate:
+    - [x] `make test ENV=test-radar-scraping-sources`
+    - [x] `make typecheck ENV=test-radar-scraping-sources`
+    - [x] `make lint ENV=test-radar-scraping-sources`
 
 - [ ] **Lot 2 — Promote priority adapter skeletons**
   - [ ] Map top-5 source IDs to the new contract without network fetching behavior.
