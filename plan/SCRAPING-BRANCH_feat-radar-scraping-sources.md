@@ -55,9 +55,9 @@ Create the source ingestion contract required by `SPEC_PLAN_SCRAPING.md` J0, the
     - [x] `make typecheck ENV=test-radar-scraping-sources`
     - [x] `make lint ENV=test-radar-scraping-sources`
 
-- [ ] **Lot 2 — Promote priority adapter skeletons**
-  - [ ] Map top-5 source IDs to the new contract without network fetching behavior.
-  - [ ] Keep adapter implementation lots small enough for atomic commits.
+- [x] **Lot 2 — Promote priority adapter skeletons**
+  - [x] Map top-5 source IDs to the new contract without network fetching behavior.
+  - [x] Keep adapter implementation lots small enough for atomic commits.
 
 - [ ] **Lot N — Merge & close**
   - [ ] Push branch.
