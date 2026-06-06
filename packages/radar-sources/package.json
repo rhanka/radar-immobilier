@@ -1,0 +1,24 @@
+{
+  "name": "@radar/sources",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Source adapter contracts and implementations for radar-immobilier ingestion.",
+  "license": "UNLICENSED",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@radar/domain": "0.0.0"
+  },
+  "devDependencies": {
+    "typescript": "5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
