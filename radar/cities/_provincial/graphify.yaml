@@ -1,0 +1,23 @@
+# graphify PROVINCIAL PROJECT (one only, SPEC_ONTOLOGY §6.1 D1).
+#
+# Holds the province-wide keys (Lot / Adresse, and CPTAQ in V2) that span cities.
+# Same SHARED profile; a single cross-city corpus + the authoritative registries.
+# Reconciliation here is bounded by the provincial registries, not by city.
+#
+# REAL: the registry roles (cadastre = NO_LOT, adresses_qc) are real concepts.
+# The CSV paths and the `raw/cross-city` corpus prefix are ILLUSTRATIVE layout.
+version: 1
+profile:
+  path: ../../ontology/ontology-profile.yaml          # SHARED profile
+inputs:
+  corpus:
+    - raw/cross-city                                    # docs citing provincial keys
+  registries:
+    - references/cadastre.csv                           # Lot (NO_LOT)
+    - references/adresses_qc.csv                        # Adresse
+    # references/cptaq.csv                              # CPTAQ — dedicated node in V2
+dataprep:
+  pdf_ocr: auto
+  citation_minimum: page
+outputs:
+  state_dir: .graphify/_provincial

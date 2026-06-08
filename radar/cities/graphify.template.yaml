@@ -1,0 +1,27 @@
+# graphify PROJECT TEMPLATE for a new city (SPEC_ONTOLOGY §5.4, §6.1 D1).
+#
+# Adding a city = copy this file to radar/cities/<slug>/graphify.yaml, replace
+# <slug>, and register a CityProfile + SourceBinding[] (see @radar/domain
+# CityProfile schema). The shared profile and the relational schema do NOT change.
+#
+# Placeholders in <...> are ILLUSTRATIVE; no real data here.
+version: 1
+profile:
+  path: ../../ontology/ontology-profile.yaml          # SHARED profile (never per-city)
+inputs:
+  corpus:
+    - raw/avis/<slug>
+    - raw/pv/<slug>
+    - raw/reglements/<slug>
+    - raw/grilles/<slug>
+  registries:
+    - references/municipalities.csv
+dataprep:
+  pdf_ocr: auto
+  prefer_ocr_markdown: true
+  citation_minimum: page
+  preserve_source_structure: true
+outputs:
+  state_dir: .graphify/<slug>                           # per-city state_dir (D1)
+  write_html: true
+  write_wiki: true
