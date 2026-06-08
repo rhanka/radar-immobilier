@@ -17,7 +17,13 @@ const objectStore = createObjectStore(config);
 const app = createApp({
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
+  store: objectStore,
 });
+
+// Ensure the raw bucket exists before serving RECUEIL collect requests.
+void objectStore
+  .ensureBucket()
+  .catch((e) => logger.warn({ err: String(e) }, "ensureBucket failed"));
 
 serve({ fetch: app.fetch, port: config.PORT }, (info) => {
   logger.info({ port: info.port, env: config.NODE_ENV }, "radar-api listening");
