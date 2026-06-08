@@ -2,10 +2,11 @@ import { Hono } from "hono";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
+import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
 import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
 
-export type AppDeps = HealthDeps;
+export type AppDeps = HealthDeps & SourcesDeps;
 
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
@@ -14,6 +15,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", healthRoute(deps));
   app.route("/", chatRoute());
   app.route("/", automationRoute());
+  app.route("/", sourcesRoute(deps));
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
 
