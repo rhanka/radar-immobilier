@@ -19,6 +19,7 @@
     "@aws-sdk/client-s3": "^3.600.0",
     "@hono/node-server": "^1.12.0",
     "@radar/domain": "*",
+    "@radar/sources": "*",
     "@sentropic/chat-core": "^0.1.2",
     "@sentropic/h2a": "^0.26.1",
     "@sentropic/llm-mesh": "^0.1.2",
