@@ -7,6 +7,7 @@
     MonitorDot,
     KanbanSquare,
     Network,
+    GitMerge,
     MapPin,
   } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views.js";
@@ -24,6 +25,7 @@
     { id: "signaux", label: "Signaux", icon: Radio },
     { id: "opportunity", label: "Opportunités", icon: Building2 },
     { id: "console", label: "Sources", icon: MonitorDot },
+    { id: "ontologie", label: "Ontologie", icon: GitMerge },
     { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
     { id: "coordination", label: "Coordination", icon: Network },
     { id: "backlog", label: "Backlog", icon: KanbanSquare },
