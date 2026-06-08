@@ -1,0 +1,28 @@
+{
+  "name": "decisions-de-la-cptaq",
+  "title": "Décisions de la CPTAQ",
+  "organization": "Commission de protection du territoire agricole",
+  "num_resources": 4,
+  "resources": [
+    {
+      "format": "SHP",
+      "name": "Fichier brut à télécharger",
+      "url": "https://carto.cptaq.gouv.qc.ca/data/shapefiles/demandes.zip"
+    },
+    {
+      "format": "PDF",
+      "name": "Information sur le service WMS",
+      "url": "https://carto.cptaq.gouv.qc.ca/doc/CPTAQ_Service_WMS.pdf"
+    },
+    {
+      "format": "PDF",
+      "name": "Mise en garde et limitation",
+      "url": "https://carto.cptaq.gouv.qc.ca/doc/A_Lire_decisions.pdf"
+    },
+    {
+      "format": "HTML",
+      "name": "Déméter",
+      "url": "https://demeter.cptaq.gouv.qc.ca/"
+    }
+  ]
+}
