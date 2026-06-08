@@ -1,0 +1,23 @@
+{
+  "count": 46,
+  "top": [
+    {
+      "name": "roles-d-evaluation-fonciere-du-quebec",
+      "title": "Rôles d'évaluation foncière du Québec",
+      "org": "Ministère des Affaires municipales et de l'Habitation",
+      "num_resources": 52
+    },
+    {
+      "name": "vmtl-unites-evaluation-fonciere",
+      "title": "Unités d'évaluation foncière",
+      "org": "Ville de Montréal",
+      "num_resources": 3
+    },
+    {
+      "name": "image-du-role-d-evaluation",
+      "title": "Image du rôle d’évaluation",
+      "org": "Ville de Laval",
+      "num_resources": 6
+    }
+  ]
+}
