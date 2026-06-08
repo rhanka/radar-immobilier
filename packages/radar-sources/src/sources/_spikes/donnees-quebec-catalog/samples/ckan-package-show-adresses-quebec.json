@@ -1,0 +1,48 @@
+{
+  "name": "adresses-quebec",
+  "title": "Adresses Québec",
+  "organization": "Ministère des Ressources naturelles et des Forêts",
+  "num_resources": 15,
+  "resources": [
+    {
+      "format": "SHP",
+      "name": "AQréseau",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseau/ESRI(SHP)/AQreseau_SHP.zip"
+    },
+    {
+      "format": "GPKG",
+      "name": "AQréseau",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseau/OGC(GPKG)/AQreseau_GPKG.zip"
+    },
+    {
+      "format": "FGDB",
+      "name": "AQréseau",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseau/ESRI(FGDB)/AQreseau_FGDB.zip"
+    },
+    {
+      "format": "TAB",
+      "name": "AQréseau",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseau/MapInfo(TAB)/AQreseau_TAB.zip"
+    },
+    {
+      "format": "SHP",
+      "name": "AQréseau+",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseauPlus/ESRI(SHP)/AQreseauPlus_SHP.zip"
+    },
+    {
+      "format": "GPKG",
+      "name": "AQréseau+",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseauPlus/OGC(GPKG)/AQreseauPlus_GPKG.zip"
+    },
+    {
+      "format": "FGDB",
+      "name": "AQréseau+",
+      "url": "https://diffusion.mern.gouv.qc.ca/Diffusion/RGQ/Vectoriel/Carte_Topo/Local/AQReseauPlus/ESRI(FGDB)/AQreseauPlus_FGDB.zip"
+    },
+    {
+      "format": "WMS",
+      "name": "Service Web d'adresses (AQgéobâti)",
+      "url": "https://servicescarto.mrnf.gouv.qc.ca/pes/services/Territoire/AQ_ADRESSES_WMS/MapServer/WMSServer"
+    }
+  ]
+}
