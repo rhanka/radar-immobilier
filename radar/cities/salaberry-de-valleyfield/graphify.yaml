@@ -1,0 +1,31 @@
+# graphify PROJECT for Salaberry-de-Valleyfield (the pilot city).
+#
+# Per-city project (SPEC_ONTOLOGY §6.1 D1): the SHARED profile +
+# a city-bounded corpus + a per-city state_dir. The corpus partition is what
+# bounds reconciliation candidates to the city (graphify has no municipality
+# filter); city + active period are also encoded in normalized_terms upstream
+# (extraction stage 3a).
+#
+# REAL: city slug + MAMH code 70052 are real. Corpus S3 prefixes are the
+# ILLUSTRATIVE layout (`raw/<kind>/<city>/...`) the recueil stage will populate;
+# no documents are shipped here.
+version: 1
+profile:
+  path: ../../ontology/ontology-profile.yaml          # SHARED profile
+inputs:
+  corpus:
+    - raw/avis/salaberry-de-valleyfield
+    - raw/pv/salaberry-de-valleyfield
+    - raw/reglements/salaberry-de-valleyfield
+    - raw/grilles/salaberry-de-valleyfield
+  registries:
+    - references/municipalities.csv
+dataprep:
+  pdf_ocr: auto                                         # PDF / scans : automatic OCR
+  prefer_ocr_markdown: true
+  citation_minimum: page
+  preserve_source_structure: true
+outputs:
+  state_dir: .graphify/salaberry-de-valleyfield         # per-city state_dir (D1)
+  write_html: true
+  write_wiki: true
