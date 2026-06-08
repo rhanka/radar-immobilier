@@ -11,6 +11,7 @@
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import BacklogView from "$lib/components/backlog/BacklogView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
+  import ReconciliationView from "$lib/components/reconciliation/ReconciliationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
@@ -149,6 +150,8 @@
       <SignalsT1View onApprofondir={handleApprofondir} />
     {:else if activeView === "grilles"}
       <GrillesView />
+    {:else if activeView === "ontologie"}
+      <ReconciliationView />
     {:else if activeView === "coordination"}
       <CoordinationView />
     {:else if activeView === "backlog"}
