@@ -1,0 +1,158 @@
+# radar-immobilier — graphify ontology profile (WP5 V1)
+#
+# Authoritative profile consumed by @sentropic/graphify. SHARED by every city
+# (SPEC_ONTOLOGY_DATA_MODEL.md §5.4 D1); only the *projects* (graphify.yaml, see
+# radar/cities/) are per-city. The graphify parser (`validateOntologyProfile`,
+# ontology-profile.ts) reads only: node_types, relation_types, registries,
+# citation_policy, hardening, inference_policy, evidence_policy, hierarchies,
+# outputs. Any other block is silently ignored.
+#
+# Scope of V1 (D4): 10 node types + 18 relation types. PPCMOI / CPTAQ /
+# dérogations are V1 subtypes of DesignationEvent + Signal kinds, promoted to
+# dedicated nodes in V2. ZoneVersion / LotVersion / RegulatoryStage /
+# ConstraintHit / OpportunityDossier are relational projections, never nodes.
+id: radar-immobilier-zonage
+version: 1
+default_language: fr
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Node types (§1.1) — 10 V1 types, by graphify role:
+#   registry      : authoritative CSV/JSON/XML (not reconciled)
+#   reconciled    : status_policy: hardenable (mentioned across documents)
+#   source_backed : evidence carrier
+# ─────────────────────────────────────────────────────────────────────────────
+node_types:
+  Municipality:
+    aliases: [ville, municipalite]
+    registry: municipalities
+  Zone:
+    aliases: [zone, zonage, secteur de zonage]
+    status_policy: hardenable
+  Bylaw:
+    aliases: [reglement, regl, amendement, projet de reglement]
+    status_policy: hardenable
+  DesignationEvent:
+    aliases: [changement de zonage, rezonage, scission, fusion, renommage, subdivision, ppcmoi, derogation, dezonage]
+    status_policy: hardenable
+  Constraint:
+    aliases: [contrainte, zone agricole, zone inondable, bande riveraine, milieu humide]
+    source_backed: true              # CPTAQ / BDZI / GRHQ : evidence carrier (D2)
+  Lot:
+    aliases: [lot, lot cadastral, numero de lot, matricule]
+    registry: cadastre               # NO_LOT authoritative (cadastre du Québec)
+    status_policy: hardenable        # PDF graphies reconciled to the authoritative lot
+  Adresse:
+    aliases: [adresse, no civique, adresse municipale]
+    registry: adresses_qc            # Adresses Québec (provincial key)
+    status_policy: hardenable
+  Valuation:
+    aliases: [valeur, role d'evaluation, valeur fonciere, evaluation municipale]
+    registry: role
+  Source:
+    source_backed: true              # avis PDF, PV, role XML, video, presse
+  Signal:
+    aliases: [signal, alerte, intention, precedent]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Relation types (§1.2) — 18 V1 relations. Endpoints validated by
+# `validateAddRelation`; `requires_evidence` enforced for signal-bearing edges.
+# ─────────────────────────────────────────────────────────────────────────────
+relation_types:
+  located_in:    { source: [Zone, Lot, Adresse], target: Municipality }
+  located_at:    { source: Lot, target: Adresse, requires_evidence: true }
+  governed_by:   { source: Zone, target: Bylaw, requires_evidence: true }
+  amends:        { source: Bylaw, target: Bylaw, requires_evidence: true }
+  rezones:       { source: DesignationEvent, target: Zone, requires_evidence: true }
+  splits:        { source: DesignationEvent, target: Zone, requires_evidence: true }
+  renames:       { source: DesignationEvent, target: Zone, requires_evidence: true }
+  merges:        { source: DesignationEvent, target: Zone, requires_evidence: true }
+  subdivides:    { source: DesignationEvent, target: Lot, requires_evidence: true }
+  targets_zone:  { source: DesignationEvent, target: Zone, requires_evidence: true }
+  targets_lot:   { source: DesignationEvent, target: Lot, requires_evidence: true }
+  assigned_zone: { source: Lot, target: Zone }
+  valued_by:     { source: Lot, target: Valuation }
+  constrains:    { source: Constraint, target: [Lot, Zone], requires_evidence: true }   # D2
+  derived_from:  { source: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse, Valuation], target: Source, requires_evidence: true }
+  mentions:      { source: Source, target: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse], requires_evidence: true }
+  supersedes:    { source: DesignationEvent, target: DesignationEvent }
+  raises_signal: { source: DesignationEvent, target: Signal }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Registries (§1.3) — authoritative reference tables.
+# ─────────────────────────────────────────────────────────────────────────────
+registries:
+  municipalities:
+    source: municipalities          # CSV : code MAMH, slug, nom, DGUID, mrc
+    id_column: code_mamh
+    label_column: nom_officiel
+    alias_columns: [slug]
+    node_type: Municipality
+  cadastre:
+    source: cadastre                # cadastre allégé QC : NO_LOT authoritative
+    id_column: no_lot
+    label_column: no_lot
+    node_type: Lot
+  adresses_qc:
+    source: adresses_qc             # Adresses Québec : provincial key
+    id_column: id_adresse
+    label_column: adresse_complete
+    node_type: Adresse
+  role:
+    source: role                    # role d'évaluation MAMH (XML 70052)
+    id_column: matricule
+    label_column: matricule
+    alias_columns: [no_lot]
+    node_type: Valuation
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Citation policy — page minimum, source file required, bbox when available.
+# ─────────────────────────────────────────────────────────────────────────────
+citation_policy:
+  minimum_granularity: page
+  require_source_file: true
+  allow_bbox: when_available
+
+# evidence_policy : REALLY parsed/validated (ontology-profile.ts). Requires refs
+# on signal-bearing relations and on Constraint nodes → citation mandatory in graphify.
+evidence_policy:
+  require_evidence_refs: true
+  min_refs: 1
+  relation_types: [governed_by, amends, rezones, splits, renames, merges, subdivides, constrains, mentions, derived_from]
+  node_types: [Constraint]
+
+# inference_policy : REALLY parsed/validated. Forbids any inferred relation not
+# listed → graphify never fabricates a relation outside this set.
+inference_policy:
+  allow_inferred_relations: false
+  allowed_relation_types: [located_in, located_at, assigned_zone, valued_by]
+  require_evidence_refs: true
+
+# hardening.status_transitions : the ONLY transition mechanic graphify applies
+# (ontology-patch.ts). `promotion_requires` is re-surfaced to the prompt only —
+# its real enforcement is the radar validator (next lot, §3.5/§4.4).
+hardening:
+  statuses: [candidate, attached, needs_review, validated, rejected, superseded]
+  default_status: candidate
+  promotion_requires:               # NOTE: prompt hint only, NOT a hard gate
+    - source_citation
+    - allowed_relation_type
+    - registry_match_for_registered_types   # enforced by the RADAR VALIDATOR (next lot)
+  status_transitions:
+    - { from: [candidate], to: [needs_review, validated, rejected] }
+    - { from: [attached],  to: [needs_review, validated, rejected] }
+    - { from: [needs_review], to: [validated, rejected] }
+    - { from: [validated], to: [superseded] }
+    # from rejected/superseded: no transition (terminal states)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Outputs — canonical / source node types and exported relations.
+# ─────────────────────────────────────────────────────────────────────────────
+outputs:
+  ontology:
+    enabled: true
+    canonical_node_types: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse]
+    source_node_types: [Source]
+    relation_exports: [governed_by, amends, rezones, constrains, assigned_zone, raises_signal]
+    wiki:
+      enabled: true
+      page_node_types: [Zone, Bylaw]
