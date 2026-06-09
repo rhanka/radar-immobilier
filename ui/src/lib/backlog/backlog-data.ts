@@ -1,22 +1,29 @@
-// ÉV15 — Backlog seed.
+// WP6 — Backlog data (live track sidecar + offline fallback).
 //
-// The seed is faithful to what actually shipped: each item is derived from a
-// real evolution (`docs/spec/SPEC_EVOL_*.md` + `PLAN.md`) and the merged Git
-// history (PR numbers verified via `gh pr list --state merged`). No fictional
-// item is invented. Future / not-yet-started UAT-round-5 items sit in "a-faire".
-//
-// The Backlog view loads dynamic items from `GET /api/backlog` (added through
-// the "Ajouter une demande" affordance) and merges them with this static seed,
-// de-duplicated by `id`.
+// The Backlog view now renders the REAL, event-sourced `track` backlog: the API
+// (`GET /api/backlog`) folds `.track/events.jsonl` into items and returns them
+// with `source: "track"`. This static seed below is kept ONLY as an offline /
+// API-down fallback (`source: "ev-fallback"` server-side) so the demo view is
+// never empty; it is faithful to the merged Git history (PR numbers verified via
+// `gh pr list --state merged`), no fictional item invented.
 
 /** Lifecycle status of a backlog item (board column). */
-export type BacklogStatut = "a-faire" | "en-cours" | "realise";
+export type BacklogStatut = "a-faire" | "en-cours" | "realise" | "abandonne";
 
-/** A single backlog item (evolution). */
+/** Provenance of a backlog item. */
+export type BacklogSource = "track" | "request" | "ev-fallback";
+
+/** Acceptance annotation carried by tracked items. */
+export type BacklogAcceptance = "pass" | "fail" | "none";
+
+/** Coarse track bucket. */
+export type BacklogBucket = "DONE" | "TO-DO" | "DROPPED";
+
+/** A single backlog item. */
 export interface BacklogItem {
-  /** Stable identifier (kebab-case slug). */
+  /** Stable identifier (track ULID or kebab-case slug). */
   id: string;
-  /** Short evolution code, e.g. "ÉV11". */
+  /** Short code (evolution code, track workspace, or "Demande"). */
   code: string;
   /** French title. */
   titre: string;
@@ -24,7 +31,15 @@ export interface BacklogItem {
   description: string;
   /** Board column. */
   statut: BacklogStatut;
-  /** Merged PR number, when the work shipped through a known PR. */
+  /** Where the item came from (live track / runtime request / fallback). */
+  source?: BacklogSource;
+  /** Track workspace, when sourced from the sidecar (e.g. "wp4-sources"). */
+  groupe?: string;
+  /** Latest acceptance run, when sourced from the sidecar. */
+  acceptance?: BacklogAcceptance;
+  /** Coarse track bucket, when sourced from the sidecar. */
+  bucket?: BacklogBucket;
+  /** Merged PR number, when the work shipped through a known PR (fallback). */
   pr?: number;
 }
 
@@ -214,6 +229,7 @@ export const BACKLOG_COLUMNS: readonly { statut: BacklogStatut; label: string }[
   { statut: "a-faire", label: "À faire" },
   { statut: "en-cours", label: "En cours" },
   { statut: "realise", label: "Réalisé" },
+  { statut: "abandonne", label: "Abandonné" },
 ];
 
 /** French label for a status. */
@@ -222,13 +238,29 @@ export function statutLabel(statut: BacklogStatut): string {
 }
 
 /** Design-system Badge tone for a status. */
-export function statutTone(statut: BacklogStatut): "neutral" | "info" | "success" {
+export function statutTone(
+  statut: BacklogStatut,
+): "neutral" | "info" | "success" | "error" {
   switch (statut) {
     case "realise":
       return "success";
     case "en-cours":
       return "info";
+    case "abandonne":
+      return "error";
     default:
       return "neutral";
+  }
+}
+
+/** French label + symbol for a track acceptance annotation. */
+export function acceptanceLabel(acceptance: BacklogAcceptance | undefined): string {
+  switch (acceptance) {
+    case "pass":
+      return "✓ pass";
+    case "fail":
+      return "✗ fail";
+    default:
+      return "—";
   }
 }

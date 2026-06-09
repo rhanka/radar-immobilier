@@ -1,25 +1,44 @@
 /**
- * ÉV15 — Backlog API (demo, in-memory store).
+ * Backlog API — wired to the REAL track sidecar (WP6).
  *
- *   GET  /api/backlog                  — seed evolutions + added items
- *   POST /api/backlog/items            — add a request (statut "a-faire")
+ *   GET  /api/backlog                   — real tracked items (folded from
+ *                                         `.track/events.jsonl`) + runtime-added
+ *                                         items; ÉV seed only as a labeled
+ *                                         fallback when the sidecar is absent.
+ *   GET  /api/backlog/track             — raw track buckets (DONE/TO-DO/DROPPED)
+ *   POST /api/backlog/items             — add a request (statut "a-faire")
  *   POST /api/backlog/items/:id/process — process a request (-> "en-cours")
  *
- * The store is a process-lifetime in-memory map (the demo has no persistence
- * layer for the backlog). The Backlog view merges this with the static UI seed
- * (`ui/src/lib/backlog/backlog-data.ts`), de-duplicated by id, so the two seeds
- * collapse into one faithful list.
+ * History: the Backlog view used to read a hand-maintained in-memory ÉV seed.
+ * It now reflects the genuine, event-sourced `track` backlog: per aggregate the
+ * latest `realization.transition` decides the bucket (done → réalisé,
+ * cancelled/rejected → abandonné, else à-faire/en-cours) and the latest
+ * `acceptance.run.result` annotates it. The ÉV seed survives only as an
+ * offline/CI fallback when the sidecar is not bind-mounted.
  *
- * No fictional data: the seed below mirrors the real evolution track (the same
- * codes/PR numbers the UI seed carries), and added items come only from real
- * user/chat requests.
+ * Anti-invention: tracked items come verbatim from the sidecar; nothing is
+ * fabricated. The ÉV fallback is clearly labeled (`source: "ev-fallback"`).
+ *
+ * The `POST` endpoints keep driving the runtime store (and the chat
+ * `ajouter_demande` / `traiter_demande` tools); runtime-added items are merged
+ * on top of the tracked list so a freshly-added demand shows immediately.
  */
 
 import { Hono } from "hono";
 import { z } from "zod";
 
+import {
+  loadTrackItems,
+  type TrackAcceptance,
+  type TrackBucket,
+  type TrackItem,
+} from "../services/track/track-reader.js";
+
 /** Lifecycle status of a backlog item (board column). */
-export type BacklogStatut = "a-faire" | "en-cours" | "realise";
+export type BacklogStatut = "a-faire" | "en-cours" | "realise" | "abandonne";
+
+/** Where a backlog item came from. */
+export type BacklogSource = "track" | "request" | "ev-fallback";
 
 /** A single backlog item. */
 export interface BacklogItem {
@@ -28,33 +47,71 @@ export interface BacklogItem {
   titre: string;
   description: string;
   statut: BacklogStatut;
+  /** Provenance: live track sidecar, a runtime request, or the ÉV fallback. */
+  source?: BacklogSource;
+  /** Track workspace, when sourced from the sidecar (e.g. "wp4-sources"). */
+  groupe?: string;
+  /** Latest acceptance run, when sourced from the sidecar. */
+  acceptance?: TrackAcceptance;
+  /** Coarse track bucket, when sourced from the sidecar. */
+  bucket?: TrackBucket;
   pr?: number;
 }
 
 /**
- * Server-side seed. Faithful to the merged Git history (PR numbers verified via
- * `gh pr list --state merged`). Kept in sync with the UI seed; ids collide on
- * purpose so the view's merge de-duplicates cleanly.
+ * ÉV fallback seed — used ONLY when the track sidecar is unavailable (e.g. a
+ * deployed env that doesn't bind-mount the repo, or offline CI). Faithful to the
+ * merged Git history (PR numbers verified via `gh pr list --state merged`).
  */
-const SEED: readonly BacklogItem[] = [
-  { id: "ev1-socle-states-scoring", code: "ÉV1", titre: "Socle : modèle d'états + grilles de score", description: "Modèle d'états + @radar/scoring + calibration sur les 3 pilotes Valleyfield + vue Grilles.", statut: "realise", pr: 18 },
-  { id: "ev2-radar-t1-signals", code: "ÉV2", titre: "Radar T1 : flux de signaux", description: "Flux de signaux (valeur/confiance triables, filtre statut + réel/sim, action Approfondir).", statut: "realise", pr: 19 },
-  { id: "ev3-opportunites-t2-funnel", code: "ÉV3", titre: "Opportunités T2 : entonnoir 6 phases", description: "Entonnoir 6 phases + score honnête + bascule réel/simulation + signal→N opportunités.", statut: "realise", pr: 20 },
-  { id: "ev4-onboarding-sources", code: "ÉV4", titre: "Onboarding T0 : catalogue de sources", description: "Checklist du catalogue + rétro-analyse 2 ans + CTA Lancer l'onboarding.", statut: "realise", pr: 21 },
-  { id: "ev5-coordination-chat-stub", code: "ÉV5", titre: "Coordination humain↔agents (concepts h2a)", description: "Interface de coordination découplée (rôle/POLICY/journal) + chat stub. Adaptateur h2a réel différé.", statut: "realise", pr: 22 },
-  { id: "ev6-consoles-t3-t4", code: "ÉV6", titre: "Console T3/T4 : qualification + jobs", description: "Qualification des sources + approfondissement + tableau de suivi des jobs.", statut: "realise", pr: 23 },
-  { id: "ev7-automation-benchmark", code: "ÉV7", titre: "Automatisation + benchmark par étape", description: "Cadences de traitement + connecteurs + récapitulatif de benchmark agent honnête.", statut: "realise", pr: 24 },
-  { id: "ev8-recadrage-demo", code: "ÉV8", titre: "Recadrage démo : app-shell + 100% design-system", description: "App-shell dense + registre des bugs UAT résolus + passage 100% design-system.", statut: "realise", pr: 26 },
-  { id: "ev9-chat-reel", code: "ÉV9", titre: "Chat réel multi-fournisseurs", description: "Chat-ui réel (chat-ui + chat-core + llm-mesh) multi-fournisseurs, tokens streamés via SSE.", statut: "realise", pr: 34 },
-  { id: "chat-shortlist-fix", code: "Fix chat", titre: "Correctif chat : shortlist de modèles réelle", description: "Câble la shortlist réelle de sentropic + sélecteur de modèle groupé par fournisseur.", statut: "realise", pr: 35 },
-  { id: "ev11-automation-reelle", code: "ÉV11", titre: "Collecte RÉELLE d'une source publique", description: "Collecte réelle sans clé d'une source publique de Valleyfield. Aucune donnée fabriquée.", statut: "realise", pr: 32 },
-  { id: "ev12-uat-round4", code: "ÉV12", titre: "UI round 4 : nav horizontale + accordéons + master-detail", description: "Nav horizontale + accordéon Signaux + libellé de filtre lisible, puis master-detail + accordéon Sources + refonte Grilles.", statut: "realise", pr: 31 },
-  { id: "ev14-uat-round5", code: "ÉV14", titre: "UAT round 5 : bande latérale uniforme + Automatisation→Sources", description: "Bande latérale standardisée (w-72) sur 5 vues + Automatisation comme onglet de Sources + sélection Opportunités renforcée.", statut: "realise", pr: 37 },
-  { id: "ev15-backlog", code: "ÉV15", titre: "Vue Backlog pilotée par le chat", description: "Vue Backlog (À faire / En cours / Réalisé) seedée des évolutions réelles + API add/process + affordance Ajouter une demande.", statut: "en-cours" },
-  { id: "ev10-h2a-real-adapter", code: "ÉV10", titre: "Adaptateur h2a réel (coordination signée)", description: "Adaptateur @sentropic/h2a réel (signature crypto + journal persisté SQL). Différé côté build serveur.", statut: "a-faire" },
-  { id: "chat-backlog-tools", code: "ÉV15+", titre: "Outils chat ajouter_demande / traiter_demande", description: "Tool-calling dans le pipeline chat pour piloter le backlog. Bloqué en une passe (suivi documenté).", statut: "a-faire" },
-  { id: "uat-round5-accordeons-reaudit", code: "UAT5", titre: "Réaudit des accordéons (retour UAT round 5)", description: "Réappliquer le motif accordéon là où il manque, une fois lot 2 + uniformisation en place.", statut: "a-faire" },
+const EV_FALLBACK: readonly BacklogItem[] = [
+  { id: "ev1-socle-states-scoring", code: "ÉV1", titre: "Socle : modèle d'états + grilles de score", description: "Modèle d'états + @radar/scoring + calibration sur les 3 pilotes Valleyfield + vue Grilles.", statut: "realise", source: "ev-fallback", pr: 18 },
+  { id: "ev2-radar-t1-signals", code: "ÉV2", titre: "Radar T1 : flux de signaux", description: "Flux de signaux (valeur/confiance triables, filtre statut + réel/sim, action Approfondir).", statut: "realise", source: "ev-fallback", pr: 19 },
+  { id: "ev3-opportunites-t2-funnel", code: "ÉV3", titre: "Opportunités T2 : entonnoir 6 phases", description: "Entonnoir 6 phases + score honnête + bascule réel/simulation + signal→N opportunités.", statut: "realise", source: "ev-fallback", pr: 20 },
+  { id: "ev9-chat-reel", code: "ÉV9", titre: "Chat réel multi-fournisseurs", description: "Chat-ui réel (chat-ui + chat-core + llm-mesh) multi-fournisseurs, tokens streamés via SSE.", statut: "realise", source: "ev-fallback", pr: 34 },
+  { id: "ev15-backlog", code: "ÉV15", titre: "Vue Backlog pilotée par le chat", description: "Vue Backlog (À faire / En cours / Réalisé) seedée des évolutions réelles + API add/process + affordance Ajouter une demande.", statut: "en-cours", source: "ev-fallback" },
+  { id: "ev10-h2a-real-adapter", code: "ÉV10", titre: "Adaptateur h2a réel (coordination signée)", description: "Adaptateur @sentropic/h2a réel (signature crypto + journal persisté SQL). Différé côté build serveur.", statut: "a-faire", source: "ev-fallback" },
 ];
+
+/** Map a track realization/bucket to the backlog board column. */
+function statutForTrack(item: TrackItem): BacklogStatut {
+  switch (item.realization) {
+    case "done":
+      return "realise";
+    case "in-progress":
+      return "en-cours";
+    case "cancelled":
+    case "rejected":
+      return "abandonne";
+    default:
+      return "a-faire";
+  }
+}
+
+/** Short code from the workspace, e.g. "wp4-sources" -> "WP4-SOURCES". */
+function codeForWorkspace(workspace: string): string {
+  return workspace.toUpperCase();
+}
+
+/** Project a folded track item into the backlog shape (no fabrication). */
+export function trackItemToBacklog(item: TrackItem): BacklogItem {
+  const acceptanceNote =
+    item.acceptance === "pass"
+      ? "Acceptation : ✓ pass"
+      : item.acceptance === "fail"
+        ? "Acceptation : ✗ fail"
+        : "Acceptation : —";
+  return {
+    id: item.id,
+    code: codeForWorkspace(item.workspace),
+    titre: item.title,
+    description: `${item.workspace} · ${item.kind} · ${acceptanceNote}`,
+    statut: statutForTrack(item),
+    source: "track",
+    groupe: item.workspace,
+    acceptance: item.acceptance,
+    bucket: item.bucket,
+  };
+}
 
 const addItemSchema = z.object({
   titre: z.string().trim().min(1).max(200),
@@ -72,9 +129,9 @@ const slugify = (titre: string): string =>
     .slice(0, 48) || "demande";
 
 /**
- * In-memory store of items ADDED at runtime (seed items are not stored, they
- * are streamed from `SEED` on every GET so a restart resets to the truth).
- * Exported as a factory so tests get an isolated store per app instance.
+ * In-memory store of items ADDED at runtime (the "Ajouter une demande"
+ * affordance + the chat tools). Tracked items are never written here; they are
+ * folded from the sidecar on every GET so the list always reflects the truth.
  */
 export interface BacklogStore {
   list(): BacklogItem[];
@@ -105,21 +162,64 @@ export function createBacklogStore(): BacklogStore {
 const defaultStore = createBacklogStore();
 
 /**
- * Builds the /api/backlog routes. A `store` can be injected for tests;
- * production uses the shared process-lifetime store.
+ * Reader of the track sidecar. Injectable for tests; production uses the real
+ * filesystem loader (which honours `TRACK_EVENTS_PATH` and degrades gracefully).
  */
-export function backlogRoute(store: BacklogStore = defaultStore): Hono {
+export type TrackBacklogReader = () => {
+  available: boolean;
+  items: BacklogItem[];
+};
+
+const defaultTrackReader: TrackBacklogReader = () => {
+  const result = loadTrackItems();
+  return {
+    available: result.available,
+    items: result.items.map(trackItemToBacklog),
+  };
+};
+
+/**
+ * Builds the /api/backlog routes. `store` and `trackReader` can be injected for
+ * tests; production uses the shared store + the real filesystem track reader.
+ */
+export function backlogRoute(
+  store: BacklogStore = defaultStore,
+  trackReader: TrackBacklogReader = defaultTrackReader,
+): Hono {
   const app = new Hono();
 
-  /** Seed evolutions + items added at runtime (added override seed by id). */
+  /**
+   * Real tracked items (folded from the sidecar) + runtime-added items.
+   * When the sidecar is unavailable, falls back to the labeled ÉV seed so the
+   * view is never empty. Runtime items override tracked/seed items by id.
+   */
   app.get("/api/backlog", (c) => {
+    const track = trackReader();
+    const base = track.available ? track.items : EV_FALLBACK;
     const byId = new Map<string, BacklogItem>();
-    for (const item of SEED) byId.set(item.id, item);
+    for (const item of base) byId.set(item.id, item);
     for (const item of store.list()) byId.set(item.id, item);
-    return c.json({ items: [...byId.values()] });
+    return c.json({
+      items: [...byId.values()],
+      source: track.available ? "track" : "ev-fallback",
+    });
   });
 
-  /** Add a request -> statut "a-faire". */
+  /** Raw track buckets (DONE / TO-DO / DROPPED). Empty when unavailable. */
+  app.get("/api/backlog/track", (c) => {
+    const track = trackReader();
+    const buckets: Record<TrackBucket, BacklogItem[]> = {
+      DONE: [],
+      "TO-DO": [],
+      DROPPED: [],
+    };
+    for (const item of track.items) {
+      if (item.bucket) buckets[item.bucket].push(item);
+    }
+    return c.json({ available: track.available, buckets });
+  });
+
+  /** Add a request -> statut "a-faire" (runtime store). */
   app.post("/api/backlog/items", async (c) => {
     const parsed = addItemSchema.safeParse(await c.req.json().catch(() => null));
     if (!parsed.success) {
@@ -129,7 +229,7 @@ export function backlogRoute(store: BacklogStore = defaultStore): Hono {
     const base = slugify(titre);
     let id = base;
     let n = 2;
-    while (store.get(id) || SEED.some((s) => s.id === id)) {
+    while (store.get(id)) {
       id = `${base}-${n}`;
       n += 1;
     }
@@ -139,6 +239,7 @@ export function backlogRoute(store: BacklogStore = defaultStore): Hono {
       titre,
       description: description ?? "",
       statut: "a-faire",
+      source: "request",
     };
     store.add(item);
     return c.json({ item }, 201);
@@ -152,7 +253,7 @@ export function backlogRoute(store: BacklogStore = defaultStore): Hono {
       return c.json(
         {
           error: "not-found",
-          detail: `No runtime backlog item with id "${id}" (seed items are read-only)`,
+          detail: `No runtime backlog item with id "${id}" (tracked items are read-only)`,
         },
         404,
       );
