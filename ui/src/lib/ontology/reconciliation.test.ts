@@ -10,6 +10,9 @@ import {
   shortRawRef,
   fetchCityState,
   seedCity,
+  applyOntologyPatch,
+  resolveWriteToken,
+  WRITE_TOKEN_HEADER,
   type CanonicalEntityV,
   type OntologyCityState,
   type CandidateV,
@@ -204,5 +207,96 @@ describe("seedCity", () => {
       "/api/ontology/beauharnois/exploit-samples",
       { method: "POST" },
     );
+  });
+});
+
+describe("resolveWriteToken", () => {
+  it("prefers an explicit override", () => {
+    expect(resolveWriteToken("dev-token")).toBe("dev-token");
+  });
+
+  it("returns undefined when no override and no env var (read-only)", () => {
+    // import.meta.env.VITE_RADAR_ONTOLOGY_WRITE_TOKEN is unset under vitest.
+    expect(resolveWriteToken()).toBeUndefined();
+    expect(resolveWriteToken("")).toBeUndefined();
+  });
+});
+
+describe("applyOntologyPatch (write-core client)", () => {
+  function jsonRes(body: unknown, status = 200): Response {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      json: async () => body,
+    } as unknown as Response;
+  }
+  const rejectOp = {
+    op: "reject_match" as const,
+    aId: "mention:lot:1",
+    bId: "mention:lot:2",
+  };
+
+  it("short-circuits to unauthorized without a token (no fetch)", async () => {
+    const fetchImpl = vi.fn();
+    const res = await applyOntologyPatch(
+      "salaberry-de-valleyfield",
+      rejectOp,
+      undefined,
+      fetchImpl as unknown as typeof fetch,
+    );
+    expect(res.kind).toBe("unauthorized");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("POSTs the op with the write-token header and returns the applied state", async () => {
+    const applied = {
+      entities: [{ ...lot, status: "candidate" }],
+      candidates: [],
+    };
+    const fetchImpl = vi.fn<Parameters<typeof fetch>, Promise<Response>>(
+      async () => jsonRes(applied),
+    );
+    const res = await applyOntologyPatch(
+      "salaberry-de-valleyfield",
+      rejectOp,
+      "tok-123",
+      fetchImpl as unknown as typeof fetch,
+    );
+    expect(res.kind).toBe("ok");
+    if (res.kind === "ok") expect(res.applied.entities).toHaveLength(1);
+    const init = fetchImpl.mock.calls[0]![1] as unknown as RequestInit & {
+      headers: Record<string, string>;
+    };
+    expect(init.method).toBe("POST");
+    expect(init.headers[WRITE_TOKEN_HEADER]).toBe("tok-123");
+    expect(init.body).toBe(JSON.stringify(rejectOp));
+  });
+
+  it("maps a 401 to unauthorized", async () => {
+    const fetchImpl = vi.fn(async () => jsonRes({ ok: false }, 401));
+    const res = await applyOntologyPatch(
+      "salaberry-de-valleyfield",
+      rejectOp,
+      "bad",
+      fetchImpl as unknown as typeof fetch,
+    );
+    expect(res.kind).toBe("unauthorized");
+  });
+
+  it("maps a 422 to error with the server detail", async () => {
+    const fetchImpl = vi.fn(async () =>
+      jsonRes({ ok: false, error: "unknown-id", detail: "no such id" }, 422),
+    );
+    const res = await applyOntologyPatch(
+      "salaberry-de-valleyfield",
+      { op: "accept_match", aId: "x", bId: "y" },
+      "tok",
+      fetchImpl as unknown as typeof fetch,
+    );
+    expect(res.kind).toBe("error");
+    if (res.kind === "error") {
+      expect(res.status).toBe(422);
+      expect(res.detail).toBe("no such id");
+    }
   });
 });
