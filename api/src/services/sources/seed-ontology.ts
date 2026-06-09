@@ -3,7 +3,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML,
+  AVIS_PUBLICS_BEAUHARNOIS_SOURCE_URL,
+  AVIS_PUBLICS_FIXTURE_HTML,
+  AVIS_PUBLICS_SOURCE_URL,
   buildRawDocumentRecord,
+  parseAvisPublics,
   parseRoleEvaluation,
   type RawDocumentRecord,
 } from "@radar/sources";
@@ -21,21 +26,31 @@ import {
 
 /**
  * SEED-ONTOLOGY — a deterministic, NETWORK-FREE path that populates a city's
- * graphify project state from the REAL committed MAMH role samples so the
- * reconciliation studio is never empty on a fresh stack (SPEC_ONTOLOGY §0.2).
+ * graphify project state from the REAL committed corpus so the reconciliation
+ * studio is never empty on a fresh stack (SPEC_ONTOLOGY §0.2).
  *
  * It reuses the RECUEIL S3 substrate: the committed sample bytes are wrapped as
- * a `RawDocumentRecord` and PUT into object storage under the canonical raw key
+ * `RawDocumentRecord`s and PUT into object storage under the canonical raw keys
  * (exactly as RECUEIL would after a real fetch — but with NO network call), then
  * EXPLOITATION re-reads those bytes and reconciles them. Every entity that
- * results is derived from `parseRoleEvaluation` on the real bytes (anti-invention,
- * §7.4: owner/PII is NEVER surfaced — always `non-disponible`).
+ * results is derived from the parsers on the real bytes (anti-invention, §7.4:
+ * owner/PII is NEVER surfaced — always `non-disponible`).
  *
- * Both pilot cities are seeded from their REAL role record:
- *   - salaberry-de-valleyfield (MAMH 70052): lot 4193751 (+4 lots),
- *     matricule 5114-86-8189, total 2 748 500 $.
- *   - beauharnois (MAMH 70022): lot 4716029, matricule 6719-81-9976,
- *     total 444 000 $.
+ * Each pilot city is seeded from TWO real sources so the screen carries cross-
+ * source structure (WP4 Source #2):
+ *   1. its REAL MAMH role record (Lot / Valuation canonicals), and
+ *   2. its REAL avis-publics index (Bylaw + DesignationEvent canonicals +
+ *      derogation/PPCMOI Signals).
+ * A Bylaw or Lot that co-occurs in BOTH the role and the avis surfaces as a
+ * cross-source `entity_match` candidate; where the two committed records share
+ * no identifier, the honest result is zero such candidates (reported as-is).
+ *
+ *   - salaberry-de-valleyfield (MAMH 70052): role lot 4193751 (+4 lots),
+ *     matricule 5114-86-8189, total 2 748 500 $; avis = Craft index (4 notices:
+ *     dérogation, registre 150-49-1, EEV 209-47/216-34, PPCMOI 2026-0066).
+ *   - beauharnois (MAMH 70022): role lot 4716029, matricule 6719-81-9976,
+ *     total 444 000 $; avis = WordPress index (4 notices: dérogation
+ *     DM-2026-0037, consultation/projet 701-102, EEV 2026-11/2026-07).
  */
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -52,17 +67,29 @@ const SAMPLES_DIR = join(
   "samples",
 );
 
-/** Per-city REAL role sample mapping (committed bytes, no network). */
+/** A city's REAL committed avis-publics index (committed bytes, no network). */
+export interface CityAvisSpec {
+  /** Stable source id stamped on the seeded avis RawDocument. */
+  readonly sourceId: string;
+  /** The real, public avis-publics index URL (provenance). */
+  readonly sourceUrl: string;
+  /** Verbatim HTML captured from the live page (the committed fixture). */
+  readonly html: string;
+}
+
+/** Per-city REAL sample mapping (committed bytes, no network). */
 export interface CitySampleSpec {
   readonly citySlug: string;
   /** MAMH municipality code (provenance only; the bytes are authoritative). */
   readonly codeMamh: string;
-  /** Committed sample filename under the spikes samples dir. */
+  /** Committed role sample filename under the spikes samples dir. */
   readonly sampleFile: string;
-  /** Stable source id stamped on the seeded RawDocument. */
+  /** Stable source id stamped on the seeded role RawDocument. */
   readonly sourceId: string;
   /** A real, public URL for provenance (the MAMH open-data role product). */
   readonly sourceUrl: string;
+  /** The city's REAL committed avis-publics index (cross-source corpus). */
+  readonly avis: CityAvisSpec;
 }
 
 export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
@@ -73,6 +100,11 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
     sourceId: "role-evaluation-mamh-70052",
     sourceUrl:
       "https://www.donneesquebec.ca/recherche/dataset/role-evaluation-fonciere",
+    avis: {
+      sourceId: "avis-publics-valleyfield",
+      sourceUrl: AVIS_PUBLICS_SOURCE_URL,
+      html: AVIS_PUBLICS_FIXTURE_HTML,
+    },
   },
   beauharnois: {
     citySlug: "beauharnois",
@@ -81,6 +113,11 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
     sourceId: "role-evaluation-mamh-70022",
     sourceUrl:
       "https://www.donneesquebec.ca/recherche/dataset/role-evaluation-fonciere",
+    avis: {
+      sourceId: "avis-publics-beauharnois",
+      sourceUrl: AVIS_PUBLICS_BEAUHARNOIS_SOURCE_URL,
+      html: AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML,
+    },
   },
 };
 
@@ -96,16 +133,27 @@ export interface SeededRealEntity {
   readonly valeurDate: string;
 }
 
+/** A concrete real avis notice the seed parsed (for honest reporting / tests). */
+export interface SeededRealAvis {
+  readonly title: string;
+  readonly type: string;
+  readonly bylaws: string[];
+}
+
 export interface SeedOntologyResult {
   readonly ok: boolean;
   readonly citySlug: string;
-  /** S3 key the raw sample was stored under (RECUEIL substrate). */
+  /** S3 key the raw ROLE sample was stored under (RECUEIL substrate). */
   readonly rawRef: string;
+  /** S3 key the raw AVIS index was stored under (RECUEIL substrate). */
+  readonly avisRawRef: string;
   readonly mentionCount: number;
   readonly candidateCount: number;
   readonly canonicalCount: number;
   /** Real role units parsed from the sample bytes (verbatim values). */
   readonly realEntities: SeededRealEntity[];
+  /** Real avis notices parsed from the committed index bytes (verbatim). */
+  readonly realAvis: SeededRealAvis[];
   /** Count of validated OntoSignals derived from reconciled DesignationEvents. */
   readonly signalCount: number;
   readonly stateKey: string;
@@ -143,8 +191,8 @@ export async function seedCityOntology(
   const bytes = readCitySampleBytes(spec);
   const fetchedAt = now().toISOString();
 
-  // Build the RECUEIL record from the REAL bytes and PUT them under the raw key
-  // (exactly what RECUEIL persists after a fetch — but the bytes are committed).
+  // Build the RECUEIL record from the REAL ROLE bytes and PUT them under the raw
+  // key (exactly what RECUEIL persists after a fetch — but the bytes are committed).
   const record: RawDocumentRecord = buildRawDocumentRecord({
     source: spec.sourceId,
     sourceUrl: spec.sourceUrl,
@@ -158,12 +206,33 @@ export async function seedCityOntology(
     await store.put(record.storageKey, bytes, record.contentType);
   }
 
-  // EXPLOITATION: re-read the bytes → modeled mentions → graphify reconciliation
-  // → persisted per-city project state served at GET /api/ontology/:city/*.
+  // Build the RECUEIL record from the REAL AVIS index bytes (committed fixture —
+  // the city's live avis-publics page captured verbatim) and PUT them too. This
+  // is the second source that gives the screen Bylaw/DesignationEvent canonicals
+  // + Signals, and any role↔avis overlap as a cross-source entity_match candidate.
+  const avisBytes = new TextEncoder().encode(spec.avis.html);
+  const avisRecord: RawDocumentRecord = buildRawDocumentRecord({
+    source: spec.avis.sourceId,
+    sourceUrl: spec.avis.sourceUrl,
+    body: avisBytes,
+    fetchedAt,
+    contentType: "text/html; charset=utf-8",
+    provenance: { version: "seed-1", userAgent: "radar-seed", viaObscura: false },
+  });
+  const avisExisting = await store.head(avisRecord.storageKey);
+  if (!avisExisting) {
+    await store.put(avisRecord.storageKey, avisBytes, avisRecord.contentType);
+  }
+
+  // EXPLOITATION over BOTH real docs: re-read the bytes → modeled mentions →
+  // graphify reconciliation → persisted per-city project state served at
+  // GET /api/ontology/:city/*. The role XML yields Lot/Valuation mentions; the
+  // avis HTML yields Bylaw/DesignationEvent mentions; shared identifiers across
+  // the two reconcile into a single cross-source canonical.
   const exploitation = await runExploitation({
     store,
     citySlug,
-    rawDocRecords: [record],
+    rawDocRecords: [record, avisRecord],
     now,
   });
 
@@ -174,6 +243,13 @@ export async function seedCityOntology(
     matricule: u.matricule,
     valeur: u.valeur,
     valeurDate: u.valeurDate,
+  }));
+
+  // Parse the REAL avis notices straight from the committed bytes for reporting.
+  const realAvis: SeededRealAvis[] = parseAvisPublics(spec.avis.html).map((a) => ({
+    title: a.title,
+    type: a.type,
+    bylaws: a.bylaws,
   }));
 
   // Signals derived from reconciled DesignationEvent canonicals (role-only seed
@@ -198,10 +274,12 @@ export async function seedCityOntology(
     ok: exploitation.ok && validation.ok,
     citySlug,
     rawRef: record.storageKey,
+    avisRawRef: avisRecord.storageKey,
     mentionCount: exploitation.mentionCount,
     candidateCount: exploitation.candidateCount,
     canonicalCount: exploitation.canonicalCount,
     realEntities,
+    realAvis,
     signalCount,
     stateKey: exploitation.stateKey,
     validation,

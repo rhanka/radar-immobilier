@@ -72,10 +72,42 @@ export const VALLEYFIELD_PRIORITY_SOURCE_BINDINGS = [
   },
 ] as const satisfies readonly PrioritySourceBinding[];
 
+/**
+ * Beauharnois priority bindings (WP4 Source #2 — the second pilot city, first on
+ * a different CMS). Kept in a separate array so the Valleyfield top-five stays
+ * pinned; `getPrioritySourceBinding` resolves across both city plans.
+ */
+export const BEAUHARNOIS_PRIORITY_SOURCE_BINDINGS = [
+  {
+    sourceId: "avis-publics-beauharnois",
+    priority: 1,
+    tier: "A",
+    kind: "avis-publics",
+    city: "beauharnois",
+    recommendation: "build-now",
+    cadence: "daily",
+  },
+  {
+    sourceId: "roles-evaluation-fonciere-mamh-beauharnois",
+    priority: 3,
+    tier: "A",
+    kind: "role-evaluation",
+    city: "beauharnois",
+    recommendation: "build-now",
+    cadence: "annual",
+  },
+] as const satisfies readonly PrioritySourceBinding[];
+
+/** Every registered priority binding across all pilot cities. */
+export const ALL_PRIORITY_SOURCE_BINDINGS: readonly PrioritySourceBinding[] = [
+  ...VALLEYFIELD_PRIORITY_SOURCE_BINDINGS,
+  ...BEAUHARNOIS_PRIORITY_SOURCE_BINDINGS,
+];
+
 export function getPrioritySourceBinding(
   sourceId: string,
 ): PrioritySourceBinding | undefined {
-  return VALLEYFIELD_PRIORITY_SOURCE_BINDINGS.find(
+  return ALL_PRIORITY_SOURCE_BINDINGS.find(
     (source) => source.sourceId === sourceId,
   );
 }
