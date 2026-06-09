@@ -7,6 +7,8 @@ import {
   type JobT,
 } from "@radar/domain";
 
+import type { RawDocumentRecord } from "@radar/sources";
+
 import type { ObjectStore } from "../../storage/object-store.js";
 import type { CiblageStore } from "../ciblage/ciblage-store.js";
 import { runRecueil } from "../sources/recueil.js";
@@ -17,16 +19,20 @@ import type { JobsStore } from "./jobs-store.js";
 /**
  * PIPELINE executor (CIBLAGE → RECUEIL → EXPLOITATION). Consumes an *enabled*
  * `CiblagePlan` and, for each (citySlug × sourceBinding) it declares, runs the
- * EXISTING recueil → exploitation path (`runRecueil` then `runExploitation`,
- * reused — not duplicated), stamping the plan id onto every collected
- * RawDocument provenance (`ciblagePlanId`). Produces ONE `Job` record summarising
- * the run, persisted via the injected `JobsStore`.
+ * EXISTING recueil path (`runRecueil`, reused — not duplicated), stamping the
+ * plan id onto every collected RawDocument provenance (`ciblagePlanId`). Once a
+ * city's sources are all collected, it runs a SINGLE `runExploitation` over the
+ * city's COMBINED corpus so the per-city ontology project state ACCUMULATES every
+ * source (mirroring `seed-ontology`), rather than being overwritten per source.
+ * Produces ONE `Job` record summarising the run, persisted via the injected
+ * `JobsStore`.
  *
  * Robustness contract: a single failing source becomes a `failed` JobStep and
  * marks the whole run `partial`; the executor NEVER throws the run away. Recueil
  * is already idempotent (sha256-keyed), so re-running a plan is safe. A binding
  * with no registered adapter yields an honest `skipped` step, never a fabricated
- * one.
+ * one. The per-city exploitation runs over whatever sources DID collect, so one
+ * failing source never starves the others' accumulated state.
  */
 
 export interface RunCiblagePlanInput {
@@ -117,6 +123,12 @@ export async function runCiblagePlan(
   // when a plan selects both an abstract binding and its concrete child.
   const seen = new Set<string>();
   const steps: JobStepT[] = [];
+  // Per-city accumulator: every successfully-collected source's RawDocs, kept
+  // together so a SINGLE exploitation runs over the city's COMBINED corpus.
+  const cityCorpus = new Map<
+    string,
+    { records: RawDocumentRecord[]; stepIdx: number[] }
+  >();
 
   for (const target of targets) {
     const entry = input.registry.resolve(target.bindingId, target.city);
@@ -137,14 +149,58 @@ export async function runCiblagePlan(
     if (seen.has(dedupKey)) continue;
     seen.add(dedupKey);
 
-    const step = await runOneSource({
+    // RECUEIL only — exploitation is deferred to a per-city pass below so all of
+    // a city's sources accumulate into ONE project state instead of overwriting.
+    const { step, records } = await collectOneSource({
       objectStore: input.objectStore,
       registryEntry: entry,
-      bindingId: target.bindingId,
       planId: plan.id,
       ...(input.limit !== undefined ? { limit: input.limit } : {}),
     });
+    const stepIdx = steps.length;
     steps.push(step);
+
+    if (step.status === "succeeded" && records.length > 0) {
+      const bucket = cityCorpus.get(entry.city) ?? { records: [], stepIdx: [] };
+      bucket.records.push(...records);
+      bucket.stepIdx.push(stepIdx);
+      cityCorpus.set(entry.city, bucket);
+    }
+  }
+
+  // EXPLOITATION — ONE pass per city over its COMBINED corpus (mirrors
+  // seed-ontology). The accumulated project state reflects EVERY source that
+  // collected, which is also what unblocks cross-source `entity_match`: graphify
+  // now sees ≥2 sources together, so a shared identifier can become a candidate.
+  for (const [city, bucket] of cityCorpus) {
+    try {
+      const exploit = await runExploitation({
+        store: input.objectStore,
+        citySlug: city,
+        rawDocRecords: bucket.records,
+        ...(input.now ? { now: input.now } : {}),
+      });
+      // Stamp the per-city accumulated totals onto each succeeded step of the
+      // city so the console surfaces real mention / candidate / canonical counts.
+      for (const idx of bucket.stepIdx) {
+        const s = steps[idx]!;
+        steps[idx] = {
+          ...s,
+          mentionCount: exploit.mentionCount,
+          candidateCount: exploit.candidateCount,
+          canonicalCount: exploit.canonicalCount,
+        };
+      }
+    } catch (e) {
+      // An exploitation failure does not erase the recueil work: the city's
+      // succeeded recueil steps become `failed` with the typed reason, never
+      // throwing the whole run away.
+      const message = e instanceof Error ? e.message : String(e);
+      for (const idx of bucket.stepIdx) {
+        const s = steps[idx]!;
+        steps[idx] = { ...s, status: "failed", error: message };
+      }
+    }
   }
 
   const status = rollupStatus(steps);
@@ -154,7 +210,9 @@ export async function runCiblagePlan(
     failed: steps.filter((s) => s.status === "failed").length,
     skipped: steps.filter((s) => s.status === "skipped").length,
     rawDocs: steps.reduce((n, s) => n + s.rawDocIds.length, 0),
-    mentions: steps.reduce((n, s) => n + (s.mentionCount ?? 0), 0),
+    // City-level mention totals are identical across a city's sibling steps
+    // (they share one exploitation), so sum DISTINCT cities, not steps.
+    mentions: cityMentionTotal(steps),
   };
 
   const job: JobT = Job.parse({
@@ -173,21 +231,44 @@ export async function runCiblagePlan(
   return { ok: true, job: saved };
 }
 
-interface RunOneSourceInput {
+/**
+ * Sum each city's mention count ONCE. Sibling steps of a city share a single
+ * per-city exploitation, so their `mentionCount` is the same accumulated value;
+ * summing per step would double-count. We take the first succeeded step per city.
+ */
+function cityMentionTotal(steps: readonly JobStepT[]): number {
+  const perCity = new Map<string, number>();
+  for (const s of steps) {
+    if (s.status !== "succeeded" || s.mentionCount === undefined) continue;
+    if (!perCity.has(s.city)) perCity.set(s.city, s.mentionCount);
+  }
+  let total = 0;
+  for (const v of perCity.values()) total += v;
+  return total;
+}
+
+interface CollectOneSourceInput {
   readonly objectStore: ObjectStore;
   readonly registryEntry: { sourceId: string; city: string; build: () => import("@radar/sources").SourceAdapter };
-  readonly bindingId: string;
   readonly planId: string;
   readonly limit?: number;
 }
 
+interface CollectOneSourceOutput {
+  readonly step: JobStepT;
+  readonly records: readonly RawDocumentRecord[];
+}
+
 /**
- * Run the recueil → exploitation path for ONE concrete source, returning a
- * `JobStep`. Reuses `runRecueil` (which already accepts `ciblagePlanId`) and
- * `runExploitation`; on a typed recueil failure the step is `failed` and carries
- * the error kind. Never throws.
+ * Run the RECUEIL stage for ONE concrete source, returning a `JobStep` plus the
+ * collected `RawDocumentRecord`s (so the caller can accumulate them into the
+ * city's combined corpus for a single exploitation). Reuses `runRecueil` (which
+ * already accepts `ciblagePlanId`); on a typed recueil failure the step is
+ * `failed` and carries the error kind. Never throws.
  */
-async function runOneSource(input: RunOneSourceInput): Promise<JobStepT> {
+async function collectOneSource(
+  input: CollectOneSourceInput,
+): Promise<CollectOneSourceOutput> {
   const { sourceId, city } = input.registryEntry;
   const base = (status: JobStepStatusT): JobStepT => ({
     sourceId,
@@ -208,32 +289,26 @@ async function runOneSource(input: RunOneSourceInput): Promise<JobStepT> {
     );
 
     if (!recueil.ok) {
-      return {
-        ...base("failed"),
-        error: recueil.error,
-      };
+      return { step: { ...base("failed"), error: recueil.error }, records: [] };
     }
 
-    const exploit = await runExploitation({
-      store: input.objectStore,
-      citySlug: city,
-      rawDocRecords: recueil.records,
-    });
-
     return {
-      sourceId,
-      city,
-      status: "succeeded",
-      rawDocIds: [...recueil.rawDocIds],
-      mentionCount: exploit.mentionCount,
-      candidateCount: exploit.candidateCount,
-      canonicalCount: exploit.canonicalCount,
+      step: {
+        sourceId,
+        city,
+        status: "succeeded",
+        rawDocIds: [...recueil.rawDocIds],
+      },
+      records: recueil.records,
     };
   } catch (e) {
-    // Exploitation / storage failures are recorded, never thrown away.
+    // Storage / unexpected failures are recorded, never thrown away.
     return {
-      ...base("failed"),
-      error: e instanceof Error ? e.message : String(e),
+      step: {
+        ...base("failed"),
+        error: e instanceof Error ? e.message : String(e),
+      },
+      records: [],
     };
   }
 }
