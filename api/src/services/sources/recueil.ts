@@ -18,7 +18,14 @@ import type { ObjectStore } from "../../storage/object-store.js";
 
 export interface RecueilOptions {
   readonly limit?: number;
-  /** CIBLAGE plan id propagated into provenance, when collection was scheduled. */
+  /**
+   * CIBLAGE plan id propagated into provenance, when collection was scheduled.
+   * References a `CiblagePlan.id` (pipeline stage 1, `@radar/domain`): the
+   * editable plan that DECLARED this collection. The recueil executor (next lot)
+   * passes the enabled plan's id here so every collected RawDocument traces back
+   * to the targeting decision. Stage 1 (ciblage) writes the plan; this is the
+   * read of that plan's id at recueil time.
+   */
   readonly ciblagePlanId?: string;
   readonly signal?: AbortSignal;
 }

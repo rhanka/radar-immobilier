@@ -6,6 +6,7 @@
   import TourOverlay from "$lib/components/tour/TourOverlay.svelte";
   import type { DemoView } from "$lib/demo/views";
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
+  import CiblageView from "$lib/components/ciblage/CiblageView.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
@@ -146,6 +147,8 @@
       />
     {:else if activeView === "onboarding"}
       <OnboardingView />
+    {:else if activeView === "ciblage"}
+      <CiblageView />
     {:else if activeView === "signaux"}
       <SignalsT1View onApprofondir={handleApprofondir} />
     {:else if activeView === "grilles"}
