@@ -37,3 +37,12 @@ test("priority bindings are addressable by source id", () => {
   );
   expect(getPrioritySourceBinding("unknown-source")).toBeUndefined();
 });
+
+test("collectible terrAPI / Adresses Québec adapters resolve per city (WP4 #4)", () => {
+  const vf = getPrioritySourceBinding("adresses-quebec-70052");
+  expect(vf?.kind).toBe("adresses-quebec");
+  expect(vf?.city).toBe("salaberry-de-valleyfield");
+  const beau = getPrioritySourceBinding("adresses-quebec-70022");
+  expect(beau?.kind).toBe("adresses-quebec");
+  expect(beau?.city).toBe("beauharnois");
+});

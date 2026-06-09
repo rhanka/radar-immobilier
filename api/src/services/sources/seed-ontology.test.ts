@@ -89,6 +89,33 @@ describe("seedCityOntology — REAL committed role bytes → project state", () 
     expect(res.realAvis.some((a) => a.type === "ppcmoi")).toBe(true);
     // At least one validated Signal (the PPCMOI / dérogation watch).
     expect(res.signalCount).toBeGreaterThanOrEqual(1);
+
+    // WP4 Source #4: the committed terrAPI / Adresses Québec list seeds the screen.
+    expect(res.adresseRawRef).toMatch(/^raw\/adresses-quebec-70052\//);
+    expect(await store.head(res.adresseRawRef)).not.toBeNull();
+    // Real addresses reported verbatim (nom from the committed terrAPI bytes).
+    expect(res.realAdresses).toHaveLength(3);
+    expect(res.realAdresses.map((a) => a.nom)).toEqual(
+      expect.arrayContaining([
+        "24 rue Paquette, Salaberry-de-Valleyfield J6S6A5",
+        "310 boulevard Pie-XII, Salaberry-de-Valleyfield J6S6P7",
+      ]),
+    );
+    // Real Adresse canonicals carry the verbatim nom as label.
+    const adresses = res.exploitation.state.canonicals.filter(
+      (c) => c.type === "Adresse",
+    );
+    expect(adresses).toHaveLength(3);
+    expect(adresses.map((a) => a.label)).toEqual(
+      expect.arrayContaining([
+        "24 rue Paquette, Salaberry-de-Valleyfield J6S6A5",
+      ]),
+    );
+    // HONESTY: the geometry=0 sample carries no lot ⇒ no Adresse↔Lot candidate is
+    // fabricated. The role lot (4193751) and the addresses share no identifier.
+    expect(
+      res.exploitation.state.candidates.length,
+    ).toBe(res.candidateCount);
   });
 
   it("seeds Beauharnois with the REAL lot 4716029 / matricule 6719-81-9976 / 444 000 $", async () => {
@@ -128,9 +155,25 @@ describe("seedCityOntology — REAL committed role bytes → project state", () 
     // The dérogation notice yields one validated watch Signal.
     expect(res.signalCount).toBeGreaterThanOrEqual(1);
 
+    // WP4 Source #4: the committed terrAPI / Adresses Québec list seeds the screen.
+    expect(res.adresseRawRef).toMatch(/^raw\/adresses-quebec-70022\//);
+    expect(await store.head(res.adresseRawRef)).not.toBeNull();
+    expect(res.realAdresses).toHaveLength(3);
+    expect(res.realAdresses.map((a) => a.nom)).toEqual(
+      expect.arrayContaining([
+        "279 chemin Saint-Louis, Beauharnois J6N2J3",
+        "568 2 rue Richard, Beauharnois J6N2P3",
+      ]),
+    );
+    const adresses = res.exploitation.state.canonicals.filter(
+      (c) => c.type === "Adresse",
+    );
+    expect(adresses).toHaveLength(3);
+
     // HONEST cross-source check: the committed role record (lot 4716029, no
-    // bylaws) and the committed avis (bylaws 701-102/2026-11/…, no role lots)
-    // share NO identifier ⇒ zero role↔avis entity_match candidates. Recorded.
+    // bylaws), the committed avis (bylaws 701-102/2026-11/…, no role lots) and the
+    // terrAPI addresses (geometry=0 ⇒ no lot) share NO identifier ⇒ zero
+    // entity_match candidates across the three. Recorded.
     expect(res.candidateCount).toBe(0);
   });
 
