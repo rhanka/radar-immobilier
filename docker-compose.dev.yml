@@ -36,6 +36,12 @@ services:
       - radar-api-node-modules:/workspace/api/node_modules
     environment:
       NODE_ENV: development
+      # Reconciliation studio WRITE gate (write-core). Empty by default ⇒ the
+      # POST /api/ontology/:city/patch route is fail-closed (every patch → 401).
+      # Set RADAR_ONTOLOGY_WRITE_TOKEN in .env (matching the UI's
+      # VITE_RADAR_ONTOLOGY_WRITE_TOKEN below) to enable accept / reject /
+      # set_status on the running dev stack.
+      RADAR_ONTOLOGY_WRITE_TOKEN: ${RADAR_ONTOLOGY_WRITE_TOKEN:-}
 
   ui:
     image: node:24-bookworm-slim
@@ -52,6 +58,10 @@ services:
     environment:
       API_PROXY_TARGET: ${API_PROXY_TARGET:-http://api:3000}
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+      # Studio write token surfaced to the browser bundle (Vite inlines VITE_*).
+      # Must equal the api's RADAR_ONTOLOGY_WRITE_TOKEN above for accept/reject to
+      # work on 5301. Empty ⇒ the studio runs read-only (affordances disabled).
+      VITE_RADAR_ONTOLOGY_WRITE_TOKEN: ${RADAR_ONTOLOGY_WRITE_TOKEN:-}
     networks: [radar]
 
 volumes:

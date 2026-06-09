@@ -6,6 +6,8 @@ import {
   groupEntitiesByType,
   studioCounts,
   candidateSharedTerms,
+  legalStatusTargets,
+  statusDisplayLabel,
   mentionProvenance,
   shortRawRef,
   fetchCityState,
@@ -133,6 +135,41 @@ describe("candidate + provenance helpers", () => {
     expect(shortRawRef("raw/role-evaluation-mamh-70052/2026/06/08/abc.xml")).toBe(
       "abc.xml",
     );
+  });
+});
+
+describe("legalStatusTargets (set_status, D3 transition gate)", () => {
+  it("offers the profile's candidate transitions", () => {
+    expect(legalStatusTargets("candidate")).toEqual([
+      "needs_review",
+      "validated",
+      "rejected",
+    ]);
+  });
+
+  it("offers only superseded from validated (no validated→rejected)", () => {
+    expect(legalStatusTargets("validated")).toEqual(["superseded"]);
+    expect(legalStatusTargets("validated")).not.toContain("rejected");
+  });
+
+  it("returns no target for a terminal status (rejected/superseded)", () => {
+    expect(legalStatusTargets("rejected")).toEqual([]);
+    expect(legalStatusTargets("superseded")).toEqual([]);
+  });
+
+  it("returns a fresh array (caller cannot mutate the table)", () => {
+    const a = legalStatusTargets("candidate");
+    a.push("bogus");
+    expect(legalStatusTargets("candidate")).not.toContain("bogus");
+  });
+});
+
+describe("statusDisplayLabel", () => {
+  it("renders French labels for the known statuses", () => {
+    expect(statusDisplayLabel("validated")).toBe("validée");
+    expect(statusDisplayLabel("rejected")).toBe("rejetée");
+    expect(statusDisplayLabel("needs_review")).toBe("à revoir");
+    expect(statusDisplayLabel("candidate")).toBe("candidate");
   });
 });
 
