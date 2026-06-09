@@ -8,6 +8,8 @@
     groupEntitiesByType,
     studioCounts,
     candidateSharedTerms,
+    legalStatusTargets,
+    statusDisplayLabel,
     shortRawRef,
     fetchCityState,
     seedCity,
@@ -16,6 +18,7 @@
     type OntologyCityState,
     type FetchCityStateResult,
     type CandidateV,
+    type CanonicalEntityV,
   } from "$lib/ontology/reconciliation.js";
 
   // ── State ────────────────────────────────────────────────────────────────────
@@ -30,6 +33,8 @@
   const canWrite = writeToken !== undefined;
   // Per-candidate in-flight id (disables its buttons while the patch posts).
   let pendingCandidateId: string | null = null;
+  // Per-canonical in-flight id (disables its set_status control while it posts).
+  let pendingCanonicalId: string | null = null;
   let writeError: string | null = null;
 
   async function load(slug: string): Promise<void> {
@@ -79,6 +84,41 @@
     }
   }
 
+  /**
+   * Override a canonical's reconciliation status (set_status) → POST the
+   * `graphify_ontology_patch_v1` op, then patch the local read-model from the
+   * route's re-derived response. `to` is one of the D3-legal targets for the
+   * canonical's current status (the API re-validates the transition server-side).
+   */
+  async function setStatus(
+    entity: CanonicalEntityV,
+    to: string,
+  ): Promise<void> {
+    if (!canWrite || pendingCanonicalId || !to) return;
+    pendingCanonicalId = entity.id;
+    writeError = null;
+    const res = await applyOntologyPatch(
+      citySlug,
+      { op: "set_status", canonicalId: entity.id, from: entity.status, to },
+      writeToken,
+    );
+    pendingCanonicalId = null;
+    if (res.kind === "ok" && result && result.kind === "ok") {
+      result = {
+        kind: "ok",
+        state: {
+          ...(result.state as OntologyCityState),
+          entities: res.applied.entities,
+          candidates: res.applied.candidates,
+        },
+      };
+    } else if (res.kind === "unauthorized") {
+      writeError = "Écriture refusée : jeton manquant ou invalide.";
+    } else if (res.kind === "error") {
+      writeError = res.detail;
+    }
+  }
+
   // Reload whenever the selected city changes (skips re-entrant loads).
   let loadedCity: string | null = null;
   $: if (citySlug !== loadedCity && !loading) {
@@ -105,11 +145,8 @@
     return "neutral";
   }
 
-  function statusLabel(status: string): string {
-    if (status === "validated") return "validée";
-    if (status === "rejected") return "rejetée";
-    return "candidate";
-  }
+  // Shared French label for a reconciliation status (lock-step with the helper).
+  const statusLabel = statusDisplayLabel;
 </script>
 
 <ViewLayout>
@@ -255,6 +292,36 @@
                       <p class="mt-0.5 truncate text-xs text-slate-400" title={e.evidenceRefs.join(", ")}>
                         {e.evidenceRefs.length} preuve{e.evidenceRefs.length !== 1 ? "s" : ""}
                       </p>
+                      {#if canWrite && legalStatusTargets(e.status).length > 0}
+                        <!-- set_status control: change the canonical's reconciliation
+                             status to a D3-legal target (re-validated server-side). -->
+                        <div class="mt-1.5 flex items-center gap-1.5">
+                          <label
+                            class="sr-only"
+                            for={`set-status-${e.id}`}
+                          >
+                            Statut de {e.label}
+                          </label>
+                          <select
+                            id={`set-status-${e.id}`}
+                            class="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-600 disabled:opacity-50"
+                            disabled={pendingCanonicalId !== null}
+                            title="Changer le statut de réconciliation (set_status)"
+                            value=""
+                            onchange={(ev) => {
+                              const sel = ev.currentTarget;
+                              const to = sel.value;
+                              sel.value = "";
+                              if (to) void setStatus(e, to);
+                            }}
+                          >
+                            <option value="" disabled>Changer le statut…</option>
+                            {#each legalStatusTargets(e.status) as target}
+                              <option value={target}>→ {statusLabel(target)}</option>
+                            {/each}
+                          </select>
+                        </div>
+                      {/if}
                     </li>
                   {/each}
                 </ul>
