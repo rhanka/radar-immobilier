@@ -14,7 +14,12 @@ import {
   buildRawDocumentRecord,
   parseAdressesQuebec,
   parseAvisPublics,
+  parseReglementDocument,
   parseRoleEvaluation,
+  REGLEMENT_150_51_TEXT,
+  REGLEMENT_450_02_TEXT,
+  REGLEMENTS_URBANISME_PDF_PREFIX,
+  REGLEMENTS_URBANISME_SOURCE_ID,
   type RawDocumentRecord,
 } from "@radar/sources";
 
@@ -96,6 +101,22 @@ export interface CityAdresseSpec {
   readonly json: string;
 }
 
+/**
+ * A city's REAL committed règlement-d'urbanisme document (WP4 Source #5). The
+ * bytes are the VERBATIM pdftotext output of a public bylaw PDF (the regulatory
+ * backbone): the header/recitals name the Bylaw number(s) and the articles name
+ * the Zone codes they modify. Ingested as `text/plain` (the extracted text is the
+ * parseable projection; the binary PDF is NOT committed).
+ */
+export interface CityReglementSpec {
+  /** Stable source id stamped on the seeded règlement RawDocument. */
+  readonly sourceId: string;
+  /** The real, public bylaw-PDF URL (provenance). */
+  readonly sourceUrl: string;
+  /** Verbatim pdftotext output of the bylaw PDF (the committed fixture). */
+  readonly text: string;
+}
+
 /** Per-city REAL sample mapping (committed bytes, no network). */
 export interface CitySampleSpec {
   readonly citySlug: string;
@@ -111,6 +132,12 @@ export interface CitySampleSpec {
   readonly avis: CityAvisSpec;
   /** The city's REAL committed terrAPI / Adresses Québec list (WP4 #4). */
   readonly adresses: CityAdresseSpec;
+  /**
+   * The city's REAL committed règlement-d'urbanisme documents (WP4 #5). May be
+   * empty for a city with no committed règlement (e.g. Beauharnois) — reported
+   * honestly, never fabricated.
+   */
+  readonly reglements: readonly CityReglementSpec[];
 }
 
 export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
@@ -131,6 +158,22 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
       sourceUrl: adressesResourceUrl("70052"),
       json: ADRESSES_QUEBEC_VALLEYFIELD_JSON,
     },
+    // WP4 Source #5: two REAL committed urbanisme bylaws (verbatim pdftotext of
+    // the public CloudFront PDFs). 150-51 is the ZONING amendment (Bylaw 150-51 +
+    // 150, plus 14 real Zone codes); 450-02 is the plan-d'urbanisme amendment
+    // named in the brief (Bylaw 450-02 + 450, NO zone codes — honest).
+    reglements: [
+      {
+        sourceId: REGLEMENTS_URBANISME_SOURCE_ID,
+        sourceUrl: `${REGLEMENTS_URBANISME_PDF_PREFIX}Reglement-150-51-zonage.pdf`,
+        text: REGLEMENT_150_51_TEXT,
+      },
+      {
+        sourceId: REGLEMENTS_URBANISME_SOURCE_ID,
+        sourceUrl: `${REGLEMENTS_URBANISME_PDF_PREFIX}Reglement-450-02.pdf`,
+        text: REGLEMENT_450_02_TEXT,
+      },
+    ],
   },
   beauharnois: {
     citySlug: "beauharnois",
@@ -149,6 +192,10 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
       sourceUrl: adressesResourceUrl("70022"),
       json: ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
     },
+    // HONEST: no règlement-d'urbanisme document is committed for Beauharnois yet,
+    // so WP4 #5 does not enrich the Beauharnois seed (it stays role + avis +
+    // adresses). Reported as-is, never fabricated.
+    reglements: [],
   },
 };
 
@@ -181,6 +228,18 @@ export interface SeededRealAdresse {
   readonly nbUnite: number | null;
 }
 
+/** A concrete real règlement the seed parsed (for honest reporting / tests, WP4 #5). */
+export interface SeededRealReglement {
+  /** The document's own bylaw number (header), verbatim. */
+  readonly primaryNumero: string;
+  /** Verbatim title line. */
+  readonly titre: string;
+  /** Every bylaw number present (verbatim). */
+  readonly bylaws: string[];
+  /** Every zone code present (verbatim) — empty when the bylaw names no zones. */
+  readonly zones: string[];
+}
+
 export interface SeedOntologyResult {
   readonly ok: boolean;
   readonly citySlug: string;
@@ -190,6 +249,8 @@ export interface SeedOntologyResult {
   readonly avisRawRef: string;
   /** S3 key the raw terrAPI ADRESSES list was stored under (WP4 #4). */
   readonly adresseRawRef: string;
+  /** S3 keys the raw règlement-d'urbanisme docs were stored under (WP4 #5). */
+  readonly reglementRawRefs: string[];
   readonly mentionCount: number;
   readonly candidateCount: number;
   readonly canonicalCount: number;
@@ -199,6 +260,8 @@ export interface SeedOntologyResult {
   readonly realAvis: SeededRealAvis[];
   /** Real terrAPI addresses parsed from the committed bytes (verbatim, WP4 #4). */
   readonly realAdresses: SeededRealAdresse[];
+  /** Real règlements parsed from the committed text (verbatim, WP4 #5). */
+  readonly realReglements: SeededRealReglement[];
   /** Count of validated OntoSignals derived from reconciled DesignationEvents. */
   readonly signalCount: number;
   readonly stateKey: string;
@@ -293,16 +356,39 @@ export async function seedCityOntology(
     );
   }
 
-  // EXPLOITATION over the THREE real docs: re-read the bytes → modeled mentions →
+  // Build the RECUEIL record(s) from the REAL règlement-d'urbanisme TEXT bytes
+  // (committed fixture — verbatim pdftotext output of the public bylaw PDFs) and
+  // PUT them as `text/plain`. This is the FOURTH source (WP4 #5 — the regulatory
+  // backbone): it gives the reconciliation screen real Bylaw + Zone canonicals.
+  // A city with no committed règlement (Beauharnois) seeds none — honest.
+  const reglementRecords: RawDocumentRecord[] = [];
+  for (const reg of spec.reglements) {
+    const regBytes = new TextEncoder().encode(reg.text);
+    const regRecord: RawDocumentRecord = buildRawDocumentRecord({
+      source: reg.sourceId,
+      sourceUrl: reg.sourceUrl,
+      body: regBytes,
+      fetchedAt,
+      contentType: "text/plain; charset=utf-8",
+      provenance: { version: "seed-1", userAgent: "radar-seed", viaObscura: false },
+    });
+    const regExisting = await store.head(regRecord.storageKey);
+    if (!regExisting) {
+      await store.put(regRecord.storageKey, regBytes, regRecord.contentType);
+    }
+    reglementRecords.push(regRecord);
+  }
+
+  // EXPLOITATION over the real docs: re-read the bytes → modeled mentions →
   // graphify reconciliation → persisted per-city project state served at
   // GET /api/ontology/:city/*. The role XML yields Lot/Valuation mentions; the
   // avis HTML yields Bylaw/DesignationEvent mentions; the terrAPI JSON yields
-  // Adresse mentions; shared identifiers across them reconcile into single
-  // cross-source canonicals.
+  // Adresse mentions; the règlement text yields Bylaw/Zone mentions (WP4 #5);
+  // shared identifiers across them reconcile into single cross-source canonicals.
   const exploitation = await runExploitation({
     store,
     citySlug,
-    rawDocRecords: [record, avisRecord, adresseRecord],
+    rawDocRecords: [record, avisRecord, adresseRecord, ...reglementRecords],
     now,
   });
 
@@ -331,6 +417,17 @@ export async function seedCityOntology(
     nbUnite: a.nbUnite,
   }));
 
+  // Parse the REAL règlements straight from the committed text bytes (WP4 #5).
+  const realReglements: SeededRealReglement[] = spec.reglements.map((reg) => {
+    const doc = parseReglementDocument(reg.text);
+    return {
+      primaryNumero: doc.primaryNumero,
+      titre: doc.titre,
+      bylaws: doc.bylaws.map((b) => b.numero),
+      zones: doc.zones.map((z) => z.code),
+    };
+  });
+
   // Signals derived from reconciled DesignationEvent canonicals (role-only seed
   // produces Lot/Valuation/Source canonicals ⇒ typically zero signals; an avis
   // corpus would add some). Reported honestly.
@@ -355,12 +452,14 @@ export async function seedCityOntology(
     rawRef: record.storageKey,
     avisRawRef: avisRecord.storageKey,
     adresseRawRef: adresseRecord.storageKey,
+    reglementRawRefs: reglementRecords.map((r) => r.storageKey),
     mentionCount: exploitation.mentionCount,
     candidateCount: exploitation.candidateCount,
     canonicalCount: exploitation.canonicalCount,
     realEntities,
     realAvis,
     realAdresses,
+    realReglements,
     signalCount,
     stateKey: exploitation.stateKey,
     validation,
