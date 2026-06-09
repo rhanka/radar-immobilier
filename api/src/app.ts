@@ -5,10 +5,15 @@ import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
 import { ontologyRoute, type OntologyDeps } from "./routes/ontology.js";
 import { ciblageRoute, type CiblageDeps } from "./routes/ciblage.js";
+import { jobsRoute, type JobsDeps } from "./routes/jobs.js";
 import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
 
-export type AppDeps = HealthDeps & SourcesDeps & OntologyDeps & CiblageDeps;
+export type AppDeps = HealthDeps &
+  SourcesDeps &
+  OntologyDeps &
+  CiblageDeps &
+  JobsDeps;
 
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
@@ -20,6 +25,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", sourcesRoute(deps));
   app.route("/", ontologyRoute(deps));
   app.route("/", ciblageRoute(deps));
+  app.route("/", jobsRoute(deps));
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
 
