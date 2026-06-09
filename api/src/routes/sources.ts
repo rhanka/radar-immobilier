@@ -1,7 +1,10 @@
 import {
+  AVIS_PUBLICS_BEAUHARNOIS_CITY,
   AVIS_PUBLICS_CITY,
   AVIS_PUBLICS_SOURCE_ID,
   createAvisPublicsValleyfieldAdapter,
+  createRoleEvaluationMamhAdapter,
+  roleSourceId,
   type SourceAdapter,
 } from "@radar/sources";
 import { Hono } from "hono";
@@ -14,18 +17,40 @@ export interface SourcesDeps {
   store: ObjectStore;
 }
 
+/** Pilot-city MAMH rôle codes (Valleyfield 70052, Beauharnois 70022). */
+const ROLE_MAMH_VALLEYFIELD = "70052";
+const ROLE_MAMH_BEAUHARNOIS = "70022";
+
 /**
  * Registry of REAL RECUEIL adapters keyed by source id. Each factory builds a
  * stateless SourceAdapter (J0 contract). Adding a source = one entry here plus
  * the adapter in `@radar/sources`.
+ *
+ * The rôle d'évaluation MAMH adapters (WP4 Source #3) make the rôle a REAL
+ * collectible source: a collected rôle XML RawDocument flows through the SAME
+ * recueil → exploitation pipeline as the avis indexes (the exploitation mention
+ * extractor already dispatches role XML → Lot/Valuation mentions). The source id
+ * matches the deterministic seed-ontology id, so collect and seed share storage.
  */
 const ADAPTERS: Record<string, () => SourceAdapter> = {
   [AVIS_PUBLICS_SOURCE_ID]: () => createAvisPublicsValleyfieldAdapter(),
+  [roleSourceId(ROLE_MAMH_VALLEYFIELD)]: () =>
+    createRoleEvaluationMamhAdapter({
+      codeMamh: ROLE_MAMH_VALLEYFIELD,
+      city: AVIS_PUBLICS_CITY,
+    }),
+  [roleSourceId(ROLE_MAMH_BEAUHARNOIS)]: () =>
+    createRoleEvaluationMamhAdapter({
+      codeMamh: ROLE_MAMH_BEAUHARNOIS,
+      city: AVIS_PUBLICS_BEAUHARNOIS_CITY,
+    }),
 };
 
 /** City scope per source id (per-city graphify project, D1). */
 const SOURCE_CITY: Record<string, string> = {
   [AVIS_PUBLICS_SOURCE_ID]: AVIS_PUBLICS_CITY,
+  [roleSourceId(ROLE_MAMH_VALLEYFIELD)]: AVIS_PUBLICS_CITY,
+  [roleSourceId(ROLE_MAMH_BEAUHARNOIS)]: AVIS_PUBLICS_BEAUHARNOIS_CITY,
 };
 
 /**
