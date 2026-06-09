@@ -11,8 +11,8 @@
    * `acceptance.run`. La bande latérale porte le filtre, la légende et l'affordance
    * « Ajouter une demande » (POST /api/backlog/items, store runtime).
    */
-  import { onMount } from "svelte";
-  import { ListTodo, Loader, CheckCircle2, XCircle, Plus, ExternalLink, ChevronDown, ChevronRight } from "@lucide/svelte";
+  import { onDestroy, onMount } from "svelte";
+  import { ListTodo, Loader, CheckCircle2, XCircle, Plus, ExternalLink, ChevronDown, ChevronRight, RefreshCw, Pause, Play } from "@lucide/svelte";
   import { Badge, Button, Card, Alert, EmptyState } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import {
@@ -25,6 +25,11 @@
     type BacklogStatut,
   } from "$lib/backlog/backlog-data.js";
   import { addBacklogItem, fetchBacklog } from "$lib/backlog/backlog-client.js";
+  import {
+    createBacklogPoller,
+    DEFAULT_BACKLOG_POLL_MS,
+    type BacklogPoller,
+  } from "$lib/backlog/backlog-poller.js";
 
   // ── État ────────────────────────────────────────────────────────────────
   /** Items effectivement affichés (track réel, ou seed ÉV en repli). */
@@ -35,6 +40,32 @@
   let statusFilter: BacklogStatut | null = null;
   /** Id de la carte dépliée (accordéon). */
   let expandedId: string | null = null;
+
+  // ── Rafraîchissement live (poll du sidecar track) ─────────────────────────
+  /** True pendant un poll (chargement initial / Actualiser). */
+  let loading = false;
+  /** Horodatage (ms) du dernier poll réussi, ou null avant le premier succès. */
+  let lastUpdated: number | null = null;
+  /** Le poll automatique est-il en pause ? */
+  let paused = false;
+  /** Message de la dernière erreur de poll (null si le dernier poll a réussi). */
+  let pollError: string | null = null;
+
+  /**
+   * Poller injectable (timer-based). La vue s'abonne à ses transitions d'état
+   * et reflète en direct les ajouts/transitions du sidecar track sans reload.
+   * En repli (API hors ligne) le poller conserve les derniers items connus et
+   * bascule la source sur le seed ÉV — la vue ne se vide jamais en cours de poll.
+   */
+  const poller: BacklogPoller = createBacklogPoller({ fetchBacklog });
+  const unsubscribe = poller.subscribe((s) => {
+    items = s.items;
+    source = s.source;
+    loading = s.loading;
+    lastUpdated = s.lastUpdated;
+    paused = s.paused;
+    pollError = s.error;
+  });
 
   // Formulaire « Ajouter une demande »
   let showAddForm = false;
@@ -66,20 +97,38 @@
     expandedId = expandedId === id ? null : id;
   }
 
-  // ── Chargement initial : track réel via l'API, sinon repli seed ───────────
-  async function reload(): Promise<void> {
-    try {
-      const res = await fetchBacklog();
-      items = res.items;
-      source = res.source;
-    } catch {
-      // API hors ligne : on retombe sur le seed ÉV statique (démo offline).
-      items = [...backlogSeed];
-      source = "ev-fallback";
-    }
+  // ── Cycle de vie : démarre le poll au montage, le nettoie au démontage ────
+  onMount(() => {
+    poller.start();
+  });
+  onDestroy(() => {
+    poller.stop();
+    unsubscribe();
+  });
+
+  /** Bouton « Actualiser » : poll hors bande immédiat. */
+  function refreshNow(): void {
+    void poller.refresh();
   }
 
-  onMount(reload);
+  /** Bascule pause/reprise du poll automatique. */
+  function togglePause(): void {
+    if (paused) poller.resume();
+    else poller.pause();
+  }
+
+  /** Horodatage lisible (heure locale) du dernier poll réussi. */
+  function formatUpdated(ms: number | null): string {
+    if (ms === null) return "—";
+    return new Date(ms).toLocaleTimeString("fr-CA", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }
+
+  /** Cadence du poll en secondes (pour l'étiquette d'aide). */
+  const pollSeconds = Math.round(DEFAULT_BACKLOG_POLL_MS / 1000);
 
   // ── Ajouter une demande ───────────────────────────────────────────────────
   async function submitNew(): Promise<void> {
@@ -98,7 +147,7 @@
       newTitre = "";
       newDescription = "";
       showAddForm = false;
-      await reload();
+      await poller.refresh();
     } catch (error) {
       formError =
         error instanceof Error ? error.message : "Impossible d'ajouter la demande.";
@@ -234,34 +283,78 @@
 
   <!-- ── Contenu principal : tableau 3 colonnes ─────────────────────────── -->
   <section class="min-h-full bg-slate-50 p-6">
-    <header class="mb-6">
-      <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
-        Évolutions du radar
-      </p>
-      <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
-        Backlog
-      </h1>
-      <p class="mt-1 text-sm text-slate-500">
-        Backlog réel, replié depuis le système <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">track</code>
-        (<code class="rounded bg-slate-100 px-1 py-0.5 text-xs">.track/events.jsonl</code>) : statut = dernière
-        <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">realization.transition</code>, annoté de la dernière
-        <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">acceptance.run</code>.
-      </p>
+    <header class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
+          Évolutions du radar
+        </p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
+          Backlog
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+          Backlog réel, replié depuis le système <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">track</code>
+          (<code class="rounded bg-slate-100 px-1 py-0.5 text-xs">.track/events.jsonl</code>) : statut = dernière
+          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">realization.transition</code>, annoté de la dernière
+          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">acceptance.run</code>.
+        </p>
+      </div>
+
+      <!-- Contrôle de rafraîchissement live (motif aligné sur JobsTab) -->
+      <div class="flex shrink-0 flex-col items-end gap-2">
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm transition hover:bg-slate-50"
+            on:click={togglePause}
+            aria-pressed={paused}
+            title={paused ? "Reprendre le rafraîchissement automatique" : "Mettre en pause le rafraîchissement automatique"}
+          >
+            {#if paused}
+              <Play class="h-3.5 w-3.5" aria-hidden="true" />
+              Reprendre
+            {:else}
+              <Pause class="h-3.5 w-3.5" aria-hidden="true" />
+              Pause
+            {/if}
+          </button>
+          <button
+            type="button"
+            class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm transition hover:bg-slate-50"
+            on:click={refreshNow}
+            disabled={loading}
+          >
+            <RefreshCw class={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
+            Actualiser
+          </button>
+        </div>
+        <p class="text-right text-xs text-slate-400">
+          {#if paused}
+            Auto-actualisation en pause
+          {:else}
+            Auto-actualisation toutes les {pollSeconds} s
+          {/if}
+          · {items.length} item{items.length !== 1 ? "s" : ""}
+          · MAJ {formatUpdated(lastUpdated)}
+        </p>
+      </div>
     </header>
 
-    <div class="mb-4">
+    <div class="mb-4 space-y-2">
       {#if source === "track"}
         <Alert
           tone="success"
           title="Source : sidecar track en direct"
-          message="Les items ci-dessous sont repliés en direct depuis .track/events.jsonl (système track). Les demandes ajoutées via la bande gauche se superposent à cette liste."
+          message="Les items ci-dessous sont repliés en direct depuis .track/events.jsonl (système track) et rafraîchis automatiquement : les éléments nouvellement tracés et les transitions de statut apparaissent sans recharger la page. Les demandes ajoutées via la bande gauche se superposent à cette liste."
         />
       {:else}
         <Alert
           tone="info"
           title="Source : repli ÉV (sidecar track indisponible)"
-          message="Le sidecar .track/events.jsonl n'est pas accessible (offline ou non bind-monté). La vue retombe sur le seed ÉV statique, fidèle à l'historique Git mergé."
+          message="Le sidecar .track/events.jsonl n'est pas accessible (offline ou non bind-monté). La vue retombe sur le seed ÉV statique, fidèle à l'historique Git mergé ; l'auto-actualisation réessaiera au prochain cycle."
         />
+        {#if pollError}
+          <p class="text-xs text-slate-400">Dernier poll en échec : {pollError}</p>
+        {/if}
       {/if}
     </div>
 
