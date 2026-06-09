@@ -241,6 +241,66 @@ async function savePlan(
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RUN — execute the pipeline (recueil → exploitation) for an enabled plan.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** A pipeline-run job returned by POST /api/ciblage/:id/run (mirror subset). */
+export interface CiblageJobV {
+  id: string;
+  planId: string;
+  planLabel: string;
+  status: "running" | "succeeded" | "failed" | "partial";
+  mode: "real" | "simulation";
+  startedAt: string;
+  finishedAt?: string;
+  totals: {
+    sources: number;
+    succeeded: number;
+    failed: number;
+    skipped: number;
+    rawDocs: number;
+    mentions: number;
+  };
+}
+
+export type RunPlanResult =
+  | { ok: true; job: CiblageJobV }
+  | { ok: false; detail: string };
+
+/**
+ * Execute the pipeline for an enabled plan. The API runs RECUEIL → EXPLOITATION
+ * over each (city × source) the plan declares and returns the finished Job.
+ * Never throws.
+ */
+export async function runPlan(
+  id: string,
+  fetchImpl: typeof fetch = fetch,
+  baseUrl?: string,
+): Promise<RunPlanResult> {
+  const base = apiBase(baseUrl);
+  try {
+    const res = await fetchImpl(`${base}/api/ciblage/${id}/run`, {
+      method: "POST",
+    });
+    const body = (await res.json().catch(() => null)) as {
+      ok?: boolean;
+      job?: CiblageJobV;
+      detail?: string;
+      error?: string;
+    } | null;
+    if (!res.ok || !body?.ok || !body.job) {
+      return {
+        ok: false,
+        detail: body?.detail ?? body?.error ?? `HTTP ${res.status}`,
+      };
+    }
+    return { ok: true, job: body.job };
+  } catch (e) {
+    return { ok: false, detail: e instanceof Error ? e.message : "échec" };
+  }
+}
+
 /** Delete a plan by id. */
 export async function deletePlan(
   id: string,

@@ -12,8 +12,10 @@ import {
   formFromPlan,
   groupBindingsByKind,
   isFormValid,
+  runPlan,
   toggleIn,
   updatePlan,
+  type CiblageJobV,
   type CiblagePlanV,
   type SourceBindingV,
 } from "./ciblage.js";
@@ -192,5 +194,46 @@ describe("createPlan / updatePlan / deletePlan", () => {
       "/api/ciblage/veille-valleyfield",
       { method: "DELETE" },
     );
+  });
+});
+
+describe("runPlan", () => {
+  const JOB: CiblageJobV = {
+    id: "job-1",
+    planId: "veille-valleyfield",
+    planLabel: "Veille Valleyfield",
+    status: "succeeded",
+    mode: "real",
+    startedAt: "2026-06-09T00:00:00.000Z",
+    finishedAt: "2026-06-09T00:00:02.000Z",
+    totals: { sources: 1, succeeded: 1, failed: 0, skipped: 0, rawDocs: 1, mentions: 3 },
+  };
+
+  it("POSTs /run and returns the Job", async () => {
+    const fetchImpl = vi.fn(async () => jsonRes({ ok: true, job: JOB }));
+    const res = await runPlan("veille-valleyfield", fetchImpl as unknown as typeof fetch);
+    expect(res.ok).toBe(true);
+    if (res.ok) expect(res.job.status).toBe("succeeded");
+    expect(fetchImpl).toHaveBeenCalledWith("/api/ciblage/veille-valleyfield/run", {
+      method: "POST",
+    });
+  });
+
+  it("surfaces a typed error detail on a failed run", async () => {
+    const fetchImpl = vi.fn(async () =>
+      jsonRes({ ok: false, error: "plan-disabled", detail: "enable it first" }, 409),
+    );
+    const res = await runPlan("x", fetchImpl as unknown as typeof fetch);
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.detail).toBe("enable it first");
+  });
+
+  it("resolves to error when the fetch throws", async () => {
+    const fetchImpl = vi.fn(async () => {
+      throw new Error("offline");
+    });
+    const res = await runPlan("x", fetchImpl as unknown as typeof fetch);
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.detail).toContain("offline");
   });
 });

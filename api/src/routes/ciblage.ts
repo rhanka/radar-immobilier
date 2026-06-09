@@ -12,10 +12,26 @@ import {
   createCiblageStore,
   type CiblageStore,
 } from "../services/ciblage/ciblage-store.js";
+import { createJobsStore } from "../services/pipeline/jobs-store.js";
+import {
+  defaultAdapterRegistry,
+  type AdapterRegistry,
+} from "../services/pipeline/adapter-registry.js";
+import {
+  runCiblagePlan,
+  type RunCiblagePlanResult,
+} from "../services/pipeline/executor.js";
 
 export interface CiblageDeps {
   store: ObjectStore;
 }
+
+/**
+ * Injectable run hook: drives recueil→exploitation for an enabled plan and
+ * returns the produced Job. Tests inject a fixture-backed runner (no network);
+ * production wires the default registry of REAL network adapters.
+ */
+export type CiblageRunner = (planId: string) => Promise<RunCiblagePlanResult>;
 
 /** Set of REAL, selectable source-binding ids (anti-invention guard). */
 const KNOWN_SOURCE_BINDING_IDS = new Set(
@@ -51,9 +67,27 @@ function unknownBindingIds(ids: readonly string[]): string[] {
 export function ciblageRoute(
   deps: CiblageDeps,
   injectedStore?: CiblageStore,
+  injectedRunner?: CiblageRunner,
+  injectedRegistry?: AdapterRegistry,
 ): Hono {
   const app = new Hono();
   const store = injectedStore ?? createCiblageStore(deps.store);
+
+  /**
+   * Default runner: build the production adapter registry (REAL public-data
+   * adapters) and drive the executor over the plan, persisting the Job. Tests
+   * inject `injectedRunner` (fixture adapters, no network) instead.
+   */
+  const run: CiblageRunner =
+    injectedRunner ??
+    ((planId: string) =>
+      runCiblagePlan({
+        ciblageStore: store,
+        jobsStore: createJobsStore(deps.store),
+        objectStore: deps.store,
+        registry: injectedRegistry ?? defaultAdapterRegistry(),
+        planId,
+      }));
 
   /** List plans + the REAL source-binding catalogue the picker selects from. */
   app.get("/api/ciblage", async (c) => {
@@ -145,6 +179,34 @@ export function ciblageRoute(
       return c.json({ ok: false, error: "not-found" }, 404);
     }
     return c.json({ ok: true });
+  });
+
+  /**
+   * POST /api/ciblage/:id/run — EXECUTE the pipeline for an enabled plan.
+   *
+   * Drives RECUEIL → EXPLOITATION over each (citySlug × sourceBinding) the plan
+   * declares (reusing the existing collect+exploit path), stamping the plan id
+   * onto every collected RawDocument (`ciblagePlanId`), and persists a `Job`
+   * record. Runs synchronously and returns the finished Job so the UI can show
+   * the outcome immediately; the run is responsive at demo scale (idempotent
+   * recueil, bounded sources). A failing source becomes a failed step + a
+   * `partial` job — the request never 500s on an upstream outage.
+   */
+  app.post("/api/ciblage/:id/run", async (c) => {
+    const result = await run(c.req.param("id"));
+    if (!result.ok) {
+      const httpStatus =
+        result.error === "plan-not-found"
+          ? 404
+          : result.error === "plan-disabled"
+            ? 409
+            : 400;
+      return c.json(
+        { ok: false, error: result.error, detail: result.detail },
+        httpStatus,
+      );
+    }
+    return c.json({ ok: true, job: result.job }, 200);
   });
 
   return app;
