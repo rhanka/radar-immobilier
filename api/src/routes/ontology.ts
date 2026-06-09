@@ -10,10 +10,25 @@ import {
   seedCityOntology,
   SEED_CITY_SLUGS,
 } from "../services/sources/seed-ontology.js";
+import { ontologyPatchSchema } from "../services/exploitation/patches.js";
+import {
+  applyPatch,
+  deriveAppliedState,
+  DecisionError,
+} from "../services/exploitation/decisions.js";
 
 export interface OntologyDeps {
   store: ObjectStore;
+  /**
+   * Shared secret that gates the reconciliation WRITE route. Injected from
+   * `RADAR_ONTOLOGY_WRITE_TOKEN`; when unset (no token configured), the write
+   * route is disabled and every patch is refused with 401 (fail-closed).
+   */
+  ontologyWriteToken?: string | undefined;
 }
+
+/** Header the studio sends its write token in (no Authorization reuse). */
+export const WRITE_TOKEN_HEADER = "x-radar-write-token";
 
 /**
  * Read-only ontology project-state API (EXPLOITATION output → reconciliation
@@ -36,35 +51,42 @@ async function loadState(
 export function ontologyRoute(deps: OntologyDeps): Hono {
   const app = new Hono();
 
-  /** Canonical entities for the reconciliation screen. */
+  /**
+   * Canonical entities for the reconciliation screen — re-derived with any
+   * persisted human decisions applied (so a refetch after a patch reflects the
+   * new clustering / status), falling back to the persisted canonicals when no
+   * decision log exists.
+   */
   app.get("/api/ontology/:city/entities", async (c) => {
     const city = c.req.param("city");
     const state = await loadState(deps.store, city);
     if (!state) {
       return c.json({ ok: false, error: "no-project-state", city }, 404);
     }
+    const applied = await deriveAppliedState(deps.store, city);
     return c.json({
       ok: true,
       citySlug: state.citySlug,
       profileHash: state.profileHash,
       generatedAt: state.generatedAt,
-      entities: state.canonicals,
+      entities: applied.entities,
     });
   });
 
-  /** Reconciliation candidates (entity_match queue). */
+  /** Reconciliation candidates (entity_match queue) — minus human-rejected pairs. */
   app.get("/api/ontology/:city/candidates", async (c) => {
     const city = c.req.param("city");
     const state = await loadState(deps.store, city);
     if (!state) {
       return c.json({ ok: false, error: "no-project-state", city }, 404);
     }
+    const applied = await deriveAppliedState(deps.store, city);
     return c.json({
       ok: true,
       citySlug: state.citySlug,
       profileHash: state.profileHash,
       generatedAt: state.generatedAt,
-      candidates: state.candidates,
+      candidates: applied.candidates,
     });
   });
 
@@ -128,6 +150,62 @@ export function ontologyRoute(deps: OntologyDeps): Hono {
       },
       200,
     );
+  });
+
+  /**
+   * POST /api/ontology/:city/patch — the WRITE-CORE mutation (token-gated). Body
+   * is ONE `graphify_ontology_patch_v1` op (accept_match / reject_match /
+   * set_status). The op is persisted to the city's append-only patch log and
+   * re-applied, returning the updated read-model `{ entities, candidates }`.
+   *
+   * Auth: a shared secret in the `x-radar-write-token` header must equal the
+   * configured `RADAR_ONTOLOGY_WRITE_TOKEN`. A missing token config, a missing
+   * header, or a mismatch → 401 (fail-closed; the screen stays read-only).
+   */
+  app.post("/api/ontology/:city/patch", async (c) => {
+    const expected = deps.ontologyWriteToken;
+    const provided = c.req.header(WRITE_TOKEN_HEADER);
+    if (!expected || !provided || provided !== expected) {
+      return c.json(
+        {
+          ok: false,
+          error: "unauthorized",
+          detail: "Missing or invalid write token.",
+        },
+        401,
+      );
+    }
+
+    const city = c.req.param("city");
+    const parsed = ontologyPatchSchema.safeParse(
+      await c.req.json().catch(() => null),
+    );
+    if (!parsed.success) {
+      return c.json(
+        { ok: false, error: "invalid-patch", details: parsed.error.issues },
+        400,
+      );
+    }
+
+    try {
+      const applied = await applyPatch(deps.store, city, parsed.data);
+      return c.json(
+        {
+          ok: true,
+          citySlug: city,
+          op: parsed.data.op,
+          entities: applied.entities,
+          candidates: applied.candidates,
+        },
+        200,
+      );
+    } catch (e) {
+      if (e instanceof DecisionError) {
+        const status = e.code === "no-project-state" ? 404 : 422;
+        return c.json({ ok: false, error: e.code, detail: e.message }, status);
+      }
+      throw e;
+    }
   });
 
   return app;
