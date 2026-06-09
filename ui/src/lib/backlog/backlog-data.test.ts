@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BACKLOG_COLUMNS,
+  acceptanceLabel,
   backlogSeed,
   mergeBacklog,
   statutLabel,
@@ -78,5 +79,17 @@ describe("helpers", () => {
     expect(statutTone("realise")).toBe("success");
     expect(statutTone("en-cours")).toBe("info");
     expect(statutTone("a-faire")).toBe("neutral");
+    expect(statutTone("abandonne")).toBe("error");
+  });
+
+  it("acceptanceLabel renders pass / fail / none", () => {
+    expect(acceptanceLabel("pass")).toContain("pass");
+    expect(acceptanceLabel("fail")).toContain("fail");
+    expect(acceptanceLabel("none")).toBe("—");
+    expect(acceptanceLabel(undefined)).toBe("—");
+  });
+
+  it("BACKLOG_COLUMNS includes the abandonné column", () => {
+    expect(BACKLOG_COLUMNS.map((c) => c.statut)).toContain("abandonne");
   });
 });
