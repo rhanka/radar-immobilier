@@ -5,5 +5,10 @@ export * from "./sources/avis-publics-parser.js";
 export * from "./sources/role-evaluation-parser.js";
 export * from "./sources/avis-publics-valleyfield.js";
 export * from "./sources/avis-publics-beauharnois.js";
+export * from "./sources/role-evaluation-mamh.js";
 export { AVIS_PUBLICS_FIXTURE_HTML } from "./sources/avis-publics-valleyfield.fixture.js";
 export { AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML } from "./sources/avis-publics-beauharnois.fixture.js";
+export {
+  ROLE_EVALUATION_MAMH_VALLEYFIELD_XML,
+  ROLE_EVALUATION_MAMH_BEAUHARNOIS_XML,
+} from "./sources/role-evaluation-mamh.fixture.js";
