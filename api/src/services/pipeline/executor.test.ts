@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AVIS_PUBLICS_FIXTURE_HTML,
+  AVIS_PUBLICS_SOURCE_ID,
   ROLE_EVALUATION_MAMH_VALLEYFIELD_XML,
   SourceFetchError,
+  createAvisPublicsValleyfieldAdapter,
   createRoleEvaluationMamhAdapter,
   roleSourceId,
   type FetchLike,
@@ -57,6 +60,20 @@ function fixtureRoleFetch(xml: string): FetchLike {
   });
 }
 
+/** FetchLike returning the COMMITTED real avis-publics HTML fixture (NO network). */
+function fixtureAvisFetch(html: string): FetchLike {
+  return async () => ({
+    ok: true,
+    status: 200,
+    headers: {
+      get: (n: string) =>
+        n.toLowerCase() === "content-type" ? "text/html; charset=utf-8" : null,
+    },
+    arrayBuffer: async () =>
+      new TextEncoder().encode(html).buffer as ArrayBuffer,
+  });
+}
+
 /** A fixture-backed registry entry: real rôle adapter wired to the committed XML. */
 function roleEntry(): AdapterEntry {
   return {
@@ -67,6 +84,18 @@ function roleEntry(): AdapterEntry {
         codeMamh: "70052",
         city: CITY,
         fetchImpl: fixtureRoleFetch(ROLE_EVALUATION_MAMH_VALLEYFIELD_XML),
+      }),
+  };
+}
+
+/** A fixture-backed registry entry: real avis-publics adapter wired to the HTML. */
+function avisEntry(): AdapterEntry {
+  return {
+    sourceId: AVIS_PUBLICS_SOURCE_ID,
+    city: CITY,
+    build: () =>
+      createAvisPublicsValleyfieldAdapter({
+        fetchImpl: fixtureAvisFetch(AVIS_PUBLICS_FIXTURE_HTML),
       }),
   };
 }
@@ -108,6 +137,76 @@ async function seedPlan(
 }
 
 describe("runCiblagePlan (executor over fixture adapters — REAL entities)", () => {
+  it("ACCUMULATES every plan source into ONE per-city project state (rôle + avis coexist)", async () => {
+    // A 2-source plan for ONE city. The rôle XML yields Lot/Valuation canonicals;
+    // the avis HTML yields Bylaw canonicals. Before the fix, the second source's
+    // exploitation OVERWROTE the first's project state — only the LAST survived.
+    const store = new MemoryStore();
+    const plan = await seedPlan(store, [ROLE_VF, AVIS_PUBLICS_SOURCE_ID]);
+    const registry = buildAdapterRegistry([roleEntry(), avisEntry()]);
+    const jobsStore = createJobsStore(store);
+
+    const result = await runCiblagePlan({
+      ciblageStore: createCiblageStore(store),
+      jobsStore,
+      objectStore: store,
+      registry,
+      planId: plan.id,
+      mode: "simulation",
+      now: () => new Date("2026-06-08T08:00:00.000Z"),
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const job = result.job;
+    expect(job.status).toBe("succeeded");
+    // Two real sources collected; both recorded a succeeded step.
+    expect(job.steps).toHaveLength(2);
+    expect(job.steps.every((s) => s.status === "succeeded")).toBe(true);
+
+    // The persisted project state holds canonicals from BOTH sources, proving the
+    // single per-city exploitation accumulated rather than overwrote.
+    const stateKey = `ontology/${CITY}/project-state.json`;
+    const stateBytes = await store.get(stateKey);
+    const state = JSON.parse(new TextDecoder().decode(stateBytes)) as {
+      canonicals: { type: string; label: string; evidenceRefs: string[] }[];
+      candidates: unknown[];
+      mentions: unknown[];
+      rawRefs: string[];
+    };
+    const types = new Set(state.canonicals.map((c) => c.type));
+    // From the rôle XML:
+    expect(types.has("Lot")).toBe(true);
+    expect(
+      state.canonicals.some(
+        (c) => c.type === "Lot" && c.label.includes("4193751"),
+      ),
+    ).toBe(true);
+    // From the avis HTML — would be ABSENT under the overwrite bug:
+    expect(types.has("Bylaw")).toBe(true);
+
+    // The project state evidences BOTH raw sources (role XML + avis HTML).
+    expect(state.rawRefs.length).toBeGreaterThanOrEqual(2);
+
+    // Cross-source candidate report on the accumulated REAL corpus: graphify's
+    // entity_match now sees both sources together. Honest count (may be 0 if the
+    // committed fixtures share no same-type normalized identifier).
+    console.log(
+      `[accumulation] city=${CITY} canonicals=${state.canonicals.length} ` +
+        `candidates=${state.candidates.length} mentions=${state.mentions.length} ` +
+        `types=${[...types].sort().join(",")}`,
+    );
+
+    // Each city source's step surfaces the SAME accumulated per-city totals.
+    const roleStep = job.steps.find((s) => s.sourceId === ROLE_VF)!;
+    const avisStep = job.steps.find((s) => s.sourceId === AVIS_PUBLICS_SOURCE_ID)!;
+    expect(roleStep.canonicalCount).toBe(state.canonicals.length);
+    expect(avisStep.canonicalCount).toBe(state.canonicals.length);
+    expect(roleStep.candidateCount).toBe(state.candidates.length);
+    // Mentions are summed ONCE per city (not double-counted across siblings).
+    expect(job.totals.mentions).toBe(state.mentions.length);
+  });
+
   it("runs recueil→exploitation and flows the REAL lot 4193751 into the project state", async () => {
     const store = new MemoryStore();
     const plan = await seedPlan(store, [ROLE_VF]);
