@@ -71,6 +71,24 @@ describe("seedCityOntology — REAL committed role bytes → project state", () 
       (c) => c.type === "Valuation" && c.label.includes("5114-86-8189"),
     );
     expect(val).toBeDefined();
+
+    // WP4 Source #2: the committed Valleyfield avis index also seeds the screen.
+    expect(res.avisRawRef).toMatch(/^raw\/avis-publics-valleyfield\//);
+    expect(await store.head(res.avisRawRef)).not.toBeNull();
+    // Real Bylaw canonicals from the avis (209-47, 216-34 verbatim).
+    const bylaws = res.exploitation.state.canonicals.filter((c) => c.type === "Bylaw");
+    expect(bylaws.map((b) => b.label)).toEqual(
+      expect.arrayContaining(["Règlement 209-47", "Règlement 216-34"]),
+    );
+    // Real DesignationEvent canonicals from the densification notices.
+    const events = res.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    // Real avis notices reported verbatim (PPCMOI present).
+    expect(res.realAvis.some((a) => a.type === "ppcmoi")).toBe(true);
+    // At least one validated Signal (the PPCMOI / dérogation watch).
+    expect(res.signalCount).toBeGreaterThanOrEqual(1);
   });
 
   it("seeds Beauharnois with the REAL lot 4716029 / matricule 6719-81-9976 / 444 000 $", async () => {
@@ -90,6 +108,30 @@ describe("seedCityOntology — REAL committed role bytes → project state", () 
       (c) => c.type === "Lot" && c.label.includes("4716029"),
     );
     expect(lot).toBeDefined();
+
+    // WP4 Source #2: the committed Beauharnois WordPress avis index seeds the screen.
+    expect(res.avisRawRef).toMatch(/^raw\/avis-publics-beauharnois\//);
+    expect(await store.head(res.avisRawRef)).not.toBeNull();
+    // Real Bylaw canonical 701-102 (cited in the consultation/projet notice).
+    const bylaw = res.exploitation.state.canonicals.find(
+      (c) => c.type === "Bylaw" && c.label.includes("701-102"),
+    );
+    expect(bylaw).toBeDefined();
+    // Real DesignationEvent for the dérogation mineure DM-2026-0037.
+    const dm = res.exploitation.state.canonicals.find(
+      (c) => c.type === "DesignationEvent" && c.label.includes("DM-2026-0037"),
+    );
+    expect(dm).toBeDefined();
+    // Real avis notices reported verbatim (dérogation + consultation present).
+    expect(res.realAvis.some((a) => a.type === "derogation-mineure")).toBe(true);
+    expect(res.realAvis.some((a) => a.type === "consultation")).toBe(true);
+    // The dérogation notice yields one validated watch Signal.
+    expect(res.signalCount).toBeGreaterThanOrEqual(1);
+
+    // HONEST cross-source check: the committed role record (lot 4716029, no
+    // bylaws) and the committed avis (bylaws 701-102/2026-11/…, no role lots)
+    // share NO identifier ⇒ zero role↔avis entity_match candidates. Recorded.
+    expect(res.candidateCount).toBe(0);
   });
 
   it("NEVER surfaces owner/PII — every real unit is owner-free (Loi 25, §7.4)", () => {
