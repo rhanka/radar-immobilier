@@ -9,6 +9,7 @@
     Network,
     GitMerge,
     MapPin,
+    Target,
   } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views.js";
   import { appMode, toggleMode } from "$lib/state/mode.js";
@@ -22,6 +23,7 @@
 
   const items: { id: DemoView; label: string; icon: typeof Rocket }[] = [
     { id: "onboarding", label: "Onboarding", icon: Rocket },
+    { id: "ciblage", label: "Ciblage", icon: Target },
     { id: "signaux", label: "Signaux", icon: Radio },
     { id: "opportunity", label: "Opportunités", icon: Building2 },
     { id: "console", label: "Sources", icon: MonitorDot },
