@@ -98,10 +98,40 @@ export const BEAUHARNOIS_PRIORITY_SOURCE_BINDINGS = [
   },
 ] as const satisfies readonly PrioritySourceBinding[];
 
+/**
+ * Concrete, COLLECTIBLE MAMH rôle adapters (WP4 Source #3). The bindings above
+ * describe the abstract rôle product per city plan; these are the per-MAMH-code
+ * `RoleEvaluationMamhAdapter` ids that the RECUEIL endpoint actually resolves
+ * (and that the deterministic seed-ontology path reuses), so a collected rôle
+ * RawDocument flows through the SAME recueil → exploitation pipeline as the avis
+ * adapters. The source id matches `roleSourceId(codeMamh)`.
+ */
+export const ROLE_EVALUATION_MAMH_SOURCE_BINDINGS = [
+  {
+    sourceId: "role-evaluation-mamh-70052",
+    priority: 3,
+    tier: "A",
+    kind: "role-evaluation",
+    city: "salaberry-de-valleyfield",
+    recommendation: "build-now",
+    cadence: "annual",
+  },
+  {
+    sourceId: "role-evaluation-mamh-70022",
+    priority: 3,
+    tier: "A",
+    kind: "role-evaluation",
+    city: "beauharnois",
+    recommendation: "build-now",
+    cadence: "annual",
+  },
+] as const satisfies readonly PrioritySourceBinding[];
+
 /** Every registered priority binding across all pilot cities. */
 export const ALL_PRIORITY_SOURCE_BINDINGS: readonly PrioritySourceBinding[] = [
   ...VALLEYFIELD_PRIORITY_SOURCE_BINDINGS,
   ...BEAUHARNOIS_PRIORITY_SOURCE_BINDINGS,
+  ...ROLE_EVALUATION_MAMH_SOURCE_BINDINGS,
 ];
 
 export function getPrioritySourceBinding(
