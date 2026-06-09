@@ -34,6 +34,23 @@ const envSchema = z.object({
    * read-only). Set per-environment; NEVER commit a real secret.
    */
   RADAR_ONTOLOGY_WRITE_TOKEN: z.string().min(1).optional(),
+
+  /**
+   * Master switch for the OPTIONAL @sentropic/llm-mesh semantic (LLM-backed)
+   * mention extraction (`services/exploitation/semantic-extract.ts`). OFF by
+   * default ("0"): radar runs only its deterministic, anti-invention extraction
+   * and never reaches a provider (CI/tests stay offline). Set to "1" — together
+   * with at least one provider key below — to augment unstructured docs with
+   * semantic mentions. The provider keys themselves are read by the shared mesh
+   * (`services/chat/mesh-runtime.ts`), not parsed here, so they live alongside
+   * the existing chat keys (ANTHROPIC_API_KEY / OPENAI_API_KEY / MISTRAL_API_KEY
+   * / GEMINI_API_KEY|GOOGLE_API_KEY / COHERE_API_KEY). For radar-dev, source
+   * `../sentropic/.env.prod` into the api process env (see `.env.example`).
+   */
+  RADAR_LLM_EXTRACTION: z
+    .enum(["0", "1"])
+    .default("0")
+    .transform((v) => v === "1"),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
