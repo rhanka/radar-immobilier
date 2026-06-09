@@ -1,0 +1,58 @@
+# ── Sentropic auth delegation (OIDC) — declarative wiring ────────────────
+#
+# radar deploys "as a sentropic app": human authentication is NOT standalone.
+# It is delegated to the SHARED sentropic Identity Provider hosted by the
+# sentropic tenant at https://auth.sent-tech.ca
+# (sentropic deploy/k8s/35-auth-idp.yaml + 60-ingress.yaml: a standalone IdP
+# running the sentropic-api image as `node apps/auth-idp/dist/index.js`,
+# exposing /.well-known/openid-configuration, /.well-known/jwks.json, and
+# /api/v1/auth/oauth/{authorize,token,userinfo,consent,revoke,introspect}).
+#
+# radar is the OIDC RELYING PARTY (RP). The exact flow it implements is the
+# sentropic recipe apps/auth-idp/RP_SESSION_GLUE.md:
+#   1. /login -> startAuthorization() -> 302 to the IdP authorize endpoint
+#      (authorization_code + PKCE, scopes: openid profile email);
+#   2. user logs in / consents at auth.sent-tech.ca (the IdP origin);
+#   3. 302 back to radar's redirect_uri with code+state;
+#   4. RP exchanges the code (POST /oauth/token), verifies the id_token
+#      signature against the IdP JWKS (EdDSA), and checks iss/aud/exp/nonce;
+#   5. RP mints its OWN HttpOnly session cookie scoped to immo.sent-tech.ca.
+# The runtime env for all of this lives on the api ConfigMap/Secret
+# (30-api.yaml: SENTROPIC_IDP_ISSUER, SENTROPIC_OAUTH_CLIENT_ID,
+# SENTROPIC_OAUTH_REDIRECT_URI, AUTH_CALLBACK_BASE_URL, and the
+# SENTROPIC_OAUTH_CLIENT_SECRET / SESSION_SECRET from radar-sentropic-auth).
+#
+# This ConfigMap is the single declarative record of that delegation, so the
+# wiring is greppable in-cluster and reviewable in git without secrets.
+#
+# Operator preconditions on the sentropic side (cite: RP_SESSION_GLUE.md
+# "Preconditions" + sentropic api/src/services/auth/oauth-client-seed.ts):
+#   - register an oauth_clients row at the IdP with
+#       client_id = radar-immobilier
+#       redirect_uris = [https://immo.sent-tech.ca/api/v1/auth/oauth/callback]
+#       grant = authorization_code (+ PKCE), scopes = openid profile email
+#   - hand the resulting client_secret to the radar-sentropic-auth Secret.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-sentropic-auth
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: auth
+    # Declares which sentropic IdP this app federates with.
+    sentropic.dev/idp: auth.sent-tech.ca
+data:
+  # Mirrors the api ConfigMap (30-api.yaml) for visibility; the api reads the
+  # 30-api copy at runtime. Kept here as the auth source-of-record.
+  SENTROPIC_IDP_ISSUER: "https://auth.sent-tech.ca"
+  SENTROPIC_IDP_DISCOVERY_URL: "https://auth.sent-tech.ca/.well-known/openid-configuration"
+  SENTROPIC_IDP_JWKS_URL: "https://auth.sent-tech.ca/.well-known/jwks.json"
+  SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier"
+  SENTROPIC_OAUTH_SCOPES: "openid profile email"
+  SENTROPIC_OAUTH_REDIRECT_URI: "https://immo.sent-tech.ca/api/v1/auth/oauth/callback"
+  # Auth model marker: the api is itself the RP (no auth-proxy sidecar), which
+  # matches how sentropic RPs (e.g. design-system) consume the IdP — the RP
+  # backend owns the callback + session, the IdP owns login/consent.
+  SENTROPIC_AUTH_MODE: "oidc-rp"
