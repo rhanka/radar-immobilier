@@ -1,0 +1,34 @@
+# radar-immobilier deployed as a *sentropic app* (tenant) on the shared
+# Scaleway poc-k8s cluster (cluster-operator repo: github.com/rhanka/poc-k8s).
+#
+# "Sentropic app" model — mirrors the sentropic tenant layout
+# (~/src/sentropic/deploy/k8s/{10-rbac,30-api,40-ui,60-ingress}.yaml):
+#   - one tenant Namespace per app, default-deny NetworkPolicy + ResourceQuota
+#     owned by the cluster operator;
+#   - a namespace-scoped ServiceAccount with an imagePullSecret for the SCW
+#     Container Registry;
+#   - api + ui + postgres workloads behind a public Traefik Ingress with
+#     cert-manager TLS;
+#   - human auth DELEGATED to the shared sentropic IdP at auth.sent-tech.ca
+#     (OIDC, see 80-auth.yaml + README "Auth delegation").
+#
+# The `sentropic.dev/workspace` label declares the *sentropic workspace for
+# code management* this app belongs to (see deploy/k8s/README.md
+# "Sentropic workspace for code management").
+#
+# NOTE: on the live cluster the Namespace + ResourceQuota + LimitRange +
+# baseline NetworkPolicy are owned by the operator (poc-k8s). This file is kept
+# so `kubectl kustomize` renders a self-contained, validatable bundle and so a
+# throwaway/kind cluster can be stood up for review. The operator's copy wins.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    # Sentropic platform tenant/workspace identity (mirrors sentropic's
+    # per-tenant namespace convention; the workspace name is the code-mgmt
+    # boundary documented in the README).
+    sentropic.dev/tenant: radar-immobilier
+    sentropic.dev/workspace: radar-immobilier

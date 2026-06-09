@@ -32,6 +32,16 @@ export API_VERSION ?= dev
 export UI_VERSION  ?= dev
 export E2E_VERSION ?= dev
 
+# ── Kubernetes (radar as a sentropic app) ─────────────────────────────
+# Manifests are PREPARED here and validated offline; deploying to a live
+# cluster is a deliberate human action with cluster creds (see deploy/k8s/README.md).
+KUBECTL              ?= kubectl
+K8S_MANIFEST_DIR     ?= deploy/k8s
+K8S_NAMESPACE        ?= radar-immobilier
+# Set to 1 only when a real KUBECONFIG is present to additionally run a
+# server-side dry-run. Offline render works with no cluster.
+K8S_VALIDATE_WITH_CLUSTER ?= 0
+
 .DEFAULT_GOAL := help
 
 # ─────────────────────────────────────────────────────────────────────
@@ -267,10 +277,35 @@ deploy-gh-pages: ## Deploy the SPA to GitHub Pages
 	@echo "[deploy-gh-pages] wired in BR-03"
 	@exit 1
 
+.PHONY: k8s-validate
+k8s-validate: ## Validate the radar/sentropic-app manifests offline (no cluster)
+	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[k8s-validate] kubectl not found"; exit 1; }
+	@echo "[k8s-validate] rendering $(K8S_MANIFEST_DIR) with kustomize…"
+	@$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) >/dev/null
+	@echo "[k8s-validate] structural check (every doc has apiVersion + kind)…"
+	@$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) \
+	  | awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in a document"; bad=1 } } END{ exit bad }'
+	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
+	  echo "[k8s-validate] server-side dry-run (KUBECONFIG required)…"; \
+	  $(KUBECTL) apply --dry-run=server -k $(K8S_MANIFEST_DIR); \
+	else \
+	  echo "[k8s-validate] offline render ok; set K8S_VALIDATE_WITH_CLUSTER=1 for a server dry-run"; \
+	fi
+
+# PREPARE-ONLY guardrail: deploying to a live cluster is a deliberate human
+# action. This target validates and prints the exact apply command instead of
+# applying, unless K8S_DEPLOY_CONFIRM=1 AND a KUBECONFIG is explicitly set.
 .PHONY: deploy-k8s
-deploy-k8s: ## Deploy api+postgres+obscura+maildev to K8s poc tenant
-	@echo "[deploy-k8s] wired in BR-04"
-	@exit 1
+deploy-k8s: ## Validate manifests; apply ONLY with K8S_DEPLOY_CONFIRM=1 + KUBECONFIG
+	@$(MAKE) k8s-validate ENV=$(ENV)
+	@if [ "$(K8S_DEPLOY_CONFIRM)" = "1" ] && [ -n "$$KUBECONFIG" ]; then \
+	  echo "[deploy-k8s] applying to $$KUBECONFIG (namespace $(K8S_NAMESPACE))"; \
+	  $(KUBECTL) apply -k $(K8S_MANIFEST_DIR); \
+	else \
+	  echo "[deploy-k8s] PREPARE-ONLY: not applied."; \
+	  echo "  Human deploy step (with cluster creds):"; \
+	  echo "    KUBECONFIG=<path> make deploy-k8s K8S_DEPLOY_CONFIRM=1 ENV=poc"; \
+	fi
 
 # ─────────────────────────────────────────────────────────────────────
 # Orchestration / conductor reporting
