@@ -17,7 +17,8 @@ export interface CanonicalEntityV {
   aliases: string[];
   memberMentionIds: string[];
   evidenceRefs: string[];
-  status: "validated" | "candidate";
+  /** `rejected` only via an explicit human `set_status` override. */
+  status: "validated" | "candidate" | "rejected";
 }
 
 /** A raw modeled-entity mention (mirrors the API `mentions[]` shape). */
@@ -225,6 +226,98 @@ export async function fetchCityState(
   } catch (e) {
     return {
       kind: "error",
+      detail: e instanceof Error ? e.message : "Connexion impossible",
+    };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Write-core client — POST a reconciliation decision (graphify_ontology_patch_v1).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Header the write token travels in (mirrors the API's WRITE_TOKEN_HEADER). */
+export const WRITE_TOKEN_HEADER = "x-radar-write-token";
+
+/** The three `graphify_ontology_patch_v1` ops the studio can emit. */
+export type OntologyPatchOp =
+  | { op: "accept_match"; aId: string; bId: string }
+  | { op: "reject_match"; aId: string; bId: string }
+  | {
+      op: "set_status";
+      canonicalId: string;
+      from: string;
+      to: string;
+    };
+
+/** The read-model the patch route returns (re-derived with the decision applied). */
+export interface AppliedStateV {
+  entities: CanonicalEntityV[];
+  candidates: CandidateV[];
+}
+
+export type ApplyPatchResult =
+  | { kind: "ok"; applied: AppliedStateV }
+  | { kind: "unauthorized" }
+  | { kind: "error"; status: number; detail: string };
+
+/**
+ * Resolve the studio write token from the env-injected
+ * `VITE_RADAR_ONTOLOGY_WRITE_TOKEN` (NEVER hardcoded). When unset, the studio
+ * runs read-only (the accept/reject affordances are disabled). An explicit token
+ * may be passed for tests / a dev override field.
+ */
+export function resolveWriteToken(override?: string): string | undefined {
+  if (override !== undefined && override !== "") return override;
+  const fromEnv = import.meta.env.VITE_RADAR_ONTOLOGY_WRITE_TOKEN;
+  return fromEnv ? fromEnv : undefined;
+}
+
+/**
+ * POST one reconciliation decision to the token-gated write route and return the
+ * re-derived read-model. A missing/invalid token surfaces as `unauthorized` (the
+ * caller keeps the screen read-only); any other non-2xx surfaces as `error`.
+ */
+export async function applyOntologyPatch(
+  citySlug: string,
+  patch: OntologyPatchOp,
+  token: string | undefined,
+  fetchImpl: typeof fetch = fetch,
+  baseUrl?: string,
+): Promise<ApplyPatchResult> {
+  if (!token) return { kind: "unauthorized" };
+  const base = apiBase(baseUrl);
+  try {
+    const res = await fetchImpl(`${base}/api/ontology/${citySlug}/patch`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        [WRITE_TOKEN_HEADER]: token,
+      },
+      body: JSON.stringify(patch),
+    });
+    if (res.status === 401) return { kind: "unauthorized" };
+    if (!res.ok) {
+      let detail = `HTTP ${res.status}`;
+      try {
+        const body = (await res.json()) as { detail?: string; error?: string };
+        detail = body.detail ?? body.error ?? detail;
+      } catch {
+        /* keep the status-only detail */
+      }
+      return { kind: "error", status: res.status, detail };
+    }
+    const body = (await res.json()) as {
+      entities: CanonicalEntityV[];
+      candidates: CandidateV[];
+    };
+    return {
+      kind: "ok",
+      applied: { entities: body.entities, candidates: body.candidates },
+    };
+  } catch (e) {
+    return {
+      kind: "error",
+      status: 0,
       detail: e instanceof Error ? e.message : "Connexion impossible",
     };
   }
