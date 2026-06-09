@@ -4,10 +4,11 @@ import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
 import { ontologyRoute, type OntologyDeps } from "./routes/ontology.js";
+import { ciblageRoute, type CiblageDeps } from "./routes/ciblage.js";
 import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
 
-export type AppDeps = HealthDeps & SourcesDeps & OntologyDeps;
+export type AppDeps = HealthDeps & SourcesDeps & OntologyDeps & CiblageDeps;
 
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
@@ -18,6 +19,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", automationRoute());
   app.route("/", sourcesRoute(deps));
   app.route("/", ontologyRoute(deps));
+  app.route("/", ciblageRoute(deps));
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
 
