@@ -1,0 +1,19 @@
+# Namespace-scoped ServiceAccount used by every radar Pod, carrying the
+# imagePullSecret for the SCW Container Registry. Mirrors sentropic's
+# deploy/k8s/10-rbac.yaml (ServiceAccount `sentropic-app` +
+# imagePullSecrets: [sentropic-registry]).
+#
+# The `radar-registry-pull` dockerconfigjson Secret is created out-of-band by
+# the operator (see deploy/k8s/secrets.example.yaml + README); it is NOT
+# committed with real credentials.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-app
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: app
+imagePullSecrets:
+  - name: radar-registry-pull
