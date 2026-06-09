@@ -1,0 +1,45 @@
+# Public Traefik Ingress for the radar sentropic app, exposed through the
+# cluster-wide Traefik + shared SCW LoadBalancer + cert-manager delivered by
+# the poc-k8s platform stack. Mirrors sentropic deploy/k8s/60-ingress.yaml:
+#   - single host -> the `radar-ui` Service; nginx baked into the UI fans out
+#     /api -> radar-api:3000 (50-ui.yaml), so no separate api subdomain;
+#   - TLS issued by cert-manager via the platform `letsencrypt-prod`
+#     ClusterIssuer (ACME DNS-01, Cloudflare solver on zone sent-tech.ca);
+#   - the A record immo.sent-tech.ca must point at the Traefik LB public IP
+#     (same LB as sentropic.sent-tech.ca / auth.sent-tech.ca).
+#
+# Auth: there is intentionally NO ingress-level auth annotation / forward-auth
+# here. radar delegates auth at the APPLICATION layer (OIDC RP, see 80-auth.yaml
+# + 30-api.yaml), exactly like sentropic RPs — the browser is redirected to the
+# sentropic IdP (auth.sent-tech.ca) by the api, not by an ingress middleware.
+# This keeps the OIDC authorization-code + PKCE + own-session model intact.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radar
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ui
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - immo.sent-tech.ca
+      secretName: radar-immo-tls
+  rules:
+    - host: immo.sent-tech.ca
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: radar-ui
+                port:
+                  name: http

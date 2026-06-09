@@ -1,0 +1,29 @@
+# Kustomization for radar-immobilier as a sentropic app.
+#
+# `secrets.example.yaml` is intentionally NOT a resource (it carries no real
+# values); real Secrets are created out-of-band (SealedSecrets or
+# `make k8s-create-secrets`). The `00-namespace.yaml` is included so the bundle
+# renders/validates standalone and can be applied to a throwaway/kind cluster
+# for review; on the live poc-k8s cluster the operator owns the Namespace +
+# ResourceQuota + baseline NetworkPolicy, and its copy wins.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: radar-immobilier
+
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: sentropic
+      sentropic.dev/workspace: radar-immobilier
+
+resources:
+  - 00-namespace.yaml
+  - 10-rbac.yaml
+  - 20-postgres-postgis.yaml
+  - 25-minio.yaml
+  - 30-api.yaml
+  - 35-obscura.yaml
+  - 40-maildev.yaml
+  - 50-ui.yaml
+  - 60-ingress.yaml
+  - 80-auth.yaml

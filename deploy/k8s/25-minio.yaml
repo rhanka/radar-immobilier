@@ -1,0 +1,92 @@
+# In-cluster MinIO (S3-compatible object store) for radar's raw-document
+# storage. Matches the dev/test stack (docker-compose.yml `minio` service):
+# the api talks S3 to it via S3_ENDPOINT=http://radar-minio:9000.
+#
+# Draft PR #8 wired the api to external Scaleway Object Storage; here we keep
+# the self-contained MinIO the radar app already uses so the tenant is fully
+# self-hosted (no extra SCW bucket dependency for the POC). Swap S3_ENDPOINT in
+# 30-api.yaml to an external SCW endpoint if/when the operator provisions one.
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-minio
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: minio
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: minio
+  ports:
+    - name: s3
+      port: 9000
+      targetPort: s3
+    - name: console
+      port: 9001
+      targetPort: console
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: radar-minio
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: minio
+spec:
+  serviceName: radar-minio
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: minio
+    spec:
+      serviceAccountName: radar-app
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          imagePullPolicy: IfNotPresent
+          args: ["server", "/data", "--console-address", ":9001"]
+          ports:
+            - name: s3
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+          readinessProbe:
+            httpGet: { path: /minio/health/live, port: s3 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet: { path: /minio/health/live, port: s3 }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: minio-data
+              mountPath: /data
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 250m, memory: 384Mi }
+  volumeClaimTemplates:
+    - metadata:
+        name: minio-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
