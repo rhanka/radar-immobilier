@@ -116,6 +116,48 @@ describe("seedCityOntology — REAL committed role bytes → project state", () 
     expect(
       res.exploitation.state.candidates.length,
     ).toBe(res.candidateCount);
+
+    // WP4 Source #5: the committed règlements d'urbanisme seed the screen with
+    // real Bylaw + Zone canonicals (the regulatory backbone).
+    expect(res.reglementRawRefs).toHaveLength(2);
+    for (const ref of res.reglementRawRefs) {
+      expect(ref).toMatch(/^raw\/reglements-urbanisme-valleyfield\//);
+      expect(await store.head(ref)).not.toBeNull();
+    }
+    // Real règlements reported verbatim: 150-51 (zoning, 14 zones) + 450-02 (no zones).
+    expect(res.realReglements).toHaveLength(2);
+    const reg15051 = res.realReglements.find((r) => r.primaryNumero === "150-51");
+    expect(reg15051?.bylaws).toEqual(["150-51", "150"]);
+    expect(reg15051?.zones).toEqual(
+      expect.arrayContaining(["H-521", "C-566", "I-918", "REC-137"]),
+    );
+    const reg45002 = res.realReglements.find((r) => r.primaryNumero === "450-02");
+    expect(reg45002?.bylaws).toEqual(["450-02", "450"]);
+    // HONESTY: the plan-d'urbanisme amendment names no zones.
+    expect(reg45002?.zones).toEqual([]);
+
+    // Real Bylaw canonicals from the règlement text (150-51 / 450-02 verbatim).
+    const reglBylaws = res.exploitation.state.canonicals.filter(
+      (c) => c.type === "Bylaw",
+    );
+    expect(reglBylaws.map((b) => b.label)).toEqual(
+      expect.arrayContaining([
+        "Règlement 150-51",
+        "Règlement 150",
+        "Règlement 450-02",
+        "Règlement 450",
+      ]),
+    );
+    // Real Zone canonicals from the zoning règlement (verbatim displayed codes).
+    const zones = res.exploitation.state.canonicals.filter(
+      (c) => c.type === "Zone",
+    );
+    expect(zones.map((z) => z.label)).toEqual(
+      expect.arrayContaining(["H-521", "C-566", "I-918", "P-571", "REC-137"]),
+    );
+    // HONESTY: the committed règlement numbers (150-51/450-02/150/450) do NOT
+    // appear in the avis corpus (150-49/209-47/216-34), so the règlement adds no
+    // cross-source Bylaw candidate — the candidate count stays as recorded above.
   });
 
   it("seeds Beauharnois with the REAL lot 4716029 / matricule 6719-81-9976 / 444 000 $", async () => {
@@ -175,6 +217,14 @@ describe("seedCityOntology — REAL committed role bytes → project state", () 
     // terrAPI addresses (geometry=0 ⇒ no lot) share NO identifier ⇒ zero
     // entity_match candidates across the three. Recorded.
     expect(res.candidateCount).toBe(0);
+
+    // WP4 Source #5: HONESTY — no règlement-d'urbanisme is committed for
+    // Beauharnois, so the seed ingests none (it stays role + avis + adresses).
+    expect(res.reglementRawRefs).toEqual([]);
+    expect(res.realReglements).toEqual([]);
+    expect(
+      res.exploitation.state.canonicals.some((c) => c.type === "Zone"),
+    ).toBe(false);
   });
 
   it("NEVER surfaces owner/PII — every real unit is owner-free (Loi 25, §7.4)", () => {
