@@ -1,0 +1,143 @@
+# radar API (Hono) Deployment + Service. Brought in from draft PR #8
+# (deploy/k8s/api.yaml) and extended for the sentropic-app model:
+#   - runs under the radar-app ServiceAccount (SCW registry pull);
+#   - object storage points at the in-cluster MinIO (25-minio.yaml);
+#   - the SENTROPIC_* / OAUTH_* / AUTH_* env wires human auth to the shared
+#     sentropic IdP (OIDC, see 80-auth.yaml + README "Auth delegation").
+#     The api is the OIDC *relying party*: it runs the authorization-code +
+#     PKCE flow against auth.sent-tech.ca, verifies the id_token against the
+#     IdP JWKS, and mints its OWN session cookie (per sentropic's
+#     apps/auth-idp/RP_SESSION_GLUE.md recipe).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-api
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: api
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  # IPv4-first DNS on the IPv4-only POC egress path (mirrors sentropic 30-api).
+  NODE_OPTIONS: "--dns-result-order=ipv4first"
+  POSTGRES_HOST: "radar-postgres"
+  POSTGRES_PORT: "5432"
+  # In-cluster MinIO (25-minio.yaml). Replace with an external SCW S3 endpoint
+  # if the operator provisions a managed bucket.
+  S3_ENDPOINT: "http://radar-minio:9000"
+  S3_REGION: "fr-par"
+  S3_BUCKET: "radar-immobilier-raw"
+  S3_FORCE_PATH_STYLE: "true"
+  OBSCURA_CDP_URL: "http://radar-obscura:9222"
+  MAILDEV_SMTP_HOST: "radar-maildev"
+  MAILDEV_SMTP_PORT: "1025"
+  # ── Sentropic app / auth delegation (OIDC relying party) ──────────────
+  # The shared sentropic IdP issuer (sentropic deploy/k8s/35-auth-idp.yaml:
+  # OAUTH_ISSUER_URL=https://auth.sent-tech.ca; discovery at
+  # /.well-known/openid-configuration, JWKS at /.well-known/jwks.json).
+  SENTROPIC_IDP_ISSUER: "https://auth.sent-tech.ca"
+  # This app's registered oauth_clients id at the IdP. The operator seeds the
+  # `radar-immobilier` client row at the IdP with this id and the redirect_uri
+  # below (mirrors design-system seeding in sentropic
+  # api/src/services/auth/oauth-client-seed.ts).
+  SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier"
+  SENTROPIC_OAUTH_SCOPES: "openid profile email"
+  # Public base URL of this app (the Ingress host) — used for the OIDC
+  # redirect_uri and user-facing callbacks (mirrors sentropic AUTH_CALLBACK_BASE_URL).
+  AUTH_CALLBACK_BASE_URL: "https://immo.sent-tech.ca"
+  SENTROPIC_OAUTH_REDIRECT_URI: "https://immo.sent-tech.ca/api/v1/auth/oauth/callback"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radar-api
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: api
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: radar-app
+      containers:
+        - name: api
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # OIDC RP client secret for the sentropic IdP token exchange
+            # (confidential client). Seeded with the client row at the IdP.
+            - name: SENTROPIC_OAUTH_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: radar-sentropic-auth, key: SENTROPIC_OAUTH_CLIENT_SECRET } }
+            # Symmetric key the api uses to sign its OWN RP session cookie
+            # (the id_token proves identity; the RP session is separate — see
+            # RP_SESSION_GLUE.md Step 5).
+            - name: SESSION_SECRET
+              valueFrom: { secretKeyRef: { name: radar-sentropic-auth, key: SESSION_SECRET } }
+            # LLM provider keys (optional; chat reports "no provider" if unset).
+            - name: OPENAI_API_KEY
+              valueFrom: { secretKeyRef: { name: radar-llm-credentials, key: OPENAI_API_KEY, optional: true } }
+            - name: ANTHROPIC_API_KEY
+              valueFrom: { secretKeyRef: { name: radar-llm-credentials, key: ANTHROPIC_API_KEY, optional: true } }
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 75m, memory: 160Mi }
+            limits: { cpu: 300m, memory: 384Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-api
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: api
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
