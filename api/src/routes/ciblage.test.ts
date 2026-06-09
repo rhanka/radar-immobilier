@@ -211,3 +211,74 @@ describe("DELETE /api/ciblage/:id", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("POST /api/ciblage/:id/run", () => {
+  it("runs an enabled plan and returns the Job (fixture runner)", async () => {
+    const store = new MemoryStore();
+    // Inject a fixture runner so the route is tested without any network.
+    const app = ciblageRoute({ store }, undefined, async (planId) => ({
+      ok: true as const,
+      job: {
+        id: "job-run-1",
+        planId,
+        planLabel: "Veille Valleyfield",
+        status: "succeeded" as const,
+        mode: "real" as const,
+        startedAt: "2026-06-08T08:00:00.000Z",
+        finishedAt: "2026-06-08T08:00:02.000Z",
+        steps: [
+          {
+            sourceId: "avis-publics-valleyfield",
+            city: "salaberry-de-valleyfield",
+            status: "succeeded" as const,
+            rawDocIds: ["raw-1"],
+            mentionCount: 2,
+          },
+        ],
+        totals: {
+          sources: 1,
+          succeeded: 1,
+          failed: 0,
+          skipped: 0,
+          rawDocs: 1,
+          mentions: 2,
+        },
+      },
+    }));
+
+    const { plan } = (await (
+      await app.request("/api/ciblage", json(VALID_INPUT))
+    ).json()) as { plan: CiblagePlanT };
+
+    const res = await app.request(`/api/ciblage/${plan.id}/run`, {
+      method: "POST",
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      ok: boolean;
+      job: { id: string; planId: string; status: string };
+    };
+    expect(body.ok).toBe(true);
+    expect(body.job.planId).toBe(plan.id);
+    expect(body.job.status).toBe("succeeded");
+  });
+
+  it("maps plan-not-found → 404, plan-disabled → 409", async () => {
+    const store = new MemoryStore();
+    const app = ciblageRoute({ store }, undefined, async (planId) =>
+      planId === "missing"
+        ? { ok: false as const, error: "plan-not-found" as const, detail: "x" }
+        : { ok: false as const, error: "plan-disabled" as const, detail: "y" },
+    );
+
+    const notFound = await app.request("/api/ciblage/missing/run", {
+      method: "POST",
+    });
+    expect(notFound.status).toBe(404);
+
+    const disabled = await app.request("/api/ciblage/anything/run", {
+      method: "POST",
+    });
+    expect(disabled.status).toBe(409);
+  });
+});

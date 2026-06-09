@@ -15,8 +15,10 @@
     formFromPlan,
     groupBindingsByKind,
     isFormValid,
+    runPlan,
     toggleIn,
     updatePlan,
+    type CiblageJobV,
     type CiblagePlanFormV,
     type CiblagePlanV,
     type SourceBindingV,
@@ -33,6 +35,55 @@
   let formOpen = false;
   let saving = false;
   let saveError: string | null = null;
+
+  // ── Run state (pipeline execution: recueil → exploitation) ──────────────────
+  let runningPlanId: string | null = null; // plan currently executing
+  let lastJob: CiblageJobV | null = null; // most recent run outcome
+  let runError: string | null = null;
+
+  async function runCollecte(plan: CiblagePlanV): Promise<void> {
+    if (!plan.enabled || runningPlanId) return;
+    runningPlanId = plan.id;
+    runError = null;
+    lastJob = null;
+    const res = await runPlan(plan.id);
+    runningPlanId = null;
+    if (!res.ok) {
+      runError = res.detail;
+      return;
+    }
+    lastJob = res.job;
+  }
+
+  function jobStatusTone(
+    status: CiblageJobV["status"],
+  ): "success" | "warning" | "error" | "info" {
+    switch (status) {
+      case "succeeded":
+        return "success";
+      case "partial":
+        return "warning";
+      case "failed":
+        return "error";
+      default:
+        return "info";
+    }
+  }
+
+  function jobStatusLabel(status: CiblageJobV["status"]): string {
+    switch (status) {
+      case "succeeded":
+        return "Réussi";
+      case "partial":
+        return "Partiel";
+      case "failed":
+        return "Échoué";
+      case "running":
+        return "En cours";
+      default:
+        return status;
+    }
+  }
 
   $: bindingGroups = groupBindingsByKind(sourceBindings);
   $: canSave = isFormValid(form);
@@ -125,11 +176,11 @@
             <span class="font-semibold text-slate-900">Ciblage</span> : déclarer quoi collecter
           </li>
           <li class="flex items-center gap-2">
-            <span class="inline-block h-2 w-2 rounded-full bg-slate-300"></span>
-            Recueil : exécuter la collecte (lot suivant)
+            <span class="inline-block h-2 w-2 rounded-full bg-teal-500"></span>
+            Recueil : exécuter la collecte (« Lancer »)
           </li>
           <li class="flex items-center gap-2">
-            <span class="inline-block h-2 w-2 rounded-full bg-slate-300"></span>
+            <span class="inline-block h-2 w-2 rounded-full bg-teal-500"></span>
             Exploitation : modéliser + réconcilier
           </li>
         </ol>
@@ -163,6 +214,47 @@
         lance pas de collecte (le recueil est le lot suivant).
       </p>
     </header>
+
+    <!-- ── Résultat de la dernière exécution (recueil → exploitation) ─────────── -->
+    {#if runError}
+      <Alert
+        tone="warning"
+        title="Collecte impossible"
+        message={runError}
+        class="mb-4"
+      />
+    {:else if lastJob}
+      <Card class="mb-4 overflow-hidden border-teal-200">
+        <div class="space-y-2 p-4">
+          <div class="flex items-center gap-2">
+            <Rocket class="h-4 w-4 text-teal-600" aria-hidden="true" />
+            <h2 class="text-sm font-semibold text-slate-900">
+              Collecte exécutée : {lastJob.planLabel}
+            </h2>
+            <Badge tone={jobStatusTone(lastJob.status)} class="ml-auto">
+              {jobStatusLabel(lastJob.status)}
+            </Badge>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5 text-xs">
+            <Badge tone="neutral">{lastJob.totals.sources} source{lastJob.totals.sources !== 1 ? "s" : ""}</Badge>
+            <Badge tone="success">{lastJob.totals.succeeded} réussie{lastJob.totals.succeeded !== 1 ? "s" : ""}</Badge>
+            {#if lastJob.totals.failed > 0}
+              <Badge tone="error">{lastJob.totals.failed} échouée{lastJob.totals.failed !== 1 ? "s" : ""}</Badge>
+            {/if}
+            {#if lastJob.totals.skipped > 0}
+              <Badge tone="neutral">{lastJob.totals.skipped} ignorée{lastJob.totals.skipped !== 1 ? "s" : ""}</Badge>
+            {/if}
+            <Badge tone="info">{lastJob.totals.rawDocs} doc{lastJob.totals.rawDocs !== 1 ? "s" : ""} bruts</Badge>
+            <Badge tone="info">{lastJob.totals.mentions} mention{lastJob.totals.mentions !== 1 ? "s" : ""}</Badge>
+          </div>
+          <p class="text-xs text-slate-500">
+            Job <code class="rounded bg-slate-100 px-1 font-mono text-[11px]">{lastJob.id}</code>.
+            Détail par source dans la console
+            <span class="font-medium text-slate-700">Jobs (T4)</span>.
+          </p>
+        </div>
+      </Card>
+    {/if}
 
     <!-- ── Formulaire création / édition ─────────────────────────────────────── -->
     {#if formOpen}
@@ -315,18 +407,30 @@
             <Button variant="ghost" size="sm" type="button" onclick={cancelForm} disabled={saving}>
               Annuler
             </Button>
-            <!-- Affordance différée : la collecte est le lot suivant (recueil). -->
-            <Button
-              variant="secondary"
-              size="sm"
-              type="button"
-              disabled
-              title="Exécution du recueil à venir (lot suivant) : un plan ne déclenche aucune collecte"
-              class="ml-auto"
-            >
-              <Rocket class="h-4 w-4" aria-hidden="true" />
-              Lancer la collecte (à venir)
-            </Button>
+            <!-- Lancer la collecte : exécute recueil → exploitation pour ce plan
+                 (uniquement en édition d'un plan activé ; un nouveau plan doit
+                 d'abord être enregistré). -->
+            {#if editingId}
+              <Button
+                variant="secondary"
+                size="sm"
+                type="button"
+                disabled={saving || !form.enabled || runningPlanId === editingId}
+                title={form.enabled
+                  ? "Exécuter le recueil puis l'exploitation pour ce plan"
+                  : "Activez le plan pour lancer la collecte"}
+                class="ml-auto"
+                onclick={() =>
+                  plans
+                    .filter((p) => p.id === editingId)
+                    .forEach((p) => runCollecte(p))}
+              >
+                <Rocket class="h-4 w-4" aria-hidden="true" />
+                {runningPlanId === editingId
+                  ? "Collecte en cours…"
+                  : "Lancer la collecte"}
+              </Button>
+            {/if}
           </div>
         </div>
       </Card>
@@ -403,11 +507,15 @@
                   variant="secondary"
                   size="sm"
                   type="button"
-                  disabled
-                  title="Exécution du recueil à venir (lot suivant)"
+                  disabled={!plan.enabled || runningPlanId !== null}
+                  title={plan.enabled
+                    ? "Exécuter le recueil puis l'exploitation pour ce plan"
+                    : "Plan désactivé : activez-le pour lancer la collecte"}
                   class="ml-auto"
+                  onclick={() => runCollecte(plan)}
                 >
-                  <Rocket class="mr-1 h-3.5 w-3.5" aria-hidden="true" /> Lancer (à venir)
+                  <Rocket class="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+                  {runningPlanId === plan.id ? "Collecte…" : "Lancer"}
                 </Button>
               </div>
             </div>

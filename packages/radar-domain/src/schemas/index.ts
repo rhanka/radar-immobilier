@@ -5,6 +5,7 @@ export * from "./opportunity-fiche.v1.js";
 export * from "./opportunity.js";
 export * from "./signal.js";
 export * from "./ciblage.js";
+export * from "./job.js";
 export * from "./score.js";
 export * from "./journal.js";
 export * from "./temporal.js";
