@@ -127,11 +127,42 @@ export const ROLE_EVALUATION_MAMH_SOURCE_BINDINGS = [
   },
 ] as const satisfies readonly PrioritySourceBinding[];
 
+/**
+ * Concrete, COLLECTIBLE terrAPI / Adresses Québec adapters (WP4 Source #4). The
+ * abstract `adresses-quebec-igo-geocoder` binding above describes the open-data
+ * product; these are the per-municipality `AdressesQuebecAdapter` ids the RECUEIL
+ * endpoint actually resolves (and that the deterministic seed-ontology path
+ * reuses), so a collected address list flows through the SAME recueil →
+ * exploitation pipeline as the avis and rôle adapters. The source id matches
+ * `adressesSourceId(codeMamh)`.
+ */
+export const ADRESSES_QUEBEC_SOURCE_BINDINGS = [
+  {
+    sourceId: "adresses-quebec-70052",
+    priority: 4,
+    tier: "A",
+    kind: "adresses-quebec",
+    city: "salaberry-de-valleyfield",
+    recommendation: "build-now",
+    cadence: "monthly",
+  },
+  {
+    sourceId: "adresses-quebec-70022",
+    priority: 4,
+    tier: "A",
+    kind: "adresses-quebec",
+    city: "beauharnois",
+    recommendation: "build-now",
+    cadence: "monthly",
+  },
+] as const satisfies readonly PrioritySourceBinding[];
+
 /** Every registered priority binding across all pilot cities. */
 export const ALL_PRIORITY_SOURCE_BINDINGS: readonly PrioritySourceBinding[] = [
   ...VALLEYFIELD_PRIORITY_SOURCE_BINDINGS,
   ...BEAUHARNOIS_PRIORITY_SOURCE_BINDINGS,
   ...ROLE_EVALUATION_MAMH_SOURCE_BINDINGS,
+  ...ADRESSES_QUEBEC_SOURCE_BINDINGS,
 ];
 
 export function getPrioritySourceBinding(

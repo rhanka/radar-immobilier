@@ -3,11 +3,16 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
+  ADRESSES_QUEBEC_VALLEYFIELD_JSON,
+  adressesResourceUrl,
+  adressesSourceId,
   AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML,
   AVIS_PUBLICS_BEAUHARNOIS_SOURCE_URL,
   AVIS_PUBLICS_FIXTURE_HTML,
   AVIS_PUBLICS_SOURCE_URL,
   buildRawDocumentRecord,
+  parseAdressesQuebec,
   parseAvisPublics,
   parseRoleEvaluation,
   type RawDocumentRecord,
@@ -36,14 +41,18 @@ import {
  * results is derived from the parsers on the real bytes (anti-invention, §7.4:
  * owner/PII is NEVER surfaced — always `non-disponible`).
  *
- * Each pilot city is seeded from TWO real sources so the screen carries cross-
- * source structure (WP4 Source #2):
- *   1. its REAL MAMH role record (Lot / Valuation canonicals), and
+ * Each pilot city is seeded from THREE real sources so the screen carries cross-
+ * source structure (WP4 Source #2 + #4):
+ *   1. its REAL MAMH role record (Lot / Valuation canonicals),
  *   2. its REAL avis-publics index (Bylaw + DesignationEvent canonicals +
- *      derogation/PPCMOI Signals).
+ *      derogation/PPCMOI Signals), and
+ *   3. its REAL terrAPI / Adresses Québec list (Adresse canonicals — WP4 #4).
  * A Bylaw or Lot that co-occurs in BOTH the role and the avis surfaces as a
- * cross-source `entity_match` candidate; where the two committed records share
- * no identifier, the honest result is zero such candidates (reported as-is).
+ * cross-source `entity_match` candidate; where the committed records share no
+ * identifier, the honest result is zero such candidates (reported as-is). The
+ * terrAPI sample was fetched with geometry=0 (NO coordinates, NO lot), so each
+ * Adresse canonical's geom stays null and yields ZERO cross-source Adresse↔Lot
+ * candidates — reported honestly, never fabricated.
  *
  *   - salaberry-de-valleyfield (MAMH 70052): role lot 4193751 (+4 lots),
  *     matricule 5114-86-8189, total 2 748 500 $; avis = Craft index (4 notices:
@@ -77,6 +86,16 @@ export interface CityAvisSpec {
   readonly html: string;
 }
 
+/** A city's REAL committed terrAPI / Adresses Québec list (committed bytes). */
+export interface CityAdresseSpec {
+  /** Stable source id stamped on the seeded adresse RawDocument. */
+  readonly sourceId: string;
+  /** The real, public terrAPI address resource URL (provenance). */
+  readonly sourceUrl: string;
+  /** Verbatim terrAPI FeatureCollection JSON (the committed fixture). */
+  readonly json: string;
+}
+
 /** Per-city REAL sample mapping (committed bytes, no network). */
 export interface CitySampleSpec {
   readonly citySlug: string;
@@ -90,6 +109,8 @@ export interface CitySampleSpec {
   readonly sourceUrl: string;
   /** The city's REAL committed avis-publics index (cross-source corpus). */
   readonly avis: CityAvisSpec;
+  /** The city's REAL committed terrAPI / Adresses Québec list (WP4 #4). */
+  readonly adresses: CityAdresseSpec;
 }
 
 export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
@@ -105,6 +126,11 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
       sourceUrl: AVIS_PUBLICS_SOURCE_URL,
       html: AVIS_PUBLICS_FIXTURE_HTML,
     },
+    adresses: {
+      sourceId: adressesSourceId("70052"),
+      sourceUrl: adressesResourceUrl("70052"),
+      json: ADRESSES_QUEBEC_VALLEYFIELD_JSON,
+    },
   },
   beauharnois: {
     citySlug: "beauharnois",
@@ -117,6 +143,11 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
       sourceId: "avis-publics-beauharnois",
       sourceUrl: AVIS_PUBLICS_BEAUHARNOIS_SOURCE_URL,
       html: AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML,
+    },
+    adresses: {
+      sourceId: adressesSourceId("70022"),
+      sourceUrl: adressesResourceUrl("70022"),
+      json: ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
     },
   },
 };
@@ -140,6 +171,16 @@ export interface SeededRealAvis {
   readonly bylaws: string[];
 }
 
+/** A concrete real address the seed parsed (for honest reporting / tests). */
+export interface SeededRealAdresse {
+  /** Adresses Québec province-wide key (`properties.code`). */
+  readonly code: string;
+  /** Verbatim full address label (`properties.nom`). */
+  readonly nom: string;
+  /** Dwelling-unit count, or null when absent. */
+  readonly nbUnite: number | null;
+}
+
 export interface SeedOntologyResult {
   readonly ok: boolean;
   readonly citySlug: string;
@@ -147,6 +188,8 @@ export interface SeedOntologyResult {
   readonly rawRef: string;
   /** S3 key the raw AVIS index was stored under (RECUEIL substrate). */
   readonly avisRawRef: string;
+  /** S3 key the raw terrAPI ADRESSES list was stored under (WP4 #4). */
+  readonly adresseRawRef: string;
   readonly mentionCount: number;
   readonly candidateCount: number;
   readonly canonicalCount: number;
@@ -154,6 +197,8 @@ export interface SeedOntologyResult {
   readonly realEntities: SeededRealEntity[];
   /** Real avis notices parsed from the committed index bytes (verbatim). */
   readonly realAvis: SeededRealAvis[];
+  /** Real terrAPI addresses parsed from the committed bytes (verbatim, WP4 #4). */
+  readonly realAdresses: SeededRealAdresse[];
   /** Count of validated OntoSignals derived from reconciled DesignationEvents. */
   readonly signalCount: number;
   readonly stateKey: string;
@@ -224,15 +269,40 @@ export async function seedCityOntology(
     await store.put(avisRecord.storageKey, avisBytes, avisRecord.contentType);
   }
 
-  // EXPLOITATION over BOTH real docs: re-read the bytes → modeled mentions →
+  // Build the RECUEIL record from the REAL terrAPI / Adresses Québec list bytes
+  // (committed fixture — the city's live address list captured verbatim, fetched
+  // with geometry=0) and PUT them too. This is the THIRD source (WP4 #4): it gives
+  // the reconciliation screen real Adresse canonicals. HONESTY: the sample carries
+  // NO geometry and NO lot, so the Adresse geom stays null and there is NO
+  // fabricated cross-source Adresse↔Lot candidate.
+  const adresseBytes = new TextEncoder().encode(spec.adresses.json);
+  const adresseRecord: RawDocumentRecord = buildRawDocumentRecord({
+    source: spec.adresses.sourceId,
+    sourceUrl: spec.adresses.sourceUrl,
+    body: adresseBytes,
+    fetchedAt,
+    contentType: "application/json",
+    provenance: { version: "seed-1", userAgent: "radar-seed", viaObscura: false },
+  });
+  const adresseExisting = await store.head(adresseRecord.storageKey);
+  if (!adresseExisting) {
+    await store.put(
+      adresseRecord.storageKey,
+      adresseBytes,
+      adresseRecord.contentType,
+    );
+  }
+
+  // EXPLOITATION over the THREE real docs: re-read the bytes → modeled mentions →
   // graphify reconciliation → persisted per-city project state served at
   // GET /api/ontology/:city/*. The role XML yields Lot/Valuation mentions; the
-  // avis HTML yields Bylaw/DesignationEvent mentions; shared identifiers across
-  // the two reconcile into a single cross-source canonical.
+  // avis HTML yields Bylaw/DesignationEvent mentions; the terrAPI JSON yields
+  // Adresse mentions; shared identifiers across them reconcile into single
+  // cross-source canonicals.
   const exploitation = await runExploitation({
     store,
     citySlug,
-    rawDocRecords: [record, avisRecord],
+    rawDocRecords: [record, avisRecord, adresseRecord],
     now,
   });
 
@@ -250,6 +320,15 @@ export async function seedCityOntology(
     title: a.title,
     type: a.type,
     bylaws: a.bylaws,
+  }));
+
+  // Parse the REAL terrAPI addresses straight from the committed bytes (WP4 #4).
+  const realAdresses: SeededRealAdresse[] = parseAdressesQuebec(
+    spec.adresses.json,
+  ).adresses.map((a) => ({
+    code: a.code,
+    nom: a.nom,
+    nbUnite: a.nbUnite,
   }));
 
   // Signals derived from reconciled DesignationEvent canonicals (role-only seed
@@ -275,11 +354,13 @@ export async function seedCityOntology(
     citySlug,
     rawRef: record.storageKey,
     avisRawRef: avisRecord.storageKey,
+    adresseRawRef: adresseRecord.storageKey,
     mentionCount: exploitation.mentionCount,
     candidateCount: exploitation.candidateCount,
     canonicalCount: exploitation.canonicalCount,
     realEntities,
     realAvis,
+    realAdresses,
     signalCount,
     stateKey: exploitation.stateKey,
     validation,
