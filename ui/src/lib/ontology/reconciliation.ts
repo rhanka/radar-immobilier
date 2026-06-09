@@ -135,6 +135,49 @@ export function candidateSharedTerms(c: CandidateV): string[] {
 }
 
 /**
+ * The ontology status-transition table — mirrors the SHARED profile's
+ * `hardening.status_transitions` (D3). The API re-validates every `set_status`
+ * against this same table server-side (validators.ts), so the studio only OFFERS
+ * the legal targets to avoid a guaranteed 422. Keep in lock-step with
+ * `radar/ontology/ontology-profile.yaml`.
+ */
+const STATUS_TRANSITIONS: Readonly<Record<string, readonly string[]>> = {
+  candidate: ["needs_review", "validated", "rejected"],
+  attached: ["needs_review", "validated", "rejected"],
+  needs_review: ["validated", "rejected"],
+  validated: ["superseded"],
+  // rejected / superseded are terminal (no outgoing transition).
+};
+
+/**
+ * The statuses a human may move a canonical to from its current status (D3 gate).
+ * Returns `[]` for a terminal status — the studio then renders no set_status
+ * control. A canonical's derived status is `candidate` or `validated`; the human
+ * override may also land it on `rejected` (terminal).
+ */
+export function legalStatusTargets(current: string): string[] {
+  return [...(STATUS_TRANSITIONS[current] ?? [])];
+}
+
+/** French display label for a reconciliation status (studio chrome). */
+export function statusDisplayLabel(status: string): string {
+  switch (status) {
+    case "validated":
+      return "validée";
+    case "rejected":
+      return "rejetée";
+    case "needs_review":
+      return "à revoir";
+    case "superseded":
+      return "remplacée";
+    case "attached":
+      return "rattachée";
+    default:
+      return "candidate";
+  }
+}
+
+/**
  * A mention's display provenance: the raw S3 evidence refs that back it. Owner
  * /PII is NEVER part of a mention (Loi 25, §7.4) — only structural refs.
  */
