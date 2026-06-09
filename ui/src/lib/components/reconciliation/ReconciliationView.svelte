@@ -11,8 +11,11 @@
     shortRawRef,
     fetchCityState,
     seedCity,
+    applyOntologyPatch,
+    resolveWriteToken,
     type OntologyCityState,
     type FetchCityStateResult,
+    type CandidateV,
   } from "$lib/ontology/reconciliation.js";
 
   // ── State ────────────────────────────────────────────────────────────────────
@@ -20,6 +23,14 @@
   let result: FetchCityStateResult | null = null;
   let loading = false;
   let seeding = false;
+
+  // Write-core: the studio is writable only when a token is env-injected
+  // (VITE_RADAR_ONTOLOGY_WRITE_TOKEN). No secret is ever hardcoded here.
+  const writeToken = resolveWriteToken();
+  const canWrite = writeToken !== undefined;
+  // Per-candidate in-flight id (disables its buttons while the patch posts).
+  let pendingCandidateId: string | null = null;
+  let writeError: string | null = null;
 
   async function load(slug: string): Promise<void> {
     loading = true;
@@ -32,6 +43,40 @@
     const r = await seedCity(citySlug);
     seeding = false;
     if (r.ok) await load(citySlug);
+  }
+
+  /**
+   * Accept or reject a candidate appariement → POST the matching
+   * `graphify_ontology_patch_v1` op, then patch the local read-model from the
+   * route's re-derived response (no full refetch needed).
+   */
+  async function decide(
+    cand: CandidateV,
+    op: "accept_match" | "reject_match",
+  ): Promise<void> {
+    if (!canWrite || pendingCandidateId) return;
+    pendingCandidateId = cand.id;
+    writeError = null;
+    const res = await applyOntologyPatch(
+      citySlug,
+      { op, aId: cand.candidate_id, bId: cand.canonical_id },
+      writeToken,
+    );
+    pendingCandidateId = null;
+    if (res.kind === "ok" && result && result.kind === "ok") {
+      result = {
+        kind: "ok",
+        state: {
+          ...(result.state as OntologyCityState),
+          entities: res.applied.entities,
+          candidates: res.applied.candidates,
+        },
+      };
+    } else if (res.kind === "unauthorized") {
+      writeError = "Écriture refusée : jeton manquant ou invalide.";
+    } else if (res.kind === "error") {
+      writeError = res.detail;
+    }
   }
 
   // Reload whenever the selected city changes (skips re-entrant loads).
@@ -54,8 +99,16 @@
   $: cityLabel =
     STUDIO_CITIES.find((c) => c.slug === citySlug)?.label ?? citySlug;
 
-  function statusTone(status: string): "success" | "neutral" {
-    return status === "validated" ? "success" : "neutral";
+  function statusTone(status: string): "success" | "neutral" | "error" {
+    if (status === "validated") return "success";
+    if (status === "rejected") return "error";
+    return "neutral";
+  }
+
+  function statusLabel(status: string): string {
+    if (status === "validated") return "validée";
+    if (status === "rejected") return "rejetée";
+    return "candidate";
   }
 </script>
 
@@ -105,10 +158,20 @@
       {/if}
 
       <div class="border-t border-slate-100 pt-3">
-        <p class="text-xs leading-5 text-slate-400">
-          Lecture seule. L'écriture (accepter / rejeter un appariement) passe par
-          le cœur write-guarded du studio graphify (différée dans ce lot).
-        </p>
+        {#if canWrite}
+          <p class="text-xs leading-5 text-slate-400">
+            Écriture activée. Accepter / rejeter un appariement persiste une
+            décision <code class="rounded bg-slate-100 px-1 text-xs">graphify_ontology_patch_v1</code>
+            (route protégée par jeton) puis re-réconcilie l'état.
+          </p>
+        {:else}
+          <p class="text-xs leading-5 text-slate-400">
+            Lecture seule. L'écriture (accepter / rejeter un appariement) passe par
+            le cœur write-guarded du studio, activé par un jeton
+            (<code class="rounded bg-slate-100 px-1 text-xs">x-radar-write-token</code>)
+            non configuré dans cet environnement.
+          </p>
+        {/if}
       </div>
     </div>
   </svelte:fragment>
@@ -127,8 +190,9 @@
         (D1) : entités canoniques par type, file de candidats
         <code class="rounded bg-slate-100 px-1 text-xs">entity_match</code>
         et mentions brutes avec leur provenance S3. Données
-        <span class="font-semibold text-teal-700">réelles</span> issues des rôles
-        d'évaluation MAMH (aucune donnée fabriquée ; propriétaire jamais exposé, Loi 25).
+        <span class="font-semibold text-teal-700">réelles</span> issues des rôles,
+        avis publics, adresses et règlements (données réelles ; aucune donnée
+        fabriquée ; propriétaire jamais exposé, Loi 25).
       </p>
     </header>
 
@@ -180,7 +244,7 @@
                           {e.label}
                         </span>
                         <Badge tone={statusTone(e.status)} class="ml-auto">
-                          {e.status === "validated" ? "validée" : "candidate"}
+                          {statusLabel(e.status)}
                         </Badge>
                       </div>
                       {#if e.aliases.length > 0}
@@ -204,6 +268,11 @@
       <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
         File de candidats (entity_match)
       </h2>
+      {#if writeError}
+        <div class="mb-3">
+          <Alert tone="warning" title="Décision non appliquée" message={writeError} />
+        </div>
+      {/if}
       {#if state.candidates.length === 0}
         <div class="mb-6 rounded-lg border border-slate-200 bg-white px-6 py-6 text-center text-sm text-slate-400">
           Aucun candidat d'appariement en attente (les rôles MAMH se réconcilient
@@ -224,10 +293,26 @@
                   <Badge tone="neutral">{term}</Badge>
                 {/each}
                 <div class="ml-auto flex items-center gap-1.5">
-                  <Button variant="secondary" size="sm" disabled title="Écriture différée (studio write core)">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={!canWrite || pendingCandidateId !== null}
+                    title={canWrite
+                      ? "Accepter l'appariement (fusion canonique)"
+                      : "Écriture désactivée : aucun jeton configuré"}
+                    onclick={() => decide(cand, "accept_match")}
+                  >
                     <Check class="mr-1 h-3.5 w-3.5" aria-hidden="true" /> Accepter
                   </Button>
-                  <Button variant="secondary" size="sm" disabled title="Écriture différée (studio write core)">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={!canWrite || pendingCandidateId !== null}
+                    title={canWrite
+                      ? "Rejeter l'appariement (jamais fusionné)"
+                      : "Écriture désactivée : aucun jeton configuré"}
+                    onclick={() => decide(cand, "reject_match")}
+                  >
                     <X class="mr-1 h-3.5 w-3.5" aria-hidden="true" /> Rejeter
                   </Button>
                 </div>
@@ -280,7 +365,7 @@
         <Alert
           tone="info"
           title="Provenance"
-          message="État du projet réconcilié à {state.generatedAt} (profil {state.profileHash.slice(0, 12)}…). Entités issues des rôles d'évaluation MAMH réels ; aucune donnée illustrative dans cet écran."
+          message="État du projet réconcilié à {state.generatedAt} (profil {state.profileHash.slice(0, 12)}…). Entités issues des rôles, avis publics, adresses et règlements (données réelles) ; aucune donnée illustrative dans cet écran."
         />
       </div>
     {/if}
