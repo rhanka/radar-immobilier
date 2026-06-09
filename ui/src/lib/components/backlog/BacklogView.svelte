@@ -1,35 +1,36 @@
 <script lang="ts">
   /**
-   * ÉV15 — Vue Backlog.
+   * WP6 — Vue Backlog (branchée sur le track réel).
    *
-   * Tableau 3 colonnes (À faire / En cours / Réalisé) des évolutions, seedé des
-   * évolutions réelles (`backlog-data.ts`) et fusionné avec les items ajoutés à
-   * l'exécution via `GET /api/backlog`. La bande latérale gauche (w-72, standard)
-   * porte le filtre par statut, la légende et l'affordance « Ajouter une demande »
-   * (POST /api/backlog/items) : flux demande → en cours → réalisé démontrable.
-   *
-   * Note vision (chat ↔ backlog) : le chat devait porter les outils
-   * ajouter_demande / traiter_demande. Câblage non faisable en une passe (le
-   * client mesh radar n'émet pas de payload `tools` et le chat-ui packagé ne rend
-   * pas les événements tool_call) : suivi documenté, affordance UI en repli.
+   * Le tableau reflète désormais le VRAI backlog event-sourcé du système `track`
+   * (`.track/events.jsonl`, replié côté API). `GET /api/backlog` renvoie les items
+   * tracés (`source: "track"`) ; en repli (sidecar absent, offline) la vue retombe
+   * sur le seed ÉV statique (`source: "ev-fallback"`). Colonnes par statut dérivé
+   * de la dernière `realization.transition` (done → Réalisé, in-progress → En cours,
+   * cancelled/rejected → Abandonné, sinon À faire), annoté de la dernière
+   * `acceptance.run`. La bande latérale porte le filtre, la légende et l'affordance
+   * « Ajouter une demande » (POST /api/backlog/items, store runtime).
    */
   import { onMount } from "svelte";
-  import { ListTodo, Loader, CheckCircle2, Plus, ExternalLink, ChevronDown, ChevronRight } from "@lucide/svelte";
+  import { ListTodo, Loader, CheckCircle2, XCircle, Plus, ExternalLink, ChevronDown, ChevronRight } from "@lucide/svelte";
   import { Badge, Button, Card, Alert, EmptyState } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import {
     BACKLOG_COLUMNS,
     backlogSeed,
-    mergeBacklog,
+    acceptanceLabel,
     statutTone,
     type BacklogItem,
+    type BacklogSource,
     type BacklogStatut,
   } from "$lib/backlog/backlog-data.js";
   import { addBacklogItem, fetchBacklog } from "$lib/backlog/backlog-client.js";
 
   // ── État ────────────────────────────────────────────────────────────────
-  /** Items effectivement affichés (seed fusionné avec l'API si disponible). */
+  /** Items effectivement affichés (track réel, ou seed ÉV en repli). */
   let items: BacklogItem[] = [...backlogSeed];
+  /** Provenance des items affichés (live track vs. repli ÉV). */
+  let source: BacklogSource = "ev-fallback";
   /** Filtre de colonne : null = toutes les colonnes visibles. */
   let statusFilter: BacklogStatut | null = null;
   /** Id de la carte dépliée (accordéon). */
@@ -46,6 +47,7 @@
     "a-faire": ListTodo,
     "en-cours": Loader,
     realise: CheckCircle2,
+    abandonne: XCircle,
   };
 
   $: visibleColumns = statusFilter
@@ -64,14 +66,16 @@
     expandedId = expandedId === id ? null : id;
   }
 
-  // ── Chargement initial : fusion seed + API ────────────────────────────────
+  // ── Chargement initial : track réel via l'API, sinon repli seed ───────────
   async function reload(): Promise<void> {
     try {
-      const dynamic = await fetchBacklog();
-      items = mergeBacklog(backlogSeed, dynamic);
+      const res = await fetchBacklog();
+      items = res.items;
+      source = res.source;
     } catch {
-      // API hors ligne : on reste sur le seed statique (démo offline-friendly).
+      // API hors ligne : on retombe sur le seed ÉV statique (démo offline).
       items = [...backlogSeed];
+      source = "ev-fallback";
     }
   }
 
@@ -163,7 +167,11 @@
           </li>
           <li class="flex items-center gap-2">
             <span class="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
-            Réalisé : mergé (PR liée).
+            Réalisé : realization « done ».
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="inline-block h-2 w-2 rounded-full bg-rose-500"></span>
+            Abandonné : « cancelled » / « rejected ».
           </li>
         </ul>
       </div>
@@ -234,20 +242,30 @@
         Backlog
       </h1>
       <p class="mt-1 text-sm text-slate-500">
-        Évolutions en cours et réalisées, seedées des specs et de l'historique Git
-        (PR mergées = réalisé). Le chat sert à ajouter et à traiter des demandes.
+        Backlog réel, replié depuis le système <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">track</code>
+        (<code class="rounded bg-slate-100 px-1 py-0.5 text-xs">.track/events.jsonl</code>) : statut = dernière
+        <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">realization.transition</code>, annoté de la dernière
+        <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">acceptance.run</code>.
       </p>
     </header>
 
     <div class="mb-4">
-      <Alert
-        tone="info"
-        title="Outils chat ajouter_demande / traiter_demande : suivi documenté"
-        message="Le câblage tool-calling n'est pas faisable en une passe (le client mesh radar n'envoie pas de payload tools aux fournisseurs et le chat-ui packagé ne rend pas les événements tool_call). En repli, l'affordance « Ajouter une demande » de la bande gauche démontre le flux."
-      />
+      {#if source === "track"}
+        <Alert
+          tone="success"
+          title="Source : sidecar track en direct"
+          message="Les items ci-dessous sont repliés en direct depuis .track/events.jsonl (système track). Les demandes ajoutées via la bande gauche se superposent à cette liste."
+        />
+      {:else}
+        <Alert
+          tone="info"
+          title="Source : repli ÉV (sidecar track indisponible)"
+          message="Le sidecar .track/events.jsonl n'est pas accessible (offline ou non bind-monté). La vue retombe sur le seed ÉV statique, fidèle à l'historique Git mergé."
+        />
+      {/if}
     </div>
 
-    <div class={`grid gap-4 ${statusFilter ? "grid-cols-1" : "lg:grid-cols-3"}`}>
+    <div class={`grid gap-4 ${statusFilter ? "grid-cols-1" : "md:grid-cols-2 xl:grid-cols-4"}`}>
       {#each visibleColumns as col}
         {@const Icon = COLUMN_ICONS[col.statut]}
         {@const columnItems = itemsFor(col.statut)}
@@ -279,11 +297,16 @@
                       {/if}
                     </span>
                     <span class="min-w-0 flex-1">
-                      <span class="flex items-center gap-2">
+                      <span class="flex flex-wrap items-center gap-2">
                         <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-bold text-slate-600">
                           {item.code}
                         </span>
                         <Badge tone={statutTone(item.statut)}>{col.label}</Badge>
+                        {#if item.acceptance && item.acceptance !== "none"}
+                          <Badge tone={item.acceptance === "pass" ? "success" : "error"}>
+                            acc {acceptanceLabel(item.acceptance)}
+                          </Badge>
+                        {/if}
                       </span>
                       <span class="mt-1 block text-sm font-medium text-slate-900">
                         {item.titre}
@@ -294,6 +317,24 @@
                   {#if isOpen}
                     <div class="border-t border-slate-100 px-3 py-2.5">
                       <p class="text-sm leading-6 text-slate-600">{item.description}</p>
+                      <dl class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                        {#if item.groupe}
+                          <div>
+                            <dt class="inline font-semibold">Workspace :</dt>
+                            <dd class="inline">{item.groupe}</dd>
+                          </div>
+                        {/if}
+                        <div>
+                          <dt class="inline font-semibold">Acceptation :</dt>
+                          <dd class="inline">{acceptanceLabel(item.acceptance)}</dd>
+                        </div>
+                        {#if item.source}
+                          <div>
+                            <dt class="inline font-semibold">Source :</dt>
+                            <dd class="inline">{item.source}</dd>
+                          </div>
+                        {/if}
+                      </dl>
                       {#if item.pr !== undefined}
                         <a
                           class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-teal-700 hover:text-teal-800 hover:underline"

@@ -1,10 +1,12 @@
-// ÉV15 — Backlog API client (browser).
+// WP6 — Backlog API client (browser).
 //
 // Thin wrapper over the radar backlog API. The Backlog view loads from
-// `GET /api/backlog`, then merges the result with the static seed (deduped by
-// id). The "Ajouter une demande" affordance posts to `POST /api/backlog/items`.
+// `GET /api/backlog`, which returns the REAL tracked items folded from the
+// `.track` sidecar (`source: "track"`) or the ÉV fallback (`source:
+// "ev-fallback"`) when the sidecar is unavailable. The "Ajouter une demande"
+// affordance posts to `POST /api/backlog/items` (runtime request).
 
-import type { BacklogItem } from "./backlog-data.js";
+import type { BacklogItem, BacklogSource } from "./backlog-data.js";
 
 export function resolveBacklogUrl(
   path: string,
@@ -14,14 +16,24 @@ export function resolveBacklogUrl(
   return `${baseUrl.replace(/\/$/, "")}${path}`;
 }
 
-/** Fetch the API backlog (seed + runtime items). Throws on HTTP error. */
+/** The backlog list plus its provenance (live track vs. fallback). */
+export interface BacklogResponse {
+  items: BacklogItem[];
+  /** "track" when folded from the live sidecar; "ev-fallback" otherwise. */
+  source: BacklogSource;
+}
+
+/** Fetch the API backlog (tracked items + runtime items). Throws on HTTP error. */
 export async function fetchBacklog(
   baseUrl = import.meta.env.VITE_API_BASE_URL,
-): Promise<BacklogItem[]> {
+): Promise<BacklogResponse> {
   const res = await fetch(resolveBacklogUrl("/api/backlog", baseUrl));
   if (!res.ok) throw new Error(`backlog HTTP ${res.status}`);
-  const body = (await res.json()) as { items: BacklogItem[] };
-  return body.items;
+  const body = (await res.json()) as {
+    items: BacklogItem[];
+    source?: BacklogSource;
+  };
+  return { items: body.items, source: body.source ?? "ev-fallback" };
 }
 
 /** Add a request (statut "a-faire"). Throws on HTTP error. */
