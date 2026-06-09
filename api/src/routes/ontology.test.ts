@@ -241,6 +241,42 @@ describe("POST /api/ontology/:city/patch (write-core, token-gated)", () => {
     expect(after.filter((e) => e.type === "Lot")).toHaveLength(2);
   });
 
+  it("happy path: accept_match drops the candidate from the queue", async () => {
+    const store = new MemoryStore();
+    await seedReconcilable(store);
+    const app = ontologyRoute({ store, ontologyWriteToken: TOKEN });
+
+    // Baseline: one auto entity_match candidate is pending for the shared NO_LOT.
+    const beforeRes = await app.request(`/api/ontology/${CITY}/candidates`);
+    const before = (await beforeRes.json()) as { candidates: unknown[] };
+    expect(before.candidates).toHaveLength(1);
+
+    const res = await app.request(`/api/ontology/${CITY}/patch`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-radar-write-token": TOKEN },
+      body: JSON.stringify({
+        op: "accept_match",
+        aId: "mention:lot:4193751",
+        bId: "mention:lot:4193751-avis",
+      }),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      ok: boolean;
+      entities: { id: string; type: string }[];
+      candidates: unknown[];
+    };
+    expect(body.ok).toBe(true);
+    // The accepted pair LEAVES the queue, and the two lots stay one canonical.
+    expect(body.candidates).toHaveLength(0);
+    expect(body.entities.filter((e) => e.type === "Lot")).toHaveLength(1);
+
+    // The decision persists: a re-fetch still shows an empty candidate queue.
+    const afterRes = await app.request(`/api/ontology/${CITY}/candidates`);
+    const after = (await afterRes.json()) as { candidates: unknown[] };
+    expect(after.candidates).toHaveLength(0);
+  });
+
   it("happy path: set_status candidate→validated overrides a canonical status", async () => {
     const store = new MemoryStore();
     await seedReconcilable(store);
