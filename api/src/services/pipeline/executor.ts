@@ -39,6 +39,14 @@ export interface RunCiblagePlanInput {
   readonly ciblageStore: CiblageStore;
   readonly jobsStore: JobsStore;
   readonly objectStore: ObjectStore;
+  /**
+   * Optional dedicated store for raw scraped documents (RECUEIL output).
+   * When provided, raw bytes are written to / read from this store (e.g. the
+   * SCW `radar-immobilier-docs` bucket in production); the main `objectStore`
+   * is still used for project-state, ciblage plans, and jobs. When absent,
+   * `objectStore` handles everything (local-dev / MinIO default).
+   */
+  readonly scrapeStore?: ObjectStore;
   readonly registry: AdapterRegistry;
   readonly planId: string;
   /** Clock injection for deterministic ids / timestamps in tests. */
@@ -151,8 +159,10 @@ export async function runCiblagePlan(
 
     // RECUEIL only — exploitation is deferred to a per-city pass below so all of
     // a city's sources accumulate into ONE project state instead of overwriting.
+    // When a dedicated scrapeStore is provided, raw bytes go there; otherwise the
+    // main objectStore handles everything (MinIO local default).
     const { step, records } = await collectOneSource({
-      objectStore: input.objectStore,
+      objectStore: input.scrapeStore ?? input.objectStore,
       registryEntry: entry,
       planId: plan.id,
       ...(input.limit !== undefined ? { limit: input.limit } : {}),
@@ -176,6 +186,9 @@ export async function runCiblagePlan(
     try {
       const exploit = await runExploitation({
         store: input.objectStore,
+        // When a dedicated scrape store is provided, raw bytes are read from
+        // there; project-state is always written to the main objectStore.
+        ...(input.scrapeStore ? { rawStore: input.scrapeStore } : {}),
         citySlug: city,
         rawDocRecords: bucket.records,
         ...(input.now ? { now: input.now } : {}),
