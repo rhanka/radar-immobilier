@@ -157,12 +157,30 @@ export const ADRESSES_QUEBEC_SOURCE_BINDINGS = [
   },
 ] as const satisfies readonly PrioritySourceBinding[];
 
+/**
+ * Procès-verbaux (PV) adapters — WP A.2.2 generic PV scraper.
+ * Easy-first cities: plain WordPress/Fusion sites, no CAPTCHA, direct download.
+ * Window: 6 months (183 days) by default.
+ */
+export const PV_SOURCE_BINDINGS = [
+  {
+    sourceId: "proces-verbaux-saint-damase",
+    priority: 1,
+    tier: "A",
+    kind: "pv",
+    city: "saint-damase",
+    recommendation: "build-now",
+    cadence: "monthly",
+  },
+] as const satisfies readonly PrioritySourceBinding[];
+
 /** Every registered priority binding across all pilot cities. */
 export const ALL_PRIORITY_SOURCE_BINDINGS: readonly PrioritySourceBinding[] = [
   ...VALLEYFIELD_PRIORITY_SOURCE_BINDINGS,
   ...BEAUHARNOIS_PRIORITY_SOURCE_BINDINGS,
   ...ROLE_EVALUATION_MAMH_SOURCE_BINDINGS,
   ...ADRESSES_QUEBEC_SOURCE_BINDINGS,
+  ...PV_SOURCE_BINDINGS,
 ];
 
 export function getPrioritySourceBinding(
