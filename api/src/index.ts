@@ -19,6 +19,7 @@ const app = createApp({
   checkObjectStore: makeObjectStoreProbe(objectStore),
   store: objectStore,
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
+  db: dbHandle.db,
 });
 
 // Ensure the raw bucket exists before serving RECUEIL collect requests.
