@@ -23,16 +23,18 @@
  *        - Règlement modifiant le règlement de zonage Z-3001 visant à agrandir
  *          la zone C-810 à même la zone H-812 (AVIS DE MOTION 2026-02-120)
  *
- * PARSER LIMITATION NOTE: Châteauguay uses alphanumeric règlement numbering
- *   Z-3001 (format "[letter]-[digits]") rather than numeric-only (e.g. 1528-17).
- *   The REGLEMENT_NUMBER_RE pattern matches digit-only patterns like "1528-17"
- *   but NOT "Z-3001". Therefore:
+ * PARSER SUPPORT: Châteauguay uses alphanumeric règlement numbering
+ *   Z-3001 (format "[letter]-[digits]").  The REGLEMENT_ZONAGE_LETTER_RE pattern
+ *   matches Z-prefix numbers that immediately follow "règlement de zonage", which
+ *   is exactly the pattern in this PV:
+ *     "règlement modifiant le règlement de zonage Z-3001 visant à..."
+ *   Zone codes like "C-754" or non-zonage bylaws like "règlement de construction
+ *   Z-3300" are NOT matched (precision guard).  Therefore:
  *     - avisDeMotion: true (motions found)
- *     - changementZonage: false (honest limitation: "règlement de zonage" IS present
- *       in the ±400 chars window, but no matching règlement number extracted)
- *   The zonage changes ARE real and documented — they are Z-3001-156-26 and
- *   Z-3001-157-26 adopted in April 2026 (confirmed in PV_2026-04-20.pdf).
- *   This is an honest parser limitation, not an absence of zonage change.
+ *     - changementZonage: true (Z-3001 extracted, "zonage" keyword present)
+ *     - reglementNumbers: ["Z-3001"]
+ *   The zonage changes adopted as Z-3001-156-26 and Z-3001-157-26 in April 2026
+ *   are confirmed in PV_2026-04-20.pdf.
  *
  * HTTP + robots.txt status (confirmed 2026-06-10):
  *   - https://ville.chateauguay.qc.ca/ → HTTP 200
@@ -189,11 +191,12 @@ export const PV_CHATEAUGUAY_INDEX_HTML = `
  * Both changes were adopted as final règlements Z-3001-157-26 and Z-3001-156-26
  * respectively in the April 20, 2026 council session (confirmed in PV_2026-04-20.pdf).
  *
- * PARSER LIMITATION: Châteauguay uses alphanumeric numbering (Z-3001, G-062-22, etc.)
- * REGLEMENT_NUMBER_RE requires digit-only prefixes (\d{2,4}-\d{1,4}).
- * "Z-3001" does not match → reglementNumbers=[], changementZonage=false.
- * "règlement de zonage" IS present → zonage keyword found.
- * Honest result: avisDeMotion=true, changementZonage=false (reglement number not extractable).
+ * DETECTION: Châteauguay uses alphanumeric numbering (Z-3001, G-062-22, etc.)
+ * REGLEMENT_ZONAGE_LETTER_RE matches Z-prefix when preceded by "règlement de zonage".
+ * "règlement de zonage Z-3001" → reglementNumbers=["Z-3001"], changementZonage=true.
+ * Zone codes ("C-754") and non-zonage bylaws ("règlement de construction Z-3300") are
+ * not matched (precision guard).
+ * Result: avisDeMotion=true, reglementNumbers=["Z-3001"], changementZonage=true.
  */
 export const PV_CHATEAUGUAY_2026_02_TEXT = `
 Procès-verbal de la séance ordinaire du conseil municipal de la Ville de Châteauguay,

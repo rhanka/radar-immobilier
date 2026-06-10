@@ -17,14 +17,14 @@
  * Zonage detection results per city (honest — anti-invention):
  *   - La Prairie May 2026: avisDeMotion=true, changementZonage=false
  *     (motions for taxes/patrimoine/circulation, no "règlement de zonage" in ±400 window)
- *   - Châteauguay Feb 2026: avisDeMotion=true, changementZonage=false
- *     (real zonage changes Z-3001-156/157-26 ARE present, but règlement numbering
- *     is Z-prefix alphanumeric, not matching REGLEMENT_NUMBER_RE — parser limitation,
- *     documented honestly)
+ *   - Châteauguay Feb 2026: avisDeMotion=true, changementZonage=true
+ *     (real zonage changes Z-3001 ARE present and now detected via REGLEMENT_ZONAGE_LETTER_RE;
+ *     "règlement de zonage Z-3001" in same sentence as avis de motion → true positive)
  *   - Delson May 2026: avisDeMotion=true, changementZonage=false
  *     (only emprunt expropriation bylaw reference, no zonage)
- *   - Vaudreuil-Dorion May 2026: avisDeMotion=true, changementZonage=false
- *     (tarification + démolition motions; zonage only in derogation context)
+ *   - Vaudreuil-Dorion May 2026: avisDeMotion=true, changementZonage=false (CORRIGÉ)
+ *     (tarification + démolition motions; "Règlement de zonage" only in next agenda item
+ *     26-05-0429, past the \n\n paragraph boundary — forward window now capped there)
  *
  * Test suite:
  *   1. parsePvIndex — La Prairie: parses c-document-card accordion HTML → PDF links
@@ -32,10 +32,11 @@
  *   3. parsePvIndex — Delson: parses wp-block-file HTML → PDF links
  *   4. parsePvIndex — Vaudreuil-Dorion: parses <li><a href="...pv.pdf"> HTML → PDF links
  *   5. detectZonageChange — La Prairie May 2026: avisDeMotion=true, changementZonage=false
- *   6. detectZonageChange — Châteauguay Feb 2026: avisDeMotion=true, changementZonage=false
- *      (parser limitation documented: Z-3001 alphanumeric not matched)
+ *   6. detectZonageChange — Châteauguay Feb 2026: avisDeMotion=true, changementZonage=true
+ *      (Z-3001 detected via REGLEMENT_ZONAGE_LETTER_RE — "règlement de zonage Z-3001")
  *   7. detectZonageChange — Delson May 2026: avisDeMotion=true, changementZonage=false
  *   8. detectZonageChange — Vaudreuil-Dorion May 2026: avisDeMotion=true, changementZonage=false
+ *      (CORRIGÉ: forward window capped at \\n\\n, no cross-item contamination)
  *   9. ProcesVerbauxGenericAdapter.list() — La Prairie (mocked fetch)
  *   10. ProcesVerbauxGenericAdapter.list() — Châteauguay (mocked fetch)
  *   11. ProcesVerbauxGenericAdapter.list() — Delson (mocked fetch)
@@ -228,10 +229,10 @@ describe("detectZonageChange – La Prairie Mai 2026 (motions taxes/patrimoine, 
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. detectZonageChange — Châteauguay Fév 2026: zonage réel, limitation parser
+// 6. detectZonageChange — Châteauguay Fév 2026: zonage réel Z-3001, détecté
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("detectZonageChange – Châteauguay Fév 2026 (zonage réel Z-3001, limitation parser)", () => {
+describe("detectZonageChange – Châteauguay Fév 2026 (zonage réel Z-3001, détecté via REGLEMENT_ZONAGE_LETTER_RE)", () => {
   const result = detectZonageChange(PV_CHATEAUGUAY_2026_02_TEXT);
 
   it("détecte avisDeMotion (motions 2026-02-119 et 2026-02-120 présentes)", () => {
@@ -239,13 +240,18 @@ describe("detectZonageChange – Châteauguay Fév 2026 (zonage réel Z-3001, li
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("ne lève PAS changementZonage (limitation: Z-3001 alphanumérique non matchable par REGLEMENT_NUMBER_RE)", () => {
-    // The PV DOES contain real zonage changes (Z-3001-156-26, Z-3001-157-26),
-    // but Châteauguay uses Z-prefix numbering. REGLEMENT_NUMBER_RE requires
-    // \d{2,4}-\d{1,4} (digit-only prefix). "Z-3001" does not match → no number
-    // extracted → changementZonage=false.
-    // This is an honest limitation documented in the fixture file.
-    expect(result.changementZonage).toBe(false);
+  it("lève changementZonage=true (Z-3001 détecté via REGLEMENT_ZONAGE_LETTER_RE)", () => {
+    // The PV contains real zonage changes: "règlement de zonage Z-3001" in the
+    // same sentence as "donne avis de motion".  The REGLEMENT_ZONAGE_LETTER_RE
+    // pattern matches Z-prefix numbers when immediately preceded by "règlement de
+    // zonage", distinguishing them from zone codes (e.g. C-754) and non-zonage
+    // bylaws (e.g. "règlement de construction Z-3300").
+    expect(result.changementZonage).toBe(true);
+  });
+
+  it("extrait le n° de règlement Z-3001 (style lettre-préfixe Châteauguay)", () => {
+    // REGLEMENT_ZONAGE_LETTER_RE captures Z-3001 from "règlement de zonage Z-3001".
+    expect(result.reglementNumbers).toContain("Z-3001");
   });
 
   it("le texte contient bien 'règlement de zonage Z-3001' et 'zone C-754'", () => {
@@ -281,10 +287,10 @@ describe("detectZonageChange – Delson Mai 2026 (emprunt expropriation, 0 zonag
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. detectZonageChange — Vaudreuil-Dorion Mai 2026: motions non-zonage
+// 8. detectZonageChange — Vaudreuil-Dorion Mai 2026: motions non-zonage (CORRIGÉ)
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("detectZonageChange – Vaudreuil-Dorion Mai 2026 (tarification + démolition)", () => {
+describe("detectZonageChange – Vaudreuil-Dorion Mai 2026 (tarification + démolition, faux positif supprimé)", () => {
   const result = detectZonageChange(PV_VAUDREUIL_DORION_2026_05_TEXT);
 
   it("détecte avisDeMotion (motions pour 1709-38 tarification et 1835-01 démolition)", () => {
@@ -296,24 +302,23 @@ describe("detectZonageChange – Vaudreuil-Dorion Mai 2026 (tarification + démo
     expect(result.reglementNumbers).toContain("1835-01");
   });
 
-  it("changementZonage détecté à cause de la proximité textuelle (faux-positif fenêtre ±400)", () => {
-    // HONESTY: The parser fires changementZonage=true because the next agenda item
-    // (26-05-0429: dérogation art. 10.13 du Règlement de zonage no 1872) is only
-    // ~325 chars after the last "donne avis de motion" for règlement 1835-01
-    // (démolition), which falls within the ±400 chars detection window.
+  it("NE lève PAS changementZonage (faux positif corrigé — fenêtre forward bornée par \\n\\n)", () => {
+    // FIX: The "Règlement de zonage (règlement no 1872)" mention is in item
+    // 26-05-0429 (dérogation enseigne), ~325 chars after the last "donne avis de
+    // motion" for règlement 1835-01 (démolition).  The previous ±400-char flat
+    // window reached across the blank-line separator between the two items and
+    // falsely flagged this as a zonage change.
     //
-    // This is a parser false-positive — a known limitation of the proximity-window
-    // approach when consecutive agenda items are close together.
-    // Règlements 1709-38 and 1835-01 are NOT zonage changes.
-    //
-    // Documented honestly (ANTI-INVENTION): the result IS what the parser returns.
-    expect(result.changementZonage).toBe(true);
-    // The triggering règlement is 1835-01 (not a true zonage bylaw)
-    expect(result.reglementNumbers).toContain("1835-01");
+    // The corrected algorithm caps the FORWARD window at the first \n\n after the
+    // motion phrase end.  Item 26-05-0428 ends with \n\n before 26-05-0429, so the
+    // "Règlement de zonage" in 26-05-0429 is no longer in scope.
+    // Règlements 1709-38 (tarification) and 1835-01 (démolition) are NOT zonage.
+    expect(result.changementZonage).toBe(false);
   });
 
   it("le texte contient 'Règlement de zonage' dans le contexte de l'item 26-05-0429 (dérogation enseigne)", () => {
-    // Confirms the proximity of zonage keyword to the avis de motion for 1835-01.
+    // Confirms the content is present — the fix works by bounding the window, not
+    // by removing zonage text from the fixture.
     expect(PV_VAUDREUIL_DORION_2026_05_TEXT).toContain("Règlement de zonage");
     expect(PV_VAUDREUIL_DORION_2026_05_TEXT).toContain("1835-01");
   });

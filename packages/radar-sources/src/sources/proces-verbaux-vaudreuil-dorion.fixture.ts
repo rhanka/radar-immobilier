@@ -24,9 +24,10 @@
  *      Règlement de zonage is mentioned once (in a derogation context,
  *      NOT in avis de motion ±400 chars window).
  *
- * Expected detection:
+ * Expected detection (after paragraph-boundary fix in detectZonageChange):
  *   - avisDeMotion: true (motions present with règlement numbers 1709-38, 1835-01)
- *   - changementZonage: false (no zonage keyword in avis de motion ±400 chars window)
+ *   - changementZonage: false (the "Règlement de zonage" mention is in item 26-05-0429,
+ *     separated from the last motion by \n\n — forward window capped at paragraph break)
  *
  * HTTP + robots.txt status (confirmed 2026-06-10):
  *   - https://www.ville.vaudreuil-dorion.qc.ca/ → HTTP 200
@@ -73,10 +74,12 @@ export const PV_VAUDREUIL_DORION_INDEX_HTML = `
  *   - "Règlement de zonage (règlement no 1872)" appears only in a derogation context
  *     (enseignes publicitaires), not in avis de motion context.
  *
- * Expected detection:
+ * Expected detection (after paragraph-boundary fix):
  *   - avisDeMotion: true
  *   - reglementNumbers: ["1709-38", "1835-01"] (both in avis de motion context)
- *   - changementZonage: false (no zonage keyword in avis de motion ±400 chars window)
+ *   - changementZonage: false (the "Règlement de zonage no 1872" mention is in the
+ *     NEXT agenda item 26-05-0429, separated from the last motion by \n\n; the
+ *     corrected forward window is capped at that paragraph break)
  */
 export const PV_VAUDREUIL_DORION_2026_05_TEXT = `
 SÉANCE ORDINAIRE DU 19 MAI 2026
