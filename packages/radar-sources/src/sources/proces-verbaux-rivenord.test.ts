@@ -39,12 +39,13 @@
  *       reglementNumbers=["801-71"] (REGLEMENT_NUMBER_RE: "Règlement 801-71 modifiant
  *       le Règlement de zonage 801" — "801-71" matches \d{2,4}-\d{1,4})
  *   - Lorraine Avril 2026:
- *       avisDeMotion=true, changementZonage=false (honest — URB prefix not capturable)
+ *       avisDeMotion=true, changementZonage=true
  *       (Règlement URB-03-17 modifiant le Règlement URB-03 sur le zonage,
  *        changements aux zones I-133 et I-226)
- *       Parser requires BOTH règlement number AND zonage keyword; URB-03-17 has no
- *       REGLEMENT_NUMBER_RE nor REGLEMENT_ZONAGE_LETTER_RE match.
- *       reglementNumbers=[] (documented limitation — same as Coteau-du-Lac URB-400)
+ *       REGLEMENT_MULTIPREFIX_RE captures URB-03-17 when ZONAGE_KEYWORDS_RE fires on
+ *       "le zonage" in the same paragraph. filterNewReglements excludes URB-03 (the
+ *       modified règlement identified by MODIFIANT_REGLEMENT_MULTIPREFIX_RE).
+ *       reglementNumbers=["URB-03-17"]
  *   - Boisbriand Avril 2026:
  *       avisDeMotion=true, changementZonage=false (honest negative — ANTI-FAUX-POSITIF)
  *       (avis de motion for RV-1787-1 tarifs and RV-1796 réserve financière,
@@ -57,7 +58,7 @@
  *   2. parsePvIndex — Lorraine: parse the c-document-card HTML → PV PDF links
  *   3. parsePvIndex — Boisbriand: parse the c-document-card accordion HTML → PV PDF links
  *   4. detectZonageChange — Rosemère Mars 2026: zonage RÉEL (801-71, Règlement de zonage 801)
- *   5. detectZonageChange — Lorraine Avril 2026: zonage RÉEL (URB-03-17, URB-03 sur le zonage)
+ *   5. detectZonageChange — Lorraine Avril 2026: zonage RÉEL détecté (URB-03-17 via MULTIPREFIX_RE)
  *   6. detectZonageChange — Boisbriand Avril 2026: honest negative (tarifs/réserve, no zonage)
  *   7. ProcesVerbauxGenericAdapter.list() — Rosemère (mocked fetch)
  *   8. ProcesVerbauxGenericAdapter.list() — Lorraine (mocked fetch)
@@ -252,22 +253,29 @@ describe("detectZonageChange – Lorraine Avril 2026 (URB-03-17, Règlement URB-
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("changementZonage=false : URB-03-17 uses URB prefix — no règlement number extractable", () => {
-    // URB-03-17 does not match \d{2,4}-\d{1,4} nor REGLEMENT_ZONAGE_LETTER_RE.
-    // The parser requires BOTH a règlement number AND a zonage keyword in the context
-    // window. Since no règlement number is extractable (URB prefix), changementZonage
-    // stays false even though ZONAGE_KEYWORDS_RE fires on "sur le zonage".
-    // This is an honest documented limitation — the same as Coteau-du-Lac URB-400.
-    expect(result.changementZonage).toBe(false);
+  it("changementZonage=true : REGLEMENT_MULTIPREFIX_RE capture 'URB-03-17' + ZONAGE_KEYWORDS_RE sur 'le zonage'", () => {
+    // REGLEMENT_MULTIPREFIX_RE matches "Règlement URB-03-17" (URB = [A-Z]{2,4},
+    // 03 = \d{2,4}, -17 = optional -\d{1,3}) when ZONAGE_KEYWORDS_RE fires on
+    // "Règlement URB-03 sur le zonage" in the same paragraph window.
+    // filterNewReglements excludes URB-03 (modified règlement via
+    // MODIFIANT_REGLEMENT_MULTIPREFIX_RE) → reglementNumbers=["URB-03-17"].
+    expect(result.changementZonage).toBe(true);
   });
 
-  it("ANTI-FAUX-POSITIF: reglementNumbers est vide ou sans nombre non-URB", () => {
-    // URB-03-17 uses URB prefix — not matched by \d{2,4}-\d{1,4}.
-    // Documented limitation (same as Saint-Rémi V-prefix case).
-    // reglementNumbers may be [] or contain only genuinely matched numbers.
+  it("reglementNumbers contient 'URB-03-17' (nouveau règlement de zonage)", () => {
+    // The NEW proposed règlement (URB-03-17) is captured by REGLEMENT_MULTIPREFIX_RE.
+    // The OLD/modified règlement (URB-03) is excluded by MODIFIANT_REGLEMENT_MULTIPREFIX_RE
+    // matching "modifiant le « Règlement URB-03 sur le zonage »".
+    expect(result.reglementNumbers).toContain("URB-03-17");
+  });
+
+  it("ANTI-FAUX-POSITIF: reglementNumbers ne contient PAS de codes de zones (I-133, 1-226, R-301)", () => {
+    // Zone codes (I-133, I-226) have only 1 letter before the dash → not matched by
+    // REGLEMENT_MULTIPREFIX_RE ([A-Z]{2,4}). Numbers with < 2 digits (03, 17) need
+    // at least 2 digits → URB-03 is matched but filtered as the modified règlement.
+    // R-301 has 1 letter and is not preceded by "règlement" in the relevant context.
     for (const num of result.reglementNumbers) {
-      // Should not contain false extractions from non-zonage context
-      expect(num).not.toMatch(/^(03|17|133|226|301)$/);
+      expect(num).not.toMatch(/^(133|226|301)$/);
     }
   });
 
