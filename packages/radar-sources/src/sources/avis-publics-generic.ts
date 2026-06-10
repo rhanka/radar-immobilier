@@ -309,3 +309,47 @@ export function createAvisPublicsBeauharnoisGenericAdapter(
 ): AvisPublicsGenericAdapter {
   return new AvisPublicsGenericAdapter(BEAUHARNOIS_AVIS_CONFIG, options);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rive-Sud cluster: Roussillon MRC cities near Montréal
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sainte-Catherine (MRC Roussillon, ~25 km SW of Montréal).
+ * Avis publics on a dedicated page (custom CMS, direct PDF links).
+ * Confirmed HTTP 200, robots.txt: Disallow /craft/ only.
+ * Captured 2026-06-10.
+ */
+export const SAINTE_CATHERINE_AVIS_CONFIG: AvisCityConfig = {
+  citySlug: "sainte-catherine",
+  avisIndexUrl:
+    "https://www.ville.sainte-catherine.qc.ca/ville/vie-municipale/avis-publics-et-divulgations-legales/",
+  sourceId: "avis-publics-sainte-catherine",
+};
+
+/** Factory shortcut for the Sainte-Catherine avis-publics adapter. */
+export function createAvisPublicsSainteCatherineAdapter(
+  options: AvisAdapterOptions = {},
+): AvisPublicsGenericAdapter {
+  return new AvisPublicsGenericAdapter(SAINTE_CATHERINE_AVIS_CONFIG, options);
+}
+
+/**
+ * Saint-Constant (MRC Roussillon, ~30 km SW of Montréal).
+ * Avis publics co-located with the PV/séances page, organized by week.
+ * Confirmed HTTP 200, robots.txt: no restrictions.
+ * Captured 2026-06-10.
+ */
+export const SAINT_CONSTANT_AVIS_CONFIG: AvisCityConfig = {
+  citySlug: "saint-constant",
+  avisIndexUrl:
+    "https://saint-constant.ca/fr/seances-du-conseil-et-documents-publics",
+  sourceId: "avis-publics-saint-constant",
+};
+
+/** Factory shortcut for the Saint-Constant avis-publics adapter. */
+export function createAvisPublicsSaintConstantAdapter(
+  options: AvisAdapterOptions = {},
+): AvisPublicsGenericAdapter {
+  return new AvisPublicsGenericAdapter(SAINT_CONSTANT_AVIS_CONFIG, options);
+}
