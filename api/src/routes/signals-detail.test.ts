@@ -95,6 +95,8 @@ const STATE_WITH_DESIGNATION_EVENT: OntologyProjectState = {
       normalized_terms: ["1926-26", "1927-26"],
       source_refs: [PV_RAW_REF],
       zoneRefs: ["H-431"],
+      // structured field — primary path for extractReglementNumbers
+      reglementNumbers: ["1926-26", "1927-26"],
     },
   ],
   candidates: [],
@@ -150,6 +152,8 @@ const STATE_CHATEAUGUAY: OntologyProjectState = {
       normalized_terms: ["z-3001"],
       source_refs: [CHATEAUGUAY_PV_RAW_REF],
       zoneRefs: ["C-754", "C-810", "H-812"],
+      // structured field — primary path for extractReglementNumbers (pass 1)
+      reglementNumbers: ["Z-3001"],
     },
   ],
   candidates: [],
@@ -330,6 +334,7 @@ describe("GET /api/signals/:city/detail", () => {
           normalized_terms: ["1926-26", "1927-26"],
           source_refs: [PV_RAW_REF],
           zoneRefs: ["H-431"],
+          reglementNumbers: ["1926-26", "1927-26"],
         },
       ],
       candidates: [],
@@ -411,5 +416,112 @@ describe("GET /api/signals/chateauguay/detail — séparation règlement Z-3001 
     // Digit-prefix règlement numbers must NOT appear in zoneRefs.
     expect(event.zoneRefs).not.toContain("1926-26");
     expect(event.zoneRefs).not.toContain("1927-26");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Saint-Rémi — champ structuré reglementNumbers (format multi-segment V654-2026-33)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SAINT_REMI_PV_RAW_REF =
+  "raw/proces-verbaux-saint-remi/2026/04/20/20260420_pv.txt";
+
+/**
+ * Saint-Rémi fixture: DesignationEvent with multi-segment règlement V654-2026-33.
+ * This format was NOT recognised by the legacy regex approach
+ * (/^\d[\d-]+\d$/ or /^[A-Za-z]-\d{3,4}$/) and caused reglementNumbers=[].
+ * With the structured-field primary path, V654-2026-33 is read directly.
+ */
+const STATE_SAINT_REMI: OntologyProjectState = {
+  schema: "radar_ontology_project_state_v1",
+  citySlug: "saint-remi",
+  profileHash: "e".repeat(64),
+  generatedAt: GENERATED_AT,
+  rawRefs: [SAINT_REMI_PV_RAW_REF],
+  mentions: [
+    {
+      id: "mention:designationevent:saint-remi-v654-2026-33",
+      type: "DesignationEvent",
+      label: "Avis de motion règlement de zonage V654-2026-33",
+      // norm() lowercases: "v654-2026-33" — fails all legacy regex patterns
+      normalized_terms: ["v654-2026-33"],
+      source_refs: [SAINT_REMI_PV_RAW_REF],
+      // structured field — parser-extracted verbatim, all formats pass
+      reglementNumbers: ["V654-2026-33"],
+    },
+  ],
+  candidates: [],
+  canonicals: [
+    {
+      id: "designationevent::saint-remi::v654-2026-33",
+      type: "DesignationEvent",
+      label: "Avis de motion règlement de zonage V654-2026-33",
+      aliases: [],
+      memberMentionIds: ["mention:designationevent:saint-remi-v654-2026-33"],
+      evidenceRefs: [SAINT_REMI_PV_RAW_REF],
+      status: "candidate",
+    },
+  ],
+};
+
+describe("GET /api/signals/saint-remi/detail — champ structuré (V654-2026-33 multi-segment)", () => {
+  it("reglementNumbers contient V654-2026-33 (lu depuis le champ structuré, pas regex)", async () => {
+    const store = new MemoryStore();
+    await seedState(store, STATE_SAINT_REMI);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request("/api/signals/saint-remi/detail");
+    expect(res.status).toBe(200);
+
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    // Primary path: reads reglementNumbers directly, no format regex → works
+    expect(event.reglementNumbers).toContain("V654-2026-33");
+    // Must NOT be empty (was the bug: legacy regex missed this format)
+    expect(event.reglementNumbers.length).toBeGreaterThan(0);
+  });
+
+  it("fallback: mention SANS reglementNumbers + normalized_terms=['1926-26'] → reglementNumbers=['1926-26']", async () => {
+    // Verify the legacy fallback still works for data without the structured field.
+    const stateLegacy: OntologyProjectState = {
+      schema: "radar_ontology_project_state_v1",
+      citySlug: "saint-remi",
+      profileHash: "f".repeat(64),
+      generatedAt: GENERATED_AT,
+      rawRefs: [SAINT_REMI_PV_RAW_REF],
+      mentions: [
+        {
+          id: "mention:designationevent:saint-remi-legacy",
+          type: "DesignationEvent",
+          label: "Avis de motion règlement de zonage 1926-26",
+          // No reglementNumbers field — legacy data path
+          normalized_terms: ["1926-26"],
+          source_refs: [SAINT_REMI_PV_RAW_REF],
+        },
+      ],
+      candidates: [],
+      canonicals: [
+        {
+          id: "designationevent::saint-remi::legacy",
+          type: "DesignationEvent",
+          label: "Avis de motion règlement de zonage 1926-26",
+          aliases: [],
+          memberMentionIds: ["mention:designationevent:saint-remi-legacy"],
+          evidenceRefs: [SAINT_REMI_PV_RAW_REF],
+          status: "candidate",
+        },
+      ],
+    };
+    const store = new MemoryStore();
+    await seedState(store, stateLegacy);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request("/api/signals/saint-remi/detail");
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    // Fallback (pass 2) extracts "1926-26" from normalized_terms via digit regex.
+    expect(event.reglementNumbers).toContain("1926-26");
   });
 });
