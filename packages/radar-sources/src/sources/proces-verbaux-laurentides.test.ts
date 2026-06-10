@@ -251,7 +251,7 @@ describe("parsePvIndex – Saint-Eustache index HTML (annual compiled PDFs)", ()
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. detectZonageChange — Sainte-Thérèse Mars 2026: honnête (window cut par paragraphe)
+// 5. detectZonageChange — Sainte-Thérèse Mars 2026: fenêtre étendue au 2e paragraphe
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("detectZonageChange – Sainte-Thérèse Mars 2026 (règlement 1200-93, zone C-254)", () => {
@@ -261,24 +261,24 @@ describe("detectZonageChange – Sainte-Thérèse Mars 2026 (règlement 1200-93,
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("changementZonage=false car la fenêtre 400 chars est coupée au saut de paragraphe (\\n\\n)", () => {
-    // HONEST LIMITATION: detectZonageChange uses a ±400 char context window
-    // capped at paragraph breaks (\n\n). In this PV, the "ATTENDU l'avis de motion"
-    // phrase is followed by paragraph text about "règlement 1200-93 (P-1) N.S.", but
-    // "règlement de zonage 1200 N.S." appears in the NEXT paragraph (after the \n\n
-    // blank line that separates "ATTENDU l'assemblée de consultation publique..." from
-    // "Sur proposition de M. le Conseiller...").
-    // The algorithm correctly avoids cross-paragraph contamination, but this means
-    // it does NOT fire for this PV structure.
-    // Honest: the text DOES contain a real zonage change (règlement 1200-93 agrandissant
-    // zone C-254), but detectZonageChange returns false due to paragraph-boundary capping.
-    // This is a known algorithm limitation for PDFs with multi-paragraph resolution structure.
-    expect(result.changementZonage).toBe(false);
+  it("changementZonage=true : fenêtre étendue au 2e paragraphe (règlement 1200-93 + règlement de zonage 1200 N.S.)", () => {
+    // EXTENDED FORWARD WINDOW (fix 2026-06): when the first forward paragraph after
+    // "ATTENDU l'avis de motion" contains a règlement number (règlement 1200-93) but
+    // NO zonage keyword, detectZonageChange now extends the forward window to the
+    // second \n\n. This captures "règlement de zonage 1200 N.S." in the
+    // "Sur proposition … QUE le projet de règlement numéro 1200-93 … agrandissant
+    // la zone C-254 à même la zone H-202-1 de l'annexe A du règlement de zonage
+    // 1200 N.S., soit et est adopté" paragraph.
+    // Anti-FP: extension only fires when the 1st forward para has a règlement number;
+    // Vaudreuil-Dorion's "démolition" para has no hyphenated number → no extension.
+    expect(result.changementZonage).toBe(true);
+  });
+
+  it("reglementNumbers contient '1200-93' (REGLEMENT_NUMBER_RE via fenêtre étendue)", () => {
+    expect(result.reglementNumbers).toContain("1200-93");
   });
 
   it("le texte brut contient 'règlement de zonage 1200 N.S.' et '1200-93'", () => {
-    // Confirming the raw text DOES have the zonage content — detectZonageChange
-    // just doesn't cross the paragraph boundary to find it.
     const lower = PV_SAINTE_THERESE_2026_03_TEXT.toLowerCase();
     expect(lower).toContain("règlement de zonage");
     expect(PV_SAINTE_THERESE_2026_03_TEXT).toContain("1200-93");
@@ -287,33 +287,42 @@ describe("detectZonageChange – Sainte-Thérèse Mars 2026 (règlement 1200-93,
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. detectZonageChange — Deux-Montagnes Avril 2026: honnête (numéros sans tiret)
+// 6. detectZonageChange — Deux-Montagnes Avril 2026: entiers captés via REGLEMENT_NOHYPHEN_RE
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("detectZonageChange – Deux-Montagnes Avril 2026 (règl. de zonage Règl. n°1733, zones H-204/H-381/P-386)", () => {
   const result = detectZonageChange(PV_DEUX_MONTAGNES_2026_04_TEXT);
 
-  it("détecte avisDeMotion (past-tense form: 'avis de motion...a dûment été donné')", () => {
-    // AVIS_MOTION_PAST_TENSE_RE matches "avis de motion du présent règlement a dûment été donné"
+  it("détecte avisDeMotion ('avis de motion...a dûment été donné' présent)", () => {
+    // AVIS_MOTION_RE matches "avis de motion" in "un avis de motion du présent règlement
+    // a dûment été donné" (non-past-tense form — "dûment" intervenes before "a").
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("changementZonage=false car règlements 1767/1768/1769/1770 sont des entiers sans tiret", () => {
-    // HONEST LIMITATION: Deux-Montagnes uses sequential non-hyphenated numbering
-    // (1767, 1768, 1769, 1770). REGLEMENT_NUMBER_RE requires \d{2,4}-\d{1,4} (hyphenated).
-    // The algorithm requires BOTH a matching règlement number AND a "zonage" keyword
-    // within the same ±400 char context window.
-    //
-    // Past-tense form ("avis de motion a dûment été donné") sets ctxStart = idx
-    // (zero backward window). The forward window from the past-tense match needs
-    // to contain BOTH a règlement number (hyphenated \d{2,4}-\d{1,4}) AND a zonage keyword.
-    // "1767" alone has no hyphen → REGLEMENT_NUMBER_RE doesn't match → regNumbers=[].
-    // Since regNumbers.length === 0, even with ZONAGE_KEYWORDS_RE matching, changementZonage=false.
-    //
-    // The text DOES contain real zonage changes (règlements 1767-1770 modifying règlement de
-    // zonage Règl. n°1733), but the municipality's numbering format evades the detection regex.
-    // This is a known limitation: Deux-Montagnes would need custom detection support.
-    expect(result.changementZonage).toBe(false);
+  it("changementZonage=true : règlements 1767–1770 captés via REGLEMENT_NOHYPHEN_RE (entiers nº/n°)", () => {
+    // REGLEMENT_NOHYPHEN_RE (fix 2026-06): captures 3-4 digit integers immediately
+    // preceded by "règlement nº/n°/no/numéro", ONLY when the context window already
+    // has a ZONAGE_KEYWORDS_RE match. In Deux-Montagnes, each section header reads:
+    //   "Adoption – Règlement nº 1767 - Règlement modifiant le Règlement de zonage
+    //    (Règl. n°1733)"
+    // The backward window from "avis de motion" captures this header (prev \n\n is
+    // right before the section header). REGLEMENT_NOHYPHEN_RE extracts 1767 (new)
+    // and 1733 (modified via MODIFIANT_NOHYPHEN_RE → excluded). Final: [1767].
+    // Anti-FP guard: the ZONAGE_KEYWORDS_RE test ensures integers are only captured
+    // in a confirmed zonage context, not for any règlement mention.
+    expect(result.changementZonage).toBe(true);
+  });
+
+  it("reglementNumbers contient au moins un des règlements 1767–1770", () => {
+    const nums = result.reglementNumbers;
+    const hasAny = nums.some((n) => ["1767", "1768", "1769", "1770"].includes(n));
+    expect(hasAny).toBe(true);
+  });
+
+  it("reglementNumbers ne contient pas 1733 (règlement modifié, exclu)", () => {
+    // 1733 is the MODIFIED règlement (Règl. n°1733 in the "modifiant" clause).
+    // MODIFIANT_NOHYPHEN_RE marks it as modified → excluded by filterNewReglements.
+    expect(result.reglementNumbers).not.toContain("1733");
   });
 
   it("le texte brut contient 'Règlement de zonage' et les zones H-204, H-381, P-386", () => {
@@ -333,7 +342,7 @@ describe("detectZonageChange – Deux-Montagnes Avril 2026 (règl. de zonage Rè
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. detectZonageChange — Mirabel Avril 2026: honnête (préfixe lettres U-2300)
+// 7. detectZonageChange — Mirabel Avril 2026: U-2300 capté via REGLEMENT_ZONAGE_LETTER_RE étendu
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("detectZonageChange – Mirabel Avril 2026 (avis de motion règlement de zonage U-2300)", () => {
@@ -343,19 +352,19 @@ describe("detectZonageChange – Mirabel Avril 2026 (avis de motion règlement d
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("changementZonage=false car Mirabel utilise la numérotation U-préfixe (U-2300, U-2701)", () => {
-    // HONEST LIMITATION: Mirabel uses letter-prefix numbering (U-2300, U-2701).
-    // REGLEMENT_NUMBER_RE matches \d{2,4}-\d{1,4} (digits-only hyphenated).
-    // REGLEMENT_ZONAGE_LETTER_RE matches [A-Z]-\d{3,4} (single-letter prefix like Z-3001,
-    //   BUT only when "règlement de zonage" immediately precedes it).
-    // "règlement de zonage numéro U-2300" → "numéro" is between "zonage" and "U-2300",
-    //   so REGLEMENT_ZONAGE_LETTER_RE ("règlement de zonage [A-Z]-\d{3,4}") doesn't match.
-    // REGLEMENT_VPREFIX_RE matches [A-Z]\d{2,4}-\d{4}-\d{1,3} — "U-2300" only has one segment
-    //   after the letter, not the compound year format.
-    // Result: regNumbers=[] → changementZonage=false (correct anti-faux-positif behavior).
-    // The text DOES contain real zonage changes, but Mirabel's numbering format
-    // requires custom parser support (prefixing rule with "numéro" separator).
-    expect(result.changementZonage).toBe(false);
+  it("changementZonage=true : U-2300 capté par REGLEMENT_ZONAGE_LETTER_RE étendu (numéro intercalé)", () => {
+    // REGLEMENT_ZONAGE_LETTER_RE extended (fix 2026-06): now allows an optional
+    // n°/nº/no/numéro between "règlement de zonage" and the letter-prefix code.
+    // In Mirabel, résolution 225-04-2026 reads:
+    //   "un règlement modifiant le règlement de zonage numéro U-2300 de façon à…"
+    // The extended regex matches "règlement de zonage numéro U-2300" → U-2300.
+    // Precision preserved: "règlement de zonage" prefix still required (prevents
+    // "zone U-xxx" or "règlement sur les permis... U-2303" from matching).
+    expect(result.changementZonage).toBe(true);
+  });
+
+  it("reglementNumbers contient 'U-2300'", () => {
+    expect(result.reglementNumbers).toContain("U-2300");
   });
 
   it("ANTI-FAUX-POSITIF: résolution 223-04-2026 (U-2700 permis et certificats) n'est PAS zonage", () => {
@@ -375,7 +384,7 @@ describe("detectZonageChange – Mirabel Avril 2026 (avis de motion règlement d
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 8. detectZonageChange — Saint-Eustache Fév 2026: honnête (entiers sans tiret: 1998, 1675)
+// 8. detectZonageChange — Saint-Eustache Fév 2026: 1998 capté via REGLEMENT_NOHYPHEN_RE
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("detectZonageChange – Saint-Eustache Fév 2026 (règlement 1998 Règlement de zonage, remplace 1675)", () => {
@@ -386,17 +395,25 @@ describe("detectZonageChange – Saint-Eustache Fév 2026 (règlement 1998 Règl
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("changementZonage=false car Saint-Eustache utilise des entiers sans tiret (1998, 1675)", () => {
-    // HONEST LIMITATION: Saint-Eustache uses sequential non-hyphenated numbering
-    // (1998, 1675, 1999, 1673, etc.). REGLEMENT_NUMBER_RE requires \d{2,4}-\d{1,4} (hyphenated).
-    // The text "donne avis de motion... règlement numéro 1675... concernant le règlement de zonage"
-    // has "1675" without a hyphen, and "1998" (the new règlement) also has no hyphen.
-    // → regNumbers=[] → changementZonage=false.
-    //
-    // The text DOES contain a real zonage change (règlement 1998 "Règlement de zonage"
-    // replacing règlement 1675), but the non-hyphenated numbering evades REGLEMENT_NUMBER_RE.
-    // This is a known limitation: Saint-Eustache would need custom detection support.
-    expect(result.changementZonage).toBe(false);
+  it("changementZonage=true : règlement 1998 capté via REGLEMENT_NOHYPHEN_RE (entier numéro 1998)", () => {
+    // REGLEMENT_NOHYPHEN_RE (fix 2026-06): captures non-hyphenated integers
+    // preceded by "règlement numéro", ONLY in a confirmed zonage context.
+    // In Saint-Eustache, the context window for "donne avis de motion" includes:
+    //   "Règlement numéro 1998 intitulé « Règlement de zonage »"
+    // REGLEMENT_NOHYPHEN_RE extracts: 1998 (new), 1675 (to be replaced).
+    // REMPLACER_NOHYPHEN_RE marks 1675 as modified ("remplacer le règlement
+    // numéro 1675 en vigueur concernant le règlement de zonage") → excluded.
+    // Final reglementNumbers: ["1998"].
+    // Anti-FP: the "concernant le règlement de LOTISSEMENT" section (4.3.5) does
+    // NOT have "zonage" in its window → REGLEMENT_NOHYPHEN_RE not applied there.
+    expect(result.changementZonage).toBe(true);
+  });
+
+  it("reglementNumbers contient '1998' et ne contient pas '1675' (remplacé, exclu)", () => {
+    expect(result.reglementNumbers).toContain("1998");
+    // 1675 is the OLD règlement being replaced (not the new proposed one).
+    // REMPLACER_NOHYPHEN_RE marks it as modified → excluded by filterNewReglements.
+    expect(result.reglementNumbers).not.toContain("1675");
   });
 
   it("le texte brut contient 'règlement de zonage' et '1998' et '1675'", () => {
