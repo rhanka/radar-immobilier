@@ -145,7 +145,9 @@ const STATE_CHATEAUGUAY: OntologyProjectState = {
       type: "DesignationEvent",
       label:
         "Avis de motion règlement de zonage Z-3001 visant à permettre les bâtiments de 4 étages dans la zone C-754",
-      normalized_terms: ["Z-3001"],
+      // norm() lowercases terms in the real pipeline; use the realistic form so
+      // the case-insensitive extraction is actually exercised (z-3001 → Z-3001).
+      normalized_terms: ["z-3001"],
       source_refs: [CHATEAUGUAY_PV_RAW_REF],
       zoneRefs: ["C-754", "C-810", "H-812"],
     },
