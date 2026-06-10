@@ -28,18 +28,18 @@
  *   - Candiac: PV text non disponible (PDFs scannés, aucune couche texte)
  *       → détection non applicable; index listing OK (≥5 refs PDF dans la fenêtre)
  *   - Saint-Rémi Avril 2026:
- *       avisDeMotion=true, changementZonage=false (LIMITATION DU PARSER)
- *       (vrai changement zonage V654-2026-33 présent mais numéro V-préfixe non
- *       reconnu par REGLEMENT_NUMBER_RE ni REGLEMENT_ZONAGE_LETTER_RE)
- *       → 0 faux positif confirmé
+ *       avisDeMotion=true, changementZonage=true (DÉTECTION RÉELLE)
+ *       (V654-2026-33 amendant règlement de zonage V654-2017-00 — capturé par
+ *       REGLEMENT_VPREFIX_RE quand contexte contient "règlement de zonage")
+ *       reglementNumbers=[V654-2026-33]
  *
  * Suite de tests:
  *   1. parsePvIndex — Sainte-Martine: parse les liens PDF directs (document-item structure)
  *   2. parsePvIndex — Candiac: parse les liens PDF directs (ul/li structure)
  *   3. parsePvIndex — Saint-Rémi: parse les liens PDF directs (Elementor accordion structure)
  *   4. detectZonageChange — Sainte-Martine Avril 2026: zonage RÉEL détecté (2026-510)
- *   5. detectZonageChange — Saint-Rémi Avril 2026: avisDeMotion=true, changementZonage=false
- *      (parser limitation V-prefix, pas de faux positif)
+ *   5. detectZonageChange — Saint-Rémi Avril 2026: avisDeMotion=true, changementZonage=true
+ *      (V654-2026-33 détecté via REGLEMENT_VPREFIX_RE, V654-2017-00 exclu comme modifié)
  *   6. ProcesVerbauxGenericAdapter.list() — Sainte-Martine (mocked fetch)
  *   7. ProcesVerbauxGenericAdapter.list() — Candiac (mocked fetch)
  *   8. ProcesVerbauxGenericAdapter.list() — Saint-Rémi (mocked fetch)
@@ -235,6 +235,14 @@ describe("detectZonageChange – Sainte-Martine Avril 2026 (zonage réel 2026-51
     expect(result.reglementNumbers).not.toContain("2019-341");
   });
 
+  it("zoneRefs contient MxtV-2 (zone à casse mixte, capturée par ZONE_CODE_CONTEXT_RE)", () => {
+    // PRECISION FIX: ZONE_CODE_CONTEXT_RE now captures mixed-case zone codes preceded
+    // by the word "zone" (e.g. "zone MxtV-2"). The all-uppercase ZONE_CODE_RE cannot
+    // match "MxtV" (mixed case) or the single-digit suffix "-2" (requires 2+ digits).
+    // Verbatim from real PV: "afin d'agrandir la zone MxtV-2"
+    expect(result.zoneRefs).toContain("MxtV-2");
+  });
+
   it("le texte brut contient bien 'règlement de zonage' et 'zone MxtV-2'", () => {
     expect(PV_SAINTE_MARTINE_2026_04_TEXT.toLowerCase()).toContain("règlement de zonage");
     expect(PV_SAINTE_MARTINE_2026_04_TEXT).toContain("zone MxtV-2");
@@ -243,30 +251,42 @@ describe("detectZonageChange – Sainte-Martine Avril 2026 (zonage réel 2026-51
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 5. detectZonageChange — Saint-Rémi Avril 2026: avisDeMotion=true, 0 faux positif
+// 5. detectZonageChange — Saint-Rémi Avril 2026: changementZonage=true, V654-2026-33
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("detectZonageChange – Saint-Rémi Avril 2026 (V-prefix limitation, 0 faux positif)", () => {
+describe("detectZonageChange – Saint-Rémi Avril 2026 (V-prefix détecté, changementZonage=true)", () => {
   const result = detectZonageChange(PV_SAINT_REMI_2026_04_TEXT);
 
   it("détecte avisDeMotion ('donne avis de motion' présent pour V654-2026-33)", () => {
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("NE lève PAS changementZonage (limitation parser V-préfixe)", () => {
-    // HONEST LIMITATION: V654-2026-33 is a real zonage change but the parser
-    // does not recognize V-prefix règlement numbers (REGLEMENT_NUMBER_RE requires
-    // numeric-only; REGLEMENT_ZONAGE_LETTER_RE requires [A-Z]-\d{3,4} like Z-3001).
-    // This is a documented gap, not a false positive.
-    expect(result.changementZonage).toBe(false);
+  it("lève changementZonage=true (V654-2026-33 amendant règlement de zonage V654-2017-00)", () => {
+    // PRECISION FIX: REGLEMENT_VPREFIX_RE now captures compound V-prefix règlement
+    // numbers (e.g. V654-2026-33) when the context window contains "règlement de
+    // zonage". The phrase "amendant le règlement de zonage numéro V654-2017-00" in
+    // the same context provides the zonage keyword.
+    expect(result.changementZonage).toBe(true);
   });
 
-  it("reglementNumbers vide (V654-2026-33 non extrait)", () => {
-    expect(result.reglementNumbers).toEqual([]);
+  it("extrait V654-2026-33 en reglementNumbers (nouveau règlement de zonage)", () => {
+    // V654-2026-33 is the NEW règlement (object of the avis de motion).
+    // V654-2017-00 is the OLD règlement (excluded by MODIFIANT_REGLEMENT_VPREFIX_RE
+    // + filterNewReglements: "amendant le règlement de zonage numéro V654-2017-00").
+    expect(result.reglementNumbers).toContain("V654-2026-33");
+    // V654-2017-00 = l'ancien règlement modifié, PAS un nouvel avis de motion
+    expect(result.reglementNumbers).not.toContain("V654-2017-00");
   });
 
-  it("le texte contient bien 'règlement de zonage' et 'V654-2026-33' (faux négatif, pas faux positif)", () => {
-    // Confirms: the real zonage text IS present, just not detected due to parser limitation
+  it("NE contient PAS V655-2026-03 ni V700-2026-09 (lotissement + tarification — pas zonage)", () => {
+    // V655-2026-03 = règlement de lotissement (context has no "zonage" keyword)
+    // V700-2026-09 = tarification (context has no "zonage" keyword)
+    // Both are excluded by the ZONAGE_KEYWORDS_RE guard on REGLEMENT_VPREFIX_RE.
+    expect(result.reglementNumbers).not.toContain("V655-2026-03");
+    expect(result.reglementNumbers).not.toContain("V700-2026-09");
+  });
+
+  it("le texte contient bien 'règlement de zonage' et 'V654-2026-33' (détection réelle)", () => {
     expect(PV_SAINT_REMI_2026_04_TEXT.toLowerCase()).toContain("règlement de zonage");
     expect(PV_SAINT_REMI_2026_04_TEXT).toContain("V654-2026-33");
   });
