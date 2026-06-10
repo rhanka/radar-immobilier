@@ -116,6 +116,22 @@ export {
   PV_LAVALTRIE_INDEX_HTML,
   PV_LAVALTRIE_2026_05_TEXT,
 } from "./sources/proces-verbaux-lavaltrie.fixture.js";
+export {
+  PV_LES_CEDRES_INDEX_HTML,
+  PV_LES_CEDRES_2026_05_TEXT,
+} from "./sources/proces-verbaux-les-cedres.fixture.js";
+export {
+  PV_PINCOURT_INDEX_HTML,
+  PV_PINCOURT_2026_05_TEXT,
+} from "./sources/proces-verbaux-pincourt.fixture.js";
+export {
+  PV_COTEAU_DU_LAC_INDEX_HTML,
+  PV_COTEAU_DU_LAC_2026_04_TEXT,
+} from "./sources/proces-verbaux-coteau-du-lac.fixture.js";
+export {
+  PV_LES_COTEAUX_INDEX_HTML,
+  PV_LES_COTEAUX_2026_04_TEXT,
+} from "./sources/proces-verbaux-les-coteaux.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
