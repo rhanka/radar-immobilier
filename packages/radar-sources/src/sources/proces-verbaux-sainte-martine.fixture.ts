@@ -139,7 +139,7 @@ export const PV_SAINTE_MARTINE_INDEX_HTML = `
  *     2019-342 afin d'agrandir la zone MxtV-2"; idem 2026-511 if in excerpt)
  *   - reglementNumbers: ["2026-510"]  ← SEUL le vrai règlement de zonage
  *     (les autres exclus car leur contexte immédiat ne contient pas "zonage")
- *   - zoneRefs: [] (MxtV-2 uses non-standard format not matched by ZONE_CODE_RE)
+ *   - zoneRefs: ["MxtV-2"] (capturée par ZONE_CODE_CONTEXT_RE: "zone MxtV-2")
  *
  * Preuve tirée du texte réel :
  *   Règlement 2026-507 = contrôle et garde des animaux (PAS de "zonage" → exclus).
@@ -148,6 +148,7 @@ export const PV_SAINTE_MARTINE_INDEX_HTML = `
  *     ("plan d'urbanisme" ≠ "règlement de zonage" / "règlement d'urbanisme" → exclus).
  *   Règlement 2026-510 = modifiant le "Règlement de zonage numéro 2019-342", zone MxtV-2
  *     → ZONAGE CONFIRMÉ, seul numéro retenu dans reglementNumbers.
+ *     "zone MxtV-2" capturée par ZONE_CODE_CONTEXT_RE (casse mixte + 1 chiffre).
  *   Règlement 2019-342 = ancien règlement modifié (cible de "modifiant le Règlement de
  *     zonage numéro 2019-342") → exclu par filterNewReglements().
  *   Règlement 2026-511 = hors-fixture (non inclus dans cet extrait).

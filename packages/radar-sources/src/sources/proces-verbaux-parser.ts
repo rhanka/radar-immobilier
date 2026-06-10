@@ -278,8 +278,34 @@ const REGLEMENT_NUMBER_RE =
 const REGLEMENT_ZONAGE_LETTER_RE =
   /r[eè]glement\s+de\s+zonage\s+([A-Z]-\d{3,4})\b/gi;
 
-/** Zone code pattern (matches Valleyfield codes like H-521, C-627-3). */
+/**
+ * V-prefix règlement-number pattern for municipalities using compound-prefix
+ * numbering (e.g. Saint-Rémi: V654-2026-33, V655-2026-03).
+ *
+ * Format: one uppercase letter + 2–4 digits + "-" + 4-digit year + "-" + 1–3 digits.
+ *
+ * PRECISION GUARD: only applied when the surrounding context window already
+ * contains a "règlement de zonage" keyword (checked by the caller), preventing
+ * false positives from other V-prefix bylaws such as tarification (V700-2026-09).
+ * Group 1 captures the full V-prefix number.
+ */
+const REGLEMENT_VPREFIX_RE =
+  /r[eè]glement\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?([A-Z]\d{2,4}-\d{4}-\d{1,3})\b/gi;
+
+/** Zone code pattern (matches Valleyfield codes like H-521, C-627-3). All-uppercase. */
 const ZONE_CODE_RE = /\b([A-Z]{1,4}-\d{2,4}(?:-\d{1,3})?)\b/g;
+
+/**
+ * Mixed-case zone code pattern for municipalities using non-standard casing
+ * (e.g. Sainte-Martine: MxtV-2).
+ *
+ * PRECISION GUARD: requires the literal word "zone " immediately before the
+ * code. This ensures only genuine zone designators are captured and prevents
+ * ordinary words or règlement numbers from being mistaken for zone codes.
+ * Allows 1–4 letters (mixed case) followed by "-" and 1–4 digits.
+ * Group 1 captures the zone code (preserving verbatim casing).
+ */
+const ZONE_CODE_CONTEXT_RE = /\bzone\s+([A-Za-z]{1,4}-\d{1,4}(?:-\d{1,3})?)\b/gi;
 
 /**
  * Keywords that indicate a change to the zoning bylaw (high-precision).
@@ -302,11 +328,15 @@ const DENSITE_RE =
  * Extract all règlement numbers cited in a text window (case-insensitive,
  * deduped, verbatim).
  *
- * Handles two numbering styles:
+ * Handles three numbering styles:
  *   - Digit-only (e.g. 1926-26, 2024-58): via REGLEMENT_NUMBER_RE
- *   - Letter-prefix zonage bylaws (e.g. Z-3001): via REGLEMENT_ZONAGE_LETTER_RE
+ *   - Single-letter-prefix zonage bylaws (e.g. Z-3001): via REGLEMENT_ZONAGE_LETTER_RE
  *     (only matched when explicitly preceded by "règlement de zonage", to
  *     prevent confusing zone codes like C-754 with règlement identifiers)
+ *   - Compound V-prefix zonage bylaws (e.g. V654-2026-33): via REGLEMENT_VPREFIX_RE
+ *     (only applied when the context already contains a "règlement de zonage"
+ *     keyword, preventing false positives from non-zonage V-prefix bylaws such as
+ *     tarification — V700-2026-09)
  */
 function extractReglementNumbers(window: string): string[] {
   const numbers: string[] = [];
@@ -318,6 +348,15 @@ function extractReglementNumbers(window: string): string[] {
   for (const m of window.matchAll(reZ)) {
     if (m[1]) numbers.push(m[1]);
   }
+  // V-prefix compound numbers (e.g. V654-2026-33): only apply when context
+  // explicitly references "règlement de zonage" to avoid catching non-zonage
+  // V-prefix bylaws (e.g. tarification V700-2026-09).
+  if (ZONAGE_KEYWORDS_RE.test(window)) {
+    const reV = new RegExp(REGLEMENT_VPREFIX_RE.source, "gi");
+    for (const m of window.matchAll(reV)) {
+      if (m[1]) numbers.push(m[1]);
+    }
+  }
   return Array.from(new Set(numbers));
 }
 
@@ -325,7 +364,13 @@ function extractReglementNumbers(window: string): string[] {
  * Extract zone codes from a text window (deduped), excluding codes that are
  * actually règlement numbers.
  *
- * Two-pass exclusion:
+ * Two passes:
+ *   Pass A — standard all-uppercase codes (ZONE_CODE_RE): matches H-521, C-627-3.
+ *   Pass B — mixed-case codes preceded by "zone " (ZONE_CODE_CONTEXT_RE): matches
+ *     MxtV-2 and similar non-standard municipal zone designators that cannot be
+ *     captured by the all-uppercase pattern.
+ *
+ * Two-pass exclusion (applied to both):
  *   1. Any code already captured by `reglementNumbers` (e.g. Z-3001 captured
  *      via REGLEMENT_ZONAGE_LETTER_RE) is excluded from zoneRefs.
  *   2. Any code immediately preceded (within 40 chars) by the word "règlement"
@@ -335,10 +380,13 @@ function extractReglementNumbers(window: string): string[] {
  *
  * This prevents pollution of the form zoneRefs=[C-754,C-810,H-812,Z-3001,Z-3300]
  * and produces the expected zoneRefs=[C-754,C-810,H-812].
+ * For Sainte-Martine, "zone MxtV-2" is captured by Pass B → zoneRefs=[MxtV-2].
  */
 function extractZoneCodes(window: string, reglementNumbers: string[] = []): string[] {
   const reglementSet = new Set(reglementNumbers.map((r) => r.toUpperCase()));
   const codes: string[] = [];
+
+  // Pass A: standard all-uppercase zone codes.
   const re = new RegExp(ZONE_CODE_RE.source, "g");
   for (const m of window.matchAll(re)) {
     const code = m[1];
@@ -351,16 +399,36 @@ function extractZoneCodes(window: string, reglementNumbers: string[] = []): stri
     if (/r[eè]glement\b/i.test(lookback)) continue;
     codes.push(code);
   }
+
+  // Pass B: mixed-case zone codes that require the "zone " context prefix.
+  // Only captures codes NOT already found by Pass A (case-insensitive dedup).
+  const existingUpper = new Set(codes.map((c) => c.toUpperCase()));
+  const reCtx = new RegExp(ZONE_CODE_CONTEXT_RE.source, "gi");
+  for (const m of window.matchAll(reCtx)) {
+    const code = m[1];
+    if (!code) continue;
+    // Exclude if already in règlement numbers or already captured by Pass A.
+    if (reglementSet.has(code.toUpperCase())) continue;
+    if (existingUpper.has(code.toUpperCase())) continue;
+    codes.push(code);
+  }
+
   return Array.from(new Set(codes));
 }
 
 /**
  * Pattern that matches a règlement number appearing as the TARGET of a
- * "modifiant" clause, e.g. "modifiant le règlement de zonage numéro 2019-342"
- * or "modifiant le règlement d'urbanisme numéro 150-49".
+ * "modifiant" / "amendant" clause, e.g.:
+ *   "modifiant le règlement de zonage numéro 2019-342"
+ *   "amendant le règlement de zonage numéro V654-2017-00"
+ *   "modifiant le règlement d'urbanisme numéro 150-49"
  *
  * Group 1 captures the number of the EXISTING (modified) règlement — NOT the
  * new proposed règlement that is the actual object of the avis de motion.
+ *
+ * Two sub-patterns cover both numbering styles:
+ *   - Digit-only modified numbers (e.g. 2019-342): MODIFIANT_REGLEMENT_RE
+ *   - V-prefix modified numbers (e.g. V654-2017-00): MODIFIANT_REGLEMENT_VPREFIX_RE
  *
  * Used to distinguish new règlements (proposed) from referenced/modified ones
  * when both appear in the same context window.  If the context contains ONLY
@@ -368,13 +436,18 @@ function extractZoneCodes(window: string, reglementNumbers: string[] = []): stri
  * zonage Z-3001" with no separate new number), the modified numbers are kept.
  */
 const MODIFIANT_REGLEMENT_RE =
-  /modifiant\s+le\s+r[eè]glement\s+(?:de\s+zonage|d[''']urbanisme)\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
+  /(?:modifiant|amendant)\s+le\s+r[eè]glement\s+(?:de\s+zonage|d[''']urbanisme)\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
+
+/** Same as MODIFIANT_REGLEMENT_RE but for V-prefix compound numbers (e.g. V654-2017-00). */
+const MODIFIANT_REGLEMENT_VPREFIX_RE =
+  /(?:modifiant|amendant)\s+le\s+r[eè]glement\s+(?:de\s+zonage|d[''']urbanisme)\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?([A-Z]\d{2,4}-\d{4}-\d{1,3})\b/gi;
 
 /**
- * Extract règlement numbers that are the TARGET of a "modifiant" clause
- * within a context window (i.e. the OLD règlement being amended, not the new
- * proposed one).  Returns an empty set when none are found.
+ * Extract règlement numbers that are the TARGET of a "modifiant" / "amendant"
+ * clause within a context window (i.e. the OLD règlement being amended, not the
+ * new proposed one).  Returns an empty set when none are found.
  *
+ * Handles both digit-only (2019-342) and V-prefix (V654-2017-00) numbers.
  * These are EXCLUDED from `reglementNumbers` when distinct new règlement
  * numbers exist in the same context.
  */
@@ -382,6 +455,10 @@ function extractModifiedReglementNumbers(window: string): Set<string> {
   const modified = new Set<string>();
   const re = new RegExp(MODIFIANT_REGLEMENT_RE.source, "gi");
   for (const m of window.matchAll(re)) {
+    if (m[1]) modified.add(m[1]);
+  }
+  const reV = new RegExp(MODIFIANT_REGLEMENT_VPREFIX_RE.source, "gi");
+  for (const m of window.matchAll(reV)) {
     if (m[1]) modified.add(m[1]);
   }
   return modified;
