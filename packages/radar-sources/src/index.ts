@@ -36,6 +36,14 @@ export {
   PV_SAINT_DAMASE_2026_03_NEGATIVE,
   PV_SAINT_DAMASE_INDEX_HTML,
 } from "./sources/proces-verbaux-saint-damase.fixture.js";
+export {
+  PV_SAINT_CONSTANT_2026_05_TEXT,
+  PV_SAINT_CONSTANT_INDEX_HTML,
+} from "./sources/proces-verbaux-saint-constant.fixture.js";
+export {
+  PV_SAINTE_CATHERINE_2026_05_TEXT,
+  PV_SAINTE_CATHERINE_INDEX_HTML,
+} from "./sources/proces-verbaux-sainte-catherine.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {

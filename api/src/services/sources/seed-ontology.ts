@@ -199,7 +199,7 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
   },
 };
 
-/** The cities the seed knows how to populate (used for scope enforcement). */
+/** The cities the MAMH role seed knows how to populate (used for scope enforcement). */
 export const SEED_CITY_SLUGS: readonly string[] = Object.keys(CITY_SAMPLES);
 
 /** A concrete real entity the seed produced (for honest reporting / tests). */
