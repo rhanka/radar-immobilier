@@ -303,14 +303,15 @@ describe("detectZonageChange – Les Coteaux Avril 2026 (317-01 correctifs zonag
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("ne lève PAS changementZonage (317-01 présent dans le texte mais hors de la fenêtre du parseur)", () => {
-    // The April 20, 2026 PV contains the adoption of 317-01 ("RÈGLEMENT NUMÉRO 317-01
-    // MODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 317"), but the parser's backward window
-    // (400 chars) does not reach the heading where "317-01" appears — the match is on
-    // "l'avis de motion du présent règlement a été dûment donné" (line 99) and the
-    // heading with 317-01 is ~600 chars before that.
-    // changementZonage=false is the correct parser output for this fixture.
-    expect(result.changementZonage).toBe(false);
+  it("lève changementZonage (317-01 modifie le règlement de zonage 317 — détection réelle)", () => {
+    // The April 20, 2026 PV adopts "RÈGLEMENT NUMÉRO 317-01 MODIFIANT LE RÈGLEMENT DE
+    // ZONAGE NUMÉRO 317". The widened backward window (PR #110) now reaches the heading,
+    // so the real zoning change is detected — matching the documented reality. The
+    // parser identifies the targeted zoning bylaw (317); 167-2022-01 (contrôle des
+    // chiens) reste exclu (hors contexte zonage).
+    expect(result.changementZonage).toBe(true);
+    expect(result.reglementNumbers).toContain("317");
+    expect(result.reglementNumbers).not.toContain("167-2022-01");
   });
 
   it("le texte contient 'RÈGLEMENT DE ZONAGE NUMÉRO 317' (en-tête) et '317-01'", () => {
