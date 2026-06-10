@@ -69,7 +69,7 @@ describe("GET /api/scrape-status?city=valleyfield", () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { items: ScrapeStatusT[] };
     expect(body.items).toHaveLength(1);
-    expect(body.items[0].citySlug).toBe("valleyfield");
+    expect(body.items[0]!.citySlug).toBe("valleyfield");
   });
 });
 
@@ -126,7 +126,7 @@ describe("PUT /api/scrape-status/:city/:source", () => {
     const body = (await res2.json()) as { items: ScrapeStatusT[] };
     // Only 1 record after upsert (no duplicate)
     expect(body.items).toHaveLength(1);
-    expect(body.items[0].status).toBe("scraped");
+    expect(body.items[0]!.status).toBe("scraped");
   });
 
   it("returns 400 for an unknown source in URL params", async () => {
