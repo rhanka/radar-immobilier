@@ -25,3 +25,10 @@ export {
   REGLEMENT_150_51_TEXT,
 } from "./sources/reglements-urbanisme-valleyfield.fixture.js";
 export { QC_MUNICIPALITIES, prioritizedCities } from "./municipalities.js";
+export * from "./sources/proces-verbaux-parser.js";
+export * from "./sources/proces-verbaux-generic.js";
+export {
+  PV_SAINT_DAMASE_2025_05_POSITIVE,
+  PV_SAINT_DAMASE_2026_03_NEGATIVE,
+  PV_SAINT_DAMASE_INDEX_HTML,
+} from "./sources/proces-verbaux-saint-damase.fixture.js";
