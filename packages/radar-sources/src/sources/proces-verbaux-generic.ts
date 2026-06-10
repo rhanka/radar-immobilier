@@ -1182,6 +1182,88 @@ import {
 import {
   PV_HEMMINGFORD_2026_04_TEXT,
 } from "./proces-verbaux-hemmingford.fixture.js";
+import {
+  PV_SAINT_ALEXANDRE_2026_03_TEXT,
+} from "./proces-verbaux-saint-alexandre.fixture.js";
+import {
+  PV_SAINT_VALENTIN_2026_01_TEXT,
+} from "./proces-verbaux-saint-valentin.fixture.js";
+import {
+  PV_HENRYVILLE_2026_01_TEXT,
+} from "./proces-verbaux-henryville.fixture.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Haut-Richelieu cluster: MRC du Haut-Richelieu (villes ~50–70 km SE de Montréal)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Saint-Alexandre (MRC Haut-Richelieu, ~60 km SE de Montréal).
+ * WordPress CMS (custom MSA theme). PV list at /la-municipalite/vie-democratique/seances-du-conseil/.
+ * Simple <ul> list with direct PDF links under /wp-content/uploads/, + YouTube video links.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Zonage réel: règlement 26-434 amendant le règlement de zonage 20-366 (normes d'abattage
+ * d'arbres, corrections générales) — avis de motion du 2 mars 2026.
+ * Captured 2026-06-10.
+ */
+export const SAINT_ALEXANDRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-alexandre",
+  pvIndexUrl:
+    "https://saint-alexandre.ca/la-municipalite/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-alexandre",
+};
+
+/** Factory shortcut for the Saint-Alexandre PV adapter. */
+export function createSaintAlexandrePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINT_ALEXANDRE_PV_CONFIG, options);
+}
+
+/**
+ * Saint-Valentin (MRC Haut-Richelieu, ~70 km SE de Montréal).
+ * Custom CMS (nginx/PleskLin). PV list at /proces-verbaux.
+ * Yearly sections with direct PDF links under /documents/YYYY/, some .docx via Office viewer.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: HTTP 200 content-length 0 (empty — no restrictions).
+ * Zonage réel: règlement 506-1 amendant le règlement de zonage 506 du périmètre d'urbanisation —
+ * second projet adopté le 13 janvier 2026 (avis de motion donné à la séance du 2 décembre 2025).
+ * Permet les usages bi-familiales, tri-familiales et multifamiliales de 4 logements dans la zone P-02.
+ * Captured 2026-06-10.
+ */
+export const SAINT_VALENTIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-valentin",
+  pvIndexUrl: "https://municipalite.saint-valentin.qc.ca/proces-verbaux",
+  sourceId: "proces-verbaux-saint-valentin",
+};
+
+/** Factory shortcut for the Saint-Valentin PV adapter. */
+export function createSaintValentinPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINT_VALENTIN_PV_CONFIG, options);
+}
+
+/**
+ * Henryville (MRC Haut-Richelieu, ~65 km SE de Montréal).
+ * WordPress CMS. PV list at /conseil-municipal/proces-verbaux/.
+ * Yearly sections with direct PDF links under /wp-content/uploads/ (HTTP, not HTTPS for 2025-2026).
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow /wp-admin/ — wp-content/uploads allowed.
+ * NOTE: Only one 2026 PV published at capture date (January 12, 2026). The avis de motion in
+ *       that PV concerns règlements d'emprunt (238-2026, 239-2026) for aqueduc works, NOT a
+ *       zonage change. detectZonageChange → avisDeMotion=true, changementZonage=false (honest zero).
+ * Captured 2026-06-10.
+ */
+export const HENRYVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "henryville",
+  pvIndexUrl: "https://henryville.ca/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-henryville",
+};
+
+/** Factory shortcut for the Henryville PV adapter. */
+export function createHenryvillePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(HENRYVILLE_PV_CONFIG, options);
+}
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -1405,5 +1487,26 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_BOISBRIAND_2026_04_TEXT,
     sourceUrl:
       "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-04-14_Seance-ordinaire.pdf",
+  },
+  // Haut-Richelieu
+  {
+    config: SAINT_ALEXANDRE_PV_CONFIG,
+    pvText: PV_SAINT_ALEXANDRE_2026_03_TEXT,
+    sourceUrl:
+      "https://saint-alexandre.ca/wp-content/uploads/2026/03/Proces-verbal-preliminaire-2-mars-2026.pdf",
+  },
+  // Haut-Richelieu
+  {
+    config: SAINT_VALENTIN_PV_CONFIG,
+    pvText: PV_SAINT_VALENTIN_2026_01_TEXT,
+    sourceUrl:
+      "https://municipalite.saint-valentin.qc.ca/documents/2026/PV%2013%20JANVIER.pdf",
+  },
+  // Haut-Richelieu
+  {
+    config: HENRYVILLE_PV_CONFIG,
+    pvText: PV_HENRYVILLE_2026_01_TEXT,
+    sourceUrl:
+      "http://henryville.ca/wp-content/uploads/2026/03/proces-verbal-20260112.pdf",
   },
 ];

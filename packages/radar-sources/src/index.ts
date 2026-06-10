@@ -164,6 +164,18 @@ export {
   PV_HEMMINGFORD_INDEX_HTML,
   PV_HEMMINGFORD_2026_04_TEXT,
 } from "./sources/proces-verbaux-hemmingford.fixture.js";
+export {
+  PV_SAINT_ALEXANDRE_INDEX_HTML,
+  PV_SAINT_ALEXANDRE_2026_03_TEXT,
+} from "./sources/proces-verbaux-saint-alexandre.fixture.js";
+export {
+  PV_SAINT_VALENTIN_INDEX_HTML,
+  PV_SAINT_VALENTIN_2026_01_TEXT,
+} from "./sources/proces-verbaux-saint-valentin.fixture.js";
+export {
+  PV_HENRYVILLE_INDEX_HTML,
+  PV_HENRYVILLE_2026_01_TEXT,
+} from "./sources/proces-verbaux-henryville.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
