@@ -19,8 +19,14 @@
  *   2. PV_SAINTE_MARTINE_2026_04_TEXT — pdftotext excerpt from the real April 14, 2026 PV.
  *      Contains "avis de motion" for règlements 2026-507, 2026-508, 2026-509, 2026-510,
  *      2026-511.  Règlement 2026-510 and 2026-511 modify "Règlement de zonage numéro
- *      2019-342" (zone MxtV-2) → expected: avisDeMotion=true, changementZonage=true,
- *      reglementNumbers contains 2026-510 and 2026-511.
+ *      2019-342" (zone MxtV-2).
+ *
+ *      DETECTED (precision-filtered — anti-sur-agrégation):
+ *        avisDeMotion=true, changementZonage=true
+ *        reglementNumbers=[2026-510]   ← only the real zonage règlement
+ *        (2026-507/508/509 excluded: no "zonage" in their immediate context;
+ *         2019-342 excluded: it is the OLD règlement being modified, not new;
+ *         2011-185/2019-341 excluded: not zonage règlements)
  *
  * HTTP + robots.txt status (confirmed 2026-06-10):
  *   - https://sainte-martine.ca/ → HTTP 200
@@ -127,18 +133,24 @@ export const PV_SAINTE_MARTINE_INDEX_HTML = `
  *
  * This excerpt covers the "avis de motion" section (règlements 2026-507 through 2026-511).
  *
- * Détection attendue (honest, anti-invention):
+ * Détection attendue après correction anti-sur-agrégation (honest, anti-invention):
  *   - avisDeMotion: true (multiple "Donne avis de motion" for règlements 2026-507..2026-511)
  *   - changementZonage: true (Règlement 2026-510 modifying "Règlement de zonage numéro
- *     2019-342 afin d'agrandir la zone MxtV-2"; idem 2026-511)
- *   - reglementNumbers: includes "2026-507", "2026-508", "2026-509", "2026-510", "2026-511"
- *   - zoneRefs: may include "MxtV-2" (non-standard zone code format, best-effort)
+ *     2019-342 afin d'agrandir la zone MxtV-2"; idem 2026-511 if in excerpt)
+ *   - reglementNumbers: ["2026-510"]  ← SEUL le vrai règlement de zonage
+ *     (les autres exclus car leur contexte immédiat ne contient pas "zonage")
+ *   - zoneRefs: [] (MxtV-2 uses non-standard format not matched by ZONE_CODE_RE)
  *
- * Règlement 2026-507 = contrôle et garde des animaux (NOT zonage).
- * Règlement 2026-508 = nuisances (NOT zonage).
- * Règlement 2026-509 = plan d'urbanisme (agrandir aire d'affectation Mixte villageoise).
- * Règlement 2026-510 = règlement de zonage 2019-342, zone MxtV-2 (ZONAGE — true positive).
- * Règlement 2026-511 = règlement de zonage 2019-342, diverses modifications (ZONAGE).
+ * Preuve tirée du texte réel :
+ *   Règlement 2026-507 = contrôle et garde des animaux (PAS de "zonage" → exclus).
+ *   Règlement 2026-508 = nuisances, modifiant règlement 2011-185 (PAS de "zonage" → exclus).
+ *   Règlement 2026-509 = plan d'urbanisme, modifiant règlement 2019-341
+ *     ("plan d'urbanisme" ≠ "règlement de zonage" / "règlement d'urbanisme" → exclus).
+ *   Règlement 2026-510 = modifiant le "Règlement de zonage numéro 2019-342", zone MxtV-2
+ *     → ZONAGE CONFIRMÉ, seul numéro retenu dans reglementNumbers.
+ *   Règlement 2019-342 = ancien règlement modifié (cible de "modifiant le Règlement de
+ *     zonage numéro 2019-342") → exclu par filterNewReglements().
+ *   Règlement 2026-511 = hors-fixture (non inclus dans cet extrait).
  */
 export const PV_SAINTE_MARTINE_2026_04_TEXT = `Avis de motion et dépôt du projet de Règlement numéro 2026-507 relatif au
 contrôle et à la garde des animaux
