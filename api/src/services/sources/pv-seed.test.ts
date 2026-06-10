@@ -1,6 +1,6 @@
 /**
  * Tests pour pv-seed.ts — seed PV Rive-Sud (saint-constant, sainte-catherine,
- *                          chateauguay, la-prairie, delson, vaudreuil-dorion).
+ *                          chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine).
  *
  * Vérifie :
  *   1. Saint-Constant : PV réel → ≥1 DesignationEvent canonique (règl. 1926-26/1927-26)
@@ -9,7 +9,8 @@
  *   4. La Prairie : PV réel → 0 DesignationEvent zonage (taxes/patrimoine/circulation)
  *   5. Delson : PV réel → 0 DesignationEvent zonage (référence passée sans avis de motion actif)
  *   6. Vaudreuil-Dorion : PV réel → 0 DesignationEvent zonage (faux-positif écarté)
- *   7. ALL_SIGNALS_CITY_SLUGS inclut toutes les villes
+ *   7. Sainte-Martine : PV réel → 1 DesignationEvent (2026-510, zone MxtV-2)
+ *   8. ALL_SIGNALS_CITY_SLUGS inclut toutes les villes
  *
  * Aucun appel réseau — objectStore en mémoire uniquement.
  */
@@ -293,7 +294,54 @@ describe("seedPvCity — Vaudreuil-Dorion (NÉGATIF : 0 DesignationEvent zonage)
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. ALL_SIGNALS_CITY_SLUGS — inclut toutes les villes (MAMH + PV Rive-Sud)
+// 7. Sainte-Martine — POSITIF (règlement 2026-510, zone MxtV-2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Sainte-Martine (POSITIF : zonage réel 2026-510, zone MxtV-2)", () => {
+  let store: MemoryStore;
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "sainte-martine",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("la clé S3 du PV contient 'proces-verbaux-sainte-martine'", () => {
+    expect(result.pvRawRef).toMatch(/proces-verbaux-sainte-martine/);
+  });
+
+  it("exactement 1 DesignationEvent canonique (règlement 2026-510, zone MxtV-2)", () => {
+    // Le vrai PV d'avril 2026 contient l'avis de motion pour le règlement 2026-510
+    // modifiant le règlement de zonage 2019-342 afin d'agrandir la zone MxtV-2.
+    // detectZonageChange() → changementZonage:true → 1 DesignationEvent émis.
+    expect(result.designationEventCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("le DesignationEvent référence le règlement 2026-510", () => {
+    const events = result.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    const terms = events.flatMap((e) => e.aliases.concat(e.label));
+    const combined = terms.join(" ").toLowerCase();
+    expect(combined.includes("2026-510") || combined.includes("2026-511")).toBe(true);
+  });
+
+  it("le project-state de sainte-martine est persisté dans le store", () => {
+    expect(result.stateKey).toMatch(/sainte-martine/);
+    expect(store.objects.has(result.stateKey)).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. ALL_SIGNALS_CITY_SLUGS — inclut toutes les villes (MAMH + PV Rive-Sud)
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("ALL_SIGNALS_CITY_SLUGS", () => {
@@ -329,13 +377,18 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(ALL_SIGNALS_CITY_SLUGS).toContain("beauharnois");
   });
 
-  it("PV_SEED_CITY_SLUGS contient les 6 villes PV Rive-Sud", () => {
+  it("inclut sainte-martine (villes PV Rive-Sud)", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("sainte-martine");
+  });
+
+  it("PV_SEED_CITY_SLUGS contient les 7 villes PV Rive-Sud", () => {
     expect(PV_SEED_CITY_SLUGS).toContain("saint-constant");
     expect(PV_SEED_CITY_SLUGS).toContain("sainte-catherine");
     expect(PV_SEED_CITY_SLUGS).toContain("chateauguay");
     expect(PV_SEED_CITY_SLUGS).toContain("la-prairie");
     expect(PV_SEED_CITY_SLUGS).toContain("delson");
     expect(PV_SEED_CITY_SLUGS).toContain("vaudreuil-dorion");
+    expect(PV_SEED_CITY_SLUGS).toContain("sainte-martine");
   });
 });
 
