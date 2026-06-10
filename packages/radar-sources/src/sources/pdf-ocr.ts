@@ -287,7 +287,7 @@ export async function tesseractImpl(
     if (err && typeof err === "object" && "code" in err) {
       const e = err as NodeJS.ErrnoException & { stderr?: string };
       throw new OcrProcessError(
-        (e as { code?: number }).code ?? null,
+        (e as unknown as { code?: number }).code ?? null,
         e.stderr ?? String(err),
       );
     }
