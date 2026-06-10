@@ -35,18 +35,17 @@
  *      du conseil subséquente, sera adopté le Règlement URB-03-17 modifiant le
  *      « Règlement URB-03 sur le zonage »")
  *     → AVIS_MOTION_RE matches "Avis de motion est donné"
- *   - changementZonage: false
- *     ("Règlement URB-03 sur le zonage" appears in same paragraph as avis de motion)
- *     REGLEMENT_ZONAGE_LETTER_RE does NOT directly match "URB-03" (requires letter-digit pattern A-NNN).
- *     REGLEMENT_NUMBER_RE does NOT match "URB-03-17" — "URB" is not \d{2,4}.
- *     Parser requires BOTH règlement number AND zonage keyword in the same window.
- *     Since no règlement number is extractable (URB prefix), changementZonage stays false
- *     even though ZONAGE_KEYWORDS_RE fires on "le zonage".
- *     Honest documented limitation — same as Coteau-du-Lac (URB-400) pattern.
- *     reglementNumbers=[] (URB-prefixed numbers don't match numeric patterns).
- *   - NOTE: Lorraine uses letter-prefix règlement numbering (URB-03-17). This is similar to
- *     Saint-Rémi (V-prefix) — the parser detects zonage via keyword match but cannot extract
- *     the règlement number in standard format. Honest documented limitation.
+ *   - changementZonage: true (2026-06-10: fixed by REGLEMENT_MULTIPREFIX_RE)
+ *     REGLEMENT_MULTIPREFIX_RE matches "Règlement URB-03-17" in the same paragraph
+ *     where ZONAGE_KEYWORDS_RE fires on "le zonage". The ANTI-FP guard (only applied
+ *     in confirmed zonage context) prevents false positives from non-zonage bylaws.
+ *   - reglementNumbers: ["URB-03-17"]
+ *     URB-03 (the existing règlement being modified) is identified by
+ *     MODIFIANT_REGLEMENT_MULTIPREFIX_RE from "modifiant le « Règlement URB-03 »"
+ *     and excluded via filterNewReglements.
+ *   - NOTE: Lorraine uses multi-letter-prefix règlement numbering (URB-). Handled by the
+ *     new REGLEMENT_MULTIPREFIX_RE pattern alongside V-prefix (Saint-Rémi) and
+ *     single-letter-prefix (Châteauguay/Mirabel) patterns.
  */
 
 /**
@@ -124,15 +123,15 @@ export const PV_LORRAINE_INDEX_HTML = `
  *   7.1 (résolution 2026-04-78): ADOPTION DU PREMIER PROJET DE RÈGLEMENT URB-03-17
  *       (soumettre à une assemblée publique de consultation)
  *
- * Détection honnête:
+ * Détection honnête (mise à jour 2026-06-10 — REGLEMENT_MULTIPREFIX_RE):
  *   - avisDeMotion: true
  *     (AVIS_MOTION_RE: "Avis de motion est donné" matches)
  *   - changementZonage: true
- *     (ZONAGE_KEYWORDS_RE: "sur le zonage" in same paragraph window)
- *   - reglementNumbers: [] (URB-03-17 uses URB prefix — not matched by \d{2,4}-\d{1,4};
- *     this is a documented limitation: same as Saint-Rémi V-prefix case)
+ *     (REGLEMENT_MULTIPREFIX_RE captures URB-03-17; ZONAGE_KEYWORDS_RE fires on "le zonage")
+ *   - reglementNumbers: ["URB-03-17"]
+ *     (URB-03 excluded by MODIFIANT_REGLEMENT_MULTIPREFIX_RE → filterNewReglements)
  *   - NOTE: "zones I-133 et I-226" are zone codes (not règlement numbers) → not captured
- *     by REGLEMENT_ZONAGE_LETTER_RE (requires "règlement de zonage" prefix before letter code)
+ *     by REGLEMENT_MULTIPREFIX_RE (single letter before dash → doesn't match [A-Z]{2,4})
  */
 export const PV_LORRAINE_2026_04_TEXT = `
 2026-04-14
