@@ -94,6 +94,7 @@ const STATE_WITH_DESIGNATION_EVENT: OntologyProjectState = {
       label: "Avis de motion règlement de zonage 1926-26+1927-26",
       normalized_terms: ["1926-26", "1927-26"],
       source_refs: [PV_RAW_REF],
+      zoneRefs: ["H-431"],
     },
   ],
   candidates: [],
@@ -267,5 +268,52 @@ describe("GET /api/signals/:city/detail", () => {
     const event = body.events[0]!;
 
     expect(event.dateObserved).toBe(GENERATED_AT);
+  });
+
+  it("reads zoneRefs from member mention zoneRefs field (primary path, not label scan)", async () => {
+    // State where the canonical label has NO zone code in it, but the member
+    // mention carries zoneRefs: ["H-431"] — verifies the mention-based path.
+    const stateMentionOnlyZone: OntologyProjectState = {
+      schema: "radar_ontology_project_state_v1",
+      citySlug: CITY,
+      profileHash: "c".repeat(64),
+      generatedAt: GENERATED_AT,
+      rawRefs: [PV_RAW_REF],
+      mentions: [
+        {
+          id: "mention:designationevent:saint-constant-1926-26+1927-26",
+          type: "DesignationEvent",
+          label: "Avis de motion règlement de zonage 1926-26+1927-26",
+          normalized_terms: ["1926-26", "1927-26"],
+          source_refs: [PV_RAW_REF],
+          zoneRefs: ["H-431"],
+        },
+      ],
+      candidates: [],
+      canonicals: [
+        {
+          id: "designationevent::saint-constant::1926-26",
+          type: "DesignationEvent",
+          // Label deliberately has NO zone code — tests the mention-based path.
+          label: "Avis de motion règlement de zonage 1926-26+1927-26",
+          aliases: [],
+          memberMentionIds: [
+            "mention:designationevent:saint-constant-1926-26+1927-26",
+          ],
+          evidenceRefs: [PV_RAW_REF],
+          status: "candidate",
+        },
+      ],
+    };
+    const store = new MemoryStore();
+    await seedState(store, stateMentionOnlyZone);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request(`/api/signals/${CITY}/detail`);
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    // zoneRefs must come from the mention field, not from label scanning.
+    expect(event.zoneRefs).toContain("H-431");
   });
 });

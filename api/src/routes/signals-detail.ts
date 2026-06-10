@@ -126,18 +126,42 @@ function extractReglementNumbers(
 /**
  * Extract zone codes from a DesignationEvent canonical.
  *
- * Strategy: scan the canonical label and all aliases for ZONE_CODE_RE matches
- * (e.g. H-431, RA-2). Anti-invention: only returns codes found verbatim.
+ * Strategy (two-pass, anti-invention):
+ *   1. Member mentions' `zoneRefs` field — verbatim codes extracted by the PV
+ *      parser from the real bytes (most reliable, set by pvMentions when
+ *      detectZonageChange returns non-empty zoneRefs).
+ *   2. Fallback: scan the canonical label and aliases for ZONE_CODE_RE matches
+ *      (e.g. H-431 embedded in the label text).  Only codes found verbatim.
+ * Nothing is fabricated.
  */
-function extractZoneRefs(canonical: CanonicalEntity): string[] {
+function extractZoneRefs(
+  canonical: CanonicalEntity,
+  mentionIndex: Map<string, MentionNode>,
+): string[] {
   const seen = new Set<string>();
-  const targets = [canonical.label, ...canonical.aliases];
-  for (const text of targets) {
-    const matches = text.matchAll(ZONE_CODE_RE);
-    for (const m of matches) {
-      seen.add(m[1]!.toUpperCase());
+
+  // Pass 1 — structured zoneRefs from DesignationEvent member mentions.
+  for (const mId of canonical.memberMentionIds) {
+    const m = mentionIndex.get(mId);
+    if (!m || m.type !== "DesignationEvent") continue;
+    if (m.zoneRefs && m.zoneRefs.length > 0) {
+      for (const z of m.zoneRefs) {
+        seen.add(z.toUpperCase());
+      }
     }
   }
+
+  // Pass 2 — label / alias scan (fallback when mention has no zoneRefs field).
+  if (seen.size === 0) {
+    const targets = [canonical.label, ...canonical.aliases];
+    for (const text of targets) {
+      const matches = text.matchAll(ZONE_CODE_RE);
+      for (const match of matches) {
+        seen.add(match[1]!.toUpperCase());
+      }
+    }
+  }
+
   return Array.from(seen).sort();
 }
 
@@ -153,7 +177,7 @@ function toDetail(
   return {
     label: canonical.label,
     reglementNumbers: extractReglementNumbers(canonical, mentionIndex),
-    zoneRefs: extractZoneRefs(canonical),
+    zoneRefs: extractZoneRefs(canonical, mentionIndex),
     sourceRef: canonical.evidenceRefs[0] ?? "",
     dateObserved: generatedAt,
   };
