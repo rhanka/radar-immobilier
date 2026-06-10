@@ -1,10 +1,15 @@
 /**
- * Tests pour pv-seed.ts — seed PV Rive-Sud (saint-constant, sainte-catherine).
+ * Tests pour pv-seed.ts — seed PV Rive-Sud (saint-constant, sainte-catherine,
+ *                          chateauguay, la-prairie, delson, vaudreuil-dorion).
  *
  * Vérifie :
  *   1. Saint-Constant : PV réel → ≥1 DesignationEvent canonique (règl. 1926-26/1927-26)
  *   2. Sainte-Catherine : PV réel → 0 DesignationEvent zonage (faux-positif écarté)
- *   3. ALL_SIGNALS_CITY_SLUGS inclut saint-constant et sainte-catherine
+ *   3. Châteauguay : PV réel → 1 DesignationEvent (Z-3001, zones C-754/C-810)
+ *   4. La Prairie : PV réel → 0 DesignationEvent zonage (taxes/patrimoine/circulation)
+ *   5. Delson : PV réel → 0 DesignationEvent zonage (référence passée sans avis de motion actif)
+ *   6. Vaudreuil-Dorion : PV réel → 0 DesignationEvent zonage (faux-positif écarté)
+ *   7. ALL_SIGNALS_CITY_SLUGS inclut toutes les villes
  *
  * Aucun appel réseau — objectStore en mémoire uniquement.
  */
@@ -146,7 +151,149 @@ describe("seedPvCity — Sainte-Catherine (NÉGATIF : 0 DesignationEvent zonage)
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. ALL_SIGNALS_CITY_SLUGS — inclut saint-constant et les villes MAMH
+// 3. Châteauguay — POSITIF (règlement Z-3001, zones C-754/C-810)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Châteauguay (POSITIF : zonage Z-3001, zones C-754/C-810)", () => {
+  let store: MemoryStore;
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "chateauguay",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("la clé S3 du PV contient 'proces-verbaux-chateauguay'", () => {
+    expect(result.pvRawRef).toMatch(/proces-verbaux-chateauguay/);
+  });
+
+  it("exactement 1 DesignationEvent canonique (Z-3001)", () => {
+    expect(result.designationEventCount).toBe(1);
+  });
+
+  it("le DesignationEvent est keyed sur le règlement Z-3001", () => {
+    // Le DesignationEvent canonique porte le label "Avis de motion règlement de zonage Z-3001".
+    // Les zones C-754/C-810 sont dans les zoneRefs des mentions, pas dans le label canonique.
+    const events = result.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    const combined = events.map((e) => e.label).join(" ").toLowerCase();
+    expect(combined.includes("z-3001")).toBe(true);
+  });
+
+  it("les mentions DesignationEvent référencent les zones C-754 et/ou C-810", () => {
+    // Les zoneRefs sont portées par les MentionNode (pas par les canonicaux).
+    const eventMentions = result.exploitation.state.mentions.filter(
+      (m) => m.type === "DesignationEvent",
+    );
+    const allZoneRefs = eventMentions.flatMap((m) => m.zoneRefs ?? []);
+    const combined = allZoneRefs.join(" ").toUpperCase();
+    expect(combined.includes("C-754") || combined.includes("C-810")).toBe(true);
+  });
+
+  it("le project-state de chateauguay est persisté dans le store", () => {
+    expect(result.stateKey).toMatch(/chateauguay/);
+    expect(store.objects.has(result.stateKey)).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. La Prairie — NÉGATIF (0 DesignationEvent zonage)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — La Prairie (NÉGATIF : 0 DesignationEvent zonage)", () => {
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    const store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "la-prairie",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("ANTI-INVENTION : 0 DesignationEvent zonage (taxes/patrimoine/circulation ≠ zonage)", () => {
+    expect(result.designationEventCount).toBe(0);
+  });
+
+  it("le project-state de la-prairie est persisté", () => {
+    expect(result.stateKey).toMatch(/la-prairie/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. Delson — NÉGATIF (0 DesignationEvent zonage)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Delson (NÉGATIF : 0 DesignationEvent zonage)", () => {
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    const store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "delson",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("ANTI-INVENTION : 0 DesignationEvent zonage (référence passée ≠ avis de motion actif)", () => {
+    expect(result.designationEventCount).toBe(0);
+  });
+
+  it("le project-state de delson est persisté", () => {
+    expect(result.stateKey).toMatch(/delson/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. Vaudreuil-Dorion — NÉGATIF (0 DesignationEvent zonage)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Vaudreuil-Dorion (NÉGATIF : 0 DesignationEvent zonage)", () => {
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    const store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "vaudreuil-dorion",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("ANTI-INVENTION : 0 DesignationEvent zonage (faux-positif écarté en amont)", () => {
+    expect(result.designationEventCount).toBe(0);
+  });
+
+  it("le project-state de vaudreuil-dorion est persisté", () => {
+    expect(result.stateKey).toMatch(/vaudreuil-dorion/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. ALL_SIGNALS_CITY_SLUGS — inclut toutes les villes (MAMH + PV Rive-Sud)
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("ALL_SIGNALS_CITY_SLUGS", () => {
@@ -158,6 +305,22 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(ALL_SIGNALS_CITY_SLUGS).toContain("sainte-catherine");
   });
 
+  it("inclut chateauguay", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("chateauguay");
+  });
+
+  it("inclut la-prairie", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("la-prairie");
+  });
+
+  it("inclut delson", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("delson");
+  });
+
+  it("inclut vaudreuil-dorion", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("vaudreuil-dorion");
+  });
+
   it("inclut salaberry-de-valleyfield (villes MAMH)", () => {
     expect(ALL_SIGNALS_CITY_SLUGS).toContain("salaberry-de-valleyfield");
   });
@@ -166,9 +329,13 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(ALL_SIGNALS_CITY_SLUGS).toContain("beauharnois");
   });
 
-  it("PV_SEED_CITY_SLUGS contient saint-constant et sainte-catherine", () => {
+  it("PV_SEED_CITY_SLUGS contient les 6 villes PV Rive-Sud", () => {
     expect(PV_SEED_CITY_SLUGS).toContain("saint-constant");
     expect(PV_SEED_CITY_SLUGS).toContain("sainte-catherine");
+    expect(PV_SEED_CITY_SLUGS).toContain("chateauguay");
+    expect(PV_SEED_CITY_SLUGS).toContain("la-prairie");
+    expect(PV_SEED_CITY_SLUGS).toContain("delson");
+    expect(PV_SEED_CITY_SLUGS).toContain("vaudreuil-dorion");
   });
 });
 
