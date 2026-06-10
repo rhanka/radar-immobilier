@@ -34,12 +34,21 @@
     fetchSignalsByCity,
     type SignalCityItem,
   } from "$lib/signals/signals-by-city-client.js";
+  import {
+    fetchSignalDetail,
+    type DesignationEventDetail,
+  } from "$lib/signals/signal-detail-client.js";
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
   let loading = true;
   let loadError: string | null = null;
   let apiItems: SignalCityItem[] = [];
+
+  // ── Détail ville sélectionnée ──────────────────────────────────────────────
+  let detailLoading = false;
+  let detailError: string | null = null;
+  let detailEvents: DesignationEventDetail[] = [];
 
   // ── Données réactives ──────────────────────────────────────────────────────
   // Rebuilt whenever apiItems changes (after fetch).
@@ -62,10 +71,27 @@
   $: citiesWithSignals = allEntries.filter((e) => e.signalCount6m > 0).length;
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
-  function selectCity(entry: CityMapEntry): void {
-    selectedCity = selectedCity?.municipality.slug === entry.municipality.slug
-      ? null
-      : entry;
+  async function selectCity(entry: CityMapEntry): Promise<void> {
+    // Toggle: deselect if already selected.
+    if (selectedCity?.municipality.slug === entry.municipality.slug) {
+      selectedCity = null;
+      detailEvents = [];
+      detailError = null;
+      return;
+    }
+    selectedCity = entry;
+    detailEvents = [];
+    detailError = null;
+    detailLoading = true;
+    try {
+      const res = await fetchSignalDetail(entry.municipality.slug);
+      detailEvents = res.events;
+    } catch (e) {
+      detailError =
+        e instanceof Error ? e.message : "Erreur chargement détail";
+    } finally {
+      detailLoading = false;
+    }
   }
 
   // ── Aperçu de ville dans la liste (hover) ─────────────────────────────────
@@ -292,27 +318,66 @@
           <button
             type="button"
             class="text-xs text-slate-400 hover:text-slate-600"
-            on:click={() => { selectedCity = null; }}
+            on:click={() => {
+              selectedCity = null;
+              detailEvents = [];
+              detailError = null;
+            }}
             aria-label="Fermer le détail"
           >✕</button>
         </div>
 
-        {#if selectedCity.signalCount6m === 0}
+        {#if detailLoading}
+          <!-- Chargement détail -->
+          <div class="flex items-center gap-2 py-3 text-xs text-slate-400">
+            <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
+            Chargement des changements de zonage…
+          </div>
+        {:else if detailError}
+          <Alert
+            tone="error"
+            title="Erreur de chargement du détail"
+            message={detailError}
+          />
+        {:else if detailEvents.length === 0}
           <Alert
             tone="info"
-            title="Aucun signal disponible pour cette ville."
-            message="Les signaux de changements de zonage sont dérivés des DesignationEvent de l'état projet ontologie. Cette ville n'a pas encore de données recueillies ou son état projet date de plus de 6 mois."
+            title="Aucun changement de zonage disponible pour cette ville."
+            message="Les données sont dérivées des DesignationEvent de l'état projet ontologie. Cette ville n'a pas encore de données recueillies ou son état projet date de plus de 6 mois."
           />
         {:else}
-          <div class="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3">
-            <p class="text-sm font-semibold text-teal-800">
-              {selectedCity.signalCount6m} DesignationEvent{selectedCity.signalCount6m > 1 ? "s" : ""} (6 mois)
-            </p>
-            <p class="mt-1 text-xs text-teal-600">
-              Changements de zonage détectés depuis l'état projet ontologie.
-              Consultez la vue <em>Ontologie</em> pour le détail des entités canoniques.
-            </p>
-          </div>
+          <!-- Liste des changements de zonage réels -->
+          <ul class="space-y-3" aria-label="Changements de zonage">
+            {#each detailEvents as event, i (i)}
+              <li class="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3">
+                <p class="text-sm font-semibold text-teal-800 leading-snug">
+                  {event.label}
+                </p>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  {#each event.reglementNumbers as num (num)}
+                    <Badge tone="info" class="text-xs font-mono">
+                      Règl. {num}
+                    </Badge>
+                  {/each}
+                  {#each event.zoneRefs as zone (zone)}
+                    <Badge tone="warning" class="text-xs font-mono">
+                      Zone {zone}
+                    </Badge>
+                  {/each}
+                </div>
+                {#if event.sourceRef}
+                  <p class="mt-1.5 truncate text-xs text-teal-500" title={event.sourceRef}>
+                    Source : <span class="font-mono">{event.sourceRef}</span>
+                  </p>
+                {/if}
+                {#if event.dateObserved}
+                  <p class="mt-0.5 text-xs text-slate-400">
+                    Observé : {new Date(event.dateObserved).toLocaleDateString("fr-CA")}
+                  </p>
+                {/if}
+              </li>
+            {/each}
+          </ul>
         {/if}
       </div>
     {:else}
