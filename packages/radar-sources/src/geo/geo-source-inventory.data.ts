@@ -34,10 +34,14 @@ import type { GeoSourceInventoryT } from "./geo-source-inventory.js";
 
 /**
  * URL de la couche cadastre allégé (REST ESRI, province-entière).
- * La query se fait par bbox (EPSG:3857) → retourne des polygones GeoJSON.
+ * La query se fait par bbox (EPSG:4326) → retourne des polygones GeoJSON.
+ *
+ * Chemin corrigé : /donnees/rest/services/Reference/... (pas /arcgis/rest/services/Mern/...)
+ * Vérifié HTTP 200 le 2026-06-10 sur Salaberry-de-Valleyfield avec inSR=4326.
+ * Ref. interne : role-cadastre-valleyfield.md §Source 2.
  */
 const CADASTRE_ALLEGE_URL =
-  "https://geo.environnement.gouv.qc.ca/arcgis/rest/services/Mern/Cadastre_allege/MapServer/0/query";
+  "https://geo.environnement.gouv.qc.ca/donnees/rest/services/Reference/Cadastre_allege/MapServer/0/query";
 
 /**
  * Inventaire initial pour les 6 villes pilotes de la phase 1 du radar.

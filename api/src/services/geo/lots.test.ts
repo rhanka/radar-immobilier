@@ -4,6 +4,11 @@
  * Fixture cadastre : imite une réponse MapServer MRNF réelle avec
  * 3 lots NO_LOT réels de Salaberry-de-Valleyfield.
  * Anti-invention : aucun propriétaire, aucune PII.
+ *
+ * Tests ajoutés (2026-06-10, WP-B-lotsfix) :
+ * - Construction d'URL correcte : geometry+spatialRel+outFields présents, where=1=1 absent.
+ * - Bbox par défaut utilisée si opts.bbox absent.
+ * - NO_LOT avec espaces (format réel MRNF) correctement extrait.
  */
 import { describe, expect, it } from "vitest";
 import { lotsForCity, type LotFeatureCollectionT } from "./lots.js";
@@ -214,5 +219,118 @@ describe("lotsForCity — typage LotFeatureCollection (compile-time)", () => {
     // Type guard : doit compiler sans cast
     const fc: LotFeatureCollectionT = result.featureCollection;
     expect(fc.type).toBe("FeatureCollection");
+  });
+});
+
+// ─── Tests construction d'URL (WP-B-lotsfix) ─────────────────────────────────
+
+describe("lotsForCity — construction URL ArcGIS correcte (WP-B-lotsfix)", () => {
+  /** Capture l'URL appelée et retourne une FeatureCollection vide. */
+  function makeCaptureFetch(): { fn: typeof fetch; getUrl: () => string | undefined } {
+    let captured: string | undefined;
+    const fn = (async (url: string | URL | Request) => {
+      captured = String(url);
+      return new Response(
+        JSON.stringify({ type: "FeatureCollection", features: [] }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as unknown as typeof fetch;
+    return { fn, getUrl: () => captured };
+  }
+
+  it("l'URL contient geometry= et geometryType=esriGeometryEnvelope", async () => {
+    const { fn, getUrl } = makeCaptureFetch();
+    await lotsForCity("salaberry-de-valleyfield", { fetchImpl: fn });
+    const url = getUrl()!;
+    expect(url).toContain("geometry=");
+    expect(url).toContain("geometryType=esriGeometryEnvelope");
+  });
+
+  it("l'URL contient spatialRel=esriSpatialRelIntersects", async () => {
+    const { fn, getUrl } = makeCaptureFetch();
+    await lotsForCity("salaberry-de-valleyfield", { fetchImpl: fn });
+    const url = getUrl()!;
+    expect(url).toContain("spatialRel=esriSpatialRelIntersects");
+  });
+
+  it("l'URL contient outFields=NO_LOT", async () => {
+    const { fn, getUrl } = makeCaptureFetch();
+    await lotsForCity("salaberry-de-valleyfield", { fetchImpl: fn });
+    const url = getUrl()!;
+    expect(url).toContain("outFields=NO_LOT");
+  });
+
+  it("l'URL NE contient PAS where=1%3D1 (requête non bornée)", async () => {
+    const { fn, getUrl } = makeCaptureFetch();
+    await lotsForCity("salaberry-de-valleyfield", { fetchImpl: fn });
+    const url = getUrl()!;
+    // where=1=1 encodeé est where=1%3D1 ou where=1%3d1
+    expect(url.toLowerCase()).not.toContain("where=1%3d1");
+    expect(url).not.toContain("where=1=1");
+  });
+
+  it("opts.bbox fournie est encodée dans l'URL geometry", async () => {
+    const { fn, getUrl } = makeCaptureFetch();
+    const customBbox: [number, number, number, number] = [-74.15, 45.25, -74.10, 45.30];
+    await lotsForCity("salaberry-de-valleyfield", { fetchImpl: fn, bbox: customBbox });
+    const url = getUrl()!;
+    // La bbox doit apparaître dans le paramètre geometry encodé
+    expect(url).toContain("geometry=");
+    expect(url).toContain("-74.15");
+  });
+
+  it("sans opts.bbox, la bbox par défaut de la ville est utilisée", async () => {
+    const { fn, getUrl } = makeCaptureFetch();
+    await lotsForCity("salaberry-de-valleyfield", { fetchImpl: fn });
+    const url = getUrl()!;
+    // La bbox par défaut de Valleyfield contient -74.16 (xmin)
+    expect(url).toContain("-74.16");
+  });
+});
+
+describe("lotsForCity — NO_LOT format MRNF avec espaces", () => {
+  /** Fixture avec NO_LOT au format réel MRNF (espaces dans le numéro). */
+  const FIXTURE_ESPACES = {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        geometry: null,
+        properties: {
+          NO_LOT: "4 516 943",
+          OBJECTID: 99,
+        },
+      },
+      {
+        type: "Feature",
+        geometry: null,
+        properties: {
+          NO_LOT: "3 818 335",
+          OBJECTID: 100,
+        },
+      },
+    ],
+  };
+
+  it("NO_LOT avec espaces est préservé tel quel dans noLot", async () => {
+    const result = await lotsForCity("salaberry-de-valleyfield", {
+      fetchImpl: makeCadastreFetch(FIXTURE_ESPACES),
+    });
+
+    expect(result.ok).toBe(true);
+    const noLots = result.featureCollection.features.map((f) => f.properties.noLot);
+    expect(noLots).toContain("4 516 943");
+    expect(noLots).toContain("3 818 335");
+  });
+
+  it("pas de PII même avec NO_LOT espacé", async () => {
+    const result = await lotsForCity("salaberry-de-valleyfield", {
+      fetchImpl: makeCadastreFetch(FIXTURE_ESPACES),
+    });
+
+    for (const feature of result.featureCollection.features) {
+      const keys = Object.keys(feature.properties).sort();
+      expect(keys).toEqual(["citySlug", "noLot"]);
+    }
   });
 });
