@@ -132,6 +132,18 @@ export {
   PV_LES_COTEAUX_INDEX_HTML,
   PV_LES_COTEAUX_2026_04_TEXT,
 } from "./sources/proces-verbaux-les-coteaux.fixture.js";
+export {
+  PV_MSH_INDEX_HTML,
+  PV_MSH_2026_03_TEXT,
+} from "./sources/proces-verbaux-mont-saint-hilaire.fixture.js";
+export {
+  PV_BOUCHERVILLE_INDEX_HTML,
+  PV_BOUCHERVILLE_2026_03_TEXT,
+} from "./sources/proces-verbaux-boucherville.fixture.js";
+export {
+  PV_VARENNES_INDEX_HTML,
+  PV_VARENNES_2026_04_TEXT,
+} from "./sources/proces-verbaux-varennes.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
