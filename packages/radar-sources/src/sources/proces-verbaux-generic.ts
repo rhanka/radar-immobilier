@@ -529,3 +529,69 @@ export function createSaintRemiPvAdapter(
 ): ProcesVerbauxGenericAdapter {
   return new ProcesVerbauxGenericAdapter(SAINT_REMI_PV_CONFIG, options);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Round-3 cluster: Vallée-du-Richelieu / Marguerite-D'Youville cities near MTL
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * McMasterville (MRC Vallée-du-Richelieu, ~25 km SE of Montréal).
+ * WordPress + Visual Composer CMS. PV list at /mairie/seances-du-conseil/.
+ * Panels (vc_tta-accordion) with sc_button PDF links for Procès-verbal + ODJ + Vidéo.
+ * Direct PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const MCMASTERVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "mcmasterville",
+  pvIndexUrl: "https://www.mcmasterville.ca/mairie/seances-du-conseil/",
+  sourceId: "proces-verbaux-mcmasterville",
+};
+
+/** Factory shortcut for the McMasterville PV adapter. */
+export function createMcmastervillePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(MCMASTERVILLE_PV_CONFIG, options);
+}
+
+/**
+ * Beloeil (MRC La Vallée-du-Richelieu, ~30 km SE of Montréal).
+ * WordPress + Elementor CMS. PV list at /mairie/seances-du-conseil/.
+ * Elementor accordion: 2026 individual sessions + compiled 2025/2024 PDFs.
+ * Direct PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions, Yoast sitemap).
+ * Captured 2026-06-10.
+ */
+export const BELOEIL_PV_CONFIG: PvCityConfig = {
+  citySlug: "beloeil",
+  pvIndexUrl: "https://www.beloeil.ca/mairie/seances-du-conseil/",
+  sourceId: "proces-verbaux-beloeil",
+};
+
+/** Factory shortcut for the Beloeil PV adapter. */
+export function createBeloeilPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(BELOEIL_PV_CONFIG, options);
+}
+
+/**
+ * Sainte-Julie (MRC Marguerite-D'Youville, ~30 km SE of Montréal).
+ * Custom CMS (saintejulie.ca). PV list at /administration/seances-publiques.
+ * Custom accordeon structure with direct PDF links under /uploads/html_content/Séances publiques/.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: 404 (no restrictions file; permissive by default).
+ * Captured 2026-06-10.
+ */
+export const SAINTE_JULIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-julie",
+  pvIndexUrl: "https://saintejulie.ca/administration/seances-publiques",
+  sourceId: "proces-verbaux-sainte-julie",
+};
+
+/** Factory shortcut for the Sainte-Julie PV adapter. */
+export function createSainteJuliePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINTE_JULIE_PV_CONFIG, options);
+}
