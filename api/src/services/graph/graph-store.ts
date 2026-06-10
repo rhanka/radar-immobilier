@@ -9,12 +9,15 @@
  * Read helpers cover the two main access patterns:
  *   - `queryNeighbors(nodeId)`    → all edges incident on a node + their endpoints
  *   - `subgraphForCity(citySlug)` → all nodes + edges for a city scope
+ *   - `subgraphForMrc(mrc)`       → merged subgraph for all cities in an MRC
+ *   - `listMrcs(db)`              → MRC list with ingested node counts
  */
 
 import { z } from "zod";
-import { eq, or, sql } from "drizzle-orm";
+import { eq, or, sql, inArray } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
+import { QC_MUNICIPALITIES } from "@radar/sources";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Zod schema for graphify graph.json
@@ -282,4 +285,127 @@ export async function subgraphForCity(
   const edges = candidateEdges.filter((e) => nodeIds.has(e.dstId));
 
   return { citySlug, nodes, edges };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MRC-level aggregation
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Merged subgraph for all cities in an MRC.
+ *
+ * Queries QC_MUNICIPALITIES to resolve which city slugs belong to `mrc`, then
+ * fetches all nodes + intra-MRC edges in a single pass.
+ */
+export interface MrcSubgraph {
+  mrc: string;
+  citySlugs: string[];
+  nodes: (typeof graphNodes.$inferSelect)[];
+  edges: (typeof graphEdges.$inferSelect)[];
+}
+
+/**
+ * Return all graph nodes whose citySlug belongs to `mrc`, plus all edges where
+ * BOTH endpoints are in that MRC node set.
+ *
+ * Returns empty nodes/edges (not an error) when no data has been ingested for
+ * any city in the requested MRC.
+ */
+export async function subgraphForMrc(
+  db: Database,
+  mrc: string,
+): Promise<MrcSubgraph> {
+  // Resolve all city slugs that belong to this MRC (case-sensitive match on
+  // the `mrc` field coming from QC_MUNICIPALITIES).
+  const citySlugs = QC_MUNICIPALITIES
+    .filter((m) => m.mrc === mrc)
+    .map((m) => m.slug);
+
+  if (citySlugs.length === 0) {
+    return { mrc, citySlugs: [], nodes: [], edges: [] };
+  }
+
+  // Fetch all nodes for the MRC in one query.
+  const nodes = await db
+    .select()
+    .from(graphNodes)
+    .where(inArray(graphNodes.citySlug, citySlugs));
+
+  if (nodes.length === 0) {
+    return { mrc, citySlugs, nodes: [], edges: [] };
+  }
+
+  const nodeIds = new Set(nodes.map((n) => n.id));
+  const nodeIdList = Array.from(nodeIds);
+
+  // Fetch candidate edges where srcId is in the MRC node set.
+  const candidateEdges = await db
+    .select()
+    .from(graphEdges)
+    .where(inArray(graphEdges.srcId, nodeIdList));
+
+  // Keep only edges where both endpoints are inside the MRC node set.
+  const edges = candidateEdges.filter((e) => nodeIds.has(e.dstId));
+
+  return { mrc, citySlugs, nodes, edges };
+}
+
+/**
+ * Summary entry for one MRC: how many nodes are stored + which city slugs are
+ * represented.
+ */
+export interface MrcSummary {
+  mrc: string;
+  nodeCount: number;
+  citySlugs: string[];
+}
+
+/**
+ * List all MRCs that have at least one ingested graph node, with their node
+ * count and city slugs. Sorted by nodeCount descending.
+ *
+ * Relies on QC_MUNICIPALITIES to resolve citySlug→mrc; cities with a null mrc
+ * field (e.g. Westmount, agglomeration members) are skipped.
+ */
+export async function listMrcs(db: Database): Promise<MrcSummary[]> {
+  // Build slug→mrc map from reference data (skip entries with null mrc).
+  const slugToMrc = new Map<string, string>(
+    QC_MUNICIPALITIES
+      .filter((m): m is typeof m & { mrc: string } => m.mrc !== null && m.mrc !== undefined)
+      .map((m) => [m.slug, m.mrc]),
+  );
+
+  // Fetch all distinct citySlug values that have nodes.
+  const rows = await db
+    .selectDistinct({ citySlug: graphNodes.citySlug })
+    .from(graphNodes)
+    .where(sql`${graphNodes.citySlug} IS NOT NULL`);
+
+  // Count nodes per MRC.
+  const mrcCities = new Map<string, { citySlugs: string[]; nodeCount: number }>();
+
+  for (const { citySlug } of rows) {
+    if (!citySlug) continue;
+    const mrc = slugToMrc.get(citySlug);
+    if (!mrc) continue; // city not in QC_MUNICIPALITIES or mrc is null
+
+    if (!mrcCities.has(mrc)) {
+      mrcCities.set(mrc, { citySlugs: [], nodeCount: 0 });
+    }
+    const entry = mrcCities.get(mrc)!;
+    entry.citySlugs.push(citySlug);
+  }
+
+  // Enrich with actual node counts per MRC in batch.
+  const summaries: MrcSummary[] = [];
+  for (const [mrc, { citySlugs }] of mrcCities.entries()) {
+    const countRows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(graphNodes)
+      .where(inArray(graphNodes.citySlug, citySlugs));
+    const nodeCount = countRows[0]?.count ?? 0;
+    summaries.push({ mrc, nodeCount, citySlugs: citySlugs });
+  }
+
+  return summaries.sort((a, b) => b.nodeCount - a.nodeCount);
 }

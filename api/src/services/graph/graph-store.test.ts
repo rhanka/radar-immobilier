@@ -19,6 +19,8 @@ import {
   upsertGraph,
   queryNeighbors,
   subgraphForCity,
+  subgraphForMrc,
+  listMrcs,
   type GraphifyNode,
   type GraphifyLink,
 } from "./graph-store.js";
@@ -144,6 +146,94 @@ describe("buildEdgeRow — idempotency key", () => {
     const r1 = buildEdgeRow(link);
     const r2 = buildEdgeRow(link);
     expect(`${r1.srcId}|${r1.dstId}|${r1.kind}`).toBe(`${r2.srcId}|${r2.dstId}|${r2.kind}`);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. MRC aggregation — pure (mock DB, no Postgres)
+// ─────────────────────────────────────────────────────────────────────────────
+// These tests stub the Database at the Drizzle builder level using simple
+// inline mocks. They exercise QC_MUNICIPALITIES look-up logic and routing
+// without requiring Postgres.
+
+describe("subgraphForMrc — unknown MRC returns empty", () => {
+  it("returns empty when MRC not in QC_MUNICIPALITIES", async () => {
+    // We need a db that will never be queried for the empty-cities path.
+    // Build a minimal db mock that returns empty arrays unconditionally.
+    const db = {
+      select: () => ({
+        from: () => ({
+          where: () => Promise.resolve([]),
+        }),
+      }),
+      selectDistinct: () => ({
+        from: () => ({
+          where: () => Promise.resolve([]),
+        }),
+      }),
+    } as unknown;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await subgraphForMrc(db as any, "__mrc_that_does_not_exist__");
+    expect(result.citySlugs).toHaveLength(0);
+    expect(result.nodes).toHaveLength(0);
+    expect(result.edges).toHaveLength(0);
+  });
+});
+
+describe("subgraphForMrc — known MRC with no ingested data returns empty", () => {
+  it("returns empty nodes array when DB has no rows for MRC cities", async () => {
+    // "Beauharnois-Salaberry" is a real MRC in QC_MUNICIPALITIES.
+    const db = {
+      select: () => ({
+        from: () => ({
+          where: () => Promise.resolve([]),
+        }),
+      }),
+    } as unknown;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await subgraphForMrc(db as any, "Beauharnois-Salaberry");
+    // citySlugs should be populated (cities exist in QC_MUNICIPALITIES).
+    expect(result.citySlugs.length).toBeGreaterThan(0);
+    // But nodes should be empty (nothing in DB).
+    expect(result.nodes).toHaveLength(0);
+    expect(result.edges).toHaveLength(0);
+    expect(result.mrc).toBe("Beauharnois-Salaberry");
+  });
+});
+
+describe("listMrcs — pure: returns empty when DB has no nodes", () => {
+  it("returns empty array when no graph nodes exist", async () => {
+    const db = {
+      selectDistinct: () => ({
+        from: () => ({
+          where: () => Promise.resolve([]),
+        }),
+      }),
+    } as unknown;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await listMrcs(db as any);
+    expect(result).toEqual([]);
+  });
+});
+
+describe("subgraphForMrc — QC_MUNICIPALITIES MRC membership", () => {
+  it("Beauharnois-Salaberry contains salaberry-de-valleyfield and beauharnois", async () => {
+    const { QC_MUNICIPALITIES } = await import("@radar/sources");
+    const cities = QC_MUNICIPALITIES.filter((m) => m.mrc === "Beauharnois-Salaberry");
+    const slugs = cities.map((c) => c.slug);
+    expect(slugs).toContain("salaberry-de-valleyfield");
+    expect(slugs).toContain("beauharnois");
+  });
+
+  it("Roussillon contains sainte-catherine and saint-constant", async () => {
+    const { QC_MUNICIPALITIES } = await import("@radar/sources");
+    const cities = QC_MUNICIPALITIES.filter((m) => m.mrc === "Roussillon");
+    const slugs = cities.map((c) => c.slug);
+    expect(slugs).toContain("sainte-catherine");
+    expect(slugs).toContain("saint-constant");
   });
 });
 
