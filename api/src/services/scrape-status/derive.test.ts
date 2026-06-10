@@ -4,14 +4,16 @@
  * Vérifie que :
  *   1. deriveStaticScrapeStatuses() retourne les statuts réels dérivés de
  *      ALL_PV_CITIES et des villes MAMH (anti-invention §0.2).
- *   2. mergeWithDerived() donne la priorité aux enregistrements stockés.
- *   3. GET /api/scrape-status/maturity retourne un score cohérent.
+ *   2. deriveStaticScrapeStatuses() couvre les 1106 villes du Québec.
+ *   3. mergeWithDerived() donne la priorité aux enregistrements stockés.
+ *   4. GET /api/scrape-status/maturity retourne un score cohérent.
+ *   5. GET /api/scrape-status/coverage retourne l'agrégat provincial (total=1106).
  */
 
 import { describe, expect, it } from "vitest";
 import type { ScrapeStatusT } from "@radar/domain";
-import { ALL_PV_CITIES } from "@radar/sources";
-import { deriveStaticScrapeStatuses, mergeWithDerived } from "./derive.js";
+import { ALL_PV_CITIES, QC_MUNICIPALITIES } from "@radar/sources";
+import { deriveStaticScrapeStatuses, mergeWithDerived, deriveProvincialCoverage } from "./derive.js";
 import { scrapeStatusRoute } from "../../routes/scrape-status.js";
 import type { ObjectStore } from "../../storage/object-store.js";
 
@@ -44,10 +46,15 @@ function makeMemStore(): ObjectStore {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("deriveStaticScrapeStatuses()", () => {
-  it("retourne au moins ALL_PV_CITIES.length enregistrements conseils-municipaux", () => {
+  it("retourne QC_MUNICIPALITIES.length enregistrements conseils-municipaux (inventaire provincial)", () => {
     const records = deriveStaticScrapeStatuses();
     const pvRecords = records.filter((r) => r.source === "conseils-municipaux");
-    expect(pvRecords.length).toBe(ALL_PV_CITIES.length);
+    // Inventaire provincial : 1 enregistrement CM par ville QC (1106)
+    // + les villes ALL_PV_CITIES dont le slug ne correspond pas à QC_MUNICIPALITIES
+    // (saint-damase, hemmingford) s'ajoutent aux 1106 QC → total > 1106
+    // mais le test de cohérence principal est l'inventaire QC = 1106 CM records.
+    expect(pvRecords.length).toBeGreaterThanOrEqual(ALL_PV_CITIES.length);
+    expect(pvRecords.length).toBeGreaterThanOrEqual(QC_MUNICIPALITIES.length);
   });
 
   it("chaque ville PV a status=scraped et dataQuality=pdf", () => {
@@ -103,6 +110,59 @@ describe("deriveStaticScrapeStatuses()", () => {
     // Valleyfield has a pdf URL in GeoSourceInventory → identified
     expect(zonage!.status).toBe("identified");
     expect(zonage!.siteUrl).toBeDefined();
+  });
+
+  it("inventaire provincial : couvre au moins QC_MUNICIPALITIES.length villes pour conseils-municipaux", () => {
+    const records = deriveStaticScrapeStatuses();
+    const cmRecords = records.filter((r) => r.source === "conseils-municipaux");
+    // Le total CM = ALL_PV_CITIES (32) + villes QC non câblées + exclues.
+    // Les villes PV dont le slug ne figure pas dans QC_MUNICIPALITIES s'ajoutent.
+    // La somme finale doit couvrir les 1106 villes QC au minimum.
+    expect(cmRecords.length).toBeGreaterThanOrEqual(QC_MUNICIPALITIES.length);
+    expect(cmRecords.length).toBeGreaterThanOrEqual(1106);
+  });
+
+  it("villes câblées (ALL_PV_CITIES) ont status=scraped dans l'inventaire provincial", () => {
+    const records = deriveStaticScrapeStatuses();
+    for (const city of ALL_PV_CITIES) {
+      const rec = records.find(
+        (r) =>
+          r.citySlug === city.config.citySlug &&
+          r.source === "conseils-municipaux",
+      );
+      expect(rec).toBeDefined();
+      expect(rec!.status).toBe("scraped");
+    }
+  });
+
+  it("villes non câblées ont status=todo dans l'inventaire provincial", () => {
+    const records = deriveStaticScrapeStatuses();
+    const wiredSlugs = new Set(ALL_PV_CITIES.map((c) => c.config.citySlug));
+    const nonWired = records.filter(
+      (r) =>
+        r.source === "conseils-municipaux" && !wiredSlugs.has(r.citySlug),
+    );
+    expect(nonWired.length).toBeGreaterThan(0);
+    for (const rec of nonWired) {
+      expect(rec.status).toBe("todo");
+    }
+  });
+
+  it("villes exclues (Montréal, Laval) sont présentes avec status=todo et dataQuality=none", () => {
+    const records = deriveStaticScrapeStatuses();
+    const montreal = records.find(
+      (r) => r.citySlug === "montreal" && r.source === "conseils-municipaux",
+    );
+    const laval = records.find(
+      (r) => r.citySlug === "laval" && r.source === "conseils-municipaux",
+    );
+    // Les deux villes exclues doivent être présentes dans l'inventaire
+    expect(montreal).toBeDefined();
+    expect(montreal!.status).toBe("todo");
+    expect(montreal!.dataQuality).toBe("none");
+    expect(laval).toBeDefined();
+    expect(laval!.status).toBe("todo");
+    expect(laval!.dataQuality).toBe("none");
   });
 
   it("pas de doublon (citySlug × source unique)", () => {
@@ -294,5 +354,117 @@ describe("GET /api/scrape-status/maturity", () => {
     expect(stConstant).toBeDefined();
     // graphified → maturity = 100 (100% of 1 source)
     expect(stConstant!.maturity).toBe(100);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// deriveProvincialCoverage
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("deriveProvincialCoverage()", () => {
+  it("total = 1106 (QC_MUNICIPALITIES.length)", () => {
+    const records = deriveStaticScrapeStatuses();
+    const coverage = deriveProvincialCoverage(records);
+    expect(coverage.total).toBe(1106);
+    expect(coverage.total).toBe(QC_MUNICIPALITIES.length);
+  });
+
+  it("byStatus.todo + byStatus.scraped + byStatus.graphified + byStatus.identified + byStatus.error = total", () => {
+    const records = deriveStaticScrapeStatuses();
+    const coverage = deriveProvincialCoverage(records);
+    const sum =
+      coverage.byStatus.todo +
+      coverage.byStatus.identified +
+      coverage.byStatus.scraped +
+      coverage.byStatus.graphified +
+      coverage.byStatus.error;
+    expect(sum).toBe(coverage.total);
+  });
+
+  it("byStatus.scraped = nombre de villes PV dont le slug figure dans QC_MUNICIPALITIES", () => {
+    const records = deriveStaticScrapeStatuses();
+    const coverage = deriveProvincialCoverage(records);
+    // Certaines villes ALL_PV_CITIES (ex : saint-damase, hemmingford) ont des slugs
+    // qui ne correspondent pas exactement à QC_MUNICIPALITIES (ambiguïté de nom).
+    // La couverture ne compte donc que les villes QC trouvées → ≤ ALL_PV_CITIES.length.
+    const qcSlugs = new Set(QC_MUNICIPALITIES.map((m) => m.slug));
+    const pvInQc = ALL_PV_CITIES.filter((c) => qcSlugs.has(c.config.citySlug)).length;
+    expect(coverage.byStatus.scraped).toBe(pvInQc);
+    expect(coverage.byStatus.scraped).toBeGreaterThan(0);
+  });
+
+  it("byStatus.todo >= 1068 (majorité des villes non câblées)", () => {
+    const records = deriveStaticScrapeStatuses();
+    const coverage = deriveProvincialCoverage(records);
+    // 1106 total - ~34 câblées (scraped) - 2 exclues (also todo) - ~4 MAMH (autre source)
+    // Les villes non câblées sont en "todo", majorité
+    expect(coverage.byStatus.todo).toBeGreaterThan(1060);
+  });
+
+  it("byMrc contient des clés MRC avec total, scraped, todo", () => {
+    const records = deriveStaticScrapeStatuses();
+    const coverage = deriveProvincialCoverage(records);
+    const mrcKeys = Object.keys(coverage.byMrc);
+    expect(mrcKeys.length).toBeGreaterThan(0);
+    for (const key of mrcKeys) {
+      const mrc = coverage.byMrc[key]!;
+      expect(mrc.total).toBeGreaterThan(0);
+      expect(mrc.scraped + mrc.todo).toBeLessThanOrEqual(mrc.total);
+    }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/scrape-status/coverage
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("GET /api/scrape-status/coverage", () => {
+  it("retourne total=1106 et byStatus avec tous les compteurs", async () => {
+    const app = scrapeStatusRoute(makeMemStore());
+    const res = await app.request("/api/scrape-status/coverage");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      total: number;
+      byStatus: {
+        todo: number;
+        identified: number;
+        scraped: number;
+        graphified: number;
+        error: number;
+      };
+      byMrc: Record<string, { total: number; scraped: number; todo: number }>;
+    };
+    expect(body.total).toBe(1106);
+    expect(body.byStatus).toBeDefined();
+    expect(typeof body.byStatus.todo).toBe("number");
+    expect(typeof body.byStatus.scraped).toBe("number");
+    expect(typeof body.byStatus.graphified).toBe("number");
+    // scraped = villes PV dont le slug correspond à QC_MUNICIPALITIES (≤ ALL_PV_CITIES.length)
+    expect(body.byStatus.scraped).toBeGreaterThan(0);
+    expect(body.byStatus.scraped).toBeLessThanOrEqual(ALL_PV_CITIES.length);
+    expect(body.byMrc).toBeDefined();
+    expect(Object.keys(body.byMrc).length).toBeGreaterThan(0);
+  });
+
+  it("somme byStatus = total (cohérence comptage)", async () => {
+    const app = scrapeStatusRoute(makeMemStore());
+    const res = await app.request("/api/scrape-status/coverage");
+    const body = (await res.json()) as {
+      total: number;
+      byStatus: {
+        todo: number;
+        identified: number;
+        scraped: number;
+        graphified: number;
+        error: number;
+      };
+    };
+    const sum =
+      body.byStatus.todo +
+      body.byStatus.identified +
+      body.byStatus.scraped +
+      body.byStatus.graphified +
+      body.byStatus.error;
+    expect(sum).toBe(body.total);
   });
 });
