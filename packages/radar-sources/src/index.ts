@@ -72,6 +72,18 @@ export {
   PV_SAINT_REMI_INDEX_HTML,
   PV_SAINT_REMI_2026_04_TEXT,
 } from "./sources/proces-verbaux-saint-remi.fixture.js";
+export {
+  PV_MCMASTERVILLE_INDEX_HTML,
+  PV_MCMASTERVILLE_2025_11_TEXT,
+} from "./sources/proces-verbaux-mcmasterville.fixture.js";
+export {
+  PV_BELOEIL_INDEX_HTML,
+  PV_BELOEIL_2026_02_TEXT,
+} from "./sources/proces-verbaux-beloeil.fixture.js";
+export {
+  PV_SAINTE_JULIE_INDEX_HTML,
+  PV_SAINTE_JULIE_2026_03_TEXT,
+} from "./sources/proces-verbaux-sainte-julie.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
