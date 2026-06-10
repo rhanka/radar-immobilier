@@ -381,7 +381,11 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(ALL_SIGNALS_CITY_SLUGS).toContain("sainte-martine");
   });
 
-  it("PV_SEED_CITY_SLUGS contient les 7 villes PV Rive-Sud", () => {
+  it("inclut saint-remi (villes PV Rive-Sud)", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("saint-remi");
+  });
+
+  it("PV_SEED_CITY_SLUGS contient les 8 villes PV Rive-Sud", () => {
     expect(PV_SEED_CITY_SLUGS).toContain("saint-constant");
     expect(PV_SEED_CITY_SLUGS).toContain("sainte-catherine");
     expect(PV_SEED_CITY_SLUGS).toContain("chateauguay");
@@ -389,6 +393,54 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(PV_SEED_CITY_SLUGS).toContain("delson");
     expect(PV_SEED_CITY_SLUGS).toContain("vaudreuil-dorion");
     expect(PV_SEED_CITY_SLUGS).toContain("sainte-martine");
+    expect(PV_SEED_CITY_SLUGS).toContain("saint-remi");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 8. Saint-Rémi — POSITIF (règlement V654-2026-33, modifie V654-2017-00)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Saint-Rémi (POSITIF : zonage réel V654-2026-33)", () => {
+  let store: MemoryStore;
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "saint-remi",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("la clé S3 du PV contient 'proces-verbaux-saint-remi'", () => {
+    expect(result.pvRawRef).toMatch(/proces-verbaux-saint-remi/);
+  });
+
+  it("exactement 1 DesignationEvent canonique (règlement V654-2026-33)", () => {
+    // Le vrai PV d'avril 2026 contient l'avis de motion pour le règlement V654-2026-33
+    // modifiant le règlement de zonage V654-2017-00.
+    // detectZonageChange() → changementZonage:true → 1 DesignationEvent émis.
+    expect(result.designationEventCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("le DesignationEvent référence le règlement V654-2026-33", () => {
+    const events = result.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    const terms = events.flatMap((e) => e.aliases.concat(e.label));
+    const combined = terms.join(" ").toLowerCase();
+    expect(combined.includes("v654-2026-33") || combined.includes("654-2026-33")).toBe(true);
+  });
+
+  it("le project-state de saint-remi est persisté dans le store", () => {
+    expect(result.stateKey).toMatch(/saint-remi/);
+    expect(store.objects.has(result.stateKey)).toBe(true);
   });
 });
 

@@ -1,6 +1,7 @@
 /**
  * PV-SEED — Réseau de villes PV Rive-Sud (saint-constant, sainte-catherine,
- *           chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine).
+ *           chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine,
+ *           saint-remi).
  *
  * Sème les fixtures PV RÉELLES (extraits pdftotext de vrais PV publics captés
  * 2026-06-10) dans l'objet-store comme le ferait RECUEIL, puis lance
@@ -18,6 +19,7 @@
  *   - Delson → 0 DesignationEvent zonage (référence passée sans avis de motion actif).
  *   - Vaudreuil-Dorion → 0 DesignationEvent zonage (faux-positif écarté en amont).
  *   - Sainte-Martine → 1 DesignationEvent zonage (règlement 2026-510, zone MxtV-2).
+ *   - Saint-Rémi → 1 DesignationEvent zonage (règlement V654-2026-33, modifie V654-2017-00).
  *
  * La clé S3 suit le patron du RECUEIL :
  *   raw/proces-verbaux-<city>/<yyyy>/<mm>/<dd>/<sha256>.<ext>
@@ -32,6 +34,7 @@ import {
   PV_SAINT_CONSTANT_2026_05_TEXT,
   PV_SAINTE_CATHERINE_2026_05_TEXT,
   PV_SAINTE_MARTINE_2026_04_TEXT,
+  PV_SAINT_REMI_2026_04_TEXT,
   PV_VAUDREUIL_DORION_2026_05_TEXT,
   type RawDocumentRecord,
 } from "@radar/sources";
@@ -112,6 +115,13 @@ export const PV_FIXTURES: readonly PvFixtureSpec[] = [
     sourceUrl:
       "https://sainte-martine.ca/wp-content/uploads/2026/05/conseil-avril-2026.pdf",
     pvText: PV_SAINTE_MARTINE_2026_04_TEXT,
+  },
+  {
+    citySlug: "saint-remi",
+    sourceId: "proces-verbaux-saint-remi",
+    sourceUrl:
+      "https://www.saint-remi.ca/wp-content/uploads/2026/05/20260420_pv.pdf",
+    pvText: PV_SAINT_REMI_2026_04_TEXT,
   },
 ];
 
