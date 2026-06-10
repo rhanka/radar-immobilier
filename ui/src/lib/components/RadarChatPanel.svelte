@@ -41,6 +41,14 @@
   const STORAGE_KEY = "radar-chat-turns";
   const MAX_PERSISTED = 50;
 
+  /** Suggestions de questions radar affichees dans l'etat vide du chat. */
+  const RADAR_SUGGESTIONS: readonly string[] = [
+    "Top opportunités ?",
+    "Quelles villes ont un changement de zonage ?",
+    "Détail Saint-Constant ?",
+    "Détail Valleyfield ?",
+  ];
+
   let providers: ChatProvider[] = [];
   let providersLoaded = false;
   let providersError = "";
@@ -389,12 +397,23 @@
         {/if}
       </Alert>
     {:else if turns.length === 0}
-      <div class="flex h-full items-center justify-center">
+      <div class="flex h-full flex-col items-center justify-center gap-4 px-2">
         <p class="max-w-xs text-center text-sm text-slate-500">
-          Posez une question sur les signaux, les contraintes reglementaires ou
-          une fiche d'opportunite. Vous pouvez aussi demander d'ajouter une
-          demande au backlog (ex. « Ajoute une demande : carte interactive »).
+          Posez une question sur les signaux, les opportunites ou les
+          reglements. Exemples :
         </p>
+        <div class="flex flex-wrap justify-center gap-2">
+          {#each RADAR_SUGGESTIONS as suggestion (suggestion)}
+            <button
+              type="button"
+              class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50"
+              disabled={!configured || sending}
+              on:click={() => sendContent(suggestion)}
+            >
+              {suggestion}
+            </button>
+          {/each}
+        </div>
       </div>
     {:else}
       <div class="space-y-5">

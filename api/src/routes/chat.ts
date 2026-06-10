@@ -10,6 +10,12 @@
  *   GET  /api/chat/providers       — providers actually configured via env
  *   POST /api/chat/messages        — start a streamed assistant turn
  *   GET  /api/chat/streams/sse     — StreamHub SSE (named events)
+ *
+ * feat(chat): Each assistant turn now injects a live radar context snapshot
+ * (cities with zonage changes, top opportunities) into the system prompt so
+ * the LLM can answer factual questions about the radar without fabricating
+ * data. The context is fetched from the internal endpoints before the turn
+ * starts. If the fetch fails, a degraded-mode note is injected instead.
  */
 
 import { Hono } from "hono";
@@ -32,6 +38,10 @@ import {
   subscribe,
   type StreamFrame,
 } from "../services/chat/stream-bus.js";
+import {
+  buildRadarContext,
+  serializeRadarContext,
+} from "../services/chat/radar-context.js";
 
 const chatTurnSchema = z.object({
   role: z.enum(["system", "user", "assistant"]),
@@ -44,16 +54,21 @@ const createMessageSchema = z.object({
   messages: z.array(chatTurnSchema).min(1),
 });
 
-const SYSTEM_PROMPT =
-  "Tu es l'assistant du radar immobilier de Salaberry-de-Valleyfield. " +
+/**
+ * Static part of the system prompt (role, language, guardrails, backlog tools).
+ * The live radar context snapshot is appended at call time.
+ */
+const SYSTEM_PROMPT_BASE =
+  "Tu es l'assistant du radar immobilier. " +
   "Reponds en francais, de maniere concise et factuelle, en t'appuyant " +
-  "uniquement sur les informations fournies. N'invente jamais de fait, " +
-  "de reglement, de zone ni de lot. " +
+  "uniquement sur les informations fournies dans le contexte radar ci-dessous. " +
+  "N'invente jamais de fait, de reglement, de zone ni de lot. " +
+  "Si la donnee demandee n'est pas dans le contexte, dis-le clairement. " +
   "Tu disposes de deux outils pour piloter le backlog des evolutions : " +
   "appelle ajouter_demande(titre, description) des que l'utilisateur souhaite " +
   "une nouvelle fonctionnalite, amelioration ou correction ; appelle " +
   "traiter_demande(id) quand il demande de demarrer le traitement d'une " +
-  "demande deja ajoutee. Confirme ensuite a l'utilisateur ce qui a ete fait.";
+  "demande deja ajoutee. Confirme ensuite a l'utilisateur ce qui a ete fait.\n\n";
 
 /**
  * Translate a mesh `StreamEvent` to the wire shape the browser `StreamMessage`
@@ -178,11 +193,10 @@ export function chatRoute(): Hono {
     const streamId = randomStreamId();
     const resolvedModel = model ?? defaultModelFor(providerId);
 
-    // Prepend the radar system prompt unless the caller already sent one.
+    // Prepend the radar system prompt (with live context) unless the caller
+    // already sent a system turn. Context is fetched asynchronously before the
+    // LLM call in the background task so the POST response is instant.
     const hasSystem = messages.some((message) => message.role === "system");
-    const turns = hasSystem
-      ? messages
-      : [{ role: "system" as const, content: SYSTEM_PROMPT }, ...messages];
 
     // Run the assistant turn in the background; the browser subscribes to
     // the SSE feed and renders frames as they arrive. Tool-capable providers
@@ -190,6 +204,18 @@ export function chatRoute(): Hono {
     // backlog items; other providers stream text only.
     void (async () => {
       await publish(streamId, "status", { status: "started", providerId, modelId: resolvedModel });
+
+      // Build live radar context and inject it into the system prompt.
+      // Errors are caught inside buildRadarContext (returns ok:false), so the
+      // turn always proceeds — the assistant gracefully acknowledges missing data.
+      let turns: Array<{ role: "system" | "user" | "assistant"; content: string }>;
+      if (hasSystem) {
+        turns = messages as typeof turns;
+      } else {
+        const radarCtx = await buildRadarContext();
+        const systemContent = SYSTEM_PROMPT_BASE + serializeRadarContext(radarCtx);
+        turns = [{ role: "system" as const, content: systemContent }, ...messages];
+      }
       try {
         const apiKey = apiKeyFor(providerId);
         if (!apiKey) {
