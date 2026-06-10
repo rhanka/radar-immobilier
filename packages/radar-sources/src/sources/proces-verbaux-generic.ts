@@ -802,6 +802,93 @@ export function createLavaltrieAdvAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Vaudreuil-Soulanges cluster (additional cities beyond Vaudreuil-Dorion)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Les Cèdres (MRC Vaudreuil-Soulanges, ~50 km W of Montréal).
+ * Drupal CMS. PV list at /fr/services-aux-citoyens/greffe/proces-verbaux-ordres-du-jour.
+ * Relative PDF links under /sites/default/files/PDF/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /admin/, /includes/ — content pages allowed.
+ * Captured 2026-06-10.
+ */
+export const LES_CEDRES_PV_CONFIG: PvCityConfig = {
+  citySlug: "les-cedres",
+  pvIndexUrl:
+    "https://www.ville.lescedres.qc.ca/fr/services-aux-citoyens/greffe/proces-verbaux-ordres-du-jour",
+  sourceId: "proces-verbaux-les-cedres",
+};
+
+/** Factory shortcut for the Les Cèdres PV adapter. */
+export function createLesCedresPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(LES_CEDRES_PV_CONFIG, options);
+}
+
+/**
+ * Pincourt (MRC Vaudreuil-Soulanges, ~40 km W of Montréal).
+ * Custom CMS. PV list at /fr/la-ville/administration/seances-et-proces-verbaux.
+ * Direct absolute PDF links under /uploads/Proces-verbaux/2026/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const PINCOURT_PV_CONFIG: PvCityConfig = {
+  citySlug: "pincourt",
+  pvIndexUrl:
+    "https://www.villepincourt.qc.ca/fr/la-ville/administration/seances-et-proces-verbaux",
+  sourceId: "proces-verbaux-pincourt",
+};
+
+/** Factory shortcut for the Pincourt PV adapter. */
+export function createPincourtPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(PINCOURT_PV_CONFIG, options);
+}
+
+/**
+ * Coteau-du-Lac (MRC Vaudreuil-Soulanges, ~55 km W of Montréal).
+ * October CMS. PV list at /vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux.
+ * Direct absolute PDF links under /storage/app/media/…/proces-verbaux/2026/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /administration — content pages allowed.
+ * Captured 2026-06-10.
+ */
+export const COTEAU_DU_LAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "coteau-du-lac",
+  pvIndexUrl:
+    "https://coteau-du-lac.com/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux",
+  sourceId: "proces-verbaux-coteau-du-lac",
+};
+
+/** Factory shortcut for the Coteau-du-Lac PV adapter. */
+export function createCoteauDuLacPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(COTEAU_DU_LAC_PV_CONFIG, options);
+}
+
+/**
+ * Les Coteaux (MRC Vaudreuil-Soulanges, ~60 km W of Montréal).
+ * WordPress CMS (Yoast). PV list at /citoyens/greffe/seance-du-conseil/.
+ * Direct absolute PDF links under /wp-content/uploads/2026/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const LES_COTEAUX_PV_CONFIG: PvCityConfig = {
+  citySlug: "les-coteaux",
+  pvIndexUrl: "https://les-coteaux.qc.ca/citoyens/greffe/seance-du-conseil/",
+  sourceId: "proces-verbaux-les-coteaux",
+};
+
+/** Factory shortcut for the Les Coteaux PV adapter. */
+export function createLesCoteauxPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(LES_COTEAUX_PV_CONFIG, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ALL_PV_CITIES — single source of truth for generic PV city wiring
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -865,6 +952,18 @@ import {
 import {
   PV_LAVALTRIE_2026_05_TEXT,
 } from "./proces-verbaux-lavaltrie.fixture.js";
+import {
+  PV_LES_CEDRES_2026_05_TEXT,
+} from "./proces-verbaux-les-cedres.fixture.js";
+import {
+  PV_PINCOURT_2026_05_TEXT,
+} from "./proces-verbaux-pincourt.fixture.js";
+import {
+  PV_COTEAU_DU_LAC_2026_04_TEXT,
+} from "./proces-verbaux-coteau-du-lac.fixture.js";
+import {
+  PV_LES_COTEAUX_2026_04_TEXT,
+} from "./proces-verbaux-les-coteaux.fixture.js";
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -1004,5 +1103,33 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_LAVALTRIE_2026_05_TEXT,
     sourceUrl:
       "https://www.ville.lavaltrie.qc.ca/storage/app/media/Proc%C3%A8s-verbaux/2026/2026-05-04_PV_ord.pdf",
+  },
+  // Vaudreuil-Soulanges
+  {
+    config: LES_CEDRES_PV_CONFIG,
+    pvText: PV_LES_CEDRES_2026_05_TEXT,
+    sourceUrl:
+      "https://www.ville.lescedres.qc.ca/sites/default/files/PDF/pv_ass_2026_05_12.pdf",
+  },
+  // Vaudreuil-Soulanges
+  {
+    config: PINCOURT_PV_CONFIG,
+    pvText: PV_PINCOURT_2026_05_TEXT,
+    sourceUrl:
+      "https://www.villepincourt.qc.ca/uploads/Proces-verbaux/2026/2026-05-12_-_PV_OFFICIEL.pdf",
+  },
+  // Vaudreuil-Soulanges
+  {
+    config: COTEAU_DU_LAC_PV_CONFIG,
+    pvText: PV_COTEAU_DU_LAC_2026_04_TEXT,
+    sourceUrl:
+      "https://coteau-du-lac.com/storage/app/media/vie-municipale/vie-democratique/seances-ordres-du-jour-et-proces-verbaux/proces-verbaux/2026/FINAL_PVSO14avril2026-version-approuve.pdf",
+  },
+  // Vaudreuil-Soulanges
+  {
+    config: LES_COTEAUX_PV_CONFIG,
+    pvText: PV_LES_COTEAUX_2026_04_TEXT,
+    sourceUrl:
+      "https://les-coteaux.qc.ca/wp-content/uploads/2026/05/pv_so_20260420.pdf",
   },
 ];
