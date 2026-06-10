@@ -1,0 +1,85 @@
+/**
+ * Client for GET /api/geo/:city/lots — WP B slice-2.
+ *
+ * Retourne un FeatureCollection GeoJSON de lots cadastraux réels (MRNF)
+ * pour une ville.  Propriétés exposées : uniquement `noLot` et `citySlug`
+ * (Loi 25 — aucune PII, aucun propriétaire).
+ *
+ * Lorsque la ville n'a pas de source lots (ok=false) on retourne
+ * un FeatureCollection vide plutôt que de lever, sauf si
+ * opts.throwOnEmpty=true.
+ */
+
+/** Properties d'un lot cadastral (uniquement données publiques non-PII). */
+export interface LotProperties {
+  noLot: string;
+  citySlug?: string;
+}
+
+export interface LotGeometry {
+  type: string;
+  coordinates: unknown;
+}
+
+export interface LotFeature {
+  type: "Feature";
+  geometry: LotGeometry | null;
+  properties: LotProperties;
+}
+
+export interface LotFeatureCollection {
+  type: "FeatureCollection";
+  features: LotFeature[];
+}
+
+export interface LotsResponse {
+  ok: boolean;
+  citySlug: string;
+  source: "donnees-quebec" | "none";
+  /** Raison de l'échec (ok=false seulement). */
+  reason?: string;
+  featureCollection: LotFeatureCollection;
+}
+
+export interface FetchLotsOptions {
+  limit?: number;
+  bbox?: [number, number, number, number];
+  baseUrl?: string;
+}
+
+export function resolveLotsUrl(
+  citySlug: string,
+  opts: FetchLotsOptions = {},
+): string {
+  const baseUrl = opts.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? "";
+  const base = baseUrl ? baseUrl.replace(/\/$/, "") : "";
+  const path = `/api/geo/${encodeURIComponent(citySlug)}/lots`;
+  const params = new URLSearchParams();
+  if (opts.limit !== undefined) params.set("limit", String(opts.limit));
+  if (opts.bbox) params.set("bbox", opts.bbox.join(","));
+  const qs = params.toString();
+  return `${base}${path}${qs ? `?${qs}` : ""}`;
+}
+
+/**
+ * Charge les lots cadastraux d'une ville depuis l'API.
+ *
+ * - Retourne le FeatureCollection quand ok=true.
+ * - Retourne { ok:false, featureCollection:{features:[]} } quand la ville
+ *   n'a pas de source lots (source absente) — pas d'exception.
+ * - Lève en cas d'erreur réseau ou HTTP non-2xx.
+ */
+export async function fetchLots(
+  citySlug: string,
+  opts: FetchLotsOptions = {},
+): Promise<LotsResponse> {
+  const url = resolveLotsUrl(citySlug, opts);
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`lots HTTP ${res.status} for ${citySlug}`);
+  }
+  const body = (await res.json()) as LotsResponse;
+  // ok=false with featureCollection={features:[]} is a valid "no source" case —
+  // we return it directly so the caller can display an honest empty state.
+  return body;
+}
