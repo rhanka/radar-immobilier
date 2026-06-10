@@ -1,6 +1,7 @@
 /**
- * Tests pour pv-seed.ts — seed PV Rive-Sud (saint-constant, sainte-catherine,
- *                          chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine).
+ * Tests pour pv-seed.ts — seed PV Rive-Sud + Vallée-du-Richelieu + Marguerite-D'Youville
+ *   (saint-constant, sainte-catherine, chateauguay, la-prairie, delson, vaudreuil-dorion,
+ *    sainte-martine, saint-remi, mcmasterville, beloeil, sainte-julie).
  *
  * Vérifie :
  *   1. Saint-Constant : PV réel → ≥1 DesignationEvent canonique (règl. 1926-26/1927-26)
@@ -11,6 +12,9 @@
  *   6. Vaudreuil-Dorion : PV réel → 0 DesignationEvent zonage (faux-positif écarté)
  *   7. Sainte-Martine : PV réel → 1 DesignationEvent (2026-510, zone MxtV-2)
  *   8. ALL_SIGNALS_CITY_SLUGS inclut toutes les villes
+ *   9. McMasterville : PV réel → 1 DesignationEvent (382-37, modifie zonage 382-00-2008)
+ *  10. Beloeil : PV réel → 1 DesignationEvent (1667-127/1667-128, zone C-523)
+ *  11. Sainte-Julie : PV réel → 1 DesignationEvent (1101-132, zone C-150)
  *
  * Aucun appel réseau — objectStore en mémoire uniquement.
  */
@@ -385,7 +389,19 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(ALL_SIGNALS_CITY_SLUGS).toContain("saint-remi");
   });
 
-  it("PV_SEED_CITY_SLUGS contient les 8 villes PV Rive-Sud", () => {
+  it("inclut mcmasterville (villes PV Vallée-du-Richelieu)", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("mcmasterville");
+  });
+
+  it("inclut beloeil (villes PV Vallée-du-Richelieu)", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("beloeil");
+  });
+
+  it("inclut sainte-julie (villes PV Marguerite-D'Youville)", () => {
+    expect(ALL_SIGNALS_CITY_SLUGS).toContain("sainte-julie");
+  });
+
+  it("PV_SEED_CITY_SLUGS contient les 11 villes PV (Rive-Sud + Vallée-du-Richelieu + Marguerite-D'Youville)", () => {
     expect(PV_SEED_CITY_SLUGS).toContain("saint-constant");
     expect(PV_SEED_CITY_SLUGS).toContain("sainte-catherine");
     expect(PV_SEED_CITY_SLUGS).toContain("chateauguay");
@@ -394,6 +410,9 @@ describe("ALL_SIGNALS_CITY_SLUGS", () => {
     expect(PV_SEED_CITY_SLUGS).toContain("vaudreuil-dorion");
     expect(PV_SEED_CITY_SLUGS).toContain("sainte-martine");
     expect(PV_SEED_CITY_SLUGS).toContain("saint-remi");
+    expect(PV_SEED_CITY_SLUGS).toContain("mcmasterville");
+    expect(PV_SEED_CITY_SLUGS).toContain("beloeil");
+    expect(PV_SEED_CITY_SLUGS).toContain("sainte-julie");
   });
 });
 
@@ -440,6 +459,148 @@ describe("seedPvCity — Saint-Rémi (POSITIF : zonage réel V654-2026-33)", () 
 
   it("le project-state de saint-remi est persisté dans le store", () => {
     expect(result.stateKey).toMatch(/saint-remi/);
+    expect(store.objects.has(result.stateKey)).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 9. McMasterville — POSITIF (règlement 382-37, modifie zonage 382-00-2008)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — McMasterville (POSITIF : zonage réel 382-37)", () => {
+  let store: MemoryStore;
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "mcmasterville",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("la clé S3 du PV contient 'proces-verbaux-mcmasterville'", () => {
+    expect(result.pvRawRef).toMatch(/proces-verbaux-mcmasterville/);
+  });
+
+  it("exactement 1 DesignationEvent canonique (règlement 382-37)", () => {
+    // Le vrai PV de novembre 2025 contient l'avis de motion pour le règlement 382-37-2025
+    // modifiant le règlement de zonage numéro 382-00-2008.
+    // detectZonageChange() → changementZonage:true → 1 DesignationEvent émis.
+    expect(result.designationEventCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("le DesignationEvent référence le règlement 382-37", () => {
+    const events = result.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    const terms = events.flatMap((e) => e.aliases.concat(e.label));
+    const combined = terms.join(" ").toLowerCase();
+    expect(combined.includes("382-37")).toBe(true);
+  });
+
+  it("le project-state de mcmasterville est persisté dans le store", () => {
+    expect(result.stateKey).toMatch(/mcmasterville/);
+    expect(store.objects.has(result.stateKey)).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. Beloeil — POSITIF (règlements 1667-127/1667-128, zone C-523)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Beloeil (POSITIF : zonage réel 1667-127/1667-128, zone C-523)", () => {
+  let store: MemoryStore;
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "beloeil",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("la clé S3 du PV contient 'proces-verbaux-beloeil'", () => {
+    expect(result.pvRawRef).toMatch(/proces-verbaux-beloeil/);
+  });
+
+  it("exactement 1 DesignationEvent canonique (règlements 1667-127/1667-128)", () => {
+    // Le vrai PV de février 2026 contient deux avis de motion pour les règlements
+    // 1667-127-2026 et 1667-128-2026 modifiant le règlement de zonage 1667-00-2011.
+    // detectZonageChange() → changementZonage:true → 1 DesignationEvent émis.
+    expect(result.designationEventCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("le DesignationEvent référence le règlement 1667-127", () => {
+    const events = result.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    const terms = events.flatMap((e) => e.aliases.concat(e.label));
+    const combined = terms.join(" ").toLowerCase();
+    expect(combined.includes("1667-127") || combined.includes("1667-128")).toBe(true);
+  });
+
+  it("le project-state de beloeil est persisté dans le store", () => {
+    expect(result.stateKey).toMatch(/beloeil/);
+    expect(store.objects.has(result.stateKey)).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. Sainte-Julie — POSITIF (règlement 1101-132, zone C-150)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("seedPvCity — Sainte-Julie (POSITIF : zonage réel 1101-132, zone C-150)", () => {
+  let store: MemoryStore;
+  let result: Awaited<ReturnType<typeof seedPvCity>>;
+
+  beforeEach(async () => {
+    store = new MemoryStore();
+    result = await seedPvCity(
+      store,
+      "sainte-julie",
+      () => new Date("2026-06-10T00:00:00Z"),
+    );
+  });
+
+  it("seed réussit (ok: true)", () => {
+    expect(result.ok).toBe(true);
+  });
+
+  it("la clé S3 du PV contient 'proces-verbaux-sainte-julie'", () => {
+    expect(result.pvRawRef).toMatch(/proces-verbaux-sainte-julie/);
+  });
+
+  it("exactement 1 DesignationEvent canonique (règlement 1101-132, zone C-150)", () => {
+    // Le vrai PV de mars 2026 contient l'avis de motion pour le règlement 1101-132
+    // modifiant le Règlement de zonage 1101 afin de modifier la grille des usages
+    // et des normes de la zone C-150.
+    // detectZonageChange() → changementZonage:true → 1 DesignationEvent émis.
+    expect(result.designationEventCount).toBeGreaterThanOrEqual(1);
+  });
+
+  it("le DesignationEvent référence le règlement 1101-132", () => {
+    const events = result.exploitation.state.canonicals.filter(
+      (c) => c.type === "DesignationEvent",
+    );
+    const terms = events.flatMap((e) => e.aliases.concat(e.label));
+    const combined = terms.join(" ").toLowerCase();
+    expect(combined.includes("1101-132")).toBe(true);
+  });
+
+  it("le project-state de sainte-julie est persisté dans le store", () => {
+    expect(result.stateKey).toMatch(/sainte-julie/);
     expect(store.objects.has(result.stateKey)).toBe(true);
   });
 });
