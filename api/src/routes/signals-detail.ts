@@ -113,9 +113,13 @@ function extractReglementNumbers(
     // Only DesignationEvent mentions carry règlement numbers as terms.
     if (m.type !== "DesignationEvent") continue;
     for (const term of m.normalized_terms) {
-      // Règlement numbers look like "1926-26", "38-41", "1528-17":
-      // digit-hyphen-digit pattern (not a zone code which starts with a letter).
-      if (/^\d[\d-]+\d$/u.test(term)) {
+      // Règlement numbers come in two styles:
+      //   - Digit-prefix: "1926-26", "38-41", "1528-17" (most municipalities)
+      //   - Letter-prefix: "Z-3001" (Châteauguay-style alphanumeric numbering)
+      // Both are accepted here; zone codes (e.g. "C-754", "H-431") would also
+      // match the letter-prefix shape, but the PV parser already ensures only
+      // genuine règlement numbers reach normalized_terms via REGLEMENT_ZONAGE_LETTER_RE.
+      if (/^\d[\d-]+\d$/u.test(term) || /^[A-Z]-\d{3,4}$/u.test(term)) {
         seen.add(term);
       }
     }
@@ -152,12 +156,20 @@ function extractZoneRefs(
   }
 
   // Pass 2 — label / alias scan (fallback when mention has no zoneRefs field).
+  // Exclude codes that are règlement identifiers (letter-prefix style, e.g.
+  // Z-3001) which can appear in labels like "règlement de zonage Z-3001".
+  // Precision guard: skip any code immediately preceded by "règlement" in the
+  // label text (same rule as the PV parser's extractZoneCodes).
   if (seen.size === 0) {
     const targets = [canonical.label, ...canonical.aliases];
     for (const text of targets) {
       const matches = text.matchAll(ZONE_CODE_RE);
       for (const match of matches) {
-        seen.add(match[1]!.toUpperCase());
+        const code = match[1]!.toUpperCase();
+        const matchStart = match.index ?? 0;
+        const lookback = text.slice(Math.max(0, matchStart - 40), matchStart);
+        if (/r[eè]glement\b/i.test(lookback)) continue;
+        seen.add(code);
       }
     }
   }
