@@ -365,3 +365,91 @@ export function createSaintConstantPvAdapter(
 ): ProcesVerbauxGenericAdapter {
   return new ProcesVerbauxGenericAdapter(SAINT_CONSTANT_PV_CONFIG, options);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rive-Sud / Vaudreuil-Soulanges cluster: additional cities near Montréal
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * La Prairie (MRC Roussillon, ~25 km SW of Montréal).
+ * October CMS (custom accordion). PV list under /ville/democratie/seances-du-conseil.
+ * Direct PDF links under /storage/app/media/..., no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /administration/ only.
+ * Captured 2026-06-10.
+ */
+export const LAPRAIRIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-prairie",
+  pvIndexUrl: "https://laprairie.ca/ville/democratie/seances-du-conseil",
+  sourceId: "proces-verbaux-la-prairie",
+};
+
+/** Factory shortcut for the La Prairie PV adapter. */
+export function createLaPrairiePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(LAPRAIRIE_PV_CONFIG, options);
+}
+
+/**
+ * Châteauguay (MRC Roussillon, ~35 km SW of Montréal).
+ * WordPress CMS. PV list at /affaires-municipales/seances-du-conseil/.
+ * Direct PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /wp-admin/ only; Crawl-delay: 3.
+ * Captured 2026-06-10.
+ */
+export const CHATEAUGUAY_PV_CONFIG: PvCityConfig = {
+  citySlug: "chateauguay",
+  pvIndexUrl:
+    "https://ville.chateauguay.qc.ca/affaires-municipales/seances-du-conseil/",
+  sourceId: "proces-verbaux-chateauguay",
+};
+
+/** Factory shortcut for the Châteauguay PV adapter. */
+export function createChateauguayPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(CHATEAUGUAY_PV_CONFIG, options);
+}
+
+/**
+ * Delson (MRC Roussillon, ~35 km SW of Montréal).
+ * WordPress CMS (act-collapsible blocks). PV list at
+ * /la-ville/vie-democratique/seances-du-conseil-et-proces-verbaux/.
+ * Direct PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const DELSON_PV_CONFIG: PvCityConfig = {
+  citySlug: "delson",
+  pvIndexUrl:
+    "https://ville.delson.qc.ca/la-ville/vie-democratique/seances-du-conseil-et-proces-verbaux/",
+  sourceId: "proces-verbaux-delson",
+};
+
+/** Factory shortcut for the Delson PV adapter. */
+export function createDelsonPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(DELSON_PV_CONFIG, options);
+}
+
+/**
+ * Vaudreuil-Dorion (MRC Vaudreuil-Soulanges, ~40 km W of Montréal).
+ * Custom CMS. PV list at /fr/la-ville/conseil-municipal/seances-publiques.
+ * Direct PDF links under /uploads/sections/La_Ville/Mairie/Seances_publiques/PV_20XX/.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow /assets/admin/ and search pages.
+ * Captured 2026-06-10.
+ */
+export const VAUDREUIL_DORION_PV_CONFIG: PvCityConfig = {
+  citySlug: "vaudreuil-dorion",
+  pvIndexUrl:
+    "https://www.ville.vaudreuil-dorion.qc.ca/fr/la-ville/conseil-municipal/seances-publiques",
+  sourceId: "proces-verbaux-vaudreuil-dorion",
+};
+
+/** Factory shortcut for the Vaudreuil-Dorion PV adapter. */
+export function createVaudreuilDorionPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(VAUDREUIL_DORION_PV_CONFIG, options);
+}
