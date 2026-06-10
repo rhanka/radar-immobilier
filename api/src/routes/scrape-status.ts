@@ -1,21 +1,58 @@
 import { Hono } from "hono";
-import { ScrapeStatus, ScrapeStatusSource } from "@radar/domain";
+import { ScrapeStatus, ScrapeStatusSource, cityMaturity } from "@radar/domain";
 import type { ObjectStore } from "../storage/object-store.js";
 import { readAll, upsert } from "../services/scrape-status/store.js";
+import { mergeWithDerived } from "../services/scrape-status/derive.js";
 
 /**
  * Builds the /api/scrape-status routes.
  *
- *   GET  /api/scrape-status           — list all records (optionally ?city=<slug>)
- *   PUT  /api/scrape-status/:city/:source — upsert a record (agents call this)
+ *   GET  /api/scrape-status                  — list all records (optionally ?city=<slug>)
+ *                                              merged with statically-derived real statuses
+ *   GET  /api/scrape-status/maturity          — city-level maturity aggregate (0–100)
+ *   PUT  /api/scrape-status/:city/:source     — upsert a record (agents call this)
  */
 export function scrapeStatusRoute(store: ObjectStore): Hono {
   const app = new Hono();
 
   app.get("/api/scrape-status", async (c) => {
     const cityFilter = c.req.query("city");
-    const all = await readAll(store);
-    const items = cityFilter ? all.filter((r) => r.citySlug === cityFilter) : all;
+    const stored = await readAll(store);
+    // Merge stored (manual agent upserts) with statically-derived real statuses.
+    // Stored records take priority for the same city×source key.
+    const items = mergeWithDerived(stored);
+    const filtered = cityFilter ? items.filter((r) => r.citySlug === cityFilter) : items;
+    return c.json({ items: filtered });
+  });
+
+  /**
+   * GET /api/scrape-status/maturity
+   *
+   * Returns the aggregated maturity score (0–100) per city across all sources,
+   * derived from the merged (static + stored) ScrapeStatus records.
+   *
+   * Response:
+   *   { items: [{ citySlug: string, maturity: number, sourceCount: number }] }
+   */
+  app.get("/api/scrape-status/maturity", async (c) => {
+    const stored = await readAll(store);
+    const all = mergeWithDerived(stored);
+
+    // Group by city
+    const byCity = new Map<string, typeof all>();
+    for (const rec of all) {
+      const existing = byCity.get(rec.citySlug) ?? [];
+      byCity.set(rec.citySlug, [...existing, rec]);
+    }
+
+    const items = Array.from(byCity.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([citySlug, cityItems]) => ({
+        citySlug,
+        maturity: cityMaturity(cityItems),
+        sourceCount: cityItems.length,
+      }));
+
     return c.json({ items });
   });
 
