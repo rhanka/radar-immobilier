@@ -4,6 +4,9 @@ import {
   AVIS_PUBLICS_CITY,
   AVIS_PUBLICS_SOURCE_ID,
   BEAUHARNOIS_AVIS_CONFIG,
+  CHATEAUGUAY_PV_CONFIG,
+  DELSON_PV_CONFIG,
+  LAPRAIRIE_PV_CONFIG,
   REGLEMENTS_URBANISME_CITY,
   REGLEMENTS_URBANISME_SOURCE_ID,
   SAINT_DAMASE_PV_CONFIG,
@@ -11,6 +14,7 @@ import {
   SAINT_CONSTANT_PV_CONFIG,
   VALLEYFIELD_AVIS_CONFIG,
   VALLEYFIELD_YOUTUBE_CONFIG,
+  VAUDREUIL_DORION_PV_CONFIG,
   adressesSourceId,
   createAdressesQuebecAdapter,
   createAvisPublicsAdapter,
@@ -43,6 +47,10 @@ export const ROLE_MAMH_BEAUHARNOIS = "70022";
 export const PV_SAINT_DAMASE_SOURCE_ID = SAINT_DAMASE_PV_CONFIG.sourceId;
 export const PV_SAINTE_CATHERINE_SOURCE_ID = SAINTE_CATHERINE_PV_CONFIG.sourceId;
 export const PV_SAINT_CONSTANT_SOURCE_ID = SAINT_CONSTANT_PV_CONFIG.sourceId;
+export const PV_LAPRAIRIE_SOURCE_ID = LAPRAIRIE_PV_CONFIG.sourceId;
+export const PV_CHATEAUGUAY_SOURCE_ID = CHATEAUGUAY_PV_CONFIG.sourceId;
+export const PV_DELSON_SOURCE_ID = DELSON_PV_CONFIG.sourceId;
+export const PV_VAUDREUIL_DORION_SOURCE_ID = VAUDREUIL_DORION_PV_CONFIG.sourceId;
 export const AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID =
   VALLEYFIELD_AVIS_CONFIG.sourceId;
 export const AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID =
@@ -201,6 +209,34 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       city: SAINT_CONSTANT_PV_CONFIG.citySlug,
       build: () => createProcesVerbauxAdapter(SAINT_CONSTANT_PV_CONFIG),
     },
+    // procès-verbaux: La Prairie (Rive-Sud, MRC Roussillon, ~25 km SW Montréal)
+    // PV mai 2026 : 0 DesignationEvent zonage (règlements taxes/patrimoine/circulation)
+    {
+      sourceId: PV_LAPRAIRIE_SOURCE_ID,
+      city: LAPRAIRIE_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(LAPRAIRIE_PV_CONFIG),
+    },
+    // procès-verbaux: Châteauguay (MRC Roussillon, ~35 km SW Montréal)
+    // PV fév. 2026 : 1 DesignationEvent zonage — règlement Z-3001 (zones C-754/C-810)
+    {
+      sourceId: PV_CHATEAUGUAY_SOURCE_ID,
+      city: CHATEAUGUAY_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(CHATEAUGUAY_PV_CONFIG),
+    },
+    // procès-verbaux: Delson (MRC Roussillon, ~35 km SW Montréal)
+    // PV mai 2026 : 0 DesignationEvent zonage (référence passée sans avis de motion actif)
+    {
+      sourceId: PV_DELSON_SOURCE_ID,
+      city: DELSON_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(DELSON_PV_CONFIG),
+    },
+    // procès-verbaux: Vaudreuil-Dorion (MRC Vaudreuil-Soulanges, ~40 km W Montréal)
+    // PV mai 2026 : 0 DesignationEvent zonage (faux-positif écarté en amont)
+    {
+      sourceId: PV_VAUDREUIL_DORION_SOURCE_ID,
+      city: VAUDREUIL_DORION_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(VAUDREUIL_DORION_PV_CONFIG),
+    },
     // avis-publics generic: Valleyfield (Craft CMS)
     {
       sourceId: AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
@@ -244,6 +280,10 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       PV_SAINT_DAMASE_SOURCE_ID,
       PV_SAINTE_CATHERINE_SOURCE_ID,
       PV_SAINT_CONSTANT_SOURCE_ID,
+      PV_LAPRAIRIE_SOURCE_ID,
+      PV_CHATEAUGUAY_SOURCE_ID,
+      PV_DELSON_SOURCE_ID,
+      PV_VAUDREUIL_DORION_SOURCE_ID,
     ],
     // youtube-seances: abstract id fans out to all configured YouTube cities.
     "youtube-seances": [YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID],
