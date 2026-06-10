@@ -12,6 +12,7 @@ import {
   SAINT_DAMASE_PV_CONFIG,
   SAINTE_CATHERINE_PV_CONFIG,
   SAINT_CONSTANT_PV_CONFIG,
+  SAINTE_MARTINE_PV_CONFIG,
   VALLEYFIELD_AVIS_CONFIG,
   VALLEYFIELD_YOUTUBE_CONFIG,
   VAUDREUIL_DORION_PV_CONFIG,
@@ -51,6 +52,7 @@ export const PV_LAPRAIRIE_SOURCE_ID = LAPRAIRIE_PV_CONFIG.sourceId;
 export const PV_CHATEAUGUAY_SOURCE_ID = CHATEAUGUAY_PV_CONFIG.sourceId;
 export const PV_DELSON_SOURCE_ID = DELSON_PV_CONFIG.sourceId;
 export const PV_VAUDREUIL_DORION_SOURCE_ID = VAUDREUIL_DORION_PV_CONFIG.sourceId;
+export const PV_SAINTE_MARTINE_SOURCE_ID = SAINTE_MARTINE_PV_CONFIG.sourceId;
 export const AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID =
   VALLEYFIELD_AVIS_CONFIG.sourceId;
 export const AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID =
@@ -237,6 +239,13 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       city: VAUDREUIL_DORION_PV_CONFIG.citySlug,
       build: () => createProcesVerbauxAdapter(VAUDREUIL_DORION_PV_CONFIG),
     },
+    // procès-verbaux: Sainte-Martine (MRC Beauharnois-Salaberry, ~55 km SW Montréal)
+    // PV avr. 2026 : 1 DesignationEvent zonage — règlement 2026-510 (zone MxtV-2)
+    {
+      sourceId: PV_SAINTE_MARTINE_SOURCE_ID,
+      city: SAINTE_MARTINE_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(SAINTE_MARTINE_PV_CONFIG),
+    },
     // avis-publics generic: Valleyfield (Craft CMS)
     {
       sourceId: AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
@@ -284,6 +293,7 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       PV_CHATEAUGUAY_SOURCE_ID,
       PV_DELSON_SOURCE_ID,
       PV_VAUDREUIL_DORION_SOURCE_ID,
+      PV_SAINTE_MARTINE_SOURCE_ID,
     ],
     // youtube-seances: abstract id fans out to all configured YouTube cities.
     "youtube-seances": [YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID],

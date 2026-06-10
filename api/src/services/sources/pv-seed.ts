@@ -1,6 +1,6 @@
 /**
  * PV-SEED — Réseau de villes PV Rive-Sud (saint-constant, sainte-catherine,
- *           chateauguay, la-prairie, delson, vaudreuil-dorion).
+ *           chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine).
  *
  * Sème les fixtures PV RÉELLES (extraits pdftotext de vrais PV publics captés
  * 2026-06-10) dans l'objet-store comme le ferait RECUEIL, puis lance
@@ -17,6 +17,7 @@
  *   - La Prairie → 0 DesignationEvent zonage (taxes/patrimoine/circulation ≠ zonage).
  *   - Delson → 0 DesignationEvent zonage (référence passée sans avis de motion actif).
  *   - Vaudreuil-Dorion → 0 DesignationEvent zonage (faux-positif écarté en amont).
+ *   - Sainte-Martine → 1 DesignationEvent zonage (règlement 2026-510, zone MxtV-2).
  *
  * La clé S3 suit le patron du RECUEIL :
  *   raw/proces-verbaux-<city>/<yyyy>/<mm>/<dd>/<sha256>.<ext>
@@ -30,6 +31,7 @@ import {
   PV_LAPRAIRIE_2026_05_TEXT,
   PV_SAINT_CONSTANT_2026_05_TEXT,
   PV_SAINTE_CATHERINE_2026_05_TEXT,
+  PV_SAINTE_MARTINE_2026_04_TEXT,
   PV_VAUDREUIL_DORION_2026_05_TEXT,
   type RawDocumentRecord,
 } from "@radar/sources";
@@ -103,6 +105,13 @@ export const PV_FIXTURES: readonly PvFixtureSpec[] = [
     sourceUrl:
       "https://www.ville.vaudreuil-dorion.qc.ca/uploads/sections/La_Ville/Mairie/Seances_publiques/PV_2026/20260519_pv.pdf",
     pvText: PV_VAUDREUIL_DORION_2026_05_TEXT,
+  },
+  {
+    citySlug: "sainte-martine",
+    sourceId: "proces-verbaux-sainte-martine",
+    sourceUrl:
+      "https://sainte-martine.ca/wp-content/uploads/2026/05/conseil-avril-2026.pdf",
+    pvText: PV_SAINTE_MARTINE_2026_04_TEXT,
   },
 ];
 
