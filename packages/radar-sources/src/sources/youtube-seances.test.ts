@@ -353,14 +353,17 @@ describe("getTranscript — YouTube caption path", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("getTranscript — Voxtral fallback (mocked transcribeImpl)", () => {
-  it("calls transcribeImpl when captions are unavailable", async () => {
-    const transcribeMock = vi.fn().mockResolvedValue({
-      text: EXPECTED_PLAIN_TRANSCRIPT,
-      language: "fr",
-      durationSeconds: 90,
+  it("rejects with no-transcript when captions are unavailable and no transcribeImpl", async () => {
+    // Guard: ensure no real network call escapes this test.
+    // getTranscript reaches the no-transcript branch before any fetch is made
+    // (no apiKey → caption path is fully skipped), but the spy catches any
+    // accidental globalThis.fetch usage in future refactors.
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(() => {
+      throw new Error("no real fetch allowed in this unit test");
     });
 
-    // Fetch always 404 for captions → fallback to transcribeImpl
+    // A hermetic 404 fetchImpl is injected for completeness (defence-in-depth)
+    // even though it is never called when no youtubeApiKey is set.
     const fetchImpl: YtFetchLike = async () => ({
       ok: false,
       status: 404,
@@ -369,50 +372,27 @@ describe("getTranscript — Voxtral fallback (mocked transcribeImpl)", () => {
       arrayBuffer: async () => new ArrayBuffer(0),
     });
 
-    // We cannot actually run yt-dlp in tests, so we mock getTranscript's
-    // internal transcribeWithVoxtral by providing a transcribeImpl that doesn't
-    // need a real file (the mock ignores the path).
-    // Since transcribeWithVoxtral calls execFile("yt-dlp"), we skip the
-    // full integration path and instead call getTranscript with no apiKey
-    // so the caption path is skipped entirely.
+    // No youtubeApiKey  → caption path is skipped entirely (no fetch, no yt-dlp).
+    // No transcribeImpl → getTranscript throws YouTubeSeancesError("no-transcript")
+    //                     immediately, without spawning yt-dlp or touching the
+    //                     network.  This is the hermetic, deterministic path.
     //
-    // To test the fallback cleanly without spawning yt-dlp, we stub the
-    // transcribeImpl directly and verify it receives a path argument.
-    // The test validates the RawDocument shape returned from the mock.
-    //
-    // Note: in a real CI, yt-dlp is not installed; transcribeImpl is always
-    // mocked and no child process is spawned.
-
-    // We patch the module to avoid yt-dlp execution: inject transcribeImpl
-    // that resolves immediately (as if yt-dlp succeeded and file is ready).
-    // Since the actual transcribeWithVoxtral does spawn yt-dlp, this test
-    // validates the path via a module-level mock approach: we use a custom
-    // implementation of getTranscript's internal flow by injecting a
-    // transcribeImpl that is called with a fake path.
-
-    // The simplest safe approach: mock the entire transcribeImpl and verify
-    // the RawDocument produced when the mock resolves.
-    // We accept that yt-dlp is not called (it's not installed in CI).
-    // The CI path is: captions fetch fails → transcribeImpl is called.
-
-    // Skip yt-dlp in this unit test by using a special test that directly
-    // exercises the adapter fetch() with a mock.
+    // Full yt-dlp + Voxtral integration is tested in
+    // e2e/youtube-seances.live.test.ts (YOUTUBE_SEANCES_LIVE=1 only).
     const adapter = new YouTubeSeancesAdapter(VALLEYFIELD_YOUTUBE_CONFIG, {
       fetchImpl,
-      transcribeImpl: transcribeMock,
+      // intentionally omitted: transcribeImpl — absence is what triggers no-transcript
       now: () => FIXED_NOW,
-      // No youtubeApiKey → captions path is skipped
+      // intentionally omitted: youtubeApiKey — absence skips the caption path
     });
 
-    // fetch() should call transcribeImpl (after skipping caption path)
-    // but transcribeWithVoxtral tries to spawn yt-dlp. To avoid that in CI,
-    // we test the no-transcript error path instead.
-    //
-    // Full integration test (yt-dlp present) is in e2e/youtube-seances.live.test.ts
-    // which is only run when YOUTUBE_SEANCES_LIVE=1.
-    await expect(adapter.fetch(MOCK_VIDEO_REF)).rejects.toMatchObject({
-      kind: "no-transcript",
-    });
+    try {
+      await expect(adapter.fetch(MOCK_VIDEO_REF)).rejects.toMatchObject({
+        kind: "no-transcript",
+      });
+    } finally {
+      fetchSpy.mockRestore();
+    }
   });
 
   it("transcribeMock returning text produces correct RawDocument shape", async () => {
