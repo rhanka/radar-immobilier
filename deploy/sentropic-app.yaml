@@ -1,0 +1,32 @@
+# ── Sentropic app registration descriptor — radar-immobilier ──────────────────
+#
+# This file is a DECLARATIVE DESCRIPTOR of the intent to register radar-immobilier
+# as a named sentropic workspace of type `code`. It is NOT machine-executable: the
+# actual registration must be performed by the owner (Fabien) via the sentropic UI
+# or API (see deploy/REGISTER.md for the step-by-step procedure).
+#
+# The fields below map directly to the sentropic POST /api/workspaces schema
+# (sentropic api/src/routes/api/workspaces.ts, createWorkspaceSchema):
+#
+#   name  → workspaces.name (string, 1–128 chars)
+#   type  → workspaces.type (enum: neutral | ai-priorities | opportunity | code)
+#           'code' seats the workspace in the code management lane and seeds
+#           default code-type workflows + view templates (workspaces.ts §7.6, §12.6).
+#   owner → the creator becomes ownerUserId + admin member
+#             (workspaces.ts: tx.insert workspaces + tx.insert workspaceMemberships role=admin)
+#
+# Runtime binding to the cluster:
+#   - every k8s resource in deploy/k8s/ carries the label
+#       sentropic.dev/workspace: radar-immobilier
+#     stamped by deploy/k8s/kustomization.yaml — this is the cluster-side workspace
+#     boundary, discoverable with:
+#       kubectl get all,ingress,cm -A -l sentropic.dev/workspace=radar-immobilier
+#   - the public URL (immo.sent-tech.ca) is wired in deploy/k8s/60-ingress.yaml
+#   - auth delegation to auth.sent-tech.ca is declared in deploy/k8s/80-auth.yaml
+
+name: radar-immobilier
+type: code
+owner: fabien.antoine@m4x.org
+repo: rhanka/radar-immobilier
+url: https://immo.sent-tech.ca
+workspace: code
