@@ -98,34 +98,58 @@ const ZONE_CODE_RE = /\b([A-Za-z]{1,4}-?\d+)\b/gu;
 /**
  * Extract règlement numbers from a DesignationEvent canonical.
  *
- * Strategy (anti-invention): use the member mentions' normalized_terms —
- * those are the verbatim terms the parser extracted from the real bytes.
- * When no mentions are available, return empty.
+ * Two-pass strategy (anti-invention, format-agnostic):
+ *
+ *   Pass 1 (PRIMARY) — read the structured `reglementNumbers` field on
+ *     DesignationEvent member mentions. This field is set by pvMentions when
+ *     detectZonageChange returns non-empty reglementNumbers. It contains the
+ *     verbatim parser output, covering ALL règlement formats (digit-prefix
+ *     like "1926-26", letter-prefix like "Z-3001", multi-segment like
+ *     "V654-2026-33", etc.) without any format regex. Numbers are uppercased
+ *     for canonical display.
+ *
+ *   Pass 2 (FALLBACK) — if no mention carries the structured field (legacy
+ *     data pre-dating this fix), fall back to the normalized_terms filter with
+ *     the format regexes previously used. Ensures backward-compatibility for
+ *     project states persisted before this change.
+ *
+ * Nothing is fabricated: a number only appears when it was explicitly set on
+ * the mention by the parser.
  */
 function extractReglementNumbers(
   canonical: CanonicalEntity,
   mentionIndex: Map<string, MentionNode>,
 ): string[] {
   const seen = new Set<string>();
+
+  // Pass 1 — read the structured reglementNumbers field (format-agnostic).
   for (const mId of canonical.memberMentionIds) {
     const m = mentionIndex.get(mId);
-    if (!m) continue;
-    // Only DesignationEvent mentions carry règlement numbers as terms.
-    if (m.type !== "DesignationEvent") continue;
-    for (const term of m.normalized_terms) {
-      // Règlement numbers come in two styles:
-      //   - Digit-prefix: "1926-26", "38-41", "1528-17" (most municipalities)
-      //   - Letter-prefix: "Z-3001" (Châteauguay-style alphanumeric numbering)
-      // Both are accepted here; zone codes (e.g. "C-754", "H-431") would also
-      // match the letter-prefix shape, but the PV parser already ensures only
-      // genuine règlement numbers reach normalized_terms via REGLEMENT_ZONAGE_LETTER_RE.
-      // normalized_terms are lowercased by norm(); match case-insensitively and
-      // store the canonical upper-case form so "z-3001" surfaces as "Z-3001".
-      if (/^\d[\d-]+\d$/u.test(term) || /^[A-Za-z]-\d{3,4}$/u.test(term)) {
-        seen.add(term.toUpperCase());
+    if (!m || m.type !== "DesignationEvent") continue;
+    if (m.reglementNumbers && m.reglementNumbers.length > 0) {
+      for (const num of m.reglementNumbers) {
+        seen.add(num.toUpperCase());
       }
     }
   }
+
+  // Pass 2 — fallback for legacy mentions without the structured field.
+  if (seen.size === 0) {
+    for (const mId of canonical.memberMentionIds) {
+      const m = mentionIndex.get(mId);
+      if (!m || m.type !== "DesignationEvent") continue;
+      for (const term of m.normalized_terms) {
+        // Règlement numbers come in two legacy-supported styles:
+        //   - Digit-prefix: "1926-26", "38-41", "1528-17"
+        //   - Letter-single-prefix: "z-3001" (Châteauguay) → "Z-3001"
+        // normalized_terms are lowercased by norm(); store canonical upper-case.
+        if (/^\d[\d-]+\d$/u.test(term) || /^[A-Za-z]-\d{3,4}$/u.test(term)) {
+          seen.add(term.toUpperCase());
+        }
+      }
+    }
+  }
+
   return Array.from(seen).sort();
 }
 
