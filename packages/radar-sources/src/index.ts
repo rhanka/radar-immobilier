@@ -60,6 +60,18 @@ export {
   PV_VAUDREUIL_DORION_INDEX_HTML,
   PV_VAUDREUIL_DORION_2026_05_TEXT,
 } from "./sources/proces-verbaux-vaudreuil-dorion.fixture.js";
+export {
+  PV_SAINTE_MARTINE_INDEX_HTML,
+  PV_SAINTE_MARTINE_2026_04_TEXT,
+} from "./sources/proces-verbaux-sainte-martine.fixture.js";
+export {
+  PV_CANDIAC_INDEX_HTML,
+  PV_CANDIAC_SCANNED_NOTE,
+} from "./sources/proces-verbaux-candiac.fixture.js";
+export {
+  PV_SAINT_REMI_INDEX_HTML,
+  PV_SAINT_REMI_2026_04_TEXT,
+} from "./sources/proces-verbaux-saint-remi.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
