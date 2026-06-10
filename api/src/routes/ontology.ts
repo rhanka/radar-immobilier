@@ -10,6 +10,11 @@ import {
   seedCityOntology,
   SEED_CITY_SLUGS,
 } from "../services/sources/seed-ontology.js";
+import {
+  seedPvCity,
+  PV_SEED_CITY_SLUGS,
+  ALL_SIGNALS_CITY_SLUGS,
+} from "../services/sources/pv-seed.js";
 import { ontologyPatchSchema } from "../services/exploitation/patches.js";
 import {
   applyPatch,
@@ -83,7 +88,7 @@ export function ontologyRoute(deps: OntologyDeps): Hono {
   app.get("/api/signals/by-city", async (c) => {
     const now = Date.now();
     const items: SignalCityItem[] = await Promise.all(
-      SEED_CITY_SLUGS.map(async (citySlug): Promise<SignalCityItem> => {
+      ALL_SIGNALS_CITY_SLUGS.map(async (citySlug): Promise<SignalCityItem> => {
         const state = await loadState(deps.store, citySlug);
         if (!state) {
           return { citySlug, designationEventCount: 0, generatedAt: null };
@@ -197,6 +202,48 @@ export function ontologyRoute(deps: OntologyDeps): Hono {
         realReglements: result.realReglements,
         stateKey: result.stateKey,
         validation: result.validation,
+      },
+      200,
+    );
+  });
+
+  /**
+   * POST /api/ontology/:city/exploit-pv-samples — NETWORK-FREE seed PV Rive-Sud.
+   *
+   * Sème la fixture PV réelle (extrait pdftotext) dans l'objet-store puis lance
+   * EXPLOITATION pour produire les mentions/canoniques Bylaw + DesignationEvent.
+   * Disponible pour les villes PV Rive-Sud (saint-constant, sainte-catherine).
+   * Anti-invention : un DesignationEvent n'est émis que si detectZonageChange()
+   * retourne changementZonage:true sur le texte brut réel.
+   *
+   * Usage démo (sans réseau) :
+   *   curl -X POST http://localhost:5301/api/ontology/saint-constant/exploit-pv-samples
+   *   curl -X POST http://localhost:5301/api/ontology/sainte-catherine/exploit-pv-samples
+   */
+  app.post("/api/ontology/:city/exploit-pv-samples", async (c) => {
+    const city = c.req.param("city");
+    if (!PV_SEED_CITY_SLUGS.includes(city)) {
+      return c.json(
+        {
+          ok: false,
+          error: "unknown-city",
+          detail: `No committed PV sample for "${city}"`,
+          available: PV_SEED_CITY_SLUGS,
+        },
+        404,
+      );
+    }
+    const result = await seedPvCity(deps.store, city);
+    return c.json(
+      {
+        ok: result.ok,
+        citySlug: result.citySlug,
+        pvRawRef: result.pvRawRef,
+        mentionCount: result.mentionCount,
+        candidateCount: result.candidateCount,
+        canonicalCount: result.canonicalCount,
+        designationEventCount: result.designationEventCount,
+        stateKey: result.stateKey,
       },
       200,
     );

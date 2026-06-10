@@ -7,6 +7,8 @@ import {
   REGLEMENTS_URBANISME_CITY,
   REGLEMENTS_URBANISME_SOURCE_ID,
   SAINT_DAMASE_PV_CONFIG,
+  SAINTE_CATHERINE_PV_CONFIG,
+  SAINT_CONSTANT_PV_CONFIG,
   VALLEYFIELD_AVIS_CONFIG,
   VALLEYFIELD_YOUTUBE_CONFIG,
   adressesSourceId,
@@ -39,6 +41,8 @@ export const ROLE_MAMH_BEAUHARNOIS = "70022";
 
 /** Generic source IDs for config-driven adapters (procès-verbaux, avis, youtube). */
 export const PV_SAINT_DAMASE_SOURCE_ID = SAINT_DAMASE_PV_CONFIG.sourceId;
+export const PV_SAINTE_CATHERINE_SOURCE_ID = SAINTE_CATHERINE_PV_CONFIG.sourceId;
+export const PV_SAINT_CONSTANT_SOURCE_ID = SAINT_CONSTANT_PV_CONFIG.sourceId;
 export const AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID =
   VALLEYFIELD_AVIS_CONFIG.sourceId;
 export const AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID =
@@ -184,6 +188,19 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       city: SAINT_DAMASE_PV_CONFIG.citySlug,
       build: () => createProcesVerbauxAdapter(SAINT_DAMASE_PV_CONFIG),
     },
+    // procès-verbaux: Sainte-Catherine (Rive-Sud, MRC Roussillon, ~25 km SW Montréal)
+    {
+      sourceId: PV_SAINTE_CATHERINE_SOURCE_ID,
+      city: SAINTE_CATHERINE_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(SAINTE_CATHERINE_PV_CONFIG),
+    },
+    // procès-verbaux: Saint-Constant (Rive-Sud, MRC Roussillon, ~30 km SW Montréal)
+    // Zonage réel détecté : règlements 1926-26/1927-26, zone H-431 (PV mai 2026)
+    {
+      sourceId: PV_SAINT_CONSTANT_SOURCE_ID,
+      city: SAINT_CONSTANT_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(SAINT_CONSTANT_PV_CONFIG),
+    },
     // avis-publics generic: Valleyfield (Craft CMS)
     {
       sourceId: AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
@@ -223,7 +240,11 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID,
     ],
     // procès-verbaux-generic: abstract id fans out to all configured PV cities.
-    "proces-verbaux-generic": [PV_SAINT_DAMASE_SOURCE_ID],
+    "proces-verbaux-generic": [
+      PV_SAINT_DAMASE_SOURCE_ID,
+      PV_SAINTE_CATHERINE_SOURCE_ID,
+      PV_SAINT_CONSTANT_SOURCE_ID,
+    ],
     // youtube-seances: abstract id fans out to all configured YouTube cities.
     "youtube-seances": [YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID],
   };
