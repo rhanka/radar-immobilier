@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { ScrapeStatus, ScrapeStatusSource, cityMaturity } from "@radar/domain";
 import type { ObjectStore } from "../storage/object-store.js";
 import { readAll, upsert } from "../services/scrape-status/store.js";
-import { mergeWithDerived } from "../services/scrape-status/derive.js";
+import { mergeWithDerived, deriveProvincialCoverage } from "../services/scrape-status/derive.js";
 
 /**
  * Builds the /api/scrape-status routes.
@@ -10,6 +10,7 @@ import { mergeWithDerived } from "../services/scrape-status/derive.js";
  *   GET  /api/scrape-status                  — list all records (optionally ?city=<slug>)
  *                                              merged with statically-derived real statuses
  *   GET  /api/scrape-status/maturity          — city-level maturity aggregate (0–100)
+ *   GET  /api/scrape-status/coverage          — provincial coverage aggregate (1106 cities)
  *   PUT  /api/scrape-status/:city/:source     — upsert a record (agents call this)
  */
 export function scrapeStatusRoute(store: ObjectStore): Hono {
@@ -54,6 +55,27 @@ export function scrapeStatusRoute(store: ObjectStore): Hono {
       }));
 
     return c.json({ items });
+  });
+
+  /**
+   * GET /api/scrape-status/coverage
+   *
+   * Returns the provincial coverage aggregate for "conseils-municipaux" across
+   * all 1106 QC municipalities. Counts are derived from the merged
+   * (static + stored) ScrapeStatus records — never invented.
+   *
+   * Response:
+   *   {
+   *     total: number,           // always 1106 (QC_MUNICIPALITIES.length)
+   *     byStatus: { todo, identified, scraped, graphified, error },
+   *     byMrc: { [mrcName]: { total, scraped, todo } }
+   *   }
+   */
+  app.get("/api/scrape-status/coverage", async (c) => {
+    const stored = await readAll(store);
+    const all = mergeWithDerived(stored);
+    const coverage = deriveProvincialCoverage(all);
+    return c.json(coverage);
   });
 
   app.put("/api/scrape-status/:city/:source", async (c) => {
