@@ -1,19 +1,28 @@
 <script lang="ts">
   /**
-   * EvaluationMapView — Vue Évaluation (maille zone/lots + grilles).
+   * EvaluationMapView — Vue Évaluation (maille zone/lots) — WP B slice-2.
    *
-   * Troisième niveau de zoom : pour un signal sélectionné (zone de la ville pilote),
-   * affiche les informations de grille de scoring disponibles. Pour les villes non
-   * pilotes et les zones sans données d'évaluation, un placeholder honnête
-   * est affiché (aucune donnée inventée).
+   * Drilldown zone→lot : sélection d'une ville (parmi celles avec source lots
+   * donnees-quebec) → charge les lots cadastraux réels (MRNF) via
+   * GET /api/geo/:city/lots → affiche les polygones GeoJSON sur la carte SVG.
    *
-   * Anti-invention: seule la ville pilote (Salaberry-de-Valleyfield) dispose
-   * de données réelles de signaux zonaux (demoSignalsT1 — recueil public
-   * consultation notices). Les grilles d'évaluation de lots (rôle MAMH) ne sont
-   * pas encore disponibles — ce fait est affiché clairement.
-   * Note: la vue Signaux utilise l'ontologie réelle via GET /api/signals/by-city.
+   * Anti-PII (Loi 25) : seul `noLot` (NO_LOT du cadastre allégé) est affiché.
+   * Aucune donnée propriétaire, aucun owner, aucun nom de personne.
+   *
+   * Carte : SVG pur (même approche que SignauxMapView + OpportunitesMapView —
+   * pas de nouvelle dépendance carto). Projection équirectangulaire bornée par
+   * la bbox des lots chargés.
    */
-  import { BarChart3, MapPin, Info, ChevronRight, AlertCircle } from "@lucide/svelte";
+  import { onMount } from "svelte";
+  import {
+    BarChart3,
+    MapPin,
+    Info,
+    ChevronRight,
+    AlertCircle,
+    RefreshCw,
+    Layers,
+  } from "@lucide/svelte";
   import { Badge, Alert } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import {
@@ -21,11 +30,23 @@
     CONFIDENCE_TONE,
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
+  import { fetchLots, type LotFeatureCollection, type LotFeature } from "$lib/maps/lots-client.js";
   import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
-  // ── Données ────────────────────────────────────────────────────────────────
+  // ── Villes avec source lots ────────────────────────────────────────────────
+  // Cities that have lots.availability === "donnees-quebec" in the geo inventory.
+  const LOTS_CITIES: Array<{ slug: string; name: string; mrc?: string }> = [
+    { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry" },
+    { slug: "saint-constant", name: "Saint-Constant", mrc: "Roussillon" },
+    { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry" },
+    { slug: "sainte-catherine", name: "Sainte-Catherine", mrc: "Roussillon" },
+    { slug: "delson", name: "Delson", mrc: "Roussillon" },
+    { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains" },
+  ];
+
+  // ── Données signaux (conservées pour la section grille) ───────────────────
   interface CitySignalEntry {
     slug: string;
     name: string;
@@ -39,7 +60,15 @@
     ? [{ slug: pilotCity.slug, name: pilotCity.name, mrc: pilotCity.mrc ?? undefined, signals: demoSignalsT1 }]
     : [];
 
-  // ── State ──────────────────────────────────────────────────────────────────
+  // ── State drilldown lots ───────────────────────────────────────────────────
+  let selectedLotCity: (typeof LOTS_CITIES)[0] | null = LOTS_CITIES[0] ?? null;
+  let lotsLoading = false;
+  let lotsError: string | null = null;
+  let lotsFC: LotFeatureCollection = { type: "FeatureCollection", features: [] };
+  let hoveredLot: string | null = null;
+  let selectedLot: LotFeature | null = null;
+
+  // ── State signaux ─────────────────────────────────────────────────────────
   let selectedCity: CitySignalEntry | null = cityEntries[0] ?? null;
   let selectedSignal: SignalT | null =
     cityEntries[0]?.signals[0] ?? null;
@@ -53,13 +82,8 @@
     selectedSignal = selectedSignal?.id === signal.id ? null : signal;
   }
 
-  // ── Signaux de la ville sélectionnée ──────────────────────────────────────
   $: citySignals = selectedCity?.signals ?? [];
 
-  // ── Disponibilité des données d'évaluation ─────────────────────────────────
-  // L'évaluation de lot MAMH est disponible uniquement pour la ville pilote et
-  // uniquement pour les signaux de type "residential-rezoning" avec une zone.
-  // Pour tous les autres cas, un placeholder honnête est affiché.
   function hasEvaluationData(signal: SignalT | null): boolean {
     return (
       selectedCity?.slug === PILOT_CITY_SLUG &&
@@ -71,24 +95,172 @@
 
   $: evalAvailable = hasEvaluationData(selectedSignal);
 
-  // ── Scoring axes (données réelles du scoring package) ─────────────────────
-  // Pour la démo, les valeurs des axes proviennent du dossier pilote Valleyfield
-  // documenté dans GrillesView (valleyfieldDossiers[0]). On ne les réinvente pas —
-  // on affiche seulement les champs que le dossier réel contient.
-  // Pour l'instant, aucune donnée de lot (CU/FAR/prix) n'est disponible :
-  // placeholder honnête affiché.
+  // ── Chargement des lots ────────────────────────────────────────────────────
+
+  async function loadLots(citySlug: string): Promise<void> {
+    lotsLoading = true;
+    lotsError = null;
+    lotsFC = { type: "FeatureCollection", features: [] };
+    selectedLot = null;
+    hoveredLot = null;
+    try {
+      const res = await fetchLots(citySlug, { limit: 200 });
+      lotsFC = res.featureCollection;
+      if (!res.ok) {
+        lotsError = res.reason ?? "Source lots non disponible pour cette ville.";
+      }
+    } catch (e) {
+      lotsError = e instanceof Error ? e.message : "Erreur de chargement des lots";
+      lotsFC = { type: "FeatureCollection", features: [] };
+    } finally {
+      lotsLoading = false;
+    }
+  }
+
+  function selectLotCity(city: (typeof LOTS_CITIES)[0]): void {
+    selectedLotCity = city;
+    void loadLots(city.slug);
+  }
+
+  onMount(() => {
+    if (selectedLotCity) {
+      void loadLots(selectedLotCity.slug);
+    }
+  });
+
+  // ── Projection SVG des polygones GeoJSON ──────────────────────────────────
+  // Même approche que SignauxMapView : équirectangulaire, SVG pur.
+  const SVG_W = 640;
+  const SVG_H = 400;
+
+  interface SvgBbox {
+    minLon: number;
+    minLat: number;
+    maxLon: number;
+    maxLat: number;
+  }
+
+  function computeLotsBbox(features: LotFeature[]): SvgBbox {
+    let minLon = Infinity, minLat = Infinity, maxLon = -Infinity, maxLat = -Infinity;
+    for (const f of features) {
+      if (!f.geometry || f.geometry.type !== "Polygon") continue;
+      const rings = f.geometry.coordinates as number[][][];
+      for (const ring of rings) {
+        for (const pt of ring) {
+          const lon = pt[0];
+          const lat = pt[1];
+          if (lon < minLon) minLon = lon;
+          if (lon > maxLon) maxLon = lon;
+          if (lat < minLat) minLat = lat;
+          if (lat > maxLat) maxLat = lat;
+        }
+      }
+    }
+    if (!isFinite(minLon)) {
+      // Fallback : Montérégie approximative
+      return { minLon: -74.2, minLat: 45.2, maxLon: -73.4, maxLat: 45.6 };
+    }
+    const padLon = (maxLon - minLon) * 0.08 + 0.001;
+    const padLat = (maxLat - minLat) * 0.08 + 0.001;
+    return {
+      minLon: minLon - padLon,
+      minLat: minLat - padLat,
+      maxLon: maxLon + padLon,
+      maxLat: maxLat + padLat,
+    };
+  }
+
+  function projX(lon: number, bbox: SvgBbox): number {
+    return ((lon - bbox.minLon) / (bbox.maxLon - bbox.minLon)) * SVG_W;
+  }
+
+  function projY(lat: number, bbox: SvgBbox): number {
+    return ((bbox.maxLat - lat) / (bbox.maxLat - bbox.minLat)) * SVG_H;
+  }
+
+  function ringToPoints(ring: number[][], bbox: SvgBbox): string {
+    return ring
+      .map((pt) => `${projX(pt[0], bbox).toFixed(2)},${projY(pt[1], bbox).toFixed(2)}`)
+      .join(" ");
+  }
+
+  $: lotsBbox = computeLotsBbox(lotsFC.features);
+  $: polygonFeatures = lotsFC.features.filter(
+    (f) => f.geometry && f.geometry.type === "Polygon",
+  );
 </script>
 
 <ViewLayout controlsWidth="w-80">
-  <!-- ── Left: villes + signaux ─────────────────────────────────────────────── -->
+  <!-- ── Left: sélecteur lots + signaux ─────────────────────────────────────── -->
   <svelte:fragment slot="controls">
+    <!-- Titre -->
     <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
       <BarChart3 class="h-4 w-4 text-teal-600" aria-hidden="true" />
       <h1 class="text-sm font-bold text-slate-900">Évaluation : Lots</h1>
     </div>
 
-    <div class="px-4 py-2 text-xs text-slate-500 border-b border-slate-100">
-      {cityEntries.length} ville{cityEntries.length !== 1 ? "s" : ""} avec signaux
+    <!-- Section lots cadastraux -->
+    <div class="border-b border-slate-100 px-4 py-2 flex items-center justify-between">
+      <span class="text-xs font-semibold uppercase tracking-wide text-slate-400 flex items-center gap-1">
+        <Layers class="h-3 w-3" aria-hidden="true" />
+        Lots cadastraux MRNF
+      </span>
+      {#if selectedLotCity}
+        <button
+          type="button"
+          aria-label="Actualiser les lots"
+          class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          on:click={() => { if (selectedLotCity) void loadLots(selectedLotCity.slug); }}
+          disabled={lotsLoading}
+        >
+          <RefreshCw class={`h-3.5 w-3.5 ${lotsLoading ? "animate-spin" : ""}`} aria-hidden="true" />
+        </button>
+      {/if}
+    </div>
+
+    <!-- Sélecteur de ville (lots) -->
+    <div class="divide-y divide-slate-100 border-b border-slate-200">
+      {#each LOTS_CITIES as city (city.slug)}
+        {@const isSelected = selectedLotCity?.slug === city.slug}
+        <button
+          type="button"
+          class={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+            isSelected ? "bg-teal-50 border-l-2 border-teal-500" : "hover:bg-slate-50"
+          }`}
+          on:click={() => selectLotCity(city)}
+        >
+          <MapPin
+            class={`h-3.5 w-3.5 shrink-0 ${isSelected ? "text-teal-600" : "text-slate-300"}`}
+            aria-hidden="true"
+          />
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-sm font-medium text-slate-900">
+              {city.name}
+            </span>
+            {#if city.mrc}
+              <span class="text-xs text-slate-400">{city.mrc}</span>
+            {/if}
+          </span>
+          {#if isSelected}
+            {#if lotsLoading}
+              <span class="text-xs text-slate-400">…</span>
+            {:else if lotsError}
+              <AlertCircle class="h-3.5 w-3.5 text-amber-500" aria-hidden="true" />
+            {:else}
+              <Badge tone="success" class="text-xs shrink-0">
+                {polygonFeatures.length}
+              </Badge>
+            {/if}
+          {:else}
+            <ChevronRight class="h-4 w-4 shrink-0 text-slate-300" aria-hidden="true" />
+          {/if}
+        </button>
+      {/each}
+    </div>
+
+    <!-- Section signaux -->
+    <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400 border-b border-slate-100">
+      Signaux · Ville pilote
     </div>
 
     {#if cityEntries.length === 0}
@@ -100,7 +272,6 @@
         />
       </div>
     {:else}
-      <!-- Sélecteur de ville -->
       <div class="divide-y divide-slate-100">
         {#each cityEntries as entry (entry.slug)}
           {@const isSelected = selectedCity?.slug === entry.slug}
@@ -131,7 +302,6 @@
         {/each}
       </div>
 
-      <!-- Signaux de la ville sélectionnée -->
       {#if selectedCity}
         <div class="border-t border-slate-200 pt-2">
           <p class="px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -176,17 +346,137 @@
     {/if}
   </svelte:fragment>
 
-  <!-- ── Main: grille d'évaluation ──────────────────────────────────────────── -->
+  <!-- ── Main: carte SVG lots + grille signal ───────────────────────────────── -->
   <div class="flex h-full flex-col bg-slate-50 p-4 gap-4 overflow-y-auto">
+
+    <!-- ─── Carte des lots cadastraux ─────────────────────────────────────── -->
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="border-b border-slate-100 px-4 py-2 flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+          {selectedLotCity?.name ?? "Sélectionnez une ville"} · Lots cadastraux (MRNF)
+        </span>
+        <span class="text-xs text-slate-400">
+          {#if lotsLoading}
+            chargement…
+          {:else if !lotsError}
+            {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · Données Québec CC-BY
+          {:else}
+            Source indisponible
+          {/if}
+        </span>
+      </div>
+
+      {#if lotsLoading}
+        <div class="flex items-center justify-center p-8 text-sm text-slate-400">
+          <RefreshCw class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          Chargement des lots…
+        </div>
+
+      {:else if lotsError}
+        <div class="p-4">
+          <Alert
+            tone="warning"
+            title="Données de lots non disponibles"
+            message={lotsError}
+          />
+        </div>
+
+      {:else if polygonFeatures.length === 0}
+        <div class="p-4">
+          <Alert
+            tone="info"
+            title="Aucun lot disponible pour cette ville."
+            message="La source MRNF n'a retourné aucun lot pour cette ville dans la zone couverte. Essayez une autre ville."
+          />
+        </div>
+
+      {:else}
+        <!-- Carte SVG des polygones lots -->
+        <svg
+          viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+          width="100%"
+          aria-label={`Carte des lots cadastraux de ${selectedLotCity?.name ?? ""}`}
+          role="img"
+          class="block"
+          style="max-height: 380px; cursor: default;"
+        >
+          <rect width={SVG_W} height={SVG_H} class="fill-blue-50" rx="2" />
+
+          {#each polygonFeatures as feature (feature.properties.noLot)}
+            {@const rings = feature.geometry?.coordinates as number[][][] | undefined}
+            {@const isHovered = hoveredLot === feature.properties.noLot}
+            {@const isLotSelected = selectedLot?.properties.noLot === feature.properties.noLot}
+            {#if rings && rings.length > 0}
+              <!-- svelte-ignore a11y-click-events-have-key-events -->
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <g
+                class="cursor-pointer"
+                on:click={() => {
+                  selectedLot = isLotSelected ? null : feature;
+                }}
+                on:mouseenter={() => { hoveredLot = feature.properties.noLot; }}
+                on:mouseleave={() => { hoveredLot = null; }}
+                role="button"
+                aria-label="Lot {feature.properties.noLot}"
+                tabindex="0"
+              >
+                <polygon
+                  points={ringToPoints(rings[0], lotsBbox)}
+                  fill={isLotSelected ? "#0d9488" : isHovered ? "#5eead4" : "#99f6e4"}
+                  stroke={isLotSelected ? "#0d9488" : "#2dd4bf"}
+                  stroke-width={isLotSelected ? "1.5" : "0.8"}
+                  fill-opacity={isLotSelected ? "0.7" : isHovered ? "0.6" : "0.45"}
+                />
+                {#if (isHovered || isLotSelected) && rings[0].length > 0}
+                  {@const cx = rings[0].reduce((s, p) => s + projX(p[0], lotsBbox), 0) / rings[0].length}
+                  {@const cy = rings[0].reduce((s, p) => s + projY(p[1], lotsBbox), 0) / rings[0].length}
+                  <text
+                    x={cx}
+                    y={cy}
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    style="font-size: 9px; font-weight: 600; pointer-events: none;"
+                    fill={isLotSelected ? "white" : "#0d9488"}
+                  >
+                    {feature.properties.noLot}
+                  </text>
+                {/if}
+              </g>
+            {/if}
+          {/each}
+        </svg>
+
+        <!-- Détail lot sélectionné -->
+        {#if selectedLot}
+          <div class="border-t border-teal-100 bg-teal-50 px-4 py-3 flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs font-semibold text-teal-800">Lot sélectionné</p>
+              <p class="text-sm font-mono font-bold text-teal-900">{selectedLot.properties.noLot}</p>
+              <p class="text-xs text-teal-600 mt-0.5">
+                Cadastre allégé MRNF · {selectedLotCity?.name}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="text-xs text-teal-500 hover:text-teal-700"
+              on:click={() => { selectedLot = null; }}
+              aria-label="Désélectionner le lot"
+            >✕</button>
+          </div>
+        {/if}
+      {/if}
+    </div>
+
+    <!-- ─── Section grille d'évaluation signal ─────────────────────────────── -->
     {#if !selectedCity || !selectedSignal}
-      <div class="flex flex-1 items-center justify-center text-center p-8">
+      <div class="flex items-center justify-center rounded-xl border border-slate-100 bg-white p-6 text-center">
         <div>
           <BarChart3 class="mx-auto mb-3 h-8 w-8 text-slate-300" aria-hidden="true" />
           <p class="text-sm text-slate-400">Sélectionnez un signal pour évaluer ses lots.</p>
         </div>
       </div>
     {:else}
-      <!-- En-tête signal sélectionné -->
+      <!-- En-tête signal -->
       <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div>
@@ -221,7 +511,7 @@
       </div>
 
       {#if evalAvailable}
-        <!-- Grille d'évaluation (5 axes) — placeholder honnête avec vraies étiquettes -->
+        <!-- Grille d'évaluation (5 axes) -->
         <div class="rounded-xl border border-teal-200 bg-white shadow-sm overflow-hidden">
           <div class="border-b border-teal-100 px-4 py-3 bg-teal-50 flex items-center gap-2">
             <BarChart3 class="h-4 w-4 text-teal-600" aria-hidden="true" />
@@ -230,7 +520,6 @@
           </div>
 
           <div class="p-4 space-y-3">
-            <!-- Notice honnête sur les données disponibles -->
             <div class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
               <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-600" aria-hidden="true" />
               <p>
@@ -240,7 +529,6 @@
               </p>
             </div>
 
-            <!-- Axes connus (structure de grille réelle) -->
             <table class="w-full text-xs">
               <thead>
                 <tr class="border-b border-slate-100">
@@ -274,7 +562,6 @@
               </tbody>
             </table>
 
-            <!-- Score global — placeholder honnête -->
             <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-3">
               <span class="text-sm font-semibold text-slate-700">Score global estimé</span>
               <div class="text-right">
@@ -285,26 +572,7 @@
           </div>
         </div>
 
-        <!-- Lots de la zone — placeholder honnête -->
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div class="border-b border-slate-100 px-4 py-3 flex items-center gap-2">
-            <MapPin class="h-4 w-4 text-slate-500" aria-hidden="true" />
-            <span class="text-sm font-semibold text-slate-700">Lots de la zone</span>
-          </div>
-          <div class="p-4">
-            <div class="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-              <AlertCircle class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
-              <p>
-                Les données de lots (numéros de cadastre, CU, superficie, évaluation foncière)
-                ne sont pas encore disponibles pour cette zone. L'extracteur du rôle MAMH
-                est planifié dans le backlog (WP4, Exploitation).
-              </p>
-            </div>
-          </div>
-        </div>
-
       {:else if selectedCity.slug !== PILOT_CITY_SLUG}
-        <!-- Ville non-pilote : placeholder honnête -->
         <Alert
           tone="info"
           title="Données d'évaluation non disponibles pour cette ville."
@@ -312,7 +580,6 @@
         />
 
       {:else}
-        <!-- Ville pilote, signal non-residential ou sans zone : placeholder honnête -->
         <div class="rounded-xl border border-slate-100 bg-white shadow-sm p-6">
           <div class="flex items-start gap-3">
             <Info class="h-5 w-5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
