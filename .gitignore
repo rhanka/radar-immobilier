@@ -65,3 +65,7 @@ kubeconfig*
 
 # Compiled obscura binary cache (we use docker)
 obscura-bin/
+
+# walkthrough heavy media (keep transcript + graph + screenshots)
+docs/spec/input/walkthrough/*.mp4
+docs/spec/input/walkthrough/*.mp3
