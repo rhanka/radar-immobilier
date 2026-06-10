@@ -264,19 +264,44 @@ const AVIS_MOTION_RE =
  * Both must be preceded by "règlement" to avoid false positives on lot ids.
  */
 const REGLEMENT_NUMBER_RE =
-  /r[eè]glement\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
+  /r[eè]glement\s+(?:n(?:[o°º]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
 
 /**
  * Z-prefix règlement-number pattern for municipalities using letter-prefixed
- * numbering (e.g. Châteauguay: Z-3001, G-062-22).
+ * numbering (e.g. Châteauguay: Z-3001, G-062-22; Mirabel: U-2300).
  *
  * PRECISION GUARD: requires the full phrase "règlement de zonage" immediately
  * before the letter-prefix number. This prevents misidentifying zone codes
  * (e.g. "zone C-754") or non-zonage bylaws ("règlement de construction Z-3300")
  * as règlement numbers.  Group 1 captures the letter-prefixed number.
+ *
+ * Extended (2026-06): allows an optional n°/nº/numéro between "zonage" and
+ * the letter-prefix code, to handle municipalities like Mirabel that write
+ * "règlement de zonage numéro U-2300" (with "numéro" interposed).
+ * Precision is preserved: the "règlement de zonage" prefix is still required.
  */
 const REGLEMENT_ZONAGE_LETTER_RE =
-  /r[eè]glement\s+de\s+zonage\s+([A-Z]-\d{3,4})\b/gi;
+  /r[eè]glement\s+de\s+zonage\s+(?:n(?:[o°º]|um[eé]ro)?\s*[.°º]?\s*)?([A-Z]-\d{3,4})\b/gi;
+
+/**
+ * Non-hyphenated integer règlement-number pattern for municipalities using
+ * sequential plain-integer numbering (e.g. Deux-Montagnes: 1767, 1768;
+ * Saint-Eustache: 1998, 1675).
+ *
+ * ANTI-FAUX-POSITIF guards:
+ *   1. The integer must be immediately preceded by "règlement [optional zonage
+ *      qualifier] n°/nº/no/numéro" — bare integers (years, lot counts,
+ *      article numbers) are never matched.
+ *   2. The pattern is ONLY applied by `extractReglementNumbers` when the
+ *      context window already contains a ZONAGE_KEYWORDS_RE match.
+ *   3. Negative lookahead `(?!-\d)` prevents matching the integer prefix of
+ *      a hyphenated number (e.g. "1200-93" would give "1200" without this).
+ *
+ * Handles: nº (U+00BA masculine ordinal), n° (U+00B0 degree sign), no, numéro.
+ * Group 1 captures the 3-or-4-digit integer.
+ */
+const REGLEMENT_NOHYPHEN_RE =
+  /r[eè]gl(?:ement)?\s*[.]?\s+(?:(?:de\s+)?(?:zonage|lotissement|construction)\s+|d[''']urbanisme\s+)?n(?:[o°º]|um[eé]ro)?\s*[.°º]?\s*(\d{3,4})\b(?!-\d)/gi;
 
 /**
  * V-prefix règlement-number pattern for municipalities using compound-prefix
@@ -328,15 +353,19 @@ const DENSITE_RE =
  * Extract all règlement numbers cited in a text window (case-insensitive,
  * deduped, verbatim).
  *
- * Handles three numbering styles:
- *   - Digit-only (e.g. 1926-26, 2024-58): via REGLEMENT_NUMBER_RE
- *   - Single-letter-prefix zonage bylaws (e.g. Z-3001): via REGLEMENT_ZONAGE_LETTER_RE
- *     (only matched when explicitly preceded by "règlement de zonage", to
- *     prevent confusing zone codes like C-754 with règlement identifiers)
+ * Handles four numbering styles:
+ *   - Hyphenated digit-only (e.g. 1926-26, 2024-58): via REGLEMENT_NUMBER_RE
+ *   - Single-letter-prefix zonage bylaws (e.g. Z-3001, U-2300): via
+ *     REGLEMENT_ZONAGE_LETTER_RE (requires "règlement de zonage" prefix, with
+ *     optional n°/numéro interposed for Mirabel-style "zonage numéro U-2300")
  *   - Compound V-prefix zonage bylaws (e.g. V654-2026-33): via REGLEMENT_VPREFIX_RE
  *     (only applied when the context already contains a "règlement de zonage"
  *     keyword, preventing false positives from non-zonage V-prefix bylaws such as
  *     tarification — V700-2026-09)
+ *   - Non-hyphenated 3-4 digit integers (e.g. 1767, 1998): via REGLEMENT_NOHYPHEN_RE
+ *     (only applied when the context already contains a ZONAGE_KEYWORDS_RE match,
+ *     AND the number is immediately preceded by "règlement n°/nº/no/numéro" —
+ *     never captures bare integers like years or lot counts)
  */
 function extractReglementNumbers(window: string): string[] {
   const numbers: string[] = [];
@@ -354,6 +383,12 @@ function extractReglementNumbers(window: string): string[] {
   if (ZONAGE_KEYWORDS_RE.test(window)) {
     const reV = new RegExp(REGLEMENT_VPREFIX_RE.source, "gi");
     for (const m of window.matchAll(reV)) {
+      if (m[1]) numbers.push(m[1]);
+    }
+    // Non-hyphenated integers (e.g. Deux-Montagnes 1767, Saint-Eustache 1998):
+    // only applied in a confirmed zonage context to prevent false positives.
+    const reNH = new RegExp(REGLEMENT_NOHYPHEN_RE.source, "gi");
+    for (const m of window.matchAll(reNH)) {
       if (m[1]) numbers.push(m[1]);
     }
   }
@@ -426,9 +461,13 @@ function extractZoneCodes(window: string, reglementNumbers: string[] = []): stri
  * Group 1 captures the number of the EXISTING (modified) règlement — NOT the
  * new proposed règlement that is the actual object of the avis de motion.
  *
- * Two sub-patterns cover both numbering styles:
- *   - Digit-only modified numbers (e.g. 2019-342): MODIFIANT_REGLEMENT_RE
+ * Four sub-patterns cover all numbering styles:
+ *   - Hyphenated digit-only modified numbers (e.g. 2019-342): MODIFIANT_REGLEMENT_RE
  *   - V-prefix modified numbers (e.g. V654-2017-00): MODIFIANT_REGLEMENT_VPREFIX_RE
+ *   - Non-hyphenated integers in parenthetical form (e.g. 1733 from
+ *     "modifiant le Règlement de zonage (Règl. n°1733)"): MODIFIANT_NOHYPHEN_RE
+ *   - Non-hyphenated integers in replacement form (e.g. 1675 from
+ *     "remplacer le règlement numéro 1675 en vigueur"): REMPLACER_NOHYPHEN_RE
  *
  * Used to distinguish new règlements (proposed) from referenced/modified ones
  * when both appear in the same context window.  If the context contains ONLY
@@ -443,13 +482,33 @@ const MODIFIANT_REGLEMENT_VPREFIX_RE =
   /(?:modifiant|amendant)\s+le\s+r[eè]glement\s+(?:de\s+zonage|d[''']urbanisme)\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?([A-Z]\d{2,4}-\d{4}-\d{1,3})\b/gi;
 
 /**
+ * Non-hyphenated modified règlement numbers in parenthetical form.
+ * Matches "modifiant le Règlement de zonage (Règl. n°1733)" → 1733.
+ * Used for Deux-Montagnes-style resolutions where the base bylaw number
+ * appears in parentheses after the zonage qualifier.
+ */
+const MODIFIANT_NOHYPHEN_RE =
+  /(?:modifiant|amendant)\s+le\s+r[eè]gl(?:ement)?\.?\s+(?:de\s+zonage|d[''']urbanisme)\s+\(?r[eè]gl\.\s+n[°º]\s*(\d{3,4})\)?/gi;
+
+/**
+ * Non-hyphenated replacement règlement numbers.
+ * Matches "remplacer le règlement numéro 1675 en vigueur" → 1675.
+ * Requires n°/nº/no/numéro prefix (never captures bare integers).
+ * Used for Saint-Eustache-style resolutions where a complete bylaw is replaced.
+ */
+const REMPLACER_NOHYPHEN_RE =
+  /(?:remplacer|remplaçant|abroger|abrog[eé])\s+(?:le\s+)?r[eè]gl(?:ement)?\.?\s*(?:n[o°º]|num[eé]ro)\s*[.°º]?\s*(\d{3,4})\b(?!-\d)/gi;
+
+/**
  * Extract règlement numbers that are the TARGET of a "modifiant" / "amendant"
- * clause within a context window (i.e. the OLD règlement being amended, not the
- * new proposed one).  Returns an empty set when none are found.
+ * / "remplacer" clause within a context window (i.e. the OLD règlement being
+ * amended or replaced, not the new proposed one).  Returns an empty set when
+ * none are found.
  *
- * Handles both digit-only (2019-342) and V-prefix (V654-2017-00) numbers.
- * These are EXCLUDED from `reglementNumbers` when distinct new règlement
- * numbers exist in the same context.
+ * Handles hyphenated digit-only (2019-342), V-prefix (V654-2017-00),
+ * non-hyphenated parenthetical (Règl. n°1733), and replacement (numéro 1675)
+ * forms.  These are EXCLUDED from `reglementNumbers` when distinct new
+ * règlement numbers exist in the same context.
  */
 function extractModifiedReglementNumbers(window: string): Set<string> {
   const modified = new Set<string>();
@@ -459,6 +518,14 @@ function extractModifiedReglementNumbers(window: string): Set<string> {
   }
   const reV = new RegExp(MODIFIANT_REGLEMENT_VPREFIX_RE.source, "gi");
   for (const m of window.matchAll(reV)) {
+    if (m[1]) modified.add(m[1]);
+  }
+  const reNH = new RegExp(MODIFIANT_NOHYPHEN_RE.source, "gi");
+  for (const m of window.matchAll(reNH)) {
+    if (m[1]) modified.add(m[1]);
+  }
+  const reR = new RegExp(REMPLACER_NOHYPHEN_RE.source, "gi");
+  for (const m of window.matchAll(reR)) {
     if (m[1]) modified.add(m[1]);
   }
   return modified;
@@ -523,16 +590,26 @@ const AVIS_MOTION_PAST_TENSE_RE = /avis\s+de\s+motion\s+a\s+[eé]t[eé]\s+donn[e
  *        other règlements from preceding Attendu lines.
  *      - BOTH forms: forward window capped at the next \n\n AND ±400 chars,
  *        preventing cross-item contamination (Vaudreuil-Dorion pattern).
+ *      - EXTENDED FORWARD (ACTIVE form only): when the standard first-paragraph
+ *        forward window already contains a règlement number but NO zonage keyword,
+ *        the window is extended to the SECOND \n\n (capped at 800 chars total).
+ *        This handles multi-paragraph resolution blocks where the section header
+ *        names the règlement in one paragraph and the "règlement de zonage" clause
+ *        appears in the next paragraph (Sainte-Thérèse ATTENDU → Sur proposition).
+ *        Anti-FP guard: extension only fires when the first forward para has a
+ *        règlement number — this prevents extending into the NEXT agenda item
+ *        (Vaudreuil-Dorion: the forward para after the motion has no règlement
+ *        number, so no extension occurs and changementZonage stays false).
  *   3. Within that window, look for a règlement number AND a zonage keyword.
  *   4. If both are present → `changementZonage: true` (high-precision).
  *      Only règlement numbers from zonage contexts are added to
  *      `reglementNumbers`; non-zonage motions do NOT contribute to the list.
  *   5. Modified-règlement exclusion: when the context contains both a NEW
  *      règlement number (the object of the avis de motion) and an OLD one (via
- *      "modifiant le règlement de zonage numéro Y"), only the new number is
- *      kept in `reglementNumbers`.  When only the old number exists (Châteauguay
- *      Z-3001: "d'un règlement modifiant le règlement de zonage Z-3001"), it is
- *      retained as the best available identifier.
+ *      "modifiant le règlement de zonage numéro Y" or "remplacer le règlement
+ *      numéro Y"), only the new number is kept in `reglementNumbers`.  When
+ *      only the old number exists (Châteauguay Z-3001: "d'un règlement modifiant
+ *      le règlement de zonage Z-3001"), it is retained as the best identifier.
  *   6. If only a motion is present but no règlement/zonage → `avisDeMotion: true`
  *      but `changementZonage: false` (medium-confidence, reported separately).
  *
@@ -569,14 +646,39 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
         : Math.max(prevParaBreak + 2, idx - WINDOW);
     }
 
-    // Forward window: capped at the next \n\n after the match end AND at 400
-    // chars after the match end.  Prevents cross-item contamination from the
-    // forward direction (Vaudreuil-Dorion pattern).
-    const nextParaBreak = pvText.indexOf("\n\n", matchEnd);
-    const forwardLimit = nextParaBreak === -1
-      ? Math.min(pvText.length, matchEnd + WINDOW)
-      : Math.min(matchEnd + WINDOW, nextParaBreak);
-    const ctxEnd = forwardLimit;
+    // Forward window: standard cap at the next \n\n AND 400 chars.
+    // Extended cap (ACTIVE form only): when the first forward paragraph already
+    // contains a règlement number but NO zonage keyword, extend to the second
+    // \n\n (capped at 800 chars total).  This covers multi-paragraph resolution
+    // blocks (Sainte-Thérèse: ATTENDU para → Sur proposition para with zonage).
+    // Anti-FP: only extends when the first para has a règlement number, which
+    // prevents reaching into the next unrelated agenda item (Vaudreuil-Dorion).
+    const nextParaBreak1 = pvText.indexOf("\n\n", matchEnd);
+    const nextParaBreak2 = nextParaBreak1 !== -1
+      ? pvText.indexOf("\n\n", nextParaBreak1 + 2)
+      : -1;
+
+    let ctxEnd: number;
+    if (!isPastTense && nextParaBreak2 !== -1) {
+      // Check the first forward para for a règlement number (without zonage)
+      const fwdPara1End = nextParaBreak1 === -1 ? pvText.length : nextParaBreak1;
+      const fwdPara1 = pvText.slice(matchEnd, fwdPara1End);
+      const fwdHasRegl = new RegExp(REGLEMENT_NUMBER_RE.source, "gi").test(fwdPara1);
+      const fwdHasZonage = ZONAGE_KEYWORDS_RE.test(fwdPara1);
+      if (fwdHasRegl && !fwdHasZonage) {
+        // Extend to second paragraph break (max 800 chars forward)
+        ctxEnd = Math.min(matchEnd + WINDOW * 2, nextParaBreak2);
+      } else {
+        ctxEnd = nextParaBreak1 === -1
+          ? Math.min(pvText.length, matchEnd + WINDOW)
+          : Math.min(matchEnd + WINDOW, nextParaBreak1);
+      }
+    } else {
+      ctxEnd = nextParaBreak1 === -1
+        ? Math.min(pvText.length, matchEnd + WINDOW)
+        : Math.min(matchEnd + WINDOW, nextParaBreak1);
+    }
+
     const ctx = pvText.slice(ctxStart, ctxEnd);
 
     const regNumbers = extractReglementNumbers(ctx);
