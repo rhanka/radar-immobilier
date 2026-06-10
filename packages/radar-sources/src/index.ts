@@ -100,6 +100,22 @@ export {
   PV_SAINT_EUSTACHE_INDEX_HTML,
   PV_SAINT_EUSTACHE_2026_02_TEXT,
 } from "./sources/proces-verbaux-saint-eustache.fixture.js";
+export {
+  PV_MASCOUCHE_INDEX_HTML,
+  PV_MASCOUCHE_2026_04_TEXT,
+} from "./sources/proces-verbaux-mascouche.fixture.js";
+export {
+  PV_CHARLEMAGNE_INDEX_HTML,
+  PV_CHARLEMAGNE_2026_05_TEXT,
+} from "./sources/proces-verbaux-charlemagne.fixture.js";
+export {
+  PV_LASSOMPTION_INDEX_HTML,
+  PV_LASSOMPTION_2026_05_TEXT,
+} from "./sources/proces-verbaux-lassomption.fixture.js";
+export {
+  PV_LAVALTRIE_INDEX_HTML,
+  PV_LAVALTRIE_2026_05_TEXT,
+} from "./sources/proces-verbaux-lavaltrie.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {

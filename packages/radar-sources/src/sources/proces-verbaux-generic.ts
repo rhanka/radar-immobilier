@@ -709,6 +709,99 @@ export function createSaintEustachePvAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Lanaudière cluster: couronne nord-est de Montréal (MRC Les Moulins, L'Assomption,
+// D'Autray) — villes à ~40–60 km NE de Montréal
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mascouche (MRC Les Moulins, ~40 km NE de Montréal).
+ * October CMS. PV index at /ville/vie-democratique/seances-du-conseil.
+ * One compiled PDF per year (all sessions in one file).
+ * Direct PDF links under /storage/app/media/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: 404 (no restrictions file — permissive by default).
+ * Captured 2026-06-10.
+ */
+export const MASCOUCHE_PV_CONFIG: PvCityConfig = {
+  citySlug: "mascouche",
+  pvIndexUrl:
+    "https://mascouche.ca/ville/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-mascouche",
+};
+
+/** Factory shortcut for the Mascouche PV adapter. */
+export function createMascouchePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(MASCOUCHE_PV_CONFIG, options);
+}
+
+/**
+ * Charlemagne (MRC Les Moulins, ~40 km NE de Montréal).
+ * October CMS. PV index at /la-ville/vie-democratique/seances-du-conseil.
+ * One PDF per month, class="small-document" anchor links.
+ * Direct PDF links under /storage/app/media/la-ville/Séances du conseil/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: 404 (no restrictions file — permissive by default).
+ * Captured 2026-06-10.
+ */
+export const CHARLEMAGNE_PV_CONFIG: PvCityConfig = {
+  citySlug: "charlemagne",
+  pvIndexUrl:
+    "https://www.charlemagne.ca/la-ville/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-charlemagne",
+};
+
+/** Factory shortcut for the Charlemagne PV adapter. */
+export function createCharlemagnePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(CHARLEMAGNE_PV_CONFIG, options);
+}
+
+/**
+ * L'Assomption (MRC L'Assomption, ~45 km NE de Montréal).
+ * Custom CMS (Bootstrap 3 accordion). PV index at /seances-conseil/.
+ * Individual PV PDFs per session via download.php?filename= relative links.
+ * Confirmed HTTP 200 (301 redirect from ville.lassomption.qc.ca),
+ * robots.txt: User-agent: * / Sitemap only — NO Disallow rules.
+ * Captured 2026-06-10.
+ */
+export const LASSOMPTION_PV_CONFIG: PvCityConfig = {
+  citySlug: "lassomption",
+  pvIndexUrl:
+    "https://www.ville.lassomption.qc.ca/seances-conseil/",
+  sourceId: "proces-verbaux-lassomption",
+};
+
+/** Factory shortcut for the L'Assomption PV adapter. */
+export function createLAssomptionPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(LASSOMPTION_PV_CONFIG, options);
+}
+
+/**
+ * Lavaltrie (MRC D'Autray, ~60 km NE de Montréal).
+ * October / Byscuit CMS. PV index at /conseil-municipal/seances-du-conseil-et-proces-verbaux.
+ * Individual PDFs per session via fr-file relative links under /storage/app/media/.
+ * Confirmed HTTP 200 (301 redirect from lavaltrie.ca),
+ * robots.txt: 404 (permissive by default).
+ * Captured 2026-06-10.
+ */
+export const LAVALTRIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lavaltrie",
+  pvIndexUrl:
+    "https://www.ville.lavaltrie.qc.ca/conseil-municipal/seances-du-conseil-et-proces-verbaux",
+  sourceId: "proces-verbaux-lavaltrie",
+};
+
+/** Factory shortcut for the Lavaltrie PV adapter. */
+export function createLavaltrieAdvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(LAVALTRIE_PV_CONFIG, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ALL_PV_CITIES — single source of truth for generic PV city wiring
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -760,6 +853,18 @@ import {
 import {
   PV_SAINT_EUSTACHE_2026_02_TEXT,
 } from "./proces-verbaux-saint-eustache.fixture.js";
+import {
+  PV_MASCOUCHE_2026_04_TEXT,
+} from "./proces-verbaux-mascouche.fixture.js";
+import {
+  PV_CHARLEMAGNE_2026_05_TEXT,
+} from "./proces-verbaux-charlemagne.fixture.js";
+import {
+  PV_LASSOMPTION_2026_05_TEXT,
+} from "./proces-verbaux-lassomption.fixture.js";
+import {
+  PV_LAVALTRIE_2026_05_TEXT,
+} from "./proces-verbaux-lavaltrie.fixture.js";
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -874,5 +979,30 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_SAINT_EUSTACHE_2026_02_TEXT,
     sourceUrl:
       "https://www.saint-eustache.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/proces-verbaux/2026PV_internet.pdf",
+  },
+  // Lanaudière ───────────────────────────────────────────────────────────────
+  {
+    config: MASCOUCHE_PV_CONFIG,
+    pvText: PV_MASCOUCHE_2026_04_TEXT,
+    sourceUrl:
+      "https://mascouche.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/proces-verbaux/20260609proces-verbaux-seances-du-conseil.pdf",
+  },
+  {
+    config: CHARLEMAGNE_PV_CONFIG,
+    pvText: PV_CHARLEMAGNE_2026_05_TEXT,
+    sourceUrl:
+      "https://www.charlemagne.ca/storage/app/media/la-ville/S%C3%A9ances%20du%20conseil/Proc%C3%A8s-verbal%20officiel_12%20mai%202026.pdf",
+  },
+  {
+    config: LASSOMPTION_PV_CONFIG,
+    pvText: PV_LASSOMPTION_2026_05_TEXT,
+    sourceUrl:
+      "https://www.ville.lassomption.qc.ca/download.php?filename=pv20260512.pdf",
+  },
+  {
+    config: LAVALTRIE_PV_CONFIG,
+    pvText: PV_LAVALTRIE_2026_05_TEXT,
+    sourceUrl:
+      "https://www.ville.lavaltrie.qc.ca/storage/app/media/Proc%C3%A8s-verbaux/2026/2026-05-04_PV_ord.pdf",
   },
 ];
