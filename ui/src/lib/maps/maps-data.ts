@@ -3,67 +3,61 @@
  *
  * Anti-invention policy: city/coordinate data comes exclusively from
  * QC_MUNICIPALITIES (GeoNames+MAMH CC-BY 4.0). Signal counts per city are
- * derived from demoSignalsT1 (3 real pilot signals for Salaberry-de-Valleyfield,
- * 3 synthetic simulation fixtures). No cities or signal counts are fabricated.
+ * derived from real ontology DesignationEvent canonicals via
+ * GET /api/signals/by-city. Cities without API data receive count=0 (honest
+ * placeholder — never fabricated).
  *
- * Cities without any signals receive count=0 (honest placeholder, not a
- * fabricated signal). Only cities with priorityRank (non-excluded, non-
- * deprioritized) are shown in the signal map.
+ * Only cities with priorityRank (non-excluded, non-deprioritized) are shown
+ * in the signal map.
  */
 
 import { prioritizedCities } from "@radar/sources/municipalities";
 import type { MunicipalityT } from "@radar/domain";
-import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
-import type { SignalT } from "@radar/domain";
+import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
 
 /**
- * The pilot city for which we have real signals. All real signals in
- * demoSignalsT1 originate from Valleyfield documents (bylaws 150-49,
- * 150-49-1, 150-51).
+ * The pilot city for which we have real signals. Kept as a named export for
+ * use in templates (e.g. label the pilot city on the SVG map).
  */
 export const PILOT_CITY_SLUG = "salaberry-de-valleyfield";
-
-/**
- * Six-month window: only count signals detected within the last 6 months.
- * Reference date: 2026-06-10 (today).
- */
-const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000;
-const NOW_MS = Date.parse("2026-06-10");
 
 /** A city enriched with its signal count for the map view. */
 export interface CityMapEntry {
   municipality: MunicipalityT;
-  /** Count of rezoning signals (any type) detected in the last 6 months. */
+  /**
+   * Count of DesignationEvent canonicals (rezoning changes) from the real
+   * ontology project state (GET /api/signals/by-city), 0 when no data.
+   */
   signalCount6m: number;
-  /** The signals for this city (for city detail panel). */
-  signals: SignalT[];
 }
 
 /**
- * Build the city map entries ordered by priority rank (closest to MTL first).
+ * Build city map entries from the real API response.
  *
- * Anti-invention: only the pilot city (salaberry-de-valleyfield) has real
- * signals. All other cities show 0. Simulation-mode signals are included
- * only for the pilot city since they are anchored to its zoning.
+ * Anti-invention: signal counts come exclusively from the API. Cities absent
+ * from the API response (no project state, or stale state > 6 months) get
+ * count=0 — never fabricated. City/coordinate data from QC_MUNICIPALITIES.
+ *
+ * @param apiItems — items from GET /api/signals/by-city (may be empty on
+ *   first deploy, before any city has been seeded).
+ * @param options.maxCities — limit the number of returned cities.
  */
 export function buildCityMapEntries(
+  apiItems: readonly SignalCityItem[],
   options: { maxCities?: number } = {},
 ): CityMapEntry[] {
   const cities = prioritizedCities();
   const limit = options.maxCities ?? cities.length;
 
-  return cities.slice(0, limit).map((m) => {
-    const citySignals = m.slug === PILOT_CITY_SLUG ? demoSignalsT1 : [];
-    const signals6m = citySignals.filter((s) => {
-      const age = NOW_MS - Date.parse(s.detectedAt);
-      return age <= SIX_MONTHS_MS;
-    });
-    return {
-      municipality: m,
-      signalCount6m: signals6m.filter((s) => s.type !== "derogation-irrelevant").length,
-      signals: citySignals,
-    };
-  });
+  // Index API items by city slug for O(1) lookup.
+  const countByCitySlug = new Map<string, number>(
+    apiItems.map((item) => [item.citySlug, item.designationEventCount]),
+  );
+
+  return cities.slice(0, limit).map((m) => ({
+    municipality: m,
+    signalCount6m: countByCitySlug.get(m.slug) ?? 0,
+  }));
 }
 
 /**

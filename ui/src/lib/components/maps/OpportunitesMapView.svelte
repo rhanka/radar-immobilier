@@ -3,36 +3,47 @@
    * OpportunitesMapView — Vue Opportunités (maille ville/zones).
    *
    * Vue intermédiaire : liste les opportunités (signaux à approfondir) par ville,
-   * avec zoom sur zone. Données réelles : 3 signaux pilot Valleyfield.
+   * avec zoom sur zone. Données réelles : 3 signaux pilot Valleyfield (demoSignalsT1).
    * Autres villes : placeholder honnête (0 opportunités).
    *
    * Anti-invention: aucune opportunité synthétique sans marquage "Exemple (simulation)".
+   * Note: cette vue conserve les signaux demoSignalsT1 (le recueil de documents de
+   * la ville pilote produit ces 3 signaux réels + 3 simulations de fixture). La vue
+   * Signaux utilise l'ontologie réelle via GET /api/signals/by-city.
    */
   import { Building2, MapPin, ChevronRight, Info } from "@lucide/svelte";
   import { Badge, Alert } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import {
-    buildCityMapEntries,
     SIGNAL_TYPE_LABEL,
     CONFIDENCE_TONE,
     PILOT_CITY_SLUG,
-    type CityMapEntry,
   } from "$lib/maps/maps-data.js";
+  import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
+  import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
   // ── Données ────────────────────────────────────────────────────────────────
-  // Only show cities that have at least 1 signal (or the pilot city) in the
-  // left panel. All 1106 cities are NOT listed — only the ones with data.
-  const allEntries = buildCityMapEntries();
-  const cityEntries = allEntries.filter(
-    (e) => e.signals.length > 0
-  );
+  // Only show cities that have at least 1 signal in the left panel.
+  // Currently only the pilot city (salaberry-de-valleyfield) has signals.
+  interface CitySignalEntry {
+    slug: string;
+    name: string;
+    mrc?: string;
+    signals: SignalT[];
+  }
+
+  const allCities = prioritizedCities();
+  const pilotCity = allCities.find((c) => c.slug === PILOT_CITY_SLUG);
+  const cityEntries: CitySignalEntry[] = pilotCity
+    ? [{ slug: pilotCity.slug, name: pilotCity.name, mrc: pilotCity.mrc ?? undefined, signals: demoSignalsT1 }]
+    : [];
 
   // ── State ──────────────────────────────────────────────────────────────────
-  let selectedCity: CityMapEntry | null = cityEntries[0] ?? null;
+  let selectedCity: CitySignalEntry | null = cityEntries[0] ?? null;
   let selectedSignal: SignalT | null = null;
 
-  function selectCity(entry: CityMapEntry): void {
+  function selectCity(entry: CitySignalEntry): void {
     selectedCity = entry;
     selectedSignal = null;
   }
@@ -69,8 +80,8 @@
       </div>
     {:else}
       <ul class="divide-y divide-slate-100">
-        {#each cityEntries as entry (entry.municipality.slug)}
-          {@const isSelected = selectedCity?.municipality.slug === entry.municipality.slug}
+        {#each cityEntries as entry (entry.slug)}
+          {@const isSelected = selectedCity?.slug === entry.slug}
           <li>
             <button
               type="button"
@@ -85,7 +96,7 @@
               />
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-sm font-medium text-slate-900">
-                  {entry.municipality.name}
+                  {entry.name}
                 </span>
                 <span class="text-xs text-slate-400">
                   {entry.signals.filter((s) => s.status === "à-approfondir").length} à approfondir
@@ -114,9 +125,9 @@
     {:else}
       <!-- En-tête ville -->
       <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-        <h2 class="text-base font-semibold text-slate-900">{selectedCity.municipality.name}</h2>
-        {#if selectedCity.municipality.mrc}
-          <p class="text-xs text-slate-400 mt-0.5">MRC : {selectedCity.municipality.mrc}</p>
+        <h2 class="text-base font-semibold text-slate-900">{selectedCity.name}</h2>
+        {#if selectedCity.mrc}
+          <p class="text-xs text-slate-400 mt-0.5">MRC : {selectedCity.mrc}</p>
         {/if}
         <div class="mt-2 flex items-center gap-3 text-xs text-slate-500">
           <span>
@@ -126,7 +137,7 @@
           <span>
             <strong class="text-slate-700">{citySignals.length}</strong> total
           </span>
-          {#if selectedCity.municipality.slug === PILOT_CITY_SLUG}
+          {#if selectedCity.slug === PILOT_CITY_SLUG}
             <Badge tone="success" class="text-xs">Ville pilote</Badge>
           {/if}
         </div>
