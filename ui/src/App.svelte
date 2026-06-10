@@ -15,6 +15,9 @@
   import SourcesMapView from "$lib/components/sources-map/SourcesMapView.svelte";
   import ReconciliationView from "$lib/components/reconciliation/ReconciliationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
+  import SignauxMapView from "$lib/components/maps/SignauxMapView.svelte";
+  import OpportunitesMapView from "$lib/components/maps/OpportunitesMapView.svelte";
+  import EvaluationMapView from "$lib/components/maps/EvaluationMapView.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
@@ -162,6 +165,12 @@
       <BacklogView />
     {:else if activeView === "sources"}
       <SourcesMapView />
+    {:else if activeView === "carte-signaux"}
+      <SignauxMapView />
+    {:else if activeView === "carte-opportunites"}
+      <OpportunitesMapView />
+    {:else if activeView === "carte-evaluation"}
+      <EvaluationMapView />
     {:else}
       <ConsoleView />
     {/if}
