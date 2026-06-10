@@ -44,6 +44,22 @@ export {
   PV_SAINTE_CATHERINE_2026_05_TEXT,
   PV_SAINTE_CATHERINE_INDEX_HTML,
 } from "./sources/proces-verbaux-sainte-catherine.fixture.js";
+export {
+  PV_LAPRAIRIE_INDEX_HTML,
+  PV_LAPRAIRIE_2026_05_TEXT,
+} from "./sources/proces-verbaux-laprairie.fixture.js";
+export {
+  PV_CHATEAUGUAY_INDEX_HTML,
+  PV_CHATEAUGUAY_2026_02_TEXT,
+} from "./sources/proces-verbaux-chateauguay.fixture.js";
+export {
+  PV_DELSON_INDEX_HTML,
+  PV_DELSON_2026_05_TEXT,
+} from "./sources/proces-verbaux-delson.fixture.js";
+export {
+  PV_VAUDREUIL_DORION_INDEX_HTML,
+  PV_VAUDREUIL_DORION_2026_05_TEXT,
+} from "./sources/proces-verbaux-vaudreuil-dorion.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
