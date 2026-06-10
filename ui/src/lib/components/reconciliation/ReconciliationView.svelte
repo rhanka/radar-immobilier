@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { Alert, Badge, Button, Card, EmptyState, Select } from "@sentropic/design-system-svelte";
-  import { Check, X, Database } from "@lucide/svelte";
+  import { Check, X, Database, GitMerge, Network } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
+  import CityGraphView from "$lib/components/reconciliation/CityGraphView.svelte";
   import {
     STUDIO_CITIES,
     groupEntitiesByType,
@@ -20,6 +21,10 @@
     type CandidateV,
     type CanonicalEntityV,
   } from "$lib/ontology/reconciliation.js";
+
+  // ── Onglet actif : "ontologie" (entités/candidats) ou "graphe" (SVG) ─────────
+  type StudioTab = "ontologie" | "graphe";
+  let activeTab: StudioTab = "ontologie";
 
   // ── State ────────────────────────────────────────────────────────────────────
   let citySlug: string = STUDIO_CITIES[0]!.slug;
@@ -214,15 +219,58 @@
   </svelte:fragment>
 
   <!-- ── Contenu principal ────────────────────────────────────────────────────── -->
-  <section class="min-h-full bg-slate-50 p-6">
-    <header class="mb-4">
+  <section class="flex min-h-full flex-col bg-slate-50">
+    <header class="shrink-0 border-b border-slate-200 bg-white px-6 pt-5 pb-0">
       <p class="text-xs font-medium uppercase tracking-normal text-teal-700">
         Studio de réconciliation (ontologie graphify)
       </p>
       <h1 class="mt-1 text-2xl font-semibold tracking-normal text-slate-950">
         Réconciliation : {cityLabel}
       </h1>
-      <p class="mt-2 max-w-prose rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-600">
+
+      <!-- Barre d'onglets -->
+      <nav class="mt-4 flex gap-0" aria-label="Onglets du studio">
+        <button
+          type="button"
+          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+            activeTab === "ontologie"
+              ? "border-teal-600 text-teal-700"
+              : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+          }`}
+          onclick={() => (activeTab = "ontologie")}
+          aria-current={activeTab === "ontologie" ? "page" : undefined}
+        >
+          <GitMerge class="h-4 w-4 shrink-0" aria-hidden="true" />
+          Entités &amp; candidats
+        </button>
+        <button
+          type="button"
+          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+            activeTab === "graphe"
+              ? "border-teal-600 text-teal-700"
+              : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+          }`}
+          onclick={() => (activeTab = "graphe")}
+          aria-current={activeTab === "graphe" ? "page" : undefined}
+          data-testid="tab-graphe"
+        >
+          <Network class="h-4 w-4 shrink-0" aria-hidden="true" />
+          Graphe graphify
+        </button>
+      </nav>
+    </header>
+
+    <!-- Onglet Graphe -->
+    {#if activeTab === "graphe"}
+      <div class="flex min-h-0 flex-1">
+        <CityGraphView {citySlug} />
+      </div>
+
+    <!-- Onglet Ontologie -->
+    {:else}
+    <div class="flex-1 p-6">
+    <div class="mb-4">
+      <p class="max-w-prose rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-600">
         État du projet graphify <span class="font-semibold text-slate-800">par ville</span>
         (D1) : entités canoniques par type, file de candidats
         <code class="rounded bg-slate-100 px-1 text-xs">entity_match</code>
@@ -231,7 +279,7 @@
         avis publics, adresses et règlements (données réelles ; aucune donnée
         fabriquée ; propriétaire jamais exposé, Loi 25).
       </p>
-    </header>
+    </div>
 
     {#if loading}
       <div class="rounded-lg border border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-400">
@@ -435,6 +483,8 @@
           message="État du projet réconcilié à {state.generatedAt} (profil {state.profileHash.slice(0, 12)}…). Entités issues des rôles, avis publics, adresses et règlements (données réelles) ; aucune donnée illustrative dans cet écran."
         />
       </div>
+    {/if}
+    </div>
     {/if}
   </section>
 </ViewLayout>
