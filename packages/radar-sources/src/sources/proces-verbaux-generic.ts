@@ -889,6 +889,82 @@ export function createLesCoteauxPvAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Rive-Nord cluster: MRC Thérèse-De Blainville (villes additionnelles)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Rosemère (MRC Thérèse-De Blainville, ~30 km N of Montréal).
+ * Custom CMS (PHP legacy). PV list at /seances-conseil/.
+ * Simple anchor list with relative /images/clients/PV YYYY-MM-DD FINAL.pdf links.
+ * Direct PDF links (relative hrefs resolved to www.ville.rosemere.qc.ca), no CAPTCHA.
+ * Confirmed HTTP 200 (via 301 redirect: ville.rosemere.qc.ca → www.ville.rosemere.qc.ca).
+ * robots.txt: User-agent: * / Sitemap only — NO Disallow rules (fully permissive).
+ * Captured 2026-06-10.
+ */
+export const ROSEMERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "rosemere",
+  pvIndexUrl: "https://www.ville.rosemere.qc.ca/seances-conseil/",
+  sourceId: "proces-verbaux-rosemere",
+};
+
+/** Factory shortcut for the Rosemère PV adapter. */
+export function createRosemerePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(ROSEMERE_PV_CONFIG, options);
+}
+
+/**
+ * Lorraine (MRC Thérèse-De Blainville, ~35 km N of Montréal).
+ * October CMS (same as Sainte-Thérèse / Deux-Montagnes). PV list at /conseil-municipal.
+ * Direct PDF links under /storage/app/media/decouvrir/bienvenue-a-lorraine/
+ * conseil-municipal/proces-verbaux/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /administration, /administration/,
+ * /administration/backend, /administration/backend/ only — content pages allowed.
+ * Captured 2026-06-10.
+ */
+export const LORRAINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lorraine",
+  pvIndexUrl: "https://lorraine.ca/conseil-municipal",
+  sourceId: "proces-verbaux-lorraine",
+};
+
+/** Factory shortcut for the Lorraine PV adapter. */
+export function createLorrainePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(LORRAINE_PV_CONFIG, options);
+}
+
+/**
+ * Boisbriand (MRC Thérèse-De Blainville, ~35 km NW of Montréal).
+ * October CMS (same as Lorraine / Sainte-Thérèse). PV list at
+ * /ville/vie-democratique/seances-du-conseil (boisbriand.ca redirects to
+ * www.ville.boisbriand.qc.ca).
+ * Direct PDF links under /storage/app/media/ville/vie-democratique/seances-du-conseil/PV/.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow /administration,
+ * /administration/, /administration/backend, /administration/backend/ only.
+ * NOTE: April 2026 PV has avis de motion for non-zonage règlements only (RV-1787-1 tarifs,
+ *   RV-1796 réserve financière). The zonage modification uses an "intention" resolution
+ *   (different procedural language). detectZonageChange → avisDeMotion=true,
+ *   changementZonage=false (honest zero — no false positive).
+ * Captured 2026-06-10.
+ */
+export const BOISBRIAND_PV_CONFIG: PvCityConfig = {
+  citySlug: "boisbriand",
+  pvIndexUrl:
+    "https://boisbriand.ca/ville/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-boisbriand",
+};
+
+/** Factory shortcut for the Boisbriand PV adapter. */
+export function createBoisbriandPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(BOISBRIAND_PV_CONFIG, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Montérégie-Est cluster: Vallée-du-Richelieu / Marguerite-D'Youville (suite)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1043,6 +1119,15 @@ import {
 import {
   PV_VARENNES_2026_04_TEXT,
 } from "./proces-verbaux-varennes.fixture.js";
+import {
+  PV_ROSEMERE_2026_03_TEXT,
+} from "./proces-verbaux-rosemere.fixture.js";
+import {
+  PV_LORRAINE_2026_04_TEXT,
+} from "./proces-verbaux-lorraine.fixture.js";
+import {
+  PV_BOISBRIAND_2026_04_TEXT,
+} from "./proces-verbaux-boisbriand.fixture.js";
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -1231,5 +1316,26 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_VARENNES_2026_04_TEXT,
     sourceUrl:
       "https://www.ville.varennes.qc.ca/uploads/conseil_municipal/2026/20260413-PV-SO.pdf",
+  },
+  // Rive-Nord
+  {
+    config: ROSEMERE_PV_CONFIG,
+    pvText: PV_ROSEMERE_2026_03_TEXT,
+    sourceUrl:
+      "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-03-09%20FINAL.pdf",
+  },
+  // Rive-Nord
+  {
+    config: LORRAINE_PV_CONFIG,
+    pvText: PV_LORRAINE_2026_04_TEXT,
+    sourceUrl:
+      "https://lorraine.ca/storage/app/media/decouvrir/bienvenue-a-lorraine/conseil-municipal/proces-verbaux/2026/PV_2026-04-14_Signe.pdf",
+  },
+  // Rive-Nord
+  {
+    config: BOISBRIAND_PV_CONFIG,
+    pvText: PV_BOISBRIAND_2026_04_TEXT,
+    sourceUrl:
+      "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-04-14_Seance-ordinaire.pdf",
   },
 ];
