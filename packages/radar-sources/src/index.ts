@@ -7,6 +7,7 @@ export * from "./sources/adresses-quebec-parser.js";
 export * from "./sources/reglements-urbanisme-parser.js";
 export * from "./sources/avis-publics-valleyfield.js";
 export * from "./sources/avis-publics-beauharnois.js";
+export * from "./sources/avis-publics-generic.js";
 export * from "./sources/role-evaluation-mamh.js";
 export * from "./sources/adresses-quebec.js";
 export * from "./sources/reglements-urbanisme-valleyfield.js";
