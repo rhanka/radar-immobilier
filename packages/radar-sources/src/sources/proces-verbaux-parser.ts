@@ -317,6 +317,34 @@ const REGLEMENT_NOHYPHEN_RE =
 const REGLEMENT_VPREFIX_RE =
   /r[eè]glement\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?([A-Z]\d{2,4}-\d{4}-\d{1,3})\b/gi;
 
+/**
+ * Multi-letter-prefix règlement-number pattern for municipalities using 2–4
+ * uppercase-letter prefixes (e.g. Lorraine: URB-03-17; Coteau-du-Lac: URB-400).
+ *
+ * Format: 2–4 uppercase letters + "-" + 2–4 digits + optional "-" + 1–3 digits.
+ * Examples: URB-400, URB-03-17.
+ *
+ * ANTI-FAUX-POSITIF guards:
+ *   1. The code must be immediately preceded by "règlement" (with optional
+ *      "de zonage / de l'urbanisme" qualifier and optional n°/nº/numéro).
+ *      This prevents capturing zone codes like RO-2, I-133 (those are never
+ *      preceded by "règlement" — they follow "zone" or "zones").
+ *   2. This pattern is ONLY applied by `extractReglementNumbers` when the
+ *      context window already contains a ZONAGE_KEYWORDS_RE match, preventing
+ *      false positives from non-zonage bylaws with multi-letter prefixes
+ *      (e.g. Boisbriand RV-1787-1 tarifs, RV-1796 réserve financière —
+ *      their avis de motion context has no "zonage" keyword).
+ *   3. Single-digit codes (e.g. RO-2, RO-7 as zone references) have 1 digit
+ *      after the dash — they do NOT satisfy \d{2,4} (min 2 digits), so they
+ *      are never captured by this pattern (captured as zoneRefs instead via
+ *      ZONE_CODE_CONTEXT_RE when preceded by "zone ").
+ *
+ * Group 1 captures the full multi-letter-prefix number (e.g. "URB-400",
+ * "URB-03-17").
+ */
+const REGLEMENT_MULTIPREFIX_RE =
+  /r[eè]glement\s+(?:de\s+(?:zonage|l[''']urbanisme)\s+)?(?:n(?:[o°º]|um[eé]ro)?\s*[.°º]?\s*)?([A-Z]{2,4}-\d{2,4}(?:-\d{1,3})?)\b/gi;
+
 /** Zone code pattern (matches Valleyfield codes like H-521, C-627-3). All-uppercase. */
 const ZONE_CODE_RE = /\b([A-Z]{1,4}-\d{2,4}(?:-\d{1,3})?)\b/g;
 
@@ -353,7 +381,7 @@ const DENSITE_RE =
  * Extract all règlement numbers cited in a text window (case-insensitive,
  * deduped, verbatim).
  *
- * Handles four numbering styles:
+ * Handles five numbering styles:
  *   - Hyphenated digit-only (e.g. 1926-26, 2024-58): via REGLEMENT_NUMBER_RE
  *   - Single-letter-prefix zonage bylaws (e.g. Z-3001, U-2300): via
  *     REGLEMENT_ZONAGE_LETTER_RE (requires "règlement de zonage" prefix, with
@@ -366,6 +394,10 @@ const DENSITE_RE =
  *     (only applied when the context already contains a ZONAGE_KEYWORDS_RE match,
  *     AND the number is immediately preceded by "règlement n°/nº/no/numéro" —
  *     never captures bare integers like years or lot counts)
+ *   - Multi-letter-prefix zonage bylaws (e.g. URB-400, URB-03-17): via
+ *     REGLEMENT_MULTIPREFIX_RE (only applied when the context already contains a
+ *     ZONAGE_KEYWORDS_RE match, preventing false positives from non-zonage
+ *     multi-prefix bylaws such as Boisbriand RV-1787-1 tarifs, RV-1796 réserve)
  */
 function extractReglementNumbers(window: string): string[] {
   const numbers: string[] = [];
@@ -389,6 +421,13 @@ function extractReglementNumbers(window: string): string[] {
     // only applied in a confirmed zonage context to prevent false positives.
     const reNH = new RegExp(REGLEMENT_NOHYPHEN_RE.source, "gi");
     for (const m of window.matchAll(reNH)) {
+      if (m[1]) numbers.push(m[1]);
+    }
+    // Multi-letter-prefix numbers (e.g. URB-400, URB-03-17): only applied in a
+    // confirmed zonage context to prevent false positives from non-zonage bylaws
+    // that use similar prefixes (Boisbriand RV-1787-1 tarifs, RV-1796 réserve).
+    const reMP = new RegExp(REGLEMENT_MULTIPREFIX_RE.source, "gi");
+    for (const m of window.matchAll(reMP)) {
       if (m[1]) numbers.push(m[1]);
     }
   }
@@ -461,13 +500,15 @@ function extractZoneCodes(window: string, reglementNumbers: string[] = []): stri
  * Group 1 captures the number of the EXISTING (modified) règlement — NOT the
  * new proposed règlement that is the actual object of the avis de motion.
  *
- * Four sub-patterns cover all numbering styles:
+ * Five sub-patterns cover all numbering styles:
  *   - Hyphenated digit-only modified numbers (e.g. 2019-342): MODIFIANT_REGLEMENT_RE
  *   - V-prefix modified numbers (e.g. V654-2017-00): MODIFIANT_REGLEMENT_VPREFIX_RE
  *   - Non-hyphenated integers in parenthetical form (e.g. 1733 from
  *     "modifiant le Règlement de zonage (Règl. n°1733)"): MODIFIANT_NOHYPHEN_RE
  *   - Non-hyphenated integers in replacement form (e.g. 1675 from
  *     "remplacer le règlement numéro 1675 en vigueur"): REMPLACER_NOHYPHEN_RE
+ *   - Multi-letter-prefix modified numbers (e.g. URB-03 from
+ *     "modifiant le « Règlement URB-03 sur le zonage »"): MODIFIANT_REGLEMENT_MULTIPREFIX_RE
  *
  * Used to distinguish new règlements (proposed) from referenced/modified ones
  * when both appear in the same context window.  If the context contains ONLY
@@ -500,15 +541,34 @@ const REMPLACER_NOHYPHEN_RE =
   /(?:remplacer|remplaçant|abroger|abrog[eé])\s+(?:le\s+)?r[eè]gl(?:ement)?\.?\s*(?:n[o°º]|num[eé]ro)\s*[.°º]?\s*(\d{3,4})\b(?!-\d)/gi;
 
 /**
+ * Multi-letter-prefix modified règlement numbers.
+ *
+ * Matches the OLD/existing zonage règlement when the text reads:
+ *   "modifiant le [«] Règlement URB-03 sur le zonage"
+ *   "modifiant le Règlement URB-03-00"
+ *   "amendant le Règlement URB-400 de zonage"
+ *
+ * The "«" guillemet and optional qualifiers between "le" and "Règlement" are
+ * handled by allowing any non-letter characters ([\W]*) between "le " and
+ * "règlement".  Group 1 captures the multi-letter-prefix number.
+ *
+ * Used to distinguish the NEW proposed règlement (URB-03-17) from the OLD
+ * modified règlement (URB-03) when both appear in the same context window.
+ */
+const MODIFIANT_REGLEMENT_MULTIPREFIX_RE =
+  /(?:modifiant|amendant)\s+le\s+[\W]*r[eè]glement\s+([A-Z]{2,4}-\d{2,4}(?:-\d{1,3})?)\b/gi;
+
+/**
  * Extract règlement numbers that are the TARGET of a "modifiant" / "amendant"
  * / "remplacer" clause within a context window (i.e. the OLD règlement being
  * amended or replaced, not the new proposed one).  Returns an empty set when
  * none are found.
  *
  * Handles hyphenated digit-only (2019-342), V-prefix (V654-2017-00),
- * non-hyphenated parenthetical (Règl. n°1733), and replacement (numéro 1675)
- * forms.  These are EXCLUDED from `reglementNumbers` when distinct new
- * règlement numbers exist in the same context.
+ * non-hyphenated parenthetical (Règl. n°1733), replacement (numéro 1675),
+ * and multi-letter-prefix (URB-03) forms.  These are EXCLUDED from
+ * `reglementNumbers` when distinct new règlement numbers exist in the same
+ * context.
  */
 function extractModifiedReglementNumbers(window: string): Set<string> {
   const modified = new Set<string>();
@@ -526,6 +586,12 @@ function extractModifiedReglementNumbers(window: string): Set<string> {
   }
   const reR = new RegExp(REMPLACER_NOHYPHEN_RE.source, "gi");
   for (const m of window.matchAll(reR)) {
+    if (m[1]) modified.add(m[1]);
+  }
+  // Multi-letter-prefix modified règlements (e.g. URB-03 from
+  // "modifiant le « Règlement URB-03 sur le zonage »").
+  const reMP = new RegExp(MODIFIANT_REGLEMENT_MULTIPREFIX_RE.source, "gi");
+  for (const m of window.matchAll(reMP)) {
     if (m[1]) modified.add(m[1]);
   }
   return modified;
