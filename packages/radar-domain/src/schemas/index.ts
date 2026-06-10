@@ -11,3 +11,4 @@ export * from "./journal.js";
 export * from "./temporal.js";
 export * from "./provenance.js";
 export * from "./ontology/index.js";
+export * from "./municipality.js";
