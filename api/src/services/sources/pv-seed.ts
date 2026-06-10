@@ -1,7 +1,8 @@
 /**
- * PV-SEED — Réseau de villes PV Rive-Sud (saint-constant, sainte-catherine,
- *           chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine,
- *           saint-remi, mcmasterville, beloeil, sainte-julie).
+ * PV-SEED — Réseau de villes PV génériques (saint-damase, saint-constant,
+ *           sainte-catherine, chateauguay, la-prairie, delson, vaudreuil-dorion,
+ *           sainte-martine, saint-remi, mcmasterville, beloeil, sainte-julie).
+ *           Liste pilotée par ALL_PV_CITIES dans @radar/sources.
  *
  * Sème les fixtures PV RÉELLES (extraits pdftotext de vrais PV publics captés
  * 2026-06-10) dans l'objet-store comme le ferait RECUEIL, puis lance
@@ -30,18 +31,8 @@
  */
 
 import {
+  ALL_PV_CITIES,
   buildRawDocumentRecord,
-  PV_BELOEIL_2026_02_TEXT,
-  PV_CHATEAUGUAY_2026_02_TEXT,
-  PV_DELSON_2026_05_TEXT,
-  PV_LAPRAIRIE_2026_05_TEXT,
-  PV_MCMASTERVILLE_2025_11_TEXT,
-  PV_SAINT_CONSTANT_2026_05_TEXT,
-  PV_SAINTE_CATHERINE_2026_05_TEXT,
-  PV_SAINTE_JULIE_2026_03_TEXT,
-  PV_SAINTE_MARTINE_2026_04_TEXT,
-  PV_SAINT_REMI_2026_04_TEXT,
-  PV_VAUDREUIL_DORION_2026_05_TEXT,
   type RawDocumentRecord,
 } from "@radar/sources";
 
@@ -69,88 +60,19 @@ export interface PvFixtureSpec {
 }
 
 /**
- * Fixtures réelles des villes Rive-Sud proches de Montréal.
- * Données captées 2026-06-10 depuis des PDFs publics (robots.txt : sans restrictions).
+ * Fixtures réelles de toutes les villes PV génériques (données captées 2026-06-10).
+ * Générées automatiquement depuis ALL_PV_CITIES — source de vérité unique.
+ * Pour ajouter une ville : ajouter une entrée dans ALL_PV_CITIES ; aucune
+ * modification ici ni dans adapter-registry.ts n'est nécessaire.
  */
-export const PV_FIXTURES: readonly PvFixtureSpec[] = [
-  {
-    citySlug: "saint-constant",
-    sourceId: "proces-verbaux-saint-constant",
-    sourceUrl:
-      "https://saint-constant.ca/uploads/attachments/Greffe/2026/2026-05-19/2026-05-19_PV_Seance_ordinaire_non_approuve_par_Conseil.pdf",
-    pvText: PV_SAINT_CONSTANT_2026_05_TEXT,
-  },
-  {
-    citySlug: "sainte-catherine",
-    sourceId: "proces-verbaux-sainte-catherine",
-    sourceUrl:
-      "https://www.ville.sainte-catherine.qc.ca/medias/documents/content/PvCm-20260512-vns-vp20260514.pdf",
-    pvText: PV_SAINTE_CATHERINE_2026_05_TEXT,
-  },
-  {
-    citySlug: "chateauguay",
-    sourceId: "proces-verbaux-chateauguay",
-    sourceUrl:
-      "https://ville.chateauguay.qc.ca/wp-content/uploads/2026/03/PV_2026-02-23.pdf",
-    pvText: PV_CHATEAUGUAY_2026_02_TEXT,
-  },
-  {
-    citySlug: "la-prairie",
-    sourceId: "proces-verbaux-la-prairie",
-    sourceUrl:
-      "https://laprairie.ca/storage/app/media/ville/democratie/seances-du-conseil/PV_2026/2026-05-19_pv_non_officiel.pdf",
-    pvText: PV_LAPRAIRIE_2026_05_TEXT,
-  },
-  {
-    citySlug: "delson",
-    sourceId: "proces-verbaux-delson",
-    sourceUrl:
-      "https://ville.delson.qc.ca/wp-content/uploads/2026/05/2026-05-12-ordinaire-20h-2.pdf",
-    pvText: PV_DELSON_2026_05_TEXT,
-  },
-  {
-    citySlug: "vaudreuil-dorion",
-    sourceId: "proces-verbaux-vaudreuil-dorion",
-    sourceUrl:
-      "https://www.ville.vaudreuil-dorion.qc.ca/uploads/sections/La_Ville/Mairie/Seances_publiques/PV_2026/20260519_pv.pdf",
-    pvText: PV_VAUDREUIL_DORION_2026_05_TEXT,
-  },
-  {
-    citySlug: "sainte-martine",
-    sourceId: "proces-verbaux-sainte-martine",
-    sourceUrl:
-      "https://sainte-martine.ca/wp-content/uploads/2026/05/conseil-avril-2026.pdf",
-    pvText: PV_SAINTE_MARTINE_2026_04_TEXT,
-  },
-  {
-    citySlug: "saint-remi",
-    sourceId: "proces-verbaux-saint-remi",
-    sourceUrl:
-      "https://www.saint-remi.ca/wp-content/uploads/2026/05/20260420_pv.pdf",
-    pvText: PV_SAINT_REMI_2026_04_TEXT,
-  },
-  {
-    citySlug: "mcmasterville",
-    sourceId: "proces-verbaux-mcmasterville",
-    sourceUrl:
-      "https://www.mcmasterville.ca/wp-content/uploads/2025/12/pv-17-novembre-2025.pdf",
-    pvText: PV_MCMASTERVILLE_2025_11_TEXT,
-  },
-  {
-    citySlug: "beloeil",
-    sourceId: "proces-verbaux-beloeil",
-    sourceUrl:
-      "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260223_pv.pdf",
-    pvText: PV_BELOEIL_2026_02_TEXT,
-  },
-  {
-    citySlug: "sainte-julie",
-    sourceId: "proces-verbaux-sainte-julie",
-    sourceUrl:
-      "https://saintejulie.ca/uploads/html_content/S%C3%A9ances%20publiques/2026-03-10_-_Proces-verbal.pdf",
-    pvText: PV_SAINTE_JULIE_2026_03_TEXT,
-  },
-];
+export const PV_FIXTURES: readonly PvFixtureSpec[] = ALL_PV_CITIES.map(
+  ({ config, pvText, sourceUrl }) => ({
+    citySlug: config.citySlug,
+    sourceId: config.sourceId,
+    sourceUrl,
+    pvText,
+  }),
+);
 
 /** Slugs des villes PV-seed (Rive-Sud). */
 export const PV_SEED_CITY_SLUGS: readonly string[] = PV_FIXTURES.map(

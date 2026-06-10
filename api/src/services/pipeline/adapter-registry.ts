@@ -1,25 +1,14 @@
 import {
+  ALL_PV_CITIES,
   AVIS_PUBLICS_BEAUHARNOIS_CITY,
   AVIS_PUBLICS_BEAUHARNOIS_SOURCE_ID,
   AVIS_PUBLICS_CITY,
   AVIS_PUBLICS_SOURCE_ID,
   BEAUHARNOIS_AVIS_CONFIG,
-  BELOEIL_PV_CONFIG,
-  CHATEAUGUAY_PV_CONFIG,
-  DELSON_PV_CONFIG,
-  LAPRAIRIE_PV_CONFIG,
-  MCMASTERVILLE_PV_CONFIG,
   REGLEMENTS_URBANISME_CITY,
   REGLEMENTS_URBANISME_SOURCE_ID,
-  SAINT_DAMASE_PV_CONFIG,
-  SAINTE_CATHERINE_PV_CONFIG,
-  SAINT_CONSTANT_PV_CONFIG,
-  SAINTE_JULIE_PV_CONFIG,
-  SAINTE_MARTINE_PV_CONFIG,
-  SAINT_REMI_PV_CONFIG,
   VALLEYFIELD_AVIS_CONFIG,
   VALLEYFIELD_YOUTUBE_CONFIG,
-  VAUDREUIL_DORION_PV_CONFIG,
   adressesSourceId,
   createAdressesQuebecAdapter,
   createAvisPublicsAdapter,
@@ -48,19 +37,47 @@ import {
 export const ROLE_MAMH_VALLEYFIELD = "70052";
 export const ROLE_MAMH_BEAUHARNOIS = "70022";
 
-/** Generic source IDs for config-driven adapters (procès-verbaux, avis, youtube). */
-export const PV_SAINT_DAMASE_SOURCE_ID = SAINT_DAMASE_PV_CONFIG.sourceId;
-export const PV_SAINTE_CATHERINE_SOURCE_ID = SAINTE_CATHERINE_PV_CONFIG.sourceId;
-export const PV_SAINT_CONSTANT_SOURCE_ID = SAINT_CONSTANT_PV_CONFIG.sourceId;
-export const PV_LAPRAIRIE_SOURCE_ID = LAPRAIRIE_PV_CONFIG.sourceId;
-export const PV_CHATEAUGUAY_SOURCE_ID = CHATEAUGUAY_PV_CONFIG.sourceId;
-export const PV_DELSON_SOURCE_ID = DELSON_PV_CONFIG.sourceId;
-export const PV_VAUDREUIL_DORION_SOURCE_ID = VAUDREUIL_DORION_PV_CONFIG.sourceId;
-export const PV_SAINTE_MARTINE_SOURCE_ID = SAINTE_MARTINE_PV_CONFIG.sourceId;
-export const PV_SAINT_REMI_SOURCE_ID = SAINT_REMI_PV_CONFIG.sourceId;
-export const PV_MCMASTERVILLE_SOURCE_ID = MCMASTERVILLE_PV_CONFIG.sourceId;
-export const PV_BELOEIL_SOURCE_ID = BELOEIL_PV_CONFIG.sourceId;
-export const PV_SAINTE_JULIE_SOURCE_ID = SAINTE_JULIE_PV_CONFIG.sourceId;
+/**
+ * Generic PV source IDs derived from ALL_PV_CITIES (data-driven).
+ * Kept as named exports for backward-compat with executor tests that import
+ * e.g. PV_SAINT_DAMASE_SOURCE_ID.
+ */
+export const PV_SAINT_DAMASE_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "saint-damase",
+)!.config.sourceId;
+export const PV_SAINTE_CATHERINE_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "sainte-catherine",
+)!.config.sourceId;
+export const PV_SAINT_CONSTANT_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "saint-constant",
+)!.config.sourceId;
+export const PV_LAPRAIRIE_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "la-prairie",
+)!.config.sourceId;
+export const PV_CHATEAUGUAY_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "chateauguay",
+)!.config.sourceId;
+export const PV_DELSON_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "delson",
+)!.config.sourceId;
+export const PV_VAUDREUIL_DORION_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "vaudreuil-dorion",
+)!.config.sourceId;
+export const PV_SAINTE_MARTINE_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "sainte-martine",
+)!.config.sourceId;
+export const PV_SAINT_REMI_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "saint-remi",
+)!.config.sourceId;
+export const PV_MCMASTERVILLE_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "mcmasterville",
+)!.config.sourceId;
+export const PV_BELOEIL_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "beloeil",
+)!.config.sourceId;
+export const PV_SAINTE_JULIE_SOURCE_ID = ALL_PV_CITIES.find(
+  (c) => c.config.citySlug === "sainte-julie",
+)!.config.sourceId;
 export const AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID =
   VALLEYFIELD_AVIS_CONFIG.sourceId;
 export const AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID =
@@ -199,89 +216,14 @@ export function defaultAdapterRegistry(): AdapterRegistry {
           city: AVIS_PUBLICS_BEAUHARNOIS_CITY,
         }),
     },
-    // ── Generic config-driven adapters ──────────────────────────────────────
-    // procès-verbaux: Saint-Damase (WordPress, simple, easy-first target)
-    {
-      sourceId: PV_SAINT_DAMASE_SOURCE_ID,
-      city: SAINT_DAMASE_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(SAINT_DAMASE_PV_CONFIG),
-    },
-    // procès-verbaux: Sainte-Catherine (Rive-Sud, MRC Roussillon, ~25 km SW Montréal)
-    {
-      sourceId: PV_SAINTE_CATHERINE_SOURCE_ID,
-      city: SAINTE_CATHERINE_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(SAINTE_CATHERINE_PV_CONFIG),
-    },
-    // procès-verbaux: Saint-Constant (Rive-Sud, MRC Roussillon, ~30 km SW Montréal)
-    // Zonage réel détecté : règlements 1926-26/1927-26, zone H-431 (PV mai 2026)
-    {
-      sourceId: PV_SAINT_CONSTANT_SOURCE_ID,
-      city: SAINT_CONSTANT_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(SAINT_CONSTANT_PV_CONFIG),
-    },
-    // procès-verbaux: La Prairie (Rive-Sud, MRC Roussillon, ~25 km SW Montréal)
-    // PV mai 2026 : 0 DesignationEvent zonage (règlements taxes/patrimoine/circulation)
-    {
-      sourceId: PV_LAPRAIRIE_SOURCE_ID,
-      city: LAPRAIRIE_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(LAPRAIRIE_PV_CONFIG),
-    },
-    // procès-verbaux: Châteauguay (MRC Roussillon, ~35 km SW Montréal)
-    // PV fév. 2026 : 1 DesignationEvent zonage — règlement Z-3001 (zones C-754/C-810)
-    {
-      sourceId: PV_CHATEAUGUAY_SOURCE_ID,
-      city: CHATEAUGUAY_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(CHATEAUGUAY_PV_CONFIG),
-    },
-    // procès-verbaux: Delson (MRC Roussillon, ~35 km SW Montréal)
-    // PV mai 2026 : 0 DesignationEvent zonage (référence passée sans avis de motion actif)
-    {
-      sourceId: PV_DELSON_SOURCE_ID,
-      city: DELSON_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(DELSON_PV_CONFIG),
-    },
-    // procès-verbaux: Vaudreuil-Dorion (MRC Vaudreuil-Soulanges, ~40 km W Montréal)
-    // PV mai 2026 : 0 DesignationEvent zonage (faux-positif écarté en amont)
-    {
-      sourceId: PV_VAUDREUIL_DORION_SOURCE_ID,
-      city: VAUDREUIL_DORION_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(VAUDREUIL_DORION_PV_CONFIG),
-    },
-    // procès-verbaux: Sainte-Martine (MRC Beauharnois-Salaberry, ~55 km SW Montréal)
-    // PV avr. 2026 : 1 DesignationEvent zonage — règlement 2026-510 (zone MxtV-2)
-    {
-      sourceId: PV_SAINTE_MARTINE_SOURCE_ID,
-      city: SAINTE_MARTINE_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(SAINTE_MARTINE_PV_CONFIG),
-    },
-    // procès-verbaux: Saint-Rémi (MRC Les Jardins-de-Napierville, ~50 km S Montréal)
-    // PV avr. 2026 : 1 DesignationEvent zonage — règlement V654-2026-33 (modifie V654-2017-00)
-    {
-      sourceId: PV_SAINT_REMI_SOURCE_ID,
-      city: SAINT_REMI_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(SAINT_REMI_PV_CONFIG),
-    },
-    // procès-verbaux: McMasterville (MRC La Vallée-du-Richelieu, ~30 km SE Montréal)
-    // PV nov. 2025 : 1 DesignationEvent zonage — règlement 382-37 (modifie zonage 382-00-2008)
-    {
-      sourceId: PV_MCMASTERVILLE_SOURCE_ID,
-      city: MCMASTERVILLE_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(MCMASTERVILLE_PV_CONFIG),
-    },
-    // procès-verbaux: Beloeil (MRC La Vallée-du-Richelieu, ~30 km SE Montréal)
-    // PV fév. 2026 : 1 DesignationEvent zonage — règlements 1667-127/1667-128 (zone C-523)
-    {
-      sourceId: PV_BELOEIL_SOURCE_ID,
-      city: BELOEIL_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(BELOEIL_PV_CONFIG),
-    },
-    // procès-verbaux: Sainte-Julie (MRC Marguerite-D'Youville, ~30 km SE Montréal)
-    // PV mars 2026 : 1 DesignationEvent zonage — règlement 1101-132 (zone C-150)
-    {
-      sourceId: PV_SAINTE_JULIE_SOURCE_ID,
-      city: SAINTE_JULIE_PV_CONFIG.citySlug,
-      build: () => createProcesVerbauxAdapter(SAINTE_JULIE_PV_CONFIG),
-    },
+    // ── Generic PV adapters — data-driven from ALL_PV_CITIES ────────────────
+    // To add a city: append one entry in packages/radar-sources/src/sources/
+    // proces-verbaux-generic.ts → ALL_PV_CITIES. No changes needed here.
+    ...ALL_PV_CITIES.map(({ config }) => ({
+      sourceId: config.sourceId,
+      city: config.citySlug,
+      build: () => createProcesVerbauxAdapter(config),
+    })),
     // avis-publics generic: Valleyfield (Craft CMS)
     {
       sourceId: AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
@@ -320,21 +262,8 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
       AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID,
     ],
-    // procès-verbaux-generic: abstract id fans out to all configured PV cities.
-    "proces-verbaux-generic": [
-      PV_SAINT_DAMASE_SOURCE_ID,
-      PV_SAINTE_CATHERINE_SOURCE_ID,
-      PV_SAINT_CONSTANT_SOURCE_ID,
-      PV_LAPRAIRIE_SOURCE_ID,
-      PV_CHATEAUGUAY_SOURCE_ID,
-      PV_DELSON_SOURCE_ID,
-      PV_VAUDREUIL_DORION_SOURCE_ID,
-      PV_SAINTE_MARTINE_SOURCE_ID,
-      PV_SAINT_REMI_SOURCE_ID,
-      PV_MCMASTERVILLE_SOURCE_ID,
-      PV_BELOEIL_SOURCE_ID,
-      PV_SAINTE_JULIE_SOURCE_ID,
-    ],
+    // procès-verbaux-generic: abstract id fans out to all configured PV cities (data-driven).
+    "proces-verbaux-generic": ALL_PV_CITIES.map((c) => c.config.sourceId),
     // youtube-seances: abstract id fans out to all configured YouTube cities.
     "youtube-seances": [YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID],
   };
