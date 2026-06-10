@@ -8,32 +8,43 @@
    * est affiché (aucune donnée inventée).
    *
    * Anti-invention: seule la ville pilote (Salaberry-de-Valleyfield) dispose
-   * de données réelles de signaux zonaux. Les grilles d'évaluation de lots
-   * (rôle MAMH) ne sont pas encore disponibles — ce fait est affiché clairement.
+   * de données réelles de signaux zonaux (demoSignalsT1 — recueil public
+   * consultation notices). Les grilles d'évaluation de lots (rôle MAMH) ne sont
+   * pas encore disponibles — ce fait est affiché clairement.
+   * Note: la vue Signaux utilise l'ontologie réelle via GET /api/signals/by-city.
    */
   import { BarChart3, MapPin, Info, ChevronRight, AlertCircle } from "@lucide/svelte";
   import { Badge, Alert } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import {
-    buildCityMapEntries,
     SIGNAL_TYPE_LABEL,
     CONFIDENCE_TONE,
     PILOT_CITY_SLUG,
-    type CityMapEntry,
   } from "$lib/maps/maps-data.js";
+  import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
+  import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
   // ── Données ────────────────────────────────────────────────────────────────
-  const allEntries = buildCityMapEntries();
-  // Only cities with at least 1 signal (zone data) appear in the left panel
-  const cityEntries = allEntries.filter((e) => e.signals.length > 0);
+  interface CitySignalEntry {
+    slug: string;
+    name: string;
+    mrc?: string;
+    signals: SignalT[];
+  }
+
+  const allCities = prioritizedCities();
+  const pilotCity = allCities.find((c) => c.slug === PILOT_CITY_SLUG);
+  const cityEntries: CitySignalEntry[] = pilotCity
+    ? [{ slug: pilotCity.slug, name: pilotCity.name, mrc: pilotCity.mrc ?? undefined, signals: demoSignalsT1 }]
+    : [];
 
   // ── State ──────────────────────────────────────────────────────────────────
-  let selectedCity: CityMapEntry | null = cityEntries[0] ?? null;
+  let selectedCity: CitySignalEntry | null = cityEntries[0] ?? null;
   let selectedSignal: SignalT | null =
     cityEntries[0]?.signals[0] ?? null;
 
-  function selectCity(entry: CityMapEntry): void {
+  function selectCity(entry: CitySignalEntry): void {
     selectedCity = entry;
     selectedSignal = entry.signals[0] ?? null;
   }
@@ -51,7 +62,7 @@
   // Pour tous les autres cas, un placeholder honnête est affiché.
   function hasEvaluationData(signal: SignalT | null): boolean {
     return (
-      selectedCity?.municipality.slug === PILOT_CITY_SLUG &&
+      selectedCity?.slug === PILOT_CITY_SLUG &&
       signal?.type === "residential-rezoning" &&
       !!signal.zone &&
       signal.mode !== "simulation"
@@ -91,8 +102,8 @@
     {:else}
       <!-- Sélecteur de ville -->
       <div class="divide-y divide-slate-100">
-        {#each cityEntries as entry (entry.municipality.slug)}
-          {@const isSelected = selectedCity?.municipality.slug === entry.municipality.slug}
+        {#each cityEntries as entry (entry.slug)}
+          {@const isSelected = selectedCity?.slug === entry.slug}
           <button
             type="button"
             class={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
@@ -106,7 +117,7 @@
             />
             <span class="min-w-0 flex-1">
               <span class="block truncate text-sm font-medium text-slate-900">
-                {entry.municipality.name}
+                {entry.name}
               </span>
               <span class="text-xs text-slate-400">
                 {entry.signals.filter((s) => s.zone).length} zone{entry.signals.filter((s) => s.zone).length !== 1 ? "s" : ""}
@@ -180,13 +191,13 @@
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h2 class="text-base font-semibold text-slate-900">
-              {selectedCity.municipality.name}
+              {selectedCity.name}
               {#if selectedSignal.zone}
                 <span class="ml-2 font-mono text-sm text-teal-700">Zone {selectedSignal.zone}</span>
               {/if}
             </h2>
-            {#if selectedCity.municipality.mrc}
-              <p class="text-xs text-slate-400 mt-0.5">MRC : {selectedCity.municipality.mrc}</p>
+            {#if selectedCity.mrc}
+              <p class="text-xs text-slate-400 mt-0.5">MRC : {selectedCity.mrc}</p>
             {/if}
           </div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -292,7 +303,7 @@
           </div>
         </div>
 
-      {:else if selectedCity.municipality.slug !== PILOT_CITY_SLUG}
+      {:else if selectedCity.slug !== PILOT_CITY_SLUG}
         <!-- Ville non-pilote : placeholder honnête -->
         <Alert
           tone="info"
