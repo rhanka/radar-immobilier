@@ -453,3 +453,79 @@ export function createVaudreuilDorionPvAdapter(
 ): ProcesVerbauxGenericAdapter {
   return new ProcesVerbauxGenericAdapter(VAUDREUIL_DORION_PV_CONFIG, options);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Round-2 cluster: Roussillon / Haut-St-Laurent cities near Montréal
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sainte-Martine (MRC Beauharnois-Salaberry, ~50 km SW of Montréal).
+ * WordPress CMS. PV list via publications page filtered by document_type=proces-verbaux.
+ * Direct PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const SAINTE_MARTINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-martine",
+  pvIndexUrl:
+    "https://sainte-martine.ca/municipalite/administration-et-finances/publications/?document_type=proces-verbaux",
+  sourceId: "proces-verbaux-sainte-martine",
+};
+
+/** Factory shortcut for the Sainte-Martine PV adapter. */
+export function createSainteMartinePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINTE_MARTINE_PV_CONFIG, options);
+}
+
+/**
+ * Candiac (MRC Roussillon, ~25 km S of Montréal).
+ * Custom CMS. PV list at /la-ville/vie-democratique/seances-publiques.
+ * Direct PDF links under /uploads/Documents/Juridiques/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: /admin, /uploads/carrier — content pages allowed.
+ * NOTE: All Candiac PV PDFs are PaperCut scanned images (no embedded text layer).
+ *       pdftotext returns 0 bytes. OCR required for text extraction.
+ *       The adapter correctly lists PV refs from the index; text detection not applicable.
+ * Captured 2026-06-10.
+ */
+export const CANDIAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "candiac",
+  pvIndexUrl:
+    "https://candiac.ca/la-ville/vie-democratique/seances-publiques",
+  sourceId: "proces-verbaux-candiac",
+};
+
+/** Factory shortcut for the Candiac PV adapter. */
+export function createCandiacPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(CANDIAC_PV_CONFIG, options);
+}
+
+/**
+ * Saint-Rémi (MRC Les Jardins-de-Napierville, ~40 km S of Montréal).
+ * WordPress / Elementor CMS. Main séances page at /ville/vie-municipale/seances-du-conseil/.
+ * Archives 2025: direct PDF links in accordion. 2026: sub-page links (parsePvIndex finds
+ * the 2025 direct PDF links; 2026 sub-pages require an additional fetch per session).
+ * Direct PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * NOTE: Saint-Rémi uses V-prefix règlement numbering (V654-2026-33). The existing
+ *       REGLEMENT_NUMBER_RE pattern does not match V-prefix numbers, so detectZonageChange
+ *       returns avisDeMotion=true but changementZonage=false even for real zonage changes.
+ *       This is a documented parser limitation (honest, not a faux positif).
+ * Captured 2026-06-10.
+ */
+export const SAINT_REMI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-remi",
+  pvIndexUrl:
+    "https://www.saint-remi.ca/ville/vie-municipale/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-remi",
+};
+
+/** Factory shortcut for the Saint-Rémi PV adapter. */
+export function createSaintRemiPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINT_REMI_PV_CONFIG, options);
+}
