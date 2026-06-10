@@ -7,7 +7,8 @@ import {
   S3Client,
   type S3ClientConfig,
 } from "@aws-sdk/client-s3";
-import type { AppConfig } from "../config.js";
+import type { AppConfig, ScrapeS3Config } from "../config.js";
+import { resolveScrapeS3Config } from "../config.js";
 import type { ProbeResult } from "../routes/health.js";
 import type { ObjectInfo, ObjectStore } from "./object-store.js";
 
@@ -89,6 +90,35 @@ export function createS3Client(config: AppConfig): S3Client {
 
 export function createObjectStore(config: AppConfig): S3ObjectStore {
   return new S3ObjectStore(createS3Client(config), config.S3_BUCKET);
+}
+
+/**
+ * Build an S3Client from a resolved ScrapeS3Config (not a full AppConfig).
+ * Used by `getScrapeObjectStore` and testable in isolation.
+ */
+export function createScrapeS3Client(scrapeConfig: ScrapeS3Config): S3Client {
+  const clientConfig: S3ClientConfig = {
+    region: scrapeConfig.region,
+    endpoint: scrapeConfig.endpoint,
+    forcePathStyle: scrapeConfig.forcePathStyle,
+    credentials: {
+      accessKeyId: scrapeConfig.accessKey,
+      secretAccessKey: scrapeConfig.secretKey,
+    },
+  };
+  return new S3Client(clientConfig);
+}
+
+/**
+ * Build the dedicated scraping-document store from a full AppConfig.
+ * In production (SCRAPE_S3_* set to SCW), this targets `radar-immobilier-docs`
+ * on `https://s3.fr-par.scw.cloud`. Locally (no SCRAPE_S3_* set), it falls back
+ * to the same MinIO instance as the main store, using the `radar-immobilier-docs`
+ * bucket name (which ensureBucket will create on first use).
+ */
+export function getScrapeObjectStore(config: AppConfig): S3ObjectStore {
+  const scrapeConfig = resolveScrapeS3Config(config);
+  return new S3ObjectStore(createScrapeS3Client(scrapeConfig), scrapeConfig.bucket);
 }
 
 /** Health probe: bucket exists / is reachable. */

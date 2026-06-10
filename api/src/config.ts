@@ -23,6 +23,24 @@ const envSchema = z.object({
     .default("true")
     .transform((v) => v === "true"),
 
+  /**
+   * Dedicated scraping-document store (Scaleway Object Storage `radar-immobilier-docs`
+   * in production). Each variable falls back to its S3_* counterpart when absent, so
+   * local dev keeps MinIO as the default store without any extra configuration.
+   * In production, set these to the SCW bucket credentials (Object Storage scoped
+   * keys for `radar-immobilier-docs`, region fr-par) — NEVER commit real secrets.
+   */
+  SCRAPE_S3_ENDPOINT: z.string().url().optional(),
+  SCRAPE_S3_REGION: z.string().optional(),
+  SCRAPE_S3_BUCKET: z.string().optional(),
+  SCRAPE_S3_ACCESS_KEY: z.string().optional(),
+  SCRAPE_S3_SECRET_KEY: z.string().optional(),
+  /** When absent, inherits S3_FORCE_PATH_STYLE. Scaleway does not need path-style. */
+  SCRAPE_S3_FORCE_PATH_STYLE: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),
@@ -54,6 +72,37 @@ const envSchema = z.object({
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
+
+/**
+ * Resolved, effective configuration for the scraping-document S3 store.
+ * Each field falls back to the corresponding S3_* value when the SCRAPE_S3_*
+ * override is absent, so local dev keeps MinIO without any extra setup.
+ */
+export interface ScrapeS3Config {
+  readonly endpoint: string;
+  readonly region: string;
+  readonly bucket: string;
+  readonly accessKey: string;
+  readonly secretKey: string;
+  readonly forcePathStyle: boolean;
+}
+
+/**
+ * Derive the effective scraping-store config from a parsed AppConfig.
+ * SCW production values (fr-par, radar-immobilier-docs) are the intended
+ * overrides; MinIO local defaults are inherited when SCRAPE_S3_* are absent.
+ */
+export function resolveScrapeS3Config(config: AppConfig): ScrapeS3Config {
+  return {
+    endpoint: config.SCRAPE_S3_ENDPOINT ?? config.S3_ENDPOINT,
+    region: config.SCRAPE_S3_REGION ?? config.S3_REGION,
+    bucket: config.SCRAPE_S3_BUCKET ?? "radar-immobilier-docs",
+    accessKey: config.SCRAPE_S3_ACCESS_KEY ?? config.S3_ACCESS_KEY,
+    secretKey: config.SCRAPE_S3_SECRET_KEY ?? config.S3_SECRET_KEY,
+    forcePathStyle:
+      config.SCRAPE_S3_FORCE_PATH_STYLE ?? config.S3_FORCE_PATH_STYLE,
+  };
+}
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   return envSchema.parse(env);
