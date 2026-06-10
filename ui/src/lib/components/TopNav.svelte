@@ -31,6 +31,7 @@
     { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
     { id: "coordination", label: "Coordination", icon: Network },
     { id: "backlog", label: "Backlog", icon: KanbanSquare },
+    { id: "sources", label: "Recueil", icon: MapPin },
   ];
 </script>
 
