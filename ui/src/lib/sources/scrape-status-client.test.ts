@@ -39,7 +39,7 @@ describe("fetchScrapeStatus", () => {
       return new Response(JSON.stringify({ items: [] }), { status: 200 });
     });
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => { vi.unstubAllGlobals(); });
 
   it("fetches all items when no city filter", async () => {
     const res = await fetchScrapeStatus(undefined, "");
