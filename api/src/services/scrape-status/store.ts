@@ -1,4 +1,4 @@
-import { ScrapeStatus, type ScrapeStatusT } from "@radar/domain";
+import { ScrapeStatus, type ScrapeStatusSourceT, type ScrapeStatusT } from "@radar/domain";
 import type { ObjectStore } from "../../storage/object-store.js";
 
 /** Object-storage key where the scrape-status list is persisted. */
@@ -21,6 +21,38 @@ export async function readAll(store: ObjectStore): Promise<ScrapeStatusT[]> {
     // Object not found or malformed — start with empty state.
     return [];
   }
+}
+
+/**
+ * Mark a (citySlug × source) pair as `graphified` (scraped → graphified).
+ *
+ * Called by the exploitation pipeline after mentions have been extracted and
+ * committed to the knowledge graph. If no record exists yet for the pair, a
+ * minimal one is created. Timestamps `lastRunAt` to now (ISO-8601).
+ *
+ * USAGE: call this AFTER `extractMentions` + `reconcileMentions` succeed so the
+ * transition is only recorded when the pipeline step completed successfully.
+ */
+export async function markAsGraphified(
+  store: ObjectStore,
+  citySlug: string,
+  source: ScrapeStatusSourceT,
+  now: Date = new Date(),
+): Promise<ScrapeStatusT[]> {
+  const current = await readAll(store);
+  const existing = current.find(
+    (r) => r.citySlug === citySlug && r.source === source,
+  );
+  const updated: ScrapeStatusT = ScrapeStatus.parse({
+    ...(existing ?? {
+      citySlug,
+      source,
+      automation: "refresh",
+    }),
+    status: "graphified",
+    lastRunAt: now.toISOString(),
+  });
+  return upsert(store, updated);
 }
 
 /**
