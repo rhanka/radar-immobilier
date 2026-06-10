@@ -6,7 +6,8 @@ import {
   serializeProjectState,
   type OntologyProjectState,
 } from "../services/exploitation/project-state.js";
-import { ontologyRoute } from "./ontology.js";
+import { ontologyRoute, type SignalCityItem } from "./ontology.js";
+import { SEED_CITY_SLUGS } from "../services/sources/seed-ontology.js";
 
 const CITY = "salaberry-de-valleyfield";
 
@@ -367,6 +368,108 @@ describe("POST /api/ontology/:city/patch (write-core, token-gated)", () => {
       }),
     });
     expect(res.status).toBe(404);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/signals/by-city — aggregate DesignationEvent counts
+// ─────────────────────────────────────────────────────────────────────────────
+
+const RECENT_AT = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days ago
+const STALE_AT = new Date(Date.now() - 200 * 24 * 60 * 60 * 1000).toISOString(); // 200 days ago (> 6 months)
+
+const STATE_WITH_DESIGNATION: OntologyProjectState = {
+  schema: "radar_ontology_project_state_v1",
+  citySlug: CITY,
+  profileHash: "b".repeat(64),
+  generatedAt: RECENT_AT,
+  rawRefs: ["raw/role-evaluation-mamh/2026/01/01/sample.xml"],
+  mentions: [],
+  candidates: [],
+  canonicals: [
+    {
+      id: "designationevent::salaberry-de-valleyfield::rezonage-h609",
+      type: "DesignationEvent",
+      label: "Rezonage H-609-4",
+      aliases: [],
+      memberMentionIds: [],
+      evidenceRefs: ["raw/role-evaluation-mamh/2026/01/01/sample.xml"],
+      status: "validated",
+    },
+    {
+      id: "lot::salaberry-de-valleyfield::4193751",
+      type: "Lot",
+      label: "Lot 4193751",
+      aliases: [],
+      memberMentionIds: [],
+      evidenceRefs: ["raw/role-evaluation-mamh/2026/01/01/sample.xml"],
+      status: "candidate",
+    },
+  ],
+};
+
+describe("GET /api/signals/by-city", () => {
+  it("returns 200 with all SEED_CITY_SLUGS as items", async () => {
+    const store = new MemoryStore();
+    const app = ontologyRoute({ store });
+    const res = await app.request("/api/signals/by-city");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { ok: boolean; items: SignalCityItem[] };
+    expect(body.ok).toBe(true);
+    expect(Array.isArray(body.items)).toBe(true);
+    // All SEED_CITY_SLUGS must appear (even with count=0 when no state).
+    for (const slug of SEED_CITY_SLUGS) {
+      expect(body.items.some((i) => i.citySlug === slug)).toBe(true);
+    }
+  });
+
+  it("returns designationEventCount=0 when no project state for city", async () => {
+    const store = new MemoryStore();
+    const app = ontologyRoute({ store });
+    const res = await app.request("/api/signals/by-city");
+    const body = (await res.json()) as { ok: boolean; items: SignalCityItem[] };
+    const valleyfield = body.items.find((i) => i.citySlug === CITY);
+    expect(valleyfield).toBeDefined();
+    expect(valleyfield!.designationEventCount).toBe(0);
+    expect(valleyfield!.generatedAt).toBeNull();
+  });
+
+  it("counts DesignationEvent canonicals from a recent project state", async () => {
+    const store = new MemoryStore();
+    await store.put(
+      projectStateKey(CITY),
+      serializeProjectState(STATE_WITH_DESIGNATION),
+      "application/json",
+    );
+    const app = ontologyRoute({ store });
+    const res = await app.request("/api/signals/by-city");
+    const body = (await res.json()) as { ok: boolean; items: SignalCityItem[] };
+    const valleyfield = body.items.find((i) => i.citySlug === CITY);
+    expect(valleyfield).toBeDefined();
+    // The state has 1 DesignationEvent canonical and 1 Lot — only count DesignationEvent.
+    expect(valleyfield!.designationEventCount).toBe(1);
+    expect(valleyfield!.generatedAt).toBe(RECENT_AT);
+  });
+
+  it("returns designationEventCount=0 for a stale project state (> 6 months)", async () => {
+    const store = new MemoryStore();
+    const staleState: OntologyProjectState = {
+      ...STATE_WITH_DESIGNATION,
+      generatedAt: STALE_AT,
+    };
+    await store.put(
+      projectStateKey(CITY),
+      serializeProjectState(staleState),
+      "application/json",
+    );
+    const app = ontologyRoute({ store });
+    const res = await app.request("/api/signals/by-city");
+    const body = (await res.json()) as { ok: boolean; items: SignalCityItem[] };
+    const valleyfield = body.items.find((i) => i.citySlug === CITY);
+    expect(valleyfield).toBeDefined();
+    expect(valleyfield!.designationEventCount).toBe(0);
+    // generatedAt is still returned (not null) even for stale states.
+    expect(valleyfield!.generatedAt).toBe(STALE_AT);
   });
 });
 

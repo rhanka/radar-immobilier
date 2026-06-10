@@ -6,8 +6,11 @@
    * Chaque ville est représentée par un point coloré selon son compteur de signaux
    * de changements de zonage sur 6 mois. Clic ville → liste des signaux.
    *
-   * Anti-invention: seule la ville pilote (Salaberry-de-Valleyfield) a des signaux
-   * réels. Toutes les autres villes affichent 0. Aucun signal n'est inventé.
+   * Source des données : GET /api/signals/by-city — compte les DesignationEvent
+   * canonicaux de l'état projet ontologie (résultats exploitation réels).
+   *
+   * Anti-invention: seules les villes avec un état projet récent (< 6 mois) ont un
+   * compteur > 0. Toutes les autres villes affichent 0. Aucun signal n'est inventé.
    *
    * Carte: SVG pur (pas de lib externe). Les coordonnées WGS-84 sont projetées en
    * espace SVG via une projection équirectangulaire simple — suffisant pour la région
@@ -15,6 +18,7 @@
    * Choix justifié: tree-shakeable (0 ko supplémentaire), pas de dépendance réseau,
    * et la distorsion reste acceptable sur la zone 44°–63° N.
    */
+  import { onMount } from "svelte";
   import { Map as MapIcon, Radio, RefreshCw } from "@lucide/svelte";
   import { Badge, Alert } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -23,27 +27,34 @@
     computeBbox,
     projectToSvg,
     signalCountTier,
-    SIGNAL_TYPE_LABEL,
     PILOT_CITY_SLUG,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
+  import {
+    fetchSignalsByCity,
+    type SignalCityItem,
+  } from "$lib/signals/signals-by-city-client.js";
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
+  let loading = true;
+  let loadError: string | null = null;
+  let apiItems: SignalCityItem[] = [];
 
-  // ── Données ────────────────────────────────────────────────────────────────
-  const allEntries = buildCityMapEntries();
+  // ── Données réactives ──────────────────────────────────────────────────────
+  // Rebuilt whenever apiItems changes (after fetch).
+  $: allEntries = buildCityMapEntries(apiItems);
   // Limit displayed cities to the top 80 (closest to MTL) to keep SVG readable
-  const mapEntries = allEntries.slice(0, 80);
-  const allMunis = mapEntries.map((e) => e.municipality);
+  $: mapEntries = allEntries.slice(0, 80);
+  $: allMunis = mapEntries.map((e) => e.municipality);
 
   // ── Projection SVG ─────────────────────────────────────────────────────────
   const SVG_W = 700;
   const SVG_H = 480;
-  const bbox = computeBbox(allMunis);
+  $: bbox = computeBbox(allMunis);
 
-  function toSvg(lon: number, lat: number): { x: number; y: number } {
-    return projectToSvg(lon, lat, bbox, SVG_W, SVG_H);
+  function toSvg(lon: number, lat: number, currentBbox: ReturnType<typeof computeBbox>): { x: number; y: number } {
+    return projectToSvg(lon, lat, currentBbox, SVG_W, SVG_H);
   }
 
   // ── Compteurs globaux ──────────────────────────────────────────────────────
@@ -59,6 +70,26 @@
 
   // ── Aperçu de ville dans la liste (hover) ─────────────────────────────────
   let hoveredSlug: string | null = null;
+
+  // ── Chargement API ─────────────────────────────────────────────────────────
+  async function load() {
+    loading = true;
+    loadError = null;
+    try {
+      const res = await fetchSignalsByCity();
+      apiItems = res.items;
+    } catch (e) {
+      loadError = e instanceof Error ? e.message : "Erreur de chargement";
+      // Keep apiItems empty → all cities show 0 (honest placeholder).
+      apiItems = [];
+    } finally {
+      loading = false;
+    }
+  }
+
+  onMount(() => {
+    void load();
+  });
 </script>
 
 <ViewLayout controlsWidth="w-80">
@@ -69,13 +100,37 @@
         <Radio class="h-4 w-4 text-teal-600" aria-hidden="true" />
         Signaux : Villes
       </h1>
-      <span class="text-xs text-slate-400">6 mois</span>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400">6 mois</span>
+        <button
+          type="button"
+          aria-label="Actualiser"
+          class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          on:click={load}
+          disabled={loading}
+        >
+          <RefreshCw
+            class={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
     </div>
+
+    {#if loadError}
+      <div class="px-4 py-2 text-xs text-red-600">
+        {loadError} (compteurs affichés à 0, données indisponibles)
+      </div>
+    {/if}
 
     <!-- Compteur global -->
     <div class="border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
-      <span class="font-semibold text-slate-700">{totalSignals}</span> signal{totalSignals !== 1 ? "s" : ""} ·
-      <span class="font-semibold text-slate-700">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
+      {#if loading}
+        <span class="text-slate-400">Chargement…</span>
+      {:else}
+        <span class="font-semibold text-slate-700">{totalSignals}</span> signal{totalSignals !== 1 ? "s" : ""} ·
+        <span class="font-semibold text-slate-700">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
+      {/if}
     </div>
 
     <!-- Liste des villes avec signaux (en premier), puis les autres -->
@@ -147,12 +202,14 @@
         <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
           Québec, villes prioritisées (80 plus proches de MTL)
         </span>
-        <span class="text-xs text-slate-400">Projection équirectangulaire · GeoNames CC-BY</span>
+        <span class="text-xs text-slate-400">
+          {loading ? "chargement…" : "DesignationEvent ontologie · GeoNames CC-BY"}
+        </span>
       </div>
       <svg
         viewBox={`0 0 ${SVG_W} ${SVG_H}`}
         width="100%"
-        aria-label="Carte des villes du Québec avec compteurs de signaux"
+        aria-label="Carte des villes du Québec avec compteurs de signaux de changements de zonage"
         role="img"
         class="block"
         style="max-height: 400px;"
@@ -162,7 +219,7 @@
 
         <!-- Points de villes -->
         {#each mapEntries as entry (entry.municipality.slug)}
-          {@const pos = toSvg(entry.municipality.lon, entry.municipality.lat)}
+          {@const pos = toSvg(entry.municipality.lon, entry.municipality.lat, bbox)}
           {@const tier = signalCountTier(entry.signalCount6m)}
           {@const isSelected = selectedCity?.municipality.slug === entry.municipality.slug}
           {@const isHovered = hoveredSlug === entry.municipality.slug}
@@ -240,44 +297,22 @@
           >✕</button>
         </div>
 
-        {#if selectedCity.signals.length === 0}
+        {#if selectedCity.signalCount6m === 0}
           <Alert
             tone="info"
             title="Aucun signal disponible pour cette ville."
-            message="Les données de signaux sont collectées automatiquement lors du recueil de documents municipaux. Cette ville figure dans le plan de ciblage mais n'a pas encore été sourcée."
+            message="Les signaux de changements de zonage sont dérivés des DesignationEvent de l'état projet ontologie. Cette ville n'a pas encore de données recueillies ou son état projet date de plus de 6 mois."
           />
         {:else}
-          <ul class="space-y-2">
-            {#each selectedCity.signals as signal (signal.id)}
-              <li class="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-                <span
-                  class={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${
-                    signal.confidence === "high" ? "bg-teal-500"
-                    : signal.confidence === "medium" ? "bg-amber-400"
-                    : "bg-red-400"
-                  }`}
-                  aria-hidden="true"
-                ></span>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-sm font-medium text-slate-800">
-                      {SIGNAL_TYPE_LABEL[signal.type] ?? signal.type}
-                    </span>
-                    {#if signal.bylaw}
-                      <Badge tone="neutral" class="text-xs">Règl. {signal.bylaw}</Badge>
-                    {/if}
-                    {#if signal.mode === "simulation"}
-                      <Badge tone="info" class="text-xs">Exemple</Badge>
-                    {/if}
-                  </div>
-                  {#if signal.zone}
-                    <p class="text-xs text-slate-500 mt-0.5">Zone : {signal.zone}</p>
-                  {/if}
-                  <p class="text-xs text-slate-400 mt-0.5">Détecté : {signal.detectedAt}</p>
-                </div>
-              </li>
-            {/each}
-          </ul>
+          <div class="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3">
+            <p class="text-sm font-semibold text-teal-800">
+              {selectedCity.signalCount6m} DesignationEvent{selectedCity.signalCount6m > 1 ? "s" : ""} (6 mois)
+            </p>
+            <p class="mt-1 text-xs text-teal-600">
+              Changements de zonage détectés depuis l'état projet ontologie.
+              Consultez la vue <em>Ontologie</em> pour le détail des entités canoniques.
+            </p>
+          </div>
         {/if}
       </div>
     {:else}
@@ -288,7 +323,7 @@
             Cliquez sur une ville pour voir ses signaux de changements de zonage.
           </p>
           <p class="mt-1 text-xs text-slate-300">
-            Données réelles : Salaberry-de-Valleyfield uniquement.
+            Données réelles : DesignationEvent de l'état projet ontologie.
           </p>
         </div>
       </div>
