@@ -45,8 +45,18 @@ export const ZonageChangeDetection = z.object({
    */
   avisDeMotion: z.boolean(),
   /**
-   * Règlement numbers extracted when the avis-de-motion context names a règlement
-   * modifying the zonage bylaw.  Empty when no such number is found.
+   * Règlement numbers that are themselves the OBJECT of an avis de motion for a
+   * zonage change (new/proposed règlement numbers).  Only populated when the
+   * immediate item context contains "zonage" / "règlement de zonage" /
+   * "règlement d'urbanisme".  Empty when no zonage motion is detected.
+   *
+   * Anti-over-aggregation rule: each context is bounded by the enclosing
+   * paragraph (previous and next \n\n), preventing cross-item contamination.
+   * The règlement being MODIFIED ("modifiant le règlement de zonage numéro Y")
+   * is excluded when a distinct NEW number exists in the same context; when
+   * the modified number is the only one present (e.g. Châteauguay Z-3001),
+   * it is retained.
+   *
    * Verbatim, no fabrication.
    */
   reglementNumbers: z.array(z.string()),
@@ -345,20 +355,108 @@ function extractZoneCodes(window: string, reglementNumbers: string[] = []): stri
 }
 
 /**
+ * Pattern that matches a règlement number appearing as the TARGET of a
+ * "modifiant" clause, e.g. "modifiant le règlement de zonage numéro 2019-342"
+ * or "modifiant le règlement d'urbanisme numéro 150-49".
+ *
+ * Group 1 captures the number of the EXISTING (modified) règlement — NOT the
+ * new proposed règlement that is the actual object of the avis de motion.
+ *
+ * Used to distinguish new règlements (proposed) from referenced/modified ones
+ * when both appear in the same context window.  If the context contains ONLY
+ * modified règlement numbers (e.g. Châteauguay "modifiant le règlement de
+ * zonage Z-3001" with no separate new number), the modified numbers are kept.
+ */
+const MODIFIANT_REGLEMENT_RE =
+  /modifiant\s+le\s+r[eè]glement\s+(?:de\s+zonage|d[''']urbanisme)\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
+
+/**
+ * Extract règlement numbers that are the TARGET of a "modifiant" clause
+ * within a context window (i.e. the OLD règlement being amended, not the new
+ * proposed one).  Returns an empty set when none are found.
+ *
+ * These are EXCLUDED from `reglementNumbers` when distinct new règlement
+ * numbers exist in the same context.
+ */
+function extractModifiedReglementNumbers(window: string): Set<string> {
+  const modified = new Set<string>();
+  const re = new RegExp(MODIFIANT_REGLEMENT_RE.source, "gi");
+  for (const m of window.matchAll(re)) {
+    if (m[1]) modified.add(m[1]);
+  }
+  return modified;
+}
+
+/**
+ * Given the full set of extracted règlement numbers and the set of "modified"
+ * règlement numbers from "modifiant le règlement de zonage numéro Y" clauses,
+ * return the subset that are genuinely NEW (the object of the avis de motion).
+ *
+ * Rule:
+ *   - If there exist numbers NOT in the modified set → return only those.
+ *   - If ALL extracted numbers are in the modified set (Châteauguay pattern:
+ *     "modifiant le règlement de zonage Z-3001" with no distinct new number)
+ *     → return all of them (the modified number is the best proxy for the
+ *     règlement being changed).
+ *
+ * This preserves Châteauguay's Z-3001 and Saint-Constant's 1926-26 while
+ * excluding 2019-342 (Sainte-Martine) and 1528-17 (Saint-Constant) from the
+ * output when those modified-rule numbers appear alongside distinct new numbers.
+ */
+function filterNewReglements(
+  allNumbers: string[],
+  modifiedNumbers: Set<string>,
+): string[] {
+  const newNumbers = allNumbers.filter((n) => !modifiedNumbers.has(n));
+  return newNumbers.length > 0 ? newNumbers : allNumbers;
+}
+
+/**
+ * Regex to detect the PAST-TENSE reference form of "avis de motion":
+ * "avis de motion a été donné".
+ *
+ * These appear in ATTENDU QUE / CONSIDÉRANT QUE clauses within the adoption
+ * section of a resolution (e.g. "Attendu qu'un avis de motion a été donné lors
+ * de la séance du …").  They reference a motion that was ALREADY given in a
+ * previous clause — the relevant règlement information is in the FORWARD
+ * direction (the "Que le conseil adopte … le règlement numéro X…" clause),
+ * NOT in the backward direction.
+ *
+ * For these past-tense matches we suppress the backward window entirely to
+ * prevent backward contamination from preceding Attendu clauses that may
+ * reference other règlements (Sainte-Martine 2026-510 adoption section
+ * references "modifié par le projet de Règlement numéro 2026-509").
+ */
+const AVIS_MOTION_PAST_TENSE_RE = /avis\s+de\s+motion\s+a\s+[eé]t[eé]\s+donn[eé]/i;
+
+/**
  * Detect "avis de motion → changement de zonage" in the plain text of a PV.
  *
  * Algorithm:
  *   1. Find every occurrence of `AVIS_MOTION_RE` in the text.
- *   2. For each match, extract a context window: up to 400 chars BEFORE the
- *      match, and up to 400 chars AFTER the match end — but capped at the
- *      first blank line (\n\n) following the match.  The backward (-400) window
- *      is kept uncapped to handle PVs that list the règlement number before the
- *      "avis de motion" phrase.  The forward cap prevents an agenda item's
- *      context from bleeding into the next item (e.g. a derogation entry that
- *      mentions "Règlement de zonage" right after an unrelated motion).
+ *   2. For each match, extract a context window:
+ *      - ACTIVE form ("Donne avis de motion", "Avis de motion est donné"):
+ *        backward window capped at the previous \n\n AND ±400 chars.  This
+ *        handles PVs where the section header names the règlement BEFORE the
+ *        motion phrase (Saint-Damase pattern) while preventing cross-item
+ *        backward contamination (Sainte-Martine 2026-510 vs 2026-509).
+ *      - PAST-TENSE form ("avis de motion a été donné"): ZERO backward window.
+ *        These appear in ATTENDU QUE clauses; the règlement being adopted is
+ *        named FORWARD.  Backward context only risks picking up references to
+ *        other règlements from preceding Attendu lines.
+ *      - BOTH forms: forward window capped at the next \n\n AND ±400 chars,
+ *        preventing cross-item contamination (Vaudreuil-Dorion pattern).
  *   3. Within that window, look for a règlement number AND a zonage keyword.
  *   4. If both are present → `changementZonage: true` (high-precision).
- *   5. If only a motion is present but no règlement/zonage → `avisDeMotion: true`
+ *      Only règlement numbers from zonage contexts are added to
+ *      `reglementNumbers`; non-zonage motions do NOT contribute to the list.
+ *   5. Modified-règlement exclusion: when the context contains both a NEW
+ *      règlement number (the object of the avis de motion) and an OLD one (via
+ *      "modifiant le règlement de zonage numéro Y"), only the new number is
+ *      kept in `reglementNumbers`.  When only the old number exists (Châteauguay
+ *      Z-3001: "d'un règlement modifiant le règlement de zonage Z-3001"), it is
+ *      retained as the best available identifier.
+ *   6. If only a motion is present but no règlement/zonage → `avisDeMotion: true`
  *      but `changementZonage: false` (medium-confidence, reported separately).
  *
  * Returns a typed `ZonageChangeDetectionT` — never throws.
@@ -377,10 +475,26 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
   for (const m of pvText.matchAll(motionRe)) {
     const idx = m.index ?? 0;
     const matchEnd = idx + (m[0]?.length ?? 0);
-    const ctxStart = Math.max(0, idx - WINDOW);
-    // Forward window: capped at the next blank line (\n\n) after the match end,
-    // to prevent cross-item contamination (e.g. adjacent derogation item that
-    // mentions "Règlement de zonage" for an unrelated subject).
+    const isPastTense = AVIS_MOTION_PAST_TENSE_RE.test(m[0] ?? "");
+
+    // Backward window:
+    //   - Past-tense form: zero backward window (règlement info is in the
+    //     forward "Que le conseil adopte…" clause, not behind the match).
+    //   - Active form: capped at the previous \n\n paragraph separator AND at
+    //     400 chars before the match, whichever is MORE recent.
+    let ctxStart: number;
+    if (isPastTense) {
+      ctxStart = idx;
+    } else {
+      const prevParaBreak = pvText.lastIndexOf("\n\n", idx);
+      ctxStart = prevParaBreak === -1
+        ? Math.max(0, idx - WINDOW)
+        : Math.max(prevParaBreak + 2, idx - WINDOW);
+    }
+
+    // Forward window: capped at the next \n\n after the match end AND at 400
+    // chars after the match end.  Prevents cross-item contamination from the
+    // forward direction (Vaudreuil-Dorion pattern).
     const nextParaBreak = pvText.indexOf("\n\n", matchEnd);
     const forwardLimit = nextParaBreak === -1
       ? Math.min(pvText.length, matchEnd + WINDOW)
@@ -399,17 +513,20 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
 
     if (regNumbers.length > 0 && hasZonageKw) {
       foundChangement = true;
-      allReglementNumbers.push(...regNumbers);
+      // Precision filter: exclude the MODIFIED règlement number ("modifiant le
+      // règlement de zonage numéro Y") when a distinct NEW number exists.
+      const modifiedNums = extractModifiedReglementNumbers(ctx);
+      const newNums = filterNewReglements(regNumbers, modifiedNums);
+      allReglementNumbers.push(...newNums);
       allZoneRefs.push(...zoneCodes);
       excerpts.push(trimExcerpt(pvText, idx));
       if (densMatch && !densiteAutorisee) {
         densiteAutorisee = densMatch[0].replace(/\s+/g, " ").trim();
       }
     } else if (regNumbers.length > 0) {
-      // Motion with règlement but no explicit zonage keyword — conservative:
-      // still report but don't flag changementZonage.
-      allReglementNumbers.push(...regNumbers);
-      allZoneRefs.push(...zoneCodes);
+      // Motion with règlement but no explicit zonage keyword — avisDeMotion
+      // reported, but règlement numbers are NOT added to reglementNumbers
+      // (which is reserved for zonage-specific règlements only).
       excerpts.push(trimExcerpt(pvText, idx));
     }
   }
