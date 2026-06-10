@@ -311,12 +311,35 @@ function extractReglementNumbers(window: string): string[] {
   return Array.from(new Set(numbers));
 }
 
-/** Extract zone codes from a text window (deduped). */
-function extractZoneCodes(window: string): string[] {
+/**
+ * Extract zone codes from a text window (deduped), excluding codes that are
+ * actually règlement numbers.
+ *
+ * Two-pass exclusion:
+ *   1. Any code already captured by `reglementNumbers` (e.g. Z-3001 captured
+ *      via REGLEMENT_ZONAGE_LETTER_RE) is excluded from zoneRefs.
+ *   2. Any code immediately preceded (within 40 chars) by the word "règlement"
+ *      (with or without context "de zonage", "de construction", etc.) is
+ *      excluded — those are bylaw identifiers, not zone designators.
+ *      Example: "règlement de construction Z-3300" → Z-3300 excluded.
+ *
+ * This prevents pollution of the form zoneRefs=[C-754,C-810,H-812,Z-3001,Z-3300]
+ * and produces the expected zoneRefs=[C-754,C-810,H-812].
+ */
+function extractZoneCodes(window: string, reglementNumbers: string[] = []): string[] {
+  const reglementSet = new Set(reglementNumbers.map((r) => r.toUpperCase()));
   const codes: string[] = [];
   const re = new RegExp(ZONE_CODE_RE.source, "g");
   for (const m of window.matchAll(re)) {
-    if (m[1]) codes.push(m[1]);
+    const code = m[1];
+    if (!code) continue;
+    // Exclude codes already identified as règlement numbers.
+    if (reglementSet.has(code.toUpperCase())) continue;
+    // Exclude codes preceded by "règlement" within 40 chars (bylaw identifiers).
+    const matchStart = m.index ?? 0;
+    const lookback = window.slice(Math.max(0, matchStart - 40), matchStart);
+    if (/r[eè]glement\b/i.test(lookback)) continue;
+    codes.push(code);
   }
   return Array.from(new Set(codes));
 }
@@ -367,7 +390,9 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
 
     const regNumbers = extractReglementNumbers(ctx);
     const hasZonageKw = ZONAGE_KEYWORDS_RE.test(ctx);
-    const zoneCodes = extractZoneCodes(ctx);
+    // Pass regNumbers so that règlement identifiers (e.g. Z-3001) are not
+    // also listed as zone codes in zoneRefs.
+    const zoneCodes = extractZoneCodes(ctx, regNumbers);
     const densMatch = ctx.match(DENSITE_RE);
 
     foundAvisDeMotion = true;

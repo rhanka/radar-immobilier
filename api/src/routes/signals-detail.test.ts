@@ -124,6 +124,47 @@ const STATE_WITH_DESIGNATION_EVENT: OntologyProjectState = {
   ],
 };
 
+/**
+ * Châteauguay fixture: DesignationEvent with letter-prefix règlement Z-3001
+ * and real zone codes C-754, C-810, H-812.
+ *
+ * Tests the fix for data pollution: Z-3001 must appear in reglementNumbers,
+ * NOT in zoneRefs.  zoneRefs must be [C-754, C-810, H-812] only.
+ */
+const CHATEAUGUAY_PV_RAW_REF =
+  "raw/proces-verbaux-chateauguay/2026/02/23/pv2026-02-23.txt";
+const STATE_CHATEAUGUAY: OntologyProjectState = {
+  schema: "radar_ontology_project_state_v1",
+  citySlug: "chateauguay",
+  profileHash: "d".repeat(64),
+  generatedAt: GENERATED_AT,
+  rawRefs: [CHATEAUGUAY_PV_RAW_REF],
+  mentions: [
+    {
+      id: "mention:designationevent:chateauguay-Z-3001",
+      type: "DesignationEvent",
+      label:
+        "Avis de motion règlement de zonage Z-3001 visant à permettre les bâtiments de 4 étages dans la zone C-754",
+      normalized_terms: ["Z-3001"],
+      source_refs: [CHATEAUGUAY_PV_RAW_REF],
+      zoneRefs: ["C-754", "C-810", "H-812"],
+    },
+  ],
+  candidates: [],
+  canonicals: [
+    {
+      id: "designationevent::chateauguay::Z-3001",
+      type: "DesignationEvent",
+      label:
+        "Avis de motion règlement de zonage Z-3001 visant à permettre les bâtiments de 4 étages dans la zone C-754",
+      aliases: [],
+      memberMentionIds: ["mention:designationevent:chateauguay-Z-3001"],
+      evidenceRefs: [CHATEAUGUAY_PV_RAW_REF],
+      status: "candidate",
+    },
+  ],
+};
+
 /** Project state with no DesignationEvent canonicals (only Bylaw/Source). */
 const STATE_NO_DESIGNATION_EVENTS: OntologyProjectState = {
   schema: "radar_ontology_project_state_v1",
@@ -315,5 +356,58 @@ describe("GET /api/signals/:city/detail", () => {
 
     // zoneRefs must come from the mention field, not from label scanning.
     expect(event.zoneRefs).toContain("H-431");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Châteauguay — correction pollution données Z-3001 / zoneRefs
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("GET /api/signals/chateauguay/detail — séparation règlement Z-3001 des zones (fix pollution)", () => {
+  it("reglementNumbers contient Z-3001 (lettre-préfixe, normalized_terms)", async () => {
+    const store = new MemoryStore();
+    await seedState(store, STATE_CHATEAUGUAY);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request("/api/signals/chateauguay/detail");
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    // Z-3001 is in normalized_terms and matches the letter-prefix règlement pattern.
+    expect(event.reglementNumbers).toContain("Z-3001");
+  });
+
+  it("zoneRefs = [C-754, C-810, H-812] sans Z-3001 (mention zoneRefs, pas label scan)", async () => {
+    const store = new MemoryStore();
+    await seedState(store, STATE_CHATEAUGUAY);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request("/api/signals/chateauguay/detail");
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    // Pass 1 (mention zoneRefs) carries the real zone codes; Z-3001 must NOT appear.
+    expect(event.zoneRefs).toContain("C-754");
+    expect(event.zoneRefs).toContain("C-810");
+    expect(event.zoneRefs).toContain("H-812");
+    expect(event.zoneRefs).not.toContain("Z-3001");
+    expect(event.zoneRefs).not.toContain("Z-3300");
+  });
+
+  it("non-régression Saint-Constant: reglementNumbers=[1926-26, 1927-26], zoneRefs=[H-431]", async () => {
+    const store = new MemoryStore();
+    await seedState(store, STATE_WITH_DESIGNATION_EVENT);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request(`/api/signals/${CITY}/detail`);
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    expect(event.reglementNumbers).toContain("1926-26");
+    expect(event.reglementNumbers).toContain("1927-26");
+    expect(event.zoneRefs).toContain("H-431");
+    // Digit-prefix règlement numbers must NOT appear in zoneRefs.
+    expect(event.zoneRefs).not.toContain("1926-26");
+    expect(event.zoneRefs).not.toContain("1927-26");
   });
 });
