@@ -337,9 +337,14 @@ describe("detectZonageChange – Vaudreuil-Dorion Mai 2026 (tarification + démo
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("extrait les n° de règlement (1709-38, 1835-01) des motions", () => {
-    expect(result.reglementNumbers).toContain("1709-38");
-    expect(result.reglementNumbers).toContain("1835-01");
+  it("reglementNumbers VIDE (1709-38 tarification et 1835-01 démolition NE sont PAS de zonage)", () => {
+    // PRÉCISION FIX: reglementNumbers n'est désormais peuplé QUE pour les motions
+    // dont le contexte immédiat contient un mot-clé de zonage ("zonage", "règlement
+    // de zonage", "règlement d'urbanisme"). Les règlements 1709-38 (tarification)
+    // et 1835-01 (démolition) ne sont pas de zonage → reglementNumbers est vide.
+    // Le texte source contient bien ces règlements (vérifiable ci-dessous) mais
+    // leur contexte d'avis de motion ne mentionne pas "zonage".
+    expect(result.reglementNumbers).toEqual([]);
   });
 
   it("NE lève PAS changementZonage (faux positif corrigé — fenêtre forward bornée par \\n\\n)", () => {
