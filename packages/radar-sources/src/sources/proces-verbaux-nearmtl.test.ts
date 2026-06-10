@@ -43,43 +43,43 @@ import {
 } from "./proces-verbaux-sainte-catherine.fixture.js";
 import {
   PV_SAINT_CONSTANT_INDEX_HTML,
-  AVIS_SAINT_CONSTANT_INDEX_HTML,
   PV_SAINT_CONSTANT_2026_05_TEXT,
 } from "./proces-verbaux-saint-constant.fixture.js";
 import { isAvisLieAuZonage } from "./avis-publics-generic.js";
 import { inferAvisType } from "./avis-publics-parser.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. detectZonageChange — LIMITATION DOCUMENTÉE (Saint-Constant May 2026)
-//    Real zonage change is present in the text but the parser's REGLEMENT_NUMBER_RE
-//    does not handle "RÈGLEMENT NUMÉRO 1926-26" (full "numéro" word). This is an
-//    honest limitation of the current parser, not a fabricated result.
+// 1. detectZonageChange — DÉTECTION RÉELLE (Saint-Constant May 2026)
+//    Real zonage change present in the live PV text, now auto-detected after the
+//    REGLEMENT_NUMBER_RE fix (supports "RÈGLEMENT NUMÉRO 1926-26", full "numéro"
+//    word). Règlements 1926-26 & 1927-26 modify zoning bylaw 1528-17, zone H-431.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("detectZonageChange – PARSER GAP (Saint-Constant May 2026, 'NUMÉRO' style non supporté)", () => {
+describe("detectZonageChange – DÉTECTION RÉELLE (Saint-Constant May 2026, style 'NUMÉRO')", () => {
   const result = detectZonageChange(PV_SAINT_CONSTANT_2026_05_TEXT);
 
   it("détecte avisDeMotion (motions présentes dans le texte réel)", () => {
-    // The text does contain "Avis de motion est donné" and "AVIS DE MOTION DU RÈGLEMENT"
     expect(result.avisDeMotion).toBe(true);
   });
 
-  it("reglementNumbers vide — gap connu: 'RÈGLEMENT NUMÉRO 1926-26' non reconnu par le regex", () => {
-    // REGLEMENT_NUMBER_RE handles "règlement no 1926-26" / "règlement n° 1926-26"
-    // but NOT "règlement numéro 1926-26" (full word "numéro").
-    // Saint-Constant uses the "NUMÉRO" style throughout. Parser improvement needed.
-    expect(result.reglementNumbers).toHaveLength(0);
+  it("extrait les n° de règlement réels en style 'NUMÉRO' (1926-26, 1927-26)", () => {
+    // REGLEMENT_NUMBER_RE handles "règlement numéro 1926-26" (full word "numéro"),
+    // in addition to "règlement no/n° X". Saint-Constant uses the "NUMÉRO" style.
+    expect(result.reglementNumbers).toContain("1926-26");
+    expect(result.reglementNumbers).toContain("1927-26");
   });
 
-  it("changementZonage false — conséquence du gap: sans numéro de règlement extrait, pas de détection", () => {
-    // The real PV DOES contain a zonage change (1926-26 modifying zonage bylaw 1528-17,
-    // zone H-431). This false result is the HONEST output of the current parser,
-    // not a fabrication. The finding is documented for future parser improvement.
-    expect(result.changementZonage).toBe(false);
+  it("lève changementZonage=true (vrai changement de zonage détecté)", () => {
+    // The real PV contains a zonage change: 1926-26 & 1927-26 modify zoning bylaw
+    // 1528-17, zone H-431. Auto-detected via "règlement de zonage" + n° règlement.
+    expect(result.changementZonage).toBe(true);
   });
 
-  it("le texte brut contient bien les mots-clés attendus (vérification manuelle)", () => {
-    // This confirms the real content is present even if the parser misses it.
+  it("référence la zone réelle H-431", () => {
+    expect(result.zoneRefs).toContain("H-431");
+  });
+
+  it("le texte brut contient bien les mots-clés attendus", () => {
     const lower = PV_SAINT_CONSTANT_2026_05_TEXT.toLowerCase();
     expect(lower).toContain("1926-26");
     expect(lower).toContain("règlement de zonage");
