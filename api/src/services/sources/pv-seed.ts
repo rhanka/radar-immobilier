@@ -1,5 +1,6 @@
 /**
- * PV-SEED — Réseau de villes PV Rive-Sud (saint-constant, sainte-catherine).
+ * PV-SEED — Réseau de villes PV Rive-Sud (saint-constant, sainte-catherine,
+ *           chateauguay, la-prairie, delson, vaudreuil-dorion).
  *
  * Sème les fixtures PV RÉELLES (extraits pdftotext de vrais PV publics captés
  * 2026-06-10) dans l'objet-store comme le ferait RECUEIL, puis lance
@@ -12,6 +13,10 @@
  *     `detectZonageChange` retourne `changementZonage: true` sur le texte réel.
  *   - Sainte-Catherine → 0 DesignationEvent zonage (faux-positif écarté).
  *   - Saint-Constant → ≥1 DesignationEvent zonage (règlements 1926-26/1927-26).
+ *   - Châteauguay → 1 DesignationEvent zonage (règlement Z-3001, zones C-754/C-810).
+ *   - La Prairie → 0 DesignationEvent zonage (taxes/patrimoine/circulation ≠ zonage).
+ *   - Delson → 0 DesignationEvent zonage (référence passée sans avis de motion actif).
+ *   - Vaudreuil-Dorion → 0 DesignationEvent zonage (faux-positif écarté en amont).
  *
  * La clé S3 suit le patron du RECUEIL :
  *   raw/proces-verbaux-<city>/<yyyy>/<mm>/<dd>/<sha256>.<ext>
@@ -20,8 +25,12 @@
 
 import {
   buildRawDocumentRecord,
+  PV_CHATEAUGUAY_2026_02_TEXT,
+  PV_DELSON_2026_05_TEXT,
+  PV_LAPRAIRIE_2026_05_TEXT,
   PV_SAINT_CONSTANT_2026_05_TEXT,
   PV_SAINTE_CATHERINE_2026_05_TEXT,
+  PV_VAUDREUIL_DORION_2026_05_TEXT,
   type RawDocumentRecord,
 } from "@radar/sources";
 
@@ -66,6 +75,34 @@ export const PV_FIXTURES: readonly PvFixtureSpec[] = [
     sourceUrl:
       "https://www.ville.sainte-catherine.qc.ca/medias/documents/content/PvCm-20260512-vns-vp20260514.pdf",
     pvText: PV_SAINTE_CATHERINE_2026_05_TEXT,
+  },
+  {
+    citySlug: "chateauguay",
+    sourceId: "proces-verbaux-chateauguay",
+    sourceUrl:
+      "https://ville.chateauguay.qc.ca/wp-content/uploads/2026/03/PV_2026-02-23.pdf",
+    pvText: PV_CHATEAUGUAY_2026_02_TEXT,
+  },
+  {
+    citySlug: "la-prairie",
+    sourceId: "proces-verbaux-la-prairie",
+    sourceUrl:
+      "https://laprairie.ca/storage/app/media/ville/democratie/seances-du-conseil/PV_2026/2026-05-19_pv_non_officiel.pdf",
+    pvText: PV_LAPRAIRIE_2026_05_TEXT,
+  },
+  {
+    citySlug: "delson",
+    sourceId: "proces-verbaux-delson",
+    sourceUrl:
+      "https://ville.delson.qc.ca/wp-content/uploads/2026/05/2026-05-12-ordinaire-20h-2.pdf",
+    pvText: PV_DELSON_2026_05_TEXT,
+  },
+  {
+    citySlug: "vaudreuil-dorion",
+    sourceId: "proces-verbaux-vaudreuil-dorion",
+    sourceUrl:
+      "https://www.ville.vaudreuil-dorion.qc.ca/uploads/sections/La_Ville/Mairie/Seances_publiques/PV_2026/20260519_pv.pdf",
+    pvText: PV_VAUDREUIL_DORION_2026_05_TEXT,
   },
 ];
 
