@@ -204,15 +204,35 @@ describe("detectZonageChange – Sainte-Martine Avril 2026 (zonage réel 2026-51
     expect(result.changementZonage).toBe(true);
   });
 
-  it("extrait le n° de règlement 2026-510 (zonage confirmé)", () => {
+  it("extrait UNIQUEMENT 2026-510 en reglementNumbers (seul vrai règlement de zonage)", () => {
+    // PRÉCISION FIX (anti-sur-agrégation Sainte-Martine):
+    // Le PV contient 5 avis de motion pour règlements 2026-507..2026-511.
+    // Seul 2026-510 (et 2026-511 si présent dans le fixture) modifie
+    // le "Règlement de zonage numéro 2019-342" → reglementNumbers = [2026-510].
+    //
+    // Règlements exclus par la règle de contexte immédiat (\n\n borné) :
+    //   - 2026-507 = contrôle animaux (pas de "zonage" dans son contexte)
+    //   - 2026-508 = nuisances modifiant règlement 2011-185 (pas de "zonage")
+    //   - 2026-509 = plan d'urbanisme modifiant règlement 2019-341 ("urbanisme"
+    //     sans "règlement de" = ne déclenche pas ZONAGE_KEYWORDS_RE)
+    //   - 2019-342 = l'ANCIEN règlement modifié (exclu par filterNewReglements)
+    //
+    // Proof from real PV text:
+    // "Donne avis de motion...le Règlement numéro 2026-510 modifiant le Règlement
+    // de zonage numéro 2019-342 afin d'agrandir la zone MxtV-2."
+    // → "règlement de zonage" présent → hasZonageKw=true
+    // → "Règlement numéro 2026-510" = NEW, "zonage numéro 2019-342" = MODIFIÉ
+    // → filterNewReglements retient [2026-510]
     expect(result.reglementNumbers).toContain("2026-510");
-  });
-
-  it("extrait également 2026-509 (plan d'urbanisme) et 2026-511 si présent", () => {
-    // 2026-509 modifies the plan d'urbanisme (urbanisme keyword in context)
-    // At minimum 2026-510 must be in the list; 2026-507 may or may not appear
-    // depending on window bounds (non-zonage règlement — conservative)
-    expect(result.reglementNumbers.length).toBeGreaterThanOrEqual(1);
+    // 2019-342 est l'ancien règlement modifié, PAS un nouvel avis de motion de zonage
+    expect(result.reglementNumbers).not.toContain("2019-342");
+    // 2026-507, 2026-508, 2026-509 ne sont pas de zonage
+    expect(result.reglementNumbers).not.toContain("2026-507");
+    expect(result.reglementNumbers).not.toContain("2026-508");
+    expect(result.reglementNumbers).not.toContain("2026-509");
+    // 2011-185 et 2019-341 ne sont pas de zonage
+    expect(result.reglementNumbers).not.toContain("2011-185");
+    expect(result.reglementNumbers).not.toContain("2019-341");
   });
 
   it("le texte brut contient bien 'règlement de zonage' et 'zone MxtV-2'", () => {
