@@ -174,6 +174,33 @@ export const PV_SOURCE_BINDINGS = [
   },
 ] as const satisfies readonly PrioritySourceBinding[];
 
+/**
+ * Generic avis-publics adapters — multi-city, config-driven (feat/avis-generic).
+ * The `AvisPublicsGenericAdapter` + `AvisCityConfig` model replaces the per-city
+ * city-specific adapters for new cities; Valleyfield and Beauharnois are the two
+ * first pilot registrations. Source ids match `AvisCityConfig.sourceId`.
+ */
+export const AVIS_PUBLICS_GENERIC_SOURCE_BINDINGS = [
+  {
+    sourceId: "avis-publics-valleyfield",
+    priority: 1,
+    tier: "A",
+    kind: "avis-publics",
+    city: "salaberry-de-valleyfield",
+    recommendation: "build-now",
+    cadence: "daily",
+  },
+  {
+    sourceId: "avis-publics-beauharnois",
+    priority: 1,
+    tier: "A",
+    kind: "avis-publics",
+    city: "beauharnois",
+    recommendation: "build-now",
+    cadence: "daily",
+  },
+] as const satisfies readonly PrioritySourceBinding[];
+
 /** Every registered priority binding across all pilot cities. */
 export const ALL_PRIORITY_SOURCE_BINDINGS: readonly PrioritySourceBinding[] = [
   ...VALLEYFIELD_PRIORITY_SOURCE_BINDINGS,
@@ -181,6 +208,7 @@ export const ALL_PRIORITY_SOURCE_BINDINGS: readonly PrioritySourceBinding[] = [
   ...ROLE_EVALUATION_MAMH_SOURCE_BINDINGS,
   ...ADRESSES_QUEBEC_SOURCE_BINDINGS,
   ...PV_SOURCE_BINDINGS,
+  ...AVIS_PUBLICS_GENERIC_SOURCE_BINDINGS,
 ];
 
 export function getPrioritySourceBinding(
