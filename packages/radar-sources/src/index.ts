@@ -26,6 +26,9 @@ export {
   REGLEMENT_150_51_TEXT,
 } from "./sources/reglements-urbanisme-valleyfield.fixture.js";
 export { QC_MUNICIPALITIES, prioritizedCities } from "./municipalities.js";
+export * from "./geo/geo-source-inventory.js";
+export * from "./geo/geo-source-inventory.data.js";
+export * from "./geo/geo-vertical-priority.js";
 export * from "./sources/proces-verbaux-parser.js";
 export * from "./sources/proces-verbaux-generic.js";
 export {
