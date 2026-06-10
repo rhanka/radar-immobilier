@@ -3,14 +3,21 @@ import {
   AVIS_PUBLICS_BEAUHARNOIS_SOURCE_ID,
   AVIS_PUBLICS_CITY,
   AVIS_PUBLICS_SOURCE_ID,
+  BEAUHARNOIS_AVIS_CONFIG,
   REGLEMENTS_URBANISME_CITY,
   REGLEMENTS_URBANISME_SOURCE_ID,
+  SAINT_DAMASE_PV_CONFIG,
+  VALLEYFIELD_AVIS_CONFIG,
+  VALLEYFIELD_YOUTUBE_CONFIG,
   adressesSourceId,
   createAdressesQuebecAdapter,
+  createAvisPublicsAdapter,
   createAvisPublicsBeauharnoisAdapter,
   createAvisPublicsValleyfieldAdapter,
+  createProcesVerbauxAdapter,
   createReglementsUrbanismeValleyfieldAdapter,
   createRoleEvaluationMamhAdapter,
+  createYouTubeSeancesAdapter,
   roleSourceId,
   type SourceAdapter,
 } from "@radar/sources";
@@ -29,6 +36,14 @@ import {
 /** Pilot-city MAMH rôle codes (Valleyfield 70052, Beauharnois 70022). */
 export const ROLE_MAMH_VALLEYFIELD = "70052";
 export const ROLE_MAMH_BEAUHARNOIS = "70022";
+
+/** Generic source IDs for config-driven adapters (procès-verbaux, avis, youtube). */
+export const PV_SAINT_DAMASE_SOURCE_ID = SAINT_DAMASE_PV_CONFIG.sourceId;
+export const AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID =
+  VALLEYFIELD_AVIS_CONFIG.sourceId;
+export const AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID =
+  BEAUHARNOIS_AVIS_CONFIG.sourceId;
+export const YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID = "youtube-seances-salaberry-de-valleyfield";
 
 /** One resolvable collectible source: how to build its adapter + its city. */
 export interface AdapterEntry {
@@ -162,6 +177,31 @@ export function defaultAdapterRegistry(): AdapterRegistry {
           city: AVIS_PUBLICS_BEAUHARNOIS_CITY,
         }),
     },
+    // ── Generic config-driven adapters ──────────────────────────────────────
+    // procès-verbaux: Saint-Damase (WordPress, simple, easy-first target)
+    {
+      sourceId: PV_SAINT_DAMASE_SOURCE_ID,
+      city: SAINT_DAMASE_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(SAINT_DAMASE_PV_CONFIG),
+    },
+    // avis-publics generic: Valleyfield (Craft CMS)
+    {
+      sourceId: AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
+      city: VALLEYFIELD_AVIS_CONFIG.citySlug,
+      build: () => createAvisPublicsAdapter(VALLEYFIELD_AVIS_CONFIG),
+    },
+    // avis-publics generic: Beauharnois (WordPress)
+    {
+      sourceId: AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID,
+      city: BEAUHARNOIS_AVIS_CONFIG.citySlug,
+      build: () => createAvisPublicsAdapter(BEAUHARNOIS_AVIS_CONFIG),
+    },
+    // YouTube séances: Valleyfield (off by default — missing API key → skipped)
+    {
+      sourceId: YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID,
+      city: VALLEYFIELD_YOUTUBE_CONFIG.citySlug,
+      build: () => createYouTubeSeancesAdapter(VALLEYFIELD_YOUTUBE_CONFIG),
+    },
   ];
 
   // Abstract catalogue bindings → concrete collectible ids (city-disambiguated).
@@ -177,6 +217,15 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       adressesSourceId(ROLE_MAMH_VALLEYFIELD),
       adressesSourceId(ROLE_MAMH_BEAUHARNOIS),
     ],
+    // Generic avis-publics: abstract catalogue id fans out to all cities.
+    "avis-publics-generic": [
+      AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
+      AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID,
+    ],
+    // procès-verbaux-generic: abstract id fans out to all configured PV cities.
+    "proces-verbaux-generic": [PV_SAINT_DAMASE_SOURCE_ID],
+    // youtube-seances: abstract id fans out to all configured YouTube cities.
+    "youtube-seances": [YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID],
   };
 
   return buildAdapterRegistry(entries, aliases);
