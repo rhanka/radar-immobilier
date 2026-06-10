@@ -889,6 +889,76 @@ export function createLesCoteauxPvAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Montérégie-Est cluster: Vallée-du-Richelieu / Marguerite-D'Youville (suite)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mont-Saint-Hilaire (MRC La Vallée-du-Richelieu, ~30 km SE de Montréal).
+ * WordPress + custom accordion CMS. PV list at /ville/conseil-municipal/seances-du-conseil/.
+ * Direct absolute PDF links under /wp-content/uploads/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /wp-admin/ — wp-content/uploads allowed.
+ * Captured 2026-06-10.
+ */
+export const MONT_SAINT_HILAIRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-saint-hilaire",
+  pvIndexUrl:
+    "https://www.villemsh.ca/ville/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-mont-saint-hilaire",
+};
+
+/** Factory shortcut for the Mont-Saint-Hilaire PV adapter. */
+export function createMontSaintHilairePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(MONT_SAINT_HILAIRE_PV_CONFIG, options);
+}
+
+/**
+ * Boucherville (MRC Marguerite-D'Youville, ~25 km SE de Montréal).
+ * WordPress CMS. PV index at /mairie-conseil/seances-du-conseil/.
+ * PV links are HTML intermediate pages (/medias-publications/publications/...) that
+ * each contain a direct PDF download link (PV_seance_YYMMDD.pdf).
+ * Direct PDF project-règlement links under /wp-content/uploads/ (2026-290-XX pattern).
+ * Confirmed HTTP 200, robots.txt: Disallow /wp-admin/ — wp-content/uploads allowed.
+ * Captured 2026-06-10.
+ */
+export const BOUCHERVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "boucherville",
+  pvIndexUrl:
+    "https://www.boucherville.ca/mairie-conseil/seances-du-conseil/",
+  sourceId: "proces-verbaux-boucherville",
+};
+
+/** Factory shortcut for the Boucherville PV adapter. */
+export function createBouchervillePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(BOUCHERVILLE_PV_CONFIG, options);
+}
+
+/**
+ * Varennes (MRC Marguerite-D'Youville, ~35 km SE de Montréal).
+ * Custom CMS. PV index at /la-ville/vie-democratique/seances-et-proces-verbaux.
+ * Two separate lists: ODJ PDFs and PV PDFs (approved minutes).
+ * Direct absolute PDF links under /uploads/conseil_municipal/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const VARENNES_PV_CONFIG: PvCityConfig = {
+  citySlug: "varennes",
+  pvIndexUrl:
+    "https://www.ville.varennes.qc.ca/la-ville/vie-democratique/seances-et-proces-verbaux",
+  sourceId: "proces-verbaux-varennes",
+};
+
+/** Factory shortcut for the Varennes PV adapter. */
+export function createVarennesPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(VARENNES_PV_CONFIG, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ALL_PV_CITIES — single source of truth for generic PV city wiring
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -964,6 +1034,15 @@ import {
 import {
   PV_LES_COTEAUX_2026_04_TEXT,
 } from "./proces-verbaux-les-coteaux.fixture.js";
+import {
+  PV_MSH_2026_03_TEXT,
+} from "./proces-verbaux-mont-saint-hilaire.fixture.js";
+import {
+  PV_BOUCHERVILLE_2026_03_TEXT,
+} from "./proces-verbaux-boucherville.fixture.js";
+import {
+  PV_VARENNES_2026_04_TEXT,
+} from "./proces-verbaux-varennes.fixture.js";
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -1131,5 +1210,26 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_LES_COTEAUX_2026_04_TEXT,
     sourceUrl:
       "https://les-coteaux.qc.ca/wp-content/uploads/2026/05/pv_so_20260420.pdf",
+  },
+  // Montérégie-Est
+  {
+    config: MONT_SAINT_HILAIRE_PV_CONFIG,
+    pvText: PV_MSH_2026_03_TEXT,
+    sourceUrl:
+      "https://www.villemsh.ca/wp-content/uploads/2026/04/Proces_verbal_2026_03_09.pdf",
+  },
+  // Montérégie-Est
+  {
+    config: BOUCHERVILLE_PV_CONFIG,
+    pvText: PV_BOUCHERVILLE_2026_03_TEXT,
+    sourceUrl:
+      "https://www.boucherville.ca/wp-content/uploads/2026/03/PV_seance_260316.pdf",
+  },
+  // Montérégie-Est
+  {
+    config: VARENNES_PV_CONFIG,
+    pvText: PV_VARENNES_2026_04_TEXT,
+    sourceUrl:
+      "https://www.ville.varennes.qc.ca/uploads/conseil_municipal/2026/20260413-PV-SO.pdf",
   },
 ];
