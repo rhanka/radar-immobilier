@@ -24,3 +24,4 @@ export {
   REGLEMENT_450_02_TEXT,
   REGLEMENT_150_51_TEXT,
 } from "./sources/reglements-urbanisme-valleyfield.fixture.js";
+export { QC_MUNICIPALITIES, prioritizedCities } from "./municipalities.js";
