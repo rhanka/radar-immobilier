@@ -15,6 +15,13 @@
       "when": 1780000000000,
       "tag": "0001_wp5v1_ontology_bitemporal",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749524400000,
+      "tag": "0002_graph_store",
+      "breakpoints": true
     }
   ]
 }

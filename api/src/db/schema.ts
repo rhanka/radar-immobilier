@@ -249,6 +249,60 @@ export const opportunityDossiers = pgTable(
   }),
 );
 
+// ═══════════════════════════════════════════════════════════════════════════
+// WP A.3.1 — Graph store (nodes + edges from graphify graph.json output).
+//
+// Lightweight Postgres-native graph persistence. No dedicated graph DB — the
+// adjacency is a pair of plain tables with FK-like text ids (no hard FK to
+// keep ingestion idempotent). Indexes cover the read patterns: by type, by
+// citySlug, by kind, and neighbour lookups via srcId/dstId. A full graph-DB
+// migration can be driven later by exporting these tables.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Graph nodes — one row per graphify node (entity or document concept).
+ * `id` is the graphify node id (string slug, not a UUID) so upserts are
+ * purely idempotent on the natural key.
+ */
+export const graphNodes = pgTable(
+  "graph_nodes",
+  {
+    id: text("id").primaryKey(),
+    type: text("type").notNull().default("concept"), // graphify file_type
+    label: text("label").notNull(),
+    citySlug: text("city_slug"), // null = cross-city / global
+    props: jsonb("props").notNull().default({}), // community, source_file, …
+    sourceRef: text("source_ref"), // S3 key / raw ref
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byType: index("graph_nodes_type_idx").on(t.type),
+    byCity: index("graph_nodes_city_idx").on(t.citySlug),
+  }),
+);
+
+/**
+ * Graph edges — one row per graphify link.
+ * Composite natural key (srcId, dstId, kind) drives idempotent upserts:
+ * conflicting rows update props only (no duplicate edges).
+ */
+export const graphEdges = pgTable(
+  "graph_edges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    srcId: text("src_id").notNull(), // → graph_nodes.id (soft ref)
+    dstId: text("dst_id").notNull(), // → graph_nodes.id (soft ref)
+    kind: text("kind").notNull(), // graphify relation
+    props: jsonb("props").notNull().default({}), // confidence, source_file, …
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byKind: index("graph_edges_kind_idx").on(t.kind),
+    bySrc: index("graph_edges_src_idx").on(t.srcId),
+    byDst: index("graph_edges_dst_idx").on(t.dstId),
+  }),
+);
+
 export const schema = {
   sources,
   ingestions,
@@ -262,4 +316,6 @@ export const schema = {
   regulatoryStages,
   constraintHits,
   opportunityDossiers,
+  graphNodes,
+  graphEdges,
 };
