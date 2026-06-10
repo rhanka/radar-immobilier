@@ -10,6 +10,7 @@ import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
 import { scrapeStatusRoute } from "./routes/scrape-status.js";
 import { graphRoute, type GraphDeps } from "./routes/graph.js";
+import { geoLotsRoute } from "./routes/geo-lots.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -33,6 +34,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", h2aRoute());
   app.route("/", scrapeStatusRoute(deps.store));
   app.route("/", graphRoute(deps));
+  app.route("/", geoLotsRoute());
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 
