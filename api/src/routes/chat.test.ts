@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { chatRoute } from "./chat.js";
 import {
   isConfiguredProvider,
@@ -32,9 +32,33 @@ describe("mesh-runtime provider configuration", () => {
   });
 });
 
+/** All env-var names read by mesh-runtime to detect configured providers. */
+const PROVIDER_KEY_VARS = [
+  "ANTHROPIC_API_KEY",
+  "OPENAI_API_KEY",
+  "GEMINI_API_KEY",
+  "GOOGLE_API_KEY",
+  "MISTRAL_API_KEY",
+  "COHERE_API_KEY",
+] as const;
+
 describe("chat route", () => {
+  // Ensure the "unconfigured" tests are independent of whatever provider keys
+  // happen to be present in the host environment (docker-compose passes the
+  // .env keys into the container). We stub every key to an empty string before
+  // each test and restore the original values afterwards.
+  beforeEach(() => {
+    for (const key of PROVIDER_KEY_VARS) {
+      vi.stubEnv(key, "");
+    }
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("GET /api/chat/providers reports the unconfigured state when no key is set", async () => {
-    // The test environment has no provider keys.
+    // Provider keys are stubbed to empty in beforeEach — always unconfigured.
     const app = chatRoute();
     const res = await app.request("/api/chat/providers");
     expect(res.status).toBe(200);
