@@ -616,6 +616,99 @@ export function createSainteJuliePvAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Basses-Laurentides cluster: cities north of Montréal (MRC Thérèse-De Blainville,
+// MRC Deux-Montagnes, Laurentides MRC)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sainte-Thérèse (MRC Thérèse-De Blainville, ~30 km N of Montréal).
+ * October CMS (same as La Prairie / Blainville). PV list at
+ * /la-ville/democratie/seances-du-conseil/.
+ * Direct PDF links under /storage/app/media/ville/democratie/seances-du-conseil/proces-verbaux/.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow /administration, /administration/backend only.
+ * Captured 2026-06-10.
+ */
+export const SAINTE_THERESE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-therese",
+  pvIndexUrl:
+    "https://www.sainte-therese.ca/la-ville/democratie/seances-du-conseil/",
+  sourceId: "proces-verbaux-sainte-therese",
+};
+
+/** Factory shortcut for the Sainte-Thérèse PV adapter. */
+export function createSainteTheresePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINTE_THERESE_PV_CONFIG, options);
+}
+
+/**
+ * Deux-Montagnes (MRC Deux-Montagnes, ~40 km NW of Montréal).
+ * October CMS (same as La Prairie). PV list at
+ * /ville-de-deux-montagnes/vie-democratique/seances-du-conseil-municipal.
+ * Direct PDF links under /storage/app/media/ville-de-deux-montagnes/vie-democratique/.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow /administration, /administration/backend only.
+ * Captured 2026-06-10.
+ */
+export const DEUX_MONTAGNES_PV_CONFIG: PvCityConfig = {
+  citySlug: "deux-montagnes",
+  pvIndexUrl:
+    "https://www.ville.deux-montagnes.qc.ca/ville-de-deux-montagnes/vie-democratique/seances-du-conseil-municipal",
+  sourceId: "proces-verbaux-deux-montagnes",
+};
+
+/** Factory shortcut for the Deux-Montagnes PV adapter. */
+export function createDeuxMontagnePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(DEUX_MONTAGNES_PV_CONFIG, options);
+}
+
+/**
+ * Mirabel (MRC Mirabel, ~50 km NW of Montréal — largest city in Laurentides).
+ * Custom CMS (mirabel.ca). PV list at /seances-conseil.
+ * Custom table layout with direct PDF links under /uploads/.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const MIRABEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "mirabel",
+  pvIndexUrl: "https://mirabel.ca/seances-conseil",
+  sourceId: "proces-verbaux-mirabel",
+};
+
+/** Factory shortcut for the Mirabel PV adapter. */
+export function createMirabelPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(MIRABEL_PV_CONFIG, options);
+}
+
+/**
+ * Saint-Eustache (MRC Deux-Montagnes, ~40 km NW of Montréal).
+ * October CMS (same as Sainte-Thérèse / La Prairie). PV list at
+ * /ville/vie-democratique/seances-du-conseil.
+ * NOTE: Saint-Eustache publishes PV as ANNUAL compiled documents (2026PV_internet.pdf,
+ * 2025PV_internet.pdf, etc.) — one file per year. The parsePvIndex finds the links but
+ * cannot extract individual session dates from the compiled-document filenames.
+ * No CAPTCHA. Confirmed HTTP 200, robots.txt: Disallow /administration, /administration/backend only.
+ * Captured 2026-06-10.
+ */
+export const SAINT_EUSTACHE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-eustache",
+  pvIndexUrl:
+    "https://www.saint-eustache.ca/ville/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-eustache",
+};
+
+/** Factory shortcut for the Saint-Eustache PV adapter. */
+export function createSaintEustachePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINT_EUSTACHE_PV_CONFIG, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ALL_PV_CITIES — single source of truth for generic PV city wiring
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -655,6 +748,18 @@ import {
 import {
   PV_SAINTE_JULIE_2026_03_TEXT,
 } from "./proces-verbaux-sainte-julie.fixture.js";
+import {
+  PV_SAINTE_THERESE_2026_03_TEXT,
+} from "./proces-verbaux-sainte-therese.fixture.js";
+import {
+  PV_DEUX_MONTAGNES_2026_04_TEXT,
+} from "./proces-verbaux-deux-montagnes.fixture.js";
+import {
+  PV_MIRABEL_2026_04_TEXT,
+} from "./proces-verbaux-mirabel.fixture.js";
+import {
+  PV_SAINT_EUSTACHE_2026_02_TEXT,
+} from "./proces-verbaux-saint-eustache.fixture.js";
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -744,5 +849,30 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_SAINTE_JULIE_2026_03_TEXT,
     sourceUrl:
       "https://saintejulie.ca/uploads/html_content/S%C3%A9ances%20publiques/2026-03-10_-_Proces-verbal.pdf",
+  },
+  // Laurentides ──────────────────────────────────────────────────────────────
+  {
+    config: SAINTE_THERESE_PV_CONFIG,
+    pvText: PV_SAINTE_THERESE_2026_03_TEXT,
+    sourceUrl:
+      "https://www.sainte-therese.ca/storage/app/media/ville/democratie/seances-du-conseil/proces-verbaux/2026/26-03-02_ordinaire.pdf",
+  },
+  {
+    config: DEUX_MONTAGNES_PV_CONFIG,
+    pvText: PV_DEUX_MONTAGNES_2026_04_TEXT,
+    sourceUrl:
+      "https://www.ville.deux-montagnes.qc.ca/storage/app/media/ville-de-deux-montagnes/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-04-09-proces-verbal-ordinaire.pdf",
+  },
+  {
+    config: MIRABEL_PV_CONFIG,
+    pvText: PV_MIRABEL_2026_04_TEXT,
+    sourceUrl:
+      "https://mirabel.ca/uploads/2._Ville/2.3_Vie_democratique/2.3.5_Seances_du_conseil/2026/2026-04-13_Proces-verbal_FINAL.pdf",
+  },
+  {
+    config: SAINT_EUSTACHE_PV_CONFIG,
+    pvText: PV_SAINT_EUSTACHE_2026_02_TEXT,
+    sourceUrl:
+      "https://www.saint-eustache.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/proces-verbaux/2026PV_internet.pdf",
   },
 ];
