@@ -1,7 +1,7 @@
 /**
  * PV-SEED — Réseau de villes PV Rive-Sud (saint-constant, sainte-catherine,
  *           chateauguay, la-prairie, delson, vaudreuil-dorion, sainte-martine,
- *           saint-remi).
+ *           saint-remi, mcmasterville, beloeil, sainte-julie).
  *
  * Sème les fixtures PV RÉELLES (extraits pdftotext de vrais PV publics captés
  * 2026-06-10) dans l'objet-store comme le ferait RECUEIL, puis lance
@@ -20,6 +20,9 @@
  *   - Vaudreuil-Dorion → 0 DesignationEvent zonage (faux-positif écarté en amont).
  *   - Sainte-Martine → 1 DesignationEvent zonage (règlement 2026-510, zone MxtV-2).
  *   - Saint-Rémi → 1 DesignationEvent zonage (règlement V654-2026-33, modifie V654-2017-00).
+ *   - McMasterville → 1 DesignationEvent zonage (règlement 382-37, modifie zonage 382-00-2008).
+ *   - Beloeil → 1 DesignationEvent zonage (règlements 1667-127/1667-128, zone C-523).
+ *   - Sainte-Julie → 1 DesignationEvent zonage (règlement 1101-132, zone C-150).
  *
  * La clé S3 suit le patron du RECUEIL :
  *   raw/proces-verbaux-<city>/<yyyy>/<mm>/<dd>/<sha256>.<ext>
@@ -28,11 +31,14 @@
 
 import {
   buildRawDocumentRecord,
+  PV_BELOEIL_2026_02_TEXT,
   PV_CHATEAUGUAY_2026_02_TEXT,
   PV_DELSON_2026_05_TEXT,
   PV_LAPRAIRIE_2026_05_TEXT,
+  PV_MCMASTERVILLE_2025_11_TEXT,
   PV_SAINT_CONSTANT_2026_05_TEXT,
   PV_SAINTE_CATHERINE_2026_05_TEXT,
+  PV_SAINTE_JULIE_2026_03_TEXT,
   PV_SAINTE_MARTINE_2026_04_TEXT,
   PV_SAINT_REMI_2026_04_TEXT,
   PV_VAUDREUIL_DORION_2026_05_TEXT,
@@ -122,6 +128,27 @@ export const PV_FIXTURES: readonly PvFixtureSpec[] = [
     sourceUrl:
       "https://www.saint-remi.ca/wp-content/uploads/2026/05/20260420_pv.pdf",
     pvText: PV_SAINT_REMI_2026_04_TEXT,
+  },
+  {
+    citySlug: "mcmasterville",
+    sourceId: "proces-verbaux-mcmasterville",
+    sourceUrl:
+      "https://www.mcmasterville.ca/wp-content/uploads/2025/12/pv-17-novembre-2025.pdf",
+    pvText: PV_MCMASTERVILLE_2025_11_TEXT,
+  },
+  {
+    citySlug: "beloeil",
+    sourceId: "proces-verbaux-beloeil",
+    sourceUrl:
+      "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260223_pv.pdf",
+    pvText: PV_BELOEIL_2026_02_TEXT,
+  },
+  {
+    citySlug: "sainte-julie",
+    sourceId: "proces-verbaux-sainte-julie",
+    sourceUrl:
+      "https://saintejulie.ca/uploads/html_content/S%C3%A9ances%20publiques/2026-03-10_-_Proces-verbal.pdf",
+    pvText: PV_SAINTE_JULIE_2026_03_TEXT,
   },
 ];
 
