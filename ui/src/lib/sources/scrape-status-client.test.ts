@@ -3,7 +3,6 @@ import {
   fetchScrapeStatus,
   resolveScrapeStatusUrl,
 } from "./scrape-status-client.js";
-import type { ScrapeStatusT } from "@radar/domain";
 
 describe("resolveScrapeStatusUrl", () => {
   it("returns path directly when no baseUrl", () => {
