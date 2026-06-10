@@ -4,14 +4,17 @@ import {
   AVIS_PUBLICS_CITY,
   AVIS_PUBLICS_SOURCE_ID,
   BEAUHARNOIS_AVIS_CONFIG,
+  BELOEIL_PV_CONFIG,
   CHATEAUGUAY_PV_CONFIG,
   DELSON_PV_CONFIG,
   LAPRAIRIE_PV_CONFIG,
+  MCMASTERVILLE_PV_CONFIG,
   REGLEMENTS_URBANISME_CITY,
   REGLEMENTS_URBANISME_SOURCE_ID,
   SAINT_DAMASE_PV_CONFIG,
   SAINTE_CATHERINE_PV_CONFIG,
   SAINT_CONSTANT_PV_CONFIG,
+  SAINTE_JULIE_PV_CONFIG,
   SAINTE_MARTINE_PV_CONFIG,
   SAINT_REMI_PV_CONFIG,
   VALLEYFIELD_AVIS_CONFIG,
@@ -55,6 +58,9 @@ export const PV_DELSON_SOURCE_ID = DELSON_PV_CONFIG.sourceId;
 export const PV_VAUDREUIL_DORION_SOURCE_ID = VAUDREUIL_DORION_PV_CONFIG.sourceId;
 export const PV_SAINTE_MARTINE_SOURCE_ID = SAINTE_MARTINE_PV_CONFIG.sourceId;
 export const PV_SAINT_REMI_SOURCE_ID = SAINT_REMI_PV_CONFIG.sourceId;
+export const PV_MCMASTERVILLE_SOURCE_ID = MCMASTERVILLE_PV_CONFIG.sourceId;
+export const PV_BELOEIL_SOURCE_ID = BELOEIL_PV_CONFIG.sourceId;
+export const PV_SAINTE_JULIE_SOURCE_ID = SAINTE_JULIE_PV_CONFIG.sourceId;
 export const AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID =
   VALLEYFIELD_AVIS_CONFIG.sourceId;
 export const AVIS_PUBLICS_BEAUHARNOIS_GENERIC_SOURCE_ID =
@@ -255,6 +261,27 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       city: SAINT_REMI_PV_CONFIG.citySlug,
       build: () => createProcesVerbauxAdapter(SAINT_REMI_PV_CONFIG),
     },
+    // procès-verbaux: McMasterville (MRC La Vallée-du-Richelieu, ~30 km SE Montréal)
+    // PV nov. 2025 : 1 DesignationEvent zonage — règlement 382-37 (modifie zonage 382-00-2008)
+    {
+      sourceId: PV_MCMASTERVILLE_SOURCE_ID,
+      city: MCMASTERVILLE_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(MCMASTERVILLE_PV_CONFIG),
+    },
+    // procès-verbaux: Beloeil (MRC La Vallée-du-Richelieu, ~30 km SE Montréal)
+    // PV fév. 2026 : 1 DesignationEvent zonage — règlements 1667-127/1667-128 (zone C-523)
+    {
+      sourceId: PV_BELOEIL_SOURCE_ID,
+      city: BELOEIL_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(BELOEIL_PV_CONFIG),
+    },
+    // procès-verbaux: Sainte-Julie (MRC Marguerite-D'Youville, ~30 km SE Montréal)
+    // PV mars 2026 : 1 DesignationEvent zonage — règlement 1101-132 (zone C-150)
+    {
+      sourceId: PV_SAINTE_JULIE_SOURCE_ID,
+      city: SAINTE_JULIE_PV_CONFIG.citySlug,
+      build: () => createProcesVerbauxAdapter(SAINTE_JULIE_PV_CONFIG),
+    },
     // avis-publics generic: Valleyfield (Craft CMS)
     {
       sourceId: AVIS_PUBLICS_VALLEYFIELD_GENERIC_SOURCE_ID,
@@ -304,6 +331,9 @@ export function defaultAdapterRegistry(): AdapterRegistry {
       PV_VAUDREUIL_DORION_SOURCE_ID,
       PV_SAINTE_MARTINE_SOURCE_ID,
       PV_SAINT_REMI_SOURCE_ID,
+      PV_MCMASTERVILLE_SOURCE_ID,
+      PV_BELOEIL_SOURCE_ID,
+      PV_SAINTE_JULIE_SOURCE_ID,
     ],
     // youtube-seances: abstract id fans out to all configured YouTube cities.
     "youtube-seances": [YOUTUBE_SEANCES_VALLEYFIELD_SOURCE_ID],
