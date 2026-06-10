@@ -3,7 +3,6 @@ import {
   cityMaturityColor,
   maturityLabel,
   groupByCity,
-  type CityMaturitySummary,
 } from "./maturity.js";
 import type { ScrapeStatusT } from "@radar/domain";
 
