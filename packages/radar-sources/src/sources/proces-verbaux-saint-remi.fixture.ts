@@ -28,14 +28,13 @@
  *
  * Détection attendue (honest, anti-invention):
  *   - avisDeMotion: true (multiple "donne avis de motion" occurrences)
- *   - changementZonage: false (PARSER LIMITATION)
- *     Reason: Saint-Rémi uses V-prefix règlement numbering (V654-2026-33, V655-2026-03).
- *     The existing REGLEMENT_NUMBER_RE pattern requires numeric-only numbers (e.g. 1926-26).
- *     REGLEMENT_ZONAGE_LETTER_RE matches only single-letter-prefixed numbers (Z-3001).
- *     "V654-2026-33 amendant le règlement de zonage V654-2017-00" is a real zonage change
- *     but the parser cannot extract the V-prefix règlement number → changementZonage=false.
- *     This is an honest parser limitation, not a faux positif.
- *     reglementNumbers: [] (no numeric-only or single-letter-prefix numbers found)
+ *   - changementZonage: true (DÉTECTION RÉELLE via REGLEMENT_VPREFIX_RE)
+ *     V654-2026-33 amendant le règlement de zonage V654-2017-00 → capturé par
+ *     REGLEMENT_VPREFIX_RE quand le contexte contient "règlement de zonage".
+ *     V654-2017-00 exclu par MODIFIANT_REGLEMENT_VPREFIX_RE + filterNewReglements.
+ *     V655-2026-03 (lotissement) et V700-2026-09 (tarification) NON capturés car
+ *     leur contexte ne contient pas "règlement de zonage".
+ *     reglementNumbers: ["V654-2026-33"]
  */
 
 /**
@@ -148,11 +147,11 @@ export const PV_SAINT_REMI_INDEX_HTML = `
  *
  * Détection attendue (honest, anti-invention):
  *   - avisDeMotion: true ("donne avis de motion" present multiple times)
- *   - changementZonage: false (PARSER LIMITATION — see fixture file header)
- *     Real zonage change: V654-2026-33 amending règlement de zonage V654-2017-00.
- *     V-prefix numbers not matched by REGLEMENT_NUMBER_RE or REGLEMENT_ZONAGE_LETTER_RE.
- *   - reglementNumbers: [] (V654-2026-33 not matched; no numeric-only règlement numbers
- *     appear in the avis de motion context windows)
+ *   - changementZonage: true (DÉTECTION RÉELLE via REGLEMENT_VPREFIX_RE)
+ *     V654-2026-33 amendant le règlement de zonage V654-2017-00 → capturé car le
+ *     contexte de l'avis de motion contient "règlement de zonage" (ZONAGE_KEYWORDS_RE).
+ *     V655-2026-03 et V700-2026-09 NON capturés (leur contexte ne mentionne pas "zonage").
+ *   - reglementNumbers: ["V654-2026-33"] (V654-2017-00 exclu car c'est le modifié)
  */
 export const PV_SAINT_REMI_2026_04_TEXT = `SERVICE DE L'URBANISME
 
