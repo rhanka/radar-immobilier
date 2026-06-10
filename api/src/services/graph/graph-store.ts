@@ -12,7 +12,7 @@
  */
 
 import { z } from "zod";
-import { eq, or, and, sql } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 
