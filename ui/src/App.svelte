@@ -12,6 +12,7 @@
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import BacklogView from "$lib/components/backlog/BacklogView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
+  import SourcesMapView from "$lib/components/sources-map/SourcesMapView.svelte";
   import ReconciliationView from "$lib/components/reconciliation/ReconciliationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
@@ -159,6 +160,8 @@
       <CoordinationView />
     {:else if activeView === "backlog"}
       <BacklogView />
+    {:else if activeView === "sources"}
+      <SourcesMapView />
     {:else}
       <ConsoleView />
     {/if}
