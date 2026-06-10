@@ -144,6 +144,18 @@ export {
   PV_VARENNES_INDEX_HTML,
   PV_VARENNES_2026_04_TEXT,
 } from "./sources/proces-verbaux-varennes.fixture.js";
+export {
+  PV_ROSEMERE_INDEX_HTML,
+  PV_ROSEMERE_2026_03_TEXT,
+} from "./sources/proces-verbaux-rosemere.fixture.js";
+export {
+  PV_LORRAINE_INDEX_HTML,
+  PV_LORRAINE_2026_04_TEXT,
+} from "./sources/proces-verbaux-lorraine.fixture.js";
+export {
+  PV_BOISBRIAND_INDEX_HTML,
+  PV_BOISBRIAND_2026_04_TEXT,
+} from "./sources/proces-verbaux-boisbriand.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
