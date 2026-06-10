@@ -319,3 +319,49 @@ export function createProcesVerbauxAdapter(
 ): ProcesVerbauxGenericAdapter {
   return new ProcesVerbauxGenericAdapter(config, options);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Rive-Sud cluster: Roussillon MRC cities near Montréal
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sainte-Catherine (MRC Roussillon, ~25 km SW of Montréal).
+ * Custom CMS (same vendor as Saint-Constant). PV list at the
+ * "séances publiques" page. Direct PDF links, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow /craft/ only.
+ * Captured 2026-06-10.
+ */
+export const SAINTE_CATHERINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-catherine",
+  pvIndexUrl:
+    "https://www.ville.sainte-catherine.qc.ca/ville/conseil-municipal/seances-publiques/",
+  sourceId: "proces-verbaux-sainte-catherine",
+};
+
+/** Factory shortcut for the Sainte-Catherine PV adapter. */
+export function createSainteCatherinePvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINTE_CATHERINE_PV_CONFIG, options);
+}
+
+/**
+ * Saint-Constant (MRC Roussillon, ~30 km SW of Montréal).
+ * Custom CMS. PV list at the "séances-du-conseil-et-documents-publics" page.
+ * Direct PDF links under /uploads/attachments/Greffe/, no CAPTCHA.
+ * Confirmed HTTP 200, robots.txt: Disallow: (empty — no restrictions).
+ * Captured 2026-06-10.
+ */
+export const SAINT_CONSTANT_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-constant",
+  pvIndexUrl:
+    "https://saint-constant.ca/fr/seances-du-conseil-et-documents-publics",
+  sourceId: "proces-verbaux-saint-constant",
+};
+
+/** Factory shortcut for the Saint-Constant PV adapter. */
+export function createSaintConstantPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINT_CONSTANT_PV_CONFIG, options);
+}
