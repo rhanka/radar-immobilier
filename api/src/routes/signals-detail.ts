@@ -119,8 +119,10 @@ function extractReglementNumbers(
       // Both are accepted here; zone codes (e.g. "C-754", "H-431") would also
       // match the letter-prefix shape, but the PV parser already ensures only
       // genuine règlement numbers reach normalized_terms via REGLEMENT_ZONAGE_LETTER_RE.
-      if (/^\d[\d-]+\d$/u.test(term) || /^[A-Z]-\d{3,4}$/u.test(term)) {
-        seen.add(term);
+      // normalized_terms are lowercased by norm(); match case-insensitively and
+      // store the canonical upper-case form so "z-3001" surfaces as "Z-3001".
+      if (/^\d[\d-]+\d$/u.test(term) || /^[A-Za-z]-\d{3,4}$/u.test(term)) {
+        seen.add(term.toUpperCase());
       }
     }
   }
