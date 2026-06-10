@@ -33,3 +33,11 @@ export {
   PV_SAINT_DAMASE_2026_03_NEGATIVE,
   PV_SAINT_DAMASE_INDEX_HTML,
 } from "./sources/proces-verbaux-saint-damase.fixture.js";
+export * from "./sources/voxtral-transcriber.js";
+export * from "./sources/youtube-seances.js";
+export {
+  SEANCE_VTT_FIXTURE,
+  EXPECTED_PLAIN_TRANSCRIPT,
+  YOUTUBE_SEARCH_RESPONSE_FIXTURE,
+  YOUTUBE_SEARCH_EMPTY_RESPONSE_FIXTURE,
+} from "./sources/youtube-seances.fixture.js";
