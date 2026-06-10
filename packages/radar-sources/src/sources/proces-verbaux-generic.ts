@@ -550,6 +550,54 @@ export function createSaintRemiPvAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Roussillon / Jardins-de-Napierville cluster (new cities 2026-06-10)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Saint-Jacques-le-Mineur (MRC Les Jardins-de-Napierville, ~45 km SSW of Montréal).
+ * WordPress + custom Jupiter X theme. PV list at /seances-du-conseil/.
+ * Cards (.avis_public_item) with direct PDF links to PV + OJ per session.
+ * Confirmed HTTP 200, robots.txt: Crawl-delay: 10, Disallow: (empty — no restrictions).
+ * Zonage réel: règlement 1212-2026 modifiant zonage 1200-2018 (zones commerciales).
+ * Captured 2026-06-10.
+ */
+export const SAINT_JACQUES_LE_MINEUR_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-jacques-le-mineur",
+  pvIndexUrl:
+    "https://www.saint-jacques-le-mineur.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-jacques-le-mineur",
+};
+
+/** Factory shortcut for the Saint-Jacques-le-Mineur PV adapter. */
+export function createSaintJacquesLeMineurPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(SAINT_JACQUES_LE_MINEUR_PV_CONFIG, options);
+}
+
+/**
+ * Canton Hemmingford (MRC Les Jardins-de-Napierville, ~65 km SSW of Montréal).
+ * WordPress custom theme. PV list at /municipalite/conseil-et-administration/proces-verbaux/.
+ * Table layout with 2025/2026 columns and direct PDF links.
+ * Confirmed HTTP 200, robots.txt: User-agent: * / Disallow: (empty — no restrictions).
+ * Zonage réel: règlement 309-19 modifiant règlement de zonage 309 (bâtiment accessoire).
+ * Captured 2026-06-10.
+ */
+export const HEMMINGFORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "hemmingford",
+  pvIndexUrl:
+    "https://canton.hemmingford.ca/municipalite/conseil-et-administration/proces-verbaux/",
+  sourceId: "proces-verbaux-hemmingford",
+};
+
+/** Factory shortcut for the Canton Hemmingford PV adapter. */
+export function createHemmingfordPvAdapter(
+  options: PvAdapterOptions = {},
+): ProcesVerbauxGenericAdapter {
+  return new ProcesVerbauxGenericAdapter(HEMMINGFORD_PV_CONFIG, options);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Round-3 cluster: Vallée-du-Richelieu / Marguerite-D'Youville cities near MTL
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1128,6 +1176,12 @@ import {
 import {
   PV_BOISBRIAND_2026_04_TEXT,
 } from "./proces-verbaux-boisbriand.fixture.js";
+import {
+  PV_SAINT_JACQUES_LE_MINEUR_2026_02_TEXT,
+} from "./proces-verbaux-saint-jacques-le-mineur.fixture.js";
+import {
+  PV_HEMMINGFORD_2026_04_TEXT,
+} from "./proces-verbaux-hemmingford.fixture.js";
 
 /**
  * Complete registry of generic PV cities — the single source of truth for
@@ -1197,6 +1251,20 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     pvText: PV_SAINT_REMI_2026_04_TEXT,
     sourceUrl:
       "https://www.saint-remi.ca/wp-content/uploads/2026/05/20260420_pv.pdf",
+  },
+  // Roussillon
+  {
+    config: SAINT_JACQUES_LE_MINEUR_PV_CONFIG,
+    pvText: PV_SAINT_JACQUES_LE_MINEUR_2026_02_TEXT,
+    sourceUrl:
+      "https://www.saint-jacques-le-mineur.ca/wp-content/uploads/2026/02/PV_2026-02-17.pdf",
+  },
+  // Roussillon
+  {
+    config: HEMMINGFORD_PV_CONFIG,
+    pvText: PV_HEMMINGFORD_2026_04_TEXT,
+    sourceUrl:
+      "https://canton.hemmingford.ca/wp-content/uploads/2026/05/pv-2026-04-13-1.pdf",
   },
   // ── Vallée-du-Richelieu ───────────────────────────────────────────────────
   {

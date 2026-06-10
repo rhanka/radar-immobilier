@@ -156,6 +156,14 @@ export {
   PV_BOISBRIAND_INDEX_HTML,
   PV_BOISBRIAND_2026_04_TEXT,
 } from "./sources/proces-verbaux-boisbriand.fixture.js";
+export {
+  PV_SAINT_JACQUES_LE_MINEUR_INDEX_HTML,
+  PV_SAINT_JACQUES_LE_MINEUR_2026_02_TEXT,
+} from "./sources/proces-verbaux-saint-jacques-le-mineur.fixture.js";
+export {
+  PV_HEMMINGFORD_INDEX_HTML,
+  PV_HEMMINGFORD_2026_04_TEXT,
+} from "./sources/proces-verbaux-hemmingford.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
