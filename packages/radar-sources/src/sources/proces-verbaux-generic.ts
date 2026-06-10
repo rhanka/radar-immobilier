@@ -321,6 +321,25 @@ export function createProcesVerbauxAdapter(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ALL_PV_CITIES — single source of truth for generic PV city wiring
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * One city entry in the generic PV city registry.
+ *
+ * `config`    — PvCityConfig (citySlug + pvIndexUrl + sourceId).
+ * `pvText`    — Real pdftotext excerpt used by pv-seed (no network needed).
+ * `sourceUrl` — Public URL of the real PV PDF (provenance, never re-fetched).
+ */
+export interface PvCityEntry {
+  readonly config: PvCityConfig;
+  /** Real pdftotext excerpt used by pv-seed to seed the object-store. */
+  readonly pvText: string;
+  /** Public URL of the original PV PDF (provenance). */
+  readonly sourceUrl: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Rive-Sud cluster: Roussillon MRC cities near Montréal
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -595,3 +614,135 @@ export function createSainteJuliePvAdapter(
 ): ProcesVerbauxGenericAdapter {
   return new ProcesVerbauxGenericAdapter(SAINTE_JULIE_PV_CONFIG, options);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ALL_PV_CITIES — single source of truth for generic PV city wiring
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Lazy imports so this module stays importable without pulling fixture text in
+// production (tree-shaking eliminates the strings when they are unused).
+import { PV_SAINT_DAMASE_2025_05_POSITIVE } from "./proces-verbaux-saint-damase.fixture.js";
+import {
+  PV_SAINT_CONSTANT_2026_05_TEXT,
+} from "./proces-verbaux-saint-constant.fixture.js";
+import {
+  PV_SAINTE_CATHERINE_2026_05_TEXT,
+} from "./proces-verbaux-sainte-catherine.fixture.js";
+import {
+  PV_LAPRAIRIE_2026_05_TEXT,
+} from "./proces-verbaux-laprairie.fixture.js";
+import {
+  PV_CHATEAUGUAY_2026_02_TEXT,
+} from "./proces-verbaux-chateauguay.fixture.js";
+import {
+  PV_DELSON_2026_05_TEXT,
+} from "./proces-verbaux-delson.fixture.js";
+import {
+  PV_VAUDREUIL_DORION_2026_05_TEXT,
+} from "./proces-verbaux-vaudreuil-dorion.fixture.js";
+import {
+  PV_SAINTE_MARTINE_2026_04_TEXT,
+} from "./proces-verbaux-sainte-martine.fixture.js";
+import {
+  PV_SAINT_REMI_2026_04_TEXT,
+} from "./proces-verbaux-saint-remi.fixture.js";
+import {
+  PV_MCMASTERVILLE_2025_11_TEXT,
+} from "./proces-verbaux-mcmasterville.fixture.js";
+import {
+  PV_BELOEIL_2026_02_TEXT,
+} from "./proces-verbaux-beloeil.fixture.js";
+import {
+  PV_SAINTE_JULIE_2026_03_TEXT,
+} from "./proces-verbaux-sainte-julie.fixture.js";
+
+/**
+ * Complete registry of generic PV cities — the single source of truth for
+ * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
+ *
+ * To add a new city:
+ *   1. Create `proces-verbaux-<slug>.fixture.ts` with the real PV text (pdftotext).
+ *   2. Add a `*_PV_CONFIG` constant above.
+ *   3. Append one entry here — adapter-registry and pv-seed are AUTO-wired.
+ */
+export const ALL_PV_CITIES: readonly PvCityEntry[] = [
+  // ── Round-0: Saint-Damase (easy-first, WordPress, MRC des Maskoutains) ─────
+  {
+    config: SAINT_DAMASE_PV_CONFIG,
+    pvText: PV_SAINT_DAMASE_2025_05_POSITIVE,
+    sourceUrl:
+      "https://www.st-damase.qc.ca/wp-content/uploads/2025/05/Proces-verbal-manuscrit-6-mai.pdf",
+  },
+  // ── Rive-Sud / MRC Roussillon ─────────────────────────────────────────────
+  {
+    config: SAINTE_CATHERINE_PV_CONFIG,
+    pvText: PV_SAINTE_CATHERINE_2026_05_TEXT,
+    sourceUrl:
+      "https://www.ville.sainte-catherine.qc.ca/medias/documents/content/PvCm-20260512-vns-vp20260514.pdf",
+  },
+  {
+    config: SAINT_CONSTANT_PV_CONFIG,
+    pvText: PV_SAINT_CONSTANT_2026_05_TEXT,
+    sourceUrl:
+      "https://saint-constant.ca/uploads/attachments/Greffe/2026/2026-05-19/2026-05-19_PV_Seance_ordinaire_non_approuve_par_Conseil.pdf",
+  },
+  {
+    config: LAPRAIRIE_PV_CONFIG,
+    pvText: PV_LAPRAIRIE_2026_05_TEXT,
+    sourceUrl:
+      "https://laprairie.ca/storage/app/media/ville/democratie/seances-du-conseil/PV_2026/2026-05-19_pv_non_officiel.pdf",
+  },
+  {
+    config: CHATEAUGUAY_PV_CONFIG,
+    pvText: PV_CHATEAUGUAY_2026_02_TEXT,
+    sourceUrl:
+      "https://ville.chateauguay.qc.ca/wp-content/uploads/2026/03/PV_2026-02-23.pdf",
+  },
+  {
+    config: DELSON_PV_CONFIG,
+    pvText: PV_DELSON_2026_05_TEXT,
+    sourceUrl:
+      "https://ville.delson.qc.ca/wp-content/uploads/2026/05/2026-05-12-ordinaire-20h-2.pdf",
+  },
+  // ── Vaudreuil-Soulanges ───────────────────────────────────────────────────
+  {
+    config: VAUDREUIL_DORION_PV_CONFIG,
+    pvText: PV_VAUDREUIL_DORION_2026_05_TEXT,
+    sourceUrl:
+      "https://www.ville.vaudreuil-dorion.qc.ca/uploads/sections/La_Ville/Mairie/Seances_publiques/PV_2026/20260519_pv.pdf",
+  },
+  // ── Beauharnois-Salaberry / Haut-St-Laurent ───────────────────────────────
+  {
+    config: SAINTE_MARTINE_PV_CONFIG,
+    pvText: PV_SAINTE_MARTINE_2026_04_TEXT,
+    sourceUrl:
+      "https://sainte-martine.ca/wp-content/uploads/2026/05/conseil-avril-2026.pdf",
+  },
+  // ── Les Jardins-de-Napierville ────────────────────────────────────────────
+  {
+    config: SAINT_REMI_PV_CONFIG,
+    pvText: PV_SAINT_REMI_2026_04_TEXT,
+    sourceUrl:
+      "https://www.saint-remi.ca/wp-content/uploads/2026/05/20260420_pv.pdf",
+  },
+  // ── Vallée-du-Richelieu ───────────────────────────────────────────────────
+  {
+    config: MCMASTERVILLE_PV_CONFIG,
+    pvText: PV_MCMASTERVILLE_2025_11_TEXT,
+    sourceUrl:
+      "https://www.mcmasterville.ca/wp-content/uploads/2025/12/pv-17-novembre-2025.pdf",
+  },
+  {
+    config: BELOEIL_PV_CONFIG,
+    pvText: PV_BELOEIL_2026_02_TEXT,
+    sourceUrl:
+      "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260223_pv.pdf",
+  },
+  // ── Marguerite-D'Youville ─────────────────────────────────────────────────
+  {
+    config: SAINTE_JULIE_PV_CONFIG,
+    pvText: PV_SAINTE_JULIE_2026_03_TEXT,
+    sourceUrl:
+      "https://saintejulie.ca/uploads/html_content/S%C3%A9ances%20publiques/2026-03-10_-_Proces-verbal.pdf",
+  },
+];
