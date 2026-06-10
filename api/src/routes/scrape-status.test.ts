@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ScrapeStatusT } from "@radar/domain";
 import { scrapeStatusRoute } from "./scrape-status.js";
 import type { ObjectStore } from "../storage/object-store.js";
+import { ALL_PV_CITIES } from "@radar/sources";
 
 /** In-memory ObjectStore stub for tests — no MinIO required. */
 function makeMemStore(): ObjectStore {
@@ -29,12 +30,31 @@ function makeMemStore(): ObjectStore {
 }
 
 describe("GET /api/scrape-status (empty store)", () => {
-  it("returns an empty list", async () => {
+  it("returns derived real statuses even with an empty store", async () => {
     const app = scrapeStatusRoute(makeMemStore());
     const res = await app.request("/api/scrape-status");
     expect(res.status).toBe(200);
     const body = (await res.json()) as { items: ScrapeStatusT[] };
-    expect(body.items).toEqual([]);
+    // With derivation from ALL_PV_CITIES + MAMH cities, items is never empty.
+    // Each PV city contributes one "conseils-municipaux" record (scraped),
+    // plus salaberry-de-valleyfield and beauharnois each contribute 3+ records.
+    expect(body.items.length).toBeGreaterThan(ALL_PV_CITIES.length);
+    // All PV cities have at least a "conseils-municipaux" record with status "scraped"
+    const pvCitySlugs = ALL_PV_CITIES.map((c) => c.config.citySlug);
+    for (const slug of pvCitySlugs) {
+      const cityItems = body.items.filter(
+        (r) => r.citySlug === slug && r.source === "conseils-municipaux",
+      );
+      expect(cityItems).toHaveLength(1);
+      expect(cityItems[0]!.status).toBe("scraped");
+      expect(cityItems[0]!.dataQuality).toBe("pdf");
+    }
+    // MAMH cities have avis-publics graphified
+    const valleyfield = body.items.filter(
+      (r) => r.citySlug === "salaberry-de-valleyfield" && r.source === "avis-publics",
+    );
+    expect(valleyfield).toHaveLength(1);
+    expect(valleyfield[0]!.status).toBe("graphified");
   });
 });
 
