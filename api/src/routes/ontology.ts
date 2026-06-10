@@ -48,8 +48,58 @@ async function loadState(
   return parseProjectState(bytes);
 }
 
+/**
+ * Aggregate signal count by city, derived from persisted DesignationEvent
+ * canonicals in the ontology project state.
+ *
+ * Anti-invention: only cities that have a persisted project state contribute a
+ * non-zero count. Cities without a state are returned with count=0 (honest
+ * placeholder). The 6-month window applies to `generatedAt` — a state older
+ * than 6 months is treated as stale and returns 0.
+ */
+export interface SignalCityItem {
+  citySlug: string;
+  /** Number of DesignationEvent canonicals in the current project state. */
+  designationEventCount: number;
+  /** ISO timestamp when the project state was generated; null when no state. */
+  generatedAt: string | null;
+}
+
+const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000;
+
 export function ontologyRoute(deps: OntologyDeps): Hono {
   const app = new Hono();
+
+  /**
+   * GET /api/signals/by-city — aggregate DesignationEvent counts per city.
+   *
+   * Iterates over all cities that have a committed ontology seed (SEED_CITY_SLUGS),
+   * loads their project state from object storage, and counts DesignationEvent
+   * canonicals whose project state was generated within the last 6 months.
+   *
+   * Anti-invention policy: cities without a project state or with a stale state
+   * (> 6 months old) return designationEventCount=0. No signal is fabricated.
+   */
+  app.get("/api/signals/by-city", async (c) => {
+    const now = Date.now();
+    const items: SignalCityItem[] = await Promise.all(
+      SEED_CITY_SLUGS.map(async (citySlug): Promise<SignalCityItem> => {
+        const state = await loadState(deps.store, citySlug);
+        if (!state) {
+          return { citySlug, designationEventCount: 0, generatedAt: null };
+        }
+        const stateAgeMs = now - Date.parse(state.generatedAt);
+        if (stateAgeMs > SIX_MONTHS_MS) {
+          return { citySlug, designationEventCount: 0, generatedAt: state.generatedAt };
+        }
+        const designationEventCount = state.canonicals.filter(
+          (c) => c.type === "DesignationEvent",
+        ).length;
+        return { citySlug, designationEventCount, generatedAt: state.generatedAt };
+      }),
+    );
+    return c.json({ ok: true, items });
+  });
 
   /**
    * Canonical entities for the reconciliation screen — re-derived with any
