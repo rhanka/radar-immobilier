@@ -279,6 +279,30 @@ describe("detectZonageChange – Coteau-du-Lac Avril 2026 (avis de motion RO-2..
     expect(result.avisDeMotion).toBe(true);
   });
 
+  it("changementZonage=true : REGLEMENT_MULTIPREFIX_RE capture 'URB-400' via 'Règlement de zonage no URB-400'", () => {
+    // The header paragraph "159-04-2026\nAvis de motion. Modification...du Règlement de
+    // zonage no URB-400" is captured in the backward window of the first "Avis de motion"
+    // match (no \n\n before it in the excerpt). REGLEMENT_MULTIPREFIX_RE matches
+    // "Règlement de zonage no URB-400" (URB = [A-Z]{2,4}, 400 = \d{2,4}) and
+    // ZONAGE_KEYWORDS_RE fires on "de zonage".
+    expect(result.changementZonage).toBe(true);
+  });
+
+  it("reglementNumbers contient 'URB-400' (règlement de zonage cible)", () => {
+    // URB-400 is the municipal zonage bylaw being amended for zones RO-2..RO-7.
+    // It is captured by REGLEMENT_MULTIPREFIX_RE from "Règlement de zonage no URB-400".
+    expect(result.reglementNumbers).toContain("URB-400");
+  });
+
+  it("ANTI-FAUX-POSITIF: reglementNumbers ne contient PAS les codes de zones RO-2..RO-7", () => {
+    // RO-2, RO-3, RO-4, RO-5, RO-7 have only 1 digit after the dash — they do NOT
+    // satisfy \d{2,4} (min 2 digits) in REGLEMENT_MULTIPREFIX_RE. They are zone codes
+    // not règlement numbers. Verbatim anti-FP check.
+    for (const num of result.reglementNumbers) {
+      expect(num).not.toMatch(/^RO-[2-9]$/);
+    }
+  });
+
   it("le texte contient 'Règlement de zonage no URB-400' et les zones RO-2..RO-7", () => {
     expect(PV_COTEAU_DU_LAC_2026_04_TEXT).toContain("Règlement de zonage no URB-400");
     expect(PV_COTEAU_DU_LAC_2026_04_TEXT).toContain("RO-2");

@@ -1,9 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { Alert, Badge, Button, Card, EmptyState, Select } from "@sentropic/design-system-svelte";
-  import { Check, X, Database, GitMerge, Network } from "@lucide/svelte";
+  import { Check, X, Database, GitMerge, Network, Layers } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import CityGraphView from "$lib/components/reconciliation/CityGraphView.svelte";
+  import MrcGraphView from "$lib/components/reconciliation/MrcGraphView.svelte";
   import {
     STUDIO_CITIES,
     groupEntitiesByType,
@@ -22,8 +23,8 @@
     type CanonicalEntityV,
   } from "$lib/ontology/reconciliation.js";
 
-  // ── Onglet actif : "ontologie" (entités/candidats) ou "graphe" (SVG) ─────────
-  type StudioTab = "ontologie" | "graphe";
+  // ── Onglet actif : "ontologie" (entités/candidats), "graphe" (ville SVG) ou "mrc" (MRC SVG)
+  type StudioTab = "ontologie" | "graphe" | "mrc";
   let activeTab: StudioTab = "ontologie";
 
   // ── State ────────────────────────────────────────────────────────────────────
@@ -257,13 +258,33 @@
           <Network class="h-4 w-4 shrink-0" aria-hidden="true" />
           Graphe graphify
         </button>
+        <button
+          type="button"
+          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+            activeTab === "mrc"
+              ? "border-teal-600 text-teal-700"
+              : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+          }`}
+          onclick={() => (activeTab = "mrc")}
+          aria-current={activeTab === "mrc" ? "page" : undefined}
+          data-testid="tab-mrc"
+        >
+          <Layers class="h-4 w-4 shrink-0" aria-hidden="true" />
+          Graphe par MRC
+        </button>
       </nav>
     </header>
 
-    <!-- Onglet Graphe -->
+    <!-- Onglet Graphe ville -->
     {#if activeTab === "graphe"}
       <div class="flex min-h-0 flex-1">
         <CityGraphView {citySlug} />
+      </div>
+
+    <!-- Onglet Graphe MRC -->
+    {:else if activeTab === "mrc"}
+      <div class="flex min-h-0 flex-1">
+        <MrcGraphView />
       </div>
 
     <!-- Onglet Ontologie -->
