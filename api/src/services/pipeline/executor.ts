@@ -5,14 +5,16 @@ import {
   type JobStepT,
   type JobStatusT,
   type JobT,
+  type ScrapeStatusSourceT,
 } from "@radar/domain";
 
-import type { RawDocumentRecord } from "@radar/sources";
+import type { RawDocumentRecord, SourceAdapter } from "@radar/sources";
 
 import type { ObjectStore } from "../../storage/object-store.js";
 import type { CiblageStore } from "../ciblage/ciblage-store.js";
 import { runRecueil } from "../sources/recueil.js";
 import { runExploitation } from "../sources/exploitation.js";
+import * as ScrapeStatusStore from "../scrape-status/store.js";
 import type { AdapterRegistry } from "./adapter-registry.js";
 import type { JobsStore } from "./jobs-store.js";
 
@@ -47,6 +49,15 @@ export interface RunCiblagePlanInput {
    * `objectStore` handles everything (local-dev / MinIO default).
    */
   readonly scrapeStore?: ObjectStore;
+  /**
+   * Optional object store where the `scrape-status/index.json` is persisted.
+   * When provided, the executor updates `ScrapeStatus` records:
+   *   - `scraped`    — after a successful RECUEIL step
+   *   - `graphified` — after a successful per-city EXPLOITATION
+   *   - `error`      — when a step fails (recueil or exploitation)
+   * When absent, no ScrapeStatus is written (existing behaviour preserved).
+   */
+  readonly scrapeStatusStore?: ObjectStore;
   readonly registry: AdapterRegistry;
   readonly planId: string;
   /** Clock injection for deterministic ids / timestamps in tests. */
@@ -66,6 +77,38 @@ export type RunCiblagePlanResult =
       readonly error: "plan-not-found" | "plan-disabled" | "no-targets";
       readonly detail: string;
     };
+
+/**
+ * Map a `SourceAdapter.kind` (SourceKind) to the matching `ScrapeStatusSourceT`
+ * value used in the maturity model. Returns `undefined` for source kinds that
+ * are not tracked in ScrapeStatus (e.g. "adresses-quebec", "reglement").
+ *
+ * Mapping:
+ *   "avis-publics"   → "avis-publics"
+ *   "pv"             → "conseils-municipaux"
+ *   "video-youtube"  → "youtube-seances"
+ *   "role-evaluation"→ "role-evaluation"
+ *   "reglement"/"zonage" → "zonage"
+ */
+function toScrapeStatusSource(
+  kind: SourceAdapter["kind"],
+): ScrapeStatusSourceT | undefined {
+  switch (kind) {
+    case "avis-publics":
+      return "avis-publics";
+    case "pv":
+      return "conseils-municipaux";
+    case "video-youtube":
+      return "youtube-seances";
+    case "role-evaluation":
+      return "role-evaluation";
+    case "reglement":
+    case "zonage":
+      return "zonage";
+    default:
+      return undefined;
+  }
+}
 
 /** Cross product of (citySlug × sourceBinding) the plan declares. */
 function planTargets(
@@ -133,9 +176,15 @@ export async function runCiblagePlan(
   const steps: JobStepT[] = [];
   // Per-city accumulator: every successfully-collected source's RawDocs, kept
   // together so a SINGLE exploitation runs over the city's COMBINED corpus.
+  // `scrapeStatusSource` carries the adapter kind for ScrapeStatus updates.
   const cityCorpus = new Map<
     string,
-    { records: RawDocumentRecord[]; stepIdx: number[] }
+    {
+      records: RawDocumentRecord[];
+      stepIdx: number[];
+      /** Parallel array: ScrapeStatusSource value per stepIdx entry (undefined = not tracked). */
+      scrapeStatusSources: Array<ScrapeStatusSourceT | undefined>;
+    }
   >();
 
   for (const target of targets) {
@@ -161,19 +210,52 @@ export async function runCiblagePlan(
     // a city's sources accumulate into ONE project state instead of overwriting.
     // When a dedicated scrapeStore is provided, raw bytes go there; otherwise the
     // main objectStore handles everything (MinIO local default).
+    const adapter = entry.build();
     const { step, records } = await collectOneSource({
       objectStore: input.scrapeStore ?? input.objectStore,
       registryEntry: entry,
+      adapter,
       planId: plan.id,
       ...(input.limit !== undefined ? { limit: input.limit } : {}),
     });
     const stepIdx = steps.length;
     steps.push(step);
 
+    // ScrapeStatus: mark `scraped` after successful recueil, `error` on failure.
+    const scrapeStatusSrc = toScrapeStatusSource(adapter.kind);
+    if (input.scrapeStatusStore && scrapeStatusSrc) {
+      const statusStore = input.scrapeStatusStore;
+      const nowDate = now();
+      if (step.status === "succeeded") {
+        await ScrapeStatusStore.upsert(statusStore, {
+          citySlug: entry.city,
+          source: scrapeStatusSrc,
+          automation: "refresh",
+          windowMonths: 6,
+          status: "scraped",
+          lastRunAt: nowDate.toISOString(),
+        });
+      } else if (step.status === "failed") {
+        await ScrapeStatusStore.upsert(statusStore, {
+          citySlug: entry.city,
+          source: scrapeStatusSrc,
+          automation: "refresh",
+          windowMonths: 6,
+          status: "error",
+          lastRunAt: nowDate.toISOString(),
+        });
+      }
+    }
+
     if (step.status === "succeeded" && records.length > 0) {
-      const bucket = cityCorpus.get(entry.city) ?? { records: [], stepIdx: [] };
+      const bucket = cityCorpus.get(entry.city) ?? {
+        records: [],
+        stepIdx: [],
+        scrapeStatusSources: [],
+      };
       bucket.records.push(...records);
       bucket.stepIdx.push(stepIdx);
+      bucket.scrapeStatusSources.push(scrapeStatusSrc);
       cityCorpus.set(entry.city, bucket);
     }
   }
@@ -204,6 +286,23 @@ export async function runCiblagePlan(
           canonicalCount: exploit.canonicalCount,
         };
       }
+      // ScrapeStatus: mark each source in this city as `graphified` after
+      // successful exploitation.
+      if (input.scrapeStatusStore) {
+        const statusStore = input.scrapeStatusStore;
+        const nowDate = now();
+        const seenScrapeStatusSrcs = new Set<string>();
+        for (const src of bucket.scrapeStatusSources) {
+          if (!src || seenScrapeStatusSrcs.has(src)) continue;
+          seenScrapeStatusSrcs.add(src);
+          await ScrapeStatusStore.markAsGraphified(
+            statusStore,
+            city,
+            src,
+            nowDate,
+          );
+        }
+      }
     } catch (e) {
       // An exploitation failure does not erase the recueil work: the city's
       // succeeded recueil steps become `failed` with the typed reason, never
@@ -212,6 +311,26 @@ export async function runCiblagePlan(
       for (const idx of bucket.stepIdx) {
         const s = steps[idx]!;
         steps[idx] = { ...s, status: "failed", error: message };
+      }
+      // ScrapeStatus: mark each source in this city as `error` after
+      // exploitation failure (recueil still succeeded so we downgrade from
+      // `scraped` → `error` to reflect the failed pipeline stage).
+      if (input.scrapeStatusStore) {
+        const statusStore = input.scrapeStatusStore;
+        const nowDate = now();
+        const seenScrapeStatusSrcs = new Set<string>();
+        for (const src of bucket.scrapeStatusSources) {
+          if (!src || seenScrapeStatusSrcs.has(src)) continue;
+          seenScrapeStatusSrcs.add(src);
+          await ScrapeStatusStore.upsert(statusStore, {
+            citySlug: city,
+            source: src,
+            automation: "refresh",
+            windowMonths: 6,
+            status: "error",
+            lastRunAt: nowDate.toISOString(),
+          });
+        }
       }
     }
   }
@@ -262,7 +381,9 @@ function cityMentionTotal(steps: readonly JobStepT[]): number {
 
 interface CollectOneSourceInput {
   readonly objectStore: ObjectStore;
-  readonly registryEntry: { sourceId: string; city: string; build: () => import("@radar/sources").SourceAdapter };
+  readonly registryEntry: { sourceId: string; city: string; build: () => SourceAdapter };
+  /** Pre-built adapter instance (avoids building twice when the caller already holds it). */
+  readonly adapter: SourceAdapter;
   readonly planId: string;
   readonly limit?: number;
 }
@@ -293,7 +414,7 @@ async function collectOneSource(
   try {
     const recueil = await runRecueil(
       sourceId,
-      input.registryEntry.build(),
+      input.adapter,
       input.objectStore,
       {
         ciblagePlanId: input.planId,
