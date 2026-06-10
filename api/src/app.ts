@@ -8,6 +8,7 @@ import { ciblageRoute, type CiblageDeps } from "./routes/ciblage.js";
 import { jobsRoute, type JobsDeps } from "./routes/jobs.js";
 import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
+import { scrapeStatusRoute } from "./routes/scrape-status.js";
 import { graphRoute, type GraphDeps } from "./routes/graph.js";
 
 export type AppDeps = HealthDeps &
@@ -30,6 +31,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", jobsRoute(deps));
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
+  app.route("/", scrapeStatusRoute(deps.store));
   app.route("/", graphRoute(deps));
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
