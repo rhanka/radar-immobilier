@@ -84,6 +84,22 @@ export {
   PV_SAINTE_JULIE_INDEX_HTML,
   PV_SAINTE_JULIE_2026_03_TEXT,
 } from "./sources/proces-verbaux-sainte-julie.fixture.js";
+export {
+  PV_SAINTE_THERESE_INDEX_HTML,
+  PV_SAINTE_THERESE_2026_03_TEXT,
+} from "./sources/proces-verbaux-sainte-therese.fixture.js";
+export {
+  PV_DEUX_MONTAGNES_INDEX_HTML,
+  PV_DEUX_MONTAGNES_2026_04_TEXT,
+} from "./sources/proces-verbaux-deux-montagnes.fixture.js";
+export {
+  PV_MIRABEL_INDEX_HTML,
+  PV_MIRABEL_2026_04_TEXT,
+} from "./sources/proces-verbaux-mirabel.fixture.js";
+export {
+  PV_SAINT_EUSTACHE_INDEX_HTML,
+  PV_SAINT_EUSTACHE_2026_02_TEXT,
+} from "./sources/proces-verbaux-saint-eustache.fixture.js";
 export * from "./sources/voxtral-transcriber.js";
 export * from "./sources/youtube-seances.js";
 export {
