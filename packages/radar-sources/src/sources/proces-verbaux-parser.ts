@@ -256,6 +256,18 @@ const AVIS_MOTION_RE =
 const REGLEMENT_NUMBER_RE =
   /r[eè]glement\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
 
+/**
+ * Z-prefix règlement-number pattern for municipalities using letter-prefixed
+ * numbering (e.g. Châteauguay: Z-3001, G-062-22).
+ *
+ * PRECISION GUARD: requires the full phrase "règlement de zonage" immediately
+ * before the letter-prefix number. This prevents misidentifying zone codes
+ * (e.g. "zone C-754") or non-zonage bylaws ("règlement de construction Z-3300")
+ * as règlement numbers.  Group 1 captures the letter-prefixed number.
+ */
+const REGLEMENT_ZONAGE_LETTER_RE =
+  /r[eè]glement\s+de\s+zonage\s+([A-Z]-\d{3,4})\b/gi;
+
 /** Zone code pattern (matches Valleyfield codes like H-521, C-627-3). */
 const ZONE_CODE_RE = /\b([A-Z]{1,4}-\d{2,4}(?:-\d{1,3})?)\b/g;
 
@@ -279,11 +291,21 @@ const DENSITE_RE =
 /**
  * Extract all règlement numbers cited in a text window (case-insensitive,
  * deduped, verbatim).
+ *
+ * Handles two numbering styles:
+ *   - Digit-only (e.g. 1926-26, 2024-58): via REGLEMENT_NUMBER_RE
+ *   - Letter-prefix zonage bylaws (e.g. Z-3001): via REGLEMENT_ZONAGE_LETTER_RE
+ *     (only matched when explicitly preceded by "règlement de zonage", to
+ *     prevent confusing zone codes like C-754 with règlement identifiers)
  */
 function extractReglementNumbers(window: string): string[] {
   const numbers: string[] = [];
   const re = new RegExp(REGLEMENT_NUMBER_RE.source, "gi");
   for (const m of window.matchAll(re)) {
+    if (m[1]) numbers.push(m[1]);
+  }
+  const reZ = new RegExp(REGLEMENT_ZONAGE_LETTER_RE.source, "gi");
+  for (const m of window.matchAll(reZ)) {
     if (m[1]) numbers.push(m[1]);
   }
   return Array.from(new Set(numbers));
@@ -304,7 +326,13 @@ function extractZoneCodes(window: string): string[] {
  *
  * Algorithm:
  *   1. Find every occurrence of `AVIS_MOTION_RE` in the text.
- *   2. For each match, extract a context window of ±400 chars.
+ *   2. For each match, extract a context window: up to 400 chars BEFORE the
+ *      match, and up to 400 chars AFTER the match end — but capped at the
+ *      first blank line (\n\n) following the match.  The backward (-400) window
+ *      is kept uncapped to handle PVs that list the règlement number before the
+ *      "avis de motion" phrase.  The forward cap prevents an agenda item's
+ *      context from bleeding into the next item (e.g. a derogation entry that
+ *      mentions "Règlement de zonage" right after an unrelated motion).
  *   3. Within that window, look for a règlement number AND a zonage keyword.
  *   4. If both are present → `changementZonage: true` (high-precision).
  *   5. If only a motion is present but no règlement/zonage → `avisDeMotion: true`
@@ -325,8 +353,16 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
   const motionRe = new RegExp(AVIS_MOTION_RE.source, "gi");
   for (const m of pvText.matchAll(motionRe)) {
     const idx = m.index ?? 0;
+    const matchEnd = idx + (m[0]?.length ?? 0);
     const ctxStart = Math.max(0, idx - WINDOW);
-    const ctxEnd = Math.min(pvText.length, idx + (m[0]?.length ?? 0) + WINDOW);
+    // Forward window: capped at the next blank line (\n\n) after the match end,
+    // to prevent cross-item contamination (e.g. adjacent derogation item that
+    // mentions "Règlement de zonage" for an unrelated subject).
+    const nextParaBreak = pvText.indexOf("\n\n", matchEnd);
+    const forwardLimit = nextParaBreak === -1
+      ? Math.min(pvText.length, matchEnd + WINDOW)
+      : Math.min(matchEnd + WINDOW, nextParaBreak);
+    const ctxEnd = forwardLimit;
     const ctx = pvText.slice(ctxStart, ctxEnd);
 
     const regNumbers = extractReglementNumbers(ctx);
