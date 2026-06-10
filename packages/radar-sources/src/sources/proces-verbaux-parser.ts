@@ -254,14 +254,23 @@ const AVIS_MOTION_RE =
  * Both must be preceded by "règlement" to avoid false positives on lot ids.
  */
 const REGLEMENT_NUMBER_RE =
-  /r[eè]glement\s+(?:n[o°]?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
+  /r[eè]glement\s+(?:n(?:[o°]|um[eé]ro)?\s*\.?\s*)?(\d{2,4}-\d{1,4})\b/gi;
 
 /** Zone code pattern (matches Valleyfield codes like H-521, C-627-3). */
 const ZONE_CODE_RE = /\b([A-Z]{1,4}-\d{2,4}(?:-\d{1,3})?)\b/g;
 
-/** Keywords that indicate a change to the zoning bylaw (high-precision). */
+/**
+ * Keywords that indicate a change to the zoning bylaw (high-precision).
+ *
+ * Only ZONING-SPECIFIC terms qualify. Generic "modifier le règlement" /
+ * "modification du règlement" were intentionally removed: they match any bylaw
+ * amendment (e.g. a circulation or borrowing bylaw) and caused false positives
+ * (e.g. Sainte-Catherine 2026-05, a circulation bylaw). Genuine zoning changes
+ * always reference "zonage" or "règlement d'urbanisme" (verified across the
+ * Saint-Damase, Saint-Constant and Valleyfield fixtures).
+ */
 const ZONAGE_KEYWORDS_RE =
-  /\b(?:zonage|r[eè]glement\s+de\s+zonage|r[eè]glement\s+d[''']urbanisme|modifier\s+le\s+r[eè]glement|modification\s+du\s+r[eè]glement)\b/i;
+  /\b(?:zonage|r[eè]glement\s+de\s+zonage|r[eè]glement\s+d[''']urbanisme)\b/i;
 
 /** Multi-family / densification keywords (best-effort, only for densiteAutorisee). */
 const DENSITE_RE =
