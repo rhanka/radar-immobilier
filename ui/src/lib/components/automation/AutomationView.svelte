@@ -21,6 +21,7 @@
     CONNECTORS,
     STATUS_LABELS_FR,
     benchmarkRecap,
+    connectorActionHint,
   } from "$lib/automation/automation-data.js";
   import type { TreatmentKind, Connector } from "$lib/automation/automation-data.js";
   import { runCollect, avisTypeLabel } from "$lib/automation/collect.js";
@@ -169,15 +170,17 @@
       <h2 class="text-base font-semibold text-slate-950">Sources & connecteurs</h2>
     </div>
 
-    <!-- Status disclaimer : one connector is REAL, the rest are still simulated -->
+    <!-- Status disclaimer : honest per-connector status (no « simulé ») -->
     <div class="mb-4 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3">
       <ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
       <p class="text-xs leading-5 text-emerald-800">
-        <span class="font-semibold">Amorce réelle (ÉV11) :</span> le connecteur
-        <span class="font-semibold">« Avis publics municipaux »</span> est désormais
-        <span class="font-semibold">RÉEL</span> : il interroge la page publique de
-        Salaberry-de-Valleyfield côté serveur, sans clé, et affiche les avis réellement publiés.
-        Les autres connecteurs restent <span class="font-semibold">simulés</span>.
+        <span class="font-semibold">Statut réel par connecteur :</span> le connecteur
+        <span class="font-semibold">« Avis publics municipaux »</span> est
+        <span class="font-semibold">RÉEL</span> (il interroge la page publique de
+        Salaberry-de-Valleyfield côté serveur, sans clé, et affiche les avis réellement publiés).
+        Les sources <span class="font-semibold">« Manuel »</span> sont alimentées par un apport
+        manuel à l'onboarding ; les sources <span class="font-semibold">« À venir »</span> sont des
+        intégrations planifiées, non encore branchées. Aucune donnée n'est simulée.
       </p>
     </div>
 
@@ -223,7 +226,7 @@
                     {/if}
                   </Button>
                 {:else}
-                  <span class="text-xs italic text-slate-400">simulé</span>
+                  <span class="text-xs italic text-slate-400">{connectorActionHint(connector)}</span>
                 {/if}
               </td>
             </tr>

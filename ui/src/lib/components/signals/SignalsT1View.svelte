@@ -1,19 +1,36 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { HelpCircle } from "@lucide/svelte";
   import { Alert, Button, Select } from "@sentropic/design-system-svelte";
-  import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
+  import { fetchSignalsByCity } from "$lib/signals/signals-by-city-client.js";
+  import { fetchSignalDetail } from "$lib/signals/signal-detail-client.js";
+  import { loadLiveSignals } from "$lib/signals/signals-live.js";
   import type { SignalT, SignalStatusT } from "@radar/domain";
-  import { appMode } from "$lib/state/mode.js";
   import SignalRow from "./SignalRow.svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
 
   // ── Props ────────────────────────────────────────────────────────────────────
   export let onApprofondir: (s: SignalT) => void = () => {};
 
-  // ── Copie locale mutable des signaux (en-mémoire ; persistance hors-périmètre ÉV3) ──
-  let signals: SignalT[] = demoSignalsT1.map((s) => ({ ...s }));
+  // ── Signaux RÉELS chargés depuis l'API ontologie (DesignationEvent) ──────────
+  //   Plus aucun signal simulé : le fil reflète les vrais changements de zonage
+  //   détectés (avis de motion / règlements) via GET /api/signals/by-city +
+  //   /api/signals/:city/detail. Persistance des actions hors-périmètre ÉV3.
+  let signals: SignalT[] = [];
+  let loading = true;
+  let loadError: string | null = null;
+
+  onMount(async () => {
+    try {
+      signals = await loadLiveSignals({ fetchSignalsByCity, fetchSignalDetail });
+    } catch (e) {
+      loadError = e instanceof Error ? e.message : String(e);
+    } finally {
+      loading = false;
+    }
+  });
 
   // ── Contrôles ────────────────────────────────────────────────────────────────
   let sortMode: "score" | "vision" = "score";
@@ -49,13 +66,8 @@
     { value: "écarté", label: "Écarté" },
   ];
 
-  // Mode global
-  $: mode = $appMode;
-
-  // Compteurs
+  // Compteurs — le fil ne contient plus que des signaux réels (mode:"real").
   $: countReal = signals.filter((s) => s.mode === "real").length;
-  $: countSim = signals.filter((s) => s.mode === "simulation").length;
-  $: countPool = mode === "real" ? countReal : signals.length;
 </script>
 
 <ViewLayout>
@@ -144,7 +156,7 @@
           {visible.length} / {signals.length} signal{signals.length !== 1 ? "s" : ""}
         </p>
         <p class="text-xs text-slate-300 mt-0.5">
-          ({countReal} réels + {countSim} exemples)
+          ({countReal} réel{countReal !== 1 ? "s" : ""}, données live)
         </p>
       </div>
     </div>
@@ -171,26 +183,38 @@
       </p>
     </header>
 
-    <!-- Bandeau mode réel / simulation -->
-    {#if mode === "real"}
+    <!-- Bandeau état du chargement / mode réel -->
+    {#if loadError}
       <div class="mb-4">
         <Alert
-          tone="success"
-          title="Mode réel : {countReal} signal{countReal !== 1 ? 's' : ''} confirmé{countReal !== 1 ? 's' : ''}."
-          message="Basculez en simulation pour voir les exemples de calibration."
+          tone="error"
+          title="Chargement des signaux impossible."
+          message={loadError}
         />
+      </div>
+    {:else if loading}
+      <div class="mb-4">
+        <Alert tone="info" title="Chargement des signaux réels…" />
       </div>
     {:else}
       <div class="mb-4">
         <Alert
-          tone="info"
-          title="Mode simulation : {countPool} signal{countPool !== 1 ? 's' : ''} ({countReal} réel{countReal !== 1 ? 's' : ''} + {countSim} exemple{countSim !== 1 ? 's' : ''} synthétique{countSim !== 1 ? 's' : ''} badgé{countSim !== 1 ? 's' : ''})."
+          tone="success"
+          title="Données live : {countReal} signal{countReal !== 1 ? 's' : ''} réel{countReal !== 1 ? 's' : ''} (changements de zonage détectés)."
         />
       </div>
     {/if}
 
     <!-- Liste -->
-    {#if visible.length === 0}
+    {#if loading}
+      <div class="rounded-lg border border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-400">
+        Chargement…
+      </div>
+    {:else if signals.length === 0}
+      <div class="rounded-lg border border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-400">
+        Aucun signal réel pour l'instant (aucun changement de zonage détecté dans les villes suivies).
+      </div>
+    {:else if visible.length === 0}
       <div class="rounded-lg border border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-400">
         Aucun signal pour ce filtre.
       </div>
@@ -213,12 +237,14 @@
     {/if}
 
     <!-- Note de provenance -->
-    <div class="mt-6">
-      <Alert
-        tone="warning"
-        title="Provenance des signaux"
-        message="{countReal} signal{countReal !== 1 ? 's' : ''} réel{countReal !== 1 ? 's' : ''} (avis de consultation publique vérifiés, règlements 150-49, 150-49-1, 150-51) et {countSim} exemple{countSim !== 1 ? 's' : ''} (marqués Exemple (simulation)). Les exemples illustrent des types de signaux non encore détectés dans les données réelles et restent visibles dans tous les modes."
-      />
-    </div>
+    {#if !loading && !loadError}
+      <div class="mt-6">
+        <Alert
+          tone="info"
+          title="Provenance des signaux"
+          message="Tous les signaux affichés sont réels : ils proviennent des DesignationEvent détectés dans les procès-verbaux et avis publics des villes suivies (changements de zonage — avis de motion / règlements). Aucun exemple simulé n'est inclus."
+        />
+      </div>
+    {/if}
   </section>
 </ViewLayout>
