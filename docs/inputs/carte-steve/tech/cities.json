@@ -1,0 +1,38 @@
+[
+  {
+    "nom": "Delson",
+    "slug": "delson",
+    "region": "Montérégie — Rive-Sud",
+    "population": 8000,
+    "lots": 3213,
+    "status": "ready",
+    "centre": [45.377, -73.544]
+  },
+  {
+    "nom": "Sainte-Catherine",
+    "slug": "sainte-catherine",
+    "region": "Montérégie — Rive-Sud",
+    "population": 18000,
+    "lots": 5615,
+    "status": "ready",
+    "centre": [45.402, -73.578]
+  },
+  {
+    "nom": "Saint-Constant",
+    "slug": "saint-constant",
+    "region": "Montérégie — Rive-Sud",
+    "population": 25000,
+    "lots": 11261,
+    "status": "ready",
+    "centre": [45.371, -73.573]
+  },
+  {
+    "nom": "Candiac",
+    "slug": "candiac",
+    "region": "Montérégie — Rive-Sud",
+    "population": 23000,
+    "lots": 7190,
+    "status": "ready",
+    "centre": [45.381, -73.517]
+  }
+]
