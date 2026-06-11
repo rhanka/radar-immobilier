@@ -69,3 +69,6 @@ obscura-bin/
 # walkthrough heavy media (keep transcript + graph + screenshots)
 docs/spec/input/walkthrough/*.mp4
 docs/spec/input/walkthrough/*.mp3
+
+# Per-branch harness plan (working doc, read locally by 'harness verify' — not tracked to avoid merge conflicts)
+BRANCH.md
