@@ -3928,6 +3928,173 @@ export const MARSTON_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-marston",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round8 -- 27 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const EGAN_SUD_PV_CONFIG: PvCityConfig = {
+  citySlug: "egan-sud",
+  pvIndexUrl: "https://www.egan-sud.ca/index.php/conseil/proces-verbaux-et-ordres-du-jour",
+  sourceId: "proces-verbaux-egan-sud",
+};
+
+export const LAC_DROLET_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-drolet",
+  pvIndexUrl: "https://lacdrolet.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-lac-drolet",
+};
+
+export const FOSSAMBAULT_SUR_LE_LAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "fossambault-sur-le-lac",
+  pvIndexUrl: "https://fossambault-sur-le-lac.com/ville/democratie/diffusion-des-seances-du-conseil/",
+  sourceId: "proces-verbaux-fossambault-sur-le-lac",
+};
+
+export const SAINT_BERNARD_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-bernard",
+  pvIndexUrl: "https://saint-bernard.quebec/ma-municipalite/proces-verbaux-ordre-jour/",
+  sourceId: "proces-verbaux-saint-bernard",
+};
+
+export const FRONTENAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "frontenac",
+  pvIndexUrl: "https://municipalitefrontenac.qc.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-frontenac",
+};
+
+export const LAC_SAINT_JOSEPH_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-saint-joseph",
+  pvIndexUrl: "https://www.villelacstjoseph.com/fr/vie-municipale/conseil-municipal/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-lac-saint-joseph",
+};
+
+export const SAINT_ELZEAR_LA_NOUVELLE_BEAUCE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-elzear--la-nouvelle-beauce",
+  pvIndexUrl: "https://st-elzear.ca/gestion-municipale/proces-verbaux-avis-publics-2/",
+  sourceId: "proces-verbaux-saint-elzear--la-nouvelle-beauce",
+};
+
+export const BOIS_FRANC_PV_CONFIG: PvCityConfig = {
+  citySlug: "bois-franc",
+  pvIndexUrl: "https://bois-franc.ca/index.php/page-3/proces-verbaux",
+  sourceId: "proces-verbaux-bois-franc",
+};
+
+export const SAINT_VICTOR_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-victor",
+  pvIndexUrl: "https://st-victor.qc.ca/municipalite/vie-democratique/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-victor",
+};
+
+export const SAINT_FREDERIC_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-frederic",
+  pvIndexUrl: "https://www.st-frederic.com/municipalite/proces-verbaux",
+  sourceId: "proces-verbaux-saint-frederic",
+};
+
+export const CAYAMANT_PV_CONFIG: PvCityConfig = {
+  citySlug: "cayamant",
+  pvIndexUrl: "https://www.cayamant.ca/fr/vie-municipale/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-cayamant",
+};
+
+export const SHANNON_PV_CONFIG: PvCityConfig = {
+  citySlug: "shannon",
+  pvIndexUrl: "https://shannon.ca/vie-municipale/proces-verbaux/",
+  sourceId: "proces-verbaux-shannon",
+};
+
+export const SAINT_HONORE_DE_SHENLEY_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-honore-de-shenley",
+  pvIndexUrl: "https://sthonoredeshenley.com/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-honore-de-shenley",
+};
+
+export const SCOTT_PV_CONFIG: PvCityConfig = {
+  citySlug: "scott",
+  pvIndexUrl: "https://www.municipalitescott.com/municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-scott",
+};
+
+export const LANCIENNE_LORETTE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lancienne-lorette",
+  pvIndexUrl: "https://lancienne-lorette.org/rapports-et-publications/proces-verbaux",
+  sourceId: "proces-verbaux-lancienne-lorette",
+};
+
+export const SAINTE_MARIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-marie",
+  pvIndexUrl: "https://www.sainte-marie.ca/gestion-municipale/conseil-municipal/",
+  sourceId: "proces-verbaux-sainte-marie",
+};
+
+export const SAINT_BENOIT_LABRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-benoit-labre",
+  pvIndexUrl: "https://saintbenoitlabre.com/proces-verbal/",
+  sourceId: "proces-verbaux-saint-benoit-labre",
+};
+
+export const SAINT_LUDGER_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-ludger",
+  pvIndexUrl: "https://st-ludger.qc.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-ludger",
+};
+
+export const MONTCERF_LYTTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "montcerf-lytton",
+  pvIndexUrl: "https://www.montcerf-lytton.com/fr/municipalite/vie-municipale/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-montcerf-lytton",
+};
+
+export const SAINT_GABRIEL_DE_VALCARTIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-gabriel-de-valcartier",
+  pvIndexUrl: "https://saint-gabriel-de-valcartier.ca/municipalite/conseil-municipal/?accordion=proces-verbaux",
+  sourceId: "proces-verbaux-saint-gabriel-de-valcartier",
+};
+
+export const CLARENDON_PV_CONFIG: PvCityConfig = {
+  citySlug: "clarendon",
+  pvIndexUrl: "https://clarendon.ca/municipality/council-meetings/",
+  sourceId: "proces-verbaux-clarendon",
+};
+
+export const SAINTE_HENEDINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-henedine",
+  pvIndexUrl: "https://www.ste-henedine.com/fr/proces-verbaux",
+  sourceId: "proces-verbaux-sainte-henedine",
+};
+
+export const SAINT_JOSEPH_DE_BEAUCE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-joseph-de-beauce",
+  pvIndexUrl: "https://vsjb.ca/la-ville/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-joseph-de-beauce",
+};
+
+export const SAINTS_ANGES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saints-anges",
+  pvIndexUrl: "https://www.saintsanges.com/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-saints-anges",
+};
+
+export const BEAUCEVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "beauceville",
+  pvIndexUrl: "https://ville.beauceville.qc.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-beauceville",
+};
+
+export const SAINTE_MARGUERITE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-marguerite",
+  pvIndexUrl: "https://sainte-marguerite.ca/municipalite/municipalites/seances-du-conseil",
+  sourceId: "proces-verbaux-sainte-marguerite",
+};
+
+export const SAINT_GEORGES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-georges",
+  pvIndexUrl: "https://www.saint-georges.ca/ville/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-georges",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4615,4 +4782,32 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINT_GILLES_PV_CONFIG },
   { config: PONT_ROUGE_PV_CONFIG },
   { config: MARSTON_PV_CONFIG },
+  // -- Lot cities-round8 (config-only, verifie 2026-06-11) --
+  { config: EGAN_SUD_PV_CONFIG },
+  { config: LAC_DROLET_PV_CONFIG },
+  { config: FOSSAMBAULT_SUR_LE_LAC_PV_CONFIG },
+  { config: SAINT_BERNARD_PV_CONFIG },
+  { config: FRONTENAC_PV_CONFIG },
+  { config: LAC_SAINT_JOSEPH_PV_CONFIG },
+  { config: SAINT_ELZEAR_LA_NOUVELLE_BEAUCE_PV_CONFIG },
+  { config: BOIS_FRANC_PV_CONFIG },
+  { config: SAINT_VICTOR_PV_CONFIG },
+  { config: SAINT_FREDERIC_PV_CONFIG },
+  { config: CAYAMANT_PV_CONFIG },
+  { config: SHANNON_PV_CONFIG },
+  { config: SAINT_HONORE_DE_SHENLEY_PV_CONFIG },
+  { config: SCOTT_PV_CONFIG },
+  { config: LANCIENNE_LORETTE_PV_CONFIG },
+  { config: SAINTE_MARIE_PV_CONFIG },
+  { config: SAINT_BENOIT_LABRE_PV_CONFIG },
+  { config: SAINT_LUDGER_PV_CONFIG },
+  { config: MONTCERF_LYTTON_PV_CONFIG },
+  { config: SAINT_GABRIEL_DE_VALCARTIER_PV_CONFIG },
+  { config: CLARENDON_PV_CONFIG },
+  { config: SAINTE_HENEDINE_PV_CONFIG },
+  { config: SAINT_JOSEPH_DE_BEAUCE_PV_CONFIG },
+  { config: SAINTS_ANGES_PV_CONFIG },
+  { config: BEAUCEVILLE_PV_CONFIG },
+  { config: SAINTE_MARGUERITE_PV_CONFIG },
+  { config: SAINT_GEORGES_PV_CONFIG },
 ];
