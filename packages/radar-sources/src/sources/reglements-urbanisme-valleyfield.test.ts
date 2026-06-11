@@ -9,6 +9,7 @@ import {
 import { REGLEMENTS_URBANISME_SOURCE_URL } from "./reglements-urbanisme-parser.js";
 import {
   createReglementsUrbanismeValleyfieldAdapter,
+  isPdftotextAvailable,
   ReglementsUrbanismeValleyfieldAdapter,
   reglementPdfUrl,
 } from "./reglements-urbanisme-valleyfield.js";
@@ -159,5 +160,22 @@ describe("ReglementsUrbanismeValleyfieldAdapter — typed errors (never a raw th
     const err = await a.fetch(pdfRef as RawDocumentRef).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(SourceFetchError);
     expect((err as SourceFetchError).kind).toBe("parse");
+  });
+});
+
+describe("isPdftotextAvailable (poppler preflight)", () => {
+  it("resolves to a boolean and never throws, whatever the runtime", async () => {
+    // Contract: a missing binary must resolve(false), not reject — so the
+    // worker preflight can turn the silent 0-signal false-negative into a
+    // loud diagnostic without crashing.
+    const available = await isPdftotextAvailable();
+    expect(typeof available).toBe("boolean");
+  });
+
+  it("reflects the binary on PATH (true here — poppler is part of the toolchain)", async () => {
+    // The test/dev image and CI ship poppler-utils (api/Dockerfile bakes it in;
+    // docker-compose installs it in the dev api service). If this ever flips to
+    // false, the scrape image lost pdftotext and PV PDFs would extract empty.
+    await expect(isPdftotextAvailable()).resolves.toBe(true);
   });
 });
