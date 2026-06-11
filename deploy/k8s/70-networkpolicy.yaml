@@ -1,0 +1,58 @@
+# Tenant-side ADDITIVE NetworkPolicy — let public traffic reach the UI pod.
+#
+# Why this file exists
+# --------------------
+# The public entrypoint for immo.sent-tech.ca is the `radar-ui` (nginx) pod on
+# port 8080 (50-ui.yaml): nginx serves the Svelte SPA and reverse-proxies
+# /api + /health to radar-api:3000 so the browser stays same-origin. The api
+# itself does NOT serve the UI (api/src/app.ts: GET / returns a JSON banner).
+#
+# The cluster-operator baseline NetworkPolicy in poc-k8s
+# (tenants/radar-immobilier/30-netpol.yaml: `allow-traefik-to-api`) only allows
+# Traefik -> the `component: api` pod on port 3000. Under the namespace's
+# default-deny ingress, Traefik traffic to the `component: ui` pod on 8080 is
+# DROPPED — so without this policy the Ingress host resolves but every request
+# (including GET /health) is blocked before reaching nginx.
+#
+# This NetworkPolicy is purely ADDITIVE (k8s NetworkPolicies are OR-combined):
+# it opens Traefik -> ui:8080 without touching the operator's api policy. It is
+# tenant-owned app-layer wiring, consistent with the poc-k8s split where the
+# operator owns the default-deny baseline and the tenant owns app specifics.
+#
+# Resolution options (the parent/operator picks one — see deploy/k8s/README.md
+# "Ingress reaches the UI pod, not the api"):
+#   (A) [this file] tenant ships an additive Traefik -> ui:8080 policy;
+#   (B) operator extends poc-k8s tenants/radar-immobilier/30-netpol.yaml to add
+#       a Traefik -> {component: ui, port 8080} rule (then this file is a no-op
+#       and can be dropped from the kustomization);
+#   (C) front the Ingress directly on the api (port 3000) and serve the SPA from
+#       the api — NOT how radar is built today (api is JSON-only), so rejected.
+#
+# The traefik/kube-system namespaceSelectors mirror the operator's
+# `allow-traefik-to-api` exactly, so behaviour is identical, just targeting ui.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-ui
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ui
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: ui
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8080
