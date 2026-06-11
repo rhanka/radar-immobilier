@@ -36,7 +36,7 @@ mrg=$(echo "$json" | python3 -c "import sys,json;print(json.load(sys.stdin).get(
 #    Excludes fixtures/docs/test (public municipal phone numbers, sample amounts
 #    in French format like "250 000 000" are NOT PII) and honors an inline
 #    `gate:allow-pii` pragma for vetted exceptions. Fail-closed otherwise.
-pii=$(gh pr diff "$PR" --repo "$REPO" 2>/dev/null | python3 - <<'PY' || true
+pii=$(gh pr diff "$PR" --repo "$REPO" 2>/dev/null | python3 - <<'PY'
 import sys, re
 EXCL = re.compile(r'(^|/)(fixtures?|docs|__fixtures__)/|\.fixture\.|\.spec\.|\.test\.')
 PII = re.compile(r'\b[0-9]{3}[ -][0-9]{3}[ -][0-9]{3}\b|\b\(?[0-9]{3}\)?[ .-][0-9]{3}[ .-][0-9]{4}\b|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY|AKIA[0-9A-Z]{16}|SCW[A-Z0-9]{17,}')
