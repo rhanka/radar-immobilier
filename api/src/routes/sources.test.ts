@@ -84,12 +84,13 @@ describe("POST /api/sources/collect/:source (RECUEIL)", () => {
       expect(body.rawDocIds[0]).toMatch(/^raw:avis-publics-valleyfield:[a-f0-9]{64}$/);
       expect(body.fetchedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
-      // The raw bytes were stored under the canonical key before any extraction.
+      // Raw bytes + sidecar meta.json stored under content-addressed keys.
       const keys = [...store.objects.keys()];
-      expect(keys).toHaveLength(1);
-      expect(keys[0]).toMatch(
-        /^raw\/avis-publics-valleyfield\/\d{4}\/\d{2}\/\d{2}\/[a-f0-9]{64}\.html$/,
+      const rawKey = keys.find((k) => !k.endsWith(".meta.json"));
+      expect(rawKey).toMatch(
+        /^raw\/avis-publics-valleyfield\/cas\/[a-f0-9]{64}\.html$/,
       );
+      expect(keys).toContain(`${rawKey}.meta.json`);
     });
 
     it("is idempotent: a second collection re-uses the stored object", async () => {
@@ -97,9 +98,10 @@ describe("POST /api/sources/collect/:source (RECUEIL)", () => {
       const app = sourcesRoute({ store });
       await app.request("/api/sources/collect/avis-publics-valleyfield", { method: "POST" });
       await app.request("/api/sources/collect/avis-publics-valleyfield", { method: "POST" });
-      // Same sha → one object, and the second run skipped the put().
-      expect(store.objects.size).toBe(1);
-      expect(store.putCalls).toBe(1);
+      // Same sha → one raw object + its meta (2 keys); the second run
+      // HEAD-skipped both puts.
+      expect(store.objects.size).toBe(2);
+      expect(store.putCalls).toBe(2);
     });
   });
 
@@ -132,10 +134,11 @@ describe("POST /api/sources/collect/:source (RECUEIL)", () => {
       expect(body.count).toBe(1);
       expect(body.rawDocIds[0]).toMatch(/^raw:role-evaluation-mamh-70052:[a-f0-9]{64}$/);
       const keys = [...store.objects.keys()];
-      expect(keys).toHaveLength(1);
-      expect(keys[0]).toMatch(
-        /^raw\/role-evaluation-mamh-70052\/\d{4}\/\d{2}\/\d{2}\/[a-f0-9]{64}\.xml$/,
+      const rawKey = keys.find((k) => !k.endsWith(".meta.json"));
+      expect(rawKey).toMatch(
+        /^raw\/role-evaluation-mamh-70052\/cas\/[a-f0-9]{64}\.xml$/,
       );
+      expect(keys).toContain(`${rawKey}.meta.json`);
     });
 
     it("is idempotent: a second collection re-uses the stored rôle object", async () => {
@@ -143,8 +146,8 @@ describe("POST /api/sources/collect/:source (RECUEIL)", () => {
       const app = sourcesRoute({ store });
       await app.request("/api/sources/collect/role-evaluation-mamh-70052", { method: "POST" });
       await app.request("/api/sources/collect/role-evaluation-mamh-70052", { method: "POST" });
-      expect(store.objects.size).toBe(1);
-      expect(store.putCalls).toBe(1);
+      expect(store.objects.size).toBe(2);
+      expect(store.putCalls).toBe(2);
     });
 
     it("collect-and-exploit yields REAL Lot/Valuation mentions from the rôle bytes", async () => {
