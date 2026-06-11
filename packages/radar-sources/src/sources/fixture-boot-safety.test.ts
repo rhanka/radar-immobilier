@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
  * BOOT-SAFETY contract (prod crash regression guard).
  *
  * The production API bundles @radar/sources into a single file and runs it with
- * plain `node`. The runtime image does NOT ship the dev `_spikes/**/samples/`
+ * plain `node`. The runtime image does NOT ship the dev `_spikes/.../samples/`
  * fixture bytes. So importing @radar/sources (or any module that re-exports its
  * fixtures) MUST NOT touch the filesystem at import time — otherwise the API
  * crashes at boot with ENOENT before it can serve /health.
