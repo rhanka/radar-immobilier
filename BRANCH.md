@@ -1,42 +1,38 @@
-# Lot 2b — manifeste de run
+# Lot 2c — migration fixtures -> S3
 
-Réf : `docs/spec/SPEC_PERSISTENCE_S3_FIRST.md` §1.1 (manifeste), §5 (pipeline).
+Réf : `docs/spec/SPEC_PERSISTENCE_S3_FIRST.md` §3.
 
-Branche : `feat/s3-lot2b-run-manifest`. Ajoute le **manifeste de run** (axe
-transaction-time / enregistrement de commit du modèle S3-first) et un chemin
-« scrape une ville → SCW » testable en mémoire, sans réseau ni Postgres.
+Branche : `feat/s3-lot2c-migrate-fixtures`. Migre les ~50 villes « golden »
+(`PV_FIXTURES`) vers l'objet-store CAS **sans réseau** : on encode le `pvText`
+(texte extrait pdftotext, pas le PDF original) en bytes `text/plain`, on
+construit le `RawDocumentRecord` (`buildRawDocumentRecord`) et on écrit le
+`raw/.../cas/<sha>.txt` + son sidecar `.meta.json`. Idempotent (HEAD-skip).
 
-Le manifeste est écrit EN DERNIER dans un run : `runs/{source}/{runId}/manifest.jsonl`,
-une ligne JSON par doc vu (`{ sha256, sourceUrl, casKey, status: "new"|"seen",
-publishedAt? }`). Présence du manifeste ⇒ tout ce qu'il référence (CAS + sidecar)
-existe déjà.
+**Honnêteté (anti-invention §0.2)** : la meta étiquette explicitement que c'est
+le TEXTE EXTRAIT migré d'une fixture, PAS le PDF source. Le worker live
+backfillera le `raw/` PDF original au prochain refresh.
 
 ## Scope
 
 ### Allowed
-- `api/src/services/sources/run-manifest.ts`
-- `api/src/services/sources/run-manifest.test.ts`
-- `api/src/services/sources/recueil.ts`
-- `api/src/services/sources/recueil.test.ts`
+- `api/src/services/sources/migrate-fixtures-to-s3.ts`
+- `api/src/services/sources/migrate-fixtures-to-s3.test.ts`
 - `BRANCH.md`
 
 ### Forbidden
 - `packages/radar-sources/src/sources/proces-verbaux-parser.ts`
 - `packages/radar-sources/src/sources/*.fixture.ts`
+- `packages/radar-sources/src/sources/proces-verbaux-generic.ts`
+- `api/src/services/sources/pv-seed.ts`
 
 ## Plan
 
-### Lot 2b — manifeste de run
-- [x] `run-manifest.ts` : `writeRunManifest(store, { source, runId, entries })` écrit
-      `runs/{source}/{runId}/manifest.jsonl` en JSONL (1 objet/ligne, pas un tableau),
-      `publishedAt` omis si absent ; helper `manifestKey(source, runId)`.
-- [x] `recueil.ts` : `runId?` optionnel dans `RecueilOptions` (défaut dérivé de
-      `fetchedAt` → `${fetchedAt.replace(/[:.]/g,"")}-r`), statut `new`/`seen`
-      capturé sur le HEAD-skip, exposé via `RecueilSuccess.manifestEntries`
-      (extension additive — signature publique inchangée).
-- [x] wrapper `runRecueilWithManifest(...)` : sur run réussi, écrit le manifeste
-      en dernier ; sur échec, aucun manifeste (run partiel non committé).
-- [x] test-first (RED→GREEN) : 1 ligne/doc statut `new` au 1er run ; 2e run
-      contenu identique → statut `seen` (HEAD-skip), aucun nouvel objet `raw/cas`.
-- [x] gate : `tsc --noEmit` 0 erreur ; `api/src` + `packages/radar-sources`
-      1151 verts (7 skipped préexistants), dont 7 nouveaux tests.
+### Lot 2c — migration fixtures -> S3
+- [x] test-first (RED) : MemoryStore, N fixtures → 2N objets (raw + meta),
+      chaque meta parse en `RawDocumentRecord`, `storageKey` en `raw/.../cas/...`
+- [x] test-first (RED) : idempotence — 2e appel `migrated=0 skipped=N`, store inchangé
+- [x] `migrateFixturesToS3(store, fixtures, { now })` : encode `pvText`, build
+      record, put raw + meta honnête (mode « texte extrait »), HEAD-skip
+- [x] gate : `npx vitest run api/src/services/sources/` (83) + `npx vitest run api/src` (493) verts
+- [x] gate : `npx tsc --noEmit -p api/tsconfig.json` 0 erreur
+- [x] gate : `harness verify --category static` + `--category unit` PASS
