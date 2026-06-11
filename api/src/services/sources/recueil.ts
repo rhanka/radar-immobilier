@@ -1,5 +1,6 @@
 import {
   buildRawDocumentRecord,
+  rawMetaKey,
   SourceFetchError,
   type RawDocumentRecord,
   type SourceAdapter,
@@ -98,6 +99,17 @@ export async function runRecueil(
       const existing = await store.head(record.storageKey);
       if (!existing) {
         await store.put(record.storageKey, raw.body, record.contentType);
+      }
+
+      // Sidecar meta.json (RawDocumentRecord) so each CAS object is
+      // self-describing on S3 (url, fetchedAt, provenance, sha256).
+      const metaKey = rawMetaKey(record.storageKey);
+      if (!(await store.head(metaKey))) {
+        await store.put(
+          metaKey,
+          JSON.stringify(record, null, 2),
+          "application/json",
+        );
       }
 
       records.push(record);
