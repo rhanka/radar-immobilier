@@ -28,7 +28,7 @@
 ## 0. Thèse en une phrase
 
 Le corpus de Steve est une **vérité-terrain externe** : une équipe humaine a déjà *qualifié* 4 villes
-(cadastre + rôle + zonage + TOD, et 5 247 marques de prospection à Sainte-Catherine). On l'**importe
+(cadastre + rôle + zonage + TOD, et 5 253 marques de prospection à Sainte-Catherine). On l'**importe
 en référence isolée** (« table de contrôle / golden »), puis on **mesure la parité** entre cette
 référence et ce que **notre** pipeline produit en scrapant les **mêmes** 4 villes en profondeur.
 La parité **mesure** le pipeline ; elle ne le **nourrit jamais** (séparation stricte, §3).
@@ -171,7 +171,7 @@ C'est l'invariant **central** de cette spec (et le sens de la décision §6.2 EV
 
 1. **Le détecteur est intact** : `detectZonageChange` et le pipeline de signaux **ne lisent jamais**
    `ControlLot`/`ControlMark`. La table de contrôle est **hors** du flux opérationnel.
-2. **Pas de `ProspectMark`** : les 5 247 marques de Steve (5 043 non-retenus + 204 lettres + … à
+2. **Pas de `ProspectMark`** : les 5 253 marques de Steve (5 043 non-retenus + 204 lettres + … à
    Sainte-Catherine) vivent en `ControlMark`, **jamais** en `ProspectMark` (§4.1 EVOL). Le store
    opérationnel n'est alimenté **que** par les décisions prises **dans** le radar.
 3. **Pas de `DesignationEvent`** : l'import de contrôle **n'émet aucun** événement de désignation
@@ -310,7 +310,7 @@ Valleyfield et le reste du backlog (`SPEC_PLAN_SCRAPING.md` §5) tant que la par
 - **Saint-Constant** : 642 lots 4+, 1 polygone TOD (5 287 lots) ; rôle le plus riche → bon test des
   champs rôle.
 - **Sainte-Catherine** : zonage **dessiné** (193 zones) → test du gap polygone (notre extraction vs
-  numérisation manuelle Steve) ; **+ les marques d'équipe** (5 247) → seul jeu de `ControlMark`.
+  numérisation manuelle Steve) ; **+ les marques d'équipe** (5 253) → seul jeu de `ControlMark`.
 - **Candiac** : **aucun zonage ni TOD** → cas-test `non-disponible` honnête (zones/TOD `non-disponible`
   des deux côtés, §4.3).
 
@@ -357,7 +357,7 @@ Valleyfield et le reste du backlog (`SPEC_PLAN_SCRAPING.md` §5) tant que la par
   scrape pas** Firestore.
 - **Chemin recommandé** : demander à Steve l'**export JSON natif de son outil** (« 💾 Exporter toutes
   mes données » — README §B4.3 : dump `marks`/`listings`/`lot_notes`/`pastilles`) → import en
-  `ControlMark` (mapping §2.1). C'est **le** moyen propre d'obtenir les 5 247 marques de
+  `ControlMark` (mapping §2.1). C'est **le** moyen propre d'obtenir les 5 253 marques de
   Sainte-Catherine.
 - **À défaut d'export** : `ControlMark` reste **vide** pour la ville → la métrique `marksControl`
   est `non-disponible` (honnête), le reste de la parité (cadastre/rôle/zone/TOD) **n'en dépend pas**.
