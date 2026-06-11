@@ -313,7 +313,6 @@ function main(): void {
     `packages/radar-sources/src/sources/proces-verbaux-${citySlug}.fixture.ts`;
 
   const outcome = summarizeParserOutcome({ indexHtml, baseUrl: indexUrl, pvText });
-  // eslint-disable-next-line no-console
   console.error(
     `[fixture-promote] family=${family.id} indexItems=${outcome.indexItemCount} ` +
       `avisDeMotion=${outcome.detection.avisDeMotion} ` +
@@ -325,7 +324,6 @@ function main(): void {
     process.stdout.write(fixture);
   } else {
     writeFileSync(outPath, fixture, "utf8");
-    // eslint-disable-next-line no-console
     console.error(`[fixture-promote] wrote ${outPath}`);
   }
 }
