@@ -14,6 +14,14 @@ RUN npm run build --workspace=api
 FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /workspace
+# poppler-utils ships `pdftotext`, which the live-scrape worker shells out to in
+# order to extract the text layer of every PV PDF (see
+# packages/radar-sources/.../reglements-urbanisme-valleyfield.ts `pdfToTextViaPoppler`).
+# Without it the worker silently yields empty text → 0 signal on real PDFs.
+# ~2 MB; keep the image slim by clearing the apt lists afterwards.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends poppler-utils \
+ && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1001 radar \
  && useradd --system --uid 1001 --gid radar radar
 COPY --from=build /workspace/node_modules ./node_modules
