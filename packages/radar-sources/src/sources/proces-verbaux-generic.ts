@@ -4220,6 +4220,214 @@ export const SAINTE_FELICITE_LISLET_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-sainte-felicite--lislet",
 };
 
+// ---------------------------------------------------------------------------
+// Lot cities-round9 -- 34 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const SAINT_HENRI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-henri",
+  pvIndexUrl: "https://www.saint-henri.ca/seances/",
+  sourceId: "proces-verbaux-saint-henri",
+};
+
+export const LITCHFIELD_PV_CONFIG: PvCityConfig = {
+  citySlug: "litchfield",
+  pvIndexUrl: "https://litchfield-qc.ca/minutes_fr.html",
+  sourceId: "proces-verbaux-litchfield",
+};
+
+export const CAMPBELLS_BAY_PV_CONFIG: PvCityConfig = {
+  citySlug: "campbells-bay",
+  pvIndexUrl: "https://campbellsbay.ca/fr/proces-verbaux/",
+  sourceId: "proces-verbaux-campbells-bay",
+};
+
+export const SAINT_ROBERT_BELLARMIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-robert-bellarmin",
+  pvIndexUrl: "https://www.st-robertbellarmin.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-robert-bellarmin",
+};
+
+export const FRAMPTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "frampton",
+  pvIndexUrl: "https://frampton.ca/pages/affaires-conseil-municipal",
+  sourceId: "proces-verbaux-frampton",
+};
+
+export const LAC_BEAUPORT_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-beauport",
+  pvIndexUrl: "https://lac-beauport.quebec/la-municipalite/conseil-municipal/",
+  sourceId: "proces-verbaux-lac-beauport",
+};
+
+export const SAINTE_PETRONILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-petronille",
+  pvIndexUrl: "https://stepetronille.com/seances-du-conseil/",
+  sourceId: "proces-verbaux-sainte-petronille",
+};
+
+export const PORTAGE_DU_FORT_PV_CONFIG: PvCityConfig = {
+  citySlug: "portage-du-fort",
+  pvIndexUrl: "https://portage-du-fort.com/2026-minutes",
+  sourceId: "proces-verbaux-portage-du-fort",
+};
+
+export const SAINTE_CLAIRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-claire",
+  pvIndexUrl: "https://ste-claire.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-claire",
+};
+
+export const BOISCHATEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "boischatel",
+  pvIndexUrl: "https://www.boischatel.ca/ma-ville/vie-democratique/seance-du-conseil",
+  sourceId: "proces-verbaux-boischatel",
+};
+
+export const SAINT_ODILON_DE_CRANBOURNE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-odilon-de-cranbourne",
+  pvIndexUrl: "https://www.saint-odilon.qc.ca/conseil-municipal/greffe/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-odilon-de-cranbourne",
+};
+
+export const LILE_DU_GRAND_CALUMET_PV_CONFIG: PvCityConfig = {
+  citySlug: "lile-du-grand-calumet",
+  pvIndexUrl: "https://xn--le-du-grand-calumet-41b.ca/administration/proces-verbaux/proces-verbaux-2026/",
+  sourceId: "proces-verbaux-lile-du-grand-calumet",
+};
+
+export const SAINT_PHILIBERT_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-philibert",
+  pvIndexUrl: "https://www.st-philibert.qc.ca/pages/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-philibert",
+};
+
+export const SAINT_COME_LINIERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-come-liniere",
+  pvIndexUrl: "https://www.stcomeliniere.com/municipalite/conseil-municipal-saint-come-liniere",
+  sourceId: "proces-verbaux-saint-come-liniere",
+};
+
+export const STONEHAM_ET_TEWKESBURY_PV_CONFIG: PvCityConfig = {
+  citySlug: "stoneham-et-tewkesbury",
+  pvIndexUrl: "https://www.villestoneham.com/ma-municipalite/democratie/seances-du-conseil",
+  sourceId: "proces-verbaux-stoneham-et-tewkesbury",
+};
+
+export const SAINT_CHARLES_DE_BELLECHASSE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-charles-de-bellechasse",
+  pvIndexUrl: "https://www.saint-charles.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-charles-de-bellechasse",
+};
+
+export const SAINT_BENJAMIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-benjamin",
+  pvIndexUrl: "https://www.st-benjamin.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-benjamin",
+};
+
+export const LANGE_GARDIEN_LA_COTE_DE_BEAUPRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lange-gardien--la-cote-de-beaupre",
+  pvIndexUrl: "https://municipalitedelangegardien.com/document-category/proces-verbaux/",
+  sourceId: "proces-verbaux-lange-gardien--la-cote-de-beaupre",
+};
+
+export const SAINT_LAURENT_DE_LILE_DORLEANS_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-laurent-de-lile-dorleans",
+  pvIndexUrl: "https://saintlaurentio.com/proces-verbaux-et-videos/",
+  sourceId: "proces-verbaux-saint-laurent-de-lile-dorleans",
+};
+
+export const SAINT_THEOPHILE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-theophile",
+  pvIndexUrl: "https://www.sainttheophile.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-theophile",
+};
+
+export const SAINTE_BRIGITTE_DE_LAVAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-brigitte-de-laval",
+  pvIndexUrl: "https://sbdl.net/notre-ville/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-brigitte-de-laval",
+};
+
+export const SAINT_LAZARE_DE_BELLECHASSE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-lazare-de-bellechasse",
+  pvIndexUrl: "https://www.st-lazare-qc.com/conseil-municipal",
+  sourceId: "proces-verbaux-saint-lazare-de-bellechasse",
+};
+
+export const SAINT_LEON_DE_STANDON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-leon-de-standon",
+  pvIndexUrl: "https://www.st-leon-de-standon.com/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-leon-de-standon",
+};
+
+export const SAINT_NAZAIRE_DE_DORCHESTER_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-nazaire-de-dorchester",
+  pvIndexUrl: "https://saint-nazaire-de-dorchester.com/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-nazaire-de-dorchester",
+};
+
+export const LAC_EDOUARD_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-edouard",
+  pvIndexUrl: "https://www.lacedouard.ca/fr/ma-municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-lac-edouard",
+};
+
+export const LA_DURANTAYE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-durantaye",
+  pvIndexUrl: "https://www.munladurantaye.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-la-durantaye",
+};
+
+export const CHATEAU_RICHER_PV_CONFIG: PvCityConfig = {
+  citySlug: "chateau-richer",
+  pvIndexUrl: "https://www.chateauricher.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-chateau-richer",
+};
+
+export const LAC_ETCHEMIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-etchemin",
+  pvIndexUrl: "https://lac-etchemin.ca/municipalite/seances-du-conseil-municipal/",
+  sourceId: "proces-verbaux-lac-etchemin",
+};
+
+export const SAINT_DAMIEN_DE_BUCKLAND_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-damien-de-buckland",
+  pvIndexUrl: "https://saint-damien.com/conseilmunicipal/",
+  sourceId: "proces-verbaux-saint-damien-de-buckland",
+};
+
+export const SAINT_NEREE_DE_BELLECHASSE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-neree-de-bellechasse",
+  pvIndexUrl: "https://www.st-neree.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-neree-de-bellechasse",
+};
+
+export const SAINT_ZACHARIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-zacharie",
+  pvIndexUrl: "https://www.st-zacharie.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-zacharie",
+};
+
+export const SAINTE_ROSE_DE_WATFORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-rose-de-watford",
+  pvIndexUrl: "https://www.sainterosedewatford.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-sainte-rose-de-watford",
+};
+
+export const SAINTE_AURELIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-aurelie",
+  pvIndexUrl: "https://www.ste-aurelie.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-sainte-aurelie",
+};
+
+export const SAINT_RAPHAEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-raphael",
+  pvIndexUrl: "https://www.saint-raphael.ca/fr/vie-municipale/conseil-municipal/ordre-du-jour-et-proces-verbaux/",
+  sourceId: "proces-verbaux-saint-raphael",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4956,4 +5164,39 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINT_AUBERT_PV_CONFIG },
   { config: LISLE_AUX_COUDRES_PV_CONFIG },
   { config: SAINTE_FELICITE_LISLET_PV_CONFIG },
+  // -- Lot cities-round9 (config-only, verifie 2026-06-11) --
+  { config: SAINT_HENRI_PV_CONFIG },
+  { config: LITCHFIELD_PV_CONFIG },
+  { config: CAMPBELLS_BAY_PV_CONFIG },
+  { config: SAINT_ROBERT_BELLARMIN_PV_CONFIG },
+  { config: FRAMPTON_PV_CONFIG },
+  { config: LAC_BEAUPORT_PV_CONFIG },
+  { config: SAINTE_PETRONILLE_PV_CONFIG },
+  { config: PORTAGE_DU_FORT_PV_CONFIG },
+  { config: SAINTE_CLAIRE_PV_CONFIG },
+  { config: BOISCHATEL_PV_CONFIG },
+  { config: SAINT_ODILON_DE_CRANBOURNE_PV_CONFIG },
+  { config: LILE_DU_GRAND_CALUMET_PV_CONFIG },
+  { config: SAINT_PHILIBERT_PV_CONFIG },
+  { config: SAINT_COME_LINIERE_PV_CONFIG },
+  { config: STONEHAM_ET_TEWKESBURY_PV_CONFIG },
+  { config: SAINT_CHARLES_DE_BELLECHASSE_PV_CONFIG },
+  { config: SAINT_BENJAMIN_PV_CONFIG },
+  { config: LANGE_GARDIEN_LA_COTE_DE_BEAUPRE_PV_CONFIG },
+  { config: SAINT_LAURENT_DE_LILE_DORLEANS_PV_CONFIG },
+  { config: SAINT_THEOPHILE_PV_CONFIG },
+  { config: SAINTE_BRIGITTE_DE_LAVAL_PV_CONFIG },
+  { config: SAINT_LAZARE_DE_BELLECHASSE_PV_CONFIG },
+  { config: SAINT_LEON_DE_STANDON_PV_CONFIG },
+  { config: SAINT_NAZAIRE_DE_DORCHESTER_PV_CONFIG },
+  { config: LAC_EDOUARD_PV_CONFIG },
+  { config: LA_DURANTAYE_PV_CONFIG },
+  { config: CHATEAU_RICHER_PV_CONFIG },
+  { config: LAC_ETCHEMIN_PV_CONFIG },
+  { config: SAINT_DAMIEN_DE_BUCKLAND_PV_CONFIG },
+  { config: SAINT_NEREE_DE_BELLECHASSE_PV_CONFIG },
+  { config: SAINT_ZACHARIE_PV_CONFIG },
+  { config: SAINTE_ROSE_DE_WATFORD_PV_CONFIG },
+  { config: SAINTE_AURELIE_PV_CONFIG },
+  { config: SAINT_RAPHAEL_PV_CONFIG },
 ];
