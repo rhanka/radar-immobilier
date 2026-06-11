@@ -14,12 +14,12 @@ export * from "./sources/reglements-urbanisme-valleyfield.js";
 export { AVIS_PUBLICS_FIXTURE_HTML } from "./sources/avis-publics-valleyfield.fixture.js";
 export { AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML } from "./sources/avis-publics-beauharnois.fixture.js";
 export {
-  ROLE_EVALUATION_MAMH_VALLEYFIELD_XML,
-  ROLE_EVALUATION_MAMH_BEAUHARNOIS_XML,
+  roleEvaluationMamhValleyfieldXml,
+  roleEvaluationMamhBeauharnoisXml,
 } from "./sources/role-evaluation-mamh.fixture.js";
 export {
-  ADRESSES_QUEBEC_VALLEYFIELD_JSON,
-  ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
+  adressesQuebecValleyfieldJson,
+  adressesQuebecBeauharnoisJson,
 } from "./sources/adresses-quebec.fixture.js";
 export {
   REGLEMENT_450_02_TEXT,

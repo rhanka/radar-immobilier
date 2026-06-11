@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { parseAdressesQuebec } from "./adresses-quebec-parser.js";
 import {
-  ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
-  ADRESSES_QUEBEC_VALLEYFIELD_JSON,
+  adressesQuebecBeauharnoisJson,
+  adressesQuebecValleyfieldJson,
 } from "./adresses-quebec.fixture.js";
 
 describe("parseAdressesQuebec (REAL committed terrAPI bytes, anti-invention)", () => {
   it("parses the REAL Salaberry addresses verbatim (code / nom / nbUnite)", () => {
-    const { adresses } = parseAdressesQuebec(ADRESSES_QUEBEC_VALLEYFIELD_JSON);
+    const { adresses } = parseAdressesQuebec(adressesQuebecValleyfieldJson());
     expect(adresses).toHaveLength(3);
     const first = adresses[0]!;
     expect(first.code).toBe("000464c34bfd4f25862f208af2e3dbf5J6S6A5");
@@ -24,7 +24,7 @@ describe("parseAdressesQuebec (REAL committed terrAPI bytes, anti-invention)", (
   });
 
   it("parses the REAL Beauharnois addresses verbatim (different municipality)", () => {
-    const { adresses } = parseAdressesQuebec(ADRESSES_QUEBEC_BEAUHARNOIS_JSON);
+    const { adresses } = parseAdressesQuebec(adressesQuebecBeauharnoisJson());
     expect(adresses).toHaveLength(3);
     expect(adresses.map((a) => a.nom)).toEqual([
       "279 chemin Saint-Louis, Beauharnois J6N2J3",
@@ -38,7 +38,7 @@ describe("parseAdressesQuebec (REAL committed terrAPI bytes, anti-invention)", (
   it("never fabricates coordinates or lots — the sample carries NO geometry", () => {
     // The committed sample was fetched with geometry=0: no `geometry` member and
     // no lot number exists in the bytes, so the parser shape has no geom/lot field.
-    const parsed = parseAdressesQuebec(ADRESSES_QUEBEC_VALLEYFIELD_JSON);
+    const parsed = parseAdressesQuebec(adressesQuebecValleyfieldJson());
     for (const a of parsed.adresses) {
       expect(a).not.toHaveProperty("geom");
       expect(a).not.toHaveProperty("geometry");
