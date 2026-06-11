@@ -3,8 +3,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
-  ADRESSES_QUEBEC_VALLEYFIELD_JSON,
+  adressesQuebecBeauharnoisJson,
+  adressesQuebecValleyfieldJson,
   adressesResourceUrl,
   adressesSourceId,
   AVIS_PUBLICS_BEAUHARNOIS_FIXTURE_HTML,
@@ -97,8 +97,13 @@ export interface CityAdresseSpec {
   readonly sourceId: string;
   /** The real, public terrAPI address resource URL (provenance). */
   readonly sourceUrl: string;
-  /** Verbatim terrAPI FeatureCollection JSON (the committed fixture). */
-  readonly json: string;
+  /**
+   * Verbatim terrAPI FeatureCollection JSON (the committed fixture), read LAZILY.
+   * Stored as a thunk so building `CITY_SAMPLES` at module load performs NO
+   * filesystem access — the prod API can boot without the dev sample bytes; the
+   * read only fires when `seedCityOntology` actually seeds the city.
+   */
+  readonly json: () => string;
 }
 
 /**
@@ -156,7 +161,7 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
     adresses: {
       sourceId: adressesSourceId("70052"),
       sourceUrl: adressesResourceUrl("70052"),
-      json: ADRESSES_QUEBEC_VALLEYFIELD_JSON,
+      json: adressesQuebecValleyfieldJson,
     },
     // WP4 Source #5: two REAL committed urbanisme bylaws (verbatim pdftotext of
     // the public CloudFront PDFs). 150-51 is the ZONING amendment (Bylaw 150-51 +
@@ -190,7 +195,7 @@ export const CITY_SAMPLES: Record<string, CitySampleSpec> = {
     adresses: {
       sourceId: adressesSourceId("70022"),
       sourceUrl: adressesResourceUrl("70022"),
-      json: ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
+      json: adressesQuebecBeauharnoisJson,
     },
     // HONEST: no règlement-d'urbanisme document is committed for Beauharnois yet,
     // so WP4 #5 does not enrich the Beauharnois seed (it stays role + avis +
@@ -338,7 +343,7 @@ export async function seedCityOntology(
   // the reconciliation screen real Adresse canonicals. HONESTY: the sample carries
   // NO geometry and NO lot, so the Adresse geom stays null and there is NO
   // fabricated cross-source Adresse↔Lot candidate.
-  const adresseBytes = new TextEncoder().encode(spec.adresses.json);
+  const adresseBytes = new TextEncoder().encode(spec.adresses.json());
   const adresseRecord: RawDocumentRecord = buildRawDocumentRecord({
     source: spec.adresses.sourceId,
     sourceUrl: spec.adresses.sourceUrl,
@@ -410,7 +415,7 @@ export async function seedCityOntology(
 
   // Parse the REAL terrAPI addresses straight from the committed bytes (WP4 #4).
   const realAdresses: SeededRealAdresse[] = parseAdressesQuebec(
-    spec.adresses.json,
+    spec.adresses.json(),
   ).adresses.map((a) => ({
     code: a.code,
     nom: a.nom,
