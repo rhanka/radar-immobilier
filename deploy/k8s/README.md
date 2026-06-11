@@ -43,6 +43,7 @@ and extended with the sentropic-app integration.
 | `40-maildev.yaml` | SMTP sink (POC) |
 | `50-ui.yaml` | Svelte SPA via nginx + `/api` proxy (ConfigMap holds the nginx conf) |
 | `60-ingress.yaml` | public Traefik Ingress for `immo.sent-tech.ca` + cert-manager TLS |
+| `70-networkpolicy.yaml` | tenant-side additive NetworkPolicy: Traefik → `radar-ui`:8080 (see "Ingress reaches the UI pod, not the api") |
 | `80-auth.yaml` | declarative record of the sentropic OIDC delegation (`radar-sentropic-auth` ConfigMap) |
 | `kustomization.yaml` | bundles the resources; stamps the `sentropic` part-of + workspace labels |
 | `secrets.example.yaml` | **EXAMPLE only**, no real values — DB / S3 / LLM / OIDC client-secret / registry pull |
@@ -97,6 +98,40 @@ consume the IdP. The runtime wiring is on the api:
 > the id_token currently carries only `sub`/`name`/`email` — no `tenant`/`role`.
 > That is sufficient for radar's single-tenant POC login. Do not hand-roll
 > tenant/role from A0 claims; tenant-scoped claims arrive in IdP Phase A1.
+
+## Ingress reaches the UI pod, not the api — NetworkPolicy dependency
+
+The public host `immo.sent-tech.ca` is fronted by the **`radar-ui` (nginx)**
+pod on port **8080** (`50-ui.yaml`), which serves the SPA and reverse-proxies
+`/api` + `/health` to `radar-api:3000`. The api is JSON-only and does **not**
+serve the SPA (`api/src/app.ts`: `GET /` → `{name,status}`), so the Ingress
+**must** target the ui Service, as it does in `60-ingress.yaml`.
+
+The cluster-operator baseline in **poc-k8s**
+(`tenants/radar-immobilier/30-netpol.yaml`, policy `allow-traefik-to-api`)
+only opens **Traefik → api:3000**. Under the namespace's default-deny ingress,
+Traefik traffic to the ui pod on 8080 is **dropped** — so without an additional
+policy the host resolves and the cert issues, but every request (including
+`GET /health`) is blocked before reaching nginx.
+
+This branch ships the tenant-side fix `70-networkpolicy.yaml`
+(`allow-traefik-to-ui`, additive — NetworkPolicies are OR-combined), mirroring
+the operator's selectors but targeting `{component: ui, port 8080}`.
+
+> **Parent/operator decision** — pick one before the live deploy:
+> - **(A)** apply `70-networkpolicy.yaml` from this repo (default; tenant-owned);
+> - **(B)** instead extend poc-k8s `tenants/radar-immobilier/30-netpol.yaml`
+>   with a Traefik → `{component: ui, port 8080}` rule (then drop
+>   `70-networkpolicy.yaml` from `kustomization.yaml`);
+> - **(C)** rejected: fronting the Ingress on the api — radar's api does not
+>   serve the SPA.
+>
+> Note: the poc-k8s `requests/radar-immobilier.md` says "Ingress: host
+> immo.sent-tech.ca, **API only**" and cites issuer `letsencrypt`. Both are
+> stale vs. what radar actually deploys: the public surface is the **UI**
+> (nginx → api same-origin), and the issuer that exists on the cluster is
+> **`letsencrypt-prod`** (poc-k8s `platform/30-clusterissuer.yaml`), which is
+> what `60-ingress.yaml` already references.
 
 ## Sentropic workspace for code management
 
