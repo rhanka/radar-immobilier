@@ -24,7 +24,7 @@ import { fileURLToPath } from "node:url";
  * BOOT-SAFETY: the reads are LAZY (deferred to first access, then memoized).
  * Importing this module — and therefore the @radar/sources barrel and anything
  * that re-exports it — performs NO filesystem access, so the production API can
- * boot without shipping the dev `_spikes/**​/samples/` bytes. The read only
+ * boot without shipping the dev `_spikes/.../samples/` bytes. The read only
  * happens when a fixture value is actually requested (tests, sample-seeding).
  */
 
