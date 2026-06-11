@@ -16,6 +16,8 @@ avant d'écrire le premier vrai objet sur SCW S3 — aucune logique métier nouv
 - `api/src/routes/scrape-status.ts`
 - `api/src/routes/scrape-status.test.ts`
 - `api/src/services/scrape-status/derive.test.ts`
+- `api/src/services/pipeline/executor-generic-sources.test.ts`
+- `api/tests/integration/object-store.spec.ts`
 - `BRANCH.md`
 
 ### Forbidden

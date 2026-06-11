@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { loadConfig } from "../../src/config.js";
-import { rawObjectKey } from "../../src/storage/object-store.js";
+import { casObjectKey } from "../../src/storage/object-store.js";
 import { createObjectStore } from "../../src/storage/s3-object-store.js";
 
 const store = createObjectStore(loadConfig());
@@ -11,13 +11,15 @@ beforeAll(async () => {
 
 describe("object store integration", () => {
   it("round-trips put / get / head", async () => {
-    const key = rawObjectKey({
-      source: "avis-publics",
-      date: new Date("2024-05-18T00:00:00Z"),
+    const key = casObjectKey({
+      citySlug: "salaberry-de-valleyfield",
+      sourceKind: "avis-publics",
       sha256: "deadbeef",
       ext: "txt",
     });
-    expect(key).toBe("raw/avis-publics/2024/05/18/deadbeef.txt");
+    expect(key).toBe(
+      "raw/salaberry-de-valleyfield/avis-publics/cas/deadbeef.txt",
+    );
 
     const body = "Règlement 2024-58 — densité augmentée";
     await store.put(key, body, "text/plain");

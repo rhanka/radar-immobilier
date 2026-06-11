@@ -76,6 +76,9 @@ class MemoryStore implements ObjectStore {
     const v = this.objects.get(key);
     return v ? { key, size: v.byteLength } : null;
   }
+  async list(prefix: string): Promise<string[]> {
+    return [...this.objects.keys()].filter((k) => k.startsWith(prefix));
+  }
 }
 
 // ─── Fixture fetch mocks (NO network) ───────────────────────────────────────
