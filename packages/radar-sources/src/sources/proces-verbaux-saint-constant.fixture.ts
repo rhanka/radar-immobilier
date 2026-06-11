@@ -22,9 +22,6 @@
  *        - Règlement 1927-26: modifiant le règlement de zonage numéro 1528-17
  *          (nombre de véhicules récréatifs + unités d'habitations accessoires).
  *      → Expected: avisDeMotion=true, changementZonage=true, règlements [1926-26, 1927-26].
- *
- * Plus avis publics fixture showing "Consultation publique sur le projet de
- * règlement numéro 1926-26" and "1927-26" (zonage-related).
  */
 
 /**
@@ -43,35 +40,6 @@ export const PV_SAINT_CONSTANT_INDEX_HTML = `
 <a class="c-table_link o-link -underline-hover" href="https://saint-constant.ca/uploads/attachments/Greffe/2026/2026-04-21/2026-03-17_Seance_ordinaire.pdf" target="_blank">Procès-verbal de la séance ordinaire du 17 mars 2026</a>
 <a class="c-table_link o-link -underline-hover" href="https://saint-constant.ca/uploads/attachments/Greffe/2026/2026-03-17/2026-02-17_Seance_ordinaire.pdf" target="_blank">Procès-verbal de la séance ordinaire du 17 février 2026</a>
 <a class="c-table_link o-link -underline-hover" href="https://saint-constant.ca/uploads/attachments/Greffe/2026/2026-02-17/2026-01-20_Seance_ordinaire.pdf" target="_blank">Procès-verbal de la séance ordinaire du 20 janvier 2026</a>
-`;
-
-/**
- * Real HTML snippet from the avis publics section of Saint-Constant's page.
- * Captured 2026-06-10. Shows zonage-related avis (consultation publique 1926-26
- * and 1927-26 — both modifying règlement de zonage 1528-17).
- *
- * Source: https://saint-constant.ca/fr/seances-du-conseil-et-documents-publics
- * Fetched: 2026-06-10 / HTTP 200 / robots.txt: no restrictions
- */
-export const AVIS_SAINT_CONSTANT_INDEX_HTML = `
-<tr>
-<td style="width: 50%;">Semaine du 18 mai 2026</td>
-<td style="width: 44.2197%;">
-<ul>
-<li><a title="CP_Proj_reg_1926-26.pdf (1.20 MB)" href="https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/CP/CP_Proj_reg_1926-26.pdf" target="_blank" rel="noopener">Consultation publique sur le projet de règlement numéro 1926-26</a> (publié le 20 mai 2026)</li>
-<li><a title="CP_Proj_reg_1927-26.pdf (194 KB)" href="https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/CP/CP_Proj_reg_1927-26.pdf" target="_blank" rel="noopener">Consultation publique sur le projet de règlement numéro 1927-26</a> (publié le 20 mai 2026)</li>
-</ul>
-</td>
-</tr>
-<tr>
-<td style="width: 50%;">Entrées en vigueur 2026</td>
-<td style="width: 44.2197%;">
-<ul>
-<li><a title="EEV1917-26.pdf (5.67 MB)" href="https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/EEV1917-26.pdf" target="_blank" rel="noopener">Entrée en vigueur - Règlement numéro 1917-26</a></li>
-<li><a title="EEV1911-26.pdf (4.13 MB)" href="https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/EEV1911-26.pdf" target="_blank" rel="noopener">Entrée en vigueur - Règlement numéro 1911-26</a></li>
-</ul>
-</td>
-</tr>
 `;
 
 /**
