@@ -12,7 +12,12 @@
  *   LIVE_SCRAPE_LIMIT=2 tsx src/scripts/worker-live.ts carignan
  *
  * Env:
- *   LIVE_SCRAPE_LIMIT  optional per-city cap on the number of docs collected.
+ *   LIVE_SCRAPE_LIMIT    optional per-city cap on the number of docs collected.
+ *   LIVE_SCRAPE_EXPLOIT  when "1"/"true", also run EXPLOITATION after each
+ *                        city's RECUEIL: PARSE the raw PV (pdftotext via poppler)
+ *                        + project the real DesignationEvents into the per-city
+ *                        project-state (`ontology/{city}/project-state.json`),
+ *                        i.e. the key the Signaux view reads. Off by default.
  */
 import { loadConfig } from "../config.js";
 import { createLogger } from "../logger.js";
@@ -27,20 +32,29 @@ async function main(): Promise<void> {
   const slugs = process.argv.slice(2);
   const limitEnv = process.env.LIVE_SCRAPE_LIMIT;
   const limit = limitEnv ? Number.parseInt(limitEnv, 10) : undefined;
+  const exploitEnv = (process.env.LIVE_SCRAPE_EXPLOIT ?? "").toLowerCase();
+  const exploit = exploitEnv === "1" || exploitEnv === "true";
 
   logger.info(
-    { cities: slugs.length > 0 ? slugs : "all-config-only", limit },
+    { cities: slugs.length > 0 ? slugs : "all-config-only", limit, exploit },
     "worker-live: starting live PV scrape",
   );
 
   const recap = await runLiveScrape(slugs.length > 0 ? slugs : undefined, {
     store,
     ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
+    ...(exploit ? { exploit: true } : {}),
   });
 
   for (const r of recap) {
     logger.info(
-      { city: r.city, status: r.status, docs: r.count, error: r.error },
+      {
+        city: r.city,
+        status: r.status,
+        docs: r.count,
+        signals: r.signals,
+        error: r.error ?? r.exploitError,
+      },
       `worker-live: ${r.city} → ${r.status}`,
     );
   }
