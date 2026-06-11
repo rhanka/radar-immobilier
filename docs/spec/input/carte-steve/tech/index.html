@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Plateforme d'analyse immobilière — Québec</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;min-height:100vh;}
+    header{background:#1a1a2e;color:#fff;padding:20px 32px;display:flex;align-items:center;gap:16px;}
+    header h1{font-size:20px;font-weight:800;}
+    header p{font-size:12px;color:#aaa;margin-top:2px;}
+    .logo{font-size:28px;}
+    .container{max-width:1100px;margin:0 auto;padding:28px 24px;}
+    .search-bar{display:flex;gap:10px;margin-bottom:28px;}
+    .search-bar input{flex:1;padding:12px 16px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s;}
+    .search-bar input:focus{border-color:#1a5e30;}
+    .section-title{font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+    .cities-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+    .city-card{background:#fff;border-radius:14px;padding:20px;border:2px solid transparent;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+    .city-card:hover{border-color:#1a5e30;transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.12);}
+    .city-card.pending{opacity:.6;cursor:default;}
+    .city-card.pending:hover{border-color:transparent;transform:none;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+    .city-name{font-size:17px;font-weight:800;color:#1a1a2e;margin-bottom:2px;}
+    .city-region{font-size:11px;color:#888;margin-bottom:12px;}
+    .city-stats{display:flex;gap:12px;}
+    .city-stat{text-align:center;}
+    .city-stat .n{font-size:16px;font-weight:800;color:#1a5e30;}
+    .city-stat .l{font-size:9px;color:#aaa;margin-top:1px;}
+    .city-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:10px;}
+    .badge-ready{background:#e8f5e9;color:#1a5e30;}
+    .badge-pending{background:#f5f5f5;color:#999;}
+    .btn-open{display:block;margin-top:14px;padding:9px 0;background:#1a1a2e;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .15s;}
+    .btn-open:hover{opacity:.85;}
+    .empty{text-align:center;padding:40px;color:#aaa;font-size:13px;}
+    footer{text-align:center;padding:24px;color:#bbb;font-size:11px;margin-top:32px;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🗺️</div>
+  <div>
+    <h1>Plateforme d'analyse immobilière</h1>
+    <p>Rive-Sud de Montréal · Québec</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="🔍  Rechercher une ville…" oninput="filtrerVilles(this.value)">
+  </div>
+
+  <div class="section-title">Villes disponibles</div>
+  <div class="cities-grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">Aucune ville trouvée.</div>
+</div>
+
+<footer>Plateforme privée — Guillaume Chaperon · Données cadastrales : MERN Québec</footer>
+
+<script>
+let cities = [];
+
+// Données des villes — source de vérité dans le code
+// (synchronisé avec data/cities.json)
+const CITIES_DATA = [
+  {nom:"Delson",          slug:"delson",          region:"Montérégie — Rive-Sud",population:8000, lots:3213,  status:"ready",centre:[45.377,-73.544]},
+  {nom:"Sainte-Catherine",slug:"sainte-catherine",region:"Montérégie — Rive-Sud",population:18000,lots:5615,  status:"ready",centre:[45.402,-73.578]},
+  {nom:"Saint-Constant",  slug:"saint-constant",  region:"Montérégie — Rive-Sud",population:25000,lots:11261, status:"ready",centre:[45.371,-73.573]},
+  {nom:"Candiac",         slug:"candiac",         region:"Montérégie — Rive-Sud",population:23000,lots:7190,  status:"ready",centre:[45.381,-73.517]}
+];
+
+async function init(){
+  // Tenter de charger depuis cities.json (plus à jour si modifié manuellement)
+  try{
+    const res = await fetch('data/cities.json');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    // Vérifier que c'est bien du JSON (pas une page HTML d'erreur)
+    if(text.trim().startsWith('<')) throw new Error('Réponse HTML inattendue');
+    cities = JSON.parse(text);
+  } catch(e){
+    // Fallback : utiliser les données embarquées (toujours à jour)
+    cities = CITIES_DATA;
+  }
+  renderGrid(cities);
+}
+
+function renderGrid(list){
+  const grid  = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  if(!list.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  grid.innerHTML = list.map(c => {
+    const ready = c.status === 'ready';
+    return `<div class="city-card${ready?'':' pending'}" onclick="${ready?`ouvrirVille('${c.slug}')`:''}" >
+      <div class="city-name">${c.nom}</div>
+      <div class="city-region">${c.region}</div>
+      <div class="city-stats">
+        <div class="city-stat">
+          <div class="n">${c.lots ? c.lots.toLocaleString('fr-CA') : '—'}</div>
+          <div class="l">Lots</div>
+        </div>
+        <div class="city-stat">
+          <div class="n">${c.population ? c.population.toLocaleString('fr-CA') : '—'}</div>
+          <div class="l">Habitants</div>
+        </div>
+      </div>
+      <span class="city-badge ${ready?'badge-ready':'badge-pending'}">${ready?'✅ Disponible':'⏳ En préparation'}</span>
+      ${ready ? `<a class="btn-open" href="carte.html?ville=${c.slug}&v=${Date.now()}">Ouvrir la carte →</a>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function ouvrirVille(slug){
+  window.location.href = 'carte.html?ville=' + slug + '&v=' + Date.now();
+}
+
+function filtrerVilles(q){
+  const filtered = cities.filter(c =>
+    c.nom.toLowerCase().includes(q.toLowerCase()) ||
+    c.region.toLowerCase().includes(q.toLowerCase())
+  );
+  renderGrid(filtered);
+}
+
+init();
+</script>
+</body>
+</html>

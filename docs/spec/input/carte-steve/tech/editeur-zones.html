@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Éditeur de zones</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <!-- Leaflet.draw pour dessiner des polygones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;}
+    #map{width:100vw;height:100vh;}
+
+    /* ── Panneau latéral ── */
+    #panel{
+      position:absolute;top:12px;right:12px;z-index:1000;
+      background:rgba(255,255,255,0.98);border-radius:16px;
+      padding:18px 20px;width:290px;
+      box-shadow:0 4px 30px rgba(0,0,0,0.25);
+      max-height:94vh;overflow-y:auto;
+    }
+    #panel h2{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:2px;}
+    .sub{font-size:11px;color:#999;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #eee;}
+
+    /* ── Boutons ── */
+    .btn{
+      display:block;width:100%;padding:10px 14px;margin-bottom:8px;
+      border:none;border-radius:10px;font-size:13px;font-weight:600;
+      cursor:pointer;text-align:left;transition:opacity .15s;
+    }
+    .btn:hover{opacity:.85;}
+    .btn-draw { background:#27ae60;color:#fff; }
+    .btn-edit { background:#2980b9;color:#fff; }
+    .btn-del  { background:#e74c3c;color:#fff; }
+    .btn-exp  { background:#1a1a2e;color:#fff; }
+    .btn-imp  { background:#7f8c8d;color:#fff;font-size:11px; }
+    .btn-clear{ background:#f39c12;color:#fff; }
+    .btn-sec  { background:#f0f2f5;color:#333;font-size:12px;margin-bottom:4px; }
+
+    /* ── Section zones ── */
+    #zone-list{margin-top:4px;}
+    .zone-item{
+      display:flex;align-items:center;gap:8px;
+      padding:6px 8px;border-radius:8px;margin-bottom:4px;
+      background:#f7f8fa;border:1px solid #eee;
+      font-size:12px;cursor:pointer;
+    }
+    .zone-item:hover{background:#eef;}
+    .zone-item.selected{background:#ddf;border-color:#27ae60;}
+    .zone-color{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+    .zone-name{font-weight:600;flex:1;}
+    .zone-del{color:#e74c3c;font-size:15px;cursor:pointer;padding:0 4px;}
+
+    /* ── Modal ── */
+    #modal{
+      display:none;position:fixed;inset:0;z-index:9999;
+      background:rgba(0,0,0,.5);align-items:center;justify-content:center;
+    }
+    #modal.open{display:flex;}
+    .modal-box{
+      background:#fff;border-radius:16px;padding:28px 32px;
+      width:340px;box-shadow:0 8px 40px rgba(0,0,0,.3);
+    }
+    .modal-box h3{font-size:16px;font-weight:800;margin-bottom:16px;}
+    .modal-box label{font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;}
+    .modal-box input,.modal-box select{
+      width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;
+      font-size:13px;margin-bottom:12px;
+    }
+    .modal-btns{display:flex;gap:8px;}
+    .modal-btns button{flex:1;padding:10px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;}
+    #btn-modal-ok{background:#27ae60;color:#fff;}
+    #btn-modal-cancel{background:#eee;color:#333;}
+
+    /* ── Notice ── */
+    #notice{
+      position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+      background:rgba(26,26,46,.88);color:#fff;padding:10px 20px;
+      border-radius:30px;font-size:13px;z-index:2000;
+      pointer-events:none;opacity:0;transition:opacity .3s;
+    }
+    #notice.show{opacity:1;}
+
+    /* ── Labels zones sur carte ── */
+    .zone-label-edit{
+      background:transparent!important;border:none!important;box-shadow:none!important;
+      font-size:11px;font-weight:700;color:#000;white-space:nowrap;
+      text-shadow:0 0 3px #fff, 0 0 3px #fff;
+    }
+
+    /* Séparateur ── */
+    .sep{border-top:1px solid #eee;margin:12px 0;}
+
+    /* Instructions ── */
+    .instr{font-size:11px;color:#666;background:#f7f8fa;border-radius:8px;padding:10px 12px;line-height:1.5;margin-bottom:10px;}
+    .instr b{color:#333;}
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<!-- Panneau latéral -->
+<div id="panel">
+  <h2>✏️ Éditeur de zones</h2>
+  <div class="sub" id="ville-label">Chargement…</div>
+
+  <div class="instr">
+    <b>1.</b> Ouvre le plan de zonage PDF de la ville dans un autre onglet.<br>
+    <b>2.</b> Clique <b>Dessiner une zone</b> et trace le polygone sur la carte.<br>
+    <b>3.</b> Entre le code de zone (ex : H-308) et clique OK.<br>
+    <b>4.</b> Répète pour toutes les zones. Puis <b>Exporter</b>.
+  </div>
+
+  <button class="btn btn-draw" id="btn-draw">✏️ Dessiner une zone</button>
+  <button class="btn btn-edit" id="btn-edit">🔧 Modifier un polygone</button>
+  <button class="btn btn-del"  id="btn-del">🗑️ Supprimer un polygone</button>
+
+  <div class="sep"></div>
+
+  <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px;">
+    Zones dessinées (<span id="zone-count">0</span>) :
+  </div>
+  <div id="zone-list"><i style="font-size:11px;color:#aaa;">Aucune zone encore dessinée.</i></div>
+
+  <div class="sep"></div>
+
+  <button class="btn btn-exp" id="btn-export">💾 Exporter les zones (JSON)</button>
+  <button class="btn btn-imp" id="btn-import">📂 Importer des zones existantes</button>
+  <button class="btn btn-clear" id="btn-clear" style="margin-top:4px">🗑️ Tout effacer</button>
+  <input type="file" id="file-input" accept=".json" style="display:none">
+
+  <div class="sep"></div>
+
+  <button class="btn btn-sec" onclick="window.open('https://www.ville.sainte-catherine.qc.ca/medias/documents/content/PLAN_Zonage_Z85pt3_vp20240710.pdf','_blank')">
+    📄 Plan zonage Sainte-Catherine (PDF)
+  </button>
+  <button class="btn btn-sec" onclick="window.open('https://www.ville.sainte-catherine.qc.ca/citoyens/reglements/reglements-durbanisme/','_blank')">
+    📋 Grilles de zonage — site ville
+  </button>
+</div>
+
+<!-- Modal saisie nom de zone -->
+<div id="modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Nommer la zone</h3>
+    <label>Code de zone (ex : H-308, C-125, I-405)</label>
+    <input id="zone-code" type="text" placeholder="H-308" autocomplete="off">
+    <label>Type (optionnel)</label>
+    <select id="zone-type">
+      <option value="Résidentielle">Résidentielle</option>
+      <option value="Commercial">Commercial</option>
+      <option value="Industrielle">Industrielle</option>
+      <option value="Mixte">Mixte</option>
+      <option value="Institutionnelle">Institutionnelle</option>
+      <option value="Parc / Récréation">Parc / Récréation</option>
+      <option value="Agricole">Agricole</option>
+      <option value="Autre">Autre</option>
+    </select>
+    <div class="modal-btns">
+      <button id="btn-modal-ok">✅ OK</button>
+      <button id="btn-modal-cancel">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notice flash -->
+<div id="notice" id="notice"></div>
+
+<script>
+// ── Config depuis URL ────────────────────────────────────────────────────────
+const urlP     = new URLSearchParams(window.location.search);
+const villeSlug= urlP.get('ville') || 'sainte-catherine';
+const LSK      = villeSlug + '_zones_edit'; // clé localStorage
+
+// Palette couleurs par type
+const TYPE_COLORS = {
+  'Résidentielle':  '#27ae60',
+  'Commercial':     '#e67e22',
+  'Industrielle':   '#8e44ad',
+  'Mixte':          '#2980b9',
+  'Institutionnelle':'#c0392b',
+  'Parc / Récréation':'#16a085',
+  'Agricole':       '#d4ac0d',
+  'Autre':          '#7f8c8d',
+};
+
+// ── Initialisation carte ────────────────────────────────────────────────────
+const map = L.map('map', { zoomControl:true });
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap / CartoDB', maxZoom:20
+}).addTo(map);
+
+// Chargement données ville
+let lotLayer = null;
+fetch('data/' + villeSlug + '.json')
+  .then(r=>r.json())
+  .then(city=>{
+    const meta = city.meta || {};
+    document.getElementById('ville-label').textContent = meta.nom || villeSlug;
+    document.title = 'Éditeur de zones — ' + (meta.nom || villeSlug);
+
+    const c = meta.centre || [45.4, -73.56];
+    map.setView(c, meta.zoom_initial || 14);
+
+    // Afficher les lots en filigrane (fond gris semi-transparent)
+    if(city.lots && city.lots.features){
+      lotLayer = L.geoJSON(city.lots, {
+        style:{ fillColor:'#ecf0f1', fillOpacity:.35, color:'#bdc3c7', weight:.8, opacity:.6 },
+        interactive: false
+      }).addTo(map);
+    }
+  })
+  .catch(()=>{
+    map.setView([45.40, -73.57], 14);
+    document.getElementById('ville-label').textContent = villeSlug;
+  });
+
+// ── Couche de dessin ────────────────────────────────────────────────────────
+const drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+const drawControl = new L.Control.Draw({
+  draw:{
+    polygon:{ allowIntersection:false, showArea:true,
+      shapeOptions:{ color:'#27ae60', weight:2, fillOpacity:.2 } },
+    polyline:false, rectangle:false, circle:false,
+    marker:false, circlemarker:false
+  },
+  edit:{ featureGroup:drawnItems, remove:true }
+});
+map.addControl(drawControl);
+
+// ── État ────────────────────────────────────────────────────────────────────
+let zones = [];          // [{id, code, type, geojson}]
+let pendingLayer = null; // polygone en attente de nommage
+let editingId = null;    // zone en cours de renommage
+
+// ── Persistance localStorage ────────────────────────────────────────────────
+function saveLS(){ localStorage.setItem(LSK, JSON.stringify(zones)); }
+function loadLS(){
+  try{
+    const s = localStorage.getItem(LSK);
+    if(s){ zones = JSON.parse(s); rebuildLayers(); }
+  }catch(e){}
+}
+
+// ── Boutons dessin ──────────────────────────────────────────────────────────
+document.getElementById('btn-draw').addEventListener('click', ()=>{
+  new L.Draw.Polygon(map, drawControl.options.draw.polygon).enable();
+  flash('Cliquez sur la carte pour tracer le polygone. Double-clic pour terminer.');
+});
+document.getElementById('btn-edit').addEventListener('click', ()=>{
+  new L.EditToolbar.Edit(map, { featureGroup:drawnItems }).enable();
+  flash('Cliquez sur un polygone pour le modifier. Puis cliquez Sauvegarder (en haut).');
+});
+document.getElementById('btn-del').addEventListener('click', ()=>{
+  new L.EditToolbar.Delete(map, { featureGroup:drawnItems }).enable();
+  flash('Cliquez sur un polygone pour le supprimer. Puis Sauvegarder (en haut).');
+});
+
+// ── Événement : polygone terminé ────────────────────────────────────────────
+map.on(L.Draw.Event.CREATED, e=>{
+  pendingLayer = e.layer;
+  editingId    = null;
+  openModal('Nommer la zone', '', 'Résidentielle');
+});
+
+// Sauvegarde après édition geometrie
+map.on(L.Draw.Event.EDITED, e=>{
+  e.layers.eachLayer(l=>{
+    const id = l._zoneId;
+    if(id !== undefined){
+      const z = zones.find(z=>z.id === id);
+      if(z){ z.geojson = l.toGeoJSON(); }
+    }
+  });
+  saveLS();
+  flash('Modifications sauvegardées.');
+});
+
+map.on(L.Draw.Event.DELETED, e=>{
+  e.layers.eachLayer(l=>{
+    const id = l._zoneId;
+    if(id !== undefined){ zones = zones.filter(z=>z.id !== id); }
+  });
+  saveLS();
+  renderList();
+  flash('Zone(s) supprimée(s).');
+});
+
+// ── Modal ────────────────────────────────────────────────────────────────────
+function openModal(title, code, type){
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('zone-code').value  = code;
+  document.getElementById('zone-type').value  = type;
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('zone-code').focus(), 50);
+}
+
+document.getElementById('btn-modal-ok').addEventListener('click', confirmModal);
+document.getElementById('zone-code').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmModal(); });
+document.getElementById('btn-modal-cancel').addEventListener('click', cancelModal);
+
+function confirmModal(){
+  const code = document.getElementById('zone-code').value.trim().toUpperCase();
+  const type = document.getElementById('zone-type').value;
+  if(!code){ alert('Entre un code de zone.'); return; }
+
+  if(editingId !== null){
+    // Renommage d'une zone existante
+    const z = zones.find(z=>z.id === editingId);
+    if(z){ z.code = code; z.type = type; }
+  } else if(pendingLayer){
+    // Nouvelle zone
+    const id = Date.now();
+    const gj = pendingLayer.toGeoJSON();
+    zones.push({ id, code, type, geojson:gj });
+    pendingLayer = null;
+  }
+
+  closeModal();
+  saveLS();
+  rebuildLayers();
+  flash('Zone « ' + code + ' » sauvegardée.');
+}
+
+function cancelModal(){
+  pendingLayer = null;
+  editingId    = null;
+  closeModal();
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+// ── Reconstruction des couches ────────────────────────────────────────────────
+function rebuildLayers(){
+  drawnItems.clearLayers();
+  zones.forEach(z=>{
+    const color = TYPE_COLORS[z.type] || '#7f8c8d';
+    const poly  = L.geoJSON(z.geojson, {
+      style:{ color, weight:2, fillColor:color, fillOpacity:.18, dashArray:'5,4' }
+    });
+    poly.eachLayer(l=>{
+      l._zoneId = z.id;
+      // Label permanent
+      const center = l.getBounds().getCenter();
+      L.marker(center,{
+        icon: L.divIcon({
+          className:'zone-label-edit',
+          html:`<span>${z.code}</span>`,
+          iconSize:[60,20],
+          iconAnchor:[30,10]
+        })
+      }).addTo(drawnItems);
+      drawnItems.addLayer(l);
+    });
+  });
+  renderList();
+}
+
+// ── Liste latérale ───────────────────────────────────────────────────────────
+function renderList(){
+  const el = document.getElementById('zone-list');
+  document.getElementById('zone-count').textContent = zones.length;
+  if(!zones.length){
+    el.innerHTML = '<i style="font-size:11px;color:#aaa;">Aucune zone encore dessinée.</i>';
+    return;
+  }
+  el.innerHTML = zones.map(z=>{
+    const c = TYPE_COLORS[z.type] || '#7f8c8d';
+    return `<div class="zone-item" onclick="selectZone(${z.id})">
+      <div class="zone-color" style="background:${c}"></div>
+      <div class="zone-name">${z.code}</div>
+      <div style="font-size:10px;color:#999;flex-shrink:0">${z.type.split('/')[0].trim()}</div>
+      <div class="zone-del" onclick="event.stopPropagation();deleteZone(${z.id})" title="Supprimer">×</div>
+    </div>`;
+  }).join('');
+}
+
+function selectZone(id){
+  editingId = id;
+  const z = zones.find(z=>z.id===id);
+  if(z) openModal('Modifier la zone', z.code, z.type);
+}
+
+function deleteZone(id){
+  if(!confirm('Supprimer cette zone ?')) return;
+  zones = zones.filter(z=>z.id!==id);
+  saveLS();
+  rebuildLayers();
+}
+
+// ── Export JSON ──────────────────────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click', ()=>{
+  if(!zones.length){ alert('Aucune zone à exporter.'); return; }
+
+  // Construire un GeoJSON propre compatible avec carte.html
+  const fc = {
+    type:'FeatureCollection',
+    name:'Zonage-' + villeSlug,
+    features: zones.map(z=>({
+      type:'Feature',
+      properties:{ zone:z.code, nom:z.type },
+      geometry: z.geojson.geometry || z.geojson.features?.[0]?.geometry || z.geojson
+    }))
+  };
+
+  // Télécharger
+  const blob = new Blob([JSON.stringify(fc, null, 2)], {type:'application/json'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = villeSlug + '-zones.json';
+  a.click();
+
+  flash('Fichier ' + villeSlug + '-zones.json téléchargé !');
+
+  // Instructions
+  setTimeout(()=>{
+    alert(
+      '✅ Export terminé !\n\n' +
+      'Pour activer les zones dans la plateforme :\n\n' +
+      '1. Ouvre le fichier data/' + villeSlug + '.json\n' +
+      '2. Ajoute après "lots":{ ... } une virgule puis :\n' +
+      '   "zones": [le contenu du fichier exporté]\n\n' +
+      'Ou envoie-moi le fichier exporté et je l\'intègre automatiquement.'
+    );
+  }, 400);
+});
+
+// ── Import JSON ──────────────────────────────────────────────────────────────
+document.getElementById('btn-import').addEventListener('click', ()=>{
+  document.getElementById('file-input').click();
+});
+
+document.getElementById('file-input').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    try{
+      const data = JSON.parse(ev.target.result);
+      // Accepte GeoJSON FeatureCollection ou tableau de zones
+      let features = [];
+      if(data.type === 'FeatureCollection'){ features = data.features; }
+      else if(Array.isArray(data)){ features = data; }
+
+      zones = features.map((f, i)=>({
+        id: Date.now() + i,
+        code: (f.properties?.zone || f.code || 'Z-'+(i+1)).toUpperCase(),
+        type: f.properties?.nom || f.type || 'Autre',
+        geojson: { type:'Feature', geometry: f.geometry, properties: f.properties||{} }
+      }));
+
+      saveLS();
+      rebuildLayers();
+      flash(zones.length + ' zone(s) importée(s).');
+    }catch(err){
+      alert('Erreur de lecture du fichier JSON : ' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+// ── Tout effacer ─────────────────────────────────────────────────────────────
+document.getElementById('btn-clear').addEventListener('click', ()=>{
+  if(!confirm('Effacer TOUTES les zones dessinées ?')) return;
+  zones = [];
+  saveLS();
+  rebuildLayers();
+  flash('Toutes les zones effacées.');
+});
+
+// ── Notification flash ────────────────────────────────────────────────────────
+let _noticeT;
+function flash(msg){
+  const n = document.getElementById('notice');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(_noticeT);
+  _noticeT = setTimeout(()=>n.classList.remove('show'), 3000);
+}
+
+// ── Démarrage ────────────────────────────────────────────────────────────────
+loadLS();
+</script>
+</body>
+</html>
