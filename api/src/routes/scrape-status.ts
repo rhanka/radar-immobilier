@@ -108,8 +108,9 @@ export function scrapeStatusRoute(store: ObjectStore): Hono {
       );
     }
 
-    const updated = await upsert(store, parsed.data);
-    return c.json({ item: parsed.data, items: updated });
+    await upsert(store, parsed.data);
+    const items = await readAll(store);
+    return c.json({ item: parsed.data, items });
   });
 
   return app;

@@ -1,34 +1,63 @@
 import { ScrapeStatus, type ScrapeStatusSourceT, type ScrapeStatusT } from "@radar/domain";
 import type { ObjectStore } from "../../storage/object-store.js";
 
-/** Object-storage key where the scrape-status list is persisted. */
-const STORE_KEY = "scrape-status/index.json";
-
 /**
- * Read the current list from object storage.
- * Returns [] if the object does not exist yet (new environment).
+ * Scrape-status is SHARDED per (city × source): each record lives at its own
+ * key `state/{citySlug}/{source}.json` (spec §1.4). One writer per key removes
+ * the read→modify→write race of the previous single global object, which lost
+ * updates under concurrency at 1000 cities (spec §7 bug #2).
  */
-export async function readAll(store: ObjectStore): Promise<ScrapeStatusT[]> {
+const STATE_PREFIX = "state/";
+
+/** Per-shard key for a (city × source) pair. */
+export function stateKey(citySlug: string, source: ScrapeStatusSourceT): string {
+  return `${STATE_PREFIX}${citySlug}/${source}.json`;
+}
+
+/** Read one shard, or null if absent/malformed. */
+async function readShard(
+  store: ObjectStore,
+  key: string,
+): Promise<ScrapeStatusT | null> {
   try {
-    const raw = await store.get(STORE_KEY);
-    const text = new TextDecoder().decode(raw);
-    const parsed = JSON.parse(text) as unknown[];
-    return parsed
-      .map((item) => ScrapeStatus.safeParse(item))
-      .filter((r) => r.success)
-      .map((r) => r.data as ScrapeStatusT);
+    const raw = await store.get(key);
+    const parsed = ScrapeStatus.safeParse(
+      JSON.parse(new TextDecoder().decode(raw)),
+    );
+    return parsed.success ? (parsed.data as ScrapeStatusT) : null;
   } catch {
-    // Object not found or malformed — start with empty state.
-    return [];
+    return null;
   }
 }
 
 /**
+ * Aggregate all stored records by listing the `state/` shards.
+ * Degrades to [] when the store cannot list (e.g. a mock without `list`) —
+ * the sharded WRITES already fix the race regardless of the read path.
+ */
+export async function readAll(store: ObjectStore): Promise<ScrapeStatusT[]> {
+  const keys = (await store.list?.(STATE_PREFIX)) ?? [];
+  const records = await Promise.all(keys.map((k) => readShard(store, k)));
+  return records.filter((r): r is ScrapeStatusT => r !== null);
+}
+
+/**
+ * Upsert a single ScrapeStatus record — writes ONLY its own shard
+ * `state/{city}/{source}.json` (no global read→modify→write). Returns the
+ * stored record.
+ */
+export async function upsert(
+  store: ObjectStore,
+  record: ScrapeStatusT,
+): Promise<ScrapeStatusT> {
+  const key = stateKey(record.citySlug, record.source);
+  await store.put(key, JSON.stringify(record, null, 2), "application/json");
+  return record;
+}
+
+/**
  * Mark a (citySlug × source) pair as `graphified` (scraped → graphified).
- *
- * Called by the exploitation pipeline after mentions have been extracted and
- * committed to the knowledge graph. If no record exists yet for the pair, a
- * minimal one is created. Timestamps `lastRunAt` to now (ISO-8601).
+ * Reads and rewrites ONLY that pair's shard — never touches other cities.
  *
  * USAGE: call this AFTER `extractMentions` + `reconcileMentions` succeed so the
  * transition is only recorded when the pipeline step completed successfully.
@@ -38,43 +67,12 @@ export async function markAsGraphified(
   citySlug: string,
   source: ScrapeStatusSourceT,
   now: Date = new Date(),
-): Promise<ScrapeStatusT[]> {
-  const current = await readAll(store);
-  const existing = current.find(
-    (r) => r.citySlug === citySlug && r.source === source,
-  );
+): Promise<ScrapeStatusT> {
+  const existing = await readShard(store, stateKey(citySlug, source));
   const updated: ScrapeStatusT = ScrapeStatus.parse({
-    ...(existing ?? {
-      citySlug,
-      source,
-      automation: "refresh",
-    }),
+    ...(existing ?? { citySlug, source, automation: "refresh" }),
     status: "graphified",
     lastRunAt: now.toISOString(),
   });
   return upsert(store, updated);
-}
-
-/**
- * Upsert a single ScrapeStatus record (keyed by citySlug + source).
- * Persists the updated list back to object storage atomically.
- */
-export async function upsert(
-  store: ObjectStore,
-  record: ScrapeStatusT,
-): Promise<ScrapeStatusT[]> {
-  const current = await readAll(store);
-  const idx = current.findIndex(
-    (r) => r.citySlug === record.citySlug && r.source === record.source,
-  );
-  const updated =
-    idx === -1
-      ? [...current, record]
-      : current.map((r, i) => (i === idx ? record : r));
-  await store.put(
-    STORE_KEY,
-    JSON.stringify(updated, null, 2),
-    "application/json",
-  );
-  return updated;
 }
