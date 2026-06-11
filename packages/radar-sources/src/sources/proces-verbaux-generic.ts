@@ -4220,6 +4220,179 @@ export const SAINTE_FELICITE_LISLET_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-sainte-felicite--lislet",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round11 -- 28 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const SAINT_DAMASE_DE_LISLET_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-damase-de-lislet",
+  pvIndexUrl: "https://saintdamasedelislet.com/municipalite/organisation-municipale-et-conseil/",
+  sourceId: "proces-verbaux-saint-damase-de-lislet",
+};
+
+export const SAINTE_LOUISE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-louise",
+  pvIndexUrl: "https://www.saintelouise.qc.ca/fr/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-louise",
+};
+
+export const SAINT_FRANCOIS_DE_SALES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-francois-de-sales",
+  pvIndexUrl: "https://municipalites-du-quebec.com/saint-francois-de-sales/f-pv-2026.php",
+  sourceId: "proces-verbaux-saint-francois-de-sales",
+};
+
+export const LES_EBOULEMENTS_PV_CONFIG: PvCityConfig = {
+  citySlug: "les-eboulements",
+  pvIndexUrl: "https://leseboulements.com/vie-municipale/municipalite/seances-du-conseil-et-proces-verbaux/",
+  sourceId: "proces-verbaux-les-eboulements",
+};
+
+export const SAINTE_HEDWIDGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-hedwidge",
+  pvIndexUrl: "https://municipalites-du-quebec.com/ste-hedwidge/f-pv-2026.php",
+  sourceId: "proces-verbaux-sainte-hedwidge",
+};
+
+export const SAINT_HILARION_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-hilarion",
+  pvIndexUrl: "https://sainthilarion.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-hilarion",
+};
+
+export const SAINT_ANDRE_DU_LAC_SAINT_JEAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-andre-du-lac-saint-jean",
+  pvIndexUrl: "https://www.municipalites-du-quebec.com/st-andre-du-lac-st-jean/f-pv-2026.php",
+  sourceId: "proces-verbaux-saint-andre-du-lac-saint-jean",
+};
+
+export const LA_POCATIERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-pocatiere",
+  pvIndexUrl: "https://www.lapocatiere.ca/ma-ville/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-la-pocatiere",
+};
+
+export const CHAMBORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "chambord",
+  pvIndexUrl: "https://chambord.ca/proces-verbaux",
+  sourceId: "proces-verbaux-chambord",
+};
+
+export const HEBERTVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "hebertville",
+  pvIndexUrl: "https://www.hebertville.qc.ca/vie-municipale/proces-verbaux/",
+  sourceId: "proces-verbaux-hebertville",
+};
+
+export const RIVIERE_OUELLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "riviere-ouelle",
+  pvIndexUrl: "https://www.riviereouelle.ca/fr/municipalite/vie-municipale/seances-du-conseil-proces-verbaux/",
+  sourceId: "proces-verbaux-riviere-ouelle",
+};
+
+export const SAINT_PACOME_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-pacome",
+  pvIndexUrl: "https://st-pacome.ca/pv/",
+  sourceId: "proces-verbaux-saint-pacome",
+};
+
+export const CLERMONT_CHARLEVOIX_EST_PV_CONFIG: PvCityConfig = {
+  citySlug: "clermont--charlevoix-est",
+  pvIndexUrl: "https://ville.clermont.qc.ca/fr/ville/conseil-de-ville/proces-verbaux",
+  sourceId: "proces-verbaux-clermont--charlevoix-est",
+};
+
+export const SAINT_PHILIPPE_DE_NERI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-philippe-de-neri",
+  pvIndexUrl: "https://www.stphilippedeneri.com/proces-verbaux-2/",
+  sourceId: "proces-verbaux-saint-philippe-de-neri",
+};
+
+export const MONT_CARMEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-carmel",
+  pvIndexUrl: "https://www.mont-carmel.ca/mot-du-maire/calendrier-des-seances-et-proces-verbaux/",
+  sourceId: "proces-verbaux-mont-carmel",
+};
+
+export const FERLAND_ET_BOILLEAU_PV_CONFIG: PvCityConfig = {
+  citySlug: "ferland-et-boilleau",
+  pvIndexUrl: "https://www.ferlandetboilleau.com/copie-de-conseil-municipal",
+  sourceId: "proces-verbaux-ferland-et-boilleau",
+};
+
+export const KAMOURASKA_PV_CONFIG: PvCityConfig = {
+  citySlug: "kamouraska",
+  pvIndexUrl: "https://kamouraska.ca/documentation/Proces-verbaux",
+  sourceId: "proces-verbaux-kamouraska",
+};
+
+export const LAROUCHE_PV_CONFIG: PvCityConfig = {
+  citySlug: "larouche",
+  pvIndexUrl: "https://www.larouche.ca/documentation/proces-verbaux",
+  sourceId: "proces-verbaux-larouche",
+};
+
+export const SAINT_CHARLES_DE_BOURGET_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-charles-de-bourget",
+  pvIndexUrl: "https://www.stcharlesdebourget.ca/fr/municipalite/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-charles-de-bourget",
+};
+
+export const SAINT_ANDRE_DE_KAMOURASKA_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-andre-de-kamouraska",
+  pvIndexUrl: "https://www.standredekamouraska.ca/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-andre-de-kamouraska",
+};
+
+export const SAINT_SIMEON_CHARLEVOIX_EST_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-simeon--charlevoix-est",
+  pvIndexUrl: "https://saintsimeon.ca/fr/vie-municipale/conseil-municipal/ordres-du-jour-et-proces-verbaux/",
+  sourceId: "proces-verbaux-saint-simeon--charlevoix-est",
+};
+
+export const BEGIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "begin",
+  pvIndexUrl: "https://begin.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-begin",
+};
+
+export const PETIT_SAGUENAY_PV_CONFIG: PvCityConfig = {
+  citySlug: "petit-saguenay",
+  pvIndexUrl: "https://petit-saguenay.com/vivre/affaires-municipales/conseil-municipal/proces-verbaux-annee-2026/",
+  sourceId: "proces-verbaux-petit-saguenay",
+};
+
+export const RIVIERE_BLEUE_PV_CONFIG: PvCityConfig = {
+  citySlug: "riviere-bleue",
+  pvIndexUrl: "https://riviere-bleue.ca/municipalite/conseil-municipal/proces-verbaux",
+  sourceId: "proces-verbaux-riviere-bleue",
+};
+
+export const SAINT_MARC_DU_LAC_LONG_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-marc-du-lac-long",
+  pvIndexUrl: "https://saintmarcdulaclong.ca/index.php/component/edocman/proces-verbaux",
+  sourceId: "proces-verbaux-saint-marc-du-lac-long",
+};
+
+export const VAL_DOR_PV_CONFIG: PvCityConfig = {
+  citySlug: "val-dor",
+  pvIndexUrl: "https://www.ville.valdor.qc.ca/seances",
+  sourceId: "proces-verbaux-val-dor",
+};
+
+export const TADOUSSAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "tadoussac",
+  pvIndexUrl: "https://www.municipalite.tadoussac.com/fr/municipalite/vie-municipale/reunions-et-proces-verbaux/",
+  sourceId: "proces-verbaux-tadoussac",
+};
+
+export const SAINT_EPIPHANE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-epiphane",
+  pvIndexUrl: "https://saint-epiphane.ca/seances/",
+  sourceId: "proces-verbaux-saint-epiphane",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4956,4 +5129,33 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINT_AUBERT_PV_CONFIG },
   { config: LISLE_AUX_COUDRES_PV_CONFIG },
   { config: SAINTE_FELICITE_LISLET_PV_CONFIG },
+  // -- Lot cities-round11 (config-only, verifie 2026-06-11) --
+  { config: SAINT_DAMASE_DE_LISLET_PV_CONFIG },
+  { config: SAINTE_LOUISE_PV_CONFIG },
+  { config: SAINT_FRANCOIS_DE_SALES_PV_CONFIG },
+  { config: LES_EBOULEMENTS_PV_CONFIG },
+  { config: SAINTE_HEDWIDGE_PV_CONFIG },
+  { config: SAINT_HILARION_PV_CONFIG },
+  { config: SAINT_ANDRE_DU_LAC_SAINT_JEAN_PV_CONFIG },
+  { config: LA_POCATIERE_PV_CONFIG },
+  { config: CHAMBORD_PV_CONFIG },
+  { config: HEBERTVILLE_PV_CONFIG },
+  { config: RIVIERE_OUELLE_PV_CONFIG },
+  { config: SAINT_PACOME_PV_CONFIG },
+  { config: CLERMONT_CHARLEVOIX_EST_PV_CONFIG },
+  { config: SAINT_PHILIPPE_DE_NERI_PV_CONFIG },
+  { config: MONT_CARMEL_PV_CONFIG },
+  { config: FERLAND_ET_BOILLEAU_PV_CONFIG },
+  { config: KAMOURASKA_PV_CONFIG },
+  { config: LAROUCHE_PV_CONFIG },
+  { config: SAINT_CHARLES_DE_BOURGET_PV_CONFIG },
+  { config: SAINT_ANDRE_DE_KAMOURASKA_PV_CONFIG },
+  { config: SAINT_SIMEON_CHARLEVOIX_EST_PV_CONFIG },
+  { config: BEGIN_PV_CONFIG },
+  { config: PETIT_SAGUENAY_PV_CONFIG },
+  { config: RIVIERE_BLEUE_PV_CONFIG },
+  { config: SAINT_MARC_DU_LAC_LONG_PV_CONFIG },
+  { config: VAL_DOR_PV_CONFIG },
+  { config: TADOUSSAC_PV_CONFIG },
+  { config: SAINT_EPIPHANE_PV_CONFIG },
 ];
