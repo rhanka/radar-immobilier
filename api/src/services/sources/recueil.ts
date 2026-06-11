@@ -8,6 +8,11 @@ import {
 } from "@radar/sources";
 
 import type { ObjectStore } from "../../storage/object-store.js";
+import {
+  manifestKey,
+  writeRunManifest,
+  type RunManifestEntry,
+} from "./run-manifest.js";
 
 /**
  * RECUEIL stage (SPEC_PLAN_SCRAPING §3.2): run a SourceAdapter, store the raw
@@ -29,6 +34,13 @@ export interface RecueilOptions {
    */
   readonly ciblagePlanId?: string;
   readonly signal?: AbortSignal;
+  /**
+   * Run id, used to namespace the run manifest under `runs/{source}/{runId}/`.
+   * Optional — defaults to a value derived from `fetchedAt`
+   * (`${fetchedAt.replace(/[:.]/g, "")}-r`). Only consumed by
+   * `runRecueilWithManifest`; `runRecueil` itself ignores it.
+   */
+  readonly runId?: string;
 }
 
 export interface RecueilSuccess {
@@ -38,6 +50,13 @@ export interface RecueilSuccess {
   readonly rawDocIds: readonly string[];
   readonly records: readonly RawDocumentRecord[];
   readonly fetchedAt: string;
+  /**
+   * One manifest entry per doc seen this run, in collection order, each
+   * carrying the dedup decision (`new` = bytes PUT, `seen` = HEAD-skip). The
+   * commit record (`runs/{source}/{runId}/manifest.jsonl`) is built from this;
+   * `runRecueilWithManifest` writes it, `runRecueil` only computes it.
+   */
+  readonly manifestEntries: readonly RunManifestEntry[];
 }
 
 export interface RecueilFailure {
@@ -65,6 +84,7 @@ export async function runRecueil(
 ): Promise<RecueilOutcome> {
   const fetchedAt = new Date().toISOString();
   const records: RawDocumentRecord[] = [];
+  const manifestEntries: RunManifestEntry[] = [];
   const limit = options.limit ?? Number.POSITIVE_INFINITY;
 
   try {
@@ -96,7 +116,10 @@ export async function runRecueil(
       });
 
       // Idempotent store: write the raw bytes only if the object is absent.
+      // The HEAD result is the dedup decision recorded in the run manifest:
+      // absent ⇒ "new" (we PUT), present ⇒ "seen" (byte-identical, HEAD-skip).
       const existing = await store.head(record.storageKey);
+      const status: RunManifestEntry["status"] = existing ? "seen" : "new";
       if (!existing) {
         await store.put(record.storageKey, raw.body, record.contentType);
       }
@@ -113,6 +136,15 @@ export async function runRecueil(
       }
 
       records.push(record);
+      manifestEntries.push({
+        sha256: record.sha256,
+        sourceUrl: record.sourceUrl,
+        casKey: record.storageKey,
+        status,
+        ...(ref.publishedAt !== undefined
+          ? { publishedAt: ref.publishedAt }
+          : {}),
+      });
       processed += 1;
     }
   } catch (e) {
@@ -137,5 +169,45 @@ export async function runRecueil(
     rawDocIds: records.map((r) => r.id),
     records,
     fetchedAt,
+    manifestEntries,
   };
 }
+
+/**
+ * Default run id derived from a fetch timestamp (SPEC §5): the ISO instant with
+ * `:` and `.` stripped, suffixed `-r`, e.g. `2026-06-08T09:30:00.000Z` →
+ * `2026-06-08T093000000Z-r`. Used when the caller does not pass `runId`.
+ */
+function defaultRunId(fetchedAt: string): string {
+  return `${fetchedAt.replace(/[:.]/g, "")}-r`;
+}
+
+/**
+ * Like {@link runRecueil}, but on a SUCCESSFUL run also writes the run manifest
+ * `runs/{source}/{runId}/manifest.jsonl` (SPEC_PERSISTENCE_S3_FIRST §1.1, §5) —
+ * one JSONL line per doc seen, with the `new`/`seen` dedup status. The manifest
+ * is written LAST (after every CAS object + sidecar), so its presence attests
+ * that everything it references already exists. On failure, no manifest is
+ * written (a partial run is not committed).
+ *
+ * `runId` is taken from `options.runId`, else derived from `fetchedAt`.
+ */
+export async function runRecueilWithManifest(
+  source: string,
+  adapter: SourceAdapter,
+  store: ObjectStore,
+  options: RecueilOptions = {},
+): Promise<RecueilOutcome> {
+  const outcome = await runRecueil(source, adapter, store, options);
+  if (!outcome.ok) return outcome;
+
+  const runId = options.runId ?? defaultRunId(outcome.fetchedAt);
+  await writeRunManifest(store, {
+    source,
+    runId,
+    entries: outcome.manifestEntries,
+  });
+  return outcome;
+}
+
+export { manifestKey };
