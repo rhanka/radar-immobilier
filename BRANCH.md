@@ -1,18 +1,23 @@
-# Lot 3 — Villes config-only (débloque immo_subagents)
+# Lot 2b — manifeste de run
 
-Réf : `docs/spec/SPEC_PERSISTENCE_S3_FIRST.md` §3, §8.
+Réf : `docs/spec/SPEC_PERSISTENCE_S3_FIRST.md` §1.1 (manifeste), §5 (pipeline).
 
-Branche : `feat/s3-lot3-config-only`. Découple config↔fixture : une ville peut
-être ajoutée **config-only** (`{ config }` sans `pvText`) ; le worker la fetch
-en live → S3. Plus besoin de fixture par ville. immo_subagents authore des
-configs, pas du contenu.
+Branche : `feat/s3-lot2b-run-manifest`. Ajoute le **manifeste de run** (axe
+transaction-time / enregistrement de commit du modèle S3-first) et un chemin
+« scrape une ville → SCW » testable en mémoire, sans réseau ni Postgres.
+
+Le manifeste est écrit EN DERNIER dans un run : `runs/{source}/{runId}/manifest.jsonl`,
+une ligne JSON par doc vu (`{ sha256, sourceUrl, casKey, status: "new"|"seen",
+publishedAt? }`). Présence du manifeste ⇒ tout ce qu'il référence (CAS + sidecar)
+existe déjà.
 
 ## Scope
 
 ### Allowed
-- `packages/radar-sources/src/sources/proces-verbaux-generic.ts`
-- `api/src/services/sources/pv-seed.ts`
-- `api/src/services/sources/pv-seed-config-only.test.ts`
+- `api/src/services/sources/run-manifest.ts`
+- `api/src/services/sources/run-manifest.test.ts`
+- `api/src/services/sources/recueil.ts`
+- `api/src/services/sources/recueil.test.ts`
 - `BRANCH.md`
 
 ### Forbidden
@@ -21,8 +26,17 @@ configs, pas du contenu.
 
 ## Plan
 
-### Lot 3 — config-only
-- [x] `PvCityEntry.pvText` / `.sourceUrl` optionnels (villes config-only)
-- [x] `toPvFixtures()` pure : filtre les entrées sans `pvText` ; `PV_FIXTURES = toPvFixtures(ALL_PV_CITIES)` (seed ne casse pas sur config-only)
-- [x] test-first : golden gardée, config-only ignorée, jamais de fixture vide
-- [x] gate : typecheck 0, api + radar-sources 1145 verts
+### Lot 2b — manifeste de run
+- [x] `run-manifest.ts` : `writeRunManifest(store, { source, runId, entries })` écrit
+      `runs/{source}/{runId}/manifest.jsonl` en JSONL (1 objet/ligne, pas un tableau),
+      `publishedAt` omis si absent ; helper `manifestKey(source, runId)`.
+- [x] `recueil.ts` : `runId?` optionnel dans `RecueilOptions` (défaut dérivé de
+      `fetchedAt` → `${fetchedAt.replace(/[:.]/g,"")}-r`), statut `new`/`seen`
+      capturé sur le HEAD-skip, exposé via `RecueilSuccess.manifestEntries`
+      (extension additive — signature publique inchangée).
+- [x] wrapper `runRecueilWithManifest(...)` : sur run réussi, écrit le manifeste
+      en dernier ; sur échec, aucun manifeste (run partiel non committé).
+- [x] test-first (RED→GREEN) : 1 ligne/doc statut `new` au 1er run ; 2e run
+      contenu identique → statut `seen` (HEAD-skip), aucun nouvel objet `raw/cas`.
+- [x] gate : `tsc --noEmit` 0 erreur ; `api/src` + `packages/radar-sources`
+      1151 verts (7 skipped préexistants), dont 7 nouveaux tests.
