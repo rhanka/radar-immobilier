@@ -14,11 +14,14 @@ import {
 } from "@radar/sources";
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
-import { runRecueil } from "./recueil.js";
+import { runRecueil, runRecueilWithManifest } from "./recueil.js";
+import { manifestKey } from "./run-manifest.js";
 
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
+  putCount = 0;
   async put(key: string, body: Uint8Array | Buffer | string): Promise<ObjectInfo> {
+    this.putCount += 1;
     const bytes =
       typeof body === "string" ? new TextEncoder().encode(body) : new Uint8Array(body);
     this.objects.set(key, bytes);
@@ -95,5 +98,93 @@ describe("runRecueil — raw bytes + sidecar meta.json", () => {
     expect(meta.sha256).toBe(rec.sha256);
     expect(meta.storageKey).toBe(rec.storageKey);
     expect(meta.sourceUrl).toBe("https://testville.qc.ca/avis");
+  });
+});
+
+describe("runRecueilWithManifest — run manifest (commit record)", () => {
+  it("first run writes runs/{source}/{runId}/manifest.jsonl with status new", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueilWithManifest(
+      "avis-publics-testville",
+      fakeAdapter("<html>avis 2026-58</html>"),
+      store,
+      { runId: "20260608T093000-r" },
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+
+    const key = manifestKey("avis-publics-testville", "20260608T093000-r");
+    expect(key).toBe(
+      "runs/avis-publics-testville/20260608T093000-r/manifest.jsonl",
+    );
+    expect(store.objects.has(key)).toBe(true);
+
+    const body = new TextDecoder().decode(store.objects.get(key)!);
+    const lines = body.split("\n").filter((l) => l.length > 0);
+    expect(lines).toHaveLength(out.records.length);
+    expect(lines).toHaveLength(1);
+    const entry = JSON.parse(lines[0]!);
+    expect(entry.status).toBe("new");
+    expect(entry.sha256).toBe(out.records[0]!.sha256);
+    expect(entry.casKey).toBe(out.records[0]!.storageKey);
+    expect(entry.sourceUrl).toBe("https://testville.qc.ca/avis");
+  });
+
+  it("second run on byte-identical content is HEAD-skipped → status seen, no new raw object", async () => {
+    const store = new MemoryStore();
+    const body = "<html>avis 2026-58</html>";
+
+    const first = await runRecueilWithManifest(
+      "avis-publics-testville",
+      fakeAdapter(body),
+      store,
+      { runId: "run-1" },
+    );
+    expect(first.ok).toBe(true);
+    // After the first run, the raw object + its sidecar exist (2 puts) and the
+    // manifest is the 3rd put.
+    const rawKeysAfterFirst = [...store.objects.keys()].filter((k) =>
+      k.includes("/cas/"),
+    );
+    const putsAfterFirst = store.putCount;
+
+    const second = await runRecueilWithManifest(
+      "avis-publics-testville",
+      fakeAdapter(body),
+      store,
+      { runId: "run-2" },
+    );
+    expect(second.ok).toBe(true);
+    if (!second.ok) return;
+
+    // No NEW raw/cas object was written on the second run (HEAD-skip dedup).
+    const rawKeysAfterSecond = [...store.objects.keys()].filter((k) =>
+      k.includes("/cas/"),
+    );
+    expect(rawKeysAfterSecond).toEqual(rawKeysAfterFirst);
+    // The only put of the second run is the manifest itself.
+    expect(store.putCount).toBe(putsAfterFirst + 1);
+
+    const key = manifestKey("avis-publics-testville", "run-2");
+    const manifest = new TextDecoder().decode(store.objects.get(key)!);
+    const lines = manifest.split("\n").filter((l) => l.length > 0);
+    expect(lines).toHaveLength(1);
+    const entry = JSON.parse(lines[0]!);
+    expect(entry.status).toBe("seen");
+    expect(entry.sha256).toBe(second.records[0]!.sha256);
+  });
+
+  it("derives a default runId from fetchedAt when none is given", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueilWithManifest(
+      "avis-publics-testville",
+      fakeAdapter("<html>avis</html>"),
+      store,
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const expectedRunId = `${out.fetchedAt.replace(/[:.]/g, "")}-r`;
+    const key = manifestKey("avis-publics-testville", expectedRunId);
+    expect(store.objects.has(key)).toBe(true);
   });
 });
