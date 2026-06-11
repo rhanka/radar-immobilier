@@ -26,4 +26,5 @@ resources:
   - 40-maildev.yaml
   - 50-ui.yaml
   - 60-ingress.yaml
+  - 70-networkpolicy.yaml
   - 80-auth.yaml
