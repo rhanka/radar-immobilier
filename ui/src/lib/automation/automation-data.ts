@@ -71,6 +71,27 @@ export const STATUS_LABELS_FR: Record<ConnectorStatus, string> = {
   reel: "Réel",
 };
 
+/**
+ * Honest action-column hint for a connector that has no live-collect button.
+ * A connector without `realCollectSource` is NOT "simulated" — it is either a
+ * manual feed (CSV/registre fourni à l'onboarding) or a planned integration.
+ * Returning the real status label avoids the misleading « simulé » wording.
+ */
+export function connectorActionHint(connector: Connector): string {
+  switch (connector.status) {
+    case "manuel":
+      return "Apport manuel";
+    case "a-venir":
+      return "À venir";
+    case "connecte":
+    case "reel":
+      // A wired connector renders its own action button, not a hint.
+      return "";
+    default:
+      return "";
+  }
+}
+
 export const CONNECTORS: Connector[] = [
   {
     id: "avis-publics",
