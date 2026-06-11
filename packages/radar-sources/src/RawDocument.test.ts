@@ -44,15 +44,15 @@ describe("extForContentType", () => {
   });
 });
 
-describe("rawStorageKey", () => {
-  it("builds the canonical raw/<source>/<Y>/<M>/<D>/<sha>.<ext> key (UTC)", () => {
+describe("rawStorageKey (content-addressed, no fetch date)", () => {
+  it("builds raw/<source>/cas/<sha>.<ext> — no date partition", () => {
     const key = rawStorageKey({
       source: "avis-publics-valleyfield",
-      fetchedAt: "2026-06-08T09:30:00.000Z",
       sha256: "deadbeef",
       contentType: "text/html",
     });
-    expect(key).toBe("raw/avis-publics-valleyfield/2026/06/08/deadbeef.html");
+    expect(key).toBe("raw/avis-publics-valleyfield/cas/deadbeef.html");
+    expect(key).not.toMatch(/\/\d{4}\/\d{2}\/\d{2}\//);
   });
 });
 
@@ -73,7 +73,7 @@ describe("buildRawDocumentRecord", () => {
     expect(rec.sha256).toBe(sha256Hex(body));
     expect(rec.id).toBe(rawDocumentId("avis-publics-valleyfield", rec.sha256));
     expect(rec.storageKey).toBe(
-      `raw/avis-publics-valleyfield/2026/06/08/${rec.sha256}.html`,
+      `raw/avis-publics-valleyfield/cas/${rec.sha256}.html`,
     );
     expect(rec.bytesLen).toBe(body.byteLength);
     expect(rec.provenance.viaObscura).toBe(false);
@@ -98,6 +98,27 @@ describe("buildRawDocumentRecord", () => {
     });
     expect(a.id).toBe(b.id);
     expect(a.storageKey).toBe(b.storageKey);
+  });
+
+  it("dedups across fetches: same content fetched on different days → same key", () => {
+    const common = {
+      source: "avis-publics-valleyfield",
+      sourceUrl: "https://www.ville.valleyfield.qc.ca/avis-publics",
+      body,
+      contentType: "text/html",
+      provenance: PROVENANCE,
+    } as const;
+    const day1 = buildRawDocumentRecord({
+      ...common,
+      fetchedAt: "2026-06-08T09:30:00.000Z",
+    });
+    const day2 = buildRawDocumentRecord({
+      ...common,
+      fetchedAt: "2026-09-15T23:59:00.000Z",
+    });
+    // The whole point of CAS: re-fetching the identical doc must NOT create a
+    // second object (HEAD-skip works), so the keys must match despite the dates.
+    expect(day2.storageKey).toBe(day1.storageKey);
   });
 
   it("carries the ciblagePlanId into provenance when supplied", () => {
