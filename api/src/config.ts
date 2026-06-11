@@ -69,6 +69,37 @@ const envSchema = z.object({
     .enum(["0", "1"])
     .default("0")
     .transform((v) => v === "1"),
+
+  // ── Sentropic OIDC relying-party (human auth delegation) ───────────────
+  // radar is the OIDC RP to the shared sentropic IdP (auth.sent-tech.ca).
+  // The flow is authorization_code + PKCE, the id_token is verified against
+  // the IdP JWKS, and the api mints its OWN signed session cookie. See
+  // deploy/k8s/80-auth.yaml + README "Auth delegation" and services/auth/.
+  //
+  // ALL of these are OPTIONAL so local dev / tests stay open by default
+  // (fail-open, same posture as RADAR_ONTOLOGY_WRITE_TOKEN). Auth is enabled
+  // only when both SESSION_SECRET *and* SENTROPIC_OAUTH_CLIENT_SECRET are set
+  // (the two secrets the deployment injects from radar-sentropic-auth).
+  /** IdP issuer origin, e.g. https://auth.sent-tech.ca. Discovery is at
+   * `${issuer}/.well-known/openid-configuration`. */
+  SENTROPIC_IDP_ISSUER: z.string().url().optional(),
+  /** This app's registered oauth_clients id at the IdP. */
+  SENTROPIC_OAUTH_CLIENT_ID: z.string().min(1).optional(),
+  /** Confidential client secret (client_secret_basic). Secret. */
+  SENTROPIC_OAUTH_CLIENT_SECRET: z.string().min(1).optional(),
+  /** Absolute redirect_uri registered at the IdP, e.g.
+   * https://immo.sent-tech.ca/api/v1/auth/oauth/callback. */
+  SENTROPIC_OAUTH_REDIRECT_URI: z.string().url().optional(),
+  /** Space-separated scopes; openid is always required. */
+  SENTROPIC_OAUTH_SCOPES: z.string().default("openid profile email"),
+  /** Public base URL of this app (the Ingress host). Used to scope the
+   * session cookie and as the post-login landing default. */
+  AUTH_CALLBACK_BASE_URL: z.string().url().optional(),
+  /** Symmetric key the api uses to sign its OWN session cookie (HS256).
+   * Secret — distinct from the IdP. */
+  SESSION_SECRET: z.string().min(1).optional(),
+  /** Session cookie lifetime in seconds (default 8h). */
+  SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(28800),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
@@ -101,6 +132,59 @@ export function resolveScrapeS3Config(config: AppConfig): ScrapeS3Config {
     secretKey: config.SCRAPE_S3_SECRET_KEY ?? config.S3_SECRET_KEY,
     forcePathStyle:
       config.SCRAPE_S3_FORCE_PATH_STYLE ?? config.S3_FORCE_PATH_STYLE,
+  };
+}
+
+/**
+ * Effective OIDC relying-party configuration, derived from the SENTROPIC_ /
+ * SESSION_ env. `enabled` is true only when the deployment injected BOTH the
+ * client secret and the session secret (and the non-secret wiring is present),
+ * so local dev / tests stay open by default (fail-open). When disabled, the
+ * auth routes return 503 and the protect middleware lets every request through.
+ */
+export interface AuthConfig {
+  readonly enabled: boolean;
+  readonly issuer: string;
+  readonly clientId: string;
+  readonly clientSecret: string;
+  readonly redirectUri: string;
+  readonly scopes: string;
+  /** Public app origin; the cookie + post-login landing default. */
+  readonly appBaseUrl: string;
+  readonly sessionSecret: string;
+  readonly sessionTtlSeconds: number;
+}
+
+/**
+ * Derive the effective auth config from a parsed AppConfig. Returns
+ * `{ enabled: false, ... }` (with empty strings) unless every required field
+ * is present — that is the single switch the routes/middleware read.
+ */
+export function resolveAuthConfig(config: AppConfig): AuthConfig {
+  const issuer = config.SENTROPIC_IDP_ISSUER ?? "";
+  const clientId = config.SENTROPIC_OAUTH_CLIENT_ID ?? "";
+  const clientSecret = config.SENTROPIC_OAUTH_CLIENT_SECRET ?? "";
+  const redirectUri = config.SENTROPIC_OAUTH_REDIRECT_URI ?? "";
+  const appBaseUrl = config.AUTH_CALLBACK_BASE_URL ?? "";
+  const sessionSecret = config.SESSION_SECRET ?? "";
+
+  const enabled =
+    issuer !== "" &&
+    clientId !== "" &&
+    clientSecret !== "" &&
+    redirectUri !== "" &&
+    sessionSecret !== "";
+
+  return {
+    enabled,
+    issuer: issuer.replace(/\/$/, ""),
+    clientId,
+    clientSecret,
+    redirectUri,
+    scopes: config.SENTROPIC_OAUTH_SCOPES,
+    appBaseUrl: appBaseUrl.replace(/\/$/, ""),
+    sessionSecret,
+    sessionTtlSeconds: config.SESSION_TTL_SECONDS,
   };
 }
 
