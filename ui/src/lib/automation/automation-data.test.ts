@@ -5,8 +5,9 @@ import {
   STATUS_LABELS_FR,
   TREATMENTS,
   benchmarkRecap,
+  connectorActionHint,
 } from "./automation-data.js";
-import type { ConnectorStatus, TreatmentKind } from "./automation-data.js";
+import type { Connector, ConnectorStatus, TreatmentKind } from "./automation-data.js";
 
 describe("TREATMENTS", () => {
   it("has exactly 3 treatments", () => {
@@ -60,6 +61,34 @@ describe("CONNECTORS", () => {
     for (const c of CONNECTORS) {
       expect(c.id.length).toBeGreaterThan(0);
       expect(c.label.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("connectorActionHint — honest wording (no « simulé »)", () => {
+  it("labels a manual connector as a manual feed, not simulated", () => {
+    const manual: Connector = { id: "m", label: "M", status: "manuel" };
+    expect(connectorActionHint(manual)).toBe("Apport manuel");
+  });
+
+  it("labels a planned connector as « À venir », not simulated", () => {
+    const planned: Connector = { id: "p", label: "P", status: "a-venir" };
+    expect(connectorActionHint(planned)).toBe("À venir");
+  });
+
+  it("returns an empty hint for wired connectors (they render an action button)", () => {
+    const real: Connector = {
+      id: "r",
+      label: "R",
+      status: "reel",
+      realCollectSource: "x",
+    };
+    expect(connectorActionHint(real)).toBe("");
+  });
+
+  it("no connector is ever presented as « simulé »", () => {
+    for (const c of CONNECTORS) {
+      expect(connectorActionHint(c).toLowerCase()).not.toContain("simul");
     }
   });
 });
