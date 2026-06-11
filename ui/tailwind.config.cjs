@@ -3,13 +3,15 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{svelte,ts}"],
   theme: {
     extend: {
+      // Project palette aliased onto @sentropic design-system semantic tokens
+      // so it stays theme-reactive instead of carrying hardcoded hex values.
       colors: {
         radar: {
-          ink: "#17202a",
-          teal: "#0f766e",
-          amber: "#b45309",
-          signal: "#2563eb",
-          risk: "#dc2626",
+          ink: "var(--st-semantic-text-primary)",
+          teal: "var(--st-semantic-action-primary)",
+          amber: "var(--st-semantic-feedback-warning)",
+          signal: "var(--st-semantic-feedback-info)",
+          risk: "var(--st-semantic-feedback-error)",
         },
       },
     },
