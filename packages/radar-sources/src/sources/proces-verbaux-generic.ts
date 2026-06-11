@@ -2710,6 +2710,137 @@ export const SAINT_NORBERT_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-saint-norbert",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round6 -- 21 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const COURCELLES_SAINT_EVARISTE_PV_CONFIG: PvCityConfig = {
+  citySlug: "courcelles-saint-evariste",
+  pvIndexUrl: "https://www.muncste.ca/pages/proces-verbaux-regroupement",
+  sourceId: "proces-verbaux-courcelles-saint-evariste",
+};
+
+export const SAINT_SEBASTIEN_LE_GRANIT_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-sebastien--le-granit",
+  pvIndexUrl: "https://www.st-sebastien.com/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-sebastien--le-granit",
+};
+
+export const SAINT_PATRICE_DE_BEAURIVAGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-patrice-de-beaurivage",
+  pvIndexUrl: "https://www.spdb.ca/fr/municipalite/conseil-municipal/ordres-du-jour-et-proces-verbaux/",
+  sourceId: "proces-verbaux-saint-patrice-de-beaurivage",
+};
+
+export const AUMOND_PV_CONFIG: PvCityConfig = {
+  citySlug: "aumond",
+  pvIndexUrl: "https://www.aumond.ca/index.php/proces-verbaux-2025",
+  sourceId: "proces-verbaux-aumond",
+};
+
+export const SAINTE_CLOTILDE_DE_BEAUCE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-clotilde-de-beauce",
+  pvIndexUrl: "https://www.ste-clotilde.com/pages/proces-verbaux",
+  sourceId: "proces-verbaux-sainte-clotilde-de-beauce",
+};
+
+export const LAC_SERGENT_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-sergent",
+  pvIndexUrl: "https://www.villelacsergent.com/pages/la-ville/proc%C3%A8s-verbaux-et-ordre-du-jour",
+  sourceId: "proces-verbaux-lac-sergent",
+};
+
+export const EAST_BROUGHTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "east-broughton",
+  pvIndexUrl: "https://www.municipaliteeastbroughton.com/fr/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-east-broughton",
+};
+
+export const SACRE_COEUR_DE_JESUS_PV_CONFIG: PvCityConfig = {
+  citySlug: "sacre-coeur-de-jesus",
+  pvIndexUrl: "https://municipalites-du-quebec.com/sacre-coeur-de-jesus/f-pv-2026.php",
+  sourceId: "proces-verbaux-sacre-coeur-de-jesus",
+};
+
+export const BLUE_SEA_PV_CONFIG: PvCityConfig = {
+  citySlug: "blue-sea",
+  pvIndexUrl: "https://www.bluesea.ca/fr/municipalite/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-blue-sea",
+};
+
+export const SAINT_NARCISSE_DE_BEAURIVAGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-narcisse-de-beaurivage",
+  pvIndexUrl: "https://www.saintnarcissedebeaurivage.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-narcisse-de-beaurivage",
+};
+
+export const SAINTE_ANNE_DU_LAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-anne-du-lac",
+  pvIndexUrl: "https://www.steannedulac.ca/proces-verbaux",
+  sourceId: "proces-verbaux-sainte-anne-du-lac",
+};
+
+export const MANIWAKI_PV_CONFIG: PvCityConfig = {
+  citySlug: "maniwaki",
+  pvIndexUrl: "https://www.ville.maniwaki.qc.ca/index.php/hotel-de-ville/proces-verbaux",
+  sourceId: "proces-verbaux-maniwaki",
+};
+
+export const MESSINES_PV_CONFIG: PvCityConfig = {
+  citySlug: "messines",
+  pvIndexUrl: "https://www.messines.ca/fr/conseil/seances-du-conseil/proces-verbaux",
+  sourceId: "proces-verbaux-messines",
+};
+
+export const LA_GUADELOUPE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-guadeloupe",
+  pvIndexUrl: "https://www.munlaguadeloupe.qc.ca/pages/seances-du-conseil",
+  sourceId: "proces-verbaux-la-guadeloupe",
+};
+
+export const SAINT_RAYMOND_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-raymond",
+  pvIndexUrl: "https://villesaintraymond.com/a-propos-de-la-ville/conseil-municipal/ordres-du-jour-et-proces-verbaux",
+  sourceId: "proces-verbaux-saint-raymond",
+};
+
+export const FERME_NEUVE_PV_CONFIG: PvCityConfig = {
+  citySlug: "ferme-neuve",
+  pvIndexUrl: "https://municipalite.ferme-neuve.qc.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-ferme-neuve",
+};
+
+export const SAINTE_CATHERINE_DE_LA_JACQUES_CARTIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-catherine-de-la-jacques-cartier",
+  pvIndexUrl: "https://www.villescjc.com/vie-municipale/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-sainte-catherine-de-la-jacques-cartier",
+};
+
+export const ALLEYN_ET_CAWOOD_PV_CONFIG: PvCityConfig = {
+  citySlug: "alleyn-et-cawood",
+  pvIndexUrl: "https://alleyn-cawood.ca/fr/municipalite-alleyn-cawood/avis-publics-minutes",
+  sourceId: "proces-verbaux-alleyn-et-cawood",
+};
+
+export const SAINT_AUGUSTIN_DE_DESMAURES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-augustin-de-desmaures",
+  pvIndexUrl: "https://vsad.ca/seances",
+  sourceId: "proces-verbaux-saint-augustin-de-desmaures",
+};
+
+export const SAINT_AUGUSTIN_DE_WOBURN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-augustin-de-woburn",
+  pvIndexUrl: "https://www.saintaugustindewoburn.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-augustin-de-woburn",
+};
+
+export const SAINT_EPHREM_DE_BEAUCE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-ephrem-de-beauce",
+  pvIndexUrl: "https://www.saint-ephrem.com/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-ephrem-de-beauce",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -3193,4 +3324,26 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: YAMASKA_PV_CONFIG },
   { config: SAINT_ALPHONSE_RODRIGUEZ_PV_CONFIG },
   { config: SAINT_NORBERT_PV_CONFIG },
+  // -- Lot cities-round6 (config-only, verifie 2026-06-11) --
+  { config: COURCELLES_SAINT_EVARISTE_PV_CONFIG },
+  { config: SAINT_SEBASTIEN_LE_GRANIT_PV_CONFIG },
+  { config: SAINT_PATRICE_DE_BEAURIVAGE_PV_CONFIG },
+  { config: AUMOND_PV_CONFIG },
+  { config: SAINTE_CLOTILDE_DE_BEAUCE_PV_CONFIG },
+  { config: LAC_SERGENT_PV_CONFIG },
+  { config: EAST_BROUGHTON_PV_CONFIG },
+  { config: SACRE_COEUR_DE_JESUS_PV_CONFIG },
+  { config: BLUE_SEA_PV_CONFIG },
+  { config: SAINT_NARCISSE_DE_BEAURIVAGE_PV_CONFIG },
+  { config: SAINTE_ANNE_DU_LAC_PV_CONFIG },
+  { config: MANIWAKI_PV_CONFIG },
+  { config: MESSINES_PV_CONFIG },
+  { config: LA_GUADELOUPE_PV_CONFIG },
+  { config: SAINT_RAYMOND_PV_CONFIG },
+  { config: FERME_NEUVE_PV_CONFIG },
+  { config: SAINTE_CATHERINE_DE_LA_JACQUES_CARTIER_PV_CONFIG },
+  { config: ALLEYN_ET_CAWOOD_PV_CONFIG },
+  { config: SAINT_AUGUSTIN_DE_DESMAURES_PV_CONFIG },
+  { config: SAINT_AUGUSTIN_DE_WOBURN_PV_CONFIG },
+  { config: SAINT_EPHREM_DE_BEAUCE_PV_CONFIG },
 ];
