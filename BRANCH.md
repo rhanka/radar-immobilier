@@ -1,33 +1,28 @@
-# Lot 2 (a) — Persistance S3-first : recueil écrit CAS + meta.json
+# Lot 3 — Villes config-only (débloque immo_subagents)
 
-Réf : `docs/spec/SPEC_PERSISTENCE_S3_FIRST.md` §1.1, §8 (lot 2).
+Réf : `docs/spec/SPEC_PERSISTENCE_S3_FIRST.md` §3, §8.
 
-Branche : `feat/s3-lot2-recueil-writer`. Le **vrai** builder de clé en usage
-(`rawStorageKey` dans `@radar/sources`, via `buildRawDocumentRecord`) mettait la
-date de fetch dans la clé → dédup impossible. Migré en CAS + chaque objet raw
-gagne un sidecar `meta.json` auto-descriptif.
+Branche : `feat/s3-lot3-config-only`. Découple config↔fixture : une ville peut
+être ajoutée **config-only** (`{ config }` sans `pvText`) ; le worker la fetch
+en live → S3. Plus besoin de fixture par ville. immo_subagents authore des
+configs, pas du contenu.
 
 ## Scope
 
 ### Allowed
-- `packages/radar-sources/src/RawDocument.ts`
-- `packages/radar-sources/src/RawDocument.test.ts`
-- `api/src/services/sources/recueil.ts`
-- `api/src/services/sources/recueil.test.ts`
-- `api/src/routes/sources.test.ts`
+- `packages/radar-sources/src/sources/proces-verbaux-generic.ts`
+- `api/src/services/sources/pv-seed.ts`
+- `api/src/services/sources/pv-seed-config-only.test.ts`
 - `BRANCH.md`
 
 ### Forbidden
-- `packages/radar-sources/src/sources/*.fixture.ts`
 - `packages/radar-sources/src/sources/proces-verbaux-parser.ts`
+- `packages/radar-sources/src/sources/*.fixture.ts`
 
 ## Plan
 
-### Lot 2a — recueil CAS + meta.json
-- [x] `rawStorageKey` → CAS `raw/{source}/cas/{sha}.{ext}` (sans date) ; `fetchedAt` retiré du calcul de clé ; `rawMetaKey` ajouté
-- [x] `runRecueil` écrit le sidecar `meta.json` (RawDocumentRecord) à côté du raw, idempotent (HEAD-skip)
-- [x] tests : RawDocument (dédup multi-jours), recueil (raw+meta), assertions route sources migrées en CAS
-- [x] gate : typecheck 0, radar-sources 657 + api 486 verts
-
-### Lot 2b (suite) — manifeste de run `runs/{source}/{runId}/manifest.jsonl`
-- [ ] (PR suivante)
+### Lot 3 — config-only
+- [x] `PvCityEntry.pvText` / `.sourceUrl` optionnels (villes config-only)
+- [x] `toPvFixtures()` pure : filtre les entrées sans `pvText` ; `PV_FIXTURES = toPvFixtures(ALL_PV_CITIES)` (seed ne casse pas sur config-only)
+- [x] test-first : golden gardée, config-only ignorée, jamais de fixture vide
+- [x] gate : typecheck 0, api + radar-sources 1145 verts

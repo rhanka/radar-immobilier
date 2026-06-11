@@ -333,10 +333,14 @@ export function createProcesVerbauxAdapter(
  */
 export interface PvCityEntry {
   readonly config: PvCityConfig;
-  /** Real pdftotext excerpt used by pv-seed to seed the object-store. */
-  readonly pvText: string;
-  /** Public URL of the original PV PDF (provenance). */
-  readonly sourceUrl: string;
+  /**
+   * OPTIONAL real pdftotext excerpt — present only for the "golden" demo cities
+   * that pv-seed seeds offline. **New cities are config-only** (no fixture): the
+   * production worker fetches them live and writes to S3 (spec S3-first §3).
+   */
+  readonly pvText?: string;
+  /** OPTIONAL public URL of the original PV PDF (provenance for the excerpt). */
+  readonly sourceUrl?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -33,6 +33,7 @@
 import {
   ALL_PV_CITIES,
   buildRawDocumentRecord,
+  type PvCityEntry,
   type RawDocumentRecord,
 } from "@radar/sources";
 
@@ -60,19 +61,34 @@ export interface PvFixtureSpec {
 }
 
 /**
- * Fixtures réelles de toutes les villes PV génériques (données captées 2026-06-10).
- * Générées automatiquement depuis ALL_PV_CITIES — source de vérité unique.
- * Pour ajouter une ville : ajouter une entrée dans ALL_PV_CITIES ; aucune
- * modification ici ni dans adapter-registry.ts n'est nécessaire.
+ * Dérive les fixtures de seed depuis des PvCityEntry. Les villes **config-only**
+ * (sans `pvText` — ajoutées pour le worker live → S3) sont ignorées : seules les
+ * villes « golden » avec un extrait réel sont seedées offline.
  */
-export const PV_FIXTURES: readonly PvFixtureSpec[] = ALL_PV_CITIES.map(
-  ({ config, pvText, sourceUrl }) => ({
-    citySlug: config.citySlug,
-    sourceId: config.sourceId,
-    sourceUrl,
-    pvText,
-  }),
-);
+export function toPvFixtures(
+  entries: readonly PvCityEntry[],
+): readonly PvFixtureSpec[] {
+  return entries.flatMap((e) =>
+    e.pvText && e.sourceUrl
+      ? [
+          {
+            citySlug: e.config.citySlug,
+            sourceId: e.config.sourceId,
+            sourceUrl: e.sourceUrl,
+            pvText: e.pvText,
+          },
+        ]
+      : [],
+  );
+}
+
+/**
+ * Fixtures réelles des villes PV « golden » (données captées 2026-06-10).
+ * Dérivées de ALL_PV_CITIES — source de vérité unique. Pour ajouter une ville
+ * config-only : ajouter `{ config }` dans ALL_PV_CITIES (sans pvText) ; elle est
+ * ignorée ici et prise en charge par le worker live.
+ */
+export const PV_FIXTURES: readonly PvFixtureSpec[] = toPvFixtures(ALL_PV_CITIES);
 
 /** Slugs des villes PV-seed (Rive-Sud). */
 export const PV_SEED_CITY_SLUGS: readonly string[] = PV_FIXTURES.map(
