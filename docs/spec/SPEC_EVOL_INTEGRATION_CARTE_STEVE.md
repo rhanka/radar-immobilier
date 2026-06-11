@@ -75,6 +75,23 @@ Pour chaque feature : la vue radar cible, le **COMMENT** (geste équivalent côt
 - **Gain** : scoring **continu et data-driven** (0-100) au lieu d'un booléen `4plus && tod` ;
   pas de hardcode par ville ; honnêteté `partial`/cap si données manquantes.
 
+#### S-1b. Panneau de stats ville + légende (compteurs Lots / 4+ / TOD / priorité max)
+- **Écran : Opportunités** (panneau latéral de la couche lots) — pendant carto de la vue Sources
+  pour le compte agrégé.
+- **Comment** : reproduire le **panneau droit B1 de Steve** (README §B1, captures 10/30/40/50) :
+  titre ville + règlement de zonage, et **4 compteurs** — *Lots total*, *Zones 4+ logements*,
+  *Dans périmètre TOD*, *⭐ Priorité max (4+ ∩ TOD)* — fermable (✕), lien retour. Côté radar ces
+  compteurs sont des **agrégats data-driven** : `count(lots)`, `count(score potentiel ≥ seuil)`,
+  `count(∩ couche requalification-tod)`, `count(priorité = 4+ ∩ TOD)` — recalculés, pas des flags
+  importés. Accompagné de la **légende** (README §B4.6 / §B2) : palette de la couche lots (favori
+  / 4+ / TOD / priorité / autres) + toggles des couches env, avec la mention d'honnêteté du genre
+  « Règlement 901 · à valider avec la Ville » → côté radar = badge `verification` (`fait` /
+  `hypothese` / `simulé`).
+- **Données** : agrégats sur `OpportunityDossier.scoreGlobal` + couche TOD + `LotVersion`, par
+  ville chargée. En maquette CS-L6, ces compteurs servent de **contrôle de calibration** face aux
+  totaux de Steve (Delson : 278 lots 4+, 1 443 TOD, **130 priorité max** — `analyse-donnees.json`).
+- **Gain** : compteurs **reproductibles** (recalcul vs flags figés) ; honnêteté `partial` affichée.
+
 #### S-2. Fiche lot complète (cadastre + rôle + zone + grille PDF + Google Maps + notes)
 - **Écran : Évaluation** (panneau de détail au clic sur un lot).
 - **Comment** : reproduire le panneau de Steve (README §B3, capture 13) comme **fiche lot** de la
@@ -82,10 +99,22 @@ Pour chaque feature : la vue radar cible, le **COMMENT** (geste équivalent côt
   superficie m²/ha, **façade & profondeur estimées**, utilisation actuelle, année de construction,
   nb logements au rôle, nb étages, **valeur totale/bâtiment/terrain (rôle)**, lien grille de
   zonage PDF, lien Google Maps/Street View, **notes libres**. Champs masqués si vides (comme Steve).
+  La fiche porte aussi les **5 boutons de marquage** (toggle favori / non retenu / sollicité /
+  lettre / en vente — détail dans S-3) ; et **lorsque le lot est marqué « en vente »**, un
+  **mini-formulaire « en vente »** apparaît (README §B3, capture 13) : champ **prix demandé** +
+  champ **lien Centris/Realtor** (rendu en lien cliquable). Côté radar, ces deux champs
+  alimentent l'enrichissement « annonce » du dossier (S-12) — `Valuation{kind:"market-estimate"}`
+  + champ lien annonce — et **non** un scrape Centris (Centris = DO NOT SCRAPE, voir S-12).
 - **Données** : `LotVersion{superficieM2, adresseCivique, usageCode}`,
   `Valuation{valeurTotale, valeurTerrain, valeurBatiment, rolYear}` (A5 rôle MAMH),
   `ZoneVersion{codeAffiche, densiteLogHa, etagesMax}`, lien grille = artefact source (A2/B2),
   façade/profondeur = champs estimés du rôle (RL). Notes = nouvel objet utilisateur (voir S-3).
+  Mini-formulaire « en vente » = `prixDemande` + `lienAnnonce` portés par le `ProspectMark`
+  `status:"en-vente"` / le dossier (S-12). **Code postal** = lookup S-13 ; **note maquette
+  (CS-L6)** : le **JSON Netlify de Steve ne contient pas les codes postaux** (ils sont dans le
+  **cache Firestore geocoder.ca non exporté** ; le JSON ne porte qu'un `postal_prefix` au niveau
+  ville, ex. « J5B ») → en maquette, le **champ code postal de la fiche est vide** et la **colonne
+  code postal de l'export CSV (S-4) reste blanche** tant que S-13 n'est pas branché — à assumer.
 - **Gain** : alimenté par le **rôle MAMH standardisé** (universel QC via code MAMH) au lieu d'un
   JSON figé ; bitemporel (valeur as-of-date) ; pas de PII (NO_LOT seul, Loi 25).
 
@@ -258,7 +287,8 @@ Pour chaque feature : la vue radar cible, le **COMMENT** (geste équivalent côt
 | # | Feature Steve | Priorité | Écran radar | Entités/sources radar |
 |---|---|---|---|---|
 | S-1 | Carte lots+zonage+TOD, scoring visuel | P0 | **Opportunités** (+Évaluation) | Lot/ZoneVersion/TOD, `scoreGlobal` |
-| S-2 | Fiche lot complète | P0 | **Évaluation** | LotVersion, Valuation (rôle A5), ZoneVersion |
+| S-1b | Panneau stats ville (Lots/4+/TOD/priorité) + légende | P0 | **Opportunités** | agrégats `scoreGlobal`/TOD/`LotVersion` |
+| S-2 | Fiche lot complète (+ mini-formulaire « en vente ») | P0 | **Évaluation** | LotVersion, Valuation (rôle A5), ZoneVersion |
 | S-3 | Marques d'équipe + notes + filtres/compteurs | P0 | **Opportunités** (+Évaluation) | `ProspectMark`, JournalEntry |
 | S-4 | Export CSV lettres + export sélection | P0 | **Opportunités** | fiche lot + statut + code postal |
 | S-5 | Filtres combinés potentiel×usage×superficie | P0 | **Opportunités** (+Évaluation) | scoreGlobal, usageCode/cubf, superficieM2 |
@@ -275,8 +305,8 @@ Pour chaque feature : la vue radar cible, le **COMMENT** (geste équivalent côt
 | S-16 | Mobile bottom-sheet fiche | P2 | **Évaluation** (responsive) | — |
 | S-17 | Dashboard multi-villes couverture | P2 | **Sources** (= déjà cette vue) | ScrapeStatus, maturité |
 
-**Couverture : 17/17 features de Steve, 0 nouvel écran.** Toutes tombent dans Signaux /
-Opportunités / Évaluation / Sources ou leurs couches/contrôles carto.
+**Couverture : 17/17 features de Steve (+ S-1b panneau stats/légende), 0 nouvel écran.** Toutes
+tombent dans Signaux / Opportunités / Évaluation / Sources ou leurs couches/contrôles carto.
 
 ---
 
@@ -298,10 +328,54 @@ Opportunités / Évaluation / Sources ou leurs couches/contrôles carto.
 | Annonces | Firestore `listings` | `Valuation` market / champ annonce | connecteur Sources (PAS Centris scrape) |
 | Couches env | WMS/ArcGIS publics | couches carto + intersections risque | A8 CPTAQ, A9 BDZI, A10 GRHQ, MELCC |
 
-**Nouvelle entité à spécifier** (non encore au modèle) : `ProspectMark{id, lotId|dossierId,
-status: favori|écarté|sollicité|lettre|en-vente, note?, who, role, at, mode, supersedes?}` —
-append-only, journalisée, alignée sur la doctrine `JournalEntry` (`SPEC_EVOL_SOCLE_STATES_SCORING.md`
-§2.4). C'est le seul ajout de modèle requis par l'intégration ; tout le reste réutilise l'existant.
+**Nouvelle entité à spécifier** (non encore au modèle) : `ProspectMark`. C'est le **seul** ajout de
+modèle requis par l'intégration ; tout le reste réutilise l'existant.
+
+#### 4.1 ProspectMark ↔ JournalEntry — relation précisée (amendé revue Fable5)
+
+**Recommandation : table propre `ProspectMark` + entrée `JournalEntry`** — **exactement** le
+patron des dossiers (`OpportunityDossier`), pas une surcharge de `JournalEntry`. Les deux objets
+ont des rôles distincts et complémentaires :
+
+- **`ProspectMark`** = l'**état courant** du marquage d'un lot/dossier (la projection « ce lot est
+  *en-vente* avec ce prix »), lisible directement par la carte/les filtres sans rejouer le journal.
+- **`JournalEntry`** = l'**acte** qui a produit ce changement d'état (qui, quand, pourquoi), unité
+  de redevabilité — « *signer les décisions, jamais chaque donnée* » (`SPEC_EVOL_SOCLE_STATES_SCORING.md`
+  §2.4). **Un** marquage = **une** entrée de journal.
+
+```ts
+interface ProspectMark {
+  id: string;
+  lotId?: string; dossierId?: string;      // l'un OU l'autre
+  status: "favori" | "écarté" | "sollicité" | "lettre-envoyée" | "en-vente";
+  note?: string;
+  prixDemande?: number; lienAnnonce?: string; // si status === "en-vente" (mini-formulaire S-2/S-12)
+  who: string; role: string;               // PRINCIPAL = un humain (jamais l'IA), comme §2.4
+  at: string;                              // ISO timestamp
+  mode: "real" | "simulation";             // §2.7 — un mark simulé ne franchit jamais le réel
+  supersedes?: string;                     // correction append-only → id du mark précédent
+}
+```
+
+**Doctrine append-only (alignée §2.4 / §2.7) :**
+
+- **Append-only + `supersedes`** : on ne **modifie/supprime jamais** un `ProspectMark` en place ;
+  un changement de marque (re-toggle, correction) **insère** un nouveau mark qui `supersedes` le
+  précédent (même sémantique que la correction de `JournalEntry`). L'état courant = le dernier mark
+  non-superseded par lot/dossier ; l'historique reste intégral et traçable. Application logicielle
+  en ÉV1 ; révocation Postgres `UPDATE`/`DELETE` au niveau rôle **différée** (comme le journal,
+  §2.4 « grant-hardening deferred »).
+- **`mode: real|simulation`** : `ProspectMark` porte le discriminant comme `Signal` /
+  `OpportunityDossier` / `JournalEntry` (§2.7). En maquette (CS-L6) **tous** les marks sont
+  `mode:"simulation"` ; la **frontière réel** exclut tout `mode==="simulation"` → les marks de
+  démo ne polluent jamais le pipeline réel ni le journal réel.
+- **Chaque mutation de mark écrit une `JournalEntry`** : `action` ∈ taxonomie §2.4
+  (`rejeter` ↔ écarté, `surveiller` ↔ favori, `approcher-propriétaire` ↔ sollicité/lettre…),
+  `target` = `lotId|dossierId`, `mode` identique, `supersedes` chaîné. Les **compteurs par marque**
+  (S-3) s'agrègent sur le **dernier état** de `ProspectMark`, pas sur le journal.
+
+Ce double objet (état projeté + acte journalisé, tous deux append-only) **réutilise** la doctrine
+existante des dossiers : aucune nouvelle mécanique de persistance, juste une nouvelle table d'état.
 
 ---
 
@@ -359,8 +433,14 @@ comme **fixture de maquette** (mode `simulation`, jamais mélangé au réel — 
 | `tod[]` | couche `requalification-tod` | périmètres |
 | `boundary[]` (CSDUID) | boundary GeoJSON de la ville | — |
 | `meta.grilles` | lien grille rattaché à `ZoneVersion` | 3 formats (préfixe / `_fallback_map` / défaut) |
+| `meta.postal_prefix` (ville) | — (pas de code postal lot) | **le JSON n'a PAS de code postal par lot** : seulement un préfixe ville (ex. « J5B »). Le code postal complet vit dans le **cache Firestore geocoder.ca non exporté** → champ vide en maquette (S-13 le remplit hors maquette) |
 
 ### 6.3 Contraintes de la maquette
+- **Pas de codes postaux dans la fixture** : le JSON Netlify n'exporte **pas** le cache Firestore
+  geocoder.ca (codes postaux par lot) ; il ne porte qu'un `postal_prefix` au niveau ville. En
+  maquette, le **champ code postal de la fiche lot (S-2) est vide** et la **colonne code postal de
+  l'export CSV (S-4) reste blanche** — à assumer ; S-13 (CS-P2) la remplit une fois le lookup IGO /
+  geocoder.ca branché hors maquette.
 - **`mode: "simulation"` + `verification: "simulé"` partout** : les données de Steve **ne
   fuient jamais** dans le flux réel (la frontière réel exclut `mode==="simulation"` et
   `verification==="simulé"`, `SPEC_EVOL_SOCLE_STATES_SCORING.md` §2.7).
@@ -384,15 +464,50 @@ des paramètres `?ville=` de Steve, généralisé.
 
 ---
 
-## 8. Décision carto (à arbitrer en revue Fable5)
+## 8. Décision carto (tranchée en revue Fable5)
 
-Steve = **Leaflet** (couches WMS/ArcGIS, Leaflet.draw, satellite). Radar = **SVG pur** aujourd'hui.
-Les features S-7 (couches env WMS/ArcGIS), S-14 (Leaflet.draw éditeur), satellite, et le rendu de
-gros volumes de polygones (jusqu'à 11 261 lots/ville) **poussent vers une vraie lib carto**
-(Leaflet ou MapLibre + tuiles vectorielles). **Préco** : adopter **MapLibre GL + PMTiles** pour
-les couches lots/zones (volume + style data-driven + WMS overlay), tout en gardant le SVG pour la
-maille Québec (vue Signaux/Sources, faible volume). À trancher en revue ; impacte le périmètre des
-lots P1 (S-7, S-10) et P2 (S-14). Ce choix **ne crée pas d'écran**, il outille les écrans existants.
+> **Décision (Fable5) : MapLibre GL dès CS-L1 / CS-L6 pour la couche lots/zones. SVG conservé pour
+> la maille Québec (Signaux / Sources). PMTiles différé en étape de scaling.** Leaflet écarté.
+
+### 8.1 Constat — pourquoi le SVG ne suffit plus
+
+Steve = **Leaflet** (couches WMS/ArcGIS, Leaflet.draw, satellite). Radar = **SVG pur + projection
+équirectangulaire** aujourd'hui. Le SVG **plafonne** : `EvaluationMapView.svelte:125` charge les
+lots avec `fetchLots(citySlug, { limit: 200 })` — un cap **codé en dur à 200 lots** pour ne pas
+écrouler le DOM. Or les villes de Steve montent à **~11 261 lots** (Saint-Constant), et le radar
+vise ~150 villes. Rendre ~11 k polygones par ville + le style data-driven (couleur par score) +
+les overlays WMS (S-7) dépasse ce que le SVG/DOM peut tenir → **WebGL nécessaire**.
+
+### 8.2 Arbitrage — MapLibre GL maintenant, PMTiles plus tard
+
+- **MapLibre GL dès CS-L1 / CS-L6** : WebGL, style data-driven (`paint` par expression sur le
+  score), overlays WMS/ArcGIS natifs (S-7), labels dépendants du zoom (S-10). C'est la lib qui
+  outille toutes les features carto de Steve sans Firestore ni hardcode. **Leaflet écarté** (pas de
+  WebGL pour gros volumes, rendu DOM/canvas qui retombe sur la même limite que le SVG).
+- **PMTiles différé en étape de scaling** : on **ne** génère **pas** de tuiles vectorielles au
+  socle. Tant qu'on sert le `FeatureCollection` d'une ville via l'API paginée
+  (`/api/geo/:city/lots?limit&bbox`, déjà en place), MapLibre rend un *source* GeoJSON directement.
+  PMTiles arrive **quand le volume l'exige** : génération **`tippecanoe`** ville→`.pmtiles`,
+  **fichier statique servi depuis S3** (aligné `SPEC_PERSISTENCE_S3_FIRST.md` — S3-first, pas de
+  tile-server à opérer). Étape de scaling, pas de blocage du P0.
+- **SVG conservé** pour la maille **Québec** (vues **Signaux / Sources**, ~150 entités) : faible
+  volume, pas de WebGL requis, rendu actuel suffisant. On ne migre **que** les couches lots/zones.
+
+### 8.3 Contraintes à tenir (impact périmètre lots)
+
+- **Poids du bundle** : MapLibre GL ≈ **~250 KB gz**. À assumer (chargé seulement sur les vues
+  Opportunités/Évaluation, pas Signaux/Sources).
+- **Canvas hors Design System** : le rendu WebGL est un canvas — il échappe aux tokens CSS du DS.
+  Mitigation : **mapper les tokens DS → propriétés `paint` MapLibre** (palette de score, couches),
+  un adaptateur tokens→style-JSON, pour que la carte reste cohérente avec le DS.
+- **Non testable en jsdom** : WebGL n'a pas de contexte en jsdom → les tests unitaires **ne**
+  peuvent **pas** monter la carte. Stratégie : **tester le style JSON séparément** (la fonction
+  qui produit l'objet style/paint depuis les tokens + le score, en pur), et couvrir le rendu réel
+  par **UAT Playwright** (`harness verify --category uat`).
+
+Impact périmètre : conditionne CS-L1 (couche), CS-L6 (substrat affiché), et les lots P1 S-7/S-10
+et P2 S-14. Ce choix **ne crée pas d'écran**, il outille les écrans existants — et il devient le
+**prérequis « carto tranchée »** de l'ordre d'exécution (§9.1).
 
 ---
 
@@ -400,9 +515,43 @@ lots P1 (S-7, S-10) et P2 (S-14). Ce choix **ne crée pas d'écran**, il outille
 
 Les lots d'intégration sont créés dans le workspace track **`reorientation`**, parentés sous la
 racine **« Réorientation Grand filet »** (`01KTQP5EHKKMM5TSD4ZSE3CFZ2`), aux côtés des lots L1–L6
-existants. Chaque lot porte `body: "ref docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md …"`. Ordre :
-**P0 d'abord** (CS-L1→CS-L5), puis la **maquette** (CS-L6, substrat Netlify), puis P1 (CS-P1), puis
-P2 (CS-P2). Les chapeaux CS-P1/CS-P2 seront éclatés en lots fins à l'attaque de chaque palier.
+existants. Chaque lot porte `body: "ref docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md …"`.
+
+### 9.1 Ordre d'exécution (amendé revue Fable5)
+
+L'ordre n'est **pas** « P0 dans l'ordre des numéros » : sans données, CS-L1→CS-L5 n'ont rien à
+afficher. Le **socle est la donnée**, et la donnée réelle (rôle MAMH + zonage extrait) n'est pas
+encore là. Deux préalables conditionnent tout le reste :
+
+1. **Carto tranchée** (prérequis transverse, §8) : adopter MapLibre GL pour la couche lots/zones
+   **avant** CS-L1/CS-L6 — le SVG plafonne à 200 lots (`EvaluationMapView.svelte:125`,
+   `fetchLots(..., { limit: 200 })`) et ne peut pas rendre ~11 k polygones/ville. C'est l'outillage
+   carto, pas un écran.
+2. **CS-L6 (maquette substrat) EN PREMIER** : sans rôle MAMH ni zonage extrait, **aucune** des
+   features P0 n'a de données réelles à montrer. La fixture Netlify de Steve (mode `simulation`)
+   est le **socle de données** qui débloque toute l'UX P0. Elle passe donc **avant** CS-L1→CS-L5.
+
+**Ordre recommandé :**
+
+> **carto tranchée → CS-L6 → (CS-L1 ∥ CS-L5) → CS-L2 → CS-L3 → CS-L4** → CS-P1 → CS-P2.
+
+CS-L1 (couche lots coloriée) et CS-L5 (filtres) peuvent démarrer **en parallèle** une fois le
+substrat CS-L6 en place (ils consomment le même `FeatureCollection` de lots scorés). CS-L2 (fiche
+lot) puis CS-L3 (marques) suivent ; CS-L4 (export) ferme P0.
+
+**Dépendances explicites (à matérialiser en `blocker --kind dependency` sur les items track) :**
+
+- **CS-L1, CS-L5 ← CS-L6** (pas de couche/filtres sans substrat de données).
+- **CS-L2 ← CS-L6** (la fiche lot lit le rôle/zonage du substrat).
+- **CS-L3 ← CS-L2** (les marques se posent sur la fiche lot).
+- **CS-L4 ← CS-L2 + CS-L3** : l'export CSV agrège les **colonnes de la fiche lot** (CS-L2) **et**
+  le **statut de prospection** (CS-L3) ; il ne peut donc partir qu'une fois les deux livrés.
+- **S-4 (export, CS-L4) ← S-13 (code postal, CS-P2)** : l'export porte une **colonne code postal**,
+  fournie par le lookup S-13. En maquette, cette colonne est **vide** (le JSON Netlify de Steve
+  n'exporte pas le cache Firestore des codes postaux — voir §2 / §6.3) ; l'export reste valide,
+  colonne code postal blanche, jusqu'à ce que S-13 (CS-P2) soit livré.
+
+Les chapeaux CS-P1/CS-P2 restent en aval et seront éclatés en lots fins à l'attaque de chaque palier.
 
 | Lot track | Feature(s) Steve | Priorité | Écran(s) cible | item id |
 |---|---|---|---|---|
