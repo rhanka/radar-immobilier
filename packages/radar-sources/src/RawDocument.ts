@@ -92,22 +92,25 @@ export function extForContentType(contentType: string): string {
 }
 
 /**
- * Canonical raw-object key (rules/MASTER.md Storage Policy + SPEC_PLAN §0.1):
- *   raw/<source>/<YYYY>/<MM>/<DD>/<sha256>.<ext>
- * The date partition uses the fetch timestamp (UTC).
+ * Canonical raw-object key — content-addressed (CAS), spec
+ * docs/spec/SPEC_PERSISTENCE_S3_FIRST.md §1.1:
+ *   raw/<source>/cas/<sha256>.<ext>
+ * The fetch date is deliberately NOT in the key: the same content always maps
+ * to the same key, so re-fetching an identical document is a HEAD-skip (no
+ * duplicate object). The temporal axis lives in the run manifests instead.
  */
 export function rawStorageKey(params: {
   source: string;
-  fetchedAt: string;
   sha256: string;
   contentType: string;
 }): string {
-  const date = new Date(params.fetchedAt);
-  const yyyy = date.getUTCFullYear().toString().padStart(4, "0");
-  const mm = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  const dd = date.getUTCDate().toString().padStart(2, "0");
   const ext = extForContentType(params.contentType);
-  return `raw/${params.source}/${yyyy}/${mm}/${dd}/${params.sha256}.${ext}`;
+  return `raw/${params.source}/cas/${params.sha256}.${ext}`;
+}
+
+/** Sibling metadata key for a CAS raw object: `<storageKey>` → `….meta.json`. */
+export function rawMetaKey(storageKey: string): string {
+  return `${storageKey}.meta.json`;
 }
 
 /**
@@ -127,7 +130,6 @@ export function buildRawDocumentRecord(input: {
   const sha256 = sha256Hex(input.body);
   const storageKey = rawStorageKey({
     source: input.source,
-    fetchedAt: input.fetchedAt,
     sha256,
     contentType: input.contentType,
   });
