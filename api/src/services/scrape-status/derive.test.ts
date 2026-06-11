@@ -38,6 +38,9 @@ function makeMemStore(): ObjectStore {
     async head(key) {
       return data.has(key) ? { key } : null;
     },
+    async list(prefix) {
+      return [...data.keys()].filter((k) => k.startsWith(prefix));
+    },
   };
 }
 
