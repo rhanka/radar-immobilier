@@ -19,16 +19,32 @@ import { z } from "zod";
 // Item schema
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Document type carried by an enumerated index item.
+ *
+ *  - "proces-verbal"   — the verbatim transcript (the value-bearing document).
+ *  - "ordre-du-jour"   — the agenda published before a session (kept but typed
+ *                        so downstream can de-prioritise / skip it).
+ *  - "document"        — a PV-section document whose subtype is undetermined.
+ */
+export const PvDocType = z.enum(["proces-verbal", "ordre-du-jour", "document"]);
+export type PvDocTypeT = z.infer<typeof PvDocType>;
+
 /** One PV item enumerated by the index page (before fetching the full text). */
 export const PvIndexItem = z.object({
   /** Title / file name of the PV as displayed in the index. */
   title: z.string().min(1),
   /** Absolute URL of the PV document (HTML or PDF). */
   url: z.string().url(),
-  /** ISO date (YYYY-MM-DD) when parseable from the title/context, else NON_DISPONIBLE. */
+  /**
+   * ISO date when parseable from the title/context, else NON_DISPONIBLE.
+   * Full dates yield "YYYY-MM-DD"; month-year-only labels yield "YYYY-MM".
+   */
   dateIso: z.string().min(1),
   /** Human-readable date label from the index, verbatim. */
   dateLabel: z.string().min(1),
+  /** Whether the link is a procès-verbal, an ordre-du-jour, or undetermined. */
+  docType: PvDocType,
 });
 export type PvIndexItemT = z.infer<typeof PvIndexItem>;
 
@@ -113,15 +129,47 @@ const FRENCH_MONTHS_PV: Record<string, string> = {
   décembre: "12", decembre: "12",
 };
 
-/** "séance du 10 mars 2025" or "10 mars 2025" → "2025-03-10", else NON_DISPONIBLE. */
+/**
+ * Extract an ISO date from a human label, most specific first:
+ *   - "séance du 10 mars 2025" / "10 mars 2025"  → "2025-03-10"
+ *   - "2025-03-10" / "2025/03/10"                → "2025-03-10"
+ *   - "Mars 2025" (month + year, no day)         → "2025-03"  (YYYY-MM)
+ *   - "pv-2025-03" (filename year-month)          → "2025-03"
+ * Returns NON_DISPONIBLE when nothing parses.
+ *
+ * The month-only form (YYYY-MM) is intentional: many flat-list municipalities
+ * label PVs by month ("Mars 2025") with no day. A YYYY-MM string still sorts
+ * and window-filters correctly (lexicographic ≥/≤ against YYYY-MM-DD bounds).
+ */
 function extractIsoFromLabel(label: string): string {
-  const m = label
-    .toLowerCase()
-    .match(/(\d{1,2})\s+([a-zàâçéèêëîïôûù]+)\s+(\d{4})/i);
-  if (!m || !m[1] || !m[2] || !m[3]) return PV_NON_DISPONIBLE;
-  const month = FRENCH_MONTHS_PV[m[2]];
-  if (!month) return PV_NON_DISPONIBLE;
-  return `${m[3]}-${month}-${m[1].padStart(2, "0")}`;
+  const lower = label.toLowerCase();
+
+  // 1. Full French date: "10 mars 2025" or ordinal "1er octobre 2025"
+  //    ("1er"/"1ᵉʳ"/"2e" — the ordinal suffix is consumed, not the day digit).
+  const full = lower.match(
+    /(\d{1,2})(?:er|re|e|ère|ème|ᵉʳ|ᵉ)?\s+([a-zàâçéèêëîïôûù]+)\s+(\d{4})/i,
+  );
+  if (full?.[1] && full[2] && full[3]) {
+    const month = FRENCH_MONTHS_PV[full[2]];
+    if (month) return `${full[3]}-${month}-${full[1].padStart(2, "0")}`;
+  }
+
+  // 2. ISO-ish numeric date: "2025-03-10" or "2025/03/10".
+  const iso = lower.match(/\b(\d{4})[-/](\d{2})[-/](\d{2})\b/);
+  if (iso?.[1] && iso[2] && iso[3]) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+  // 3. Month + year only: "mars 2025".
+  const monthYear = lower.match(/\b([a-zàâçéèêëîïôûù]+)\s+(\d{4})\b/i);
+  if (monthYear?.[1] && monthYear[2]) {
+    const month = FRENCH_MONTHS_PV[monthYear[1]];
+    if (month) return `${monthYear[2]}-${month}`;
+  }
+
+  // 4. Filename year-month: "pv-2025-03" / "2025_03".
+  const fileYm = lower.match(/\b(20\d{2})[-_](0[1-9]|1[0-2])\b/);
+  if (fileYm?.[1] && fileYm[2]) return `${fileYm[1]}-${fileYm[2]}`;
+
+  return PV_NON_DISPONIBLE;
 }
 
 /** Decode minimal HTML entities in a fragment. */
@@ -150,65 +198,173 @@ function stripTags(s: string): string {
 }
 
 /**
+ * Resolve an href (possibly relative) against a base URL.
+ *
+ * Handles every relative form WHATWG URL resolution supports, which the old
+ * parser did not: protocol-relative (`//host/x`), root-absolute (`/x`),
+ * directory-relative (`./x`, `../../x`) and bare-path (`x/y.pdf`). The base is
+ * the document's effective base: a `<base href>` when the page declares one,
+ * otherwise the index URL.
+ *
+ * Returns null for in-page anchors (`#…`), `javascript:`/`mailto:`/`tel:` URIs
+ * and anything that fails to resolve to an http(s) URL.
+ */
+function resolveHref(href: string, base: string): string | null {
+  const raw = decodeHtmlEntities(href).trim();
+  if (!raw) return null;
+  if (/^(?:#|javascript:|mailto:|tel:|data:)/i.test(raw)) return null;
+  try {
+    const resolved = new URL(raw, base);
+    if (resolved.protocol !== "http:" && resolved.protocol !== "https:") {
+      return null;
+    }
+    // Drop the fragment; keep query (it may be the document selector).
+    resolved.hash = "";
+    return resolved.href;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Normalise a URL to its registrable site (host with a leading "www." stripped),
+ * lower-cased. Used for same-site comparison so `www.beloeil.ca` and `beloeil.ca`
+ * match while `sto.ca` vs `gatineau.ca` stay distinct. Returns null on a
+ * malformed URL.
+ */
+function registrableSite(u: string): string | null {
+  try {
+    return new URL(u).host.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/** Read the document's `<base href>` if present, else fall back to the index URL. */
+function effectiveBase(html: string, indexUrl: string): string {
+  const m = html.match(/<base\b[^>]*href=["']([^"']+)["']/i);
+  if (m?.[1]) {
+    try {
+      return new URL(m[1], indexUrl).href;
+    } catch {
+      // Malformed <base> — ignore, use the index URL.
+    }
+  }
+  return indexUrl;
+}
+
+/** True when the href points at a PV-style document (PDF, DOC, or a download endpoint). */
+function looksLikeDocumentHref(url: string): boolean {
+  return (
+    /\.(?:pdf|docx?|odt)(?:[?#].*)?$/i.test(url) ||
+    /[?&](?:download|telechargement|getfile|fichier|file|attachment)=/i.test(url) ||
+    /\/(?:download|telecharger|getfile|fichier)[/?]/i.test(url)
+  );
+}
+
+const ODJ_LABEL_RE = /ordre\s+du\s+jour|\bodj\b|^od[-_ ]|\bagenda\b/i;
+const PV_LABEL_RE =
+  /proc[èe]s[-\s]?verbal|proc[èe]s[-\s]?verbaux|\bpv\b|s[ée]ance|\bprocès\b/i;
+const SESSION_MONTH_LABEL_RE =
+  /\b(?:janvier|février|fevrier|mars|avril|mai|juin|juillet|août|aout|septembre|octobre|novembre|décembre|decembre)\b/i;
+
+/** Classify a document link by its label + filename (best-effort, never throws). */
+function classifyDocType(label: string, url: string): PvDocTypeT {
+  const hay = `${label} ${url}`;
+  if (ODJ_LABEL_RE.test(hay)) return "ordre-du-jour";
+  if (PV_LABEL_RE.test(hay) || /\bpv[-_]/i.test(url)) return "proces-verbal";
+  return "document";
+}
+
+/**
  * Parse a WordPress-style or plain HTML PV index page.
  *
- * Strategy: look for `<a>` elements whose href ends in `.pdf` or whose text
- * contains "procès-verbal" / "séance" / "PV".  Tolerates a wide range of CMS
- * markups (WordPress, Craft, static HTML) because every Québec municipality
- * page is different.
+ * Strategy: scan every `<a href>` in the page and KEEP a link when EITHER
+ *   - its label looks like a PV / séance / ordre-du-jour, OR
+ *   - the href points at a document (`.pdf`/`.doc(x)`/download endpoint),
+ * after resolving the href against the document's effective base (a `<base
+ * href>` when present, else the index URL). Links to a different host than the
+ * index are dropped (anti sto.ca / outbound capture). Tolerates a wide range of
+ * CMS markups (WordPress, October, Drupal, static HTML, .php flat lists)
+ * because every Québec municipality page is different.
  *
- * Pagination / JS-rendered pages are NOT handled here (Obscura fallback noted
- * but not required at test time — download direct + fixture).
+ * JS-rendered families (gestionweblex SaaS, ASP.NET portals) emit ZERO links
+ * from the static HTML — callers should consult `detectIndexRenderMode` first
+ * and route those to the headless-browser (obscura) path rather than trusting
+ * an empty/erroneous static parse.
  */
 export function parsePvIndex(html: string, baseUrl: string): PvIndexItemT[] {
   const items: PvIndexItemT[] = [];
   const seen = new Set<string>();
 
-  // Match every <a href="...">...</a> in the page.
+  // JS-rendered families (gestionweblex SaaS, ASP.NET portals) inject the PV
+  // list at runtime; the static HTML holds only chrome/nav. Returning nothing
+  // is the honest outcome — the caller routes these to obscura. Emitting the
+  // sibling nav links would be worse than empty (false documents).
+  if (detectIndexRenderMode(html).requiresBrowser) return items;
+
+  const base = effectiveBase(html, baseUrl);
+  // Allowed sites: the index site AND the effective-base site, by registrable
+  // domain (leading "www." stripped). Used ONLY to gate NON-document outbound
+  // links: a municipality routinely hosts PV PDFs on a different domain/subdomain
+  // (CDN, ville.X.qc.ca, a document portal), so a *document* link is kept even
+  // cross-site, while a non-document outbound link (sto.ca header nav, social
+  // media) is dropped — that is what made gatineau capture sto.ca at the pilot.
+  const allowedSites = new Set<string>();
+  for (const u of [baseUrl, base]) {
+    const site = registrableSite(u);
+    if (site) allowedSites.add(site);
+  }
+
+  // Match every <a …>…</a> in the page.
   const anchorRe = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi;
   for (const m of html.matchAll(anchorRe)) {
     const attrs = m[1] ?? "";
     const inner = stripTags(m[2] ?? "");
 
-    const hrefMatch = attrs.match(/href="([^"]+)"/i) ?? attrs.match(/href='([^']+)'/i);
-    let url = hrefMatch?.[1]?.trim() ?? "";
+    const hrefMatch =
+      attrs.match(/(?:^|\s)href=["']([^"']+)["']/i);
+    const url = resolveHref(hrefMatch?.[1] ?? "", base);
     if (!url) continue;
 
-    // Resolve relative URLs against baseUrl.
-    if (/^\//.test(url)) {
-      try {
-        const base = new URL(baseUrl);
-        url = `${base.protocol}//${base.host}${url}`;
-      } catch {
-        // Malformed baseUrl — skip.
-        continue;
-      }
-    }
-    if (!/^https?:\/\//i.test(url)) continue;
-
     // Accept links that are clearly PV documents.
-    const isPdf = /\.pdf(\?[^"]*)?$/i.test(url);
+    const isDoc = looksLikeDocumentHref(url);
     const labelLower = inner.toLowerCase();
-    const isPv =
-      labelLower.includes("procès-verbal") ||
-      labelLower.includes("proces-verbal") ||
-      labelLower.includes("procès verbal") ||
-      labelLower.includes("séance") ||
-      labelLower.includes("seance") ||
-      /\bpv\b/.test(labelLower) ||
-      /\bprocès\b/.test(labelLower);
+    const isPvLabel =
+      PV_LABEL_RE.test(labelLower) || ODJ_LABEL_RE.test(labelLower);
 
-    if (!isPdf && !isPv) continue;
+    // Drop NON-document outbound links (sto.ca header nav, social media). A
+    // document link is kept even cross-site because municipalities legitimately
+    // host PV PDFs on a separate domain/subdomain (e.g. boisbriand.ca index →
+    // ville.boisbriand.qc.ca CDN). This is what prevented gatineau capturing
+    // sto.ca while keeping every legitimate cross-domain PDF.
+    if (!isDoc && allowedSites.size > 0) {
+      const site = registrableSite(url);
+      if (!site || !allowedSites.has(site)) continue;
+    }
+
+    // A document href is accepted regardless of label wording (flat lists label
+    // PVs only by month, e.g. "Mars 2025"). A non-document href is accepted only
+    // when the label itself is PV-ish AND it is not a bare same-site navigation
+    // page (those are filtered out below by the document/keyword requirement).
+    if (!isDoc && !isPvLabel) continue;
+
     if (seen.has(url)) continue;
     seen.add(url);
 
     const title = inner || url.split("/").pop() || url;
-    const dateIso = extractIsoFromLabel(title);
+    // For month-only labels with no month name in the visible text, fall back to
+    // the filename (e.g. "pv-2025-03.pdf") to recover a YYYY-MM date.
+    const dateSource = SESSION_MONTH_LABEL_RE.test(title) || /\d{4}/.test(title)
+      ? title
+      : `${title} ${url}`;
+    const dateIso = extractIsoFromLabel(dateSource);
     const parsed = PvIndexItem.safeParse({
       title,
       url,
       dateIso,
       dateLabel: title,
+      docType: classifyDocType(title, url),
     });
     if (parsed.success) items.push(parsed.data);
   }
@@ -216,9 +372,58 @@ export function parsePvIndex(html: string, baseUrl: string): PvIndexItemT[] {
   return items;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Render-mode detection (obscura routing)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Result of `detectIndexRenderMode`. */
+export interface IndexRenderMode {
+  /** True when the PV list is rendered client-side (needs a headless browser). */
+  requiresBrowser: boolean;
+  /** Short, verbatim reason (the matched marker) for traceability. */
+  reason: string;
+}
+
+/**
+ * JS-rendered / SaaS index families whose PV list is injected at runtime. For
+ * these the static HTML carries no usable document link, so a static parse
+ * silently returns nothing (or, worse, captures sibling/outbound links). The
+ * RECUEIL job must route these to the headless-browser (obscura) path.
+ *
+ * Each marker is a substring matched against the raw index HTML, most specific
+ * first. Markers are taken verbatim from the real pages (gestionweblex SaaS,
+ * gatineau ASP.NET portal) — see proces-verbaux-link-extraction.fixture.ts.
+ */
+const BROWSER_REQUIRED_MARKERS: ReadonlyArray<{ marker: RegExp; reason: string }> = [
+  { marker: /apps\.gestionweblex\.ca\/+doc-list/i, reason: "gestionweblex doc-list (client-side rendered)" },
+  { marker: /gestionweblex\.ca\/+doc-list\/assets\/list\.ashx/i, reason: "gestionweblex doc-list list.ashx (client-side rendered)" },
+  { marker: /id=["']liste-documents["'][^>]*>\s*<!--/i, reason: "ASP.NET portal — document list injected by scripts.js" },
+  { marker: /default\.aspx[^"']*proces_verbaux/i, reason: "ASP.NET default.aspx portal (postback-rendered)" },
+];
+
+/**
+ * Decide whether a PV index page can be parsed from its static HTML, or whether
+ * it needs a headless browser (obscura). Returns `requiresBrowser: true` with a
+ * verbatim reason for the JS-rendered families above; otherwise false.
+ *
+ * Pure + side-effect-free: callers gate on it BEFORE trusting `parsePvIndex`.
+ */
+export function detectIndexRenderMode(html: string): IndexRenderMode {
+  for (const { marker, reason } of BROWSER_REQUIRED_MARKERS) {
+    if (marker.test(html)) return { requiresBrowser: true, reason };
+  }
+  return { requiresBrowser: false, reason: "static HTML" };
+}
+
 /**
  * Filter a list of PV index items to those whose date falls within [since, until].
- * Items whose date is NON_DISPONIBLE are always included (conservative).
+ *
+ * Conservative by design (anti-false-negative — we would rather fetch one extra
+ * PV than miss a zonage change):
+ *   - NON_DISPONIBLE dates are always included.
+ *   - Month-only dates ("YYYY-MM") are expanded to their whole-month span
+ *     [YYYY-MM-01, YYYY-MM-31] and kept when that span OVERLAPS the window, so a
+ *     PV labelled only by month near a window boundary is not silently dropped.
  */
 export function filterPvByWindow(
   items: PvIndexItemT[],
@@ -227,6 +432,12 @@ export function filterPvByWindow(
 ): PvIndexItemT[] {
   return items.filter((item) => {
     if (item.dateIso === PV_NON_DISPONIBLE) return true;
+    // Month-only "YYYY-MM": overlap test against the whole month.
+    if (/^\d{4}-\d{2}$/.test(item.dateIso)) {
+      const monthStart = `${item.dateIso}-01`;
+      const monthEnd = `${item.dateIso}-31`;
+      return monthStart <= until && monthEnd >= since;
+    }
     return item.dateIso >= since && item.dateIso <= until;
   });
 }

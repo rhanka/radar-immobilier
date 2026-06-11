@@ -515,12 +515,15 @@ describe("ProcesVerbauxGenericAdapter.list() – Lavaltrie (mocked fetch)", () =
     windowDays: 183,
   });
 
-  it("yields au moins 9 refs PV dans la fenêtre 6 mois", async () => {
+  it("yields au moins 8 refs PV dans la fenêtre 6 mois", async () => {
+    // 2026-06-10 − 183 jours = 2025-12-09. Avec la datation corrigée des labels,
+    // "1er octobre 2025" → 2025-10-01 (correctement HORS fenêtre) au lieu de
+    // rester NON_DISPONIBLE et d'être inclus à tort ; 8 PV restent dans la fenêtre.
     const refs: unknown[] = [];
     for await (const ref of adapter.list({})) {
       refs.push(ref);
     }
-    expect(refs.length).toBeGreaterThanOrEqual(9);
+    expect(refs.length).toBeGreaterThanOrEqual(8);
   });
 
   it("tous les refs ont sourceKind 'pv'", async () => {
