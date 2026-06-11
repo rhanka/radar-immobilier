@@ -1269,6 +1269,116 @@ export function createHenryvillePvAdapter(
   return new ProcesVerbauxGenericAdapter(HENRYVILLE_PV_CONFIG, options);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Lot « agglo-mtl » — 14 villes les plus proches de Montréal (≤25 km).
+// CONFIG-ONLY (contrat S3-first) : pas de fixture, pas de pvText. Le worker
+// fetch en live et écrit le raw sur S3 (content-addressed). URLs d'index réelles
+// vérifiées en live HTTP 200 le 2026-06-11 ; preuve par ville (lien PV à couche
+// texte + robots) dans la description de PR.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Westmount (île de Montréal, bilingue). Statamic; PV sous /storage/app/media. */
+export const WESTMOUNT_PV_CONFIG: PvCityConfig = {
+  citySlug: "westmount",
+  pvIndexUrl: "https://westmount.org/fr/seances-du-conseil",
+  sourceId: "proces-verbaux-westmount",
+};
+
+/** Mont-Royal / Town of Mount Royal (île, bilingue). Statamic; PV sous /storage/app/media. */
+export const MONT_ROYAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-royal",
+  pvIndexUrl:
+    "https://www.ville.mont-royal.qc.ca/fr/ma-ville/vie-democratique/ordres-du-jour-et-proces-verbaux",
+  sourceId: "proces-verbaux-mont-royal",
+};
+
+/** Hampstead (île, FR). WordPress; index AJAX, PV découverts via media REST sous /wp-content/uploads. */
+export const HAMPSTEAD_PV_CONFIG: PvCityConfig = {
+  citySlug: "hampstead",
+  pvIndexUrl:
+    "https://www.hampstead.qc.ca/fr/ville/vie-democratique/seances-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-hampstead",
+};
+
+/** Montréal-Ouest / Montreal West (île, anglais). WordPress; PV sous /wp-content/uploads. */
+export const MONTREAL_OUEST_PV_CONFIG: PvCityConfig = {
+  citySlug: "montreal-ouest",
+  pvIndexUrl: "https://montreal-ouest.ca/en/our-town/town-council/public-meetings/",
+  sourceId: "proces-verbaux-montreal-ouest",
+};
+
+/** Côte-Saint-Luc (île, FR/bilingue). WordPress + Ninja Tables; PV sous /wp-content/uploads. */
+export const COTE_SAINT_LUC_PV_CONFIG: PvCityConfig = {
+  citySlug: "cote-saint-luc",
+  pvIndexUrl: "https://cotesaintluc.org/fr/affaires-municipales/seances-du-conseil/",
+  sourceId: "proces-verbaux-cote-saint-luc",
+};
+
+/** Brossard (Rive-Sud, FR). WordPress; pages par séance, PV sous /app/uploads. */
+export const BROSSARD_PV_CONFIG: PvCityConfig = {
+  citySlug: "brossard",
+  pvIndexUrl: "https://brossard.ca/assemblees-du-conseil-municipal/",
+  sourceId: "proces-verbaux-brossard",
+};
+
+/** Montréal-Est (île, FR). WordPress; PV sous /wp-content/uploads. */
+export const MONTREAL_EST_PV_CONFIG: PvCityConfig = {
+  citySlug: "montreal-est",
+  pvIndexUrl: "https://ville.montreal-est.qc.ca/vie-democratique/proces-verbaux/",
+  sourceId: "proces-verbaux-montreal-est",
+};
+
+/** Dorval (île, bilingue mais PV en FR). Statamic; PV sous /storage/app/media. */
+export const DORVAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "dorval",
+  pvIndexUrl:
+    "https://www.ville.dorval.qc.ca/fr/la-cite/vie-democratique/seances-du-conseil-municipal",
+  sourceId: "proces-verbaux-dorval",
+};
+
+/** Saint-Bruno-de-Montarville (Rive-Sud, FR). WordPress; PV hébergés sur AWS S3. */
+export const SAINT_BRUNO_DE_MONTARVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-bruno-de-montarville",
+  pvIndexUrl: "https://stbruno.ca/ville/conseil-municipal/seances-conseil-municipal/",
+  sourceId: "proces-verbaux-saint-bruno-de-montarville",
+};
+
+/** Dollard-Des Ormeaux (île, PV bilingue FR/EN). WordPress; PV sous /wp-content/uploads. */
+export const DOLLARD_DES_ORMEAUX_PV_CONFIG: PvCityConfig = {
+  citySlug: "dollard-des-ormeaux",
+  pvIndexUrl: "https://ville.ddo.qc.ca/ma-ville/conseil/seances-du-conseil/",
+  sourceId: "proces-verbaux-dollard-des-ormeaux",
+};
+
+/** Pointe-Claire (île, bilingue mais PV en FR). Statamic; PV sous /assets/images/Documents. */
+export const POINTE_CLAIRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "pointe-claire",
+  pvIndexUrl:
+    "https://www.pointe-claire.ca/democratie-et-participation-citoyenne/seances-du-conseil",
+  sourceId: "proces-verbaux-pointe-claire",
+};
+
+/** Carignan (MRC La Vallée-du-Richelieu, FR). WordPress; PV servis via miroir KeyCDN. */
+export const CARIGNAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "carignan",
+  pvIndexUrl: "https://www.carignan.quebec/ma-ville/democratie/proces-verbaux/",
+  sourceId: "proces-verbaux-carignan",
+};
+
+/** Saint-Basile-le-Grand (MRC La Vallée-du-Richelieu, FR). WordPress; robots interdit /wp-content/uploads. */
+export const SAINT_BASILE_LE_GRAND_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-basile-le-grand",
+  pvIndexUrl: "https://www.villesblg.ca/ville/democratie/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-basile-le-grand",
+};
+
+/** Chambly (MRC La Vallée-du-Richelieu, FR). Statamic; PV sous /storage/app/media. */
+export const CHAMBLY_PV_CONFIG: PvCityConfig = {
+  citySlug: "chambly",
+  pvIndexUrl: "https://chambly.ca/ville/vie-democratique/assemblees-du-conseil",
+  sourceId: "proces-verbaux-chambly",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -1513,4 +1623,21 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     sourceUrl:
       "http://henryville.ca/wp-content/uploads/2026/03/proces-verbal-20260112.pdf",
   },
+  // ── Lot « agglo-mtl » (CONFIG-ONLY, S3-first) : Agglomération de Montréal (île)
+  { config: WESTMOUNT_PV_CONFIG },
+  { config: MONT_ROYAL_PV_CONFIG },
+  { config: HAMPSTEAD_PV_CONFIG },
+  { config: MONTREAL_OUEST_PV_CONFIG },
+  { config: COTE_SAINT_LUC_PV_CONFIG },
+  { config: MONTREAL_EST_PV_CONFIG },
+  { config: DORVAL_PV_CONFIG },
+  { config: DOLLARD_DES_ORMEAUX_PV_CONFIG },
+  { config: POINTE_CLAIRE_PV_CONFIG },
+  // ── Lot « agglo-mtl » : Agglomération de Longueuil / Rive-Sud ──────────────
+  { config: BROSSARD_PV_CONFIG },
+  { config: SAINT_BRUNO_DE_MONTARVILLE_PV_CONFIG },
+  // ── Lot « agglo-mtl » : MRC La Vallée-du-Richelieu ─────────────────────────
+  { config: CARIGNAN_PV_CONFIG },
+  { config: SAINT_BASILE_LE_GRAND_PV_CONFIG },
+  { config: CHAMBLY_PV_CONFIG },
 ];
