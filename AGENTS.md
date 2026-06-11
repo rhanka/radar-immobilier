@@ -59,8 +59,15 @@ project rules.
 - `graphifyy` — knowledge graph (relating documents, regulations, files, lots).
 - `obscura` — Rust headless browser (anti-detect, sidecar).
 - `impeccable` — design-skill anti-pattern detection for AI coding agents.
-- `superpowers` (Claude Code plugin) — meta-skills: brainstorming,
-  writing-plans, executing-plans, TDD, verification.
+- `@sentropic/harness` — **native dev-discipline layer and SINGLE front door**
+  for code-work + PR-workflow. Its `harness <verb>` CLI + `harness/*` skills
+  SUPERSEDE superpowers for the acts they cover: `harness brainstorm` (ideation),
+  `harness test` (test-first, NOT "tdd ritual"), `harness debug`, `harness review`,
+  `harness plan`, `harness branch init|close`, `harness verify --category` /
+  `harness check scope|branch` (gate). Load `harness/using-harness` first. Do NOT
+  invoke the superpowers equivalents.
+- `superpowers` (Claude Code plugin) — present but SUPERSEDED by harness for the
+  acts above; use only for skills the harness does not cover.
 
 Refer to `docs/spec/SPEC_EVOL_SCAFFOLDING.md` §6 for the full stack and
 exact version pins.
