@@ -396,12 +396,14 @@ describe("deriveProvincialCoverage()", () => {
     expect(coverage.byStatus.scraped).toBeGreaterThan(0);
   });
 
-  it("byStatus.todo >= 1068 (majorité des villes non câblées)", () => {
+  it("byStatus.todo reste la majorité (> moitié du total) tant que < 50% des villes sont câblées", () => {
     const records = deriveStaticScrapeStatuses();
     const coverage = deriveProvincialCoverage(records);
-    // 1106 total - ~34 câblées (scraped) - 2 exclues (also todo) - ~4 MAMH (autre source)
-    // Les villes non câblées sont en "todo", majorité
-    expect(coverage.byStatus.todo).toBeGreaterThan(1060);
+    // Seuil RELATIF (pas un nombre magique) : le « todo » décroît légitimement
+    // à mesure qu'on câble des villes (immo ajoute des configs config-only).
+    // L'invariant utile est « la majorité reste non câblée » — à revisiter
+    // quand on franchira 50 % de couverture (jalon réel), pas à chaque lot.
+    expect(coverage.byStatus.todo).toBeGreaterThan(coverage.total / 2);
   });
 
   it("byMrc contient des clés MRC avec total, scraped, todo", () => {
