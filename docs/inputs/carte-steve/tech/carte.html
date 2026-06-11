@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Outil de développement</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/esri-leaflet/3.0.12/esri-leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Firebase — Collaboration temps réel -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;}
+    #map{width:100vw;height:100vh;}
+
+    #panel{
+      position:absolute;top:12px;right:12px;z-index:1000;
+      background:rgba(255,255,255,0.98);border-radius:16px;
+      padding:18px 20px;width:300px;
+      box-shadow:0 4px 30px rgba(0,0,0,0.15);
+      max-height:94vh;overflow-y:auto;
+    }
+    #panel h2{font-size:16px;font-weight:800;color:#1a1a2e;margin-bottom:2px;}
+    .sub{font-size:11px;color:#999;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee;}
+
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+    .stat{background:#f7f8fa;border-radius:10px;padding:10px;text-align:center;}
+    .stat .n{font-size:22px;font-weight:800;}
+    .stat .l{font-size:10px;color:#999;margin-top:2px;line-height:1.3;}
+    .stat.green .n{color:#27ae60;}
+    .stat.blue  .n{color:#2980b9;}
+    .stat.orange .n{color:#e67e22;}
+    .stat.purple .n{color:#8e44ad;}
+
+    #lot-info{font-size:13px;}
+    .ph{color:#ccc;font-style:italic;font-size:12px;text-align:center;padding:10px 0;}
+    .field{margin-bottom:8px;}
+    .fl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#bbb;}
+    .fv{font-weight:600;color:#1a1a2e;font-size:14px;margin-top:2px;}
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .b-green{background:#d5f5e3;color:#1a7a3c;}
+    .b-grey{background:#eee;color:#888;}
+    .b-orange{background:#fdebd0;color:#c0392b;}
+    .b-purple{background:#e8daef;color:#6c3483;}
+    .b-blue{background:#d6eaf8;color:#1a5276;}
+    .b-tod{background:#154360;color:#fff;}
+    hr{border:none;border-top:1px solid #f0f0f0;margin:10px 0;}
+    .priority-banner{
+      background:linear-gradient(135deg,#1a1a2e,#e67e22);
+      color:#fff;border-radius:8px;padding:8px 12px;
+      font-size:12px;font-weight:600;margin-bottom:8px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .mark-btns{display:flex;gap:6px;margin:10px 0 6px;}
+    .mbtn{
+      flex:1;padding:7px 4px;border:2px solid #eee;border-radius:10px;
+      font-size:12px;font-weight:600;cursor:pointer;background:#fff;
+      transition:all .15s;text-align:center;
+    }
+    .mbtn:hover{transform:scale(1.03);}
+    .mbtn.fav-on{background:#fff8dc;border-color:#f1c40f;color:#8a6d00;}
+    .mbtn.ver-on{background:#fef0f0;border-color:#e74c3c;color:#c0392b;}
+    .mbtn.env-on{background:#fef5e7;border-color:#e67e22;color:#b7770d;}
+    .mbtn.sol-on{background:#eaf4fb;border-color:#2980b9;color:#1a5276;}
+    .mark-note{font-size:10px;color:#aaa;text-align:center;margin-bottom:8px;}
+    .mbtn.let-on{background:#fdf0ff;border-color:#9b59b6;color:#6c3483;}
+    .fb.fav-btn{border-left:3px solid #f1c40f;}
+    .fb.ver-btn{border-left:3px solid #e74c3c;}
+    .fb.env-btn{border-left:3px solid #e67e22;}
+    .fb.sol-btn{border-left:3px solid #2980b9;}
+    .fb.let-btn{border-left:3px solid #9b59b6;}
+    .export-btn{
+      display:block;width:100%;padding:8px 10px;margin-top:8px;
+      background:linear-gradient(135deg,#27ae60,#1a8a4a);
+      color:#fff;border:none;border-radius:8px;font-size:11px;
+      font-weight:700;cursor:pointer;text-align:center;
+      transition:opacity .15s;
+    }
+    .export-btn:hover{opacity:.88;}
+
+    /* Marqueurs événements réglementaires */
+    .ev-marker{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;border:3px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;
+    }
+    .ev-popup .leaflet-popup-content-wrapper{border-radius:12px;max-width:300px;}
+    .ev-popup-inner{font-family:-apple-system,sans-serif;font-size:12px;}
+    .ev-popup-inner h4{font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:6px;}
+    .ev-popup-inner .ev-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-bottom:6px;}
+    .ev-popup-inner .ev-resume{color:#444;line-height:1.5;margin-bottom:8px;}
+    .ev-popup-inner .ev-meta{font-size:10px;color:#aaa;}
+    .ev-popup-inner .ev-gains span{display:inline-block;padding:2px 6px;border-radius:4px;background:#e8f0fe;color:#1558d6;font-size:10px;margin:2px 2px 2px 0;}
+    .ev-popup-inner .ev-analyse{background:#fef9e7;border-left:3px solid #f1c40f;padding:6px 10px;border-radius:0 6px 6px 0;font-size:10px;color:#7d6608;margin-top:6px;line-height:1.5;}
+
+    /* Couches environnementales */
+    .env-toggle{
+      display:flex;align-items:center;gap:8px;
+      padding:6px 10px;margin-bottom:4px;
+      border-radius:8px;cursor:pointer;
+      font-size:11px;font-weight:600;color:#333;
+      border:none;background:#f5f5f5;width:100%;text-align:left;
+      transition:all .15s;
+    }
+    .env-toggle:hover{background:#e8e8e8;}
+    .env-toggle.on{color:#fff;}
+    .env-toggle .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* Labels de zones permanents */
+    .zone-label{
+      background:rgba(255,255,255,0.82);
+      border:1px solid rgba(80,80,80,0.35);
+      border-radius:4px;
+      padding:1px 5px;
+      font-size:10px;
+      font-weight:700;
+      color:#333;
+      white-space:nowrap;
+      box-shadow:0 1px 3px rgba(0,0,0,0.12);
+      pointer-events:none;
+      transition:opacity .2s;
+    }
+    /* Supprime la flèche Leaflet */
+    .zone-label::before{ display:none !important; }
+    .zone-label.leaflet-tooltip-top::before,
+    .zone-label.leaflet-tooltip-bottom::before,
+    .zone-label.leaflet-tooltip-left::before,
+    .zone-label.leaflet-tooltip-right::before{ display:none !important; }
+
+    #filters{
+      position:absolute;top:12px;left:12px;z-index:1000;
+      background:rgba(255,255,255,0.97);border-radius:14px;
+      padding:14px 16px;font-size:12px;width:210px;
+      box-shadow:0 2px 16px rgba(0,0,0,0.12);
+      transition:transform .2s,opacity .2s;
+    }
+    #filters.collapsed #filters-body{ display:none; }
+    #filters.collapsed{ padding:10px 14px; }
+    #filters-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;}
+    #filters h4{font-size:12px;font-weight:700;color:#444;margin-bottom:0;}
+    #toggle-filters{background:none;border:none;cursor:pointer;font-size:14px;padding:0;color:#aaa;line-height:1;}
+    #filters-body{margin-top:9px;}
+    /* ── Modal pastille ── */
+    .pm-cat-btn{
+      padding:5px 10px;border-radius:8px;border:1.5px solid #ddd;
+      font-size:11px;font-weight:700;cursor:pointer;background:#fff;transition:all .15s;
+    }
+    .pm-cat-btn:hover{border-color:#8e44ad;}
+    /* Lot notes */
+    /* ── Recherche par adresse ── */
+    #search-wrap{position:relative;padding:8px 10px 0;margin-bottom:4px;}
+    #search-input{width:100%;box-sizing:border-box;padding:8px 34px 8px 32px;border:1.5px solid #ddd;border-radius:10px;font-size:12px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s;}
+    #search-input:focus{border-color:#2980b9;}
+    #search-icon{position:absolute;left:19px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;top:calc(50% + 4px);}
+    #search-clear{position:absolute;right:19px;top:calc(50% + 4px);transform:translateY(-50%);background:none;border:none;font-size:14px;cursor:pointer;color:#aaa;display:none;padding:0;line-height:1;}
+    #search-results{position:absolute;top:100%;left:10px;right:10px;background:#fff;border:1.5px solid #2980b9;border-radius:10px;z-index:3000;max-height:260px;overflow-y:auto;box-shadow:0 6px 24px rgba(0,0,0,.13);display:none;}
+    .sr-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;transition:background .1s;}
+    .sr-item:last-child{border-bottom:none;}
+    .sr-item:hover{background:#eaf4fb;}
+    .sr-addr{font-size:12px;font-weight:600;color:#1a1a2e;}
+    .sr-meta{font-size:10px;color:#888;margin-top:1px;}
+    .sr-nores{padding:10px 12px;font-size:11px;color:#aaa;text-align:center;}
+    #lot-notes-ta{
+      width:100%;box-sizing:border-box;padding:8px 10px;
+      border:1.5px solid #e0e0e0;border-radius:8px;
+      font-family:inherit;font-size:12px;min-height:80px;resize:vertical;margin-top:4px;
+    }
+    #lot-notes-ta:focus{outline:none;border-color:#8e44ad;}
+    /* Indicateur de mode déplacement */
+    #drag-indicator{
+      display:none;position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+      background:#1a1a2e;color:#fff;padding:10px 22px;border-radius:50px;
+      font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.35);
+      pointer-events:none;
+    }
+    /* Section collapsible dans le panneau gauche */
+    .sec-header{
+      display:flex;align-items:center;justify-content:space-between;
+      cursor:pointer;user-select:none;
+      padding:7px 0 5px;border-top:1px solid #eee;margin-top:8px;
+    }
+    .sec-header:first-of-type{border-top:none;margin-top:0;}
+    .sec-title{font-size:11px;font-weight:700;color:#444;}
+    .sec-toggle{font-size:11px;color:#bbb;background:none;border:none;cursor:pointer;padding:0;}
+    .sec-body{overflow:hidden;transition:max-height .2s ease;}
+    .sec-body.closed{max-height:0 !important;overflow:hidden;}
+    .fb{
+      display:block;width:100%;text-align:left;
+      padding:6px 10px;margin-bottom:4px;
+      border:none;border-radius:8px;cursor:pointer;
+      font-size:11px;background:#f5f5f5;color:#333;
+      transition:all .15s;
+    }
+    .fb:hover{background:#e8e8e8;}
+    .fb.active{background:#1a1a2e;color:#fff;font-weight:600;}
+    .sup-wrap{margin-top:10px;padding-top:8px;border-top:1px solid #eee;}
+    .sup-wrap label{display:block;font-size:11px;color:#888;margin-bottom:4px;}
+    .sup-wrap input{width:100%;accent-color:#1a1a2e;}
+
+    .lr{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+    .ld{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+    .lp{width:14px;height:14px;border-radius:2px;border:2px dashed;flex-shrink:0;}
+    /* ── Mobile responsive ── */
+    @media (max-width: 768px){
+      #panel{
+        position:fixed;bottom:0;left:0;right:0;top:auto;
+        width:100%;max-width:100%;border-radius:16px 16px 0 0;
+        max-height:55vh;z-index:1001;padding:16px 16px 24px;
+        transform:translateY(100%);transition:transform .3s ease;
+      }
+      #panel.mobile-lot-open{transform:translateY(0);}
+      #filters{
+        width:90vw;max-width:280px;max-height:82vh;
+      }
+      #mobile-fab{display:flex !important;}
+      .mbtn{font-size:13px;padding:9px 6px;}
+      .mark-btns{gap:4px;}
+    }
+    @media (min-width: 769px){
+      #mobile-fab{display:none !important;}
+    }
+    #mobile-fab{
+      display:none;position:fixed;bottom:20px;right:16px;z-index:1002;
+      background:#8e44ad;color:#fff;border:none;border-radius:50px;
+      padding:13px 18px;font-size:14px;font-weight:800;cursor:pointer;
+      box-shadow:0 4px 20px rgba(0,0,0,.35);gap:6px;align-items:center;
+    }
+
+
+    /* Loading overlay */
+    #loading-overlay{position:fixed;inset:0;background:#1a1a2e;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+    #loading-overlay h1{color:#fff;font-size:22px;font-weight:800;}
+    #loading-overlay p{color:#aaa;font-size:13px;}
+    .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#27ae60;border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <h1 id="loading-ville">Chargement…</h1>
+  <p id="loading-detail">Récupération des données cadastrales</p>
+</div>
+<div id="map"></div>
+
+<!-- Bouton mobile flottant -->
+<button id="mobile-fab" onclick="document.getElementById('panel').classList.toggle('mobile-lot-open')">
+  📋 Fiche lot
+</button>
+
+<div id="panel">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+    <div style="display:flex;align-items:center;gap:8px"><a href='/' style='color:#aaa;text-decoration:none;font-size:18px' title='Retour au tableau de bord'>◀</a><h2 id="titre-ville" style="margin-bottom:0">🏙️ Outil de développement</h2></div>
+    <button id="close-panel-btn" onclick="fermerPanel()" title="Fermer"
+      style="background:none;border:none;font-size:22px;cursor:pointer;color:#ccc;padding:0;line-height:1;flex-shrink:0">✕</button>
+  </div>
+  <div class="sub" id="ville-reglements">Chargement…</div>
+  <div class="stats">
+    <div class="stat blue"><div class="n" id="stat-lots">—</div><div class="l">Lots total</div></div>
+    <div class="stat green"><div class="n" id="stat-4plus">—</div><div class="l">Zones 4+ logements</div></div>
+    <div class="stat blue" style="--c:#2980b9"><div class="n" id="stat-tod" style="color:#2980b9">—</div><div class="l">Dans périmètre TOD</div></div>
+    <div class="stat orange"><div class="n" id="stat-prio">—</div><div class="l">⭐ Priorité max (4+ & TOD)</div></div>
+  </div>
+  <hr>
+  <div id="lot-info"><div class="ph">👆 Cliquez sur un lot pour voir ses détails</div></div>
+</div>
+
+<div id="filters">
+  <div id="filters-header" onclick="toggleFilters()">
+    <h4>🔍 Filtres & Outils</h4>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="sync-indicator" title="Synchronisation d'équipe active" style="display:none;align-items:center;gap:4px;font-size:10px;font-weight:700;color:#fff;background:#27ae60;padding:3px 8px;border-radius:10px;cursor:default">
+        <span style="width:7px;height:7px;background:#7dffb3;border-radius:50%;display:inline-block;animation:pulse 2s infinite"></span>
+        EN DIRECT
+      </div>
+      <button id="toggle-filters" title="Réduire">◀</button>
+    </div>
+  </div>
+  <div id="filters-body">
+
+    <!-- 🔍 RECHERCHE PAR ADRESSE -->
+    <div id="search-wrap">
+      <span id="search-icon">🔍</span>
+      <input id="search-input" type="text" placeholder="Rechercher une adresse ou un no de lot…"
+        oninput="rechercherAdresse(this.value)" onkeydown="rechercheKeydown(event)"
+        autocomplete="off" autocorrect="off" spellcheck="false">
+      <button id="search-clear" onclick="clearSearch()">✕</button>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- 📍 PASTILLES -->
+    <div class="sec-header" onclick="toggleSec('sec-pastilles')">
+      <span class="sec-title" style="color:#8e44ad">📍 Pastilles</span>
+      <button class="sec-toggle" id="tog-pastilles">▾</button>
+    </div>
+    <div class="sec-body" id="sec-pastilles">
+      <button id="btn-add-pastille" onclick="activerAjoutPastille()"
+        style="width:100%;padding:9px 12px;background:#8e44ad;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:8px;transition:background .15s">
+        ＋ Ajouter une pastille
+      </button>
+      <div id="pastilles-list"></div>
+    </div>
+
+    <!-- 🔍 ZONAGE -->
+    <div class="sec-header" onclick="toggleSec('sec-zonage')">
+      <span class="sec-title">🔍 Zonage / Potentiel</span>
+      <button class="sec-toggle" id="tog-zonage">▾</button>
+    </div>
+    <div class="sec-body" id="sec-zonage">
+      <button class="fb active" id="f-all"       onclick="setFilter('all')">Tous les lots</button>
+      <button class="fb"        id="f-4plus"      onclick="setFilter('4plus')">🟢 Zones 4+ seulement</button>
+      <button class="fb"        id="f-tod"        onclick="setFilter('tod')">🔵 Dans TOD seulement</button>
+      <button class="fb"        id="f-prio"       onclick="setFilter('prio')">⭐ Priorité (4+ & TOD)</button>
+      <button class="fb fav-btn" id="f-favoris"   onclick="setFilter('favoris')">⭐ Mes favoris <span id="cnt-fav" style="float:right;opacity:.6"></span></button>
+      <button class="fb ver-btn" id="f-verifies"  onclick="setFilter('verifies')">❌ Non retenus <span id="cnt-ver" style="float:right;opacity:.6"></span></button>
+      <button class="fb env-btn" id="f-enventes"  onclick="setFilter('enventes')">🏷️ En vente <span id="cnt-env" style="float:right;opacity:.6"></span></button>
+      <div id="listings-status" style="font-size:10px;color:#888;margin:4px 4px 0;display:flex;align-items:center;justify-content:space-between;gap:6px">
+        <span id="listings-msg">Chargement des annonces…</span>
+        <button onclick="chargerAnnonces(true)" title="Rafraîchir" style="border:none;background:none;cursor:pointer;font-size:14px;padding:0;color:#2980b9">↺</button>
+      </div>
+      <button class="fb sol-btn" id="f-sollicites" onclick="setFilter('sollicites')">📬 Sollicités <span id="cnt-sol" style="float:right;opacity:.6"></span></button>
+      <button class="fb let-btn" id="f-lettres" onclick="setFilter('lettres')">✉️ À lettre <span id="cnt-let" style="float:right;opacity:.6"></span></button>
+      <button class="export-btn" onclick="exportLettresCSV()">✉️ Exporter lettres → CSV</button>
+      <button class="export-btn" onclick="exporterDonnees()" style="background:linear-gradient(135deg,#2980b9,#1a5276);margin-top:5px">💾 Exporter toutes mes données</button>
+      <label class="export-btn" style="background:linear-gradient(135deg,#27ae60,#1a7a3c);margin-top:5px;cursor:pointer;display:block;text-align:center">
+        📂 Importer mes données
+        <input type="file" accept=".json" onchange="importerDonnees(this)" style="display:none">
+      </label>
+      <a id="btn-editeur-zones" href="#" onclick="ouvrirEditeurZones();return false;" class="export-btn" style="background:linear-gradient(135deg,#2c3e50,#1a252f);margin-top:5px;display:block;text-align:center;text-decoration:none">
+        ✏️ Éditeur de zones
+      </a>
+      <div style="height:6px"></div>
+      <button class="fb" id="btn-multi" onclick="toggleMultiSelect()" style="border:1.5px solid #2980b9;color:#2980b9;background:#f0f8ff">☑ Sélection multiple</button>
+      <div id="multi-count" style="font-size:10px;color:#2980b9;text-align:center;margin:3px 0;font-weight:700"></div>
+      <div id="multi-actions" style="display:none;margin-top:4px">
+        <div style="font-size:10px;color:#888;margin-bottom:5px">Appliquer aux lots sélectionnés :</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button onclick="applyBatchMark('favori')" style="flex:1;min-width:60px;padding:7px 4px;border:none;border-radius:7px;background:#fff8dc;color:#8a6d00;font-size:11px;font-weight:700;cursor:pointer">⭐ Favoris</button>
+          <button onclick="applyBatchMark('verifie')" style="flex:1;min-width:60px;padding:7px 4px;border:none;border-radius:7px;background:#fef0f0;color:#c0392b;font-size:11px;font-weight:700;cursor:pointer">❌ Non ret.</button>
+          <button onclick="applyBatchMark('envente')" style="flex:1;min-width:60px;padding:7px 4px;border:none;border-radius:7px;background:#fef5e7;color:#b7770d;font-size:11px;font-weight:700;cursor:pointer">🏷️ Vente</button>
+          <button onclick="applyBatchMark('sollicite')" style="flex:1;min-width:60px;padding:7px 4px;border:none;border-radius:7px;background:#eaf4fb;color:#1a5276;font-size:11px;font-weight:700;cursor:pointer">📬 Sollic.</button>
+          <button onclick="applyBatchMark('lettre')" style="flex:1;min-width:60px;padding:7px 4px;border:none;border-radius:7px;background:#fdf0ff;color:#6c3483;font-size:11px;font-weight:700;cursor:pointer">✉️ Lettre</button>
+        </div>
+        <button onclick="exporterSelectionCSV()" style="width:100%;margin-top:6px;padding:7px;border:none;border-radius:7px;background:#27ae60;color:#fff;font-size:11px;font-weight:700;cursor:pointer">📊 Exporter sélection → CSV</button>
+      </div>
+    </div>
+
+    <!-- 🏗️ USAGE -->
+    <div class="sec-header" onclick="toggleSec('sec-usage')">
+      <span class="sec-title">🏗️ Usage actuel</span>
+      <button class="sec-toggle" id="tog-usage">▾</button>
+    </div>
+    <div class="sec-body" id="sec-usage">
+      <button class="fb" id="f-u-res" onclick="setUsage('Résidentiel')">🏠 Résidentiel</button>
+      <button class="fb" id="f-u-mul" onclick="setUsage('Multi-logements')">🏢 Multi-logements</button>
+      <button class="fb" id="f-u-com" onclick="setUsage('Commercial')">🛍️ Commercial</button>
+      <button class="fb" id="f-u-ind" onclick="setUsage('Industriel')">🏭 Industriel</button>
+      <button class="fb" id="f-u-mix" onclick="setUsage('Mixte')">⚡ Mixte</button>
+      <button class="fb" id="f-u-pub" onclick="setUsage('Public')">🌳 Public / Institutionnel</button>
+      <button class="fb" id="f-u-vac" onclick="setUsage('Vacant')">⬜ Vacant / Terrain nu</button>
+      <div class="sup-wrap">
+        <label>Superficie min : <strong id="sv">0</strong> m² <span id="sv-count" style="font-weight:400;color:#999;font-size:11px"></span></label>
+        <input type="range" min="0" max="10000" step="100" value="0" oninput="setMin(this.value)">
+      </div>
+    </div>
+
+    <!-- 🌿 COUCHES ENV -->
+    <div class="sec-header" onclick="toggleSec('sec-env')">
+      <span class="sec-title">🌿 Couches environnementales</span>
+      <button class="sec-toggle" id="tog-env">▾</button>
+    </div>
+    <div class="sec-body" id="sec-env">
+      <button class="env-toggle" id="btn-mh" onclick="toggleEnv('mh')">
+        <span class="dot" style="background:#2ecc71;border:1px solid #27ae60"></span>Milieux humides
+      </button>
+      <button class="env-toggle" id="btn-zi" onclick="toggleEnv('zi')">
+        <span class="dot" style="background:#3498db;border:1px solid #2980b9"></span>Zones inondables (BDZI)
+      </button>
+      <div id="wms-diag" style="display:none;font-size:11px;padding:6px 8px;margin-top:4px;border-radius:6px;background:#f8f9fa;border:1px solid #dee2e6;color:#555;"></div>
+      <button class="env-toggle" id="btn-sat" onclick="toggleEnv('sat')">
+        <span class="dot" style="background:#555;border:1px solid #333"></span>Vue satellite
+      </button>
+      <button class="env-toggle" id="btn-agr" onclick="toggleEnv('agr')">
+        <span class="dot" style="background:#7dbb00;border:1px solid #5a8a00"></span>Zones agricoles (CPTAQ)
+      </button>
+      <button class="env-toggle" id="btn-civic" onclick="toggleCivicLabels()">
+        <span class="dot" style="background:#1a1a2e;border:1px solid #000"></span>N° civiques (zoom 15+)
+      </button>
+    </div>
+
+    <!-- 🗺️ LÉGENDE -->
+    <div class="sec-header" onclick="toggleSec('sec-legend')">
+      <span class="sec-title">🗺️ Légende</span>
+      <button class="sec-toggle" id="tog-legend">▾</button>
+    </div>
+    <div class="sec-body" id="sec-legend">
+      <div class="lr"><div class="ld" style="background:#e67e22;opacity:.9"></div>⭐ Zone 4+ dans TOD</div>
+      <div class="lr"><div class="ld" style="background:#27ae60;opacity:.75"></div>Zone 4+ logements</div>
+      <div class="lr"><div class="ld" style="background:#2980b9;opacity:.4"></div>Dans périmètre TOD</div>
+      <div class="lr"><div class="ld" style="background:#bdc3c7;opacity:.4"></div>Autres zones</div>
+      <div class="lr"><div class="lp" style="border-color:#154360"></div>Périmètre TOD</div>
+      <div class="lr"><div class="lp" style="border-color:#e74c3c"></div>Limite <span id="legend-ville-nom"></span></div>
+      <div class="lr"><div class="ld" style="background:#f1c40f;opacity:.9"></div>⭐ Favori</div>
+      <div class="lr"><div class="ld" style="background:#95a5a6;opacity:.7"></div>✓ Vérifié</div>
+      <div class="lr"><div class="ld" style="background:#2980b9;opacity:.7"></div>📬 Sollicité</div>
+      <div id="legend-env" style="display:none">
+        <div class="lr" style="margin-top:5px"><div class="ld" style="background:#2ecc71;opacity:.6"></div>Milieux humides</div>
+        <div class="lr"><div class="ld" style="background:#3498db;opacity:.55"></div>Zones inondables</div>
+        <div class="lr"><div class="ld" style="background:#7dbb00;opacity:.6"></div>Zones agricoles</div>
+      </div>
+      <div style="margin-top:6px;font-size:10px;color:#aaa;">Règlement 901 · Valider avec la Ville</div>
+    </div>
+
+  </div><!-- /filters-body -->
+</div>
+
+
+<!-- Indicateur de mode déplacement -->
+<div id="drag-indicator">🔀 Faites glisser la pastille vers sa position — clic sur la carte pour annuler</div>
+
+
+<script>
+
+// ── Chargement dynamique des données de la ville ─────────────────────────────
+const urlParams  = new URLSearchParams(window.location.search);
+const villeSlug  = urlParams.get('ville') || 'delson';
+const LSP        = villeSlug + '_'; // localStorage key prefix
+let   cityMeta   = {};
+
+// ── Firebase — Collaboration temps réel ─────────────────────────────────────
+// 👉 Collez ici la config de votre projet Firebase
+//    (console.firebase.google.com → Paramètres → Vos applications → Config)
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyCXcffXVz4pQzLHGBjheJm_hbtfVucFDzc",
+  authDomain:        "plateforme-quebec.firebaseapp.com",
+  projectId:         "plateforme-quebec",
+  storageBucket:     "plateforme-quebec.firebasestorage.app",
+  messagingSenderId: "636362215204",
+  appId:             "1:636362215204:web:a964e117531edcd895adb1"
+};
+
+let db = null, cityDoc = null;
+const SYNC_OK = !Object.values(FIREBASE_CONFIG).some(v => v.includes('REMPLACER'));
+
+if (SYNC_OK) {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    cityDoc = db.collection('plateforme').doc(villeSlug);
+  } catch(e) { console.warn('Firebase init error:', e); }
+}
+
+// Sauvegarde dans Firestore ET localStorage (fallback si Firebase non configuré)
+function syncSave(field, data) {
+  localStorage.setItem(LSP + field, JSON.stringify(data));
+  if (cityDoc) cityDoc.set({ [field]: data }, { merge: true })
+    .catch(e => console.warn('Sync error:', e));
+}
+
+// Écoute les changements des collègues en temps réel
+function initSync() {
+  if (!cityDoc) return;
+  const indicator = document.getElementById('sync-indicator');
+  if (indicator) { indicator.style.display = 'flex'; indicator.title = 'Synchronisation active'; }
+
+  cityDoc.onSnapshot(doc => {
+    if (!doc.exists) return;
+    const d = doc.data();
+    let changed = false;
+    if (d.marks       !== undefined) { marks        = d.marks;        localStorage.setItem(LSP+'marks',        JSON.stringify(marks));        changed = true; }
+    if (d.lot_notes   !== undefined) { lotNotes     = d.lot_notes;    localStorage.setItem(LSP+'lot_notes',    JSON.stringify(lotNotes));    changed = true; }
+    if (d.pastilles_v2!== undefined) { pastilles    = d.pastilles_v2; localStorage.setItem(LSP+'pastilles_v2',JSON.stringify(pastilles));  changed = true; }
+    if (d.listings    !== undefined) { listingsData = d.listings;     localStorage.setItem(LSP+'listings',     JSON.stringify(listingsData)); changed = true; }
+    if (changed && typeof lotsLayer !== 'undefined') {
+      lotsLayer.setStyle(lotStyle);
+      updateMarkCounts();
+      if (typeof afficherPastilles === 'function') afficherPastilles();
+      if (typeof renderPastilleList === 'function') renderPastilleList();
+    }
+  }, e => {
+    console.warn('Firestore listener error:', e);
+    if (indicator) { indicator.style.background = '#e74c3c'; indicator.title = 'Erreur de synchronisation'; }
+  });
+}
+let   lotsData   = { type:'FeatureCollection', features:[] };
+let   zonesData  = { type:'FeatureCollection', features:[] };
+let   todData    = { type:'FeatureCollection', features:[] };
+let   boundaryData = { type:'FeatureCollection', features:[] };
+
+async function chargerDonnesVille(){
+  const overlay  = document.getElementById('loading-overlay');
+  const lVille   = document.getElementById('loading-ville');
+  const lDetail  = document.getElementById('loading-detail');
+
+  try {
+    lDetail.textContent = 'Récupération de data/' + villeSlug + '.json…';
+    const res  = await fetch('data/' + villeSlug + '.json?v=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('Fichier introuvable : data/' + villeSlug + '.json');
+
+    lDetail.textContent = 'Parsing des données…';
+    const city = await res.json();
+
+    cityMeta   = city.meta   || {};
+    lotsData   = city.lots   || lotsData;
+    zonesData  = city.zones  || zonesData;
+    todData    = city.tod    || todData;
+    boundaryData = city.boundary || boundaryData;
+
+    // Update page title & meta
+    const nomVille = cityMeta.nom || villeSlug;
+    document.title = 'Outil de développement — ' + nomVille;
+    lVille.textContent  = nomVille;
+    const legendNom = document.getElementById('legend-ville-nom');
+    if(legendNom) legendNom.textContent = nomVille;
+
+    // Tenter de charger un fichier de zones séparé (data/<slug>-zones.json)
+    // Créé via l'éditeur de zones si absent du fichier principal
+    if(!zonesData.features || zonesData.features.length === 0){
+      try {
+        lDetail.textContent = 'Recherche fichier de zones…';
+        const zRes = await fetch('data/' + villeSlug + '-zones.json');
+        if(zRes.ok){ zonesData = await zRes.json(); }
+      } catch(e){ /* pas de fichier de zones — normal */ }
+    }
+
+    // Fallback : charger les zones depuis localStorage (dessinées via l'éditeur de zones)
+    // Clé : <slug>_zones_edit (même clé que l'éditeur)
+    if(!zonesData.features || zonesData.features.length === 0){
+      try {
+        const lsZones = localStorage.getItem(villeSlug + '_zones_edit');
+        if(lsZones){
+          const rawZones = JSON.parse(lsZones); // tableau [{id,code,type,geojson}]
+          if(rawZones.length){
+            zonesData = {
+              type:'FeatureCollection',
+              features: rawZones.map(z=>({
+                type:'Feature',
+                properties:{ zone:z.code, nom:z.type },
+                geometry: z.geojson?.geometry || z.geojson
+              }))
+            };
+          }
+        }
+      } catch(e){ /* pas de zones en localStorage */ }
+    }
+
+    lDetail.textContent = 'Initialisation de la carte…';
+
+    // Kick off map init (defined below)
+    initMap();
+
+  } catch(err) {
+    lVille.textContent  = '❌ Erreur';
+    lDetail.textContent = err.message;
+    console.error(err);
+  }
+}
+
+// Start loading immediately
+chargerDonnesVille();
+
+
+const Z4 = new Set(["H-110", "M-209", "H-106", "H-113", "M-122", "M-129", "H-119", "H-211", "H-132", "H-135", "M-216", "H-131", "M-128", "M-107", "M-319", "H-115", "H-315", "H-210", "M-126", "H-103", "H-205", "M-201", "H-133", "H-134", "M-121"]);
+const ZD = {"H-103": "Max 12 log \u00b7 3 \u00e9tages \u00b7 Riverain", "H-106": "9\u201328 log \u00b7 3 \u00e9tages \u00b7 Projets int\u00e9gr\u00e9s", "H-110": "6\u201312 log \u00b7 3 \u00e9tages \u00b7 Projets int\u00e9gr\u00e9s", "H-113": "Max 12 log \u00b7 4 \u00e9tages", "H-115": "H-03 : 4\u20138 log \u00b7 3 \u00e9tages", "H-119": "H-03 : 4\u20138 log \u00b7 3 \u00e9tages", "H-131": "Min 150 log \u00b7 12 \u00e9tages \u00b7 Grande envergure", "H-132": "Min 32 log \u00b7 6 \u00e9tages", "H-133": "Min 55 log \u00b7 12 \u00e9tages", "H-134": "40 log/ha \u00b7 4 \u00e9tages \u00b7 Projets int\u00e9gr\u00e9s", "H-135": "40 log/ha \u00b7 6 \u00e9tages \u00b7 Grand terrain", "H-205": "Max 6 log \u00b7 2 \u00e9tages \u00b7 Abords ferroviaires", "H-210": "15\u2013100 log \u00b7 10 \u00e9tages \u00b7 \u2b50 Fort potentiel", "H-211": "Min 96 log/terrain \u00b7 6 \u00e9tages", "H-315": "Max 9 log \u00b7 3 \u00e9tages", "M-107": "H-03/H-04 \u00b7 6 \u00e9tages \u00b7 Mixte", "M-121": "Min 12 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-122": "Min 12 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-126": "Min 16 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-128": "Min 16 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-129": "40 log/ha \u00b7 8 \u00e9tages \u00b7 3,6 ha requis", "M-201": "Min 12 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-209": "4\u20138 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-216": "Min 16 log \u00b7 6 \u00e9tages \u00b7 Mixte", "M-319": "Min 18 log \u00b7 6 \u00e9tages \u00b7 Mixte"};
+
+
+
+
+
+
+
+function initMap(){
+const map = L.map('map',{center:[45.375,-73.540],zoom:14});
+
+// Pane dédié aux couches env (milieux humides, zones inondables, agricole)
+// z-index 450 = au-dessus des lots GeoJSON (overlay pane = 400)
+map.createPane('envPane');
+map.getPane('envPane').style.zIndex = 450;
+map.getPane('envPane').style.pointerEvents = 'none';
+
+const cartoLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+  attribution:'© OpenStreetMap contributors © CARTO',maxZoom:20
+}).addTo(map);
+
+// Périmètre Delson
+L.geoJSON(boundaryData,{style:{fillColor:'transparent',color:'#e74c3c',weight:2.5,dashArray:'7,4',opacity:.9}}).addTo(map);
+
+// Retourne l'URL de la grille de zonage selon la configuration de la ville
+function getGrilleUrl(zone){
+  if(!zone||zone==='N/D') return null;
+  const grilles = cityMeta.grilles;
+
+  // Ancien format : _fallback = tableau de codes de zones → PDF groupé par lettre
+  if(grilles && Array.isArray(grilles._fallback) && grilles._fallback.includes(zone)){
+    const prefix = zone[0];
+    return grilles[prefix] || null;
+  }
+
+  // Nouveau format : _fallback_map = objet {code_zone: chemin_pdf_groupé ou null}
+  if(grilles && grilles._fallback_map && zone in grilles._fallback_map){
+    return grilles._fallback_map[zone] || null; // null = pas de grille disponible
+  }
+
+  // PDF individuel préfixé par ville (ex: grilles/saint-constant-H-120.pdf)
+  return 'grilles/' + villeSlug + '-' + zone + '.pdf';
+}
+
+// Périmètre TOD
+L.geoJSON(todData,{style:{fillColor:'#154360',fillOpacity:.07,color:'#154360',weight:2.5,dashArray:'6,3',opacity:.9}}).addTo(map);
+
+// Couche zones (contours + labels — visibles seulement à zoom ≥ 14)
+const zonesLayer = L.geoJSON(zonesData,{
+  style:{fillColor:'transparent',color:'#333',weight:2,opacity:.8,dashArray:'5,3'},
+  interactive:false,
+  onEachFeature:(f,l)=>{
+    if(f.properties.zone){
+      l.bindTooltip(f.properties.zone,{
+        permanent:true,
+        direction:'center',
+        className:'zone-label',
+        offset:[0,0]
+      });
+    }
+  }
+}).addTo(map);
+
+// Masquer/afficher les labels selon le niveau de zoom
+function updateZoneLabelsVisibility(){
+  const show = map.getZoom() >= 14;
+  document.querySelectorAll('.zone-label').forEach(el=>{
+    el.style.opacity = show ? '1' : '0';
+    el.style.pointerEvents = 'none';
+  });
+}
+map.on('zoomend', updateZoneLabelsVisibility);
+updateZoneLabelsVisibility();
+
+let sel=null, currentFilter='all', minSup=0;
+
+// ── Système de marquage (persisté en localStorage) ──────────────────────────
+let marks = {};
+try { marks = JSON.parse(localStorage.getItem(LSP+'marks') || '{}'); } catch(e){}
+// Clear old Nominatim cache (inaccurate) — only keep entries confirmed via Overpass
+let postalCache = {};
+try {
+  const old = JSON.parse(localStorage.getItem(LSP+'postal') || '{}');
+  // Keep only entries that look like real Canadian postal codes
+  for(const [k,v] of Object.entries(old)){
+    if(/^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i.test(v)) postalCache[k] = v;
+  }
+} catch(e){}
+
+let listingsData = {};
+try { listingsData = JSON.parse(localStorage.getItem(LSP+'listings') || '{}'); } catch(e){}
+
+// ── Propriétés en vente — Realtor.ca auto-sync ───────────────────────────────
+let autoListings = [];
+let autoListingsUpdated = null;
+const AUTO_REFRESH_MS = 30 * 60 * 1000;
+
+async function chargerAnnonces(force){
+  const msgEl = document.getElementById('listings-msg');
+  if(msgEl) msgEl.textContent = '⏳ Recherche en cours…';
+  if(location.protocol === 'file:'){
+    if(msgEl) msgEl.textContent = '⚠️ Disponible sur Netlify seulement';
+    return;
+  }
+  try{
+    const res  = await fetch('/.netlify/functions/listings?ville=' + encodeURIComponent(villeSlug));
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    autoListings        = data.listings || [];
+    autoListingsUpdated = new Date();
+    _applyAutoListings();
+    const h = autoListingsUpdated.toLocaleTimeString('fr-CA',{hour:'2-digit',minute:'2-digit'});
+    if(msgEl) msgEl.textContent = `${autoListings.length} annonce${autoListings.length!==1?'s':''} · ${h}`;
+  }catch(e){
+    if(msgEl) msgEl.textContent = '❌ ' + e.message;
+  }
+}
+function _applyAutoListings(){
+  autoListings.forEach(listing => {
+    const lot = _matchAdresse(listing.street);
+    if(!lot) return;
+    const no = lot.properties.NO_LOT;
+    if(!marks[no] || marks[no] === 'envente') marks[no] = 'envente';
+    if(listing.prix || listing.url){
+      listingsData[no] = { prix:listing.prix, url:listing.url, mls:listing.mls,
+        postal:listing.postal, date:new Date().toISOString().slice(0,10), auto:true };
+    }
+  });
+  syncSave('marks',    marks);
+  syncSave('listings', listingsData);
+  updateMarkCounts();
+  lotsLayer.setStyle(lotStyle);
+}
+function _matchAdresse(streetAddr){
+  if(!streetAddr) return null;
+  const m = streetAddr.match(/^(\d+)\s+(.+)$/);
+  if(!m) return null;
+  const civicNo  = m[1];
+  const streetUp = m[2].toUpperCase();
+  const words    = streetUp.split(/\s+/).filter(w => w.length > 2);
+  const keyword  = words[words.length - 1] || '';
+  return lotsData.features.find(f => {
+    const addr = (f.properties.adresse || '').toUpperCase();
+    return addr && addr.startsWith(civicNo + ' ') && (!keyword || addr.includes(keyword));
+  }) || null;
+}
+setTimeout(()=>{ chargerAnnonces(); setInterval(()=>chargerAnnonces(), AUTO_REFRESH_MS); }, 2000);
+
+function getMark(no_lot){ return marks[no_lot] || null; }
+
+// ── Marquer toute une zone comme Non retenu ───────────────────────────────────
+function marquerZoneComplete(zone){
+  if(!confirm('Marquer TOUS les lots de la zone ' + zone + ' comme ❌ Non retenu ?\n\nCela remplacera le statut actuel de chaque lot de cette zone.')) return;
+  let count = 0;
+  lotsData.features.forEach(f => {
+    if(f.properties.zone === zone){ marks[f.properties.NO_LOT] = 'verifie'; count++; }
+  });
+  syncSave('marks', marks);
+  updateMarkCounts();
+  lotsLayer.setStyle(lotStyle);
+  alert(count + ' lot' + (count>1?'s':'') + ' de la zone ' + zone + ' marqués comme Non retenu.');
+}
+
+// ── Sauvegarder infos annonce en vente ───────────────────────────────────────
+function saveListing(no_lot){
+  const prix = (document.getElementById('listing-prix')?.value || '').trim();
+  const url  = (document.getElementById('listing-url')?.value  || '').trim();
+  if(!prix && !url){ delete listingsData[no_lot]; }
+  else { listingsData[no_lot] = { prix, url, date: new Date().toISOString().slice(0,10) }; }
+  syncSave('listings', listingsData);
+  const btn = document.getElementById('btn-listing-save');
+  if(btn){ btn.textContent='✓ Sauvegardé'; setTimeout(()=>{ btn.textContent='💾 Sauvegarder'; },1500); }
+}
+
+function toggleMark(no_lot, type){
+  if(marks[no_lot] === type) delete marks[no_lot];
+  else marks[no_lot] = type;
+  syncSave('marks', marks);
+  updateMarkCounts();
+  lotsLayer.setStyle(lotStyle);
+  const cur = getMark(no_lot);
+  const bf = document.getElementById('btn-fav');
+  const bv = document.getElementById('btn-ver');
+  const bs = document.getElementById('btn-sol');
+  const bl = document.getElementById('btn-let');
+  if(bf){ bf.className='mbtn'+(cur==='favori'?' fav-on':''); bf.textContent=cur==='favori'?'⭐ Favori (retirer)':'⭐ Favori'; }
+  if(bv){ bv.className='mbtn'+(cur==='verifie'?' ver-on':''); bv.textContent=cur==='verifie'?'✓ Non retenu (retirer)':'✓ Non retenu'; }
+  if(bs){ bs.className='mbtn'+(cur==='sollicite'?' sol-on':''); bs.textContent=cur==='sollicite'?'📬 Sollicité (retirer)':'📬 Sollicité'; }
+  if(bl){ bl.className='mbtn'+(cur==='lettre'?' let-on':''); bl.textContent=cur==='lettre'?'✉️ Lettre (retirer)':'✉️ Lettre'; }
+  const be = document.getElementById('btn-env');
+  if(be){ be.className='mbtn'+(cur==='envente'?' env-on':''); be.textContent=cur==='envente'?'🏷️ En vente (retirer)':'🏷️ En vente'; }
+  const ls = document.getElementById('listing-section');
+  if(ls) ls.style.display = cur==='envente'?'block':'none';
+}
+
+function updateMarkCounts(){
+  const nFav = Object.values(marks).filter(v=>v==='favori').length;
+  const nVer = Object.values(marks).filter(v=>v==='verifie').length;
+  const nSol = Object.values(marks).filter(v=>v==='sollicite').length;
+  const nLet = Object.values(marks).filter(v=>v==='lettre').length;
+  const nEnv = Object.values(marks).filter(v=>v==='envente').length;
+  const ef=document.getElementById('cnt-fav'), ev=document.getElementById('cnt-ver'), es=document.getElementById('cnt-sol'), el=document.getElementById('cnt-let'), ee=document.getElementById('cnt-env');
+  if(ef) ef.textContent=nFav||'';
+  if(ev) ev.textContent=nVer||'';
+  if(es) es.textContent=nSol||'';
+  if(el) el.textContent=nLet||'';
+  if(ee) ee.textContent=nEnv||'';
+}
+updateMarkCounts();
+
+// ── Code postal via Nominatim (OpenStreetMap) ────────────────────────────────
+// Lookup asynchrone avec cache localStorage — 1 requête par adresse unique
+// ── Code postal : geocoder.ca (gratuit, sans clé) + champ modifiable ─────────
+// geocoder.ca = service canadien qui utilise les données réelles de Postes Canada
+let postalFetchActive = false;
+const postalQueue = [];
+
+function savePostalCode(address){
+  const inp = document.getElementById('inp-postal');
+  if(!inp || !address) return;
+  let val = inp.value.trim().toUpperCase().replace(/\s+/g,'');
+  // Format: J5B1E3 → J5B 1E3
+  if(val.length === 6) val = val.slice(0,3) + ' ' + val.slice(3);
+  inp.value = val;
+  postalCache[address] = val;
+  syncSave('postal', postalCache);
+  const btn = document.getElementById('btn-postal-save');
+  if(btn){ btn.textContent='✓'; btn.style.background='#27ae60';
+    setTimeout(()=>{ btn.textContent='💾'; btn.style.background='#555'; },1500); }
+}
+
+function fetchPostalCode(address){
+  if(!address) return;
+  const cached = postalCache[address];
+  if(cached !== undefined){
+    _setPostalInput(cached);
+    return;
+  }
+  postalQueue.push(address);
+  _drainPostalQueue();
+}
+
+function _setPostalInput(val){
+  const inp = document.getElementById('inp-postal');
+  if(inp) inp.value = val || '';
+}
+
+async function _drainPostalQueue(){
+  if(postalFetchActive) return;
+  postalFetchActive = true;
+  while(postalQueue.length){
+    const address = postalQueue.shift();
+    if(postalCache[address] !== undefined){ _setPostalInput(postalCache[address]); continue; }
+    try{
+      // geocoder.ca — API gratuite canadienne, données Postes Canada
+      const query = address + ', ' + (cityMeta.nom || villeSlug) + ', QC';
+      const url = 'https://geocoder.ca/?locate=' + encodeURIComponent(query) + '&json=1';
+      const r = await fetch(url);
+      const data = await r.json();
+      let postal = (data.postal || (data.standard && data.standard.postal) || '').trim().toUpperCase();
+      // Format J5B1E3 → J5B 1E3
+      if(postal.length === 6) postal = postal.slice(0,3) + ' ' + postal.slice(3);
+      if(postal && /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/.test(postal)){
+        postalCache[address] = postal;
+        syncSave('postal', postalCache);
+        const inp = document.getElementById('inp-postal');
+        if(inp && inp.dataset.addr === address) inp.value = postal;
+      } else {
+        // Pas de résultat — laisser le champ vide pour saisie manuelle
+        postalCache[address] = '';
+        syncSave('postal', postalCache);
+      }
+    }catch(e){
+      // CORS ou réseau inaccessible — saisie manuelle disponible
+    }
+    await new Promise(r => setTimeout(r, 400));
+  }
+  postalFetchActive = false;
+}
+
+function lookupPostalCode(address){
+  if(!address) return '';
+  return postalCache[address] || '';
+}
+
+// ── Export lettres ───────────────────────────────────────────────────────────
+function exportLettresCSV(){
+  // Export lots marqués "lettre" as CSV — pour envoi de lettres de sollicitation
+  const lotsList = lotsData.features.filter(f=>getMark(f.properties.NO_LOT)==='lettre');
+  if(!lotsList.length){
+    alert('Aucun lot marqué "Lettre" à exporter.\n\nMarquez des lots avec ✉️ Lettre, puis réessayez.');
+    return;
+  }
+  const headers=['Numéro de lot','Adresse','Code postal','Zone','Catégorie',
+    'Usage actuel','Année constr.','Nb logements','Nb étages',
+    'Superficie lot (m²)','Façade (m)','Profondeur (m)',
+    'Valeur totale ($)','Valeur bâtiment ($)','Valeur terrain ($)',
+    'Zone 4+','Dans TOD','Priorité','Notes','Lien Google Maps'];
+
+  const esc = v => {
+    const s = String(v==null?'':v);
+    return s.includes(',') || s.includes('"') || s.includes('\n')
+      ? '"' + s.replace(/"/g,'""') + '"' : s;
+  };
+
+  const rows = [headers.map(esc).join(',')];
+  for(const f of lotsList){
+    const p=f.properties;
+    rows.push([
+      p.NO_LOT||'', p.adresse||'', postalCache[p.adresse]||'', p.zone||'', p.categorie||'',
+      p.utilisation||'', p.annee_construction||'', p.nb_logements_role||'',
+      p.nb_etages||'',
+      p.superficie_m2_calculee?Math.round(p.superficie_m2_calculee):'',
+      p.facade_m||'', p.profondeur_m||'',
+      p.val_totale||'', p.val_batiment||'', p.val_terrain||'',
+      p.multifamilial_4plus?'Oui':'Non', p.tod?'Oui':'Non', p.priorite?'Oui':'Non',
+      (lotNotes[p.NO_LOT]||'').replace(/\n/g,' | '),
+      p.adresse?'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p.adresse):''
+    ].map(esc).join(','));
+  }
+
+  // Download as CSV (opens directly in Excel)
+  const bom  = '\uFEFF'; // UTF-8 BOM so Excel shows accents correctly
+  const blob = new Blob([bom + rows.join('\r\n')], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `Lettres_${villeSlug}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+let currentUsage = '';  // '' = tous les usages
+
+function setUsage(u){
+  // Toggle: cliquer deux fois efface le filtre
+  currentUsage = (currentUsage === u) ? '' : u;
+  // Update button styles
+  ['res','mul','com','ind','mix','pub','vac'].forEach(x=>{
+    const el=document.getElementById('f-u-'+x); if(el) el.classList.remove('active');
+  });
+  const usageToId = {'Résidentiel':'res','Multi-logements':'mul','Commercial':'com',
+    'Industriel':'ind','Mixte':'mix','Public':'pub','Vacant':'vac'};
+  if(currentUsage){
+    const id = usageToId[currentUsage];
+    const el = document.getElementById('f-u-'+id);
+    if(el) el.classList.add('active');
+  }
+  lotsLayer.setStyle(lotStyle);
+}
+
+function getLotColor(p){
+  const m = getMark(p.NO_LOT);
+  if(m==='favori')    return '#f1c40f';
+  if(m==='verifie')   return '#e74c3c';
+  if(m==='sollicite') return '#2980b9';
+  if(m==='lettre')    return '#9b59b6';
+  if(m==='envente')   return '#e67e22';
+  if(p.priorite) return '#e67e22';
+  if(p.multifamilial_4plus) return '#27ae60';
+  if(p.tod) return '#2980b9';
+  return '#bdc3c7';
+}
+function getLotOpacity(p){
+  const m = getMark(p.NO_LOT);
+  if(m==='favori')    return .85;
+  if(m==='verifie')   return .70;
+  if(m==='sollicite') return .75;
+  if(m==='lettre')    return .80;
+  if(m==='envente')   return .85;
+  if(p.priorite) return .5;
+  if(p.multifamilial_4plus) return .4;
+  if(p.tod) return .25;
+  return .15;
+}
+function isVisible(p){
+  if(p.is_rue) return false;
+  const sup = p.superficie_m2_calculee||0;
+  if(sup<minSup) return false;
+  const m = getMark(p.NO_LOT);
+  if(currentUsage){
+    const util = p.utilisation || p.categorie || '';
+    if(currentUsage==='Multi-logements' && !(p.cubf||'').startsWith('5')) return false;
+    else if(currentUsage==='Résidentiel' && util!=='Résidentiel') return false;
+    else if(currentUsage==='Commercial'  && util!=='Commercial' && !['Commerce de détail','Commercial (bureaux)'].includes(util)) return false;
+    else if(currentUsage==='Industriel'  && util!=='Industriel') return false;
+    else if(currentUsage==='Mixte'       && p.categorie!=='Mixte') return false;
+    else if(currentUsage==='Public'      && !['Public','Institutionnel / comm.','Loisirs / culture','Transport / serv. pub.'].includes(util) && p.categorie!=='Public') return false;
+    else if(currentUsage==='Vacant'      && util!=='Vacant') return false;
+  }
+  if(currentFilter==='favoris')    return m==='favori';
+  if(currentFilter==='verifies')   return m==='verifie';
+  if(currentFilter==='sollicites') return m==='sollicite';
+  if(currentFilter==='lettres')    return m==='lettre';
+  if(currentFilter==='enventes')   return m==='envente';
+  if(currentFilter==='4plus') return p.multifamilial_4plus;
+  if(currentFilter==='tod')   return p.tod;
+  if(currentFilter==='prio')  return p.priorite;
+  return true;
+}
+function lotStyle(f){
+  const p=f.properties, vis=isVisible(p);
+  const m=getMark(p.NO_LOT);
+  const borderColor = m==='favori'?'#b7950b': m==='verifie'?'#c0392b': m==='sollicite'?'#1a5276': m==='lettre'?'#6c3483': m==='envente'?'#ca6f1e': (p.multifamilial_4plus||p.priorite?'#1a5e30':'#aaa');
+  const borderW = m?2.5: (p.priorite?1.5:.7);
+  return{
+    fillColor:getLotColor(p), fillOpacity:vis?getLotOpacity(p):0,
+    color:vis?borderColor:'transparent',
+    weight:vis?borderW:0, opacity:vis?1:0
+  };
+}
+function getLotCentroid(geometry){
+  // Get all coordinate points from the polygon (handles Polygon and MultiPolygon)
+  let pts=[];
+  if(geometry.type==='Polygon') pts=geometry.coordinates[0];
+  else if(geometry.type==='MultiPolygon') pts=geometry.coordinates[0][0];
+  if(!pts||!pts.length) return null;
+  let sumLng=0, sumLat=0;
+  pts.forEach(c=>{sumLng+=c[0]; sumLat+=c[1];});
+  return {lat:sumLat/pts.length, lng:sumLng/pts.length};
+}
+
+function fmtArea(m2){
+  if(!m2) return 'N/D';
+  if(m2>=10000) return (m2/10000).toFixed(2)+' ha';
+  return Math.round(m2).toLocaleString('fr-CA')+' m²';
+}
+
+const lotsLayer=L.geoJSON(lotsData,{
+  style:lotStyle,
+  filter: f => !f.properties.is_rue,   // exclude streets entirely
+  onEachFeature:(f,layer)=>{
+    layer.on({
+      click(e){
+        // Mode: placer pastille
+        if(modeAjout){
+          modeAjout = false;
+          const _btn = document.getElementById('btn-add-pastille');
+          if(_btn){_btn.style.background='#8e44ad';_btn.textContent='＋ Ajouter une pastille';}
+          const _ind = document.getElementById('drag-indicator');
+          if(_ind) _ind.style.display='none';
+          ouvrirModalPastille(null, e.latlng.lat, e.latlng.lng);
+          L.DomEvent.stopPropagation(e);
+          return;
+        }
+        // Mode: sélection multiple
+        if(multiSelectMode){
+          const no = f.properties.NO_LOT;
+          if(multiSelected.has(no)){
+            multiSelected.delete(no);
+            lotsLayer.resetStyle(layer);
+          } else {
+            multiSelected.add(no);
+            layer.setStyle({fillColor:'#3498db',fillOpacity:.7,color:'#1a5276',weight:2.5});
+          }
+          updateMultiSelectUI();
+          L.DomEvent.stopPropagation(e);
+          return;
+        }
+        if(sel) lotsLayer.resetStyle(sel);
+        layer.setStyle({fillColor:'#f39c12',fillOpacity:.9,color:'#e67e22',weight:2.5});
+        sel=layer;
+        ouvrirPanel();
+        const p=f.properties;
+        const z=p.zone||'N/D';
+        const desc=ZD[z]||'';
+        const is4=p.multifamilial_4plus;
+        const tod=p.tod;
+        const prio=p.priorite;
+        let zoneBadge='';
+        if(prio)       zoneBadge=`<span class="badge b-orange">⭐ ${z} — Priorité max</span>`;
+        else if(is4)   zoneBadge=`<span class="badge b-green">🟢 ${z} — 4+ logements</span>`;
+        else if(tod)   zoneBadge=`<span class="badge b-blue">🔵 ${z} — Dans TOD</span>`;
+        else           zoneBadge=`<span class="badge b-grey">${z}</span>`;
+
+        const curMark = getMark(p.NO_LOT);
+        // Google Maps link: use address if available, otherwise GPS
+        const centroid=getLotCentroid(f.geometry);
+        const mapsUrl = p.adresse
+          ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.adresse)}`
+          : (centroid ? `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${centroid.lat},${centroid.lng}` : '');
+
+        document.getElementById('lot-info').innerHTML=`
+          ${prio?'<div class="priority-banner">⭐ Opportunité prioritaire — Zone 4+ dans périmètre TOD</div>':''}
+          <div class="field"><div class="fl">Numéro de lot</div><div class="fv">📍 ${p.NO_LOT||'N/D'}</div></div>
+          ${p.adresse?`<div class="field"><div class="fl">Adresse</div><div class="fv">🏠 ${p.adresse}</div></div>`:''}
+          ${p.adresse?`<div class="field" id="field-postal">
+            <div class="fl">Code postal</div>
+            <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+              <input id="inp-postal" type="text" value="${postalCache[p.adresse]||''}" placeholder="ex: J5B 1E3"
+                data-addr="${p.adresse||''}"
+                style="flex:1;padding:6px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:inherit;text-transform:uppercase"
+                onkeydown="if(event.key==='Enter') savePostalCode('${p.adresse}')"
+                oninput="this.value=this.value.toUpperCase()">
+              <button id="btn-postal-save" onclick="savePostalCode('${p.adresse}')"
+                style="padding:6px 10px;background:#555;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;flex-shrink:0">💾</button>
+            </div>
+          </div>`:''}
+          <div class="mark-btns" style="flex-wrap:wrap">
+            <button id="btn-fav" class="mbtn${curMark==='favori'?' fav-on':''}" onclick="toggleMark('${p.NO_LOT}','favori')">${curMark==='favori'?'⭐ Favori (retirer)':'⭐ Favori'}</button>
+            <button id="btn-ver" class="mbtn${curMark==='verifie'?' ver-on':''}" onclick="toggleMark('${p.NO_LOT}','verifie')">${curMark==='verifie'?'❌ Non retenu (retirer)':'❌ Non retenu'}</button>
+            <button id="btn-sol" class="mbtn${curMark==='sollicite'?' sol-on':''}" onclick="toggleMark('${p.NO_LOT}','sollicite')">${curMark==='sollicite'?'📬 Sollicité (retirer)':'📬 Sollicité'}</button>
+            <button id="btn-let" class="mbtn${curMark==='lettre'?' let-on':''}" onclick="toggleMark('${p.NO_LOT}','lettre')">${curMark==='lettre'?'✉️ Lettre (retirer)':'✉️ Lettre'}</button>
+            <button id="btn-env" class="mbtn${curMark==='envente'?' env-on':''}" onclick="toggleMark('${p.NO_LOT}','envente')">${curMark==='envente'?'🏷️ En vente (retirer)':'🏷️ En vente'}</button>
+          </div>
+          ${z&&z!=='N/D'?`<button onclick="marquerZoneComplete('${z}')"
+            style="width:100%;margin:6px 0 2px;padding:7px 10px;background:#fef0f0;color:#c0392b;border:1.5px solid #e74c3c;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer">
+            ❌ Marquer toute la zone ${z} comme Non retenu</button>`:''}
+          <div id="listing-section" style="display:${curMark==='envente'?'block':'none'};margin-top:6px;background:#fef5e7;border-radius:10px;padding:10px;border:1.5px solid #f0a500">
+            <div style="font-size:11px;font-weight:700;color:#b7770d;margin-bottom:6px">🏷️ Informations de l'annonce</div>
+            <input id="listing-prix" type="text" value="${(listingsData[p.NO_LOT]||{}).prix||''}" placeholder="Prix demandé (ex: 450 000 $)"
+              style="width:100%;box-sizing:border-box;padding:6px 10px;border:1.5px solid #f0a500;border-radius:7px;font-size:12px;margin-bottom:5px;font-family:inherit">
+            <input id="listing-url" type="text" value="${(listingsData[p.NO_LOT]||{}).url||''}" placeholder="Lien Centris / Realtor"
+              style="width:100%;box-sizing:border-box;padding:6px 10px;border:1.5px solid #f0a500;border-radius:7px;font-size:12px;margin-bottom:6px;font-family:inherit">
+            ${(listingsData[p.NO_LOT]||{}).url?`<a href="${(listingsData[p.NO_LOT]||{}).url}" target="_blank" style="font-size:11px;color:#1a5e30;display:block;margin-bottom:5px;word-break:break-all">🔗 Voir l'annonce</a>`:''}
+            <button onclick="saveListing('${p.NO_LOT}')" id="btn-listing-save"
+              style="width:100%;padding:6px;background:#e67e22;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">💾 Sauvegarder</button>
+          </div>
+          <div class="field"><div class="fl">Zone</div><div class="fv">${zoneBadge}${desc?`<div style="font-size:11px;color:#888;margin-top:4px">${desc}</div>`:''}</div></div>
+          <div class="field"><div class="fl">Catégorie</div><div class="fv" style="font-size:13px">${p.categorie||'N/D'}</div></div>
+          <div class="field"><div class="fl">Périmètre TOD</div><div class="fv">${tod?'<span class="badge b-tod">🔵 Oui — Zone de densification</span>':'<span style="color:#aaa">Non</span>'}</div></div>
+          <div class="field"><div class="fl">Multifamilial 4+</div><div class="fv">${is4?'✅ Oui':'❌ Non'}</div></div>
+          <div class="field"><div class="fl">Superficie du lot</div><div class="fv">${fmtArea(p.superficie_m2_calculee)}</div></div>
+          ${p.facade_m?`<div class="field"><div class="fl">Façade estimée</div><div class="fv">${p.facade_m} m</div></div>`:''}
+          ${p.profondeur_m?`<div class="field"><div class="fl">Profondeur estimée</div><div class="fv">${p.profondeur_m} m</div></div>`:''}
+          ${p.utilisation?`<div class="field"><div class="fl">Utilisation actuelle</div><div class="fv" style="font-weight:600">${p.utilisation}</div></div>`:''}
+          ${p.annee_construction?`<div class="field"><div class="fl">Année de construction</div><div class="fv">${p.annee_construction}</div></div>`:''}
+          ${p.nb_logements_role>0?`<div class="field"><div class="fl">Logements (rôle 2022)</div><div class="fv" style="font-weight:600">${p.nb_logements_role} logement${p.nb_logements_role>1?'s':''}</div></div>`:''}
+          ${p.nb_etages?`<div class="field"><div class="fl">Nombre d'étages</div><div class="fv">${p.nb_etages}</div></div>`:''}
+          ${p.val_totale>0?`<div class="field"><div class="fl">Valeur totale (2022)</div><div class="fv">${(p.val_totale).toLocaleString('fr-CA')} $</div></div>`:''}
+          ${p.val_batiment>0?`<div class="field"><div class="fl">Valeur bâtiment</div><div class="fv">${(p.val_batiment).toLocaleString('fr-CA')} $</div></div>`:''}
+          ${p.val_terrain>0?`<div class="field"><div class="fl">Valeur terrain</div><div class="fv">${(p.val_terrain).toLocaleString('fr-CA')} $</div></div>`:''}
+          ${z&&z!=='N/D'&&getGrilleUrl(z)?`<div class="field"><div class="fl">Grille de zonage</div><div class="fv"><a href="${getGrilleUrl(z)}" target="_blank" style="color:#1a5e30;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#e8f5e9;border-radius:6px;border:1px solid #a5d6a7">📄 Voir la grille ${z}</a></div></div>`:''}
+          ${mapsUrl?`<div class="field"><div class="fl">Google Maps</div><div class="fv"><a href="${mapsUrl}" target="_blank" style="color:#1558d6;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#e8eaf6;border-radius:6px;border:1px solid #9fa8da">🗺️ Ouvrir dans Google Maps</a></div></div>`:''}
+          <hr style="margin:12px 0">
+          <div class="field">
+            <div class="fl">📝 Notes</div>
+            <textarea id="lot-notes-ta" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:12px;min-height:80px;resize:vertical;margin-top:4px" placeholder="Observations, contacts, prochaines étapes…">${getLotNotes(p.NO_LOT)}</textarea>
+            <button id="lot-notes-btn" onclick="saveLotNotes('${p.NO_LOT}')" style="margin-top:6px;width:100%;padding:8px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">💾 Sauvegarder les notes</button>
+          </div>
+        `;
+
+        if(p.adresse) fetchPostalCode(p.adresse);
+        L.DomEvent.stopPropagation(e);
+      },
+      mouseover(){if(layer!==sel&&isVisible(f.properties)) layer.setStyle({fillOpacity:getLotOpacity(f.properties)+.2,weight:1.5});},
+      mouseout(){if(layer!==sel) lotsLayer.resetStyle(layer);}
+    });
+  }
+}).addTo(map);
+
+map.fitBounds(lotsLayer.getBounds(),{padding:[20,20]});
+lotsLayer.bringToFront();
+map.on('click',()=>{
+  if(sel){lotsLayer.resetStyle(sel);sel=null;
+    document.getElementById('lot-info').innerHTML='<div class="ph">👆 Cliquez sur un lot pour voir ses détails</div>';
+  }
+});
+
+function setFilter(f){
+  currentFilter=f;
+  ['all','4plus','tod','prio','favoris','verifies','sollicites','lettres','enventes'].forEach(x=>{
+    const el=document.getElementById('f-'+x); if(el) el.classList.remove('active');
+  });
+  const active=document.getElementById('f-'+f); if(active) active.classList.add('active');
+  // Usage filter is additive — stays active unless clicking same filter
+  lotsLayer.setStyle(lotStyle);
+}
+function setMin(v){
+  minSup=parseInt(v);
+  document.getElementById('sv').textContent=parseInt(v).toLocaleString('fr-CA');
+  lotsLayer.setStyle(lotStyle);
+  // Mise à jour du compteur de lots visibles
+  if(minSup > 0){
+    const n = lotsData.features.filter(f => !f.properties.is_rue && (f.properties.superficie_m2_calculee||0) >= minSup).length;
+    const total = lotsData.features.filter(f => !f.properties.is_rue).length;
+    const el = document.getElementById('sv-count');
+    if(el) el.textContent = '— ' + n.toLocaleString('fr-CA') + ' / ' + total.toLocaleString('fr-CA') + ' lots';
+  } else {
+    const el = document.getElementById('sv-count');
+    if(el) el.textContent = '';
+  }
+}
+
+// ── Couches environnementales (Gouvernement du Québec) ──────────────────────
+// Utilise esri-leaflet dynamicMapLayer (gère automatiquement la projection 32198)
+// Couches 2 (milieux humides) et 22 (BDZI) — enviroweb.gouv.qc.ca
+const ENV_MAPSERVER = 'https://www.servicesgeo.enviroweb.gouv.qc.ca/donnees/rest/services/Public/Themes_publics/MapServer';
+
+const mhLayer = L.esri.dynamicMapLayer({
+  url: ENV_MAPSERVER,
+  layers: [2],
+  opacity: 0.7,
+  attribution: 'Milieux humides — MELCC Québec'
+});
+
+const ziLayer = L.esri.dynamicMapLayer({
+  url: ENV_MAPSERVER,
+  layers: [22],
+  opacity: 0.6,
+  attribution: 'Zones inondables BDZI — MELCC Québec'
+});
+
+const envState = { mh: false, zi: false, sat: false, agr: false };
+
+// ── Toggle panneau gauche ────────────────────────────────────────────────────
+function toggleFilters(){
+  const f=document.getElementById('filters');
+  const btn=document.getElementById('toggle-filters');
+  f.classList.toggle('collapsed');
+  btn.textContent = f.classList.contains('collapsed') ? '▶' : '◀';
+}
+
+// Sections collapsibles individuelles
+function toggleSec(id){
+  const body=document.getElementById(id);
+  const suffix=id.replace('sec-','');
+  const btn=document.getElementById('tog-'+suffix);
+  const closed=body.classList.toggle('closed');
+  if(btn) btn.textContent=closed?'▸':'▾';
+  // Forcer la hauteur pour la transition
+  if(!closed){ body.style.maxHeight=body.scrollHeight+200+'px'; }
+}
+
+// ── Couche satellite ──────────────────────────────────────────────────────────
+const satelliteLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Imagery © Esri', maxZoom: 19 }
+);
+
+// ── Zones agricoles (CPTAQ) ───────────────────────────────────────────────────
+const agricoleLayer = L.tileLayer.wms(
+  'https://carto.cptaq.gouv.qc.ca/cgi-bin/cptaq?',
+  {
+    layers: 'zone_agricole',
+    format: 'image/png',
+    transparent: true,
+    opacity: 0.45,
+    version: '1.3.0',
+    attribution: 'CPTAQ — Zones agricoles permanentes',
+    pane: 'envPane'
+  }
+);
+
+// ── Couche pastilles (layer group toujours actif) ─────────────────────────────
+const pastilleLayer = L.layerGroup().addTo(map);
+
+// ── Toggle couches ────────────────────────────────────────────────────────────
+function toggleEnv(id) {
+  envState[id] = !envState[id];
+  const btn = document.getElementById('btn-' + id);
+
+  if (id === 'sat') {
+    if (envState.sat) {
+      map.removeLayer(cartoLayer);
+      satelliteLayer.addTo(map);
+    } else {
+      map.removeLayer(satelliteLayer);
+      cartoLayer.addTo(map);
+    }
+    if (btn) { btn.style.background = envState.sat ? '#555' : ''; btn.style.color = envState.sat ? '#fff' : ''; }
+    lotsLayer.bringToFront();
+    return;
+  }
+
+  // Toutes les couches env (mh, zi, agr) sont maintenant des tileLayer.wms
+  const layerMap  = { mh: mhLayer, zi: ziLayer, agr: agricoleLayer };
+  const colorMap  = { mh: '#27ae60', zi: '#2980b9', agr: '#5a8a00' };
+  const layer = layerMap[id];
+  const color = colorMap[id] || '#555';
+
+  if (envState[id]) {
+    layer.addTo(map);
+    lotsLayer.bringToFront();
+    if (btn) { btn.style.background = color; btn.style.color = '#fff'; }
+
+    // ── Diagnostic : test de connectivité au serveur ArcGIS ──
+    if (id === 'mh' || id === 'zi') {
+      const diagEl = document.getElementById('wms-diag');
+      if (diagEl) {
+        diagEl.style.display = 'block';
+        diagEl.style.background = '#e8f5e9';
+        diagEl.style.borderColor = '#c3e6cb';
+        diagEl.style.color = '#1a5e30';
+        diagEl.innerHTML = '✅ Couche chargée via esri-leaflet (projection automatique). Si rien n\'apparaît sur la carte, zoom vers une zone avec des données (ex: bord d\'une rivière).';
+      }
+    }
+  } else {
+    map.removeLayer(layer);
+    if (btn) { btn.style.background = ''; btn.style.color = ''; }
+    const diagEl = document.getElementById('wms-diag');
+    if (diagEl) diagEl.style.display = 'none';
+  }
+
+  const anyEnv = envState.mh || envState.zi || envState.agr;
+  const leg = document.getElementById('legend-env');
+  if (leg) leg.style.display = anyEnv ? 'block' : 'none';
+}
+
+// ── Notes par lot ─────────────────────────────────────────────────────────────
+let lotNotes = {};
+try { lotNotes = JSON.parse(localStorage.getItem(LSP+'lot_notes') || '{}'); } catch(e) {}
+
+function getLotNotes(no_lot) { return (lotNotes[no_lot] || '').replace(/</g,'&lt;'); }
+
+function saveLotNotes(no_lot) {
+  const ta = document.getElementById('lot-notes-ta');
+  if (!ta) return;
+  const val = ta.value.trim();
+  if (val) lotNotes[no_lot] = val;
+  else delete lotNotes[no_lot];
+  syncSave('lot_notes', lotNotes);
+  const btn = document.getElementById('lot-notes-btn');
+  if (btn) {
+    btn.textContent = '✅ Sauvegardé';
+    btn.style.background = '#27ae60';
+    setTimeout(() => { btn.textContent = '💾 Sauvegarder les notes'; btn.style.background = '#1a1a2e'; }, 1800);
+  }
+}
+
+// ── Système de pastilles (100% manuel) ───────────────────────────────────────
+const PASTILLE_CATS = {
+  'PPCMOI':              { icon: '⚡', color: '#f1c40f' },
+  'Dérogation mineure':  { icon: '📋', color: '#e67e22' },
+  'Changement de zonage':{ icon: '🗺️', color: '#27ae60' },
+  'Opportunité':         { icon: '⭐', color: '#8e44ad' },
+  'À analyser':          { icon: '🔍', color: '#3498db' },
+  'Autre':               { icon: '📌', color: '#95a5a6' },
+};
+
+let pastilles = [];
+try { pastilles = JSON.parse(localStorage.getItem(LSP+'pastilles_v2') || '[]'); } catch(e) {}
+
+let modeAjout = false;
+let pastilleEditId = null;
+
+function sauvegarderPastilles() {
+  syncSave('pastilles_v2', pastilles);
+}
+
+function activerAjoutPastille() {
+  modeAjout = !modeAjout;
+  const btn = document.getElementById('btn-add-pastille');
+  const ind = document.getElementById('drag-indicator');
+  if (modeAjout) {
+    btn.style.background = '#e74c3c';
+    btn.textContent = '✕ Annuler';
+    if (ind) { ind.textContent = '📍 Cliquez sur la carte pour placer la pastille'; ind.style.display = 'block'; }
+  } else {
+    btn.style.background = '#8e44ad';
+    btn.textContent = '＋ Ajouter une pastille';
+    if (ind) ind.style.display = 'none';
+  }
+}
+
+// Map click → placer pastille ou repositionner
+map.on('click', function(e) {
+  if (!modeAjout) return;
+  modeAjout = false;
+  const btn = document.getElementById('btn-add-pastille');
+  const ind = document.getElementById('drag-indicator');
+  if (btn) { btn.style.background = '#8e44ad'; btn.textContent = '＋ Ajouter une pastille'; }
+  if (ind) ind.style.display = 'none';
+  ouvrirModalPastille(null, e.latlng.lat, e.latlng.lng);
+});
+
+function ouvrirModalPastille(id, lat, lng) {
+  pastilleEditId = id;
+  const p = id ? pastilles.find(x => x.id === id) : null;
+  const modal = document.getElementById('pastille-modal');
+
+  document.getElementById('pm-titre').value = p ? p.titre : '';
+  document.getElementById('pm-notes').value = p ? p.notes : '';
+  modal.dataset.id  = id || '';
+  modal.dataset.lat = (lat !== undefined && lat !== null) ? lat : (p ? p.lat : '');
+  modal.dataset.lng = (lng !== undefined && lng !== null) ? lng : (p ? p.lng : '');
+
+  // Highlight selected category
+  const defaultCat = p ? p.categorie : 'Opportunité';
+  document.querySelectorAll('.pm-cat-btn').forEach(b => {
+    const isOn = b.dataset.cat === defaultCat;
+    b.dataset.selected = isOn ? '1' : '';
+    const cat = PASTILLE_CATS[b.dataset.cat] || { color: '#999' };
+    b.style.background   = isOn ? cat.color : '';
+    b.style.color        = isOn ? '#fff' : '';
+    b.style.borderColor  = isOn ? cat.color : '#ddd';
+  });
+
+  // Show/hide edit buttons
+  const editBtns = document.getElementById('pm-edit-btns');
+  if (editBtns) {
+    editBtns.style.display = id ? 'flex' : 'none';
+    if (id) {
+      document.getElementById('pm-move-btn').onclick = () => deplacerPastille(id);
+      document.getElementById('pm-del-btn').onclick  = () => supprimerPastille(id);
+    }
+  }
+
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('pm-titre').focus(), 50);
+}
+
+function fermerModalPastille() {
+  const modal = document.getElementById('pastille-modal');
+  if (modal) modal.style.display = 'none';
+  pastilleEditId = null;
+}
+
+function selectCat(btn) {
+  document.querySelectorAll('.pm-cat-btn').forEach(b => {
+    b.dataset.selected = '';
+    b.style.background = '';
+    b.style.color = '';
+    b.style.borderColor = '#ddd';
+  });
+  btn.dataset.selected = '1';
+  const cat = PASTILLE_CATS[btn.dataset.cat] || { color: '#8e44ad' };
+  btn.style.background  = cat.color;
+  btn.style.color       = '#fff';
+  btn.style.borderColor = cat.color;
+}
+
+function sauvegarderPastilleModal() {
+  const titre     = document.getElementById('pm-titre').value.trim();
+  const notes     = document.getElementById('pm-notes').value.trim();
+  const catBtn    = document.querySelector('.pm-cat-btn[data-selected="1"]');
+  const categorie = catBtn ? catBtn.dataset.cat : 'Autre';
+  const modal     = document.getElementById('pastille-modal');
+
+  if (pastilleEditId) {
+    const p = pastilles.find(x => x.id === pastilleEditId);
+    if (p) { p.titre = titre || categorie; p.notes = notes; p.categorie = categorie; }
+  } else {
+    const lat = parseFloat(modal.dataset.lat);
+    const lng = parseFloat(modal.dataset.lng);
+    if (isNaN(lat) || isNaN(lng)) { alert('Position introuvable'); return; }
+    pastilles.push({
+      id: 'pas_' + Date.now(),
+      lat, lng,
+      titre: titre || categorie,
+      notes, categorie,
+      date: new Date().toISOString().slice(0, 10)
+    });
+  }
+
+  sauvegarderPastilles();
+  fermerModalPastille();
+  afficherPastilles();
+  renderPastilleList();
+}
+
+function supprimerPastille(id) {
+  if (!confirm('Supprimer cette pastille ?')) return;
+  pastilles = pastilles.filter(p => p.id !== id);
+  sauvegarderPastilles();
+  fermerModalPastille();
+  afficherPastilles();
+  renderPastilleList();
+}
+
+function deplacerPastille(id) {
+  fermerModalPastille();
+  const ind = document.getElementById('drag-indicator');
+  if (ind) { ind.textContent = '📍 Cliquez sur la carte pour repositionner la pastille'; ind.style.display = 'block'; }
+  const handler = function(e) {
+    const p = pastilles.find(x => x.id === id);
+    if (p) { p.lat = e.latlng.lat; p.lng = e.latlng.lng; }
+    sauvegarderPastilles();
+    afficherPastilles();
+    renderPastilleList();
+    if (ind) { ind.style.display = 'none'; ind.textContent = '📍 Cliquez sur la carte pour placer la pastille'; }
+    map.off('click', handler);
+  };
+  map.on('click', handler);
+}
+
+function afficherPastilles() {
+  pastilleLayer.clearLayers();
+  for (const p of pastilles) {
+    const cat = PASTILLE_CATS[p.categorie] || PASTILLE_CATS['Autre'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div title="${p.titre}" style="background:${cat.color};width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,.4);cursor:pointer">${cat.icon}</div>`,
+      iconSize: [34, 34], iconAnchor: [17, 17]
+    });
+    const m = L.marker([p.lat, p.lng], { icon }).addTo(pastilleLayer);
+    m.on('click', function(e) {
+      L.DomEvent.stopPropagation(e);
+      ouvrirModalPastille(p.id, p.lat, p.lng);
+    });
+  }
+}
+
+function renderPastilleList() {
+  const el = document.getElementById('pastilles-list');
+  if (!el) return;
+  if (!pastilles.length) {
+    el.innerHTML = '<div style="font-size:11px;color:#bbb;text-align:center;padding:10px 0">Aucune pastille — cliquez ＋ pour en ajouter</div>';
+    return;
+  }
+  el.innerHTML = pastilles.map(p => {
+    const cat = PASTILLE_CATS[p.categorie] || PASTILLE_CATS['Autre'];
+    return `<div onclick="ouvrirModalPastille('${p.id}',${p.lat},${p.lng})" style="display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid #f0f0f0;cursor:pointer">
+      <span style="font-size:16px;flex-shrink:0">${cat.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:#1a1a2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.titre}</div>
+        <div style="font-size:10px;color:${cat.color};margin-top:1px">${p.categorie}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Export favoris ────────────────────────────────────────────────────────────
+// (function exportFavorisExcel already defined above)
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+afficherPastilles();
+renderPastilleList();
+updateMarkCounts();
+
+// Démarrer la synchronisation temps réel (si Firebase configuré)
+initSync();
+
+// ── Sélection multiple de lots ────────────────────────────────────────────────
+let multiSelectMode = false;
+let multiSelected = new Set();
+
+function toggleMultiSelect() {
+  multiSelectMode = !multiSelectMode;
+  const btn = document.getElementById('btn-multi');
+  if (multiSelectMode) {
+    btn.style.background = '#1a5276';
+    btn.style.color = '#fff';
+    btn.textContent = '✕ Quitter sélection';
+  } else {
+    multiSelected.clear();
+    lotsLayer.setStyle(lotStyle);
+    if (btn) { btn.style.background = ''; btn.style.color = ''; btn.textContent = '☑ Sélection multiple'; }
+    updateMultiSelectUI();
+  }
+}
+
+function updateMultiSelectUI() {
+  const n = multiSelected.size;
+  const el = document.getElementById('multi-count');
+  if (el) el.textContent = n ? `${n} lot${n>1?'s':''} sélectionné${n>1?'s':''}` : '';
+  const acts = document.getElementById('multi-actions');
+  if (acts) acts.style.display = n > 0 ? 'block' : 'none';
+}
+
+function applyBatchMark(type) {
+  multiSelected.forEach(no => { marks[no] = type; });
+  syncSave('marks', marks);
+  updateMarkCounts();
+  multiSelected.clear();
+  lotsLayer.setStyle(lotStyle);
+  updateMultiSelectUI();
+}
+
+// ── Numéros civiques sur la carte ─────────────────────────────────────────────
+let civicLabelsActive = false;
+const civicLayer = L.layerGroup();
+let civicBuilt = false;
+
+function buildCivicLabels() {
+  if (civicBuilt) return;
+  civicBuilt = true;
+  for (const f of lotsData.features) {
+    const p = f.properties;
+    if (!p.adresse || p.is_rue) continue;
+    const m = (p.adresse || '').match(/^(\d+)/);
+    if (!m) continue;
+    const num = m[1];
+    const g = f.geometry;
+    const coords = g.type === 'Polygon' ? g.coordinates[0] : (g.coordinates[0]||[])[0] || [];
+    if (!coords.length) continue;
+    let sLng = 0, sLat = 0;
+    coords.forEach(c => { sLng += c[0]; sLat += c[1]; });
+    const lat = sLat / coords.length, lng = sLng / coords.length;
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="font-size:9px;font-weight:800;color:#222;background:rgba(255,255,255,.78);padding:0 3px;border-radius:2px;pointer-events:none;white-space:nowrap;line-height:1.4">${num}</div>`,
+      iconSize: [0, 0], iconAnchor: [0, 0]
+    });
+    L.marker([lat, lng], { icon, interactive: false }).addTo(civicLayer);
+  }
+}
+
+function toggleCivicLabels() {
+  civicLabelsActive = !civicLabelsActive;
+  const btn = document.getElementById('btn-civic');
+  if (civicLabelsActive) {
+    buildCivicLabels();
+    if (map.getZoom() >= 15) civicLayer.addTo(map);
+    lotsLayer.bringToFront();
+    if (btn) { btn.style.background = '#1a1a2e'; btn.style.color = '#fff'; }
+  } else {
+    map.removeLayer(civicLayer);
+    if (btn) { btn.style.background = ''; btn.style.color = ''; }
+  }
+}
+
+map.on('zoomend', () => {
+  if (!civicLabelsActive) return;
+  if (map.getZoom() >= 15) { civicLayer.addTo(map); lotsLayer.bringToFront(); }
+  else map.removeLayer(civicLayer);
+});
+
+// ── Mobile : afficher la fiche lot automatiquement ────────────────────────────
+(function() {
+  const panel = document.getElementById('panel');
+  const orig  = panel ? panel.innerHTML : '';
+  // On lot click, reveal panel on mobile
+  document.addEventListener('click', () => {
+    if (window.innerWidth < 768 && panel) {
+      panel.classList.add('mobile-lot-open');
+    }
+  });
+  map.on('click', () => {
+    if (window.innerWidth < 768 && panel) {
+      panel.classList.remove('mobile-lot-open');
+    }
+  });
+})();
+
+// ── Éditeur de zones ─────────────────────────────────────────────────────────
+function ouvrirEditeurZones(){
+  window.open('editeur-zones.html?ville=' + villeSlug, '_blank');
+}
+
+// ── Export / Import toutes les données ───────────────────────────────────────
+function exporterDonnees() {
+  const cles = [
+    LSP+'marks',
+    LSP+'listings',
+    LSP+'lot_notes',
+    LSP+'pastilles_v2',
+    LSP+'overpass',
+    LSP+'postal',
+  ];
+  const data = { version: 1, date: new Date().toISOString(), donnees: {} };
+  cles.forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) data.donnees[k] = JSON.parse(v);
+  });
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'carte-' + villeSlug + '-donnees.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importerDonnees(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.donnees) throw new Error('Format invalide');
+      let count = 0;
+      Object.entries(data.donnees).forEach(([k, v]) => {
+        localStorage.setItem(k, JSON.stringify(v));
+        count++;
+      });
+      // Recharger les données en mémoire
+      try { marks = JSON.parse(localStorage.getItem(LSP+'marks') || '{}'); } catch(ex) {}
+      try { lotNotes = JSON.parse(localStorage.getItem(LSP+'lot_notes') || '{}'); } catch(ex) {}
+      try { pastilles = JSON.parse(localStorage.getItem(LSP+'pastilles_v2') || '[]'); } catch(ex) {}
+      // Rafraîchir l'affichage
+      lotsLayer.setStyle(lotStyle);
+      updateMarkCounts();
+      afficherPastilles();
+      renderPastilleList();
+      if (sel) { lotsLayer.resetStyle(sel); sel = null;
+        document.getElementById('lot-info').innerHTML = '<div class="ph">👆 Cliquez sur un lot pour voir ses détails</div>';
+      }
+      alert('✅ ' + count + ' éléments importés avec succès !\nVos favoris, notes et pastilles sont restaurés.');
+    } catch(err) {
+      alert('❌ Erreur lors de l\'importation : ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ── Fermer/ouvrir le panneau lot ──────────────────────────────────────────────
+function fermerPanel() {
+  const panel = document.getElementById('panel');
+  if (!panel) return;
+  panel.style.display = 'none';
+  if (sel) { lotsLayer.resetStyle(sel); sel = null; }
+}
+function ouvrirPanel() {
+  const panel = document.getElementById('panel');
+  if (panel) panel.style.display = '';
+}
+
+// ── Export sélection multiple → CSV (lettres de sollicitation) ────────────────
+function exporterSelectionCSV() {
+  if (!multiSelected.size) { alert('Aucun lot sélectionné.'); return; }
+  // Collect features for selected lots
+  const rows = [['No Lot','Adresse','Zone','Catégorie','Superficie (m²)','TOD','4+ logements','Notes']];
+  for (const f of lotsData.features) {
+    const p = f.properties;
+    if (!multiSelected.has(p.NO_LOT)) continue;
+    rows.push([
+      p.NO_LOT || '',
+      p.adresse || '',
+      p.zone || '',
+      p.categorie || '',
+      Math.round(p.superficie_m2_calculee || 0),
+      p.tod ? 'Oui' : 'Non',
+      p.multifamilial_4plus ? 'Oui' : 'Non',
+      (lotNotes[p.NO_LOT]||'').replace(/\n/g,' | '),
+    ]);
+  }
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lots-selectionnes-' + villeSlug + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Recherche par adresse / numéro de lot ─────────────────────────────────────
+let searchTimeout = null;
+let searchResults = [];
+let searchIdx = -1;
+
+function rechercherAdresse(val){
+  const clear = document.getElementById('search-clear');
+  if(clear) clear.style.display = val ? 'block' : 'none';
+  clearTimeout(searchTimeout);
+  if(!val || val.length < 2){ fermerRecherche(); return; }
+  searchTimeout = setTimeout(()=>{
+    const q = val.toLowerCase().replace(/\s+/g,' ').trim();
+    // Search in: adresse, NO_LOT, zone
+    searchResults = lotsData.features.filter(f=>{
+      const p = f.properties;
+      if(p.is_rue) return false;
+      const addr = (p.adresse||'').toLowerCase();
+      const lot  = (p.NO_LOT||'').toLowerCase().replace(/\s/g,'');
+      const zone = (p.zone||'').toLowerCase();
+      const qno  = q.replace(/\s/g,'');
+      return addr.includes(q) || lot.includes(qno) || zone === q;
+    }).slice(0, 10);
+    afficherResultatsRecherche(q);
+  }, 180);
+}
+
+function afficherResultatsRecherche(q){
+  const div = document.getElementById('search-results');
+  if(!div) return;
+  if(!searchResults.length){
+    div.innerHTML = '<div class="sr-nores">Aucun résultat pour "' + q + '"</div>';
+    div.style.display = 'block';
+    return;
+  }
+  div.innerHTML = searchResults.map((f,i)=>{
+    const p = f.properties;
+    const mark = getMark(p.NO_LOT);
+    const dot = mark==='favori'?'⭐':mark==='verifie'?'❌':mark==='sollicite'?'📬':mark==='lettre'?'✉️':mark==='envente'?'🏷️':'';
+    return `<div class="sr-item" onmousedown="zoomSurLot(${searchResults.indexOf(f)})" data-idx="${i}">
+      <div class="sr-addr">${dot ? dot+' ': ''}${p.adresse || p.NO_LOT}</div>
+      <div class="sr-meta">Lot ${p.NO_LOT} · Zone ${p.zone||'N/D'} · ${p.superficie_m2_calculee?Math.round(p.superficie_m2_calculee)+' m²':''}</div>
+    </div>`;
+  }).join('');
+  div.style.display = 'block';
+  searchIdx = -1;
+}
+
+function zoomSurLot(idx){
+  const f = searchResults[idx];
+  if(!f) return;
+  fermerRecherche();
+  const inp = document.getElementById('search-input');
+  if(inp) inp.value = f.properties.adresse || f.properties.NO_LOT;
+
+  // Zoom sur le lot
+  lotsLayer.eachLayer(layer=>{
+    if(layer.feature && layer.feature.properties.NO_LOT === f.properties.NO_LOT){
+      const bounds = layer.getBounds();
+      map.fitBounds(bounds, {maxZoom:18, padding:[60,60]});
+      // Simuler un clic pour ouvrir la fiche
+      if(sel) lotsLayer.resetStyle(sel);
+      layer.setStyle({fillColor:'#f39c12',fillOpacity:.9,color:'#e67e22',weight:2.5});
+      sel = layer;
+      layer.fire('click', {latlng: bounds.getCenter()});
+    }
+  });
+}
+
+function rechercheKeydown(e){
+  const items = document.querySelectorAll('.sr-item');
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); searchIdx=Math.min(searchIdx+1,items.length-1); _highlightSearch(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); searchIdx=Math.max(searchIdx-1,0); _highlightSearch(); }
+  else if(e.key==='Enter' && searchIdx>=0){ zoomSurLot(searchIdx); }
+  else if(e.key==='Escape'){ fermerRecherche(); clearSearch(); }
+}
+
+function _highlightSearch(){
+  document.querySelectorAll('.sr-item').forEach((el,i)=>{
+    el.style.background = i===searchIdx?'#eaf4fb':'';
+  });
+}
+
+function fermerRecherche(){
+  const div = document.getElementById('search-results');
+  if(div) div.style.display = 'none';
+  searchResults = []; searchIdx = -1;
+}
+
+function clearSearch(){
+  const inp = document.getElementById('search-input');
+  const clear = document.getElementById('search-clear');
+  if(inp) inp.value = '';
+  if(clear) clear.style.display = 'none';
+  fermerRecherche();
+}
+
+// Fermer dropdown si on clique ailleurs
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#search-wrap')) fermerRecherche();
+});
+
+
+// ── Exposition globale des fonctions appelées depuis le HTML ──────────────────
+// Toutes les fonctions définies ici sont dans la portée de initMap().
+// Les handlers onclick/oninput/onchange du HTML cherchent dans window.*,
+// donc on les expose explicitement ici.
+window.setFilter            = setFilter;
+window.setMin               = setMin;
+window.setUsage             = setUsage;
+window.toggleEnv            = toggleEnv;
+window.toggleFilters        = toggleFilters;
+window.toggleSec            = toggleSec;
+window.toggleCivicLabels    = typeof toggleCivicLabels !== 'undefined' ? toggleCivicLabels : ()=>{};
+window.toggleMark           = toggleMark;
+window.toggleMultiSelect    = typeof toggleMultiSelect !== 'undefined' ? toggleMultiSelect : ()=>{};
+window.toggleFilters        = toggleFilters;
+window.zoomSurLot           = typeof zoomSurLot !== 'undefined' ? zoomSurLot : ()=>{};
+window.rechercherAdresse    = rechercherAdresse;
+window.rechercheKeydown     = rechercheKeydown;
+window.clearSearch          = clearSearch;
+window.exportLettresCSV     = exportLettresCSV;
+window.exporterDonnees      = typeof exporterDonnees !== 'undefined' ? exporterDonnees : ()=>{};
+window.exporterSelectionCSV = typeof exporterSelectionCSV !== 'undefined' ? exporterSelectionCSV : ()=>{};
+window.importerDonnees      = typeof importerDonnees !== 'undefined' ? importerDonnees : ()=>{};
+window.fermerPanel          = typeof fermerPanel !== 'undefined' ? fermerPanel : ()=>{};
+window.fermerModalPastille  = typeof fermerModalPastille !== 'undefined' ? fermerModalPastille : ()=>{};
+window.ouvrirModalPastille  = typeof ouvrirModalPastille !== 'undefined' ? ouvrirModalPastille : ()=>{};
+window.ouvrirEditeurZones   = typeof ouvrirEditeurZones !== 'undefined' ? ouvrirEditeurZones : ()=>{};
+window.sauvegarderPastilleModal = typeof sauvegarderPastilleModal !== 'undefined' ? sauvegarderPastilleModal : ()=>{};
+window.activerAjoutPastille = typeof activerAjoutPastille !== 'undefined' ? activerAjoutPastille : ()=>{};
+window.applyBatchMark       = typeof applyBatchMark !== 'undefined' ? applyBatchMark : ()=>{};
+window.marquerZoneComplete  = typeof marquerZoneComplete !== 'undefined' ? marquerZoneComplete : ()=>{};
+window.saveListing          = typeof saveListing !== 'undefined' ? saveListing : ()=>{};
+window.saveLotNotes         = typeof saveLotNotes !== 'undefined' ? saveLotNotes : ()=>{};
+window.savePostalCode       = typeof savePostalCode !== 'undefined' ? savePostalCode : ()=>{};
+window.selectCat            = typeof selectCat !== 'undefined' ? selectCat : ()=>{};
+window.chargerAnnonces      = typeof chargerAnnonces !== 'undefined' ? chargerAnnonces : ()=>{};
+
+// ── Post-init: update stats & title ──────────────────────────
+  const nomVille = cityMeta.nom || villeSlug;
+  const el = document.getElementById("ville-reglements");
+  if(el) el.textContent = "Ville de " + nomVille + (cityMeta.reglements ? " · " + cityMeta.reglements : "");
+  const nLots = lotsData.features.filter(f=>!f.properties.is_rue).length;
+  const n4p   = lotsData.features.filter(f=>f.properties.multifamilial_4plus).length;
+  const nTod  = lotsData.features.filter(f=>f.properties.tod).length;
+  const nPrio = lotsData.features.filter(f=>f.properties.priorite).length;
+  const s = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v.toLocaleString("fr-CA"); };
+  s("stat-lots",nLots); s("stat-4plus",n4p); s("stat-tod",nTod); s("stat-prio",nPrio);
+  document.getElementById("loading-overlay").style.display = "none";
+}
+</script>
+
+
+<!-- ── Modal pastille ── -->
+<div id="pastille-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9000;align-items:center;justify-content:center" onclick="if(event.target===this)fermerModalPastille()">
+  <div style="background:#fff;border-radius:16px;width:400px;max-width:95vw;padding:24px;box-shadow:0 12px 50px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:14px;font-weight:800;color:#1a1a2e;margin:0">📍 Pastille</h3>
+      <button onclick="fermerModalPastille()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#bbb;padding:0">✕</button>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#bbb;margin-bottom:7px">Catégorie</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="pm-cat-btn" data-cat="PPCMOI" onclick="selectCat(this)">⚡ PPCMOI</button>
+        <button class="pm-cat-btn" data-cat="Dérogation mineure" onclick="selectCat(this)">📋 Dérogation min.</button>
+        <button class="pm-cat-btn" data-cat="Changement de zonage" onclick="selectCat(this)">🗺️ Chgt. zonage</button>
+        <button class="pm-cat-btn" data-cat="Opportunité" onclick="selectCat(this)">⭐ Opportunité</button>
+        <button class="pm-cat-btn" data-cat="À analyser" onclick="selectCat(this)">🔍 À analyser</button>
+        <button class="pm-cat-btn" data-cat="Autre" onclick="selectCat(this)">📌 Autre</button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#bbb;margin-bottom:5px">Titre</div>
+      <input id="pm-titre" type="text" placeholder="ex: Lot vacant intéressant" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:13px">
+    </div>
+    <div style="margin-bottom:18px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#bbb;margin-bottom:5px">Notes</div>
+      <textarea id="pm-notes" placeholder="Observations, contacts, prochaines étapes…" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:13px;min-height:80px;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="sauvegarderPastilleModal()" style="flex:1;padding:11px;background:#8e44ad;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">💾 Sauvegarder</button>
+      <div id="pm-edit-btns" style="display:none;gap:6px">
+        <button id="pm-move-btn" style="padding:11px 14px;background:#eafaf1;color:#1a7a3c;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">🔀 Déplacer</button>
+        <button id="pm-del-btn" style="padding:11px 14px;background:#fdecea;color:#c0392b;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer">🗑 Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
