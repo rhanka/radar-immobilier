@@ -4095,6 +4095,131 @@ export const SAINT_GEORGES_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-saint-georges",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round10 -- 20 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const WALTHAM_PV_CONFIG: PvCityConfig = {
+  citySlug: "waltham",
+  pvIndexUrl: "https://pontiacouest.ca/en/waltham/minutes/",
+  sourceId: "proces-verbaux-waltham",
+};
+
+export const ARMAGH_PV_CONFIG: PvCityConfig = {
+  citySlug: "armagh",
+  pvIndexUrl: "https://armagh.ca/proces-verbaux.php",
+  sourceId: "proces-verbaux-armagh",
+};
+
+export const BERTHIER_SUR_MER_PV_CONFIG: PvCityConfig = {
+  citySlug: "berthier-sur-mer",
+  pvIndexUrl: "https://berthiersurmer.ca/municipalite/conseil-municipal/",
+  sourceId: "proces-verbaux-berthier-sur-mer",
+};
+
+export const SAINTE_SABINE_LES_ETCHEMINS_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-sabine--les-etchemins",
+  pvIndexUrl: "https://municipalites-du-quebec.com/sainte-sabine/f-pv-2025.php",
+  sourceId: "proces-verbaux-sainte-sabine--les-etchemins",
+};
+
+export const SAINT_FERREOL_LES_NEIGES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-ferreol-les-neiges",
+  pvIndexUrl: "https://www.saintferreollesneiges.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-saint-ferreol-les-neiges",
+};
+
+export const MONTMAGNY_PV_CONFIG: PvCityConfig = {
+  citySlug: "montmagny",
+  pvIndexUrl: "https://www.ville.montmagny.qc.ca/fr/ville/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-montmagny",
+};
+
+export const SAINT_TITE_DES_CAPS_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-tite-des-caps",
+  pvIndexUrl: "https://sainttitedescaps.com/assemblees-du-conseil-municipal/",
+  sourceId: "proces-verbaux-saint-tite-des-caps",
+};
+
+export const NOTRE_DAME_DU_ROSAIRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-du-rosaire",
+  pvIndexUrl: "https://www.notredamedurosaire.com/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-notre-dame-du-rosaire",
+};
+
+export const SAINT_ANTOINE_DE_LISLE_AUX_GRUES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-antoine-de-lisle-aux-grues",
+  pvIndexUrl: "https://www.isle-aux-grues.com/fr/vie-municipale/conseil-municipal/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-saint-antoine-de-lisle-aux-grues",
+};
+
+export const SAINT_JUST_DE_BRETENIERES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-just-de-bretenieres",
+  pvIndexUrl: "https://www.saintjustdebretenieres.com/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-just-de-bretenieres",
+};
+
+export const SAINT_FABIEN_DE_PANET_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-fabien-de-panet",
+  pvIndexUrl: "https://www.saintfabiendepanet.com/la-ville/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-fabien-de-panet",
+};
+
+export const CAP_SAINT_IGNACE_PV_CONFIG: PvCityConfig = {
+  citySlug: "cap-saint-ignace",
+  pvIndexUrl: "https://www.capsaintignace.ca/fr/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-cap-saint-ignace",
+};
+
+export const PETITE_RIVIERE_SAINT_FRANCOIS_PV_CONFIG: PvCityConfig = {
+  citySlug: "petite-riviere-saint-francois",
+  pvIndexUrl: "https://www.petiteriviere.com/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-petite-riviere-saint-francois",
+};
+
+export const SAINTE_LUCIE_DE_BEAUREGARD_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-lucie-de-beauregard",
+  pvIndexUrl: "https://www.sainteluciedebeauregard.com/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-lucie-de-beauregard",
+};
+
+export const LISLET_PV_CONFIG: PvCityConfig = {
+  citySlug: "lislet",
+  pvIndexUrl: "https://www.lislet.com/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux",
+  sourceId: "proces-verbaux-lislet",
+};
+
+export const BAIE_SAINT_PAUL_PV_CONFIG: PvCityConfig = {
+  citySlug: "baie-saint-paul",
+  pvIndexUrl: "https://baiesaintpaul.com/ville/vie-democratique/seances-publiques",
+  sourceId: "proces-verbaux-baie-saint-paul",
+};
+
+export const SAINT_JEAN_PORT_JOLI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-jean-port-joli",
+  pvIndexUrl: "https://saintjeanportjoli.com/municipalite/conseil-municipal/",
+  sourceId: "proces-verbaux-saint-jean-port-joli",
+};
+
+export const SAINT_AUBERT_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-aubert",
+  pvIndexUrl: "https://saint-aubert.net/fr/ma-municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-aubert",
+};
+
+export const LISLE_AUX_COUDRES_PV_CONFIG: PvCityConfig = {
+  citySlug: "lisle-aux-coudres",
+  pvIndexUrl: "https://www.municipaliteiac.ca/fr/municipalite/vie-municipale/proces-verbaux/",
+  sourceId: "proces-verbaux-lisle-aux-coudres",
+};
+
+export const SAINTE_FELICITE_LISLET_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-felicite--lislet",
+  pvIndexUrl: "https://www.saintefelicite.ca/municipalite/conseil-municipal/",
+  sourceId: "proces-verbaux-sainte-felicite--lislet",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4810,4 +4935,25 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: BEAUCEVILLE_PV_CONFIG },
   { config: SAINTE_MARGUERITE_PV_CONFIG },
   { config: SAINT_GEORGES_PV_CONFIG },
+  // -- Lot cities-round10 (config-only, verifie 2026-06-11) --
+  { config: WALTHAM_PV_CONFIG },
+  { config: ARMAGH_PV_CONFIG },
+  { config: BERTHIER_SUR_MER_PV_CONFIG },
+  { config: SAINTE_SABINE_LES_ETCHEMINS_PV_CONFIG },
+  { config: SAINT_FERREOL_LES_NEIGES_PV_CONFIG },
+  { config: MONTMAGNY_PV_CONFIG },
+  { config: SAINT_TITE_DES_CAPS_PV_CONFIG },
+  { config: NOTRE_DAME_DU_ROSAIRE_PV_CONFIG },
+  { config: SAINT_ANTOINE_DE_LISLE_AUX_GRUES_PV_CONFIG },
+  { config: SAINT_JUST_DE_BRETENIERES_PV_CONFIG },
+  { config: SAINT_FABIEN_DE_PANET_PV_CONFIG },
+  { config: CAP_SAINT_IGNACE_PV_CONFIG },
+  { config: PETITE_RIVIERE_SAINT_FRANCOIS_PV_CONFIG },
+  { config: SAINTE_LUCIE_DE_BEAUREGARD_PV_CONFIG },
+  { config: LISLET_PV_CONFIG },
+  { config: BAIE_SAINT_PAUL_PV_CONFIG },
+  { config: SAINT_JEAN_PORT_JOLI_PV_CONFIG },
+  { config: SAINT_AUBERT_PV_CONFIG },
+  { config: LISLE_AUX_COUDRES_PV_CONFIG },
+  { config: SAINTE_FELICITE_LISLET_PV_CONFIG },
 ];
