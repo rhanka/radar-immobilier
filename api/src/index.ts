@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { createApp } from "./app.js";
-import { loadConfig } from "./config.js";
+import { loadConfig, resolveAuthConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
 import {
@@ -19,6 +19,16 @@ const objectStore = createObjectStore(config);
 // falls back to MinIO locally when SCRAPE_S3_* env vars are not set).
 const scrapeObjectStore = getScrapeObjectStore(config);
 
+// Resolve the OIDC relying-party config. `enabled` is false unless the
+// deployment injected the IdP wiring + secrets — local dev stays OPEN.
+const auth = resolveAuthConfig(config);
+logger.info(
+  { authEnabled: auth.enabled, issuer: auth.enabled ? auth.issuer : undefined },
+  auth.enabled
+    ? "OIDC relying-party enabled (login required)"
+    : "OIDC relying-party disabled (open mode — no login)",
+);
+
 const app = createApp({
   checkDb: makeDbProbe(dbHandle),
   checkObjectStore: makeObjectStoreProbe(objectStore),
@@ -26,6 +36,7 @@ const app = createApp({
   scrapeStore: scrapeObjectStore,
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
+  auth,
 });
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.
