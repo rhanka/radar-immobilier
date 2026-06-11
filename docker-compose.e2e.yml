@@ -13,6 +13,9 @@ services:
       NODE_ENV: production
 
   ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
     image: radar-immobilier-ui:${UI_VERSION:-local}
     command: []
     networks: [radar]
