@@ -224,6 +224,16 @@ s3-ls: ## List keys under PREFIX=<prefix>
 	  mc ls -r local/$${S3_BUCKET:-radar-immobilier-raw}/$$PREFIX'
 
 # ─────────────────────────────────────────────────────────────────────
+# Worker live (config-only PV cities → scraping object store)
+# ─────────────────────────────────────────────────────────────────────
+
+.PHONY: worker-live
+worker-live: ## Live-scrape config-only PV cities → SCW (CITIES="a b", LIMIT=n)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) run --rm -T \
+	  -e LIVE_SCRAPE_LIMIT=$(LIMIT) api \
+	  npx tsx src/scripts/worker-live.ts $(CITIES)
+
+# ─────────────────────────────────────────────────────────────────────
 # Dependency installation (workspace-aware)
 # ─────────────────────────────────────────────────────────────────────
 
