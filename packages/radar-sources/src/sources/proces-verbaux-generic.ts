@@ -4220,6 +4220,215 @@ export const SAINTE_FELICITE_LISLET_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-sainte-felicite--lislet",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round13 -- 34 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const MATAGAMI_PV_CONFIG: PvCityConfig = {
+  citySlug: "matagami",
+  pvIndexUrl: "https://matagami.com/ma-ville/democratie/proces-verbaux/",
+  sourceId: "proces-verbaux-matagami",
+};
+
+export const SAYABEC_PV_CONFIG: PvCityConfig = {
+  citySlug: "sayabec",
+  pvIndexUrl: "https://municipalitesayabec.com/mairie/seances-budgets-proces-verbaux.html",
+  sourceId: "proces-verbaux-sayabec",
+};
+
+export const LA_SARRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-sarre",
+  pvIndexUrl: "https://www.lasarre.ca/ma-ville/seances-du-conseil/",
+  sourceId: "proces-verbaux-la-sarre",
+};
+
+export const ALBERTVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "albertville",
+  pvIndexUrl: "https://municipalite-albertville.ca/conseil-municipal.html",
+  sourceId: "proces-verbaux-albertville",
+};
+
+export const AMQUI_PV_CONFIG: PvCityConfig = {
+  citySlug: "amqui",
+  pvIndexUrl: "https://amqui.ca/a-propos/democratie/seances-du-conseil/",
+  sourceId: "proces-verbaux-amqui",
+};
+
+export const SAINT_ULRIC_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-ulric",
+  pvIndexUrl: "https://st-ulric.ca/seances-du-conseil-municipal-proces-verbaux/",
+  sourceId: "proces-verbaux-saint-ulric",
+};
+
+export const SAINTE_PAULE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-paule",
+  pvIndexUrl: "https://municipalite.sainte-paule.qc.ca/proces-verbaux.html",
+  sourceId: "proces-verbaux-sainte-paule",
+};
+
+export const CAUSAPSCAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "causapscal",
+  pvIndexUrl: "https://www.causapscal.net/municipalite/vie-municipale/seance-du-conseil.html",
+  sourceId: "proces-verbaux-causapscal",
+};
+
+export const BAIE_COMEAU_PV_CONFIG: PvCityConfig = {
+  citySlug: "baie-comeau",
+  pvIndexUrl: "https://www.ville.baie-comeau.qc.ca/ville/vie-democratique/seances-du-conseil-municipal/",
+  sourceId: "proces-verbaux-baie-comeau",
+};
+
+export const NORMETAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "normetal",
+  pvIndexUrl: "https://normetal.ao.ca/fr/page/index.cfm?PageID=1154",
+  sourceId: "proces-verbaux-normetal",
+};
+
+export const MATANE_PV_CONFIG: PvCityConfig = {
+  citySlug: "matane",
+  pvIndexUrl: "https://www.ville.matane.qc.ca/ma-ville/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-matane",
+};
+
+export const SAINT_RENE_DE_MATANE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-rene-de-matane",
+  pvIndexUrl: "https://saintrene.ca/municipalite/documents-administratifs.html",
+  sourceId: "proces-verbaux-saint-rene-de-matane",
+};
+
+export const SAINTE_FELICITE_LA_MATANIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-felicite--la-matanie",
+  pvIndexUrl: "https://www.saintefelicite.ca/municipalite/conseil-municipal/",
+  sourceId: "proces-verbaux-sainte-felicite--la-matanie",
+};
+
+export const SAINT_JEAN_DE_CHERBOURG_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-jean-de-cherbourg",
+  pvIndexUrl: "https://www.st-jeandecherbourg.ca/documents/ordres-du-jour-et-proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-jean-de-cherbourg",
+};
+
+export const GROSSES_ROCHES_PV_CONFIG: PvCityConfig = {
+  citySlug: "grosses-roches",
+  pvIndexUrl: "https://municipalite.grossesroches.ca/documents-administratifs.html",
+  sourceId: "proces-verbaux-grosses-roches",
+};
+
+export const NOUVELLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "nouvelle",
+  pvIndexUrl: "https://nouvellegaspesie.com/proces-verbaux/",
+  sourceId: "proces-verbaux-nouvelle",
+};
+
+export const CARLETON_SUR_MER_PV_CONFIG: PvCityConfig = {
+  citySlug: "carleton-sur-mer",
+  pvIndexUrl: "https://carletonsurmer.com/gouvernance-municipale/seances-conseil-municipal/",
+  sourceId: "proces-verbaux-carleton-sur-mer",
+};
+
+export const CAP_CHAT_PV_CONFIG: PvCityConfig = {
+  citySlug: "cap-chat",
+  pvIndexUrl: "https://ville.cap-chat.ca/proces-verbaux-cap-chat",
+  sourceId: "proces-verbaux-cap-chat",
+};
+
+export const CAPLAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "caplan",
+  pvIndexUrl: "https://municipalitecaplan.com/proces-verbaux/",
+  sourceId: "proces-verbaux-caplan",
+};
+
+export const SAINTE_ANNE_DES_MONTS_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-anne-des-monts",
+  pvIndexUrl: "https://villesadm.net/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-anne-des-monts",
+};
+
+export const SAINT_ALPHONSE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-alphonse",
+  pvIndexUrl: "https://st-alphonsegaspesie.com/seances/",
+  sourceId: "proces-verbaux-saint-alphonse",
+};
+
+export const BONAVENTURE_PV_CONFIG: PvCityConfig = {
+  citySlug: "bonaventure",
+  pvIndexUrl: "https://villebonaventure.ca/a-propos/conseil-municipal/ordres-du-jour-et-proces-verbaux/",
+  sourceId: "proces-verbaux-bonaventure",
+};
+
+export const PORT_CARTIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "port-cartier",
+  pvIndexUrl: "https://villeport-cartier.com/vie-municipale/mairie-et-organisation-municipale/seances-publiques/proces-verbaux/",
+  sourceId: "proces-verbaux-port-cartier",
+};
+
+export const SAINT_ELZEAR_BONAVENTURE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-elzear--bonaventure",
+  pvIndexUrl: "https://st-elzear.ca/gestion-municipale/proces-verbaux-avis-publics-2/",
+  sourceId: "proces-verbaux-saint-elzear--bonaventure",
+};
+
+export const NEW_CARLISLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "new-carlisle",
+  pvIndexUrl: "https://new-carlisle.ca/municipalite/documentation/proces-verbaux/",
+  sourceId: "proces-verbaux-new-carlisle",
+};
+
+export const LA_MARTRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-martre",
+  pvIndexUrl: "https://municipalites-du-quebec.com/la-martre/f-pv-2026.php",
+  sourceId: "proces-verbaux-la-martre",
+};
+
+export const PASPEBIAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "paspebiac",
+  pvIndexUrl: "https://villepaspebiac.ca/vie-citoyenne-et-ville/proces-verbaux/",
+  sourceId: "proces-verbaux-paspebiac",
+};
+
+export const MARSOUI_PV_CONFIG: PvCityConfig = {
+  citySlug: "marsoui",
+  pvIndexUrl: "https://municipalites-du-quebec.com/marsoui/f-pv-2026.php",
+  sourceId: "proces-verbaux-marsoui",
+};
+
+export const HOPE_PV_CONFIG: PvCityConfig = {
+  citySlug: "hope",
+  pvIndexUrl: "https://municipalitedehope.ca/municipalite/proces-verbaux/2025-2/",
+  sourceId: "proces-verbaux-hope",
+};
+
+export const RIVIERE_A_CLAUDE_PV_CONFIG: PvCityConfig = {
+  citySlug: "riviere-a-claude",
+  pvIndexUrl: "https://municipalites-du-quebec.com/riviere-a-claude/f-pv-2026.php",
+  sourceId: "proces-verbaux-riviere-a-claude",
+};
+
+export const MONT_SAINT_PIERRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-saint-pierre",
+  pvIndexUrl: "https://municipalites-du-quebec.com/mont-st-pierre/f-pv-2026.php",
+  sourceId: "proces-verbaux-mont-saint-pierre",
+};
+
+export const MURDOCHVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "murdochville",
+  pvIndexUrl: "https://murdochville.com/mairie/seances-et-proces-verbaux/",
+  sourceId: "proces-verbaux-murdochville",
+};
+
+export const GRANDE_VALLEE_PV_CONFIG: PvCityConfig = {
+  citySlug: "grande-vallee",
+  pvIndexUrl: "https://grandevallee.ca/administration-municipale/documents/proces-verbaux",
+  sourceId: "proces-verbaux-grande-vallee",
+};
+
+export const GRANDE_RIVIERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "grande-riviere",
+  pvIndexUrl: "https://villegranderiviere.ca/municipalite/vie-democratique/proces-verbaux-ordre-du-jour-des-seances/",
+  sourceId: "proces-verbaux-grande-riviere",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4956,4 +5165,39 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINT_AUBERT_PV_CONFIG },
   { config: LISLE_AUX_COUDRES_PV_CONFIG },
   { config: SAINTE_FELICITE_LISLET_PV_CONFIG },
+  // -- Lot cities-round13 (config-only, verifie 2026-06-11) --
+  { config: MATAGAMI_PV_CONFIG },
+  { config: SAYABEC_PV_CONFIG },
+  { config: LA_SARRE_PV_CONFIG },
+  { config: ALBERTVILLE_PV_CONFIG },
+  { config: AMQUI_PV_CONFIG },
+  { config: SAINT_ULRIC_PV_CONFIG },
+  { config: SAINTE_PAULE_PV_CONFIG },
+  { config: CAUSAPSCAL_PV_CONFIG },
+  { config: BAIE_COMEAU_PV_CONFIG },
+  { config: NORMETAL_PV_CONFIG },
+  { config: MATANE_PV_CONFIG },
+  { config: SAINT_RENE_DE_MATANE_PV_CONFIG },
+  { config: SAINTE_FELICITE_LA_MATANIE_PV_CONFIG },
+  { config: SAINT_JEAN_DE_CHERBOURG_PV_CONFIG },
+  { config: GROSSES_ROCHES_PV_CONFIG },
+  { config: NOUVELLE_PV_CONFIG },
+  { config: CARLETON_SUR_MER_PV_CONFIG },
+  { config: CAP_CHAT_PV_CONFIG },
+  { config: CAPLAN_PV_CONFIG },
+  { config: SAINTE_ANNE_DES_MONTS_PV_CONFIG },
+  { config: SAINT_ALPHONSE_PV_CONFIG },
+  { config: BONAVENTURE_PV_CONFIG },
+  { config: PORT_CARTIER_PV_CONFIG },
+  { config: SAINT_ELZEAR_BONAVENTURE_PV_CONFIG },
+  { config: NEW_CARLISLE_PV_CONFIG },
+  { config: LA_MARTRE_PV_CONFIG },
+  { config: PASPEBIAC_PV_CONFIG },
+  { config: MARSOUI_PV_CONFIG },
+  { config: HOPE_PV_CONFIG },
+  { config: RIVIERE_A_CLAUDE_PV_CONFIG },
+  { config: MONT_SAINT_PIERRE_PV_CONFIG },
+  { config: MURDOCHVILLE_PV_CONFIG },
+  { config: GRANDE_VALLEE_PV_CONFIG },
+  { config: GRANDE_RIVIERE_PV_CONFIG },
 ];
