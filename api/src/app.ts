@@ -1,4 +1,10 @@
 import { Hono } from "hono";
+import type { AuthConfig } from "./config.js";
+import {
+  authRoute,
+  protect,
+  type AuthRouteOptions,
+} from "./routes/auth.js";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
@@ -19,11 +25,28 @@ export type AppDeps = HealthDeps &
   OntologyDeps &
   CiblageDeps &
   JobsDeps &
-  GraphDeps;
+  GraphDeps & {
+    /**
+     * Resolved OIDC relying-party config. Optional: when absent (or
+     * `enabled === false`) the app runs OPEN — no login required — which keeps
+     * local dev and tests unchanged. The deployment injects an enabled config
+     * via env (see config.resolveAuthConfig + deploy/k8s/30-api.yaml).
+     */
+    auth?: AuthConfig;
+    /** Test seams for the OIDC routes (mock fetch / JWKS / discovery). */
+    authOptions?: AuthRouteOptions;
+  };
 
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
+
+  // Auth is wired first so the protect middleware runs before every business
+  // route. When `deps.auth` is absent or disabled both are inert no-ops.
+  if (deps.auth) {
+    app.use("*", protect(deps.auth));
+    app.route("/", authRoute(deps.auth, deps.authOptions));
+  }
 
   app.route("/", healthRoute(deps));
   app.route("/", chatRoute());
