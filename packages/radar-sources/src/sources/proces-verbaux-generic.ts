@@ -4220,6 +4220,275 @@ export const SAINTE_FELICITE_LISLET_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-sainte-felicite--lislet",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round12 -- 44 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const SAINT_EUSEBE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-eusebe",
+  pvIndexUrl: "https://www.sainteusebe.ca/fr/municipalite/proces-verbaux",
+  sourceId: "proces-verbaux-saint-eusebe",
+};
+
+export const SENNETERRE_LA_VALLEE_DE_LOR_PV_CONFIG: PvCityConfig = {
+  citySlug: "senneterre--la-vallee-de-lor",
+  pvIndexUrl: "https://www.ville.senneterre.qc.ca/fr/vie-municipale/organisation-municipale/seances-du-conseil",
+  sourceId: "proces-verbaux-senneterre--la-vallee-de-lor",
+};
+
+export const PACKINGTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "packington",
+  pvIndexUrl: "https://packington.org/greffes/proces-verbaux",
+  sourceId: "proces-verbaux-packington",
+};
+
+export const LES_BERGERONNES_PV_CONFIG: PvCityConfig = {
+  citySlug: "les-bergeronnes",
+  pvIndexUrl: "https://bergeronnes.com/proc%C3%A8s-verbaux-1",
+  sourceId: "proces-verbaux-les-bergeronnes",
+};
+
+export const SAINT_ELOI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-eloi",
+  pvIndexUrl: "https://www.municipalite-st-eloi.com/seance-du-conseil",
+  sourceId: "proces-verbaux-saint-eloi",
+};
+
+export const TEMISCAMING_PV_CONFIG: PvCityConfig = {
+  citySlug: "temiscaming",
+  pvIndexUrl: "https://www.temiscaming.net/fr/la-ville/seances-du-conseil",
+  sourceId: "proces-verbaux-temiscaming",
+};
+
+export const NOTRE_DAME_DES_NEIGES_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-des-neiges",
+  pvIndexUrl: "https://www.notredamedesneiges.qc.ca/affaires-municipales/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-notre-dame-des-neiges",
+};
+
+export const DEGELIS_PV_CONFIG: PvCityConfig = {
+  citySlug: "degelis",
+  pvIndexUrl: "https://www.degelis.ca/ville/greffe",
+  sourceId: "proces-verbaux-degelis",
+};
+
+export const BARRAUTE_PV_CONFIG: PvCityConfig = {
+  citySlug: "barraute",
+  pvIndexUrl: "https://www.municipalitedebarraute.com/proces-verbaux-2",
+  sourceId: "proces-verbaux-barraute",
+};
+
+export const LA_CORNE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-corne",
+  pvIndexUrl: "https://lacorne.ca/proces-verbaux-et-ordres-du-jour-2026/",
+  sourceId: "proces-verbaux-la-corne",
+};
+
+export const SAINT_SIMON_DE_RIMOUSKI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-simon-de-rimouski",
+  pvIndexUrl: "https://www.saint-simon.ca/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-simon-de-rimouski",
+};
+
+export const LEJEUNE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lejeune",
+  pvIndexUrl: "https://municipalitelejeune.com/proces-verbaux",
+  sourceId: "proces-verbaux-lejeune",
+};
+
+export const RIVIERE_HEVA_PV_CONFIG: PvCityConfig = {
+  citySlug: "riviere-heva",
+  pvIndexUrl: "https://riviere-heva.com/registre-des-proces-verbaux",
+  sourceId: "proces-verbaux-riviere-heva",
+};
+
+export const LATULIPE_ET_GABOURY_PV_CONFIG: PvCityConfig = {
+  citySlug: "latulipe-et-gaboury",
+  pvIndexUrl: "https://latulipeetgaboury.net/",
+  sourceId: "proces-verbaux-latulipe-et-gaboury",
+};
+
+export const BEARN_PV_CONFIG: PvCityConfig = {
+  citySlug: "bearn",
+  pvIndexUrl: "https://www.bearn.ca/organisation-municipale/seances-du-conseil/",
+  sourceId: "proces-verbaux-bearn",
+};
+
+export const SAINT_FABIEN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-fabien",
+  pvIndexUrl: "https://www.saint-fabien.ca/conseil_municipal/proces-verbaux",
+  sourceId: "proces-verbaux-saint-fabien",
+};
+
+export const SAINT_MARC_DE_FIGUERY_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-marc-de-figuery",
+  pvIndexUrl: "https://www.saint-marc-de-figuery.org/fr/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-marc-de-figuery",
+};
+
+export const SAINT_EUGENE_DE_LADRIERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-eugene-de-ladriere",
+  pvIndexUrl: "https://ladriere.ca/conseil-municipal/",
+  sourceId: "proces-verbaux-saint-eugene-de-ladriere",
+};
+
+export const ESPRIT_SAINT_PV_CONFIG: PvCityConfig = {
+  citySlug: "esprit-saint",
+  pvIndexUrl: "https://www.municipalite.esprit-saint.qc.ca/documents/?c=3&sc=24",
+  sourceId: "proces-verbaux-esprit-saint",
+};
+
+export const SAINT_MATHIEU_DHARRICANA_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-mathieu-dharricana",
+  pvIndexUrl: "https://stmathieudharricana.com/je-suis-citoyen/informations-municipales/proces-verbaux-et-odj",
+  sourceId: "proces-verbaux-saint-mathieu-dharricana",
+};
+
+export const AMOS_PV_CONFIG: PvCityConfig = {
+  citySlug: "amos",
+  pvIndexUrl: "https://amos.quebec/decouvrir-amos/vie-democratique/ordres-du-jour-et-proces-verbaux",
+  sourceId: "proces-verbaux-amos",
+};
+
+export const REMIGNY_PV_CONFIG: PvCityConfig = {
+  citySlug: "remigny",
+  pvIndexUrl: "https://www.municipaliteremigny.qc.ca/avis-publics-et-proces-verbaux/",
+  sourceId: "proces-verbaux-remigny",
+};
+
+export const PREISSAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "preissac",
+  pvIndexUrl: "https://preissac.com/proces-verbaux",
+  sourceId: "proces-verbaux-preissac",
+};
+
+export const SAINT_VALERIEN_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-valerien",
+  pvIndexUrl: "https://municipalite.saint-valerien.qc.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-valerien",
+};
+
+export const SAINT_NARCISSE_DE_RIMOUSKI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-narcisse-de-rimouski",
+  pvIndexUrl: "https://saintnarcisse.net/municipalite/conseil-municipal.html",
+  sourceId: "proces-verbaux-saint-narcisse-de-rimouski",
+};
+
+export const VILLE_MARIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "ville-marie",
+  pvIndexUrl: "https://www.villevillemarie.org/seances-du-conseil/",
+  sourceId: "proces-verbaux-ville-marie",
+};
+
+export const FORESTVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "forestville",
+  pvIndexUrl: "https://ville.forestville.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-forestville",
+};
+
+export const RIMOUSKI_PV_CONFIG: PvCityConfig = {
+  citySlug: "rimouski",
+  pvIndexUrl: "https://rimouski.ca/ville/democratie/proces-verbaux",
+  sourceId: "proces-verbaux-rimouski",
+};
+
+export const ROUYN_NORANDA_PV_CONFIG: PvCityConfig = {
+  citySlug: "rouyn-noranda",
+  pvIndexUrl: "https://www.rouyn-noranda.ca/ville/vie-democratique/proces-verbaux-archives",
+  sourceId: "proces-verbaux-rouyn-noranda",
+};
+
+export const TRECESSON_PV_CONFIG: PvCityConfig = {
+  citySlug: "trecesson",
+  pvIndexUrl: "https://www.municipalitedetrecesson.com/proces-verbaux",
+  sourceId: "proces-verbaux-trecesson",
+};
+
+export const SAINT_BRUNO_DE_GUIGUES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-bruno-de-guigues",
+  pvIndexUrl: "https://www.guigues.ca/document-category/procesverbal/",
+  sourceId: "proces-verbaux-saint-bruno-de-guigues",
+};
+
+export const NEDELEC_PV_CONFIG: PvCityConfig = {
+  citySlug: "nedelec",
+  pvIndexUrl: "https://www.municipalite.nedelec.qc.ca/fr/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-nedelec",
+};
+
+export const SAINT_ANACLET_DE_LESSARD_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-anaclet-de-lessard",
+  pvIndexUrl: "https://stanaclet.qc.ca/municipalite/gestion-municipale/conseil-municipal/seance-publique.html",
+  sourceId: "proces-verbaux-saint-anaclet-de-lessard",
+};
+
+export const LAUNAY_PV_CONFIG: PvCityConfig = {
+  citySlug: "launay",
+  pvIndexUrl: "https://municipalites-du-quebec.com/launay/f-pv-2026.php",
+  sourceId: "proces-verbaux-launay",
+};
+
+export const COLOMBIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "colombier",
+  pvIndexUrl: "https://mun-qc.ca/colombier/proces-verbaux.php",
+  sourceId: "proces-verbaux-colombier",
+};
+
+export const BERRY_PV_CONFIG: PvCityConfig = {
+  citySlug: "berry",
+  pvIndexUrl: "https://municipalites-du-quebec.com/berry/f-pv-2026.php",
+  sourceId: "proces-verbaux-berry",
+};
+
+export const SAINT_GABRIEL_DE_RIMOUSKI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-gabriel-de-rimouski",
+  pvIndexUrl: "https://www.municipalite.saint-gabriel-de-rimouski.qc.ca/proc%C3%A8s-verbaux",
+  sourceId: "proces-verbaux-saint-gabriel-de-rimouski",
+};
+
+export const LES_HAUTEURS_PV_CONFIG: PvCityConfig = {
+  citySlug: "les-hauteurs",
+  pvIndexUrl: "https://municipalites-du-quebec.com/les-hauteurs/f-pv-2026.php",
+  sourceId: "proces-verbaux-les-hauteurs",
+};
+
+export const SAINT_DONAT_LA_MITIS_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-donat--la-mitis",
+  pvIndexUrl: "https://www.saintdonat.ca/votre-municipalite/documents/conseil-municipal/proces-verbaux-du-conseil-municipal/",
+  sourceId: "proces-verbaux-saint-donat--la-mitis",
+};
+
+export const SAINT_CHARLES_GARNIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-charles-garnier",
+  pvIndexUrl: "https://www.municipalite.saint-charles-garnier.qc.ca/proc%C3%A8s-verbaux",
+  sourceId: "proces-verbaux-saint-charles-garnier",
+};
+
+export const TASCHEREAU_PV_CONFIG: PvCityConfig = {
+  citySlug: "taschereau",
+  pvIndexUrl: "https://taschereau.ao.ca/fr/page/index.cfm?PageID=2841",
+  sourceId: "proces-verbaux-taschereau",
+};
+
+export const SAINT_JOSEPH_DE_LEPAGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-joseph-de-lepage",
+  pvIndexUrl: "https://municipalite.saint-joseph-de-lepage.qc.ca/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-joseph-de-lepage",
+};
+
+export const MONT_JOLI_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-joli",
+  pvIndexUrl: "https://ville.mont-joli.qc.ca/documents/?categorie=23",
+  sourceId: "proces-verbaux-mont-joli",
+};
+
+export const AUTHIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "authier",
+  pvIndexUrl: "https://authier.ao.ca/fr/page/index.cfm?PageID=6335",
+  sourceId: "proces-verbaux-authier",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4956,4 +5225,49 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINT_AUBERT_PV_CONFIG },
   { config: LISLE_AUX_COUDRES_PV_CONFIG },
   { config: SAINTE_FELICITE_LISLET_PV_CONFIG },
+  // -- Lot cities-round12 (config-only, verifie 2026-06-11) --
+  { config: SAINT_EUSEBE_PV_CONFIG },
+  { config: SENNETERRE_LA_VALLEE_DE_LOR_PV_CONFIG },
+  { config: PACKINGTON_PV_CONFIG },
+  { config: LES_BERGERONNES_PV_CONFIG },
+  { config: SAINT_ELOI_PV_CONFIG },
+  { config: TEMISCAMING_PV_CONFIG },
+  { config: NOTRE_DAME_DES_NEIGES_PV_CONFIG },
+  { config: DEGELIS_PV_CONFIG },
+  { config: BARRAUTE_PV_CONFIG },
+  { config: LA_CORNE_PV_CONFIG },
+  { config: SAINT_SIMON_DE_RIMOUSKI_PV_CONFIG },
+  { config: LEJEUNE_PV_CONFIG },
+  { config: RIVIERE_HEVA_PV_CONFIG },
+  { config: LATULIPE_ET_GABOURY_PV_CONFIG },
+  { config: BEARN_PV_CONFIG },
+  { config: SAINT_FABIEN_PV_CONFIG },
+  { config: SAINT_MARC_DE_FIGUERY_PV_CONFIG },
+  { config: SAINT_EUGENE_DE_LADRIERE_PV_CONFIG },
+  { config: ESPRIT_SAINT_PV_CONFIG },
+  { config: SAINT_MATHIEU_DHARRICANA_PV_CONFIG },
+  { config: AMOS_PV_CONFIG },
+  { config: REMIGNY_PV_CONFIG },
+  { config: PREISSAC_PV_CONFIG },
+  { config: SAINT_VALERIEN_PV_CONFIG },
+  { config: SAINT_NARCISSE_DE_RIMOUSKI_PV_CONFIG },
+  { config: VILLE_MARIE_PV_CONFIG },
+  { config: FORESTVILLE_PV_CONFIG },
+  { config: RIMOUSKI_PV_CONFIG },
+  { config: ROUYN_NORANDA_PV_CONFIG },
+  { config: TRECESSON_PV_CONFIG },
+  { config: SAINT_BRUNO_DE_GUIGUES_PV_CONFIG },
+  { config: NEDELEC_PV_CONFIG },
+  { config: SAINT_ANACLET_DE_LESSARD_PV_CONFIG },
+  { config: LAUNAY_PV_CONFIG },
+  { config: COLOMBIER_PV_CONFIG },
+  { config: BERRY_PV_CONFIG },
+  { config: SAINT_GABRIEL_DE_RIMOUSKI_PV_CONFIG },
+  { config: LES_HAUTEURS_PV_CONFIG },
+  { config: SAINT_DONAT_LA_MITIS_PV_CONFIG },
+  { config: SAINT_CHARLES_GARNIER_PV_CONFIG },
+  { config: TASCHEREAU_PV_CONFIG },
+  { config: SAINT_JOSEPH_DE_LEPAGE_PV_CONFIG },
+  { config: MONT_JOLI_PV_CONFIG },
+  { config: AUTHIER_PV_CONFIG },
 ];
