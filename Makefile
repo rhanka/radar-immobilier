@@ -234,6 +234,20 @@ worker-live: ## Live-scrape config-only PV cities → SCW (CITIES="a b", LIMIT=n
 	  npx tsx src/scripts/worker-live.ts $(CITIES)
 
 # ─────────────────────────────────────────────────────────────────────
+# Golden fixtures (L5 — SPEC_PERSISTENCE_S3_FIRST §3)
+# ─────────────────────────────────────────────────────────────────────
+
+.PHONY: fixture-promote
+fixture-promote: ## Promote an S3/local PV capture to a golden fixture (CITY, INDEX_URL, INDEX_HTML, PV_URL, PV_TEXT[, OUT, STDOUT=1])
+	$(COMPOSE_RUN_API_NODEPS) \
+	  -e CITY="$(CITY)" -e CITY_LABEL="$(CITY_LABEL)" \
+	  -e INDEX_URL="$(INDEX_URL)" -e INDEX_HTML="$(INDEX_HTML)" \
+	  -e PV_URL="$(PV_URL)" -e PV_TEXT="$(PV_TEXT)" \
+	  -e INDEX_SHA256="$(INDEX_SHA256)" -e PV_SHA256="$(PV_SHA256)" \
+	  -e FETCHED_AT="$(FETCHED_AT)" -e OUT="$(OUT)" -e STDOUT="$(STDOUT)" \
+	  api npx tsx packages/radar-sources/src/scripts/fixture-promote.ts
+
+# ─────────────────────────────────────────────────────────────────────
 # Dependency installation (workspace-aware)
 # ─────────────────────────────────────────────────────────────────────
 
