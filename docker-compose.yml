@@ -63,6 +63,18 @@ services:
     # e2e surcharge and for K8s (BR-04).
     image: node:24-bookworm-slim
     working_dir: /workspace
+    # The dev/test api image is node:24 stock — it does NOT ship poppler-utils.
+    # The live-scrape worker shells out to `pdftotext` (poppler) to extract the
+    # text layer of every PV PDF; without it the worker silently yields empty
+    # text → 0 signal. Installing via an `entrypoint` (idempotent, ~2 MB) covers
+    # EVERY invocation of this service — `up` (dev hot-reload), `run --rm api …`
+    # (which `make worker-live` uses and which REPLACES the command), and `exec`.
+    # The production image bakes poppler-utils into api/Dockerfile instead.
+    entrypoint:
+      - sh
+      - -c
+      - 'command -v pdftotext >/dev/null 2>&1 || { apt-get update && apt-get install -y --no-install-recommends poppler-utils && rm -rf /var/lib/apt/lists/*; }; exec "$$@"'
+      - --
     command: sh -c "npm run dev --workspace=api"
     # Obscura (scraping, BR-07) and maildev (auth mail, BR-09) are NOT on
     # the api critical path yet — they stay standalone services so the api

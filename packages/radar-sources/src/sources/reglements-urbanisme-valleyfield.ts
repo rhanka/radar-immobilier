@@ -91,6 +91,29 @@ export function reglementPdfUrl(name: string): string {
 export type PdfToText = (bytes: Uint8Array, timeoutMs: number) => Promise<string>;
 
 /**
+ * Probe whether the `pdftotext` (poppler) binary is callable in this runtime.
+ * The PDF→text step shells out to it; when it is ABSENT every PV PDF yields
+ * empty text and the scrape produces 0 signal *silently* (the adapter swallows
+ * the spawn error by design). Callers (e.g. the live-scrape worker) use this at
+ * start-up to turn that silent false-negative into a LOUD diagnostic instead of
+ * scraping into the void. Resolves `true` iff `pdftotext -v` exits 0.
+ */
+export async function isPdftotextAvailable(): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    let child;
+    try {
+      child = spawn("pdftotext", ["-v"], { stdio: "ignore" });
+    } catch {
+      resolve(false);
+      return;
+    }
+    child.on("error", () => resolve(false));
+    // poppler prints its version banner to stderr and exits 0 for `-v`.
+    child.on("close", (code) => resolve(code === 0));
+  });
+}
+
+/**
  * Convert PDF bytes to UTF-8 text via `pdftotext - -` (poppler). Reads the bytes
  * on stdin, returns stdout. Throws a typed `SourceFetchError(kind: "parse")` on a
  * non-zero exit, a spawn failure (binary absent), or a timeout — the adapter

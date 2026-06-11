@@ -19,6 +19,8 @@
  *                        project-state (`ontology/{city}/project-state.json`),
  *                        i.e. the key the Signaux view reads. Off by default.
  */
+import { isPdftotextAvailable } from "@radar/sources";
+
 import { loadConfig } from "../config.js";
 import { createLogger } from "../logger.js";
 import { runLiveScrape } from "../services/sources/live-scrape.js";
@@ -39,6 +41,20 @@ async function main(): Promise<void> {
     { cities: slugs.length > 0 ? slugs : "all-config-only", limit, exploit },
     "worker-live: starting live PV scrape",
   );
+
+  // Preflight: EXPLOITATION extracts every PV PDF's text via `pdftotext`
+  // (poppler). If the binary is missing the adapter silently yields "" → 0
+  // signal on real PDFs. Surface that as a LOUD diagnostic instead of a silent
+  // false-negative. We do not abort RECUEIL (raw capture still works); we warn
+  // so the empty-signal run is never mistaken for "no opportunities found".
+  if (exploit && !(await isPdftotextAvailable())) {
+    logger.error(
+      { binary: "pdftotext", remedy: "install poppler-utils in this image" },
+      "worker-live: pdftotext (poppler) NOT available — every PV PDF will " +
+        "extract to EMPTY text and EXPLOITATION will produce 0 signal. This " +
+        "is a misconfigured image, not an absence of opportunities.",
+    );
+  }
 
   const recap = await runLiveScrape(slugs.length > 0 ? slugs : undefined, {
     store,
