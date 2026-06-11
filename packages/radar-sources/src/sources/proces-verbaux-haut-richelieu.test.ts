@@ -393,14 +393,16 @@ describe("ProcesVerbauxGenericAdapter.list() – Henryville (mocked fetch)", () 
     windowDays: 183,
   });
 
-  it("yields au moins 3 refs PV dans la fenêtre 6 mois", async () => {
-    // 2026-06-10 − 183 jours = 2025-12-09: seuls 2026-01-12, 2025-12-17, 2025-12-01
-    // sont dans la fenêtre → 3 refs (les PVs de nov/oct/… sont antérieurs)
+  it("yields au moins 2 refs PV dans la fenêtre 6 mois", async () => {
+    // 2026-06-10 − 183 jours = 2025-12-09. Avec la datation corrigée des labels,
+    // "1er décembre 2025" → 2025-12-01 (8 jours AVANT le début de fenêtre, donc
+    // hors fenêtre) ; restent 2026-01-12 et 2025-12-17 dans la fenêtre → 2 refs.
+    // (Auparavant "1er décembre" restait NON_DISPONIBLE et était inclus à tort.)
     const refs: unknown[] = [];
     for await (const ref of adapter.list({})) {
       refs.push(ref);
     }
-    expect(refs.length).toBeGreaterThanOrEqual(3);
+    expect(refs.length).toBeGreaterThanOrEqual(2);
   });
 
   it("tous les refs ont sourceKind 'pv'", async () => {
