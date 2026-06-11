@@ -4220,6 +4220,167 @@ export const SAINTE_FELICITE_LISLET_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-sainte-felicite--lislet",
 };
 
+
+// ---------------------------------------------------------------------------
+// Lot cities-round14 -- 26 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const LA_REDEMPTION_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-redemption",
+  pvIndexUrl: "https://municipalite.laredemption.qc.ca/municipal/proces-verbaux",
+  sourceId: "proces-verbaux-la-redemption",
+};
+
+export const GRAND_METIS_PV_CONFIG: PvCityConfig = {
+  citySlug: "grand-metis",
+  pvIndexUrl: "https://grandmetis.ca/f-pv-2026.php",
+  sourceId: "proces-verbaux-grand-metis",
+};
+
+export const SAINTE_GERMAINE_BOULE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-germaine-boule",
+  pvIndexUrl: "https://saintegermaineboule.com/category/seances-et-proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-germaine-boule",
+};
+
+export const METIS_SUR_MER_PV_CONFIG: PvCityConfig = {
+  citySlug: "metis-sur-mer",
+  pvIndexUrl: "https://www.ville.metis-sur-mer.qc.ca/fr/municipalite/proces-verbaux",
+  sourceId: "proces-verbaux-metis-sur-mer",
+};
+
+export const SAINT_MOISE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-moise",
+  pvIndexUrl: "https://st-moise.com/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-moise",
+};
+
+export const AUTHIER_NORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "authier-nord",
+  pvIndexUrl: "https://authier-nord.ao.ca/fr/page/index.cfm?PageID=1182",
+  sourceId: "proces-verbaux-authier-nord",
+};
+
+export const SAINT_ZENON_DU_LAC_HUMQUI_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-zenon-du-lac-humqui",
+  pvIndexUrl: "https://www.lachumqui.com/fr/vie-municipale/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-zenon-du-lac-humqui",
+};
+
+export const MACAMIC_PV_CONFIG: PvCityConfig = {
+  citySlug: "macamic",
+  pvIndexUrl: "https://www.villemacamic.qc.ca/fr/page/index.cfm?PageID=47",
+  sourceId: "proces-verbaux-macamic",
+};
+
+export const LASCENSION_DE_PATAPEDIA_PV_CONFIG: PvCityConfig = {
+  citySlug: "lascension-de-patapedia",
+  pvIndexUrl: "https://matapedialesplateaux.com/citoyens/lascension-de-patapedia/proces-verbaux/",
+  sourceId: "proces-verbaux-lascension-de-patapedia",
+};
+
+export const PALMAROLLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "palmarolle",
+  pvIndexUrl: "https://palmarolle.ao.ca/fr/page/index.cfm?PageID=1039",
+  sourceId: "proces-verbaux-palmarolle",
+};
+
+export const SAINT_CLEOPHAS_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-cleophas",
+  pvIndexUrl: "https://www.stcleophas.com/proces-verbaux",
+  sourceId: "proces-verbaux-saint-cleophas",
+};
+
+export const SAINT_NOEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-noel",
+  pvIndexUrl: "https://www.st-noel.com/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-noel",
+};
+
+export const GALLICHAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "gallichan",
+  pvIndexUrl: "https://gallichan.ao.ca/fr/page/index.cfm?PageID=1303",
+  sourceId: "proces-verbaux-gallichan",
+};
+
+export const SAINT_LEON_LE_GRAND_LA_MATAPEDIA_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-leon-le-grand--la-matapedia",
+  pvIndexUrl: "https://municipalite.saint-leon-le-grand.qc.ca/documents/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-leon-le-grand--la-matapedia",
+};
+
+export const SAINT_DAMASE_LA_MATAPEDIA_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-damase--la-matapedia",
+  pvIndexUrl: "https://saint-damase.com/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-damase--la-matapedia",
+};
+
+export const SAINTE_THERESE_DE_GASPE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-therese-de-gaspe",
+  pvIndexUrl: "https://saintetheresedegaspe.com/ma-municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-therese-de-gaspe",
+};
+
+export const SEPT_ILES_PV_CONFIG: PvCityConfig = {
+  citySlug: "sept-iles",
+  pvIndexUrl: "https://www.septiles.ca/fr/ordre-du-jour-et-procesverbal_150/",
+  sourceId: "proces-verbaux-sept-iles",
+};
+
+export const GASPE_PV_CONFIG: PvCityConfig = {
+  citySlug: "gaspe",
+  pvIndexUrl: "https://ville.gaspe.qc.ca/mairie-et-conseil-municipal/seances-du-conseil-municipal",
+  sourceId: "proces-verbaux-gaspe",
+};
+
+export const RIVIERE_AU_TONNERRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "riviere-au-tonnerre",
+  pvIndexUrl: "https://riviere-au-tonnerre.ca/archive-des-proces-verbaux/",
+  sourceId: "proces-verbaux-riviere-au-tonnerre",
+};
+
+export const RIVIERE_SAINT_JEAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "riviere-saint-jean",
+  pvIndexUrl: "https://municipalites-du-quebec.com/riviere-st-jean/f-pv-2026.php",
+  sourceId: "proces-verbaux-riviere-saint-jean",
+};
+
+export const LILE_DANTICOSTI_PV_CONFIG: PvCityConfig = {
+  citySlug: "lile-danticosti",
+  pvIndexUrl: "https://municipalite-anticosti.org/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-lile-danticosti",
+};
+
+export const LES_ILES_DE_LA_MADELEINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "les-iles-de-la-madeleine",
+  pvIndexUrl: "https://www.muniles.ca/affaires-municipales/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-les-iles-de-la-madeleine",
+};
+
+export const HAVRE_SAINT_PIERRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "havre-saint-pierre",
+  pvIndexUrl: "https://havresaintpierre.com/archives-des-proces-verbaux/",
+  sourceId: "proces-verbaux-havre-saint-pierre",
+};
+
+export const FERMONT_PV_CONFIG: PvCityConfig = {
+  citySlug: "fermont",
+  pvIndexUrl: "https://www.villedefermont.qc.ca/conseil-municipal/",
+  sourceId: "proces-verbaux-fermont",
+};
+
+export const AGUANISH_PV_CONFIG: PvCityConfig = {
+  citySlug: "aguanish",
+  pvIndexUrl: "https://www.aguanish.org/proc%C3%A8s-verbaux",
+  sourceId: "proces-verbaux-aguanish",
+};
+
+export const NATASHQUAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "natashquan",
+  pvIndexUrl: "https://www.natashquan.org/seances-municipales/",
+  sourceId: "proces-verbaux-natashquan",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -4956,4 +5117,31 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINT_AUBERT_PV_CONFIG },
   { config: LISLE_AUX_COUDRES_PV_CONFIG },
   { config: SAINTE_FELICITE_LISLET_PV_CONFIG },
+  // -- Lot cities-round14 (config-only, verifie 2026-06-11) --
+  { config: LA_REDEMPTION_PV_CONFIG },
+  { config: GRAND_METIS_PV_CONFIG },
+  { config: SAINTE_GERMAINE_BOULE_PV_CONFIG },
+  { config: METIS_SUR_MER_PV_CONFIG },
+  { config: SAINT_MOISE_PV_CONFIG },
+  { config: AUTHIER_NORD_PV_CONFIG },
+  { config: SAINT_ZENON_DU_LAC_HUMQUI_PV_CONFIG },
+  { config: MACAMIC_PV_CONFIG },
+  { config: LASCENSION_DE_PATAPEDIA_PV_CONFIG },
+  { config: PALMAROLLE_PV_CONFIG },
+  { config: SAINT_CLEOPHAS_PV_CONFIG },
+  { config: SAINT_NOEL_PV_CONFIG },
+  { config: GALLICHAN_PV_CONFIG },
+  { config: SAINT_LEON_LE_GRAND_LA_MATAPEDIA_PV_CONFIG },
+  { config: SAINT_DAMASE_LA_MATAPEDIA_PV_CONFIG },
+  { config: SAINTE_THERESE_DE_GASPE_PV_CONFIG },
+  { config: SEPT_ILES_PV_CONFIG },
+  { config: GASPE_PV_CONFIG },
+  { config: RIVIERE_AU_TONNERRE_PV_CONFIG },
+  { config: RIVIERE_SAINT_JEAN_PV_CONFIG },
+  { config: LILE_DANTICOSTI_PV_CONFIG },
+  { config: LES_ILES_DE_LA_MADELEINE_PV_CONFIG },
+  { config: HAVRE_SAINT_PIERRE_PV_CONFIG },
+  { config: FERMONT_PV_CONFIG },
+  { config: AGUANISH_PV_CONFIG },
+  { config: NATASHQUAN_PV_CONFIG },
 ];
