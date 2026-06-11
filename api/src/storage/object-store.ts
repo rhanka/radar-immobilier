@@ -18,22 +18,45 @@ export interface ObjectStore {
   ): Promise<ObjectInfo>;
   get(key: string): Promise<Uint8Array>;
   head(key: string): Promise<ObjectInfo | null>;
+  /**
+   * List object keys under a prefix. Optional: only the real S3/MinIO store
+   * and stores that back sharded aggregates (e.g. scrape-status `state/`)
+   * need it. Aggregates degrade to an empty list when a store omits it.
+   */
+  list?(prefix: string): Promise<string[]>;
 }
 
 /**
- * Build the canonical raw-object key (rules/sources.md):
- *   raw/<source>/<YYYY>/<MM>/<DD>/<sha256>.<ext>
+ * Build the content-addressed (CAS) raw-object key — spec
+ * docs/spec/SPEC_PERSISTENCE_S3_FIRST.md §1.1:
+ *   raw/{citySlug}/{sourceKind}/cas/{sha256}.{ext}
+ *
+ * The fetch date is deliberately NOT part of the key: the same document
+ * content always maps to the same key, giving free dedup + idempotence
+ * (a HEAD on the key tells you whether the doc is already stored). The
+ * temporal axis lives in the run manifests, not in the object key.
  */
-export function rawObjectKey(params: {
-  source: string;
-  date: Date;
+export function casObjectKey(params: {
+  citySlug: string;
+  sourceKind: string;
   sha256: string;
   ext: string;
 }): string {
-  const { source, date, sha256, ext } = params;
-  const yyyy = date.getUTCFullYear().toString().padStart(4, "0");
-  const mm = (date.getUTCMonth() + 1).toString().padStart(2, "0");
-  const dd = date.getUTCDate().toString().padStart(2, "0");
+  const { citySlug, sourceKind, sha256, ext } = params;
   const cleanExt = ext.replace(/^\./, "");
-  return `raw/${source}/${yyyy}/${mm}/${dd}/${sha256}.${cleanExt}`;
+  return `raw/${citySlug}/${sourceKind}/cas/${sha256}.${cleanExt}`;
+}
+
+/**
+ * Sibling metadata key for a CAS object (RawDocumentRecord: url, fetchedAt,
+ * httpStatus, robotsOk, contentType, provenance):
+ *   raw/{citySlug}/{sourceKind}/cas/{sha256}.meta.json
+ */
+export function casMetaKey(params: {
+  citySlug: string;
+  sourceKind: string;
+  sha256: string;
+}): string {
+  const { citySlug, sourceKind, sha256 } = params;
+  return `raw/${citySlug}/${sourceKind}/cas/${sha256}.meta.json`;
 }
