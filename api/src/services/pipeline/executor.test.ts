@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   AVIS_PUBLICS_FIXTURE_HTML,
   AVIS_PUBLICS_SOURCE_ID,
-  ROLE_EVALUATION_MAMH_VALLEYFIELD_XML,
+  roleEvaluationMamhValleyfieldXml,
   SourceFetchError,
   createAvisPublicsValleyfieldAdapter,
   createRoleEvaluationMamhAdapter,
@@ -83,7 +83,7 @@ function roleEntry(): AdapterEntry {
       createRoleEvaluationMamhAdapter({
         codeMamh: "70052",
         city: CITY,
-        fetchImpl: fixtureRoleFetch(ROLE_EVALUATION_MAMH_VALLEYFIELD_XML),
+        fetchImpl: fixtureRoleFetch(roleEvaluationMamhValleyfieldXml()),
       }),
   };
 }

@@ -10,8 +10,8 @@ import {
   ROLE_EVALUATION_MAMH_ADAPTER_VERSION,
 } from "./role-evaluation-mamh.js";
 import {
-  ROLE_EVALUATION_MAMH_BEAUHARNOIS_XML,
-  ROLE_EVALUATION_MAMH_VALLEYFIELD_XML,
+  roleEvaluationMamhBeauharnoisXml,
+  roleEvaluationMamhValleyfieldXml,
 } from "./role-evaluation-mamh.fixture.js";
 import { SourceFetchError, type FetchLike } from "./avis-publics-valleyfield.js";
 
@@ -104,7 +104,7 @@ describe("RoleEvaluationMamhAdapter (J0 contract)", () => {
 describe("fetch() over REAL committed rôle bytes (no network)", () => {
   it("returns raw bytes + download provenance + sha256, and hash() matches", async () => {
     const a = vfAdapter({
-      fetchImpl: okFetch(ROLE_EVALUATION_MAMH_VALLEYFIELD_XML),
+      fetchImpl: okFetch(roleEvaluationMamhValleyfieldXml()),
     });
     const [ref] = await collectRefs(a, {});
     const raw = await a.fetch(ref as RawDocumentRef);
@@ -125,7 +125,7 @@ describe("fetch() over REAL committed rôle bytes (no network)", () => {
 
   it("parseRole() turns fetched bytes into the REAL Valleyfield units (anti-invention)", async () => {
     const a = vfAdapter({
-      fetchImpl: okFetch(ROLE_EVALUATION_MAMH_VALLEYFIELD_XML),
+      fetchImpl: okFetch(roleEvaluationMamhValleyfieldXml()),
     });
     const [ref] = await collectRefs(a, {});
     const raw = await a.fetch(ref as RawDocumentRef);
@@ -147,7 +147,7 @@ describe("fetch() over REAL committed rôle bytes (no network)", () => {
       codeMamh: "70022",
       city: "beauharnois",
       now: () => FIXED_NOW,
-      fetchImpl: okFetch(ROLE_EVALUATION_MAMH_BEAUHARNOIS_XML),
+      fetchImpl: okFetch(roleEvaluationMamhBeauharnoisXml()),
     });
     const [ref] = await collectRefs(a, {});
     expect(ref?.url).toBe(
@@ -164,7 +164,7 @@ describe("fetch() over REAL committed rôle bytes (no network)", () => {
 
   it("is idempotent: re-fetching identical bytes yields the same sha256/hash", async () => {
     const a = vfAdapter({
-      fetchImpl: okFetch(ROLE_EVALUATION_MAMH_VALLEYFIELD_XML),
+      fetchImpl: okFetch(roleEvaluationMamhValleyfieldXml()),
     });
     const [ref] = await collectRefs(a, {});
     const first = await a.fetch(ref as RawDocumentRef);

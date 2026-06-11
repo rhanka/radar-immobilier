@@ -10,8 +10,8 @@ import {
   ADRESSES_QUEBEC_ADAPTER_VERSION,
 } from "./adresses-quebec.js";
 import {
-  ADRESSES_QUEBEC_BEAUHARNOIS_JSON,
-  ADRESSES_QUEBEC_VALLEYFIELD_JSON,
+  adressesQuebecBeauharnoisJson,
+  adressesQuebecValleyfieldJson,
 } from "./adresses-quebec.fixture.js";
 import { SourceFetchError, type FetchLike } from "./avis-publics-valleyfield.js";
 
@@ -103,7 +103,7 @@ describe("AdressesQuebecAdapter (J0 contract)", () => {
 describe("fetch() over REAL committed terrAPI bytes (no network)", () => {
   it("returns raw bytes + download provenance + sha256, and hash() matches", async () => {
     const a = vfAdapter({
-      fetchImpl: okFetch(ADRESSES_QUEBEC_VALLEYFIELD_JSON),
+      fetchImpl: okFetch(adressesQuebecValleyfieldJson()),
     });
     const [ref] = await collectRefs(a, {});
     const raw = await a.fetch(ref as RawDocumentRef);
@@ -124,7 +124,7 @@ describe("fetch() over REAL committed terrAPI bytes (no network)", () => {
 
   it("parseAdresses() turns fetched bytes into the REAL Valleyfield addresses (anti-invention)", async () => {
     const a = vfAdapter({
-      fetchImpl: okFetch(ADRESSES_QUEBEC_VALLEYFIELD_JSON),
+      fetchImpl: okFetch(adressesQuebecValleyfieldJson()),
     });
     const [ref] = await collectRefs(a, {});
     const raw = await a.fetch(ref as RawDocumentRef);
@@ -144,7 +144,7 @@ describe("fetch() over REAL committed terrAPI bytes (no network)", () => {
       codeMamh: "70022",
       city: "beauharnois",
       now: () => FIXED_NOW,
-      fetchImpl: okFetch(ADRESSES_QUEBEC_BEAUHARNOIS_JSON),
+      fetchImpl: okFetch(adressesQuebecBeauharnoisJson()),
     });
     const [ref] = await collectRefs(a, {});
     expect(ref?.url).toBe(
@@ -157,7 +157,7 @@ describe("fetch() over REAL committed terrAPI bytes (no network)", () => {
 
   it("is idempotent: re-fetching identical bytes yields the same sha256/hash", async () => {
     const a = vfAdapter({
-      fetchImpl: okFetch(ADRESSES_QUEBEC_VALLEYFIELD_JSON),
+      fetchImpl: okFetch(adressesQuebecValleyfieldJson()),
     });
     const [ref] = await collectRefs(a, {});
     const first = await a.fetch(ref as RawDocumentRef);

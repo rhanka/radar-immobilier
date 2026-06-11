@@ -56,3 +56,71 @@ spec:
       ports:
         - protocol: TCP
           port: 8080
+---
+# ADDITIVE: let the UI (nginx) pod reach the api on :3000.
+#
+# The public entrypoint is the `radar-ui` nginx pod, which reverse-proxies
+# `/api/*` and `/health` to `radar-api:3000` (50-ui.yaml). The operator baseline
+# `allow-traefik-to-api` only opens Traefik (+ kube-system) -> api:3000; under
+# the namespace default-deny, the SAME-NAMESPACE ui -> api hop is DROPPED, so
+# every UI `/api/*` call and the proxied `/health` hang before reaching the api.
+# This purely-additive policy opens ui -> api:3000 so the SPA's same-origin API
+# calls (and the ingress `/health` proxy) actually reach the api.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ui-to-api
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: api
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: api
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: ui
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+# ADDITIVE: let the api pod reach MinIO on :9000 (object storage).
+#
+# The api's /health probe (and every RECUEIL object PUT/GET) calls the S3 API on
+# `radar-minio:9000`. The operator baseline `allow-api-to-runtime-dependencies`
+# opens api -> {postgres:5432, obscura:9222, maildev:1025/1080} but OMITS MinIO;
+# under default-deny, api -> minio:9000 is DROPPED, so the S3 SDK HANGS (silent —
+# no error) and /health never returns -> readiness/liveness fail -> CrashLoop.
+# This purely-additive policy opens api -> minio:9000 so object-store access (and
+# therefore /health) works. (Mirror of the operator baseline, scoped to MinIO.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-minio
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: minio
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: api
+      ports:
+        - protocol: TCP
+          port: 9000

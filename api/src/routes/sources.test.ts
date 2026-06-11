@@ -4,7 +4,7 @@ import { sourcesRoute } from "./sources.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 import {
   AVIS_PUBLICS_FIXTURE_HTML,
-  ROLE_EVALUATION_MAMH_VALLEYFIELD_XML,
+  roleEvaluationMamhValleyfieldXml,
 } from "@radar/sources";
 
 /** In-memory ObjectStore so the RECUEIL route is testable without MinIO. */
@@ -109,7 +109,7 @@ describe("POST /api/sources/collect/:source (RECUEIL)", () => {
     beforeEach(() => {
       globalThis.fetch = vi.fn(
         async () =>
-          new Response(ROLE_EVALUATION_MAMH_VALLEYFIELD_XML, {
+          new Response(roleEvaluationMamhValleyfieldXml(), {
             status: 200,
             headers: { "content-type": "application/xml; charset=utf-8" },
           }),
