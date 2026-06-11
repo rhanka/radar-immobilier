@@ -1,11 +1,11 @@
 /**
- * Lot « cities-round3 » — 78 villes CONFIG-ONLY (S3-first).
+ * Lot « agglo-mtl-3 » (round 2) — 71 villes CONFIG-ONLY (S3-first).
  * URLs d'index vérifiées en live HTTP 200 le 2026-06-11 ; preuve par ville en PR.
  */
 import { describe, expect, it } from "vitest";
 import { ALL_PV_CITIES } from "./proces-verbaux-generic.js";
-const EXPECTED = ["wentworth-nord", "val-david", "frelighsburg", "saint-nazaire-dacton", "saint-adolphe-dhoward", "saint-gerard-majella", "acton-vale", "shefford", "saint-cuthbert", "saint-theodore-dacton", "saint-joachim-de-shefford", "saint-cleophas-de-brandon", "roxton", "lac-des-seize-iles", "saint-jean-de-matha", "saint-francois-du-lac", "saint-barthelemy", "waterloo", "warden", "lac-brome", "saint-germain-de-grantham", "saint-pie-de-guire", "sainte-agathe-des-monts", "brome", "saint-come", "abercorn", "dundee", "grenville-sur-la-rouge", "wickham", "saint-gabriel-de-brandon", "pierreville", "montcalm", "maskinonge", "sutton", "notre-dame-de-la-merci", "sainte-christine", "sainte-anne-de-la-rochelle", "saint-gabriel", "stukely-sud", "lefebvre", "harrington", "bolton-ouest", "sainte-emelie-de-lenergie", "barkmere", "mont-blanc", "valcourt--le-val-saint-francois", "saint-didace", "lawrenceville", "saint-zephirin-de-courval", "sainte-ursule", "arundel", "louiseville", "saint-etienne-de-bolton", "saint-edouard-de-maskinonge", "baie-du-febvre", "valcourt--le-val-saint-francois--2", "maricourt", "drummondville", "eastman", "saint-cyrille-de-wendover", "bolton-est", "val-des-lacs", "lavenir", "sainte-brigitte-des-saults", "saint-leon-le-grand--maskinonge", "sainte-angele-de-premont", "saint-donat--matawinie", "potton", "ulverton", "racine", "brebeuf", "notre-dame-du-bon-conseil--drummond--2", "yamachiche", "austin", "sainte-perpetue--nicolet-yamaska", "orford", "sainte-monique--nicolet-yamaska", "nicolet"];
-describe("Lot cities-round3 — câblage config-only", () => {
+const EXPECTED = ["saint-ours", "prevost", "saint-stanislas-de-kostka", "saint-barnabe-sud", "franklin", "saint-hippolyte", "venise-en-quebec", "clarenceville", "joliette", "saint-dominique", "pike-river", "rigaud", "lanoraie", "sainte-anne-des-lacs", "saint-andre-dargenteuil", "lachute", "saint-louis", "saint-simon", "saint-thomas", "gore", "saint-charles-borromee", "piedmont", "saint-zotique", "bedford--brome-missisquoi", "notre-dame-des-prairies", "pointe-fortune", "saint-polycarpe", "rawdon", "tres-saint-redempteur", "saint-sauveur", "sainte-cecile-de-milton", "saint-ambroise-de-kildare", "granby", "saint-hugues", "hinchinbrooke", "saint-marcel-de-richelieu", "brigham", "huntingdon", "saint-valerien-de-milton", "stanbridge-east", "saint-armand", "riviere-beaudette", "notre-dame-de-lourdes--joliette", "sainte-adele", "saint-aime", "sainte-justine-de-newton", "sainte-marcelline-de-kildare", "saint-telesphore", "wentworth", "esterel", "cowansville", "godmanchester", "upton", "brownsburg-chatham", "berthierville", "sainte-anne-de-sorel", "sainte-melanie", "bromont", "roxton-pond", "sainte-marguerite-du-lac-masson", "chertsey", "val-morin", "saint-guillaume", "saint-david", "elgin", "saint-anicet", "saint-eugene", "saint-felix-de-valois", "yamaska", "saint-alphonse-rodriguez", "saint-norbert"];
+describe("Lot agglo-mtl-3 — câblage config-only (round 2)", () => {
   const bySlug = new Map(ALL_PV_CITIES.map((c) => [c.config.citySlug, c]));
   for (const slug of EXPECTED) {
     it(`${slug}: entrée config-only valide`, () => {
@@ -17,5 +17,5 @@ describe("Lot cities-round3 — câblage config-only", () => {
       expect(entry.pvText).toBeUndefined();
     });
   }
-  it("78 villes uniques", () => { expect(new Set(EXPECTED).size).toBe(78); });
+  it("71 villes uniques", () => { expect(new Set(EXPECTED).size).toBe(71); });
 });
