@@ -1269,6 +1269,479 @@ export function createHenryvillePvAdapter(
   return new ProcesVerbauxGenericAdapter(HENRYVILLE_PV_CONFIG, options);
 }
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lot « cities-round3 » — 78 villes config-only (S3-first), vérifié 2026-06-11.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const WENTWORTH_NORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "wentworth-nord",
+  pvIndexUrl: "https://wentworth-nord.ca/mairie/proces-verbaux/",
+  sourceId: "proces-verbaux-wentworth-nord",
+};
+
+export const VAL_DAVID_PV_CONFIG: PvCityConfig = {
+  citySlug: "val-david",
+  pvIndexUrl: "https://valdavid.com/organisation-municipale/val-david-vous-informe/proces-verbaux-seances-publiques/",
+  sourceId: "proces-verbaux-val-david",
+};
+
+export const FRELIGHSBURG_PV_CONFIG: PvCityConfig = {
+  citySlug: "frelighsburg",
+  pvIndexUrl: "https://frelighsburg.ca/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-frelighsburg",
+};
+
+export const SAINT_NAZAIRE_DACTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-nazaire-dacton",
+  pvIndexUrl: "https://stnazairedacton.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-nazaire-dacton",
+};
+
+export const SAINT_ADOLPHE_DHOWARD_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-adolphe-dhoward",
+  pvIndexUrl: "https://stadolphedhoward.qc.ca/83/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-adolphe-dhoward",
+};
+
+export const SAINT_GERARD_MAJELLA_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-gerard-majella",
+  pvIndexUrl: "https://saintgerardmajella.ca/?page=cons-proc",
+  sourceId: "proces-verbaux-saint-gerard-majella",
+};
+
+export const ACTON_VALE_PV_CONFIG: PvCityConfig = {
+  citySlug: "acton-vale",
+  pvIndexUrl: "https://ville.actonvale.qc.ca/ville/conseil-municipal/calendriers-des-seances-ordres-du-jour-et-proces-verbaux/",
+  sourceId: "proces-verbaux-acton-vale",
+};
+
+export const SHEFFORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "shefford",
+  pvIndexUrl: "https://cantonshefford.qc.ca/municipalite/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-shefford",
+};
+
+export const SAINT_CUTHBERT_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-cuthbert",
+  pvIndexUrl: "https://st-cuthbert.qc.ca/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-cuthbert",
+};
+
+export const SAINT_THEODORE_DACTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-theodore-dacton",
+  pvIndexUrl: "https://st-theodore.com/communications/proces-verbaux-seances/",
+  sourceId: "proces-verbaux-saint-theodore-dacton",
+};
+
+export const SAINT_JOACHIM_DE_SHEFFORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-joachim-de-shefford",
+  pvIndexUrl: "https://st-joachim.ca/municipalite/administration-et-finance/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-joachim-de-shefford",
+};
+
+export const SAINT_CLEOPHAS_DE_BRANDON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-cleophas-de-brandon",
+  pvIndexUrl: "https://st-cleophas.qc.ca/f-pv-2026.php",
+  sourceId: "proces-verbaux-saint-cleophas-de-brandon",
+};
+
+export const ROXTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "roxton",
+  pvIndexUrl: "https://cantonderoxton.qc.ca/ville/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-roxton",
+};
+
+export const LAC_DES_SEIZE_ILES_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-des-seize-iles",
+  pvIndexUrl: "https://www.lac-des-seize-iles.com/fr/municipalite/conseil-municipal/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-lac-des-seize-iles",
+};
+
+export const SAINT_JEAN_DE_MATHA_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-jean-de-matha",
+  pvIndexUrl: "https://municipalitestjeandematha.qc.ca/municipalite/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-jean-de-matha",
+};
+
+export const SAINT_FRANCOIS_DU_LAC_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-francois-du-lac",
+  pvIndexUrl: "https://www.saintfrancoisdulac.ca/fr/municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-francois-du-lac",
+};
+
+export const SAINT_BARTHELEMY_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-barthelemy",
+  pvIndexUrl: "https://www.saint-barthelemy.ca/municipalite/conseil-municipal/ordre-du-jour-et-proces-verbaux",
+  sourceId: "proces-verbaux-saint-barthelemy",
+};
+
+export const WATERLOO_PV_CONFIG: PvCityConfig = {
+  citySlug: "waterloo",
+  pvIndexUrl: "https://ville.waterloo.qc.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-waterloo",
+};
+
+export const WARDEN_PV_CONFIG: PvCityConfig = {
+  citySlug: "warden",
+  pvIndexUrl: "https://municipalites-du-quebec.com/warden/f-pv-2026.php",
+  sourceId: "proces-verbaux-warden",
+};
+
+export const LAC_BROME_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-brome",
+  pvIndexUrl: "https://www.ville.lac-brome.qc.ca/fr/vie-municipale/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-lac-brome",
+};
+
+export const SAINT_GERMAIN_DE_GRANTHAM_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-germain-de-grantham",
+  pvIndexUrl: "https://st-germain.info/index.php/le-greffe/",
+  sourceId: "proces-verbaux-saint-germain-de-grantham",
+};
+
+export const SAINT_PIE_DE_GUIRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-pie-de-guire",
+  pvIndexUrl: "https://www.stpiedeguire.ca/fr/vivre-a-saint-pie-de-guire-/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-pie-de-guire",
+};
+
+export const SAINTE_AGATHE_DES_MONTS_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-agathe-des-monts",
+  pvIndexUrl: "https://vsadm.ca/notre-ville/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-agathe-des-monts",
+};
+
+export const BROME_PV_CONFIG: PvCityConfig = {
+  citySlug: "brome",
+  pvIndexUrl: "https://bromevillage.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-brome",
+};
+
+export const SAINT_COME_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-come",
+  pvIndexUrl: "https://www.stcomelanaudiere.ca/municipalite/vie-democratique/proces-verbaux",
+  sourceId: "proces-verbaux-saint-come",
+};
+
+export const ABERCORN_PV_CONFIG: PvCityConfig = {
+  citySlug: "abercorn",
+  pvIndexUrl: "https://abercorn.ca/f-pv-2026.php",
+  sourceId: "proces-verbaux-abercorn",
+};
+
+export const DUNDEE_PV_CONFIG: PvCityConfig = {
+  citySlug: "dundee",
+  pvIndexUrl: "https://www.cantondundee.ca/proces-verbaux-et-ordres-du-jour",
+  sourceId: "proces-verbaux-dundee",
+};
+
+export const GRENVILLE_SUR_LA_ROUGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "grenville-sur-la-rouge",
+  pvIndexUrl: "https://www.gslr.ca/ma-municipalite/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-grenville-sur-la-rouge",
+};
+
+export const WICKHAM_PV_CONFIG: PvCityConfig = {
+  citySlug: "wickham",
+  pvIndexUrl: "https://www.wickham.ca/administration-municipale/seances-du-conseil/",
+  sourceId: "proces-verbaux-wickham",
+};
+
+export const SAINT_GABRIEL_DE_BRANDON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-gabriel-de-brandon",
+  pvIndexUrl: "https://www.saintgabrieldebrandon.com/municipalite/conseil-municipal/seances-du-conseil-et-proces-verbaux",
+  sourceId: "proces-verbaux-saint-gabriel-de-brandon",
+};
+
+export const PIERREVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "pierreville",
+  pvIndexUrl: "https://pierreville.net/proces-verbaux/",
+  sourceId: "proces-verbaux-pierreville",
+};
+
+export const MONTCALM_PV_CONFIG: PvCityConfig = {
+  citySlug: "montcalm",
+  pvIndexUrl: "https://montcalm.ca/administration-municipale/proces-verbaux/",
+  sourceId: "proces-verbaux-montcalm",
+};
+
+export const MASKINONGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "maskinonge",
+  pvIndexUrl: "https://mun-maskinonge.ca/index.php/publications/proces-verbaux",
+  sourceId: "proces-verbaux-maskinonge",
+};
+
+export const SUTTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "sutton",
+  pvIndexUrl: "https://sutton.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-sutton",
+};
+
+export const NOTRE_DAME_DE_LA_MERCI_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-de-la-merci",
+  pvIndexUrl: "https://www.mun-ndm.ca/notre-municipalite/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-notre-dame-de-la-merci",
+};
+
+export const SAINTE_CHRISTINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-christine",
+  pvIndexUrl: "https://ste-christine.com/proces-verbaux-et-reunion-du-conseil/",
+  sourceId: "proces-verbaux-sainte-christine",
+};
+
+export const SAINTE_ANNE_DE_LA_ROCHELLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-anne-de-la-rochelle",
+  pvIndexUrl: "https://steannedelarochelle.ca/f-pv-2026.php",
+  sourceId: "proces-verbaux-sainte-anne-de-la-rochelle",
+};
+
+export const SAINT_GABRIEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-gabriel",
+  pvIndexUrl: "https://www.ville.stgabriel.qc.ca/ville/democratie/proces-verbaux",
+  sourceId: "proces-verbaux-saint-gabriel",
+};
+
+export const STUKELY_SUD_PV_CONFIG: PvCityConfig = {
+  citySlug: "stukely-sud",
+  pvIndexUrl: "https://stukely-sud.com/proces-verbaux/",
+  sourceId: "proces-verbaux-stukely-sud",
+};
+
+export const LEFEBVRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lefebvre",
+  pvIndexUrl: "https://municipalites-du-quebec.ca/lefebvre/pdf_procesverbaux/",
+  sourceId: "proces-verbaux-lefebvre",
+};
+
+export const HARRINGTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "harrington",
+  pvIndexUrl: "https://harrington.ca/en/municipality/council-meetings/",
+  sourceId: "proces-verbaux-harrington",
+};
+
+export const BOLTON_OUEST_PV_CONFIG: PvCityConfig = {
+  citySlug: "bolton-ouest",
+  pvIndexUrl: "https://www.bolton-ouest.ca/en/municipality/municipal-life/minutes/",
+  sourceId: "proces-verbaux-bolton-ouest",
+};
+
+export const SAINTE_EMELIE_DE_LENERGIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-emelie-de-lenergie",
+  pvIndexUrl: "https://steemelie.ca/fr/muni/conseil-municipal/seances-conseil",
+  sourceId: "proces-verbaux-sainte-emelie-de-lenergie",
+};
+
+export const BARKMERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "barkmere",
+  pvIndexUrl: "https://barkmere.ca/?page_id=2594&lang=en",
+  sourceId: "proces-verbaux-barkmere",
+};
+
+export const MONT_BLANC_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-blanc",
+  pvIndexUrl: "https://mont-blanc.quebec/conseil-municipal/",
+  sourceId: "proces-verbaux-mont-blanc",
+};
+
+export const VALCOURT_LE_VAL_SAINT_FRANCOIS_PV_CONFIG: PvCityConfig = {
+  citySlug: "valcourt--le-val-saint-francois",
+  pvIndexUrl: "https://www.valcourt.ca/a-propos/documents-publics/",
+  sourceId: "proces-verbaux-valcourt--le-val-saint-francois",
+};
+
+export const SAINT_DIDACE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-didace",
+  pvIndexUrl: "https://saint-didace.com/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-didace",
+};
+
+export const LAWRENCEVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lawrenceville",
+  pvIndexUrl: "https://lawrenceville.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-lawrenceville",
+};
+
+export const SAINT_ZEPHIRIN_DE_COURVAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-zephirin-de-courval",
+  pvIndexUrl: "https://www.saint-zephirin.ca/fr/ma-municipalite/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-zephirin-de-courval",
+};
+
+export const SAINTE_URSULE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-ursule",
+  pvIndexUrl: "https://municipalites-du-quebec.com/sainte-ursule/f-pv-2026.php",
+  sourceId: "proces-verbaux-sainte-ursule",
+};
+
+export const ARUNDEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "arundel",
+  pvIndexUrl: "https://arundel.ca/en/publications/agenda-and-minutes/",
+  sourceId: "proces-verbaux-arundel",
+};
+
+export const LOUISEVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "louiseville",
+  pvIndexUrl: "https://louiseville.ca/ville/services-municipaux/greffe/proces-verbaux-2/",
+  sourceId: "proces-verbaux-louiseville",
+};
+
+export const SAINT_ETIENNE_DE_BOLTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-etienne-de-bolton",
+  pvIndexUrl: "https://sedb.qc.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-etienne-de-bolton",
+};
+
+export const SAINT_EDOUARD_DE_MASKINONGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-edouard-de-maskinonge",
+  pvIndexUrl: "https://municipalites-du-quebec.com/st-edouard-de-maskinonge/f-pv-2026.php",
+  sourceId: "proces-verbaux-saint-edouard-de-maskinonge",
+};
+
+export const BAIE_DU_FEBVRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "baie-du-febvre",
+  pvIndexUrl: "https://baie-du-febvre.net/ma-municipalite/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-baie-du-febvre",
+};
+
+export const VALCOURT_LE_VAL_SAINT_FRANCOIS_2_PV_CONFIG: PvCityConfig = {
+  citySlug: "valcourt--le-val-saint-francois--2",
+  pvIndexUrl: "https://cantonvalcourt.qc.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-valcourt--le-val-saint-francois--2",
+};
+
+export const MARICOURT_PV_CONFIG: PvCityConfig = {
+  citySlug: "maricourt",
+  pvIndexUrl: "https://maricourt.ca/ordres-du-jour-proces-verbaux/",
+  sourceId: "proces-verbaux-maricourt",
+};
+
+export const DRUMMONDVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "drummondville",
+  pvIndexUrl: "https://www.drummondville.ca/mairie-et-vie-municipale/seances-du-conseil/",
+  sourceId: "proces-verbaux-drummondville",
+};
+
+export const EASTMAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "eastman",
+  pvIndexUrl: "https://eastman.quebec/municipalite/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-eastman",
+};
+
+export const SAINT_CYRILLE_DE_WENDOVER_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-cyrille-de-wendover",
+  pvIndexUrl: "https://stcyrille.qc.ca/vie-democratique/proces-verbaux/",
+  sourceId: "proces-verbaux-saint-cyrille-de-wendover",
+};
+
+export const BOLTON_EST_PV_CONFIG: PvCityConfig = {
+  citySlug: "bolton-est",
+  pvIndexUrl: "https://www.boltonest.ca/fr/municipalite/vie-democratique/seances-du-conseil",
+  sourceId: "proces-verbaux-bolton-est",
+};
+
+export const VAL_DES_LACS_PV_CONFIG: PvCityConfig = {
+  citySlug: "val-des-lacs",
+  pvIndexUrl: "https://www.val-des-lacs.ca/fr/vie-municipale/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-val-des-lacs",
+};
+
+export const LAVENIR_PV_CONFIG: PvCityConfig = {
+  citySlug: "lavenir",
+  pvIndexUrl: "https://www.municipalitelavenir.qc.ca/administration/seances-et-proces-verbaux",
+  sourceId: "proces-verbaux-lavenir",
+};
+
+export const SAINTE_BRIGITTE_DES_SAULTS_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-brigitte-des-saults",
+  pvIndexUrl: "https://www.saintebrigittedessaults.ca/seances-du-conseil",
+  sourceId: "proces-verbaux-sainte-brigitte-des-saults",
+};
+
+export const SAINT_LEON_LE_GRAND_MASKINONGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-leon-le-grand--maskinonge",
+  pvIndexUrl: "https://municipalite.saint-leon-le-grand.qc.ca/documents/proces-verbaux.html",
+  sourceId: "proces-verbaux-saint-leon-le-grand--maskinonge",
+};
+
+export const SAINTE_ANGELE_DE_PREMONT_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-angele-de-premont",
+  pvIndexUrl: "https://www.sainte-angele-de-premont.ca/gestion-municipale/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-angele-de-premont",
+};
+
+export const SAINT_DONAT_MATAWINIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-donat--matawinie",
+  pvIndexUrl: "https://www.saint-donat.ca/la-municipalite/vie-democratique/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-donat--matawinie",
+};
+
+export const POTTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "potton",
+  pvIndexUrl: "https://potton.ca/municipalite/affaires-municipales/",
+  sourceId: "proces-verbaux-potton",
+};
+
+export const ULVERTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "ulverton",
+  pvIndexUrl: "https://municipaliteulverton.com/seance-du-conseil-et-proces-verbaux/",
+  sourceId: "proces-verbaux-ulverton",
+};
+
+export const RACINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "racine",
+  pvIndexUrl: "https://racine.ca/conseil-municipal/",
+  sourceId: "proces-verbaux-racine",
+};
+
+export const BREBEUF_PV_CONFIG: PvCityConfig = {
+  citySlug: "brebeuf",
+  pvIndexUrl: "https://brebeuf.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-brebeuf",
+};
+
+export const NOTRE_DAME_DU_BON_CONSEIL_DRUMMOND_2_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-du-bon-conseil--drummond--2",
+  pvIndexUrl: "https://municipalites-du-quebec.com/notre-dame-du-bon-conseil/f-pv-2026.php",
+  sourceId: "proces-verbaux-notre-dame-du-bon-conseil--drummond--2",
+};
+
+export const YAMACHICHE_PV_CONFIG: PvCityConfig = {
+  citySlug: "yamachiche",
+  pvIndexUrl: "https://www.yamachiche.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-yamachiche",
+};
+
+export const AUSTIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "austin",
+  pvIndexUrl: "https://municipalite.austin.qc.ca/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-austin",
+};
+
+export const SAINTE_PERPETUE_NICOLET_YAMASKA_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-perpetue--nicolet-yamaska",
+  pvIndexUrl: "https://www.ste-perpetue.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-perpetue--nicolet-yamaska",
+};
+
+export const ORFORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "orford",
+  pvIndexUrl: "https://canton.orford.qc.ca/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-orford",
+};
+
+export const SAINTE_MONIQUE_NICOLET_YAMASKA_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-monique--nicolet-yamaska",
+  pvIndexUrl: "https://www.sainte-monique.ca/fr/municipalite/seances-du-conseil",
+  sourceId: "proces-verbaux-sainte-monique--nicolet-yamaska",
+};
+
+export const NICOLET_PV_CONFIG: PvCityConfig = {
+  citySlug: "nicolet",
+  pvIndexUrl: "https://nicolet.ca/fr/seances-du-conseil",
+  sourceId: "proces-verbaux-nicolet",
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Lot « agglo-mtl » — 14 villes les plus proches de Montréal (≤25 km).
 // CONFIG-ONLY (contrat S3-first) : pas de fixture, pas de pvText. Le worker
@@ -2698,6 +3171,334 @@ export const SAINT_MATHIEU_DU_PARC_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-saint-mathieu-du-parc",
 };
 
+// ---------------------------------------------------------------------------
+// Lot cities-round4 -- 54 villes config-only (S3-first), verifie 2026-06-11.
+// ---------------------------------------------------------------------------
+
+export const SAINTE_CLOTILDE_DE_HORTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-clotilde-de-horton",
+  pvIndexUrl: "https://steclotildehorton.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-sainte-clotilde-de-horton",
+};
+
+export const CLEVELAND_PV_CONFIG: PvCityConfig = {
+  citySlug: "cleveland",
+  pvIndexUrl: "https://cleveland.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-cleveland",
+};
+
+export const SAINTE_SERAPHINE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-seraphine",
+  pvIndexUrl: "https://www.munsainteseraphine.ca/fr/vie-municipale/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-seraphine",
+};
+
+export const LAC_TREMBLANT_NORD_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-tremblant-nord",
+  pvIndexUrl: "https://lac-tremblant-nord.qc.ca/ordres-jour-proces-verbaux/",
+  sourceId: "proces-verbaux-lac-tremblant-nord",
+};
+
+export const SAINT_FRANCOIS_XAVIER_DE_BROMPTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-francois-xavier-de-brompton",
+  pvIndexUrl: "https://sfxb.qc.ca/vie-municipale/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-francois-xavier-de-brompton",
+};
+
+export const OGDEN_PV_CONFIG: PvCityConfig = {
+  citySlug: "ogden",
+  pvIndexUrl: "https://www.munogden.ca/seances_conseil.html",
+  sourceId: "proces-verbaux-ogden",
+};
+
+export const CHENEVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "cheneville",
+  pvIndexUrl: "https://www.ville-cheneville.com/proces-verbaux",
+  sourceId: "proces-verbaux-cheneville",
+};
+
+export const SAINT_ETIENNE_DES_GRES_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-etienne-des-gres",
+  pvIndexUrl: "https://mun-stedg.qc.ca/calendrier-des-seances-ordinaires-et-proces-verbaux/",
+  sourceId: "proces-verbaux-saint-etienne-des-gres",
+};
+
+export const KINGSEY_FALLS_PV_CONFIG: PvCityConfig = {
+  citySlug: "kingsey-falls",
+  pvIndexUrl: "https://www.kingseyfalls.ca/fr/municipalite/conseil-municipal/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-kingsey-falls",
+};
+
+export const SAINT_ELIE_DE_CAXTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-elie-de-caxton",
+  pvIndexUrl: "https://www.st-elie-de-caxton.ca/fr/ma-municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-elie-de-caxton",
+};
+
+export const SAINT_WENCESLAS_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-wenceslas",
+  pvIndexUrl: "https://www.municipalitestwenceslas.com/fr/municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-wenceslas",
+};
+
+export const SAINTE_CATHERINE_DE_HATLEY_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-catherine-de-hatley",
+  pvIndexUrl: "https://www.sainte-catherine-de-hatley.ca/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-catherine-de-hatley",
+};
+
+export const WINDSOR_PV_CONFIG: PvCityConfig = {
+  citySlug: "windsor",
+  pvIndexUrl: "https://www.villedewindsor.qc.ca/seances-ordinaires/",
+  sourceId: "proces-verbaux-windsor",
+};
+
+export const SAINTE_ELIZABETH_DE_WARWICK_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-elizabeth-de-warwick",
+  pvIndexUrl: "https://www.sainte-elizabeth-de-warwick.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-sainte-elizabeth-de-warwick",
+};
+
+export const SAINTE_EULALIE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sainte-eulalie",
+  pvIndexUrl: "https://www.municipalite.sainte-eulalie.qc.ca/pv/",
+  sourceId: "proces-verbaux-sainte-eulalie",
+};
+
+export const AYERS_CLIFF_PV_CONFIG: PvCityConfig = {
+  citySlug: "ayers-cliff",
+  pvIndexUrl: "https://ayerscliff.ca/en/minutes/",
+  sourceId: "proces-verbaux-ayers-cliff",
+};
+
+export const DANVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "danville",
+  pvIndexUrl: "https://danville.ca/vie-municipale/conseil-municipal/proces-verbaux-ordre-du-jour-et-diffusion-des-seances/",
+  sourceId: "proces-verbaux-danville",
+};
+
+export const LABELLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "labelle",
+  pvIndexUrl: "https://municipalite.labelle.qc.ca/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux",
+  sourceId: "proces-verbaux-labelle",
+};
+
+export const VAL_JOLI_PV_CONFIG: PvCityConfig = {
+  citySlug: "val-joli",
+  pvIndexUrl: "https://www.val-joli.ca/fr/municipalite/conseil-municipal/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-val-joli",
+};
+
+export const SHERBROOKE_PV_CONFIG: PvCityConfig = {
+  citySlug: "sherbrooke",
+  pvIndexUrl: "https://www.sherbrooke.ca/fr/vie-municipale/publications/proces-verbaux",
+  sourceId: "proces-verbaux-sherbrooke",
+};
+
+export const SAINT_ALBERT_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-albert",
+  pvIndexUrl: "https://www.munstalbert.ca/conseil-municipal#seances-du-conseil",
+  sourceId: "proces-verbaux-saint-albert",
+};
+
+export const RIPON_PV_CONFIG: PvCityConfig = {
+  citySlug: "ripon",
+  pvIndexUrl: "https://www.ripon.ca/fr/municipalite/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-ripon",
+};
+
+export const STANSTEAD_MEMPHREMAGOG_2_PV_CONFIG: PvCityConfig = {
+  citySlug: "stanstead--memphremagog--2",
+  pvIndexUrl: "https://www.cantonstanstead.ca/la-municipalite/seance-du-conseil/",
+  sourceId: "proces-verbaux-stanstead--memphremagog--2",
+};
+
+export const SAINT_BONIFACE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-boniface",
+  pvIndexUrl: "https://saint-bo.ca/fr/ma-municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-boniface",
+};
+
+export const SAINT_CLAUDE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-claude",
+  pvIndexUrl: "https://www.municipalite.st-claude.ca/documents/",
+  sourceId: "proces-verbaux-saint-claude",
+};
+
+export const ASTON_JONCTION_PV_CONFIG: PvCityConfig = {
+  citySlug: "aston-jonction",
+  pvIndexUrl: "https://www.aston-jonction.ca/documents/",
+  sourceId: "proces-verbaux-aston-jonction",
+};
+
+export const STANSTEAD_EST_PV_CONFIG: PvCityConfig = {
+  citySlug: "stanstead-est",
+  pvIndexUrl: "https://www.stansteadest.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-stanstead-est",
+};
+
+export const SAINT_SIXTE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-sixte",
+  pvIndexUrl: "https://saintsixte.ca/seances-du-conseil/",
+  sourceId: "proces-verbaux-saint-sixte",
+};
+
+export const HATLEY_TOWNSHIP_MUNICIPALITY_PV_CONFIG: PvCityConfig = {
+  citySlug: "hatley-township-municipality",
+  pvIndexUrl: "https://cantondehatley.ca/administration/proces-verbaux/",
+  sourceId: "proces-verbaux-hatley-township-municipality",
+};
+
+export const VAL_DES_SOURCES_PV_CONFIG: PvCityConfig = {
+  citySlug: "val-des-sources",
+  pvIndexUrl: "https://valdessources.ca/a-propos-de-la-ville/vie-democratique/seances-du-conseil-municipal/",
+  sourceId: "proces-verbaux-val-des-sources",
+};
+
+export const BECANCOUR_PV_CONFIG: PvCityConfig = {
+  citySlug: "becancour",
+  pvIndexUrl: "https://becancour.net/vie-municipale/conseil-municipal/proces-verbaux/",
+  sourceId: "proces-verbaux-becancour",
+};
+
+export const NOTRE_DAME_DU_MONT_CARMEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-du-mont-carmel",
+  pvIndexUrl: "https://www.mont-carmel.org/proces-verbaux",
+  sourceId: "proces-verbaux-notre-dame-du-mont-carmel",
+};
+
+export const SAINT_VALERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-valere",
+  pvIndexUrl: "https://www.msvalere.qc.ca/seances",
+  sourceId: "proces-verbaux-saint-valere",
+};
+
+export const THURSO_PV_CONFIG: PvCityConfig = {
+  citySlug: "thurso",
+  pvIndexUrl: "https://www.ville.thurso.qc.ca/municipalite/conseil-municipal/",
+  sourceId: "proces-verbaux-thurso",
+};
+
+export const WARWICK_PV_CONFIG: PvCityConfig = {
+  citySlug: "warwick",
+  pvIndexUrl: "https://villedewarwick.quebec/seances-du-conseil-municipal/",
+  sourceId: "proces-verbaux-warwick",
+};
+
+export const SAINT_SYLVERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-sylvere",
+  pvIndexUrl: "https://www.saint-sylvere.ca/fr/municipalite/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-sylvere",
+};
+
+export const TINGWICK_PV_CONFIG: PvCityConfig = {
+  citySlug: "tingwick",
+  pvIndexUrl: "https://www.tingwick.ca/seances",
+  sourceId: "proces-verbaux-tingwick",
+};
+
+export const BARNSTON_OUEST_PV_CONFIG: PvCityConfig = {
+  citySlug: "barnston-ouest",
+  pvIndexUrl: "https://www.barnston-ouest.ca/fr/municipalite/proces-verbaux.php",
+  sourceId: "proces-verbaux-barnston-ouest",
+};
+
+export const HATLEY_PV_CONFIG: PvCityConfig = {
+  citySlug: "hatley",
+  pvIndexUrl: "https://www.municipalitehatley.com/municipalite/assemblees-publiques-2/",
+  sourceId: "proces-verbaux-hatley",
+};
+
+export const SAINT_MAURICE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-maurice",
+  pvIndexUrl: "https://st-maurice.ca/fr/ma-municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-saint-maurice",
+};
+
+export const LA_MINERVE_PV_CONFIG: PvCityConfig = {
+  citySlug: "la-minerve",
+  pvIndexUrl: "https://municipalite.laminerve.qc.ca/proces-verbaux/",
+  sourceId: "proces-verbaux-la-minerve",
+};
+
+export const SHAWINIGAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "shawinigan",
+  pvIndexUrl: "https://www.shawinigan.ca/ville/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-shawinigan",
+};
+
+export const WATERVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "waterville",
+  pvIndexUrl: "https://www.waterville.ca/fr/ville/assemblee-publique.php",
+  sourceId: "proces-verbaux-waterville",
+};
+
+export const LOCHABER_PARTIE_OUEST_PV_CONFIG: PvCityConfig = {
+  citySlug: "lochaber-partie-ouest",
+  pvIndexUrl: "http://www.lochaber-ouest.ca/documents/?c=1&sc=25",
+  sourceId: "proces-verbaux-lochaber-partie-ouest",
+};
+
+export const DAVELUYVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "daveluyville",
+  pvIndexUrl: "https://www.ville.daveluyville.qc.ca/seances-du-conseil",
+  sourceId: "proces-verbaux-daveluyville",
+};
+
+export const MADDINGTON_FALLS_PV_CONFIG: PvCityConfig = {
+  citySlug: "maddington-falls",
+  pvIndexUrl: "https://www.maddington.ca/seances-du-conseil",
+  sourceId: "proces-verbaux-maddington-falls",
+};
+
+export const MAYO_PV_CONFIG: PvCityConfig = {
+  citySlug: "mayo",
+  pvIndexUrl: "https://mayo.ca/en/municipal-life/minutes-of-the-council-meetings/",
+  sourceId: "proces-verbaux-mayo",
+};
+
+export const VICTORIAVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "victoriaville",
+  pvIndexUrl: "https://victoriaville.ca/conseil-municipal-et-elections/seances-du-conseil-et-proces-verbaux/passees",
+  sourceId: "proces-verbaux-victoriaville",
+};
+
+export const STOKE_PV_CONFIG: PvCityConfig = {
+  citySlug: "stoke",
+  pvIndexUrl: "https://stoke.ca/municipalite/conseil-municipal/seances-du-conseil/",
+  sourceId: "proces-verbaux-stoke",
+};
+
+export const CHAMPLAIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "champlain",
+  pvIndexUrl: "https://www.municipalite.champlain.qc.ca/fr/ma-municipalite/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-champlain",
+};
+
+export const SAINT_ROSAIRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "saint-rosaire",
+  pvIndexUrl: "https://www.strosaire.ca/fr/vie-municipale/conseil-municipal/proces-verbaux-et-ordres-du-jour/",
+  sourceId: "proces-verbaux-saint-rosaire",
+};
+
+export const DUHAMEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "duhamel",
+  pvIndexUrl: "https://www.municipalite.duhamel.qc.ca/fr/municipalite/Conseil-municipal/seances-du-conseil/proces-verbaux",
+  sourceId: "proces-verbaux-duhamel",
+};
+
+export const COATICOOK_PV_CONFIG: PvCityConfig = {
+  citySlug: "coaticook",
+  pvIndexUrl: "https://www.coaticook.ca/fr/ville/seances-publiques.php",
+  sourceId: "proces-verbaux-coaticook",
+};
+
+export const COMPTON_PV_CONFIG: PvCityConfig = {
+  citySlug: "compton",
+  pvIndexUrl: "https://www.compton.ca/municipalite/proces-verbaux/",
+  sourceId: "proces-verbaux-compton",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -2942,6 +3743,85 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
     sourceUrl:
       "http://henryville.ca/wp-content/uploads/2026/03/proces-verbal-20260112.pdf",
   },
+  // ── Lot « cities-round3 » (config-only, vérifié 2026-06-11) ────────────────
+  { config: WENTWORTH_NORD_PV_CONFIG },
+  { config: VAL_DAVID_PV_CONFIG },
+  { config: FRELIGHSBURG_PV_CONFIG },
+  { config: SAINT_NAZAIRE_DACTON_PV_CONFIG },
+  { config: SAINT_ADOLPHE_DHOWARD_PV_CONFIG },
+  { config: SAINT_GERARD_MAJELLA_PV_CONFIG },
+  { config: ACTON_VALE_PV_CONFIG },
+  { config: SHEFFORD_PV_CONFIG },
+  { config: SAINT_CUTHBERT_PV_CONFIG },
+  { config: SAINT_THEODORE_DACTON_PV_CONFIG },
+  { config: SAINT_JOACHIM_DE_SHEFFORD_PV_CONFIG },
+  { config: SAINT_CLEOPHAS_DE_BRANDON_PV_CONFIG },
+  { config: ROXTON_PV_CONFIG },
+  { config: LAC_DES_SEIZE_ILES_PV_CONFIG },
+  { config: SAINT_JEAN_DE_MATHA_PV_CONFIG },
+  { config: SAINT_FRANCOIS_DU_LAC_PV_CONFIG },
+  { config: SAINT_BARTHELEMY_PV_CONFIG },
+  { config: WATERLOO_PV_CONFIG },
+  { config: WARDEN_PV_CONFIG },
+  { config: LAC_BROME_PV_CONFIG },
+  { config: SAINT_GERMAIN_DE_GRANTHAM_PV_CONFIG },
+  { config: SAINT_PIE_DE_GUIRE_PV_CONFIG },
+  { config: SAINTE_AGATHE_DES_MONTS_PV_CONFIG },
+  { config: BROME_PV_CONFIG },
+  { config: SAINT_COME_PV_CONFIG },
+  { config: ABERCORN_PV_CONFIG },
+  { config: DUNDEE_PV_CONFIG },
+  { config: GRENVILLE_SUR_LA_ROUGE_PV_CONFIG },
+  { config: WICKHAM_PV_CONFIG },
+  { config: SAINT_GABRIEL_DE_BRANDON_PV_CONFIG },
+  { config: PIERREVILLE_PV_CONFIG },
+  { config: MONTCALM_PV_CONFIG },
+  { config: MASKINONGE_PV_CONFIG },
+  { config: SUTTON_PV_CONFIG },
+  { config: NOTRE_DAME_DE_LA_MERCI_PV_CONFIG },
+  { config: SAINTE_CHRISTINE_PV_CONFIG },
+  { config: SAINTE_ANNE_DE_LA_ROCHELLE_PV_CONFIG },
+  { config: SAINT_GABRIEL_PV_CONFIG },
+  { config: STUKELY_SUD_PV_CONFIG },
+  { config: LEFEBVRE_PV_CONFIG },
+  { config: HARRINGTON_PV_CONFIG },
+  { config: BOLTON_OUEST_PV_CONFIG },
+  { config: SAINTE_EMELIE_DE_LENERGIE_PV_CONFIG },
+  { config: BARKMERE_PV_CONFIG },
+  { config: MONT_BLANC_PV_CONFIG },
+  { config: VALCOURT_LE_VAL_SAINT_FRANCOIS_PV_CONFIG },
+  { config: SAINT_DIDACE_PV_CONFIG },
+  { config: LAWRENCEVILLE_PV_CONFIG },
+  { config: SAINT_ZEPHIRIN_DE_COURVAL_PV_CONFIG },
+  { config: SAINTE_URSULE_PV_CONFIG },
+  { config: ARUNDEL_PV_CONFIG },
+  { config: LOUISEVILLE_PV_CONFIG },
+  { config: SAINT_ETIENNE_DE_BOLTON_PV_CONFIG },
+  { config: SAINT_EDOUARD_DE_MASKINONGE_PV_CONFIG },
+  { config: BAIE_DU_FEBVRE_PV_CONFIG },
+  { config: VALCOURT_LE_VAL_SAINT_FRANCOIS_2_PV_CONFIG },
+  { config: MARICOURT_PV_CONFIG },
+  { config: DRUMMONDVILLE_PV_CONFIG },
+  { config: EASTMAN_PV_CONFIG },
+  { config: SAINT_CYRILLE_DE_WENDOVER_PV_CONFIG },
+  { config: BOLTON_EST_PV_CONFIG },
+  { config: VAL_DES_LACS_PV_CONFIG },
+  { config: LAVENIR_PV_CONFIG },
+  { config: SAINTE_BRIGITTE_DES_SAULTS_PV_CONFIG },
+  { config: SAINT_LEON_LE_GRAND_MASKINONGE_PV_CONFIG },
+  { config: SAINTE_ANGELE_DE_PREMONT_PV_CONFIG },
+  { config: SAINT_DONAT_MATAWINIE_PV_CONFIG },
+  { config: POTTON_PV_CONFIG },
+  { config: ULVERTON_PV_CONFIG },
+  { config: RACINE_PV_CONFIG },
+  { config: BREBEUF_PV_CONFIG },
+  { config: NOTRE_DAME_DU_BON_CONSEIL_DRUMMOND_2_PV_CONFIG },
+  { config: YAMACHICHE_PV_CONFIG },
+  { config: AUSTIN_PV_CONFIG },
+  { config: SAINTE_PERPETUE_NICOLET_YAMASKA_PV_CONFIG },
+  { config: ORFORD_PV_CONFIG },
+  { config: SAINTE_MONIQUE_NICOLET_YAMASKA_PV_CONFIG },
+  { config: NICOLET_PV_CONFIG },
   // ── Lot « agglo-mtl » (CONFIG-ONLY, S3-first) : Agglomération de Montréal (île)
   { config: WESTMOUNT_PV_CONFIG },
   { config: MONT_ROYAL_PV_CONFIG },
@@ -3179,4 +4059,59 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: VAL_ALAIN_PV_CONFIG },
   { config: LAC_DU_CERF_PV_CONFIG },
   { config: SAINT_MATHIEU_DU_PARC_PV_CONFIG },
+  // -- Lot cities-round4 (config-only, verifie 2026-06-11) --
+  { config: SAINTE_CLOTILDE_DE_HORTON_PV_CONFIG },
+  { config: CLEVELAND_PV_CONFIG },
+  { config: SAINTE_SERAPHINE_PV_CONFIG },
+  { config: LAC_TREMBLANT_NORD_PV_CONFIG },
+  { config: SAINT_FRANCOIS_XAVIER_DE_BROMPTON_PV_CONFIG },
+  { config: OGDEN_PV_CONFIG },
+  { config: CHENEVILLE_PV_CONFIG },
+  { config: SAINT_ETIENNE_DES_GRES_PV_CONFIG },
+  { config: KINGSEY_FALLS_PV_CONFIG },
+  { config: SAINT_ELIE_DE_CAXTON_PV_CONFIG },
+  { config: SAINT_WENCESLAS_PV_CONFIG },
+  { config: SAINTE_CATHERINE_DE_HATLEY_PV_CONFIG },
+  { config: WINDSOR_PV_CONFIG },
+  { config: SAINTE_ELIZABETH_DE_WARWICK_PV_CONFIG },
+  { config: SAINTE_EULALIE_PV_CONFIG },
+  { config: AYERS_CLIFF_PV_CONFIG },
+  { config: DANVILLE_PV_CONFIG },
+  { config: LABELLE_PV_CONFIG },
+  { config: VAL_JOLI_PV_CONFIG },
+  { config: SHERBROOKE_PV_CONFIG },
+  { config: SAINT_ALBERT_PV_CONFIG },
+  { config: RIPON_PV_CONFIG },
+  { config: STANSTEAD_MEMPHREMAGOG_2_PV_CONFIG },
+  { config: SAINT_BONIFACE_PV_CONFIG },
+  { config: SAINT_CLAUDE_PV_CONFIG },
+  { config: ASTON_JONCTION_PV_CONFIG },
+  { config: STANSTEAD_EST_PV_CONFIG },
+  { config: SAINT_SIXTE_PV_CONFIG },
+  { config: HATLEY_TOWNSHIP_MUNICIPALITY_PV_CONFIG },
+  { config: VAL_DES_SOURCES_PV_CONFIG },
+  { config: BECANCOUR_PV_CONFIG },
+  { config: NOTRE_DAME_DU_MONT_CARMEL_PV_CONFIG },
+  { config: SAINT_VALERE_PV_CONFIG },
+  { config: THURSO_PV_CONFIG },
+  { config: WARWICK_PV_CONFIG },
+  { config: SAINT_SYLVERE_PV_CONFIG },
+  { config: TINGWICK_PV_CONFIG },
+  { config: BARNSTON_OUEST_PV_CONFIG },
+  { config: HATLEY_PV_CONFIG },
+  { config: SAINT_MAURICE_PV_CONFIG },
+  { config: LA_MINERVE_PV_CONFIG },
+  { config: SHAWINIGAN_PV_CONFIG },
+  { config: WATERVILLE_PV_CONFIG },
+  { config: LOCHABER_PARTIE_OUEST_PV_CONFIG },
+  { config: DAVELUYVILLE_PV_CONFIG },
+  { config: MADDINGTON_FALLS_PV_CONFIG },
+  { config: MAYO_PV_CONFIG },
+  { config: VICTORIAVILLE_PV_CONFIG },
+  { config: STOKE_PV_CONFIG },
+  { config: CHAMPLAIN_PV_CONFIG },
+  { config: SAINT_ROSAIRE_PV_CONFIG },
+  { config: DUHAMEL_PV_CONFIG },
+  { config: COATICOOK_PV_CONFIG },
+  { config: COMPTON_PV_CONFIG },
 ];
