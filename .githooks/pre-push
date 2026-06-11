@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Anti-direct-push guard for `main` (consensus Fable 5 — closes the gate's
+# main weakness: a direct push bypasses CI + scripts/gate.sh entirely).
+#
+# Merges happen server-side via `gh pr merge`, which does NOT trigger this
+# local hook — so legitimate gated merges are unaffected. Only a direct
+# `git push origin main` from a workstation is refused.
+#
+# Activate once per clone:  git config core.hooksPath .githooks
+# Escape hatch (chores/emergency, use sparingly):  git push --no-verify
+remote="$1"
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "✗ pre-push: direct push to 'main' is refused (authoritative gate)." >&2
+    echo "  Open a PR and merge with: bash scripts/merge.sh <pr-number>" >&2
+    echo "  (server-side 'gh pr merge' is not affected by this hook)." >&2
+    echo "  Deliberate bypass: git push --no-verify   (avoid; chores only)." >&2
+    exit 1
+  fi
+done
+exit 0
