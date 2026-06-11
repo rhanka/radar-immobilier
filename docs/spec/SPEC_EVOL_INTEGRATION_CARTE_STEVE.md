@@ -526,16 +526,58 @@ comme **fixture de maquette** (mode `simulation`, jamais mélangé au réel — 
 | `meta.grilles` | lien grille rattaché à `ZoneVersion` | 3 formats (préfixe / `_fallback_map` / défaut) |
 | `meta.postal_prefix` (ville) | — (pas de code postal lot) | **le JSON n'a PAS de code postal par lot** : seulement un préfixe ville (ex. « J5B »). Le code postal complet vit dans le **cache Firestore geocoder.ca non exporté** → champ vide en maquette (S-13 le remplit hors maquette) |
 
-> **DÉCISION EN ATTENTE (user) : import du corpus Firestore de l'équipe Steve dans la maquette ?**
-> L'équipe de Steve a déjà produit un **corpus de prospection réel** dans Firestore (~**5 043 lots
-> « non retenus »** + **204 lettres** envoyées, plus marques/notes). Le mapping ci-dessus couvre le
-> **substrat cadastre/rôle/zonage** (JSON Netlify public, sans PII) ; il **ne tranche pas** la
-> question d'**importer aussi ce corpus de décisions d'équipe** comme `ProspectMark`
-> (`mode:"simulation"`) pour démarrer la maquette avec l'historique réel de tri. C'est une
-> **décision produit** (valeur de démo immédiate vs. provenance/PII des marques d'équipe vs.
-> charge d'import Firestore) : **laissée à l'utilisateur**, non tranchée ici. Si « oui », l'import
-> suivrait le **chemin de promotion sim→réel** du §6.3 et les **garde-fous PII** (les marques
-> portent `who`/`role` — données d'équipe, pas de propriétaire ; Loi 25).
+> **DÉCISION TRANCHÉE (user, 2026-06-11) : OUI on importe le corpus de l'équipe Steve — mais dans
+> une TABLE DE CONTRÔLE de parité, PAS dans le store opérationnel des prospects.**
+> L'équipe de Steve a produit un **corpus de prospection réel** : (a) le **substrat
+> cadastre/rôle/zonage** (JSON Netlify public par ville, sans PII) **et** (b) ses **marques
+> d'équipe Firestore** (~**5 043 lots « non retenus »** + **204 lettres**, plus marques/notes —
+> README §Données d'usage). La question « importer ce corpus ? » est désormais **tranchée** :
+>
+> 1. **Import OUI**, mais le corpus de Steve devient une **donnée de *référence / golden* isolée**,
+>    matérialisée dans une **table de contrôle** dédiée (`ControlLot` / `ControlMark`), **distincte
+>    du store opérationnel** (`Lot`/`LotVersion`/`ProspectMark`). But : **vérification de PARITÉ**
+>    entre (a) la **donnée de référence** (importée de Steve) et (b) la **donnée que NOTRE pipeline
+>    scrape/dérive**. On **ne** déverse **pas** les marques de Steve comme `ProspectMark`
+>    opérationnels (cela contredirait `mode:"real"`/`mode:"simulation"` du store réel) : on les
+>    range en **contrôle**, jamais re-publiées.
+> 2. **Les 4 villes de Steve** (`delson`, `sainte-catherine`, `saint-constant`, `candiac`)
+>    deviennent des **points de contrôle / golden cities**. Conséquence directe : on **priorise le
+>    scrape EN PROFONDEUR de ces 4 villes** (toutes sources : PV/zonage, rôle, cadastre, zones, TOD)
+>    **pour reproduire la donnée de Steve et pouvoir la *diffّer*** (cf. priorité deep amendée dans
+>    `SPEC_PLAN_SCRAPING.md` §2.4, ci-après).
+> 3. **Articulation au data model** : la table de contrôle ne **pollue ni** `ProspectMark` **ni**
+>    `DesignationEvent` (cf. garde-fou §6.2.1). C'est un **dataset de référence parallèle**, clé
+>    `(citySlug, NO_LOT)`, miroir des champs de la fiche lot Steve. **Loi 25** : ce sont des
+>    données **fournies par le client sur ses propres prospects** (cadastre + rôle publics + marques
+>    *d'équipe* portant `who`/`role`, **aucune PII de tiers / propriétaire**), conservées **en
+>    contrôle** — **jamais re-publiées** dans le flux opérationnel.
+>
+> La spec dédiée **`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`** porte le détail (modèle table de
+> contrôle, métrique de parité diffable par ville, mécanisme d'import, priorité deep des 4 villes,
+> items track). Le **substrat cadastre/rôle/zonage** de la maquette (§6.2 table de mapping
+> ci-dessus, `mode:"simulation"`) reste le socle de démo CS-L6 ; la **table de contrôle** est un
+> **usage distinct et additionnel** du même corpus Steve, orienté **mesure de parité**, pas démo UX.
+
+#### 6.2.1 Garde-fou — table de contrôle ≠ store opérationnel (suite de la décision)
+
+La table de contrôle (`ControlLot`/`ControlMark`, détaillée dans
+[`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`](SPEC_CONTROLE_PARITE_VILLES_STEVE.md)) est **strictement
+séparée** du store opérationnel et **ne touche pas** au détecteur :
+
+- **Pas de pollution `ProspectMark`** : les marques d'équipe de Steve (`non-retenu` → 5 043,
+  `lettre` → 204) sont rangées en `ControlMark` (référence golden), **jamais** insérées comme
+  `ProspectMark` (§4.1). Le store opérationnel reste alimenté **uniquement** par les décisions
+  prises **dans** le radar (réelles ou `simulation`), pas par l'historique importé de Steve.
+- **Pas de pollution `DesignationEvent`** : l'import de contrôle **n'émet aucun**
+  `DesignationEvent` (§1.3 `SPEC_DESIGN_DATA_MODEL.md`). La table de contrôle est un **snapshot de
+  référence**, pas un événement de désignation ; elle ne franchit jamais la **frontière réel**
+  (`SPEC_EVOL_SOCLE_STATES_SCORING.md` §2.7).
+- **Détecteur intact** : `detectZonageChange` et le pipeline de signaux **ne lisent jamais** la
+  table de contrôle — elle est consommée **uniquement** par le **rapport de parité** (lecture
+  seule, hors flux opérationnel). La parité **mesure** le pipeline ; elle ne le **nourrit** pas.
+- **Sens de la donnée** : `ControlLot`/`ControlMark` (référence Steve) ⟂ `Lot`/`LotVersion`/
+  `ProspectMark` (pipeline radar). Le **diff** se fait par jointure `(citySlug, NO_LOT)` **au moment
+  du rapport**, sans jamais fusionner les deux tables.
 
 ### 6.3 Contraintes de la maquette
 - **Pas de codes postaux dans la fixture** : le JSON Netlify n'exporte **pas** le cache Firestore
