@@ -19,10 +19,13 @@ import { describe, expect, it } from "vitest";
 
 import {
   ALL_PV_CITIES,
+  PV_SAINT_DAMASE_2025_05_POSITIVE,
+  type PdfToText,
   type PvFetchLike,
 } from "@radar/sources";
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
+import { projectStateKey } from "../exploitation/project-state.js";
 import { runLiveScrape } from "./live-scrape.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -226,5 +229,47 @@ describe("runLiveScrape — config-only PV cities → object store", () => {
     expect(recap[0]!.status).toBe("new");
     // With one PDF per index and limit 1, exactly one CAS object is collected.
     expect(recap[0]!.casKeys).toHaveLength(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EXPLOITATION on live scrape: `exploit: true` runs PARSE + projects real
+// signals into the per-city project-state (the key the Signaux view reads).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("runLiveScrape — exploit: true (PARSE + signaux réels)", () => {
+  /** pdftotext mock: any PV PDF → the real Saint-Damase positive text (38-41). */
+  const pdfToText: PdfToText = async () => PV_SAINT_DAMASE_2025_05_POSITIVE;
+
+  it("scrape + exploite -> 1 signal projeté + project-state écrit", async () => {
+    const slugs = configOnlySlugs(1);
+    const store = new MemoryStore();
+    const fetch = fakeFetchForSlugs(slugs, "PV bytes — séance avec zonage");
+
+    const recap = await runLiveScrape(slugs, {
+      store,
+      fetch,
+      exploit: true,
+      pdfToText,
+    });
+
+    const entry = recap[0]!;
+    expect(entry.status).toBe("new");
+    // The real DesignationEvent (règlement 38-41) was detected and projected.
+    expect(entry.signals).toBe(1);
+    expect(entry.exploitError).toBeUndefined();
+    // The Signaux view reads exactly this key.
+    expect(store.objects.has(projectStateKey(entry.city))).toBe(true);
+  });
+
+  it("sans exploit: pas de signaux, pas de project-state (RECUEIL seul)", async () => {
+    const slugs = configOnlySlugs(1);
+    const store = new MemoryStore();
+    const fetch = fakeFetchForSlugs(slugs, "PV bytes — recueil seul");
+
+    const recap = await runLiveScrape(slugs, { store, fetch });
+
+    expect(recap[0]!.signals).toBeUndefined();
+    expect(store.objects.has(projectStateKey(recap[0]!.city))).toBe(false);
   });
 });
