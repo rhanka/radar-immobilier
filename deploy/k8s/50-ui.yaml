@@ -3,13 +3,17 @@
 # same-origin (no CORS) — mirrors sentropic's deploy/k8s/40-ui.yaml, where the
 # nginx baked into the ui image proxies /api -> api:8787.
 #
-# Two delivery options for the static bundle:
-#   (A) [default here] a dedicated `radar-ui` image with the SPA + this nginx
-#       conf baked in, built/pushed by CI (analogous to sentropic-ui). Until
-#       that image exists, see option B.
-#   (B) a stock nginx image with this ConfigMap mounted as the conf and the
-#       built dist/ delivered via an initContainer/volume. The ConfigMap below
-#       holds the proxy config so either option is one small change away.
+# Delivery (option A, in effect): a dedicated `radar-ui` image (ui/Dockerfile,
+# multi-stage `vite build` + unprivileged nginx) ships the SPA at
+# /usr/share/nginx/html AND a baked default.conf. The stock-nginx-only approach
+# served NO bundle (empty html root → blank page); this image fixes that.
+#
+# This ConfigMap is mounted over /etc/nginx/conf.d and WINS in-cluster, so it
+# is the authoritative proxy conf here: ops can tune it without rebuilding the
+# image. It can `proxy_pass http://radar-api:3000` directly because the
+# `radar-api` Service DNS always exists in the namespace. (The image's baked
+# default.conf resolves the upstream lazily instead, so the container also
+# boots standalone where the api may be absent — see ui/nginx/default.conf.)
 #
 # The SPA is built with `VITE_API_BASE_URL` empty so it calls same-origin
 # /api/* (Makefile default), which nginx forwards to the api Service.
@@ -95,11 +99,12 @@ spec:
       serviceAccountName: radar-app
       containers:
         - name: ui
-          # Option A target: rg.fr-par.scw.cloud/radar-immobilier/radar-ui:latest
-          # (SPA + nginx baked in, built by CI). Until that image exists this
-          # stock nginx + mounted conf serves the static bundle (option B).
-          image: nginxinc/nginx-unprivileged:1.27-alpine
-          imagePullPolicy: IfNotPresent
+          # radar-ui image (ui/Dockerfile): SPA bundle + nginx baked in, built
+          # and pushed by CI to the SCW registry. This is the image that
+          # actually serves the static SPA (the previous stock-nginx image had
+          # an empty html root and served a blank page).
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-ui:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
