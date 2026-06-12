@@ -214,6 +214,15 @@ describe("graphify v2 — node schema with `type` field", () => {
     const row = buildNodeRow(node, null);
     expect(row.type).toBe("concept");
   });
+
+  it("buildNodeRow accepts node without label (Source nodes in v2)", () => {
+    // graphify v2 Source nodes sometimes omit label entirely.
+    const node = { id: "src:abc123", type: "Source" };
+    const row = buildNodeRow(node, "kazabazua");
+    expect(row.label).toBe(""); // default from Zod schema
+    expect(row.type).toBe("Source");
+    expect(row.citySlug).toBe("kazabazua");
+  });
 });
 
 describe("graphify v2 — edge schema with `type` field", () => {

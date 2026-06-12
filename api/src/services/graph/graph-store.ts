@@ -26,7 +26,12 @@ import { QC_MUNICIPALITIES } from "@radar/sources";
 /** A single node as emitted by graphify. */
 export const graphifyNodeSchema = z.object({
   id: z.string(),
-  label: z.string(),
+  /**
+   * graphify v1 always emits `label`. graphify v2 Source nodes sometimes omit
+   * it (e.g. `{ id: "src:abc...", type: "Source" }`). We coerce null/undefined
+   * to the empty string so the DB NOT NULL constraint is satisfied.
+   */
+  label: z.string().optional().default(""),
   /**
    * graphify v1 (old) emits `file_type`; graphify v2 (SCW) emits `type`.
    * Both are accepted and mapped to the DB `type` column.
