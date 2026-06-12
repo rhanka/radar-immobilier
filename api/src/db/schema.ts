@@ -320,6 +320,21 @@ export const graphEdges = pgTable(
   }),
 );
 
+export const accountUsers = pgTable("account_users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sub: text("sub").notNull().unique(),
+  email: text("email"),
+  name: text("name"),
+  status: text("status").notNull().default("pending"),
+  isAdmin: boolean("is_admin").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvedBy: text("approved_by"),
+}, (t) => ({
+  bySub: index("account_users_sub_idx").on(t.sub),
+  byStatus: index("account_users_status_idx").on(t.status),
+}));
+
 export const schema = {
   sources,
   ingestions,
@@ -335,4 +350,6 @@ export const schema = {
   opportunityDossiers,
   graphNodes,
   graphEdges,
+  accountUsers,
 };
+
