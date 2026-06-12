@@ -7,16 +7,51 @@
  * Query params :
  *   limit   — entier > 0, défaut 200
  *   bbox    — "minX,minY,maxX,maxY" en EPSG:4326
+ *
+ * Chaque feature porte `potentialScore` (0–10) dans ses properties.
+ * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.
+ * Quand le contexte de zone n'est pas injecté, le score est calculé avec
+ * densiteLogHa=null (score base = 0 sauf bonus si zoneVersion fournie).
  */
 
 import { Hono } from "hono";
 import { lotsForCity } from "../services/geo/lots.js";
+import {
+  lotPotentialScore,
+  type LotVersionInput,
+  type ZoneVersionInput,
+} from "../services/scoring/lot-potential.js";
 
-/** Pas de dépendances injectées pour cette route (le service est autonome). */
+/**
+ * Fournisseur de contexte de zone pour le scoring.
+ * Reçoit noLot et citySlug, retourne un ZoneVersionInput ou null
+ * (null = score calculé avec toutes valeurs null).
+ *
+ * En production (sans DB live) : retourne null → score = 0 par défaut.
+ * Injecteable via deps pour les tests ou une future couche DB.
+ */
+export type ZoneVersionProvider = (
+  noLot: string,
+  citySlug: string,
+) => ZoneVersionInput | null;
+
+/** Dépendances injectées pour la route. */
 export interface GeoLotsDeps {
   /** fetchImpl injectable pour les tests (défaut = global fetch). */
   fetchImpl?: typeof fetch;
+  /**
+   * Fournisseur optionnel de ZoneVersion par lot.
+   * Si absent, les scores sont calculés sans contexte de zone (densiteLogHa=null).
+   */
+  zoneVersionProvider?: ZoneVersionProvider;
 }
+
+/** ZoneVersion neutre : toutes valeurs null/vides. */
+const NULL_ZONE_VERSION: ZoneVersionInput = {
+  densiteLogHa: null,
+  usages: [],
+  kind: "AUTRE",
+};
 
 export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
   const app = new Hono();
@@ -74,11 +109,39 @@ export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
       );
     }
 
+    // Enrichissement du score de potentiel par lot.
+    // lotInput : LotVersionInput avec seulement superficieM2 et usageCode.
+    // Ces champs ne sont pas dans le cadastre allégé (MRNF) → null pour l'instant.
+    // Le score est calculable (retourne 0 si tout null) — aucune valeur inventée.
+    const featuresWithScore = result.featureCollection.features.map((f) => {
+      const noLot = f.properties.noLot;
+      const zoneVersion: ZoneVersionInput =
+        deps.zoneVersionProvider?.(noLot, citySlug) ?? NULL_ZONE_VERSION;
+
+      const lotInput: LotVersionInput = {
+        superficieM2: null,
+        usageCode: null,
+      };
+
+      const { score } = lotPotentialScore(lotInput, zoneVersion);
+
+      return {
+        ...f,
+        properties: {
+          ...f.properties,
+          potentialScore: score,
+        },
+      };
+    });
+
     return c.json({
       ok: true,
       citySlug: result.citySlug,
       source: result.source,
-      featureCollection: result.featureCollection,
+      featureCollection: {
+        ...result.featureCollection,
+        features: featuresWithScore,
+      },
     });
   });
 

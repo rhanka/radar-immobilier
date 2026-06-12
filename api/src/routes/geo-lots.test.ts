@@ -3,7 +3,8 @@
  * fetchImpl mocké — pas d'appel réseau.
  */
 import { describe, expect, it } from "vitest";
-import { geoLotsRoute } from "./geo-lots.js";
+import { geoLotsRoute, type ZoneVersionProvider } from "./geo-lots.js";
+import type { ZoneVersionInput } from "../services/scoring/lot-potential.js";
 
 // ─── Fixture ──────────────────────────────────────────────────────────────────
 const VALLEYFIELD_FC = {
@@ -81,7 +82,7 @@ describe("GET /api/geo/:city/lots — ville connue avec source cadastre", () => 
     expect(body.featureCollection.features).toHaveLength(2);
   });
 
-  it("les features ne contiennent pas de PII (seulement noLot + citySlug)", async () => {
+  it("les features ne contiennent pas de PII (noLot + citySlug + potentialScore uniquement)", async () => {
     const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
     const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
     const body = (await res.json()) as {
@@ -90,7 +91,7 @@ describe("GET /api/geo/:city/lots — ville connue avec source cadastre", () => 
 
     for (const f of body.featureCollection.features) {
       const keys = Object.keys(f.properties).sort();
-      expect(keys).toEqual(["citySlug", "noLot"]);
+      expect(keys).toEqual(["citySlug", "noLot", "potentialScore"]);
     }
   });
 
@@ -175,5 +176,112 @@ describe("GET /api/geo/:city/lots — params invalides", () => {
     const body = (await res.json()) as { ok: boolean; error: string };
     expect(body.ok).toBe(false);
     expect(body.error).toBe("invalid-param");
+  });
+});
+
+// ─── Tests score de potentiel dans l'endpoint ─────────────────────────────────
+
+describe("GET /api/geo/:city/lots — potentialScore dans les features", () => {
+  it("sans zoneVersionProvider, potentialScore = 0 pour chaque lot (null safe)", async () => {
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { potentialScore: number } }[] };
+    };
+
+    expect(res.status).toBe(200);
+    for (const f of body.featureCollection.features) {
+      // Sans contexte de zone : densiteLogHa=null → scoreBase=0, aucun bonus → 0
+      expect(f.properties.potentialScore).toBe(0);
+    }
+  });
+
+  it("potentialScore est un number (0–10)", async () => {
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { potentialScore: unknown } }[] };
+    };
+
+    for (const f of body.featureCollection.features) {
+      expect(typeof f.properties.potentialScore).toBe("number");
+      expect(f.properties.potentialScore).toBeGreaterThanOrEqual(0);
+      expect(f.properties.potentialScore).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it("avec zoneVersionProvider H + densité 80 → potentialScore 4.0", async () => {
+    const provider: ZoneVersionProvider = (_noLot, _citySlug): ZoneVersionInput => ({
+      densiteLogHa: 80,
+      usages: [],
+      kind: "H",
+    });
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { potentialScore: number } }[] };
+    };
+
+    expect(res.status).toBe(200);
+    // scoreBase(80)=3 + bonusKind(H)=1 = 4.0
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.potentialScore).toBe(4.0);
+    }
+  });
+
+  it("avec zoneVersionProvider C + densité 250 → potentialScore 5.5", async () => {
+    const provider: ZoneVersionProvider = (_noLot, _citySlug): ZoneVersionInput => ({
+      densiteLogHa: 250,
+      usages: [],
+      kind: "C",
+    });
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { potentialScore: number } }[] };
+    };
+
+    // scoreBase(250)=5 + bonusReconvertible(C)=0.5 = 5.5
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.potentialScore).toBe(5.5);
+    }
+  });
+
+  it("provider retournant null → potentialScore 0 (zone inconnue)", async () => {
+    const provider: ZoneVersionProvider = () => null;
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { potentialScore: number } }[] };
+    };
+
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.potentialScore).toBe(0);
+    }
+  });
+
+  it("score different selon noLot (provider per-lot)", async () => {
+    const scoreMap: Record<string, number> = {
+      "4193751": 4.0,  // lot 1 : zone H + densité 80
+      "4193752": 5.5,  // lot 2 : zone C + densité 250
+    };
+    const provider: ZoneVersionProvider = (noLot): ZoneVersionInput => {
+      if (noLot === "4193751") return { densiteLogHa: 80, usages: [], kind: "H" };
+      if (noLot === "4193752") return { densiteLogHa: 250, usages: [], kind: "C" };
+      return { densiteLogHa: null, usages: [], kind: "AUTRE" };
+    };
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: {
+        features: { properties: { noLot: string; potentialScore: number } }[];
+      };
+    };
+
+    for (const f of body.featureCollection.features) {
+      if (scoreMap[f.properties.noLot] !== undefined) {
+        expect(f.properties.potentialScore).toBe(scoreMap[f.properties.noLot]);
+      }
+    }
   });
 });
