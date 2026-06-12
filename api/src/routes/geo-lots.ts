@@ -5,11 +5,11 @@
  * Sortie : { ok, citySlug, source, featureCollection } — Loi 25, sans PII.
  *
  * ## Sources
- * - mode "donnees-quebec" : Cadastre_allege MRNF (villes réelles).
- * - mode "simulation" : fixtures Netlify Steve pour les 4 villes Steve
- *   (delson, sainte-catherine, saint-constant, candiac). CS-L6.
- *   Les données simulation portent mode:"simulation" et NE polluent JAMAIS
- *   le store réel (SPEC_EVOL_SOCLE_STATES_SCORING.md §2.7).
+ * - mode "donnees-quebec" : Cadastre_allege MRNF (villes réelles scrappées).
+ * - mode "carte-steve" : données réelles de la plateforme Netlify de Steve pour
+ *   les 4 villes (delson, sainte-catherine, saint-constant, candiac). CS-L6.
+ *   Ces données portent mode:"carte-steve" et NE polluent JAMAIS le store réel
+ *   (SPEC_EVOL_SOCLE_STATES_SCORING.md §2.7).
  *
  * Query params :
  *   limit   — entier > 0, défaut 200
@@ -200,7 +200,7 @@ export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
       bbox = parts as [number, number, number, number];
     }
 
-    // ── CS-L6 : mode simulation pour les 4 villes Steve ────────────────────
+    // ── CS-L6 : données carte Steve pour les 4 villes ──────────────────────
     if (isSimulationCity(citySlug)) {
       const fc = getSimulationLotsFeatureCollection(citySlug, {
         limit,
@@ -209,8 +209,8 @@ export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
       return c.json({
         ok: true,
         citySlug,
-        source: "simulation" as const,
-        mode: "simulation" as const,
+        source: "carte-steve" as const,
+        mode: "carte-steve" as const,
         featureCollection: fc,
       });
     }
