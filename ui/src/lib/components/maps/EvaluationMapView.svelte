@@ -44,7 +44,8 @@
   import { fetchLots, type LotFeatureCollection, type LotFeature } from "$lib/maps/lots-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
-  import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
+  import { loadLiveSignals } from "$lib/signals/signals-live.js";
+  import { fetchSignalsByCity } from "$lib/signals/signals-by-city-client.js";
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
@@ -60,7 +61,7 @@
     { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains" },
   ];
 
-  // ── Données signaux (conservées pour la section grille) ───────────────────
+  // ── Données signaux (section grille — signaux réels depuis l'API) ─────────
   interface CitySignalEntry {
     slug: string;
     name: string;
@@ -68,11 +69,39 @@
     signals: SignalT[];
   }
 
-  const allCities = prioritizedCities();
-  const pilotCity = allCities.find((c) => c.slug === PILOT_CITY_SLUG);
-  const cityEntries: CitySignalEntry[] = pilotCity
-    ? [{ slug: pilotCity.slug, name: pilotCity.name, mrc: pilotCity.mrc ?? undefined, signals: demoSignalsT1 }]
-    : [];
+  let cityEntries: CitySignalEntry[] = [];
+  let signalsLoading = true;
+
+  // Chargement des signaux réels au montage (même pipeline que SignalsT1View)
+  async function loadSignalEntries(): Promise<void> {
+    try {
+      const allSignals = await loadLiveSignals({ fetchSignalsByCity, fetchSignalDetail });
+      // Grouper par ville depuis l'index des villes prioritisées
+      const allCities = prioritizedCities();
+      const bySlug = new Map<string, SignalT[]>();
+      for (const signal of allSignals) {
+        // L'id des signaux live est "evt-{citySlug}-{index}"
+        const match = signal.id.match(/^evt-([^-].+)-\d+$/);
+        if (match) {
+          const slug = match[1];
+          if (!bySlug.has(slug)) bySlug.set(slug, []);
+          bySlug.get(slug)!.push(signal);
+        }
+      }
+      const entries: CitySignalEntry[] = [];
+      for (const [slug, signals] of bySlug.entries()) {
+        const city = allCities.find((c) => c.slug === slug);
+        if (city) {
+          entries.push({ slug, name: city.name, mrc: city.mrc ?? undefined, signals });
+        }
+      }
+      cityEntries = entries;
+    } catch {
+      // En cas d'erreur, on laisse cityEntries vide (état honnête)
+    } finally {
+      signalsLoading = false;
+    }
+  }
 
   // ── State drilldown lots ───────────────────────────────────────────────────
   let selectedEvalCity: (typeof EVAL_CITIES)[0] | null = EVAL_CITIES[0] ?? null;
@@ -107,8 +136,7 @@
     return (
       selectedCity?.slug === PILOT_CITY_SLUG &&
       signal?.type === "residential-rezoning" &&
-      !!signal.zone &&
-      signal.mode !== "simulation"
+      !!signal.zone
     );
   }
 
@@ -169,6 +197,7 @@
       void loadLots(selectedEvalCity.slug);
       void loadZonage(selectedEvalCity.slug);
     }
+    void loadSignalEntries();
   });
 
   // ── Projection SVG des polygones GeoJSON ──────────────────────────────────
@@ -332,10 +361,12 @@
 
     <!-- Section signaux -->
     <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400 border-b border-slate-100">
-      Signaux · Ville pilote
+      Signaux réels · Villes suivies
     </div>
 
-    {#if cityEntries.length === 0}
+    {#if signalsLoading}
+      <div class="p-4 text-xs text-slate-400">Chargement des signaux…</div>
+    {:else if cityEntries.length === 0}
       <div class="p-4">
         <Alert
           tone="info"
@@ -406,9 +437,6 @@
                       <span class="text-xs text-slate-400">{SIGNAL_TYPE_LABEL[signal.type] ?? signal.type}</span>
                     {/if}
                   </span>
-                  {#if signal.mode === "simulation"}
-                    <Badge tone="info" class="text-xs shrink-0">Synth.</Badge>
-                  {/if}
                 </button>
               </li>
             {/each}
@@ -669,9 +697,6 @@
             {#if selectedSignal.bylaw}
               <Badge tone="neutral" class="text-xs">Règl. {selectedSignal.bylaw}</Badge>
             {/if}
-            {#if selectedSignal.mode === "simulation"}
-              <Badge tone="info" class="text-xs">Exemple synthétique</Badge>
-            {/if}
           </div>
         </div>
         <div class="mt-3 text-xs text-slate-500">
@@ -763,7 +788,7 @@
                 L'évaluation de lot est disponible pour les signaux de rezonage résidentiel
                 avec une zone identifiée (mode réel). Ce signal de type
                 <span class="font-medium">{SIGNAL_TYPE_LABEL[selectedSignal.type] ?? selectedSignal.type}</span>
-                ne répond pas à ces critères ou est un exemple synthétique sans zone résolue.
+                ne répond pas à ces critères (rezonage résidentiel avec zone identifiée requis).
               </p>
             </div>
           </div>
