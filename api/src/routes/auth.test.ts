@@ -352,7 +352,7 @@ function makeEnrollmentDb(
         where: () => Promise.resolve(),
       }),
     }),
-  } as unknown as import("../db/client.js").Database;
+  };
 }
 
 describe("enrollment — OIDC callback with DB", () => {
@@ -364,7 +364,7 @@ describe("enrollment — OIDC callback with DB", () => {
     const { idToken, getKey } = await makeIdToken({
       nonce: "NONCE",
       sub: opts.sub,
-      email: opts.email,
+      ...(opts.email !== undefined ? { email: opts.email } : {}),
     });
     const fetchImpl: FetchLike = async (url) => {
       if (url === DISCOVERY.token_endpoint) {
@@ -377,14 +377,15 @@ describe("enrollment — OIDC callback with DB", () => {
       }
       throw new Error(`unexpected fetch ${url}`);
     };
-    const db = makeEnrollmentDb(opts.existingUsers ?? []);
+    const dbMock = makeEnrollmentDb(opts.existingUsers ?? []);
+    const db = dbMock as unknown as import("../db/client.js").Database;
     const app = authRoute(AUTH_ON, { discovery: DISCOVERY, fetchImpl, getKey, db });
     const flow = { state: "STATE", nonce: "NONCE", codeVerifier: "VERIFIER" };
     const res = await app.request(
       "/api/v1/auth/oauth/callback?code=CODE&state=STATE",
       { headers: { cookie: flowCookie(flow) } },
     );
-    return { res, db };
+    return { res, db, dbMock };
   }
 
   it("new non-admin user is redirected to /pending", async () => {
@@ -394,14 +395,14 @@ describe("enrollment — OIDC callback with DB", () => {
   });
 
   it("admin@sent-tech.ca is approved and redirected to app", async () => {
-    const { res, db } = await makeCallback({
+    const { res, dbMock } = await makeCallback({
       sub: "admin-sub",
       email: "admin@sent-tech.ca",
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
     // The inserted record should be approved
-    const inserted = (db as unknown as ReturnType<typeof makeEnrollmentDb>)._inserted;
+    const inserted = dbMock._inserted;
     expect(inserted.length).toBe(1);
     expect(inserted[0]!.status).toBe("approved");
     expect(inserted[0]!.isAdmin).toBe(true);

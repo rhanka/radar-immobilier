@@ -180,8 +180,8 @@ export function authRoute(
         const isAdmin = user.email === "admin@sent-tech.ca";
         await options.db.insert(accountUsers).values({
           sub: user.sub,
-          email: user.email,
-          name: user.name,
+          email: user.email ?? null,
+          name: user.name ?? null,
           status: isAdmin ? "approved" : "pending",
           isAdmin,
         });

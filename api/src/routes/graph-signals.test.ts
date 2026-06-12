@@ -142,7 +142,7 @@ describe("GET /api/graph-signals/:city", () => {
       sourceRef: "s3://bucket/proc-verbal.pdf",
       props: { reglement_number: "1234-56", zone_ref: "H-431" },
     };
-    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([nodeWithProps] as ReturnType<typeof makeNode>[]);
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([nodeWithProps] as unknown as ReturnType<typeof makeNode>[]);
 
     const app = graphSignalsRoute({ db: mockDb });
     const res = await app.request("/api/graph-signals/drummondville");

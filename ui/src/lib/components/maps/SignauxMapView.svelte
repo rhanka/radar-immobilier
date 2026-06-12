@@ -13,13 +13,13 @@
    * faudra intégrer le fichier `lcsd000b21a_e.zip` (StatCan 2021) ou
    * l'API WFS de Données Québec.
    *
-   * Source des données : GET /api/signals/by-city — compte les DesignationEvent
-   * canonicaux de l'état projet ontologie, filtre 6 mois glissants sur
-   * `generatedAt` (côté serveur).
+   * Source des données : GET /api/graph-signals/by-city — compte les nœuds
+   * Signal + DesignationEvent par ville depuis graph_nodes (graphify pipeline,
+   * ~197 villes).
    *
-   * Anti-invention : seules les villes avec un état projet récent (< 6 mois)
-   * ont un compteur > 0. Toutes les autres villes affichent 0. Aucun signal
-   * n'est inventé. Couleurs dérivées des comptes réels de l'API.
+   * Anti-invention : seules les villes avec au moins un nœud Signal ont un
+   * compteur > 0. Toutes les autres villes affichent 0. Aucun signal n'est
+   * inventé. Couleurs dérivées des comptes réels de l'API.
    */
   import { onMount, onDestroy } from "svelte";
   import { Map as MapIcon, Radio, RefreshCw, AlertTriangle } from "@lucide/svelte";
@@ -30,14 +30,14 @@
     signalCountTier,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
+  import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
   import {
-    fetchSignalsByCity,
-    type SignalCityItem,
-  } from "$lib/signals/signals-by-city-client.js";
+    fetchGraphSignalsByCity,
+  } from "$lib/signals/graph-signals-by-city-client.js";
   import {
-    fetchSignalDetail,
-    type DesignationEventDetail,
-  } from "$lib/signals/signal-detail-client.js";
+    fetchGraphSignalDetail,
+    type GraphSignalNode,
+  } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
@@ -48,7 +48,7 @@
   // ── Détail ville sélectionnée ──────────────────────────────────────────────
   let detailLoading = false;
   let detailError: string | null = null;
-  let detailEvents: DesignationEventDetail[] = [];
+  let detailNodes: GraphSignalNode[] = [];
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(apiItems);
@@ -248,17 +248,17 @@
   async function selectCity(entry: CityMapEntry): Promise<void> {
     if (selectedCity?.municipality.slug === entry.municipality.slug) {
       selectedCity = null;
-      detailEvents = [];
+      detailNodes = [];
       detailError = null;
       return;
     }
     selectedCity = entry;
-    detailEvents = [];
+    detailNodes = [];
     detailError = null;
     detailLoading = true;
     try {
-      const res = await fetchSignalDetail(entry.municipality.slug);
-      detailEvents = res.events;
+      const res = await fetchGraphSignalDetail(entry.municipality.slug);
+      detailNodes = res.nodes;
     } catch (e) {
       detailError = e instanceof Error ? e.message : "Erreur chargement détail";
     } finally {
@@ -274,8 +274,14 @@
     loading = true;
     loadError = null;
     try {
-      const res = await fetchSignalsByCity();
-      apiItems = res.items;
+      const res = await fetchGraphSignalsByCity();
+      // Adapter le format graph (signalCount) vers le format SignalCityItem (designationEventCount)
+      // pour réutiliser buildCityMapEntries sans modifier maps-data.ts.
+      apiItems = res.cities.map((c) => ({
+        citySlug: c.citySlug,
+        designationEventCount: c.signalCount,
+        generatedAt: null,
+      }));
     } catch (e) {
       loadError = e instanceof Error ? e.message : "Erreur de chargement";
       apiItems = [];
@@ -299,7 +305,7 @@
         Signaux : Villes
       </h1>
       <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-400">6 mois</span>
+        <span class="text-xs text-slate-400">graph_nodes</span>
         <button
           type="button"
           aria-label="Actualiser"
@@ -384,13 +390,13 @@
 
     <!-- Légende choroplèthe -->
     <div class="border-t border-slate-100 p-4">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — opportunités / ville</p>
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
       <ul class="space-y-1">
         {#each [
-          { color: "#ef4444", label: "6+ opportunités" },
-          { color: "#f97316", label: "3–5 opportunités" },
-          { color: "#fbbf24", label: "1–2 opportunités" },
-          { color: "#cbd5e1", label: "Aucune opportunité (0)" },
+          { color: "#ef4444", label: "6+ signaux" },
+          { color: "#f97316", label: "3–5 signaux" },
+          { color: "#fbbf24", label: "1–2 signaux" },
+          { color: "#cbd5e1", label: "Aucun signal (0)" },
         ] as item (item.label)}
           <li class="flex items-center gap-2 text-xs text-slate-600">
             <span class="h-3 w-3 rounded-full" style="background-color: {item.color};"></span>
@@ -425,7 +431,7 @@
               <p class="text-xs text-slate-400 mt-0.5">MRC : {selectedCity.municipality.mrc}</p>
             {/if}
             <p class="text-xs text-slate-500 mt-0.5">
-              {selectedCity.signalCount6m} opportunité{selectedCity.signalCount6m !== 1 ? "s" : ""} (6 mois)
+              {selectedCity.signalCount6m} signal{selectedCity.signalCount6m !== 1 ? "s" : ""} (graph_nodes)
             </p>
           </div>
           <button
@@ -433,7 +439,7 @@
             class="text-xs text-slate-400 hover:text-slate-600"
             on:click={() => {
               selectedCity = null;
-              detailEvents = [];
+              detailNodes = [];
               detailError = null;
             }}
             aria-label="Fermer le détail"
@@ -443,7 +449,7 @@
         {#if detailLoading}
           <div class="flex items-center gap-2 py-3 text-xs text-slate-400">
             <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
-            Chargement des changements de zonage…
+            Chargement des signaux…
           </div>
         {:else if detailError}
           <Alert
@@ -451,39 +457,39 @@
             title="Erreur de chargement du détail"
             message={detailError}
           />
-        {:else if detailEvents.length === 0}
+        {:else if detailNodes.length === 0}
           <Alert
             tone="info"
-            title="Aucun changement de zonage disponible pour cette ville."
-            message="Les données sont dérivées des DesignationEvent de l'état projet ontologie. Cette ville n'a pas encore de données recueillies ou son état projet date de plus de 6 mois."
+            title="Aucun signal disponible pour cette ville."
+            message="Les données sont dérivées des nœuds Signal/DesignationEvent de graph_nodes. Cette ville n'a pas encore de nœuds indexés."
           />
         {:else}
-          <ul class="space-y-3" aria-label="Changements de zonage">
-            {#each detailEvents as event, i (i)}
+          <ul class="space-y-3" aria-label="Signaux de changements de zonage">
+            {#each detailNodes as node, i (node.id)}
               <li class="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3">
                 <p class="text-sm font-semibold text-teal-800 leading-snug">
-                  {event.label}
+                  {node.label}
                 </p>
                 <div class="mt-2 flex flex-wrap gap-1.5">
-                  {#each event.reglementNumbers as num (num)}
+                  {#if node.props?.reglement_number}
                     <Badge tone="info" class="text-xs font-mono">
-                      Règl. {num}
+                      Règl. {node.props.reglement_number}
                     </Badge>
-                  {/each}
-                  {#each event.zoneRefs as zone (zone)}
+                  {/if}
+                  {#if node.props?.zone_ref}
                     <Badge tone="warning" class="text-xs font-mono">
-                      Zone {zone}
+                      Zone {node.props.zone_ref}
                     </Badge>
-                  {/each}
+                  {/if}
                 </div>
-                {#if event.sourceRef}
-                  <p class="mt-1.5 truncate text-xs text-teal-500" title={event.sourceRef}>
-                    Source : <span class="font-mono">{event.sourceRef}</span>
+                {#if node.sourceRef}
+                  <p class="mt-1.5 truncate text-xs text-teal-500" title={node.sourceRef}>
+                    Source : <span class="font-mono">{node.sourceRef}</span>
                   </p>
                 {/if}
-                {#if event.dateObserved}
+                {#if node.createdAt}
                   <p class="mt-0.5 text-xs text-slate-400">
-                    Observé : {new Date(event.dateObserved).toLocaleDateString("fr-CA")}
+                    Créé : {new Date(node.createdAt).toLocaleDateString("fr-CA")}
                   </p>
                 {/if}
               </li>
@@ -494,7 +500,7 @@
     {:else}
       <div class="flex items-center justify-center border-t border-slate-100 bg-white p-4 text-center" style="min-height: 80px;">
         <p class="text-xs text-slate-400">
-          Cliquez sur un disque ou une ville pour voir ses changements de zonage.
+          Cliquez sur un disque ou une ville pour voir ses signaux de changements de zonage.
         </p>
       </div>
     {/if}
