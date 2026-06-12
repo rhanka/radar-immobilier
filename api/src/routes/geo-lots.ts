@@ -1,5 +1,5 @@
 /**
- * Route GET /api/geo/:city/lots — WP B slice-1.
+ * Route GET /api/geo/:city/lots — WP B slice-1 (enrichi enrich-zone).
  *
  * Retourne les lots cadastraux (Cadastre_allege MRNF) pour une ville.
  * Sortie : { ok, citySlug, source, featureCollection } — Loi 25, sans PII.
@@ -8,10 +8,25 @@
  *   limit   — entier > 0, défaut 200
  *   bbox    — "minX,minY,maxX,maxY" en EPSG:4326
  *
- * Chaque feature porte `potentialScore` (0–10) dans ses properties.
- * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.
- * Quand le contexte de zone n'est pas injecté, le score est calculé avec
- * densiteLogHa=null (score base = 0 sauf bonus si zoneVersion fournie).
+ * ## Champs enrichis par lot (feat/geo-lots-enrich-zone)
+ *
+ * Chaque feature.properties expose désormais :
+ *   - `noLot`         — identifiant cadastral public (NO_LOT)
+ *   - `citySlug`      — slug de la ville
+ *   - `superficieM2`  — superficie calculée depuis la géométrie GeoJSON (m², arrondi
+ *                       à 1 décimale) ; null si la géométrie est absente ou non-polygone.
+ *                       Source : cadastre allégé MRNF (polygone). Les superficies du rôle
+ *                       (RL0302A) ne sont pas disponibles dans ce flux.
+ *   - `usageCode`     — code d'usage (RU/CH/BO/AV/TE). null : non disponible dans ce
+ *                       flux (source = rôle MAMH XML, non branché ici). Anti-invention.
+ *   - `zone`          — { kind, usages, densiteLogHa } si le ZoneVersionProvider résout
+ *                       le lot vers une zone ; null sinon (honnête).
+ *   - `potentialScore` — score 0–10 dérivé de zone ∩ usageCode ∩ inTod.
+ *                        Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.
+ *                        0 quand zone absente (anti-invention).
+ *
+ * ## Anti-PII
+ * Aucun champ propriétaire ni donnée personnelle dans la sortie.
  */
 
 import { Hono } from "hono";
@@ -20,15 +35,81 @@ import {
   lotPotentialScore,
   type LotVersionInput,
   type ZoneVersionInput,
+  type ZoneKind,
 } from "../services/scoring/lot-potential.js";
+
+// ─── Calcul superficie depuis géométrie GeoJSON ───────────────────────────────
+
+/**
+ * Calcule l'aire d'un anneau de polygone (coordonnées [lon, lat] en degrés)
+ * via la formule de Shoelace dans l'espace géographique projeté en mètres.
+ *
+ * Approximation locale : Δlon * cos(lat_moy) pour avoir des mètres est suffisante
+ * pour des lots < 1 km². Erreur < 0.1 % sur le territoire QC (lat ~45°).
+ * Anti-invention : retourne null si l'anneau a moins de 3 points.
+ */
+function ringAreaM2(
+  ring: number[][],
+  latMidDeg: number,
+): number | null {
+  if (ring.length < 3) return null;
+
+  const DEG_TO_RAD = Math.PI / 180;
+  // Mètres par degré de latitude (constant à ~111 320 m/°)
+  const metersPerDegLat = 111_320;
+  // Mètres par degré de longitude (varie avec lat)
+  const metersPerDegLon =
+    111_320 * Math.cos(latMidDeg * DEG_TO_RAD);
+
+  // Shoelace dans l'espace local (x = lon * metersPerDegLon, y = lat * metersPerDegLat)
+  let area = 0;
+  const n = ring.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = ring[i]![0]! * metersPerDegLon;
+    const yi = ring[i]![1]! * metersPerDegLat;
+    const xj = ring[j]![0]! * metersPerDegLon;
+    const yj = ring[j]![1]! * metersPerDegLat;
+    area += (xj + xi) * (yj - yi);
+  }
+  return Math.abs(area) / 2;
+}
+
+/**
+ * Estime la superficie en m² depuis une géométrie GeoJSON Polygon.
+ * - Prend l'anneau extérieur (index 0) uniquement (anti-invention : ne soustrait pas
+ *   les trous, ce qui est conservateur).
+ * - Retourne null si la géométrie est null, non-Polygon, ou invalide.
+ */
+function superficieFromGeometry(
+  geom: { type: string; coordinates: unknown } | null,
+): number | null {
+  if (!geom) return null;
+  if (geom.type !== "Polygon") return null;
+
+  const coords = geom.coordinates as number[][][];
+  const outerRing = coords[0];
+  if (!outerRing || outerRing.length < 3) return null;
+
+  // Latitude médiane pour la projection
+  const lats = outerRing.map((pt) => pt[1]!);
+  const latMid = (Math.min(...lats) + Math.max(...lats)) / 2;
+
+  const area = ringAreaM2(outerRing, latMid);
+  if (area === null) return null;
+
+  // Arrondi à 1 décimale (précision suffisante pour la fiche lot)
+  return Math.round(area * 10) / 10;
+}
+
+// ─── Types exportés ──────────────────────────────────────────────────────────
 
 /**
  * Fournisseur de contexte de zone pour le scoring.
  * Reçoit noLot et citySlug, retourne un ZoneVersionInput ou null
- * (null = score calculé avec toutes valeurs null).
+ * (null = zone non résolue → score 0).
  *
- * En production (sans DB live) : retourne null → score = 0 par défaut.
- * Injecteable via deps pour les tests ou une future couche DB.
+ * En production sans `lot_zone_resolution` : retourne null → score 0 honnête.
+ * Injectable via deps pour les tests ou la couche DB (`makeDbZoneVersionProvider`).
  */
 export type ZoneVersionProvider = (
   noLot: string,
@@ -41,17 +122,38 @@ export interface GeoLotsDeps {
   fetchImpl?: typeof fetch;
   /**
    * Fournisseur optionnel de ZoneVersion par lot.
-   * Si absent, les scores sont calculés sans contexte de zone (densiteLogHa=null).
+   * Si absent ou si le provider retourne null : zone=null, potentialScore=0.
    */
   zoneVersionProvider?: ZoneVersionProvider;
 }
 
-/** ZoneVersion neutre : toutes valeurs null/vides. */
+// ─── Helpers internes ────────────────────────────────────────────────────────
+
+/** ZoneVersion neutre : toutes valeurs null/vides (pas de zone résolue). */
 const NULL_ZONE_VERSION: ZoneVersionInput = {
   densiteLogHa: null,
   usages: [],
   kind: "AUTRE",
 };
+
+/**
+ * Sérialise un ZoneVersionInput en objet `zone` exposé dans les properties.
+ * null si le ZoneVersionInput est la version nulle.
+ */
+function serializeZone(
+  zv: ZoneVersionInput | null,
+): { kind: ZoneKind; usages: string[]; densiteLogHa: number | null } | null {
+  if (!zv) return null;
+  // Si le provider a retourné null, on ne fabrique rien
+  // Toujours exposé si le provider a fourni une vraie valeur
+  return {
+    kind: zv.kind,
+    usages: zv.usages,
+    densiteLogHa: zv.densiteLogHa,
+  };
+}
+
+// ─── Route ───────────────────────────────────────────────────────────────────
 
 export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
   const app = new Hono();
@@ -109,26 +211,44 @@ export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
       );
     }
 
-    // Enrichissement du score de potentiel par lot.
-    // lotInput : LotVersionInput avec seulement superficieM2 et usageCode.
-    // Ces champs ne sont pas dans le cadastre allégé (MRNF) → null pour l'instant.
-    // Le score est calculable (retourne 0 si tout null) — aucune valeur inventée.
+    // ── Enrichissement par lot ─────────────────────────────────────────────
     const featuresWithScore = result.featureCollection.features.map((f) => {
       const noLot = f.properties.noLot;
-      const zoneVersion: ZoneVersionInput =
-        deps.zoneVersionProvider?.(noLot, citySlug) ?? NULL_ZONE_VERSION;
 
-      const lotInput: LotVersionInput = {
-        superficieM2: null,
-        usageCode: null,
-      };
+      // 1. Superficie depuis la géométrie (Shoelace, approximation locale <0.1 %)
+      //    Source : cadastre allégé MRNF (polygone GeoJSON).
+      //    Le rôle MAMH (RL0302A) n'est pas branché dans ce flux → anti-invention.
+      const superficieM2 = superficieFromGeometry(
+        f.geometry as { type: string; coordinates: unknown } | null,
+      );
 
+      // 2. usageCode : non disponible dans le cadastre allégé.
+      //    Source = rôle XML MAMH (RL0101Ex), non branché ici.
+      //    Anti-invention : null honnête.
+      const usageCode: null = null;
+
+      // 3. ZoneVersion via le provider injecté
+      //    null si pas de provider ou si zone non résolue → score 0 honnête.
+      const resolvedZone = deps.zoneVersionProvider
+        ? deps.zoneVersionProvider(noLot, citySlug)
+        : null;
+
+      const zoneVersion: ZoneVersionInput = resolvedZone ?? NULL_ZONE_VERSION;
+
+      // 4. Score de potentiel
+      const lotInput: LotVersionInput = { superficieM2, usageCode };
       const { score } = lotPotentialScore(lotInput, zoneVersion);
+
+      // 5. Champ `zone` : null si pas de zone résolue (anti-invention)
+      const zone = serializeZone(resolvedZone);
 
       return {
         ...f,
         properties: {
           ...f.properties,
+          superficieM2,
+          usageCode,
+          zone,
           potentialScore: score,
         },
       };
