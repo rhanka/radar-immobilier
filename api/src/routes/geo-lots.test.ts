@@ -157,11 +157,11 @@ describe("GET /api/geo/:city/lots — upstream en erreur", () => {
   });
 });
 
-// ─── Tests mode simulation CS-L6 ─────────────────────────────────────────────
+// ─── Tests carte Steve CS-L6 ─────────────────────────────────────────────────
 
-describe("GET /api/geo/:city/lots — mode simulation (4 villes Steve)", () => {
-  it("delson : retourne 200 + source:'simulation' + mode:'simulation'", async () => {
-    // Pas de fetchImpl : la route simulation ne fait pas de requête réseau
+describe("GET /api/geo/:city/lots — carte Steve (4 villes)", () => {
+  it("delson : retourne 200 + source:'carte-steve' + mode:'carte-steve'", async () => {
+    // Pas de fetchImpl : la route carte-steve ne fait pas de requête réseau
     const app = geoLotsRoute();
     const res = await app.request("/api/geo/delson/lots?limit=10");
 
@@ -176,8 +176,8 @@ describe("GET /api/geo/:city/lots — mode simulation (4 villes Steve)", () => {
 
     expect(body.ok).toBe(true);
     expect(body.citySlug).toBe("delson");
-    expect(body.source).toBe("simulation");
-    expect(body.mode).toBe("simulation");
+    expect(body.source).toBe("carte-steve");
+    expect(body.mode).toBe("carte-steve");
     expect(body.featureCollection.type).toBe("FeatureCollection");
     expect(body.featureCollection.features).toHaveLength(10);
   });
@@ -197,34 +197,34 @@ describe("GET /api/geo/:city/lots — mode simulation (4 villes Steve)", () => {
     expect(scoredLots.length).toBeGreaterThan(0);
   });
 
-  it("sainte-catherine : retourne 200 avec lots simulation", async () => {
+  it("sainte-catherine : retourne 200 avec lots carte-steve", async () => {
     const app = geoLotsRoute();
     const res = await app.request("/api/geo/sainte-catherine/lots?limit=5");
     expect(res.status).toBe(200);
     const body = (await res.json()) as { ok: boolean; source: string };
     expect(body.ok).toBe(true);
-    expect(body.source).toBe("simulation");
+    expect(body.source).toBe("carte-steve");
   });
 
-  it("saint-constant : retourne 200 avec lots simulation", async () => {
+  it("saint-constant : retourne 200 avec lots carte-steve", async () => {
     const app = geoLotsRoute();
     const res = await app.request("/api/geo/saint-constant/lots?limit=5");
     expect(res.status).toBe(200);
     const body = (await res.json()) as { ok: boolean; source: string };
     expect(body.ok).toBe(true);
-    expect(body.source).toBe("simulation");
+    expect(body.source).toBe("carte-steve");
   });
 
-  it("candiac : retourne 200 avec lots simulation (score partiel : pas de zones)", async () => {
+  it("candiac : retourne 200 avec lots carte-steve (score partiel : pas de zones)", async () => {
     const app = geoLotsRoute();
     const res = await app.request("/api/geo/candiac/lots?limit=5");
     expect(res.status).toBe(200);
     const body = (await res.json()) as { ok: boolean; source: string };
     expect(body.ok).toBe(true);
-    expect(body.source).toBe("simulation");
+    expect(body.source).toBe("carte-steve");
   });
 
-  it("les lots simulation ont mode:'simulation' dans properties", async () => {
+  it("les lots carte-steve ont mode:'carte-steve' dans properties", async () => {
     const app = geoLotsRoute();
     const res = await app.request("/api/geo/delson/lots?limit=5");
     const body = (await res.json()) as {
@@ -233,7 +233,7 @@ describe("GET /api/geo/:city/lots — mode simulation (4 villes Steve)", () => {
       };
     };
     for (const f of body.featureCollection.features) {
-      expect(f.properties.mode).toBe("simulation");
+      expect(f.properties.mode).toBe("carte-steve");
     }
   });
 });
