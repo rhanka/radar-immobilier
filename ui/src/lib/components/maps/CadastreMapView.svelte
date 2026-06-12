@@ -215,8 +215,8 @@
     <span class="text-sm font-semibold text-radar-ink">
       {resolved?.name ?? citySlug}
     </span>
-    {#if resolved?.mode === "simulation"}
-      <Badge tone="info" class="text-xs">Exemple (simulation)</Badge>
+    {#if resolved?.mode === "carte-steve" || resolved?.mode === "simulation"}
+      <Badge tone="info" class="text-xs">Données carte Steve</Badge>
     {/if}
     {#if resolved}
       <span class="ml-auto flex flex-wrap items-center gap-1.5" data-testid="city-stats">
