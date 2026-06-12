@@ -20,6 +20,12 @@
  *   tod, multifamilial_4plus, geom.
  * Les zones portent : zone (code), nom, geom.
  *
+ * ## Scoring canonique (CS-L6 consolidé)
+ * Le score de potentiel par lot utilise le scorer CANONIQUE [0-10]
+ * (api/src/services/scoring/lot-potential.ts, PR #165).
+ * Mapping SimulationZoneKind → ZoneKind canonique via canonicalKindFromSimKind().
+ * Entrées : { densiteLogHa, kind (canonique), usages } + { superficieM2, usageCode:null } + inTod.
+ *
  * ## Couverture par ville
  *   - delson         : 500 lots / 3213, 101 zones, 4 TOD  — complet
  *   - sainte-catherine: 500 lots / 5615, 193 zones dessinées, 0 TOD
@@ -34,8 +40,13 @@ import {
   zoneKindFromCode,
   densiteLogHaFromKind,
   usagesFromKind,
+  canonicalKindFromSimKind,
 } from "./zone-kind.js";
-import { lotPotentialScore } from "./lot-potential.js";
+import {
+  lotPotentialScore,
+  type ZoneVersionInput,
+  type LotVersionInput,
+} from "../../scoring/lot-potential.js";
 import type {
   SimulationLotProperties,
   SimulationZone,
@@ -175,9 +186,12 @@ export function getSimulationZones(citySlug: SimulationCitySlug): SimulationZone
  * Retourne les lots enrichis de la ville en mode simulation.
  *
  * Chaque lot est mappé depuis le JSON Steve vers SimulationLotProperties,
- * et reçoit un potentialScore calculé par lotPotentialScore().
+ * et reçoit un potentialScore calculé par le scorer CANONIQUE lotPotentialScore()
+ * (échelle 0-10, PR #165). Le mapping SimulationZoneKind → ZoneKind canonique
+ * est effectué via canonicalKindFromSimKind().
  *
  * Les lots is_rue sont inclus mais marqués (potentialScore = 0).
+ * Candiac (0 zones) → kind="autre" → densiteLogHa=null → scoreBase=0 → score bas/nul.
  */
 export function getSimulationLots(
   citySlug: SimulationCitySlug,
@@ -195,7 +209,35 @@ export function getSimulationLots(
     const tod = Boolean(p["tod"] ?? false);
     const isRue = Boolean(p["is_rue"] ?? false);
 
-    const { score, detail } = lotPotentialScore(zone, superficieM2, tod, isRue);
+    // Calcul du score canonique 0-10
+    // 1. Dériver le SimulationZoneKind depuis le code zone Steve
+    const simKind = zoneKindFromCode(zone);
+    const densiteLogHa = densiteLogHaFromKind(simKind);
+    const canonicalKind = canonicalKindFromSimKind(simKind);
+    const usages = usagesFromKind(simKind);
+
+    // 2. Construire ZoneVersionInput canonique
+    const zoneVersion: ZoneVersionInput = {
+      densiteLogHa: densiteLogHa > 0 ? densiteLogHa : null,
+      kind: canonicalKind,
+      usages,
+    };
+
+    // 3. Construire LotVersionInput canonique
+    //    usageCode : non disponible dans les fixtures Steve → null (anti-invention)
+    const lotInput: LotVersionInput = {
+      superficieM2: superficieM2 > 0 ? superficieM2 : null,
+      usageCode: null,
+    };
+
+    // 4. Appeler le scorer canonique [0-10]
+    //    is_rue → score = 0 (on ne filtre pas via le scorer mais on force score=0)
+    const { score: canonicalScore, detail } = lotPotentialScore(
+      lotInput,
+      zoneVersion,
+      { inTod: tod },
+    );
+    const potentialScore = isRue ? 0 : canonicalScore;
 
     const properties: SimulationLotProperties = {
       noLot,
@@ -218,8 +260,19 @@ export function getSimulationLots(
       isRue,
       tod,
       multifamilial4plus: Boolean(p["multifamilial_4plus"] ?? false),
-      potentialScore: score,
-      scoreDetail: detail,
+      potentialScore,
+      scoreDetail: {
+        scoreBase: detail.scoreBase,
+        bonusKind: detail.bonusKind,
+        bonusTod: detail.bonusTod,
+        malusUsage: detail.malusUsage,
+        bonusReconvertible: detail.bonusReconvertible,
+        filteredOut: detail.filteredOut,
+        ...(detail.filteredReason !== undefined ? { filteredReason: detail.filteredReason } : {}),
+        zoneKind: simKind,
+        inTod: tod,
+        isRue,
+      },
     };
 
     // Géométrie : GeoJSON WGS84 (Polygon/MultiPolygon)
@@ -265,7 +318,7 @@ export function getSimulationCityFixture(
  *
  * Compatible avec l'endpoint /api/geo/:city/lots enrichi (route geo-lots.ts).
  * Chaque feature.properties est un SimulationLotProperties complet
- * (zone, score, rôle, etc.) — plus riche que le mode "donnees-quebec"
+ * (zone, score 0-10, rôle, etc.) — plus riche que le mode "donnees-quebec"
  * qui ne retourne que noLot + citySlug.
  */
 export function getSimulationLotsFeatureCollection(
@@ -332,4 +385,3 @@ function extractFirstCoordinate(
   }
   return null;
 }
-

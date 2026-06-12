@@ -21,6 +21,7 @@
  */
 
 import type { SimulationZoneKind } from "./types.js";
+import type { ZoneKind } from "../../scoring/lot-potential.js";
 
 /** Regex par préfixe → kind. Ordre : plus spécifique d'abord. */
 const ZONE_PREFIX_RULES: Array<{ re: RegExp; kind: SimulationZoneKind }> = [
@@ -87,4 +88,35 @@ const USAGES_BY_KIND: Record<SimulationZoneKind, string[]> = {
 /** Retourne les usages permis pour un kind. */
 export function usagesFromKind(kind: SimulationZoneKind): string[] {
   return USAGES_BY_KIND[kind];
+}
+
+/**
+ * Convertit un SimulationZoneKind (dérivé du préfixe Steve) vers
+ * un ZoneKind canonique (SPEC_DESIGN_DATA_MODEL §1.1).
+ *
+ * Mapping :
+ *   habitation  → H
+ *   mixte       → MIXTE
+ *   commercial  → C
+ *   industriel  → I
+ *   public      → P
+ *   conservation→ CONS
+ *   autre       → AUTRE
+ */
+const CANONICAL_KIND_MAP: Record<SimulationZoneKind, ZoneKind> = {
+  habitation:   "H",
+  mixte:        "MIXTE",
+  commercial:   "C",
+  industriel:   "I",
+  public:       "P",
+  conservation: "CONS",
+  autre:        "AUTRE",
+};
+
+/**
+ * Retourne le ZoneKind canonique pour un SimulationZoneKind.
+ * Utilisé pour brancher la simulation sur le scorer canonique 0-10.
+ */
+export function canonicalKindFromSimKind(kind: SimulationZoneKind): ZoneKind {
+  return CANONICAL_KIND_MAP[kind];
 }

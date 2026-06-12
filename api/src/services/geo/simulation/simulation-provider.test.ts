@@ -5,10 +5,11 @@
  * 1. Les 4 villes retournent des lots (>200 lots chacune)
  * 2. Les zones sont disponibles pour Delson, Sainte-Catherine, Saint-Constant
  * 3. Candiac retourne 0 zones (score partiel attendu)
- * 4. potentialScore est non-nul sur des lots avec zone + superficie ok
- * 5. Exemple chiffré : Delson, lot avec zone H-104, tod=true, 200 m²
+ * 4. potentialScore est non-nul sur des lots avec zone + superficie ok (échelle 0-10)
+ * 5. Exemple chiffré : Delson, lot zone H-322, tod=true, superficie=200.86m² → 0-10
  * 6. mode:"simulation" présent sur tous les lots
  * 7. Aucun lot ne contient de PII (pas de nom de propriétaire)
+ * 8. Cohérence scorer canonique : lotPotentialScore(H, 20 log/ha, tod) → score 0-10
  */
 
 import { describe, expect, it } from "vitest";
@@ -20,8 +21,12 @@ import {
   isSimulationCity,
   SIMULATION_CITIES,
 } from "./simulation-provider.js";
-import { lotPotentialScore } from "./lot-potential.js";
-import { zoneKindFromCode, densiteLogHaFromKind } from "./zone-kind.js";
+import {
+  lotPotentialScore,
+  type ZoneVersionInput,
+  type LotVersionInput,
+} from "../../scoring/lot-potential.js";
+import { zoneKindFromCode, densiteLogHaFromKind, canonicalKindFromSimKind } from "./zone-kind.js";
 
 // ─── Tests zone-kind ─────────────────────────────────────────────────────────
 
@@ -67,68 +72,109 @@ describe("densiteLogHaFromKind", () => {
   });
 });
 
-// ─── Tests lotPotentialScore ──────────────────────────────────────────────────
-
-describe("lotPotentialScore", () => {
-  it("zone H-104 + tod=true + superficie=1000m² → score > 0.5", () => {
-    const { score, detail } = lotPotentialScore("H-104", 1000, true, false);
-    // H-104 → habitation → densiteLogHa=20 → densiteScore=0.5
-    // tod=true → todScore=1.0
-    // superficie=1000 → (1000-300)/(2000-300)=0.41 → superficieScore=0.41
-    // score = 0.5*0.5 + 1.0*0.3 + 0.41*0.2 = 0.25+0.30+0.082 = 0.632
-    expect(score).toBeGreaterThan(0.5);
-    expect(detail.hasDensiteLogHa).toBe(true);
-    expect(detail.inTod).toBe(true);
-    expect(detail.eligible).toBe(true);
-    expect(detail.zoneKind).toBe("habitation");
+describe("canonicalKindFromSimKind", () => {
+  it("habitation → H", () => {
+    expect(canonicalKindFromSimKind("habitation")).toBe("H");
   });
-
-  it("zone MS-322 (mixte) + tod=false + superficie=500m² → score > 0.2", () => {
-    const { score } = lotPotentialScore("MS-322", 500, false, false);
-    // MS → mixte → densiteLogHa=40 → densiteScore=1.0
-    // tod=false → todScore=0
-    // superficie=(500-300)/(2000-300)=0.118 → superficieScore=0.118
-    // score = 1.0*0.5 + 0*0.3 + 0.118*0.2 = 0.5+0+0.024 = 0.524
-    expect(score).toBeGreaterThan(0.2);
+  it("mixte → MIXTE", () => {
+    expect(canonicalKindFromSimKind("mixte")).toBe("MIXTE");
   });
+  it("commercial → C", () => {
+    expect(canonicalKindFromSimKind("commercial")).toBe("C");
+  });
+  it("industriel → I", () => {
+    expect(canonicalKindFromSimKind("industriel")).toBe("I");
+  });
+  it("public → P", () => {
+    expect(canonicalKindFromSimKind("public")).toBe("P");
+  });
+  it("conservation → CONS", () => {
+    expect(canonicalKindFromSimKind("conservation")).toBe("CONS");
+  });
+  it("autre → AUTRE", () => {
+    expect(canonicalKindFromSimKind("autre")).toBe("AUTRE");
+  });
+});
 
-  it("zone (vide) + tod=false + superficie=500m² → score = 0 * densite", () => {
-    const { score, detail } = lotPotentialScore("", 500, false, false);
-    // Pas de densité → densiteScore=0, tod=false
-    // score = 0*0.5 + 0*0.3 + superficieScore*0.2 (partiel)
-    expect(detail.hasDensiteLogHa).toBe(false);
+// ─── Tests scorer canonique 0-10 via simulation ───────────────────────────────
+
+describe("scorer canonique [0-10] — mapping SimulationZoneKind → ZoneVersionInput", () => {
+  it("zone H-104 + tod=true + superficie=1000m² → score ∈ [0,10] et > 2", () => {
+    // H-104 → habitation → densiteLogHa=20 → canonicalKind=H
+    const simKind = zoneKindFromCode("H-104");
+    const zoneVersion: ZoneVersionInput = {
+      densiteLogHa: densiteLogHaFromKind(simKind),
+      kind: canonicalKindFromSimKind(simKind),
+      usages: ["résidentiel"],
+    };
+    const lot: LotVersionInput = { superficieM2: 1000, usageCode: null };
+    const { score, detail } = lotPotentialScore(lot, zoneVersion, { inTod: true });
+    // scoreBase: densiteLogHa=20 → palier ≤20 → 1.0
+    // bonusKind: H → +1.0
+    // bonusTod: tod=true → +1.0
+    // total = 1+1+1 = 3.0
+    expect(score).toBe(3.0);
+    expect(detail.bonusKind).toBe(1.0);
+    expect(detail.bonusTod).toBe(1.0);
     expect(score).toBeGreaterThanOrEqual(0);
-    expect(score).toBeLessThan(0.3); // partiel : seulement superficie
+    expect(score).toBeLessThanOrEqual(10);
   });
 
-  it("is_rue=true → score = 0 (emprise de rue non éligible)", () => {
-    const { score, detail } = lotPotentialScore("H-104", 1000, true, true);
+  it("zone MS-322 (mixte) + tod=false + superficie=500m² → score ∈ [0,10]", () => {
+    // MS → mixte → densiteLogHa=40 → canonicalKind=MIXTE
+    const simKind = zoneKindFromCode("MS-322");
+    const zoneVersion: ZoneVersionInput = {
+      densiteLogHa: densiteLogHaFromKind(simKind),
+      kind: canonicalKindFromSimKind(simKind),
+      usages: ["résidentiel", "commercial"],
+    };
+    const lot: LotVersionInput = { superficieM2: 500, usageCode: null };
+    const { score, detail } = lotPotentialScore(lot, zoneVersion, { inTod: false });
+    // scoreBase: densiteLogHa=40 → palier ≤50 → 2.0
+    // bonusKind: MIXTE → +1.0
+    // bonusTod: false → 0
+    // total = 2+1 = 3.0
+    expect(score).toBe(3.0);
+    expect(detail.bonusKind).toBe(1.0);
+    expect(score).toBeGreaterThanOrEqual(0);
+    expect(score).toBeLessThanOrEqual(10);
+  });
+
+  it("zone (vide) + tod=false → score = 0 (Candiac : zone absente, anti-invention)", () => {
+    const simKind = zoneKindFromCode("");
+    const zoneVersion: ZoneVersionInput = {
+      densiteLogHa: null, // densiteLogHaFromKind("autre")=0 → null
+      kind: canonicalKindFromSimKind(simKind),
+      usages: [],
+    };
+    const lot: LotVersionInput = { superficieM2: 500, usageCode: null };
+    const { score } = lotPotentialScore(lot, zoneVersion, { inTod: false });
+    // scoreBase=0 (null), bonusKind=0 (AUTRE), bonusTod=0
     expect(score).toBe(0);
-    expect(detail.eligible).toBe(false);
   });
 
-  it("superficie < 300m² → score partiel (superficie non éligible)", () => {
-    const { score, detail } = lotPotentialScore("H-104", 200, false, false);
-    // densiteScore = 0.5 (zone H → 20 log/ha)
-    // tod=false
-    // superficieScore=0 (< 300)
-    // score = 0.5*0.5 = 0.25
-    expect(detail.superficieSuffisante).toBe(false);
-    expect(score).toBe(0.25);
-  });
-
-  it("exemple chiffré documenté — H-322 Delson sample lot : superficie=200.86m², tod=true", () => {
+  it("exemple chiffré documenté — H-322 Delson sample lot : superficie=200.86m², tod=true → 0-10", () => {
     // Source : analyse-donnees.json sample_lot Delson
     // NO_LOT: "2 427 992", zone: "H-322", superficie_m2_calculee: 200.86, tod: true
-    const { score, detail } = lotPotentialScore("H-322", 200.86, true, false);
-    // H-322 → habitation → densiteLogHa=20 → densiteScore=20/40=0.5
-    // tod=true → todScore=1.0
-    // superficie=200.86 < 300 → superficieScore=0
-    // score = 0.5*0.5 + 1.0*0.3 + 0*0.2 = 0.25+0.30 = 0.55
-    expect(score).toBeCloseTo(0.55, 2);
-    expect(detail.inTod).toBe(true);
-    expect(detail.hasDensiteLogHa).toBe(true);
-    expect(detail.superficieSuffisante).toBe(false);
+    const simKind = zoneKindFromCode("H-322");
+    const zoneVersion: ZoneVersionInput = {
+      densiteLogHa: densiteLogHaFromKind(simKind), // 20
+      kind: canonicalKindFromSimKind(simKind), // H
+      usages: ["résidentiel"],
+    };
+    const lot: LotVersionInput = { superficieM2: 200.86, usageCode: null };
+    const { score, detail } = lotPotentialScore(lot, zoneVersion, { inTod: true });
+    // scoreBase: densiteLogHa=20 → palier ≤20 → 1.0
+    // bonusKind: H → +1.0
+    // bonusTod: true → +1.0
+    // malusUsage: null → 0
+    // total = 1+1+1 = 3.0
+    expect(score).toBe(3.0);
+    expect(detail.scoreBase).toBe(1.0);
+    expect(detail.bonusKind).toBe(1.0);
+    expect(detail.bonusTod).toBe(1.0);
+    expect(score).toBeGreaterThanOrEqual(0);
+    expect(score).toBeLessThanOrEqual(10);
   });
 });
 
@@ -162,12 +208,23 @@ describe("getSimulationLots — delson", () => {
     }
   });
 
-  it("les lots avec zone + superficie ok ont un potentialScore > 0", () => {
+  it("potentialScore est dans [0, 10] pour tous les lots non-rue", () => {
+    const lots = getSimulationLots("delson");
+    for (const l of lots) {
+      const s = l.properties.potentialScore;
+      if (s !== null) {
+        expect(s).toBeGreaterThanOrEqual(0);
+        expect(s).toBeLessThanOrEqual(10);
+      }
+    }
+  });
+
+  it("les lots avec zone H + superficie ok ont potentialScore > 0", () => {
     const lots = getSimulationLots("delson");
     const scoredLots = lots.filter(
       (l) =>
-        l.properties.zone !== "" &&
-        l.properties.superficieM2 >= 300 &&
+        l.properties.zone.startsWith("H-") &&
+        l.properties.superficieM2 > 0 &&
         !l.properties.isRue,
     );
     expect(scoredLots.length).toBeGreaterThan(0);
@@ -203,16 +260,17 @@ describe("getSimulationLots — sainte-catherine", () => {
     expect(zones.length).toBeGreaterThan(100);
   });
 
-  it("les lots avec zone H ont potentialScore basé sur habitation", () => {
+  it("les lots avec zone H ont potentialScore > 0 (scorer canonique H=+bonusKind)", () => {
     const lots = getSimulationLots("sainte-catherine");
     const hLot = lots.find(
-      (l) => l.properties.zone.startsWith("H-") && l.properties.superficieM2 >= 300,
+      (l) => l.properties.zone.startsWith("H-") && l.properties.superficieM2 > 0,
     );
     if (hLot) {
       expect(hLot.properties.potentialScore).toBeGreaterThan(0);
+      // scoreDetail.zoneKind doit être "habitation"
       expect(hLot.properties.scoreDetail?.zoneKind).toBe("habitation");
     }
-    // Si aucun lot H avec sup>=300 trouvé dans les 500 échantillonnés, test skippé
+    // Si aucun lot H trouvé dans les 500 échantillonnés, test skippé
   });
 });
 
@@ -249,14 +307,16 @@ describe("getSimulationLots — candiac (score partiel)", () => {
     expect(fixture.nTod).toBe(0);
   });
 
-  it("tous les lots Candiac ont zone='' ou zone vide (score partiel)", () => {
+  it("Candiac : lots sans zone ont potentialScore = 0 (anti-invention)", () => {
     const lots = getSimulationLots("candiac");
-    // Candiac : le JSON Steve a 'zone' mais souvent vide ou ''
-    // On vérifie que le score est calculable mais potentiellement 0 sur densité
-    const anyScored = lots.some((l) => (l.properties.potentialScore ?? 0) > 0);
-    // Candiac peut avoir quelques lots avec zone renseignée → score partiel
-    // Ce test documente l'état réel plutôt que d'imposer un résultat
-    expect(typeof anyScored).toBe("boolean");
+    // Candiac n'a pas de zones → simKind="autre" → densiteLogHa=null → scoreBase=0
+    // → bonusKind=0 (AUTRE), bonusTod=0 → score = 0
+    const lotsWithEmptyZone = lots.filter((l) => l.properties.zone === "" && !l.properties.isRue);
+    if (lotsWithEmptyZone.length > 0) {
+      for (const l of lotsWithEmptyZone) {
+        expect(l.properties.potentialScore).toBe(0);
+      }
+    }
   });
 });
 
@@ -323,6 +383,17 @@ describe("getSimulationLotsFeatureCollection", () => {
     const fc = getSimulationLotsFeatureCollection("sainte-catherine", { limit: 5 });
     for (const f of fc.features) {
       expect(f.properties.mode).toBe("simulation");
+    }
+  });
+
+  it("potentialScore dans [0,10] pour toutes les features", () => {
+    const fc = getSimulationLotsFeatureCollection("delson", { limit: 50 });
+    for (const f of fc.features) {
+      const s = f.properties.potentialScore;
+      if (s !== null) {
+        expect(s).toBeGreaterThanOrEqual(0);
+        expect(s).toBeLessThanOrEqual(10);
+      }
     }
   });
 });

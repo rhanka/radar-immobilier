@@ -11,6 +11,7 @@ import {
 } from "./score-color-scale.js";
 
 // The score ramp MUST derive from DS tokens, never invented palettes.
+// Échelle : 0–10 (scorer canonique PR #165, lot-potential.ts).
 describe("score-color-scale — DS-token-driven ramp", () => {
   it("every stop points to a design-system token (--st-semantic-*)", () => {
     for (const s of SCORE_STOPS) {
@@ -18,10 +19,10 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     }
   });
 
-  it("stops are sorted ascending across [0,1]", () => {
+  it("stops are sorted ascending across [0,10]", () => {
     const stops = SCORE_STOPS.map((s) => s.stop);
     expect(stops[0]).toBe(0);
-    expect(stops[stops.length - 1]).toBe(1);
+    expect(stops[stops.length - 1]).toBe(10);
     for (let i = 1; i < stops.length; i++) {
       expect(stops[i]).toBeGreaterThan(stops[i - 1]);
     }
@@ -61,14 +62,22 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     expect(resolveToken("--st-semantic-feedback-success", "#16a34a", null)).toBe("#16a34a");
   });
 
-  it("colorForScore returns a token fallback at the extremes", () => {
+  it("colorForScore returns a token fallback at the extremes (0 and 10)", () => {
     expect(colorForScore(0, null)).toBe(SCORE_STOPS[0].fallback);
-    expect(colorForScore(1, null)).toBe(SCORE_STOPS[SCORE_STOPS.length - 1].fallback);
+    expect(colorForScore(10, null)).toBe(SCORE_STOPS[SCORE_STOPS.length - 1].fallback);
   });
 
-  it("colorForScore clamps and interpolates between hex token fallbacks", () => {
-    const c = colorForScore(0.575, null); // halfway between 0.45 and 0.7 stops
+  it("colorForScore clamps and interpolates between hex token fallbacks (mid-range 5)", () => {
+    const c = colorForScore(5, null); // within 4-7 range
     expect(c).toMatch(/^#[0-9a-f]{6}$/i);
+  });
+
+  it("colorForScore clamps negative scores to 0", () => {
+    expect(colorForScore(-1, null)).toBe(SCORE_STOPS[0].fallback);
+  });
+
+  it("colorForScore clamps scores above 10 to 10", () => {
+    expect(colorForScore(11, null)).toBe(SCORE_STOPS[SCORE_STOPS.length - 1].fallback);
   });
 
   it("scoreLegend lists priorité first and maps token colors", () => {
