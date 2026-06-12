@@ -93,8 +93,8 @@ describe("mapCadastreCityToLayers — Delson snapshot", () => {
     expect(out.lots.features.length).toBe(350);
   });
 
-  it("defaults mode to simulation", () => {
-    expect(layers.mode).toBe("simulation");
+  it("defaults mode to carte-steve", () => {
+    expect(layers.mode).toBe("carte-steve");
   });
 
   it("honours an injected canonical scoreFn (scorePlaceholder=false)", () => {
