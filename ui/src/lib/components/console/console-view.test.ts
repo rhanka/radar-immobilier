@@ -32,9 +32,10 @@ describe("countsByStatus — ConsoleView contract", () => {
 });
 
 describe("filterJobsByMode — ConsoleView contract", () => {
-  it('mode="real" length is strictly less than total (demo has simulation rows)', () => {
+  it('mode="real" length equals total (all jobs are real)', () => {
     const real = filterJobsByMode(demoJobs, "real");
-    expect(real.length).toBeLessThan(demoJobs.length);
+    // All demoJobs are now real — no simulation rows remain
+    expect(real.length).toBe(demoJobs.length);
     expect(real.length).toBeGreaterThan(0);
   });
 
