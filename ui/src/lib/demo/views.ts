@@ -20,4 +20,5 @@ export type DemoView =
   | "sources"
   | "carte-signaux"
   | "carte-opportunites"
-  | "carte-evaluation";
+  | "carte-evaluation"
+  | "admin";

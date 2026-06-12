@@ -13,18 +13,26 @@
     Map,
     Layers,
     BarChart3,
+    ShieldCheck,
+    LogOut,
   } from "@lucide/svelte";
   import type { DemoView } from "$lib/demo/views.js";
+  import type { AuthState } from "$lib/auth/auth-store.js";
   import { appMode, toggleMode } from "$lib/state/mode.js";
 
   export let activeView: DemoView;
   export let onSelect: (view: DemoView) => void;
   /** Callback pour lancer / relancer la visite guidee. */
   export let onStartTour: (() => void) | undefined = undefined;
+  /** Etat d'authentification (optionnel pour compatibilite). */
+  export let authState: AuthState | undefined = undefined;
+  /** Callback de deconnexion. */
+  export let onLogout: (() => void) | undefined = undefined;
 
   $: mode = $appMode;
+  $: isAdmin = authState?.user?.isAdmin === true;
 
-  const items: { id: DemoView; label: string; icon: typeof Rocket }[] = [
+  const baseItems: { id: DemoView; label: string; icon: typeof Rocket }[] = [
     { id: "onboarding", label: "Onboarding", icon: Rocket },
     { id: "ciblage", label: "Ciblage", icon: Target },
     { id: "signaux", label: "Signaux", icon: Radio },
@@ -39,6 +47,10 @@
     { id: "carte-opportunites", label: "Carte Opport.", icon: Layers },
     { id: "carte-evaluation", label: "Carte Éval.", icon: BarChart3 },
   ];
+
+  $: items = isAdmin
+    ? [...baseItems, { id: "admin" as DemoView, label: "Admin", icon: ShieldCheck }]
+    : baseItems;
 </script>
 
 <header class="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-4 py-2">
@@ -47,7 +59,7 @@
     <span class="text-sm font-bold tracking-tight text-slate-950">Radar immobilier</span>
   </div>
 
-  <!-- Nav items (6 vues) -->
+  <!-- Nav items -->
   <nav class="flex flex-1 items-center gap-1" aria-label="Navigation principale">
     {#each items as item}
       {@const Icon = item.icon}
@@ -56,7 +68,9 @@
         aria-current={activeView === item.id ? "page" : undefined}
         class={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap ${
           activeView === item.id
-            ? "bg-teal-600 text-white"
+            ? item.id === "admin"
+              ? "bg-violet-600 text-white"
+              : "bg-teal-600 text-white"
             : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
         }`}
         on:click={() => onSelect(item.id)}
@@ -67,7 +81,7 @@
     {/each}
   </nav>
 
-  <!-- Actions : visite guidee + toggle Réel/Carte Steve -->
+  <!-- Actions : visite guidee + toggle Réel/Carte Steve + user info + logout -->
   <div class="flex shrink-0 items-center gap-2">
     {#if onStartTour}
       <button
@@ -98,5 +112,25 @@
       ></span>
       {mode === "real" ? "Réel" : "Carte Steve"}
     </button>
+
+    {#if authState?.authenticated && authState.user}
+      <!-- User name chip -->
+      <span class="max-w-[120px] truncate text-xs text-slate-500" title={authState.user.email ?? authState.user.sub}>
+        {authState.user.name ?? authState.user.email ?? authState.user.sub}
+      </span>
+      <!-- Logout button -->
+      {#if onLogout}
+        <button
+          type="button"
+          aria-label="Se déconnecter"
+          title="Se déconnecter"
+          on:click={onLogout}
+          class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-1"
+        >
+          <LogOut class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          Déconnexion
+        </button>
+      {/if}
+    {/if}
   </div>
 </header>
