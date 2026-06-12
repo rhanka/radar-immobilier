@@ -2,18 +2,29 @@
  * Client for GET /api/geo/:city/lots — WP B slice-2.
  *
  * Retourne un FeatureCollection GeoJSON de lots cadastraux réels (MRNF)
- * pour une ville.  Propriétés exposées : uniquement `noLot` et `citySlug`
- * (Loi 25 — aucune PII, aucun propriétaire).
+ * pour une ville.  Propriétés exposées : uniquement `noLot`, `citySlug`
+ * et `potentialScore` (Loi 25 — aucune PII, aucun propriétaire).
  *
  * Lorsque la ville n'a pas de source lots (ok=false) on retourne
  * un FeatureCollection vide plutôt que de lever, sauf si
  * opts.throwOnEmpty=true.
+ *
+ * CS-L2 : `potentialScore` (0–10) est retourné par l'API (PR #165).
+ * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.
+ * Quand non disponible (endpoint non enrichi) : undefined.
  */
 
 /** Properties d'un lot cadastral (uniquement données publiques non-PII). */
 export interface LotProperties {
   noLot: string;
   citySlug?: string;
+  /**
+   * Score de potentiel par lot (0–10, échelle distincte du 0-5 T2 et du 0-100 legacy).
+   * Calculé à partir de ZoneVersion.densiteLogHa, kind, usages, TOD.
+   * undefined si l'endpoint ne l'a pas encore enrichi.
+   * Source : /api/geo/:city/lots (feat/api-score-potentiel-lot).
+   */
+  potentialScore?: number;
 }
 
 export interface LotGeometry {
