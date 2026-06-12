@@ -263,6 +263,14 @@ export const opportunityDossiers = pgTable(
  * Graph nodes — one row per graphify node (entity or document concept).
  * `id` is the graphify node id (string slug, not a UUID) so upserts are
  * purely idempotent on the natural key.
+ *
+ * Index additionnels (migration 0003_graph_indexes) :
+ *   - composite (city_slug, type) → queryNeighbors / subgraphForCity filtres croisés
+ *   - GIN JSONB sur props → requêtes @> sur les métadonnées
+ *   - colonne générée label_tsv (tsvector french) + GIN → full-text FR
+ *   - GIN trigram sur label (pg_trgm) → ILIKE / recherche approximative
+ * Note : label_tsv est une colonne GENERATED ALWAYS AS STORED — non
+ * représentable en Drizzle ORM ; elle est gérée uniquement dans la migration SQL.
  */
 export const graphNodes = pgTable(
   "graph_nodes",
@@ -278,6 +286,10 @@ export const graphNodes = pgTable(
   (t) => ({
     byType: index("graph_nodes_type_idx").on(t.type),
     byCity: index("graph_nodes_city_idx").on(t.citySlug),
+    // Composite : filtre ville + type en une passe (migration 0003)
+    byCityType: index("graph_nodes_city_type_idx").on(t.citySlug, t.type),
+    // GIN JSONB sur props (migration 0003)
+    propsGin: index("graph_nodes_props_gin_idx").using("gin", t.props),
   }),
 );
 
@@ -285,6 +297,9 @@ export const graphNodes = pgTable(
  * Graph edges — one row per graphify link.
  * Composite natural key (srcId, dstId, kind) drives idempotent upserts:
  * conflicting rows update props only (no duplicate edges).
+ *
+ * Index additionnel (migration 0003_graph_indexes) :
+ *   - GIN JSONB sur props → requêtes @> sur les métadonnées d'arête
  */
 export const graphEdges = pgTable(
   "graph_edges",
@@ -300,6 +315,8 @@ export const graphEdges = pgTable(
     byKind: index("graph_edges_kind_idx").on(t.kind),
     bySrc: index("graph_edges_src_idx").on(t.srcId),
     byDst: index("graph_edges_dst_idx").on(t.dstId),
+    // GIN JSONB sur props (migration 0003)
+    propsGin: index("graph_edges_props_gin_idx").using("gin", t.props),
   }),
 );
 
