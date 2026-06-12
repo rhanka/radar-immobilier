@@ -42,6 +42,7 @@
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
   import { fetchLots, type LotFeatureCollection, type LotFeature } from "$lib/maps/lots-client.js";
+  import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
   import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
   import { prioritizedCities } from "@radar/sources/municipalities";
@@ -621,22 +622,14 @@
                 {/each}
               </svg>
 
-              <!-- Détail lot sélectionné -->
+              <!-- Fiche lot complète — CS-L2 -->
               {#if selectedLot}
-                <div class="border-t border-teal-100 bg-teal-50 px-4 py-3 flex items-center justify-between gap-3">
-                  <div>
-                    <p class="text-xs font-semibold text-teal-800">Lot sélectionné</p>
-                    <p class="text-sm font-mono font-bold text-teal-900">{selectedLot.properties.noLot}</p>
-                    <p class="text-xs text-teal-600 mt-0.5">
-                      Cadastre allégé MRNF · {selectedEvalCity?.name}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    class="text-xs text-teal-500 hover:text-teal-700"
-                    on:click={() => { selectedLot = null; }}
-                    aria-label="Désélectionner le lot"
-                  >✕</button>
+                <div class="border-t border-teal-100">
+                  <LotFichePanel
+                    lot={selectedLot}
+                    cityName={selectedEvalCity?.name ?? ""}
+                    onClose={() => { selectedLot = null; }}
+                  />
                 </div>
               {/if}
             {/if}
