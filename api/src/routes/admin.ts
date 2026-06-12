@@ -8,7 +8,7 @@
 // All routes require an authenticated session with isAdmin === true in
 // account_users. Returns 401 if no session, 403 if not admin.
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import { getCookie } from "hono/cookie";
 import { eq } from "drizzle-orm";
 import type { Database } from "../db/client.js";
@@ -31,7 +31,7 @@ export interface AdminDeps {
  * Returns the admin account on success, or an error Response.
  */
 async function requireAdmin(
-  c: Parameters<Parameters<Hono["get"]>[1]>[0],
+  c: Context,
   deps: AdminDeps,
 ): Promise<{ sub: string } | Response> {
   const nowFn = deps.now ?? (() => Date.now());
