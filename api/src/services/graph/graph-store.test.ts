@@ -238,6 +238,88 @@ describe("subgraphForMrc — QC_MUNICIPALITIES MRC membership", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 4. queryNeighbors — pure mock (N+1 fix)
+//
+// Vérifie que queryNeighbors charge les nœuds voisins en UNE seule requête
+// inArray, et non par un SELECT par arête (ancien comportement N+1).
+// Le mock compte les appels .where() sur graphNodes pour détecter la régression.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("queryNeighbors — fix N+1 : un seul inArray pour les nœuds voisins", () => {
+  it("retourne les voisins out/in avec un seul SELECT sur graphNodes", async () => {
+    // Arêtes renvoyées par les deux premiers SELECT (outEdges + inEdges)
+    const outEdgesFixture = [
+      { srcId: "zone_a", dstId: "bylaw_1", kind: "régi_par", id: "e1", props: {}, createdAt: new Date() },
+    ];
+    const inEdgesFixture = [
+      { srcId: "lot_x", dstId: "zone_a", kind: "dans", id: "e2", props: {}, createdAt: new Date() },
+    ];
+    // Nœuds renvoyés par le SELECT inArray (un seul appel attendu)
+    const nodesFixture = [
+      { id: "bylaw_1", label: "Bylaw 1", type: "document", citySlug: "valleyfield", props: {}, sourceRef: null, createdAt: new Date() },
+      { id: "lot_x",   label: "Lot X",   type: "concept",  citySlug: "valleyfield", props: {}, sourceRef: null, createdAt: new Date() },
+    ];
+
+    let nodeSelectCount = 0;
+    let callIdx = 0;
+    // Séquence d'appels db.select() :
+    //   0 → outEdges (where srcId = nodeId)
+    //   1 → inEdges  (where dstId = nodeId)
+    //   2 → inArray  (unique SELECT des nœuds voisins)
+    const responses = [outEdgesFixture, inEdgesFixture, nodesFixture];
+
+    const db = {
+      select: () => {
+        const idx = callIdx++;
+        const isNodeSelect = idx === 2;
+        if (isNodeSelect) nodeSelectCount++;
+        return {
+          from: () => ({
+            where: () => Promise.resolve(responses[idx] ?? []),
+          }),
+        };
+      },
+    } as unknown;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await queryNeighbors(db as any, "zone_a");
+
+    // Un seul SELECT sur graphNodes pour tous les voisins
+    expect(nodeSelectCount).toBe(1);
+
+    // Résultats corrects
+    const outNeighbors = result.filter((n) => n.direction === "out");
+    const inNeighbors  = result.filter((n) => n.direction === "in");
+    expect(outNeighbors).toHaveLength(1);
+    expect(inNeighbors).toHaveLength(1);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(outNeighbors[0]!.node.id).toBe("bylaw_1");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(inNeighbors[0]!.node.id).toBe("lot_x");
+  });
+
+  it("retourne un tableau vide quand il n'y a aucune arête", async () => {
+    let callIdx = 0;
+    const db = {
+      select: () => {
+        callIdx++;
+        return {
+          from: () => ({
+            where: () => Promise.resolve([]),
+          }),
+        };
+      },
+    } as unknown;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await queryNeighbors(db as any, "node_orphelin");
+    // Aucune arête → pas de SELECT sur graphNodes (court-circuit)
+    expect(callIdx).toBe(2); // seulement outEdges + inEdges
+    expect(result).toHaveLength(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 2. DB-bound tests — skipped when no POSTGRES_HOST env var
 // ─────────────────────────────────────────────────────────────────────────────
 
