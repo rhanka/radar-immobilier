@@ -146,9 +146,12 @@ Total: **34 familles de sources** spikées (`SPEC_EVOL_SOURCE_FEASIBILITY.md` §
 
 ### 2.1 Constat
 
-Une seule ville modélisée: **Salaberry-de-Valleyfield (70052)**. La MRC
-Beauharnois-Salaberry est une couche **régionale** (pas une ville pilote). Aucune
-autre ville n'est référencée comme cible. Le plan est donc **templé pour N villes**.
+Une seule ville modélisée à ce jour: **Salaberry-de-Valleyfield (70052)**. La MRC
+Beauharnois-Salaberry est une couche **régionale** (pas une ville pilote). Le plan est
+**templé pour N villes**. **Cibles prioritaires ajoutées (§2.4)** : les 4 villes de
+contrôle de parité Steve (`delson`, `sainte-catherine`, `saint-constant`, `candiac`)
+passent **en tête** en scrape profond (aucune n'a encore de dossier/adaptateur/fixture
+— à instancier via `CityProfile`).
 
 ### 2.2 Typologie des sources pour la généralisation
 
@@ -172,6 +175,44 @@ selecteurs}, sources: SourceBinding[] }`. Chaque `SourceBinding` lie une
 `SourceKind` à ses paramètres (URL, code géo, cadence). Valleyfield est la première
 entrée; ajouter une ville = ajouter une entrée + (si CMS inédit) un adaptateur de
 moteur. Aucune logique ville en dur ailleurs.
+
+### 2.4 Priorité de villes — points de contrôle « parité Steve » en TÊTE et en PROFONDEUR
+
+> Amendement (2026-06-11) découlant de la décision produit tranchée en
+> `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §6.2 et spécifiée dans
+> [`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`](SPEC_CONTROLE_PARITE_VILLES_STEVE.md).
+
+Jusqu'ici le plan ne portait **aucune** notion de priorité **par ville** ni de « profondeur » de
+collecte (priorisation par **source** au §5, ville unique Valleyfield §2.1). On l'introduit : les
+**4 villes de Steve** (`delson`, `sainte-catherine`, `saint-constant`, `candiac` — toutes
+Roussillon / CMM) deviennent des **points de contrôle de parité** et passent **en tête** du backlog,
+en **scrape profond** (toutes les sources : rôle, cadastre, zonage/PV, zones, TOD), **avant**
+Valleyfield et le grand filet. **Objectif explicite : reproduire la donnée de référence de Steve et
+mesurer la parité** (couverture + flags + delta de score —
+[`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`](SPEC_CONTROLE_PARITE_VILLES_STEVE.md) §4).
+
+**Où marquer « contrôle-parité / deep » (config) — deux annotations ajoutées au `CityProfile`
+(§2.3)** :
+
+- **`controlParity: boolean`** — la ville est un point de contrôle (un `ControlLot`/`ControlMark`
+  importé de Steve existe ; son **rapport de parité** est calculé). `true` pour les 4 villes de
+  Steve, `false` (défaut) ailleurs.
+- **`scrapeDepth: "deep" | "shallow"`** — `"deep"` = **toutes** les `SourceBinding` de la ville sont
+  attaquées (rôle A5, cadastre A6, zonage A2/B2, zones, TOD A13) ; `"shallow"` (défaut) = veille de
+  signaux seule (PV/avis A1, pour le grand filet). Les 4 villes de Steve = `"deep"`.
+
+Soit, par ville de contrôle :
+`{ …, controlParity: true, scrapeDepth: "deep", sources: [A5, A6, A2, B2, A13, A1/PV, …] }`.
+
+**Ordre** : les 4 villes `controlParity:true` sont **en tête** du backlog §5 tant que leur parité
+n'est pas atteinte (priorité de scrape, pas de logique métier en dur — toujours via `CityProfile`).
+**Codes MAMH** : la rétrodoc Steve ne les fournit pas ; ils sont **à résoudre** au remplissage de
+`codeMamh` (anti-invention — on ne les fabrique pas ;
+`SPEC_CONTROLE_PARITE_VILLES_STEVE.md` §1). **Sources templées** : les bindings municipaux
+(`*-valleyfield`) sont instanciés par ville via `CityProfile.sources` (§2.1/§2.3) ; le **gap polygone
+de zone** (§6) reste le manque structurant, avec fallback éditeur manuel (S-14 de l'intégration
+carte). La source **TOD A13 `aires-tod-pmad-cmm`** (à ajouter au §1.A, cf.
+`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §4.0) couvre les 4 villes (toutes CMM).
 
 ---
 
