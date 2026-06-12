@@ -57,6 +57,23 @@ const envSchema = z.object({
     .default("info"),
 
   /**
+   * Graph object store — Scaleway bucket that holds graphify `graph/{city}/latest.json`
+   * outputs (radar-immobilier-docs-pocs in prod). Falls back to the SCRAPE_S3_*
+   * values when absent; those in turn fall back to S3_* (MinIO locally).
+   * In production, point these at the same bucket as SCRAPE_S3_* (both targets
+   * the `radar-immobilier-docs-pocs` bucket). NEVER commit real secrets.
+   */
+  GRAPH_S3_ENDPOINT: z.string().url().optional(),
+  GRAPH_S3_REGION: z.string().optional(),
+  GRAPH_S3_BUCKET: z.string().optional(),
+  GRAPH_S3_ACCESS_KEY: z.string().optional(),
+  GRAPH_S3_SECRET_KEY: z.string().optional(),
+  GRAPH_S3_FORCE_PATH_STYLE: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+
+  /**
    * Shared secret that gates the reconciliation-studio WRITE route
    * (POST /api/ontology/:city/patch). Optional: when unset, the write route is
    * disabled and every patch is refused with 401 (fail-closed — the studio stays
@@ -149,6 +166,26 @@ export function resolveScrapeS3Config(config: AppConfig): ScrapeS3Config {
     secretKey: config.SCRAPE_S3_SECRET_KEY ?? config.S3_SECRET_KEY,
     forcePathStyle:
       config.SCRAPE_S3_FORCE_PATH_STYLE ?? config.S3_FORCE_PATH_STYLE,
+  };
+}
+
+/**
+ * Derive the effective graph object store config from a parsed AppConfig.
+ * GRAPH_S3_* override SCRAPE_S3_* which override S3_*. In production the
+ * graph snapshots (`graph/{city}/latest.json`) live in the same SCW bucket as
+ * the scraped documents (`radar-immobilier-docs-pocs`), so the GRAPH_S3_*
+ * vars can simply be left unset and the SCRAPE_S3_* fallback is correct.
+ */
+export function resolveGraphS3Config(config: AppConfig): ScrapeS3Config {
+  const scrape = resolveScrapeS3Config(config);
+  return {
+    endpoint: config.GRAPH_S3_ENDPOINT ?? scrape.endpoint,
+    region: config.GRAPH_S3_REGION ?? scrape.region,
+    bucket: config.GRAPH_S3_BUCKET ?? scrape.bucket,
+    accessKey: config.GRAPH_S3_ACCESS_KEY ?? scrape.accessKey,
+    secretKey: config.GRAPH_S3_SECRET_KEY ?? scrape.secretKey,
+    forcePathStyle:
+      config.GRAPH_S3_FORCE_PATH_STYLE ?? scrape.forcePathStyle,
   };
 }
 
