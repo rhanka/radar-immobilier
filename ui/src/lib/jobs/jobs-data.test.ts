@@ -18,9 +18,8 @@ describe("demoJobs", () => {
     expect(demoJobs.some((j) => j.status === "failed")).toBe(true);
   });
 
-  it("includes at least 2 simulation-mode jobs", () => {
-    const simJobs = demoJobs.filter((j) => j.mode === "simulation");
-    expect(simJobs.length).toBeGreaterThanOrEqual(2);
+  it("all jobs are mode:real (no invented/simulated data)", () => {
+    expect(demoJobs.every((j) => j.mode === "real")).toBe(true);
   });
 
   it("all jobs have valid status", () => {
@@ -76,14 +75,10 @@ describe("countsByStatus", () => {
 });
 
 describe("filterJobsByMode", () => {
-  it('mode="real" drops all simulation rows', () => {
+  it('mode="real" drops no rows (all jobs are already real)', () => {
     const real = filterJobsByMode(demoJobs, "real");
     expect(real.every((j) => j.mode !== "simulation")).toBe(true);
-  });
-
-  it('mode="real" is strictly shorter than full list (demo has simulation rows)', () => {
-    const real = filterJobsByMode(demoJobs, "real");
-    expect(real.length).toBeLessThan(demoJobs.length);
+    expect(real).toHaveLength(demoJobs.length);
   });
 
   it('mode="simulation" keeps all rows', () => {
