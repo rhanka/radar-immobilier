@@ -11,7 +11,42 @@
  * Aucun champ inventé ; aucun nom de propriétaire (données cadastrales publiques).
  */
 
-/** Un lot enrichi en mode simulation (propriétés Steve + score de potentiel). */
+/** Kind de zone dérivé du préfixe du code de zone Steve. */
+export type SimulationZoneKind =
+  | "habitation"     // H- → résidentiel (densification possible)
+  | "mixte"          // M-, MS-, MxtV- → mixte (potentiel moyen)
+  | "commercial"     // C- → commercial
+  | "industriel"     // I-, ID- → industriel
+  | "public"         // P-, CGS- → public/institutionnel
+  | "conservation"   // N/A → conservation
+  | "autre"          // "" ou inconnu
+  ;
+
+/** Détail du score canonique [0-10] adapté au contexte simulation. */
+export interface SimulationScoreDetail {
+  /** Score de base 0-5 (densiteLogHa → palier). */
+  scoreBase: number;
+  /** Bonus kind résidentiel/mixte (+1.0 si H ou MIXTE). */
+  bonusKind: number;
+  /** Bonus TOD (+1.0 si inTod). */
+  bonusTod: number;
+  /** Malus usage non-constructible (-1.0 si BO/TE — null dans fixtures Steve). */
+  malusUsage: number;
+  /** Bonus zone reconvertible (+0.5 si C/U/I). */
+  bonusReconvertible: number;
+  /** Lot filtré (surface trop petite ou usage exclu). */
+  filteredOut: boolean;
+  /** Raison du filtrage si filteredOut. */
+  filteredReason?: string;
+  /** Kind de zone dérivé du préfixe Steve. */
+  zoneKind: SimulationZoneKind;
+  /** Lot dans un périmètre TOD. */
+  inTod: boolean;
+  /** Lot est une emprise de rue (exclu). */
+  isRue: boolean;
+}
+
+/** Un lot enrichi en mode simulation (propriétés Steve + score de potentiel canonique). */
 export interface SimulationLotProperties {
   /** NO_LOT cadastral — identifiant public. Espaces normalisés. */
   noLot: string;
@@ -51,38 +86,15 @@ export interface SimulationLotProperties {
   tod: boolean;
   /** Flag multifamilial 4+ (calculé par Steve). Source: multifamilial_4plus. */
   multifamilial4plus: boolean;
-  /** Score de potentiel par lot [0, 1]. Calculé par potentialScore(). */
+  /**
+   * Score de potentiel par lot [0, 10] — scorer canonique (#165).
+   * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.
+   * 0 si is_rue=true ou si toutes les composantes sont nulles.
+   */
   potentialScore: number | null;
-  /** Composantes du score. null si non calculable (zone manquante). */
+  /** Composantes du score canonique. null si non calculable. */
   scoreDetail: SimulationScoreDetail | null;
 }
-
-/** Détail des composantes du score de potentiel par lot. */
-export interface SimulationScoreDetail {
-  /** Zone a une densiteLogHa > 0 (zonage multi-logements). */
-  hasDensiteLogHa: boolean;
-  /** densiteLogHa de la ZoneVersion (logements/ha). */
-  densiteLogHa: number;
-  /** Lot dans un périmètre TOD. */
-  inTod: boolean;
-  /** Superficie suffisante (≥ 300 m²). */
-  superficieSuffisante: boolean;
-  /** Type d'usage de la zone (dérivé du préfixe de code). */
-  zoneKind: SimulationZoneKind;
-  /** Vrai si le lot n'est pas une rue et a une géométrie. */
-  eligible: boolean;
-}
-
-/** Kind de zone dérivé du préfixe du code de zone Steve. */
-export type SimulationZoneKind =
-  | "habitation"     // H- → résidentiel (densification possible)
-  | "mixte"          // M-, MS-, MxtV- → mixte (potentiel moyen)
-  | "commercial"     // C- → commercial
-  | "industriel"     // I-, ID- → industriel
-  | "public"         // P-, CGS- → public/institutionnel
-  | "conservation"   // N/A → conservation
-  | "autre"          // "" ou inconnu
-  ;
 
 /** Une zone en mode simulation (propriétés Steve). */
 export interface SimulationZone {
