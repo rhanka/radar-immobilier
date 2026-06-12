@@ -24,10 +24,11 @@
  * PAS et le snapshot fixture committé ne le contient pas. `NO_LOT` est un numéro
  * cadastral public (MERN) — conservé. Aucun nom de personne, aucun propriétaire.
  *
- * ── Mode:simulation ───────────────────────────────────────────────────────────
- * Les villes de référence sont rendues en `mode:"simulation"` : ce sont des
- * données de démonstration, PAS la production de notre pipeline. Le drapeau est
- * porté par chaque jeu de couches (`mode`) pour que l'UI badge « Exemple ».
+ * ── Mode:carte-steve ──────────────────────────────────────────────────────────
+ * Les villes de la carte Steve sont rendues en `mode:"carte-steve"` : ce sont
+ * des données réelles de la plateforme Netlify de Steve, distinctes du pipeline
+ * MRNF. Le drapeau est porté par chaque jeu de couches (`mode`) pour que l'UI
+ * badge « Données carte Steve ».
  */
 
 // ── Schéma source brut (GeoJSON cadastral) ────────────────────────────────────
@@ -125,7 +126,7 @@ export type ZoneFC = CadastreRawFC<{ zone: string; nom: string }>;
 export type TodFC = CadastreRawFC<{ nom: string }>;
 export type BoundaryFC = CadastreRawFC<{ name: string; csduid: string }>;
 
-export type LayerMode = "simulation" | "real";
+export type LayerMode = "carte-steve" | "simulation" | "real";
 
 export interface CadastreCityLayers {
   slug: string;
@@ -202,7 +203,7 @@ export function mapCadastreCityToLayers(
   raw: CadastreRawCity,
   opts: MapCadastreOptions = {},
 ): CadastreCityLayers {
-  const mode = opts.mode ?? "simulation";
+  const mode = opts.mode ?? "carte-steve";
   const scoreFn = opts.scoreFn ?? deriveLotPotentialScore;
   const usingPlaceholder = opts.scoreFn === undefined;
   const excludeRue = opts.excludeRue ?? true;
@@ -331,7 +332,7 @@ export interface LoadCadastreCityOptions {
  * Charge une ville cadastrale et retourne nos couches.
  *
  * - Si `opts.raw` est fourni (fixture), aucun réseau : mapping direct.
- * - Sinon fetch live le JSON de référence (mode:simulation) puis mappe.
+ * - Sinon fetch live le JSON de référence (mode:carte-steve) puis mappe.
  */
 export async function loadCadastreCity(
   slug: string,

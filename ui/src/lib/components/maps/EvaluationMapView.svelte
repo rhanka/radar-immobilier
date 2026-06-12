@@ -407,7 +407,7 @@
                     {/if}
                   </span>
                   {#if signal.mode === "simulation"}
-                    <Badge tone="info" class="text-xs shrink-0">Ex.</Badge>
+                    <Badge tone="info" class="text-xs shrink-0">Synth.</Badge>
                   {/if}
                 </button>
               </li>
@@ -670,7 +670,7 @@
               <Badge tone="neutral" class="text-xs">Règl. {selectedSignal.bylaw}</Badge>
             {/if}
             {#if selectedSignal.mode === "simulation"}
-              <Badge tone="info" class="text-xs">Exemple (simulation)</Badge>
+              <Badge tone="info" class="text-xs">Exemple synthétique</Badge>
             {/if}
           </div>
         </div>
@@ -763,7 +763,7 @@
                 L'évaluation de lot est disponible pour les signaux de rezonage résidentiel
                 avec une zone identifiée (mode réel). Ce signal de type
                 <span class="font-medium">{SIGNAL_TYPE_LABEL[selectedSignal.type] ?? selectedSignal.type}</span>
-                ne répond pas à ces critères ou est marqué comme exemple de simulation.
+                ne répond pas à ces critères ou est un exemple synthétique sans zone résolue.
               </p>
             </div>
           </div>
