@@ -1,16 +1,16 @@
 /**
- * Provider simulation CS-L6 — données Netlify Steve pour les 4 villes.
+ * Provider carte-steve CS-L6 — données réelles Netlify de Steve pour les 4 villes.
  *
- * ## Mode simulation (SPEC §2.7)
- * Ces données sont marquées mode:"simulation" et NE franchissent JAMAIS
- * la frontière réel. Isolation totale du store opérationnel.
- *
- * ## Source de données
- * Fixtures JSON téléchargées le 2026-06-12 depuis :
+ * ## Source de données (RÉELLES — pas simulées)
+ * Fixtures JSON téléchargées le 2026-06-12 depuis la plateforme de Steve :
  *   https://thriving-kleicha-89b7ef.netlify.app/data/<slug>.json
  * Stockées dans api/src/services/geo/fixtures/simulation/<slug>.json.
  * Données cadastrales publiques (NO_LOT, rôle 2022, zonage municipal).
  * Aucun nom de propriétaire / PII.
+ *
+ * ## Mode carte-steve (SPEC §2.7)
+ * Ces données sont marquées mode:"carte-steve" pour les distinguer du
+ * pipeline MRNF (mode réel). Isolation totale du store opérationnel.
  *
  * ## Champs extraits (anti-invention)
  * Seuls les champs présents dans le JSON Steve sont mappés :
@@ -54,7 +54,7 @@ import type {
   GeoJsonGeometry,
 } from "./types.js";
 
-// ─── Villes supportées en mode simulation ─────────────────────────────────────
+// ─── Villes de la carte Steve ─────────────────────────────────────────────────
 
 export const SIMULATION_CITIES = [
   "delson",
@@ -146,7 +146,7 @@ function loadFixture(citySlug: string): FixtureData {
 // ─── Zones ────────────────────────────────────────────────────────────────────
 
 /**
- * Retourne les zones de la ville en mode simulation.
+ * Retourne les zones de la ville (données carte Steve).
  * Chaque zone a : codeAffiche, nom, kind, densiteLogHa, usages, geom.
  */
 export function getSimulationZones(citySlug: SimulationCitySlug): SimulationZone[] {
@@ -183,7 +183,7 @@ export function getSimulationZones(citySlug: SimulationCitySlug): SimulationZone
 // ─── Lots enrichis ────────────────────────────────────────────────────────────
 
 /**
- * Retourne les lots enrichis de la ville en mode simulation.
+ * Retourne les lots enrichis de la ville (données carte Steve).
  *
  * Chaque lot est mappé depuis le JSON Steve vers SimulationLotProperties,
  * et reçoit un potentialScore calculé par le scorer CANONIQUE lotPotentialScore()
@@ -242,7 +242,7 @@ export function getSimulationLots(
     const properties: SimulationLotProperties = {
       noLot,
       citySlug,
-      mode: "simulation",
+      mode: "carte-steve",
       zone,
       superficieM2,
       categorie: String(p["categorie"] ?? ""),
@@ -301,7 +301,7 @@ export function getSimulationCityFixture(
 
   return {
     citySlug,
-    mode: "simulation",
+    mode: "carte-steve",
     meta: fixture.meta,
     nLots: lots.length,
     nZones: fixture.zones.features.length,
@@ -314,7 +314,7 @@ export function getSimulationCityFixture(
 // ─── FeatureCollection GeoJSON (pour l'endpoint /api/geo/:city/lots) ──────────
 
 /**
- * Retourne un FeatureCollection GeoJSON des lots simulation.
+ * Retourne un FeatureCollection GeoJSON des lots de la carte Steve.
  *
  * Compatible avec l'endpoint /api/geo/:city/lots enrichi (route geo-lots.ts).
  * Chaque feature.properties est un SimulationLotProperties complet

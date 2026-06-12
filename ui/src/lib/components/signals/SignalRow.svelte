@@ -154,7 +154,7 @@
           {/if}
         </p>
         {#if isSimulation}
-          <Badge tone="warning">Exemple (simulation)</Badge>
+          <Badge tone="warning">Exemple synthétique</Badge>
         {/if}
       </div>
       {#if signal.bylaw || signal.zone}
@@ -214,7 +214,7 @@
         </p>
         {#if resolvedSources.length === 0}
           <p class="text-sm text-slate-400 italic">
-            {isSimulation ? "Signal synthétique :aucune source documentée (exemple de calibration)." : "Aucune source résolue pour ce signal."}
+            {isSimulation ? "Signal synthétique : aucune source documentée (exemple de calibration)." : "Aucune source résolue pour ce signal."}
           </p>
         {:else}
           <ul class="space-y-1.5">

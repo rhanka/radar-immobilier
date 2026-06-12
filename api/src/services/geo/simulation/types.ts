@@ -1,8 +1,9 @@
 /**
- * Types communs du mode simulation CS-L6.
+ * Types communs du provider carte-steve CS-L6.
  *
- * mode: "simulation" — ces données NE polluent JAMAIS le réel.
- * Toutes les entités portent ce discriminant (SPEC_EVOL_SOCLE_STATES_SCORING.md §2.7).
+ * mode: "carte-steve" — données réelles de la plateforme de Steve (Netlify),
+ * distinctes des données MRNF scrappées. Ces données NE polluent JAMAIS le
+ * pipeline réel (SPEC_EVOL_SOCLE_STATES_SCORING.md §2.7).
  *
  * Champs extraits exclusivement du JSON Netlify de Steve :
  * NO_LOT, zone, superficie_m2_calculee, categorie, cubf, utilisation,
@@ -46,12 +47,12 @@ export interface SimulationScoreDetail {
   isRue: boolean;
 }
 
-/** Un lot enrichi en mode simulation (propriétés Steve + score de potentiel canonique). */
+/** Un lot enrichi depuis la carte Steve (propriétés Steve + score de potentiel canonique). */
 export interface SimulationLotProperties {
   /** NO_LOT cadastral — identifiant public. Espaces normalisés. */
   noLot: string;
   citySlug: string;
-  mode: "simulation";
+  mode: "carte-steve";
   /** Code de zone (ex. "H-104"). Peut être vide ("") si inconnu. */
   zone: string;
   /** Superficie calculée géométriquement (m²). Source: superficie_m2_calculee. */
@@ -118,10 +119,10 @@ export interface GeoJsonGeometry {
   coordinates: unknown;
 }
 
-/** Résumé de la fixture simulation par ville. */
+/** Résumé de la fixture carte-steve par ville. */
 export interface SimulationCityFixture {
   citySlug: string;
-  mode: "simulation";
+  mode: "carte-steve";
   meta: Record<string, unknown>;
   /** Nombre de lots dans la fixture (échantillon si >200). */
   nLots: number;
