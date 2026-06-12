@@ -1,23 +1,32 @@
-// "coordination" réintroduit (ÉV10) : journal h2a réel (signé/chaîné) ; remplace le stub ÉV5.
-// "automation" retiré du nav (ÉV14) : l'Automatisation est désormais un onglet de la vue "console" (Sources).
-// "backlog" ajouté (ÉV15) : tableau des évolutions (à faire / en cours / réalisé).
-// "ontologie" ajouté (WP5) : studio de réconciliation graphify (état du projet par ville).
-// "ciblage" ajouté (WP4) : pipeline étape 1 — plans de ciblage (quoi collecter, sans I/O).
-// "sources" ajouté (WP A.1.4) : carte maturité recueil par ville × source.
-// "carte-signaux" ajouté : carte QC villes avec compteur signaux 6 mois.
-// "carte-opportunites" ajouté : carte ville/zones avec signaux à approfondir.
-// "carte-evaluation" ajouté : évaluation zone/lots + grilles de scoring.
+// Navigation réduite à 4 vues principales (WP A.1 réorientation §4).
+// Les vues internes (admin/dev) restent accessibles via le menu "admin/dev"
+// mais ne font plus partie de la navigation principale.
+//
+// 4 vues principales :
+//   "signaux"     : Carte Québec/villes — aplats colorés, nb changements de zonage / 6 mois
+//   "opportunity" : Opportunités ville/zones — classement dossiers
+//   "evaluation"  : Évaluation zone/lots — grilles de scoring (fusion "carte-evaluation" + "grilles")
+//   "sources"     : Sources — maturité recueil par ville
+//
+// Vues admin/dev (hors nav principale — code intact) :
+//   "onboarding", "ciblage", "ontologie", "coordination", "backlog", "console"
+// Legacy (conservés pour compatibilité tour-steps et deep-links) :
+//   "grilles", "carte-signaux", "carte-opportunites", "carte-evaluation"
 export type DemoView =
-  | "onboarding"
-  | "ciblage"
+  // ── 4 vues principales ────────────────────────────────────────────────────
   | "signaux"
   | "opportunity"
+  | "evaluation"
+  | "sources"
+  // ── Admin/dev (hors nav principale) ──────────────────────────────────────
+  | "onboarding"
+  | "ciblage"
   | "grilles"
   | "console"
   | "ontologie"
   | "coordination"
   | "backlog"
-  | "sources"
+  // ── Legacy (conservé pour compatibilité tour-steps et deep-links) ─────────
   | "carte-signaux"
   | "carte-opportunites"
   | "carte-evaluation";
