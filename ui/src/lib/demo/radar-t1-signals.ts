@@ -1,15 +1,16 @@
-// Demo signals for the Radar T1 feed.
-// Rows marked mode:"simulation" are synthetic fixtures — see escalations log D4.
-// The 3 real pilot signals (mode:"real") are derived from verified public consultation
-// notices for bylaws 150-49, 150-49-1, and 150-51.
+// Signaux pilotes RÉELS du fil Radar T1.
+// Ces 3 signaux proviennent des vrais avis publics de consultation et
+// d'approbation référendaire de Salaberry-de-Valleyfield (règlements 150-49,
+// 150-49-1, 150-51). Aucun signal synthétique/inventé dans ce tableau.
 //
-// S1.2: dérogation-relevant conservé pour la démo (6ᵉ signal, écarté) mais sa valeur est
-//   fixée en dur (5) — SIGNAL_TYPE_VALUES["derogation-relevant"] vaut 0 (filtre pur VISION).
+// Note : le fil live (SignalsT1View.svelte) charge désormais les signaux via
+// GET /api/signals/by-city. Ce tableau sert de référence pour la carte
+// d'évaluation (EvaluationMapView.svelte) et les tests unitaires.
 
 import { Signal, SIGNAL_TYPE_VALUES, type SignalT } from "@radar/domain";
 
 export const demoSignalsT1: SignalT[] = [
-  // --- Real pilot signals (mode: "real") ---
+  // --- Signaux pilotes réels (mode: "real") ---
   Signal.parse({
     id: "sig-h609-4",
     type: "residential-rezoning",
@@ -45,42 +46,5 @@ export const demoSignalsT1: SignalT[] = [
     bylaw: "150-49-1",
     zone: "H-143/H-143-1",
     mode: "real",
-  }),
-
-  // --- Synthetic signals (mode: "simulation") — escalations log D4 ---
-  Signal.parse({
-    id: "sig-sim-cptaq-a118",
-    type: "cptaq",
-    value: SIGNAL_TYPE_VALUES["cptaq"],
-    confidence: "medium",
-    status: "nouveau",
-    sourceRefs: [],
-    detectedAt: "2026-05-01",
-    bylaw: "150-44",
-    zone: "A-118",
-    mode: "simulation",
-  }),
-  Signal.parse({
-    id: "sig-sim-ppcmoi-c627",
-    type: "ppcmoi",
-    value: SIGNAL_TYPE_VALUES["ppcmoi"],
-    confidence: "low",
-    status: "surveillance",
-    sourceRefs: [],
-    detectedAt: "2026-05-10",
-    zone: "C-627",
-    mode: "simulation",
-  }),
-  Signal.parse({
-    id: "sig-sim-derog-h516",
-    type: "derogation-relevant",
-    // S1.2: dérogation = filtre pur ; valeur 0 (SIGNAL_TYPE_VALUES["derogation-relevant"] = 0).
-    value: SIGNAL_TYPE_VALUES["derogation-relevant"],
-    confidence: "medium",
-    status: "écarté",
-    sourceRefs: [],
-    detectedAt: "2026-05-15",
-    zone: "H-516",
-    mode: "simulation",
   }),
 ];
