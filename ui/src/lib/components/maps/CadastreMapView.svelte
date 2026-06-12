@@ -158,9 +158,11 @@
         });
 
         // ── Interaction : clic lot → détail (noLot uniquement, anti-PII) ──
-        m.on("click", LOT_FILL, (e: { features?: Array<{ properties: LotLayerProps }> }) => {
+        // MapLibre type features[].properties est { [name: string]: any } ;
+        // on caste vers LotLayerProps via unknown pour garder la sûreté de type côté svelte.
+        m.on("click", LOT_FILL, (e: import("maplibre-gl").MapMouseEvent & { features?: import("maplibre-gl").MapGeoJSONFeature[] }) => {
           const f = e.features?.[0];
-          if (f) selectedLot = f.properties;
+          if (f) selectedLot = f.properties as unknown as LotLayerProps;
         });
         m.on("mouseenter", LOT_FILL, () => {
           (m.getCanvas() as HTMLCanvasElement).style.cursor = "pointer";
