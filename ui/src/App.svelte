@@ -18,6 +18,8 @@
   import SignauxMapView from "$lib/components/maps/SignauxMapView.svelte";
   import OpportunitesMapView from "$lib/components/maps/OpportunitesMapView.svelte";
   import EvaluationMapView from "$lib/components/maps/EvaluationMapView.svelte";
+  import CadastreMapView from "$lib/components/maps/CadastreMapView.svelte";
+  import delsonFixture from "$lib/maps/fixtures/cadastre/delson.snapshot.json";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
@@ -171,6 +173,8 @@
       <OpportunitesMapView />
     {:else if activeView === "carte-evaluation"}
       <EvaluationMapView />
+    {:else if activeView === "carte-cadastre"}
+      <CadastreMapView citySlug="delson" raw={delsonFixture} />
     {:else}
       <ConsoleView />
     {/if}

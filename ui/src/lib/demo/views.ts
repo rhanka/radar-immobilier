@@ -7,6 +7,7 @@
 // "carte-signaux" ajouté : carte QC villes avec compteur signaux 6 mois.
 // "carte-opportunites" ajouté : carte ville/zones avec signaux à approfondir.
 // "carte-evaluation" ajouté : évaluation zone/lots + grilles de scoring.
+// "carte-cadastre" ajouté : vue MapLibre cadastrale (lots/zones/TOD) avec fond OSM.
 export type DemoView =
   | "onboarding"
   | "ciblage"
@@ -20,4 +21,5 @@ export type DemoView =
   | "sources"
   | "carte-signaux"
   | "carte-opportunites"
-  | "carte-evaluation";
+  | "carte-evaluation"
+  | "carte-cadastre";

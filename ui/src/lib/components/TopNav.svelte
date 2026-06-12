@@ -38,6 +38,7 @@
     { id: "carte-signaux", label: "Carte Signaux", icon: Map },
     { id: "carte-opportunites", label: "Carte Opport.", icon: Layers },
     { id: "carte-evaluation", label: "Carte Éval.", icon: BarChart3 },
+    { id: "carte-cadastre", label: "Carte Cadastre", icon: Map },
   ];
 </script>
 
