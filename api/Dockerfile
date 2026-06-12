@@ -63,6 +63,8 @@ COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/package.json ./package.json
 COPY --from=build /workspace/api/dist ./api/dist
 COPY --from=build /workspace/api/package.json ./api/package.json
+# Fixtures simulation CS-L6 (JSON lus depuis le disque à la première requête)
+COPY --from=build /workspace/api/src/services/geo/fixtures ./api/fixtures
 USER radar
 EXPOSE 3000
 CMD ["node", "api/dist/index.js"]
