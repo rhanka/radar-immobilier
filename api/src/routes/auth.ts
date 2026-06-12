@@ -12,6 +12,7 @@
 
 import { Hono, type MiddlewareHandler } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
+import { eq } from "drizzle-orm";
 import type { JWTVerifyGetKey } from "jose";
 import type { AuthConfig } from "../config.js";
 import {
@@ -28,6 +29,8 @@ import {
   type FetchLike,
   type OidcDiscovery,
 } from "../services/auth/oidc.js";
+import type { Database } from "../db/client.js";
+import { accountUsers } from "../db/schema.js";
 
 /** Transient cookie holding the per-login flow state until the callback. */
 const FLOW_COOKIE_NAME = "radar_oauth_flow";
@@ -42,6 +45,12 @@ export interface AuthRouteOptions {
   discovery?: OidcDiscovery;
   /** Clock injection for deterministic exp checks. */
   now?: () => number;
+  /**
+   * Database handle for enrollment (optional seam).
+   * When absent, the callback skips enrollment (fail-open — maintains
+   * backward compatibility for tests without DB).
+   */
+  db?: Database;
 }
 
 /** Is the request a browser navigation (vs. an XHR/fetch from the SPA)? */
@@ -157,6 +166,40 @@ export function authRoute(
       return c.json({ error: "id_token_invalid", detail: String(e) }, 401);
     }
 
+    // Enrollment: create or look up the account when DB is available.
+    // When db is absent (tests without DB), skip enrollment (fail-open).
+    if (options.db) {
+      const existing = await options.db
+        .select()
+        .from(accountUsers)
+        .where(eq(accountUsers.sub, user.sub))
+        .limit(1);
+
+      if (existing.length === 0) {
+        // First login: create account. Auto-approve for the designated admin.
+        const isAdmin = user.email === "admin@sent-tech.ca";
+        await options.db.insert(accountUsers).values({
+          sub: user.sub,
+          email: user.email ?? null,
+          name: user.name ?? null,
+          status: isAdmin ? "approved" : "pending",
+          isAdmin,
+        });
+        if (!isAdmin) {
+          // Redirect to pending screen
+          return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+        }
+      } else {
+        const account = existing[0]!;
+        if (account.status === "pending") {
+          return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+        }
+        if (account.status === "rejected") {
+          return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
+        }
+      }
+    }
+
     const sessionToken = await signSession(
       {
         sub: user.sub,
@@ -200,12 +243,30 @@ export function authRoute(
       now: nowFn(),
     });
     if (!session) return c.json({ authenticated: false });
+
+    // Enrich with account status if DB is available.
+    let status: string | undefined;
+    let isAdmin: boolean | undefined;
+    if (options.db) {
+      const rows = await options.db
+        .select()
+        .from(accountUsers)
+        .where(eq(accountUsers.sub, session.sub))
+        .limit(1);
+      if (rows.length > 0) {
+        status = rows[0]!.status;
+        isAdmin = rows[0]!.isAdmin;
+      }
+    }
+
     return c.json({
       authenticated: true,
       user: {
         sub: session.sub,
         ...(session.name !== undefined ? { name: session.name } : {}),
         ...(session.email !== undefined ? { email: session.email } : {}),
+        ...(status !== undefined ? { status } : {}),
+        ...(isAdmin !== undefined ? { isAdmin } : {}),
       },
     });
   });

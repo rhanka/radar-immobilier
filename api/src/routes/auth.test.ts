@@ -282,3 +282,148 @@ describe("protect middleware", () => {
     expect(res.status).toBe(401);
   });
 });
+
+// ── Enrollment tests (DB mock) ──────────────────────────────────────────────
+
+/**
+ * Extract the field name + comparison value from a drizzle eq() result.
+ * The queryChunks array contains:
+ *   - a column chunk (has 'columnType' and 'name')
+ *   - a value/param chunk (has 'value' as a non-array string)
+ */
+function parseEqFilter(filter: unknown): { field: string; value: string } | null {
+  if (!filter || typeof filter !== "object") return null;
+  const chunks: unknown[] = (filter as { queryChunks?: unknown[] }).queryChunks ?? [];
+  const fieldChunk = chunks.find(
+    (c) =>
+      c &&
+      typeof c === "object" &&
+      "name" in (c as object) &&
+      "columnType" in (c as object),
+  ) as { name: string } | undefined;
+  const valueChunk = chunks.find(
+    (c) =>
+      c &&
+      typeof c === "object" &&
+      "value" in (c as object) &&
+      typeof (c as { value: unknown }).value === "string",
+  ) as { value: string } | undefined;
+  if (!fieldChunk || !valueChunk) return null;
+  return { field: fieldChunk.name, value: valueChunk.value };
+}
+
+/**
+ * Minimal in-memory DB mock for enrollment tests.
+ * We only mock select / insert; the auth route checks status to decide redirect.
+ */
+function makeEnrollmentDb(
+  initialUsers: { sub: string; email?: string; status: string; isAdmin: boolean }[] = [],
+) {
+  const users = [...initialUsers];
+  const inserted: { sub: string; status: string; isAdmin: boolean }[] = [];
+
+  return {
+    _users: users,
+    _inserted: inserted,
+    select: () => ({
+      from: () => ({
+        where: (filter: unknown) => ({
+          limit: (n: number) => {
+            const parsed = parseEqFilter(filter);
+            if (!parsed) return Promise.resolve(users.slice(0, n));
+            return Promise.resolve(
+              users
+                .filter((u) => (u as Record<string, unknown>)[parsed.field] === parsed.value)
+                .slice(0, n),
+            );
+          },
+        }),
+      }),
+    }),
+    insert: () => ({
+      values: (vals: { sub: string; status: string; isAdmin: boolean }) => {
+        users.push(vals);
+        inserted.push(vals);
+        return Promise.resolve();
+      },
+    }),
+    update: () => ({
+      set: () => ({
+        where: () => Promise.resolve(),
+      }),
+    }),
+  };
+}
+
+describe("enrollment — OIDC callback with DB", () => {
+  async function makeCallback(opts: {
+    sub: string;
+    email?: string;
+    existingUsers?: { sub: string; email?: string; status: string; isAdmin: boolean }[];
+  }) {
+    const { idToken, getKey } = await makeIdToken({
+      nonce: "NONCE",
+      sub: opts.sub,
+      ...(opts.email !== undefined ? { email: opts.email } : {}),
+    });
+    const fetchImpl: FetchLike = async (url) => {
+      if (url === DISCOVERY.token_endpoint) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ id_token: idToken }),
+          text: async () => "",
+        };
+      }
+      throw new Error(`unexpected fetch ${url}`);
+    };
+    const dbMock = makeEnrollmentDb(opts.existingUsers ?? []);
+    const db = dbMock as unknown as import("../db/client.js").Database;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, fetchImpl, getKey, db });
+    const flow = { state: "STATE", nonce: "NONCE", codeVerifier: "VERIFIER" };
+    const res = await app.request(
+      "/api/v1/auth/oauth/callback?code=CODE&state=STATE",
+      { headers: { cookie: flowCookie(flow) } },
+    );
+    return { res, db, dbMock };
+  }
+
+  it("new non-admin user is redirected to /pending", async () => {
+    const { res } = await makeCallback({ sub: "new-user", email: "new@example.com" });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+  });
+
+  it("admin@sent-tech.ca is approved and redirected to app", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "admin-sub",
+      email: "admin@sent-tech.ca",
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    // The inserted record should be approved
+    const inserted = dbMock._inserted;
+    expect(inserted.length).toBe(1);
+    expect(inserted[0]!.status).toBe("approved");
+    expect(inserted[0]!.isAdmin).toBe(true);
+  });
+
+  it("existing pending user is redirected to /pending", async () => {
+    const { res } = await makeCallback({
+      sub: "pending-user",
+      existingUsers: [{ sub: "pending-user", status: "pending", isAdmin: false }],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+  });
+
+  it("existing approved user gets a session and is redirected to app", async () => {
+    const { res } = await makeCallback({
+      sub: "approved-user",
+      existingUsers: [{ sub: "approved-user", status: "approved", isAdmin: false }],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+  });
+});

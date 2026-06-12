@@ -14,7 +14,7 @@
  */
 
 import { z } from "zod";
-import { eq, or, sql, inArray } from "drizzle-orm";
+import { eq, or, sql, inArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
@@ -459,4 +459,52 @@ export async function listMrcs(db: Database): Promise<MrcSummary[]> {
   }
 
   return summaries.sort((a, b) => b.nodeCount - a.nodeCount);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Signal node read helpers (WP A.3.x)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Count Signal + DesignationEvent nodes per city in graph_nodes.
+ * Returns only cities that have at least one such node.
+ */
+export async function listCitiesWithSignalNodes(
+  db: Database,
+): Promise<Array<{ citySlug: string; signalCount: number }>> {
+  const rows = await db
+    .select({
+      citySlug: graphNodes.citySlug,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(graphNodes)
+    .where(
+      and(
+        inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
+        isNotNull(graphNodes.citySlug),
+      ),
+    )
+    .groupBy(graphNodes.citySlug);
+  return rows
+    .filter((r) => r.citySlug !== null)
+    .map((r) => ({ citySlug: r.citySlug!, signalCount: r.count }));
+}
+
+/**
+ * Fetch Signal + DesignationEvent nodes for a given city from graph_nodes.
+ * Returns empty array when no such nodes exist for the city (anti-invention).
+ */
+export async function getSignalNodesForCity(
+  db: Database,
+  citySlug: string,
+): Promise<Array<typeof graphNodes.$inferSelect>> {
+  return db
+    .select()
+    .from(graphNodes)
+    .where(
+      and(
+        inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
+        eq(graphNodes.citySlug, citySlug),
+      ),
+    );
 }

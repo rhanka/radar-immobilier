@@ -1,132 +1,151 @@
 /**
- * signals-live.test.ts — the real T1 feed is derived from the ontology API
- * (by-city counts → per-city details → SignalT), with NO synthetic/simulation
- * fixtures. Cities with 0 events are skipped (anti-invention).
+ * signals-live.test.ts — the real T1 feed is derived from graph_nodes
+ * (GET /api/graph-signals/*), with NO synthetic/simulation fixtures.
+ * Cities with 0 signal nodes are skipped (anti-invention).
  */
 import { describe, expect, it, vi } from "vitest";
 
 import { Signal } from "@radar/domain";
 
-import type { SignalsByCityResponse } from "./signals-by-city-client.js";
-import type { SignalDetailResponse } from "./signal-detail-client.js";
+import type { GraphSignalsByCityResponse } from "./graph-signals-by-city-client.js";
+import type { GraphSignalDetailResponse } from "./graph-signal-detail-client.js";
 import {
-  citiesWithEvents,
+  citiesWithSignalNodes,
   loadLiveSignals,
-  mapDesignationEventToSignal,
+  mapGraphSignalNodeToSignal,
 } from "./signals-live.js";
 
-const byCity = (...items: SignalsByCityResponse["items"]): SignalsByCityResponse => ({
+const byCity = (
+  ...cities: GraphSignalsByCityResponse["cities"]
+): GraphSignalsByCityResponse => ({
   ok: true,
-  items,
+  totalCount: cities.reduce((acc, c) => acc + c.signalCount, 0),
+  cities,
 });
 
 const detail = (
   citySlug: string,
-  events: SignalDetailResponse["events"],
-): SignalDetailResponse => ({ ok: true, citySlug, events });
+  nodes: GraphSignalDetailResponse["nodes"],
+): GraphSignalDetailResponse => ({ ok: true, citySlug, nodes });
 
-describe("mapDesignationEventToSignal", () => {
-  it("maps a fully-structured event to a high-confidence real rezoning signal", () => {
-    const signal = mapDesignationEventToSignal(
-      "saint-constant",
-      {
-        label: "Avis de motion règlement de zonage 1926-26 (zone H-431)",
-        reglementNumbers: ["1926-26", "1927-26"],
-        zoneRefs: ["H-431"],
-        sourceRef: "raw/proces-verbaux-saint-constant/2026/05/19/abc.txt",
-        dateObserved: "2026-05-19T12:00:00.000Z",
-      },
-      0,
-    );
+const makeNode = (
+  id: string,
+  citySlug: string,
+  overrides: Partial<GraphSignalDetailResponse["nodes"][0]> = {},
+) => ({
+  id,
+  type: "Signal" as const,
+  label: `Node ${id}`,
+  citySlug,
+  sourceRef: null,
+  createdAt: "2026-05-19",
+  props: {} as Record<string, unknown>,
+  ...overrides,
+});
+
+describe("mapGraphSignalNodeToSignal", () => {
+  it("maps a node with community_name to a high-confidence real rezoning signal", () => {
+    const node = makeNode("sig-001", "saint-constant", {
+      sourceRef: "raw/proc-verbaux-saint-constant/2026/05/19/abc.txt",
+      props: { reglement_number: "1926-26", zone_ref: "H-431", community_name: "Saint-Constant" },
+    });
+    const signal = mapGraphSignalNodeToSignal(node, 0);
 
     // It is a real, valid SignalT (schema-conformant).
     expect(() => Signal.parse(signal)).not.toThrow();
     expect(signal.mode).toBe("real");
     expect(signal.type).toBe("residential-rezoning");
-    expect(signal.value).toBe(10);
     expect(signal.confidence).toBe("high");
     expect(signal.status).toBe("nouveau");
-    expect(signal.bylaw).toBe("1926-26, 1927-26");
+    expect(signal.bylaw).toBe("1926-26");
     expect(signal.zone).toBe("H-431");
     expect(signal.sourceRefs).toEqual([
-      "raw/proces-verbaux-saint-constant/2026/05/19/abc.txt",
+      "raw/proc-verbaux-saint-constant/2026/05/19/abc.txt",
     ]);
-    expect(signal.detectedAt).toBe("2026-05-19T12:00:00.000Z");
+    expect(signal.detectedAt).toBe("2026-05-19");
   });
 
-  it("downgrades confidence when only one of règlement/zone is present", () => {
-    const onlyReglement = mapDesignationEventToSignal(
-      "x",
-      { label: "l", reglementNumbers: ["42-01"], zoneRefs: [], sourceRef: "r", dateObserved: "2026-01-01" },
-      0,
-    );
-    expect(onlyReglement.confidence).toBe("medium");
-    expect(onlyReglement.zone).toBeUndefined();
+  it("downgrades confidence to medium when only sourceRef is present (no community_name)", () => {
+    const node = makeNode("sig-002", "x", {
+      sourceRef: "raw/some/ref.txt",
+      props: { reglement_number: "42-01" },
+    });
+    const signal = mapGraphSignalNodeToSignal(node, 0);
+    expect(signal.confidence).toBe("medium");
+    expect(signal.bylaw).toBe("42-01");
+    expect(signal.zone).toBeUndefined();
+  });
 
-    const neither = mapDesignationEventToSignal(
-      "x",
-      { label: "l", reglementNumbers: [], zoneRefs: [], sourceRef: "", dateObserved: "2026-01-01" },
-      1,
-    );
-    expect(neither.confidence).toBe("low");
-    expect(neither.bylaw).toBeUndefined();
-    expect(neither.sourceRefs).toEqual([]);
+  it("downgrades confidence to low when neither community_name nor sourceRef is present", () => {
+    const node = makeNode("sig-003", "x", { sourceRef: null, props: {} });
+    const signal = mapGraphSignalNodeToSignal(node, 1);
+    expect(signal.confidence).toBe("low");
+    expect(signal.bylaw).toBeUndefined();
+    expect(signal.sourceRefs).toEqual([]);
   });
 });
 
-describe("citiesWithEvents", () => {
-  it("keeps only cities with a positive designationEventCount", () => {
+describe("citiesWithSignalNodes", () => {
+  it("keeps only cities with a positive signalCount", () => {
     const items = byCity(
-      { citySlug: "a", designationEventCount: 2, generatedAt: "2026-05-01" },
-      { citySlug: "b", designationEventCount: 0, generatedAt: null },
-    ).items;
-    expect(citiesWithEvents(items).map((c) => c.citySlug)).toEqual(["a"]);
+      { citySlug: "a", signalCount: 2 },
+      { citySlug: "b", signalCount: 0 },
+    ).cities;
+    expect(citiesWithSignalNodes(items).map((c) => c.citySlug)).toEqual(["a"]);
   });
 });
 
 describe("loadLiveSignals", () => {
-  it("fetches details only for cities with events and returns real signals newest-first", async () => {
-    const fetchSignalsByCity = vi.fn(async () =>
+  it("fetches details only for cities with signal nodes and returns real signals newest-first", async () => {
+    const fetchGraphSignalsByCity = vi.fn(async () =>
       byCity(
-        { citySlug: "saint-constant", designationEventCount: 1, generatedAt: "2026-05-19T12:00:00.000Z" },
-        { citySlug: "sainte-catherine", designationEventCount: 0, generatedAt: null },
-        { citySlug: "chateauguay", designationEventCount: 1, generatedAt: "2026-02-23T12:00:00.000Z" },
+        { citySlug: "saint-constant", signalCount: 1 },
+        { citySlug: "sainte-catherine", signalCount: 0 },
+        { citySlug: "chateauguay", signalCount: 1 },
       ),
     );
-    const fetchSignalDetail = vi.fn(async (citySlug: string) => {
+    const fetchGraphSignalDetail = vi.fn(async (citySlug: string) => {
       if (citySlug === "saint-constant")
         return detail("saint-constant", [
-          { label: "z 1926-26", reglementNumbers: ["1926-26"], zoneRefs: ["H-431"], sourceRef: "r1", dateObserved: "2026-05-19T12:00:00.000Z" },
+          makeNode("sig-sc", "saint-constant", {
+            sourceRef: "r1",
+            createdAt: "2026-05-19",
+            props: { reglement_number: "1926-26", zone_ref: "H-431", community_name: "SC" },
+          }),
         ]);
       if (citySlug === "chateauguay")
         return detail("chateauguay", [
-          { label: "z Z-3001", reglementNumbers: ["Z-3001"], zoneRefs: ["C-754"], sourceRef: "r2", dateObserved: "2026-02-23T12:00:00.000Z" },
+          makeNode("sig-ch", "chateauguay", {
+            sourceRef: "r2",
+            createdAt: "2026-02-23",
+            props: { reglement_number: "Z-3001", zone_ref: "C-754" },
+          }),
         ]);
       throw new Error(`unexpected detail fetch for ${citySlug}`);
     });
 
-    const signals = await loadLiveSignals({ fetchSignalsByCity, fetchSignalDetail });
+    const signals = await loadLiveSignals({ fetchGraphSignalsByCity, fetchGraphSignalDetail });
 
-    // sainte-catherine (0 events) was never fetched → anti-invention.
-    expect(fetchSignalDetail).toHaveBeenCalledTimes(2);
-    expect(fetchSignalDetail).not.toHaveBeenCalledWith("sainte-catherine");
+    // sainte-catherine (0 signal nodes) was never fetched → anti-invention.
+    expect(fetchGraphSignalDetail).toHaveBeenCalledTimes(2);
+    expect(fetchGraphSignalDetail).not.toHaveBeenCalledWith("sainte-catherine");
 
     // Two real signals, all mode:"real", newest-first by detectedAt.
     expect(signals).toHaveLength(2);
     expect(signals.every((s) => s.mode === "real")).toBe(true);
-    expect(signals[0]!.detectedAt).toBe("2026-05-19T12:00:00.000Z");
-    expect(signals[1]!.detectedAt).toBe("2026-02-23T12:00:00.000Z");
+    expect(signals[0]!.detectedAt).toBe("2026-05-19");
+    expect(signals[1]!.detectedAt).toBe("2026-02-23");
     // No simulation fixtures ever appear.
     expect(signals.some((s) => s.mode === "simulation")).toBe(false);
   });
 
-  it("returns an empty feed (honest) when no city has events", async () => {
-    const fetchSignalsByCity = vi.fn(async () =>
-      byCity({ citySlug: "a", designationEventCount: 0, generatedAt: null }),
+  it("returns an empty feed (honest) when no city has signal nodes", async () => {
+    const fetchGraphSignalsByCity = vi.fn(async () =>
+      byCity({ citySlug: "a", signalCount: 0 }),
     );
-    const fetchSignalDetail = vi.fn(async () => detail("a", []));
-    const signals = await loadLiveSignals({ fetchSignalsByCity, fetchSignalDetail });
+    const fetchGraphSignalDetail = vi.fn(async () => detail("a", []));
+    const signals = await loadLiveSignals({ fetchGraphSignalsByCity, fetchGraphSignalDetail });
     expect(signals).toEqual([]);
-    expect(fetchSignalDetail).not.toHaveBeenCalled();
+    expect(fetchGraphSignalDetail).not.toHaveBeenCalled();
   });
 });
