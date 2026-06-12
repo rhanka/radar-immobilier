@@ -81,16 +81,28 @@ function makeMockDb(returnQueue: Array<QueryResult>): Database {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("GET /api/graph/:city", () => {
-  it("returns 404 for an unknown city", async () => {
+  it("returns 200 with empty graph for an unknown city (not yet ingested)", async () => {
     // subgraphForCity queries nodes first → empty → short-circuits.
+    // Route now returns 200 + {nodes:[], edges:[]} instead of 404 so the UI
+    // can display "not ingested yet" gracefully.
     const db = makeMockDb([[]]);
     const app = graphRoute({ db });
     const res = await app.request("/api/graph/__no_such_city__");
-    expect(res.status).toBe(404);
-    const body = (await res.json()) as { ok: boolean; error: string; city: string };
-    expect(body.ok).toBe(false);
-    expect(body.error).toBe("no-graph-data");
-    expect(body.city).toBe("__no_such_city__");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      ok: boolean;
+      citySlug: string;
+      nodeCount: number;
+      edgeCount: number;
+      nodes: unknown[];
+      edges: unknown[];
+    };
+    expect(body.ok).toBe(true);
+    expect(body.citySlug).toBe("__no_such_city__");
+    expect(body.nodeCount).toBe(0);
+    expect(body.edgeCount).toBe(0);
+    expect(body.nodes).toHaveLength(0);
+    expect(body.edges).toHaveLength(0);
   });
 
   it("returns nodes and edges for a known city", async () => {
