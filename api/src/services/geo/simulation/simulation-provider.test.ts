@@ -1,5 +1,5 @@
 /**
- * Tests du provider simulation CS-L6.
+ * Tests du provider carte-steve CS-L6.
  *
  * Vérifie :
  * 1. Les 4 villes retournent des lots (>200 lots chacune)
@@ -7,7 +7,7 @@
  * 3. Candiac retourne 0 zones (score partiel attendu)
  * 4. potentialScore est non-nul sur des lots avec zone + superficie ok (échelle 0-10)
  * 5. Exemple chiffré : Delson, lot zone H-322, tod=true, superficie=200.86m² → 0-10
- * 6. mode:"simulation" présent sur tous les lots
+ * 6. mode:"carte-steve" présent sur tous les lots
  * 7. Aucun lot ne contient de PII (pas de nom de propriétaire)
  * 8. Cohérence scorer canonique : lotPotentialScore(H, 20 log/ha, tod) → score 0-10
  */
@@ -194,10 +194,10 @@ describe("getSimulationLots — delson", () => {
     expect(lots.length).toBeGreaterThan(200);
   });
 
-  it("tous les lots ont mode:'simulation'", () => {
+  it("tous les lots ont mode:'carte-steve'", () => {
     const lots = getSimulationLots("delson");
     for (const l of lots) {
-      expect(l.properties.mode).toBe("simulation");
+      expect(l.properties.mode).toBe("carte-steve");
     }
   });
 
@@ -327,7 +327,7 @@ describe("getSimulationCityFixture", () => {
     for (const city of SIMULATION_CITIES) {
       const fixture = getSimulationCityFixture(city);
       expect(fixture.citySlug).toBe(city);
-      expect(fixture.mode).toBe("simulation");
+      expect(fixture.mode).toBe("carte-steve");
       expect(fixture.nLots).toBeGreaterThan(200);
     }
   });
@@ -379,10 +379,10 @@ describe("getSimulationLotsFeatureCollection", () => {
     }
   });
 
-  it("les properties contiennent mode:'simulation'", () => {
+  it("les properties contiennent mode:'carte-steve'", () => {
     const fc = getSimulationLotsFeatureCollection("sainte-catherine", { limit: 5 });
     for (const f of fc.features) {
-      expect(f.properties.mode).toBe("simulation");
+      expect(f.properties.mode).toBe("carte-steve");
     }
   });
 
