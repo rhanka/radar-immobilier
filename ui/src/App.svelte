@@ -25,6 +25,7 @@
   import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
   import { tourSteps } from "$lib/tour/tour-steps.js";
 
+  // Vue par défaut : Signaux (1ère vue principale)
   let activeView: DemoView = "signaux";
   /** Signal id transmis par Approfondir -> filtre OpportunityFunnel. */
   let opportuniteSignalId: string | undefined = undefined;
@@ -143,18 +144,26 @@
     />
 
     <!-- Zone de contenu -->
-    {#if activeView === "opportunity"}
+    <!-- 4 vues principales -->
+    {#if activeView === "signaux"}
+      <!-- Vue Signaux : carte aplats GeoJSON coloriés par nb d'opportunités / 6 mois -->
+      <SignauxMapView />
+    {:else if activeView === "opportunity"}
       <OpportunityFunnel
         selectedSignalId={opportuniteSignalId}
         selectedSignalLabel={opportuniteSignalLabel}
         onClearFilter={clearOpportuniteFilter}
       />
+    {:else if activeView === "evaluation"}
+      <!-- Vue Évaluation : fusion EvaluationMapView + GrillesView (carte cadastrale + grilles) -->
+      <EvaluationMapView />
+    {:else if activeView === "sources"}
+      <SourcesMapView />
+    <!-- Vues admin/dev (hors nav principale) -->
     {:else if activeView === "onboarding"}
       <OnboardingView />
     {:else if activeView === "ciblage"}
       <CiblageView />
-    {:else if activeView === "signaux"}
-      <SignalsT1View onApprofondir={handleApprofondir} />
     {:else if activeView === "grilles"}
       <GrillesView />
     {:else if activeView === "ontologie"}
@@ -163,8 +172,7 @@
       <CoordinationView />
     {:else if activeView === "backlog"}
       <BacklogView />
-    {:else if activeView === "sources"}
-      <SourcesMapView />
+    <!-- Legacy deep-links (redirigés vers les vues principales équivalentes) -->
     {:else if activeView === "carte-signaux"}
       <SignauxMapView />
     {:else if activeView === "carte-opportunites"}
@@ -172,6 +180,7 @@
     {:else if activeView === "carte-evaluation"}
       <EvaluationMapView />
     {:else}
+      <!-- Fallback : console sources -->
       <ConsoleView />
     {/if}
   </div>
