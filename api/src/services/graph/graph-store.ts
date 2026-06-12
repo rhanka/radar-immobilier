@@ -206,40 +206,51 @@ export interface Neighbor {
 /**
  * All edges incident on `nodeId` (outgoing + incoming), with the connected
  * node record attached. Empty array when the node has no edges.
+ *
+ * Fix N+1 : les nœuds voisins sont chargés en une seule requête `inArray`
+ * plutôt qu'un SELECT par arête.
  */
 export async function queryNeighbors(
   db: Database,
   nodeId: string,
 ): Promise<Neighbor[]> {
-  // Outgoing edges
+  // Outgoing edges (nodeId → dst)
   const outEdges = await db
     .select()
     .from(graphEdges)
     .where(eq(graphEdges.srcId, nodeId));
 
-  // Incoming edges
+  // Incoming edges (src → nodeId)
   const inEdges = await db
     .select()
     .from(graphEdges)
     .where(eq(graphEdges.dstId, nodeId));
 
+  // Collect all neighbour ids to fetch in a single round-trip.
+  const neighbourIds = [
+    ...outEdges.map((e) => e.dstId),
+    ...inEdges.map((e) => e.srcId),
+  ];
+
+  if (neighbourIds.length === 0) return [];
+
+  // Single query for all neighbour nodes (replaces the per-edge SELECT).
+  const neighbourNodes = await db
+    .select()
+    .from(graphNodes)
+    .where(inArray(graphNodes.id, neighbourIds));
+
+  const nodeMap = new Map(neighbourNodes.map((n) => [n.id, n]));
+
   const results: Neighbor[] = [];
 
   for (const edge of outEdges) {
-    const [node] = await db
-      .select()
-      .from(graphNodes)
-      .where(eq(graphNodes.id, edge.dstId))
-      .limit(1);
+    const node = nodeMap.get(edge.dstId);
     if (node) results.push({ edge, node, direction: "out" });
   }
 
   for (const edge of inEdges) {
-    const [node] = await db
-      .select()
-      .from(graphNodes)
-      .where(eq(graphNodes.id, edge.srcId))
-      .limit(1);
+    const node = nodeMap.get(edge.srcId);
     if (node) results.push({ edge, node, direction: "in" });
   }
 
