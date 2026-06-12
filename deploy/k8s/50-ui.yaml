@@ -34,13 +34,35 @@ data:
       root /usr/share/nginx/html;
       index index.html;
 
-      # SPA history fallback.
+      # ── AS-IS PRIVATE PREVIEW: BasicAuth at the edge ───────────────────────
+      # The platform Traefik runs with --providers.kubernetesingress only (no
+      # CRD provider), so a Traefik BasicAuth Middleware is not available. The
+      # nginx baked into this UI pod is the first hop we control after Traefik's
+      # TLS termination, so we gate the whole origin (SPA + /api proxy) here with
+      # HTTP Basic auth backed by a k8s Secret (radar-edge-basicauth, an htpasswd
+      # file mounted read-only at /etc/nginx/auth/htpasswd, never committed). The
+      # Let's Encrypt cert is unaffected (Traefik still terminates TLS upstream).
+      # This keeps the as-is url private while the OIDC RP is being wired.
+      auth_basic "radar-immobilier (private preview)";
+      auth_basic_user_file /etc/nginx/auth/htpasswd;
+
+      # k8s liveness/readiness probe target — NO auth (probes send no creds and
+      # would otherwise 401-kill the pod). Internal-only 200, not the SPA.
+      location = /healthz {
+        auth_basic off;
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 "ok\n";
+      }
+
+      # SPA history fallback (BasicAuth inherited from the server block).
       location / {
         try_files $uri $uri/ /index.html;
       }
 
       # Same-origin API proxy to the radar api Service (incl. the sentropic
       # OIDC callback /api/v1/auth/oauth/callback handled by the api RP glue).
+      # BasicAuth inherited from the server block gates every /api/* call too.
       location /api/ {
         proxy_pass http://radar-api:3000;
         proxy_set_header Host $host;
@@ -111,12 +133,19 @@ spec:
           volumeMounts:
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d
+            # htpasswd for the edge BasicAuth (radar-edge-basicauth Secret).
+            # Mounted read-only; the file is referenced by auth_basic_user_file.
+            - name: edge-basicauth
+              mountPath: /etc/nginx/auth
+              readOnly: true
+          # Probes hit /healthz (auth_basic off) so the BasicAuth gate on /
+          # does not 401-kill the pod.
           readinessProbe:
-            httpGet: { path: /, port: http }
+            httpGet: { path: /healthz, port: http }
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
-            httpGet: { path: /, port: http }
+            httpGet: { path: /healthz, port: http }
             initialDelaySeconds: 20
             periodSeconds: 15
           resources:
@@ -126,3 +155,9 @@ spec:
         - name: nginx-conf
           configMap:
             name: radar-ui-nginx
+        - name: edge-basicauth
+          secret:
+            secretName: radar-edge-basicauth
+            items:
+              - key: htpasswd
+                path: htpasswd

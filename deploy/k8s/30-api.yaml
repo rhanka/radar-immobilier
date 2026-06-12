@@ -42,7 +42,19 @@ data:
   # `radar-immobilier` client row at the IdP with this id and the redirect_uri
   # below (mirrors design-system seeding in sentropic
   # api/src/services/auth/oauth-client-seed.ts).
-  SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier"
+  #
+  # ── AS-IS PRIVATE PREVIEW (auth delegation TEMPORARILY off) ───────────────
+  # The sentropic IdP client row for `radar-immobilier` is not yet fully wired
+  # (the OIDC authorization-code flow does not complete, so the RP never mints a
+  # session cookie and every /api/* call 401s — the SPA loads but no data does).
+  # To make the as-is usable behind a PRIVATE url, we disable the application
+  # auth layer by leaving SENTROPIC_OAUTH_CLIENT_ID empty: resolveAuthConfig()
+  # (api/src/config.ts) only sets `enabled=true` when ALL five OIDC fields are
+  # non-empty, so an empty client_id yields `enabled=false` and protect()
+  # becomes a pass-through (fail-open, the documented dev posture). The url stays
+  # private via a Traefik BasicAuth middleware at the edge (60-ingress.yaml).
+  # FOLLOW-UP: seed the IdP client row + restore this id to re-enable OIDC RP.
+  SENTROPIC_OAUTH_CLIENT_ID: ""
   SENTROPIC_OAUTH_SCOPES: "openid profile email"
   # Public base URL of this app (the Ingress host) — used for the OIDC
   # redirect_uri and user-facing callbacks (mirrors sentropic AUTH_CALLBACK_BASE_URL).
