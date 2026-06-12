@@ -27,23 +27,48 @@ import { QC_MUNICIPALITIES } from "@radar/sources";
 export const graphifyNodeSchema = z.object({
   id: z.string(),
   label: z.string(),
-  /** graphify calls this `file_type`; may be absent on older snapshots. */
+  /**
+   * graphify v1 (old) emits `file_type`; graphify v2 (SCW) emits `type`.
+   * Both are accepted and mapped to the DB `type` column.
+   */
   file_type: z.string().optional(),
+  /** graphify v2: node type (e.g. "Signal", "DesignationEvent", "Bylaw", …). */
+  type: z.string().optional(),
   source_file: z.string().optional(),
   community: z.number().optional(),
   community_name: z.string().optional(),
+  /** graphify v2: reconciliation status ("candidate", "validated", …). */
+  status: z.string().optional(),
+  /** graphify v2: textual description of the node. */
+  description: z.string().optional(),
+  /**
+   * graphify v2: evidence refs list.
+   * Shape varies across snapshots; kept as passthrough for props.
+   */
+  refs: z.array(z.record(z.unknown())).optional(),
 });
 
 /** A single link / edge as emitted by graphify. */
 export const graphifyLinkSchema = z.object({
   source: z.string(),
   target: z.string(),
-  /** graphify uses `relation` for the edge label. */
-  relation: z.string(),
+  /**
+   * graphify v1 (old) emits `relation`; graphify v2 (SCW) emits `type` on
+   * edges. We coerce both: `relation` takes priority when present (v1),
+   * otherwise `type` is used (v2). At least one of the two is required.
+   */
+  relation: z.string().optional(),
+  /** graphify v2: edge type field (used when `relation` is absent). */
+  type: z.string().optional(),
   confidence: z.string().optional(),
   confidence_score: z.number().optional(),
   source_file: z.string().optional(),
-});
+  /** graphify v2: evidence refs on edges. */
+  refs: z.array(z.record(z.unknown())).optional(),
+}).refine(
+  (v) => v.relation !== undefined || v.type !== undefined,
+  { message: "edge must have either 'relation' or 'type'" },
+);
 
 /**
  * The top-level graphify graph.json structure.
@@ -84,32 +109,42 @@ export interface EdgeRow {
 
 /** Build a DB-shaped node row from a graphify node. */
 export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): NodeRow {
-  const { id, label, file_type, source_file, community, community_name } = node;
+  const { id, label, file_type, type: nodeType, source_file, community, community_name, status, description, refs } = node;
   return {
     id,
     label,
-    type: file_type ?? "concept",
+    // v1: file_type; v2: type; fallback: "concept"
+    type: file_type ?? nodeType ?? "concept",
     citySlug: citySlug ?? null,
     sourceRef: source_file ?? null,
     props: {
       ...(community !== undefined ? { community } : {}),
       ...(community_name !== undefined ? { community_name } : {}),
       ...(source_file !== undefined ? { source_file } : {}),
+      // v2 extras — kept in props for forward compatibility
+      ...(status !== undefined ? { status } : {}),
+      ...(description !== undefined ? { description } : {}),
+      ...(refs !== undefined ? { refs } : {}),
     },
   };
 }
 
 /** Build a DB-shaped edge row from a graphify link. */
 export function buildEdgeRow(link: GraphifyLink): EdgeRow {
-  const { source, target, relation, confidence, confidence_score, source_file } = link;
+  // v1 emits `relation`; v2 emits `type` for the edge kind. Non-null assert is
+  // safe here because the Zod refine above guarantees at least one is present.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const kind = link.relation ?? link.type!;
+  const { source, target, confidence, confidence_score, source_file, refs } = link;
   return {
     srcId: source,
     dstId: target,
-    kind: relation,
+    kind,
     props: {
       ...(confidence !== undefined ? { confidence } : {}),
       ...(confidence_score !== undefined ? { confidence_score } : {}),
       ...(source_file !== undefined ? { source_file } : {}),
+      ...(refs !== undefined ? { refs } : {}),
     },
   };
 }

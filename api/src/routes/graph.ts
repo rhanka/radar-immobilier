@@ -75,19 +75,14 @@ export function graphRoute(deps: GraphDeps): Hono {
    * Sub-graph for a city — all `graph_nodes` with the given `city_slug` plus
    * all `graph_edges` whose both endpoints belong to that node set.
    *
-   * Returns `{ ok: true, citySlug, nodes[], edges[] }` or 404 when no nodes
-   * are stored for the requested city.
+   * Returns `{ ok: true, citySlug, nodes[], edges[] }` — always 200, even
+   * when no nodes are stored yet (returns an empty graph rather than 404 so
+   * the UI can display "not ingested yet" gracefully and the SCW→PG projection
+   * can confirm success via a simple 200 check).
    */
   app.get("/api/graph/:city", async (c) => {
     const city = c.req.param("city");
     const subgraph = await subgraphForCity(deps.db, city);
-
-    if (subgraph.nodes.length === 0) {
-      return c.json(
-        { ok: false, error: "no-graph-data", city },
-        404,
-      );
-    }
 
     return c.json({
       ok: true,
