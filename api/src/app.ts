@@ -19,6 +19,7 @@ import { graphRoute, type GraphDeps } from "./routes/graph.js";
 import { geoLotsRoute } from "./routes/geo-lots.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
+import { adminRoute } from "./routes/admin.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -45,7 +46,22 @@ export function createApp(deps: AppDeps): Hono {
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   if (deps.auth) {
     app.use("*", protect(deps.auth));
-    app.route("/", authRoute(deps.auth, deps.authOptions));
+    // Pass db into authOptions so enrollment runs in production.
+    const authOptions: AuthRouteOptions = {
+      ...deps.authOptions,
+      ...(deps.db ? { db: deps.db } : {}),
+    };
+    app.route("/", authRoute(deps.auth, authOptions));
+    // Admin routes require a live DB.
+    if (deps.db) {
+      app.route(
+        "/",
+        adminRoute({
+          db: deps.db,
+          sessionSecret: deps.auth.sessionSecret,
+        }),
+      );
+    }
   }
 
   app.route("/", healthRoute(deps));
