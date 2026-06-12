@@ -1,16 +1,15 @@
 /**
- * signals-live — derive the REAL T1 signal feed from the ontology API.
+ * signals-live — derive the REAL T1 signal feed from graph_nodes.
  *
- * The T1 feed used to be seeded from `demoSignalsT1`, which mixed 3 real pilot
- * signals with 3 synthetic `mode:"simulation"` fixtures. This module replaces
- * that with the real pipeline: it reads aggregate DesignationEvent counts
- * (`GET /api/signals/by-city`), then fetches the per-city change details
- * (`GET /api/signals/:city/detail`) for every city that actually has events,
- * and maps each DesignationEvent to a `SignalT` (always `mode:"real"`).
+ * Replaces the old ontology/project-state pipeline (~9 villes pilote) with a
+ * direct read of Signal and DesignationEvent nodes from graph_nodes (graphify
+ * pipeline, ~197 villes / 1 141 nœuds).
  *
- * Anti-invention: a city with `designationEventCount === 0` is skipped (no
- * detail fetch, no fabricated signal). When no city has events the feed is
- * legitimately empty — that is the honest state, not an error.
+ * GET /api/graph-signals/by-city → cities with ≥1 signal node
+ * GET /api/graph-signals/:city   → Signal+DesignationEvent nodes for one city
+ *
+ * Anti-invention: a city with signalCount === 0 is skipped (no detail fetch,
+ * no fabricated signal). When no city has nodes the feed is legitimately empty.
  */
 
 import {
@@ -20,85 +19,103 @@ import {
 } from "@radar/domain";
 
 import type {
-  SignalCityItem,
-  SignalsByCityResponse,
-} from "./signals-by-city-client.js";
+  GraphSignalCityItem,
+  GraphSignalsByCityResponse,
+} from "./graph-signals-by-city-client.js";
 import type {
-  DesignationEventDetail,
-  SignalDetailResponse,
-} from "./signal-detail-client.js";
+  GraphSignalNode,
+  GraphSignalDetailResponse,
+} from "./graph-signal-detail-client.js";
+
+// Re-export types so downstream consumers can import from this module.
+export type { GraphSignalCityItem, GraphSignalsByCityResponse };
+export type { GraphSignalNode, GraphSignalDetailResponse };
 
 /** Minimal client surface this module depends on (injected in tests). */
 export interface LiveSignalsClients {
-  fetchSignalsByCity: () => Promise<SignalsByCityResponse>;
-  fetchSignalDetail: (citySlug: string) => Promise<SignalDetailResponse>;
+  fetchGraphSignalsByCity: () => Promise<GraphSignalsByCityResponse>;
+  fetchGraphSignalDetail: (citySlug: string) => Promise<GraphSignalDetailResponse>;
 }
 
 /**
- * Map one real DesignationEvent to a T1 `SignalT`.
+ * Map one graph_nodes Signal/DesignationEvent row to a T1 `SignalT`.
  *
- * A DesignationEvent is a confirmed zonage change (avis de motion / règlement),
- * so it maps to the highest-value VISION type, `residential-rezoning` (10/10).
- *
- * Confidence is derived from how well-structured the evidence is:
- *   - `high`   the event carries at least one règlement number AND one zone ref,
- *   - `medium` it carries one of the two,
- *   - `low`    it carries neither (label-only — kept honest, still real).
+ * Confidence is derived from available evidence:
+ *   - `high`   node carries community_name (rich community context)
+ *   - `medium` node carries a sourceRef (evidence file reference)
+ *   - `low`    label only (honest — still real, just less structured)
  */
-export function mapDesignationEventToSignal(
-  citySlug: string,
-  event: DesignationEventDetail,
+export function mapGraphSignalNodeToSignal(
+  node: GraphSignalNode,
   index: number,
 ): SignalT {
-  const hasReglement = event.reglementNumbers.length > 0;
-  const hasZone = event.zoneRefs.length > 0;
-  const confidence: ConfidenceT =
-    hasReglement && hasZone ? "high" : hasReglement || hasZone ? "medium" : "low";
+  const props = node.props ?? {};
+  const hasCommunity = Boolean(props.community_name);
+  const hasSourceRef = Boolean(node.sourceRef);
+  const confidence: ConfidenceT = hasCommunity
+    ? "high"
+    : hasSourceRef
+      ? "medium"
+      : "low";
 
   const signal: SignalT = {
-    id: `evt-${citySlug}-${index}`,
+    id: `gn-${node.citySlug ?? "x"}-${index}`,
     type: "residential-rezoning",
     value: SIGNAL_TYPE_VALUES["residential-rezoning"],
     confidence,
     status: "nouveau",
-    sourceRefs: event.sourceRef ? [event.sourceRef] : [],
-    detectedAt: event.dateObserved,
+    sourceRefs: node.sourceRef ? [node.sourceRef] : [],
+    detectedAt: node.createdAt
+      ? node.createdAt.slice(0, 10)
+      : new Date().toISOString().slice(0, 10),
     mode: "real",
   };
-  if (hasReglement) signal.bylaw = event.reglementNumbers.join(", ");
-  if (hasZone) signal.zone = event.zoneRefs.join(", ");
+
+  if (props.reglement_number) signal.bylaw = String(props.reglement_number);
+  if (props.zone_ref) signal.zone = String(props.zone_ref);
+
   return signal;
 }
 
-/** Cities with at least one real DesignationEvent (count > 0). */
-export function citiesWithEvents(
-  items: readonly SignalCityItem[],
-): SignalCityItem[] {
-  return items.filter((i) => i.designationEventCount > 0);
+/** Cities with at least one signal node (count > 0). */
+export function citiesWithSignalNodes(
+  items: readonly GraphSignalCityItem[],
+): GraphSignalCityItem[] {
+  return items.filter((i) => i.signalCount > 0);
 }
 
 /**
- * Load the real T1 signal feed: aggregate counts → per-city details → signals.
- * Returns signals sorted newest-first by `detectedAt`. Never fabricates: an
- * empty array is the honest result when no city has events.
+ * Load the real T1 signal feed from graph_nodes:
+ * aggregate counts → per-city nodes → signals.
+ *
+ * Returns signals sorted newest-first by `detectedAt`. Never fabricates:
+ * an empty array is the honest result when no city has signal nodes.
+ *
+ * Uses Promise.allSettled for per-city fetches so a single city failure
+ * does not abort the entire feed.
  */
 export async function loadLiveSignals(
   clients: LiveSignalsClients,
 ): Promise<SignalT[]> {
-  const byCity = await clients.fetchSignalsByCity();
-  const cities = citiesWithEvents(byCity.items);
+  const byCity = await clients.fetchGraphSignalsByCity();
+  const cities = citiesWithSignalNodes(byCity.cities);
 
-  const perCity = await Promise.all(
-    cities.map((c) => clients.fetchSignalDetail(c.citySlug)),
+  const settled = await Promise.allSettled(
+    cities.map((c) => clients.fetchGraphSignalDetail(c.citySlug)),
   );
 
   const signals: SignalT[] = [];
-  for (const detail of perCity) {
-    detail.events.forEach((event, i) => {
-      signals.push(mapDesignationEventToSignal(detail.citySlug, event, i));
-    });
+  for (const result of settled) {
+    if (result.status === "fulfilled") {
+      result.value.nodes.forEach((node, i) => {
+        signals.push(mapGraphSignalNodeToSignal(node, i));
+      });
+    }
+    // Rejected (network error, 404): skip silently — anti-invention.
   }
 
-  signals.sort((a, b) => (a.detectedAt < b.detectedAt ? 1 : a.detectedAt > b.detectedAt ? -1 : 0));
+  signals.sort((a, b) =>
+    a.detectedAt < b.detectedAt ? 1 : a.detectedAt > b.detectedAt ? -1 : 0,
+  );
   return signals;
 }

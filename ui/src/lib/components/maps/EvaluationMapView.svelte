@@ -44,8 +44,11 @@
   import { fetchLots, type LotFeatureCollection, type LotFeature } from "$lib/maps/lots-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
+  import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
+  import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
   import { loadLiveSignals } from "$lib/signals/signals-live.js";
-  import { fetchSignalsByCity } from "$lib/signals/signals-by-city-client.js";
+  
+  
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
@@ -72,16 +75,19 @@
   let cityEntries: CitySignalEntry[] = [];
   let signalsLoading = true;
 
-  // Chargement des signaux réels au montage (même pipeline que SignalsT1View)
+  // Chargement des signaux réels au montage (pipeline graph_nodes, ~197 villes)
   async function loadSignalEntries(): Promise<void> {
     try {
-      const allSignals = await loadLiveSignals({ fetchSignalsByCity, fetchSignalDetail });
+      const allSignals = await loadLiveSignals({
+        fetchGraphSignalsByCity,
+        fetchGraphSignalDetail,
+      });
       // Grouper par ville depuis l'index des villes prioritisées
+      // L'id des signaux graph_nodes est "gn-{citySlug}-{index}"
       const allCities = prioritizedCities();
       const bySlug = new Map<string, SignalT[]>();
       for (const signal of allSignals) {
-        // L'id des signaux live est "evt-{citySlug}-{index}"
-        const match = signal.id.match(/^evt-([^-].+)-\d+$/);
+        const match = signal.id.match(/^gn-(.+)-\d+$/);
         if (match) {
           const slug = match[1];
           if (!bySlug.has(slug)) bySlug.set(slug, []);
@@ -89,10 +95,10 @@
         }
       }
       const entries: CitySignalEntry[] = [];
-      for (const [slug, signals] of bySlug.entries()) {
+      for (const [slug, sigs] of bySlug.entries()) {
         const city = allCities.find((c) => c.slug === slug);
         if (city) {
-          entries.push({ slug, name: city.name, mrc: city.mrc ?? undefined, signals });
+          entries.push({ slug, name: city.name, mrc: city.mrc ?? undefined, signals: sigs });
         }
       }
       cityEntries = entries;
