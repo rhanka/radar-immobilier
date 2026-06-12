@@ -67,7 +67,7 @@
     {/each}
   </nav>
 
-  <!-- Actions : visite guidee + toggle Reel/Simulation -->
+  <!-- Actions : visite guidee + toggle Réel/Carte Steve -->
   <div class="flex shrink-0 items-center gap-2">
     {#if onStartTour}
       <button
@@ -84,8 +84,8 @@
 
     <button
       type="button"
-      aria-label={mode === "real" ? "Passer en mode simulation" : "Passer en mode réel"}
-      title={mode === "real" ? "Passer en mode simulation" : "Passer en mode réel"}
+      aria-label={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles scrappées"}
+      title={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles scrappées"}
       on:click={toggleMode}
       class={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
         mode === "real"
@@ -96,7 +96,7 @@
       <span
         class={`h-2 w-2 rounded-full ${mode === "real" ? "bg-teal-500" : "bg-violet-500"}`}
       ></span>
-      {mode === "real" ? "Réel" : "Simulation"}
+      {mode === "real" ? "Réel" : "Carte Steve"}
     </button>
   </div>
 </header>
