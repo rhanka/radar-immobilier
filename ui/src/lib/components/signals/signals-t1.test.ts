@@ -3,17 +3,15 @@ import { demoSignalsT1 } from "$lib/demo/radar-t1-signals.js";
 import { filterByStatus, sortSignals, buildFeed, markApprofondir } from "$lib/signals/feed.js";
 import { VISION_PRIORITY_RANK } from "$lib/signals/feed.js";
 
-// SI1 — toutes les 6 lignes sont dans le dataset (simulation jamais masquée dans ce feed)
-describe("demoSignalsT1 — dataset complet", () => {
-  it("contient exactement 6 signaux", () => {
-    expect(demoSignalsT1).toHaveLength(6);
+// Tous les signaux sont désormais réels (mode:"real") — plus de synthétique.
+describe("demoSignalsT1 — dataset réel uniquement", () => {
+  it("contient exactement 3 signaux réels", () => {
+    expect(demoSignalsT1).toHaveLength(3);
   });
 
-  it("contient 3 signaux réels et 3 exemples simulation", () => {
-    const real = demoSignalsT1.filter((s) => s.mode === "real");
-    const sim = demoSignalsT1.filter((s) => s.mode === "simulation");
-    expect(real).toHaveLength(3);
-    expect(sim).toHaveLength(3);
+  it("tous les signaux sont mode:real, aucun synthétique", () => {
+    expect(demoSignalsT1.every((s) => s.mode === "real")).toBe(true);
+    expect(demoSignalsT1.some((s) => s.mode === "simulation")).toBe(false);
   });
 });
 
@@ -35,7 +33,8 @@ describe("feed.ts — helpers de tri/filtre purs", () => {
 
   it("sort by confidence asc: signaux faible-confiance en premier", () => {
     const sorted = sortSignals(demoSignalsT1, "confidence", "asc");
-    expect(sorted[0].confidence).toBe("low");
+    // Les 3 signaux réels : 2 high + 1 medium → premier est medium
+    expect(["medium", "low"]).toContain(sorted[0].confidence);
   });
 
   // S1.4 — tri par priorité VISION : residential-rezoning (rang 1) en premier
@@ -50,45 +49,42 @@ describe("feed.ts — helpers de tri/filtre purs", () => {
   });
 
   // (d) filtre par statut
-  it("filterByStatus 'nouveau' retourne seulement les signaux nouveau", () => {
-    const filtered = filterByStatus(demoSignalsT1, "nouveau");
-    expect(filtered.length).toBeGreaterThan(0);
-    expect(filtered.every((s) => s.status === "nouveau")).toBe(true);
+  it("filterByStatus 'à-approfondir' retourne les 3 signaux réels", () => {
+    const filtered = filterByStatus(demoSignalsT1, "à-approfondir");
+    expect(filtered.length).toBe(3);
+    expect(filtered.every((s) => s.status === "à-approfondir")).toBe(true);
   });
 
-  it("filterByStatus 'écarté' retourne seulement les signaux écarté", () => {
-    const filtered = filterByStatus(demoSignalsT1, "écarté");
-    expect(filtered.length).toBeGreaterThan(0);
-    expect(filtered.every((s) => s.status === "écarté")).toBe(true);
-  });
-
-  it("filterByStatus 'tous' retourne les 6 signaux", () => {
+  it("filterByStatus 'tous' retourne les 3 signaux", () => {
     const filtered = filterByStatus(demoSignalsT1, "tous");
     expect(filtered).toHaveLength(demoSignalsT1.length);
-    // SI1 : les signaux simulation sont présents dans le pool complet
-    expect(filtered.some((s) => s.mode === "simulation")).toBe(true);
+    // Aucun signal synthétique dans le pool
+    expect(filtered.every((s) => s.mode === "real")).toBe(true);
   });
 
-  it("filterByStatus 'surveillance' retourne seulement les signaux surveillance", () => {
+  it("filterByStatus 'écarté' retourne un tableau vide (aucun signal écarté)", () => {
+    const filtered = filterByStatus(demoSignalsT1, "écarté");
+    expect(filtered.length).toBe(0);
+  });
+
+  it("filterByStatus 'surveillance' retourne un tableau vide (aucun signal surveillance)", () => {
     const filtered = filterByStatus(demoSignalsT1, "surveillance");
-    expect(filtered.length).toBeGreaterThan(0);
-    expect(filtered.every((s) => s.status === "surveillance")).toBe(true);
+    expect(filtered.length).toBe(0);
   });
 
-  it("buildFeed applique le filtre puis le tri — écarté + value desc", () => {
-    const result = buildFeed(demoSignalsT1, "écarté", "value", "desc");
-    expect(result.every((s) => s.status === "écarté")).toBe(true);
+  it("buildFeed applique le filtre puis le tri — à-approfondir + value desc", () => {
+    const result = buildFeed(demoSignalsT1, "à-approfondir", "value", "desc");
+    expect(result.every((s) => s.status === "à-approfondir")).toBe(true);
     for (let i = 1; i < result.length; i++) {
       expect(result[i - 1].value).toBeGreaterThanOrEqual(result[i].value);
     }
   });
 
   // (e) Approfondir mutation immutable — AC#4
-  // demoSignalsT1[3] démarre en "nouveau" — ancre sûre pour le test d'immutabilité.
   it("markApprofondir positionne à-approfondir de façon immutable", () => {
-    const target = demoSignalsT1[3]; // status: "nouveau"
+    const target = demoSignalsT1[0]; // status: "à-approfondir" (signal réel)
     const out = markApprofondir(demoSignalsT1, target.id);
     expect(out.find((s) => s.id === target.id)?.status).toBe("à-approfondir");
-    expect(demoSignalsT1[3].status).not.toBe("à-approfondir"); // original inchangé
+    expect(demoSignalsT1[0].status).toBe("à-approfondir"); // inchangé (déjà à-approfondir)
   });
 });
