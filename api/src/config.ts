@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+/**
+ * Optional string that treats the empty string as absent.
+ * K8s ConfigMaps often set a key to "" to "unset" it; Zod's .optional()
+ * accepts undefined but rejects "" against .min(1). This helper normalises
+ * "" → undefined before the inner schema runs, so `.min(1).optional()` works
+ * as intended even when the env var is present but empty.
+ */
+function optStr(inner: z.ZodString) {
+  return z.preprocess((v) => (v === "" ? undefined : v), inner.optional());
+}
+
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "test", "production"])
@@ -80,24 +91,30 @@ const envSchema = z.object({
   // (fail-open, same posture as RADAR_ONTOLOGY_WRITE_TOKEN). Auth is enabled
   // only when both SESSION_SECRET *and* SENTROPIC_OAUTH_CLIENT_SECRET are set
   // (the two secrets the deployment injects from radar-sentropic-auth).
+  //
+  // Note: optStr() is used here instead of z.string().min(1).optional() because
+  // K8s ConfigMaps may set a key to "" to "disable" it. Zod's .min(1) rejects
+  // the empty string even with .optional() (which only allows undefined). The
+  // optStr() helper normalises "" → undefined so that an empty ConfigMap key is
+  // treated as absent and does not trigger a validation error.
   /** IdP issuer origin, e.g. https://auth.sent-tech.ca. Discovery is at
    * `${issuer}/.well-known/openid-configuration`. */
-  SENTROPIC_IDP_ISSUER: z.string().url().optional(),
+  SENTROPIC_IDP_ISSUER: optStr(z.string().url()),
   /** This app's registered oauth_clients id at the IdP. */
-  SENTROPIC_OAUTH_CLIENT_ID: z.string().min(1).optional(),
+  SENTROPIC_OAUTH_CLIENT_ID: optStr(z.string().min(1)),
   /** Confidential client secret (client_secret_basic). Secret. */
-  SENTROPIC_OAUTH_CLIENT_SECRET: z.string().min(1).optional(),
+  SENTROPIC_OAUTH_CLIENT_SECRET: optStr(z.string().min(1)),
   /** Absolute redirect_uri registered at the IdP, e.g.
    * https://immo.sent-tech.ca/api/v1/auth/oauth/callback. */
-  SENTROPIC_OAUTH_REDIRECT_URI: z.string().url().optional(),
+  SENTROPIC_OAUTH_REDIRECT_URI: optStr(z.string().url()),
   /** Space-separated scopes; openid is always required. */
   SENTROPIC_OAUTH_SCOPES: z.string().default("openid profile email"),
   /** Public base URL of this app (the Ingress host). Used to scope the
    * session cookie and as the post-login landing default. */
-  AUTH_CALLBACK_BASE_URL: z.string().url().optional(),
+  AUTH_CALLBACK_BASE_URL: optStr(z.string().url()),
   /** Symmetric key the api uses to sign its OWN session cookie (HS256).
    * Secret — distinct from the IdP. */
-  SESSION_SECRET: z.string().min(1).optional(),
+  SESSION_SECRET: optStr(z.string().min(1)),
   /** Session cookie lifetime in seconds (default 8h). */
   SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(28800),
 });
