@@ -4,8 +4,8 @@
   import { Alert, Button, Select } from "@sentropic/design-system-svelte";
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
-  import { fetchSignalsByCity } from "$lib/signals/signals-by-city-client.js";
-  import { fetchSignalDetail } from "$lib/signals/signal-detail-client.js";
+  import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
+  import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
   import { loadLiveSignals } from "$lib/signals/signals-live.js";
   import type { SignalT, SignalStatusT } from "@radar/domain";
   import SignalRow from "./SignalRow.svelte";
@@ -14,17 +14,20 @@
   // ── Props ────────────────────────────────────────────────────────────────────
   export let onApprofondir: (s: SignalT) => void = () => {};
 
-  // ── Signaux RÉELS chargés depuis l'API ontologie (DesignationEvent) ──────────
+  // ── Signaux RÉELS chargés depuis graph_nodes (Signal+DesignationEvent) ───────
   //   Plus aucun signal simulé : le fil reflète les vrais changements de zonage
-  //   détectés (avis de motion / règlements) via GET /api/signals/by-city +
-  //   /api/signals/:city/detail. Persistance des actions hors-périmètre ÉV3.
+  //   détectés via GET /api/graph-signals/by-city + /api/graph-signals/:city.
+  //   Pipeline graphify (~197 villes, ~1141 nœuds). Persistance hors-périmètre ÉV3.
   let signals: SignalT[] = [];
   let loading = true;
   let loadError: string | null = null;
 
   onMount(async () => {
     try {
-      signals = await loadLiveSignals({ fetchSignalsByCity, fetchSignalDetail });
+      signals = await loadLiveSignals({
+        fetchGraphSignalsByCity,
+        fetchGraphSignalDetail,
+      });
     } catch (e) {
       loadError = e instanceof Error ? e.message : String(e);
     } finally {
@@ -242,7 +245,7 @@
         <Alert
           tone="info"
           title="Provenance des signaux"
-          message="Tous les signaux affichés sont réels : ils proviennent des DesignationEvent détectés dans les procès-verbaux et avis publics des villes suivies (changements de zonage — avis de motion / règlements). Aucun exemple simulé n'est inclus."
+          message="Tous les signaux affichés sont réels : ils proviennent des nœuds Signal et DesignationEvent détectés dans les procès-verbaux et avis publics des villes suivies via le pipeline graphify (~197 villes). Aucun exemple simulé n'est inclus."
         />
       </div>
     {/if}

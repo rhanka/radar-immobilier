@@ -111,7 +111,6 @@
 
   $: typeLabel = TYPE_LABELS[signal.type] ?? signal.type;
   $: isEcarte = signal.status === "écarté";
-  $: isSimulation = signal.mode === "simulation";
   $: isDerogation = signal.type === "derogation-relevant" || signal.type === "derogation-irrelevant";
 
   // Nombre d'opportunités attachées (compte les dossiers dont signalId = signal.id)
@@ -123,8 +122,7 @@
     .filter((s) => s.meta !== undefined) as Array<{ ref: string; meta: { label: string; url: string } }>;
 </script>
 
-<!-- SI1 : simulation = légèrement atténuée (opacity-80) mais toujours visible -->
-<div class={`rounded-lg border bg-white shadow-sm transition ${isEcarte ? "border-slate-100 opacity-60" : isSimulation ? "border-slate-200 opacity-80" : "border-slate-200"}`}>
+<div class={`rounded-lg border bg-white shadow-sm transition ${isEcarte ? "border-slate-100 opacity-60" : "border-slate-200"}`}>
   <!-- En-tête de la carte : toujours visible (collapsed) -->
   <button
     type="button"
@@ -153,9 +151,6 @@
             {typeLabel}
           {/if}
         </p>
-        {#if isSimulation}
-          <Badge tone="warning">Exemple synthétique</Badge>
-        {/if}
       </div>
       {#if signal.bylaw || signal.zone}
         <p class="mt-0.5 text-xs text-slate-500">
@@ -214,7 +209,7 @@
         </p>
         {#if resolvedSources.length === 0}
           <p class="text-sm text-slate-400 italic">
-            {isSimulation ? "Signal synthétique : aucune source documentée (exemple de calibration)." : "Aucune source résolue pour ce signal."}
+            Aucune source résolue pour ce signal.
           </p>
         {:else}
           <ul class="space-y-1.5">

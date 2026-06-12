@@ -16,6 +16,7 @@ import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
 import { scrapeStatusRoute } from "./routes/scrape-status.js";
 import { graphRoute, type GraphDeps } from "./routes/graph.js";
+import { graphSignalsRoute, type GraphSignalsDeps } from "./routes/graph-signals.js";
 import { geoLotsRoute } from "./routes/geo-lots.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
@@ -26,7 +27,8 @@ export type AppDeps = HealthDeps &
   OntologyDeps &
   CiblageDeps &
   JobsDeps &
-  GraphDeps & {
+  GraphDeps &
+  GraphSignalsDeps & {
     /**
      * Resolved OIDC relying-party config. Optional: when absent (or
      * `enabled === false`) the app runs OPEN — no login required — which keeps
@@ -74,6 +76,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
   app.route("/", scrapeStatusRoute(deps.store));
+  app.route("/", graphSignalsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", signalsDetailRoute(deps));
