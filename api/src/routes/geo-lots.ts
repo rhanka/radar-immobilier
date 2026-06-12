@@ -1,8 +1,15 @@
 /**
- * Route GET /api/geo/:city/lots — WP B slice-1 (enrichi enrich-zone).
+ * Route GET /api/geo/:city/lots — WP B slice-1 + CS-L6 simulation (enrichi enrich-zone).
  *
- * Retourne les lots cadastraux (Cadastre_allege MRNF) pour une ville.
+ * Retourne les lots cadastraux pour une ville.
  * Sortie : { ok, citySlug, source, featureCollection } — Loi 25, sans PII.
+ *
+ * ## Sources
+ * - mode "donnees-quebec" : Cadastre_allege MRNF (villes réelles).
+ * - mode "simulation" : fixtures Netlify Steve pour les 4 villes Steve
+ *   (delson, sainte-catherine, saint-constant, candiac). CS-L6.
+ *   Les données simulation portent mode:"simulation" et NE polluent JAMAIS
+ *   le store réel (SPEC_EVOL_SOCLE_STATES_SCORING.md §2.7).
  *
  * Query params :
  *   limit   — entier > 0, défaut 200
@@ -37,6 +44,10 @@ import {
   type ZoneVersionInput,
   type ZoneKind,
 } from "../services/scoring/lot-potential.js";
+import {
+  isSimulationCity,
+  getSimulationLotsFeatureCollection,
+} from "../services/geo/simulation/simulation-provider.js";
 
 // ─── Calcul superficie depuis géométrie GeoJSON ───────────────────────────────
 
@@ -189,6 +200,22 @@ export function geoLotsRoute(deps: GeoLotsDeps = {}): Hono {
       bbox = parts as [number, number, number, number];
     }
 
+    // ── CS-L6 : mode simulation pour les 4 villes Steve ────────────────────
+    if (isSimulationCity(citySlug)) {
+      const fc = getSimulationLotsFeatureCollection(citySlug, {
+        limit,
+        ...(bbox !== undefined ? { bbox } : {}),
+      });
+      return c.json({
+        ok: true,
+        citySlug,
+        source: "simulation" as const,
+        mode: "simulation" as const,
+        featureCollection: fc,
+      });
+    }
+
+    // ── Mode réel : Cadastre_allege MRNF ────────────────────────────────────
     const serviceOpts = {
       limit,
       ...(deps.fetchImpl ? { fetchImpl: deps.fetchImpl } : {}),
