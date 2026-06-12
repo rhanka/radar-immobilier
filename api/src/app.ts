@@ -16,16 +16,19 @@ import { backlogRoute } from "./routes/backlog.js";
 import { h2aRoute } from "./routes/h2a.js";
 import { scrapeStatusRoute } from "./routes/scrape-status.js";
 import { graphRoute, type GraphDeps } from "./routes/graph.js";
+import { graphSignalsRoute, type GraphSignalsDeps } from "./routes/graph-signals.js";
 import { geoLotsRoute } from "./routes/geo-lots.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
+import { adminRoute } from "./routes/admin.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
   OntologyDeps &
   CiblageDeps &
   JobsDeps &
-  GraphDeps & {
+  GraphDeps &
+  GraphSignalsDeps & {
     /**
      * Resolved OIDC relying-party config. Optional: when absent (or
      * `enabled === false`) the app runs OPEN — no login required — which keeps
@@ -45,7 +48,22 @@ export function createApp(deps: AppDeps): Hono {
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   if (deps.auth) {
     app.use("*", protect(deps.auth));
-    app.route("/", authRoute(deps.auth, deps.authOptions));
+    // Pass db into authOptions so enrollment runs in production.
+    const authOptions: AuthRouteOptions = {
+      ...deps.authOptions,
+      ...(deps.db ? { db: deps.db } : {}),
+    };
+    app.route("/", authRoute(deps.auth, authOptions));
+    // Admin routes require a live DB.
+    if (deps.db) {
+      app.route(
+        "/",
+        adminRoute({
+          db: deps.db,
+          sessionSecret: deps.auth.sessionSecret,
+        }),
+      );
+    }
   }
 
   app.route("/", healthRoute(deps));
@@ -58,6 +76,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
   app.route("/", scrapeStatusRoute(deps.store));
+  app.route("/", graphSignalsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", signalsDetailRoute(deps));

@@ -19,17 +19,25 @@
   import OpportunitesMapView from "$lib/components/maps/OpportunitesMapView.svelte";
   import EvaluationMapView from "$lib/components/maps/EvaluationMapView.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
+  import PendingView from "$lib/components/auth/PendingView.svelte";
+  import RejectedView from "$lib/components/auth/RejectedView.svelte";
+  import AdminView from "$lib/components/admin/AdminView.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
   import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
   import { tourSteps } from "$lib/tour/tour-steps.js";
+  import { authStore } from "$lib/auth/auth-store.js";
 
+  // Vue par défaut : Signaux (1ère vue principale)
   let activeView: DemoView = "signaux";
   /** Signal id transmis par Approfondir -> filtre OpportunityFunnel. */
   let opportuniteSignalId: string | undefined = undefined;
   /** Label humain du signal sélectionné (signal-2 : libellé lisible dans le chip de filtre). */
   let opportuniteSignalLabel: string | undefined = undefined;
+
+  // Auth state
+  $: authState = $authStore;
 
   // Libellés lisibles par type de signal
   const TYPE_LABELS_SHORT: Record<string, string> = {
@@ -71,6 +79,11 @@
     opportuniteSignalId = undefined;
     opportuniteSignalLabel = undefined;
     setChatContext([]);
+  }
+
+  async function handleLogout(): Promise<void> {
+    await fetch("/api/v1/auth/logout");
+    authStore.redirectToLogin();
   }
 
   // ── Tour ─────────────────────────────────────────────────────────────────
@@ -123,7 +136,8 @@
       : "0px";
 
   // ── Auto-start 1re visite ─────────────────────────────────────────────────
-  onMount(() => {
+  onMount(async () => {
+    await authStore.checkSession();
     if (isFirstVisit()) {
       startTour();
     }
@@ -131,61 +145,89 @@
 </script>
 
 <ThemeProvider theme={sentTechTheme}>
-  <div
-    class="flex h-screen flex-col overflow-hidden transition-[padding] duration-200"
-    style={`padding-right: ${dockPaddingCss};`}
-  >
-    <!-- Barre de navigation horizontale -->
-    <TopNav
-      {activeView}
-      onSelect={(view) => (activeView = view)}
-      onStartTour={startTour}
-    />
-
-    <!-- Zone de contenu -->
-    {#if activeView === "opportunity"}
-      <OpportunityFunnel
-        selectedSignalId={opportuniteSignalId}
-        selectedSignalLabel={opportuniteSignalLabel}
-        onClearFilter={clearOpportuniteFilter}
+  {#if authState.loading}
+    <div class="flex h-screen items-center justify-center">
+      <span class="text-slate-500 text-sm">Chargement...</span>
+    </div>
+  {:else if !authState.authenticated && !authState.authDisabled}
+    <!-- Redirige automatiquement -->
+    {@const _ = authStore.redirectToLogin()}
+    <div class="flex h-screen items-center justify-center">
+      <span class="text-slate-500 text-sm">Redirection vers la connexion...</span>
+    </div>
+  {:else if authState.user?.status === "pending"}
+    <PendingView />
+  {:else if authState.user?.status === "rejected"}
+    <RejectedView />
+  {:else}
+    <div
+      class="flex h-screen flex-col overflow-hidden transition-[padding] duration-200"
+      style={`padding-right: ${dockPaddingCss};`}
+    >
+      <!-- Barre de navigation horizontale -->
+      <TopNav
+        {activeView}
+        onSelect={(view) => (activeView = view)}
+        onStartTour={startTour}
+        {authState}
+        onLogout={handleLogout}
       />
-    {:else if activeView === "onboarding"}
-      <OnboardingView />
-    {:else if activeView === "ciblage"}
-      <CiblageView />
-    {:else if activeView === "signaux"}
-      <SignalsT1View onApprofondir={handleApprofondir} />
-    {:else if activeView === "grilles"}
-      <GrillesView />
-    {:else if activeView === "ontologie"}
-      <ReconciliationView />
-    {:else if activeView === "coordination"}
-      <CoordinationView />
-    {:else if activeView === "backlog"}
-      <BacklogView />
-    {:else if activeView === "sources"}
-      <SourcesMapView />
-    {:else if activeView === "carte-signaux"}
-      <SignauxMapView />
-    {:else if activeView === "carte-opportunites"}
-      <OpportunitesMapView />
-    {:else if activeView === "carte-evaluation"}
-      <EvaluationMapView />
-    {:else}
-      <ConsoleView />
-    {/if}
-  </div>
 
-  <!-- Assistant radar (chat reel @sentropic/chat-ui, ancre par defaut) -->
-  <ChatWidgetHost />
+      <!-- Zone de contenu -->
+      <!-- 4 vues principales -->
+      {#if activeView === "signaux"}
+        <!-- Vue Signaux : carte aplats GeoJSON coloriés par nb d'opportunités / 6 mois -->
+        <SignauxMapView />
+      {:else if activeView === "opportunity"}
+        <OpportunityFunnel
+          selectedSignalId={opportuniteSignalId}
+          selectedSignalLabel={opportuniteSignalLabel}
+          onClearFilter={clearOpportuniteFilter}
+        />
+      {:else if activeView === "evaluation"}
+        <!-- Vue Évaluation : fusion EvaluationMapView + GrillesView (carte cadastrale + grilles) -->
+        <EvaluationMapView />
+      {:else if activeView === "sources"}
+        <SourcesMapView />
+      <!-- Vues admin/dev (hors nav principale) -->
+      {:else if activeView === "admin"}
+        <AdminView {authState} />
+      {:else if activeView === "onboarding"}
+        <OnboardingView />
+      {:else if activeView === "ciblage"}
+        <CiblageView />
+      {:else if activeView === "grilles"}
+        <GrillesView />
+      {:else if activeView === "ontologie"}
+        <ReconciliationView />
+      {:else if activeView === "coordination"}
+        <CoordinationView />
+      {:else if activeView === "backlog"}
+        <BacklogView />
+      <!-- Legacy deep-links (redirigés vers les vues principales équivalentes) -->
+      {:else if activeView === "carte-signaux"}
+        <SignauxMapView />
+      {:else if activeView === "carte-opportunites"}
+        <OpportunitesMapView />
+      {:else if activeView === "carte-evaluation"}
+        <EvaluationMapView />
+      {:else}
+        <!-- Fallback : console sources -->
+        <ConsoleView />
+      {/if}
+    </div>
 
-  <!-- Visite guidee (overlay bulle jaune) -->
-  <TourOverlay
-    steps={tourSteps}
-    active={isTourActive}
-    currentIndex={currentTourStepIndex}
-    onNext={handleTourNext}
-    onPrev={handleTourPrev}
-    onClose={handleTourClose}
-  />
+    <!-- Assistant radar (chat reel @sentropic/chat-ui, ancre par defaut) -->
+    <ChatWidgetHost />
+
+    <!-- Visite guidee (overlay bulle jaune) -->
+    <TourOverlay
+      steps={tourSteps}
+      active={isTourActive}
+      currentIndex={currentTourStepIndex}
+      onNext={handleTourNext}
+      onPrev={handleTourPrev}
+      onClose={handleTourClose}
+    />
+  {/if}
 </ThemeProvider>
