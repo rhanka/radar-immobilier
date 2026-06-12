@@ -1,0 +1,177 @@
+{
+  "_note": "Snapshot fixture MINIMAL de Delson (mode:simulation) pour tests offline du loader cadastre-geojson-source. Géométries simplifiées (carrés ~quelques m), pas de PII (aucun champ `adresse`, NO_LOT cadastral public uniquement). Couvre les 4 cas de score (priorite / 4+ / tod / autre) + 1 emprise is_rue exclue + 1 lot sans geometry ignoré.",
+  "meta": {
+    "nom": "Delson",
+    "slug": "delson",
+    "region": "Montérégie — Rive-Sud",
+    "population": 8253,
+    "bbox": [45.36, -73.55, 45.39, -73.51],
+    "centre": [45.375, -73.53],
+    "zoom_initial": 14,
+    "reglements": "Règlement de zonage 901",
+    "postal_prefix": "J5B"
+  },
+  "lots": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "NO_LOT": "2181127",
+          "zone": "H-12",
+          "zone_desc": "Habitation multifamiliale",
+          "categorie": "Multi-logements",
+          "cubf": "5100",
+          "utilisation": "Logement multifamilial",
+          "superficie_m2_calculee": 1240.5,
+          "nb_logements_role": 6,
+          "nb_etages": "3",
+          "annee_construction": "1998",
+          "val_totale": 850000,
+          "val_terrain": 220000,
+          "val_batiment": 630000,
+          "facade_m": 28,
+          "profondeur_m": 44,
+          "multifamilial_4plus": true,
+          "tod": true,
+          "priorite": true,
+          "adresse": "MASQUE-PII"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.531, 45.374], [-73.530, 45.374], [-73.530, 45.375], [-73.531, 45.375], [-73.531, 45.374]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "NO_LOT": "2181200",
+          "zone": "H-08",
+          "zone_desc": "Habitation",
+          "categorie": "Multi-logements",
+          "cubf": "5100",
+          "superficie_m2_calculee": 980,
+          "nb_logements_role": 4,
+          "multifamilial_4plus": true,
+          "tod": false,
+          "priorite": false
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.532, 45.376], [-73.531, 45.376], [-73.531, 45.377], [-73.532, 45.377], [-73.532, 45.376]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "NO_LOT": "2181333",
+          "zone": "C-02",
+          "zone_desc": "Commerce",
+          "categorie": "Commercial",
+          "cubf": "6000",
+          "superficie_m2_calculee": 2100,
+          "nb_logements_role": 0,
+          "multifamilial_4plus": false,
+          "tod": true,
+          "priorite": false
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.533, 45.372], [-73.532, 45.372], [-73.532, 45.373], [-73.533, 45.373], [-73.533, 45.372]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "NO_LOT": "2181444",
+          "zone": "H-01",
+          "zone_desc": "Habitation unifamiliale",
+          "categorie": "Résidentiel",
+          "cubf": "1000",
+          "superficie_m2_calculee": 520,
+          "nb_logements_role": 1,
+          "multifamilial_4plus": false,
+          "tod": false,
+          "priorite": false
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.529, 45.378], [-73.528, 45.378], [-73.528, 45.379], [-73.529, 45.379], [-73.529, 45.378]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "NO_LOT": "RUE-001",
+          "zone": "",
+          "categorie": "Emprise",
+          "superficie_m2_calculee": 0,
+          "is_rue": true
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.534, 45.371], [-73.533, 45.371], [-73.533, 45.3715], [-73.534, 45.3715], [-73.534, 45.371]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "NO_LOT": "NO-GEOM-001",
+          "zone": "H-05",
+          "categorie": "Résidentiel",
+          "multifamilial_4plus": false,
+          "tod": false,
+          "priorite": false
+        },
+        "geometry": null
+      }
+    ]
+  },
+  "zones": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": { "zone": "H-12", "nom": "Habitation multifamiliale" },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.532, 45.373], [-73.529, 45.373], [-73.529, 45.376], [-73.532, 45.376], [-73.532, 45.373]]]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": { "zone": "C-02", "nom": "Commerce" },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.534, 45.371], [-73.531, 45.371], [-73.531, 45.374], [-73.534, 45.374], [-73.534, 45.371]]]
+        }
+      }
+    ]
+  },
+  "tod": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": { "nom": "Aire TOD gare Delson", "id": "tod-delson-1" },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.535, 45.370], [-73.528, 45.370], [-73.528, 45.378], [-73.535, 45.378], [-73.535, 45.370]]]
+        }
+      }
+    ]
+  },
+  "boundary": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": { "name": "Delson", "CSDUID": "2467020" },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [[[-73.55, 45.36], [-73.51, 45.36], [-73.51, 45.39], [-73.55, 45.39], [-73.55, 45.36]]]
+        }
+      }
+    ]
+  }
+}
