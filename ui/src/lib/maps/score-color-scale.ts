@@ -7,11 +7,13 @@
  * `@sentropic/design-system` exposés en variables CSS par le thème
  * (`--st-semantic-*`, cf. `@sentropic/design-system-themes/css/sent-tech.css`).
  *
- * La rampe est définie par des STOPS qui pointent chacun vers un token DS :
- *   0.00  faible potentiel  → --st-semantic-text-muted     (gris neutre)
- *   0.45  périmètre TOD     → --st-semantic-feedback-info   (bleu info)
- *   0.70  zone 4+ logements → --st-semantic-feedback-success(vert succès)
- *   1.00  priorité (4+ ∩ TOD) → --st-semantic-feedback-warning (ambre accent)
+ * ## Échelle : 0–10 (scorer canonique lot-potential.ts, PR #165)
+ * Les stops correspondent aux paliers significatifs du scorer canonique 0-10 :
+ *   0.0  aucun potentiel       → --st-semantic-text-muted      (gris neutre)
+ *   2.0  faible (zone C/I/P)   → --st-semantic-feedback-info   (bleu info)
+ *   4.0  moyen (zone H ou H+TOD ou mixte) → --st-semantic-feedback-success (vert)
+ *   7.0  fort (H+TOD+bonusReconv ou MIXTE+TOD) → --st-semantic-feedback-warning (ambre)
+ *  10.0  max théorique         → --st-semantic-feedback-warning (ambre)
  *
  * Au runtime, on résout la valeur de chaque token via `getComputedStyle` sur un
  * élément (généralement le conteneur de carte, sous le `ThemeProvider`), puis on
@@ -24,7 +26,7 @@
 /** Type minimal d'une expression MapLibre (évite la dépendance de type au build). */
 export type StyleExpression = unknown[];
 
-/** Un point de la rampe : seuil de score [0,1] + token DS + libellé légende. */
+/** Un point de la rampe : seuil de score [0,10] + token DS + libellé légende. */
 export interface ScoreStop {
   stop: number;
   /** Nom de la variable CSS du token DS (sans la valeur). */
@@ -36,15 +38,23 @@ export interface ScoreStop {
 }
 
 /**
- * Rampe du score → token DS. L'ordre des stops est croissant.
+ * Rampe du score [0-10] → token DS. L'ordre des stops est croissant.
  * `fallback` reflète la valeur `sent-tech` du token (cf. sent-tech.css) ; elle
  * n'est utilisée que lorsque `getComputedStyle` n'est pas disponible.
+ *
+ * Correspondance scorer canonique (PR #165 lot-potential.ts) :
+ *   score=0   : aucune composante (zone absente / AUTRE)
+ *   score=2-3 : zone H seule (scoreBase=1 + bonusKind=1, sans TOD)
+ *   score=3-4 : zone H+TOD (scoreBase=1 + bonusKind=1 + bonusTod=1)
+ *   score=4-5 : zone MIXTE (scoreBase=2 + bonusKind=1, sans TOD)
+ *   score=5-7 : combinaisons fortes (MIXTE+TOD, H+TOD+reconvertible…)
  */
 export const SCORE_STOPS: ScoreStop[] = [
-  { stop: 0, token: "--st-semantic-text-muted", fallback: "#64748b", label: "Autres lots (faible potentiel)" },
-  { stop: 0.45, token: "--st-semantic-feedback-info", fallback: "#2563eb", label: "Dans périmètre TOD" },
-  { stop: 0.7, token: "--st-semantic-feedback-success", fallback: "#16a34a", label: "Zone 4+ logements" },
-  { stop: 1, token: "--st-semantic-feedback-warning", fallback: "#d97706", label: "Priorité (4+ ∩ TOD)" },
+  { stop: 0, token: "--st-semantic-text-muted", fallback: "#64748b", label: "Aucun potentiel détecté" },
+  { stop: 2, token: "--st-semantic-feedback-info", fallback: "#2563eb", label: "Faible potentiel (zone C/I/P)" },
+  { stop: 4, token: "--st-semantic-feedback-success", fallback: "#16a34a", label: "Potentiel modéré (zone H ou mixte)" },
+  { stop: 7, token: "--st-semantic-feedback-warning", fallback: "#d97706", label: "Fort potentiel (H+TOD ou MIXTE+TOD)" },
+  { stop: 10, token: "--st-semantic-feedback-warning", fallback: "#d97706", label: "Priorité maximale" },
 ];
 
 /** Token DS du contour de lot prioritaire (accent fort). */
@@ -71,7 +81,7 @@ export function resolveToken(token: string, fallback: string, el?: Element | nul
 
 /**
  * Construit l'expression MapLibre `interpolate` qui colorie un lot par sa
- * propriété `potentialScore` ∈ [0,1], avec les couleurs RÉSOLUES depuis les
+ * propriété `potentialScore` ∈ [0,10], avec les couleurs RÉSOLUES depuis les
  * tokens DS de `el`.
  *
  * Produit : ["interpolate", ["linear"], ["get","potentialScore"], 0,c0, ...].
@@ -101,9 +111,9 @@ export function lotLineColorExpression(el?: Element | null): StyleExpression {
   ];
 }
 
-/** Couleur résolue en JS pour un score (légende/tests, PAS le rendu de masse). */
+/** Couleur résolue en JS pour un score [0-10] (légende/tests, PAS le rendu de masse). */
 export function colorForScore(score: number, el?: Element | null): string {
-  const s = Number.isFinite(score) ? Math.min(1, Math.max(0, score)) : 0;
+  const s = Number.isFinite(score) ? Math.min(10, Math.max(0, score)) : 0;
   let prev = SCORE_STOPS[0];
   for (const cur of SCORE_STOPS) {
     if (s <= cur.stop) {
