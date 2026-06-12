@@ -38,6 +38,7 @@ Thumbs.db
 
 # Worktrees (repository-local ./tmp/<slug>, never system /tmp)
 tmp/
+.scw-mount
 
 # Test artifacts
 coverage/
