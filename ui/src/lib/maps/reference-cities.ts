@@ -1,16 +1,14 @@
 /**
- * reference-cities — Catalogue des villes de RÉFÉRENCE (substrat de maquette).
+ * reference-cities — Catalogue des villes de la CARTE STEVE.
  *
- * Ces 4 villes de la Rive-Sud servent de substrat « mode:simulation » pour
- * valider l'UX carto (couche lots coloriée + compteurs) sur de vraies géométries
- * cadastrales AVANT que le pipeline complet (rôle MAMH + zonage extrait) ne soit
- * disponible. C'est un INPUT/référence, pas un nom d'architecture : la carte ne
- * connaît que des « villes de référence » génériques.
+ * Ces 4 villes de la Rive-Sud (Delson, Sainte-Catherine, Saint-Constant, Candiac)
+ * sont issues de la plateforme Netlify de Steve (prospection foncière tierce).
+ * Ce sont des DONNÉES RÉELLES (cadastre + rôle public + zones dessinées, sans PII),
+ * pas des données simulées ou inventées.
  *
- * Provenance des données : exports GeoJSON publics d'une plateforme de
- * prospection foncière tierce (cadastre + rôle public + zones dessinées, sans
- * PII). En maquette, on les sert en `mode:"simulation"` et `verification:"simulé"`
- * — ces données ne franchissent jamais la frontière du réel (cf. SPEC §6.3).
+ * Elles servent de référence pour la carte cadastrale (UX carto — couche lots
+ * coloriée) en attendant que le pipeline complet (rôle MAMH + zonage extrait)
+ * couvre ces villes. Mode interne : "carte-steve" (cf. SPEC §6.3).
  */
 
 export interface ReferenceCityRef {
@@ -21,7 +19,7 @@ export interface ReferenceCityRef {
   fullLotsCount: number;
 }
 
-/** Les 4 villes de référence du substrat de maquette (Rive-Sud, CMM). */
+/** Les 4 villes de la carte Steve (Rive-Sud, CMM). Données réelles Netlify. */
 export const REFERENCE_CITIES: ReferenceCityRef[] = [
   { slug: "delson", name: "Delson", region: "Montérégie — Rive-Sud", fullLotsCount: 3213 },
   { slug: "sainte-catherine", name: "Sainte-Catherine", region: "Montérégie — Rive-Sud", fullLotsCount: 5615 },
@@ -30,9 +28,9 @@ export const REFERENCE_CITIES: ReferenceCityRef[] = [
 ];
 
 /**
- * Base HTTP publique des JSON de référence (mode:simulation, données de démo).
+ * Base HTTP publique des JSON de la carte Steve (données réelles Netlify).
  *
- * NOTE : c'est un détail de provenance du substrat de maquette, isolé ici ;
+ * NOTE : c'est un détail de provenance du substrat carte-steve, isolé ici ;
  * aucun autre module ne référence cette URL en dur.
  */
 export const REFERENCE_DATA_BASE = "https://thriving-kleicha-89b7ef.netlify.app";
