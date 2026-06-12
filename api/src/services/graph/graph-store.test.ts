@@ -130,6 +130,151 @@ describe("graphifyGraphSchema", () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// graphify v2 (SCW) format tests — `type` instead of `file_type`, `type` on
+// edges, `status`/`description`/`refs` on nodes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Fixture: real-world shape from graph/drummondville/latest.json (SCW). */
+const FIXTURE_GRAPH_V2 = {
+  ville: "drummondville",
+  generatedAt: "2026-06-12",
+  nodes: [
+    {
+      id: "drummondville:ppcmoi:0349-04-26",
+      type: "DesignationEvent",
+      label: "PPCMOI 0349/04/26 — 2130 bd Lemire (15 logements)",
+      status: "candidate",
+      description: "PPCMOI résolution 0349/04/26 : autorisation habitation multifamiliale H-6.",
+      refs: [{ file: "abc123.pdf", page: 1 }],
+    },
+    {
+      id: "drummondville:signal:densification-logement-2026",
+      type: "Signal",
+      label: "Signal densification résidentielle Drummondville 2026",
+      status: "candidate",
+    },
+    {
+      id: "drummondville:bylaw:4300",
+      type: "Bylaw",
+      label: "Règlement 4300",
+      status: "candidate",
+    },
+  ],
+  edges: [
+    {
+      source: "drummondville:ppcmoi:0349-04-26",
+      type: "concerns",
+      target: "drummondville:bylaw:4300",
+    },
+  ],
+};
+
+/** Fixture: abercorn edge format (type-keyed edges, no relation). */
+const FIXTURE_GRAPH_V2_ABERCORN = {
+  nodes: [
+    { id: "mun:abercorn", type: "Municipality", label: "Village d'Abercorn", status: "candidate" },
+    { id: "bylaw:abercorn:398-2026", type: "Bylaw", label: "Règlement 398-2026", status: "candidate" },
+  ],
+  edges: [
+    { type: "located_in", source: "adresse:abercorn:33-rue-thibault-sud", target: "mun:abercorn" },
+  ],
+};
+
+describe("graphify v2 — node schema with `type` field", () => {
+  it("parses a v2 node using `type` instead of `file_type`", () => {
+    const result = graphifyGraphSchema.safeParse(FIXTURE_GRAPH_V2);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.nodes).toHaveLength(3);
+    const de = result.data.nodes[0]!;
+    expect(de.type).toBe("DesignationEvent");
+    expect(de.status).toBe("candidate");
+    expect(de.description).toBeDefined();
+    expect(de.refs).toHaveLength(1);
+  });
+
+  it("buildNodeRow maps `type` field when `file_type` is absent", () => {
+    const node = FIXTURE_GRAPH_V2.nodes[0]!;
+    const row = buildNodeRow(node, "drummondville");
+    expect(row.type).toBe("DesignationEvent");
+    expect(row.label).toBe("PPCMOI 0349/04/26 — 2130 bd Lemire (15 logements)");
+    expect(row.citySlug).toBe("drummondville");
+    expect(row.props).toMatchObject({ status: "candidate", description: expect.any(String) });
+  });
+
+  it("buildNodeRow prefers `file_type` over `type` when both present (v1 wins)", () => {
+    const node = { id: "x", label: "X", file_type: "document", type: "Signal" };
+    const row = buildNodeRow(node, "testville");
+    expect(row.type).toBe("document"); // file_type takes priority
+  });
+
+  it("buildNodeRow defaults to 'concept' when neither file_type nor type present", () => {
+    const node = { id: "x", label: "X" };
+    const row = buildNodeRow(node, null);
+    expect(row.type).toBe("concept");
+  });
+});
+
+describe("graphify v2 — edge schema with `type` field", () => {
+  it("parses edges using `type` as relation (abercorn format)", () => {
+    const result = graphifyGraphSchema.safeParse(FIXTURE_GRAPH_V2_ABERCORN);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.edges).toHaveLength(1);
+    const e = result.data.edges![0]!;
+    expect(e.type).toBe("located_in");
+    expect(e.relation).toBeUndefined();
+  });
+
+  it("buildEdgeRow uses `type` as kind when `relation` is absent (v2)", () => {
+    const link = { source: "a", target: "b", type: "located_in" };
+    const row = buildEdgeRow(link);
+    expect(row.kind).toBe("located_in");
+    expect(row.srcId).toBe("a");
+    expect(row.dstId).toBe("b");
+  });
+
+  it("buildEdgeRow prefers `relation` over `type` when both present (v1 wins)", () => {
+    const link = { source: "a", target: "b", relation: "régi_par", type: "something_else" };
+    const row = buildEdgeRow(link);
+    expect(row.kind).toBe("régi_par");
+  });
+
+  it("rejects edge with neither `relation` nor `type`", () => {
+    const bad = { nodes: [], edges: [{ source: "a", target: "b" }] };
+    const result = graphifyGraphSchema.safeParse(bad);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("graphify v2 — full graph upsert mapping (no DB)", () => {
+  it("buildNodeRow and buildEdgeRow process a full v2 graph without throwing", () => {
+    const parsed = graphifyGraphSchema.parse(FIXTURE_GRAPH_V2);
+    const edges = parsed.links ?? parsed.edges ?? [];
+    const nodeRows = parsed.nodes.map((n) => buildNodeRow(n, "drummondville"));
+    const edgeRows = edges.map(buildEdgeRow);
+    expect(nodeRows).toHaveLength(3);
+    expect(edgeRows).toHaveLength(1);
+    expect(nodeRows.map((r) => r.type)).toContain("Signal");
+    expect(nodeRows.map((r) => r.type)).toContain("DesignationEvent");
+    expect(edgeRows[0]!.kind).toBe("concerns");
+  });
+
+  it("skips graphs without a valid `nodes` array (résumé format)", () => {
+    const summary = {
+      city: "blue-sea",
+      generatedAt: "2026-06-12",
+      pvCount: 11,
+      stats: { nodes: 12 },
+      signalsByKind: {},
+    };
+    const result = graphifyGraphSchema.safeParse(summary);
+    // Must fail because `nodes` is missing.
+    expect(result.success).toBe(false);
+  });
+});
+
 describe("buildNodeRow — idempotency key", () => {
   it("produces same id for same node regardless of citySlug", () => {
     const node: GraphifyNode = { id: "zone_a", label: "Zone A" };

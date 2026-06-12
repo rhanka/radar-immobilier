@@ -1,0 +1,97 @@
+# graph-projection-job.yaml — projette les graphes graphify SCW dans Postgres.
+#
+# Deux étapes dans le même Job (initContainers) :
+#   1. db-migrate   : applique les migrations Drizzle (idempotent, CREATE IF NOT EXISTS).
+#   2. project-graph: lit graph/<ville>/latest.json depuis SCW (SCRAPE_S3_*) et
+#                     appelle upsertGraph pour chaque ville trouvée.
+#
+# Usage one-shot :
+#   kubectl apply -f deploy/k8s/31-graph-projection-job.yaml -n radar-immobilier
+#   kubectl wait job/radar-graph-projection --for=condition=complete -n radar-immobilier --timeout=300s
+#   kubectl logs -l job-name=radar-graph-projection -n radar-immobilier
+#   kubectl delete job radar-graph-projection -n radar-immobilier
+#
+# Pour cibler des villes spécifiques, surcharger la commande du conteneur
+# project-graph via un patch (ou créer un job séparé avec les args souhaités).
+#
+# Nota : les secrets S3 sont partagés avec le Deployment radar-api via le
+# même Secret radar-s3-credentials / radar-scrape-s3-credentials.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-graph-projection
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  # Pas de relance automatique : si ça échoue, investiguer avant de relancer.
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      # ── Étape 1 : migrations Drizzle ──────────────────────────────────────
+      initContainers:
+        - name: db-migrate
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          command: ["node", "dist/db/migrate.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+      # ── Étape 2 : projection SCW → PG ────────────────────────────────────
+      containers:
+        - name: project-graph
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          command: ["node", "--experimental-specifier-resolution=node", "dist/scripts/project-graph-from-s3.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # Creds SCW pour le bucket radar-immobilier-docs-pocs (SCRAPE_S3_*).
+            # Le script project-graph-from-s3.ts lit GRAPH_S3_* puis se rabat
+            # sur SCRAPE_S3_* : aucune variable GRAPH_S3_* supplémentaire n'est
+            # nécessaire si les SCRAPE_S3_* pointent déjà sur le bon bucket.
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              value: "false"
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 500m, memory: 512Mi }
