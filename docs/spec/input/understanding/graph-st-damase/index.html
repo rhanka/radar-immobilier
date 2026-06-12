@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graphe St-Damase — extraction graphify (PV 2022 + 2024)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 18px;
+      color: #2c3e50;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      flex-shrink: 0;
+    }
+    #cy-container {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+    }
+    #cy {
+      width: 100%;
+      height: 100%;
+    }
+    #legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(255,255,255,0.93);
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #333;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      z-index: 10;
+    }
+    #legend h3 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 7px;
+      color: #555;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Graphe St-Damase — extraction graphify (PV 2022 + 2024)</h1>
+  <div id="cy-container">
+    <div id="cy"></div>
+    <div id="legend">
+      <h3>Types de nœuds</h3>
+      <div class="legend-item"><div class="legend-color" style="background:#4A90D9"></div><span>Source</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#E67E22"></div><span>Municipality</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#27AE60"></div><span>Zone</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#8E44AD"></div><span>Bylaw</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#E74C3C"></div><span>DesignationEvent</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#F39C12"></div><span>Lot</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#1ABC9C"></div><span>Adresse</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#95A5A6"></div><span>Constraint</span></div>
+      <div class="legend-item"><div class="legend-color" style="background:#D35400"></div><span>Signal</span></div>
+    </div>
+  </div>
+
+  <script>
+    const typeColors = {
+      "Source":           "#4A90D9",
+      "Municipality":     "#E67E22",
+      "Zone":             "#27AE60",
+      "Bylaw":            "#8E44AD",
+      "DesignationEvent": "#E74C3C",
+      "Lot":              "#F39C12",
+      "Adresse":          "#1ABC9C",
+      "Constraint":       "#95A5A6",
+      "Signal":           "#D35400"
+    };
+
+    const graphData = {
+      "nodes": [
+        {"id": "src-38-35", "type": "Source", "label": "PV 2022-10-04"},
+        {"id": "src-38-39", "type": "Source", "label": "PV 2024-04-02"},
+        {"id": "mun", "type": "Municipality", "label": "Saint-Damase"},
+        {"id": "zone-201", "type": "Zone", "label": "Zone 201"},
+        {"id": "zone-113", "type": "Zone", "label": "Zone 113 (nouvelle)"},
+        {"id": "bylaw-38", "type": "Bylaw", "label": "Règl. zonage 38 (parent)"},
+        {"id": "bylaw-38-35", "type": "Bylaw", "label": "Règl. 38-35 (zonage, multifam. z201)"},
+        {"id": "bylaw-38-39", "type": "Bylaw", "label": "Règl. 38-39 (zonage z113/Gingras)"},
+        {"id": "bylaw-42", "type": "Bylaw", "label": "Règl. PIIA 42 (parent)"},
+        {"id": "bylaw-42-2", "type": "Bylaw", "label": "Règl. 42-2 (PIIA Gingras)"},
+        {"id": "bylaw-144", "type": "Bylaw", "label": "Règl. 144 (vitesse)"},
+        {"id": "de-38-35-avis", "type": "DesignationEvent", "label": "Avis motion 38-35"},
+        {"id": "de-38-35-rezoning", "type": "DesignationEvent", "label": "Rezonage z201 (20 log, 3 ét.)"},
+        {"id": "de-cptaq", "type": "DesignationEvent", "label": "Demande CPTAQ (échange lots)"},
+        {"id": "de-38-39-avis", "type": "DesignationEvent", "label": "Avis motion 38-39"},
+        {"id": "de-38-39-rezoning", "type": "DesignationEvent", "label": "Création z113 + multifam. Gingras"},
+        {"id": "de-42-2-piia", "type": "DesignationEvent", "label": "PIIA 42-2 Gingras"},
+        {"id": "lot-172", "type": "Lot", "label": "Lot 2 366 172"},
+        {"id": "lot-170", "type": "Lot", "label": "Lot 2 366 170"},
+        {"id": "adr-stetienne", "type": "Adresse", "label": "115 rue Saint-Étienne"},
+        {"id": "adr-cordon", "type": "Adresse", "label": "356 rang du Cordon"},
+        {"id": "cstr-cptaq", "type": "Constraint", "label": "Zone agricole CPTAQ"},
+        {"id": "sig-z201", "type": "Signal", "label": "Densification z201 (20 log)"},
+        {"id": "sig-gingras", "type": "Signal", "label": "Densification Gingras"},
+        {"id": "sig-piia", "type": "Signal", "label": "PIIA Gingras"}
+      ],
+      "edges": [
+        {"from": "zone-201", "relation": "located_in", "to": "mun"},
+        {"from": "zone-113", "relation": "located_in", "to": "mun"},
+        {"from": "lot-172", "relation": "located_in", "to": "mun"},
+        {"from": "lot-170", "relation": "located_in", "to": "mun"},
+        {"from": "bylaw-38-35", "relation": "amends", "to": "bylaw-38"},
+        {"from": "bylaw-38-39", "relation": "amends", "to": "bylaw-38"},
+        {"from": "bylaw-42-2", "relation": "amends", "to": "bylaw-42"},
+        {"from": "de-38-35-avis", "relation": "precedes", "to": "de-38-35-rezoning"},
+        {"from": "de-38-39-avis", "relation": "precedes", "to": "de-38-39-rezoning"},
+        {"from": "de-38-35-rezoning", "relation": "rezones", "to": "zone-201"},
+        {"from": "de-38-39-rezoning", "relation": "rezones", "to": "zone-113"},
+        {"from": "de-cptaq", "relation": "targets_lot", "to": "lot-172"},
+        {"from": "de-cptaq", "relation": "targets_lot", "to": "lot-170"},
+        {"from": "cstr-cptaq", "relation": "constrains", "to": "lot-172"},
+        {"from": "cstr-cptaq", "relation": "constrains", "to": "lot-170"},
+        {"from": "de-38-35-rezoning", "relation": "raises_signal", "to": "sig-z201"},
+        {"from": "de-38-39-rezoning", "relation": "raises_signal", "to": "sig-gingras"},
+        {"from": "de-42-2-piia", "relation": "raises_signal", "to": "sig-piia"},
+        {"from": "src-38-35", "relation": "mentions", "to": "de-38-35-rezoning"},
+        {"from": "src-38-35", "relation": "mentions", "to": "de-cptaq"},
+        {"from": "src-38-39", "relation": "mentions", "to": "de-38-39-rezoning"},
+        {"from": "src-38-39", "relation": "mentions", "to": "de-42-2-piia"},
+        {"from": "bylaw-38-35", "relation": "derived_from", "to": "src-38-35"},
+        {"from": "bylaw-38-39", "relation": "derived_from", "to": "src-38-39"},
+        {"from": "bylaw-42-2", "relation": "derived_from", "to": "src-38-39"},
+        {"from": "lot-172", "relation": "located_at", "to": "adr-cordon"}
+      ]
+    };
+
+    const cytoscapeNodes = graphData.nodes.map(n => ({
+      data: {
+        id: n.id,
+        label: n.label,
+        type: n.type,
+        color: typeColors[n.type] || "#aaa"
+      }
+    }));
+
+    const cytoscapeEdges = graphData.edges.map((e, i) => ({
+      data: {
+        id: "e" + i,
+        source: e.from,
+        target: e.to,
+        label: e.relation
+      }
+    }));
+
+    const cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: {
+        nodes: cytoscapeNodes,
+        edges: cytoscapeEdges
+      },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': 'data(color)',
+            'label': 'data(label)',
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '10px',
+            'font-weight': '600',
+            'text-wrap': 'wrap',
+            'text-max-width': '120px',
+            'width': 'label',
+            'height': 'label',
+            'padding': '10px',
+            'shape': 'round-rectangle',
+            'text-outline-width': 0,
+            'border-width': 0
+          }
+        },
+        {
+          selector: 'node[type = "Municipality"]',
+          style: {
+            'shape': 'ellipse',
+            'font-size': '12px',
+            'padding': '14px',
+            'border-width': 3,
+            'border-color': '#BF5B17'
+          }
+        },
+        {
+          selector: 'node[type = "Source"]',
+          style: {
+            'shape': 'diamond',
+            'padding': '16px'
+          }
+        },
+        {
+          selector: 'node[type = "Signal"]',
+          style: {
+            'shape': 'star',
+            'padding': '12px'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'width': 1.5,
+            'line-color': '#aaa',
+            'target-arrow-color': '#aaa',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'label': 'data(label)',
+            'font-size': '9px',
+            'color': '#555',
+            'text-rotation': 'autorotate',
+            'text-background-color': '#fff',
+            'text-background-opacity': 0.8,
+            'text-background-padding': '2px',
+            'edge-text-rotation': 'autorotate'
+          }
+        },
+        {
+          selector: ':selected',
+          style: {
+            'border-width': 3,
+            'border-color': '#333'
+          }
+        }
+      ],
+      layout: {
+        name: 'cose',
+        animate: false,
+        randomize: false,
+        nodeRepulsion: function() { return 6000; },
+        idealEdgeLength: function() { return 100; },
+        edgeElasticity: function() { return 100; },
+        nestingFactor: 5,
+        gravity: 80,
+        numIter: 1000,
+        initialTemp: 200,
+        coolingFactor: 0.95,
+        minTemp: 1.0,
+        padding: 30
+      }
+    });
+
+    // fit on load
+    cy.ready(function() {
+      cy.fit(undefined, 30);
+    });
+  </script>
+</body>
+</html>
