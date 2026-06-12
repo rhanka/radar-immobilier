@@ -82,7 +82,7 @@ describe("GET /api/geo/:city/lots — ville connue avec source cadastre", () => 
     expect(body.featureCollection.features).toHaveLength(2);
   });
 
-  it("les features ne contiennent pas de PII (noLot + citySlug + potentialScore uniquement)", async () => {
+  it("les features ne contiennent pas de PII (champs publics enrichis seulement)", async () => {
     const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
     const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
     const body = (await res.json()) as {
@@ -91,7 +91,9 @@ describe("GET /api/geo/:city/lots — ville connue avec source cadastre", () => 
 
     for (const f of body.featureCollection.features) {
       const keys = Object.keys(f.properties).sort();
-      expect(keys).toEqual(["citySlug", "noLot", "potentialScore"]);
+      // Champs publics enrichis : noLot, citySlug, superficieM2, usageCode, zone, potentialScore
+      // Pas de nom propriétaire, pas d'adresse, pas de matricule
+      expect(keys).toEqual(["citySlug", "noLot", "potentialScore", "superficieM2", "usageCode", "zone"]);
     }
   });
 
@@ -283,5 +285,175 @@ describe("GET /api/geo/:city/lots — potentialScore dans les features", () => {
         expect(f.properties.potentialScore).toBe(scoreMap[f.properties.noLot]);
       }
     }
+  });
+});
+
+// ─── Tests enrichissement superficieM2, usageCode, zone ──────────────────────
+
+describe("GET /api/geo/:city/lots — enrichissement superficieM2 / usageCode / zone", () => {
+  it("superficieM2 est calculée depuis la géométrie Polygon (> 0)", async () => {
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { superficieM2: unknown } }[] };
+    };
+
+    expect(res.status).toBe(200);
+    for (const f of body.featureCollection.features) {
+      // La fixture a des polygones ~0.001°×0.001° ~ 7 700 m² à lat 45°
+      expect(typeof f.properties.superficieM2).toBe("number");
+      expect(f.properties.superficieM2 as number).toBeGreaterThan(0);
+    }
+  });
+
+  it("superficieM2 est arrondie à 1 décimale", async () => {
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { superficieM2: unknown } }[] };
+    };
+
+    for (const f of body.featureCollection.features) {
+      const s = f.properties.superficieM2 as number;
+      expect(s).toBe(Math.round(s * 10) / 10);
+    }
+  });
+
+  it("superficieM2 = null si géométrie absente", async () => {
+    const fcNullGeom = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { NO_LOT: "9999999", OBJECTID: 99 },
+        },
+      ],
+    };
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(fcNullGeom) });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { superficieM2: unknown } }[] };
+    };
+
+    expect(res.status).toBe(200);
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.superficieM2).toBeNull();
+    }
+  });
+
+  it("usageCode = null (non disponible dans ce flux, anti-invention)", async () => {
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: { features: { properties: { usageCode: unknown } }[] };
+    };
+
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.usageCode).toBeNull();
+    }
+  });
+
+  it("zone = null quand pas de zoneVersionProvider (zones absentes → score 0)", async () => {
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch() });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: {
+        features: {
+          properties: { zone: unknown; potentialScore: number };
+        }[];
+      };
+    };
+
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.zone).toBeNull();
+      expect(f.properties.potentialScore).toBe(0);
+    }
+  });
+
+  it("zone = null quand provider retourne null (zones absentes → score 0)", async () => {
+    const provider: ZoneVersionProvider = () => null;
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: {
+        features: {
+          properties: { zone: unknown; potentialScore: number };
+        }[];
+      };
+    };
+
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.zone).toBeNull();
+      expect(f.properties.potentialScore).toBe(0);
+    }
+  });
+
+  it("zone exposée quand provider réel retourne une ZoneVersionInput", async () => {
+    const provider: ZoneVersionProvider = (_noLot, _city): ZoneVersionInput => ({
+      densiteLogHa: 80,
+      usages: ["résidentiel", "multifamilial"],
+      kind: "H",
+    });
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: {
+        features: {
+          properties: {
+            zone: { kind: string; usages: string[]; densiteLogHa: number | null } | null;
+            potentialScore: number;
+          };
+        }[];
+      };
+    };
+
+    expect(res.status).toBe(200);
+    for (const f of body.featureCollection.features) {
+      expect(f.properties.zone).not.toBeNull();
+      expect(f.properties.zone?.kind).toBe("H");
+      expect(f.properties.zone?.densiteLogHa).toBe(80);
+      expect(f.properties.zone?.usages).toEqual(["résidentiel", "multifamilial"]);
+      // scoreBase(80)=3 + bonusKind(H)=1 = 4.0
+      expect(f.properties.potentialScore).toBe(4.0);
+    }
+  });
+
+  it("zone provider per-lot : chaque lot a sa zone et son score réel", async () => {
+    const provider: ZoneVersionProvider = (noLot): ZoneVersionInput | null => {
+      if (noLot === "4193751") return { densiteLogHa: 50, usages: ["commercial"], kind: "C" };
+      if (noLot === "4193752") return { densiteLogHa: 150, usages: ["résidentiel"], kind: "H" };
+      return null;
+    };
+    const app = geoLotsRoute({ fetchImpl: makeOkFetch(), zoneVersionProvider: provider });
+    const res = await app.request("/api/geo/salaberry-de-valleyfield/lots");
+    const body = (await res.json()) as {
+      featureCollection: {
+        features: {
+          properties: {
+            noLot: string;
+            zone: { kind: string; densiteLogHa: number | null } | null;
+            potentialScore: number;
+          };
+        }[];
+      };
+    };
+
+    const f1 = body.featureCollection.features.find(
+      (f) => f.properties.noLot === "4193751",
+    );
+    const f2 = body.featureCollection.features.find(
+      (f) => f.properties.noLot === "4193752",
+    );
+
+    expect(f1?.properties.zone?.kind).toBe("C");
+    expect(f1?.properties.zone?.densiteLogHa).toBe(50);
+    // scoreBase(50)=2 + bonusReconvertible(C)=0.5 = 2.5
+    expect(f1?.properties.potentialScore).toBe(2.5);
+
+    expect(f2?.properties.zone?.kind).toBe("H");
+    expect(f2?.properties.zone?.densiteLogHa).toBe(150);
+    // scoreBase(150)=4 + bonusKind(H)=1 = 5.0
+    expect(f2?.properties.potentialScore).toBe(5.0);
   });
 });
