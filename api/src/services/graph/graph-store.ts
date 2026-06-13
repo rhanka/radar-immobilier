@@ -23,6 +23,8 @@ import { QC_MUNICIPALITIES } from "@radar/sources";
 // Zod schema for graphify graph.json
 // ─────────────────────────────────────────────────────────────────────────────
 
+const passthroughPropsSchema = z.record(z.unknown());
+
 /** A single node as emitted by graphify. */
 export const graphifyNodeSchema = z.object({
   id: z.string(),
@@ -51,28 +53,45 @@ export const graphifyNodeSchema = z.object({
    * Shape varies across snapshots; kept as passthrough for props.
    */
   refs: z.array(z.record(z.unknown())).optional(),
+  /** Manual graphify extraction metadata kept nested in DB props. */
+  properties: passthroughPropsSchema.optional(),
 });
 
 /** A single link / edge as emitted by graphify. */
-export const graphifyLinkSchema = z.object({
-  source: z.string(),
-  target: z.string(),
-  /**
-   * graphify v1 (old) emits `relation`; graphify v2 (SCW) emits `type` on
-   * edges. We coerce both: `relation` takes priority when present (v1),
-   * otherwise `type` is used (v2). At least one of the two is required.
-   */
-  relation: z.string().optional(),
-  /** graphify v2: edge type field (used when `relation` is absent). */
-  type: z.string().optional(),
-  confidence: z.string().optional(),
-  confidence_score: z.number().optional(),
-  source_file: z.string().optional(),
-  /** graphify v2: evidence refs on edges. */
-  refs: z.array(z.record(z.unknown())).optional(),
-}).refine(
-  (v) => v.relation !== undefined || v.type !== undefined,
-  { message: "edge must have either 'relation' or 'type'" },
+export const graphifyLinkSchema = z.preprocess(
+  (value) => {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+      return value;
+    }
+    const record = value as Record<string, unknown>;
+    return {
+      ...record,
+      source: record.source ?? record.from,
+      target: record.target ?? record.to,
+    };
+  },
+  z.object({
+    source: z.string(),
+    target: z.string(),
+    /**
+     * graphify v1 (old) emits `relation`; graphify v2 (SCW) emits `type` on
+     * edges. We coerce both: `relation` takes priority when present (v1),
+     * otherwise `type` is used (v2). At least one of the two is required.
+     */
+    relation: z.string().optional(),
+    /** graphify v2: edge type field (used when `relation` is absent). */
+    type: z.string().optional(),
+    confidence: z.string().optional(),
+    confidence_score: z.number().optional(),
+    source_file: z.string().optional(),
+    /** graphify v2: evidence refs on edges. */
+    refs: z.array(z.record(z.unknown())).optional(),
+    /** Manual graphify extraction metadata kept nested in DB props. */
+    properties: passthroughPropsSchema.optional(),
+  }).refine(
+    (v) => v.relation !== undefined || v.type !== undefined,
+    { message: "edge must have either 'relation' or 'type'" },
+  ),
 );
 
 /**
@@ -114,7 +133,7 @@ export interface EdgeRow {
 
 /** Build a DB-shaped node row from a graphify node. */
 export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): NodeRow {
-  const { id, label, file_type, type: nodeType, source_file, community, community_name, status, description, refs } = node;
+  const { id, label, file_type, type: nodeType, source_file, community, community_name, status, description, refs, properties } = node;
   return {
     id,
     label,
@@ -130,6 +149,7 @@ export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): Node
       ...(status !== undefined ? { status } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(refs !== undefined ? { refs } : {}),
+      ...(properties !== undefined ? { properties } : {}),
     },
   };
 }
@@ -138,9 +158,8 @@ export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): Node
 export function buildEdgeRow(link: GraphifyLink): EdgeRow {
   // v1 emits `relation`; v2 emits `type` for the edge kind. Non-null assert is
   // safe here because the Zod refine above guarantees at least one is present.
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kind = link.relation ?? link.type!;
-  const { source, target, confidence, confidence_score, source_file, refs } = link;
+  const { source, target, confidence, confidence_score, source_file, refs, properties } = link;
   return {
     srcId: source,
     dstId: target,
@@ -150,6 +169,7 @@ export function buildEdgeRow(link: GraphifyLink): EdgeRow {
       ...(confidence_score !== undefined ? { confidence_score } : {}),
       ...(source_file !== undefined ? { source_file } : {}),
       ...(refs !== undefined ? { refs } : {}),
+      ...(properties !== undefined ? { properties } : {}),
     },
   };
 }
@@ -180,7 +200,7 @@ export async function upsertGraph(
   graphJson: unknown,
 ): Promise<UpsertResult> {
   const parsed = graphifyGraphSchema.parse(graphJson);
-  const links = parsed.links ?? parsed.edges ?? [];
+  const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
 
   const nodeRows = parsed.nodes.map((n) => buildNodeRow(n, citySlug));
   const edgeRows = links.map(buildEdgeRow);
