@@ -181,6 +181,39 @@ const FIXTURE_GRAPH_V2_ABERCORN = {
   ],
 };
 
+/** Fixture: manual extraction shape produced by graphify fan-out agents. */
+const FIXTURE_GRAPH_MANUAL = {
+  nodes: [
+    {
+      id: "src:proces-verbaux-pincourt",
+      type: "Source",
+      label: "Proces-verbaux Pincourt",
+      properties: { slug: "proces-verbaux-pincourt" },
+    },
+    {
+      id: "bylaw:pincourt:943-01",
+      type: "Bylaw",
+      label: "Reglement no 943-01",
+      status: "candidate",
+      properties: { number: "943-01", parentBylaw: "943" },
+    },
+  ],
+  edges: [
+    {
+      from: "src:proces-verbaux-pincourt",
+      to: "bylaw:pincourt:943-01",
+      relation: "located_in",
+      properties: { evidence: "index municipal" },
+    },
+    {
+      from: "src:proces-verbaux-pincourt",
+      to: "bylaw:pincourt:943-01",
+      type: "mentions",
+      refs: [{ excerpt: "ADOPTION DU REGLEMENT NO 943-01" }],
+    },
+  ],
+};
+
 describe("graphify v2 — node schema with `type` field", () => {
   it("parses a v2 node using `type` instead of `file_type`", () => {
     const result = graphifyGraphSchema.safeParse(FIXTURE_GRAPH_V2);
@@ -254,6 +287,55 @@ describe("graphify v2 — edge schema with `type` field", () => {
     const bad = { nodes: [], edges: [{ source: "a", target: "b" }] };
     const result = graphifyGraphSchema.safeParse(bad);
     expect(result.success).toBe(false);
+  });
+});
+
+describe("manual graphify fan-out compatibility", () => {
+  it("normalizes `from`/`to` edges into source/target", () => {
+    const result = graphifyGraphSchema.safeParse(FIXTURE_GRAPH_MANUAL);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.edges).toHaveLength(2);
+    expect(result.data.edges![0]).toMatchObject({
+      source: "src:proces-verbaux-pincourt",
+      target: "bylaw:pincourt:943-01",
+      relation: "located_in",
+    });
+  });
+
+  it("preserves node and edge properties in DB props", () => {
+    const parsed = graphifyGraphSchema.parse(FIXTURE_GRAPH_MANUAL);
+    const nodeRow = buildNodeRow(parsed.nodes[1]!, "pincourt");
+    const edgeRow = buildEdgeRow(parsed.edges![0]!);
+
+    expect(nodeRow.props).toMatchObject({
+      status: "candidate",
+      properties: {
+        number: "943-01",
+        parentBylaw: "943",
+      },
+    });
+    expect(edgeRow.props).toMatchObject({
+      properties: { evidence: "index municipal" },
+    });
+  });
+
+  it("parses graphs that include both `links` and `edges`", () => {
+    const result = graphifyGraphSchema.safeParse({
+      nodes: FIXTURE_GRAPH_MANUAL.nodes,
+      links: [
+        {
+          source: "mun:pincourt",
+          target: "bylaw:pincourt:943-01",
+          relation: "governed_by",
+        },
+      ],
+      edges: FIXTURE_GRAPH_MANUAL.edges,
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.links).toHaveLength(1);
+    expect(result.data.edges).toHaveLength(2);
   });
 });
 
@@ -446,9 +528,7 @@ describe("queryNeighbors — fix N+1 : un seul inArray pour les nœuds voisins",
     const inNeighbors  = result.filter((n) => n.direction === "in");
     expect(outNeighbors).toHaveLength(1);
     expect(inNeighbors).toHaveLength(1);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(outNeighbors[0]!.node.id).toBe("bylaw_1");
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     expect(inNeighbors[0]!.node.id).toBe("lot_x");
   });
 
