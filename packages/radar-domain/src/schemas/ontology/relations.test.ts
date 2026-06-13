@@ -8,13 +8,27 @@ import {
 /** Tests for V1 relation types and relational projections (SPEC_ONTOLOGY §1.2, §4.2-4.3). */
 
 describe("OntoRelationType", () => {
-  it("lists the 18 V1 relation types", () => {
-    expect(OntoRelationType.options).toHaveLength(18);
+  it("lists the 25 v2.0 relation types (renames/valued_by supprimés, 9 ajouts)", () => {
+    expect(OntoRelationType.options).toHaveLength(25);
     expect(OntoRelationType.options).toContain("constrains"); // D2
     expect(OntoRelationType.options).toContain("targets_zone"); // intentions (D6)
+    // Ajouts v2.0
+    expect(OntoRelationType.options).toContain("supports");
+    expect(OntoRelationType.options).toContain("references");
+    expect(OntoRelationType.options).toContain("concerns");
+    expect(OntoRelationType.options).toContain("applies_to");
+    expect(OntoRelationType.options).toContain("flags");
+    expect(OntoRelationType.options).toContain("has_source");
+    expect(OntoRelationType.options).toContain("issued_for");
+    expect(OntoRelationType.options).toContain("defines");
+    expect(OntoRelationType.options).toContain("subject_of");
+    // Suppressions v2.0
+    expect(OntoRelationType.options).not.toContain("valued_by");
+    expect(OntoRelationType.options).not.toContain("renames");
   });
   it("rejects an unknown relation type", () => {
-    expect(() => OntoRelationType.parse("has_stage")).toThrow(); // relational only in V1
+    expect(() => OntoRelationType.parse("has_stage")).toThrow(); // relational only, non graphify
+    expect(() => OntoRelationType.parse("valued_by")).toThrow(); // supprimé v2.0
   });
 });
 
