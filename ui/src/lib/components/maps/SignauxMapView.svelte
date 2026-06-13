@@ -5,21 +5,12 @@
    * Carte du Québec avec les villes prioritisées colorées par le nb de signaux
    * de changements de zonage sur 6 mois (fenêtre glissante).
    *
-   * Rendu : MapLibre GL + couche GeoJSON de cercles (bubble choroplèthe).
-   * NOTICE polygones : les limites polygonales des municipalités du Québec ne
-   * sont pas encore intégrées dans ce projet (source A11 StatCan / Données
-   * Québec non encore téléchargée). La choroplèthe utilise donc des disques
-   * de rayon proportionnel au compteur. Pour des aplats polygonaux réels il
-   * faudra intégrer le fichier `lcsd000b21a_e.zip` (StatCan 2021) ou
-   * l'API WFS de Données Québec.
+   * Rendu : MapLibre GL + couche fill polygonale (choroplèthe aplats) depuis
+   * municipalities.geojson (StatCan CSD 2025, 1104 villes QC).
+   * Jointure par citySlug (propriété GeoJSON) ↔ API /api/graph-signals/by-city.
    *
    * Source des données : GET /api/graph-signals/by-city — compte les nœuds
-   * Signal + DesignationEvent par ville depuis graph_nodes (graphify pipeline,
-   * ~197 villes).
-   *
-   * Anti-invention : seules les villes avec au moins un nœud Signal ont un
-   * compteur > 0. Toutes les autres villes affichent 0. Aucun signal n'est
-   * inventé. Couleurs dérivées des comptes réels de l'API.
+   * Signal + DesignationEvent par ville depuis graph_nodes (graphify pipeline).
    */
   import { onMount, onDestroy } from "svelte";
   import { Map as MapIcon, Radio, RefreshCw, AlertTriangle } from "@lucide/svelte";
@@ -38,6 +29,7 @@
     fetchGraphSignalDetail,
     type GraphSignalNode,
   } from "$lib/signals/graph-signal-detail-client.js";
+  import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
@@ -59,79 +51,52 @@
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
-  let mapInstance: unknown = null; // maplibregl.Map — typé large pour éviter la dépendance au build
+  let mapInstance: unknown = null;
   let mapReady = false;
 
   /**
    * Couleur hex pour le rendu MapLibre selon le nb de signaux.
-   * Correspond à la même échelle 4-tiers que signalCountTier().
+   * Rampe séquentielle : gris neutre → jaune → orange → rouge.
    */
   function signalCountColor(count: number): string {
-    if (count === 0) return "#cbd5e1"; // slate-300
+    if (count === 0) return "#e2e8f0"; // slate-200 (neutre)
     if (count <= 2) return "#fbbf24"; // amber-400
     if (count <= 5) return "#f97316"; // orange-500
     return "#ef4444"; // red-500
   }
 
   /**
-   * Rayon du cercle en pixels selon le nb de signaux (bubble map).
-   * Plus le nb est grand, plus le disque est grand — rendu "aplat" visible.
+   * Expression MapLibre "match" pour colorier les polygones par citySlug
+   * selon le dictionnaire count → color.
+   * Villes sans donnée → couleur neutre.
    */
-  function signalCountRadius(count: number): number {
-    if (count === 0) return 8;
-    if (count <= 2) return 14;
-    if (count <= 5) return 20;
-    return 28;
+  function buildFillColorExpression(
+    entries: CityMapEntry[],
+  ): ExpressionSpecification {
+    const expr: unknown[] = ["match", ["get", "citySlug"]];
+    for (const e of entries) {
+      expr.push(e.municipality.slug, signalCountColor(e.signalCount6m));
+    }
+    expr.push("#e2e8f0"); // fallback pour villes sans data
+    return expr as ExpressionSpecification;
   }
 
-  /** Type minimal FeatureCollection (points uniquement) — @types/geojson non requis. */
-  interface CityFeature {
-    type: "Feature";
-    geometry: { type: "Point"; coordinates: [number, number] };
-    properties: { slug: string; name: string; mrc: string; count: number; color: string; radius: number };
-  }
-  interface CityFeatureCollection {
-    type: "FeatureCollection";
-    features: CityFeature[];
-  }
-
-  /** Construit un GeoJSON FeatureCollection à partir des entrées de villes. */
-  function buildGeoJsonSource(entries: CityMapEntry[]): CityFeatureCollection {
-    return {
-      type: "FeatureCollection",
-      features: entries.map((e) => ({
-        type: "Feature" as const,
-        geometry: {
-          type: "Point" as const,
-          coordinates: [e.municipality.lon, e.municipality.lat] as [number, number],
-        },
-        properties: {
-          slug: e.municipality.slug,
-          name: e.municipality.name,
-          mrc: e.municipality.mrc ?? "",
-          count: e.signalCount6m,
-          color: signalCountColor(e.signalCount6m),
-          radius: signalCountRadius(e.signalCount6m),
-        },
-      })),
-    };
-  }
-
-  /** Met à jour la source GeoJSON si la carte est prête. */
-  function updateMapSource(): void {
+  /** Met à jour la peinture fill quand les données changent. */
+  function updateFillColors(): void {
     if (!mapInstance || !mapReady || allEntries.length === 0) return;
     const m = mapInstance as {
-      getSource: (id: string) => { setData: (data: CityFeatureCollection) => void } | undefined;
+      setPaintProperty: (layer: string, prop: string, value: unknown) => void;
     };
-    const src = m.getSource("cities");
-    if (src) {
-      src.setData(buildGeoJsonSource(allEntries));
-    }
+    m.setPaintProperty(
+      "cities-fill",
+      "fill-color",
+      buildFillColorExpression(allEntries),
+    );
   }
 
   // Met à jour la carte quand les données changent
   $: if (mapReady && allEntries.length > 0) {
-    updateMapSource();
+    updateFillColors();
   }
 
   async function initMap(): Promise<void> {
@@ -164,58 +129,83 @@
         maxBounds: [[-85, 41], [-55, 63]],
       });
 
-      m.on("load", () => {
-        // Source GeoJSON villes (cercles)
-        m.addSource("cities", {
+      m.on("load", async () => {
+        // Fetch GeoJSON polygones municipaux (asset statique servi par nginx)
+        let polygonsData: unknown = { type: "FeatureCollection", features: [] };
+        try {
+          const resp = await fetch("/municipalities.geojson");
+          if (resp.ok) {
+            polygonsData = await resp.json();
+          } else {
+            console.warn("municipalities.geojson fetch failed:", resp.status);
+          }
+        } catch (err) {
+          console.warn("municipalities.geojson fetch error:", err);
+        }
+
+        // Source GeoJSON polygones (aplats)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        m.addSource("cities-polygons", {
           type: "geojson",
-          data: buildGeoJsonSource(allEntries),
+          data: polygonsData as any,
         });
 
-        // Couche disques remplis (choroplèthe bubble)
+        // Couche aplat fill choroplèthe
         m.addLayer({
           id: "cities-fill",
-          type: "circle",
-          source: "cities",
+          type: "fill",
+          source: "cities-polygons",
           paint: {
-            "circle-radius": ["get", "radius"],
-            "circle-color": ["get", "color"],
-            "circle-opacity": 0.75,
-            "circle-stroke-width": 1.5,
-            "circle-stroke-color": "#fff",
+            "fill-color": buildFillColorExpression(allEntries),
+            "fill-opacity": 0.75,
+            "fill-outline-color": "#94a3b8", // slate-400
           },
         });
 
-        // Couche labels (nom de ville si count > 0 ou hover)
+        // Couche contour fill (plus visible)
+        m.addLayer({
+          id: "cities-outline",
+          type: "line",
+          source: "cities-polygons",
+          paint: {
+            "line-color": "#64748b", // slate-500
+            "line-width": 0.5,
+            "line-opacity": 0.4,
+          },
+        });
+
+        // Couche labels sur les polygones avec signaux
         m.addLayer({
           id: "cities-label",
           type: "symbol",
-          source: "cities",
+          source: "cities-polygons",
           layout: {
             "text-field": ["get", "name"],
             "text-size": 11,
-            "text-offset": [0, 1.5],
-            "text-anchor": "top",
+            "text-anchor": "center",
             "text-optional": true,
           },
           paint: {
-            "text-color": "#334155",
+            "text-color": "#1e293b",
             "text-halo-color": "#ffffff",
-            "text-halo-width": 1,
+            "text-halo-width": 1.5,
           },
-          filter: [">", ["get", "count"], 0],
+          // Labels uniquement sur les villes avec signaux (données dynamiques →
+          // on les active après update)
         });
 
-        // Interaction clic
+        // Interaction clic sur les aplats
         m.on("click", "cities-fill", (e) => {
           const features = e.features;
           if (!features || features.length === 0) return;
           const props = features[0].properties as {
-            slug: string;
+            citySlug: string;
             name: string;
             mrc: string;
-            count: number;
           };
-          const entry = allEntries.find((e) => e.municipality.slug === props.slug);
+          const entry = allEntries.find(
+            (ent) => ent.municipality.slug === props.citySlug,
+          );
           if (entry) void selectCity(entry);
         });
 
@@ -227,8 +217,8 @@
         });
 
         mapReady = true;
-        // Injecter les données si déjà chargées
-        if (allEntries.length > 0) updateMapSource();
+        // Injecter les couleurs si les données API sont déjà chargées
+        if (allEntries.length > 0) updateFillColors();
       });
 
       mapInstance = m;
@@ -337,18 +327,8 @@
       {/if}
     </div>
 
-    <!-- Avis absence polygones municipaux -->
-    <div class="border-b border-amber-100 bg-amber-50 px-4 py-2">
-      <p class="flex items-start gap-1.5 text-xs text-amber-700">
-        <AlertTriangle class="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <span>
-          Aplats circulaires (limites polygonales QC non intégrées — source StatCan A11 requise).
-        </span>
-      </p>
-    </div>
-
     <!-- Liste des villes avec signaux (en premier), puis les autres -->
-    <ul class="divide-y divide-slate-100 overflow-y-auto" style="max-height: calc(100vh - 220px);">
+    <ul class="divide-y divide-slate-100 overflow-y-auto" style="max-height: calc(100vh - 200px);">
       {#each allEntries.slice(0, 40) as entry (entry.municipality.slug)}
         {@const tier = signalCountTier(entry.signalCount6m)}
         {@const isSelected = selectedCity?.municipality.slug === entry.municipality.slug}
@@ -362,9 +342,9 @@
             on:mouseenter={() => { hoveredSlug = entry.municipality.slug; }}
             on:mouseleave={() => { hoveredSlug = null; }}
           >
-            <!-- Disque couleur signal -->
+            <!-- Carré couleur signal (aplat) -->
             <span
-              class="h-3 w-3 shrink-0 rounded-full"
+              class="h-3 w-3 shrink-0 rounded-sm"
               style="background-color: {signalCountColor(entry.signalCount6m)};"
               aria-hidden="true"
             ></span>
@@ -388,7 +368,7 @@
       {/each}
     </ul>
 
-    <!-- Légende choroplèthe -->
+    <!-- Légende choroplèthe aplats -->
     <div class="border-t border-slate-100 p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
       <ul class="space-y-1">
@@ -396,10 +376,10 @@
           { color: "#ef4444", label: "6+ signaux" },
           { color: "#f97316", label: "3–5 signaux" },
           { color: "#fbbf24", label: "1–2 signaux" },
-          { color: "#cbd5e1", label: "Aucun signal (0)" },
+          { color: "#e2e8f0", label: "Aucun signal (0)" },
         ] as item (item.label)}
           <li class="flex items-center gap-2 text-xs text-slate-600">
-            <span class="h-3 w-3 rounded-full" style="background-color: {item.color};"></span>
+            <span class="h-3 w-3 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
             {item.label}
           </li>
         {/each}
@@ -500,7 +480,7 @@
     {:else}
       <div class="flex items-center justify-center border-t border-slate-100 bg-white p-4 text-center" style="min-height: 80px;">
         <p class="text-xs text-slate-400">
-          Cliquez sur un disque ou une ville pour voir ses signaux de changements de zonage.
+          Cliquez sur un aplat ou une ville dans la liste pour voir ses signaux de changements de zonage.
         </p>
       </div>
     {/if}
