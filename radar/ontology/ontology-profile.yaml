@@ -1,4 +1,4 @@
-# radar-immobilier — graphify ontology profile (WP5 V1)
+# radar-immobilier — graphify ontology profile (v2.0)
 #
 # Authoritative profile consumed by @sentropic/graphify. SHARED by every city
 # (SPEC_ONTOLOGY_DATA_MODEL.md §5.4 D1); only the *projects* (graphify.yaml, see
@@ -7,78 +7,442 @@
 # citation_policy, hardening, inference_policy, evidence_policy, hierarchies,
 # outputs. Any other block is silently ignored.
 #
-# Scope of V1 (D4): 10 node types + 18 relation types. PPCMOI / CPTAQ /
-# dérogations are V1 subtypes of DesignationEvent + Signal kinds, promoted to
-# dedicated nodes in V2. ZoneVersion / LotVersion / RegulatoryStage /
-# ConstraintHit / OpportunityDossier are relational projections, never nodes.
+# Changements v2.0 vs v1 :
+#   - 9 types de nœuds (Valuation supprimé, Address/Document fusionnés dans Adresse/Source)
+#   - 25 relations déclarées (16 conservées + 9 ajoutées d'après observé ; renames/valued_by supprimés)
+#   - has_signal consolidé dans raises_signal (table synonymes)
+#   - Schéma d'arête canonique : source/target/type/refs[{docSha,page}], conteneur edges
+#   - Préfixes d'id figés : muni-/source-/bylaw-/zone-/event-/signal-/lot-/adresse-/constraint-
+#   - Top-level : municipality/generated_at/ontology_version/pv_count/nodes/edges
+#
+# COMPATIBILITÉ : le champ `id` reste `radar-immobilier-zonage` (référencé par
+# api/src/services/exploitation/reconcile.ts:188 `profile_id: profile.id`).
 id: radar-immobilier-zonage
-version: 1
+version: 2
+ontology_version: "2.0"
 default_language: fr
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Node types (§1.1) — 10 V1 types, by graphify role:
-#   registry      : authoritative CSV/JSON/XML (not reconciled)
-#   reconciled    : status_policy: hardenable (mentioned across documents)
-#   source_backed : evidence carrier
+# Node types (§1.1) — 9 types canoniques v2.0
+#
+# Annotations:
+#   id_prefix         : préfixe IMPOSÉ pour les ids de nœuds (figé)
+#   definition        : définition courte (use-case radar)
+#   registry          : table de référence autoritative (non réconciliée)
+#   status_policy     : hardenable = réconciliation multi-documents possible
+#   source_backed     : porteur d'évidence PDF/PV
+#   properties        : clés CURÉES depuis inventaire empirique (522 villes)
+#                       Les autres clés produites restent libres dans properties{}.
+#
+# Clés supprimées vs v1 : Valuation (0 émissions), Address (doublon →Adresse),
+#   Document (doublon →Source).
 # ─────────────────────────────────────────────────────────────────────────────
 node_types:
+
   Municipality:
-    aliases: [ville, municipalite]
+    id_prefix: muni
+    definition: Entité municipale québécoise (ville, municipalité, arrondissement).
+    aliases: [ville, municipalite, municipalité, commune]
     registry: municipalities
+    properties:
+      # Clés curées — à plat sur le nœud ou dans properties{}
+      slug:           { type: string, description: Slug normalisé (kebab-case) }
+      citySlug:       { type: string, description: Alias legacy du slug }
+      name:           { type: string, description: Nom officiel }
+      mrc:            { type: string, description: MRC d'appartenance }
+      province:       { type: string, description: Province (défaut QC) }
+      adresse:        { type: string, description: Adresse du bureau municipal }
+      source:         { type: string, description: Référence source de la fiche }
+
+  Source:
+    id_prefix: source
+    definition: >
+      Document source brut (PV, avis, règlement PDF, vidéo, presse).
+      Fusionne l'ancien type Document (38 nœuds) : tout document est un Source.
+    aliases: [pv, proces-verbal, avis, document, pdf, source]
+    source_backed: true
+    properties:
+      docSha:         { type: string, description: SHA-256 hex du fichier source }
+      sha256:         { type: string, description: Alias legacy de docSha }
+      date:           { type: string, format: date, description: Date du document }
+      municipality:   { type: string, description: Slug de la municipalité }
+      citySlug:       { type: string, description: Alias legacy municipality }
+      url:            { type: string, description: URL d'accès au document }
+      sourceUrl:      { type: string, description: Alias legacy de url }
+      pdfPath:        { type: string, description: Chemin SCW vers le PDF }
+      sourceKind:     { type: string, description: "Type de source : pv/reglement/avis/media" }
+      sourceType:     { type: string, description: Alias legacy de sourceKind }
+      format:         { type: string, description: "Format : pdf/video/html" }
+      fetchedAt:      { type: string, format: datetime, description: Horodatage de récupération }
+      slug:           { type: string, description: Slug du document }
+      rawRef:         { type: string, description: Référence brute dans le document }
+
+  Bylaw:
+    id_prefix: bylaw
+    definition: Règlement municipal ou provincial (zonage, lotissement, construction, etc.).
+    aliases: [reglement, regl, amendement, projet de reglement, règlement]
+    status_policy: hardenable
+    properties:
+      numero:         { type: string, description: Numéro officiel du règlement }
+      bylawNumber:    { type: string, description: Alias legacy de numero }
+      number:         { type: string, description: Alias legacy de numero }
+      title:          { type: string, description: Titre ou objet officiel }
+      titre:          { type: string, description: Alias FR de title }
+      objet:          { type: string, description: Objet du règlement }
+      date:           { type: string, format: date, description: Date d'adoption }
+      dateAdoption:   { type: string, format: date, description: Alias legacy de date }
+      date_adoption:  { type: string, format: date, description: Alias legacy de date }
+      status:         { type: string, description: "Statut : en_vigueur/abroge/remplace/projet" }
+      statut:         { type: string, description: Alias FR de status }
+      stage:          { type: string, description: "Étape : projet/1er_projet/2e_projet/adoption" }
+      stade:          { type: string, description: Alias FR de stage }
+      municipality:   { type: string, description: Slug de la municipalité }
+      citySlug:       { type: string, description: Alias legacy municipality }
+      zone_cible:     { type: string, description: Zone ciblée par le règlement }
+      zone_visee:     { type: string, description: Alias de zone_cible }
+      zones_ciblees:  { type: array,  description: Zones ciblées (pluriel) }
+      docSha:         { type: string, description: SHA-256 du document source }
+      meetingDate:    { type: string, format: date, description: Date de séance }
+      resolution:     { type: string, description: Numéro de résolution d'adoption }
+      resolutionRef:  { type: string, description: Référence complète de résolution }
+      # Clés moins fréquentes conservées libres dans properties{}
+
   Zone:
+    id_prefix: zone
+    definition: Zone de zonage municipal (usage, normes, secteur).
     aliases: [zone, zonage, secteur de zonage]
     status_policy: hardenable
-  Bylaw:
-    aliases: [reglement, regl, amendement, projet de reglement]
-    status_policy: hardenable
+    properties:
+      code:           { type: string, description: Code officiel de zone }
+      zoneCode:       { type: string, description: Alias legacy de code }
+      code_zone:      { type: string, description: Alias legacy de code }
+      municipality:   { type: string, description: Slug de la municipalité }
+      citySlug:       { type: string, description: Alias legacy municipality }
+      usage:          { type: string, description: Usage principal de la zone }
+      usages_autorises: { type: array, description: Liste des usages autorisés }
+      designation:    { type: string, description: Désignation réglementaire }
+      status:         { type: string, description: "Statut de la zone" }
+      statut:         { type: string, description: Alias FR de status }
+      description:    { type: string, description: Description textuelle }
+      bylaw:          { type: string, description: Règlement constitutif }
+      regl_zonage:    { type: string, description: Alias legacy de bylaw }
+      secteur:        { type: string, description: Secteur géographique }
+      superficie_m2:  { type: number, description: Superficie en m² }
+      docSha:         { type: string, description: SHA-256 du document source }
+      meetingDate:    { type: string, format: date, description: Date de séance }
+
   DesignationEvent:
-    aliases: [changement de zonage, rezonage, scission, fusion, renommage, subdivision, ppcmoi, derogation, dezonage]
+    id_prefix: event
+    definition: >
+      Événement de changement de désignation réglementaire (rezonage, dérogation,
+      PPCMOI, subdivision, PIIA, CPTAQ, changement d'usage, etc.).
+    aliases: [changement de zonage, rezonage, scission, fusion, subdivision,
+              ppcmoi, derogation, dezonage, dérogation, piia, cptaq]
     status_policy: hardenable
-  Constraint:
-    aliases: [contrainte, zone agricole, zone inondable, bande riveraine, milieu humide]
-    source_backed: true              # CPTAQ / BDZI / GRHQ : evidence carrier (D2)
-  Lot:
-    aliases: [lot, lot cadastral, numero de lot, matricule]
-    registry: cadastre               # NO_LOT authoritative (cadastre du Québec)
-    status_policy: hardenable        # PDF graphies reconciled to the authoritative lot
-  Adresse:
-    aliases: [adresse, no civique, adresse municipale]
-    registry: adresses_qc            # Adresses Québec (provincial key)
-    status_policy: hardenable
-  Valuation:
-    aliases: [valeur, role d'evaluation, valeur fonciere, evaluation municipale]
-    registry: role
-  Source:
-    source_backed: true              # avis PDF, PV, role XML, video, presse
+    properties:
+      date:           { type: string, format: date, description: Date de décision }
+      meetingDate:    { type: string, format: date, description: Date de séance }
+      decision:       { type: string, description: "Décision : approuvé/refusé/reporté" }
+      status:         { type: string, description: "Statut de l'événement" }
+      statut:         { type: string, description: Alias FR de status }
+      kind:           { type: string, description: "Sous-type : rezonage/derogation/subdivision/piia/cptaq" }
+      eventType:      { type: string, description: Alias legacy de kind }
+      type_evenement: { type: string, description: Alias FR de kind }
+      dossier:        { type: string, description: Numéro de dossier }
+      numeroDossier:  { type: string, description: Alias legacy de dossier }
+      demandeur:      { type: string, description: Demandeur (anonymisé si PII) }
+      demandeur_corporate: { type: string, description: Demandeur (entité morale seulement) }
+      municipality:   { type: string, description: Slug de la municipalité }
+      citySlug:       { type: string, description: Alias legacy municipality }
+      resolution:     { type: string, description: Numéro de résolution }
+      resolutionRef:  { type: string, description: Référence complète de résolution }
+      docSha:         { type: string, description: SHA-256 du document source }
+      description:    { type: string, description: Description textuelle }
+      motif:          { type: string, description: Motif de la décision }
+      conditions:     { type: array,  description: Conditions imposées }
+      superficie_m2:  { type: number, description: Superficie visée (m²) }
+      # Note : lots/zones ciblés via arêtes targets_lot/targets_zone/concerns
+
   Signal:
+    id_prefix: signal
+    definition: >
+      Signal radar d'opportunité immobilière ou de changement réglementaire
+      (rezonage, densification, vente institutionnelle, PIIA, etc.).
     aliases: [signal, alerte, intention, precedent]
+    properties:
+      category:       { type: string, description: "Catégorie principale du signal" }
+      categorie:      { type: string, description: Alias FR de category }
+      signalType:     { type: string, description: Alias legacy de category }
+      signal_type:    { type: string, description: Alias legacy de category }
+      type_signal:    { type: string, description: Alias legacy de category }
+      kind:           { type: string, description: Sous-type du signal }
+      date:           { type: string, format: date, description: Date du signal }
+      meetingDate:    { type: string, format: date, description: Date de séance source }
+      description:    { type: string, description: Description textuelle }
+      status:         { type: string, description: "Statut : candidate/attached/validated/rejected" }
+      resolution:     { type: string, description: Numéro de résolution source }
+      resolutionRef:  { type: string, description: Référence complète de résolution }
+      scope:          { type: string, description: "Portée : local/regional" }
+      portee:         { type: string, description: Alias FR de scope }
+      municipality:   { type: string, description: Slug de la municipalité }
+      citySlug:       { type: string, description: Alias legacy municipality }
+      docSha:         { type: string, description: SHA-256 du document source }
+      intensite:      { type: string, description: Intensité estimée du signal }
+      outcome:        { type: string, description: Issue finale si connue }
+      nb_unites_min:  { type: integer, description: Nb d'unités minimum estimé }
+      nb_unites_max:  { type: integer, description: Nb d'unités maximum estimé }
+      amount_cad:     { type: number,  description: Montant ($CAD) si applicable }
+
+  Lot:
+    id_prefix: lot
+    definition: Lot cadastral québécois (NO_LOT, matricule).
+    aliases: [lot, lot cadastral, numero de lot, matricule, no lot]
+    registry: cadastre
+    status_policy: hardenable
+    properties:
+      lotNumber:      { type: string, description: Numéro de lot cadastral }
+      lot_number:     { type: string, description: Alias legacy de lotNumber }
+      no_lot:         { type: string, description: Alias legacy de lotNumber }
+      matricule:      { type: string, description: Matricule du rôle d'évaluation }
+      municipality:   { type: string, description: Slug de la municipalité }
+      citySlug:       { type: string, description: Alias legacy municipality }
+      status:         { type: string, description: "Statut du lot" }
+      statut:         { type: string, description: Alias FR de status }
+      superficie_m2:  { type: number,  description: Superficie en m² }
+      usage:          { type: string, description: Usage actuel }
+      zone:           { type: string, description: Code de zone affecté }
+      proprietaire:   { type: string, description: Propriétaire (entité morale uniquement, sans PII) }
+      owner_corporate: { type: string, description: Alias anglais de proprietaire }
+      description:    { type: string, description: Description textuelle }
+      docSha:         { type: string, description: SHA-256 du document source }
+
+  Adresse:
+    id_prefix: adresse
+    definition: >
+      Adresse municipale québécoise (numéro civique + rue + ville).
+      Fusionne l'ancien type Address (27 nœuds) : toute adresse est une Adresse.
+    aliases: [adresse, adresse municipale, no civique, address, civic address]
+    registry: adresses_qc
+    status_policy: hardenable
+    properties:
+      adresse:          { type: string, description: Adresse complète normalisée }
+      adresse_complete: { type: string, description: Alias legacy de adresse }
+      address:          { type: string, description: Alias anglais de adresse }
+      civic_number:     { type: string, description: Numéro civique }
+      street:           { type: string, description: Nom de rue }
+      municipality:     { type: string, description: Slug de la municipalité }
+      ville:            { type: string, description: Alias legacy de municipality }
+
+  Constraint:
+    id_prefix: constraint
+    definition: >
+      Contrainte réglementaire ou environnementale (CPTAQ, zone agricole,
+      milieu humide, bande riveraine, zone inondable, etc.).
+    aliases: [contrainte, zone agricole, zone inondable, bande riveraine,
+              milieu humide, cptaq, contrainte réglementaire]
+    source_backed: true
+    properties:
+      constraintType:   { type: string, description: "Type : cptaq/milieu_humide/inondable/riveraine/autre" }
+      constraint_type:  { type: string, description: Alias legacy de constraintType }
+      type_contrainte:  { type: string, description: Alias FR legacy de constraintType }
+      status:           { type: string, description: "Statut : actif/leve/en_appel" }
+      statut:           { type: string, description: Alias FR de status }
+      municipality:     { type: string, description: Slug de la municipalité }
+      citySlug:         { type: string, description: Alias legacy municipality }
+      loi:              { type: string, description: Loi ou règlement fondement }
+      loi_reference:    { type: string, description: Alias legacy de loi }
+      organisme:        { type: string, description: Organisme émetteur }
+      resolution:       { type: string, description: Numéro de résolution }
+      resolutionRef:    { type: string, description: Référence complète de résolution }
+      description:      { type: string, description: Description textuelle }
+      docSha:           { type: string, description: SHA-256 du document source }
+      superficie_concernee_m2: { type: number, description: Superficie concernée (m²) }
+      meetingDate:      { type: string, format: date, description: Date de séance }
+      dossier:          { type: string, description: Numéro de dossier (CPTAQ etc.) }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Relation types (§1.2) — 18 V1 relations. Endpoints validated by
-# `validateAddRelation`; `requires_evidence` enforced for signal-bearing edges.
+# Relation types (§1.2) — 25 relations canoniques v2.0
+#
+# Dérivées STRICTEMENT de l'inventaire empirique (inventaire-relations.json).
+# Suppressions vs v1 : renames (0 arêtes), valued_by (0 arêtes, dépend de Valuation supprimé).
+# Ajouts vs v1 (observées mais non déclarées, volume significatif) :
+#   supports (1720), references (580), concerns (488), applies_to (234),
+#   flags (157), has_source (55), issued_for (53), defines (46), subject_of (42).
+# Consolidation synonyme : has_signal (530 arêtes) → raises_signal.
+#
+# Champs par relation :
+#   source           : type(s) de nœud source autorisés
+#   target           : type(s) de nœud cible autorisés
+#   requires_evidence: si true, refs non-vide obligatoire sur l'arête
 # ─────────────────────────────────────────────────────────────────────────────
 relation_types:
-  located_in:    { source: [Zone, Lot, Adresse], target: Municipality }
-  located_at:    { source: Lot, target: Adresse, requires_evidence: true }
-  governed_by:   { source: Zone, target: Bylaw, requires_evidence: true }
-  amends:        { source: Bylaw, target: Bylaw, requires_evidence: true }
-  rezones:       { source: DesignationEvent, target: Zone, requires_evidence: true }
-  splits:        { source: DesignationEvent, target: Zone, requires_evidence: true }
-  renames:       { source: DesignationEvent, target: Zone, requires_evidence: true }
-  merges:        { source: DesignationEvent, target: Zone, requires_evidence: true }
-  subdivides:    { source: DesignationEvent, target: Lot, requires_evidence: true }
-  targets_zone:  { source: DesignationEvent, target: Zone, requires_evidence: true }
-  targets_lot:   { source: DesignationEvent, target: Lot, requires_evidence: true }
-  assigned_zone: { source: Lot, target: Zone }
-  valued_by:     { source: Lot, target: Valuation }
-  constrains:    { source: Constraint, target: [Lot, Zone], requires_evidence: true }   # D2
-  derived_from:  { source: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse, Valuation], target: Source, requires_evidence: true }
-  mentions:      { source: Source, target: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse], requires_evidence: true }
-  supersedes:    { source: DesignationEvent, target: DesignationEvent }
-  raises_signal: { source: DesignationEvent, target: Signal }
+
+  # ── Localisation ──────────────────────────────────────────────────────────
+  located_in:
+    source: [Zone, Lot, Adresse, Municipality, Source]
+    target: Municipality
+    description: L'entité est géographiquement située dans cette municipalité.
+
+  located_at:
+    source: Lot
+    target: Adresse
+    requires_evidence: true
+    description: Le lot est associé à cette adresse civique.
+
+  # ── Gouvernance réglementaire ──────────────────────────────────────────────
+  governed_by:
+    source: Zone
+    target: Bylaw
+    requires_evidence: true
+    description: La zone est régie par ce règlement de zonage.
+
+  amends:
+    source: Bylaw
+    target: Bylaw
+    requires_evidence: true
+    description: Ce règlement modifie (amende) un règlement antérieur.
+
+  defines:
+    source: Bylaw
+    target: Zone
+    requires_evidence: true
+    description: Ce règlement crée ou définit formellement cette zone.
+
+  # ── Événements de désignation ─────────────────────────────────────────────
+  rezones:
+    source: DesignationEvent
+    target: Zone
+    requires_evidence: true
+    description: Cet événement rezonage la zone cible.
+
+  splits:
+    source: DesignationEvent
+    target: Zone
+    requires_evidence: true
+    description: Cet événement scinde la zone en plusieurs zones.
+
+  merges:
+    source: DesignationEvent
+    target: Zone
+    requires_evidence: true
+    description: Cet événement fusionne plusieurs zones en une.
+
+  subdivides:
+    source: DesignationEvent
+    target: Lot
+    requires_evidence: true
+    description: Cet événement subdivise le lot cadastral.
+
+  supersedes:
+    source: DesignationEvent
+    target: DesignationEvent
+    description: Cet événement remplace/révise un événement antérieur.
+
+  targets_zone:
+    source: DesignationEvent
+    target: Zone
+    requires_evidence: true
+    description: Cet événement vise ou affecte cette zone.
+
+  targets_lot:
+    source: DesignationEvent
+    target: Lot
+    requires_evidence: true
+    description: Cet événement vise ou affecte ce lot cadastral.
+
+  raises_signal:
+    source: DesignationEvent
+    target: Signal
+    requires_evidence: true
+    description: >
+      Cet événement génère un signal radar. Consolidation v2.0 : absorbe
+      has_signal (530 arêtes, synonyme observé non déclaré en v1).
+
+  concerns:
+    source: [Signal, DesignationEvent]
+    target: [Zone, Lot]
+    requires_evidence: true
+    description: Ce signal/événement concerne directement cette zone ou ce lot.
+
+  # ── Lots ──────────────────────────────────────────────────────────────────
+  assigned_zone:
+    source: Lot
+    target: Zone
+    description: Ce lot est affecté à cette zone de zonage.
+
+  issued_for:
+    source: [Bylaw, DesignationEvent]
+    target: Lot
+    requires_evidence: true
+    description: Ce règlement ou événement a été émis/autorisé pour ce lot.
+
+  subject_of:
+    source: Lot
+    target: DesignationEvent
+    requires_evidence: true
+    description: Ce lot fait l'objet de cet événement de désignation.
+
+  # ── Contraintes ───────────────────────────────────────────────────────────
+  constrains:
+    source: Constraint
+    target: [Lot, Zone]
+    requires_evidence: true
+    description: Cette contrainte réglementaire s'applique à ce lot ou cette zone.
+
+  applies_to:
+    source: [Constraint, Bylaw]
+    target: [Zone, Lot]
+    requires_evidence: true
+    description: Cette contrainte ou ce règlement s'applique à cette zone/lot.
+
+  # ── Sources / preuves ─────────────────────────────────────────────────────
+  mentions:
+    source: Source
+    target: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse, Signal]
+    requires_evidence: true
+    description: Ce document source mentionne cette entité.
+
+  supports:
+    source: Source
+    target: [Bylaw, DesignationEvent, Signal]
+    requires_evidence: true
+    description: >
+      Ce document source apporte la preuve documentaire de cet événement/règlement.
+      Relation la plus fréquente non déclarée en v1 (1 720 arêtes, 13 villes).
+
+  references:
+    source: Source
+    target: [Bylaw, DesignationEvent]
+    requires_evidence: true
+    description: Ce document source référence formellement ce règlement ou événement.
+
+  flags:
+    source: Source
+    target: [Bylaw, DesignationEvent]
+    requires_evidence: true
+    description: Ce document source signale/marque une anomalie ou un point d'attention.
+
+  derived_from:
+    source: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse]
+    target: Source
+    requires_evidence: true
+    description: Cette entité a été extraite/dérivée de ce document source.
+
+  has_source:
+    source: Municipality
+    target: Source
+    description: Cette municipalité est associée à ce document source.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Synonym mapping — variantes observées → relation canonique v2.0
+# Utilisé lors du re-graphify pour normaliser les relations héritées.
+# ─────────────────────────────────────────────────────────────────────────────
+synonym_relations:
+  has_signal: raises_signal    # 530 arêtes observées → raises_signal
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Registries (§1.3) — authoritative reference tables.
+# Note v2.0 : registry `role` supprimé (dépendait de Valuation, supprimé).
 # ─────────────────────────────────────────────────────────────────────────────
 registries:
   municipalities:
@@ -97,12 +461,6 @@ registries:
     id_column: id_adresse
     label_column: adresse_complete
     node_type: Adresse
-  role:
-    source: role                    # role d'évaluation MAMH (XML 70052)
-    id_column: matricule
-    label_column: matricule
-    alias_columns: [no_lot]
-    node_type: Valuation
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Citation policy — page minimum, source file required, bbox when available.
@@ -117,14 +475,18 @@ citation_policy:
 evidence_policy:
   require_evidence_refs: true
   min_refs: 1
-  relation_types: [governed_by, amends, rezones, splits, renames, merges, subdivides, constrains, mentions, derived_from]
+  relation_types:
+    [governed_by, amends, rezones, splits, merges, subdivides, constrains,
+     mentions, derived_from, targets_zone, targets_lot, raises_signal,
+     supports, references, concerns, applies_to, flags, issued_for,
+     subject_of, defines]
   node_types: [Constraint]
 
 # inference_policy : REALLY parsed/validated. Forbids any inferred relation not
 # listed → graphify never fabricates a relation outside this set.
 inference_policy:
   allow_inferred_relations: false
-  allowed_relation_types: [located_in, located_at, assigned_zone, valued_by]
+  allowed_relation_types: [located_in, located_at, assigned_zone, has_source]
   require_evidence_refs: true
 
 # hardening.status_transitions : the ONLY transition mechanic graphify applies
@@ -150,9 +512,12 @@ hardening:
 outputs:
   ontology:
     enabled: true
-    canonical_node_types: [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse]
+    canonical_node_types:
+      [Zone, Bylaw, DesignationEvent, Constraint, Lot, Adresse, Signal]
     source_node_types: [Source]
-    relation_exports: [governed_by, amends, rezones, constrains, assigned_zone, raises_signal]
+    relation_exports:
+      [governed_by, amends, rezones, constrains, assigned_zone, raises_signal,
+       targets_lot, targets_zone, concerns, supports, mentions]
     wiki:
       enabled: true
       page_node_types: [Zone, Bylaw]
