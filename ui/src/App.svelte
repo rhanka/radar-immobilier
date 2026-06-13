@@ -135,6 +135,18 @@
       ? chatLayout.dockWidthCss
       : "0px";
 
+  // ── Redirection auth ──────────────────────────────────────────────────────
+  // Guard SPA : dès que le statut devient "non authentifié et auth activée",
+  // on navigue vers le endpoint login. On utilise une déclaration réactive
+  // ($:) pour réagir aux changements du store, PAS un {@const} dans le markup
+  // (anti-pattern : les effets de bord dans le template Svelte ne se
+  // déclenchent pas de façon fiable).
+  $: {
+    if (!authState.loading && !authState.authenticated && !authState.authDisabled) {
+      authStore.redirectToLogin();
+    }
+  }
+
   // ── Auto-start 1re visite ─────────────────────────────────────────────────
   onMount(async () => {
     await authStore.checkSession();
@@ -150,8 +162,7 @@
       <span class="text-slate-500 text-sm">Chargement...</span>
     </div>
   {:else if !authState.authenticated && !authState.authDisabled}
-    <!-- Redirige automatiquement -->
-    {@const _ = authStore.redirectToLogin()}
+    <!-- Redirection en cours (déclenchée par le guard réactif dans le script) -->
     <div class="flex h-screen items-center justify-center">
       <span class="text-slate-500 text-sm">Redirection vers la connexion...</span>
     </div>
