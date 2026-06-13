@@ -4,31 +4,56 @@ import { EvidenceItem } from "../opportunity.js";
 import { ConstraintKind, ConstraintConfidence } from "./entities.js";
 
 /**
- * V1 relation types (SPEC_ONTOLOGY §1.2) and the relational PROJECTIONS that are
+ * V2.0 relation types (SPEC_ONTOLOGY §1.2) and the relational PROJECTIONS that are
  * NOT graphify nodes (RegulatoryStage, ConstraintHit) — they are computed, not
  * reconciled (§1.1 deferral note, §4.2, §4.3).
+ *
+ * DETTE TECHNIQUE : cet enum est une DEUXIÈME source de vérité hardcodée,
+ * distincte du YAML radar/ontology/ontology-profile.yaml v2.0. Idéalement,
+ * cette liste serait dérivée automatiquement du YAML au build (génération de code
+ * ou lecture dynamique). En attendant, garder synchronisé manuellement.
+ * Ref: ontology-profile.yaml relation_types (25 relations v2.0).
+ *
+ * Suppressions vs v1 : renames (0 arêtes), valued_by (0 arêtes, dépend de
+ * Valuation supprimé).
+ * Ajouts vs v1 : supports, references, concerns, applies_to, flags, has_source,
+ * issued_for, defines, subject_of.
+ * Consolidation : has_signal → raises_signal (synonyme v2.0).
  */
 
-/** The 18 V1 relation types of the graphify profile (§1.2 / §8.1). */
+/** The 25 v2.0 relation types of the graphify profile (§1.2 / §8.1). */
 export const OntoRelationType = z.enum([
+  // ── Localisation ──────────────────────────────────────────────────────────
   "located_in",
   "located_at",
+  // ── Gouvernance réglementaire ─────────────────────────────────────────────
   "governed_by",
   "amends",
+  "defines",
+  // ── Événements de désignation ─────────────────────────────────────────────
   "rezones",
   "splits",
-  "renames",
   "merges",
   "subdivides",
+  "supersedes",
   "targets_zone",
   "targets_lot",
-  "assigned_zone",
-  "valued_by",
-  "constrains",
-  "derived_from",
-  "mentions",
-  "supersedes",
   "raises_signal",
+  "concerns",
+  // ── Lots ──────────────────────────────────────────────────────────────────
+  "assigned_zone",
+  "issued_for",
+  "subject_of",
+  // ── Contraintes ───────────────────────────────────────────────────────────
+  "constrains",
+  "applies_to",
+  // ── Sources / preuves ─────────────────────────────────────────────────────
+  "mentions",
+  "supports",
+  "references",
+  "flags",
+  "derived_from",
+  "has_source",
 ]);
 export type OntoRelationTypeT = z.infer<typeof OntoRelationType>;
 
