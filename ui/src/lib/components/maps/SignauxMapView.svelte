@@ -286,7 +286,7 @@
   });
 </script>
 
-<ViewLayout controlsWidth="w-80">
+<ViewLayout controlsWidth="w-80" stickyControlsFooter>
   <!-- ── Left sidebar: city list ───────────────────────────────────────────── -->
   <svelte:fragment slot="controls">
     <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
@@ -328,7 +328,7 @@
     </div>
 
     <!-- Liste des villes avec signaux (en premier), puis les autres -->
-    <ul class="divide-y divide-slate-100 overflow-y-auto" style="max-height: calc(100vh - 200px);">
+    <ul class="divide-y divide-slate-100">
       {#each allEntries.slice(0, 40) as entry (entry.municipality.slug)}
         {@const tier = signalCountTier(entry.signalCount6m)}
         {@const isSelected = selectedCity?.municipality.slug === entry.municipality.slug}
@@ -368,8 +368,11 @@
       {/each}
     </ul>
 
-    <!-- Légende choroplèthe aplats -->
-    <div class="border-t border-slate-100 p-4">
+  </svelte:fragment>
+
+  <!-- Légende choroplèthe épinglée en bas de la bande (footer de menu DS) -->
+  <svelte:fragment slot="controls-footer">
+    <div class="p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
       <ul class="space-y-1">
         {#each [
