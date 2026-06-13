@@ -29,6 +29,7 @@
     fetchGraphSignalDetail,
     type GraphSignalNode,
   } from "$lib/signals/graph-signal-detail-client.js";
+  import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
@@ -71,13 +72,13 @@
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
-  ): unknown[] {
+  ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
       expr.push(e.municipality.slug, signalCountColor(e.signalCount6m));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
-    return expr;
+    return expr as ExpressionSpecification;
   }
 
   /** Met à jour la peinture fill quand les données changent. */
