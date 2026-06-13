@@ -60,6 +60,13 @@
   const ZONE_LABEL = "radar-zones-label";
   const TOD_FILL = "radar-tod-fill";
 
+  // OSM raster basemap. Set VITE_MAP_TILES_URL="" to disable it.
+  const OSM_TILES_URL: string =
+    (import.meta.env.VITE_MAP_TILES_URL as string | undefined) ??
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+
+  const hasBasemap = OSM_TILES_URL.trim().length > 0;
+
   async function ensureLayers(): Promise<CadastreCityLayers> {
     if (resolved) return resolved;
     resolved = await loadCadastreCity(citySlug, {
@@ -82,12 +89,39 @@
         container,
         style: {
           version: 8,
-          sources: {},
+          sources: {
+            ...(hasBasemap
+              ? {
+                  "osm-raster": {
+                    type: "raster" as const,
+                    tiles: [OSM_TILES_URL],
+                    tileSize: 256,
+                    attribution:
+                      "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                  },
+                }
+              : {}),
+          },
           layers: [
+            ...(hasBasemap
+              ? [
+                  {
+                    id: "osm-raster-layer",
+                    type: "raster" as const,
+                    source: "osm-raster",
+                    minzoom: 0,
+                    maxzoom: 22,
+                  },
+                ]
+              : []),
             {
               id: "bg",
-              type: "background",
-              paint: { "background-color": readSurface() },
+              type: "background" as const,
+              paint: {
+                "background-color": readSurface(),
+                // Hide the solid background when the basemap is enabled.
+                "background-opacity": hasBasemap ? 0 : 1,
+              },
             },
           ],
           glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
@@ -96,7 +130,7 @@
         fitBoundsOptions: { padding: 24 },
         center: data.center,
         zoom: data.zoom,
-        attributionControl: false,
+        attributionControl: { compact: true },
       });
       map = m;
 
