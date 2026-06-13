@@ -188,7 +188,6 @@ async function fetchAllFeatures(): Promise<RawFeature[]> {
   const features: RawFeature[] = [];
   let offset = 0;
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const page = await fetchPage(offset);
     features.push(...page.features);
@@ -275,7 +274,7 @@ function joinToRegistry(
   statcanFeatures: RawFeature[],
   registry: RegistryEntry[],
 ): JoinResult {
-  const { byNameMrc, byName, bySlug } = buildRegistryIndex(registry);
+  const { bySlug } = buildRegistryIndex(registry);
   const scIndex = buildStatCanIndex(statcanFeatures);
 
   const outputFeatures: JoinResult["features"] = [];
