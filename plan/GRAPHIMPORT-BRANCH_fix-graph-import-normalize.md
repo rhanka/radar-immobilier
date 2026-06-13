@@ -36,5 +36,5 @@ endpoints or free-form metadata.
   - [x] Lot gate: typecheck, lint, build.
 - [ ] **Lot 2 — PR handoff**
   - [x] Commit branch changes.
-  - [ ] Push branch.
-  - [ ] Open PR.
+  - [x] Push branch.
+  - [x] Open PR.
