@@ -51,8 +51,11 @@ export const graphifyNodeSchema = z.object({
   /**
    * graphify v2: evidence refs list.
    * Shape varies across snapshots; kept as passthrough for props.
+   * Some variants emit refs as string[] — strings are wrapped in { ref: s }.
    */
-  refs: z.array(z.record(z.unknown())).optional(),
+  refs: z
+    .array(z.union([z.record(z.unknown()), z.string().transform((s) => ({ ref: s }))]))
+    .optional(),
   /** Manual graphify extraction metadata kept nested in DB props. */
   properties: passthroughPropsSchema.optional(),
 });
@@ -64,10 +67,16 @@ export const graphifyLinkSchema = z.preprocess(
       return value;
     }
     const record = value as Record<string, unknown>;
+    // Normalise source/target aliases: src/tgt (v2 variant), from/to (v1 variant)
+    const source = record.source ?? record.src ?? record.from;
+    const target = record.target ?? record.tgt ?? record.to;
+    // Normalise relation alias: `rel` used in some v2 variants
+    const relation = record.relation ?? (record.rel !== undefined ? record.rel : undefined);
     return {
       ...record,
-      source: record.source ?? record.from,
-      target: record.target ?? record.to,
+      source,
+      target,
+      ...(relation !== undefined ? { relation } : {}),
     };
   },
   z.object({
@@ -77,6 +86,8 @@ export const graphifyLinkSchema = z.preprocess(
      * graphify v1 (old) emits `relation`; graphify v2 (SCW) emits `type` on
      * edges. We coerce both: `relation` takes priority when present (v1),
      * otherwise `type` is used (v2). At least one of the two is required.
+     * Some v2 variants use `rel` which is normalised to `relation` in the
+     * preprocess above.
      */
     relation: z.string().optional(),
     /** graphify v2: edge type field (used when `relation` is absent). */
@@ -84,8 +95,15 @@ export const graphifyLinkSchema = z.preprocess(
     confidence: z.string().optional(),
     confidence_score: z.number().optional(),
     source_file: z.string().optional(),
-    /** graphify v2: evidence refs on edges. */
-    refs: z.array(z.record(z.unknown())).optional(),
+    /**
+     * graphify v2: evidence refs on edges.
+     * Some v2 variants emit refs as string[] (citation strings) instead of
+     * object[]. We accept both: strings are wrapped in `{ ref: s }` for
+     * uniform storage.
+     */
+    refs: z
+      .array(z.union([z.record(z.unknown()), z.string().transform((s) => ({ ref: s }))]))
+      .optional(),
     /** Manual graphify extraction metadata kept nested in DB props. */
     properties: passthroughPropsSchema.optional(),
   }).refine(
