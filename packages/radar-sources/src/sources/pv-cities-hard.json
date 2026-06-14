@@ -1,24 +1,247 @@
 {
   "_comment": "Manifeste des villes M-Z 'dures' (SPA/403/scans/captcha) sans graph/<ville>/latest.json sur SCW. Stratégie complémentaire par ville. Anti-invention : aucune URL non vérifiée HTTP 200. Tenu à jour au fur et à mesure.",
-  "_scope": "Villes ACTIVES (excluded falsy) de municipalities.qc.json dont le nom NFD commence M..Z et qui n'ont PAS de graph/<ville>/latest.json sur le bucket SCW radar-immobilier-docs-pocs (38 villes au 2026-06-14).",
+  "_scope": "Villes ACTIVES (excluded falsy) de packages/radar-sources/src/geo/municipalities.qc.json dont le nom NFD commence M..Z et qui n'ont PAS de graph/<ville>/latest.json sur le bucket SCW radar-immobilier-docs-pocs (s3.fr-par.scw.cloud). 38 villes au 2026-06-14 (les A..L sont traitées par un autre agent).",
+  "_method": "URLs découvertes par recherche web + rendu Playwright, puis vérifiées HTTP 200 via curl. SPA détectées via shell JS vide en curl mais contenu réel au rendu navigateur. Aucune donnée fabriquée.",
   "_strategies": {
+    "static-curl": "Index HTML statique, liens PDF visibles en curl → adapter générique (curl) suffit.",
     "spa-playwright": "Index rendu côté client (JS) → rendu navigateur (Playwright/obscura) pour extraire les liens PDF.",
-    "static-curl": "Index HTML statique → adapter générique (curl) suffit.",
-    "obscura-403": "Mur anti-bot/403/captcha → service headless radar-obscura.",
+    "spa-modellium-backdoor": "SPA Angular 'vplus' de Modellium → porte de service curl-friendly : sitemap https://vplus.modellium.com/api/<slug>/sitemap/xml + PDF sur vplus-documents.s3.ca-central-1.amazonaws.com/<slug>/_publication/fichiers/. Scriptable sans navigateur.",
+    "obscura-403": "Mur anti-bot/403/captcha → bypass UA (Googlebot) ou service headless radar-obscura.",
+    "calameo": "Index HTML OK mais minutes ouvertes dans un visualiseur Calameo (pas de PDF direct) → extraction ad-hoc Calameo.",
     "ocr": "PDF scannés (image) → packages/radar-sources/src/sources/pdf-ocr.ts.",
-    "adhoc": "Quirk site-spécifique → config/adapter ad-hoc committé.",
     "irreductible": "Aucune source PV publique exploitable trouvée → noté + passé."
   },
+  "_status_legend": "config-ready = pvIndexUrl vérifié et scrapable par adapter générique. spa-needs-render = config ajoutée mais scrape nécessite navigateur/obscura. blocked = anti-bot, nécessite bypass UA. irreductible = pas de PV public.",
   "generated_at": "2026-06-14",
+  "total_mz_active_without_graph": 38,
   "cities": [
     {
-      "slug": "marieville",
-      "name": "Marieville",
-      "mrc": "Rouville",
+      "slug": "marieville", "name": "Marieville", "mrc": "Rouville",
       "pvIndexUrl": "https://www.ville.marieville.qc.ca/fr/la-ville/conseil-municipal/seances-du-conseil",
-      "strategy": "spa-playwright",
-      "diagnostic": "SPA ASP.NET — nav et liste PV rendues en JS. Page 'seances-du-conseil' expose 53 PDF dont des 'Procès-verbal' (Greffe/proces-verbaux/YYYYMMDD_PV_Seance.pdf). PV PDF vérifié 200 application/pdf le 2026-06-14.",
-      "status": "config-found"
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA ASP.NET (Maruche CMS). Au rendu navigateur : 53 PDF dont 'Procès-verbal' (Greffe/proces-verbaux/YYYYMMDD_PV_Seance.pdf). PV PDF vérifié 200 application/pdf. Vrai 404 sur chemins bogus (200 fiable)."
+    },
+    {
+      "slug": "oka", "name": "Oka", "mrc": "Deux-Montagnes",
+      "pvIndexUrl": "https://municipalite.oka.qc.ca/seances-publiques-du-conseil-municipal/",
+      "strategy": "calameo", "status": "config-ready",
+      "diagnostic": "Index HTML serveur, riche, par année (200). Minutes ouvertes dans visualiseur Calameo (calameo.com/oka/read/...), pas de PDF direct → extraction ad-hoc Calameo requise."
+    },
+    {
+      "slug": "notre-dame-de-stanbridge", "name": "Notre-Dame-de-Stanbridge", "mrc": "Brome-Missisquoi",
+      "pvIndexUrl": "https://www.notredamedestanbridge.qc.ca/documents-municipaux/proces-verbaux",
+      "strategy": "spa-modellium-backdoor", "status": "spa-needs-render",
+      "diagnostic": "SPA Modellium vplus (Angular). curl = shell vide. Back door : sitemap vplus.modellium.com/api/<slug>/sitemap/xml + PDF S3 vplus-documents."
+    },
+    {
+      "slug": "massueville", "name": "Massueville", "mrc": "Pierre-De Saurel",
+      "pvIndexUrl": "https://www.massueville.net/?page=cons-proc",
+      "strategy": "static-curl", "status": "config-ready",
+      "diagnostic": "Index statique curl-friendly (200). PV via include/fichier.php?id=<n> servant application/pdf, minutes 2016-2026. ATTENTION : 200 pour tout ?page= (soft-404) → matcher sur contenu."
+    },
+    {
+      "slug": "notre-dame-de-bonsecours", "name": "Notre-Dame-de-Bonsecours", "mrc": "Papineau",
+      "pvIndexUrl": "https://www.ndbonsecours.com/vie-municipale/proces-verbaux",
+      "strategy": "spa-modellium-backdoor", "status": "spa-needs-render",
+      "diagnostic": "SPA Modellium vplus (Angular). curl = shell vide. Back door sitemap+S3 vplus-documents."
+    },
+    {
+      "slug": "namur", "name": "Namur", "mrc": "Papineau",
+      "pvIndexUrl": "https://www.namur.ca/la-municipalite/conseil-municipal/proces-verbaux",
+      "strategy": "spa-modellium-backdoor", "status": "spa-needs-render",
+      "diagnostic": "SPA Modellium vplus. Au rendu navigateur : 182 PDF PV réels sur vplus-documents.s3.ca-central-1.amazonaws.com. Sitemap back door vérifié 200 application/xml."
+    },
+    {
+      "slug": "papineauville", "name": "Papineauville", "mrc": "Papineau",
+      "pvIndexUrl": "https://www.papineauville.ca/fr/municipalite-de-papineauville/conseil-municipal-et-seances-du-conseil-de-papineauville/seances-du-conseil",
+      "strategy": "obscura-403", "status": "blocked",
+      "diagnostic": "WAF anti-bot keyé sur UA : 403 en Mozilla, 200 en Googlebot (vérifié). PDF directs servent application/pdf 200. Scrape nécessite UA Googlebot/whitelisté ou navigateur."
+    },
+    {
+      "slug": "mayo", "name": "Mayo", "mrc": "Papineau",
+      "pvIndexUrl": "https://mayo.ca/vie-municipale/proces-verbaux/",
+      "strategy": "static-curl", "status": "config-ready",
+      "diagnostic": "Index HTML propre par année (sous-pages /proces-verbaux-2026/ etc.). Miroir EN /en/municipal-life/minutes-of-the-council-meetings/."
+    },
+    {
+      "slug": "montpellier", "name": "Montpellier", "mrc": "Papineau",
+      "pvIndexUrl": "https://montpellier.ca/vie-municipale/conseil-municipal/proces-verbaux",
+      "strategy": "spa-modellium-backdoor", "status": "spa-needs-render",
+      "diagnostic": "SPA Modellium vplus. curl = 0 lien PDF. Back door sitemap+S3 vplus-documents."
+    },
+    {
+      "slug": "notre-dame-du-laus", "name": "Notre-Dame-du-Laus", "mrc": "Antoine-Labelle",
+      "pvIndexUrl": "https://www.notre-dame-du-laus.ca/administration/seances-du-conseil-et-proces-verbaux",
+      "strategy": "spa-modellium-backdoor", "status": "spa-needs-render",
+      "diagnostic": "SPA Modellium vplus. curl = 0 lien PDF (mentions PV présentes). Back door sitemap+S3 vplus-documents."
+    },
+    {
+      "slug": "notre-dame-de-pontmain", "name": "Notre-Dame-de-Pontmain", "mrc": "Antoine-Labelle",
+      "pvIndexUrl": "https://munpontmain.qc.ca/publication/seances-du-conseil",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA React portailcitoyen. PV datés rendus en JS, PDF via vplus-documents S3. curl ne voit pas les liens."
+    },
+    {
+      "slug": "milan", "name": "Milan", "mrc": "Le Granit",
+      "pvIndexUrl": "https://www.munmilan.qc.ca/pages/proces-verbaux",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA B-CITI/gestionweblex. PV rendus en JS, PDF via apps.gestionweblex.ca. Détecté par BROWSER_REQUIRED_MARKERS de l'adapter (gestionweblex doc-list)."
+    },
+    {
+      "slug": "quebec", "name": "Québec", "mrc": null,
+      "pvIndexUrl": "https://decisions.ville.quebec.qc.ca/?type=proces-verbaux&inst=conseil-ville",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "Portail décisions Ville de Québec, UI de recherche JS. PV réels datés avec liens PDF au rendu. Gros volume — capitale. Nécessite navigateur ou API sous-jacente."
+    },
+    {
+      "slug": "notre-dame-des-anges", "name": "Notre-Dame-des-Anges", "mrc": null,
+      "pvIndexUrl": null,
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "Plus petite municipalité du QC (0.04 km², enclave dans Québec, gérée par les Augustines). Aucun site municipal officiel, aucune publication PV en ligne. Irréductible."
+    },
+    {
+      "slug": "notre-dame-des-pins", "name": "Notre-Dame-des-Pins", "mrc": "Beauce-Sartigan",
+      "pvIndexUrl": "https://notredamedespins.qc.ca/pages/proces-verbaux-et-enregistrements-des-seances",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "Site B-CITI. Index PV 200, mentions PV présentes mais 0 lien PDF en curl (injection JS). Nécessite rendu navigateur."
+    },
+    {
+      "slug": "mansfield-et-pontefract", "name": "Mansfield-et-Pontefract", "mrc": "Pontiac",
+      "pvIndexUrl": "https://mansfield-pontefract.com/la-municipalite/proces-verbal-de-la-reunion-du-conseil/",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "WordPress, index serveur listant chaque séance par date (2024-2026), chaque date → page /events/ contenant les minutes. 0 PDF direct en curl (liens vers sous-pages). Crawl 2 niveaux requis."
+    },
+    {
+      "slug": "notre-dame-auxiliatrice-de-buckland", "name": "Notre-Dame-Auxiliatrice-de-Buckland", "mrc": "Bellechasse",
+      "pvIndexUrl": "https://www.buckland.qc.ca/pages/proces-verbaux",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "Site B-CITI. Index PV 200, mentions présentes mais 0 lien PDF en curl (injection JS). Nécessite rendu navigateur."
+    },
+    {
+      "slug": "rapides-des-joachims", "name": "Rapides-des-Joachims", "mrc": "Pontiac",
+      "pvIndexUrl": null,
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "Aucun domaine officiel fonctionnel. Agrégateur municipalites-du-quebec.ca = 'Aucun fichier' (0 PV). MRC Pontiac ne porte que les PV de la MRC. Irréductible."
+    },
+    {
+      "slug": "metabetchouan-lac-a-la-croix", "name": "Métabetchouan-Lac-à-la-Croix", "mrc": "Lac-Saint-Jean-Est",
+      "pvIndexUrl": "https://ville.metabetchouan.qc.ca/ville-et-citoyen/le-conseil/proces-verbaux-ordre-du-jour/",
+      "strategy": "static-curl", "status": "config-ready",
+      "diagnostic": "WordPress, liens PDF directs visibles dans le HTML brut (wp-content/uploads/...pdf). Cas le plus propre du lot — adapter générique suffit."
+    },
+    {
+      "slug": "roberval", "name": "Roberval", "mrc": "Le Domaine-du-Roy",
+      "pvIndexUrl": "https://www.roberval.ca/documentation/proces-verbaux",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA Webflow. PV datés réels avec PDF via website-files.com au rendu. curl ne voit pas les liens."
+    },
+    {
+      "slug": "peribonka", "name": "Péribonka", "mrc": "Maria-Chapdelaine",
+      "pvIndexUrl": "https://peribonka.ca/conseil-municipal/",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "Index conseil-municipal = page PV (mentions présentes), mais minutes PDF hébergées sur acrobat.adobe.com et 0 lien PDF direct en curl. Organisé par année 2025/2026. Extraction ad-hoc/rendu requis."
+    },
+    {
+      "slug": "riviere-eternite", "name": "Rivière-Éternité", "mrc": "Le Fjord-du-Saguenay",
+      "pvIndexUrl": null,
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "WordPress. 'Documents en ligne' ne contient que bulletins, offres d'emploi, règlements d'urbanisme. Aucun PV de conseil publié. Irréductible (aucune minute publiée)."
+    },
+    {
+      "slug": "pohenegamook", "name": "Pohénégamook", "mrc": "Témiscouata",
+      "pvIndexUrl": "https://www.villepohenegamook.ca/accueil",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA Angular VPlus 'Portail citoyen'. curl 200 = shell JS vide. Aucune URL PV distincte scrapable en curl. Nécessite Playwright."
+    },
+    {
+      "slug": "malartic", "name": "Malartic", "mrc": "La Vallée-de-l'Or",
+      "pvIndexUrl": "https://malartic.quebec/vie-municipale/seances-du-conseil",
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "Site officiel malartic.quebec 200 mais page séances = 0 PDF/minute (info livestream uniquement), sitemap sans index PV. Domaine ville.malartic.qc.ca DNS-down. Pas de listing PV exploitable."
+    },
+    {
+      "slug": "moffet", "name": "Moffet", "mrc": "Témiscamingue",
+      "pvIndexUrl": "https://moffet.ca/la-municipalite/calendrier-des-seances-du-conseil-et-proces-verbaux",
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "Page titrée 'séances et procès-verbaux' (200) mais ne montre que le calendrier 2026 — aucun document PDF/HTML de minute lié actuellement. Bonne page, contenu absent."
+    },
+    {
+      "slug": "portneuf-sur-mer", "name": "Portneuf-sur-Mer", "mrc": "La Haute-Côte-Nord",
+      "pvIndexUrl": "https://portneuf-sur-mer.ca/",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA Angular VPlus 'Portail citoyen'. curl 200 = shell vide, aucune URL PV distincte. Nécessite Playwright."
+    },
+    {
+      "slug": "notre-dame-du-nord", "name": "Notre-Dame-du-Nord", "mrc": "Témiscamingue",
+      "pvIndexUrl": "https://www.nddn.ca/seances-du-conseil/",
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "WordPress partiellement 'en développement'. Page séances décrit l'horaire mais ne lie aucune minute. Sitemap WP complet sans page PV. Pas de minute publiée."
+    },
+    {
+      "slug": "mont-joli", "name": "Mont-Joli", "mrc": "La Mitis",
+      "pvIndexUrl": "https://ville.mont-joli.qc.ca/documents/?categorie=23",
+      "strategy": "static-curl", "status": "config-ready",
+      "diagnostic": "Archive minutes dédiée, PDF sur OVH S3 (ville-mont-joli-qc-ca.s3.bhs.io.cloud.ovh.net/AAAA/MM/pv-*.pdf), remonte à 2022. PV PDF vérifié 200 application/pdf."
+    },
+    {
+      "slug": "price", "name": "Price", "mrc": "La Mitis",
+      "pvIndexUrl": null,
+      "strategy": "irreductible", "status": "irreductible",
+      "diagnostic": "Domaine municipaliteprice.com NXDOMAIN (résolveurs Google 8.8.8.8 + Cloudflare 1.1.1.1), WebFetch ECONNREFUSED. DNS expiré/mal configuré au 2026-06-14 — non vérifiable. À retenter plus tard."
+    },
+    {
+      "slug": "padoue", "name": "Padoue", "mrc": "La Mitis",
+      "pvIndexUrl": "https://www.municipalite.padoue.qc.ca/municipal/proces-verbaux",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA Angular VPlus 'Portail citoyen'. Chemin server-routed /municipal/proces-verbaux (200) mais rendu JS. Nécessite Playwright."
+    },
+    {
+      "slug": "rapide-danseur", "name": "Rapide-Danseur", "mrc": "Abitibi-Ouest",
+      "pvIndexUrl": "https://rapide-danseur.ao.ca/fr/page/index.cfm?PageID=1245",
+      "strategy": "static-curl", "status": "config-ready",
+      "diagnostic": "Page ColdFusion (ao.ca) listant des PDF de PV. Liens PDF présents — adapter générique candidat."
+    },
+    {
+      "slug": "pointe-lebel", "name": "Pointe-Lebel", "mrc": "Manicouagan",
+      "pvIndexUrl": "https://pointe-lebel.com/proces-verbaux",
+      "strategy": "obscura-403", "status": "config-ready",
+      "diagnostic": "Mur anti-bot sensible aux en-têtes : 405 sans 'Accept: text/html' ou avec -L, 200 stable avec en-tête Accept. La page liste 234 PDF PV (CloudFront, par année). Régler l'en-tête Accept au scrape."
+    },
+    {
+      "slug": "matapedia", "name": "Matapédia", "mrc": "Avignon",
+      "pvIndexUrl": "https://matapedialesplateaux.com/citoyens/matapedia/proces-verbaux/",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "WordPress+JS. HTML statique contient le token non rendu {{openpdflink}} → liens PDF injectés en JS. Nécessite rendu navigateur."
+    },
+    {
+      "slug": "ristigouche-sud-est", "name": "Ristigouche-Sud-Est", "mrc": "Avignon",
+      "pvIndexUrl": "https://ristigouche.ca/ma-municipalite/seances-du-conseil",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA Angular VPlus 'Portail citoyen'. curl 200 = shell. Nécessite Playwright."
+    },
+    {
+      "slug": "pointe-a-la-croix", "name": "Pointe-à-la-Croix", "mrc": "Avignon",
+      "pvIndexUrl": "https://pointealacroix.com/documents_type/proces-verbaux/",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "WordPress+JS. Titres PV lient vers ancres '#' (liens réels injectés en JS). pointe-a-la-croix.com 301 → pointealacroix.com (sans tirets). Nécessite rendu navigateur."
+    },
+    {
+      "slug": "maria", "name": "Maria", "mrc": "Avignon",
+      "pvIndexUrl": "https://www.mariaquebec.com/conseil-municipal",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "SPA VPlus catch-all (200 pour tout chemin). /conseil-municipal = entrée canonique mais rendu JS. Nécessite Playwright."
+    },
+    {
+      "slug": "new-richmond", "name": "New Richmond", "mrc": "Bonaventure",
+      "pvIndexUrl": "https://villenewrichmond.com/la-ville/vie-democratique/proces-verbaux/",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "Page officielle = index canonique mais minutes servies via portail embarqué AppVoila (new-richmond.appvoila.com, 200). HTML statique = 2 PDF footer + lien 'consulter les PV' vers le portail. Scrape profond = suivre dans appvoila."
+    },
+    {
+      "slug": "petite-vallee", "name": "Petite-Vallée", "mrc": "La Côte-de-Gaspé",
+      "pvIndexUrl": "https://petitevallee.ca/administration-municipale/documents/proces-verbaux",
+      "strategy": "spa-playwright", "status": "spa-needs-render",
+      "diagnostic": "Page /documents/proces-verbaux 200 mais titre 'Procès-Verbaux' sans documents au rendu (placeholder/vide). Parent conseil-municipal 200. À revérifier — peut être vide à la source."
     }
   ]
 }
