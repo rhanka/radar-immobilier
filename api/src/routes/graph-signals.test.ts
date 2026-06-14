@@ -62,7 +62,7 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: unknown[];
+      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number> }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(0);
@@ -71,8 +71,8 @@ describe("GET /api/graph-signals/by-city", () => {
 
   it("returns ok:true with city list and correct totalCount", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
-      { citySlug: "drummondville", signalCount: 5 },
-      { citySlug: "saint-constant", signalCount: 3 },
+      { citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } },
+      { citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 } },
     ]);
 
     const app = graphSignalsRoute({ db: mockDb });
@@ -82,13 +82,14 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number }[];
+      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number> }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(8);
     expect(body.cities).toHaveLength(2);
-    expect(body.cities[0]).toEqual({ citySlug: "drummondville", signalCount: 5 });
-    expect(body.cities[1]).toEqual({ citySlug: "saint-constant", signalCount: 3 });
+    expect(body.cities[0]).toEqual({ citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } });
+    expect(body.cities[1]).toEqual({ citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 } });
+    expect(body.cities[0]!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
   });
 });
 

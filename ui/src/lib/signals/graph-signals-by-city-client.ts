@@ -8,6 +8,8 @@
 export interface GraphSignalCityItem {
   citySlug: string;
   signalCount: number;
+  /** Breakdown by node type (Signal, DesignationEvent, …). */
+  countsByType: Record<string, number>;
 }
 
 export interface GraphSignalsByCityResponse {
