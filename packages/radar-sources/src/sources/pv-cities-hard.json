@@ -92,8 +92,9 @@
       "uuid": "EF709034-00F9-49B8-B424-8CE7B1C5835B",
       "pvIndexUrl": "https://lyster.ca/proces-verbaux",
       "pdf_count": 251,
-      "status": "graphifying",
-      "notes": "graphify en cours"
+      "status": "graphified",
+      "notes": "251 PVs, 1924 nodes, 3155 edges",
+      "scw_key": "graph/lyster/latest.json"
     },
     "baie-des-sables": {
       "strategy": "vplus",
