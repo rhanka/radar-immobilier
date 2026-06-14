@@ -25,6 +25,8 @@ import {
   ZONAGE_CATEGORIES,
   deriveEtape,
   isMulti4Plus,
+  isPrecoceSignal,
+  buildSubsetKey,
   ETAPE_ORDER,
   ETAPES_PRECOCES,
   type GraphifyNode,
@@ -801,5 +803,46 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraph (integration)", () => {
     const subgraph = await subgraphForCity(db, "__city_that_does_not_exist__");
     expect(subgraph.nodes).toHaveLength(0);
     expect(subgraph.edges).toHaveLength(0);
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. Signal flag helpers — isPrecoceSignal, buildSubsetKey — pure tests
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("isPrecoceSignal", () => {
+  it("retourne true quand etapeAnnote = avis_motion", () => {
+    expect(isPrecoceSignal("avis_motion", null, null)).toBe(true);
+  });
+  it("retourne true quand etapeAnnote = projet_reglement", () => {
+    expect(isPrecoceSignal("projet_reglement", null, null)).toBe(true);
+  });
+  it("retourne false quand etapeAnnote = adoption", () => {
+    expect(isPrecoceSignal("adoption", "avis de motion dans le texte", null)).toBe(false);
+  });
+  it("fallback sur deriveEtape quand etapeAnnote est null", () => {
+    expect(isPrecoceSignal(null, "avis de motion séance du 5 mars", null)).toBe(true);
+  });
+  it("fallback sur deriveEtape quand etapeAnnote est vide", () => {
+    expect(isPrecoceSignal("", "projet de règlement 2025", null)).toBe(true);
+  });
+  it("retourne false si ni annotation ni mots-clés précoces", () => {
+    expect(isPrecoceSignal(null, "adoption du règlement 456", null)).toBe(false);
+  });
+});
+
+describe("buildSubsetKey", () => {
+  it('retourne "" quand aucun flag', () => {
+    expect(buildSubsetKey(false, false, false)).toBe("");
+  });
+  it('retourne "z" quand z seul', () => {
+    expect(buildSubsetKey(true, false, false)).toBe("z");
+  });
+  it('retourne "z|m|p" quand tous les flags', () => {
+    expect(buildSubsetKey(true, true, true)).toBe("z|m|p");
+  });
+  it('retourne "m|p" quand m et p', () => {
+    expect(buildSubsetKey(false, true, true)).toBe("m|p");
   });
 });
