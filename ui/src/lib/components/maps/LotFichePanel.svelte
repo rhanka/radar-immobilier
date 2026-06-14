@@ -31,7 +31,7 @@
    * 55 vh, swipeable via le bouton fermer) — CS-L2 S-16 bonus.
    */
   import { X, MapPin, Star, Info, ExternalLink } from "@lucide/svelte";
-  import { Badge } from "@sentropic/design-system-svelte";
+  import { Badge, Card } from "@sentropic/design-system-svelte";
   import type { LotFeature } from "$lib/maps/lots-client.js";
   import {
     centroid,
@@ -63,21 +63,78 @@
 
 {#if lot}
   <!--
-    Desktop : panneau inline (dans le flux).
-    Mobile  : bottom-sheet fixe (< 768 px).
+    Desktop (md+) : Card DS — panneau inline dans le flux.
+    Mobile (<768px) : bottom-sheet fixe bespoke (55 vh, rounded-t).
+    NOTE DS-GAP : le Drawer DS ne supporte pas le pattern bottom-sheet mobile
+    (side="bottom" non disponible en v0.7). Voir docs/spec/ds-api-gaps.md.
   -->
+  <!-- Mobile bottom-sheet wrapper (hidden on md+) -->
   <div
     class="
       lot-fiche-panel
       fixed bottom-0 left-0 right-0 z-30
       max-h-[55vh] overflow-y-auto
       rounded-t-2xl border-t border-slate-200 bg-white shadow-2xl
-      md:static md:max-h-none md:rounded-xl md:border md:shadow-sm md:z-auto
+      md:hidden
     "
-    data-testid="lot-fiche-panel"
+    data-testid="lot-fiche-panel-mobile"
     role="region"
     aria-label="Fiche du lot {noLot}"
   >
+    <!-- ── En-tête (mobile) ────────────────────────────────────────────── -->
+    <div
+      class="
+        sticky top-0 z-10
+        flex items-center justify-between gap-3
+        border-b border-teal-100 bg-teal-50 px-4 py-3
+      "
+    >
+      <div class="flex items-center gap-2 min-w-0">
+        <MapPin class="h-4 w-4 text-teal-600 shrink-0" aria-hidden="true" />
+        <div class="min-w-0">
+          <p class="text-xs text-teal-600 font-medium uppercase tracking-wide">Fiche lot</p>
+          <p class="font-mono text-base font-bold text-teal-900 truncate" data-testid="fiche-nolot-mobile">
+            {noLot}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-teal-100 hover:text-teal-700 shrink-0"
+        on:click={onClose}
+        aria-label="Fermer la fiche lot"
+      >
+        <X class="h-4 w-4" aria-hidden="true" />
+      </button>
+    </div>
+    <!-- Corps mobile (inline, voir Desktop ci-dessous pour le contenu partagé) -->
+    <div class="p-4 space-y-4">
+      <p class="text-xs text-slate-500">N° lot : <span class="font-mono font-semibold text-slate-900">{noLot}</span></p>
+      {#if potentialScore !== undefined}
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-bold text-slate-900">{potentialScore}<span class="text-sm font-normal text-slate-400">/10</span></span>
+          <Badge tone={scoreTone(potentialScore)}>{scoreLabel(potentialScore)}</Badge>
+        </div>
+      {/if}
+      {#if mapsUrl}
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-teal-700 hover:border-teal-300 hover:bg-teal-50"
+          data-testid="fiche-maps-link-mobile"
+          aria-label="Ouvrir le lot {noLot} dans Google Maps (nouvelle fenêtre)"
+        >
+          <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          Voir dans Google Maps
+        </a>
+      {/if}
+    </div>
+  </div>
+
+  <!-- Desktop : Card DS (md+) -->
+  <Card class="hidden md:block overflow-hidden" data-testid="lot-fiche-panel">
+    <div role="region" aria-label="Fiche du lot {noLot}">
     <!-- ── En-tête ─────────────────────────────────────────────────────────── -->
     <div
       class="
@@ -261,5 +318,6 @@
         Données cadastrales publiques MRNF.
       </p>
     </div>
-  </div>
+    </div>
+  </Card>
 {/if}
