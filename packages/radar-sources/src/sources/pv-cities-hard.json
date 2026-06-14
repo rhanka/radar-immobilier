@@ -103,8 +103,9 @@
       "uuid": "DF5D6441-A00F-4595-A96A-BC90A54BAA9D",
       "pvIndexUrl": "https://baiedessables.ca/documents-et-publications/proces-verbaux",
       "pdf_count": 215,
-      "status": "graphifying",
-      "notes": "graphify en cours"
+      "status": "graphified",
+      "notes": "215 PVs, 1610 nodes, 2658 edges",
+      "scw_key": "graph/baie-des-sables/latest.json"
     },
     "beaupre": {
       "strategy": "vplus",
