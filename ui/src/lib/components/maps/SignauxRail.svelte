@@ -3,8 +3,10 @@
    * SignauxRail — bande latérale gauche de la vue Signaux.
    *
    * Accordéon de 1er niveau à 2 sections (<details> natif) :
-   *   1. « Signaux » (ouverte par défaut) : cases à cocher par type de signal
-   *      → filtre GLOBAL (listes + recoloration aplats via callback)
+   *   1. « Signaux » (ouverte par défaut) : toggle « Zonage uniquement » (DÉFAUT ON)
+   *      → filtre PRIMAIRE top-down : la base de comptage des villes = zonageCount
+   *        quand ON, signalCount6m (total) quand OFF. Le filtre est indépendant
+   *        de la ville sélectionnée.
    *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
    *
    * Anti-invention : aucun appel API ici, tout par props.
@@ -15,7 +17,7 @@
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
-  /** Toutes les entrées villes (avec signalCount6m). */
+  /** Toutes les entrées villes (avec signalCount6m et zonageCount). */
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
@@ -33,8 +35,12 @@
   export let onSelectCity: (entry: CityMapEntry) => void = () => {};
   /** Appelé pour actualiser les données. */
   export let onRefresh: () => void = () => {};
-  /** Appelé quand le filtre types change (ensemble des types EXCLUS). */
-  export let onFilterChange: (excluded: Set<string>) => void = () => {};
+  /**
+   * Appelé quand le filtre change.
+   * Passe l'état zonage-only ET les types exclus pour que SignauxMapView
+   * puisse recolorer les aplats avec la bonne base de compte.
+   */
+  export let onFilterChange: (excluded: Set<string>, zonageOnly: boolean) => void = () => {};
 
   // ── Palette 12 couleurs par type (identique graphify) ─────────────────────
   const TYPE_PALETTE = [
@@ -56,63 +62,23 @@
     return "#ef4444";
   }
 
-  // ── Section accordéon 1er niveau ──────────────────────────────────────────
-  // Les deux sections sont ouvertes par défaut à l'init.
+  // ── Toggle « Zonage uniquement » — filtre PRIMAIRE TOP-DOWN ───────────────
+  /**
+   * Quand zonageOnly est ON (défaut) :
+   *   - la base de comptage de TOUTES les villes = entry.zonageCount
+   *   - totalSignals, citiesWithSignals, pastilles, tri = basés sur zonageCount
+   *   - les aplats MapLibre utilisent aussi zonageCount (via callback)
+   *
+   * Ce filtre est INDÉPENDANT de la ville sélectionnée.
+   */
+  let zonageOnly = true;
 
-  // ── Types zonage (Signal + DesignationEvent — confirmé par requête SQL prod) ──
-  const ZONAGE_TYPES = new Set(["Signal", "DesignationEvent"]);
-
-  // ── Filtre GLOBAL par type (section Signaux) ───────────────────────────────
   /** Types disponibles = union des types connus (multi-villes) + types actuels. */
   $: allKnownTypes = Array.from(
     new Set([...knownNodeTypes, ...detailNodes.map((n) => n.type)])
   ).sort();
 
-  /** Toggle « Zonage uniquement » — activé par défaut. */
-  let zonageOnly = true;
-
-  /** Ensemble des types exclus par l'utilisateur. */
-  let excludedTypes = new Set<string>();
-
-  /** Calcule l'ensemble des types exclus selon l'état du toggle zonage et des cases. */
-  function computeExcluded(
-    types: string[],
-    excluded: Set<string>,
-    zOnly: boolean,
-  ): Set<string> {
-    if (zOnly) {
-      // Exclut tous les types sauf les types zonage
-      return new Set(types.filter((t) => !ZONAGE_TYPES.has(t)));
-    }
-    return excluded;
-  }
-
-  /** Ensemble effectif des types exclus (tient compte du toggle zonage). */
-  $: effectiveExcluded = computeExcluded(allKnownTypes, excludedTypes, zonageOnly);
-
-  function toggleZonageOnly(): void {
-    zonageOnly = !zonageOnly;
-    if (zonageOnly) {
-      // Quand on réactive zonage-only, on remet les cases à cocher à leur état initial
-      excludedTypes = new Set<string>();
-    }
-    onFilterChange(effectiveExcluded);
-  }
-
-  function toggleType(type: string): void {
-    if (excludedTypes.has(type)) {
-      excludedTypes.delete(type);
-    } else {
-      excludedTypes.add(type);
-    }
-    excludedTypes = excludedTypes; // trigger reactivity
-    onFilterChange(effectiveExcluded);
-  }
-
-  // Propagate filter on initial mount / when known types change
-  $: onFilterChange(effectiveExcluded);
-
-  // ── Compteur par type (nœuds de la ville sélectionnée) ────────────────────
+  /** Compteur par type (nœuds de la ville sélectionnée — filtre secondaire). */
   $: countByType = detailNodes.reduce(
     (acc, n) => {
       acc[n.type] = (acc[n.type] ?? 0) + 1;
@@ -121,8 +87,26 @@
     {} as Record<string, number>,
   );
 
-  // ── Nœuds filtrés selon les types cochés ──────────────────────────────────
-  $: filteredNodes = detailNodes.filter((n) => !effectiveExcluded.has(n.type));
+  /** Nœuds filtrés (filtre secondaire par type, uniquement quand zonageOnly=OFF). */
+  $: filteredNodes = detailNodes;
+
+  function toggleZonageOnly(): void {
+    zonageOnly = !zonageOnly;
+    onFilterChange(new Set<string>(), zonageOnly);
+  }
+
+  // Propagate filter on initial mount / when entries change
+  $: onFilterChange(new Set<string>(), zonageOnly);
+
+  // ── Compteur actif par ville (TOP-DOWN) ────────────────────────────────────
+  /**
+   * Retourne le compte actif pour une ville selon l'état du toggle zonage.
+   * Quand zonageOnly=ON → entry.zonageCount
+   * Quand zonageOnly=OFF → entry.signalCount6m (total)
+   */
+  function activeCountForEntry(entry: CityMapEntry): number {
+    return zonageOnly ? (entry.zonageCount ?? 0) : entry.signalCount6m;
+  }
 
   // ── Recherche villes (section Villes) ─────────────────────────────────────
   let searchQuery = "";
@@ -135,20 +119,12 @@
     : entries;
 
   $: sortedEntries = [...filteredEntries].sort(
-    (a, b) => b.signalCount6m - a.signalCount6m
+    (a, b) => activeCountForEntry(b) - activeCountForEntry(a)
   ).slice(0, 60);
 
-  // ── Compteur filtré par ville (selon les types actifs) ─────────────────────
-  function filteredCountForEntry(entry: CityMapEntry): number {
-    if (effectiveExcluded.size === 0) return entry.signalCount6m;
-    return Object.entries(entry.countsByType ?? {})
-      .filter(([t]) => !effectiveExcluded.has(t))
-      .reduce((s, [, n]) => s + n, 0);
-  }
-
-  // ── Compteurs globaux (réactifs au filtre) ────────────────────────────────
-  $: totalSignals = entries.reduce((s, e) => s + filteredCountForEntry(e), 0);
-  $: citiesWithSignals = entries.filter((e) => filteredCountForEntry(e) > 0).length;
+  // ── Compteurs globaux (réactifs au filtre zonage) ─────────────────────────
+  $: totalSignals = entries.reduce((s, e) => s + activeCountForEntry(e), 0);
+  $: citiesWithSignals = entries.filter((e) => activeCountForEntry(e) > 0).length;
 </script>
 
 <!-- Rail container -->
@@ -174,7 +150,8 @@
       {#if loading}
         <span class="text-slate-400">Chargement…</span>
       {:else}
-        <span class="font-semibold text-slate-700">{totalSignals}</span> signal{totalSignals !== 1 ? "s" : ""}
+        <span class="font-semibold text-slate-700">{totalSignals}</span>
+        {zonageOnly ? " signaux de zonage" : ` signal${totalSignals !== 1 ? "s" : ""}`}
         · <span class="font-semibold text-slate-700">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
       {/if}
     </div>
@@ -188,13 +165,10 @@
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
         <span class="rail-section-title">Signaux</span>
-        {#if effectiveExcluded.size > 0}
-          <span class="rail-section-badge">{allKnownTypes.length - effectiveExcluded.size}/{allKnownTypes.length}</span>
-        {/if}
       </summary>
 
       <div class="rail-section-body">
-        <!-- Toggle « Zonage uniquement » — activé par défaut -->
+        <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE top-down, activé par défaut -->
         <div class="zonage-toggle-row px-3 pt-2 pb-1">
           <label class="rail-type-row">
             <input
@@ -205,49 +179,11 @@
               aria-label="Zonage uniquement"
             />
             <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
-            {#if zonageOnly}
-              <span class="zonage-badge">Signal · Désignation</span>
+            {#if zonageOnly && !loading}
+              <span class="zonage-badge">{totalSignals} signaux</span>
             {/if}
           </label>
         </div>
-
-        {#if !zonageOnly}
-          {#if allKnownTypes.length === 0}
-            <p class="text-xs text-slate-400 italic px-4 py-2">
-              Sélectionnez une ville pour voir les types de signaux.
-            </p>
-          {:else}
-            <ul class="space-y-0.5 px-3 py-1" role="list">
-              {#each allKnownTypes as type (type)}
-                {@const excluded = excludedTypes.has(type)}
-                {@const count = countByType[type] ?? null}
-                <li>
-                  <label
-                    class="rail-type-row"
-                    class:rail-type-row--excluded={excluded}
-                  >
-                    <input
-                      type="checkbox"
-                      class="rail-type-checkbox"
-                      checked={!excluded}
-                      on:change={() => toggleType(type)}
-                      aria-label={type}
-                    />
-                    <span
-                      class="rail-swatch"
-                      style="background-color: {excluded ? '#cbd5e1' : typeColor(type)};"
-                      aria-hidden="true"
-                    ></span>
-                    <span class="rail-row-label">{type}</span>
-                    {#if count !== null}
-                      <span class="rail-row-count text-slate-500">{count}</span>
-                    {/if}
-                  </label>
-                </li>
-              {/each}
-            </ul>
-          {/if}
-        {/if}
       </div>
     </details>
 
@@ -278,7 +214,7 @@
           {:else}
             {#each sortedEntries as entry (entry.municipality.slug)}
               {@const isSelected = selectedSlug === entry.municipality.slug}
-              {@const filteredCount = filteredCountForEntry(entry)}
+              {@const activeCount = activeCountForEntry(entry)}
               <li>
                 <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
                 <details
@@ -290,10 +226,10 @@
                     class:ws-acc-summary--active={isSelected}
                     on:click|preventDefault={() => onSelectCity(entry)}
                   >
-                    <!-- Pastille couleur signal (basée sur le compte filtré) -->
+                    <!-- Pastille couleur signal (basée sur le compte actif zonage ou total) -->
                     <span
                       class="rail-swatch"
-                      style="background-color: {signalColor(filteredCount)};"
+                      style="background-color: {signalColor(activeCount)};"
                       aria-hidden="true"
                     ></span>
                     <span class="rail-row-label">
@@ -302,9 +238,9 @@
                         <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
                       {/if}
                     </span>
-                    {#if filteredCount > 0}
+                    {#if activeCount > 0}
                       <Badge tone="warning" class="rail-row-count shrink-0">
-                        {filteredCount}
+                        {activeCount}
                       </Badge>
                     {:else}
                       <span class="rail-row-count text-slate-300">0</span>
@@ -467,15 +403,6 @@
     flex: 1;
   }
 
-  .rail-section-badge {
-    font-size: 0.68rem;
-    font-variant-numeric: tabular-nums;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    background: #e2e8f0;
-    border-radius: 999px;
-    padding: 0.1rem 0.45rem;
-  }
-
   .rail-section-chevron {
     font-size: 0.65rem;
     color: var(--st-semantic-text-muted, #94a3b8);
@@ -501,10 +428,6 @@
 
   .rail-type-row:hover {
     background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
-  .rail-type-row--excluded {
-    opacity: 0.5;
   }
 
   .rail-type-checkbox {
