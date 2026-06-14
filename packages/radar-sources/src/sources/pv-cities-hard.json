@@ -11,7 +11,8 @@
     "ocr": "PDF scannés (image) → packages/radar-sources/src/sources/pdf-ocr.ts.",
     "irreductible": "Aucune source PV publique exploitable trouvée → noté + passé."
   },
-  "_status_legend": "config-ready = pvIndexUrl vérifié et scrapable par adapter générique. spa-needs-render = config ajoutée mais scrape nécessite navigateur/obscura. blocked = anti-bot, nécessite bypass UA. irreductible = pas de PV public.",
+  "_status_legend": "config-ready = pvIndexUrl vérifié, scrapable par adapter générique (pas encore scrapé). scraped-raw = RECUEIL fait, raw sur SCW, reste graphify. scraped-0docs = scrape lancé mais 0 doc extrait (liens dynamiques, adapter ad-hoc requis). spa-needs-render = config ajoutée mais scrape nécessite navigateur/obscura. blocked = anti-bot, nécessite bypass UA. irreductible = pas de PV public.",
+  "_pipeline_status": "Les 30 villes joignables sont CÂBLÉES (config-only dans ALL_PV_CITIES). RECUEIL validé end-to-end : mont-joli + metabetchouan scrapés → raw/.../cas/ sur SCW (2026-06-14). Étape GRAPHIFY (raw → graph/<ville>/latest.json, contrat radar/ontology/graphify-output-contract.md) NON exécutée ici : la skill graphify n'est pas installée dans cet environnement (~/.claude/skills/graphify absent). Les villes SPA (23) nécessitent en plus le chemin navigateur/obscura au scrape (l'adapter générique les route via detectIndexRenderMode mais n'exécute pas le rendu sans service obscura déployé).",
   "generated_at": "2026-06-14",
   "total_mz_active_without_graph": 38,
   "cities": [
@@ -36,8 +37,8 @@
     {
       "slug": "massueville", "name": "Massueville", "mrc": "Pierre-De Saurel",
       "pvIndexUrl": "https://www.massueville.net/?page=cons-proc",
-      "strategy": "static-curl", "status": "config-ready",
-      "diagnostic": "Index statique curl-friendly (200). PV via include/fichier.php?id=<n> servant application/pdf, minutes 2016-2026. ATTENTION : 200 pour tout ?page= (soft-404) → matcher sur contenu."
+      "strategy": "static-curl", "status": "scraped-0docs",
+      "diagnostic": "Index statique curl-friendly (200). PV via include/fichier.php?id=<n>. Scrape live 2026-06-14 = 'seen' 0 doc : les liens fichier.php?id= ne sont pas extraits comme docs PV par l'adapter générique (200 pour tout ?page= = soft-404). Nécessite adapter ad-hoc (matcher fichier.php sur cette page) ou crawl du contenu."
     },
     {
       "slug": "notre-dame-de-bonsecours", "name": "Notre-Dame-de-Bonsecours", "mrc": "Papineau",
@@ -126,8 +127,8 @@
     {
       "slug": "metabetchouan-lac-a-la-croix", "name": "Métabetchouan-Lac-à-la-Croix", "mrc": "Lac-Saint-Jean-Est",
       "pvIndexUrl": "https://ville.metabetchouan.qc.ca/ville-et-citoyen/le-conseil/proces-verbaux-ordre-du-jour/",
-      "strategy": "static-curl", "status": "config-ready",
-      "diagnostic": "WordPress, liens PDF directs visibles dans le HTML brut (wp-content/uploads/...pdf). Cas le plus propre du lot — adapter générique suffit."
+      "strategy": "static-curl", "status": "scraped-raw",
+      "diagnostic": "WordPress. Scrape live 2026-06-14 = 'new' 3 docs → raw/proces-verbaux-metabetchouan-lac-a-la-croix/cas/ (6 objets) sur SCW. Adapter générique OK. Reste : graphify → graph/<ville>/latest.json."
     },
     {
       "slug": "roberval", "name": "Roberval", "mrc": "Le Domaine-du-Roy",
@@ -180,8 +181,8 @@
     {
       "slug": "mont-joli", "name": "Mont-Joli", "mrc": "La Mitis",
       "pvIndexUrl": "https://ville.mont-joli.qc.ca/documents/?categorie=23",
-      "strategy": "static-curl", "status": "config-ready",
-      "diagnostic": "Archive minutes dédiée, PDF sur OVH S3 (ville-mont-joli-qc-ca.s3.bhs.io.cloud.ovh.net/AAAA/MM/pv-*.pdf), remonte à 2022. PV PDF vérifié 200 application/pdf."
+      "strategy": "static-curl", "status": "scraped-raw",
+      "diagnostic": "Archive minutes dédiée, PDF sur OVH S3 (ville-mont-joli-qc-ca.s3.bhs.io.cloud.ovh.net/AAAA/MM/pv-*.pdf), remonte à 2022. Scrape live 2026-06-14 = 'new' 3 docs → raw/proces-verbaux-mont-joli/cas/ (6 objets : index HTML + 2 PV PDFs) sur SCW. Reste : graphify → graph/<ville>/latest.json."
     },
     {
       "slug": "price", "name": "Price", "mrc": "La Mitis",
