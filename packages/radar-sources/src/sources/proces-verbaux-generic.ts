@@ -4511,6 +4511,12 @@ export const BEAUPRE_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-beaupre",
 };
 
+export const LAC_FRONTIERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-frontiere",
+  pvIndexUrl: "https://www.lac-frontiere.ca/web/proces-verbaux/",
+  sourceId: "proces-verbaux-lac-frontiere",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -5296,4 +5302,5 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: BAIE_DES_SABLES_PV_CONFIG },
   { config: GRAND_REMOUS_PV_CONFIG },
   { config: BEAUPRE_PV_CONFIG },
+  { config: LAC_FRONTIERE_PV_CONFIG },
 ];
