@@ -131,7 +131,7 @@
   }
 </script>
 
-<ViewLayout controlsWidth="w-80">
+<ViewLayout controlsWidth="w-80" stickyControlsFooter>
   <!-- ── Left sidebar: city list ────────────────────────────────────────── -->
   <svelte:fragment slot="controls">
     <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
@@ -262,8 +262,11 @@
       {/if}
     {/if}
 
-    <!-- Legend -->
-    <div class="border-t border-slate-100 p-4">
+  </svelte:fragment>
+
+  <!-- Légende maturité épinglée en bas de la bande (footer de menu DS) -->
+  <svelte:fragment slot="controls-footer">
+    <div class="p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Légende (maturité recueil)
       </p>
