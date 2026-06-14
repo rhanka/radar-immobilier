@@ -4428,6 +4428,200 @@ export const SAINT_RAPHAEL_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-saint-raphael",
 };
 
+// ---------------------------------------------------------------------------
+// Lot « M-Z villes dures » -- config-only, URLs vérifiées HTTP 200 le 2026-06-14.
+// Villes ACTIVES M..Z (NFD) sans graph/<ville>/latest.json sur SCW. La plupart
+// sont des SPA (Modellium vplus / VPlus Angular / B-CITI / Webflow) dont la liste
+// PV est rendue en JS : l'adapter générique les détecte (detectIndexRenderMode)
+// et les route vers le chemin navigateur/obscura. Détail + stratégie par ville :
+// packages/radar-sources/src/sources/pv-cities-hard.json. Les 7 villes
+// irréductibles (pas de PV public) ne sont PAS wirées ici.
+// ---------------------------------------------------------------------------
+
+export const MARIEVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "marieville",
+  pvIndexUrl: "https://www.ville.marieville.qc.ca/fr/la-ville/conseil-municipal/seances-du-conseil",
+  sourceId: "proces-verbaux-marieville",
+};
+
+export const OKA_PV_CONFIG: PvCityConfig = {
+  citySlug: "oka",
+  pvIndexUrl: "https://municipalite.oka.qc.ca/seances-publiques-du-conseil-municipal/",
+  sourceId: "proces-verbaux-oka",
+};
+
+export const NOTRE_DAME_DE_STANBRIDGE_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-de-stanbridge",
+  pvIndexUrl: "https://www.notredamedestanbridge.qc.ca/documents-municipaux/proces-verbaux",
+  sourceId: "proces-verbaux-notre-dame-de-stanbridge",
+};
+
+export const MASSUEVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "massueville",
+  pvIndexUrl: "https://www.massueville.net/?page=cons-proc",
+  sourceId: "proces-verbaux-massueville",
+};
+
+export const NOTRE_DAME_DE_BONSECOURS_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-de-bonsecours",
+  pvIndexUrl: "https://www.ndbonsecours.com/vie-municipale/proces-verbaux",
+  sourceId: "proces-verbaux-notre-dame-de-bonsecours",
+};
+
+export const NAMUR_PV_CONFIG: PvCityConfig = {
+  citySlug: "namur",
+  pvIndexUrl: "https://www.namur.ca/la-municipalite/conseil-municipal/proces-verbaux",
+  sourceId: "proces-verbaux-namur",
+};
+
+export const PAPINEAUVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "papineauville",
+  pvIndexUrl: "https://www.papineauville.ca/fr/municipalite-de-papineauville/conseil-municipal-et-seances-du-conseil-de-papineauville/seances-du-conseil",
+  sourceId: "proces-verbaux-papineauville",
+};
+
+// NOTE: mayo est déjà configurée + enregistrée (lot antérieur, URL EN
+// mayo.ca/en/.../minutes-of-the-council-meetings/). Pas de doublon ici ; son
+// absence de graphe SCW relève du scrape/graphify, pas de la config.
+
+export const MONTPELLIER_PV_CONFIG: PvCityConfig = {
+  citySlug: "montpellier",
+  pvIndexUrl: "https://montpellier.ca/vie-municipale/conseil-municipal/proces-verbaux",
+  sourceId: "proces-verbaux-montpellier",
+};
+
+export const NOTRE_DAME_DU_LAUS_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-du-laus",
+  pvIndexUrl: "https://www.notre-dame-du-laus.ca/administration/seances-du-conseil-et-proces-verbaux",
+  sourceId: "proces-verbaux-notre-dame-du-laus",
+};
+
+export const NOTRE_DAME_DE_PONTMAIN_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-de-pontmain",
+  pvIndexUrl: "https://munpontmain.qc.ca/publication/seances-du-conseil",
+  sourceId: "proces-verbaux-notre-dame-de-pontmain",
+};
+
+export const MILAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "milan",
+  pvIndexUrl: "https://www.munmilan.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-milan",
+};
+
+export const QUEBEC_PV_CONFIG: PvCityConfig = {
+  citySlug: "quebec",
+  pvIndexUrl: "https://decisions.ville.quebec.qc.ca/?type=proces-verbaux&inst=conseil-ville",
+  sourceId: "proces-verbaux-quebec",
+};
+
+export const NOTRE_DAME_DES_PINS_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-des-pins",
+  pvIndexUrl: "https://notredamedespins.qc.ca/pages/proces-verbaux-et-enregistrements-des-seances",
+  sourceId: "proces-verbaux-notre-dame-des-pins",
+};
+
+export const MANSFIELD_ET_PONTEFRACT_PV_CONFIG: PvCityConfig = {
+  citySlug: "mansfield-et-pontefract",
+  pvIndexUrl: "https://mansfield-pontefract.com/la-municipalite/proces-verbal-de-la-reunion-du-conseil/",
+  sourceId: "proces-verbaux-mansfield-et-pontefract",
+};
+
+export const NOTRE_DAME_AUXILIATRICE_DE_BUCKLAND_PV_CONFIG: PvCityConfig = {
+  citySlug: "notre-dame-auxiliatrice-de-buckland",
+  pvIndexUrl: "https://www.buckland.qc.ca/pages/proces-verbaux",
+  sourceId: "proces-verbaux-notre-dame-auxiliatrice-de-buckland",
+};
+
+export const METABETCHOUAN_LAC_A_LA_CROIX_PV_CONFIG: PvCityConfig = {
+  citySlug: "metabetchouan-lac-a-la-croix",
+  pvIndexUrl: "https://ville.metabetchouan.qc.ca/ville-et-citoyen/le-conseil/proces-verbaux-ordre-du-jour/",
+  sourceId: "proces-verbaux-metabetchouan-lac-a-la-croix",
+};
+
+export const ROBERVAL_PV_CONFIG: PvCityConfig = {
+  citySlug: "roberval",
+  pvIndexUrl: "https://www.roberval.ca/documentation/proces-verbaux",
+  sourceId: "proces-verbaux-roberval",
+};
+
+export const PERIBONKA_PV_CONFIG: PvCityConfig = {
+  citySlug: "peribonka",
+  pvIndexUrl: "https://peribonka.ca/conseil-municipal/",
+  sourceId: "proces-verbaux-peribonka",
+};
+
+export const POHENEGAMOOK_PV_CONFIG: PvCityConfig = {
+  citySlug: "pohenegamook",
+  pvIndexUrl: "https://www.villepohenegamook.ca/accueil",
+  sourceId: "proces-verbaux-pohenegamook",
+};
+
+export const PORTNEUF_SUR_MER_PV_CONFIG: PvCityConfig = {
+  citySlug: "portneuf-sur-mer",
+  pvIndexUrl: "https://portneuf-sur-mer.ca/",
+  sourceId: "proces-verbaux-portneuf-sur-mer",
+};
+
+export const MONT_JOLI_PV_CONFIG: PvCityConfig = {
+  citySlug: "mont-joli",
+  pvIndexUrl: "https://ville.mont-joli.qc.ca/documents/?categorie=23",
+  sourceId: "proces-verbaux-mont-joli",
+};
+
+export const PADOUE_PV_CONFIG: PvCityConfig = {
+  citySlug: "padoue",
+  pvIndexUrl: "https://www.municipalite.padoue.qc.ca/municipal/proces-verbaux",
+  sourceId: "proces-verbaux-padoue",
+};
+
+export const RAPIDE_DANSEUR_PV_CONFIG: PvCityConfig = {
+  citySlug: "rapide-danseur",
+  pvIndexUrl: "https://rapide-danseur.ao.ca/fr/page/index.cfm?PageID=1245",
+  sourceId: "proces-verbaux-rapide-danseur",
+};
+
+export const POINTE_LEBEL_PV_CONFIG: PvCityConfig = {
+  citySlug: "pointe-lebel",
+  pvIndexUrl: "https://pointe-lebel.com/proces-verbaux",
+  sourceId: "proces-verbaux-pointe-lebel",
+};
+
+export const MATAPEDIA_PV_CONFIG: PvCityConfig = {
+  citySlug: "matapedia",
+  pvIndexUrl: "https://matapedialesplateaux.com/citoyens/matapedia/proces-verbaux/",
+  sourceId: "proces-verbaux-matapedia",
+};
+
+export const RISTIGOUCHE_SUD_EST_PV_CONFIG: PvCityConfig = {
+  citySlug: "ristigouche-sud-est",
+  pvIndexUrl: "https://ristigouche.ca/ma-municipalite/seances-du-conseil",
+  sourceId: "proces-verbaux-ristigouche-sud-est",
+};
+
+export const POINTE_A_LA_CROIX_PV_CONFIG: PvCityConfig = {
+  citySlug: "pointe-a-la-croix",
+  pvIndexUrl: "https://pointealacroix.com/documents_type/proces-verbaux/",
+  sourceId: "proces-verbaux-pointe-a-la-croix",
+};
+
+export const MARIA_PV_CONFIG: PvCityConfig = {
+  citySlug: "maria",
+  pvIndexUrl: "https://www.mariaquebec.com/conseil-municipal",
+  sourceId: "proces-verbaux-maria",
+};
+
+export const NEW_RICHMOND_PV_CONFIG: PvCityConfig = {
+  citySlug: "new-richmond",
+  pvIndexUrl: "https://villenewrichmond.com/la-ville/vie-democratique/proces-verbaux/",
+  sourceId: "proces-verbaux-new-richmond",
+};
+
+export const PETITE_VALLEE_PV_CONFIG: PvCityConfig = {
+  citySlug: "petite-vallee",
+  pvIndexUrl: "https://petitevallee.ca/administration-municipale/documents/proces-verbaux",
+  sourceId: "proces-verbaux-petite-vallee",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -5199,4 +5393,36 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINTE_ROSE_DE_WATFORD_PV_CONFIG },
   { config: SAINTE_AURELIE_PV_CONFIG },
   { config: SAINT_RAPHAEL_PV_CONFIG },
+  // ── Lot « M-Z villes dures » (config-only, vérifié 2026-06-14) ─────────────
+  { config: MARIEVILLE_PV_CONFIG },
+  { config: OKA_PV_CONFIG },
+  { config: NOTRE_DAME_DE_STANBRIDGE_PV_CONFIG },
+  { config: MASSUEVILLE_PV_CONFIG },
+  { config: NOTRE_DAME_DE_BONSECOURS_PV_CONFIG },
+  { config: NAMUR_PV_CONFIG },
+  { config: PAPINEAUVILLE_PV_CONFIG },
+  // mayo déjà enregistrée plus haut (lot antérieur) — pas de doublon.
+  { config: MONTPELLIER_PV_CONFIG },
+  { config: NOTRE_DAME_DU_LAUS_PV_CONFIG },
+  { config: NOTRE_DAME_DE_PONTMAIN_PV_CONFIG },
+  { config: MILAN_PV_CONFIG },
+  { config: QUEBEC_PV_CONFIG },
+  { config: NOTRE_DAME_DES_PINS_PV_CONFIG },
+  { config: MANSFIELD_ET_PONTEFRACT_PV_CONFIG },
+  { config: NOTRE_DAME_AUXILIATRICE_DE_BUCKLAND_PV_CONFIG },
+  { config: METABETCHOUAN_LAC_A_LA_CROIX_PV_CONFIG },
+  { config: ROBERVAL_PV_CONFIG },
+  { config: PERIBONKA_PV_CONFIG },
+  { config: POHENEGAMOOK_PV_CONFIG },
+  { config: PORTNEUF_SUR_MER_PV_CONFIG },
+  { config: MONT_JOLI_PV_CONFIG },
+  { config: PADOUE_PV_CONFIG },
+  { config: RAPIDE_DANSEUR_PV_CONFIG },
+  { config: POINTE_LEBEL_PV_CONFIG },
+  { config: MATAPEDIA_PV_CONFIG },
+  { config: RISTIGOUCHE_SUD_EST_PV_CONFIG },
+  { config: POINTE_A_LA_CROIX_PV_CONFIG },
+  { config: MARIA_PV_CONFIG },
+  { config: NEW_RICHMOND_PV_CONFIG },
+  { config: PETITE_VALLEE_PV_CONFIG },
 ];
