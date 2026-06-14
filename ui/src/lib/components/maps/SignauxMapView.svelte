@@ -24,10 +24,8 @@
     buildCityMapEntries,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
-  import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
   import {
     fetchGraphSignalsByCity,
-    type GraphSignalCityItem,
   } from "$lib/signals/graph-signals-by-city-client.js";
   import {
     fetchGraphSignalDetail,
@@ -39,11 +37,7 @@
   let selectedCity: CityMapEntry | null = null;
   let loading = true;
   let loadError: string | null = null;
-  let apiItems: SignalCityItem[] = [];
-  let graphItems: GraphSignalCityItem[] = [];
-
-  /** countsByType par ville slug (depuis /by-city, disponible immédiatement). */
-  const cityCountsByType = new Map<string, Record<string, number>>();
+  let graphItems: { citySlug: string; signalCount: number; subsetCounts: Record<string, number> }[] = [];
 
   // ── Détail ville sélectionnée ──────────────────────────────────────────────
   let detailLoading = false;
@@ -57,32 +51,18 @@
   const detailCache = new Map<string, GraphSignalNode[]>();
 
   // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
-  let excludedTypes = new Set<string>();
-  /** Reflète l'état du toggle « Zonage uniquement » du rail. */
-  let zonageOnlyActive = true;
-  /** Reflète l'état du toggle « Multifamilial 4+ » du rail. */
-  let multi4plusActive = false;
-  /** Reflète l'état du toggle « Signaux précoces » du rail. */
-  let precoceOnlyActive = false;
-
-  /** Étapes précoces (miroir de la constante dans SignauxRail). */
-  const ETAPES_PRECOCES = ["avis_motion", "projet_reglement"];
+  /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
+  let activeSubsetKey = "z"; // défaut : zonageOnly ON
 
   function handleFilterChange(
-    excluded: Set<string>,
-    zonageOnly: boolean,
-    multi4plus: boolean,
-    precoceOnly: boolean,
+    subsetKey: string,
   ): void {
-    excludedTypes = new Set(excluded);
-    zonageOnlyActive = zonageOnly;
-    multi4plusActive = multi4plus;
-    precoceOnlyActive = precoceOnly;
+    activeSubsetKey = subsetKey;
     updateFillColors();
   }
 
   // ── Données réactives ──────────────────────────────────────────────────────
-  $: allEntries = buildCityMapEntries(apiItems, graphItems);
+  $: allEntries = buildCityMapEntries(graphItems);
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
@@ -102,35 +82,15 @@
 
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
-   * selon la base active combinée (zonage ∩ 4+ ∩ précoce selon les toggles).
-   *
-   * Logique de base de compte (intersection conservative par MIN) :
-   *   1. Base : zonageOnlyActive ON → entry.zonageCount, OFF → entry.signalCount6m
-   *   2. Si multi4plusActive ON : min(base, entry.multi4plusCount)
-   *   3. Si precoceOnlyActive ON : min(résultat, somme avis_motion+projet_reglement)
-   *
-   * Les gardes ?? {} et ?? 0 protègent contre les champs null/undefined (anti-crash).
-   * Quadrant prioritaire (4+ ∩ précoce) → couleur violette (#7c3aed) au lieu de rouge.
+   * selon le compte actif exact (subsetCounts[activeSubsetKey]).
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      // Base selon le filtre zonage
-      let count = zonageOnlyActive ? (e.zonageCount ?? 0) : e.signalCount6m;
-      // Axe DIMENSION
-      if (multi4plusActive) count = Math.min(count, e.multi4plusCount ?? 0);
-      // Axe ANTICIPATION
-      if (precoceOnlyActive) {
-        const byStage = e.countsByStage ?? {};
-        const precoce = ETAPES_PRECOCES.reduce((s, etape) => s + (byStage[etape] ?? 0), 0);
-        count = Math.min(count, precoce);
-      }
-      // Couleur : violet pour le quadrant prioritaire, sinon rampe standard
-      const isPriority = multi4plusActive && precoceOnlyActive && count > 0;
-      const color = isPriority ? "#7c3aed" : signalCountColor(count);
-      expr.push(e.municipality.slug, color);
+      const count = (e.subsetCounts[activeSubsetKey] ?? 0);
+      expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
     return expr as ExpressionSpecification;
@@ -348,28 +308,9 @@
     loadError = null;
     try {
       const res = await fetchGraphSignalsByCity();
-      // Adapter le format graph (signalCount) vers le format SignalCityItem
-      apiItems = res.cities.map((c) => ({
-        citySlug: c.citySlug,
-        designationEventCount: c.signalCount,
-        generatedAt: null,
-      }));
-      // Garder les items graphiques pour enrichir CityMapEntry.countsByType
       graphItems = res.cities;
-      // Alimenter countsByType depuis la réponse API (disponible pour toutes les villes dès le load)
-      cityCountsByType.clear();
-      for (const c of res.cities) {
-        cityCountsByType.set(c.citySlug, c.countsByType ?? {});
-      }
-      // Peupler knownNodeTypes depuis countsByType (toutes les villes) sans attendre un clic
-      const allTypes = new Set<string>();
-      for (const ct of res.cities) {
-        for (const t of Object.keys(ct.countsByType ?? {})) allTypes.add(t);
-      }
-      knownNodeTypes = Array.from(allTypes).sort();
     } catch (e) {
       loadError = e instanceof Error ? e.message : "Erreur de chargement";
-      apiItems = [];
     } finally {
       loading = false;
     }
@@ -407,12 +348,6 @@
     <div class="p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
       <ul class="space-y-1">
-        {#if multi4plusActive && precoceOnlyActive}
-          <li class="flex items-center gap-2 text-xs text-slate-600">
-            <span class="h-3 w-3 rounded-sm border border-slate-300 shrink-0" style="background-color: #7c3aed;"></span>
-            Quadrant prioritaire (4+ ∩ précoce)
-          </li>
-        {/if}
         {#each [
           { color: "#ef4444", label: "6+ signaux" },
           { color: "#f97316", label: "3–5 signaux" },

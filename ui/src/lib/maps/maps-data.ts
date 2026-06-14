@@ -13,7 +13,6 @@
 
 import { prioritizedCities } from "@radar/sources/municipalities";
 import type { MunicipalityT } from "@radar/domain";
-import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
 import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
 /**
@@ -26,85 +25,47 @@ export const PILOT_CITY_SLUG = "salaberry-de-valleyfield";
 export interface CityMapEntry {
   municipality: MunicipalityT;
   /**
-   * Count of DesignationEvent canonicals (rezoning changes) from the real
-   * ontology project state (GET /api/signals/by-city), 0 when no data.
+   * Total count of Signal + DesignationEvent nodes for this city. 0 when no data.
    */
   signalCount6m: number;
   /**
-   * Breakdown of signal count by node type (e.g. { Signal: 3, DesignationEvent: 2 }).
-   * Empty object when data is not yet available or city has no signals.
-   * Used to compute filtered counts when excludedTypes is non-empty.
+   * Exact intersection counts for each subset of {z, m, p} flags.
+   * Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+   * Value = nb signals satisfying ALL flags in the key.
+   * Empty record when city has no signal data.
    */
-  countsByType: Record<string, number>;
-  /**
-   * Count of zonage signals only (from GET /api/graph-signals/by-city).
-   * DesignationEvent always counts as zonage; Signal only if its category
-   * is in ZONAGE_CATEGORIES (server-side). 0 when no data.
-   * Used as the base count when « Zonage uniquement » toggle is ON.
-   */
-  zonageCount: number;
-  /**
-   * Count of Signal nodes with dimension 4+ (multifamilial).
-   * Signal.nb_unites_max ≥ 4 OU Signal.intensite = 'haute'. 0 when no data.
-   * Used by the « Multifamilial 4+ » toggle (DIMENSION axis).
-   */
-  multi4plusCount: number;
-  /**
-   * Breakdown by derived regulatory stage (ANTICIPATION axis).
-   * Keys: avis_motion | projet_reglement | consultation | second_projet |
-   *       adoption | entree_vigueur | accorde | refuse | inconnu.
-   * Empty object when no data. Used by the « Signaux précoces » toggle.
-   */
-  countsByStage: Record<string, number>;
+  subsetCounts: Record<string, number>;
 }
 
 /**
  * Build city map entries from the real API response.
  *
  * Anti-invention: signal counts come exclusively from the API. Cities absent
- * from the API response (no project state, or stale state > 6 months) get
- * count=0 — never fabricated. City/coordinate data from QC_MUNICIPALITIES.
+ * from the API response get count=0 — never fabricated.
+ * City/coordinate data from QC_MUNICIPALITIES.
  *
- * @param apiItems — items from GET /api/signals/by-city (may be empty on
- *   first deploy, before any city has been seeded).
- * @param graphItems — optional items from GET /api/graph-signals/by-city
- *   (provides countsByType breakdown per city).
+ * @param graphItems — items from GET /api/graph-signals/by-city.
  * @param options.maxCities — limit the number of returned cities.
  */
 export function buildCityMapEntries(
-  apiItems: readonly SignalCityItem[],
-  graphItems: readonly GraphSignalCityItem[] = [],
+  graphItems: readonly GraphSignalCityItem[],
   options: { maxCities?: number } = {},
 ): CityMapEntry[] {
   const cities = prioritizedCities();
   const limit = options.maxCities ?? cities.length;
 
-  // Index API items by city slug for O(1) lookup.
-  const countByCitySlug = new Map<string, number>(
-    apiItems.map((item) => [item.citySlug, item.designationEventCount]),
+  // Index graph items by city slug for O(1) lookup.
+  const signalCountBySlug = new Map<string, number>(
+    graphItems.map((item) => [item.citySlug, item.signalCount]),
   );
-
-  // Index graph items by city slug for countsByType, zonageCount, multi4plusCount, countsByStage lookup.
-  const countsByTypeByCitySlug = new Map<string, Record<string, number>>(
-    graphItems.map((item) => [item.citySlug, item.countsByType]),
-  );
-  const zonageCountByCitySlug = new Map<string, number>(
-    graphItems.map((item) => [item.citySlug, item.zonageCount ?? 0]),
-  );
-  const multi4plusCountByCitySlug = new Map<string, number>(
-    graphItems.map((item) => [item.citySlug, item.multi4plusCount ?? 0]),
-  );
-  const countsByStageByCity = new Map<string, Record<string, number>>(
-    graphItems.map((item) => [item.citySlug, item.countsByStage ?? {}]),
+  const subsetCountsBySlug = new Map<string, Record<string, number>>(
+    graphItems.map((item) => [item.citySlug, item.subsetCounts]),
   );
 
   return cities.slice(0, limit).map((m) => ({
     municipality: m,
-    signalCount6m: countByCitySlug.get(m.slug) ?? 0,
-    countsByType: countsByTypeByCitySlug.get(m.slug) ?? {},
-    zonageCount: zonageCountByCitySlug.get(m.slug) ?? 0,
-    multi4plusCount: multi4plusCountByCitySlug.get(m.slug) ?? 0,
-    countsByStage: countsByStageByCity.get(m.slug) ?? {},
+    signalCount6m: signalCountBySlug.get(m.slug) ?? 0,
+    subsetCounts: subsetCountsBySlug.get(m.slug) ?? {},
   }));
 }
 
