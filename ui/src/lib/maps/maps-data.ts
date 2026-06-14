@@ -14,6 +14,7 @@
 import { prioritizedCities } from "@radar/sources/municipalities";
 import type { MunicipalityT } from "@radar/domain";
 import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
+import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
 /**
  * The pilot city for which we have real signals. Kept as a named export for
@@ -29,6 +30,12 @@ export interface CityMapEntry {
    * ontology project state (GET /api/signals/by-city), 0 when no data.
    */
   signalCount6m: number;
+  /**
+   * Breakdown of signal count by node type (e.g. { Signal: 3, DesignationEvent: 2 }).
+   * Empty object when data is not yet available or city has no signals.
+   * Used to compute filtered counts when excludedTypes is non-empty.
+   */
+  countsByType: Record<string, number>;
 }
 
 /**
@@ -40,10 +47,13 @@ export interface CityMapEntry {
  *
  * @param apiItems — items from GET /api/signals/by-city (may be empty on
  *   first deploy, before any city has been seeded).
+ * @param graphItems — optional items from GET /api/graph-signals/by-city
+ *   (provides countsByType breakdown per city).
  * @param options.maxCities — limit the number of returned cities.
  */
 export function buildCityMapEntries(
   apiItems: readonly SignalCityItem[],
+  graphItems: readonly GraphSignalCityItem[] = [],
   options: { maxCities?: number } = {},
 ): CityMapEntry[] {
   const cities = prioritizedCities();
@@ -54,9 +64,15 @@ export function buildCityMapEntries(
     apiItems.map((item) => [item.citySlug, item.designationEventCount]),
   );
 
+  // Index graph items by city slug for countsByType lookup.
+  const countsByTypeByCitySlug = new Map<string, Record<string, number>>(
+    graphItems.map((item) => [item.citySlug, item.countsByType]),
+  );
+
   return cities.slice(0, limit).map((m) => ({
     municipality: m,
     signalCount6m: countByCitySlug.get(m.slug) ?? 0,
+    countsByType: countsByTypeByCitySlug.get(m.slug) ?? {},
   }));
 }
 
