@@ -1,24 +1,27 @@
 <script lang="ts">
   /**
-   * SignauxMapView — Vue Signaux (maille Québec→villes) — WP A.1.
+   * SignauxMapView — Vue Signaux Phase 1 — layout 3 colonnes.
    *
-   * Carte du Québec avec les villes prioritisées colorées par le nb de signaux
-   * de changements de zonage sur 6 mois (fenêtre glissante).
+   * Layout ws-shell (graphify) :
+   *   RAIL (menu gauche w-80) | CANVAS (carte MapLibre) | SEL (panneau droit w-80)
    *
-   * Rendu : MapLibre GL + couche fill polygonale (choroplèthe aplats) depuis
-   * municipalities.geojson (StatCan CSD 2025, 1104 villes QC).
-   * Jointure par citySlug (propriété GeoJSON) ↔ API /api/graph-signals/by-city.
+   * - Rail gauche : SignauxRail (recherche + facets + accordéon natif)
+   * - Canvas : MapLibre GL aplats choroplèthe + flyTo au clic ville
+   * - Sel droit : SignauxSelPanel (détail ville + nœuds par type)
+   * - Légende épinglée en bas du rail (slot controls-footer ViewLayout)
    *
-   * Source des données : GET /api/graph-signals/by-city — compte les nœuds
-   * Signal + DesignationEvent par ville depuis graph_nodes (graphify pipeline).
+   * Garde-fous Phase 1 :
+   *  - NE swap PAS MapLibre
+   *  - NE touche PAS API/OIDC/PG/geo
+   *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount, onDestroy } from "svelte";
-  import { Map as MapIcon, Radio, RefreshCw, AlertTriangle } from "@lucide/svelte";
-  import { Badge, Alert } from "@sentropic/design-system-svelte";
+  import { RefreshCw } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
+  import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
+  import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
   import {
     buildCityMapEntries,
-    signalCountTier,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
   import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
@@ -44,10 +47,6 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(apiItems);
-
-  // ── Compteurs globaux ──────────────────────────────────────────────────────
-  $: totalSignals = allEntries.reduce((s, e) => s + e.signalCount6m, 0);
-  $: citiesWithSignals = allEntries.filter((e) => e.signalCount6m > 0).length;
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
@@ -97,6 +96,22 @@
   // Met à jour la carte quand les données changent
   $: if (mapReady && allEntries.length > 0) {
     updateFillColors();
+  }
+
+  /**
+   * Effectue un flyTo sur la carte vers la ville sélectionnée.
+   * Utilise les coordonnées WGS-84 du centroïde (MunicipalityT.lon/lat).
+   */
+  function flyToCity(entry: CityMapEntry): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      flyTo: (options: { center: [number, number]; zoom: number; duration: number }) => void;
+    };
+    m.flyTo({
+      center: [entry.municipality.lon, entry.municipality.lat],
+      zoom: 12,
+      duration: 800,
+    });
   }
 
   async function initMap(): Promise<void> {
@@ -190,8 +205,6 @@
             "text-halo-color": "#ffffff",
             "text-halo-width": 1.5,
           },
-          // Labels uniquement sur les villes avec signaux (données dynamiques →
-          // on les active après update)
         });
 
         // Interaction clic sur les aplats
@@ -237,6 +250,7 @@
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
   async function selectCity(entry: CityMapEntry): Promise<void> {
     if (selectedCity?.municipality.slug === entry.municipality.slug) {
+      // Deuxième clic sur la même ville : désélectionne
       selectedCity = null;
       detailNodes = [];
       detailError = null;
@@ -246,6 +260,10 @@
     detailNodes = [];
     detailError = null;
     detailLoading = true;
+
+    // flyTo sur la carte (centroïde de la ville)
+    flyToCity(entry);
+
     try {
       const res = await fetchGraphSignalDetail(entry.municipality.slug);
       detailNodes = res.nodes;
@@ -256,8 +274,11 @@
     }
   }
 
-  // ── Aperçu de ville dans la liste (hover) ─────────────────────────────────
-  let hoveredSlug: string | null = null;
+  function clearSelection(): void {
+    selectedCity = null;
+    detailNodes = [];
+    detailError = null;
+  }
 
   // ── Chargement API ─────────────────────────────────────────────────────────
   async function load() {
@@ -265,8 +286,7 @@
     loadError = null;
     try {
       const res = await fetchGraphSignalsByCity();
-      // Adapter le format graph (signalCount) vers le format SignalCityItem (designationEventCount)
-      // pour réutiliser buildCityMapEntries sans modifier maps-data.ts.
+      // Adapter le format graph (signalCount) vers le format SignalCityItem
       apiItems = res.cities.map((c) => ({
         citySlug: c.citySlug,
         designationEventCount: c.signalCount,
@@ -286,91 +306,26 @@
   });
 </script>
 
-<ViewLayout controlsWidth="w-80" stickyControlsFooter>
-  <!-- ── Left sidebar: city list ───────────────────────────────────────────── -->
+<ViewLayout controlsWidth="w-80" stickyControlsFooter selWidth="w-80">
+  <!-- ── RAIL gauche : recherche + facets + accordéon villes ─────────────── -->
   <svelte:fragment slot="controls">
-    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-      <h1 class="flex items-center gap-2 text-sm font-bold text-slate-900">
-        <Radio class="h-4 w-4 text-teal-600" aria-hidden="true" />
-        Signaux : Villes
-      </h1>
-      <div class="flex items-center gap-2">
-        <span class="text-xs text-slate-400">graph_nodes</span>
-        <button
-          type="button"
-          aria-label="Actualiser"
-          class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-          on:click={load}
-          disabled={loading}
-        >
-          <RefreshCw
-            class={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
-            aria-hidden="true"
-          />
-        </button>
-      </div>
-    </div>
-
     {#if loadError}
-      <div class="px-4 py-2 text-xs text-red-600">
-        {loadError} (compteurs affichés à 0, données indisponibles)
+      <div class="px-4 py-2 text-xs text-red-600 border-b border-red-100 bg-red-50">
+        {loadError} — données indisponibles, compteurs à 0.
       </div>
     {/if}
-
-    <!-- Compteur global -->
-    <div class="border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
-      {#if loading}
-        <span class="text-slate-400">Chargement…</span>
-      {:else}
-        <span class="font-semibold text-slate-700">{totalSignals}</span> signal{totalSignals !== 1 ? "s" : ""} ·
-        <span class="font-semibold text-slate-700">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
-      {/if}
-    </div>
-
-    <!-- Liste des villes avec signaux (en premier), puis les autres -->
-    <ul class="divide-y divide-slate-100">
-      {#each allEntries.slice(0, 40) as entry (entry.municipality.slug)}
-        {@const tier = signalCountTier(entry.signalCount6m)}
-        {@const isSelected = selectedCity?.municipality.slug === entry.municipality.slug}
-        <li>
-          <button
-            type="button"
-            class={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-              isSelected ? "bg-teal-50" : "hover:bg-slate-50"
-            }`}
-            on:click={() => selectCity(entry)}
-            on:mouseenter={() => { hoveredSlug = entry.municipality.slug; }}
-            on:mouseleave={() => { hoveredSlug = null; }}
-          >
-            <!-- Carré couleur signal (aplat) -->
-            <span
-              class="h-3 w-3 shrink-0 rounded-sm"
-              style="background-color: {signalCountColor(entry.signalCount6m)};"
-              aria-hidden="true"
-            ></span>
-            <span class="min-w-0 flex-1">
-              <span class="block truncate text-sm font-medium text-slate-900">
-                {entry.municipality.name}
-              </span>
-              {#if entry.municipality.mrc}
-                <span class="block truncate text-xs text-slate-400">{entry.municipality.mrc}</span>
-              {/if}
-            </span>
-            {#if entry.signalCount6m > 0}
-              <Badge tone="warning" class="shrink-0 text-xs">
-                {entry.signalCount6m}
-              </Badge>
-            {:else}
-              <span class="text-xs text-slate-300">0</span>
-            {/if}
-          </button>
-        </li>
-      {/each}
-    </ul>
-
+    <SignauxRail
+      entries={allEntries}
+      selectedSlug={selectedCity?.municipality.slug ?? null}
+      {detailNodes}
+      {loading}
+      {detailLoading}
+      onSelectCity={selectCity}
+      onRefresh={load}
+    />
   </svelte:fragment>
 
-  <!-- Légende choroplèthe épinglée en bas de la bande (footer de menu DS) -->
+  <!-- Légende choroplèthe épinglée en bas du rail -->
   <svelte:fragment slot="controls-footer">
     <div class="p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
@@ -382,7 +337,7 @@
           { color: "#e2e8f0", label: "Aucun signal (0)" },
         ] as item (item.label)}
           <li class="flex items-center gap-2 text-xs text-slate-600">
-            <span class="h-3 w-3 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+            <span class="h-3 w-3 rounded-sm border border-slate-300 shrink-0" style="background-color: {item.color};"></span>
             {item.label}
           </li>
         {/each}
@@ -390,102 +345,24 @@
     </div>
   </svelte:fragment>
 
-  <!-- ── Main: carte MapLibre + détail ville ────────────────────────────────── -->
-  <div class="flex h-full flex-col bg-slate-50 gap-0">
-    <!-- Carte MapLibre -->
-    <div class="relative flex-1 rounded-none overflow-hidden border-b border-slate-200">
-      <div bind:this={mapContainer} class="absolute inset-0"></div>
-      {#if !mapReady}
-        <div class="absolute inset-0 flex items-center justify-center bg-slate-100">
-          <span class="text-xs text-slate-400">Chargement de la carte…</span>
-        </div>
-      {/if}
-    </div>
-
-    <!-- Détail ville sélectionnée -->
-    {#if selectedCity}
-      <div class="overflow-y-auto border-t border-slate-200 bg-white p-4" style="max-height: 300px;">
-        <div class="mb-3 flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-semibold text-slate-900">
-              {selectedCity.municipality.name}
-            </h2>
-            {#if selectedCity.municipality.mrc}
-              <p class="text-xs text-slate-400 mt-0.5">MRC : {selectedCity.municipality.mrc}</p>
-            {/if}
-            <p class="text-xs text-slate-500 mt-0.5">
-              {selectedCity.signalCount6m} signal{selectedCity.signalCount6m !== 1 ? "s" : ""} (graph_nodes)
-            </p>
-          </div>
-          <button
-            type="button"
-            class="text-xs text-slate-400 hover:text-slate-600"
-            on:click={() => {
-              selectedCity = null;
-              detailNodes = [];
-              detailError = null;
-            }}
-            aria-label="Fermer le détail"
-          >✕</button>
-        </div>
-
-        {#if detailLoading}
-          <div class="flex items-center gap-2 py-3 text-xs text-slate-400">
-            <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
-            Chargement des signaux…
-          </div>
-        {:else if detailError}
-          <Alert
-            tone="error"
-            title="Erreur de chargement du détail"
-            message={detailError}
-          />
-        {:else if detailNodes.length === 0}
-          <Alert
-            tone="info"
-            title="Aucun signal disponible pour cette ville."
-            message="Les données sont dérivées des nœuds Signal/DesignationEvent de graph_nodes. Cette ville n'a pas encore de nœuds indexés."
-          />
-        {:else}
-          <ul class="space-y-3" aria-label="Signaux de changements de zonage">
-            {#each detailNodes as node, i (node.id)}
-              <li class="rounded-lg border border-teal-100 bg-teal-50 px-4 py-3">
-                <p class="text-sm font-semibold text-teal-800 leading-snug">
-                  {node.label}
-                </p>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  {#if node.props?.reglement_number}
-                    <Badge tone="info" class="text-xs font-mono">
-                      Règl. {node.props.reglement_number}
-                    </Badge>
-                  {/if}
-                  {#if node.props?.zone_ref}
-                    <Badge tone="warning" class="text-xs font-mono">
-                      Zone {node.props.zone_ref}
-                    </Badge>
-                  {/if}
-                </div>
-                {#if node.sourceRef}
-                  <p class="mt-1.5 truncate text-xs text-teal-500" title={node.sourceRef}>
-                    Source : <span class="font-mono">{node.sourceRef}</span>
-                  </p>
-                {/if}
-                {#if node.createdAt}
-                  <p class="mt-0.5 text-xs text-slate-400">
-                    Créé : {new Date(node.createdAt).toLocaleDateString("fr-CA")}
-                  </p>
-                {/if}
-              </li>
-            {/each}
-          </ul>
-        {/if}
-      </div>
-    {:else}
-      <div class="flex items-center justify-center border-t border-slate-100 bg-white p-4 text-center" style="min-height: 80px;">
-        <p class="text-xs text-slate-400">
-          Cliquez sur un aplat ou une ville dans la liste pour voir ses signaux de changements de zonage.
-        </p>
+  <!-- ── CANVAS : carte MapLibre ──────────────────────────────────────────── -->
+  <div class="relative h-full w-full overflow-hidden">
+    <div bind:this={mapContainer} class="absolute inset-0"></div>
+    {#if !mapReady}
+      <div class="absolute inset-0 flex items-center justify-center bg-slate-100">
+        <span class="text-xs text-slate-400">Chargement de la carte…</span>
       </div>
     {/if}
   </div>
+
+  <!-- ── SEL droit : panneau de sélection ville ───────────────────────────── -->
+  <svelte:fragment slot="sel">
+    <SignauxSelPanel
+      {selectedCity}
+      {detailNodes}
+      {detailLoading}
+      {detailError}
+      onClear={clearSelection}
+    />
+  </svelte:fragment>
 </ViewLayout>
