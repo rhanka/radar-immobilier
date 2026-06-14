@@ -2,11 +2,12 @@
   /**
    * SignauxRail — bande latérale gauche de la vue Signaux.
    *
-   * Layout façon graphify ws-shell : rail gauche avec
-   *  - Recherche villes (Search DS)
-   *  - Filtres par type de nœud (facets pastille + badge count)
-   *  - Accordéon par ville (DS Accordion + <details> natif) : clic → flyTo + sélection
-   *  - Légende épinglée en bas (slot controls-footer via ViewLayout)
+   * Accordéon de 1er niveau à 2 sections (<details> natif) :
+   *   1. « Signaux » (ouverte par défaut) : cases à cocher par type de signal
+   *      → filtre GLOBAL (listes + recoloration aplats via callback)
+   *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
+   *
+   * Anti-invention : aucun appel API ici, tout par props.
    */
   import { Search, Badge } from "@sentropic/design-system-svelte";
   import { RefreshCw } from "@lucide/svelte";
@@ -20,6 +21,8 @@
   export let selectedSlug: string | null = null;
   /** Nœuds de détail de la ville sélectionnée. */
   export let detailNodes: GraphSignalNode[] = [];
+  /** Tous les nœuds vus (cache multi-villes pour les types connus). */
+  export let knownNodeTypes: string[] = [];
   /** Chargement de la liste principale. */
   export let loading = false;
   /** Chargement du détail de ville. */
@@ -30,6 +33,8 @@
   export let onSelectCity: (entry: CityMapEntry) => void = () => {};
   /** Appelé pour actualiser les données. */
   export let onRefresh: () => void = () => {};
+  /** Appelé quand le filtre types change (ensemble des types EXCLUS). */
+  export let onFilterChange: (excluded: Set<string>) => void = () => {};
 
   // ── Palette 12 couleurs par type (identique graphify) ─────────────────────
   const TYPE_PALETTE = [
@@ -51,16 +56,16 @@
     return "#ef4444";
   }
 
-  // ── Recherche ──────────────────────────────────────────────────────────────
-  let searchQuery = "";
+  // ── Section accordéon 1er niveau ──────────────────────────────────────────
+  // Les deux sections sont ouvertes par défaut à l'init.
 
-  // ── Facets par type de nœud ────────────────────────────────────────────────
-  /** Collecte tous les types distincts depuis les nœuds de détail actuels. */
-  $: allNodeTypes = Array.from(
-    new Set(detailNodes.map((n) => n.type))
+  // ── Filtre GLOBAL par type (section Signaux) ───────────────────────────────
+  /** Types disponibles = union des types connus (multi-villes) + types actuels. */
+  $: allKnownTypes = Array.from(
+    new Set([...knownNodeTypes, ...detailNodes.map((n) => n.type)])
   ).sort();
 
-  /** Ensemble des types exclus par l'utilisateur (toggle). */
+  /** Ensemble des types exclus par l'utilisateur. */
   let excludedTypes = new Set<string>();
 
   function toggleType(type: string): void {
@@ -70,12 +75,13 @@
       excludedTypes.add(type);
     }
     excludedTypes = excludedTypes; // trigger reactivity
+    onFilterChange(excludedTypes);
   }
 
-  /** Nœuds filtrés selon les facets. */
-  $: filteredNodes = detailNodes.filter((n) => !excludedTypes.has(n.type));
+  // Propagate filter on initial mount / when known types change
+  $: onFilterChange(excludedTypes);
 
-  // ── Compteur par type ──────────────────────────────────────────────────────
+  // ── Compteur par type (nœuds de la ville sélectionnée) ────────────────────
   $: countByType = detailNodes.reduce(
     (acc, n) => {
       acc[n.type] = (acc[n.type] ?? 0) + 1;
@@ -84,7 +90,12 @@
     {} as Record<string, number>,
   );
 
-  // ── Villes filtrées par recherche ─────────────────────────────────────────
+  // ── Nœuds filtrés selon les types cochés ──────────────────────────────────
+  $: filteredNodes = detailNodes.filter((n) => !excludedTypes.has(n.type));
+
+  // ── Recherche villes (section Villes) ─────────────────────────────────────
+  let searchQuery = "";
+
   $: filteredEntries = searchQuery.trim()
     ? entries.filter((e) =>
         e.municipality.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
@@ -92,12 +103,11 @@
       )
     : entries;
 
-  // ── Villes avec signaux en premier ────────────────────────────────────────
   $: sortedEntries = [...filteredEntries].sort(
     (a, b) => b.signalCount6m - a.signalCount6m
   ).slice(0, 60);
 
-  // ── Compteur global ───────────────────────────────────────────────────────
+  // ── Compteurs globaux ─────────────────────────────────────────────────────
   $: totalSignals = entries.reduce((s, e) => s + e.signalCount6m, 0);
   $: citiesWithSignals = entries.filter((e) => e.signalCount6m > 0).length;
 </script>
@@ -120,16 +130,6 @@
       </button>
     </div>
 
-    <!-- Recherche villes (Search DS) -->
-    <div class="px-3 pb-2">
-      <Search
-        placeholder="Rechercher une ville…"
-        size="sm"
-        bind:value={searchQuery}
-        aria-label="Rechercher une ville"
-      />
-    </div>
-
     <!-- Compteur global -->
     <div class="border-b border-slate-100 px-4 pb-2 text-xs text-slate-500">
       {#if loading}
@@ -141,121 +141,164 @@
     </div>
   </div>
 
-  <!-- Facets types de nœuds (visibles si ville sélectionnée avec nœuds) -->
-  {#if allNodeTypes.length > 0}
-    <div class="rail-section border-b border-slate-100 px-4 py-2">
-      <p class="rail-kicker mb-1.5">Types de signaux</p>
-      <ul class="flex flex-wrap gap-1.5" role="list">
-        {#each allNodeTypes as type (type)}
-          {@const excluded = excludedTypes.has(type)}
-          {@const count = countByType[type] ?? 0}
-          <li>
-            <button
-              type="button"
-              class="rail-facet"
-              class:rail-facet--excluded={excluded}
-              aria-pressed={!excluded}
-              on:click={() => toggleType(type)}
-            >
-              <span
-                class="rail-swatch"
-                style="background-color: {excluded ? '#cbd5e1' : typeColor(type)};"
-                aria-hidden="true"
-              ></span>
-              <span class="rail-row-label">{type}</span>
-              <span class="rail-row-count">{count}</span>
-            </button>
-          </li>
-        {/each}
-      </ul>
-    </div>
-  {/if}
+  <!-- Corps scrollable : 2 sections accordéon natif -->
+  <div class="rail-body flex-1 min-h-0 overflow-y-auto">
 
-  <!-- Liste villes avec accordéon natif (<details>) -->
-  <ul class="rail-list flex-1 overflow-y-auto divide-y divide-slate-50" role="list">
-    {#if sortedEntries.length === 0 && !loading}
-      <li class="rail-empty">
-        {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
-      </li>
-    {:else}
-      {#each sortedEntries as entry (entry.municipality.slug)}
-        {@const isSelected = selectedSlug === entry.municipality.slug}
-        <li>
-          <!-- Accordéon natif <details> (pattern ws-acc) -->
-          <details
-            class="ws-acc ws-acc--compact"
-            open={isSelected}
-          >
-            <summary
-              class="ws-acc-summary"
-              class:ws-acc-summary--active={isSelected}
-              on:click|preventDefault={() => onSelectCity(entry)}
-            >
-              <!-- Pastille couleur signal -->
-              <span
-                class="rail-swatch"
-                style="background-color: {signalColor(entry.signalCount6m)};"
-                aria-hidden="true"
-              ></span>
-              <span class="rail-row-label">
-                {entry.municipality.name}
-                {#if entry.municipality.mrc}
-                  <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
-                {/if}
-              </span>
-              {#if entry.signalCount6m > 0}
-                <Badge tone="warning" class="rail-row-count shrink-0">
-                  {entry.signalCount6m}
-                </Badge>
-              {:else}
-                <span class="rail-row-count text-slate-300">0</span>
-              {/if}
-            </summary>
+    <!-- ── Section 1 : Signaux (cases à cocher par type) ───────────────────── -->
+    <details class="rail-section-acc" open>
+      <summary class="rail-section-summary">
+        <span class="rail-section-chevron" aria-hidden="true">▸</span>
+        <span class="rail-section-title">Signaux</span>
+        {#if excludedTypes.size > 0}
+          <span class="rail-section-badge">{allKnownTypes.length - excludedTypes.size}/{allKnownTypes.length}</span>
+        {/if}
+      </summary>
 
-            <!-- Contenu accordéon : liste des signaux de la ville -->
-            {#if isSelected}
-              <div class="ws-acc-body">
-                {#if detailLoading}
-                  <div class="flex items-center gap-2 py-2 text-xs text-slate-400">
-                    <RefreshCw class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                    Chargement…
-                  </div>
-                {:else if filteredNodes.length === 0 && detailNodes.length === 0}
-                  <p class="text-xs text-slate-400 italic py-1">Aucun signal indexé pour cette ville.</p>
-                {:else if filteredNodes.length === 0}
-                  <p class="text-xs text-slate-400 italic py-1">Tous les types sont masqués.</p>
-                {:else}
-                  <ul class="space-y-1" role="list">
-                    {#each filteredNodes.slice(0, 10) as node (node.id)}
-                      <li class="signal-item">
-                        <span
-                          class="rail-swatch shrink-0"
-                          style="background-color: {typeColor(node.type)};"
-                          aria-hidden="true"
-                        ></span>
-                        <span class="min-w-0">
-                          <span class="block truncate text-xs font-medium text-slate-800 leading-snug">
-                            {node.label}
-                          </span>
-                          <span class="block text-xs text-slate-400 font-mono">{node.type}</span>
-                        </span>
-                      </li>
-                    {/each}
-                    {#if filteredNodes.length > 10}
-                      <li class="text-xs text-slate-400 italic pl-4">
-                        +{filteredNodes.length - 10} autres…
-                      </li>
+      <div class="rail-section-body">
+        {#if allKnownTypes.length === 0}
+          <p class="text-xs text-slate-400 italic px-4 py-2">
+            Sélectionnez une ville pour voir les types de signaux.
+          </p>
+        {:else}
+          <ul class="space-y-0.5 px-3 py-1" role="list">
+            {#each allKnownTypes as type (type)}
+              {@const excluded = excludedTypes.has(type)}
+              {@const count = countByType[type] ?? null}
+              <li>
+                <label
+                  class="rail-type-row"
+                  class:rail-type-row--excluded={excluded}
+                >
+                  <input
+                    type="checkbox"
+                    class="rail-type-checkbox"
+                    checked={!excluded}
+                    on:change={() => toggleType(type)}
+                    aria-label={type}
+                  />
+                  <span
+                    class="rail-swatch"
+                    style="background-color: {excluded ? '#cbd5e1' : typeColor(type)};"
+                    aria-hidden="true"
+                  ></span>
+                  <span class="rail-row-label">{type}</span>
+                  {#if count !== null}
+                    <span class="rail-row-count text-slate-500">{count}</span>
+                  {/if}
+                </label>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </div>
+    </details>
+
+    <!-- ── Section 2 : Villes (recherche + sous-accordéon) ─────────────────── -->
+    <details class="rail-section-acc" open>
+      <summary class="rail-section-summary">
+        <span class="rail-section-chevron" aria-hidden="true">▸</span>
+        <span class="rail-section-title">Villes</span>
+      </summary>
+
+      <div class="rail-section-body">
+        <!-- Recherche villes (Search DS) -->
+        <div class="px-3 pb-2 pt-1">
+          <Search
+            placeholder="Rechercher une ville…"
+            size="sm"
+            bind:value={searchQuery}
+            aria-label="Rechercher une ville"
+          />
+        </div>
+
+        <!-- Liste villes avec sous-accordéon natif (<details>) -->
+        <ul class="divide-y divide-slate-50" role="list">
+          {#if sortedEntries.length === 0 && !loading}
+            <li class="rail-empty">
+              {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
+            </li>
+          {:else}
+            {#each sortedEntries as entry (entry.municipality.slug)}
+              {@const isSelected = selectedSlug === entry.municipality.slug}
+              <li>
+                <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
+                <details
+                  class="ws-acc ws-acc--compact"
+                  open={isSelected}
+                >
+                  <summary
+                    class="ws-acc-summary"
+                    class:ws-acc-summary--active={isSelected}
+                    on:click|preventDefault={() => onSelectCity(entry)}
+                  >
+                    <!-- Pastille couleur signal -->
+                    <span
+                      class="rail-swatch"
+                      style="background-color: {signalColor(entry.signalCount6m)};"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="rail-row-label">
+                      {entry.municipality.name}
+                      {#if entry.municipality.mrc}
+                        <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
+                      {/if}
+                    </span>
+                    {#if entry.signalCount6m > 0}
+                      <Badge tone="warning" class="rail-row-count shrink-0">
+                        {entry.signalCount6m}
+                      </Badge>
+                    {:else}
+                      <span class="rail-row-count text-slate-300">0</span>
                     {/if}
-                  </ul>
-                {/if}
-              </div>
-            {/if}
-          </details>
-        </li>
-      {/each}
-    {/if}
-  </ul>
+                  </summary>
 
+                  <!-- Contenu sous-accordéon : signaux filtrés de la ville -->
+                  {#if isSelected}
+                    <div class="ws-acc-body">
+                      {#if detailLoading}
+                        <div class="flex items-center gap-2 py-2 text-xs text-slate-400">
+                          <RefreshCw class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                          Chargement…
+                        </div>
+                      {:else if filteredNodes.length === 0 && detailNodes.length === 0}
+                        <p class="text-xs text-slate-400 italic py-1">Aucun signal indexé pour cette ville.</p>
+                      {:else if filteredNodes.length === 0}
+                        <p class="text-xs text-slate-400 italic py-1">Tous les types sont masqués.</p>
+                      {:else}
+                        <ul class="space-y-1" role="list">
+                          {#each filteredNodes.slice(0, 10) as node (node.id)}
+                            <li class="signal-item">
+                              <span
+                                class="rail-swatch shrink-0"
+                                style="background-color: {typeColor(node.type)};"
+                                aria-hidden="true"
+                              ></span>
+                              <span class="min-w-0">
+                                <span class="block truncate text-xs font-medium text-slate-800 leading-snug">
+                                  {node.label}
+                                </span>
+                                <span class="block text-xs text-slate-400 font-mono">{node.type}</span>
+                              </span>
+                            </li>
+                          {/each}
+                          {#if filteredNodes.length > 10}
+                            <li class="text-xs text-slate-400 italic pl-4">
+                              +{filteredNodes.length - 10} autres…
+                            </li>
+                          {/if}
+                        </ul>
+                      {/if}
+                    </div>
+                  {/if}
+                </details>
+              </li>
+            {/each}
+          {/if}
+        </ul>
+      </div>
+    </details>
+
+  </div>
 </div>
 
 <style>
@@ -273,14 +316,11 @@
     flex-shrink: 0;
   }
 
-  .rail-section {
-    flex-shrink: 0;
-  }
-
-  .rail-list {
+  .rail-body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    scrollbar-gutter: stable;
   }
 
   /* ── Kicker ── */
@@ -331,26 +371,89 @@
     flex-shrink: 0;
   }
 
-  /* ── Facet toggle (type de signal) ── */
-  .rail-facet {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: var(--st-radius-sm, 4px);
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    background: var(--st-semantic-surface-default, #fff);
-    transition: background 0.1s, opacity 0.1s;
-    font-size: 0.72rem;
+  /* ── Accordéon de 1er niveau (sections Signaux / Villes) ── */
+  .rail-section-acc {
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
   }
 
-  .rail-facet:hover {
+  .rail-section-acc > summary {
+    list-style: none;
+  }
+
+  .rail-section-acc > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .rail-section-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    transition: background 0.1s;
+  }
+
+  .rail-section-summary:hover {
+    background: #f1f5f9; /* slate-100 */
+  }
+
+  .rail-section-title {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    flex: 1;
+  }
+
+  .rail-section-badge {
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    background: #e2e8f0;
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+  }
+
+  .rail-section-chevron {
+    font-size: 0.65rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    transition: transform 0.12s ease;
+    flex-shrink: 0;
+  }
+
+  details[open] > .rail-section-summary > .rail-section-chevron {
+    transform: rotate(90deg);
+  }
+
+  /* ── Type row (case à cocher + pastille + label) ── */
+  .rail-type-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.22rem 0.3rem;
+    border-radius: var(--st-radius-sm, 4px);
+    cursor: pointer;
+    transition: background 0.1s, opacity 0.1s;
+    font-size: 0.8rem;
+  }
+
+  .rail-type-row:hover {
     background: var(--st-semantic-surface-subtle, #f8fafc);
   }
 
-  .rail-facet--excluded {
-    opacity: 0.45;
+  .rail-type-row--excluded {
+    opacity: 0.5;
+  }
+
+  .rail-type-checkbox {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    accent-color: var(--st-semantic-accent, #3b82f6);
+    cursor: pointer;
   }
 
   /* ── État vide ── */
@@ -361,7 +464,7 @@
     color: var(--st-semantic-text-muted, #94a3b8);
   }
 
-  /* ── Accordéon natif ws-acc (pattern graphify) ── */
+  /* ── Accordéon natif ws-acc (sous-accordéon villes) ── */
   :global(.ws-acc > summary) {
     list-style: none;
     cursor: pointer;
@@ -406,7 +509,7 @@
     padding: 0.3rem 1rem 0.5rem 1.75rem;
   }
 
-  /* ── Signal item dans l'accordéon ── */
+  /* ── Signal item dans le sous-accordéon ── */
   .signal-item {
     display: flex;
     align-items: flex-start;
