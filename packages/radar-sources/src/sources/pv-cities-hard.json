@@ -121,8 +121,9 @@
       "uuid": "679C5E47-64D5-41D5-BA89-8688BA4F4A3D",
       "pvIndexUrl": "https://grandremous.ca/proces-verbaux",
       "pdf_count": 323,
-      "status": "graphifying",
-      "notes": "graphify en cours"
+      "status": "graphified",
+      "notes": "323 PVs, 2073 nodes, 3337 edges",
+      "scw_key": "graph/grand-remous/latest.json"
     }
   },
   "other_scraped": {
