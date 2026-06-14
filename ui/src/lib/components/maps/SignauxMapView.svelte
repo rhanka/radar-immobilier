@@ -45,6 +45,20 @@
   let detailError: string | null = null;
   let detailNodes: GraphSignalNode[] = [];
 
+  // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
+  /** Accumule les types de nœuds vus au fil des villes cliquées. */
+  let knownNodeTypes: string[] = [];
+  /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
+  const detailCache = new Map<string, GraphSignalNode[]>();
+
+  // ── Filtre GLOBAL par type ─────────────────────────────────────────────────
+  let excludedTypes = new Set<string>();
+
+  function handleFilterChange(excluded: Set<string>): void {
+    excludedTypes = new Set(excluded);
+    updateFillColors();
+  }
+
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(apiItems);
 
@@ -67,14 +81,20 @@
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
    * selon le dictionnaire count → color.
-   * Villes sans donnée → couleur neutre.
+   * Villes avec détail en cache : count filtré selon les types cochés.
+   * Villes sans détail : count total (signalCount6m).
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      expr.push(e.municipality.slug, signalCountColor(e.signalCount6m));
+      let count = e.signalCount6m;
+      const cached = detailCache.get(e.municipality.slug);
+      if (cached !== undefined && excludedTypes.size > 0) {
+        count = cached.filter((n) => !excludedTypes.has(n.type)).length;
+      }
+      expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
     return expr as ExpressionSpecification;
@@ -267,6 +287,12 @@
     try {
       const res = await fetchGraphSignalDetail(entry.municipality.slug);
       detailNodes = res.nodes;
+      // Alimenter le cache multi-villes et accumuler les types connus
+      detailCache.set(entry.municipality.slug, res.nodes);
+      const newTypes = res.nodes.map((n) => n.type);
+      knownNodeTypes = Array.from(new Set([...knownNodeTypes, ...newTypes])).sort();
+      // Recolorer les aplats avec les nouvelles données en cache
+      updateFillColors();
     } catch (e) {
       detailError = e instanceof Error ? e.message : "Erreur chargement détail";
     } finally {
@@ -318,10 +344,12 @@
       entries={allEntries}
       selectedSlug={selectedCity?.municipality.slug ?? null}
       {detailNodes}
+      {knownNodeTypes}
       {loading}
       {detailLoading}
       onSelectCity={selectCity}
       onRefresh={load}
+      onFilterChange={handleFilterChange}
     />
   </svelte:fragment>
 
