@@ -47,9 +47,9 @@ export function googleMapsUrl(lat: number, lon: number): string {
  * 0 ou undefined = nul (neutral).
  */
 export function scoreTone(
-  score: number | undefined,
+  score: number | null | undefined,
 ): "success" | "warning" | "error" | "neutral" | "info" {
-  if (score === undefined) return "neutral";
+  if (score === undefined || score === null) return "neutral";
   if (score >= 7) return "success";
   if (score >= 4) return "warning";
   if (score >= 1) return "info";
@@ -59,8 +59,8 @@ export function scoreTone(
 /**
  * Retourne le label textuel du score de potentiel.
  */
-export function scoreLabel(score: number | undefined): string {
-  if (score === undefined) return "non calculé";
+export function scoreLabel(score: number | null | undefined): string {
+  if (score === undefined || score === null) return "non calculé";
   if (score >= 7) return "Élevé";
   if (score >= 4) return "Moyen";
   if (score >= 1) return "Faible";

@@ -7,21 +7,13 @@
    *   1. Les lots cadastraux réels (MRNF) via GET /api/geo/:city/lots
    *   2. Les changements de zonage réels via GET /api/signals/:city/detail
    *
-   * Affichage côte à côte :
-   *   - Panneau gauche : changement(s) de zonage (reglementNumbers + zoneRefs)
-   *   - Panneau droit : lots cadastraux SVG de la ville
-   *   Lien honnête : la géométrie exacte de la zone n'est pas disponible — on
-   *   montre les lots de la ville + la/les zone(s) du signal en libellé.
-   *
-   * Sélecteur : uniquement les villes avec lots ET/OU zonage.
-   * Résumé : "<ville> : <N> changements de zonage · <M> lots chargés".
+   * CS-L6 : les 4 villes Steve (delson, sainte-catherine, saint-constant, candiac)
+   * retournent mode:"carte-steve" depuis l'API. La palette de couleurs Steve est
+   * appliquée (orange 4+∩TOD, vert 4+, bleu TOD, gris). Un switch source permet
+   * de basculer entre Steve et MRNF.
    *
    * Anti-PII (Loi 25) : seul `noLot` (NO_LOT du cadastre allégé) est affiché.
    * Aucune donnée propriétaire, aucun owner, aucun nom de personne.
-   *
-   * Carte : SVG pur (même approche que SignauxMapView + OpportunitesMapView —
-   * pas de nouvelle dépendance carto). Projection équirectangulaire bornée par
-   * la bbox des lots chargés.
    */
   import { onMount } from "svelte";
   import {
@@ -41,28 +33,50 @@
     CONFIDENCE_TONE,
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
-  import { fetchLots, type LotFeatureCollection, type LotFeature } from "$lib/maps/lots-client.js";
+  import { fetchLots, type LotFeatureCollection, type LotFeature, type LotsResponse } from "$lib/maps/lots-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
   import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
   import { loadLiveSignals } from "$lib/signals/signals-live.js";
   
-  
+
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
+  // ── Palette de couleurs Steve ──────────────────────────────────────────────
+  function getLotColor(props: Record<string, unknown>): { fill: string; opacity: number } {
+    const isRue = Boolean(props["isRue"]);
+    if (isRue) return { fill: "none", opacity: 0 };
+    const m4 = Boolean(props["multifamilial4plus"]);
+    const tod = Boolean(props["tod"]);
+    if (m4 && tod) return { fill: "#e67e22", opacity: 0.7 };  // orange priorité 4+∩TOD
+    if (m4) return { fill: "#27ae60", opacity: 0.65 };         // vert 4+
+    if (tod) return { fill: "#2980b9", opacity: 0.35 };        // bleu TOD
+    return { fill: "#bdc3c7", opacity: 0.45 };                 // gris autres
+  }
+
   // ── Villes avec source lots et/ou zonage ──────────────────────────────────
-  // Cities that have lots.availability === "donnees-quebec" in the geo inventory
-  // and/or a known signal (changement de zonage).
-  const EVAL_CITIES: Array<{ slug: string; name: string; mrc?: string }> = [
-    { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry" },
-    { slug: "saint-constant", name: "Saint-Constant", mrc: "Roussillon" },
-    { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry" },
-    { slug: "sainte-catherine", name: "Sainte-Catherine", mrc: "Roussillon" },
-    { slug: "delson", name: "Delson", mrc: "Roussillon" },
-    { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains" },
+  // source: "steve" = données carte Steve (CS-L6)
+  // source: "mrnf"  = cadastre allégé MRNF (donnees-quebec)
+  const EVAL_CITIES: Array<{ slug: string; name: string; mrc?: string; source?: "steve" | "mrnf" }> = [
+    // Villes Steve (Roussillon — CS-L6)
+    { slug: "delson", name: "Delson", mrc: "Roussillon", source: "steve" },
+    { slug: "sainte-catherine", name: "Sainte-Catherine", mrc: "Roussillon", source: "steve" },
+    { slug: "saint-constant", name: "Saint-Constant", mrc: "Roussillon", source: "steve" },
+    { slug: "candiac", name: "Candiac", mrc: "Roussillon", source: "steve" },
+    // Villes MRNF
+    { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry", source: "mrnf" },
+    { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry", source: "mrnf" },
+    { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains", source: "mrnf" },
   ];
+
+  // ── Switch source ──────────────────────────────────────────────────────────
+  // "steve" : villes carte Steve (CS-L6)
+  // "mrnf"  : villes MRNF (donnees-quebec)
+  let sourceFilter: "steve" | "mrnf" = "steve";
+
+  $: filteredCities = EVAL_CITIES.filter((c) => c.source === sourceFilter);
 
   // ── Données signaux (section grille — signaux réels depuis l'API) ─────────
   interface CitySignalEntry {
@@ -110,10 +124,11 @@
   }
 
   // ── State drilldown lots ───────────────────────────────────────────────────
-  let selectedEvalCity: (typeof EVAL_CITIES)[0] | null = EVAL_CITIES[0] ?? null;
+  let selectedEvalCity: (typeof EVAL_CITIES)[0] | null = null;
   let lotsLoading = false;
   let lotsError: string | null = null;
   let lotsFC: LotFeatureCollection = { type: "FeatureCollection", features: [] };
+  let lotsResponse: LotsResponse | null = null;
   let hoveredLot: string | null = null;
   let selectedLot: LotFeature | null = null;
 
@@ -148,16 +163,21 @@
 
   $: evalAvailable = hasEvaluationData(selectedSignal);
 
+  // ── Mode carte-steve détecté depuis la réponse API ────────────────────────
+  $: isCarteSteve = lotsResponse?.source === "carte-steve" || lotsResponse?.mode === "carte-steve";
+
   // ── Chargement des lots ────────────────────────────────────────────────────
 
   async function loadLots(citySlug: string): Promise<void> {
     lotsLoading = true;
     lotsError = null;
     lotsFC = { type: "FeatureCollection", features: [] };
+    lotsResponse = null;
     selectedLot = null;
     hoveredLot = null;
     try {
       const res = await fetchLots(citySlug, { limit: 200 });
+      lotsResponse = res;
       lotsFC = res.featureCollection;
       if (!res.ok) {
         lotsError = res.reason ?? "Source lots non disponible pour cette ville.";
@@ -198,10 +218,20 @@
     void loadZonage(city.slug);
   }
 
+  // ── Sélection automatique de la 1re ville lors du changement de filtre ────
+  $: {
+    const first = filteredCities[0];
+    if (first && (!selectedEvalCity || !filteredCities.some((c) => c.slug === selectedEvalCity?.slug))) {
+      selectEvalCity(first);
+    }
+  }
+
   onMount(() => {
-    if (selectedEvalCity) {
-      void loadLots(selectedEvalCity.slug);
-      void loadZonage(selectedEvalCity.slug);
+    const first = filteredCities[0];
+    if (first) {
+      selectedEvalCity = first;
+      void loadLots(first.slug);
+      void loadZonage(first.slug);
     }
     void loadSignalEntries();
   });
@@ -264,7 +294,7 @@
 
   $: lotsBbox = computeLotsBbox(lotsFC.features);
   $: polygonFeatures = lotsFC.features.filter(
-    (f) => f.geometry && f.geometry.type === "Polygon",
+    (f) => f.geometry && f.geometry.type === "Polygon" && !f.properties.isRue,
   );
 
   // ── Indicateurs réactifs ──────────────────────────────────────────────────
@@ -280,6 +310,37 @@
     <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
       <BarChart3 class="h-4 w-4 text-teal-600" aria-hidden="true" />
       <h1 class="text-sm font-bold text-slate-900">Évaluation : Lots & Zonage</h1>
+    </div>
+
+    <!-- Switch source Steve ↔ MRNF -->
+    <div class="border-b border-slate-200 px-4 py-3">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Source de données</p>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          class={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+            sourceFilter === "steve"
+              ? "border-orange-400 bg-orange-50 text-orange-800"
+              : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+          }`}
+          on:click={() => { sourceFilter = "steve"; }}
+          aria-pressed={sourceFilter === "steve"}
+        >
+          Steve (rôle 2022 + zonage + TOD)
+        </button>
+        <button
+          type="button"
+          class={`flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+            sourceFilter === "mrnf"
+              ? "border-teal-400 bg-teal-50 text-teal-800"
+              : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+          }`}
+          on:click={() => { sourceFilter = "mrnf"; }}
+          aria-pressed={sourceFilter === "mrnf"}
+        >
+          Nos signaux (MRNF)
+        </button>
+      </div>
     </div>
 
     <!-- Section lots + zonage -->
@@ -303,7 +364,7 @@
 
     <!-- Sélecteur de ville (lots + zonage) -->
     <div class="divide-y divide-slate-100 border-b border-slate-200">
-      {#each EVAL_CITIES as city (city.slug)}
+      {#each filteredCities as city (city.slug)}
         {@const isSelected = selectedEvalCity?.slug === city.slug}
         <button
           type="button"
@@ -487,6 +548,9 @@
               {:else if !lotsError}
                 <span class="text-xs text-slate-400">Aucun lot</span>
               {/if}
+              {#if isCarteSteve}
+                <Badge tone="neutral" class="text-xs">Steve</Badge>
+              {/if}
             </div>
           {/if}
         </div>
@@ -566,12 +630,12 @@
               <div class="flex items-center gap-2">
                 <Layers class="h-4 w-4 text-teal-500 shrink-0" aria-hidden="true" />
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Lots cadastraux MRNF
+                  {isCarteSteve ? "Lots cadastraux Steve" : "Lots cadastraux MRNF"}
                 </span>
               </div>
               {#if !lotsLoading && !lotsError && hasLots}
                 <span class="text-xs text-slate-400">
-                  {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · CC-BY
+                  {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · {isCarteSteve ? "Steve" : "CC-BY"}
                 </span>
               {/if}
             </div>
@@ -596,7 +660,9 @@
                 <Alert
                   tone="info"
                   title="Aucun lot disponible pour cette ville."
-                  message="La source MRNF n'a retourné aucun lot pour cette ville dans la zone couverte. Essayez une autre ville."
+                  message={isCarteSteve
+                    ? "La source Steve n'a retourné aucun lot pour cette ville. Vérifiez que les fixtures CS-L6 sont chargées."
+                    : "La source MRNF n'a retourné aucun lot pour cette ville dans la zone couverte. Essayez une autre ville."}
                 />
               </div>
 
@@ -616,6 +682,7 @@
                   {@const rings = feature.geometry?.coordinates as number[][][] | undefined}
                   {@const isHovered = hoveredLot === feature.properties.noLot}
                   {@const isLotSelected = selectedLot?.properties.noLot === feature.properties.noLot}
+                  {@const steveColor = isCarteSteve ? getLotColor(feature.properties as unknown as Record<string, unknown>) : null}
                   {#if rings && rings.length > 0}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -632,10 +699,10 @@
                     >
                       <polygon
                         points={ringToPoints(rings[0], lotsBbox)}
-                        fill={isLotSelected ? "#0d9488" : isHovered ? "#5eead4" : "#99f6e4"}
-                        stroke={isLotSelected ? "#0d9488" : "#2dd4bf"}
+                        fill={isLotSelected ? "#0d9488" : isHovered ? (steveColor ? steveColor.fill : "#5eead4") : (steveColor ? steveColor.fill : "#99f6e4")}
+                        stroke={isLotSelected ? "#0d9488" : (steveColor ? steveColor.fill : "#2dd4bf")}
                         stroke-width={isLotSelected ? "1.5" : "0.8"}
-                        fill-opacity={isLotSelected ? "0.7" : isHovered ? "0.6" : "0.45"}
+                        fill-opacity={isLotSelected ? "0.7" : isHovered ? "0.75" : (steveColor ? String(steveColor.opacity) : "0.45")}
                       />
                       {#if (isHovered || isLotSelected) && rings[0].length > 0}
                         {@const cx = rings[0].reduce((s, p) => s + projX(p[0], lotsBbox), 0) / rings[0].length}
@@ -655,6 +722,31 @@
                   {/if}
                 {/each}
               </svg>
+
+              <!-- Légende Steve (visible uniquement en mode carte-steve) -->
+              {#if isCarteSteve}
+                <div class="border-t border-slate-100 px-4 py-3" aria-label="Légende carte Steve">
+                  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende</p>
+                  <ul class="flex flex-wrap gap-x-4 gap-y-1.5">
+                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
+                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#e67e22; opacity:0.7;"></span>
+                      4+ logements ∩ TOD (priorité max)
+                    </li>
+                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
+                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#27ae60; opacity:0.65;"></span>
+                      Zone 4+ logements
+                    </li>
+                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
+                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#2980b9; opacity:0.35;"></span>
+                      Périmètre TOD
+                    </li>
+                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
+                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#bdc3c7; opacity:0.45;"></span>
+                      Autres lots
+                    </li>
+                  </ul>
+                </div>
+              {/if}
 
               <!-- Fiche lot complète — CS-L2 -->
               {#if selectedLot}
