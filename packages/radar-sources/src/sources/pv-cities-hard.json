@@ -9,7 +9,8 @@
       "uuid": "E1B63304-B021-451F-B0D1-458F17400A11",
       "pvIndexUrl": "https://batiscan.ca/proces-verbaux",
       "pdf_count": 20,
-      "status": "raw_uploaded"
+      "status": "graphified",
+      "scw_key": "graph/batiscan/latest.json"
     },
     "boileau": {
       "strategy": "vplus",
@@ -17,7 +18,8 @@
       "uuid": "4342C881-44F3-4594-B9B2-E5AE40A23279",
       "pvIndexUrl": "https://boileau.ca/proces-verbaux",
       "pdf_count": 164,
-      "status": "raw_uploaded"
+      "status": "graphified",
+      "scw_key": "graph/boileau/latest.json"
     },
     "bowman": {
       "strategy": "vplus",
@@ -25,7 +27,8 @@
       "uuid": "CA9CE655-C80F-4FCD-93AE-FD4E166934AC",
       "pvIndexUrl": "https://bowman.ca/les-proces-verbaux",
       "pdf_count": 13,
-      "status": "raw_uploaded"
+      "status": "graphified",
+      "scw_key": "graph/bowman/latest.json"
     },
     "chibougamau": {
       "strategy": "vplus",
@@ -33,7 +36,17 @@
       "uuid": "07AB1863-1C79-40C0-B8AB-3AF4F1CD7550",
       "pvIndexUrl": "https://ville.chibougamau.qc.ca/seances-du-conseil",
       "pdf_count": 270,
-      "status": "raw_uploaded"
+      "status": "graphifying",
+      "notes": "graphify en cours"
+    },
+    "dunham": {
+      "strategy": "vplus",
+      "hostname": "ville.dunham.qc.ca",
+      "uuid": "AAEAC377-4DCA-419B-8457-816D5E82A568",
+      "pvIndexUrl": "https://ville.dunham.qc.ca/seances-du-conseil-municipal",
+      "pdf_count": 132,
+      "status": "graphified",
+      "scw_key": "graph/dunham/latest.json"
     },
     "grenville": {
       "strategy": "vplus",
@@ -41,7 +54,8 @@
       "uuid": "016527C8-1DD8-42AC-9878-013947F1F66C",
       "pvIndexUrl": "https://grenville.ca/seances-du-conseil",
       "pdf_count": 12,
-      "status": "raw_uploaded"
+      "status": "graphified",
+      "scw_key": "graph/grenville/latest.json"
     },
     "lac-saint-paul": {
       "strategy": "vplus",
@@ -49,7 +63,8 @@
       "uuid": "2D2DB56D-AADB-48C1-88BD-67FCE2D99283",
       "pvIndexUrl": "https://lac-saint-paul.ca/proces-verbaux",
       "pdf_count": 82,
-      "status": "raw_uploaded",
+      "status": "graphified",
+      "scw_key": "graph/lac-saint-paul/latest.json",
       "notes": "3 PDFs 2024 déjà en SCW, 2 403 (fichiers anciens supprimés)"
     },
     "laurierville": {
@@ -58,7 +73,8 @@
       "uuid": "B7364266-9FC6-4AC7-9B35-119A1137E4F9",
       "pvIndexUrl": "https://laurierville.ca/proces-verbaux",
       "pdf_count": 227,
-      "status": "raw_uploaded"
+      "status": "graphifying",
+      "notes": "graphify en cours"
     },
     "lorrainville": {
       "strategy": "vplus",
@@ -66,7 +82,9 @@
       "uuid": "40030C70-0557-4C0E-8F1D-7466BBA57EC3",
       "pvIndexUrl": "https://lorrainville.ca/proces-verbaux",
       "pdf_count": 60,
-      "status": "raw_uploaded"
+      "status": "graphified",
+      "scw_key": "graph/lorrainville/latest.json",
+      "notes": "60 PDFs scannés/image → 62 noeuds seulement (OCR non disponible)"
     },
     "lyster": {
       "strategy": "vplus",
@@ -74,15 +92,46 @@
       "uuid": "EF709034-00F9-49B8-B424-8CE7B1C5835B",
       "pvIndexUrl": "https://lyster.ca/proces-verbaux",
       "pdf_count": 251,
-      "status": "raw_uploaded"
+      "status": "graphifying",
+      "notes": "graphify en cours"
     },
-    "dunham": {
+    "baie-des-sables": {
       "strategy": "vplus",
-      "hostname": "ville.dunham.qc.ca",
-      "uuid": "AAEAC377-4DCA-419B-8457-816D5E82A568",
-      "pvIndexUrl": "https://ville.dunham.qc.ca/seances-du-conseil-municipal",
-      "pdf_count": 132,
-      "status": "raw_uploaded"
+      "hostname": "baiedessables.ca",
+      "uuid": "DF5D6441-A00F-4595-A96A-BC90A54BAA9D",
+      "pvIndexUrl": "https://baiedessables.ca/documents-et-publications/proces-verbaux",
+      "pdf_count": 215,
+      "status": "graphifying",
+      "notes": "graphify en cours"
+    },
+    "beaupre": {
+      "strategy": "vplus",
+      "hostname": "villedebeaupre.com",
+      "uuid": "25831DB8-CFFF-40E7-B1F6-108BF95A3AF0",
+      "pvIndexUrl": "https://villedebeaupre.com/conseil-municipal/seance-du-conseil",
+      "pdf_count": 114,
+      "status": "graphifying",
+      "notes": "graphify en cours"
+    },
+    "grand-remous": {
+      "strategy": "vplus",
+      "hostname": "grandremous.ca",
+      "uuid": "679C5E47-64D5-41D5-BA89-8688BA4F4A3D",
+      "pvIndexUrl": "https://grandremous.ca/proces-verbaux",
+      "pdf_count": 323,
+      "status": "graphifying",
+      "notes": "graphify en cours"
+    }
+  },
+  "other_scraped": {
+    "_description": "Villes avec PDFs accessibles via stratégie alternative (non-VPlus)",
+    "lac-frontiere": {
+      "strategy": "wordpress-wpdm",
+      "pvIndexUrl": "https://www.lac-frontiere.ca/web/proces-verbaux/",
+      "pvArchiveUrl": "https://www.lac-frontiere.ca/web/proces-verbaux-archive/",
+      "pdf_count": 85,
+      "status": "graphifying",
+      "notes": "WordPress Download Manager (wpdmdl=N redirect). Graphify en cours."
     }
   },
   "configured_not_scraped": {
@@ -113,201 +162,239 @@
       "status": "configured"
     }
   },
-  "pending_survey": {
-    "_description": "Villes non configurées, URL/stratégie à déterminer",
+  "irreductible": {
+    "_description": "Villes sans PDFs PV accessibles programmatiquement. Raison documentée.",
     "amqui": {
-      "status": "pending",
-      "notes": "WordPress Elementor, PDFs non indexés directement"
+      "status": "irreductible",
+      "notes": "WordPress Elementor, PDFs non indexés directement dans le HTML"
     },
     "audet": {
-      "status": "pending"
-    },
-    "baie-des-sables": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "baie-johan-beetz": {
-      "status": "pending",
-      "notes": "très petite pop=75"
+      "status": "irreductible",
+      "notes": "Population=75, très petite. Domaine non résolu."
     },
     "beaulac-garthby": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "beaumont": {
-      "status": "pending"
-    },
-    "beaupre": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "beaumont.ca = directory index, pas le site municipal. Site officiel inaccessible."
     },
     "belcourt": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Template municipalites-du-quebec.ca, aucun contenu PV"
     },
     "belleterre": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Site en construction (villedebelleterre.ca)"
     },
     "bethanie": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Template municipalites-du-quebec.ca, aucun contenu PV"
     },
     "bonne-esperance": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "bonsecours": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Template municipalites-du-quebec.ca, aucun contenu PV"
     },
     "bristol": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "bristol.ca répond sur AWS mais connexion TLS timeout. Anti-bot probable."
     },
     "bryson": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "WordPress avec calendrier d'événements, aucun téléchargement PDF PV"
     },
     "cacouna": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Challenge JS / anti-bot"
     },
     "caniapiscau": {
-      "status": "pending",
-      "notes": "pop=null, territoire non-organisé?"
+      "status": "irreductible",
+      "notes": "caniapiscau.ca = MRC (pas une ville). Territoire non-organisé, gouvernance distincte."
     },
     "cascapedia-saint-jules": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "cascapedia.ca = Cascapedia River Society (pas la municipalité). Domaine officiel inconnu."
     },
     "chambord": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "WordPress, aucune page conseil/proc-verbaux trouvée"
     },
     "chapais": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "villedechapais.com = Next.js SPA, PDFs non accessibles statiquement"
     },
     "chichester": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "chute-aux-outardes": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "colombier": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Template mun-qc.ca, aucun contenu PV"
     },
     "cote-nord-du-golfe-du-saint-laurent": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "disraeli--les-appalaches--2": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Slug ambigu (MRC vs ville). Domaine non résolu."
     },
     "duhamel-ouest": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "eeyou-istchee-james-bay": {
-      "status": "pending",
-      "notes": "territoire Eeyou, gouvernance distincte"
+      "status": "irreductible",
+      "notes": "Territoire Eeyou Istchee, gouvernance Cree Nation. Domaine non résolu."
     },
     "entrelacs": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "escuminac": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "fort-coulonge": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "franquelin": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "fugereville": {
-      "status": "pending"
-    },
-    "grand-remous": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Template municipalites-du-quebec.ca, aucun contenu PV"
     },
     "gros-mecatina": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "grosmecatina.ca = Wix site anglophone, aucun PDF PV"
     },
     "grosse-ile": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "grosseile.ca = site touristique Parks Canada (Grosse-Île), pas la municipalité"
     },
     "guerin": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Template municipalites-du-quebec.ca, aucun contenu PV"
     },
     "honfleur": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "irlande": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "kipawa": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "kirkland": {
-      "status": "pending",
-      "notes": "pop=19689, 403 probable anti-bot"
+      "status": "irreductible",
+      "notes": "403 anti-bot"
     },
     "la-conception": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu (la-conception.ca, laconception.ca, mun-laconception.ca)"
     },
     "la-macaza": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "la-malbaie": {
-      "status": "pending",
-      "notes": "Vue SPA possible"
+      "status": "irreductible",
+      "notes": "PDFs sur Google Drive, non scrapables"
     },
     "la-reine": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "la-visitation-de-lile-dupas": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "la-visitation-de-yamaska": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lac-delage": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lac-des-plages": {
-      "status": "pending"
-    },
-    "lac-frontiere": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lac-megantic": {
-      "status": "pending",
-      "notes": "Angular SPA possible"
+      "status": "irreductible",
+      "notes": "Domaine non résolu (Angular SPA présumé)"
     },
     "lac-poulin": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "gestionweblex.ca = ASP.NET AJAX-only SPA, non scrapable"
     },
     "landrienne": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lascension-de-patapedia": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lemieux": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "les-bergeronnes": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu (lesbergeronnes.ca, bergeronnes.ca)"
     },
     "les-hauteurs": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "les-mechins": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "WordPress, aucun lien PDF direct trouvé"
     },
     "lile-dorval": {
-      "status": "pending",
-      "notes": "pop=9, île minuscule"
+      "status": "irreductible",
+      "notes": "Pop=9, île minuscule. Domaine non résolu."
     },
     "lingwick": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "lingwick.ca = Wix site, 1 seul PDF non-PV. Lien vers portailcitoyen.cauca.ca (alertes, pas PVs)"
     },
     "lisle-aux-allumettes": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lisle-verte": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "longue-pointe-de-mingan": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     },
     "lotbiniere": {
-      "status": "pending"
+      "status": "irreductible",
+      "notes": "Domaine non résolu"
     }
   }
 }
