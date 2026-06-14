@@ -740,33 +740,60 @@ export function isMulti4Plus(
 }
 
 /**
- * Count Signal + DesignationEvent nodes per city AND per type in graph_nodes.
+ * Les 8 clés de sous-ensemble possibles pour {z, m, p}.
+ * Ordre canonique : z < m < p (flags triés).
+ * Valeur = nb de signaux satisfaisant TOUS les flags de la clé (intersection exacte).
+ */
+export type SubsetKey = "" | "z" | "m" | "p" | "z|m" | "z|p" | "m|p" | "z|m|p";
+
+/** Construit la clé de sous-ensemble à partir d'un ensemble de flags actifs. */
+export function buildSubsetKey(z: boolean, m: boolean, p: boolean): SubsetKey {
+  const parts: string[] = [];
+  if (z) parts.push("z");
+  if (m) parts.push("m");
+  if (p) parts.push("p");
+  return parts.join("|") as SubsetKey;
+}
+
+/**
+ * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
+ *
+ * Préfère le champ annoté `etape` (v2.1) quand présent dans
+ * props->'properties'->>'etape'. Sinon fallback sur deriveEtape(label, description).
+ */
+export function isPrecoceSignal(
+  etapeAnnote: string | null | undefined,
+  label: string | null | undefined,
+  description: string | null | undefined,
+): boolean {
+  const etape = (etapeAnnote?.trim() || undefined) ?? deriveEtape(label, description);
+  return etape === "avis_motion" || etape === "projet_reglement";
+}
+
+/**
+ * Count Signal + DesignationEvent nodes per city in graph_nodes.
  * Returns only cities that have at least one such node.
  *
  * Each city entry includes:
- *   - signalCount    : total count (all types, backward-compat)
- *   - countsByType   : breakdown per node type (e.g. { Signal: 3, DesignationEvent: 2 })
- *   - zonageCount    : count of zonage signals only (DesignationEvent always + Signal
- *                      with category ∈ ZONAGE_CATEGORIES). Used by the « Zonage uniquement »
- *                      toggle in the UI to filter the city list top-down.
- *   - multi4plusCount: count of Signal nodes with dimension 4+ (nb_unites_max ≥ 4 OU
- *                      intensite = 'haute'). Used by the « Multifamilial 4+ » toggle.
- *   - countsByStage  : breakdown par étape réglementaire dérivée (see deriveEtape).
- *                      Used by the « Signaux précoces » toggle.
+ *   - signalCount  : total count (all signals, all flags)
+ *   - subsetCounts : exact intersection counts for each subset of {z, m, p} flags.
+ *                    Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+ *                    Value = nb signals satisfying ALL flags in the key.
+ *                    isZonage (z) = DesignationEvent OR (Signal + category ∈ ZONAGE_CATEGORIES)
+ *                    isMulti4 (m) = nb_unites_max ≥ 4 OR intensite = 'haute'
+ *                    isPrecoce (p) = etape ∈ {avis_motion, projet_reglement}
+ *                      (prefers props->'properties'->>'etape' annotation when present,
+ *                       falls back to deriveEtape heuristic)
  */
 export async function listCitiesWithSignalNodes(
   db: Database,
 ): Promise<Array<{
   citySlug: string;
   signalCount: number;
-  countsByType: Record<string, number>;
-  zonageCount: number;
-  multi4plusCount: number;
-  countsByStage: Record<string, number>;
+  subsetCounts: Record<SubsetKey, number>;
 }>> {
-  // One row per (citySlug, type, category, label, nb_unites_max, intensite, description)
-  // — lets us build the total, the type breakdown, the zonage count, the dimension count,
-  // and the stage breakdown in one query.
+  // One row per individual signal node (no count grouping in SQL) so we can
+  // compute the 3 boolean flags per-signal and accumulate into subsetCounts.
   const rows = await db
     .select({
       citySlug: graphNodes.citySlug,
@@ -776,7 +803,7 @@ export async function listCitiesWithSignalNodes(
       nbUnitesMax: sql<string | null>`${graphNodes.props}->'properties'->>'nb_unites_max'`,
       intensite: sql<string | null>`${graphNodes.props}->'properties'->>'intensite'`,
       description: sql<string | null>`${graphNodes.props}->'properties'->>'description'`,
-      count: sql<number>`count(*)::int`,
+      etapeAnnote: sql<string | null>`${graphNodes.props}->'properties'->>'etape'`,
     })
     .from(graphNodes)
     .where(
@@ -784,24 +811,17 @@ export async function listCitiesWithSignalNodes(
         inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
         isNotNull(graphNodes.citySlug),
       ),
-    )
-    .groupBy(
-      graphNodes.citySlug,
-      graphNodes.type,
-      sql`${graphNodes.props}->'properties'->>'category'`,
-      graphNodes.label,
-      sql`${graphNodes.props}->'properties'->>'nb_unites_max'`,
-      sql`${graphNodes.props}->'properties'->>'intensite'`,
-      sql`${graphNodes.props}->'properties'->>'description'`,
     );
+
+  /** Initialise un subsetCounts vide pour une ville. */
+  function emptySubsetCounts(): Record<SubsetKey, number> {
+    return { "": 0, "z": 0, "m": 0, "p": 0, "z|m": 0, "z|p": 0, "m|p": 0, "z|m|p": 0 };
+  }
 
   // Aggregate into per-city entries in application code.
   const byCity = new Map<string, {
     signalCount: number;
-    countsByType: Record<string, number>;
-    zonageCount: number;
-    multi4plusCount: number;
-    countsByStage: Record<string, number>;
+    subsetCounts: Record<SubsetKey, number>;
   }>();
 
   for (const row of rows) {
@@ -809,40 +829,40 @@ export async function listCitiesWithSignalNodes(
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
-        countsByType: {},
-        zonageCount: 0,
-        multi4plusCount: 0,
-        countsByStage: {},
+        subsetCounts: emptySubsetCounts(),
       });
     }
     const entry = byCity.get(row.citySlug)!;
-    entry.signalCount += row.count;
+    entry.signalCount += 1;
 
-    // countsByType agrège par type (Signal ou DesignationEvent), pas par catégorie
-    entry.countsByType[row.type] = (entry.countsByType[row.type] ?? 0) + row.count;
+    // Calcule les 3 flags booléens pour CE signal individuel.
+    const z = isZonageSignal(row.type, row.category);
+    const m = isMulti4Plus(row.type, row.nbUnitesMax, row.intensite);
+    const p = isPrecoceSignal(row.etapeAnnote, row.label, row.description);
 
-    // zonageCount : DesignationEvent toujours + Signal si category ∈ ZONAGE_CATEGORIES
-    if (isZonageSignal(row.type, row.category)) {
-      entry.zonageCount += row.count;
+    // Incrémente TOUS les sous-ensembles dont les flags sont satisfaits par ce signal.
+    // Un signal avec (z=true, m=false, p=true) contribue à : "", "z", "p", "z|p"
+    for (const [kZ, kM, kP] of [
+      [false, false, false],
+      [true,  false, false],
+      [false, true,  false],
+      [false, false, true ],
+      [true,  true,  false],
+      [true,  false, true ],
+      [false, true,  true ],
+      [true,  true,  true ],
+    ] as [boolean, boolean, boolean][]) {
+      if ((!kZ || z) && (!kM || m) && (!kP || p)) {
+        const key = buildSubsetKey(kZ, kM, kP);
+        entry.subsetCounts[key] += 1;
+      }
     }
-
-    // multi4plusCount : Signal avec nb_unites_max ≥ 4 OU intensite = 'haute'
-    if (isMulti4Plus(row.type, row.nbUnitesMax, row.intensite)) {
-      entry.multi4plusCount += row.count;
-    }
-
-    // countsByStage : étape dérivée par mots-clés (label + description)
-    const etape = deriveEtape(row.label, row.description);
-    entry.countsByStage[etape] = (entry.countsByStage[etape] ?? 0) + row.count;
   }
 
   return Array.from(byCity.entries()).map(([citySlug, data]) => ({
     citySlug,
     signalCount: data.signalCount,
-    countsByType: data.countsByType,
-    zonageCount: data.zonageCount,
-    multi4plusCount: data.multi4plusCount,
-    countsByStage: data.countsByStage,
+    subsetCounts: data.subsetCounts,
   }));
 }
 

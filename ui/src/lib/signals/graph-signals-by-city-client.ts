@@ -8,29 +8,15 @@
 export interface GraphSignalCityItem {
   citySlug: string;
   signalCount: number;
-  /** Breakdown by node type (Signal, DesignationEvent, …). */
-  countsByType: Record<string, number>;
   /**
-   * Count of zonage signals only.
-   * DesignationEvent always counts as zonage; Signal counts only if its
-   * category ∈ ZONAGE_CATEGORIES (see api/src/services/graph/graph-store.ts).
-   * Used by the « Zonage uniquement » toggle to filter cities top-down.
+   * Exact intersection counts for each subset of {z, m, p} flags.
+   * Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+   * Value = nb signals satisfying ALL flags in the key.
+   *   z = isZonage  (DesignationEvent always; Signal if category ∈ ZONAGE_CATEGORIES)
+   *   m = isMulti4  (nb_unites_max ≥ 4 OR intensite = 'haute')
+   *   p = isPrecoce (etape ∈ {avis_motion, projet_reglement})
    */
-  zonageCount: number;
-  /**
-   * Count of Signal nodes with dimension 4+ (multifamilial).
-   * Signal.nb_unites_max ≥ 4 OU Signal.intensite = 'haute'.
-   * DesignationEvent excluded (no dimension data).
-   * Used by the « Multifamilial 4+ » toggle.
-   */
-  multi4plusCount: number;
-  /**
-   * Breakdown by derived regulatory stage (étape réglementaire).
-   * Keys are Etape values: avis_motion, projet_reglement, consultation,
-   * second_projet, adoption, entree_vigueur, accorde, refuse, inconnu.
-   * Used by the « Signaux précoces » toggle.
-   */
-  countsByStage: Record<string, number>;
+  subsetCounts: Record<string, number>;
 }
 
 export interface GraphSignalsByCityResponse {

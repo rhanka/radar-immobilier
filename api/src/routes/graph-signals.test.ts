@@ -62,30 +62,24 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number>; zonageCount: number }[];
+      cities: { citySlug: string; signalCount: number; subsetCounts: Record<string, number> }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(0);
     expect(body.cities).toEqual([]);
   });
 
-  it("returns ok:true with city list, correct totalCount, and new dimension/anticipation fields", async () => {
+  it("returns ok:true with city list, correct totalCount et subsetCounts", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
       {
         citySlug: "drummondville",
         signalCount: 5,
-        countsByType: { Signal: 3, DesignationEvent: 2 },
-        zonageCount: 4,
-        multi4plusCount: 2,
-        countsByStage: { avis_motion: 1, projet_reglement: 1, inconnu: 3 },
+        subsetCounts: { "": 5, "z": 4, "m": 2, "p": 1, "z|m": 2, "z|p": 1, "m|p": 0, "z|m|p": 0 },
       },
       {
         citySlug: "saint-constant",
         signalCount: 3,
-        countsByType: { Signal: 3 },
-        zonageCount: 1,
-        multi4plusCount: 0,
-        countsByStage: { inconnu: 3 },
+        subsetCounts: { "": 3, "z": 1, "m": 0, "p": 0, "z|m": 0, "z|p": 0, "m|p": 0, "z|m|p": 0 },
       },
     ]);
 
@@ -99,31 +93,25 @@ describe("GET /api/graph-signals/by-city", () => {
       cities: {
         citySlug: string;
         signalCount: number;
-        countsByType: Record<string, number>;
-        zonageCount: number;
-        multi4plusCount: number;
-        countsByStage: Record<string, number>;
+        subsetCounts: Record<string, number>;
       }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(8);
     expect(body.cities).toHaveLength(2);
-
-    // Drummondville : multi4plusCount et countsByStage présents
+    // Drummondville : monotonie subsetCounts vérifiée
     const drummond = body.cities[0]!;
     expect(drummond.citySlug).toBe("drummondville");
-    expect(drummond.signalCount).toBe(5);
-    expect(drummond.zonageCount).toBe(4);
-    expect(drummond.multi4plusCount).toBe(2);
-    expect(drummond.countsByStage).toEqual({ avis_motion: 1, projet_reglement: 1, inconnu: 3 });
-    expect(drummond.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
-
-    // Saint-Constant : multi4plusCount=0 et pas d'avis de motion
+    expect(drummond.subsetCounts["z"]).toBe(4);
+    expect(drummond.subsetCounts["z|m"]).toBe(2);
+    expect(drummond.subsetCounts["z|m|p"]).toBe(0);
+    // Monotonie : z|m ≤ z ≤ ""
+    expect(drummond.subsetCounts["z|m"]).toBeLessThanOrEqual(drummond.subsetCounts["z"]!);
+    expect(drummond.subsetCounts["z"]).toBeLessThanOrEqual(drummond.subsetCounts[""]!);
+    // Saint-Constant
     const stconst = body.cities[1]!;
-    expect(stconst.multi4plusCount).toBe(0);
-    expect(stconst.countsByStage).toEqual({ inconnu: 3 });
-    // zonageCount < signalCount quand il y a des signaux non-zonage
-    expect(stconst.zonageCount).toBeLessThan(stconst.signalCount);
+    expect(stconst.subsetCounts["z"]).toBeLessThanOrEqual(stconst.subsetCounts[""]!);
+    expect(stconst.subsetCounts["z|m"]).toBe(0);
   });
 });
 
