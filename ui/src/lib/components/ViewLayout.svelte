@@ -61,7 +61,8 @@
       <div class="flex h-full w-full">
         {#if stickyControlsFooter}
           <!-- Bande controls avec footer épinglé (flex-col) : scroll interne + légende toujours visible -->
-          <aside class={`${controlsWidth} shrink-0 border-r border-slate-200 bg-white flex flex-col`}>
+          <!-- min-h-0 requis pour contraindre la hauteur dans une chaîne flex imbriquée (bug légende coupée) -->
+          <aside class={`${controlsWidth} shrink-0 border-r border-slate-200 bg-white flex flex-col min-h-0`}>
             <div class="flex-1 overflow-y-auto">
               <slot name="controls" />
             </div>
