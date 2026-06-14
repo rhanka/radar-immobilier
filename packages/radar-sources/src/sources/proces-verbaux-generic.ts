@@ -4493,6 +4493,24 @@ export const DUNHAM_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-dunham",
 };
 
+export const BAIE_DES_SABLES_PV_CONFIG: PvCityConfig = {
+  citySlug: "baie-des-sables",
+  pvIndexUrl: "https://baiedessables.ca/documents-et-publications/proces-verbaux",
+  sourceId: "proces-verbaux-baie-des-sables",
+};
+
+export const GRAND_REMOUS_PV_CONFIG: PvCityConfig = {
+  citySlug: "grand-remous",
+  pvIndexUrl: "https://grandremous.ca/proces-verbaux",
+  sourceId: "proces-verbaux-grand-remous",
+};
+
+export const BEAUPRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "beaupre",
+  pvIndexUrl: "https://villedebeaupre.com/conseil-municipal/seance-du-conseil",
+  sourceId: "proces-verbaux-beaupre",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -5275,4 +5293,7 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: LORRAINVILLE_PV_CONFIG },
   { config: LYSTER_PV_CONFIG },
   { config: DUNHAM_PV_CONFIG },
+  { config: BAIE_DES_SABLES_PV_CONFIG },
+  { config: GRAND_REMOUS_PV_CONFIG },
+  { config: BEAUPRE_PV_CONFIG },
 ];
