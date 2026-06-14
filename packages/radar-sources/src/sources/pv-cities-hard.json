@@ -36,8 +36,9 @@
       "uuid": "07AB1863-1C79-40C0-B8AB-3AF4F1CD7550",
       "pvIndexUrl": "https://ville.chibougamau.qc.ca/seances-du-conseil",
       "pdf_count": 270,
-      "status": "graphifying",
-      "notes": "graphify en cours"
+      "status": "graphified",
+      "notes": "270 PVs, 2016 nodes, 2664 edges",
+      "scw_key": "graph/chibougamau/latest.json"
     },
     "dunham": {
       "strategy": "vplus",
