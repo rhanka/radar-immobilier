@@ -1,0 +1,18 @@
+# graphify PROJECT for lac-saint-paul (VPlus/Portail Citoyen, lot-round11).
+version: 1
+profile:
+  path: ../../ontology/ontology-profile.yaml
+inputs:
+  corpus:
+    - raw/proces-verbaux-lac-saint-paul
+  registries:
+    - references/municipalities.csv
+dataprep:
+  pdf_ocr: auto
+  prefer_ocr_markdown: true
+  citation_minimum: page
+  preserve_source_structure: true
+outputs:
+  state_dir: .graphify/lac-saint-paul
+  write_html: true
+  write_wiki: true
