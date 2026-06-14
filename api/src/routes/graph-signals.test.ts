@@ -69,10 +69,24 @@ describe("GET /api/graph-signals/by-city", () => {
     expect(body.cities).toEqual([]);
   });
 
-  it("returns ok:true with city list, correct totalCount, and zonageCount", async () => {
+  it("returns ok:true with city list, correct totalCount, and new dimension/anticipation fields", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
-      { citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 }, zonageCount: 4 },
-      { citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 }, zonageCount: 1 },
+      {
+        citySlug: "drummondville",
+        signalCount: 5,
+        countsByType: { Signal: 3, DesignationEvent: 2 },
+        zonageCount: 4,
+        multi4plusCount: 2,
+        countsByStage: { avis_motion: 1, projet_reglement: 1, inconnu: 3 },
+      },
+      {
+        citySlug: "saint-constant",
+        signalCount: 3,
+        countsByType: { Signal: 3 },
+        zonageCount: 1,
+        multi4plusCount: 0,
+        countsByStage: { inconnu: 3 },
+      },
     ]);
 
     const app = graphSignalsRoute({ db: mockDb });
@@ -82,26 +96,34 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number>; zonageCount: number }[];
+      cities: {
+        citySlug: string;
+        signalCount: number;
+        countsByType: Record<string, number>;
+        zonageCount: number;
+        multi4plusCount: number;
+        countsByStage: Record<string, number>;
+      }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(8);
     expect(body.cities).toHaveLength(2);
-    expect(body.cities[0]).toEqual({
-      citySlug: "drummondville",
-      signalCount: 5,
-      countsByType: { Signal: 3, DesignationEvent: 2 },
-      zonageCount: 4,
-    });
-    expect(body.cities[1]).toEqual({
-      citySlug: "saint-constant",
-      signalCount: 3,
-      countsByType: { Signal: 3 },
-      zonageCount: 1,
-    });
+
+    // Drummondville : multi4plusCount et countsByStage présents
+    const drummond = body.cities[0]!;
+    expect(drummond.citySlug).toBe("drummondville");
+    expect(drummond.signalCount).toBe(5);
+    expect(drummond.zonageCount).toBe(4);
+    expect(drummond.multi4plusCount).toBe(2);
+    expect(drummond.countsByStage).toEqual({ avis_motion: 1, projet_reglement: 1, inconnu: 3 });
+    expect(drummond.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
+
+    // Saint-Constant : multi4plusCount=0 et pas d'avis de motion
+    const stconst = body.cities[1]!;
+    expect(stconst.multi4plusCount).toBe(0);
+    expect(stconst.countsByStage).toEqual({ inconnu: 3 });
     // zonageCount < signalCount quand il y a des signaux non-zonage
-    expect(body.cities[1]!.zonageCount).toBeLessThan(body.cities[1]!.signalCount);
-    expect(body.cities[0]!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
+    expect(stconst.zonageCount).toBeLessThan(stconst.signalCount);
   });
 });
 

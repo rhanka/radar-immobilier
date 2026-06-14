@@ -569,27 +569,213 @@ export function isZonageSignal(type: string, category: string | null | undefined
   return false;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ANTICIPATION — étape réglementaire dérivée par mots-clés
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Étapes réglementaires ordonnées du plus précoce (plus grande valeur
+ * d'anticipation) au plus tardif.
+ *
+ * Étapes résolutions (DM / PIIA / PPCMOI) :
+ *   - accorde / refuse : terminaux, donc après adoption (équivalent fonctionnel)
+ *
+ * Défaut : inconnu (aucun mot-clé reconnu).
+ */
+export type Etape =
+  | "avis_motion"
+  | "projet_reglement"
+  | "consultation"
+  | "second_projet"
+  | "adoption"
+  | "entree_vigueur"
+  | "accorde"
+  | "refuse"
+  | "inconnu";
+
+/**
+ * Ordre d'anticipation : plus l'index est petit, plus l'étape est précoce
+ * (= plus d'anticipation / de valeur pour le radar).
+ * `inconnu` est traité à part (dernière position pour le tri).
+ */
+export const ETAPE_ORDER: Record<Etape, number> = {
+  avis_motion:      0,
+  projet_reglement: 1,
+  consultation:     2,
+  second_projet:    3,
+  adoption:         4,
+  entree_vigueur:   5,
+  accorde:          6,
+  refuse:           7,
+  inconnu:          99,
+};
+
+/**
+ * Étapes considérées comme « précoces » pour le toggle Anticipation.
+ * = avis_motion OU projet_reglement (les deux premières étapes).
+ */
+export const ETAPES_PRECOCES: readonly Etape[] = ["avis_motion", "projet_reglement"];
+
+/**
+ * Dérive l'étape réglementaire d'un signal à partir du texte libre.
+ *
+ * Stratégie : recherche séquentielle des mots-clés dans l'ordre du plus
+ * précis/précoce au plus tardif pour éviter les collisions (ex. « second
+ * projet » matché avant « projet »). Le texte est normalisé en minuscules
+ * sans accents avant la comparaison (robustesse encodage).
+ *
+ * Ambiguïtés signalées :
+ *  - « projet de règlement » et « premier projet » → même étape projet_reglement
+ *  - « accordé(e) » vs « accord » → on cible spécifiquement les formes "accorde"
+ *    après normalisation NFD pour éviter les faux positifs (ex. « en accord avec »)
+ *  - « en vigueur » présent dans « pas en vigueur » → gardé tel quel car cas rare
+ *  - Les résolutions PIIA/PPCMOI « accordé » sont classées après adoption dans
+ *    ETAPE_ORDER car elles représentent une décision terminale similaire.
+ *
+ * @param label       Libellé court du nœud signal.
+ * @param description Description longue (props->'properties'->>'description').
+ * @returns           Étape dérivée, défaut `inconnu`.
+ */
+export function deriveEtape(
+  label: string | null | undefined,
+  description: string | null | undefined,
+): Etape {
+  // Concatène label + description pour maximiser la couverture.
+  const raw = `${label ?? ""} ${description ?? ""}`;
+  // Normalise : minuscules + supprime les combinaisons d'accents unicode (é→e, è→e…)
+  const text = raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+
+  // ── Ordre de test : du plus précoce au plus tardif ──────────────────────
+  // 1. avis de motion
+  if (text.includes("avis de motion") || text.includes("avis d motion")) {
+    return "avis_motion";
+  }
+  // 2. second projet (testé avant « projet » pour éviter la collision)
+  if (
+    text.includes("second projet") ||
+    text.includes("2e projet") ||
+    text.includes("deuxieme projet")
+  ) {
+    return "second_projet";
+  }
+  // 3. premier projet / projet de règlement / projet du règlement
+  if (
+    text.includes("premier projet") ||
+    text.includes("1er projet") ||
+    text.includes("projet de reglement") ||
+    text.includes("projet du reglement")
+  ) {
+    return "projet_reglement";
+  }
+  // 4. consultation publique
+  if (text.includes("consultation")) {
+    return "consultation";
+  }
+  // 5. entré en vigueur / en vigueur (avant adoption pour éviter collision)
+  if (
+    text.includes("entree en vigueur") ||
+    text.includes("entre en vigueur") ||
+    text.includes("en vigueur")
+  ) {
+    return "entree_vigueur";
+  }
+  // 6. adoption / adopté
+  if (
+    text.includes("adoption") ||
+    text.includes("adopte") ||
+    text.includes("adoptee")
+  ) {
+    return "adoption";
+  }
+  // 7. accordé / accordée (résolutions DM / PIIA / PPCMOI)
+  if (
+    text.includes("accordee") ||
+    text.includes("accorde") ||
+    text.includes("autorise") ||
+    text.includes("autorisee")
+  ) {
+    return "accorde";
+  }
+  // 8. refusé / refusée
+  if (
+    text.includes("refuse") ||
+    text.includes("refusee") ||
+    text.includes("rejete") ||
+    text.includes("rejetee")
+  ) {
+    return "refuse";
+  }
+
+  return "inconnu";
+}
+
+/**
+ * Détermine si un nœud Signal est de dimension 4+ (multifamilial).
+ *
+ * Règle :
+ *   - `nb_unites_max` ≥ 4 (entier dans props->'properties'->>'nb_unites_max'), OU
+ *   - `intensite` = 'haute' (signal à fort potentiel logements)
+ *
+ * Les `DesignationEvent` sont exclus (pas de champ nb_unites_max / intensite).
+ *
+ * @param type         Type de nœud ('Signal' ou 'DesignationEvent').
+ * @param nbUnitesMax  Valeur string du champ nb_unites_max (peut être null).
+ * @param intensite    Valeur string du champ intensite (peut être null).
+ */
+export function isMulti4Plus(
+  type: string,
+  nbUnitesMax: string | null | undefined,
+  intensite: string | null | undefined,
+): boolean {
+  if (type !== "Signal") return false;
+  if (intensite === "haute") return true;
+  if (nbUnitesMax !== null && nbUnitesMax !== undefined && nbUnitesMax !== "") {
+    const n = parseInt(nbUnitesMax, 10);
+    if (!isNaN(n) && n >= 4) return true;
+  }
+  return false;
+}
+
 /**
  * Count Signal + DesignationEvent nodes per city AND per type in graph_nodes.
  * Returns only cities that have at least one such node.
  *
  * Each city entry includes:
- *   - signalCount  : total count (all types, backward-compat)
- *   - countsByType : breakdown per node type (e.g. { Signal: 3, DesignationEvent: 2 })
- *   - zonageCount  : count of zonage signals only (DesignationEvent always + Signal
- *                    with category ∈ ZONAGE_CATEGORIES). Used by the « Zonage uniquement »
- *                    toggle in the UI to filter the city list top-down.
+ *   - signalCount    : total count (all types, backward-compat)
+ *   - countsByType   : breakdown per node type (e.g. { Signal: 3, DesignationEvent: 2 })
+ *   - zonageCount    : count of zonage signals only (DesignationEvent always + Signal
+ *                      with category ∈ ZONAGE_CATEGORIES). Used by the « Zonage uniquement »
+ *                      toggle in the UI to filter the city list top-down.
+ *   - multi4plusCount: count of Signal nodes with dimension 4+ (nb_unites_max ≥ 4 OU
+ *                      intensite = 'haute'). Used by the « Multifamilial 4+ » toggle.
+ *   - countsByStage  : breakdown par étape réglementaire dérivée (see deriveEtape).
+ *                      Used by the « Signaux précoces » toggle.
  */
 export async function listCitiesWithSignalNodes(
   db: Database,
-): Promise<Array<{ citySlug: string; signalCount: number; countsByType: Record<string, number>; zonageCount: number }>> {
-  // One row per (citySlug, type, category) — lets us build the total, the type breakdown,
-  // and the zonage count in one query.
+): Promise<Array<{
+  citySlug: string;
+  signalCount: number;
+  countsByType: Record<string, number>;
+  zonageCount: number;
+  multi4plusCount: number;
+  countsByStage: Record<string, number>;
+}>> {
+  // One row per (citySlug, type, category, label, nb_unites_max, intensite, description)
+  // — lets us build the total, the type breakdown, the zonage count, the dimension count,
+  // and the stage breakdown in one query.
   const rows = await db
     .select({
       citySlug: graphNodes.citySlug,
       type: graphNodes.type,
       category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
+      label: graphNodes.label,
+      nbUnitesMax: sql<string | null>`${graphNodes.props}->'properties'->>'nb_unites_max'`,
+      intensite: sql<string | null>`${graphNodes.props}->'properties'->>'intensite'`,
+      description: sql<string | null>`${graphNodes.props}->'properties'->>'description'`,
       count: sql<number>`count(*)::int`,
     })
     .from(graphNodes)
@@ -603,30 +789,60 @@ export async function listCitiesWithSignalNodes(
       graphNodes.citySlug,
       graphNodes.type,
       sql`${graphNodes.props}->'properties'->>'category'`,
+      graphNodes.label,
+      sql`${graphNodes.props}->'properties'->>'nb_unites_max'`,
+      sql`${graphNodes.props}->'properties'->>'intensite'`,
+      sql`${graphNodes.props}->'properties'->>'description'`,
     );
 
   // Aggregate into per-city entries in application code.
-  const byCity = new Map<string, { signalCount: number; countsByType: Record<string, number>; zonageCount: number }>();
+  const byCity = new Map<string, {
+    signalCount: number;
+    countsByType: Record<string, number>;
+    zonageCount: number;
+    multi4plusCount: number;
+    countsByStage: Record<string, number>;
+  }>();
+
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!byCity.has(row.citySlug)) {
-      byCity.set(row.citySlug, { signalCount: 0, countsByType: {}, zonageCount: 0 });
+      byCity.set(row.citySlug, {
+        signalCount: 0,
+        countsByType: {},
+        zonageCount: 0,
+        multi4plusCount: 0,
+        countsByStage: {},
+      });
     }
     const entry = byCity.get(row.citySlug)!;
     entry.signalCount += row.count;
+
     // countsByType agrège par type (Signal ou DesignationEvent), pas par catégorie
     entry.countsByType[row.type] = (entry.countsByType[row.type] ?? 0) + row.count;
+
     // zonageCount : DesignationEvent toujours + Signal si category ∈ ZONAGE_CATEGORIES
     if (isZonageSignal(row.type, row.category)) {
       entry.zonageCount += row.count;
     }
+
+    // multi4plusCount : Signal avec nb_unites_max ≥ 4 OU intensite = 'haute'
+    if (isMulti4Plus(row.type, row.nbUnitesMax, row.intensite)) {
+      entry.multi4plusCount += row.count;
+    }
+
+    // countsByStage : étape dérivée par mots-clés (label + description)
+    const etape = deriveEtape(row.label, row.description);
+    entry.countsByStage[etape] = (entry.countsByStage[etape] ?? 0) + row.count;
   }
 
-  return Array.from(byCity.entries()).map(([citySlug, { signalCount, countsByType, zonageCount }]) => ({
+  return Array.from(byCity.entries()).map(([citySlug, data]) => ({
     citySlug,
-    signalCount,
-    countsByType,
-    zonageCount,
+    signalCount: data.signalCount,
+    countsByType: data.countsByType,
+    zonageCount: data.zonageCount,
+    multi4plusCount: data.multi4plusCount,
+    countsByStage: data.countsByStage,
   }));
 }
 

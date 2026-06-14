@@ -17,20 +17,24 @@ import {
 
 /**
  * Helper : construit une GraphSignalsByCityResponse de test.
- * Les items partiels sont complétés avec countsByType et zonageCount
- * pour satisfaire l'interface GraphSignalCityItem sans polluer les tests avec
- * des champs non pertinents pour leurs assertions.
+ * Les items partiels sont complétés avec countsByType, zonageCount,
+ * multi4plusCount et countsByStage pour satisfaire l'interface
+ * GraphSignalCityItem sans polluer les tests avec des champs non pertinents.
  */
 const byCity = (
-  ...cities: (Omit<GraphSignalsByCityResponse["cities"][0], "countsByType" | "zonageCount"> & {
+  ...cities: (Omit<GraphSignalsByCityResponse["cities"][0], "countsByType" | "zonageCount" | "multi4plusCount" | "countsByStage"> & {
     countsByType?: Record<string, number>;
     zonageCount?: number;
+    multi4plusCount?: number;
+    countsByStage?: Record<string, number>;
   })[]
 ): GraphSignalsByCityResponse => {
   const normalized = cities.map((c) => ({
     ...c,
     countsByType: c.countsByType ?? { Signal: c.signalCount },
     zonageCount: c.zonageCount ?? 0,
+    multi4plusCount: c.multi4plusCount ?? 0,
+    countsByStage: c.countsByStage ?? {},
   }));
   return {
     ok: true,

@@ -7,7 +7,8 @@
  *
  * GET /api/graph-signals/by-city
  *   Returns aggregate signal counts per city.
- *   Response: { ok: true, totalCount, cities: [{ citySlug, signalCount }] }
+ *   Response: { ok: true, totalCount, cities: [{ citySlug, signalCount, countsByType,
+ *               zonageCount, multi4plusCount, countsByStage }] }
  *
  * GET /api/graph-signals/:city
  *   Returns Signal + DesignationEvent nodes for one city.
