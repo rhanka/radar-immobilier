@@ -84,3 +84,25 @@ describe("ConstraintHit (auditable risk axis)", () => {
     ).toThrow();
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Test de non-dérive (#54) — vérifie que le fichier généré est à jour par
+// rapport au YAML. Ce test ÉCHOUE si quelqu'un édite l'enum à la main ou si
+// le YAML diverge sans régénérer (drift détecté en CI avant tout merge).
+//
+// Pour corriger un échec : `npm run gen:onto` depuis packages/radar-domain/
+// ─────────────────────────────────────────────────────────────────────────────
+describe("Non-dérive YAML → généré (#54)", () => {
+  it("OntoRelationType.options est identique aux clés du YAML (YAML_RELATION_KEYS)", async () => {
+    const { OntoRelationType, YAML_RELATION_KEYS } = await import("./relations-generated.js");
+    // Les deux ensembles doivent avoir exactement les mêmes éléments
+    const generated = [...OntoRelationType.options].sort();
+    const fromYaml = [...YAML_RELATION_KEYS].sort();
+    expect(generated).toEqual(fromYaml);
+  });
+
+  it("le nombre de relations générées est 25 (v2.0)", async () => {
+    const { OntoRelationType } = await import("./relations-generated.js");
+    expect(OntoRelationType.options).toHaveLength(25);
+  });
+});
