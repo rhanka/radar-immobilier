@@ -93,10 +93,8 @@ describe("buildCityMapEntries", () => {
         subsetCounts: { "": 5, z: 3, "z|m": 1 },
       },
     ];
-    const entries = buildCityMapEntries([VALLEYFIELD_ITEM, ...graphItems.slice(1)]);
-    // Use the graphItem directly
-    const entries2 = buildCityMapEntries(graphItems);
-    const pilot = entries2.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    const entries = buildCityMapEntries(graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
     expect(pilot).toBeDefined();
     expect(pilot!.subsetCounts).toEqual({ "": 5, z: 3, "z|m": 1 });
   });
