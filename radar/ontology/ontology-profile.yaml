@@ -1,4 +1,4 @@
-# radar-immobilier — graphify ontology profile (v2.0)
+# radar-immobilier — graphify ontology profile (v2.1)
 #
 # Authoritative profile consumed by @sentropic/graphify. SHARED by every city
 # (SPEC_ONTOLOGY_DATA_MODEL.md §5.4 D1); only the *projects* (graphify.yaml, see
@@ -15,11 +15,19 @@
 #   - Préfixes d'id figés : muni-/source-/bylaw-/zone-/event-/signal-/lot-/adresse-/constraint-
 #   - Top-level : municipality/generated_at/ontology_version/pv_count/nodes/edges
 #
+# Changements v2.1 vs v2.0 :
+#   - Champ `etape` (enum ordonné : avis_motion → entree_vigueur + instruments à résolution)
+#     ajouté dans Signal et DesignationEvent — axe ANTICIPATION du scoring radar.
+#   - Champ `etape_date` (date de cette étape, ISO-8601 YYYY-MM-DD) ajouté aux mêmes types.
+#   - `etape` est une PROP (pas une entité) : rétro-compatible, pas de nouveau type de nœud.
+#   - ontology_version bumped à "2.1" ; le champ `id` reste `radar-immobilier-zonage`
+#     (référencé par api/src/services/exploitation/reconcile.ts:188).
+#
 # COMPATIBILITÉ : le champ `id` reste `radar-immobilier-zonage` (référencé par
 # api/src/services/exploitation/reconcile.ts:188 `profile_id: profile.id`).
 id: radar-immobilier-zonage
 version: 2
-ontology_version: "2.0"
+ontology_version: "2.1"
 default_language: fr
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -161,6 +169,12 @@ node_types:
       motif:          { type: string, description: Motif de la décision }
       conditions:     { type: array,  description: Conditions imposées }
       superficie_m2:  { type: number, description: Superficie visée (m²) }
+      # ── Axe ANTICIPATION (v2.1) ───────────────────────────────────────────
+      # etape : étape réglementaire du dossier (enum ordonné — voir etape_enum ci-dessous).
+      # etape_date : date à laquelle cette étape a été franchie (ISO-8601 YYYY-MM-DD).
+      # Plus l'étape est précoce dans l'ordre, plus l'avantage d'anticipation est grand.
+      etape:          { type: string, description: "Étape réglementaire (enum ordonné v2.1) : avis_motion/projet_reglement/consultation_publique/second_projet/adoption/entree_vigueur/derogation_mineure/piia/ppcmoi/usage_conditionnel/inconnu" }
+      etape_date:     { type: string, format: date, description: "Date de cette étape (ISO-8601 YYYY-MM-DD)" }
       # Note : lots/zones ciblés via arêtes targets_lot/targets_zone/concerns
 
   Signal:
@@ -192,6 +206,11 @@ node_types:
       nb_unites_min:  { type: integer, description: Nb d'unités minimum estimé }
       nb_unites_max:  { type: integer, description: Nb d'unités maximum estimé }
       amount_cad:     { type: number,  description: Montant ($CAD) si applicable }
+      # ── Axe ANTICIPATION (v2.1) ───────────────────────────────────────────
+      # etape : étape réglementaire du dossier au moment où ce signal est émis.
+      # etape_date : date de cette étape (ISO-8601 YYYY-MM-DD) — axe temporel scoring.
+      etape:          { type: string, description: "Étape réglementaire (enum ordonné v2.1) : avis_motion/projet_reglement/consultation_publique/second_projet/adoption/entree_vigueur/derogation_mineure/piia/ppcmoi/usage_conditionnel/inconnu" }
+      etape_date:     { type: string, format: date, description: "Date de cette étape (ISO-8601 YYYY-MM-DD)" }
 
   Lot:
     id_prefix: lot
@@ -505,6 +524,63 @@ hardening:
     - { from: [needs_review], to: [validated, rejected] }
     - { from: [validated], to: [superseded] }
     # from rejected/superseded: no transition (terminal states)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# etape_enum (v2.1) — Axe ANTICIPATION du scoring radar.
+#
+# Enum ORDONNÉ du plus précoce (anticipation max) au plus tardif.
+# Applicable aux types : Signal, DesignationEvent (propriétés etape + etape_date).
+#
+# Pipeline complet (rezonage / modification réglementaire) :
+#   1. avis_motion          — Intention annoncée ; avant tout texte réglementaire formel.
+#   2. projet_reglement     — Premier projet adopté en séance (1er projet de règlement).
+#   3. consultation_publique — Assemblée/consultation publique tenue (LAU art. 123).
+#   4. second_projet        — Version révisée adoptée (règlements susceptibles d'approbation
+#                             référendaire — art. 123.1 et suivants LAU).
+#   5. adoption             — Vote final du conseil ; règlement adopté.
+#   6. entree_vigueur       — Après certificat de conformité MRC (art. 137 LAU) ;
+#                             règlement opposable.
+#
+# Instruments à résolution autonome (hors pipeline complet) :
+#   derogation_mineure      — Dérogation mineure (art. 145.1 LAU) — avec issue accordee/refusee.
+#   piia                    — Plan d'implantation et d'intégration architecturale.
+#   ppcmoi                  — Projet particulier de construction, modification ou occupation
+#                             d'immeuble (art. 145.36 LAU).
+#   usage_conditionnel      — Permis d'usage conditionnel (art. 145.5.1 LAU).
+#
+# Valeur par défaut si l'étape ne peut pas être déterminée depuis le texte :
+#   inconnu
+#
+# Règle de priorité d'extraction (quand plusieurs étapes dans un même PV) :
+#   Retenir l'étape la PLUS PRÉCOCE mentionnée pour un dossier donné si le PV
+#   mentionne plusieurs étapes du même dossier (ex. avis de motion + premier projet
+#   dans la même séance → retenir avis_motion).
+# ─────────────────────────────────────────────────────────────────────────────
+etape_enum:
+  # pipeline complet — ordre croissant (index = score d'anticipation inversé)
+  pipeline:
+    - avis_motion            # index 0 — anticipation maximale
+    - projet_reglement       # index 1
+    - consultation_publique  # index 2
+    - second_projet          # index 3
+    - adoption               # index 4
+    - entree_vigueur         # index 5 — anticipation minimale (dossier clôturé)
+
+  # instruments à résolution autonome — ne s'inscrivent pas dans le pipeline complet
+  instruments:
+    - derogation_mineure     # résolution : accordee / refusee
+    - piia                   # résolution : approuve / refuse
+    - ppcmoi                 # résolution : adopte / refuse
+    - usage_conditionnel     # résolution : accorde / refuse
+
+  # valeur par défaut
+  fallback: inconnu
+
+  # champ d'issue pour les instruments (valeurs libres extraites du texte)
+  # Portées sur la prop `outcome` existante du Signal/DesignationEvent.
+  outcome_values:
+    accordee: [accordée, accordé, accord, approuvé, approuvee, adopté, adoptee, accordée]
+    refusee:  [refusée, refusé, refus, rejeté, rejetée]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Outputs — canonical / source node types and exported relations.

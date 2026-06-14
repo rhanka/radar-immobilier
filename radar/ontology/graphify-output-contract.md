@@ -1,9 +1,12 @@
-# Contrat de sortie graphify — ontologie canonique v2.0
+# Contrat de sortie graphify — ontologie canonique v2.1
 
 > **Statut : NORMATIF.**  
 > Tout graphe produit par graphify (re-graphify ou nouvelle ville) DOIT se conformer
 > à ce contrat. Toute variante listée en section [INTERDIT](#interdit--variantes-bannies)
 > est invalide et doit être corrigée avant ingestion dans le pipeline SCW→PG.
+>
+> **v2.1** (2026-06-14) : ajout des champs `etape` + `etape_date` sur Signal et
+> DesignationEvent pour l'axe ANTICIPATION du scoring. Voir §8.
 
 ---
 
@@ -24,7 +27,7 @@
 |-------------------|----------|-----------------------------------------------------------|
 | `municipality`    | string   | Slug kebab-case de la ville (ex : `saint-constant`)       |
 | `generated_at`    | string   | ISO-8601, ex : `2026-06-12T14:23:00Z`                    |
-| `ontology_version`| string   | **Toujours `"2.0"`** pour les graphes v2.0               |
+| `ontology_version`| string   | **`"2.0"`** pour graphes v2.0 ; **`"2.1"`** pour graphes v2.1 (avec `etape`) |
 | `pv_count`        | integer  | Nombre de PVs traités                                     |
 | `nodes`           | array    | Liste de nœuds (peut être vide `[]`)                      |
 | `edges`           | array    | Liste d'arêtes (peut être vide `[]`)                      |
@@ -484,3 +487,104 @@ Un graphe v2.0 est valide si et seulement si :
 4. Chaque arête a : `source`, `target`, `type` (l'une des 25 relations), `refs` (array, peut être vide).
 5. Chaque élément de `refs` a : `docSha` (string), `page` (entier ≥ 1).
 6. Aucune variante bannie des sections 6.1 à 6.12 n'est présente.
+
+Un graphe v2.1 est valide si les règles ci-dessus sont satisfaites ET :
+
+7. `ontology_version` vaut `"2.1"`.
+8. Tout Signal et DesignationEvent portant un dossier de rezonage / instrument à résolution
+   a un champ `etape` dont la valeur appartient à l'enum v2.1 (voir §8).
+9. Si `etape` est présent, `etape_date` est présent et valide (format YYYY-MM-DD).
+
+---
+
+## 8. Champs v2.1 — Axe ANTICIPATION : `etape` + `etape_date`
+
+### 8.1 Contexte
+
+L'axe ANTICIPATION du scoring radar mesure à quelle étape du processus réglementaire
+en est un dossier. Plus l'étape est précoce, plus l'avantage concurrentiel de l'analyste
+est grand. Ces champs sont ajoutés aux propriétés de **Signal** et **DesignationEvent**.
+
+### 8.2 Enum `etape` — valeurs autorisées
+
+**Pipeline complet** (rezonage / modification réglementaire — ordre anticipation décroissante) :
+
+| Valeur                 | Définition                                                                 | Score anticipation |
+|------------------------|----------------------------------------------------------------------------|--------------------|
+| `avis_motion`          | Intention annoncée avant tout texte formel (avant le 1er projet)           | MAX (5)            |
+| `projet_reglement`     | Premier projet de règlement adopté en séance                               | 4                  |
+| `consultation_publique`| Assemblée ou consultation publique tenue (LAU art. 123)                    | 3                  |
+| `second_projet`        | Second projet adopté (règlements susceptibles d'approbation référendaire)  | 2                  |
+| `adoption`             | Vote final — règlement adopté                                              | 1                  |
+| `entree_vigueur`       | Certificat de conformité MRC reçu ; règlement opposable                    | 0                  |
+
+**Instruments à résolution autonome** (ne s'inscrivent pas dans le pipeline complet) :
+
+| Valeur               | Définition                                              |
+|----------------------|---------------------------------------------------------|
+| `derogation_mineure` | Dérogation mineure (LAU art. 145.1)                     |
+| `piia`               | Plan d'implantation et d'intégration architecturale     |
+| `ppcmoi`             | Projet particulier (LAU art. 145.36)                    |
+| `usage_conditionnel` | Permis d'usage conditionnel (LAU art. 145.5.1)         |
+
+**Valeur par défaut** si l'étape ne peut pas être déterminée : `inconnu`.
+
+### 8.3 Champ `etape_date`
+
+- Type : `string`, format `date` (ISO-8601, YYYY-MM-DD).
+- Valeur : date à laquelle l'étape a été franchie, extraite du PV source.
+- Obligatoire si `etape` est présent et différent de `inconnu`.
+- Absent ou `null` si `etape` vaut `inconnu`.
+
+### 8.4 Règle de priorité (plusieurs étapes dans un PV)
+
+Quand un PV mentionne plusieurs étapes d'un même dossier dans la même séance
+(ex. « avis de motion et dépôt du premier projet de règlement »), retenir l'étape
+**la plus précoce** dans l'ordre du pipeline complet.
+
+### 8.5 Exemple
+
+```json
+{
+  "id":    "signal-saint-constant-rezonage-ra-rb",
+  "type":  "Signal",
+  "label": "Signal : rezonage RA→RB — avis de motion (2026-04-01)",
+  "properties": {
+    "category":    "rezonage",
+    "kind":        "densification",
+    "date":        "2026-04-01",
+    "municipality":"saint-constant",
+    "status":      "candidate",
+    "intensite":   "haute",
+    "nb_unites_min": 8,
+    "nb_unites_max": 24,
+    "etape":       "avis_motion",
+    "etape_date":  "2026-04-01"
+  }
+}
+```
+
+### 8.6 Gate jq de validation (v2.1)
+
+```bash
+# Vérifie que tous les Signal/DesignationEvent ont un champ etape
+jq '
+  [.nodes[]
+    | select(.type == "Signal" or .type == "DesignationEvent")
+    | select(.properties.etape == null or .properties.etape == "")
+  ] | length == 0
+' graph/<slug>/latest.json
+# → doit retourner true
+
+# Vérifie que les valeurs d'etape appartiennent à l'enum
+ETAPE_ENUM='["avis_motion","projet_reglement","consultation_publique","second_projet","adoption","entree_vigueur","derogation_mineure","piia","ppcmoi","usage_conditionnel","inconnu"]'
+jq --argjson enum "$ETAPE_ENUM" '
+  [.nodes[]
+    | select(.type == "Signal" or .type == "DesignationEvent")
+    | select(.properties.etape != null)
+    | select(.properties.etape as $e | ($enum | index($e)) == null)
+    | .id
+  ]
+' graph/<slug>/latest.json
+# → doit retourner []
+```
