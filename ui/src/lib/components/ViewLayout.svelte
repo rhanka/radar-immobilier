@@ -40,6 +40,13 @@
    * défilable (overflow-y-auto flex-1). Corrige le bug légende coupée.
    */
   export let stickyControlsFooter: boolean = false;
+
+  /**
+   * Largeur CSS de la colonne de sélection droite (slot `sel`).
+   * Activée seulement si le slot `sel` est fourni.
+   * Exemple : "w-80" (20rem), "w-96" (24rem).
+   */
+  export let selWidth: string = "w-80";
 </script>
 
 {#if fullWidth}
@@ -70,8 +77,16 @@
             <slot name="controls" />
           </aside>
         {/if}
-        <div class="flex-1 overflow-auto">
-          <slot />
+        <div class="flex min-h-0 flex-1 overflow-auto">
+          <div class="flex-1 overflow-auto min-h-0">
+            <slot />
+          </div>
+          {#if $$slots.sel}
+            <!-- Colonne droite de sélection (façon graphify Sel) -->
+            <aside class={`${selWidth} shrink-0 border-l border-slate-200 bg-white flex flex-col min-h-0`}>
+              <slot name="sel" />
+            </aside>
+          {/if}
         </div>
       </div>
     {:else}
