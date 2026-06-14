@@ -21,6 +21,8 @@ import {
   subgraphForCity,
   subgraphForMrc,
   listMrcs,
+  isZonageSignal,
+  ZONAGE_CATEGORIES,
   type GraphifyNode,
   type GraphifyLink,
 } from "./graph-store.js";
@@ -550,6 +552,46 @@ describe("queryNeighbors — fix N+1 : un seul inArray pour les nœuds voisins",
     // Aucune arête → pas de SELECT sur graphNodes (court-circuit)
     expect(callIdx).toBe(2); // seulement outEdges + inEdges
     expect(result).toHaveLength(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. isZonageSignal — pure logic tests (no DB required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("isZonageSignal", () => {
+  it("DesignationEvent est toujours zonage (quelle que soit la catégorie)", () => {
+    expect(isZonageSignal("DesignationEvent", null)).toBe(true);
+    expect(isZonageSignal("DesignationEvent", undefined)).toBe(true);
+    expect(isZonageSignal("DesignationEvent", "acquisition_fonciere")).toBe(true);
+    expect(isZonageSignal("DesignationEvent", "rezonage")).toBe(true);
+  });
+
+  it("Signal avec catégorie ZONAGE → true", () => {
+    for (const cat of ZONAGE_CATEGORIES) {
+      expect(isZonageSignal("Signal", cat)).toBe(true);
+    }
+  });
+
+  it("Signal sans catégorie → false", () => {
+    expect(isZonageSignal("Signal", null)).toBe(false);
+    expect(isZonageSignal("Signal", undefined)).toBe(false);
+    expect(isZonageSignal("Signal", "")).toBe(false);
+  });
+
+  it("Signal avec catégorie NON-zonage → false", () => {
+    expect(isZonageSignal("Signal", "acquisition_fonciere")).toBe(false);
+    expect(isZonageSignal("Signal", "infrastructure")).toBe(false);
+    expect(isZonageSignal("Signal", "vente_terrain")).toBe(false);
+    expect(isZonageSignal("Signal", "vente_institutionnelle")).toBe(false);
+  });
+
+  it("ZONAGE_CATEGORIES contient exactement les 15 catégories attendues", () => {
+    expect(ZONAGE_CATEGORIES).toHaveLength(15);
+    expect(ZONAGE_CATEGORIES).toContain("rezonage");
+    expect(ZONAGE_CATEGORIES).toContain("derogation");
+    expect(ZONAGE_CATEGORIES).toContain("cptaq");
+    expect(ZONAGE_CATEGORIES).toContain("patrimoine");
   });
 });
 

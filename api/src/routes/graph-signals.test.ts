@@ -62,17 +62,17 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number> }[];
+      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number>; zonageCount: number }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(0);
     expect(body.cities).toEqual([]);
   });
 
-  it("returns ok:true with city list and correct totalCount", async () => {
+  it("returns ok:true with city list, correct totalCount, and zonageCount", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
-      { citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } },
-      { citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 } },
+      { citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 }, zonageCount: 4 },
+      { citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 }, zonageCount: 1 },
     ]);
 
     const app = graphSignalsRoute({ db: mockDb });
@@ -82,13 +82,25 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number> }[];
+      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number>; zonageCount: number }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(8);
     expect(body.cities).toHaveLength(2);
-    expect(body.cities[0]).toEqual({ citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } });
-    expect(body.cities[1]).toEqual({ citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 } });
+    expect(body.cities[0]).toEqual({
+      citySlug: "drummondville",
+      signalCount: 5,
+      countsByType: { Signal: 3, DesignationEvent: 2 },
+      zonageCount: 4,
+    });
+    expect(body.cities[1]).toEqual({
+      citySlug: "saint-constant",
+      signalCount: 3,
+      countsByType: { Signal: 3 },
+      zonageCount: 1,
+    });
+    // zonageCount < signalCount quand il y a des signaux non-zonage
+    expect(body.cities[1]!.zonageCount).toBeLessThan(body.cities[1]!.signalCount);
     expect(body.cities[0]!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
   });
 });

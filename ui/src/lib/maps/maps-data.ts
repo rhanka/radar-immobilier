@@ -36,6 +36,13 @@ export interface CityMapEntry {
    * Used to compute filtered counts when excludedTypes is non-empty.
    */
   countsByType: Record<string, number>;
+  /**
+   * Count of zonage signals only (from GET /api/graph-signals/by-city).
+   * DesignationEvent always counts as zonage; Signal only if its category
+   * is in ZONAGE_CATEGORIES (server-side). 0 when no data.
+   * Used as the base count when « Zonage uniquement » toggle is ON.
+   */
+  zonageCount: number;
 }
 
 /**
@@ -64,15 +71,19 @@ export function buildCityMapEntries(
     apiItems.map((item) => [item.citySlug, item.designationEventCount]),
   );
 
-  // Index graph items by city slug for countsByType lookup.
+  // Index graph items by city slug for countsByType and zonageCount lookup.
   const countsByTypeByCitySlug = new Map<string, Record<string, number>>(
     graphItems.map((item) => [item.citySlug, item.countsByType]),
+  );
+  const zonageCountByCitySlug = new Map<string, number>(
+    graphItems.map((item) => [item.citySlug, item.zonageCount ?? 0]),
   );
 
   return cities.slice(0, limit).map((m) => ({
     municipality: m,
     signalCount6m: countByCitySlug.get(m.slug) ?? 0,
     countsByType: countsByTypeByCitySlug.get(m.slug) ?? {},
+    zonageCount: zonageCountByCitySlug.get(m.slug) ?? 0,
   }));
 }
 

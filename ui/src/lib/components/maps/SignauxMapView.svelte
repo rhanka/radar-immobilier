@@ -58,9 +58,12 @@
 
   // ── Filtre GLOBAL par type ─────────────────────────────────────────────────
   let excludedTypes = new Set<string>();
+  /** Reflète l'état du toggle « Zonage uniquement » du rail. */
+  let zonageOnlyActive = true;
 
-  function handleFilterChange(excluded: Set<string>): void {
+  function handleFilterChange(excluded: Set<string>, zonageOnly: boolean): void {
     excludedTypes = new Set(excluded);
+    zonageOnlyActive = zonageOnly;
     updateFillColors();
   }
 
@@ -86,30 +89,22 @@
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
    * selon le dictionnaire count → color.
-   * Villes avec détail en cache : count filtré selon les types cochés.
-   * Villes sans détail : count total (signalCount6m).
+   *
+   * Logique de base de compte :
+   *   - zonageOnlyActive=ON → entry.zonageCount (catégorie sémantique, calculée côté API)
+   *   - zonageOnlyActive=OFF → entry.signalCount6m (total tous types)
+   *
+   * Les gardes ?? {} et ?? 0 protègent contre countsByType null (fix anti-crash).
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      let count = e.signalCount6m;
-      if (excludedTypes.size > 0) {
-        // Préférer countsByType (from /by-city — toutes les villes) ou le cache détail
-        const byType = cityCountsByType.get(e.municipality.slug);
-        if (byType !== undefined) {
-          count = Object.entries(byType)
-            .filter(([t]) => !excludedTypes.has(t))
-            .reduce((s, [, n]) => s + n, 0);
-        } else {
-          // Fallback : cache détail si /by-city n'avait pas encore chargé pour cette ville
-          const cached = detailCache.get(e.municipality.slug);
-          if (cached !== undefined) {
-            count = cached.filter((n) => !excludedTypes.has(n.type)).length;
-          }
-        }
-      }
+      // Base de compte selon le filtre zonage (TOP-DOWN, indépendant de la ville sélectionnée)
+      const count = zonageOnlyActive
+        ? (e.zonageCount ?? 0)
+        : e.signalCount6m;
       expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
