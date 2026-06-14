@@ -3,7 +3,7 @@
    * CityDetailPanel — shows scrape status for all sources in one city.
    * Rendered in the right main area when the user clicks a city in the sidebar.
    */
-  import { Badge } from "@sentropic/design-system-svelte";
+  import { Badge, Card } from "@sentropic/design-system-svelte";
   import type { ScrapeStatusT } from "@radar/domain";
   import { maturityLabel, cityMaturityColor } from "$lib/sources/maturity.js";
   import { cityMaturity } from "@radar/domain";
@@ -64,7 +64,9 @@
   {:else}
     <ul class="space-y-3">
       {#each items as item (item.source)}
-        <li class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <li>
+          <Card>
+          <div class="p-4">
           <div class="flex items-center justify-between gap-2">
             <span class="text-sm font-medium text-slate-800">
               {SOURCE_LABELS[item.source] ?? item.source}
@@ -112,6 +114,8 @@
               Dernier run : {new Date(item.lastRunAt).toLocaleDateString("fr-CA")}
             </p>
           {/if}
+          </div>
+          </Card>
         </li>
       {/each}
     </ul>
