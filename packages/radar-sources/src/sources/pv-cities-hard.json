@@ -130,8 +130,9 @@
       "pvIndexUrl": "https://www.lac-frontiere.ca/web/proces-verbaux/",
       "pvArchiveUrl": "https://www.lac-frontiere.ca/web/proces-verbaux-archive/",
       "pdf_count": 85,
-      "status": "graphifying",
-      "notes": "WordPress Download Manager (wpdmdl=N redirect). Graphify en cours."
+      "status": "graphified",
+      "scw_key": "graph/lac-frontiere/latest.json",
+      "notes": "WordPress Download Manager (wpdmdl=N redirect). 658 nodes, 902 edges."
     },
     "clarendon": {
       "strategy": "wordpress-events",
@@ -152,10 +153,6 @@
       "pvIndexUrl": "https://www.municipalite-charette.ca/documentation/",
       "status": "configured",
       "notes": "403 probable"
-    },
-    "la-durantaye": {
-      "pvIndexUrl": "https://www.munladurantaye.qc.ca/pages/proces-verbaux",
-      "status": "configured"
     },
     "lefebvre": {
       "pvIndexUrl": "https://municipalites-du-quebec.ca/lefebvre/pdf_procesverbaux/",
@@ -232,6 +229,10 @@
     "chapais": {
       "status": "irreductible",
       "notes": "villedechapais.com = Next.js SPA, PDFs non accessibles statiquement"
+    },
+    "la-durantaye": {
+      "status": "irreductible",
+      "notes": "munladurantaye.qc.ca utilise gestionweblex.ca (ASP.NET AJAX-only SPA), non scrapable"
     },
     "chateau-richer": {
       "status": "irreductible",
