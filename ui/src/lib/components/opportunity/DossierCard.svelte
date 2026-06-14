@@ -1,6 +1,6 @@
 <script lang="ts">
   import { TrendingUp, Clock, ChevronRight } from "@lucide/svelte";
-  import { Alert, Badge } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, Popover } from "@sentropic/design-system-svelte";
   import type { AxisScoreT, OpportunityDossierT } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
   import { toGrilleRows } from "$lib/scoring/grilles-data.js";
@@ -154,7 +154,7 @@
       </Badge>
     </div>
 
-    <!-- Per-axis breakdown with ScoreHover -->
+    <!-- Per-axis breakdown with ScoreHover via Popover DS -->
     <div class="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {#each axisOrder as axis}
           {@const origAxisScore = dossier.axes[axis]}
@@ -163,63 +163,67 @@
           {#if origAxisScore && effectiveAxisScore && gridRow}
             {@const hypothesis = isHypothesis(axis)}
             {@const excludedInReal = mode === "real" && hypothesis}
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div
-              class="relative"
-              on:mouseenter={() => { hoveredAxis = axis; }}
-              on:mouseleave={() => { hoveredAxis = null; }}
-              on:focusin={() => { hoveredAxis = axis; }}
-              on:focusout={() => { hoveredAxis = null; }}
+            <Popover
+              open={hoveredAxis === axis}
+              label="Détail axe {gridRow.label}"
+              placement="top"
             >
-              <div
-                class={`cursor-default rounded border px-3 py-2 transition ${
-                  effectiveAxisScore.availability === "non-disponible"
-                    ? excludedInReal
-                      ? "border-slate-200 bg-slate-100 opacity-60"
-                      : "border-slate-200 bg-white"
-                    : "border-teal-100 bg-teal-50"
-                }`}
-              >
-                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                  {gridRow.label}
-                </p>
-                {#if effectiveAxisScore.availability === "non-disponible"}
-                  {#if excludedInReal}
-                    <p class="mt-0.5 text-[10px] font-semibold text-slate-400">
-                      À confirmer, exclu en mode réel
-                    </p>
-                    <p class="mt-0.5 text-[10px] text-slate-400 line-through">
-                      {origAxisScore.level}/5 (hypothèse)
-                    </p>
-                  {:else}
-                    <p class="mt-0.5 text-xs font-semibold text-slate-400">Non disponible</p>
-                  {/if}
-                {:else}
-                  <p class="mt-0.5 text-base font-bold text-teal-700">
-                    {effectiveAxisScore.level}/5
+              {#snippet trigger()}
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <div
+                  class={`cursor-default rounded border px-3 py-2 transition ${
+                    effectiveAxisScore.availability === "non-disponible"
+                      ? excludedInReal
+                        ? "border-slate-200 bg-slate-100 opacity-60"
+                        : "border-slate-200 bg-white"
+                      : "border-teal-100 bg-teal-50"
+                  }`}
+                  on:mouseenter={() => { hoveredAxis = axis; }}
+                  on:mouseleave={() => { hoveredAxis = null; }}
+                  on:focusin={() => { hoveredAxis = axis; }}
+                  on:focusout={() => { hoveredAxis = null; }}
+                  tabindex="0"
+                  role="button"
+                  aria-expanded={hoveredAxis === axis}
+                  aria-label="Détail axe {gridRow.label}"
+                >
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    {gridRow.label}
                   </p>
-                  {#if hypothesis && mode === "simulation"}
-                    <p class="mt-0.5 text-[10px] font-medium text-violet-600">
-                      hypothèse (simulation)
+                  {#if effectiveAxisScore.availability === "non-disponible"}
+                    {#if excludedInReal}
+                      <p class="mt-0.5 text-[10px] font-semibold text-slate-400">
+                        À confirmer, exclu en mode réel
+                      </p>
+                      <p class="mt-0.5 text-[10px] text-slate-400 line-through">
+                        {origAxisScore.level}/5 (hypothèse)
+                      </p>
+                    {:else}
+                      <p class="mt-0.5 text-xs font-semibold text-slate-400">Non disponible</p>
+                    {/if}
+                  {:else}
+                    <p class="mt-0.5 text-base font-bold text-teal-700">
+                      {effectiveAxisScore.level}/5
                     </p>
+                    {#if hypothesis && mode === "simulation"}
+                      <p class="mt-0.5 text-[10px] font-medium text-violet-600">
+                        hypothèse (simulation)
+                      </p>
+                    {/if}
                   {/if}
-                {/if}
-                <p class="mt-0.5 text-[10px] text-slate-400">
-                  Poids {gridRow.weightPct.toFixed(0)} %
-                </p>
-              </div>
-
-              <!-- ScoreHover tooltip -->
-              {#if hoveredAxis === axis}
-                <div class="absolute bottom-full left-0 z-10 mb-1">
-                  <ScoreHover
-                    axisScore={effectiveAxisScore}
-                    grid={gridRow}
-                    axisLabel={gridRow.label}
-                  />
+                  <p class="mt-0.5 text-[10px] text-slate-400">
+                    Poids {gridRow.weightPct.toFixed(0)} %
+                  </p>
                 </div>
-              {/if}
-            </div>
+              {/snippet}
+              {#snippet children()}
+                <ScoreHover
+                  axisScore={effectiveAxisScore}
+                  grid={gridRow}
+                  axisLabel={gridRow.label}
+                />
+              {/snippet}
+            </Popover>
           {/if}
       {/each}
     </div>
