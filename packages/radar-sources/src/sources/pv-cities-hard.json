@@ -110,8 +110,8 @@
       "uuid": "25831DB8-CFFF-40E7-B1F6-108BF95A3AF0",
       "pvIndexUrl": "https://villedebeaupre.com/conseil-municipal/seance-du-conseil",
       "pdf_count": 114,
-      "status": "graphifying",
-      "notes": "graphify en cours"
+      "status": "graphified",
+      "scw_key": "graph/beaupre/latest.json"
     },
     "grand-remous": {
       "strategy": "vplus",
@@ -143,21 +143,16 @@
     }
   },
   "configured_not_scraped": {
-    "_description": "Villes déjà dans ALL_PV_CITIES mais pas encore scrapées (raw/ absent de SCW)",
+    "_description": "Villes déjà dans ALL_PV_CITIES mais pas encore scrapées (raw/ absent de SCW). Ces villes sont confirmées irréductibles pour l'instant.",
     "brossard": {
       "pvIndexUrl": "https://brossard.ca/assemblees-du-conseil-municipal/",
-      "status": "configured",
-      "notes": "WordPress avec custom post type city-event — PVs non exposés dans le HTML, JS requis"
-    },
-    "charette": {
-      "pvIndexUrl": "https://www.municipalite-charette.ca/documentation/",
-      "status": "configured",
-      "notes": "403 probable"
+      "status": "irreductible",
+      "notes": "WordPress city-event (1902 PDFs total) — PV non présents dans event pages, aucun PDF PV trouvé via REST API ni HTML scraping"
     },
     "lefebvre": {
       "pvIndexUrl": "https://municipalites-du-quebec.ca/lefebvre/pdf_procesverbaux/",
-      "status": "configured",
-      "notes": "403 Forbidden"
+      "status": "irreductible",
+      "notes": "403 Forbidden sur le dossier PDF"
     }
   },
   "irreductible": {
@@ -213,6 +208,10 @@
     "cacouna": {
       "status": "irreductible",
       "notes": "Challenge JS / anti-bot"
+    },
+    "charette": {
+      "status": "irreductible",
+      "notes": "Memphis Documents Library avec 7 fichiers (politiques, calendrier) mais AUCUN procès-verbal"
     },
     "caniapiscau": {
       "status": "irreductible",
