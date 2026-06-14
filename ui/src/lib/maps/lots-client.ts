@@ -24,7 +24,15 @@ export interface LotProperties {
    * undefined si l'endpoint ne l'a pas encore enrichi.
    * Source : /api/geo/:city/lots (feat/api-score-potentiel-lot).
    */
-  potentialScore?: number;
+  potentialScore?: number | null;
+  /** Mode de la source (carte-steve uniquement). */
+  mode?: string;
+  /** Flag emprise de rue — carte-steve uniquement. */
+  isRue?: boolean;
+  /** Flag dans périmètre TOD — carte-steve uniquement. */
+  tod?: boolean;
+  /** Flag multifamilial 4+ — carte-steve uniquement. */
+  multifamilial4plus?: boolean;
 }
 
 export interface LotGeometry {
@@ -46,7 +54,9 @@ export interface LotFeatureCollection {
 export interface LotsResponse {
   ok: boolean;
   citySlug: string;
-  source: "donnees-quebec" | "none";
+  source: "donnees-quebec" | "carte-steve" | "none";
+  /** Mode de la source (carte-steve uniquement). */
+  mode?: "carte-steve" | "donnees-quebec";
   /** Raison de l'échec (ok=false seulement). */
   reason?: string;
   featureCollection: LotFeatureCollection;
