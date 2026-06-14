@@ -22,11 +22,12 @@ import {
  * GraphSignalCityItem sans polluer les tests avec des champs non pertinents.
  */
 const byCity = (
-  ...cities: (Omit<GraphSignalsByCityResponse["cities"][0], "countsByType" | "zonageCount" | "multi4plusCount" | "countsByStage"> & {
+  ...cities: (Omit<GraphSignalsByCityResponse["cities"][0], "countsByType" | "zonageCount" | "multi4plusCount" | "countsByStage" | "subsetCounts"> & {
     countsByType?: Record<string, number>;
     zonageCount?: number;
     multi4plusCount?: number;
     countsByStage?: Record<string, number>;
+    subsetCounts?: Record<string, number>;
   })[]
 ): GraphSignalsByCityResponse => {
   const normalized = cities.map((c) => ({
@@ -35,6 +36,7 @@ const byCity = (
     zonageCount: c.zonageCount ?? 0,
     multi4plusCount: c.multi4plusCount ?? 0,
     countsByStage: c.countsByStage ?? {},
+    subsetCounts: c.subsetCounts ?? {},
   }));
   return {
     ok: true,
