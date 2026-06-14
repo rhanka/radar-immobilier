@@ -75,81 +75,239 @@
       "pvIndexUrl": "https://lyster.ca/proces-verbaux",
       "pdf_count": 251,
       "status": "raw_uploaded"
+    },
+    "dunham": {
+      "strategy": "vplus",
+      "hostname": "ville.dunham.qc.ca",
+      "uuid": "AAEAC377-4DCA-419B-8457-816D5E82A568",
+      "pvIndexUrl": "https://ville.dunham.qc.ca/seances-du-conseil-municipal",
+      "pdf_count": 132,
+      "status": "raw_uploaded"
     }
   },
   "configured_not_scraped": {
     "_description": "Villes déjà dans ALL_PV_CITIES mais pas encore scrapées (raw/ absent de SCW)",
-    "brossard": { "pvIndexUrl": "https://brossard.ca/assemblees-du-conseil-municipal/", "status": "configured" },
-    "charette": { "pvIndexUrl": "https://www.municipalite-charette.ca/documentation/", "status": "configured", "notes": "403 probable" },
-    "chateau-richer": { "pvIndexUrl": "https://www.chateauricher.qc.ca/pages/proces-verbaux", "status": "configured" },
-    "clarendon": { "pvIndexUrl": "https://clarendon.ca/municipality/council-meetings/", "status": "configured" },
-    "la-durantaye": { "pvIndexUrl": "https://www.munladurantaye.qc.ca/pages/proces-verbaux", "status": "configured" },
-    "lefebvre": { "pvIndexUrl": "https://municipalites-du-quebec.ca/lefebvre/pdf_procesverbaux/", "status": "configured" }
+    "brossard": {
+      "pvIndexUrl": "https://brossard.ca/assemblees-du-conseil-municipal/",
+      "status": "configured"
+    },
+    "charette": {
+      "pvIndexUrl": "https://www.municipalite-charette.ca/documentation/",
+      "status": "configured",
+      "notes": "403 probable"
+    },
+    "chateau-richer": {
+      "pvIndexUrl": "https://www.chateauricher.qc.ca/pages/proces-verbaux",
+      "status": "configured"
+    },
+    "clarendon": {
+      "pvIndexUrl": "https://clarendon.ca/municipality/council-meetings/",
+      "status": "configured"
+    },
+    "la-durantaye": {
+      "pvIndexUrl": "https://www.munladurantaye.qc.ca/pages/proces-verbaux",
+      "status": "configured"
+    },
+    "lefebvre": {
+      "pvIndexUrl": "https://municipalites-du-quebec.ca/lefebvre/pdf_procesverbaux/",
+      "status": "configured"
+    }
   },
   "pending_survey": {
     "_description": "Villes non configurées, URL/stratégie à déterminer",
-    "amqui": { "status": "pending", "notes": "WordPress Elementor, PDFs non indexés directement" },
-    "audet": { "status": "pending" },
-    "baie-des-sables": { "status": "pending" },
-    "baie-johan-beetz": { "status": "pending", "notes": "très petite pop=75" },
-    "beaulac-garthby": { "status": "pending" },
-    "beaumont": { "status": "pending" },
-    "beaupre": { "status": "pending" },
-    "belcourt": { "status": "pending" },
-    "belleterre": { "status": "pending" },
-    "bethanie": { "status": "pending" },
-    "bonne-esperance": { "status": "pending" },
-    "bonsecours": { "status": "pending" },
-    "bristol": { "status": "pending" },
-    "bryson": { "status": "pending" },
-    "cacouna": { "status": "pending" },
-    "caniapiscau": { "status": "pending", "notes": "pop=null, territoire non-organisé?" },
-    "cascapedia-saint-jules": { "status": "pending" },
-    "chambord": { "status": "pending" },
-    "chapais": { "status": "pending" },
-    "chichester": { "status": "pending" },
-    "chute-aux-outardes": { "status": "pending" },
-    "colombier": { "status": "pending" },
-    "cote-nord-du-golfe-du-saint-laurent": { "status": "pending" },
-    "disraeli--les-appalaches--2": { "status": "pending" },
-    "duhamel-ouest": { "status": "pending" },
-    "dunham": { "status": "pending" },
-    "eeyou-istchee-james-bay": { "status": "pending", "notes": "territoire Eeyou, gouvernance distincte" },
-    "entrelacs": { "status": "pending" },
-    "escuminac": { "status": "pending" },
-    "fort-coulonge": { "status": "pending" },
-    "franquelin": { "status": "pending" },
-    "fugereville": { "status": "pending" },
-    "grand-remous": { "status": "pending" },
-    "gros-mecatina": { "status": "pending" },
-    "grosse-ile": { "status": "pending" },
-    "guerin": { "status": "pending" },
-    "honfleur": { "status": "pending" },
-    "irlande": { "status": "pending" },
-    "kipawa": { "status": "pending" },
-    "kirkland": { "status": "pending", "notes": "pop=19689, 403 probable anti-bot" },
-    "la-conception": { "status": "pending" },
-    "la-macaza": { "status": "pending" },
-    "la-malbaie": { "status": "pending", "notes": "Vue SPA possible" },
-    "la-reine": { "status": "pending" },
-    "la-visitation-de-lile-dupas": { "status": "pending" },
-    "la-visitation-de-yamaska": { "status": "pending" },
-    "lac-delage": { "status": "pending" },
-    "lac-des-plages": { "status": "pending" },
-    "lac-frontiere": { "status": "pending" },
-    "lac-megantic": { "status": "pending", "notes": "Angular SPA possible" },
-    "lac-poulin": { "status": "pending" },
-    "landrienne": { "status": "pending" },
-    "lascension-de-patapedia": { "status": "pending" },
-    "lemieux": { "status": "pending" },
-    "les-bergeronnes": { "status": "pending" },
-    "les-hauteurs": { "status": "pending" },
-    "les-mechins": { "status": "pending" },
-    "lile-dorval": { "status": "pending", "notes": "pop=9, île minuscule" },
-    "lingwick": { "status": "pending" },
-    "lisle-aux-allumettes": { "status": "pending" },
-    "lisle-verte": { "status": "pending" },
-    "longue-pointe-de-mingan": { "status": "pending" },
-    "lotbiniere": { "status": "pending" }
+    "amqui": {
+      "status": "pending",
+      "notes": "WordPress Elementor, PDFs non indexés directement"
+    },
+    "audet": {
+      "status": "pending"
+    },
+    "baie-des-sables": {
+      "status": "pending"
+    },
+    "baie-johan-beetz": {
+      "status": "pending",
+      "notes": "très petite pop=75"
+    },
+    "beaulac-garthby": {
+      "status": "pending"
+    },
+    "beaumont": {
+      "status": "pending"
+    },
+    "beaupre": {
+      "status": "pending"
+    },
+    "belcourt": {
+      "status": "pending"
+    },
+    "belleterre": {
+      "status": "pending"
+    },
+    "bethanie": {
+      "status": "pending"
+    },
+    "bonne-esperance": {
+      "status": "pending"
+    },
+    "bonsecours": {
+      "status": "pending"
+    },
+    "bristol": {
+      "status": "pending"
+    },
+    "bryson": {
+      "status": "pending"
+    },
+    "cacouna": {
+      "status": "pending"
+    },
+    "caniapiscau": {
+      "status": "pending",
+      "notes": "pop=null, territoire non-organisé?"
+    },
+    "cascapedia-saint-jules": {
+      "status": "pending"
+    },
+    "chambord": {
+      "status": "pending"
+    },
+    "chapais": {
+      "status": "pending"
+    },
+    "chichester": {
+      "status": "pending"
+    },
+    "chute-aux-outardes": {
+      "status": "pending"
+    },
+    "colombier": {
+      "status": "pending"
+    },
+    "cote-nord-du-golfe-du-saint-laurent": {
+      "status": "pending"
+    },
+    "disraeli--les-appalaches--2": {
+      "status": "pending"
+    },
+    "duhamel-ouest": {
+      "status": "pending"
+    },
+    "eeyou-istchee-james-bay": {
+      "status": "pending",
+      "notes": "territoire Eeyou, gouvernance distincte"
+    },
+    "entrelacs": {
+      "status": "pending"
+    },
+    "escuminac": {
+      "status": "pending"
+    },
+    "fort-coulonge": {
+      "status": "pending"
+    },
+    "franquelin": {
+      "status": "pending"
+    },
+    "fugereville": {
+      "status": "pending"
+    },
+    "grand-remous": {
+      "status": "pending"
+    },
+    "gros-mecatina": {
+      "status": "pending"
+    },
+    "grosse-ile": {
+      "status": "pending"
+    },
+    "guerin": {
+      "status": "pending"
+    },
+    "honfleur": {
+      "status": "pending"
+    },
+    "irlande": {
+      "status": "pending"
+    },
+    "kipawa": {
+      "status": "pending"
+    },
+    "kirkland": {
+      "status": "pending",
+      "notes": "pop=19689, 403 probable anti-bot"
+    },
+    "la-conception": {
+      "status": "pending"
+    },
+    "la-macaza": {
+      "status": "pending"
+    },
+    "la-malbaie": {
+      "status": "pending",
+      "notes": "Vue SPA possible"
+    },
+    "la-reine": {
+      "status": "pending"
+    },
+    "la-visitation-de-lile-dupas": {
+      "status": "pending"
+    },
+    "la-visitation-de-yamaska": {
+      "status": "pending"
+    },
+    "lac-delage": {
+      "status": "pending"
+    },
+    "lac-des-plages": {
+      "status": "pending"
+    },
+    "lac-frontiere": {
+      "status": "pending"
+    },
+    "lac-megantic": {
+      "status": "pending",
+      "notes": "Angular SPA possible"
+    },
+    "lac-poulin": {
+      "status": "pending"
+    },
+    "landrienne": {
+      "status": "pending"
+    },
+    "lascension-de-patapedia": {
+      "status": "pending"
+    },
+    "lemieux": {
+      "status": "pending"
+    },
+    "les-bergeronnes": {
+      "status": "pending"
+    },
+    "les-hauteurs": {
+      "status": "pending"
+    },
+    "les-mechins": {
+      "status": "pending"
+    },
+    "lile-dorval": {
+      "status": "pending",
+      "notes": "pop=9, île minuscule"
+    },
+    "lingwick": {
+      "status": "pending"
+    },
+    "lisle-aux-allumettes": {
+      "status": "pending"
+    },
+    "lisle-verte": {
+      "status": "pending"
+    },
+    "longue-pointe-de-mingan": {
+      "status": "pending"
+    },
+    "lotbiniere": {
+      "status": "pending"
+    }
   }
 }
