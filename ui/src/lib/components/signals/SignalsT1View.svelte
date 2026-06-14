@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { HelpCircle } from "@lucide/svelte";
-  import { Alert, Button, Select } from "@sentropic/design-system-svelte";
+  import { Alert, Button, Select, Popover } from "@sentropic/design-system-svelte";
   import { filterByStatus, sortSignals, markApprofondir } from "$lib/signals/feed.js";
   import type { SortKey, SortDir } from "$lib/signals/feed.js";
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
@@ -90,7 +90,7 @@
             Par score /10
           </Button>
 
-          <div class="relative flex items-center gap-1">
+          <div class="flex items-center gap-1">
             <Button
               variant={sortMode === "vision" ? "primary" : "secondary"}
               size="sm"
@@ -100,43 +100,43 @@
             >
               Par priorité VISION
             </Button>
-            <button
-              type="button"
-              class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-yellow-400 bg-yellow-50 text-yellow-700 transition hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              on:click={toggleHelp}
-              aria-label="Explication des deux tris"
-              title="Pourquoi deux tris ?"
-            >
-              <HelpCircle class="h-3.5 w-3.5" aria-hidden="true" />
-            </button>
-
-            {#if helpOpen}
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
-              <!-- svelte-ignore a11y-no-static-element-interactions -->
-              <div
-                class="absolute left-0 top-full z-20 mt-2 w-72 rounded-lg border border-yellow-300 bg-yellow-50 p-4 shadow-lg"
-                role="tooltip"
-              >
+            <Popover open={helpOpen} label="Pourquoi deux tris ?" placement="bottom">
+              {#snippet trigger()}
                 <button
                   type="button"
-                  class="absolute right-2 top-2 text-yellow-500 hover:text-yellow-700 focus:outline-none"
-                  on:click={closeHelp}
-                  aria-label="Fermer"
-                >x</button>
-                <p class="pr-4 text-sm font-semibold text-yellow-900">Pourquoi deux tris ?</p>
-                <p class="mt-1 text-sm leading-5 text-yellow-800">
-                  La VISION numérote Priorité&nbsp;1 à 4, mais les notes /10 ne suivent pas cet ordre :
-                  CPTAQ est «&nbsp;Priorité&nbsp;4&nbsp;» dans la VISION mais vaut
-                  <strong>8/10</strong>, supérieur à PPCMOI «&nbsp;Priorité&nbsp;2&nbsp;» à <strong>7/10</strong>.
-                </p>
-                <p class="mt-2 text-sm leading-5 text-yellow-800">
-                  Par score /10&nbsp;: importance métier calibrée.<br />
-                  Par priorité VISION&nbsp;: ordre Priorité&nbsp;1 (rezonage)
-                  à 2 (PPCMOI) à 3 (plan d'urb.) à 4 (CPTAQ / grille).
-                </p>
-              </div>
-              <div class="fixed inset-0 z-10" role="presentation" on:click={closeHelp}></div>
-            {/if}
+                  class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-yellow-400 bg-yellow-50 text-yellow-700 transition hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  aria-label="Explication des deux tris"
+                  aria-expanded={helpOpen}
+                  title="Pourquoi deux tris ?"
+                  on:click={toggleHelp}
+                >
+                  <HelpCircle class="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              {/snippet}
+              {#snippet children()}
+                <div class="w-72">
+                  <div class="mb-2 flex items-center justify-between">
+                    <p class="text-sm font-semibold text-slate-900">Pourquoi deux tris ?</p>
+                    <button
+                      type="button"
+                      class="text-slate-400 hover:text-slate-600 focus:outline-none"
+                      on:click={closeHelp}
+                      aria-label="Fermer"
+                    >x</button>
+                  </div>
+                  <p class="text-sm leading-5 text-slate-700">
+                    La VISION numérote Priorité&nbsp;1 à 4, mais les notes /10 ne suivent pas cet ordre :
+                    CPTAQ est «&nbsp;Priorité&nbsp;4&nbsp;» dans la VISION mais vaut
+                    <strong>8/10</strong>, supérieur à PPCMOI «&nbsp;Priorité&nbsp;2&nbsp;» à <strong>7/10</strong>.
+                  </p>
+                  <p class="mt-2 text-sm leading-5 text-slate-700">
+                    Par score /10&nbsp;: importance métier calibrée.<br />
+                    Par priorité VISION&nbsp;: ordre Priorité&nbsp;1 (rezonage)
+                    à 2 (PPCMOI) à 3 (plan d'urb.) à 4 (CPTAQ / grille).
+                  </p>
+                </div>
+              {/snippet}
+            </Popover>
           </div>
         </div>
       </div>
