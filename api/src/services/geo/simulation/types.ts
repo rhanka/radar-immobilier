@@ -87,6 +87,8 @@ export interface SimulationLotProperties {
   tod: boolean;
   /** Flag multifamilial 4+ (calculé par Steve). Source: multifamilial_4plus. */
   multifamilial4plus: boolean;
+  /** Tag de provenance : "steve-import" pour distinguer des données MRNF scrappées. */
+  provenance: "steve-import";
   /**
    * Score de potentiel par lot [0, 10] — scorer canonique (#165).
    * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.

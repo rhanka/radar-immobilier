@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Info, ChevronDown, ChevronUp, ChevronRight, Pencil } from "@lucide/svelte";
-  import { Card, Badge, Alert } from "@sentropic/design-system-svelte";
+  import { Card, Badge, Alert, Popover } from "@sentropic/design-system-svelte";
   import Acronym from "$lib/components/Acronym.svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import { SIGNAL_TYPE_VALUES } from "@radar/domain";
@@ -397,53 +397,58 @@
                     </div>
                   </div>
 
-                  <!-- Per-axis breakdown -->
+                  <!-- Per-axis breakdown with ScoreHover via Popover DS -->
                   <div class="grid gap-2 p-4 sm:grid-cols-2 lg:grid-cols-5">
                     {#each axisOrder as axis}
                       {@const axisScore = dossier.axes[axis]}
                       {@const gridRow = grilleRows.find((r) => r.axis === axis)}
                       {#if axisScore && gridRow}
                         {@const key = hoverKey(dossier.id, axis)}
-                        <!-- svelte-ignore a11y-no-static-element-interactions -->
-                        <div
-                          class="relative"
-                          on:mouseenter={() => { hoveredKey = key; }}
-                          on:mouseleave={() => { hoveredKey = null; }}
-                          on:focusin={() => { hoveredKey = key; }}
-                          on:focusout={() => { hoveredKey = null; }}
+                        <Popover
+                          open={hoveredKey === key}
+                          label="Détail axe {gridRow.label}"
+                          placement="top"
                         >
-                          <div
-                            class={`rounded border px-3 py-2 cursor-default ${
-                              axisScore.availability === "non-disponible"
-                                ? "border-slate-200 bg-slate-50"
-                                : "border-teal-100 bg-teal-50"
-                            }`}
-                          >
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                              {gridRow.label}
-                            </p>
-                            {#if axisScore.availability === "non-disponible"}
-                              <p class="mt-0.5 text-xs font-semibold text-slate-400">Non disponible</p>
-                            {:else}
-                              <p class="mt-0.5 text-base font-bold text-teal-700">
-                                {axisScore.level}/5
+                          {#snippet trigger()}
+                            <!-- svelte-ignore a11y-no-static-element-interactions -->
+                            <div
+                              class={`rounded border px-3 py-2 cursor-default ${
+                                axisScore.availability === "non-disponible"
+                                  ? "border-slate-200 bg-slate-50"
+                                  : "border-teal-100 bg-teal-50"
+                              }`}
+                              on:mouseenter={() => { hoveredKey = key; }}
+                              on:mouseleave={() => { hoveredKey = null; }}
+                              on:focusin={() => { hoveredKey = key; }}
+                              on:focusout={() => { hoveredKey = null; }}
+                              tabindex="0"
+                              role="button"
+                              aria-expanded={hoveredKey === key}
+                              aria-label="Détail axe {gridRow.label}"
+                            >
+                              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                {gridRow.label}
                               </p>
-                            {/if}
-                            <p class="mt-0.5 text-[10px] text-slate-400">
-                              Poids {gridRow.weightPct.toFixed(0)} %
-                            </p>
-                          </div>
-
-                          {#if hoveredKey === key}
-                            <div class="absolute bottom-full left-0 z-10 mb-1">
-                              <ScoreHover
-                                {axisScore}
-                                grid={gridRow}
-                                axisLabel={gridRow.label}
-                              />
+                              {#if axisScore.availability === "non-disponible"}
+                                <p class="mt-0.5 text-xs font-semibold text-slate-400">Non disponible</p>
+                              {:else}
+                                <p class="mt-0.5 text-base font-bold text-teal-700">
+                                  {axisScore.level}/5
+                                </p>
+                              {/if}
+                              <p class="mt-0.5 text-[10px] text-slate-400">
+                                Poids {gridRow.weightPct.toFixed(0)} %
+                              </p>
                             </div>
-                          {/if}
-                        </div>
+                          {/snippet}
+                          {#snippet children()}
+                            <ScoreHover
+                              {axisScore}
+                              grid={gridRow}
+                              axisLabel={gridRow.label}
+                            />
+                          {/snippet}
+                        </Popover>
                       {/if}
                     {/each}
                   </div>
