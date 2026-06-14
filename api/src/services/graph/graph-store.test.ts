@@ -23,6 +23,10 @@ import {
   listMrcs,
   isZonageSignal,
   ZONAGE_CATEGORIES,
+  deriveEtape,
+  isMulti4Plus,
+  ETAPE_ORDER,
+  ETAPES_PRECOCES,
   type GraphifyNode,
   type GraphifyLink,
 } from "./graph-store.js";
@@ -592,6 +596,129 @@ describe("isZonageSignal", () => {
     expect(ZONAGE_CATEGORIES).toContain("derogation");
     expect(ZONAGE_CATEGORIES).toContain("cptaq");
     expect(ZONAGE_CATEGORIES).toContain("patrimoine");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. deriveEtape — pure mots-clés tests (no DB required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("deriveEtape — mots-clés label/description", () => {
+  // Cas avis_motion
+  it("retourne avis_motion pour 'avis de motion'", () => {
+    expect(deriveEtape("Avis de motion programme d'habitation", null)).toBe("avis_motion");
+  });
+  it("retourne avis_motion insensible à la casse et aux accents", () => {
+    expect(deriveEtape("AVIS DE MOTION — règlement 536-26", null)).toBe("avis_motion");
+    expect(deriveEtape("Avis de motion rezonage zone REC-3", "description plus longue")).toBe("avis_motion");
+  });
+  it("retourne avis_motion depuis la description seule", () => {
+    expect(deriveEtape("Signal : rezonage zone H-1", "Avis de motion du règlement 536-26")).toBe("avis_motion");
+  });
+
+  // Cas projet_reglement
+  it("retourne projet_reglement pour 'projet de règlement'", () => {
+    expect(deriveEtape("1er projet du règlement 2026-300", null)).toBe("projet_reglement");
+    expect(deriveEtape("Premier projet du règlement", null)).toBe("projet_reglement");
+    expect(deriveEtape("projet de règlement no 4500", null)).toBe("projet_reglement");
+  });
+
+  // second_projet doit être matché AVANT projet_reglement
+  it("retourne second_projet pour '2e projet' et 'second projet'", () => {
+    expect(deriveEtape("2e projet du règlement 2026-300", null)).toBe("second_projet");
+    expect(deriveEtape("Second projet du règlement", null)).toBe("second_projet");
+    expect(deriveEtape("Deuxième projet de règlement", null)).toBe("second_projet");
+  });
+
+  // Cas consultation
+  it("retourne consultation pour 'consultation publique'", () => {
+    expect(deriveEtape("Consultation publique — modification zonage", null)).toBe("consultation");
+  });
+
+  // Cas entree_vigueur
+  it("retourne entree_vigueur pour 'en vigueur'", () => {
+    expect(deriveEtape("Règlement entré en vigueur", null)).toBe("entree_vigueur");
+    expect(deriveEtape("Modification de zonage en vigueur", null)).toBe("entree_vigueur");
+  });
+
+  // Cas adoption
+  it("retourne adoption pour 'adopté' et 'adoption'", () => {
+    expect(deriveEtape("Règlement adopté au conseil", null)).toBe("adoption");
+    expect(deriveEtape("Adoption du règlement 2026-300", null)).toBe("adoption");
+  });
+
+  // Cas accorde
+  it("retourne accorde pour 'accordé' et 'autorisé'", () => {
+    expect(deriveEtape("PIIA accordé — 15 logements rue Principale", null)).toBe("accorde");
+    expect(deriveEtape("PPCMOI autorisé résolution 0349/04/26", null)).toBe("accorde");
+  });
+
+  // Cas refuse
+  it("retourne refuse pour 'refusé' et 'rejeté'", () => {
+    expect(deriveEtape("PIIA refusé — Île-Bellevue zone H-12", null)).toBe("refuse");
+    expect(deriveEtape("Dérogation rejetée par le conseil", null)).toBe("refuse");
+  });
+
+  // Défaut inconnu
+  it("retourne inconnu quand aucun mot-clé n'est trouvé", () => {
+    expect(deriveEtape("Signal : modification zonage en cours", "description neutre")).toBe("inconnu");
+    expect(deriveEtape(null, null)).toBe("inconnu");
+    expect(deriveEtape("", "")).toBe("inconnu");
+  });
+
+  // Ordre ETAPE_ORDER
+  it("ETAPE_ORDER : avis_motion (0) < projet_reglement (1) < entree_vigueur (5)", () => {
+    expect(ETAPE_ORDER["avis_motion"]).toBe(0);
+    expect(ETAPE_ORDER["projet_reglement"]).toBe(1);
+    expect(ETAPE_ORDER["entree_vigueur"]).toBe(5);
+    expect(ETAPE_ORDER["inconnu"]).toBe(99);
+  });
+
+  // ETAPES_PRECOCES
+  it("ETAPES_PRECOCES contient avis_motion et projet_reglement", () => {
+    expect(ETAPES_PRECOCES).toContain("avis_motion");
+    expect(ETAPES_PRECOCES).toContain("projet_reglement");
+    expect(ETAPES_PRECOCES).toHaveLength(2);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. isMulti4Plus — pure logic tests (no DB required)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("isMulti4Plus — dimension 4+ détection", () => {
+  it("Signal avec intensite=haute → true", () => {
+    expect(isMulti4Plus("Signal", null, "haute")).toBe(true);
+    expect(isMulti4Plus("Signal", "", "haute")).toBe(true);
+  });
+
+  it("Signal avec nb_unites_max ≥ 4 → true", () => {
+    expect(isMulti4Plus("Signal", "4", null)).toBe(true);
+    expect(isMulti4Plus("Signal", "12", null)).toBe(true);
+    expect(isMulti4Plus("Signal", "30", "moyenne")).toBe(true);
+  });
+
+  it("Signal avec nb_unites_max < 4 → false", () => {
+    expect(isMulti4Plus("Signal", "3", null)).toBe(false);
+    expect(isMulti4Plus("Signal", "1", null)).toBe(false);
+    expect(isMulti4Plus("Signal", "0", null)).toBe(false);
+  });
+
+  it("Signal sans intensite ni nb_unites_max → false", () => {
+    expect(isMulti4Plus("Signal", null, null)).toBe(false);
+    expect(isMulti4Plus("Signal", undefined, undefined)).toBe(false);
+    expect(isMulti4Plus("Signal", "", "")).toBe(false);
+    expect(isMulti4Plus("Signal", "", "moyenne")).toBe(false);
+  });
+
+  it("DesignationEvent → toujours false (pas de champ dimension)", () => {
+    expect(isMulti4Plus("DesignationEvent", "10", "haute")).toBe(false);
+    expect(isMulti4Plus("DesignationEvent", null, null)).toBe(false);
+  });
+
+  it("nb_unites_max non-numérique → false (valeur invalide)", () => {
+    expect(isMulti4Plus("Signal", "inconnu", null)).toBe(false);
+    expect(isMulti4Plus("Signal", "N/A", null)).toBe(false);
   });
 });
 

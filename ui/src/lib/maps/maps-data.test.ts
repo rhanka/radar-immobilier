@@ -87,7 +87,14 @@ describe("buildCityMapEntries", () => {
 
   it("countsByType is populated from graphItems", () => {
     const graphItems = [
-      { citySlug: PILOT_CITY_SLUG, signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 }, zonageCount: 4 },
+      {
+        citySlug: PILOT_CITY_SLUG,
+        signalCount: 5,
+        countsByType: { Signal: 3, DesignationEvent: 2 },
+        zonageCount: 4,
+        multi4plusCount: 1,
+        countsByStage: { avis_motion: 1, inconnu: 4 },
+      },
     ];
     const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
     const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
@@ -104,7 +111,14 @@ describe("buildCityMapEntries", () => {
 
   it("zonageCount is populated from graphItems", () => {
     const graphItems = [
-      { citySlug: PILOT_CITY_SLUG, signalCount: 10, countsByType: { Signal: 6, DesignationEvent: 4 }, zonageCount: 7 },
+      {
+        citySlug: PILOT_CITY_SLUG,
+        signalCount: 10,
+        countsByType: { Signal: 6, DesignationEvent: 4 },
+        zonageCount: 7,
+        multi4plusCount: 2,
+        countsByStage: { inconnu: 10 },
+      },
     ];
     const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
     const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
@@ -114,7 +128,14 @@ describe("buildCityMapEntries", () => {
 
   it("zonageCount peut être inférieur à signalCount (signaux non-zonage)", () => {
     const graphItems = [
-      { citySlug: PILOT_CITY_SLUG, signalCount: 10, countsByType: { Signal: 10 }, zonageCount: 3 },
+      {
+        citySlug: PILOT_CITY_SLUG,
+        signalCount: 10,
+        countsByType: { Signal: 10 },
+        zonageCount: 3,
+        multi4plusCount: 0,
+        countsByStage: { inconnu: 10 },
+      },
     ];
     const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
     const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
@@ -132,12 +153,50 @@ describe("buildCityMapEntries", () => {
         signalCount: number;
         countsByType: Record<string, number>;
         zonageCount: number;
+        multi4plusCount: number;
+        countsByStage: Record<string, number>;
       },
     ];
     const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
     const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
     expect(pilot).toBeDefined();
     expect(pilot!.zonageCount).toBe(0);
+    expect(pilot!.multi4plusCount).toBe(0);
+    expect(pilot!.countsByStage).toEqual({});
+  });
+
+  it("multi4plusCount est 0 pour les villes absentes de graphItems", () => {
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
+    for (const e of entries) {
+      expect(e.multi4plusCount).toBe(0);
+    }
+  });
+
+  it("multi4plusCount est populé depuis graphItems", () => {
+    const graphItems = [
+      {
+        citySlug: PILOT_CITY_SLUG,
+        signalCount: 10,
+        countsByType: { Signal: 8, DesignationEvent: 2 },
+        zonageCount: 7,
+        multi4plusCount: 3,
+        countsByStage: { avis_motion: 2, inconnu: 8 },
+      },
+    ];
+    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.multi4plusCount).toBe(3);
+    expect(pilot!.countsByStage).toEqual({ avis_motion: 2, inconnu: 8 });
+    // multi4plusCount ≤ signalCount (borne cohérente)
+    expect(pilot!.multi4plusCount).toBeLessThanOrEqual(pilot!.signalCount6m + 7);
+  });
+
+  it("countsByStage est vide pour les villes absentes de graphItems", () => {
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
+    for (const e of entries) {
+      expect(e.countsByStage).toEqual({});
+    }
   });
 });
 

@@ -56,14 +56,28 @@
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
 
-  // ── Filtre GLOBAL par type ─────────────────────────────────────────────────
+  // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
   let excludedTypes = new Set<string>();
   /** Reflète l'état du toggle « Zonage uniquement » du rail. */
   let zonageOnlyActive = true;
+  /** Reflète l'état du toggle « Multifamilial 4+ » du rail. */
+  let multi4plusActive = false;
+  /** Reflète l'état du toggle « Signaux précoces » du rail. */
+  let precoceOnlyActive = false;
 
-  function handleFilterChange(excluded: Set<string>, zonageOnly: boolean): void {
+  /** Étapes précoces (miroir de la constante dans SignauxRail). */
+  const ETAPES_PRECOCES = ["avis_motion", "projet_reglement"];
+
+  function handleFilterChange(
+    excluded: Set<string>,
+    zonageOnly: boolean,
+    multi4plus: boolean,
+    precoceOnly: boolean,
+  ): void {
     excludedTypes = new Set(excluded);
     zonageOnlyActive = zonageOnly;
+    multi4plusActive = multi4plus;
+    precoceOnlyActive = precoceOnly;
     updateFillColors();
   }
 
@@ -88,24 +102,35 @@
 
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
-   * selon le dictionnaire count → color.
+   * selon la base active combinée (zonage ∩ 4+ ∩ précoce selon les toggles).
    *
-   * Logique de base de compte :
-   *   - zonageOnlyActive=ON → entry.zonageCount (catégorie sémantique, calculée côté API)
-   *   - zonageOnlyActive=OFF → entry.signalCount6m (total tous types)
+   * Logique de base de compte (intersection conservative par MIN) :
+   *   1. Base : zonageOnlyActive ON → entry.zonageCount, OFF → entry.signalCount6m
+   *   2. Si multi4plusActive ON : min(base, entry.multi4plusCount)
+   *   3. Si precoceOnlyActive ON : min(résultat, somme avis_motion+projet_reglement)
    *
-   * Les gardes ?? {} et ?? 0 protègent contre countsByType null (fix anti-crash).
+   * Les gardes ?? {} et ?? 0 protègent contre les champs null/undefined (anti-crash).
+   * Quadrant prioritaire (4+ ∩ précoce) → couleur violette (#7c3aed) au lieu de rouge.
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      // Base de compte selon le filtre zonage (TOP-DOWN, indépendant de la ville sélectionnée)
-      const count = zonageOnlyActive
-        ? (e.zonageCount ?? 0)
-        : e.signalCount6m;
-      expr.push(e.municipality.slug, signalCountColor(count));
+      // Base selon le filtre zonage
+      let count = zonageOnlyActive ? (e.zonageCount ?? 0) : e.signalCount6m;
+      // Axe DIMENSION
+      if (multi4plusActive) count = Math.min(count, e.multi4plusCount ?? 0);
+      // Axe ANTICIPATION
+      if (precoceOnlyActive) {
+        const byStage = e.countsByStage ?? {};
+        const precoce = ETAPES_PRECOCES.reduce((s, etape) => s + (byStage[etape] ?? 0), 0);
+        count = Math.min(count, precoce);
+      }
+      // Couleur : violet pour le quadrant prioritaire, sinon rampe standard
+      const isPriority = multi4plusActive && precoceOnlyActive && count > 0;
+      const color = isPriority ? "#7c3aed" : signalCountColor(count);
+      expr.push(e.municipality.slug, color);
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
     return expr as ExpressionSpecification;
@@ -382,6 +407,12 @@
     <div class="p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
       <ul class="space-y-1">
+        {#if multi4plusActive && precoceOnlyActive}
+          <li class="flex items-center gap-2 text-xs text-slate-600">
+            <span class="h-3 w-3 rounded-sm border border-slate-300 shrink-0" style="background-color: #7c3aed;"></span>
+            Quadrant prioritaire (4+ ∩ précoce)
+          </li>
+        {/if}
         {#each [
           { color: "#ef4444", label: "6+ signaux" },
           { color: "#f97316", label: "3–5 signaux" },
