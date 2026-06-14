@@ -5,11 +5,13 @@ import {
   index,
   jsonb,
   numeric,
+  pgEnum,
   pgTable,
   text,
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
 /**
  * PostGIS geometry column (SRID 4326). Represented in TS as WKT/EWKT text; the
@@ -335,6 +337,228 @@ export const accountUsers = pgTable("account_users", {
   byStatus: index("account_users_status_idx").on(t.status),
 }));
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Inc 1 — Marquage d'équipe Steve (SPEC_EVOL_INTEGRATION_CARTE_STEVE §4.1)
+//
+// Quatre tables :
+//   prospect_marks              — marquages append-only par lot + dimension
+//   prospect_notes              — notes libres append-only multi-auteurs
+//   prospect_contacts           — couche CRM/PII séparée (Loi 25)
+//   prospect_contact_access_log — journal d'accès PII (Loi 25)
+//
+// Les enums DB sont définis dans la migration 0005 ; les pgEnum Drizzle ici
+// permettent le typage TS sans régénération de snapshot (hand-authored DDL,
+// cohérent avec les patterns migrations 0001–0003).
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Deux dimensions orthogonales : pipeline (funnel commercial) ⊥ marche (état de vente).
+ * Un lot peut avoir un marquage actif dans chacune des deux dimensions simultanément.
+ */
+export const prospectDimensionEnum = pgEnum("prospect_dimension", [
+  "pipeline",
+  "marche",
+]);
+
+/**
+ * Statut unifié couvrant les deux dimensions.
+ * pipeline : favori | ecarte | sollicite | lettre_envoyee
+ * marche   : en_vente
+ * La cohérence dimension↔statut est garantie par une CHECK constraint SQL.
+ */
+export const prospectStatutEnum = pgEnum("prospect_statut", [
+  "favori",
+  "ecarte",
+  "sollicite",
+  "lettre_envoyee",
+  "en_vente",
+]);
+
+/**
+ * Mode d'origine du marquage.
+ * real       = saisie manuelle par l'équipe
+ * simulation = import Steve (Inc 4, substrat Netlify)
+ */
+export const prospectModeEnum = pgEnum("prospect_mode", ["real", "simulation"]);
+
+/**
+ * Marquages append-only par lot et par dimension.
+ *
+ * Un marquage n'écrase jamais l'existant : on insère une nouvelle ligne.
+ * Le serveur stampe superseded_by sur l'ancien en transaction (Inc 2).
+ * Contrainte d'unicité de chaîne active :
+ *   UNIQUE(lot_version_id, dimension) WHERE superseded_by IS NULL
+ * (index partiel — non exprimable en Drizzle, géré dans la migration SQL).
+ */
+export const prospectMarks = pgTable(
+  "prospect_marks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // Ancrage bitemporel principal
+    lotVersionId: uuid("lot_version_id")
+      .notNull()
+      .references(() => lotVersions.id, { onDelete: "restrict" }),
+    // Dénormalisés pour requêtes sans jointure bitemporale
+    noLot: text("no_lot").notNull(),
+    citySlug: text("city_slug").notNull(),
+
+    // Dimension orthogonale
+    dimension: prospectDimensionEnum("dimension").notNull(),
+
+    // Statut unifié (cohérence garantie par CHECK SQL dans migration 0005)
+    statut: prospectStatutEnum("statut").notNull(),
+
+    // Mode d'origine
+    mode: prospectModeEnum("mode").notNull().default("real"),
+
+    // Auteur
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => accountUsers.id, { onDelete: "restrict" }),
+
+    // Chaîne append-only
+    supersedes: uuid("supersedes").references(
+      (): AnyPgColumn => prospectMarks.id,
+      { onDelete: "restrict" },
+    ),
+    supersededBy: uuid("superseded_by").references(
+      (): AnyPgColumn => prospectMarks.id,
+      { onDelete: "restrict" },
+    ),
+
+    // Données métier dimension marche (null pour dimension pipeline)
+    prixDemande: numeric("prix_demande", { precision: 14, scale: 2 }),
+    lienAnnonce: text("lien_annonce"),
+
+    // Immuable
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byLot: index("prospect_marks_lot_idx").on(t.lotVersionId),
+    byNoLot: index("prospect_marks_nolot_idx").on(t.noLot),
+    byAuthor: index("prospect_marks_author_idx").on(t.authorId),
+    byMode: index("prospect_marks_mode_idx").on(t.mode),
+    byStatut: index("prospect_marks_statut_idx").on(t.statut),
+    // L'index partiel d'unicité de chaîne active vit dans la migration SQL :
+    // UNIQUE(lot_version_id, dimension) WHERE superseded_by IS NULL
+  }),
+);
+
+/**
+ * Notes append-only multi-auteurs par lot.
+ * Jamais mises à jour : une nouvelle ligne par note.
+ * Ancrées sur (no_lot, city_slug) — pas de FK bitemporale stricte.
+ */
+export const prospectNotes = pgTable(
+  "prospect_notes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    noLot: text("no_lot").notNull(),
+    citySlug: text("city_slug").notNull(),
+
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => accountUsers.id, { onDelete: "restrict" }),
+
+    body: text("body").notNull(),
+
+    mode: prospectModeEnum("mode").notNull().default("real"),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byLot: index("prospect_notes_lot_idx").on(t.noLot, t.citySlug),
+    byAuthor: index("prospect_notes_author_idx").on(t.authorId),
+  }),
+);
+
+/**
+ * Couche CRM/PII séparée — données personnelles propriétaire (Loi 25).
+ *
+ * FINALITÉ DOCUMENTÉE : prospection immobilière pour rachat de terrains.
+ * Accès journalisé dans prospect_contact_access_log.
+ *
+ * INVARIANT ONTOLOGIQUE : le nom du propriétaire NE DOIT PAS apparaître dans
+ * graph_nodes / graph_edges ni dans prospect_marks. Couche isolée uniquement.
+ *
+ * Append-only : supersedes / superseded_by tracent la chaîne de versions.
+ * Contrainte d'unicité de chaîne active (index partiel dans migration SQL) :
+ *   UNIQUE(no_lot, city_slug) WHERE superseded_by IS NULL
+ */
+export const prospectContacts = pgTable(
+  "prospect_contacts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    noLot: text("no_lot").notNull(),
+    citySlug: text("city_slug").notNull(),
+
+    // PII Loi 25 — collecte minimale, tous champs nullable
+    proprietaireNom: text("proprietaire_nom"),
+    proprietaireTel: text("proprietaire_tel"),
+    proprietaireCourriel: text("proprietaire_courriel"),
+    proprietaireAdresse: text("proprietaire_adresse"),
+
+    sourceInfo: text("source_info"),
+
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => accountUsers.id, { onDelete: "restrict" }),
+
+    supersedes: uuid("supersedes").references(
+      (): AnyPgColumn => prospectContacts.id,
+      { onDelete: "restrict" },
+    ),
+    supersededBy: uuid("superseded_by").references(
+      (): AnyPgColumn => prospectContacts.id,
+      { onDelete: "restrict" },
+    ),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byLot: index("prospect_contacts_lot_idx").on(t.noLot, t.citySlug),
+    byAuthor: index("prospect_contacts_author_idx").on(t.authorId),
+    // Index partiel d'unicité de chaîne active dans migration SQL :
+    // UNIQUE(no_lot, city_slug) WHERE superseded_by IS NULL
+  }),
+);
+
+/**
+ * Journal d'accès à la couche PII (Loi 25 — traçabilité).
+ * Chaque consultation de prospect_contacts est enregistrée ici.
+ * Le middleware applicatif (Inc 2) alimentera cette table.
+ */
+export const prospectContactAccessLog = pgTable(
+  "prospect_contact_access_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    contactId: uuid("contact_id")
+      .notNull()
+      .references(() => prospectContacts.id, { onDelete: "restrict" }),
+
+    accessorId: uuid("accessor_id")
+      .notNull()
+      .references(() => accountUsers.id, { onDelete: "restrict" }),
+
+    // 'view' | 'export' | 'api' | …
+    action: text("action").notNull().default("view"),
+
+    accessedAt: timestamp("accessed_at", { withTimezone: true }).notNull().defaultNow(),
+
+    // IP, user-agent, session, endpoint…
+    context: jsonb("context").notNull().default({}),
+  },
+  (t) => ({
+    byContact: index("prospect_contact_access_log_contact_idx").on(t.contactId),
+    byAccessor: index("prospect_contact_access_log_accessor_idx").on(t.accessorId),
+    byAt: index("prospect_contact_access_log_at_idx").on(t.accessedAt),
+  }),
+);
+
 export const schema = {
   sources,
   ingestions,
@@ -351,5 +575,10 @@ export const schema = {
   graphNodes,
   graphEdges,
   accountUsers,
+  // Inc 1 — marquage Steve
+  prospectMarks,
+  prospectNotes,
+  prospectContacts,
+  prospectContactAccessLog,
 };
 
