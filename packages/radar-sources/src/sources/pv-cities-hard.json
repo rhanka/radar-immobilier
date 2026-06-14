@@ -132,26 +132,26 @@
       "pdf_count": 85,
       "status": "graphifying",
       "notes": "WordPress Download Manager (wpdmdl=N redirect). Graphify en cours."
+    },
+    "clarendon": {
+      "strategy": "wordpress-events",
+      "pvIndexUrl": "https://clarendon.ca/municipality/council-meetings/",
+      "pdf_count": 56,
+      "status": "graphifying",
+      "notes": "42 Minutes PDFs depuis pages événements + 14 depuis zip 2023-frn. Bilingue EN/FR."
     }
   },
   "configured_not_scraped": {
     "_description": "Villes déjà dans ALL_PV_CITIES mais pas encore scrapées (raw/ absent de SCW)",
     "brossard": {
       "pvIndexUrl": "https://brossard.ca/assemblees-du-conseil-municipal/",
-      "status": "configured"
+      "status": "configured",
+      "notes": "WordPress avec custom post type city-event — PVs non exposés dans le HTML, JS requis"
     },
     "charette": {
       "pvIndexUrl": "https://www.municipalite-charette.ca/documentation/",
       "status": "configured",
       "notes": "403 probable"
-    },
-    "chateau-richer": {
-      "pvIndexUrl": "https://www.chateauricher.qc.ca/pages/proces-verbaux",
-      "status": "configured"
-    },
-    "clarendon": {
-      "pvIndexUrl": "https://clarendon.ca/municipality/council-meetings/",
-      "status": "configured"
     },
     "la-durantaye": {
       "pvIndexUrl": "https://www.munladurantaye.qc.ca/pages/proces-verbaux",
@@ -159,7 +159,8 @@
     },
     "lefebvre": {
       "pvIndexUrl": "https://municipalites-du-quebec.ca/lefebvre/pdf_procesverbaux/",
-      "status": "configured"
+      "status": "configured",
+      "notes": "403 Forbidden"
     }
   },
   "irreductible": {
@@ -231,6 +232,10 @@
     "chapais": {
       "status": "irreductible",
       "notes": "villedechapais.com = Next.js SPA, PDFs non accessibles statiquement"
+    },
+    "chateau-richer": {
+      "status": "irreductible",
+      "notes": "chateauricher.qc.ca utilise gestionweblex.ca (ASP.NET AJAX-only SPA), non scrapable"
     },
     "chichester": {
       "status": "irreductible",
