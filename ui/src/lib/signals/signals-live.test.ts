@@ -15,13 +15,25 @@ import {
   mapGraphSignalNodeToSignal,
 } from "./signals-live.js";
 
+/**
+ * Helper : construit une GraphSignalsByCityResponse de test.
+ * Les items partiels sont complétés avec countsByType: { Signal: signalCount }
+ * pour satisfaire l'interface GraphSignalCityItem sans polluer les tests avec
+ * un champ non pertinent pour leur assertion.
+ */
 const byCity = (
-  ...cities: GraphSignalsByCityResponse["cities"]
-): GraphSignalsByCityResponse => ({
-  ok: true,
-  totalCount: cities.reduce((acc, c) => acc + c.signalCount, 0),
-  cities,
-});
+  ...cities: (Omit<GraphSignalsByCityResponse["cities"][0], "countsByType"> & { countsByType?: Record<string, number> })[]
+): GraphSignalsByCityResponse => {
+  const normalized = cities.map((c) => ({
+    ...c,
+    countsByType: c.countsByType ?? { Signal: c.signalCount },
+  }));
+  return {
+    ok: true,
+    totalCount: normalized.reduce((acc, c) => acc + c.signalCount, 0),
+    cities: normalized,
+  };
+};
 
 const detail = (
   citySlug: string,

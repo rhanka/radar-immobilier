@@ -19,12 +19,12 @@ const VALLEYFIELD_ITEM: SignalCityItem = {
 // MD1 — buildCityMapEntries returns only prioritized (non-excluded, non-deprioritized) cities
 describe("buildCityMapEntries", () => {
   it("returns at least one city even with empty API items", () => {
-    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 20 });
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 20 });
     expect(entries.length).toBeGreaterThan(0);
   });
 
   it("all entries have a municipality with lat/lon", () => {
-    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 10 });
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 10 });
     for (const e of entries) {
       expect(typeof e.municipality.lat).toBe("number");
       expect(typeof e.municipality.lon).toBe("number");
@@ -33,7 +33,7 @@ describe("buildCityMapEntries", () => {
   });
 
   it("cities absent from API items have signalCount6m === 0 (anti-invention)", () => {
-    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 50 });
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 50 });
     for (const e of entries) {
       expect(e.signalCount6m).toBe(0);
     }
@@ -71,18 +71,35 @@ describe("buildCityMapEntries", () => {
   });
 
   it("ordered by priorityRank ascending (closest to MTL first)", () => {
-    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 10 });
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 10 });
     const ranks = entries.map((e) => e.municipality.priorityRank ?? Infinity);
     for (let i = 1; i < ranks.length; i++) {
       expect(ranks[i]).toBeGreaterThanOrEqual(ranks[i - 1]);
     }
+  });
+
+  it("cities absent from graphItems have empty countsByType", () => {
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
+    for (const e of entries) {
+      expect(e.countsByType).toEqual({});
+    }
+  });
+
+  it("countsByType is populated from graphItems", () => {
+    const graphItems = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } },
+    ];
+    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
   });
 });
 
 // MD2 — computeBbox
 describe("computeBbox", () => {
   it("returns a valid bbox for a list of municipalities", () => {
-    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 5 });
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
     const cities = entries.map((e) => e.municipality);
     const bbox = computeBbox(cities);
     expect(bbox.minLon).toBeLessThan(bbox.maxLon);
