@@ -43,6 +43,19 @@ export interface CityMapEntry {
    * Used as the base count when « Zonage uniquement » toggle is ON.
    */
   zonageCount: number;
+  /**
+   * Count of Signal nodes with dimension 4+ (multifamilial).
+   * Signal.nb_unites_max ≥ 4 OU Signal.intensite = 'haute'. 0 when no data.
+   * Used by the « Multifamilial 4+ » toggle (DIMENSION axis).
+   */
+  multi4plusCount: number;
+  /**
+   * Breakdown by derived regulatory stage (ANTICIPATION axis).
+   * Keys: avis_motion | projet_reglement | consultation | second_projet |
+   *       adoption | entree_vigueur | accorde | refuse | inconnu.
+   * Empty object when no data. Used by the « Signaux précoces » toggle.
+   */
+  countsByStage: Record<string, number>;
 }
 
 /**
@@ -71,12 +84,18 @@ export function buildCityMapEntries(
     apiItems.map((item) => [item.citySlug, item.designationEventCount]),
   );
 
-  // Index graph items by city slug for countsByType and zonageCount lookup.
+  // Index graph items by city slug for countsByType, zonageCount, multi4plusCount, countsByStage lookup.
   const countsByTypeByCitySlug = new Map<string, Record<string, number>>(
     graphItems.map((item) => [item.citySlug, item.countsByType]),
   );
   const zonageCountByCitySlug = new Map<string, number>(
     graphItems.map((item) => [item.citySlug, item.zonageCount ?? 0]),
+  );
+  const multi4plusCountByCitySlug = new Map<string, number>(
+    graphItems.map((item) => [item.citySlug, item.multi4plusCount ?? 0]),
+  );
+  const countsByStageByCity = new Map<string, Record<string, number>>(
+    graphItems.map((item) => [item.citySlug, item.countsByStage ?? {}]),
   );
 
   return cities.slice(0, limit).map((m) => ({
@@ -84,6 +103,8 @@ export function buildCityMapEntries(
     signalCount6m: countByCitySlug.get(m.slug) ?? 0,
     countsByType: countsByTypeByCitySlug.get(m.slug) ?? {},
     zonageCount: zonageCountByCitySlug.get(m.slug) ?? 0,
+    multi4plusCount: multi4plusCountByCitySlug.get(m.slug) ?? 0,
+    countsByStage: countsByStageByCity.get(m.slug) ?? {},
   }));
 }
 

@@ -3,10 +3,12 @@
    * SignauxRail — bande latérale gauche de la vue Signaux.
    *
    * Accordéon de 1er niveau à 2 sections (<details> natif) :
-   *   1. « Signaux » (ouverte par défaut) : toggle « Zonage uniquement » (DÉFAUT ON)
-   *      → filtre PRIMAIRE top-down : la base de comptage des villes = zonageCount
-   *        quand ON, signalCount6m (total) quand OFF. Le filtre est indépendant
-   *        de la ville sélectionnée.
+   *   1. « Signaux » (ouverte par défaut) :
+   *      - Toggle « Zonage uniquement » (DÉFAUT ON) — filtre PRIMAIRE
+   *      - Toggle « Multifamilial 4+ » (DÉFAUT OFF) — axe DIMENSION
+   *      - Toggle « Signaux précoces » (DÉFAUT OFF) — axe ANTICIPATION
+   *      Les trois toggles sont COMBINABLES ; la base de comptage est
+   *      l'intersection des filtres actifs.
    *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
    *
    * Anti-invention : aucun appel API ici, tout par props.
@@ -17,7 +19,7 @@
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
-  /** Toutes les entrées villes (avec signalCount6m et zonageCount). */
+  /** Toutes les entrées villes (avec signalCount6m, zonageCount, multi4plusCount, countsByStage). */
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
@@ -37,10 +39,15 @@
   export let onRefresh: () => void = () => {};
   /**
    * Appelé quand le filtre change.
-   * Passe l'état zonage-only ET les types exclus pour que SignauxMapView
-   * puisse recolorer les aplats avec la bonne base de compte.
+   * Passe l'état zonage-only, multi4plus, precoceOnly ET les types exclus
+   * pour que SignauxMapView puisse recolorer les aplats avec la bonne base.
    */
-  export let onFilterChange: (excluded: Set<string>, zonageOnly: boolean) => void = () => {};
+  export let onFilterChange: (
+    excluded: Set<string>,
+    zonageOnly: boolean,
+    multi4plus: boolean,
+    precoceOnly: boolean,
+  ) => void = () => {};
 
   // ── Palette 12 couleurs par type (identique graphify) ─────────────────────
   const TYPE_PALETTE = [
@@ -54,7 +61,7 @@
     return TYPE_PALETTE[h % TYPE_PALETTE.length];
   }
 
-  /** Couleur de l'aplat choroplèthe selon le nb de signaux. */
+  /** Couleur de l'aplat choroplèthe selon le nb de signaux actifs. */
   function signalColor(count: number): string {
     if (count === 0) return "#e2e8f0";
     if (count <= 2) return "#fbbf24";
@@ -62,16 +69,34 @@
     return "#ef4444";
   }
 
-  // ── Toggle « Zonage uniquement » — filtre PRIMAIRE TOP-DOWN ───────────────
+  // ── Étapes « précoces » (avis_motion + projet_reglement) ──────────────────
+  const ETAPES_PRECOCES = ["avis_motion", "projet_reglement"];
+
+  /** Retourne le nombre de signaux précoces pour une ville. */
+  function precoceCountForEntry(entry: CityMapEntry): number {
+    const byStage = entry.countsByStage ?? {};
+    return ETAPES_PRECOCES.reduce((s, e) => s + (byStage[e] ?? 0), 0);
+  }
+
+  // ── Toggles — filtres combinables TOP-DOWN ──────────────────────────────────
   /**
-   * Quand zonageOnly est ON (défaut) :
-   *   - la base de comptage de TOUTES les villes = entry.zonageCount
-   *   - totalSignals, citiesWithSignals, pastilles, tri = basés sur zonageCount
-   *   - les aplats MapLibre utilisent aussi zonageCount (via callback)
-   *
-   * Ce filtre est INDÉPENDANT de la ville sélectionnée.
+   * Zonage uniquement (DÉFAUT ON) :
+   *   base = entry.zonageCount quand ON, sinon entry.signalCount6m
    */
   let zonageOnly = true;
+
+  /**
+   * Multifamilial 4+ (DÉFAUT OFF — axe DIMENSION) :
+   *   restreint la base de comptage à entry.multi4plusCount
+   */
+  let multi4plus = false;
+
+  /**
+   * Signaux précoces (DÉFAUT OFF — axe ANTICIPATION) :
+   *   restreint la base de comptage à la somme des étapes ≤ projet_reglement
+   *   (avis_motion + projet_reglement dans entry.countsByStage)
+   */
+  let precoceOnly = false;
 
   /** Types disponibles = union des types connus (multi-villes) + types actuels. */
   $: allKnownTypes = Array.from(
@@ -87,25 +112,65 @@
     {} as Record<string, number>,
   );
 
-  /** Nœuds filtrés (filtre secondaire par type, uniquement quand zonageOnly=OFF). */
+  /** Nœuds filtrés (affichage dans le panneau détail). */
   $: filteredNodes = detailNodes;
+
+  function emitFilterChange(): void {
+    onFilterChange(new Set<string>(), zonageOnly, multi4plus, precoceOnly);
+  }
 
   function toggleZonageOnly(): void {
     zonageOnly = !zonageOnly;
-    onFilterChange(new Set<string>(), zonageOnly);
+    emitFilterChange();
+  }
+
+  function toggleMulti4plus(): void {
+    multi4plus = !multi4plus;
+    emitFilterChange();
+  }
+
+  function togglePrecoceOnly(): void {
+    precoceOnly = !precoceOnly;
+    emitFilterChange();
   }
 
   // Propagate filter on initial mount / when entries change
-  $: onFilterChange(new Set<string>(), zonageOnly);
+  $: onFilterChange(new Set<string>(), zonageOnly, multi4plus, precoceOnly);
 
-  // ── Compteur actif par ville (TOP-DOWN) ────────────────────────────────────
+  // ── Compteur actif par ville (base combinée zonage ∩ 4+ ∩ précoce) ────────
   /**
-   * Retourne le compte actif pour une ville selon l'état du toggle zonage.
-   * Quand zonageOnly=ON → entry.zonageCount
-   * Quand zonageOnly=OFF → entry.signalCount6m (total)
+   * Retourne le compte actif pour une ville selon les toggles actifs.
+   *
+   * Logique de combinaison (intersection) :
+   *   - Base : zonageOnly ON → zonageCount, OFF → signalCount6m
+   *   - Si multi4plus ON : min(base, multi4plusCount)
+   *   - Si precoceOnly ON : min(résultat, precoceCount)
+   *
+   * Note : on utilise le MIN car on n'a pas de compte exact de l'intersection
+   * zonage ∩ 4+ ∩ précoce en un seul champ. Le MIN donne une borne inférieure
+   * conservatives correcte pour le tri et la pastille.
+   * Le quadrant prioritaire (4+ ∩ précoce) est mis en avant par le tri.
    */
   function activeCountForEntry(entry: CityMapEntry): number {
-    return zonageOnly ? (entry.zonageCount ?? 0) : entry.signalCount6m;
+    let base = zonageOnly ? (entry.zonageCount ?? 0) : entry.signalCount6m;
+    if (multi4plus) base = Math.min(base, entry.multi4plusCount ?? 0);
+    if (precoceOnly) base = Math.min(base, precoceCountForEntry(entry));
+    return base;
+  }
+
+  /**
+   * Score de tri quadrant prioritaire (4+ ∩ précoce).
+   * Quand les deux toggles 4+ et précoce sont actifs, on trie d'abord par
+   * le MIN(multi4plusCount, precoceCount) — le quadrant prioritaire —
+   * puis par activeCount pour départager.
+   */
+  function sortScore(entry: CityMapEntry): number {
+    if (multi4plus && precoceOnly) {
+      // Quadrant prioritaire : on fait remonter les villes avec les deux
+      return Math.min(entry.multi4plusCount ?? 0, precoceCountForEntry(entry)) * 10000
+        + activeCountForEntry(entry);
+    }
+    return activeCountForEntry(entry);
   }
 
   // ── Recherche villes (section Villes) ─────────────────────────────────────
@@ -119,12 +184,16 @@
     : entries;
 
   $: sortedEntries = [...filteredEntries].sort(
-    (a, b) => activeCountForEntry(b) - activeCountForEntry(a)
+    (a, b) => sortScore(b) - sortScore(a)
   ).slice(0, 60);
 
-  // ── Compteurs globaux (réactifs au filtre zonage) ─────────────────────────
+  // ── Compteurs globaux (réactifs aux filtres) ──────────────────────────────
   $: totalSignals = entries.reduce((s, e) => s + activeCountForEntry(e), 0);
   $: citiesWithSignals = entries.filter((e) => activeCountForEntry(e) > 0).length;
+
+  // ── Compteurs globaux pour afficher à côté des toggles ────────────────────
+  $: totalMulti4plus = entries.reduce((s, e) => s + (e.multi4plusCount ?? 0), 0);
+  $: totalPrecoce = entries.reduce((s, e) => s + precoceCountForEntry(e), 0);
 </script>
 
 <!-- Rail container -->
@@ -160,7 +229,7 @@
   <!-- Corps scrollable : 2 sections accordéon natif -->
   <div class="rail-body flex-1 min-h-0 overflow-y-auto">
 
-    <!-- ── Section 1 : Signaux (cases à cocher par type) ───────────────────── -->
+    <!-- ── Section 1 : Signaux — filtres combinables ───────────────────────── -->
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
@@ -168,8 +237,8 @@
       </summary>
 
       <div class="rail-section-body">
-        <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE top-down, activé par défaut -->
-        <div class="zonage-toggle-row px-3 pt-2 pb-1">
+        <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE, activé par défaut -->
+        <div class="axis-toggle-row px-3 pt-2 pb-1">
           <label class="rail-type-row">
             <input
               type="checkbox"
@@ -179,10 +248,58 @@
               aria-label="Zonage uniquement"
             />
             <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
-            {#if zonageOnly && !loading}
-              <span class="zonage-badge">{totalSignals} signaux</span>
+            {#if !loading}
+              <span class="axis-badge axis-badge--zonage">
+                {zonageOnly ? totalSignals : entries.reduce((s, e) => s + e.signalCount6m, 0)}
+              </span>
             {/if}
           </label>
+        </div>
+
+        <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
+        <div class="axis-toggle-row px-3 pb-1">
+          <label class="rail-type-row">
+            <input
+              type="checkbox"
+              class="rail-type-checkbox"
+              checked={multi4plus}
+              on:change={toggleMulti4plus}
+              aria-label="Multifamilial 4+"
+            />
+            <span class="rail-row-label text-slate-700">
+              Multifamilial 4+
+              <span class="rail-row-sublabel">nb unités ≥ 4 ou intensité haute</span>
+            </span>
+            {#if !loading}
+              <span class="axis-badge axis-badge--dimension">{totalMulti4plus}</span>
+            {/if}
+          </label>
+        </div>
+
+        <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
+        <div class="axis-toggle-row axis-toggle-row--last px-3 pb-2">
+          <label class="rail-type-row">
+            <input
+              type="checkbox"
+              class="rail-type-checkbox"
+              checked={precoceOnly}
+              on:change={togglePrecoceOnly}
+              aria-label="Signaux précoces"
+            />
+            <span class="rail-row-label text-slate-700">
+              Signaux précoces
+              <span class="rail-row-sublabel">avis de motion / 1er projet</span>
+            </span>
+            {#if !loading}
+              <span class="axis-badge axis-badge--anticipation">{totalPrecoce}</span>
+            {/if}
+          </label>
+          <!-- Indicateur quadrant prioritaire quand les deux axes sont actifs -->
+          {#if multi4plus && precoceOnly && !loading}
+            <div class="quadrant-badge">
+              Quadrant prioritaire actif
+            </div>
+          {/if}
         </div>
       </div>
     </details>
@@ -215,6 +332,7 @@
             {#each sortedEntries as entry (entry.municipality.slug)}
               {@const isSelected = selectedSlug === entry.municipality.slug}
               {@const activeCount = activeCountForEntry(entry)}
+              {@const isPriorityQuadrant = multi4plus && precoceOnly && activeCount > 0}
               <li>
                 <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
                 <details
@@ -224,12 +342,13 @@
                   <summary
                     class="ws-acc-summary"
                     class:ws-acc-summary--active={isSelected}
+                    class:ws-acc-summary--priority={isPriorityQuadrant}
                     on:click|preventDefault={() => onSelectCity(entry)}
                   >
-                    <!-- Pastille couleur signal (basée sur le compte actif zonage ou total) -->
+                    <!-- Pastille couleur signal (basée sur le compte actif combiné) -->
                     <span
                       class="rail-swatch"
-                      style="background-color: {signalColor(activeCount)};"
+                      style="background-color: {isPriorityQuadrant ? '#7c3aed' : signalColor(activeCount)};"
                       aria-hidden="true"
                     ></span>
                     <span class="rail-row-label">
@@ -239,7 +358,7 @@
                       {/if}
                     </span>
                     {#if activeCount > 0}
-                      <Badge tone="warning" class="rail-row-count shrink-0">
+                      <Badge tone={isPriorityQuadrant ? "info" : "warning"} class="rail-row-count shrink-0">
                         {activeCount}
                       </Badge>
                     {:else}
@@ -499,19 +618,58 @@
     padding: 0.25rem 0;
   }
 
-  /* ── Toggle « Zonage uniquement » ── */
-  .zonage-toggle-row {
+  /* ── Toggles axes (Zonage / Dimension / Anticipation) ── */
+  .axis-toggle-row {
     border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  .axis-toggle-row--last {
     margin-bottom: 0.25rem;
   }
 
-  .zonage-badge {
+  .axis-badge {
     font-size: 0.65rem;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    background: #e0f2fe; /* sky-100 */
     border-radius: 999px;
     padding: 0.1rem 0.4rem;
     white-space: nowrap;
     flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis-badge--zonage {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    background: #e0f2fe; /* sky-100 */
+  }
+
+  .axis-badge--dimension {
+    color: #854d0e; /* yellow-800 */
+    background: #fef9c3; /* yellow-100 */
+  }
+
+  .axis-badge--anticipation {
+    color: #166534; /* green-800 */
+    background: #dcfce7; /* green-100 */
+  }
+
+  /* ── Quadrant prioritaire badge ── */
+  .quadrant-badge {
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: #5b21b6; /* violet-800 */
+    background: #ede9fe; /* violet-100 */
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    margin-top: 0.2rem;
+    margin-left: 0.3rem;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Entrée ville en mode quadrant prioritaire ── */
+  .ws-acc-summary--priority {
+    background: #f5f3ff; /* violet-50 */
+  }
+
+  .ws-acc-summary--priority:hover {
+    background: #ede9fe; /* violet-100 */
   }
 </style>

@@ -17,6 +17,20 @@ export interface GraphSignalCityItem {
    * Used by the « Zonage uniquement » toggle to filter cities top-down.
    */
   zonageCount: number;
+  /**
+   * Count of Signal nodes with dimension 4+ (multifamilial).
+   * Signal.nb_unites_max ≥ 4 OU Signal.intensite = 'haute'.
+   * DesignationEvent excluded (no dimension data).
+   * Used by the « Multifamilial 4+ » toggle.
+   */
+  multi4plusCount: number;
+  /**
+   * Breakdown by derived regulatory stage (étape réglementaire).
+   * Keys are Etape values: avis_motion, projet_reglement, consultation,
+   * second_projet, adoption, entree_vigueur, accorde, refuse, inconnu.
+   * Used by the « Signaux précoces » toggle.
+   */
+  countsByStage: Record<string, number>;
 }
 
 export interface GraphSignalsByCityResponse {
