@@ -27,6 +27,7 @@
   import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
   import {
     fetchGraphSignalsByCity,
+    type GraphSignalCityItem,
   } from "$lib/signals/graph-signals-by-city-client.js";
   import {
     fetchGraphSignalDetail,
@@ -39,6 +40,7 @@
   let loading = true;
   let loadError: string | null = null;
   let apiItems: SignalCityItem[] = [];
+  let graphItems: GraphSignalCityItem[] = [];
 
   /** countsByType par ville slug (depuis /by-city, disponible immédiatement). */
   const cityCountsByType = new Map<string, Record<string, number>>();
@@ -63,7 +65,7 @@
   }
 
   // ── Données réactives ──────────────────────────────────────────────────────
-  $: allEntries = buildCityMapEntries(apiItems);
+  $: allEntries = buildCityMapEntries(apiItems, graphItems);
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
@@ -332,6 +334,8 @@
         designationEventCount: c.signalCount,
         generatedAt: null,
       }));
+      // Garder les items graphiques pour enrichir CityMapEntry.countsByType
+      graphItems = res.cities;
       // Alimenter countsByType depuis la réponse API (disponible pour toutes les villes dès le load)
       cityCountsByType.clear();
       for (const c of res.cities) {
