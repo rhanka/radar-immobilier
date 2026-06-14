@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { ThemeProvider } from "@sentropic/design-system-svelte";
   import { sentTechTheme } from "@sentropic/design-system-themes";
   import TopNav from "$lib/components/TopNav.svelte";
@@ -28,9 +28,10 @@
   import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
   import { tourSteps } from "$lib/tour/tour-steps.js";
   import { authStore } from "$lib/auth/auth-store.js";
+  import { activeRouteView, navigateTo, initRouter } from "$lib/router/router.js";
 
-  // Vue par défaut : Signaux (1ère vue principale)
-  let activeView: DemoView = "signaux";
+  // Vue par défaut : pilotée par le routeur (synchronisé avec l'URL hash)
+  $: activeView = $activeRouteView;
   /** Signal id transmis par Approfondir -> filtre OpportunityFunnel. */
   let opportuniteSignalId: string | undefined = undefined;
   /** Label humain du signal sélectionné (signal-2 : libellé lisible dans le chip de filtre). */
@@ -62,7 +63,7 @@
   function handleApprofondir(signal: SignalT): void {
     opportuniteSignalId = signal.id;
     opportuniteSignalLabel = buildSignalLabel(signal);
-    activeView = "opportunity";
+    navigateTo("opportunity");
     // P3 — expose the selected signal as an already-resolved chat context chip.
     setChatContext([
       {
@@ -98,7 +99,7 @@
     if (isTourActive) {
       const step = tourSteps[currentTourStepIndex];
       if (step && step.view !== activeView) {
-        activeView = step.view;
+        navigateTo(step.view);
       }
     }
   }
@@ -148,11 +149,19 @@
   }
 
   // ── Auto-start 1re visite ─────────────────────────────────────────────────
+  // Cleanup du listener popstate du routeur
+  let cleanupRouter: (() => void) | undefined;
+
   onMount(async () => {
+    cleanupRouter = initRouter();
     await authStore.checkSession();
     if (isFirstVisit()) {
       startTour();
     }
+  });
+
+  onDestroy(() => {
+    cleanupRouter?.();
   });
 </script>
 
@@ -178,7 +187,7 @@
       <!-- Barre de navigation horizontale -->
       <TopNav
         {activeView}
-        onSelect={(view) => (activeView = view)}
+        onSelect={(view) => navigateTo(view)}
         onStartTour={startTour}
         {authState}
         onLogout={handleLogout}
