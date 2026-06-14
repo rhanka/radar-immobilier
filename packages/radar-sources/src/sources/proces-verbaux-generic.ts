@@ -4487,6 +4487,12 @@ export const LYSTER_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-lyster",
 };
 
+export const DUNHAM_PV_CONFIG: PvCityConfig = {
+  citySlug: "dunham",
+  pvIndexUrl: "https://ville.dunham.qc.ca/seances-du-conseil-municipal",
+  sourceId: "proces-verbaux-dunham",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -5268,4 +5274,5 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: LAURIERVILLE_PV_CONFIG },
   { config: LORRAINVILLE_PV_CONFIG },
   { config: LYSTER_PV_CONFIG },
+  { config: DUNHAM_PV_CONFIG },
 ];
