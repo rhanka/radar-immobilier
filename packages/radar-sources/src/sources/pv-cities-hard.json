@@ -73,8 +73,9 @@
       "uuid": "B7364266-9FC6-4AC7-9B35-119A1137E4F9",
       "pvIndexUrl": "https://laurierville.ca/proces-verbaux",
       "pdf_count": 227,
-      "status": "graphifying",
-      "notes": "graphify en cours"
+      "status": "graphified",
+      "notes": "227 PVs, 1575 nodes, 2324 edges",
+      "scw_key": "graph/laurierville/latest.json"
     },
     "lorrainville": {
       "strategy": "vplus",
