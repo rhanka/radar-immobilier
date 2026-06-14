@@ -25,8 +25,8 @@
     {
       "slug": "oka", "name": "Oka", "mrc": "Deux-Montagnes",
       "pvIndexUrl": "https://municipalite.oka.qc.ca/seances-publiques-du-conseil-municipal/",
-      "strategy": "calameo", "status": "config-ready",
-      "diagnostic": "Index HTML serveur, riche, par année (200). Minutes ouvertes dans visualiseur Calameo (calameo.com/oka/read/...), pas de PDF direct → extraction ad-hoc Calameo requise."
+      "strategy": "calameo", "status": "scraped-partial",
+      "diagnostic": "Index HTML serveur par année (200). Scrape live 2026-06-14 = 'new' 1 doc (page index) → raw/proces-verbaux-oka/cas/ (2 objets) sur SCW. Minutes elles-mêmes dans visualiseur Calameo (calameo.com/oka/read/...) sans PDF direct → extraction ad-hoc Calameo requise pour les PV complets."
     },
     {
       "slug": "notre-dame-de-stanbridge", "name": "Notre-Dame-de-Stanbridge", "mrc": "Brome-Missisquoi",
@@ -199,8 +199,8 @@
     {
       "slug": "rapide-danseur", "name": "Rapide-Danseur", "mrc": "Abitibi-Ouest",
       "pvIndexUrl": "https://rapide-danseur.ao.ca/fr/page/index.cfm?PageID=1245",
-      "strategy": "static-curl", "status": "config-ready",
-      "diagnostic": "Page ColdFusion (ao.ca) listant des PDF de PV. Liens PDF présents — adapter générique candidat."
+      "strategy": "static-curl", "status": "scraped-raw",
+      "diagnostic": "Page ColdFusion (ao.ca) listant des PDF de PV. Scrape live 2026-06-14 = 'new' 4 docs → raw/proces-verbaux-rapide-danseur/cas/ (8 objets) sur SCW. Adapter générique OK. Reste : graphify → graph/<ville>/latest.json."
     },
     {
       "slug": "pointe-lebel", "name": "Pointe-Lebel", "mrc": "Manicouagan",
