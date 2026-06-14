@@ -504,15 +504,21 @@ export async function listMrcs(db: Database): Promise<MrcSummary[]> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Count Signal + DesignationEvent nodes per city in graph_nodes.
+ * Count Signal + DesignationEvent nodes per city AND per type in graph_nodes.
  * Returns only cities that have at least one such node.
+ *
+ * Each city entry includes:
+ *   - signalCount  : total count (all types, backward-compat)
+ *   - countsByType : breakdown per node type (e.g. { Signal: 3, DesignationEvent: 2 })
  */
 export async function listCitiesWithSignalNodes(
   db: Database,
-): Promise<Array<{ citySlug: string; signalCount: number }>> {
+): Promise<Array<{ citySlug: string; signalCount: number; countsByType: Record<string, number> }>> {
+  // One row per (citySlug, type) — lets us build both the total and the breakdown.
   const rows = await db
     .select({
       citySlug: graphNodes.citySlug,
+      type: graphNodes.type,
       count: sql<number>`count(*)::int`,
     })
     .from(graphNodes)
@@ -522,10 +528,25 @@ export async function listCitiesWithSignalNodes(
         isNotNull(graphNodes.citySlug),
       ),
     )
-    .groupBy(graphNodes.citySlug);
-  return rows
-    .filter((r) => r.citySlug !== null)
-    .map((r) => ({ citySlug: r.citySlug!, signalCount: r.count }));
+    .groupBy(graphNodes.citySlug, graphNodes.type);
+
+  // Aggregate into per-city entries in application code.
+  const byCity = new Map<string, { signalCount: number; countsByType: Record<string, number> }>();
+  for (const row of rows) {
+    if (!row.citySlug) continue;
+    if (!byCity.has(row.citySlug)) {
+      byCity.set(row.citySlug, { signalCount: 0, countsByType: {} });
+    }
+    const entry = byCity.get(row.citySlug)!;
+    entry.signalCount += row.count;
+    entry.countsByType[row.type] = row.count;
+  }
+
+  return Array.from(byCity.entries()).map(([citySlug, { signalCount, countsByType }]) => ({
+    citySlug,
+    signalCount,
+    countsByType,
+  }));
 }
 
 /**
