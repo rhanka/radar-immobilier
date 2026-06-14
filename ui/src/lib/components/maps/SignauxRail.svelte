@@ -59,14 +59,45 @@
   // ── Section accordéon 1er niveau ──────────────────────────────────────────
   // Les deux sections sont ouvertes par défaut à l'init.
 
+  // ── Types zonage (Signal + DesignationEvent — confirmé par requête SQL prod) ──
+  const ZONAGE_TYPES = new Set(["Signal", "DesignationEvent"]);
+
   // ── Filtre GLOBAL par type (section Signaux) ───────────────────────────────
   /** Types disponibles = union des types connus (multi-villes) + types actuels. */
   $: allKnownTypes = Array.from(
     new Set([...knownNodeTypes, ...detailNodes.map((n) => n.type)])
   ).sort();
 
+  /** Toggle « Zonage uniquement » — activé par défaut. */
+  let zonageOnly = true;
+
   /** Ensemble des types exclus par l'utilisateur. */
   let excludedTypes = new Set<string>();
+
+  /** Calcule l'ensemble des types exclus selon l'état du toggle zonage et des cases. */
+  function computeExcluded(
+    types: string[],
+    excluded: Set<string>,
+    zOnly: boolean,
+  ): Set<string> {
+    if (zOnly) {
+      // Exclut tous les types sauf les types zonage
+      return new Set(types.filter((t) => !ZONAGE_TYPES.has(t)));
+    }
+    return excluded;
+  }
+
+  /** Ensemble effectif des types exclus (tient compte du toggle zonage). */
+  $: effectiveExcluded = computeExcluded(allKnownTypes, excludedTypes, zonageOnly);
+
+  function toggleZonageOnly(): void {
+    zonageOnly = !zonageOnly;
+    if (zonageOnly) {
+      // Quand on réactive zonage-only, on remet les cases à cocher à leur état initial
+      excludedTypes = new Set<string>();
+    }
+    onFilterChange(effectiveExcluded);
+  }
 
   function toggleType(type: string): void {
     if (excludedTypes.has(type)) {
@@ -75,11 +106,11 @@
       excludedTypes.add(type);
     }
     excludedTypes = excludedTypes; // trigger reactivity
-    onFilterChange(excludedTypes);
+    onFilterChange(effectiveExcluded);
   }
 
   // Propagate filter on initial mount / when known types change
-  $: onFilterChange(excludedTypes);
+  $: onFilterChange(effectiveExcluded);
 
   // ── Compteur par type (nœuds de la ville sélectionnée) ────────────────────
   $: countByType = detailNodes.reduce(
@@ -91,7 +122,7 @@
   );
 
   // ── Nœuds filtrés selon les types cochés ──────────────────────────────────
-  $: filteredNodes = detailNodes.filter((n) => !excludedTypes.has(n.type));
+  $: filteredNodes = detailNodes.filter((n) => !effectiveExcluded.has(n.type));
 
   // ── Recherche villes (section Villes) ─────────────────────────────────────
   let searchQuery = "";
@@ -107,9 +138,17 @@
     (a, b) => b.signalCount6m - a.signalCount6m
   ).slice(0, 60);
 
-  // ── Compteurs globaux ─────────────────────────────────────────────────────
-  $: totalSignals = entries.reduce((s, e) => s + e.signalCount6m, 0);
-  $: citiesWithSignals = entries.filter((e) => e.signalCount6m > 0).length;
+  // ── Compteur filtré par ville (selon les types actifs) ─────────────────────
+  function filteredCountForEntry(entry: CityMapEntry): number {
+    if (effectiveExcluded.size === 0) return entry.signalCount6m;
+    return Object.entries(entry.countsByType)
+      .filter(([t]) => !effectiveExcluded.has(t))
+      .reduce((s, [, n]) => s + n, 0);
+  }
+
+  // ── Compteurs globaux (réactifs au filtre) ────────────────────────────────
+  $: totalSignals = entries.reduce((s, e) => s + filteredCountForEntry(e), 0);
+  $: citiesWithSignals = entries.filter((e) => filteredCountForEntry(e) > 0).length;
 </script>
 
 <!-- Rail container -->
@@ -149,46 +188,65 @@
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
         <span class="rail-section-title">Signaux</span>
-        {#if excludedTypes.size > 0}
-          <span class="rail-section-badge">{allKnownTypes.length - excludedTypes.size}/{allKnownTypes.length}</span>
+        {#if effectiveExcluded.size > 0}
+          <span class="rail-section-badge">{allKnownTypes.length - effectiveExcluded.size}/{allKnownTypes.length}</span>
         {/if}
       </summary>
 
       <div class="rail-section-body">
-        {#if allKnownTypes.length === 0}
-          <p class="text-xs text-slate-400 italic px-4 py-2">
-            Sélectionnez une ville pour voir les types de signaux.
-          </p>
-        {:else}
-          <ul class="space-y-0.5 px-3 py-1" role="list">
-            {#each allKnownTypes as type (type)}
-              {@const excluded = excludedTypes.has(type)}
-              {@const count = countByType[type] ?? null}
-              <li>
-                <label
-                  class="rail-type-row"
-                  class:rail-type-row--excluded={excluded}
-                >
-                  <input
-                    type="checkbox"
-                    class="rail-type-checkbox"
-                    checked={!excluded}
-                    on:change={() => toggleType(type)}
-                    aria-label={type}
-                  />
-                  <span
-                    class="rail-swatch"
-                    style="background-color: {excluded ? '#cbd5e1' : typeColor(type)};"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="rail-row-label">{type}</span>
-                  {#if count !== null}
-                    <span class="rail-row-count text-slate-500">{count}</span>
-                  {/if}
-                </label>
-              </li>
-            {/each}
-          </ul>
+        <!-- Toggle « Zonage uniquement » — activé par défaut -->
+        <div class="zonage-toggle-row px-3 pt-2 pb-1">
+          <label class="rail-type-row">
+            <input
+              type="checkbox"
+              class="rail-type-checkbox"
+              checked={zonageOnly}
+              on:change={toggleZonageOnly}
+              aria-label="Zonage uniquement"
+            />
+            <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
+            {#if zonageOnly}
+              <span class="zonage-badge">Signal · Désignation</span>
+            {/if}
+          </label>
+        </div>
+
+        {#if !zonageOnly}
+          {#if allKnownTypes.length === 0}
+            <p class="text-xs text-slate-400 italic px-4 py-2">
+              Sélectionnez une ville pour voir les types de signaux.
+            </p>
+          {:else}
+            <ul class="space-y-0.5 px-3 py-1" role="list">
+              {#each allKnownTypes as type (type)}
+                {@const excluded = excludedTypes.has(type)}
+                {@const count = countByType[type] ?? null}
+                <li>
+                  <label
+                    class="rail-type-row"
+                    class:rail-type-row--excluded={excluded}
+                  >
+                    <input
+                      type="checkbox"
+                      class="rail-type-checkbox"
+                      checked={!excluded}
+                      on:change={() => toggleType(type)}
+                      aria-label={type}
+                    />
+                    <span
+                      class="rail-swatch"
+                      style="background-color: {excluded ? '#cbd5e1' : typeColor(type)};"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="rail-row-label">{type}</span>
+                    {#if count !== null}
+                      <span class="rail-row-count text-slate-500">{count}</span>
+                    {/if}
+                  </label>
+                </li>
+              {/each}
+            </ul>
+          {/if}
         {/if}
       </div>
     </details>
@@ -220,6 +278,7 @@
           {:else}
             {#each sortedEntries as entry (entry.municipality.slug)}
               {@const isSelected = selectedSlug === entry.municipality.slug}
+              {@const filteredCount = filteredCountForEntry(entry)}
               <li>
                 <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
                 <details
@@ -231,10 +290,10 @@
                     class:ws-acc-summary--active={isSelected}
                     on:click|preventDefault={() => onSelectCity(entry)}
                   >
-                    <!-- Pastille couleur signal -->
+                    <!-- Pastille couleur signal (basée sur le compte filtré) -->
                     <span
                       class="rail-swatch"
-                      style="background-color: {signalColor(entry.signalCount6m)};"
+                      style="background-color: {signalColor(filteredCount)};"
                       aria-hidden="true"
                     ></span>
                     <span class="rail-row-label">
@@ -243,9 +302,9 @@
                         <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
                       {/if}
                     </span>
-                    {#if entry.signalCount6m > 0}
+                    {#if filteredCount > 0}
                       <Badge tone="warning" class="rail-row-count shrink-0">
-                        {entry.signalCount6m}
+                        {filteredCount}
                       </Badge>
                     {:else}
                       <span class="rail-row-count text-slate-300">0</span>
@@ -515,5 +574,21 @@
     align-items: flex-start;
     gap: 0.4rem;
     padding: 0.25rem 0;
+  }
+
+  /* ── Toggle « Zonage uniquement » ── */
+  .zonage-toggle-row {
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    margin-bottom: 0.25rem;
+  }
+
+  .zonage-badge {
+    font-size: 0.65rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    background: #e0f2fe; /* sky-100 */
+    border-radius: 999px;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 </style>
