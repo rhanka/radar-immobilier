@@ -1,0 +1,24 @@
+{
+  "_comment": "Manifeste des villes M-Z 'dures' (SPA/403/scans/captcha) sans graph/<ville>/latest.json sur SCW. Stratégie complémentaire par ville. Anti-invention : aucune URL non vérifiée HTTP 200. Tenu à jour au fur et à mesure.",
+  "_scope": "Villes ACTIVES (excluded falsy) de municipalities.qc.json dont le nom NFD commence M..Z et qui n'ont PAS de graph/<ville>/latest.json sur le bucket SCW radar-immobilier-docs-pocs (38 villes au 2026-06-14).",
+  "_strategies": {
+    "spa-playwright": "Index rendu côté client (JS) → rendu navigateur (Playwright/obscura) pour extraire les liens PDF.",
+    "static-curl": "Index HTML statique → adapter générique (curl) suffit.",
+    "obscura-403": "Mur anti-bot/403/captcha → service headless radar-obscura.",
+    "ocr": "PDF scannés (image) → packages/radar-sources/src/sources/pdf-ocr.ts.",
+    "adhoc": "Quirk site-spécifique → config/adapter ad-hoc committé.",
+    "irreductible": "Aucune source PV publique exploitable trouvée → noté + passé."
+  },
+  "generated_at": "2026-06-14",
+  "cities": [
+    {
+      "slug": "marieville",
+      "name": "Marieville",
+      "mrc": "Rouville",
+      "pvIndexUrl": "https://www.ville.marieville.qc.ca/fr/la-ville/conseil-municipal/seances-du-conseil",
+      "strategy": "spa-playwright",
+      "diagnostic": "SPA ASP.NET — nav et liste PV rendues en JS. Page 'seances-du-conseil' expose 53 PDF dont des 'Procès-verbal' (Greffe/proces-verbaux/YYYYMMDD_PV_Seance.pdf). PV PDF vérifié 200 application/pdf le 2026-06-14.",
+      "status": "config-found"
+    }
+  ]
+}
