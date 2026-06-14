@@ -35,6 +35,7 @@
   } from "$lib/maps/maps-data.js";
   import { fetchLots, type LotFeatureCollection, type LotFeature, type LotsResponse } from "$lib/maps/lots-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
+  import MapLegend from "$lib/components/maps/MapLegend.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
   import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
@@ -725,27 +726,7 @@
 
               <!-- Légende Steve (visible uniquement en mode carte-steve) -->
               {#if isCarteSteve}
-                <div class="border-t border-slate-100 px-4 py-3" aria-label="Légende carte Steve">
-                  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende</p>
-                  <ul class="flex flex-wrap gap-x-4 gap-y-1.5">
-                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#e67e22; opacity:0.7;"></span>
-                      4+ logements ∩ TOD (priorité max)
-                    </li>
-                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#27ae60; opacity:0.65;"></span>
-                      Zone 4+ logements
-                    </li>
-                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#2980b9; opacity:0.35;"></span>
-                      Périmètre TOD
-                    </li>
-                    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-                      <span class="inline-block h-3 w-5 rounded-sm" style="background:#bdc3c7; opacity:0.45;"></span>
-                      Autres lots
-                    </li>
-                  </ul>
-                </div>
+                <MapLegend />
               {/if}
 
               <!-- Fiche lot complète — CS-L2 -->
