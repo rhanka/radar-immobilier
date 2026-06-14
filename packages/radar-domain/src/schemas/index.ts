@@ -13,3 +13,4 @@ export * from "./provenance.js";
 export * from "./ontology/index.js";
 export * from "./municipality.js";
 export * from "./scrape-status.js";
+export * from "./prospect-mark.js";
