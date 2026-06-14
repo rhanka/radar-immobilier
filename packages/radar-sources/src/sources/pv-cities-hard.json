@@ -138,8 +138,9 @@
       "strategy": "wordpress-events",
       "pvIndexUrl": "https://clarendon.ca/municipality/council-meetings/",
       "pdf_count": 56,
-      "status": "graphifying",
-      "notes": "42 Minutes PDFs depuis pages événements + 14 depuis zip 2023-frn. Bilingue EN/FR."
+      "status": "graphified",
+      "scw_key": "graph/clarendon/latest.json",
+      "notes": "42 Minutes PDFs depuis pages événements + 14 depuis zip 2023-frn. Bilingue EN/FR. 603 nodes, 872 edges."
     }
   },
   "configured_not_scraped": {
