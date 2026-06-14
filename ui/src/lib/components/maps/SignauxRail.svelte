@@ -97,16 +97,25 @@
   /** Nœuds filtrés (affichage dans le panneau détail). */
   $: filteredNodes = detailNodes;
 
-  function currentSubsetKey(): string {
+  /** Construit la clé subsetCounts à partir des 3 flags — fonction PURE. */
+  function buildKey(z: boolean, m: boolean, p: boolean): string {
     const parts: string[] = [];
-    if (zonageOnly) parts.push("z");
-    if (multi4plus) parts.push("m");
-    if (precoceOnly) parts.push("p");
+    if (z) parts.push("z");
+    if (m) parts.push("m");
+    if (p) parts.push("p");
     return parts.join("|");
   }
 
+  /**
+   * Clé active RÉACTIVE : dépend DIRECTEMENT des 3 toggles → Svelte la
+   * recalcule à chaque toggle. (Le bug venait d'une fonction qui lisait les
+   * toggles « cachés » dans son corps → Svelte ne voyait aucune dépendance,
+   * donc les $: total/villes/tri/filtre ne re-tournaient jamais.)
+   */
+  $: activeKey = buildKey(zonageOnly, multi4plus, precoceOnly);
+
   function emitFilterChange(): void {
-    onFilterChange(currentSubsetKey());
+    onFilterChange(buildKey(zonageOnly, multi4plus, precoceOnly));
   }
 
   function toggleZonageOnly(): void {
@@ -124,13 +133,13 @@
     emitFilterChange();
   }
 
-  // Propagate filter on initial mount / when toggles change
-  $: onFilterChange(currentSubsetKey());
+  // Propagate filter à l'init / au changement de clé active (réactif)
+  $: onFilterChange(activeKey);
 
-  // ── Compteur actif par ville (base combinée zonage ∩ 4+ ∩ précoce) ────────
-  /** Retourne le compte actif exact pour une ville selon les toggles actifs. */
-  function activeCountForEntry(entry: CityMapEntry): number {
-    return entry.subsetCounts[currentSubsetKey()] ?? 0;
+  // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
+  /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
+  function countFor(entry: CityMapEntry, key: string): number {
+    return entry.subsetCounts[key] ?? 0;
   }
 
 
@@ -142,27 +151,24 @@
     const matchSearch = !searchQuery.trim() ||
       e.municipality.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
       (e.municipality.mrc ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase());
-    return matchSearch && activeCountForEntry(e) > 0;
+    return matchSearch && countFor(e, activeKey) > 0;
   });
 
   $: sortedEntries = [...filteredEntries].sort(
-    (a, b) => activeCountForEntry(b) - activeCountForEntry(a)
+    (a, b) => countFor(b, activeKey) - countFor(a, activeKey)
   ).slice(0, 60);
 
-  // ── Compteurs globaux (réactifs aux filtres) ──────────────────────────────
-  $: totalSignals = entries.reduce((s, e) => s + activeCountForEntry(e), 0);
-  $: citiesWithSignals = entries.filter((e) => activeCountForEntry(e) > 0).length;
+  // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
+  $: totalSignals = entries.reduce((s, e) => s + countFor(e, activeKey), 0);
+  $: citiesWithSignals = entries.filter((e) => countFor(e, activeKey) > 0).length;
 
-  // ── Badges des toggles : compte si ce toggle était activé en plus des toggles actifs ──
-  /** Compte si on active aussi le toggle zonage (en plus des toggles actifs). */
-  function badgeCountWithFlag(flag: "z" | "m" | "p"): number {
-    const parts: string[] = [];
-    if (zonageOnly || flag === "z") parts.push("z");
-    if (multi4plus || flag === "m") parts.push("m");
-    if (precoceOnly || flag === "p") parts.push("p");
-    const key = parts.join("|");
-    return entries.reduce((s, e) => s + (e.subsetCounts[key] ?? 0), 0);
-  }
+  // ── Badges « funnel » RÉACTIFS : compte si on ajoute ce toggle à l'actif ──
+  $: badgeZonage = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(true, multi4plus, precoceOnly)), 0);
+  $: badgeMulti = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(zonageOnly, true, precoceOnly)), 0);
+  $: badgePrecoce = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, true)), 0);
 </script>
 
 <!-- Rail container -->
@@ -219,7 +225,7 @@
             <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
             {#if !loading}
               <span class="axis-badge axis-badge--zonage">
-                {badgeCountWithFlag("z")}
+                {badgeZonage}
               </span>
             {/if}
           </label>
@@ -240,7 +246,7 @@
               <span class="rail-row-sublabel">nb unités ≥ 4 ou intensité haute</span>
             </span>
             {#if !loading}
-              <span class="axis-badge axis-badge--dimension">{badgeCountWithFlag("m")}</span>
+              <span class="axis-badge axis-badge--dimension">{badgeMulti}</span>
             {/if}
           </label>
         </div>
@@ -260,7 +266,7 @@
               <span class="rail-row-sublabel">avis de motion / 1er projet</span>
             </span>
             {#if !loading}
-              <span class="axis-badge axis-badge--anticipation">{badgeCountWithFlag("p")}</span>
+              <span class="axis-badge axis-badge--anticipation">{badgePrecoce}</span>
             {/if}
           </label>
         </div>
@@ -294,7 +300,7 @@
           {:else}
             {#each sortedEntries as entry (entry.municipality.slug)}
               {@const isSelected = selectedSlug === entry.municipality.slug}
-              {@const activeCount = activeCountForEntry(entry)}
+              {@const activeCount = countFor(entry, activeKey)}
               <li>
                 <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
                 <details
