@@ -40,6 +40,9 @@
   let loadError: string | null = null;
   let apiItems: SignalCityItem[] = [];
 
+  /** countsByType par ville slug (depuis /by-city, disponible immédiatement). */
+  const cityCountsByType = new Map<string, Record<string, number>>();
+
   // ── Détail ville sélectionnée ──────────────────────────────────────────────
   let detailLoading = false;
   let detailError: string | null = null;
@@ -90,9 +93,20 @@
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
       let count = e.signalCount6m;
-      const cached = detailCache.get(e.municipality.slug);
-      if (cached !== undefined && excludedTypes.size > 0) {
-        count = cached.filter((n) => !excludedTypes.has(n.type)).length;
+      if (excludedTypes.size > 0) {
+        // Préférer countsByType (from /by-city — toutes les villes) ou le cache détail
+        const byType = cityCountsByType.get(e.municipality.slug);
+        if (byType !== undefined) {
+          count = Object.entries(byType)
+            .filter(([t]) => !excludedTypes.has(t))
+            .reduce((s, [, n]) => s + n, 0);
+        } else {
+          // Fallback : cache détail si /by-city n'avait pas encore chargé pour cette ville
+          const cached = detailCache.get(e.municipality.slug);
+          if (cached !== undefined) {
+            count = cached.filter((n) => !excludedTypes.has(n.type)).length;
+          }
+        }
       }
       expr.push(e.municipality.slug, signalCountColor(count));
     }
@@ -318,6 +332,17 @@
         designationEventCount: c.signalCount,
         generatedAt: null,
       }));
+      // Alimenter countsByType depuis la réponse API (disponible pour toutes les villes dès le load)
+      cityCountsByType.clear();
+      for (const c of res.cities) {
+        cityCountsByType.set(c.citySlug, c.countsByType);
+      }
+      // Peupler knownNodeTypes depuis countsByType (toutes les villes) sans attendre un clic
+      const allTypes = new Set<string>();
+      for (const ct of res.cities) {
+        for (const t of Object.keys(ct.countsByType)) allTypes.add(t);
+      }
+      knownNodeTypes = Array.from(allTypes).sort();
     } catch (e) {
       loadError = e instanceof Error ? e.message : "Erreur de chargement";
       apiItems = [];
