@@ -141,7 +141,7 @@
   // ── Compteur filtré par ville (selon les types actifs) ─────────────────────
   function filteredCountForEntry(entry: CityMapEntry): number {
     if (effectiveExcluded.size === 0) return entry.signalCount6m;
-    return Object.entries(entry.countsByType)
+    return Object.entries(entry.countsByType ?? {})
       .filter(([t]) => !effectiveExcluded.has(t))
       .reduce((s, [, n]) => s + n, 0);
   }

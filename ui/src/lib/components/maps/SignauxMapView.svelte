@@ -339,12 +339,12 @@
       // Alimenter countsByType depuis la réponse API (disponible pour toutes les villes dès le load)
       cityCountsByType.clear();
       for (const c of res.cities) {
-        cityCountsByType.set(c.citySlug, c.countsByType);
+        cityCountsByType.set(c.citySlug, c.countsByType ?? {});
       }
       // Peupler knownNodeTypes depuis countsByType (toutes les villes) sans attendre un clic
       const allTypes = new Set<string>();
       for (const ct of res.cities) {
-        for (const t of Object.keys(ct.countsByType)) allTypes.add(t);
+        for (const t of Object.keys(ct.countsByType ?? {})) allTypes.add(t);
       }
       knownNodeTypes = Array.from(allTypes).sort();
     } catch (e) {
