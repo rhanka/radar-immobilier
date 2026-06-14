@@ -10,6 +10,13 @@ export interface GraphSignalCityItem {
   signalCount: number;
   /** Breakdown by node type (Signal, DesignationEvent, …). */
   countsByType: Record<string, number>;
+  /**
+   * Count of zonage signals only.
+   * DesignationEvent always counts as zonage; Signal counts only if its
+   * category ∈ ZONAGE_CATEGORIES (see api/src/services/graph/graph-store.ts).
+   * Used by the « Zonage uniquement » toggle to filter cities top-down.
+   */
+  zonageCount: number;
 }
 
 export interface GraphSignalsByCityResponse {

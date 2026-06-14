@@ -504,21 +504,92 @@ export async function listMrcs(db: Database): Promise<MrcSummary[]> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Catégories sémantiques ZONAGE pour les nœuds de type `Signal`.
+ *
+ * Un signal est considéré ZONAGE si :
+ *   - son type est `DesignationEvent` (toujours zonage), OU
+ *   - son type est `Signal` ET sa catégorie (props->'properties'->>'category')
+ *     appartient à cet ensemble.
+ *
+ * Les `Signal` sans catégorie (null/vide) ou avec une catégorie absente de cet
+ * ensemble sont considérés NON-zonage.
+ *
+ * Sources : requête SQL prod 2026-06-14 sur graph_nodes (type='Signal').
+ * Catégories incluses délibérément :
+ *   - rezonage, derogation, derogation_mineure, piia, cptaq, ppcmoi,
+ *     lotissement, subdivision, densification, usage_conditionnel,
+ *     modification_zonage, changement_usage, zone_agricole,
+ *     contrainte_reglementaire, patrimoine
+ * Catégories EXCLUES (non-zonage) :
+ *   - acquisition_fonciere, infrastructure, vente_terrain, vente_institutionnelle
+ *     et toutes catégories sans lien direct avec la réglementation foncière.
+ *
+ * CATÉGORIES AMBIGUËS (présentes en prod, non incluses — à arbitrer si besoin) :
+ *   amendement_zonage, modification_reglementaire, reglementation_urbanisme,
+ *   plan_urbanisme, infraction_zonage, usage, urbanisme, gouvernance_urbanisme,
+ *   developpement_residentiel, logement, logement_abordable, projet_particulier,
+ *   reglementation, contrainte.
+ *   Ces catégories existent en prod (1-5 occurrences chacune) mais n'étaient
+ *   pas dans la liste de référence initiale.
+ *
+ * Pour ajuster la liste : modifier ce seul tableau. L'effet est immédiat au
+ * prochain démarrage (aucune migration DB requise).
+ */
+export const ZONAGE_CATEGORIES: readonly string[] = [
+  "rezonage",
+  "derogation",
+  "derogation_mineure",
+  "piia",
+  "cptaq",
+  "ppcmoi",
+  "lotissement",
+  "subdivision",
+  "densification",
+  "usage_conditionnel",
+  "modification_zonage",
+  "changement_usage",
+  "zone_agricole",
+  "contrainte_reglementaire",
+  "patrimoine",
+];
+
+/** Set pour lookup O(1) en application code. */
+const ZONAGE_CATEGORIES_SET = new Set(ZONAGE_CATEGORIES);
+
+/**
+ * Détermine si un nœud signal (type + category) est de zonage.
+ *
+ * - `DesignationEvent` → toujours zonage
+ * - `Signal` + category ∈ ZONAGE_CATEGORIES → zonage
+ * - `Signal` sans category ou category hors liste → non-zonage
+ */
+export function isZonageSignal(type: string, category: string | null | undefined): boolean {
+  if (type === "DesignationEvent") return true;
+  if (type === "Signal" && category) return ZONAGE_CATEGORIES_SET.has(category);
+  return false;
+}
+
+/**
  * Count Signal + DesignationEvent nodes per city AND per type in graph_nodes.
  * Returns only cities that have at least one such node.
  *
  * Each city entry includes:
  *   - signalCount  : total count (all types, backward-compat)
  *   - countsByType : breakdown per node type (e.g. { Signal: 3, DesignationEvent: 2 })
+ *   - zonageCount  : count of zonage signals only (DesignationEvent always + Signal
+ *                    with category ∈ ZONAGE_CATEGORIES). Used by the « Zonage uniquement »
+ *                    toggle in the UI to filter the city list top-down.
  */
 export async function listCitiesWithSignalNodes(
   db: Database,
-): Promise<Array<{ citySlug: string; signalCount: number; countsByType: Record<string, number> }>> {
-  // One row per (citySlug, type) — lets us build both the total and the breakdown.
+): Promise<Array<{ citySlug: string; signalCount: number; countsByType: Record<string, number>; zonageCount: number }>> {
+  // One row per (citySlug, type, category) — lets us build the total, the type breakdown,
+  // and the zonage count in one query.
   const rows = await db
     .select({
       citySlug: graphNodes.citySlug,
       type: graphNodes.type,
+      category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
       count: sql<number>`count(*)::int`,
     })
     .from(graphNodes)
@@ -528,24 +599,34 @@ export async function listCitiesWithSignalNodes(
         isNotNull(graphNodes.citySlug),
       ),
     )
-    .groupBy(graphNodes.citySlug, graphNodes.type);
+    .groupBy(
+      graphNodes.citySlug,
+      graphNodes.type,
+      sql`${graphNodes.props}->'properties'->>'category'`,
+    );
 
   // Aggregate into per-city entries in application code.
-  const byCity = new Map<string, { signalCount: number; countsByType: Record<string, number> }>();
+  const byCity = new Map<string, { signalCount: number; countsByType: Record<string, number>; zonageCount: number }>();
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!byCity.has(row.citySlug)) {
-      byCity.set(row.citySlug, { signalCount: 0, countsByType: {} });
+      byCity.set(row.citySlug, { signalCount: 0, countsByType: {}, zonageCount: 0 });
     }
     const entry = byCity.get(row.citySlug)!;
     entry.signalCount += row.count;
-    entry.countsByType[row.type] = row.count;
+    // countsByType agrège par type (Signal ou DesignationEvent), pas par catégorie
+    entry.countsByType[row.type] = (entry.countsByType[row.type] ?? 0) + row.count;
+    // zonageCount : DesignationEvent toujours + Signal si category ∈ ZONAGE_CATEGORIES
+    if (isZonageSignal(row.type, row.category)) {
+      entry.zonageCount += row.count;
+    }
   }
 
-  return Array.from(byCity.entries()).map(([citySlug, { signalCount, countsByType }]) => ({
+  return Array.from(byCity.entries()).map(([citySlug, { signalCount, countsByType, zonageCount }]) => ({
     citySlug,
     signalCount,
     countsByType,
+    zonageCount,
   }));
 }
 

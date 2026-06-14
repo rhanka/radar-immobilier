@@ -87,12 +87,57 @@ describe("buildCityMapEntries", () => {
 
   it("countsByType is populated from graphItems", () => {
     const graphItems = [
-      { citySlug: PILOT_CITY_SLUG, signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } },
+      { citySlug: PILOT_CITY_SLUG, signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 }, zonageCount: 4 },
     ];
     const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
     const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
     expect(pilot).toBeDefined();
     expect(pilot!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
+  });
+
+  it("cities absent from graphItems have zonageCount === 0", () => {
+    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
+    for (const e of entries) {
+      expect(e.zonageCount).toBe(0);
+    }
+  });
+
+  it("zonageCount is populated from graphItems", () => {
+    const graphItems = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 10, countsByType: { Signal: 6, DesignationEvent: 4 }, zonageCount: 7 },
+    ];
+    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.zonageCount).toBe(7);
+  });
+
+  it("zonageCount peut être inférieur à signalCount (signaux non-zonage)", () => {
+    const graphItems = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 10, countsByType: { Signal: 10 }, zonageCount: 3 },
+    ];
+    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.zonageCount).toBeLessThan(pilot!.signalCount6m + 7); // total réel
+    expect(pilot!.zonageCount).toBe(3);
+  });
+
+  it("graphItems sans zonageCount explicite donnent zonageCount=0 (backward-compat)", () => {
+    // Simule une réponse ancienne sans zonageCount (cast via unknown pour simuler
+    // la sérialisation JSON qui ignorerait un champ absent).
+    const graphItems = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } } as unknown as {
+        citySlug: string;
+        signalCount: number;
+        countsByType: Record<string, number>;
+        zonageCount: number;
+      },
+    ];
+    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.zonageCount).toBe(0);
   });
 });
 
