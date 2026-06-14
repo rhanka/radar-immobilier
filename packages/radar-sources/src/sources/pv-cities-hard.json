@@ -93,7 +93,7 @@
       "pvIndexUrl": "https://lyster.ca/proces-verbaux",
       "pdf_count": 251,
       "status": "graphified",
-      "notes": "251 PVs, 1924 nodes, 3155 edges",
+      "notes": "251 PVs, 1924 nodes, 3155 edges. 1924 nodes, 3155 edges",
       "scw_key": "graph/lyster/latest.json"
     },
     "baie-des-sables": {
