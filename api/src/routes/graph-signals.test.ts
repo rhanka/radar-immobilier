@@ -62,17 +62,25 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number> }[];
+      cities: { citySlug: string; signalCount: number; subsetCounts: Record<string, number> }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(0);
     expect(body.cities).toEqual([]);
   });
 
-  it("returns ok:true with city list and correct totalCount", async () => {
+  it("returns ok:true with city list, correct totalCount et subsetCounts", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
-      { citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } },
-      { citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 } },
+      {
+        citySlug: "drummondville",
+        signalCount: 5,
+        subsetCounts: { "": 5, "z": 4, "m": 2, "p": 1, "z|m": 2, "z|p": 1, "m|p": 0, "z|m|p": 0 },
+      },
+      {
+        citySlug: "saint-constant",
+        signalCount: 3,
+        subsetCounts: { "": 3, "z": 1, "m": 0, "p": 0, "z|m": 0, "z|p": 0, "m|p": 0, "z|m|p": 0 },
+      },
     ]);
 
     const app = graphSignalsRoute({ db: mockDb });
@@ -82,14 +90,28 @@ describe("GET /api/graph-signals/by-city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       totalCount: number;
-      cities: { citySlug: string; signalCount: number; countsByType: Record<string, number> }[];
+      cities: {
+        citySlug: string;
+        signalCount: number;
+        subsetCounts: Record<string, number>;
+      }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(8);
     expect(body.cities).toHaveLength(2);
-    expect(body.cities[0]).toEqual({ citySlug: "drummondville", signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } });
-    expect(body.cities[1]).toEqual({ citySlug: "saint-constant", signalCount: 3, countsByType: { Signal: 3 } });
-    expect(body.cities[0]!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
+    // Drummondville : monotonie subsetCounts vérifiée
+    const drummond = body.cities[0]!;
+    expect(drummond.citySlug).toBe("drummondville");
+    expect(drummond.subsetCounts["z"]).toBe(4);
+    expect(drummond.subsetCounts["z|m"]).toBe(2);
+    expect(drummond.subsetCounts["z|m|p"]).toBe(0);
+    // Monotonie : z|m ≤ z ≤ ""
+    expect(drummond.subsetCounts["z|m"]).toBeLessThanOrEqual(drummond.subsetCounts["z"]!);
+    expect(drummond.subsetCounts["z"]).toBeLessThanOrEqual(drummond.subsetCounts[""]!);
+    // Saint-Constant
+    const stconst = body.cities[1]!;
+    expect(stconst.subsetCounts["z"]).toBeLessThanOrEqual(stconst.subsetCounts[""]!);
+    expect(stconst.subsetCounts["z|m"]).toBe(0);
   });
 });
 

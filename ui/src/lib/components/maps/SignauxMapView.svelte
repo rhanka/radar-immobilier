@@ -24,7 +24,6 @@
     buildCityMapEntries,
     type CityMapEntry,
   } from "$lib/maps/maps-data.js";
-  import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
   import {
     fetchGraphSignalsByCity,
   } from "$lib/signals/graph-signals-by-city-client.js";
@@ -38,10 +37,7 @@
   let selectedCity: CityMapEntry | null = null;
   let loading = true;
   let loadError: string | null = null;
-  let apiItems: SignalCityItem[] = [];
-
-  /** countsByType par ville slug (depuis /by-city, disponible immédiatement). */
-  const cityCountsByType = new Map<string, Record<string, number>>();
+  let graphItems: { citySlug: string; signalCount: number; subsetCounts: Record<string, number> }[] = [];
 
   // ── Détail ville sélectionnée ──────────────────────────────────────────────
   let detailLoading = false;
@@ -54,16 +50,19 @@
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
 
-  // ── Filtre GLOBAL par type ─────────────────────────────────────────────────
-  let excludedTypes = new Set<string>();
+  // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
+  /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
+  let activeSubsetKey = "z"; // défaut : zonageOnly ON
 
-  function handleFilterChange(excluded: Set<string>): void {
-    excludedTypes = new Set(excluded);
+  function handleFilterChange(
+    subsetKey: string,
+  ): void {
+    activeSubsetKey = subsetKey;
     updateFillColors();
   }
 
   // ── Données réactives ──────────────────────────────────────────────────────
-  $: allEntries = buildCityMapEntries(apiItems);
+  $: allEntries = buildCityMapEntries(graphItems);
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
@@ -83,31 +82,14 @@
 
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
-   * selon le dictionnaire count → color.
-   * Villes avec détail en cache : count filtré selon les types cochés.
-   * Villes sans détail : count total (signalCount6m).
+   * selon le compte actif exact (subsetCounts[activeSubsetKey]).
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      let count = e.signalCount6m;
-      if (excludedTypes.size > 0) {
-        // Préférer countsByType (from /by-city — toutes les villes) ou le cache détail
-        const byType = cityCountsByType.get(e.municipality.slug);
-        if (byType !== undefined) {
-          count = Object.entries(byType)
-            .filter(([t]) => !excludedTypes.has(t))
-            .reduce((s, [, n]) => s + n, 0);
-        } else {
-          // Fallback : cache détail si /by-city n'avait pas encore chargé pour cette ville
-          const cached = detailCache.get(e.municipality.slug);
-          if (cached !== undefined) {
-            count = cached.filter((n) => !excludedTypes.has(n.type)).length;
-          }
-        }
-      }
+      const count = (e.subsetCounts[activeSubsetKey] ?? 0);
       expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
@@ -326,26 +308,9 @@
     loadError = null;
     try {
       const res = await fetchGraphSignalsByCity();
-      // Adapter le format graph (signalCount) vers le format SignalCityItem
-      apiItems = res.cities.map((c) => ({
-        citySlug: c.citySlug,
-        designationEventCount: c.signalCount,
-        generatedAt: null,
-      }));
-      // Alimenter countsByType depuis la réponse API (disponible pour toutes les villes dès le load)
-      cityCountsByType.clear();
-      for (const c of res.cities) {
-        cityCountsByType.set(c.citySlug, c.countsByType);
-      }
-      // Peupler knownNodeTypes depuis countsByType (toutes les villes) sans attendre un clic
-      const allTypes = new Set<string>();
-      for (const ct of res.cities) {
-        for (const t of Object.keys(ct.countsByType)) allTypes.add(t);
-      }
-      knownNodeTypes = Array.from(allTypes).sort();
+      graphItems = res.cities;
     } catch (e) {
       loadError = e instanceof Error ? e.message : "Erreur de chargement";
-      apiItems = [];
     } finally {
       loading = false;
     }

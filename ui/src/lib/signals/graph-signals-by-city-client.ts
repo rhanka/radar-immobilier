@@ -8,8 +8,15 @@
 export interface GraphSignalCityItem {
   citySlug: string;
   signalCount: number;
-  /** Breakdown by node type (Signal, DesignationEvent, …). */
-  countsByType: Record<string, number>;
+  /**
+   * Exact intersection counts for each subset of {z, m, p} flags.
+   * Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+   * Value = nb signals satisfying ALL flags in the key.
+   *   z = isZonage  (DesignationEvent always; Signal if category ∈ ZONAGE_CATEGORIES)
+   *   m = isMulti4  (nb_unites_max ≥ 4 OR intensite = 'haute')
+   *   p = isPrecoce (etape ∈ {avis_motion, projet_reglement})
+   */
+  subsetCounts: Record<string, number>;
 }
 
 export interface GraphSignalsByCityResponse {
