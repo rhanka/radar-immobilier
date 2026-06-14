@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Bell } from "@lucide/svelte";
-  import { Header } from "@sentropic/design-system-svelte";
+  import { Header, Search } from "@sentropic/design-system-svelte";
   import ApiStatusBadge from "./ApiStatusBadge.svelte";
   import type { HealthView } from "$lib/api/health";
 
@@ -19,17 +19,14 @@
 
   {#snippet navigation()}
     <div class="min-w-0 flex-1 flex justify-center px-4">
-      <label class="flex h-10 w-full max-w-md items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-sm text-slate-500">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <span class="sr-only">Rechercher</span>
-        <input
-          class="min-w-0 flex-1 bg-transparent text-slate-700 outline-none placeholder:text-slate-400"
+      <div class="w-full max-w-md">
+        <Search
           placeholder="Lot, rue, reglement, source"
-          type="search"
+          size="md"
+          label="Rechercher"
+          class="w-full"
         />
-      </label>
+      </div>
     </div>
   {/snippet}
 
