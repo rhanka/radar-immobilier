@@ -6,25 +6,25 @@ import {
   signalCountTier,
   PILOT_CITY_SLUG,
 } from "./maps-data.js";
-import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
+import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
-const EMPTY_API: SignalCityItem[] = [];
+const EMPTY_API: GraphSignalCityItem[] = [];
 
-const VALLEYFIELD_ITEM: SignalCityItem = {
+const VALLEYFIELD_ITEM: GraphSignalCityItem = {
   citySlug: PILOT_CITY_SLUG,
-  designationEventCount: 3,
-  generatedAt: "2026-06-08T00:00:00.000Z",
+  signalCount: 3,
+  subsetCounts: { "": 3, z: 2 },
 };
 
 // MD1 — buildCityMapEntries returns only prioritized (non-excluded, non-deprioritized) cities
 describe("buildCityMapEntries", () => {
   it("returns at least one city even with empty API items", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 20 });
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 20 });
     expect(entries.length).toBeGreaterThan(0);
   });
 
   it("all entries have a municipality with lat/lon", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 10 });
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 10 });
     for (const e of entries) {
       expect(typeof e.municipality.lat).toBe("number");
       expect(typeof e.municipality.lon).toBe("number");
@@ -33,7 +33,7 @@ describe("buildCityMapEntries", () => {
   });
 
   it("cities absent from API items have signalCount6m === 0 (anti-invention)", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 50 });
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 50 });
     for (const e of entries) {
       expect(e.signalCount6m).toBe(0);
     }
@@ -57,9 +57,9 @@ describe("buildCityMapEntries", () => {
   });
 
   it("multiple cities with counts are correctly indexed", () => {
-    const items: SignalCityItem[] = [
-      { citySlug: PILOT_CITY_SLUG, designationEventCount: 4, generatedAt: "2026-06-01T00:00:00Z" },
-      { citySlug: "beauharnois", designationEventCount: 2, generatedAt: "2026-06-01T00:00:00Z" },
+    const items: GraphSignalCityItem[] = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 4, subsetCounts: { "": 4 } },
+      { citySlug: "beauharnois", signalCount: 2, subsetCounts: { "": 2 } },
     ];
     // No maxCities limit — ensure pilot city (wherever it ranks) is included.
     const entries = buildCityMapEntries(items);
@@ -71,139 +71,53 @@ describe("buildCityMapEntries", () => {
   });
 
   it("ordered by priorityRank ascending (closest to MTL first)", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 10 });
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 10 });
     const ranks = entries.map((e) => e.municipality.priorityRank ?? Infinity);
     for (let i = 1; i < ranks.length; i++) {
       expect(ranks[i]).toBeGreaterThanOrEqual(ranks[i - 1]);
     }
   });
 
-  it("cities absent from graphItems have empty countsByType", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
+  it("cities absent from graphItems have empty subsetCounts", () => {
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 5 });
     for (const e of entries) {
-      expect(e.countsByType).toEqual({});
+      expect(e.subsetCounts).toEqual({});
     }
   });
 
-  it("countsByType is populated from graphItems", () => {
-    const graphItems = [
+  it("subsetCounts is populated from graphItems", () => {
+    const graphItems: GraphSignalCityItem[] = [
       {
         citySlug: PILOT_CITY_SLUG,
         signalCount: 5,
-        countsByType: { Signal: 3, DesignationEvent: 2 },
-        zonageCount: 4,
-        multi4plusCount: 1,
-        countsByStage: { avis_motion: 1, inconnu: 4 },
+        subsetCounts: { "": 5, z: 3, "z|m": 1 },
       },
     ];
-    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
-    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    const entries = buildCityMapEntries([VALLEYFIELD_ITEM, ...graphItems.slice(1)]);
+    // Use the graphItem directly
+    const entries2 = buildCityMapEntries(graphItems);
+    const pilot = entries2.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
     expect(pilot).toBeDefined();
-    expect(pilot!.countsByType).toEqual({ Signal: 3, DesignationEvent: 2 });
+    expect(pilot!.subsetCounts).toEqual({ "": 5, z: 3, "z|m": 1 });
   });
 
-  it("cities absent from graphItems have zonageCount === 0", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
-    for (const e of entries) {
-      expect(e.zonageCount).toBe(0);
-    }
-  });
-
-  it("zonageCount is populated from graphItems", () => {
-    const graphItems = [
-      {
-        citySlug: PILOT_CITY_SLUG,
-        signalCount: 10,
-        countsByType: { Signal: 6, DesignationEvent: 4 },
-        zonageCount: 7,
-        multi4plusCount: 2,
-        countsByStage: { inconnu: 10 },
-      },
-    ];
-    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
-    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
-    expect(pilot).toBeDefined();
-    expect(pilot!.zonageCount).toBe(7);
-  });
-
-  it("zonageCount peut être inférieur à signalCount (signaux non-zonage)", () => {
-    const graphItems = [
-      {
-        citySlug: PILOT_CITY_SLUG,
-        signalCount: 10,
-        countsByType: { Signal: 10 },
-        zonageCount: 3,
-        multi4plusCount: 0,
-        countsByStage: { inconnu: 10 },
-      },
-    ];
-    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
-    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
-    expect(pilot).toBeDefined();
-    expect(pilot!.zonageCount).toBeLessThan(pilot!.signalCount6m + 7); // total réel
-    expect(pilot!.zonageCount).toBe(3);
-  });
-
-  it("graphItems sans zonageCount explicite donnent zonageCount=0 (backward-compat)", () => {
-    // Simule une réponse ancienne sans zonageCount (cast via unknown pour simuler
+  it("graphItems sans subsetCounts explicite donnent subsetCounts={} (backward-compat)", () => {
+    // Simule une réponse ancienne sans subsetCounts (cast via unknown pour simuler
     // la sérialisation JSON qui ignorerait un champ absent).
     const graphItems = [
-      { citySlug: PILOT_CITY_SLUG, signalCount: 5, countsByType: { Signal: 3, DesignationEvent: 2 } } as unknown as {
-        citySlug: string;
-        signalCount: number;
-        countsByType: Record<string, number>;
-        zonageCount: number;
-        multi4plusCount: number;
-        countsByStage: Record<string, number>;
-      },
+      { citySlug: PILOT_CITY_SLUG, signalCount: 5 } as unknown as GraphSignalCityItem,
     ];
-    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
+    const entries = buildCityMapEntries(graphItems);
     const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
     expect(pilot).toBeDefined();
-    expect(pilot!.zonageCount).toBe(0);
-    expect(pilot!.multi4plusCount).toBe(0);
-    expect(pilot!.countsByStage).toEqual({});
-  });
-
-  it("multi4plusCount est 0 pour les villes absentes de graphItems", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
-    for (const e of entries) {
-      expect(e.multi4plusCount).toBe(0);
-    }
-  });
-
-  it("multi4plusCount est populé depuis graphItems", () => {
-    const graphItems = [
-      {
-        citySlug: PILOT_CITY_SLUG,
-        signalCount: 10,
-        countsByType: { Signal: 8, DesignationEvent: 2 },
-        zonageCount: 7,
-        multi4plusCount: 3,
-        countsByStage: { avis_motion: 2, inconnu: 8 },
-      },
-    ];
-    const entries = buildCityMapEntries([VALLEYFIELD_ITEM], graphItems);
-    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
-    expect(pilot).toBeDefined();
-    expect(pilot!.multi4plusCount).toBe(3);
-    expect(pilot!.countsByStage).toEqual({ avis_motion: 2, inconnu: 8 });
-    // multi4plusCount ≤ signalCount (borne cohérente)
-    expect(pilot!.multi4plusCount).toBeLessThanOrEqual(pilot!.signalCount6m + 7);
-  });
-
-  it("countsByStage est vide pour les villes absentes de graphItems", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
-    for (const e of entries) {
-      expect(e.countsByStage).toEqual({});
-    }
+    expect(pilot!.subsetCounts).toEqual({});
   });
 });
 
 // MD2 — computeBbox
 describe("computeBbox", () => {
   it("returns a valid bbox for a list of municipalities", () => {
-    const entries = buildCityMapEntries(EMPTY_API, [], { maxCities: 5 });
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 5 });
     const cities = entries.map((e) => e.municipality);
     const bbox = computeBbox(cities);
     expect(bbox.minLon).toBeLessThan(bbox.maxLon);
