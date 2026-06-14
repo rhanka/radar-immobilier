@@ -25,6 +25,40 @@ export interface LotProperties {
    * Source : /api/geo/:city/lots (feat/api-score-potentiel-lot).
    */
   potentialScore?: number;
+  /**
+   * Mode de la source de données.
+   * "carte-steve" = données Steve (4 villes), "donnees-quebec" = MRNF scrappé.
+   * undefined si l'endpoint est l'ancien format.
+   */
+  mode?: "carte-steve" | "donnees-quebec";
+  /**
+   * Tag de provenance — "steve-import" pour les données de la carte Steve.
+   * Permet de distinguer les sources dans l'UI.
+   */
+  provenance?: "steve-import";
+  // ── Champs enrichis mode carte-steve ──────────────────────────────────────
+  /** Code de zone (ex. "H-104"). Présent en mode carte-steve. */
+  zone?: string;
+  /** Flag dans périmètre TOD. Présent en mode carte-steve. */
+  tod?: boolean;
+  /** Flag multifamilial 4+ logements. Présent en mode carte-steve. */
+  multifamilial4plus?: boolean;
+  /**
+   * Flag priorité = 4+ ∩ TOD (précalculé par Steve).
+   * Lots prioritaires affichés en orange sur la carte.
+   * Présent en mode carte-steve.
+   */
+  priorite?: boolean;
+  /** Valeur totale au rôle 2022 ($). Présent en mode carte-steve. */
+  valTotale?: number;
+  /** Valeur terrain ($). Présent en mode carte-steve. */
+  valTerrain?: number;
+  /** Catégorie (ex. "Résidentiel"). Présent en mode carte-steve. */
+  categorie?: string;
+  /** Nombre de logements au rôle. Présent en mode carte-steve. */
+  nbLogementsRole?: number;
+  /** Nombre d'étages. Présent en mode carte-steve. */
+  nbEtages?: string;
 }
 
 export interface LotGeometry {
@@ -46,7 +80,9 @@ export interface LotFeatureCollection {
 export interface LotsResponse {
   ok: boolean;
   citySlug: string;
-  source: "donnees-quebec" | "none";
+  source: "donnees-quebec" | "carte-steve" | "none";
+  /** Mode de la source (carte-steve = données Steve, donnees-quebec = MRNF). */
+  mode?: "carte-steve" | "donnees-quebec";
   /** Raison de l'échec (ok=false seulement). */
   reason?: string;
   featureCollection: LotFeatureCollection;

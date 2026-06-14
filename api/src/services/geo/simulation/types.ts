@@ -53,6 +53,11 @@ export interface SimulationLotProperties {
   noLot: string;
   citySlug: string;
   mode: "carte-steve";
+  /**
+   * Tag de provenance — toujours "steve-import" pour les données de la carte Steve.
+   * Permet de distinguer les données importées de Steve des données scrapées/graphifiées.
+   */
+  provenance: "steve-import";
   /** Code de zone (ex. "H-104"). Peut être vide ("") si inconnu. */
   zone: string;
   /** Superficie calculée géométriquement (m²). Source: superficie_m2_calculee. */
@@ -87,6 +92,12 @@ export interface SimulationLotProperties {
   tod: boolean;
   /** Flag multifamilial 4+ (calculé par Steve). Source: multifamilial_4plus. */
   multifamilial4plus: boolean;
+  /**
+   * Flag priorité = multifamilial 4+ ∩ TOD (calculé par Steve, préservé tel quel).
+   * Source: priorite dans le JSON Steve.
+   * Lots prioritaires sont affichés en orange sur la carte.
+   */
+  priorite: boolean;
   /**
    * Score de potentiel par lot [0, 10] — scorer canonique (#165).
    * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.

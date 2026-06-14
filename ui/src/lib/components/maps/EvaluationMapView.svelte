@@ -1,27 +1,29 @@
 <script lang="ts">
   /**
-   * EvaluationMapView — Vue Évaluation (maille zone/lots) — WP B slice-2.
+   * EvaluationMapView — Vue Évaluation (maille zone/lots) — WP B slice-2 + PHASE 3 Steve.
    *
    * Drilldown zone→lot : sélection d'une ville (parmi celles avec source lots
    * donnees-quebec ET/OU changements de zonage) → charge simultanément :
    *   1. Les lots cadastraux réels (MRNF) via GET /api/geo/:city/lots
    *   2. Les changements de zonage réels via GET /api/signals/:city/detail
    *
+   * PHASE 3 — Données Steve (carte-steve) :
+   * Les 4 villes Steve (delson, sainte-catherine, saint-constant, candiac) sont
+   * disponibles avec la palette de couleurs Steve :
+   *   - Orange (#e67e22) : priorité = 4+ ∩ TOD
+   *   - Vert   (#27ae60) : zone multifamilial 4+
+   *   - Bleu pâle (#2980b9 op.25) : dans périmètre TOD
+   *   - Gris (#bdc3c7) : autres lots
+   * SWITCH de source : bouton "Carte Steve" ↔ "Signaux radar" dans la section lots.
+   *
    * Affichage côte à côte :
    *   - Panneau gauche : changement(s) de zonage (reglementNumbers + zoneRefs)
    *   - Panneau droit : lots cadastraux SVG de la ville
-   *   Lien honnête : la géométrie exacte de la zone n'est pas disponible — on
-   *   montre les lots de la ville + la/les zone(s) du signal en libellé.
-   *
-   * Sélecteur : uniquement les villes avec lots ET/OU zonage.
-   * Résumé : "<ville> : <N> changements de zonage · <M> lots chargés".
    *
    * Anti-PII (Loi 25) : seul `noLot` (NO_LOT du cadastre allégé) est affiché.
    * Aucune donnée propriétaire, aucun owner, aucun nom de personne.
    *
-   * Carte : SVG pur (même approche que SignauxMapView + OpportunitesMapView —
-   * pas de nouvelle dépendance carto). Projection équirectangulaire bornée par
-   * la bbox des lots chargés.
+   * Carte : SVG pur — projection équirectangulaire bornée par la bbox des lots.
    */
   import { onMount } from "svelte";
   import {
@@ -33,6 +35,8 @@
     RefreshCw,
     Layers,
     FileText,
+    ToggleLeft,
+    ToggleRight,
   } from "@lucide/svelte";
   import { Badge, Alert } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -41,7 +45,7 @@
     CONFIDENCE_TONE,
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
-  import { fetchLots, type LotFeatureCollection, type LotFeature } from "$lib/maps/lots-client.js";
+  import { fetchLots, type LotFeatureCollection, type LotFeature, type LotProperties } from "$lib/maps/lots-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
@@ -55,14 +59,53 @@
   // ── Villes avec source lots et/ou zonage ──────────────────────────────────
   // Cities that have lots.availability === "donnees-quebec" in the geo inventory
   // and/or a known signal (changement de zonage).
-  const EVAL_CITIES: Array<{ slug: string; name: string; mrc?: string }> = [
+  const EVAL_CITIES: Array<{ slug: string; name: string; mrc?: string; hasSteve?: boolean }> = [
     { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry" },
-    { slug: "saint-constant", name: "Saint-Constant", mrc: "Roussillon" },
+    { slug: "saint-constant", name: "Saint-Constant", mrc: "Roussillon", hasSteve: true },
     { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry" },
-    { slug: "sainte-catherine", name: "Sainte-Catherine", mrc: "Roussillon" },
-    { slug: "delson", name: "Delson", mrc: "Roussillon" },
+    { slug: "sainte-catherine", name: "Sainte-Catherine", mrc: "Roussillon", hasSteve: true },
+    { slug: "delson", name: "Delson", mrc: "Roussillon", hasSteve: true },
     { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains" },
+    { slug: "candiac", name: "Candiac", mrc: "Roussillon", hasSteve: true },
   ];
+
+  // ── SWITCH de source : données Steve ↔ signaux scrapés ────────────────────
+  // "steve" = palette Steve (priorité/4+/TOD/gris), "signaux" = palette teal
+  let sourceMode: "steve" | "signaux" = "steve";
+
+  function toggleSourceMode(): void {
+    sourceMode = sourceMode === "steve" ? "signaux" : "steve";
+  }
+
+  // ── Palette de couleurs Steve (PHASE 3) ────────────────────────────────────
+  // Reproduit la logique de getLotColor() de la carte Steve :
+  //   - Orange (#e67e22) : priorite = 4+ ∩ TOD
+  //   - Vert   (#27ae60) : multifamilial 4+ (non priorité)
+  //   - Bleu pâle (#2980b9, op 0.25) : dans TOD mais pas 4+
+  //   - Gris (#bdc3c7) : autres lots
+  // Lots is_rue : gris très pâle
+  function getLotColorSteve(props: LotProperties): { fill: string; opacity: number; stroke: string } {
+    if (props.priorite) {
+      return { fill: "#e67e22", opacity: 0.8, stroke: "#d35400" };    // orange — priorité
+    }
+    if (props.multifamilial4plus) {
+      return { fill: "#27ae60", opacity: 0.75, stroke: "#1e8449" };   // vert — zone 4+
+    }
+    if (props.tod) {
+      return { fill: "#2980b9", opacity: 0.25, stroke: "#2471a3" };   // bleu pâle — TOD
+    }
+    return { fill: "#bdc3c7", opacity: 0.45, stroke: "#95a5a6" };     // gris — autres
+  }
+
+  // Palette teal (mode "signaux" — ancienne palette neutre)
+  function getLotColorSignaux(isHovered: boolean, isSelected: boolean): { fill: string; opacity: number; stroke: string } {
+    if (isSelected) return { fill: "#0d9488", opacity: 0.7, stroke: "#0d9488" };
+    if (isHovered)  return { fill: "#5eead4", opacity: 0.6, stroke: "#2dd4bf" };
+    return { fill: "#99f6e4", opacity: 0.45, stroke: "#2dd4bf" };
+  }
+
+  // Limite de lots : les villes Steve ont jusqu'à 11k lots, on charge tout mais avec bbox optionnelle
+  const LOTS_LIMIT = 15000;
 
   // ── Données signaux (section grille — signaux réels depuis l'API) ─────────
   interface CitySignalEntry {
@@ -150,15 +193,20 @@
 
   // ── Chargement des lots ────────────────────────────────────────────────────
 
+  /** Source de données de la réponse lots chargés. */
+  let lotsSource: "carte-steve" | "donnees-quebec" | "none" | null = null;
+
   async function loadLots(citySlug: string): Promise<void> {
     lotsLoading = true;
     lotsError = null;
     lotsFC = { type: "FeatureCollection", features: [] };
+    lotsSource = null;
     selectedLot = null;
     hoveredLot = null;
     try {
-      const res = await fetchLots(citySlug, { limit: 200 });
+      const res = await fetchLots(citySlug, { limit: LOTS_LIMIT });
       lotsFC = res.featureCollection;
+      lotsSource = res.source ?? null;
       if (!res.ok) {
         lotsError = res.reason ?? "Source lots non disponible pour cette ville.";
       }
@@ -169,6 +217,20 @@
       lotsLoading = false;
     }
   }
+
+  /** Est-ce que les lots chargés viennent de la carte Steve ? */
+  $: isCarteSteve = lotsSource === "carte-steve";
+
+  /** Lots prioritaires (4+ ∩ TOD) — uniquement disponible en mode carte-steve. */
+  $: nPriority = isCarteSteve
+    ? polygonFeatures.filter((f) => f.properties.priorite).length
+    : 0;
+  $: n4plus = isCarteSteve
+    ? polygonFeatures.filter((f) => f.properties.multifamilial4plus && !f.properties.priorite).length
+    : 0;
+  $: nTod = isCarteSteve
+    ? polygonFeatures.filter((f) => f.properties.tod && !f.properties.multifamilial4plus).length
+    : 0;
 
   // ── Chargement des changements de zonage ───────────────────────────────────
 
@@ -487,6 +549,11 @@
               {:else if !lotsError}
                 <span class="text-xs text-slate-400">Aucun lot</span>
               {/if}
+              {#if isCarteSteve && nPriority > 0}
+                <Badge tone="neutral" class="text-xs" style="background:#e67e22;color:white;">
+                  {nPriority}&nbsp;priorité
+                </Badge>
+              {/if}
             </div>
           {/if}
         </div>
@@ -562,19 +629,67 @@
 
           <!-- ── Colonne droite : Lots cadastraux ─────────────────────────── -->
           <div class="flex-1 min-w-0" data-testid="lots-panel">
-            <div class="px-4 pt-4 pb-2 flex items-center justify-between">
+            <div class="px-4 pt-4 pb-2 flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2">
                 <Layers class="h-4 w-4 text-teal-500 shrink-0" aria-hidden="true" />
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Lots cadastraux MRNF
+                  {isCarteSteve ? "Lots — données Steve" : "Lots cadastraux MRNF"}
                 </span>
               </div>
-              {#if !lotsLoading && !lotsError && hasLots}
-                <span class="text-xs text-slate-400">
-                  {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · CC-BY
-                </span>
-              {/if}
+              <div class="flex items-center gap-2">
+                {#if !lotsLoading && !lotsError && hasLots}
+                  <span class="text-xs text-slate-400">
+                    {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · CC-BY
+                  </span>
+                {/if}
+                {#if isCarteSteve}
+                  <!-- Switch source : carte Steve ↔ radar signaux -->
+                  <button
+                    type="button"
+                    class={`flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium transition-colors ${
+                      sourceMode === "steve"
+                        ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                        : "bg-teal-100 text-teal-700 hover:bg-teal-200"
+                    }`}
+                    on:click={toggleSourceMode}
+                    aria-label={sourceMode === "steve" ? "Basculer vers palette radar" : "Basculer vers palette Steve"}
+                    title={sourceMode === "steve" ? "Palette Steve : priorité/4+/TOD/gris" : "Palette radar : score de potentiel"}
+                    data-testid="source-mode-toggle"
+                  >
+                    {#if sourceMode === "steve"}
+                      <ToggleRight class="h-3.5 w-3.5" aria-hidden="true" />
+                      Carte Steve
+                    {:else}
+                      <ToggleLeft class="h-3.5 w-3.5" aria-hidden="true" />
+                      Radar
+                    {/if}
+                  </button>
+                {/if}
+              </div>
             </div>
+
+            <!-- Légende palette Steve (mode steve uniquement) -->
+            {#if isCarteSteve && sourceMode === "steve" && hasLots}
+              <div class="px-4 pb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500" data-testid="steve-legend">
+                <span class="flex items-center gap-1">
+                  <span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#e67e22;opacity:0.8;" aria-hidden="true"></span>
+                  Priorité ({nPriority})
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#27ae60;opacity:0.75;" aria-hidden="true"></span>
+                  Zone 4+ ({n4plus})
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#2980b9;opacity:0.4;" aria-hidden="true"></span>
+                  TOD ({nTod})
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#bdc3c7;opacity:0.6;" aria-hidden="true"></span>
+                  Autres
+                </span>
+                <span class="text-slate-400 ml-auto italic">provenance: steve-import</span>
+              </div>
+            {/if}
 
             {#if lotsLoading}
               <div class="flex items-center justify-center p-6 text-sm text-slate-400">
@@ -630,13 +745,29 @@
                       aria-label="Lot {feature.properties.noLot}"
                       tabindex="0"
                     >
-                      <polygon
-                        points={ringToPoints(rings[0], lotsBbox)}
-                        fill={isLotSelected ? "#0d9488" : isHovered ? "#5eead4" : "#99f6e4"}
-                        stroke={isLotSelected ? "#0d9488" : "#2dd4bf"}
-                        stroke-width={isLotSelected ? "1.5" : "0.8"}
-                        fill-opacity={isLotSelected ? "0.7" : isHovered ? "0.6" : "0.45"}
-                      />
+                      {#if isCarteSteve && sourceMode === "steve"}
+                        {@const lotColor = isLotSelected
+                          ? { fill: "#0d9488", opacity: 0.7, stroke: "#0d9488" }
+                          : isHovered
+                            ? { fill: "#5eead4", opacity: 0.6, stroke: "#2dd4bf" }
+                            : getLotColorSteve(feature.properties)}
+                        <polygon
+                          points={ringToPoints(rings[0], lotsBbox)}
+                          fill={lotColor.fill}
+                          stroke={lotColor.stroke}
+                          stroke-width={isLotSelected ? "1.5" : "0.8"}
+                          fill-opacity={String(lotColor.opacity)}
+                        />
+                      {:else}
+                        {@const lotColor = getLotColorSignaux(isHovered, isLotSelected)}
+                        <polygon
+                          points={ringToPoints(rings[0], lotsBbox)}
+                          fill={lotColor.fill}
+                          stroke={lotColor.stroke}
+                          stroke-width={isLotSelected ? "1.5" : "0.8"}
+                          fill-opacity={String(lotColor.opacity)}
+                        />
+                      {/if}
                       {#if (isHovered || isLotSelected) && rings[0].length > 0}
                         {@const cx = rings[0].reduce((s, p) => s + projX(p[0], lotsBbox), 0) / rings[0].length}
                         {@const cy = rings[0].reduce((s, p) => s + projY(p[1], lotsBbox), 0) / rings[0].length}

@@ -201,6 +201,25 @@ describe("getSimulationLots — delson", () => {
     }
   });
 
+  it("tous les lots ont provenance:'steve-import'", () => {
+    const lots = getSimulationLots("delson");
+    for (const l of lots) {
+      expect(l.properties.provenance).toBe("steve-import");
+    }
+  });
+
+  it("les lots prioritaires (4+ ∩ TOD) ont priorite=true", () => {
+    const lots = getSimulationLots("delson");
+    const priorityLots = lots.filter((l) => l.properties.priorite);
+    // Delson a 130 lots prioritaires selon la spec
+    expect(priorityLots.length).toBeGreaterThan(0);
+    // Chaque lot prioritaire doit aussi avoir tod=true et multifamilial4plus=true
+    for (const l of priorityLots) {
+      expect(l.properties.tod).toBe(true);
+      expect(l.properties.multifamilial4plus).toBe(true);
+    }
+  });
+
   it("tous les lots ont un citySlug='delson'", () => {
     const lots = getSimulationLots("delson");
     for (const l of lots) {

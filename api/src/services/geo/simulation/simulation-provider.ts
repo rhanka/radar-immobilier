@@ -98,6 +98,8 @@ interface SteveLotProperties {
   is_rue?: unknown;
   tod?: unknown;
   multifamilial_4plus?: unknown;
+  /** Flag priorité = 4+ ∩ TOD, précalculé par Steve. */
+  priorite?: unknown;
 }
 
 interface SteveFeature {
@@ -208,6 +210,8 @@ export function getSimulationLots(
     const superficieM2 = Number(p["superficie_m2_calculee"] ?? 0);
     const tod = Boolean(p["tod"] ?? false);
     const isRue = Boolean(p["is_rue"] ?? false);
+    // priorite = flag précalculé par Steve : multifamilial_4plus ∩ TOD
+    const priorite = Boolean(p["priorite"] ?? false);
 
     // Calcul du score canonique 0-10
     // 1. Dériver le SimulationZoneKind depuis le code zone Steve
@@ -243,6 +247,7 @@ export function getSimulationLots(
       noLot,
       citySlug,
       mode: "carte-steve",
+      provenance: "steve-import",
       zone,
       superficieM2,
       categorie: String(p["categorie"] ?? ""),
@@ -260,6 +265,7 @@ export function getSimulationLots(
       isRue,
       tod,
       multifamilial4plus: Boolean(p["multifamilial_4plus"] ?? false),
+      priorite,
       potentialScore,
       scoreDetail: {
         scoreBase: detail.scoreBase,
