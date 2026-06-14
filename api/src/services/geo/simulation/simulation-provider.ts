@@ -27,10 +27,10 @@
  * Entrées : { densiteLogHa, kind (canonique), usages } + { superficieM2, usageCode:null } + inTod.
  *
  * ## Couverture par ville
- *   - delson         : 500 lots / 3213, 101 zones, 4 TOD  — complet
- *   - sainte-catherine: 500 lots / 5615, 193 zones dessinées, 0 TOD
- *   - saint-constant : 500 lots / 11261, 265 zones, 1 TOD
- *   - candiac        : 500 lots / 7190,  0 zones, 0 TOD   — score partiel
+ *   - delson         : 3213 lots complets, 101 zones, 4 TOD
+ *   - sainte-catherine: 5615 lots complets, 193 zones dessinées, 0 TOD
+ *   - saint-constant : 11261 lots complets, 265 zones, 1 TOD
+ *   - candiac        : 7190 lots complets, 0 zones, 0 TOD — score partiel
  */
 
 import { readFileSync } from "node:fs";
@@ -260,6 +260,7 @@ export function getSimulationLots(
       isRue,
       tod,
       multifamilial4plus: Boolean(p["multifamilial_4plus"] ?? false),
+      provenance: "steve-import" as const,
       potentialScore,
       scoreDetail: {
         scoreBase: detail.scoreBase,
