@@ -10,6 +10,7 @@
   import { RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+  import { extractDocRefs } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   export let selectedCity: CityMapEntry | null = null;
@@ -179,6 +180,45 @@
                           </div>
                         {/if}
                       </div>
+
+                      <!-- ── Documents sources ── -->
+                      {#each [extractDocRefs(node.props)] as docRefs}
+                        <div class="doc-refs-section">
+                          <span class="doc-refs-label">Documents sources</span>
+                          {#if docRefs.length === 0}
+                            <p class="doc-refs-empty">Source non liée</p>
+                          {:else}
+                            <ul class="doc-refs-list">
+                              {#each docRefs as ref, i (ref.docSha + i)}
+                                <li class="doc-ref-item">
+                                  {#if ref.sourceUrl}
+                                    <a
+                                      href={ref.sourceUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      class="doc-ref-link"
+                                      title={ref.sourceUrl}
+                                    >
+                                      PV{ref.page !== undefined ? ` · p.​${ref.page}` : ""}
+                                    </a>
+                                  {:else}
+                                    <span class="doc-ref-sha" title={ref.docSha}>
+                                      {ref.docSha.slice(0, 8)}…{ref.page !== undefined ? ` · p.${ref.page}` : ""}
+                                    </span>
+                                  {/if}
+                                  {#if ref.excerpt}
+                                    <blockquote class="doc-ref-excerpt">
+                                      {ref.excerpt.length > 140
+                                        ? ref.excerpt.slice(0, 140) + "…"
+                                        : ref.excerpt}
+                                    </blockquote>
+                                  {/if}
+                                </li>
+                              {/each}
+                            </ul>
+                          {/if}
+                        </div>
+                      {/each}
                     </div>
                   {/if}
                 </div>
@@ -449,6 +489,79 @@
 
   .entity-meta-link:hover {
     color: #1d4ed8;
+  }
+
+  /* ── Documents sources ── */
+  .doc-refs-section {
+    margin-top: 0.55rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  .doc-refs-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.3rem;
+  }
+
+  .doc-refs-empty {
+    font-size: 0.74rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-style: italic;
+    margin: 0;
+  }
+
+  .doc-refs-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .doc-ref-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .doc-ref-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--st-semantic-action-primary, #2563eb);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-family: var(--st-font-mono, ui-monospace, monospace);
+  }
+
+  .doc-ref-link:hover {
+    color: #1d4ed8;
+  }
+
+  .doc-ref-sha {
+    font-size: 0.72rem;
+    color: var(--st-semantic-text-secondary, #64748b);
+    font-family: var(--st-font-mono, ui-monospace, monospace);
+  }
+
+  .doc-ref-excerpt {
+    margin: 0;
+    padding: 0.2rem 0.4rem;
+    border-left: 2px solid var(--st-semantic-border-subtle, #cbd5e1);
+    font-size: 0.72rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-style: italic;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
 
   /* ── Accordéon dans le bucket ── */
