@@ -1,0 +1,17 @@
+version: 1
+profile:
+  path: ../../ontology/ontology-profile.yaml
+inputs:
+  corpus:
+    - raw/proces-verbaux-beaupre
+  registries:
+    - references/municipalities.csv
+dataprep:
+  pdf_ocr: auto
+  prefer_ocr_markdown: true
+  citation_minimum: page
+  preserve_source_structure: true
+outputs:
+  state_dir: .graphify/beaupre
+  write_html: true
+  write_wiki: true
