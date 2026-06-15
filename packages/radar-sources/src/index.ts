@@ -184,3 +184,6 @@ export {
   YOUTUBE_SEARCH_RESPONSE_FIXTURE,
   YOUTUBE_SEARCH_EMPTY_RESPONSE_FIXTURE,
 } from "./sources/youtube-seances.fixture.js";
+export * from "./geo/cadastre-allege.js";
+export * from "./geo/arcgis-zonage.js";
+export * from "./geo/arcgis-service-registry.js";
