@@ -43,6 +43,13 @@
       "when": 1750000000000,
       "tag": "0005_prospect_marks",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1750000001000,
+      "tag": "0006_geo_mapper",
+      "breakpoints": true
     }
   ]
 }
