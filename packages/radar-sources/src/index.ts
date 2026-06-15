@@ -184,7 +184,6 @@ export {
   YOUTUBE_SEARCH_RESPONSE_FIXTURE,
   YOUTUBE_SEARCH_EMPTY_RESPONSE_FIXTURE,
 } from "./sources/youtube-seances.fixture.js";
-export * from "./geo/cadastre-allege.js";
-export * from "./geo/arcgis-zonage.js";
-export * from "./geo/arcgis-service-registry.js";
-export * from "./geo/ckan-zonage.js";
+// Adapters d'acquisition géo supprimés (cadastre-allege, arcgis-zonage,
+// arcgis-service-registry, ckan-zonage) — remplacés par @sentropic/geo 0.1.1
+// et @sentropic/geo-sources-americas 0.1.1 (consommés dans api/populate-geo.ts).
