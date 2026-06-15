@@ -62,8 +62,8 @@ vi.mock("../services/prospect/marks-service.js", () => ({
 
 // ─── Constantes de test ───────────────────────────────────────────────────────
 
-const VALID_LOT_VERSION_ID = "11111111-1111-1111-1111-111111111111";
-const VALID_AUTHOR_ID = "22222222-2222-2222-2222-222222222222";
+const _VALID_LOT_VERSION_ID = "11111111-1111-1111-1111-111111111111";
+const _VALID_AUTHOR_ID = "22222222-2222-2222-2222-222222222222";
 
 // Mock DB minimal (utilisé pour les requêtes auth — en open mode jamais appelé)
 const mockDb = {
