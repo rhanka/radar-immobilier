@@ -16,6 +16,7 @@
  *   - La couche contact (lecture + journalisation) est dans contact-service.ts.
  */
 
+import { randomUUID } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import {
@@ -132,17 +133,27 @@ export async function getNotesForLot(
 /**
  * Crée ou met à jour un marquage (append-only + supersedes en transaction LWW).
  *
- * 1. Cherche l'actif courant en transaction FOR UPDATE (LWW).
- * 2. INSERT le nouveau avec supersedes = id de l'ancien.
- * 3. UPDATE l'ancien : superseded_by = id du nouveau.
- * Tout en une transaction : respecte la contrainte UNIQUE partielle.
+ * Ordre transactionnel (évite la violation de prospect_marks_active_uq) :
+ *   a. Générer l'UUID du nouveau marquage côté app.
+ *   b. UPDATE l'ancien actif : superseded_by = newId
+ *      → l'ancien passe de 1 actif à 0 actif pour ce (lot_version_id, dimension).
+ *      → la FK superseded_by est DEFERRABLE INITIALLY DEFERRED (migration 0006) :
+ *        elle tolère que newId n'existe pas encore au moment de l'UPDATE.
+ *   c. INSERT le nouveau avec cet id et superseded_by = NULL
+ *      → 0 actif devient 1 actif ; l'index partiel unique est satisfait.
+ *   d. COMMIT → la FK différée valide (le nouveau existe désormais).
+ *
+ * À chaque instant dans la transaction l'index partiel voit 0 ou 1 actif.
  */
 export async function upsertMark(
   db: Database,
   input: CreateMarkInput,
 ) {
   return db.transaction(async (tx) => {
-    // 1. Chercher l'actif courant
+    // a. Générer l'id du nouveau marquage côté application.
+    const newId = randomUUID();
+
+    // b. Chercher et superséder l'actif courant (si existant).
     const existingRows = await tx
       .select({ id: prospectMarks.id })
       .from(prospectMarks)
@@ -157,10 +168,22 @@ export async function upsertMark(
 
     const previousId = existingRows[0]?.id ?? null;
 
-    // 2. Insérer le nouveau marquage
+    if (previousId) {
+      // UPDATE d'abord : l'ancien passe de actif (superseded_by IS NULL) à inactif.
+      // La FK superseded_by est DEFERRABLE INITIALLY DEFERRED : newId peut ne pas
+      // encore exister à cet instant ; la contrainte FK est vérifiée au COMMIT.
+      await tx
+        .update(prospectMarks)
+        .set({ supersededBy: newId })
+        .where(eq(prospectMarks.id, previousId));
+    }
+
+    // c. INSERT le nouveau avec l'id pré-généré et superseded_by = NULL.
+    //    À ce stade il y a exactement 1 actif → l'index partiel unique est satisfait.
     const [newMark] = await tx
       .insert(prospectMarks)
       .values({
+        id: newId,
         lotVersionId: input.lotVersionId,
         noLot: input.noLot,
         citySlug: input.citySlug,
@@ -177,14 +200,7 @@ export async function upsertMark(
 
     if (!newMark) throw new Error("insert prospect_marks returned no row");
 
-    // 3. Stamper superseded_by sur l'ancien actif
-    if (previousId) {
-      await tx
-        .update(prospectMarks)
-        .set({ supersededBy: newMark.id })
-        .where(eq(prospectMarks.id, previousId));
-    }
-
+    // d. COMMIT → la FK différée valide que newId existe bien.
     return newMark;
   });
 }
