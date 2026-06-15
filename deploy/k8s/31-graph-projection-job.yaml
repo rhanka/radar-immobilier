@@ -1,18 +1,40 @@
 # graph-projection-job.yaml — projette les graphes graphify SCW dans Postgres.
 #
-# Deux étapes dans le même Job (initContainers) :
-#   1. db-migrate   : applique les migrations Drizzle (idempotent, CREATE IF NOT EXISTS).
-#   2. project-graph: lit graph/<ville>/latest.json depuis SCW (SCRAPE_S3_*) et
-#                     appelle upsertGraph pour chaque ville trouvée.
+# Trois étapes dans le même Job (initContainers exécutés dans l'ordre, puis le
+# conteneur principal) :
+#   1. db-backfill-0004 : insère (idempotent) la ligne de tracking drizzle de la
+#                         migration 0004_auth_users appliquée À LA MAIN en prod et
+#                         JAMAIS trackée dans __drizzle_migrations. SANS cette étape,
+#                         l'étape (2) `migrate` tenterait de REJOUER 0004 et
+#                         échouerait (table account_users déjà existante). No-op si
+#                         la ligne est déjà là → ré-exécutable sans dégât.
+#   2. db-migrate       : applique les migrations Drizzle (idempotent, CREATE IF NOT
+#                         EXISTS). workingDir /workspace/api car migrate.js lit
+#                         `migrationsFolder: "drizzle"` RELATIF au CWD.
+#   3. project-graph    : lit graph/<ville>/latest.json depuis SCW (GRAPH_S3_* →
+#                         SCRAPE_S3_*) et appelle upsertGraph pour chaque ville.
 #
-# Usage one-shot :
+# Les trois conteneurs partagent l'IMAGE radar-api unique : depuis le fix esbuild
+# multi-entryPoints (api/Dockerfile), l'image embarque api/dist/index.js ET
+# api/dist/db/migrate.js, api/dist/db/scripts/backfill-0004-tracking.js,
+# api/dist/scripts/project-graph-from-s3.js. (Avant le fix, ce dernier était
+# ABSENT → MODULE_NOT_FOUND : c'était la douleur D1 « projection PG cassée ».)
+#
+# Usage one-shot (reprojection des ~1000 graphes v2.1 SCW→PG) :
 #   kubectl apply -f deploy/k8s/31-graph-projection-job.yaml -n radar-immobilier
-#   kubectl wait job/radar-graph-projection --for=condition=complete -n radar-immobilier --timeout=300s
+#   kubectl wait job/radar-graph-projection --for=condition=complete -n radar-immobilier --timeout=900s
 #   kubectl logs -l job-name=radar-graph-projection -n radar-immobilier
 #   kubectl delete job radar-graph-projection -n radar-immobilier
 #
-# Pour cibler des villes spécifiques, surcharger la commande du conteneur
-# project-graph via un patch (ou créer un job séparé avec les args souhaités).
+# Pour cibler des villes spécifiques, surcharger les args du conteneur
+# project-graph via un patch (ou utiliser 32-graph-projection-only-job.yaml).
+#
+# Variante SANS migrate (DB déjà à jour) : 32-graph-projection-only-job.yaml.
+# CronJob de rafraîchissement périodique : 34-projection-cronjob.yaml.
+#
+# Budget mémoire tenant SERRÉ : api+ui+pg+minio laissent ~256Mi/150m CPU libres.
+# requests 96Mi/50m, limits 256Mi/150m, NODE_OPTIONS=--max-old-space-size=200
+# (heap V8 plafonné sous la limite conteneur pour éviter l'OOM-kill).
 #
 # Nota : les secrets S3 sont partagés avec le Deployment radar-api via le
 # même Secret radar-s3-credentials / radar-scrape-s3-credentials.
@@ -36,16 +58,42 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: radar-app
-      # ── Étape 1 : migrations Drizzle ──────────────────────────────────────
       initContainers:
+        # ── Étape 1 : backfill tracking 0004 (AVANT migrate, idempotent) ──────
+        - name: db-backfill-0004
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "dist/db/scripts/backfill-0004-tracking.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
+        # ── Étape 2 : migrations Drizzle ──────────────────────────────────────
         - name: db-migrate
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
+          # migrate.js lit `migrationsFolder: "drizzle"` relatif au CWD → /workspace/api
+          # où l'image copie api/drizzle/*.sql + meta/_journal.json.
+          workingDir: /workspace/api
           command: ["node", "dist/db/migrate.js"]
           envFrom:
             - configMapRef:
                 name: radar-api
           env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
             - name: POSTGRES_USER
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
             - name: POSTGRES_PASSWORD
@@ -56,16 +104,22 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
-      # ── Étape 2 : projection SCW → PG ────────────────────────────────────
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
+      # ── Étape 3 : projection SCW → PG ────────────────────────────────────
       containers:
         - name: project-graph
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
-          command: ["node", "--experimental-specifier-resolution=node", "dist/scripts/project-graph-from-s3.js"]
+          workingDir: /workspace/api
+          command: ["node", "dist/scripts/project-graph-from-s3.js"]
           envFrom:
             - configMapRef:
                 name: radar-api
           env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
             - name: POSTGRES_USER
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
             - name: POSTGRES_PASSWORD
@@ -93,5 +147,5 @@ spec:
             - name: SCRAPE_S3_FORCE_PATH_STYLE
               value: "false"
           resources:
-            requests: { cpu: 100m, memory: 256Mi }
-            limits: { cpu: 500m, memory: 512Mi }
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
