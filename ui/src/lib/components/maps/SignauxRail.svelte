@@ -2,7 +2,7 @@
   /**
    * SignauxRail — bande latérale gauche de la vue Signaux.
    *
-   * Accordéon de 1er niveau à 2 sections (<details> natif) :
+   * Accordéon de 1er niveau à 2 sections (Collapsible DS) :
    *   1. « Signaux » (ouverte par défaut) :
    *      - Toggle « Zonage uniquement » (DÉFAUT ON) — filtre PRIMAIRE
    *      - Toggle « Multifamilial 4+ » (DÉFAUT OFF) — axe DIMENSION
@@ -11,9 +11,15 @@
    *      l'intersection des filtres actifs.
    *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
    *
+   * Migration Collapsible DS :
+   *   - Sections niveau 1 → <Collapsible> DS (open par défaut, chevron DS)
+   *   - Sous-accordéon ville → <details> bespoke conservé (open contrôlé
+   *     extérieurement via isSelected + clic intercepté par preventDefault
+   *     pour onSelectCity ; Collapsible DS ne permet pas ce contrôle externe)
+   *
    * Anti-invention : aucun appel API ici, tout par props.
    */
-  import { Search, Badge } from "@sentropic/design-system-svelte";
+  import { Search, Badge, Collapsible } from "@sentropic/design-system-svelte";
   import { RefreshCw } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
@@ -201,183 +207,181 @@
     </div>
   </div>
 
-  <!-- Corps scrollable : 2 sections accordéon natif -->
+  <!-- Corps scrollable : 2 sections Collapsible DS -->
   <div class="rail-body flex-1 min-h-0 overflow-y-auto">
 
     <!-- ── Section 1 : Signaux — filtres combinables ───────────────────────── -->
-    <details class="rail-section-acc" open>
-      <summary class="rail-section-summary">
-        <span class="rail-section-chevron" aria-hidden="true">▸</span>
-        <span class="rail-section-title">Signaux</span>
-      </summary>
+    <div class="rail-section-wrap">
+      <Collapsible title="Signaux" open={true} size="sm" class="rail-collapsible">
+        <div class="rail-section-body">
+          <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE, activé par défaut -->
+          <div class="axis-toggle-row px-3 pt-2 pb-1">
+            <label class="rail-type-row">
+              <input
+                type="checkbox"
+                class="rail-type-checkbox"
+                checked={zonageOnly}
+                on:change={toggleZonageOnly}
+                aria-label="Zonage uniquement"
+              />
+              <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
+              {#if !loading}
+                <span class="axis-badge axis-badge--zonage">
+                  {badgeZonage}
+                </span>
+              {/if}
+            </label>
+          </div>
 
-      <div class="rail-section-body">
-        <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE, activé par défaut -->
-        <div class="axis-toggle-row px-3 pt-2 pb-1">
-          <label class="rail-type-row">
-            <input
-              type="checkbox"
-              class="rail-type-checkbox"
-              checked={zonageOnly}
-              on:change={toggleZonageOnly}
-              aria-label="Zonage uniquement"
-            />
-            <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
-            {#if !loading}
-              <span class="axis-badge axis-badge--zonage">
-                {badgeZonage}
+          <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
+          <div class="axis-toggle-row px-3 pb-1">
+            <label class="rail-type-row">
+              <input
+                type="checkbox"
+                class="rail-type-checkbox"
+                checked={multi4plus}
+                on:change={toggleMulti4plus}
+                aria-label="Multifamilial 4+"
+              />
+              <span class="rail-row-label text-slate-700">
+                Multifamilial 4+
+                <span class="rail-row-sublabel">nb unités ≥ 4 ou intensité haute</span>
               </span>
-            {/if}
-          </label>
-        </div>
+              {#if !loading}
+                <span class="axis-badge axis-badge--dimension">{badgeMulti}</span>
+              {/if}
+            </label>
+          </div>
 
-        <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
-        <div class="axis-toggle-row px-3 pb-1">
-          <label class="rail-type-row">
-            <input
-              type="checkbox"
-              class="rail-type-checkbox"
-              checked={multi4plus}
-              on:change={toggleMulti4plus}
-              aria-label="Multifamilial 4+"
-            />
-            <span class="rail-row-label text-slate-700">
-              Multifamilial 4+
-              <span class="rail-row-sublabel">nb unités ≥ 4 ou intensité haute</span>
-            </span>
-            {#if !loading}
-              <span class="axis-badge axis-badge--dimension">{badgeMulti}</span>
-            {/if}
-          </label>
+          <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
+          <div class="axis-toggle-row axis-toggle-row--last px-3 pb-2">
+            <label class="rail-type-row">
+              <input
+                type="checkbox"
+                class="rail-type-checkbox"
+                checked={precoceOnly}
+                on:change={togglePrecoceOnly}
+                aria-label="Signaux précoces"
+              />
+              <span class="rail-row-label text-slate-700">
+                Signaux précoces (approx.)
+                <span class="rail-row-sublabel">avis de motion / 1er projet</span>
+              </span>
+              {#if !loading}
+                <span class="axis-badge axis-badge--anticipation">{badgePrecoce}</span>
+              {/if}
+            </label>
+          </div>
         </div>
-
-        <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
-        <div class="axis-toggle-row axis-toggle-row--last px-3 pb-2">
-          <label class="rail-type-row">
-            <input
-              type="checkbox"
-              class="rail-type-checkbox"
-              checked={precoceOnly}
-              on:change={togglePrecoceOnly}
-              aria-label="Signaux précoces"
-            />
-            <span class="rail-row-label text-slate-700">
-              Signaux précoces (approx.)
-              <span class="rail-row-sublabel">avis de motion / 1er projet</span>
-            </span>
-            {#if !loading}
-              <span class="axis-badge axis-badge--anticipation">{badgePrecoce}</span>
-            {/if}
-          </label>
-        </div>
-      </div>
-    </details>
+      </Collapsible>
+    </div>
 
     <!-- ── Section 2 : Villes (recherche + sous-accordéon) ─────────────────── -->
-    <details class="rail-section-acc" open>
-      <summary class="rail-section-summary">
-        <span class="rail-section-chevron" aria-hidden="true">▸</span>
-        <span class="rail-section-title">Villes</span>
-      </summary>
+    <div class="rail-section-wrap">
+      <Collapsible title="Villes" open={true} size="sm" class="rail-collapsible">
+        <div class="rail-section-body">
+          <!-- Recherche villes (Search DS) -->
+          <div class="px-3 pb-2 pt-1">
+            <Search
+              placeholder="Rechercher une ville…"
+              size="sm"
+              bind:value={searchQuery}
+              aria-label="Rechercher une ville"
+            />
+          </div>
 
-      <div class="rail-section-body">
-        <!-- Recherche villes (Search DS) -->
-        <div class="px-3 pb-2 pt-1">
-          <Search
-            placeholder="Rechercher une ville…"
-            size="sm"
-            bind:value={searchQuery}
-            aria-label="Rechercher une ville"
-          />
-        </div>
-
-        <!-- Liste villes avec sous-accordéon natif (<details>) -->
-        <ul class="divide-y divide-slate-50" role="list">
-          {#if sortedEntries.length === 0 && !loading}
-            <li class="rail-empty">
-              {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
-            </li>
-          {:else}
-            {#each sortedEntries as entry (entry.municipality.slug)}
-              {@const isSelected = selectedSlug === entry.municipality.slug}
-              {@const activeCount = countFor(entry, activeKey)}
-              <li>
-                <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
-                <details
-                  class="ws-acc ws-acc--compact"
-                  open={isSelected}
-                >
-                  <summary
-                    class="ws-acc-summary"
-                    class:ws-acc-summary--active={isSelected}
-                    on:click|preventDefault={() => onSelectCity(entry)}
-                  >
-                    <!-- Pastille couleur signal (basée sur le compte actif) -->
-                    <span
-                      class="rail-swatch"
-                      style="background-color: {signalColor(activeCount)};"
-                      aria-hidden="true"
-                    ></span>
-                    <span class="rail-row-label">
-                      {entry.municipality.name}
-                      {#if entry.municipality.mrc}
-                        <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
-                      {/if}
-                    </span>
-                    {#if activeCount > 0}
-                      <Badge tone="warning" class="rail-row-count shrink-0">
-                        {activeCount}
-                      </Badge>
-                    {:else}
-                      <span class="rail-row-count text-slate-300">0</span>
-                    {/if}
-                  </summary>
-
-                  <!-- Contenu sous-accordéon : signaux filtrés de la ville -->
-                  {#if isSelected}
-                    <div class="ws-acc-body">
-                      {#if detailLoading}
-                        <div class="flex items-center gap-2 py-2 text-xs text-slate-400">
-                          <RefreshCw class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                          Chargement…
-                        </div>
-                      {:else if filteredNodes.length === 0 && detailNodes.length === 0}
-                        <p class="text-xs text-slate-400 italic py-1">Aucun signal indexé pour cette ville.</p>
-                      {:else if filteredNodes.length === 0}
-                        <p class="text-xs text-slate-400 italic py-1">Tous les types sont masqués.</p>
-                      {:else}
-                        <ul class="space-y-1" role="list">
-                          {#each filteredNodes.slice(0, 10) as node (node.id)}
-                            <li class="signal-item">
-                              <span
-                                class="rail-swatch shrink-0"
-                                style="background-color: {typeColor(node.type)};"
-                                aria-hidden="true"
-                              ></span>
-                              <span class="min-w-0">
-                                <span class="block truncate text-xs font-medium text-slate-800 leading-snug">
-                                  {node.label}
-                                </span>
-                                <span class="block text-xs text-slate-400 font-mono">{node.type}</span>
-                              </span>
-                            </li>
-                          {/each}
-                          {#if filteredNodes.length > 10}
-                            <li class="text-xs text-slate-400 italic pl-4">
-                              +{filteredNodes.length - 10} autres…
-                            </li>
-                          {/if}
-                        </ul>
-                      {/if}
-                    </div>
-                  {/if}
-                </details>
+          <!-- Liste villes avec sous-accordéon bespoke <details> -->
+          <!-- NOTE : le sous-accordéon reste en <details> natif car :
+               1. open={isSelected} est contrôlé de l'extérieur (prop, pas toggle interne)
+               2. le clic utilise preventDefault pour router vers onSelectCity()
+               Collapsible DS ne supporte pas ce pattern de contrôle externe -->
+          <ul class="divide-y divide-slate-50" role="list">
+            {#if sortedEntries.length === 0 && !loading}
+              <li class="rail-empty">
+                {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
               </li>
-            {/each}
-          {/if}
-        </ul>
-      </div>
-    </details>
+            {:else}
+              {#each sortedEntries as entry (entry.municipality.slug)}
+                {@const isSelected = selectedSlug === entry.municipality.slug}
+                {@const activeCount = countFor(entry, activeKey)}
+                <li>
+                  <!-- Sous-accordéon bespoke <details> conservé (voir NOTE ci-dessus) -->
+                  <details
+                    class="ws-acc ws-acc--compact"
+                    open={isSelected}
+                  >
+                    <summary
+                      class="ws-acc-summary"
+                      class:ws-acc-summary--active={isSelected}
+                      on:click|preventDefault={() => onSelectCity(entry)}
+                    >
+                      <!-- Pastille couleur signal (basée sur le compte actif) -->
+                      <span
+                        class="rail-swatch"
+                        style="background-color: {signalColor(activeCount)};"
+                        aria-hidden="true"
+                      ></span>
+                      <span class="rail-row-label">
+                        {entry.municipality.name}
+                        {#if entry.municipality.mrc}
+                          <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
+                        {/if}
+                      </span>
+                      {#if activeCount > 0}
+                        <Badge tone="warning" class="rail-row-count shrink-0">
+                          {activeCount}
+                        </Badge>
+                      {:else}
+                        <span class="rail-row-count text-slate-300">0</span>
+                      {/if}
+                    </summary>
+
+                    <!-- Contenu sous-accordéon : signaux filtrés de la ville -->
+                    {#if isSelected}
+                      <div class="ws-acc-body">
+                        {#if detailLoading}
+                          <div class="flex items-center gap-2 py-2 text-xs text-slate-400">
+                            <RefreshCw class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                            Chargement…
+                          </div>
+                        {:else if filteredNodes.length === 0 && detailNodes.length === 0}
+                          <p class="text-xs text-slate-400 italic py-1">Aucun signal indexé pour cette ville.</p>
+                        {:else if filteredNodes.length === 0}
+                          <p class="text-xs text-slate-400 italic py-1">Tous les types sont masqués.</p>
+                        {:else}
+                          <ul class="space-y-1" role="list">
+                            {#each filteredNodes.slice(0, 10) as node (node.id)}
+                              <li class="signal-item">
+                                <span
+                                  class="rail-swatch shrink-0"
+                                  style="background-color: {typeColor(node.type)};"
+                                  aria-hidden="true"
+                                ></span>
+                                <span class="min-w-0">
+                                  <span class="block truncate text-xs font-medium text-slate-800 leading-snug">
+                                    {node.label}
+                                  </span>
+                                  <span class="block text-xs text-slate-400 font-mono">{node.type}</span>
+                                </span>
+                              </li>
+                            {/each}
+                            {#if filteredNodes.length > 10}
+                              <li class="text-xs text-slate-400 italic pl-4">
+                                +{filteredNodes.length - 10} autres…
+                              </li>
+                            {/if}
+                          </ul>
+                        {/if}
+                      </div>
+                    {/if}
+                  </details>
+                </li>
+              {/each}
+            {/if}
+          </ul>
+        </div>
+      </Collapsible>
+    </div>
 
   </div>
 </div>
@@ -406,6 +410,20 @@
 
   /* ── Kicker ── */
   .rail-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--st-semantic-text-muted, #94a3b8);
+  }
+
+  /* ── Wrapper section DS Collapsible : séparateur bas de section ── */
+  .rail-section-wrap {
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  /* Surcharge titre Collapsible DS : uppercase kicker style ── */
+  :global(.rail-collapsible .st-collapsible__title) {
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 0.7rem;
@@ -452,54 +470,6 @@
     flex-shrink: 0;
   }
 
-  /* ── Accordéon de 1er niveau (sections Signaux / Villes) ── */
-  .rail-section-acc {
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-  }
-
-  .rail-section-acc > summary {
-    list-style: none;
-  }
-
-  .rail-section-acc > summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .rail-section-summary {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 1rem;
-    cursor: pointer;
-    user-select: none;
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-    transition: background 0.1s;
-  }
-
-  .rail-section-summary:hover {
-    background: #f1f5f9; /* slate-100 */
-  }
-
-  .rail-section-title {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    flex: 1;
-  }
-
-  .rail-section-chevron {
-    font-size: 0.65rem;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    transition: transform 0.12s ease;
-    flex-shrink: 0;
-  }
-
-  details[open] > .rail-section-summary > .rail-section-chevron {
-    transform: rotate(90deg);
-  }
-
   /* ── Type row (case à cocher + pastille + label) ── */
   .rail-type-row {
     display: flex;
@@ -532,7 +502,7 @@
     color: var(--st-semantic-text-muted, #94a3b8);
   }
 
-  /* ── Accordéon natif ws-acc (sous-accordéon villes) ── */
+  /* ── Accordéon natif ws-acc (sous-accordéon villes — bespoke conservé) ── */
   :global(.ws-acc > summary) {
     list-style: none;
     cursor: pointer;
@@ -617,6 +587,4 @@
     color: #166534; /* green-800 */
     background: #dcfce7; /* green-100 */
   }
-
-
 </style>
