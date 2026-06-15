@@ -1,9 +1,9 @@
 # Suivi — Acquisition Zones + Lots (Phase 2 géo data)
 
-> **Statut** : en cours — P0 livré.
+> **Statut** : en cours — P0 + P1 livrés.
 > **Date création** : 2026-06-14. **Auteur** : rhanka.
 > **Référence** : `docs/spec/cadrage-zones-lots-acquisition.md` (PR #203).
-> **Branche** : `feat/acquisition-zones-lots-p0`.
+> **Branches** : `feat/acquisition-zones-lots-p0` (PR #205), `feat/acquisition-zones-lots-p1` (empilée sur #205).
 
 ---
 
@@ -13,7 +13,7 @@
 |------|------------|----------------------------:|--------|-------------------|---------|
 | **LOTS** | Cadastre allégé REST (MELCC/MRNF) | **1104/1104** | ✅ **FAIT (P0-A)** | ~1 j-h | `cadastre-allege.ts` |
 | **T1** | ArcGIS REST FeatureServer/MapServer | ~150–250 (T1) | ✅ **FAIT crawler (P0-B)** / seed 3 villes | ~1,5 j-h | `arcgis-zonage.ts` |
-| **T2** | Données Québec CKAN (open data) | ~10–15 | 🔲 **DIFFÉRÉ PLANIFIÉ (P1)** | ~1,5–2,5 j-h | à créer |
+| **T2** | Données Québec CKAN (open data) | **8/~15** (2 vérifiées live) | ✅ **FAIT (P1-A)** | ~1,5 j-h | `ckan-zonage.ts` |
 | **T3** | JMap / JMap NG (K2 Geospatial) | ~10–30 | 🔲 **DIFFÉRÉ PLANIFIÉ (S4)** | ~3–8 j-h/déploiement | à créer |
 | **T4** | GOnet / Azimut (PG Solutions) | minoritaire (souvent auth) | 🔲 **DIFFÉRÉ PLANIFIÉ (S4, si export public)** | ~8–15+ j-h, risqué | à créer |
 | **T5** | PDF scannés / plans papier | ~600–800 | 🔲 **DIFFÉRÉ PLANIFIÉ (OCR + éditeur)** | non automatisable | éditeur semi-manuel |
@@ -107,11 +107,99 @@ Candidats par priorité : `NO_ZONE` > `CODEZONE` > `CODE_ZONE` > `Zonage` > `zon
 
 ---
 
+---
+
+## P1 livré (2026-06-14)
+
+### P1-A — Adapter CKAN Données Québec (zonage)
+
+**Fichiers** :
+- `packages/radar-sources/src/geo/ckan-zonage.ts` — adapter principal + registre CKAN
+- `packages/radar-sources/src/geo/ckan-zonage.fixture.ts` — fixtures CI
+- `packages/radar-sources/src/geo/ckan-zonage.test.ts` — 30 tests (0 réseau)
+
+**API CKAN vérifiée live (2026-06-14)** :
+```
+https://www.donneesquebec.ca/recherche/api/3/action/package_search?q=zonage&rows=0
+→ count: 50 datasets (toutes organisations confondues)
+```
+
+**Villes avec GeoJSON vérifié live** :
+
+| Ville | Package ID | URL GeoJSON | Champ zone | Features | Statut |
+|-------|-----------|-------------|-----------|---------|--------|
+| Longueuil | `aedd53ac-...` | `.../download/zonage.json` | `Zonage` | 2085 | ✅ vérifié |
+| Saguenay | `a086941f-...` | `.../download/sag_zonage.geojson` | `no_zone` | 2838 | ✅ vérifié |
+
+**Villes connues via package_search (URL à confirmer)** :
+- Lévis (`6cd041e3-...`)
+- Trois-Rivières (`85fa8f51-...`)
+- Québec (ville) (`a56dfef1-...`)
+- Repentigny (`d8dffd21-...`)
+- Rimouski (`d1935001-...`)
+- Rouyn-Noranda (`81cfd131-...`)
+
+**Échantillons réels vérifiés** :
+
+Longueuil (HTTP 200, 2085 features) :
+```json
+{"Zonage": "P22-328 (VLO)", "URL_Grille": "...P22-328.pdf"}
+{"Zonage": "H22-101 (VLO)", "URL_Grille": "...H22-101.pdf"}
+```
+
+Saguenay (HTTP 200, 2838 features) :
+```json
+{"id": 2472, "municipalite": "94068", "no_zone": "1000"}
+{"id": 2473, "municipalite": "94068", "no_zone": "2000"}
+```
+
+**Fonctionnalités** :
+- `ckanPackageSearch()` : recherche par terme sur CKAN DQ
+- `ckanPackageShow()` : résolution package → URLs réelles des ressources
+- `filterCkanGeoResources()` : filtre GeoJSON direct vs EsriREST (pour délégation à arcgis-zonage)
+- `detectCkanZoneCodeField()` : détection automatique du champ code-de-zone
+- `CkanZonageAdapter` : adapter complet SourceAdapter (list + fetch + hash)
+- `CKAN_ZONAGE_REGISTRY` : registre 8 villes (2 vérifiées + 6 candidates)
+
+**SOURCE_KINDS** : ajout de `"ckan-zonage"` dans `packages/radar-domain/src/source-kind.ts`.
+
+---
+
+### P1-B — Recensement ArcGIS rejouable (offline)
+
+**Fichiers** :
+- `packages/radar-sources/src/geo/arcgis-discovery.ts` — module de sondage
+- `packages/radar-sources/src/geo/arcgis-discovery.test.ts` — 23 tests (0 réseau)
+
+**Fonctionnement** :
+1. Pour chaque ville, dérive des domaines candidats (`cartes.<slug>.ca`, `sig.<slug>.ca`, etc.)
+2. Sonde les patterns ArcGIS REST (`/arcgis/rest/services`, `/server/rest/services`)
+3. Filtre par patterns de nom de service (`/zonage/i`, `/zoning/i`, `/urbanisme/i`)
+4. Résout la couche (FeatureServer/N ou MapServer/N)
+5. Produit un `ArcgisDiscoveryReport` par ville (found / not-found / error / skipped)
+
+**Idempotence** : les villes déjà dans `ARCGIS_SERVICE_REGISTRY` sont ignorées (sauf `force=true`).
+
+**Limitation documentée** : la précision du guesseur de domaines est ~30-40% sans annuaire MAMH.
+Un recensement complet nécessite un annuaire des sites municipaux (lot à part, 3-5 j-h).
+
+**Outil offline** : non inclus dans CI. A lancer avec `discoverArcgisServices(slugs)` depuis un script.
+
+**Format sortie** : `formatDiscoveryReport()` (texte lisible) + `reportToRegistryEntries()` (entrées pour `ARCGIS_SERVICE_REGISTRY`).
+
+**Politesse** :
+- Timeout 8s par requête
+- User-Agent honnête
+- Pas de retry sur 403/404
+- Pas de scan agressif (1-2 URLs par ville)
+
+---
+
 ## Backlog planifié (types T2–T5)
 
-### T2 — Données Québec CKAN (P1 différé)
+### T2 — Données Québec CKAN
 
-**Statut** : DIFFÉRÉ PLANIFIÉ (S1/P1). Non implémenté dans P0.
+**Statut** : ✅ FAIT (P1-A). Adapter `ckan-zonage.ts` livré.
 
 **Effort estimé** : ~1,5–2,5 j-h.
 
@@ -193,4 +281,4 @@ domaine immo → extraction directe. Frontière claire : `geo` livre GeoJSON nor
 
 ---
 
-*Dernière mise à jour : 2026-06-14 — feat/acquisition-zones-lots-p0*
+*Dernière mise à jour : 2026-06-14 — feat/acquisition-zones-lots-p1 (empilée sur #205)*
