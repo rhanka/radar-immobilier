@@ -504,16 +504,306 @@ export async function listMrcs(db: Database): Promise<MrcSummary[]> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Catégories sémantiques ZONAGE pour les nœuds de type `Signal`.
+ *
+ * Un signal est considéré ZONAGE si :
+ *   - son type est `DesignationEvent` (toujours zonage), OU
+ *   - son type est `Signal` ET sa catégorie (props->'properties'->>'category')
+ *     appartient à cet ensemble.
+ *
+ * Les `Signal` sans catégorie (null/vide) ou avec une catégorie absente de cet
+ * ensemble sont considérés NON-zonage.
+ *
+ * Sources : requête SQL prod 2026-06-14 sur graph_nodes (type='Signal').
+ * Catégories incluses délibérément :
+ *   - rezonage, derogation, derogation_mineure, piia, cptaq, ppcmoi,
+ *     lotissement, subdivision, densification, usage_conditionnel,
+ *     modification_zonage, changement_usage, zone_agricole,
+ *     contrainte_reglementaire, patrimoine
+ * Catégories EXCLUES (non-zonage) :
+ *   - acquisition_fonciere, infrastructure, vente_terrain, vente_institutionnelle
+ *     et toutes catégories sans lien direct avec la réglementation foncière.
+ *
+ * CATÉGORIES AMBIGUËS (présentes en prod, non incluses — à arbitrer si besoin) :
+ *   amendement_zonage, modification_reglementaire, reglementation_urbanisme,
+ *   plan_urbanisme, infraction_zonage, usage, urbanisme, gouvernance_urbanisme,
+ *   developpement_residentiel, logement, logement_abordable, projet_particulier,
+ *   reglementation, contrainte.
+ *   Ces catégories existent en prod (1-5 occurrences chacune) mais n'étaient
+ *   pas dans la liste de référence initiale.
+ *
+ * Pour ajuster la liste : modifier ce seul tableau. L'effet est immédiat au
+ * prochain démarrage (aucune migration DB requise).
+ */
+export const ZONAGE_CATEGORIES: readonly string[] = [
+  "rezonage",
+  "derogation",
+  "derogation_mineure",
+  "piia",
+  "cptaq",
+  "ppcmoi",
+  "lotissement",
+  "subdivision",
+  "densification",
+  "usage_conditionnel",
+  "modification_zonage",
+  "changement_usage",
+  "zone_agricole",
+  "contrainte_reglementaire",
+  "patrimoine",
+];
+
+/** Set pour lookup O(1) en application code. */
+const ZONAGE_CATEGORIES_SET = new Set(ZONAGE_CATEGORIES);
+
+/**
+ * Détermine si un nœud signal (type + category) est de zonage.
+ *
+ * - `DesignationEvent` → toujours zonage
+ * - `Signal` + category ∈ ZONAGE_CATEGORIES → zonage
+ * - `Signal` sans category ou category hors liste → non-zonage
+ */
+export function isZonageSignal(type: string, category: string | null | undefined): boolean {
+  if (type === "DesignationEvent") return true;
+  if (type === "Signal" && category) return ZONAGE_CATEGORIES_SET.has(category);
+  return false;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ANTICIPATION — étape réglementaire dérivée par mots-clés
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Étapes réglementaires ordonnées du plus précoce (plus grande valeur
+ * d'anticipation) au plus tardif.
+ *
+ * Étapes résolutions (DM / PIIA / PPCMOI) :
+ *   - accorde / refuse : terminaux, donc après adoption (équivalent fonctionnel)
+ *
+ * Défaut : inconnu (aucun mot-clé reconnu).
+ */
+export type Etape =
+  | "avis_motion"
+  | "projet_reglement"
+  | "consultation"
+  | "second_projet"
+  | "adoption"
+  | "entree_vigueur"
+  | "accorde"
+  | "refuse"
+  | "inconnu";
+
+/**
+ * Ordre d'anticipation : plus l'index est petit, plus l'étape est précoce
+ * (= plus d'anticipation / de valeur pour le radar).
+ * `inconnu` est traité à part (dernière position pour le tri).
+ */
+export const ETAPE_ORDER: Record<Etape, number> = {
+  avis_motion:      0,
+  projet_reglement: 1,
+  consultation:     2,
+  second_projet:    3,
+  adoption:         4,
+  entree_vigueur:   5,
+  accorde:          6,
+  refuse:           7,
+  inconnu:          99,
+};
+
+/**
+ * Étapes considérées comme « précoces » pour le toggle Anticipation.
+ * = avis_motion OU projet_reglement (les deux premières étapes).
+ */
+export const ETAPES_PRECOCES: readonly Etape[] = ["avis_motion", "projet_reglement"];
+
+/**
+ * Dérive l'étape réglementaire d'un signal à partir du texte libre.
+ *
+ * Stratégie : recherche séquentielle des mots-clés dans l'ordre du plus
+ * précis/précoce au plus tardif pour éviter les collisions (ex. « second
+ * projet » matché avant « projet »). Le texte est normalisé en minuscules
+ * sans accents avant la comparaison (robustesse encodage).
+ *
+ * Ambiguïtés signalées :
+ *  - « projet de règlement » et « premier projet » → même étape projet_reglement
+ *  - « accordé(e) » vs « accord » → on cible spécifiquement les formes "accorde"
+ *    après normalisation NFD pour éviter les faux positifs (ex. « en accord avec »)
+ *  - « en vigueur » présent dans « pas en vigueur » → gardé tel quel car cas rare
+ *  - Les résolutions PIIA/PPCMOI « accordé » sont classées après adoption dans
+ *    ETAPE_ORDER car elles représentent une décision terminale similaire.
+ *
+ * @param label       Libellé court du nœud signal.
+ * @param description Description longue (props->'properties'->>'description').
+ * @returns           Étape dérivée, défaut `inconnu`.
+ */
+export function deriveEtape(
+  label: string | null | undefined,
+  description: string | null | undefined,
+): Etape {
+  // Concatène label + description pour maximiser la couverture.
+  const raw = `${label ?? ""} ${description ?? ""}`;
+  // Normalise : minuscules + supprime les combinaisons d'accents unicode (é→e, è→e…)
+  const text = raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+
+  // ── Ordre de test : du plus précoce au plus tardif ──────────────────────
+  // 1. avis de motion
+  if (text.includes("avis de motion") || text.includes("avis d motion")) {
+    return "avis_motion";
+  }
+  // 2. second projet (testé avant « projet » pour éviter la collision)
+  if (
+    text.includes("second projet") ||
+    text.includes("2e projet") ||
+    text.includes("deuxieme projet")
+  ) {
+    return "second_projet";
+  }
+  // 3. premier projet / projet de règlement / projet du règlement
+  if (
+    text.includes("premier projet") ||
+    text.includes("1er projet") ||
+    text.includes("projet de reglement") ||
+    text.includes("projet du reglement")
+  ) {
+    return "projet_reglement";
+  }
+  // 4. consultation publique
+  if (text.includes("consultation")) {
+    return "consultation";
+  }
+  // 5. entré en vigueur / en vigueur (avant adoption pour éviter collision)
+  if (
+    text.includes("entree en vigueur") ||
+    text.includes("entre en vigueur") ||
+    text.includes("en vigueur")
+  ) {
+    return "entree_vigueur";
+  }
+  // 6. adoption / adopté
+  if (
+    text.includes("adoption") ||
+    text.includes("adopte") ||
+    text.includes("adoptee")
+  ) {
+    return "adoption";
+  }
+  // 7. accordé / accordée (résolutions DM / PIIA / PPCMOI)
+  if (
+    text.includes("accordee") ||
+    text.includes("accorde") ||
+    text.includes("autorise") ||
+    text.includes("autorisee")
+  ) {
+    return "accorde";
+  }
+  // 8. refusé / refusée
+  if (
+    text.includes("refuse") ||
+    text.includes("refusee") ||
+    text.includes("rejete") ||
+    text.includes("rejetee")
+  ) {
+    return "refuse";
+  }
+
+  return "inconnu";
+}
+
+/**
+ * Détermine si un nœud Signal est de dimension 4+ (multifamilial).
+ *
+ * Règle :
+ *   - `nb_unites_max` ≥ 4 (entier dans props->'properties'->>'nb_unites_max'), OU
+ *   - `intensite` = 'haute' (signal à fort potentiel logements)
+ *
+ * Les `DesignationEvent` sont exclus (pas de champ nb_unites_max / intensite).
+ *
+ * @param type         Type de nœud ('Signal' ou 'DesignationEvent').
+ * @param nbUnitesMax  Valeur string du champ nb_unites_max (peut être null).
+ * @param intensite    Valeur string du champ intensite (peut être null).
+ */
+export function isMulti4Plus(
+  type: string,
+  nbUnitesMax: string | null | undefined,
+  intensite: string | null | undefined,
+): boolean {
+  if (type !== "Signal") return false;
+  if (intensite === "haute") return true;
+  if (nbUnitesMax !== null && nbUnitesMax !== undefined && nbUnitesMax !== "") {
+    const n = parseInt(nbUnitesMax, 10);
+    if (!isNaN(n) && n >= 4) return true;
+  }
+  return false;
+}
+
+/**
+ * Les 8 clés de sous-ensemble possibles pour {z, m, p}.
+ * Ordre canonique : z < m < p (flags triés).
+ * Valeur = nb de signaux satisfaisant TOUS les flags de la clé (intersection exacte).
+ */
+export type SubsetKey = "" | "z" | "m" | "p" | "z|m" | "z|p" | "m|p" | "z|m|p";
+
+/** Construit la clé de sous-ensemble à partir d'un ensemble de flags actifs. */
+export function buildSubsetKey(z: boolean, m: boolean, p: boolean): SubsetKey {
+  const parts: string[] = [];
+  if (z) parts.push("z");
+  if (m) parts.push("m");
+  if (p) parts.push("p");
+  return parts.join("|") as SubsetKey;
+}
+
+/**
+ * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
+ *
+ * Préfère le champ annoté `etape` (v2.1) quand présent dans
+ * props->'properties'->>'etape'. Sinon fallback sur deriveEtape(label, description).
+ */
+export function isPrecoceSignal(
+  etapeAnnote: string | null | undefined,
+  label: string | null | undefined,
+  description: string | null | undefined,
+): boolean {
+  const etape = (etapeAnnote?.trim() || undefined) ?? deriveEtape(label, description);
+  return etape === "avis_motion" || etape === "projet_reglement";
+}
+
+/**
  * Count Signal + DesignationEvent nodes per city in graph_nodes.
  * Returns only cities that have at least one such node.
+ *
+ * Each city entry includes:
+ *   - signalCount  : total count (all signals, all flags)
+ *   - subsetCounts : exact intersection counts for each subset of {z, m, p} flags.
+ *                    Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+ *                    Value = nb signals satisfying ALL flags in the key.
+ *                    isZonage (z) = DesignationEvent OR (Signal + category ∈ ZONAGE_CATEGORIES)
+ *                    isMulti4 (m) = nb_unites_max ≥ 4 OR intensite = 'haute'
+ *                    isPrecoce (p) = etape ∈ {avis_motion, projet_reglement}
+ *                      (prefers props->'properties'->>'etape' annotation when present,
+ *                       falls back to deriveEtape heuristic)
  */
 export async function listCitiesWithSignalNodes(
   db: Database,
-): Promise<Array<{ citySlug: string; signalCount: number }>> {
+): Promise<Array<{
+  citySlug: string;
+  signalCount: number;
+  subsetCounts: Record<SubsetKey, number>;
+}>> {
+  // One row per individual signal node (no count grouping in SQL) so we can
+  // compute the 3 boolean flags per-signal and accumulate into subsetCounts.
   const rows = await db
     .select({
       citySlug: graphNodes.citySlug,
-      count: sql<number>`count(*)::int`,
+      type: graphNodes.type,
+      category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
+      label: graphNodes.label,
+      nbUnitesMax: sql<string | null>`${graphNodes.props}->'properties'->>'nb_unites_max'`,
+      intensite: sql<string | null>`${graphNodes.props}->'properties'->>'intensite'`,
+      description: sql<string | null>`${graphNodes.props}->'properties'->>'description'`,
+      etapeAnnote: sql<string | null>`${graphNodes.props}->'properties'->>'etape'`,
     })
     .from(graphNodes)
     .where(
@@ -521,11 +811,59 @@ export async function listCitiesWithSignalNodes(
         inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
         isNotNull(graphNodes.citySlug),
       ),
-    )
-    .groupBy(graphNodes.citySlug);
-  return rows
-    .filter((r) => r.citySlug !== null)
-    .map((r) => ({ citySlug: r.citySlug!, signalCount: r.count }));
+    );
+
+  /** Initialise un subsetCounts vide pour une ville. */
+  function emptySubsetCounts(): Record<SubsetKey, number> {
+    return { "": 0, "z": 0, "m": 0, "p": 0, "z|m": 0, "z|p": 0, "m|p": 0, "z|m|p": 0 };
+  }
+
+  // Aggregate into per-city entries in application code.
+  const byCity = new Map<string, {
+    signalCount: number;
+    subsetCounts: Record<SubsetKey, number>;
+  }>();
+
+  for (const row of rows) {
+    if (!row.citySlug) continue;
+    if (!byCity.has(row.citySlug)) {
+      byCity.set(row.citySlug, {
+        signalCount: 0,
+        subsetCounts: emptySubsetCounts(),
+      });
+    }
+    const entry = byCity.get(row.citySlug)!;
+    entry.signalCount += 1;
+
+    // Calcule les 3 flags booléens pour CE signal individuel.
+    const z = isZonageSignal(row.type, row.category);
+    const m = isMulti4Plus(row.type, row.nbUnitesMax, row.intensite);
+    const p = isPrecoceSignal(row.etapeAnnote, row.label, row.description);
+
+    // Incrémente TOUS les sous-ensembles dont les flags sont satisfaits par ce signal.
+    // Un signal avec (z=true, m=false, p=true) contribue à : "", "z", "p", "z|p"
+    for (const [kZ, kM, kP] of [
+      [false, false, false],
+      [true,  false, false],
+      [false, true,  false],
+      [false, false, true ],
+      [true,  true,  false],
+      [true,  false, true ],
+      [false, true,  true ],
+      [true,  true,  true ],
+    ] as [boolean, boolean, boolean][]) {
+      if ((!kZ || z) && (!kM || m) && (!kP || p)) {
+        const key = buildSubsetKey(kZ, kM, kP);
+        entry.subsetCounts[key] += 1;
+      }
+    }
+  }
+
+  return Array.from(byCity.entries()).map(([citySlug, data]) => ({
+    citySlug,
+    signalCount: data.signalCount,
+    subsetCounts: data.subsetCounts,
+  }));
 }
 
 /**

@@ -6,14 +6,14 @@ import {
   signalCountTier,
   PILOT_CITY_SLUG,
 } from "./maps-data.js";
-import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
+import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
-const EMPTY_API: SignalCityItem[] = [];
+const EMPTY_API: GraphSignalCityItem[] = [];
 
-const VALLEYFIELD_ITEM: SignalCityItem = {
+const VALLEYFIELD_ITEM: GraphSignalCityItem = {
   citySlug: PILOT_CITY_SLUG,
-  designationEventCount: 3,
-  generatedAt: "2026-06-08T00:00:00.000Z",
+  signalCount: 3,
+  subsetCounts: { "": 3, z: 2 },
 };
 
 // MD1 — buildCityMapEntries returns only prioritized (non-excluded, non-deprioritized) cities
@@ -57,9 +57,9 @@ describe("buildCityMapEntries", () => {
   });
 
   it("multiple cities with counts are correctly indexed", () => {
-    const items: SignalCityItem[] = [
-      { citySlug: PILOT_CITY_SLUG, designationEventCount: 4, generatedAt: "2026-06-01T00:00:00Z" },
-      { citySlug: "beauharnois", designationEventCount: 2, generatedAt: "2026-06-01T00:00:00Z" },
+    const items: GraphSignalCityItem[] = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 4, subsetCounts: { "": 4 } },
+      { citySlug: "beauharnois", signalCount: 2, subsetCounts: { "": 2 } },
     ];
     // No maxCities limit — ensure pilot city (wherever it ranks) is included.
     const entries = buildCityMapEntries(items);
@@ -76,6 +76,39 @@ describe("buildCityMapEntries", () => {
     for (let i = 1; i < ranks.length; i++) {
       expect(ranks[i]).toBeGreaterThanOrEqual(ranks[i - 1]);
     }
+  });
+
+  it("cities absent from graphItems have empty subsetCounts", () => {
+    const entries = buildCityMapEntries(EMPTY_API, { maxCities: 5 });
+    for (const e of entries) {
+      expect(e.subsetCounts).toEqual({});
+    }
+  });
+
+  it("subsetCounts is populated from graphItems", () => {
+    const graphItems: GraphSignalCityItem[] = [
+      {
+        citySlug: PILOT_CITY_SLUG,
+        signalCount: 5,
+        subsetCounts: { "": 5, z: 3, "z|m": 1 },
+      },
+    ];
+    const entries = buildCityMapEntries(graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.subsetCounts).toEqual({ "": 5, z: 3, "z|m": 1 });
+  });
+
+  it("graphItems sans subsetCounts explicite donnent subsetCounts={} (backward-compat)", () => {
+    // Simule une réponse ancienne sans subsetCounts (cast via unknown pour simuler
+    // la sérialisation JSON qui ignorerait un champ absent).
+    const graphItems = [
+      { citySlug: PILOT_CITY_SLUG, signalCount: 5 } as unknown as GraphSignalCityItem,
+    ];
+    const entries = buildCityMapEntries(graphItems);
+    const pilot = entries.find((e) => e.municipality.slug === PILOT_CITY_SLUG);
+    expect(pilot).toBeDefined();
+    expect(pilot!.subsetCounts).toEqual({});
   });
 });
 
