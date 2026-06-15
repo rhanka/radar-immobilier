@@ -27,6 +27,8 @@ const VALID_VIEWS = new Set<string>([
   "ontologie",
   "coordination",
   "backlog",
+  // G3 — Vue géo intégration
+  "geo",
   "carte-signaux",
   "carte-opportunites",
   "carte-evaluation",

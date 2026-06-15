@@ -9,7 +9,7 @@
 //   "sources"     : Sources — maturité recueil par ville
 //
 // Vues admin/dev (hors nav principale — code intact) :
-//   "onboarding", "ciblage", "ontologie", "coordination", "backlog", "console"
+//   "onboarding", "ciblage", "ontologie", "coordination", "backlog", "console", "geo"
 // Legacy (conservés pour compatibilité tour-steps et deep-links) :
 //   "grilles", "carte-signaux", "carte-opportunites", "carte-evaluation"
 export type DemoView =
@@ -26,6 +26,8 @@ export type DemoView =
   | "ontologie"
   | "coordination"
   | "backlog"
+  // ── G3 — Vue géo intégration ───────────────────────────────────────────────
+  | "geo"
   // ── Legacy (conservé pour compatibilité tour-steps et deep-links) ─────────
   | "carte-signaux"
   | "carte-opportunites"

@@ -18,6 +18,7 @@ import { scrapeStatusRoute } from "./routes/scrape-status.js";
 import { graphRoute, type GraphDeps } from "./routes/graph.js";
 import { graphSignalsRoute, type GraphSignalsDeps } from "./routes/graph-signals.js";
 import { geoLotsRoute } from "./routes/geo-lots.js";
+import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
@@ -29,7 +30,8 @@ export type AppDeps = HealthDeps &
   CiblageDeps &
   JobsDeps &
   GraphDeps &
-  GraphSignalsDeps & {
+  GraphSignalsDeps &
+  GeoFeaturesDeps & {
     /**
      * Resolved OIDC relying-party config. Optional: when absent (or
      * `enabled === false`) the app runs OPEN — no login required — which keeps
@@ -80,6 +82,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", graphSignalsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
+  app.route("/", geoFeaturesRoute({ db: deps.db }));
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
