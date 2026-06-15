@@ -3,18 +3,18 @@
  *
  * ## Stratégie CI — 0 réseau réel, 0 Postgres
  *
- * Tous les adapters (@radar/sources) sont MOCKÉS via vi.mock().
- * La DB est mockée (cf. pattern resolve-refs.test.ts).
+ * Toutes les sources (@sentropic/geo, @sentropic/geo-sources-americas) sont
+ * MOCKÉES via vi.mock(). La DB est mockée (pattern resolve-refs.test.ts).
  *
  * ## Ce qui est vérifié
  *
- * 1. Zones ArcGIS mockées → zonesUpserted=3.
- * 2. Zones CKAN mockées   → zonesUpserted=2.
+ * 1. Zones CKAN (via acquireCkanGeoJson mocké) → zonesUpserted=3 pour longueuil.
+ * 2. Zones CKAN (via acquireCkanGeoJson mocké) → zonesUpserted=2 pour saguenay.
  * 3. Bornage STRICT : LOT_CITY_BBOXES définies pour DEFAULT_LOT_CITIES.
  * 4. populateLots=true  → lots upsertés pour les villes dans lotCitySlugs.
  * 5. populateLots=false → totalLotsUpserted=0.
- * 6. runResolution=true  → resolveGeoRefsBatch appelé.
- * 7. runResolution=false → resolveGeoRefsBatch NOT appelé.
+ * 6. runResolution=true  → resolution définie.
+ * 7. runResolution=false → resolution absente.
  * 8. Erreur sur une ville → citiesErrored=1.
  */
 import { describe, it, expect, vi } from "vitest";
@@ -35,21 +35,33 @@ const ZONE_GEO_POLYGON = {
   ],
 };
 
-const ZONE_FEATURES_ARCGIS = [
-  { zoneCode: "H34-327 (VLO)", zoneCodeField: "Zonage", objectid: 1, properties: {}, geometry: ZONE_GEO_POLYGON },
-  { zoneCode: "H34-141 (VLO)", zoneCodeField: "Zonage", objectid: 2, properties: {}, geometry: ZONE_GEO_POLYGON },
-  { zoneCode: "P34-191 (VLO)", zoneCodeField: "Zonage", objectid: 3, properties: {}, geometry: ZONE_GEO_POLYGON },
-];
+// FeatureCollection mock pour acquireCkanGeoJson (longueuil → 3 zones)
+const CKAN_FC_LONGUEUIL = {
+  type: "FeatureCollection" as const,
+  features: [
+    { type: "Feature", properties: { Zonage: "H34-327 (VLO)" }, geometry: ZONE_GEO_POLYGON },
+    { type: "Feature", properties: { Zonage: "H34-141 (VLO)" }, geometry: ZONE_GEO_POLYGON },
+    { type: "Feature", properties: { Zonage: "P34-191 (VLO)" }, geometry: ZONE_GEO_POLYGON },
+  ],
+};
 
-const ZONE_FEATURES_CKAN = [
-  { zoneCode: "1000", zoneCodeField: "no_zone", index: 0, properties: {}, geometry: ZONE_GEO_POLYGON },
-  { zoneCode: "2000", zoneCodeField: "no_zone", index: 1, properties: {}, geometry: ZONE_GEO_POLYGON },
-];
+// FeatureCollection mock pour acquireCkanGeoJson (saguenay → 2 zones)
+const CKAN_FC_SAGUENAY = {
+  type: "FeatureCollection" as const,
+  features: [
+    { type: "Feature", properties: { no_zone: "1000" }, geometry: ZONE_GEO_POLYGON },
+    { type: "Feature", properties: { no_zone: "2000" }, geometry: ZONE_GEO_POLYGON },
+  ],
+};
 
-const LOT_FEATURES = [
-  { no_lot: "6 057 912", objectid: 21621, geometry: ZONE_GEO_POLYGON },
-  { no_lot: "2 095 168", objectid: 28449, geometry: ZONE_GEO_POLYGON },
-];
+// AdminFeatureCollection mock pour crawlQcCadastreLots (2 lots)
+const CADASTRE_FC = {
+  type: "FeatureCollection" as const,
+  features: [
+    { type: "Feature", properties: { NO_LOT: "6 057 912" }, geometry: ZONE_GEO_POLYGON },
+    { type: "Feature", properties: { NO_LOT: "2 095 168" }, geometry: ZONE_GEO_POLYGON },
+  ],
+};
 
 // ─── Mock DB factory ──────────────────────────────────────────────────────────
 
@@ -59,7 +71,6 @@ function makeMockDb(): { db: Database; executeCount: number } {
   const db = {
     execute: (_sqlTag: unknown): Promise<{ rows: unknown[] }> => {
       executeCount++;
-      // Retourne un compteur live
       return Promise.resolve({ rows: [] });
     },
     select: (_fields: unknown) => ({
@@ -71,7 +82,6 @@ function makeMockDb(): { db: Database; executeCount: number } {
     }),
   } as unknown as Database;
 
-  // Proxy pour retourner le compteur live
   const proxy = new Proxy(
     { db, get executeCount() { return executeCount; } },
     {},
@@ -81,59 +91,65 @@ function makeMockDb(): { db: Database; executeCount: number } {
 
 // ─── Mocks des modules ────────────────────────────────────────────────────────
 
-// Les vi.mock() sont hoistés avant les imports par vitest.
-// Le chemin doit correspondre exactement à ce qu'importe populate-geo.ts.
-// populate-geo.ts importe depuis "@radar/sources".
+// Mock de @sentropic/geo → acquireCkanGeoJson dispatche par URL
+vi.mock("@sentropic/geo", () => ({
+  acquireCkanGeoJson: vi.fn().mockImplementation(async (url: string) => {
+    const makeProv = () => ({
+      source: "mock",
+      url,
+      fetchedAt: new Date().toISOString(),
+    });
+    if (url.includes("longueuil")) {
+      return { collection: CKAN_FC_LONGUEUIL, provenance: makeProv() };
+    }
+    if (url.includes("saguenay") || url.includes("sag_zonage")) {
+      return { collection: CKAN_FC_SAGUENAY, provenance: makeProv() };
+    }
+    return {
+      collection: { type: "FeatureCollection", features: [] },
+      provenance: makeProv(),
+    };
+  }),
+}));
 
-vi.mock("@radar/sources", async (importOriginal) => {
-  // On import et on merge avec les mocks
-  const original = await importOriginal<typeof import("@radar/sources")>();
-  return {
-    ...original,
+// Mock de @sentropic/geo-sources-americas (2 manifestes minimalistes)
+vi.mock("@sentropic/geo-sources-americas", () => ({
+  QC_ZONAGE_CKAN_MANIFESTS: [
+    {
+      id: "ca-qc/zonage-longueuil",
+      datasets: [
+        {
+          id: "qc-zonage-longueuil",
+          url: "https://mock.dq.ca/longueuil/zonage.json",
+          format: "geojson",
+        },
+      ],
+    },
+    {
+      id: "ca-qc/zonage-saguenay",
+      datasets: [
+        {
+          id: "qc-zonage-saguenay",
+          url: "https://mock.dq.ca/saguenay/sag_zonage.geojson",
+          format: "geojson",
+        },
+      ],
+    },
+  ],
+  crawlQcCadastreLots: vi.fn().mockResolvedValue({
+    collection: CADASTRE_FC,
+    provenance: {
+      url: "https://mock-cadastre/layer",
+      fetchedAt: new Date().toISOString(),
+      strategy: "bbox",
+      pageSize: 1000,
+      pages: 2,
+    },
+    recipeVersion: "0.1.0",
+  }),
+}));
 
-    // Mock ArcgisZonageAdapter
-    ArcgisZonageAdapter: vi.fn().mockImplementation(() => ({
-      fetchAllZones: async function* () {
-        for (const z of ZONE_FEATURES_ARCGIS) yield z;
-      },
-    })),
-
-    // Mock CkanZonageAdapter
-    CkanZonageAdapter: vi.fn().mockImplementation(() => ({
-      fetchAllZones: async () => ZONE_FEATURES_CKAN,
-    })),
-
-    // Mock CadastreAllegeAdapter
-    CadastreAllegeAdapter: vi.fn().mockImplementation(() => ({
-      fetchAllLots: async function* () {
-        for (const l of LOT_FEATURES) yield l;
-      },
-    })),
-
-    // Registres minimalistes pour les tests
-    ARCGIS_SERVICE_REGISTRY: [
-      {
-        citySlug: "longueuil",
-        serviceUrl: "https://mock-arcgis/longueuil",
-        zoneCodeField: "Zonage",
-        verifiedAt: "2026-06-14",
-      },
-    ],
-    CKAN_ZONAGE_REGISTRY: [
-      {
-        citySlug: "saguenay",
-        packageId: "mock-saguenay-id",
-        organization: "ville-de-saguenay",
-        geojsonUrl: "https://mock.dq.ca/saguenay.geojson",
-        zoneCodeField: "no_zone",
-        verifiedAt: "2026-06-14",
-        featureCount: 2838,
-      },
-    ],
-  };
-});
-
-// Mock de resolve-refs pour éviter les appels DB réels lors de la résolution
+// Mock de resolve-refs
 vi.mock("./resolve-refs.js", () => ({
   resolveGeoRefsBatch: vi.fn().mockResolvedValue({
     total: 5,
@@ -151,8 +167,8 @@ const { resolveGeoRefsBatch } = await import("./resolve-refs.js");
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe("populateGeo — zones ArcGIS (longueuil)", () => {
-  it("upserte 3 zones ArcGIS → zonesUpserted=3", async () => {
+describe("populateGeo — zones CKAN via @sentropic/geo (longueuil)", () => {
+  it("upserte 3 zones CKAN → zonesUpserted=3", async () => {
     const { db } = makeMockDb();
 
     const result = await populateGeo(db, {
@@ -181,7 +197,7 @@ describe("populateGeo — zones ArcGIS (longueuil)", () => {
   });
 });
 
-describe("populateGeo — zones CKAN (saguenay)", () => {
+describe("populateGeo — zones CKAN via @sentropic/geo (saguenay)", () => {
   it("upserte 2 zones CKAN → zonesUpserted=2", async () => {
     const { db } = makeMockDb();
 
@@ -204,7 +220,6 @@ describe("populateGeo — lots (bornage STRICT)", () => {
       if (bbox) {
         expect(bbox.minLon).toBeLessThan(bbox.maxLon);
         expect(bbox.minLat).toBeLessThan(bbox.maxLat);
-        // Santé : bboxes raisonnables pour le Québec
         expect(bbox.minLon).toBeGreaterThan(-80);
         expect(bbox.maxLon).toBeLessThan(-60);
         expect(bbox.minLat).toBeGreaterThan(44);
@@ -242,11 +257,10 @@ describe("populateGeo — lots (bornage STRICT)", () => {
   it("ville hors lotCitySlugs → pas de lots", async () => {
     const { db } = makeMockDb();
 
-    // saguenay est dans le registre CKAN mais on l'exclut de lotCitySlugs
     const result = await populateGeo(db, {
       citySlugs: ["saguenay"],
       populateLots: true,
-      lotCitySlugs: ["longueuil"], // saguenay exclu explicitement
+      lotCitySlugs: ["longueuil"],
       runResolution: false,
     });
 
@@ -256,29 +270,19 @@ describe("populateGeo — lots (bornage STRICT)", () => {
 });
 
 describe("populateGeo — résolution géo", () => {
-  it("runResolution=true → resolveGeoRefsBatch appelé", async () => {
+  it("runResolution=true → resolution définie (0 signaux en DB mock)", async () => {
     const { db } = makeMockDb();
 
     vi.mocked(resolveGeoRefsBatch).mockClear();
 
-    await populateGeo(db, {
-      citySlugs: ["longueuil"],
-      populateLots: false,
-      runResolution: true,
-    });
-
-    // resolveGeoRefsBatch est appelé (même si 0 signaux en DB mock)
-    // La fonction est appelée via fetchSignalInputsForCity → rows=[] → resolution=0
-    // Mais comme db.execute retourne rows=[], fetchSignalInputsForCity retourne []
-    // → inputs.length=0 → resolveGeoRefsBatch NON appelé (shortcut inputs.length=0)
-    // C'est le comportement CORRECT (pas de signaux = pas de résolution)
-    // On vérifie que le champ resolution est défini
     const result = await populateGeo(db, {
       citySlugs: ["longueuil"],
       populateLots: false,
       runResolution: true,
     });
 
+    // DB mock retourne rows=[] → fetchSignalInputsForCity retourne []
+    // → inputs.length=0 → resolveGeoRefsBatch NON appelé (shortcut)
     expect(result.byCity[0]?.resolution).toBeDefined();
     expect(result.byCity[0]?.resolution?.total).toBe(0);
   });
@@ -297,16 +301,12 @@ describe("populateGeo — résolution géo", () => {
 });
 
 describe("populateGeo — résilience erreur", () => {
-  it("erreur adapter → citiesErrored=1, error dans byCity", async () => {
-    const { ArcgisZonageAdapter: MockArcgis } = await import("@radar/sources");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(MockArcgis as any).mockImplementationOnce(() => ({
-      fetchAllZones: async function* () {
-        throw new Error("Service ArcGIS temporairement indisponible");
-        // eslint-disable-next-line no-unreachable
-        yield ZONE_FEATURES_ARCGIS[0]!;
-      },
-    }));
+  it("erreur acquireCkanGeoJson → citiesErrored=1, error dans byCity", async () => {
+    const { acquireCkanGeoJson: mockAcquire } = await import("@sentropic/geo");
+
+    vi.mocked(mockAcquire).mockRejectedValueOnce(
+      new Error("Service CKAN temporairement indisponible"),
+    );
 
     const { db } = makeMockDb();
 
@@ -336,7 +336,7 @@ describe("populateGeo — bilan", () => {
     expect(result.byCity[0]?.citySlug).toBe("longueuil");
   });
 
-  it("toutes villes des registres traitées si citySlugs absent", async () => {
+  it("toutes villes des manifestes traitées si citySlugs absent", async () => {
     const { db } = makeMockDb();
 
     const result = await populateGeo(db, {
@@ -344,7 +344,7 @@ describe("populateGeo — bilan", () => {
       runResolution: false,
     });
 
-    // 1 ArcGIS (longueuil) + 1 CKAN (saguenay) = 2 villes
+    // 2 manifestes mockés (longueuil + saguenay) = 2 villes
     expect(result.citiesProcessed).toBe(2);
   });
 });

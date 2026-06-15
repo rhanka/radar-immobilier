@@ -10,7 +10,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./municipalities": "./src/municipalities.ts",
-    "./geo/ckan-zonage.js": "./src/geo/ckan-zonage.ts",
     "./geo/geo-fetch-utils.js": "./src/geo/geo-fetch-utils.ts"
   },
   "scripts": {
