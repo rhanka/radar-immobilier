@@ -50,6 +50,13 @@
       "when": 1750100000000,
       "tag": "0006_prospect_marks_fk_deferrable",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1750100001000,
+      "tag": "0007_geo_mapper",
+      "breakpoints": true
     }
   ]
 }
