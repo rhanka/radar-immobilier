@@ -13,7 +13,7 @@
 
 import { prioritizedCities } from "@radar/sources/municipalities";
 import type { MunicipalityT } from "@radar/domain";
-import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
+import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
 /**
  * The pilot city for which we have real signals. Kept as a named export for
@@ -25,38 +25,47 @@ export const PILOT_CITY_SLUG = "salaberry-de-valleyfield";
 export interface CityMapEntry {
   municipality: MunicipalityT;
   /**
-   * Count of DesignationEvent canonicals (rezoning changes) from the real
-   * ontology project state (GET /api/signals/by-city), 0 when no data.
+   * Total count of Signal + DesignationEvent nodes for this city. 0 when no data.
    */
   signalCount6m: number;
+  /**
+   * Exact intersection counts for each subset of {z, m, p} flags.
+   * Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+   * Value = nb signals satisfying ALL flags in the key.
+   * Empty record when city has no signal data.
+   */
+  subsetCounts: Record<string, number>;
 }
 
 /**
  * Build city map entries from the real API response.
  *
  * Anti-invention: signal counts come exclusively from the API. Cities absent
- * from the API response (no project state, or stale state > 6 months) get
- * count=0 — never fabricated. City/coordinate data from QC_MUNICIPALITIES.
+ * from the API response get count=0 — never fabricated.
+ * City/coordinate data from QC_MUNICIPALITIES.
  *
- * @param apiItems — items from GET /api/signals/by-city (may be empty on
- *   first deploy, before any city has been seeded).
+ * @param graphItems — items from GET /api/graph-signals/by-city.
  * @param options.maxCities — limit the number of returned cities.
  */
 export function buildCityMapEntries(
-  apiItems: readonly SignalCityItem[],
+  graphItems: readonly GraphSignalCityItem[],
   options: { maxCities?: number } = {},
 ): CityMapEntry[] {
   const cities = prioritizedCities();
   const limit = options.maxCities ?? cities.length;
 
-  // Index API items by city slug for O(1) lookup.
-  const countByCitySlug = new Map<string, number>(
-    apiItems.map((item) => [item.citySlug, item.designationEventCount]),
+  // Index graph items by city slug for O(1) lookup.
+  const signalCountBySlug = new Map<string, number>(
+    graphItems.map((item) => [item.citySlug, item.signalCount]),
+  );
+  const subsetCountsBySlug = new Map<string, Record<string, number>>(
+    graphItems.map((item) => [item.citySlug, item.subsetCounts]),
   );
 
   return cities.slice(0, limit).map((m) => ({
     municipality: m,
-    signalCount6m: countByCitySlug.get(m.slug) ?? 0,
+    signalCount6m: signalCountBySlug.get(m.slug) ?? 0,
+    subsetCounts: subsetCountsBySlug.get(m.slug) ?? {},
   }));
 }
 

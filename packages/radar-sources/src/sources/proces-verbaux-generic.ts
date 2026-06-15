@@ -4428,6 +4428,95 @@ export const SAINT_RAPHAEL_PV_CONFIG: PvCityConfig = {
   sourceId: "proces-verbaux-saint-raphael",
 };
 
+// ── Lot cities-round11 (VPlus/Portail Citoyen, verifie 2026-06-14) ──────────
+// VPlus SPA: PDFs servis depuis vplus-documents.s3.ca-central-1.amazonaws.com
+// pvIndexUrl = page publique (SPA, contenu dynamique — scraper direct non applicable).
+// Téléchargement via API: GET /api/{hostname}/structure/detail/{uuid}?inStructure=true&localisation=fr
+
+export const BATISCAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "batiscan",
+  pvIndexUrl: "https://batiscan.ca/proces-verbaux",
+  sourceId: "proces-verbaux-batiscan",
+};
+
+export const BOILEAU_PV_CONFIG: PvCityConfig = {
+  citySlug: "boileau",
+  pvIndexUrl: "https://boileau.ca/proces-verbaux",
+  sourceId: "proces-verbaux-boileau",
+};
+
+export const BOWMAN_PV_CONFIG: PvCityConfig = {
+  citySlug: "bowman",
+  pvIndexUrl: "https://bowman.ca/les-proces-verbaux",
+  sourceId: "proces-verbaux-bowman",
+};
+
+export const CHIBOUGAMAU_PV_CONFIG: PvCityConfig = {
+  citySlug: "chibougamau",
+  pvIndexUrl: "https://ville.chibougamau.qc.ca/seances-du-conseil",
+  sourceId: "proces-verbaux-chibougamau",
+};
+
+export const GRENVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "grenville",
+  pvIndexUrl: "https://grenville.ca/seances-du-conseil",
+  sourceId: "proces-verbaux-grenville",
+};
+
+export const LAC_SAINT_PAUL_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-saint-paul",
+  pvIndexUrl: "https://lac-saint-paul.ca/proces-verbaux",
+  sourceId: "proces-verbaux-lac-saint-paul",
+};
+
+export const LAURIERVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "laurierville",
+  pvIndexUrl: "https://laurierville.ca/proces-verbaux",
+  sourceId: "proces-verbaux-laurierville",
+};
+
+export const LORRAINVILLE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lorrainville",
+  pvIndexUrl: "https://lorrainville.ca/proces-verbaux",
+  sourceId: "proces-verbaux-lorrainville",
+};
+
+export const LYSTER_PV_CONFIG: PvCityConfig = {
+  citySlug: "lyster",
+  pvIndexUrl: "https://lyster.ca/proces-verbaux",
+  sourceId: "proces-verbaux-lyster",
+};
+
+export const DUNHAM_PV_CONFIG: PvCityConfig = {
+  citySlug: "dunham",
+  pvIndexUrl: "https://ville.dunham.qc.ca/seances-du-conseil-municipal",
+  sourceId: "proces-verbaux-dunham",
+};
+
+export const BAIE_DES_SABLES_PV_CONFIG: PvCityConfig = {
+  citySlug: "baie-des-sables",
+  pvIndexUrl: "https://baiedessables.ca/documents-et-publications/proces-verbaux",
+  sourceId: "proces-verbaux-baie-des-sables",
+};
+
+export const GRAND_REMOUS_PV_CONFIG: PvCityConfig = {
+  citySlug: "grand-remous",
+  pvIndexUrl: "https://grandremous.ca/proces-verbaux",
+  sourceId: "proces-verbaux-grand-remous",
+};
+
+export const BEAUPRE_PV_CONFIG: PvCityConfig = {
+  citySlug: "beaupre",
+  pvIndexUrl: "https://villedebeaupre.com/conseil-municipal/seance-du-conseil",
+  sourceId: "proces-verbaux-beaupre",
+};
+
+export const LAC_FRONTIERE_PV_CONFIG: PvCityConfig = {
+  citySlug: "lac-frontiere",
+  pvIndexUrl: "https://www.lac-frontiere.ca/web/proces-verbaux/",
+  sourceId: "proces-verbaux-lac-frontiere",
+};
+
 /**
  * Complete registry of generic PV cities — the single source of truth for
  * city wiring in the pipeline (adapter-registry) and seed (pv-seed).
@@ -5199,4 +5288,19 @@ export const ALL_PV_CITIES: readonly PvCityEntry[] = [
   { config: SAINTE_ROSE_DE_WATFORD_PV_CONFIG },
   { config: SAINTE_AURELIE_PV_CONFIG },
   { config: SAINT_RAPHAEL_PV_CONFIG },
+  // -- Lot cities-round11 (VPlus/Portail Citoyen, config-only, verifie 2026-06-14) --
+  { config: BATISCAN_PV_CONFIG },
+  { config: BOILEAU_PV_CONFIG },
+  { config: BOWMAN_PV_CONFIG },
+  { config: CHIBOUGAMAU_PV_CONFIG },
+  { config: GRENVILLE_PV_CONFIG },
+  { config: LAC_SAINT_PAUL_PV_CONFIG },
+  { config: LAURIERVILLE_PV_CONFIG },
+  { config: LORRAINVILLE_PV_CONFIG },
+  { config: LYSTER_PV_CONFIG },
+  { config: DUNHAM_PV_CONFIG },
+  { config: BAIE_DES_SABLES_PV_CONFIG },
+  { config: GRAND_REMOUS_PV_CONFIG },
+  { config: BEAUPRE_PV_CONFIG },
+  { config: LAC_FRONTIERE_PV_CONFIG },
 ];
