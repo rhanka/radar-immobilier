@@ -9,6 +9,7 @@ export const SOURCE_KINDS = [
   "cadastre",
   "cadastre-allege",
   "arcgis-zonage",
+  "ckan-zonage",
   "role-evaluation",
   "registre-foncier",
   "cptaq",
