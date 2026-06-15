@@ -1,0 +1,82 @@
+# scrape-job.yaml — Job DÉTERMINISTE de scrape live des PV municipaux → SCW.
+#
+# Exécute le worker-live (api/dist/scripts/worker-live.js) : pour chaque ville
+# config-only, fenêtre 183 j, fetch des PDF/HTML nouveaux, PUT raw/<city>/pv/cas/
+# <sha>.<ext> + manifeste runs/<source>/<runId>/manifest.jsonl. HEAD-skip CAS →
+# 100 % idempotent : re-lancer ne re-télécharge que le NOUVEAU. AUCUN LLM, AUCUN
+# Postgres requis (S3-only). Réponse à la douleur D2 « scrape jamais automatisé ».
+#
+# LIVE_SCRAPE_EXPLOIT=1 active aussi le PARSE+EXPLOIT (pdftotext via poppler →
+# ontology/<city>/project-state.json, la clé que lit la vue Signaux). Laissé à 1
+# ici car parse/exploit sont déterministes et idempotents (HEAD-skip parsed/).
+#
+# Ce Job NE graphifie PAS (graphify = maillon agentique, Vague B). Il prépare
+# seulement raw/ + parsed/ + ontology/ pour que graphify ait du frais à traiter.
+#
+# Usage one-shot (toutes les villes) :
+#   kubectl apply -f deploy/k8s/33-scrape-job.yaml -n radar-immobilier
+#   kubectl wait job/radar-scrape --for=condition=complete -n radar-immobilier --timeout=1800s
+#   kubectl logs -l job-name=radar-scrape -n radar-immobilier
+#   kubectl delete job radar-scrape -n radar-immobilier
+#
+# Cibler des villes / limiter : surcharger args + LIVE_SCRAPE_LIMIT via un patch,
+#   command: ["node", "dist/scripts/worker-live.js", "carignan", "delson"]
+#   env: LIVE_SCRAPE_LIMIT=2
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-scrape
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: scrape
+spec:
+  # Le scrape touche le réseau (sites municipaux fragiles) : 1 relance tolérée.
+  backoffLimit: 1
+  # Garde-fou : un run complet 549 villes peut être long ; coupe à 2 h.
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: scrape
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: scrape
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "dist/scripts/worker-live.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            # Active PARSE+EXPLOIT après RECUEIL (pdftotext → project-state).
+            - name: LIVE_SCRAPE_EXPLOIT
+              value: "1"
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # Bucket scraping SCW (radar-immobilier-docs). Le worker écrit raw/,
+            # parsed/, runs/ ; getScrapeObjectStore lit SCRAPE_S3_* → S3_*.
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              value: "false"
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }

@@ -1,0 +1,78 @@
+# graph-projection-only-job.yaml — PROJECTION SEULE (sans migrate, sans backfill).
+#
+# Variante allégée de 31-graph-projection-job.yaml pour le cas où le schéma PG est
+# DÉJÀ à jour (migrations + backfill 0004 déjà appliqués une fois). N'exécute que
+# l'étape 3 : lire graph/<ville>/latest.json depuis SCW et upsert dans PG.
+#
+# C'EST LE JOB À UTILISER POUR LES REPROJECTIONS RÉPÉTÉES (re-graphify v2.x, etc.) :
+# upsert ON CONFLICT → 100 % idempotent, aucune mutation de schéma, aucun risque
+# de re-jeu de migration. Plus court, plus sûr, plus léger.
+#
+# Le premier déploiement (ou après un reset DB) DOIT passer par
+# 31-graph-projection-job.yaml (qui chaîne backfill-0004 → migrate → projection).
+# Ensuite, ce job-ci suffit.
+#
+# Usage one-shot (toutes les villes) :
+#   kubectl apply -f deploy/k8s/32-graph-projection-only-job.yaml -n radar-immobilier
+#   kubectl wait job/radar-graph-projection-only --for=condition=complete -n radar-immobilier --timeout=900s
+#   kubectl logs -l job-name=radar-graph-projection-only -n radar-immobilier
+#   kubectl delete job radar-graph-projection-only -n radar-immobilier
+#
+# Cibler des villes : ajouter les slugs en args, p.ex.
+#   command: ["node", "dist/scripts/project-graph-from-s3.js", "sherbrooke", "ogden"]
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-graph-projection-only
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: project-graph
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "dist/scripts/project-graph-from-s3.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              value: "false"
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
