@@ -15,6 +15,7 @@
     LogOut,
     ChevronDown,
     Settings,
+    Map,
   } from "@lucide/svelte";
   import { Header } from "@sentropic/design-system-svelte";
   import type { DemoView } from "$lib/demo/views.js";
@@ -51,6 +52,8 @@
     { id: "ontologie", label: "Ontologie", icon: GitMerge },
     { id: "coordination", label: "Coordination", icon: Network },
     { id: "backlog", label: "Backlog", icon: KanbanSquare },
+    // G3 — Vue Géo (zones + lots + opportunités)
+    { id: "geo", label: "Carte géo", icon: Map },
   ];
 
   let adminMenuOpen = false;
