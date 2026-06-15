@@ -18,6 +18,7 @@
   import SignauxMapView from "$lib/components/maps/SignauxMapView.svelte";
   import OpportunitesMapView from "$lib/components/maps/OpportunitesMapView.svelte";
   import EvaluationMapView from "$lib/components/maps/EvaluationMapView.svelte";
+  import GeoView from "$lib/components/geo/GeoView.svelte";
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import PendingView from "$lib/components/auth/PendingView.svelte";
   import RejectedView from "$lib/components/auth/RejectedView.svelte";
@@ -224,6 +225,9 @@
         <CoordinationView />
       {:else if activeView === "backlog"}
         <BacklogView />
+      <!-- G3 — Vue Géo (zones + lots + opportunités) -->
+      {:else if activeView === "geo"}
+        <GeoView />
       <!-- Legacy deep-links (redirigés vers les vues principales équivalentes) -->
       {:else if activeView === "carte-signaux"}
         <SignauxMapView />
