@@ -35,13 +35,28 @@ COPY api api
 # as external (resolved from node_modules at runtime) so only the @radar/*
 # workspace TS sources get inlined — robust to transitive deps, small bundle.
 RUN npm run typecheck --workspace=api
+# Bundle ALL runtime entrypoints, not just the API server. K8s Jobs/CronJobs
+# (deploy/k8s/3x-*.yaml) invoke the DB migrator, the SCW→PG graph projector, the
+# 0004 tracking backfill and the live scraper as standalone `node` processes.
+# esbuild with `outdir` + multiple `entryPoints` mirrors the source tree under
+# `api/dist/` (entryNames=[dir]/[name]) so each Job's `node api/dist/<path>.js`
+# resolves to a real file — the previous single-entry build only emitted
+# `api/dist/index.js`, so `dist/scripts/project-graph-from-s3.js` was MISSING
+# and the projection Job died with MODULE_NOT_FOUND (douleur D1).
 RUN npm install --no-save esbuild@0.24.0 \
  && printf '%s\n' \
   "import { build } from 'esbuild';" \
   "await build({" \
-  "  entryPoints: ['api/src/index.ts']," \
+  "  entryPoints: [" \
+  "    'api/src/index.ts'," \
+  "    'api/src/db/migrate.ts'," \
+  "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
+  "    'api/src/scripts/project-graph-from-s3.ts'," \
+  "    'api/src/scripts/worker-live.ts'," \
+  "  ]," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
-  "  outfile: 'api/dist/index.js', logLevel: 'info'," \
+  "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
+  "  logLevel: 'info'," \
   "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => a.path.startsWith('@radar/') ? null : ({ path: a.path, external: true })); } }]," \
   "});" > /workspace/esbuild.mjs \
  && node /workspace/esbuild.mjs
@@ -63,6 +78,11 @@ COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/package.json ./package.json
 COPY --from=build /workspace/api/dist ./api/dist
 COPY --from=build /workspace/api/package.json ./api/package.json
+# Drizzle SQL migrations + journal. The migrate entrypoint (api/dist/db/migrate.js)
+# reads `migrationsFolder: "drizzle"` RELATIVE to its CWD, so the db-migrate Job
+# runs with workingDir /workspace/api and finds these files. Without this COPY
+# the migrator would find an empty folder and apply nothing.
+COPY --from=build /workspace/api/drizzle ./api/drizzle
 # Fixtures simulation CS-L6 (JSON lus depuis le disque à la première requête)
 COPY --from=build /workspace/api/src/services/geo/fixtures ./api/fixtures
 USER radar
