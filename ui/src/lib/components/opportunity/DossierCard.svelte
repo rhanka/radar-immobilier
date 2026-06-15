@@ -24,8 +24,6 @@
   });
   $: timeline = deriveTimeline(dossier);
 
-  let hoveredAxis: string | null = null;
-
   function score100Color(s: number | null): string {
     if (s === null) return "text-slate-400";
     if (s >= 70) return "text-emerald-700";
@@ -164,12 +162,11 @@
             {@const hypothesis = isHypothesis(axis)}
             {@const excludedInReal = mode === "real" && hypothesis}
             <Popover
-              open={hoveredAxis === axis}
+              openOn="hover"
               label="Détail axe {gridRow.label}"
               placement="top"
             >
               {#snippet trigger()}
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div
                   class={`cursor-default rounded border px-3 py-2 transition ${
                     effectiveAxisScore.availability === "non-disponible"
@@ -178,13 +175,8 @@
                         : "border-slate-200 bg-white"
                       : "border-teal-100 bg-teal-50"
                   }`}
-                  on:mouseenter={() => { hoveredAxis = axis; }}
-                  on:mouseleave={() => { hoveredAxis = null; }}
-                  on:focusin={() => { hoveredAxis = axis; }}
-                  on:focusout={() => { hoveredAxis = null; }}
                   tabindex="0"
                   role="button"
-                  aria-expanded={hoveredAxis === axis}
                   aria-label="Détail axe {gridRow.label}"
                 >
                   <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
