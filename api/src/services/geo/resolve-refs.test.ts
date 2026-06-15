@@ -101,7 +101,11 @@ function makeMockDb(selectQueue: SelectResult[]): {
         // ignore
       }
 
-      executeCalls.push({ isResolution, isUnresolved, raison });
+      executeCalls.push({
+        isResolution,
+        isUnresolved,
+        ...(raison !== undefined ? { raison } : {}),
+      });
       return Promise.resolve({ rows: [] });
     },
   } as unknown as Database;
