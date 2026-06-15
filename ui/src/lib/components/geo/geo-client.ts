@@ -55,10 +55,8 @@ export interface GeoFeaturesResponse {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function apiBase(): string {
-  const base = (import.meta as Record<string, unknown>).env
-    ? ((import.meta as { env: Record<string, string> }).env.VITE_API_BASE_URL ?? "")
-    : "";
-  return base;
+  const meta = import.meta as unknown as { env?: Record<string, string> };
+  return meta.env?.VITE_API_BASE_URL ?? "";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
