@@ -3,8 +3,12 @@
    * SignauxRail — bande latérale gauche de la vue Signaux.
    *
    * Accordéon de 1er niveau à 2 sections (<details> natif) :
-   *   1. « Signaux » (ouverte par défaut) : cases à cocher par type de signal
-   *      → filtre GLOBAL (listes + recoloration aplats via callback)
+   *   1. « Signaux » (ouverte par défaut) :
+   *      - Toggle « Zonage uniquement » (DÉFAUT ON) — filtre PRIMAIRE
+   *      - Toggle « Multifamilial 4+ » (DÉFAUT OFF) — axe DIMENSION
+   *      - Toggle « Signaux précoces » (DÉFAUT OFF) — axe ANTICIPATION
+   *      Les trois toggles sont COMBINABLES ; la base de comptage est
+   *      l'intersection des filtres actifs.
    *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
    *
    * Anti-invention : aucun appel API ici, tout par props.
@@ -15,7 +19,7 @@
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
-  /** Toutes les entrées villes (avec signalCount6m). */
+  /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
@@ -33,8 +37,7 @@
   export let onSelectCity: (entry: CityMapEntry) => void = () => {};
   /** Appelé pour actualiser les données. */
   export let onRefresh: () => void = () => {};
-  /** Appelé quand le filtre types change (ensemble des types EXCLUS). */
-  export let onFilterChange: (excluded: Set<string>) => void = () => {};
+  export let onFilterChange: (subsetKey: string) => void = () => {};
 
   // ── Palette 12 couleurs par type (identique graphify) ─────────────────────
   const TYPE_PALETTE = [
@@ -48,7 +51,7 @@
     return TYPE_PALETTE[h % TYPE_PALETTE.length];
   }
 
-  /** Couleur de l'aplat choroplèthe selon le nb de signaux. */
+  /** Couleur de l'aplat choroplèthe selon le nb de signaux actifs. */
   function signalColor(count: number): string {
     if (count === 0) return "#e2e8f0";
     if (count <= 2) return "#fbbf24";
@@ -56,32 +59,33 @@
     return "#ef4444";
   }
 
-  // ── Section accordéon 1er niveau ──────────────────────────────────────────
-  // Les deux sections sont ouvertes par défaut à l'init.
 
-  // ── Filtre GLOBAL par type (section Signaux) ───────────────────────────────
+
+  // ── Toggles — filtres combinables TOP-DOWN ──────────────────────────────────
+  /**
+   * Zonage uniquement (DÉFAUT ON) :
+   *   filtre sur la clé "z" de subsetCounts
+   */
+  let zonageOnly = true;
+
+  /**
+   * Multifamilial 4+ (DÉFAUT OFF — axe DIMENSION) :
+   *   filtre sur la clé "m" de subsetCounts
+   */
+  let multi4plus = false;
+
+  /**
+   * Signaux précoces (DÉFAUT OFF — axe ANTICIPATION) :
+   *   filtre sur la clé "p" de subsetCounts
+   */
+  let precoceOnly = false;
+
   /** Types disponibles = union des types connus (multi-villes) + types actuels. */
   $: allKnownTypes = Array.from(
     new Set([...knownNodeTypes, ...detailNodes.map((n) => n.type)])
   ).sort();
 
-  /** Ensemble des types exclus par l'utilisateur. */
-  let excludedTypes = new Set<string>();
-
-  function toggleType(type: string): void {
-    if (excludedTypes.has(type)) {
-      excludedTypes.delete(type);
-    } else {
-      excludedTypes.add(type);
-    }
-    excludedTypes = excludedTypes; // trigger reactivity
-    onFilterChange(excludedTypes);
-  }
-
-  // Propagate filter on initial mount / when known types change
-  $: onFilterChange(excludedTypes);
-
-  // ── Compteur par type (nœuds de la ville sélectionnée) ────────────────────
+  /** Compteur par type (nœuds de la ville sélectionnée — filtre secondaire). */
   $: countByType = detailNodes.reduce(
     (acc, n) => {
       acc[n.type] = (acc[n.type] ?? 0) + 1;
@@ -90,26 +94,81 @@
     {} as Record<string, number>,
   );
 
-  // ── Nœuds filtrés selon les types cochés ──────────────────────────────────
-  $: filteredNodes = detailNodes.filter((n) => !excludedTypes.has(n.type));
+  /** Nœuds filtrés (affichage dans le panneau détail). */
+  $: filteredNodes = detailNodes;
+
+  /** Construit la clé subsetCounts à partir des 3 flags — fonction PURE. */
+  function buildKey(z: boolean, m: boolean, p: boolean): string {
+    const parts: string[] = [];
+    if (z) parts.push("z");
+    if (m) parts.push("m");
+    if (p) parts.push("p");
+    return parts.join("|");
+  }
+
+  /**
+   * Clé active RÉACTIVE : dépend DIRECTEMENT des 3 toggles → Svelte la
+   * recalcule à chaque toggle. (Le bug venait d'une fonction qui lisait les
+   * toggles « cachés » dans son corps → Svelte ne voyait aucune dépendance,
+   * donc les $: total/villes/tri/filtre ne re-tournaient jamais.)
+   */
+  $: activeKey = buildKey(zonageOnly, multi4plus, precoceOnly);
+
+  function emitFilterChange(): void {
+    onFilterChange(buildKey(zonageOnly, multi4plus, precoceOnly));
+  }
+
+  function toggleZonageOnly(): void {
+    zonageOnly = !zonageOnly;
+    emitFilterChange();
+  }
+
+  function toggleMulti4plus(): void {
+    multi4plus = !multi4plus;
+    emitFilterChange();
+  }
+
+  function togglePrecoceOnly(): void {
+    precoceOnly = !precoceOnly;
+    emitFilterChange();
+  }
+
+  // Propagate filter à l'init / au changement de clé active (réactif)
+  $: onFilterChange(activeKey);
+
+  // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
+  /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
+  function countFor(entry: CityMapEntry, key: string): number {
+    return entry.subsetCounts[key] ?? 0;
+  }
+
+
 
   // ── Recherche villes (section Villes) ─────────────────────────────────────
   let searchQuery = "";
 
-  $: filteredEntries = searchQuery.trim()
-    ? entries.filter((e) =>
-        e.municipality.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-        (e.municipality.mrc ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase())
-      )
-    : entries;
+  $: filteredEntries = entries.filter((e) => {
+    const matchSearch = !searchQuery.trim() ||
+      e.municipality.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+      (e.municipality.mrc ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase());
+    return matchSearch && countFor(e, activeKey) > 0;
+  });
 
   $: sortedEntries = [...filteredEntries].sort(
-    (a, b) => b.signalCount6m - a.signalCount6m
+    (a, b) => countFor(b, activeKey) - countFor(a, activeKey)
   ).slice(0, 60);
 
-  // ── Compteurs globaux ─────────────────────────────────────────────────────
-  $: totalSignals = entries.reduce((s, e) => s + e.signalCount6m, 0);
-  $: citiesWithSignals = entries.filter((e) => e.signalCount6m > 0).length;
+  // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
+  $: totalSignals = entries.reduce((s, e) => s + countFor(e, activeKey), 0);
+  $: citiesWithSignals = entries.filter((e) => countFor(e, activeKey) > 0).length;
+
+  // ── Badges « funnel » RÉACTIFS : compte si on ajoute ce toggle à l'actif ──
+  $: badgeZonage = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(true, multi4plus, precoceOnly)), 0);
+  $: badgeMulti = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(zonageOnly, true, precoceOnly)), 0);
+  $: badgePrecoce = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, true)), 0);
 </script>
 
 <!-- Rail container -->
@@ -135,7 +194,8 @@
       {#if loading}
         <span class="text-slate-400">Chargement…</span>
       {:else}
-        <span class="font-semibold text-slate-700">{totalSignals}</span> signal{totalSignals !== 1 ? "s" : ""}
+        <span class="font-semibold text-slate-700">{totalSignals}</span>
+        {totalSignals !== 1 ? " signaux" : " signal"}
         · <span class="font-semibold text-slate-700">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
       {/if}
     </div>
@@ -144,52 +204,72 @@
   <!-- Corps scrollable : 2 sections accordéon natif -->
   <div class="rail-body flex-1 min-h-0 overflow-y-auto">
 
-    <!-- ── Section 1 : Signaux (cases à cocher par type) ───────────────────── -->
+    <!-- ── Section 1 : Signaux — filtres combinables ───────────────────────── -->
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
         <span class="rail-section-title">Signaux</span>
-        {#if excludedTypes.size > 0}
-          <span class="rail-section-badge">{allKnownTypes.length - excludedTypes.size}/{allKnownTypes.length}</span>
-        {/if}
       </summary>
 
       <div class="rail-section-body">
-        {#if allKnownTypes.length === 0}
-          <p class="text-xs text-slate-400 italic px-4 py-2">
-            Sélectionnez une ville pour voir les types de signaux.
-          </p>
-        {:else}
-          <ul class="space-y-0.5 px-3 py-1" role="list">
-            {#each allKnownTypes as type (type)}
-              {@const excluded = excludedTypes.has(type)}
-              {@const count = countByType[type] ?? null}
-              <li>
-                <label
-                  class="rail-type-row"
-                  class:rail-type-row--excluded={excluded}
-                >
-                  <input
-                    type="checkbox"
-                    class="rail-type-checkbox"
-                    checked={!excluded}
-                    on:change={() => toggleType(type)}
-                    aria-label={type}
-                  />
-                  <span
-                    class="rail-swatch"
-                    style="background-color: {excluded ? '#cbd5e1' : typeColor(type)};"
-                    aria-hidden="true"
-                  ></span>
-                  <span class="rail-row-label">{type}</span>
-                  {#if count !== null}
-                    <span class="rail-row-count text-slate-500">{count}</span>
-                  {/if}
-                </label>
-              </li>
-            {/each}
-          </ul>
-        {/if}
+        <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE, activé par défaut -->
+        <div class="axis-toggle-row px-3 pt-2 pb-1">
+          <label class="rail-type-row">
+            <input
+              type="checkbox"
+              class="rail-type-checkbox"
+              checked={zonageOnly}
+              on:change={toggleZonageOnly}
+              aria-label="Zonage uniquement"
+            />
+            <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
+            {#if !loading}
+              <span class="axis-badge axis-badge--zonage">
+                {badgeZonage}
+              </span>
+            {/if}
+          </label>
+        </div>
+
+        <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
+        <div class="axis-toggle-row px-3 pb-1">
+          <label class="rail-type-row">
+            <input
+              type="checkbox"
+              class="rail-type-checkbox"
+              checked={multi4plus}
+              on:change={toggleMulti4plus}
+              aria-label="Multifamilial 4+"
+            />
+            <span class="rail-row-label text-slate-700">
+              Multifamilial 4+
+              <span class="rail-row-sublabel">nb unités ≥ 4 ou intensité haute</span>
+            </span>
+            {#if !loading}
+              <span class="axis-badge axis-badge--dimension">{badgeMulti}</span>
+            {/if}
+          </label>
+        </div>
+
+        <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
+        <div class="axis-toggle-row axis-toggle-row--last px-3 pb-2">
+          <label class="rail-type-row">
+            <input
+              type="checkbox"
+              class="rail-type-checkbox"
+              checked={precoceOnly}
+              on:change={togglePrecoceOnly}
+              aria-label="Signaux précoces"
+            />
+            <span class="rail-row-label text-slate-700">
+              Signaux précoces (approx.)
+              <span class="rail-row-sublabel">avis de motion / 1er projet</span>
+            </span>
+            {#if !loading}
+              <span class="axis-badge axis-badge--anticipation">{badgePrecoce}</span>
+            {/if}
+          </label>
+        </div>
       </div>
     </details>
 
@@ -220,6 +300,7 @@
           {:else}
             {#each sortedEntries as entry (entry.municipality.slug)}
               {@const isSelected = selectedSlug === entry.municipality.slug}
+              {@const activeCount = countFor(entry, activeKey)}
               <li>
                 <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
                 <details
@@ -231,10 +312,10 @@
                     class:ws-acc-summary--active={isSelected}
                     on:click|preventDefault={() => onSelectCity(entry)}
                   >
-                    <!-- Pastille couleur signal -->
+                    <!-- Pastille couleur signal (basée sur le compte actif) -->
                     <span
                       class="rail-swatch"
-                      style="background-color: {signalColor(entry.signalCount6m)};"
+                      style="background-color: {signalColor(activeCount)};"
                       aria-hidden="true"
                     ></span>
                     <span class="rail-row-label">
@@ -243,9 +324,9 @@
                         <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
                       {/if}
                     </span>
-                    {#if entry.signalCount6m > 0}
+                    {#if activeCount > 0}
                       <Badge tone="warning" class="rail-row-count shrink-0">
-                        {entry.signalCount6m}
+                        {activeCount}
                       </Badge>
                     {:else}
                       <span class="rail-row-count text-slate-300">0</span>
@@ -408,15 +489,6 @@
     flex: 1;
   }
 
-  .rail-section-badge {
-    font-size: 0.68rem;
-    font-variant-numeric: tabular-nums;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    background: #e2e8f0;
-    border-radius: 999px;
-    padding: 0.1rem 0.45rem;
-  }
-
   .rail-section-chevron {
     font-size: 0.65rem;
     color: var(--st-semantic-text-muted, #94a3b8);
@@ -442,10 +514,6 @@
 
   .rail-type-row:hover {
     background: var(--st-semantic-surface-subtle, #f8fafc);
-  }
-
-  .rail-type-row--excluded {
-    opacity: 0.5;
   }
 
   .rail-type-checkbox {
@@ -516,4 +584,39 @@
     gap: 0.4rem;
     padding: 0.25rem 0;
   }
+
+  /* ── Toggles axes (Zonage / Dimension / Anticipation) ── */
+  .axis-toggle-row {
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  .axis-toggle-row--last {
+    margin-bottom: 0.25rem;
+  }
+
+  .axis-badge {
+    font-size: 0.65rem;
+    border-radius: 999px;
+    padding: 0.1rem 0.4rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis-badge--zonage {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    background: #e0f2fe; /* sky-100 */
+  }
+
+  .axis-badge--dimension {
+    color: #854d0e; /* yellow-800 */
+    background: #fef9c3; /* yellow-100 */
+  }
+
+  .axis-badge--anticipation {
+    color: #166534; /* green-800 */
+    background: #dcfce7; /* green-100 */
+  }
+
+
 </style>

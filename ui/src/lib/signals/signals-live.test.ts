@@ -15,13 +15,35 @@ import {
   mapGraphSignalNodeToSignal,
 } from "./signals-live.js";
 
+/**
+ * Helper : construit une GraphSignalsByCityResponse de test.
+ * Les items partiels sont complétés avec countsByType, zonageCount,
+ * multi4plusCount et countsByStage pour satisfaire l'interface
+ * GraphSignalCityItem sans polluer les tests avec des champs non pertinents.
+ */
 const byCity = (
-  ...cities: GraphSignalsByCityResponse["cities"]
-): GraphSignalsByCityResponse => ({
-  ok: true,
-  totalCount: cities.reduce((acc, c) => acc + c.signalCount, 0),
-  cities,
-});
+  ...cities: (Omit<GraphSignalsByCityResponse["cities"][0], "countsByType" | "zonageCount" | "multi4plusCount" | "countsByStage" | "subsetCounts"> & {
+    countsByType?: Record<string, number>;
+    zonageCount?: number;
+    multi4plusCount?: number;
+    countsByStage?: Record<string, number>;
+    subsetCounts?: Record<string, number>;
+  })[]
+): GraphSignalsByCityResponse => {
+  const normalized = cities.map((c) => ({
+    ...c,
+    countsByType: c.countsByType ?? { Signal: c.signalCount },
+    zonageCount: c.zonageCount ?? 0,
+    multi4plusCount: c.multi4plusCount ?? 0,
+    countsByStage: c.countsByStage ?? {},
+    subsetCounts: c.subsetCounts ?? {},
+  }));
+  return {
+    ok: true,
+    totalCount: normalized.reduce((acc, c) => acc + c.signalCount, 0),
+    cities: normalized,
+  };
+};
 
 const detail = (
   citySlug: string,
