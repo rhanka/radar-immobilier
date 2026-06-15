@@ -187,3 +187,4 @@ export {
 export * from "./geo/cadastre-allege.js";
 export * from "./geo/arcgis-zonage.js";
 export * from "./geo/arcgis-service-registry.js";
+export * from "./geo/ckan-zonage.js";
