@@ -21,6 +21,7 @@ import { geoLotsRoute } from "./routes/geo-lots.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
+import { prospectMarksRoute } from "./routes/prospect-marks.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -81,6 +82,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", geoLotsRoute());
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
+  app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 
