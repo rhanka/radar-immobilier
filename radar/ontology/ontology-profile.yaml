@@ -659,11 +659,9 @@ extraction_hints:
       - "du secteur [CODE]"         # ex : "du secteur H34-327 (VLO)" — si clairement un code
       - "affectée [CODE]"           # ex : "affectée zone RA"
     anti_invention:
-      - Ne pas extraire un code depuis une description géographique vague
-        (ex : "secteur nord", "quartier résidentiel", "zone commerciale") → OMIS.
-      - Ne pas confondre un numéro de règlement (ex "Z-2026-042") avec un code de zone.
-      - Si plusieurs zones sont mentionnées, prendre la première citée explicitement
-        (zone SOURCE du rezonage ou zone cible si unique) ; sinon OMIS.
+      - 'Ne pas extraire un code depuis une description géographique vague (ex : "secteur nord", "quartier résidentiel", "zone commerciale") → OMIS.'
+      - 'Ne pas confondre un numéro de règlement (ex "Z-2026-042") avec un code de zone.'
+      - 'Si plusieurs zones sont mentionnées, prendre la première citée explicitement (zone SOURCE du rezonage ou zone cible si unique) ; sinon OMIS.'
     examples:
       - text: "Rezonage du lot 4567890 de la zone H-431 vers la zone C-512"
         zone_ref: "H-431"
