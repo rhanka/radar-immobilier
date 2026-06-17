@@ -14,6 +14,12 @@ Graphify v2.3 must be run with Claude Sonnet 4.6 once quota is available. It mus
 
 Every `Signal` and `DesignationEvent` node should carry enough evidence to render a right-pane card without guessing.
 
+This does **not** make flat zone/lot/bylaw properties the source of truth.
+The canonical graph structure remains edge-based. v2.3 must preserve or
+create the expected ontology relations (`TARGETS_ZONE`, `TARGETS_LOT`,
+`REZONES`, `RAISES_SIGNAL`, `MENTIONS` / `DERIVED_FROM` where applicable)
+and any derived UI fields must be recomputable from those nodes and edges.
+
 Required output shape:
 
 ```json
@@ -50,7 +56,13 @@ Field rules:
 - `refs[].sourceUrl` is preferred; `rawRef` is accepted as fallback when the public URL is unavailable.
 - `page` is required for PDFs when known.
 - `bbox` is required when the extraction path can provide it; otherwise it may be absent but must not be fabricated.
-- Existing `zone_ref`, `no_lot`, and `reglement_number` enrichments remain part of v2.3.
+- Zone, lot, and bylaw references must be represented canonically through
+  graph nodes and relations. Legacy flat enrichments such as `zone_ref`,
+  `no_lot`, or `reglement_number` may be kept only as derived convenience
+  properties when already present; they must not replace the graph relation.
+- v2.1 anticipation fields remain protected: `etape` and `etape_date` must
+  be preserved on `Signal` / `DesignationEvent` nodes where the output
+  contract requires them.
 
 ## 3. Gates
 
@@ -63,16 +75,32 @@ For every `Signal` and `DesignationEvent`, the gate must report:
 - `hasPdfLink`
 - `hasDocSha`
 - `hasPageOrBbox` for PDF-backed refs
-- `hasZoneRef`
-- `hasLotNumber`
-- `hasReglementNumber`
+- `hasEtape`
+- `hasEtapeDateWhenRequired`
+- `hasCanonicalZoneRelation`
+- `hasCanonicalLotRelation`
+- `hasCanonicalBylawRelation`
+
+Before the run, build a protected manifest for the current 33 priority
+`z|m|p` detections. Each entry must contain the current node id, a stable
+business key, node type, municipality, date or stage date, `docSha`, label,
+kind/stage fields, and expected zone/lot/bylaw relation fingerprints when
+known. The gate compares this manifest by stable key, not by count alone.
 
 Blocking thresholds:
 
+- `ontology_version` must be exactly `"2.3"` for the accepted candidate.
+- v2.1 compatibility gates must remain green, including non-regression of
+  `etape` and `etape_date` values where they existed or were required.
 - No critical `z|m|p` node may lose its existing business classification.
-- No critical `z|m|p` node may ship without `description`, citation excerpt, and PDF/raw link.
+- No critical `z|m|p` node may lose its canonical zone, lot, bylaw, or
+  designation-event relation when that relation existed in the protected
+  manifest.
+- No critical `z|m|p` node may ship without `description`, citation excerpt, and PDF/raw/document link.
 - Non-critical missing evidence is allowed only with an explicit `evidenceStatus: "incomplete"` marker and a reason.
-- The published `z|m|p` count must not silently drop below the protected 33 without a reviewed explanation.
+- The published `z|m|p` count must not silently drop below the protected 33,
+  and preserving the count is not sufficient if the manifest identity or
+  relation fingerprints changed without review.
 
 ## 4. Execution constraints
 
@@ -81,7 +109,7 @@ The run must use the graphify CLI/runtime path explicitly. Patching `latest.json
 Before running:
 
 - Align the repo/container graphify version with the system graphify CLI capability.
-- Record graphify package version, model, reasoning mode, prompt version, source graph version, and raw manifest hash.
+- Record graphify package version, model, reasoning mode, prompt version, source graph version, raw manifest hash, and protected `z|m|p` manifest hash.
 - Keep Sonnet 4.6 provenance distinct from Codex Spark or deterministic repair provenance.
 
 ## 5. Acceptance
