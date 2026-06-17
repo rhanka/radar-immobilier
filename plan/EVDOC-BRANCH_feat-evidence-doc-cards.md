@@ -72,13 +72,13 @@ Make graph-backed signal cards evidence-complete: preserve source publication da
   - [x] Import this plan into track from the repository root.
   - [x] Lot gate: no runtime gate; branch plan and specs reviewed.
 
-- [ ] **Lot 1 — Persist `publishedAt` at recueil time**
-  - [ ] Extend `RawDocumentRecord` and `buildRawDocumentRecord` with optional `publishedAt` and `title`.
-  - [ ] Pass `RawDocumentRef.publishedAt` / `title` from `runRecueil`.
-  - [ ] Ensure meta sidecars and manifests preserve document date without inventing unknown dates.
-  - [ ] Lot gate:
-    - [ ] `make test-api SCOPE=src/services/sources/recueil.test.ts ENV=test-evidence-doc-cards-api`
-    - [ ] `make test ENV=test-evidence-doc-cards-all`
+- [x] **Lot 1 — Persist `publishedAt` at recueil time**
+  - [x] Extend `RawDocumentRecord` and `buildRawDocumentRecord` with optional `publishedAt` and `title`.
+  - [x] Pass `RawDocumentRef.publishedAt` / `title` from `runRecueil`.
+  - [x] Ensure meta sidecars and manifests preserve document date without inventing unknown dates.
+  - [x] Lot gate:
+    - [x] `make test-api SCOPE=src/services/sources/recueil.test.ts ENV=test-evidence-doc-cards-api`
+    - [x] `make test ENV=test-evidence-doc-cards-all`
 
 - [ ] **Lot 2 — Metadata repair from existing S3**
   - [ ] Add a pure repair service that reads existing `runs/**/manifest.jsonl` and `raw/**/*.meta.json`.
