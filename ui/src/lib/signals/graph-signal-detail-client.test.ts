@@ -16,8 +16,13 @@ describe("extractDocRefs", () => {
     expect(extractDocRefs({ refs: 42 })).toEqual([]);
   });
 
-  it("returns [] when refs items have no docSha string", () => {
-    expect(extractDocRefs({ refs: [{ excerpt: "foo" }] })).toEqual([]);
+  it("keeps citation-only refs instead of dropping evidence", () => {
+    expect(extractDocRefs({ refs: [{ excerpt: "foo" }] })).toEqual([
+      { docSha: "ref-1", excerpt: "foo" },
+    ]);
+  });
+
+  it("returns [] when refs items have no usable identifier, URL or citation", () => {
     expect(extractDocRefs({ refs: [{ docSha: 123 }] })).toEqual([]);
   });
 
@@ -67,6 +72,52 @@ describe("extractDocRefs", () => {
       },
     ]);
     expect(result[0].sourceUrl).toBeUndefined();
+  });
+
+  it("extracts graphify file/ref/citation aliases", () => {
+    const result = extractDocRefs({
+      refs: [
+        {
+          file: "a74652366eeffeea.pdf",
+          citation: "Avis de motion concernant le règlement de zonage.",
+          page: "4",
+        },
+      ],
+    });
+
+    expect(result).toEqual([
+      {
+        docSha: "a74652366eeffeea.pdf",
+        excerpt: "Avis de motion concernant le règlement de zonage.",
+        rawRef: "a74652366eeffeea.pdf",
+        page: 4,
+      },
+    ]);
+  });
+
+  it("extracts top-level citation and PDF URL when refs is absent", () => {
+    const result = extractDocRefs({
+      citation: "Le conseil donne avis de motion.",
+      pdfUrl: "https://example.test/pv.pdf",
+    });
+
+    expect(result).toEqual([
+      {
+        docSha: "https://example.test/pv.pdf",
+        excerpt: "Le conseil donne avis de motion.",
+        sourceUrl: "https://example.test/pv.pdf",
+      },
+    ]);
+  });
+
+  it("deduplicates identical refs from refs and top-level fields", () => {
+    const result = extractDocRefs({
+      refs: [{ docSha: "aaa", excerpt: "foo" }],
+      docSha: "aaa",
+      excerpt: "foo",
+    });
+
+    expect(result).toEqual([{ docSha: "aaa", excerpt: "foo" }]);
   });
 
   it("extracts multiple refs and skips invalid items in the same array", () => {
