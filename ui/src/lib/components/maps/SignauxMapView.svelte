@@ -60,6 +60,19 @@
     features: [],
   };
 
+  function emptyUnconfiguredZones(citySlug: string): GeoZonesResponse {
+    return {
+      ok: false,
+      citySlug,
+      source: "none",
+      resolutionStatus: "missing",
+      geometryStatus: "missing",
+      zoneCount: 0,
+      warnings: ["geo-collection-not-configured"],
+      featureCollection: EMPTY_ZONES,
+    };
+  }
+
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
   let loading = true;
@@ -347,11 +360,26 @@
 
     try {
       const res = await fetchGraphSignalDetail(entry.municipality.slug);
+      if (selectedCity?.municipality.slug !== entry.municipality.slug) return;
       detailNodes = res.nodes;
       // Alimenter le cache multi-villes et accumuler les types connus
       detailCache.set(entry.municipality.slug, res.nodes);
       const newTypes = res.nodes.map((n) => n.type);
       knownNodeTypes = Array.from(new Set([...knownNodeTypes, ...newTypes])).sort();
+      const firstSignal = res.nodes[0] ?? null;
+      if (firstSignal && selectionState.focusedKey === cityKey) {
+        try {
+          const firstSignalKey = makeKey("signal", firstSignal.id);
+          selectionState = createSelectionBucketState({
+            selectedKeys: [...selectionState.selectedKeys, firstSignalKey],
+            focusedKey: firstSignalKey,
+            hoveredKey: selectionState.hoveredKey,
+            expandedKeys: [...selectionState.expandedKeys, firstSignalKey],
+          });
+        } catch {
+          // Ignore malformed graph ids; the city selection remains valid.
+        }
+      }
       // Recolorer les aplats avec les nouvelles données en cache
       updateFillColors();
     } catch (e) {
@@ -548,11 +576,15 @@
     if (zonesResult.status === "fulfilled") {
       zonesResponse = zonesResult.value;
     } else {
-      errors.push(
+      const message =
         zonesResult.reason instanceof Error
           ? zonesResult.reason.message
-          : "zones indisponibles",
-      );
+          : "zones indisponibles";
+      if (message.includes("geo-zones HTTP 404")) {
+        zonesResponse = emptyUnconfiguredZones(citySlug);
+      } else {
+        errors.push(message);
+      }
     }
 
     if (lotsResult.status === "fulfilled") {
