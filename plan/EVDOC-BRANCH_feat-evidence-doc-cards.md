@@ -88,13 +88,13 @@ Make graph-backed signal cards evidence-complete: preserve source publication da
     - [x] `make test-api SCOPE=src/services/sources/repair-published-at.test.ts ENV=test-evidence-doc-cards-lot2`
     - [x] `make test-api SCOPE=src/services/sources/rebuild-from-s3.test.ts ENV=test-evidence-doc-cards-lot2`
 
-- [ ] **Lot 3 — API evidence DTO and document route**
-  - [ ] Add server-side `GraphSignalCard` mapping that preserves label, description, citations, document metadata, and relations.
-  - [ ] Resolve `docSha`/`rawRef`/`sourceUrl` against projected document metadata when available.
-  - [ ] Add a controlled document endpoint for private `rawRef` fallback, while preferring public `sourceUrl`.
-  - [ ] Lot gate:
-    - [ ] `make test-api SCOPE=src/routes/graph-signals.test.ts ENV=test-evidence-doc-cards`
-    - [ ] `make test-api SCOPE=src/routes/documents.test.ts ENV=test-evidence-doc-cards`
+- [x] **Lot 3 — API evidence DTO and document route**
+  - [x] Add server-side `GraphSignalCard` mapping that preserves label, description, citations, document metadata, and relations.
+  - [x] Resolve `docSha`/`rawRef`/`sourceUrl` against projected document metadata when available.
+  - [x] Add a controlled document endpoint for private `rawRef` fallback, while preferring public `sourceUrl`.
+  - [x] Lot gate:
+    - [x] `make test-api SCOPE=src/routes/graph-signals.test.ts ENV=test-evidence-doc-cards-lot3`
+    - [x] `make test-api SCOPE=src/routes/documents.test.ts ENV=test-evidence-doc-cards-lot3`
 
 - [ ] **Lot 4 — UI signal card and PDF overlay**
   - [ ] Extend graph-signal clients to read enriched evidence and distinct dates.
