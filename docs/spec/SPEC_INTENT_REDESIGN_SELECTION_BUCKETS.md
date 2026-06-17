@@ -31,7 +31,13 @@ The redesign should turn the map into the primary work surface. Left and right p
 - Map objects can be selected and deselected directly: municipality, signal, zone, lot.
 - Selected map objects render at full opacity; non-selected objects render about 50% more transparent.
 - Grouping follows Graphify-like collapsible buckets: municipalities, signals, zones, lots.
-- Hierarchy: municipality -> signals -> zones -> lots.
+- Hierarchy is not linear. The left tree is:
+  `municipality -> { signals[], zones[] }` and `zone -> lots[]`.
+  Signals may link to zones and lots through graph relations, but zones are
+  not children of signals in the discovery tree.
+- The right selection bucket remains grouped by object category:
+  municipalities, signals, zones, lots. Selection state, focus state, and
+  expansion state are separate concepts.
 
 ## 3. Detail model
 
@@ -72,6 +78,10 @@ The redesign is a Design System alignment task, not a new bespoke shell.
 - Header, left rail, right rail, accordions, buttons, search, badges, drawers/overlays, tabs, tables, empty states, and loading states should use `@sentropic/design-system-svelte` primitives where they exist.
 - Any local component kept because the DS has no equivalent must be listed as a DS gap with a tracked request.
 - The deployed header must align with the DS AppShell/Header contract: no custom visual gap, no bespoke chrome styling where a DS primitive exists.
+- "0 bespoke" means zero bespoke implementation for UI primitives already
+  covered by the DS. Domain-specific map components may remain local only
+  when the DS has no published equivalent, and each case must be tracked as
+  a DS gap.
 - DS requests should be routed to the Codex design-system lane via h2a, not to a Claude-only design-system lane.
 
 ## 6. Data quality view
@@ -94,8 +104,27 @@ The admin view must support user validation. At minimum:
 - Approve a user.
 - Reject or suspend a user.
 - See current validation status.
+- Only an admin role may change validation status.
+- Status transitions must be auditable with actor, timestamp, target user,
+  previous status, new status, and optional reason.
+- Revoking or suspending a user must be enforced on existing sessions, not
+  only on the next login.
 
-## 8. Acceptance criteria
+## 8. Implementation lanes
+
+The redesign should be split into independent implementation lanes so the
+graphify v2.3 wait does not block product UI work:
+
+1. DS shell and rails: App shell, header, left rail, right rail, common
+   rail states, and tracked DS gaps.
+2. Selection bucket UX: shared selection model, map opacity rules, left
+   discovery tree, right detail bucket, and document overlay fallback states.
+3. Zones and lots incorporation: official geometry first, lot-group fallback
+   second, text-only or missing geometry states when data is not available.
+4. Data quality and admin: per-city data-quality summary plus user
+   validation, suspension, and session enforcement.
+
+## 9. Acceptance criteria
 
 - The spec is discoverable from `docs/spec/`.
 - Track contains work items for DS alignment and selection buckets.
