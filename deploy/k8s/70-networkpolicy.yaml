@@ -91,6 +91,38 @@ spec:
         - protocol: TCP
           port: 3000
 ---
+# ADDITIVE: let one-shot graph projection jobs reach Postgres on :5432.
+#
+# Projection jobs (31/32/32b) run with `component: graph-projection`, not
+# `component: api`. The operator baseline `allow-api-to-runtime-dependencies`
+# only allows api -> postgres, so graph projection pods can list SCW objects but
+# then hang on the first DB upsert. Keep this tenant-owned exception narrowly
+# scoped to graph-projection -> postgres:5432.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-graph-projection-to-postgres
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: postgres
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: graph-projection
+      ports:
+        - protocol: TCP
+          port: 5432
+---
 # ADDITIVE: let the api pod reach MinIO on :9000 (object storage).
 #
 # The api's /health probe (and every RECUEIL object PUT/GET) calls the S3 API on
