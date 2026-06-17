@@ -76,11 +76,11 @@ Fix the production white page caused by the UI browser bundle resolving Svelte's
   - [x] Run `make smoke-ui-image-bundle UI_VERSION=main-d4ff77e-clientfix ENV=fix-ui-svelte-client-runtime`.
 
 - [ ] **Lot 3 — Publish, deploy, and close**
-  - [ ] Commit hotfix.
-  - [ ] Push branch.
-  - [ ] Push verified UI image tag.
-  - [ ] Apply Kubernetes deployment.
-  - [ ] Verify public URL with browser-console smoke.
+  - [x] Commit hotfix.
+  - [x] Push branch.
+  - [x] Push verified UI image tag.
+  - [x] Apply Kubernetes deployment.
+  - [x] Verify public URL with bundle smoke and Chrome headless render.
   - [ ] Open PR.
   - [ ] Verify CI green.
   - [ ] Merge commit into `main`.
