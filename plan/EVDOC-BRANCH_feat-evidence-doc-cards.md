@@ -114,9 +114,11 @@ Make graph-backed signal cards evidence-complete: preserve source publication da
     - [x] `make typecheck ENV=test-evidence-doc-cards-lot5`
     - [x] `make lint ENV=test-evidence-doc-cards-lot5`
 
-- [ ] **Lot 6 — Merge readiness**
-  - [ ] Run focused tests for Lots 1-5.
-  - [ ] Run `make build ENV=test-evidence-doc-cards`.
+- [x] **Lot 6 — Merge readiness**
+  - [x] Run focused tests for Lots 1-5.
+  - [x] Run `make test ENV=test-evidence-doc-cards-merge`.
+  - [x] Run `make build ENV=test-evidence-doc-cards-lot5`.
+  - [x] Run `make smoke-ui-bundle ENV=test-evidence-doc-cards-lot5`.
   - [ ] Push branch and open PR.
   - [ ] Verify CI green.
   - [ ] Merge commit only; preserve branch.
