@@ -45,7 +45,16 @@
   $: zones = zonesResponse?.featureCollection.features ?? [];
   $: lots = lotsResponse?.featureCollection.features ?? [];
   $: visibleLots = lots.slice(0, 80);
-  $: hiddenLotCount = Math.max(0, lots.length - visibleLots.length);
+  $: zonesUnavailableReason =
+    zonesResponse?.warnings.includes("geo-collection-not-configured")
+      ? "Zones non configurées dans l'API geo."
+      : null;
+  $: lotTotalCount = lotsResponse?.numberMatched ?? lots.length;
+  $: hiddenLotCount = Math.max(0, lotTotalCount - visibleLots.length);
+  $: lotsUnavailableReason =
+    lotsResponse && !lotsResponse.ok
+      ? lotsResponse.reason ?? "Lots non configurés dans l'API geo."
+      : null;
   $: cityKey = selectedCity
     ? safeKey("municipality", selectedCity.municipality.slug)
     : null;
@@ -96,8 +105,11 @@
   function nodeDescription(node: GraphSignalNode): string | null {
     return (
       readString(node.props.description) ??
+      readString(node.props.desc) ??
       readString(node.props.summary) ??
       readString(node.props.resume) ??
+      readString(node.props.abstract) ??
+      readString(node.props.rationale) ??
       readString(node.props.justification) ??
       null
     );
@@ -124,6 +136,23 @@
 
   function docRefs(node: GraphSignalNode): SignalDocRef[] {
     return extractDocRefs(node.props);
+  }
+
+  function formatSignalCount(count: number): string {
+    return formatCount(count, "signal", "signaux");
+  }
+
+  function formatCount(count: number, singular: string, plural: string): string {
+    return `${formatNumber(count)} ${count === 1 ? singular : plural}`;
+  }
+
+  function formatNumber(count: number): string {
+    return count.toLocaleString("fr-CA");
+  }
+
+  function nodeTypeLabel(type: string): string {
+    if (type === "DesignationEvent") return "Événement de désignation";
+    return type;
   }
 
   function zoneSourceLabel(zone: GeoZoneFeature): string {
@@ -183,14 +212,22 @@
       {/if}
       <div class="sel-pill-row">
         <Badge tone={selectedCity.signalCount6m > 0 ? "warning" : "neutral"}>
-          {selectedCity.signalCount6m} signal{selectedCity.signalCount6m !== 1 ? "s" : ""}
+          {formatSignalCount(selectedCity.signalCount6m)}
         </Badge>
-        <Badge tone={zones.length > 0 ? "info" : "neutral"}>
-          {zones.length} zone{zones.length !== 1 ? "s" : ""}
-        </Badge>
-        <Badge tone={lots.length > 0 ? "success" : "neutral"}>
-          {lots.length} lot{lots.length !== 1 ? "s" : ""}
-        </Badge>
+        {#if zonesUnavailableReason}
+          <Badge tone="neutral">zones non configurées</Badge>
+        {:else}
+          <Badge tone={zones.length > 0 ? "info" : "neutral"}>
+            {zones.length} zone{zones.length !== 1 ? "s" : ""}
+          </Badge>
+        {/if}
+        {#if lotsUnavailableReason}
+          <Badge tone="neutral">lots non configurés</Badge>
+        {:else}
+          <Badge tone={lotTotalCount > 0 ? "success" : "neutral"}>
+            {formatCount(lotTotalCount, "lot", "lots")}
+          </Badge>
+        {/if}
       </div>
     </div>
 
@@ -271,7 +308,7 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
-                    <span class="sel-entity-type">{node.type}</span>
+                    <span class="sel-entity-type">{nodeTypeLabel(node.type)}</span>
                   </button>
 
                   {#if nodeVisual.focused}
@@ -354,7 +391,7 @@
       <details class="sel-bucket" open>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Zones</span>
-          <span class="rail-row-count">{zones.length}</span>
+          <span class="rail-row-count">{zonesUnavailableReason ? "n/d" : zones.length}</span>
         </summary>
         <div class="sel-entities">
           {#if geoLoading}
@@ -362,6 +399,8 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement zones/lots…</span>
             </div>
+          {:else if zonesUnavailableReason}
+            <p class="sel-empty">{zonesUnavailableReason}</p>
           {:else if zones.length === 0}
             <p class="sel-empty">Aucune zone géométrique disponible.</p>
           {:else}
@@ -412,7 +451,7 @@
       <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Lots</span>
-          <span class="rail-row-count">{lots.length}</span>
+          <span class="rail-row-count">{lotsUnavailableReason ? "n/d" : formatNumber(lotTotalCount)}</span>
         </summary>
         <div class="sel-entities">
           {#if geoLoading}
@@ -420,11 +459,15 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement zones/lots…</span>
             </div>
+          {:else if lotsUnavailableReason}
+            <p class="sel-empty">{lotsUnavailableReason}</p>
           {:else if lots.length === 0}
-            <p class="sel-empty">Aucun lot disponible pour cette ville.</p>
+            <p class="sel-empty">Aucun lot retourné par la collection geo.</p>
           {:else}
             {#if hiddenLotCount > 0}
-              <p class="sel-warning">Affichage limité aux 80 premiers lots chargés (+{hiddenLotCount}).</p>
+              <p class="sel-warning">
+                {formatNumber(visibleLots.length)} lots affichés sur {formatNumber(lotTotalCount)} disponibles.
+              </p>
             {/if}
             {#each visibleLots as lot (lot.properties.noLot)}
               {@const key = lotKey(lot)}
@@ -461,6 +504,10 @@
                         {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</span>
+                        {#if lotsResponse?.collectionId}
+                          <span class="entity-meta-key">Collection</span>
+                          <code class="entity-meta-val">{lotsResponse.collectionId}</code>
+                        {/if}
                       </div>
                     </div>
                   {/if}
