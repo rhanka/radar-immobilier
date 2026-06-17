@@ -6,7 +6,7 @@
    * selected entities: cities, graph signals, zones and lots.
    */
   import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { RefreshCw, X } from "@lucide/svelte";
+  import { FileText, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -41,6 +41,7 @@
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
   export let onFocusKey: (key: SelectionKey | null) => void = () => {};
+  export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
 
   $: zones = zonesResponse?.featureCollection.features ?? [];
   $: lots = lotsResponse?.featureCollection.features ?? [];
@@ -104,6 +105,7 @@
 
   function nodeDescription(node: GraphSignalNode): string | null {
     return (
+      readString(node.description) ??
       readString(node.props.description) ??
       readString(node.props.desc) ??
       readString(node.props.summary) ??
@@ -135,7 +137,21 @@
   }
 
   function docRefs(node: GraphSignalNode): SignalDocRef[] {
-    return extractDocRefs(node.props);
+    return node.docRefs && node.docRefs.length > 0
+      ? node.docRefs
+      : extractDocRefs(node.props);
+  }
+
+  function signalPublishedAt(node: GraphSignalNode): string | null {
+    return node.publishedAt ?? docRefs(node).find((ref) => ref.publishedAt)?.publishedAt ?? null;
+  }
+
+  function docButtonLabel(ref: SignalDocRef): string {
+    return `PDF${ref.page !== undefined ? ` · p.${ref.page}` : ""}`;
+  }
+
+  function docTitle(ref: SignalDocRef): string {
+    return ref.title ?? ref.sourceUrl ?? ref.rawRef ?? ref.docSha;
   }
 
   function formatSignalCount(count: number): string {
@@ -325,8 +341,11 @@
                           <span class="entity-meta-key">Zone</span>
                           <code class="entity-meta-val">{nodeZoneRef(node)}</code>
                         {/if}
-                        {#if formatDate(node.createdAt)}
-                          <span class="entity-meta-key">Créé</span>
+                        {#if formatDate(signalPublishedAt(node))}
+                          <span class="entity-meta-key">Publié</span>
+                          <span class="entity-meta-val">{formatDate(signalPublishedAt(node))}</span>
+                        {:else if formatDate(node.createdAt)}
+                          <span class="entity-meta-key">Ingestion</span>
                           <span class="entity-meta-val">{formatDate(node.createdAt)}</span>
                         {/if}
                       </div>
@@ -339,16 +358,16 @@
                           <ul class="doc-refs-list">
                             {#each docRefs(node) as ref, i (`${ref.docSha}-${i}`)}
                               <li class="doc-ref-item">
-                                {#if ref.sourceUrl}
-                                  <a
-                                    href={ref.sourceUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                {#if ref.documentUrl || ref.sourceUrl}
+                                  <button
+                                    type="button"
                                     class="doc-ref-link"
-                                    title={ref.sourceUrl}
+                                    title={docTitle(ref)}
+                                    on:click={() => onOpenDocument(ref)}
                                   >
-                                    PDF{ref.page !== undefined ? ` · p.${ref.page}` : ""}
-                                  </a>
+                                    <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                                    {docButtonLabel(ref)}
+                                  </button>
                                 {:else}
                                   <span class="doc-ref-sha" title={ref.docSha}>
                                     {ref.docSha.slice(0, 8)}…{ref.page !== undefined ? ` · p.${ref.page}` : ""}
@@ -363,19 +382,6 @@
                                 {/if}
                               </li>
                             {/each}
-                            {#if node.sourceRef}
-                              <li class="doc-ref-item">
-                                <a
-                                  href={node.sourceRef}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  class="doc-ref-link"
-                                  title={node.sourceRef}
-                                >
-                                  Source liée
-                                </a>
-                              </li>
-                            {/if}
                           </ul>
                         {/if}
                       </div>
@@ -815,7 +821,13 @@
   }
 
   .doc-ref-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    border: 0;
+    background: transparent;
     color: #0f766e;
+    cursor: pointer;
     font-size: 0.74rem;
     font-weight: 600;
     text-decoration: none;

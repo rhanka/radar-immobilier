@@ -23,6 +23,12 @@ export interface SignalDocRef {
   page?: number;
   sourceUrl?: string;
   rawRef?: string;
+  documentUrl?: string;
+  title?: string;
+  contentType?: string;
+  fetchedAt?: string;
+  publishedAt?: string;
+  bbox?: unknown;
 }
 
 /**
@@ -66,8 +72,6 @@ function parseDocRefRecord(item: unknown, fallbackId: string): SignalDocRef | nu
     "source_url",
     "pdfUrl",
     "pdf_url",
-    "documentUrl",
-    "document_url",
     "url",
     "href",
   ]);
@@ -96,15 +100,32 @@ function parseDocRefRecord(item: unknown, fallbackId: string): SignalDocRef | nu
     "source_ref",
   ]);
   const page = firstNumber(r, ["page", "pageNumber", "page_number"]);
+  const documentUrl = firstString(r, ["documentUrl", "document_url", "apiUrl", "api_url"]);
+  const title = firstString(r, ["title", "documentTitle", "document_title"]);
+  const contentType = firstString(r, ["contentType", "content_type", "mimeType", "mime_type"]);
+  const fetchedAt = firstString(r, ["fetchedAt", "fetched_at"]);
+  const publishedAt = firstString(r, [
+    "publishedAt",
+    "published_at",
+    "documentDate",
+    "document_date",
+  ]);
+  const bbox = r.bbox ?? r.boundingBox ?? r.bounding_box;
 
-  if (!docSha && !excerpt && !sourceUrl && !rawRef) return null;
+  if (!docSha && !excerpt && !sourceUrl && !rawRef && !documentUrl) return null;
 
   return {
-    docSha: docSha ?? rawRef ?? sourceUrl ?? fallbackId,
-    excerpt: excerpt ?? undefined,
-    page: page ?? undefined,
-    sourceUrl: sourceUrl ?? undefined,
-    rawRef: rawRef ?? undefined,
+    docSha: docSha ?? rawRef ?? sourceUrl ?? documentUrl ?? fallbackId,
+    ...(excerpt !== null ? { excerpt } : {}),
+    ...(page !== null ? { page } : {}),
+    ...(sourceUrl !== null ? { sourceUrl } : {}),
+    ...(rawRef !== null ? { rawRef } : {}),
+    ...(documentUrl !== null ? { documentUrl } : {}),
+    ...(title !== null ? { title } : {}),
+    ...(contentType !== null ? { contentType } : {}),
+    ...(fetchedAt !== null ? { fetchedAt } : {}),
+    ...(publishedAt !== null ? { publishedAt } : {}),
+    ...(bbox !== undefined ? { bbox } : {}),
   };
 }
 
@@ -145,6 +166,7 @@ function dedupeRefs(refs: readonly SignalDocRef[]): SignalDocRef[] {
       ref.page ?? "",
       ref.sourceUrl ?? "",
       ref.rawRef ?? "",
+      ref.documentUrl ?? "",
       ref.excerpt ?? "",
     ].join("\u0000");
     if (seen.has(key)) continue;
@@ -161,6 +183,9 @@ export interface GraphSignalNode {
   citySlug: string | null;
   sourceRef: string | null;
   createdAt: string | null;
+  description?: string | null;
+  publishedAt?: string | null;
+  docRefs?: SignalDocRef[];
   props: Record<string, unknown>;
 }
 
