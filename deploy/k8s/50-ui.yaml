@@ -113,7 +113,7 @@ spec:
           # and pushed by CI to the SCW registry. This is the image that
           # actually serves the static SPA (the previous stock-nginx image had
           # an empty html root and served a blank page).
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-ui:main-1781576379
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-ui:main-f4a73fd
           imagePullPolicy: Always
           ports:
             - name: http

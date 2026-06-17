@@ -31,6 +31,9 @@ export API_PROXY_TARGET ?= http://api:3000
 export API_VERSION ?= dev
 export UI_VERSION  ?= dev
 export E2E_VERSION ?= dev
+export REGISTRY ?= rg.fr-par.scw.cloud/radar-immobilier
+export API_IMAGE ?= $(REGISTRY)/radar-api
+export UI_IMAGE ?= $(REGISTRY)/radar-ui
 
 # ── Kubernetes (radar as a sentropic app) ─────────────────────────────
 # Manifests are PREPARED here and validated offline; deploying to a live
@@ -274,6 +277,32 @@ install-dev: ## Add a devDep at workspace root: make install-dev LIB=foo
 build-api-image: ## Build the production api image from api/Dockerfile
 	$(DOCKER_COMPOSE) $(COMPOSE_FILES_E2E) build api
 
+.PHONY: build-ui-image
+build-ui-image: ## Build the production ui image from ui/Dockerfile
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_E2E) build ui
+
+.PHONY: build-images
+build-images: build-api-image build-ui-image ## Build production api + ui images
+
+.PHONY: registry-login
+registry-login: ## Login docker to the Scaleway registry using the scw CLI profile
+	scw registry login
+
+.PHONY: push-api-image
+push-api-image: ## Push API image (API_VERSION=<tag>, also updates latest)
+	docker tag radar-immobilier-api:$(API_VERSION) $(API_IMAGE):$(API_VERSION)
+	docker tag radar-immobilier-api:$(API_VERSION) $(API_IMAGE):latest
+	docker push $(API_IMAGE):$(API_VERSION)
+	docker push $(API_IMAGE):latest
+
+.PHONY: push-ui-image
+push-ui-image: ## Push UI image (UI_VERSION=<tag>)
+	docker tag radar-immobilier-ui:$(UI_VERSION) $(UI_IMAGE):$(UI_VERSION)
+	docker push $(UI_IMAGE):$(UI_VERSION)
+
+.PHONY: push-images
+push-images: push-api-image push-ui-image ## Push production api + ui images
+
 # ─────────────────────────────────────────────────────────────────────
 # Commit helper
 # ─────────────────────────────────────────────────────────────────────
@@ -330,6 +359,17 @@ deploy-k8s: ## Validate manifests; apply ONLY with K8S_DEPLOY_CONFIRM=1 + KUBECO
 	  echo "  Human deploy step (with cluster creds):"; \
 	  echo "    KUBECONFIG=<path> make deploy-k8s K8S_DEPLOY_CONFIRM=1 ENV=poc"; \
 	fi
+
+.PHONY: deploy-db-migrate-k8s
+deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
+	@if [ "$(K8S_DEPLOY_CONFIRM)" != "1" ] || [ -z "$$KUBECONFIG" ]; then \
+	  echo "[deploy-db-migrate-k8s] refused: set KUBECONFIG and K8S_DEPLOY_CONFIRM=1"; \
+	  exit 1; \
+	fi
+	$(KUBECTL) -n $(K8S_NAMESPACE) delete job radar-db-migrate --ignore-not-found
+	$(KUBECTL) -n $(K8S_NAMESPACE) apply -f deploy/k8s/36-db-migrate-job.yaml
+	$(KUBECTL) -n $(K8S_NAMESPACE) wait --for=condition=complete job/radar-db-migrate --timeout=180s
+	$(KUBECTL) -n $(K8S_NAMESPACE) logs job/radar-db-migrate
 
 # ─────────────────────────────────────────────────────────────────────
 # Orchestration / conductor reporting
