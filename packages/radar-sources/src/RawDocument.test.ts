@@ -133,6 +133,28 @@ describe("buildRawDocumentRecord", () => {
     expect(rec.provenance.ciblagePlanId).toBe("plan-42");
   });
 
+  it("persists optional source title and publishedAt without affecting CAS identity", () => {
+    const base = {
+      source: "proces-verbaux-testville",
+      sourceUrl: "https://testville.qc.ca/pv/2026-06-01.pdf",
+      body,
+      fetchedAt: "2026-06-08T09:30:00.000Z",
+      contentType: "application/pdf",
+      provenance: PROVENANCE,
+    } as const;
+    const withMeta = buildRawDocumentRecord({
+      ...base,
+      title: "Séance ordinaire du 1 juin 2026",
+      publishedAt: "2026-06-01",
+    });
+    const withoutMeta = buildRawDocumentRecord(base);
+
+    expect(withMeta.title).toBe("Séance ordinaire du 1 juin 2026");
+    expect(withMeta.publishedAt).toBe("2026-06-01");
+    expect(withMeta.id).toBe(withoutMeta.id);
+    expect(withMeta.storageKey).toBe(withoutMeta.storageKey);
+  });
+
   it("rejects a non-hex sha (schema guard)", () => {
     expect(() =>
       RawDocumentRecordSchema.parse({

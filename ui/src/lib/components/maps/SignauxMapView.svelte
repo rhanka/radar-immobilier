@@ -19,6 +19,7 @@
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
   import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
+  import DocumentOverlay from "$lib/components/maps/DocumentOverlay.svelte";
   import {
     buildCityMapEntries,
     type CityMapEntry,
@@ -29,6 +30,7 @@
   import {
     fetchGraphSignalDetail,
     type GraphSignalNode,
+    type SignalDocRef,
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
     fetchGeoZones,
@@ -88,6 +90,7 @@
   let geoError: string | null = null;
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
+  let activeDocument: SignalDocRef | null = null;
 
   // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
   /** Accumule les types de nœuds vus au fil des villes cliquées. */
@@ -396,6 +399,7 @@
     geoError = null;
     zonesResponse = null;
     lotsResponse = null;
+    activeDocument = null;
     selectionState = createSelectionBucketState();
     updateFillColors();
     updateGeoLayers();
@@ -409,6 +413,14 @@
 
   function focusBucketKey(key: SelectionKey | null): void {
     selectionState = setFocus(selectionState, key);
+  }
+
+  function openDocument(ref: SignalDocRef): void {
+    activeDocument = ref;
+  }
+
+  function closeDocument(): void {
+    activeDocument = null;
   }
 
   function selectedKeysForKind(kind: string): Set<SelectionKey> {
@@ -671,6 +683,7 @@
         <span class="text-xs text-slate-400">Chargement de la carte…</span>
       </div>
     {/if}
+    <DocumentOverlay documentRef={activeDocument} onClose={closeDocument} />
   </div>
 
   <!-- ── SEL droit : panneau de sélection ville ───────────────────────────── -->
@@ -688,6 +701,7 @@
       onClear={clearSelection}
       onToggleKey={toggleBucketKey}
       onFocusKey={focusBucketKey}
+      onOpenDocument={openDocument}
     />
   </svelte:fragment>
 </ViewLayout>

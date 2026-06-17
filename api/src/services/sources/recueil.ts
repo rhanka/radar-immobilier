@@ -102,6 +102,8 @@ export async function runRecueil(
       const record = buildRawDocumentRecord({
         source,
         sourceUrl: raw.url,
+        ...(raw.ref.title !== undefined ? { title: raw.ref.title } : {}),
+        ...(raw.ref.publishedAt !== undefined ? { publishedAt: raw.ref.publishedAt } : {}),
         body: raw.body,
         fetchedAt: raw.fetchedAt,
         contentType: raw.contentType,
@@ -141,8 +143,8 @@ export async function runRecueil(
         sourceUrl: record.sourceUrl,
         casKey: record.storageKey,
         status,
-        ...(ref.publishedAt !== undefined
-          ? { publishedAt: ref.publishedAt }
+        ...(record.publishedAt !== undefined
+          ? { publishedAt: record.publishedAt }
           : {}),
       });
       processed += 1;

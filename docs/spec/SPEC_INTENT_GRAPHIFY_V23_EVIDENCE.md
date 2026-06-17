@@ -64,6 +64,30 @@ Field rules:
   be preserved on `Signal` / `DesignationEvent` nodes where the output
   contract requires them.
 
+## 2.1 Document dates and provenance
+
+The UI must not treat graph ingestion time as a source date. v2.3 distinguishes
+the following date axes:
+
+- `publishedAt`: publication/date exposed by the source listing or run
+  manifest. This is a document metadata field.
+- `meetingDate`: date of the council meeting/session, when extractable from
+  the PV body or a structured source.
+- `etape_date`: date of the regulatory stage described by the signal.
+- `createdAt`: database projection/ingestion time only; never shown as the PV
+  or signal source date unless explicitly labelled as ingestion time.
+
+Graphify v2.3 should use existing raw/parsed/run-manifest data as input. It
+must not require a full rescrape when raw PDFs, parsed text, and run manifests
+already exist. If `publishedAt` is absent from a legacy sidecar but present in
+the run manifest, the manifest value is authoritative. If only the URL or title
+is available, extraction is allowed only when precision is explicit; partial
+dates must carry a precision/incomplete marker rather than inventing a day.
+
+The API/UI layer resolves document metadata server-side. Graphify should emit
+`docSha` and `rawRef`/`sourceUrl` where possible, but the API may enrich these
+refs from the S3 manifest/document projection before returning UI cards.
+
 ## 3. Gates
 
 A v2.3 candidate must fail the gate if it drops any existing `Signal` or `DesignationEvent`.
@@ -120,3 +144,17 @@ v2.3 is accepted only when:
 - The 33 priority detections remain protected.
 - Right-pane signal cards can display description + citation + PDF link for the priority set.
 - The performance of deterministic extraction remains evaluated separately and is not used as an unproven replacement for Sonnet output.
+
+## 6. Workpackage integration
+
+The evidence work is split across three existing workpackages:
+
+- **Data PV / S3-first persistence**: persist `publishedAt` and title metadata
+  during initial recueil, and add a repair path from existing run manifests and
+  URLs without full rescrape.
+- **Graphify ontology v2.3**: require description, citation, document refs,
+  distinct source dates, and non-regression gates for protected priority
+  detections.
+- **Data model / API / UI selection bucket**: expose a `GraphSignalCard`
+  server DTO, resolve document metadata, and render source PDF overlays with
+  citation/page/bbox fallback states.
