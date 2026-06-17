@@ -156,7 +156,9 @@ async function projectDocuments(
       ? metaKey.slice(0, -META_SUFFIX.length)
       : record.storageKey;
     const publishedAt =
-      publishedByCasKey.get(record.storageKey) ?? publishedByCasKey.get(casKey);
+      publishedByCasKey.get(record.storageKey) ??
+      publishedByCasKey.get(casKey) ??
+      record.publishedAt;
 
     await repo.upsertDocument(toProjectedDocument(record, publishedAt));
     count += 1;
