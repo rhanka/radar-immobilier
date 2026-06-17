@@ -38,12 +38,16 @@ class MemoryStore implements ObjectStore {
   }
 }
 
-function fakeAdapter(body: string): SourceAdapter {
+function fakeAdapter(
+  body: string,
+  refOverrides: Partial<RawDocumentRef> = {},
+): SourceAdapter {
   const ref: RawDocumentRef = {
     sourceKind: "avis-publics",
     city: "testville",
     url: "https://testville.qc.ca/avis",
     discoveredAt: "2026-06-08T00:00:00.000Z",
+    ...refOverrides,
   };
   const raw: RawDocument = {
     ref,
@@ -99,6 +103,30 @@ describe("runRecueil — raw bytes + sidecar meta.json", () => {
     expect(meta.storageKey).toBe(rec.storageKey);
     expect(meta.sourceUrl).toBe("https://testville.qc.ca/avis");
   });
+
+  it("persists source listing title and publishedAt in sidecar metadata", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueil(
+      "avis-publics-testville",
+      fakeAdapter("<html>avis 2026-58</html>", {
+        title: "Avis public du 8 juin",
+        publishedAt: "2026-06-08",
+      }),
+      store,
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+
+    const rec = out.records[0]!;
+    expect(rec.title).toBe("Avis public du 8 juin");
+    expect(rec.publishedAt).toBe("2026-06-08");
+
+    const meta = JSON.parse(
+      new TextDecoder().decode(store.objects.get(rawMetaKey(rec.storageKey))!),
+    );
+    expect(meta.title).toBe("Avis public du 8 juin");
+    expect(meta.publishedAt).toBe("2026-06-08");
+  });
 });
 
 describe("runRecueilWithManifest — run manifest (commit record)", () => {
@@ -128,6 +156,25 @@ describe("runRecueilWithManifest — run manifest (commit record)", () => {
     expect(entry.sha256).toBe(out.records[0]!.sha256);
     expect(entry.casKey).toBe(out.records[0]!.storageKey);
     expect(entry.sourceUrl).toBe("https://testville.qc.ca/avis");
+  });
+
+  it("writes publishedAt from the persisted record into the manifest", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueilWithManifest(
+      "avis-publics-testville",
+      fakeAdapter("<html>avis 2026-58</html>", {
+        publishedAt: "2026-06-08",
+      }),
+      store,
+      { runId: "run-dated" },
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+
+    const key = manifestKey("avis-publics-testville", "run-dated");
+    const body = new TextDecoder().decode(store.objects.get(key)!);
+    const entry = JSON.parse(body.split("\n")[0]!);
+    expect(entry.publishedAt).toBe("2026-06-08");
   });
 
   it("second run on byte-identical content is HEAD-skipped → status seen, no new raw object", async () => {

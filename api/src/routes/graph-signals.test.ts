@@ -10,8 +10,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
+
 import { graphSignalsRoute } from "./graph-signals.js";
 import type { Database } from "../db/client.js";
+import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 
 // Mock the graph-store module so tests do not touch Postgres.
 vi.mock("../services/graph/graph-store.js", () => ({
@@ -28,13 +31,60 @@ import {
 // Fixtures
 // ─────────────────────────────────────────────────────────────────────────────
 
-function makeNode(id: string, citySlug: string, type = "Signal") {
+class MemoryStore implements ObjectStore {
+  readonly objects = new Map<string, Uint8Array>();
+
+  async put(key: string, body: Uint8Array | Buffer | string): Promise<ObjectInfo> {
+    const bytes =
+      typeof body === "string" ? new TextEncoder().encode(body) : new Uint8Array(body);
+    this.objects.set(key, bytes);
+    return { key, size: bytes.byteLength };
+  }
+
+  async get(key: string): Promise<Uint8Array> {
+    const value = this.objects.get(key);
+    if (!value) throw new Error(`missing ${key}`);
+    return value;
+  }
+
+  async head(key: string): Promise<ObjectInfo | null> {
+    const value = this.objects.get(key);
+    return value ? { key, size: value.byteLength } : null;
+  }
+
+  async list(prefix: string): Promise<string[]> {
+    return [...this.objects.keys()].filter((key) => key.startsWith(prefix));
+  }
+}
+
+async function seedPdf(store: ObjectStore) {
+  const record = buildRawDocumentRecord({
+    source: "proces-verbaux-drummondville",
+    sourceUrl: "https://drummondville.ca/pv/2026-05-12.pdf",
+    title: "Proces-verbal du 12 mai 2026",
+    publishedAt: "2026-05-12",
+    body: new TextEncoder().encode("%PDF-1.4"),
+    fetchedAt: "2026-06-08T09:30:00.000Z",
+    contentType: "application/pdf",
+    provenance: { version: "1.0.0", userAgent: "radar/test", viaObscura: false },
+  });
+  await store.put(record.storageKey, "%PDF-1.4", "application/pdf");
+  await store.put(rawMetaKey(record.storageKey), JSON.stringify(record, null, 2));
+  return record;
+}
+
+function makeNode(
+  id: string,
+  citySlug: string,
+  type = "Signal",
+  props: Record<string, unknown> = {},
+) {
   return {
     id,
     citySlug,
     type,
     label: `Node ${id}`,
-    props: {},
+    props,
     sourceRef: null,
     createdAt: new Date("2025-03-15T10:00:00Z"),
   };
@@ -42,6 +92,8 @@ function makeNode(id: string, citySlug: string, type = "Signal") {
 
 // Minimal mock DB (never actually called — graph-store is mocked).
 const mockDb = {} as unknown as Database;
+const freshRoute = (store: ObjectStore = new MemoryStore()) =>
+  graphSignalsRoute({ db: mockDb, store });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tests
@@ -55,7 +107,7 @@ describe("GET /api/graph-signals/by-city", () => {
   it("returns ok:true with empty cities when no signal nodes exist", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
 
-    const app = graphSignalsRoute({ db: mockDb });
+    const app = freshRoute();
     const res = await app.request("/api/graph-signals/by-city");
 
     expect(res.status).toBe(200);
@@ -83,7 +135,7 @@ describe("GET /api/graph-signals/by-city", () => {
       },
     ]);
 
-    const app = graphSignalsRoute({ db: mockDb });
+    const app = freshRoute();
     const res = await app.request("/api/graph-signals/by-city");
 
     expect(res.status).toBe(200);
@@ -119,7 +171,7 @@ describe("GET /api/graph-signals/:city", () => {
   it("returns 404 with ok:false when no signal nodes exist for the city", async () => {
     vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([]);
 
-    const app = graphSignalsRoute({ db: mockDb });
+    const app = freshRoute();
     const res = await app.request("/api/graph-signals/ville-inconnue");
 
     expect(res.status).toBe(404);
@@ -140,7 +192,7 @@ describe("GET /api/graph-signals/:city", () => {
     ];
     vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(nodes as ReturnType<typeof makeNode>[]);
 
-    const app = graphSignalsRoute({ db: mockDb });
+    const app = freshRoute();
     const res = await app.request("/api/graph-signals/drummondville");
 
     expect(res.status).toBe(200);
@@ -167,7 +219,7 @@ describe("GET /api/graph-signals/:city", () => {
     };
     vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([nodeWithProps] as unknown as ReturnType<typeof makeNode>[]);
 
-    const app = graphSignalsRoute({ db: mockDb });
+    const app = freshRoute();
     const res = await app.request("/api/graph-signals/drummondville");
 
     expect(res.status).toBe(200);
@@ -177,5 +229,54 @@ describe("GET /api/graph-signals/:city", () => {
     };
     expect(body.nodes[0]!.sourceRef).toBe("s3://bucket/proc-verbal.pdf");
     expect(body.nodes[0]!.props).toEqual({ reglement_number: "1234-56", zone_ref: "H-431" });
+  });
+
+  it("enriches node cards with description, citation, source PDF and document date", async () => {
+    const store = new MemoryStore();
+    const record = await seedPdf(store);
+    const node = makeNode("sig-004", "drummondville", "Signal", {
+      description: "Avis de motion pour un changement de zonage.",
+      refs: [
+        {
+          rawRef: record.storageKey,
+          excerpt: "Avis de motion est donné pour modifier le règlement de zonage.",
+          page: 3,
+        },
+      ],
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const app = freshRoute(store);
+    const res = await app.request("/api/graph-signals/drummondville");
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      nodes: Array<{
+        description: string;
+        publishedAt: string;
+        docRefs: Array<{
+          docSha: string;
+          rawRef: string;
+          sourceUrl: string;
+          documentUrl: string;
+          publishedAt: string;
+          excerpt: string;
+          page: number;
+        }>;
+      }>;
+    };
+    expect(body.nodes[0]!.description).toBe(
+      "Avis de motion pour un changement de zonage.",
+    );
+    expect(body.nodes[0]!.publishedAt).toBe("2026-05-12");
+    expect(body.nodes[0]!.docRefs[0]).toMatchObject({
+      docSha: record.sha256,
+      rawRef: record.storageKey,
+      sourceUrl: "https://drummondville.ca/pv/2026-05-12.pdf",
+      documentUrl: `/api/documents/raw?rawRef=${encodeURIComponent(record.storageKey)}`,
+      publishedAt: "2026-05-12",
+      excerpt: "Avis de motion est donné pour modifier le règlement de zonage.",
+      page: 3,
+    });
   });
 });
