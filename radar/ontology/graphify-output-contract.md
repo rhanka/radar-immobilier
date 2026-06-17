@@ -1,4 +1,4 @@
-# Contrat de sortie graphify — ontologie canonique v2.2
+# Contrat de sortie graphify — ontologie canonique v2.3
 
 > **Statut : NORMATIF.**  
 > Tout graphe produit par graphify (re-graphify ou nouvelle ville) DOIT se conformer
@@ -11,6 +11,11 @@
 > **v2.2** (2026-06-15) : ajout des champs `zone_ref`, `no_lot`, `reglement_number`
 > sur Signal et DesignationEvent pour alimenter le mapper géo (résolution ~70–85 % vs
 > ~30 % avec regex post-hoc). Champs OPTIONNELS — jamais inventés. Voir §9.
+>
+> **v2.3** (2026-06-17) : ajout du contrat evidence-complete pour Signal et
+> DesignationEvent : `description`, citations verbatim, refs documentaires
+> enrichies, dates distinctes (`publishedAt`, `meetingDate`, `etape_date`) et
+> gates de non-régression des 33 détections prioritaires `z|m|p`. Voir §10.
 
 ---
 
@@ -31,7 +36,7 @@
 |-------------------|----------|-----------------------------------------------------------|
 | `municipality`    | string   | Slug kebab-case de la ville (ex : `saint-constant`)       |
 | `generated_at`    | string   | ISO-8601, ex : `2026-06-12T14:23:00Z`                    |
-| `ontology_version`| string   | **`"2.0"`** pour graphes v2.0 ; **`"2.1"`** pour graphes v2.1 (avec `etape`) |
+| `ontology_version`| string   | **`"2.0"`**, **`"2.1"`**, **`"2.2"`** ou **`"2.3"`** selon le contrat satisfait |
 | `pv_count`        | integer  | Nombre de PVs traités                                     |
 | `nodes`           | array    | Liste de nœuds (peut être vide `[]`)                      |
 | `edges`           | array    | Liste d'arêtes (peut être vide `[]`)                      |
@@ -88,6 +93,10 @@ Chaque élément de `refs` :
 |----------|---------|------------------------------------|
 | `docSha` | string  | SHA-256 hex du fichier source      |
 | `page`   | integer | Numéro de page (≥ 1)               |
+
+En v2.3, les preuves attachées aux nœuds `Signal` et `DesignationEvent`
+peuvent porter des champs supplémentaires normatifs décrits en §10 :
+`excerpt`, `sourceUrl`, `rawRef`, `bbox`, `publishedAt`, `meetingDate`.
 
 ---
 
@@ -508,6 +517,20 @@ Un graphe v2.2 est valide si les règles v2.1 sont satisfaites ET :
 12. Règle anti-invention : aucun Signal/DesignationEvent n'a un `zone_ref`, `no_lot` ou
     `reglement_number` inventé ou déduit par inférence hors-texte.
 
+Un graphe v2.3 est valide si les règles v2.2 sont satisfaites ET :
+
+13. `ontology_version` vaut `"2.3"`.
+14. Tout Signal et DesignationEvent porte une description sourcée quand le
+    document permet une description fiable.
+15. Tout Signal et DesignationEvent adossé à un document porte au moins une
+    `refs[]` avec citation verbatim et lien documentaire résoluble.
+16. Les axes de date sont séparés : `publishedAt` pour la publication/source
+    listing, `meetingDate` pour la séance, `etape_date` pour l'étape
+    réglementaire, `createdAt` uniquement pour l'ingestion/projection.
+17. Les 33 détections prioritaires `z|m|p` sont protégées par manifeste stable :
+    aucune perte silencieuse de classification, relation canonique zone/lot/règlement,
+    description, citation ou document source.
+
 ---
 
 ## 8. Champs v2.1 — Axe ANTICIPATION : `etape` + `etape_date`
@@ -722,3 +745,134 @@ jq '
 ' graph/<slug>/latest.json
 # → rapport informatif (pas de seuil bloquant — la couverture varie selon le texte des PVs)
 ```
+
+---
+
+## 10. Champs v2.3 — Evidence cards, dates, and protected priority set
+
+### 10.1 Goal
+
+v2.3 is the evidence contract required by the map selection bucket UI. It does
+not replace v2.1 anticipation fields or v2.2 geo-resolution fields. It adds the
+minimum source-grounded evidence needed to render a right-pane card without
+guessing.
+
+The canonical ontology remains graph-first. Zone, lot, bylaw, Source, Signal,
+and DesignationEvent relations must stay represented as nodes and edges. Flat
+properties such as `zone_ref`, `no_lot`, `reglement_number`, `docSha`, or
+`sourceUrl` are convenience projections only; they are never the sole source of
+truth when a canonical relation can be emitted.
+
+### 10.2 Signal and DesignationEvent evidence fields
+
+Every `Signal` and `DesignationEvent` should expose, under `properties`, the
+fields below when the source supports them:
+
+| Field | Type | Rule |
+|-------|------|------|
+| `description` | string | Human-readable description grounded in source text. Required for priority `z|m|p` detections. |
+| `docSha` | string | SHA-256 of the source document when known. |
+| `sourceUrl` | string | Public source URL when available. Prefer this over private storage refs. |
+| `rawRef` | string | Private object-store ref when public URL is absent. The API resolves it; UI must not build it. |
+| `sourceKind` | string | `proces-verbal`, `avis-public`, `youtube`, or `other`. |
+| `publishedAt` | string | Source listing / run-manifest publication date, `YYYY-MM-DD`, never DB ingestion time. |
+| `meetingDate` | string | Council/session date extracted from the document body when known. |
+| `date` | string | Business signal date; may equal `meetingDate` when that is the best grounded date. |
+| `etape` | string | v2.1 anticipation enum, preserved. |
+| `etape_date` | string | v2.1 stage date, preserved. |
+| `evidenceStatus` | string | Omit when complete. Use `incomplete` only with `evidenceStatusReason`. |
+| `evidenceStatusReason` | string | Required when `evidenceStatus` is `incomplete`. |
+
+Do not invent any field. If the document does not support a value, omit the
+field unless the node is intentionally marked incomplete.
+
+### 10.3 `refs[]` shape for evidence cards
+
+For v2.3, `Signal` and `DesignationEvent` nodes may carry a node-level `refs`
+array in addition to edge-level refs. Edge-level refs remain mandatory on edges
+where available. Node-level refs are the card evidence source.
+
+Each node-level `refs[]` item:
+
+| Field | Type | Rule |
+|-------|------|------|
+| `docSha` | string | Required when known. |
+| `excerpt` | string | Verbatim citation from the source document; not a paraphrase. |
+| `page` | integer | PDF page number, 1-based, required when known. |
+| `bbox` | array | Optional normalized PDF bounding box `[x1,y1,x2,y2]`; never fabricate. |
+| `sourceUrl` | string | Public PDF/source URL when available. |
+| `rawRef` | string | Private object-store ref fallback. |
+| `publishedAt` | string | Document publication/listing date when attached at ref level. |
+| `meetingDate` | string | Meeting/session date when attached at ref level. |
+
+A priority `z|m|p` card is evidence-complete only if it has:
+
+- a grounded `properties.description`;
+- at least one `refs[].excerpt`;
+- a resolvable document link through `sourceUrl`, `rawRef`, or `docSha` plus
+  document metadata;
+- a page or bbox when the evidence is PDF-backed and the extraction path can
+  supply it.
+
+### 10.4 Existing-data input policy
+
+v2.3 must use the existing raw PDFs, parsed text, run manifests, and document
+metadata already available from the recueil/S3 pipeline. It must not require a
+full municipal document rescrape when these artifacts exist.
+
+Date precedence:
+
+1. Run manifest / source listing `publishedAt`.
+2. Raw document sidecar `publishedAt`.
+3. Explicit date in URL or document title, only when the precision is a full
+   day (`YYYY-MM-DD` or equivalent).
+4. No `publishedAt`; mark incomplete if the card needs the date.
+
+`publishedAt` and `meetingDate` are different axes. Do not copy one into the
+other unless the source explicitly supports that equivalence.
+
+### 10.5 Protected `z|m|p` non-regression manifest
+
+Before accepting a v2.3 candidate, build a protected manifest for the current
+33 priority detections. Each entry must include:
+
+- stable business key;
+- node id and type;
+- municipality;
+- label;
+- `kind`, `category`, `etape`, and stage fields;
+- `date`, `meetingDate`, and `etape_date` when present;
+- `docSha`, `rawRef`, `sourceUrl`, and ref fingerprint when present;
+- canonical relation fingerprints for zone, lot, bylaw, Source, and
+  DesignationEvent links when present.
+
+The gate compares by stable business key and relation fingerprint, not by raw
+count alone. Keeping a count of 33 is not sufficient if identity, classification,
+or relations changed silently.
+
+Blocking failures for the 33 protected detections:
+
+- missing node by stable key;
+- lost `z|m|p` business classification;
+- lost `etape` or `etape_date` when previously present or required;
+- lost canonical zone/lot/bylaw/source/designation relation that existed in the
+  protected manifest;
+- missing description, citation excerpt, or resolvable source document link.
+
+### 10.6 Provenance and model record
+
+Every accepted v2.3 run must record:
+
+- graphify package/runtime version;
+- CLI/runtime path used;
+- model and reasoning mode;
+- prompt version;
+- source graph version;
+- raw manifest hash;
+- protected `z|m|p` manifest hash;
+- operator/agent provenance.
+
+Sonnet 4.6, Codex Spark, and deterministic repair outputs must stay distinct in
+provenance. Deterministic extraction may be evaluated as a separate automation
+study, but it is not an accepted replacement for Sonnet v2.3 until a held-out
+evaluation proves equal or better performance.

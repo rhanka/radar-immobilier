@@ -106,12 +106,13 @@ Make graph-backed signal cards evidence-complete: preserve source publication da
     - [x] `make test-api SCOPE=src/routes/graph-signals.test.ts ENV=test-evidence-doc-cards-lot4`
     - [x] `make typecheck ENV=test-evidence-doc-cards-lot4`
 
-- [ ] **Lot 5 — Graphify contract and non-regression gate notes**
-  - [ ] Update `radar/ontology/graphify-output-contract.md` to align v2.3 with the intent spec.
-  - [ ] Document that v2.3 uses existing raw/parsed/manifests, not full rescrape, and must protect the 33 priority detections.
-  - [ ] Lot gate:
-    - [ ] `make typecheck ENV=test-evidence-doc-cards`
-    - [ ] `make lint ENV=test-evidence-doc-cards`
+- [x] **Lot 5 — Graphify contract and non-regression gate notes**
+  - [x] Update `radar/ontology/graphify-output-contract.md` to align v2.3 with the intent spec.
+  - [x] Document that v2.3 uses existing raw/parsed/manifests, not full rescrape, and must protect the 33 priority detections.
+  - [x] Lot gate:
+    - [x] `make install ENV=test-evidence-doc-cards-lot5`
+    - [x] `make typecheck ENV=test-evidence-doc-cards-lot5`
+    - [x] `make lint ENV=test-evidence-doc-cards-lot5`
 
 - [ ] **Lot 6 — Merge readiness**
   - [ ] Run focused tests for Lots 1-5.
