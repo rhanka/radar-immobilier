@@ -120,6 +120,45 @@ describe("extractDocRefs", () => {
     expect(result).toEqual([{ docSha: "aaa", excerpt: "foo" }]);
   });
 
+  it("extracts API-enriched document metadata fields", () => {
+    const result = extractDocRefs({
+      refs: [
+        {
+          docSha: "abc123",
+          documentUrl: "/api/documents/raw?rawRef=raw%2Fpv.pdf",
+          title: "Proces-verbal du 12 mai 2026",
+          contentType: "application/pdf",
+          fetchedAt: "2026-06-08T09:30:00.000Z",
+          publishedAt: "2026-05-12",
+        },
+      ],
+    });
+
+    expect(result).toEqual([
+      {
+        docSha: "abc123",
+        documentUrl: "/api/documents/raw?rawRef=raw%2Fpv.pdf",
+        title: "Proces-verbal du 12 mai 2026",
+        contentType: "application/pdf",
+        fetchedAt: "2026-06-08T09:30:00.000Z",
+        publishedAt: "2026-05-12",
+      },
+    ]);
+  });
+
+  it("keeps documentUrl-only refs produced by the API fallback route", () => {
+    const result = extractDocRefs({
+      refs: [{ documentUrl: "/api/documents/raw?rawRef=raw%2Fpv.pdf" }],
+    });
+
+    expect(result).toEqual([
+      {
+        docSha: "/api/documents/raw?rawRef=raw%2Fpv.pdf",
+        documentUrl: "/api/documents/raw?rawRef=raw%2Fpv.pdf",
+      },
+    ]);
+  });
+
   it("extracts multiple refs and skips invalid items in the same array", () => {
     const result = extractDocRefs({
       refs: [

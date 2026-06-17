@@ -96,11 +96,10 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
     "source_url",
     "pdfUrl",
     "pdf_url",
-    "documentUrl",
-    "document_url",
     "url",
     "href",
   ]);
+  const documentUrl = firstString(r, ["documentUrl", "document_url", "apiUrl", "api_url"]);
   const rawRef = firstString(r, [
     "rawRef",
     "raw_ref",
@@ -128,14 +127,15 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
   const page = firstNumber(r, ["page", "pageNumber", "page_number"]);
   const bbox = r.bbox ?? r.boundingBox ?? r.bounding_box;
 
-  if (!docSha && !excerpt && !sourceUrl && !rawRef) return null;
+  if (!docSha && !excerpt && !sourceUrl && !rawRef && !documentUrl) return null;
 
   return {
-    docSha: docSha ?? rawRef ?? sourceUrl ?? fallbackId,
+    docSha: docSha ?? rawRef ?? sourceUrl ?? documentUrl ?? fallbackId,
     ...(excerpt !== null ? { excerpt } : {}),
     ...(page !== undefined ? { page } : {}),
     ...(sourceUrl !== null ? { sourceUrl } : {}),
     ...(rawRef !== null ? { rawRef } : {}),
+    ...(documentUrl !== null ? { documentUrl } : {}),
     ...(bbox !== undefined ? { bbox } : {}),
   };
 }
@@ -168,6 +168,7 @@ function extractDocRefs(
       ref.page ?? "",
       ref.sourceUrl ?? "",
       ref.rawRef ?? "",
+      ref.documentUrl ?? "",
       ref.excerpt ?? "",
     ].join("\u0000");
     if (seen.has(key)) return false;

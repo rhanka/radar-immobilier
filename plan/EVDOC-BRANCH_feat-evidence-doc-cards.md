@@ -96,13 +96,15 @@ Make graph-backed signal cards evidence-complete: preserve source publication da
     - [x] `make test-api SCOPE=src/routes/graph-signals.test.ts ENV=test-evidence-doc-cards-lot3`
     - [x] `make test-api SCOPE=src/routes/documents.test.ts ENV=test-evidence-doc-cards-lot3`
 
-- [ ] **Lot 4 — UI signal card and PDF overlay**
-  - [ ] Extend graph-signal clients to read enriched evidence and distinct dates.
-  - [ ] Update the right selection panel to display description, citation, source PDF link, and incomplete-evidence states.
-  - [ ] Add a map-surface document overlay with page/hash fallback; highlight bbox when provided.
-  - [ ] Lot gate:
-    - [ ] `make test-ui SCOPE=src/lib/signals/graph-signal-detail-client.test.ts ENV=test-evidence-doc-cards`
-    - [ ] `make test-ui SCOPE=src/lib/components/maps ENV=test-evidence-doc-cards`
+- [x] **Lot 4 — UI signal card and PDF overlay**
+  - [x] Extend graph-signal clients to read enriched evidence and distinct dates.
+  - [x] Update the right selection panel to display description, citation, source PDF link, and incomplete-evidence states.
+  - [x] Add a map-surface document overlay with page/hash fallback and yellow citation context; carry bbox metadata for the PDF.js/highlight follow-up.
+  - [x] Lot gate:
+    - [x] `make test-ui SCOPE=src/lib/signals/graph-signal-detail-client.test.ts ENV=test-evidence-doc-cards-lot4`
+    - [x] `make test-ui SCOPE=src/lib/components/maps ENV=test-evidence-doc-cards-lot4`
+    - [x] `make test-api SCOPE=src/routes/graph-signals.test.ts ENV=test-evidence-doc-cards-lot4`
+    - [x] `make typecheck ENV=test-evidence-doc-cards-lot4`
 
 - [ ] **Lot 5 — Graphify contract and non-regression gate notes**
   - [ ] Update `radar/ontology/graphify-output-contract.md` to align v2.3 with the intent spec.
