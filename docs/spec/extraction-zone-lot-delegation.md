@@ -1,7 +1,7 @@
 # Re-graphify v2.2 — extraction structurée zone_ref / no_lot / reglement_number
 # Package de délégation pour `claude:immo_subagents`
 
-> **Statut : DÉLÉGATION PRÊTE.**  
+> **Statut : DÉLÉGATION PRÊTE.**
 > Ce document est le brief H2A complet pour déléguer à `claude:immo_subagents`
 > le re-graphify des villes M–Z (tranche immo) afin de peupler les champs
 > `zone_ref`, `no_lot` et `reglement_number` sur les nœuds Signal et DesignationEvent.

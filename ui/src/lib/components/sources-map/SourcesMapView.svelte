@@ -35,6 +35,14 @@
     type CoverageCityEntry,
   } from "$lib/sources/coverage.js";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
+  import { fetchDataQuality } from "$lib/sources/data-quality-client.js";
+  import type {
+    DataQualityCitySummaryT,
+    DataQualityCollectionSummaryT,
+    DataQualityGeoSummaryT,
+    DataQualityOntologySummaryT,
+    DataQualityStateT,
+  } from "@radar/domain";
 
   // ── State ──────────────────────────────────────────────────────────────────
   let loading = false;
@@ -46,6 +54,9 @@
   let detailLoading = false;
   let detailError: string | null = null;
   let detailEvents: DesignationEventDetail[] = [];
+  let dataQualityLoading = false;
+  let dataQualityError: string | null = null;
+  let dataQualitySummary: DataQualityCitySummaryT | null = null;
 
   // ── Derived stats ──────────────────────────────────────────────────────────
   $: stats = computeCoverageStats(entries);
@@ -103,6 +114,7 @@
     selectedCity = entry;
     detailEvents = [];
     detailError = null;
+    void loadDataQuality(entry.citySlug);
 
     if (entry.hasZonage) {
       detailLoading = true;
@@ -117,6 +129,19 @@
     }
   }
 
+  async function loadDataQuality(citySlug: string): Promise<void> {
+    dataQualityLoading = true;
+    dataQualityError = null;
+    dataQualitySummary = null;
+    try {
+      dataQualitySummary = await fetchDataQuality(citySlug);
+    } catch (e) {
+      dataQualityError = e instanceof Error ? e.message : "Erreur qualité données";
+    } finally {
+      dataQualityLoading = false;
+    }
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   function colorForEntry(entry: CoverageCityEntry): string {
     if (entry.maturitySummary) return entry.maturitySummary.color;
@@ -128,6 +153,38 @@
       return `${maturityLabel(entry.maturitySummary.maturity)} — ${entry.maturitySummary.maturity}%`;
     }
     return "Recueil non initié";
+  }
+
+  const QUALITY_TONE: Record<
+    DataQualityStateT,
+    "success" | "info" | "warning" | "neutral"
+  > = {
+    fresh: "success",
+    partial: "info",
+    stale: "warning",
+    unknown: "neutral",
+  };
+
+  const QUALITY_LABEL: Record<DataQualityStateT, string> = {
+    fresh: "frais",
+    partial: "partiel",
+    stale: "périmé",
+    unknown: "inconnu",
+  };
+
+  function collectionDetail(summary: DataQualityCollectionSummaryT): string {
+    const c = summary.counts;
+    return `${c.graphified} graphifié(s) · ${c.scraped} scrappé(s) · ${c.error} erreur(s)`;
+  }
+
+  function ontologyDetail(summary: DataQualityOntologySummaryT): string {
+    const c = summary.counts;
+    return `${c.nodes} nœuds · ${c.edges} liens · ${c.signals} signaux`;
+  }
+
+  function geoDetail(summary: DataQualityGeoSummaryT): string {
+    const c = summary.counts;
+    return `${c.currentVersions} version(s) · ${c.withGeometry} avec géométrie`;
   }
 </script>
 
@@ -292,6 +349,73 @@
   {#if selectedCity}
     {@const entry = selectedCity}
     <div class="flex flex-col gap-0">
+      <div class="border-b border-slate-200 bg-white px-6 py-4">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h2 class="text-base font-semibold text-slate-900">
+            Qualité des données — <span class="capitalize">{entry.citySlug}</span>
+          </h2>
+          {#if dataQualitySummary}
+            <span class="text-xs text-slate-400">
+              {new Date(dataQualitySummary.generatedAt).toLocaleDateString("fr-CA")}
+            </span>
+          {/if}
+        </div>
+
+        {#if dataQualityLoading}
+          <p class="text-sm text-slate-400">Chargement de la qualité des données…</p>
+        {:else if dataQualityError}
+          <p class="text-sm text-amber-700">{dataQualityError}</p>
+        {:else if dataQualitySummary}
+          <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
+            <div class="rounded-md border border-slate-200 px-3 py-2">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">PV</span>
+                <Badge tone={QUALITY_TONE[dataQualitySummary.councilMinutes.status]}>
+                  {QUALITY_LABEL[dataQualitySummary.councilMinutes.status]}
+                </Badge>
+              </div>
+              <p class="text-xs text-slate-600">{collectionDetail(dataQualitySummary.councilMinutes)}</p>
+            </div>
+            <div class="rounded-md border border-slate-200 px-3 py-2">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">YouTube</span>
+                <Badge tone={QUALITY_TONE[dataQualitySummary.youtube.status]}>
+                  {QUALITY_LABEL[dataQualitySummary.youtube.status]}
+                </Badge>
+              </div>
+              <p class="text-xs text-slate-600">{collectionDetail(dataQualitySummary.youtube)}</p>
+            </div>
+            <div class="rounded-md border border-slate-200 px-3 py-2">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Ontologie</span>
+                <Badge tone={QUALITY_TONE[dataQualitySummary.ontology.status]}>
+                  {QUALITY_LABEL[dataQualitySummary.ontology.status]}
+                </Badge>
+              </div>
+              <p class="text-xs text-slate-600">{ontologyDetail(dataQualitySummary.ontology)}</p>
+            </div>
+            <div class="rounded-md border border-slate-200 px-3 py-2">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Zones</span>
+                <Badge tone={QUALITY_TONE[dataQualitySummary.zones.status]}>
+                  {QUALITY_LABEL[dataQualitySummary.zones.status]}
+                </Badge>
+              </div>
+              <p class="text-xs text-slate-600">{geoDetail(dataQualitySummary.zones)}</p>
+            </div>
+            <div class="rounded-md border border-slate-200 px-3 py-2">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</span>
+                <Badge tone={QUALITY_TONE[dataQualitySummary.lots.status]}>
+                  {QUALITY_LABEL[dataQualitySummary.lots.status]}
+                </Badge>
+              </div>
+              <p class="text-xs text-slate-600">{geoDetail(dataQualitySummary.lots)}</p>
+            </div>
+          </div>
+        {/if}
+      </div>
+
       <!-- Zonage events (only for cities with detected zonage) -->
       {#if entry.hasZonage}
         <div class="border-b border-slate-200 bg-teal-50 px-6 py-4">

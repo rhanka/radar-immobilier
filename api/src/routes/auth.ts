@@ -197,6 +197,9 @@ export function authRoute(
         if (account.status === "rejected") {
           return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
         }
+        if (account.status === "suspended") {
+          return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
+        }
       }
     }
 
@@ -298,7 +301,7 @@ function isPublicPath(path: string): boolean {
  */
 export function protect(
   auth: AuthConfig,
-  options: { now?: () => number } = {},
+  options: { now?: () => number; db?: Database } = {},
 ): MiddlewareHandler {
   const nowFn = options.now ?? (() => Date.now());
   return async (c, next) => {
@@ -320,6 +323,23 @@ export function protect(
         return c.redirect("/api/v1/auth/login", 302);
       }
       return c.json({ error: "unauthenticated" }, 401);
+    }
+
+    if (options.db) {
+      const rows = await options.db
+        .select()
+        .from(accountUsers)
+        .where(eq(accountUsers.sub, session.sub))
+        .limit(1);
+      if (rows.length > 0 && rows[0]!.status !== "approved") {
+        return c.json(
+          {
+            error: "account_not_approved",
+            status: rows[0]!.status,
+          },
+          403,
+        );
+      }
     }
 
     c.set("session" as never, session as never);

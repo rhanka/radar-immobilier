@@ -18,10 +18,12 @@ import { scrapeStatusRoute } from "./routes/scrape-status.js";
 import { graphRoute, type GraphDeps } from "./routes/graph.js";
 import { graphSignalsRoute, type GraphSignalsDeps } from "./routes/graph-signals.js";
 import { geoLotsRoute } from "./routes/geo-lots.js";
+import { geoZonesRoute } from "./routes/geo-zones.js";
 import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
+import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
 
 export type AppDeps = HealthDeps &
@@ -29,6 +31,7 @@ export type AppDeps = HealthDeps &
   OntologyDeps &
   CiblageDeps &
   JobsDeps &
+  DataQualityDeps &
   GraphDeps &
   GraphSignalsDeps &
   GeoFeaturesDeps & {
@@ -50,7 +53,7 @@ export function createApp(deps: AppDeps): Hono {
   // Auth is wired first so the protect middleware runs before every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   if (deps.auth) {
-    app.use("*", protect(deps.auth));
+    app.use("*", protect(deps.auth, { db: deps.db }));
     // Pass db into authOptions so enrollment runs in production.
     const authOptions: AuthRouteOptions = {
       ...deps.authOptions,
@@ -79,9 +82,11 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", backlogRoute());
   app.route("/", h2aRoute());
   app.route("/", scrapeStatusRoute(deps.store));
+  app.route("/", dataQualityRoute(deps));
   app.route("/", graphSignalsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
+  app.route("/", geoZonesRoute({ db: deps.db }));
   app.route("/", geoFeaturesRoute({ db: deps.db }));
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));

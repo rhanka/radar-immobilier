@@ -343,6 +343,26 @@ export const accountUsers = pgTable("account_users", {
   byStatus: index("account_users_status_idx").on(t.status),
 }));
 
+export const accountUserStatusEvents = pgTable(
+  "account_user_status_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userSub: text("user_sub")
+      .notNull()
+      .references(() => accountUsers.sub, { onDelete: "restrict" }),
+    fromStatus: text("from_status"),
+    toStatus: text("to_status").notNull(),
+    actorSub: text("actor_sub").notNull(),
+    reason: text("reason").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byUser: index("account_user_status_events_user_idx").on(t.userSub),
+    byActor: index("account_user_status_events_actor_idx").on(t.actorSub),
+    byCreatedAt: index("account_user_status_events_created_at_idx").on(t.createdAt),
+  }),
+);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Inc 1 — Marquage d'équipe Steve (SPEC_EVOL_INTEGRATION_CARTE_STEVE §4.1)
 //
@@ -638,6 +658,7 @@ export const schema = {
   graphNodes,
   graphEdges,
   accountUsers,
+  accountUserStatusEvents,
   // Inc 1 — marquage Steve
   prospectMarks,
   prospectNotes,
@@ -647,4 +668,3 @@ export const schema = {
   geoResolutions,
   geoUnresolved,
 };
-
