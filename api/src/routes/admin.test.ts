@@ -44,6 +44,7 @@ function makeDb(users: {
   approvedBy: string | null;
 }[]) {
   const updates: { field: string; value: string; set: Record<string, unknown> }[] = [];
+  const inserts: Record<string, unknown>[] = [];
 
   const db = {
     select: () => ({
@@ -75,7 +76,10 @@ function makeDb(users: {
       }),
     }),
     insert: () => ({
-      values: () => Promise.resolve(),
+      values: (vals: Record<string, unknown>) => {
+        inserts.push(vals);
+        return Promise.resolve();
+      },
     }),
     update: () => ({
       set: (set: Record<string, unknown>) => ({
@@ -87,8 +91,12 @@ function makeDb(users: {
       }),
     }),
     _updates: updates,
+    _inserts: inserts,
   };
-  return db as unknown as Parameters<typeof adminRoute>[0]["db"];
+  return db as unknown as Parameters<typeof adminRoute>[0]["db"] & {
+    _updates: typeof updates;
+    _inserts: typeof inserts;
+  };
 }
 
 describe("adminRoute", () => {
@@ -177,5 +185,86 @@ describe("adminRoute", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.status).toBe("approved");
+    expect(db._updates[0]!.set.status).toBe("approved");
+    expect(db._updates[0]!.set.approvedAt).toBeInstanceOf(Date);
+    expect(db._inserts[0]).toMatchObject({
+      userSub: pendingUser.sub,
+      fromStatus: "pending",
+      toStatus: "approved",
+      actorSub: adminUser.sub,
+      reason: "Approved by admin",
+    });
+  });
+
+  it("POST /reject audits the transition without overloading approvedAt", async () => {
+    const db = makeDb([adminUser, pendingUser]);
+    const app = adminRoute({
+      db,
+      sessionSecret: SESSION_SECRET,
+      now: () => Date.parse("2026-06-17T12:00:00Z"),
+    });
+    const token = await makeAdminSession();
+    const res = await app.request(
+      `/api/v1/admin/users/${encodeURIComponent(pendingUser.sub)}/reject`,
+      {
+        method: "POST",
+        headers: { cookie: `radar_session=${token}` },
+      },
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("rejected");
+    expect(body.audit).toEqual({
+      actorSub: adminUser.sub,
+      at: "2026-06-17T12:00:00.000Z",
+      reason: "Rejected by admin",
+    });
+    expect(db._updates[0]!.set).toEqual({ status: "rejected" });
+    expect(db._inserts[0]).toMatchObject({
+      userSub: pendingUser.sub,
+      fromStatus: "pending",
+      toStatus: "rejected",
+      actorSub: adminUser.sub,
+      reason: "Rejected by admin",
+      createdAt: new Date("2026-06-17T12:00:00Z"),
+    });
+  });
+
+  it("POST /status can suspend a user with an explicit reason", async () => {
+    const db = makeDb([adminUser, pendingUser]);
+    const app = adminRoute({
+      db,
+      sessionSecret: SESSION_SECRET,
+      now: () => Date.parse("2026-06-17T13:00:00Z"),
+    });
+    const token = await makeAdminSession();
+    const res = await app.request(
+      `/api/v1/admin/users/${encodeURIComponent(pendingUser.sub)}/status`,
+      {
+        method: "POST",
+        headers: {
+          cookie: `radar_session=${token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "suspended",
+          reason: "Offboarding requested",
+        }),
+      },
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("suspended");
+    expect(body.audit.reason).toBe("Offboarding requested");
+    expect(db._updates[0]!.set).toEqual({ status: "suspended" });
+    expect(db._inserts[0]).toMatchObject({
+      userSub: pendingUser.sub,
+      fromStatus: "pending",
+      toStatus: "suspended",
+      actorSub: adminUser.sub,
+      reason: "Offboarding requested",
+    });
   });
 });
