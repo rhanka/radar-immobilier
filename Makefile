@@ -124,6 +124,20 @@ build: ## Build all workspaces
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=api
 	$(COMPOSE_RUN_API_NODEPS) npm run build --workspace=ui
 
+.PHONY: smoke-ui-bundle
+smoke-ui-bundle: ## Fail if the production UI bundle embeds Svelte's server runtime
+	@test -d ui/dist/assets || { echo "[smoke-ui-bundle] ui/dist/assets missing; run make build first"; exit 1; }
+	@if grep -R -E 'lifecycle_function_unavailable|`mount\(\.\.\.\)` is not available on the server|src/internal/server/render-context|node:async_hooks' ui/dist/assets >/tmp/radar-ui-bundle-smoke.txt; then \
+	  echo "[smoke-ui-bundle] server-only Svelte runtime found in browser bundle"; \
+	  cat /tmp/radar-ui-bundle-smoke.txt; \
+	  exit 1; \
+	fi
+	@echo "[smoke-ui-bundle] browser bundle does not contain Svelte server runtime"
+
+.PHONY: smoke-ui-image-bundle
+smoke-ui-image-bundle: ## Fail if the built UI image embeds Svelte's server runtime
+	docker run --rm radar-immobilier-ui:$(UI_VERSION) sh -c 'test -d /usr/share/nginx/html/assets || { echo "[smoke-ui-image-bundle] /usr/share/nginx/html/assets missing"; exit 1; }; if grep -R -E "lifecycle_function_unavailable|mount\(\.\.\.\) is not available on the server|src/internal/server/render-context|node:async_hooks" /usr/share/nginx/html/assets >/tmp/radar-ui-image-bundle-smoke.txt; then echo "[smoke-ui-image-bundle] server-only Svelte runtime found in browser image"; cat /tmp/radar-ui-image-bundle-smoke.txt; exit 1; fi; echo "[smoke-ui-image-bundle] browser image does not contain Svelte server runtime"'
+
 # ─────────────────────────────────────────────────────────────────────
 # Tests
 # ─────────────────────────────────────────────────────────────────────
