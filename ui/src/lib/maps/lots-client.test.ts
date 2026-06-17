@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   fetchLots,
+  lotsCollectionId,
   resolveLotsUrl,
   type LotsResponse,
   type LotFeature,
@@ -48,6 +49,34 @@ const MOCK_LOTS_EMPTY: LotsResponse = {
   featureCollection: { type: "FeatureCollection", features: [] },
 };
 
+const MOCK_OGC_LOTS_OK = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-74.002, 45.53],
+            [-74.001, 45.53],
+            [-74.001, 45.531],
+            [-74.002, 45.531],
+            [-74.002, 45.53],
+          ],
+        ],
+      },
+      properties: {
+        NO_LOT: "1 733 312",
+        noLot: "1 733 312",
+        geoId: "ca/qc/lot/1-733-312",
+      },
+    },
+  ],
+  numberMatched: 45099,
+  numberReturned: 1,
+};
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -58,7 +87,7 @@ describe("resolveLotsUrl", () => {
   it("returns path when no baseUrl", () => {
     const url = resolveLotsUrl("salaberry-de-valleyfield", { baseUrl: "" });
     expect(url).toBe(
-      "/api/geo/salaberry-de-valleyfield/lots",
+      "/api/geo/collections/qc-lots-salaberry-de-valleyfield/items",
     );
   });
 
@@ -67,7 +96,7 @@ describe("resolveLotsUrl", () => {
       baseUrl: "http://localhost:3000/",
     });
     expect(url).toBe(
-      "http://localhost:3000/api/geo/salaberry-de-valleyfield/lots",
+      "http://localhost:3000/api/geo/collections/qc-lots-salaberry-de-valleyfield/items",
     );
   });
 
@@ -90,10 +119,30 @@ describe("resolveLotsUrl", () => {
   });
 });
 
+describe("lotsCollectionId", () => {
+  it("maps a city slug to the OGC lot collection id", () => {
+    expect(lotsCollectionId("saint-eustache")).toBe("qc-lots-saint-eustache");
+  });
+});
+
 // ── fetchLots ──────────────────────────────────────────────────────────────────
 
 describe("fetchLots", () => {
-  it("returns FeatureCollection on HTTP 200 ok=true", async () => {
+  it("returns normalized FeatureCollection on OGC HTTP 200", async () => {
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(MOCK_OGC_LOTS_OK), { status: 200 }),
+    );
+    const res = await fetchLots("saint-eustache", { baseUrl: "", limit: 1 });
+    expect(res.ok).toBe(true);
+    expect(res.citySlug).toBe("saint-eustache");
+    expect(res.collectionId).toBe("qc-lots-saint-eustache");
+    expect(res.numberMatched).toBe(45099);
+    expect(res.numberReturned).toBe(1);
+    expect(res.featureCollection.features).toHaveLength(1);
+    expect(res.featureCollection.features[0].properties.noLot).toBe("1 733 312");
+  });
+
+  it("still accepts legacy LotsResponse bodies used by older mocks", async () => {
     vi.stubGlobal("fetch", async () =>
       new Response(JSON.stringify(MOCK_LOTS_OK), { status: 200 }),
     );
@@ -101,15 +150,10 @@ describe("fetchLots", () => {
     expect(res.ok).toBe(true);
     expect(res.citySlug).toBe("salaberry-de-valleyfield");
     expect(res.featureCollection.features).toHaveLength(2);
-    expect(res.featureCollection.features[0].properties.noLot).toBe("4 516 943");
+    expect(res.numberMatched).toBe(2);
   });
 
-  it("returns ok=false with empty featureCollection when city has no source", async () => {
-    vi.stubGlobal("fetch", async () =>
-      new Response(JSON.stringify(MOCK_LOTS_EMPTY), { status: 200 }),
-    );
-    // API returns ok=false but HTTP 200 — no source city returns status 404 from API
-    // Here we test the ok=false parsing path
+  it("returns ok=false with empty featureCollection when legacy body has no source", async () => {
     const body = MOCK_LOTS_EMPTY;
     vi.stubGlobal("fetch", async () =>
       new Response(JSON.stringify(body), { status: 200 }),
@@ -129,16 +173,19 @@ describe("fetchLots", () => {
     );
   });
 
-  it("throws on HTTP 404 error (ville inconnue returns 404 from route)", async () => {
+  it("returns ok=false on HTTP 404 collection missing", async () => {
     vi.stubGlobal("fetch", async () =>
       new Response(
-        JSON.stringify({ ok: false, reason: "Ville inconnue" }),
+        JSON.stringify({ error: "collection_not_found" }),
         { status: 404 },
       ),
     );
-    await expect(fetchLots("unknown", { baseUrl: "" })).rejects.toThrow(
-      "lots HTTP 404",
-    );
+    const res = await fetchLots("unknown", { baseUrl: "" });
+    expect(res.ok).toBe(false);
+    expect(res.source).toBe("none");
+    expect(res.collectionId).toBe("qc-lots-unknown");
+    expect(res.featureCollection.features).toHaveLength(0);
+    expect(res.reason).toContain("Collection lots non configurée");
   });
 
   it("features have no PII — only noLot and citySlug properties", async () => {
