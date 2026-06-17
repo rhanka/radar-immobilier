@@ -1,4 +1,4 @@
-# Contrat de sortie graphify — ontologie canonique v2.1
+# Contrat de sortie graphify — ontologie canonique v2.2
 
 > **Statut : NORMATIF.**  
 > Tout graphe produit par graphify (re-graphify ou nouvelle ville) DOIT se conformer
@@ -7,6 +7,10 @@
 >
 > **v2.1** (2026-06-14) : ajout des champs `etape` + `etape_date` sur Signal et
 > DesignationEvent pour l'axe ANTICIPATION du scoring. Voir §8.
+>
+> **v2.2** (2026-06-15) : ajout des champs `zone_ref`, `no_lot`, `reglement_number`
+> sur Signal et DesignationEvent pour alimenter le mapper géo (résolution ~70–85 % vs
+> ~30 % avec regex post-hoc). Champs OPTIONNELS — jamais inventés. Voir §9.
 
 ---
 
@@ -495,6 +499,15 @@ Un graphe v2.1 est valide si les règles ci-dessus sont satisfaites ET :
    a un champ `etape` dont la valeur appartient à l'enum v2.1 (voir §8).
 9. Si `etape` est présent, `etape_date` est présent et valide (format YYYY-MM-DD).
 
+Un graphe v2.2 est valide si les règles v2.1 sont satisfaites ET :
+
+10. `ontology_version` vaut `"2.2"`.
+11. Les champs `zone_ref`, `no_lot`, `reglement_number` — quand présents — respectent les
+    formats définis en §9 (pas de valeur vide `""`, pas de valeur `null` — utiliser l'absence
+    de clé si la donnée est absente du PV).
+12. Règle anti-invention : aucun Signal/DesignationEvent n'a un `zone_ref`, `no_lot` ou
+    `reglement_number` inventé ou déduit par inférence hors-texte.
+
 ---
 
 ## 8. Champs v2.1 — Axe ANTICIPATION : `etape` + `etape_date`
@@ -587,4 +600,125 @@ jq --argjson enum "$ETAPE_ENUM" '
   ]
 ' graph/<slug>/latest.json
 # → doit retourner []
+```
+
+---
+
+## 9. Champs v2.2 — Axe GÉO-RÉSOLUTION : `zone_ref` + `no_lot` + `reglement_number`
+
+### 9.1 Contexte
+
+Ces trois champs peuplent les données structurées à la source (dans graphify) pour que
+le mapper géo (`api/src/services/geo/extract-refs.ts` + `resolve-refs.ts`) puisse
+faire une simple jointure PG au lieu d'une extraction regex post-hoc sur texte libre.
+
+Taux de résolution attendu avec ces champs peuplés : **~70–85 %** (vs ~30 % en regex seul).
+
+### 9.2 Règles communes
+
+| Règle | Détail |
+|-------|--------|
+| **Optionnel** | Les trois champs sont optionnels. Leur absence est normale pour les PVs qui n'en font pas mention. |
+| **Anti-invention** | Si la valeur n'est PAS explicitement dans le texte du PV → champ OMIS (pas de `null`, pas de `""`). |
+| **Pas de null ni vide** | Utiliser l'absence de clé dans `properties`. `zone_ref: null` et `zone_ref: ""` sont tous deux invalides. |
+| **Loi 25** | Les trois champs sont des données réglementaires publiques. Aucune PII. |
+
+### 9.3 Champ `zone_ref`
+
+- **Type** : `string`
+- **Contenu** : code de zone officiel tel qu'il apparaît dans le PV (format brut conservé).
+- **Formats observés** : `H-431`, `C-512`, `H34-327`, `H34-327 (VLO)`, `RU1302`, `A1336`, `1000`.
+- **Quand présent** : le PV cite explicitement un code de zone (pas une description textuelle vague).
+
+### 9.4 Champ `no_lot`
+
+- **Type** : `string`
+- **Contenu** : numéro de lot cadastral, chiffres uniquement (espaces supprimés), 7–10 chiffres.
+- **Exemples** : `"6057912"`, `"3819015"`, `"4567890"`.
+- **Quand présent** : le PV cite explicitement "lot XXXXXXX" ou "lot X XXX XXX".
+
+### 9.5 Champ `reglement_number`
+
+- **Type** : `string`
+- **Contenu** : numéro de règlement tel que dans le PV.
+- **Exemples** : `"Z-2026-042"`, `"450-2023"`, `"RZ-2024-012"`.
+- **Quand présent** : le PV cite explicitement un numéro de règlement ET ce numéro n'est pas
+  déjà porté par un nœud Bylaw lié.
+
+### 9.6 Exemple de nœud v2.2
+
+```json
+{
+  "id":    "event-saint-constant-rezonage-2026-04-01",
+  "type":  "DesignationEvent",
+  "label": "Rezonage lot 4 567 890 : zone H-431 vers zone C-512 (règlement Z-2026-042)",
+  "properties": {
+    "date":            "2026-04-01",
+    "meetingDate":     "2026-04-01",
+    "decision":        "approuvé",
+    "kind":            "rezonage",
+    "municipality":    "saint-constant",
+    "resolution":      "2026-04-120",
+    "etape":           "adoption",
+    "etape_date":      "2026-04-01",
+    "zone_ref":        "H-431",
+    "no_lot":          "4567890",
+    "reglement_number": "Z-2026-042"
+  }
+}
+```
+
+Nœud sans lot ni zone mentionnés (dérogation textuelle sans code) :
+
+```json
+{
+  "id":    "event-saint-constant-derogation-2026-04-02",
+  "type":  "DesignationEvent",
+  "label": "Dérogation mineure — agrandissement en zone agricole",
+  "properties": {
+    "date":        "2026-04-02",
+    "meetingDate": "2026-04-02",
+    "decision":    "refusé",
+    "kind":        "derogation_mineure",
+    "municipality":"saint-constant",
+    "etape":       "derogation_mineure",
+    "etape_date":  "2026-04-02",
+    "outcome":     "refusee"
+  }
+}
+```
+
+### 9.7 Gate jq de validation (v2.2)
+
+```bash
+# Gate 1 : ontology_version = "2.2"
+jq '.ontology_version == "2.2"' graph/<slug>/latest.json
+# → true
+
+# Gate 2 : aucun zone_ref vide ou null (si présent → non-vide)
+jq '[.nodes[]
+     | select(.type == "Signal" or .type == "DesignationEvent")
+     | select(.properties.zone_ref != null)
+     | select(.properties.zone_ref == "")
+     | .id] | length == 0' graph/<slug>/latest.json
+# → true
+
+# Gate 3 : aucun no_lot vide ou non-numérique (si présent → chiffres uniquement)
+jq '[.nodes[]
+     | select(.type == "Signal" or .type == "DesignationEvent")
+     | select(.properties.no_lot != null)
+     | select(.properties.no_lot | test("^[0-9]{7,10}$") | not)
+     | .id] | length == 0' graph/<slug>/latest.json
+# → true
+
+# Gate 4 : couverture zone_ref — taux de nœuds avec zone_ref vs total Signal/DesignationEvent
+jq '
+  (.nodes | map(select(.type == "Signal" or .type == "DesignationEvent"))) as $sde |
+  {
+    total:     ($sde | length),
+    avec_zone: ($sde | map(select(.properties.zone_ref != null)) | length),
+    avec_lot:  ($sde | map(select(.properties.no_lot != null)) | length)
+  }
+' graph/<slug>/latest.json
+# → rapport informatif (pas de seuil bloquant — la couverture varie selon le texte des PVs)
 ```

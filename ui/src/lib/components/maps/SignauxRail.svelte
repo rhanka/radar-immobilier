@@ -12,9 +12,21 @@
    *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
    *
    * Anti-invention : aucun appel API ici, tout par props.
+   *
+   * Vague 1 DS (0.34.47+) : Overline · IconButton · Checkbox (desc+trailing) ·
+   * Badge tonal · StatusDot (tone) · Search fluid · Divider
+   * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
+   * ZÉRO checkbox/search bespoke.
    */
-  import { Search, Badge } from "@sentropic/design-system-svelte";
-  import { RefreshCw } from "@lucide/svelte";
+  import {
+    Search,
+    Badge,
+    Checkbox,
+    Overline,
+    IconButton,
+    StatusDot,
+    Divider,
+  } from "@sentropic/design-system-svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 
@@ -51,15 +63,16 @@
     return TYPE_PALETTE[h % TYPE_PALETTE.length];
   }
 
-  /** Couleur de l'aplat choroplèthe selon le nb de signaux actifs. */
-  function signalColor(count: number): string {
-    if (count === 0) return "#e2e8f0";
-    if (count <= 2) return "#fbbf24";
-    if (count <= 5) return "#f97316";
-    return "#ef4444";
+  /**
+   * Mappe le compte de signaux actifs vers un tone StatusDot DS.
+   * 0 → neutral · 1–2 → warning · 3–5 → warning · >5 → error
+   * (supprime signalColor hex)
+   */
+  function signalTone(count: number): "neutral" | "warning" | "error" {
+    if (count === 0) return "neutral";
+    if (count <= 5) return "warning";
+    return "error";
   }
-
-
 
   // ── Toggles — filtres combinables TOP-DOWN ──────────────────────────────────
   /**
@@ -169,6 +182,10 @@
     (s, e) => s + countFor(e, buildKey(zonageOnly, true, precoceOnly)), 0);
   $: badgePrecoce = entries.reduce(
     (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, true)), 0);
+
+  // ── Icône refresh SVG inline (DS-safe — zéro dépendance lucide) ───────────
+  // Inline SVG minimaliste : arrow circulaire 14×14, accessible via IconButton DS.
+  // Tourne via classe CSS animate-spin quand loading=true.
 </script>
 
 <!-- Rail container -->
@@ -176,29 +193,47 @@
 
   <!-- En-tête du rail -->
   <div class="rail-head">
-    <div class="flex items-center justify-between px-4 pt-3 pb-1">
-      <span class="rail-kicker">Signaux · Villes</span>
-      <button
-        type="button"
+    <div class="rail-head-row">
+      <!-- Overline DS remplace .rail-kicker (uppercased, small-caps, token) -->
+      <Overline as="span">Signaux · Villes</Overline>
+      <!-- IconButton DS remplace le <button> bespoke + lucide RefreshCw -->
+      <IconButton
         aria-label="Actualiser"
-        class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
-        on:click={onRefresh}
+        size="sm"
+        variant="ghost"
         disabled={loading}
+        onclick={onRefresh}
       >
-        <RefreshCw class={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
-      </button>
+        <!-- SVG refresh inline — aucune dépendance lucide -->
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class={loading ? "spin" : ""}
+          aria-hidden="true"
+        >
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </IconButton>
     </div>
 
     <!-- Compteur global -->
-    <div class="border-b border-slate-100 px-4 pb-2 text-xs text-slate-500">
+    <div class="rail-global-count">
       {#if loading}
-        <span class="text-slate-400">Chargement…</span>
+        <span class="rail-muted">Chargement…</span>
       {:else}
-        <span class="font-semibold text-slate-700">{totalSignals}</span>
+        <span class="rail-count-strong">{totalSignals}</span>
         {totalSignals !== 1 ? " signaux" : " signal"}
-        · <span class="font-semibold text-slate-700">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
+        · <span class="rail-count-strong">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
       {/if}
     </div>
+    <Divider />
   </div>
 
   <!-- Corps scrollable : 2 sections accordéon natif -->
@@ -208,67 +243,57 @@
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
-        <span class="rail-section-title">Signaux</span>
+        <!-- Overline DS remplace .rail-section-title -->
+        <Overline as="span">Signaux</Overline>
       </summary>
 
       <div class="rail-section-body">
         <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE, activé par défaut -->
-        <div class="axis-toggle-row px-3 pt-2 pb-1">
-          <label class="rail-type-row">
-            <input
-              type="checkbox"
-              class="rail-type-checkbox"
-              checked={zonageOnly}
-              on:change={toggleZonageOnly}
-              aria-label="Zonage uniquement"
-            />
-            <span class="rail-row-label font-semibold text-slate-700">Zonage uniquement</span>
-            {#if !loading}
-              <span class="axis-badge axis-badge--zonage">
-                {badgeZonage}
-              </span>
-            {/if}
-          </label>
+        <!-- Checkbox DS : label + description + slot trailing = Badge tonal info -->
+        <div class="axis-toggle-row">
+          <Checkbox
+            label="Zonage uniquement"
+            checked={zonageOnly}
+            onchange={toggleZonageOnly}
+          >
+            {#snippet trailing()}
+              {#if !loading}
+                <Badge tone="info" size="sm">{badgeZonage}</Badge>
+              {/if}
+            {/snippet}
+          </Checkbox>
         </div>
 
         <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
-        <div class="axis-toggle-row px-3 pb-1">
-          <label class="rail-type-row">
-            <input
-              type="checkbox"
-              class="rail-type-checkbox"
-              checked={multi4plus}
-              on:change={toggleMulti4plus}
-              aria-label="Multifamilial 4+"
-            />
-            <span class="rail-row-label text-slate-700">
-              Multifamilial 4+
-              <span class="rail-row-sublabel">nb unités ≥ 4 ou intensité haute</span>
-            </span>
-            {#if !loading}
-              <span class="axis-badge axis-badge--dimension">{badgeMulti}</span>
-            {/if}
-          </label>
+        <div class="axis-toggle-row">
+          <Checkbox
+            label="Multifamilial 4+"
+            description="nb unités ≥ 4 ou intensité haute"
+            checked={multi4plus}
+            onchange={toggleMulti4plus}
+          >
+            {#snippet trailing()}
+              {#if !loading}
+                <Badge tone="warning" size="sm">{badgeMulti}</Badge>
+              {/if}
+            {/snippet}
+          </Checkbox>
         </div>
 
         <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
-        <div class="axis-toggle-row axis-toggle-row--last px-3 pb-2">
-          <label class="rail-type-row">
-            <input
-              type="checkbox"
-              class="rail-type-checkbox"
-              checked={precoceOnly}
-              on:change={togglePrecoceOnly}
-              aria-label="Signaux précoces"
-            />
-            <span class="rail-row-label text-slate-700">
-              Signaux précoces (approx.)
-              <span class="rail-row-sublabel">avis de motion / 1er projet</span>
-            </span>
-            {#if !loading}
-              <span class="axis-badge axis-badge--anticipation">{badgePrecoce}</span>
-            {/if}
-          </label>
+        <div class="axis-toggle-row axis-toggle-row--last">
+          <Checkbox
+            label="Signaux précoces (approx.)"
+            description="avis de motion / 1er projet"
+            checked={precoceOnly}
+            onchange={togglePrecoceOnly}
+          >
+            {#snippet trailing()}
+              {#if !loading}
+                <Badge tone="success" size="sm">{badgePrecoce}</Badge>
+              {/if}
+            {/snippet}
+          </Checkbox>
         </div>
       </div>
     </details>
@@ -277,22 +302,24 @@
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
-        <span class="rail-section-title">Villes</span>
+        <!-- Overline DS remplace .rail-section-title -->
+        <Overline as="span">Villes</Overline>
       </summary>
 
       <div class="rail-section-body">
-        <!-- Recherche villes (Search DS) -->
+        <!-- Recherche villes (Search DS fluid — remplit le rail) -->
         <div class="px-3 pb-2 pt-1">
           <Search
             placeholder="Rechercher une ville…"
             size="sm"
+            fluid
             bind:value={searchQuery}
             aria-label="Rechercher une ville"
           />
         </div>
 
         <!-- Liste villes avec sous-accordéon natif (<details>) -->
-        <ul class="divide-y divide-slate-50" role="list">
+        <ul class="rail-city-list" role="list">
           {#if sortedEntries.length === 0 && !loading}
             <li class="rail-empty">
               {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
@@ -302,7 +329,7 @@
               {@const isSelected = selectedSlug === entry.municipality.slug}
               {@const activeCount = countFor(entry, activeKey)}
               <li>
-                <!-- Sous-accordéon natif <details> (pattern ws-acc) -->
+                <!-- Sous-accordéon natif <details> (pattern ws-acc — Vague 2/3) -->
                 <details
                   class="ws-acc ws-acc--compact"
                   open={isSelected}
@@ -312,24 +339,19 @@
                     class:ws-acc-summary--active={isSelected}
                     on:click|preventDefault={() => onSelectCity(entry)}
                   >
-                    <!-- Pastille couleur signal (basée sur le compte actif) -->
-                    <span
-                      class="rail-swatch"
-                      style="background-color: {signalColor(activeCount)};"
-                      aria-hidden="true"
-                    ></span>
+                    <!-- StatusDot DS remplace .rail-swatch hex en dur -->
+                    <StatusDot tone={signalTone(activeCount)} size={10} />
                     <span class="rail-row-label">
                       {entry.municipality.name}
                       {#if entry.municipality.mrc}
                         <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
                       {/if}
                     </span>
+                    <!-- Badge DS tonal sans override — remplace rail-row-count -->
                     {#if activeCount > 0}
-                      <Badge tone="warning" class="rail-row-count shrink-0">
-                        {activeCount}
-                      </Badge>
+                      <Badge tone="warning" size="sm" aria-label="{activeCount} signaux">{activeCount}</Badge>
                     {:else}
-                      <span class="rail-row-count text-slate-300">0</span>
+                      <Badge tone="neutral" size="sm">0</Badge>
                     {/if}
                   </summary>
 
@@ -337,33 +359,47 @@
                   {#if isSelected}
                     <div class="ws-acc-body">
                       {#if detailLoading}
-                        <div class="flex items-center gap-2 py-2 text-xs text-slate-400">
-                          <RefreshCw class="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                        <div class="rail-loading-row">
+                          <!-- SVG spinner inline — zéro lucide -->
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="spin"
+                            aria-hidden="true"
+                          >
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                          </svg>
                           Chargement…
                         </div>
                       {:else if filteredNodes.length === 0 && detailNodes.length === 0}
-                        <p class="text-xs text-slate-400 italic py-1">Aucun signal indexé pour cette ville.</p>
+                        <p class="rail-detail-empty">Aucun signal indexé pour cette ville.</p>
                       {:else if filteredNodes.length === 0}
-                        <p class="text-xs text-slate-400 italic py-1">Tous les types sont masqués.</p>
+                        <p class="rail-detail-empty">Tous les types sont masqués.</p>
                       {:else}
                         <ul class="space-y-1" role="list">
                           {#each filteredNodes.slice(0, 10) as node (node.id)}
                             <li class="signal-item">
-                              <span
-                                class="rail-swatch shrink-0"
-                                style="background-color: {typeColor(node.type)};"
-                                aria-hidden="true"
-                              ></span>
+                              <!--
+                                Pastille type-couleur : typeColor() retourne une couleur de palette
+                                12 couleurs. StatusDot accepte `color` (prop arbitraire), utilisé
+                                ici pour la palette type (non mappable sur les 5 tones DS).
+                              -->
+                              <StatusDot color={typeColor(node.type)} size={10} />
                               <span class="min-w-0">
-                                <span class="block truncate text-xs font-medium text-slate-800 leading-snug">
-                                  {node.label}
-                                </span>
-                                <span class="block text-xs text-slate-400 font-mono">{node.type}</span>
+                                <span class="signal-label">{node.label}</span>
+                                <span class="signal-type">{node.type}</span>
                               </span>
                             </li>
                           {/each}
                           {#if filteredNodes.length > 10}
-                            <li class="text-xs text-slate-400 italic pl-4">
+                            <li class="rail-detail-empty rail-detail-more">
                               +{filteredNodes.length - 10} autres…
                             </li>
                           {/if}
@@ -404,22 +440,37 @@
     scrollbar-gutter: stable;
   }
 
-  /* ── Kicker ── */
-  .rail-kicker {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--st-semantic-text-muted, #94a3b8);
+  /* ── En-tête du rail ── */
+  .rail-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.25rem;
   }
 
-  /* ── Pastille couleur ── */
-  .rail-swatch {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
+  /* ── Compteur global ── */
+  .rail-global-count {
+    padding: 0 1rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--st-semantic-text-secondary);
+  }
+
+  .rail-muted {
+    color: var(--st-semantic-text-muted);
+  }
+
+  .rail-count-strong {
+    font-weight: 600;
+    color: var(--st-semantic-text-primary);
+  }
+
+  /* ── Spin animation (refresh + detail loading) ── */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spin {
+    animation: spin 1s linear infinite;
   }
 
   /* ── Label tronqué ── */
@@ -431,30 +482,22 @@
     white-space: nowrap;
     font-size: 0.82rem;
     font-weight: 500;
-    color: var(--st-semantic-text-primary, #1e293b);
+    color: var(--st-semantic-text-primary);
   }
 
   .rail-row-sublabel {
     display: block;
     font-size: 0.7rem;
     font-weight: 400;
-    color: var(--st-semantic-text-muted, #94a3b8);
+    color: var(--st-semantic-text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  /* ── Badge count pill ── */
-  .rail-row-count {
-    font-variant-numeric: tabular-nums;
-    font-size: 0.7rem;
-    border-radius: var(--st-radius-pill, 999px);
-    flex-shrink: 0;
-  }
-
   /* ── Accordéon de 1er niveau (sections Signaux / Villes) ── */
   .rail-section-acc {
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    border-bottom: 1px solid var(--st-semantic-border-subtle);
   }
 
   .rail-section-acc > summary {
@@ -472,26 +515,17 @@
     padding: 0.45rem 1rem;
     cursor: pointer;
     user-select: none;
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+    background: var(--st-semantic-surface-subtle);
     transition: background 0.1s;
   }
 
   .rail-section-summary:hover {
-    background: #f1f5f9; /* slate-100 */
-  }
-
-  .rail-section-title {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    flex: 1;
+    background: var(--st-semantic-surface-hover, var(--st-semantic-surface-subtle));
   }
 
   .rail-section-chevron {
     font-size: 0.65rem;
-    color: var(--st-semantic-text-muted, #94a3b8);
+    color: var(--st-semantic-text-muted);
     transition: transform 0.12s ease;
     flex-shrink: 0;
   }
@@ -500,28 +534,19 @@
     transform: rotate(90deg);
   }
 
-  /* ── Type row (case à cocher + pastille + label) ── */
-  .rail-type-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.22rem 0.3rem;
-    border-radius: var(--st-radius-sm, 4px);
-    cursor: pointer;
-    transition: background 0.1s, opacity 0.1s;
-    font-size: 0.8rem;
+  /* ── Toggles axes (Zonage / Dimension / Anticipation) ── */
+  .axis-toggle-row {
+    border-bottom: 1px solid var(--st-semantic-border-subtle);
+    padding: 0.4rem 0.75rem;
   }
 
-  .rail-type-row:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+  .axis-toggle-row--last {
+    margin-bottom: 0.25rem;
   }
 
-  .rail-type-checkbox {
-    width: 13px;
-    height: 13px;
-    flex-shrink: 0;
-    accent-color: var(--st-semantic-accent, #3b82f6);
-    cursor: pointer;
+  /* Largeur pleine pour que le Checkbox DS remplisse la rangée (trailing poussé à droite) */
+  .axis-toggle-row :global(.st-choice) {
+    width: 100%;
   }
 
   /* ── État vide ── */
@@ -529,10 +554,20 @@
     padding: 0.75rem 1rem;
     font-size: 0.82rem;
     font-style: italic;
-    color: var(--st-semantic-text-muted, #94a3b8);
+    color: var(--st-semantic-text-muted);
   }
 
-  /* ── Accordéon natif ws-acc (sous-accordéon villes) ── */
+  /* ── Loading inline (detail) ── */
+  .rail-loading-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    font-size: 0.75rem;
+    color: var(--st-semantic-text-muted);
+  }
+
+  /* ── Accordéon natif ws-acc (sous-accordéon villes — Vague 2/3) ── */
   :global(.ws-acc > summary) {
     list-style: none;
     cursor: pointer;
@@ -553,18 +588,18 @@
   }
 
   .ws-acc-summary:hover {
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+    background: var(--st-semantic-surface-subtle);
   }
 
   .ws-acc-summary--active {
-    background: #f0fdfa; /* teal-50 */
+    background: var(--st-semantic-surface-selected, var(--st-semantic-surface-subtle));
   }
 
   /* Chevron via ::before */
   .ws-acc-summary::before {
     content: "▸";
     font-size: 0.65rem;
-    color: var(--st-semantic-text-muted, #94a3b8);
+    color: var(--st-semantic-text-muted);
     transition: transform 0.12s ease;
     flex-shrink: 0;
   }
@@ -585,38 +620,32 @@
     padding: 0.25rem 0;
   }
 
-  /* ── Toggles axes (Zonage / Dimension / Anticipation) ── */
-  .axis-toggle-row {
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-  }
-
-  .axis-toggle-row--last {
-    margin-bottom: 0.25rem;
-  }
-
-  .axis-badge {
-    font-size: 0.65rem;
-    border-radius: 999px;
-    padding: 0.1rem 0.4rem;
+  .signal-label {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--st-semantic-text-primary);
+    line-height: 1.35;
   }
 
-  .axis-badge--zonage {
-    color: var(--st-semantic-text-muted, #94a3b8);
-    background: #e0f2fe; /* sky-100 */
+  .signal-type {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--st-semantic-text-muted);
+    font-family: monospace;
   }
 
-  .axis-badge--dimension {
-    color: #854d0e; /* yellow-800 */
-    background: #fef9c3; /* yellow-100 */
+  .rail-detail-empty {
+    font-size: 0.75rem;
+    color: var(--st-semantic-text-muted);
+    font-style: italic;
+    padding: 0.25rem 0;
   }
 
-  .axis-badge--anticipation {
-    color: #166534; /* green-800 */
-    background: #dcfce7; /* green-100 */
+  .rail-detail-more {
+    padding-left: 1rem;
   }
-
-
 </style>

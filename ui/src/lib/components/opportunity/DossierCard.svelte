@@ -1,6 +1,6 @@
 <script lang="ts">
   import { TrendingUp, Clock, ChevronRight } from "@lucide/svelte";
-  import { Alert, Badge, Popover } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, Popover, Timeline } from "@sentropic/design-system-svelte";
   import type { AxisScoreT, OpportunityDossierT } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
   import { toGrilleRows } from "$lib/scoring/grilles-data.js";
@@ -23,8 +23,12 @@
     evidence: applyMode(dossier.evidence, mode),
   });
   $: timeline = deriveTimeline(dossier);
-
-  let hoveredAxis: string | null = null;
+  // Mappe la chronologie vers le contrat TimelineItem du composant Timeline DS.
+  $: timelineItems = timeline.map((item) => ({
+    title: item.label,
+    meta: item.date,
+    description: phaseLabel(item.phase),
+  }));
 
   function score100Color(s: number | null): string {
     if (s === null) return "text-slate-400";
@@ -164,12 +168,11 @@
             {@const hypothesis = isHypothesis(axis)}
             {@const excludedInReal = mode === "real" && hypothesis}
             <Popover
-              open={hoveredAxis === axis}
+              openOn="hover"
               label="Détail axe {gridRow.label}"
               placement="top"
             >
               {#snippet trigger()}
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div
                   class={`cursor-default rounded border px-3 py-2 transition ${
                     effectiveAxisScore.availability === "non-disponible"
@@ -178,13 +181,8 @@
                         : "border-slate-200 bg-white"
                       : "border-teal-100 bg-teal-50"
                   }`}
-                  on:mouseenter={() => { hoveredAxis = axis; }}
-                  on:mouseleave={() => { hoveredAxis = null; }}
-                  on:focusin={() => { hoveredAxis = axis; }}
-                  on:focusout={() => { hoveredAxis = null; }}
                   tabindex="0"
                   role="button"
-                  aria-expanded={hoveredAxis === axis}
                   aria-label="Détail axe {gridRow.label}"
                 >
                   <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -243,17 +241,6 @@
         Chronologie des preuves
       </h2>
     </div>
-    <ol class="relative border-l border-slate-200 pl-4 space-y-3">
-      {#each timeline as item}
-        <li class="relative">
-          <span class="absolute -left-[1.125rem] mt-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-teal-400"></span>
-          <p class="text-[10px] font-semibold text-slate-400">{item.date}</p>
-          <p class="text-xs text-slate-700">
-            <span class="font-medium text-teal-700">{phaseLabel(item.phase)}</span>
-            · {item.label}
-          </p>
-        </li>
-      {/each}
-    </ol>
+    <Timeline items={timelineItems} />
   </section>
 </div>

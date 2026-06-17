@@ -147,12 +147,15 @@ export const zoneVersions = pgTable(
     knownTo: timestamp("known_to", { withTimezone: true }), // null = still believed
     geom: geometry("geom"), // nullable PostGIS geometry (§4)
     geomSource: text("geom_source").notNull().default("none"),
+    geomFetchedAt: timestamp("geom_fetched_at", { withTimezone: true }),
+    codeNorm: text("code_norm"), // code normalisé pour le mapper G1 (migration 0006)
     rawRef: text("raw_ref").notNull(),
     evidence: jsonb("evidence").notNull().default([]),
   },
   (t) => ({
     byCanonical: index("zone_versions_canonical_idx").on(t.canonicalId),
     byCity: index("zone_versions_city_idx").on(t.citySlug),
+    byCodeNormCity: index("zone_versions_code_norm_city_idx").on(t.codeNorm, t.citySlug),
   }),
 );
 
@@ -175,12 +178,15 @@ export const lotVersions = pgTable(
     knownTo: timestamp("known_to", { withTimezone: true }),
     geom: geometry("geom"),
     geomSource: text("geom_source").notNull().default("none"),
+    geomFetchedAt: timestamp("geom_fetched_at", { withTimezone: true }),
+    noLotNorm: text("no_lot_norm"), // numéro de lot normalisé pour le mapper G1 (migration 0006)
     rawRef: text("raw_ref").notNull(),
     evidence: jsonb("evidence").notNull().default([]),
   },
   (t) => ({
     byCanonical: index("lot_versions_canonical_idx").on(t.canonicalId),
     byNoLot: index("lot_versions_no_lot_idx").on(t.noLot),
+    byNoLotNorm: index("lot_versions_no_lot_norm_idx").on(t.noLotNorm),
   }),
 );
 
@@ -579,6 +585,63 @@ export const prospectContactAccessLog = pgTable(
   }),
 );
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// G1 — Géo-mapper : résolution Signal/DesignationEvent → Zone/Lot (migration 0006).
+//
+// geo_resolutions : arêtes résolues (score >= seuil).
+// geo_unresolved  : audit des non-résolus (mesure du taux).
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Arêtes de résolution géo — Signal/DesignationEvent → Zone ou Lot.
+ * Clé naturelle : (node_id, relation_type, target_id) — idempotent.
+ */
+export const geoResolutions = pgTable(
+  "geo_resolutions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    nodeId: text("node_id").notNull(),
+    nodeType: text("node_type").notNull(),           // 'Signal' | 'DesignationEvent'
+    citySlug: text("city_slug").notNull(),
+    relationType: text("relation_type").notNull(),   // 'concerns_zone' | 'concerns_lot'
+    targetId: text("target_id").notNull(),           // canonical_id Zone ou Lot
+    targetType: text("target_type").notNull(),        // 'Zone' | 'Lot'
+    extraitBrut: text("extrait_brut"),
+    scoreConfiance: numeric("score_confiance").notNull(),
+    provenance: text("provenance").notNull(),         // 'zone_explicit' | 'zone_standard' | ...
+    asOfDate: date("as_of_date"),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byNode: index("geo_resolutions_node_idx").on(t.nodeId),
+    byCity: index("geo_resolutions_city_idx").on(t.citySlug),
+  }),
+);
+
+/**
+ * Nœuds non-résolus — audit + amélioration continue.
+ * Enregistre les raisons d'échec de résolution.
+ */
+export const geoUnresolved = pgTable(
+  "geo_unresolved",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    nodeId: text("node_id").notNull(),
+    nodeType: text("node_type").notNull(),
+    citySlug: text("city_slug").notNull(),
+    extraitBrut: text("extrait_brut"),
+    patternType: text("pattern_type").notNull(),      // 'zone_code' | 'no_lot'
+    scoreConfiance: numeric("score_confiance"),
+    raison: text("raison").notNull(),                 // 'no_polygon' | 'score_too_low' | 'ambiguous' | 'no_extract'
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byNode: index("geo_unresolved_node_idx").on(t.nodeId),
+    byCity: index("geo_unresolved_city_idx").on(t.citySlug),
+  }),
+);
+
 export const schema = {
   sources,
   ingestions,
@@ -601,4 +664,7 @@ export const schema = {
   prospectNotes,
   prospectContacts,
   prospectContactAccessLog,
+  // G1 — Géo-mapper
+  geoResolutions,
+  geoUnresolved,
 };

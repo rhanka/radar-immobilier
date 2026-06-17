@@ -1,9 +1,10 @@
 # Suivi — Acquisition Zones + Lots (Phase 2 géo data)
 
-> **Statut** : en cours — P0 + P1 livrés.
+> **Statut** : **ACQUISITION = GEO (consommée). Adapters immo supprimés.**
 > **Date création** : 2026-06-14. **Auteur** : rhanka.
 > **Référence** : `docs/spec/cadrage-zones-lots-acquisition.md` (PR #203).
-> **Branches** : `feat/acquisition-zones-lots-p0` (PR #205), `feat/acquisition-zones-lots-p1` (empilée sur #205).
+> **Branches** : `feat/acquisition-zones-lots-p0` (PR #205), `feat/acquisition-zones-lots-p1` (#205),
+>   `feat/consume-geo-lib` (consommation `@sentropic/geo 0.1.1` + suppression adapters immo).
 
 ---
 
@@ -281,4 +282,64 @@ domaine immo → extraction directe. Frontière claire : `geo` livre GeoJSON nor
 
 ---
 
-*Dernière mise à jour : 2026-06-14 — feat/acquisition-zones-lots-p1 (empilée sur #205)*
+---
+
+## Consommation @sentropic/geo 0.1.1 (2026-06-15)
+
+**Branche** : `feat/consume-geo-lib`
+
+### Principe — max délégué à geo, 0 adapter immo d'acquisition
+
+L'acquisition des zones et lots est désormais déléguée entièrement à `@sentropic/geo 0.1.1`
+et `@sentropic/geo-sources-americas 0.1.1`. Les adapters immo correspondants sont **supprimés**.
+Le mapper (résolution) reste côté immo (`extract-refs.ts`, `resolve-refs.ts`).
+
+### Fonctions geo consommées
+
+| Fonction | Package | Usage |
+|---|---|---|
+| `acquireCkanGeoJson(url, {fetchImpl})` | `@sentropic/geo` | Télécharge le GeoJSON de zone d'une ville depuis son URL CKAN directe |
+| `crawlQcCadastreLots({fetchImpl, extent})` | `@sentropic/geo-sources-americas` | Crawl cadastre allégé par bbox-tiling (extent = bbox commune, bornage STRICT) |
+| `QC_ZONAGE_CKAN_MANIFESTS` | `@sentropic/geo-sources-americas` | 11 manifestes CKAN QC confirmés (Longueuil/Gatineau/Saguenay/Lévis/Trois-Rivières/Sherbrooke/Québec/Repentigny/Rimouski/Rouyn-Noranda/Shawinigan) |
+
+### Comment populate-geo source depuis geo
+
+1. **Zones** : `buildZoneRegistry()` extrait les citySlug + URL depuis `QC_ZONAGE_CKAN_MANIFESTS`
+   (id de la forme `ca-qc/zonage-{ville}` → slug). Pour chaque ville, `acquireCkanGeoJson(url)`
+   retourne `{ collection: FeatureCollection, provenance }`. Détection du champ zone par liste de
+   candidats (`NO_ZONE`, `no_zone`, `Zonage`, `zone_`, …). Upsert dans `zone_versions`.
+
+2. **Lots** : pour les villes dans `lotCitySlugs`, `crawlQcCadastreLots({ extent: [w,s,e,n] })`
+   crawle le cadastre allégé en bbox-tiling borné à la commune. Retourne
+   `{ collection: AdminFeatureCollection, provenance }` avec `NO_LOT` verbatim.
+   Upsert dans `lot_versions`.
+
+### Fix ON CONFLICT (bug critique)
+
+`ON CONFLICT (canonical_id) WHERE known_to IS NULL` référençait une contrainte inexistante :
+`zone_versions`/`lot_versions` ont un INDEX (non unique) + une contrainte EXCLUDE sur canonical_id,
+mais pas de contrainte UNIQUE. L'upsert PG échouait.
+
+**Fix** : upsert manuel — `UPDATE … WHERE canonical_id = ? AND known_to IS NULL RETURNING id`,
+puis si 0 lignes → `INSERT`. Idempotent, sans référencer de contrainte inexistante.
+
+### Adapters immo supprimés
+
+Les fichiers suivants sont supprimés (remplacés par @sentropic/geo) :
+
+- `packages/radar-sources/src/geo/cadastre-allege.ts` + `.test.ts` + `.fixture.ts`
+- `packages/radar-sources/src/geo/arcgis-zonage.ts` + `.test.ts` + `.fixture.ts`
+- `packages/radar-sources/src/geo/ckan-zonage.ts` + `.test.ts` + `.fixture.ts`
+- `packages/radar-sources/src/geo/arcgis-discovery.ts` + `.test.ts`
+- `packages/radar-sources/src/geo/arcgis-service-registry.ts`
+
+Leurs exports ont été retirés de `packages/radar-sources/src/index.ts`.
+
+### Mapper conservé
+
+- `api/src/services/geo/extract-refs.ts` — normalisation codes zone/lot (inchangé)
+- `api/src/services/geo/resolve-refs.ts` — résolution géo Signal → Zone/Lot (inchangé)
+
+---
+
+*Dernière mise à jour : 2026-06-15 — feat/consume-geo-lib*
