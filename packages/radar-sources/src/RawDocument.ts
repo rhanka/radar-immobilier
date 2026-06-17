@@ -41,6 +41,13 @@ export const RawDocumentRecordSchema = z.object({
   source: z.string().min(1),
   /** Exact URL the bytes were fetched from (anti-invention: the real link). */
   sourceUrl: z.string().url(),
+  /** Human title exposed by the source listing, when available. */
+  title: z.string().min(1).optional(),
+  /**
+   * Publication/session date exposed by the source listing, when available.
+   * May be an ISO date (`YYYY-MM-DD`) or an ISO datetime depending on source.
+   */
+  publishedAt: z.string().min(4).optional(),
   /** SHA-256 hex digest of the raw bytes — the idempotency key. */
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   /** ISO timestamp of the fetch. */
@@ -122,6 +129,8 @@ export function rawMetaKey(storageKey: string): string {
 export function buildRawDocumentRecord(input: {
   source: string;
   sourceUrl: string;
+  title?: string;
+  publishedAt?: string;
   body: Uint8Array;
   fetchedAt: string;
   contentType: string;
@@ -137,6 +146,8 @@ export function buildRawDocumentRecord(input: {
     id: rawDocumentId(input.source, sha256),
     source: input.source,
     sourceUrl: input.sourceUrl,
+    ...(input.title !== undefined ? { title: input.title } : {}),
+    ...(input.publishedAt !== undefined ? { publishedAt: input.publishedAt } : {}),
     sha256,
     fetchedAt: input.fetchedAt,
     storageKey,
