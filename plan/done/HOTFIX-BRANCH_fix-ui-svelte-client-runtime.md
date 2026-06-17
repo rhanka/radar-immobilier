@@ -81,7 +81,7 @@ Fix the production white page caused by the UI browser bundle resolving Svelte's
   - [x] Push verified UI image tag.
   - [x] Apply Kubernetes deployment.
   - [x] Verify public URL with bundle smoke and Chrome headless render.
-  - [ ] Open PR.
-  - [ ] Verify CI green.
-  - [ ] Merge commit into `main`.
-  - [ ] Preserve branch.
+  - [x] Open PR.
+  - [x] Verify CI green.
+  - [x] Merge commit into `main`.
+  - [x] Preserve branch.
