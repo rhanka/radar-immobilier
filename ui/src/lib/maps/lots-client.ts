@@ -33,6 +33,16 @@ export interface LotProperties {
   tod?: boolean;
   /** Flag multifamilial 4+ — carte-steve uniquement. */
   multifamilial4plus?: boolean;
+  /** Surface calculée par l'API depuis la géométrie publique, en m². */
+  superficieM2?: number | null;
+  /** Usage public résolu quand disponible; null sinon. */
+  usageCode?: string | null;
+  /** Zone résolue pour le lot quand disponible; null sinon. */
+  zone?: {
+    kind: string;
+    usages: string[];
+    densiteLogHa: number | null;
+  } | null;
 }
 
 export interface LotGeometry {
