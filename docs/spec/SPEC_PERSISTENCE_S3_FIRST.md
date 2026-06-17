@@ -36,6 +36,11 @@ runs/{citySlug}/{sourceKind}/{YYYY-MM-DD}T{HHMMSS}Z-{runId}/manifest.jsonl
 #   1 ligne/doc vu: {sha256, sourceUrl, publishedAt, httpStatus, casKey, status: new|seen|error}
 #   validTime = publishedAt/date de séance ; knownAt = le run.
 
+# réparation metadata append-only (sans toucher aux RAW immuables)
+runs/zz-repair-published-at/{YYYY-MM-DD}T{HHMMSS}Z-{runId}/manifest.jsonl
+#   1 ligne/doc réparé: {casKey, sha256, sourceUrl, previousPublishedAt?, publishedAt?,
+#   publishedAtPrecision, repairSource: manifest|url|title|index, status: repaired|unresolved}
+
 # 1.2 PARSED (clé = docSha × version parser → re-parse ciblé sur bump)
 parsed/{citySlug}/{sourceKind}/{docSha256}/{parserVersion}/extract.json.gz   # mentions Zod (@radar/domain): règlements, zones, avisDeMotion, changementZonage, offsets
 parsed/{citySlug}/{sourceKind}/{docSha256}/{parserVersion}/text.txt.gz        # texte extrait (pdftotext)
@@ -54,6 +59,14 @@ fixtures/{family}/…                   # corpus de test étendu (hors git), tes
 ```
 
 **Immutabilité / coûts** : versioning bucket activé (ceinture-bretelles) ; lifecycle = pas d'expiration `raw/`+`graph/` (mémoire du système), Glacier `runs/` anciens si besoin. **Listing interdit en chemin chaud** → manifestes + `latest.json` font l'index ; LIST réservé au rebuild/audit, borné par préfixe ville (~10²–10³ objets). Ordre d'écriture = protocole de commit : bytes CAS → meta → manifest (dernier). Manifest présent ⇒ tout ce qu'il référence existe. Volumétrie raw ≈ 12 Go/an (<1 €/mois) ; le coût dominant = LLM graphify, maîtrisé par le cache CAS.
+
+`publishedAt` is duplicated deliberately: it is written in the run manifest
+for audit/rebuild, and should also be present in new raw sidecars when known so
+single-document reads do not need to scan every manifest. Legacy sidecars are
+not rewritten in place; a repair run emits an append-only repair manifest, then
+the projection layer materialises the latest trusted document metadata into
+Postgres. URL/title-based reconstruction is conservative: partial dates keep a
+precision marker and unknown dates remain absent.
 
 ---
 
