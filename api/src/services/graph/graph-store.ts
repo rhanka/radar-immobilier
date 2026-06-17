@@ -192,6 +192,77 @@ export function buildEdgeRow(link: GraphifyLink): EdgeRow {
   };
 }
 
+function mergeRefs(a: unknown, b: unknown): unknown {
+  if (!Array.isArray(a) && !Array.isArray(b)) return b ?? a;
+
+  const refs = [...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])];
+  const seen = new Set<string>();
+  const merged: unknown[] = [];
+
+  for (const ref of refs) {
+    const key = JSON.stringify(ref);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(ref);
+  }
+
+  return merged;
+}
+
+function mergeProps(
+  current: Record<string, unknown>,
+  next: Record<string, unknown>,
+): Record<string, unknown> {
+  const merged = { ...current, ...next };
+  const refs = mergeRefs(current.refs, next.refs);
+  if (refs !== undefined) merged.refs = refs;
+  return merged;
+}
+
+/** Collapse duplicate node ids before bulk upsert. PostgreSQL rejects duplicate
+ * conflict keys in a single INSERT ... ON CONFLICT batch. */
+export function mergeNodeRows(rows: NodeRow[]): NodeRow[] {
+  const byId = new Map<string, NodeRow>();
+
+  for (const row of rows) {
+    const current = byId.get(row.id);
+    if (!current) {
+      byId.set(row.id, row);
+      continue;
+    }
+
+    byId.set(row.id, {
+      ...current,
+      ...row,
+      props: mergeProps(current.props, row.props),
+    });
+  }
+
+  return [...byId.values()];
+}
+
+/** Collapse duplicate edge natural keys before bulk upsert, preserving evidence
+ * by merging refs from all duplicate graph edges. */
+export function mergeEdgeRows(rows: EdgeRow[]): EdgeRow[] {
+  const byKey = new Map<string, EdgeRow>();
+
+  for (const row of rows) {
+    const key = `${row.srcId}\u0000${row.dstId}\u0000${row.kind}`;
+    const current = byKey.get(key);
+    if (!current) {
+      byKey.set(key, row);
+      continue;
+    }
+
+    byKey.set(key, {
+      ...current,
+      props: mergeProps(current.props, row.props),
+    });
+  }
+
+  return [...byKey.values()];
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Service
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,8 +291,8 @@ export async function upsertGraph(
   const parsed = graphifyGraphSchema.parse(graphJson);
   const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
 
-  const nodeRows = parsed.nodes.map((n) => buildNodeRow(n, citySlug));
-  const edgeRows = links.map(buildEdgeRow);
+  const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
+  const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
 
   // Upsert nodes (ON CONFLICT on pk = id)
   if (nodeRows.length > 0) {
