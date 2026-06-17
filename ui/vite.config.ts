@@ -9,6 +9,7 @@ export default defineConfig({
   base,
   plugins: [svelte()],
   resolve: {
+    conditions: ["browser", "svelte", "module", "import", "default"],
     alias: {
       $lib: fileURLToPath(new URL("./src/lib", import.meta.url)),
     },
