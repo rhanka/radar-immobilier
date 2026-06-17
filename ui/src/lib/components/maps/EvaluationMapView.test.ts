@@ -129,11 +129,11 @@ describe("EvaluationMapView drilldown — lots-client integration", () => {
 
   it("resolveLotsUrl construit l'URL correcte avec limit", () => {
     const url = resolveLotsUrl("salaberry-de-valleyfield", { baseUrl: "http://api:3000", limit: 100 });
-    expect(url).toBe("http://api:3000/api/geo/salaberry-de-valleyfield/lots?limit=100");
+    expect(url).toBe("http://api:3000/api/geo/collections/qc-lots-salaberry-de-valleyfield/items?limit=100");
   });
 
   it("resolveLotsUrl construit l'URL sans baseUrl", () => {
-    expect(resolveLotsUrl("beauharnois", { baseUrl: "" })).toBe("/api/geo/beauharnois/lots");
+    expect(resolveLotsUrl("beauharnois", { baseUrl: "" })).toBe("/api/geo/collections/qc-lots-beauharnois/items");
   });
 });
 
