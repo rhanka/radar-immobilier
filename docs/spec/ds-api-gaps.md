@@ -1,95 +1,88 @@
 # Rapport DS API Gaps — Radar Immobilier UI
 
-Date : 2026-06-14
-Branche : `chore/ds-finalisation-2`
+Date : 2026-06-15 (mis à jour)
+Branche : `feat/ds-gaps-round2b`
 Auteur : rhanka
-Contexte : migration DS Phase 1 reliquat + Phase 2 hors rail (#63)
+Contexte : migration DS round 2 — gaps débloqués par `@sentropic/design-system-svelte@0.34.44`
 
-Ce rapport recense les cas d'usage UI non couverts par `@sentropic/design-system-svelte@0.7.0`,
-constatés lors de la tentative de migration de chaque composant vers le DS natif.
-Il est destiné à l'équipe DS pour priorisation du backlog.
+Ce rapport recense les cas d'usage UI, leur statut après le bump 0.34.44, et les cas
+restants en attente DS.
 
 ---
 
 ## Gap 1 — `Tabs` : contenu riche (Snippet Svelte) non supporté
 
-**Composant affecté :** `console/ConsoleView.svelte`, `reconciliation/ReconciliationView.svelte`, `source-review/SourceReviewShell.svelte`
+**Statut : RÉSOLU en v0.34.43** ✓
 
-**Cas d'usage :** Système d'onglets dont chaque panneau contient un composant Svelte complet
-(ex. `QualificationTab`, `DeepDiveTab`, `CityGraphView`, `MrcGraphView`).
-
-**API actuelle (`TabItem`) :**
+**API livrée :**
 ```ts
 interface TabItem {
   value: string;
   label: string;
-  content: string;   // ← string seulement
+  content: string | Snippet;   // ← Snippet désormais supporté
   disabled?: boolean;
 }
 ```
 
-**API manquante :** `content` devrait accepter un `Snippet` (ou équivalent Svelte 5) pour
-permettre du contenu arbitraire par onglet, pas seulement du texte.
+**Migrations réalisées :** aucune migration possible pour les composants affectés.
 
-**Contournement actuel :** Tab switcher bespoke (liste de boutons dans rail gauche pour
-ConsoleView, `<nav>` avec boutons pour ReconciliationView, `div.inline-flex` pour SourceReviewShell).
-Tous préservent `aria-current`, focus, keyboard.
+**Composants restés bespoke avec justification :**
+- `ConsoleView` : rail latéral vertical avec icônes Lucide — le DS Tabs impose une
+  tablist horizontale. Layout 2-colonnes (nav|contenu) incompatible avec le composant
+  Tabs DS qui gère son propre layout intégré.
+- `ReconciliationView` : onglets avec icônes Lucide dans les labels (`TabItem.label`
+  est `string`-only) ; switcher dans le `<header>`, contenu dans `<main>` — découplage
+  spatial incompatible avec Tabs DS.
+- `SourceReviewShell` : switcher dans header avec bouton "Retour" adjacent ; layout
+  `xl:grid-cols` dans `<main>` — incompatible avec le conteneur panneau Tabs DS.
 
-**Impact :** 3 composants restent bespoke pour leur système de navigation par onglets.
+**Note pour le DS :** Un `label: Snippet` dans TabItem (ou slot `label-icon`) permettrait
+de migrer ReconciliationView et ConsoleView.
 
 ---
 
 ## Gap 2 — `Drawer` : pattern bottom-sheet mobile (side="bottom") non supporté
 
-**Composant affecté :** `maps/LotFichePanel.svelte`
+**Statut : RÉSOLU en v0.34.44** ✓
 
-**Cas d'usage :** Sur mobile (<768px), le panneau fiche lot doit s'afficher comme un
-bottom-sheet fixe (position fixed, bottom-0, 55vh, `rounded-t-2xl`).
-
-**API actuelle (`DrawerProps.side`) :**
+**API livrée :**
 ```ts
-side?: "left" | "right";  // bottom non disponible
+side?: "left" | "right" | "bottom";  // bottom disponible
 ```
 
-**API manquante :** `side="bottom"` pour un panneau glissant depuis le bas, style bottom-sheet
-mobile (hauteur partielle, border-radius en haut).
-
-**Contournement actuel :** Panneau mobile bespoke (`fixed bottom-0 left-0 right-0`)
-masqué sur desktop (`md:hidden`) ; `Card` DS utilisé sur desktop (`hidden md:block`).
-
-**Impact :** LotFichePanel partiellement migré — desktop utilise `Card` DS,
-mobile reste bespoke.
+**Migration réalisée :**
+- `maps/LotFichePanel.svelte` : le mobile bespoke (bottom-sheet fixe DIV) est remplacé
+  par `<Drawer side="bottom" bind:open={drawerOpen} ...>` avec `{#snippet children()}`.
+  Le desktop reste `<Card class="hidden md:block">`. Wrapper `<div class="md:hidden">`
+  pour n'activer le Drawer que sur mobile.
 
 ---
 
 ## Gap 3 — `Modal` : z-index non configurable, fond non customisable
 
-**Composant affecté :** `tour/TourOverlay.svelte`
+**Statut : PARTIELLEMENT RÉSOLU en v0.34.44**
 
-**Cas d'usage :** Overlay de visite guidée qui doit passer au-dessus de la carte Mapbox
-(z-index requis : 9000+). Fond semi-transparent amber custom.
+**API livrée :**
+- `dismissible?: boolean` — ✓ résolu
+- `zIndex?: number` — ✓ résolu
+- `children/footer: Snippet` — ✓ résolu
 
-**API actuelle :**
-- `z-index` du backdrop : `var(--st-component-overlay-zIndex, 90)` — non configurable via props
-- Fond : `var(--st-semantic-surface-overlay)` — non customisable
-- Navigation multi-étapes : aucun slot step / aucune prop `currentStep/totalSteps`
-- Boutons navigation (Précédent/Passer/Suivant) : non supportés dans le footer par défaut
+**Migration non réalisée pour TourOverlay :**
+- `tour/TourOverlay.svelte` : **gardé bespoke** pour deux raisons cumulées :
+  1. Fond amber custom (`bg-amber-50`) — le DS Modal applique un backdrop sombre
+     non configurable par prop ; surcharge CSS trop fragile.
+  2. TourOverlay est en syntaxe Svelte 4 (`export let`, `on:click`) — migration DS
+     implique une réécriture complète en Svelte 5 (hors scope round 2).
+  Le composant est fonctionnel : `role="dialog"`, `aria-modal="true"`, navigation
+  clavier (Esc/←/→), focus trap.
 
-**API manquante :**
-1. Prop `zIndex?: number` pour override le z-index du backdrop
-2. Slot ou prop pour le fond (permettre amber/custom)
-3. Slot `steps` ou props `currentStep/totalSteps` pour navigation multi-étapes
-4. Footer pré-câblé pour navigation (Précédent/Suivant/Fermer)
-
-**Contournement actuel :** TourOverlay reste bespoke (Svelte 4, `export let`, `on:click`).
-Il implémente correctement `role="dialog"`, `aria-modal="true"`, navigation clavier
-(Esc/ArrowLeft/ArrowRight), focus trap manuel.
-
-**Impact :** TourOverlay non migré — a11y et keyboard déjà conformes en bespoke.
+**Reste ouvert pour DS :** Prop `backdropClass` ou `backdropColor` pour customiser le fond.
 
 ---
 
 ## Gap 4 — `StructuredList` : timeline chronologique non supportée
+
+**Statut : EN ATTENTE DS** — inchangé
 
 **Composant affecté :** `opportunity/DossierCard.svelte` (section timeline)
 
@@ -112,39 +105,35 @@ interface StructuredListItem {
 **Contournement actuel :** Timeline bespoke `<ol class="relative border-l border-slate-200 pl-4 space-y-3">`
 avec `<span class="absolute -left-[1.125rem] ...">` pour le bullet.
 
-**Impact :** Timeline DossierCard reste bespoke — fonctionnel et accessible,
-mais sans cohérence visuelle DS.
-
 ---
 
 ## Gap 5 — `Popover` : déclencheur hover/focus (pas click) non géré en interne
 
-**Composant affecté :** `scoring/ScoreHover.svelte` (usage dans DossierCard + GrillesView)
+**Statut : RÉSOLU en v0.34.44** ✓
 
-**Cas d'usage :** Popover de détail d'axe de score affiché au survol/focus d'une cellule.
+**API livrée :**
+```ts
+openOn?: "manual" | "hover";  // "hover" = survol + focus clavier
+```
 
-**API actuelle :** `open` est contrôlé de l'extérieur (`open?: boolean`) — correct,
-mais le composant n'inclut pas de gestion interne du hover/focus sur le trigger.
-
-**Statut :** **Migré** avec pattern `open={hoveredAxis === axis}` + events
-`on:mouseenter`/`on:mouseleave`/`on:focusin`/`on:focusout` sur le trigger snippet.
-Fonctionnel et accessible.
-
-**Note pour le DS :** Ajouter un mode `trigger="hover"` ou `trigger="focus"` natif
-réduirait le boilerplate côté consommateur.
+**Migrations réalisées :**
+- `scoring/GrillesView.svelte` : `open={hoveredKey === key}` + 4 event handlers manuels
+  supprimés → `openOn="hover"` natif. `hoveredKey` state et `hoverKey()` helper retirés.
+- `opportunity/DossierCard.svelte` : `open={hoveredAxis === axis}` + 4 event handlers
+  supprimés → `openOn="hover"` natif. `hoveredAxis` state retiré.
 
 ---
 
 ## Résumé
 
-| Gap | Composant DS | Cas manquant | Sévérité |
-|-----|-------------|--------------|----------|
-| G1 | `Tabs` | `content: Snippet` (contenu riche par onglet) | Haute — bloque 3 composants |
-| G2 | `Drawer` | `side="bottom"` (bottom-sheet mobile) | Moyenne — 1 composant partiellement migré |
-| G3 | `Modal` | `zIndex` prop, fond custom, navigation multi-étapes | Haute — 1 composant non migré |
-| G4 | aucun | Composant `Timeline` DS manquant | Moyenne — 1 section bespoke |
-| G5 | `Popover` | Mode hover/focus natif (nice-to-have) | Faible — contournable |
+| Gap | Composant DS | Statut | Version | Note |
+|-----|-------------|--------|---------|------|
+| G1 | `Tabs` | Résolu mais migrations limitées | 0.34.43 | `content: Snippet` livré ; `label: Snippet` manquant bloque ConsoleView/Reconciliation/SourceReview |
+| G2 | `Drawer` | **RÉSOLU** | 0.34.44 | LotFichePanel mobile migré vers Drawer bottom |
+| G3 | `Modal` | Partiellement résolu | 0.34.44 | `dismissible`+`zIndex` livrés ; fond custom + Svelte 4 bloquent TourOverlay |
+| G4 | aucun | En attente DS | — | Composant `Timeline` DS manquant |
+| G5 | `Popover` | **RÉSOLU** | 0.34.44 | GrillesView + DossierCard simplifiés avec `openOn="hover"` |
 
 ---
 
-*Généré par l'agent chore/ds-finalisation-2 — 2026-06-14*
+*Mise à jour par l'agent feat/ds-gaps-round2b — 2026-06-15*

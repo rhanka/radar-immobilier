@@ -1,4 +1,4 @@
-# radar-immobilier — graphify ontology profile (v2.1)
+# radar-immobilier — graphify ontology profile (v2.2)
 #
 # Authoritative profile consumed by @sentropic/graphify. SHARED by every city
 # (SPEC_ONTOLOGY_DATA_MODEL.md §5.4 D1); only the *projects* (graphify.yaml, see
@@ -23,11 +23,25 @@
 #   - ontology_version bumped à "2.1" ; le champ `id` reste `radar-immobilier-zonage`
 #     (référencé par api/src/services/exploitation/reconcile.ts:188).
 #
+# Changements v2.2 vs v2.1 :
+#   - Champs `zone_ref`, `no_lot`, `reglement_number` ajoutés dans Signal et DesignationEvent
+#     comme PROPS structurées — le LLM graphify est guidé pour les extraire directement
+#     depuis le texte du PV (via extraction_hints §§ dans ce profil).
+#   - `zone_ref` : code de zone officiel (ex "H-431", "C-512") — extrait quand présent dans le PV.
+#   - `no_lot` : numéro de lot cadastral (ex "6 057 912") — extrait quand mentionné.
+#   - `reglement_number` : numéro de règlement impliqué (ex "Z-2026-042") — extrait quand distinct
+#     du règlement déjà porté par un nœud Bylaw lié.
+#   - Ces trois champs sont optionnels (absents = champ OMIS, jamais inventé).
+#   - Règle ANTI-INVENTION : si le texte ne mentionne pas explicitement la valeur → champ OMIS.
+#     Ne jamais inférer un code de zone depuis une description géographique vague.
+#   - Loi 25 : les trois champs sont des données réglementaires publiques (pas de PII).
+#   - ontology_version bumped à "2.2" ; le champ `id` reste `radar-immobilier-zonage`.
+#
 # COMPATIBILITÉ : le champ `id` reste `radar-immobilier-zonage` (référencé par
 # api/src/services/exploitation/reconcile.ts:188 `profile_id: profile.id`).
 id: radar-immobilier-zonage
 version: 2
-ontology_version: "2.1"
+ontology_version: "2.2"
 default_language: fr
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -176,6 +190,22 @@ node_types:
       etape:          { type: string, description: "Étape réglementaire (enum ordonné v2.1) : avis_motion/projet_reglement/consultation_publique/second_projet/adoption/entree_vigueur/derogation_mineure/piia/ppcmoi/usage_conditionnel/inconnu" }
       etape_date:     { type: string, format: date, description: "Date de cette étape (ISO-8601 YYYY-MM-DD)" }
       # Note : lots/zones ciblés via arêtes targets_lot/targets_zone/concerns
+      # ── Axe GÉO-RÉSOLUTION (v2.2) ────────────────────────────────────────
+      # zone_ref        : code de zone officiel mentionné EXPLICITEMENT dans le PV.
+      #                   Format : lettre(s) + chiffres + tiret (ex "H-431", "C-512", "H34-327").
+      #                   ANTI-INVENTION : si le texte ne cite aucun code de zone → champ OMIS.
+      #                   Ne pas inférer depuis une description géographique ("secteur nord").
+      # no_lot          : numéro de lot cadastral mentionné EXPLICITEMENT dans le PV.
+      #                   Format : séquence 7–10 chiffres avec ou sans espaces (ex "6 057 912").
+      #                   Valeur normalisée : chiffres uniquement (espaces supprimés).
+      #                   ANTI-INVENTION : si le texte ne cite aucun no de lot → champ OMIS.
+      # reglement_number: numéro de règlement impliqué dans cet événement, tel que mentionné
+      #                   dans le PV (ex "Z-2026-042", "2024-003"). Porter ici uniquement si
+      #                   aucun nœud Bylaw lié ne porte déjà ce numéro dans sa prop `numero`.
+      #                   ANTI-INVENTION : si non mentionné → champ OMIS.
+      zone_ref:         { type: string, description: "Code de zone officiel (v2.2) — extrait si mentionné explicitement dans le PV. Ex: H-431, C-512, H34-327. ANTI-INVENTION: omis si absent du texte." }
+      no_lot:           { type: string, description: "Numéro de lot cadastral (v2.2) — chiffres uniquement, espaces supprimés. Ex: 6057912. ANTI-INVENTION: omis si absent du texte." }
+      reglement_number: { type: string, description: "Numéro de règlement impliqué (v2.2) — tel que dans le PV. Ex: Z-2026-042. ANTI-INVENTION: omis si absent du texte." }
 
   Signal:
     id_prefix: signal
@@ -211,6 +241,16 @@ node_types:
       # etape_date : date de cette étape (ISO-8601 YYYY-MM-DD) — axe temporel scoring.
       etape:          { type: string, description: "Étape réglementaire (enum ordonné v2.1) : avis_motion/projet_reglement/consultation_publique/second_projet/adoption/entree_vigueur/derogation_mineure/piia/ppcmoi/usage_conditionnel/inconnu" }
       etape_date:     { type: string, format: date, description: "Date de cette étape (ISO-8601 YYYY-MM-DD)" }
+      # ── Axe GÉO-RÉSOLUTION (v2.2) ────────────────────────────────────────
+      # Mêmes règles d'extraction que sur DesignationEvent (voir ci-dessus) :
+      # ces champs sont propagés depuis le DesignationEvent source quand le Signal
+      # est généré par un événement portant un zone_ref / no_lot / reglement_number,
+      # OU extraits directement depuis le label/description du Signal si le texte
+      # les mentionne sans DesignationEvent intermédiaire.
+      # ANTI-INVENTION : omis si absents du texte source.
+      zone_ref:         { type: string, description: "Code de zone officiel (v2.2) — extrait si mentionné explicitement dans le PV. Ex: H-431, C-512. ANTI-INVENTION: omis si absent du texte." }
+      no_lot:           { type: string, description: "Numéro de lot cadastral (v2.2) — chiffres uniquement, espaces supprimés. Ex: 6057912. ANTI-INVENTION: omis si absent du texte." }
+      reglement_number: { type: string, description: "Numéro de règlement impliqué (v2.2) — tel que dans le PV. Ex: Z-2026-042. ANTI-INVENTION: omis si absent du texte." }
 
   Lot:
     id_prefix: lot
@@ -581,6 +621,130 @@ etape_enum:
   outcome_values:
     accordee: [accordée, accordé, accord, approuvé, approuvee, adopté, adoptee, accordée]
     refusee:  [refusée, refusé, refus, rejeté, rejetée]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# extraction_hints (v2.2) — Directives d'extraction structurée pour le LLM graphify.
+#
+# Ces hints guident le LLM pour peupler les champs structurés zone_ref / no_lot /
+# reglement_number sur les nœuds Signal et DesignationEvent.
+# Ils complètent (ne remplacent pas) les propriétés déclarées dans node_types.
+#
+# PRINCIPE FONDAMENTAL : honnêteté anti-invention.
+#   → Extraire UNIQUEMENT ce qui est EXPLICITEMENT dans le texte du PV.
+#   → Si le texte ne cite pas de code de zone → zone_ref OMIS (jamais inventé).
+#   → Si le texte ne cite pas de no de lot → no_lot OMIS (jamais inventé).
+#   → Si le texte ne cite pas de numéro de règlement → reglement_number OMIS.
+#   → Un champ vide ("") ou null est INTERDIT : utiliser l'absence de clé.
+#
+# LOI 25 : les trois champs sont des données réglementaires publiques (zonage,
+# cadastre, règlements municipaux). Aucune PII (pas de nom de propriétaire).
+# ─────────────────────────────────────────────────────────────────────────────
+extraction_hints:
+
+  # ── zone_ref ──────────────────────────────────────────────────────────────
+  zone_ref:
+    applies_to: [Signal, DesignationEvent]
+    description: >
+      Code de zone officiel mentionné EXPLICITEMENT dans le texte du PV.
+      À extraire quand le PV cite le code alphanumérique d'une zone de zonage
+      municipal (ex : "zone H-431", "la zone C-512", "zonée RU1302", "zone 1000").
+    format: >
+      Lettre(s) majuscules + chiffres optionnels + tiret + chiffres/lettres.
+      Conserver le format brut du PV ; ne pas normaliser.
+      Exemples valides : "H-431", "C-512", "H34-327", "H34-327 (VLO)",
+      "A1336", "RU1302", "P-02", "1000" (format Saguenay numérique pur).
+    extraction_patterns:
+      - "zone [CODE]"               # ex : "zone H-431", "zone C-512"
+      - "zonée [CODE]"              # ex : "zonée RB"
+      - "du secteur [CODE]"         # ex : "du secteur H34-327 (VLO)" — si clairement un code
+      - "affectée [CODE]"           # ex : "affectée zone RA"
+    anti_invention:
+      - 'Ne pas extraire un code depuis une description géographique vague (ex : "secteur nord", "quartier résidentiel", "zone commerciale") → OMIS.'
+      - 'Ne pas confondre un numéro de règlement (ex "Z-2026-042") avec un code de zone.'
+      - 'Si plusieurs zones sont mentionnées, prendre la première citée explicitement (zone SOURCE du rezonage ou zone cible si unique) ; sinon OMIS.'
+    examples:
+      - text: "Rezonage du lot 4567890 de la zone H-431 vers la zone C-512"
+        zone_ref: "H-431"
+        note: "Zone source du rezonage — première zone explicitement citée."
+      - text: "Dérogation mineure — lot 3 819 015 — marges de recul"
+        zone_ref: ""
+        note: "Aucun code de zone dans le texte → zone_ref OMIS."
+      - text: "Modification du règlement de zonage dans le secteur résidentiel nord"
+        zone_ref: ""
+        note: 'Description géographique vague — pas un code de zone → zone_ref OMIS.'
+      - text: "PIIA approuvé pour le 12 rue Principale, zone C-512"
+        zone_ref: "C-512"
+        note: "Code de zone explicitement cité."
+      - text: "Rezonage zone H34-327 (VLO) vers zone P22-328 (VLO)"
+        zone_ref: "H34-327 (VLO)"
+        note: "Format Longueuil avec suffixe secteur — conserver tel quel."
+
+  # ── no_lot ────────────────────────────────────────────────────────────────
+  no_lot:
+    applies_to: [Signal, DesignationEvent]
+    description: >
+      Numéro de lot cadastral québécois mentionné EXPLICITEMENT dans le texte du PV.
+      Format cadastre allégé : séquence de 7–10 chiffres, parfois avec espaces
+      (ex : "lot 6 057 912" ou "lot 6057912"). Normaliser en supprimant les espaces.
+    format: >
+      Chiffres uniquement après normalisation (supprimer espaces et tirets).
+      Longueur : 7 à 10 chiffres.
+      Exemples : "6057912", "3819015", "4567890".
+    extraction_patterns:
+      - "lot [N° cadastral]"        # ex : "lot 6 057 912", "lot 4567890"
+      - "lots [N°] et [N°]"         # prendre le premier
+      - "numéro de lot [N°]"
+      - "no lot [N°]"
+    anti_invention:
+      - Ne pas extraire un numéro d'article de règlement (ex "art. 6.2") comme no_lot.
+      - Ne pas extraire un numéro de résolution (ex "2026-04-120") comme no_lot.
+      - Ne pas extraire un numéro de téléphone, un code postal ou autre séquence de chiffres.
+      - Distinguer "lot" (cadastral) de "unité" ou "logement".
+      - Si plusieurs lots sont mentionnés, consigner le premier ; si ambiguïté totale → OMIS.
+    examples:
+      - text: "Subdivision du lot 4 567 890 en deux lots"
+        no_lot: "4567890"
+        note: "Numéro de lot cadastral avec espaces → normalisé sans espaces."
+      - text: "Dérogation mineure — lot 3 819 015 — marges de recul"
+        no_lot: "3819015"
+        note: "No lot présent explicitement."
+      - text: "Rezonage du secteur nord — résolution 2026-04-120"
+        no_lot: ""
+        note: "Aucun numéro de lot mentionné → no_lot OMIS."
+      - text: "Certificat d'autorisation no 2024-003 pour construction"
+        no_lot: ""
+        note: "Le numéro 2024-003 est un certificat, pas un no de lot → OMIS."
+
+  # ── reglement_number ──────────────────────────────────────────────────────
+  reglement_number:
+    applies_to: [Signal, DesignationEvent]
+    description: >
+      Numéro du règlement municipal impliqué dans cet événement, tel qu'il apparaît
+      dans le texte du PV. Porter ici uniquement si ce numéro n'est pas déjà porté
+      par un nœud Bylaw lié à cet événement via une arête (amends/defines/governed_by).
+      Sert de lien de secours quand le Bylaw n'est pas créé en nœud distinct.
+    format: >
+      Texte brut tel que mentionné dans le PV.
+      Exemples : "Z-2026-042", "2024-003", "RZ-2024-012", "No 450-2023".
+    extraction_patterns:
+      - "règlement [N°]"            # ex : "règlement Z-2026-042"
+      - "règl. [N°]"
+      - "projet de règlement [N°]"
+      - "modification du règlement [N°]"
+    anti_invention:
+      - Ne pas extraire un numéro de résolution de conseil (ex "R-2026-120") comme reglement_number.
+      - Ne pas extraire un numéro de dossier CPTAQ ou autre dossier administratif.
+      - Si un nœud Bylaw lié porte déjà ce numéro → ne pas doubler dans reglement_number.
+    examples:
+      - text: "Avis de motion — projet de règlement Z-2026-042 modification zonage"
+        reglement_number: "Z-2026-042"
+        note: "Numéro de règlement explicitement cité, pas encore en nœud Bylaw."
+      - text: "Adoption du règlement de zonage no 450-2023"
+        reglement_number: "450-2023"
+        note: "Numéro de règlement présent."
+      - text: "Dérogation mineure accordée — résolution 2026-04-095"
+        reglement_number: ""
+        note: "2026-04-095 est un no de résolution, pas un règlement → OMIS."
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Outputs — canonical / source node types and exported relations.

@@ -79,13 +79,6 @@
 
   let showCalibration = false;
 
-  // ── Per-dossier axis hover state ─────────────────────────────────────────────
-  let hoveredKey: string | null = null;
-
-  function hoverKey(dossierId: string, axis: string): string {
-    return `${dossierId}:${axis}`;
-  }
-
   // ── Helpers ──────────────────────────────────────────────────────────────────
   function capLabel(cap: string): string {
     if (cap === "monter-dossier-acquisition") return "Monter dossier";
@@ -403,27 +396,20 @@
                       {@const axisScore = dossier.axes[axis]}
                       {@const gridRow = grilleRows.find((r) => r.axis === axis)}
                       {#if axisScore && gridRow}
-                        {@const key = hoverKey(dossier.id, axis)}
                         <Popover
-                          open={hoveredKey === key}
+                          openOn="hover"
                           label="Détail axe {gridRow.label}"
                           placement="top"
                         >
                           {#snippet trigger()}
-                            <!-- svelte-ignore a11y-no-static-element-interactions -->
                             <div
                               class={`rounded border px-3 py-2 cursor-default ${
                                 axisScore.availability === "non-disponible"
                                   ? "border-slate-200 bg-slate-50"
                                   : "border-teal-100 bg-teal-50"
                               }`}
-                              on:mouseenter={() => { hoveredKey = key; }}
-                              on:mouseleave={() => { hoveredKey = null; }}
-                              on:focusin={() => { hoveredKey = key; }}
-                              on:focusout={() => { hoveredKey = null; }}
                               tabindex="0"
                               role="button"
-                              aria-expanded={hoveredKey === key}
                               aria-label="Détail axe {gridRow.label}"
                             >
                               <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
