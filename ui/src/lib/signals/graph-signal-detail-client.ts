@@ -26,24 +26,130 @@ export interface SignalDocRef {
 }
 
 /**
- * Extract typed SignalDocRef[] from a node's raw props.refs (unknown[]).
- * Returns [] when props.refs is absent, not an array, or items lack docSha.
+ * Extract typed SignalDocRef[] from graphify props.
+ *
+ * Graphify versions have not used one stable evidence shape: some rows store
+ * `docSha/sourceUrl/excerpt`, others store `file/ref/citation` or only top-level
+ * citation fields. Keep every usable citation/PDF reference instead of dropping
+ * it because one identifier key is missing.
  */
 export function extractDocRefs(props: Record<string, unknown>): SignalDocRef[] {
-  const raw = props["refs"];
-  if (!Array.isArray(raw)) return [];
   const result: SignalDocRef[] = [];
-  for (const item of raw) {
-    if (typeof item !== "object" || item === null) continue;
-    const r = item as Record<string, unknown>;
-    if (typeof r["docSha"] !== "string") continue;
-    result.push({
-      docSha: r["docSha"] as string,
-      excerpt: typeof r["excerpt"] === "string" ? r["excerpt"] : undefined,
-      page: typeof r["page"] === "number" ? r["page"] : undefined,
-      sourceUrl: typeof r["sourceUrl"] === "string" ? r["sourceUrl"] : undefined,
-      rawRef: typeof r["rawRef"] === "string" ? r["rawRef"] : undefined,
+  const raw = props["refs"];
+
+  if (Array.isArray(raw)) {
+    raw.forEach((item, index) => {
+      const ref = parseDocRefRecord(item, `ref-${index + 1}`);
+      if (ref) result.push(ref);
     });
+  }
+
+  const topLevelRef = parseDocRefRecord(props, "citation");
+  if (topLevelRef) result.push(topLevelRef);
+
+  return dedupeRefs(result);
+}
+
+function parseDocRefRecord(item: unknown, fallbackId: string): SignalDocRef | null {
+  if (typeof item !== "object" || item === null) return null;
+  const r = item as Record<string, unknown>;
+  const excerpt = firstString(r, [
+    "excerpt",
+    "citation",
+    "quote",
+    "text",
+    "selection",
+    "highlight",
+  ]);
+  const sourceUrl = firstString(r, [
+    "sourceUrl",
+    "source_url",
+    "pdfUrl",
+    "pdf_url",
+    "documentUrl",
+    "document_url",
+    "url",
+    "href",
+  ]);
+  const rawRef = firstString(r, [
+    "rawRef",
+    "raw_ref",
+    "file",
+    "ref",
+    "sourceRef",
+    "source_ref",
+    "path",
+    "s3Key",
+    "s3_key",
+  ]);
+  const docSha = firstString(r, [
+    "docSha",
+    "doc_sha",
+    "sha",
+    "sha256",
+    "hash",
+    "documentSha",
+    "document_sha",
+    "file",
+    "ref",
+    "sourceRef",
+    "source_ref",
+  ]);
+  const page = firstNumber(r, ["page", "pageNumber", "page_number"]);
+
+  if (!docSha && !excerpt && !sourceUrl && !rawRef) return null;
+
+  return {
+    docSha: docSha ?? rawRef ?? sourceUrl ?? fallbackId,
+    excerpt: excerpt ?? undefined,
+    page: page ?? undefined,
+    sourceUrl: sourceUrl ?? undefined,
+    rawRef: rawRef ?? undefined,
+  };
+}
+
+function firstString(
+  record: Record<string, unknown>,
+  keys: readonly string[],
+): string | null {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+function firstNumber(
+  record: Record<string, unknown>,
+  keys: readonly string[],
+): number | null {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim().length > 0) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+function dedupeRefs(refs: readonly SignalDocRef[]): SignalDocRef[] {
+  const seen = new Set<string>();
+  const result: SignalDocRef[] = [];
+  for (const ref of refs) {
+    const key = [
+      ref.docSha,
+      ref.page ?? "",
+      ref.sourceUrl ?? "",
+      ref.rawRef ?? "",
+      ref.excerpt ?? "",
+    ].join("\u0000");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(ref);
   }
   return result;
 }
