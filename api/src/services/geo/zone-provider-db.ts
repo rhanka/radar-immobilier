@@ -24,11 +24,12 @@
  * - Retourne null si le lot n'a pas de zone résolue.
  */
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { zoneVersions } from "../../db/schema.js";
 import type { ZoneVersionProvider } from "../../routes/geo-lots.js";
 import type { ZoneVersionInput, ZoneKind } from "../scoring/lot-potential.js";
+import type { GeoJsonGeometry, OfficialZoneInput } from "./zones.js";
 
 // ─── Chargement index de zones par ville ──────────────────────────────────────
 
@@ -94,6 +95,45 @@ export async function makeCityZoneIndex(
     byCode,
     totalZones: rows.length,
   };
+}
+
+/**
+ * Load current official zone shapes for the zone display endpoint.
+ *
+ * Geometry is converted in SQL with ST_AsGeoJSON to avoid leaking the raw
+ * PostGIS/EWKT representation into the API contract.
+ */
+export async function officialZonesForCityFromDb(
+  db: Database,
+  citySlug: string,
+): Promise<OfficialZoneInput[]> {
+  const rows = await db
+    .select({
+      codeAffiche: zoneVersions.codeAffiche,
+      kind: zoneVersions.kind,
+      geomSource: zoneVersions.geomSource,
+      geometry: sql<GeoJsonGeometry | null>`
+        CASE
+          WHEN ${zoneVersions.geom} IS NULL THEN NULL
+          ELSE ST_AsGeoJSON(${zoneVersions.geom})::json
+        END
+      `,
+    })
+    .from(zoneVersions)
+    .where(
+      and(
+        eq(zoneVersions.citySlug, citySlug),
+        isNull(zoneVersions.knownTo),
+      ),
+    );
+
+  return rows.map((row) => ({
+    code: row.codeAffiche,
+    citySlug,
+    label: row.kind,
+    geometry: row.geometry,
+    source: `db:${row.geomSource}`,
+  }));
 }
 
 // ─── Provider ZoneVersion injectable ─────────────────────────────────────────

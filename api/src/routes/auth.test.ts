@@ -214,9 +214,12 @@ describe("GET /api/v1/auth/me", () => {
 });
 
 describe("protect middleware", () => {
-  function appWith(auth: AuthConfig): Hono {
+  function appWith(
+    auth: AuthConfig,
+    db?: import("../db/client.js").Database,
+  ): Hono {
     const app = new Hono();
-    app.use("*", protect(auth));
+    app.use("*", protect(auth, db ? { db } : {}));
     app.get("/health", (c) => c.json({ status: "ok" }));
     app.get("/api/protected", (c) => c.json({ secret: true }));
     return app;
@@ -280,6 +283,26 @@ describe("protect middleware", () => {
       headers: { cookie: `radar_session=${token}` },
     });
     expect(res.status).toBe(401);
+  });
+
+  it("blocks a protected route when the DB account is suspended", async () => {
+    const token = await signSession(
+      { sub: "user-1" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+    const db = makeEnrollmentDb([
+      { sub: "user-1", status: "suspended", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = appWith(AUTH_ON, db);
+    const res = await app.request("/api/protected", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "suspended",
+    });
   });
 });
 
@@ -425,5 +448,15 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
+  });
+
+  it("existing suspended user is redirected away without a session", async () => {
+    const { res } = await makeCallback({
+      sub: "suspended-user",
+      existingUsers: [{ sub: "suspended-user", status: "suspended", isAdmin: false }],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
+    expect(readSetCookie(res, "radar_session")).toBeUndefined();
   });
 });
