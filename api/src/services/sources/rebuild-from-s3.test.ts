@@ -57,7 +57,13 @@ class MemoryStore implements ObjectStore {
 /** Put a CAS object + sidecar `.meta.json`, mirroring the RECUEIL write order. */
 async function seedRawDoc(
   store: ObjectStore,
-  params: { source: string; sourceUrl: string; body: string; contentType: string },
+  params: {
+    source: string;
+    sourceUrl: string;
+    body: string;
+    contentType: string;
+    publishedAt?: string;
+  },
 ): Promise<RawDocumentRecord> {
   const record = buildRawDocumentRecord({
     source: params.source,
@@ -65,6 +71,7 @@ async function seedRawDoc(
     body: new TextEncoder().encode(params.body),
     fetchedAt: "2026-06-08T09:30:00.000Z",
     contentType: params.contentType,
+    ...(params.publishedAt !== undefined ? { publishedAt: params.publishedAt } : {}),
     provenance: { version: "1.0.0", userAgent: "radar/test", viaObscura: false },
   });
   await store.put(record.storageKey, params.body, record.contentType);
@@ -293,6 +300,24 @@ describe("rebuildFromS3 — empty / partial stores", () => {
     const doc = repo.allDocuments()[0]!;
     expect(doc.s3Key).toBe(rec.storageKey);
     expect(doc.publishedAt).toBeUndefined();
+  });
+
+  it("projects publishedAt directly from a CAS sidecar when no manifest exists", async () => {
+    const store = new MemoryStore();
+    const rec = await seedRawDoc(store, {
+      source: "avis-publics-dated",
+      sourceUrl: "https://x.qc.ca/a.html",
+      body: "<html/>",
+      contentType: "text/html",
+      publishedAt: "2026-05-20",
+    });
+    const repo = new InMemoryProjectionRepo();
+
+    await rebuildFromS3(store, { repo });
+
+    const doc = repo.allDocuments()[0]!;
+    expect(doc.s3Key).toBe(rec.storageKey);
+    expect(doc.publishedAt).toBe("2026-05-20");
   });
 });
 

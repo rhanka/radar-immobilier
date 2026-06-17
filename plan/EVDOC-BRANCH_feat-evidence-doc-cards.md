@@ -80,12 +80,13 @@ Make graph-backed signal cards evidence-complete: preserve source publication da
     - [x] `make test-api SCOPE=src/services/sources/recueil.test.ts ENV=test-evidence-doc-cards-api`
     - [x] `make test ENV=test-evidence-doc-cards-all`
 
-- [ ] **Lot 2 — Metadata repair from existing S3**
-  - [ ] Add a pure repair service that reads existing `runs/**/manifest.jsonl` and `raw/**/*.meta.json`.
-  - [ ] Reconstruct `publishedAt` from manifests first, URL/title parsers second, and leave absent when precision is unsafe.
-  - [ ] Emit append-only repair output; do not rewrite raw PDFs.
-  - [ ] Lot gate:
-    - [ ] `make test-api SCOPE=src/services/sources/rebuild-from-s3.test.ts ENV=test-evidence-doc-cards`
+- [x] **Lot 2 — Metadata repair from existing S3**
+  - [x] Add a pure repair service that reads existing `runs/**/manifest.jsonl` and `raw/**/*.meta.json`.
+  - [x] Reconstruct `publishedAt` from manifests first, URL/title parsers second, and leave absent when precision is unsafe.
+  - [x] Emit append-only repair output; do not rewrite raw PDFs.
+  - [x] Lot gate:
+    - [x] `make test-api SCOPE=src/services/sources/repair-published-at.test.ts ENV=test-evidence-doc-cards-lot2`
+    - [x] `make test-api SCOPE=src/services/sources/rebuild-from-s3.test.ts ENV=test-evidence-doc-cards-lot2`
 
 - [ ] **Lot 3 — API evidence DTO and document route**
   - [ ] Add server-side `GraphSignalCard` mapping that preserves label, description, citations, document metadata, and relations.
