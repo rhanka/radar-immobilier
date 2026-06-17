@@ -59,6 +59,21 @@ Graphify signal cards have a mandatory evidence contract:
 - `refs[]` should carry the structured citation when available: document SHA, excerpt, page or bounding box, source URL or raw object reference.
 - If description, citation, or PDF link is missing, the card must show an explicit incomplete-source state rather than silently hiding the missing evidence.
 
+The source document link must be resolved by the API, not assembled in the
+browser from a private storage key. The UI uses, in order:
+
+1. a public `sourceUrl` when graphify or the document projection has one;
+2. an API-controlled document route when only a private `rawRef` or `docSha`
+   is available;
+3. an explicit missing-document state when neither can be resolved.
+
+Signal cards must label dates by meaning:
+
+- `Published` / `Publié`: source listing or manifest `publishedAt`.
+- `Meeting` / `Séance`: `meetingDate` extracted from the PV body when known.
+- `Stage` / `Étape`: `etape_date`.
+- `Ingested` / `Ingestion`: DB projection time, diagnostic only.
+
 ## 4. Data incorporation target
 
 The immediate demo goal is not full province-wide zone geometry. It is to show, among the 33 priority `z|m|p` detections, at least a handful where zones and lots can be displayed credibly.
@@ -131,3 +146,7 @@ graphify v2.3 wait does not block product UI work:
 - The first implementation branch can be scoped without inventing additional product intent.
 - Critical demo data remains protected: the 33 priority `z|m|p` detections must not be silently reduced by projection cleanup or deterministic replacement.
 - Signal cards show description + citation + PDF link for graphify-backed signals whenever the graph provides them, with explicit missing-evidence states otherwise.
+- Clicking a signal citation opens a map-surface document overlay. The overlay
+  navigates to the cited page when available and highlights the provided bbox
+  when available; when bbox is absent it still opens the best known page or
+  document link without fabricating coordinates.
