@@ -15,6 +15,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildNodeRow,
   buildEdgeRow,
+  mergeEdgeRows,
   graphifyGraphSchema,
   upsertGraph,
   queryNeighbors,
@@ -390,6 +391,39 @@ describe("buildEdgeRow — idempotency key", () => {
     const r1 = buildEdgeRow(link);
     const r2 = buildEdgeRow(link);
     expect(`${r1.srcId}|${r1.dstId}|${r1.kind}`).toBe(`${r2.srcId}|${r2.dstId}|${r2.kind}`);
+  });
+});
+
+describe("mergeEdgeRows", () => {
+  it("merges duplicate natural keys and preserves distinct refs", () => {
+    const rows = [
+      buildEdgeRow({
+        source: "muni-grenville-grenville",
+        target: "bylaw-grenville-255-2007",
+        type: "governed_by",
+        refs: [{ docSha: "a", page: 1 }],
+      }),
+      buildEdgeRow({
+        source: "muni-grenville-grenville",
+        target: "bylaw-grenville-255-2007",
+        type: "governed_by",
+        refs: [{ docSha: "b", page: 2 }],
+      }),
+      buildEdgeRow({
+        source: "muni-grenville-grenville",
+        target: "bylaw-grenville-255-2007",
+        type: "governed_by",
+        refs: [{ docSha: "a", page: 1 }],
+      }),
+    ];
+
+    const merged = mergeEdgeRows(rows);
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0]!.props.refs).toEqual([
+      { docSha: "a", page: 1 },
+      { docSha: "b", page: 2 },
+    ]);
   });
 });
 
