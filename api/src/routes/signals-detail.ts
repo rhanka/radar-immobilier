@@ -37,6 +37,52 @@ export interface SignalsDetailDeps {
 // Response shape
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type EvidenceMissingField =
+  | "description"
+  | "citation"
+  | "pdfLink"
+  | "documentDate"
+  | "page"
+  | "bbox";
+
+export interface EvidenceCompleteness {
+  hasDescription: boolean;
+  hasCitationExcerpt: boolean;
+  hasPdfLink: boolean;
+  hasDocumentDate: boolean;
+  hasPage: boolean;
+  hasBbox: boolean;
+  missing: EvidenceMissingField[];
+}
+
+export interface SignalEvidenceRef {
+  docSha: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  sourceUrl: string | null;
+  documentUrl: string | null;
+  rawRef: string | null;
+  rawObjectKey: string | null;
+  page: number | null;
+  bbox: [number, number, number, number] | null;
+}
+
+export interface SignalEvidence {
+  description: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  sourceUrl: string | null;
+  documentUrl: string | null;
+  rawRef: string | null;
+  rawObjectKey: string | null;
+  sourceRef: string | null;
+  documentDate: string | null;
+  page: number | null;
+  bbox: [number, number, number, number] | null;
+  refs: SignalEvidenceRef[];
+  completeness: EvidenceCompleteness;
+}
+
 /** One real DesignationEvent from the ontology project state (NO PII). */
 export interface DesignationEventDetail {
   /** Human-readable label extracted from the canonical (verbatim from source). */
@@ -64,6 +110,8 @@ export interface DesignationEventDetail {
    * embedded in the S3 key (not re-parsed here).
    */
   dateObserved: string;
+  /** Explicit evidence contract. Missing fields stay visible to the UI. */
+  evidence: SignalEvidence;
 }
 
 export interface SignalDetailResponse {
@@ -203,6 +251,95 @@ function extractZoneRefs(
   return Array.from(seen).sort();
 }
 
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : null;
+}
+
+function parseDocumentDateFromRef(sourceRef: string): string | null {
+  const dashed = sourceRef.match(
+    /(?:^|[^\d])(\d{4})[-/](\d{2})[-/](\d{2})(?:[^\d]|$)/u,
+  );
+  const compact = sourceRef.match(
+    /(?:^|[^\d])(\d{4})(\d{2})(\d{2})(?:[^\d]|$)/u,
+  );
+  const match = dashed ?? compact;
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  const candidate = `${year}-${month}-${day}`;
+  const date = new Date(`${candidate}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : candidate;
+}
+
+function buildCompleteness(evidence: Omit<SignalEvidence, "completeness">): EvidenceCompleteness {
+  const completeness: EvidenceCompleteness = {
+    hasDescription: evidence.description !== null,
+    hasCitationExcerpt: evidence.citation !== null || evidence.excerpt !== null,
+    hasPdfLink:
+      evidence.sourceUrl !== null ||
+      evidence.documentUrl !== null ||
+      evidence.rawRef !== null ||
+      evidence.rawObjectKey !== null ||
+      evidence.sourceRef !== null,
+    hasDocumentDate: evidence.documentDate !== null,
+    hasPage: evidence.page !== null,
+    hasBbox: evidence.bbox !== null,
+    missing: [],
+  };
+
+  if (!completeness.hasDescription) completeness.missing.push("description");
+  if (!completeness.hasCitationExcerpt) completeness.missing.push("citation");
+  if (!completeness.hasPdfLink) completeness.missing.push("pdfLink");
+  if (!completeness.hasDocumentDate) completeness.missing.push("documentDate");
+  if (!completeness.hasPage) completeness.missing.push("page");
+  if (!completeness.hasBbox) completeness.missing.push("bbox");
+
+  return completeness;
+}
+
+function buildLegacyEvidence(sourceRef: string): SignalEvidence {
+  const normalizedSourceRef = readString(sourceRef);
+  const documentDate = normalizedSourceRef
+    ? parseDocumentDateFromRef(normalizedSourceRef)
+    : null;
+  const refs: SignalEvidenceRef[] = normalizedSourceRef
+    ? [
+        {
+          docSha: null,
+          citation: null,
+          excerpt: null,
+          sourceUrl: null,
+          documentUrl: null,
+          rawRef: normalizedSourceRef,
+          rawObjectKey: normalizedSourceRef,
+          page: null,
+          bbox: null,
+        },
+      ]
+    : [];
+  const evidenceWithoutCompleteness: Omit<SignalEvidence, "completeness"> = {
+    description: null,
+    citation: null,
+    excerpt: null,
+    sourceUrl: null,
+    documentUrl: null,
+    rawRef: normalizedSourceRef,
+    rawObjectKey: normalizedSourceRef,
+    sourceRef: normalizedSourceRef,
+    documentDate,
+    page: null,
+    bbox: null,
+    refs,
+  };
+
+  return {
+    ...evidenceWithoutCompleteness,
+    completeness: buildCompleteness(evidenceWithoutCompleteness),
+  };
+}
+
 /**
  * Map a DesignationEvent canonical to its detail DTO.
  * No PII: canonical entities at the DesignationEvent level never carry owner info.
@@ -218,6 +355,7 @@ function toDetail(
     zoneRefs: extractZoneRefs(canonical, mentionIndex),
     sourceRef: canonical.evidenceRefs[0] ?? "",
     dateObserved: generatedAt,
+    evidence: buildLegacyEvidence(canonical.evidenceRefs[0] ?? ""),
   };
 }
 

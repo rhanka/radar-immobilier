@@ -10,9 +10,12 @@
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
+    extractSignalEvidence,
     type GraphSignalNode,
     type SignalDocRef,
+    type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
+  import SignalPdfOverlay from "./SignalPdfOverlay.svelte";
   import type {
     GeoZoneFeature,
     GeoZonesResponse,
@@ -43,8 +46,15 @@
   export let onFocusKey: (key: SelectionKey | null) => void = () => {};
   export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
 
+  let activeEvidence: { title: string; evidence: SignalEvidence } | null = null;
+
   $: zones = zonesResponse?.featureCollection.features ?? [];
   $: lots = lotsResponse?.featureCollection.features ?? [];
+  $: configuredZoneCount = zonesResponse?.zoneCount ?? zones.length;
+  $: zoneBadgeText =
+    zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
+      ? "zones non configurées"
+      : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
   $: visibleLots = lots.slice(0, 80);
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
@@ -59,6 +69,7 @@
   $: cityKey = selectedCity
     ? safeKey("municipality", selectedCity.municipality.slug)
     : null;
+  $: if (!selectedCity && activeEvidence) activeEvidence = null;
 
   function safeKey(kind: "municipality" | "signal" | "zone" | "lot", id: string): SelectionKey | null {
     try {
@@ -97,24 +108,16 @@
     return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString("fr-CA");
   }
 
+  function formatDocumentDate(value: string | null): string | null {
+    if (!value) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/u.test(value)) return value;
+    return formatDate(value);
+  }
+
   function readString(value: unknown): string | null {
     return typeof value === "string" && value.trim().length > 0
       ? value.trim()
       : null;
-  }
-
-  function nodeDescription(node: GraphSignalNode): string | null {
-    return (
-      readString(node.description) ??
-      readString(node.props.description) ??
-      readString(node.props.desc) ??
-      readString(node.props.summary) ??
-      readString(node.props.resume) ??
-      readString(node.props.abstract) ??
-      readString(node.props.rationale) ??
-      readString(node.props.justification) ??
-      null
-    );
   }
 
   function nodeReglement(node: GraphSignalNode): string | null {
@@ -169,6 +172,56 @@
   function nodeTypeLabel(type: string): string {
     if (type === "DesignationEvent") return "Événement de désignation";
     return type;
+  }
+
+  function signalEvidence(node: GraphSignalNode): SignalEvidence {
+    return extractSignalEvidence(node);
+  }
+
+  function evidenceText(value: string | null, maxLength = 260): string | null {
+    if (!value) return null;
+    return value.length > maxLength ? `${value.slice(0, maxLength)}…` : value;
+  }
+
+  function formatBbox(value: [number, number, number, number] | null): string | null {
+    return value ? value.map((n) => n.toFixed(3)).join(", ") : null;
+  }
+
+  function evidenceCompletenessItems(evidence: SignalEvidence): Array<{ label: string; ok: boolean }> {
+    return [
+      { label: "Description", ok: evidence.completeness.hasDescription },
+      { label: "Citation", ok: evidence.completeness.hasCitationExcerpt },
+      { label: "PDF/source", ok: evidence.completeness.hasPdfLink },
+      { label: "Page", ok: evidence.completeness.hasPage },
+      { label: "BBox", ok: evidence.completeness.hasBbox },
+    ];
+  }
+
+  function hasSourceEvidence(evidence: SignalEvidence): boolean {
+    return (
+      evidence.documentUrl !== null ||
+      evidence.sourceUrl !== null ||
+      evidence.rawRef !== null ||
+      evidence.rawObjectKey !== null ||
+      evidence.sourceRef !== null
+    );
+  }
+
+  function sourceButtonLabel(evidence: SignalEvidence): string {
+    if (evidence.documentUrl || evidence.sourceUrl) return "Voir PDF/source";
+    if (hasSourceEvidence(evidence)) return "Voir provenance";
+    return "Source manquante";
+  }
+
+  function openEvidence(node: GraphSignalNode): void {
+    activeEvidence = {
+      title: node.label,
+      evidence: signalEvidence(node),
+    };
+  }
+
+  function closeEvidence(): void {
+    activeEvidence = null;
   }
 
   function zoneSourceLabel(zone: GeoZoneFeature): string {
@@ -233,8 +286,8 @@
         {#if zonesUnavailableReason}
           <Badge tone="neutral">zones non configurées</Badge>
         {:else}
-          <Badge tone={zones.length > 0 ? "info" : "neutral"}>
-            {zones.length} zone{zones.length !== 1 ? "s" : ""}
+          <Badge tone={configuredZoneCount > 0 ? "info" : "neutral"}>
+            {zoneBadgeText}
           </Badge>
         {/if}
         {#if lotsUnavailableReason}
@@ -328,9 +381,14 @@
                   </button>
 
                   {#if nodeVisual.focused}
+                    {@const evidence = signalEvidence(node)}
                     <div class="sel-entity-detail">
-                      {#if nodeDescription(node)}
-                        <p class="entity-summary">{nodeDescription(node)}</p>
+                      {#if evidence.description}
+                        <p class="entity-summary">{evidence.description}</p>
+                      {:else}
+                        <p class="entity-summary entity-summary--missing">
+                          Description non fournie par le graphe actuel.
+                        </p>
                       {/if}
                       <div class="entity-meta">
                         {#if nodeReglement(node)}
@@ -348,15 +406,73 @@
                           <span class="entity-meta-key">Ingestion</span>
                           <span class="entity-meta-val">{formatDate(node.createdAt)}</span>
                         {/if}
+                        <span class="entity-meta-key">Date doc.</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={!formatDocumentDate(evidence.documentDate)}
+                        >
+                          {formatDocumentDate(evidence.documentDate) ?? "non disponible"}
+                        </span>
+                        <span class="entity-meta-key">Page</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={evidence.page === null}
+                        >
+                          {evidence.page ?? "non disponible"}
+                        </span>
+                        <span class="entity-meta-key">BBox</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={!formatBbox(evidence.bbox)}
+                          title={formatBbox(evidence.bbox) ?? undefined}
+                        >
+                          {formatBbox(evidence.bbox) ?? "non disponible"}
+                        </span>
                       </div>
 
                       <div class="doc-refs-section">
-                        <span class="doc-refs-label">Citation + PDF</span>
-                        {#if docRefs(node).length === 0 && !node.sourceRef}
-                          <p class="doc-refs-empty">Citation non liée dans cette version graphify.</p>
+                        <span class="doc-refs-label">Evidence</span>
+                        <div class="evidence-status-grid">
+                          {#each evidenceCompletenessItems(evidence) as item (item.label)}
+                            <span
+                              class="evidence-chip"
+                              class:evidence-chip--ok={item.ok}
+                              class:evidence-chip--missing={!item.ok}
+                            >
+                              {item.label} : {item.ok ? "présent" : "manquant"}
+                            </span>
+                          {/each}
+                        </div>
+
+                        <span class="doc-refs-sub-label">Citation/extrait</span>
+                        {#if evidenceText(evidence.excerpt ?? evidence.citation)}
+                          <blockquote class="doc-ref-excerpt">
+                            {evidenceText(evidence.excerpt ?? evidence.citation)}
+                          </blockquote>
                         {:else}
+                          <p class="doc-refs-empty">
+                            Citation/extrait absent dans cette version graphify.
+                          </p>
+                        {/if}
+
+                        <div class="source-action-row">
+                          <button
+                            type="button"
+                            class="doc-ref-button"
+                            disabled={!hasSourceEvidence(evidence)}
+                            on:click={() => openEvidence(node)}
+                            title={hasSourceEvidence(evidence)
+                              ? "Ouvrir la source dans un overlay"
+                              : "Aucune source documentaire dans le DTO"}
+                          >
+                            <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                            {sourceButtonLabel(evidence)}
+                          </button>
+                        </div>
+
+                        {#if evidence.refs.length > 0}
                           <ul class="doc-refs-list">
-                            {#each docRefs(node) as ref, i (`${ref.docSha}-${i}`)}
+                            {#each evidence.refs as ref, i (`${ref.docSha ?? ref.rawRef ?? ref.sourceUrl ?? i}-${i}`)}
                               <li class="doc-ref-item">
                                 {#if ref.documentUrl || ref.sourceUrl}
                                   <button
@@ -377,7 +493,7 @@
                                   <blockquote class="doc-ref-excerpt">
                                     {ref.excerpt.length > 180
                                       ? ref.excerpt.slice(0, 180) + "…"
-                                      : ref.excerpt}
+                                    : ref.excerpt}
                                   </blockquote>
                                 {/if}
                               </li>
@@ -397,7 +513,13 @@
       <details class="sel-bucket" open>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Zones</span>
-          <span class="rail-row-count">{zonesUnavailableReason ? "n/d" : zones.length}</span>
+          <span class="rail-row-count">
+            {zonesUnavailableReason
+              ? "n/d"
+              : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
+              ? "fallback"
+              : configuredZoneCount}
+          </span>
         </summary>
         <div class="sel-entities">
           {#if geoLoading}
@@ -529,6 +651,21 @@
     </div>
   {/if}
 </div>
+
+{#if activeEvidence}
+  <SignalPdfOverlay
+    title={activeEvidence.title}
+    sourceUrl={activeEvidence.evidence.documentUrl ?? activeEvidence.evidence.sourceUrl}
+    sourceRef={activeEvidence.evidence.sourceRef}
+    rawRef={activeEvidence.evidence.rawRef}
+    rawObjectKey={activeEvidence.evidence.rawObjectKey}
+    documentDate={activeEvidence.evidence.documentDate}
+    page={activeEvidence.evidence.page}
+    bbox={activeEvidence.evidence.bbox}
+    excerpt={activeEvidence.evidence.excerpt ?? activeEvidence.evidence.citation}
+    onClose={closeEvidence}
+  />
+{/if}
 
 <style>
   .sel {
@@ -769,6 +906,11 @@
     line-height: 1.45;
   }
 
+  .entity-summary--missing {
+    color: var(--st-semantic-text-muted, #64748b);
+    font-style: italic;
+  }
+
   .entity-meta {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
@@ -792,6 +934,11 @@
     white-space: nowrap;
   }
 
+  .entity-meta-val--missing {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-style: italic;
+  }
+
   .doc-refs-section {
     margin-top: 0.55rem;
     border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
@@ -808,11 +955,78 @@
     letter-spacing: 0.04em;
   }
 
+  .doc-refs-sub-label {
+    display: block;
+    margin: 0.45rem 0 0.25rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
   .doc-refs-empty {
     margin: 0;
     color: var(--st-semantic-text-muted, #94a3b8);
     font-size: 0.74rem;
     font-style: italic;
+  }
+
+  .evidence-status-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .evidence-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.25rem;
+    border-radius: var(--st-radius-sm, 4px);
+    padding: 0.05rem 0.35rem;
+    font-size: 0.66rem;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  .evidence-chip--ok {
+    border: 1px solid #99f6e4;
+    background: #f0fdfa;
+    color: #0f766e;
+  }
+
+  .evidence-chip--missing {
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
+  }
+
+  .source-action-row {
+    margin: 0.5rem 0;
+  }
+
+  .doc-ref-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.85rem;
+    border: 1px solid #14b8a6;
+    border-radius: var(--st-radius-sm, 4px);
+    background: #f0fdfa;
+    color: #0f766e;
+    cursor: pointer;
+    font-size: 0.74rem;
+    font-weight: 650;
+    padding: 0.2rem 0.55rem;
+  }
+
+  .doc-ref-button:hover:not(:disabled) {
+    background: #ccfbf1;
+  }
+
+  .doc-ref-button:disabled {
+    border-color: var(--st-semantic-border-subtle, #e2e8f0);
+    background: #f8fafc;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    cursor: not-allowed;
   }
 
   .doc-refs-list {
@@ -821,6 +1035,12 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  .doc-ref-item {
+    display: grid;
+    gap: 0.12rem;
+    min-width: 0;
   }
 
   .doc-ref-link {

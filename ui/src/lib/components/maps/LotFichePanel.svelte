@@ -27,8 +27,9 @@
    * que ce qui existe réellement dans la réponse.
    *
    * ## Mobile
-   * Sur < 768 px le panneau est affiché via Drawer DS side="bottom" (G2 résolu
-   * en v0.34.44). Sur desktop (md+), Card DS.
+   * Sur < 768 px le panneau est affiché via Drawer DS. La version DS courante
+   * expose seulement les côtés gauche/droite; le bottom sheet reste dépendant
+   * d'une vague DS ultérieure. Sur desktop (md+), Card DS.
    */
   import { X, MapPin, Star, Info, ExternalLink } from "@lucide/svelte";
   import { Badge, Card, Drawer } from "@sentropic/design-system-svelte";
@@ -64,17 +65,17 @@
 
 {#if lot}
   <!--
-    Mobile (<768px) : Drawer DS side="bottom" (G2 résolu, v0.34.44).
+    Mobile (<768px) : Drawer DS.
     Desktop (md+) : Card DS — panneau inline dans le flux.
   -->
 
-  <!-- Mobile : Drawer DS bottom (masqué sur desktop via wrapper md:hidden) -->
+  <!-- Mobile : Drawer DS (masqué sur desktop via wrapper md:hidden) -->
   <div class="md:hidden">
     <Drawer
-      bind:open={drawerOpen}
+      open={drawerOpen}
       title="Fiche lot {noLot}"
       description="Cadastre allégé MRNF · Anti-PII Loi 25"
-      side="bottom"
+      side="right"
       closeLabel="Fermer la fiche lot"
       onclose={onClose}
       data-testid="lot-fiche-panel-mobile"

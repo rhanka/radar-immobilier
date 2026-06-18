@@ -36,6 +36,43 @@ const MOCK_DETAIL_OK: SignalDetailResponse = {
       sourceRef:
         "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
       dateObserved: "2026-05-19T12:00:00.000Z",
+      evidence: {
+        description: null,
+        citation: null,
+        excerpt: null,
+        sourceUrl: null,
+        documentUrl: null,
+        rawRef: "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
+        rawObjectKey: "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
+        sourceRef: "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
+        documentDate: "2026-05-19",
+        page: null,
+        bbox: null,
+        refs: [
+          {
+            docSha: null,
+            citation: null,
+            excerpt: null,
+            sourceUrl: null,
+            documentUrl: null,
+            rawRef:
+              "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
+            rawObjectKey:
+              "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
+            page: null,
+            bbox: null,
+          },
+        ],
+        completeness: {
+          hasDescription: false,
+          hasCitationExcerpt: false,
+          hasPdfLink: true,
+          hasDocumentDate: true,
+          hasPage: false,
+          hasBbox: false,
+          missing: ["description", "citation", "page", "bbox"],
+        },
+      },
     },
   ],
 };
@@ -69,6 +106,9 @@ describe("fetchSignalDetail", () => {
     expect(event.reglementNumbers).toContain("1927-26");
     expect(event.zoneRefs).toContain("H-431");
     expect(event.sourceRef).toMatch(/^raw\//);
+    expect(event.evidence.documentDate).toBe("2026-05-19");
+    expect(event.evidence.completeness.missing).toContain("citation");
+    expect(event.evidence.completeness.missing).toContain("bbox");
   });
 
   it("returns empty events list for unseeded city", async () => {
