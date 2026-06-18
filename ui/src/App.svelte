@@ -29,7 +29,12 @@
   import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
   import { tourSteps } from "$lib/tour/tour-steps.js";
   import { authStore } from "$lib/auth/auth-store.js";
-  import { activeRouteView, navigateTo, initRouter } from "$lib/router/router.js";
+  import {
+    activeGeoRoute,
+    activeRouteView,
+    navigateTo,
+    initRouter,
+  } from "$lib/router/router.js";
 
   // Vue par défaut : pilotée par le routeur (synchronisé avec l'URL hash)
   $: activeView = $activeRouteView;
@@ -198,7 +203,7 @@
       <!-- 4 vues principales -->
       {#if activeView === "signaux"}
         <!-- Vue Signaux : carte aplats GeoJSON coloriés par nb d'opportunités / 6 mois -->
-        <SignauxMapView />
+        <SignauxMapView geoRoute={$activeGeoRoute} />
       {:else if activeView === "opportunity"}
         <OpportunityFunnel
           selectedSignalId={opportuniteSignalId}
@@ -212,7 +217,7 @@
         <SourcesMapView />
       <!-- Vues admin/dev (hors nav principale) -->
       {:else if activeView === "admin"}
-        <AdminView {authState} />
+        <AdminView />
       {:else if activeView === "onboarding"}
         <OnboardingView />
       {:else if activeView === "ciblage"}
@@ -230,7 +235,7 @@
         <GeoView />
       <!-- Legacy deep-links (redirigés vers les vues principales équivalentes) -->
       {:else if activeView === "carte-signaux"}
-        <SignauxMapView />
+        <SignauxMapView geoRoute={$activeGeoRoute} />
       {:else if activeView === "carte-opportunites"}
         <OpportunitesMapView />
       {:else if activeView === "carte-evaluation"}

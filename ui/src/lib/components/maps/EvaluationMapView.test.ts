@@ -19,6 +19,7 @@ import {
   resolveSignalDetailUrl,
   type DesignationEventDetail,
   type SignalDetailResponse,
+  type SignalEvidence,
 } from "$lib/signals/signal-detail-client.js";
 
 // ── Fixtures réalistes (lots MRNF, aucune PII) ────────────────────────────────
@@ -53,6 +54,44 @@ const VALLEYFIELD_FC = {
 
 // ── Fixtures réalistes (changements de zonage) ────────────────────────────────
 
+function legacyEvidence(sourceRef: string): SignalEvidence {
+  return {
+    description: null,
+    citation: null,
+    excerpt: null,
+    sourceUrl: null,
+    documentUrl: null,
+    rawRef: sourceRef,
+    rawObjectKey: sourceRef,
+    sourceRef,
+    documentDate: null,
+    page: null,
+    bbox: null,
+    refs: [
+      {
+        docSha: null,
+        citation: null,
+        excerpt: null,
+        sourceUrl: null,
+        documentUrl: null,
+        rawRef: sourceRef,
+        rawObjectKey: sourceRef,
+        page: null,
+        bbox: null,
+      },
+    ],
+    completeness: {
+      hasDescription: false,
+      hasCitationExcerpt: false,
+      hasPdfLink: true,
+      hasDocumentDate: false,
+      hasPage: false,
+      hasBbox: false,
+      missing: ["description", "citation", "documentDate", "page", "bbox"],
+    },
+  };
+}
+
 const MOCK_ZONAGE_EVENTS: DesignationEventDetail[] = [
   {
     label: "Avis de motion règlement de zonage 1926-26+1927-26 (zone H-431)",
@@ -60,6 +99,7 @@ const MOCK_ZONAGE_EVENTS: DesignationEventDetail[] = [
     zoneRefs: ["H-431"],
     sourceRef: "raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt",
     dateObserved: "2026-05-19T12:00:00.000Z",
+    evidence: legacyEvidence("raw/proces-verbaux-saint-constant/2026/05/19/abc123.txt"),
   },
   {
     label: "Avis d'approbation règlement zonage résidentiel 1928-10 (zone H-521)",
@@ -67,6 +107,7 @@ const MOCK_ZONAGE_EVENTS: DesignationEventDetail[] = [
     zoneRefs: ["H-521"],
     sourceRef: "raw/proces-verbaux-saint-constant/2026/05/22/def456.txt",
     dateObserved: "2026-05-22T14:00:00.000Z",
+    evidence: legacyEvidence("raw/proces-verbaux-saint-constant/2026/05/22/def456.txt"),
   },
 ];
 
@@ -488,7 +529,7 @@ describe("EvaluationMapView drilldown — anti-PII (Loi 25)", () => {
       // Les champs présents ne contiennent que des données réglementaires publiques
       const keys = Object.keys(event);
       for (const k of keys) {
-        expect(["label", "reglementNumbers", "zoneRefs", "sourceRef", "dateObserved"]).toContain(k);
+        expect(["label", "reglementNumbers", "zoneRefs", "sourceRef", "dateObserved", "evidence"]).toContain(k);
       }
     }
   });
