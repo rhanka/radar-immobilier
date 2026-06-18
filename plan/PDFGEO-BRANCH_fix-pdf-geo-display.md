@@ -57,4 +57,4 @@ Ensure Signaux map evidence documents remain linkable from raw document referenc
   - [x] Run focused API tests through `make`.
   - [x] Run focused UI tests through `make`.
   - [x] Run typecheck/lint/build as feasible through `make`.
-  - [ ] Commit and push.
+  - [x] Commit and push.
