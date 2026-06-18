@@ -76,7 +76,7 @@ spec:
       serviceAccountName: radar-app
       containers:
         - name: api
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:main-f4a73fd
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:main-8909943-pdfgeo
           imagePullPolicy: Always
           ports:
             - name: http
