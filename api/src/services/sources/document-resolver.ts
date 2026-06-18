@@ -26,29 +26,39 @@ function tryParseJson(bytes: Uint8Array): unknown | null {
 }
 
 export function isSafeRawRef(rawRef: string): boolean {
+  return normalizeRawRef(rawRef) !== null;
+}
+
+export function normalizeRawRef(rawRef: string): string | null {
+  const trimmed = rawRef.trim();
+  const rawIndex = trimmed.indexOf(RAW_PREFIX);
+  const normalized = rawIndex >= 0 ? trimmed.slice(rawIndex) : trimmed;
   return (
-    rawRef.startsWith(RAW_PREFIX) &&
-    !rawRef.endsWith(META_SUFFIX) &&
-    !rawRef.includes("..") &&
-    !rawRef.includes("\0")
-  );
+    normalized.startsWith(RAW_PREFIX) &&
+    !normalized.endsWith(META_SUFFIX) &&
+    !normalized.includes("..") &&
+    !normalized.includes("\0")
+  )
+    ? normalized
+    : null;
 }
 
 export function apiDocumentUrl(rawRef: string): string {
-  return `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}`;
+  return `/api/documents/raw?rawRef=${encodeURIComponent(normalizeRawRef(rawRef) ?? rawRef)}`;
 }
 
 export async function loadDocumentMetadata(
   store: ObjectStore,
   rawRef: string,
 ): Promise<DocumentMetadata | null> {
-  if (!isSafeRawRef(rawRef)) return null;
+  const normalizedRawRef = normalizeRawRef(rawRef);
+  if (!normalizedRawRef) return null;
 
-  const head = await store.head(rawMetaKey(rawRef));
+  const head = await store.head(rawMetaKey(normalizedRawRef));
   if (!head) return null;
 
   const parsed = RawDocumentRecordSchema.safeParse(
-    tryParseJson(await store.get(rawMetaKey(rawRef))),
+    tryParseJson(await store.get(rawMetaKey(normalizedRawRef))),
   );
   if (!parsed.success) return null;
 
@@ -107,4 +117,3 @@ export async function resolveRawContentType(
   const meta = await loadDocumentMetadata(store, rawRef);
   return meta?.contentType ?? "application/octet-stream";
 }
-

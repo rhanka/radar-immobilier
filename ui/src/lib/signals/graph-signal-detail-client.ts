@@ -31,6 +31,23 @@ export interface SignalDocRef {
   bbox?: unknown;
 }
 
+function normalizeRawRef(rawRef: string): string | null {
+  const trimmed = rawRef.trim();
+  const rawIndex = trimmed.indexOf("raw/");
+  const normalized = rawIndex >= 0 ? trimmed.slice(rawIndex) : trimmed;
+  return normalized.startsWith("raw/") &&
+    !normalized.endsWith(".meta.json") &&
+    !normalized.includes("..") &&
+    !normalized.includes("\0")
+    ? normalized
+    : null;
+}
+
+function rawDocumentUrl(rawRef: string): string | null {
+  const normalized = normalizeRawRef(rawRef);
+  return normalized ? `/api/documents/raw?rawRef=${encodeURIComponent(normalized)}` : null;
+}
+
 /**
  * Extract typed SignalDocRef[] from graphify props.
  *
@@ -114,13 +131,17 @@ function parseDocRefRecord(item: unknown, fallbackId: string): SignalDocRef | nu
 
   if (!docSha && !excerpt && !sourceUrl && !rawRef && !documentUrl) return null;
 
+  const normalizedRawRef = rawRef !== null ? normalizeRawRef(rawRef) ?? rawRef : null;
+  const resolvedDocumentUrl =
+    documentUrl ?? (rawRef !== null && !sourceUrl ? rawDocumentUrl(rawRef) : null);
+
   return {
     docSha: docSha ?? rawRef ?? sourceUrl ?? documentUrl ?? fallbackId,
     ...(excerpt !== null ? { excerpt } : {}),
     ...(page !== null ? { page } : {}),
     ...(sourceUrl !== null ? { sourceUrl } : {}),
-    ...(rawRef !== null ? { rawRef } : {}),
-    ...(documentUrl !== null ? { documentUrl } : {}),
+    ...(normalizedRawRef !== null ? { rawRef: normalizedRawRef } : {}),
+    ...(resolvedDocumentUrl !== null ? { documentUrl: resolvedDocumentUrl } : {}),
     ...(title !== null ? { title } : {}),
     ...(contentType !== null ? { contentType } : {}),
     ...(fetchedAt !== null ? { fetchedAt } : {}),
