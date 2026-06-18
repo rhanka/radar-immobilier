@@ -17,7 +17,7 @@
     Settings,
     Map,
   } from "@lucide/svelte";
-  import { Header } from "@sentropic/design-system-svelte";
+  import { Badge, Button, Header } from "@sentropic/design-system-svelte";
   import type { DemoView } from "$lib/demo/views.js";
   import type { AuthState } from "$lib/auth/auth-store.js";
   import { appMode, toggleMode } from "$lib/state/mode.js";
@@ -73,38 +73,34 @@
     <div class="flex items-center gap-1">
       {#each mainItems as item}
         {@const Icon = item.icon}
-        <button
+        <Button
           type="button"
+          size="sm"
+          variant={activeView === item.id ? "primary" : "ghost"}
           aria-current={activeView === item.id ? "page" : undefined}
-          class={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap ${
-            activeView === item.id
-              ? "bg-teal-600 text-white"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          }`}
-          on:click={() => onSelect(item.id)}
+          class="whitespace-nowrap"
+          onclick={() => onSelect(item.id)}
         >
           <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
           {item.label}
-        </button>
+        </Button>
       {/each}
 
       <!-- Menu admin/dev -->
       <div class="relative">
-        <button
+        <Button
           type="button"
+          size="sm"
+          variant={isAdminActive ? "primary" : "ghost"}
           aria-haspopup="true"
           aria-expanded={adminMenuOpen}
-          class={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap ${
-            isAdminActive
-              ? "bg-slate-700 text-white"
-              : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-          }`}
-          on:click={() => (adminMenuOpen = !adminMenuOpen)}
+          class="whitespace-nowrap"
+          onclick={() => (adminMenuOpen = !adminMenuOpen)}
         >
           <Settings class="h-4 w-4 shrink-0" aria-hidden="true" />
-          Admin/Dev
+          Outils
           <ChevronDown class={`h-3.5 w-3.5 shrink-0 transition-transform ${adminMenuOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-        </button>
+        </Button>
 
         {#if adminMenuOpen}
           <!-- Backdrop pour fermer le menu -->
@@ -123,19 +119,17 @@
             {#each adminItems as item}
               {#if item.id !== "admin" || isAdmin}
                 {@const Icon = item.icon}
-                <button
+                <Button
                   type="button"
+                  size="sm"
+                  variant={activeView === item.id ? "primary" : "ghost"}
                   aria-current={activeView === item.id ? "page" : undefined}
-                  class={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors ${
-                    activeView === item.id
-                      ? "bg-slate-100 font-semibold text-slate-900"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
-                  on:click={() => selectAndClose(item.id)}
+                  class="w-full justify-start"
+                  onclick={() => selectAndClose(item.id)}
                 >
-                  <Icon class="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+                  <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
                   {item.label}
-                </button>
+                </Button>
               {/if}
             {/each}
           </div>
@@ -148,34 +142,31 @@
     <!-- Actions : visite guidee + toggle Réel/Carte Steve + user info + logout -->
     <div class="flex items-center gap-2">
       {#if onStartTour}
-        <button
+        <Button
           type="button"
+          size="sm"
+          variant="secondary"
           aria-label="Lancer la visite guidée"
           title="Lancer la visite guidée"
-          on:click={onStartTour}
-          class="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-1"
+          onclick={onStartTour}
         >
           <MapPin class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           Visite guidée
-        </button>
+        </Button>
       {/if}
 
-      <button
+      <Button
         type="button"
-        aria-label={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles scrappées"}
-        title={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles scrappées"}
-        on:click={toggleMode}
-        class={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-          mode === "real"
-            ? "border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 focus:ring-teal-400"
-            : "border-violet-300 bg-violet-50 text-violet-800 hover:bg-violet-100 focus:ring-violet-400"
-        }`}
+        size="sm"
+        variant="secondary"
+        aria-label={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles collectées"}
+        title={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles collectées"}
+        onclick={toggleMode}
       >
-        <span
-          class={`h-2 w-2 rounded-full ${mode === "real" ? "bg-teal-500" : "bg-violet-500"}`}
-        ></span>
-        {mode === "real" ? "Réel" : "Carte Steve"}
-      </button>
+        <Badge tone={mode === "real" ? "success" : "info"}>
+          {mode === "real" ? "Réel" : "Carte Steve"}
+        </Badge>
+      </Button>
 
       {#if authState?.authenticated && authState.user}
         <!-- User name chip -->
@@ -184,16 +175,17 @@
         </span>
         <!-- Logout button -->
         {#if onLogout}
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             aria-label="Se déconnecter"
             title="Se déconnecter"
-            on:click={onLogout}
-            class="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:ring-offset-1"
+            onclick={onLogout}
           >
             <LogOut class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Déconnexion
-          </button>
+          </Button>
         {/if}
       {/if}
     </div>

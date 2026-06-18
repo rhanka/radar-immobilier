@@ -18,7 +18,7 @@
    */
   import { onMount } from "svelte";
   import { MapPin, RefreshCw, Zap } from "@lucide/svelte";
-  import { Badge, EmptyState } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, EmptyState } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import CityDetailPanel from "./CityDetailPanel.svelte";
   import { fetchScrapeStatus } from "$lib/sources/scrape-status-client.js";
@@ -35,7 +35,12 @@
     type CoverageCityEntry,
   } from "$lib/sources/coverage.js";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
-  import { fetchDataQuality } from "$lib/sources/data-quality-client.js";
+  import {
+    computeDataQualityReadiness,
+    computeEvidenceReadiness,
+    dataQualityStatusLabel,
+    fetchDataQuality,
+  } from "$lib/sources/data-quality-client.js";
   import type {
     DataQualityCitySummaryT,
     DataQualityCollectionSummaryT,
@@ -62,6 +67,10 @@
   $: stats = computeCoverageStats(entries);
   $: withZonage = entries.filter((e) => e.hasZonage);
   $: withoutZonage = entries.filter((e) => !e.hasZonage);
+  $: dataQualityReadiness = dataQualitySummary
+    ? computeDataQualityReadiness(dataQualitySummary)
+    : null;
+  $: evidenceReadiness = computeEvidenceReadiness(detailEvents);
 
   // ── Color CSS mapping ──────────────────────────────────────────────────────
   const DOT_BG: Record<string, string> = {
@@ -165,16 +174,9 @@
     unknown: "neutral",
   };
 
-  const QUALITY_LABEL: Record<DataQualityStateT, string> = {
-    fresh: "frais",
-    partial: "partiel",
-    stale: "périmé",
-    unknown: "inconnu",
-  };
-
   function collectionDetail(summary: DataQualityCollectionSummaryT): string {
     const c = summary.counts;
-    return `${c.graphified} graphifié(s) · ${c.scraped} scrappé(s) · ${c.error} erreur(s)`;
+    return `${c.graphified} graphifié(s) · ${c.scraped} scrappé(s) · ${c.identified} identifié(s) · ${c.error} erreur(s)`;
   }
 
   function ontologyDetail(summary: DataQualityOntologySummaryT): string {
@@ -184,7 +186,7 @@
 
   function geoDetail(summary: DataQualityGeoSummaryT): string {
     const c = summary.counts;
-    return `${c.currentVersions} version(s) · ${c.withGeometry} avec géométrie`;
+    return `${c.inventoryLayers} source(s) · ${c.currentVersions} version(s) · ${c.withGeometry} avec géométrie`;
   }
 </script>
 
@@ -211,7 +213,9 @@
     </div>
 
     {#if loadError}
-      <div class="p-4 text-sm text-red-600">{loadError}</div>
+      <div class="p-4">
+        <Alert tone="error" title="Impossible de charger les sources" message={loadError} />
+      </div>
     {:else if loading}
       <div class="p-4 text-sm text-slate-400">Chargement…</div>
     {:else if entries.length === 0}
@@ -270,7 +274,7 @@
                   <span class="flex shrink-0 items-center gap-1">
                     <Zap class="h-3.5 w-3.5 text-teal-500" aria-hidden="true" />
                     <Badge tone="info">
-                      {entry.designationEventCount} signal{entry.designationEventCount !== 1 ? "s" : ""}
+                      {entry.designationEventCount} {entry.designationEventCount === 1 ? "signal" : "signaux"}
                     </Badge>
                   </span>
                 </button>
@@ -351,9 +355,21 @@
     <div class="flex flex-col gap-0">
       <div class="border-b border-slate-200 bg-white px-6 py-4">
         <div class="mb-3 flex items-center justify-between gap-3">
-          <h2 class="text-base font-semibold text-slate-900">
-            Qualité des données — <span class="capitalize">{entry.citySlug}</span>
-          </h2>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-base font-semibold text-slate-900">
+                Qualité des données — <span class="capitalize">{entry.citySlug}</span>
+              </h2>
+              {#if dataQualityReadiness}
+                <Badge tone={QUALITY_TONE[dataQualityReadiness.status]}>
+                  {dataQualityReadiness.label}
+                </Badge>
+              {/if}
+            </div>
+            {#if dataQualityReadiness}
+              <p class="mt-0.5 text-xs text-slate-500">{dataQualityReadiness.detail}</p>
+            {/if}
+          </div>
           {#if dataQualitySummary}
             <span class="text-xs text-slate-400">
               {new Date(dataQualitySummary.generatedAt).toLocaleDateString("fr-CA")}
@@ -364,14 +380,14 @@
         {#if dataQualityLoading}
           <p class="text-sm text-slate-400">Chargement de la qualité des données…</p>
         {:else if dataQualityError}
-          <p class="text-sm text-amber-700">{dataQualityError}</p>
+          <Alert tone="warning" title="Qualité des données indisponible" message={dataQualityError} />
         {:else if dataQualitySummary}
-          <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
+          <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
             <div class="rounded-md border border-slate-200 px-3 py-2">
               <div class="mb-1 flex items-center justify-between gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">PV</span>
                 <Badge tone={QUALITY_TONE[dataQualitySummary.councilMinutes.status]}>
-                  {QUALITY_LABEL[dataQualitySummary.councilMinutes.status]}
+                  {dataQualityStatusLabel(dataQualitySummary.councilMinutes.status)}
                 </Badge>
               </div>
               <p class="text-xs text-slate-600">{collectionDetail(dataQualitySummary.councilMinutes)}</p>
@@ -380,7 +396,7 @@
               <div class="mb-1 flex items-center justify-between gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">YouTube</span>
                 <Badge tone={QUALITY_TONE[dataQualitySummary.youtube.status]}>
-                  {QUALITY_LABEL[dataQualitySummary.youtube.status]}
+                  {dataQualityStatusLabel(dataQualitySummary.youtube.status)}
                 </Badge>
               </div>
               <p class="text-xs text-slate-600">{collectionDetail(dataQualitySummary.youtube)}</p>
@@ -389,7 +405,7 @@
               <div class="mb-1 flex items-center justify-between gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Ontologie</span>
                 <Badge tone={QUALITY_TONE[dataQualitySummary.ontology.status]}>
-                  {QUALITY_LABEL[dataQualitySummary.ontology.status]}
+                  {dataQualityStatusLabel(dataQualitySummary.ontology.status)}
                 </Badge>
               </div>
               <p class="text-xs text-slate-600">{ontologyDetail(dataQualitySummary.ontology)}</p>
@@ -398,7 +414,7 @@
               <div class="mb-1 flex items-center justify-between gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Zones</span>
                 <Badge tone={QUALITY_TONE[dataQualitySummary.zones.status]}>
-                  {QUALITY_LABEL[dataQualitySummary.zones.status]}
+                  {dataQualityStatusLabel(dataQualitySummary.zones.status)}
                 </Badge>
               </div>
               <p class="text-xs text-slate-600">{geoDetail(dataQualitySummary.zones)}</p>
@@ -407,10 +423,21 @@
               <div class="mb-1 flex items-center justify-between gap-2">
                 <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</span>
                 <Badge tone={QUALITY_TONE[dataQualitySummary.lots.status]}>
-                  {QUALITY_LABEL[dataQualitySummary.lots.status]}
+                  {dataQualityStatusLabel(dataQualitySummary.lots.status)}
                 </Badge>
               </div>
               <p class="text-xs text-slate-600">{geoDetail(dataQualitySummary.lots)}</p>
+            </div>
+            <div class="rounded-md border border-slate-200 px-3 py-2">
+              <div class="mb-1 flex items-center justify-between gap-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">PDF / preuves</span>
+                <Badge tone={QUALITY_TONE[evidenceReadiness.status]}>
+                  {detailLoading ? "chargement" : evidenceReadiness.label}
+                </Badge>
+              </div>
+              <p class="text-xs text-slate-600">
+                {detailLoading ? "Chargement des preuves liées…" : evidenceReadiness.detail}
+              </p>
             </div>
           </div>
         {/if}
