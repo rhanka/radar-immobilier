@@ -507,6 +507,9 @@
                         {#if lot.properties.zone}
                           <span class="entity-meta-key">Zone</span>
                           <span class="entity-meta-val">{lot.properties.zone.kind}</span>
+                        {:else if lot.properties.zoneCode}
+                          <span class="entity-meta-key">Zone</span>
+                          <span class="entity-meta-val">{lot.properties.zoneCode}</span>
                         {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</span>
