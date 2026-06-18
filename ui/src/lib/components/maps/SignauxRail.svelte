@@ -21,11 +21,8 @@
   import {
     Search,
     Badge,
+    Button,
     Checkbox,
-    Overline,
-    IconButton,
-    StatusDot,
-    Divider,
   } from "@sentropic/design-system-svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
@@ -196,10 +193,9 @@
   <!-- En-tête du rail -->
   <div class="rail-head">
     <div class="rail-head-row">
-      <!-- Overline DS remplace .rail-kicker (uppercased, small-caps, token) -->
-      <Overline as="span">Signaux · Villes</Overline>
-      <!-- IconButton DS remplace le <button> bespoke + lucide RefreshCw -->
-      <IconButton
+      <span class="rail-overline">Signaux · Villes</span>
+      <Button
+        type="button"
         aria-label="Actualiser"
         size="sm"
         variant="ghost"
@@ -222,7 +218,7 @@
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
         </svg>
-      </IconButton>
+      </Button>
     </div>
 
     <!-- Compteur global -->
@@ -237,7 +233,7 @@
         · <span class="rail-count-strong">{citiesWithSignals}</span> ville{citiesWithSignals !== 1 ? "s" : ""}
       {/if}
     </div>
-    <Divider />
+    <div class="rail-divider" aria-hidden="true"></div>
   </div>
 
   <!-- Corps scrollable : 2 sections accordéon natif -->
@@ -247,8 +243,7 @@
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
-        <!-- Overline DS remplace .rail-section-title -->
-        <Overline as="span">Signaux</Overline>
+        <span class="rail-overline">Signaux</span>
       </summary>
 
       <div class="rail-section-body">
@@ -259,45 +254,36 @@
             label="Zonage uniquement"
             checked={zonageOnly}
             onchange={toggleZonageOnly}
-          >
-            {#snippet trailing()}
-              {#if !loading}
-                <Badge tone="info" size="sm">{badgeZonage}</Badge>
-              {/if}
-            {/snippet}
-          </Checkbox>
+          />
+          {#if !loading}
+            <Badge tone="info">{badgeZonage}</Badge>
+          {/if}
         </div>
 
         <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
         <div class="axis-toggle-row">
           <Checkbox
             label="Multifamilial 4+"
-            description="nb unités ≥ 4 ou intensité haute"
+            helperText="nb unités ≥ 4 ou intensité haute"
             checked={multi4plus}
             onchange={toggleMulti4plus}
-          >
-            {#snippet trailing()}
-              {#if !loading}
-                <Badge tone="warning" size="sm">{badgeMulti}</Badge>
-              {/if}
-            {/snippet}
-          </Checkbox>
+          />
+          {#if !loading}
+            <Badge tone="warning">{badgeMulti}</Badge>
+          {/if}
         </div>
 
         <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
         <div class="axis-toggle-row axis-toggle-row--last">
           <Checkbox
             label="Signaux précoces (approx.)"
-            description="avis de motion / 1er projet"
+            helperText="avis de motion / 1er projet"
             checked={precoceOnly}
             onchange={togglePrecoceOnly}
-          >
-            {#snippet trailing()}
-              {#if !loading}
-                <Badge tone="success" size="sm">{badgePrecoce}</Badge>
-              {/if}
-            {/snippet}
-          </Checkbox>
+          />
+          {#if !loading}
+            <Badge tone="success">{badgePrecoce}</Badge>
+          {/if}
         </div>
       </div>
     </details>
@@ -306,8 +292,7 @@
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
-        <!-- Overline DS remplace .rail-section-title -->
-        <Overline as="span">Villes</Overline>
+        <span class="rail-overline">Villes</span>
       </summary>
 
       <div class="rail-section-body">
@@ -316,9 +301,9 @@
           <Search
             placeholder="Rechercher une ville…"
             size="sm"
-            fluid
             bind:value={searchQuery}
             aria-label="Rechercher une ville"
+            class="w-full"
           />
         </div>
 
@@ -347,8 +332,7 @@
                     class:ws-acc-summary--active={isSelected}
                     on:click|preventDefault={() => onSelectCity(entry)}
                   >
-                    <!-- StatusDot DS remplace .rail-swatch hex en dur -->
-                    <StatusDot tone={signalTone(activeCount)} size={10} />
+                    <span class={`rail-status-dot rail-status-dot--${signalTone(activeCount)}`} aria-hidden="true"></span>
                     <span class="rail-row-label">
                       {entry.municipality.name}
                       {#if entry.municipality.mrc}
@@ -357,9 +341,9 @@
                     </span>
                     <!-- Badge DS tonal sans override — remplace rail-row-count -->
                     {#if activeCount > 0}
-                      <Badge tone="warning" size="sm" aria-label="{activeCount} signaux">{activeCount}</Badge>
+                      <Badge tone="warning" aria-label="{activeCount} signaux">{activeCount}</Badge>
                     {:else}
-                      <Badge tone="neutral" size="sm">0</Badge>
+                      <Badge tone="neutral">0</Badge>
                     {/if}
                   </summary>
 
@@ -396,10 +380,13 @@
                             <li class="signal-item">
                               <!--
                                 Pastille type-couleur : typeColor() retourne une couleur de palette
-                                12 couleurs. StatusDot accepte `color` (prop arbitraire), utilisé
-                                ici pour la palette type (non mappable sur les 5 tones DS).
+                                12 couleurs, non mappable proprement sur les tones DS.
                               -->
-                              <StatusDot color={typeColor(node.type)} size={10} />
+                              <span
+                                class="rail-type-dot"
+                                style={`--type-color: ${typeColor(node.type)}`}
+                                aria-hidden="true"
+                              ></span>
                               <span class="min-w-0">
                                 <span class="signal-label">{node.label}</span>
                                 <span class="signal-type">{node.type}</span>
@@ -454,6 +441,44 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1rem 0.25rem;
+  }
+
+  .rail-overline {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--st-semantic-text-muted, #64748b);
+  }
+
+  .rail-divider {
+    height: 1px;
+    background: var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  .rail-status-dot,
+  .rail-type-dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    flex: 0 0 auto;
+    border-radius: 999px;
+  }
+
+  .rail-status-dot--neutral {
+    background: var(--st-semantic-surface-muted, #e2e8f0);
+  }
+
+  .rail-status-dot--warning {
+    background: var(--st-semantic-warning, #f59e0b);
+  }
+
+  .rail-status-dot--error {
+    background: var(--st-semantic-error, #ef4444);
+  }
+
+  .rail-type-dot {
+    background: var(--type-color);
   }
 
   /* ── Compteur global ── */
