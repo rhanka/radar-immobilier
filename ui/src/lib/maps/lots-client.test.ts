@@ -70,6 +70,10 @@ const MOCK_OGC_LOTS_OK = {
         NO_LOT: "1 733 312",
         noLot: "1 733 312",
         geoId: "ca/qc/lot/1-733-312",
+        zone: "H-431",
+        tod: true,
+        multifamilial_4plus: true,
+        superficie_m2_calculee: 712.9,
       },
     },
   ],
@@ -139,7 +143,14 @@ describe("fetchLots", () => {
     expect(res.numberMatched).toBe(45099);
     expect(res.numberReturned).toBe(1);
     expect(res.featureCollection.features).toHaveLength(1);
-    expect(res.featureCollection.features[0].properties.noLot).toBe("1 733 312");
+    expect(res.featureCollection.features[0].properties).toMatchObject({
+      noLot: "1 733 312",
+      citySlug: "saint-eustache",
+      zoneCode: "H-431",
+      tod: true,
+      multifamilial4plus: true,
+      superficieM2: 712.9,
+    });
   });
 
   it("still accepts legacy LotsResponse bodies used by older mocks", async () => {
@@ -188,16 +199,23 @@ describe("fetchLots", () => {
     expect(res.reason).toContain("Collection lots non configurée");
   });
 
-  it("features have no PII — only noLot and citySlug properties", async () => {
+  it("features preserve public non-PII display fields and drop unrelated raw properties", async () => {
     vi.stubGlobal("fetch", async () =>
-      new Response(JSON.stringify(MOCK_LOTS_OK), { status: 200 }),
+      new Response(JSON.stringify(MOCK_OGC_LOTS_OK), { status: 200 }),
     );
-    const res = await fetchLots("salaberry-de-valleyfield", { baseUrl: "" });
+    const res = await fetchLots("saint-eustache", { baseUrl: "" });
     for (const f of res.featureCollection.features) {
       const keys = Object.keys(f.properties);
-      // Only public identifiers — no owner, no address, no name
+      // Public display fields only — no owner/address/name/raw geo ids.
       for (const k of keys) {
-        expect(["noLot", "citySlug"]).toContain(k);
+        expect([
+          "noLot",
+          "citySlug",
+          "zoneCode",
+          "tod",
+          "multifamilial4plus",
+          "superficieM2",
+        ]).toContain(k);
       }
     }
   });
