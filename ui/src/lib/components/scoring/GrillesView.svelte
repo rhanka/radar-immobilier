@@ -397,7 +397,6 @@
                       {@const gridRow = grilleRows.find((r) => r.axis === axis)}
                       {#if axisScore && gridRow}
                         <Popover
-                          openOn="hover"
                           label="Détail axe {gridRow.label}"
                           placement="top"
                         >

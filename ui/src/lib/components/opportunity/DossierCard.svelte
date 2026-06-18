@@ -1,6 +1,6 @@
 <script lang="ts">
   import { TrendingUp, Clock, ChevronRight } from "@lucide/svelte";
-  import { Alert, Badge, Popover, Timeline } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, Popover } from "@sentropic/design-system-svelte";
   import type { AxisScoreT, OpportunityDossierT } from "@radar/domain";
   import { WEIGHTS, aggregate } from "@radar/scoring";
   import { toGrilleRows } from "$lib/scoring/grilles-data.js";
@@ -168,7 +168,6 @@
             {@const hypothesis = isHypothesis(axis)}
             {@const excludedInReal = mode === "real" && hypothesis}
             <Popover
-              openOn="hover"
               label="Détail axe {gridRow.label}"
               placement="top"
             >
@@ -241,6 +240,13 @@
         Chronologie des preuves
       </h2>
     </div>
-    <Timeline items={timelineItems} />
+    <ol class="space-y-2">
+      {#each timelineItems as item}
+        <li class="rounded-md border border-slate-200 bg-white px-3 py-2">
+          <p class="text-sm font-medium text-slate-800">{item.title}</p>
+          <p class="text-xs text-slate-500">{item.meta} · {item.description}</p>
+        </li>
+      {/each}
+    </ol>
   </section>
 </div>
