@@ -263,8 +263,18 @@ describe("GET /api/graph-signals/:city", () => {
           excerpt: string;
           page: number;
         }>;
+        evidence: {
+          description: string | null;
+          citation: string | null;
+          sourceUrl: string | null;
+          documentUrl: string | null;
+          documentDate: string | null;
+          page: number | null;
+          completeness: { missing: string[] };
+        };
       }>;
     };
+    const evidence = body.nodes[0]!.evidence;
     expect(body.nodes[0]!.description).toBe(
       "Avis de motion pour un changement de zonage.",
     );
@@ -278,6 +288,13 @@ describe("GET /api/graph-signals/:city", () => {
       excerpt: "Avis de motion est donné pour modifier le règlement de zonage.",
       page: 3,
     });
+    expect(evidence.description).toBe("Avis de motion pour un changement de zonage.");
+    expect(evidence.citation).toBe("Avis de motion est donné pour modifier le règlement de zonage.");
+    expect(evidence.sourceUrl).toBe("https://drummondville.ca/pv/2026-05-12.pdf");
+    expect(evidence.documentUrl).toBe(`/api/documents/raw?rawRef=${encodeURIComponent(record.storageKey)}`);
+    expect(evidence.documentDate).toBe("2026-05-12");
+    expect(evidence.page).toBe(3);
+    expect(evidence.completeness.missing).toEqual(["bbox"]);
   });
 
   it("keeps a raw document link when metadata is missing but the raw key is resolvable", async () => {
@@ -299,6 +316,12 @@ describe("GET /api/graph-signals/:city", () => {
     const body = (await res.json()) as {
       nodes: Array<{
         docRefs: Array<{ rawRef: string; documentUrl: string; excerpt: string }>;
+        evidence: {
+          rawRef: string | null;
+          documentUrl: string | null;
+          citation: string | null;
+          completeness: { hasPdfLink: boolean; missing: string[] };
+        };
       }>;
     };
     expect(body.nodes[0]!.docRefs[0]).toMatchObject({
@@ -307,5 +330,13 @@ describe("GET /api/graph-signals/:city", () => {
         "/api/documents/raw?rawRef=raw%2Fproces-verbaux-testville%2Fcas%2Fabc123.pdf",
       excerpt: "Le conseil donne un avis de motion.",
     });
+    const evidence = body.nodes[0]!.evidence;
+    expect(evidence.rawRef).toBe("raw/proces-verbaux-testville/cas/abc123.pdf");
+    expect(evidence.documentUrl).toBe(
+      "/api/documents/raw?rawRef=raw%2Fproces-verbaux-testville%2Fcas%2Fabc123.pdf",
+    );
+    expect(evidence.citation).toBe("Le conseil donne un avis de motion.");
+    expect(evidence.completeness.hasPdfLink).toBe(true);
+    expect(evidence.completeness.missing).toEqual(["description", "documentDate", "page", "bbox"]);
   });
 });

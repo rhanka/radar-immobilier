@@ -7,15 +7,30 @@
  * Anti-invention: returns 404 when no signal nodes exist for the city.
  */
 
+export type EvidenceMissingField =
+  | "description"
+  | "citation"
+  | "pdfLink"
+  | "documentDate"
+  | "page"
+  | "bbox";
+
+export interface EvidenceCompleteness {
+  hasDescription: boolean;
+  hasCitationExcerpt: boolean;
+  hasPdfLink: boolean;
+  hasDocumentDate: boolean;
+  hasPage: boolean;
+  hasBbox: boolean;
+  missing: EvidenceMissingField[];
+}
+
 /**
  * A documentary reference attached to a Signal or DesignationEvent node.
  *
- * Mirrors the graphify v2 `refs` array items stored in graph_nodes.props.refs.
- *   - docSha     : SHA-256 hex of the source document (always present)
- *   - excerpt    : short citation extracted from the document (optional)
- *   - page       : 1-based page number in the PDF (optional)
- *   - sourceUrl  : public URL of the original PDF/page (optional, preferred for link)
- *   - rawRef     : SCW-internal path (optional, fallback identifier)
+ * Mirrors graphify `refs` items but keeps absence explicit. Older graph
+ * snapshots may have a raw ref or citation without `docSha`; those are still
+ * surfaced instead of being silently dropped.
  */
 export interface SignalDocRef {
   docSha: string;
@@ -29,6 +44,22 @@ export interface SignalDocRef {
   fetchedAt?: string;
   publishedAt?: string;
   bbox?: unknown;
+}
+
+export interface SignalEvidence {
+  description: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  sourceUrl: string | null;
+  documentUrl: string | null;
+  rawRef: string | null;
+  rawObjectKey: string | null;
+  sourceRef: string | null;
+  documentDate: string | null;
+  page: number | null;
+  bbox: [number, number, number, number] | null;
+  refs: SignalDocRef[];
+  completeness: EvidenceCompleteness;
 }
 
 function normalizeRawRef(rawRef: string): string | null {
@@ -197,6 +228,203 @@ function dedupeRefs(refs: readonly SignalDocRef[]): SignalDocRef[] {
   return result;
 }
 
+function evidenceString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function evidenceNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function evidenceBbox(value: unknown): [number, number, number, number] | null {
+  if (!Array.isArray(value) || value.length !== 4) return null;
+  const numbers = value.map(evidenceNumber);
+  return numbers.every((n): n is number => n !== null)
+    ? [numbers[0]!, numbers[1]!, numbers[2]!, numbers[3]!]
+    : null;
+}
+
+function firstEvidenceString(values: readonly unknown[]): string | null {
+  for (const value of values) {
+    const str = evidenceString(value);
+    if (str) return str;
+  }
+  return null;
+}
+
+function firstEvidenceNumber(values: readonly unknown[]): number | null {
+  for (const value of values) {
+    const number = evidenceNumber(value);
+    if (number !== null) return number;
+  }
+  return null;
+}
+
+function firstEvidenceBbox(values: readonly unknown[]): [number, number, number, number] | null {
+  for (const value of values) {
+    const bbox = evidenceBbox(value);
+    if (bbox) return bbox;
+  }
+  return null;
+}
+
+function evidenceProperties(props: Record<string, unknown>): Record<string, unknown> {
+  const properties = props.properties;
+  return typeof properties === "object" && properties !== null && !Array.isArray(properties)
+    ? (properties as Record<string, unknown>)
+    : {};
+}
+
+function isUrlLike(value: string | null): boolean {
+  return value !== null && /^(?:https?:)?\/\//u.test(value);
+}
+
+function normalizeApiRefs(refs: readonly SignalDocRef[] | undefined): SignalDocRef[] {
+  if (!Array.isArray(refs)) return [];
+  const normalized: SignalDocRef[] = [];
+  refs.forEach((ref, index) => {
+    const item = parseDocRefRecord(ref, `api-ref-${index + 1}`);
+    if (item) normalized.push(item);
+  });
+  return normalized;
+}
+
+function buildCompleteness(evidence: Omit<SignalEvidence, "completeness">): EvidenceCompleteness {
+  const completeness: EvidenceCompleteness = {
+    hasDescription: evidence.description !== null,
+    hasCitationExcerpt: evidence.citation !== null || evidence.excerpt !== null,
+    hasPdfLink:
+      evidence.sourceUrl !== null ||
+      evidence.documentUrl !== null ||
+      evidence.rawRef !== null ||
+      evidence.rawObjectKey !== null ||
+      evidence.sourceRef !== null,
+    hasDocumentDate: evidence.documentDate !== null,
+    hasPage: evidence.page !== null,
+    hasBbox: evidence.bbox !== null,
+    missing: [],
+  };
+
+  if (!completeness.hasDescription) completeness.missing.push("description");
+  if (!completeness.hasCitationExcerpt) completeness.missing.push("citation");
+  if (!completeness.hasPdfLink) completeness.missing.push("pdfLink");
+  if (!completeness.hasDocumentDate) completeness.missing.push("documentDate");
+  if (!completeness.hasPage) completeness.missing.push("page");
+  if (!completeness.hasBbox) completeness.missing.push("bbox");
+
+  return completeness;
+}
+
+export function extractSignalEvidence(node: GraphSignalNode): SignalEvidence {
+  const props = node.props ?? {};
+  const properties = evidenceProperties(props);
+  const apiEvidence = node.evidence;
+  const refs = normalizeApiRefs(apiEvidence?.refs);
+  const nodeRefs = normalizeApiRefs(node.docRefs);
+  const fallbackRefs = refs.length > 0 ? refs : nodeRefs.length > 0 ? nodeRefs : extractDocRefs(props);
+  const firstRef = fallbackRefs[0];
+  const sourceRef = evidenceString(apiEvidence?.sourceRef) ?? evidenceString(node.sourceRef);
+
+  const sourceUrl = firstEvidenceString([
+    apiEvidence?.sourceUrl,
+    firstRef?.sourceUrl,
+    firstRef?.documentUrl,
+    props.sourceUrl,
+    properties.sourceUrl,
+    props.url,
+    properties.url,
+    isUrlLike(sourceRef) ? sourceRef : null,
+  ]);
+  const documentUrl = firstEvidenceString([
+    apiEvidence?.documentUrl,
+    firstRef?.documentUrl,
+    props.documentUrl,
+    properties.documentUrl,
+    sourceUrl,
+  ]);
+  const rawRef = firstEvidenceString([
+    apiEvidence?.rawRef,
+    firstRef?.rawRef,
+    props.rawRef,
+    properties.rawRef,
+    !isUrlLike(sourceRef) ? sourceRef : null,
+  ]);
+
+  const evidenceWithoutCompleteness: Omit<SignalEvidence, "completeness"> = {
+    description: firstEvidenceString([
+      apiEvidence?.description,
+      node.description,
+      props.description,
+      properties.description,
+      props.summary,
+      properties.summary,
+      props.resume,
+      properties.resume,
+      props.justification,
+      properties.justification,
+    ]),
+    citation: firstEvidenceString([
+      apiEvidence?.citation,
+      firstRef?.excerpt,
+      props.citation,
+      properties.citation,
+      props.excerpt,
+      properties.excerpt,
+    ]),
+    excerpt: firstEvidenceString([
+      apiEvidence?.excerpt,
+      firstRef?.excerpt,
+      props.excerpt,
+      properties.excerpt,
+      props.citation,
+      properties.citation,
+    ]),
+    sourceUrl,
+    documentUrl,
+    rawRef,
+    rawObjectKey: firstEvidenceString([
+      apiEvidence?.rawObjectKey,
+      props.rawObjectKey,
+      properties.rawObjectKey,
+      props.storageKey,
+      properties.storageKey,
+      props.casKey,
+      properties.casKey,
+    ]),
+    sourceRef,
+    documentDate: firstEvidenceString([
+      apiEvidence?.documentDate,
+      node.publishedAt,
+      firstRef?.publishedAt,
+      props.documentDate,
+      properties.documentDate,
+      props.date,
+      properties.date,
+      props.publishedAt,
+      properties.publishedAt,
+      props.meetingDate,
+      properties.meetingDate,
+      props.etapeDate,
+      properties.etapeDate,
+      props.etape_date,
+      properties.etape_date,
+    ]),
+    page: firstEvidenceNumber([apiEvidence?.page, firstRef?.page, props.page, properties.page]),
+    bbox: firstEvidenceBbox([apiEvidence?.bbox, firstRef?.bbox, props.bbox, properties.bbox]),
+    refs: fallbackRefs,
+  };
+
+  return {
+    ...evidenceWithoutCompleteness,
+    completeness: buildCompleteness(evidenceWithoutCompleteness),
+  };
+}
+
 export interface GraphSignalNode {
   id: string;
   type: "Signal" | "DesignationEvent" | string;
@@ -208,6 +436,7 @@ export interface GraphSignalNode {
   publishedAt?: string | null;
   docRefs?: SignalDocRef[];
   props: Record<string, unknown>;
+  evidence?: SignalEvidence;
 }
 
 export interface GraphSignalDetailResponse {
