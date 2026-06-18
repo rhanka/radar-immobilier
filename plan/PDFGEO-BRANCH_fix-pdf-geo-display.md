@@ -48,13 +48,13 @@ Ensure Signaux map evidence documents remain linkable from raw document referenc
   - [x] Preserve a `/api/documents/raw` link when metadata is missing but the raw key is resolvable.
   - [x] Add focused API/UI tests.
 
-- [ ] **Lot 2 — Geo display when data exists**
-  - [ ] Preserve non-PII lot display fields from OGC collections.
-  - [ ] Fix nginx routing so only `/api/geo/collections` goes to geo-api; native radar geo routes stay on radar-api.
-  - [ ] Add focused UI tests.
+- [x] **Lot 2 — Geo display when data exists**
+  - [x] Preserve non-PII lot display fields from OGC collections.
+  - [x] Fix nginx routing so only `/api/geo/collections` goes to geo-api; native radar geo routes stay on radar-api.
+  - [x] Add focused UI tests.
 
 - [ ] **Lot 3 — Verification**
   - [x] Run focused API tests through `make`.
-  - [ ] Run focused UI tests through `make`.
-  - [ ] Run typecheck/lint/build as feasible through `make`.
+  - [x] Run focused UI tests through `make`.
+  - [x] Run typecheck/lint/build as feasible through `make`.
   - [ ] Commit and push.
