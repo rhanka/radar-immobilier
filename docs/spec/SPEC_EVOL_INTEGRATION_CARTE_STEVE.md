@@ -14,6 +14,9 @@
 > - Modèle de données : [`SPEC_DESIGN_DATA_MODEL.md`](SPEC_DESIGN_DATA_MODEL.md),
 >   [`SPEC_ONTOLOGY_DATA_MODEL.md`](SPEC_ONTOLOGY_DATA_MODEL.md),
 >   [`SPEC_INTENT_DATA_MODEL_ZONING_LOTS.md`](SPEC_INTENT_DATA_MODEL_ZONING_LOTS.md).
+> - Navigation géographique : [`SPEC_INTENT_GEO_NAVIGATION_SELECTION.md`](SPEC_INTENT_GEO_NAVIGATION_SELECTION.md)
+>   clarifie la hiérarchie **Province / Ville / Zone**, le switch **Signal / Données**,
+>   les règles de fallback zones/lots et le bucket de sélection.
 > - Scoring / états / pipeline : [`SPEC_EVOL_SOCLE_STATES_SCORING.md`](SPEC_EVOL_SOCLE_STATES_SCORING.md),
 >   [`SPEC_EVOL_OPPORTUNITES_T2.md`](SPEC_EVOL_OPPORTUNITES_T2.md),
 >   [`SPEC_EVOL_RADAR_T1.md`](SPEC_EVOL_RADAR_T1.md), [`SPEC_PLAN_SCRAPING.md`](SPEC_PLAN_SCRAPING.md),
@@ -629,6 +632,13 @@ Steve n'a aucun état d'URL (sauf `?ville=`). Le radar rend **partageable** l'é
 `?ville=<slug>&view=<signaux|opportunites|evaluation|sources>&zoom=<n>&center=<lat,lng>&filtres=<encodés>&lot=<noLot>&signal=<id>`.
 Permet le deep-link d'un lot/signal/opportunité (collaboration, support, démo). C'est le pendant
 des paramètres `?ville=` de Steve, généralisé.
+
+**Amendement navigation géographique (2026-06-18)** : la forme canonique de l'URL cartographique
+est désormais cadrée dans [`SPEC_INTENT_GEO_NAVIGATION_SELECTION.md`](SPEC_INTENT_GEO_NAVIGATION_SELECTION.md).
+Les routes de référence sont `/geo/region/quebec`, `/geo/city/:citySlug` et
+`/geo/zone/:citySlug/:zoneKey`, avec `?mode=signal|data` pour le switch d'examen.
+Cette clarification ne retire pas les vues produit existantes ; elle définit l'épine dorsale
+cartographique sur laquelle Signaux / Opportunités / Évaluation / Sources se projettent.
 
 ---
 
