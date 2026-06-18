@@ -41,6 +41,8 @@
   export let knownNodeTypes: string[] = [];
   /** Chargement de la liste principale. */
   export let loading = false;
+  /** Signal data failed to load; avoid rendering a fake zero state. */
+  export let dataUnavailable = false;
   /** Chargement du détail de ville. */
   export let detailLoading = false;
 
@@ -227,6 +229,8 @@
     <div class="rail-global-count">
       {#if loading}
         <span class="rail-muted">Chargement…</span>
+      {:else if dataUnavailable}
+        <span class="font-semibold text-slate-700">Données des signaux indisponibles</span>
       {:else}
         <span class="rail-count-strong">{totalSignals}</span>
         {totalSignals !== 1 ? " signaux" : " signal"}
@@ -322,7 +326,11 @@
         <ul class="rail-city-list" role="list">
           {#if sortedEntries.length === 0 && !loading}
             <li class="rail-empty">
-              {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
+              {#if dataUnavailable}
+                Donnée indisponible
+              {:else}
+                {searchQuery ? "Aucune ville trouvée" : "Aucune donnée disponible"}
+              {/if}
             </li>
           {:else}
             {#each sortedEntries as entry (entry.municipality.slug)}

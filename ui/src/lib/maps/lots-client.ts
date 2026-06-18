@@ -46,6 +46,8 @@ export interface LotProperties {
   } | null;
   /** Raw zone code/group from an OGC lot collection when present. */
   zoneCode?: string | null;
+  /** UI-derived projection state for signal mode; not persisted by the API. */
+  signalProjection?: "direct" | "inherited" | "none";
 }
 
 export interface LotGeometry {
