@@ -9,6 +9,52 @@
  * honest response for unseeded or stale cities.
  */
 
+export type EvidenceMissingField =
+  | "description"
+  | "citation"
+  | "pdfLink"
+  | "documentDate"
+  | "page"
+  | "bbox";
+
+export interface EvidenceCompleteness {
+  hasDescription: boolean;
+  hasCitationExcerpt: boolean;
+  hasPdfLink: boolean;
+  hasDocumentDate: boolean;
+  hasPage: boolean;
+  hasBbox: boolean;
+  missing: EvidenceMissingField[];
+}
+
+export interface SignalEvidenceRef {
+  docSha: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  sourceUrl: string | null;
+  documentUrl: string | null;
+  rawRef: string | null;
+  rawObjectKey: string | null;
+  page: number | null;
+  bbox: [number, number, number, number] | null;
+}
+
+export interface SignalEvidence {
+  description: string | null;
+  citation: string | null;
+  excerpt: string | null;
+  sourceUrl: string | null;
+  documentUrl: string | null;
+  rawRef: string | null;
+  rawObjectKey: string | null;
+  sourceRef: string | null;
+  documentDate: string | null;
+  page: number | null;
+  bbox: [number, number, number, number] | null;
+  refs: SignalEvidenceRef[];
+  completeness: EvidenceCompleteness;
+}
+
 /** One DesignationEvent change detail (NO PII). */
 export interface DesignationEventDetail {
   /** Human-readable label (verbatim from source bytes). */
@@ -21,6 +67,8 @@ export interface DesignationEventDetail {
   sourceRef: string;
   /** ISO date — when the event was observed in the project state. */
   dateObserved: string;
+  /** Explicit evidence status for source/citation/PDF/page/bbox completeness. */
+  evidence: SignalEvidence;
 }
 
 export interface SignalDetailResponse {

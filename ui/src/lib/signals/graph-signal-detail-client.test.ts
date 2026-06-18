@@ -3,7 +3,10 @@
  * graph_nodes into typed SignalDocRef[].
  */
 import { describe, it, expect } from "vitest";
-import { extractDocRefs } from "./graph-signal-detail-client.js";
+import {
+  extractDocRefs,
+  extractSignalEvidence,
+} from "./graph-signal-detail-client.js";
 
 describe("extractDocRefs", () => {
   it("returns [] when props has no refs key", () => {
@@ -174,5 +177,80 @@ describe("extractDocRefs", () => {
     expect(result).toHaveLength(2);
     expect(result[0].docSha).toBe("aaa");
     expect(result[1].docSha).toBe("bbb");
+  });
+
+  it("extracts bbox when available", () => {
+    const result = extractDocRefs({
+      refs: [
+        {
+          docSha: "aaa",
+          page: 7,
+          bbox: [0.12, 0.34, 0.56, 0.78],
+        },
+      ],
+    });
+    expect(result).toEqual([
+      {
+        docSha: "aaa",
+        page: 7,
+        bbox: [0.12, 0.34, 0.56, 0.78],
+      },
+    ]);
+  });
+});
+
+describe("extractSignalEvidence", () => {
+  it("builds complete evidence from a graph node with refs and properties", () => {
+    const evidence = extractSignalEvidence({
+      id: "sig-1",
+      type: "Signal",
+      label: "Signal",
+      citySlug: "ville",
+      sourceRef: "raw/proces-verbaux-ville/cas/abc.pdf",
+      createdAt: "2026-06-01T00:00:00.000Z",
+      props: {
+        properties: {
+          description: "Description grounded in the source.",
+          date: "2026-05-19",
+        },
+        refs: [
+          {
+            docSha: "abc",
+            excerpt: "verbatim excerpt",
+            sourceUrl: "https://example.test/pv.pdf",
+            page: 2,
+            bbox: [0.1, 0.2, 0.3, 0.4],
+          },
+        ],
+      },
+    });
+
+    expect(evidence.description).toBe("Description grounded in the source.");
+    expect(evidence.citation).toBe("verbatim excerpt");
+    expect(evidence.sourceUrl).toBe("https://example.test/pv.pdf");
+    expect(evidence.documentDate).toBe("2026-05-19");
+    expect(evidence.page).toBe(2);
+    expect(evidence.bbox).toEqual([0.1, 0.2, 0.3, 0.4]);
+    expect(evidence.completeness.missing).toEqual([]);
+  });
+
+  it("marks missing citation/page/bbox explicitly for legacy sourceRef-only nodes", () => {
+    const evidence = extractSignalEvidence({
+      id: "sig-2",
+      type: "DesignationEvent",
+      label: "Signal",
+      citySlug: "ville",
+      sourceRef: "raw/proces-verbaux-ville/cas/abc.txt",
+      createdAt: null,
+      props: {},
+    });
+
+    expect(evidence.rawRef).toBe("raw/proces-verbaux-ville/cas/abc.txt");
+    expect(evidence.completeness.hasPdfLink).toBe(true);
+    expect(evidence.completeness.missing).toContain("description");
+    expect(evidence.completeness.missing).toContain("citation");
+    expect(evidence.completeness.missing).toContain("documentDate");
+    expect(evidence.completeness.missing).toContain("page");
+    expect(evidence.completeness.missing).toContain("bbox");
   });
 });

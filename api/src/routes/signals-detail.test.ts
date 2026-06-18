@@ -279,6 +279,31 @@ describe("GET /api/signals/:city/detail", () => {
     expect(event.sourceRef).toMatch(/^raw\//);
   });
 
+  it("returns explicit evidence completeness for legacy DesignationEvents", async () => {
+    const store = new MemoryStore();
+    await seedState(store, STATE_WITH_DESIGNATION_EVENT);
+    const app = signalsDetailRoute({ store });
+
+    const res = await app.request(`/api/signals/${CITY}/detail`);
+    const body = (await res.json()) as SignalDetailResponse;
+    const event = body.events[0]!;
+
+    expect(event.evidence.sourceRef).toBe(PV_RAW_REF);
+    expect(event.evidence.rawRef).toBe(PV_RAW_REF);
+    expect(event.evidence.rawObjectKey).toBe(PV_RAW_REF);
+    expect(event.evidence.documentDate).toBe("2026-05-19");
+    expect(event.evidence.page).toBeNull();
+    expect(event.evidence.bbox).toBeNull();
+    expect(event.evidence.refs).toHaveLength(1);
+    expect(event.evidence.completeness.hasPdfLink).toBe(true);
+    expect(event.evidence.completeness.missing).toEqual([
+      "description",
+      "citation",
+      "page",
+      "bbox",
+    ]);
+  });
+
   it("returns events=[] when city has no project state", async () => {
     const store = new MemoryStore(); // empty
     const app = signalsDetailRoute({ store });
