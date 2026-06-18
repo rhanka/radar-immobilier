@@ -22,6 +22,7 @@ import type { ObjectStore } from "../storage/object-store.js";
 import {
   apiDocumentUrl,
   findDocumentMetadata,
+  normalizeRawRef,
   type DocumentMetadata,
 } from "../services/sources/document-resolver.js";
 
@@ -179,8 +180,9 @@ function extractDocRefs(
 
 function applyMetadata(ref: GraphSignalDocRef, meta: DocumentMetadata | null): GraphSignalDocRef {
   if (!meta) {
-    return ref.rawRef && !ref.sourceUrl
-      ? { ...ref, documentUrl: apiDocumentUrl(ref.rawRef) }
+    const normalizedRawRef = ref.rawRef ? normalizeRawRef(ref.rawRef) : null;
+    return normalizedRawRef && !ref.sourceUrl
+      ? { ...ref, rawRef: normalizedRawRef, documentUrl: apiDocumentUrl(normalizedRawRef) }
       : ref;
   }
 
