@@ -34,6 +34,7 @@
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
     fetchGeoZones,
+    type GeoZoneFeature,
     type GeoZonesResponse,
     type GeoZoneFeatureCollection,
   } from "$lib/maps/geo-zones-client.js";
@@ -51,6 +52,17 @@
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
+  import {
+    navigateToGeoRoute,
+    type GeoRoute,
+  } from "$lib/router/router.js";
+  import {
+    decorateLotsWithSignalProjection,
+    fallbackZoneCode,
+    opacityForSelectionKey,
+    withCityFallbackZone,
+  } from "$lib/maps/signaux-map-geo.js";
+  import type { GeoJsonGeometry } from "$lib/maps/cadastre-geojson-source.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   const EMPTY_ZONES: GeoZoneFeatureCollection = {
@@ -75,6 +87,8 @@
     };
   }
 
+  export let geoRoute: GeoRoute | null = null;
+
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
   let loading = true;
@@ -88,15 +102,20 @@
   let detailNodes: GraphSignalNode[] = [];
   let geoLoading = false;
   let geoError: string | null = null;
+  let geoNotices: string[] = [];
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
   let activeDocument: SignalDocRef | null = null;
+  let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
   // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
   /** Accumule les types de nœuds vus au fil des villes cliquées. */
   let knownNodeTypes: string[] = [];
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
+  const cityBoundaryBySlug = new Map<string, GeoJsonGeometry>();
+  let appliedGeoRouteKey: string | null = null;
+  let pendingRouteZoneKey: string | null = null;
 
   // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
   /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
@@ -109,8 +128,41 @@
     updateFillColors();
   }
 
+  function buildDisplayedLots(): LotFeatureCollection {
+    return lotsResponse
+      ? decorateLotsWithSignalProjection(
+          lotsResponse.featureCollection,
+          zonesResponse?.featureCollection.features ?? [],
+          detailNodes,
+        )
+      : EMPTY_LOTS;
+  }
+
+  function hasSelectedKind(kind: string): boolean {
+    if (selectionState.focusedKey?.startsWith(`${kind}:`)) return true;
+    for (const key of selectionState.selectedKeys) {
+      if (key.startsWith(`${kind}:`)) return true;
+    }
+    return false;
+  }
+
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
+  $: displayedLots = buildDisplayedLots();
+
+  $: activeGeoLevel = hasSelectedKind("zone")
+    ? "Zone"
+    : selectedCity
+      ? "Ville"
+      : "Province";
+
+  $: if (geoRoute && allEntries.length > 0) {
+    void applyGeoRoute(geoRoute);
+  }
+
+  $: if (pendingRouteZoneKey && selectedCity && zonesResponse) {
+    applyPendingRouteZone();
+  }
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
@@ -147,17 +199,21 @@
   function buildFillOpacityExpression(
     entries: CityMapEntry[],
   ): ExpressionSpecification {
-    const selectedCityKeys = selectedKeysForKind("municipality");
-    const hasCitySelection = selectedCityKeys.size > 0;
     const expr: unknown[] = ["match", ["get", "citySlug"]];
+    const activeCitySlug = selectedCity?.municipality.slug ?? null;
     for (const entry of entries) {
       const key = makeKey("municipality", entry.municipality.slug);
+      const contextualOpacity = activeCitySlug
+        ? (entry.municipality.slug === activeCitySlug ? 0.06 : 0.1)
+        : 0.75;
       expr.push(
         entry.municipality.slug,
-        hasCitySelection && !selectedCityKeys.has(key) ? 0.38 : 0.75,
+        activeCitySlug
+          ? contextualOpacity
+          : opacityForSelectionKey(selectionState, key, 0.75),
       );
     }
-    expr.push(hasCitySelection ? 0.38 : 0.75);
+    expr.push(activeCitySlug ? 0.08 : 0.75);
     return expr as ExpressionSpecification;
   }
 
@@ -204,6 +260,69 @@
     });
   }
 
+  type MapLayerEvent = {
+    features?: Array<{ properties?: Record<string, unknown> }>;
+    originalEvent?: { stopPropagation?: () => void };
+  };
+
+  function cacheCityBoundaries(geojson: unknown): void {
+    const features = (geojson as { features?: unknown[] }).features;
+    if (!Array.isArray(features)) return;
+
+    for (const feature of features) {
+      const record = feature as {
+        geometry?: GeoJsonGeometry | null;
+        properties?: Record<string, unknown>;
+      };
+      const citySlug = readString(record.properties?.citySlug);
+      if (citySlug && record.geometry) {
+        cityBoundaryBySlug.set(citySlug, record.geometry);
+      }
+    }
+  }
+
+  function readString(value: unknown): string | null {
+    return typeof value === "string" && value.trim().length > 0
+      ? value.trim()
+      : null;
+  }
+
+  function registerGeoLayerInteractions(m: {
+    on: (event: string, layer: string, handler: (e: MapLayerEvent) => void) => void;
+    getCanvas: () => HTMLCanvasElement;
+  }): void {
+    m.on("click", "selected-zones-fill", (e) => {
+      const props = e.features?.[0]?.properties;
+      const citySlug = readString(props?.citySlug);
+      const code = readString(props?.code);
+      if (!citySlug || !code) return;
+      e.originalEvent?.stopPropagation?.();
+      toggleMapSelection(makeKey("zone", `${citySlug}/${code}`));
+    });
+
+    m.on("click", "selected-lots-fill", (e) => {
+      const props = e.features?.[0]?.properties;
+      const noLot = readString(props?.noLot);
+      const citySlug = readString(props?.citySlug) ?? selectedCity?.municipality.slug;
+      if (!noLot || !citySlug) return;
+      e.originalEvent?.stopPropagation?.();
+      toggleMapSelection(makeKey("lot", `${citySlug}/${noLot}`));
+    });
+
+    m.on("mouseenter", "selected-zones-fill", () => {
+      m.getCanvas().style.cursor = "pointer";
+    });
+    m.on("mouseleave", "selected-zones-fill", () => {
+      m.getCanvas().style.cursor = "";
+    });
+    m.on("mouseenter", "selected-lots-fill", () => {
+      m.getCanvas().style.cursor = "pointer";
+    });
+    m.on("mouseleave", "selected-lots-fill", () => {
+      m.getCanvas().style.cursor = "";
+    });
+  }
+
   async function initMap(): Promise<void> {
     if (!mapContainer) return;
     try {
@@ -247,6 +366,7 @@
         } catch (err) {
           console.warn("municipalities.geojson fetch error:", err);
         }
+        cacheCityBoundaries(polygonsData);
 
         // Source GeoJSON polygones (aplats)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -309,11 +429,14 @@
           const entry = allEntries.find(
             (ent) => ent.municipality.slug === props.citySlug,
           );
+          if (selectedCity?.municipality.slug === props.citySlug) return;
           if (entry) void selectCity(entry);
         });
 
-        m.on("mouseenter", "cities-fill", () => {
-          m.getCanvas().style.cursor = "pointer";
+        m.on("mousemove", "cities-fill", (e) => {
+          const props = e.features?.[0]?.properties as { citySlug?: string } | undefined;
+          m.getCanvas().style.cursor =
+            selectedCity?.municipality.slug === props?.citySlug ? "" : "pointer";
         });
         m.on("mouseleave", "cities-fill", () => {
           m.getCanvas().style.cursor = "";
@@ -323,6 +446,7 @@
         // Injecter les couleurs si les données API sont déjà chargées
         if (allEntries.length > 0) updateFillColors();
         updateGeoLayers();
+        registerGeoLayerInteractions(m);
       });
 
       mapInstance = m;
@@ -339,16 +463,26 @@
   });
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
-  async function selectCity(entry: CityMapEntry): Promise<void> {
+  async function selectCity(
+    entry: CityMapEntry,
+    options: { syncUrl?: boolean } = {},
+  ): Promise<void> {
+    const syncUrl = options.syncUrl ?? true;
     if (selectedCity?.municipality.slug === entry.municipality.slug) {
-      // Deuxième clic sur la même ville : désélectionne
-      clearSelection();
       return;
+    }
+    if (syncUrl) {
+      navigateToGeoRoute({
+        level: "city",
+        citySlug: entry.municipality.slug,
+        state: { mode: geoRoute?.state.mode ?? "signal" },
+      });
     }
     selectedCity = entry;
     detailNodes = [];
     detailError = null;
     detailLoading = true;
+    geoNotices = [];
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
       selectedKeys: [cityKey],
@@ -385,8 +519,10 @@
       }
       // Recolorer les aplats avec les nouvelles données en cache
       updateFillColors();
+      updateGeoLayers();
     } catch (e) {
-      detailError = e instanceof Error ? e.message : "Erreur chargement détail";
+      console.warn("Signal detail load failed:", e);
+      detailError = "Donnée indisponible pour les signaux de cette ville.";
     } finally {
       detailLoading = false;
     }
@@ -394,9 +530,11 @@
 
   function clearSelection(): void {
     selectedCity = null;
+    pendingRouteZoneKey = null;
     detailNodes = [];
     detailError = null;
     geoError = null;
+    geoNotices = [];
     zonesResponse = null;
     lotsResponse = null;
     activeDocument = null;
@@ -407,6 +545,7 @@
 
   function toggleBucketKey(key: SelectionKey): void {
     selectionState = toggleSelection(selectionState, key);
+    syncRouteForSelectionKey(key);
     updateFillColors();
     updateGeoLayers();
   }
@@ -423,55 +562,121 @@
     activeDocument = null;
   }
 
-  function selectedKeysForKind(kind: string): Set<SelectionKey> {
-    const keys = new Set<SelectionKey>();
-    for (const key of selectionState.selectedKeys) {
-      if (parseKey(key)?.kind === kind) keys.add(key);
-    }
-    return keys;
+  function zoneSelectionKey(zone: GeoZoneFeature): SelectionKey {
+    return makeKey("zone", `${zone.properties.citySlug}/${zone.properties.code}`);
   }
 
-  function selectedCodesForZones(): Set<string> {
-    const codes = new Set<string>();
-    const citySlug = selectedCity?.municipality.slug;
-    if (!citySlug) return codes;
-    for (const zone of zonesResponse?.featureCollection.features ?? []) {
-      const code = zone.properties.code;
-      if (selectionState.selectedKeys.has(makeKey("zone", `${citySlug}/${code}`))) {
-        codes.add(code);
-      }
-    }
-    return codes;
+  function lotSelectionKey(noLot: string, citySlug = selectedCity?.municipality.slug): SelectionKey | null {
+    if (!citySlug) return null;
+    return makeKey("lot", `${citySlug}/${noLot}`);
   }
 
-  function selectedNumbersForLots(): Set<string> {
-    const lotNumbers = new Set<string>();
-    const citySlug = selectedCity?.municipality.slug;
-    if (!citySlug) return lotNumbers;
-    for (const lot of lotsResponse?.featureCollection.features ?? []) {
-      const noLot = lot.properties.noLot;
-      if (selectionState.selectedKeys.has(makeKey("lot", `${citySlug}/${noLot}`))) {
-        lotNumbers.add(noLot);
-      }
-    }
-    return lotNumbers;
+  function toggleMapSelection(key: SelectionKey): void {
+    const wasSelected = selectionState.selectedKeys.has(key);
+    selectionState = toggleSelection(selectionState, key);
+    selectionState = setFocus(selectionState, wasSelected ? null : key);
+    if (!wasSelected) syncRouteForSelectionKey(key);
+    updateFillColors();
+    updateGeoLayers();
   }
 
-  function buildZoneOpacityExpression(): ExpressionSpecification {
-    const selectedCodes = selectedCodesForZones();
-    const hasZoneSelection = selectedCodes.size > 0;
+  function routeKey(route: GeoRoute): string {
+    if (route.level === "region") return `region:${route.region}:${route.state.mode}`;
+    if (route.level === "city") return `city:${route.citySlug}:${route.state.mode}`;
+    return `zone:${route.citySlug}:${route.zoneKey}:${route.state.mode}`;
+  }
+
+  async function applyGeoRoute(route: GeoRoute): Promise<void> {
+    const key = routeKey(route);
+    if (appliedGeoRouteKey === key) return;
+    appliedGeoRouteKey = key;
+
+    if (route.level === "region") {
+      clearSelection();
+      return;
+    }
+
+    const entry = allEntries.find(
+      (item) => item.municipality.slug === route.citySlug,
+    );
+    if (!entry) return;
+
+    await selectCity(entry, { syncUrl: false });
+
+    if (route.level === "zone") {
+      pendingRouteZoneKey = route.zoneKey;
+      applyPendingRouteZone();
+    } else {
+      pendingRouteZoneKey = null;
+    }
+  }
+
+  function selectBucketKey(key: SelectionKey): void {
+    if (!selectionState.selectedKeys.has(key)) {
+      selectionState = toggleSelection(selectionState, key);
+    }
+    selectionState = setFocus(selectionState, key);
+    updateFillColors();
+    updateGeoLayers();
+  }
+
+  function applyPendingRouteZone(): void {
+    if (!pendingRouteZoneKey || !selectedCity || !zonesResponse) return;
+    const citySlug = selectedCity.municipality.slug;
+    const zone = zonesResponse.featureCollection.features.find(
+      (feature) =>
+        feature.properties.citySlug === citySlug &&
+        feature.properties.code === pendingRouteZoneKey,
+    );
+    if (!zone) return;
+    selectBucketKey(makeKey("zone", `${citySlug}/${zone.properties.code}`));
+    pendingRouteZoneKey = null;
+  }
+
+  function syncRouteForSelectionKey(key: SelectionKey): void {
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== "zone") return;
+    const separatorIndex = parsed.id.indexOf("/");
+    if (separatorIndex <= 0 || separatorIndex === parsed.id.length - 1) return;
+    const citySlug = parsed.id.slice(0, separatorIndex);
+    const zoneKey = parsed.id.slice(separatorIndex + 1);
+    navigateToGeoRoute({
+      level: "zone",
+      citySlug,
+      zoneKey,
+      state: { mode: geoRoute?.state.mode ?? "signal" },
+    });
+  }
+
+  function buildZoneOpacityExpression(
+    zones = zonesResponse?.featureCollection.features ?? EMPTY_ZONES.features,
+  ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "code"]];
-    for (const code of selectedCodes) expr.push(code, 0.62);
-    expr.push(hasZoneSelection ? 0.18 : 0.38);
+    for (const zone of zones) {
+      const key = zoneSelectionKey(zone);
+      expr.push(
+        zone.properties.code,
+        opacityForSelectionKey(selectionState, key, 0.42),
+      );
+    }
+    expr.push(selectionState.selectedKeys.size > 0 ? 0.5 : 0.42);
     return expr as ExpressionSpecification;
   }
 
-  function buildLotOpacityExpression(): ExpressionSpecification {
-    const selectedNumbers = selectedNumbersForLots();
-    const hasLotSelection = selectedNumbers.size > 0;
+  function buildLotOpacityExpression(
+    lots: LotFeatureCollection = displayedLots,
+  ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "noLot"]];
-    for (const noLot of selectedNumbers) expr.push(noLot, 0.72);
-    expr.push(hasLotSelection ? 0.2 : 0.42);
+    const citySlug = selectedCity?.municipality.slug;
+    for (const lot of lots.features) {
+      const noLot = lot.properties.noLot;
+      const key = lotSelectionKey(noLot, lot.properties.citySlug ?? citySlug);
+      expr.push(
+        noLot,
+        key ? opacityForSelectionKey(selectionState, key, 0.36) : 0.36,
+      );
+    }
+    expr.push(selectionState.selectedKeys.size > 0 ? 0.5 : 0.36);
     return expr as ExpressionSpecification;
   }
 
@@ -486,7 +691,13 @@
     };
 
     const zones = zonesResponse?.featureCollection ?? EMPTY_ZONES;
-    const lots = lotsResponse?.featureCollection ?? EMPTY_LOTS;
+    const lots = lotsResponse
+      ? decorateLotsWithSignalProjection(
+          lotsResponse.featureCollection,
+          zones.features,
+          detailNodes,
+        )
+      : EMPTY_LOTS;
 
     const zoneSource = m.getSource("selected-zones");
     if (zoneSource?.setData) {
@@ -509,9 +720,11 @@
             "#f59e0b",
             "text-only",
             "#94a3b8",
+            "missing",
+            "#475569",
             "#94a3b8",
           ],
-          "fill-opacity": buildZoneOpacityExpression(),
+          "fill-opacity": buildZoneOpacityExpression(zones.features),
           "fill-outline-color": "#0f172a",
         },
       });
@@ -543,6 +756,10 @@
         paint: {
           "fill-color": [
             "case",
+            ["==", ["get", "signalProjection"], "direct"],
+            "#dc2626",
+            ["==", ["get", "signalProjection"], "inherited"],
+            "#f59e0b",
             ["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]],
             "#e67e22",
             ["==", ["get", "multifamilial4plus"], true],
@@ -551,7 +768,7 @@
             "#2980b9",
             "#64748b",
           ],
-          "fill-opacity": buildLotOpacityExpression(),
+          "fill-opacity": buildLotOpacityExpression(lots),
           "fill-outline-color": "#ffffff",
         },
       });
@@ -569,24 +786,41 @@
       });
     }
 
-    m.setPaintProperty("selected-zones-fill", "fill-opacity", buildZoneOpacityExpression());
-    m.setPaintProperty("selected-lots-fill", "fill-opacity", buildLotOpacityExpression());
+    m.setPaintProperty("selected-zones-fill", "fill-opacity", buildZoneOpacityExpression(zones.features));
+    m.setPaintProperty("selected-lots-fill", "fill-opacity", buildLotOpacityExpression(lots));
   }
 
   async function loadGeoForCity(citySlug: string): Promise<void> {
     geoLoading = true;
     geoError = null;
+    geoNotices = [];
     zonesResponse = null;
     lotsResponse = null;
     updateGeoLayers();
     const errors: string[] = [];
+    const notices: string[] = [];
     const [zonesResult, lotsResult] = await Promise.allSettled([
         fetchGeoZones(citySlug, { fallback: "lots", limit: 500 }),
         fetchLots(citySlug, { limit: 500 }),
       ]);
 
     if (zonesResult.status === "fulfilled") {
-      zonesResponse = zonesResult.value;
+      const entry = allEntries.find((item) => item.municipality.slug === citySlug);
+      const withFallback = withCityFallbackZone(zonesResult.value, {
+        citySlug,
+        cityName: entry?.municipality.name ?? citySlug,
+        geometry: cityBoundaryBySlug.get(citySlug) ?? null,
+      });
+      zonesResponse = withFallback.response;
+      if (withFallback.created) {
+        notices.push(
+          cityBoundaryBySlug.has(citySlug)
+            ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
+            : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
+        );
+      } else if (zonesResult.value.resolutionStatus === "fallback") {
+        notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
+      }
     } else {
       const message =
         zonesResult.reason instanceof Error
@@ -601,15 +835,22 @@
 
     if (lotsResult.status === "fulfilled") {
       lotsResponse = lotsResult.value;
+      if (!lotsResult.value.ok || lotsResult.value.source === "none") {
+        notices.push(
+          lotsResult.value.reason
+            ? `Lots non configurés : ${lotsResult.value.reason}`
+            : "Lots non configurés pour cette ville.",
+        );
+      } else if (lotsResult.value.featureCollection.features.length === 0) {
+        notices.push("Lots configurés, mais aucun lot dans la réponse.");
+      }
     } else {
-      errors.push(
-        lotsResult.reason instanceof Error
-          ? lotsResult.reason.message
-          : "lots indisponibles",
-      );
+      console.warn("Lots load failed:", lotsResult.reason);
+      errors.push("Lots : donnée indisponible.");
     }
 
     geoError = errors.length > 0 ? errors.join(" · ") : null;
+    geoNotices = notices;
     geoLoading = false;
     updateGeoLayers();
   }
@@ -622,7 +863,8 @@
       const res = await fetchGraphSignalsByCity();
       graphItems = res.cities;
     } catch (e) {
-      loadError = e instanceof Error ? e.message : "Erreur de chargement";
+      console.warn("Signals by city load failed:", e);
+      loadError = "Données des signaux indisponibles.";
     } finally {
       loading = false;
     }
@@ -639,7 +881,7 @@
   <svelte:fragment slot="controls">
     {#if loadError}
       <div class="px-4 py-2 text-xs text-red-600 border-b border-red-100 bg-red-50">
-        {loadError} — données indisponibles, compteurs à 0.
+        {loadError} — aucun compteur n’est affiché pour éviter un faux zéro.
       </div>
     {/if}
     <SignauxRail
@@ -648,6 +890,7 @@
       {detailNodes}
       {knownNodeTypes}
       {loading}
+      dataUnavailable={loadError !== null}
       {detailLoading}
       onSelectCity={selectCity}
       onRefresh={load}
@@ -678,6 +921,30 @@
   <!-- ── CANVAS : carte MapLibre ──────────────────────────────────────────── -->
   <div class="relative h-full w-full overflow-hidden">
     <div bind:this={mapContainer} class="absolute inset-0"></div>
+    <div class="absolute left-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] flex-col gap-2">
+      <div class="inline-flex w-fit overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm">
+        {#each ["Province", "Ville", "Zone"] as level (level)}
+          <span
+            class={`px-2.5 py-1 font-semibold ${activeGeoLevel === level ? "bg-slate-900 text-white" : "text-slate-600"}`}
+          >
+            {level}
+          </span>
+        {/each}
+      </div>
+      {#if selectedCity && (geoLoading || geoNotices.length > 0 || geoError)}
+        <div class="max-w-sm rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
+          {#if geoLoading}
+            <p class="m-0 font-semibold text-slate-500">Chargement zones/lots…</p>
+          {/if}
+          {#if geoError}
+            <p class="m-0 text-amber-700">{geoError}</p>
+          {/if}
+          {#each geoNotices as notice (notice)}
+            <p class="m-0 text-slate-600">{notice}</p>
+          {/each}
+        </div>
+      {/if}
+    </div>
     {#if !mapReady}
       <div class="absolute inset-0 flex items-center justify-center bg-slate-100">
         <span class="text-xs text-slate-400">Chargement de la carte…</span>

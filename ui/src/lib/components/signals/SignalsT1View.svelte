@@ -61,6 +61,10 @@
     onApprofondir({ ...signal, status: "à-approfondir" });
   }
 
+  function signalLabel(count: number): string {
+    return count === 1 ? "signal" : "signaux";
+  }
+
   const STATUS_OPTIONS: Array<{ value: SignalStatusT | "tous"; label: string }> = [
     { value: "tous", label: "Tous" },
     { value: "nouveau", label: "Nouveau" },
@@ -156,7 +160,7 @@
 
       <div class="pt-2 border-t border-slate-100">
         <p class="text-xs text-slate-400">
-          {visible.length} / {signals.length} signal{signals.length !== 1 ? "s" : ""}
+          {visible.length} / {signals.length} {signalLabel(signals.length)}
         </p>
         <p class="text-xs text-slate-300 mt-0.5">
           ({countReal} réel{countReal !== 1 ? "s" : ""}, données live)
@@ -203,7 +207,7 @@
       <div class="mb-4">
         <Alert
           tone="success"
-          title="Données live : {countReal} signal{countReal !== 1 ? 's' : ''} réel{countReal !== 1 ? 's' : ''} (changements de zonage détectés)."
+          title="Données live : {countReal} {signalLabel(countReal)} réel{countReal !== 1 ? 's' : ''} (changements de zonage détectés)."
         />
       </div>
     {/if}
