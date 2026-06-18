@@ -15,11 +15,16 @@ import {
 } from "$lib/sources/maturity.js";
 import { resolveScrapeStatusUrl } from "$lib/sources/scrape-status-client.js";
 import {
+  computeDataQualityReadiness,
+  computeEvidenceReadiness,
+  dataQualityStatusLabel,
+} from "$lib/sources/data-quality-client.js";
+import {
   buildCoverageEntries,
   computeCoverageStats,
   type CoverageCityEntry,
 } from "$lib/sources/coverage.js";
-import type { ScrapeStatusT } from "@radar/domain";
+import type { DataQualityCitySummaryT, ScrapeStatusT } from "@radar/domain";
 import type { SignalCityItem } from "$lib/signals/signals-by-city-client.js";
 
 // ── 1. Coverage summary derived from mock by-city data ────────────────────────
@@ -176,5 +181,122 @@ describe("Maturity helpers used by SourcesMapView", () => {
     expect(resolveScrapeStatusUrl("/api/scrape-status", "")).toBe(
       "/api/scrape-status",
     );
+  });
+});
+
+// ── 4. Data readiness helpers used by Données mode ───────────────────────────
+
+describe("SourcesMapView data readiness helpers", () => {
+  function makeSummary(
+    overrides: Partial<DataQualityCitySummaryT> = {},
+  ): DataQualityCitySummaryT {
+    const collection = {
+      status: "unknown" as const,
+      freshness: "unknown" as const,
+      lastObservedAt: null,
+      counts: {
+        records: 0,
+        todo: 0,
+        identified: 0,
+        scraped: 0,
+        graphified: 0,
+        error: 0,
+      },
+    };
+    const ontology = {
+      status: "unknown" as const,
+      freshness: "unknown" as const,
+      lastObservedAt: null,
+      counts: {
+        nodes: 0,
+        edges: 0,
+        signals: 0,
+        designationEvents: 0,
+        zones: 0,
+        lots: 0,
+        bylaws: 0,
+      },
+    };
+    const geo = {
+      status: "unknown" as const,
+      freshness: "unknown" as const,
+      lastObservedAt: null,
+      source: null,
+      counts: {
+        inventoryLayers: 0,
+        currentVersions: 0,
+        withGeometry: 0,
+      },
+    };
+
+    return {
+      citySlug: "salaberry-de-valleyfield",
+      generatedAt: "2026-06-18T12:00:00.000Z",
+      councilMinutes: collection,
+      youtube: collection,
+      ontology,
+      zones: geo,
+      lots: geo,
+      ...overrides,
+    };
+  }
+
+  it("summarizes the five P4 data checks without inventing a separate page", () => {
+    const readyCollection = {
+      status: "fresh" as const,
+      freshness: "fresh" as const,
+      lastObservedAt: "2026-06-18T10:00:00.000Z",
+      counts: {
+        records: 2,
+        todo: 0,
+        identified: 0,
+        scraped: 1,
+        graphified: 1,
+        error: 0,
+      },
+    };
+    const partialGeo = {
+      status: "partial" as const,
+      freshness: "unknown" as const,
+      lastObservedAt: null,
+      source: { availability: "pdf", quality: "pdf", hasUrl: true },
+      counts: {
+        inventoryLayers: 1,
+        currentVersions: 0,
+        withGeometry: 0,
+      },
+    };
+
+    const readiness = computeDataQualityReadiness(
+      makeSummary({
+        councilMinutes: readyCollection,
+        youtube: readyCollection,
+        zones: partialGeo,
+      }),
+    );
+
+    expect(readiness.status).toBe("partial");
+    expect(readiness.readyCount).toBe(2);
+    expect(readiness.partialCount).toBe(1);
+    expect(readiness.unknownCount).toBe(2);
+    expect(readiness.detail).toBe("2/5 prêts · 1 partiel · 2 à configurer");
+  });
+
+  it("uses clear French labels for API data-quality states", () => {
+    expect(dataQualityStatusLabel("fresh")).toBe("prêt");
+    expect(dataQualityStatusLabel("partial")).toBe("partiel");
+    expect(dataQualityStatusLabel("stale")).toBe("périmé");
+    expect(dataQualityStatusLabel("unknown")).toBe("à configurer");
+  });
+
+  it("summarizes PDF/raw evidence linkage from signal detail events", () => {
+    const readiness = computeEvidenceReadiness([
+      { sourceRef: "raw/proces-verbaux/2026/06/18/a.pdf" },
+      { sourceRef: "" },
+    ]);
+
+    expect(readiness.status).toBe("partial");
+    expect(readiness.label).toBe("preuves à relier");
+    expect(readiness.detail).toBe("1/2 événements avec source PDF/raw");
   });
 });
