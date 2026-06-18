@@ -86,5 +86,17 @@ describe("GET /api/documents/raw", () => {
     expect(res.headers.get("content-type")).toBe("application/pdf");
     expect(await res.text()).toBe("%PDF-1.4");
   });
-});
 
+  it("accepts legacy local paths when they contain a canonical raw key", async () => {
+    const store = new MemoryStore();
+    const record = await seedPdf(store);
+    const app = documentsRoute({ store });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(`/tmp/scw-docs/${record.storageKey}`)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+  });
+});
