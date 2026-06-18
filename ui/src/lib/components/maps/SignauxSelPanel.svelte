@@ -1066,11 +1066,6 @@
     font-size: 0.72rem;
   }
 
-  .doc-ref-state {
-    color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
-  }
-
   .doc-ref-excerpt {
     margin: 0.25rem 0 0;
     border-left: 2px solid #facc15;
