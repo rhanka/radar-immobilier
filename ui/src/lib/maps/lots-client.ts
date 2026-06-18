@@ -44,6 +44,8 @@ export interface LotProperties {
     usages: string[];
     densiteLogHa: number | null;
   } | null;
+  /** Raw zone code/group from an OGC lot collection when present. */
+  zoneCode?: string | null;
 }
 
 export interface LotGeometry {
@@ -203,7 +205,67 @@ function normalizeOgcLotFeature(feature: unknown, citySlug: string): LotFeature 
   return {
     type: "Feature",
     geometry: normalizeGeometry(raw.geometry),
-    properties: { noLot, citySlug },
+    properties: {
+      noLot,
+      citySlug,
+      ...normalizeOgcLotProperties(properties),
+    },
+  };
+}
+
+function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial<LotProperties> {
+  const potentialScore = firstNumber([
+    properties.potentialScore,
+    properties.potential_score,
+    properties.score,
+  ]);
+  const mode = readString(properties.mode);
+  const isRue = firstBoolean([properties.isRue, properties.is_rue]);
+  const tod = firstBoolean([properties.tod, properties.inTod, properties.in_tod]);
+  const multifamilial4plus = firstBoolean([
+    properties.multifamilial4plus,
+    properties.multifamilial_4plus,
+  ]);
+  const superficieM2 = firstNumber([
+    properties.superficieM2,
+    properties.superficie_m2,
+    properties.superficie_m2_calculee,
+  ]);
+  const usageCode = firstString([
+    properties.usageCode,
+    properties.usage_code,
+    properties.cubf,
+  ]);
+  const zone = normalizeZone(properties.zone);
+  const zoneCode = firstString([
+    properties.zoneCode,
+    properties.zone_code,
+    properties.zone,
+  ]);
+
+  return {
+    ...(potentialScore !== null ? { potentialScore } : {}),
+    ...(mode !== null ? { mode } : {}),
+    ...(isRue !== null ? { isRue } : {}),
+    ...(tod !== null ? { tod } : {}),
+    ...(multifamilial4plus !== null ? { multifamilial4plus } : {}),
+    ...(superficieM2 !== null ? { superficieM2 } : {}),
+    ...(usageCode !== null ? { usageCode } : {}),
+    ...(zone !== undefined ? { zone } : {}),
+    ...(zoneCode !== null ? { zoneCode } : {}),
+  };
+}
+
+function normalizeZone(value: unknown): LotProperties["zone"] | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const kind = readString(record.kind);
+  if (!kind) return undefined;
+  const rawUsages = Array.isArray(record.usages) ? record.usages : [];
+  return {
+    kind,
+    usages: rawUsages.map(String),
+    densiteLogHa: firstNumber([record.densiteLogHa, record.densite_log_ha]),
   };
 }
 
@@ -223,4 +285,35 @@ function readString(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0
     ? value.trim()
     : null;
+}
+
+function firstString(values: readonly unknown[]): string | null {
+  for (const value of values) {
+    const parsed = readString(value);
+    if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
+function firstNumber(values: readonly unknown[]): number | null {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim().length > 0) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return null;
+}
+
+function firstBoolean(values: readonly unknown[]): boolean | null {
+  for (const value of values) {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+      if (["true", "1", "yes", "oui"].includes(normalized)) return true;
+      if (["false", "0", "no", "non"].includes(normalized)) return false;
+    }
+  }
+  return null;
 }
