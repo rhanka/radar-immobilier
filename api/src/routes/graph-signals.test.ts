@@ -279,4 +279,33 @@ describe("GET /api/graph-signals/:city", () => {
       page: 3,
     });
   });
+
+  it("keeps a raw document link when metadata is missing but the raw key is resolvable", async () => {
+    const legacyRawRef = "/tmp/scw-docs/raw/proces-verbaux-testville/cas/abc123.pdf";
+    const node = makeNode("sig-005", "drummondville", "Signal", {
+      refs: [
+        {
+          rawRef: legacyRawRef,
+          excerpt: "Le conseil donne un avis de motion.",
+        },
+      ],
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const app = freshRoute();
+    const res = await app.request("/api/graph-signals/drummondville");
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      nodes: Array<{
+        docRefs: Array<{ rawRef: string; documentUrl: string; excerpt: string }>;
+      }>;
+    };
+    expect(body.nodes[0]!.docRefs[0]).toMatchObject({
+      rawRef: "raw/proces-verbaux-testville/cas/abc123.pdf",
+      documentUrl:
+        "/api/documents/raw?rawRef=raw%2Fproces-verbaux-testville%2Fcas%2Fabc123.pdf",
+      excerpt: "Le conseil donne un avis de motion.",
+    });
+  });
 });
