@@ -510,20 +510,10 @@
       detailCache.set(entry.municipality.slug, res.nodes);
       const newTypes = res.nodes.map((n) => n.type);
       knownNodeTypes = Array.from(new Set([...knownNodeTypes, ...newTypes])).sort();
-      const firstSignal = res.nodes[0] ?? null;
-      if (firstSignal && selectionState.focusedKey === cityKey) {
-        try {
-          const firstSignalKey = makeKey("signal", firstSignal.id);
-          selectionState = createSelectionBucketState({
-            selectedKeys: [...selectionState.selectedKeys, firstSignalKey],
-            focusedKey: firstSignalKey,
-            hoveredKey: selectionState.hoveredKey,
-            expandedKeys: [...selectionState.expandedKeys, firstSignalKey],
-          });
-        } catch {
-          // Ignore malformed graph ids; the city selection remains valid.
-        }
-      }
+      // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
+      // quel signal ouvrir (clic dans le panneau droit). L'auto-focus créait
+      // un paradoxe accordéon : le 1er clic sur un signal pré-focusé le fermait
+      // au lieu de l'ouvrir, rendant le détail inaccessible.
       // Recolorer les aplats avec les nouvelles données en cache
       updateFillColors();
       updateGeoLayers();
@@ -578,12 +568,21 @@
   }
 
   function toggleBucketKey(key: SelectionKey): void {
-    // #9 — déterminer si l'item est en train d'être sélectionné (pas désélectionné)
-    const wasSelected = selectionState.selectedKeys.has(key);
-    selectionState = toggleSelection(selectionState, key);
-    // Si l'item vient d'être sélectionné → le mettre en focus (ouvre l'accordéon).
-    // Si l'item était déjà sélectionné → le déselectionner ET effacer le focus.
-    selectionState = setFocus(selectionState, wasSelected ? null : key);
+    // #9 fix — l'accordéon pilote le FOCUS (ouvre/ferme le détail), pas la
+    // sélection multi. On bascule le focus : si l'item est déjà focusé on le
+    // referme (null), sinon on le focalise (key). La sélection est assurée
+    // pour la cohérence carte (opacité zones/lots), mais ne pilote pas le détail.
+    const isFocused = selectionState.focusedKey === key;
+    if (isFocused) {
+      // Re-clic sur l'item focusé → referme le détail, conserve la sélection.
+      selectionState = setFocus(selectionState, null);
+    } else {
+      // Clic sur un autre item → l'ajouter aux sélectionnés si absent, puis focaliser.
+      if (!selectionState.selectedKeys.has(key)) {
+        selectionState = toggleSelection(selectionState, key);
+      }
+      selectionState = setFocus(selectionState, key);
+    }
     syncRouteForSelectionKey(key);
     updateFillColors();
     updateGeoLayers();

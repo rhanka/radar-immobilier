@@ -12,7 +12,9 @@
   export let excerpt: string | null = null;
   export let onClose: () => void = () => {};
 
-  $: viewerUrl = sourceUrl ? withPage(sourceUrl, page) : null;
+  // Préfère sourceUrl (PDF public ou route streaming), puis rawRef via /api/documents/raw
+  $: resolvedSourceUrl = sourceUrl ?? (rawRef ? `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}` : null);
+  $: viewerUrl = resolvedSourceUrl ? withPage(resolvedSourceUrl, page) : null;
   $: canEmbed = viewerUrl !== null && (/^https?:\/\//u.test(viewerUrl) || viewerUrl.startsWith("/"));
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
 
