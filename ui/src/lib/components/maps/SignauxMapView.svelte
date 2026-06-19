@@ -156,6 +156,13 @@
       ? "Ville"
       : "Province";
 
+  /** True si la ville sélectionnée a des zones géo configurées (pas juste un fallback vide). */
+  $: zonesConfigured = !!(
+    zonesResponse &&
+    zonesResponse.zoneCount > 0 &&
+    zonesResponse.featureCollection.features.length > 0
+  );
+
   $: if (geoRoute && allEntries.length > 0) {
     void applyGeoRoute(geoRoute);
   }
@@ -543,6 +550,33 @@
     updateGeoLayers();
   }
 
+  /**
+   * Clic sur le segmented-control Province / Ville / Zone.
+   * Province → clearSelection (retour vue globale)
+   * Ville → désélectionner les zones/lots mais conserver la ville sélectionnée
+   * Zone → sélectionner la première zone disponible (si zones configurées)
+   */
+  function handleGeoLevelClick(level: string): void {
+    if (level === activeGeoLevel) return;
+    if (level === "Province") {
+      clearSelection();
+    } else if (level === "Ville") {
+      if (!selectedCity) return;
+      // Effacer toutes les sélections zone/lot, conserver la ville
+      selectionState = createSelectionBucketState();
+      updateFillColors();
+      updateGeoLayers();
+    } else if (level === "Zone") {
+      if (!selectedCity) return;
+      const zones = zonesResponse?.featureCollection.features ?? [];
+      if (zones.length === 0) return; // zones non configurées — rien à faire
+      const firstZone = zones[0];
+      const key = zoneSelectionKey(firstZone);
+      selectBucketKey(key);
+      syncRouteForSelectionKey(key);
+    }
+  }
+
   function toggleBucketKey(key: SelectionKey): void {
     selectionState = toggleSelection(selectionState, key);
     syncRouteForSelectionKey(key);
@@ -853,6 +887,20 @@
     geoNotices = notices;
     geoLoading = false;
     updateGeoLayers();
+
+    // 2.4 — Ville sans zones configurées → bascule par défaut sur le 1er lot.
+    const noZones =
+      !zonesResponse ||
+      zonesResponse.zoneCount === 0 ||
+      zonesResponse.featureCollection.features.length === 0;
+    const firstLot = lotsResponse?.featureCollection.features[0] ?? null;
+    if (noZones && firstLot && selectedCity?.municipality.slug === citySlug) {
+      const key = lotSelectionKey(
+        firstLot.properties.noLot,
+        firstLot.properties.citySlug ?? citySlug,
+      );
+      if (key) selectBucketKey(key);
+    }
   }
 
   // ── Chargement API ─────────────────────────────────────────────────────────
@@ -924,11 +972,23 @@
     <div class="absolute left-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] flex-col gap-2">
       <div class="inline-flex w-fit overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm">
         {#each ["Province", "Ville", "Zone"] as level (level)}
-          <span
-            class={`px-2.5 py-1 font-semibold ${activeGeoLevel === level ? "bg-slate-900 text-white" : "text-slate-600"}`}
+          {@const isZoneDisabled = level === "Zone" && selectedCity !== null && !zonesConfigured}
+          <button
+            type="button"
+            class={`px-2.5 py-1 font-semibold transition-colors ${
+              activeGeoLevel === level
+                ? "bg-slate-900 text-white"
+                : isZoneDisabled
+                  ? "text-slate-300 cursor-not-allowed"
+                  : "text-slate-600 hover:bg-slate-100 cursor-pointer"
+            }`}
+            aria-pressed={activeGeoLevel === level}
+            aria-label={isZoneDisabled ? `${level} (zones non configurées)` : level}
+            disabled={isZoneDisabled}
+            onclick={() => handleGeoLevelClick(level)}
           >
             {level}
-          </span>
+          </button>
         {/each}
       </div>
       {#if selectedCity && (geoLoading || geoNotices.length > 0 || geoError)}

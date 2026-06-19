@@ -2,7 +2,6 @@
   import {
     Rocket,
     Radio,
-    Building2,
     SlidersHorizontal,
     MonitorDot,
     KanbanSquare,
@@ -17,10 +16,9 @@
     Settings,
     Map,
   } from "@lucide/svelte";
-  import { Badge, Button, Header } from "@sentropic/design-system-svelte";
+  import { Button, Header } from "@sentropic/design-system-svelte";
   import type { DemoView } from "$lib/demo/views.js";
   import type { AuthState } from "$lib/auth/auth-store.js";
-  import { appMode, toggleMode } from "$lib/state/mode.js";
 
   export let activeView: DemoView;
   export let onSelect: (view: DemoView) => void;
@@ -31,13 +29,11 @@
   /** Callback de deconnexion. */
   export let onLogout: (() => void) | undefined = undefined;
 
-  $: mode = $appMode;
   $: isAdmin = authState?.user?.isAdmin === true;
 
-  /** 4 vues principales — navigation visible. */
+  /** 3 vues principales — navigation visible (Opportunités retirée de la nav principale). */
   const mainItems: { id: DemoView; label: string; icon: typeof Rocket }[] = [
     { id: "signaux", label: "Signaux", icon: Radio },
-    { id: "opportunity", label: "Opportunités", icon: Building2 },
     { id: "evaluation", label: "Évaluation", icon: BarChart3 },
     { id: "sources", label: "Sources", icon: MapPin },
   ];
@@ -154,19 +150,6 @@
           Visite guidée
         </Button>
       {/if}
-
-      <Button
-        type="button"
-        size="sm"
-        variant="secondary"
-        aria-label={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles collectées"}
-        title={mode === "real" ? "Afficher les données carte Steve" : "Afficher les données réelles collectées"}
-        onclick={toggleMode}
-      >
-        <Badge tone={mode === "real" ? "success" : "info"}>
-          {mode === "real" ? "Réel" : "Carte Steve"}
-        </Badge>
-      </Button>
 
       {#if authState?.authenticated && authState.user}
         <!-- User name chip -->
