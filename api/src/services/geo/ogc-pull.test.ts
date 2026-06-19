@@ -10,7 +10,9 @@
  *   - fetchCollectionFeatures : pagination (2 pages), last page
  *   - upsertLotBatch : INSERT nouveau lot, UPDATE lot existant, skip NO_LOT vide
  *   - upsertZoneBatch : INSERT nouvelle zone, skip code vide
+ *   - extractZoneCode : priorité NUM_ZONE > NO_ZONAGE > CODE_MUN, URL_GRILLE
  *   - pullGeoOgc : intégration villes + gestion erreur ville inconnue
+ *   - pullGeoOgc (override) : zoneCollectionOverrides → collection exacte
  */
 import { describe, expect, it, vi } from "vitest";
 import type { Database } from "../../db/client.js";
@@ -20,6 +22,7 @@ import {
   normalizeZoneCode,
   lotCanonicalId,
   zoneCanonicalId,
+  extractZoneCode,
   fetchCollectionIds,
   fetchCollectionFeatures,
   upsertLotBatch,
@@ -463,5 +466,219 @@ describe("pullGeoOgc", () => {
     expect(results[1]!.citySlug).toBe("saint-eustache");
     expect(results[0]!.lotsUpserted).toBe(1);
     expect(results[1]!.lotsUpserted).toBe(1);
+  });
+});
+
+// ─── extractZoneCode ──────────────────────────────────────────────────────────
+
+describe("extractZoneCode", () => {
+  it("NUM_ZONE a la priorité sur NO_ZONAGE et CODE_MUN", () => {
+    expect(
+      extractZoneCode({ NUM_ZONE: "RA-1", NO_ZONAGE: "Z-99", CODE_MUN: "XX" }),
+    ).toBe("RA-1");
+  });
+
+  it("NO_ZONAGE utilisé si NUM_ZONE absent", () => {
+    expect(
+      extractZoneCode({ NO_ZONAGE: "Z-42", CODE_MUN: "XX" }),
+    ).toBe("Z-42");
+  });
+
+  it("CODE_MUN utilisé si NUM_ZONE et NO_ZONAGE absents", () => {
+    expect(
+      extractZoneCode({ CODE_MUN: "RCU-01" }),
+    ).toBe("RCU-01");
+  });
+
+  it("repli sur featureId si aucun attribut", () => {
+    expect(extractZoneCode({}, "feature-123")).toBe("feature-123");
+  });
+
+  it("retourne null si rien trouvé", () => {
+    expect(extractZoneCode({})).toBeNull();
+  });
+
+  it("ignore les valeurs vides / null", () => {
+    expect(
+      extractZoneCode({ NUM_ZONE: "", NO_ZONAGE: null, CODE_MUN: "MRC-02" }),
+    ).toBe("MRC-02");
+  });
+});
+
+// ─── pullGeoOgc (zoneCollectionOverrides) ────────────────────────────────────
+
+describe("pullGeoOgc avec zoneCollectionOverrides", () => {
+  it("tire la collection exacte de l'override (pas de catalogue zones)", async () => {
+    // Catalogue lots seulement — si on touchait aux zones du catalogue, le test échouerait
+    const catalogueLots = {
+      collections: [{ id: "qc-lots-mont-tremblant" }],
+    };
+    const zonePage: OgcFeatureCollection = {
+      type: "FeatureCollection",
+      numberMatched: 2,
+      numberReturned: 2,
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[-74.6, 46.1], [-74.5, 46.1], [-74.5, 46.2], [-74.6, 46.2], [-74.6, 46.1]]],
+          },
+          properties: { NUM_ZONE: "RA-1" },
+        },
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[-74.7, 46.1], [-74.6, 46.1], [-74.6, 46.2], [-74.7, 46.2], [-74.7, 46.1]]],
+          },
+          properties: { NUM_ZONE: "RA-2" },
+        },
+      ],
+    };
+
+    // Appels fetch attendus :
+    // 1. GET /collections (catalogue lots — pullLots=false, donc PAS de catalogue lots)
+    //    Avec override et pullLots=false : 0 appel catalogue ; 1 seul appel items zone
+    // pullLots=false → pas de GET catalogue lots
+    // zoneCollectionOverrides fourni → pas de GET catalogue zones
+    // → 1 seul appel : GET /collections/qc-zonage-mont-tremblant-arcgis/items
+    const fetchCalls: string[] = [];
+    const mockFetch = (async (url: string | URL | Request) => {
+      const urlStr = String(url);
+      fetchCalls.push(urlStr);
+      return new Response(JSON.stringify(zonePage), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+
+    const queryMock = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
+    const client = { query: queryMock, release: vi.fn() };
+    const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
+    const db = makeMockDb();
+
+    const results = await pullGeoOgc(db, pool, ["mont-tremblant"], {
+      fetchImpl: mockFetch,
+      pullLots: false,
+      pullZones: true,
+      zoneCollectionOverrides: {
+        "mont-tremblant": "qc-zonage-mont-tremblant-arcgis",
+      },
+    });
+
+    expect(results).toHaveLength(1);
+    expect(results[0]!.zonesUpserted).toBe(2);
+    expect(results[0]!.errors).toHaveLength(0);
+
+    // L'URL tirée doit cibler exactement la collection d'override
+    expect(fetchCalls).toHaveLength(1);
+    expect(fetchCalls[0]).toContain("qc-zonage-mont-tremblant-arcgis");
+    // Pas de catalogue général
+    expect(fetchCalls[0]).not.toContain("/collections?");
+  });
+
+  it("lit NUM_ZONE et l'inscrit comme code_affiche normalisé", async () => {
+    const zonePage: OgcFeatureCollection = {
+      type: "FeatureCollection",
+      numberMatched: 1,
+      numberReturned: 1,
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[-74.6, 46.1], [-74.5, 46.1], [-74.5, 46.2], [-74.6, 46.2], [-74.6, 46.1]]],
+          },
+          properties: { NUM_ZONE: "  ra-5  " }, // doit être normalisé en "RA-5"
+        },
+      ],
+    };
+
+    const mockFetch = (async () =>
+      new Response(JSON.stringify(zonePage), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+
+    const queryMock = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
+    const client = { query: queryMock, release: vi.fn() };
+    const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
+    const db = makeMockDb();
+
+    await pullGeoOgc(db, pool, ["mont-tremblant"], {
+      fetchImpl: mockFetch,
+      pullLots: false,
+      pullZones: true,
+      zoneCollectionOverrides: {
+        "mont-tremblant": "qc-zonage-mont-tremblant-arcgis",
+      },
+    });
+
+    const selectCall = queryMock.mock.calls.find(
+      (c: unknown[]) =>
+        typeof c[0] === "string" && c[0].includes("SELECT id FROM zone_versions"),
+    );
+    expect(selectCall).toBeDefined();
+    expect(selectCall![1]).toContain("RA-5");
+  });
+
+  it("conserve URL_GRILLE dans l'evidence (rimouski NO_ZONAGE)", async () => {
+    const zonePage: OgcFeatureCollection = {
+      type: "FeatureCollection",
+      numberMatched: 1,
+      numberReturned: 1,
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[-68.5, 48.4], [-68.4, 48.4], [-68.4, 48.5], [-68.5, 48.5], [-68.5, 48.4]]],
+          },
+          properties: {
+            NO_ZONAGE: "H-1",
+            URL_GRILLE: "https://example.com/grille-H-1.pdf",
+          },
+        },
+      ],
+    };
+
+    const mockFetch = (async () =>
+      new Response(JSON.stringify(zonePage), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+
+    const queryMock = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
+    const client = { query: queryMock, release: vi.fn() };
+    const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
+    const db = makeMockDb();
+
+    await pullGeoOgc(db, pool, ["rimouski"], {
+      fetchImpl: mockFetch,
+      pullLots: false,
+      pullZones: true,
+      zoneCollectionOverrides: {
+        rimouski: "qc-zonage-rimouski",
+      },
+    });
+
+    // Trouver l'appel INSERT avec evidence JSONB ($9)
+    const insertCall = queryMock.mock.calls.find(
+      (c: unknown[]) =>
+        typeof c[0] === "string" && c[0].includes("INSERT INTO zone_versions"),
+    );
+    expect(insertCall).toBeDefined();
+    // Les paramètres de l'INSERT avec geom sont : [canonId, citySlug, codeNorm, kind,
+    //   today, now, geomJson, rawRef, evidenceJson]
+    // L'evidence est donc à l'index 1 du tableau params (args[1] est le tableau de params)
+    const params = insertCall![1] as unknown[];
+    // Trouver le paramètre qui est du JSON avec "urlGrille"
+    const evidenceParam = params.find(
+      (p) => typeof p === "string" && p.includes("urlGrille"),
+    ) as string | undefined;
+    expect(evidenceParam).toBeDefined();
+    const evidence = JSON.parse(evidenceParam!) as Array<Record<string, unknown>>;
+    expect(evidence[0]!["urlGrille"]).toBe("https://example.com/grille-H-1.pdf");
   });
 });
