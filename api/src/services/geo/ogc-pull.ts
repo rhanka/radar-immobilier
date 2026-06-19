@@ -84,6 +84,15 @@ export interface PullGeoOgcOptions {
   pullLots?: boolean;
   /** Pull zones (default: true) */
   pullZones?: boolean;
+  /**
+   * Override de collection-id de zone EXACT par ville.
+   * Quand fourni pour un citySlug, UNIQUEMENT cette collection est tirée
+   * (le préfixe qc-zonage-<slug>* est ignoré).
+   *
+   * Exemple : { "mont-tremblant": "qc-zonage-mont-tremblant-arcgis",
+   *              "rimouski": "qc-zonage-rimouski" }
+   */
+  zoneCollectionOverrides?: Record<string, string>;
   /** Injectable fetch for tests (default: global fetch) */
   fetchImpl?: typeof fetch;
   /** Logger interface */
@@ -325,10 +334,58 @@ export async function upsertLotBatch(
 }
 
 /**
+ * Ordre de priorité pour la lecture du code de zone dans les propriétés OGC.
+ *
+ * Couvre les attributs rencontrés sur les différentes grilles québécoises :
+ *  - NUM_ZONE   : mont-tremblant (arcgis)
+ *  - NO_ZONAGE  : rimouski
+ *  - CODE_MUN   : saint-eustache, sainte-catherine, etc.
+ *  - CODE / code / ZONAGE / zonage : autres variantes connues
+ */
+export const ZONE_CODE_ATTRS = [
+  "NUM_ZONE",
+  "NO_ZONAGE",
+  "ZONE_CODE",
+  "zone_code",
+  "CODE_ZONE",
+  "code_zone",
+  "CODE_MUN",
+  "code_mun",
+  "ZONE",
+  "zone",
+  "CODE",
+  "code",
+  "ZONAGE",
+  "zonage",
+] as const;
+
+/**
+ * Extrait le premier attribut de code de zone non-vide dans les propriétés d'une feature.
+ * Retourne null si aucun attribut n'est trouvé.
+ */
+export function extractZoneCode(
+  properties: Record<string, unknown>,
+  featureId?: string | number,
+): string | null {
+  for (const attr of ZONE_CODE_ATTRS) {
+    const val = properties[attr];
+    if (val !== null && val !== undefined && String(val).trim() !== "") {
+      return String(val);
+    }
+  }
+  // Repli sur l'id de la feature si aucun attribut n'est trouvé
+  if (featureId !== undefined && featureId !== null && String(featureId).trim() !== "") {
+    return String(featureId);
+  }
+  return null;
+}
+
+/**
  * Upsert un batch de features zones dans zone_versions.
  * Clé : (code_affiche, city_slug) WHERE known_to IS NULL.
- * Le code de zone est lu depuis les propriétés courantes (CODE_MUN, code_mun,
- * CODE, ZONAGE, ou feature.id).
+ *
+ * Le code de zone est lu depuis les propriétés selon ZONE_CODE_ATTRS (ordre de priorité).
+ * URL_GRILLE est conservé dans les métadonnées evidence si présent.
  */
 export async function upsertZoneBatch(
   db: Database,
@@ -360,15 +417,7 @@ export async function upsertZoneBatch(
         : "zonage";
 
     for (const feature of features) {
-      const rawCode =
-        feature.properties?.["CODE_MUN"] ??
-        feature.properties?.["code_mun"] ??
-        feature.properties?.["CODE"] ??
-        feature.properties?.["code"] ??
-        feature.properties?.["ZONAGE"] ??
-        feature.properties?.["zonage"] ??
-        feature.id ??
-        null;
+      const rawCode = extractZoneCode(feature.properties ?? {}, feature.id);
 
       const codeNorm = normalizeZoneCode(rawCode);
       if (!codeNorm) {
@@ -383,6 +432,20 @@ export async function upsertZoneBatch(
       const canonId = zoneCanonicalId(citySlug, codeNorm);
       const rawRef = `ogc:${collectionId}:${codeNorm}`;
 
+      // Conserver URL_GRILLE (lien PDF de la grille) si présent dans les props
+      const urlGrille =
+        feature.properties?.["URL_GRILLE"] ??
+        feature.properties?.["url_grille"] ??
+        null;
+      const evidenceEntry: Record<string, unknown> = {
+        source: "ogc-api",
+        collectionId,
+        fetchedAt: now,
+      };
+      if (urlGrille) {
+        evidenceEntry["urlGrille"] = String(urlGrille);
+      }
+
       const existing = await client.query<{ id: string }>(
         `SELECT id FROM zone_versions
          WHERE code_affiche = $1 AND city_slug = $2 AND known_to IS NULL
@@ -396,9 +459,10 @@ export async function upsertZoneBatch(
             `UPDATE zone_versions
              SET geom = ST_SetSRID(ST_GeomFromGeoJSON($1), 4326),
                  geom_source = 'ogc-api',
-                 raw_ref = $2
-             WHERE id = $3`,
-            [geomJson, rawRef, existing.rows[0]!.id],
+                 raw_ref = $2,
+                 evidence = $3::jsonb
+             WHERE id = $4`,
+            [geomJson, rawRef, JSON.stringify([evidenceEntry]), existing.rows[0]!.id],
           );
         }
         upserted++;
@@ -421,7 +485,7 @@ export async function upsertZoneBatch(
               now,
               geomJson,
               rawRef,
-              JSON.stringify([{ source: "ogc-api", collectionId, fetchedAt: now }]),
+              JSON.stringify([evidenceEntry]),
             ],
           );
         } else {
@@ -441,7 +505,7 @@ export async function upsertZoneBatch(
               today,
               now,
               rawRef,
-              JSON.stringify([{ source: "ogc-api", collectionId, fetchedAt: now }]),
+              JSON.stringify([evidenceEntry]),
             ],
           );
         }
@@ -488,21 +552,32 @@ export async function pullGeoOgc(
     pageSize = DEFAULT_PAGE_SIZE,
     pullLots = true,
     pullZones = true,
+    zoneCollectionOverrides = {},
     fetchImpl = fetch,
     logger = silentLogger,
   } = opts;
 
-  // Charger le catalogue une fois
+  // Charger le catalogue une fois (seulement si nécessaire pour les collections sans override)
+  const needsCatalogueForLots = pullLots;
+  // On a besoin du catalogue pour les zones seulement si au moins une ville n'a pas d'override
+  const needsCatalogueForZones =
+    pullZones &&
+    citySlugs.some((slug) => !zoneCollectionOverrides[slug]);
+
   logger.info({ baseUrl }, "ogc-pull: chargement catalogue collections");
-  const lotsCollIds = pullLots
+  const lotsCollIds = needsCatalogueForLots
     ? await fetchCollectionIds(baseUrl, "qc-lots-", fetchImpl)
     : [];
-  const zoneCollIds = pullZones
+  const zoneCollIds = needsCatalogueForZones
     ? await fetchCollectionIds(baseUrl, "qc-zonage-", fetchImpl)
     : [];
 
   logger.info(
-    { lots: lotsCollIds.length, zones: zoneCollIds.length },
+    {
+      lots: lotsCollIds.length,
+      zones: zoneCollIds.length,
+      zoneOverrides: Object.keys(zoneCollectionOverrides).length,
+    },
     "ogc-pull: catalogue chargé",
   );
 
@@ -575,13 +650,23 @@ export async function pullGeoOgc(
 
     // ── Zones ─────────────────────────────────────────────────────────────────
     if (pullZones) {
-      const cityZoneCollIds = zoneCollIds.filter(
-        (id) =>
-          id === `qc-zonage-${citySlug}` ||
-          id.startsWith(`qc-zonage-${citySlug}-`),
-      );
+      // Si un override de collection exacte est fourni pour cette ville,
+      // on l'utilise directement sans passer par le catalogue par préfixe.
+      const overrideCollId = zoneCollectionOverrides[citySlug];
+      const cityZoneCollIds = overrideCollId
+        ? [overrideCollId]
+        : zoneCollIds.filter(
+            (id) =>
+              id === `qc-zonage-${citySlug}` ||
+              id.startsWith(`qc-zonage-${citySlug}-`),
+          );
 
-      if (cityZoneCollIds.length === 0) {
+      if (overrideCollId) {
+        logger.info(
+          { citySlug, collectionId: overrideCollId },
+          "ogc-pull: utilisation override collection zones",
+        );
+      } else if (cityZoneCollIds.length === 0) {
         logger.warn(
           { citySlug },
           "ogc-pull: aucune collection zones pour cette ville",
