@@ -345,6 +345,8 @@ export async function upsertLotBatch(
 export const ZONE_CODE_ATTRS = [
   "NUM_ZONE",
   "NO_ZONAGE",
+  "ZONE_CODE",
+  "zone_code",
   "CODE_ZONE",
   "code_zone",
   "CODE_MUN",
