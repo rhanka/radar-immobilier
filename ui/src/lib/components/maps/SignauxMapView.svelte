@@ -516,10 +516,15 @@
       return;
     }
     if (syncUrl) {
+      // Conserver le filtre actif dans la nouvelle route ville
+      const subsetValues = activeSubsetKey ? activeSubsetKey.split("|") : [];
       navigateToGeoRoute({
         level: "city",
         citySlug: entry.municipality.slug,
-        state: { mode: geoRoute?.state.mode ?? "signal" },
+        state: {
+          mode: geoRoute?.state.mode ?? "signal",
+          filters: subsetValues.length > 0 ? { subset: subsetValues } : {},
+        },
       });
     }
     selectedCity = entry;
