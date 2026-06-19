@@ -510,7 +510,7 @@ describe("extractZoneCode", () => {
 describe("pullGeoOgc avec zoneCollectionOverrides", () => {
   it("tire la collection exacte de l'override (pas de catalogue zones)", async () => {
     // Catalogue lots seulement — si on touchait aux zones du catalogue, le test échouerait
-    const catalogueLots = {
+    const _catalogueLots = {
       collections: [{ id: "qc-lots-mont-tremblant" }],
     };
     const zonePage: OgcFeatureCollection = {
