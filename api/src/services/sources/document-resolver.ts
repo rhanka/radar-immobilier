@@ -108,6 +108,45 @@ export async function findDocumentMetadata(
   return null;
 }
 
+const SHA256_RE = /^[0-9a-f]{64}$/i;
+
+/**
+ * Resolve a bare docSha (sha256) to its canonical CAS rawRef.
+ *
+ * Strategy, cheapest-first:
+ *   1. `findDocumentMetadata({ docSha })` — works when sibling `.meta.json`
+ *      files exist (scans them and matches `sha256`).
+ *   2. Fallback CAS scan — lists `raw/` and matches `…/cas/<docSha>.<ext>`.
+ *      Required for sources stored without `.meta.json` siblings (e.g.
+ *      `raw/proces-verbaux-rimouski/cas/<sha>.pdf`), where strategy 1 finds
+ *      nothing.
+ *
+ * Returns the normalized rawRef, or `null` when the docSha is malformed or no
+ * matching CAS object exists.
+ */
+export async function resolveDocShaToRawRef(
+  store: ObjectStore,
+  docSha: string,
+): Promise<string | null> {
+  const sha = docSha.trim().toLowerCase();
+  if (!SHA256_RE.test(sha)) return null;
+
+  // 1. Metadata-backed resolution (when .meta.json siblings exist).
+  const meta = await findDocumentMetadata(store, { docSha: sha });
+  if (meta?.rawRef) {
+    const normalized = normalizeRawRef(meta.rawRef);
+    if (normalized) return normalized;
+  }
+
+  // 2. CAS fallback: scan raw/ for …/cas/<sha>.<ext> (no .meta.json needed).
+  if (!store.list) return null;
+  const needle = `/cas/${sha}.`;
+  const match = (await store.list(RAW_PREFIX)).find(
+    (key) => key.includes(needle) && !key.endsWith(META_SUFFIX),
+  );
+  return match ? normalizeRawRef(match) : null;
+}
+
 export async function resolveRawContentType(
   store: ObjectStore,
   rawRef: string,

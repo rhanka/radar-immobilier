@@ -33,6 +33,10 @@ class MemoryStore implements ObjectStore {
       ? { key, size: value.bytes.byteLength, contentType: value.contentType }
       : null;
   }
+
+  async list(prefix: string): Promise<string[]> {
+    return [...this.objects.keys()].filter((k) => k.startsWith(prefix));
+  }
 }
 
 async function seedPdf(store: ObjectStore) {
@@ -98,5 +102,72 @@ describe("GET /api/documents/raw", () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("application/pdf");
+  });
+});
+
+describe("GET /api/documents/pdf/:docSha", () => {
+  it("returns 404 for a malformed docSha", async () => {
+    const app = documentsRoute({ store: new MemoryStore() });
+
+    const res = await app.request("/api/documents/pdf/not-a-sha");
+
+    expect(res.status).toBe(404);
+    await expect(res.json()).resolves.toMatchObject({ error: "document_not_found" });
+  });
+
+  it("returns 404 when no CAS object matches the docSha", async () => {
+    const sha = "a".repeat(64);
+    const app = documentsRoute({ store: new MemoryStore() });
+
+    const res = await app.request(`/api/documents/pdf/${sha}`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it("streams the PDF resolved via .meta.json siblings", async () => {
+    const store = new MemoryStore();
+    const record = await seedPdf(store);
+    const app = documentsRoute({ store });
+
+    const res = await app.request(`/api/documents/pdf/${record.sha256}`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+    expect(await res.text()).toBe("%PDF-1.4");
+  });
+
+  it("streams the PDF via the CAS fallback when no .meta.json exists", async () => {
+    const store = new MemoryStore();
+    const sha = "b".repeat(64);
+    // CAS object only — no .meta.json sibling (mirrors proces-verbaux-rimouski).
+    await store.put(
+      `raw/proces-verbaux-rimouski/cas/${sha}.pdf`,
+      "%PDF-1.5",
+      "application/pdf",
+    );
+    const app = documentsRoute({ store });
+
+    const res = await app.request(`/api/documents/pdf/${sha}`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+    expect(await res.text()).toBe("%PDF-1.5");
+  });
+
+  it("prefers the scrapeStore over the main store", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const sha = "c".repeat(64);
+    await scrapeStore.put(
+      `raw/proces-verbaux-rimouski/cas/${sha}.pdf`,
+      "%PDF-scrape",
+      "application/pdf",
+    );
+    const app = documentsRoute({ store, scrapeStore });
+
+    const res = await app.request(`/api/documents/pdf/${sha}`);
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("%PDF-scrape");
   });
 });
