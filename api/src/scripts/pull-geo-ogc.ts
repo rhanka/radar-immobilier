@@ -9,6 +9,12 @@
  *   node api/dist/scripts/pull-geo-ogc.js --no-zones saint-eustache
  *   node api/dist/scripts/pull-geo-ogc.js --no-lots saint-eustache
  *
+ *   # Override de collection de zonage EXACTE par ville (évite de tirer la mauvaise couche)
+ *   node api/dist/scripts/pull-geo-ogc.js mont-tremblant rimouski \
+ *     --zone-collection mont-tremblant=qc-zonage-mont-tremblant-arcgis \
+ *     --zone-collection rimouski=qc-zonage-rimouski \
+ *     --no-lots
+ *
  * ## Variables d'environnement requises
  *
  *   POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
@@ -42,23 +48,55 @@ function parseArgs(argv: string[]): {
   citySlugs: string[];
   pullLots: boolean;
   pullZones: boolean;
+  zoneCollectionOverrides: Record<string, string>;
 } {
   const args = argv.slice(2);
   let pullLots = true;
   let pullZones = true;
   const citySlugs: string[] = [];
+  const zoneCollectionOverrides: Record<string, string> = {};
 
-  for (const arg of args) {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!;
     if (arg === "--no-lots") {
       pullLots = false;
     } else if (arg === "--no-zones") {
       pullZones = false;
+    } else if (arg === "--zone-collection") {
+      // Forme : --zone-collection <citySlug>=<collectionId>
+      const next = args[++i];
+      if (!next) {
+        throw new Error("--zone-collection requiert un argument <citySlug>=<collectionId>");
+      }
+      const eqIdx = next.indexOf("=");
+      if (eqIdx < 1) {
+        throw new Error(`--zone-collection: format invalide "${next}", attendu citySlug=collectionId`);
+      }
+      const slug = next.slice(0, eqIdx).trim();
+      const collId = next.slice(eqIdx + 1).trim();
+      if (!slug || !collId) {
+        throw new Error(`--zone-collection: slug ou collectionId vide dans "${next}"`);
+      }
+      zoneCollectionOverrides[slug] = collId;
+    } else if (arg.startsWith("--zone-collection=")) {
+      // Forme compacte : --zone-collection=<citySlug>=<collectionId>
+      const rest = arg.slice("--zone-collection=".length);
+      const eqIdx = rest.indexOf("=");
+      if (eqIdx < 1) {
+        throw new Error(`--zone-collection: format invalide "${arg}", attendu --zone-collection=citySlug=collectionId`);
+      }
+      const slug = rest.slice(0, eqIdx).trim();
+      const collId = rest.slice(eqIdx + 1).trim();
+      if (!slug || !collId) {
+        throw new Error(`--zone-collection: slug ou collectionId vide dans "${arg}"`);
+      }
+      zoneCollectionOverrides[slug] = collId;
     } else if (!arg.startsWith("--")) {
       citySlugs.push(arg);
     }
   }
 
-  return { citySlugs, pullLots, pullZones };
+  return { citySlugs, pullLots, pullZones, zoneCollectionOverrides };
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -67,7 +105,7 @@ async function main(): Promise<void> {
   const config = loadConfig();
   const logger = createLogger(config.LOG_LEVEL);
 
-  const { citySlugs, pullLots, pullZones } = parseArgs(process.argv);
+  const { citySlugs, pullLots, pullZones, zoneCollectionOverrides } = parseArgs(process.argv);
 
   if (citySlugs.length === 0) {
     logger.error(
@@ -90,6 +128,7 @@ async function main(): Promise<void> {
       pullZones,
       baseUrl,
       pageSize,
+      zoneCollectionOverrides,
     },
     "pull-geo-ogc: démarrage",
   );
@@ -108,6 +147,7 @@ async function main(): Promise<void> {
       pageSize,
       pullLots,
       pullZones,
+      zoneCollectionOverrides,
       logger: {
         info: (obj, msg) => {
           if (msg) logger.info(obj as object, msg);
