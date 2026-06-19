@@ -1,0 +1,1443 @@
+{
+  "municipality": "rimouski",
+  "generated_at": "2026-06-19T10:23:06.026Z",
+  "ontology_version": "2.3",
+  "pv_count": 12,
+  "nodes": [
+    {
+      "id": "muni-rimouski",
+      "type": "Municipality",
+      "label": "Rimouski",
+      "properties": {
+        "slug": "rimouski",
+        "name": "Ville de Rimouski",
+        "mrc": "Rimouski-Neigette",
+        "province": "QC",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-01-13",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-01-13 — Rimouski",
+      "properties": {
+        "docSha": "76b616fc09f0e211616619ddf531583b367db4e094945826ca00df681afb377e",
+        "date": "2025-01-13",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-01-27",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-01-27 — Rimouski",
+      "properties": {
+        "docSha": "5a0730f572880791b831b96a835664d614d26b97acc13a1f2d3ce3bd882d58dd",
+        "date": "2025-01-27",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-02-10",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-02-10 — Rimouski",
+      "properties": {
+        "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+        "date": "2025-02-10",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-02-24",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-02-24 — Rimouski",
+      "properties": {
+        "docSha": "4541355d36bd72014f8837eedd7ef0502d62d0bb008c19e915cc89bcd615845a",
+        "date": "2025-02-24",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-03-05",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-03-05 — Rimouski",
+      "properties": {
+        "docSha": "76cf64912a1da2e26fda4c503d0d6f67d9b8af14b918774e180b7f3b1c955050",
+        "date": "2025-03-05",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-03-10",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-03-10 — Rimouski",
+      "properties": {
+        "docSha": "a5fb49d29a1c3bfc3c9fd47762f8d533e3fa1d34f081cdeab0ad27460903fef1",
+        "date": "2025-03-10",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-03-24",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-03-24 — Rimouski",
+      "properties": {
+        "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+        "date": "2025-03-24",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-04-07",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-04-07 — Rimouski",
+      "properties": {
+        "docSha": "19f71fac763f099044be245ec9b5d84891d48c29e03b0d5935a365078a6e12db",
+        "date": "2025-04-07",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-04-22",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-04-22 — Rimouski",
+      "properties": {
+        "docSha": "a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5",
+        "date": "2025-04-22",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-05-05",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-05-05 — Rimouski",
+      "properties": {
+        "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+        "date": "2025-05-05",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-05-20",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-05-20 — Rimouski",
+      "properties": {
+        "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "source-rimouski-pv-2025-06-02",
+      "type": "Source",
+      "label": "PV Conseil municipal 2025-06-02 — Rimouski",
+      "properties": {
+        "docSha": "78bbaa87c13550d85b6390f55d1bfdcd8f72146fa4f22a8bc3a8c2ff1b16fb09",
+        "date": "2025-06-02",
+        "municipality": "rimouski",
+        "sourceKind": "pv",
+        "format": "pdf"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-820-2014",
+      "type": "Bylaw",
+      "label": "Règlement de zonage R.V.R. 820-2014 — Rimouski",
+      "properties": {
+        "numero": "820-2014",
+        "title": "Règlement de zonage de la Ville de Rimouski",
+        "date": "2014-01-01",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-25-015",
+      "type": "Bylaw",
+      "label": "Règlement R.V.R. 25-015 — Modification règlement PPCMOI (évaluation patrimoniale)",
+      "properties": {
+        "numero": "25-015",
+        "title": "Règlement modifiant le Règlement relatif aux projets particuliers PPCMOI",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "stage": "adoption",
+        "meetingDate": "2025-05-20",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-25-016",
+      "type": "Bylaw",
+      "label": "Règlement R.V.R. 25-016 — Modification délimitation zone H-1289/R-1287",
+      "properties": {
+        "numero": "25-016",
+        "title": "Règlement modifiant le Règlement de zonage — délimitation zone H-1289/R-1287",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "stage": "adoption",
+        "meetingDate": "2025-05-20",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-25-017",
+      "type": "Bylaw",
+      "label": "Règlement R.V.R. 25-017 — Contingentement entrepôts zones I-1418/I-1451",
+      "properties": {
+        "numero": "25-017",
+        "title": "Règlement modifiant le Règlement de zonage — entrepôts zones I-1418 et I-1451",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "stage": "adoption",
+        "meetingDate": "2025-05-20",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-25-018",
+      "type": "Bylaw",
+      "label": "Règlement R.V.R. 25-018 — Plan d'urbanisme habitation densité pôle commercial",
+      "properties": {
+        "numero": "25-018",
+        "title": "Règlement modifiant le Plan d'urbanisme — habitation moyenne/forte densité pôle commercial régional",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "stage": "adoption",
+        "meetingDate": "2025-05-20",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-25-019",
+      "type": "Bylaw",
+      "label": "Règlement R.V.R. 25-019 — Usage entrepreneur général zone C-5019",
+      "properties": {
+        "numero": "25-019",
+        "title": "Règlement modifiant le Règlement de zonage — usage entrepreneur général C6 zone C-5019",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "stage": "adoption",
+        "meetingDate": "2025-05-20",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "bylaw-rimouski-25-020",
+      "type": "Bylaw",
+      "label": "Règlement R.V.R. 25-020 — Administration règlements d'urbanisme (permis/certificats)",
+      "properties": {
+        "numero": "25-020",
+        "title": "Règlement modifiant le Règlement sur l'application et l'administration des règlements d'urbanisme",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "en_vigueur",
+        "stage": "adoption",
+        "meetingDate": "2025-05-20",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-C-062",
+      "type": "Zone",
+      "label": "Zone C-062 — Rimouski (usage mixte/commercial centre-ville)",
+      "properties": {
+        "code": "C-062",
+        "municipality": "rimouski",
+        "usage": "commercial_mixte",
+        "bylaw": "820-2014",
+        "description": "Zone commerciale centre-ville — usage habitation multifamiliale H4 autorisé",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-H-1438",
+      "type": "Zone",
+      "label": "Zone H-1438 — Rimouski (habitation collective/hôtellerie)",
+      "properties": {
+        "code": "H-1438",
+        "municipality": "rimouski",
+        "usage": "habitation_collective",
+        "bylaw": "820-2014",
+        "description": "Zone habitation — usage H4 et H7 principaux, C4 hébergement dérogatoire",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-H-1289",
+      "type": "Zone",
+      "label": "Zone H-1289 — Rimouski (résidentiel, délimitation modifiée)",
+      "properties": {
+        "code": "H-1289",
+        "municipality": "rimouski",
+        "usage": "residentiel",
+        "bylaw": "820-2014",
+        "description": "Zone résidentielle dont la délimitation est modifiée par R.V.R. 25-016",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-R-1287",
+      "type": "Zone",
+      "label": "Zone R-1287 — Rimouski (résidentiel, délimitation modifiée)",
+      "properties": {
+        "code": "R-1287",
+        "municipality": "rimouski",
+        "usage": "residentiel",
+        "bylaw": "820-2014",
+        "description": "Zone résidentielle absorbant partie de H-1289 par R.V.R. 25-016",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-C-384",
+      "type": "Zone",
+      "label": "Zone C-384 — Rimouski (nouvelle zone Cité des achats)",
+      "properties": {
+        "code": "C-384",
+        "municipality": "rimouski",
+        "usage": "commercial",
+        "bylaw": "820-2014",
+        "description": "Nouvelle zone commerciale créée dans la Cité des achats (projet de règlement mai 2025)",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-C-1411-B",
+      "type": "Zone",
+      "label": "Zone C-1411-B — Rimouski (salle de quilles/arcade)",
+      "properties": {
+        "code": "C-1411-B",
+        "municipality": "rimouski",
+        "usage": "commercial_loisirs",
+        "bylaw": "820-2014",
+        "description": "Zone commerciale — usage complémentaire arcade autorisé par R.V.R. 25-016",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-C-5019",
+      "type": "Zone",
+      "label": "Zone C-5019 — Rimouski (entrepreneur général)",
+      "properties": {
+        "code": "C-5019",
+        "municipality": "rimouski",
+        "usage": "commercial_services",
+        "bylaw": "820-2014",
+        "description": "Zone commerciale — usage entrepreneur général C6 ajouté par R.V.R. 25-019",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-I-1418",
+      "type": "Zone",
+      "label": "Zone I-1418 — Rimouski (industrielle, entrepôts contingentés)",
+      "properties": {
+        "code": "I-1418",
+        "municipality": "rimouski",
+        "usage": "industriel",
+        "bylaw": "820-2014",
+        "description": "Zone industrielle — entrepôts et mini-entrepôts contingentés par R.V.R. 25-017",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-I-1451",
+      "type": "Zone",
+      "label": "Zone I-1451 — Rimouski (industrielle, entrepôts contingentés)",
+      "properties": {
+        "code": "I-1451",
+        "municipality": "rimouski",
+        "usage": "industriel",
+        "bylaw": "820-2014",
+        "description": "Zone industrielle — entrepôts et mini-entrepôts contingentés par R.V.R. 25-017",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-A-9145",
+      "type": "Zone",
+      "label": "Zone A-9145 — Rimouski (agricole CPTAQ)",
+      "properties": {
+        "code": "A-9145",
+        "municipality": "rimouski",
+        "usage": "agricole",
+        "bylaw": "820-2014",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-A-9003",
+      "type": "Zone",
+      "label": "Zone A-9003 — Rimouski (agricole CPTAQ)",
+      "properties": {
+        "code": "A-9003",
+        "municipality": "rimouski",
+        "usage": "agricole",
+        "bylaw": "820-2014",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-H-9036",
+      "type": "Zone",
+      "label": "Zone H-9036 — Rimouski (résidentiel usage conditionnel)",
+      "properties": {
+        "code": "H-9036",
+        "municipality": "rimouski",
+        "usage": "residentiel",
+        "bylaw": "820-2014",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "zone-rimouski-H-1261",
+      "type": "Zone",
+      "label": "Zone H-1261 — Rimouski (résidentiel usage conditionnel)",
+      "properties": {
+        "code": "H-1261",
+        "municipality": "rimouski",
+        "usage": "residentiel",
+        "bylaw": "820-2014",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "lot-rimouski-6661741",
+      "type": "Lot",
+      "label": "Lot 6 661 741 — 333, boul. René-Lepage Est, Rimouski (SPAR 328 logements)",
+      "properties": {
+        "lotNumber": "6661741",
+        "municipality": "rimouski",
+        "usage": "residentiel_mixte",
+        "description": "Lot SPAR — projet 328 logements abordables en zone C-062",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "lot-rimouski-6661049",
+      "type": "Lot",
+      "label": "Lot 6 661 049 — Stationnement adjacent projet SPAR, Rimouski",
+      "properties": {
+        "lotNumber": "6661049",
+        "municipality": "rimouski",
+        "usage": "stationnement",
+        "description": "Lot de stationnement associé au projet SPAR 328 logements",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "lot-rimouski-2968175",
+      "type": "Lot",
+      "label": "Lot 2 968 175 — 556, rue Saint-Germain Est (Manoir Normandie), Rimouski",
+      "properties": {
+        "lotNumber": "2968175",
+        "municipality": "rimouski",
+        "usage": "hebergement",
+        "description": "Lot Manoir Normandie — PPCMOI agrandissement hébergement en zone H-1438",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "lot-rimouski-3340425",
+      "type": "Lot",
+      "label": "Lot 3 340 425 — Ferme E.M. Duchesne, Rimouski (CPTAQ)",
+      "properties": {
+        "lotNumber": "3340425",
+        "municipality": "rimouski",
+        "usage": "agricole",
+        "description": "Lot agricole — demande CPTAQ aliénation 0,185 ha zone A-9145",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "lot-rimouski-3662549",
+      "type": "Lot",
+      "label": "Lot 3 662 549 — Claude Dubois, Rimouski (CPTAQ)",
+      "properties": {
+        "lotNumber": "3662549",
+        "municipality": "rimouski",
+        "usage": "agricole",
+        "description": "Lot agricole — demande CPTAQ aliénation 0,1 ha zone A-9003",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "lot-rimouski-3447399",
+      "type": "Lot",
+      "label": "Lot 3 447 399 — Rue des Chenel, Rimouski (vente terrain)",
+      "properties": {
+        "lotNumber": "3447399",
+        "municipality": "rimouski",
+        "usage": "residentiel",
+        "description": "Lot vendu par la Ville à Jean Gagné et Julie Doucet",
+        "evidenceCompleteness": "missing_source_link"
+      }
+    },
+    {
+      "id": "event-rimouski-ppcmoi-spar-2025-02-10",
+      "type": "DesignationEvent",
+      "label": "PPCMOI — Projet SPAR 328 logements abordables, 333 boul. René-Lepage Est (consultation)",
+      "properties": {
+        "date": "2025-02-10",
+        "meetingDate": "2025-02-10",
+        "decision": "approuvé_pour_consultation",
+        "kind": "ppcmoi",
+        "municipality": "rimouski",
+        "resolution": "2025-02-086",
+        "description": "Projet mixte 328 logements abordables SPAR — dérogation normes zonage zone C-062",
+        "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+        "demandeur_corporate": "Société du patrimoine Angus Résidentiel (SPAR)",
+        "etape": "ppcmoi",
+        "etape_date": "2025-02-10",
+        "zone_ref": "C-062",
+        "page": 10,
+        "citation": "Projet de résolution - Pouvoir en habitation - Construction de logements abordables - 333, boulevard René-Lepage Est - Société du patrimoine Angus Résidentiel (SPAR)",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-ppcmoi-manoir-2025-02-10",
+      "type": "DesignationEvent",
+      "label": "PPCMOI — Manoir Normandie, 556 rue Saint-Germain Est (second projet)",
+      "properties": {
+        "date": "2025-02-10",
+        "meetingDate": "2025-02-10",
+        "decision": "approuvé_second_projet",
+        "kind": "ppcmoi",
+        "municipality": "rimouski",
+        "resolution": "2025-02-087",
+        "description": "Agrandissement Manoir Normandie — usage C4 hébergement + dérogations stationnement zone H-1438",
+        "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+        "demandeur_corporate": "Capital Transit inc.",
+        "etape": "ppcmoi",
+        "etape_date": "2025-02-10",
+        "outcome": "accordee",
+        "page": 13,
+        "citation": "Second projet de résolution - Projet particulier de construction, de modification ou d'occupation d'un immeuble (PPCMOI) - Lot 2 968 175 du cadastre du Québec Capital Transit inc. (Manoir Normandie)",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-cptaq-duchesne-2025-05-05",
+      "type": "DesignationEvent",
+      "label": "CPTAQ — Ferme E.M. Duchesne, lot 3 340 425 (aliénation 0,185 ha zone A-9145)",
+      "properties": {
+        "date": "2025-05-05",
+        "meetingDate": "2025-05-05",
+        "decision": "recommandé",
+        "kind": "cptaq",
+        "municipality": "rimouski",
+        "description": "Recommandation CPTAQ aliénation 0,185 ha lot 3 340 425 zone A-9145",
+        "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+        "etape": "inconnu",
+        "no_lot": "3340425",
+        "zone_ref": "A-9145",
+        "page": 13,
+        "citation": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Ferme E.M. Duchesne - Lot 3 340 425 du cadastre du Québec. Et résolu que le conseil recommande à la Commission de protection du territoire agricole du Québec (CPTAQ) d'accepter la demande de monsieur Duchesne, telle que formulée.",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1.pdf",
+        "etape_date": "2025-05-05"
+      }
+    },
+    {
+      "id": "event-rimouski-cptaq-dubois-2025-03-24",
+      "type": "DesignationEvent",
+      "label": "CPTAQ — Claude Dubois, lot 3 662 549 (aliénation 0,1 ha zone A-9003)",
+      "properties": {
+        "date": "2025-03-24",
+        "meetingDate": "2025-03-24",
+        "decision": "recommandé",
+        "kind": "cptaq",
+        "municipality": "rimouski",
+        "description": "Recommandation CPTAQ aliénation 0,1 ha lot 3 662 549 zone A-9003",
+        "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+        "etape": "inconnu",
+        "no_lot": "3662549",
+        "zone_ref": "A-9003",
+        "page": 13,
+        "citation": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Monsieur Claude Dubois - Lot 3 662 549 du cadastre du Québec",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e.pdf",
+        "etape_date": "2025-03-24"
+      }
+    },
+    {
+      "id": "event-rimouski-rezonage-H1289-R1287-2025-05-20",
+      "type": "DesignationEvent",
+      "label": "Rezonage — Modification délimitation zone H-1289 vers R-1287 (R.V.R. 25-016)",
+      "properties": {
+        "date": "2025-05-20",
+        "meetingDate": "2025-05-20",
+        "decision": "approuvé",
+        "kind": "rezonage",
+        "municipality": "rimouski",
+        "resolution": "25-016",
+        "description": "Modification délimitation zone H-1289 à même zone R-1287",
+        "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+        "etape": "adoption",
+        "etape_date": "2025-05-20",
+        "page": 24,
+        "citation": "25-016\n\nRèglement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287\n\n[…] Et résolu que le conseil adopte le Règlement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287 (R.V.R. 25-016).",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-creation-C384-2025-05-20",
+      "type": "DesignationEvent",
+      "label": "Création zone C-384 — Modification zonage Cité des achats (projet règlement)",
+      "properties": {
+        "date": "2025-05-20",
+        "meetingDate": "2025-05-20",
+        "decision": "premier_projet",
+        "kind": "rezonage",
+        "municipality": "rimouski",
+        "resolution": "2025-05-393",
+        "description": "Premier projet règlement créant zone C-384 et modifiant délimitation zones Cité des achats",
+        "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+        "etape": "projet_reglement",
+        "etape_date": "2025-05-20",
+        "zone_ref": "C-384",
+        "page": 22,
+        "citation": "2025-05-393\n\nPremier projet de règlement - Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats\n\nEt résolu que le conseil adopte un premier projet du Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats.",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-derogation-H312-2025-05-05",
+      "type": "DesignationEvent",
+      "label": "Dérogation refusée — modification zonage stationnement zone H-312",
+      "properties": {
+        "date": "2025-05-05",
+        "meetingDate": "2025-05-05",
+        "decision": "refusé",
+        "kind": "derogation",
+        "municipality": "rimouski",
+        "description": "Refus modification Règlement de zonage pour paver stationnement zone H-312",
+        "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+        "etape": "derogation_mineure",
+        "etape_date": "2025-05-05",
+        "outcome": "refusee",
+        "zone_ref": "H-312",
+        "page": 14,
+        "citation": "Refus - Demande de modification à la réglementation d'urbanisme - Obligation de paver un stationnement - Zone H-312 - Règlement de zonage (R.V.R. 820-2014). Et résolu que le conseil refuse la demande de modification au Règlement de zonage (R.V.R. 820-2014) décrite en préambule de la présente résolution.",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-derogation-514-2025-05-20",
+      "type": "DesignationEvent",
+      "label": "Dérogation mineure — demande urbanisme 2025-00081 accordée",
+      "properties": {
+        "date": "2025-05-20",
+        "meetingDate": "2025-05-20",
+        "decision": "approuvé",
+        "kind": "derogation",
+        "municipality": "rimouski",
+        "dossier": "2025-00081",
+        "description": "Dérogation mineure accordée conditionnellement — aires gazonnées cour avant stationnement",
+        "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+        "etape": "derogation_mineure",
+        "etape_date": "2025-05-20",
+        "outcome": "accordee",
+        "page": 21,
+        "citation": "2025-05-392\n\nDérogation mineure - Demande d'urbanisme 2025-00081 - Immeuble sis au 514, rue Tessier\n\nEt résolu que le conseil accorde la dérogation mineure décrite en préambule de la présente résolution, conditionnellement à l'aménagement et au maintien d'aires gazonnées en cour avant dans les zones hachurées du stationnement, sur une superficie d'au moins 35 mètres carrés.",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-derogation-orge-2025-04-22",
+      "type": "DesignationEvent",
+      "label": "Dérogation mineure refusée — 15 rue de l'Orge, lot 3 339 765",
+      "properties": {
+        "date": "2025-04-22",
+        "meetingDate": "2025-04-22",
+        "decision": "refusé",
+        "kind": "derogation",
+        "municipality": "rimouski",
+        "dossier": "2025-00055",
+        "description": "Dérogation 16,53 m² refusée — dérogation non mineure, pas conforme R.V.R. 820-2014",
+        "docSha": "a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5",
+        "etape": "derogation_mineure",
+        "etape_date": "2025-04-22",
+        "outcome": "refusee",
+        "no_lot": "3339765",
+        "page": 13,
+        "citation": "Dérogation mineure - Demande d'urbanisme 2025-00055 - Immeuble sis au 15, rue de l'Orge - Lot 3 339 765 du cadastre du Québec. Et résolu que le conseil refuse la dérogation mineure décrite en préambule de la présente résolution.",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5.pdf"
+      }
+    },
+    {
+      "id": "event-rimouski-derogation-arthur-buies-2025-04-22",
+      "type": "DesignationEvent",
+      "label": "Dérogations mineures accordées — 16 boul. Arthur-Buies Ouest, lot 2 488 508",
+      "properties": {
+        "date": "2025-04-22",
+        "meetingDate": "2025-04-22",
+        "decision": "approuvé",
+        "kind": "derogation",
+        "municipality": "rimouski",
+        "dossier": "2024-00278",
+        "description": "Dérogations mineures accordées (4,5 m et 1 m) — lot 2 488 508",
+        "docSha": "a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5",
+        "etape": "derogation_mineure",
+        "etape_date": "2025-04-22",
+        "outcome": "accordee",
+        "no_lot": "2488508",
+        "page": 13,
+        "citation": "Dérogations mineures - Demande d'urbanisme 2024-00278 - Immeuble sis au 16, boulevard Arthur-Buies Ouest - Lot 2 488 508 du cadastre du Québec. Et résolu que le conseil autorise les dérogations mineures décrites en préambule de la présente résolution.",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5.pdf"
+      }
+    },
+    {
+      "id": "signal-rimouski-densification-spar-328-logements",
+      "type": "Signal",
+      "label": "Signal densification — SPAR 328 logements abordables centre-ville Rimouski",
+      "properties": {
+        "category": "densification",
+        "kind": "logements_abordables",
+        "date": "2025-02-10",
+        "municipality": "rimouski",
+        "status": "candidate",
+        "intensite": "haute",
+        "nb_unites_min": 328,
+        "nb_unites_max": 328,
+        "description": "Projet mixte SPAR 328 logements abordables 333 boul. René-Lepage Est — dérogations multiples zone C-062",
+        "resolution": "2025-02-086",
+        "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+        "etape": "projet_reglement",
+        "etape_date": "2025-02-10",
+        "zone_ref": "C-062",
+        "page": 20,
+        "citation": "Considérant que Société du Patrimoine Angus Résidentiel (SPAR) souhaite réaliser un projet d'habitation de 328 logements (ci-après le « Projet ») permettant ainsi d'accroître l'offre de logements abordables",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d.pdf"
+      }
+    },
+    {
+      "id": "signal-rimouski-densification-polecommercial-2025-05",
+      "type": "Signal",
+      "label": "Signal densification — Habitation densité dans pôle commercial régional (R.V.R. 25-018)",
+      "properties": {
+        "category": "rezonage",
+        "kind": "densification",
+        "date": "2025-05-20",
+        "municipality": "rimouski",
+        "status": "candidate",
+        "intensite": "moyenne",
+        "description": "Autorisation logements moyenne/forte densité dans affectation pôle commercial régional — signal opportunité résidentiel",
+        "resolution": "25-018",
+        "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+        "etape": "projet_reglement",
+        "etape_date": "2025-05-20",
+        "page": 25,
+        "citation": "25-018\n\nRèglement modifiant le Plan d'urbanisme, notamment, afin d'autoriser le groupe d'usages « Habitation de moyenne ou forte densité » dans l'affectation « Pôle commercial régional » sur certains lots\n\nEt résolu que le conseil adopte le Règlement modifiant le Plan d'urbanisme, notamment, afin d'autoriser le groupe d'usages « Habitation de moyenne ou forte densité » dans l'affectation « Pôle commercial régional » sur certains lots (R.V.R. 25-018).",
+        "pdfPath": "raw/proces-verbaux-rimouski/cas/da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff.pdf"
+      }
+    },
+    {
+      "id": "constraint-rimouski-cptaq-duchesne-A9145",
+      "type": "Constraint",
+      "label": "Contrainte CPTAQ — Zone agricole A-9145, lot 3 340 425 (Ferme Duchesne)",
+      "properties": {
+        "constraintType": "cptaq",
+        "status": "actif",
+        "municipality": "rimouski",
+        "loi": "Loi sur la protection du territoire et des activités agricoles (LPTAA)",
+        "organisme": "CPTAQ",
+        "description": "Zone agricole protégée — aliénation 0,185 ha soumise à autorisation CPTAQ",
+        "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+        "meetingDate": "2025-05-05"
+      }
+    },
+    {
+      "id": "constraint-rimouski-cptaq-dubois-A9003",
+      "type": "Constraint",
+      "label": "Contrainte CPTAQ — Zone agricole A-9003, lot 3 662 549 (Claude Dubois)",
+      "properties": {
+        "constraintType": "cptaq",
+        "status": "actif",
+        "municipality": "rimouski",
+        "loi": "Loi sur la protection du territoire et des activités agricoles (LPTAA)",
+        "organisme": "CPTAQ",
+        "description": "Zone agricole protégée — aliénation 0,1 ha soumise à autorisation CPTAQ",
+        "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+        "meetingDate": "2025-03-24"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-01-13",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-01-27",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-02-10",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-02-24",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-03-05",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-03-10",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-03-24",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-04-07",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-04-22",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-05-05",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "muni-rimouski",
+      "target": "source-rimouski-pv-2025-06-02",
+      "type": "has_source",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-C-062",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-H-1438",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-H-1289",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-R-1287",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-C-384",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-C-1411-B",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-C-5019",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-I-1418",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-I-1451",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-A-9145",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-A-9003",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-H-9036",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-H-1261",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "lot-rimouski-6661741",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "lot-rimouski-6661049",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "lot-rimouski-2968175",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "lot-rimouski-3340425",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "lot-rimouski-3662549",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "lot-rimouski-3447399",
+      "target": "muni-rimouski",
+      "type": "located_in",
+      "refs": []
+    },
+    {
+      "source": "zone-rimouski-C-062",
+      "target": "bylaw-rimouski-820-2014",
+      "type": "governed_by",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "zone-rimouski-H-1438",
+      "target": "bylaw-rimouski-820-2014",
+      "type": "governed_by",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "zone-rimouski-A-9145",
+      "target": "bylaw-rimouski-820-2014",
+      "type": "governed_by",
+      "refs": [
+        {
+          "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-016",
+      "target": "bylaw-rimouski-820-2014",
+      "type": "amends",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-017",
+      "target": "bylaw-rimouski-820-2014",
+      "type": "amends",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-019",
+      "target": "bylaw-rimouski-820-2014",
+      "type": "amends",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-015",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "derived_from",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-016",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "derived_from",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-017",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "derived_from",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-018",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "derived_from",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-019",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "derived_from",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-020",
+      "target": "source-rimouski-pv-2025-05-20",
+      "type": "derived_from",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-ppcmoi-spar-2025-02-10",
+      "target": "lot-rimouski-6661741",
+      "type": "targets_lot",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 10,
+          "excerpt": "Projet de résolution - Pouvoir en habitation - Construction de logements abordables - 333, boulevard René-Lepage Est - Société du patrimoine Angus Résidentiel (SPAR)"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-ppcmoi-spar-2025-02-10",
+      "target": "zone-rimouski-C-062",
+      "type": "targets_zone",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 10,
+          "excerpt": "Projet de résolution - Pouvoir en habitation - Construction de logements abordables - 333, boulevard René-Lepage Est - Société du patrimoine Angus Résidentiel (SPAR)"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-ppcmoi-spar-2025-02-10",
+      "target": "signal-rimouski-densification-spar-328-logements",
+      "type": "raises_signal",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 10,
+          "excerpt": "Projet de résolution - Pouvoir en habitation - Construction de logements abordables - 333, boulevard René-Lepage Est - Société du patrimoine Angus Résidentiel (SPAR)"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-ppcmoi-manoir-2025-02-10",
+      "target": "lot-rimouski-2968175",
+      "type": "targets_lot",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 13,
+          "excerpt": "Second projet de résolution - Projet particulier de construction, de modification ou d'occupation d'un immeuble (PPCMOI) - Lot 2 968 175 du cadastre du Québec Capital Transit inc. (Manoir Normandie)"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-ppcmoi-manoir-2025-02-10",
+      "target": "zone-rimouski-H-1438",
+      "type": "targets_zone",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 13,
+          "excerpt": "Second projet de résolution - Projet particulier de construction, de modification ou d'occupation d'un immeuble (PPCMOI) - Lot 2 968 175 du cadastre du Québec Capital Transit inc. (Manoir Normandie)"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-cptaq-duchesne-2025-05-05",
+      "target": "lot-rimouski-3340425",
+      "type": "targets_lot",
+      "refs": [
+        {
+          "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+          "page": 13,
+          "excerpt": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Ferme E.M. Duchesne - Lot 3 340 425 du cadastre du Québec. Et résolu que le conseil recommande à la Commission de protection du territoire agricole du Québec (CPTAQ) d'accepter la demande de monsieur Duchesne, telle que formulée."
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-cptaq-duchesne-2025-05-05",
+      "target": "zone-rimouski-A-9145",
+      "type": "targets_zone",
+      "refs": [
+        {
+          "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+          "page": 13,
+          "excerpt": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Ferme E.M. Duchesne - Lot 3 340 425 du cadastre du Québec. Et résolu que le conseil recommande à la Commission de protection du territoire agricole du Québec (CPTAQ) d'accepter la demande de monsieur Duchesne, telle que formulée."
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-cptaq-dubois-2025-03-24",
+      "target": "lot-rimouski-3662549",
+      "type": "targets_lot",
+      "refs": [
+        {
+          "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+          "page": 13,
+          "excerpt": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Monsieur Claude Dubois - Lot 3 662 549 du cadastre du Québec"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-cptaq-dubois-2025-03-24",
+      "target": "zone-rimouski-A-9003",
+      "type": "targets_zone",
+      "refs": [
+        {
+          "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+          "page": 13,
+          "excerpt": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Monsieur Claude Dubois - Lot 3 662 549 du cadastre du Québec"
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-rezonage-H1289-R1287-2025-05-20",
+      "target": "zone-rimouski-H-1289",
+      "type": "rezones",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 24,
+          "excerpt": "25-016\n\nRèglement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287\n\n[…] Et résolu que le conseil adopte le Règlement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287 (R.V.R. 25-016)."
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-rezonage-H1289-R1287-2025-05-20",
+      "target": "zone-rimouski-R-1287",
+      "type": "rezones",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 24,
+          "excerpt": "25-016\n\nRèglement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287\n\n[…] Et résolu que le conseil adopte le Règlement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287 (R.V.R. 25-016)."
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-creation-C384-2025-05-20",
+      "target": "zone-rimouski-C-384",
+      "type": "rezones",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 22,
+          "excerpt": "2025-05-393\n\nPremier projet de règlement - Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats\n\nEt résolu que le conseil adopte un premier projet du Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats."
+        }
+      ]
+    },
+    {
+      "source": "event-rimouski-creation-C384-2025-05-20",
+      "target": "signal-rimouski-densification-polecommercial-2025-05",
+      "type": "raises_signal",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 22,
+          "excerpt": "2025-05-393\n\nPremier projet de règlement - Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats\n\nEt résolu que le conseil adopte un premier projet du Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-02-10",
+      "target": "event-rimouski-ppcmoi-spar-2025-02-10",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 10,
+          "excerpt": "Projet de résolution - Pouvoir en habitation - Construction de logements abordables - 333, boulevard René-Lepage Est - Société du patrimoine Angus Résidentiel (SPAR)"
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-02-10",
+      "target": "event-rimouski-ppcmoi-manoir-2025-02-10",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+          "page": 13,
+          "excerpt": "Second projet de résolution - Projet particulier de construction, de modification ou d'occupation d'un immeuble (PPCMOI) - Lot 2 968 175 du cadastre du Québec Capital Transit inc. (Manoir Normandie)"
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-05-05",
+      "target": "event-rimouski-cptaq-duchesne-2025-05-05",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+          "page": 13,
+          "excerpt": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Ferme E.M. Duchesne - Lot 3 340 425 du cadastre du Québec. Et résolu que le conseil recommande à la Commission de protection du territoire agricole du Québec (CPTAQ) d'accepter la demande de monsieur Duchesne, telle que formulée."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-03-24",
+      "target": "event-rimouski-cptaq-dubois-2025-03-24",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+          "page": 13,
+          "excerpt": "Recommandation - Commission de protection du territoire agricole du Québec (CPTAQ) - Monsieur Claude Dubois - Lot 3 662 549 du cadastre du Québec"
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-05-20",
+      "target": "event-rimouski-rezonage-H1289-R1287-2025-05-20",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 24,
+          "excerpt": "25-016\n\nRèglement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287\n\n[…] Et résolu que le conseil adopte le Règlement modifiant le Règlement de zonage, afin de modifier la délimitation de la zone H-1289 au plan de zonage à même la zone R-1287 (R.V.R. 25-016)."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-05-20",
+      "target": "event-rimouski-creation-C384-2025-05-20",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 22,
+          "excerpt": "2025-05-393\n\nPremier projet de règlement - Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats\n\nEt résolu que le conseil adopte un premier projet du Règlement modifiant le Règlement de zonage, afin de créer la zone C-384 et modifier la délimitation de certaines zones dans la Cité des achats."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-04-22",
+      "target": "event-rimouski-derogation-orge-2025-04-22",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5",
+          "page": 13,
+          "excerpt": "Dérogation mineure - Demande d'urbanisme 2025-00055 - Immeuble sis au 15, rue de l'Orge - Lot 3 339 765 du cadastre du Québec. Et résolu que le conseil refuse la dérogation mineure décrite en préambule de la présente résolution."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-04-22",
+      "target": "event-rimouski-derogation-arthur-buies-2025-04-22",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5",
+          "page": 13,
+          "excerpt": "Dérogations mineures - Demande d'urbanisme 2024-00278 - Immeuble sis au 16, boulevard Arthur-Buies Ouest - Lot 2 488 508 du cadastre du Québec. Et résolu que le conseil autorise les dérogations mineures décrites en préambule de la présente résolution."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-05-20",
+      "target": "event-rimouski-derogation-514-2025-05-20",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 21,
+          "excerpt": "2025-05-392\n\nDérogation mineure - Demande d'urbanisme 2025-00081 - Immeuble sis au 514, rue Tessier\n\nEt résolu que le conseil accorde la dérogation mineure décrite en préambule de la présente résolution, conditionnellement à l'aménagement et au maintien d'aires gazonnées en cour avant dans les zones hachurées du stationnement, sur une superficie d'au moins 35 mètres carrés."
+        }
+      ]
+    },
+    {
+      "source": "source-rimouski-pv-2025-05-05",
+      "target": "event-rimouski-derogation-H312-2025-05-05",
+      "type": "supports",
+      "refs": [
+        {
+          "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+          "page": 14,
+          "excerpt": "Refus - Demande de modification à la réglementation d'urbanisme - Obligation de paver un stationnement - Zone H-312 - Règlement de zonage (R.V.R. 820-2014). Et résolu que le conseil refuse la demande de modification au Règlement de zonage (R.V.R. 820-2014) décrite en préambule de la présente résolution."
+        }
+      ]
+    },
+    {
+      "source": "constraint-rimouski-cptaq-duchesne-A9145",
+      "target": "lot-rimouski-3340425",
+      "type": "constrains",
+      "refs": [
+        {
+          "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "constraint-rimouski-cptaq-dubois-A9003",
+      "target": "lot-rimouski-3662549",
+      "type": "constrains",
+      "refs": [
+        {
+          "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-017",
+      "target": "zone-rimouski-I-1418",
+      "type": "applies_to",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-017",
+      "target": "zone-rimouski-I-1451",
+      "type": "applies_to",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    },
+    {
+      "source": "bylaw-rimouski-25-019",
+      "target": "zone-rimouski-C-5019",
+      "type": "applies_to",
+      "refs": [
+        {
+          "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+          "page": 1
+        }
+      ]
+    }
+  ]
+}

@@ -94,3 +94,24 @@ noeud, portées sur les `edges[].refs` (aujourd'hui `excerpt:"" page:1`).
    baseline, re-transform v2.3 → gate → publish SCW → projeter PG.
 3. Vérif SQL : count signaux groundés (`source_url`/`citation` ≠ null) > 0.
 4. Ajouter la route `GET /…/pdf/:docSha` côté api si nécessaire (UI #2).
+
+## 6. Résultat du pilote rimouski (exécuté)
+
+- 5 PV téléchargés par docSha (`raw/proces-verbaux-rimouski/cas/<sha>.pdf`),
+  pdftotext OK (58–101 pages).
+- Citations extraites par **Sonnet 4.6** (`claude -p --model claude-sonnet-4-6`),
+  une par noeud, page + verbatim. Vérif anti-hallucination : **12/12 verbatim**
+  (4 full-match, 8 partial-match dû au wrapping multi-colonnes ; 0 mismatch),
+  **12/12 pages exactes**.
+- Grounding injecté : `properties.{page,citation,pdfPath,docSha}` sur les 12
+  noeuds + `edges[].refs[] {docSha,page,excerpt}` (23 refs).
+- Pipeline canonique : transform v2.3 (préserve etape×12 / zone_ref×6 / no_lot×4)
+  → clean-refs → **gate v2.3 PASSE** (`validatedExtraction:true`, 0 generated://,
+  0 missing_source_link) → **publié SCW** `graph/rimouski/latest.json`
+  (backup `history/pre-v23-pilot-<ts>.json`).
+- Projeté en PG (`project-graph-from-s3.ts rimouski`) : 53 nodes / 71 edges.
+- **Vérif SQL : 12/12** Signal+DesignationEvent avec `citation`+`page`+`pdfPath`.
+
+Artefacts : `docs/spec/grounding/rimouski/*.cites.json` (citations vérifiées),
+`rimouski-grounded-v23.json` (graphe publié). Outils :
+`tools/grounding/extract-citations.sh`, `tools/grounding/inject-grounding.mjs`.

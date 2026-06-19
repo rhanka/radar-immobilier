@@ -1,0 +1,87 @@
+[
+  {
+    "docSha": "0ba26024588a3db4f3ba011c17a07c2acc8e2e225e85ba6d5d6f8739366444e1",
+    "nodes": [
+      {
+        "id": "event-rimouski-cptaq-duchesne-2025-05-05",
+        "type": "DesignationEvent",
+        "label": "CPTAQ — Ferme E.M. Duchesne, lot 3 340 425 (aliénation 0,185 ha zone A-9145)"
+      },
+      {
+        "id": "event-rimouski-derogation-H312-2025-05-05",
+        "type": "DesignationEvent",
+        "label": "Dérogation refusée — modification zonage stationnement zone H-312"
+      }
+    ]
+  },
+  {
+    "docSha": "0d75f6841e8124da5397d0362c2e8941e88159c613af0bf4dc42ebbfad9f7b4d",
+    "nodes": [
+      {
+        "id": "event-rimouski-ppcmoi-spar-2025-02-10",
+        "type": "DesignationEvent",
+        "label": "PPCMOI — Projet SPAR 328 logements abordables, 333 boul. René-Lepage Est (consultation)"
+      },
+      {
+        "id": "event-rimouski-ppcmoi-manoir-2025-02-10",
+        "type": "DesignationEvent",
+        "label": "PPCMOI — Manoir Normandie, 556 rue Saint-Germain Est (second projet)"
+      },
+      {
+        "id": "signal-rimouski-densification-spar-328-logements",
+        "type": "Signal",
+        "label": "Signal densification — SPAR 328 logements abordables centre-ville Rimouski"
+      }
+    ]
+  },
+  {
+    "docSha": "24850b86f57d022a7e8e2f43361b229276a84174668d5351ad73b6dc6a82cd4e",
+    "nodes": [
+      {
+        "id": "event-rimouski-cptaq-dubois-2025-03-24",
+        "type": "DesignationEvent",
+        "label": "CPTAQ — Claude Dubois, lot 3 662 549 (aliénation 0,1 ha zone A-9003)"
+      }
+    ]
+  },
+  {
+    "docSha": "a4781f17bb966711b4d95fde6789b9f2024448d2b71aacb111e0092cd7da6cd5",
+    "nodes": [
+      {
+        "id": "event-rimouski-derogation-orge-2025-04-22",
+        "type": "DesignationEvent",
+        "label": "Dérogation mineure refusée — 15 rue de l'Orge, lot 3 339 765"
+      },
+      {
+        "id": "event-rimouski-derogation-arthur-buies-2025-04-22",
+        "type": "DesignationEvent",
+        "label": "Dérogations mineures accordées — 16 boul. Arthur-Buies Ouest, lot 2 488 508"
+      }
+    ]
+  },
+  {
+    "docSha": "da8cd8b1e43b3b8a7560fb491104df8b210ff2ff610e21b710a36bcbede090ff",
+    "nodes": [
+      {
+        "id": "event-rimouski-rezonage-H1289-R1287-2025-05-20",
+        "type": "DesignationEvent",
+        "label": "Rezonage — Modification délimitation zone H-1289 vers R-1287 (R.V.R. 25-016)"
+      },
+      {
+        "id": "event-rimouski-creation-C384-2025-05-20",
+        "type": "DesignationEvent",
+        "label": "Création zone C-384 — Modification zonage Cité des achats (projet règlement)"
+      },
+      {
+        "id": "event-rimouski-derogation-514-2025-05-20",
+        "type": "DesignationEvent",
+        "label": "Dérogation mineure — demande urbanisme 2025-00081 accordée"
+      },
+      {
+        "id": "signal-rimouski-densification-polecommercial-2025-05",
+        "type": "Signal",
+        "label": "Signal densification — Habitation densité dans pôle commercial régional (R.V.R. 25-018)"
+      }
+    ]
+  }
+]
