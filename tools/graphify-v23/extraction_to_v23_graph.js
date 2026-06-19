@@ -1,4 +1,4 @@
-/* global process, require, module, __dirname, Buffer, console */
+/* global process */
 /**
  * extraction_to_v23_graph.js
  *
