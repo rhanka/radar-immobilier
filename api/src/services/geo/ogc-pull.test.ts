@@ -12,7 +12,7 @@
  *   - upsertZoneBatch : INSERT nouvelle zone, skip code vide
  *   - pullGeoOgc : intégration villes + gestion erreur ville inconnue
  */
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Database } from "../../db/client.js";
 import type pg from "pg";
 import {
