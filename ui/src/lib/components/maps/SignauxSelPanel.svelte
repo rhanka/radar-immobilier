@@ -41,12 +41,64 @@
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
   export let selectionState: SelectionBucketState = createSelectionBucketState();
+  /** #3 — Clé de filtre active (ex. "z", "z|m", "") propagée depuis SignauxMapView. */
+  export let activeSubsetKey = "";
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
-  export let onFocusKey: (key: SelectionKey | null) => void = () => {};
+  // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
+  // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
   export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
 
   let activeEvidence: { title: string; evidence: SignalEvidence } | null = null;
+
+  // ── #3 — Catégories de zonage (miroir client de ZONAGE_CATEGORIES serveur) ──
+  const ZONAGE_CATEGORIES_CLIENT = new Set([
+    "rezonage", "derogation", "derogation_mineure", "piia", "cptaq",
+    "ppcmoi", "lotissement", "subdivision", "densification",
+    "usage_conditionnel", "modification_zonage", "changement_usage",
+    "zone_agricole", "contrainte_reglementaire", "patrimoine",
+  ]);
+
+  function nodeIsZonage(node: GraphSignalNode): boolean {
+    if (node.type === "DesignationEvent") return true;
+    const props = node.props;
+    const nested =
+      props.properties !== null && typeof props.properties === "object"
+        ? (props.properties as Record<string, unknown>)
+        : props;
+    const category = typeof nested.category === "string" ? nested.category : null;
+    return node.type === "Signal" && category !== null && ZONAGE_CATEGORIES_CLIENT.has(category);
+  }
+
+  function nodeIsMulti4(node: GraphSignalNode): boolean {
+    const props = node.props;
+    const nested =
+      props.properties !== null && typeof props.properties === "object"
+        ? (props.properties as Record<string, unknown>)
+        : props;
+    const nbUnites = nested.nb_unites_max ?? nested.nbUnitesMax;
+    if (typeof nbUnites === "string") {
+      const parsed = parseFloat(nbUnites);
+      if (!isNaN(parsed) && parsed >= 4) return true;
+    }
+    if (typeof nbUnites === "number" && nbUnites >= 4) return true;
+    return typeof nested.intensite === "string" && nested.intensite === "haute";
+  }
+
+  function nodeMatchesSubset(node: GraphSignalNode, subsetKey: string): boolean {
+    if (!subsetKey) return true;
+    const flags = subsetKey.split("|");
+    if (flags.includes("z") && !nodeIsZonage(node)) return false;
+    if (flags.includes("m") && !nodeIsMulti4(node)) return false;
+    // "p" (précoce) — heuristique label/description trop complexe côté client,
+    // on retourne true pour ne pas masquer de signaux réels.
+    return true;
+  }
+
+  /** #3 — Nœuds filtrés selon la clé de filtre active. */
+  $: filteredDetailNodes = activeSubsetKey
+    ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
+    : detailNodes;
 
   $: zones = zonesResponse?.featureCollection.features ?? [];
   $: lots = lotsResponse?.featureCollection.features ?? [];
@@ -98,8 +150,10 @@
   }
 
   function toggleEntity(key: SelectionKey): void {
+    // #9 — n'appelle PAS onFocusKey séparément : toggleBucketKey dans le parent
+    // gère déjà le focus via setFocus après le toggle. Appeler les deux causait
+    // un état focus-sans-sélection qui bloquait l'accordéon sur le 1er item.
     onToggleKey(key);
-    onFocusKey(key);
   }
 
   function formatDate(value: string | null): string | null {
@@ -280,21 +334,24 @@
         <p class="sel-city-meta">MRC : {selectedCity.municipality.mrc}</p>
       {/if}
       <div class="sel-pill-row">
-        <Badge tone={selectedCity.signalCount6m > 0 ? "warning" : "neutral"}>
-          {formatSignalCount(selectedCity.signalCount6m)}
+        <!-- #6 : "–" pendant le chargement du détail -->
+        <Badge tone={detailLoading ? "neutral" : selectedCity.signalCount6m > 0 ? "warning" : "neutral"}>
+          {detailLoading ? "–" : formatSignalCount(selectedCity.signalCount6m)}
         </Badge>
         {#if zonesUnavailableReason}
           <Badge tone="neutral">zones non configurées</Badge>
         {:else}
-          <Badge tone={configuredZoneCount > 0 ? "info" : "neutral"}>
-            {zoneBadgeText}
+          <!-- #6 : "–" pendant le chargement géo -->
+          <Badge tone={geoLoading ? "neutral" : configuredZoneCount > 0 ? "info" : "neutral"}>
+            {geoLoading ? "–" : zoneBadgeText}
           </Badge>
         {/if}
         {#if lotsUnavailableReason}
           <Badge tone="neutral">lots non configurés</Badge>
         {:else}
-          <Badge tone={lotTotalCount > 0 ? "success" : "neutral"}>
-            {formatCount(lotTotalCount, "lot", "lots")}
+          <!-- #6 : "–" pendant le chargement géo -->
+          <Badge tone={geoLoading ? "neutral" : lotTotalCount > 0 ? "success" : "neutral"}>
+            {geoLoading ? "–" : formatCount(lotTotalCount, "lot", "lots")}
           </Badge>
         {/if}
       </div>
@@ -349,10 +406,12 @@
         </div>
       </details>
 
-      <details class="sel-bucket" open>
+      <!-- #8 : pas d'attribut open → replié par défaut -->
+      <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Signaux</span>
-          <span class="rail-row-count">{detailNodes.length}</span>
+          <!-- #6 : "–" pendant le chargement ; #3 : compte filtré -->
+          <span class="rail-row-count">{detailLoading ? "–" : filteredDetailNodes.length}</span>
         </summary>
         <div class="sel-entities">
           {#if detailLoading}
@@ -360,10 +419,10 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement des signaux…</span>
             </div>
-          {:else if detailNodes.length === 0}
+          {:else if filteredDetailNodes.length === 0}
             <p class="sel-empty">Aucun signal indexé pour cette ville.</p>
           {:else}
-            {#each detailNodes as node (node.id)}
+            {#each filteredDetailNodes as node (node.id)}
               {@const key = signalKey(node)}
               {#if key}
                 {@const nodeVisual = visual(key)}
@@ -510,11 +569,15 @@
         </div>
       </details>
 
-      <details class="sel-bucket" open>
+      <!-- #8 : pas d'attribut open → replié par défaut -->
+      <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Zones</span>
+          <!-- #6 : "–" pendant le chargement géo -->
           <span class="rail-row-count">
-            {zonesUnavailableReason
+            {geoLoading
+              ? "–"
+              : zonesUnavailableReason
               ? "n/d"
               : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
               ? "fallback"
@@ -579,7 +642,8 @@
       <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Lots</span>
-          <span class="rail-row-count">{lotsUnavailableReason ? "n/d" : formatNumber(lotTotalCount)}</span>
+          <!-- #6 : "–" pendant le chargement géo -->
+          <span class="rail-row-count">{geoLoading ? "–" : lotsUnavailableReason ? "n/d" : formatNumber(lotTotalCount)}</span>
         </summary>
         <div class="sel-entities">
           {#if geoLoading}
@@ -832,11 +896,12 @@
     border-bottom: none;
   }
 
+  /* #10 — layout colonne : titre complet sur plusieurs lignes + sous-titre dessous */
   .sel-entity-head {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
     width: 100%;
     padding: 0.34rem 0.85rem;
     font-size: 0.78rem;
@@ -865,32 +930,29 @@
     opacity: 0.5;
   }
 
+  /* #10 — titre complet, sans troncature */
   .sel-entity-label {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 100%;
     font-size: 0.78rem;
     line-height: 1.4;
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
+  /* #10 — sous-titre (type) sur sa propre ligne */
   .sel-entity-type {
-    flex-shrink: 0;
-    max-width: 7rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    width: 100%;
     color: var(--st-semantic-text-muted, #94a3b8);
     font-family: var(--st-font-mono, ui-monospace, monospace);
     font-size: 0.68rem;
   }
 
+  /* #10 — l'indicateur de toggle reste discret, aligné à gauche dans la colonne */
   .sel-entity-toggle {
     font-size: 0.62rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    flex-shrink: 0;
-    margin-left: 0.3rem;
+    align-self: flex-end;
+    margin-top: 0.1rem;
   }
 
   .sel-entity-detail {
