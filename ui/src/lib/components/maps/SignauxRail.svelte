@@ -163,7 +163,9 @@
     const matchSearch = !searchQuery.trim() ||
       e.municipality.name.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
       (e.municipality.mrc ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase());
-    return matchSearch && countFor(e, activeKey) > 0;
+    // #5 — garder la ville sélectionnée même si son compte pour le filtre actif est 0.
+    const isSelected = selectedSlug !== null && e.municipality.slug === selectedSlug;
+    return matchSearch && (countFor(e, activeKey) > 0 || isSelected);
   });
 
   $: sortedEntries = [...filteredEntries].sort(
