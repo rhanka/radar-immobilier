@@ -1,3 +1,4 @@
+/* global process, require, module, __dirname, Buffer, console */
 /**
  * graphify_to_extraction_v23.js
  *
