@@ -276,7 +276,7 @@
         <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
         <div class="axis-toggle-row axis-toggle-row--last">
           <Checkbox
-            label="Signaux précoces (approx.)"
+            label="Signaux précoces"
             helperText="avis de motion / 1er projet"
             checked={precoceOnly}
             onchange={togglePrecoceOnly}
@@ -569,6 +569,10 @@
 
   /* ── Toggles axes (Zonage / Dimension / Anticipation) ── */
   .axis-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
     border-bottom: 1px solid var(--st-semantic-border-subtle);
     padding: 0.4rem 0.75rem;
   }
@@ -577,9 +581,15 @@
     margin-bottom: 0.25rem;
   }
 
-  /* Largeur pleine pour que le Checkbox DS remplisse la rangée (trailing poussé à droite) */
+  /* Checkbox DS prend l'espace restant ; le badge reste en trailing flex-shrink:0 */
   .axis-toggle-row :global(.st-choice) {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Badge trailing dans la rangée toggle — ne rétrécit pas */
+  .axis-toggle-row :global(.st-badge) {
+    flex-shrink: 0;
   }
 
   /* ── État vide ── */
