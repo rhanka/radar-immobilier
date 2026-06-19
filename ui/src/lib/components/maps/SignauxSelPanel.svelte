@@ -100,6 +100,12 @@
     ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
     : detailNodes;
 
+  /** Compteurs filtré/total pour les badges signaux. */
+  $: filteredSignalCount = filteredDetailNodes.length;
+  $: totalSignalCount = detailNodes.length;
+  /** True si le filtre actif réduit le nombre de signaux. */
+  $: signalIsFiltered = activeSubsetKey && filteredSignalCount < totalSignalCount;
+
   $: zones = zonesResponse?.featureCollection.features ?? [];
   $: lots = lotsResponse?.featureCollection.features ?? [];
   $: configuredZoneCount = zonesResponse?.zoneCount ?? zones.length;
@@ -334,9 +340,15 @@
         <p class="sel-city-meta">MRC : {selectedCity.municipality.mrc}</p>
       {/if}
       <div class="sel-pill-row">
-        <!-- #6 : "–" pendant le chargement du détail -->
-        <Badge tone={detailLoading ? "neutral" : selectedCity.signalCount6m > 0 ? "warning" : "neutral"}>
-          {detailLoading ? "–" : formatSignalCount(selectedCity.signalCount6m)}
+        <!-- #6 : "–" pendant le chargement du détail ; badges filtré/total (#improvement) -->
+        <Badge tone={detailLoading ? "neutral" : (signalIsFiltered ? filteredSignalCount : totalSignalCount) > 0 ? "warning" : "neutral"}>
+          {#if detailLoading}
+            –
+          {:else if signalIsFiltered}
+            {filteredSignalCount}/{totalSignalCount} signal{totalSignalCount !== 1 ? "aux" : ""}
+          {:else}
+            {formatSignalCount(totalSignalCount)}
+          {/if}
         </Badge>
         {#if zonesUnavailableReason}
           <Badge tone="neutral">zones non configurées</Badge>
@@ -410,8 +422,10 @@
       <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Signaux</span>
-          <!-- #6 : "–" pendant le chargement ; #3 : compte filtré -->
-          <span class="rail-row-count">{detailLoading ? "–" : filteredDetailNodes.length}</span>
+          <!-- #6 : "–" pendant le chargement ; filtré/total si filtre actif -->
+          <span class="rail-row-count">
+            {#if detailLoading}–{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
+          </span>
         </summary>
         <div class="sel-entities">
           {#if detailLoading}
