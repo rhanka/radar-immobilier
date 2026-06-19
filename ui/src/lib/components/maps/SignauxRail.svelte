@@ -26,6 +26,7 @@
   } from "@sentropic/design-system-svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+  import { filterNodesBySubset } from "$lib/signals/graph-signal-filter.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
@@ -42,6 +43,9 @@
   export let dataUnavailable = false;
   /** Chargement du détail de ville. */
   export let detailLoading = false;
+
+  /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
+  export let initialSubsetKey = "z";
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
@@ -78,19 +82,19 @@
    * Zonage uniquement (DÉFAUT ON) :
    *   filtre sur la clé "z" de subsetCounts
    */
-  let zonageOnly = true;
+  let zonageOnly = initialSubsetKey.includes("z");
 
   /**
    * Multifamilial 4+ (DÉFAUT OFF — axe DIMENSION) :
    *   filtre sur la clé "m" de subsetCounts
    */
-  let multi4plus = false;
+  let multi4plus = initialSubsetKey.includes("m");
 
   /**
    * Signaux précoces (DÉFAUT OFF — axe ANTICIPATION) :
    *   filtre sur la clé "p" de subsetCounts
    */
-  let precoceOnly = false;
+  let precoceOnly = initialSubsetKey.includes("p");
 
   /** Types disponibles = union des types connus (multi-villes) + types actuels. */
   $: allKnownTypes = Array.from(
@@ -106,8 +110,8 @@
     {} as Record<string, number>,
   );
 
-  /** Nœuds filtrés (affichage dans le panneau détail). */
-  $: filteredNodes = detailNodes;
+  /** Nœuds filtrés (affichage dans le drawer gauche — même filtre que le panneau droit). */
+  $: filteredNodes = filterNodesBySubset(detailNodes, activeKey);
 
   /** Construit la clé subsetCounts à partir des 3 flags — fonction PURE. */
   function buildKey(z: boolean, m: boolean, p: boolean): string {

@@ -15,7 +15,7 @@
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
-  import SignalPdfOverlay from "./SignalPdfOverlay.svelte";
+  import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
   import type {
     GeoZoneFeature,
     GeoZonesResponse,
@@ -48,52 +48,7 @@
   // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
   // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
   export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
-
-  let activeEvidence: { title: string; evidence: SignalEvidence } | null = null;
-
-  // ── #3 — Catégories de zonage (miroir client de ZONAGE_CATEGORIES serveur) ──
-  const ZONAGE_CATEGORIES_CLIENT = new Set([
-    "rezonage", "derogation", "derogation_mineure", "piia", "cptaq",
-    "ppcmoi", "lotissement", "subdivision", "densification",
-    "usage_conditionnel", "modification_zonage", "changement_usage",
-    "zone_agricole", "contrainte_reglementaire", "patrimoine",
-  ]);
-
-  function nodeIsZonage(node: GraphSignalNode): boolean {
-    if (node.type === "DesignationEvent") return true;
-    const props = node.props;
-    const nested =
-      props.properties !== null && typeof props.properties === "object"
-        ? (props.properties as Record<string, unknown>)
-        : props;
-    const category = typeof nested.category === "string" ? nested.category : null;
-    return node.type === "Signal" && category !== null && ZONAGE_CATEGORIES_CLIENT.has(category);
-  }
-
-  function nodeIsMulti4(node: GraphSignalNode): boolean {
-    const props = node.props;
-    const nested =
-      props.properties !== null && typeof props.properties === "object"
-        ? (props.properties as Record<string, unknown>)
-        : props;
-    const nbUnites = nested.nb_unites_max ?? nested.nbUnitesMax;
-    if (typeof nbUnites === "string") {
-      const parsed = parseFloat(nbUnites);
-      if (!isNaN(parsed) && parsed >= 4) return true;
-    }
-    if (typeof nbUnites === "number" && nbUnites >= 4) return true;
-    return typeof nested.intensite === "string" && nested.intensite === "haute";
-  }
-
-  function nodeMatchesSubset(node: GraphSignalNode, subsetKey: string): boolean {
-    if (!subsetKey) return true;
-    const flags = subsetKey.split("|");
-    if (flags.includes("z") && !nodeIsZonage(node)) return false;
-    if (flags.includes("m") && !nodeIsMulti4(node)) return false;
-    // "p" (précoce) — heuristique label/description trop complexe côté client,
-    // on retourne true pour ne pas masquer de signaux réels.
-    return true;
-  }
+  export let onOpenEvidence: (payload: { title: string; evidence: SignalEvidence }) => void = () => {};
 
   /** #3 — Nœuds filtrés selon la clé de filtre active. */
   $: filteredDetailNodes = activeSubsetKey
@@ -127,7 +82,6 @@
   $: cityKey = selectedCity
     ? safeKey("municipality", selectedCity.municipality.slug)
     : null;
-  $: if (!selectedCity && activeEvidence) activeEvidence = null;
 
   function safeKey(kind: "municipality" | "signal" | "zone" | "lot", id: string): SelectionKey | null {
     try {
@@ -274,14 +228,10 @@
   }
 
   function openEvidence(node: GraphSignalNode): void {
-    activeEvidence = {
+    onOpenEvidence({
       title: node.label,
       evidence: signalEvidence(node),
-    };
-  }
-
-  function closeEvidence(): void {
-    activeEvidence = null;
+    });
   }
 
   function zoneSourceLabel(zone: GeoZoneFeature): string {
@@ -504,7 +454,7 @@
                       </div>
 
                       <div class="doc-refs-section">
-                        <span class="doc-refs-label">Evidence</span>
+                        <span class="doc-refs-label">Preuve</span>
                         <div class="evidence-status-grid">
                           {#each evidenceCompletenessItems(evidence) as item (item.label)}
                             <span
@@ -517,9 +467,8 @@
                           {/each}
                         </div>
 
-                        <span class="doc-refs-sub-label">Citation/extrait</span>
                         {#if evidenceText(evidence.excerpt ?? evidence.citation)}
-                          <blockquote class="doc-ref-excerpt">
+                          <blockquote class="doc-ref-excerpt doc-ref-excerpt--citation">
                             {evidenceText(evidence.excerpt ?? evidence.citation)}
                           </blockquote>
                         {:else}
@@ -535,44 +484,13 @@
                             disabled={!hasSourceEvidence(evidence)}
                             on:click={() => openEvidence(node)}
                             title={hasSourceEvidence(evidence)
-                              ? "Ouvrir la source dans un overlay"
+                              ? "Ouvrir la preuve dans un overlay"
                               : "Aucune source documentaire dans le DTO"}
                           >
                             <FileText class="h-3.5 w-3.5" aria-hidden="true" />
-                            {sourceButtonLabel(evidence)}
+                            Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
                           </button>
                         </div>
-
-                        {#if evidence.refs.length > 0}
-                          <ul class="doc-refs-list">
-                            {#each evidence.refs as ref, i (`${ref.docSha ?? ref.rawRef ?? ref.sourceUrl ?? i}-${i}`)}
-                              <li class="doc-ref-item">
-                                {#if ref.documentUrl || ref.sourceUrl}
-                                  <button
-                                    type="button"
-                                    class="doc-ref-link"
-                                    title={docTitle(ref)}
-                                    on:click={() => onOpenDocument(ref)}
-                                  >
-                                    <FileText class="h-3.5 w-3.5" aria-hidden="true" />
-                                    {docButtonLabel(ref)}
-                                  </button>
-                                {:else}
-                                  <span class="doc-ref-sha" title={ref.docSha}>
-                                    {ref.docSha.slice(0, 8)}…{ref.page !== undefined ? ` · p.${ref.page}` : ""}
-                                  </span>
-                                {/if}
-                                {#if ref.excerpt}
-                                  <blockquote class="doc-ref-excerpt">
-                                    {ref.excerpt.length > 180
-                                      ? ref.excerpt.slice(0, 180) + "…"
-                                    : ref.excerpt}
-                                  </blockquote>
-                                {/if}
-                              </li>
-                            {/each}
-                          </ul>
-                        {/if}
                       </div>
                     </div>
                   {/if}
@@ -730,20 +648,6 @@
   {/if}
 </div>
 
-{#if activeEvidence}
-  <SignalPdfOverlay
-    title={activeEvidence.title}
-    sourceUrl={activeEvidence.evidence.documentUrl ?? activeEvidence.evidence.sourceUrl}
-    sourceRef={activeEvidence.evidence.sourceRef}
-    rawRef={activeEvidence.evidence.rawRef}
-    rawObjectKey={activeEvidence.evidence.rawObjectKey}
-    documentDate={activeEvidence.evidence.documentDate}
-    page={activeEvidence.evidence.page}
-    bbox={activeEvidence.evidence.bbox}
-    excerpt={activeEvidence.evidence.excerpt ?? activeEvidence.evidence.citation}
-    onClose={closeEvidence}
-  />
-{/if}
 
 <style>
   .sel {
@@ -1149,5 +1053,11 @@
     color: var(--st-semantic-text-secondary, #475569);
     font-size: 0.75rem;
     line-height: 1.45;
+  }
+
+  .doc-ref-excerpt--citation {
+    margin: 0.4rem 0 0.5rem;
+    font-size: 0.78rem;
+    font-style: italic;
   }
 </style>

@@ -448,10 +448,29 @@ export interface GraphSignalDetailResponse {
 export async function fetchGraphSignalDetail(
   citySlug: string,
   baseUrl = "",
+  timeoutMs = 15_000,
 ): Promise<GraphSignalDetailResponse> {
-  const res = await fetch(
-    `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}`,
-  );
-  if (!res.ok) throw new Error(`graph-signals/${citySlug}: ${res.status}`);
-  return res.json();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(
+      `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}`,
+      { signal: controller.signal },
+    );
+    if (!res.ok) {
+      // 404 = ville sans signaux dans la DB — état vide honnête
+      if (res.status === 404) {
+        return { ok: false, citySlug, nodes: [] };
+      }
+      throw new Error(`graph-signals/${citySlug}: ${res.status}`);
+    }
+    return res.json();
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`graph-signals/${citySlug}: timeout after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
