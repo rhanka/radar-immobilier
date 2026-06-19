@@ -14,17 +14,34 @@
 
   // Préfère sourceUrl (PDF public ou route streaming), puis rawRef via /api/documents/raw
   $: resolvedSourceUrl = sourceUrl ?? (rawRef ? `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}` : null);
-  $: viewerUrl = resolvedSourceUrl ? withPage(resolvedSourceUrl, page) : null;
+  $: viewerUrl = resolvedSourceUrl ? withPageAndSearch(resolvedSourceUrl, page, excerpt) : null;
   $: canEmbed = viewerUrl !== null && (/^https?:\/\//u.test(viewerUrl) || viewerUrl.startsWith("/"));
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
 
-  function withPage(url: string, pageNumber: number | null): string {
-    if (pageNumber === null) return url;
+  /**
+   * Construit l'URL PDF avec fragment #page=N et optionnellement #search=texte.
+   * #page=N  : supporté par Chrome/Firefox PDF viewer natif et pdf.js
+   * #search=  : supporté par Chrome PDF viewer pour surligner le texte
+   * Les deux paramètres sont combinés dans le fragment : #page=N&search=texte
+   */
+  function withPageAndSearch(
+    url: string,
+    pageNumber: number | null,
+    searchText: string | null,
+  ): string {
     const parts = url.split("#", 2);
     const base = parts[0] ?? url;
-    const hash = parts[1];
-    const pageHash = `page=${pageNumber}`;
-    return `${base}#${hash ? `${hash}&${pageHash}` : pageHash}`;
+    const existingHash = parts[1] ?? "";
+    const fragments: string[] = existingHash ? [existingHash] : [];
+    if (pageNumber !== null) {
+      fragments.push(`page=${pageNumber}`);
+    }
+    if (searchText !== null && searchText.trim().length > 0) {
+      // Extrait les 6 premiers mots de la citation pour la recherche
+      const words = searchText.trim().split(/\s+/).slice(0, 6).join(" ");
+      fragments.push(`search=${encodeURIComponent(words)}`);
+    }
+    return fragments.length > 0 ? `${base}#${fragments.join("&")}` : base;
   }
 
   function formatBbox(value: [number, number, number, number] | null): string | null {
