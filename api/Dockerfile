@@ -37,7 +37,8 @@ COPY api api
 RUN npm run typecheck --workspace=api
 # Bundle ALL runtime entrypoints, not just the API server. K8s Jobs/CronJobs
 # (deploy/k8s/3x-*.yaml) invoke the DB migrator, the SCW→PG graph projector, the
-# 0004 tracking backfill and the live scraper as standalone `node` processes.
+# 0004 tracking backfill, the live scraper, populate-geo and pull-geo-ogc as
+# standalone `node` processes.
 # esbuild with `outdir` + multiple `entryPoints` mirrors the source tree under
 # `api/dist/` (entryNames=[dir]/[name]) so each Job's `node api/dist/<path>.js`
 # resolves to a real file — the previous single-entry build only emitted
@@ -54,6 +55,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
   "    'api/src/scripts/worker-live.ts'," \
   "    'api/src/scripts/populate-geo.ts'," \
+  "    'api/src/scripts/pull-geo-ogc.ts'," \
   "  ]," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
