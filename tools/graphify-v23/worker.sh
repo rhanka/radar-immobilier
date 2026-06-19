@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# worker.sh — worker v2.3 : extraction candidate uniquement (PAS de publish)
+# worker.sh — worker v2.3 : extraction candidate déterministe (PAS de publish, PAS de LLM)
 # Usage: worker.sh <city> <baseline_json> <work_dir> <root_dir>
 # Produit: <work_dir>/latest.v23.json (candidat) ou exit 1
+#
+# NOTE: Ce worker est DÉTERMINISTE (transformation de baseline sans LLM).
+# Pour enrichir les descriptions manquantes via Sonnet 4.6 CLI claude,
+# utiliser: tools/graphify-v23/worker-llm-descriptions.sh
+# Commande LLM headless: echo "$PROMPT" | claude -p --model claude-sonnet-4-6
 set -euo pipefail
 
 CITY="${1:?city requis}"
