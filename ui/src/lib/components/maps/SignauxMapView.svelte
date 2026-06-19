@@ -578,7 +578,12 @@
   }
 
   function toggleBucketKey(key: SelectionKey): void {
+    // #9 — déterminer si l'item est en train d'être sélectionné (pas désélectionné)
+    const wasSelected = selectionState.selectedKeys.has(key);
     selectionState = toggleSelection(selectionState, key);
+    // Si l'item vient d'être sélectionné → le mettre en focus (ouvre l'accordéon).
+    // Si l'item était déjà sélectionné → le déselectionner ET effacer le focus.
+    selectionState = setFocus(selectionState, wasSelected ? null : key);
     syncRouteForSelectionKey(key);
     updateFillColors();
     updateGeoLayers();
@@ -1025,9 +1030,9 @@
       {zonesResponse}
       {lotsResponse}
       {selectionState}
+      {activeSubsetKey}
       onClear={clearSelection}
       onToggleKey={toggleBucketKey}
-      onFocusKey={focusBucketKey}
       onOpenDocument={openDocument}
     />
   </svelte:fragment>
