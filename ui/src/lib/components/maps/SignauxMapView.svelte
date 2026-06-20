@@ -143,7 +143,7 @@
     const currentRoute = geoRoute;
     if (currentRoute) {
       const subsetValues = subsetKey ? subsetKey.split("|") : [];
-      const newFilters = subsetValues.length > 0 ? { subset: subsetValues } : {};
+      const newFilters: Record<string, string[]> = subsetValues.length > 0 ? { subset: subsetValues } : {};
       const newState = { ...currentRoute.state, filters: newFilters };
       if (currentRoute.level === "zone") {
         navigateToGeoRoute(
