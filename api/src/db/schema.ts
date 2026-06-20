@@ -642,6 +642,32 @@ export const geoUnresolved = pgTable(
   }),
 );
 
+/**
+ * Invitations envoyées par l'admin — associe un email à un token opaque.
+ * Quand le user invité se logue via OIDC avec l'email correspondant, son
+ * compte est auto-approuvé (matching par email dans le callback auth).
+ */
+export const accountInvitations = pgTable(
+  "account_invitations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    token: text("token").notNull().unique(),
+    status: text("status").notNull().default("pending"),
+    invitedBy: text("invited_by").notNull(),
+    invitedAt: timestamp("invited_at", { withTimezone: true }).notNull().defaultNow(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    note: text("note"),
+  },
+  (t) => ({
+    byEmail: index("account_invitations_email_idx").on(t.email),
+    byToken: index("account_invitations_token_idx").on(t.token),
+    byStatus: index("account_invitations_status_idx").on(t.status),
+    byInvitedBy: index("account_invitations_invited_by_idx").on(t.invitedBy),
+  }),
+);
+
 export const schema = {
   sources,
   ingestions,
@@ -659,6 +685,7 @@ export const schema = {
   graphEdges,
   accountUsers,
   accountUserStatusEvents,
+  accountInvitations,
   // Inc 1 — marquage Steve
   prospectMarks,
   prospectNotes,

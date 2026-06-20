@@ -30,7 +30,7 @@ import {
   type OidcDiscovery,
 } from "../services/auth/oidc.js";
 import type { Database } from "../db/client.js";
-import { accountUsers } from "../db/schema.js";
+import { accountUsers, accountInvitations } from "../db/schema.js";
 
 /** Transient cookie holding the per-login flow state until the callback. */
 const FLOW_COOKIE_NAME = "radar_oauth_flow";
@@ -176,28 +176,76 @@ export function authRoute(
         .limit(1);
 
       if (existing.length === 0) {
-        // First login: create account. Auto-approve for the designated admin.
+        // First login: create account. Auto-approve for the designated admin
+        // or for users with a pending invitation matching their email.
         const isAdmin = user.email === "admin@sent-tech.ca";
+
+        // Check invitation by email
+        let hasInvitation = false;
+        if (!isAdmin && user.email) {
+          const invitations = await options.db
+            .select()
+            .from(accountInvitations)
+            .where(eq(accountInvitations.email, user.email))
+            .limit(1);
+          hasInvitation = invitations.some((inv) => inv.status === "pending");
+
+          if (hasInvitation) {
+            // Mark invitation as accepted
+            await options.db
+              .update(accountInvitations)
+              .set({ status: "accepted", acceptedAt: new Date(nowFn()) })
+              .where(eq(accountInvitations.email, user.email));
+          }
+        }
+
+        const autoApproved = isAdmin || hasInvitation;
         await options.db.insert(accountUsers).values({
           sub: user.sub,
           email: user.email ?? null,
           name: user.name ?? null,
-          status: isAdmin ? "approved" : "pending",
+          status: autoApproved ? "approved" : "pending",
           isAdmin,
+          ...(autoApproved ? { approvedAt: new Date(nowFn()), approvedBy: "invitation" } : {}),
         });
-        if (!isAdmin) {
+        if (!autoApproved) {
           // Redirect to pending screen
           return c.redirect(`${auth.appBaseUrl}/pending`, 302);
         }
       } else {
         const account = existing[0]!;
-        if (account.status === "pending") {
+        // If account is 'invited' or 'pending' and the user has a pending
+        // invitation for their email, auto-approve on login.
+        if (
+          (account.status === "pending" || account.status === "invited") &&
+          user.email
+        ) {
+          const invitations = await options.db
+            .select()
+            .from(accountInvitations)
+            .where(eq(accountInvitations.email, user.email))
+            .limit(1);
+          const hasInvitation = invitations.some((inv) => inv.status === "pending");
+
+          if (hasInvitation) {
+            const now = new Date(nowFn());
+            await options.db
+              .update(accountUsers)
+              .set({ status: "approved", approvedAt: now, approvedBy: "invitation" })
+              .where(eq(accountUsers.sub, user.sub));
+            await options.db
+              .update(accountInvitations)
+              .set({ status: "accepted", acceptedAt: now })
+              .where(eq(accountInvitations.email, user.email));
+            // continue to session minting (approved)
+          } else {
+            return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+          }
+        } else if (account.status === "pending") {
           return c.redirect(`${auth.appBaseUrl}/pending`, 302);
-        }
-        if (account.status === "rejected") {
+        } else if (account.status === "rejected") {
           return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
-        }
-        if (account.status === "suspended") {
+        } else if (account.status === "suspended") {
           return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
         }
       }
