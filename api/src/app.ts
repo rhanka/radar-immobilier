@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type { AuthConfig } from "./config.js";
+import type { AuthConfig, SmtpConfig } from "./config.js";
 import {
   authRoute,
   protect,
@@ -46,6 +46,8 @@ export type AppDeps = HealthDeps &
     auth?: AuthConfig;
     /** Test seams for the OIDC routes (mock fetch / JWKS / discovery). */
     authOptions?: AuthRouteOptions;
+    /** SMTP config optionnel pour les emails d'invitation. */
+    smtp?: SmtpConfig;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -69,6 +71,19 @@ export function createApp(deps: AppDeps): Hono {
         adminRoute({
           db: deps.db,
           sessionSecret: deps.auth.sessionSecret,
+          ...(deps.smtp?.enabled
+            ? {
+                mailer: {
+                  smtpHost: deps.smtp.host,
+                  smtpPort: deps.smtp.port,
+                  smtpUser: deps.smtp.user,
+                  smtpPass: deps.smtp.pass,
+                  smtpFrom: deps.smtp.from,
+                  appBaseUrl: deps.auth.appBaseUrl,
+                },
+                appBaseUrl: deps.auth.appBaseUrl,
+              }
+            : { appBaseUrl: deps.auth.appBaseUrl }),
         }),
       );
     }

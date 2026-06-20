@@ -12,19 +12,45 @@
     createdAt: string;
   }
 
+  interface Invitation {
+    id: string;
+    email: string;
+    status: string;
+    invitedBy: string;
+    invitedAt: string;
+    acceptedAt: string | null;
+    note: string | null;
+  }
+
   let pendingUsers: AccountUser[] = [];
   let allUsers: AccountUser[] = [];
+  let invitations: Invitation[] = [];
   let loading = true;
   let error: string | null = null;
   let actionError: string | null = null;
-  let activeTab: "pending" | "all" = "pending";
+  let activeTab: "pending" | "all" | "invitations" = "pending";
   let actingSub: string | null = null;
+
+  // Invitation form state
+  let inviteEmail = "";
+  let inviteNote = "";
+  let inviting = false;
+  let inviteSuccess: string | null = null;
+  let inviteError: string | null = null;
 
   const STATUS_LABELS: Record<string, string> = {
     pending: "En attente",
     approved: "Validé",
     rejected: "Rejeté",
     suspended: "Suspendu",
+    invited: "Invité",
+  };
+
+  const INVITATION_STATUS_LABELS: Record<string, string> = {
+    pending: "En attente",
+    accepted: "Acceptée",
+    expired: "Expirée",
+    revoked: "Révoquée",
   };
 
   function statusLabel(status: string): string {
@@ -36,21 +62,32 @@
     if (status === "pending") return "warning";
     if (status === "rejected") return "error";
     if (status === "suspended") return "neutral";
+    if (status === "invited") return "info";
+    return "neutral";
+  }
+
+  function invitationStatusTone(status: string): "success" | "info" | "neutral" | "warning" | "error" {
+    if (status === "accepted") return "success";
+    if (status === "pending") return "warning";
+    if (status === "expired") return "neutral";
+    if (status === "revoked") return "error";
     return "neutral";
   }
 
   $: pendingCount = allUsers.filter((user) => user.status === "pending").length;
   $: approvedCount = allUsers.filter((user) => user.status === "approved").length;
   $: suspendedCount = allUsers.filter((user) => user.status === "suspended").length;
+  $: pendingInvitationsCount = invitations.filter((inv) => inv.status === "pending").length;
 
   async function loadUsers(): Promise<void> {
     loading = true;
     error = null;
     actionError = null;
     try {
-      const [pendingRes, allRes] = await Promise.all([
+      const [pendingRes, allRes, invRes] = await Promise.all([
         fetch("/api/v1/admin/users/pending"),
         fetch("/api/v1/admin/users"),
+        fetch("/api/v1/admin/invitations"),
       ]);
       if (!pendingRes.ok || !allRes.ok) {
         error = "Erreur lors du chargement des comptes";
@@ -60,10 +97,57 @@
       const allData = await allRes.json();
       pendingUsers = pendingData.users ?? [];
       allUsers = allData.users ?? [];
+      if (invRes.ok) {
+        const invData = await invRes.json();
+        invitations = invData.invitations ?? [];
+      }
     } catch (e) {
       error = String(e);
     } finally {
       loading = false;
+    }
+  }
+
+  async function sendInvitation(): Promise<void> {
+    const emailTrimmed = inviteEmail.trim();
+    if (!emailTrimmed) return;
+
+    inviting = true;
+    inviteSuccess = null;
+    inviteError = null;
+
+    try {
+      const res = await fetch("/api/v1/admin/invitations", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: emailTrimmed,
+          ...(inviteNote.trim() ? { note: inviteNote.trim() } : {}),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.email?.sent) {
+          inviteSuccess = `Invitation envoyée à ${emailTrimmed} par courriel.`;
+        } else {
+          // Mode dégradé : lien loggué sur le serveur
+          inviteSuccess = `Invitation créée pour ${emailTrimmed}. Le lien a été enregistré dans les logs du serveur (mode sans SMTP).`;
+        }
+        inviteEmail = "";
+        inviteNote = "";
+        // Recharge les invitations
+        await loadUsers();
+      } else {
+        const errData = await res.json().catch(() => null);
+        inviteError = errData?.error === "validation_failed"
+          ? "Adresse courriel invalide."
+          : `Erreur lors de l'envoi de l'invitation (${res.status}).`;
+      }
+    } catch (e) {
+      inviteError = String(e);
+    } finally {
+      inviting = false;
     }
   }
 
@@ -119,6 +203,7 @@
   $: displayedUsers = activeTab === "pending" ? pendingUsers : allUsers;
 </script>
 
+
 <div class="flex flex-1 flex-col overflow-hidden p-6">
   <div class="mb-6 flex items-center justify-between">
     <div>
@@ -127,6 +212,9 @@
         <Badge tone="warning">{pendingCount} en attente</Badge>
         <Badge tone="success">{approvedCount} validé{approvedCount > 1 ? "s" : ""}</Badge>
         <Badge tone="neutral">{suspendedCount} suspendu{suspendedCount > 1 ? "s" : ""}</Badge>
+        {#if pendingInvitationsCount > 0}
+          <Badge tone="info">{pendingInvitationsCount} invitation{pendingInvitationsCount > 1 ? "s" : ""} en attente</Badge>
+        {/if}
       </div>
     </div>
     <Button
@@ -160,6 +248,17 @@
     >
       Tous les comptes
     </Button>
+    <Button
+      type="button"
+      variant={activeTab === "invitations" ? "primary" : "ghost"}
+      size="sm"
+      onclick={() => (activeTab = "invitations")}
+    >
+      Invitations
+      {#if pendingInvitationsCount > 0}
+        <Badge tone="info">{pendingInvitationsCount}</Badge>
+      {/if}
+    </Button>
   </div>
 
   {#if loading}
@@ -168,6 +267,104 @@
     </div>
   {:else if error}
     <Alert tone="error" title="Chargement impossible" message={error} />
+  {:else if activeTab === "invitations"}
+    <!-- Formulaire d'invitation -->
+    <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <h2 class="mb-3 text-sm font-semibold text-slate-800">Inviter un utilisateur</h2>
+      {#if inviteSuccess}
+        <div class="mb-3">
+          <Alert tone="success" title="Invitation envoyée" message={inviteSuccess} />
+        </div>
+      {/if}
+      {#if inviteError}
+        <div class="mb-3">
+          <Alert tone="error" title="Erreur" message={inviteError} />
+        </div>
+      {/if}
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="flex-1">
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="invite-email">
+            Adresse courriel
+          </label>
+          <input
+            id="invite-email"
+            type="email"
+            bind:value={inviteEmail}
+            placeholder="steve@example.com"
+            disabled={inviting}
+            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+                   placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1
+                   focus:ring-blue-500 disabled:opacity-50"
+          />
+        </div>
+        <div class="flex-1">
+          <label class="mb-1 block text-xs font-medium text-slate-600" for="invite-note">
+            Note (optionnel)
+          </label>
+          <input
+            id="invite-note"
+            type="text"
+            bind:value={inviteNote}
+            placeholder="Bienvenue dans l'équipe !"
+            disabled={inviting}
+            maxlength="500"
+            class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
+                   placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1
+                   focus:ring-blue-500 disabled:opacity-50"
+          />
+        </div>
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          disabled={inviting || !inviteEmail.trim()}
+          onclick={sendInvitation}
+        >
+          {inviting ? "Envoi en cours..." : "Envoyer l'invitation"}
+        </Button>
+      </div>
+    </div>
+
+    <!-- Liste des invitations -->
+    {#if invitations.length === 0}
+      <EmptyState
+        title="Aucune invitation"
+        message="Les invitations envoyées par l'admin apparaissent ici."
+      />
+    {:else}
+      <div class="overflow-auto rounded-lg border border-slate-200">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-left">
+            <tr>
+              <th class="px-4 py-3 font-medium text-slate-700">Courriel invité</th>
+              <th class="px-4 py-3 font-medium text-slate-700">Statut</th>
+              <th class="px-4 py-3 font-medium text-slate-700">Note</th>
+              <th class="px-4 py-3 font-medium text-slate-700">Envoyée le</th>
+              <th class="px-4 py-3 font-medium text-slate-700">Acceptée le</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {#each invitations as inv}
+              <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-mono text-xs text-slate-900">{inv.email}</td>
+                <td class="px-4 py-3">
+                  <Badge tone={invitationStatusTone(inv.status)}>
+                    {INVITATION_STATUS_LABELS[inv.status] ?? inv.status}
+                  </Badge>
+                </td>
+                <td class="px-4 py-3 text-slate-500 text-xs">{inv.note ?? "—"}</td>
+                <td class="px-4 py-3 text-slate-500">
+                  {new Date(inv.invitedAt).toLocaleDateString("fr-CA")}
+                </td>
+                <td class="px-4 py-3 text-slate-500">
+                  {inv.acceptedAt ? new Date(inv.acceptedAt).toLocaleDateString("fr-CA") : "—"}
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {/if}
   {:else if displayedUsers.length === 0}
     <EmptyState
       title={activeTab === "pending" ? "Aucun compte en attente" : "Aucun compte"}
