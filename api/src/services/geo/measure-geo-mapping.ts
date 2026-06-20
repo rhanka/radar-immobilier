@@ -150,18 +150,6 @@ function makeGeoMatchDb(drizzleDb: typeof db): GeoMatchDb {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface NodeStats {
-  nodeId: string;
-  label: string;
-  zoneRefs: string[];         // zone_refs extractables (score >= 0.50)
-  lotRefs: string[];          // no_lots extractables (score >= 0.50)
-  mappableZones: number;      // zones avec zone en DB (mappable)
-  mappableLots: number;       // lots avec lot en DB (mappable)
-  resolvedZones: number;
-  resolvedLots: number;
-  unresolvedReasons: string[];
-}
-
 interface CityStats {
   citySlug: string;
   totalNodes: number;
