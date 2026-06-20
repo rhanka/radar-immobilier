@@ -33,6 +33,7 @@
 
 import pg from "pg";
 import type { Database } from "../../db/client.js";
+import { normalizeZoneCode as normalizeZoneCodeUnified } from "./extract-refs.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -120,11 +121,16 @@ export function normalizeNoLot(raw: unknown): string {
 }
 
 /**
- * Normalise un code de zone : trim + uppercase.
- * Retourne "" si vide/null.
+ * Normalise un code de zone pour le stockage OGC.
+ *
+ * Délègue à la fonction canonique de extract-refs.ts pour garantir la cohérence
+ * entre ce qui est stocké dans zone_versions.code_norm et ce qui est produit
+ * par l'extracteur de texte libre.
+ *
+ * @deprecated Utiliser directement `normalizeZoneCode` de extract-refs.ts.
  */
 export function normalizeZoneCode(raw: unknown): string {
-  return String(raw ?? "").trim().toUpperCase();
+  return normalizeZoneCodeUnified(raw);
 }
 
 /**
