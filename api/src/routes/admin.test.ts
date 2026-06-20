@@ -268,3 +268,263 @@ describe("adminRoute", () => {
     });
   });
 });
+
+// ── Tests invitations ────────────────────────────────────────────────────────
+
+/**
+ * Mock DB étendu pour les invitations : supporte deux collections
+ * (users + invitations) via un discriminant sur la table sélectionnée.
+ *
+ * La stratégie consiste à intercepter `select().from(table)` en regardant
+ * le nom interne de la table Drizzle (accédé via `[Symbol.for('drizzle:Name')]`).
+ */
+function makeDbWithInvitations(
+  users: {
+    id: string;
+    sub: string;
+    email: string | null;
+    name: string | null;
+    status: string;
+    isAdmin: boolean;
+    createdAt: Date;
+    approvedAt: Date | null;
+    approvedBy: string | null;
+  }[],
+  invitations: {
+    id: string;
+    email: string;
+    token: string;
+    status: string;
+    invitedBy: string;
+    invitedAt: Date;
+    acceptedAt: Date | null;
+    expiresAt: Date | null;
+    note: string | null;
+  }[] = [],
+) {
+  const updates: { field: string; value: string; set: Record<string, unknown> }[] = [];
+  const inserts: Record<string, unknown>[] = [];
+
+  const db = {
+    select: () => ({
+      from: (table: unknown) => {
+        // Discriminate which collection to use based on the drizzle table name
+        const tableName =
+          table &&
+          typeof table === "object" &&
+          Symbol.for("drizzle:Name") in (table as object)
+            ? (table as Record<symbol, unknown>)[Symbol.for("drizzle:Name")]
+            : null;
+        const isInvitations = tableName === "account_invitations";
+        const collection: unknown[] = isInvitations ? invitations : users;
+
+        return {
+          where: (filter: unknown) => {
+            const parsed = parseEqFilter(filter);
+            return {
+              limit: (n: number) => {
+                if (!parsed) return Promise.resolve(collection.slice(0, n));
+                return Promise.resolve(
+                  collection
+                    .filter((u) => (u as Record<string, unknown>)[parsed.field] === parsed.value)
+                    .slice(0, n),
+                );
+              },
+              then: (
+                resolve: (v: unknown[]) => unknown,
+                reject?: (e: unknown) => unknown,
+              ) => {
+                const result = parsed
+                  ? collection.filter((u) => (u as Record<string, unknown>)[parsed.field] === parsed.value)
+                  : collection;
+                return Promise.resolve(result).then(resolve, reject);
+              },
+            };
+          },
+          orderBy: () => ({
+            then: (resolve: (v: unknown[]) => unknown, reject?: (e: unknown) => unknown) =>
+              Promise.resolve(collection).then(resolve, reject),
+          }),
+          then: (resolve: (v: unknown[]) => unknown, reject?: (e: unknown) => unknown) =>
+            Promise.resolve(collection).then(resolve, reject),
+        };
+      },
+    }),
+    insert: () => ({
+      values: (vals: Record<string, unknown>) => {
+        inserts.push(vals);
+        return Promise.resolve();
+      },
+    }),
+    update: () => ({
+      set: (set: Record<string, unknown>) => ({
+        where: (filter: unknown) => {
+          const parsed = parseEqFilter(filter);
+          if (parsed) updates.push({ ...parsed, set });
+          return Promise.resolve();
+        },
+      }),
+    }),
+    _updates: updates,
+    _inserts: inserts,
+  };
+  return db as unknown as Parameters<typeof adminRoute>[0]["db"] & {
+    _updates: typeof updates;
+    _inserts: typeof inserts;
+  };
+}
+
+describe("adminRoute — invitations", () => {
+  const adminUser = {
+    id: "a1",
+    sub: "admin-sub",
+    email: "admin@sent-tech.ca",
+    name: "Admin Principal",
+    status: "approved",
+    isAdmin: true,
+    createdAt: new Date(),
+    approvedAt: null,
+    approvedBy: null,
+  };
+
+  async function makeAdminSession() {
+    return signSession(
+      { sub: adminUser.sub },
+      { sessionSecret: SESSION_SECRET, ttlSeconds: 3600 },
+    );
+  }
+
+  it("POST /invitations sans session retourne 401", async () => {
+    const db = makeDbWithInvitations([adminUser]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const res = await app.request("/api/v1/admin/invitations", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: "test@example.com" }),
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it("POST /invitations avec email invalide retourne 400", async () => {
+    const db = makeDbWithInvitations([adminUser]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations", {
+      method: "POST",
+      headers: {
+        cookie: `radar_session=${token}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email: "pas-un-email" }),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("validation_failed");
+  });
+
+  it("POST /invitations avec email valide crée une invitation et retourne 200", async () => {
+    const db = makeDbWithInvitations([adminUser]);
+    const app = adminRoute({
+      db,
+      sessionSecret: SESSION_SECRET,
+      now: () => Date.parse("2026-06-20T10:00:00Z"),
+    });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations", {
+      method: "POST",
+      headers: {
+        cookie: `radar_session=${token}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email: "steve@example.com", note: "Bienvenue Steve" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.invitation.email).toBe("steve@example.com");
+    expect(body.invitation.status).toBe("pending");
+    expect(body.invitation.invitedBy).toBe(adminUser.sub);
+    // Mode dégradé (pas de config SMTP) : sent=false, link fourni
+    expect(body.email.sent).toBe(false);
+    // Le lien contient le token d'invitation
+    expect(body.email.link).toContain("/enroll?token=");
+
+    // DB: une insertion dans account_invitations
+    expect(db._inserts).toHaveLength(1);
+    const inserted = db._inserts[0]!;
+    expect(inserted["email"]).toBe("steve@example.com");
+    expect(inserted["status"]).toBe("pending");
+    expect(inserted["invitedBy"]).toBe(adminUser.sub);
+    expect(inserted["note"]).toBe("Bienvenue Steve");
+    expect(typeof inserted["token"]).toBe("string");
+    // Token est base64url non vide
+    expect((inserted["token"] as string).length).toBeGreaterThan(20);
+  });
+
+  it("POST /invitations sans note fonctionne aussi", async () => {
+    const db = makeDbWithInvitations([adminUser]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations", {
+      method: "POST",
+      headers: {
+        cookie: `radar_session=${token}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email: "fardin@example.com" }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(body.invitation.email).toBe("fardin@example.com");
+  });
+
+  it("GET /invitations retourne la liste des invitations", async () => {
+    const existingInvitation = {
+      id: "inv-1",
+      email: "alice@example.com",
+      token: "tok-abc",
+      status: "pending",
+      invitedBy: adminUser.sub,
+      invitedAt: new Date("2026-06-19T09:00:00Z"),
+      acceptedAt: null,
+      expiresAt: null,
+      note: null,
+    };
+    const db = makeDbWithInvitations([adminUser], [existingInvitation]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(Array.isArray(body.invitations)).toBe(true);
+    expect(body.invitations).toHaveLength(1);
+    expect(body.invitations[0].email).toBe("alice@example.com");
+  });
+
+  it("GET /invitations sans session retourne 401", async () => {
+    const db = makeDbWithInvitations([adminUser]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const res = await app.request("/api/v1/admin/invitations");
+    expect(res.status).toBe(401);
+  });
+
+  it("POST /invitations avec JSON invalide retourne 400", async () => {
+    const db = makeDbWithInvitations([adminUser]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations", {
+      method: "POST",
+      headers: {
+        cookie: `radar_session=${token}`,
+        "content-type": "application/json",
+      },
+      body: "not json",
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("invalid_json");
+  });
+});
