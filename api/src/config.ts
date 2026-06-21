@@ -134,6 +134,15 @@ const envSchema = z.object({
   SESSION_SECRET: optStr(z.string().min(1)),
   /** Session cookie lifetime in seconds (default 8h). */
   SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(28800),
+
+  // ── SMTP optionnel pour les emails d'invitation ────────────────────────
+  // Quand SMTP_HOST est absent, le service mailer log le lien d'invitation
+  // sur stdout (mode dégradé — ne bloque pas la démo).
+  SMTP_HOST: optStr(z.string().min(1)),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_USER: optStr(z.string().min(1)),
+  SMTP_PASS: optStr(z.string().min(1)),
+  SMTP_FROM: z.string().default("noreply@sent-tech.ca"),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
@@ -244,4 +253,36 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   return envSchema.parse(env);
+}
+
+/**
+ * Effective SMTP mailer configuration, derived from AppConfig.
+ * When SMTP_HOST is absent, `enabled` is false and the mailer falls back to
+ * logging the invitation link on stdout (fail-open for demo/dev).
+ */
+export interface SmtpConfig {
+  readonly enabled: boolean;
+  readonly host: string;
+  readonly port: number;
+  readonly user?: string | undefined;
+  readonly pass?: string | undefined;
+  readonly from: string;
+}
+
+export function resolveSmtpConfig(config: AppConfig): SmtpConfig {
+  const host = config.SMTP_HOST ?? "";
+  const smtp: SmtpConfig = {
+    enabled: host !== "",
+    host,
+    port: config.SMTP_PORT,
+    from: config.SMTP_FROM,
+  };
+  // exactOptionalPropertyTypes: only include user/pass when defined
+  if (config.SMTP_USER !== undefined) {
+    return { ...smtp, user: config.SMTP_USER };
+  }
+  if (config.SMTP_PASS !== undefined) {
+    return { ...smtp, pass: config.SMTP_PASS };
+  }
+  return smtp;
 }

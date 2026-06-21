@@ -105,8 +105,15 @@
     return safeKey("lot", `${citySlug}/${lot.properties.noLot}`);
   }
 
-  function visual(key: SelectionKey) {
-    return selectionVisualState(selectionState, key);
+  // `state` is passed explicitly (not read from the closure) so that
+  // `selectionState` appears textually in each `{@const … = visual(selectionState, key)}`
+  // expression. In Svelte 5 legacy mode, the `{@const}` deriveds inside a keyed
+  // `{#each}` only re-run when a reactive value read *directly in the expression*
+  // changes. Reading `selectionState` inside the function body alone left the
+  // derived stale, so clicking a signal updated the state but never re-rendered
+  // its detail card (`{#if nodeVisual.focused}`).
+  function visual(state: SelectionBucketState, key: SelectionKey) {
+    return selectionVisualState(state, key);
   }
 
   function toggleEntity(key: SelectionKey): void {
@@ -338,7 +345,7 @@
         </summary>
         <div class="sel-entities">
           {#if cityKey}
-            {@const cityVisual = visual(cityKey)}
+            {@const cityVisual = visual(selectionState, cityKey)}
             <button
               type="button"
               class="sel-entity-head"
@@ -389,7 +396,7 @@
             {#each filteredDetailNodes as node (node.id)}
               {@const key = signalKey(node)}
               {#if key}
-                {@const nodeVisual = visual(key)}
+                {@const nodeVisual = visual(selectionState, key)}
                 <div class="sel-entity-bar">
                   <button
                     type="button"
@@ -533,7 +540,7 @@
             {#each zones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
               {@const key = zoneKey(zone)}
               {#if key}
-                {@const zoneVisual = visual(key)}
+                {@const zoneVisual = visual(selectionState, key)}
                 <div class="sel-entity-bar">
                   <button
                     type="button"
@@ -596,7 +603,7 @@
             {#each visibleLots as lot (lot.properties.noLot)}
               {@const key = lotKey(lot)}
               {#if key}
-                {@const lotVisual = visual(key)}
+                {@const lotVisual = visual(selectionState, key)}
                 <div class="sel-entity-bar">
                   <button
                     type="button"

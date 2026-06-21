@@ -33,6 +33,7 @@
 
 import pg from "pg";
 import type { Database } from "../../db/client.js";
+import { normalizeZoneCode as normalizeZoneCodeUnified } from "./extract-refs.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -120,11 +121,16 @@ export function normalizeNoLot(raw: unknown): string {
 }
 
 /**
- * Normalise un code de zone : trim + uppercase.
- * Retourne "" si vide/null.
+ * Normalise un code de zone pour le stockage OGC.
+ *
+ * Délègue à la fonction canonique de extract-refs.ts pour garantir la cohérence
+ * entre ce qui est stocké dans zone_versions.code_norm et ce qui est produit
+ * par l'extracteur de texte libre.
+ *
+ * @deprecated Utiliser directement `normalizeZoneCode` de extract-refs.ts.
  */
 export function normalizeZoneCode(raw: unknown): string {
-  return String(raw ?? "").trim().toUpperCase();
+  return normalizeZoneCodeUnified(raw);
 }
 
 /**
@@ -454,15 +460,23 @@ export async function upsertZoneBatch(
       );
 
       if (existing.rowCount && existing.rowCount > 0) {
+        // UPDATE : toujours réécrire code_norm pour corriger les enregistrements sans code_norm
         if (geomJson) {
           await client.query(
             `UPDATE zone_versions
              SET geom = ST_SetSRID(ST_GeomFromGeoJSON($1), 4326),
                  geom_source = 'ogc-api',
                  raw_ref = $2,
-                 evidence = $3::jsonb
+                 evidence = $3::jsonb,
+                 code_norm = $5
              WHERE id = $4`,
-            [geomJson, rawRef, JSON.stringify([evidenceEntry]), existing.rows[0]!.id],
+            [geomJson, rawRef, JSON.stringify([evidenceEntry]), existing.rows[0]!.id, codeNorm],
+          );
+        } else {
+          // Pas de géom mais on met à jour code_norm quand même
+          await client.query(
+            `UPDATE zone_versions SET code_norm = $1 WHERE id = $2`,
+            [codeNorm, existing.rows[0]!.id],
           );
         }
         upserted++;
@@ -470,10 +484,10 @@ export async function upsertZoneBatch(
         if (geomJson) {
           await client.query(
             `INSERT INTO zone_versions
-               (canonical_id, city_slug, code_affiche, kind, recon_status,
+               (canonical_id, city_slug, code_affiche, code_norm, kind, recon_status,
                 valid_from, known_from, geom, geom_source, raw_ref, evidence)
              VALUES
-               ($1, $2, $3, $4, 'validated',
+               ($1, $2, $3, $10, $4, 'validated',
                 $5::date, $6::timestamptz,
                 ST_SetSRID(ST_GeomFromGeoJSON($7), 4326), 'ogc-api', $8, $9::jsonb)`,
             [
@@ -486,15 +500,16 @@ export async function upsertZoneBatch(
               geomJson,
               rawRef,
               JSON.stringify([evidenceEntry]),
+              codeNorm, // $10 = code_norm
             ],
           );
         } else {
           await client.query(
             `INSERT INTO zone_versions
-               (canonical_id, city_slug, code_affiche, kind, recon_status,
+               (canonical_id, city_slug, code_affiche, code_norm, kind, recon_status,
                 valid_from, known_from, geom_source, raw_ref, evidence)
              VALUES
-               ($1, $2, $3, $4, 'validated',
+               ($1, $2, $3, $9, $4, 'validated',
                 $5::date, $6::timestamptz,
                 'none', $7, $8::jsonb)`,
             [
@@ -506,6 +521,7 @@ export async function upsertZoneBatch(
               now,
               rawRef,
               JSON.stringify([evidenceEntry]),
+              codeNorm, // $9 = code_norm
             ],
           );
         }

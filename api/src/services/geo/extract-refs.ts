@@ -105,23 +105,30 @@ const LOT_COMPACT_SRC = String.raw`(?<![0-9])([0-9]{7,10})(?![0-9])`;
 // ─── Normalisation ────────────────────────────────────────────────────────────
 
 /**
- * Normalise un code de zone :
+ * Normalise un code de zone (UNIQUE source de vérité — utilisée par extract-refs ET ogc-pull).
+ *
+ * Règles :
  * - Majuscules
- * - Suppression des espaces
- * - Suppression du suffixe secteur entre parenthèses (ex. `(VLO)`)
- * - Remplacement du tiret en demi-cadratin par un tiret ASCII
+ * - Remplacement des tirets demi-cadratins (–, —) par des tirets ASCII (-)
+ * - Suppression du suffixe secteur entre parenthèses (ex. `(VLO)`, `(SAT)`)
+ * - Suppression de tous les espaces restants
  *
  * Exemples :
  *   "H34-327 (VLO)" -> "H34-327"
  *   "h-431"         -> "H-431"
  *   "RU1302"        -> "RU1302"
+ *   "H 34-327"      -> "H34-327"
+ *   "H–431"         -> "H-431"     (demi-cadratin unicode)
+ *   null / undefined -> ""
+ *
+ * @param raw - Valeur brute (string ou unknown depuis les propriétés OGC)
  */
-export function normalizeZoneCode(raw: string): string {
-  return raw
+export function normalizeZoneCode(raw: unknown): string {
+  return String(raw ?? "")
     .toUpperCase()
-    .replace(/\s*\([A-Z]{2,5}\)\s*/g, "")
-    .replace(/\s+/g, "")
-    .replace(/–/g, "-");
+    .replace(/[–—]/g, "-")
+    .replace(/\s*\([A-Z0-9]{2,8}\)\s*/g, "")
+    .replace(/\s+/g, "");
 }
 
 /**
