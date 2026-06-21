@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { createApp } from "./app.js";
-import { loadConfig, resolveAuthConfig, resolveSmtpConfig } from "./config.js";
+import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
 import {
@@ -29,13 +29,14 @@ logger.info(
     : "OIDC relying-party disabled (open mode — no login)",
 );
 
-// Resolve optional SMTP config for invitation emails.
-const smtp = resolveSmtpConfig(config);
+// Resolve optional Scaleway TEM config for invitation emails. SMTP egress is
+// blocked at the platform level (BR-37b), so mail goes through the TEM HTTP API.
+const tem = resolveTemConfig(config);
 logger.info(
-  { smtpEnabled: smtp.enabled, smtpHost: smtp.enabled ? smtp.host : undefined },
-  smtp.enabled
-    ? "SMTP mailer enabled (invitation emails will be sent)"
-    : "SMTP mailer disabled (invitation links will be logged to stdout)",
+  { temEnabled: tem.enabled, temRegion: tem.enabled ? tem.region : undefined },
+  tem.enabled
+    ? "Scaleway TEM mailer enabled (invitation emails will be sent via HTTP API)"
+    : "Scaleway TEM mailer disabled (invitation links will be logged to stdout)",
 );
 
 const app = createApp({
@@ -46,7 +47,7 @@ const app = createApp({
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
   auth,
-  smtp,
+  tem,
 });
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.
