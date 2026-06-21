@@ -97,7 +97,6 @@
       type="button"
       title="Ouvrir l'assistant radar"
       aria-label="Ouvrir l'assistant radar"
-      data-tour="chat"
       on:click={toggleOpen}
     >
       <MessageCircle class="h-5 w-5" aria-hidden="true" />
