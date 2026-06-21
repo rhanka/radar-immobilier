@@ -28,7 +28,6 @@ const OUT_PATH = resolve(__dirname, "../src/schemas/ontology/relations-generated
 
 // ── Lecture et parse du YAML ─────────────────────────────────────────────────
 const raw = readFileSync(YAML_PATH, "utf-8");
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const profile = parse(raw) as { relation_types: Record<string, unknown> };
 
 if (!profile.relation_types || typeof profile.relation_types !== "object") {
