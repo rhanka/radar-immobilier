@@ -135,14 +135,18 @@ const envSchema = z.object({
   /** Session cookie lifetime in seconds (default 8h). */
   SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(28800),
 
-  // ── SMTP optionnel pour les emails d'invitation ────────────────────────
-  // Quand SMTP_HOST est absent, le service mailer log le lien d'invitation
-  // sur stdout (mode dégradé — ne bloque pas la démo).
-  SMTP_HOST: optStr(z.string().min(1)),
-  SMTP_PORT: z.coerce.number().int().positive().default(587),
-  SMTP_USER: optStr(z.string().min(1)),
-  SMTP_PASS: optStr(z.string().min(1)),
-  SMTP_FROM: z.string().default("noreply@sent-tech.ca"),
+  // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
+  // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
+  // le relais smtp.tem.scw.cloud:587 ne délivre jamais. On envoie via l'API HTTP
+  // TEM (POST .../transactional-email/v1alpha1/regions/{region}/emails), comme
+  // sentropic. Quand SCW_TEM_SECRET_KEY est absent, le mailer log le lien
+  // d'invitation sur stdout (mode dégradé — ne bloque pas la démo).
+  SCW_TEM_API_BASE_URL: z.string().default("https://api.scaleway.com"),
+  SCW_TEM_REGION: z.string().default("fr-par"),
+  SCW_TEM_PROJECT_ID: optStr(z.string().min(1)),
+  SCW_TEM_FROM_EMAIL: z.string().default("no-reply@sent-tech.ca"),
+  SCW_TEM_FROM_NAME: z.string().default("Radar"),
+  SCW_TEM_SECRET_KEY: optStr(z.string().min(1)),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
@@ -256,33 +260,39 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
 }
 
 /**
- * Effective SMTP mailer configuration, derived from AppConfig.
- * When SMTP_HOST is absent, `enabled` is false and the mailer falls back to
- * logging the invitation link on stdout (fail-open for demo/dev).
+ * Effective Scaleway TEM mailer configuration, derived from AppConfig.
+ * When SCW_TEM_SECRET_KEY is absent, `enabled` is false and the mailer falls
+ * back to logging the invitation link on stdout (fail-open for demo/dev).
+ * SMTP is intentionally NOT used: egress on :587 is blocked at the platform
+ * level (BR-37b), so all mail goes through the TEM HTTP API.
  */
-export interface SmtpConfig {
+export interface TemConfig {
   readonly enabled: boolean;
-  readonly host: string;
-  readonly port: number;
-  readonly user?: string | undefined;
-  readonly pass?: string | undefined;
-  readonly from: string;
+  readonly apiBaseUrl: string;
+  readonly region: string;
+  readonly projectId?: string | undefined;
+  readonly fromEmail: string;
+  readonly fromName: string;
+  readonly secretKey?: string | undefined;
 }
 
-export function resolveSmtpConfig(config: AppConfig): SmtpConfig {
-  const host = config.SMTP_HOST ?? "";
-  const smtp: SmtpConfig = {
-    enabled: host !== "",
-    host,
-    port: config.SMTP_PORT,
-    from: config.SMTP_FROM,
+export function resolveTemConfig(config: AppConfig): TemConfig {
+  const secretKey = config.SCW_TEM_SECRET_KEY ?? "";
+  const tem: TemConfig = {
+    enabled: secretKey !== "",
+    apiBaseUrl: config.SCW_TEM_API_BASE_URL,
+    region: config.SCW_TEM_REGION,
+    fromEmail: config.SCW_TEM_FROM_EMAIL,
+    fromName: config.SCW_TEM_FROM_NAME,
   };
-  // exactOptionalPropertyTypes: only include user/pass when defined
-  if (config.SMTP_USER !== undefined) {
-    return { ...smtp, user: config.SMTP_USER };
-  }
-  if (config.SMTP_PASS !== undefined) {
-    return { ...smtp, pass: config.SMTP_PASS };
-  }
-  return smtp;
+  // exactOptionalPropertyTypes: only include projectId/secretKey when defined.
+  return {
+    ...tem,
+    ...(config.SCW_TEM_PROJECT_ID !== undefined
+      ? { projectId: config.SCW_TEM_PROJECT_ID }
+      : {}),
+    ...(config.SCW_TEM_SECRET_KEY !== undefined
+      ? { secretKey: config.SCW_TEM_SECRET_KEY }
+      : {}),
+  };
 }
