@@ -9,7 +9,6 @@
     Target,
     ShieldCheck,
     Map,
-    Settings,
     Radio,
   } from "@lucide/svelte";
   import {
@@ -31,12 +30,12 @@
   export let onSelect: (view: DemoView) => void;
   /** État d'authentification (optionnel pour compatibilité). */
   export let authState: AuthState | undefined = undefined;
-  /** Callback de déconnexion. */
+  /** Callback de déconnexion (logout corrigé : fetch /logout + reload propre). */
   export let onLogout: (() => void) | undefined = undefined;
 
   $: isAdmin = authState?.user?.isAdmin === true;
 
-  /** 3 vues principales — navigation visible. */
+  /** 3 vues principales — navigation visible, grand public. */
   const mainItems: { id: DemoView; label: string }[] = [
     { id: "signaux", label: "Signaux" },
     { id: "evaluation", label: "Évaluation" },
@@ -44,12 +43,12 @@
   ];
 
   /**
-   * Items du menu Outils construits dynamiquement pour filtrer Admin si non-admin.
-   * MenuItem du DS supporte icon?: Component compatible Lucide.
+   * Outils internes (admin/dev) — GATÉS AU RÔLE ADMIN. Ils ne font plus partie
+   * de la navigation top-level grand public : le menu Admin n'apparaît QUE si
+   * `isAdmin`. Plus aucun doublon avec la nav principale.
    */
-  $: outilsItems = [
-    { kind: "group" as const, label: "Outils internes" },
-    ...(isAdmin ? [{ value: "admin", label: "Admin", icon: ShieldCheck }] : []),
+  const adminItems: { value: DemoView; label: string; icon: typeof Rocket }[] = [
+    { value: "admin", label: "Admin", icon: ShieldCheck },
     { value: "onboarding", label: "Onboarding", icon: Rocket },
     { value: "ciblage", label: "Ciblage", icon: Target },
     { value: "grilles", label: "Grilles", icon: SlidersHorizontal },
@@ -58,35 +57,46 @@
     { value: "coordination", label: "Coordination", icon: Network },
     { value: "backlog", label: "Backlog", icon: KanbanSquare },
     { value: "geo", label: "Carte géo", icon: Map },
-  ] as MenuItem[];
+  ];
 
-  /** Vrai si la vue active est une vue Outils. */
-  $: isOutilsActive = outilsItems.some(
-    (item) => "value" in item && (item as { value: string }).value === activeView
-  );
+  /** Items DS du menu Admin (group + entrées actionnables). */
+  const adminMenuItems: MenuItem[] = [
+    { kind: "group", label: "Outils internes" },
+    ...adminItems.map(
+      (item): MenuItem => ({
+        kind: "item",
+        value: item.value,
+        label: item.label,
+        icon: item.icon,
+      }),
+    ),
+  ];
 
-  let outilsOpen = false;
-  /** Référence à l'élément HTML du déclencheur Outils (span wrapper). */
-  let outilsTriggerEl: HTMLElement | null = null;
+  /** Vrai si la vue active est un outil admin (état visuel du déclencheur). */
+  $: isAdminActive = adminItems.some((item) => item.value === activeView);
 
-  function handleOutilsSelect(value: string): void {
+  let adminOpen = false;
+  /** Référence HTML du déclencheur Admin (ancre du MenuPopover). */
+  let adminTriggerEl: HTMLElement | null = null;
+
+  function handleAdminSelect(value: string): void {
     onSelect(value as DemoView);
-    outilsOpen = false;
+    adminOpen = false;
   }
 
-  /** Identité utilisateur pour IdentityMenu. */
-  $: identityUser = authState?.authenticated && authState.user
-    ? {
-        displayName: authState.user.name ?? authState.user.email ?? authState.user.sub,
-        email: authState.user.email,
-      }
-    : null;
+  /** Identité utilisateur pour IdentityMenu (contrat DS : displayName requis). */
+  $: identityUser =
+    authState?.authenticated && authState.user
+      ? {
+          displayName:
+            authState.user.name ?? authState.user.email ?? authState.user.sub,
+          email: authState.user.email,
+        }
+      : null;
 
   /**
-   * Items mobile : toutes les vues (principales + Outils) regroupées dans
-   * l'OverflowMenu DS pour le repli responsive sous le seuil md (768px).
-   * Réutilise outilsItems (déjà filtré sur Admin) en ne conservant que les
-   * entrées actionnables.
+   * Items mobile : vues principales (toujours) + outils admin (UNIQUEMENT si
+   * admin), regroupés dans l'OverflowMenu DS pour le repli responsive (< md).
    */
   $: mobileNavItems = [
     ...mainItems.map(
@@ -94,20 +104,22 @@
         value: item.id,
         label: item.label,
         onclick: () => onSelect(item.id),
-      })
+      }),
     ),
-    ...outilsItems.flatMap((item): OverflowMenuItem[] =>
-      "value" in item
-        ? [
-            {
+    ...(isAdmin
+      ? [
+          { kind: "divider" as const },
+          { kind: "group" as const, label: "Outils internes" },
+          ...adminItems.map(
+            (item): OverflowMenuItem => ({
               value: item.value,
               label: item.label,
               icon: item.icon,
-              onclick: () => onSelect(item.value as DemoView),
-            },
-          ]
-        : []
-    ),
+              onclick: () => onSelect(item.value),
+            }),
+          ),
+        ]
+      : []),
   ];
 </script>
 
@@ -123,7 +135,7 @@
   {/snippet}
 
   {#snippet navigation()}
-    <!-- Nav desktop (≥ md = 768px) : vues principales + menu Outils DS -->
+    <!-- Nav desktop (≥ md = 768px) : vues principales + menu Admin (si admin) -->
     <div class="hidden md:flex items-center gap-1">
       {#each mainItems as item}
         <Button
@@ -139,44 +151,44 @@
       {/each}
 
       <!--
-        Déclencheur Outils : span ancre HTMLElement pour MenuPopover.
-        `inline-flex` (et NON `display:contents`) garantit une boîte de rendu
-        réelle ; sinon getBoundingClientRect() renvoie un rect dégénéré et le
-        popover se positionne en haut-gauche du viewport au lieu de sous le
-        bouton.
+        Menu Admin — outils internes gatés au rôle admin. Rendu UNIQUEMENT pour
+        un compte admin : le grand public ne voit aucun outil interne.
+        Le span est une ancre HTMLElement (inline-flex, pas display:contents)
+        pour que MenuPopover se positionne bien sous le bouton.
       -->
-      <span bind:this={outilsTriggerEl} class="inline-flex">
-        <Button
-          type="button"
-          size="sm"
-          variant={isOutilsActive ? "primary" : "ghost"}
-          aria-haspopup="menu"
-          aria-expanded={outilsOpen}
-          onclick={() => (outilsOpen = !outilsOpen)}
-        >
-          <Settings size={16} aria-hidden="true" />
-          Outils
-        </Button>
-      </span>
+      {#if isAdmin}
+        <span bind:this={adminTriggerEl} class="inline-flex">
+          <Button
+            type="button"
+            size="sm"
+            variant={isAdminActive ? "primary" : "ghost"}
+            aria-haspopup="menu"
+            aria-expanded={adminOpen}
+            onclick={() => (adminOpen = !adminOpen)}
+          >
+            <ShieldCheck size={16} aria-hidden="true" />
+            Admin
+          </Button>
+        </span>
 
-      <!-- Popover DS positionné sous le déclencheur -->
-      <MenuPopover
-        bind:open={outilsOpen}
-        trigger={outilsTriggerEl}
-        placement="bottom-start"
-        label="Menu Outils"
-      >
-        <Menu
-          label="Outils internes"
-          items={outilsItems}
-          open={true}
-          dismissOnSelect={false}
-          onselect={handleOutilsSelect}
-        />
-      </MenuPopover>
+        <MenuPopover
+          bind:open={adminOpen}
+          trigger={adminTriggerEl}
+          placement="bottom-start"
+          label="Menu Admin"
+        >
+          <Menu
+            label="Outils internes"
+            items={adminMenuItems}
+            open={true}
+            dismissOnSelect={false}
+            onselect={handleAdminSelect}
+          />
+        </MenuPopover>
+      {/if}
     </div>
 
-    <!-- Nav mobile (< md = 768px) : OverflowMenu DS regroupant toutes les vues -->
+    <!-- Nav mobile (< md = 768px) : OverflowMenu DS regroupant les vues -->
     <div class="flex md:hidden items-center">
       <OverflowMenu
         items={mobileNavItems}
@@ -188,6 +200,16 @@
   {/snippet}
 
   {#snippet actions()}
+    <!--
+      Menu identité — composant canonique DS `IdentityMenu`, câblé sur le store
+      auth réel. `onLogout` = le logout CORRIGÉ (fetch /logout + purge du
+      disjoncteur anti-boucle + reload propre vers /).
+
+      TODO DS items[] extension : quand la version DS exposant `items[]` +
+      `secondaryLabel` sera publiée (non dispo en 0.34.57), brancher ici en une
+      ligne `items={[Profil, Paramètres, Admin profils/utilisateurs]}` +
+      `secondaryLabel="Créer un compte"`.
+    -->
     <IdentityMenu
       user={identityUser}
       isAuthenticated={!!(authState?.authenticated && authState.user)}
