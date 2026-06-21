@@ -27,6 +27,8 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/svelte": "^5.2.4",
     "@tsconfig/svelte": "^5.0.0",
     "@types/node": "^20.14.2",
     "autoprefixer": "^10.4.17",

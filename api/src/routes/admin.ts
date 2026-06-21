@@ -1,24 +1,31 @@
-// Admin routes — account approval workflow.
+// Admin routes — account approval workflow + invitations par email.
 //
 //   GET  /api/v1/admin/users            -> list all account_users (admin only)
 //   GET  /api/v1/admin/users/pending    -> list pending accounts (admin only)
 //   POST /api/v1/admin/users/:sub/approve -> approve an account (admin only)
 //   POST /api/v1/admin/users/:sub/reject  -> reject an account (admin only)
 //   POST /api/v1/admin/users/:sub/status  -> set approved/rejected/suspended
+//   POST /api/v1/admin/invitations       -> envoyer une invitation (admin only)
+//   GET  /api/v1/admin/invitations       -> lister les invitations (admin only)
 //
 // All routes require an authenticated session with isAdmin === true in
 // account_users. Returns 401 if no session, 403 if not admin.
 
 import { Hono, type Context } from "hono";
 import { getCookie } from "hono/cookie";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { z } from "zod";
+import { randomBytes } from "node:crypto";
 import type { Database } from "../db/client.js";
-import { accountUserStatusEvents, accountUsers } from "../db/schema.js";
+import { accountUserStatusEvents, accountUsers, accountInvitations } from "../db/schema.js";
 import {
   SESSION_COOKIE_NAME,
   verifySession,
 } from "../services/auth/session.js";
+import {
+  sendInvitationEmail,
+  type MailerConfig,
+} from "../services/auth/mailer.js";
 
 export interface AdminDeps {
   db: Database;
@@ -26,6 +33,19 @@ export interface AdminDeps {
   sessionSecret: string;
   /** Clock injection for deterministic exp checks. */
   now?: () => number;
+  /** Config mailer optionnelle — mode dégradé (log) si absente. */
+  mailer?: MailerConfig;
+  /** URL de base de l'app (pour construire le lien d'invitation). */
+  appBaseUrl?: string;
+}
+
+/** Génère un token d'invitation opaque (base64url, 32 bytes). */
+function generateInvitationToken(): string {
+  return randomBytes(32)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 const AdminStatusTarget = z.enum(["approved", "rejected", "suspended"]);
@@ -259,6 +279,98 @@ export function adminRoute(deps: AdminDeps): Hono {
       return c.json({ error: "not_found" }, 404);
     }
     return statusResponse(c, change);
+  });
+
+  // ── Invitations ────────────────────────────────────────────────────────
+
+  const InvitationBody = z.object({
+    email: z.string().trim().email(),
+    note: z.string().trim().max(500).optional(),
+  });
+
+  /** Envoyer une invitation par email (admin only). */
+  app.post("/api/v1/admin/invitations", async (c) => {
+    const result = await requireAdmin(c, deps);
+    if (isResponse(result)) return result as Response;
+    const adminSub = (result as { sub: string }).sub;
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: "invalid_json" }, 400);
+    }
+
+    const parsed = InvitationBody.safeParse(body);
+    if (!parsed.success) {
+      return c.json(
+        { error: "validation_failed", detail: parsed.error.format() },
+        400,
+      );
+    }
+
+    const { email, note } = parsed.data;
+    const at = new Date((deps.now ?? (() => Date.now()))());
+    const token = generateInvitationToken();
+
+    // Upsert : si une invitation pending existe pour cet email, on en crée
+    // une nouvelle (l'ancienne reste dans l'historique avec son statut).
+    await deps.db.insert(accountInvitations).values({
+      email,
+      token,
+      status: "pending",
+      invitedBy: adminSub,
+      invitedAt: at,
+      ...(note ? { note } : {}),
+    });
+
+    // Récupère le nom de l'admin pour personnaliser l'email
+    const adminRows = await deps.db
+      .select()
+      .from(accountUsers)
+      .where(eq(accountUsers.sub, adminSub))
+      .limit(1);
+    const adminNameRaw = adminRows[0]?.name ?? null;
+
+    // Envoie l'email (ou log en mode dégradé)
+    const mailerConfig: MailerConfig = deps.mailer ?? {};
+    if (!deps.mailer && deps.appBaseUrl) {
+      mailerConfig.appBaseUrl = deps.appBaseUrl;
+    }
+    const inviteParams: { to: string; token: string; invitedByName?: string } = {
+      to: email,
+      token,
+    };
+    if (adminNameRaw) inviteParams.invitedByName = adminNameRaw;
+    const mailResult = await sendInvitationEmail(inviteParams, mailerConfig);
+
+    return c.json({
+      ok: true,
+      invitation: {
+        email,
+        token: mailResult.sent ? undefined : token, // retourne le token en mode dégradé pour la démo
+        status: "pending",
+        invitedBy: adminSub,
+        invitedAt: at.toISOString(),
+      },
+      email: {
+        sent: mailResult.sent,
+        link: mailResult.link,
+      },
+    });
+  });
+
+  /** Lister les invitations (admin only). */
+  app.get("/api/v1/admin/invitations", async (c) => {
+    const result = await requireAdmin(c, deps);
+    if (isResponse(result)) return result as Response;
+
+    const invitations = await deps.db
+      .select()
+      .from(accountInvitations)
+      .orderBy(desc(accountInvitations.invitedAt));
+
+    return c.json({ ok: true, invitations });
   });
 
   return app;
