@@ -411,10 +411,14 @@ describe("enrollment — OIDC callback with DB", () => {
     return { res, db, dbMock };
   }
 
-  it("new non-admin user is redirected to /pending", async () => {
+  it("new non-admin user is redirected to /pending WITH a session cookie", async () => {
     const { res } = await makeCallback({ sub: "new-user", email: "new@example.com" });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    // Regression guard for the mobile ping-pong: the session cookie MUST be set
+    // even for a pending user, so the SPA's /me probe sees authenticated:true
+    // (status:pending) and renders PendingView instead of bouncing to /login.
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
   it("admin@sent-tech.ca is approved and redirected to app", async () => {
@@ -431,13 +435,14 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(inserted[0]!.isAdmin).toBe(true);
   });
 
-  it("existing pending user is redirected to /pending", async () => {
+  it("existing pending user is redirected to /pending WITH a session cookie", async () => {
     const { res } = await makeCallback({
       sub: "pending-user",
       existingUsers: [{ sub: "pending-user", status: "pending", isAdmin: false }],
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
   it("existing approved user gets a session and is redirected to app", async () => {
@@ -450,13 +455,17 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
-  it("existing suspended user is redirected away without a session", async () => {
+  it("existing suspended user is redirected to /rejected WITH a session cookie", async () => {
     const { res } = await makeCallback({
       sub: "suspended-user",
       existingUsers: [{ sub: "suspended-user", status: "suspended", isAdmin: false }],
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
-    expect(readSetCookie(res, "radar_session")).toBeUndefined();
+    // The session cookie is now set even for non-approved users so the SPA can
+    // resolve /me to authenticated:true (status:suspended) and render the
+    // static RejectedView — `protect` still 403s every protected API route, so
+    // setting the cookie does NOT grant access; it only stops the ping-pong.
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 });
