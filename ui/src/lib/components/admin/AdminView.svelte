@@ -37,6 +37,24 @@
   let inviting = false;
   let inviteSuccess: string | null = null;
   let inviteError: string | null = null;
+  // Lien d'enrôlement à copier-coller — affiché quand l'email n'est pas parti
+  // (mode dégradé sans SMTP). Indépendant de la délivrabilité du courriel :
+  // l'admin transmet ce lien lui-même (utile p.ex. quand un utilisateur n'a
+  // que sa passkey sur ordi et doit s'enrôler depuis son mobile).
+  let inviteLink: string | null = null;
+  let inviteLinkCopied = false;
+
+  async function copyInviteLink(): Promise<void> {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      inviteLinkCopied = true;
+      setTimeout(() => (inviteLinkCopied = false), 2000);
+    } catch {
+      // clipboard indisponible (http, permissions) : l'utilisateur sélectionne
+      // le lien affiché à la main — pas d'erreur bloquante.
+    }
+  }
 
   const STATUS_LABELS: Record<string, string> = {
     pending: "En attente",
@@ -115,6 +133,8 @@
     inviting = true;
     inviteSuccess = null;
     inviteError = null;
+    inviteLink = null;
+    inviteLinkCopied = false;
 
     try {
       const res = await fetch("/api/v1/admin/invitations", {
@@ -131,8 +151,11 @@
         if (data.email?.sent) {
           inviteSuccess = `Invitation envoyée à ${emailTrimmed} par courriel.`;
         } else {
-          // Mode dégradé : lien loggué sur le serveur
-          inviteSuccess = `Invitation créée pour ${emailTrimmed}. Le lien a été enregistré dans les logs du serveur (mode sans SMTP).`;
+          // Mode dégradé (pas de SMTP) : l'API renvoie le lien d'enrôlement.
+          // On l'affiche pour copie-collé plutôt que de le laisser uniquement
+          // dans les logs serveur.
+          inviteSuccess = `Invitation créée pour ${emailTrimmed}. L'envoi par courriel est désactivé : copiez le lien ci-dessous et transmettez-le à la personne invitée.`;
+          inviteLink = data.email?.link ?? null;
         }
         inviteEmail = "";
         inviteNote = "";
@@ -273,7 +296,28 @@
       <h2 class="mb-3 text-sm font-semibold text-slate-800">Inviter un utilisateur</h2>
       {#if inviteSuccess}
         <div class="mb-3">
-          <Alert tone="success" title="Invitation envoyée" message={inviteSuccess} />
+          <Alert tone="success" title="Invitation créée" message={inviteSuccess} />
+        </div>
+      {/if}
+      {#if inviteLink}
+        <div class="mb-3 rounded-md border border-slate-300 bg-white p-3">
+          <span class="mb-1 block text-xs font-medium text-slate-600">
+            Lien d'enrôlement à transmettre
+          </span>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              type="text"
+              readonly
+              value={inviteLink}
+              onclick={(e) => (e.currentTarget as HTMLInputElement).select()}
+              class="flex-1 rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-mono
+                     text-xs text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1
+                     focus:ring-blue-500"
+            />
+            <Button type="button" variant="secondary" size="sm" onclick={copyInviteLink}>
+              {inviteLinkCopied ? "Copié !" : "Copier le lien"}
+            </Button>
+          </div>
         </div>
       {/if}
       {#if inviteError}
