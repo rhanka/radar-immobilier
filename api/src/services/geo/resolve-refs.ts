@@ -27,7 +27,7 @@
  * La résolution lot est possible dès que lot_versions.no_lot_norm est peuplé.
  */
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { zoneVersions, lotVersions } from "../../db/schema.js";
 import {
@@ -36,6 +36,11 @@ import {
   normalizeZoneCode,
   RESOLUTION_THRESHOLD,
 } from "./extract-refs.js";
+import {
+  matchZoneMultiLevel,
+  isMatchResult,
+  type GeoMatchDb,
+} from "./match-refs.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -128,6 +133,8 @@ async function insertUnresolved(
  * Retourne le canonical_id de la première zone trouvée, ou null.
  *
  * Note : on cherche les versions actuellement valides (knownTo IS NULL).
+ *
+ * @deprecated Utiliser l'adaptateur GeoMatchDb via makeGeoMatchDb() + matchZoneMultiLevel().
  */
 async function findZoneByCodeNorm(
   db: Database,
@@ -174,6 +181,84 @@ async function findLotByNoLotNorm(
   return rows[0]?.canonicalId ?? null;
 }
 
+// ─── Adaptateur GeoMatchDb (Drizzle) ─────────────────────────────────────────
+
+/**
+ * Crée un GeoMatchDb branché sur une instance Drizzle.
+ * Toutes les requêtes ciblent les versions actives (knownTo IS NULL).
+ */
+function makeGeoMatchDb(db: Database): GeoMatchDb {
+  return {
+    async findZoneExact(codeNorm, citySlug) {
+      return findZoneByCodeNorm(db, codeNorm, citySlug);
+    },
+
+    async findZoneByVariants(codeVariants, citySlug) {
+      if (codeVariants.length === 0) return null;
+      const rows = await db
+        .select({ canonicalId: zoneVersions.canonicalId })
+        .from(zoneVersions)
+        .where(
+          and(
+            inArray(zoneVersions.codeNorm, codeVariants),
+            eq(zoneVersions.citySlug, citySlug),
+            isNull(zoneVersions.knownTo),
+          ),
+        )
+        .limit(1);
+      return rows[0]?.canonicalId ?? null;
+    },
+
+    async listZoneCodesForCity(citySlug) {
+      // limit(2000) = cap raisonnable pour le nombre de zones d'une ville.
+      // Permet au mock de test de fonctionner via la queue habituelle.
+      const rows = await db
+        .select({
+          canonicalId: zoneVersions.canonicalId,
+          codeNorm: zoneVersions.codeNorm,
+        })
+        .from(zoneVersions)
+        .where(
+          and(
+            eq(zoneVersions.citySlug, citySlug),
+            isNull(zoneVersions.knownTo),
+          ),
+        )
+        .limit(2000);
+      return (rows as Array<{ canonicalId: string; codeNorm: string | null }>)
+        .filter((r): r is { canonicalId: string; codeNorm: string } =>
+          typeof r.codeNorm === "string" && r.codeNorm.length > 0,
+        );
+    },
+
+    async findZoneAllCities(codeNorm) {
+      // limit(50) = cap pour la désambiguïsation — si > 50 villes ont ce code → ambiguïté de toute façon.
+      const rows = await db
+        .select({
+          canonicalId: zoneVersions.canonicalId,
+          codeNorm: zoneVersions.codeNorm,
+          citySlug: zoneVersions.citySlug,
+        })
+        .from(zoneVersions)
+        .where(
+          and(
+            eq(zoneVersions.codeNorm, codeNorm),
+            isNull(zoneVersions.knownTo),
+          ),
+        )
+        .limit(50);
+      return (rows as Array<{ canonicalId: string; codeNorm: string | null; citySlug: string }>).filter(
+        (r): r is { canonicalId: string; codeNorm: string; citySlug: string } =>
+          typeof r.codeNorm === "string",
+      );
+    },
+
+    async findLotExact(noLotNorm) {
+      return findLotByNoLotNorm(db, noLotNorm);
+    },
+  };
+}
+
 // ─── Résolution principale ────────────────────────────────────────────────────
 
 /**
@@ -201,7 +286,10 @@ export async function resolveGeoRefs(
   // 1. Extraction
   const { zoneCodes, lotRefs } = extractRefsFromNode(input.label, input.description);
 
-  // 2. Résolution des codes de zone
+  // Adaptateur DB pour le matching multi-niveau
+  const geoDb = makeGeoMatchDb(db);
+
+  // 2. Résolution des codes de zone (matching multi-niveau N1→N4)
   if (zoneCodes.length === 0) {
     // Aucun code extrait — enregistre un non-résolu de type "no_extract"
     await insertUnresolved(db, {
@@ -216,7 +304,7 @@ export async function resolveGeoRefs(
     result.unresolvedZones++;
   } else {
     for (const zoneCode of zoneCodes) {
-      // Score insuffisant -> non-résolu
+      // Score insuffisant -> non-résolu sans appel DB
       if (zoneCode.score < RESOLUTION_THRESHOLD) {
         await insertUnresolved(db, {
           nodeId: input.nodeId,
@@ -231,40 +319,46 @@ export async function resolveGeoRefs(
         continue;
       }
 
-      // Matching DB
+      // Matching multi-niveau N1 (exact) → N2 (variantes) → N3 (edit dist) → N4 (city fallback)
       const codeNorm = normalizeZoneCode(zoneCode.codeNorm);
-      const canonicalId = await findZoneByCodeNorm(db, codeNorm, input.citySlug);
+      const matchResult = await matchZoneMultiLevel(
+        geoDb,
+        codeNorm,
+        zoneCode.rawText,
+        input.citySlug,
+        zoneCode.score,
+      );
 
-      if (!canonicalId) {
-        await insertUnresolved(db, {
-          nodeId: input.nodeId,
-          nodeType: input.nodeType,
-          citySlug: input.citySlug,
-          extraitBrut: zoneCode.rawText,
-          patternType: "zone_code",
-          scoreConfiance: zoneCode.score,
-          raison: "no_polygon",
-        });
-        result.unresolvedZones++;
-      } else {
+      if (isMatchResult(matchResult)) {
         await insertResolution(db, {
           nodeId: input.nodeId,
           nodeType: input.nodeType,
           citySlug: input.citySlug,
           relationType: "concerns_zone",
-          targetId: canonicalId,
+          targetId: matchResult.canonicalId,
           targetType: "Zone",
-          extraitBrut: zoneCode.rawText,
-          scoreConfiance: zoneCode.score,
-          provenance: zoneCode.patternId,
+          extraitBrut: matchResult.extraitBrut,
+          scoreConfiance: matchResult.scoreConfiance,
+          provenance: matchResult.provenance,
           asOfDate: input.asOfDate,
         });
         result.resolvedZones++;
+      } else {
+        await insertUnresolved(db, {
+          nodeId: input.nodeId,
+          nodeType: input.nodeType,
+          citySlug: input.citySlug,
+          extraitBrut: matchResult.extraitBrut,
+          patternType: "zone_code",
+          scoreConfiance: matchResult.scoreConfiance,
+          raison: matchResult.raison,
+        });
+        result.unresolvedZones++;
       }
     }
   }
 
-  // 3. Résolution des numéros de lot
+  // 3. Résolution des numéros de lot (exact no_lot_norm — cadastre province-entière)
   if (lotRefs.length === 0) {
     // Aucun lot extrait — pas de no_extract pour les lots car c'est rare
     // (on n'enregistre un non-résolu lot que si on a tenté d'extraire)
@@ -285,7 +379,7 @@ export async function resolveGeoRefs(
       }
 
       const noLotNorm = normalizeLotRef(lotRef.noLotNorm);
-      const canonicalId = await findLotByNoLotNorm(db, noLotNorm);
+      const canonicalId = await geoDb.findLotExact(noLotNorm);
 
       if (!canonicalId) {
         await insertUnresolved(db, {
