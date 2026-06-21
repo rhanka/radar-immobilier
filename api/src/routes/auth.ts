@@ -303,7 +303,16 @@ export function authRoute(
   });
 
   app.get("/api/v1/auth/logout", (c) => {
-    deleteCookie(c, SESSION_COOKIE_NAME, { path: "/" });
+    // Efface le cookie de session avec les MÊMES attributs que ceux posés par
+    // `mintSessionCookie` (path/secure/sameSite). Le navigateur identifie un
+    // cookie par name+domain+path : `path:"/"` suffit techniquement, mais on
+    // réaligne secure/sameSite par défense en profondeur (certains navigateurs
+    // stricts refusent un Set-Cookie de suppression aux attributs divergents).
+    deleteCookie(c, SESSION_COOKIE_NAME, {
+      path: "/",
+      secure: cookieSecure(auth),
+      sameSite: "Lax",
+    });
     if (isBrowserNavigation(c.req.header("accept"))) {
       return c.redirect(auth.appBaseUrl || "/", 302);
     }

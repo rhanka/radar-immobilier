@@ -213,6 +213,47 @@ describe("GET /api/v1/auth/me", () => {
   });
 });
 
+describe("GET /api/v1/auth/logout", () => {
+  /** Full Set-Cookie segment (name + attributes) for a given cookie name. */
+  function readSetCookieRaw(res: Response, name: string): string | undefined {
+    const all = res.headers.get("set-cookie") ?? "";
+    return all
+      .split(/,(?=[^;]+?=)/)
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(name + "="));
+  }
+
+  it("clears the session cookie (Max-Age=0, Path=/)", async () => {
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/logout");
+    const raw = readSetCookieRaw(res, "radar_session");
+    expect(raw).toBeTruthy();
+    // The delete cookie must blank the value and expire immediately, on the
+    // same Path as the cookie minted at login — otherwise the browser keeps it.
+    expect(raw).toContain("radar_session=;");
+    expect(raw).toMatch(/Max-Age=0/i);
+    expect(raw).toMatch(/Path=\//);
+  });
+
+  it("redirects a browser navigation home", async () => {
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/logout", {
+      headers: { accept: "text/html" },
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+  });
+
+  it("returns JSON {ok:true} for an XHR/fetch call", async () => {
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/logout", {
+      headers: { accept: "application/json" },
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+  });
+});
+
 describe("protect middleware", () => {
   function appWith(
     auth: AuthConfig,
