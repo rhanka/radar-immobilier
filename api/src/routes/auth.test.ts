@@ -378,44 +378,81 @@ function parseEqFilter(filter: unknown): { field: string; value: string } | null
 
 /**
  * Minimal in-memory DB mock for enrollment tests.
- * We only mock select / insert; the auth route checks status to decide redirect.
+ * Discriminates `account_users` vs `account_invitations` by the drizzle table
+ * name so the callback's invitation lookup/acceptance can be exercised.
  */
 function makeEnrollmentDb(
   initialUsers: { sub: string; email?: string; status: string; isAdmin: boolean }[] = [],
+  initialInvitations: { email: string; status: string }[] = [],
 ) {
-  const users = [...initialUsers];
+  const users = [...initialUsers] as Record<string, unknown>[];
+  const invitations = [...initialInvitations] as Record<string, unknown>[];
   const inserted: { sub: string; status: string; isAdmin: boolean }[] = [];
+  const updates: { table: string; field: string; value: string; set: Record<string, unknown> }[] = [];
+
+  const tableNameOf = (table: unknown): string | null =>
+    table &&
+    typeof table === "object" &&
+    Symbol.for("drizzle:Name") in (table as object)
+      ? ((table as Record<symbol, unknown>)[Symbol.for("drizzle:Name")] as string)
+      : null;
+  const collectionFor = (table: unknown): Record<string, unknown>[] =>
+    tableNameOf(table) === "account_invitations" ? invitations : users;
+  // The last table passed to update().set().where() — set on the from-step.
+  let pendingUpdateTable: string | null = null;
 
   return {
     _users: users,
+    _invitations: invitations,
     _inserted: inserted,
+    _updates: updates,
     select: () => ({
-      from: () => ({
-        where: (filter: unknown) => ({
-          limit: (n: number) => {
-            const parsed = parseEqFilter(filter);
-            if (!parsed) return Promise.resolve(users.slice(0, n));
-            return Promise.resolve(
-              users
-                .filter((u) => (u as Record<string, unknown>)[parsed.field] === parsed.value)
-                .slice(0, n),
-            );
-          },
-        }),
-      }),
+      from: (table: unknown) => {
+        const collection = collectionFor(table);
+        return {
+          where: (filter: unknown) => ({
+            limit: (n: number) => {
+              const parsed = parseEqFilter(filter);
+              if (!parsed) return Promise.resolve(collection.slice(0, n));
+              return Promise.resolve(
+                collection
+                  .filter((u) => u[parsed.field] === parsed.value)
+                  .slice(0, n),
+              );
+            },
+          }),
+        };
+      },
     }),
-    insert: () => ({
-      values: (vals: { sub: string; status: string; isAdmin: boolean }) => {
-        users.push(vals);
-        inserted.push(vals);
+    insert: (table: unknown) => ({
+      values: (vals: Record<string, unknown>) => {
+        collectionFor(table).push(vals);
+        if (tableNameOf(table) !== "account_invitations") {
+          inserted.push(vals as unknown as { sub: string; status: string; isAdmin: boolean });
+        }
         return Promise.resolve();
       },
     }),
-    update: () => ({
-      set: () => ({
-        where: () => Promise.resolve(),
-      }),
-    }),
+    update: (table: unknown) => {
+      pendingUpdateTable = tableNameOf(table);
+      return {
+        set: (set: Record<string, unknown>) => ({
+          where: (filter: unknown) => {
+            const parsed = parseEqFilter(filter);
+            const tableName = pendingUpdateTable ?? "account_users";
+            const collection =
+              tableName === "account_invitations" ? invitations : users;
+            if (parsed) {
+              updates.push({ table: tableName, ...parsed, set });
+              for (const row of collection) {
+                if (row[parsed.field] === parsed.value) Object.assign(row, set);
+              }
+            }
+            return Promise.resolve();
+          },
+        }),
+      };
+    },
   };
 }
 
@@ -424,6 +461,7 @@ describe("enrollment — OIDC callback with DB", () => {
     sub: string;
     email?: string;
     existingUsers?: { sub: string; email?: string; status: string; isAdmin: boolean }[];
+    existingInvitations?: { email: string; status: string }[];
   }) {
     const { idToken, getKey } = await makeIdToken({
       nonce: "NONCE",
@@ -441,7 +479,7 @@ describe("enrollment — OIDC callback with DB", () => {
       }
       throw new Error(`unexpected fetch ${url}`);
     };
-    const dbMock = makeEnrollmentDb(opts.existingUsers ?? []);
+    const dbMock = makeEnrollmentDb(opts.existingUsers ?? [], opts.existingInvitations ?? []);
     const db = dbMock as unknown as import("../db/client.js").Database;
     const app = authRoute(AUTH_ON, { discovery: DISCOVERY, fetchImpl, getKey, db });
     const flow = { state: "STATE", nonce: "NONCE", codeVerifier: "VERIFIER" };
@@ -507,6 +545,55 @@ describe("enrollment — OIDC callback with DB", () => {
     // resolve /me to authenticated:true (status:suspended) and render the
     // static RejectedView — `protect` still 403s every protected API route, so
     // setting the cookie does NOT grant access; it only stops the ping-pong.
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+  });
+
+  it("rejected user WITH a pending invitation is re-approved and lands on the app", async () => {
+    // Bug prod (fabien.antoine@gmail.com) : un compte 'rejected' réinvité voyait
+    // « refusé » au login car le callback ne consultait l'invitation que pour
+    // les statuts pending/invited. L'invitation pending doit PRIMER.
+    const { res, dbMock } = await makeCallback({
+      sub: "rejected-then-reinvited",
+      email: "comeback@example.com",
+      existingUsers: [
+        {
+          sub: "rejected-then-reinvited",
+          email: "comeback@example.com",
+          status: "rejected",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [{ email: "comeback@example.com", status: "pending" }],
+    });
+    // Accès accordé : redirigé vers l'app, pas vers /rejected.
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+
+    // Le compte est passé 'approved' via le flux invitation.
+    const userUpdate = dbMock._updates.find(
+      (u) => u.table === "account_users" && u.value === "rejected-then-reinvited",
+    );
+    expect(userUpdate).toBeDefined();
+    expect(userUpdate!.set).toMatchObject({ status: "approved", approvedBy: "invitation" });
+    expect((dbMock._users[0] as { status: string }).status).toBe("approved");
+
+    // L'invitation est marquée 'accepted'.
+    const invUpdate = dbMock._updates.find((u) => u.table === "account_invitations");
+    expect(invUpdate).toBeDefined();
+    expect(invUpdate!.set).toMatchObject({ status: "accepted" });
+  });
+
+  it("rejected user WITHOUT a pending invitation still lands on /rejected", async () => {
+    const { res } = await makeCallback({
+      sub: "stays-rejected",
+      email: "nope@example.com",
+      existingUsers: [
+        { sub: "stays-rejected", email: "nope@example.com", status: "rejected", isAdmin: false },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 });
