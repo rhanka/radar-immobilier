@@ -60,6 +60,8 @@
   } from "$lib/router/router.js";
   import {
     decorateLotsWithSignalProjection,
+    extractSignalLotRefs,
+    extractSignalZoneRefs,
     fallbackZoneCode,
     opacityForSelectionKey,
     withCityFallbackZone,
@@ -206,6 +208,33 @@
 
   $: if (pendingRouteZoneKey && selectedCity && zonesResponse) {
     applyPendingRouteZone();
+  }
+
+  // ── #11 — Highlight géo : cibles du signal focusé ─────────────────────────
+  /** Codes de zones référencées par le signal focusé (vide si pas de signal focusé). */
+  $: focusedSignalZoneRefs = (() => {
+    const key = selectionState.focusedKey;
+    if (!key) return new Set<string>();
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== "signal") return new Set<string>();
+    const node = detailNodes.find((n) => n.id === parsed.id);
+    if (!node) return new Set<string>();
+    return new Set(extractSignalZoneRefs(node));
+  })();
+
+  /** Numéros de lots référencés par le signal focusé (vide si pas de signal focusé). */
+  $: focusedSignalLotRefs = (() => {
+    const key = selectionState.focusedKey;
+    if (!key) return new Set<string>();
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== "signal") return new Set<string>();
+    const node = detailNodes.find((n) => n.id === parsed.id);
+    if (!node) return new Set<string>();
+    return new Set(extractSignalLotRefs(node));
+  })();
+
+  $: if (mapReady && (focusedSignalZoneRefs || focusedSignalLotRefs)) {
+    updateGeoLayers();
   }
 
   // ── MapLibre ───────────────────────────────────────────────────────────────
@@ -747,33 +776,43 @@
 
   function buildZoneOpacityExpression(
     zones = zonesResponse?.featureCollection.features ?? EMPTY_ZONES.features,
+    signalZoneRefs: ReadonlySet<string> = focusedSignalZoneRefs,
   ): ExpressionSpecification {
+    const hasSignalFocus = signalZoneRefs.size > 0;
     const expr: unknown[] = ["match", ["get", "code"]];
     for (const zone of zones) {
       const key = zoneSelectionKey(zone);
-      expr.push(
-        zone.properties.code,
-        opacityForSelectionKey(selectionState, key, 0.42),
-      );
+      let opacity: number;
+      if (hasSignalFocus) {
+        opacity = signalZoneRefs.has(zone.properties.code) ? 0.85 : 0.15;
+      } else {
+        opacity = opacityForSelectionKey(selectionState, key, 0.42);
+      }
+      expr.push(zone.properties.code, opacity);
     }
-    expr.push(selectionState.selectedKeys.size > 0 ? 0.5 : 0.42);
+    expr.push(hasSignalFocus ? 0.12 : (selectionState.selectedKeys.size > 0 ? 0.5 : 0.42));
     return expr as ExpressionSpecification;
   }
 
   function buildLotOpacityExpression(
     lots: LotFeatureCollection = displayedLots,
+    signalLotRefs: ReadonlySet<string> = focusedSignalLotRefs,
   ): ExpressionSpecification {
+    const hasSignalFocus = signalLotRefs.size > 0;
     const expr: unknown[] = ["match", ["get", "noLot"]];
     const citySlug = selectedCity?.municipality.slug;
     for (const lot of lots.features) {
       const noLot = lot.properties.noLot;
-      const key = lotSelectionKey(noLot, lot.properties.citySlug ?? citySlug);
-      expr.push(
-        noLot,
-        key ? opacityForSelectionKey(selectionState, key, 0.36) : 0.36,
-      );
+      let opacity: number;
+      if (hasSignalFocus) {
+        opacity = signalLotRefs.has(noLot) ? 0.85 : 0.15;
+      } else {
+        const key = lotSelectionKey(noLot, lot.properties.citySlug ?? citySlug);
+        opacity = key ? opacityForSelectionKey(selectionState, key, 0.36) : 0.36;
+      }
+      expr.push(noLot, opacity);
     }
-    expr.push(selectionState.selectedKeys.size > 0 ? 0.5 : 0.36);
+    expr.push(hasSignalFocus ? 0.12 : (selectionState.selectedKeys.size > 0 ? 0.5 : 0.36));
     return expr as ExpressionSpecification;
   }
 

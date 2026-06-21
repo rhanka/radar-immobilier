@@ -31,6 +31,10 @@
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
+  import {
+    extractSignalLotRefs,
+    extractSignalZoneRefs,
+  } from "$lib/maps/signaux-map-geo.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -63,17 +67,49 @@
 
   $: zones = zonesResponse?.featureCollection.features ?? [];
   $: lots = lotsResponse?.featureCollection.features ?? [];
+
+  // ── #4 — Filtrage zones/lots selon filtre actif ────────────────────────────
+  /** Codes de zones référencées par au moins un signal filtré. */
+  $: filteredZoneCodeSet = (() => {
+    if (!activeSubsetKey || filteredDetailNodes.length === 0) return null;
+    const codes = new Set<string>();
+    for (const node of filteredDetailNodes) {
+      for (const code of extractSignalZoneRefs(node)) {
+        codes.add(code);
+      }
+    }
+    return codes.size > 0 ? codes : null;
+  })();
+
+  /** Numéros de lots référencés par au moins un signal filtré. */
+  $: filteredLotNoSet = (() => {
+    if (!activeSubsetKey || filteredDetailNodes.length === 0) return null;
+    const noLots = new Set<string>();
+    for (const node of filteredDetailNodes) {
+      for (const ref of extractSignalLotRefs(node)) {
+        noLots.add(ref);
+      }
+    }
+    return noLots.size > 0 ? noLots : null;
+  })();
+
+  /** Zones filtrées : uniquement celles liées aux signaux filtrés (si filtre actif et résultats). */
+  $: filteredZones = filteredZoneCodeSet ? zones.filter((z) => filteredZoneCodeSet!.has(z.properties.code)) : zones;
+
+  /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
+  $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
+
   $: configuredZoneCount = zonesResponse?.zoneCount ?? zones.length;
   $: zoneBadgeText =
     zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
       ? "zones non configurées"
       : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
-  $: visibleLots = lots.slice(0, 80);
+  $: visibleLots = filteredLots.slice(0, 80);
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
       : null;
-  $: lotTotalCount = lotsResponse?.numberMatched ?? lots.length;
+  $: lotTotalCount = filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
   $: hiddenLotCount = Math.max(0, lotTotalCount - visibleLots.length);
   $: lotsUnavailableReason =
     lotsResponse && !lotsResponse.ok
@@ -537,7 +573,7 @@
             {#if zonesResponse?.warnings.includes("lot-union-fallback-is-visual-only")}
               <p class="sel-warning">Fallback visuel : les zones sont dérivées de groupes de lots.</p>
             {/if}
-            {#each zones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
+            {#each filteredZones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
               {@const key = zoneKey(zone)}
               {#if key}
                 {@const zoneVisual = visual(selectionState, key)}
