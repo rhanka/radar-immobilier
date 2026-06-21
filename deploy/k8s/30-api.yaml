@@ -31,20 +31,23 @@ data:
   S3_BUCKET: "radar-immobilier-raw"
   S3_FORCE_PATH_STYLE: "true"
   OBSCURA_CDP_URL: "http://radar-obscura:9222"
-  # ── SMTP outbound (invitation / enrolment mail) ───────────────────────────
-  # The api reads SMTP_HOST/SMTP_PORT/SMTP_FROM (config.ts resolveSmtpConfig);
-  # SMTP_USER/SMTP_PASS come from the radar-smtp-credentials Secret (see env +
-  # secrets.example.yaml). When SMTP_HOST is empty the mailer logs the link to
-  # stdout (degraded mode) and the admin copies it from the UI instead.
-  #
-  # Production target = Scaleway TEM (Transactional Email), the same relay the
-  # sentropic tenant uses — host smtp.tem.scw.cloud, STARTTLS on 587. The sender
-  # domain (sent-tech.ca) must be validated in the SCW TEM console first.
-  # NOTE: the old MAILDEV_SMTP_HOST/MAILDEV_SMTP_PORT keys were dead — the code
-  # never read them — so even MailDev never received anything. They are removed.
-  SMTP_HOST: "smtp.tem.scw.cloud"
-  SMTP_PORT: "587"
-  SMTP_FROM: "noreply@sent-tech.ca"
+  # ── Scaleway TEM outbound (invitation / enrolment mail) ───────────────────
+  # SMTP egress (:587) is BLOCKED at the Kapsule platform level (BR-37b), so the
+  # nodemailer/smtp.tem.scw.cloud relay never delivers. The api sends mail via
+  # the Scaleway Transactional Email HTTP API instead — same approach as the
+  # sentropic tenant (api/src/services/scw-tem-client.ts):
+  #   POST {SCW_TEM_API_BASE_URL}/transactional-email/v1alpha1/regions/{region}/emails
+  #   X-Auth-Token: {SCW_TEM_SECRET_KEY}
+  # config.ts resolveTemConfig reads these non-secret keys; SCW_TEM_SECRET_KEY
+  # comes from the radar-tem-credentials Secret (see env + secrets.example.yaml).
+  # When SCW_TEM_SECRET_KEY is empty the mailer logs the link to stdout (degraded
+  # mode) and the admin copies it from the UI instead. The sender domain
+  # (sent-tech.ca) must be validated in the SCW TEM console first.
+  SCW_TEM_API_BASE_URL: "https://api.scaleway.com"
+  SCW_TEM_REGION: "fr-par"
+  SCW_TEM_PROJECT_ID: "09ac728a-e3b9-4a5b-9749-664b0f147c70"
+  SCW_TEM_FROM_EMAIL: "no-reply@sent-tech.ca"
+  SCW_TEM_FROM_NAME: "Radar"
   # ── Sentropic app / auth delegation (OIDC relying party) ──────────────
   # The shared sentropic IdP issuer (sentropic deploy/k8s/35-auth-idp.yaml:
   # OAUTH_ISSUER_URL=https://auth.sent-tech.ca; discovery at
@@ -121,14 +124,14 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-llm-credentials, key: OPENAI_API_KEY, optional: true } }
             - name: ANTHROPIC_API_KEY
               valueFrom: { secretKeyRef: { name: radar-llm-credentials, key: ANTHROPIC_API_KEY, optional: true } }
-            # SMTP relay credentials (Scaleway TEM). Optional: when the Secret is
-            # absent the mailer stays in degraded/log mode (invitation link is
-            # shown in the admin UI instead of emailed). For SCW TEM these are
-            # the TEM SMTP credentials generated in the console.
-            - name: SMTP_USER
-              valueFrom: { secretKeyRef: { name: radar-smtp-credentials, key: SMTP_USER, optional: true } }
-            - name: SMTP_PASS
-              valueFrom: { secretKeyRef: { name: radar-smtp-credentials, key: SMTP_PASS, optional: true } }
+            # Scaleway TEM API secret key (X-Auth-Token). Optional: when the
+            # Secret is absent the mailer stays in degraded/log mode (invitation
+            # link is shown in the admin UI instead of emailed). Generated in the
+            # SCW console (Transactional Email → API keys); reused from the same
+            # SCW project as sentropic. Secret radar-tem-credentials is created
+            # out-of-band in the namespace.
+            - name: SCW_TEM_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-tem-credentials, key: SCW_TEM_SECRET_KEY, optional: true } }
           readinessProbe:
             httpGet: { path: /health, port: http }
             initialDelaySeconds: 10
