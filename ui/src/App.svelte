@@ -87,8 +87,27 @@
   }
 
   async function handleLogout(): Promise<void> {
-    await fetch("/api/v1/auth/logout");
-    authStore.redirectToLogin();
+    // Déconnexion serveur : efface le cookie de session (GET /logout ->
+    // deleteCookie). On envoie `Accept: application/json` pour récupérer la
+    // réponse JSON `{ok:true}` plutôt qu'un 302 (navigation), et on ignore les
+    // erreurs réseau (le reload ci-dessous re-sondera /me de toute façon).
+    try {
+      await fetch("/api/v1/auth/logout", {
+        headers: { Accept: "application/json" },
+      });
+    } catch {
+      /* réseau indisponible : on recharge quand même pour repartir propre. */
+    }
+    // Purge le disjoncteur anti-boucle (#260) : sinon, au prochain /me toujours
+    // non authentifié, le marqueur ferait croire à une boucle et bloquerait la
+    // reconnexion (LoginView "blocked"). Le logout est un état propre, pas une
+    // tentative échouée.
+    authStore.resetLoginAttempt();
+    // Rechargement COMPLET vers la racine : la SPA se réinitialise, rappelle
+    // /api/v1/auth/me (désormais non authentifié) et affiche LoginView. Sans ce
+    // reload, le store auth resterait "authentifié" en mémoire et rien ne
+    // changerait à l'écran malgré le cookie supprimé côté serveur.
+    window.location.assign("/");
   }
 
   // ── Chat dock layout ───────────────────────────────────────────────────────
