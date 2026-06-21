@@ -3,7 +3,6 @@
   import { ThemeProvider } from "@sentropic/design-system-svelte";
   import { sentTechTheme } from "@sentropic/design-system-themes";
   import TopNav from "$lib/components/TopNav.svelte";
-  import TourOverlay from "$lib/components/tour/TourOverlay.svelte";
   import type { DemoView } from "$lib/demo/views";
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import CiblageView from "$lib/components/ciblage/CiblageView.svelte";
@@ -26,8 +25,6 @@
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
-  import { tourActive, tourStep, startTour, closeTour, isFirstVisit } from "$lib/state/tour.js";
-  import { tourSteps } from "$lib/tour/tour-steps.js";
   import { authStore } from "$lib/auth/auth-store.js";
   import {
     activeGeoRoute,
@@ -93,46 +90,6 @@
     authStore.redirectToLogin();
   }
 
-  // ── Tour ─────────────────────────────────────────────────────────────────
-  $: isTourActive = $tourActive;
-  $: currentTourStepIndex = $tourStep;
-
-  /**
-   * Quand l'index d'etape change (store), on bascule la vue si necessaire.
-   * La reaction est conditionnelle pour eviter les mises a jour inutiles.
-   */
-  $: {
-    if (isTourActive) {
-      const step = tourSteps[currentTourStepIndex];
-      if (step && step.view !== activeView) {
-        navigateTo(step.view);
-      }
-    }
-  }
-
-  /** Avancer d'une etape (appele depuis TourOverlay). */
-  function handleTourNext(): void {
-    const next = currentTourStepIndex + 1;
-    if (next >= tourSteps.length) {
-      closeTour();
-    } else {
-      tourStep.set(next);
-    }
-  }
-
-  /** Reculer d'une etape (appele depuis TourOverlay). */
-  function handleTourPrev(): void {
-    const prev = currentTourStepIndex - 1;
-    if (prev >= 0) {
-      tourStep.set(prev);
-    }
-  }
-
-  /** Ferme la visite guidee. */
-  function handleTourClose(): void {
-    closeTour();
-  }
-
   // ── Chat dock layout ───────────────────────────────────────────────────────
   // When the chat is docked + open, reserve space on the right so the demo
   // content is never hidden behind the panel.
@@ -154,16 +111,12 @@
     }
   }
 
-  // ── Auto-start 1re visite ─────────────────────────────────────────────────
   // Cleanup du listener popstate du routeur
   let cleanupRouter: (() => void) | undefined;
 
   onMount(async () => {
     cleanupRouter = initRouter();
     await authStore.checkSession();
-    if (isFirstVisit()) {
-      startTour();
-    }
   });
 
   onDestroy(() => {
@@ -194,7 +147,6 @@
       <TopNav
         {activeView}
         onSelect={(view) => navigateTo(view)}
-        onStartTour={startTour}
         {authState}
         onLogout={handleLogout}
       />
@@ -248,15 +200,5 @@
 
     <!-- Assistant radar (chat reel @sentropic/chat-ui, ancre par defaut) -->
     <ChatWidgetHost />
-
-    <!-- Visite guidee (overlay bulle jaune) -->
-    <TourOverlay
-      steps={tourSteps}
-      active={isTourActive}
-      currentIndex={currentTourStepIndex}
-      onNext={handleTourNext}
-      onPrev={handleTourPrev}
-      onClose={handleTourClose}
-    />
   {/if}
 </ThemeProvider>
