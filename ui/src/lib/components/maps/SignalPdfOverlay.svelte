@@ -14,17 +14,34 @@
 
   // Préfère sourceUrl (PDF public ou route streaming), puis rawRef via /api/documents/raw
   $: resolvedSourceUrl = sourceUrl ?? (rawRef ? `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}` : null);
-  $: viewerUrl = resolvedSourceUrl ? withPage(resolvedSourceUrl, page) : null;
+  $: viewerUrl = resolvedSourceUrl ? withPageAndSearch(resolvedSourceUrl, page, excerpt) : null;
   $: canEmbed = viewerUrl !== null && (/^https?:\/\//u.test(viewerUrl) || viewerUrl.startsWith("/"));
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
 
-  function withPage(url: string, pageNumber: number | null): string {
-    if (pageNumber === null) return url;
+  /**
+   * Construit l'URL PDF avec fragment #page=N et optionnellement #search=texte.
+   * #page=N  : supporté par Chrome/Firefox PDF viewer natif et pdf.js
+   * #search=  : supporté par Chrome PDF viewer pour surligner le texte
+   * Les deux paramètres sont combinés dans le fragment : #page=N&search=texte
+   */
+  function withPageAndSearch(
+    url: string,
+    pageNumber: number | null,
+    searchText: string | null,
+  ): string {
     const parts = url.split("#", 2);
     const base = parts[0] ?? url;
-    const hash = parts[1];
-    const pageHash = `page=${pageNumber}`;
-    return `${base}#${hash ? `${hash}&${pageHash}` : pageHash}`;
+    const existingHash = parts[1] ?? "";
+    const fragments: string[] = existingHash ? [existingHash] : [];
+    if (pageNumber !== null) {
+      fragments.push(`page=${pageNumber}`);
+    }
+    if (searchText !== null && searchText.trim().length > 0) {
+      // Extrait les 6 premiers mots de la citation pour la recherche
+      const words = searchText.trim().split(/\s+/).slice(0, 6).join(" ");
+      fragments.push(`search=${encodeURIComponent(words)}`);
+    }
+    return fragments.length > 0 ? `${base}#${fragments.join("&")}` : base;
   }
 
   function formatBbox(value: [number, number, number, number] | null): string | null {
@@ -32,10 +49,11 @@
   }
 </script>
 
-<aside class="pdf-overlay" aria-label="Document source">
+<div class="pdf-overlay-backdrop" aria-hidden="true" on:click={onClose}></div>
+<aside class="pdf-overlay" aria-label="Preuve documentaire" role="dialog" aria-modal="true">
   <header class="pdf-overlay-head">
     <div class="pdf-overlay-title-block">
-      <span class="pdf-overlay-kicker">Source</span>
+      <span class="pdf-overlay-kicker">Preuve</span>
       <h2 class="pdf-overlay-title">{title}</h2>
       <div class="pdf-overlay-meta">
         <span>Date : {documentDate ?? "non disponible"}</span>
@@ -43,7 +61,7 @@
         <span>BBox : {formatBbox(bbox) ?? "non disponible"}</span>
       </div>
     </div>
-    <button type="button" class="pdf-overlay-close" on:click={onClose} aria-label="Fermer l'overlay source">
+    <button type="button" class="pdf-overlay-close" on:click={onClose} aria-label="Fermer la preuve documentaire">
       <X class="h-4 w-4" aria-hidden="true" />
     </button>
   </header>
@@ -65,7 +83,7 @@
     </section>
 
     <aside class="pdf-side" aria-label="Citation et provenance">
-      <span class="pdf-side-label">Citation</span>
+      <span class="pdf-side-label">Extrait cité</span>
       {#if excerpt}
         <blockquote>{excerpt}</blockquote>
       {:else}
@@ -100,13 +118,17 @@
 </aside>
 
 <style>
+  .pdf-overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 39;
+    background: rgb(15 23 42 / 0.15);
+  }
+
   .pdf-overlay {
-    position: fixed;
-    top: 4.5rem;
-    right: clamp(19rem, 31vw, 28rem);
-    bottom: 1rem;
-    left: 1rem;
-    z-index: 80;
+    position: absolute;
+    inset: 1.25rem;
+    z-index: 40;
     display: flex;
     min-width: 18rem;
     flex-direction: column;
@@ -114,7 +136,7 @@
     border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
     border-radius: var(--st-radius-md, 6px);
     background: var(--st-semantic-surface-default, #fff);
-    box-shadow: 0 18px 50px rgb(15 23 42 / 0.24);
+    box-shadow: 0 18px 50px rgb(15 23 42 / 0.3);
   }
 
   .pdf-overlay-head {
@@ -273,7 +295,7 @@
 
   @media (max-width: 900px) {
     .pdf-overlay {
-      inset: 4rem 0.5rem 0.5rem;
+      inset: 0.5rem;
     }
 
     .pdf-overlay-body {

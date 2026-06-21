@@ -20,6 +20,7 @@
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
   import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
   import DocumentOverlay from "$lib/components/maps/DocumentOverlay.svelte";
+  import SignalPdfOverlay from "$lib/components/maps/SignalPdfOverlay.svelte";
   import {
     buildCityMapEntries,
     type CityMapEntry,
@@ -31,6 +32,7 @@
     fetchGraphSignalDetail,
     type GraphSignalNode,
     type SignalDocRef,
+    type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
     fetchGeoZones,
@@ -106,6 +108,7 @@
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
   let activeDocument: SignalDocRef | null = null;
+  let activeEvidence: { title: string; evidence: SignalEvidence } | null = null;
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
   // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
@@ -121,10 +124,44 @@
   /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
   let activeSubsetKey = "z"; // défaut : zonageOnly ON
 
+  /**
+   * Restaure la clé filtre depuis l'URL au chargement.
+   * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
+   * Ex : filters={"subset":["z","m"]} → subsetKey="z|m"
+   */
+  function subsetKeyFromRoute(route: GeoRoute | null): string {
+    if (!route) return "z";
+    const values = route.state.filters["subset"] ?? [];
+    return values.length > 0 ? values.join("|") : "z";
+  }
+
   function handleFilterChange(
     subsetKey: string,
   ): void {
     activeSubsetKey = subsetKey;
+    // Persiste le filtre dans l'URL (remplace sans ajouter à l'historique)
+    const currentRoute = geoRoute;
+    if (currentRoute) {
+      const subsetValues = subsetKey ? subsetKey.split("|") : [];
+      const newFilters: Record<string, string[]> = subsetValues.length > 0 ? { subset: subsetValues } : {};
+      const newState = { ...currentRoute.state, filters: newFilters };
+      if (currentRoute.level === "zone") {
+        navigateToGeoRoute(
+          { level: "zone", citySlug: currentRoute.citySlug, zoneKey: currentRoute.zoneKey, state: newState },
+          { replace: true },
+        );
+      } else if (currentRoute.level === "city") {
+        navigateToGeoRoute(
+          { level: "city", citySlug: currentRoute.citySlug, state: newState },
+          { replace: true },
+        );
+      } else {
+        navigateToGeoRoute(
+          { level: "region", state: newState },
+          { replace: true },
+        );
+      }
+    }
     updateFillColors();
   }
 
@@ -479,10 +516,15 @@
       return;
     }
     if (syncUrl) {
+      // Conserver le filtre actif dans la nouvelle route ville
+      const subsetValues = activeSubsetKey ? activeSubsetKey.split("|") : [];
       navigateToGeoRoute({
         level: "city",
         citySlug: entry.municipality.slug,
-        state: { mode: geoRoute?.state.mode ?? "signal" },
+        state: {
+          mode: geoRoute?.state.mode ?? "signal",
+          filters: subsetValues.length > 0 ? { subset: subsetValues } : {},
+        },
       });
     }
     selectedCity = entry;
@@ -505,6 +547,12 @@
     try {
       const res = await fetchGraphSignalDetail(entry.municipality.slug);
       if (selectedCity?.municipality.slug !== entry.municipality.slug) return;
+      if (!res.ok && res.nodes.length === 0) {
+        // 404 — ville sans signaux graphify (état vide honnête)
+        detailNodes = [];
+        detailError = null;
+        return;
+      }
       detailNodes = res.nodes;
       // Alimenter le cache multi-villes et accumuler les types connus
       detailCache.set(entry.municipality.slug, res.nodes);
@@ -535,6 +583,7 @@
     zonesResponse = null;
     lotsResponse = null;
     activeDocument = null;
+    activeEvidence = null;
     selectionState = createSelectionBucketState();
     updateFillColors();
     updateGeoLayers();
@@ -598,6 +647,16 @@
 
   function closeDocument(): void {
     activeDocument = null;
+  }
+
+  function openEvidence(payload: { title: string; evidence: SignalEvidence }): void {
+    activeEvidence = payload;
+    // Ferme le doc overlay si ouvert pour éviter deux overlays superposés
+    activeDocument = null;
+  }
+
+  function closeEvidence(): void {
+    activeEvidence = null;
   }
 
   function zoneSelectionKey(zone: GeoZoneFeature): SelectionKey {
@@ -923,6 +982,11 @@
   }
 
   onMount(() => {
+    // Restaurer le filtre depuis l'URL au premier chargement
+    const initialSubsetKey = subsetKeyFromRoute(geoRoute);
+    if (initialSubsetKey !== activeSubsetKey) {
+      activeSubsetKey = initialSubsetKey;
+    }
     void load();
     void initMap();
   });
@@ -944,6 +1008,7 @@
       {loading}
       dataUnavailable={loadError !== null}
       {detailLoading}
+      initialSubsetKey={activeSubsetKey}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
@@ -1015,6 +1080,20 @@
       </div>
     {/if}
     <DocumentOverlay documentRef={activeDocument} onClose={closeDocument} />
+    {#if activeEvidence}
+      <SignalPdfOverlay
+        title={activeEvidence.title}
+        sourceUrl={activeEvidence.evidence.documentUrl ?? activeEvidence.evidence.sourceUrl}
+        sourceRef={activeEvidence.evidence.sourceRef}
+        rawRef={activeEvidence.evidence.rawRef}
+        rawObjectKey={activeEvidence.evidence.rawObjectKey}
+        documentDate={activeEvidence.evidence.documentDate}
+        page={activeEvidence.evidence.page}
+        bbox={activeEvidence.evidence.bbox}
+        excerpt={activeEvidence.evidence.excerpt ?? activeEvidence.evidence.citation}
+        onClose={closeEvidence}
+      />
+    {/if}
   </div>
 
   <!-- ── SEL droit : panneau de sélection ville ───────────────────────────── -->
@@ -1033,6 +1112,7 @@
       onClear={clearSelection}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
+      onOpenEvidence={openEvidence}
     />
   </svelte:fragment>
 </ViewLayout>

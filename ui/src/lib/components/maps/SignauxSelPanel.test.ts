@@ -76,16 +76,16 @@ describe("SignauxSelPanel — clic signal → fiche détail", () => {
 
     // Avant le clic : aucun détail ouvert.
     expect(queryByText("Premier signal de zonage.")).toBeNull();
-    expect(queryByText("Evidence")).toBeNull();
+    expect(queryByText("Preuve")).toBeNull();
 
     // Clic sur le bouton du 1er signal.
     await fireEvent.click(getByText("Avis de motion règlement zonage H-431"));
 
     // La fiche détail doit apparaître.
     expect(queryByText("Premier signal de zonage.")).not.toBeNull();
-    expect(queryByText("Evidence")).not.toBeNull();
-    // Source documentaire présente (sourceRef raw/...) → bouton "Voir provenance".
-    expect(queryByText("Voir provenance")).not.toBeNull();
+    expect(queryByText("Preuve")).not.toBeNull();
+    // Source documentaire présente (sourceRef raw/...) → bouton "Voir la preuve".
+    expect(queryByText("Voir la preuve")).not.toBeNull();
   });
 
   it("ouvre n'importe quel signal, pas seulement le 1er", async () => {
