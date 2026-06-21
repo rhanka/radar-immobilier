@@ -256,20 +256,25 @@ export function authRoute(
         }
       } else {
         const account = existing[0]!;
-        // If account is 'invited' or 'pending' and the user has a pending
-        // invitation for their email, auto-approve on login.
-        if (
-          (account.status === "pending" || account.status === "invited") &&
-          user.email
-        ) {
-          const invitations = await options.db
-            .select()
-            .from(accountInvitations)
-            .where(eq(accountInvitations.email, user.email))
-            .limit(1);
-          const hasInvitation = invitations.some((inv) => inv.status === "pending");
 
-          if (hasInvitation) {
+        if (account.status !== "approved") {
+          // A pending invitation for this email is an explicit admin decision
+          // and PRIMES over any non-approved status — including
+          // `rejected`/`suspended`. Without this, a stale negative
+          // `account_users.status` would shadow a fresh invitation (the login
+          // reads account status, not the invitation), so the invitee would
+          // land on /rejected despite being re-invited.
+          let hasInvitation = false;
+          if (user.email) {
+            const invitations = await options.db
+              .select()
+              .from(accountInvitations)
+              .where(eq(accountInvitations.email, user.email))
+              .limit(1);
+            hasInvitation = invitations.some((inv) => inv.status === "pending");
+          }
+
+          if (hasInvitation && user.email) {
             const now = new Date(nowFn());
             await options.db
               .update(accountUsers)
@@ -280,19 +285,16 @@ export function authRoute(
               .set({ status: "accepted", acceptedAt: now })
               .where(eq(accountInvitations.email, user.email));
             // continue to session minting (approved)
-          } else {
+          } else if (account.status === "pending" || account.status === "invited") {
             await mintSessionCookie(c, sessionClaims);
             return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+          } else {
+            // rejected / suspended (or any other non-approved status) and no
+            // pending invitation: keep the negative status. This MUST NOT depend
+            // on `user.email` — an emailless token must never bypass the gate.
+            await mintSessionCookie(c, sessionClaims);
+            return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
           }
-        } else if (account.status === "pending") {
-          await mintSessionCookie(c, sessionClaims);
-          return c.redirect(`${auth.appBaseUrl}/pending`, 302);
-        } else if (account.status === "rejected") {
-          await mintSessionCookie(c, sessionClaims);
-          return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
-        } else if (account.status === "suspended") {
-          await mintSessionCookie(c, sessionClaims);
-          return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
         }
       }
     }
