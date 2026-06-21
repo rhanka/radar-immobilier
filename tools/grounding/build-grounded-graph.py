@@ -40,7 +40,7 @@ for n in g["nodes"]:
         ds = (n.get("properties") or {}).get("docSha")
         if ds: node_sha[n["id"]] = ds
 for e in g.get("edges", []):
-    refs = e.get("refs") or []
+    refs = [r for r in (e.get("refs") or []) if isinstance(r, dict)]
     ds = next((r.get("docSha") for r in refs if r.get("docSha")), None)
     if not ds:
         src = nodes.get(e.get("source"))
@@ -80,7 +80,18 @@ for n in g["nodes"]:
     p["rawRef"] = md.get("rawRef")
     p["refs"] = [ref]
     n["refs"] = [ref]  # node top-level -> props.refs (read by API buildEvidence)
+    # fallback: si description vide, utiliser le label du nœud
+    if not p.get("description") and n.get("label"):
+        p["description"] = n["label"]
     grounded_nodes += 1
+
+# --- fallback description sur nœuds sans docSha (non groundés) ---------------
+for n in g["nodes"]:
+    if n["type"] not in ("DesignationEvent", "Signal"):
+        continue
+    p = n.setdefault("properties", {})
+    if not p.get("description") and n.get("label"):
+        p["description"] = n["label"]
 
 # --- inject grounded refs onto edges, replacing synthetic generated:// refs ---
 def grounded_edge_ref(ds, node_id):
@@ -101,6 +112,10 @@ for e in g.get("edges", []):
             ds = node_sha[ep]; target_node = ep; break
     new_refs = []
     for r in (e.get("refs") or []):
+        if not isinstance(r, dict):
+            # ref non-dict (string) : conserver tel quel, pas synthétique
+            new_refs.append(r)
+            continue
         raw = str(r.get("rawRef") or "")
         src_file = str(r.get("source_file") or "")
         if raw.startswith("generated://") or src_file.startswith("generated://") or r.get("synthetic"):
