@@ -324,6 +324,35 @@ export function adminRoute(deps: AdminDeps): Hono {
       ...(note ? { note } : {}),
     });
 
+    // Réhabilitation : si un compte existe DÉJÀ pour cet email avec un statut
+    // négatif (rejected / suspended), une nouvelle invitation est une décision
+    // explicite de l'admin qui doit primer sur l'ancien statut. Sans ça, le
+    // login lirait toujours `account_users.status='rejected'` (la table de
+    // vérité côté `protect`/callback) et l'invité verrait « refusé » malgré
+    // l'invitation `pending`. On repasse le compte en `pending` : il sera
+    // auto-approuvé au prochain login OIDC via le flux invitation (auth.ts),
+    // ce qui évite d'accorder l'accès avant que l'invité ne se soit connecté.
+    const existingForEmail = await deps.db
+      .select()
+      .from(accountUsers)
+      .where(eq(accountUsers.email, email))
+      .limit(1);
+    const reinvited = existingForEmail[0];
+    if (reinvited && (reinvited.status === "rejected" || reinvited.status === "suspended")) {
+      await deps.db
+        .update(accountUsers)
+        .set({ status: "pending" })
+        .where(eq(accountUsers.sub, reinvited.sub));
+      await deps.db.insert(accountUserStatusEvents).values({
+        userSub: reinvited.sub,
+        fromStatus: reinvited.status,
+        toStatus: "pending",
+        actorSub: adminSub,
+        reason: "reinvited",
+        createdAt: at,
+      });
+    }
+
     // Récupère le nom de l'admin pour personnaliser l'email
     const adminRows = await deps.db
       .select()
