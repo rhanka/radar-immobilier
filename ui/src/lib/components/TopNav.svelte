@@ -1,176 +1,148 @@
 <script lang="ts">
   import {
     Rocket,
-    Radio,
     SlidersHorizontal,
     MonitorDot,
     KanbanSquare,
     Network,
     GitMerge,
-    MapPin,
     Target,
-    BarChart3,
     ShieldCheck,
-    LogOut,
-    ChevronDown,
-    Settings,
     Map,
+    Settings,
   } from "@lucide/svelte";
-  import { Button, Header } from "@sentropic/design-system-svelte";
+  import {
+    Button,
+    Header,
+    IdentityMenu,
+    Menu,
+    MenuPopover,
+  } from "@sentropic/design-system-svelte";
+  import type { MenuItem } from "@sentropic/design-system-svelte";
   import type { DemoView } from "$lib/demo/views.js";
   import type { AuthState } from "$lib/auth/auth-store.js";
 
   export let activeView: DemoView;
   export let onSelect: (view: DemoView) => void;
-  /** Callback pour lancer / relancer la visite guidee. */
+  /** Callback pour lancer / relancer la visite guidée. */
   export let onStartTour: (() => void) | undefined = undefined;
-  /** Etat d'authentification (optionnel pour compatibilite). */
+  /** État d'authentification (optionnel pour compatibilité). */
   export let authState: AuthState | undefined = undefined;
-  /** Callback de deconnexion. */
+  /** Callback de déconnexion. */
   export let onLogout: (() => void) | undefined = undefined;
 
   $: isAdmin = authState?.user?.isAdmin === true;
 
-  /** 3 vues principales — navigation visible (Opportunités retirée de la nav principale). */
-  const mainItems: { id: DemoView; label: string; icon: typeof Rocket }[] = [
-    { id: "signaux", label: "Signaux", icon: Radio },
-    { id: "evaluation", label: "Évaluation", icon: BarChart3 },
-    { id: "sources", label: "Sources", icon: MapPin },
+  /** 3 vues principales — navigation visible. */
+  const mainItems: { id: DemoView; label: string }[] = [
+    { id: "signaux", label: "Signaux" },
+    { id: "evaluation", label: "Évaluation" },
+    { id: "sources", label: "Sources" },
   ];
 
-  /** Vues admin/dev — cachées derrière le menu déroulant. */
-  const adminItems: { id: DemoView; label: string; icon: typeof Rocket }[] = [
-    { id: "admin", label: "Admin", icon: ShieldCheck },
-    { id: "onboarding", label: "Onboarding", icon: Rocket },
-    { id: "ciblage", label: "Ciblage", icon: Target },
-    { id: "grilles", label: "Grilles", icon: SlidersHorizontal },
-    { id: "console", label: "Console sources", icon: MonitorDot },
-    { id: "ontologie", label: "Ontologie", icon: GitMerge },
-    { id: "coordination", label: "Coordination", icon: Network },
-    { id: "backlog", label: "Backlog", icon: KanbanSquare },
-    // G3 — Vue Géo (zones + lots + opportunités)
-    { id: "geo", label: "Carte géo", icon: Map },
-  ];
+  /**
+   * Items du menu Outils construits dynamiquement pour filtrer Admin si non-admin.
+   * MenuItem du DS supporte icon?: Component compatible Lucide.
+   */
+  $: outilsItems = [
+    { kind: "group" as const, label: "Outils internes" },
+    ...(isAdmin ? [{ value: "admin", label: "Admin", icon: ShieldCheck }] : []),
+    { value: "onboarding", label: "Onboarding", icon: Rocket },
+    { value: "ciblage", label: "Ciblage", icon: Target },
+    { value: "grilles", label: "Grilles", icon: SlidersHorizontal },
+    { value: "console", label: "Console sources", icon: MonitorDot },
+    { value: "ontologie", label: "Ontologie", icon: GitMerge },
+    { value: "coordination", label: "Coordination", icon: Network },
+    { value: "backlog", label: "Backlog", icon: KanbanSquare },
+    { value: "geo", label: "Carte géo", icon: Map },
+  ] satisfies MenuItem[];
 
-  let adminMenuOpen = false;
+  /** Vrai si la vue active est une vue Outils. */
+  $: isOutilsActive = outilsItems.some(
+    (item) => "value" in item && (item as { value: string }).value === activeView
+  );
 
-  /** Vérifier si la vue active est une vue admin/dev. */
-  $: isAdminActive = adminItems.some((item) => item.id === activeView);
+  let outilsOpen = false;
+  /** Référence à l'élément HTML du déclencheur Outils (span wrapper). */
+  let outilsTriggerEl: HTMLElement | null = null;
 
-  function selectAndClose(view: DemoView): void {
-    onSelect(view);
-    adminMenuOpen = false;
+  function handleOutilsSelect(value: string): void {
+    onSelect(value as DemoView);
+    outilsOpen = false;
   }
+
+  /** Identité utilisateur pour IdentityMenu. */
+  $: identityUser = authState?.authenticated && authState.user
+    ? {
+        displayName: authState.user.name ?? authState.user.email ?? authState.user.sub,
+        email: authState.user.email,
+      }
+    : null;
 </script>
 
 <Header title="Radar immobilier" sticky={false} label="Navigation principale">
   {#snippet navigation()}
-    <!-- Nav principale : 4 vues -->
-    <div class="flex items-center gap-1">
-      {#each mainItems as item}
-        {@const Icon = item.icon}
-        <Button
-          type="button"
-          size="sm"
-          variant={activeView === item.id ? "primary" : "ghost"}
-          aria-current={activeView === item.id ? "page" : undefined}
-          class="whitespace-nowrap"
-          onclick={() => onSelect(item.id)}
-        >
-          <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
-          {item.label}
-        </Button>
-      {/each}
+    {#each mainItems as item}
+      <Button
+        type="button"
+        size="sm"
+        variant={activeView === item.id ? "primary" : "ghost"}
+        aria-current={activeView === item.id ? "page" : undefined}
+        onclick={() => onSelect(item.id)}
+      >
+        {item.label}
+      </Button>
+    {/each}
 
-      <!-- Menu admin/dev -->
-      <div class="relative">
-        <Button
-          type="button"
-          size="sm"
-          variant={isAdminActive ? "primary" : "ghost"}
-          aria-haspopup="true"
-          aria-expanded={adminMenuOpen}
-          class="whitespace-nowrap"
-          onclick={() => (adminMenuOpen = !adminMenuOpen)}
-        >
-          <Settings class="h-4 w-4 shrink-0" aria-hidden="true" />
-          Outils
-          <ChevronDown class={`h-3.5 w-3.5 shrink-0 transition-transform ${adminMenuOpen ? "rotate-180" : ""}`} aria-hidden="true" />
-        </Button>
+    <!-- Déclencheur Outils : span comme ancre HTMLElement pour MenuPopover -->
+    <span bind:this={outilsTriggerEl} style="display:contents">
+      <Button
+        type="button"
+        size="sm"
+        variant={isOutilsActive ? "primary" : "ghost"}
+        aria-haspopup="menu"
+        aria-expanded={outilsOpen}
+        onclick={() => (outilsOpen = !outilsOpen)}
+      >
+        <Settings size={16} aria-hidden="true" />
+        Outils
+      </Button>
+    </span>
 
-        {#if adminMenuOpen}
-          <!-- Backdrop pour fermer le menu -->
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div
-            class="fixed inset-0 z-10"
-            on:click={() => (adminMenuOpen = false)}
-          ></div>
-
-          <!-- Dropdown menu -->
-          <div class="absolute left-0 top-full z-20 mt-1 min-w-48 rounded-lg border border-slate-200 bg-white shadow-lg py-1">
-            <p class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Outils internes
-            </p>
-            {#each adminItems as item}
-              {#if item.id !== "admin" || isAdmin}
-                {@const Icon = item.icon}
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={activeView === item.id ? "primary" : "ghost"}
-                  aria-current={activeView === item.id ? "page" : undefined}
-                  class="w-full justify-start"
-                  onclick={() => selectAndClose(item.id)}
-                >
-                  <Icon class="h-4 w-4 shrink-0" aria-hidden="true" />
-                  {item.label}
-                </Button>
-              {/if}
-            {/each}
-          </div>
-        {/if}
-      </div>
-    </div>
+    <!-- Popover DS positionné sous le déclencheur -->
+    <MenuPopover
+      bind:open={outilsOpen}
+      trigger={outilsTriggerEl}
+      placement="bottom-start"
+      label="Menu Outils"
+    >
+      <Menu
+        label="Outils internes"
+        items={outilsItems}
+        open={true}
+        dismissOnSelect={false}
+        onselect={handleOutilsSelect}
+      />
+    </MenuPopover>
   {/snippet}
 
   {#snippet actions()}
-    <!-- Actions : visite guidee + toggle Réel/Carte Steve + user info + logout -->
-    <div class="flex items-center gap-2">
-      {#if onStartTour}
-        <Button
-          type="button"
-          size="sm"
-          variant="secondary"
-          aria-label="Lancer la visite guidée"
-          title="Lancer la visite guidée"
-          onclick={onStartTour}
-        >
-          <MapPin class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          Visite guidée
-        </Button>
-      {/if}
+    {#if onStartTour}
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        aria-label="Lancer la visite guidée"
+        onclick={onStartTour}
+      >
+        Visite guidée
+      </Button>
+    {/if}
 
-      {#if authState?.authenticated && authState.user}
-        <!-- User name chip -->
-        <span class="max-w-[120px] truncate text-xs text-slate-500" title={authState.user.email ?? authState.user.sub}>
-          {authState.user.name ?? authState.user.email ?? authState.user.sub}
-        </span>
-        <!-- Logout button -->
-        {#if onLogout}
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            aria-label="Se déconnecter"
-            title="Se déconnecter"
-            onclick={onLogout}
-          >
-            <LogOut class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Déconnexion
-          </Button>
-        {/if}
-      {/if}
-    </div>
+    <IdentityMenu
+      user={identityUser}
+      isAuthenticated={!!(authState?.authenticated && authState.user)}
+      onLogout={onLogout}
+    />
   {/snippet}
 </Header>
