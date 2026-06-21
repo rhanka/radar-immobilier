@@ -10,7 +10,7 @@
 //
 // Vues admin/dev (hors nav principale — code intact) :
 //   "onboarding", "ciblage", "ontologie", "coordination", "backlog", "console", "geo"
-// Legacy (conservés pour compatibilité tour-steps et deep-links) :
+// Legacy (conservés pour compatibilité deep-links) :
 //   "grilles", "carte-signaux", "carte-opportunites", "carte-evaluation"
 export type DemoView =
   // ── 4 vues principales ────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ export type DemoView =
   | "backlog"
   // ── G3 — Vue géo intégration ───────────────────────────────────────────────
   | "geo"
-  // ── Legacy (conservé pour compatibilité tour-steps et deep-links) ─────────
+  // ── Legacy (conservé pour compatibilité deep-links) ───────────────────────
   | "carte-signaux"
   | "carte-opportunites"
   | "carte-evaluation"

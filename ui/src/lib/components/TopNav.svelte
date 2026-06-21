@@ -10,6 +10,7 @@
     ShieldCheck,
     Map,
     Settings,
+    Radio,
   } from "@lucide/svelte";
   import {
     Button,
@@ -28,8 +29,6 @@
 
   export let activeView: DemoView;
   export let onSelect: (view: DemoView) => void;
-  /** Callback pour lancer / relancer la visite guidée. */
-  export let onStartTour: (() => void) | undefined = undefined;
   /** État d'authentification (optionnel pour compatibilité). */
   export let authState: AuthState | undefined = undefined;
   /** Callback de déconnexion. */
@@ -113,6 +112,16 @@
 </script>
 
 <Header title="Radar immobilier" sticky={false} label="Navigation principale">
+  {#snippet logo()}
+    <!--
+      Bloc logo conforme au pattern Header DS : carré coloré + glyphe, couleurs
+      via tokens sémantiques DS uniquement (zéro hex/classe couleur en dur).
+    -->
+    <span class="topnav-logo" aria-hidden="true">
+      <Radio size={18} strokeWidth={2.25} />
+    </span>
+  {/snippet}
+
   {#snippet navigation()}
     <!-- Nav desktop (≥ md = 768px) : vues principales + menu Outils DS -->
     <div class="hidden md:flex items-center gap-1">
@@ -129,8 +138,14 @@
         </Button>
       {/each}
 
-      <!-- Déclencheur Outils : span comme ancre HTMLElement pour MenuPopover -->
-      <span bind:this={outilsTriggerEl} style="display:contents">
+      <!--
+        Déclencheur Outils : span ancre HTMLElement pour MenuPopover.
+        `inline-flex` (et NON `display:contents`) garantit une boîte de rendu
+        réelle ; sinon getBoundingClientRect() renvoie un rect dégénéré et le
+        popover se positionne en haut-gauche du viewport au lieu de sous le
+        bouton.
+      -->
+      <span bind:this={outilsTriggerEl} class="inline-flex">
         <Button
           type="button"
           size="sm"
@@ -173,18 +188,6 @@
   {/snippet}
 
   {#snippet actions()}
-    {#if onStartTour}
-      <Button
-        type="button"
-        size="sm"
-        variant="secondary"
-        aria-label="Lancer la visite guidée"
-        onclick={onStartTour}
-      >
-        Visite guidée
-      </Button>
-    {/if}
-
     <IdentityMenu
       user={identityUser}
       isAuthenticated={!!(authState?.authenticated && authState.user)}
@@ -192,3 +195,18 @@
     />
   {/snippet}
 </Header>
+
+<style>
+  /* Logo : couleurs exclusivement via tokens sémantiques DS. */
+  .topnav-logo {
+    align-items: center;
+    background: var(--st-semantic-action-primary);
+    border-radius: var(--st-radius-md, 0.375rem);
+    color: var(--st-semantic-action-primaryText);
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 2rem;
+    justify-content: center;
+    width: 2rem;
+  }
+</style>
