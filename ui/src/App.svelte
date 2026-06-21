@@ -22,6 +22,7 @@
   import ChatWidgetHost from "$lib/components/chat/ChatWidgetHost.svelte";
   import PendingView from "$lib/components/auth/PendingView.svelte";
   import RejectedView from "$lib/components/auth/RejectedView.svelte";
+  import LoginView from "$lib/components/auth/LoginView.svelte";
   import AdminView from "$lib/components/admin/AdminView.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
@@ -142,16 +143,18 @@
       ? chatLayout.dockWidthCss
       : "0px";
 
-  // ── Redirection auth ──────────────────────────────────────────────────────
-  // Guard SPA : dès que le statut devient "non authentifié et auth activée",
-  // on navigue vers le endpoint login. On utilise une déclaration réactive
-  // ($:) pour réagir aux changements du store, PAS un {@const} dans le markup
-  // (anti-pattern : les effets de bord dans le template Svelte ne se
-  // déclenchent pas de façon fiable).
-  $: {
-    if (!authState.loading && !authState.authenticated && !authState.authDisabled) {
-      authStore.redirectToLogin();
-    }
+  // ── Guard auth ────────────────────────────────────────────────────────────
+  // Quand l'utilisateur n'est pas authentifié et que l'auth est activée, on
+  // affiche une page de connexion STATIQUE (LoginView) — PAS de redirection
+  // automatique. Une auto-redirection ici provoquait un ping-pong infini sur
+  // mobile : si le cookie de session n'était pas reçu au retour de l'IdP,
+  // /me répondait toujours `authenticated:false`, ce qui relançait /login,
+  // que l'IdP ré-autorisait silencieusement, etc. C'est désormais un clic
+  // explicite de l'utilisateur qui lance le flux OIDC (voir auth-store.ts pour
+  // le disjoncteur `loginBlocked`).
+  function handleLogin(): void {
+    authStore.resetLoginAttempt();
+    authStore.redirectToLogin();
   }
 
   // ── Auto-start 1re visite ─────────────────────────────────────────────────
@@ -177,10 +180,10 @@
       <span class="text-slate-500 text-sm">Chargement...</span>
     </div>
   {:else if !authState.authenticated && !authState.authDisabled}
-    <!-- Redirection en cours (déclenchée par le guard réactif dans le script) -->
-    <div class="flex h-screen items-center justify-center">
-      <span class="text-slate-500 text-sm">Redirection vers la connexion...</span>
-    </div>
+    <!-- Page de connexion statique : aucun auto-redirect (anti-boucle mobile).
+         `blocked` distingue le cas "première connexion" du cas "cookie bloqué
+         après une tentative" (disjoncteur loginBlocked). -->
+    <LoginView blocked={authState.loginBlocked} onLogin={handleLogin} />
   {:else if authState.user?.status === "pending"}
     <PendingView />
   {:else if authState.user?.status === "rejected"}
