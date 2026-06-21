@@ -10,7 +10,7 @@
 // All of it is gated by AuthConfig.enabled: when auth is not configured (local
 // dev / tests), the routes report 503 and `protect` lets every request pass.
 
-import { Hono, type MiddlewareHandler } from "hono";
+import { Hono, type Context, type MiddlewareHandler } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { eq } from "drizzle-orm";
 import type { JWTVerifyGetKey } from "jose";
@@ -78,6 +78,37 @@ export function authRoute(
 
   async function discover(): Promise<OidcDiscovery> {
     return options.discovery ?? fetchDiscovery(auth, fetchImpl);
+  }
+
+  /**
+   * Mint and set the RP session cookie for an authenticated user.
+   *
+   * IMPORTANT: this is called for EVERY authenticated user, including those
+   * whose account status is `pending`/`rejected`/`suspended`. Previously the
+   * callback redirected non-approved users to `/pending` (or `/rejected`)
+   * WITHOUT setting the session cookie. The SPA then probed `/api/v1/auth/me`,
+   * got `authenticated:false` (no cookie), and the auth guard bounced back to
+   * `/login` — which the IdP silently re-authorized — producing an infinite
+   * ping-pong on mobile. Setting the cookie regardless of status lets `/me`
+   * report `authenticated:true` + the real `status`, so the SPA renders the
+   * static Pending/Rejected screen instead of looping.
+   */
+  async function mintSessionCookie(
+    c: Context,
+    claims: { sub: string; name?: string; email?: string },
+  ): Promise<void> {
+    const sessionToken = await signSession(claims, {
+      sessionSecret: auth.sessionSecret,
+      ttlSeconds: auth.sessionTtlSeconds,
+      now: nowFn(),
+    });
+    setCookie(c, SESSION_COOKIE_NAME, sessionToken, {
+      httpOnly: true,
+      secure: cookieSecure(auth),
+      sameSite: "Lax",
+      path: "/",
+      maxAge: auth.sessionTtlSeconds,
+    });
   }
 
   app.get("/api/v1/auth/login", async (c) => {
@@ -166,6 +197,15 @@ export function authRoute(
       return c.json({ error: "id_token_invalid", detail: String(e) }, 401);
     }
 
+    // Claims carried in the RP session cookie. Built once and reused for both
+    // the success path and the not-yet-approved paths (so the cookie is always
+    // set — see mintSessionCookie's note on the ping-pong bug).
+    const sessionClaims = {
+      sub: user.sub,
+      ...(user.name !== undefined ? { name: user.name } : {}),
+      ...(user.email !== undefined ? { email: user.email } : {}),
+    };
+
     // Enrollment: create or look up the account when DB is available.
     // When db is absent (tests without DB), skip enrollment (fail-open).
     if (options.db) {
@@ -209,7 +249,9 @@ export function authRoute(
           ...(autoApproved ? { approvedAt: new Date(nowFn()), approvedBy: "invitation" } : {}),
         });
         if (!autoApproved) {
-          // Redirect to pending screen
+          // Set the session cookie BEFORE redirecting so the SPA's /me probe
+          // recognises the user (status:pending) and renders PendingView.
+          await mintSessionCookie(c, sessionClaims);
           return c.redirect(`${auth.appBaseUrl}/pending`, 302);
         }
       } else {
@@ -239,38 +281,24 @@ export function authRoute(
               .where(eq(accountInvitations.email, user.email));
             // continue to session minting (approved)
           } else {
+            await mintSessionCookie(c, sessionClaims);
             return c.redirect(`${auth.appBaseUrl}/pending`, 302);
           }
         } else if (account.status === "pending") {
+          await mintSessionCookie(c, sessionClaims);
           return c.redirect(`${auth.appBaseUrl}/pending`, 302);
         } else if (account.status === "rejected") {
+          await mintSessionCookie(c, sessionClaims);
           return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
         } else if (account.status === "suspended") {
+          await mintSessionCookie(c, sessionClaims);
           return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
         }
       }
     }
 
-    const sessionToken = await signSession(
-      {
-        sub: user.sub,
-        ...(user.name !== undefined ? { name: user.name } : {}),
-        ...(user.email !== undefined ? { email: user.email } : {}),
-      },
-      {
-        sessionSecret: auth.sessionSecret,
-        ttlSeconds: auth.sessionTtlSeconds,
-        now: nowFn(),
-      },
-    );
-    setCookie(c, SESSION_COOKIE_NAME, sessionToken, {
-      httpOnly: true,
-      secure: cookieSecure(auth),
-      sameSite: "Lax",
-      path: "/",
-      maxAge: auth.sessionTtlSeconds,
-    });
-
+    // Approved user (or DB-less fail-open path): set the session and land home.
+    await mintSessionCookie(c, sessionClaims);
     return c.redirect(auth.appBaseUrl || "/", 302);
   });
 
