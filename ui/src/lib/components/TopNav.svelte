@@ -17,8 +17,12 @@
     IdentityMenu,
     Menu,
     MenuPopover,
+    OverflowMenu,
   } from "@sentropic/design-system-svelte";
-  import type { MenuItem } from "@sentropic/design-system-svelte";
+  import type {
+    MenuItem,
+    OverflowMenuItem,
+  } from "@sentropic/design-system-svelte";
   import type { DemoView } from "$lib/demo/views.js";
   import type { AuthState } from "$lib/auth/auth-store.js";
 
@@ -55,7 +59,7 @@
     { value: "coordination", label: "Coordination", icon: Network },
     { value: "backlog", label: "Backlog", icon: KanbanSquare },
     { value: "geo", label: "Carte géo", icon: Map },
-  ] satisfies MenuItem[];
+  ] as MenuItem[];
 
   /** Vrai si la vue active est une vue Outils. */
   $: isOutilsActive = outilsItems.some(
@@ -78,52 +82,94 @@
         email: authState.user.email,
       }
     : null;
+
+  /**
+   * Items mobile : toutes les vues (principales + Outils) regroupées dans
+   * l'OverflowMenu DS pour le repli responsive sous le seuil md (768px).
+   * Réutilise outilsItems (déjà filtré sur Admin) en ne conservant que les
+   * entrées actionnables.
+   */
+  $: mobileNavItems = [
+    ...mainItems.map(
+      (item): OverflowMenuItem => ({
+        value: item.id,
+        label: item.label,
+        onclick: () => onSelect(item.id),
+      })
+    ),
+    ...outilsItems.flatMap((item): OverflowMenuItem[] =>
+      "value" in item
+        ? [
+            {
+              value: item.value,
+              label: item.label,
+              icon: item.icon,
+              onclick: () => onSelect(item.value as DemoView),
+            },
+          ]
+        : []
+    ),
+  ];
 </script>
 
 <Header title="Radar immobilier" sticky={false} label="Navigation principale">
   {#snippet navigation()}
-    {#each mainItems as item}
-      <Button
-        type="button"
-        size="sm"
-        variant={activeView === item.id ? "primary" : "ghost"}
-        aria-current={activeView === item.id ? "page" : undefined}
-        onclick={() => onSelect(item.id)}
-      >
-        {item.label}
-      </Button>
-    {/each}
+    <!-- Nav desktop (≥ md = 768px) : vues principales + menu Outils DS -->
+    <div class="hidden md:flex items-center gap-1">
+      {#each mainItems as item}
+        <Button
+          type="button"
+          size="sm"
+          variant={activeView === item.id ? "primary" : "ghost"}
+          aria-current={activeView === item.id ? "page" : undefined}
+          class="whitespace-nowrap"
+          onclick={() => onSelect(item.id)}
+        >
+          {item.label}
+        </Button>
+      {/each}
 
-    <!-- Déclencheur Outils : span comme ancre HTMLElement pour MenuPopover -->
-    <span bind:this={outilsTriggerEl} style="display:contents">
-      <Button
-        type="button"
-        size="sm"
-        variant={isOutilsActive ? "primary" : "ghost"}
-        aria-haspopup="menu"
-        aria-expanded={outilsOpen}
-        onclick={() => (outilsOpen = !outilsOpen)}
-      >
-        <Settings size={16} aria-hidden="true" />
-        Outils
-      </Button>
-    </span>
+      <!-- Déclencheur Outils : span comme ancre HTMLElement pour MenuPopover -->
+      <span bind:this={outilsTriggerEl} style="display:contents">
+        <Button
+          type="button"
+          size="sm"
+          variant={isOutilsActive ? "primary" : "ghost"}
+          aria-haspopup="menu"
+          aria-expanded={outilsOpen}
+          onclick={() => (outilsOpen = !outilsOpen)}
+        >
+          <Settings size={16} aria-hidden="true" />
+          Outils
+        </Button>
+      </span>
 
-    <!-- Popover DS positionné sous le déclencheur -->
-    <MenuPopover
-      bind:open={outilsOpen}
-      trigger={outilsTriggerEl}
-      placement="bottom-start"
-      label="Menu Outils"
-    >
-      <Menu
-        label="Outils internes"
-        items={outilsItems}
-        open={true}
-        dismissOnSelect={false}
-        onselect={handleOutilsSelect}
+      <!-- Popover DS positionné sous le déclencheur -->
+      <MenuPopover
+        bind:open={outilsOpen}
+        trigger={outilsTriggerEl}
+        placement="bottom-start"
+        label="Menu Outils"
+      >
+        <Menu
+          label="Outils internes"
+          items={outilsItems}
+          open={true}
+          dismissOnSelect={false}
+          onselect={handleOutilsSelect}
+        />
+      </MenuPopover>
+    </div>
+
+    <!-- Nav mobile (< md = 768px) : OverflowMenu DS regroupant toutes les vues -->
+    <div class="flex md:hidden items-center">
+      <OverflowMenu
+        items={mobileNavItems}
+        label="Navigation"
+        triggerLabel="Ouvrir la navigation"
+        placement="bottom-start"
       />
-    </MenuPopover>
+    </div>
   {/snippet}
 
   {#snippet actions()}
