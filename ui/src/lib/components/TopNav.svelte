@@ -290,7 +290,7 @@
 
   .topnav-brandcopy {
     display: grid;
-    gap: 0.08rem;
+    gap: var(--st-spacing-px, 1px);
     line-height: 1;
   }
 
@@ -341,7 +341,7 @@
 
   .topnav-drawer-section:first-child {
     border-top: 0;
-    padding-top: 0;
+    padding-top: var(--st-spacing-1, 0.25rem);
   }
 
   .topnav-drawer-label {
