@@ -31,8 +31,20 @@ data:
   S3_BUCKET: "radar-immobilier-raw"
   S3_FORCE_PATH_STYLE: "true"
   OBSCURA_CDP_URL: "http://radar-obscura:9222"
-  MAILDEV_SMTP_HOST: "radar-maildev"
-  MAILDEV_SMTP_PORT: "1025"
+  # ── SMTP outbound (invitation / enrolment mail) ───────────────────────────
+  # The api reads SMTP_HOST/SMTP_PORT/SMTP_FROM (config.ts resolveSmtpConfig);
+  # SMTP_USER/SMTP_PASS come from the radar-smtp-credentials Secret (see env +
+  # secrets.example.yaml). When SMTP_HOST is empty the mailer logs the link to
+  # stdout (degraded mode) and the admin copies it from the UI instead.
+  #
+  # Production target = Scaleway TEM (Transactional Email), the same relay the
+  # sentropic tenant uses — host smtp.tem.scw.cloud, STARTTLS on 587. The sender
+  # domain (sent-tech.ca) must be validated in the SCW TEM console first.
+  # NOTE: the old MAILDEV_SMTP_HOST/MAILDEV_SMTP_PORT keys were dead — the code
+  # never read them — so even MailDev never received anything. They are removed.
+  SMTP_HOST: "smtp.tem.scw.cloud"
+  SMTP_PORT: "587"
+  SMTP_FROM: "noreply@sent-tech.ca"
   # ── Sentropic app / auth delegation (OIDC relying party) ──────────────
   # The shared sentropic IdP issuer (sentropic deploy/k8s/35-auth-idp.yaml:
   # OAUTH_ISSUER_URL=https://auth.sent-tech.ca; discovery at
@@ -109,6 +121,14 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-llm-credentials, key: OPENAI_API_KEY, optional: true } }
             - name: ANTHROPIC_API_KEY
               valueFrom: { secretKeyRef: { name: radar-llm-credentials, key: ANTHROPIC_API_KEY, optional: true } }
+            # SMTP relay credentials (Scaleway TEM). Optional: when the Secret is
+            # absent the mailer stays in degraded/log mode (invitation link is
+            # shown in the admin UI instead of emailed). For SCW TEM these are
+            # the TEM SMTP credentials generated in the console.
+            - name: SMTP_USER
+              valueFrom: { secretKeyRef: { name: radar-smtp-credentials, key: SMTP_USER, optional: true } }
+            - name: SMTP_PASS
+              valueFrom: { secretKeyRef: { name: radar-smtp-credentials, key: SMTP_PASS, optional: true } }
           readinessProbe:
             httpGet: { path: /health, port: http }
             initialDelaySeconds: 10
