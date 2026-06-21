@@ -1,24 +1,35 @@
 // Service d'envoi d'email d'invitation.
 //
-// Mode SMTP réel : quand SMTP_HOST est configuré dans l'env, utilise un
-// transport SMTP (via l'API native Node net/tls, ou via nodemailer si installé).
-// Mode dégradé : si nodemailer n'est pas disponible ou SMTP_HOST absent,
-// log le lien d'invitation sur stdout — la démo reste fonctionnelle sans config.
+// Mode TEM réel : quand SCW_TEM_SECRET_KEY est configuré dans l'env, envoie le
+// courriel via l'API HTTP Scaleway Transactional Email (TEM) — fetch natif, pas
+// de dépendance SMTP. L'egress SMTP est BLOQUÉ au niveau plateforme sur ce
+// cluster (BR-37b), donc le relais nodemailer/smtp.tem.scw.cloud:587 ne délivre
+// jamais ; on appelle l'API HTTP TEM, exactement comme sentropic.
+// Mode dégradé : si SCW_TEM_SECRET_KEY est absent, log le lien d'invitation sur
+// stdout — la démo reste fonctionnelle sans config (lien copiable depuis l'UI).
 //
-// Variables d'env optionnelles :
-//   SMTP_HOST    — ex. smtp.sendgrid.net ou smtp.gmail.com
-//   SMTP_PORT    — défaut 587
-//   SMTP_USER    — identifiant SMTP
-//   SMTP_PASS    — mot de passe SMTP (secret)
-//   SMTP_FROM    — adresse expéditeur (défaut: noreply@sent-tech.ca)
-//   APP_BASE_URL — URL de base de l'app (pour le lien dans l'email)
+// Variables d'env (résolues dans config.ts → resolveMailerConfig) :
+//   SCW_TEM_API_BASE_URL — défaut https://api.scaleway.com
+//   SCW_TEM_REGION       — défaut fr-par
+//   SCW_TEM_PROJECT_ID   — id du projet SCW (requis côté API)
+//   SCW_TEM_FROM_EMAIL   — adresse expéditeur (défaut no-reply@sent-tech.ca)
+//   SCW_TEM_FROM_NAME    — nom expéditeur (défaut Radar)
+//   SCW_TEM_SECRET_KEY   — clé secrète d'API TEM (X-Auth-Token). Absente → dégradé.
+//   APP_BASE_URL         — URL de base de l'app (pour le lien dans l'email)
 
 export interface MailerConfig {
-  smtpHost?: string | undefined;
-  smtpPort?: number | undefined;
-  smtpUser?: string | undefined;
-  smtpPass?: string | undefined;
-  smtpFrom?: string | undefined;
+  /** Base de l'API SCW (ex. https://api.scaleway.com). */
+  temApiBaseUrl?: string | undefined;
+  /** Région TEM (ex. fr-par). */
+  temRegion?: string | undefined;
+  /** Id du projet SCW. */
+  temProjectId?: string | undefined;
+  /** Adresse expéditeur. */
+  temFromEmail?: string | undefined;
+  /** Nom expéditeur. */
+  temFromName?: string | undefined;
+  /** Clé secrète d'API TEM (X-Auth-Token). Absente → mode dégradé. */
+  temSecretKey?: string | undefined;
   appBaseUrl?: string | undefined;
 }
 
@@ -30,30 +41,38 @@ export interface InvitationEmailParams {
 
 /**
  * Résout la config mailer depuis les variables d'environnement.
- * Toutes les clés sont optionnelles : si SMTP_HOST est absent, mode dégradé.
+ * Toutes les clés sont optionnelles : si SCW_TEM_SECRET_KEY est absent, mode dégradé.
  */
 export function resolveMailerConfig(env: NodeJS.ProcessEnv = process.env): MailerConfig {
   const config: MailerConfig = {};
-  const smtpHost = env["SMTP_HOST"];
-  if (smtpHost) config.smtpHost = smtpHost;
-  const smtpPort = env["SMTP_PORT"];
-  config.smtpPort = smtpPort ? parseInt(smtpPort, 10) : 587;
-  const smtpUser = env["SMTP_USER"];
-  if (smtpUser) config.smtpUser = smtpUser;
-  const smtpPass = env["SMTP_PASS"];
-  if (smtpPass) config.smtpPass = smtpPass;
-  config.smtpFrom = env["SMTP_FROM"] || "noreply@sent-tech.ca";
+  config.temApiBaseUrl = env["SCW_TEM_API_BASE_URL"] || "https://api.scaleway.com";
+  config.temRegion = env["SCW_TEM_REGION"] || "fr-par";
+  const temProjectId = env["SCW_TEM_PROJECT_ID"];
+  if (temProjectId) config.temProjectId = temProjectId;
+  config.temFromEmail = env["SCW_TEM_FROM_EMAIL"] || "no-reply@sent-tech.ca";
+  config.temFromName = env["SCW_TEM_FROM_NAME"] || "Radar";
+  const temSecretKey = env["SCW_TEM_SECRET_KEY"];
+  if (temSecretKey) config.temSecretKey = temSecretKey;
   config.appBaseUrl =
     env["AUTH_CALLBACK_BASE_URL"] || env["APP_BASE_URL"] || "http://localhost:5173";
   return config;
 }
 
+interface TemSuccessResponse {
+  emails?: Array<{
+    id?: string;
+    message_id?: string;
+    status?: string;
+  }>;
+}
+
 /**
  * Envoie un email d'invitation.
  *
- * Tente d'abord via nodemailer si SMTP_HOST est configuré.
- * En cas d'absence de nodemailer ou de config SMTP, log le lien sur stdout
- * (mode dégradé pour la démo — ne bloque pas).
+ * Mode TEM réel : quand `temSecretKey` est présent, POST vers l'API HTTP
+ * Scaleway Transactional Email (le seul transport qui délivre ici — l'egress
+ * SMTP est bloqué au niveau plateforme). En cas d'absence de clé ou d'erreur
+ * réseau/API, log le lien sur stdout (mode dégradé pour la démo — ne bloque pas).
  *
  * Retourne { sent: true } si l'email part réellement,
  *           { sent: false, link } si mode dégradé (lien loggué).
@@ -70,35 +89,55 @@ export async function sendInvitationEmail(
   if (params.invitedByName) bodyOpts.invitedByName = params.invitedByName;
   const body = buildEmailBody(bodyOpts);
 
-  // Mode SMTP réel — tente nodemailer
-  if (config.smtpHost) {
+  // Mode TEM réel — POST vers l'API HTTP Scaleway Transactional Email.
+  if (config.temSecretKey) {
     try {
-      // Import dynamique : nodemailer n'est pas dans les deps core
-      // Si absent, on tombera dans le catch et loggera le lien
-      const nodemailer = await import("nodemailer" as string);
-      const transporter = nodemailer.createTransport({
-        host: config.smtpHost,
-        port: config.smtpPort ?? 587,
-        secure: (config.smtpPort ?? 587) === 465,
-        auth:
-          config.smtpUser && config.smtpPass
-            ? { user: config.smtpUser, pass: config.smtpPass }
-            : undefined,
-      });
+      const baseUrl = (config.temApiBaseUrl ?? "https://api.scaleway.com").replace(
+        /\/$/,
+        "",
+      );
+      const region = config.temRegion ?? "fr-par";
+      const url = `${baseUrl}/transactional-email/v1alpha1/regions/${region}/emails`;
 
-      await transporter.sendMail({
-        from: config.smtpFrom,
-        to: params.to,
+      const payload = {
+        from: {
+          email: config.temFromEmail ?? "no-reply@sent-tech.ca",
+          name: config.temFromName ?? "Radar",
+        },
+        to: [{ email: params.to }],
         subject,
         text: body.text,
         html: body.html,
+        ...(config.temProjectId ? { project_id: config.temProjectId } : {}),
+      };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "X-Auth-Token": config.temSecretKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
+
+      if (!response.ok) {
+        const raw = await response.text().catch(() => "");
+        throw new Error(
+          `Scaleway TEM send failed: HTTP ${response.status} ${response.statusText} - ${raw.slice(0, 500)}`,
+        );
+      }
+
+      // Drain la réponse (id/message_id) sans la rendre obligatoire.
+      await response
+        .json()
+        .then((d) => d as TemSuccessResponse)
+        .catch(() => undefined);
 
       return { sent: true, link };
     } catch (err) {
-      // nodemailer absent ou erreur SMTP → mode dégradé
+      // Erreur réseau / API TEM → mode dégradé
       console.warn(
-        `[mailer] SMTP unavailable (${String(err)}). Falling back to log mode.`,
+        `[mailer] Scaleway TEM unavailable (${String(err)}). Falling back to log mode.`,
       );
     }
   }
