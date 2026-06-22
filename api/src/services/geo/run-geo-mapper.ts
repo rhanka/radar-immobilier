@@ -68,12 +68,24 @@ async function main() {
       id: string;
       label: string;
       description: string | null;
+      zone_ref: string | null;
+      no_lot: string | null;
+      citation: string | null;
+      excerpts: string[] | null;
       as_of_date: string | null;
     }>(sql`
       SELECT
         gn.id,
         gn.label,
         gn.props->'properties'->>'description' as description,
+        gn.props->'properties'->>'zone_ref' as zone_ref,
+        gn.props->'properties'->>'no_lot' as no_lot,
+        gn.props->'properties'->>'citation' as citation,
+        ARRAY(
+          SELECT r->>'excerpt'
+          FROM jsonb_array_elements(gn.props->'properties'->'refs') AS r
+          WHERE r->>'excerpt' IS NOT NULL
+        ) as excerpts,
         gn.props->'properties'->>'as_of_date' as as_of_date
       FROM graph_nodes gn
       WHERE gn.city_slug = ${citySlug}
@@ -88,6 +100,10 @@ async function main() {
       citySlug,
       label: n.label ?? "",
       description: n.description,
+      zoneRef: n.zone_ref,
+      noLot: n.no_lot,
+      citation: n.citation,
+      excerpts: n.excerpts ?? undefined,
       asOfDate: n.as_of_date,
     }));
 
