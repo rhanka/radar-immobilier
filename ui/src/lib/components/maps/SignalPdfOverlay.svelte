@@ -18,9 +18,16 @@
   export let excerpt: string | null = null;
   export let onClose: () => void = () => {};
 
-  // Préfère sourceUrl (PDF public ou route streaming), puis rawRef via /api/documents/raw
-  $: resolvedSourceUrl =
-    sourceUrl ?? (rawRef ? `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}` : null);
+  // Préfère sourceUrl (PDF public ou route streaming), puis rawRef via
+  // /api/documents/raw. L'URL raw est préfixée par VITE_API_BASE_URL comme tous
+  // les autres clients API : sans ça, le `/api/...` relatif ne marche que
+  // same-origin et casse dès que l'UI et l'API sont sur des origines distinctes.
+  function rawDocumentUrl(ref: string): string {
+    const base = import.meta.env.VITE_API_BASE_URL;
+    const path = `/api/documents/raw?rawRef=${encodeURIComponent(ref)}`;
+    return base ? `${base.replace(/\/$/, "")}${path}` : path;
+  }
+  $: resolvedSourceUrl = sourceUrl ?? (rawRef ? rawDocumentUrl(rawRef) : null);
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
   $: isPdfSource = looksLikePdf(resolvedSourceUrl, rawRef, sourceRef);
 
@@ -43,7 +50,8 @@
     const probe = `${url ?? ""} ${raw ?? ""} ${sref ?? ""}`.toLowerCase();
     if (probe.includes(".pdf")) return true;
     // Route streaming interne : on tente le rendu PDF, fallback iframe si échec.
-    if (url && url.startsWith("/api/documents/raw")) return true;
+    // Match indépendant de la base (relatif `/api/...` OU absolu `https://…/api/…`).
+    if (url && url.includes("/api/documents/raw")) return true;
     return false;
   }
 
