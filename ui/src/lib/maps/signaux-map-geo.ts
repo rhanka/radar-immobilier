@@ -16,6 +16,42 @@ import {
 
 export const CITY_FALLBACK_ZONE_PREFIX = "fallback:";
 
+/**
+ * Normalise un code de zone côté client pour qu'il soit comparable au
+ * `properties.code` retourné par l'API geo (qui normalise côté serveur).
+ *
+ * Miroir de `normalizeZoneCode` dans api/src/services/geo/extract-refs.ts :
+ *   - majuscules
+ *   - tirets demi-cadratins → tirets ASCII
+ *   - suppression du suffixe secteur (ex. "(VLO)")
+ *   - suppression de tous les espaces
+ *
+ * Exemples :
+ *   "h-431"        → "H-431"
+ *   "H 431"        → "H431"
+ *   "H34-327 (VLO)" → "H34-327"
+ *   "H–431"        → "H-431"   (demi-cadratin unicode)
+ */
+export function normalizeZoneCodeRef(raw: string): string {
+  return raw
+    .toUpperCase()
+    .replace(/[–—]/g, "-")
+    .replace(/\s*\([A-Z0-9]{2,8}\)\s*/g, "")
+    .replace(/\s+/g, "");
+}
+
+/**
+ * Normalise un numéro de lot pour la comparaison client :
+ * conserve uniquement les chiffres (supprime espaces et tirets).
+ *
+ * Exemples :
+ *   "4 516 943" → "4516943"
+ *   "4516943"   → "4516943"
+ */
+export function normalizeLotNoRef(raw: string): string {
+  return raw.replace(/[^0-9]/g, "");
+}
+
 export type LotSignalProjection = "direct" | "inherited" | "none";
 
 export interface CityFallbackZoneInput {
@@ -138,7 +174,7 @@ export function decorateLotsWithSignalProjection(
 }
 
 export function extractSignalZoneRefs(node: GraphSignalNode): string[] {
-  return uniqueStrings(
+  const raw = uniqueStrings(
     propRecords(node).flatMap((props) => [
       ...extractStructuredRefs(props.zone_ref),
       ...extractStructuredRefs(props.zoneRef),
@@ -149,10 +185,13 @@ export function extractSignalZoneRefs(node: GraphSignalNode): string[] {
       ...extractStructuredRefs(props.targets_zone),
     ]),
   );
+  // Normalise chaque code extrait pour qu'il soit comparable au
+  // `properties.code` de la réponse API geo (normalisé côté serveur).
+  return uniqueStrings(raw.map(normalizeZoneCodeRef));
 }
 
 export function extractSignalLotRefs(node: GraphSignalNode): string[] {
-  return uniqueStrings(
+  const raw = uniqueStrings(
     propRecords(node).flatMap((props) => [
       ...extractStructuredRefs(props.lot_ref),
       ...extractStructuredRefs(props.lotRef),
@@ -166,6 +205,9 @@ export function extractSignalLotRefs(node: GraphSignalNode): string[] {
       ...extractRelationRefs(props.subdivides, "lot"),
     ]),
   );
+  // Retourne les refs brutes ET les formes compactes (sans espaces)
+  // pour couvrir les deux formats possibles du noLot API ("4 516 943" et "4516943").
+  return uniqueStrings(raw.flatMap((ref) => [ref, normalizeLotNoRef(ref)]));
 }
 
 function propRecords(node: GraphSignalNode): Record<string, unknown>[] {
