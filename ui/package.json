@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "qa:header": "playwright test --config playwright.config.ts",
+    "qa:harness": "playwright test --config playwright.harness.config.ts"
   },
   "dependencies": {
     "@lucide/svelte": "^0.562.0",
