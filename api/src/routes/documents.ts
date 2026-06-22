@@ -5,10 +5,25 @@ import { normalizeRawRef, resolveRawContentType } from "../services/sources/docu
 
 export interface DocumentsDeps {
   store: ObjectStore;
+  /**
+   * Dedicated store for raw scraped documents (CAS PV PDFs live here:
+   * `radar-immobilier-docs` on SCW). The RECUEIL/scrape pipeline writes the
+   * binary bytes under `raw/proces-verbaux-<city>/cas/<sha>.pdf` to THIS bucket,
+   * NOT to `store` (which only holds raw-metadata + project state). When absent
+   * (tests/local without SCRAPE_S3_*), `store` handles everything.
+   */
+  scrapeStore?: ObjectStore;
 }
 
 export function documentsRoute(deps: DocumentsDeps): Hono {
   const app = new Hono();
+
+  // CAS PV PDFs live in the scrape bucket; the metadata store is the fallback
+  // (legacy objects + sidecars). Probe the scrape store first so the viewer can
+  // actually fetch `raw/proces-verbaux-<city>/cas/<sha>.pdf`.
+  const stores: ObjectStore[] = deps.scrapeStore
+    ? [deps.scrapeStore, deps.store]
+    : [deps.store];
 
   app.get("/api/documents/raw", async (c) => {
     const rawRef = c.req.query("rawRef");
@@ -17,14 +32,20 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
       return c.json({ ok: false, error: "invalid_raw_ref" }, 400);
     }
 
-    const head = await deps.store.head(normalizedRawRef);
-    if (!head) {
+    let resolved: ObjectStore | null = null;
+    for (const store of stores) {
+      if (await store.head(normalizedRawRef)) {
+        resolved = store;
+        break;
+      }
+    }
+    if (!resolved) {
       return c.json({ ok: false, error: "document_not_found" }, 404);
     }
 
     const [bytes, contentType] = await Promise.all([
-      deps.store.get(normalizedRawRef),
-      resolveRawContentType(deps.store, normalizedRawRef),
+      resolved.get(normalizedRawRef),
+      resolveRawContentType(resolved, normalizedRawRef),
     ]);
 
     return new Response(bytes, {
