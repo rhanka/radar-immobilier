@@ -111,18 +111,23 @@ export async function fetchDiscovery(
  * when set to `"login"` the IdP MUST re-authenticate the End-User even if it
  * holds an active SSO session, instead of silently re-issuing an id_token for
  * whoever is currently signed in at the IdP. This is what makes
- * "logout → reconnect" land on a fresh login screen (not the previous user)
- * and makes an invitation link force a real device authentication (not reuse a
+ * "logout → reconnect" re-display a login screen (not the previous user) and
+ * makes an invitation link force a real device authentication (not reuse a
  * residual admin SSO session at the IdP). Without it, deleting radar's own
  * cookie is not enough — the IdP's session would silently re-authorize the
  * last user. Omitted (no `prompt`) for ordinary first logins where SSO reuse
  * is desirable.
+ *
+ * Type is narrowed to `"login"` only: the sentropic IdP's authorize-handler
+ * (packages/auth-hono/src/oauth/authorize-handler.ts) honours `login`/`none`/
+ * `consent` but has NO account-chooser, so `select_account` is silently
+ * ignored — sending it is a no-op and was the cause of a prior regression.
  */
 export function buildAuthorizeUrl(
   auth: AuthConfig,
   discovery: OidcDiscovery,
   flow: AuthFlowState,
-  opts: { prompt?: "login" | "select_account" | "none" | "consent" } = {},
+  opts: { prompt?: "login" } = {},
 ): string {
   const params = new URLSearchParams({
     response_type: "code",

@@ -2,10 +2,10 @@
  * QA auth-store — prouve les garanties de sécurité côté SPA SANS stack :
  *   - /me est sondé avec `cache: "no-store"` (jamais resservir un user périmé
  *     après logout/reconnexion — symptôme « reconnect = compte précédent ») ;
- *   - le clic « Se connecter » force le SÉLECTEUR DE COMPTES IdP
- *     (`/api/v1/auth/login?prompt=select_account`), pour pouvoir CHANGER de
- *     compte au lieu de réutiliser silencieusement la session SSO du dernier
- *     user (ni se voir re-imposer ce même compte par un simple `prompt=login`).
+ *   - le clic « Se connecter » envoie `/api/v1/auth/login?prompt=login` — la
+ *     SEULE valeur `prompt` honorée par l'IdP sentropic (qui ignore
+ *     `select_account`), pour forcer le ré-affichage du login au lieu de
+ *     réutiliser silencieusement la session SSO du dernier user.
  *
  * On mocke `fetch` et on stubbe `window.location` pour observer l'URL de
  * redirection sans naviguer réellement.
@@ -82,12 +82,15 @@ describe("auth-store — le login explicite ouvre le sélecteur de comptes IdP",
     vi.restoreAllMocks();
   });
 
-  it("redirectToLogin() pointe sur /api/v1/auth/login?prompt=select_account (permet de CHANGER de compte)", () => {
+  it("redirectToLogin() pointe sur /api/v1/auth/login?prompt=login (seule valeur honorée par l'IdP)", () => {
     authStore.redirectToLogin();
-    // prompt=select_account : `prompt=login` re-demandait juste le mot de passe
-    // DU MÊME compte SSO (le symptôme « reconnect = compte précédent, impossible
-    // de switcher »). `select_account` ouvre le sélecteur de comptes de l'IdP
-    // pour réellement basculer d'identité.
-    expect(assignedHref).toBe("/api/v1/auth/login?prompt=select_account");
+    // `prompt=login` est la SEULE valeur `prompt` que l'IdP sentropic honore :
+    // son authorize-handler traite login/none/consent mais IGNORE
+    // `select_account` (aucun sélecteur de comptes). Un ancien fix envoyait
+    // `select_account` — silencieusement jeté par l'IdP, d'où la persistance du
+    // symptôme « reconnect = compte précédent ». `prompt=login` force au moins
+    // le ré-affichage du login. LIMITE : changer réellement de compte tant que
+    // le cookie SSO de l'IdP vit dépend d'une évolution IdP.
+    expect(assignedHref).toBe("/api/v1/auth/login?prompt=login");
   });
 });
