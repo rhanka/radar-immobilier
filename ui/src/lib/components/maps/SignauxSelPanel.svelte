@@ -34,6 +34,8 @@
   import {
     extractSignalLotRefs,
     extractSignalZoneRefs,
+    mergeDesignatedZones,
+    zoneRefComparableKey,
   } from "$lib/maps/signaux-map-geo.js";
 
   export let selectedCity: CityMapEntry | null = null;
@@ -65,20 +67,40 @@
   /** True si le filtre actif réduit le nombre de signaux. */
   $: signalIsFiltered = activeSubsetKey && filteredSignalCount < totalSignalCount;
 
-  $: zones = zonesResponse?.featureCollection.features ?? [];
+  /** Slug de la ville courante (pour les features de zones désignées sans géo). */
+  $: activeCitySlug =
+    selectedCity?.municipality.slug ??
+    zonesResponse?.citySlug ??
+    detailNodes.find((n) => n.citySlug)?.citySlug ??
+    "";
+
+  /**
+   * Zones affichées = zones géo de l'API + zones DÉSIGNÉES par les signaux
+   * mais absentes de la couche cadastrale (ex. rezonage futur "A16"/"I93").
+   * Une zone désignée sans polygone est listée (badge « géométrie geo
+   * manquante ») au lieu d'être masquée : le polygone ne sert qu'à la carte.
+   */
+  $: zones = mergeDesignatedZones(
+    zonesResponse?.featureCollection.features ?? [],
+    detailNodes,
+    activeCitySlug,
+  );
   $: lots = lotsResponse?.featureCollection.features ?? [];
 
   // ── #4 — Filtrage zones/lots selon filtre actif ────────────────────────────
-  /** Codes de zones référencées par au moins un signal filtré. */
+  /**
+   * Clés comparables (tiret ignoré) des zones référencées par au moins un
+   * signal filtré. La clé comparable réconcilie "A16" (signal) et "A-16" (zone).
+   */
   $: filteredZoneCodeSet = (() => {
     if (!activeSubsetKey || filteredDetailNodes.length === 0) return null;
-    const codes = new Set<string>();
+    const keys = new Set<string>();
     for (const node of filteredDetailNodes) {
       for (const code of extractSignalZoneRefs(node)) {
-        codes.add(code);
+        keys.add(zoneRefComparableKey(code));
       }
     }
-    return codes.size > 0 ? codes : null;
+    return keys.size > 0 ? keys : null;
   })();
 
   /** Numéros de lots référencés par au moins un signal filtré. */
@@ -94,12 +116,16 @@
   })();
 
   /** Zones filtrées : uniquement celles liées aux signaux filtrés (si filtre actif et résultats). */
-  $: filteredZones = filteredZoneCodeSet ? zones.filter((z) => filteredZoneCodeSet!.has(z.properties.code)) : zones;
+  $: filteredZones = filteredZoneCodeSet
+    ? zones.filter((z) => filteredZoneCodeSet!.has(zoneRefComparableKey(z.properties.code)))
+    : zones;
 
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
   $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
 
-  $: configuredZoneCount = zonesResponse?.zoneCount ?? zones.length;
+  // Total = zones réellement affichables (couche cadastrale + zones désignées
+  // par les signaux), pas seulement le zoneCount de la couche géo.
+  $: configuredZoneCount = zones.length;
   /** Nombre de zones visibles selon le filtre actif. */
   $: visibleZoneCount = filteredZoneCodeSet ? filteredZones.length : configuredZoneCount;
   $: zoneBadgeText =
@@ -283,6 +309,7 @@
 
   function zoneSourceLabel(zone: GeoZoneFeature): string {
     if (zone.properties.source === "official-zone") return "officiel";
+    if (zone.properties.source === "signal-designated") return "désignée par signal";
     return "fallback lots";
   }
 

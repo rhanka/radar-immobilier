@@ -190,6 +190,80 @@ export function extractSignalZoneRefs(node: GraphSignalNode): string[] {
   return uniqueStrings(raw.map(normalizeZoneCodeRef));
 }
 
+/**
+ * Forme comparable d'un code de zone pour l'appariement signal↔zone géo.
+ *
+ * Plus laxiste que `normalizeZoneCodeRef` : on retire AUSSI les tirets afin que
+ * "A16" (référence d'un signal) et "A-16" (code_affiche d'une zone cadastrale)
+ * soient reconnus comme la même zone. Le tiret est un artefact d'affichage du
+ * cadastre OGC, pas une différence sémantique de zone.
+ *
+ * Exemples :
+ *   "A16"   → "A16"
+ *   "A-16"  → "A16"
+ *   "H-431" → "H431"
+ */
+export function zoneRefComparableKey(code: string): string {
+  return normalizeZoneCodeRef(code).replace(/-/g, "");
+}
+
+/**
+ * Fusionne les zones géo de l'API avec les zones DÉSIGNÉES par les signaux.
+ *
+ * Problème résolu : un signal peut désigner une zone (`zone_ref`) qui n'existe
+ * PAS dans la couche cadastrale OGC — typiquement une zone que la municipalité
+ * veut *créer ou modifier* par un futur règlement (ex. St-Frédéric : rezonage
+ * "A16"/"I93" du règlement 419-26). Cette zone est la donnée de valeur même
+ * sans polygone : elle DOIT être listée et liée au signal. Le polygone ne sert
+ * qu'à colorer la carte.
+ *
+ * Pour chaque code de zone désigné par un signal et absent des zones API
+ * (comparaison par forme normalisée, tiret ignoré), on ajoute une feature
+ * synthétique sans géométrie (`geometryStatus: "missing"`,
+ * `source: "signal-designated"`). Les zones API existantes sont conservées
+ * telles quelles, donc une zone désignée déjà présente côté géo n'est pas
+ * dupliquée (corrige aussi le faux négatif "A16" ≠ "A-16").
+ *
+ * @param apiZones - Zones renvoyées par l'API geo (couche cadastrale).
+ * @param nodes    - Nœuds Signal/DesignationEvent (filtrés ou non) à projeter.
+ * @param citySlug - Slug de la ville pour les features synthétiques.
+ * @returns Zones API + zones désignées manquantes, dédupliquées.
+ */
+export function mergeDesignatedZones(
+  apiZones: readonly GeoZoneFeature[],
+  nodes: readonly GraphSignalNode[],
+  citySlug: string,
+): GeoZoneFeature[] {
+  const merged: GeoZoneFeature[] = [...apiZones];
+  const knownKeys = new Set(
+    apiZones.map((z) => zoneRefComparableKey(z.properties.code)),
+  );
+
+  for (const node of nodes) {
+    for (const code of extractSignalZoneRefs(node)) {
+      const key = zoneRefComparableKey(code);
+      if (key.length === 0 || knownKeys.has(key)) continue;
+      knownKeys.add(key);
+      merged.push({
+        type: "Feature",
+        geometry: null,
+        properties: {
+          code,
+          citySlug,
+          geometryStatus: "missing",
+          confidence: 0,
+          source: "signal-designated",
+          lotCount: 0,
+          lots: [],
+          label: `Zone ${code} (désignée — géométrie geo manquante)`,
+        },
+      });
+    }
+  }
+
+  return merged;
+}
+
 export function extractSignalLotRefs(node: GraphSignalNode): string[] {
   const raw = uniqueStrings(
     propRecords(node).flatMap((props) => [
