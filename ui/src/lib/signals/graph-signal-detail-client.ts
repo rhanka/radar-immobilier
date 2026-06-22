@@ -76,7 +76,13 @@ function normalizeRawRef(rawRef: string): string | null {
 
 function rawDocumentUrl(rawRef: string): string | null {
   const normalized = normalizeRawRef(rawRef);
-  return normalized ? `/api/documents/raw?rawRef=${encodeURIComponent(normalized)}` : null;
+  if (!normalized) return null;
+  // Préfixe VITE_API_BASE_URL comme TOUS les autres clients API du repo : sans
+  // ça, l'URL `/api/...` relative ne fonctionne que same-origin (proxy dev /
+  // prod nginx) et casse dès que l'UI et l'API sont sur des origines distinctes.
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const path = `/api/documents/raw?rawRef=${encodeURIComponent(normalized)}`;
+  return baseUrl ? `${baseUrl.replace(/\/$/, "")}${path}` : path;
 }
 
 /**
