@@ -114,6 +114,34 @@ describe("GET /api/v1/auth/login", () => {
     expect(url.searchParams.get("client_id")).toBe(AUTH_ON.clientId);
     expect(readSetCookie(res, "radar_oauth_flow")).toBeTruthy();
   });
+
+  it("does NOT force re-auth by default (SSO reuse allowed for first login)", async () => {
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/login");
+    const url = new URL(res.headers.get("location")!);
+    expect(url.searchParams.get("prompt")).toBeNull();
+  });
+
+  it("forwards prompt=login to the IdP so it RE-AUTHENTICATES (kills SSO reuse)", async () => {
+    // The reported symptom "logout → reconnect = previous user" and "invite
+    // link → residual admin" both stem from the IdP silently re-authorizing its
+    // own SSO session. `?prompt=login` (set by /enroll and the SPA login button)
+    // must reach the IdP authorize endpoint to force a fresh authentication.
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/login?prompt=login");
+    const url = new URL(res.headers.get("location")!);
+    expect(url.searchParams.get("prompt")).toBe("login");
+  });
+
+  it("whitelists prompt: an attacker cannot smuggle prompt=none to bypass re-auth", async () => {
+    // prompt=none would tell the IdP to NEVER show a login UI (silent auth),
+    // which is the opposite of what we want here. Only login/select_account are
+    // honoured; anything else is dropped (no prompt => default IdP behaviour).
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/login?prompt=none");
+    const url = new URL(res.headers.get("location")!);
+    expect(url.searchParams.get("prompt")).toBeNull();
+  });
 });
 
 describe("GET /api/v1/auth/oauth/callback", () => {
@@ -195,6 +223,24 @@ describe("GET /api/v1/auth/me", () => {
     const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
     const res = await app.request("/api/v1/auth/me");
     expect(await res.json()).toEqual({ authenticated: false });
+  });
+
+  it("sets Cache-Control: no-store so a stale identity is never replayed", async () => {
+    // A cached /me would let the browser/bfcache resurrect the previous user
+    // after a logout/reconnect — the "reconnect = previous user" symptom. The
+    // probe must be uncacheable, with or without a session.
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/me");
+    expect(res.headers.get("cache-control")).toBe("no-store");
+
+    const token = await signSession(
+      { sub: "user-9", name: "Carol" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+    const res2 = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res2.headers.get("cache-control")).toBe("no-store");
   });
 
   it("returns the user when a valid session cookie is present", async () => {
@@ -345,13 +391,15 @@ describe("GET /api/v1/auth/enroll (invitation sas — no session without IdP)", 
       .find((c) => c.startsWith(name + "="));
   }
 
-  it("does NOT mint a session and redirects to the IdP login flow", async () => {
+  it("does NOT mint a session and redirects to the IdP login flow (forcing re-auth)", async () => {
     const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
     const res = await app.request("/api/v1/auth/enroll?token=inv-tok");
     expect(res.status).toBe(302);
     // Must bounce to the real auth flow (which goes to the IdP), never grant
     // access on its own. No `radar_session` with a real value is ever set.
-    expect(res.headers.get("location")).toBe("/api/v1/auth/login");
+    // `prompt=login` is REQUIRED so the IdP re-authenticates (device challenge)
+    // instead of silently reusing a residual SSO session.
+    expect(res.headers.get("location")).toBe("/api/v1/auth/login?prompt=login");
     const raw = readSetCookieRaw(res, "radar_session");
     // The only Set-Cookie allowed is a DELETE (blank value, Max-Age=0).
     if (raw) {
@@ -374,7 +422,7 @@ describe("GET /api/v1/auth/enroll (invitation sas — no session without IdP)", 
       headers: { cookie: `radar_session=${adminToken}` },
     });
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe("/api/v1/auth/login");
+    expect(res.headers.get("location")).toBe("/api/v1/auth/login?prompt=login");
     // The residual session cookie is explicitly deleted.
     const raw = readSetCookieRaw(res, "radar_session")!;
     expect(raw).toContain("radar_session=;");
@@ -386,6 +434,81 @@ describe("GET /api/v1/auth/enroll (invitation sas — no session without IdP)", 
     const app = authRoute(AUTH_OFF);
     const res = await app.request("/api/v1/auth/enroll?token=inv-tok");
     expect(res.status).toBe(503);
+  });
+});
+
+describe("secure session lifecycle — the reported symptoms end-to-end", () => {
+  /** Full Set-Cookie segment (name + attributes) for a given cookie name. */
+  function readSetCookieRaw(res: Response, name: string): string | undefined {
+    const all = res.headers.get("set-cookie") ?? "";
+    return all
+      .split(/,(?=[^;]+?=)/)
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(name + "="));
+  }
+
+  it("SYMPTOM A — logout then reconnect cannot land on the previous user", async () => {
+    // 1) A user is logged in (valid session cookie present).
+    const prevUser = await signSession(
+      { sub: "previous-user", email: "prev@example.com" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+
+    // 2) Logout deletes the cookie with the exact mint attributes.
+    const logout = await app.request("/api/v1/auth/logout");
+    const delRaw = readSetCookieRaw(logout, "radar_session")!;
+    expect(delRaw).toContain("radar_session=;");
+    expect(delRaw).toMatch(/Max-Age=0/i);
+
+    // 3) /me WITHOUT a cookie => authenticated:false (the browser dropped it).
+    const meAfterLogout = await app.request("/api/v1/auth/me");
+    expect(await meAfterLogout.json()).toEqual({ authenticated: false });
+    expect(meAfterLogout.headers.get("cache-control")).toBe("no-store");
+
+    // 4) Reconnect via the explicit login button => prompt=login reaches the
+    //    IdP, forcing re-authentication. Even if the OLD cookie somehow lingered
+    //    (replayed below), the login flow does not depend on it — it goes to the
+    //    IdP, which must re-authenticate and cannot silently return prev-user.
+    const reconnect = await app.request("/api/v1/auth/login?prompt=login", {
+      headers: { cookie: `radar_session=${prevUser}` },
+    });
+    const url = new URL(reconnect.headers.get("location")!);
+    expect(url.searchParams.get("prompt")).toBe("login");
+    expect(url.origin + url.pathname).toBe(DISCOVERY.authorization_endpoint);
+  });
+
+  it("SYMPTOM B — an invite link with a residual admin cookie forces IdP re-auth and grants nothing", async () => {
+    // A stale ADMIN session cookie is present on the device.
+    const adminToken = await signSession(
+      { sub: "admin-sub", email: "admin@sent-tech.ca" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+
+    // Clicking the invitation link (the API sas) must: destroy the session AND
+    // bounce to /login with prompt=login (no app access, no session reuse).
+    const enroll = await app.request("/api/v1/auth/enroll?token=inv-tok", {
+      headers: { cookie: `radar_session=${adminToken}` },
+    });
+    expect(enroll.status).toBe(302);
+    expect(enroll.headers.get("location")).toBe("/api/v1/auth/login?prompt=login");
+    const del = readSetCookieRaw(enroll, "radar_session")!;
+    expect(del).toContain("radar_session=;");
+    expect(del).toMatch(/Max-Age=0/i);
+
+    // Following that redirect to /login (still carrying the residual admin
+    // cookie, as a browser would until it processes the delete) reaches the IdP
+    // with prompt=login — the IdP re-authenticates; the residual admin SSO
+    // session can NOT be silently reused.
+    const login = await app.request("/api/v1/auth/login?prompt=login", {
+      headers: { cookie: `radar_session=${adminToken}` },
+    });
+    const url = new URL(login.headers.get("location")!);
+    expect(url.searchParams.get("prompt")).toBe("login");
+    expect(url.origin + url.pathname).toBe(DISCOVERY.authorization_endpoint);
+    // No NEW session cookie is minted by /login (only the transient flow cookie).
+    expect(readSetCookie(login, "radar_session")).toBeFalsy();
   });
 });
 

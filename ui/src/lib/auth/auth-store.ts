@@ -68,7 +68,11 @@ function createAuthStore() {
 
   async function checkSession(): Promise<void> {
     try {
-      const res = await fetch("/api/v1/auth/me");
+      // `cache: "no-store"` est CRITIQUE : sans lui, le navigateur (cache HTTP
+      // ou bfcache) peut resservir une ancienne réponse `/me` et ré-afficher le
+      // DERNIER user après une déconnexion/reconnexion — exactement le symptôme
+      // « reconnect = compte précédent ». On force un aller-retour réseau frais.
+      const res = await fetch("/api/v1/auth/me", { cache: "no-store" });
       const data = await res.json();
       const authenticated = data.authenticated === true;
       const authDisabled = data.authDisabled === true;
@@ -109,7 +113,13 @@ function createAuthStore() {
     // Pose le marqueur AVANT de partir : au retour, checkSession() saura
     // qu'une tentative a déjà eu lieu et activera le disjoncteur si besoin.
     markLoginAttempt();
-    window.location.href = "/api/v1/auth/login";
+    // `prompt=login` : un clic EXPLICITE sur « Se connecter » force l'IdP à
+    // RÉ-AUTHENTIFIER (écran de login + device) au lieu de resservir
+    // silencieusement la session SSO du DERNIER user. C'est le correctif du
+    // symptôme « après logout, reconnect = compte précédent » : effacer le
+    // cookie radar ne suffit pas si l'IdP garde sa propre session SSO. Le coût
+    // UX est nul (l'utilisateur a justement demandé à se (re)connecter).
+    window.location.href = "/api/v1/auth/login?prompt=login";
   }
 
   /** Réinitialise le disjoncteur (bouton "Réessayer" de la page bloquée). */

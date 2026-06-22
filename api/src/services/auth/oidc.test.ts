@@ -123,6 +123,23 @@ describe("buildAuthorizeUrl", () => {
       codeChallengeS256(flow.codeVerifier),
     );
   });
+
+  it("omits `prompt` by default (SSO reuse allowed for first login)", () => {
+    const flow = createAuthFlowState();
+    const url = new URL(buildAuthorizeUrl(AUTH, DISCOVERY, flow));
+    expect(url.searchParams.get("prompt")).toBeNull();
+  });
+
+  it("forces re-authentication with prompt=login when requested", () => {
+    // prompt=login makes the IdP re-authenticate instead of silently reusing
+    // an active SSO session — the fix for "logout → reconnect = previous user"
+    // and "invite link → residual admin".
+    const flow = createAuthFlowState();
+    const url = new URL(
+      buildAuthorizeUrl(AUTH, DISCOVERY, flow, { prompt: "login" }),
+    );
+    expect(url.searchParams.get("prompt")).toBe("login");
+  });
 });
 
 describe("exchangeCode", () => {
