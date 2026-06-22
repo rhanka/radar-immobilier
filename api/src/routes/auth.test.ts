@@ -211,6 +211,25 @@ describe("GET /api/v1/auth/me", () => {
     expect(body.user.sub).toBe("user-9");
     expect(body.user.name).toBe("Carol");
   });
+
+  it("never invents isAdmin: a session without a matching DB account is NOT admin", async () => {
+    // Guard against "logged in as admin without enrollment": admin is only ever
+    // sourced from account_users.isAdmin in the DB. A valid session with no DB
+    // row (or a non-admin row) must report no admin flag.
+    const token = await signSession(
+      { sub: "ghost", email: "fabien.antoine@gmail.com" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+    const db = makeEnrollmentDb([]) as unknown as import("../db/client.js").Database;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    const body = await res.json();
+    expect(body.authenticated).toBe(true);
+    expect(body.user.isAdmin).toBeUndefined();
+    expect(body.user.status).toBeUndefined();
+  });
 });
 
 describe("GET /api/v1/auth/logout", () => {
@@ -235,6 +254,68 @@ describe("GET /api/v1/auth/logout", () => {
     expect(raw).toMatch(/Path=\//);
   });
 
+  it("delete-cookie attributes EXACTLY match the login set-cookie (else the browser keeps the session)", async () => {
+    // Forge a login cookie via the OIDC callback, then logout, and compare the
+    // attribute tuple (HttpOnly/Secure/SameSite/Path). A mismatch is the root
+    // cause of "reconnect lands on the previous user" + "still logged in after
+    // wiping the F12 store": the delete Set-Cookie targets a different cookie.
+    const { idToken, getKey } = await makeIdToken({ nonce: "N", sub: "user-x" });
+    const fetchImpl: FetchLike = async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ id_token: idToken }),
+      text: async () => "",
+    });
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, fetchImpl, getKey });
+    const flow = { state: "S", nonce: "N", codeVerifier: "V" };
+    const setRes = await app.request(
+      "/api/v1/auth/oauth/callback?code=C&state=S",
+      { headers: { cookie: flowCookie(flow) } },
+    );
+    const setRaw = readSetCookieRaw(setRes, "radar_session")!;
+    const delRaw = readSetCookieRaw(
+      await app.request("/api/v1/auth/logout"),
+      "radar_session",
+    )!;
+
+    // Helper: pull the attribute tokens that identify the cookie to the browser.
+    const attrs = (raw: string) =>
+      raw
+        .split(";")
+        .slice(1) // drop "name=value"
+        .map((a) => a.trim())
+        .filter((a) => /^(HttpOnly|Secure|SameSite|Path|Domain)/i.test(a))
+        .map((a) => a.toLowerCase())
+        .sort();
+
+    // AUTH_ON.appBaseUrl is https -> Secure must be present on BOTH.
+    expect(setRaw).toMatch(/Secure/i);
+    expect(setRaw).toMatch(/HttpOnly/i);
+    // The delete cookie must carry the SAME identity attributes as the set one.
+    expect(attrs(delRaw)).toEqual(attrs(setRaw));
+  });
+
+  it("after logout, /me reports authenticated:false (session no longer accepted)", async () => {
+    // Even if the browser somehow replayed the old token, /me must not honour a
+    // logged-out session in the real flow: the cookie is gone client-side. Here
+    // we assert the contract end-to-end — no cookie => authenticated:false.
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    await app.request("/api/v1/auth/logout");
+    const me = await app.request("/api/v1/auth/me");
+    expect(await me.json()).toEqual({ authenticated: false });
+  });
+
+  it("logout omits Secure when the app origin is http (dev), matching mint", async () => {
+    const httpAuth: AuthConfig = { ...AUTH_ON, appBaseUrl: "http://localhost:5173" };
+    const app = authRoute(httpAuth, { discovery: DISCOVERY });
+    const raw = readSetCookieRaw(
+      await app.request("/api/v1/auth/logout"),
+      "radar_session",
+    )!;
+    expect(raw).not.toMatch(/Secure/i);
+    expect(raw).toMatch(/HttpOnly/i);
+  });
+
   it("redirects a browser navigation home", async () => {
     const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
     const res = await app.request("/api/v1/auth/logout", {
@@ -251,6 +332,60 @@ describe("GET /api/v1/auth/logout", () => {
     });
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
+  });
+});
+
+describe("GET /api/v1/auth/enroll (invitation sas — no session without IdP)", () => {
+  /** Full Set-Cookie segment (name + attributes) for a given cookie name. */
+  function readSetCookieRaw(res: Response, name: string): string | undefined {
+    const all = res.headers.get("set-cookie") ?? "";
+    return all
+      .split(/,(?=[^;]+?=)/)
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(name + "="));
+  }
+
+  it("does NOT mint a session and redirects to the IdP login flow", async () => {
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/enroll?token=inv-tok");
+    expect(res.status).toBe(302);
+    // Must bounce to the real auth flow (which goes to the IdP), never grant
+    // access on its own. No `radar_session` with a real value is ever set.
+    expect(res.headers.get("location")).toBe("/api/v1/auth/login");
+    const raw = readSetCookieRaw(res, "radar_session");
+    // The only Set-Cookie allowed is a DELETE (blank value, Max-Age=0).
+    if (raw) {
+      expect(raw).toContain("radar_session=;");
+      expect(raw).toMatch(/Max-Age=0/i);
+    }
+  });
+
+  it("DESTROYS an existing session so an invite link never reuses it (the reported admin leak)", async () => {
+    // Scenario: a stale admin session cookie is present (e.g. the device was
+    // previously logged in as admin). Clicking an invitation link MUST NOT land
+    // that admin straight into the app — it must wipe the session and force a
+    // fresh IdP authentication.
+    const adminToken = await signSession(
+      { sub: "admin-sub", email: "admin@sent-tech.ca" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/enroll?token=inv-tok", {
+      headers: { cookie: `radar_session=${adminToken}` },
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("/api/v1/auth/login");
+    // The residual session cookie is explicitly deleted.
+    const raw = readSetCookieRaw(res, "radar_session")!;
+    expect(raw).toContain("radar_session=;");
+    expect(raw).toMatch(/Max-Age=0/i);
+    expect(raw).toMatch(/Path=\//);
+  });
+
+  it("returns 503 when auth is disabled (no session granting in open mode)", async () => {
+    const app = authRoute(AUTH_OFF);
+    const res = await app.request("/api/v1/auth/enroll?token=inv-tok");
+    expect(res.status).toBe(503);
   });
 });
 

@@ -73,7 +73,7 @@ describe("sendInvitationEmail (Scaleway TEM HTTP API)", () => {
 
     expect(result.sent).toBe(true);
     expect(result.link).toBe(
-      "https://immo.sent-tech.ca/enroll?token=tok-123",
+      "https://immo.sent-tech.ca/api/v1/auth/enroll?token=tok-123",
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
@@ -101,7 +101,7 @@ describe("sendInvitationEmail (Scaleway TEM HTTP API)", () => {
     expect(typeof body.html).toBe("string");
     // Lien d'enrôlement présent dans le corps texte.
     expect(body.text).toContain(
-      "https://immo.sent-tech.ca/enroll?token=tok-123",
+      "https://immo.sent-tech.ca/api/v1/auth/enroll?token=tok-123",
     );
   });
 
@@ -143,7 +143,7 @@ describe("sendInvitationEmail (Scaleway TEM HTTP API)", () => {
 
     expect(result.sent).toBe(false);
     expect(result.link).toBe(
-      "https://immo.sent-tech.ca/enroll?token=tok-789",
+      "https://immo.sent-tech.ca/api/v1/auth/enroll?token=tok-789",
     );
     expect(warn).toHaveBeenCalled();
   });
@@ -161,7 +161,7 @@ describe("sendInvitationEmail (Scaleway TEM HTTP API)", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(result.sent).toBe(false);
     expect(result.link).toBe(
-      "https://immo.sent-tech.ca/enroll?token=tok-degraded",
+      "https://immo.sent-tech.ca/api/v1/auth/enroll?token=tok-degraded",
     );
   });
 });
