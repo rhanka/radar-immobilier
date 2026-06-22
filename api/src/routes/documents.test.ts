@@ -99,4 +99,38 @@ describe("GET /api/documents/raw", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("application/pdf");
   });
+
+  it("serves CAS PV PDFs that live only in the scrape store", async () => {
+    // Regression: CAS PV PDFs (raw/proces-verbaux-<city>/cas/<sha>.pdf) are
+    // written by the RECUEIL pipeline to the scrape bucket, NOT to `store`.
+    // The viewer must still resolve them via /api/documents/raw.
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const casKey = "raw/proces-verbaux-saint-frederic/cas/fb6fb3096321f1.pdf";
+    await scrapeStore.put(casKey, "%PDF-1.4 cas", "application/pdf");
+    const app = documentsRoute({ store, scrapeStore });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(casKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+    expect(await res.text()).toBe("%PDF-1.4 cas");
+  });
+
+  it("prefers the scrape store but falls back to the metadata store", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const record = await seedPdf(store); // only in the metadata store
+    const app = documentsRoute({ store, scrapeStore });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(record.storageKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+    expect(await res.text()).toBe("%PDF-1.4");
+  });
 });
