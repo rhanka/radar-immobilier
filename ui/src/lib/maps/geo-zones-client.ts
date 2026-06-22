@@ -17,7 +17,7 @@ export interface GeoZoneProperties {
   citySlug: string;
   geometryStatus: GeoZoneGeometryStatus;
   confidence: number;
-  source: "official-zone" | "lot-zone-fallback";
+  source: "official-zone" | "lot-zone-fallback" | "signal-designated";
   lotCount: number;
   lots: GeoZoneLotRef[];
   label?: string;
