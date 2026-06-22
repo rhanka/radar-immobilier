@@ -18,16 +18,24 @@
   export let excerpt: string | null = null;
   export let onClose: () => void = () => {};
 
-  // Préfère sourceUrl (PDF public ou route streaming), puis rawRef via
-  // /api/documents/raw. L'URL raw est préfixée par VITE_API_BASE_URL comme tous
-  // les autres clients API : sans ça, le `/api/...` relatif ne marche que
-  // same-origin et casse dès que l'UI et l'API sont sur des origines distinctes.
+  // URL raw préfixée par VITE_API_BASE_URL comme tous les autres clients API :
+  // sans ça, le `/api/...` relatif ne marche que same-origin et casse dès que
+  // l'UI et l'API sont sur des origines distinctes.
   function rawDocumentUrl(ref: string): string {
     const base = import.meta.env.VITE_API_BASE_URL;
     const path = `/api/documents/raw?rawRef=${encodeURIComponent(ref)}`;
     return base ? `${base.replace(/\/$/, "")}${path}` : path;
   }
-  $: resolvedSourceUrl = sourceUrl ?? (rawRef ? rawDocumentUrl(rawRef) : null);
+  // Source RENDUE par pdf.js : préfère TOUJOURS la route interne /api/documents/raw
+  // (via rawRef) au `sourceUrl` public. pdf.js récupère les octets par fetch/XHR :
+  // l'URL publique de la ville (ex. https://vdmt.ca/…/PV.pdf) est cross-origin et
+  // ne renvoie aucun en-tête CORS (Access-Control-Allow-Origin), donc le navigateur
+  // BLOQUE le fetch → loadError → « preuve non rendue ». La route interne est
+  // same-origin + authentifiée et sert les octets depuis le bucket (preuve prouvée
+  // 200 application/pdf). Le `sourceUrl` public reste utilisé pour le lien « Ouvrir »
+  // (balise <a href>, non soumise au CORS) plus bas.
+  $: resolvedSourceUrl =
+    (rawRef ? rawDocumentUrl(rawRef) : null) ?? sourceUrl;
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
   $: isPdfSource = looksLikePdf(resolvedSourceUrl, rawRef, sourceRef);
 
