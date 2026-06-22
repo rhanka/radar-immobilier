@@ -2,9 +2,10 @@
  * QA auth-store — prouve les garanties de sécurité côté SPA SANS stack :
  *   - /me est sondé avec `cache: "no-store"` (jamais resservir un user périmé
  *     après logout/reconnexion — symptôme « reconnect = compte précédent ») ;
- *   - le clic « Se connecter » force la RÉ-AUTHENTIFICATION IdP
- *     (`/api/v1/auth/login?prompt=login`), au lieu de réutiliser silencieusement
- *     la session SSO du dernier user.
+ *   - le clic « Se connecter » force le SÉLECTEUR DE COMPTES IdP
+ *     (`/api/v1/auth/login?prompt=select_account`), pour pouvoir CHANGER de
+ *     compte au lieu de réutiliser silencieusement la session SSO du dernier
+ *     user (ni se voir re-imposer ce même compte par un simple `prompt=login`).
  *
  * On mocke `fetch` et on stubbe `window.location` pour observer l'URL de
  * redirection sans naviguer réellement.
@@ -50,7 +51,7 @@ describe("auth-store — sondage /me non-caché", () => {
   });
 });
 
-describe("auth-store — le login explicite force la ré-authentification IdP", () => {
+describe("auth-store — le login explicite ouvre le sélecteur de comptes IdP", () => {
   let assignedHref: string | undefined;
   let originalLocation: Location;
 
@@ -81,10 +82,12 @@ describe("auth-store — le login explicite force la ré-authentification IdP", 
     vi.restoreAllMocks();
   });
 
-  it("redirectToLogin() pointe sur /api/v1/auth/login?prompt=login (kill SSO reuse)", () => {
+  it("redirectToLogin() pointe sur /api/v1/auth/login?prompt=select_account (permet de CHANGER de compte)", () => {
     authStore.redirectToLogin();
-    // prompt=login : sans lui, l'IdP resservirait silencieusement la session
-    // SSO du DERNIER user après une déconnexion — la faille rapportée.
-    expect(assignedHref).toBe("/api/v1/auth/login?prompt=login");
+    // prompt=select_account : `prompt=login` re-demandait juste le mot de passe
+    // DU MÊME compte SSO (le symptôme « reconnect = compte précédent, impossible
+    // de switcher »). `select_account` ouvre le sélecteur de comptes de l'IdP
+    // pour réellement basculer d'identité.
+    expect(assignedHref).toBe("/api/v1/auth/login?prompt=select_account");
   });
 });

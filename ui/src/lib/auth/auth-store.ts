@@ -113,13 +113,16 @@ function createAuthStore() {
     // Pose le marqueur AVANT de partir : au retour, checkSession() saura
     // qu'une tentative a déjà eu lieu et activera le disjoncteur si besoin.
     markLoginAttempt();
-    // `prompt=login` : un clic EXPLICITE sur « Se connecter » force l'IdP à
-    // RÉ-AUTHENTIFIER (écran de login + device) au lieu de resservir
-    // silencieusement la session SSO du DERNIER user. C'est le correctif du
-    // symptôme « après logout, reconnect = compte précédent » : effacer le
-    // cookie radar ne suffit pas si l'IdP garde sa propre session SSO. Le coût
-    // UX est nul (l'utilisateur a justement demandé à se (re)connecter).
-    window.location.href = "/api/v1/auth/login?prompt=login";
+    // `prompt=select_account` : un clic EXPLICITE sur « Se connecter » ouvre le
+    // SÉLECTEUR DE COMPTES de l'IdP, pour pouvoir CHANGER de compte. C'est le
+    // correctif du vrai symptôme rapporté : « je me déconnecte, je reconnecte,
+    // ça me remet sur le compte précédent et je ne peux pas switcher ». Effacer
+    // le cookie radar ne suffit pas (l'IdP garde sa session SSO), et un simple
+    // `prompt=login` ne faisait que re-demander le mot de passe DU MÊME compte
+    // — sans offrir d'en choisir un autre. `select_account` casse ce piège.
+    // (L'IdP sentropic n'expose pas d'end_session_endpoint : un RP-initiated
+    // logout standard est impossible, ce levier `prompt` est le seul disponible.)
+    window.location.href = "/api/v1/auth/login?prompt=select_account";
   }
 
   /** Réinitialise le disjoncteur (bouton "Réessayer" de la page bloquée). */
