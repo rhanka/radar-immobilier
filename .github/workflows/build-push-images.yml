@@ -6,14 +6,22 @@ name: Build & push images
 # the Makefile `build-images` / `push-images` targets (deploy/k8s/README.md step 2:
 # "CI does this on the live path").
 #
-# Deploy is intentionally NOT wired here: rolling the live cluster is a deliberate
-# human action with cluster creds (Makefile deploy-k8s is PREPARE-ONLY, and no
-# KUBECONFIG secret exists). After a successful push, deploy manually with the
-# pushed sha tag, e.g.:
+# Deploy (CD) is wired below in the `deploy` job, but ONLY on pushes to `main`
+# (never on PRs / feature branches). It rolls the live Scaleway Kapsule cluster
+# with `kubectl set image` against the same short-sha tag the build just pushed.
+#
+# Auth uses the `KUBE_CONFIG_DATA` gh secret (same pattern as rhanka/surch
+# ci-k8s.yml): a kubeconfig (base64 OR raw) for a NAMESPACE-SCOPED ServiceAccount
+# `radar-ci-deployer` that can only get/list/patch/update Deployments (+ read
+# pods/replicasets for `rollout status`) inside the `radar-immobilier` namespace —
+# it cannot read Secrets or touch any other namespace. There is no GitOps
+# controller (Argo/Flux) on this cluster, so `kubectl set image` is not reverted.
+#
+# To roll back or deploy by hand, the same commands still work with a full
+# kubeconfig:
 #   kubectl -n radar-immobilier set image deploy/radar-api  api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
 #   kubectl -n radar-immobilier set image deploy/radar-ui   ui=rg.fr-par.scw.cloud/radar-immobilier/radar-ui:<sha>
 #   kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui
-# (See the report / PR body for how to enable deploy-from-CI later.)
 
 on:
   push:
@@ -117,24 +125,70 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-  deploy-hint:
-    name: Deploy hint (manual step)
+  deploy:
+    name: Deploy to cluster
     needs: build-push
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' }}
+    timeout-minutes: 10
+    # Only roll the live cluster on pushes to main. PRs / feature-branch
+    # dispatches build & push images but never deploy.
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    env:
+      NAMESPACE: radar-immobilier
     steps:
-      - name: Print manual deploy command
+      - name: Short SHA
+        id: vars
+        # Same short-sha the build job tags with (GITHUB_SHA::7), so the deploy
+        # always targets the image this run just pushed.
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         run: |
-          SHA="${GITHUB_SHA::7}"
+          mkdir -p "$HOME/.kube"
+          # Accept the secret in either raw YAML or base64-encoded form.
+          if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+          # Scoped SA can read deployments in this namespace; fail fast if not.
+          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui >/dev/null
+
+      - name: Roll deployments to pushed sha
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" set image deploy/radar-api \
+            api="${IMAGE_PREFIX}/radar-api:${SHA}"
+          kubectl -n "$NAMESPACE" set image deploy/radar-ui \
+            ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
+
+      - name: Wait for rollouts
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+
+      - name: Summary
+        if: always()
+        run: |
+          SHA="${{ steps.vars.outputs.sha }}"
           {
-            echo "### Images pushed — deploy is a manual step"
+            echo "### Deployed to \`${NAMESPACE}\`"
             echo ""
-            echo "No KUBECONFIG secret exists and the live cluster is not assumed reachable"
-            echo "from GitHub runners, so this workflow does not roll the cluster. Deploy with:"
-            echo ""
-            echo '```sh'
-            echo "kubectl -n radar-immobilier set image deploy/radar-api api=${IMAGE_PREFIX}/radar-api:${SHA}"
-            echo "kubectl -n radar-immobilier set image deploy/radar-ui  ui=${IMAGE_PREFIX}/radar-ui:${SHA}"
-            echo "kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui"
+            echo '```'
+            echo "deploy/radar-api -> ${IMAGE_PREFIX}/radar-api:${SHA}"
+            echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
