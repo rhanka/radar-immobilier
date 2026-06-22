@@ -133,6 +133,20 @@ describe("GET /api/v1/auth/login", () => {
     expect(url.searchParams.get("prompt")).toBe("login");
   });
 
+  it("forwards prompt=select_account to the IdP so the user can SWITCH account", async () => {
+    // The REAL reported symptom: "logout → reconnect lands me back on the
+    // previous account and I cannot switch / cannot pick another one".
+    // `prompt=login` only re-prompts the password OF THE SAME SSO account;
+    // `prompt=select_account` opens the IdP account chooser, which is the only
+    // way to change identity (the IdP exposes no end_session_endpoint, so a
+    // standard RP-initiated logout is not available — this is the sole lever).
+    // The SPA login button now sends this value; the route must pass it through.
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY });
+    const res = await app.request("/api/v1/auth/login?prompt=select_account");
+    const url = new URL(res.headers.get("location")!);
+    expect(url.searchParams.get("prompt")).toBe("select_account");
+  });
+
   it("whitelists prompt: an attacker cannot smuggle prompt=none to bypass re-auth", async () => {
     // prompt=none would tell the IdP to NEVER show a login UI (silent auth),
     // which is the opposite of what we want here. Only login/select_account are
@@ -466,15 +480,19 @@ describe("secure session lifecycle — the reported symptoms end-to-end", () => 
     expect(await meAfterLogout.json()).toEqual({ authenticated: false });
     expect(meAfterLogout.headers.get("cache-control")).toBe("no-store");
 
-    // 4) Reconnect via the explicit login button => prompt=login reaches the
-    //    IdP, forcing re-authentication. Even if the OLD cookie somehow lingered
-    //    (replayed below), the login flow does not depend on it — it goes to the
-    //    IdP, which must re-authenticate and cannot silently return prev-user.
-    const reconnect = await app.request("/api/v1/auth/login?prompt=login", {
-      headers: { cookie: `radar_session=${prevUser}` },
-    });
+    // 4) Reconnect via the explicit login button => prompt=select_account
+    //    reaches the IdP, opening the account chooser so the user can SWITCH
+    //    account (the real symptom: "reconnect puts me back on the previous
+    //    account and I can't pick another"). `prompt=login` only re-prompted the
+    //    SAME account's password; `select_account` is what lets the user change
+    //    identity. Even if the OLD cookie somehow lingered (replayed below), the
+    //    login flow does not depend on it — it goes to the IdP account chooser.
+    const reconnect = await app.request(
+      "/api/v1/auth/login?prompt=select_account",
+      { headers: { cookie: `radar_session=${prevUser}` } },
+    );
     const url = new URL(reconnect.headers.get("location")!);
-    expect(url.searchParams.get("prompt")).toBe("login");
+    expect(url.searchParams.get("prompt")).toBe("select_account");
     expect(url.origin + url.pathname).toBe(DISCOVERY.authorization_endpoint);
   });
 
