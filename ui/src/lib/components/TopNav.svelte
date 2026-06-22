@@ -309,17 +309,23 @@
 
   /* ── Pont <button> ↔ classe de lien de nav DS ──────────────────────────────
      `st-appHeader__navLink` est la classe utilitaire PUBLIÉE par le DS pour les
-     liens de nav (état actif = soulignement). Conçue pour des <a> ; nos items
-     sont des <button> (navigation SPA, pas des URLs). Ce bloc ne fait QUE
-     neutraliser les défauts du <button> pour que le rendu soit BYTE-identique
-     au lien DS — aucun re-style (couleurs/tailles/état actif restent ceux du DS).
+     liens de nav (état actif = SOULIGNEMENT `border-bottom-color` sur
+     `[aria-current=page]`). Conçue pour des <a> ; nos items sont des <button>
+     (navigation SPA, pas des URLs). Ce bloc ne fait QUE neutraliser les défauts
+     du <button> SANS toucher au `border-bottom` : le DS gère entièrement la
+     bordure basse (transparente au repos, colorée sur l'actif). Touchant le
+     `border-bottom` ici, le CSS scopé Svelte (`.topnav-navbtn.svelte-xxx`)
+     égalait la spécificité du sélecteur DS `[aria-current=page]` et, injecté
+     après, écrasait le soulignement actif en transparent (bug #1). On neutralise
+     donc UNIQUEMENT les bordures top/right/left, et on laisse le DS souligner.
      MANQUE DS : un composant/`navItem` de nav top-level pilotable en mode
      bouton (sans href) supprimerait ce pont — voir rapport. */
   .topnav-navbtn {
     appearance: none;
     background: transparent;
-    border: 0;
-    border-bottom: 2px solid transparent;
+    border-top: 0;
+    border-right: 0;
+    border-left: 0;
     cursor: pointer;
     font: inherit;
   }
