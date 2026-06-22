@@ -104,11 +104,25 @@ export async function fetchDiscovery(
   };
 }
 
-/** Build the 302 target to the IdP authorize endpoint (code + PKCE). */
+/**
+ * Build the 302 target to the IdP authorize endpoint (code + PKCE).
+ *
+ * `prompt` (OIDC `prompt` parameter, RFC 6749 / OpenID Connect Core §3.1.2.1):
+ * when set to `"login"` the IdP MUST re-authenticate the End-User even if it
+ * holds an active SSO session, instead of silently re-issuing an id_token for
+ * whoever is currently signed in at the IdP. This is what makes
+ * "logout → reconnect" land on a fresh login screen (not the previous user)
+ * and makes an invitation link force a real device authentication (not reuse a
+ * residual admin SSO session at the IdP). Without it, deleting radar's own
+ * cookie is not enough — the IdP's session would silently re-authorize the
+ * last user. Omitted (no `prompt`) for ordinary first logins where SSO reuse
+ * is desirable.
+ */
 export function buildAuthorizeUrl(
   auth: AuthConfig,
   discovery: OidcDiscovery,
   flow: AuthFlowState,
+  opts: { prompt?: "login" | "select_account" | "none" | "consent" } = {},
 ): string {
   const params = new URLSearchParams({
     response_type: "code",
@@ -120,6 +134,7 @@ export function buildAuthorizeUrl(
     code_challenge: codeChallengeS256(flow.codeVerifier),
     code_challenge_method: "S256",
   });
+  if (opts.prompt) params.set("prompt", opts.prompt);
   return `${discovery.authorization_endpoint}?${params.toString()}`;
 }
 
