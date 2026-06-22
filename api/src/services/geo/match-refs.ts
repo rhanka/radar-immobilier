@@ -188,10 +188,56 @@ export interface GeoMatchDb {
   findZoneAllCities(codeNorm: string): Promise<{ canonicalId: string; codeNorm: string; citySlug: string }[]>;
 
   /**
-   * Cherche un lot par no_lot_norm.
+   * Cherche un lot par no_lot_norm (province-wide, sans préférence de ville).
    * Retourne le canonical_id ou null.
+   *
+   * @deprecated Utiliser `findLotCandidates` pour la résolution Signal→Lot :
+   * un même no_lot peut exister dans plusieurs villes (cadastre non-rénové),
+   * et la ville du signal doit être préférée (cf. précision géo).
    */
   findLotExact(noLotNorm: string): Promise<string | null>;
+
+  /**
+   * Cherche TOUS les lots partageant un no_lot_norm, en retournant leur ville.
+   *
+   * Un même numéro de lot peut exister dans plusieurs municipalités (le cadastre
+   * non-rénové réutilise les numéros entre villes). La résolution Signal→Lot doit
+   * donc PRÉFÉRER le lot de la ville du signal, et ne tomber sur une autre ville
+   * que si le no_lot y est NON-AMBIGU (présent dans une seule ville).
+   *
+   * Retourne [{ canonicalId, citySlug }] (vide si aucun match).
+   */
+  findLotCandidates(noLotNorm: string): Promise<{ canonicalId: string; citySlug: string }[]>;
+}
+
+/**
+ * Sélectionne le bon lot parmi les candidats pour un signal d'une ville donnée.
+ *
+ * Politique (précision géo) :
+ *   1. Si un candidat appartient à la ville du signal → on le retient (match local fiable).
+ *   2. Sinon, si le no_lot est NON-AMBIGU (une seule ville candidate) → on le retient
+ *      (résolution cross-ville honnête : un seul polygone possible).
+ *   3. Sinon (plusieurs villes, aucune n'étant celle du signal) → AMBIGU : pas de
+ *      résolution (on évite de géolocaliser le signal au mauvais endroit).
+ *
+ * @returns Le canonical_id retenu, ou null si ambigu / aucun candidat.
+ */
+export function pickLotForCity(
+  candidates: { canonicalId: string; citySlug: string }[],
+  citySlug: string,
+): string | null {
+  if (candidates.length === 0) return null;
+
+  // 1. Préférence stricte : lot de la ville du signal.
+  const local = candidates.find((c) => c.citySlug === citySlug);
+  if (local) return local.canonicalId;
+
+  // 2. Cross-ville accepté seulement si non-ambigu (une seule ville candidate).
+  const cities = new Set(candidates.map((c) => c.citySlug));
+  if (cities.size === 1) return candidates[0]!.canonicalId;
+
+  // 3. Plusieurs villes, aucune n'étant celle du signal → ambigu.
+  return null;
 }
 
 // ─── Seuils de matching ───────────────────────────────────────────────────────
