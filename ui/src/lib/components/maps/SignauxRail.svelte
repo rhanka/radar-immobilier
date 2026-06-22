@@ -45,7 +45,7 @@
   export let detailLoading = false;
 
   /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
-  export let initialSubsetKey = "z";
+  export let initialSubsetKey = "z|m|p";
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
@@ -591,6 +591,13 @@
   .axis-toggle-row :global(.st-choice) {
     flex: 1;
     min-width: 0;
+    /* Bug 3 : réduire la taille du label via le token DS Checkbox */
+    --st-component-selection-choiceLabelFontSize: var(--st-component-tag-fontSize, 0.75rem);
+  }
+
+  /* Bug 3 : réduire la taille du helper text (sous-libellé) des filtres */
+  .axis-toggle-row :global(.st-choice__help) {
+    font-size: var(--st-component-tag-fontSize, 0.75rem);
   }
 
   /* Badge trailing dans la rangée toggle — ne rétrécit pas */
@@ -684,7 +691,7 @@
     display: block;
     font-size: 0.75rem;
     color: var(--st-semantic-text-muted);
-    font-family: monospace;
+    font-family: var(--st-font-mono, ui-monospace, monospace);
   }
 
   .rail-detail-empty {
