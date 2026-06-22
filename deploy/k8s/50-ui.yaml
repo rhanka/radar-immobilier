@@ -34,6 +34,18 @@ data:
       root /usr/share/nginx/html;
       index index.html;
 
+      # ES module assets (.mjs) — notably the pdf.js worker bundled by Vite as
+      # `pdf.worker.min-*.mjs`. nginx 1.27's stock mime.types maps .js but NOT
+      # .mjs, so .mjs falls back to application/octet-stream. pdf.js loads its
+      # worker with `new Worker(src, { type: "module" })`; browsers REJECT a
+      # module worker whose Content-Type is not a JavaScript MIME → the worker
+      # fails → pdf.js raises loadError → the "preuve non rendue" fallback. Map
+      # .mjs to a JavaScript MIME so the worker loads. (Same-origin, no CORS.)
+      location ~ \.mjs$ {
+        types { }
+        default_type text/javascript;
+      }
+
       # SPA history fallback.
       location / {
         try_files $uri $uri/ /index.html;
