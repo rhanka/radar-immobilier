@@ -5,8 +5,11 @@
  * avec un vrai PDF), rendu canvas. Aucune donnée backend, aucun stack docker.
  *
  * Props pilotées par la query string :
- *   ?rawRef=...     → l'overlay construit /api/documents/raw?rawRef=...
- *   ?sourceUrl=...  → URL directe (prioritaire)
+ *   ?rawRef=...     → l'overlay construit /api/documents/raw?rawRef=... et le
+ *                     RENDU pdf.js passe par cette route interne (same-origin,
+ *                     CORS-safe) — PRIORITAIRE sur sourceUrl pour le rendu.
+ *   ?sourceUrl=...  → URL publique de la ville ; sert au lien « Ouvrir » (et au
+ *                     rendu UNIQUEMENT quand aucun rawRef n'est fourni).
  */
 import "../../src/app.css";
 import { mount } from "svelte";
