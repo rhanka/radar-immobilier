@@ -21,7 +21,7 @@ import type { Database } from "../../db/client.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SelectResult = { canonicalId: string }[];
+type SelectResult = { canonicalId: string; citySlug?: string }[];
 
 // ─── Mock DB factory ──────────────────────────────────────────────────────────
 
@@ -214,8 +214,11 @@ describe("resolveGeoRefs — zones", () => {
 
 describe("resolveGeoRefs — lots", () => {
   it("résout un lot via mention explicite : resolvedLots=1", async () => {
-    // "lot 6 057 912" ne contient pas de code zone -> 0 selects zone, 1 select lot
-    const { db } = makeMockDb([[{ canonicalId: "lot-6057912" }]]);
+    // "lot 6 057 912" ne contient pas de code zone -> 0 selects zone, 1 select lot.
+    // Le candidat porte le city_slug de la ville du signal (préférence locale).
+    const { db } = makeMockDb([
+      [{ canonicalId: "lot-6057912", citySlug: BASE_INPUT.citySlug }],
+    ]);
 
     const result = await resolveGeoRefs(db, {
       ...BASE_INPUT,
@@ -253,6 +256,43 @@ describe("resolveGeoRefs — lots", () => {
     expect(result.unresolvedLots).toBe(1);
   });
 
+  it("lot d'une AUTRE ville unique (non-ambigu) -> résout cross-ville : resolvedLots=1", async () => {
+    // Le no_lot n'existe pas dans la ville du signal mais dans une seule autre ville.
+    const { db } = makeMockDb([
+      [{ canonicalId: "ogc:lots:coaticook:6057912", citySlug: "coaticook" }],
+    ]);
+
+    const result = await resolveGeoRefs(db, {
+      ...BASE_INPUT,
+      label: "Demande concernant le lot 6 057 912",
+      description: null,
+    });
+
+    expect(result.resolvedLots).toBe(1);
+    expect(result.unresolvedLots).toBe(0);
+  });
+
+  it("lot ambigu (2 villes, aucune n'est celle du signal) -> non résolu (unresolvedLots=1)", async () => {
+    const { db, executeCalls } = makeMockDb([
+      [
+        { canonicalId: "ogc:lots:saint-amable:6057912", citySlug: "saint-amable" },
+        { canonicalId: "ogc:lots:saint-mathieu-de-beloeil:6057912", citySlug: "saint-mathieu-de-beloeil" },
+      ],
+    ]);
+
+    const result = await resolveGeoRefs(db, {
+      ...BASE_INPUT,
+      label: "Demande concernant le lot 6 057 912",
+      description: null,
+    });
+
+    // Aucune résolution (on ne géolocalise pas au mauvais endroit).
+    expect(result.resolvedLots).toBe(0);
+    expect(result.unresolvedLots).toBe(1);
+    // Exactement 2 inserts : 1 zone "no_extract" + 1 lot non résolu (ambigu) ; aucun resolution.
+    expect(executeCalls.length).toBe(2);
+  });
+
   it("aucun lot extrait -> resolvedLots=0, unresolvedLots=0", async () => {
     const { db } = makeMockDb([]);
 
@@ -274,7 +314,7 @@ describe("resolveGeoRefs — cas mixte zone + lot", () => {
     // 1 select zone résolu + 1 select lot résolu
     const { db } = makeMockDb([
       [{ canonicalId: "zone-valleyfield-h431" }],
-      [{ canonicalId: "lot-6057912" }],
+      [{ canonicalId: "lot-6057912", citySlug: BASE_INPUT.citySlug }],
     ]);
 
     const result = await resolveGeoRefs(db, {
