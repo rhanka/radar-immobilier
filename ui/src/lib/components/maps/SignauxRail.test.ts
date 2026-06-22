@@ -5,7 +5,8 @@
  *   1. Par défaut (initialSubsetKey="z|m|p"), les 3 checkboxes sont cochées.
  *   2. Avec initialSubsetKey="", les 3 checkboxes sont décochées.
  *   3. Avec initialSubsetKey="z", seul Zonage est coché.
- *   4. onFilterChange est appelé à l'initialisation avec la clé active.
+ *   4. onFilterChange N'EST PAS appelé au montage (post-#283 : pas de
+ *      ré-émission de la clé restaurée → pas d'écrasement du filtre au reload).
  *   5. Cliquer sur "Zonage uniquement" appelle onFilterChange sans le flag "z".
  *
  * Aucun docker, aucune API. jsdom + @testing-library/svelte.
@@ -70,17 +71,21 @@ describe("SignauxRail — état initial des filtres", () => {
     expect(precoce.checked).toBe(false);
   });
 
-  it("onFilterChange est appelé à l'init avec la clé active (z|m|p)", () => {
+  it("onFilterChange N'EST PAS appelé au montage (clé restaurée z|m|p non ré-émise)", () => {
+    // Contrat post-#283 : au mount, le composant NE propage PLUS la clé active.
+    // Ré-émettre `initialSubsetKey` écraserait le filtre que le parent vient de
+    // restaurer (URL > localStorage), d'où la perte du filtre au reload/Ctrl+R.
+    // La propagation ne doit venir QUE d'un toggle utilisateur (cf. bloc suivant).
     const spy = vi.fn();
     renderRail("z|m|p", spy);
-    // Le composant propage la clé active via $: onFilterChange(activeKey) lors du mount.
-    expect(spy).toHaveBeenCalledWith("z|m|p");
+    expect(spy).not.toHaveBeenCalled();
   });
 
-  it("onFilterChange est appelé à l'init avec '' si aucun filtre", () => {
+  it("onFilterChange N'EST PAS appelé au montage avec '' (aucun filtre, pas d'écrasement)", () => {
+    // Même contrat avec une clé restaurée vide : pas de propagation au mount.
     const spy = vi.fn();
     renderRail("", spy);
-    expect(spy).toHaveBeenCalledWith("");
+    expect(spy).not.toHaveBeenCalled();
   });
 });
 
