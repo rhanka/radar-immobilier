@@ -118,15 +118,28 @@ export function levenshteinNorm(a: string, b: string): number {
  *
  * Couvre les divergences courantes dans les données québécoises :
  *   - Suppression du tiret : "H-431" → "H431"
+ *   - Insertion du tiret : "C18" → "C-18" (DB compacte vs signal tireté)
  *   - Suppression des zéros de padding : "H-0431" → "H-431"
  *   - Suppression du préfixe lettre unique : "ZH-431" → "H-431"
+ *
+ * La symétrie tiret/sans-tiret couvre le décalage fréquent entre l'odonyme
+ * source (tiret "C-18") et la couche cadastrale (espace → compacte "C18").
  */
 export function zoneCodeVariants(codeNorm: string): string[] {
   const variants = new Set<string>();
 
-  // Sans tiret
+  // Sans tiret : "C-18" → "C18"
   const noHyphen = codeNorm.replace(/-/g, "");
   if (noHyphen !== codeNorm) variants.add(noHyphen);
+
+  // Avec tiret (insertion lettre↔chiffre) : "C18" → "C-18", "RU1302" → "RU-1302"
+  // Uniquement si le code n'a pas déjà de tiret (sinon ambiguïté).
+  if (!codeNorm.includes("-")) {
+    const splitMatch = codeNorm.match(/^([A-Z]{1,3})([0-9].*)$/);
+    if (splitMatch && splitMatch[1] && splitMatch[2]) {
+      variants.add(`${splitMatch[1]}-${splitMatch[2]}`);
+    }
+  }
 
   // Suppression du préfixe lettre unique (ex. "ZH-431" → "H-431", "VH-431" → "H-431")
   const prefixMatch = codeNorm.match(/^[A-Z]([A-Z]-?\d.*)$/);
