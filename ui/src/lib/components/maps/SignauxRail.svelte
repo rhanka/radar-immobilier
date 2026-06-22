@@ -96,6 +96,22 @@
    */
   let precoceOnly = initialSubsetKey.includes("p");
 
+  /**
+   * RESYNC au reload/navigation (bug #3) : `initialSubsetKey` est piloté par le
+   * parent qui le recalcule au onMount (URL > localStorage > défaut). Les trois
+   * `let` ci-dessus n'étant initialisés QU'UNE fois, ils restaient figés sur le
+   * défaut quand le parent restaurait un filtre depuis l'URL → cases désyncs.
+   * Ce bloc applique toute nouvelle `initialSubsetKey` aux cases (sans boucle :
+   * il ne propage rien, il ne fait que refléter la source de vérité du parent).
+   */
+  let appliedInitialKey = initialSubsetKey;
+  $: if (initialSubsetKey !== appliedInitialKey) {
+    appliedInitialKey = initialSubsetKey;
+    zonageOnly = initialSubsetKey.includes("z");
+    multi4plus = initialSubsetKey.includes("m");
+    precoceOnly = initialSubsetKey.includes("p");
+  }
+
   /** Types disponibles = union des types connus (multi-villes) + types actuels. */
   $: allKnownTypes = Array.from(
     new Set([...knownNodeTypes, ...detailNodes.map((n) => n.type)])
@@ -149,8 +165,12 @@
     emitFilterChange();
   }
 
-  // Propagate filter à l'init / au changement de clé active (réactif)
-  $: onFilterChange(activeKey);
+  // NOTE (bug #3) : on ne propage PLUS via un `$: onFilterChange(activeKey)`.
+  // Ce bloc réactif tirait au MONTAGE avec la clé par défaut et écrasait le
+  // filtre que le parent venait de restaurer depuis l'URL (perte au reload).
+  // La propagation vers le parent vient désormais UNIQUEMENT d'un toggle
+  // utilisateur explicite (toggleZonageOnly / toggleMulti4plus / togglePrecoceOnly
+  // → emitFilterChange), qui est la seule source légitime d'écriture URL+LS.
 
   // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
   /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
