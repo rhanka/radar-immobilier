@@ -89,9 +89,16 @@ describe("zoneCodeVariants", () => {
     expect(variants).toContain("H431");
   });
 
-  it("code sans tiret → tableau vide", () => {
+  it("code sans tiret → variante avec tiret inséré (symétrie cadastre)", () => {
+    // "H431" → "H-431" : la couche cadastrale stocke souvent le code compacté
+    // ("C 18" → "C18") alors que l'odonyme source est tireté ("C-18").
     const variants = zoneCodeVariants("H431");
-    expect(variants).not.toContain("H-431");
+    expect(variants).toContain("H-431");
+  });
+
+  it("C18 ↔ C-18 (cas rosemere) : insertion de tiret lettre↔chiffre", () => {
+    expect(zoneCodeVariants("C18")).toContain("C-18");
+    expect(zoneCodeVariants("C-18")).toContain("C18");
   });
 
   it("code avec préfixe lettre unique → variante sans préfixe", () => {
@@ -106,10 +113,9 @@ describe("zoneCodeVariants", () => {
     expect(variants).toContain("H-431");
   });
 
-  it("code simple sans variante connue → tableau vide ou sans doublons", () => {
+  it("code lettre+chiffres compact → variante tiret (A1336 → A-1336)", () => {
     const variants = zoneCodeVariants("A1336");
-    // Pas de tiret, pas de préfixe, pas de padding → tableau vide
-    expect(variants).toHaveLength(0);
+    expect(variants).toContain("A-1336");
   });
 });
 
