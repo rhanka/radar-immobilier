@@ -8,6 +8,7 @@ import {
   extractSignalLotRefs,
   extractSignalZoneRefs,
   fallbackZoneCode,
+  mergeDesignatedZones,
   normalizeZoneCodeRef,
   normalizeLotNoRef,
   opacityForSelectionKey,
@@ -212,6 +213,66 @@ describe("extractSignalLotRefs — double forme brute + compacte", () => {
     const node = signal("sig-1", { noLot: "4516944" });
     const refs = extractSignalLotRefs(node);
     expect(refs).toContain("4516944");
+  });
+});
+
+describe("mergeDesignatedZones — zones désignées par signal sans polygone", () => {
+  it("ajoute une feature 'désignée' pour un code de zone absent des zones API", () => {
+    // Cas St-Frédéric : signal désigne A16 (rezonage futur), inexistant dans le cadastre OGC.
+    const apiZones = [zone("A-19", []), zone("I-90", [])];
+    const nodes = [
+      signal("sig-a16", { zone_ref: "A16" }),
+      signal("sig-i93", { properties: { zone_ref: "I93" } }),
+    ];
+
+    const merged = mergeDesignatedZones(apiZones, nodes, CITY_SLUG);
+    const codes = merged.map((z) => z.properties.code);
+
+    expect(codes).toContain("A-19");
+    expect(codes).toContain("I-90");
+    expect(codes).toContain("A16");
+    expect(codes).toContain("I93");
+
+    const a16 = merged.find((z) => z.properties.code === "A16")!;
+    expect(a16.geometry).toBeNull();
+    expect(a16.properties.geometryStatus).toBe("missing");
+    expect(a16.properties.source).toBe("signal-designated");
+    expect(a16.properties.citySlug).toBe(CITY_SLUG);
+  });
+
+  it("ne duplique pas une zone déjà présente (match par forme normalisée, tiret ignoré)", () => {
+    // signal désigne "A16", l'API renvoie "A-16" (même zone, tiret différent) → pas de doublon.
+    const apiZones = [zone("A-16", [])];
+    const nodes = [signal("sig-a16", { zone_ref: "A16" })];
+
+    const merged = mergeDesignatedZones(apiZones, nodes, CITY_SLUG);
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0].properties.code).toBe("A-16");
+    expect(merged[0].properties.source).toBe("official-zone");
+  });
+
+  it("retourne les zones API inchangées quand aucun signal ne désigne de zone hors-couche", () => {
+    const apiZones = [zone("H-609", [])];
+    const nodes = [signal("sig-h609", { zone_ref: "H-609" })];
+
+    const merged = mergeDesignatedZones(apiZones, nodes, CITY_SLUG);
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0].properties.source).toBe("official-zone");
+  });
+
+  it("déduplique plusieurs signaux désignant le même code hors-couche", () => {
+    const merged = mergeDesignatedZones(
+      [],
+      [
+        signal("sig-1", { zone_ref: "A16" }),
+        signal("sig-2", { zone_ref: "A16" }),
+      ],
+      CITY_SLUG,
+    );
+
+    expect(merged.filter((z) => z.properties.code === "A16")).toHaveLength(1);
   });
 });
 
