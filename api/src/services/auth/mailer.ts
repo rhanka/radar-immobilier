@@ -82,7 +82,14 @@ export async function sendInvitationEmail(
   config: MailerConfig,
 ): Promise<{ sent: boolean; link: string }> {
   const appBase = (config.appBaseUrl ?? "").replace(/\/$/, "");
-  const link = `${appBase}/enroll?token=${encodeURIComponent(params.token)}`;
+  // SÉCURITÉ : le lien d'invitation entre par le sas API `/api/v1/auth/enroll`,
+  // PAS par une route SPA. Le sas détruit toute session résiduelle puis force
+  // le flux OIDC (auth device sur l'IdP sentropic) — un lien d'invitation ne
+  // peut donc jamais réutiliser un cookie existant ni accorder un accès sans
+  // authentification réelle. Le `token` reste en query pour la traçabilité ;
+  // l'invitation est matchée par email côté callback (le token n'est pas le
+  // secret d'authentification).
+  const link = `${appBase}/api/v1/auth/enroll?token=${encodeURIComponent(params.token)}`;
 
   const subject = "Invitation à rejoindre Radar Immobilier";
   const bodyOpts: { link: string; invitedByName?: string } = { link };

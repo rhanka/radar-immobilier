@@ -446,8 +446,9 @@ describe("adminRoute — invitations", () => {
     expect(body.invitation.invitedBy).toBe(adminUser.sub);
     // Mode dégradé (pas de config SMTP) : sent=false, link fourni
     expect(body.email.sent).toBe(false);
-    // Le lien contient le token d'invitation
-    expect(body.email.link).toContain("/enroll?token=");
+    // Le lien d'invitation passe par le sas API qui force l'auth IdP (jamais
+    // une route SPA qui réutiliserait une session existante).
+    expect(body.email.link).toContain("/api/v1/auth/enroll?token=");
 
     // DB: une insertion dans account_invitations
     expect(db._inserts).toHaveLength(1);
