@@ -133,6 +133,7 @@
 <AppHeader
   brandName="Radar"
   productName="immobilier"
+  navAlign="center"
   {compact}
   {menuOpen}
   onMenuToggle={() => (menuOpen = !menuOpen)}
