@@ -1,15 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import {
-    Rocket,
     SlidersHorizontal,
     MonitorDot,
-    KanbanSquare,
-    Network,
     GitMerge,
-    Target,
     ShieldCheck,
-    Map,
     ChevronDown,
   } from "@lucide/svelte";
   import {
@@ -43,16 +38,11 @@
    * de la navigation top-level grand public : le menu Admin n'apparaît QUE si
    * `isAdmin`. Plus aucun doublon avec la nav principale.
    */
-  const adminItems: { value: DemoView; label: string; icon: typeof Rocket }[] = [
+  const adminItems: { value: DemoView; label: string; icon: typeof ShieldCheck }[] = [
     { value: "admin", label: "Admin", icon: ShieldCheck },
-    { value: "onboarding", label: "Onboarding", icon: Rocket },
-    { value: "ciblage", label: "Ciblage", icon: Target },
     { value: "grilles", label: "Grilles", icon: SlidersHorizontal },
     { value: "console", label: "Console sources", icon: MonitorDot },
     { value: "ontologie", label: "Ontologie", icon: GitMerge },
-    { value: "coordination", label: "Coordination", icon: Network },
-    { value: "backlog", label: "Backlog", icon: KanbanSquare },
-    { value: "geo", label: "Carte géo", icon: Map },
   ];
 
   /** Items DS du menu Admin (group + entrées actionnables). */
@@ -185,7 +175,7 @@
       <MenuPopover
         bind:open={adminOpen}
         trigger={adminTriggerEl}
-        placement="bottom-start"
+        placement="bottom-end"
         label="Menu Admin"
       >
         <Menu

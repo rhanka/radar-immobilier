@@ -5,3 +5,9 @@
 tmp
 .git
 *.log
+.worktrees
+.claude/worktrees
+**/.local
+.remote
+.h2a
+.playwright-mcp
