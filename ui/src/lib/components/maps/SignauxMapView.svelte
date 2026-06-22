@@ -55,6 +55,10 @@
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
   import {
+    buildGeoLevelNavigation,
+    type GeoLevel,
+  } from "$lib/maps/geo-level-navigation.js";
+  import {
     navigateToGeoRoute,
     type GeoRoute,
   } from "$lib/router/router.js";
@@ -648,6 +652,24 @@
   function handleGeoLevelClick(level: string): void {
     if (level === activeGeoLevel) return;
     if (level === "Province") {
+      // Dézoom → vue province (bug #4). On REMET L'URL au niveau `region` (en
+      // conservant le filtre subset actif) via la logique pure
+      // buildGeoLevelNavigation, pas seulement l'état local. Sans cette
+      // navigation, l'URL restait sur `city:slug` : au reload / à la navigation
+      // suivante, `applyGeoRoute` re-sélectionnait la ville → on restait
+      // « coincé » en focus ville. La navigation déclenche le bloc réactif
+      // `applyGeoRoute(region)` → `clearSelection()`, l'état région devient
+      // persistant et cohérent avec l'URL.
+      const nav = buildGeoLevelNavigation({
+        target: "Province",
+        current: activeGeoLevel as GeoLevel,
+        hasSelectedCity: !!selectedCity,
+        mode: geoRoute?.state.mode,
+        subsetKey: activeSubsetKey,
+      });
+      if (nav) navigateToGeoRoute(nav);
+      // Filet local immédiat (au cas où la route n'aurait pas changé d'identité,
+      // ex. déjà en region) : on garantit un état de base propre tout de suite.
       clearSelection();
     } else if (level === "Ville") {
       if (!selectedCity) return;

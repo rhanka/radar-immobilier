@@ -17,6 +17,9 @@ const harnessInput = qaHarness
       "rail-filter": fileURLToPath(
         new URL("./e2e-qa/harness/rail-filter.html", import.meta.url),
       ),
+      "geo-level": fileURLToPath(
+        new URL("./e2e-qa/harness/geo-level.html", import.meta.url),
+      ),
     }
   : undefined;
 
