@@ -369,6 +369,14 @@ export function authRoute(
     // navigateurs stricts) ; le moindre écart laisse la session vivante — d'où
     // « reconnect = compte précédent » et « encore logué après vidage du store
     // F12 » (le store F12 = localStorage, PAS ce cookie HttpOnly).
+    //
+    // NB — PAS de RP-initiated logout (OIDC end-session) : la discovery de l'IdP
+    // sentropic (auth.sent-tech.ca/.well-known/openid-configuration) N'EXPOSE
+    // PAS d'`end_session_endpoint`. On ne peut donc pas terminer la session SSO
+    // de l'IdP depuis radar ; on n'efface QUE le cookie radar. Le réemploi de la
+    // session SSO de l'IdP est neutralisé en aval, au moment de la reconnexion,
+    // via `prompt=select_account` sur l'authorize (cf. /login + auth-store.ts) —
+    // qui force le sélecteur de comptes et permet de changer d'identité.
     deleteCookie(c, SESSION_COOKIE_NAME, sessionCookieAttributes(auth));
     if (isBrowserNavigation(c.req.header("accept"))) {
       return c.redirect(auth.appBaseUrl || "/", 302);
