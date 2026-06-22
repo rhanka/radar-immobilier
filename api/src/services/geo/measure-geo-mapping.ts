@@ -45,6 +45,7 @@ import {
 import {
   matchZoneMultiLevel,
   isMatchResult,
+  pickLotForCity,
   type GeoMatchDb,
 } from "./match-refs.js";
 
@@ -159,6 +160,24 @@ function makeGeoMatchDb(drizzleDb: typeof db): GeoMatchDb {
         )
         .limit(1);
       return rows[0]?.canonicalId ?? null;
+    },
+
+    async findLotCandidates(noLotNorm) {
+      const rows = await drizzleDb
+        .select({
+          canonicalId: schema.lotVersions.canonicalId,
+          citySlug: schema.lotVersions.citySlug,
+        })
+        .from(schema.lotVersions)
+        .where(
+          and(
+            eq(schema.lotVersions.noLotNorm, noLotNorm),
+            isNull(schema.lotVersions.knownTo),
+          ),
+        )
+        .limit(50);
+      return (rows as Array<{ canonicalId: string; citySlug: string | null }>)
+        .filter((r): r is { canonicalId: string; citySlug: string } => typeof r.citySlug === "string");
     },
   };
 }
@@ -286,7 +305,9 @@ async function measureCity(citySlug: string): Promise<CityStats> {
     let nodeLotResolved = false;
     for (const lr of validLotRefs) {
       const noLotNorm = normalizeLotRef(lr.noLotNorm);
-      const canonId = await geoDb.findLotExact(noLotNorm);
+      // Préférence ville du signal + garde anti-ambiguïté cross-ville (précision géo).
+      const candidates = await geoDb.findLotCandidates(noLotNorm);
+      const canonId = pickLotForCity(candidates, citySlug);
 
       if (canonId) {
         nodeLotMappable = true;
@@ -301,7 +322,7 @@ async function measureCity(citySlug: string): Promise<CityStats> {
         if (exists.length > 0) correctResolutions++;
       } else {
         nodeLotMappable = true;
-        const r = "no_polygon";
+        const r = candidates.length === 0 ? "no_polygon" : "ambiguous";
         stats.unresolvedByReason[r] = (stats.unresolvedByReason[r] ?? 0) + 1;
       }
     }

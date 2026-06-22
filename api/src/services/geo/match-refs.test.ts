@@ -22,8 +22,58 @@ import {
   VARIANT_SCORE_FACTOR,
   EDIT_DIST_SCORE_FACTOR,
   CITY_FALLBACK_SCORE_FACTOR,
+  pickLotForCity,
   type GeoMatchDb,
 } from "./match-refs.js";
+
+// ─── pickLotForCity (précision lot cross-ville) ───────────────────────────────
+
+describe("pickLotForCity", () => {
+  it("aucun candidat → null", () => {
+    expect(pickLotForCity([], "saint-amable")).toBeNull();
+  });
+
+  it("préfère le lot de la ville du signal", () => {
+    const got = pickLotForCity(
+      [
+        { canonicalId: "ogc:lots:saint-mathieu-de-beloeil:6609778", citySlug: "saint-mathieu-de-beloeil" },
+        { canonicalId: "ogc:lots:saint-amable:6609778", citySlug: "saint-amable" },
+      ],
+      "saint-amable",
+    );
+    expect(got).toBe("ogc:lots:saint-amable:6609778");
+  });
+
+  it("cross-ville accepté si non-ambigu (une seule ville candidate)", () => {
+    const got = pickLotForCity(
+      [{ canonicalId: "ogc:lots:coaticook:2935698", citySlug: "coaticook" }],
+      "hatley-township-municipality",
+    );
+    expect(got).toBe("ogc:lots:coaticook:2935698");
+  });
+
+  it("cross-ville ambigu (plusieurs villes, aucune n'est celle du signal) → null", () => {
+    const got = pickLotForCity(
+      [
+        { canonicalId: "ogc:lots:saint-amable:5881201", citySlug: "saint-amable" },
+        { canonicalId: "ogc:lots:saint-mathieu-de-beloeil:5881201", citySlug: "saint-mathieu-de-beloeil" },
+      ],
+      "sainte-julie",
+    );
+    expect(got).toBeNull();
+  });
+
+  it("plusieurs versions dans la MÊME ville cible → retient cette ville (non ambigu)", () => {
+    const got = pickLotForCity(
+      [
+        { canonicalId: "ogc:lots:rosemere:6717635#a", citySlug: "rosemere" },
+        { canonicalId: "ogc:lots:rosemere:6717635#b", citySlug: "rosemere" },
+      ],
+      "rosemere",
+    );
+    expect(got).toBe("ogc:lots:rosemere:6717635#a");
+  });
+});
 
 // ─── levenshtein ──────────────────────────────────────────────────────────────
 
@@ -134,6 +184,7 @@ function makeDb(opts: {
     listZoneCodesForCity: async (_citySlug) => opts.listResult ?? [],
     findZoneAllCities: async (_codeNorm) => opts.allCitiesResult ?? [],
     findLotExact: async (_noLotNorm) => null,
+    findLotCandidates: async (_noLotNorm) => [],
   };
 }
 
