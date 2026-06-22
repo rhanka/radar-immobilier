@@ -152,7 +152,24 @@ export function authRoute(
       maxAge: 600,
     });
 
-    return c.redirect(buildAuthorizeUrl(auth, discovery, flow), 302);
+    // `prompt=login` forces the IdP to RE-AUTHENTICATE rather than reuse an
+    // active SSO session. This is whitelisted (only `login`/`select_account`)
+    // so a caller can't smuggle `prompt=none` to bypass the device challenge.
+    // The invitation sas (`/enroll`) and logout-then-reconnect both arrive here
+    // with `?prompt=login`, which is the fix for "reconnect lands on the
+    // previous user" and "invite link logs me in as the residual admin": even
+    // after radar's own cookie is gone, without this the IdP would silently
+    // re-issue a token for whoever is still signed in there.
+    const requestedPrompt = c.req.query("prompt");
+    const prompt =
+      requestedPrompt === "login" || requestedPrompt === "select_account"
+        ? requestedPrompt
+        : undefined;
+
+    return c.redirect(
+      buildAuthorizeUrl(auth, discovery, flow, prompt ? { prompt } : {}),
+      302,
+    );
   });
 
   // Entrée d'un lien d'invitation. SÉCURITÉ : un lien d'invitation ne doit
@@ -167,7 +184,12 @@ export function authRoute(
   app.get("/api/v1/auth/enroll", (c) => {
     if (!auth.enabled) return c.json({ error: "auth_disabled" }, 503);
     deleteCookie(c, SESSION_COOKIE_NAME, sessionCookieAttributes(auth));
-    return c.redirect("/api/v1/auth/login", 302);
+    // `prompt=login` is REQUIRED here: destroying radar's own cookie is not
+    // enough if the IdP still holds an SSO session (e.g. a residual admin).
+    // Forcing re-authentication guarantees the invitee proves their identity on
+    // the IdP (device challenge) instead of silently riding the last user's
+    // IdP session — the reported "invite link → logged in as admin" leak.
+    return c.redirect("/api/v1/auth/login?prompt=login", 302);
   });
 
   app.get("/api/v1/auth/oauth/callback", async (c) => {
@@ -355,6 +377,11 @@ export function authRoute(
   });
 
   app.get("/api/v1/auth/me", async (c) => {
+    // The session probe MUST never be cached: a cached `/me` would let the
+    // browser (HTTP cache / bfcache) or any intermediary replay a stale user
+    // identity after a logout/reconnect — the "reconnect lands on the previous
+    // user" symptom. `no-store` forbids any storage of the response.
+    c.header("Cache-Control", "no-store");
     if (!auth.enabled) {
       // Auth not configured -> open mode. Report so the SPA can adapt.
       return c.json({ authenticated: false, authDisabled: true });
