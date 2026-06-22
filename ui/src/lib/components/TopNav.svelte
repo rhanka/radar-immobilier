@@ -6,6 +6,9 @@
     GitMerge,
     ShieldCheck,
     ChevronDown,
+    Globe,
+    Sun,
+    Moon,
   } from "@lucide/svelte";
   import {
     AppHeader,
@@ -106,6 +109,28 @@
     onSelect(view);
     menuOpen = false;
   }
+
+  /**
+   * Contrôles utilitaires de la zone `actions` (parité avec le chrome DS / docs) :
+   * langue (globe + libellé court) et thème jour/nuit (soleil/lune). Rendus via la
+   * classe utilitaire PUBLIÉE `st-appHeader__control` (pill icône canonique du DS).
+   * État local (l'app n'expose pas encore de store i18n/thème) : le bouton thème
+   * reflète la préférence en posant `data-theme` sur <html>, le bouton langue
+   * bascule le libellé FR/EN.
+   */
+  let lang: "fr" | "en" = "fr";
+  let dark = false;
+
+  function toggleLang(): void {
+    lang = lang === "fr" ? "en" : "fr";
+  }
+
+  function toggleTheme(): void {
+    dark = !dark;
+    if (typeof document !== "undefined") {
+      document.documentElement.dataset.theme = dark ? "dark" : "light";
+    }
+  }
 </script>
 
 <!--
@@ -122,11 +147,14 @@
     bleue `Button variant="primary"` maison.
   - Burger + tiroir mobile : `compact`/`drawer` NATIFS d'AppHeader (plus
     d'OverflowMenu détourné en nav) → aucun débordement viewport mobile.
-  - Identité : `IdentityMenu` DS dans `actions` (API publiée 0.34.58 : avatar +
-    items Paramètres/Appareils + déconnexion). Le menu data-driven `items`
-    annoncé pour 0.34.59 n'est PAS encore publié sur npm.
+  - Actions : contrôles utilitaires canoniques DS (`st-appHeader__control`) —
+    langue (globe + libellé FR/EN) et thème jour/nuit (soleil/lune) — puis
+    `IdentityMenu` DS en mode `compact` (carré à initiales).
+  - Identité : `IdentityMenu` DS dans `actions` (API publiée 0.34.62 : avatar
+    compact + items Paramètres/Appareils + déconnexion).
 -->
 <AppHeader
+  brandMode="icon"
   brandName="Radar"
   productName="immobilier"
   logoSrc="/radar-logo.svg"
@@ -191,7 +219,37 @@
 
   {#snippet actions()}
     <!--
-      Menu identité — composant canonique DS `IdentityMenu`, câblé sur le store
+      Contrôles utilitaires canoniques DS (`st-appHeader__control`) : langue
+      (globe + libellé) puis thème jour/nuit (soleil/lune). Mêmes pills que le
+      chrome de la doc DS — aucun style maison.
+    -->
+    <button
+      type="button"
+      class="st-appHeader__control"
+      aria-label="Changer de langue"
+      onclick={toggleLang}
+    >
+      <Globe size={14} aria-hidden="true" />
+      {lang === "fr" ? "FR" : "EN"}
+      <ChevronDown size={12} aria-hidden="true" />
+    </button>
+    <button
+      type="button"
+      class="st-appHeader__control"
+      aria-label={dark ? "Activer le mode clair" : "Activer le mode sombre"}
+      aria-pressed={dark}
+      onclick={toggleTheme}
+    >
+      {#if dark}
+        <Moon size={16} aria-hidden="true" />
+      {:else}
+        <Sun size={16} aria-hidden="true" />
+      {/if}
+    </button>
+
+    <!--
+      Menu identité — composant canonique DS `IdentityMenu` en mode `compact`
+      (carré à initiales, gabarit `st-appHeader__control`), câblé sur le store
       auth réel. `onLogout` = le logout CORRIGÉ (fetch /logout + purge du
       disjoncteur anti-boucle + reload propre vers /).
     -->
@@ -199,6 +257,7 @@
       user={identityUser}
       isAuthenticated={!!(authState?.authenticated && authState.user)}
       onLogout={onLogout}
+      compact={true}
     />
   {/snippet}
 
@@ -244,6 +303,31 @@
       {/if}
 
       <div class="topnav-drawer-section">
+        <div class="topnav-drawer-controls">
+          <button
+            type="button"
+            class="st-appHeader__control"
+            aria-label="Changer de langue"
+            onclick={toggleLang}
+          >
+            <Globe size={14} aria-hidden="true" />
+            {lang === "fr" ? "FR" : "EN"}
+            <ChevronDown size={12} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="st-appHeader__control"
+            aria-label={dark ? "Activer le mode clair" : "Activer le mode sombre"}
+            aria-pressed={dark}
+            onclick={toggleTheme}
+          >
+            {#if dark}
+              <Moon size={16} aria-hidden="true" />
+            {:else}
+              <Sun size={16} aria-hidden="true" />
+            {/if}
+          </button>
+        </div>
         <IdentityMenu
           user={identityUser}
           isAuthenticated={!!(authState?.authenticated && authState.user)}
@@ -315,5 +399,12 @@
     border-bottom: 0;
     justify-content: flex-start;
     width: 100%;
+  }
+
+  /* Contrôles utilitaires du tiroir (langue + thème) : rangée alignée à gauche. */
+  .topnav-drawer-controls {
+    display: flex;
+    gap: var(--st-spacing-2, 0.5rem);
+    margin-bottom: var(--st-spacing-2, 0.5rem);
   }
 </style>
