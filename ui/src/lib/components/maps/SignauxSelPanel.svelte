@@ -100,10 +100,14 @@
   $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
 
   $: configuredZoneCount = zonesResponse?.zoneCount ?? zones.length;
+  /** Nombre de zones visibles selon le filtre actif. */
+  $: visibleZoneCount = filteredZoneCodeSet ? filteredZones.length : configuredZoneCount;
   $: zoneBadgeText =
     zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
       ? "zones non configurées"
-      : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
+      : filteredZoneCodeSet
+        ? `${visibleZoneCount}/${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`
+        : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
   $: visibleLots = filteredLots.slice(0, 80);
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
@@ -556,6 +560,8 @@
               ? "n/d"
               : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
               ? "fallback"
+              : filteredZoneCodeSet
+              ? `${visibleZoneCount}/${configuredZoneCount}`
               : configuredZoneCount}
           </span>
         </summary>
@@ -569,6 +575,8 @@
             <p class="sel-empty">{zonesUnavailableReason}</p>
           {:else if zones.length === 0}
             <p class="sel-empty">Aucune zone géométrique disponible.</p>
+          {:else if filteredZones.length === 0}
+            <p class="sel-empty">Aucune zone liée aux signaux du filtre actif.</p>
           {:else}
             {#if zonesResponse?.warnings.includes("lot-union-fallback-is-visual-only")}
               <p class="sel-warning">Fallback visuel : les zones sont dérivées de groupes de lots.</p>
