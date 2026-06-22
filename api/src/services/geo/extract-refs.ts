@@ -161,7 +161,36 @@ const LOT_COMPACT_SRC = String.raw`(?<![0-9])([0-9]{7,10})(?![0-9])`;
  * "486, chemin de la Grande-Côte". Capture le(s) numéro(s) puis le type de
  * voie + odonyme. La résolution spatiale est une dépendance geo (cf. levier D).
  */
-const ADDRESS_SRC = String.raw`\b(\d{1,5}(?:\s*(?:,|et|&)\s*\d{1,5})*)\s*,?\s*(rue|avenue|av\.?|boulevard|boul\.?|chemin|ch\.?|montée|montee|rang|route|place|impasse|allée|allee|côte|cote|croissant|terrasse)\s+((?:de\s+la\s+|de\s+l['’]|du\s+|des\s+|de\s+|le\s+|la\s+|les\s+|d['’])?[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’.\-]*(?:[ \-][A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’.\-]*){0,3})`;
+// Le radical de l'odonyme : une particule optionnelle de tête (du / de la / des…)
+// suivie d'un premier mot, éventuellement hyphené (Grande-Côte) ou suivi d'un
+// second mot. La regex est appliquée en case-insensitive ; les connecteurs
+// résiduels ("à Rosemère") sont retirés en post-traitement (trimStreetTail).
+const ADDRESS_SRC = String.raw`\b(\d{1,5}(?:\s*(?:,|et|&)\s*\d{1,5})*)\s*,?\s*(rue|avenue|av\.?|boulevard|boul\.?|chemin|ch\.?|montée|montee|rang|route|place|impasse|allée|allee|côte|cote|croissant|terrasse)\s+((?:de\s+la\s+|de\s+l['’]|du\s+|des\s+|de\s+|le\s+|la\s+|les\s+|d['’])?[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’.]*(?:[ \-][A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’.]*){0,3})`;
+
+/**
+ * Mots-outils (prépositions/connecteurs) qui ne peuvent pas apparaître au
+ * milieu d'un odonyme : dès qu'on en rencontre un APRÈS le premier mot du nom,
+ * on tronque (le reste appartient à une autre proposition, ex. "… à Rosemère").
+ */
+const STREET_TAIL_STOP = new Set([
+  "A", "AU", "AUX", "ET", "OU", "DANS", "POUR", "VERS", "PRES",
+  "SUR", "SOUS", "AFIN", "ENTRE", "SELON", "AVEC", "CHEZ",
+]);
+
+/**
+ * Tronque un odonyme normalisé au premier mot-outil rencontré après le 1er mot.
+ * Ex. "WILLIAM A ROSEMERE" → "WILLIAM" ; "GRANDE-COTE" inchangé.
+ */
+function trimStreetTail(name: string): string {
+  const words = name.split(" ");
+  const kept: string[] = [];
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i]!;
+    if (i > 0 && STREET_TAIL_STOP.has(w)) break;
+    kept.push(w);
+  }
+  return kept.join(" ");
+}
 
 // ─── Normalisation ────────────────────────────────────────────────────────────
 
@@ -412,7 +441,7 @@ export function extractAddresses(text: string): ExtractedAddress[] {
       .filter((n) => n.length > 0);
 
     const streetType = STREET_TYPE_CANON[typeRaw.toUpperCase()] ?? typeRaw.toUpperCase();
-    const streetName = normalizeStreetName(nameRaw);
+    const streetName = trimStreetTail(normalizeStreetName(nameRaw));
 
     if (civicNumbers.length === 0 || streetName.length === 0) continue;
 
