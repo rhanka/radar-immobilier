@@ -39,6 +39,7 @@ import {
 import {
   matchZoneMultiLevel,
   isMatchResult,
+  pickLotForCity,
   type GeoMatchDb,
 } from "./match-refs.js";
 
@@ -170,6 +171,10 @@ async function findZoneByCodeNorm(
  * Cherche une lot_version dont no_lot_norm matche le no_lot extrait.
  * Pas de filtre city_slug (cadastre province-entière).
  * Retourne le canonical_id du premier lot trouvé, ou null.
+ *
+ * @deprecated Conservé pour rétro-compat (measure-geo-mapping). La résolution
+ * Signal→Lot doit passer par `findLotCandidates` + `pickLotForCity` pour préférer
+ * la ville du signal (précision géo).
  */
 async function findLotByNoLotNorm(
   db: Database,
@@ -187,6 +192,37 @@ async function findLotByNoLotNorm(
     .limit(1);
 
   return rows[0]?.canonicalId ?? null;
+}
+
+/**
+ * Cherche TOUS les lots partageant un no_lot_norm, avec leur ville.
+ *
+ * Un même numéro de lot peut exister dans plusieurs municipalités (cadastre
+ * non-rénové). On retourne tous les candidats pour que `pickLotForCity` préfère
+ * la ville du signal et écarte les homonymies cross-ville ambiguës.
+ *
+ * limit(50) : cap raisonnable ; au-delà le no_lot est de toute façon trop ambigu.
+ */
+async function findLotCandidatesByNoLotNorm(
+  db: Database,
+  noLotNorm: string,
+): Promise<{ canonicalId: string; citySlug: string }[]> {
+  const rows = await db
+    .select({
+      canonicalId: lotVersions.canonicalId,
+      citySlug: lotVersions.citySlug,
+    })
+    .from(lotVersions)
+    .where(
+      and(
+        eq(lotVersions.noLotNorm, noLotNorm),
+        isNull(lotVersions.knownTo),
+      ),
+    )
+    .limit(50);
+
+  return (rows as Array<{ canonicalId: string; citySlug: string | null }>)
+    .filter((r): r is { canonicalId: string; citySlug: string } => typeof r.citySlug === "string");
 }
 
 // ─── Adaptateur GeoMatchDb (Drizzle) ─────────────────────────────────────────
@@ -263,6 +299,10 @@ function makeGeoMatchDb(db: Database): GeoMatchDb {
 
     async findLotExact(noLotNorm) {
       return findLotByNoLotNorm(db, noLotNorm);
+    },
+
+    async findLotCandidates(noLotNorm) {
+      return findLotCandidatesByNoLotNorm(db, noLotNorm);
     },
   };
 }
@@ -395,9 +435,17 @@ export async function resolveGeoRefs(
       }
 
       const noLotNorm = normalizeLotRef(lotRef.noLotNorm);
-      const canonicalId = await geoDb.findLotExact(noLotNorm);
+      // Préférence ville du signal + garde anti-ambiguïté cross-ville (précision géo) :
+      // un même no_lot peut exister dans plusieurs municipalités. On retient le lot
+      // de la ville du signal ; à défaut, un cross-ville UNIQUE ; sinon non-résolu.
+      const candidates = await geoDb.findLotCandidates(noLotNorm);
+      const canonicalId = pickLotForCity(candidates, input.citySlug);
 
       if (!canonicalId) {
+        // Distinguer l'absence de polygone (0 candidat) de l'ambiguïté cross-ville
+        // (plusieurs villes, aucune n'étant celle du signal) pour l'audit.
+        const raison: "no_polygon" | "ambiguous" =
+          candidates.length === 0 ? "no_polygon" : "ambiguous";
         await insertUnresolved(db, {
           nodeId: input.nodeId,
           nodeType: input.nodeType,
@@ -405,7 +453,7 @@ export async function resolveGeoRefs(
           extraitBrut: lotRef.rawText,
           patternType: "no_lot",
           scoreConfiance: lotRef.score,
-          raison: "no_polygon",
+          raison,
         });
         result.unresolvedLots++;
       } else {
