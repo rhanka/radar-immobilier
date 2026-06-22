@@ -66,6 +66,7 @@
     opacityForSelectionKey,
     withCityFallbackZone,
   } from "$lib/maps/signaux-map-geo.js";
+  import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
   import type { GeoJsonGeometry } from "$lib/maps/cadastre-geojson-source.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
@@ -179,14 +180,15 @@
       }
     }
     updateFillColors();
+    updateGeoLayers();
   }
 
-  function buildDisplayedLots(): LotFeatureCollection {
+  function buildDisplayedLots(nodes: GraphSignalNode[]): LotFeatureCollection {
     return lotsResponse
       ? decorateLotsWithSignalProjection(
           lotsResponse.featureCollection,
           zonesResponse?.featureCollection.features ?? [],
-          detailNodes,
+          nodes,
         )
       : EMPTY_LOTS;
   }
@@ -201,7 +203,11 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
-  $: displayedLots = buildDisplayedLots();
+  /** Nœuds filtrés selon la clé active — miroir côté carte de SignauxSelPanel. */
+  $: filteredDetailNodes = activeSubsetKey
+    ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
+    : detailNodes;
+  $: displayedLots = buildDisplayedLots(filteredDetailNodes);
 
   $: activeGeoLevel = hasSelectedKind("zone")
     ? "Zone"
@@ -327,7 +333,8 @@
     updateFillColors();
   }
 
-  $: if (mapReady) {
+  // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
+  $: if (mapReady && filteredDetailNodes !== undefined) {
     updateGeoLayers();
   }
 
@@ -845,7 +852,7 @@
       ? decorateLotsWithSignalProjection(
           lotsResponse.featureCollection,
           zones.features,
-          detailNodes,
+          filteredDetailNodes,
         )
       : EMPTY_LOTS;
 
