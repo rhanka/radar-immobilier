@@ -23,7 +23,7 @@ import pg from "pg";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import * as schema from "../../db/schema.js";
 import {
-  extractRefsFromNode,
+  extractRefsFromFields,
   normalizeZoneCode,
   normalizeLotRef,
   RESOLUTION_THRESHOLD,
@@ -41,11 +41,12 @@ const DATABASE_URL =
   "postgres://radar:219c0ff1da554bfd05e410b35f32a114319599423f6a96d8@127.0.0.1:5434/radar";
 
 const PILOT_CITIES = [
+  "saint-frederic",
+  "saint-amable",
+  "rosemere",
   "mont-tremblant",
   "rimouski",
   "sutton",
-  "rosemere",
-  "saint-amable",
   "cowansville",
   "levis",
   "mont-saint-hilaire",
@@ -178,13 +179,21 @@ async function measureCity(citySlug: string): Promise<CityStats> {
     description: string | null;
     zone_ref: string | null;
     no_lot: string | null;
+    citation: string | null;
+    excerpts: string[] | null;
   }>(sql`
     SELECT
       gn.id,
       gn.label,
       gn.props->'properties'->>'description' as description,
       gn.props->'properties'->>'zone_ref' as zone_ref,
-      gn.props->'properties'->>'no_lot' as no_lot
+      gn.props->'properties'->>'no_lot' as no_lot,
+      gn.props->'properties'->>'citation' as citation,
+      ARRAY(
+        SELECT r->>'excerpt'
+        FROM jsonb_array_elements(gn.props->'properties'->'refs') AS r
+        WHERE r->>'excerpt' IS NOT NULL
+      ) as excerpts
     FROM graph_nodes gn
     WHERE gn.city_slug = ${citySlug}
       AND gn.type IN ('Signal', 'DesignationEvent')
@@ -209,10 +218,14 @@ async function measureCity(citySlug: string): Promise<CityStats> {
   let correctResolutions = 0;
 
   for (const node of nodes.rows) {
-    const label = node.label ?? "";
-    const description = node.description ?? null;
-
-    const { zoneCodes, lotRefs } = extractRefsFromNode(label, description);
+    const { zoneCodes, lotRefs } = extractRefsFromFields({
+      label: node.label ?? "",
+      description: node.description,
+      zoneRef: node.zone_ref,
+      noLot: node.no_lot,
+      citation: node.citation,
+      excerpts: node.excerpts ?? undefined,
+    });
 
     const validZoneCodes = zoneCodes.filter((z) => z.score >= RESOLUTION_THRESHOLD);
     const validLotRefs = lotRefs.filter((l) => l.score >= RESOLUTION_THRESHOLD);

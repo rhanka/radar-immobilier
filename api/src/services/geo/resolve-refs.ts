@@ -31,7 +31,7 @@ import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { zoneVersions, lotVersions } from "../../db/schema.js";
 import {
-  extractRefsFromNode,
+  extractRefsFromFields,
   normalizeLotRef,
   normalizeZoneCode,
   RESOLUTION_THRESHOLD,
@@ -56,6 +56,14 @@ export interface GeoResolveInput {
   label: string;
   /** Champ props.properties.description (peut être absent). */
   description?: string | null;
+  /** Champ structuré props.properties.zone_ref (levier A direct). */
+  zoneRef?: string | null | undefined;
+  /** Champ structuré props.properties.no_lot (levier B direct). */
+  noLot?: string | null | undefined;
+  /** Citation/extrait du PV props.properties.citation (source texte riche). */
+  citation?: string | null | undefined;
+  /** Extraits additionnels (props.properties.excerpt, refs[].excerpt). */
+  excerpts?: Array<string | null | undefined> | undefined;
   /** Date du signal/événement pour as_of_date. */
   asOfDate?: string | null;
 }
@@ -283,8 +291,16 @@ export async function resolveGeoRefs(
     unresolvedLots: 0,
   };
 
-  // 1. Extraction
-  const { zoneCodes, lotRefs } = extractRefsFromNode(input.label, input.description);
+  // 1. Extraction multi-source (label + description + zone_ref/no_lot structurés
+  //    + citation/excerpts). Les champs structurés sont la référence la plus fiable.
+  const { zoneCodes, lotRefs } = extractRefsFromFields({
+    label: input.label,
+    description: input.description,
+    zoneRef: input.zoneRef,
+    noLot: input.noLot,
+    citation: input.citation,
+    excerpts: input.excerpts,
+  });
 
   // Adaptateur DB pour le matching multi-niveau
   const geoDb = makeGeoMatchDb(db);
