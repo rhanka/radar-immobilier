@@ -153,18 +153,16 @@ export function authRoute(
     });
 
     // `prompt=login` forces the IdP to RE-AUTHENTICATE rather than reuse an
-    // active SSO session. This is whitelisted (only `login`/`select_account`)
-    // so a caller can't smuggle `prompt=none` to bypass the device challenge.
-    // The invitation sas (`/enroll`) and logout-then-reconnect both arrive here
-    // with `?prompt=login`, which is the fix for "reconnect lands on the
-    // previous user" and "invite link logs me in as the residual admin": even
-    // after radar's own cookie is gone, without this the IdP would silently
-    // re-issue a token for whoever is still signed in there.
+    // active SSO session. Only `login` is whitelisted: the sentropic IdP's
+    // authorize-handler honours `login`/`none`/`consent` but IGNORES
+    // `select_account` (it has no account-chooser screen), and `none` must not
+    // be smuggled in to silently bypass the re-auth. So we forward `login` and
+    // drop anything else. The invitation sas (`/enroll`) and logout-then-
+    // reconnect both arrive here with `?prompt=login`: even after radar's own
+    // cookie is gone, without this the IdP would silently re-issue a token for
+    // whoever is still signed in there.
     const requestedPrompt = c.req.query("prompt");
-    const prompt =
-      requestedPrompt === "login" || requestedPrompt === "select_account"
-        ? requestedPrompt
-        : undefined;
+    const prompt = requestedPrompt === "login" ? "login" : undefined;
 
     return c.redirect(
       buildAuthorizeUrl(auth, discovery, flow, prompt ? { prompt } : {}),
@@ -370,13 +368,18 @@ export function authRoute(
     // « reconnect = compte précédent » et « encore logué après vidage du store
     // F12 » (le store F12 = localStorage, PAS ce cookie HttpOnly).
     //
-    // NB — PAS de RP-initiated logout (OIDC end-session) : la discovery de l'IdP
-    // sentropic (auth.sent-tech.ca/.well-known/openid-configuration) N'EXPOSE
-    // PAS d'`end_session_endpoint`. On ne peut donc pas terminer la session SSO
-    // de l'IdP depuis radar ; on n'efface QUE le cookie radar. Le réemploi de la
-    // session SSO de l'IdP est neutralisé en aval, au moment de la reconnexion,
-    // via `prompt=select_account` sur l'authorize (cf. /login + auth-store.ts) —
-    // qui force le sélecteur de comptes et permet de changer d'identité.
+    // NB — PAS de RP-initiated logout (OIDC end-session) : l'IdP sentropic
+    // N'EXPOSE PAS d'`end_session_endpoint` (ni annoncé dans la discovery, ni
+    // existant dans son code). Son seul logout est `DELETE /api/v1/auth/session`
+    // (révoque la session + efface le cookie SSO host-only `session`), une route
+    // fetch MÊME-ORIGINE non navigable cross-site : radar (immo.sent-tech.ca) ne
+    // peut donc PAS détruire la session SSO de l'IdP (auth.sent-tech.ca). On
+    // n'efface QUE le cookie radar. Le réemploi de la session SSO de l'IdP est
+    // atténué en aval, à la reconnexion, via `prompt=login` sur l'authorize (cf.
+    // /login + auth-store.ts) — la SEULE valeur `prompt` honorée par l'IdP, qui
+    // force le ré-affichage du login. LIMITE : sans destruction du cookie SSO,
+    // ça ne permet pas encore de CHANGER d'identité (l'IdP n'a pas de sélecteur
+    // de comptes) — un vrai switch dépend d'une évolution IdP (cf. rapport auth).
     deleteCookie(c, SESSION_COOKIE_NAME, sessionCookieAttributes(auth));
     if (isBrowserNavigation(c.req.header("accept"))) {
       return c.redirect(auth.appBaseUrl || "/", 302);
