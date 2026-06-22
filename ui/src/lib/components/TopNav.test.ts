@@ -14,6 +14,7 @@
 import { describe, it, expect, afterEach, beforeAll } from "vitest";
 import { render, cleanup } from "@testing-library/svelte";
 import TopNav from "./TopNav.svelte";
+import type { DemoView } from "$lib/demo/views";
 
 /**
  * jsdom ne fournit pas window.matchMedia — TopNav l'utilise dans onMount pour
@@ -39,7 +40,7 @@ afterEach(() => cleanup());
 
 const MAIN_VIEWS = ["Signaux", "Évaluation", "Sources"] as const;
 
-function renderNav(activeView = "signaux") {
+function renderNav(activeView: DemoView = "signaux") {
   return render(TopNav, {
     props: {
       activeView,
@@ -107,7 +108,10 @@ describe("TopNav — classe DS navLink et état actif", () => {
         activeView: "signaux",
         onSelect: () => {},
         authState: {
+          loading: false,
           authenticated: true,
+          authDisabled: false,
+          loginBlocked: false,
           user: { sub: "u1", name: "Admin", email: "a@b.com", isAdmin: true },
         },
       },
