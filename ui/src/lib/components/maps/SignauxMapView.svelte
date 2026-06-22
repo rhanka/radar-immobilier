@@ -124,23 +124,37 @@
 
   // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
   /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
-  let activeSubsetKey = "z"; // défaut : zonageOnly ON
+  const FILTER_DEFAULT = "z|m|p";
+  const FILTER_LS_KEY = "signaux-filter-subset";
+  let activeSubsetKey = FILTER_DEFAULT; // défaut : 3 filtres cochés
 
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
+   * Priorité : URL (filter.subset) > localStorage > défaut (z|m|p).
    * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
    * Ex : filters={"subset":["z","m"]} → subsetKey="z|m"
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
-    if (!route) return "z";
-    const values = route.state.filters["subset"] ?? [];
-    return values.length > 0 ? values.join("|") : "z";
+    if (route) {
+      const values = route.state.filters["subset"] ?? [];
+      if (values.length > 0) return values.join("|");
+    }
+    // Repli localStorage
+    if (typeof localStorage !== "undefined") {
+      const stored = localStorage.getItem(FILTER_LS_KEY);
+      if (stored && stored.trim().length > 0) return stored.trim();
+    }
+    return FILTER_DEFAULT;
   }
 
   function handleFilterChange(
     subsetKey: string,
   ): void {
     activeSubsetKey = subsetKey;
+    // Persiste le filtre dans localStorage
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(FILTER_LS_KEY, subsetKey);
+    }
     // Persiste le filtre dans l'URL (remplace sans ajouter à l'historique)
     const currentRoute = geoRoute;
     if (currentRoute) {
