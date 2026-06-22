@@ -9,13 +9,27 @@
  *   - précision = corrects / faits (échantillon vérifié = correspondance code DB exact)
  *
  * Méthodologie :
- *   - "mappable" = node dont le label+description contient au moins un code zone (score>=0.50)
- *                  OU un no_lot (score>=0.50) ET la ville a des zones/lots en DB
+ *   - "mappable" = node dont l'extraction multi-source (label + description +
+ *                  zone_ref/no_lot structurés + citation + refs[].excerpt) produit
+ *                  au moins un code zone OU un no_lot (score>=0.50), tentative de
+ *                  matching incluse — cf. extractRefsFromFields.
  *   - "résolu"   = au moins 1 arête geo_resolutions produite pour ce node
  *   - "correct"  = le canonical_id cible existe bien dans zone_versions/lot_versions
  *                  (vérification automatique — précision formelle, pas humaine)
  *
- * Loi 25 : aucune PII, uniquement codes cadastraux publics.
+ * Leviers de recall couverts ici (A/B/C) :
+ *   A - code de zone (structuré zone_ref + texte + flèche TR-185→CEN-183)
+ *   B - no_lot (structuré + listes "lots A,B,C" + texte)
+ *   C - fuzzy : variantes (tiret↔compact, padding, préfixe) + edit-distance + city-fallback
+ *
+ * Levier D (adresse → géocodage → jointure spatiale) — NON mesuré ici :
+ *   L'extraction d'adresses est faite côté immo (extractAddresses) ; la
+ *   RÉSOLUTION exige (1) une couche d'adresses géoréférencées (Adresses Québec /
+ *   terrAPI — acquisition déléguée à geo, cf. docs/spec/data-division-immo-geo.md)
+ *   puis (2) une jointure point-in-polygon sur les lots/zones (immo). Dépendance
+ *   geo bloquante pour la résolution, pas pour l'extraction.
+ *
+ * Loi 25 : aucune PII, uniquement codes cadastraux et adresses publics.
  */
 
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -23,7 +37,7 @@ import pg from "pg";
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import * as schema from "../../db/schema.js";
 import {
-  extractRefsFromNode,
+  extractRefsFromFields,
   normalizeZoneCode,
   normalizeLotRef,
   RESOLUTION_THRESHOLD,
@@ -41,11 +55,12 @@ const DATABASE_URL =
   "postgres://radar:219c0ff1da554bfd05e410b35f32a114319599423f6a96d8@127.0.0.1:5434/radar";
 
 const PILOT_CITIES = [
+  "saint-frederic",
+  "saint-amable",
+  "rosemere",
   "mont-tremblant",
   "rimouski",
   "sutton",
-  "rosemere",
-  "saint-amable",
   "cowansville",
   "levis",
   "mont-saint-hilaire",
@@ -178,13 +193,21 @@ async function measureCity(citySlug: string): Promise<CityStats> {
     description: string | null;
     zone_ref: string | null;
     no_lot: string | null;
+    citation: string | null;
+    excerpts: string[] | null;
   }>(sql`
     SELECT
       gn.id,
       gn.label,
       gn.props->'properties'->>'description' as description,
       gn.props->'properties'->>'zone_ref' as zone_ref,
-      gn.props->'properties'->>'no_lot' as no_lot
+      gn.props->'properties'->>'no_lot' as no_lot,
+      gn.props->'properties'->>'citation' as citation,
+      ARRAY(
+        SELECT r->>'excerpt'
+        FROM jsonb_array_elements(gn.props->'properties'->'refs') AS r
+        WHERE r->>'excerpt' IS NOT NULL
+      ) as excerpts
     FROM graph_nodes gn
     WHERE gn.city_slug = ${citySlug}
       AND gn.type IN ('Signal', 'DesignationEvent')
@@ -209,10 +232,14 @@ async function measureCity(citySlug: string): Promise<CityStats> {
   let correctResolutions = 0;
 
   for (const node of nodes.rows) {
-    const label = node.label ?? "";
-    const description = node.description ?? null;
-
-    const { zoneCodes, lotRefs } = extractRefsFromNode(label, description);
+    const { zoneCodes, lotRefs } = extractRefsFromFields({
+      label: node.label ?? "",
+      description: node.description,
+      zoneRef: node.zone_ref,
+      noLot: node.no_lot,
+      citation: node.citation,
+      excerpts: node.excerpts ?? undefined,
+    });
 
     const validZoneCodes = zoneCodes.filter((z) => z.score >= RESOLUTION_THRESHOLD);
     const validLotRefs = lotRefs.filter((l) => l.score >= RESOLUTION_THRESHOLD);

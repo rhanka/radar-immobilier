@@ -16,9 +16,12 @@ import { describe, expect, it } from "vitest";
 import {
   extractZoneCodes,
   extractLotRefs,
+  extractAddresses,
   extractRefsFromNode,
+  extractRefsFromFields,
   normalizeZoneCode,
   normalizeLotRef,
+  normalizeStreetName,
   SCORE,
   RESOLUTION_THRESHOLD,
 } from "./extract-refs.js";
@@ -261,5 +264,174 @@ describe("extractRefsFromNode", () => {
     const result = extractRefsFromNode(label);
     expect(result.zoneCodes.find((r) => r.codeNorm === "H-431")).toBeDefined();
     expect(result.lotRefs.find((r) => r.noLotNorm === "6057912")).toBeDefined();
+  });
+
+  it("expose un tableau adresses (vide si aucune)", () => {
+    const result = extractRefsFromNode("zone H-431 approuvée");
+    expect(result.addresses).toEqual([]);
+  });
+});
+
+// ─── Notation flèche de rezonage (levier A) ─────────────────────────────────────
+
+describe("extractZoneCodes — notation flèche", () => {
+  it("TR-185→CEN-183 (flèche unicode) → 2 codes", () => {
+    const results = extractZoneCodes("Rezonage TR-185→CEN-183 adopté");
+    const norms = results.map((r) => r.codeNorm);
+    expect(norms).toContain("TR-185");
+    expect(norms).toContain("CEN-183");
+  });
+
+  it("TR-185 -> CEN-183 (flèche ASCII avec espaces) → 2 codes", () => {
+    const results = extractZoneCodes("zone TR-185 -> CEN-183");
+    const norms = results.map((r) => r.codeNorm);
+    expect(norms).toContain("TR-185");
+    expect(norms).toContain("CEN-183");
+  });
+
+  it("'TR-185 vers CEN-183' (mot-clé) → 2 codes", () => {
+    const results = extractZoneCodes("reclassement TR-185 vers CEN-183");
+    const norms = results.map((r) => r.codeNorm);
+    expect(norms).toContain("TR-185");
+    expect(norms).toContain("CEN-183");
+  });
+
+  it("ne capture pas une flèche purement numérique (185→183)", () => {
+    const results = extractZoneCodes("page 185→183");
+    expect(results.find((r) => r.codeNorm === "185")).toBeUndefined();
+  });
+});
+
+// ─── Listes de lots (levier B) ──────────────────────────────────────────────────
+
+describe("extractLotRefs — liste de lots", () => {
+  it("'lots 6691146, 5978310, 5978320' → 3 lots (cas saint-amable)", () => {
+    const results = extractLotRefs("Acquisition lots 6691146, 5978310, 5978320 pour parc");
+    const norms = results.map((r) => r.noLotNorm);
+    expect(norms).toContain("6691146");
+    expect(norms).toContain("5978310");
+    expect(norms).toContain("5978320");
+  });
+
+  it("'lots 6 691 146 et 5 978 310' (espaces + 'et') → 2 lots", () => {
+    const results = extractLotRefs("lots 6 691 146 et 5 978 310 visés");
+    const norms = results.map((r) => r.noLotNorm);
+    expect(norms).toContain("6691146");
+    expect(norms).toContain("5978310");
+  });
+});
+
+// ─── normalizeStreetName + extractAddresses (levier D) ──────────────────────────
+
+describe("normalizeStreetName", () => {
+  it("majuscules simples : William → WILLIAM", () => {
+    expect(normalizeStreetName("William")).toBe("WILLIAM");
+  });
+  it("supprime la particule 'du' : du Locle → LOCLE", () => {
+    expect(normalizeStreetName("du Locle")).toBe("LOCLE");
+  });
+  it("supprime 'de la' + désaccentue : de la Grande-Côte → GRANDE-COTE", () => {
+    expect(normalizeStreetName("de la Grande-Côte")).toBe("GRANDE-COTE");
+  });
+  it("désaccentue Église → EGLISE", () => {
+    expect(normalizeStreetName("de l'Église")).toBe("EGLISE");
+  });
+});
+
+describe("extractAddresses", () => {
+  it("retourne [] sans adresse", () => {
+    expect(extractAddresses("Adoption du budget 2026")).toEqual([]);
+  });
+
+  it("'206 et 208, rue William' → 2 numéros + odonyme (cas rosemere)", () => {
+    const results = extractAddresses("construction 206 et 208, rue William à Rosemère");
+    expect(results).toHaveLength(1);
+    expect(results[0]!.civicNumbers).toEqual(["206", "208"]);
+    expect(results[0]!.streetType).toBe("RUE");
+    expect(results[0]!.streetName).toBe("WILLIAM");
+    expect(results[0]!.score).toBe(SCORE.ADDRESS_EXPLICIT);
+  });
+
+  it("'126, rue du Locle' → 1 numéro + odonyme normalisé (cas saint-amable)", () => {
+    const results = extractAddresses("LOT 6 514 813 — 126, RUE DU LOCLE");
+    const found = results.find((a) => a.streetName === "LOCLE");
+    expect(found).toBeDefined();
+    expect(found!.civicNumbers).toEqual(["126"]);
+  });
+
+  it("'486, chemin de la Grande-Côte' → type CHEMIN normalisé", () => {
+    const results = extractAddresses("dérogation 486, chemin de la Grande-Côte");
+    const found = results.find((a) => a.streetName === "GRANDE-COTE");
+    expect(found).toBeDefined();
+    expect(found!.streetType).toBe("CHEMIN");
+  });
+});
+
+// ─── extractRefsFromFields (leviers A/B multi-source) ───────────────────────────
+
+describe("extractRefsFromFields", () => {
+  it("zone_ref structuré seul (label sans code) → code score 0.95 (cas saint-amable H-59)", () => {
+    const result = extractRefsFromFields({
+      label: "Avis de motion règlement 712-47-2026",
+      zoneRef: "H-59",
+    });
+    const found = result.zoneCodes.find((z) => z.codeNorm === "H-59");
+    expect(found).toBeDefined();
+    expect(found!.score).toBe(SCORE.ZONE_STRUCTURED);
+    expect(found!.patternId).toBe("zone_structured");
+  });
+
+  it("no_lot structuré seul → lot score 0.90 (cas saint-amable 5975613)", () => {
+    const result = extractRefsFromFields({
+      label: "Dérogation mineure 2026-004-DM",
+      noLot: "5975613",
+    });
+    const found = result.lotRefs.find((l) => l.noLotNorm === "5975613");
+    expect(found).toBeDefined();
+    expect(found!.score).toBe(SCORE.LOT_STRUCTURED);
+    expect(found!.patternId).toBe("lot_structured");
+  });
+
+  it("no_lot structuré multiple 'A, B' → plusieurs lots", () => {
+    const result = extractRefsFromFields({ label: "x", noLot: "5975613, 5978320" });
+    const norms = result.lotRefs.map((l) => l.noLotNorm);
+    expect(norms).toContain("5975613");
+    expect(norms).toContain("5978320");
+  });
+
+  it("citation enrichit l'extraction quand le label ne porte rien", () => {
+    const result = extractRefsFromFields({
+      label: "Avis de motion",
+      citation:
+        "RÈGLEMENT MODIFIANT LE ZONAGE AFIN DE MODIFIER LES LIMITES DE LA ZONE H-59 ET DE SUPPRIMER LA ZONE RX-122",
+    });
+    const norms = result.zoneCodes.map((z) => z.codeNorm);
+    expect(norms).toContain("H-59");
+    expect(norms).toContain("RX-122");
+  });
+
+  it("excerpts (refs[].excerpt) sont scannés", () => {
+    const result = extractRefsFromFields({
+      label: "Conversion aéroport",
+      excerpts: ["la municipalité souhaite modifier la zone A16", null],
+    });
+    expect(result.zoneCodes.find((z) => z.codeNorm === "A16")).toBeDefined();
+  });
+
+  it("déduplication : zone_ref + même code en citation → score max (0.95)", () => {
+    const result = extractRefsFromFields({
+      label: "zone H-59",
+      zoneRef: "H-59",
+      citation: "modification zone H-59",
+    });
+    const found = result.zoneCodes.filter((z) => z.codeNorm === "H-59");
+    expect(found).toHaveLength(1);
+    expect(found[0]!.score).toBe(SCORE.ZONE_STRUCTURED);
+  });
+
+  it("anti-invention : aucun champ exploitable → vide", () => {
+    const result = extractRefsFromFields({ label: "Adoption du budget municipal 2026" });
+    expect(result.zoneCodes).toHaveLength(0);
+    expect(result.lotRefs).toHaveLength(0);
   });
 });
