@@ -138,6 +138,28 @@ smoke-ui-bundle: ## Fail if the production UI bundle embeds Svelte's server runt
 smoke-ui-image-bundle: ## Fail if the built UI image embeds Svelte's server runtime
 	docker run --rm radar-immobilier-ui:$(UI_VERSION) sh -c 'test -d /usr/share/nginx/html/assets || { echo "[smoke-ui-image-bundle] /usr/share/nginx/html/assets missing"; exit 1; }; if grep -R -E "lifecycle_function_unavailable|mount\(\.\.\.\) is not available on the server|src/internal/server/render-context|node:async_hooks" /usr/share/nginx/html/assets >/tmp/radar-ui-image-bundle-smoke.txt; then echo "[smoke-ui-image-bundle] server-only Svelte runtime found in browser image"; cat /tmp/radar-ui-image-bundle-smoke.txt; exit 1; fi; echo "[smoke-ui-image-bundle] browser image does not contain Svelte server runtime"'
 
+.PHONY: smoke-ui-mjs-mime
+smoke-ui-mjs-mime: ## Fail if nginx serves the pdf.js worker (.mjs) with a non-JS MIME
+	@# The pdf.js worker is bundled by Vite as `pdf.worker.min-*.mjs`. pdf.js loads
+	@# it via `new Worker(src, { type: "module" })`; browsers REJECT a module worker
+	@# whose Content-Type is not a JavaScript MIME (octet-stream) → loadError → the
+	@# "preuve non rendue" fallback. nginx 1.27's stock mime.types maps .js but NOT
+	@# .mjs, so the radar-ui nginx conf MUST map .mjs explicitly. Boot the built
+	@# image and assert the worker is served as a JavaScript MIME.
+	@set -e; \
+	  cid=$$(docker run -d -p 18093:8080 radar-immobilier-ui:$(UI_VERSION)); \
+	  trap "docker rm -f $$cid >/dev/null 2>&1" EXIT; \
+	  for i in $$(seq 1 30); do curl -sf -o /dev/null http://localhost:18093/ 2>/dev/null && break; sleep 0.3; done; \
+	  mjs=$$(curl -s http://localhost:18093/ | grep -oE '/assets/[A-Za-z0-9_.-]+\.mjs' | head -1); \
+	  if [ -z "$$mjs" ]; then mjs=$$(docker exec $$cid sh -c 'ls /usr/share/nginx/html/assets/*.mjs 2>/dev/null | head -1 | sed s#/usr/share/nginx/html##'); fi; \
+	  test -n "$$mjs" || { echo "[smoke-ui-mjs-mime] no .mjs asset found in image"; exit 1; }; \
+	  ct=$$(curl -s -o /dev/null -w '%{content_type}' "http://localhost:18093$$mjs"); \
+	  echo "[smoke-ui-mjs-mime] $$mjs -> $$ct"; \
+	  case "$$ct" in \
+	    text/javascript*|application/javascript*) echo "[smoke-ui-mjs-mime] OK (module worker loads)";; \
+	    *) echo "[smoke-ui-mjs-mime] BAD MIME for .mjs ($$ct): pdf.js module worker will be rejected by the browser"; exit 1;; \
+	  esac
+
 # ─────────────────────────────────────────────────────────────────────
 # Tests
 # ─────────────────────────────────────────────────────────────────────
