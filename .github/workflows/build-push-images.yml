@@ -1,0 +1,140 @@
+name: Build & push images
+
+# Builds the production api + ui images on GitHub-hosted runners and pushes them
+# to the Scaleway registry, so the local box (which hosts the k8s demo + agents)
+# no longer has to carry the heavy `docker build`. This is the CI counterpart of
+# the Makefile `build-images` / `push-images` targets (deploy/k8s/README.md step 2:
+# "CI does this on the live path").
+#
+# Deploy is intentionally NOT wired here: rolling the live cluster is a deliberate
+# human action with cluster creds (Makefile deploy-k8s is PREPARE-ONLY, and no
+# KUBECONFIG secret exists). After a successful push, deploy manually with the
+# pushed sha tag, e.g.:
+#   kubectl -n radar-immobilier set image deploy/radar-api  api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#   kubectl -n radar-immobilier set image deploy/radar-ui   ui=rg.fr-par.scw.cloud/radar-immobilier/radar-ui:<sha>
+#   kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui
+# (See the report / PR body for how to enable deploy-from-CI later.)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Extra image tag to push alongside the commit sha (optional; e.g. main-pdfgeo)"
+        required: false
+        type: string
+
+concurrency:
+  # Cancel superseded builds on the same ref (a newer push to main / re-dispatch
+  # makes the in-flight build redundant).
+  group: build-push-images-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: rg.fr-par.scw.cloud
+  IMAGE_PREFIX: rg.fr-par.scw.cloud/radar-immobilier
+
+jobs:
+  build-push:
+    name: Build & push ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: api
+            image: radar-api
+            dockerfile: api/Dockerfile
+          - service: ui
+            image: radar-ui
+            dockerfile: ui/Dockerfile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: vars
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Scaleway container registry convention: docker login with username
+      # `nologin` and the SCW *secret key* as the password (same secret the
+      # `scw registry login` CLI uses). Registry host is rg.fr-par.scw.cloud;
+      # the project namespace (/radar-immobilier) is part of the image path.
+      - name: Login to Scaleway registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+
+      - name: Image tags
+        id: tags
+        run: |
+          {
+            echo "tags<<EOF"
+            echo "${IMAGE_PREFIX}/${{ matrix.image }}:${{ steps.vars.outputs.sha }}"
+            echo "${IMAGE_PREFIX}/${{ matrix.image }}:latest"
+            if [ -n "${{ inputs.tag }}" ]; then
+              echo "${IMAGE_PREFIX}/${{ matrix.image }}:${{ inputs.tag }}"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # Build context is the repo ROOT (the SPA / API import the @radar/* workspace
+      # packages — see api/Dockerfile & ui/Dockerfile comments and docker-compose.e2e.yml).
+      #
+      # Cache: GitHub Actions cache (type=gha), scoped per service. Both Dockerfiles
+      # COPY the package manifests and run `npm install` BEFORE COPYing the sources,
+      # so the (heavy) install layer is cached and reused as long as the manifests are
+      # unchanged; only the source + `vite build` / esbuild bundle layer re-runs when
+      # the source changes. The cache key is bound to the layer contents (Dockerfile
+      # ordering), so a stale bundle is impossible BY CONSTRUCTION — no global --no-cache.
+      - name: Build & push ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          provenance: false
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,scope=${{ matrix.service }},mode=max
+
+      - name: Summary
+        run: |
+          {
+            echo "### Pushed \`${{ matrix.image }}\`"
+            echo ""
+            echo '```'
+            echo "${{ steps.tags.outputs.tags }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-hint:
+    name: Deploy hint (manual step)
+    needs: build-push
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
+    steps:
+      - name: Print manual deploy command
+        run: |
+          SHA="${GITHUB_SHA::7}"
+          {
+            echo "### Images pushed — deploy is a manual step"
+            echo ""
+            echo "No KUBECONFIG secret exists and the live cluster is not assumed reachable"
+            echo "from GitHub runners, so this workflow does not roll the cluster. Deploy with:"
+            echo ""
+            echo '```sh'
+            echo "kubectl -n radar-immobilier set image deploy/radar-api api=${IMAGE_PREFIX}/radar-api:${SHA}"
+            echo "kubectl -n radar-immobilier set image deploy/radar-ui  ui=${IMAGE_PREFIX}/radar-ui:${SHA}"
+            echo "kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
