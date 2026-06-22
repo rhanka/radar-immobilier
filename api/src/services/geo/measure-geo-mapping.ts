@@ -9,13 +9,27 @@
  *   - précision = corrects / faits (échantillon vérifié = correspondance code DB exact)
  *
  * Méthodologie :
- *   - "mappable" = node dont le label+description contient au moins un code zone (score>=0.50)
- *                  OU un no_lot (score>=0.50) ET la ville a des zones/lots en DB
+ *   - "mappable" = node dont l'extraction multi-source (label + description +
+ *                  zone_ref/no_lot structurés + citation + refs[].excerpt) produit
+ *                  au moins un code zone OU un no_lot (score>=0.50), tentative de
+ *                  matching incluse — cf. extractRefsFromFields.
  *   - "résolu"   = au moins 1 arête geo_resolutions produite pour ce node
  *   - "correct"  = le canonical_id cible existe bien dans zone_versions/lot_versions
  *                  (vérification automatique — précision formelle, pas humaine)
  *
- * Loi 25 : aucune PII, uniquement codes cadastraux publics.
+ * Leviers de recall couverts ici (A/B/C) :
+ *   A - code de zone (structuré zone_ref + texte + flèche TR-185→CEN-183)
+ *   B - no_lot (structuré + listes "lots A,B,C" + texte)
+ *   C - fuzzy : variantes (tiret↔compact, padding, préfixe) + edit-distance + city-fallback
+ *
+ * Levier D (adresse → géocodage → jointure spatiale) — NON mesuré ici :
+ *   L'extraction d'adresses est faite côté immo (extractAddresses) ; la
+ *   RÉSOLUTION exige (1) une couche d'adresses géoréférencées (Adresses Québec /
+ *   terrAPI — acquisition déléguée à geo, cf. docs/spec/data-division-immo-geo.md)
+ *   puis (2) une jointure point-in-polygon sur les lots/zones (immo). Dépendance
+ *   geo bloquante pour la résolution, pas pour l'extraction.
+ *
+ * Loi 25 : aucune PII, uniquement codes cadastraux et adresses publics.
  */
 
 import { drizzle } from "drizzle-orm/node-postgres";
