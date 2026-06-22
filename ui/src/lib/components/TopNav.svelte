@@ -10,7 +10,6 @@
     Target,
     ShieldCheck,
     Map,
-    Radio,
     ChevronDown,
   } from "@lucide/svelte";
   import {
@@ -123,35 +122,32 @@
   Header CANONIQUE DS : `AppHeader` (la primitive de chrome du design system).
   - Conteneur / barre / hauteur / bordure / fond : 100% AppHeader (zéro layout
     bespoke, plus de `Header` + flex maison).
+  - Marque : props `brandName`/`productName`/`logoSrc` → bloc CANONIQUE
+    `st-appHeader__brand` (carré 2rem + nom poids 760 + sous-titre poids 650),
+    rendu par le DS. Plus de snippet `logo` maison ni de CSS `.topnav-brand*`
+    dupliqué (gap-analysis §3.1/§5.2). Le glyphe Radar (Lucide « Radio ») vit
+    dans l'asset `logoSrc` (`/radar-logo.svg`), pas en CSS consommateur.
   - Nav desktop : liens via la classe utilitaire PUBLIÉE `st-appHeader__navLink`
     (pill soulignée + état actif `aria-current="page"` du DS), PAS une pilule
     bleue `Button variant="primary"` maison.
   - Burger + tiroir mobile : `compact`/`drawer` NATIFS d'AppHeader (plus
-    d'OverflowMenu détourné en nav).
-  - Identité : `IdentityMenu` DS dans `actions`.
+    d'OverflowMenu détourné en nav) → aucun débordement viewport mobile.
+  - Identité : `IdentityMenu` DS dans `actions` (API publiée 0.34.58 : avatar +
+    items Paramètres/Appareils + déconnexion). Le menu data-driven `items`
+    annoncé pour 0.34.59 n'est PAS encore publié sur npm.
 -->
 <AppHeader
   brandName="Radar"
   productName="immobilier"
+  logoSrc="/radar-logo.svg"
+  logoAlt="Radar"
+  brandLabel="Radar immobilier"
   navAlign="center"
   {compact}
   {menuOpen}
   onMenuToggle={() => (menuOpen = !menuOpen)}
   menuLabel="Ouvrir la navigation"
 >
-  {#snippet logo()}
-    <!-- Marque : carré coloré + glyphe, couleurs via tokens sémantiques DS. -->
-    <span class="topnav-brand">
-      <span class="topnav-logo" aria-hidden="true">
-        <Radio size={18} strokeWidth={2.25} />
-      </span>
-      <span class="topnav-brandcopy">
-        <span class="topnav-brandname">Radar</span>
-        <span class="topnav-brandproduct">immobilier</span>
-      </span>
-    </span>
-  {/snippet}
-
   {#snippet nav()}
     <!-- Vues principales : liens de nav DS (état actif = soulignement canonique). -->
     {#each mainItems as item}
@@ -269,43 +265,9 @@
 </AppHeader>
 
 <style>
-  /* ── Marque : aligne le bloc logo carré + nom + sous-titre sur le pattern DS ──
-     (couleurs exclusivement via tokens sémantiques, aucune valeur en dur). */
-  .topnav-brand {
-    align-items: center;
-    display: inline-flex;
-    gap: var(--st-spacing-3, 0.75rem);
-  }
-
-  .topnav-logo {
-    align-items: center;
-    background: var(--st-semantic-action-primary);
-    border-radius: var(--st-radius-md, 0.375rem);
-    color: var(--st-semantic-action-primaryText);
-    display: inline-flex;
-    flex: 0 0 auto;
-    height: 2rem;
-    justify-content: center;
-    width: 2rem;
-  }
-
-  .topnav-brandcopy {
-    display: grid;
-    gap: var(--st-spacing-px, 1px);
-    line-height: 1;
-  }
-
-  .topnav-brandname {
-    color: var(--st-semantic-text-primary);
-    font-size: 1rem;
-    font-weight: 760;
-  }
-
-  .topnav-brandproduct {
-    color: var(--st-semantic-text-secondary);
-    font-size: 0.75rem;
-    font-weight: 650;
-  }
+  /* Marque : 100% bloc canonique DS `st-appHeader__brand` via props
+     brandName/productName/logoSrc. Aucun CSS marque maison (supprimé :
+     .topnav-brand/.topnav-logo/.topnav-brandcopy/-name/-product). */
 
   /* ── Pont <button> ↔ classe de lien de nav DS ──────────────────────────────
      `st-appHeader__navLink` est la classe utilitaire PUBLIÉE par le DS pour les
