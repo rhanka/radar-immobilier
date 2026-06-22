@@ -1,6 +1,7 @@
 // Sentropic OIDC relying-party routes + session-protect middleware.
 //
 //   GET  /api/v1/auth/login            -> 302 to the IdP authorize endpoint
+//   GET  /api/v1/auth/enroll           -> drop any session, 302 to /login (IdP)
 //   GET  /api/v1/auth/oauth/callback   -> code->token, verify id_token, set session
 //   GET  /api/v1/auth/logout           -> clear session, 302 home
 //   GET  /api/v1/auth/me               -> { authenticated, user } (UI session probe)
@@ -64,6 +65,28 @@ function cookieSecure(auth: AuthConfig): boolean {
 }
 
 /**
+ * Identity attributes of the session cookie — the tuple the browser uses to
+ * MATCH a `Set-Cookie` against an existing cookie (name + path + domain, with
+ * secure/sameSite required to match by strict browsers). Login (set) and logout
+ * (delete) MUST share these EXACT attributes, otherwise the deletion `Set-Cookie`
+ * targets a different cookie and the browser keeps the live session — the root
+ * cause of "reconnect lands on the previous user" + "still logged in after
+ * clearing the F12 store" (the F12 store is localStorage, NOT this HttpOnly
+ * cookie). No `Domain` is set on purpose: the cookie stays host-only on the app
+ * origin (immo.sent-tech.ca), matching the deploy contract.
+ */
+function sessionCookieAttributes(
+  auth: AuthConfig,
+): { httpOnly: true; secure: boolean; sameSite: "Lax"; path: "/" } {
+  return {
+    httpOnly: true,
+    secure: cookieSecure(auth),
+    sameSite: "Lax",
+    path: "/",
+  };
+}
+
+/**
  * Build the OIDC RP routes. When `auth.enabled` is false the routes are still
  * mounted but answer 503 (so the wiring is greppable and the contract stable).
  */
@@ -103,10 +126,7 @@ export function authRoute(
       now: nowFn(),
     });
     setCookie(c, SESSION_COOKIE_NAME, sessionToken, {
-      httpOnly: true,
-      secure: cookieSecure(auth),
-      sameSite: "Lax",
-      path: "/",
+      ...sessionCookieAttributes(auth),
       maxAge: auth.sessionTtlSeconds,
     });
   }
@@ -133,6 +153,21 @@ export function authRoute(
     });
 
     return c.redirect(buildAuthorizeUrl(auth, discovery, flow), 302);
+  });
+
+  // Entrée d'un lien d'invitation. SÉCURITÉ : un lien d'invitation ne doit
+  // JAMAIS réutiliser une session existante ni en créer une sans passer par
+  // l'IdP. Le lien (mailer) pointe ici ; on DÉTRUIT toute session courante puis
+  // on renvoie vers `/login` (flux OIDC device sur l'IdP sentropic). Ainsi
+  // l'invité s'authentifie réellement (enrôlement device requis), et c'est le
+  // callback OIDC — pas le clic sur le lien — qui décide approved/pending via
+  // l'invitation. Sans ce sas, cliquer le lien chargeait directement le SPA qui
+  // s'appuyait sur le cookie résiduel (p.ex. une session admin), accordant un
+  // accès non authentifié (la faille rapportée).
+  app.get("/api/v1/auth/enroll", (c) => {
+    if (!auth.enabled) return c.json({ error: "auth_disabled" }, 503);
+    deleteCookie(c, SESSION_COOKIE_NAME, sessionCookieAttributes(auth));
+    return c.redirect("/api/v1/auth/login", 302);
   });
 
   app.get("/api/v1/auth/oauth/callback", async (c) => {
@@ -305,16 +340,14 @@ export function authRoute(
   });
 
   app.get("/api/v1/auth/logout", (c) => {
-    // Efface le cookie de session avec les MÊMES attributs que ceux posés par
-    // `mintSessionCookie` (path/secure/sameSite). Le navigateur identifie un
-    // cookie par name+domain+path : `path:"/"` suffit techniquement, mais on
-    // réaligne secure/sameSite par défense en profondeur (certains navigateurs
-    // stricts refusent un Set-Cookie de suppression aux attributs divergents).
-    deleteCookie(c, SESSION_COOKIE_NAME, {
-      path: "/",
-      secure: cookieSecure(auth),
-      sameSite: "Lax",
-    });
+    // Efface le cookie de session avec EXACTEMENT les mêmes attributs que ceux
+    // posés par `mintSessionCookie` (httpOnly/secure/sameSite/path). Le
+    // navigateur n'applique un `Set-Cookie` de suppression que s'il cible le
+    // même cookie (name + path + domain, secure/sameSite alignés sur les
+    // navigateurs stricts) ; le moindre écart laisse la session vivante — d'où
+    // « reconnect = compte précédent » et « encore logué après vidage du store
+    // F12 » (le store F12 = localStorage, PAS ce cookie HttpOnly).
+    deleteCookie(c, SESSION_COOKIE_NAME, sessionCookieAttributes(auth));
     if (isBrowserNavigation(c.req.header("accept"))) {
       return c.redirect(auth.appBaseUrl || "/", 302);
     }
@@ -368,6 +401,7 @@ export function authRoute(
 const PUBLIC_PREFIXES = [
   "/health",
   "/api/v1/auth/login",
+  "/api/v1/auth/enroll",
   "/api/v1/auth/oauth/callback",
   "/api/v1/auth/logout",
   "/api/v1/auth/me",
