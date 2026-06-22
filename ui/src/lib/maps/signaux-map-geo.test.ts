@@ -5,7 +5,11 @@ import type { GeoZoneFeature, GeoZonesResponse } from "./geo-zones-client.js";
 import type { LotFeatureCollection } from "./lots-client.js";
 import {
   decorateLotsWithSignalProjection,
+  extractSignalLotRefs,
+  extractSignalZoneRefs,
   fallbackZoneCode,
+  normalizeZoneCodeRef,
+  normalizeLotNoRef,
   opacityForSelectionKey,
   withCityFallbackZone,
 } from "./signaux-map-geo.js";
@@ -139,6 +143,75 @@ describe("opacityForSelectionKey", () => {
 
     expect(opacityForSelectionKey(state, selectedKey, 0.42)).toBe(FULL_SELECTION_OPACITY);
     expect(opacityForSelectionKey(state, otherKey, 0.42)).toBe(DIMMED_SELECTION_OPACITY);
+  });
+});
+
+describe("normalizeZoneCodeRef — miroir client de extract-refs serveur", () => {
+  it("passe en majuscules", () => {
+    expect(normalizeZoneCodeRef("h-431")).toBe("H-431");
+  });
+
+  it("supprime les espaces", () => {
+    expect(normalizeZoneCodeRef("H 431")).toBe("H431");
+    expect(normalizeZoneCodeRef("H34 -327")).toBe("H34-327");
+  });
+
+  it("remplace les tirets demi-cadratins par des tirets ASCII", () => {
+    expect(normalizeZoneCodeRef("H–431")).toBe("H-431");
+    expect(normalizeZoneCodeRef("H—431")).toBe("H-431");
+  });
+
+  it("supprime le suffixe secteur entre parenthèses", () => {
+    expect(normalizeZoneCodeRef("H34-327 (VLO)")).toBe("H34-327");
+    expect(normalizeZoneCodeRef("C-512 (SAT)")).toBe("C-512");
+  });
+
+  it("code déjà normalisé reste identique", () => {
+    expect(normalizeZoneCodeRef("H-431")).toBe("H-431");
+    expect(normalizeZoneCodeRef("RU1302")).toBe("RU1302");
+  });
+});
+
+describe("normalizeLotNoRef — suppression espaces/tirets", () => {
+  it("supprime les espaces dans un noLot cadastral", () => {
+    expect(normalizeLotNoRef("4 516 943")).toBe("4516943");
+  });
+
+  it("lot déjà compact reste identique", () => {
+    expect(normalizeLotNoRef("4516943")).toBe("4516943");
+  });
+});
+
+describe("extractSignalZoneRefs — normalisation à l'extraction", () => {
+  it("normalise les codes de zone extraits (casse, espaces, tirets unicode)", () => {
+    const node = signal("sig-1", { zone_ref: "h-431" });
+    expect(extractSignalZoneRefs(node)).toContain("H-431");
+  });
+
+  it("normalise le code avec suffixe secteur", () => {
+    const node = signal("sig-1", { zone_ref: "H34-327 (VLO)" });
+    expect(extractSignalZoneRefs(node)).toContain("H34-327");
+  });
+
+  it("déduplique les codes après normalisation (h-431 et H-431 → un seul H-431)", () => {
+    const node = signal("sig-1", { zone_ref: "h-431", zoneRef: "H-431" });
+    const refs = extractSignalZoneRefs(node);
+    expect(refs.filter((r) => r === "H-431").length).toBe(1);
+  });
+});
+
+describe("extractSignalLotRefs — double forme brute + compacte", () => {
+  it("retourne la forme brute ET la forme compacte pour couvrir les deux formats API", () => {
+    const node = signal("sig-1", { noLot: "4 516 944" });
+    const refs = extractSignalLotRefs(node);
+    expect(refs).toContain("4 516 944");
+    expect(refs).toContain("4516944");
+  });
+
+  it("le lot compact en entrée produit une seule valeur", () => {
+    const node = signal("sig-1", { noLot: "4516944" });
+    const refs = extractSignalLotRefs(node);
+    expect(refs).toContain("4516944");
   });
 });
 
