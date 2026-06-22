@@ -11,9 +11,15 @@ import { expect, test } from "@playwright/test";
  * (.pdf-canvas-scroll visible, pas le bloc d'erreur .pdf-missing).
  *
  * Ce test PROUVE que le câblage UI + worker pdf.js fonctionnent. Si l'API
- * renvoie bien le binaire, la preuve se rend. Le blocage prod résiduel
- * (« fallback Mont-Tremblant ») est donc côté DONNÉE (PDF absent du bucket)
- * ou réseau, pas côté worker/bundling — voir rapport.
+ * renvoie bien le binaire, la preuve se rend.
+ *
+ * Le blocage prod résiduel (« fallback Mont-Tremblant / St-Frédéric ») n'était
+ * PAS une donnée absente : les PV existent sur SCW radar-immobilier-docs-pocs
+ * (raw/proces-verbaux-<ville>/cas/<sha>.pdf) et la route /api/documents/raw les
+ * sert en 200 application/pdf. La cause : les nœuds graphify portent aussi un
+ * sourceUrl PUBLIC (PDF de la ville) que l'overlay préférait pour le RENDU →
+ * pdf.js tentait un fetch cross-origin bloqué par CORS. Le rendu passe désormais
+ * par la route interne same-origin (test « préfère la route interne » ci-dessous).
  */
 
 const pdfFixture = readFileSync(
@@ -59,6 +65,65 @@ test.describe("SignalPdfOverlay — rendu pdf.js (navigateur)", () => {
       .boundingBox();
     expect(canvasBox?.width ?? 0).toBeGreaterThan(0);
     expect(canvasBox?.height ?? 0).toBeGreaterThan(0);
+  });
+
+  test("préfère la route interne /api/documents/raw au sourceUrl public cross-origin (CORS)", async ({
+    page,
+  }) => {
+    // Régression du fallback prod : les nœuds graphify portent À LA FOIS un
+    // sourceUrl public (PDF de la ville, ex. https://vdmt.ca/…/PV.pdf) ET un
+    // rawRef. L'ancien code préférait sourceUrl → pdf.js tentait un fetch
+    // cross-origin que le navigateur BLOQUE (la ville ne renvoie aucun en-tête
+    // CORS) → « preuve non rendue ». Le rendu DOIT passer par la route interne
+    // same-origin /api/documents/raw, qui sert les octets depuis le bucket.
+    const crossOriginPdf =
+      "https://ville-externe.example.test/storage/PV-2026.pdf";
+
+    // Si pdf.js tentait le sourceUrl public, cette route serait sollicitée (et,
+    // en vrai navigateur, échouerait sur CORS). On la mappe pour DÉTECTER toute
+    // tentative — le test échoue alors via l'assert "0 hit" plus bas.
+    let crossOriginHits = 0;
+    await page.route(`${crossOriginPdf}*`, (route) => {
+      crossOriginHits += 1;
+      return route.fulfill({
+        status: 200,
+        contentType: "application/pdf",
+        body: pdfFixture,
+      });
+    });
+
+    const rawRequest = page.waitForRequest("**/api/documents/raw*", {
+      timeout: 15_000,
+    });
+    await page.route("**/api/documents/raw*", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/pdf",
+        body: pdfFixture,
+      }),
+    );
+
+    // BOTH props présents (cas prod) : sourceUrl public + rawRef interne.
+    await page.goto(
+      `${HARNESS}?rawRef=raw/qa/preuve.pdf&sourceUrl=${encodeURIComponent(
+        crossOriginPdf,
+      )}`,
+    );
+
+    // Le rendu pdf.js a sollicité la route INTERNE, pas l'URL publique.
+    const req = await rawRequest;
+    expect(decodeURIComponent(req.url())).toContain(
+      "/api/documents/raw?rawRef=raw/qa/preuve.pdf",
+    );
+
+    // Le canvas est peint (pipeline OK), aucun bloc d'erreur.
+    await expect(page.locator(".pdf-canvas-scroll")).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator(".pdf-missing")).toHaveCount(0);
+
+    // L'URL publique cross-origin n'a JAMAIS été chargée par le viewer.
+    expect(crossOriginHits).toBe(0);
   });
 
   test("affiche le bloc d'erreur si l'API ne fournit pas le PDF (404)", async ({
