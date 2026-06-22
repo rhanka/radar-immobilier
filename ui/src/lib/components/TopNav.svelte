@@ -152,6 +152,14 @@
     `IdentityMenu` DS en mode `compact` (carré à initiales).
   - Identité : `IdentityMenu` DS dans `actions` (API publiée 0.34.62 : avatar
     compact + items Paramètres/Appareils + déconnexion).
+  - navAlign="start" (DÉFAUT DS, requis) : `navAlign="center"` pose
+    `position:absolute; transform:translateX(-50%)` sur `.st-appHeader__nav`,
+    ce qui crée un CONTAINING BLOCK transformé. Le `MenuPopover` du menu Admin,
+    positionné en coordonnées DOCUMENT (`rect.right + scrollX`), se retrouvait
+    alors décalé de ~325px et collé au bord droit du viewport au lieu d'être
+    ancré sous le déclencheur. `start` (aucun transform sur le nav) rend
+    l'ancrage natif DS correct, sans une seule surcharge CSS. NE PAS remettre
+    `center` sans portail/teleport pour le popover (non exposé par le DS ici).
 -->
 <AppHeader
   brandMode="icon"
@@ -160,7 +168,7 @@
   logoSrc="/radar-logo.svg"
   logoAlt="Radar"
   brandLabel="Radar immobilier"
-  navAlign="center"
+  navAlign="start"
   {compact}
   {menuOpen}
   onMenuToggle={() => (menuOpen = !menuOpen)}
