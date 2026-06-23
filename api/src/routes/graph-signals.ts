@@ -46,6 +46,14 @@ export interface GraphSignalDocRef {
   fetchedAt?: string;
   publishedAt?: string;
   bbox?: unknown;
+  /**
+   * `true` quand le PV a été rattaché AUTOMATIQUEMENT par le filet Radar
+   * (`linkSource === "radar-auto-link"`), à distinguer d'une citation graphify
+   * vérifiée. Voir `linkSource` pour la provenance brute.
+   */
+  provisional?: boolean;
+  /** Provenance du lien documentaire (ex. `"radar-auto-link"`). */
+  linkSource?: string;
 }
 
 export interface GraphSignalCard {
@@ -77,6 +85,28 @@ function firstNumber(record: Record<string, unknown>, keys: readonly string[]): 
     if (typeof value === "string" && value.trim().length > 0) {
       const parsed = Number(value);
       if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Lit un drapeau booléen tolérant (true / "true" / 1) sur la 1re clé présente.
+ * `undefined` si aucune clé n'est explicitement positionnée (l'absence n'est
+ * PAS `false` : un PV non auto-lié laisse simplement le champ vide).
+ */
+function firstBoolean(
+  record: Record<string, unknown>,
+  keys: readonly string[],
+): boolean | undefined {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number" && Number.isFinite(value)) return value !== 0;
+    if (typeof value === "string") {
+      const trimmed = value.trim().toLowerCase();
+      if (trimmed === "true" || trimmed === "1") return true;
+      if (trimmed === "false" || trimmed === "0") return false;
     }
   }
   return undefined;
@@ -131,6 +161,11 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
   ]);
   const page = firstNumber(r, ["page", "pageNumber", "page_number"]);
   const bbox = r.bbox ?? r.boundingBox ?? r.bounding_box;
+  // Filet Radar : un PV auto-lié porte `provisional: true` + `linkSource`.
+  const linkSource = firstString(r, ["linkSource", "link_source"]);
+  const provisional =
+    firstBoolean(r, ["provisional", "is_provisional", "isProvisional", "auto", "autoLinked"]) ??
+    (linkSource === "radar-auto-link" ? true : undefined);
 
   if (!docSha && !excerpt && !sourceUrl && !rawRef && !documentUrl) return null;
 
@@ -142,6 +177,8 @@ function parseDocRefRecord(item: unknown, fallbackId: string): GraphSignalDocRef
     ...(rawRef !== null ? { rawRef } : {}),
     ...(documentUrl !== null ? { documentUrl } : {}),
     ...(bbox !== undefined ? { bbox } : {}),
+    ...(provisional !== undefined ? { provisional } : {}),
+    ...(linkSource !== null ? { linkSource } : {}),
   };
 }
 
@@ -300,6 +337,10 @@ export interface SignalEvidenceRef {
   rawObjectKey: string | null;
   page: number | null;
   bbox: [number, number, number, number] | null;
+  /** PV rattaché automatiquement par le filet Radar (à confirmer). */
+  provisional: boolean;
+  /** Provenance brute du lien (ex. `"radar-auto-link"`), `null` si inconnue. */
+  linkSource: string | null;
 }
 
 export interface SignalEvidence {
@@ -314,6 +355,15 @@ export interface SignalEvidence {
   documentDate: string | null;
   page: number | null;
   bbox: [number, number, number, number] | null;
+  /**
+   * `true` quand la preuve provient d'un rattachement AUTOMATIQUE du filet
+   * Radar (`linkSource === "radar-auto-link"`) plutôt que d'une citation
+   * graphify vérifiée. Pilote l'affichage du badge « source liée
+   * automatiquement » côté UI.
+   */
+  provisional: boolean;
+  /** Provenance brute du lien documentaire, `null` si inconnue. */
+  linkSource: string | null;
   refs: SignalEvidenceRef[];
   completeness: EvidenceCompleteness;
 }
@@ -391,6 +441,8 @@ function extractEvidenceRefs(props: Record<string, unknown>): SignalEvidenceRef[
           rawObjectKey: null,
           page: null,
           bbox: null,
+          provisional: false,
+          linkSource: null,
         });
       }
       continue;
@@ -407,6 +459,16 @@ function extractEvidenceRefs(props: Record<string, unknown>): SignalEvidenceRef[
     ]);
     const excerpt = firstEvidenceString([item.excerpt, item.citation]);
     const citation = firstEvidenceString([item.citation, excerpt]);
+    // Filet Radar : un PV auto-lié porte `provisional: true` + `linkSource`.
+    const linkSource = firstEvidenceString([item.linkSource, item.link_source]);
+    const provisional =
+      firstBoolean(item, [
+        "provisional",
+        "is_provisional",
+        "isProvisional",
+        "auto",
+        "autoLinked",
+      ]) ?? linkSource === "radar-auto-link";
     const ref: SignalEvidenceRef = {
       docSha: firstEvidenceString([item.docSha, item.sha256]),
       citation,
@@ -417,6 +479,8 @@ function extractEvidenceRefs(props: Record<string, unknown>): SignalEvidenceRef[
       rawObjectKey,
       page: firstEvidenceNumber([item.page]),
       bbox: firstEvidenceBbox([item.bbox]),
+      provisional,
+      linkSource,
     };
 
     if (
@@ -428,7 +492,9 @@ function extractEvidenceRefs(props: Record<string, unknown>): SignalEvidenceRef[
       ref.rawRef ||
       ref.rawObjectKey ||
       ref.page !== null ||
-      ref.bbox
+      ref.bbox ||
+      ref.provisional ||
+      ref.linkSource
     ) {
       refs.push(ref);
     }
@@ -550,6 +616,16 @@ function buildEvidence(input: {
     ]),
     page: firstEvidenceNumber([firstRef?.page, props.page, properties.page]),
     bbox: firstEvidenceBbox([firstRef?.bbox, props.bbox, properties.bbox]),
+    // Filet Radar : auto-liaison provisoire (node-level OU top-level OU nested).
+    linkSource:
+      firstRef?.linkSource ??
+      firstEvidenceString([props.linkSource, properties.linkSource, props.link_source, properties.link_source]),
+    provisional:
+      (firstRef?.provisional ?? false) ||
+      (firstBoolean(props, ["provisional", "is_provisional", "isProvisional"]) ?? false) ||
+      (firstBoolean(properties, ["provisional", "is_provisional", "isProvisional"]) ?? false) ||
+      firstEvidenceString([props.linkSource, properties.linkSource, props.link_source, properties.link_source]) ===
+        "radar-auto-link",
     refs,
   };
 
@@ -570,6 +646,8 @@ function evidenceRefFromDocRef(ref: GraphSignalDocRef): SignalEvidenceRef {
     rawObjectKey: null,
     page: ref.page ?? null,
     bbox: readBbox(ref.bbox),
+    provisional: ref.provisional ?? ref.linkSource === "radar-auto-link",
+    linkSource: ref.linkSource ?? null,
   };
 }
 
@@ -590,6 +668,11 @@ function mergeEvidenceWithDocRefs(
     documentDate: evidence.documentDate ?? firstRef?.publishedAt ?? firstPublishedAt,
     page: evidence.page ?? firstRef?.page ?? null,
     bbox: evidence.bbox ?? readBbox(firstRef?.bbox),
+    // Filet Radar : on retient l'auto-liaison si elle est présente côté node-level
+    // (evidence) OU sur le docRef enrichi (firstRef).
+    provisional:
+      evidence.provisional || (firstRef?.provisional ?? firstRef?.linkSource === "radar-auto-link"),
+    linkSource: evidence.linkSource ?? firstRef?.linkSource ?? null,
     refs,
   };
   return {
