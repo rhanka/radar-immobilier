@@ -7,7 +7,7 @@
    */
   import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { FileText, RefreshCw, X } from "@lucide/svelte";
+  import { FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -645,18 +645,28 @@
                         {/if}
 
                         <div class="source-action-row">
-                          <button
-                            type="button"
-                            class="doc-ref-button"
-                            disabled={!hasSourceEvidence(evidence)}
-                            on:click={() => openEvidence(node)}
-                            title={hasSourceEvidence(evidence)
-                              ? "Ouvrir la preuve dans un overlay"
-                              : "Aucune source documentaire dans le DTO"}
-                          >
-                            <FileText class="h-3.5 w-3.5" aria-hidden="true" />
-                            Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
-                          </button>
+                          {#if hasSourceEvidence(evidence)}
+                            <button
+                              type="button"
+                              class="doc-ref-button"
+                              on:click={() => openEvidence(node)}
+                              title="Ouvrir la preuve dans un overlay"
+                            >
+                              <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                              Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
+                            </button>
+                          {:else}
+                            <!-- #94 — affichage HONNÊTE : pas de bouton mort muet (rond
+                                 barré silencieux). Aucune source documentaire n'est
+                                 reliée à ce signal → on dit pourquoi, explicitement. -->
+                            <div class="evidence-unavailable" role="note">
+                              <FileX class="h-3.5 w-3.5" aria-hidden="true" />
+                              <span>
+                                Preuve non disponible — aucune source documentaire
+                                reliée à ce signal pour l'instant.
+                              </span>
+                            </div>
+                          {/if}
                         </div>
                       </div>
                     </div>
@@ -1228,6 +1238,26 @@
     background: #f8fafc;
     color: var(--st-semantic-text-muted, #94a3b8);
     cursor: not-allowed;
+  }
+
+  /* #94 — état HONNÊTE « preuve non disponible » : remplace le bouton mort muet.
+     Encart neutre explicite (pas un bouton désactivé), avec icône fichier barré. */
+  .evidence-unavailable {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    border: 1px dashed var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    color: var(--st-semantic-text-muted, #64748b);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .evidence-unavailable :global(svg) {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
   }
 
   .doc-refs-list {
