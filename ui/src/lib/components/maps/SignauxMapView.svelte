@@ -35,6 +35,10 @@
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
+    buildOverlaySignals,
+    type OverlaySignal,
+  } from "$lib/signals/pdf-overlay-signals.js";
+  import {
     fetchGeoZones,
     type GeoZoneFeature,
     type GeoZonesResponse,
@@ -115,7 +119,9 @@
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
   let activeDocument: SignalDocRef | null = null;
-  let activeEvidence: { title: string; evidence: SignalEvidence } | null = null;
+  let activeEvidence:
+    | { title: string; evidence: SignalEvidence; signals: OverlaySignal[] }
+    | null = null;
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
   // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
@@ -721,8 +727,20 @@
     activeDocument = null;
   }
 
-  function openEvidence(payload: { title: string; evidence: SignalEvidence }): void {
-    activeEvidence = payload;
+  function openEvidence(payload: {
+    title: string;
+    evidence: SignalEvidence;
+    node: GraphSignalNode;
+  }): void {
+    // LOT 2 (#84) : surligne TOUS les signaux du même PV (même rawRef). On
+    // groupe ici car `detailNodes` (tous les signaux de la ville) vit dans
+    // cette vue ; aucune route API à modifier.
+    const signals = buildOverlaySignals(
+      payload.node,
+      detailNodes,
+      payload.evidence.rawRef,
+    );
+    activeEvidence = { title: payload.title, evidence: payload.evidence, signals };
     // Ferme le doc overlay si ouvert pour éviter deux overlays superposés
     activeDocument = null;
   }
@@ -1173,6 +1191,7 @@
         page={activeEvidence.evidence.page}
         bbox={activeEvidence.evidence.bbox}
         excerpt={activeEvidence.evidence.excerpt ?? activeEvidence.evidence.citation}
+        signals={activeEvidence.signals}
         onClose={closeEvidence}
       />
     {/if}
