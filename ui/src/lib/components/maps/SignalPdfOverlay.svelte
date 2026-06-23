@@ -97,8 +97,20 @@
     Plus,
     X,
   } from "@lucide/svelte";
+  import {
+    ChevronsLeft,
+    ChevronsRight,
+    EyeOff,
+    Eye,
+    Search,
+  } from "@lucide/svelte";
   import { findCitationInPage } from "$lib/signals/pdf-citation-match.js";
-  import type { OverlaySignal } from "$lib/signals/pdf-overlay-signals.js";
+  import type {
+    OverlaySignal,
+    OverlayNavSignal,
+    HoverCardData,
+  } from "$lib/signals/pdf-overlay-signals.js";
+  import { distinctDocCount } from "$lib/signals/pdf-overlay-signals.js";
 
   export let title = "Document source";
   export let sourceUrl: string | null = null;
@@ -121,7 +133,214 @@
    * /`bbox`) — voir `effectiveSignals`.
    */
   export let signals: OverlaySignal[] = [];
+  /**
+   * #91 — NAVIGATION PAR SIGNAL. `navSignals` est la liste FILTRÉE COMPLÈTE du
+   * parent (ordre du pane droit), potentiellement MULTI-DOC : c'est la source de
+   * vérité de la nav (◀ Signal ▶, compteur i/N, menu « aller à »). Le viewer NE
+   * refiltre PAS ; il consomme cette liste + `navIndex` (rang courant, 0-based)
+   * et notifie le parent via `onNavigate`. Vide ⇒ rangée nav masquée (LOT 1/2).
+   */
+  export let navSignals: OverlayNavSignal[] = [];
+  /** Rang courant (0-based) dans `navSignals`. -1 si non résolu. */
+  export let navIndex = -1;
+  /**
+   * Demande de navigation : le viewer délègue au PARENT le recalcul de
+   * l'évidence/des signaux/du document (le parent réassigne rawRef/page → le
+   * bloc réactif déclenche loadPdf si c'est un autre doc, #89/#90). Idempotent.
+   */
+  export let onNavigate: (index: number) => void = () => {};
   export let onClose: () => void = () => {};
+
+  // ── Navigation par signal (#91) ─────────────────────────────────────────────
+  // Index courant borné à la liste. Si le parent fournit -1 (pas encore résolu),
+  // on retombe sur le signal marqué `current` dans `signals` (rétrocompat) ou 0.
+  $: navCount = navSignals.length;
+  $: effectiveNavIndex = (() => {
+    if (navCount === 0) return -1;
+    if (navIndex >= 0 && navIndex < navCount) return navIndex;
+    // Repli : retrouve le navSignal correspondant au signal courant surligné.
+    const currentSig = signals.find((s) => s.current);
+    if (currentSig) {
+      const i = navSignals.findIndex((n) => n.id === currentSig.id);
+      if (i >= 0) return i;
+    }
+    return 0;
+  })();
+  $: hasNav = navCount > 0 && effectiveNavIndex >= 0;
+  $: currentNavSignal =
+    hasNav ? (navSignals[effectiveNavIndex] ?? null) : null;
+  // Indicateur PDF i/N : visible seulement si la nav couvre ≥ 2 documents.
+  $: navDocCount = distinctDocCount(navSignals);
+  $: isMultiDoc = navDocCount >= 2;
+  // Rang du DOCUMENT courant (1-based) parmi les docs distincts, dans l'ordre.
+  $: navDocOrder = (() => {
+    const order: string[] = [];
+    for (const n of navSignals) if (n.docId && !order.includes(n.docId)) order.push(n.docId);
+    return order;
+  })();
+  $: currentDocRank =
+    currentNavSignal && currentNavSignal.docId
+      ? navDocOrder.indexOf(currentNavSignal.docId) + 1
+      : 0;
+
+  /** Va au signal de rang `i` (borné, pas de wrap circulaire). */
+  function goToNavSignal(i: number): void {
+    if (i < 0 || i >= navCount) return;
+    if (i === effectiveNavIndex) return;
+    closeNavMenu();
+    onNavigate(i);
+  }
+  function navPrevSignal(): void {
+    if (effectiveNavIndex > 0) goToNavSignal(effectiveNavIndex - 1);
+  }
+  function navNextSignal(): void {
+    if (effectiveNavIndex >= 0 && effectiveNavIndex < navCount - 1)
+      goToNavSignal(effectiveNavIndex + 1);
+  }
+
+  // ── Menu déroulant « aller à » (#91 scalabilité) ────────────────────────────
+  let navMenuOpen = false;
+  let navMenuQuery = "";
+  function toggleNavMenu(): void {
+    navMenuOpen = !navMenuOpen;
+    if (navMenuOpen) navMenuQuery = "";
+  }
+  function closeNavMenu(): void {
+    navMenuOpen = false;
+  }
+  /** Items du menu, groupés par document, filtrés par la recherche texte. */
+  $: navMenuGroups = (() => {
+    const q = navMenuQuery.trim().toLowerCase();
+    const groups = new Map<
+      string,
+      { docId: string; docTitle: string; items: { index: number; sig: OverlayNavSignal }[] }
+    >();
+    navSignals.forEach((sig, index) => {
+      if (
+        q.length > 0 &&
+        !`${sig.label} ${sig.docTitle} ${sig.page ?? ""}`.toLowerCase().includes(q)
+      )
+        return;
+      const docId = sig.docId || "(sans document)";
+      if (!groups.has(docId))
+        groups.set(docId, { docId, docTitle: sig.docTitle || "Document", items: [] });
+      groups.get(docId)!.items.push({ index, sig });
+    });
+    return Array.from(groups.values());
+  })();
+
+  // ── Toggle « masquer hors-filtre » (#4) ─────────────────────────────────────
+  // Par défaut les hors-filtre du doc sont VISIBLES (slate désaturé). Le toggle
+  // les masque. L'état est relayé au surlignage via `signals` côté parent ; ici
+  // on expose juste l'intention pour que le viewer la propage au rendu.
+  export let hideOutOfFilter = false;
+  export let onToggleHideOutOfFilter: (hide: boolean) => void = () => {};
+  function toggleHideOutOfFilter(): void {
+    hideOutOfFilter = !hideOutOfFilter;
+    onToggleHideOutOfFilter(hideOutOfFilter);
+  }
+
+  // ── #86 — Cross-highlight signal ↔ fiche (PAS de flèche SVG) ─────────────────
+  /**
+   * Sens VIEWER → FICHE : hover/focus d'un badge/surlignage PDF notifie le parent
+   * (qui sélectionne + scrolle la fiche correspondante à droite).
+   */
+  export let onSignalHover: (id: string | null) => void = () => {};
+  /**
+   * Sens FICHE → VIEWER : id du signal survolé à DROITE. Le surlignage
+   * correspondant dans le PDF PULSE (outline animé) ; s'il est hors page
+   * courante, un mini-toast d'ancrage « Signal X — page N ↘ » s'affiche (clic =
+   * y aller). null = aucun hover externe.
+   */
+  export let hoveredSignalId: string | null = null;
+
+  // Applique/retire la classe de pulse sur les marques du signal survolé à
+  // droite, et calcule le toast d'ancrage si le signal est sur une autre page.
+  $: applyExternalHover(hoveredSignalId);
+  $: externalHoverToast = (() => {
+    if (!hoveredSignalId) return null;
+    const sig = effectiveSignals.find((s) => s.id === hoveredSignalId);
+    if (!sig || sig.page === null || sig.page === currentPage) return null;
+    return { label: sig.label || "Signal", page: sig.page, color: sig.color };
+  })();
+
+  function applyExternalHover(id: string | null): void {
+    if (typeof document === "undefined" || !textLayerEl) return;
+    // Retire toute pulsation précédente puis (ré)applique sur le signal courant.
+    for (const el of textLayerEl.querySelectorAll(".pdf-hl--pulse")) {
+      el.classList.remove("pdf-hl--pulse");
+    }
+    if (!id) return;
+    for (const el of textLayerEl.querySelectorAll<HTMLElement>(
+      `.pdf-hl[data-signal-id="${cssAttrEscape(id)}"]`,
+    )) {
+      el.classList.add("pdf-hl--pulse");
+    }
+  }
+
+  /** Va à la page d'un signal (clic sur le toast d'ancrage #86). */
+  function goToSignalPage(targetPage: number): void {
+    if (pdfDoc && targetPage >= 1 && targetPage <= numPages) {
+      void renderPage(targetPage);
+    }
+  }
+
+  /** Échappe une valeur pour un sélecteur d'attribut CSS (id arbitraire). */
+  function cssAttrEscape(value: string): string {
+    return value.replace(/["\\]/g, "\\$&");
+  }
+
+  // ── #4 — Hover-card des signaux HORS-FILTRE ─────────────────────────────────
+  /**
+   * Résout les données de la hover-card pour un signal (le parent projette le
+   * nœud, le viewer ne connaît pas la forme du DTO). null ⇒ pas de carte.
+   */
+  export let resolveHoverCard: (id: string) => HoverCardData | null = () => null;
+  /** Actions de la hover-card (footer). */
+  export let onMakeCurrent: (id: string) => void = () => {};
+  export let onAddToFilter: (id: string) => void = () => {};
+
+  let hoverCard: HoverCardData | null = null;
+  let hoverCardAnchor: { x: number; y: number; flipUp: boolean } | null = null;
+  let hoverCardHovered = false; // souris sur la carte elle-même (safe-triangle)
+  let hoverCardCloseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Ouvre la hover-card pour un signal hors-filtre, ancrée sur son badge. */
+  function openHoverCard(id: string, badge: HTMLElement): void {
+    const data = resolveHoverCard(id);
+    if (!data) return;
+    if (hoverCardCloseTimer) {
+      clearTimeout(hoverCardCloseTimer);
+      hoverCardCloseTimer = null;
+    }
+    const rect = badge.getBoundingClientRect();
+    const overlayRect =
+      viewerScrollEl?.closest(".pdf-overlay")?.getBoundingClientRect() ?? null;
+    const baseX = overlayRect ? rect.left - overlayRect.left : rect.left;
+    const baseY = overlayRect ? rect.top - overlayRect.top : rect.top;
+    // Flip vertical auto : si trop bas dans l'overlay, ouvre vers le HAUT.
+    const flipUp = overlayRect ? baseY > overlayRect.height * 0.55 : false;
+    hoverCard = data;
+    hoverCardAnchor = { x: baseX, y: baseY, flipUp };
+  }
+
+  /** Programme la fermeture (laisse le temps de glisser vers la carte). */
+  function scheduleHoverCardClose(): void {
+    if (hoverCardCloseTimer) clearTimeout(hoverCardCloseTimer);
+    hoverCardCloseTimer = setTimeout(() => {
+      if (!hoverCardHovered) {
+        hoverCard = null;
+        hoverCardAnchor = null;
+      }
+    }, 160);
+  }
+  function closeHoverCardNow(): void {
+    if (hoverCardCloseTimer) clearTimeout(hoverCardCloseTimer);
+    hoverCardCloseTimer = null;
+    hoverCardHovered = false;
+    hoverCard = null;
+    hoverCardAnchor = null;
+  }
 
   // Liste effective des signaux à surligner. Avec `signals` non vide on est en
   // mode multi (LOT 2) ; sinon on synthétise un signal unique « courant » à
@@ -328,11 +547,14 @@
         drawBboxHighlight(layer, viewport.width, viewport.height);
       } else {
         // Pré-charge la couche texte UNE fois pour tous les signaux de la page.
+        // #4 — quand `hideOutOfFilter` est actif, on EXCLUT les signaux
+        // hors-filtre du rendu (ils ne sont ni surlignés ni badgés).
         const targets = effectiveSignals.filter(
           (s) =>
             currentPage === (s.page ?? currentPage) &&
             s.excerpt !== null &&
-            s.excerpt.trim().length > 0,
+            s.excerpt.trim().length > 0 &&
+            (!hideOutOfFilter || s.inFilter !== false),
         );
         if (targets.length > 0) {
           const content = await pdfPage.getTextContent();
@@ -356,6 +578,8 @@
           queueScrollToHighlight(layer, drewCurrent ? "current" : null);
         }
       }
+      // #86 — réapplique la pulsation du hover externe après recréation des marques.
+      applyExternalHover(hoveredSignalId);
     }
   }
 
@@ -394,12 +618,25 @@
     queueScrollToHighlight(layer, null);
   }
 
+  // Teinte SLATE désaturée pour les signaux HORS-FILTRE (#4) : présents mais
+  // visuellement en retrait, distincts des dans-filtre colorés.
+  const OUT_OF_FILTER_COLOR = "#64748b"; // slate-500
+
   /** Teinte un surlignage : couleur pleine pour le courant, estompé sinon. */
   function applyHighlightColor(
     mark: HTMLElement,
     color: string,
     current: boolean,
+    inFilter = true,
   ): void {
+    if (!inFilter) {
+      // HORS-FILTRE : slate désaturé + bordure TIRETÉE (le viewer signale qu'il
+      // est sur le PV mais pas dans le filtre actif). Pas de mise en avant.
+      mark.style.setProperty("--hl-color", OUT_OF_FILTER_COLOR);
+      mark.style.background = withAlpha(OUT_OF_FILTER_COLOR, 0.16);
+      mark.style.outline = `1px dashed ${withAlpha(OUT_OF_FILTER_COLOR, 0.7)}`;
+      return;
+    }
     // Le courant garde un fond plus opaque ; les autres signaux sont estompés
     // (alpha plus faible) mais restent identifiables par teinte + badge (#84).
     mark.style.setProperty("--hl-color", color);
@@ -478,14 +715,19 @@
       // `viewport.width/(viewport.width||1)` valait 1 (no-op) : supprimé.
       const fontHeight = (Math.hypot(b!, d!) || item.height || 10) * renderScale;
       const width = Math.max(item.width * renderScale, 4);
+      const inFilter = signal.inFilter !== false;
       const mark = document.createElement("div");
-      mark.className = signal.current ? "pdf-hl pdf-hl--current" : "pdf-hl";
+      mark.className = signal.current
+        ? "pdf-hl pdf-hl--current"
+        : inFilter
+          ? "pdf-hl"
+          : "pdf-hl pdf-hl--out";
       mark.dataset.signalId = signal.id;
       mark.style.left = `${tx}px`;
       mark.style.top = `${ty - fontHeight}px`;
       mark.style.width = `${width}px`;
       mark.style.height = `${fontHeight * 1.15}px`;
-      applyHighlightColor(mark, signal.color, signal.current);
+      applyHighlightColor(mark, signal.color, signal.current, inFilter);
       layer.appendChild(mark);
       if (!firstMark) firstMark = mark;
       drewOne = true;
@@ -495,13 +737,50 @@
     // Affiché seulement quand un libellé est fourni (mode multi #84) — en mode
     // mono LOT 1 le libellé est vide, on n'ajoute pas de badge (non-régression).
     if (drewOne && firstMark && signal.label.trim().length > 0) {
+      const inFilter = signal.inFilter !== false;
       const badge = document.createElement("span");
-      badge.className = signal.current ? "pdf-hl-badge pdf-hl-badge--current" : "pdf-hl-badge";
+      // #4 — badge PLEIN pour les dans-filtre (couleur signal), badge CREUX
+      // (contour, fond transparent) pour les hors-filtre slate.
+      badge.className = signal.current
+        ? "pdf-hl-badge pdf-hl-badge--current"
+        : inFilter
+          ? "pdf-hl-badge"
+          : "pdf-hl-badge pdf-hl-badge--out";
       badge.dataset.signalId = signal.id;
       badge.textContent = signal.label;
       badge.style.left = firstMark.style.left;
       badge.style.top = firstMark.style.top;
-      badge.style.background = withAlpha(signal.color, signal.current ? 0.95 : 0.8);
+      // Hover/focus du badge. pointer-events réactivé (la couche est inerte).
+      badge.style.pointerEvents = "auto";
+      badge.tabIndex = 0;
+      badge.setAttribute("role", "button");
+      badge.setAttribute("aria-label", `Signal ${signal.label}`);
+      const sigId = signal.id;
+      const enter = (ev: Event) => {
+        if (inFilter) {
+          // #86 — dans-filtre : notifie le parent (fiche droite se sélectionne).
+          onSignalHover(sigId);
+        } else {
+          // #4 — hors-filtre : ouvre la hover-card miroir, ancrée sur le badge.
+          openHoverCard(sigId, ev.currentTarget as HTMLElement);
+        }
+      };
+      const leave = () => {
+        if (inFilter) onSignalHover(null);
+        else scheduleHoverCardClose();
+      };
+      badge.addEventListener("mouseenter", enter);
+      badge.addEventListener("mouseleave", leave);
+      badge.addEventListener("focus", enter);
+      badge.addEventListener("blur", leave);
+      if (inFilter) {
+        badge.style.background = withAlpha(signal.color, signal.current ? 0.95 : 0.8);
+      } else {
+        // Badge creux : fond clair, texte + contour slate.
+        badge.style.background = "rgba(255, 255, 255, 0.9)";
+        badge.style.color = OUT_OF_FILTER_COLOR;
+        badge.style.border = `1px dashed ${OUT_OF_FILTER_COLOR}`;
+      }
       layer.appendChild(badge);
     }
 
@@ -564,8 +843,23 @@
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    if (event.key === "Escape") onClose();
-    else if (event.key === "ArrowLeft") goPrev();
+    if (event.key === "Escape") {
+      if (hoverCard) {
+        closeHoverCardNow();
+        return;
+      }
+      if (navMenuOpen) {
+        closeNavMenu();
+        return;
+      }
+      onClose();
+    } else if (hasNav && (event.key === "PageUp" || event.altKey && event.key === "ArrowLeft")) {
+      event.preventDefault();
+      navPrevSignal();
+    } else if (hasNav && (event.key === "PageDown" || event.altKey && event.key === "ArrowRight")) {
+      event.preventDefault();
+      navNextSignal();
+    } else if (event.key === "ArrowLeft") goPrev();
     else if (event.key === "ArrowRight") goNext();
     else if ((event.ctrlKey || event.metaKey) && (event.key === "+" || event.key === "=")) {
       event.preventDefault();
@@ -579,6 +873,43 @@
   // Charge / recharge le PDF quand la source résolue change.
   $: if (isPdfSource && resolvedSourceUrl && resolvedSourceUrl !== loadedUrl) {
     void loadPdf(resolvedSourceUrl);
+  }
+
+  // #4 — re-rend la page courante quand le toggle « masquer hors-filtre »
+  // bascule (les surlignages hors-filtre apparaissent/disparaissent). On ne
+  // touche pas au scroll : même page, même échelle, juste le set de marques.
+  let lastHideOutOfFilter = hideOutOfFilter;
+  $: if (hideOutOfFilter !== lastHideOutOfFilter) {
+    lastHideOutOfFilter = hideOutOfFilter;
+    if (pdfDoc) void renderPage(currentPage);
+  }
+
+  // #91 — navigation INTRA-PDF pilotée par le parent : quand la prop `page`
+  // change SANS recharger le doc (même rawRef, autre signal sur une autre page),
+  // on va à cette page + recentre le surlignage du nouveau signal courant. Sans
+  // ça le compteur avancerait mais le PDF resterait figé. On ignore le 1er
+  // passage (déjà géré par loadPdf) et les changements vers la page déjà rendue.
+  let lastPageProp = page;
+  $: if (page !== lastPageProp) {
+    lastPageProp = page;
+    if (pdfDoc && page && page >= 1 && page <= numPages && page !== currentPage) {
+      void renderPage(page);
+    }
+  }
+
+  // #91 — navigation vers un signal sur la MÊME page (ex. A16 → Rf51 page 2) :
+  // `page` ne change pas, mais le signal COURANT (signals[].current) change. On
+  // re-rend pour mettre à jour la mise en avant + recentrer sur le nouveau
+  // courant. Clé = id du signal marqué courant.
+  $: currentSignalId = effectiveSignals.find((s) => s.current)?.id ?? null;
+  let lastCurrentSignalId = currentSignalId;
+  $: if (currentSignalId !== lastCurrentSignalId) {
+    lastCurrentSignalId = currentSignalId;
+    // Ne re-rend que si la page ne va PAS changer (sinon double rendu) : le bloc
+    // `page` ci-dessus s'en charge quand la page diffère.
+    if (pdfDoc && (!page || page === currentPage)) {
+      void renderPage(currentPage);
+    }
   }
 
   onDestroy(() => {
@@ -600,6 +931,7 @@
 <div class="pdf-overlay-backdrop" aria-hidden="true" on:click={onClose}></div>
 <div class="pdf-overlay" aria-label="Preuve documentaire" role="dialog" aria-modal="true">
   <header class="pdf-overlay-head">
+    <div class="pdf-overlay-head-row">
     <div class="pdf-overlay-title-block">
       <span class="pdf-overlay-kicker">Preuve</span>
       <h2 class="pdf-overlay-title">{title}</h2>
@@ -681,6 +1013,134 @@
         <X class="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
+    </div>
+
+    {#if hasNav && currentNavSignal}
+      <!-- #91 — RANGÉE NAV : nav-signal (primaire) + compteur i/N + pastille,
+           nav-page (secondaire), indicateur PDF i/N (multi-doc), toggle
+           hors-filtre. Reflet lecture-seule du filtre actif (navSignals). -->
+      <div class="pdf-overlay-nav" role="group" aria-label="Navigation par signal">
+        <div class="pdf-nav-signal">
+          <button
+            type="button"
+            class="pdf-pager-btn pdf-nav-signal-btn"
+            on:click={navPrevSignal}
+            disabled={effectiveNavIndex <= 0}
+            aria-label="Signal précédent"
+            title="Signal précédent (Page préc.)"
+          >
+            <ChevronsLeft class="h-4 w-4" aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
+            class="pdf-nav-counter"
+            on:click={toggleNavMenu}
+            aria-haspopup="listbox"
+            aria-expanded={navMenuOpen}
+            aria-label="Aller à un signal — actuellement {effectiveNavIndex + 1} sur {navCount}"
+            title="Cliquer pour aller à un signal"
+          >
+            <span
+              class="pdf-nav-dot"
+              style="background:{currentNavSignal.color}"
+              aria-hidden="true"
+            ></span>
+            <span class="pdf-nav-counter-label">Signal</span>
+            <strong class="pdf-nav-counter-pos">
+              {effectiveNavIndex + 1}<span class="pdf-nav-counter-sep">/</span>{navCount}
+            </strong>
+          </button>
+
+          <button
+            type="button"
+            class="pdf-pager-btn pdf-nav-signal-btn"
+            on:click={navNextSignal}
+            disabled={effectiveNavIndex >= navCount - 1}
+            aria-label="Signal suivant"
+            title="Signal suivant (Page suiv.)"
+          >
+            <ChevronsRight class="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+
+        {#if isMultiDoc}
+          <span class="pdf-nav-pdfcount" title="Document {currentDocRank} sur {navDocCount}">
+            PDF {currentDocRank}/{navDocCount}
+          </span>
+        {/if}
+
+        <span class="pdf-nav-spacer"></span>
+
+        <button
+          type="button"
+          class="pdf-nav-toggle"
+          class:pdf-nav-toggle--on={hideOutOfFilter}
+          on:click={toggleHideOutOfFilter}
+          aria-pressed={hideOutOfFilter}
+          title={hideOutOfFilter
+            ? "Afficher les signaux hors-filtre du document"
+            : "Masquer les signaux hors-filtre du document"}
+        >
+          {#if hideOutOfFilter}
+            <EyeOff class="h-3.5 w-3.5" aria-hidden="true" />
+          {:else}
+            <Eye class="h-3.5 w-3.5" aria-hidden="true" />
+          {/if}
+          <span>Hors-filtre</span>
+        </button>
+      </div>
+
+      {#if navMenuOpen}
+        <!-- Menu déroulant « aller à » : scrollable, GROUPÉ PAR DOCUMENT,
+             recherche texte. Item = pastille + label + page. Courant surligné. -->
+        <div class="pdf-nav-menu" role="listbox" aria-label="Liste des signaux filtrés">
+          <div class="pdf-nav-menu-search">
+            <Search class="h-3.5 w-3.5" aria-hidden="true" />
+            <input
+              type="text"
+              class="pdf-nav-menu-input"
+              placeholder="Rechercher un signal…"
+              bind:value={navMenuQuery}
+              aria-label="Rechercher un signal dans la liste"
+            />
+          </div>
+          <div class="pdf-nav-menu-scroll">
+            {#each navMenuGroups as group (group.docId)}
+              <div class="pdf-nav-menu-group">
+                {#if isMultiDoc}
+                  <div class="pdf-nav-menu-group-head" title={group.docTitle}>
+                    {group.docTitle}
+                  </div>
+                {/if}
+                {#each group.items as { index, sig } (sig.id)}
+                  <button
+                    type="button"
+                    class="pdf-nav-menu-item"
+                    class:pdf-nav-menu-item--current={index === effectiveNavIndex}
+                    role="option"
+                    aria-selected={index === effectiveNavIndex}
+                    on:click={() => goToNavSignal(index)}
+                  >
+                    <span
+                      class="pdf-nav-dot"
+                      style="background:{sig.color}"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="pdf-nav-menu-item-label">{sig.label}</span>
+                    {#if sig.page !== null}
+                      <span class="pdf-nav-menu-item-page">p.{sig.page}</span>
+                    {/if}
+                  </button>
+                {/each}
+              </div>
+            {:else}
+              <p class="pdf-nav-menu-empty">Aucun signal ne correspond.</p>
+            {/each}
+          </div>
+        </div>
+      {/if}
+    {/if}
   </header>
 
   <div class="pdf-overlay-body">
@@ -705,6 +1165,24 @@
             <span>Chargement de la preuve…</span>
           </div>
         {/if}
+
+        {#if externalHoverToast}
+          <!-- #86 — mini-toast d'ancrage : le signal survolé à droite est sur
+               une AUTRE page. Clic = y aller. Pas de flèche SVG : un libellé. -->
+          <button
+            type="button"
+            class="pdf-anchor-toast"
+            on:click={() => goToSignalPage(externalHoverToast.page)}
+            title="Aller à la page {externalHoverToast.page}"
+          >
+            <span
+              class="pdf-nav-dot"
+              style="background:{externalHoverToast.color}"
+              aria-hidden="true"
+            ></span>
+            <span>{externalHoverToast.label} — page {externalHoverToast.page} ↘</span>
+          </button>
+        {/if}
       </div>
     {:else if resolvedSourceUrl && !loadError}
       <!-- Source non-PDF (HTML…) : aperçu direct en iframe, sans éditeur. -->
@@ -727,6 +1205,97 @@
       </div>
     {/if}
   </div>
+
+  {#if hoverCard && hoverCardAnchor}
+    <!-- #4 — HOVER-CARD non-modale d'un signal HORS-FILTRE : miroir de la fiche
+         droite. role=dialog, Escape ferme, accessible clavier, flip auto. -->
+    <div
+      class="pdf-hovercard"
+      class:pdf-hovercard--up={hoverCardAnchor.flipUp}
+      role="dialog"
+      tabindex="-1"
+      aria-label="Aperçu du signal {hoverCard.title}"
+      style="left:{hoverCardAnchor.x}px; {hoverCardAnchor.flipUp
+        ? `bottom:calc(100% - ${hoverCardAnchor.y}px + 0.4rem)`
+        : `top:calc(${hoverCardAnchor.y}px + 1.2rem)`}"
+      on:mouseenter={() => {
+        hoverCardHovered = true;
+      }}
+      on:mouseleave={() => {
+        hoverCardHovered = false;
+        scheduleHoverCardClose();
+      }}
+    >
+      <div class="pdf-hovercard-head">
+        <span
+          class="pdf-nav-dot"
+          style="background:{hoverCard.color}"
+          aria-hidden="true"
+        ></span>
+        <strong class="pdf-hovercard-title">{hoverCard.title}</strong>
+        <span class="pdf-hovercard-type">{hoverCard.typeLabel}</span>
+      </div>
+
+      <div class="pdf-hovercard-meta">
+        {#if hoverCard.reglement}
+          <span class="pdf-hovercard-key">Règlement</span>
+          <code class="pdf-hovercard-val">{hoverCard.reglement}</code>
+        {/if}
+        {#if hoverCard.zoneRef}
+          <span class="pdf-hovercard-key">Zone</span>
+          <code class="pdf-hovercard-val">{hoverCard.zoneRef}</code>
+        {/if}
+        {#if hoverCard.documentDate}
+          <span class="pdf-hovercard-key">Date doc.</span>
+          <span class="pdf-hovercard-val">{hoverCard.documentDate}</span>
+        {/if}
+        {#if hoverCard.page !== null}
+          <span class="pdf-hovercard-key">Page</span>
+          <span class="pdf-hovercard-val">{hoverCard.page}</span>
+        {/if}
+      </div>
+
+      {#if hoverCard.citation}
+        <blockquote class="pdf-hovercard-citation">{hoverCard.citation}</blockquote>
+      {/if}
+
+      <div class="pdf-hovercard-chips">
+        {#each hoverCard.completeness as chip (chip.label)}
+          <span
+            class="pdf-hovercard-chip"
+            class:pdf-hovercard-chip--ok={chip.ok}
+            class:pdf-hovercard-chip--missing={!chip.ok}
+          >
+            {chip.label}
+          </span>
+        {/each}
+      </div>
+
+      <div class="pdf-hovercard-footer">
+        <button
+          type="button"
+          class="pdf-hovercard-action pdf-hovercard-action--primary"
+          on:click={() => {
+            const id = hoverCard?.id;
+            closeHoverCardNow();
+            if (id) onMakeCurrent(id);
+          }}
+        >
+          Voir comme courant
+        </button>
+        <button
+          type="button"
+          class="pdf-hovercard-action"
+          on:click={() => {
+            const id = hoverCard?.id;
+            if (id) onAddToFilter(id);
+          }}
+        >
+          Ajouter au filtre
+        </button>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -752,13 +1321,223 @@
   }
 
   .pdf-overlay-head {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+  }
+
+  .pdf-overlay-head-row {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.7rem 0.85rem;
+  }
+
+  /* ── Rangée de navigation par signal (#91) ─────────────────────────────── */
+  .pdf-overlay-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.15rem;
+    border-top: 1px dashed var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  .pdf-nav-signal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .pdf-nav-signal-btn {
+    /* nav-signal est PRIMAIRE : teinte d'accent plus marquée que la nav-page. */
+    border-color: var(--st-semantic-border-strong, #94a3b8);
+    color: var(--st-semantic-text-primary, #0f172a);
+  }
+
+  .pdf-nav-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 1.9rem;
+    padding: 0 0.6rem;
+    border: 1px solid var(--st-semantic-border-strong, #94a3b8);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.76rem;
+    cursor: pointer;
+  }
+
+  .pdf-nav-counter:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+
+  .pdf-nav-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 1px rgb(15 23 42 / 0.15);
+    flex-shrink: 0;
+  }
+
+  .pdf-nav-counter-label {
+    color: var(--st-semantic-text-muted, #64748b);
+    font-weight: 600;
+  }
+
+  .pdf-nav-counter-pos {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+
+  .pdf-nav-counter-sep {
+    margin: 0 0.1rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-weight: 500;
+  }
+
+  .pdf-nav-pdfcount {
+    display: inline-flex;
+    align-items: center;
+    height: 1.6rem;
+    padding: 0 0.5rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: 9999px;
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.68rem;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pdf-nav-spacer {
+    flex: 1;
+  }
+
+  .pdf-nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    height: 1.7rem;
+    padding: 0 0.55rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .pdf-nav-toggle:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+
+  .pdf-nav-toggle--on {
+    border-color: var(--st-semantic-border-strong, #94a3b8);
+    color: var(--st-semantic-text-primary, #0f172a);
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+
+  /* ── Menu déroulant « aller à » (#91 scalabilité) ──────────────────────── */
+  .pdf-nav-menu {
+    position: absolute;
+    top: calc(100% - 0.4rem);
+    left: 0.85rem;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    width: min(22rem, calc(100% - 1.7rem));
+    max-height: 22rem;
+    overflow: hidden;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-md, 6px);
+    background: var(--st-semantic-surface-default, #fff);
+    box-shadow: 0 12px 32px rgb(15 23 42 / 0.22);
+  }
+
+  .pdf-nav-menu-search {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.6rem;
     border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    background: var(--st-semantic-surface-subtle, #f8fafc);
+    color: var(--st-semantic-text-muted, #64748b);
+  }
+
+  .pdf-nav-menu-input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.78rem;
+    outline: none;
+  }
+
+  .pdf-nav-menu-scroll {
+    overflow-y: auto;
+    padding: 0.25rem;
+  }
+
+  .pdf-nav-menu-group-head {
+    padding: 0.3rem 0.5rem 0.15rem;
+    color: var(--st-semantic-text-muted, #64748b);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pdf-nav-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 0;
+    border-radius: var(--st-radius-sm, 4px);
+    background: transparent;
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.78rem;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .pdf-nav-menu-item:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+
+  .pdf-nav-menu-item--current {
+    background: var(--st-semantic-surface-selected, #e0f2fe);
+    font-weight: 650;
+  }
+
+  .pdf-nav-menu-item-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pdf-nav-menu-item-page {
+    color: var(--st-semantic-text-muted, #64748b);
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pdf-nav-menu-empty {
+    margin: 0;
+    padding: 0.6rem;
+    color: var(--st-semantic-text-muted, #64748b);
+    font-size: 0.76rem;
+    text-align: center;
   }
 
   .pdf-overlay-title-block {
@@ -942,6 +1721,69 @@
     outline: 1px solid rgb(255 255 255 / 0.7);
   }
 
+  /* #4 — surlignage HORS-FILTRE : slate désaturé, passe SOUS les dans-filtre. */
+  .pdf-text-layer :global(.pdf-hl--out) {
+    z-index: 0;
+    mix-blend-mode: normal;
+  }
+
+  /* Badge CREUX hors-filtre : pas d'ombre portée, contour discret. */
+  .pdf-text-layer :global(.pdf-hl-badge--out) {
+    z-index: 1;
+    box-shadow: none;
+    text-shadow: none;
+  }
+
+  /* #86 — pulsation du surlignage quand la fiche correspondante est survolée à
+     droite : outline animé (pas de flèche). Passe au-dessus pour être vu. */
+  .pdf-text-layer :global(.pdf-hl--pulse) {
+    z-index: 5;
+    animation: pdf-hl-pulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes pdf-hl-pulse {
+    0%,
+    100% {
+      outline: 2px solid rgb(15 23 42 / 0.35);
+      outline-offset: 0;
+    }
+    50% {
+      outline: 2px solid rgb(15 23 42 / 0.85);
+      outline-offset: 2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pdf-text-layer :global(.pdf-hl--pulse) {
+      animation: none;
+      outline: 2px solid rgb(15 23 42 / 0.7);
+    }
+  }
+
+  /* #86 — mini-toast d'ancrage (signal survolé sur une autre page). */
+  .pdf-anchor-toast {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    z-index: 12;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.65rem;
+    border: 1px solid var(--st-semantic-border-strong, #94a3b8);
+    border-radius: 9999px;
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.74rem;
+    font-weight: 650;
+    box-shadow: 0 6px 18px rgb(15 23 42 / 0.22);
+    cursor: pointer;
+  }
+
+  .pdf-anchor-toast:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+
   .pdf-frame {
     flex: 1;
     width: 100%;
@@ -1003,5 +1845,122 @@
     .pdf-overlay {
       inset: 0.5rem;
     }
+  }
+
+  /* ── #4 — Hover-card non-modale (signal hors-filtre) ────────────────────── */
+  .pdf-hovercard {
+    position: absolute;
+    z-index: 60;
+    width: 20rem;
+    max-width: calc(100% - 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--st-semantic-border-strong, #94a3b8);
+    border-radius: var(--st-radius-md, 6px);
+    background: var(--st-semantic-surface-default, #fff);
+    box-shadow: 0 14px 38px rgb(15 23 42 / 0.28);
+  }
+
+  .pdf-hovercard-head {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .pdf-hovercard-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.84rem;
+  }
+
+  .pdf-hovercard-type {
+    color: var(--st-semantic-text-muted, #64748b);
+    font-size: 0.66rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .pdf-hovercard-meta {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.2rem 0.5rem;
+    font-size: 0.74rem;
+  }
+
+  .pdf-hovercard-key {
+    color: var(--st-semantic-text-muted, #64748b);
+    font-weight: 600;
+  }
+
+  .pdf-hovercard-val {
+    color: var(--st-semantic-text-primary, #0f172a);
+    overflow-wrap: anywhere;
+  }
+
+  .pdf-hovercard-citation {
+    margin: 0;
+    padding: 0.4rem 0.55rem;
+    border-left: 3px solid var(--st-semantic-border-subtle, #cbd5e1);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.74rem;
+    font-style: italic;
+  }
+
+  .pdf-hovercard-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .pdf-hovercard-chip {
+    padding: 0.05rem 0.4rem;
+    border-radius: 9999px;
+    font-size: 0.64rem;
+    font-weight: 600;
+  }
+
+  .pdf-hovercard-chip--ok {
+    background: rgb(16 185 129 / 0.16);
+    color: #047857;
+  }
+
+  .pdf-hovercard-chip--missing {
+    background: rgb(148 163 184 / 0.22);
+    color: #475569;
+  }
+
+  .pdf-hovercard-footer {
+    display: flex;
+    gap: 0.4rem;
+    padding-top: 0.15rem;
+  }
+
+  .pdf-hovercard-action {
+    flex: 1;
+    height: 1.8rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.72rem;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .pdf-hovercard-action:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+
+  .pdf-hovercard-action--primary {
+    border-color: var(--st-semantic-border-strong, #0f766e);
+    color: var(--st-semantic-text-link, #0f766e);
   }
 </style>

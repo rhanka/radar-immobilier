@@ -5,6 +5,7 @@
    * The left rail keeps navigation light; this panel owns detailed cards for
    * selected entities: cities, graph signals, zones and lots.
    */
+  import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
   import { FileText, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
@@ -60,6 +61,33 @@
     evidence: SignalEvidence;
     node: GraphSignalNode;
   }) => void = () => {};
+  /**
+   * #86 — cross-highlight signal ↔ fiche. `hoveredSignalId` est l'id du signal
+   * survolé DANS LE VIEWER PDF : la fiche correspondante ici prend un état
+   * sélectionné + scrolle en vue. `onHoverSignal` notifie le parent quand une
+   * fiche est survolée à droite (→ le surlignage PDF pulse). Bidirectionnel.
+   */
+  export let hoveredSignalId: string | null = null;
+  export let onHoverSignal: (id: string | null) => void = () => {};
+
+  // Conteneur scrollable des fiches (pour amener en vue la fiche cross-survolée).
+  let entityListEl: HTMLDivElement | null = null;
+
+  // #86 — quand le viewer survole un badge, scrolle la fiche correspondante en
+  // vue (sans la focaliser : on n'ouvre pas le détail, on signale juste). Le
+  // surlignage visuel se fait via la classe sel-entity-head--xhover.
+  $: void scrollHoveredFicheIntoView(hoveredSignalId);
+  async function scrollHoveredFicheIntoView(id: string | null): Promise<void> {
+    if (!id || !entityListEl) return;
+    await tick();
+    const el = entityListEl.querySelector<HTMLElement>(
+      `[data-signal-node="${cssAttrEscape(id)}"]`,
+    );
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function cssAttrEscape(value: string): string {
+    return value.replace(/["\\]/g, "\\$&");
+  }
 
   /** #3 — Nœuds filtrés selon la clé de filtre active. */
   $: filteredDetailNodes = activeSubsetKey
@@ -483,7 +511,7 @@
             {#if detailLoading}–{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
           </span>
         </summary>
-        <div class="sel-entities">
+        <div class="sel-entities" bind:this={entityListEl}>
           {#if detailLoading}
             <div class="sel-loading">
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -496,7 +524,19 @@
               {@const key = signalKey(node)}
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
-                <div class="sel-entity-bar">
+                <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
+                     cross-survolé quand le viewer survole ce signal. Survoler
+                     la fiche notifie le parent (→ le surlignage PDF pulse). -->
+                <div
+                  class="sel-entity-bar"
+                  class:sel-entity-bar--xhover={hoveredSignalId === node.id}
+                  data-signal-node={node.id}
+                  role="presentation"
+                  on:mouseenter={() => onHoverSignal(node.id)}
+                  on:mouseleave={() => onHoverSignal(null)}
+                  on:focusin={() => onHoverSignal(node.id)}
+                  on:focusout={() => onHoverSignal(null)}
+                >
                   <button
                     type="button"
                     class="sel-entity-head"
@@ -943,6 +983,13 @@
 
   .sel-entity-bar:last-child {
     border-bottom: none;
+  }
+
+  /* #86 — cross-highlight : la fiche correspondant au surlignage PDF survolé
+     prend un état SÉLECTIONNÉ visible (liseré + fond) sans ouvrir le détail. */
+  .sel-entity-bar--xhover {
+    background: var(--st-semantic-surface-selected, #e0f2fe);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
   }
 
   /* #10 — layout colonne : titre complet sur plusieurs lignes + sous-titre dessous */

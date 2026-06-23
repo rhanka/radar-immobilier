@@ -17,6 +17,9 @@ const harnessInput = qaHarness
       "pdf-switch": fileURLToPath(
         new URL("./e2e-qa/harness/pdf-switch.html", import.meta.url),
       ),
+      "pdf-nav": fileURLToPath(
+        new URL("./e2e-qa/harness/pdf-nav.html", import.meta.url),
+      ),
       "rail-filter": fileURLToPath(
         new URL("./e2e-qa/harness/rail-filter.html", import.meta.url),
       ),
