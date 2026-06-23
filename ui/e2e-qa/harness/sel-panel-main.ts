@@ -27,17 +27,30 @@ if (!target) throw new Error("Missing #harness-root");
 // rawRef partagé par les deux signaux = même PV.
 const RAW_REF = "raw/proces-verbaux-saint-frederic/2026/cas/abc123.pdf";
 
+// #94 — mode QA piloté par la query string :
+//   ?evidence=none → signal SANS aucune source documentaire (ni rawRef, ni
+//     sourceUrl, ni sourceRef) → la fiche doit afficher l'état HONNÊTE « preuve
+//     non disponible » À LA PLACE du bouton mort. Défaut (absent) : comportement
+//     historique #84 (rawRef présent → bouton « Voir la preuve » actif).
+const params = new URLSearchParams(window.location.search);
+const evidenceMode = params.get("evidence");
+const withoutEvidence = evidenceMode === "none";
+
 function signal(id: string, label: string, description: string): GraphSignalNode {
   return {
     id,
     type: "DesignationEvent",
     label,
     citySlug: "saint-frederic",
-    sourceRef: RAW_REF,
+    // Sans preuve : aucune source documentaire reliée (sourceRef null + props
+    // dépourvues de rawRef/sourceUrl/documentUrl).
+    sourceRef: withoutEvidence ? null : RAW_REF,
     createdAt: "2026-05-19T12:00:00.000Z",
     description,
     publishedAt: "2026-05-19T12:00:00.000Z",
-    props: { description, rawRef: RAW_REF, page: 2 },
+    props: withoutEvidence
+      ? { description, page: 2 }
+      : { description, rawRef: RAW_REF, page: 2 },
   };
 }
 
