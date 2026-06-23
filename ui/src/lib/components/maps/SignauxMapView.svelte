@@ -1304,6 +1304,7 @@
         page={activeEvidence.evidence.page}
         bbox={activeEvidence.evidence.bbox}
         excerpt={activeEvidence.evidence.excerpt ?? activeEvidence.evidence.citation}
+        provisional={activeEvidence.evidence.provisional}
         signals={activeEvidence.signals}
         {navSignals}
         {navIndex}

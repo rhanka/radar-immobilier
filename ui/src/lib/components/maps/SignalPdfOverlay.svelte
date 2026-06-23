@@ -124,6 +124,13 @@
   export let page: number | null = null;
   export let bbox: [number, number, number, number] | null = null;
   /**
+   * Filet Radar : `true` quand ce PV a été rattaché AUTOMATIQUEMENT
+   * (`linkSource === "radar-auto-link"`), à distinguer d'une citation graphify
+   * vérifiée. Affiche une mention DISCRÈTE « lien automatique » près du titre.
+   * Absent/`false` → aucune mention (lien vérifié).
+   */
+  export let provisional = false;
+  /**
    * Extrait cité du signal COURANT — utilisé UNIQUEMENT pour surligner le
    * passage dans le PDF. Il n'est PAS réaffiché ici : la citation vit déjà dans
    * le panneau de droite. Conservé pour la rétrocompat LOT 1 (un seul signal).
@@ -957,6 +964,16 @@
         {:else if page}
           <span>Page : {page}</span>
         {/if}
+        {#if provisional}
+          <!-- Filet Radar : mention DISCRÈTE d'un PV auto-lié (à confirmer). -->
+          <span
+            class="pdf-overlay-autolink"
+            title="PV rattaché automatiquement par Radar (à confirmer) — distinct d'une citation vérifiée."
+            aria-label="Source liée automatiquement par le filet Radar, à confirmer"
+          >
+            Lien automatique
+          </span>
+        {/if}
       </div>
     </div>
 
@@ -1607,6 +1624,19 @@
     gap: 0.45rem;
     color: var(--st-semantic-text-secondary, #475569);
     font-size: 0.72rem;
+  }
+
+  /* Filet Radar : mention DISCRÈTE « lien automatique » — pastille info/neutre
+     en tokens DS, jamais warning. */
+  .pdf-overlay-autolink {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.4rem;
+    border-radius: var(--st-radius-pill, 999px);
+    background: var(--st-semantic-feedback-info-surface, #eff6ff);
+    color: var(--st-semantic-feedback-info, #1d4ed8);
+    font-weight: 650;
+    cursor: help;
   }
 
   .pdf-overlay-actions {
