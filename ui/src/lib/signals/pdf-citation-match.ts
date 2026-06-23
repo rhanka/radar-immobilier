@@ -104,7 +104,11 @@ export function findCitationInPage(
   excerpt: string,
   options: { minWords?: number; minCoverage?: number } = {},
 ): CitationMatch | null {
-  const minWords = options.minWords ?? 4;
+  // minWords relevé de 4 → 6 : une fenêtre de 4 mots génériques (« ATTENDU QUE
+  // la municipalité ») se retrouve sur PLUSIEURS pages d'un PV et générait des
+  // surlignages parasites (bug #83). Exiger une fenêtre plus longue ET une
+  // couverture minimale rend le fallback spécifique au passage réellement cité.
+  const minWords = options.minWords ?? 6;
   const minCoverage = options.minCoverage ?? 0.4;
 
   const cleanExcerpt = normalizeForMatch(excerpt);
@@ -142,7 +146,10 @@ export function findCitationInPage(
         const range = toRawRange(idx, idx + candidate.length);
         if (range) {
           const coverage = windowLen / totalWords.length;
-          if (coverage >= minCoverage || windowLen >= minWords) {
+          // ET (pas OU) : la fenêtre doit être assez longue ET couvrir une part
+          // significative de la citation. Le `||` précédent acceptait toute
+          // fenêtre de `minWords` mots, même générique → faux positifs multi-pages.
+          if (coverage >= minCoverage && windowLen >= minWords) {
             return { ...range, coverage };
           }
         }
