@@ -622,6 +622,21 @@
 
                       <div class="doc-refs-section">
                         <span class="doc-refs-label">Preuve</span>
+                        {#if evidence.provisional}
+                          <!-- Filet Radar : PV rattaché AUTOMATIQUEMENT (provisional +
+                               linkSource "radar-auto-link"), distinct d'une citation
+                               graphify vérifiée. Badge DISCRET, ton info/neutre. -->
+                          <div
+                            class="auto-link-row"
+                            title="PV rattaché automatiquement par Radar (à confirmer) — distinct d'une citation vérifiée."
+                          >
+                            <Badge tone="info" size="sm">
+                              <span aria-label="Source liée automatiquement par le filet Radar, à confirmer">
+                                Source liée automatiquement
+                              </span>
+                            </Badge>
+                          </div>
+                        {/if}
                         <div class="evidence-status-grid">
                           {#each evidenceCompletenessItems(evidence) as item (item.label)}
                             <span
@@ -1179,6 +1194,16 @@
     color: var(--st-semantic-text-muted, #94a3b8);
     font-size: 0.74rem;
     font-style: italic;
+  }
+
+  /* Filet Radar : ligne du badge « source liée automatiquement ». Discrète,
+     juste un petit espacement sous le label « Preuve ». La couleur/forme du
+     badge vient des tokens DS (tone="info"). */
+  .auto-link-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    cursor: help;
   }
 
   .evidence-status-grid {
