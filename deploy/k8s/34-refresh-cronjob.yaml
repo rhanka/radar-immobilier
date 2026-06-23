@@ -110,7 +110,12 @@ spec:
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      backoffLimit: 0
+      # backoffLimit: 1 → 1 retry (au lieu de 0) pour absorber un aléa réseau S3/PG
+      # transitoire. NB : le script lui-même exit !=0 si des villes sont abortées
+      # (régression de preuves) ou si des upserts ont échoué (cf.
+      # project-graph-from-s3.ts), ce qui rend l'échec visible dans
+      # failedJobsHistoryLimit + les logs jalons "project-graph-from-s3: terminé".
+      backoffLimit: 1
       activeDeadlineSeconds: 1800
       template:
         metadata:
@@ -142,6 +147,27 @@ spec:
                   valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
                 - name: S3_SECRET_KEY
                   valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+                # ── Store de graphes EXPLICITE (GRAPH_S3_*) ───────────────────
+                # Garantit le bon bucket SCW (radar-immobilier-docs-pocs)
+                # INDÉPENDAMMENT du secret radar-scrape-s3-credentials, absent en
+                # prod (sa disparition faisait tomber resolveGraphS3Config sur
+                # S3_ENDPOINT=radar-minio + bucket "radar-immobilier-docs" →
+                # ENOTFOUND, projection gelée). GRAPH_S3_* a priorité sur
+                # SCRAPE_S3_*/S3_* dans resolveGraphS3Config (config.ts).
+                - name: GRAPH_S3_ENDPOINT
+                  value: "https://s3.fr-par.scw.cloud"
+                - name: GRAPH_S3_BUCKET
+                  value: "radar-immobilier-docs-pocs"
+                - name: GRAPH_S3_REGION
+                  value: "fr-par"
+                - name: GRAPH_S3_FORCE_PATH_STYLE
+                  value: "false"
+                - name: GRAPH_S3_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+                - name: GRAPH_S3_SECRET_KEY
+                  valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+                # Bloc SCRAPE_S3_* conservé (optional:true → ne gêne pas ; sert de
+                # repli quand GRAPH_S3_* ne serait pas fourni). Sans effet ici.
                 - name: SCRAPE_S3_ENDPOINT
                   valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
                 - name: SCRAPE_S3_BUCKET
