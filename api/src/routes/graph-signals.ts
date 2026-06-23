@@ -162,6 +162,20 @@ function extractDocRefs(
   const topLevel = parseDocRefRecord(props, "citation");
   if (topLevel) result.push(topLevel);
 
+  // Lit aussi le bloc imbriqué props.properties (structure « rimouski » : tout
+  // le docSha/citation/rawRef vit dans properties, sans props.refs ni top-level).
+  const nested = props.properties;
+  if (isRecord(nested)) {
+    if (Array.isArray(nested.refs)) {
+      nested.refs.forEach((item, index) => {
+        const parsed = parseDocRefRecord(item, `nested-ref-${index + 1}`);
+        if (parsed) result.push(parsed);
+      });
+    }
+    const nestedTop = parseDocRefRecord(nested, "nested-citation");
+    if (nestedTop) result.push(nestedTop);
+  }
+
   if (sourceRef && result.length === 0) {
     result.push({ docSha: sourceRef, rawRef: sourceRef });
   }
