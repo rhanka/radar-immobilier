@@ -299,6 +299,22 @@ function firstNonEmptyString(
 }
 
 /**
+ * Une ref « provisional » est un lien posé AUTOMATIQUEMENT par le filet Radar
+ * (`provisional: true` et/ou `linkSource: "radar-auto-link"`). Elle ne constitue
+ * PAS une preuve graphify vérifiée : on l'exclut du calcul anti-régression
+ * (cf. `countCompleteSignals(..., { ignoreProvisional: true })`) afin qu'un lien
+ * provisional n'élève jamais le seuil de complétude et donc ne bloque jamais une
+ * reprojection graphify légitime. En revanche, hors anti-régression, un
+ * provisional avec citation+rawRef compte bien comme « complet » (il rend la
+ * preuve affichable au client).
+ */
+function isProvisionalRef(r: Record<string, unknown>): boolean {
+  if (r.provisional === true || r.provisional === "true") return true;
+  const ls = r.linkSource ?? r.link_source;
+  return typeof ls === "string" && ls.trim() === "radar-auto-link";
+}
+
+/**
  * Un node de signal est « complet »/preuve-vivante quand il porte AU MOINS une
  * ref contenant à la fois une citation/excerpt ET un rawRef (preuve PDF).
  *
@@ -310,18 +326,27 @@ function firstNonEmptyString(
  * par du vide. En cas de régression de ce compte, la ville est abortée (cf.
  * upsertGraphAtomic).
  */
-export function isCompleteSignalProps(props: Record<string, unknown>): boolean {
+export function isCompleteSignalProps(
+  props: Record<string, unknown>,
+  options: { ignoreProvisional?: boolean } = {},
+): boolean {
+  const { ignoreProvisional = false } = options;
   const refs = props.refs;
   if (Array.isArray(refs)) {
     for (const item of refs) {
       if (typeof item !== "object" || item === null || Array.isArray(item)) continue;
       const r = item as Record<string, unknown>;
+      // Anti-régression : une ref provisional (filet Radar) ne compte pas comme
+      // preuve « dure » — sinon elle élèverait le seuil et bloquerait une
+      // reprojection graphify ultérieure sans rawRef.
+      if (ignoreProvisional && isProvisionalRef(r)) continue;
       if (firstNonEmptyString(r, REF_CITATION_KEYS) && firstNonEmptyString(r, REF_RAWREF_KEYS)) {
         return true;
       }
     }
   }
   // Repli : citation + rawRef portés directement au niveau racine des props.
+  if (ignoreProvisional && isProvisionalRef(props)) return false;
   if (firstNonEmptyString(props, REF_CITATION_KEYS) && firstNonEmptyString(props, REF_RAWREF_KEYS)) {
     return true;
   }
@@ -331,12 +356,19 @@ export function isCompleteSignalProps(props: Record<string, unknown>): boolean {
 /**
  * Compte les nœuds de signal « complets » (Signal/DesignationEvent avec au moins
  * une ref citation+rawRef) parmi un ensemble de NodeRow. Pur, sans DB.
+ *
+ * Avec `{ ignoreProvisional: true }` (calcul anti-régression du gate), les liens
+ * provisional du filet Radar sont exclus : ils n'élèvent pas le seuil et ne
+ * peuvent donc jamais faire aborter une reprojection graphify légitime.
  */
-export function countCompleteSignals(nodeRows: Array<{ type: string; props: Record<string, unknown> }>): number {
+export function countCompleteSignals(
+  nodeRows: Array<{ type: string; props: Record<string, unknown> }>,
+  options: { ignoreProvisional?: boolean } = {},
+): number {
   let count = 0;
   for (const row of nodeRows) {
     if (!SIGNAL_NODE_TYPES.has(row.type)) continue;
-    if (isCompleteSignalProps(row.props)) count++;
+    if (isCompleteSignalProps(row.props, options)) count++;
   }
   return count;
 }
@@ -523,6 +555,7 @@ export async function upsertGraphAtomic(
       type: r.type,
       props: (r.props ?? {}) as Record<string, unknown>,
     })),
+    { ignoreProvisional: true },
   );
 
   try {
@@ -623,6 +656,7 @@ export async function upsertGraphAtomic(
           type: r.type,
           props: (r.props ?? {}) as Record<string, unknown>,
         })),
+        { ignoreProvisional: true },
       );
 
       if (completeAfter < completeBefore) {
