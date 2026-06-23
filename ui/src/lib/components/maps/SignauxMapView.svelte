@@ -36,8 +36,14 @@
   } from "$lib/signals/graph-signal-detail-client.js";
   import {
     buildOverlaySignals,
+    buildNavSignals,
+    buildHoverCard,
     type OverlaySignal,
+    type OverlayNavSignal,
+    type HoverCardData,
   } from "$lib/signals/pdf-overlay-signals.js";
+  import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
+  import { extractSignalEvidence } from "$lib/signals/graph-signal-detail-client.js";
   import {
     fetchGeoZones,
     type GeoZoneFeature,
@@ -120,8 +126,21 @@
   let lotsResponse: LotsResponse | null = null;
   let activeDocument: SignalDocRef | null = null;
   let activeEvidence:
-    | { title: string; evidence: SignalEvidence; signals: OverlaySignal[] }
+    | {
+        title: string;
+        evidence: SignalEvidence;
+        signals: OverlaySignal[];
+        nodeId: string;
+      }
     | null = null;
+  // #91 — toggle « masquer hors-filtre » du viewer (défaut : visibles).
+  let hideOutOfFilter = false;
+  // #86 — cross-highlight : id du signal survolé (canal bidirectionnel
+  // viewer ↔ fiche droite). Source unique de vérité du hover croisé.
+  let hoveredEvidenceSignalId: string | null = null;
+  function setHoveredEvidenceSignal(id: string | null): void {
+    hoveredEvidenceSignalId = id;
+  }
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
   // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
@@ -218,6 +237,16 @@
     ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
     : detailNodes;
   $: displayedLots = buildDisplayedLots(filteredDetailNodes);
+
+  // ── #91 — Navigation par signal du viewer de preuve ────────────────────────
+  // Source de vérité de la nav : la liste FILTRÉE (ordre du pane droit). Le
+  // viewer la reçoit + l'index courant et NE refiltre pas. navSignals est
+  // multi-doc ; le viewer affiche PDF i/N quand ≥ 2 docs distincts.
+  $: navSignals = buildNavSignals(filteredDetailNodes);
+  /** Rang du signal ouvert dans navSignals (-1 si overlay fermé / hors-liste). */
+  $: navIndex = activeEvidence
+    ? navSignals.findIndex((n) => n.id === activeEvidence!.nodeId)
+    : -1;
 
   $: activeGeoLevel = hasSelectedKind("zone")
     ? "Zone"
@@ -739,14 +768,98 @@
       payload.node,
       detailNodes,
       payload.evidence.rawRef,
+      // #4 — marque les co-PV signaux HORS-FILTRE (peints en slate par le viewer).
+      (n) => nodeMatchesSubset(n, activeSubsetKey),
     );
-    activeEvidence = { title: payload.title, evidence: payload.evidence, signals };
+    activeEvidence = {
+      title: payload.title,
+      evidence: payload.evidence,
+      signals,
+      nodeId: payload.node.id,
+    };
+    // #91 — synchro bidirectionnelle : ouvrir/déplacer le viewer focalise AUSSI
+    // la fiche correspondante à droite (elle se déplie + scrolle en miroir).
+    syncRightPaneFocus(payload.node.id);
     // Ferme le doc overlay si ouvert pour éviter deux overlays superposés
     activeDocument = null;
   }
 
+  /**
+   * #91 — NAVIGATION par signal demandée par le viewer (◀ Signal ▶ / menu).
+   * `index` est un rang dans `navSignals` (= liste filtrée). On reconstruit
+   * l'évidence + les signaux du nœud cible et on réassigne `activeEvidence` :
+   * si le nœud cible pointe un AUTRE document, les props rawRef/page changent →
+   * le viewer recharge le PDF (waiter #90, cache #89). Idempotent sur overlay
+   * ouvert (déplace simplement l'index). Synchro la fiche droite en miroir.
+   */
+  function navigateToSignal(index: number): void {
+    if (index < 0 || index >= navSignals.length) return;
+    const target = navSignals[index];
+    if (!target) return;
+    const node = detailNodes.find((n) => n.id === target.id);
+    if (!node) return;
+    openEvidence({
+      title: node.label,
+      evidence: extractSignalEvidence(node),
+      node,
+    });
+  }
+
+  /**
+   * Focalise la fiche d'un signal dans le pane droit (la déplie + scrolle).
+   * Réutilise le mécanisme de focus existant (selectionState) que le pane
+   * consomme déjà. Non destructif : conserve la sélection multi.
+   */
+  function syncRightPaneFocus(nodeId: string): void {
+    const key = makeKey("signal", nodeId);
+    if (!selectionState.selectedKeys.has(key)) {
+      selectionState = toggleSelection(selectionState, key);
+    }
+    selectionState = setFocus(selectionState, key);
+  }
+
   function closeEvidence(): void {
     activeEvidence = null;
+  }
+
+  function setHideOutOfFilter(hide: boolean): void {
+    hideOutOfFilter = hide;
+  }
+
+  /**
+   * #4 — Projette un nœud en données de hover-card pour le viewer (popover des
+   * signaux hors-filtre). La couleur reprend celle du surlignage du même signal
+   * dans le doc courant (cohérence pastille ↔ surlignage). Repli rang 0.
+   */
+  function resolveHoverCard(id: string): HoverCardData | null {
+    const node = detailNodes.find((n) => n.id === id);
+    if (!node) return null;
+    const sig = activeEvidence?.signals.find((s) => s.id === id);
+    const color = sig?.color ?? signalColorAt(0);
+    return buildHoverCard(node, color);
+  }
+
+  /** #4 — « Voir comme courant » : ouvre ce signal hors-filtre dans le viewer. */
+  function makeSignalCurrent(id: string): void {
+    const node = detailNodes.find((n) => n.id === id);
+    if (!node) return;
+    openEvidence({
+      title: node.label,
+      evidence: extractSignalEvidence(node),
+      node,
+    });
+  }
+
+  /**
+   * #4 — « Ajouter au filtre » : le signal est hors-filtre (il échoue z/m).
+   * DÉFAUT SOBRE retenu : on relâche le filtre (clé vide → tous les signaux
+   * visibles) pour que ce signal apparaisse dans la liste/nav, puis on le rend
+   * courant. Alternative écartée (ajouter dynamiquement un axe) : 'p' est neutre
+   * et z/m ne se « décochent » pas par signal sans casser le sens du filtre.
+   */
+  function addSignalToFilter(id: string): void {
+    handleFilterChange("");
+    makeSignalCurrent(id);
   }
 
   function zoneSelectionKey(zone: GeoZoneFeature): SelectionKey {
@@ -1192,6 +1305,16 @@
         bbox={activeEvidence.evidence.bbox}
         excerpt={activeEvidence.evidence.excerpt ?? activeEvidence.evidence.citation}
         signals={activeEvidence.signals}
+        {navSignals}
+        {navIndex}
+        onNavigate={navigateToSignal}
+        {hideOutOfFilter}
+        onToggleHideOutOfFilter={setHideOutOfFilter}
+        onSignalHover={setHoveredEvidenceSignal}
+        hoveredSignalId={hoveredEvidenceSignalId}
+        {resolveHoverCard}
+        onMakeCurrent={makeSignalCurrent}
+        onAddToFilter={addSignalToFilter}
         onClose={closeEvidence}
       />
     {/if}
@@ -1214,6 +1337,8 @@
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
+      hoveredSignalId={hoveredEvidenceSignalId}
+      onHoverSignal={setHoveredEvidenceSignal}
     />
   </svelte:fragment>
 </ViewLayout>
