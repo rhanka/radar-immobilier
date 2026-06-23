@@ -16,6 +16,7 @@
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import type {
     GeoZoneFeature,
     GeoZonesResponse,
@@ -54,7 +55,11 @@
   // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
   // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
   export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
-  export let onOpenEvidence: (payload: { title: string; evidence: SignalEvidence }) => void = () => {};
+  export let onOpenEvidence: (payload: {
+    title: string;
+    evidence: SignalEvidence;
+    node: GraphSignalNode;
+  }) => void = () => {};
 
   /** #3 — Nœuds filtrés selon la clé de filtre active. */
   $: filteredDetailNodes = activeSubsetKey
@@ -304,7 +309,34 @@
     onOpenEvidence({
       title: node.label,
       evidence: signalEvidence(node),
+      node,
     });
+  }
+
+  /**
+   * Nombre de signaux (autres que `node`) pointant le MÊME PV (même rawRef).
+   * Sert à signaler dans la fiche que le surlignage de la preuve montrera
+   * plusieurs signaux (#84). 0 si rawRef absent ou signal unique.
+   */
+  function coPvSignalCount(node: GraphSignalNode): number {
+    const rawRef = signalEvidence(node).rawRef;
+    if (!rawRef) return 0;
+    let count = 0;
+    for (const other of detailNodes) {
+      if (other.id === node.id) continue;
+      if (signalEvidence(other).rawRef === rawRef) count += 1;
+    }
+    return count;
+  }
+
+  /**
+   * Couleur de la pastille du signal dans la fiche. Quand on ouvre un signal il
+   * est le « signal courant » du viewer, donc TOUJOURS de la couleur de rang 0
+   * (mise en avant). On répète cette couleur ici pour le lien visuel
+   * surlignage ↔ fiche (#84).
+   */
+  function signalColor(): string {
+    return signalColorAt(0);
   }
 
   function zoneSourceLabel(zone: GeoZoneFeature): string {
@@ -479,7 +511,28 @@
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
+                    {@const coPv = coPvSignalCount(node)}
                     <div class="sel-entity-detail">
+                      <!-- ID du signal + pastille couleur : lien visuel avec le
+                           surlignage de la preuve (#84). La pastille reprend la
+                           couleur du signal COURANT du viewer (rang 0). -->
+                      <div class="signal-id-row">
+                        <span
+                          class="signal-color-dot"
+                          style="background:{signalColor()}"
+                          aria-hidden="true"
+                        ></span>
+                        <span class="signal-id-key">Signal</span>
+                        <code class="signal-id-val" title={node.id}>{node.id}</code>
+                        {#if coPv > 0}
+                          <span
+                            class="signal-copv-badge"
+                            title="Ce procès-verbal porte {coPv + 1} signaux : la preuve les surligne tous, chacun d'une couleur."
+                          >
+                            +{coPv} sur ce PV
+                          </span>
+                        {/if}
+                      </div>
                       {#if evidence.description}
                         <p class="entity-summary">{evidence.description}</p>
                       {:else}
@@ -955,6 +1008,49 @@
     padding: 0.45rem 0.85rem 0.65rem 1.15rem;
     background: #f8fafc;
     border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  /* ── ID signal + pastille couleur (#84) ───────────────────────────────── */
+  .signal-id-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .signal-color-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgb(15 23 42 / 0.15);
+  }
+
+  .signal-id-key {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: 0.68rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .signal-id-val {
+    overflow: hidden;
+    max-width: 12rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .signal-copv-badge {
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--st-semantic-warning-surface, #fef3c7);
+    color: var(--st-semantic-warning-text, #92400e);
+    font-size: 0.64rem;
+    font-weight: 700;
   }
 
   .entity-summary {

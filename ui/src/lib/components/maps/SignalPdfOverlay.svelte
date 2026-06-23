@@ -10,6 +10,7 @@
     X,
   } from "@lucide/svelte";
   import { findCitationInPage } from "$lib/signals/pdf-citation-match.js";
+  import type { OverlaySignal } from "$lib/signals/pdf-overlay-signals.js";
 
   export let title = "Document source";
   export let sourceUrl: string | null = null;
@@ -20,11 +21,41 @@
   export let page: number | null = null;
   export let bbox: [number, number, number, number] | null = null;
   /**
-   * Extrait cité — utilisé UNIQUEMENT pour surligner le passage dans le PDF.
-   * Il n'est PAS réaffiché ici : la citation vit déjà dans le panneau de droite.
+   * Extrait cité du signal COURANT — utilisé UNIQUEMENT pour surligner le
+   * passage dans le PDF. Il n'est PAS réaffiché ici : la citation vit déjà dans
+   * le panneau de droite. Conservé pour la rétrocompat LOT 1 (un seul signal).
    */
   export let excerpt: string | null = null;
+  /**
+   * LOT 2 (#84) — TOUS les signaux du même PV (même rawRef), chacun avec sa
+   * couleur + son libellé : surlignage multi-signaux. Quand la liste est vide,
+   * on retombe sur le comportement LOT 1 (un surlignage depuis `excerpt`/`page`
+   * /`bbox`) — voir `effectiveSignals`.
+   */
+  export let signals: OverlaySignal[] = [];
   export let onClose: () => void = () => {};
+
+  // Liste effective des signaux à surligner. Avec `signals` non vide on est en
+  // mode multi (LOT 2) ; sinon on synthétise un signal unique « courant » à
+  // partir des props scalaires (LOT 1) — garde-fou de non-régression.
+  $: effectiveSignals =
+    signals.length > 0
+      ? signals
+      : excerpt && excerpt.trim().length > 0
+        ? [
+            {
+              id: "current",
+              label: "",
+              excerpt,
+              page,
+              color: SINGLE_SIGNAL_COLOR,
+              current: true,
+            } satisfies OverlaySignal,
+          ]
+        : [];
+
+  // Couleur du surlignage en mode mono-signal (LOT 1) : l'ambre historique.
+  const SINGLE_SIGNAL_COLOR = "#eab308";
 
   // URL raw préfixée par VITE_API_BASE_URL comme tous les autres clients API :
   // sans ça, le `/api/...` relatif ne marche que same-origin et casse dès que
@@ -151,21 +182,50 @@
     await pdfPage.render({ canvasContext: ctx, viewport }).promise;
     if (token !== renderToken) return;
 
-    // ── Surlignage du passage cité ──────────────────────────────────────────
+    // ── Surlignage des passages cités (multi-signaux, #84) ───────────────────
     if (layer) {
       layer.innerHTML = "";
       layer.style.width = `${Math.floor(viewport.width)}px`;
       layer.style.height = `${Math.floor(viewport.height)}px`;
 
-      // Le surlignage (bbox OU texte) n'est dessiné QUE sur la page cible de la
-      // référence du signal (`page`). Sans ce garde, la voie texte re-surlignait
-      // à CHAQUE page un passage générique → faux positifs (bug #83).
-      const onTargetPage = currentPage === (page ?? currentPage);
-      if (bbox && onTargetPage) {
+      // bbox (mono-signal LOT 1) prioritaire si fourni ET sur la page cible.
+      // Le garde de page reste PAR signal : un surlignage n'est dessiné QUE sur
+      // la page de SA référence. Sans ce garde, la voie texte re-surlignait à
+      // CHAQUE page un passage générique → faux positifs (bug #83). On le
+      // conserve signal par signal en mode multi.
+      const onBboxPage = currentPage === (page ?? currentPage);
+      if (bbox && signals.length === 0 && onBboxPage) {
         // bbox fourni en fractions [x0, y0, x1, y1] de la page → rectangle.
         drawBboxHighlight(layer, viewport.width, viewport.height);
-      } else if (onTargetPage && excerpt && excerpt.trim().length > 0) {
-        await drawTextHighlight(layer, pdfPage, viewport, effectiveScale);
+      } else {
+        // Pré-charge la couche texte UNE fois pour tous les signaux de la page.
+        const targets = effectiveSignals.filter(
+          (s) =>
+            currentPage === (s.page ?? currentPage) &&
+            s.excerpt !== null &&
+            s.excerpt.trim().length > 0,
+        );
+        if (targets.length > 0) {
+          const content = await pdfPage.getTextContent();
+          if (token !== renderToken) return;
+          let drewCurrent = false;
+          // Dessine les AUTRES d'abord, le COURANT en dernier → au-dessus.
+          const ordered = [...targets].sort(
+            (a, b) => Number(a.current) - Number(b.current),
+          );
+          for (const sig of ordered) {
+            const drew = drawTextHighlight(
+              layer,
+              content,
+              viewport,
+              effectiveScale,
+              sig,
+            );
+            if (drew && sig.current) drewCurrent = true;
+          }
+          // Centre le scroll sur le surlignage du signal courant en priorité.
+          queueScrollToHighlight(layer, drewCurrent ? "current" : null);
+        }
       }
     }
   }
@@ -195,23 +255,57 @@
     if (!bbox) return;
     const [x0, y0, x1, y1] = bbox;
     const mark = document.createElement("div");
-    mark.className = "pdf-hl";
+    mark.className = "pdf-hl pdf-hl--current";
     mark.style.left = `${Math.min(x0, x1) * w}px`;
     mark.style.top = `${Math.min(y0, y1) * h}px`;
     mark.style.width = `${Math.abs(x1 - x0) * w}px`;
     mark.style.height = `${Math.abs(y1 - y0) * h}px`;
+    applyHighlightColor(mark, SINGLE_SIGNAL_COLOR, true);
     layer.appendChild(mark);
-    queueScrollToHighlight(layer);
+    queueScrollToHighlight(layer, null);
   }
 
-  async function drawTextHighlight(
+  /** Teinte un surlignage : couleur pleine pour le courant, estompé sinon. */
+  function applyHighlightColor(
+    mark: HTMLElement,
+    color: string,
+    current: boolean,
+  ): void {
+    // Le courant garde un fond plus opaque ; les autres signaux sont estompés
+    // (alpha plus faible) mais restent identifiables par teinte + badge (#84).
+    mark.style.setProperty("--hl-color", color);
+    mark.style.background = current ? withAlpha(color, 0.42) : withAlpha(color, 0.2);
+    mark.style.outline = current ? `1px solid ${withAlpha(color, 0.85)}` : "none";
+  }
+
+  /** Convertit un hex #rrggbb en rgba(...) avec l'alpha donné. */
+  function withAlpha(hex: string, alpha: number): string {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+    if (!m) return hex;
+    const int = Number.parseInt(m[1]!, 16);
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  type PdfTextContent = Awaited<
+    ReturnType<import("pdfjs-dist").PDFPageProxy["getTextContent"]>
+  >;
+
+  /**
+   * Surligne UN signal sur la page courante. Retourne true si au moins une
+   * marque a été dessinée. La couche texte (`content`) est chargée une seule
+   * fois par la page appelante et partagée entre tous les signaux.
+   */
+  function drawTextHighlight(
     layer: HTMLDivElement,
-    pdfPage: import("pdfjs-dist").PDFPageProxy,
+    content: PdfTextContent,
     viewport: { width: number; height: number; transform: number[] },
     renderScale: number,
-  ): Promise<void> {
-    if (!excerpt) return;
-    const content = await pdfPage.getTextContent();
+    signal: OverlaySignal,
+  ): boolean {
+    if (!signal.excerpt) return false;
     // Concatène le texte de la page + garde, pour chaque item, son offset.
     // pdf.js mélange TextItem (avec `str`) et TextMarkedContent (sans) ; on ne
     // garde que les TextItem porteurs de texte.
@@ -232,10 +326,12 @@
       pageText += " ";
     }
 
-    const match = findCitationInPage(pageText, excerpt);
-    if (!match) return;
+    const match = findCitationInPage(pageText, signal.excerpt);
+    if (!match) return false;
 
     // Surligne tout item qui chevauche l'intervalle [match.start, match.end).
+    // Mémorise le 1er rectangle pour y ancrer le badge ID du signal.
+    let firstMark: HTMLElement | null = null;
     let drewOne = false;
     for (const { start, end, item } of offsets) {
       if (end <= match.start || start >= match.end) continue;
@@ -254,22 +350,46 @@
       const fontHeight = (Math.hypot(b!, d!) || item.height || 10) * renderScale;
       const width = Math.max(item.width * renderScale, 4);
       const mark = document.createElement("div");
-      mark.className = "pdf-hl";
+      mark.className = signal.current ? "pdf-hl pdf-hl--current" : "pdf-hl";
+      mark.dataset.signalId = signal.id;
       mark.style.left = `${tx}px`;
       mark.style.top = `${ty - fontHeight}px`;
       mark.style.width = `${width}px`;
       mark.style.height = `${fontHeight * 1.15}px`;
+      applyHighlightColor(mark, signal.color, signal.current);
       layer.appendChild(mark);
+      if (!firstMark) firstMark = mark;
       drewOne = true;
     }
-    if (drewOne) queueScrollToHighlight(layer);
+
+    // Badge ID en surimpression, ancré au coin haut-gauche du 1er rectangle.
+    // Affiché seulement quand un libellé est fourni (mode multi #84) — en mode
+    // mono LOT 1 le libellé est vide, on n'ajoute pas de badge (non-régression).
+    if (drewOne && firstMark && signal.label.trim().length > 0) {
+      const badge = document.createElement("span");
+      badge.className = signal.current ? "pdf-hl-badge pdf-hl-badge--current" : "pdf-hl-badge";
+      badge.dataset.signalId = signal.id;
+      badge.textContent = signal.label;
+      badge.style.left = firstMark.style.left;
+      badge.style.top = firstMark.style.top;
+      badge.style.background = withAlpha(signal.color, signal.current ? 0.95 : 0.8);
+      layer.appendChild(badge);
+    }
+
+    return drewOne;
   }
 
-  function queueScrollToHighlight(layer: HTMLDivElement): void {
+  function queueScrollToHighlight(
+    layer: HTMLDivElement,
+    prefer: "current" | null,
+  ): void {
     requestAnimationFrame(() => {
-      const first = layer.querySelector(".pdf-hl") as HTMLElement | null;
-      if (first && viewerScrollEl) {
-        const top = first.offsetTop - viewerScrollEl.clientHeight / 3;
+      const target =
+        (prefer === "current"
+          ? (layer.querySelector(".pdf-hl--current") as HTMLElement | null)
+          : null) ?? (layer.querySelector(".pdf-hl") as HTMLElement | null);
+      if (target && viewerScrollEl) {
+        const top = target.offsetTop - viewerScrollEl.clientHeight / 3;
         viewerScrollEl.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       }
     });
@@ -643,9 +763,39 @@
 
   .pdf-text-layer :global(.pdf-hl) {
     position: absolute;
-    background: var(--st-semantic-warning-surface, rgb(234 179 8 / 0.4));
+    /* La couleur (background/outline) est appliquée en inline par signal pour
+       le multi-signaux (#84) — chaque signal a sa teinte. */
     mix-blend-mode: multiply;
     border-radius: 2px;
+  }
+
+  /* Le surlignage du signal COURANT passe au-dessus des autres. */
+  .pdf-text-layer :global(.pdf-hl--current) {
+    z-index: 2;
+  }
+
+  /* Badge ID en surimpression, ancré au coin haut-gauche du 1er rectangle du
+     surlignage. Petit, lisible, non envahissant (#84). */
+  .pdf-text-layer :global(.pdf-hl-badge) {
+    position: absolute;
+    z-index: 3;
+    transform: translateY(-100%);
+    padding: 0 0.28rem;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    text-shadow: 0 1px 1px rgb(15 23 42 / 0.35);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.25);
+    pointer-events: none;
+  }
+
+  .pdf-text-layer :global(.pdf-hl-badge--current) {
+    z-index: 4;
+    outline: 1px solid rgb(255 255 255 / 0.7);
   }
 
   .pdf-frame {
