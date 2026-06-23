@@ -92,9 +92,12 @@
     ChevronLeft,
     ChevronRight,
     ExternalLink,
+    FileX,
     Loader2,
     Minus,
     Plus,
+    RefreshCw,
+    TriangleAlert,
     X,
   } from "@lucide/svelte";
   import {
@@ -803,6 +806,18 @@
     });
   }
 
+  /**
+   * #94 — RÉESSAYER après une erreur de chargement (cas b : doc attendu mais
+   * fetch/render KO). `loadedUrl` vaut déjà l'URL fautive, donc le bloc réactif
+   * de chargement ne reboucle pas tout seul : on relance loadPdf directement.
+   * L'entrée fautive a déjà été retirée du docCache (catch getCachedDocument),
+   * donc un retry refait un vrai fetch (utile pour un 404/réseau transitoire).
+   */
+  function retryLoad(): void {
+    if (!resolvedSourceUrl) return;
+    void loadPdf(resolvedSourceUrl);
+  }
+
   function goPrev(): void {
     if (currentPage > 1) void renderPage(currentPage - 1);
   }
@@ -1187,18 +1202,43 @@
     {:else if resolvedSourceUrl && !loadError}
       <!-- Source non-PDF (HTML…) : aperçu direct en iframe, sans éditeur. -->
       <iframe class="pdf-frame" title={title} src={resolvedSourceUrl}></iframe>
-    {:else}
-      <div class="pdf-missing">
-        {#if loadError}
-          <p>La preuve n'a pas pu être rendue dans le visualiseur.</p>
+    {:else if loadError}
+      <!-- #94 cas (b) — PROBLÈME TEMPORAIRE : un document est attendu (rawRef /
+           sourceRef présent) mais le fetch/render a échoué. On le dit clairement,
+           on propose RÉESSAYER (refait un vrai fetch) et le lien externe si dispo.
+           Distinct du cas (a) « aucune source » géré plus bas. -->
+      <div class="pdf-missing" role="alert">
+        <TriangleAlert class="pdf-missing-icon" aria-hidden="true" />
+        <p class="pdf-missing-title">Problème temporaire de chargement</p>
+        <p class="pdf-missing-detail">
+          Le document source est attendu mais n'a pas pu être chargé. Cela peut être
+          passager (réseau, source momentanément indisponible).
+        </p>
+        <div class="pdf-missing-actions">
+          <button type="button" class="pdf-missing-retry" on:click={retryLoad}>
+            <RefreshCw class="h-3.5 w-3.5" aria-hidden="true" />
+            Réessayer
+          </button>
           {#if sourceUrl}
             <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
               Ouvrir le document <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
             </a>
           {/if}
-        {:else}
-          <p>Aucune URL PDF publique ou route de streaming n'est disponible pour cette preuve.</p>
+        </div>
+        {#if fallbackRef}
+          <code>{fallbackRef}</code>
         {/if}
+      </div>
+    {:else}
+      <!-- #94 cas (a) — preuve NON DISPONIBLE : aucune source documentaire n'est
+           reliée à ce signal (ni rawRef, ni sourceUrl, ni route de streaming).
+           Message explicite plutôt qu'un cadre vide ou un bouton mort. -->
+      <div class="pdf-missing" role="note">
+        <FileX class="pdf-missing-icon" aria-hidden="true" />
+        <p class="pdf-missing-title">Preuve non disponible</p>
+        <p class="pdf-missing-detail">
+          Aucune source documentaire n'est reliée à ce signal pour l'instant.
+        </p>
         {#if fallbackRef}
           <code>{fallbackRef}</code>
         {/if}
@@ -1811,15 +1851,70 @@
     flex: 1;
     min-height: 100%;
     place-content: center;
-    gap: 0.65rem;
+    justify-items: center;
+    gap: 0.5rem;
     padding: 1.25rem;
+    max-width: 26rem;
+    margin: 0 auto;
     color: var(--st-semantic-text-secondary, #475569);
     text-align: center;
+  }
+
+  /* #94 — icône d'état (fichier barré = absence ; triangle = problème temporaire).
+     :global car la classe est posée sur un composant Lucide (SVG enfant), pas un
+     élément DOM direct → Svelte ne la scoperait pas sinon (selector "unused"). */
+  .pdf-missing :global(.pdf-missing-icon) {
+    width: 2rem;
+    height: 2rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+  }
+
+  .pdf-missing-title {
+    margin: 0;
+    color: var(--st-semantic-text-primary, #1e293b);
+    font-size: 0.92rem;
+    font-weight: 650;
+  }
+
+  .pdf-missing-detail {
+    margin: 0;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.8rem;
+    line-height: 1.45;
   }
 
   .pdf-missing p {
     margin: 0;
     font-size: 0.86rem;
+  }
+
+  /* #94 — rangée d'actions (Réessayer + Ouvrir) pour le cas temporaire (b). */
+  .pdf-missing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.15rem;
+  }
+
+  .pdf-missing-retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.95rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--st-semantic-border-strong, #0f766e);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-link, #0f766e);
+    font-size: 0.78rem;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .pdf-missing-retry:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
   }
 
   .pdf-missing a {
@@ -1839,6 +1934,7 @@
     overflow-wrap: anywhere;
     white-space: normal;
     font-size: 0.74rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
   }
 
   @media (max-width: 900px) {
