@@ -1,3 +1,91 @@
+<script module lang="ts">
+  // ── Singletons partagés entre TOUS les montages du viewer (#89) ─────────────
+  // Ce bloc `module` est évalué UNE FOIS par chargement de l'app : son état
+  // SURVIT à la fermeture/réouverture de l'overlay (le `<script>` d'instance,
+  // lui, est ré-exécuté à chaque montage). C'est la condition pour que le worker
+  // pdf.js ET le cache de documents persistent d'une ouverture à l'autre.
+  type PdfjsModule = typeof import("pdfjs-dist");
+  type PDFDocumentProxy = import("pdfjs-dist").PDFDocumentProxy;
+
+  // pdf.js + worker chargés UNE SEULE FOIS, puis réutilisés à chaque open. Avant
+  // (#89), chaque `loadPdf` refaisait `import("pdfjs-dist")` +
+  // `import(".../pdf.worker…?url")` et ré-assignait `GlobalWorkerOptions
+  // .workerSrc` → coût d'init payé à CHAQUE open. La PROMESSE est mémoïsée : un
+  // 2e+ open la réutilise sans re-bundler ni re-câbler le worker.
+  let pdfjsPromise: Promise<PdfjsModule> | null = null;
+  function getPdfjs(): Promise<PdfjsModule> {
+    if (!pdfjsPromise) {
+      pdfjsPromise = (async () => {
+        const pdfjs = await import("pdfjs-dist");
+        // Worker servi par Vite via URL d'asset (pas de CDN).
+        const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
+        pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+        return pdfjs;
+      })();
+    }
+    return pdfjsPromise;
+  }
+
+  // Cache de documents par URL résolue (#89c). Réouvrir le MÊME rawRef ne refait
+  // ni fetch ni parse : on réutilise le `PDFDocumentProxy` déjà chargé. On
+  // mémoïse la PROMESSE (pas le doc résolu) pour qu'un 2e open concurrent sur la
+  // même URL partage le MÊME chargement au lieu d'en lancer un second. LRU
+  // simple borné : au-delà de MAX_CACHED_DOCS on détruit le plus ancien.
+  const MAX_CACHED_DOCS = 6;
+  const docCache = new Map<string, Promise<PDFDocumentProxy>>();
+
+  function getCachedDocument(url: string): Promise<PDFDocumentProxy> {
+    const cached = docCache.get(url);
+    if (cached) {
+      // Touch LRU : réinsertion en queue de Map (l'ordre d'itération Map = ordre
+      // d'insertion → la 1re clé itérée est la moins récemment utilisée).
+      docCache.delete(url);
+      docCache.set(url, cached);
+      return cached;
+    }
+    const promise = (async () => {
+      const pdfjs = await getPdfjs();
+      const task = pdfjs.getDocument({ url, isEvalSupported: false });
+      return task.promise;
+    })();
+    docCache.set(url, promise);
+    // Échec non mémoïsé : on retire l'entrée pour permettre un re-essai (un 404
+    // transitoire ne doit pas geler l'URL en erreur dans le cache).
+    promise.catch(() => {
+      if (docCache.get(url) === promise) docCache.delete(url);
+    });
+    evictIfNeeded();
+    return promise;
+  }
+
+  function evictIfNeeded(): void {
+    while (docCache.size > MAX_CACHED_DOCS) {
+      const oldestKey = docCache.keys().next().value;
+      if (oldestKey === undefined) break;
+      const evicted = docCache.get(oldestKey);
+      docCache.delete(oldestKey);
+      // Détruit le doc évincé pour libérer le worker. C'est le SEUL endroit où un
+      // doc est détruit : plus aucune instance ne peut le redemander par cette
+      // URL. `void` : la promesse peut être encore en vol, on ignore l'erreur de
+      // destroy tardif.
+      void evicted?.then((doc) => doc.destroy()).catch(() => {});
+    }
+  }
+
+  // Instrumentation perf (#89) — empile chaque ouverture { url, ms, cached } sur
+  // window.__pdfPerf pour que la QA navigateur chiffre open→render avant/après.
+  // Aucun impact prod (objet de debug, non lu par l'UI ; activé seulement si le
+  // harness a posé le sink au préalable via addInitScript).
+  function recordPerf(url: string, ms: number, cached: boolean): void {
+    if (typeof window === "undefined") return;
+    const w = window as unknown as {
+      __pdfPerf?: { url: string; ms: number; cached: boolean }[];
+    };
+    if (!w.__pdfPerf) return;
+    w.__pdfPerf.push({ url, ms, cached });
+  }
+</script>
+
 <script lang="ts">
   import { onDestroy, tick } from "svelte";
   import {
@@ -90,7 +178,17 @@
   let loadError: string | null = null;
   let renderToken = 0;
 
-  // Identité du document courant — recharge quand l'URL résolue change.
+  // Token de LOAD distinct du renderToken (#89/#90). Le renderToken protège un
+  // rendu de page contre une navigation de page plus récente DANS le même doc.
+  // Le loadToken protège tout le pipeline d'OUVERTURE (fetch+parse+1er render)
+  // contre un SWITCH de doc plus récent (A→B→C en rafale) : un chargement de A
+  // qui se résout après que B a démarré ne doit RIEN peindre. Sans lui, le doc A
+  // (lent) pourrait écraser B (rapide) — l'ancien-doc-résiduel que #90 bannit.
+  let loadToken = 0;
+
+  // Identité du document courant — recharge quand l'URL résolue change. Posée
+  // AU DÉBUT du load (pas à la fin) pour que le bloc réactif ne reboucle pas
+  // pendant le chargement ; remise à null si le load échoue/est dépassé.
   let loadedUrl: string | null = null;
 
   // ── Zoom ──────────────────────────────────────────────────────────────────
@@ -118,27 +216,58 @@
   }
 
   async function loadPdf(url: string): Promise<void> {
+    const token = ++loadToken;
+    // Invalide aussi tout RENDER en vol de l'ancien doc (zoom/pagination en
+    // cours) : un render déjà passé son garde `!pdfDoc` ne doit pas peindre
+    // l'ancien doc sur le canvas pendant le chargement du nouveau.
+    renderToken++;
+    const startedAt =
+      typeof performance !== "undefined" ? performance.now() : 0;
+
+    // #90 — RESET FRANC au switch : on bannit l'ancien-doc-résiduel. On marque
+    // l'URL cible TOUT DE SUITE (le bloc réactif ne reboucle pas), on bascule en
+    // loading et on lâche la référence à l'ancien doc → la toolbar (pager/zoom)
+    // et le canvas disparaissent, remplacés par le waiter plein-cadre. Le zoom
+    // manuel d'un doc précédent ne doit pas fuiter sur le nouveau : on repart en
+    // fit-width (régime par défaut #81).
+    loadedUrl = url;
     loading = true;
     loadError = null;
+    pdfDoc = null;
+    numPages = 0;
+    userScale = null;
+
     try {
-      const pdfjs = await import("pdfjs-dist");
-      // Worker servi par Vite via URL d'asset (pas de CDN).
-      const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
-      pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
-      const task = pdfjs.getDocument({ url, isEvalSupported: false });
-      const doc = await task.promise;
+      // #89c — réutilise le doc déjà chargé pour cette URL (cache module-level)
+      // OU le charge via le worker singleton. Pas de re-import pdf.js par open.
+      const fromCache = docCache.has(url);
+      const doc = await getCachedDocument(url);
+      if (token !== loadToken) return; // un switch plus récent a pris le pas
+
       pdfDoc = doc;
       numPages = doc.numPages;
-      loadedUrl = url;
       const initial = page && page >= 1 && page <= numPages ? page : 1;
       currentPage = initial;
       await renderPage(initial);
+      if (token !== loadToken) return;
       attachResizeObserver();
+
+      // #89 — mesure open→1ère page peinte, exposée pour la QA Playwright.
+      if (typeof performance !== "undefined") {
+        recordPerf(url, performance.now() - startedAt, fromCache);
+      }
     } catch (err) {
+      if (token !== loadToken) return; // erreur d'un load dépassé : on ignore
       loadError = err instanceof Error ? err.message : String(err);
       pdfDoc = null;
+      // On GARDE `loadedUrl = url` (posé en tête) : le bloc réactif ne doit PAS
+      // reboucler sur cette URL en échec, sinon il relancerait loadPdf en boucle
+      // et remettrait loadError à null à chaque tour → le bloc .pdf-missing ne
+      // s'afficherait jamais. L'entrée fautive a déjà été retirée du docCache
+      // (catch dans getCachedDocument) : un vrai retry refera le fetch dès que
+      // `resolvedSourceUrl` change à nouveau (réouverture d'un autre doc).
     } finally {
-      loading = false;
+      if (token === loadToken) loading = false;
     }
   }
 
@@ -453,10 +582,15 @@
   }
 
   onDestroy(() => {
+    // Invalide tout rendu/chargement en vol. On NE détruit PLUS le doc : il
+    // appartient désormais au cache module-level (#89c) et peut servir une
+    // réouverture. Le détruire ici rendrait le doc caché inutilisable
+    // (worker fermé) → crash à la prochaine ouverture du même rawRef. La
+    // mémoire est bornée par l'éviction LRU du cache.
     renderToken++;
+    loadToken++;
     resizeObserver?.disconnect();
     resizeObserver = null;
-    void pdfDoc?.destroy();
     pdfDoc = null;
   });
 </script>
@@ -557,12 +691,16 @@
         aria-label="Aperçu du document source"
         on:wheel={handleWheel}
       >
-        <div class="pdf-canvas-stage">
+        <!-- #90 — pendant le chargement (ouverture OU switch de doc), le stage
+             est masqué (visibility:hidden, garde sa place) pour ne PAS laisser
+             le canvas de l'ANCIEN doc visible sous le waiter. Le scroller reste
+             monté (mesures fit-width + ResizeObserver). -->
+        <div class="pdf-canvas-stage" class:is-loading={loading}>
           <canvas bind:this={canvasEl}></canvas>
           <div class="pdf-text-layer" bind:this={textLayerEl} aria-hidden="true"></div>
         </div>
         {#if loading}
-          <div class="pdf-loading">
+          <div class="pdf-loading" role="status" aria-live="polite">
             <Loader2 class="h-5 w-5 animate-spin" aria-hidden="true" />
             <span>Chargement de la preuve…</span>
           </div>
@@ -755,6 +893,12 @@
     background: #fff;
   }
 
+  /* #90 — masqué pendant le chargement : on garde la place (pas de reflow), mais
+     le canvas de l'ancien doc ne transparaît pas sous le waiter. */
+  .pdf-canvas-stage.is-loading {
+    visibility: hidden;
+  }
+
   .pdf-text-layer {
     position: absolute;
     inset: 0;
@@ -815,7 +959,9 @@
     justify-items: center;
     color: var(--st-semantic-text-secondary, #475569);
     font-size: 0.82rem;
-    background: rgb(226 232 240 / 0.6);
+    /* Fond OPAQUE plein-cadre (#90) : le waiter couvre franchement la zone, pas
+       de doc résiduel visible derrière au switch. */
+    background: var(--st-semantic-surface-sunken, #e2e8f0);
   }
 
   .pdf-missing {
