@@ -2,10 +2,15 @@
  * project-graph-from-s3 — projette les graphes graphify SCW dans Postgres.
  *
  * Lit `graph/<ville>/latest.json` depuis le bucket SCW (GRAPH_S3_* / SCRAPE_S3_*)
- * et appelle `upsertGraph(db, citySlug, graphJson)` pour chaque fichier qui
+ * et appelle `upsertGraphAtomic(db, citySlug, graphJson)` pour chaque fichier qui
  * contient un champ `nodes` valide.
  *
- * Idempotent : upsert ON CONFLICT, relancer est sûr.
+ * Projection ATOMIQUE par ville (anti preuves-fantômes) : upsert + suppression
+ * des nœuds/arêtes disparus + gate de non-régression de complétude (rollback de
+ * la ville si le nb de signaux complets régresse). Idempotent ; relancer est sûr.
+ *
+ * Code de sortie : exit 1 si AU MOINS une ville a été abortée (régression) OU si
+ * au moins un upsert a échoué (errors) — visibilité d'échec pour le CronJob.
  *
  * Usage :
  *   tsx src/scripts/project-graph-from-s3.ts                  # toutes les villes
@@ -30,7 +35,7 @@ import {
   createScrapeS3Client,
   S3ObjectStore,
 } from "../storage/s3-object-store.js";
-import { upsertGraph } from "../services/graph/graph-store.js";
+import { upsertGraphAtomic } from "../services/graph/graph-store.js";
 
 const decoder = new TextDecoder();
 
@@ -73,6 +78,10 @@ async function main(): Promise<void> {
   let ok = 0;
   let skipped = 0;
   let errors = 0;
+  let aborted = 0;
+  let totalDeletedNodes = 0;
+  let totalDeletedEdges = 0;
+  const abortedCities: string[] = [];
 
   for (const key of keys) {
     // Extraire le citySlug depuis la clé : graph/<citySlug>/latest.json
@@ -112,12 +121,34 @@ async function main(): Promise<void> {
     }
 
     try {
-      const result = await upsertGraph(db, citySlug, graphJson);
-      logger.info(
-        { citySlug, nodes: result.nodeCount, edges: result.edgeCount },
-        "project-graph-from-s3: ville projetée",
-      );
-      ok++;
+      const result = await upsertGraphAtomic(db, citySlug, graphJson);
+      totalDeletedNodes += result.deletedNodes;
+      totalDeletedEdges += result.deletedEdges;
+      if (result.aborted) {
+        aborted++;
+        abortedCities.push(citySlug);
+        logger.warn(
+          {
+            citySlug,
+            nodes: result.nodeCount,
+            edges: result.edgeCount,
+            reason: result.reason,
+          },
+          "project-graph-from-s3: VILLE ABORTÉE (régression de preuves, rollback)",
+        );
+      } else {
+        logger.info(
+          {
+            citySlug,
+            nodes: result.nodeCount,
+            edges: result.edgeCount,
+            deletedNodes: result.deletedNodes,
+            deletedEdges: result.deletedEdges,
+          },
+          "project-graph-from-s3: ville projetée",
+        );
+        ok++;
+      }
     } catch (err) {
       logger.error({ citySlug, key, err: String(err) }, "project-graph-from-s3: upsert échoué");
       errors++;
@@ -125,12 +156,22 @@ async function main(): Promise<void> {
   }
 
   logger.info(
-    { ok, skipped, errors, total: keys.length },
+    {
+      ok,
+      aborted,
+      skipped,
+      errors,
+      total: keys.length,
+      deletedNodes: totalDeletedNodes,
+      deletedEdges: totalDeletedEdges,
+      ...(abortedCities.length > 0 ? { abortedCities } : {}),
+    },
     "project-graph-from-s3: terminé",
   );
 
   await pool.end();
-  process.exit(errors > 0 ? 1 : 0);
+  // Visibilité d'échec : exit !=0 si au moins une ville abortée OU une erreur.
+  process.exit(aborted > 0 || errors > 0 ? 1 : 0);
 }
 
 main().catch((err) => {
