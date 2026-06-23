@@ -153,7 +153,7 @@ async function linkNode(
     (props && Array.isArray(props.refs)
       ? (props.refs as unknown[]).some((r) => isRecord(r) && hasExistingRawRef(r))
       : false);
-  if (alreadyLinked) return { status: "already-linked", docSha: docSha ?? undefined };
+  if (alreadyLinked) return { status: "already-linked", ...(docSha ? { docSha } : {}) };
 
   if (!docSha) return { status: "no-docsha" };
 
