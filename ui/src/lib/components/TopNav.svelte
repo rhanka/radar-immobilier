@@ -137,9 +137,12 @@
   Header CANONIQUE DS : `AppHeader` (la primitive de chrome du design system).
   - Conteneur / barre / hauteur / bordure / fond : 100% AppHeader (zéro layout
     bespoke, plus de `Header` + flex maison).
-  - Marque : props `brandName`/`productName`/`logoSrc` → bloc CANONIQUE
-    `st-appHeader__brand` (carré 2rem + nom poids 760 + sous-titre poids 650),
-    rendu par le DS. Plus de snippet `logo` maison ni de CSS `.topnav-brand*`
+  - Marque : `brandMode="full"` + props `brandName`/`productName`/`logoSrc` →
+    bloc CANONIQUE `st-appHeader__brand` (carré 2rem + nom poids 760 + sous-titre
+    poids 650), rendu par le DS. En mode `icon` (défaut DS) le DS rend l'IMAGE
+    SEULE et masque nom/produit → marque réduite à un glyphe (régression visible).
+    `full` restaure le nom « Radar » + sous-titre « immobilier ».
+    Plus de snippet `logo` maison ni de CSS `.topnav-brand*`
     dupliqué (gap-analysis §3.1/§5.2). Le glyphe Radar (Lucide « Radio ») vit
     dans l'asset `logoSrc` (`/radar-logo.svg`), pas en CSS consommateur.
   - Nav desktop : liens via la classe utilitaire PUBLIÉE `st-appHeader__navLink`
@@ -154,7 +157,7 @@
     compact + items Paramètres/Appareils + déconnexion).
 -->
 <AppHeader
-  brandMode="icon"
+  brandMode="full"
   brandName="Radar"
   productName="immobilier"
   logoSrc="/radar-logo.svg"
