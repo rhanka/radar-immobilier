@@ -1181,7 +1181,6 @@
           </div>
         </div>
       {/if}
-    {/if}
   </header>
 
   <div class="pdf-overlay-body">
