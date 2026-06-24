@@ -162,14 +162,9 @@
 
   // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
   /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
-  // #4 — DÉFAUT « zonage seul » (z). Les axes Multifamilial (m) et Précoce (p)
-  // sont OFF par défaut (cf. commentaires SignauxRail). L'ancien défaut "z|m|p"
-  // appliquait l'INTERSECTION des 3 → ~31 villes sur 724 (z∩m∩p), masquant la
-  // quasi-totalité du parc. La vue resserrée « prioritaires » reste atteignable
-  // en cochant Multifamilial + Précoce.
-  const FILTER_DEFAULT = "z";
+  const FILTER_DEFAULT = "z|m|p";
   const FILTER_LS_KEY = "signaux-filter-subset";
-  let activeSubsetKey = FILTER_DEFAULT; // défaut : zonage seul
+  let activeSubsetKey = FILTER_DEFAULT; // défaut : 3 filtres cochés
 
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
