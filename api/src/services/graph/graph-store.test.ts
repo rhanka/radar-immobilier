@@ -687,6 +687,22 @@ describe("isZonageSignal", () => {
     expect(isZonageSignal("Signal", "vente_institutionnelle")).toBe(false);
   });
 
+  it("#4 — Signal category=NULL mais etape de zonage → true (repli etape)", () => {
+    expect(isZonageSignal("Signal", null, "derogation_mineure")).toBe(true);
+    expect(isZonageSignal("Signal", undefined, "rezonage")).toBe(true);
+    expect(isZonageSignal("Signal", "", "cptaq")).toBe(true);
+  });
+
+  it("#4 — Signal sans category ni etape de zonage → false", () => {
+    expect(isZonageSignal("Signal", null, null)).toBe(false);
+    expect(isZonageSignal("Signal", null, "vente_terrain")).toBe(false);
+    expect(isZonageSignal("Signal", "acquisition_fonciere", "infrastructure")).toBe(false);
+  });
+
+  it("#4 — category de zonage suffit même si etape hors-zonage", () => {
+    expect(isZonageSignal("Signal", "rezonage", "vente_terrain")).toBe(true);
+  });
+
   it("ZONAGE_CATEGORIES contient exactement les 15 catégories attendues", () => {
     expect(ZONAGE_CATEGORIES).toHaveLength(15);
     expect(ZONAGE_CATEGORIES).toContain("rezonage");

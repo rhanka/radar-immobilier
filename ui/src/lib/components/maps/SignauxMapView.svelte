@@ -79,8 +79,16 @@
     fallbackZoneCode,
     opacityForSelectionKey,
     withCityFallbackZone,
+    filterDimsProjection,
+    FILTER_DIMMED_OPACITY,
   } from "$lib/maps/signaux-map-geo.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import {
+    geometryBounds,
+    isDegenerateBounds,
+    QUEBEC_PROVINCE_BOUNDS,
+    type LngLatBoundsTuple,
+  } from "$lib/maps/geometry-bounds.js";
   import type { GeoJsonGeometry } from "$lib/maps/cadastre-geojson-source.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
@@ -238,6 +246,18 @@
     : detailNodes;
   $: displayedLots = buildDisplayedLots(filteredDetailNodes);
 
+  /**
+   * #4 — Le filtre RESTREINT réellement l'ensemble quand il porte un axe « z »
+   * (zonage) ou « m » (multifamilial). L'axe « p » (précoce) est neutre côté
+   * client (ne masque rien) → il ne déclenche pas d'atténuation carto.
+   */
+  $: filterActive =
+    activeSubsetKey.includes("z") || activeSubsetKey.includes("m");
+  /** True si au moins un lot affiché porte une projection de signal (#4). */
+  $: hasProjectedLot = displayedLots.features.some(
+    (lot) => (lot.properties.signalProjection ?? "none") !== "none",
+  );
+
   // ── #91 — Navigation par signal du viewer de preuve ────────────────────────
   // Source de vérité de la nav : la liste FILTRÉE (ordre du pane droit). Le
   // viewer la reçoit + l'index courant et NE refiltre pas. navSignals est
@@ -391,6 +411,63 @@
       zoom: 12,
       duration: 800,
     });
+  }
+
+  /**
+   * #12/#13 — Cadre la caméra MapLibre sur une bbox WGS-84. Si la bbox est
+   * dégénérée (zone sans géométrie → un seul point), on retombe sur un `flyTo`
+   * centré pour éviter le sur-zoom MapLibre (fitBounds sur un point zoome à fond).
+   */
+  function fitMapToBounds(
+    bounds: LngLatBoundsTuple,
+    options: { maxZoom?: number; duration?: number } = {},
+  ): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      fitBounds: (
+        b: LngLatBoundsTuple,
+        opts: { padding: number; duration: number; maxZoom?: number },
+      ) => void;
+      flyTo: (o: { center: [number, number]; zoom: number; duration: number }) => void;
+    };
+    const duration = options.duration ?? 600;
+    if (isDegenerateBounds(bounds)) {
+      m.flyTo({ center: bounds[0], zoom: 14, duration });
+      return;
+    }
+    m.fitBounds(bounds, {
+      padding: 40,
+      duration,
+      maxZoom: options.maxZoom ?? 15,
+    });
+  }
+
+  /**
+   * #12 — Zoome sur l'étendue d'une zone sélectionnée. La feature de zone porte
+   * sa propre `geometry` ; on calcule sa bbox via `geometryBounds`. Une zone
+   * désignée sans polygone (geometry === null) renvoie une bbox nulle → on
+   * retombe sur le centroïde ville (cadrage stable, pas de sur-zoom).
+   */
+  function zoomToZone(citySlug: string, code: string): void {
+    if (!mapInstance || !mapReady) return;
+    const zone = zonesResponse?.featureCollection.features.find(
+      (f) => f.properties.citySlug === citySlug && f.properties.code === code,
+    );
+    const bounds = geometryBounds(zone?.geometry ?? null);
+    if (bounds) {
+      fitMapToBounds(bounds);
+      return;
+    }
+    // Repli : zone sans géométrie → recentre sur la ville sélectionnée.
+    if (selectedCity) flyToCity(selectedCity);
+  }
+
+  /**
+   * #13 — Retour à l'échelle province : cadre la caméra sur l'étendue du Québec.
+   * Symétrique de `flyToCity` / `zoomToZone` pour la transition « Province ».
+   */
+  function flyToProvince(): void {
+    fitMapToBounds(QUEBEC_PROVINCE_BOUNDS, { maxZoom: 7, duration: 800 });
   }
 
   type MapLayerEvent = {
@@ -662,7 +739,7 @@
     }
   }
 
-  function clearSelection(): void {
+  function clearSelection(options: { recenter?: boolean } = {}): void {
     selectedCity = null;
     pendingRouteZoneKey = null;
     detailNodes = [];
@@ -676,6 +753,10 @@
     selectionState = createSelectionBucketState();
     updateFillColors();
     updateGeoLayers();
+    // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
+    // au montage initial appelle clearSelection sans vouloir animer la carte
+    // (elle démarre déjà au niveau province), d'où le garde `recenter`.
+    if (options.recenter !== false) flyToProvince();
   }
 
   /**
@@ -746,6 +827,13 @@
 
   function focusBucketKey(key: SelectionKey | null): void {
     selectionState = setFocus(selectionState, key);
+    // #11 — propage immédiatement le highlight géo (zones/lots du signal focusé)
+    // à MapLibre. Le bloc réactif sur focusedSignal*Refs couvre déjà ce cas,
+    // mais l'appel explicite garantit la mise à jour même si la réactivité ne
+    // re-déclenche pas (ex. même set de refs réassigné). Idempotent.
+    updateGeoLayers();
+    // #12 — si on focalise une zone, cadrer la caméra dessus.
+    if (key) zoomToSelectionKey(key);
   }
 
   function openDocument(ref: SignalDocRef): void {
@@ -875,9 +963,26 @@
     const wasSelected = selectionState.selectedKeys.has(key);
     selectionState = toggleSelection(selectionState, key);
     selectionState = setFocus(selectionState, wasSelected ? null : key);
-    if (!wasSelected) syncRouteForSelectionKey(key);
+    if (!wasSelected) {
+      syncRouteForSelectionKey(key);
+      // #12 — zoom sur la zone qu'on vient de sélectionner (pas au déselect).
+      zoomToSelectionKey(key);
+    }
     updateFillColors();
     updateGeoLayers();
+  }
+
+  /**
+   * #12 — Si la clé désigne une zone, cadre la caméra sur son étendue. Centralisé
+   * ici pour que tous les chemins de sélection de zone (clic carte, segmented
+   * control « Zone », restauration d'URL) zooment de façon cohérente.
+   */
+  function zoomToSelectionKey(key: SelectionKey): void {
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== "zone") return;
+    const sep = parsed.id.indexOf("/");
+    if (sep <= 0 || sep === parsed.id.length - 1) return;
+    zoomToZone(parsed.id.slice(0, sep), parsed.id.slice(sep + 1));
   }
 
   function routeKey(route: GeoRoute): string {
@@ -892,7 +997,10 @@
     appliedGeoRouteKey = key;
 
     if (route.level === "region") {
-      clearSelection();
+      // Au montage / restauration d'URL, la carte démarre déjà au niveau
+      // province : pas d'animation forcée (recenter:false). Le dézoom animé
+      // est piloté par le clic explicite « Province » (handleGeoLevelClick).
+      clearSelection({ recenter: false });
       return;
     }
 
@@ -918,6 +1026,9 @@
     selectionState = setFocus(selectionState, key);
     updateFillColors();
     updateGeoLayers();
+    // #12 — cadrage caméra sur la zone (segmented control « Zone », restauration
+    // d'URL /geo/zone/...). No-op si la clé n'est pas une zone.
+    zoomToSelectionKey(key);
   }
 
   function applyPendingRouteZone(): void {
@@ -973,6 +1084,11 @@
     signalLotRefs: ReadonlySet<string> = focusedSignalLotRefs,
   ): ExpressionSpecification {
     const hasSignalFocus = signalLotRefs.size > 0;
+    const hasSelection = selectionState.selectedKeys.size > 0;
+    // #4 — atténuation par filtre uniquement quand ni focus signal ni sélection
+    // active ne pilotent déjà l'opacité (ceux-ci priment et portent leur propre
+    // logique de contraste).
+    const dimByFilter = !hasSignalFocus && !hasSelection && filterActive && hasProjectedLot;
     const expr: unknown[] = ["match", ["get", "noLot"]];
     const citySlug = selectedCity?.municipality.slug;
     for (const lot of lots.features) {
@@ -980,13 +1096,19 @@
       let opacity: number;
       if (hasSignalFocus) {
         opacity = signalLotRefs.has(noLot) ? 0.85 : 0.15;
+      } else if (
+        dimByFilter &&
+        filterDimsProjection(lot.properties.signalProjection, true, true)
+      ) {
+        // Lot sans projection de signal alors qu'un filtre restreint est actif.
+        opacity = FILTER_DIMMED_OPACITY;
       } else {
         const key = lotSelectionKey(noLot, lot.properties.citySlug ?? citySlug);
         opacity = key ? opacityForSelectionKey(selectionState, key, 0.36) : 0.36;
       }
       expr.push(noLot, opacity);
     }
-    expr.push(hasSignalFocus ? 0.12 : (selectionState.selectedKeys.size > 0 ? 0.5 : 0.36));
+    expr.push(hasSignalFocus ? 0.12 : (hasSelection ? 0.5 : 0.36));
     return expr as ExpressionSpecification;
   }
 
@@ -1334,7 +1456,7 @@
       {lotsResponse}
       {selectionState}
       {activeSubsetKey}
-      onClear={clearSelection}
+      onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
