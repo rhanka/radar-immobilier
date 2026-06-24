@@ -954,105 +954,45 @@
 <div class="pdf-overlay" aria-label="Preuve documentaire" role="dialog" aria-modal="true">
   <header class="pdf-overlay-head">
     <div class="pdf-overlay-head-row">
-    <div class="pdf-overlay-title-block">
-      <span class="pdf-overlay-kicker">Preuve</span>
-      <h2 class="pdf-overlay-title">{title}</h2>
-      <div class="pdf-overlay-meta">
-        <span>Date : {documentDate ?? "non disponible"}</span>
-        {#if pdfDoc && numPages > 0}
-          <span>Page {currentPage} / {numPages}</span>
-        {:else if page}
-          <span>Page : {page}</span>
+      <div class="pdf-overlay-title-block">
+        <span class="pdf-overlay-kicker">Preuve</span>
+        <h2 class="pdf-overlay-title">{title}</h2>
+        <div class="pdf-overlay-meta">
+          <span>Date : {documentDate ?? "non disponible"}</span>
+          {#if provisional}
+            <!-- Filet Radar : mention DISCRÈTE d'un PV auto-lié (à confirmer). -->
+            <span
+              class="pdf-overlay-autolink"
+              title="PV rattaché automatiquement par Radar (à confirmer) — distinct d'une citation vérifiée."
+              aria-label="Source liée automatiquement par le filet Radar, à confirmer"
+            >
+              Lien automatique
+            </span>
+          {/if}
+        </div>
+      </div>
+
+      <div class="pdf-overlay-actions" aria-label="Actions globales">
+        {#if sourceUrl}
+          <a class="pdf-open-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+            Ouvrir <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
         {/if}
-        {#if provisional}
-          <!-- Filet Radar : mention DISCRÈTE d'un PV auto-lié (à confirmer). -->
-          <span
-            class="pdf-overlay-autolink"
-            title="PV rattaché automatiquement par Radar (à confirmer) — distinct d'une citation vérifiée."
-            aria-label="Source liée automatiquement par le filet Radar, à confirmer"
-          >
-            Lien automatique
-          </span>
-        {/if}
+        <button
+          type="button"
+          class="pdf-overlay-close"
+          on:click={onClose}
+          aria-label="Fermer la preuve documentaire"
+        >
+          <X class="h-4 w-4" aria-hidden="true" />
+        </button>
       </div>
     </div>
 
-    <div class="pdf-overlay-actions">
-      {#if pdfDoc && numPages > 1}
-        <div class="pdf-pager" role="group" aria-label="Navigation des pages">
-          <button
-            type="button"
-            class="pdf-pager-btn"
-            on:click={goPrev}
-            disabled={currentPage <= 1}
-            aria-label="Page précédente"
-          >
-            <ChevronLeft class="h-4 w-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="pdf-pager-btn"
-            on:click={goNext}
-            disabled={currentPage >= numPages}
-            aria-label="Page suivante"
-          >
-            <ChevronRight class="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      {/if}
-      {#if pdfDoc}
-        <div class="pdf-zoom" role="group" aria-label="Zoom du document">
-          <button
-            type="button"
-            class="pdf-pager-btn"
-            on:click={zoomOut}
-            disabled={scale <= MIN_SCALE + 0.001}
-            aria-label="Dézoomer"
-          >
-            <Minus class="h-4 w-4" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="pdf-zoom-level"
-            on:click={resetZoom}
-            title="Revenir à l'ajustement à la largeur"
-            aria-label="Niveau de zoom {Math.round(scale * 100)} pour cent, cliquer pour ajuster à la largeur"
-          >
-            {Math.round(scale * 100)}%
-          </button>
-          <button
-            type="button"
-            class="pdf-pager-btn"
-            on:click={zoomIn}
-            disabled={scale >= MAX_SCALE - 0.001}
-            aria-label="Zoomer"
-          >
-            <Plus class="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      {/if}
-      {#if sourceUrl}
-        <a class="pdf-open-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
-          Ouvrir <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
-        </a>
-      {/if}
-      <button
-        type="button"
-        class="pdf-overlay-close"
-        on:click={onClose}
-        aria-label="Fermer la preuve documentaire"
-      >
-        <X class="h-4 w-4" aria-hidden="true" />
-      </button>
-    </div>
-    </div>
-
-    {#if hasNav && currentNavSignal}
-      <!-- #91 — RANGÉE NAV : nav-signal (primaire) + compteur i/N + pastille,
-           nav-page (secondaire), indicateur PDF i/N (multi-doc), toggle
-           hors-filtre. Reflet lecture-seule du filtre actif (navSignals). -->
-      <div class="pdf-overlay-nav" role="group" aria-label="Navigation par signal">
-        <div class="pdf-nav-signal">
+    <!-- Rangée contrôle : parcours signal → document/page → zoom → filtre. -->
+    <div class="pdf-overlay-nav" role="group" aria-label="Contrôles de navigation du document">
+      {#if hasNav && currentNavSignal}
+        <div class="pdf-nav-signal" aria-label="Navigation par signal">
           <button
             type="button"
             class="pdf-pager-btn pdf-nav-signal-btn"
@@ -1095,15 +1035,83 @@
             <ChevronsRight class="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
+      {/if}
 
-        {#if isMultiDoc}
-          <span class="pdf-nav-pdfcount" title="Document {currentDocRank} sur {navDocCount}">
-            PDF {currentDocRank}/{navDocCount}
-          </span>
+      {#if isMultiDoc}
+        <span class="pdf-nav-pdfcount" title="Document {currentDocRank} sur {navDocCount}">
+          PDF {currentDocRank}/{navDocCount}
+        </span>
+      {/if}
+
+      <div class="pdf-pager pdf-page-group" role="group" aria-label="Navigation des pages">
+        {#if pdfDoc && numPages > 1}
+          <button
+            type="button"
+            class="pdf-pager-btn"
+            on:click={goPrev}
+            disabled={currentPage <= 1}
+            aria-label="Page précédente"
+          >
+            <ChevronLeft class="h-4 w-4" aria-hidden="true" />
+          </button>
         {/if}
+        <span class="pdf-page-indicator">
+          {#if pdfDoc && numPages > 0}
+            Page {currentPage}/{numPages}
+          {:else if page}
+            Page {page}
+          {:else}
+            Page —
+          {/if}
+        </span>
+        {#if pdfDoc && numPages > 1}
+          <button
+            type="button"
+            class="pdf-pager-btn"
+            on:click={goNext}
+            disabled={currentPage >= numPages}
+            aria-label="Page suivante"
+          >
+            <ChevronRight class="h-4 w-4" aria-hidden="true" />
+          </button>
+        {/if}
+      </div>
 
-        <span class="pdf-nav-spacer"></span>
+      {#if pdfDoc}
+        <div class="pdf-zoom" role="group" aria-label="Zoom du document">
+          <button
+            type="button"
+            class="pdf-pager-btn"
+            on:click={zoomOut}
+            disabled={scale <= MIN_SCALE + 0.001}
+            aria-label="Dézoomer"
+          >
+            <Minus class="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="pdf-zoom-level"
+            on:click={resetZoom}
+            title="Revenir à l'ajustement à la largeur"
+            aria-label="Niveau de zoom {Math.round(scale * 100)} pour cent, cliquer pour ajuster à la largeur"
+          >
+            {Math.round(scale * 100)}%
+          </button>
+          <button
+            type="button"
+            class="pdf-pager-btn"
+            on:click={zoomIn}
+            disabled={scale >= MAX_SCALE - 0.001}
+            aria-label="Zoomer"
+          >
+            <Plus class="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      {/if}
 
+      <span class="pdf-nav-spacer"></span>
+
+      {#if hasNav && currentNavSignal}
         <button
           type="button"
           class="pdf-nav-toggle"
@@ -1121,7 +1129,8 @@
           {/if}
           <span>Hors-filtre</span>
         </button>
-      </div>
+      {/if}
+    </div>
 
       {#if navMenuOpen}
         <!-- Menu déroulant « aller à » : scrollable, GROUPÉ PAR DOCUMENT,
@@ -1651,6 +1660,22 @@
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
+  }
+
+  .pdf-page-group {
+    padding: 0.15rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-md, 6px);
+    background: var(--st-semantic-surface-default, #fff);
+  }
+
+  .pdf-page-indicator {
+    min-width: 5.6rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.74rem;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
   }
 
   .pdf-zoom-level {
