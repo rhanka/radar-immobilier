@@ -5,7 +5,7 @@
  * le contrat observable est :
  *   1. parseGeoQuery lit filter.subset=z&filter.subset=m → subsetKey "z|m"
  *   2. localStorage["signaux-filter-subset"] est lu en repli si pas d'URL
- *   3. Le défaut (aucune URL, aucun localStorage) est "z|m|p"
+ *   3. Le défaut (aucune URL, aucun localStorage) est "z" (zonage seul — #4)
  *
  * Ce test valide le contrat en utilisant directement parseGeoQuery (exporté).
  *
@@ -17,7 +17,8 @@ import { parseGeoQuery, normalizeGeoRouteState } from "./geo-route.js";
 // ── Helpers ────────────────────────────────────────────────────────��─────────
 
 const FILTER_LS_KEY = "signaux-filter-subset";
-const FILTER_DEFAULT = "z|m|p";
+// #4 — défaut « zonage seul » (z), aligné sur FILTER_DEFAULT de SignauxMapView.
+const FILTER_DEFAULT = "z";
 
 /**
  * Réplique du contrat subsetKeyFromRoute de SignauxMapView.
@@ -105,12 +106,12 @@ describe("subsetKeyFromRoute — priorité URL > localStorage > défaut", () => 
     expect(subsetKeyFromRoute(emptyFiltersState)).toBe("z|m");
   });
 
-  it("pas de subset dans URL, aucun localStorage → défaut 'z|m|p'", () => {
+  it("pas de subset dans URL, aucun localStorage → défaut 'z'", () => {
     const emptyFiltersState = normalizeGeoRouteState({});
     expect(subsetKeyFromRoute(emptyFiltersState)).toBe(FILTER_DEFAULT);
   });
 
-  it("route=null → défaut 'z|m|p'", () => {
+  it("route=null → défaut 'z'", () => {
     expect(subsetKeyFromRoute(null)).toBe(FILTER_DEFAULT);
   });
 

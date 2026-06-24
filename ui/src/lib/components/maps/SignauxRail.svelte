@@ -44,8 +44,12 @@
   /** Chargement du détail de ville. */
   export let detailLoading = false;
 
-  /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
-  export let initialSubsetKey = "z|m|p";
+  /**
+   * Clé de filtre initiale (restaurée depuis l'URL au rechargement de page).
+   * Défaut « z » (zonage seul) — cf. FILTER_DEFAULT dans SignauxMapView (#4).
+   * Multifamilial/Précoce restent OFF par défaut (intersection trop stricte).
+   */
+  export let initialSubsetKey = "z";
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */

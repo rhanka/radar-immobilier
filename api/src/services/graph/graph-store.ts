@@ -971,15 +971,29 @@ export const ZONAGE_CATEGORIES: readonly string[] = [
 const ZONAGE_CATEGORIES_SET = new Set(ZONAGE_CATEGORIES);
 
 /**
- * Détermine si un nœud signal (type + category) est de zonage.
+ * Détermine si un nœud signal (type + category + etape) est de zonage.
  *
  * - `DesignationEvent` → toujours zonage
  * - `Signal` + category ∈ ZONAGE_CATEGORIES → zonage
- * - `Signal` sans category ou category hors liste → non-zonage
+ * - `Signal` + etape ∈ ZONAGE_CATEGORIES → zonage  (replis sur l'étape annotée)
+ * - `Signal` sans category NI etape de zonage → non-zonage
+ *
+ * Élargissement (#4 — filtre zonage trop strict) : ~1700/3294 Signal ont
+ * `category=NULL` en prod alors que leur `etape` annotée (v2.1) porte une valeur
+ * de zonage (ex. `derogation_mineure`). Tester uniquement `category` masquait
+ * ces dérogations légitimes (ex. saint-anicet : 9 signaux `etape=derogation_mineure`,
+ * `category=NULL`). On accepte donc l'une OU l'autre source, sur le même
+ * vocabulaire ZONAGE_CATEGORIES.
  */
-export function isZonageSignal(type: string, category: string | null | undefined): boolean {
+export function isZonageSignal(
+  type: string,
+  category: string | null | undefined,
+  etape?: string | null | undefined,
+): boolean {
   if (type === "DesignationEvent") return true;
-  if (type === "Signal" && category) return ZONAGE_CATEGORIES_SET.has(category);
+  if (type !== "Signal") return false;
+  if (category && ZONAGE_CATEGORIES_SET.has(category)) return true;
+  if (etape && ZONAGE_CATEGORIES_SET.has(etape)) return true;
   return false;
 }
 
@@ -1250,7 +1264,10 @@ export async function listCitiesWithSignalNodes(
     entry.signalCount += 1;
 
     // Calcule les 3 flags booléens pour CE signal individuel.
-    const z = isZonageSignal(row.type, row.category);
+    // #4 — `etapeAnnote` (props.properties.etape) sert de repli quand `category`
+    // est NULL (cas majoritaire en prod) pour ne pas masquer des signaux de
+    // zonage légitimes.
+    const z = isZonageSignal(row.type, row.category, row.etapeAnnote);
     const m = isMulti4Plus(row.type, row.nbUnitesMax, row.intensite);
     const p = isPrecoceSignal(row.etapeAnnote, row.label, row.description);
 
