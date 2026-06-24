@@ -89,6 +89,21 @@ describe("nodeIsZonage", () => {
   it("catégorie 'patrimoine' est zonage", () => {
     expect(nodeIsZonage(signalWithCategory("patrimoine"))).toBe(true);
   });
+
+  it("#4 — Signal sans category mais etape de zonage est zonage (repli etape)", () => {
+    expect(
+      nodeIsZonage(makeNode({ props: { etape: "derogation_mineure" } })),
+    ).toBe(true);
+  });
+
+  it("#4 — Signal avec etape hors-zonage n'est pas zonage", () => {
+    expect(nodeIsZonage(makeNode({ props: { etape: "vente" } }))).toBe(false);
+  });
+
+  it("#4 — category prime mais etape sert de repli (category NULL)", () => {
+    // category absente, etape présente → zonage
+    expect(nodeIsZonage(makeNode({ props: { etape: "rezonage" } }))).toBe(true);
+  });
 });
 
 // ── nodeIsMulti4 ─────────────────────────────────────────────────────────────
