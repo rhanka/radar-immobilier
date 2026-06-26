@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   SCORE_STOPS,
   lotFillColorExpression,
+  signauxLotFillColorExpression,
   lotFillOpacityExpression,
   lotLineColorExpression,
   colorForScore,
@@ -32,7 +33,7 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     const expr = lotFillColorExpression();
     expect(expr[0]).toBe("interpolate");
     expect(expr[1]).toEqual(["linear"]);
-    expect(expr[2]).toEqual(["get", "potentialScore"]);
+    expect(expr[2]).toEqual(["coalesce", ["get", "potentialScore"], 0]);
     // header (3) + 2 entries (stop,color) per stop
     expect(expr.length).toBe(3 + SCORE_STOPS.length * 2);
   });
@@ -42,6 +43,15 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     // colors at odd positions after the 3-item header
     expect(expr).toContain(SCORE_STOPS[0].fallback);
     expect(expr).toContain(SCORE_STOPS[SCORE_STOPS.length - 1].fallback);
+  });
+
+  it("builds a Signaux fill expression that highlights 4+∩TOD before score ramp", () => {
+    const expr = signauxLotFillColorExpression(null);
+    expect(expr[0]).toBe("case");
+    expect(expr).toContain("multifamilial4plus");
+    expect(expr).toContain("tod");
+    expect(expr).toContain("#16a34a");
+    expect(expr[expr.length - 1]).toEqual(lotFillColorExpression(null));
   });
 
   it("opacity expression boosts priorité lots", () => {
