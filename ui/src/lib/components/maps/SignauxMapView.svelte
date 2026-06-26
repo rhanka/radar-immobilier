@@ -84,6 +84,10 @@
   } from "$lib/maps/signaux-map-geo.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
   import {
+    lotLineColorExpression,
+    signauxLotFillColorExpression,
+  } from "$lib/maps/score-color-scale.js";
+  import {
     geometryBounds,
     isDegenerateBounds,
     QUEBEC_PROVINCE_BOUNDS,
@@ -1186,20 +1190,7 @@
         type: "fill",
         source: "selected-lots",
         paint: {
-          "fill-color": [
-            "case",
-            ["==", ["get", "signalProjection"], "direct"],
-            "#dc2626",
-            ["==", ["get", "signalProjection"], "inherited"],
-            "#f59e0b",
-            ["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]],
-            "#e67e22",
-            ["==", ["get", "multifamilial4plus"], true],
-            "#27ae60",
-            ["==", ["get", "tod"], true],
-            "#2980b9",
-            "#64748b",
-          ],
+          "fill-color": signauxLotFillColorExpression(mapContainer) as never,
           "fill-opacity": buildLotOpacityExpression(lots),
           "fill-outline-color": "#ffffff",
         },
@@ -1211,7 +1202,7 @@
         type: "line",
         source: "selected-lots",
         paint: {
-          "line-color": "#334155",
+          "line-color": lotLineColorExpression(mapContainer) as never,
           "line-width": 0.4,
           "line-opacity": 0.35,
         },
@@ -1219,7 +1210,9 @@
     }
 
     m.setPaintProperty("selected-zones-fill", "fill-opacity", buildZoneOpacityExpression(zones.features));
+    m.setPaintProperty("selected-lots-fill", "fill-color", signauxLotFillColorExpression(mapContainer));
     m.setPaintProperty("selected-lots-fill", "fill-opacity", buildLotOpacityExpression(lots));
+    m.setPaintProperty("selected-lots-outline", "line-color", lotLineColorExpression(mapContainer));
   }
 
   async function loadGeoForCity(citySlug: string): Promise<void> {

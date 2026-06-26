@@ -60,6 +60,15 @@ export const SCORE_STOPS: ScoreStop[] = [
 /** Token DS du contour de lot prioritaire (accent fort). */
 export const PRIORITY_LINE_TOKEN = "--st-semantic-feedback-warning";
 export const PRIORITY_LINE_FALLBACK = "#d97706";
+/** Token DS pour un lot directement cité par un signal. */
+export const SIGNAL_DIRECT_TOKEN = "--st-semantic-error";
+export const SIGNAL_DIRECT_FALLBACK = "#ef4444";
+/** Token DS pour un lot hérité d’une zone citée par un signal. */
+export const SIGNAL_INHERITED_TOKEN = "--st-semantic-feedback-warning";
+export const SIGNAL_INHERITED_FALLBACK = "#d97706";
+/** Token DS pour le critère CS-L1: multifamilial 4+ ∩ TOD. */
+export const LOT_4PLUS_TOD_TOKEN = "--st-semantic-feedback-success";
+export const LOT_4PLUS_TOD_FALLBACK = "#16a34a";
 /** Token DS du contour de lot ordinaire. */
 export const DEFAULT_LINE_TOKEN = "--st-semantic-action-primary";
 export const DEFAULT_LINE_FALLBACK = "#2563eb";
@@ -89,11 +98,33 @@ export function resolveToken(token: string, fallback: string, el?: Element | nul
  * qui tient à l'échelle (>200 lots) là où l'ancien SVG capait à 200.
  */
 export function lotFillColorExpression(el?: Element | null): StyleExpression {
-  const expr: unknown[] = ["interpolate", ["linear"], ["get", "potentialScore"]];
+  const expr: unknown[] = ["interpolate", ["linear"], ["coalesce", ["get", "potentialScore"], 0]];
   for (const s of SCORE_STOPS) {
     expr.push(s.stop, resolveToken(s.token, s.fallback, el));
   }
   return expr;
+}
+
+
+/**
+ * Couleur de remplissage Signaux pour les lots.
+ *
+ * Ordre produit :
+ * 1. signal direct / hérité : le focus de signal reste prioritaire ;
+ * 2. CS-L1 : intersection multifamilial 4+ ∩ TOD surlignée par token DS ;
+ * 3. sinon rampe data-driven du score potentiel 0–10.
+ */
+export function signauxLotFillColorExpression(el?: Element | null): StyleExpression {
+  return [
+    "case",
+    ["==", ["get", "signalProjection"], "direct"],
+    resolveToken(SIGNAL_DIRECT_TOKEN, SIGNAL_DIRECT_FALLBACK, el),
+    ["==", ["get", "signalProjection"], "inherited"],
+    resolveToken(SIGNAL_INHERITED_TOKEN, SIGNAL_INHERITED_FALLBACK, el),
+    ["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]],
+    resolveToken(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, el),
+    lotFillColorExpression(el),
+  ];
 }
 
 /** Opacité data-driven : les lots prioritaires ressortent plus fort. */
