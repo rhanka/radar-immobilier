@@ -846,6 +846,19 @@
 
 
 <style>
+  /*
+   * Typographie panneau Signaux alignée DS.
+   * Les tailles de texte ne sont plus portées par des rem dispersés : les
+   * classes consomment ces aliases raccordés aux tokens DS.
+   */
+  .sel {
+    --signaux-fs-overline: var(--st-component-label-fontSize, 0.6875rem);
+    --signaux-fs-caption: var(--st-component-caption-fontSize, 0.6875rem);
+    --signaux-fs-small: var(--st-component-tag-fontSize, 0.75rem);
+    --signaux-fs-body: var(--st-component-body-sm-fontSize, 0.8125rem);
+    --signaux-fs-title: var(--st-component-title-sm-fontSize, 1rem);
+  }
+
   .sel {
     display: flex;
     flex-direction: column;
@@ -866,7 +879,7 @@
   .sel-kicker {
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-size: 0.7rem;
+    font-size: var(--signaux-fs-overline);
     font-weight: 700;
     color: var(--st-semantic-text-muted, #94a3b8);
   }
@@ -875,7 +888,7 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     padding: 0.2rem 0.5rem;
     border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
     border-radius: var(--st-radius-sm, 4px);
@@ -892,14 +905,14 @@
   .sel-empty {
     padding: 0.6rem 0.85rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.82rem;
+    font-size: var(--signaux-fs-body);
     font-style: italic;
   }
 
   .sel-warning {
     margin: 0.35rem 0.85rem;
     color: #92400e;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
   }
 
   .sel-alert {
@@ -913,14 +926,14 @@
   }
 
   .sel-city-title {
-    font-size: 1.05rem;
+    font-size: var(--signaux-fs-title);
     font-weight: 600;
     color: var(--st-semantic-text-primary, #1e293b);
     margin: 0.2rem 0 0.3rem;
   }
 
   .sel-city-meta {
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     color: var(--st-semantic-text-muted, #94a3b8);
     margin: 0.15rem 0 0.45rem;
   }
@@ -936,7 +949,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 0.85rem;
-    font-size: 0.82rem;
+    font-size: var(--signaux-fs-body);
     color: var(--st-semantic-text-muted, #94a3b8);
   }
 
@@ -957,7 +970,7 @@
     cursor: pointer;
     user-select: none;
     background: var(--st-semantic-surface-subtle, #f8fafc);
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     font-weight: 600;
     color: var(--st-semantic-text-secondary, #475569);
     list-style: none;
@@ -969,7 +982,7 @@
 
   .sel-bucket-head::before {
     content: "▸";
-    font-size: 0.6rem;
+    font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-muted, #94a3b8);
     transition: transform 0.12s ease;
     flex-shrink: 0;
@@ -989,7 +1002,7 @@
 
   .rail-row-count {
     font-variant-numeric: tabular-nums;
-    font-size: 0.7rem;
+    font-size: var(--signaux-fs-overline);
     border-radius: var(--st-radius-pill, 999px);
     flex-shrink: 0;
     background: var(--st-semantic-surface-subtle, #f1f5f9);
@@ -1025,7 +1038,7 @@
     gap: 0.15rem;
     width: 100%;
     padding: 0.34rem 0.85rem;
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     text-align: left;
     cursor: pointer;
     background: transparent;
@@ -1054,7 +1067,7 @@
   /* #10 — titre complet, sans troncature */
   .sel-entity-label {
     width: 100%;
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     line-height: 1.4;
     word-break: break-word;
     overflow-wrap: anywhere;
@@ -1065,12 +1078,12 @@
     width: 100%;
     color: var(--st-semantic-text-muted, #94a3b8);
     font-family: var(--st-font-mono, ui-monospace, monospace);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
   }
 
   /* #10 — l'indicateur de toggle reste discret, aligné à gauche dans la colonne */
   .sel-entity-toggle {
-    font-size: 0.62rem;
+    font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-muted, #94a3b8);
     align-self: flex-end;
     margin-top: 0.1rem;
@@ -1101,7 +1114,7 @@
 
   .signal-id-key {
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 650;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1111,7 +1124,7 @@
     overflow: hidden;
     max-width: 12rem;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.7rem;
+    font-size: var(--signaux-fs-overline);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -1121,14 +1134,14 @@
     border-radius: 999px;
     background: var(--st-semantic-warning-surface, #fef3c7);
     color: var(--st-semantic-warning-text, #92400e);
-    font-size: 0.64rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 700;
   }
 
   .entity-summary {
     margin: 0 0 0.45rem;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     line-height: 1.45;
   }
 
@@ -1146,7 +1159,7 @@
 
   .entity-meta-key {
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -1155,7 +1168,7 @@
     min-width: 0;
     overflow: hidden;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.76rem;
+    font-size: var(--signaux-fs-small);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -1175,7 +1188,7 @@
     display: block;
     margin-bottom: 0.35rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1185,14 +1198,14 @@
     display: block;
     margin: 0.45rem 0 0.25rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 700;
   }
 
   .doc-refs-empty {
     margin: 0;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     font-style: italic;
   }
 
@@ -1218,7 +1231,7 @@
     min-height: 1.25rem;
     border-radius: var(--st-radius-sm, 4px);
     padding: 0.05rem 0.35rem;
-    font-size: 0.66rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 650;
     line-height: 1.25;
   }
@@ -1249,7 +1262,7 @@
     background: #f0fdfa;
     color: #0f766e;
     cursor: pointer;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     font-weight: 650;
     padding: 0.2rem 0.55rem;
   }
@@ -1275,7 +1288,7 @@
     border-radius: var(--st-radius-sm, 4px);
     background: var(--st-semantic-surface-subtle, #f8fafc);
     color: var(--st-semantic-text-muted, #64748b);
-    font-size: 0.72rem;
+    font-size: var(--signaux-fs-caption);
     line-height: 1.4;
     padding: 0.4rem 0.55rem;
   }
@@ -1307,7 +1320,7 @@
     background: transparent;
     color: #0f766e;
     cursor: pointer;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     font-weight: 600;
     text-decoration: none;
   }
@@ -1319,7 +1332,7 @@
   .doc-ref-sha {
     color: var(--st-semantic-text-muted, #94a3b8);
     font-family: var(--st-font-mono, ui-monospace, monospace);
-    font-size: 0.72rem;
+    font-size: var(--signaux-fs-caption);
   }
 
   .doc-ref-excerpt {
@@ -1327,13 +1340,13 @@
     border-left: 2px solid #facc15;
     padding-left: 0.45rem;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     line-height: 1.45;
   }
 
   .doc-ref-excerpt--citation {
     margin: 0.4rem 0 0.5rem;
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     font-style: italic;
   }
 </style>
