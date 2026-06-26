@@ -50,8 +50,8 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     expect(expr[0]).toBe("case");
     expect(JSON.stringify(expr)).toContain("multifamilial4plus");
     expect(JSON.stringify(expr)).toContain("tod");
-    expect(expr[6]).toEqual(["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]]);
-    expect(expr[7]).toBe("#16a34a");
+    expect(expr[5]).toEqual(["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]]);
+    expect(expr[6]).toBe("#16a34a");
     expect(expr[expr.length - 1]).toEqual(lotFillColorExpression(null));
   });
 
