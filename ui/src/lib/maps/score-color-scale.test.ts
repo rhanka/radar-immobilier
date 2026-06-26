@@ -48,9 +48,10 @@ describe("score-color-scale — DS-token-driven ramp", () => {
   it("builds a Signaux fill expression that highlights 4+∩TOD before score ramp", () => {
     const expr = signauxLotFillColorExpression(null);
     expect(expr[0]).toBe("case");
-    expect(expr).toContain("multifamilial4plus");
-    expect(expr).toContain("tod");
-    expect(expr).toContain("#16a34a");
+    expect(JSON.stringify(expr)).toContain("multifamilial4plus");
+    expect(JSON.stringify(expr)).toContain("tod");
+    expect(expr[6]).toEqual(["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]]);
+    expect(expr[7]).toBe("#16a34a");
     expect(expr[expr.length - 1]).toEqual(lotFillColorExpression(null));
   });
 
