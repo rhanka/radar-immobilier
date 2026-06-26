@@ -440,6 +440,18 @@
 </div>
 
 <style>
+  /*
+   * Typographie Signaux alignée DS.
+   * On centralise les tailles au niveau composant : plus de valeurs ad hoc pour
+   * les libellés/fiches, tout passe par des aliases raccordés aux tokens DS.
+   */
+  .rail {
+    --signaux-fs-overline: var(--st-component-label-fontSize, 0.6875rem);
+    --signaux-fs-caption: var(--st-component-caption-fontSize, 0.6875rem);
+    --signaux-fs-small: var(--st-component-tag-fontSize, 0.75rem);
+    --signaux-fs-body: var(--st-component-body-sm-fontSize, 0.8125rem);
+  }
+
   /* ── Rail container ── */
   .rail {
     display: flex;
@@ -470,7 +482,7 @@
   }
 
   .rail-overline {
-    font-size: 0.72rem;
+    font-size: var(--signaux-fs-overline);
     font-weight: 700;
     letter-spacing: 0;
     text-transform: uppercase;
@@ -510,7 +522,7 @@
   /* ── Compteur global ── */
   .rail-global-count {
     padding: 0 1rem 0.5rem;
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     color: var(--st-semantic-text-secondary);
   }
 
@@ -539,14 +551,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.82rem;
+    font-size: var(--signaux-fs-body);
     font-weight: 500;
     color: var(--st-semantic-text-primary);
   }
 
   .rail-row-sublabel {
     display: block;
-    font-size: 0.7rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 400;
     color: var(--st-semantic-text-muted);
     overflow: hidden;
@@ -583,7 +595,7 @@
   }
 
   .rail-section-chevron {
-    font-size: 0.65rem;
+    font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-muted);
     transition: transform 0.12s ease;
     flex-shrink: 0;
@@ -612,12 +624,12 @@
     flex: 1;
     min-width: 0;
     /* Bug 3 : réduire la taille du label via le token DS Checkbox */
-    --st-component-selection-choiceLabelFontSize: var(--st-component-tag-fontSize, 0.75rem);
+    --st-component-selection-choiceLabelFontSize: var(--signaux-fs-small);
   }
 
   /* Bug 3 : réduire la taille du helper text (sous-libellé) des filtres */
   .axis-toggle-row :global(.st-choice__help) {
-    font-size: var(--st-component-tag-fontSize, 0.75rem);
+    font-size: var(--signaux-fs-small);
   }
 
   /* Badge trailing dans la rangée toggle — ne rétrécit pas */
@@ -628,7 +640,7 @@
   /* ── État vide ── */
   .rail-empty {
     padding: 0.75rem 1rem;
-    font-size: 0.82rem;
+    font-size: var(--signaux-fs-body);
     font-style: italic;
     color: var(--st-semantic-text-muted);
   }
@@ -639,7 +651,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 0;
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     color: var(--st-semantic-text-muted);
   }
 
@@ -674,7 +686,7 @@
   /* Chevron via ::before */
   .ws-acc-summary::before {
     content: "▸";
-    font-size: 0.65rem;
+    font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-muted);
     transition: transform 0.12s ease;
     flex-shrink: 0;
@@ -701,7 +713,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     font-weight: 500;
     color: var(--st-semantic-text-primary);
     line-height: 1.35;
@@ -709,13 +721,13 @@
 
   .signal-type {
     display: block;
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     color: var(--st-semantic-text-muted);
     font-family: var(--st-font-mono, ui-monospace, monospace);
   }
 
   .rail-detail-empty {
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     color: var(--st-semantic-text-muted);
     font-style: italic;
     padding: 0.25rem 0;
