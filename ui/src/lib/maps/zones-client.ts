@@ -227,7 +227,8 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
   const properties = raw.properties ?? {};
   // Matching de propriété FLEXIBLE : le nom du champ zone VARIE selon la source
   // geo (heads-up geo 2026-06-28) — 'zone_code' (obscura/GoNet, ~90+ villes),
-  // 'Zonage' (arcgis-réattribué), 'No_zone'/'Code' (autres sources).
+  // 'Zonage' (arcgis-réattribué), 'NumZone' (source ArcGIS Chambly/jehanni),
+  // 'No_zone'/'Code' (autres sources).
   const code = firstString([
     properties.code,
     properties.Code,
@@ -236,6 +237,8 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
     properties.ZONE,
     properties.Zonage,
     properties.zonage,
+    properties.NumZone,
+    properties.num_zone,
     properties.No_zone,
     properties.no_zone,
     properties.code_affiche,
