@@ -225,14 +225,19 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
   };
   if (raw.type !== "Feature") return null;
   const properties = raw.properties ?? {};
-  // Matching de propriété FLEXIBLE : le nom exact du champ code n'est pas figé.
+  // Matching de propriété FLEXIBLE : le nom du champ zone VARIE selon la source
+  // geo (heads-up geo 2026-06-28) — 'zone_code' (obscura/GoNet, ~90+ villes),
+  // 'Zonage' (arcgis-réattribué), 'No_zone'/'Code' (autres sources).
   const code = firstString([
     properties.code,
+    properties.Code,
     properties.zoneCode,
     properties.zone_code,
     properties.ZONE,
     properties.Zonage,
     properties.zonage,
+    properties.No_zone,
+    properties.no_zone,
     properties.code_affiche,
     properties.codeAffiche,
   ]);
