@@ -52,7 +52,7 @@ Ce rapport reconstitue la lecture attendue du Track après consolidation du drif
 - **CS\-L5 — Filtres combinés potentiel\(exclusif\) × usage actuel\(additif\) × superficie min \(Opportunités/Évaluation\)** — to-do · unknown
 
 ## DROPPED (1)
-- **Graphify v2.2 redo — rerun deterministic outputs with Sonnet 4.6 quota** — cancelled · unknown
+- **Graphify legacy redo OBSOLÈTE — rerun deterministic outputs with Sonnet 4.6 quota** — cancelled · unknown
 
 ## DONE (68)
 - **Header pas l'AppHeader canonique DS — écart structurel/visuel** — done · unknown · wsjf:8.333333333333334

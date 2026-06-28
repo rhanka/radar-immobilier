@@ -13,6 +13,7 @@
  * Échelle DISTINCTE du 0-5 T2 et du 0-100 legacy.
  * Quand non disponible (endpoint non enrichi) : undefined.
  */
+import { resolveLotPotentialScore } from "./lot-potential-visual.js";
 
 /** Properties d'un lot cadastral (uniquement données publiques non-PII). */
 export interface LotProperties {
@@ -26,6 +27,12 @@ export interface LotProperties {
    * Source prod actuelle : /api/geo/collections/qc-lots-{city}/items.
    */
   potentialScore?: number | null;
+  /** État de résolution du score visuel. */
+  potentialScoreStatus?: "scored" | "fallback" | "unavailable";
+  /** Source de résolution du score visuel. */
+  potentialScoreSource?: "api" | "zone" | "flags" | "none";
+  /** Explication courte du score/fallback. */
+  potentialScoreReason?: string;
   /** Mode de la source (carte-steve uniquement). */
   mode?: string;
   /** Flag emprise de rue — carte-steve uniquement. */
@@ -38,14 +45,29 @@ export interface LotProperties {
   superficieM2?: number | null;
   /** Usage public résolu quand disponible; null sinon. */
   usageCode?: string | null;
+  /** Champs publics du rôle d'évaluation quand l'API geo les expose. */
+  valuation?: {
+    usageCode?: string | null;
+    categorie?: string | null;
+    valeurTotale?: number | null;
+    valeurTerrain?: number | null;
+    valeurBatiment?: number | null;
+    nbLogements?: number | null;
+    nbEtages?: number | null;
+    anneeConstruction?: number | null;
+  } | null;
   /** Zone résolue pour le lot quand disponible; null sinon. */
   zone?: {
     kind: string;
     usages: string[];
     densiteLogHa: number | null;
+    code?: string | null;
+    grillePdfUrl?: string | null;
   } | null;
   /** Raw zone code/group from an OGC lot collection when present. */
   zoneCode?: string | null;
+  /** Lien direct vers la grille PDF quand exposé hors objet zone. */
+  grillePdfUrl?: string | null;
   /** UI-derived projection state for signal mode; not persisted by the API. */
   signalProjection?: "direct" | "inherited" | "none";
 }
@@ -148,11 +170,13 @@ export async function fetchLots(
   }
   const body = await res.json();
   if (isLegacyLotsResponse(body)) {
+    const featureCollection = normalizeFeatureCollection(body.featureCollection, body.citySlug);
     return {
       ...body,
+      featureCollection,
       collectionId: body.collectionId ?? collectionId,
-      numberMatched: body.numberMatched ?? body.featureCollection.features.length,
-      numberReturned: body.numberReturned ?? body.featureCollection.features.length,
+      numberMatched: body.numberMatched ?? featureCollection.features.length,
+      numberReturned: body.numberReturned ?? featureCollection.features.length,
     };
   }
   if (!isOgcFeatureCollection(body)) {
@@ -215,6 +239,32 @@ function normalizeOgcLotFeature(feature: unknown, citySlug: string): LotFeature 
   };
 }
 
+function normalizeFeatureCollection(
+  collection: LotFeatureCollection,
+  citySlug: string,
+): LotFeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: collection.features
+      .map((feature) => normalizeExistingLotFeature(feature, citySlug))
+      .filter((feature): feature is LotFeature => feature !== null),
+  };
+}
+
+function normalizeExistingLotFeature(feature: LotFeature, citySlug: string): LotFeature | null {
+  const noLot = readString(feature.properties.noLot);
+  if (!noLot) return null;
+  return {
+    type: "Feature",
+    geometry: normalizeGeometry(feature.geometry),
+    properties: {
+      noLot,
+      citySlug: feature.properties.citySlug ?? citySlug,
+      ...normalizeOgcLotProperties({ ...feature.properties, noLot }),
+    },
+  };
+}
+
 function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial<LotProperties> {
   const potentialScore = firstNumber([
     properties.potentialScore,
@@ -238,37 +288,110 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.usage_code,
     properties.cubf,
   ]);
-  const zone = normalizeZone(properties.zone);
+  const valuation = normalizeValuation(properties.valuation, usageCode, properties);
+  const zone = normalizeZone(properties.zone, properties);
   const zoneCode = firstString([
     properties.zoneCode,
     properties.zone_code,
-    properties.zone,
-  ]);
+    properties.zoneCodeRaw,
+    properties.zone_code_raw,
+    typeof properties.zone === "string" ? properties.zone : null,
+  ]) ?? zone?.code ?? null;
+  const grillePdfUrl = firstString([
+    properties.grillePdfUrl,
+    properties.grille_pdf_url,
+    properties.gridPdfUrl,
+    properties.grid_pdf_url,
+    properties.zoningGridPdfUrl,
+    properties.zoning_grid_pdf_url,
+  ]) ?? zone?.grillePdfUrl ?? null;
+  const scoreResolution = resolveLotPotentialScore({
+    ...properties,
+    ...(potentialScore !== null ? { potentialScore } : {}),
+    ...(zone !== undefined ? { zone } : {}),
+    ...(zoneCode !== null ? { zoneCode } : {}),
+    ...(tod !== null ? { tod } : {}),
+    ...(multifamilial4plus !== null ? { multifamilial4plus } : {}),
+  });
 
   return {
-    ...(potentialScore !== null ? { potentialScore } : {}),
+    potentialScore: scoreResolution.score,
+    potentialScoreStatus: scoreResolution.status,
+    potentialScoreSource: scoreResolution.source,
+    potentialScoreReason: scoreResolution.reason,
     ...(mode !== null ? { mode } : {}),
     ...(isRue !== null ? { isRue } : {}),
     ...(tod !== null ? { tod } : {}),
     ...(multifamilial4plus !== null ? { multifamilial4plus } : {}),
     ...(superficieM2 !== null ? { superficieM2 } : {}),
     ...(usageCode !== null ? { usageCode } : {}),
+    ...(valuation !== undefined ? { valuation } : {}),
     ...(zone !== undefined ? { zone } : {}),
     ...(zoneCode !== null ? { zoneCode } : {}),
+    ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
   };
 }
 
-function normalizeZone(value: unknown): LotProperties["zone"] | undefined {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) return undefined;
-  const record = value as Record<string, unknown>;
-  const kind = readString(record.kind);
-  if (!kind) return undefined;
-  const rawUsages = Array.isArray(record.usages) ? record.usages : [];
+function normalizeZone(
+  value: unknown,
+  fallback: Record<string, unknown> = {},
+): LotProperties["zone"] | undefined {
+  const record = typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : fallback;
+  const kind = firstString([record.kind, record.zoneKind, record.zone_kind, record.typeZone, record.type_zone]);
+  const code = firstString([record.code, record.zoneCode, record.zone_code, fallback.zoneCode, fallback.zone_code]);
+  const densiteLogHa = firstNumber([
+    record.densiteLogHa,
+    record.densite_log_ha,
+    record.densityLogHa,
+    record.density_log_ha,
+    fallback.densiteLogHa,
+    fallback.densite_log_ha,
+  ]);
+  const rawUsages = Array.isArray(record.usages)
+    ? record.usages
+    : Array.isArray(record.uses)
+      ? record.uses
+      : [];
+  const grillePdfUrl = firstString([
+    record.grillePdfUrl,
+    record.grille_pdf_url,
+    record.gridPdfUrl,
+    record.grid_pdf_url,
+    fallback.grillePdfUrl,
+    fallback.grille_pdf_url,
+  ]);
+
+  if (!kind && !code && densiteLogHa === null && rawUsages.length === 0 && !grillePdfUrl) return undefined;
   return {
-    kind,
+    kind: kind ?? "non précisé",
     usages: rawUsages.map(String),
-    densiteLogHa: firstNumber([record.densiteLogHa, record.densite_log_ha]),
+    densiteLogHa,
+    ...(code !== null ? { code } : {}),
+    ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
   };
+}
+
+function normalizeValuation(
+  value: unknown,
+  fallbackUsageCode: string | null,
+  fallback: Record<string, unknown> = {},
+): LotProperties["valuation"] | undefined {
+  const record = typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : fallback;
+  const valuation = {
+    usageCode: firstString([record.usageCode, record.usage_code, record.cubf]) ?? fallbackUsageCode,
+    categorie: firstString([record.categorie, record.category, record.usageLabel, record.usage_label]),
+    valeurTotale: firstNumber([record.valeurTotale, record.valeur_totale, record.totalValue, record.total_value]),
+    valeurTerrain: firstNumber([record.valeurTerrain, record.valeur_terrain, record.landValue, record.land_value]),
+    valeurBatiment: firstNumber([record.valeurBatiment, record.valeur_batiment, record.buildingValue, record.building_value]),
+    nbLogements: firstNumber([record.nbLogements, record.nb_logements, record.logements, record.dwellingCount]),
+    nbEtages: firstNumber([record.nbEtages, record.nb_etages, record.etages, record.floorCount]),
+    anneeConstruction: firstNumber([record.anneeConstruction, record.annee_construction, record.yearBuilt, record.year_built]),
+  };
+  return Object.values(valuation).some((v) => v !== null && v !== undefined) ? valuation : undefined;
 }
 
 function normalizeGeometry(value: unknown): LotGeometry | null {

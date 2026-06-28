@@ -237,22 +237,35 @@
 <div class="pdf-overlay-backdrop" aria-hidden="true" on:click={onClose}></div>
 <div class="pdf-overlay" aria-label="Preuve documentaire" role="dialog" aria-modal="true">
   <header class="pdf-overlay-head">
-    <div class="pdf-overlay-title-block">
-      <span class="pdf-overlay-kicker">Preuve</span>
-      <h2 class="pdf-overlay-title">{title}</h2>
-      <div class="pdf-overlay-meta">
-        <span>Date : {documentDate ?? "non disponible"}</span>
-        {#if pdfDoc && numPages > 0}
-          <span>Page {currentPage} / {numPages}</span>
-        {:else if page}
-          <span>Page : {page}</span>
+    <div class="pdf-overlay-head-main">
+      <div class="pdf-overlay-title-block">
+        <span class="pdf-overlay-kicker">Preuve</span>
+        <h2 class="pdf-overlay-title">{title}</h2>
+        <div class="pdf-overlay-meta">
+          <span>Date : {documentDate ?? "non disponible"}</span>
+        </div>
+      </div>
+
+      <div class="pdf-overlay-actions" aria-label="Actions globales">
+        {#if sourceUrl}
+          <a class="pdf-open-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+            Ouvrir <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
         {/if}
+        <button
+          type="button"
+          class="pdf-overlay-close"
+          on:click={onClose}
+          aria-label="Fermer la preuve documentaire"
+        >
+          <X class="h-4 w-4" aria-hidden="true" />
+        </button>
       </div>
     </div>
 
-    <div class="pdf-overlay-actions">
-      {#if pdfDoc && numPages > 1}
-        <div class="pdf-pager" role="group" aria-label="Navigation des pages">
+    <div class="pdf-overlay-toolbar" aria-label="Contrôles du document">
+      <div class="pdf-control-group pdf-page-group" role="group" aria-label="Navigation des pages">
+        {#if pdfDoc && numPages > 1}
           <button
             type="button"
             class="pdf-pager-btn"
@@ -262,6 +275,17 @@
           >
             <ChevronLeft class="h-4 w-4" aria-hidden="true" />
           </button>
+        {/if}
+        <span class="pdf-page-indicator">
+          {#if pdfDoc && numPages > 0}
+            Page {currentPage} / {numPages}
+          {:else if page}
+            Page {page}
+          {:else}
+            Page —
+          {/if}
+        </span>
+        {#if pdfDoc && numPages > 1}
           <button
             type="button"
             class="pdf-pager-btn"
@@ -271,21 +295,8 @@
           >
             <ChevronRight class="h-4 w-4" aria-hidden="true" />
           </button>
-        </div>
-      {/if}
-      {#if sourceUrl}
-        <a class="pdf-open-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
-          Ouvrir <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
-        </a>
-      {/if}
-      <button
-        type="button"
-        class="pdf-overlay-close"
-        on:click={onClose}
-        aria-label="Fermer la preuve documentaire"
-      >
-        <X class="h-4 w-4" aria-hidden="true" />
-      </button>
+        {/if}
+      </div>
     </div>
   </header>
 
@@ -350,12 +361,18 @@
 
   .pdf-overlay-head {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.65rem;
     padding: 0.7rem 0.85rem;
     border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
     background: var(--st-semantic-surface-subtle, #f8fafc);
+  }
+
+  .pdf-overlay-head-main {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
   .pdf-overlay-title-block {
@@ -394,9 +411,33 @@
     flex-shrink: 0;
   }
 
-  .pdf-pager {
+  .pdf-overlay-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .pdf-control-group {
     display: inline-flex;
-    gap: 0.2rem;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .pdf-page-group {
+    padding: 0.15rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-md, 6px);
+    background: var(--st-semantic-surface-default, #fff);
+  }
+
+  .pdf-page-indicator {
+    min-width: 6.3rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.74rem;
+    font-weight: 650;
+    text-align: center;
   }
 
   .pdf-pager-btn,
@@ -541,6 +582,20 @@
   @media (max-width: 900px) {
     .pdf-overlay {
       inset: 0.5rem;
+    }
+
+    .pdf-overlay-head-main,
+    .pdf-overlay-toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .pdf-overlay-actions {
+      justify-content: flex-end;
+    }
+
+    .pdf-page-group {
+      width: fit-content;
     }
   }
 </style>

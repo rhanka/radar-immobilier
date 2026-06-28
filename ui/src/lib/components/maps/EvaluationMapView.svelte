@@ -40,22 +40,21 @@
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
   import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
   import { loadLiveSignals } from "$lib/signals/signals-live.js";
+  import { colorForScore } from "$lib/maps/score-color-scale.js";
+  import {
+    activeMarketMark,
+    activePipelineMark,
+    computeProspectCounters,
+    fetchProspectMarksForZone,
+    lotKey,
+    prospectStatusShortLabel,
+    type ProspectMark,
+    type ProspectStatus,
+  } from "$lib/prospect/prospect-marks-client.js";
   
 
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
-
-  // ── Palette de couleurs Steve ──────────────────────────────────────────────
-  function getLotColor(props: Record<string, unknown>): { fill: string; opacity: number } {
-    const isRue = Boolean(props["isRue"]);
-    if (isRue) return { fill: "none", opacity: 0 };
-    const m4 = Boolean(props["multifamilial4plus"]);
-    const tod = Boolean(props["tod"]);
-    if (m4 && tod) return { fill: "#e67e22", opacity: 0.7 };  // orange priorité 4+∩TOD
-    if (m4) return { fill: "#27ae60", opacity: 0.65 };         // vert 4+
-    if (tod) return { fill: "#2980b9", opacity: 0.35 };        // bleu TOD
-    return { fill: "#bdc3c7", opacity: 0.45 };                 // gris autres
-  }
 
   // ── Villes avec source lots et/ou zonage ──────────────────────────────────
   // source: "steve" = données carte Steve (CS-L6)
@@ -76,6 +75,16 @@
   // "steve" : villes carte Steve (CS-L6)
   // "mrnf"  : villes MRNF (donnees-quebec)
   let sourceFilter: "steve" | "mrnf" = "steve";
+
+  const PROSPECT_FILTERS: Array<{ value: ProspectStatus | "all" | "unmarked"; label: string }> = [
+    { value: "all", label: "Tous" },
+    { value: "favori", label: "Favoris" },
+    { value: "ecarte", label: "Non retenus" },
+    { value: "sollicite", label: "Sollicités" },
+    { value: "lettre_envoyee", label: "Lettres" },
+    { value: "en_vente", label: "En vente" },
+    { value: "unmarked", label: "Sans marque" },
+  ];
 
   $: filteredCities = EVAL_CITIES.filter((c) => c.source === sourceFilter);
 
@@ -132,6 +141,10 @@
   let lotsResponse: LotsResponse | null = null;
   let hoveredLot: string | null = null;
   let selectedLot: LotFeature | null = null;
+  let prospectMarksLoading = false;
+  let prospectMarksError: string | null = null;
+  let prospectMarks: ProspectMark[] = [];
+  let prospectFilter: ProspectStatus | "all" | "unmarked" = "all";
 
   // ── State changements de zonage ──────────────────────────────────────────
   let zonageLoading = false;
@@ -168,6 +181,20 @@
   $: isCarteSteve = lotsResponse?.source === "carte-steve" || lotsResponse?.mode === "carte-steve";
 
   // ── Chargement des lots ────────────────────────────────────────────────────
+
+  async function loadProspectMarks(citySlug: string): Promise<void> {
+    prospectMarksLoading = true;
+    prospectMarksError = null;
+    prospectMarks = [];
+    prospectFilter = "all";
+    try {
+      prospectMarks = await fetchProspectMarksForZone(citySlug);
+    } catch (e) {
+      prospectMarksError = e instanceof Error ? e.message : "Marques indisponibles";
+    } finally {
+      prospectMarksLoading = false;
+    }
+  }
 
   async function loadLots(citySlug: string): Promise<void> {
     lotsLoading = true;
@@ -217,6 +244,7 @@
     selectedEvalCity = city;
     void loadLots(city.slug);
     void loadZonage(city.slug);
+    void loadProspectMarks(city.slug);
   }
 
   // ── Sélection automatique de la 1re ville lors du changement de filtre ────
@@ -233,6 +261,7 @@
       selectedEvalCity = first;
       void loadLots(first.slug);
       void loadZonage(first.slug);
+      void loadProspectMarks(first.slug);
     }
     void loadSignalEntries();
   });
@@ -297,11 +326,60 @@
   $: polygonFeatures = lotsFC.features.filter(
     (f) => f.geometry && f.geometry.type === "Polygon" && !f.properties.isRue,
   );
+  let prospectMarksByLot = new Map<string, ProspectMark[]>();
+  $: {
+    prospectMarksByLot = new Map<string, ProspectMark[]>();
+    for (const mark of prospectMarks) {
+      const key = lotKey(mark.noLot, mark.citySlug);
+      prospectMarksByLot.set(key, [...(prospectMarksByLot.get(key) ?? []), mark]);
+    }
+  }
+  $: prospectCounters = computeProspectCounters(
+    polygonFeatures.map((feature) => ({
+      noLot: feature.properties.noLot,
+      citySlug: feature.properties.citySlug ?? selectedEvalCity?.slug ?? "",
+    })),
+    prospectMarks,
+  );
+  $: filteredPolygonFeatures = polygonFeatures.filter((feature) => {
+    if (prospectFilter === "all") return true;
+    const key = lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "");
+    const marks = prospectMarks.filter((mark) => lotKey(mark.noLot, mark.citySlug) === key);
+    const pipeline = activePipelineMark(marks);
+    const market = activeMarketMark(marks);
+    if (prospectFilter === "unmarked") return !pipeline && !market;
+    return pipeline?.statut === prospectFilter || market?.statut === prospectFilter;
+  });
+
+  function prospectCounterFor(filter: ProspectStatus | "all" | "unmarked"): number {
+    if (filter === "all") return prospectCounters.all;
+    if (filter === "unmarked") return prospectCounters.unmarked;
+    return prospectCounters[filter];
+  }
 
   // ── Indicateurs réactifs ──────────────────────────────────────────────────
   $: isLoadingEval = lotsLoading || zonageLoading;
   $: hasZonage = zonageEvents.length > 0;
   $: hasLots = polygonFeatures.length > 0;
+  $: scoredLotCount = polygonFeatures.filter((f) => (f.properties.potentialScore ?? 0) > 0).length;
+  $: highPotentialLotCount = polygonFeatures.filter((f) => (f.properties.potentialScore ?? 0) >= 7).length;
+  $: fallbackScoreCount = polygonFeatures.filter((f) => f.properties.potentialScoreStatus === "fallback").length;
+  $: unavailableScoreCount = polygonFeatures.filter((f) => f.properties.potentialScoreStatus === "unavailable").length;
+
+  function lotScore(feature: LotFeature): number {
+    const score = feature.properties.potentialScore;
+    return typeof score === "number" && Number.isFinite(score) ? score : 0;
+  }
+
+  function lotFill(feature: LotFeature): string {
+    return colorForScore(lotScore(feature), null);
+  }
+
+  function lotOpacity(feature: LotFeature, selected: boolean, hovered: boolean): string {
+    if (selected) return "0.78";
+    if (hovered) return "0.75";
+    return lotScore(feature) > 0 ? "0.62" : "0.34";
+  }
 </script>
 
 <ViewLayout controlsWidth="w-80">
@@ -546,6 +624,12 @@
                 <Badge tone="success" class="text-xs">
                   {polygonFeatures.length}&nbsp;lot{polygonFeatures.length !== 1 ? "s" : ""}&nbsp;chargé{polygonFeatures.length !== 1 ? "s" : ""}
                 </Badge>
+                <Badge tone="info" class="text-xs">
+                  {scoredLotCount}&nbsp;scoré{scoredLotCount !== 1 ? "s" : ""}
+                </Badge>
+                <Badge tone="warning" class="text-xs">
+                  {highPotentialLotCount}&nbsp;prioritaire{highPotentialLotCount !== 1 ? "s" : ""}
+                </Badge>
               {:else if !lotsError}
                 <span class="text-xs text-slate-400">Aucun lot</span>
               {/if}
@@ -636,10 +720,39 @@
               </div>
               {#if !lotsLoading && !lotsError && hasLots}
                 <span class="text-xs text-slate-400">
-                  {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · {isCarteSteve ? "Steve" : "CC-BY"}
+                  {filteredPolygonFeatures.length}/{polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · {isCarteSteve ? "Steve" : "CC-BY"}
                 </span>
               {/if}
             </div>
+
+            {#if !lotsLoading && !lotsError && hasLots}
+              <div class="border-t border-slate-100 px-4 py-2" data-testid="prospect-mark-filters">
+                <div class="mb-1 flex items-center justify-between gap-2">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Filtres par marque</p>
+                  {#if prospectMarksLoading}
+                    <span class="text-xs text-slate-400">chargement…</span>
+                  {:else if prospectMarksError}
+                    <span class="text-xs text-amber-600" title={prospectMarksError}>marques indisponibles</span>
+                  {/if}
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  {#each PROSPECT_FILTERS as filter (filter.value)}
+                    <button
+                      type="button"
+                      class={`rounded-full border px-2 py-1 text-xs transition-colors ${
+                        prospectFilter === filter.value
+                          ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                      }`}
+                      on:click={() => { prospectFilter = filter.value; }}
+                      aria-pressed={prospectFilter === filter.value}
+                    >
+                      {filter.label} <span class="tabular-nums text-slate-400">{prospectCounterFor(filter.value)}</span>
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {/if}
 
             {#if lotsLoading}
               <div class="flex items-center justify-center p-6 text-sm text-slate-400">
@@ -679,11 +792,14 @@
               >
                 <rect width={SVG_W} height={SVG_H} class="fill-blue-50" rx="2" />
 
-                {#each polygonFeatures as feature (feature.properties.noLot)}
+                {#each filteredPolygonFeatures as feature (feature.properties.noLot)}
                   {@const rings = feature.geometry?.coordinates as number[][][] | undefined}
                   {@const isHovered = hoveredLot === feature.properties.noLot}
                   {@const isLotSelected = selectedLot?.properties.noLot === feature.properties.noLot}
-                  {@const steveColor = isCarteSteve ? getLotColor(feature.properties as unknown as Record<string, unknown>) : null}
+                  {@const lotMarks = prospectMarksByLot.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? []}
+                  {@const lotPipelineMark = activePipelineMark(lotMarks)}
+                  {@const lotMarketMark = activeMarketMark(lotMarks)}
+                  {@const scoreFill = lotFill(feature)}
                   {#if rings && rings.length > 0}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -700,10 +816,10 @@
                     >
                       <polygon
                         points={ringToPoints(rings[0], lotsBbox)}
-                        fill={isLotSelected ? "#0d9488" : isHovered ? (steveColor ? steveColor.fill : "#5eead4") : (steveColor ? steveColor.fill : "#99f6e4")}
-                        stroke={isLotSelected ? "#0d9488" : (steveColor ? steveColor.fill : "#2dd4bf")}
+                        fill={isLotSelected ? "#0d9488" : scoreFill}
+                        stroke={isLotSelected ? "#0d9488" : scoreFill}
                         stroke-width={isLotSelected ? "1.5" : "0.8"}
-                        fill-opacity={isLotSelected ? "0.7" : isHovered ? "0.75" : (steveColor ? String(steveColor.opacity) : "0.45")}
+                        fill-opacity={lotOpacity(feature, isLotSelected, isHovered)}
                       />
                       {#if (isHovered || isLotSelected) && rings[0].length > 0}
                         {@const cx = rings[0].reduce((s, p) => s + projX(p[0], lotsBbox), 0) / rings[0].length}
@@ -716,7 +832,7 @@
                           style="font-size: 9px; font-weight: 600; pointer-events: none;"
                           fill={isLotSelected ? "white" : "#0d9488"}
                         >
-                          {feature.properties.noLot}
+                          {feature.properties.noLot}{lotPipelineMark ? ` · ${prospectStatusShortLabel(lotPipelineMark.statut)}` : lotMarketMark ? ` · ${prospectStatusShortLabel(lotMarketMark.statut)}` : ""}
                         </text>
                       {/if}
                     </g>
@@ -724,10 +840,10 @@
                 {/each}
               </svg>
 
-              <!-- Légende Steve (visible uniquement en mode carte-steve) -->
-              {#if isCarteSteve}
-                <MapLegend />
-              {/if}
+              <MapLegend
+                fallbackCount={fallbackScoreCount}
+                unavailableCount={unavailableScoreCount}
+              />
 
               <!-- Fiche lot complète — CS-L2 -->
               {#if selectedLot}

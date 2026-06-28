@@ -16,7 +16,7 @@
 | # | Décision | Impact |
 |---|---|---|
 | **D1** | Le mapper extrait les codes zone/no-lot par **regex sur texte libre** (`label` + `props.properties.description`) car les champs structurés (`zone_ref`, `no_lot`, `reglement_number`) sont quasiment vides (1×/0×/0× sur 7 781 nœuds Signal/DesignationEvent). Taux de résolution V1 : **estimé 30–60 %**, honnêtement incertain. | Choix technique central — l'extraction vient du texte, pas des champs |
-| **D2** | **Recommander l'extraction graphify** des codes zone/no-lot à la source (ontology v2.2) : peupler `zone_ref` et `no_lot` dans les nœuds Signal/DesignationEvent pendant le graphify, pour que le mapper devienne une simple jointure. C'est la piste long terme. | Lot séparé, non bloquant pour la V1 |
+| **D2** | **Recommander l'extraction graphify** des codes zone/no-lot à la source (ontology legacy OBSOLÈTE) : peupler `zone_ref` et `no_lot` dans les nœuds Signal/DesignationEvent pendant le graphify, pour que le mapper devienne une simple jointure. C'est la piste long terme. | Lot séparé, non bloquant pour la V1 |
 | **D3** | Les entités `Zone`/`Lot` PostGIS existent déjà dans l'ontologie (v2.1) ; on esquisse la **migration Drizzle** pour y ajouter les colonnes géométrie PostGIS + les arêtes Signal→Zone et Signal→Lot. | Modèle de données |
 | **D4** | L'intégration des vues est **progressive** : nouvelle route `/geo` (ou flag feature) parallèle à `SignauxMapView`. Pas de rip de la vue Signaux existante. | Stratégie UI |
 | **D5** | Le join MUS_CO_GEO est **côté immo** : la lib `@sentropic/geo-ui-svelte` reçoit uniquement la FeatureCollection fusionnée (polygones + props métier). | Frontière lib/app |
@@ -239,12 +239,12 @@ CREATE OR REPLACE VIEW zone_lots AS
         / NULLIF(ST_Area(l.geom::geography), 0) > 0.5;
 ```
 
-### 2.5 Recommandation — extraction graphify (ontology v2.2)
+### 2.5 Recommandation — extraction graphify (ontology legacy OBSOLÈTE)
 
 **Cause racine** du problème de résolution : les champs `zone_ref` et `no_lot` ne sont pas
 peuplés par graphify car le LLM n'est pas guidé pour les extraire structurellement.
 
-**Recommandation** : ouvrir un lot **ontology v2.2** pour ajouter des `extraction_hints` dans
+**Recommandation** : ouvrir un lot **ontology legacy OBSOLÈTE** pour ajouter des `extraction_hints` dans
 `ontology-profile.yaml` sur les types Signal et DesignationEvent :
 
 - `zone_ref` — extraction ciblée regex `[A-Z][A-Z0-9-]{2,12}` dans le contexte "zone".
@@ -255,7 +255,7 @@ Ces hints deviennent des instructions au LLM graphify → taux de résolution at
 
 **Séquence recommandée** :
 - **V1 (ce WP)** : mapper regex texte libre → taux ~30–60 %, table `geo_unresolved` pour mesure.
-- **V2 (lot ontology v2.2)** : extraction graphify → taux ~70–85 %, maintenable.
+- **V2 (lot ontology legacy OBSOLÈTE)** : extraction graphify → taux ~70–85 %, maintenable.
 
 ---
 
@@ -466,14 +466,14 @@ export const GEO_LOT_DETAIL_SCHEMA: GeoDetailSchema = {
 | **G3** — Route `/geo` + GeoMap | Page `GeoView.svelte`, API `GET /api/geo/zones`, wiring `GeoMap` choroplèthe, feature flag. | G1 + G2 + `geo-ui-svelte@0.1.0` installé | **4–6 j-h** | Vue zones colorées par catégorie |
 | **G4** — GeoDetailPanel | Wiring `GeoDetailPanel` avec `GEO_ZONE_DETAIL_SCHEMA` + `GEO_LOT_DETAIL_SCHEMA`, overlay lots 4+. | G3 | **2–3 j-h** | Panneau détail complet |
 | **G5** — Adresse→lot (V2) | Géocodage 154 signaux avec adresse → `ST_Contains` → arête Signal→Lot. | G2 + géocodeur QC | **3–5 j-h** | Résolution adresse→lot |
-| **G6** — Extraction graphify v2.2 | Ajout `extraction_hints` profil ontologie → `zone_ref`/`no_lot` peuplés à la source. Re-graphify villes pilotes. | G1 (pour mesurer delta) | **2–4 j-h** | Profil v2.2 + re-graphify + delta metrics |
+| **G6** — Extraction graphify legacy OBSOLÈTE | Ajout `extraction_hints` profil ontologie → `zone_ref`/`no_lot` peuplés à la source. Re-graphify villes pilotes. | G1 (pour mesurer delta) | **2–4 j-h** | Profil legacy OBSOLÈTE + re-graphify + delta metrics |
 
 **Effort V1 (G1–G4) : ~11–18 j-h** pour mapper fonctionnel + vues lots/zones.
 **Effort V2 (G5–G6) : ~5–9 j-h** additionnels.
 
 **Taux de résolution attendu** :
 - V1 regex seul (G1–G4) : **~30–60 %** pour les villes avec couche vectorielle.
-- V2 graphify v2.2 (G6) : montée à **~70–85 %** pour les villes re-graphifiées.
+- V2 graphify legacy OBSOLÈTE (G6) : montée à **~70–85 %** pour les villes re-graphifiées.
 - Global toutes villes : **< 30 %** tant que l'acquisition géo des ~850 villes PDF/JMap est incomplète.
 
 ---
