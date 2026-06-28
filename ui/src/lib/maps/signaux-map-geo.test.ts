@@ -7,6 +7,7 @@ import {
   decorateLotsWithSignalProjection,
   extractSignalLotRefs,
   extractSignalZoneRefs,
+  extractSignalZoneRefsDetailed,
   fallbackZoneCode,
   mergeDesignatedZones,
   normalizeZoneCodeRef,
@@ -198,6 +199,83 @@ describe("extractSignalZoneRefs — normalisation à l'extraction", () => {
     const node = signal("sig-1", { zone_ref: "h-431", zoneRef: "H-431" });
     const refs = extractSignalZoneRefs(node);
     expect(refs.filter((r) => r === "H-431").length).toBe(1);
+  });
+});
+
+describe("extractSignalZoneRefsDetailed — provenance structuré vs inféré", () => {
+  it("structuré seul : source 'structured', confiance 1, aucun bruit du label", () => {
+    const node = signal("sig-struct", { zone_ref: "C-18" });
+    expect(extractSignalZoneRefsDetailed(node)).toEqual([
+      { code: "C-18", source: "structured", confidence: 1 },
+    ]);
+  });
+
+  it("citation seule (Rosemère « zone C-18 ») : code inféré listable", () => {
+    const node = signal("rezonage-lot-3005325", {
+      citation: "rezonage du lot 3005325 vers la zone C-18 (pôle régional)",
+    });
+    expect(extractSignalZoneRefsDetailed(node)).toContainEqual({
+      code: "C-18",
+      source: "inferred",
+      confidence: 0.85,
+    });
+    expect(extractSignalZoneRefs(node)).toContain("C-18");
+  });
+
+  it("label seul (« H-59 ») : code inféré du format à tiret", () => {
+    const node = signal("Rezonage H-59 secteur ouest", {});
+    expect(extractSignalZoneRefsDetailed(node)).toContainEqual({
+      code: "H-59",
+      source: "inferred",
+      confidence: 0.65,
+    });
+  });
+
+  it("format collé sans tiret (St-Frédéric « Rf51 ») : code inféré compact", () => {
+    const node = signal("Densification Rf51 prevue", {});
+    expect(extractSignalZoneRefsDetailed(node)).toContainEqual({
+      code: "RF51",
+      source: "inferred",
+      confidence: 0.5,
+    });
+  });
+
+  it("mixte : structuré I93 conservé + Rf51 cité au label inféré (cas A-SF2)", () => {
+    const node = signal("Rezonage Rf51 densification", { zone_ref: "I93" });
+    const detailed = extractSignalZoneRefsDetailed(node);
+    expect(detailed).toContainEqual({ code: "I93", source: "structured", confidence: 1 });
+    expect(detailed).toContainEqual({ code: "RF51", source: "inferred", confidence: 0.5 });
+  });
+
+  it("rien : aucun code → tableau vide (anti-invention)", () => {
+    const node = signal("sig-empty", { description: "aucune zone citée dans ce texte" });
+    expect(extractSignalZoneRefsDetailed(node)).toEqual([]);
+    expect(extractSignalZoneRefs(node)).toEqual([]);
+  });
+
+  it("anti-écrasement : un code structuré aussi cité reste 'structured'", () => {
+    const node = signal("Rezonage zone C-18 confirmee", { zone_ref: "C-18" });
+    expect(extractSignalZoneRefsDetailed(node)).toEqual([
+      { code: "C-18", source: "structured", confidence: 1 },
+    ]);
+  });
+
+  it("dédoublonnage : un même code cité deux fois → une seule entrée inférée", () => {
+    const node = signal("sig-dup", {
+      citation: "la zone C-18 est modifiée ; voir aussi la zone C-18 au plan",
+    });
+    const detailed = extractSignalZoneRefsDetailed(node);
+    expect(detailed.filter((z) => z.code === "C-18")).toHaveLength(1);
+    expect(detailed[0]).toEqual({ code: "C-18", source: "inferred", confidence: 0.85 });
+  });
+
+  it("garde-fou règlement : Z-94/Z-84 de concordance ne sont PAS pris pour des zones", () => {
+    const node = signal("sig-concordance", {
+      citation: "règlement de concordance 2009-Z-84 modifiant le règlement Z-94",
+    });
+    const refs = extractSignalZoneRefs(node);
+    expect(refs).not.toContain("Z-94");
+    expect(refs).not.toContain("Z-84");
   });
 });
 
