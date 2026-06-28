@@ -1,0 +1,602 @@
+{
+  "generatedAt": "2026-06-28T23:59:59Z",
+  "source": "Track .track/events.jsonl (vérité) + wp6-item-wp-map.json (projection WP)",
+  "totals": {
+    "items": 111
+  },
+  "project_rollup": {
+    "WP1": {
+      "total": 24,
+      "done": 19,
+      "needs_review": 0,
+      "in_progress": 1,
+      "planned": 3,
+      "blocked": 0,
+      "dropped": 1,
+      "pct_done": 83
+    },
+    "WP2": {
+      "total": 20,
+      "done": 12,
+      "needs_review": 0,
+      "in_progress": 4,
+      "planned": 3,
+      "blocked": 0,
+      "dropped": 1,
+      "pct_done": 63
+    },
+    "WP3": {
+      "total": 8,
+      "done": 1,
+      "needs_review": 2,
+      "in_progress": 4,
+      "planned": 1,
+      "blocked": 0,
+      "dropped": 0,
+      "pct_done": 12
+    },
+    "WP4": {
+      "total": 34,
+      "done": 21,
+      "needs_review": 4,
+      "in_progress": 5,
+      "planned": 4,
+      "blocked": 0,
+      "dropped": 0,
+      "pct_done": 62
+    },
+    "WP5": {
+      "total": 21,
+      "done": 12,
+      "needs_review": 0,
+      "in_progress": 1,
+      "planned": 8,
+      "blocked": 0,
+      "dropped": 0,
+      "pct_done": 57
+    },
+    "WP6": {
+      "total": 4,
+      "done": 3,
+      "needs_review": 0,
+      "in_progress": 1,
+      "planned": 0,
+      "blocked": 0,
+      "dropped": 0,
+      "pct_done": 75
+    }
+  },
+  "views": {
+    "now": {
+      "desc": "WIP courant (in_progress)",
+      "by_wp": {
+        "WP1": [
+          "01KTQP5EWW8Q7JNXYFZ9HWSS6Q"
+        ],
+        "WP2": [
+          "01KTWQEH2ATBCD75BDZY48GWHC",
+          "01KVB478A9NVXDWQPZPK8T8PZ9",
+          "01KW2KS5S8FC5150AEWQPP7X37",
+          "01KW2KS6CAK6A761D81YMX8DY0"
+        ],
+        "WP3": [
+          "01KW2KS5ZDNY72Y2G3B6DRYZQ5",
+          "01KW5N0Z3X2RFBG6NAJJZKXTWY",
+          "01KW5N4WEBT27JDFZ9VZ0MDD3Y",
+          "01KVB67H8PDQZDHN952DY0SB82"
+        ],
+        "WP4": [
+          "01KVB2KAE3C3WKCP98QJ1JQAHN",
+          "01KVB9MZ76TV5PNENQZPG7C9YS",
+          "01KVB9MZ8CQ4X5TW9NKMYE52QJ",
+          "01KVB9MZ7Y96B2B18BNBC2SVC2",
+          "01KVB67M7CV95DXB5DTX4PX59G"
+        ],
+        "WP5": [
+          "01KW2KS65RKCSBNBEWQVSN7PH7"
+        ],
+        "WP6": [
+          "01KW2KS5K2D1Y7KGYF41ZAZGSW"
+        ]
+      }
+    },
+    "week": {
+      "desc": "fait depuis 2026-06-21 + ouvert",
+      "since": "2026-06-21T23:59:59+00:00",
+      "by_wp": {
+        "WP1": {
+          "fait": [],
+          "ouvert": [
+            "01KW5RXJF7YWYHM86XY411SWJ0",
+            "01KTQP5EWW8Q7JNXYFZ9HWSS6Q",
+            "01KTQQB24Q0X5HMTFWW5JQDPQB",
+            "01KTQQB270VKEM8BGYM06B8S4N"
+          ]
+        },
+        "WP2": {
+          "fait": [],
+          "ouvert": [
+            "01KTWQEH2ATBCD75BDZY48GWHC",
+            "01KTWQF2T7V8A7K9RQCPEAGGZC",
+            "01KVB2FB14WB399NQ1VHHV3NMC",
+            "01KVB3PV4X8AXSZR5DF249X21X",
+            "01KVB478A9NVXDWQPZPK8T8PZ9",
+            "01KW2KS5S8FC5150AEWQPP7X37",
+            "01KW2KS6CAK6A761D81YMX8DY0"
+          ]
+        },
+        "WP3": {
+          "fait": [
+            "01KVB9MZ937MA148DY0D757RPT",
+            "01KTW1NC9NRQQ5G05YB5E2MH8M"
+          ],
+          "ouvert": [
+            "01KW2KS5ZDNY72Y2G3B6DRYZQ5",
+            "01KW5N0Z3X2RFBG6NAJJZKXTWY",
+            "01KTWQEVH0KHS4C472BZR51ZED",
+            "01KW5N4WEBT27JDFZ9VZ0MDD3Y",
+            "01KVB67H8PDQZDHN952DY0SB82"
+          ]
+        },
+        "WP4": {
+          "fait": [
+            "01KVPB99F1YT9DB8M6J91106T5",
+            "01KVPB9SFBGZRS4HC1MC42Q66Y",
+            "01KVPBA4W8G2Y3PACC1HFRR3NW",
+            "01KVPBAHTPHH48EC4P7SED2QGX",
+            "01KVPB0M749HH7BXHQK4PPQKPC",
+            "01KVPB0TNS49PP4MZTQC3B83A1",
+            "01KVPB0ZYVCKSPNWPJCGFAVX0D",
+            "01KVPB16FQCXEY42FJWQ5CAZTD",
+            "01KVPB1BMTMD68VKZWP9T2GYQF",
+            "01KVPB1NH794HVVMXEYTKTV0K5",
+            "01KVDWBA6KCHG425WGDRTK3DEX"
+          ],
+          "ouvert": [
+            "01KTW1PP40D39CQ3VSFNNNKMM1",
+            "01KTW1PP80NN8AYY9NDYRJ7NTN",
+            "01KTW1PPBEW81X8HTZZ4NS7VKZ",
+            "01KTW67FQGE1AZ9J841Z0FH2FB",
+            "01KVB2KAE3C3WKCP98QJ1JQAHN",
+            "01KVB9MZ76TV5PNENQZPG7C9YS",
+            "01KVB9MZ8CQ4X5TW9NKMYE52QJ",
+            "01KVB9MZ7Y96B2B18BNBC2SVC2",
+            "01KVB67M7CV95DXB5DTX4PX59G"
+          ]
+        },
+        "WP5": {
+          "fait": [
+            "01KTWQEP5BDD711394PPKBP234"
+          ],
+          "ouvert": [
+            "01KTT2X4QG1VSWNPGX61S8024P",
+            "01KTT2XP110R7EAD9EP9X1MGMG",
+            "01KTT2XP45WKMVY2P3FR5850RM",
+            "01KTT2XP663WGCX3YNF4WVMXQN",
+            "01KTW674GHVBQ2J843QP0BERGP",
+            "01KTWQF6YVGJKWNRC99FNQ7XGR",
+            "01KTQP5F3TBJW90Y4A2SX7Z2Z5",
+            "01KTQP5FAW14WSGS18TB4R5B2B",
+            "01KW2KS65RKCSBNBEWQVSN7PH7"
+          ]
+        },
+        "WP6": {
+          "fait": [],
+          "ouvert": [
+            "01KW2KS5K2D1Y7KGYF41ZAZGSW"
+          ]
+        }
+      }
+    },
+    "month": {
+      "desc": "fait depuis 2026-05-29 + ouvert",
+      "since": "2026-05-29T23:59:59+00:00",
+      "by_wp": {
+        "WP1": {
+          "fait": [
+            "01KTQP5EYKW5J20JW5VF75TRS3",
+            "01KTQP5F0D6PMGRFFHYP8CEFXX",
+            "01KTQP5F227ETENEGY0E03F4XJ",
+            "01KTQQB1YNYPFDXB9P1V7VDNZ2",
+            "01KTQQB20HMR25VB74QCNT6HEH",
+            "01KTQQB22M45MT8J7RD5WQ27MR",
+            "01KTQQB1TM98TNWYM1T4BDRC86",
+            "01KTMHTE8YCBE0596AB6SJRYE4",
+            "01KTMHVEYV9CKNJ6DYFCZ6NSSS",
+            "01KTMHWMR88VSZ2F1QKRKBGBDY",
+            "01KTN7NFSN43AGKNJ3F2X370SP",
+            "01KTN9NCEK7J6H4PSF6J79WN1Y",
+            "01KTNB5EEQZ7AWNGCA7WDEVPF3",
+            "01KTND1JNF8KCKS5E3KSGTD9V1",
+            "01KTNXDJ1F3WABEQGS7SKWBPD1",
+            "01KTNXDJ31W4A6T2WPFW7X4ZMF",
+            "01KTP0JX1WTV4JNY6K18Y3P262",
+            "01KVBT1DX4N12TSAPPAGGK07C2",
+            "01KVBT1DXNMFPAX7RNSG1P2YN6"
+          ],
+          "ouvert": [
+            "01KW5RXJF7YWYHM86XY411SWJ0",
+            "01KTQP5EWW8Q7JNXYFZ9HWSS6Q",
+            "01KTQQB24Q0X5HMTFWW5JQDPQB",
+            "01KTQQB270VKEM8BGYM06B8S4N"
+          ]
+        },
+        "WP2": {
+          "fait": [
+            "01KTMHVPBYH1VP8TXMB9DRW3YQ",
+            "01KTMHVRFA2DDWME2P7G79C2QY",
+            "01KTMHWNQZ1EYEDAM2Z7PVK1N3",
+            "01KTNXDHZS5YBQD4TDFD5NBX21",
+            "01KTNXDJ4V97FY3XSSDNA0AK81",
+            "01KTP1ZR3FA3FWJN1BDQXBCMWT",
+            "01KTQ1DVBCMRD69P8TQD8MEC05",
+            "01KVB2KF6PE59JBH38SGTGD580",
+            "01KTMHVJXFFCMPKRFCZAJPWR9C",
+            "01KVBT1DWNN72VT292EB5K8VX9",
+            "01KVBT1DZ5NGW41AY54KZNPGEK",
+            "01KVBT1DZNBBWAR8KTCHHSED5E"
+          ],
+          "ouvert": [
+            "01KTWQEH2ATBCD75BDZY48GWHC",
+            "01KTWQF2T7V8A7K9RQCPEAGGZC",
+            "01KVB2FB14WB399NQ1VHHV3NMC",
+            "01KVB3PV4X8AXSZR5DF249X21X",
+            "01KVB478A9NVXDWQPZPK8T8PZ9",
+            "01KW2KS5S8FC5150AEWQPP7X37",
+            "01KW2KS6CAK6A761D81YMX8DY0"
+          ]
+        },
+        "WP3": {
+          "fait": [
+            "01KTQP5FEAD2BQ860ZQK2WF5BQ",
+            "01KVB9MZ937MA148DY0D757RPT",
+            "01KTW1NC9NRQQ5G05YB5E2MH8M"
+          ],
+          "ouvert": [
+            "01KW2KS5ZDNY72Y2G3B6DRYZQ5",
+            "01KW5N0Z3X2RFBG6NAJJZKXTWY",
+            "01KTWQEVH0KHS4C472BZR51ZED",
+            "01KW5N4WEBT27JDFZ9VZ0MDD3Y",
+            "01KVB67H8PDQZDHN952DY0SB82"
+          ]
+        },
+        "WP4": {
+          "fait": [
+            "01KVPB99F1YT9DB8M6J91106T5",
+            "01KVPB9SFBGZRS4HC1MC42Q66Y",
+            "01KVPBA4W8G2Y3PACC1HFRR3NW",
+            "01KVDWBTA3E5KGRKR4Q649GYZ9",
+            "01KVPBAHTPHH48EC4P7SED2QGX",
+            "01KVPB0M749HH7BXHQK4PPQKPC",
+            "01KVPB0TNS49PP4MZTQC3B83A1",
+            "01KVPB0ZYVCKSPNWPJCGFAVX0D",
+            "01KVPB16FQCXEY42FJWQ5CAZTD",
+            "01KVPB1BMTMD68VKZWP9T2GYQF",
+            "01KVPB1NH794HVVMXEYTKTV0K5",
+            "01KTQP5EKT788PH268CD8CHEZE",
+            "01KTQP5ENSSF8BHDCMVV7CZ5MG",
+            "01KTQP5EQF4YZSRNYM9KJC3RS4",
+            "01KTQP5ESB0VW0100Y5ETQZFZ3",
+            "01KTQP5EV1433XRDE5E91F1DQB",
+            "01KVDWAWM7VWXZFKPV9JRYTC7H",
+            "01KVDWBA6KCHG425WGDRTK3DEX",
+            "01KVBT1DVS7XKXVDZRY78V3RTE",
+            "01KVBT1DY4J2CYM6268C6QTSNW",
+            "01KVBT1DYKFXR9008FGGM4WDWG"
+          ],
+          "ouvert": [
+            "01KTW1PP40D39CQ3VSFNNNKMM1",
+            "01KTW1PP80NN8AYY9NDYRJ7NTN",
+            "01KTW1PPBEW81X8HTZZ4NS7VKZ",
+            "01KTW67FQGE1AZ9J841Z0FH2FB",
+            "01KVB2KAE3C3WKCP98QJ1JQAHN",
+            "01KVB9MZ76TV5PNENQZPG7C9YS",
+            "01KVB9MZ8CQ4X5TW9NKMYE52QJ",
+            "01KVB9MZ7Y96B2B18BNBC2SVC2",
+            "01KVB67M7CV95DXB5DTX4PX59G"
+          ]
+        },
+        "WP5": {
+          "fait": [
+            "01KTT2XNV6K0VD4HF7N3QVYSJ8",
+            "01KTT2XNX63QANY2WQJ2RQN539",
+            "01KTT2XNZ3XBN5SSDDW9RVWNF9",
+            "01KTWQEP5BDD711394PPKBP234",
+            "01KTWQFAXCPATQQ6MPNC6CWGXJ",
+            "01KTQP5F7FPB3Q98YK0Z0Y07WK",
+            "01KTQP5F95BSTYTR9QBZ3MP3ND",
+            "01KTQP5FCJXT0230YMVP8P0NX8",
+            "01KTRFET7CYWJC9QW7PRCZVFGE",
+            "01KVB9MZ9C1WBZ3KKAZRDBPYWV",
+            "01KTMHWPV0QGRT5CTVRYJ5SGFX",
+            "01KTNXDJ7ZK5GAEAFZJQZNJMVE"
+          ],
+          "ouvert": [
+            "01KTT2X4QG1VSWNPGX61S8024P",
+            "01KTT2XP110R7EAD9EP9X1MGMG",
+            "01KTT2XP45WKMVY2P3FR5850RM",
+            "01KTT2XP663WGCX3YNF4WVMXQN",
+            "01KTW674GHVBQ2J843QP0BERGP",
+            "01KTWQF6YVGJKWNRC99FNQ7XGR",
+            "01KTQP5F3TBJW90Y4A2SX7Z2Z5",
+            "01KTQP5FAW14WSGS18TB4R5B2B",
+            "01KW2KS65RKCSBNBEWQVSN7PH7"
+          ]
+        },
+        "WP6": {
+          "fait": [
+            "01KTQP5EHKKMM5TSD4ZSE3CFZ2",
+            "01KTNXDJ6EN4WXBFKVYCZJF6E2",
+            "01KTQ1DRFWRK2DNCGPEFFETF3A"
+          ],
+          "ouvert": [
+            "01KW2KS5K2D1Y7KGYF41ZAZGSW"
+          ]
+        }
+      }
+    },
+    "project": {
+      "desc": "depuis le début",
+      "by_wp": {
+        "WP1": {
+          "fait": [
+            "01KTQP5EYKW5J20JW5VF75TRS3",
+            "01KTQP5F0D6PMGRFFHYP8CEFXX",
+            "01KTQP5F227ETENEGY0E03F4XJ",
+            "01KTQQB1YNYPFDXB9P1V7VDNZ2",
+            "01KTQQB20HMR25VB74QCNT6HEH",
+            "01KTQQB22M45MT8J7RD5WQ27MR",
+            "01KTQQB1TM98TNWYM1T4BDRC86",
+            "01KTMHTE8YCBE0596AB6SJRYE4",
+            "01KTMHVEYV9CKNJ6DYFCZ6NSSS",
+            "01KTMHWMR88VSZ2F1QKRKBGBDY",
+            "01KTN7NFSN43AGKNJ3F2X370SP",
+            "01KTN9NCEK7J6H4PSF6J79WN1Y",
+            "01KTNB5EEQZ7AWNGCA7WDEVPF3",
+            "01KTND1JNF8KCKS5E3KSGTD9V1",
+            "01KTNXDJ1F3WABEQGS7SKWBPD1",
+            "01KTNXDJ31W4A6T2WPFW7X4ZMF",
+            "01KTP0JX1WTV4JNY6K18Y3P262",
+            "01KVBT1DX4N12TSAPPAGGK07C2",
+            "01KVBT1DXNMFPAX7RNSG1P2YN6"
+          ],
+          "ouvert": [
+            "01KW5RXJF7YWYHM86XY411SWJ0",
+            "01KTQP5EWW8Q7JNXYFZ9HWSS6Q",
+            "01KTQQB24Q0X5HMTFWW5JQDPQB",
+            "01KTQQB270VKEM8BGYM06B8S4N"
+          ]
+        },
+        "WP2": {
+          "fait": [
+            "01KTMHVPBYH1VP8TXMB9DRW3YQ",
+            "01KTMHVRFA2DDWME2P7G79C2QY",
+            "01KTMHWNQZ1EYEDAM2Z7PVK1N3",
+            "01KTNXDHZS5YBQD4TDFD5NBX21",
+            "01KTNXDJ4V97FY3XSSDNA0AK81",
+            "01KTP1ZR3FA3FWJN1BDQXBCMWT",
+            "01KTQ1DVBCMRD69P8TQD8MEC05",
+            "01KVB2KF6PE59JBH38SGTGD580",
+            "01KTMHVJXFFCMPKRFCZAJPWR9C",
+            "01KVBT1DWNN72VT292EB5K8VX9",
+            "01KVBT1DZ5NGW41AY54KZNPGEK",
+            "01KVBT1DZNBBWAR8KTCHHSED5E"
+          ],
+          "ouvert": [
+            "01KTWQEH2ATBCD75BDZY48GWHC",
+            "01KTWQF2T7V8A7K9RQCPEAGGZC",
+            "01KVB2FB14WB399NQ1VHHV3NMC",
+            "01KVB3PV4X8AXSZR5DF249X21X",
+            "01KVB478A9NVXDWQPZPK8T8PZ9",
+            "01KW2KS5S8FC5150AEWQPP7X37",
+            "01KW2KS6CAK6A761D81YMX8DY0"
+          ]
+        },
+        "WP3": {
+          "fait": [
+            "01KTQP5FEAD2BQ860ZQK2WF5BQ",
+            "01KVB9MZ937MA148DY0D757RPT",
+            "01KTW1NC9NRQQ5G05YB5E2MH8M"
+          ],
+          "ouvert": [
+            "01KW2KS5ZDNY72Y2G3B6DRYZQ5",
+            "01KW5N0Z3X2RFBG6NAJJZKXTWY",
+            "01KTWQEVH0KHS4C472BZR51ZED",
+            "01KW5N4WEBT27JDFZ9VZ0MDD3Y",
+            "01KVB67H8PDQZDHN952DY0SB82"
+          ]
+        },
+        "WP4": {
+          "fait": [
+            "01KVPB99F1YT9DB8M6J91106T5",
+            "01KVPB9SFBGZRS4HC1MC42Q66Y",
+            "01KVPBA4W8G2Y3PACC1HFRR3NW",
+            "01KTW1NZ55V6FTN3ACJSKQQNQ7",
+            "01KTW1NZ8FEWYQ1T4CCNR479FK",
+            "01KTW1NZBY7F1SC7A6A4NQAEAS",
+            "01KTW1NZJ06D73BQZP14GX8PE7",
+            "01KVDWBTA3E5KGRKR4Q649GYZ9",
+            "01KVPBAHTPHH48EC4P7SED2QGX",
+            "01KVPB0M749HH7BXHQK4PPQKPC",
+            "01KVPB0TNS49PP4MZTQC3B83A1",
+            "01KVPB0ZYVCKSPNWPJCGFAVX0D",
+            "01KVPB16FQCXEY42FJWQ5CAZTD",
+            "01KVPB1BMTMD68VKZWP9T2GYQF",
+            "01KVPB1NH794HVVMXEYTKTV0K5",
+            "01KTQP5EKT788PH268CD8CHEZE",
+            "01KTQP5ENSSF8BHDCMVV7CZ5MG",
+            "01KTQP5EQF4YZSRNYM9KJC3RS4",
+            "01KTQP5ESB0VW0100Y5ETQZFZ3",
+            "01KTQP5EV1433XRDE5E91F1DQB",
+            "01KVDWAWM7VWXZFKPV9JRYTC7H",
+            "01KVDWBA6KCHG425WGDRTK3DEX",
+            "01KVBT1DVS7XKXVDZRY78V3RTE",
+            "01KVBT1DY4J2CYM6268C6QTSNW",
+            "01KVBT1DYKFXR9008FGGM4WDWG"
+          ],
+          "ouvert": [
+            "01KTW1PP40D39CQ3VSFNNNKMM1",
+            "01KTW1PP80NN8AYY9NDYRJ7NTN",
+            "01KTW1PPBEW81X8HTZZ4NS7VKZ",
+            "01KTW67FQGE1AZ9J841Z0FH2FB",
+            "01KVB2KAE3C3WKCP98QJ1JQAHN",
+            "01KVB9MZ76TV5PNENQZPG7C9YS",
+            "01KVB9MZ8CQ4X5TW9NKMYE52QJ",
+            "01KVB9MZ7Y96B2B18BNBC2SVC2",
+            "01KVB67M7CV95DXB5DTX4PX59G"
+          ]
+        },
+        "WP5": {
+          "fait": [
+            "01KTT2XNV6K0VD4HF7N3QVYSJ8",
+            "01KTT2XNX63QANY2WQJ2RQN539",
+            "01KTT2XNZ3XBN5SSDDW9RVWNF9",
+            "01KTWQEP5BDD711394PPKBP234",
+            "01KTWQFAXCPATQQ6MPNC6CWGXJ",
+            "01KTQP5F7FPB3Q98YK0Z0Y07WK",
+            "01KTQP5F95BSTYTR9QBZ3MP3ND",
+            "01KTQP5FCJXT0230YMVP8P0NX8",
+            "01KTRFET7CYWJC9QW7PRCZVFGE",
+            "01KVB9MZ9C1WBZ3KKAZRDBPYWV",
+            "01KTMHWPV0QGRT5CTVRYJ5SGFX",
+            "01KTNXDJ7ZK5GAEAFZJQZNJMVE"
+          ],
+          "ouvert": [
+            "01KTT2X4QG1VSWNPGX61S8024P",
+            "01KTT2XP110R7EAD9EP9X1MGMG",
+            "01KTT2XP45WKMVY2P3FR5850RM",
+            "01KTT2XP663WGCX3YNF4WVMXQN",
+            "01KTW674GHVBQ2J843QP0BERGP",
+            "01KTWQF6YVGJKWNRC99FNQ7XGR",
+            "01KTQP5F3TBJW90Y4A2SX7Z2Z5",
+            "01KTQP5FAW14WSGS18TB4R5B2B",
+            "01KW2KS65RKCSBNBEWQVSN7PH7"
+          ]
+        },
+        "WP6": {
+          "fait": [
+            "01KTQP5EHKKMM5TSD4ZSE3CFZ2",
+            "01KTNXDJ6EN4WXBFKVYCZJF6E2",
+            "01KTQ1DRFWRK2DNCGPEFFETF3A"
+          ],
+          "ouvert": [
+            "01KW2KS5K2D1Y7KGYF41ZAZGSW"
+          ]
+        }
+      }
+    }
+  },
+  "titles": {
+    "01KTQP5FEAD2BQ860ZQK2WF5BQ": "WP B — Vertical profond geo (zone->lot), villes prioritaires opportunites<6mois x lots GeoJSON",
+    "01KTW1NC9NRQQ5G05YB5E2MH8M": "CS-L1 — Scoring visuel lots 4+∩TOD (carte Opportunités, couche lots coloriée data-driven)",
+    "01KTW1NZ55V6FTN3ACJSKQQNQ7": "CS-L2 — Fiche lot complète (Évaluation): cadastre + rôle MAMH + zone + grille PDF + Google Maps + notes",
+    "01KTW1NZ8FEWYQ1T4CCNR479FK": "CS-L3 — Marquage d'équipe + notes par lot + filtres par marque avec compteurs (Opportunités/Évaluation)",
+    "01KTW1NZBY7F1SC7A6A4NQAEAS": "CS-L4 — Export CSV lettres de sollicitation + export de sélection (Opportunités)",
+    "01KTW1NZJ06D73BQZP14GX8PE7": "CS-L5 — Filtres combinés potentiel(exclusif) × usage actuel(additif) × superficie min (Opportunités/Évaluation)",
+    "01KTQP5F5PARP1BX4A159NWRKV": "A.2.5 Captcha->Obscura pour identification proprietaire de lot (secondaire, rate-limite, role foncier public)",
+    "01KVB2FB12QHXSE2J2ZMRA45NC": "Graphify legacy redo OBSOLÈTE — remplacé par Graphify v2.3",
+    "01KVPB0M749HH7BXHQK4PPQKPC": "Header pas l'AppHeader canonique DS — écart structurel/visuel",
+    "01KVPB0TNS49PP4MZTQC3B83A1": "Police DS non chargée app-wide — font-family Inter en dur, 0 @font-face",
+    "01KVPB0ZYVCKSPNWPJCGFAVX0D": "Filtre Signaux : les 3 filtres ne sont pas cochés par défaut",
+    "01KVPB16FQCXEY42FJWQ5CAZTD": "Filtre Signaux : état non persisté (URL / store / localStorage)",
+    "01KVPB1BMTMD68VKZWP9T2GYQF": "Filtre Signaux : taille de police des libellés trop grande",
+    "01KVPB1NH794HVVMXEYTKTV0K5": "Panneau Signaux : déclarations font bespoke (hors tokens DS)",
+    "01KTQP5F7FPB3Q98YK0Z0Y07WK": "WP A.3 — Infrastructure data & agents (remote, backlog, graph DB, UI gestion + chat-ui)",
+    "01KTQP5EKT788PH268CD8CHEZE": "WP A.1 — Visualisation geographique-centrique (carte-first, bandeau de vues)",
+    "01KTMHTE8YCBE0596AB6SJRYE4": "WP4-A — Investigation données réelles multi-villes",
+    "01KTMHVEYV9CKNJ6DYFCZ6NSSS": "WP4-B — Recueil substrat (RawDocument + S3) + 1ʳᵉ source",
+    "01KTMHVJXFFCMPKRFCZAJPWR9C": "WP4 — Pipeline exploitation (mentions -> réconciliation -> projection -> signaux)",
+    "01KTMHVPBYH1VP8TXMB9DRW3YQ": "WP5-V1 — Ontologie graphify + modèle bitemporel Zod+PostGIS",
+    "01KTMHVRFA2DDWME2P7G79C2QY": "WP5 — Studio réconciliation (UI) + seed données réelles + valideurs D3",
+    "01KTMHWMR88VSZ2F1QKRKBGBDY": "WP4 — Sources #2-5 (1 PR/source)",
+    "01KTMHWNQZ1EYEDAM2Z7PVK1N3": "WP5 — Studio write-core (accept/reject -> patches graphify)",
+    "01KTMHWPV0QGRT5CTVRYJ5SGFX": "Provincial graph — partition par MRC quand N villes ingérées (différé)",
+    "01KTN7NFSN43AGKNJ3F2X370SP": "WP4 source #2 — avis-publics Beauharnois adapter + seed ontologie enrichi",
+    "01KTN9NCEK7J6H4PSF6J79WN1Y": "WP4 source #3 — rôle d'évaluation MAMH SourceAdapter (collect->exploitation)",
+    "01KTNB5EEQZ7AWNGCA7WDEVPF3": "WP4 source #4 — Adresses Québec adapter + mentions Adresse",
+    "01KTND1JNF8KCKS5E3KSGTD9V1": "WP4 source #5 — règlements d'urbanisme adapter + Bylaw/Zone mentions",
+    "01KTNXDHZS5YBQD4TDFD5NBX21": "Reconciliation graphify VISIBLE — chevauchement cross-source reel (avis<->reglement meme Bylaw)",
+    "01KTNXDJ1F3WABEQGS7SKWBPD1": "Ciblage — stage CiblagePlan (modele + UI editable, no I/O) pilotable",
+    "01KTNXDJ31W4A6T2WPFW7X4ZMF": "Pipelines executables — declencher recueil(live)+exploitation depuis l'UI",
+    "01KTNXDJ4V97FY3XSSDNA0AK81": "llmesh — extraction semantique graphify via @sentropic/llm-mesh (enrolment token)",
+    "01KTNXDJ6EN4WXBFKVYCZJF6E2": "Backlog <-> track — brancher la vue Backlog sur le store track (au lieu de l'in-memory demo)",
+    "01KTNXDJ7ZK5GAEAFZJQZNJMVE": "Deploiement — k8s (PR #8) ou via sentropic",
+    "01KTP0JX1WTV4JNY6K18Y3P262": "Exploitation: l'etat projet est ECRASE par source au lieu d'accumuler (executor multi-sources)",
+    "01KTP1ZR3FA3FWJN1BDQXBCMWT": "WP5 — Studio write-core (accept/reject -> patches graphify, token-gated)",
+    "01KTQ1DRFWRK2DNCGPEFFETF3A": "Backlog actualisation live (auto-refresh depuis le sidecar track)",
+    "01KTQ1DVBCMRD69P8TQD8MEC05": "Write-core: candidat decide reste en file + set_status UI + token durable compose",
+    "01KTQP5EHKKMM5TSD4ZSE3CFZ2": "Réorientation « Grand filet » — radar changement de zonage, carte-first, multi-villes",
+    "01KTQP5ENSSF8BHDCMVV7CZ5MG": "A.1.1 Vue Signaux (maille Quebec/villes) — nb opportunites/ville sur 6 mois, clic ville -> liste changements de zonage",
+    "01KTQP5EQF4YZSRNYM9KJC3RS4": "A.1.2 Vue Opportunites (maille ville/zones) — clic zone -> zoom",
+    "01KTQP5ESB0VW0100Y5ETQZFZ3": "A.1.3 Vue Evaluation (maille zone/lots) — qualifier lots selon grilles de zonage",
+    "01KTQP5EV1433XRDE5E91F1DQB": "A.1.4 Vue Sources (maille Quebec, maturite recueil) — villes GeoJSON coloriees par maturite; clic -> liste donnees recueillies (site, PV scrappes/graphifies, avis, YouTube transcrits/graphifies, zonages/ilots/proprietaires PDF|GeoJSON, statut)",
+    "01KTQP5EYKW5J20JW5VF75TRS3": "A.2.1 Liste des villes + perimetre (rayon MTL extensible QC) via CiblagePlan",
+    "01KTQP5F0D6PMGRFFHYP8CEFXX": "A.2.2 Scraper procès-verbaux GENERIQUE (avis de motion + changement de zonage + n. reglement a suivre)",
+    "01KTQP5F227ETENEGY0E03F4XJ": "A.2.3 YouTube seances: download + transcrit (Voxtral si besoin) + graphify",
+    "01KTQP5F95BSTYTR9QBZ3MP3ND": "A.3.1 Graph DB / table graphe Postgres (nodes/edges) — persistance graphe ontologique (graphify graph.json)",
+    "01KTQP5FCJXT0230YMVP8P0NX8": "A.3.3 UI de gestion (dont chat-ui)",
+    "01KTQQB1TM98TNWYM1T4BDRC86": "Tracking progressif scraping par ville x source (automation 1shot/refresh, fenetre)",
+    "01KTQQB1YNYPFDXB9P1V7VDNZ2": "Source conseils-municipaux (PV) — automation=refresh",
+    "01KTQQB20HMR25VB74QCNT6HEH": "Source avis-publics — automation=refresh",
+    "01KTQQB22M45MT8J7RD5WQ27MR": "Source youtube-seances — automation=refresh",
+    "01KTRFET7CYWJC9QW7PRCZVFGE": "chat.test.ts dépend des clés provider du .env (faux-négatif make test)",
+    "01KTT2XNV6K0VD4HF7N3QVYSJ8": "L1 — Geler l'anti-pattern + 2 bugs: rawObjectKey en CAS pur (retirer date-in-key) + sharder scrape-status (state/{city}/{kind}.json); aucune nouvelle fixture ville",
+    "01KTT2XNX63QANY2WQJ2RQN539": "L2 — Worker scrape -> S3: port Storage (PUT raw cas+meta) + manifestes de run (runs/.../manifest.jsonl); re-scraper les ~40 fixtures vers SCW",
+    "01KTT2XNZ3XBN5SSDDW9RVWNF9": "L3 — Persister parsed/ + graph/ sur S3 (docSha x parserVersion ; graphifyVersion x inputsetHash ; latest.json); le seed Postgres devient le projecteur (projection_meta)",
+    "01KTWQEP5BDD711394PPKBP234": "graphify → DB graphe Postgres (persistance nodes/edges)",
+    "01KTWQFAXCPATQQ6MPNC6CWGXJ": "Mount S3 SCW read-only (substrat graphify) — rclone mount-scw.sh",
+    "01KVB2KF6PE59JBH38SGTGD580": "Graphify evidence contract — signal description, citation and PDF link",
+    "01KVB9MZ937MA148DY0D757RPT": "P3 Zones and lots display — priority detections with geometry fallback",
+    "01KVB9MZ9C1WBZ3KKAZRDBPYWV": "P5 Admin validation view — approve reject suspend users",
+    "01KVBT1DVS7XKXVDZRY78V3RTE": "Evidence-backed signal document cards",
+    "01KVBT1DWNN72VT292EB5K8VX9": "Baseline, specs, and track",
+    "01KVBT1DX4N12TSAPPAGGK07C2": "Persist `publishedAt` at recueil time",
+    "01KVBT1DXNMFPAX7RNSG1P2YN6": "Metadata repair from existing S3",
+    "01KVBT1DY4J2CYM6268C6QTSNW": "API evidence DTO and document route",
+    "01KVBT1DYKFXR9008FGGM4WDWG": "UI signal card and PDF overlay",
+    "01KVBT1DZ5NGW41AY54KZNPGEK": "Graphify contract and non-regression gate notes",
+    "01KVBT1DZNBBWAR8KTCHHSED5E": "Merge readiness",
+    "01KVDWAWM7VWXZFKPV9JRYTC7H": "Geo router compatibility layer — real /geo/* routes with hash compatibility",
+    "01KVDWBA6KCHG425WGDRTK3DEX": "Geo URL state contract — mode selection focus filters viewport",
+    "01KVDWBTA3E5KGRKR4Q649GYZ9": "Geo PDF overlay integration — signal evidence viewer with page bbox",
+    "01KVPB99F1YT9DB8M6J91106T5": "Filtre zones/lots : les listes Zones et Lots du panneau ville ne sont pas filtrées par le filtre actif (z/m/p)",
+    "01KVPB9SFBGZRS4HC1MC42Q66Y": "Fiches de zones non affichées : l'accordéon Zones (ex. Saint-Frédéric, compteur=6) ne montre aucune fiche",
+    "01KVPBA4W8G2Y3PACC1HFRR3NW": "Zones/lots matchant le filtre non colorisés sur la carte — highlight data-driven absent",
+    "01KVPBAHTPHH48EC4P7SED2QGX": "PDF viewer Preuve ne rend pas — modal affiche erreur + fallback lien (route API PDF absente)",
+    "01KTQP5EWW8Q7JNXYFZ9HWSS6Q": "WP A.2 — Data: identification progressive 'easy first' + 4 agents remote",
+    "01KTQP5F3TBJW90Y4A2SX7Z2Z5": "A.2.4 Todo permanente + 4 agents background via remote (download/Obscura) + MAJ track",
+    "01KTQP5FAW14WSGS18TB4R5B2B": "A.3.2 remote: orchestration des agents de scraping + suivi backlog (track)",
+    "01KTQQB24Q0X5HMTFWW5JQDPQB": "Source zonage (PDF/GeoJSON) — automation=one_shot",
+    "01KTQQB270VKEM8BGYM06B8S4N": "Source role-evaluation (Donnees Quebec) — automation=one_shot",
+    "01KTT2X4QG1VSWNPGX61S8024P": "WP Persistance S3-first — SCW source de vérité, Postgres index reconstructible (1000 villes)",
+    "01KTT2XP110R7EAD9EP9X1MGMG": "L4 — radar db rebuild (replay S3 -> Postgres) + test CI sur MinIO: preuve que Postgres n'est plus la source de vérité",
+    "01KTT2XP45WKMVY2P3FR5850RM": "L5 — Fixtures git reduites au golden set (par famille structurelle) + script fixture promote",
+    "01KTT2XP663WGCX3YNF4WVMXQN": "L6 — Containeriser le worker -> SCW Serverless Jobs + Cron (40 -> 1000 villes sans OOM); bucket prod dedie + IAM scope",
+    "01KTW1PP40D39CQ3VSFNNNKMM1": "CS-L6 — Maquette: substrat données réel depuis le Netlify de Steve (4 villes, mode simulation)",
+    "01KTW1PP80NN8AYY9NDYRJ7NTN": "CS-P1 — Différenciateurs P1: pastilles=Signaux auto, couches env, recherche, batch, labels, sync",
+    "01KTW1PPBEW81X8HTZZ4NS7VKZ": "CS-P2 — Compléments P2: annonces en vente, lookup code postal, éditeur zonage manuel, mobile, dashboard couverture",
+    "01KTW674GHVBQ2J843QP0BERGP": "CS-P3 — Infra: backend sync temps réel multi-utilisateurs (+ AUTH) + export/import JSON (sorti de CS-P1)",
+    "01KTW67FQGE1AZ9J841Z0FH2FB": "CS-P2-S13 — Lookup code postal (Adresses Québec/IGO A7 + geocoder.ca fallback, cache)",
+    "01KTWQEH2ATBCD75BDZY48GWHC": "Parsing graphify PV — exploitation sémantique (Sonnet 4.6)",
+    "01KTWQEVH0KHS4C472BZR51ZED": "Script one-shot — bootstrap simulation (4 villes Steve + graphify)",
+    "01KTWQF2T7V8A7K9RQCPEAGGZC": "Entités additionnelles ontologie graphify (dates, adresses, résolutions, personnes publiques)",
+    "01KTWQF6YVGJKWNRC99FNQ7XGR": "Orchestration agentique remote — parsing graphify parallèle à l'échelle (3272 docs)",
+    "01KVB2FB14WB399NQ1VHHV3NMC": "Evaluate deterministic extraction performance for ontology entities",
+    "01KVB2KAE3C3WKCP98QJ1JQAHN": "DS redesign — map selection buckets and right-pane detail cards",
+    "01KVB3PV4X8AXSZR5DF249X21X": "Graphify version parity — repo/container still pinned below global CLI",
+    "01KVB478A9NVXDWQPZPK8T8PZ9": "Graphify v2.3 — Sonnet 4.6 descriptions and exhaustive citations",
+    "01KVB67H8PDQZDHN952DY0SB82": "Geo selection — zones/lots incorporation for priority detections",
+    "01KVB67M7CV95DXB5DTX4PX59G": "Data quality and admin validation views",
+    "01KVB9MZ76TV5PNENQZPG7C9YS": "P1 DS alignment — AppShell header and rails on DS v3",
+    "01KVB9MZ7Y96B2B18BNBC2SVC2": "P4 Data quality view — per-city PV YouTube ontology zones lots",
+    "01KVB9MZ8CQ4X5TW9NKMYE52QJ": "P2 Selection bucket UX — map selection and right-pane cards",
+    "01KW2KS5K2D1Y7KGYF41ZAZGSW": "Recalage Track — drift post-2026-06-23 et consolidation Graphify/PDF/Geo/Auth",
+    "01KW2KS5S8FC5150AEWQPP7X37": "Consolidation couche preuve — citation/PDF/rawRef de graphify au viewer",
+    "01KW2KS5ZDNY72Y2G3B6DRYZQ5": "Ownership geo de la preuve PDF liée aux signaux/zones/lots",
+    "01KW2KS65RKCSBNBEWQVSN7PH7": "Auth durable Sentropic — éviter redemande permanente, session 15j, autorisation persistée",
+    "01KW2KS6CAK6A761D81YMX8DY0": "Reliquats grounding citations — laurierville / saint-eustache / villes bloquées",
+    "01KW5N0Z3X2RFBG6NAJJZKXTWY": "WPB-E2E — Cohérence opportunités 33: zones lots citations PDF signaux grille",
+    "01KW5N4WEBT27JDFZ9VZ0MDD3Y": "CS-L1b — Scoring visuel lots data-driven aligné WPB-E2E 33 opportunités",
+    "01KW5RXJF7YWYHM86XY411SWJ0": "Geo propriétaires de lots — acquisition contrôlée, Loi 25, auth et avertissement scraping"
+  }
+}

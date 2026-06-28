@@ -484,7 +484,7 @@ describe("EvaluationMapView drilldown — SVG projection helpers", () => {
 // ── 5. Anti-PII : properties des lots ────────────────────────────────────────
 
 describe("EvaluationMapView drilldown — anti-PII (Loi 25)", () => {
-  it("les properties de chaque lot ne contiennent que noLot et citySlug", async () => {
+  it("les properties de chaque lot ne contiennent que des champs publics non-PII", async () => {
     vi.stubGlobal("fetch", async () =>
       new Response(
         JSON.stringify({ ok: true, citySlug: "salaberry-de-valleyfield", source: "donnees-quebec", featureCollection: VALLEYFIELD_FC }),
@@ -495,7 +495,15 @@ describe("EvaluationMapView drilldown — anti-PII (Loi 25)", () => {
     for (const f of res.featureCollection.features) {
       const keys = Object.keys(f.properties);
       for (const k of keys) {
-        expect(["noLot", "citySlug"]).toContain(k);
+        // Champs publics autorisés : identifiants + score de potentiel dérivé (public, Loi 25 OK).
+        expect([
+          "noLot",
+          "citySlug",
+          "potentialScore",
+          "potentialScoreStatus",
+          "potentialScoreSource",
+          "potentialScoreReason",
+        ]).toContain(k);
       }
       // noLot doit être une chaîne non vide
       expect(typeof f.properties.noLot).toBe("string");

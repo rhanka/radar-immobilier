@@ -1,0 +1,1150 @@
+{
+  "version": "1.0",
+  "decision": "01KW775RC2T3FQD76A3KNNS2FD",
+  "ratifiedAt": "2026-06-28",
+  "wpRoots": {
+    "WP1": {
+      "id": "01KW775D02BW0DRNEA8RP6BTG8",
+      "name": "DATA",
+      "slug": "wp1-data"
+    },
+    "WP2": {
+      "id": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "name": "EXTRACTION",
+      "slug": "wp2-extraction"
+    },
+    "WP3": {
+      "id": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "name": "RECONCILIATION",
+      "slug": "wp3-reconciliation"
+    },
+    "WP4": {
+      "id": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "name": "PRODUIT",
+      "slug": "wp4-produit"
+    },
+    "WP5": {
+      "id": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "name": "PLATEFORME_SCALE",
+      "slug": "wp5-plateforme"
+    },
+    "WP6": {
+      "id": "01KW775DPR13V8Q1B2GNM7WSDX",
+      "name": "GOUVERNANCE",
+      "slug": "wp6-gouvernance"
+    }
+  },
+  "note": "Mapping projection item→WP. Source de vérité de l'état par item = Track; le rattachement WP est une projection (le reparent physique cross-workspace est bloqué par l'invariant de containment Track 0.19.2 — voir wp6-socle-status.md).",
+  "items": [
+    {
+      "itemId": "01KW5RXJF7YWYHM86XY411SWJ0",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Geo propriétaires de lots — acquisition contrôlée, Loi 25, auth et avertissement scraping",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTQP5F5PARP1BX4A159NWRKV",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "A.2.5 Captcha->Obscura pour identification proprietaire de lot (secondaire, rate-limite, role foncier public)",
+      "sourceWorkspace": "frontA-data",
+      "realization": "cancelled",
+      "bucket": "DROPPED"
+    },
+    {
+      "itemId": "01KTQP5EYKW5J20JW5VF75TRS3",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "A.2.1 Liste des villes + perimetre (rayon MTL extensible QC) via CiblagePlan",
+      "sourceWorkspace": "frontA-data",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5F0D6PMGRFFHYP8CEFXX",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "A.2.2 Scraper procès-verbaux GENERIQUE (avis de motion + changement de zonage + n. reglement a suivre)",
+      "sourceWorkspace": "frontA-data",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5F227ETENEGY0E03F4XJ",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": "part graphify→WP2",
+      "title": "A.2.3 YouTube seances: download + transcrit (Voxtral si besoin) + graphify",
+      "sourceWorkspace": "frontA-data",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQQB1YNYPFDXB9P1V7VDNZ2",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Source conseils-municipaux (PV) — automation=refresh",
+      "sourceWorkspace": "frontA-data",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQQB20HMR25VB74QCNT6HEH",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Source avis-publics — automation=refresh",
+      "sourceWorkspace": "frontA-data",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQQB22M45MT8J7RD5WQ27MR",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Source youtube-seances — automation=refresh",
+      "sourceWorkspace": "frontA-data",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5EWW8Q7JNXYFZ9HWSS6Q",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": "part 4 agents remote→WP5",
+      "title": "WP A.2 — Data: identification progressive 'easy first' + 4 agents remote",
+      "sourceWorkspace": "frontA-data",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTQQB24Q0X5HMTFWW5JQDPQB",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Source zonage (PDF/GeoJSON) — automation=one_shot",
+      "sourceWorkspace": "frontA-data",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTQQB270VKEM8BGYM06B8S4N",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Source role-evaluation (Donnees Quebec) — automation=one_shot",
+      "sourceWorkspace": "frontA-data",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTQQB1TM98TNWYM1T4BDRC86",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Tracking progressif scraping par ville x source (automation 1shot/refresh, fenetre)",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTMHTE8YCBE0596AB6SJRYE4",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4-A — Investigation données réelles multi-villes",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTMHVEYV9CKNJ6DYFCZ6NSSS",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4-B — Recueil substrat (RawDocument + S3) + 1ʳᵉ source",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTMHWMR88VSZ2F1QKRKBGBDY",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4 — Sources #2-5 (1 PR/source)",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTN7NFSN43AGKNJ3F2X370SP",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4 source #2 — avis-publics Beauharnois adapter + seed ontologie enrichi",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTN9NCEK7J6H4PSF6J79WN1Y",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4 source #3 — rôle d'évaluation MAMH SourceAdapter (collect->exploitation)",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNB5EEQZ7AWNGCA7WDEVPF3",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4 source #4 — Adresses Québec adapter + mentions Adresse",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTND1JNF8KCKS5E3KSGTD9V1",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "WP4 source #5 — règlements d'urbanisme adapter + Bylaw/Zone mentions",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNXDJ1F3WABEQGS7SKWBPD1",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Ciblage — stage CiblagePlan (modele + UI editable, no I/O) pilotable",
+      "sourceWorkspace": "wp4-pipeline",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNXDJ31W4A6T2WPFW7X4ZMF",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": "part exploitation→WP2",
+      "title": "Pipelines executables — declencher recueil(live)+exploitation depuis l'UI",
+      "sourceWorkspace": "wp4-pipeline",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTP0JX1WTV4JNY6K18Y3P262",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Exploitation: l'etat projet est ECRASE par source au lieu d'accumuler (executor multi-sources)",
+      "sourceWorkspace": "wp4-pipeline",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DX4N12TSAPPAGGK07C2",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Persist `publishedAt` at recueil time",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DXNMFPAX7RNSG1P2YN6",
+      "wpId": "01KW775D02BW0DRNEA8RP6BTG8",
+      "wpCode": "WP1",
+      "split": null,
+      "title": "Metadata repair from existing S3",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTWQEH2ATBCD75BDZY48GWHC",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Parsing graphify PV — exploitation sémantique (Sonnet 4.6)",
+      "sourceWorkspace": "reorientation",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB2FB12QHXSE2J2ZMRA45NC",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Graphify legacy redo OBSOLÈTE — remplacé par Graphify v2.3",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "cancelled",
+      "bucket": "DROPPED"
+    },
+    {
+      "itemId": "01KTMHVPBYH1VP8TXMB9DRW3YQ",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "WP5-V1 — Ontologie graphify + modèle bitemporel Zod+PostGIS",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTMHVRFA2DDWME2P7G79C2QY",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "WP5 — Studio réconciliation (UI) + seed données réelles + valideurs D3",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTMHWNQZ1EYEDAM2Z7PVK1N3",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "WP5 — Studio write-core (accept/reject -> patches graphify)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNXDHZS5YBQD4TDFD5NBX21",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Reconciliation graphify VISIBLE — chevauchement cross-source reel (avis<->reglement meme Bylaw)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNXDJ4V97FY3XSSDNA0AK81",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "llmesh — extraction semantique graphify via @sentropic/llm-mesh (enrolment token)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTP1ZR3FA3FWJN1BDQXBCMWT",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "WP5 — Studio write-core (accept/reject -> patches graphify, token-gated)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQ1DVBCMRD69P8TQD8MEC05",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Write-core: candidat decide reste en file + set_status UI + token durable compose",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVB2KF6PE59JBH38SGTGD580",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Graphify evidence contract — signal description, citation and PDF link",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTWQF2T7V8A7K9RQCPEAGGZC",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Entités additionnelles ontologie graphify (dates, adresses, résolutions, personnes publiques)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB2FB14WB399NQ1VHHV3NMC",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Evaluate deterministic extraction performance for ontology entities",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB3PV4X8AXSZR5DF249X21X",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Graphify version parity — repo/container still pinned below global CLI",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB478A9NVXDWQPZPK8T8PZ9",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Graphify v2.3 — Sonnet 4.6 descriptions and exhaustive citations",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KW2KS5S8FC5150AEWQPP7X37",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": "part viewer restitution→WP4",
+      "title": "Consolidation couche preuve — citation/PDF/rawRef de graphify au viewer",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KW2KS6CAK6A761D81YMX8DY0",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Reliquats grounding citations — laurierville / saint-eustache / villes bloquées",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTMHVJXFFCMPKRFCZAJPWR9C",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "WP4 — Pipeline exploitation (mentions -> réconciliation -> projection -> signaux)",
+      "sourceWorkspace": "wp4-sources",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DWNN72VT292EB5K8VX9",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Baseline, specs, and track",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DZ5NGW41AY54KZNPGEK",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Graphify contract and non-regression gate notes",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DZNBBWAR8KTCHHSED5E",
+      "wpId": "01KW775D4QVAD4V4Z0JKAME5TZ",
+      "wpCode": "WP2",
+      "split": null,
+      "title": "Merge readiness",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5FEAD2BQ860ZQK2WF5BQ",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "WP B — Vertical profond geo (zone->lot), villes prioritaires opportunites<6mois x lots GeoJSON",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "done",
+      "bucket": "AWAITED"
+    },
+    {
+      "itemId": "01KVB9MZ937MA148DY0D757RPT",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "P3 Zones and lots display — priority detections with geometry fallback",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KW2KS5ZDNY72Y2G3B6DRYZQ5",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "Ownership geo de la preuve PDF liée aux signaux/zones/lots",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KW5N0Z3X2RFBG6NAJJZKXTWY",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "WPB-E2E — Cohérence opportunités 33: zones lots citations PDF signaux grille",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTW1NC9NRQQ5G05YB5E2MH8M",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "CS-L1 — Scoring visuel lots 4+∩TOD (carte Opportunités, couche lots coloriée data-driven)",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "AWAITED"
+    },
+    {
+      "itemId": "01KTWQEVH0KHS4C472BZR51ZED",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": "part graphify→WP2",
+      "title": "Script one-shot — bootstrap simulation (4 villes Steve + graphify)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KW5N4WEBT27JDFZ9VZ0MDD3Y",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "CS-L1b — Scoring visuel lots data-driven aligné WPB-E2E 33 opportunités",
+      "sourceWorkspace": "reorientation",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB67H8PDQZDHN952DY0SB82",
+      "wpId": "01KW775D96JRBM3RKN6D4CZ8W2",
+      "wpCode": "WP3",
+      "split": null,
+      "title": "Geo selection — zones/lots incorporation for priority detections",
+      "sourceWorkspace": "WP B",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVPB99F1YT9DB8M6J91106T5",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Filtre zones/lots : les listes Zones et Lots du panneau ville ne sont pas filtrées par le filtre actif (z/m/p)",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB9SFBGZRS4HC1MC42Q66Y",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Fiches de zones non affichées : l'accordéon Zones (ex. Saint-Frédéric, compteur=6) ne montre aucune fiche",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPBA4W8G2Y3PACC1HFRR3NW",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Zones/lots matchant le filtre non colorisés sur la carte — highlight data-driven absent",
+      "sourceWorkspace": "frontB-geo",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTW1NZ55V6FTN3ACJSKQQNQ7",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-L2 — Fiche lot complète (Évaluation): cadastre + rôle MAMH + zone + grille PDF + Google Maps + notes",
+      "sourceWorkspace": "reorientation",
+      "realization": "in-progress",
+      "bucket": "AWAITED"
+    },
+    {
+      "itemId": "01KTW1NZ8FEWYQ1T4CCNR479FK",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-L3 — Marquage d'équipe + notes par lot + filtres par marque avec compteurs (Opportunités/Évaluation)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "AWAITED"
+    },
+    {
+      "itemId": "01KTW1NZBY7F1SC7A6A4NQAEAS",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-L4 — Export CSV lettres de sollicitation + export de sélection (Opportunités)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "AWAITED"
+    },
+    {
+      "itemId": "01KTW1NZJ06D73BQZP14GX8PE7",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-L5 — Filtres combinés potentiel(exclusif) × usage actuel(additif) × superficie min (Opportunités/Évaluation)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "AWAITED"
+    },
+    {
+      "itemId": "01KTW1PP40D39CQ3VSFNNNKMM1",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-L6 — Maquette: substrat données réel depuis le Netlify de Steve (4 villes, mode simulation)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTW1PP80NN8AYY9NDYRJ7NTN",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-P1 — Différenciateurs P1: pastilles=Signaux auto, couches env, recherche, batch, labels, sync",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTW1PPBEW81X8HTZZ4NS7VKZ",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-P2 — Compléments P2: annonces en vente, lookup code postal, éditeur zonage manuel, mobile, dashboard couverture",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTW67FQGE1AZ9J841Z0FH2FB",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "CS-P2-S13 — Lookup code postal (Adresses Québec/IGO A7 + geocoder.ca fallback, cache)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB2KAE3C3WKCP98QJ1JQAHN",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "DS redesign — map selection buckets and right-pane detail cards",
+      "sourceWorkspace": "reorientation",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVDWBTA3E5KGRKR4Q649GYZ9",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Geo PDF overlay integration — signal evidence viewer with page bbox",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPBAHTPHH48EC4P7SED2QGX",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "PDF viewer Preuve ne rend pas — modal affiche erreur + fallback lien (route API PDF absente)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB0M749HH7BXHQK4PPQKPC",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Header pas l'AppHeader canonique DS — écart structurel/visuel",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB0TNS49PP4MZTQC3B83A1",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Police DS non chargée app-wide — font-family Inter en dur, 0 @font-face",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB0ZYVCKSPNWPJCGFAVX0D",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Filtre Signaux : les 3 filtres ne sont pas cochés par défaut",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB16FQCXEY42FJWQ5CAZTD",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Filtre Signaux : état non persisté (URL / store / localStorage)",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB1BMTMD68VKZWP9T2GYQF",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Filtre Signaux : taille de police des libellés trop grande",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVPB1NH794HVVMXEYTKTV0K5",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Panneau Signaux : déclarations font bespoke (hors tokens DS)",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5EKT788PH268CD8CHEZE",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "WP A.1 — Visualisation geographique-centrique (carte-first, bandeau de vues)",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5ENSSF8BHDCMVV7CZ5MG",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "A.1.1 Vue Signaux (maille Quebec/villes) — nb opportunites/ville sur 6 mois, clic ville -> liste changements de zonage",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5EQF4YZSRNYM9KJC3RS4",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "A.1.2 Vue Opportunites (maille ville/zones) — clic zone -> zoom",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5ESB0VW0100Y5ETQZFZ3",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "A.1.3 Vue Evaluation (maille zone/lots) — qualifier lots selon grilles de zonage",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5EV1433XRDE5E91F1DQB",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "A.1.4 Vue Sources (maille Quebec, maturite recueil) — villes GeoJSON coloriees par maturite; clic -> liste donnees recueillies (site, PV scrappes/graphifies, avis, YouTube transcrits/graphifies, zonages/ilots/proprietaires PDF|GeoJSON, statut)",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVDWAWM7VWXZFKPV9JRYTC7H",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Geo router compatibility layer — real /geo/* routes with hash compatibility",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVDWBA6KCHG425WGDRTK3DEX",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Geo URL state contract — mode selection focus filters viewport",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVB9MZ76TV5PNENQZPG7C9YS",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "P1 DS alignment — AppShell header and rails on DS v3",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB9MZ8CQ4X5TW9NKMYE52QJ",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "P2 Selection bucket UX — map selection and right-pane cards",
+      "sourceWorkspace": "frontA-viz",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVB9MZ7Y96B2B18BNBC2SVC2",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": "dépend données WP1",
+      "title": "P4 Data quality view — per-city PV YouTube ontology zones lots",
+      "sourceWorkspace": "frontA-data",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KVBT1DVS7XKXVDZRY78V3RTE",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "Evidence-backed signal document cards",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DY4J2CYM6268C6QTSNW",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "API evidence DTO and document route",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVBT1DYKFXR9008FGGM4WDWG",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": null,
+      "title": "UI signal card and PDF overlay",
+      "sourceWorkspace": "evdoc-branch-feat-evidence-doc-cards",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVB67M7CV95DXB5DTX4PX59G",
+      "wpId": "01KW775DDRD2FE8XRV3CXE7NF6",
+      "wpCode": "WP4",
+      "split": "part admin validation→WP5",
+      "title": "Data quality and admin validation views",
+      "sourceWorkspace": "WP A.3",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTT2XNV6K0VD4HF7N3QVYSJ8",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "L1 — Geler l'anti-pattern + 2 bugs: rawObjectKey en CAS pur (retirer date-in-key) + sharder scrape-status (state/{city}/{kind}.json); aucune nouvelle fixture ville",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTT2XNX63QANY2WQJ2RQN539",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "L2 — Worker scrape -> S3: port Storage (PUT raw cas+meta) + manifestes de run (runs/.../manifest.jsonl); re-scraper les ~40 fixtures vers SCW",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTT2XNZ3XBN5SSDDW9RVWNF9",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "L3 — Persister parsed/ + graph/ sur S3 (docSha x parserVersion ; graphifyVersion x inputsetHash ; latest.json); le seed Postgres devient le projecteur (projection_meta)",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTWQEP5BDD711394PPKBP234",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "graphify → DB graphe Postgres (persistance nodes/edges)",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTWQFAXCPATQQ6MPNC6CWGXJ",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "Mount S3 SCW read-only (substrat graphify) — rclone mount-scw.sh",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTT2X4QG1VSWNPGX61S8024P",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "WP Persistance S3-first — SCW source de vérité, Postgres index reconstructible (1000 villes)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTT2XP110R7EAD9EP9X1MGMG",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "L4 — radar db rebuild (replay S3 -> Postgres) + test CI sur MinIO: preuve que Postgres n'est plus la source de vérité",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTT2XP45WKMVY2P3FR5850RM",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "L5 — Fixtures git reduites au golden set (par famille structurelle) + script fixture promote",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTT2XP663WGCX3YNF4WVMXQN",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "L6 — Containeriser le worker -> SCW Serverless Jobs + Cron (40 -> 1000 villes sans OOM); bucket prod dedie + IAM scope",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTW674GHVBQ2J843QP0BERGP",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": "export/import JSON→WP4",
+      "title": "CS-P3 — Infra: backend sync temps réel multi-utilisateurs (+ AUTH) + export/import JSON (sorti de CS-P1)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTWQF6YVGJKWNRC99FNQ7XGR",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "Orchestration agentique remote — parsing graphify parallèle à l'échelle (3272 docs)",
+      "sourceWorkspace": "reorientation",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTQP5F3TBJW90Y4A2SX7Z2Z5",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": "part MAJ track→WP6",
+      "title": "A.2.4 Todo permanente + 4 agents background via remote (download/Obscura) + MAJ track",
+      "sourceWorkspace": "frontA-data",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTQP5F7FPB3Q98YK0Z0Y07WK",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": "part backlog/track→WP6",
+      "title": "WP A.3 — Infrastructure data & agents (remote, backlog, graph DB, UI gestion + chat-ui)",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5F95BSTYTR9QBZ3MP3ND",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "A.3.1 Graph DB / table graphe Postgres (nodes/edges) — persistance graphe ontologique (graphify graph.json)",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5FCJXT0230YMVP8P0NX8",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "A.3.3 UI de gestion (dont chat-ui)",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTRFET7CYWJC9QW7PRCZVFGE",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "chat.test.ts dépend des clés provider du .env (faux-négatif make test)",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KVB9MZ9C1WBZ3KKAZRDBPYWV",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "P5 Admin validation view — approve reject suspend users",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5FAW14WSGS18TB4R5B2B",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": "part suivi backlog track→WP6",
+      "title": "A.3.2 remote: orchestration des agents de scraping + suivi backlog (track)",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "to-do",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KW2KS65RKCSBNBEWQVSN7PH7",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "Auth durable Sentropic — éviter redemande permanente, session 15j, autorisation persistée",
+      "sourceWorkspace": "frontA-infra",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    },
+    {
+      "itemId": "01KTMHWPV0QGRT5CTVRYJ5SGFX",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "Provincial graph — partition par MRC quand N villes ingérées (différé)",
+      "sourceWorkspace": "wp5-ontology",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNXDJ7ZK5GAEAFZJQZNJMVE",
+      "wpId": "01KW775DJE2BJ28ZKPANYHY3S6",
+      "wpCode": "WP5",
+      "split": null,
+      "title": "Deploiement — k8s (PR #8) ou via sentropic",
+      "sourceWorkspace": "infra",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQP5EHKKMM5TSD4ZSE3CFZ2",
+      "wpId": "01KW775DPR13V8Q1B2GNM7WSDX",
+      "wpCode": "WP6",
+      "split": null,
+      "title": "Réorientation « Grand filet » — radar changement de zonage, carte-first, multi-villes",
+      "sourceWorkspace": "reorientation",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTNXDJ6EN4WXBFKVYCZJF6E2",
+      "wpId": "01KW775DPR13V8Q1B2GNM7WSDX",
+      "wpCode": "WP6",
+      "split": null,
+      "title": "Backlog <-> track — brancher la vue Backlog sur le store track (au lieu de l'in-memory demo)",
+      "sourceWorkspace": "wp6-platform",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KTQ1DRFWRK2DNCGPEFFETF3A",
+      "wpId": "01KW775DPR13V8Q1B2GNM7WSDX",
+      "wpCode": "WP6",
+      "split": null,
+      "title": "Backlog actualisation live (auto-refresh depuis le sidecar track)",
+      "sourceWorkspace": "wp6-platform",
+      "realization": "done",
+      "bucket": "DONE"
+    },
+    {
+      "itemId": "01KW2KS5K2D1Y7KGYF41ZAZGSW",
+      "wpId": "01KW775DPR13V8Q1B2GNM7WSDX",
+      "wpCode": "WP6",
+      "split": null,
+      "title": "Recalage Track — drift post-2026-06-23 et consolidation Graphify/PDF/Geo/Auth",
+      "sourceWorkspace": "meta-track",
+      "realization": "in-progress",
+      "bucket": "TO-DO"
+    }
+  ]
+}

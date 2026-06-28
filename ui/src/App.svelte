@@ -10,6 +10,7 @@
   import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import BacklogView from "$lib/components/backlog/BacklogView.svelte";
+  import KanbanView from "$lib/components/kanban/KanbanView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
   import SourcesMapView from "$lib/components/sources-map/SourcesMapView.svelte";
   import ReconciliationView from "$lib/components/reconciliation/ReconciliationView.svelte";
@@ -204,6 +205,9 @@
         <CoordinationView />
       {:else if activeView === "backlog"}
         <BacklogView />
+      {:else if activeView === "kanban"}
+        <!-- WP6 — Kanban WorkPackages (projection 4 niveaux) -->
+        <KanbanView />
       <!-- G3 — Vue Géo (zones + lots + opportunités) -->
       {:else if activeView === "geo"}
         <GeoView />
