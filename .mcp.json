@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "immo": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["packages/immo-mcp/dist/server.js"],
+      "env": {
+        "IMMO_MCP_DATA_MODE": "mock",
+        "RADAR_API_BASE_URL": "http://127.0.0.1:8803",
+        "IMMO_MCP_AUTH_STUB_SUB": "demo-user",
+        "IMMO_MCP_AUTH_STUB_TENANT": "radar",
+        "IMMO_MCP_AUTH_STUB_SCOPES": "immo:read immo:search immo:documents:read"
+      }
+    }
+  }
+}
