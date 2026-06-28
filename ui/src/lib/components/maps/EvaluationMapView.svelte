@@ -893,7 +893,7 @@
                         stroke-width={isMatched ? "1.6" : "0.6"}
                         stroke-dasharray={isMatched ? "none" : "3 2"}
                       >
-                        <title>Zone {zone.properties.code}{isMatched ? " (citée par le signal)" : ""}</title>
+                        <title>Zone {zone.properties.code}{isMatched ? " (citée par le signal)" : ""}{zone.properties.grillePdfUrl ? " — grille PDF disponible" : ""}</title>
                       </polygon>
                     {/if}
                   {/each}
