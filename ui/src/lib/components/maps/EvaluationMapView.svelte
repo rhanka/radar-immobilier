@@ -75,8 +75,14 @@
     { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry", source: "mrnf" },
     { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry", source: "mrnf" },
     { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains", source: "mrnf" },
-    // Ville avec zonage géo canonique servi (geo #92) + lots cadastraux — démo join signal→zone
+    // Villes avec zonage géo canonique per-slug servi (geo #92 Lot A) + lots — démo join signal→zone
     { slug: "rosemere", name: "Rosemère", mrc: "Thérèse-De Blainville", source: "mrnf" },
+    { slug: "westmount", name: "Westmount", mrc: "Montréal", source: "mrnf" },
+    { slug: "hampstead", name: "Hampstead", mrc: "Montréal", source: "mrnf" },
+    { slug: "cote-saint-luc", name: "Côte-Saint-Luc", mrc: "Montréal", source: "mrnf" },
+    { slug: "dorval", name: "Dorval", mrc: "Montréal", source: "mrnf" },
+    { slug: "longueuil", name: "Longueuil", mrc: "Longueuil", source: "mrnf" },
+    { slug: "chambly", name: "Chambly", mrc: "La Vallée-du-Richelieu", source: "mrnf" },
   ];
 
   // ── Switch source ──────────────────────────────────────────────────────────
