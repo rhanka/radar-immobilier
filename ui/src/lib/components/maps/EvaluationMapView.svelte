@@ -34,6 +34,12 @@
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
   import { fetchLots, type LotFeatureCollection, type LotFeature, type LotsResponse } from "$lib/maps/lots-client.js";
+  import {
+    fetchZones,
+    matchZonesToSignal,
+    type ZoneFeatureCollection,
+    type ZoneFeature,
+  } from "$lib/maps/zones-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import MapLegend from "$lib/components/maps/MapLegend.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
@@ -151,6 +157,18 @@
   let zonageError: string | null = null;
   let zonageEvents: DesignationEventDetail[] = [];
 
+  // ── Couche ZONAGE géo (polygones de zone) — WP3 préparation ───────────────
+  // Drapeau d'ACTIVATION de la couche de zonage géo (collection OGC
+  // `qc-zonage-<slug>` servie par geo, cf. #92 part-2). Tant que la collection
+  // n'est pas servie, `fetchZones` retourne 404 → FeatureCollection vide : la
+  // couche est alors un no-op (aucun polygone rendu, aucun highlight). Passer
+  // ce drapeau à `true` suffit à brancher le rendu dès que geo sert la 1re
+  // collection — voir RENVOIE/“prêt à brancher”.
+  // Typé `boolean` (pas le littéral `false`) pour que TS ne déclare pas le
+  // chemin d'activation « code mort » : flipper la constante suffit à brancher.
+  const ZONES_LAYER_ENABLED: boolean = false;
+  let zonesFC: ZoneFeatureCollection = { type: "FeatureCollection", features: [] };
+
   // ── State signaux ─────────────────────────────────────────────────────────
   let selectedCity: CitySignalEntry | null = cityEntries[0] ?? null;
   let selectedSignal: SignalT | null =
@@ -240,11 +258,27 @@
     }
   }
 
+  // ── Chargement de la couche zonage géo (gated) ────────────────────────────
+  async function loadZones(citySlug: string): Promise<void> {
+    zonesFC = { type: "FeatureCollection", features: [] };
+    // Inerte tant que le drapeau d'activation est faux : aucun appel réseau.
+    if (!ZONES_LAYER_ENABLED) return;
+    try {
+      const res = await fetchZones(citySlug, { limit: 500 });
+      // 404 (collection pas encore servie) → ok=false → features:[] → no-op.
+      zonesFC = res.featureCollection;
+    } catch {
+      // État honnête : on garde la couche vide en cas d'erreur réseau.
+      zonesFC = { type: "FeatureCollection", features: [] };
+    }
+  }
+
   function selectEvalCity(city: (typeof EVAL_CITIES)[0]): void {
     selectedEvalCity = city;
     void loadLots(city.slug);
     void loadZonage(city.slug);
     void loadProspectMarks(city.slug);
+    void loadZones(city.slug);
   }
 
   // ── Sélection automatique de la 1re ville lors du changement de filtre ────
@@ -262,6 +296,7 @@
       void loadLots(first.slug);
       void loadZonage(first.slug);
       void loadProspectMarks(first.slug);
+      void loadZones(first.slug);
     }
     void loadSignalEntries();
   });
@@ -322,6 +357,28 @@
       .join(" ");
   }
 
+  /**
+   * Étend une bbox lots avec l'emprise des polygones de zone, pour que la
+   * couche zonage géo soit projetée dans le même repère que les lots. No-op
+   * concret tant que la couche zonage est inerte (aucune zone à folder).
+   */
+  function extendBboxWithZones(base: SvgBbox, zones: ZoneFeature[]): SvgBbox {
+    let { minLon, minLat, maxLon, maxLat } = base;
+    for (const z of zones) {
+      if (!z.geometry || z.geometry.type !== "Polygon") continue;
+      const rings = z.geometry.coordinates as number[][][];
+      for (const ring of rings) {
+        for (const pt of ring) {
+          if (pt[0] < minLon) minLon = pt[0];
+          if (pt[0] > maxLon) maxLon = pt[0];
+          if (pt[1] < minLat) minLat = pt[1];
+          if (pt[1] > maxLat) maxLat = pt[1];
+        }
+      }
+    }
+    return { minLon, minLat, maxLon, maxLat };
+  }
+
   $: lotsBbox = computeLotsBbox(lotsFC.features);
   $: polygonFeatures = lotsFC.features.filter(
     (f) => f.geometry && f.geometry.type === "Polygon" && !f.properties.isRue,
@@ -356,6 +413,25 @@
     if (filter === "unmarked") return prospectCounters.unmarked;
     return prospectCounters[filter];
   }
+
+  // ── Couche zonage géo : polygones + appariement au signal sélectionné ─────
+  // Inerte tant que ZONES_LAYER_ENABLED est faux ou que la collection 404.
+  $: zonePolygonFeatures = ZONES_LAYER_ENABLED
+    ? zonesFC.features.filter((f) => f.geometry && f.geometry.type === "Polygon")
+    : [];
+  $: hasZoneLayer = zonePolygonFeatures.length > 0;
+  // Codes de zone cités par le signal sélectionné (un SignalT porte `zone`).
+  $: selectedSignalZoneCodes = selectedSignal?.zone ? [selectedSignal.zone] : [];
+  // Zones de la couche géo qui matchent le signal sélectionné (join pur, WP3).
+  $: matchedZoneCodes = new Set(
+    matchZonesToSignal(selectedSignalZoneCodes, zonePolygonFeatures).map(
+      (z) => z.properties.code,
+    ),
+  );
+  // bbox commune lots+zones (identique à lotsBbox quand la couche est inerte).
+  $: mapBbox = hasZoneLayer
+    ? extendBboxWithZones(lotsBbox, zonePolygonFeatures)
+    : lotsBbox;
 
   // ── Indicateurs réactifs ──────────────────────────────────────────────────
   $: isLoadingEval = lotsLoading || zonageLoading;
@@ -792,6 +868,29 @@
               >
                 <rect width={SVG_W} height={SVG_H} class="fill-blue-50" rx="2" />
 
+                <!-- Couche zonage géo (WP3) — rendue SOUS les lots, inerte tant
+                     que ZONES_LAYER_ENABLED est faux ou que la collection 404.
+                     Les zones matchées au signal sélectionné sont mises en
+                     évidence (remplissage ambré). -->
+                {#if hasZoneLayer}
+                  {#each zonePolygonFeatures as zone (zone.properties.code)}
+                    {@const zRings = zone.geometry?.coordinates as number[][][] | undefined}
+                    {@const isMatched = matchedZoneCodes.has(zone.properties.code)}
+                    {#if zRings && zRings.length > 0}
+                      <polygon
+                        points={ringToPoints(zRings[0], mapBbox)}
+                        fill={isMatched ? "#f59e0b" : "none"}
+                        fill-opacity={isMatched ? "0.25" : "0"}
+                        stroke={isMatched ? "#d97706" : "#94a3b8"}
+                        stroke-width={isMatched ? "1.6" : "0.6"}
+                        stroke-dasharray={isMatched ? "none" : "3 2"}
+                      >
+                        <title>Zone {zone.properties.code}{isMatched ? " (citée par le signal)" : ""}</title>
+                      </polygon>
+                    {/if}
+                  {/each}
+                {/if}
+
                 {#each filteredPolygonFeatures as feature (feature.properties.noLot)}
                   {@const rings = feature.geometry?.coordinates as number[][][] | undefined}
                   {@const isHovered = hoveredLot === feature.properties.noLot}
@@ -815,15 +914,15 @@
                       tabindex="0"
                     >
                       <polygon
-                        points={ringToPoints(rings[0], lotsBbox)}
+                        points={ringToPoints(rings[0], mapBbox)}
                         fill={isLotSelected ? "#0d9488" : scoreFill}
                         stroke={isLotSelected ? "#0d9488" : scoreFill}
                         stroke-width={isLotSelected ? "1.5" : "0.8"}
                         fill-opacity={lotOpacity(feature, isLotSelected, isHovered)}
                       />
                       {#if (isHovered || isLotSelected) && rings[0].length > 0}
-                        {@const cx = rings[0].reduce((s, p) => s + projX(p[0], lotsBbox), 0) / rings[0].length}
-                        {@const cy = rings[0].reduce((s, p) => s + projY(p[1], lotsBbox), 0) / rings[0].length}
+                        {@const cx = rings[0].reduce((s, p) => s + projX(p[0], mapBbox), 0) / rings[0].length}
+                        {@const cy = rings[0].reduce((s, p) => s + projY(p[1], mapBbox), 0) / rings[0].length}
                         <text
                           x={cx}
                           y={cy}
