@@ -85,4 +85,29 @@ describe("loadConfig", () => {
       expect(auth.clientId).toBe("radar-immobilier");
     });
   });
+
+  describe("session lifetime (durable session — wp5 §B)", () => {
+    it("defaults SESSION_TTL_SECONDS to 15 days (was 8h — root cause of re-auth churn)", () => {
+      const cfg = loadConfig({ ...BASE_ENV });
+      expect(cfg.SESSION_TTL_SECONDS).toBe(1_296_000);
+      expect(resolveAuthConfig(cfg).sessionTtlSeconds).toBe(1_296_000);
+    });
+
+    it("defaults SESSION_ABSOLUTE_TTL_SECONDS to 30 days (sliding ceiling)", () => {
+      const cfg = loadConfig({ ...BASE_ENV });
+      expect(cfg.SESSION_ABSOLUTE_TTL_SECONDS).toBe(2_592_000);
+      expect(resolveAuthConfig(cfg).sessionAbsoluteTtlSeconds).toBe(2_592_000);
+    });
+
+    it("honours explicit SESSION_TTL_SECONDS / SESSION_ABSOLUTE_TTL_SECONDS overrides", () => {
+      const cfg = loadConfig({
+        ...BASE_ENV,
+        SESSION_TTL_SECONDS: "604800",
+        SESSION_ABSOLUTE_TTL_SECONDS: "1209600",
+      });
+      const auth = resolveAuthConfig(cfg);
+      expect(auth.sessionTtlSeconds).toBe(604800);
+      expect(auth.sessionAbsoluteTtlSeconds).toBe(1209600);
+    });
+  });
 });

@@ -132,8 +132,28 @@ const envSchema = z.object({
   /** Symmetric key the api uses to sign its OWN session cookie (HS256).
    * Secret — distinct from the IdP. */
   SESSION_SECRET: optStr(z.string().min(1)),
-  /** Session cookie lifetime in seconds (default 8h). */
-  SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(28800),
+  /**
+   * Session cookie lifetime in seconds (default 15 days = 1 296 000).
+   * Combined with the sliding re-mint in `protect`/`/me` (see
+   * services/auth/session.shouldRefreshSession), an active user gets a rolling
+   * 15-day window and almost never bounces back to the IdP. The previous 8h
+   * default was the main driver of the "re-authorise the app every time"
+   * symptom (cf. docs/spec/reports/wp5-plateforme.md §B).
+   */
+  SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(1_296_000),
+  /**
+   * Absolute ceiling for the sliding session, in seconds (default 30 days =
+   * 2 592 000). The cookie slides (re-mints) only while the ORIGINAL issuance
+   * (`iat0` claim) is younger than this; past it, the session is allowed to
+   * expire and a real re-login is required. Bounds the lifetime of a stolen
+   * cookie even though the user keeps coming back inside the rolling window.
+   */
+  SESSION_ABSOLUTE_TTL_SECONDS: z
+    .coerce
+    .number()
+    .int()
+    .positive()
+    .default(2_592_000),
 
   // ── Scaleway Transactional Email (TEM) — emails d'invitation ────────────
   // L'egress SMTP est BLOQUÉ au niveau plateforme sur ce cluster (BR-37b), donc
@@ -220,6 +240,8 @@ export interface AuthConfig {
   readonly appBaseUrl: string;
   readonly sessionSecret: string;
   readonly sessionTtlSeconds: number;
+  /** Absolute ceiling (seconds) past which the session stops sliding. */
+  readonly sessionAbsoluteTtlSeconds: number;
 }
 
 /**
@@ -252,6 +274,7 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
     appBaseUrl: appBaseUrl.replace(/\/$/, ""),
     sessionSecret,
     sessionTtlSeconds: config.SESSION_TTL_SECONDS,
+    sessionAbsoluteTtlSeconds: config.SESSION_ABSOLUTE_TTL_SECONDS,
   };
 }
 

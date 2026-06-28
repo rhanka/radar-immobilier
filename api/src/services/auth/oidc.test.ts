@@ -23,6 +23,7 @@ const AUTH: AuthConfig = {
   appBaseUrl: "https://immo.example.test",
   sessionSecret: "session-secret",
   sessionTtlSeconds: 3600,
+  sessionAbsoluteTtlSeconds: 7200,
 };
 
 const DISCOVERY: OidcDiscovery = {
