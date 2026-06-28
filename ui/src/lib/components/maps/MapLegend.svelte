@@ -1,37 +1,33 @@
 <script lang="ts">
   /**
-   * MapLegend — Légende de la carte Steve (lots cadastraux CS-L6).
+   * MapLegend — légende score de potentiel par lot.
    *
-   * Composant local extrait de EvaluationMapView pour préparer
-   * la future migration vers le composant Legend DS (backlog).
-   * NE crée PAS de dépendance au composant Legend DS non encore disponible.
-   *
-   * Affiche les 4 catégories de lots carte Steve :
-   * - Orange (priorité max) : 4+ logements ∩ TOD
-   * - Vert : Zone 4+ logements
-   * - Bleu : Périmètre TOD
-   * - Gris : Autres lots
+   * La couleur de la carte suit `potentialScore` sur l'échelle canonique 0-10.
+   * Les compteurs de fallback rendent explicite les lots scorés sans score API
+   * direct ou sans contexte zone/TOD suffisant.
    */
+  import { scoreLegend } from "$lib/maps/score-color-scale.js";
+
+  export let fallbackCount = 0;
+  export let unavailableCount = 0;
+
+  const legend = scoreLegend(null);
 </script>
 
-<div class="border-t border-slate-100 px-4 py-3" aria-label="Légende carte Steve">
-  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende</p>
-  <ul class="flex flex-wrap gap-x-4 gap-y-1.5">
-    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-      <span class="inline-block h-3 w-5 rounded-sm" style="background:#e67e22; opacity:0.7;"></span>
-      4+ logements ∩ TOD (priorité max)
-    </li>
-    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-      <span class="inline-block h-3 w-5 rounded-sm" style="background:#27ae60; opacity:0.65;"></span>
-      Zone 4+ logements
-    </li>
-    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-      <span class="inline-block h-3 w-5 rounded-sm" style="background:#2980b9; opacity:0.35;"></span>
-      Périmètre TOD
-    </li>
-    <li class="flex items-center gap-1.5 text-xs text-slate-600">
-      <span class="inline-block h-3 w-5 rounded-sm" style="background:#bdc3c7; opacity:0.45;"></span>
-      Autres lots
-    </li>
+<div class="border-t border-slate-100 px-4 py-3" aria-label="Légende score lots">
+  <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Potentiel par lot</p>
+  <ul class="grid gap-1.5 sm:grid-cols-2">
+    {#each legend as entry (entry.label)}
+      <li class="flex items-center gap-1.5 text-xs text-slate-600">
+        <span class="inline-block h-3 w-5 rounded-sm" style={`background:${entry.color}; opacity:0.65;`}></span>
+        {entry.label}
+      </li>
+    {/each}
   </ul>
+  {#if fallbackCount > 0 || unavailableCount > 0}
+    <p class="mt-2 text-xs text-amber-700">
+      {fallbackCount} lot{fallbackCount !== 1 ? "s" : ""} avec fallback zone/TOD ·
+      {unavailableCount} non disponible{unavailableCount !== 1 ? "s" : ""}.
+    </p>
+  {/if}
 </div>

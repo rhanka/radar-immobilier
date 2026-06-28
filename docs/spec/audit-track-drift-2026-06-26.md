@@ -265,7 +265,7 @@ Critères d’acceptation:
 | Item | Action proposée |
 |---|---|
 | `01KVB3PV4X8AXSZR5DF249X21X` Graphify version parity | Mettre `in-progress` + noter que la parité 0.17 n’est pas stabilisée sur main si c’est encore vrai. |
-| `01KVB2FB12QHXSE2J2ZMRA45NC` Graphify v2.2 redo | Annuler comme subsumé par v2.3, ou le garder actif explicitement; ne pas laisser TO-DO ambigu. |
+| `01KVB2FB12QHXSE2J2ZMRA45NC` Graphify legacy redo OBSOLÈTE | Annuler comme subsumé par v2.3, ou le garder actif explicitement; ne pas laisser TO-DO ambigu. |
 | `01KTWQEP5BDD711394PPKBP234` graphify→DB Postgres | Clôturer comme réalisé/doublon via A.3.1 si validé. |
 | `01KTWQEH2ATBCD75BDZY48GWHC` parsing graphify PV | Passer `in-progress`, partiel non exhaustif. |
 | `01KTWQF6YVGJKWNRC99FNQ7XGR` orchestration remote | Passer `in-progress` ou re-scoper; pas DONE sans preuve remote. |
