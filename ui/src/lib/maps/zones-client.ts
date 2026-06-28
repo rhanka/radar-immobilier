@@ -43,6 +43,12 @@ export interface ZoneProperties {
    * Candidats : usages (array|csv), usage. undefined si absent.
    */
   usages?: string[];
+  /**
+   * Lien vers la grille de zonage PDF quand la collection l'expose (preuve).
+   * Candidats hétérogènes : URL_Grille, LienGrille, Grille, URL_GRILLE, GRILLE_URL.
+   * undefined si absent.
+   */
+  grillePdfUrl?: string;
 }
 
 export interface ZoneGeometry {
@@ -274,10 +280,21 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
     properties.zone_kind,
   ]);
   const usages = normalizeUsages(properties.usages ?? properties.usage);
+  // Lien grille PDF — nom de champ hétérogène selon la source geo (catalogue #74).
+  const grillePdfUrl = firstString([
+    properties.URL_Grille,
+    properties.LienGrille,
+    properties.Grille,
+    properties.URL_GRILLE,
+    properties.GRILLE_URL,
+    properties.grille,
+    properties.lien_grille,
+  ]);
 
   return {
     ...(kind !== null ? { kind } : {}),
     ...(usages !== undefined ? { usages } : {}),
+    ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
   };
 }
 
