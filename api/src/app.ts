@@ -20,6 +20,7 @@ import { graphSignalsRoute, type GraphSignalsDeps } from "./routes/graph-signals
 import { geoLotsRoute } from "./routes/geo-lots.js";
 import { geoZonesRoute } from "./routes/geo-zones.js";
 import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js";
+import { geoCollectionsRoute } from "./routes/geo-collections.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
@@ -107,6 +108,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
   app.route("/", geoFeaturesRoute({ db: deps.db }));
+  app.route("/", geoCollectionsRoute({ db: deps.db }));
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
