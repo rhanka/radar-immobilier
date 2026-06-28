@@ -231,6 +231,8 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
     properties.zoneCode,
     properties.zone_code,
     properties.ZONE,
+    properties.Zonage,
+    properties.zonage,
     properties.code_affiche,
     properties.codeAffiche,
   ]);

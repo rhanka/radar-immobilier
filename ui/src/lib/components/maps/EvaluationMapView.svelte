@@ -75,6 +75,8 @@
     { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry", source: "mrnf" },
     { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry", source: "mrnf" },
     { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains", source: "mrnf" },
+    // Ville avec zonage géo canonique servi (geo #92) + lots cadastraux — démo join signal→zone
+    { slug: "rosemere", name: "Rosemère", mrc: "Thérèse-De Blainville", source: "mrnf" },
   ];
 
   // ── Switch source ──────────────────────────────────────────────────────────
@@ -166,7 +168,7 @@
   // collection — voir RENVOIE/“prêt à brancher”.
   // Typé `boolean` (pas le littéral `false`) pour que TS ne déclare pas le
   // chemin d'activation « code mort » : flipper la constante suffit à brancher.
-  const ZONES_LAYER_ENABLED: boolean = false;
+  const ZONES_LAYER_ENABLED: boolean = true;
   let zonesFC: ZoneFeatureCollection = { type: "FeatureCollection", features: [] };
 
   // ── State signaux ─────────────────────────────────────────────────────────
