@@ -32,9 +32,40 @@ export interface AuthState {
  */
 const LOGIN_ATTEMPT_KEY = "radar_login_attempt";
 
+/**
+ * Marqueur de RÉ-AUTH forcée. Posé par les flux SENSIBLES (logout explicite,
+ * « changer de compte ») juste avant le rechargement, il est consommé au
+ * prochain `redirectToLogin()` pour forcer `prompt=login` UNE fois. Stocké en
+ * sessionStorage : il survit au reload du même onglet (où vit le flux) mais pas
+ * à la fermeture. Sans lui, un re-login ordinaire (session expirée) part SANS
+ * `prompt` → l'IdP réutilise sa session SSO + le consentement → reconnexion
+ * silencieuse (plus d'écran « Autoriser l'application » à chaque fois).
+ */
+const FORCE_REAUTH_KEY = "radar_force_reauth";
+
 function readLoginAttempt(): boolean {
   try {
     return globalThis.sessionStorage?.getItem(LOGIN_ATTEMPT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** Pose le marqueur de ré-auth forcée (flux sensibles : logout, switch-account). */
+function markForceReauth(): void {
+  try {
+    globalThis.sessionStorage?.setItem(FORCE_REAUTH_KEY, "1");
+  } catch {
+    /* sessionStorage indisponible : on dégrade en re-login ordinaire. */
+  }
+}
+
+/** Lit ET consomme le marqueur de ré-auth forcée (one-shot). */
+function consumeForceReauth(): boolean {
+  try {
+    const forced = globalThis.sessionStorage?.getItem(FORCE_REAUTH_KEY) === "1";
+    if (forced) globalThis.sessionStorage?.removeItem(FORCE_REAUTH_KEY);
+    return forced;
   } catch {
     return false;
   }
@@ -109,26 +140,34 @@ function createAuthStore() {
     }
   }
 
-  function redirectToLogin(): void {
+  function redirectToLogin(options: { forceReauth?: boolean } = {}): void {
     // Pose le marqueur AVANT de partir : au retour, checkSession() saura
     // qu'une tentative a déjà eu lieu et activera le disjoncteur si besoin.
     markLoginAttempt();
-    // `prompt=login` : un clic EXPLICITE sur « Se connecter » force l'IdP à
-    // RÉ-AFFICHER le login au lieu de réémettre silencieusement un token pour la
-    // session SSO en cours. C'est le SEUL levier `prompt` réellement honoré par
-    // l'IdP sentropic : son authorize-handler ne traite que `login`/`none`/
-    // `consent` (packages/auth-hono/src/oauth/authorize-handler.ts) et IGNORE
-    // `select_account` (absent du code, aucun écran de sélection de compte). Un
-    // ancien fix envoyait `select_account` — silencieusement ignoré, d'où la
-    // régression « reconnect = compte précédent » qui persistait.
+
+    // `prompt=login` est désormais CONDITIONNEL. Il force l'IdP à RÉ-AFFICHER le
+    // login (+ ré-octroyer le consentement) au lieu de réutiliser la session SSO
+    // — comportement voulu UNIQUEMENT pour les flux sensibles, mais qui rendait
+    // la session durable inopérante quand on le forçait à CHAQUE re-login.
+    //   - Re-login ordinaire (session radar expirée) → SANS `prompt` : l'IdP
+    //     réutilise sa session SSO + le consentement mémorisé → reconnexion
+    //     silencieuse, plus d'écran « Autoriser l'application ».
+    //   - Flux sensible (logout explicite, « changer de compte ») → AVEC
+    //     `prompt=login` : signalé soit par `options.forceReauth`, soit par le
+    //     marqueur sessionStorage posé avant le reload de déconnexion.
+    // NB : l'entrée d'invitation `/enroll` force déjà `prompt=login` côté serveur
+    // (redirige vers /login?prompt=login) — indépendamment d'ici : la correction
+    // de la fuite « lien d'invitation → session résiduelle » reste préservée.
     //
-    // LIMITE CONNUE (dépend de l'IdP) : `prompt=login` ré-affiche le login mais
-    // ne propose pas de CHANGER d'identité tant que le cookie SSO `session` de
-    // l'IdP (host-only sur auth.sent-tech.ca, 7 j) n'est pas détruit. L'IdP
-    // n'expose ni `end_session_endpoint` ni page de logout navigable cross-site,
-    // donc radar ne peut pas le détruire depuis immo.sent-tech.ca. Le switch de
-    // compte complet requiert une évolution IdP (cf. rapport auth).
-    window.location.href = "/api/v1/auth/login?prompt=login";
+    // `prompt=login` est la SEULE valeur `prompt` honorée par l'IdP sentropic
+    // (son authorize-handler traite login/none/consent, IGNORE `select_account`).
+    // LIMITE CONNUE : ré-afficher le login ne permet pas de CHANGER d'identité
+    // tant que le cookie SSO `session` de l'IdP (7 j) vit ; l'IdP n'expose pas de
+    // logout navigable cross-site → switch de compte = évolution IdP (rapport auth).
+    const forceReauth = options.forceReauth === true || consumeForceReauth();
+    window.location.href = forceReauth
+      ? "/api/v1/auth/login?prompt=login"
+      : "/api/v1/auth/login";
   }
 
   /** Réinitialise le disjoncteur (bouton "Réessayer" de la page bloquée). */
@@ -136,7 +175,13 @@ function createAuthStore() {
     clearLoginAttempt();
   }
 
-  return { subscribe, checkSession, redirectToLogin, resetLoginAttempt };
+  return {
+    subscribe,
+    checkSession,
+    redirectToLogin,
+    resetLoginAttempt,
+    markForceReauth,
+  };
 }
 
 export const authStore = createAuthStore();

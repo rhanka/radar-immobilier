@@ -63,6 +63,14 @@ data:
   # redirect_uri and user-facing callbacks (mirrors sentropic AUTH_CALLBACK_BASE_URL).
   AUTH_CALLBACK_BASE_URL: "https://immo.sent-tech.ca"
   SENTROPIC_OAUTH_REDIRECT_URI: "https://immo.sent-tech.ca/api/v1/auth/oauth/callback"
+  # Durable RP session (cf. docs/spec/reports/wp5-plateforme.md §B). The api
+  # cookie lasts 15 days and SLIDES (re-mints in protect/`/me`) on activity, so
+  # an active user almost never bounces back to the IdP — this is the main fix
+  # for the "re-authorise the app every time" symptom. The absolute ceiling
+  # (30 days) bounds the rolling window so a stolen cookie cannot live forever.
+  # These mirror the config.ts defaults; set here so the values are declarative.
+  SESSION_TTL_SECONDS: "1296000"
+  SESSION_ABSOLUTE_TTL_SECONDS: "2592000"
 ---
 apiVersion: apps/v1
 kind: Deployment

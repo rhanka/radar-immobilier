@@ -11,7 +11,7 @@ import {
 import { authRoute, protect } from "./auth.js";
 import type { AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
-import { signSession } from "../services/auth/session.js";
+import { signSession, verifySession } from "../services/auth/session.js";
 
 const AUTH_ON: AuthConfig = {
   enabled: true,
@@ -23,6 +23,7 @@ const AUTH_ON: AuthConfig = {
   appBaseUrl: "https://immo.example.test",
   sessionSecret: "session-secret-32-bytes-long-padding!!",
   sessionTtlSeconds: 3600,
+  sessionAbsoluteTtlSeconds: 7200,
 };
 
 const AUTH_OFF: AuthConfig = { ...AUTH_ON, enabled: false };
@@ -623,6 +624,103 @@ describe("protect middleware", () => {
       error: "account_not_approved",
       status: "suspended",
     });
+  });
+});
+
+describe("sliding session re-mint (durable session — wp5 §B)", () => {
+  // AUTH_ON: ttl 3600s (half-life 1800s), absolute ceiling 7200s.
+  const T0 = 1_700_000_000_000; // ms
+
+  /** Decode a Set-Cookie session token to read its refreshed exp (seconds). */
+  async function decodeExp(res: Response, now: number): Promise<number | null> {
+    const token = readSetCookie(res, "radar_session");
+    if (!token) return null;
+    const s = await verifySession(token, {
+      sessionSecret: AUTH_ON.sessionSecret,
+      now,
+    });
+    return s?.exp ?? null;
+  }
+
+  function protectedApp(now: number): Hono {
+    const app = new Hono();
+    app.use("*", protect(AUTH_ON, { now: () => now }));
+    app.get("/api/protected", (c) => c.json({ ok: true }));
+    return app;
+  }
+
+  it("protect re-mints the cookie once past the half-life, pushing exp forward", async () => {
+    const token = await signSession(
+      { sub: "user-1" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: T0 },
+    );
+    // 1900s later: exp - now = 1700 < 1800 (past half-life), 1900 < 7200 ceiling.
+    const now = T0 + 1900 * 1000;
+    const res = await protectedApp(now).request("/api/protected", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res.status).toBe(200);
+    // A fresh cookie is set, with exp advanced to now + ttl.
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+    expect(await decodeExp(res, now)).toBe(Math.floor(now / 1000) + 3600);
+  });
+
+  it("protect does NOT re-mint before the half-life (no churn on every request)", async () => {
+    const token = await signSession(
+      { sub: "user-1" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: T0 },
+    );
+    // 100s later: exp - now = 3500 > 1800 → no re-mint.
+    const now = T0 + 100 * 1000;
+    const res = await protectedApp(now).request("/api/protected", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res.status).toBe(200);
+    expect(readSetCookie(res, "radar_session")).toBeFalsy();
+  });
+
+  it("protect STOPS re-minting past the absolute ceiling (still valid, but anchored too old)", async () => {
+    // iat0 8000s in the past (> 7200 ceiling), freshly re-signed so still valid.
+    const token = await signSession(
+      { sub: "user-1", iat0: Math.floor(T0 / 1000) - 8000 },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: T0 },
+    );
+    // 1900s later: past half-life, and now - iat0 = 9900 > 7200 → no re-mint.
+    const now = T0 + 1900 * 1000;
+    const res = await protectedApp(now).request("/api/protected", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res.status).toBe(200); // session still honoured until its exp
+    expect(readSetCookie(res, "radar_session")).toBeFalsy();
+  });
+
+  it("/me re-mints the cookie past the half-life (the SPA's polling extends the window)", async () => {
+    const token = await signSession(
+      { sub: "user-9", name: "Carol" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: T0 },
+    );
+    const now = T0 + 1900 * 1000;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, now: () => now });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    const body = await res.json();
+    expect(body.authenticated).toBe(true);
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+    expect(await decodeExp(res, now)).toBe(Math.floor(now / 1000) + 3600);
+  });
+
+  it("/me does NOT re-mint a freshly-minted session (still in the first half)", async () => {
+    const token = await signSession(
+      { sub: "user-9" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: T0 },
+    );
+    const now = T0 + 100 * 1000;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, now: () => now });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(readSetCookie(res, "radar_session")).toBeFalsy();
   });
 });
 

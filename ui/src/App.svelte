@@ -104,6 +104,12 @@
     // reconnexion (LoginView "blocked"). Le logout est un état propre, pas une
     // tentative échouée.
     authStore.resetLoginAttempt();
+    // Logout EXPLICITE = flux sensible : on force la ré-auth (`prompt=login`) au
+    // prochain « Se connecter », pour que l'IdP ré-affiche le login plutôt que de
+    // réémettre silencieusement un token pour la session SSO en place (symptôme
+    // « reconnect = compte précédent »). Le re-login ordinaire (session expirée),
+    // lui, reste silencieux. Le marqueur survit au reload du même onglet.
+    authStore.markForceReauth();
     // Rechargement COMPLET vers la racine : la SPA se réinitialise, rappelle
     // /api/v1/auth/me (désormais non authentifié) et affiche LoginView. Sans ce
     // reload, le store auth resterait "authentifié" en mémoire et rien ne
