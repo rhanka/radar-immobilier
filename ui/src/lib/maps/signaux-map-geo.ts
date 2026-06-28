@@ -173,8 +173,49 @@ export function decorateLotsWithSignalProjection(
   };
 }
 
-export function extractSignalZoneRefs(node: GraphSignalNode): string[] {
-  const raw = uniqueStrings(
+/** Provenance d'un code de zone : champ structuré ou inféré du texte libre. */
+export type ZoneRefSource = "structured" | "inferred";
+
+/**
+ * Code de zone extrait d'un signal, avec sa provenance et sa confiance.
+ *
+ * `source: "structured"` = champ `zone_ref`/`zoneRef`/… renseigné par graphify
+ * (confiance 1). `source: "inferred"` = code repéré dans le texte libre (label,
+ * citation, excerpt, description) par balayage regex (confiance 0.5–0.85).
+ *
+ * Règle d'or : une zone structurée n'est JAMAIS écrasée par une zone inférée du
+ * même code. L'inférence ne fait que COMBLER les zones citées mais non
+ * structurées (le cas Rosemère « zone C-18 », Saint-Amable « CEN-183 », etc.).
+ */
+export interface ZoneRefWithProvenance {
+  /** Code normalisé (comparable au `properties.code` de l'API geo). */
+  code: string;
+  source: ZoneRefSource;
+  /** Confiance : 1 (structuré) ; 0.5–0.85 (inféré, selon le motif). */
+  confidence: number;
+}
+
+/**
+ * Extrait les codes de zone d'un signal AVEC leur provenance.
+ *
+ * 1. Champs STRUCTURÉS (`zone_ref`, `zoneRef`, `zone`, `targets_zone`…) →
+ *    `source: "structured"`, confiance 1. Comportement historique préservé.
+ * 2. TEXTE LIBRE (label + citation + excerpt + description + refs[].excerpt) →
+ *    `source: "inferred"`. Comble les 22/27 signaux dont la zone est CITÉE mais
+ *    non structurée par graphify, pour qu'elle soit listable / filtrable /
+ *    mappable / highlightable dès que la géométrie existera.
+ *
+ * Anti-écrasement : un code déjà présent en structuré reste structuré. Les
+ * doublons inférés conservent la confiance maximale. Tout est dédupliqué et
+ * normalisé (casse, espaces, tirets unicode, suffixe secteur).
+ *
+ * NE crée AUCUNE géométrie et n'expose AUCUNE route : pure détection de codes.
+ */
+export function extractSignalZoneRefsDetailed(node: GraphSignalNode): ZoneRefWithProvenance[] {
+  const byCode = new Map<string, ZoneRefWithProvenance>();
+
+  // 1. Champs structurés — autorité maximale, jamais écrasés (comportement historique).
+  const structuredRaw = uniqueStrings(
     propRecords(node).flatMap((props) => [
       ...extractStructuredRefs(props.zone_ref),
       ...extractStructuredRefs(props.zoneRef),
@@ -185,9 +226,146 @@ export function extractSignalZoneRefs(node: GraphSignalNode): string[] {
       ...extractStructuredRefs(props.targets_zone),
     ]),
   );
-  // Normalise chaque code extrait pour qu'il soit comparable au
-  // `properties.code` de la réponse API geo (normalisé côté serveur).
-  return uniqueStrings(raw.map(normalizeZoneCodeRef));
+  for (const rawCode of structuredRaw) {
+    const code = normalizeZoneCodeRef(rawCode);
+    if (code.length === 0) continue;
+    if (!byCode.has(code)) byCode.set(code, { code, source: "structured", confidence: 1 });
+  }
+
+  // 2. Inférence depuis le texte libre — comble UNIQUEMENT les codes manquants.
+  for (const candidate of scanZoneCodesFromText(collectSignalFreeText(node))) {
+    const code = normalizeZoneCodeRef(candidate.rawText);
+    if (code.length < 2) continue;
+    const existing = byCode.get(code);
+    if (!existing) {
+      byCode.set(code, { code, source: "inferred", confidence: candidate.confidence });
+    } else if (existing.source === "inferred" && candidate.confidence > existing.confidence) {
+      // Jamais d'écrasement d'un structuré ; entre inférés, garder le plus confiant.
+      existing.confidence = candidate.confidence;
+    }
+  }
+
+  return [...byCode.values()];
+}
+
+/**
+ * Codes de zone d'un signal (forme historique `string[]`, normalisée).
+ *
+ * Inclut désormais les codes structurés ET les codes inférés du texte libre
+ * (cf. `extractSignalZoneRefsDetailed`). Les appelants qui ont besoin de la
+ * provenance/confiance utilisent la variante `…Detailed`.
+ */
+export function extractSignalZoneRefs(node: GraphSignalNode): string[] {
+  return extractSignalZoneRefsDetailed(node).map((zone) => zone.code);
+}
+
+/** Un code de zone candidat repéré dans le texte libre, avec sa confiance. */
+interface InferredZoneCandidate {
+  rawText: string;
+  confidence: number;
+}
+
+/**
+ * Concatène le texte libre exploitable d'un signal pour l'inférence de zones :
+ * label + description + citation + excerpt (au niveau props ET props.properties),
+ * plus les extraits des `refs[]`. Miroir allégé d'`extractSignalEvidence`.
+ */
+function collectSignalFreeText(node: GraphSignalNode): string {
+  const parts: string[] = [];
+  const push = (value: unknown): void => {
+    if (typeof value === "string" && value.trim().length > 0) parts.push(value);
+  };
+
+  push(node.label);
+  push(node.description);
+  for (const props of propRecords(node)) {
+    push(props.description);
+    push(props.citation);
+    push(props.excerpt);
+    push(props.summary);
+    push(props.justification);
+    push(props.resume);
+  }
+
+  const refs = (node.props ?? {}).refs;
+  if (Array.isArray(refs)) {
+    for (const ref of refs) {
+      if (ref && typeof ref === "object") {
+        const record = ref as Record<string, unknown>;
+        push(record.excerpt);
+        push(record.citation);
+        push(record.quote);
+        push(record.text);
+      }
+    }
+  }
+
+  return parts.join(" \n ");
+}
+
+/**
+ * Confiances par motif d'inférence (toujours < 1, réservé au structuré).
+ *  - explicit : précédé du mot « zone » → désambiguïsé, confiance haute.
+ *  - hyphen   : format lettre(s)+tiret+chiffres (H-431, CEN-183, IDC-1).
+ *  - compact  : format collé lettre(s)+chiffres (A16, I93, Rf51, RU1302).
+ */
+const INFERRED_CONFIDENCE = { explicit: 0.85, hyphen: 0.65, compact: 0.5 } as const;
+
+// Motifs réinstanciés à chaque appel (reset de lastIndex). Miroir simplifié de
+// api/src/services/geo/extract-refs.ts, en majuscule-tête pour éviter les faux
+// positifs sur le texte français en minuscules et les identifiants de test.
+//
+// explicit : « zone C-18 », « zones H-42-1 » — le mot « zone » lève l'ambiguïté,
+//   donc on tolère la casse (/i) mais on EXIGE un chiffre (pas « zone résidentielle »).
+const ZONE_EXPLICIT_SRC =
+  String.raw`\bzones?\s+([A-Za-z]{1,4}-?[0-9]{1,4}(?:-[0-9A-Za-z]{1,3})?)\b`;
+// hyphen : « H-431 », « CEN-183 », « MxtV-4 » — lettre-tête majuscule + tiret obligatoire.
+const ZONE_HYPHEN_SRC =
+  String.raw`\b([A-Z][A-Za-z]{0,3}[0-9]{0,2}-[0-9A-Z]{1,6}(?:-[0-9A-Z]{1,4})?)\b`;
+// compact : « A16 », « I93 », « Rf51 », « RU1302 » — lettre-tête majuscule + 2-5 chiffres collés.
+const ZONE_COMPACT_SRC = String.raw`\b([A-Z][A-Za-z]{0,3}[0-9]{2,5})\b`;
+
+/**
+ * Balaye un texte libre et renvoie les codes de zone candidats.
+ *
+ * Garde-fou anti-règlement : un code immédiatement précédé d'un contexte
+ * « règlement / concordance / résolution / annexe / article / numéro » ou d'un
+ * préfixe numérique-tiret (ex. « 2009-Z-84 ») est ÉCARTÉ — c'est un numéro de
+ * règlement de concordance, pas une zone (faux positif Z-94/Z-84 de l'audit).
+ * Le motif « zone X » explicite n'est pas soumis à ce garde-fou.
+ */
+function scanZoneCodesFromText(text: string): InferredZoneCandidate[] {
+  if (!text || text.trim().length === 0) return [];
+  const out: InferredZoneCandidate[] = [];
+
+  for (const match of text.matchAll(new RegExp(ZONE_EXPLICIT_SRC, "gi"))) {
+    if (match[1]) out.push({ rawText: match[1].trim(), confidence: INFERRED_CONFIDENCE.explicit });
+  }
+  for (const match of text.matchAll(new RegExp(ZONE_HYPHEN_SRC, "g"))) {
+    if (!match[1]) continue;
+    if (isReglementContext(text.slice(Math.max(0, match.index - 30), match.index))) continue;
+    out.push({ rawText: match[1].trim(), confidence: INFERRED_CONFIDENCE.hyphen });
+  }
+  for (const match of text.matchAll(new RegExp(ZONE_COMPACT_SRC, "g"))) {
+    if (!match[1]) continue;
+    if (isReglementContext(text.slice(Math.max(0, match.index - 30), match.index))) continue;
+    out.push({ rawText: match[1].trim(), confidence: INFERRED_CONFIDENCE.compact });
+  }
+
+  return out;
+}
+
+/**
+ * Vrai si le préfixe (texte juste avant le candidat) trahit un numéro de
+ * règlement plutôt qu'un code de zone : mot-clé règlementaire immédiatement
+ * accolé, ou suffixe numérique-tiret (« 2009-Z-84 », « 419-26 »).
+ */
+function isReglementContext(prefix: string): boolean {
+  const tail = prefix.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (/(reglement|concordance|resolution|annexe|article|chapitre|numero)\s*(?:n[o°]?\.?|#)?\s*[\w.-]*$/.test(tail)) {
+    return true;
+  }
+  return /\d\s*-\s*$/.test(tail);
 }
 
 /**
