@@ -234,9 +234,12 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
   // Matching de propriété FLEXIBLE : le nom du champ zone VARIE selon la source
   // geo (heads-up geo 2026-06-28 + mesure recall #74 2026-06-28) — 'zone_code'
   // (obscura/GoNet, ~70 collections), 'code' (×5), 'Zonage'/'NumZone' (ArcGIS),
-  // 'Zone'/'NO_ZONAGE'/'NUM_ZONE'/'zone_' (variantes casse), 'ETIQUETTE' composite.
+  // 'Zone'/'NO_ZONAGE'/'zone_' (variantes casse), 'ETIQUETTE' composite.
   // ETIQUETTE = "<id>  <CODE>" : on extrait le dernier token (le code réglementaire).
   const etiquette = typeof properties.ETIQUETTE === "string" ? properties.ETIQUETTE.trim().split(/\s+/).pop() : undefined;
+  // ORDRE CRITIQUE (#74) : les codes RÉGLEMENTAIRES d'abord (ceux qui matchent les PV),
+  // les ids SÉQUENTIELS internes (NumZone/NUM_ZONE = "4052", "R-128") en DERNIER recours —
+  // sinon ils volent la priorité au vrai code (ex. saint-hyacinthe NUM_ZONE 4052 vs ETIQUETTE H01).
   const code = firstString([
     properties.code,
     properties.Code,
@@ -247,15 +250,15 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
     properties.Zonage,
     properties.zonage,
     properties.NO_ZONAGE,
+    properties.zone_,
+    etiquette,
+    properties.code_affiche,
+    properties.codeAffiche,
+    properties.No_zone,
+    properties.no_zone,
     properties.NumZone,
     properties.num_zone,
     properties.NUM_ZONE,
-    properties.zone_,
-    etiquette,
-    properties.No_zone,
-    properties.no_zone,
-    properties.code_affiche,
-    properties.codeAffiche,
   ]);
   if (!code) return null;
 
