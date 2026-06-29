@@ -44,10 +44,14 @@
   import {
     activeMarketMark,
     activePipelineMark,
+    createProspectMark,
+    createProspectNote,
     fetchProspectLotState,
     prospectStatusLabel,
     type ProspectMark,
     type ProspectNote,
+    type ProspectMode,
+    type PipelineStatus,
   } from "$lib/prospect/prospect-marks-client.js";
 
   // ── Props ────────────────────────────────────────────────────────────────────
@@ -61,9 +65,21 @@
   /** Callback de fermeture. */
   export let onClose: () => void = () => {};
 
+  /**
+   * Autorise l'AFFICHAGE+ÉDITION du marquage d'équipe (donnée CLIENT, CS-L3).
+   * Fail-closed (défaut `false`) : tant qu'aucun rôle de session OIDC n'est câblé
+   * côté UI, ce drapeau EST le contrôle de rôle. La donnée publique (cadastre,
+   * score, zonage) reste affichée quoi qu'il arrive.
+   */
+  export let allowMarquage: boolean = false;
+
+  /** Mode d'origine des marquages posés depuis ce panneau (réel vs simulation). */
+  export let mode: ProspectMode = "real";
+
   // ── Dérivés réactifs ─────────────────────────────────────────────────────────
 
   $: noLot = lot?.properties.noLot ?? "";
+  $: lotVersionId = lot?.properties.lotVersionId ?? null;
   $: potentialScore = lot?.properties.potentialScore;
   $: superficieM2 = lot?.properties.superficieM2;
   $: valuation = lot?.properties.valuation;
@@ -136,6 +152,61 @@
       if (prospectRequestKey === `${citySlugValue}::${noLotValue}`) {
         prospectLoading = false;
       }
+    }
+  }
+
+  // ── Écriture marquage (append-only, gatée allowMarquage) ────────────────────
+  let prospectSaving = false;
+  let noteDraft = "";
+
+  const PIPELINE_ACTIONS: Array<{ statut: PipelineStatus; label: string }> = [
+    { statut: "favori", label: "Favori" },
+    { statut: "sollicite", label: "Sollicité" },
+    { statut: "lettre_envoyee", label: "Lettre envoyée" },
+    { statut: "ecarte", label: "Écarté" },
+  ];
+
+  async function setPipeline(statut: PipelineStatus): Promise<void> {
+    if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
+    prospectSaving = true;
+    prospectError = null;
+    try {
+      await createProspectMark({ lotVersionId, noLot, citySlug, dimension: "pipeline", statut, mode });
+      await loadProspectState(noLot, citySlug);
+    } catch (e) {
+      prospectError = e instanceof Error ? e.message : "Marquage échoué";
+    } finally {
+      prospectSaving = false;
+    }
+  }
+
+  async function toggleEnVente(): Promise<void> {
+    if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
+    prospectSaving = true;
+    prospectError = null;
+    try {
+      await createProspectMark({ lotVersionId, noLot, citySlug, dimension: "marche", statut: "en_vente", mode });
+      await loadProspectState(noLot, citySlug);
+    } catch (e) {
+      prospectError = e instanceof Error ? e.message : "Marquage échoué";
+    } finally {
+      prospectSaving = false;
+    }
+  }
+
+  async function submitNote(): Promise<void> {
+    const body = noteDraft.trim();
+    if (!allowMarquage || !body || !noLot || !citySlug || prospectSaving) return;
+    prospectSaving = true;
+    prospectError = null;
+    try {
+      await createProspectNote({ noLot, citySlug, body, mode, ...(lotVersionId ? { lotVersionId } : {}) });
+      noteDraft = "";
+      await loadProspectState(noLot, citySlug);
+    } catch (e) {
+      prospectError = e instanceof Error ? e.message : "Note échouée";
+    } finally {
+      prospectSaving = false;
     }
   }
 </script>
@@ -445,9 +516,59 @@
               </p>
             {/if}
 
-            <p class="text-xs text-slate-400">
-              Écriture append-only via l'API ProspectMark. Les boutons d'édition seront activés lorsque le lot GeoJSON exposera son lotVersionId.
-            </p>
+            {#if allowMarquage}
+              <div class="space-y-2 border-t border-slate-100 pt-2" data-testid="fiche-prospect-edit">
+                <div class="flex flex-wrap gap-1.5">
+                  {#each PIPELINE_ACTIONS as action (action.statut)}
+                    <button
+                      type="button"
+                      class="rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 {pipelineMark?.statut === action.statut ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}"
+                      disabled={!lotVersionId || prospectSaving}
+                      on:click={() => setPipeline(action.statut)}
+                    >
+                      {action.label}
+                    </button>
+                  {/each}
+                  <button
+                    type="button"
+                    class="rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 {marketMark ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}"
+                    disabled={!lotVersionId || prospectSaving}
+                    on:click={toggleEnVente}
+                  >
+                    En vente
+                  </button>
+                </div>
+                {#if !lotVersionId}
+                  <p class="text-[11px] text-slate-400 italic" data-testid="fiche-prospect-no-version">
+                    Statuts désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo. Les notes restent possibles.
+                  </p>
+                {/if}
+                <div class="space-y-1">
+                  <textarea
+                    class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-none"
+                    rows="2"
+                    placeholder="Ajouter une note d'équipe…"
+                    bind:value={noteDraft}
+                    disabled={prospectSaving}
+                    aria-label="Note d'équipe"
+                  ></textarea>
+                  <div class="flex justify-end">
+                    <button
+                      type="button"
+                      class="rounded-md bg-teal-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={!noteDraft.trim() || prospectSaving}
+                      on:click={submitNote}
+                    >
+                      {prospectSaving ? "Enregistrement…" : "Ajouter la note"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {:else}
+              <p class="text-xs text-slate-400" data-testid="fiche-prospect-readonly">
+                Édition réservée au poste de prospection.
+              </p>
+            {/if}
           </div>
         {/if}
       </section>
