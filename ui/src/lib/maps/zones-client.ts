@@ -237,14 +237,12 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
   // 'Zone'/'NO_ZONAGE'/'zone_' (variantes casse), 'ETIQUETTE' composite.
   // ETIQUETTE = "<id>  <CODE>" : on extrait le dernier token (le code réglementaire).
   const etiquette = typeof properties.ETIQUETTE === "string" ? properties.ETIQUETTE.trim().split(/\s+/).pop() : undefined;
-  // ORDRE CRITIQUE (#74) : les codes RÉGLEMENTAIRES d'abord (ceux qui matchent les PV),
-  // les ids SÉQUENTIELS internes (NumZone/NUM_ZONE = "4052", "R-128") en DERNIER recours —
-  // sinon ils volent la priorité au vrai code (ex. saint-hyacinthe NUM_ZONE 4052 vs ETIQUETTE H01).
+  // ORDRE CRITIQUE (#74, confirmé geo) : 'zone_code' = champ cible canonique (priorité 1),
+  // puis les autres codes RÉGLEMENTAIRES ; le 'code'/'Code' GÉNÉRIQUE après (peut être un
+  // OBJECTID, ex. saint-raphael) ; les ids SÉQUENTIELS (NumZone/NUM_ZONE = "4052") en DERNIER.
   const code = firstString([
-    properties.code,
-    properties.Code,
-    properties.zoneCode,
     properties.zone_code,
+    properties.zoneCode,
     properties.ZONE,
     properties.Zone,
     properties.Zonage,
@@ -252,6 +250,8 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
     properties.NO_ZONAGE,
     properties.zone_,
     etiquette,
+    properties.code,
+    properties.Code,
     properties.code_affiche,
     properties.codeAffiche,
     properties.No_zone,
