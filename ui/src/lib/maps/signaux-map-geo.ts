@@ -125,6 +125,33 @@ export function opacityForSelectionKey(
     : DIMMED_SELECTION_OPACITY;
 }
 
+/** Opacité atténuée appliquée aux lots/zones hors-filtre (#4). */
+export const FILTER_DIMMED_OPACITY = 0.12;
+
+/**
+ * #4 — Décide si le filtre actif doit ATTÉNUER (pas masquer) la géométrie portant
+ * cette projection de signal. Règles, volontairement conservatrices pour ne pas
+ * « cacher des zones/lots utiles » (risque noté dans le feedback) :
+ *
+ *  - filtre vide (aucun axe coché) → aucune atténuation (tout visible) ;
+ *  - aucune géométrie projetée par les nœuds filtrés (`hasAnyProjection=false`)
+ *    → aucune atténuation : il n'y a rien à mettre en valeur, on garde le
+ *    substrat cadastral pleinement lisible ;
+ *  - sinon, on atténue UNIQUEMENT les géométries sans projection (`none`), de
+ *    sorte que les lots/zones réellement touchés par le sous-ensemble actif
+ *    ressortent.
+ *
+ * Fonction PURE → testable sans MapLibre.
+ */
+export function filterDimsProjection(
+  projection: LotSignalProjection | undefined,
+  filterActive: boolean,
+  hasAnyProjection: boolean,
+): boolean {
+  if (!filterActive || !hasAnyProjection) return false;
+  return (projection ?? "none") === "none";
+}
+
 export function decorateLotsWithSignalProjection(
   lots: LotFeatureCollection,
   zones: readonly GeoZoneFeature[],
