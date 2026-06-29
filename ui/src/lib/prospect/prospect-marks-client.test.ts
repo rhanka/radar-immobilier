@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   activeMarketMark,
   activePipelineMark,
   computeProspectCounters,
+  createProspectMark,
+  createProspectNote,
   prospectStatusLabel,
   type ProspectMark,
 } from "./prospect-marks-client.js";
@@ -63,5 +65,60 @@ describe("prospect marks client helpers — CS-L3", () => {
       en_vente: 1,
       unmarked: 1,
     });
+  });
+});
+
+describe("prospect marks client — écriture (POST)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function mockFetchOnce(status: number, payload: unknown): ReturnType<typeof vi.fn> {
+    const f = vi.fn(async () => ({
+      ok: status >= 200 && status < 300,
+      status,
+      json: async () => payload,
+      text: async () => JSON.stringify(payload),
+    })) as unknown as ReturnType<typeof vi.fn>;
+    vi.stubGlobal("fetch", f);
+    return f;
+  }
+
+  it("createProspectMark POST le payload liste-blanche (pipeline) et retourne le mark", async () => {
+    const created: ProspectMark = {
+      id: "m1", lotVersionId: "lv-1", noLot: "42", citySlug: "delson",
+      dimension: "pipeline", statut: "favori", mode: "real", createdAt: "2026-06-29T00:00:00Z",
+    };
+    const f = mockFetchOnce(201, { ok: true, mark: created });
+    const res = await createProspectMark({ lotVersionId: "lv-1", noLot: "42", citySlug: "delson", dimension: "pipeline", statut: "favori" });
+    expect(res).toEqual(created);
+    const [url, init] = f.mock.calls[0];
+    expect(String(url)).toContain("/api/v1/prospects/marks");
+    expect(init.method).toBe("POST");
+    const body = JSON.parse(init.body as string);
+    expect(body).toEqual({ lotVersionId: "lv-1", noLot: "42", citySlug: "delson", dimension: "pipeline", statut: "favori", mode: "real" });
+    // anti-PII : aucune propriété étrangère
+    expect(Object.keys(body).sort()).toEqual(["citySlug", "dimension", "lotVersionId", "mode", "noLot", "statut"]);
+  });
+
+  it("createProspectMark (marché) inclut prixDemande/lienAnnonce", async () => {
+    const f = mockFetchOnce(201, { ok: true, mark: { id: "m2", noLot: "7", citySlug: "candiac", dimension: "marche", statut: "en_vente", mode: "real", createdAt: "2026-06-29T00:00:00Z" } });
+    await createProspectMark({ noLot: "7", citySlug: "candiac", dimension: "marche", statut: "en_vente", prixDemande: 450000, lienAnnonce: "https://x" });
+    const body = JSON.parse(f.mock.calls[0][1].body as string);
+    expect(body.prixDemande).toBe(450000);
+    expect(body.lienAnnonce).toBe("https://x");
+  });
+
+  it("createProspectNote POST la note et retourne la note", async () => {
+    const note = { id: "n1", noLot: "42", citySlug: "delson", body: "à rappeler", mode: "real" as const, createdAt: "2026-06-29T00:00:00Z" };
+    const f = mockFetchOnce(201, { ok: true, note });
+    const res = await createProspectNote({ noLot: "42", citySlug: "delson", body: "à rappeler" });
+    expect(res).toEqual(note);
+    expect(String(f.mock.calls[0][0])).toContain("/api/v1/prospects/notes");
+  });
+
+  it("lève quand l'API renvoie une erreur HTTP", async () => {
+    mockFetchOnce(400, { error: "Invalid request" });
+    await expect(createProspectMark({ noLot: "1", citySlug: "delson", dimension: "pipeline", statut: "favori" })).rejects.toThrow();
   });
 });
