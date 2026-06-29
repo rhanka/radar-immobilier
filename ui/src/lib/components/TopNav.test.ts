@@ -1,13 +1,15 @@
 /**
- * QA léger — TopNav : classe de nav DS, état actif, aucune classe custom seule.
+ * QA léger — TopNav (migré sur `AppChrome`, 0-custo) : nav DS, état actif, Admin
+ * gaté au rôle.
  *
  * Vérifie :
- *   1. Les liens de nav portent bien la classe DS `st-appHeader__navLink`.
- *   2. La classe `topnav-navbtn` (pont <button>) est présente — c'est le pont
- *      intentionnel documenté dans TopNav.svelte, pas un bug.
+ *   1. Les liens de nav DS portent la classe `st-appHeader__navLink` (rendus par
+ *      AppChrome en tant que <a href="#/<view>"> — SPA via hashchange).
+ *   2. Les liens de nav sont des <a> avec un href hash SPA (`#/<view>`).
  *   3. L'item actif porte `aria-current="page"`.
  *   4. Les items inactifs n'ont PAS `aria-current="page"`.
  *   5. Les vues principales attendues sont bien rendues.
+ *   6. Le dropdown Admin (zone utilitaire `extraSelectors`) est gaté au rôle.
  *
  * Environnement jsdom — aucun docker, aucun MapLibre, aucune API.
  */
@@ -65,12 +67,17 @@ describe("TopNav — classe DS navLink et état actif", () => {
     }
   });
 
-  it("chaque lien principal porte la classe pont topnav-navbtn (bridge button→navLink)", () => {
-    // topnav-navbtn est le pont <button> → style DS, son existence est intentionnelle.
+  it("chaque lien principal est un <a> avec un href hash SPA (#/<view>)", () => {
+    // AppChrome rend la nav en <a href="#/<view>"> ; le routeur intercepte
+    // hashchange pour la navigation SPA (plus de pont <button> maison).
     const { getByText } = renderNav("signaux");
     for (const label of MAIN_VIEWS) {
       const el = getByText(label);
-      expect(el.classList.contains("topnav-navbtn"), `${label} doit avoir topnav-navbtn`).toBe(true);
+      expect(el.tagName, `${label} doit être un <a>`).toBe("A");
+      expect(
+        (el.getAttribute("href") ?? "").startsWith("#/"),
+        `${label} doit avoir un href hash SPA`,
+      ).toBe(true);
     }
   });
 
@@ -116,10 +123,14 @@ describe("TopNav — classe DS navLink et état actif", () => {
         },
       },
     });
-    // Le déclencheur Admin doit avoir aria-haspopup="menu"
-    const adminTrigger = container.querySelector('button[aria-haspopup="menu"]');
+    // Le déclencheur Admin (zone utilitaire `extraSelectors`) = pill DS
+    // `st-appHeader__control` + aria-haspopup="menu". Sélecteur scopé pour ne
+    // pas heurter le trigger d'IdentityMenu (qui partage aria-haspopup="menu"
+    // mais porte la classe `st-identityMenu__trigger`).
+    const adminTrigger = container.querySelector(
+      'button.st-appHeader__control[aria-haspopup="menu"]',
+    );
     expect(adminTrigger).not.toBeNull();
-    // Il doit porter les classes DS nav
-    expect(adminTrigger!.classList.contains("st-appHeader__navLink")).toBe(true);
+    expect(adminTrigger!.textContent).toContain("Admin");
   });
 });
