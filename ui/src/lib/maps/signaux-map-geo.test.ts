@@ -14,6 +14,8 @@ import {
   normalizeLotNoRef,
   opacityForSelectionKey,
   withCityFallbackZone,
+  filterDimsProjection,
+  FILTER_DIMMED_OPACITY,
 } from "./signaux-map-geo.js";
 import {
   DIMMED_SELECTION_OPACITY,
@@ -145,6 +147,31 @@ describe("opacityForSelectionKey", () => {
 
     expect(opacityForSelectionKey(state, selectedKey, 0.42)).toBe(FULL_SELECTION_OPACITY);
     expect(opacityForSelectionKey(state, otherKey, 0.42)).toBe(DIMMED_SELECTION_OPACITY);
+  });
+});
+
+describe("filterDimsProjection — atténuation carto par filtre (#4)", () => {
+  it("n'atténue rien quand le filtre est inactif", () => {
+    expect(filterDimsProjection("none", false, true)).toBe(false);
+    expect(filterDimsProjection("direct", false, true)).toBe(false);
+  });
+
+  it("n'atténue rien quand aucun lot n'est projeté (rien à mettre en valeur)", () => {
+    expect(filterDimsProjection("none", true, false)).toBe(false);
+  });
+
+  it("atténue les lots SANS projection quand un filtre actif a des lots projetés", () => {
+    expect(filterDimsProjection("none", true, true)).toBe(true);
+    expect(filterDimsProjection(undefined, true, true)).toBe(true);
+  });
+
+  it("n'atténue jamais les lots projetés (direct/inherited)", () => {
+    expect(filterDimsProjection("direct", true, true)).toBe(false);
+    expect(filterDimsProjection("inherited", true, true)).toBe(false);
+  });
+
+  it("FILTER_DIMMED_OPACITY est nettement inférieur à l'opacité de base 0.36", () => {
+    expect(FILTER_DIMMED_OPACITY).toBeLessThan(0.36);
   });
 });
 

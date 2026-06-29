@@ -21,6 +21,25 @@ if (!target) throw new Error("Missing #harness-root");
 const params = new URLSearchParams(window.location.search);
 const rawRef = params.get("rawRef");
 const sourceUrl = params.get("sourceUrl");
+// `page` et `excerpt` pilotent le surlignage : la QA #82/#83 ouvre le PV sur
+// une page cible et fournit l'extrait cité à surligner.
+const pageParam = params.get("page");
+const page = pageParam ? Number.parseInt(pageParam, 10) : 1;
+const excerpt = params.get("excerpt");
+
+// LOT 2 (#84) : `signals` (JSON encodé) pilote le surlignage MULTI-signaux —
+// liste de { id, label, excerpt, page, color, current }. Absent ⇒ mode
+// mono-signal LOT 1 (prop `excerpt`).
+const signalsParam = params.get("signals");
+let signals: unknown[] = [];
+if (signalsParam) {
+  try {
+    const parsed = JSON.parse(signalsParam);
+    if (Array.isArray(parsed)) signals = parsed;
+  } catch {
+    signals = [];
+  }
+}
 
 mount(SignalPdfOverlay, {
   target,
@@ -28,7 +47,9 @@ mount(SignalPdfOverlay, {
     title: "Preuve QA",
     rawRef: rawRef ?? null,
     sourceUrl: sourceUrl ?? null,
-    page: 1,
+    page: Number.isFinite(page) && page >= 1 ? page : 1,
+    excerpt: excerpt ?? null,
+    signals: signals as never,
     onClose: () => {},
   },
 });

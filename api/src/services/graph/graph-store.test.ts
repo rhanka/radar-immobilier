@@ -18,6 +18,9 @@ import {
   mergeEdgeRows,
   graphifyGraphSchema,
   upsertGraph,
+  upsertGraphAtomic,
+  countCompleteSignals,
+  isCompleteSignalProps,
   queryNeighbors,
   subgraphForCity,
   subgraphForMrc,
@@ -428,6 +431,64 @@ describe("mergeEdgeRows", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 2bis. Completeness gate — pure (no DB)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("isCompleteSignalProps", () => {
+  it("true quand une ref porte citation/excerpt ET rawRef", () => {
+    expect(
+      isCompleteSignalProps({ refs: [{ excerpt: "ADOPTION 943-01", rawRef: "abc.pdf" }] }),
+    ).toBe(true);
+    expect(
+      isCompleteSignalProps({ refs: [{ citation: "extrait", file: "doc.pdf" }] }),
+    ).toBe(true);
+  });
+
+  it("false quand une ref n'a que la citation (pas de preuve PDF)", () => {
+    expect(isCompleteSignalProps({ refs: [{ excerpt: "ADOPTION 943-01" }] })).toBe(false);
+  });
+
+  it("false quand une ref n'a que le rawRef (pas de citation)", () => {
+    expect(isCompleteSignalProps({ refs: [{ rawRef: "abc.pdf" }] })).toBe(false);
+    // ref string nue = rawRef seul → insuffisant
+    expect(isCompleteSignalProps({ refs: ["abc.pdf"] })).toBe(false);
+  });
+
+  it("false quand pas de refs du tout", () => {
+    expect(isCompleteSignalProps({})).toBe(false);
+    expect(isCompleteSignalProps({ refs: [] })).toBe(false);
+  });
+
+  it("true quand citation+rawRef portés au niveau racine des props (repli)", () => {
+    expect(isCompleteSignalProps({ excerpt: "extrait", rawRef: "x.pdf" })).toBe(true);
+  });
+
+  it("vrai dès qu'AU MOINS une ref est complète parmi plusieurs", () => {
+    expect(
+      isCompleteSignalProps({
+        refs: [{ rawRef: "a.pdf" }, { excerpt: "ok", file: "b.pdf" }],
+      }),
+    ).toBe(true);
+  });
+});
+
+describe("countCompleteSignals", () => {
+  it("ne compte que les Signal/DesignationEvent complets", () => {
+    const rows = [
+      { type: "Signal", props: { refs: [{ excerpt: "c", rawRef: "a.pdf" }] } }, // complet
+      { type: "DesignationEvent", props: { refs: [{ citation: "c", file: "b.pdf" }] } }, // complet
+      { type: "Signal", props: { refs: [{ rawRef: "x.pdf" }] } }, // incomplet (pas de citation)
+      { type: "Bylaw", props: { refs: [{ excerpt: "c", rawRef: "z.pdf" }] } }, // pas un signal
+    ];
+    expect(countCompleteSignals(rows)).toBe(2);
+  });
+
+  it("retourne 0 pour une liste vide", () => {
+    expect(countCompleteSignals([])).toBe(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 3. MRC aggregation — pure (mock DB, no Postgres)
 // ─────────────────────────────────────────────────────────────────────────────
 // These tests stub the Database at the Drizzle builder level using simple
@@ -624,6 +685,22 @@ describe("isZonageSignal", () => {
     expect(isZonageSignal("Signal", "infrastructure")).toBe(false);
     expect(isZonageSignal("Signal", "vente_terrain")).toBe(false);
     expect(isZonageSignal("Signal", "vente_institutionnelle")).toBe(false);
+  });
+
+  it("#4 — Signal category=NULL mais etape de zonage → true (repli etape)", () => {
+    expect(isZonageSignal("Signal", null, "derogation_mineure")).toBe(true);
+    expect(isZonageSignal("Signal", undefined, "rezonage")).toBe(true);
+    expect(isZonageSignal("Signal", "", "cptaq")).toBe(true);
+  });
+
+  it("#4 — Signal sans category ni etape de zonage → false", () => {
+    expect(isZonageSignal("Signal", null, null)).toBe(false);
+    expect(isZonageSignal("Signal", null, "vente_terrain")).toBe(false);
+    expect(isZonageSignal("Signal", "acquisition_fonciere", "infrastructure")).toBe(false);
+  });
+
+  it("#4 — category de zonage suffit même si etape hors-zonage", () => {
+    expect(isZonageSignal("Signal", "rezonage", "vente_terrain")).toBe(true);
   });
 
   it("ZONAGE_CATEGORIES contient exactement les 15 catégories attendues", () => {
@@ -837,6 +914,121 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraph (integration)", () => {
     const subgraph = await subgraphForCity(db, "__city_that_does_not_exist__");
     expect(subgraph.nodes).toHaveLength(0);
     expect(subgraph.edges).toHaveLength(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2bis. DB-bound — upsertGraphAtomic : suppression orphelins + gate régression
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraphAtomic (atomique + gate)", () => {
+  async function getDb() {
+    const { createDb } = await import("../../db/client.js");
+    const { loadConfig } = await import("../../config.js");
+    const config = loadConfig({
+      POSTGRES_HOST: process.env.POSTGRES_HOST ?? "postgres",
+      POSTGRES_PORT: process.env.POSTGRES_PORT ?? "5432",
+      POSTGRES_USER: process.env.POSTGRES_USER ?? "radar",
+      POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD ?? "changeme-dev-only",
+      POSTGRES_DB: process.env.POSTGRES_DB ?? "radar",
+    });
+    return createDb(config).db;
+  }
+
+  /** Purge tous les nœuds + arêtes d'une ville de test (état déterministe). */
+  async function cleanCity(db: Awaited<ReturnType<typeof getDb>>, city: string) {
+    const { graphNodes, graphEdges } = await import("../../db/schema.js");
+    const { eq, inArray } = await import("drizzle-orm");
+    const ids = (
+      await db.select({ id: graphNodes.id }).from(graphNodes).where(eq(graphNodes.citySlug, city))
+    ).map((r) => r.id);
+    if (ids.length > 0) {
+      const { or } = await import("drizzle-orm");
+      await db
+        .delete(graphEdges)
+        .where(or(inArray(graphEdges.srcId, ids), inArray(graphEdges.dstId, ids)));
+    }
+    await db.delete(graphNodes).where(eq(graphNodes.citySlug, city));
+  }
+
+  it("(a) re-projeter sans un nœud → le nœud orphelin ET son arête pendante sont supprimés", async () => {
+    const db = await getDb();
+    const city = "__test_atomic_orphan__";
+    await cleanCity(db, city);
+
+    const { graphNodes, graphEdges } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+
+    // Graphe initial : nœuds A et B, arête A→B.
+    const graphAB = {
+      nodes: [
+        { id: `${city}:A`, type: "Bylaw", label: "Node A" },
+        { id: `${city}:B`, type: "Bylaw", label: "Node B" },
+      ],
+      edges: [{ source: `${city}:A`, target: `${city}:B`, type: "concerns" }],
+    };
+    const r1 = await upsertGraphAtomic(db, city, graphAB);
+    expect(r1.aborted).toBe(false);
+    expect(r1.nodeCount).toBe(2);
+
+    let nodes = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, city));
+    expect(nodes.map((n) => n.id).sort()).toEqual([`${city}:A`, `${city}:B`]);
+
+    // Re-projection SANS B (et sans l'arête A→B).
+    const graphA = { nodes: [{ id: `${city}:A`, type: "Bylaw", label: "Node A" }] };
+    const r2 = await upsertGraphAtomic(db, city, graphA);
+    expect(r2.aborted).toBe(false);
+    expect(r2.deletedNodes).toBe(1);
+    expect(r2.deletedEdges).toBe(1);
+
+    nodes = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, city));
+    expect(nodes.map((n) => n.id)).toEqual([`${city}:A`]); // B supprimé
+
+    const edges = await db.select().from(graphEdges).where(eq(graphEdges.srcId, `${city}:A`));
+    expect(edges.filter((e) => e.dstId === `${city}:B`)).toHaveLength(0); // arête pendante supprimée
+
+    await cleanCity(db, city);
+  });
+
+  it("(b) signal régressé (refs citation+rawRef → vide) → ville ABORTÉE, refs conservées (rollback)", async () => {
+    const db = await getDb();
+    const city = "__test_atomic_regression__";
+    await cleanCity(db, city);
+
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+
+    // État initial : un Signal complet (ref citation+rawRef).
+    const graphComplete = {
+      nodes: [
+        {
+          id: `${city}:sig`,
+          type: "Signal",
+          label: "Signal complet",
+          refs: [{ excerpt: "ADOPTION REGLEMENT 943-01", rawRef: "preuve.pdf" }],
+        },
+      ],
+    };
+    const r1 = await upsertGraphAtomic(db, city, graphComplete);
+    expect(r1.aborted).toBe(false);
+
+    // Nouveau graphe : même id, SANS refs (régression de preuves).
+    const graphRegressed = {
+      nodes: [{ id: `${city}:sig`, type: "Signal", label: "Signal complet" }],
+    };
+    const r2 = await upsertGraphAtomic(db, city, graphRegressed);
+    expect(r2.aborted).toBe(true);
+    expect(r2.reason).toBeDefined();
+
+    // Rollback : l'ancien nœud conserve ses refs.
+    const [node] = await db.select().from(graphNodes).where(eq(graphNodes.id, `${city}:sig`));
+    expect(node).toBeDefined();
+    const props = (node!.props ?? {}) as Record<string, unknown>;
+    expect(Array.isArray(props.refs)).toBe(true);
+    expect(props.refs).toHaveLength(1);
+    expect(isCompleteSignalProps(props)).toBe(true); // toujours complet
+
+    await cleanCity(db, city);
   });
 });
 

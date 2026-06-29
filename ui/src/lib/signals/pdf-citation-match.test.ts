@@ -66,6 +66,20 @@ describe("findCitationInPage — fallback fenêtre de mots", () => {
     expect(match!.coverage).toBeGreaterThan(0);
   });
 
+  it("ne matche PAS sur une simple fenêtre de mots génériques (bug #83)", () => {
+    // « attendu que la municipalite » est une amorce générique présente sur
+    // PLUSIEURS pages d'un PV. Avec l'ancien `||` (windowLen >= 4 suffisait),
+    // ces 4 mots déclenchaient un surlignage parasite hors page cible. La
+    // citation réelle (suite) étant absente de cette page, on attend `null`.
+    const pageText =
+      "Attendu que la municipalité de Saint-Damase tient une séance ordinaire ce jour.";
+    const match = findCitationInPage(
+      pageText,
+      "attendu que la municipalité adopte le règlement 2026-42 sur la densification résidentielle du secteur nord",
+    );
+    expect(match).toBeNull();
+  });
+
   it("retourne null quand la citation n'apparaît pas du tout", () => {
     const pageText = "Texte sans rapport avec la citation recherchée ici.";
     const match = findCitationInPage(pageText, "le conseil municipal approuve le règlement 2026-15");
