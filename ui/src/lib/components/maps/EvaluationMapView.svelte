@@ -958,6 +958,8 @@
                   <LotFichePanel
                     lot={selectedLot}
                     cityName={selectedEvalCity?.name ?? ""}
+                    allowMarquage={true}
+                    mode={isCarteSteve ? "simulation" : "real"}
                     onClose={() => { selectedLot = null; }}
                   />
                 </div>
