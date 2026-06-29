@@ -68,6 +68,12 @@ export interface LotProperties {
   zoneCode?: string | null;
   /** Lien direct vers la grille PDF quand exposé hors objet zone. */
   grillePdfUrl?: string | null;
+  /**
+   * Identifiant de version du lot cadastral, requis pour le marquage prospect
+   * (clé du mark côté API). Présent quand la collection OGC l'expose
+   * (`lotVersionId` / `lot_version_id`) ; absent sinon → marquage marks désactivé.
+   */
+  lotVersionId?: string | null;
   /** UI-derived projection state for signal mode; not persisted by the API. */
   signalProjection?: "direct" | "inherited" | "none";
 }
@@ -305,6 +311,10 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.zoningGridPdfUrl,
     properties.zoning_grid_pdf_url,
   ]) ?? zone?.grillePdfUrl ?? null;
+  const lotVersionId = firstString([
+    properties.lotVersionId,
+    properties.lot_version_id,
+  ]);
   const scoreResolution = resolveLotPotentialScore({
     ...properties,
     ...(potentialScore !== null ? { potentialScore } : {}),

@@ -174,3 +174,81 @@ export async function fetchProspectLotState(
   ]);
   return { marks, notes };
 }
+
+// ── Écriture (append-only) ──────────────────────────────────────────────────
+// Liste blanche stricte (Loi 25) : seuls statut/note/prix-public sont transmis,
+// jamais d'identité propriétaire ni d'adresse personnelle.
+
+export interface CreateProspectMarkInput {
+  lotVersionId?: string | null;
+  noLot: string;
+  citySlug: string;
+  dimension: ProspectDimension;
+  statut: ProspectStatus;
+  mode?: ProspectMode;
+  /** Marché uniquement : prix demandé (annonce publique, non-PII). */
+  prixDemande?: number | null;
+  /** Marché uniquement : lien d'annonce publique. */
+  lienAnnonce?: string | null;
+}
+
+/** POST /api/v1/prospects/marks → 201 { ok, mark }. Pose un statut (supersede LWW côté API). */
+export async function createProspectMark(
+  input: CreateProspectMarkInput,
+  baseUrl?: string,
+): Promise<ProspectMark> {
+  const payload: Record<string, unknown> = {
+    ...(input.lotVersionId != null ? { lotVersionId: input.lotVersionId } : {}),
+    noLot: input.noLot,
+    citySlug: input.citySlug,
+    dimension: input.dimension,
+    statut: input.statut,
+    mode: input.mode ?? "real",
+  };
+  if (input.dimension === "marche") {
+    if (input.prixDemande !== undefined) payload.prixDemande = input.prixDemande;
+    if (input.lienAnnonce !== undefined) payload.lienAnnonce = input.lienAnnonce;
+  }
+  const res = await fetch(apiUrl(`/api/v1/prospects/marks`, baseUrl), {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`prospect mark create HTTP ${res.status}`);
+  const body = (await res.json()) as { ok?: boolean; mark?: ProspectMark };
+  if (!body.ok || !body.mark) throw new Error("prospect mark create: réponse invalide");
+  return body.mark;
+}
+
+export interface CreateProspectNoteInput {
+  noLot: string;
+  citySlug: string;
+  body: string;
+  mode?: ProspectMode;
+  lotVersionId?: string | null;
+}
+
+/** POST /api/v1/prospects/notes → 201 { ok, note }. Ajoute une note libre append-only. */
+export async function createProspectNote(
+  input: CreateProspectNoteInput,
+  baseUrl?: string,
+): Promise<ProspectNote> {
+  const payload: Record<string, unknown> = {
+    ...(input.lotVersionId != null ? { lotVersionId: input.lotVersionId } : {}),
+    noLot: input.noLot,
+    citySlug: input.citySlug,
+    body: input.body,
+    mode: input.mode ?? "real",
+  };
+  const res = await fetch(apiUrl(`/api/v1/prospects/notes`, baseUrl), {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`prospect note create HTTP ${res.status}`);
+  const body = (await res.json()) as { ok?: boolean; note?: ProspectNote };
+  if (!body.ok || !body.note) throw new Error("prospect note create: réponse invalide");
+  return body.note;
+}
