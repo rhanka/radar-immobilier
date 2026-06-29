@@ -14,7 +14,7 @@
  */
 
 import { z } from "zod";
-import { eq, or, sql, inArray, and, isNotNull } from "drizzle-orm";
+import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
@@ -264,6 +264,116 @@ export function mergeEdgeRows(rows: EdgeRow[]): EdgeRow[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Completeness gate (pure — unit-testable without DB)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Types de nœuds porteurs de preuves (signaux). */
+const SIGNAL_NODE_TYPES = new Set(["Signal", "DesignationEvent"]);
+
+/** Clés candidates pour une citation/excerpt dans une ref. */
+const REF_CITATION_KEYS = ["excerpt", "citation", "quote", "text"] as const;
+/** Clés candidates pour une preuve PDF (rawRef) dans une ref. */
+const REF_RAWREF_KEYS = [
+  "rawRef",
+  "raw_ref",
+  "rawObjectKey",
+  "raw_object_key",
+  "file",
+  "ref",
+  "sourceRef",
+  "source_ref",
+  "path",
+  "s3Key",
+  "s3_key",
+] as const;
+
+function firstNonEmptyString(
+  record: Record<string, unknown>,
+  keys: readonly string[],
+): boolean {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim().length > 0) return true;
+  }
+  return false;
+}
+
+/**
+ * Une ref « provisional » est un lien posé AUTOMATIQUEMENT par le filet Radar
+ * (`provisional: true` et/ou `linkSource: "radar-auto-link"`). Elle ne constitue
+ * PAS une preuve graphify vérifiée : on l'exclut du calcul anti-régression
+ * (cf. `countCompleteSignals(..., { ignoreProvisional: true })`) afin qu'un lien
+ * provisional n'élève jamais le seuil de complétude et donc ne bloque jamais une
+ * reprojection graphify légitime. En revanche, hors anti-régression, un
+ * provisional avec citation+rawRef compte bien comme « complet » (il rend la
+ * preuve affichable au client).
+ */
+function isProvisionalRef(r: Record<string, unknown>): boolean {
+  if (r.provisional === true || r.provisional === "true") return true;
+  const ls = r.linkSource ?? r.link_source;
+  return typeof ls === "string" && ls.trim() === "radar-auto-link";
+}
+
+/**
+ * Un node de signal est « complet »/preuve-vivante quand il porte AU MOINS une
+ * ref contenant à la fois une citation/excerpt ET un rawRef (preuve PDF).
+ *
+ * Une ref string nue (`"abc.pdf"`) compte comme rawRef SANS citation → ne suffit
+ * PAS à elle seule. Le top-level props (clés citation/excerpt + file/ref) est
+ * aussi considéré comme une « ref » implicite.
+ *
+ * Règle d'or (anti-régression) : on n'écrase JAMAIS une citation/rawRef présente
+ * par du vide. En cas de régression de ce compte, la ville est abortée (cf.
+ * upsertGraphAtomic).
+ */
+export function isCompleteSignalProps(
+  props: Record<string, unknown>,
+  options: { ignoreProvisional?: boolean } = {},
+): boolean {
+  const { ignoreProvisional = false } = options;
+  const refs = props.refs;
+  if (Array.isArray(refs)) {
+    for (const item of refs) {
+      if (typeof item !== "object" || item === null || Array.isArray(item)) continue;
+      const r = item as Record<string, unknown>;
+      // Anti-régression : une ref provisional (filet Radar) ne compte pas comme
+      // preuve « dure » — sinon elle élèverait le seuil et bloquerait une
+      // reprojection graphify ultérieure sans rawRef.
+      if (ignoreProvisional && isProvisionalRef(r)) continue;
+      if (firstNonEmptyString(r, REF_CITATION_KEYS) && firstNonEmptyString(r, REF_RAWREF_KEYS)) {
+        return true;
+      }
+    }
+  }
+  // Repli : citation + rawRef portés directement au niveau racine des props.
+  if (ignoreProvisional && isProvisionalRef(props)) return false;
+  if (firstNonEmptyString(props, REF_CITATION_KEYS) && firstNonEmptyString(props, REF_RAWREF_KEYS)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Compte les nœuds de signal « complets » (Signal/DesignationEvent avec au moins
+ * une ref citation+rawRef) parmi un ensemble de NodeRow. Pur, sans DB.
+ *
+ * Avec `{ ignoreProvisional: true }` (calcul anti-régression du gate), les liens
+ * provisional du filet Radar sont exclus : ils n'élèvent pas le seuil et ne
+ * peuvent donc jamais faire aborter une reprojection graphify légitime.
+ */
+export function countCompleteSignals(
+  nodeRows: Array<{ type: string; props: Record<string, unknown> }>,
+  options: { ignoreProvisional?: boolean } = {},
+): number {
+  let count = 0;
+  for (const row of nodeRows) {
+    if (!SIGNAL_NODE_TYPES.has(row.type)) continue;
+    if (isCompleteSignalProps(row.props, options)) count++;
+  }
+  return count;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Service
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -340,6 +450,239 @@ export async function upsertGraph(
   }
 
   return { nodeCount: nodeRows.length, edgeCount: edgeRows.length };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Projection atomique par ville (anti preuves-fantômes + gate de complétude)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Erreur sentinelle servant à rollbacker la transaction d'une ville régressée. */
+class GraphCompletenessAbort extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GraphCompletenessAbort";
+  }
+}
+
+export interface UpsertAtomicResult {
+  /** Nombre de nœuds projetés (présents dans le nouveau graphe). */
+  nodeCount: number;
+  /** Nombre d'arêtes projetées. */
+  edgeCount: number;
+  /** Nombre de nœuds orphelins supprimés (disparus du nouveau graphe). */
+  deletedNodes: number;
+  /** Nombre d'arêtes pendantes supprimées (référençant un nœud supprimé). */
+  deletedEdges: number;
+  /** true si la ville a été abortée (rollback) suite à une régression de preuves. */
+  aborted: boolean;
+  /** Message d'alerte loggable quand aborted=true (ou skip cross-city). */
+  reason?: string;
+}
+
+/**
+ * Projection ATOMIQUE d'un graphe city-scoped dans Postgres (tout-ou-rien).
+ *
+ * Contrairement à `upsertGraph` (upsert pur, conserve indéfiniment les nœuds
+ * disparus → « preuves fantômes »), cette variante exécute dans UNE transaction
+ * par ville :
+ *   1. upsert des nœuds/arêtes présents (conserve l'existant, idempotent) ;
+ *   2. SUPPRESSION des nœuds de cette `city_slug` ABSENTS du nouveau graphe ;
+ *   3. SUPPRESSION des arêtes devenues pendantes (référençant un nœud qu'on vient
+ *      de supprimer) et qui ne sont pas dans le nouveau graphe ;
+ *   4. GATE DE COMPLÉTUDE : si le nombre de signaux « complets » (Signal/
+ *      DesignationEvent avec ref citation+rawRef) APRÈS < AVANT, la transaction
+ *      est ABORTÉE (rollback). On n'écrase JAMAIS une citation/rawRef présente
+ *      par du vide ; en cas de régression on aborte la ville (le plus sûr).
+ *
+ * Cas `citySlug === null` (nœuds cross-city/globaux) : AUCUNE suppression n'est
+ * effectuée (impossible de scoper sûrement la suppression sans risquer d'effacer
+ * des nœuds d'autres villes) — on se contente d'un upsert pur, comme `upsertGraph`.
+ *
+ * La fonction NE throw PAS en cas d'abort (les autres villes doivent continuer) :
+ * elle retourne `{ aborted: true, reason }`. Elle peut throw sur erreur DB
+ * inattendue (laissée remonter à l'appelant pour comptage `errors`).
+ *
+ * @param db       Drizzle database handle
+ * @param citySlug City scope injecté sur chaque nœud (null = cross-city → pas de suppression)
+ * @param graphJson Objet brut (validé via graphifyGraphSchema)
+ */
+export async function upsertGraphAtomic(
+  db: Database,
+  citySlug: string | null,
+  graphJson: unknown,
+): Promise<UpsertAtomicResult> {
+  const parsed = graphifyGraphSchema.parse(graphJson);
+  const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
+
+  const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
+  const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
+  const newNodeIds = nodeRows.map((r) => r.id);
+
+  // Cas cross-city : upsert pur, aucune suppression (impossible de scoper sûrement).
+  if (citySlug === null) {
+    const base = await upsertGraph(db, citySlug, graphJson);
+    return {
+      nodeCount: base.nodeCount,
+      edgeCount: base.edgeCount,
+      deletedNodes: 0,
+      deletedEdges: 0,
+      aborted: false,
+      reason: "cross-city (citySlug=null) : upsert pur sans suppression",
+    };
+  }
+
+  let result: UpsertAtomicResult = {
+    nodeCount: nodeRows.length,
+    edgeCount: edgeRows.length,
+    deletedNodes: 0,
+    deletedEdges: 0,
+    aborted: false,
+  };
+
+  // Compte des signaux complets AVANT projection (état PG actuel de la ville),
+  // mesuré hors-transaction pour servir de référence au gate de non-régression.
+  const beforeRows = await db
+    .select({ type: graphNodes.type, props: graphNodes.props })
+    .from(graphNodes)
+    .where(
+      and(
+        eq(graphNodes.citySlug, citySlug),
+        inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
+      ),
+    );
+  const completeBefore = countCompleteSignals(
+    beforeRows.map((r) => ({
+      type: r.type,
+      props: (r.props ?? {}) as Record<string, unknown>,
+    })),
+    { ignoreProvisional: true },
+  );
+
+  try {
+    await db.transaction(async (tx) => {
+      // 1. upsert nœuds (ON CONFLICT pk = id)
+      if (nodeRows.length > 0) {
+        await tx
+          .insert(graphNodes)
+          .values(
+            nodeRows.map((r) => ({
+              id: r.id,
+              type: r.type,
+              label: r.label,
+              citySlug: r.citySlug,
+              props: r.props,
+              sourceRef: r.sourceRef,
+            })),
+          )
+          .onConflictDoUpdate({
+            target: graphNodes.id,
+            set: {
+              label: sql`excluded.label`,
+              type: sql`excluded.type`,
+              props: sql`excluded.props`,
+              sourceRef: sql`excluded.source_ref`,
+            },
+          });
+      }
+
+      // 2. upsert arêtes (ON CONFLICT clé naturelle src_id,dst_id,kind)
+      if (edgeRows.length > 0) {
+        await tx
+          .insert(graphEdges)
+          .values(
+            edgeRows.map((r) => ({
+              srcId: r.srcId,
+              dstId: r.dstId,
+              kind: r.kind,
+              props: r.props,
+            })),
+          )
+          .onConflictDoUpdate({
+            target: [graphEdges.srcId, graphEdges.dstId, graphEdges.kind],
+            set: { props: sql`excluded.props` },
+          });
+      }
+
+      // 3. SUPPRESSION des nœuds orphelins de CETTE ville (jamais les null, jamais
+      //    une autre ville). Récupère d'abord leurs ids pour purger leurs arêtes.
+      const orphanCond =
+        newNodeIds.length > 0
+          ? and(eq(graphNodes.citySlug, citySlug), notInArray(graphNodes.id, newNodeIds))
+          : eq(graphNodes.citySlug, citySlug);
+
+      const orphanRows = await tx
+        .select({ id: graphNodes.id })
+        .from(graphNodes)
+        .where(orphanCond);
+      const orphanIds = orphanRows.map((r) => r.id);
+
+      if (orphanIds.length > 0) {
+        // 4. SUPPRESSION des arêtes pendantes : src_id OU dst_id pointe vers un
+        //    nœud orphelin qu'on supprime. Prudence : on ne touche QUE celles-là.
+        const danglingEdges = await tx
+          .delete(graphEdges)
+          .where(
+            or(
+              inArray(graphEdges.srcId, orphanIds),
+              inArray(graphEdges.dstId, orphanIds),
+            ),
+          )
+          .returning({ id: graphEdges.id });
+        result.deletedEdges = danglingEdges.length;
+
+        const deleted = await tx
+          .delete(graphNodes)
+          .where(
+            and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, orphanIds)),
+          )
+          .returning({ id: graphNodes.id });
+        result.deletedNodes = deleted.length;
+      }
+
+      // 5. GATE DE COMPLÉTUDE : compte les signaux complets APRÈS projection
+      //    (état projeté, dans la transaction) et compare à AVANT (count calculé
+      //    sur l'état PG d'origine, hors transaction). Si APRÈS < AVANT → rollback.
+      const afterSignalRows = await tx
+        .select({ type: graphNodes.type, props: graphNodes.props })
+        .from(graphNodes)
+        .where(
+          and(
+            eq(graphNodes.citySlug, citySlug),
+            inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
+          ),
+        );
+      const completeAfter = countCompleteSignals(
+        afterSignalRows.map((r) => ({
+          type: r.type,
+          props: (r.props ?? {}) as Record<string, unknown>,
+        })),
+        { ignoreProvisional: true },
+      );
+
+      if (completeAfter < completeBefore) {
+        result = {
+          ...result,
+          deletedNodes: 0,
+          deletedEdges: 0,
+          aborted: true,
+          reason:
+            `régression de preuves pour ${citySlug} : signaux complets ` +
+            `${completeBefore} → ${completeAfter} (rollback, projection ignorée)`,
+        };
+        // Annule TOUTE la transaction de cette ville (upsert + suppressions).
+        throw new GraphCompletenessAbort(result.reason!);
+      }
+    });
+  } catch (err) {
+    if (err instanceof GraphCompletenessAbort) {
+      // Abort attendu : la transaction a été rollbackée, on retourne le résultat
+      // marqué aborted sans propager (les autres villes continuent).
+      return result;
+    }
+    throw err;
+  }
+
+  return result;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -628,15 +971,29 @@ export const ZONAGE_CATEGORIES: readonly string[] = [
 const ZONAGE_CATEGORIES_SET = new Set(ZONAGE_CATEGORIES);
 
 /**
- * Détermine si un nœud signal (type + category) est de zonage.
+ * Détermine si un nœud signal (type + category + etape) est de zonage.
  *
  * - `DesignationEvent` → toujours zonage
  * - `Signal` + category ∈ ZONAGE_CATEGORIES → zonage
- * - `Signal` sans category ou category hors liste → non-zonage
+ * - `Signal` + etape ∈ ZONAGE_CATEGORIES → zonage  (replis sur l'étape annotée)
+ * - `Signal` sans category NI etape de zonage → non-zonage
+ *
+ * Élargissement (#4 — filtre zonage trop strict) : ~1700/3294 Signal ont
+ * `category=NULL` en prod alors que leur `etape` annotée (v2.1) porte une valeur
+ * de zonage (ex. `derogation_mineure`). Tester uniquement `category` masquait
+ * ces dérogations légitimes (ex. saint-anicet : 9 signaux `etape=derogation_mineure`,
+ * `category=NULL`). On accepte donc l'une OU l'autre source, sur le même
+ * vocabulaire ZONAGE_CATEGORIES.
  */
-export function isZonageSignal(type: string, category: string | null | undefined): boolean {
+export function isZonageSignal(
+  type: string,
+  category: string | null | undefined,
+  etape?: string | null | undefined,
+): boolean {
   if (type === "DesignationEvent") return true;
-  if (type === "Signal" && category) return ZONAGE_CATEGORIES_SET.has(category);
+  if (type !== "Signal") return false;
+  if (category && ZONAGE_CATEGORIES_SET.has(category)) return true;
+  if (etape && ZONAGE_CATEGORIES_SET.has(etape)) return true;
   return false;
 }
 
@@ -907,7 +1264,10 @@ export async function listCitiesWithSignalNodes(
     entry.signalCount += 1;
 
     // Calcule les 3 flags booléens pour CE signal individuel.
-    const z = isZonageSignal(row.type, row.category);
+    // #4 — `etapeAnnote` (props.properties.etape) sert de repli quand `category`
+    // est NULL (cas majoritaire en prod) pour ne pas masquer des signaux de
+    // zonage légitimes.
+    const z = isZonageSignal(row.type, row.category, row.etapeAnnote);
     const m = isMulti4Plus(row.type, row.nbUnitesMax, row.intensite);
     const p = isPrecoceSignal(row.etapeAnnote, row.label, row.description);
 

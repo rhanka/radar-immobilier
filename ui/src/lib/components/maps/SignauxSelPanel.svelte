@@ -5,8 +5,9 @@
    * The left rail keeps navigation light; this panel owns detailed cards for
    * selected entities: cities, graph signals, zones and lots.
    */
+  import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { FileText, RefreshCw, X } from "@lucide/svelte";
+  import { FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -16,6 +17,7 @@
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import type {
     GeoZoneFeature,
     GeoZonesResponse,
@@ -54,7 +56,38 @@
   // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
   // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
   export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
-  export let onOpenEvidence: (payload: { title: string; evidence: SignalEvidence }) => void = () => {};
+  export let onOpenEvidence: (payload: {
+    title: string;
+    evidence: SignalEvidence;
+    node: GraphSignalNode;
+  }) => void = () => {};
+  /**
+   * #86 — cross-highlight signal ↔ fiche. `hoveredSignalId` est l'id du signal
+   * survolé DANS LE VIEWER PDF : la fiche correspondante ici prend un état
+   * sélectionné + scrolle en vue. `onHoverSignal` notifie le parent quand une
+   * fiche est survolée à droite (→ le surlignage PDF pulse). Bidirectionnel.
+   */
+  export let hoveredSignalId: string | null = null;
+  export let onHoverSignal: (id: string | null) => void = () => {};
+
+  // Conteneur scrollable des fiches (pour amener en vue la fiche cross-survolée).
+  let entityListEl: HTMLDivElement | null = null;
+
+  // #86 — quand le viewer survole un badge, scrolle la fiche correspondante en
+  // vue (sans la focaliser : on n'ouvre pas le détail, on signale juste). Le
+  // surlignage visuel se fait via la classe sel-entity-head--xhover.
+  $: void scrollHoveredFicheIntoView(hoveredSignalId);
+  async function scrollHoveredFicheIntoView(id: string | null): Promise<void> {
+    if (!id || !entityListEl) return;
+    await tick();
+    const el = entityListEl.querySelector<HTMLElement>(
+      `[data-signal-node="${cssAttrEscape(id)}"]`,
+    );
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+  function cssAttrEscape(value: string): string {
+    return value.replace(/["\\]/g, "\\$&");
+  }
 
   /** #3 — Nœuds filtrés selon la clé de filtre active. */
   $: filteredDetailNodes = activeSubsetKey
@@ -304,7 +337,34 @@
     onOpenEvidence({
       title: node.label,
       evidence: signalEvidence(node),
+      node,
     });
+  }
+
+  /**
+   * Nombre de signaux (autres que `node`) pointant le MÊME PV (même rawRef).
+   * Sert à signaler dans la fiche que le surlignage de la preuve montrera
+   * plusieurs signaux (#84). 0 si rawRef absent ou signal unique.
+   */
+  function coPvSignalCount(node: GraphSignalNode): number {
+    const rawRef = signalEvidence(node).rawRef;
+    if (!rawRef) return 0;
+    let count = 0;
+    for (const other of detailNodes) {
+      if (other.id === node.id) continue;
+      if (signalEvidence(other).rawRef === rawRef) count += 1;
+    }
+    return count;
+  }
+
+  /**
+   * Couleur de la pastille du signal dans la fiche. Quand on ouvre un signal il
+   * est le « signal courant » du viewer, donc TOUJOURS de la couleur de rang 0
+   * (mise en avant). On répète cette couleur ici pour le lien visuel
+   * surlignage ↔ fiche (#84).
+   */
+  function signalColor(): string {
+    return signalColorAt(0);
   }
 
   function zoneSourceLabel(zone: GeoZoneFeature): string {
@@ -451,7 +511,7 @@
             {#if detailLoading}–{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
           </span>
         </summary>
-        <div class="sel-entities">
+        <div class="sel-entities" bind:this={entityListEl}>
           {#if detailLoading}
             <div class="sel-loading">
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -464,7 +524,19 @@
               {@const key = signalKey(node)}
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
-                <div class="sel-entity-bar">
+                <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
+                     cross-survolé quand le viewer survole ce signal. Survoler
+                     la fiche notifie le parent (→ le surlignage PDF pulse). -->
+                <div
+                  class="sel-entity-bar"
+                  class:sel-entity-bar--xhover={hoveredSignalId === node.id}
+                  data-signal-node={node.id}
+                  role="presentation"
+                  on:mouseenter={() => onHoverSignal(node.id)}
+                  on:mouseleave={() => onHoverSignal(null)}
+                  on:focusin={() => onHoverSignal(node.id)}
+                  on:focusout={() => onHoverSignal(null)}
+                >
                   <button
                     type="button"
                     class="sel-entity-head"
@@ -479,7 +551,28 @@
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
+                    {@const coPv = coPvSignalCount(node)}
                     <div class="sel-entity-detail">
+                      <!-- ID du signal + pastille couleur : lien visuel avec le
+                           surlignage de la preuve (#84). La pastille reprend la
+                           couleur du signal COURANT du viewer (rang 0). -->
+                      <div class="signal-id-row">
+                        <span
+                          class="signal-color-dot"
+                          style="background:{signalColor()}"
+                          aria-hidden="true"
+                        ></span>
+                        <span class="signal-id-key">Signal</span>
+                        <code class="signal-id-val" title={node.id}>{node.id}</code>
+                        {#if coPv > 0}
+                          <span
+                            class="signal-copv-badge"
+                            title="Ce procès-verbal porte {coPv + 1} signaux : la preuve les surligne tous, chacun d'une couleur."
+                          >
+                            +{coPv} sur ce PV
+                          </span>
+                        {/if}
+                      </div>
                       {#if evidence.description}
                         <p class="entity-summary">{evidence.description}</p>
                       {:else}
@@ -529,6 +622,21 @@
 
                       <div class="doc-refs-section">
                         <span class="doc-refs-label">Preuve</span>
+                        {#if evidence.provisional}
+                          <!-- Filet Radar : PV rattaché AUTOMATIQUEMENT (provisional +
+                               linkSource "radar-auto-link"), distinct d'une citation
+                               graphify vérifiée. Badge DISCRET, ton info/neutre. -->
+                          <div
+                            class="auto-link-row"
+                            title="PV rattaché automatiquement par Radar (à confirmer) — distinct d'une citation vérifiée."
+                          >
+                            <Badge tone="info" size="sm">
+                              <span aria-label="Source liée automatiquement par le filet Radar, à confirmer">
+                                Source liée automatiquement
+                              </span>
+                            </Badge>
+                          </div>
+                        {/if}
                         <div class="evidence-status-grid">
                           {#each evidenceCompletenessItems(evidence) as item (item.label)}
                             <span
@@ -552,18 +660,28 @@
                         {/if}
 
                         <div class="source-action-row">
-                          <button
-                            type="button"
-                            class="doc-ref-button"
-                            disabled={!hasSourceEvidence(evidence)}
-                            on:click={() => openEvidence(node)}
-                            title={hasSourceEvidence(evidence)
-                              ? "Ouvrir la preuve dans un overlay"
-                              : "Aucune source documentaire dans le DTO"}
-                          >
-                            <FileText class="h-3.5 w-3.5" aria-hidden="true" />
-                            Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
-                          </button>
+                          {#if hasSourceEvidence(evidence)}
+                            <button
+                              type="button"
+                              class="doc-ref-button"
+                              on:click={() => openEvidence(node)}
+                              title="Ouvrir la preuve dans un overlay"
+                            >
+                              <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                              Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
+                            </button>
+                          {:else}
+                            <!-- #94 — affichage HONNÊTE : pas de bouton mort muet (rond
+                                 barré silencieux). Aucune source documentaire n'est
+                                 reliée à ce signal → on dit pourquoi, explicitement. -->
+                            <div class="evidence-unavailable" role="note">
+                              <FileX class="h-3.5 w-3.5" aria-hidden="true" />
+                              <span>
+                                Preuve non disponible — aucune source documentaire
+                                reliée à ce signal pour l'instant.
+                              </span>
+                            </div>
+                          {/if}
                         </div>
                       </div>
                     </div>
@@ -728,6 +846,19 @@
 
 
 <style>
+  /*
+   * Typographie panneau Signaux alignée DS.
+   * Les tailles de texte ne sont plus portées par des rem dispersés : les
+   * classes consomment ces aliases raccordés aux tokens DS.
+   */
+  .sel {
+    --signaux-fs-overline: var(--st-component-label-fontSize, 0.6875rem);
+    --signaux-fs-caption: var(--st-component-caption-fontSize, 0.6875rem);
+    --signaux-fs-small: var(--st-component-tag-fontSize, 0.75rem);
+    --signaux-fs-body: var(--st-component-body-sm-fontSize, 0.8125rem);
+    --signaux-fs-title: var(--st-component-title-sm-fontSize, 1rem);
+  }
+
   .sel {
     display: flex;
     flex-direction: column;
@@ -748,7 +879,7 @@
   .sel-kicker {
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-size: 0.7rem;
+    font-size: var(--signaux-fs-overline);
     font-weight: 700;
     color: var(--st-semantic-text-muted, #94a3b8);
   }
@@ -757,7 +888,7 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     padding: 0.2rem 0.5rem;
     border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
     border-radius: var(--st-radius-sm, 4px);
@@ -774,14 +905,14 @@
   .sel-empty {
     padding: 0.6rem 0.85rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.82rem;
+    font-size: var(--signaux-fs-body);
     font-style: italic;
   }
 
   .sel-warning {
     margin: 0.35rem 0.85rem;
     color: #92400e;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
   }
 
   .sel-alert {
@@ -795,14 +926,14 @@
   }
 
   .sel-city-title {
-    font-size: 1.05rem;
+    font-size: var(--signaux-fs-title);
     font-weight: 600;
     color: var(--st-semantic-text-primary, #1e293b);
     margin: 0.2rem 0 0.3rem;
   }
 
   .sel-city-meta {
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     color: var(--st-semantic-text-muted, #94a3b8);
     margin: 0.15rem 0 0.45rem;
   }
@@ -818,7 +949,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 0.85rem;
-    font-size: 0.82rem;
+    font-size: var(--signaux-fs-body);
     color: var(--st-semantic-text-muted, #94a3b8);
   }
 
@@ -839,7 +970,7 @@
     cursor: pointer;
     user-select: none;
     background: var(--st-semantic-surface-subtle, #f8fafc);
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     font-weight: 600;
     color: var(--st-semantic-text-secondary, #475569);
     list-style: none;
@@ -851,7 +982,7 @@
 
   .sel-bucket-head::before {
     content: "▸";
-    font-size: 0.6rem;
+    font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-muted, #94a3b8);
     transition: transform 0.12s ease;
     flex-shrink: 0;
@@ -871,7 +1002,7 @@
 
   .rail-row-count {
     font-variant-numeric: tabular-nums;
-    font-size: 0.7rem;
+    font-size: var(--signaux-fs-overline);
     border-radius: var(--st-radius-pill, 999px);
     flex-shrink: 0;
     background: var(--st-semantic-surface-subtle, #f1f5f9);
@@ -892,6 +1023,13 @@
     border-bottom: none;
   }
 
+  /* #86 — cross-highlight : la fiche correspondant au surlignage PDF survolé
+     prend un état SÉLECTIONNÉ visible (liseré + fond) sans ouvrir le détail. */
+  .sel-entity-bar--xhover {
+    background: var(--st-semantic-surface-selected, #e0f2fe);
+    box-shadow: inset 3px 0 0 var(--st-semantic-border-strong, #0ea5e9);
+  }
+
   /* #10 — layout colonne : titre complet sur plusieurs lignes + sous-titre dessous */
   .sel-entity-head {
     display: flex;
@@ -900,7 +1038,7 @@
     gap: 0.15rem;
     width: 100%;
     padding: 0.34rem 0.85rem;
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     text-align: left;
     cursor: pointer;
     background: transparent;
@@ -929,7 +1067,7 @@
   /* #10 — titre complet, sans troncature */
   .sel-entity-label {
     width: 100%;
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     line-height: 1.4;
     word-break: break-word;
     overflow-wrap: anywhere;
@@ -940,12 +1078,12 @@
     width: 100%;
     color: var(--st-semantic-text-muted, #94a3b8);
     font-family: var(--st-font-mono, ui-monospace, monospace);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
   }
 
   /* #10 — l'indicateur de toggle reste discret, aligné à gauche dans la colonne */
   .sel-entity-toggle {
-    font-size: 0.62rem;
+    font-size: var(--signaux-fs-caption);
     color: var(--st-semantic-text-muted, #94a3b8);
     align-self: flex-end;
     margin-top: 0.1rem;
@@ -957,10 +1095,53 @@
     border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
   }
 
+  /* ── ID signal + pastille couleur (#84) ───────────────────────────────── */
+  .signal-id-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .signal-color-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgb(15 23 42 / 0.15);
+  }
+
+  .signal-id-key {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .signal-id-val {
+    overflow: hidden;
+    max-width: 12rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-overline);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .signal-copv-badge {
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--st-semantic-warning-surface, #fef3c7);
+    color: var(--st-semantic-warning-text, #92400e);
+    font-size: var(--signaux-fs-caption);
+    font-weight: 700;
+  }
+
   .entity-summary {
     margin: 0 0 0.45rem;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     line-height: 1.45;
   }
 
@@ -978,7 +1159,7 @@
 
   .entity-meta-key {
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -987,7 +1168,7 @@
     min-width: 0;
     overflow: hidden;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.76rem;
+    font-size: var(--signaux-fs-small);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -1007,7 +1188,7 @@
     display: block;
     margin-bottom: 0.35rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -1017,15 +1198,25 @@
     display: block;
     margin: 0.45rem 0 0.25rem;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.68rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 700;
   }
 
   .doc-refs-empty {
     margin: 0;
     color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     font-style: italic;
+  }
+
+  /* Filet Radar : ligne du badge « source liée automatiquement ». Discrète,
+     juste un petit espacement sous le label « Preuve ». La couleur/forme du
+     badge vient des tokens DS (tone="info"). */
+  .auto-link-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.35rem;
+    cursor: help;
   }
 
   .evidence-status-grid {
@@ -1040,7 +1231,7 @@
     min-height: 1.25rem;
     border-radius: var(--st-radius-sm, 4px);
     padding: 0.05rem 0.35rem;
-    font-size: 0.66rem;
+    font-size: var(--signaux-fs-caption);
     font-weight: 650;
     line-height: 1.25;
   }
@@ -1071,7 +1262,7 @@
     background: #f0fdfa;
     color: #0f766e;
     cursor: pointer;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     font-weight: 650;
     padding: 0.2rem 0.55rem;
   }
@@ -1085,6 +1276,26 @@
     background: #f8fafc;
     color: var(--st-semantic-text-muted, #94a3b8);
     cursor: not-allowed;
+  }
+
+  /* #94 — état HONNÊTE « preuve non disponible » : remplace le bouton mort muet.
+     Encart neutre explicite (pas un bouton désactivé), avec icône fichier barré. */
+  .evidence-unavailable {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    border: 1px dashed var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    color: var(--st-semantic-text-muted, #64748b);
+    font-size: var(--signaux-fs-caption);
+    line-height: 1.4;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .evidence-unavailable :global(svg) {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
   }
 
   .doc-refs-list {
@@ -1109,7 +1320,7 @@
     background: transparent;
     color: #0f766e;
     cursor: pointer;
-    font-size: 0.74rem;
+    font-size: var(--signaux-fs-small);
     font-weight: 600;
     text-decoration: none;
   }
@@ -1121,7 +1332,7 @@
   .doc-ref-sha {
     color: var(--st-semantic-text-muted, #94a3b8);
     font-family: var(--st-font-mono, ui-monospace, monospace);
-    font-size: 0.72rem;
+    font-size: var(--signaux-fs-caption);
   }
 
   .doc-ref-excerpt {
@@ -1129,13 +1340,13 @@
     border-left: 2px solid #facc15;
     padding-left: 0.45rem;
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.75rem;
+    font-size: var(--signaux-fs-small);
     line-height: 1.45;
   }
 
   .doc-ref-excerpt--citation {
     margin: 0.4rem 0 0.5rem;
-    font-size: 0.78rem;
+    font-size: var(--signaux-fs-body);
     font-style: italic;
   }
 </style>

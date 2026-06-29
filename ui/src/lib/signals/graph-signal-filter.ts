@@ -39,13 +39,15 @@ function nodeProps(node: GraphSignalNode): Record<string, unknown> {
 
 export function nodeIsZonage(node: GraphSignalNode): boolean {
   if (node.type === "DesignationEvent") return true;
+  if (node.type !== "Signal") return false;
   const nested = nodeProps(node);
   const category = typeof nested.category === "string" ? nested.category : null;
-  return (
-    node.type === "Signal" &&
-    category !== null &&
-    ZONAGE_CATEGORIES_CLIENT.has(category)
-  );
+  if (category !== null && ZONAGE_CATEGORIES_CLIENT.has(category)) return true;
+  // #4 — repli sur l'étape annotée (v2.1) quand `category` est NULL (cas
+  // majoritaire en prod). Miroir client de isZonageSignal côté API : tester
+  // category OU etape, sur le même vocabulaire de zonage.
+  const etape = typeof nested.etape === "string" ? nested.etape : null;
+  return etape !== null && ZONAGE_CATEGORIES_CLIENT.has(etape);
 }
 
 export function nodeIsMulti4(node: GraphSignalNode): boolean {
