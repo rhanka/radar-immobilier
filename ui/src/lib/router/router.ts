@@ -129,7 +129,19 @@ export function initRouter(): () => void {
     activeGeoRoute.set(geoRouteFromLocation(window.location));
   }
 
+  /**
+   * Les liens de nav du header DS (`AppChrome`) sont des <a href="#/<view>">.
+   * Cliquer un tel lien change le hash sans déclencher `popstate` : on écoute
+   * donc `hashchange` pour mettre à jour la vue active. Symétrique de
+   * `navigateTo` (qui, lui, fait un `pushState` SANS émettre `hashchange`), donc
+   * aucun double traitement pour la navigation programmatique.
+   */
+  function onHashChange(): void {
+    activeRouteView.set(viewFromHash(window.location.hash));
+  }
+
   window.addEventListener("popstate", onPopState);
+  window.addEventListener("hashchange", onHashChange);
 
   // Synchroniser le hash initial si vide
   if (
@@ -141,5 +153,8 @@ export function initRouter(): () => void {
 
   activeGeoRoute.set(geoRouteFromLocation(window.location));
 
-  return () => window.removeEventListener("popstate", onPopState);
+  return () => {
+    window.removeEventListener("popstate", onPopState);
+    window.removeEventListener("hashchange", onHashChange);
+  };
 }
