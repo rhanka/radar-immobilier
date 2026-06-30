@@ -34,28 +34,49 @@
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
   import { fetchLots, type LotFeatureCollection, type LotFeature, type LotsResponse } from "$lib/maps/lots-client.js";
+  import {
+    fetchZones,
+    matchZonesToSignal,
+    type ZoneFeatureCollection,
+    type ZoneFeature,
+  } from "$lib/maps/zones-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import MapLegend from "$lib/components/maps/MapLegend.svelte";
+  import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
   import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
   import { loadLiveSignals } from "$lib/signals/signals-live.js";
+  import { colorForScore } from "$lib/maps/score-color-scale.js";
+  import {
+    activeMarketMark,
+    activePipelineMark,
+    computeProspectCounters,
+    fetchProspectMarksForZone,
+    lotKey,
+    prospectStatusShortLabel,
+    type ProspectMark,
+    type ProspectStatus,
+  } from "$lib/prospect/prospect-marks-client.js";
   
 
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
 
-  // ── Palette de couleurs Steve ──────────────────────────────────────────────
-  function getLotColor(props: Record<string, unknown>): { fill: string; opacity: number } {
-    const isRue = Boolean(props["isRue"]);
-    if (isRue) return { fill: "none", opacity: 0 };
-    const m4 = Boolean(props["multifamilial4plus"]);
-    const tod = Boolean(props["tod"]);
-    if (m4 && tod) return { fill: "#e67e22", opacity: 0.7 };  // orange priorité 4+∩TOD
-    if (m4) return { fill: "#27ae60", opacity: 0.65 };         // vert 4+
-    if (tod) return { fill: "#2980b9", opacity: 0.35 };        // bleu TOD
-    return { fill: "#bdc3c7", opacity: 0.45 };                 // gris autres
-  }
+  // ── Onglets de la vue Évaluation ───────────────────────────────────────────
+  // La vue Évaluation regroupe désormais deux onglets :
+  //   "lots"    : drilldown Lots & Zonage (carte cadastrale + changements de zonage)
+  //   "grilles" : modèle de score (grilles de tri /10 et d'opportunité /100),
+  //               anciennement une vue top-level autonome, intégrée ici (WP4).
+  // Le deep-link legacy `#/grilles` route ici avec l'onglet "grilles" actif
+  // (App.svelte passe initialTab="grilles").
+  export let initialTab: "lots" | "grilles" = "lots";
+  let activeTab: "lots" | "grilles" = initialTab;
+
+  const EVAL_TABS: { id: "lots" | "grilles"; label: string }[] = [
+    { id: "lots", label: "Lots & Zonage" },
+    { id: "grilles", label: "Grilles de score" },
+  ];
 
   // ── Villes avec source lots et/ou zonage ──────────────────────────────────
   // source: "steve" = données carte Steve (CS-L6)
@@ -70,12 +91,30 @@
     { slug: "salaberry-de-valleyfield", name: "Salaberry-de-Valleyfield", mrc: "Beauharnois-Salaberry", source: "mrnf" },
     { slug: "beauharnois", name: "Beauharnois", mrc: "Beauharnois-Salaberry", source: "mrnf" },
     { slug: "saint-damase", name: "Saint-Damase", mrc: "Les Maskoutains", source: "mrnf" },
+    // Villes avec zonage géo canonique per-slug servi (geo #92 Lot A) + lots — démo join signal→zone
+    { slug: "rosemere", name: "Rosemère", mrc: "Thérèse-De Blainville", source: "mrnf" },
+    { slug: "westmount", name: "Westmount", mrc: "Montréal", source: "mrnf" },
+    { slug: "hampstead", name: "Hampstead", mrc: "Montréal", source: "mrnf" },
+    { slug: "cote-saint-luc", name: "Côte-Saint-Luc", mrc: "Montréal", source: "mrnf" },
+    { slug: "dorval", name: "Dorval", mrc: "Montréal", source: "mrnf" },
+    { slug: "longueuil", name: "Longueuil", mrc: "Longueuil", source: "mrnf" },
+    { slug: "chambly", name: "Chambly", mrc: "La Vallée-du-Richelieu", source: "mrnf" },
   ];
 
   // ── Switch source ──────────────────────────────────────────────────────────
   // "steve" : villes carte Steve (CS-L6)
   // "mrnf"  : villes MRNF (donnees-quebec)
   let sourceFilter: "steve" | "mrnf" = "steve";
+
+  const PROSPECT_FILTERS: Array<{ value: ProspectStatus | "all" | "unmarked"; label: string }> = [
+    { value: "all", label: "Tous" },
+    { value: "favori", label: "Favoris" },
+    { value: "ecarte", label: "Non retenus" },
+    { value: "sollicite", label: "Sollicités" },
+    { value: "lettre_envoyee", label: "Lettres" },
+    { value: "en_vente", label: "En vente" },
+    { value: "unmarked", label: "Sans marque" },
+  ];
 
   $: filteredCities = EVAL_CITIES.filter((c) => c.source === sourceFilter);
 
@@ -132,11 +171,27 @@
   let lotsResponse: LotsResponse | null = null;
   let hoveredLot: string | null = null;
   let selectedLot: LotFeature | null = null;
+  let prospectMarksLoading = false;
+  let prospectMarksError: string | null = null;
+  let prospectMarks: ProspectMark[] = [];
+  let prospectFilter: ProspectStatus | "all" | "unmarked" = "all";
 
   // ── State changements de zonage ──────────────────────────────────────────
   let zonageLoading = false;
   let zonageError: string | null = null;
   let zonageEvents: DesignationEventDetail[] = [];
+
+  // ── Couche ZONAGE géo (polygones de zone) — WP3 préparation ───────────────
+  // Drapeau d'ACTIVATION de la couche de zonage géo (collection OGC
+  // `qc-zonage-<slug>` servie par geo, cf. #92 part-2). Tant que la collection
+  // n'est pas servie, `fetchZones` retourne 404 → FeatureCollection vide : la
+  // couche est alors un no-op (aucun polygone rendu, aucun highlight). Passer
+  // ce drapeau à `true` suffit à brancher le rendu dès que geo sert la 1re
+  // collection — voir RENVOIE/“prêt à brancher”.
+  // Typé `boolean` (pas le littéral `false`) pour que TS ne déclare pas le
+  // chemin d'activation « code mort » : flipper la constante suffit à brancher.
+  const ZONES_LAYER_ENABLED: boolean = true;
+  let zonesFC: ZoneFeatureCollection = { type: "FeatureCollection", features: [] };
 
   // ── State signaux ─────────────────────────────────────────────────────────
   let selectedCity: CitySignalEntry | null = cityEntries[0] ?? null;
@@ -168,6 +223,20 @@
   $: isCarteSteve = lotsResponse?.source === "carte-steve" || lotsResponse?.mode === "carte-steve";
 
   // ── Chargement des lots ────────────────────────────────────────────────────
+
+  async function loadProspectMarks(citySlug: string): Promise<void> {
+    prospectMarksLoading = true;
+    prospectMarksError = null;
+    prospectMarks = [];
+    prospectFilter = "all";
+    try {
+      prospectMarks = await fetchProspectMarksForZone(citySlug);
+    } catch (e) {
+      prospectMarksError = e instanceof Error ? e.message : "Marques indisponibles";
+    } finally {
+      prospectMarksLoading = false;
+    }
+  }
 
   async function loadLots(citySlug: string): Promise<void> {
     lotsLoading = true;
@@ -213,10 +282,27 @@
     }
   }
 
+  // ── Chargement de la couche zonage géo (gated) ────────────────────────────
+  async function loadZones(citySlug: string): Promise<void> {
+    zonesFC = { type: "FeatureCollection", features: [] };
+    // Inerte tant que le drapeau d'activation est faux : aucun appel réseau.
+    if (!ZONES_LAYER_ENABLED) return;
+    try {
+      const res = await fetchZones(citySlug, { limit: 500 });
+      // 404 (collection pas encore servie) → ok=false → features:[] → no-op.
+      zonesFC = res.featureCollection;
+    } catch {
+      // État honnête : on garde la couche vide en cas d'erreur réseau.
+      zonesFC = { type: "FeatureCollection", features: [] };
+    }
+  }
+
   function selectEvalCity(city: (typeof EVAL_CITIES)[0]): void {
     selectedEvalCity = city;
     void loadLots(city.slug);
     void loadZonage(city.slug);
+    void loadProspectMarks(city.slug);
+    void loadZones(city.slug);
   }
 
   // ── Sélection automatique de la 1re ville lors du changement de filtre ────
@@ -233,6 +319,8 @@
       selectedEvalCity = first;
       void loadLots(first.slug);
       void loadZonage(first.slug);
+      void loadProspectMarks(first.slug);
+      void loadZones(first.slug);
     }
     void loadSignalEntries();
   });
@@ -293,19 +381,135 @@
       .join(" ");
   }
 
+  /**
+   * Étend une bbox lots avec l'emprise des polygones de zone, pour que la
+   * couche zonage géo soit projetée dans le même repère que les lots. No-op
+   * concret tant que la couche zonage est inerte (aucune zone à folder).
+   */
+  function extendBboxWithZones(base: SvgBbox, zones: ZoneFeature[]): SvgBbox {
+    let { minLon, minLat, maxLon, maxLat } = base;
+    for (const z of zones) {
+      if (!z.geometry || z.geometry.type !== "Polygon") continue;
+      const rings = z.geometry.coordinates as number[][][];
+      for (const ring of rings) {
+        for (const pt of ring) {
+          if (pt[0] < minLon) minLon = pt[0];
+          if (pt[0] > maxLon) maxLon = pt[0];
+          if (pt[1] < minLat) minLat = pt[1];
+          if (pt[1] > maxLat) maxLat = pt[1];
+        }
+      }
+    }
+    return { minLon, minLat, maxLon, maxLat };
+  }
+
   $: lotsBbox = computeLotsBbox(lotsFC.features);
   $: polygonFeatures = lotsFC.features.filter(
     (f) => f.geometry && f.geometry.type === "Polygon" && !f.properties.isRue,
   );
+  let prospectMarksByLot = new Map<string, ProspectMark[]>();
+  $: {
+    prospectMarksByLot = new Map<string, ProspectMark[]>();
+    for (const mark of prospectMarks) {
+      const key = lotKey(mark.noLot, mark.citySlug);
+      prospectMarksByLot.set(key, [...(prospectMarksByLot.get(key) ?? []), mark]);
+    }
+  }
+  $: prospectCounters = computeProspectCounters(
+    polygonFeatures.map((feature) => ({
+      noLot: feature.properties.noLot,
+      citySlug: feature.properties.citySlug ?? selectedEvalCity?.slug ?? "",
+    })),
+    prospectMarks,
+  );
+  $: filteredPolygonFeatures = polygonFeatures.filter((feature) => {
+    if (prospectFilter === "all") return true;
+    const key = lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "");
+    const marks = prospectMarks.filter((mark) => lotKey(mark.noLot, mark.citySlug) === key);
+    const pipeline = activePipelineMark(marks);
+    const market = activeMarketMark(marks);
+    if (prospectFilter === "unmarked") return !pipeline && !market;
+    return pipeline?.statut === prospectFilter || market?.statut === prospectFilter;
+  });
+
+  function prospectCounterFor(filter: ProspectStatus | "all" | "unmarked"): number {
+    if (filter === "all") return prospectCounters.all;
+    if (filter === "unmarked") return prospectCounters.unmarked;
+    return prospectCounters[filter];
+  }
+
+  // ── Couche zonage géo : polygones + appariement au signal sélectionné ─────
+  // Inerte tant que ZONES_LAYER_ENABLED est faux ou que la collection 404.
+  $: zonePolygonFeatures = ZONES_LAYER_ENABLED
+    ? zonesFC.features.filter((f) => f.geometry && f.geometry.type === "Polygon")
+    : [];
+  $: hasZoneLayer = zonePolygonFeatures.length > 0;
+  // Codes de zone cités par le signal sélectionné (un SignalT porte `zone`).
+  $: selectedSignalZoneCodes = selectedSignal?.zone ? [selectedSignal.zone] : [];
+  // Zones de la couche géo qui matchent le signal sélectionné (join pur, WP3).
+  $: matchedZoneCodes = new Set(
+    matchZonesToSignal(selectedSignalZoneCodes, zonePolygonFeatures).map(
+      (z) => z.properties.code,
+    ),
+  );
+  // bbox commune lots+zones (identique à lotsBbox quand la couche est inerte).
+  $: mapBbox = hasZoneLayer
+    ? extendBboxWithZones(lotsBbox, zonePolygonFeatures)
+    : lotsBbox;
 
   // ── Indicateurs réactifs ──────────────────────────────────────────────────
   $: isLoadingEval = lotsLoading || zonageLoading;
   $: hasZonage = zonageEvents.length > 0;
   $: hasLots = polygonFeatures.length > 0;
+  $: scoredLotCount = polygonFeatures.filter((f) => (f.properties.potentialScore ?? 0) > 0).length;
+  $: highPotentialLotCount = polygonFeatures.filter((f) => (f.properties.potentialScore ?? 0) >= 7).length;
+  $: fallbackScoreCount = polygonFeatures.filter((f) => f.properties.potentialScoreStatus === "fallback").length;
+  $: unavailableScoreCount = polygonFeatures.filter((f) => f.properties.potentialScoreStatus === "unavailable").length;
+
+  function lotScore(feature: LotFeature): number {
+    const score = feature.properties.potentialScore;
+    return typeof score === "number" && Number.isFinite(score) ? score : 0;
+  }
+
+  function lotFill(feature: LotFeature): string {
+    return colorForScore(lotScore(feature), null);
+  }
+
+  function lotOpacity(feature: LotFeature, selected: boolean, hovered: boolean): string {
+    if (selected) return "0.78";
+    if (hovered) return "0.75";
+    return lotScore(feature) > 0 ? "0.62" : "0.34";
+  }
 </script>
 
-<ViewLayout controlsWidth="w-80">
-  <!-- ── Left: sélecteur évaluation (lots + zonage) + signaux ────────────── -->
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+  <!-- ── Onglets de la vue Évaluation : Lots & Zonage | Grilles de score ──── -->
+  <div class="shrink-0 border-b border-slate-200 bg-white px-4">
+    <div class="flex gap-1" role="tablist" aria-label="Vues d'évaluation">
+      {#each EVAL_TABS as tab (tab.id)}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
+          class={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === tab.id
+              ? "border-teal-600 text-teal-700"
+              : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+          }`}
+          on:click={() => { activeTab = tab.id; }}
+        >
+          {tab.label}
+        </button>
+      {/each}
+    </div>
+  </div>
+
+  {#if activeTab === "grilles"}
+    <!-- Onglet Grilles : modèle de score réutilisé tel quel (composant autonome) -->
+    <GrillesView />
+  {:else}
+    <ViewLayout controlsWidth="w-80">
+      <!-- ── Left: sélecteur évaluation (lots + zonage) + signaux ────────────── -->
   <svelte:fragment slot="controls">
     <!-- Titre -->
     <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
@@ -546,6 +750,12 @@
                 <Badge tone="success" class="text-xs">
                   {polygonFeatures.length}&nbsp;lot{polygonFeatures.length !== 1 ? "s" : ""}&nbsp;chargé{polygonFeatures.length !== 1 ? "s" : ""}
                 </Badge>
+                <Badge tone="info" class="text-xs">
+                  {scoredLotCount}&nbsp;scoré{scoredLotCount !== 1 ? "s" : ""}
+                </Badge>
+                <Badge tone="warning" class="text-xs">
+                  {highPotentialLotCount}&nbsp;prioritaire{highPotentialLotCount !== 1 ? "s" : ""}
+                </Badge>
               {:else if !lotsError}
                 <span class="text-xs text-slate-400">Aucun lot</span>
               {/if}
@@ -636,10 +846,39 @@
               </div>
               {#if !lotsLoading && !lotsError && hasLots}
                 <span class="text-xs text-slate-400">
-                  {polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · {isCarteSteve ? "Steve" : "CC-BY"}
+                  {filteredPolygonFeatures.length}/{polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · {isCarteSteve ? "Steve" : "CC-BY"}
                 </span>
               {/if}
             </div>
+
+            {#if !lotsLoading && !lotsError && hasLots}
+              <div class="border-t border-slate-100 px-4 py-2" data-testid="prospect-mark-filters">
+                <div class="mb-1 flex items-center justify-between gap-2">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Filtres par marque</p>
+                  {#if prospectMarksLoading}
+                    <span class="text-xs text-slate-400">chargement…</span>
+                  {:else if prospectMarksError}
+                    <span class="text-xs text-amber-600" title={prospectMarksError}>marques indisponibles</span>
+                  {/if}
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  {#each PROSPECT_FILTERS as filter (filter.value)}
+                    <button
+                      type="button"
+                      class={`rounded-full border px-2 py-1 text-xs transition-colors ${
+                        prospectFilter === filter.value
+                          ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                      }`}
+                      on:click={() => { prospectFilter = filter.value; }}
+                      aria-pressed={prospectFilter === filter.value}
+                    >
+                      {filter.label} <span class="tabular-nums text-slate-400">{prospectCounterFor(filter.value)}</span>
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {/if}
 
             {#if lotsLoading}
               <div class="flex items-center justify-center p-6 text-sm text-slate-400">
@@ -679,11 +918,37 @@
               >
                 <rect width={SVG_W} height={SVG_H} class="fill-blue-50" rx="2" />
 
-                {#each polygonFeatures as feature (feature.properties.noLot)}
+                <!-- Couche zonage géo (WP3) — rendue SOUS les lots, inerte tant
+                     que ZONES_LAYER_ENABLED est faux ou que la collection 404.
+                     Les zones matchées au signal sélectionné sont mises en
+                     évidence (remplissage ambré). -->
+                {#if hasZoneLayer}
+                  {#each zonePolygonFeatures as zone (zone.properties.code)}
+                    {@const zRings = zone.geometry?.coordinates as number[][][] | undefined}
+                    {@const isMatched = matchedZoneCodes.has(zone.properties.code)}
+                    {#if zRings && zRings.length > 0}
+                      <polygon
+                        points={ringToPoints(zRings[0], mapBbox)}
+                        fill={isMatched ? "#f59e0b" : "none"}
+                        fill-opacity={isMatched ? "0.25" : "0"}
+                        stroke={isMatched ? "#d97706" : "#94a3b8"}
+                        stroke-width={isMatched ? "1.6" : "0.6"}
+                        stroke-dasharray={isMatched ? "none" : "3 2"}
+                      >
+                        <title>Zone {zone.properties.code}{isMatched ? " (citée par le signal)" : ""}{zone.properties.grillePdfUrl ? " — grille PDF disponible" : ""}</title>
+                      </polygon>
+                    {/if}
+                  {/each}
+                {/if}
+
+                {#each filteredPolygonFeatures as feature (feature.properties.noLot)}
                   {@const rings = feature.geometry?.coordinates as number[][][] | undefined}
                   {@const isHovered = hoveredLot === feature.properties.noLot}
                   {@const isLotSelected = selectedLot?.properties.noLot === feature.properties.noLot}
-                  {@const steveColor = isCarteSteve ? getLotColor(feature.properties as unknown as Record<string, unknown>) : null}
+                  {@const lotMarks = prospectMarksByLot.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? []}
+                  {@const lotPipelineMark = activePipelineMark(lotMarks)}
+                  {@const lotMarketMark = activeMarketMark(lotMarks)}
+                  {@const scoreFill = lotFill(feature)}
                   {#if rings && rings.length > 0}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -699,15 +964,15 @@
                       tabindex="0"
                     >
                       <polygon
-                        points={ringToPoints(rings[0], lotsBbox)}
-                        fill={isLotSelected ? "#0d9488" : isHovered ? (steveColor ? steveColor.fill : "#5eead4") : (steveColor ? steveColor.fill : "#99f6e4")}
-                        stroke={isLotSelected ? "#0d9488" : (steveColor ? steveColor.fill : "#2dd4bf")}
+                        points={ringToPoints(rings[0], mapBbox)}
+                        fill={isLotSelected ? "#0d9488" : scoreFill}
+                        stroke={isLotSelected ? "#0d9488" : scoreFill}
                         stroke-width={isLotSelected ? "1.5" : "0.8"}
-                        fill-opacity={isLotSelected ? "0.7" : isHovered ? "0.75" : (steveColor ? String(steveColor.opacity) : "0.45")}
+                        fill-opacity={lotOpacity(feature, isLotSelected, isHovered)}
                       />
                       {#if (isHovered || isLotSelected) && rings[0].length > 0}
-                        {@const cx = rings[0].reduce((s, p) => s + projX(p[0], lotsBbox), 0) / rings[0].length}
-                        {@const cy = rings[0].reduce((s, p) => s + projY(p[1], lotsBbox), 0) / rings[0].length}
+                        {@const cx = rings[0].reduce((s, p) => s + projX(p[0], mapBbox), 0) / rings[0].length}
+                        {@const cy = rings[0].reduce((s, p) => s + projY(p[1], mapBbox), 0) / rings[0].length}
                         <text
                           x={cx}
                           y={cy}
@@ -716,7 +981,7 @@
                           style="font-size: 9px; font-weight: 600; pointer-events: none;"
                           fill={isLotSelected ? "white" : "#0d9488"}
                         >
-                          {feature.properties.noLot}
+                          {feature.properties.noLot}{lotPipelineMark ? ` · ${prospectStatusShortLabel(lotPipelineMark.statut)}` : lotMarketMark ? ` · ${prospectStatusShortLabel(lotMarketMark.statut)}` : ""}
                         </text>
                       {/if}
                     </g>
@@ -724,10 +989,10 @@
                 {/each}
               </svg>
 
-              <!-- Légende Steve (visible uniquement en mode carte-steve) -->
-              {#if isCarteSteve}
-                <MapLegend />
-              {/if}
+              <MapLegend
+                fallbackCount={fallbackScoreCount}
+                unavailableCount={unavailableScoreCount}
+              />
 
               <!-- Fiche lot complète — CS-L2 -->
               {#if selectedLot}
@@ -735,6 +1000,8 @@
                   <LotFichePanel
                     lot={selectedLot}
                     cityName={selectedEvalCity?.name ?? ""}
+                    allowMarquage={true}
+                    mode={isCarteSteve ? "simulation" : "real"}
                     onClose={() => { selectedLot = null; }}
                   />
                 </div>
@@ -875,4 +1142,6 @@
       {/if}
     {/if}
   </div>
-</ViewLayout>
+    </ViewLayout>
+  {/if}
+</div>

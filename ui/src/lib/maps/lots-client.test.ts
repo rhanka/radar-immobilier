@@ -215,6 +215,10 @@ describe("fetchLots", () => {
           "tod",
           "multifamilial4plus",
           "superficieM2",
+          "potentialScore",
+          "potentialScoreStatus",
+          "potentialScoreSource",
+          "potentialScoreReason",
         ]).toContain(k);
       }
     }

@@ -1,0 +1,46 @@
+{
+  "name": "@radar/immo-mcp",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Read-only, mock-first MCP (stdio) provider exposing radar-immobilier domain tools (lots, signals, opportunities, documents) with an imposed auth context and anti-PII redaction.",
+  "license": "UNLICENSED",
+  "main": "./src/server.ts",
+  "types": "./src/server.ts",
+  "bin": {
+    "immo-mcp": "./dist/server.js"
+  },
+  "exports": {
+    ".": "./src/server.ts",
+    "./tools": "./src/tools.ts",
+    "./auth-context": "./src/auth-context.ts",
+    "./data-source": "./src/data-source.ts"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "node dist/server.js",
+    "start:http": "node dist/server-http.js",
+    "proof": "npm run build && tsx scripts/stdio-smoke.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@sentropic/mcp-auth": "^0.1.0",
+    "@sentropic/oauth-verify": "^0.1.0",
+    "hono": "^4.10.7",
+    "jose": "^5.10.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "tsx": "^4.16.0",
+    "typescript": "5.4.5",
+    "vitest": "^1.6.0"
+  }
+}
