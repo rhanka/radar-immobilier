@@ -1,0 +1,870 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-06-28",
+  "note": "Axes de focus = TAGS de PROJECTION (le CLI Track n'expose pas de primitive tag ; comme le rattachement WP, les axes sont une projection au-dessus des items). Numérateurs strictement sourcés (wp1-data-state.md 2026-06-28 09:01, 2.3-completude-1105-FRESH.md, wp3-33-anomalies.json). num=null => non recensé (pas de census), JAMAIS inventé.",
+  "axes": {
+    "focus:30": {
+      "label": "villes démo prioritaires (priorityRank 1→30)",
+      "N": 30,
+      "source": "packages/radar-sources/src/geo/municipalities.qc.json (champ priorityRank)"
+    },
+    "focus:1104": {
+      "label": "couverture provinciale (1106 − 2 exclues)",
+      "N": 1104,
+      "source": "municipalities.qc.json (1106 total, 2 exclues: Montréal, Laval)"
+    },
+    "focus:33": {
+      "label": "opportunités preuve E2E z∩m∩p (cible WPB-E2E)",
+      "N": 33,
+      "source": "WPB-E2E 33 opportunités prioritaires ; audit docs/spec/reports/wp3-33-anomalies.json (10 villes prio, 27 signaux)"
+    },
+    "focus:5000plus": {
+      "label": "tous signaux/opportunités à l'échelle ville×signaux",
+      "N": "5000+",
+      "source": "cible d'échelle (aucun census par-signal n'existe encore en local)"
+    }
+  },
+  "subItems": {
+    "WP1.1": {
+      "id": "01KW7HVAPETNMPW0F5QWR80REC",
+      "title": "WP1.1 Villes & registre (geo)",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": 30,
+          "den": 30
+        },
+        {
+          "axis": "focus:1104",
+          "num": 1104,
+          "den": 1104
+        }
+      ]
+    },
+    "WP1.2": {
+      "id": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "WP1.2 PV & sources textuelles — acquisition (immo)",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": 27,
+          "den": 30,
+          "note": "graphe toutes versions"
+        },
+        {
+          "axis": "focus:1104",
+          "num": 1007,
+          "den": 1104,
+          "note": "graphe 91,2 %"
+        }
+      ]
+    },
+    "WP1.3": {
+      "id": "01KW7HWAW2HCR0TYAX8R9R2CG0",
+      "title": "WP1.3 Zones — désignations / géo / grilles",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": 2,
+          "den": 30,
+          "note": "zonage géo joignable"
+        },
+        {
+          "axis": "focus:1104",
+          "num": 211,
+          "den": 1104,
+          "note": "zonage géo 19,1 % ; grilles 0"
+        }
+      ]
+    },
+    "WP1.4": {
+      "id": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "WP1.4 Lots — cadastre / propriétaires / géo",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": 30,
+          "den": 30,
+          "note": "lots cadastre/géo"
+        },
+        {
+          "axis": "focus:1104",
+          "num": 1102,
+          "den": 1104,
+          "note": "lots 99,8 % ; proprio 0 (Loi 25)"
+        }
+      ]
+    },
+    "WP2.1": {
+      "id": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "WP2.1 Graphify — pipeline v2.3",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": 25,
+          "den": 30,
+          "note": "v2.3"
+        },
+        {
+          "axis": "focus:1104",
+          "num": 976,
+          "den": 1104,
+          "note": "v2.3 88,4 % ; 31 v2.2 + 97 sans graphe"
+        }
+      ]
+    },
+    "WP2.2": {
+      "id": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "WP2.2 Citations / grounding / page-bbox",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": 19,
+          "den": 27,
+          "note": "signaux avec citation (8 absentes/27) ; page 19/27 ; bbox 0/27"
+        },
+        {
+          "axis": "focus:1104",
+          "num": null,
+          "den": 1104,
+          "note": "citations par ville non recensées (gate publish impose grounding)"
+        }
+      ]
+    },
+    "WP2.3": {
+      "id": "01KW7HWBE0BATB0FQ10JJHWT2V",
+      "title": "WP2.3 Ontologie — entités additionnelles",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": 9,
+          "den": 10,
+          "note": "villes auditées ontology_version=2.3"
+        },
+        {
+          "axis": "focus:1104",
+          "num": 976,
+          "den": 1104,
+          "note": "porté par v2.3"
+        }
+      ]
+    },
+    "WP2.4": {
+      "id": "01KW7HWBJJFH5AAVGZB9WEJEEG",
+      "title": "WP2.4 Orchestration parsing à l'échelle",
+      "axes": [
+        {
+          "axis": "focus:1104",
+          "num": 976,
+          "den": 1104,
+          "note": "vecteur d'extension 976→1104"
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "orchestration remote (cible 3272 docs)"
+        }
+      ]
+    },
+    "WP3.1": {
+      "id": "01KW7HWBPYSK37B2EXAB2W12DK",
+      "title": "WP3.1 Niveau 1 — signal × PDF / preuve",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": 19,
+          "den": 27,
+          "note": "signaux liés à une preuve PDF (8 citations absentes/27)"
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "non recensé"
+        }
+      ]
+    },
+    "WP3.2": {
+      "id": "01KW7HWBVFG5AYV7T0X7GWDQQZ",
+      "title": "WP3.2 Niveau 2 — signal × zone (directe/rue) × geo",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": 5,
+          "den": 27,
+          "note": "signaux avec zone_ref structuré ; geometry zone 0/15"
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "non recensé"
+        }
+      ]
+    },
+    "WP3.3": {
+      "id": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "WP3.3 Niveau 3 — signal × zone × grille × lot (opportunité)",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": null,
+          "den": 33,
+          "note": "28 anomalies sur l'échantillon (data 15 / algo 6 / data_algo 7) ; grilles 0 → niveau 3 bloqué"
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "non recensé"
+        }
+      ]
+    },
+    "WP3.4": {
+      "id": "01KW7HWC4PDZD7V50HTY6QY2HS",
+      "title": "WP3.4 Métriques rappel/précision & parité Steve",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": 4,
+          "den": 30,
+          "note": "4 villes Steve (bootstrap simulation)"
+        },
+        {
+          "axis": "focus:33",
+          "num": 28,
+          "den": 28,
+          "note": "audit data+algo produit (28 anomalies classées)"
+        }
+      ]
+    },
+    "WP4.1": {
+      "id": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "WP4.1 Vue Signaux (Québec)",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "Vue Signaux — feature produit (couverture data via WP1/WP2)"
+        }
+      ]
+    },
+    "WP4.2": {
+      "id": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "WP4.2 Vue Opportunités (ville/zones)",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "Vue Opportunités — feature produit"
+        }
+      ]
+    },
+    "WP4.3": {
+      "id": "01KW7HWCHXMA1E74WDXQ73GSQG",
+      "title": "WP4.3 Vue Évaluation (zone/lots) + fiche lot",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "Vue Évaluation + fiche lot — feature produit"
+        }
+      ]
+    },
+    "WP4.4": {
+      "id": "01KW7HWCNMCXRF9AAN3A26V1BH",
+      "title": "WP4.4 Vue Sources (couverture)",
+      "axes": [
+        {
+          "axis": "focus:1104",
+          "num": null,
+          "den": 1104,
+          "note": "Vue Sources couverture — reflète l'atome par ville"
+        }
+      ]
+    },
+    "WP4.5": {
+      "id": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "WP4.5 Marques / notes / buckets / filtres (CS-L3–L5)",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "Marques/notes/buckets/filtres — feature produit"
+        }
+      ]
+    },
+    "WP4.6": {
+      "id": "01KW7HWCX2XQ0W223VRMQ1AWNE",
+      "title": "WP4.6 Exports & différenciateurs (CS-P)",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "Exports & différenciateurs — feature produit"
+        }
+      ]
+    },
+    "WP4.7": {
+      "id": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "WP4.7 Viewer preuve PDF (transverse)",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": 19,
+          "den": 27,
+          "note": "Viewer preuve PDF — 19/27 signaux audités citables"
+        }
+      ]
+    },
+    "WP5.1": {
+      "id": "01KW7HWD47ZER7DQ2PWFDVFHV9",
+      "title": "WP5.1 Auth & session durable",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "auth démo"
+        }
+      ]
+    },
+    "WP5.2": {
+      "id": "01KW7HWD831W46RE1RM3NYMR9V",
+      "title": "WP5.2 MCP immo",
+      "axes": [
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "MCP immo — socle (forward-looking)"
+        }
+      ]
+    },
+    "WP5.3": {
+      "id": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "WP5.3 Persistance S3-first / rebuild",
+      "axes": [
+        {
+          "axis": "focus:1104",
+          "num": 1007,
+          "den": 1104,
+          "note": "graphes S3 persistés"
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "substrat S3-first reconstructible"
+        }
+      ]
+    },
+    "WP5.4": {
+      "id": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "WP5.4 Scale — serverless / agents remote",
+      "axes": [
+        {
+          "axis": "focus:1104",
+          "num": null,
+          "den": 1104,
+          "note": "scale provincial"
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "serverless / agents remote (cible 1000 villes sans OOM)"
+        }
+      ]
+    },
+    "WP5.5": {
+      "id": "01KW7HWDJXV1NK3JVG3YGNGARA",
+      "title": "WP5.5 Déploiement / CD",
+      "axes": [
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+",
+          "note": "déploiement/CD socle"
+        }
+      ]
+    },
+    "WP5.6": {
+      "id": "01KW7HWDPK55QN7CRCV7P1N9TB",
+      "title": "WP5.6 Chat-ui / llm-mesh",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30,
+          "note": "chat-ui démo"
+        }
+      ]
+    },
+    "WP6.1": {
+      "id": "01KW7HWDT6G7C0N3MS1PF8E5EC",
+      "title": "WP6.1 Structure Track & WP",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30
+        },
+        {
+          "axis": "focus:1104",
+          "num": null,
+          "den": 1104
+        },
+        {
+          "axis": "focus:33",
+          "num": null,
+          "den": 33
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+"
+        }
+      ]
+    },
+    "WP6.2": {
+      "id": "01KW7HWDXRYYPCMGX1XFCKZD98",
+      "title": "WP6.2 Reporting multi-échelle / focus",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30
+        },
+        {
+          "axis": "focus:1104",
+          "num": null,
+          "den": 1104
+        },
+        {
+          "axis": "focus:33",
+          "num": null,
+          "den": 33
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+"
+        }
+      ]
+    },
+    "WP6.3": {
+      "id": "01KW7HWE1QFZW7H5W4ZBT71Q4K",
+      "title": "WP6.3 Kanban UI / projection PG",
+      "axes": [
+        {
+          "axis": "focus:30",
+          "num": null,
+          "den": 30
+        },
+        {
+          "axis": "focus:1104",
+          "num": null,
+          "den": 1104
+        },
+        {
+          "axis": "focus:33",
+          "num": null,
+          "den": 33
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+"
+        }
+      ]
+    },
+    "WP6.4": {
+      "id": "01KW7HWE6ABHZHR4SVSBMXHMH1",
+      "title": "WP6.4 Décision-dossiers & remote→h2a",
+      "axes": [
+        {
+          "axis": "focus:33",
+          "num": null,
+          "den": 33
+        },
+        {
+          "axis": "focus:5000plus",
+          "num": null,
+          "den": "5000+"
+        }
+      ]
+    }
+  },
+  "rollupByAxis": {
+    "focus:30": [
+      {
+        "subItem": "WP1.1",
+        "title": "WP1.1 Villes & registre (geo)",
+        "num": 30,
+        "den": 30
+      },
+      {
+        "subItem": "WP1.2",
+        "title": "WP1.2 PV & sources textuelles — acquisition (immo)",
+        "num": 27,
+        "den": 30,
+        "note": "graphe toutes versions"
+      },
+      {
+        "subItem": "WP1.3",
+        "title": "WP1.3 Zones — désignations / géo / grilles",
+        "num": 2,
+        "den": 30,
+        "note": "zonage géo joignable"
+      },
+      {
+        "subItem": "WP1.4",
+        "title": "WP1.4 Lots — cadastre / propriétaires / géo",
+        "num": 30,
+        "den": 30,
+        "note": "lots cadastre/géo"
+      },
+      {
+        "subItem": "WP2.1",
+        "title": "WP2.1 Graphify — pipeline v2.3",
+        "num": 25,
+        "den": 30,
+        "note": "v2.3"
+      },
+      {
+        "subItem": "WP3.4",
+        "title": "WP3.4 Métriques rappel/précision & parité Steve",
+        "num": 4,
+        "den": 30,
+        "note": "4 villes Steve (bootstrap simulation)"
+      },
+      {
+        "subItem": "WP4.1",
+        "title": "WP4.1 Vue Signaux (Québec)",
+        "num": null,
+        "den": 30,
+        "note": "Vue Signaux — feature produit (couverture data via WP1/WP2)"
+      },
+      {
+        "subItem": "WP4.2",
+        "title": "WP4.2 Vue Opportunités (ville/zones)",
+        "num": null,
+        "den": 30,
+        "note": "Vue Opportunités — feature produit"
+      },
+      {
+        "subItem": "WP4.3",
+        "title": "WP4.3 Vue Évaluation (zone/lots) + fiche lot",
+        "num": null,
+        "den": 30,
+        "note": "Vue Évaluation + fiche lot — feature produit"
+      },
+      {
+        "subItem": "WP4.5",
+        "title": "WP4.5 Marques / notes / buckets / filtres (CS-L3–L5)",
+        "num": null,
+        "den": 30,
+        "note": "Marques/notes/buckets/filtres — feature produit"
+      },
+      {
+        "subItem": "WP4.6",
+        "title": "WP4.6 Exports & différenciateurs (CS-P)",
+        "num": null,
+        "den": 30,
+        "note": "Exports & différenciateurs — feature produit"
+      },
+      {
+        "subItem": "WP5.1",
+        "title": "WP5.1 Auth & session durable",
+        "num": null,
+        "den": 30,
+        "note": "auth démo"
+      },
+      {
+        "subItem": "WP5.6",
+        "title": "WP5.6 Chat-ui / llm-mesh",
+        "num": null,
+        "den": 30,
+        "note": "chat-ui démo"
+      },
+      {
+        "subItem": "WP6.1",
+        "title": "WP6.1 Structure Track & WP",
+        "num": null,
+        "den": 30
+      },
+      {
+        "subItem": "WP6.2",
+        "title": "WP6.2 Reporting multi-échelle / focus",
+        "num": null,
+        "den": 30
+      },
+      {
+        "subItem": "WP6.3",
+        "title": "WP6.3 Kanban UI / projection PG",
+        "num": null,
+        "den": 30
+      }
+    ],
+    "focus:1104": [
+      {
+        "subItem": "WP1.1",
+        "title": "WP1.1 Villes & registre (geo)",
+        "num": 1104,
+        "den": 1104
+      },
+      {
+        "subItem": "WP1.2",
+        "title": "WP1.2 PV & sources textuelles — acquisition (immo)",
+        "num": 1007,
+        "den": 1104,
+        "note": "graphe 91,2 %"
+      },
+      {
+        "subItem": "WP1.3",
+        "title": "WP1.3 Zones — désignations / géo / grilles",
+        "num": 211,
+        "den": 1104,
+        "note": "zonage géo 19,1 % ; grilles 0"
+      },
+      {
+        "subItem": "WP1.4",
+        "title": "WP1.4 Lots — cadastre / propriétaires / géo",
+        "num": 1102,
+        "den": 1104,
+        "note": "lots 99,8 % ; proprio 0 (Loi 25)"
+      },
+      {
+        "subItem": "WP2.1",
+        "title": "WP2.1 Graphify — pipeline v2.3",
+        "num": 976,
+        "den": 1104,
+        "note": "v2.3 88,4 % ; 31 v2.2 + 97 sans graphe"
+      },
+      {
+        "subItem": "WP2.2",
+        "title": "WP2.2 Citations / grounding / page-bbox",
+        "num": null,
+        "den": 1104,
+        "note": "citations par ville non recensées (gate publish impose grounding)"
+      },
+      {
+        "subItem": "WP2.3",
+        "title": "WP2.3 Ontologie — entités additionnelles",
+        "num": 976,
+        "den": 1104,
+        "note": "porté par v2.3"
+      },
+      {
+        "subItem": "WP2.4",
+        "title": "WP2.4 Orchestration parsing à l'échelle",
+        "num": 976,
+        "den": 1104,
+        "note": "vecteur d'extension 976→1104"
+      },
+      {
+        "subItem": "WP4.4",
+        "title": "WP4.4 Vue Sources (couverture)",
+        "num": null,
+        "den": 1104,
+        "note": "Vue Sources couverture — reflète l'atome par ville"
+      },
+      {
+        "subItem": "WP5.3",
+        "title": "WP5.3 Persistance S3-first / rebuild",
+        "num": 1007,
+        "den": 1104,
+        "note": "graphes S3 persistés"
+      },
+      {
+        "subItem": "WP5.4",
+        "title": "WP5.4 Scale — serverless / agents remote",
+        "num": null,
+        "den": 1104,
+        "note": "scale provincial"
+      },
+      {
+        "subItem": "WP6.1",
+        "title": "WP6.1 Structure Track & WP",
+        "num": null,
+        "den": 1104
+      },
+      {
+        "subItem": "WP6.2",
+        "title": "WP6.2 Reporting multi-échelle / focus",
+        "num": null,
+        "den": 1104
+      },
+      {
+        "subItem": "WP6.3",
+        "title": "WP6.3 Kanban UI / projection PG",
+        "num": null,
+        "den": 1104
+      }
+    ],
+    "focus:33": [
+      {
+        "subItem": "WP2.2",
+        "title": "WP2.2 Citations / grounding / page-bbox",
+        "num": 19,
+        "den": 27,
+        "note": "signaux avec citation (8 absentes/27) ; page 19/27 ; bbox 0/27"
+      },
+      {
+        "subItem": "WP2.3",
+        "title": "WP2.3 Ontologie — entités additionnelles",
+        "num": 9,
+        "den": 10,
+        "note": "villes auditées ontology_version=2.3"
+      },
+      {
+        "subItem": "WP3.1",
+        "title": "WP3.1 Niveau 1 — signal × PDF / preuve",
+        "num": 19,
+        "den": 27,
+        "note": "signaux liés à une preuve PDF (8 citations absentes/27)"
+      },
+      {
+        "subItem": "WP3.2",
+        "title": "WP3.2 Niveau 2 — signal × zone (directe/rue) × geo",
+        "num": 5,
+        "den": 27,
+        "note": "signaux avec zone_ref structuré ; geometry zone 0/15"
+      },
+      {
+        "subItem": "WP3.3",
+        "title": "WP3.3 Niveau 3 — signal × zone × grille × lot (opportunité)",
+        "num": null,
+        "den": 33,
+        "note": "28 anomalies sur l'échantillon (data 15 / algo 6 / data_algo 7) ; grilles 0 → niveau 3 bloqué"
+      },
+      {
+        "subItem": "WP3.4",
+        "title": "WP3.4 Métriques rappel/précision & parité Steve",
+        "num": 28,
+        "den": 28,
+        "note": "audit data+algo produit (28 anomalies classées)"
+      },
+      {
+        "subItem": "WP4.7",
+        "title": "WP4.7 Viewer preuve PDF (transverse)",
+        "num": 19,
+        "den": 27,
+        "note": "Viewer preuve PDF — 19/27 signaux audités citables"
+      },
+      {
+        "subItem": "WP6.1",
+        "title": "WP6.1 Structure Track & WP",
+        "num": null,
+        "den": 33
+      },
+      {
+        "subItem": "WP6.2",
+        "title": "WP6.2 Reporting multi-échelle / focus",
+        "num": null,
+        "den": 33
+      },
+      {
+        "subItem": "WP6.3",
+        "title": "WP6.3 Kanban UI / projection PG",
+        "num": null,
+        "den": 33
+      },
+      {
+        "subItem": "WP6.4",
+        "title": "WP6.4 Décision-dossiers & remote→h2a",
+        "num": null,
+        "den": 33
+      }
+    ],
+    "focus:5000plus": [
+      {
+        "subItem": "WP2.4",
+        "title": "WP2.4 Orchestration parsing à l'échelle",
+        "num": null,
+        "den": "5000+",
+        "note": "orchestration remote (cible 3272 docs)"
+      },
+      {
+        "subItem": "WP3.1",
+        "title": "WP3.1 Niveau 1 — signal × PDF / preuve",
+        "num": null,
+        "den": "5000+",
+        "note": "non recensé"
+      },
+      {
+        "subItem": "WP3.2",
+        "title": "WP3.2 Niveau 2 — signal × zone (directe/rue) × geo",
+        "num": null,
+        "den": "5000+",
+        "note": "non recensé"
+      },
+      {
+        "subItem": "WP3.3",
+        "title": "WP3.3 Niveau 3 — signal × zone × grille × lot (opportunité)",
+        "num": null,
+        "den": "5000+",
+        "note": "non recensé"
+      },
+      {
+        "subItem": "WP5.2",
+        "title": "WP5.2 MCP immo",
+        "num": null,
+        "den": "5000+",
+        "note": "MCP immo — socle (forward-looking)"
+      },
+      {
+        "subItem": "WP5.3",
+        "title": "WP5.3 Persistance S3-first / rebuild",
+        "num": null,
+        "den": "5000+",
+        "note": "substrat S3-first reconstructible"
+      },
+      {
+        "subItem": "WP5.4",
+        "title": "WP5.4 Scale — serverless / agents remote",
+        "num": null,
+        "den": "5000+",
+        "note": "serverless / agents remote (cible 1000 villes sans OOM)"
+      },
+      {
+        "subItem": "WP5.5",
+        "title": "WP5.5 Déploiement / CD",
+        "num": null,
+        "den": "5000+",
+        "note": "déploiement/CD socle"
+      },
+      {
+        "subItem": "WP6.1",
+        "title": "WP6.1 Structure Track & WP",
+        "num": null,
+        "den": "5000+"
+      },
+      {
+        "subItem": "WP6.2",
+        "title": "WP6.2 Reporting multi-échelle / focus",
+        "num": null,
+        "den": "5000+"
+      },
+      {
+        "subItem": "WP6.3",
+        "title": "WP6.3 Kanban UI / projection PG",
+        "num": null,
+        "den": "5000+"
+      },
+      {
+        "subItem": "WP6.4",
+        "title": "WP6.4 Décision-dossiers & remote→h2a",
+        "num": null,
+        "den": "5000+"
+      }
+    ]
+  }
+}

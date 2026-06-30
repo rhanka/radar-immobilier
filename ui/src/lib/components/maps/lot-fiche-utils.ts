@@ -39,6 +39,14 @@ export function googleMapsUrl(lat: number, lon: number): string {
   return `https://www.google.com/maps?q=${lat.toFixed(6)},${lon.toFixed(6)}`;
 }
 
+/**
+ * Construit un lien Google Street View public depuis lat/lon.
+ * Le service Google choisit le panorama disponible le plus proche.
+ */
+export function googleStreetViewUrl(lat: number, lon: number): string {
+  return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lon.toFixed(6)}`;
+}
+
 // ── Score de potentiel ─────────────────────────────────────────────────────────
 
 /**

@@ -15,12 +15,16 @@
    *  - NE touche PAS API/OIDC/PG/geo
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
   import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
   import DocumentOverlay from "$lib/components/maps/DocumentOverlay.svelte";
   import SignalPdfOverlay from "$lib/components/maps/SignalPdfOverlay.svelte";
+  import GeoCityMapBase, {
+    type GeoCityMapApi,
+    type GeoSegment,
+  } from "$lib/components/maps/GeoCityMapBase.svelte";
   import {
     buildCityMapEntries,
     type CityMapEntry,
@@ -89,11 +93,8 @@
   } from "$lib/maps/score-color-scale.js";
   import {
     geometryBounds,
-    isDegenerateBounds,
     QUEBEC_PROVINCE_BOUNDS,
-    type LngLatBoundsTuple,
   } from "$lib/maps/geometry-bounds.js";
-  import type { GeoJsonGeometry } from "$lib/maps/cadastre-geojson-source.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   const EMPTY_ZONES: GeoZoneFeatureCollection = {
@@ -160,7 +161,6 @@
   let knownNodeTypes: string[] = [];
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
-  const cityBoundaryBySlug = new Map<string, GeoJsonGeometry>();
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
@@ -220,7 +220,6 @@
         );
       }
     }
-    updateFillColors();
     updateGeoLayers();
   }
 
@@ -320,9 +319,9 @@
     updateGeoLayers();
   }
 
-  // ── MapLibre ───────────────────────────────────────────────────────────────
-  let mapContainer: HTMLDivElement;
-  let mapInstance: unknown = null;
+  // ── Carte (socle GeoCityMapBase) ───────────────────────────────────────────
+  /** API impérative du socle, captée une fois la carte prête (onReady). */
+  let mapApi: GeoCityMapApi | null = null;
   let mapReady = false;
 
   /**
@@ -338,14 +337,17 @@
 
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
-   * selon le compte actif exact (subsetCounts[activeSubsetKey]).
+   * selon le compte actif exact (subsetCounts[subsetKey]). Les dépendances
+   * sont passées en PARAMÈTRES (pas lues en variable libre) pour que Svelte
+   * suive correctement le recalcul réactif de la prop choroplèthe.
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
+    subsetKey: string,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = (e.subsetCounts[activeSubsetKey] ?? 0);
+      const count = (e.subsetCounts[subsetKey] ?? 0);
       expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
@@ -354,9 +356,10 @@
 
   function buildFillOpacityExpression(
     entries: CityMapEntry[],
+    activeCitySlug: string | null,
+    selState: SelectionBucketState,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
-    const activeCitySlug = selectedCity?.municipality.slug ?? null;
     for (const entry of entries) {
       const key = makeKey("municipality", entry.municipality.slug);
       const contextualOpacity = activeCitySlug
@@ -366,51 +369,64 @@
         entry.municipality.slug,
         activeCitySlug
           ? contextualOpacity
-          : opacityForSelectionKey(selectionState, key, 0.75),
+          : opacityForSelectionKey(selState, key, 0.75),
       );
     }
     expr.push(activeCitySlug ? 0.08 : 0.75);
     return expr as ExpressionSpecification;
   }
 
-  /** Met à jour la peinture fill quand les données changent. */
-  function updateFillColors(): void {
-    if (!mapInstance || !mapReady || allEntries.length === 0) return;
-    const m = mapInstance as {
-      setPaintProperty: (layer: string, prop: string, value: unknown) => void;
-    };
-    m.setPaintProperty(
-      "cities-fill",
-      "fill-color",
-      buildFillColorExpression(allEntries),
-    );
-    m.setPaintProperty(
-      "cities-fill",
-      "fill-opacity",
-      buildFillOpacityExpression(allEntries),
-    );
-  }
+  /**
+   * Expressions choroplèthe passées EN PROPS au socle. Les dépendances
+   * (allEntries, activeSubsetKey, selectedCity, selectionState) sont
+   * référencées ici afin que Svelte recalcule la peinture exactement quand
+   * l'ancien `updateFillColors()` impératif était déclenché.
+   */
+  $: fillColorExpression = buildFillColorExpression(allEntries, activeSubsetKey);
+  $: fillOpacityExpression = buildFillOpacityExpression(
+    allEntries,
+    selectedCity?.municipality.slug ?? null,
+    selectionState,
+  );
 
-  // Met à jour la carte quand les données changent
-  $: if (mapReady && allEntries.length > 0) {
-    updateFillColors();
-  }
+  /**
+   * `fill-color` des aplats zone par statut de géométrie (provenance). Statique,
+   * indépendant des données signal — porté par la vue, passé au socle.
+   */
+  const ZONE_GEOMETRY_STATUS_FILL_COLOR = [
+    "match",
+    ["get", "geometryStatus"],
+    "official",
+    "#0f766e",
+    "lot-union-fallback",
+    "#f59e0b",
+    "text-only",
+    "#94a3b8",
+    "missing",
+    "#475569",
+    "#94a3b8",
+  ] as ExpressionSpecification;
+
+  /** Segments du drill Province / Ville / Zone (Zone grisée si non configurée). */
+  $: zoneDrillDisabled = selectedCity !== null && !zonesConfigured;
+  $: geoSegments = [
+    { label: "Province" },
+    { label: "Ville" },
+    {
+      label: "Zone",
+      disabled: zoneDrillDisabled,
+      ariaLabel: zoneDrillDisabled ? "Zone (zones non configurées)" : "Zone",
+    },
+  ] as GeoSegment[];
 
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
   $: if (mapReady && filteredDetailNodes !== undefined) {
     updateGeoLayers();
   }
 
-  /**
-   * Effectue un flyTo sur la carte vers la ville sélectionnée.
-   * Utilise les coordonnées WGS-84 du centroïde (MunicipalityT.lon/lat).
-   */
+  /** flyTo sur le centroïde WGS-84 de la ville (MunicipalityT.lon/lat). */
   function flyToCity(entry: CityMapEntry): void {
-    if (!mapInstance || !mapReady) return;
-    const m = mapInstance as {
-      flyTo: (options: { center: [number, number]; zoom: number; duration: number }) => void;
-    };
-    m.flyTo({
+    mapApi?.flyTo({
       center: [entry.municipality.lon, entry.municipality.lat],
       zoom: 12,
       duration: 800,
@@ -418,48 +434,19 @@
   }
 
   /**
-   * #12/#13 — Cadre la caméra MapLibre sur une bbox WGS-84. Si la bbox est
-   * dégénérée (zone sans géométrie → un seul point), on retombe sur un `flyTo`
-   * centré pour éviter le sur-zoom MapLibre (fitBounds sur un point zoome à fond).
-   */
-  function fitMapToBounds(
-    bounds: LngLatBoundsTuple,
-    options: { maxZoom?: number; duration?: number } = {},
-  ): void {
-    if (!mapInstance || !mapReady) return;
-    const m = mapInstance as {
-      fitBounds: (
-        b: LngLatBoundsTuple,
-        opts: { padding: number; duration: number; maxZoom?: number },
-      ) => void;
-      flyTo: (o: { center: [number, number]; zoom: number; duration: number }) => void;
-    };
-    const duration = options.duration ?? 600;
-    if (isDegenerateBounds(bounds)) {
-      m.flyTo({ center: bounds[0], zoom: 14, duration });
-      return;
-    }
-    m.fitBounds(bounds, {
-      padding: 40,
-      duration,
-      maxZoom: options.maxZoom ?? 15,
-    });
-  }
-
-  /**
    * #12 — Zoome sur l'étendue d'une zone sélectionnée. La feature de zone porte
    * sa propre `geometry` ; on calcule sa bbox via `geometryBounds`. Une zone
    * désignée sans polygone (geometry === null) renvoie une bbox nulle → on
-   * retombe sur le centroïde ville (cadrage stable, pas de sur-zoom).
+   * retombe sur le centroïde ville (cadrage stable, pas de sur-zoom). La
+   * mécanique de cadrage (repli flyTo si bbox dégénérée) vit dans le socle.
    */
   function zoomToZone(citySlug: string, code: string): void {
-    if (!mapInstance || !mapReady) return;
     const zone = zonesResponse?.featureCollection.features.find(
       (f) => f.properties.citySlug === citySlug && f.properties.code === code,
     );
     const bounds = geometryBounds(zone?.geometry ?? null);
     if (bounds) {
-      fitMapToBounds(bounds);
+      mapApi?.fitMapToBounds(bounds);
       return;
     }
     // Repli : zone sans géométrie → recentre sur la ville sélectionnée.
@@ -471,210 +458,38 @@
    * Symétrique de `flyToCity` / `zoomToZone` pour la transition « Province ».
    */
   function flyToProvince(): void {
-    fitMapToBounds(QUEBEC_PROVINCE_BOUNDS, { maxZoom: 7, duration: 800 });
+    mapApi?.fitMapToBounds(QUEBEC_PROVINCE_BOUNDS, { maxZoom: 7, duration: 800 });
   }
 
-  type MapLayerEvent = {
-    features?: Array<{ properties?: Record<string, unknown> }>;
-    originalEvent?: { stopPropagation?: () => void };
-  };
-
-  function cacheCityBoundaries(geojson: unknown): void {
-    const features = (geojson as { features?: unknown[] }).features;
-    if (!Array.isArray(features)) return;
-
-    for (const feature of features) {
-      const record = feature as {
-        geometry?: GeoJsonGeometry | null;
-        properties?: Record<string, unknown>;
-      };
-      const citySlug = readString(record.properties?.citySlug);
-      if (citySlug && record.geometry) {
-        cityBoundaryBySlug.set(citySlug, record.geometry);
-      }
-    }
+  // ── Callbacks d'interaction passés au socle ────────────────────────────────
+  /** Clic ville → sélection (selectCity garde l'idempotence sur la même ville). */
+  function handleCityClick(citySlug: string): void {
+    if (selectedCity?.municipality.slug === citySlug) return;
+    const entry = allEntries.find((ent) => ent.municipality.slug === citySlug);
+    if (entry) void selectCity(entry);
   }
 
-  function readString(value: unknown): string | null {
-    return typeof value === "string" && value.trim().length > 0
-      ? value.trim()
-      : null;
+  /** Clic aplat zone → bascule la sélection de zone. */
+  function handleZoneClick(zone: { citySlug: string; code: string }): void {
+    toggleMapSelection(makeKey("zone", `${zone.citySlug}/${zone.code}`));
   }
 
-  function registerGeoLayerInteractions(m: {
-    on: (event: string, layer: string, handler: (e: MapLayerEvent) => void) => void;
-    getCanvas: () => HTMLCanvasElement;
-  }): void {
-    m.on("click", "selected-zones-fill", (e) => {
-      const props = e.features?.[0]?.properties;
-      const citySlug = readString(props?.citySlug);
-      const code = readString(props?.code);
-      if (!citySlug || !code) return;
-      e.originalEvent?.stopPropagation?.();
-      toggleMapSelection(makeKey("zone", `${citySlug}/${code}`));
-    });
-
-    m.on("click", "selected-lots-fill", (e) => {
-      const props = e.features?.[0]?.properties;
-      const noLot = readString(props?.noLot);
-      const citySlug = readString(props?.citySlug) ?? selectedCity?.municipality.slug;
-      if (!noLot || !citySlug) return;
-      e.originalEvent?.stopPropagation?.();
-      toggleMapSelection(makeKey("lot", `${citySlug}/${noLot}`));
-    });
-
-    m.on("mouseenter", "selected-zones-fill", () => {
-      m.getCanvas().style.cursor = "pointer";
-    });
-    m.on("mouseleave", "selected-zones-fill", () => {
-      m.getCanvas().style.cursor = "";
-    });
-    m.on("mouseenter", "selected-lots-fill", () => {
-      m.getCanvas().style.cursor = "pointer";
-    });
-    m.on("mouseleave", "selected-lots-fill", () => {
-      m.getCanvas().style.cursor = "";
-    });
+  /** Clic aplat lot → bascule la sélection de lot (repli ville sélectionnée). */
+  function handleLotClick(lot: { noLot: string; citySlug: string | null }): void {
+    const citySlug = lot.citySlug ?? selectedCity?.municipality.slug;
+    if (!citySlug) return;
+    toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`));
   }
 
-  async function initMap(): Promise<void> {
-    if (!mapContainer) return;
-    try {
-      const maplibre = (await import("maplibre-gl")).default;
-      const m = new maplibre.Map({
-        container: mapContainer,
-        style: {
-          version: 8,
-          sources: {
-            "osm-tiles": {
-              type: "raster",
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-              tileSize: 256,
-              attribution: "© OpenStreetMap contributors",
-            },
-          },
-          layers: [
-            {
-              id: "osm-background",
-              type: "raster",
-              source: "osm-tiles",
-              paint: { "raster-opacity": 0.6 },
-            },
-          ],
-        },
-        center: [-73.5, 45.7],
-        zoom: 7,
-        maxBounds: [[-85, 41], [-55, 63]],
-      });
-
-      m.on("load", async () => {
-        // Fetch GeoJSON polygones municipaux (asset statique servi par nginx)
-        let polygonsData: unknown = { type: "FeatureCollection", features: [] };
-        try {
-          const resp = await fetch("/municipalities.geojson");
-          if (resp.ok) {
-            polygonsData = await resp.json();
-          } else {
-            console.warn("municipalities.geojson fetch failed:", resp.status);
-          }
-        } catch (err) {
-          console.warn("municipalities.geojson fetch error:", err);
-        }
-        cacheCityBoundaries(polygonsData);
-
-        // Source GeoJSON polygones (aplats)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        m.addSource("cities-polygons", {
-          type: "geojson",
-          data: polygonsData as any,
-        });
-
-        // Couche aplat fill choroplèthe
-        m.addLayer({
-          id: "cities-fill",
-          type: "fill",
-          source: "cities-polygons",
-          paint: {
-            "fill-color": buildFillColorExpression(allEntries),
-            "fill-opacity": buildFillOpacityExpression(allEntries),
-            "fill-outline-color": "#94a3b8", // slate-400
-          },
-        });
-
-        // Couche contour fill (plus visible)
-        m.addLayer({
-          id: "cities-outline",
-          type: "line",
-          source: "cities-polygons",
-          paint: {
-            "line-color": "#64748b", // slate-500
-            "line-width": 0.5,
-            "line-opacity": 0.4,
-          },
-        });
-
-        // Couche labels sur les polygones avec signaux
-        m.addLayer({
-          id: "cities-label",
-          type: "symbol",
-          source: "cities-polygons",
-          layout: {
-            "text-field": ["get", "name"],
-            "text-size": 11,
-            "text-anchor": "center",
-            "text-optional": true,
-          },
-          paint: {
-            "text-color": "#1e293b",
-            "text-halo-color": "#ffffff",
-            "text-halo-width": 1.5,
-          },
-        });
-
-        // Interaction clic sur les aplats
-        m.on("click", "cities-fill", (e) => {
-          const features = e.features;
-          if (!features || features.length === 0) return;
-          const props = features[0].properties as {
-            citySlug: string;
-            name: string;
-            mrc: string;
-          };
-          const entry = allEntries.find(
-            (ent) => ent.municipality.slug === props.citySlug,
-          );
-          if (selectedCity?.municipality.slug === props.citySlug) return;
-          if (entry) void selectCity(entry);
-        });
-
-        m.on("mousemove", "cities-fill", (e) => {
-          const props = e.features?.[0]?.properties as { citySlug?: string } | undefined;
-          m.getCanvas().style.cursor =
-            selectedCity?.municipality.slug === props?.citySlug ? "" : "pointer";
-        });
-        m.on("mouseleave", "cities-fill", () => {
-          m.getCanvas().style.cursor = "";
-        });
-
-        mapReady = true;
-        // Injecter les couleurs si les données API sont déjà chargées
-        if (allEntries.length > 0) updateFillColors();
-        updateGeoLayers();
-        registerGeoLayerInteractions(m);
-      });
-
-      mapInstance = m;
-    } catch (err) {
-      console.error("MapLibre init error", err);
-    }
+  /**
+   * Le socle est prêt : on capte son API impérative. Le bloc réactif
+   * `mapReady && filteredDetailNodes` déclenche alors la 1re peinture des
+   * couches zone/lot (équivalent de l'ancien `updateGeoLayers()` au load).
+   */
+  function handleMapReady(api: GeoCityMapApi): void {
+    mapApi = api;
+    mapReady = true;
   }
-
-  onDestroy(() => {
-    if (mapInstance) {
-      (mapInstance as { remove: () => void }).remove();
-      mapInstance = null;
-    }
-  });
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
   async function selectCity(
@@ -709,7 +524,6 @@
       expandedKeys: [cityKey],
     });
     void loadGeoForCity(entry.municipality.slug);
-    updateFillColors();
 
     // flyTo sur la carte (centroïde de la ville)
     flyToCity(entry);
@@ -732,8 +546,8 @@
       // quel signal ouvrir (clic dans le panneau droit). L'auto-focus créait
       // un paradoxe accordéon : le 1er clic sur un signal pré-focusé le fermait
       // au lieu de l'ouvrir, rendant le détail inaccessible.
-      // Recolorer les aplats avec les nouvelles données en cache
-      updateFillColors();
+      // Recolorer les aplats : la peinture choroplèthe est réactive (prop
+      // fillColorExpression) ; on rafraîchit les couches zone/lot ici.
       updateGeoLayers();
     } catch (e) {
       console.warn("Signal detail load failed:", e);
@@ -755,7 +569,6 @@
     activeDocument = null;
     activeEvidence = null;
     selectionState = createSelectionBucketState();
-    updateFillColors();
     updateGeoLayers();
     // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
     // au montage initial appelle clearSelection sans vouloir animer la carte
@@ -795,7 +608,6 @@
       if (!selectedCity) return;
       // Effacer toutes les sélections zone/lot, conserver la ville
       selectionState = createSelectionBucketState();
-      updateFillColors();
       updateGeoLayers();
     } else if (level === "Zone") {
       if (!selectedCity) return;
@@ -825,7 +637,6 @@
       selectionState = setFocus(selectionState, key);
     }
     syncRouteForSelectionKey(key);
-    updateFillColors();
     updateGeoLayers();
   }
 
@@ -972,7 +783,6 @@
       // #12 — zoom sur la zone qu'on vient de sélectionner (pas au déselect).
       zoomToSelectionKey(key);
     }
-    updateFillColors();
     updateGeoLayers();
   }
 
@@ -1028,7 +838,6 @@
       selectionState = toggleSelection(selectionState, key);
     }
     selectionState = setFocus(selectionState, key);
-    updateFillColors();
     updateGeoLayers();
     // #12 — cadrage caméra sur la zone (segmented control « Zone », restauration
     // d'URL /geo/zone/...). No-op si la clé n'est pas une zone.
@@ -1116,16 +925,15 @@
     return expr as ExpressionSpecification;
   }
 
+  /**
+   * (Re)peint les couches zone/lot via le socle. La VUE calcule les données +
+   * expressions (couleur/opacité — dépendantes de l'état signal/filtre/focus) ;
+   * le socle GeoCityMapBase porte l'échafaudage source/couche/setPaintProperty.
+   * No-op tant que la carte n'est pas prête (mapApi null), comme l'ancien garde
+   * `!mapInstance || !mapReady`.
+   */
   function updateGeoLayers(): void {
-    if (!mapInstance || !mapReady) return;
-    const m = mapInstance as {
-      getLayer: (id: string) => unknown;
-      getSource: (id: string) => { setData?: (data: unknown) => void } | undefined;
-      addSource: (id: string, source: unknown) => void;
-      addLayer: (layer: unknown) => void;
-      setPaintProperty: (layer: string, prop: string, value: unknown) => void;
-    };
-
+    if (!mapApi) return;
     const zones = zonesResponse?.featureCollection ?? EMPTY_ZONES;
     const lots = lotsResponse
       ? decorateLotsWithSignalProjection(
@@ -1134,85 +942,18 @@
           filteredDetailNodes,
         )
       : EMPTY_LOTS;
-
-    const zoneSource = m.getSource("selected-zones");
-    if (zoneSource?.setData) {
-      zoneSource.setData(zones);
-    } else if (!zoneSource) {
-      m.addSource("selected-zones", { type: "geojson", data: zones });
-    }
-    if (!m.getLayer("selected-zones-fill")) {
-      m.addLayer({
-        id: "selected-zones-fill",
-        type: "fill",
-        source: "selected-zones",
-        paint: {
-          "fill-color": [
-            "match",
-            ["get", "geometryStatus"],
-            "official",
-            "#0f766e",
-            "lot-union-fallback",
-            "#f59e0b",
-            "text-only",
-            "#94a3b8",
-            "missing",
-            "#475569",
-            "#94a3b8",
-          ],
-          "fill-opacity": buildZoneOpacityExpression(zones.features),
-          "fill-outline-color": "#0f172a",
-        },
-      });
-    }
-    if (!m.getLayer("selected-zones-outline")) {
-      m.addLayer({
-        id: "selected-zones-outline",
-        type: "line",
-        source: "selected-zones",
-        paint: {
-          "line-color": "#0f172a",
-          "line-width": 1.25,
-          "line-opacity": 0.5,
-        },
-      });
-    }
-
-    const lotSource = m.getSource("selected-lots");
-    if (lotSource?.setData) {
-      lotSource.setData(lots);
-    } else if (!lotSource) {
-      m.addSource("selected-lots", { type: "geojson", data: lots });
-    }
-    if (!m.getLayer("selected-lots-fill")) {
-      m.addLayer({
-        id: "selected-lots-fill",
-        type: "fill",
-        source: "selected-lots",
-        paint: {
-          "fill-color": signauxLotFillColorExpression(mapContainer) as never,
-          "fill-opacity": buildLotOpacityExpression(lots),
-          "fill-outline-color": "#ffffff",
-        },
-      });
-    }
-    if (!m.getLayer("selected-lots-outline")) {
-      m.addLayer({
-        id: "selected-lots-outline",
-        type: "line",
-        source: "selected-lots",
-        paint: {
-          "line-color": lotLineColorExpression(mapContainer) as never,
-          "line-width": 0.4,
-          "line-opacity": 0.35,
-        },
-      });
-    }
-
-    m.setPaintProperty("selected-zones-fill", "fill-opacity", buildZoneOpacityExpression(zones.features));
-    m.setPaintProperty("selected-lots-fill", "fill-color", signauxLotFillColorExpression(mapContainer));
-    m.setPaintProperty("selected-lots-fill", "fill-opacity", buildLotOpacityExpression(lots));
-    m.setPaintProperty("selected-lots-outline", "line-color", lotLineColorExpression(mapContainer));
+    // Élément monté sous le ThemeProvider (= conteneur carte du socle) pour
+    // résoudre les tokens DS des expressions de couleur lot (parité stricte).
+    const el = mapApi.themeElement;
+    mapApi.syncGeoLayers({
+      zones,
+      lots,
+      zoneFillColor: ZONE_GEOMETRY_STATUS_FILL_COLOR,
+      zoneFillOpacity: buildZoneOpacityExpression(zones.features),
+      lotFillColor: signauxLotFillColorExpression(el),
+      lotFillOpacity: buildLotOpacityExpression(lots),
+      lotLineColor: lotLineColorExpression(el),
+    });
   }
 
   async function loadGeoForCity(citySlug: string): Promise<void> {
@@ -1234,12 +975,12 @@
       const withFallback = withCityFallbackZone(zonesResult.value, {
         citySlug,
         cityName: entry?.municipality.name ?? citySlug,
-        geometry: cityBoundaryBySlug.get(citySlug) ?? null,
+        geometry: mapApi?.getCityBoundary(citySlug) ?? null,
       });
       zonesResponse = withFallback.response;
       if (withFallback.created) {
         notices.push(
-          cityBoundaryBySlug.has(citySlug)
+          (mapApi?.hasCityBoundary(citySlug) ?? false)
             ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
             : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
         );
@@ -1316,7 +1057,7 @@
       activeSubsetKey = initialSubsetKey;
     }
     void load();
-    void initMap();
+    // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
 </script>
 
@@ -1363,31 +1104,25 @@
     </div>
   </svelte:fragment>
 
-  <!-- ── CANVAS : carte MapLibre ──────────────────────────────────────────── -->
-  <div class="relative h-full w-full overflow-hidden">
-    <div bind:this={mapContainer} class="absolute inset-0"></div>
-    <div class="absolute left-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] flex-col gap-2">
-      <div class="inline-flex w-fit overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm">
-        {#each ["Province", "Ville", "Zone"] as level (level)}
-          {@const isZoneDisabled = level === "Zone" && selectedCity !== null && !zonesConfigured}
-          <button
-            type="button"
-            class={`px-2.5 py-1 font-semibold transition-colors ${
-              activeGeoLevel === level
-                ? "bg-slate-900 text-white"
-                : isZoneDisabled
-                  ? "text-slate-300 cursor-not-allowed"
-                  : "text-slate-600 hover:bg-slate-100 cursor-pointer"
-            }`}
-            aria-pressed={activeGeoLevel === level}
-            aria-label={isZoneDisabled ? `${level} (zones non configurées)` : level}
-            disabled={isZoneDisabled}
-            onclick={() => handleGeoLevelClick(level)}
-          >
-            {level}
-          </button>
-        {/each}
-      </div>
+  <!-- ── CANVAS : carte (socle GeoCityMapBase) ────────────────────────────── -->
+  <!--
+    La couleur choroplèthe = nb de signaux (fillColorExpression). Le socle porte
+    l'init MapLibre, le drill segmenté, la caméra et l'échafaudage zone/lot ;
+    cette vue ne pilote que les données + expressions métier. Iso-comportement.
+  -->
+  <GeoCityMapBase
+    {fillColorExpression}
+    {fillOpacityExpression}
+    activeCitySlug={selectedCity?.municipality.slug ?? null}
+    segments={geoSegments}
+    activeSegment={activeGeoLevel}
+    onSegmentClick={handleGeoLevelClick}
+    onCityClick={handleCityClick}
+    onZoneClick={handleZoneClick}
+    onLotClick={handleLotClick}
+    onReady={handleMapReady}
+  >
+    <svelte:fragment slot="overlay-top-left">
       {#if selectedCity && (geoLoading || geoNotices.length > 0 || geoError)}
         <div class="max-w-sm rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
           {#if geoLoading}
@@ -1401,12 +1136,8 @@
           {/each}
         </div>
       {/if}
-    </div>
-    {#if !mapReady}
-      <div class="absolute inset-0 flex items-center justify-center bg-slate-100">
-        <span class="text-xs text-slate-400">Chargement de la carte…</span>
-      </div>
-    {/if}
+    </svelte:fragment>
+
     <DocumentOverlay documentRef={activeDocument} onClose={closeDocument} />
     {#if activeEvidence}
       <SignalPdfOverlay
@@ -1434,7 +1165,7 @@
         onClose={closeEvidence}
       />
     {/if}
-  </div>
+  </GeoCityMapBase>
 
   <!-- ── SEL droit : panneau de sélection ville ───────────────────────────── -->
   <svelte:fragment slot="sel">

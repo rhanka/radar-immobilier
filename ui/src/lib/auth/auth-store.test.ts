@@ -51,12 +51,18 @@ describe("auth-store — sondage /me non-caché", () => {
   });
 });
 
-describe("auth-store — le login explicite ouvre le sélecteur de comptes IdP", () => {
+describe("auth-store — prompt=login CONDITIONNEL (session durable, wp5 §B)", () => {
   let assignedHref: string | undefined;
   let originalLocation: Location;
 
   beforeEach(() => {
     assignedHref = undefined;
+    // Repart d'un sessionStorage propre : pas de marqueur de ré-auth résiduel.
+    try {
+      globalThis.sessionStorage?.clear();
+    } catch {
+      /* indisponible : on continue */
+    }
     originalLocation = window.location;
     // jsdom interdit l'affectation réelle de location.href ; on remplace
     // l'objet location par un proxy qui capture `href` sans naviguer.
@@ -79,18 +85,39 @@ describe("auth-store — le login explicite ouvre le sélecteur de comptes IdP",
       configurable: true,
       value: originalLocation,
     });
+    try {
+      globalThis.sessionStorage?.clear();
+    } catch {
+      /* no-op */
+    }
     vi.restoreAllMocks();
   });
 
-  it("redirectToLogin() pointe sur /api/v1/auth/login?prompt=login (seule valeur honorée par l'IdP)", () => {
+  it("re-login ORDINAIRE → /api/v1/auth/login SANS prompt (réutilise la session SSO + le consentement)", () => {
+    // Le coeur du fix P2 : un re-login courant (session radar expirée) ne force
+    // PLUS `prompt=login`, donc l'IdP réutilise sa session SSO et le consentement
+    // mémorisé → reconnexion silencieuse, plus d'écran « Autoriser l'application ».
     authStore.redirectToLogin();
-    // `prompt=login` est la SEULE valeur `prompt` que l'IdP sentropic honore :
-    // son authorize-handler traite login/none/consent mais IGNORE
-    // `select_account` (aucun sélecteur de comptes). Un ancien fix envoyait
-    // `select_account` — silencieusement jeté par l'IdP, d'où la persistance du
-    // symptôme « reconnect = compte précédent ». `prompt=login` force au moins
-    // le ré-affichage du login. LIMITE : changer réellement de compte tant que
-    // le cookie SSO de l'IdP vit dépend d'une évolution IdP.
+    expect(assignedHref).toBe("/api/v1/auth/login");
+  });
+
+  it("flux sensible explicite (forceReauth) → /api/v1/auth/login?prompt=login", () => {
+    // `prompt=login` reste la SEULE valeur honorée par l'IdP (login/none/consent ;
+    // `select_account` ignoré). Réservé aux flux sensibles (switch-account...).
+    authStore.redirectToLogin({ forceReauth: true });
     expect(assignedHref).toBe("/api/v1/auth/login?prompt=login");
+  });
+
+  it("logout explicite (marqueur markForceReauth) → prompt=login, consommé une seule fois", () => {
+    // Le logout pose le marqueur avant le reload ; le prochain redirectToLogin()
+    // force la ré-auth, puis le marqueur est consommé (one-shot).
+    authStore.markForceReauth();
+    authStore.redirectToLogin();
+    expect(assignedHref).toBe("/api/v1/auth/login?prompt=login");
+
+    // Deuxième tentative SANS reposer le marqueur : re-login ordinaire (silencieux).
+    assignedHref = undefined;
+    authStore.redirectToLogin();
+    expect(assignedHref).toBe("/api/v1/auth/login");
   });
 });

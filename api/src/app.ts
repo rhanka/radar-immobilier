@@ -20,10 +20,12 @@ import { graphSignalsRoute, type GraphSignalsDeps } from "./routes/graph-signals
 import { geoLotsRoute } from "./routes/geo-lots.js";
 import { geoZonesRoute } from "./routes/geo-zones.js";
 import { geoFeaturesRoute, type GeoFeaturesDeps } from "./routes/geo-features.js";
+import { geoCollectionsRoute } from "./routes/geo-collections.js";
 import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
 import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js";
+import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
 
@@ -101,12 +103,14 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", h2aRoute());
   app.route("/", scrapeStatusRoute(deps.store));
   app.route("/", dataQualityRoute(deps));
+  app.route("/", sourceCoverageRoute(deps));
   app.route("/", documentsRoute(deps));
   app.route("/", graphSignalsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
   app.route("/", geoFeaturesRoute({ db: deps.db }));
+  app.route("/", geoCollectionsRoute({ db: deps.db }));
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));

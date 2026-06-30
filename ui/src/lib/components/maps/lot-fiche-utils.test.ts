@@ -10,6 +10,7 @@ import { describe, it, expect } from "vitest";
 import {
   centroid,
   googleMapsUrl,
+  googleStreetViewUrl,
   scoreTone,
   scoreLabel,
 } from "./lot-fiche-utils.js";
@@ -109,6 +110,17 @@ describe("googleMapsUrl", () => {
     const url = googleMapsUrl(45.1, -73.9);
     expect(url).toContain("45.100000");
     expect(url).toContain("-73.900000");
+  });
+});
+
+// ── googleStreetViewUrl ───────────────────────────────────────────────────────
+
+describe("googleStreetViewUrl", () => {
+  it("génère une URL Street View valide au centroïde", () => {
+    const url = googleStreetViewUrl(45.123456, -73.654321);
+    expect(url).toBe(
+      "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=45.123456,-73.654321",
+    );
   });
 });
 

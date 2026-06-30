@@ -1,0 +1,931 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-06-28",
+  "note": "Projection item->sous-item (WPx.y). Source de verite de l'etat = Track; le rattachement sous-WP est une PROJECTION au meme titre que wp6-item-wp-map.json (reparent cross-workspace bloque par l'invariant containment Track 0.19.2). Les 29 sous-items sont des items Track reels (kind=chore) crees DANS le workspace de leur WP parent.",
+  "subItems": {
+    "WP1.1": {
+      "id": "01KW7HVAPETNMPW0F5QWR80REC",
+      "title": "WP1.1 Villes & registre (geo)",
+      "workspace": "wp1-data"
+    },
+    "WP1.2": {
+      "id": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "WP1.2 PV & sources textuelles — acquisition (immo)",
+      "workspace": "wp1-data"
+    },
+    "WP1.3": {
+      "id": "01KW7HWAW2HCR0TYAX8R9R2CG0",
+      "title": "WP1.3 Zones — désignations / géo / grilles",
+      "workspace": "wp1-data"
+    },
+    "WP1.4": {
+      "id": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "WP1.4 Lots — cadastre / propriétaires / géo",
+      "workspace": "wp1-data"
+    },
+    "WP2.1": {
+      "id": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "WP2.1 Graphify — pipeline v2.3",
+      "workspace": "wp2-extraction"
+    },
+    "WP2.2": {
+      "id": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "WP2.2 Citations / grounding / page-bbox",
+      "workspace": "wp2-extraction"
+    },
+    "WP2.3": {
+      "id": "01KW7HWBE0BATB0FQ10JJHWT2V",
+      "title": "WP2.3 Ontologie — entités additionnelles",
+      "workspace": "wp2-extraction"
+    },
+    "WP2.4": {
+      "id": "01KW7HWBJJFH5AAVGZB9WEJEEG",
+      "title": "WP2.4 Orchestration parsing à l'échelle",
+      "workspace": "wp2-extraction"
+    },
+    "WP3.1": {
+      "id": "01KW7HWBPYSK37B2EXAB2W12DK",
+      "title": "WP3.1 Niveau 1 — signal × PDF / preuve",
+      "workspace": "wp3-reconciliation"
+    },
+    "WP3.2": {
+      "id": "01KW7HWBVFG5AYV7T0X7GWDQQZ",
+      "title": "WP3.2 Niveau 2 — signal × zone (directe/rue) × geo",
+      "workspace": "wp3-reconciliation"
+    },
+    "WP3.3": {
+      "id": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "WP3.3 Niveau 3 — signal × zone × grille × lot (opportunité)",
+      "workspace": "wp3-reconciliation"
+    },
+    "WP3.4": {
+      "id": "01KW7HWC4PDZD7V50HTY6QY2HS",
+      "title": "WP3.4 Métriques rappel/précision & parité Steve",
+      "workspace": "wp3-reconciliation"
+    },
+    "WP4.1": {
+      "id": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "WP4.1 Vue Signaux (Québec)",
+      "workspace": "wp4-produit"
+    },
+    "WP4.2": {
+      "id": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "WP4.2 Vue Opportunités (ville/zones)",
+      "workspace": "wp4-produit"
+    },
+    "WP4.3": {
+      "id": "01KW7HWCHXMA1E74WDXQ73GSQG",
+      "title": "WP4.3 Vue Évaluation (zone/lots) + fiche lot",
+      "workspace": "wp4-produit"
+    },
+    "WP4.4": {
+      "id": "01KW7HWCNMCXRF9AAN3A26V1BH",
+      "title": "WP4.4 Vue Sources (couverture)",
+      "workspace": "wp4-produit"
+    },
+    "WP4.5": {
+      "id": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "WP4.5 Marques / notes / buckets / filtres (CS-L3–L5)",
+      "workspace": "wp4-produit"
+    },
+    "WP4.6": {
+      "id": "01KW7HWCX2XQ0W223VRMQ1AWNE",
+      "title": "WP4.6 Exports & différenciateurs (CS-P)",
+      "workspace": "wp4-produit"
+    },
+    "WP4.7": {
+      "id": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "WP4.7 Viewer preuve PDF (transverse)",
+      "workspace": "wp4-produit"
+    },
+    "WP5.1": {
+      "id": "01KW7HWD47ZER7DQ2PWFDVFHV9",
+      "title": "WP5.1 Auth & session durable",
+      "workspace": "wp5-plateforme"
+    },
+    "WP5.2": {
+      "id": "01KW7HWD831W46RE1RM3NYMR9V",
+      "title": "WP5.2 MCP immo",
+      "workspace": "wp5-plateforme"
+    },
+    "WP5.3": {
+      "id": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "WP5.3 Persistance S3-first / rebuild",
+      "workspace": "wp5-plateforme"
+    },
+    "WP5.4": {
+      "id": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "WP5.4 Scale — serverless / agents remote",
+      "workspace": "wp5-plateforme"
+    },
+    "WP5.5": {
+      "id": "01KW7HWDJXV1NK3JVG3YGNGARA",
+      "title": "WP5.5 Déploiement / CD",
+      "workspace": "wp5-plateforme"
+    },
+    "WP5.6": {
+      "id": "01KW7HWDPK55QN7CRCV7P1N9TB",
+      "title": "WP5.6 Chat-ui / llm-mesh",
+      "workspace": "wp5-plateforme"
+    },
+    "WP6.1": {
+      "id": "01KW7HWDT6G7C0N3MS1PF8E5EC",
+      "title": "WP6.1 Structure Track & WP",
+      "workspace": "wp6-gouvernance"
+    },
+    "WP6.2": {
+      "id": "01KW7HWDXRYYPCMGX1XFCKZD98",
+      "title": "WP6.2 Reporting multi-échelle / focus",
+      "workspace": "wp6-gouvernance"
+    },
+    "WP6.3": {
+      "id": "01KW7HWE1QFZW7H5W4ZBT71Q4K",
+      "title": "WP6.3 Kanban UI / projection PG",
+      "workspace": "wp6-gouvernance"
+    },
+    "WP6.4": {
+      "id": "01KW7HWE6ABHZHR4SVSBMXHMH1",
+      "title": "WP6.4 Décision-dossiers & remote→h2a",
+      "workspace": "wp6-gouvernance"
+    }
+  },
+  "items": [
+    {
+      "itemId": "01KW5RXJF7YWYHM86XY411SWJ0",
+      "wp": "WP1",
+      "subItem": "WP1.4",
+      "subItemId": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "Geo propriétaires de lots — acquisition contrôlée, Loi 25, auth et avertissement scraping"
+    },
+    {
+      "itemId": "01KTQP5F5PARP1BX4A159NWRKV",
+      "wp": "WP1",
+      "subItem": "WP1.4",
+      "subItemId": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "A.2.5 Captcha->Obscura pour identification proprietaire de lot (secondaire, rate-limite, role foncier public)"
+    },
+    {
+      "itemId": "01KTQP5EYKW5J20JW5VF75TRS3",
+      "wp": "WP1",
+      "subItem": "WP1.1",
+      "subItemId": "01KW7HVAPETNMPW0F5QWR80REC",
+      "title": "A.2.1 Liste des villes + perimetre (rayon MTL extensible QC) via CiblagePlan"
+    },
+    {
+      "itemId": "01KTQP5F0D6PMGRFFHYP8CEFXX",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "A.2.2 Scraper procès-verbaux GENERIQUE (avis de motion + changement de zonage + n. reglement a suivre)"
+    },
+    {
+      "itemId": "01KTQP5F227ETENEGY0E03F4XJ",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "A.2.3 YouTube seances: download + transcrit (Voxtral si besoin) + graphify"
+    },
+    {
+      "itemId": "01KTQQB1YNYPFDXB9P1V7VDNZ2",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Source conseils-municipaux (PV) — automation=refresh"
+    },
+    {
+      "itemId": "01KTQQB20HMR25VB74QCNT6HEH",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Source avis-publics — automation=refresh"
+    },
+    {
+      "itemId": "01KTQQB22M45MT8J7RD5WQ27MR",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Source youtube-seances — automation=refresh"
+    },
+    {
+      "itemId": "01KTQP5EWW8Q7JNXYFZ9HWSS6Q",
+      "wp": "WP1",
+      "subItem": "WP1.4",
+      "subItemId": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "WP A.2 — Data: identification progressive 'easy first' + 4 agents remote"
+    },
+    {
+      "itemId": "01KTQQB24Q0X5HMTFWW5JQDPQB",
+      "wp": "WP1",
+      "subItem": "WP1.3",
+      "subItemId": "01KW7HWAW2HCR0TYAX8R9R2CG0",
+      "title": "Source zonage (PDF/GeoJSON) — automation=one_shot"
+    },
+    {
+      "itemId": "01KTQQB270VKEM8BGYM06B8S4N",
+      "wp": "WP1",
+      "subItem": "WP1.4",
+      "subItemId": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "Source role-evaluation (Donnees Quebec) — automation=one_shot"
+    },
+    {
+      "itemId": "01KTQQB1TM98TNWYM1T4BDRC86",
+      "wp": "WP1",
+      "subItem": "WP1.1",
+      "subItemId": "01KW7HVAPETNMPW0F5QWR80REC",
+      "title": "Tracking progressif scraping par ville x source (automation 1shot/refresh, fenetre)"
+    },
+    {
+      "itemId": "01KTMHTE8YCBE0596AB6SJRYE4",
+      "wp": "WP1",
+      "subItem": "WP1.1",
+      "subItemId": "01KW7HVAPETNMPW0F5QWR80REC",
+      "title": "WP4-A — Investigation données réelles multi-villes"
+    },
+    {
+      "itemId": "01KTMHVEYV9CKNJ6DYFCZ6NSSS",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "WP4-B — Recueil substrat (RawDocument + S3) + 1ʳᵉ source"
+    },
+    {
+      "itemId": "01KTMHWMR88VSZ2F1QKRKBGBDY",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "WP4 — Sources #2-5 (1 PR/source)"
+    },
+    {
+      "itemId": "01KTN7NFSN43AGKNJ3F2X370SP",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "WP4 source #2 — avis-publics Beauharnois adapter + seed ontologie enrichi"
+    },
+    {
+      "itemId": "01KTN9NCEK7J6H4PSF6J79WN1Y",
+      "wp": "WP1",
+      "subItem": "WP1.4",
+      "subItemId": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "WP4 source #3 — rôle d'évaluation MAMH SourceAdapter (collect->exploitation)"
+    },
+    {
+      "itemId": "01KTNB5EEQZ7AWNGCA7WDEVPF3",
+      "wp": "WP1",
+      "subItem": "WP1.4",
+      "subItemId": "01KW7HWB0K10Z2Q6QHQ2629YE6",
+      "title": "WP4 source #4 — Adresses Québec adapter + mentions Adresse"
+    },
+    {
+      "itemId": "01KTND1JNF8KCKS5E3KSGTD9V1",
+      "wp": "WP1",
+      "subItem": "WP1.3",
+      "subItemId": "01KW7HWAW2HCR0TYAX8R9R2CG0",
+      "title": "WP4 source #5 — règlements d'urbanisme adapter + Bylaw/Zone mentions"
+    },
+    {
+      "itemId": "01KTNXDJ1F3WABEQGS7SKWBPD1",
+      "wp": "WP1",
+      "subItem": "WP1.1",
+      "subItemId": "01KW7HVAPETNMPW0F5QWR80REC",
+      "title": "Ciblage — stage CiblagePlan (modele + UI editable, no I/O) pilotable"
+    },
+    {
+      "itemId": "01KTNXDJ31W4A6T2WPFW7X4ZMF",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Pipelines executables — declencher recueil(live)+exploitation depuis l'UI"
+    },
+    {
+      "itemId": "01KTP0JX1WTV4JNY6K18Y3P262",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Exploitation: l'etat projet est ECRASE par source au lieu d'accumuler (executor multi-sources)"
+    },
+    {
+      "itemId": "01KVBT1DX4N12TSAPPAGGK07C2",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Persist `publishedAt` at recueil time"
+    },
+    {
+      "itemId": "01KVBT1DXNMFPAX7RNSG1P2YN6",
+      "wp": "WP1",
+      "subItem": "WP1.2",
+      "subItemId": "01KW7HWAQHW215XKNZRZH8JA3H",
+      "title": "Metadata repair from existing S3"
+    },
+    {
+      "itemId": "01KTWQEH2ATBCD75BDZY48GWHC",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "Parsing graphify PV — exploitation sémantique (Sonnet 4.6)"
+    },
+    {
+      "itemId": "01KVB2FB12QHXSE2J2ZMRA45NC",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "Graphify legacy redo OBSOLÈTE — remplacé par Graphify v2.3"
+    },
+    {
+      "itemId": "01KTMHVPBYH1VP8TXMB9DRW3YQ",
+      "wp": "WP2",
+      "subItem": "WP2.3",
+      "subItemId": "01KW7HWBE0BATB0FQ10JJHWT2V",
+      "title": "WP5-V1 — Ontologie graphify + modèle bitemporel Zod+PostGIS"
+    },
+    {
+      "itemId": "01KTMHVRFA2DDWME2P7G79C2QY",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "WP5 — Studio réconciliation (UI) + seed données réelles + valideurs D3"
+    },
+    {
+      "itemId": "01KTMHWNQZ1EYEDAM2Z7PVK1N3",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "WP5 — Studio write-core (accept/reject -> patches graphify)"
+    },
+    {
+      "itemId": "01KTNXDHZS5YBQD4TDFD5NBX21",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "Reconciliation graphify VISIBLE — chevauchement cross-source reel (avis<->reglement meme Bylaw)"
+    },
+    {
+      "itemId": "01KTNXDJ4V97FY3XSSDNA0AK81",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "llmesh — extraction semantique graphify via @sentropic/llm-mesh (enrolment token)"
+    },
+    {
+      "itemId": "01KTP1ZR3FA3FWJN1BDQXBCMWT",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "WP5 — Studio write-core (accept/reject -> patches graphify, token-gated)"
+    },
+    {
+      "itemId": "01KTQ1DVBCMRD69P8TQD8MEC05",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "Write-core: candidat decide reste en file + set_status UI + token durable compose"
+    },
+    {
+      "itemId": "01KVB2KF6PE59JBH38SGTGD580",
+      "wp": "WP2",
+      "subItem": "WP2.2",
+      "subItemId": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "Graphify evidence contract — signal description, citation and PDF link"
+    },
+    {
+      "itemId": "01KTWQF2T7V8A7K9RQCPEAGGZC",
+      "wp": "WP2",
+      "subItem": "WP2.3",
+      "subItemId": "01KW7HWBE0BATB0FQ10JJHWT2V",
+      "title": "Entités additionnelles ontologie graphify (dates, adresses, résolutions, personnes publiques)"
+    },
+    {
+      "itemId": "01KVB2FB14WB399NQ1VHHV3NMC",
+      "wp": "WP2",
+      "subItem": "WP2.3",
+      "subItemId": "01KW7HWBE0BATB0FQ10JJHWT2V",
+      "title": "Evaluate deterministic extraction performance for ontology entities"
+    },
+    {
+      "itemId": "01KVB3PV4X8AXSZR5DF249X21X",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "Graphify version parity — repo/container still pinned below global CLI"
+    },
+    {
+      "itemId": "01KVB478A9NVXDWQPZPK8T8PZ9",
+      "wp": "WP2",
+      "subItem": "WP2.1",
+      "subItemId": "01KW7HWB54R8TB03EW9685YDTY",
+      "title": "Graphify v2.3 — Sonnet 4.6 descriptions and exhaustive citations"
+    },
+    {
+      "itemId": "01KW2KS5S8FC5150AEWQPP7X37",
+      "wp": "WP2",
+      "subItem": "WP2.2",
+      "subItemId": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "Consolidation couche preuve — citation/PDF/rawRef de graphify au viewer"
+    },
+    {
+      "itemId": "01KW2KS6CAK6A761D81YMX8DY0",
+      "wp": "WP2",
+      "subItem": "WP2.2",
+      "subItemId": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "Reliquats grounding citations — laurierville / saint-eustache / villes bloquées"
+    },
+    {
+      "itemId": "01KTMHVJXFFCMPKRFCZAJPWR9C",
+      "wp": "WP2",
+      "subItem": "WP2.4",
+      "subItemId": "01KW7HWBJJFH5AAVGZB9WEJEEG",
+      "title": "WP4 — Pipeline exploitation (mentions -> réconciliation -> projection -> signaux)"
+    },
+    {
+      "itemId": "01KVBT1DWNN72VT292EB5K8VX9",
+      "wp": "WP2",
+      "subItem": "WP2.2",
+      "subItemId": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "Baseline, specs, and track"
+    },
+    {
+      "itemId": "01KVBT1DZ5NGW41AY54KZNPGEK",
+      "wp": "WP2",
+      "subItem": "WP2.2",
+      "subItemId": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "Graphify contract and non-regression gate notes"
+    },
+    {
+      "itemId": "01KVBT1DZNBBWAR8KTCHHSED5E",
+      "wp": "WP2",
+      "subItem": "WP2.2",
+      "subItemId": "01KW7HWB9HD58SBNG438FVXWDB",
+      "title": "Merge readiness"
+    },
+    {
+      "itemId": "01KTQP5FEAD2BQ860ZQK2WF5BQ",
+      "wp": "WP3",
+      "subItem": "WP3.3",
+      "subItemId": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "WP B — Vertical profond geo (zone->lot), villes prioritaires opportunites<6mois x lots GeoJSON"
+    },
+    {
+      "itemId": "01KVB9MZ937MA148DY0D757RPT",
+      "wp": "WP3",
+      "subItem": "WP3.3",
+      "subItemId": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "P3 Zones and lots display — priority detections with geometry fallback"
+    },
+    {
+      "itemId": "01KW2KS5ZDNY72Y2G3B6DRYZQ5",
+      "wp": "WP3",
+      "subItem": "WP3.1",
+      "subItemId": "01KW7HWBPYSK37B2EXAB2W12DK",
+      "title": "Ownership geo de la preuve PDF liée aux signaux/zones/lots"
+    },
+    {
+      "itemId": "01KW5N0Z3X2RFBG6NAJJZKXTWY",
+      "wp": "WP3",
+      "subItem": "WP3.3",
+      "subItemId": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "WPB-E2E — Cohérence opportunités 33: zones lots citations PDF signaux grille"
+    },
+    {
+      "itemId": "01KTW1NC9NRQQ5G05YB5E2MH8M",
+      "wp": "WP3",
+      "subItem": "WP3.3",
+      "subItemId": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "CS-L1 — Scoring visuel lots 4+∩TOD (carte Opportunités, couche lots coloriée data-driven)"
+    },
+    {
+      "itemId": "01KTWQEVH0KHS4C472BZR51ZED",
+      "wp": "WP3",
+      "subItem": "WP3.4",
+      "subItemId": "01KW7HWC4PDZD7V50HTY6QY2HS",
+      "title": "Script one-shot — bootstrap simulation (4 villes Steve + graphify)"
+    },
+    {
+      "itemId": "01KW5N4WEBT27JDFZ9VZ0MDD3Y",
+      "wp": "WP3",
+      "subItem": "WP3.3",
+      "subItemId": "01KW7HWC05G2DX55M6D5STKP07",
+      "title": "CS-L1b — Scoring visuel lots data-driven aligné WPB-E2E 33 opportunités"
+    },
+    {
+      "itemId": "01KVB67H8PDQZDHN952DY0SB82",
+      "wp": "WP3",
+      "subItem": "WP3.2",
+      "subItemId": "01KW7HWBVFG5AYV7T0X7GWDQQZ",
+      "title": "Geo selection — zones/lots incorporation for priority detections"
+    },
+    {
+      "itemId": "01KVPB99F1YT9DB8M6J91106T5",
+      "wp": "WP4",
+      "subItem": "WP4.2",
+      "subItemId": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "Filtre zones/lots : les listes Zones et Lots du panneau ville ne sont pas filtrées par le filtre actif (z/m/p)"
+    },
+    {
+      "itemId": "01KVPB9SFBGZRS4HC1MC42Q66Y",
+      "wp": "WP4",
+      "subItem": "WP4.2",
+      "subItemId": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "Fiches de zones non affichées : l'accordéon Zones (ex. Saint-Frédéric, compteur=6) ne montre aucune fiche"
+    },
+    {
+      "itemId": "01KVPBA4W8G2Y3PACC1HFRR3NW",
+      "wp": "WP4",
+      "subItem": "WP4.2",
+      "subItemId": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "Zones/lots matchant le filtre non colorisés sur la carte — highlight data-driven absent"
+    },
+    {
+      "itemId": "01KTW1NZ55V6FTN3ACJSKQQNQ7",
+      "wp": "WP4",
+      "subItem": "WP4.3",
+      "subItemId": "01KW7HWCHXMA1E74WDXQ73GSQG",
+      "title": "CS-L2 — Fiche lot complète (Évaluation): cadastre + rôle MAMH + zone + grille PDF + Google Maps + notes"
+    },
+    {
+      "itemId": "01KTW1NZ8FEWYQ1T4CCNR479FK",
+      "wp": "WP4",
+      "subItem": "WP4.5",
+      "subItemId": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "CS-L3 — Marquage d'équipe + notes par lot + filtres par marque avec compteurs (Opportunités/Évaluation)"
+    },
+    {
+      "itemId": "01KTW1NZBY7F1SC7A6A4NQAEAS",
+      "wp": "WP4",
+      "subItem": "WP4.5",
+      "subItemId": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "CS-L4 — Export CSV lettres de sollicitation + export de sélection (Opportunités)"
+    },
+    {
+      "itemId": "01KTW1NZJ06D73BQZP14GX8PE7",
+      "wp": "WP4",
+      "subItem": "WP4.5",
+      "subItemId": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "CS-L5 — Filtres combinés potentiel(exclusif) × usage actuel(additif) × superficie min (Opportunités/Évaluation)"
+    },
+    {
+      "itemId": "01KTW1PP40D39CQ3VSFNNNKMM1",
+      "wp": "WP4",
+      "subItem": "WP4.6",
+      "subItemId": "01KW7HWCX2XQ0W223VRMQ1AWNE",
+      "title": "CS-L6 — Maquette: substrat données réel depuis le Netlify de Steve (4 villes, mode simulation)"
+    },
+    {
+      "itemId": "01KTW1PP80NN8AYY9NDYRJ7NTN",
+      "wp": "WP4",
+      "subItem": "WP4.6",
+      "subItemId": "01KW7HWCX2XQ0W223VRMQ1AWNE",
+      "title": "CS-P1 — Différenciateurs P1: pastilles=Signaux auto, couches env, recherche, batch, labels, sync"
+    },
+    {
+      "itemId": "01KTW1PPBEW81X8HTZZ4NS7VKZ",
+      "wp": "WP4",
+      "subItem": "WP4.6",
+      "subItemId": "01KW7HWCX2XQ0W223VRMQ1AWNE",
+      "title": "CS-P2 — Compléments P2: annonces en vente, lookup code postal, éditeur zonage manuel, mobile, dashboard couverture"
+    },
+    {
+      "itemId": "01KTW67FQGE1AZ9J841Z0FH2FB",
+      "wp": "WP4",
+      "subItem": "WP4.6",
+      "subItemId": "01KW7HWCX2XQ0W223VRMQ1AWNE",
+      "title": "CS-P2-S13 — Lookup code postal (Adresses Québec/IGO A7 + geocoder.ca fallback, cache)"
+    },
+    {
+      "itemId": "01KVB2KAE3C3WKCP98QJ1JQAHN",
+      "wp": "WP4",
+      "subItem": "WP4.5",
+      "subItemId": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "DS redesign — map selection buckets and right-pane detail cards"
+    },
+    {
+      "itemId": "01KVDWBTA3E5KGRKR4Q649GYZ9",
+      "wp": "WP4",
+      "subItem": "WP4.7",
+      "subItemId": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "Geo PDF overlay integration — signal evidence viewer with page bbox"
+    },
+    {
+      "itemId": "01KVPBAHTPHH48EC4P7SED2QGX",
+      "wp": "WP4",
+      "subItem": "WP4.7",
+      "subItemId": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "PDF viewer Preuve ne rend pas — modal affiche erreur + fallback lien (route API PDF absente)"
+    },
+    {
+      "itemId": "01KVPB0M749HH7BXHQK4PPQKPC",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "Header pas l'AppHeader canonique DS — écart structurel/visuel"
+    },
+    {
+      "itemId": "01KVPB0TNS49PP4MZTQC3B83A1",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "Police DS non chargée app-wide — font-family Inter en dur, 0 @font-face"
+    },
+    {
+      "itemId": "01KVPB0ZYVCKSPNWPJCGFAVX0D",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "Filtre Signaux : les 3 filtres ne sont pas cochés par défaut"
+    },
+    {
+      "itemId": "01KVPB16FQCXEY42FJWQ5CAZTD",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "Filtre Signaux : état non persisté (URL / store / localStorage)"
+    },
+    {
+      "itemId": "01KVPB1BMTMD68VKZWP9T2GYQF",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "Filtre Signaux : taille de police des libellés trop grande"
+    },
+    {
+      "itemId": "01KVPB1NH794HVVMXEYTKTV0K5",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "Panneau Signaux : déclarations font bespoke (hors tokens DS)"
+    },
+    {
+      "itemId": "01KTQP5EKT788PH268CD8CHEZE",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "WP A.1 — Visualisation geographique-centrique (carte-first, bandeau de vues)"
+    },
+    {
+      "itemId": "01KTQP5ENSSF8BHDCMVV7CZ5MG",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "A.1.1 Vue Signaux (maille Quebec/villes) — nb opportunites/ville sur 6 mois, clic ville -> liste changements de zonage"
+    },
+    {
+      "itemId": "01KTQP5EQF4YZSRNYM9KJC3RS4",
+      "wp": "WP4",
+      "subItem": "WP4.2",
+      "subItemId": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "A.1.2 Vue Opportunites (maille ville/zones) — clic zone -> zoom"
+    },
+    {
+      "itemId": "01KTQP5ESB0VW0100Y5ETQZFZ3",
+      "wp": "WP4",
+      "subItem": "WP4.3",
+      "subItemId": "01KW7HWCHXMA1E74WDXQ73GSQG",
+      "title": "A.1.3 Vue Evaluation (maille zone/lots) — qualifier lots selon grilles de zonage"
+    },
+    {
+      "itemId": "01KTQP5EV1433XRDE5E91F1DQB",
+      "wp": "WP4",
+      "subItem": "WP4.4",
+      "subItemId": "01KW7HWCNMCXRF9AAN3A26V1BH",
+      "title": "A.1.4 Vue Sources (maille Quebec, maturite recueil) — villes GeoJSON coloriees par maturite; clic -> liste donnees recueillies (site, PV scrappes/graphifies, avis, YouTube transcrits/graphifies, zonages/ilots/proprietaires PDF|GeoJSON, statut)"
+    },
+    {
+      "itemId": "01KVDWAWM7VWXZFKPV9JRYTC7H",
+      "wp": "WP4",
+      "subItem": "WP4.2",
+      "subItemId": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "Geo router compatibility layer — real /geo/* routes with hash compatibility"
+    },
+    {
+      "itemId": "01KVDWBA6KCHG425WGDRTK3DEX",
+      "wp": "WP4",
+      "subItem": "WP4.2",
+      "subItemId": "01KW7HWCDXEBTC3PTS5WBJ5VAG",
+      "title": "Geo URL state contract — mode selection focus filters viewport"
+    },
+    {
+      "itemId": "01KVB9MZ76TV5PNENQZPG7C9YS",
+      "wp": "WP4",
+      "subItem": "WP4.1",
+      "subItemId": "01KW7HWC99XR5HP8M19F7K92AS",
+      "title": "P1 DS alignment — AppShell header and rails on DS v3"
+    },
+    {
+      "itemId": "01KVB9MZ8CQ4X5TW9NKMYE52QJ",
+      "wp": "WP4",
+      "subItem": "WP4.5",
+      "subItemId": "01KW7HWCSPHG5G2KWRGMCD7B3W",
+      "title": "P2 Selection bucket UX — map selection and right-pane cards"
+    },
+    {
+      "itemId": "01KVB9MZ7Y96B2B18BNBC2SVC2",
+      "wp": "WP4",
+      "subItem": "WP4.4",
+      "subItemId": "01KW7HWCNMCXRF9AAN3A26V1BH",
+      "title": "P4 Data quality view — per-city PV YouTube ontology zones lots"
+    },
+    {
+      "itemId": "01KVBT1DVS7XKXVDZRY78V3RTE",
+      "wp": "WP4",
+      "subItem": "WP4.7",
+      "subItemId": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "Evidence-backed signal document cards"
+    },
+    {
+      "itemId": "01KVBT1DY4J2CYM6268C6QTSNW",
+      "wp": "WP4",
+      "subItem": "WP4.7",
+      "subItemId": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "API evidence DTO and document route"
+    },
+    {
+      "itemId": "01KVBT1DYKFXR9008FGGM4WDWG",
+      "wp": "WP4",
+      "subItem": "WP4.7",
+      "subItemId": "01KW7HWD0P54G5QCYEBF6QDP3E",
+      "title": "UI signal card and PDF overlay"
+    },
+    {
+      "itemId": "01KVB67M7CV95DXB5DTX4PX59G",
+      "wp": "WP4",
+      "subItem": "WP4.4",
+      "subItemId": "01KW7HWCNMCXRF9AAN3A26V1BH",
+      "title": "Data quality and admin validation views"
+    },
+    {
+      "itemId": "01KTT2XNV6K0VD4HF7N3QVYSJ8",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "L1 — Geler l'anti-pattern + 2 bugs: rawObjectKey en CAS pur (retirer date-in-key) + sharder scrape-status (state/{city}/{kind}.json); aucune nouvelle fixture ville"
+    },
+    {
+      "itemId": "01KTT2XNX63QANY2WQJ2RQN539",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "L2 — Worker scrape -> S3: port Storage (PUT raw cas+meta) + manifestes de run (runs/.../manifest.jsonl); re-scraper les ~40 fixtures vers SCW"
+    },
+    {
+      "itemId": "01KTT2XNZ3XBN5SSDDW9RVWNF9",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "L3 — Persister parsed/ + graph/ sur S3 (docSha x parserVersion ; graphifyVersion x inputsetHash ; latest.json); le seed Postgres devient le projecteur (projection_meta)"
+    },
+    {
+      "itemId": "01KTWQEP5BDD711394PPKBP234",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "graphify → DB graphe Postgres (persistance nodes/edges)"
+    },
+    {
+      "itemId": "01KTWQFAXCPATQQ6MPNC6CWGXJ",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "Mount S3 SCW read-only (substrat graphify) — rclone mount-scw.sh"
+    },
+    {
+      "itemId": "01KTT2X4QG1VSWNPGX61S8024P",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "WP Persistance S3-first — SCW source de vérité, Postgres index reconstructible (1000 villes)"
+    },
+    {
+      "itemId": "01KTT2XP110R7EAD9EP9X1MGMG",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "L4 — radar db rebuild (replay S3 -> Postgres) + test CI sur MinIO: preuve que Postgres n'est plus la source de vérité"
+    },
+    {
+      "itemId": "01KTT2XP45WKMVY2P3FR5850RM",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "L5 — Fixtures git reduites au golden set (par famille structurelle) + script fixture promote"
+    },
+    {
+      "itemId": "01KTT2XP663WGCX3YNF4WVMXQN",
+      "wp": "WP5",
+      "subItem": "WP5.4",
+      "subItemId": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "L6 — Containeriser le worker -> SCW Serverless Jobs + Cron (40 -> 1000 villes sans OOM); bucket prod dedie + IAM scope"
+    },
+    {
+      "itemId": "01KTW674GHVBQ2J843QP0BERGP",
+      "wp": "WP5",
+      "subItem": "WP5.1",
+      "subItemId": "01KW7HWD47ZER7DQ2PWFDVFHV9",
+      "title": "CS-P3 — Infra: backend sync temps réel multi-utilisateurs (+ AUTH) + export/import JSON (sorti de CS-P1)"
+    },
+    {
+      "itemId": "01KTWQF6YVGJKWNRC99FNQ7XGR",
+      "wp": "WP5",
+      "subItem": "WP5.4",
+      "subItemId": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "Orchestration agentique remote — parsing graphify parallèle à l'échelle (3272 docs)"
+    },
+    {
+      "itemId": "01KTQP5F3TBJW90Y4A2SX7Z2Z5",
+      "wp": "WP5",
+      "subItem": "WP5.4",
+      "subItemId": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "A.2.4 Todo permanente + 4 agents background via remote (download/Obscura) + MAJ track"
+    },
+    {
+      "itemId": "01KTQP5F7FPB3Q98YK0Z0Y07WK",
+      "wp": "WP5",
+      "subItem": "WP5.4",
+      "subItemId": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "WP A.3 — Infrastructure data & agents (remote, backlog, graph DB, UI gestion + chat-ui)"
+    },
+    {
+      "itemId": "01KTQP5F95BSTYTR9QBZ3MP3ND",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "A.3.1 Graph DB / table graphe Postgres (nodes/edges) — persistance graphe ontologique (graphify graph.json)"
+    },
+    {
+      "itemId": "01KTQP5FCJXT0230YMVP8P0NX8",
+      "wp": "WP5",
+      "subItem": "WP5.6",
+      "subItemId": "01KW7HWDPK55QN7CRCV7P1N9TB",
+      "title": "A.3.3 UI de gestion (dont chat-ui)"
+    },
+    {
+      "itemId": "01KTRFET7CYWJC9QW7PRCZVFGE",
+      "wp": "WP5",
+      "subItem": "WP5.6",
+      "subItemId": "01KW7HWDPK55QN7CRCV7P1N9TB",
+      "title": "chat.test.ts dépend des clés provider du .env (faux-négatif make test)"
+    },
+    {
+      "itemId": "01KVB9MZ9C1WBZ3KKAZRDBPYWV",
+      "wp": "WP5",
+      "subItem": "WP5.1",
+      "subItemId": "01KW7HWD47ZER7DQ2PWFDVFHV9",
+      "title": "P5 Admin validation view — approve reject suspend users"
+    },
+    {
+      "itemId": "01KTQP5FAW14WSGS18TB4R5B2B",
+      "wp": "WP5",
+      "subItem": "WP5.4",
+      "subItemId": "01KW7HWDF1K778HJZJYCNSF6CN",
+      "title": "A.3.2 remote: orchestration des agents de scraping + suivi backlog (track)"
+    },
+    {
+      "itemId": "01KW2KS65RKCSBNBEWQVSN7PH7",
+      "wp": "WP5",
+      "subItem": "WP5.1",
+      "subItemId": "01KW7HWD47ZER7DQ2PWFDVFHV9",
+      "title": "Auth durable Sentropic — éviter redemande permanente, session 15j, autorisation persistée"
+    },
+    {
+      "itemId": "01KTMHWPV0QGRT5CTVRYJ5SGFX",
+      "wp": "WP5",
+      "subItem": "WP5.3",
+      "subItemId": "01KW7HWDBDDQP0Q7V1XA7M3K2E",
+      "title": "Provincial graph — partition par MRC quand N villes ingérées (différé)"
+    },
+    {
+      "itemId": "01KTNXDJ7ZK5GAEAFZJQZNJMVE",
+      "wp": "WP5",
+      "subItem": "WP5.5",
+      "subItemId": "01KW7HWDJXV1NK3JVG3YGNGARA",
+      "title": "Deploiement — k8s (PR #8) ou via sentropic"
+    },
+    {
+      "itemId": "01KTQP5EHKKMM5TSD4ZSE3CFZ2",
+      "wp": "WP6",
+      "subItem": "WP6.1",
+      "subItemId": "01KW7HWDT6G7C0N3MS1PF8E5EC",
+      "title": "Réorientation « Grand filet » — radar changement de zonage, carte-first, multi-villes"
+    },
+    {
+      "itemId": "01KTNXDJ6EN4WXBFKVYCZJF6E2",
+      "wp": "WP6",
+      "subItem": "WP6.3",
+      "subItemId": "01KW7HWE1QFZW7H5W4ZBT71Q4K",
+      "title": "Backlog <-> track — brancher la vue Backlog sur le store track (au lieu de l'in-memory demo)"
+    },
+    {
+      "itemId": "01KTQ1DRFWRK2DNCGPEFFETF3A",
+      "wp": "WP6",
+      "subItem": "WP6.3",
+      "subItemId": "01KW7HWE1QFZW7H5W4ZBT71Q4K",
+      "title": "Backlog actualisation live (auto-refresh depuis le sidecar track)"
+    },
+    {
+      "itemId": "01KW2KS5K2D1Y7KGYF41ZAZGSW",
+      "wp": "WP6",
+      "subItem": "WP6.1",
+      "subItemId": "01KW7HWDT6G7C0N3MS1PF8E5EC",
+      "title": "Recalage Track — drift post-2026-06-23 et consolidation Graphify/PDF/Geo/Auth"
+    }
+  ]
+}
