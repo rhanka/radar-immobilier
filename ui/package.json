@@ -13,7 +13,7 @@
     "qa:harness": "playwright test --config playwright.harness.config.ts"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.8",
+    "@fontsource-variable/inter": "^5.2.8",
     "@lucide/svelte": "^0.562.0",
     "@radar/domain": "*",
     "@radar/scoring": "*",
