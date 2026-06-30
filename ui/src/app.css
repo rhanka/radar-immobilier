@@ -1,8 +1,7 @@
-/* Inter — police de marque du thème sent-tech (--st-font-sans). Chargée en
-   préconnexion + Google Fonts (variable weight 100–900) pour garantir que
-   la police est bien servie au navigateur. Le thème DS déclare ensuite
+/* Inter — police de marque du thème sent-tech (--st-font-sans). Les fichiers
+   sont self-hostés via @fontsource/inter (importés dans main.ts), PAS via le
+   réseau (Google Fonts/CSP) : déterministe en prod. Le thème DS déclare
    --st-font-sans: Inter, system-ui, … et app.css l'applique via le token. */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 @import "@sentropic/design-system-themes/css/sent-tech.css";
 @tailwind base;
 @tailwind components;
