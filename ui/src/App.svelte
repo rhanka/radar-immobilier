@@ -7,11 +7,10 @@
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import CiblageView from "$lib/components/ciblage/CiblageView.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
-  import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import BacklogView from "$lib/components/backlog/BacklogView.svelte";
   import KanbanView from "$lib/components/kanban/KanbanView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
-  import SourcesMapView from "$lib/components/sources-map/SourcesMapView.svelte";
+  import SourceMapView from "$lib/components/sources-map/SourceMapView.svelte";
   import ReconciliationView from "$lib/components/reconciliation/ReconciliationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import SignauxMapView from "$lib/components/maps/SignauxMapView.svelte";
@@ -194,7 +193,12 @@
         <!-- Vue Évaluation : fusion EvaluationMapView + GrillesView (carte cadastrale + grilles) -->
         <EvaluationMapView />
       {:else if activeView === "sources"}
-        <SourcesMapView />
+        <SourceMapView />
+      {:else if activeView === "console"}
+        <!-- Deep-link legacy #/console : la Console est désormais l'onglet
+             « Console » de la vue Source (reconstruite sur /api/source/coverage).
+             On monte donc SourceMapView avec cet onglet pré-sélectionné. -->
+        <SourceMapView initialTab="console" />
       <!-- Vues admin/dev (hors nav principale) -->
       {:else if activeView === "admin"}
         <AdminView />
@@ -227,8 +231,10 @@
       {:else if activeView === "carte-evaluation"}
         <EvaluationMapView />
       {:else}
-        <!-- Fallback : console sources -->
-        <ConsoleView />
+        <!-- Fallback : vue par défaut (DEFAULT_VIEW = signaux). L'ancienne
+             Console n'existe plus ; la route #/console atterrit explicitement
+             sur la vue Source onglet Console (cf. branche ci-dessus). -->
+        <SignauxMapView geoRoute={$activeGeoRoute} />
       {/if}
     </div>
 
