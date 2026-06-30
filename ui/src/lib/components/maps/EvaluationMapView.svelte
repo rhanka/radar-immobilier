@@ -42,6 +42,7 @@
   } from "$lib/maps/zones-client.js";
   import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
   import MapLegend from "$lib/components/maps/MapLegend.svelte";
+  import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import { fetchSignalDetail, type DesignationEventDetail } from "$lib/signals/signal-detail-client.js";
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
   import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
@@ -61,6 +62,21 @@
 
   import { prioritizedCities } from "@radar/sources/municipalities";
   import type { SignalT } from "@radar/domain";
+
+  // ── Onglets de la vue Évaluation ───────────────────────────────────────────
+  // La vue Évaluation regroupe désormais deux onglets :
+  //   "lots"    : drilldown Lots & Zonage (carte cadastrale + changements de zonage)
+  //   "grilles" : modèle de score (grilles de tri /10 et d'opportunité /100),
+  //               anciennement une vue top-level autonome, intégrée ici (WP4).
+  // Le deep-link legacy `#/grilles` route ici avec l'onglet "grilles" actif
+  // (App.svelte passe initialTab="grilles").
+  export let initialTab: "lots" | "grilles" = "lots";
+  let activeTab: "lots" | "grilles" = initialTab;
+
+  const EVAL_TABS: { id: "lots" | "grilles"; label: string }[] = [
+    { id: "lots", label: "Lots & Zonage" },
+    { id: "grilles", label: "Grilles de score" },
+  ];
 
   // ── Villes avec source lots et/ou zonage ──────────────────────────────────
   // source: "steve" = données carte Steve (CS-L6)
@@ -466,8 +482,34 @@
   }
 </script>
 
-<ViewLayout controlsWidth="w-80">
-  <!-- ── Left: sélecteur évaluation (lots + zonage) + signaux ────────────── -->
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+  <!-- ── Onglets de la vue Évaluation : Lots & Zonage | Grilles de score ──── -->
+  <div class="shrink-0 border-b border-slate-200 bg-white px-4">
+    <div class="flex gap-1" role="tablist" aria-label="Vues d'évaluation">
+      {#each EVAL_TABS as tab (tab.id)}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
+          class={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === tab.id
+              ? "border-teal-600 text-teal-700"
+              : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+          }`}
+          on:click={() => { activeTab = tab.id; }}
+        >
+          {tab.label}
+        </button>
+      {/each}
+    </div>
+  </div>
+
+  {#if activeTab === "grilles"}
+    <!-- Onglet Grilles : modèle de score réutilisé tel quel (composant autonome) -->
+    <GrillesView />
+  {:else}
+    <ViewLayout controlsWidth="w-80">
+      <!-- ── Left: sélecteur évaluation (lots + zonage) + signaux ────────────── -->
   <svelte:fragment slot="controls">
     <!-- Titre -->
     <div class="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
@@ -1100,4 +1142,6 @@
       {/if}
     {/if}
   </div>
-</ViewLayout>
+    </ViewLayout>
+  {/if}
+</div>
