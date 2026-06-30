@@ -7,7 +7,6 @@
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import CiblageView from "$lib/components/ciblage/CiblageView.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
-  import GrillesView from "$lib/components/scoring/GrillesView.svelte";
   import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import BacklogView from "$lib/components/backlog/BacklogView.svelte";
   import KanbanView from "$lib/components/kanban/KanbanView.svelte";
@@ -204,7 +203,10 @@
       {:else if activeView === "ciblage"}
         <CiblageView />
       {:else if activeView === "grilles"}
-        <GrillesView />
+        <!-- Legacy deep-link #/grilles : la vue Grilles est désormais intégrée
+             comme onglet de la vue Évaluation (WP4). On route donc vers
+             EvaluationMapView avec l'onglet « Grilles de score » pré-sélectionné. -->
+        <EvaluationMapView initialTab="grilles" />
       {:else if activeView === "ontologie"}
         <ReconciliationView />
       {:else if activeView === "coordination"}
