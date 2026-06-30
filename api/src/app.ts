@@ -25,6 +25,7 @@ import { signalsDetailRoute } from "./routes/signals-detail.js";
 import { opportunitesRoute } from "./routes/opportunites.js";
 import { adminRoute } from "./routes/admin.js";
 import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js";
+import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
 
@@ -102,6 +103,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", h2aRoute());
   app.route("/", scrapeStatusRoute(deps.store));
   app.route("/", dataQualityRoute(deps));
+  app.route("/", sourceCoverageRoute(deps));
   app.route("/", documentsRoute(deps));
   app.route("/", graphSignalsRoute(deps));
   app.route("/", graphRoute(deps));
