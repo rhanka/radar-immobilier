@@ -10,6 +10,9 @@ export default tseslint.config(
       "**/*.config.cjs",
       "**/*.config.ts",
       "**/drizzle/**",
+      // Artefacts de docs/specs (stubs, scripts d'illustration) : pas du code produit,
+      // pas linté comme tel (ex. docs/spec/reports/*.mjs utilisant process/console node).
+      "docs/**",
     ],
   },
   js.configs.recommended,
