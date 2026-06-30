@@ -47,7 +47,6 @@ test("capture header fermé + dropdown outils ouvert (1440px)", async ({
   // Trace le boundingBox pour le rapport (alignement vs trigger).
   const menuBox = await menu.boundingBox();
   const trigBox = await trigger.boundingBox();
-  // eslint-disable-next-line no-console
   console.log(
     "DIAG menuBox=",
     JSON.stringify(menuBox),

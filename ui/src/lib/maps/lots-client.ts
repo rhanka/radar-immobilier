@@ -311,7 +311,8 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.zoningGridPdfUrl,
     properties.zoning_grid_pdf_url,
   ]) ?? zone?.grillePdfUrl ?? null;
-  const lotVersionId = firstString([
+  // Réservé (marquage prospect/marques) — extrait mais pas encore câblé au retour.
+  const _lotVersionId = firstString([
     properties.lotVersionId,
     properties.lot_version_id,
   ]);
