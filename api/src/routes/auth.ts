@@ -20,6 +20,9 @@ import {
   SESSION_COOKIE_NAME,
   signSession,
   verifySession,
+  shouldRefreshSession,
+  type SessionClaims,
+  type VerifiedSession,
 } from "../services/auth/session.js";
 import {
   buildAuthorizeUrl,
@@ -87,6 +90,59 @@ function sessionCookieAttributes(
 }
 
 /**
+ * Sign a session token and set it on the response with the canonical cookie
+ * attributes. Shared by the login/callback mint AND the sliding re-mint, so the
+ * `Set-Cookie` is byte-for-byte identical (the logout DELETE must keep matching
+ * it). `nowMs` is epoch milliseconds.
+ */
+async function signAndSetSessionCookie(
+  c: Context,
+  auth: AuthConfig,
+  claims: SessionClaims,
+  nowMs: number,
+): Promise<void> {
+  const sessionToken = await signSession(claims, {
+    sessionSecret: auth.sessionSecret,
+    ttlSeconds: auth.sessionTtlSeconds,
+    now: nowMs,
+  });
+  setCookie(c, SESSION_COOKIE_NAME, sessionToken, {
+    ...sessionCookieAttributes(auth),
+    maxAge: auth.sessionTtlSeconds,
+  });
+}
+
+/**
+ * Sliding session: re-mint the cookie when the verified session has crossed its
+ * half-life (and is still within the absolute ceiling). This keeps an active
+ * user on a rolling TTL window without ANY round-trip to the IdP — the core fix
+ * for the "re-authorise every time" symptom (wp5-plateforme §B). `iat0` is
+ * preserved so the ceiling is honoured; all other claims are carried verbatim.
+ * No-op when no re-mint is due, so it is safe to call on every protected
+ * request / `/me` probe.
+ */
+async function maybeSlideSession(
+  c: Context,
+  auth: AuthConfig,
+  session: VerifiedSession,
+  nowMs: number,
+): Promise<void> {
+  const due = shouldRefreshSession(session, {
+    ttlSeconds: auth.sessionTtlSeconds,
+    absoluteMaxSeconds: auth.sessionAbsoluteTtlSeconds,
+    now: nowMs,
+  });
+  if (!due) return;
+  const claims: SessionClaims = {
+    sub: session.sub,
+    ...(session.name !== undefined ? { name: session.name } : {}),
+    ...(session.email !== undefined ? { email: session.email } : {}),
+    ...(session.iat0 !== undefined ? { iat0: session.iat0 } : {}),
+  };
+  await signAndSetSessionCookie(c, auth, claims, nowMs);
+}
+
+/**
  * Build the OIDC RP routes. When `auth.enabled` is false the routes are still
  * mounted but answer 503 (so the wiring is greppable and the contract stable).
  */
@@ -120,15 +176,8 @@ export function authRoute(
     c: Context,
     claims: { sub: string; name?: string; email?: string },
   ): Promise<void> {
-    const sessionToken = await signSession(claims, {
-      sessionSecret: auth.sessionSecret,
-      ttlSeconds: auth.sessionTtlSeconds,
-      now: nowFn(),
-    });
-    setCookie(c, SESSION_COOKIE_NAME, sessionToken, {
-      ...sessionCookieAttributes(auth),
-      maxAge: auth.sessionTtlSeconds,
-    });
+    // First mint: no `iat0` passed → signSession anchors it to the current iat.
+    await signAndSetSessionCookie(c, auth, claims, nowFn());
   }
 
   app.get("/api/v1/auth/login", async (c) => {
@@ -405,6 +454,11 @@ export function authRoute(
     });
     if (!session) return c.json({ authenticated: false });
 
+    // Sliding re-mint: the SPA polls /me, so this is where a returning user's
+    // 15-day window is silently extended (no IdP round-trip). No-op until the
+    // session crosses its half-life.
+    await maybeSlideSession(c, auth, session, nowFn());
+
     // Enrich with account status if DB is available.
     let status: string | undefined;
     let isAdmin: boolean | undefined;
@@ -500,6 +554,11 @@ export function protect(
         );
       }
     }
+
+    // Sliding re-mint on every approved protected request: a user actively
+    // navigating the app keeps their 15-day window rolling without ever
+    // returning to the IdP. No-op until the session crosses its half-life.
+    await maybeSlideSession(c, auth, session, nowFn());
 
     c.set("session" as never, session as never);
     return next();

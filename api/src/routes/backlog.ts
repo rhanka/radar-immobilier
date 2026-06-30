@@ -33,6 +33,10 @@ import {
   type TrackBucket,
   type TrackItem,
 } from "../services/track/track-reader.js";
+import {
+  loadWpProjection,
+  type WpProjection,
+} from "../services/track/wp-projection.js";
 
 /** Lifecycle status of a backlog item (board column). */
 export type BacklogStatut = "a-faire" | "en-cours" | "realise" | "abandonne";
@@ -170,6 +174,9 @@ export type TrackBacklogReader = () => {
   items: BacklogItem[];
 };
 
+/** Reader of the WP projection (read-model). Injectable for tests. */
+export type WpProjectionReader = () => WpProjection;
+
 const defaultTrackReader: TrackBacklogReader = () => {
   const result = loadTrackItems();
   return {
@@ -185,8 +192,20 @@ const defaultTrackReader: TrackBacklogReader = () => {
 export function backlogRoute(
   store: BacklogStore = defaultStore,
   trackReader: TrackBacklogReader = defaultTrackReader,
+  wpProjectionReader: WpProjectionReader = () => loadWpProjection(),
 ): Hono {
   const app = new Hono();
+
+  /**
+   * WP projection read-model for the 4-level kanban (swimlanes WP1-6 × status
+   * columns × scales now/week/month/project). Prefers the precomputed
+   * `wp6-rollup.json`; falls back to a live fold of the sidecar + WP map. The WP
+   * grouping is a projection (Track's workspace-contained parenting blocks a
+   * physical 6-WP reparent — see docs/spec/reports/wp6-socle-status.md).
+   */
+  app.get("/api/backlog/wp-projection", (c) => {
+    return c.json(wpProjectionReader());
+  });
 
   /**
    * Real tracked items (folded from the sidecar) + runtime-added items.

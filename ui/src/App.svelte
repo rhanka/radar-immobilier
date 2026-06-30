@@ -7,11 +7,10 @@
   import OnboardingView from "$lib/components/onboarding/OnboardingView.svelte";
   import CiblageView from "$lib/components/ciblage/CiblageView.svelte";
   import OpportunityFunnel from "$lib/components/opportunity/OpportunityFunnel.svelte";
-  import GrillesView from "$lib/components/scoring/GrillesView.svelte";
-  import ConsoleView from "$lib/components/console/ConsoleView.svelte";
   import BacklogView from "$lib/components/backlog/BacklogView.svelte";
+  import KanbanView from "$lib/components/kanban/KanbanView.svelte";
   import CoordinationView from "$lib/components/coordination/CoordinationView.svelte";
-  import SourcesMapView from "$lib/components/sources-map/SourcesMapView.svelte";
+  import SourceMapView from "$lib/components/sources-map/SourceMapView.svelte";
   import ReconciliationView from "$lib/components/reconciliation/ReconciliationView.svelte";
   import SignalsT1View from "$lib/components/signals/SignalsT1View.svelte";
   import SignauxMapView from "$lib/components/maps/SignauxMapView.svelte";
@@ -103,6 +102,12 @@
     // reconnexion (LoginView "blocked"). Le logout est un état propre, pas une
     // tentative échouée.
     authStore.resetLoginAttempt();
+    // Logout EXPLICITE = flux sensible : on force la ré-auth (`prompt=login`) au
+    // prochain « Se connecter », pour que l'IdP ré-affiche le login plutôt que de
+    // réémettre silencieusement un token pour la session SSO en place (symptôme
+    // « reconnect = compte précédent »). Le re-login ordinaire (session expirée),
+    // lui, reste silencieux. Le marqueur survit au reload du même onglet.
+    authStore.markForceReauth();
     // Rechargement COMPLET vers la racine : la SPA se réinitialise, rappelle
     // /api/v1/auth/me (désormais non authentifié) et affiche LoginView. Sans ce
     // reload, le store auth resterait "authentifié" en mémoire et rien ne
@@ -188,7 +193,12 @@
         <!-- Vue Évaluation : fusion EvaluationMapView + GrillesView (carte cadastrale + grilles) -->
         <EvaluationMapView />
       {:else if activeView === "sources"}
-        <SourcesMapView />
+        <SourceMapView />
+      {:else if activeView === "console"}
+        <!-- Deep-link legacy #/console : la Console est désormais l'onglet
+             « Console » de la vue Source (reconstruite sur /api/source/coverage).
+             On monte donc SourceMapView avec cet onglet pré-sélectionné. -->
+        <SourceMapView initialTab="console" />
       <!-- Vues admin/dev (hors nav principale) -->
       {:else if activeView === "admin"}
         <AdminView />
@@ -197,13 +207,19 @@
       {:else if activeView === "ciblage"}
         <CiblageView />
       {:else if activeView === "grilles"}
-        <GrillesView />
+        <!-- Legacy deep-link #/grilles : la vue Grilles est désormais intégrée
+             comme onglet de la vue Évaluation (WP4). On route donc vers
+             EvaluationMapView avec l'onglet « Grilles de score » pré-sélectionné. -->
+        <EvaluationMapView initialTab="grilles" />
       {:else if activeView === "ontologie"}
         <ReconciliationView />
       {:else if activeView === "coordination"}
         <CoordinationView />
       {:else if activeView === "backlog"}
         <BacklogView />
+      {:else if activeView === "kanban"}
+        <!-- WP6 — Kanban WorkPackages (projection 4 niveaux) -->
+        <KanbanView />
       <!-- G3 — Vue Géo (zones + lots + opportunités) -->
       {:else if activeView === "geo"}
         <GeoView />
@@ -215,8 +231,10 @@
       {:else if activeView === "carte-evaluation"}
         <EvaluationMapView />
       {:else}
-        <!-- Fallback : console sources -->
-        <ConsoleView />
+        <!-- Fallback : vue par défaut (DEFAULT_VIEW = signaux). L'ancienne
+             Console n'existe plus ; la route #/console atterrit explicitement
+             sur la vue Source onglet Console (cf. branche ci-dessus). -->
+        <SignauxMapView geoRoute={$activeGeoRoute} />
       {/if}
     </div>
 

@@ -31,15 +31,28 @@
    * expose seulement les côtés gauche/droite; le bottom sheet reste dépendant
    * d'une vague DS ultérieure. Sur desktop (md+), Card DS.
    */
-  import { X, MapPin, Star, Info, ExternalLink } from "@lucide/svelte";
+  import { X, MapPin, Star, Info, ExternalLink, MessageSquare } from "@lucide/svelte";
   import { Badge, Card, Drawer } from "@sentropic/design-system-svelte";
   import type { LotFeature } from "$lib/maps/lots-client.js";
   import {
     centroid,
     googleMapsUrl,
+    googleStreetViewUrl,
     scoreTone,
     scoreLabel,
   } from "$lib/components/maps/lot-fiche-utils.js";
+  import {
+    activeMarketMark,
+    activePipelineMark,
+    createProspectMark,
+    createProspectNote,
+    fetchProspectLotState,
+    prospectStatusLabel,
+    type ProspectMark,
+    type ProspectNote,
+    type ProspectMode,
+    type PipelineStatus,
+  } from "$lib/prospect/prospect-marks-client.js";
 
   // ── Props ────────────────────────────────────────────────────────────────────
 
@@ -52,15 +65,150 @@
   /** Callback de fermeture. */
   export let onClose: () => void = () => {};
 
+  /**
+   * Autorise l'AFFICHAGE+ÉDITION du marquage d'équipe (donnée CLIENT, CS-L3).
+   * Fail-closed (défaut `false`) : tant qu'aucun rôle de session OIDC n'est câblé
+   * côté UI, ce drapeau EST le contrôle de rôle. La donnée publique (cadastre,
+   * score, zonage) reste affichée quoi qu'il arrive.
+   */
+  export let allowMarquage: boolean = false;
+
+  /** Mode d'origine des marquages posés depuis ce panneau (réel vs simulation). */
+  export let mode: ProspectMode = "real";
+
   // ── Dérivés réactifs ─────────────────────────────────────────────────────────
 
   $: noLot = lot?.properties.noLot ?? "";
+  $: lotVersionId = lot?.properties.lotVersionId ?? null;
   $: potentialScore = lot?.properties.potentialScore;
+  $: superficieM2 = lot?.properties.superficieM2;
+  $: valuation = lot?.properties.valuation;
+  $: zone = lot?.properties.zone;
+  $: zoneCode = lot?.properties.zoneCode ?? zone?.code;
+  $: grillePdfUrl = lot?.properties.grillePdfUrl ?? zone?.grillePdfUrl;
   $: lotCentroid = lot ? centroid(lot) : null;
+  let prospectLoading = false;
+  let prospectError: string | null = null;
+  let prospectMarks: ProspectMark[] = [];
+  let prospectNotes: ProspectNote[] = [];
+  let prospectRequestKey = "";
+
+  $: citySlug = lot?.properties.citySlug ?? "";
   $: mapsUrl = lotCentroid
     ? googleMapsUrl(lotCentroid.lat, lotCentroid.lon)
     : null;
+  $: streetViewUrl = lotCentroid
+    ? googleStreetViewUrl(lotCentroid.lat, lotCentroid.lon)
+    : null;
   $: drawerOpen = lot !== null;
+  $: pipelineMark = activePipelineMark(prospectMarks);
+  $: marketMark = activeMarketMark(prospectMarks);
+  $: latestNotes = [...prospectNotes]
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, 3);
+
+  $: {
+    const key = noLot && citySlug ? `${citySlug}::${noLot}` : "";
+    if (key && key !== prospectRequestKey) {
+      prospectRequestKey = key;
+      void loadProspectState(noLot, citySlug);
+    } else if (!key && prospectRequestKey) {
+      prospectRequestKey = "";
+      prospectMarks = [];
+      prospectNotes = [];
+      prospectError = null;
+      prospectLoading = false;
+    }
+  }
+
+  function formatArea(value: number | null | undefined): string {
+    if (value === null || value === undefined) return "non disponible";
+    return `${Math.round(value).toLocaleString("fr-CA")} m²`;
+  }
+
+  function formatMoney(value: number | null | undefined): string {
+    if (value === null || value === undefined) return "non disponible";
+    return new Intl.NumberFormat("fr-CA", {
+      style: "currency",
+      currency: "CAD",
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
+
+  async function loadProspectState(noLotValue: string, citySlugValue: string): Promise<void> {
+    prospectLoading = true;
+    prospectError = null;
+    try {
+      const state = await fetchProspectLotState(noLotValue, citySlugValue);
+      if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
+      prospectMarks = state.marks;
+      prospectNotes = state.notes;
+    } catch (e) {
+      if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
+      prospectMarks = [];
+      prospectNotes = [];
+      prospectError = e instanceof Error ? e.message : "Marquage indisponible";
+    } finally {
+      if (prospectRequestKey === `${citySlugValue}::${noLotValue}`) {
+        prospectLoading = false;
+      }
+    }
+  }
+
+  // ── Écriture marquage (append-only, gatée allowMarquage) ────────────────────
+  let prospectSaving = false;
+  let noteDraft = "";
+
+  const PIPELINE_ACTIONS: Array<{ statut: PipelineStatus; label: string }> = [
+    { statut: "favori", label: "Favori" },
+    { statut: "sollicite", label: "Sollicité" },
+    { statut: "lettre_envoyee", label: "Lettre envoyée" },
+    { statut: "ecarte", label: "Écarté" },
+  ];
+
+  async function setPipeline(statut: PipelineStatus): Promise<void> {
+    if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
+    prospectSaving = true;
+    prospectError = null;
+    try {
+      await createProspectMark({ lotVersionId, noLot, citySlug, dimension: "pipeline", statut, mode });
+      await loadProspectState(noLot, citySlug);
+    } catch (e) {
+      prospectError = e instanceof Error ? e.message : "Marquage échoué";
+    } finally {
+      prospectSaving = false;
+    }
+  }
+
+  async function toggleEnVente(): Promise<void> {
+    if (!allowMarquage || !lotVersionId || !noLot || !citySlug || prospectSaving) return;
+    prospectSaving = true;
+    prospectError = null;
+    try {
+      await createProspectMark({ lotVersionId, noLot, citySlug, dimension: "marche", statut: "en_vente", mode });
+      await loadProspectState(noLot, citySlug);
+    } catch (e) {
+      prospectError = e instanceof Error ? e.message : "Marquage échoué";
+    } finally {
+      prospectSaving = false;
+    }
+  }
+
+  async function submitNote(): Promise<void> {
+    const body = noteDraft.trim();
+    if (!allowMarquage || !body || !noLot || !citySlug || prospectSaving) return;
+    prospectSaving = true;
+    prospectError = null;
+    try {
+      await createProspectNote({ noLot, citySlug, body, mode, ...(lotVersionId ? { lotVersionId } : {}) });
+      noteDraft = "";
+      await loadProspectState(noLot, citySlug);
+    } catch (e) {
+      prospectError = e instanceof Error ? e.message : "Note échouée";
+    } finally {
+      prospectSaving = false;
+    }
+  }
 </script>
 
 {#if lot}
@@ -173,8 +321,10 @@
             <dt class="text-slate-500">Ville</dt>
             <dd class="text-slate-700">{cityName || lot.properties.citySlug}</dd>
           {/if}
-          <dt class="text-slate-500">Superficie m²</dt>
-          <dd class="text-slate-400 italic text-xs">non disponible (cadastre allégé)</dd>
+          <dt class="text-slate-500">Superficie</dt>
+          <dd class:text-slate-700={superficieM2 !== undefined && superficieM2 !== null} class:text-slate-400={superficieM2 === undefined || superficieM2 === null} class:italic={superficieM2 === undefined || superficieM2 === null} class="text-xs">
+            {formatArea(superficieM2)}
+          </dd>
         </dl>
       </section>
 
@@ -223,17 +373,35 @@
         >
           Rôle MAMH (évaluation foncière)
         </h3>
-        <div
-          class="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
-          data-testid="fiche-role-na"
-        >
-          <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
-          <p>
-            Données rôle MAMH non disponibles (usageCode, valeurTotale, valeurTerrain,
-            valeurBatiment, densité) — extraction rôle non réalisée pour cette ville.
-            Seuls les champs publics seront affichés (aucun nom de propriétaire — Loi 25).
-          </p>
-        </div>
+        {#if valuation}
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-slate-100 bg-white px-3 py-2 text-sm" data-testid="fiche-role">
+            <dt class="text-slate-500">Usage</dt>
+            <dd class="text-slate-700">{valuation.usageCode ?? lot.properties.usageCode ?? "non disponible"}</dd>
+            <dt class="text-slate-500">Catégorie</dt>
+            <dd class="text-slate-700">{valuation.categorie ?? "non disponible"}</dd>
+            <dt class="text-slate-500">Valeur totale</dt>
+            <dd class="text-slate-700">{formatMoney(valuation.valeurTotale)}</dd>
+            <dt class="text-slate-500">Terrain</dt>
+            <dd class="text-slate-700">{formatMoney(valuation.valeurTerrain)}</dd>
+            <dt class="text-slate-500">Bâtiment</dt>
+            <dd class="text-slate-700">{formatMoney(valuation.valeurBatiment)}</dd>
+            <dt class="text-slate-500">Logements / étages</dt>
+            <dd class="text-slate-700">{valuation.nbLogements ?? "?"} / {valuation.nbEtages ?? "?"}</dd>
+          </dl>
+          <p class="mt-1.5 text-xs text-slate-400">Champs publics seulement; aucun propriétaire/adresse nominative.</p>
+        {:else}
+          <div
+            class="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
+            data-testid="fiche-role-na"
+          >
+            <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
+            <p>
+              Données rôle MAMH non disponibles (usageCode, valeurTotale, valeurTerrain,
+              valeurBatiment, densité) — extraction rôle non réalisée pour cette ville.
+              Seuls les champs publics seront affichés (aucun nom de propriétaire — Loi 25).
+            </p>
+          </div>
+        {/if}
       </section>
 
       <!-- Section Zone ────────────────────────────────────────────────────── -->
@@ -244,33 +412,165 @@
         >
           Zone (règlement de zonage)
         </h3>
-        <div
-          class="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
-          data-testid="fiche-zone-na"
-        >
-          <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
-          <p>
-            ZoneVersion non disponible (kind, usages, densiteLogHa) — le lot-zone
-            resolution n'est pas encore retourné par l'endpoint.
-            Le lien grille PDF sera affiché ici lorsque disponible (artefact source A2/B2).
-          </p>
-        </div>
+        {#if zone || zoneCode || grillePdfUrl}
+          <div class="space-y-2 rounded-lg border border-slate-100 bg-white px-3 py-2" data-testid="fiche-zone">
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+              <dt class="text-slate-500">Code zone</dt>
+              <dd class="font-mono text-slate-700">{zoneCode ?? "non disponible"}</dd>
+              <dt class="text-slate-500">Type</dt>
+              <dd class="text-slate-700">{zone?.kind ?? "non disponible"}</dd>
+              <dt class="text-slate-500">Densité</dt>
+              <dd class="text-slate-700">{zone?.densiteLogHa ?? "non disponible"}{zone?.densiteLogHa !== null && zone?.densiteLogHa !== undefined ? " log/ha" : ""}</dd>
+              <dt class="text-slate-500">Usages</dt>
+              <dd class="text-slate-700">{zone?.usages?.length ? zone.usages.join(", ") : "non disponible"}</dd>
+            </dl>
+            {#if grillePdfUrl}
+              <a
+                href={grillePdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-teal-700 transition-colors hover:border-teal-300 hover:bg-teal-50"
+                data-testid="fiche-grille-pdf-link"
+              >
+                <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                Ouvrir la grille de zonage PDF
+              </a>
+            {/if}
+          </div>
+        {:else}
+          <div
+            class="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
+            data-testid="fiche-zone-na"
+          >
+            <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
+            <p>
+              ZoneVersion non disponible (kind, usages, densiteLogHa) — le lot-zone
+              resolution n'est pas encore retourné par l'endpoint.
+              Le lien grille PDF sera affiché ici lorsque disponible (artefact source A2/B2).
+            </p>
+          </div>
+        {/if}
       </section>
 
-      <!-- Section Notes équipe (placeholder CS-L3) ─────────────────────────── -->
+      <!-- Section Marquage équipe + notes (CS-L3) ─────────────────────────── -->
       <section aria-labelledby="section-notes">
         <h3
           id="section-notes"
-          class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+          class="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"
         >
-          Notes équipe
+          <MessageSquare class="h-3.5 w-3.5 text-teal-600 shrink-0" aria-hidden="true" />
+          Marquage équipe & notes
         </h3>
-        <div
-          class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400 italic"
-          data-testid="fiche-notes-placeholder"
-        >
-          Marquage équipe et notes — disponible en CS-L3 (ProspectMark).
-        </div>
+
+        {#if !citySlug}
+          <div
+            class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
+            data-testid="fiche-prospect-city-missing"
+          >
+            Marquage indisponible : citySlug absent du lot GeoJSON.
+          </div>
+        {:else if prospectLoading}
+          <div
+            class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-400"
+            data-testid="fiche-prospect-loading"
+          >
+            Chargement des marques et notes…
+          </div>
+        {:else if prospectError}
+          <div
+            class="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+            data-testid="fiche-prospect-error"
+          >
+            Marquage/notes indisponibles — {prospectError}.
+          </div>
+        {:else}
+          <div class="space-y-3" data-testid="fiche-prospect-state">
+            <div class="flex flex-wrap gap-1.5">
+              {#if pipelineMark}
+                <Badge tone={pipelineMark.statut === "ecarte" ? "neutral" : "success"} class="text-xs">
+                  Pipeline : {prospectStatusLabel(pipelineMark.statut)}
+                </Badge>
+              {:else}
+                <Badge tone="neutral" class="text-xs">Pipeline : non marqué</Badge>
+              {/if}
+              {#if marketMark}
+                <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
+              {/if}
+              <Badge tone="neutral" class="text-xs">{prospectNotes.length} note{prospectNotes.length !== 1 ? "s" : ""}</Badge>
+            </div>
+
+            {#if latestNotes.length > 0}
+              <ul class="space-y-1.5" aria-label="Dernières notes équipe">
+                {#each latestNotes as note (note.id)}
+                  <li class="rounded-lg border border-slate-100 bg-white px-3 py-2 text-xs text-slate-600">
+                    <p class="whitespace-pre-wrap leading-snug">{note.body}</p>
+                    <p class="mt-1 text-[11px] text-slate-400">
+                      {new Date(note.createdAt).toLocaleString("fr-CA")} · {note.mode === "simulation" ? "simulation" : "réel"}
+                    </p>
+                  </li>
+                {/each}
+              </ul>
+            {:else}
+              <p class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400 italic">
+                Aucune note pour ce lot.
+              </p>
+            {/if}
+
+            {#if allowMarquage}
+              <div class="space-y-2 border-t border-slate-100 pt-2" data-testid="fiche-prospect-edit">
+                <div class="flex flex-wrap gap-1.5">
+                  {#each PIPELINE_ACTIONS as action (action.statut)}
+                    <button
+                      type="button"
+                      class="rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 {pipelineMark?.statut === action.statut ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}"
+                      disabled={!lotVersionId || prospectSaving}
+                      on:click={() => setPipeline(action.statut)}
+                    >
+                      {action.label}
+                    </button>
+                  {/each}
+                  <button
+                    type="button"
+                    class="rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40 {marketMark ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}"
+                    disabled={!lotVersionId || prospectSaving}
+                    on:click={toggleEnVente}
+                  >
+                    En vente
+                  </button>
+                </div>
+                {#if !lotVersionId}
+                  <p class="text-[11px] text-slate-400 italic" data-testid="fiche-prospect-no-version">
+                    Statuts désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo. Les notes restent possibles.
+                  </p>
+                {/if}
+                <div class="space-y-1">
+                  <textarea
+                    class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-none"
+                    rows="2"
+                    placeholder="Ajouter une note d'équipe…"
+                    bind:value={noteDraft}
+                    disabled={prospectSaving}
+                    aria-label="Note d'équipe"
+                  ></textarea>
+                  <div class="flex justify-end">
+                    <button
+                      type="button"
+                      class="rounded-md bg-teal-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={!noteDraft.trim() || prospectSaving}
+                      on:click={submitNote}
+                    >
+                      {prospectSaving ? "Enregistrement…" : "Ajouter la note"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {:else}
+              <p class="text-xs text-slate-400" data-testid="fiche-prospect-readonly">
+                Édition réservée au poste de prospection.
+              </p>
+            {/if}
+          </div>
+        {/if}
       </section>
 
       <!-- Section Lien Google Maps ─────────────────────────────────────────── -->
@@ -282,17 +582,32 @@
           >
             Géolocalisation
           </h3>
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-teal-700 transition-colors hover:border-teal-300 hover:bg-teal-50"
-            data-testid="fiche-maps-link"
-            aria-label="Ouvrir le lot {noLot} dans Google Maps (nouvelle fenêtre)"
-          >
-            <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Voir dans Google Maps
-          </a>
+          <div class="flex flex-wrap gap-2">
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-teal-700 transition-colors hover:border-teal-300 hover:bg-teal-50"
+              data-testid="fiche-maps-link"
+              aria-label="Ouvrir le lot {noLot} dans Google Maps (nouvelle fenêtre)"
+            >
+              <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              Google Maps
+            </a>
+            {#if streetViewUrl}
+              <a
+                href={streetViewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-teal-700 transition-colors hover:border-teal-300 hover:bg-teal-50"
+                data-testid="fiche-streetview-link"
+                aria-label="Ouvrir Street View près du lot {noLot} (nouvelle fenêtre)"
+              >
+                <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                Street View
+              </a>
+            {/if}
+          </div>
           {#if lotCentroid}
             <p class="mt-1 text-xs text-slate-400">
               Centroïde approché : {lotCentroid.lat.toFixed(5)}°N, {lotCentroid.lon.toFixed(5)}°E
