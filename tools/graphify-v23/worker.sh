@@ -84,7 +84,7 @@ if ! node "$GRAPHIFY_TO_EXTRACTION" "$WORK_DIR/latest.old.json" "$CITY" "$local_
 fi
 
 # ── 4. Build profile (non-LLM) ────────────────────────────────────────────────
-if ! "$GRAPHIFY_CLI" profile build "$WORK_DIR" --config "$local_graphify_yaml" --out-dir "$WORK_DIR/.graphify" --all >> "$LOG" 2>&1; then
+if ! "$GRAPHIFY_CLI" profile build "$WORK_DIR" --config "$local_graphify_yaml" --out-dir ".graphify" --all >> "$LOG" 2>&1; then
   echo "[worker] $CITY: build_failed" >&2
   exit 1
 fi
