@@ -1,12 +1,14 @@
 # Public route for the remote immo MCP server on the SAME host as the radar
-# UI: https://immo.sent-tech.ca/mcp (Streamable HTTP transport, OAuth-gated)
-# and https://immo.sent-tech.ca/.well-known/oauth-protected-resource (RFC 9728
-# PRM, unauthenticated).
+# UI: https://immo.sent-tech.ca/mcp (Streamable HTTP transport, OAuth-gated,
+# AND the RFC 9728 PRM at https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource,
+# unauthenticated).
 #
 # PREPARED, NOT APPLIED — not wired into kustomization.yaml yet (mirrors how
 # 31/32/33 one-shot Jobs are deliberately left out: `kubectl apply -f` by hand
 # once the prerequisites below are resolved). See
-# docs/spec/mcp/immo-mcp-remote-deploy.md.
+# docs/spec/mcp/immo-mcp-remote-deploy.md and
+# docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md (§1/§2 now RESOLVED — see
+# below — the remaining gate is the real IdP issuer, runbook §4).
 #
 # Why a SEPARATE Ingress object (not a path added to 60-ingress.yaml)
 # ---------------------------------------------------------------------
@@ -17,31 +19,23 @@
 # adding more specific paths on the same host is standard practice and avoids
 # touching the working UI Ingress. This file is that second object.
 #
-# TWO paths route to the mcp Service, not one — because of what the pod
-# ACTUALLY serves TODAY (verified locally, see the runbook):
-#   - `/mcp`                                     (Prefix) — the MCP transport.
-#   - `/.well-known/oauth-protected-resource`     (Exact)  — the RFC 9728 PRM.
-#     @sentropic/mcp-auth's `mcpAuthRoutes()` mounts this at the Hono app's
-#     OWN ROOT ('/'), not under '/mcp' — confirmed by reading
-#     node_modules/@sentropic/mcp-auth/dist/hono.js
-#     (`router.get('/.well-known/oauth-protected-resource', ...)`) and
-#     core.js's `handle()` (`url.pathname === PROTECTED_RESOURCE_METADATA_PATH`,
-#     i.e. the BARE path, no resource-path prefix). Without this second rule,
-#     `GET /.well-known/oauth-protected-resource` at the public host would fall
-#     through to the UI Ingress's catch-all `/` and hit radar-ui's SPA
-#     fallback instead of the mcp pod.
-#   > IMPORTANT CAVEAT: the 401 challenge's `WWW-Authenticate: ...
-#     resource_metadata="..."` value is `https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource`
-#     (resource + well-known path APPENDED) — a DIFFERENT URL than the one
-#     actually served (bare root, above), and this Ingress does not and
-#     CANNOT fix that: it is a `@sentropic/mcp-auth` 0.1.0 bug (the
-#     `protectedResourceMetadataUrl()` builder and the `handle()`/hono.js
-#     route registration disagree whenever `resource` has a non-empty path,
-#     which is exactly radar's case: `.../mcp`). A strict RFC 9728 client that
-#     follows the header literally will 404. See
-#     docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 1 — this needs a
-#     fix in @sentropic/mcp-auth (or in server-http.ts's mount point) BEFORE
-#     a real (non-mock) go-live with claude.ai, independent of this manifest.
+# ONE path routes to the mcp Service (was two — history below)
+# ---------------------------------------------------------------------
+# `/mcp` (Prefix) covers BOTH the MCP transport (`POST/GET/DELETE /mcp`) AND
+# the RFC 9728 PRM (`GET /mcp/.well-known/oauth-protected-resource`), because
+# `server-http.ts`'s `createImmoHttpApp()` now mounts `@sentropic/mcp-auth`'s
+# `mcpAuthRoutes()` under `/mcp` (`app.route("/mcp", mcpAuthRoutes(mcp))`),
+# matching what `protectedResourceMetadataUrl()` advertises in the 401
+# `WWW-Authenticate: ... resource_metadata="https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource"`
+# challenge. This FIXES BLOCKERS.md item 1 (previously: `mcpAuthRoutes()` was
+# mounted at the Hono app's own root, serving the PRM at the BARE
+# `/.well-known/oauth-protected-resource` — a different URL than the one
+# advertised, and a strict RFC 9728 client following the header literally
+# 404'd). The extra `Exact /.well-known/oauth-protected-resource` rule this
+# file used to carry is GONE: the app no longer serves anything there, so
+# routing to it would just 404 at the mcp Service instead of (as before)
+# falling through to the UI's SPA catch-all — either way dead weight, so it
+# was dropped rather than kept as a no-op.
 #
 # No `cert-manager.io/cluster-issuer` annotation here on purpose: 60-ingress.yaml
 # already requests the `immo.sent-tech.ca` cert into the SAME `radar-immo-tls`
@@ -83,13 +77,6 @@ spec:
         paths:
           - path: /mcp
             pathType: Prefix
-            backend:
-              service:
-                name: radar-immo-mcp
-                port:
-                  name: http
-          - path: /.well-known/oauth-protected-resource
-            pathType: Exact
             backend:
               service:
                 name: radar-immo-mcp

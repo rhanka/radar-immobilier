@@ -19,6 +19,17 @@ See also **`docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md`** for the two
 concrete gaps found while preparing this (image bundling, PRM URL mismatch)
 and the NetworkPolicy gap this branch already closes.
 
+> **Addendum (follow-up branch): both blockers below are now RESOLVED** — see
+> BLOCKERS.md for the fix + re-verified evidence. Net effect on THIS document:
+> the PRM is now served at `/mcp/.well-known/oauth-protected-resource` (under
+> the resource's own path), not the bare `/.well-known/oauth-protected-resource`
+> this runbook's §1.3–1.5/§5/§6 curl examples and `41-immo-mcp-ingress.yaml`'s
+> now-removed second `Exact` path reference below — kept as-is as the
+> historical record of what was verified in THIS branch's worktree; read
+> BLOCKERS.md for the current, correct paths before copy-pasting a command
+> from here. `api/Dockerfile` also now bundles `packages/immo-mcp` (§2 below
+> is otherwise-resolved history, not a live gap anymore).
+
 ## 1. What was verified locally (this branch, this worktree)
 
 All four commands below were run in a **fresh, isolated worktree** with no

@@ -4,47 +4,40 @@
 # Deployment/Service pattern (30-api.yaml): radar-app ServiceAccount, tight
 # resources, envFrom a dedicated non-secret ConfigMap.
 #
-# PREPARED, NOT APPLIED — not wired into kustomization.yaml yet (see the
-# "NOT YET DEPLOYABLE" note below and docs/spec/mcp/immo-mcp-remote-deploy.md).
+# PREPARED, NOT APPLIED — not wired into kustomization.yaml yet (see
+# kustomization.yaml's own comment and docs/spec/mcp/immo-mcp-remote-deploy.md;
+# the remaining gate is the placeholder IdP issuer below, not a code/infra
+# blocker).
 #
 # What this Pod runs (verified locally, see the runbook for the exact
 # commands + pasted output):
 #   packages/immo-mcp/src/server-http.ts, built to
 #   packages/immo-mcp/dist/server-http.js — Hono app exposing:
-#     GET  /.well-known/oauth-protected-resource  → RFC 9728 PRM (200, no auth)
-#     *    /mcp                                    → OAuth RS guard, then the
-#                                                     MCP Streamable HTTP transport
+#     GET  /mcp/.well-known/oauth-protected-resource  → RFC 9728 PRM (200, no auth)
+#     *    /mcp                                        → OAuth RS guard, then the
+#                                                         MCP Streamable HTTP transport
 #   via @sentropic/mcp-auth (createMcpAuth/requireMcpAuth) +
 #   @sentropic/oauth-verify (remote-JWKS bearer verification), MCP SDK 1.29.
 #
-# ── NOT YET DEPLOYABLE: image does not contain this entrypoint today ────────
-# This manifest reuses the radar-api image + overrides `command`, per the
-# mission's primary hypothesis, BUT that hypothesis is currently FALSE:
-# `api/Dockerfile`'s build stage only npm-installs/COPYs
-# {radar-domain,radar-scoring,radar-sources,api} and its esbuild step only
-# bundles api/src/*.ts entrypoints (outdir api/dist). It never installs
-# packages/immo-mcp's own deps (@sentropic/mcp-auth, @sentropic/oauth-verify,
-# @hono/node-server, jose) nor copies/bundles packages/immo-mcp/src. So
+# ── Image gap RESOLVED (was: NOT YET DEPLOYABLE) ────────────────────────────
+# `api/Dockerfile` now also `COPY packages/immo-mcp[/package.json]`, installs
+# its deps in the same `npm install --workspaces --include-workspace-root`
+# layer, runs a SECOND esbuild call (`entryPoints:
+# ['packages/immo-mcp/src/server-http.ts']`, `outdir:
+# 'packages/immo-mcp/dist'`, `outbase: 'packages/immo-mcp/src'`, same
+# external-bare-specifier plugin) and COPYs `packages/immo-mcp/dist` into the
+# runtime stage — option (A) from the runbook §2 / BLOCKERS.md item 2, reusing
+# the existing `build-push-images.yml` `api` matrix entry (no new CI job).
 # `node packages/immo-mcp/dist/server-http.js` against `radar-api:latest`
-# today fails at the first import with MODULE_NOT_FOUND.
+# (built from this Dockerfile) now resolves. See
+# docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 2 for the local
+# verification evidence (esbuild output + boot + curl, without building the
+# full image).
 #
-# Required BEFORE this Deployment can actually run (pick ONE, see the runbook
-# "Prérequis image" section for the exact diff sketch):
-#   (A) [recommended] extend `api/Dockerfile`'s build stage: also
-#       `COPY packages/immo-mcp packages/immo-mcp`, add its package.json to
-#       the npm-install layer, and add a SECOND esbuild call
-#       (entryPoints: ['packages/immo-mcp/src/server-http.ts'],
-#        outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src')
-#       so the runtime stage's `COPY --from=build .../node_modules` already
-#       carries the extra deps and `packages/immo-mcp/dist/server-http.js`
-#       exists in the shipped `radar-api` image. Reuses the existing
-#       build-push-images.yml matrix entry (`api`) — no new CI job.
-#   (B) ship a DEDICATED `packages/immo-mcp/Dockerfile` + a new
-#       `immo-mcp` entry in build-push-images.yml's matrix, and point `image:`
-#       below at `rg.fr-par.scw.cloud/radar-immobilier/immo-mcp:latest`
-#       instead. Decouples the MCP server's release cadence/blast radius from
-#       the main api image; costs a new Dockerfile + CI matrix row.
-# See docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 1.
+# Still gating a REAL go-live (not a code/infra blocker, a cadrage step): the
+# ConfigMap below ships a PLACEHOLDER `IMMO_MCP_OAUTH_ISSUER` — see §4 below
+# and the runbook's "Demandes à architect/sentropic" before folding this
+# Deployment into `kustomization.yaml`.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -126,14 +119,18 @@ spec:
           readinessProbe:
             # `/mcp` itself always 401s without a bearer token (by design), so
             # probe the PRM well-known instead — it is served unauthenticated
-            # and returns 200 as soon as the Hono app is up.
-            httpGet: { path: /.well-known/oauth-protected-resource, port: http }
+            # and returns 200 as soon as the Hono app is up. Path is
+            # `/mcp/.well-known/...` (under the resource's own path), NOT the
+            # bare `/.well-known/...` — `server-http.ts` mounts
+            # `mcpAuthRoutes()` under `/mcp` (BLOCKERS.md item 1 fix); see that
+            # file's `createImmoHttpApp()` comment.
+            httpGet: { path: /mcp/.well-known/oauth-protected-resource, port: http }
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 6
           livenessProbe:
-            httpGet: { path: /.well-known/oauth-protected-resource, port: http }
+            httpGet: { path: /mcp/.well-known/oauth-protected-resource, port: http }
             initialDelaySeconds: 30
             periodSeconds: 20
             timeoutSeconds: 3
