@@ -37,6 +37,10 @@ metadata:
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: scrape
 spec:
+  # SUSPENDU 2026-07-01 (FinOps poc-k8s) : échoue chaque nuit et réveille le pool
+  # burst-rwx (coût). Root cause à réparer avant réactivation (image :latest désync /
+  # secret / schéma). Réactiver = suspend:false.
+  suspend: true
   # Quotidien 03:17 UTC (heure creuse ; minute décalée pour éviter le top-heure).
   schedule: "17 3 * * *"
   timeZone: "Etc/UTC"
@@ -49,6 +53,7 @@ spec:
     spec:
       backoffLimit: 1
       activeDeadlineSeconds: 7200
+      ttlSecondsAfterFinished: 3600
       template:
         metadata:
           labels:
@@ -101,6 +106,9 @@ metadata:
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: graph-projection
 spec:
+  # SUSPENDU 2026-07-01 (FinOps poc-k8s) : échoue chaque nuit avec le scrape et
+  # réveille le pool burst-rwx (coût). Réactiver après fix root cause = suspend:false.
+  suspend: true
   # Quotidien 04:30 UTC, ~1 h après le scrape (laisse le scrape finir).
   schedule: "30 4 * * *"
   timeZone: "Etc/UTC"
@@ -116,6 +124,7 @@ spec:
       # project-graph-from-s3.ts), ce qui rend l'échec visible dans
       # failedJobsHistoryLimit + les logs jalons "project-graph-from-s3: terminé".
       backoffLimit: 1
+      ttlSecondsAfterFinished: 3600
       activeDeadlineSeconds: 1800
       template:
         metadata:
