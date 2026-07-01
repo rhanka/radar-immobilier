@@ -17,6 +17,16 @@
 # the prod boot (those dev fixtures are NOT shipped here). Those reads are now
 # LAZY (deferred to first use), so the runtime no longer depends on any dev
 # fixture to boot — nothing under `_spikes/samples` needs to ship in this image.
+#
+# This image ALSO bundles packages/immo-mcp's remote (Streamable HTTP) MCP
+# entrypoint (`server-http.ts`), reusing this same build (recommendation A in
+# docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 2): the
+# `radar-immo-mcp` K8s Deployment (deploy/k8s/40-immo-mcp-http-deploy.yaml)
+# runs `node packages/immo-mcp/dist/server-http.js` against THIS image with an
+# overridden `command`, so its deps (`@sentropic/mcp-auth`,
+# `@sentropic/oauth-verify`, `@hono/node-server`, `jose`) must be installed and
+# its dist/ must exist here — sharing the CI job/matrix row rather than
+# standing up a dedicated Dockerfile+pipeline for a low-traffic POC surface.
 
 FROM node:24-bookworm-slim AS build
 WORKDIR /workspace
@@ -24,17 +34,23 @@ COPY package.json package-lock.json* tsconfig.base.json ./
 COPY packages/radar-domain/package.json packages/radar-domain/
 COPY packages/radar-scoring/package.json packages/radar-scoring/
 COPY packages/radar-sources/package.json packages/radar-sources/
+COPY packages/immo-mcp/package.json packages/immo-mcp/
 COPY api/package.json api/
 RUN npm install --workspaces --include-workspace-root
 COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring
 COPY packages/radar-sources packages/radar-sources
+COPY packages/immo-mcp packages/immo-mcp
 COPY api api
 # Typecheck (fail fast on type errors), then bundle the API entrypoint with
 # esbuild. A tiny esbuild plugin marks any bare specifier that is NOT @radar/*
 # as external (resolved from node_modules at runtime) so only the @radar/*
 # workspace TS sources get inlined — robust to transitive deps, small bundle.
 RUN npm run typecheck --workspace=api
+# Also fail fast on packages/immo-mcp type errors (own tsconfig, own dist —
+# see the second esbuild call below); not part of the api workspace's own
+# typecheck.
+RUN npm run typecheck --workspace=packages/immo-mcp
 # Bundle ALL runtime entrypoints, not just the API server. K8s Jobs/CronJobs
 # (deploy/k8s/3x-*.yaml) invoke the DB migrator, the SCW→PG graph projector, the
 # 0004 tracking backfill, the live scraper, populate-geo and pull-geo-ogc as
@@ -62,6 +78,19 @@ RUN npm install --no-save esbuild@0.24.0 \
   "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
   "  logLevel: 'info'," \
   "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => a.path.startsWith('@radar/') ? null : ({ path: a.path, external: true })); } }]," \
+  "});" \
+  "// SECOND, separate build call for packages/immo-mcp: its outbase ('src')" \
+  "// is NOT under api/src, so it cannot share the entryPoints array above" \
+  "// (outbase/entryNames there assume everything lives under api/src)." \
+  "// packages/immo-mcp has no @radar/* workspace deps of its own, so this" \
+  "// marks EVERY bare specifier external (resolved from node_modules at" \
+  "// runtime, same as the api build does for its own non-@radar/* deps)." \
+  "await build({" \
+  "  entryPoints: ['packages/immo-mcp/src/server-http.ts']," \
+  "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
+  "  outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src'," \
+  "  logLevel: 'info'," \
+  "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => ({ path: a.path, external: true })); } }]," \
   "});" > /workspace/esbuild.mjs \
  && node /workspace/esbuild.mjs
 
@@ -82,6 +111,11 @@ COPY --from=build /workspace/node_modules ./node_modules
 COPY --from=build /workspace/package.json ./package.json
 COPY --from=build /workspace/api/dist ./api/dist
 COPY --from=build /workspace/api/package.json ./api/package.json
+# packages/immo-mcp/dist/server-http.js — the `radar-immo-mcp` K8s Deployment
+# runs this against THIS image with an overridden `command` (see the header
+# comment above + deploy/k8s/40-immo-mcp-http-deploy.yaml). Its deps are
+# already in ./node_modules (installed alongside api/'s in the build stage).
+COPY --from=build /workspace/packages/immo-mcp/dist ./packages/immo-mcp/dist
 # Drizzle SQL migrations + journal. The migrate entrypoint (api/dist/db/migrate.js)
 # reads `migrationsFolder: "drizzle"` RELATIVE to its CWD, so the db-migrate Job
 # runs with workingDir /workspace/api and finds these files. Without this COPY

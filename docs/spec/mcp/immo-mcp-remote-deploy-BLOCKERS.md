@@ -2,104 +2,183 @@
 
 Companion to `docs/spec/mcp/immo-mcp-remote-deploy.md`. Both items below were
 found while preparing the K8s manifests + verifying the server locally in a
-fresh worktree; neither blocks THIS task's deliverable (Deployment + Service +
-Ingress + runbook are still shipped), but both must be resolved before a real
-(non-mock, non-placeholder-issuer) go-live with claude.ai.
+fresh worktree; neither blocked that task's deliverable (Deployment + Service
++ Ingress + runbook were still shipped), but both had to be resolved before a
+real (non-mock, non-placeholder-issuer) go-live with claude.ai.
 
-## 1. `@sentropic/mcp-auth@0.1.0` PRM `resource_metadata` URL mismatch
+**STATUS: both items §1 and §2 are RESOLVED** (follow-up branch, same repo).
+What's still NOT done — and is a separate, external, cadrage gap rather than a
+code/infra blocker — is wiring the REAL sentropic-operated IdP
+issuer/resource/JWKS (runbook §4, "Demandes à architect/sentropic"): the
+ConfigMap in `deploy/k8s/40-immo-mcp-http-deploy.yaml` still ships
+`IMMO_MCP_OAUTH_ISSUER: https://idp.sent-tech.ca` as a placeholder, so
+`40-immo-mcp-http-deploy.yaml` / `41-immo-mcp-ingress.yaml` are still
+deliberately NOT folded into `deploy/k8s/kustomization.yaml` (see that file's
+own comment) even though both would now boot/route correctly if applied.
 
-**Owner: sentropic (package `@sentropic/mcp-auth`), or a one-line mount-point
-change in radar's own `server-http.ts`.** Not fixed here — out of this task's
-mandate (infra prep, no server code changes) and the fix should be made once,
-upstream, rather than patched per-consumer.
+## 1. `@sentropic/mcp-auth@0.1.0` PRM `resource_metadata` URL mismatch — RESOLVED
 
-**Evidence** (this branch, local boot, see runbook §1.4):
+**Fix applied**: `server-http.ts`'s `createImmoHttpApp()` now mounts
+`mcpAuthRoutes(mcp)` under the resource's own path instead of the app root:
+
+```diff
+- app.route("/", mcpAuthRoutes(mcp));
++ app.route("/mcp", mcpAuthRoutes(mcp));
+```
+
+This is the one-line, consumer-side fix this section originally recommended
+(no `@sentropic/mcp-auth` release needed). The PRM is now served at exactly
+the URL `protectedResourceMetadataUrl()` advertises in the 401 challenge:
+`/mcp/.well-known/oauth-protected-resource`. Confirmed `app.use("/mcp",
+requireMcpAuth(...))` does NOT shadow this PRM sub-route: Hono only matches a
+bare (non-wildcard) `.use()` path exactly, not sub-paths — verified both by
+the updated `server-http.test.ts` (test (a) now fetches
+`/mcp${PRM_PATH}` instead of the bare path) and by the local curl evidence
+below.
+
+**Re-verification evidence** (this branch, local boot, mirrors the original
+runbook §1.2–1.4 exactly, same env vars):
 
 ```
-$ curl -s -i -X POST http://127.0.0.1:8848/mcp -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+$ IMMO_MCP_OAUTH_ISSUER=https://idp.sent-tech.ca \
+  IMMO_MCP_OAUTH_RESOURCE=https://immo.sent-tech.ca/mcp \
+  IMMO_MCP_HTTP_PORT=8848 IMMO_MCP_DATA_MODE=mock \
+  node packages/immo-mcp/dist/server-http.js
+[immo-mcp-http] listening port=8848 resource=https://immo.sent-tech.ca/mcp issuer=https://idp.sent-tech.ca dataMode=simulation requiredScopes=immo:read
+
+$ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8848/.well-known/oauth-protected-resource
+404   # bare path — correctly no longer served (was the OLD, wrong mount point)
+
+$ curl -s -i http://127.0.0.1:8848/mcp/.well-known/oauth-protected-resource
+HTTP/1.1 200 OK
+content-type: application/json
+{"resource":"https://immo.sent-tech.ca/mcp","authorization_servers":["https://idp.sent-tech.ca"],"bearer_methods_supported":["header"],"dpop_signing_alg_values_supported":["EdDSA"],"scopes_supported":["immo:read","immo:search","immo:documents:read"]}
+
+$ curl -s -i -X POST http://127.0.0.1:8848/mcp -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+HTTP/1.1 401 Unauthorized
+content-type: application/json
+www-authenticate: Bearer error="invalid_token", error_description="Authorization header is required.", resource_metadata="https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource"
+
+{"error":{"code":"invalid_token","message":"Authorization header is required."}}
+```
+
+The 401 challenge's `resource_metadata` URL and the URL that actually returns
+200 are now the SAME (`https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource`)
+— the exact gap this section reported is closed. `packages/immo-mcp`'s own
+vitest suite (`npm run -w packages/immo-mcp test`) passes 9/9, including the
+updated PRM-path assertion.
+
+**Manifest follow-through**: `deploy/k8s/41-immo-mcp-ingress.yaml`'s second
+(`Exact`, bare `/.well-known/oauth-protected-resource`) path rule — kept
+before as a routing workaround for the OLD (root-mounted) PRM — is now dead
+weight (the app doesn't serve anything at that bare path anymore either) and
+has been REMOVED; the existing `/mcp` (Prefix) rule already covers the PRM's
+new location. `deploy/k8s/40-immo-mcp-http-deploy.yaml`'s
+`readinessProbe`/`livenessProbe` `httpGet.path` were ALSO updated from the
+bare path to `/mcp/.well-known/oauth-protected-resource` — they would
+otherwise have 404'd against the fixed server and the Deployment would never
+have gone Ready, a new, self-inflicted gap this same fix would have created if
+missed.
+
+**Side-effect fix found while re-verifying**: `server-http.ts` imported
+`IMMO_MCP_NAME`/`IMMO_MCP_VERSION` from `./server.js` (the stdio entrypoint).
+Harmless when running under plain `tsc` (two separate output files, two
+separate `import.meta.url`s), but once `packages/immo-mcp/src/server-http.ts`
+is esbuild-bundled into a single self-contained file (§2 below), `server.ts`'s
+module body — including its `if (import.meta.url matches process.argv[1])
+main()` stdio-only guard — gets INLINED into that same bundle, where a
+unified `import.meta.url` post-bundling makes the guard spuriously fire: the
+HTTP process silently ALSO started an idle stdio `McpServer` on boot
+(observed firsthand: an extra `[immo-mcp] ready name=immo version=0.0.1
+mode=mock` stderr line before the intended `[immo-mcp-http] listening ...`
+one). Fixed by extracting the two constants into a new, side-effect-free
+`packages/immo-mcp/src/meta.ts`, imported by both `server.ts` and
+`server-http.ts` — neither transport's bundle needs the OTHER transport's
+entrypoint module anymore. Re-verified: rebuilding the esbuild bundle (see §2
+below) and re-running the boot+curl sequence above now prints ONLY the
+`[immo-mcp-http] listening ...` line, no stray stdio "ready" line.
+
+## 2. `radar-api:latest` image does not bundle `packages/immo-mcp` — RESOLVED
+
+**Fix applied** (option A from the runbook §2, as recommended): `api/Dockerfile`
+now:
+1. `COPY packages/immo-mcp/package.json packages/immo-mcp/` alongside the
+   other workspace `package.json` copies, so the existing `npm install
+   --workspaces --include-workspace-root` layer resolves
+   `@sentropic/mcp-auth`/`@sentropic/oauth-verify`/`@hono/node-server`/`jose`
+   into the shared `node_modules`.
+2. `COPY packages/immo-mcp packages/immo-mcp` alongside the other full
+   package copies.
+3. `RUN npm run typecheck --workspace=packages/immo-mcp` (fail-fast, mirrors
+   the existing `api` typecheck step).
+4. A SECOND `esbuild` `build()` call (own `outbase`/`outdir`, since
+   `packages/immo-mcp/src` isn't under `api/src`), with the same
+   external-bare-specifier plugin — `packages/immo-mcp` has no `@radar/*`
+   workspace deps of its own, so every bare specifier is marked external.
+5. Runtime stage: `COPY --from=build /workspace/packages/immo-mcp/dist
+   ./packages/immo-mcp/dist` (its deps are already carried by the existing
+   `COPY --from=build /workspace/node_modules ./node_modules`).
+
+No new CI job/matrix row — reuses the existing `build-push-images.yml` `api`
+entry, exactly as recommended.
+
+**Verification** (this branch; did NOT build the full Docker image — heavy —
+but ran the EXACT script the Dockerfile's `RUN` block generates, from the repo
+root, which is what actually executes at Docker build time):
+
+```
+$ node esbuild-check.mjs   # ad hoc copy of the Dockerfile's generated esbuild.mjs
+  api/dist/index.js                                1.0mb ⚠️
+  api/dist/scripts/worker-live.js                384.3kb
+  ...
+  packages/immo-mcp/dist/server-http.js  20.5kb
+
+$ IMMO_MCP_OAUTH_ISSUER=https://idp.sent-tech.ca IMMO_MCP_OAUTH_RESOURCE=https://immo.sent-tech.ca/mcp \
+  IMMO_MCP_HTTP_PORT=8850 IMMO_MCP_DATA_MODE=mock node packages/immo-mcp/dist/server-http.js
+[immo-mcp-http] listening port=8850 resource=https://immo.sent-tech.ca/mcp issuer=https://idp.sent-tech.ca dataMode=simulation requiredScopes=immo:read
+# (no stray stdio "ready" line — meta.ts fix confirmed under the SAME bundling this Dockerfile does)
+
+$ curl -s -i http://127.0.0.1:8850/mcp/.well-known/oauth-protected-resource
+HTTP/1.1 200 OK
+{"resource":"https://immo.sent-tech.ca/mcp", ...}
+
+$ curl -s -i -X POST http://127.0.0.1:8850/mcp -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 HTTP/1.1 401 Unauthorized
 www-authenticate: Bearer error="invalid_token", ..., resource_metadata="https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource"
-
-$ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8848/mcp/.well-known/oauth-protected-resource
-404
 ```
 
-The 401 challenge advertises a `resource_metadata` URL that **the server
-itself does not serve** — confirmed by curling that exact path directly
-against the same local process (no network/ingress involved, so this is not a
-routing artefact).
+The esbuild-bundled `packages/immo-mcp/dist/server-http.js` (produced the
+SAME way the Dockerfile's `RUN` block would produce it) boots and serves
+identically to the plain `tsc` build used in §1's evidence — confirming the
+Dockerfile's bundling approach is sound, without paying for a full image
+build. `make k8s-validate` (offline kustomize render + structural check) still
+passes on the untouched, applied bundle; a scratch kustomization including
+the modified `40-immo-mcp-http-deploy.yaml` + `41-immo-mcp-ingress.yaml` +
+`70-networkpolicy.yaml` also rendered clean (11 documents, all with
+`apiVersion`+`kind`, `Ingress/radar-immo-mcp` now with a SINGLE `/mcp` path
+rule, probes pointing at the new PRM path).
 
-**Root cause** (read from
-`packages/immo-mcp/node_modules/@sentropic/mcp-auth/dist/{prm,core,hono}.js`):
+**Manifest follow-through**: `deploy/k8s/40-immo-mcp-http-deploy.yaml`'s
+`command`/`workingDir` (`node packages/immo-mcp/dist/server-http.js` /
+`/workspace`) already matched the Dockerfile's runtime `WORKDIR /workspace`
+and the new `COPY .../dist ./packages/immo-mcp/dist` — no manifest change
+needed there. Its header comment (previously "NOT YET DEPLOYABLE") was
+updated to record the fix.
 
-- `prm.js#protectedResourceMetadataUrl(resource)` computes the advertised URL
-  as `${resource}${PROTECTED_RESOURCE_METADATA_PATH}` — i.e. it **appends**
-  `/.well-known/oauth-protected-resource` after the full resource URL
-  (`https://immo.sent-tech.ca/mcp` → `.../mcp/.well-known/oauth-protected-resource`).
-- `core.js#handle()` and `hono.js#mcpAuthRoutes()` both check/register the PRM
-  route at the **bare, literal** `PROTECTED_RESOURCE_METADATA_PATH`
-  (`/.well-known/oauth-protected-resource`), with no resource-path prefix at
-  all.
-- These two disagree **whenever `resource` has a non-empty path** — which is
-  exactly radar's case (`resource = https://immo.sent-tech.ca/mcp`, chosen
-  deliberately to scope the token audience to the MCP endpoint rather than
-  the whole host, since the UI/api share the same origin). If `resource` were
-  bare (`https://immo.sent-tech.ca`, no path), both would coincidentally agree
-  on the same bare path — which is likely why this shipped un-caught: it only
-  breaks resource URIs with a path component. Note also that RFC 9728 §3.1's
-  own canonical construction (insert the well-known suffix *between* the host
-  and the resource's path) is a **third** answer,
-  `https://immo.sent-tech.ca/.well-known/oauth-protected-resource/mcp`, that
-  neither the header value nor the actual mount point matches — so this is
-  not just an internal inconsistency but also a deviation from the RFC's own
-  algorithm.
+## Remaining gap before a REAL go-live (not a blocker tracked here — see runbook §4)
 
-**Impact if unresolved**: any RFC-9728-compliant client (expected to include
-claude.ai, since PRM discovery via the 401 challenge is the primary
-documented mechanism in the MCP authorization spec) that follows
-`resource_metadata` literally will 404 on the very first discovery step and
-fail to complete "Add custom connector" — even once the IdP items in the
-runbook §4 are all answered and the image/deploy gaps below are resolved.
+The ConfigMap's `IMMO_MCP_OAUTH_ISSUER`/`IMMO_MCP_OAUTH_RESOURCE` are still
+placeholders (`https://idp.sent-tech.ca`) pending the real sentropic-operated
+IdP handover (issuer, JWKS URI, scopes, Dynamic Client Registration, RFC 8414
+metadata — runbook §4). Booting the Deployment today would NOT crash (issuer
+is just a config string; JWKS is fetched lazily per-request), but every real
+bearer token would fail verification against an unreachable placeholder
+issuer. `deploy/k8s/40-immo-mcp-http-deploy.yaml` / `41-immo-mcp-ingress.yaml`
+are therefore still deliberately NOT folded into
+`deploy/k8s/kustomization.yaml`'s `resources:` — apply by hand once the IdP
+values are real, then fold both in (see `kustomization.yaml`'s own comment).
 
-**Recommendation**: mount `mcpAuthRoutes(mcp)` in `server-http.ts` under the
-resource's own path (`app.route("/mcp", mcpAuthRoutes(mcp))` instead of
-`app.route("/", mcpAuthRoutes(mcp))`) so the PRM is actually served at
-`/mcp/.well-known/oauth-protected-resource`, matching what `protectedResourceMetadataUrl()`
-already advertises — a one-line, consumer-side fix that doesn't require
-waiting on a `@sentropic/mcp-auth` release. In parallel, flag the RFC 9728
-construction deviation to sentropic for a package-level fix (their
-`protectedResourceMetadataUrl()` should follow §3.1's "insert before path"
-rule, not "append after"), since other `@sentropic/mcp-auth` consumers with a
-non-empty resource path will hit the same bug. If `server-http.ts` is
-adjusted, `41-immo-mcp-ingress.yaml`'s second (`Exact`,
-`/.well-known/oauth-protected-resource`) path rule becomes a harmless no-op
-that can be dropped — see that file's header comment.
-
-## 2. `radar-api:latest` image does not bundle `packages/immo-mcp`
-
-**Owner: whoever owns `api/Dockerfile` / `build-push-images.yml` next.**
-
-`deploy/k8s/40-immo-mcp-http-deploy.yaml` targets
-`rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest` with
-`command: ["node", "packages/immo-mcp/dist/server-http.js"]`, per this task's
-primary hypothesis. Confirmed (this branch, reading `api/Dockerfile`) that
-this image is built from `{radar-domain, radar-scoring, radar-sources, api}`
-only — `packages/immo-mcp`'s deps are never `npm install`ed into it and its
-`server-http.ts` is never bundled. Applying the Deployment as-is today would
-CrashLoop on `MODULE_NOT_FOUND` at the very first `node` invocation.
-
-Two remediation options are spelled out with an exact diff sketch in the
-runbook §2 (extend `api/Dockerfile`'s build stage vs. ship a dedicated
-`packages/immo-mcp/Dockerfile` + CI matrix row). **Recommendation: extend
-`api/Dockerfile`** (cheaper — same CI job, same multi-entrypoint esbuild
-pattern already used for the Job scripts) unless/until the MCP surface needs
-an independent release cadence.
-
-This is why `40-immo-mcp-http-deploy.yaml` / `41-immo-mcp-ingress.yaml` are
-NOT yet folded into `deploy/k8s/kustomization.yaml` — see that file's own
-comment and the runbook §3.
-
-## Not a blocker (already fixed in this branch)
+## Not a blocker (already fixed in the original branch)
 
 The public `/mcp` Ingress path would additionally have been silently dropped
 by the namespace's default-deny NetworkPolicy baseline (same class of gap

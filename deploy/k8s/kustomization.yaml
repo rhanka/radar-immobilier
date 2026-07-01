@@ -10,13 +10,24 @@
 # `40-immo-mcp-http-deploy.yaml` / `41-immo-mcp-ingress.yaml` (remote MCP HTTP
 # server for claude.ai, see docs/spec/mcp/immo-mcp-remote-deploy.md) are
 # PREPARED but deliberately NOT listed below yet, same reasoning as the
-# 31/32/33 one-shot Jobs: the image does not carry the entrypoint yet (see
-# that file's header) and the IdP issuer/JWKS are placeholders. Apply by hand
-# (`kubectl apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml -f
-# deploy/k8s/41-immo-mcp-ingress.yaml`) once the runbook's prerequisites are
-# met, then fold both into `resources:` below. The companion
-# `allow-traefik-to-immo-mcp` NetworkPolicy IS already appended to
-# `70-networkpolicy.yaml` (harmless no-op until the mcp Deployment exists).
+# 31/32/33 one-shot Jobs. Of the two gaps tracked in
+# docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md, BOTH the code-level ones
+# are now RESOLVED (§1 PRM `resource_metadata` mount-point fixed in
+# `server-http.ts`; §2 `api/Dockerfile` now builds+bundles
+# `packages/immo-mcp/dist/server-http.js` into the shipped `radar-api` image).
+# What STILL withholds these two files from `resources:` is a cadrage gap,
+# not a code/infra blocker: `40-immo-mcp-http-deploy.yaml`'s ConfigMap ships a
+# PLACEHOLDER `IMMO_MCP_OAUTH_ISSUER`/`IMMO_MCP_OAUTH_RESOURCE` (the real
+# sentropic-operated IdP items are not provisioned yet — runbook §4
+# "Demandes à architect/sentropic"). Folding the Deployment in today would
+# boot fine (issuer/resource are just config strings, JWKS is fetched lazily
+# per-request) but every real bearer token would fail verification against an
+# unreachable placeholder issuer — safe, but not a genuine go-live. Apply by
+# hand (`kubectl apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml -f
+# deploy/k8s/41-immo-mcp-ingress.yaml`) once the real IdP values land, then
+# fold both into `resources:` below. The companion `allow-traefik-to-immo-mcp`
+# NetworkPolicy IS already appended to `70-networkpolicy.yaml` (harmless
+# no-op until the mcp Deployment exists).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: radar-immobilier
