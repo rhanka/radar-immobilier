@@ -75,7 +75,10 @@ beforeAll(async () => {
 
 describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
   it("(a) serves the RFC 9728 PRM and rejects an unauthenticated /mcp with WWW-Authenticate", async () => {
-    const prm = await app.request(PRM_PATH);
+    // PRM is mounted under the resource's own path ("/mcp"), matching what
+    // protectedResourceMetadataUrl() advertises in the 401 challenge below —
+    // see server-http.ts's createImmoHttpApp() comment + BLOCKERS.md item 1.
+    const prm = await app.request(`/mcp${PRM_PATH}`);
     expect(prm.status).toBe(200);
     const prmDoc = (await prm.json()) as Record<string, unknown>;
     expect(prmDoc["resource"]).toBe(RESOURCE);

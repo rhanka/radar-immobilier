@@ -13,7 +13,7 @@ import { fromRemoteJwks } from "@sentropic/oauth-verify";
 import type { AccessTokenClaims, TokenKeySource } from "@sentropic/oauth-verify";
 import { IMMO_SCOPES, type ImmoMcpAuthContext } from "./auth-context.js";
 import { createDataSource, type ImmoDataSource } from "./data-source.js";
-import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./server.js";
+import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
 import { registerTools } from "./tools.js";
 
 /**
@@ -21,8 +21,13 @@ import { registerTools } from "./tools.js";
  * OAuth 2.1 Resource Server (RFC 9728 PRM + RFC 6750 challenges) implemented by the
  * PUBLISHED packages @sentropic/mcp-auth (+ @sentropic/oauth-verify).
  *
- * This file is ADDITIVE: the stdio entrypoint (`server.ts`) is untouched. Both share
- * `registerTools` + the `ImmoMcpAuthContext` seam — only the AUTH SOURCE differs:
+ * This file is ADDITIVE: the stdio entrypoint's BEHAVIOUR (`server.ts`) is untouched —
+ * only its two identity constants moved to the side-effect-free `meta.ts` (see that
+ * file's comment: importing them from `server.ts` itself would pull its stdio
+ * "run only as the bin" guard into THIS file's esbuild bundle, where a unified
+ * `import.meta.url` post-bundling would make that guard spuriously fire). Both
+ * transports share `registerTools` + the `ImmoMcpAuthContext` seam — only the AUTH
+ * SOURCE differs:
  *   - stdio  → `resolveAuthContext(env)` (claims stubbed from env)
  *   - http   → claims of a validated bearer token (this file's `authContextFromMcp`).
  *
@@ -129,9 +134,9 @@ interface SessionEntry {
 
 /**
  * Build the Hono app exposing:
- *   - GET  /.well-known/oauth-protected-resource  → RFC 9728 PRM (public)
- *   - *    /mcp                                    → OAuth RS guard (401/403 + WWW-Authenticate)
- *   - POST/GET/DELETE /mcp                         → MCP Streamable HTTP transport (stateful)
+ *   - GET  /mcp/.well-known/oauth-protected-resource  → RFC 9728 PRM (public)
+ *   - *    /mcp                                        → OAuth RS guard (401/403 + WWW-Authenticate)
+ *   - POST/GET/DELETE /mcp                             → MCP Streamable HTTP transport (stateful)
  */
 export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {}): Hono {
   const data = deps.data ?? createDataSource({});
@@ -148,7 +153,17 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   const app = new Hono();
 
   // RFC 9728 Protected Resource Metadata (default-off in raw mcp-auth → turned ON here).
-  app.route("/", mcpAuthRoutes(mcp));
+  // Mounted under the resource's OWN path (`/mcp`), not the app root: `resource` is
+  // `https://.../mcp` (a non-empty path), and @sentropic/mcp-auth@0.1.0's
+  // `protectedResourceMetadataUrl()` advertises `${resource}/.well-known/oauth-protected-resource`
+  // in the 401 `WWW-Authenticate: resource_metadata="..."` challenge — i.e. it APPENDS the
+  // well-known suffix after the full resource URL, path included. Mounting the routes at "/"
+  // would serve the PRM at the bare `/.well-known/oauth-protected-resource`, which disagrees
+  // with that advertised URL and 404s for any RFC-9728-compliant client (see
+  // docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 1). `.use("/mcp", requireMcpAuth(...))`
+  // below only guards the EXACT `/mcp` path (Hono doesn't treat a bare path as a wildcard
+  // prefix), so it does not shadow this PRM sub-route — verified locally, see the runbook.
+  app.route("/mcp", mcpAuthRoutes(mcp));
 
   // OAuth Resource Server guard: validates the bearer (issuer/audience/scope), or returns
   // 401/403 with the proper WWW-Authenticate (resource_metadata + scope) challenge.
