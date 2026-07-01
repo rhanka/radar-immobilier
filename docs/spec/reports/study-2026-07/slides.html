@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Radar Immobilier — Rapport d'étude</title>
+  <style>
+    :root { --bg:#0f172a; --fg:#e5e7eb; --muted:#94a3b8; --card:#111827; --accent:#38bdf8; --ok:#34d399; --warn:#fbbf24; --bad:#fb7185; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:var(--bg); color:var(--fg); }
+    main { scroll-snap-type:y mandatory; height:100vh; overflow-y:auto; }
+    section { min-height:100vh; padding:64px 8vw; display:flex; flex-direction:column; justify-content:center; scroll-snap-align:start; border-bottom:1px solid rgba(255,255,255,.08); }
+    h1 { font-size:clamp(42px,7vw,88px); line-height:.95; margin:0 0 24px; letter-spacing:-.06em; }
+    h2 { font-size:clamp(32px,5vw,58px); line-height:1; margin:0 0 28px; letter-spacing:-.04em; }
+    h3 { font-size:26px; margin:0 0 12px; }
+    p, li { font-size:clamp(18px,2vw,26px); line-height:1.45; color:var(--fg); }
+    .muted { color:var(--muted); }
+    .kicker { color:var(--accent); text-transform:uppercase; letter-spacing:.16em; font-weight:700; font-size:14px; margin-bottom:20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:24px; }
+    .card { background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.1); border-radius:22px; padding:24px; }
+    .metric { font-size:44px; font-weight:800; letter-spacing:-.04em; color:white; }
+    .label { color:var(--muted); font-size:16px; margin-top:8px; }
+    .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); } .accent { color:var(--accent); }
+    table { width:100%; border-collapse:collapse; font-size:18px; margin-top:24px; }
+    th,td { padding:14px 12px; border-bottom:1px solid rgba(255,255,255,.12); text-align:left; vertical-align:top; }
+    th { color:var(--accent); font-size:14px; text-transform:uppercase; letter-spacing:.08em; }
+    .small li, .small p { font-size:19px; }
+    code { background:rgba(255,255,255,.08); padding:.15em .35em; border-radius:6px; }
+  </style>
+</head>
+<body>
+<main>
+  <section>
+    <div class="kicker">Rapport d'étude — 2026-07</div>
+    <h1>Radar Immobilier</h1>
+    <p class="muted">Faisabilité data, réalisations fonctionnelles, code et intégration.</p>
+  </section>
+
+  <section>
+    <div class="kicker">Synthèse</div>
+    <h2>Faisabilité démontrée, consolidation requise</h2>
+    <div class="grid">
+      <div class="card"><div class="metric ok">✓</div><div class="label">Chaîne documents → signaux → API → UI opérationnelle</div></div>
+      <div class="card"><div class="metric warn">30</div><div class="label">Focus prioritaire à compléter sur toutes les couches</div></div>
+      <div class="card"><div class="metric accent">1104</div><div class="label">Potentiel cible, à distinguer de l'effectif livré</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Data</div>
+    <h2>Effectif vs projeté</h2>
+    <table>
+      <tr><th>Couche</th><th>Effectif observé</th><th>Condition d'extension</th></tr>
+      <tr><td>Graphes</td><td>978 / 1104 v2.3 mesurés</td><td>scraping + re-grounding reliquats</td></tr>
+      <tr><td>Zonage</td><td>~234 / 1104 projetés par match, focus 30 faible</td><td>canonisation 1 collection / ville</td></tr>
+      <tr><td>Lots</td><td>~1103 collections disponibles</td><td>jobs bornés, bbox, pagination</td></tr>
+      <tr><td>Signaux</td><td>exploitables si citation groundée</td><td>modèle spécialisé + gates qualité</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <div class="kicker">Geo</div>
+    <h2>Zonage : la couche critique</h2>
+    <ul>
+      <li>Sources ArcGIS, Geo*, CKAN et parfois PDF.</li>
+      <li>Collections non canoniques : fragments, affectations, PIIA, grilles.</li>
+      <li>Champs hétérogènes : <code>zone_code</code>, <code>NumZone</code>, <code>NO_ZONAGE</code>, <code>ETIQUETTE</code>.</li>
+      <li>Priorité : focus 30 + mapping stable signal → zone.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kicker">Mapper</div>
+    <h2>Signal ↔ zone : rappel mesuré</h2>
+    <div class="grid">
+      <div class="card"><div class="metric warn">47,3 %</div><div class="label">rappel live strict : 52 / 110 codes</div></div>
+      <div class="card"><div class="metric ok">57,3 %</div><div class="label">après lecture de champs non candidats : 63 / 110</div></div>
+      <div class="card"><div class="metric bad">63,8 %</div><div class="label">des non-matchs live classés gap-data</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Lots & PII</div>
+    <h2>Cadastre exploitable sans propriétaire</h2>
+    <ul>
+      <li>Numéro de lot + géométrie : donnée publique utile au scoring.</li>
+      <li>Pas de propriétaire exposé.</li>
+      <li>Tests et contrats API doivent rester anti-PII.</li>
+      <li>Principal risque : volumétrie, mémoire, pagination, fréquence.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kicker">Produit</div>
+    <h2>Réalisations fonctionnelles</h2>
+    <div class="grid">
+      <div class="card"><h3>Signaux</h3><p>Carte MapLibre, filtres, citations, détails ville.</p></div>
+      <div class="card"><h3>Sources</h3><p>Consolidation maturité, couverture et qualité des données.</p></div>
+      <div class="card"><h3>Évaluation</h3><p>Lots, scoring visuel, fiche lot — encore partiel.</p></div>
+      <div class="card"><h3>Opportunités</h3><p>Entonnoir démo ; carte lots/opportunités à finaliser.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Architecture</div>
+    <h2>Architecture modulaire et réversible</h2>
+    <p class="muted">Sources → acquisition → OCR/extraction → graphify → PostgreSQL/PostGIS → API → UI → intégrations.</p>
+    <ul>
+      <li>Remplacement possible des fournisseurs OCR / LLM.</li>
+      <li>Projection rejouable.</li>
+      <li>Couches OAuth réversibles sans modifier le domaine.</li>
+      <li>Jobs k8s pour backfill et refresh.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kicker">IA</div>
+    <h2>Mixture of experts</h2>
+    <ul>
+      <li>Claude 4.8 xhigh pour arbitrages complexes.</li>
+      <li>Codex 5.5 xhigh pour exécution, patchs, consolidation.</li>
+      <li>OCR spécialisé pour documents difficiles.</li>
+      <li>Gates déterministes pour éviter la publication non vérifiée.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kicker">Exploitation</div>
+    <h2>Industrialiser sans sur-vendre</h2>
+    <ul>
+      <li>Jobs one-shot et daily pour geo.</li>
+      <li>Tableau de bord freshness et couverture.</li>
+      <li>Coût par ville, document et signal validé.</li>
+      <li>Premium models réservés aux cas à forte valeur.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kicker">Conclusion</div>
+    <h2>Prochaine étape : focus 30 complet</h2>
+    <ol>
+      <li>Compléter zonage et lots sur les 30 villes.</li>
+      <li>Stabiliser les jobs récurrents.</li>
+      <li>Renforcer modèle signaux + grounding.</li>
+      <li>Finaliser lots / opportunités / filtres métier.</li>
+      <li>Publier une couverture honnête effectif vs projeté.</li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>
