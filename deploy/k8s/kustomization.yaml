@@ -6,6 +6,17 @@
 # renders/validates standalone and can be applied to a throwaway/kind cluster
 # for review; on the live poc-k8s cluster the operator owns the Namespace +
 # ResourceQuota + baseline NetworkPolicy, and its copy wins.
+#
+# `40-immo-mcp-http-deploy.yaml` / `41-immo-mcp-ingress.yaml` (remote MCP HTTP
+# server for claude.ai, see docs/spec/mcp/immo-mcp-remote-deploy.md) are
+# PREPARED but deliberately NOT listed below yet, same reasoning as the
+# 31/32/33 one-shot Jobs: the image does not carry the entrypoint yet (see
+# that file's header) and the IdP issuer/JWKS are placeholders. Apply by hand
+# (`kubectl apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml -f
+# deploy/k8s/41-immo-mcp-ingress.yaml`) once the runbook's prerequisites are
+# met, then fold both into `resources:` below. The companion
+# `allow-traefik-to-immo-mcp` NetworkPolicy IS already appended to
+# `70-networkpolicy.yaml` (harmless no-op until the mcp Deployment exists).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: radar-immobilier
