@@ -1,0 +1,160 @@
+# Remote MCP HTTP server (Streamable HTTP + OAuth 2.1 Resource Server) for the
+# `@radar/immo-mcp` provider, so claude.ai (Settings → Connectors → Add custom)
+# can reach it at https://immo.sent-tech.ca/mcp. Mirrors the `radar-api`
+# Deployment/Service pattern (30-api.yaml): radar-app ServiceAccount, tight
+# resources, envFrom a dedicated non-secret ConfigMap.
+#
+# PREPARED, NOT APPLIED — not wired into kustomization.yaml yet (see the
+# "NOT YET DEPLOYABLE" note below and docs/spec/mcp/immo-mcp-remote-deploy.md).
+#
+# What this Pod runs (verified locally, see the runbook for the exact
+# commands + pasted output):
+#   packages/immo-mcp/src/server-http.ts, built to
+#   packages/immo-mcp/dist/server-http.js — Hono app exposing:
+#     GET  /.well-known/oauth-protected-resource  → RFC 9728 PRM (200, no auth)
+#     *    /mcp                                    → OAuth RS guard, then the
+#                                                     MCP Streamable HTTP transport
+#   via @sentropic/mcp-auth (createMcpAuth/requireMcpAuth) +
+#   @sentropic/oauth-verify (remote-JWKS bearer verification), MCP SDK 1.29.
+#
+# ── NOT YET DEPLOYABLE: image does not contain this entrypoint today ────────
+# This manifest reuses the radar-api image + overrides `command`, per the
+# mission's primary hypothesis, BUT that hypothesis is currently FALSE:
+# `api/Dockerfile`'s build stage only npm-installs/COPYs
+# {radar-domain,radar-scoring,radar-sources,api} and its esbuild step only
+# bundles api/src/*.ts entrypoints (outdir api/dist). It never installs
+# packages/immo-mcp's own deps (@sentropic/mcp-auth, @sentropic/oauth-verify,
+# @hono/node-server, jose) nor copies/bundles packages/immo-mcp/src. So
+# `node packages/immo-mcp/dist/server-http.js` against `radar-api:latest`
+# today fails at the first import with MODULE_NOT_FOUND.
+#
+# Required BEFORE this Deployment can actually run (pick ONE, see the runbook
+# "Prérequis image" section for the exact diff sketch):
+#   (A) [recommended] extend `api/Dockerfile`'s build stage: also
+#       `COPY packages/immo-mcp packages/immo-mcp`, add its package.json to
+#       the npm-install layer, and add a SECOND esbuild call
+#       (entryPoints: ['packages/immo-mcp/src/server-http.ts'],
+#        outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src')
+#       so the runtime stage's `COPY --from=build .../node_modules` already
+#       carries the extra deps and `packages/immo-mcp/dist/server-http.js`
+#       exists in the shipped `radar-api` image. Reuses the existing
+#       build-push-images.yml matrix entry (`api`) — no new CI job.
+#   (B) ship a DEDICATED `packages/immo-mcp/Dockerfile` + a new
+#       `immo-mcp` entry in build-push-images.yml's matrix, and point `image:`
+#       below at `rg.fr-par.scw.cloud/radar-immobilier/immo-mcp:latest`
+#       instead. Decouples the MCP server's release cadence/blast radius from
+#       the main api image; costs a new Dockerfile + CI matrix row.
+# See docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 1.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-mcp-config
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: mcp
+data:
+  # IPv4-first DNS on the IPv4-only POC egress path (mirrors 30-api.yaml) —
+  # matters here because the OAuth RS fetches the IdP's JWKS over the network
+  # on first token verification (@sentropic/oauth-verify `fromRemoteJwks`).
+  NODE_OPTIONS: "--dns-result-order=ipv4first"
+  # ── OAuth 2.1 Resource Server wiring (loadHttpConfig in server-http.ts) ───
+  # PLACEHOLDER — the real sentropic-operated IdP issuer is not provisioned
+  # yet. Replace once architect/sentropic hand over the four items in
+  # docs/spec/mcp/immo-mcp-remote-deploy.md "Demandes à architect/sentropic".
+  IMMO_MCP_OAUTH_ISSUER: "https://idp.sent-tech.ca"
+  # Canonical resource URI = token audience. Deliberately scoped to the /mcp
+  # path (not the bare origin), so a token minted for this resource cannot be
+  # replayed against the unrelated radar-api/radar-ui surface on the same host.
+  IMMO_MCP_OAUTH_RESOURCE: "https://immo.sent-tech.ca/mcp"
+  # Space-separated, advertised verbatim in the RFC 9728 PRM `scopes_supported`.
+  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: "immo:read immo:search immo:documents:read"
+  # Left UNSET on purpose: @sentropic/mcp-auth defaults to
+  # `${issuer}/.well-known/jwks.json` when absent (see core.js `getKeySource`).
+  # Only set IMMO_MCP_OAUTH_JWKS_URI if the IdP publishes its JWKS at a
+  # different path.
+  # IMMO_MCP_OAUTH_JWKS_URI: ""
+  IMMO_MCP_HTTP_PORT: "8848"
+  # "mock" here (any value other than "http" maps to dataMode "simulation" in
+  # loadHttpConfig) — the real radar API is NOT wired into the remote POC yet.
+  IMMO_MCP_DATA_MODE: "mock"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radar-immo-mcp
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: mcp
+spec:
+  replicas: 1
+  strategy:
+    # Sessions live in an in-memory Map (server-http.ts `sessions`) — not
+    # shared across replicas/pods. Recreate avoids two pods briefly holding
+    # different session state during a rollout (mirrors 30-api.yaml/50-ui.yaml).
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: mcp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: mcp
+    spec:
+      serviceAccountName: radar-app
+      containers:
+        - name: mcp
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace
+          command: ["node", "packages/immo-mcp/dist/server-http.js"]
+          ports:
+            - name: http
+              containerPort: 8848
+          envFrom:
+            - configMapRef:
+                name: immo-mcp-config
+          # No secrets: this pod only VERIFIES bearer tokens against the IdP's
+          # public JWKS (remote-JWKS resource server) — it holds no client
+          # secret or signing key of its own.
+          readinessProbe:
+            # `/mcp` itself always 401s without a bearer token (by design), so
+            # probe the PRM well-known instead — it is served unauthenticated
+            # and returns 200 as soon as the Hono app is up.
+            httpGet: { path: /.well-known/oauth-protected-resource, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet: { path: /.well-known/oauth-protected-resource, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 150m, memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radar-immo-mcp
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: mcp
+spec:
+  selector:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: mcp
+  ports:
+    - name: http
+      port: 8848
+      targetPort: http

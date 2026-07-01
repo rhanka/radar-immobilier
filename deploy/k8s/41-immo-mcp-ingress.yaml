@@ -1,0 +1,97 @@
+# Public route for the remote immo MCP server on the SAME host as the radar
+# UI: https://immo.sent-tech.ca/mcp (Streamable HTTP transport, OAuth-gated)
+# and https://immo.sent-tech.ca/.well-known/oauth-protected-resource (RFC 9728
+# PRM, unauthenticated).
+#
+# PREPARED, NOT APPLIED — not wired into kustomization.yaml yet (mirrors how
+# 31/32/33 one-shot Jobs are deliberately left out: `kubectl apply -f` by hand
+# once the prerequisites below are resolved). See
+# docs/spec/mcp/immo-mcp-remote-deploy.md.
+#
+# Why a SEPARATE Ingress object (not a path added to 60-ingress.yaml)
+# ---------------------------------------------------------------------
+# 60-ingress.yaml already owns `immo.sent-tech.ca` with a single catch-all
+# `path: /` (Prefix) -> radar-ui. Kubernetes Ingress controllers (Traefik
+# included) MERGE all Ingress objects that share a host into one routing
+# table and dispatch by MOST-SPECIFIC path match, so a second Ingress object
+# adding more specific paths on the same host is standard practice and avoids
+# touching the working UI Ingress. This file is that second object.
+#
+# TWO paths route to the mcp Service, not one — because of what the pod
+# ACTUALLY serves TODAY (verified locally, see the runbook):
+#   - `/mcp`                                     (Prefix) — the MCP transport.
+#   - `/.well-known/oauth-protected-resource`     (Exact)  — the RFC 9728 PRM.
+#     @sentropic/mcp-auth's `mcpAuthRoutes()` mounts this at the Hono app's
+#     OWN ROOT ('/'), not under '/mcp' — confirmed by reading
+#     node_modules/@sentropic/mcp-auth/dist/hono.js
+#     (`router.get('/.well-known/oauth-protected-resource', ...)`) and
+#     core.js's `handle()` (`url.pathname === PROTECTED_RESOURCE_METADATA_PATH`,
+#     i.e. the BARE path, no resource-path prefix). Without this second rule,
+#     `GET /.well-known/oauth-protected-resource` at the public host would fall
+#     through to the UI Ingress's catch-all `/` and hit radar-ui's SPA
+#     fallback instead of the mcp pod.
+#   > IMPORTANT CAVEAT: the 401 challenge's `WWW-Authenticate: ...
+#     resource_metadata="..."` value is `https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource`
+#     (resource + well-known path APPENDED) — a DIFFERENT URL than the one
+#     actually served (bare root, above), and this Ingress does not and
+#     CANNOT fix that: it is a `@sentropic/mcp-auth` 0.1.0 bug (the
+#     `protectedResourceMetadataUrl()` builder and the `handle()`/hono.js
+#     route registration disagree whenever `resource` has a non-empty path,
+#     which is exactly radar's case: `.../mcp`). A strict RFC 9728 client that
+#     follows the header literally will 404. See
+#     docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 1 — this needs a
+#     fix in @sentropic/mcp-auth (or in server-http.ts's mount point) BEFORE
+#     a real (non-mock) go-live with claude.ai, independent of this manifest.
+#
+# No `cert-manager.io/cluster-issuer` annotation here on purpose: 60-ingress.yaml
+# already requests the `immo.sent-tech.ca` cert into the SAME `radar-immo-tls`
+# Secret; repeating the annotation on a second Ingress for the same host+secret
+# would make cert-manager create a second, redundant Certificate object racing
+# the first. `tls.secretName` below only tells Traefik which Secret to
+# terminate with — it does not itself trigger issuance.
+#
+# NetworkPolicy dependency (mirrors "Ingress reaches the UI pod, not the api"
+# in deploy/k8s/README.md): the poc-k8s operator baseline only opens
+# Traefik -> {component: api}:3000; this repo's own 70-networkpolicy.yaml only
+# additionally opens Traefik -> {component: ui}:8080. Neither opens
+# Traefik -> {component: mcp}:8848, so under the namespace's default-deny
+# ingress this Ingress would resolve/route but every request would be DROPPED
+# before reaching the pod. See the `allow-traefik-to-immo-mcp` NetworkPolicy
+# appended to 70-networkpolicy.yaml (same additive pattern as
+# `allow-traefik-to-ui`) — required before this Ingress is applied.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: radar-immo-mcp
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: mcp
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - immo.sent-tech.ca
+      secretName: radar-immo-tls
+  rules:
+    - host: immo.sent-tech.ca
+      http:
+        paths:
+          - path: /mcp
+            pathType: Prefix
+            backend:
+              service:
+                name: radar-immo-mcp
+                port:
+                  name: http
+          - path: /.well-known/oauth-protected-resource
+            pathType: Exact
+            backend:
+              service:
+                name: radar-immo-mcp
+                port:
+                  name: http
