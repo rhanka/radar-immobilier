@@ -22,6 +22,15 @@ export interface GeoZoneProperties {
   lotCount: number;
   lots: GeoZoneLotRef[];
   label?: string;
+  /**
+   * Famille/kind de la zone quand la source l'expose (ex. "habitation",
+   * lettre canonique "H") — sert à la teinte des aplats (zone-kind-style).
+   */
+  kind?: string | null;
+  /** Lien grille de zonage PDF quand la source l'expose (preuve). */
+  grillePdfUrl?: string;
+  /** UI-derived : couleur résolue de l'aplat par kind (peinture MapLibre) — jamais persistée. */
+  kindColor?: string;
 }
 
 export interface GeoZoneFeature {

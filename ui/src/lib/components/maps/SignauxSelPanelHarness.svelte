@@ -11,6 +11,8 @@
   import SignauxSelPanel from "./SignauxSelPanel.svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+  import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
+  import type { LotsResponse } from "$lib/maps/lots-client.js";
   import {
     createSelectionBucketState,
     setFocus,
@@ -22,6 +24,8 @@
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
   export let selectionState: SelectionBucketState = createSelectionBucketState();
+  export let zonesResponse: GeoZonesResponse | null = null;
+  export let lotsResponse: LotsResponse | null = null;
 
   // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic).
   function toggleBucketKey(key: SelectionKey): void {
@@ -41,5 +45,7 @@
   {selectedCity}
   {detailNodes}
   {selectionState}
+  {zonesResponse}
+  {lotsResponse}
   onToggleKey={toggleBucketKey}
 />

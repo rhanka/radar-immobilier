@@ -49,11 +49,14 @@
   import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import { extractSignalEvidence } from "$lib/signals/graph-signal-detail-client.js";
   import {
-    fetchGeoZones,
     type GeoZoneFeature,
     type GeoZonesResponse,
     type GeoZoneFeatureCollection,
   } from "$lib/maps/geo-zones-client.js";
+  import {
+    emptyUnconfiguredZones,
+    loadSignauxZones,
+  } from "$lib/maps/signaux-zones-loader.js";
   import {
     fetchLots,
     type LotFeatureCollection,
@@ -89,13 +92,41 @@
     opacityForSelectionKey,
     withCityFallbackZone,
     filterDimsProjection,
+    zoneRefComparableKey,
+    CITY_FALLBACK_ZONE_PREFIX,
     FILTER_DIMMED_OPACITY,
   } from "$lib/maps/signaux-map-geo.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
   import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
+    resolveToken,
+    resolveMapColor,
+    LOT_NEUTRAL_TOKEN,
+    LOT_NEUTRAL_FALLBACK,
+    LOT_TOD_TOKEN,
+    LOT_TOD_FALLBACK,
+    LOT_4PLUS_TOD_TOKEN,
+    LOT_4PLUS_TOD_FALLBACK,
+    PRIORITY_LINE_TOKEN,
+    PRIORITY_LINE_FALLBACK,
+    SIGNAL_DIRECT_TOKEN,
+    SIGNAL_DIRECT_FALLBACK,
   } from "$lib/maps/score-color-scale.js";
+  import {
+    isDefaultEvalFilter,
+    isQuatrePlus,
+    lotHierarchyOpacity,
+    lotMatchesEvalFilter,
+    LOT_HIERARCHY_OPACITY,
+    type EvalLotFilter,
+  } from "$lib/maps/eval-lot-filters.js";
+  import {
+    decorateZonesWithKindColor,
+    zoneKindLegend,
+  } from "$lib/maps/zone-kind-style.js";
+  import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
+  import LotDataFilterPanel from "$lib/components/maps/LotDataFilterPanel.svelte";
   import {
     geometryBounds,
     QUEBEC_PROVINCE_BOUNDS,
@@ -110,19 +141,6 @@
     type: "FeatureCollection",
     features: [],
   };
-
-  function emptyUnconfiguredZones(citySlug: string): GeoZonesResponse {
-    return {
-      ok: false,
-      citySlug,
-      source: "none",
-      resolutionStatus: "missing",
-      geometryStatus: "missing",
-      zoneCount: 0,
-      warnings: ["geo-collection-not-configured"],
-      featureCollection: EMPTY_ZONES,
-    };
-  }
 
   export let geoRoute: GeoRoute | null = null;
 
@@ -241,11 +259,75 @@
     updateGeoLayers();
   }
 
-  function buildDisplayedLots(nodes: GraphSignalNode[]): LotFeatureCollection {
-    return lotsResponse
+  // ── Filtre DONNÉES zones-lots (parité #315, rail droit) ────────────────────
+  // Distinct du filtre de SIGNAUX z|m|p (rail gauche) : celui-ci filtre les
+  // données cadastrales/zonage de la ville active. ZÉRO refetch : chaque
+  // changement ne fait que recalculer les expressions de peinture.
+  let lotDataFilter: EvalLotFilter = {
+    category: "all",
+    usages: new Set(),
+    superficieMin: 0,
+  };
+
+  function handleLotDataFilterChange(next: EvalLotFilter): void {
+    lotDataFilter = next;
+  }
+
+  // Recalque la peinture quand le filtre données change (assignation ci-dessus).
+  $: if (mapReady && lotDataFilter) {
+    updateGeoLayers();
+  }
+
+  /**
+   * Codes (forme comparable) des zones contenant au moins un lot 4+ — zones
+   * SURLIGNÉES quand le filtre données 4+/Priorité est actif (parité #315).
+   * Fonction (pas un réactif) : lue au moment du repaint, jamais périmée.
+   */
+  function computeFourPlusZoneKeys(): Set<string> {
+    if (
+      lotDataFilter.category !== "quatrePlus" &&
+      lotDataFilter.category !== "priorite"
+    ) {
+      return new Set();
+    }
+    const keys = new Set<string>();
+    for (const lot of displayedLots.features) {
+      if (!isQuatrePlus(lot.properties)) continue;
+      const code = lotZoneCode(lot.properties);
+      if (code) keys.add(zoneRefComparableKey(code));
+    }
+    return keys;
+  }
+
+  /**
+   * Clés de sélection GÉO (zone/lot/signal) — la sélection de la VILLE
+   * elle-même (posée à chaque selectCity) ne doit PAS estomper les couches :
+   * l'ouverture d'une ville montre la colorisation par défaut pleine.
+   */
+  function geoSelectedKeys(state: SelectionBucketState): Set<SelectionKey> {
+    const keys = new Set<SelectionKey>();
+    for (const key of state.selectedKeys) {
+      if (!key.startsWith("municipality:")) keys.add(key);
+    }
+    return keys;
+  }
+
+  /**
+   * Lots affichés, décorés de la projection signal. Les TROIS sources sont des
+   * PARAMÈTRES (pas des lectures de closure) pour que le bloc réactif `$:`
+   * re-calcule aussi à l'arrivée de lotsResponse/zonesResponse — pas seulement
+   * au changement des nœuds (sinon le panneau filtres compte 0/0 tant qu'aucun
+   * signal ne bouge).
+   */
+  function buildDisplayedLots(
+    lotsRes: LotsResponse | null,
+    zonesRes: GeoZonesResponse | null,
+    nodes: GraphSignalNode[],
+  ): LotFeatureCollection {
+    return lotsRes
       ? decorateLotsWithSignalProjection(
-          lotsResponse.featureCollection,
-          zonesResponse?.featureCollection.features ?? [],
+          lotsRes.featureCollection,
+          zonesRes?.featureCollection.features ?? [],
           nodes,
         )
       : EMPTY_LOTS;
@@ -265,7 +347,7 @@
   $: filteredDetailNodes = activeSubsetKey
     ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
     : detailNodes;
-  $: displayedLots = buildDisplayedLots(filteredDetailNodes);
+  $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
    * #4 — Le filtre RESTREINT réellement l'ensemble quand il porte un axe « z »
@@ -408,22 +490,19 @@
   );
 
   /**
-   * `fill-color` des aplats zone par statut de géométrie (provenance). Statique,
-   * indépendant des données signal — porté par la vue, passé au socle.
+   * `fill-color` des aplats zone : teinte par KIND portée par la propriété
+   * décorée `kindColor` (cf. decorateZonesWithKindColor — résidentiel jaune,
+   * commercial rouge, agricole vert…), repli neutre. L'expression est STATIQUE
+   * (le socle ne pose `fill-color` qu'à la création de la couche) : c'est la
+   * DONNÉE décorée qui change, pas l'expression.
    */
-  const ZONE_GEOMETRY_STATUS_FILL_COLOR = [
-    "match",
-    ["get", "geometryStatus"],
-    "official",
-    "#0f766e",
-    "lot-union-fallback",
-    "#f59e0b",
-    "text-only",
-    "#94a3b8",
-    "missing",
-    "#475569",
-    "#94a3b8",
-  ] as ExpressionSpecification;
+  function zoneKindFillColorExpression(el: Element | null): ExpressionSpecification {
+    return [
+      "coalesce",
+      ["get", "kindColor"],
+      resolveMapColor(LOT_NEUTRAL_TOKEN, LOT_NEUTRAL_FALLBACK, el),
+    ] as ExpressionSpecification;
+  }
 
   /** Segments du drill Province / Ville / Zone (Zone grisée si non configurée). */
   $: zoneDrillDisabled = selectedCity !== null && !zonesConfigured;
@@ -441,6 +520,24 @@
   $: if (mapReady && filteredDetailNodes !== undefined) {
     updateGeoLayers();
   }
+
+  // ── Légende (couleurs résolues des tokens DS ; fallbacks sent-tech hors DOM) ─
+  const lotLegendEntries = [
+    { color: resolveToken(SIGNAL_DIRECT_TOKEN, SIGNAL_DIRECT_FALLBACK, null), label: "Cité par un signal" },
+    { color: resolveToken(PRIORITY_LINE_TOKEN, PRIORITY_LINE_FALLBACK, null), label: "Priorité (4+ ∧ TOD)" },
+    { color: resolveToken(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, null), label: "Multifamilial 4+" },
+    { color: resolveToken(LOT_TOD_TOKEN, LOT_TOD_FALLBACK, null), label: "Périmètre TOD" },
+    { color: resolveToken(LOT_NEUTRAL_TOKEN, LOT_NEUTRAL_FALLBACK, null), label: "Sans indicateur" },
+  ];
+  /** Kinds réellement présents dans les zones de la ville active (hors fallback contour). */
+  $: zoneLegendEntries = selectedCity
+    ? zoneKindLegend(
+        (zonesResponse?.featureCollection.features ?? [])
+          .filter((f) => !f.properties.code.startsWith(CITY_FALLBACK_ZONE_PREFIX))
+          .map((f) => ({ kind: f.properties.kind ?? null, code: f.properties.code })),
+        null,
+      )
+    : [];
 
   /** flyTo sur le centroïde WGS-84 de la ville (MunicipalityT.lon/lat). */
   function flyToCity(entry: CityMapEntry): void {
@@ -920,36 +1017,78 @@
     });
   }
 
+  // ── Opacités des aplats zone (teintes DOUCES : les lots restent lisibles) ──
+  const ZONE_BASE_OPACITY = 0.25;
+  const ZONE_FALLBACK_OPACITY = 0.15;
+  /** Zones contenant des lots 4+ quand le filtre données 4+/Priorité est actif. */
+  const ZONE_4PLUS_HIGHLIGHT_OPACITY = 0.45;
+
   function buildZoneOpacityExpression(
     zones = zonesResponse?.featureCollection.features ?? EMPTY_ZONES.features,
     signalZoneRefs: ReadonlySet<string> = focusedSignalZoneRefs,
-  ): ExpressionSpecification {
+  ): ExpressionSpecification | number {
+    // Un `match` MapLibre sans branche est invalide : couche vide → constante.
+    if (zones.length === 0) return ZONE_BASE_OPACITY;
     const hasSignalFocus = signalZoneRefs.size > 0;
+    const geoKeys = geoSelectedKeys(selectionState);
+    const hasZoneSelection = [...geoKeys].some((key) => key.startsWith("zone:"));
+    const fourPlusKeys = computeFourPlusZoneKeys();
     const expr: unknown[] = ["match", ["get", "code"]];
+    // Codes DUPLIQUÉS dans les collections réelles (ex. Salaberry : C-186 ×2,
+    // polygones disjoints d'une même zone) : une seule branche match par code,
+    // sinon MapLibre rejette l'expression.
+    const seenCodes = new Set<string>();
     for (const zone of zones) {
+      const code = zone.properties.code;
+      if (seenCodes.has(code)) continue;
+      seenCodes.add(code);
       const key = zoneSelectionKey(zone);
       let opacity: number;
       if (hasSignalFocus) {
-        opacity = signalZoneRefs.has(zone.properties.code) ? 0.85 : 0.15;
+        opacity = signalZoneRefs.has(code) ? 0.85 : 0.15;
+      } else if (hasZoneSelection) {
+        // Une zone est sélectionnée : elle ressort, les autres s'estompent.
+        opacity = geoKeys.has(key) ? 0.65 : 0.12;
+      } else if (fourPlusKeys.has(zoneRefComparableKey(code))) {
+        opacity = ZONE_4PLUS_HIGHLIGHT_OPACITY;
       } else {
-        opacity = opacityForSelectionKey(selectionState, key, 0.42);
+        opacity = code.startsWith(CITY_FALLBACK_ZONE_PREFIX)
+          ? ZONE_FALLBACK_OPACITY
+          : ZONE_BASE_OPACITY;
       }
-      expr.push(zone.properties.code, opacity);
+      expr.push(code, opacity);
     }
-    expr.push(hasSignalFocus ? 0.12 : (selectionState.selectedKeys.size > 0 ? 0.5 : 0.42));
+    expr.push(hasSignalFocus || hasZoneSelection ? 0.12 : ZONE_BASE_OPACITY);
     return expr as ExpressionSpecification;
   }
 
   function buildLotOpacityExpression(
     lots: LotFeatureCollection = displayedLots,
     signalLotRefs: ReadonlySet<string> = focusedSignalLotRefs,
-  ): ExpressionSpecification {
+  ): ExpressionSpecification | number {
+    // Un `match` MapLibre sans branche est invalide : couche vide → constante.
+    if (lots.features.length === 0) return LOT_HIERARCHY_OPACITY.neutral;
     const hasSignalFocus = signalLotRefs.size > 0;
-    const hasSelection = selectionState.selectedKeys.size > 0;
-    // #4 — atténuation par filtre uniquement quand ni focus signal ni sélection
-    // active ne pilotent déjà l'opacité (ceux-ci priment et portent leur propre
-    // logique de contraste).
-    const dimByFilter = !hasSignalFocus && !hasSelection && filterActive && hasProjectedLot;
+    // Sélection GÉO uniquement (zone/lot/signal) : la sélection de la ville
+    // elle-même n'estompe rien — colorisation par défaut pleine à l'ouverture.
+    const geoKeys = geoSelectedKeys(selectionState);
+    const hasGeoSelection = geoKeys.size > 0;
+    const dataFilterActive = !isDefaultEvalFilter(lotDataFilter);
+    // #4 — atténuation par filtre SIGNAUX (z|m) uniquement quand ni focus
+    // signal ni sélection géo ne pilotent déjà l'opacité.
+    const dimByFilter =
+      !hasSignalFocus && !hasGeoSelection && filterActive && hasProjectedLot;
+    // Codes (comparables) des zones sélectionnées : leurs lots se surlignent
+    // avec elles (contrat d'interaction clic zone → zone + ses lots).
+    const selectedZoneCodes = new Set<string>();
+    for (const key of geoKeys) {
+      const parsed = parseKey(key);
+      if (!parsed || parsed.kind !== "zone") continue;
+      const sep = parsed.id.indexOf("/");
+      if (sep > 0 && sep < parsed.id.length - 1) {
+        selectedZoneCodes.add(zoneRefComparableKey(parsed.id.slice(sep + 1)));
+      }
+    }
     const expr: unknown[] = ["match", ["get", "noLot"]];
     const citySlug = selectedCity?.municipality.slug;
     for (const lot of lots.features) {
@@ -957,6 +1096,19 @@
       let opacity: number;
       if (hasSignalFocus) {
         opacity = signalLotRefs.has(noLot) ? 0.85 : 0.15;
+      } else if (hasGeoSelection) {
+        const key = lotSelectionKey(noLot, lot.properties.citySlug ?? citySlug);
+        const zoneCodeKey = zoneRefComparableKey(lotZoneCode(lot.properties) ?? "");
+        const highlighted =
+          (key !== null && geoKeys.has(key)) ||
+          (zoneCodeKey.length > 0 && selectedZoneCodes.has(zoneCodeKey));
+        opacity = highlighted ? 0.85 : 0.15;
+      } else if (
+        dataFilterActive &&
+        !lotMatchesEvalFilter(lot.properties, lotDataFilter)
+      ) {
+        // Hors-filtre données : estompé, jamais masqué (parité #315).
+        opacity = FILTER_DIMMED_OPACITY;
       } else if (
         dimByFilter &&
         filterDimsProjection(lot.properties.signalProjection, true, true)
@@ -964,12 +1116,16 @@
         // Lot sans projection de signal alors qu'un filtre restreint est actif.
         opacity = FILTER_DIMMED_OPACITY;
       } else {
-        const key = lotSelectionKey(noLot, lot.properties.citySlug ?? citySlug);
-        opacity = key ? opacityForSelectionKey(selectionState, key, 0.36) : 0.36;
+        // Hiérarchie concurrente PERMANENTE : priorité 0.5 > 4+ 0.4 > TOD 0.25
+        // > neutre 0.15. Avec filtre données actif, les matchés ressortent.
+        const base = lotHierarchyOpacity(lot.properties);
+        opacity = dataFilterActive ? Math.max(base, 0.5) : base;
       }
       expr.push(noLot, opacity);
     }
-    expr.push(hasSignalFocus ? 0.12 : (hasSelection ? 0.5 : 0.36));
+    expr.push(
+      hasSignalFocus || hasGeoSelection ? 0.12 : LOT_HIERARCHY_OPACITY.neutral,
+    );
     return expr as ExpressionSpecification;
   }
 
@@ -991,12 +1147,19 @@
         )
       : EMPTY_LOTS;
     // Élément monté sous le ThemeProvider (= conteneur carte du socle) pour
-    // résoudre les tokens DS des expressions de couleur lot (parité stricte).
+    // résoudre les tokens DS des expressions de couleur zone/lot (parité stricte).
     const el = mapApi.themeElement;
-    mapApi.syncGeoLayers({
+    // Teinte par kind portée PAR FEATURE (kindColor) : robuste aux codes
+    // dupliqués et aux données arrivant après la création de la couche.
+    const zonesForPaint = decorateZonesWithKindColor(
       zones,
+      computeFourPlusZoneKeys(),
+      el,
+    );
+    mapApi.syncGeoLayers({
+      zones: zonesForPaint,
       lots,
-      zoneFillColor: ZONE_GEOMETRY_STATUS_FILL_COLOR,
+      zoneFillColor: zoneKindFillColorExpression(el),
       zoneFillOpacity: buildZoneOpacityExpression(zones.features),
       lotFillColor: signauxLotFillColorExpression(el),
       lotFillOpacity: buildLotOpacityExpression(lots),
@@ -1044,40 +1207,47 @@
     };
 
     // ── Couche ZONES (waiter propre) ─────────────────────────────────────────
+    // Résolution TIERÉE (signaux-zones-loader) : endpoint de résolution API,
+    // PUIS collection OGC `qc-zonage-<slug>` (passthrough) quand l'endpoint ne
+    // connaît pas la ville. Le fallback contour ville ne reste appliqué que si
+    // la collection est VRAIMENT absente (cas Salaberry-de-Valleyfield : 645
+    // vraies zones servies par la collection, plus jamais le contour).
     const zonesTask = (async () => {
       try {
-        const value = await fetchGeoZones(citySlug, {
-          fallback: "lots",
-          limit: 500,
-          signal: lease.signal,
-        });
+        const loaded = await loadSignauxZones(citySlug, { signal: lease.signal });
         if (!lease.isCurrent()) return;
-        const entry = allEntries.find((item) => item.municipality.slug === citySlug);
-        const withFallback = withCityFallbackZone(value, {
-          citySlug,
-          cityName: entry?.municipality.name ?? citySlug,
-          geometry: mapApi?.getCityBoundary(citySlug) ?? null,
-        });
-        zonesResponse = withFallback.response;
-        if (withFallback.created) {
-          notices.push(
-            (mapApi?.hasCityBoundary(citySlug) ?? false)
-              ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
-              : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
-          );
-        } else if (value.resolutionStatus === "fallback") {
-          notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
+        if (loaded.tier !== "none" && loaded.response) {
+          zonesResponse = loaded.response;
+          if (
+            loaded.tier === "endpoint" &&
+            loaded.response.resolutionStatus === "fallback"
+          ) {
+            notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
+          }
+        } else if (!loaded.response) {
+          // Endpoint ET collection non configurés → état vide honnête.
+          zonesResponse = emptyUnconfiguredZones(citySlug);
+        } else {
+          const entry = allEntries.find((item) => item.municipality.slug === citySlug);
+          const withFallback = withCityFallbackZone(loaded.response, {
+            citySlug,
+            cityName: entry?.municipality.name ?? citySlug,
+            geometry: mapApi?.getCityBoundary(citySlug) ?? null,
+          });
+          zonesResponse = withFallback.response;
+          if (withFallback.created) {
+            notices.push(
+              (mapApi?.hasCityBoundary(citySlug) ?? false)
+                ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
+                : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
+            );
+          }
         }
       } catch (err) {
         // Abort (changement de ville) → réponse périmée à ignorer.
         if (!lease.isCurrent() || isAbortError(err)) return;
-        const message = err instanceof Error ? err.message : "zones indisponibles";
-        // 404 = collection non configurée → état vide honnête, PAS une erreur.
-        if (message.includes("geo-zones HTTP 404")) {
-          zonesResponse = emptyUnconfiguredZones(citySlug);
-        } else {
-          zonesError = "Zones indisponibles.";
-        }
+        console.warn("Zones load failed:", err);
+        zonesError = "Zones indisponibles.";
       } finally {
         if (lease.isCurrent()) {
           zonesLoading = false;
@@ -1188,23 +1358,53 @@
     />
   </svelte:fragment>
 
-  <!-- Légende choroplèthe épinglée en bas du rail -->
+  <!-- Légende épinglée en bas du rail : choroplèthe signaux + hiérarchie lots
+       + teintes de zonage (kinds réellement présents dans la ville active). -->
   <svelte:fragment slot="controls-footer">
-    <div class="p-4">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
-      <ul class="space-y-1">
-        {#each [
-          { color: "#ef4444", label: "6+ signaux" },
-          { color: "#f97316", label: "3–5 signaux" },
-          { color: "#fbbf24", label: "1–2 signaux" },
-          { color: "#e2e8f0", label: "Aucun signal (0)" },
-        ] as item (item.label)}
-          <li class="flex items-center gap-2 text-xs text-slate-600">
-            <span class="h-3 w-3 rounded-sm border border-slate-300 shrink-0" style="background-color: {item.color};"></span>
-            {item.label}
-          </li>
-        {/each}
-      </ul>
+    <div class="space-y-3 p-4">
+      {#if !selectedCity}
+        <div>
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
+          <ul class="space-y-1">
+            {#each [
+              { color: "#ef4444", label: "6+ signaux" },
+              { color: "#f97316", label: "3–5 signaux" },
+              { color: "#fbbf24", label: "1–2 signaux" },
+              { color: "#e2e8f0", label: "Aucun signal (0)" },
+            ] as item (item.label)}
+              <li class="flex items-center gap-2 text-xs text-slate-600">
+                <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                {item.label}
+              </li>
+            {/each}
+          </ul>
+        </div>
+      {:else}
+        <div>
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</p>
+          <ul class="space-y-1">
+            {#each lotLegendEntries as item (item.label)}
+              <li class="flex items-center gap-2 text-xs text-slate-600">
+                <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                {item.label}
+              </li>
+            {/each}
+          </ul>
+        </div>
+        {#if zoneLegendEntries.length > 0}
+          <div>
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
+            <ul class="grid grid-cols-2 gap-x-2 gap-y-1">
+              {#each zoneLegendEntries as item (item.label)}
+                <li class="flex items-center gap-2 text-xs text-slate-600">
+                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                  {item.label}
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+      {/if}
     </div>
   </svelte:fragment>
 
@@ -1285,29 +1485,56 @@
     {/if}
   </GeoCityMapBase>
 
-  <!-- ── SEL droit : panneau de sélection ville ───────────────────────────── -->
+  <!-- ── SEL droit : filtres DONNÉES zones-lots (parité #315) + sélection ──── -->
   <svelte:fragment slot="sel">
-    <SignauxSelPanel
-      {selectedCity}
-      {detailNodes}
-      {detailLoading}
-      {detailError}
-      {zonesLoading}
-      {zonesError}
-      {lotsLoading}
-      {lotsError}
-      {zonesResponse}
-      {lotsResponse}
-      {selectionState}
-      {activeSubsetKey}
-      onClear={() => clearSelection()}
-      onToggleKey={toggleBucketKey}
-      onOpenDocument={openDocument}
-      onOpenEvidence={openEvidence}
-      onRetryDetail={retryDetail}
-      onRetryGeo={retryGeo}
-      hoveredSignalId={hoveredEvidenceSignalId}
-      onHoverSignal={setHoveredEvidenceSignal}
-    />
+    <div class="sel-stack">
+      {#if selectedCity}
+        <LotDataFilterPanel
+          lots={displayedLots.features}
+          filter={lotDataFilter}
+          onChange={handleLotDataFilterChange}
+        />
+      {/if}
+      <div class="sel-stack-body">
+        <SignauxSelPanel
+          {selectedCity}
+          {detailNodes}
+          {detailLoading}
+          {detailError}
+          {zonesLoading}
+          {zonesError}
+          {lotsLoading}
+          {lotsError}
+          {zonesResponse}
+          {lotsResponse}
+          {selectionState}
+          {activeSubsetKey}
+          onClear={() => clearSelection()}
+          onToggleKey={toggleBucketKey}
+          onOpenDocument={openDocument}
+          onOpenEvidence={openEvidence}
+          onRetryDetail={retryDetail}
+          onRetryGeo={retryGeo}
+          hoveredSignalId={hoveredEvidenceSignalId}
+          onHoverSignal={setHoveredEvidenceSignal}
+        />
+      </div>
+    </div>
   </svelte:fragment>
 </ViewLayout>
+
+<style>
+  /* Rail droit : filtres données (haut, hauteur fixe) + panneau Sélection
+     (reste de la hauteur, scroll interne). */
+  .sel-stack {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .sel-stack-body {
+    flex: 1;
+    min-height: 0;
+  }
+</style>
