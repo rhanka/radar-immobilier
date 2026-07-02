@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { buildImmoServer } from "./server.js";
-import { V0_TOOL_NAMES } from "./tools.js";
+import { ALL_TOOL_NAMES } from "./tools.js";
 
 const STUB_ENV: NodeJS.ProcessEnv = {
   IMMO_MCP_AUTH_STUB_SUB: "test-user",
@@ -27,11 +27,11 @@ function textOf(result: { content: unknown }): string {
 }
 
 describe("immo-mcp server", () => {
-  it("lists exactly the 6 v0 tools", async () => {
+  it("lists exactly the 6 v0 tools + the 4 raw-data tools", async () => {
     const client = await connectClient();
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();
-    expect(names).toEqual([...V0_TOOL_NAMES].sort());
+    expect(names).toEqual([...ALL_TOOL_NAMES].sort());
     await client.close();
   });
 
@@ -83,5 +83,99 @@ describe("immo-mcp server", () => {
     expect(res.isError).toBe(true);
     expect(textOf(res)).toContain("scope_denied:immo:search");
     await client.close();
+  });
+
+  // ── Raw-data tools (mock mode by default: no RADAR_API_BASE_URL in env) ───
+
+  it("get_zones_geojson returns a bounded FeatureCollection", async () => {
+    const client = await connectClient();
+    const res = await client.callTool({
+      name: "get_zones_geojson",
+      arguments: { city: "longueuil" },
+    });
+    const payload = JSON.parse(textOf(res as { content: unknown }));
+    expect(payload.featureCollection.type).toBe("FeatureCollection");
+    expect(payload.numberReturned).toBeGreaterThan(0);
+    expect(payload).toHaveProperty("numberMatched");
+    expect(payload).toHaveProperty("truncated");
+    await client.close();
+  });
+
+  it("get_lots_geojson serves enriched flags and honours only4Plus", async () => {
+    const client = await connectClient();
+    const res = await client.callTool({
+      name: "get_lots_geojson",
+      arguments: { city: "longueuil", only4Plus: true },
+    });
+    const payload = JSON.parse(textOf(res as { content: unknown }));
+    expect(payload.numberReturned).toBeGreaterThan(0);
+    for (const f of payload.featureCollection.features) {
+      expect(f.properties.multifamilial4plus).toBe(true);
+      expect(f.properties).toHaveProperty("multifamilial4plusSource");
+      expect(f.properties).toHaveProperty("superficieM2");
+    }
+    await client.close();
+  });
+
+  it("get_lots_geojson REQUIRES a bbox beyond the default limit (size bound)", async () => {
+    const client = await connectClient();
+    const res = (await client.callTool({
+      name: "get_lots_geojson",
+      arguments: { city: "longueuil", limit: 1000 },
+    })) as { content: unknown; isError?: boolean };
+    expect(res.isError).toBe(true);
+    expect(textOf(res)).toContain("bbox_required");
+    await client.close();
+  });
+
+  it("get_grille_pdf returns the grille URL for a zone that carries one", async () => {
+    const client = await connectClient();
+    const res = await client.callTool({
+      name: "get_grille_pdf",
+      arguments: { city: "longueuil", zone: "H-203" },
+    });
+    const payload = JSON.parse(textOf(res as { content: unknown }));
+    expect(payload.found).toBe(true);
+    expect(payload.grillePdfUrl).toContain("H-203.pdf");
+    await client.close();
+  });
+
+  it("get_pv_pdf returns the served URL + metadata for a known document", async () => {
+    const client = await connectClient();
+    const res = await client.callTool({
+      name: "get_pv_pdf",
+      arguments: { rawRef: "doc-longueuil-pv-2026-04-14" },
+    });
+    const payload = JSON.parse(textOf(res as { content: unknown }));
+    expect(payload.found).toBe(true);
+    expect(payload.url).toContain("/api/documents/raw?rawRef=");
+    expect(payload.city).toBe("longueuil");
+    await client.close();
+  });
+
+  it("denies geo raw tools without immo:read and pdf tools without immo:documents:read", async () => {
+    const noRead = await connectClient({
+      ...STUB_ENV,
+      IMMO_MCP_AUTH_STUB_SCOPES: "immo:search immo:documents:read",
+    });
+    const geo = (await noRead.callTool({
+      name: "get_zones_geojson",
+      arguments: { city: "longueuil" },
+    })) as { content: unknown; isError?: boolean };
+    expect(geo.isError).toBe(true);
+    expect(textOf(geo)).toContain("scope_denied:immo:read");
+    await noRead.close();
+
+    const noDocs = await connectClient({
+      ...STUB_ENV,
+      IMMO_MCP_AUTH_STUB_SCOPES: "immo:read immo:search",
+    });
+    const pdf = (await noDocs.callTool({
+      name: "get_pv_pdf",
+      arguments: { rawRef: "doc-longueuil-pv-2026-04-14" },
+    })) as { content: unknown; isError?: boolean };
+    expect(pdf.isError).toBe(true);
+    expect(textOf(pdf)).toContain("scope_denied:immo:documents:read");
+    await noDocs.close();
   });
 });
