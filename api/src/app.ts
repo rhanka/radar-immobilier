@@ -50,6 +50,14 @@ export type AppDeps = HealthDeps &
     authOptions?: AuthRouteOptions;
     /** Config Scaleway TEM optionnelle pour les emails d'invitation. */
     tem?: TemConfig;
+    /**
+     * Seams de la couverture sources (source-coverage) : fetch injectable
+     * (tests OFFLINE — jamais de réseau en unit), base OGC geo et TTL du cache
+     * du listing live. Absents en prod : fetch global + GEO_OGC_BASE_URL.
+     */
+    fetchImpl?: typeof fetch;
+    geoBaseUrl?: string;
+    geoListingTtlMs?: number;
   };
 
 /** Compose the Hono application from injected dependencies. */
