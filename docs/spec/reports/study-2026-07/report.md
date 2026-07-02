@@ -52,20 +52,39 @@ Les limites principales, **assumées sans survente** :
 - exploitation encore partielle : jobs geo one-shot/daily en place mais **cronjobs de refresh
   suspendus** pour des raisons de coût (FinOps), en attente de correction de la cause racine.
 
+### Ontologie du signal — versions v2.2 et v2.3 (à lire avant les chiffres)
+
+Les signaux sont extraits des PV selon un **schéma d'ontologie versionné**. Deux versions apparaissent
+dans ce rapport :
+
+- **v2.2** — schéma antérieur : entités et relations correctement extraites, mais **grounding partiel**
+  (la citation source est parfois absente, ou pointe un identifiant de document non retrouvé).
+- **v2.3** — schéma courant : ajoute une **contrainte de qualité forte** — chaque signal doit porter une
+  **citation vérifiable** (page/passage du PV réel, verbatim) et franchir des **contrôles de
+  publication** qui rejettent toute citation non substantiée.
+
+Le passage **v2.2 → v2.3** est un **durcissement de la preuve** (pas un simple changement de format) :
+il publie *moins* de signaux, mais chaque signal publié est **traçable jusqu'au document**.
+
 ### Chiffres clés — deux axes : **Focus 30** (villes démo prioritaires) vs **Province ≈1104**
 
 La lecture se fait toujours sur **deux périmètres distincts** : les **30 villes focus** (banlieues MTL
 prioritaires, le banc de démonstration E2E) et la **province ≈1104** (hors Montréal/Laval). Un même
 indicateur a **deux valeurs** — ne jamais les additionner.
 
-| Dimension (par couche) | **Focus 30** | **Province ≈1104** | Statut |
+Les couches sont **distinctes** : le **PV scrapé** est le substrat brut ; les **signaux** en sont
+extraits (le graphe v2.3 est la *méthode de parsing*, pas une finalité). Un signal n'a de valeur que
+**groundé** (rattaché à une citation vérifiable).
+
+| Couche (finalité) | **Focus 30** | **Province ≈1104** | Statut |
 |---|---:|---:|---|
-| Graphe présent (v2.3) | **25 / 30** | **978 / 1104** | **[effectif]** |
-| Signaux groundés page/bbox | **56 / 70** (80 %) | — | **[effectif]** (mesure S3) |
-| **Zonage servi (geo)** | **29 / 30** | **~485 / 1106** | **[effectif — live 2026-07-02]** |
-| **Lots servis (geo)** | **30 / 30** | **~1102 / 1106** | **[effectif — live 2026-07-02]** |
-| Villes citant ≥1 zone (signaux) | **14 / 30** | — | **[effectif]** — vrai goulot |
-| Consistance signal↔zone #74 (recall) | **~60 %** (proxy) | 47–59 % (55 villes) | **[à consolider]** (vrai mapper à relancer sur PG peuplé) |
+| **PV scrapé** — recueil brut | **27 / 30** | **~1007 / 1104** | **[effectif]** — préalable ; 3 focus (brossard, kirkland, lile-dorval) sans brut |
+| **Signaux extraits** (v2.3) | **25 / 30** | **978 / 1104** | **[effectif]** — le graphe = *méthode d'extraction*, pas la finalité |
+| **Signaux groundés** (citation vérifiable) | **56 / 70** — cible **100 %** | — | **[effectif]** — **14 signaux à cleanser** (purge/re-ground, cf. §1.A.3) |
+| **Zonage servi** (geo) | **29 / 30** | **~485 / 1106** | **[effectif — live 2026-07-02]** |
+| **Lots servis** (geo) | **30 / 30** | **~1102 / 1106** | **[effectif — live 2026-07-02]** |
+| Signaux **désignant une zone** | **14 / 30** | — | **[effectif]** — vrai goulot de consistance |
+| Consistance signal↔zone (#74, recall) | **~60 %** (proxy) | 47–59 % (55 villes) | **[à consolider]** (mapper à relancer sur PG peuplé) |
 
 > **Bascule récente (geo)** : le zonage focus est passé de **7/30 → 29/30** (livraison geo ; seul
 > `lile-dorval`, micro-île, manque) et les lots à **30/30**. La **carte Évaluation en profite déjà
@@ -149,9 +168,16 @@ Les signaux sont la couche la plus utile au métier, et la plus sensible :
 - un signal de **zone proposée** ou de **règlement en cours** peut légitimement ne pas exister dans
   la couche zonage courante (non-match **attendu**, pas une erreur).
 
+> **Grounding = 100 % attendu (dette de qualité).** Un signal **non groundé n'existe pas** : sans
+> citation vérifiable, il ne doit pas être présenté. L'état focus est **56/70 groundés** → les
+> **~14 restants** sont une **dette** à traiter par une **passe de cleansing** : soit **re-grounder**
+> depuis le PDF réel (retrouver la citation verbatim), soit **purger** le signal s'il n'est pas
+> substantiable. La cible n'est pas « 80 % », c'est **100 % ou rien**.
+
 **Préconisations :**
 
-1. conserver la règle stricte **« pas de signal publié sans citation vérifiable »** ;
+1. **passe de cleansing grounding** : viser **100 %** — re-grounder ou purger les signaux non
+   substantiables (aucun signal sans citation vérifiable en production) ;
 2. **spécialiser le modèle de détection** des signaux réglementaires plutôt que de compter sur un
    modèle généraliste ;
 3. introduire un **score de confiance par signal** : citation, date, type, zone, lot, source, état
@@ -196,13 +222,18 @@ accidentelles.
 
 #### Méthode
 
-La couche zonage combine plusieurs familles de sources :
+La couche zonage est acquise par **plusieurs méthodes distinctes** (une ville peut relever d'une ou
+de plusieurs). La **répartition par méthode** est **à consolider avec geo** (demande envoyée) :
 
-- couches ArcGIS et services géographiques municipaux ;
-- collections ouvertes (catalogue provincial, portails municipaux) ;
-- documents PDF lorsque la géométrie n'est pas directement exposée ;
-- mapping standard côté geo, puis ingestion dans la table `zone_versions` ;
-- normalisation des codes de zones pour permettre le rapprochement avec les signaux.
+| Méthode d'acquisition | Ce que c'est | Villes couvertes (focus 30 · province) |
+|---|---|---:|
+| **ArcGIS** | feature-layers / services ArcGIS municipaux (ou ré-attribués) | *à confirmer avec geo* |
+| **GeoNet** | portail / harvest GeoNet (nom exact à confirmer) | *à confirmer avec geo* |
+| **CKAN — Données Québec** | catalogue ouvert provincial (manifestes CKAN) | *à confirmer avec geo* |
+| **PDF (recalage géoréférencé)** | plan de zonage PDF officiel → géoréférencement (points de contrôle / OCR) quand la géométrie n'est pas exposée | *à confirmer avec geo* |
+
+Après acquisition (quelle que soit la méthode) : mapping standard côté geo → ingestion dans
+`zone_versions` + **normalisation des codes de zone** pour permettre le rapprochement signal↔zone.
 
 L'ingestion (`ogc-pull`) interroge l'API géospatiale, pagine les collections `qc-zonage-<ville>` et
 `qc-lots-<ville>`, et **upsert** zones et lots dans PostgreSQL/PostGIS. Le service `populate-geo`
@@ -498,24 +529,26 @@ cœur de l'étude ; l'important est qu'elle soit **réversible** : le produit fo
 elle, et son durcissement (session durable, refresh silencieux, persistance du consentement) est un
 chantier identifié et cadré, indépendant du domaine métier.
 
-## 3.B — Utilisation de l'IA : mixture of experts
+## 3.B — Utilisation de l'IA : mixture of agents (consensus)
 
-La production s'est appuyée sur une **combinaison d'experts** (mixture of experts) : plusieurs
-moteurs et agents spécialisés sont mobilisés selon la nature du problème, plutôt qu'un modèle unique.
+La production repose sur une **mixture of agents** : plusieurs agents autonomes travaillent en
+parallèle et, sur les problèmes complexes, **convergent par consensus** (double relecture,
+vérification adverse, arbitrage croisé) plutôt que de faire confiance à une seule passe. Le
+consensus est le mécanisme central — il attrape les erreurs qu'un agent seul laisserait passer.
 
-| Rôle | Moteur / capacité | Usage |
+| Rôle | Agent / capacité | Usage |
 |---|---|---|
-| Raisonnement complexe, arbitrages d'architecture | profils de raisonnement premium **Claude 4.8 (xhigh)**, en **double compte** | conception, décisions, revue de cohérence |
-| Exécution, patchs, revue, consolidation | profils premium **Codex 5.5 (xhigh)**, en **double compte** | implémentation, correctifs, consolidation |
+| Raisonnement complexe, arbitrages d'architecture | agents **Claude 4.8 (xhigh)**, en **double compte** | conception, décisions, **1ʳᵉ passe** du consensus |
+| Exécution, patchs, **relecture adverse** | agents **Codex 5.5 (xhigh)**, en **double compte** | implémentation, correctifs, **2ᵉ passe** (relecture) du consensus |
 | OCR de documents complexes | moteur OCR spécialisé (**Mistral OCR 4**) | extraction de texte sur PDF difficiles |
-| Grounding verbatim des citations | modèle de raisonnement rapide | retrouver la citation exacte, anti-hallucination |
-| Agents parallèles | flotte d'agents isolés | mesures, UI, infra, data, rédaction |
+| Grounding verbatim des citations | agent de raisonnement rapide | retrouver la citation exacte, anti-hallucination |
+| Agents parallèles | flotte d'agents isolés (worktrees) | mesures, UI, infra, data, rédaction |
 
-L'usage de **doubles comptes** des profils premium (Claude 4.8 xhigh et Codex 5.5 xhigh) a servi à
-**paralléliser** les chantiers difficiles et à croiser les points de vue (un moteur exécute, un
-autre arbitre/relit). Ce mode est adapté au problème : la difficulté n'est pas seulement de générer
-du code, mais de **coordonner des couches hétérogènes, de valider les faits et d'éviter la survente
-des métriques**.
+Le **consensus multi-agents** (un agent produit, un autre relit/arbitre ; profils Claude 4.8 xhigh
+et Codex 5.5 xhigh en doubles comptes) sert à **croiser les points de vue** et à sécuriser les
+décisions difficiles. La difficulté n'est pas seulement de générer du code, mais de **coordonner des
+couches hétérogènes, valider les faits et éviter la survente des métriques** — d'où le recours
+systématique au consensus plutôt qu'à une réponse unique.
 
 **Principe à conserver :** l'IA accélère extraction, mapping, tests et rédaction ; des **gates
 déterministes** décident de ce qui est publié ; les **métriques et citations** arbitrent ; les
@@ -561,6 +594,21 @@ La suspension FinOps des CronJobs de refresh est une **illustration concrète** 
 un job récurrent défaillant a un coût réel (réveil d'un pool de calcul), et il est légitime de le
 suspendre tant qu'il ne produit pas de valeur.
 
+#### Chiffrage — à consolider avec agent-stats et k8s
+
+> **Cette section est en attente des chiffres réels** et sera renseignée pour être **cohérente avec
+> les demandes de facturation** déjà émises côté agent-stats et k8s. Structure cible :
+
+| Poste | Coût siège (démo) | Coût complet (1104) | Source |
+|---|---:|---:|---|
+| **immo** — LLM/agents (extraction, mapping, IA) | *[en attente agent-stats]* | *[en attente agent-stats]* | agent-stats (tokens) |
+| **immo** — infra (compute, PG, stockage, CDN) | *[en attente k8s]* | *[en attente k8s]* | poc-k8s |
+| **geo** — acquisition/OCR/compute | *[en attente geo]* | *[en attente geo]* | geo |
+| **geo-quebec** — (à préciser) | *[en attente geo]* | *[en attente geo]* | geo |
+
+Demandes h2a envoyées à **agent-stats** (tokens/coût immo), **poc-k8s** (infra cluster) et **geo**
+(coût geo + geo-quebec). Les montants seront insérés dès réception, format aligné sur la facturation.
+
 ---
 
 # Conclusion et feuille de route
@@ -599,7 +647,11 @@ limites documentées.
 | Couverture zonage province | ~234/1104 (juin) → **~485 / 1106** | effectif (live) | mesure directe API geo `/collections` | **2 juillet** |
 | **Focus 30 zonage servi** | 3/30 (juin) → **29 / 30** | effectif (live) | idem (seul `lile-dorval` manque) | **2 juillet** |
 | **Focus 30 lots servis** | **30 / 30** | effectif (live) | idem | **2 juillet** |
-| **Focus 30 consistance signaux** | graphe 27/30 · v2.3 25/30 · signaux 70 · groundés 56/70 (80 %) · villes citant ≥1 zone 14/30 · recall #74 proxy 28/47 (60 %) | effectif (proxy) | mesure S3 graphes + croisement geo | **2 juillet** |
+| Focus 30 — PV scrapé (recueil brut) | **27 / 30** | effectif | mesure S3 | 2 juillet |
+| Focus 30 — signaux extraits (v2.3) | **25 / 30** | effectif | mesure S3 | 2 juillet |
+| Focus 30 — signaux groundés (cible 100 %) | **56 / 70** | effectif | mesure S3 | 2 juillet |
+| Focus 30 — signaux désignant une zone | **14 / 30** | effectif | mesure S3 | 2 juillet |
+| Focus 30 — recall #74 (proxy) | **28 / 47 = 60 %** | proxy | S3 + croisement geo | 2 juillet |
 | Collections lots province | ~1103 → **~1102 / 1106** | effectif (API geo) | idem | **2 juillet** |
 | Rappel mapper (live) | 52 / 110 = 47,3 % | effectif | `wp3-mapper-recall-2026-06-28.md` | 28 juin |
 | Rappel mapper (fix applicatif) | 63 / 110 = 57,3 % | effectif | idem | 28 juin |
