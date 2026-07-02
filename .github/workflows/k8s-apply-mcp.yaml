@@ -1,0 +1,55 @@
+# k8s-apply-mcp — one-shot manual deploy of the immo-mcp HTTP resources.
+#
+# Why a dedicated workflow: build-push-images.yml only does `kubectl set image`
+# on the EXISTING radar-api/radar-ui deployments — it never applies new
+# manifests. The immo-mcp Deployment/Service/Ingress (deploy/k8s/40-41) are
+# deliberately NOT in kustomization.yaml until the IdP handover completes
+# (see deploy/k8s/40-immo-mcp-http-deploy.yaml header). This workflow applies
+# exactly those files (plus the NetworkPolicy update) using the same
+# KUBE_CONFIG_DATA credential as the CD.
+#
+# Trigger: manual only (workflow_dispatch).
+name: Apply immo-mcp manifests
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: k8s-apply-mcp
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NAMESPACE: radar-immobilier
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl -n "$NAMESPACE" get deploy radar-api >/dev/null
+
+      - name: Apply immo-mcp manifests
+        run: |
+          kubectl apply \
+            -f deploy/k8s/40-immo-mcp-http-deploy.yaml \
+            -f deploy/k8s/41-immo-mcp-ingress.yaml \
+            -f deploy/k8s/70-networkpolicy.yaml
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s
+          kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/component=immo-mcp -o wide
+
+      - name: Smoke check PRM through the pod
+        run: |
+          kubectl -n "$NAMESPACE" run mcp-smoke --rm -i --restart=Never \
+            --image=curlimages/curl:8.7.1 --command -- \
+            curl -sf http://radar-immo-mcp:8848/mcp/.well-known/oauth-protected-resource
