@@ -57,8 +57,8 @@ jobs:
           kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s
           kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/component=mcp -o wide
 
-      - name: Smoke check PRM through the pod
+      # RBAC: radar-ci-deployer cannot create pods, so smoke via the PUBLIC
+      # ingress from the runner instead of a kubectl-run curl pod.
+      - name: Smoke check PRM through the ingress
         run: |
-          kubectl -n "$NAMESPACE" run mcp-smoke --rm -i --restart=Never \
-            --image=curlimages/curl:8.7.1 --command -- \
-            curl -sf http://radar-immo-mcp:8848/mcp/.well-known/oauth-protected-resource
+          curl -sf https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource | head -c 200
