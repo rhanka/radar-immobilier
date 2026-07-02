@@ -2,10 +2,16 @@
   /**
    * SourceScorecard — scorecard qualité de données d'UNE ville (D6).
    *
-   * Affiche les 4 couches de la chaîne en tri-état, avec preuve + fraîcheur :
-   *   L1 documents · L2 données structurées · L4 zonage · L5 lots cadastraux
-   * Chaque ligne : badge « Servi » / « Partiel » / « Non couvert » (copy client).
-   * Jamais de « vert » fabriqué : la tonalité suit l'état réel de la cellule.
+   * Affiche la CHAÎNE QUALITÉ COMPLÈTE en tri-état, avec preuve + fraîcheur :
+   *   PV collectés · Données structurées · Signaux extraits (+ part avec
+   *   citation vérifiable) · Zonage servi · Grilles de zonage · Lots servis
+   * Chaque ligne : badge « Servi » / « Partiel » / « Non couvert » (copy client
+   * neutre). Jamais de « vert » fabriqué : la tonalité suit l'état réel.
+   *
+   * La ligne « Grilles de zonage » est mesurée LAZY (live, côté API) à la
+   * sélection de la ville : donnée éparse aujourd'hui, « Non couvert » honnête
+   * quand absente, « donnée indisponible » (jamais un faux gris) quand l'API
+   * géo est injoignable.
    *
    * Réutilisé par la carte (panneau au clic) ET la Console (ligne dépliée).
    */
@@ -16,17 +22,58 @@
     FRESHNESS_LABEL,
     colorForCity,
     isFocusCity,
+    fetchCityGrilles,
     type CityCoverage,
+    type CityGrilles,
   } from "$lib/sources/source-coverage-client.js";
 
   export let city: CityCoverage;
   /** Si fourni, affiche un bouton de fermeture (panneau latéral de carte). */
   export let onClose: (() => void) | null = null;
 
+  // ── Grilles de zonage : vérification lazy à la sélection ───────────────────
+  let grilles: CityGrilles | null = null;
+  let grillesLoading = false;
+  let grillesError = false;
+  let grillesForSlug = "";
+
+  $: void loadGrilles(city);
+
+  async function loadGrilles(c: CityCoverage): Promise<void> {
+    if (grillesForSlug === c.citySlug) return;
+    grillesForSlug = c.citySlug;
+    grilles = null;
+    grillesError = false;
+    // Zonage non servi → pas de zones → pas de grilles : aucun appel réseau.
+    if (!c.l4Zonage.served) return;
+    grillesLoading = true;
+    try {
+      const result = await fetchCityGrilles(c.citySlug);
+      if (grillesForSlug === c.citySlug) grilles = result;
+    } catch {
+      if (grillesForSlug === c.citySlug) grillesError = true;
+    } finally {
+      if (grillesForSlug === c.citySlug) grillesLoading = false;
+    }
+  }
+
+  function geoEvidence(
+    cell: CityCoverage["l4Zonage"],
+    servedLabel: string,
+  ): string {
+    if (cell.state === "verified") {
+      return cell.servedBy === "geo"
+        ? `${servedLabel} par l'API géo`
+        : `${servedLabel} (données locales)`;
+    }
+    if (cell.state === "declared") return "source identifiée, non publiée";
+    return "aucune donnée";
+  }
+
   $: rows = [
     {
-      key: "l1",
-      label: "L1 · Documents collectés",
+      key: "pv",
+      label: "PV collectés",
       cell: city.l1Raw,
       evidence:
         city.l1Raw.state === "verified"
@@ -36,8 +83,8 @@
             : "aucune donnée",
     },
     {
-      key: "l2",
-      label: "L2 · Données structurées",
+      key: "graph",
+      label: "Données structurées",
       cell: city.l2Graph,
       evidence:
         city.l2Graph.state === "verified"
@@ -47,28 +94,45 @@
             : "non structuré",
     },
     {
-      key: "l4",
-      label: "L4 · Zonage",
-      cell: city.l4Zonage,
+      key: "signaux",
+      label: "Signaux extraits",
+      cell: city.signals,
       evidence:
-        city.l4Zonage.state === "verified"
-          ? "zonage disponible"
-          : city.l4Zonage.state === "declared"
-            ? "source identifiée, non publiée"
-            : "aucune donnée",
+        city.signals.state === "verified"
+          ? `${city.signals.count} signal${city.signals.count !== 1 ? "aux" : ""} · ${city.signals.withCitation} avec citation vérifiable`
+          : city.signals.state === "declared"
+            ? "données structurées, signaux non projetés"
+            : "aucun signal extrait",
     },
     {
-      key: "l5",
-      label: "L5 · Lots cadastraux",
+      key: "zonage",
+      label: "Zonage servi",
+      cell: city.l4Zonage,
+      evidence: geoEvidence(city.l4Zonage, "zonage servi"),
+    },
+    {
+      key: "lots",
+      label: "Lots servis",
       cell: city.l5Lots,
-      evidence:
-        city.l5Lots.state === "verified"
-          ? "lots disponibles"
-          : city.l5Lots.state === "declared"
-            ? "source identifiée, non publiée"
-            : "aucune donnée",
+      evidence: geoEvidence(city.l5Lots, "lots servis"),
     },
   ];
+
+  // Évidence + libellé de la ligne grilles (états async distincts, honnêtes).
+  $: grillesResolved = grilles !== null && grilles.available;
+  $: grillesState =
+    grillesResolved && grilles?.state ? grilles.state : null;
+  $: grillesEvidence = !city.l4Zonage.served
+    ? "aucune donnée"
+    : grillesLoading
+      ? "vérification en cours…"
+      : grillesError || (grilles !== null && !grilles.available)
+        ? "donnée indisponible pour l'instant"
+        : grillesResolved && grilles
+          ? (grilles.covered ?? 0) > 0
+            ? `${grilles.covered}/${grilles.zoneCount} zones avec grille ou normes`
+            : "aucune grille publiée"
+          : "vérification en cours…";
 </script>
 
 <div class="flex flex-col" data-testid="source-scorecard">
@@ -110,9 +174,35 @@
     </div>
   </div>
 
-  <!-- 4 lignes tri-état -->
+  <!-- Chaîne qualité tri-état -->
   <ul class="divide-y divide-slate-100" data-testid="scorecard-rows">
     {#each rows as row (row.key)}
+      {#if row.key === "lots"}
+        <!-- Grilles de zonage : ligne LAZY (live), insérée avant les lots -->
+        <li
+          class="flex items-center justify-between gap-3 px-4 py-2.5"
+          data-testid="scorecard-grilles"
+        >
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-slate-700">Grilles de zonage</p>
+            <p class="text-xs text-slate-400">{grillesEvidence}</p>
+          </div>
+          <div class="flex shrink-0 flex-col items-end gap-0.5">
+            {#if grillesState}
+              <Badge tone={STATE_BADGE_TONE[grillesState]} class="text-xs">
+                {STATE_LABEL[grillesState]}
+              </Badge>
+              <span class="text-xs text-slate-400">fraîcheur&nbsp;: à jour</span>
+            {:else if !city.l4Zonage.served}
+              <Badge tone="neutral" class="text-xs">{STATE_LABEL.absent}</Badge>
+              <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
+            {:else}
+              <Badge tone="neutral" class="text-xs">—</Badge>
+              <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
+            {/if}
+          </div>
+        </li>
+      {/if}
       <li class="flex items-center justify-between gap-3 px-4 py-2.5">
         <div class="min-w-0">
           <p class="text-xs font-semibold text-slate-700">{row.label}</p>
@@ -130,13 +220,20 @@
     {/each}
   </ul>
 
-  <!-- Prochain gain marginal (D7) -->
+  <!-- Prochaine étape (D7) -->
   {#if city.nextMarginalGain}
     <div class="border-t border-slate-100 bg-teal-50 px-4 py-2.5">
       <p class="text-xs text-teal-800">
         <span class="font-semibold">Prochaine étape&nbsp;:</span>
         compléter le {city.nextMarginalGain === "zonage" ? "zonage" : "cadastre"}
         (donnée déjà structurée).
+      </p>
+    </div>
+  {:else if city.l4Zonage.served && grillesState && grillesState !== "verified"}
+    <div class="border-t border-slate-100 bg-teal-50 px-4 py-2.5">
+      <p class="text-xs text-teal-800">
+        <span class="font-semibold">Prochaine étape&nbsp;:</span>
+        compléter les grilles de zonage (donnée attendue de la source géo).
       </p>
     </div>
   {/if}

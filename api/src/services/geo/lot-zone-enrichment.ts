@@ -180,6 +180,43 @@ function realUsages(props: Record<string, unknown>): string[] {
   return [];
 }
 
+/**
+ * Lien grille PDF porté par les properties d'une zone (mêmes clés candidates
+ * que l'index de jointure — source de vérité UNIQUE, réutilisée par la
+ * couverture qualité /api/source/coverage).
+ */
+export function zoneGrillePdfUrl(
+  props: Record<string, unknown>,
+): string | null {
+  return firstString([
+    props["grillePdfUrl"],
+    props["grille_pdf_url"],
+    props["URL_GRILLE"],
+    props["url_grille"],
+  ]);
+}
+
+/**
+ * Normes RÉELLES portées par les properties d'une zone (densité log/ha +
+ * usages). Jamais inventées : densité null / usages [] quand la source ne les
+ * porte pas. Mêmes clés candidates que l'index de jointure.
+ */
+export function zoneNormes(props: Record<string, unknown>): {
+  densiteLogHa: number | null;
+  usages: string[];
+} {
+  return {
+    densiteLogHa: firstNumber([
+      props["densiteLogHa"],
+      props["densite_log_ha"],
+      props["DENSITE_LOG_HA"],
+      props["densite"],
+      props["DENSITE"],
+    ]),
+    usages: realUsages(props),
+  };
+}
+
 /** Bbox d'une géométrie GeoJSON (parcours récursif des coordonnées). */
 function geometryBbox(geom: EnrichGeometry | null): Bbox | null {
   if (!geom || geom.coordinates === undefined) return null;
@@ -248,24 +285,14 @@ export function buildZoneIndex(fc: {
     const geometry = feature.geometry ?? null;
     const bbox = geometryBbox(geometry);
 
+    const normes = zoneNormes(props);
     const entry: ZoneIndexEntry = {
       code,
       codeNorm,
       kind: canonicalZoneKind(props, code),
-      densiteLogHa: firstNumber([
-        props["densiteLogHa"],
-        props["densite_log_ha"],
-        props["DENSITE_LOG_HA"],
-        props["densite"],
-        props["DENSITE"],
-      ]),
-      usages: realUsages(props),
-      grillePdfUrl: firstString([
-        props["grillePdfUrl"],
-        props["grille_pdf_url"],
-        props["URL_GRILLE"],
-        props["url_grille"],
-      ]),
+      densiteLogHa: normes.densiteLogHa,
+      usages: normes.usages,
+      grillePdfUrl: zoneGrillePdfUrl(props),
       geometry,
       bbox,
       bboxArea: bbox ? (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) : 0,
