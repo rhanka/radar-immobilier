@@ -543,6 +543,8 @@ describe("protect middleware", () => {
     app.use("*", protect(auth, db ? { db } : {}));
     app.get("/health", (c) => c.json({ status: "ok" }));
     app.get("/api/protected", (c) => c.json({ secret: true }));
+    app.get("/api/geo/collections/:id/items", (c) => c.json({ type: "FeatureCollection" }));
+    app.get("/api/documents/raw", (c) => c.json({ ok: true }));
     return app;
   }
 
@@ -557,6 +559,29 @@ describe("protect middleware", () => {
     const app = appWith(AUTH_ON);
     const res = await app.request("/health");
     expect(res.status).toBe(200);
+  });
+
+  it("lets the public geo collections passthrough through even when auth is enabled", async () => {
+    // Public zonage/lots data consumed server-side by the immo-mcp pod (no
+    // session): see PUBLIC_PREFIXES comment in auth.ts.
+    const app = appWith(AUTH_ON);
+    const res = await app.request("/api/geo/collections/qc-lots-longueuil/items?limit=10");
+    expect(res.status).toBe(200);
+    expect((await res.json()).type).toBe("FeatureCollection");
+  });
+
+  it("lets the raw public-document route through even when auth is enabled", async () => {
+    const app = appWith(AUTH_ON);
+    const res = await app.request(
+      "/api/documents/raw?rawRef=raw%2Fproces-verbaux-longueuil%2Fcas%2Fabc.pdf",
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it("does NOT open sibling api routes beyond the two public data prefixes", async () => {
+    const app = appWith(AUTH_ON);
+    // Prefix matching is segment-exact: neither /api/geo nor /api/documents root.
+    expect((await app.request("/api/protected")).status).toBe(401);
   });
 
   it("blocks a protected route with 401 (JSON/XHR) when no session", async () => {

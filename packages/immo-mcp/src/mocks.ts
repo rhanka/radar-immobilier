@@ -202,6 +202,145 @@ export const MOCK_DOCUMENTS: MockDocument[] = [
 ];
 
 /**
+ * GeoJSON fixtures for the raw-data tools (`get_zones_geojson` /
+ * `get_lots_geojson` / `get_grille_pdf`). Deterministic, PII-free, aligned
+ * with MOCK_LOTS (same cities/zones/lot numbers). Property spellings mirror
+ * what the radar API serves:
+ *  - zones: live OGC spellings (ZONE / URL_GRILLE / DENSITE) so the shared
+ *    fallback readers in raw-data.ts are exercised on realistic keys;
+ *  - lots: the server-side enrichment contract of
+ *    api/src/routes/geo-collections.ts (zone / zoneCode / zoneJoin /
+ *    multifamilial4plus / multifamilial4plusSource / superficieM2).
+ * `citySlug` is a mock-only routing key (stripped nowhere: harmless extra).
+ * Geometries are small distinct squares so bbox filtering is testable.
+ */
+export interface MockGeoFeature {
+  type: "Feature";
+  geometry: { type: "Polygon"; coordinates: number[][][] };
+  properties: Record<string, unknown>;
+}
+
+function square(lon: number, lat: number, d = 0.002): number[][][] {
+  return [
+    [
+      [lon, lat],
+      [lon + d, lat],
+      [lon + d, lat + d],
+      [lon, lat + d],
+      [lon, lat],
+    ],
+  ];
+}
+
+export const MOCK_ZONE_FEATURES: MockGeoFeature[] = [
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.52, 45.53, 0.01) },
+    properties: {
+      citySlug: "longueuil",
+      ZONE: "H-203",
+      DENSITE: 35,
+      URL_GRILLE: "https://longueuil.example/grilles/H-203.pdf",
+      kind: "H",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.5, 45.51, 0.01) },
+    properties: {
+      citySlug: "longueuil",
+      ZONE: "C-101",
+      kind: "C",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-74.13, 45.25, 0.01) },
+    properties: {
+      citySlug: "valleyfield",
+      zone_code: "H-410",
+      kind: "H",
+    },
+  },
+];
+
+export const MOCK_LOT_FEATURES: MockGeoFeature[] = [
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.518, 45.532) },
+    properties: {
+      citySlug: "longueuil",
+      NO_LOT: "6 359 591",
+      zoneCode: "H-203",
+      zoneJoin: "code",
+      zone: {
+        code: "H-203",
+        kind: "H",
+        densiteLogHa: 35,
+        usages: ["habitation"],
+        grillePdfUrl: "https://longueuil.example/grilles/H-203.pdf",
+      },
+      multifamilial4plus: true,
+      multifamilial4plusSource: "grille",
+      superficieM2: 1240,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.516, 45.534) },
+    properties: {
+      citySlug: "longueuil",
+      NO_LOT: "6 359 612",
+      zoneCode: "H-203",
+      zoneJoin: "centroid",
+      zone: {
+        code: "H-203",
+        kind: "H",
+        densiteLogHa: 35,
+        usages: ["habitation"],
+        grillePdfUrl: "https://longueuil.example/grilles/H-203.pdf",
+      },
+      multifamilial4plus: true,
+      multifamilial4plusSource: "grille",
+      superficieM2: 1985,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.498, 45.512) },
+    properties: {
+      citySlug: "longueuil",
+      NO_LOT: "4 102 884",
+      zoneCode: "C-101",
+      zoneJoin: "code",
+      zone: {
+        code: "C-101",
+        kind: "C",
+        densiteLogHa: null,
+        usages: [],
+        grillePdfUrl: null,
+      },
+      multifamilial4plus: false,
+      multifamilial4plusSource: "heuristique",
+      superficieM2: 760,
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-74.128, 45.252) },
+    properties: {
+      citySlug: "valleyfield",
+      NO_LOT: "5 870 223",
+      zoneCode: "H-410",
+      zoneJoin: "centroid",
+      multifamilial4plus: true,
+      multifamilial4plusSource: "heuristique",
+      superficieM2: 3120,
+    },
+  },
+];
+
+/**
  * Bodies are kept short and free of personal data. They intentionally
  * contain no owner identity; `read_document_excerpt` still routes them
  * through `redact()` as a defence-in-depth measure.
