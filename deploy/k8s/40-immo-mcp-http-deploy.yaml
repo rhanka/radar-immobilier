@@ -53,10 +53,14 @@ data:
   # on first token verification (@sentropic/oauth-verify `fromRemoteJwks`).
   NODE_OPTIONS: "--dns-result-order=ipv4first"
   # ── OAuth 2.1 Resource Server wiring (loadHttpConfig in server-http.ts) ───
-  # PLACEHOLDER — the real sentropic-operated IdP issuer is not provisioned
-  # yet. Replace once architect/sentropic hand over the four items in
-  # docs/spec/mcp/immo-mcp-remote-deploy.md "Demandes à architect/sentropic".
-  IMMO_MCP_OAUTH_ISSUER: "https://idp.sent-tech.ca"
+  # Issuer CONFIRMED by sentropic (env:conductor-20260702-immo-authmode-ack-relay,
+  # 2026-07-02): the real sentropic-operated IdP is https://auth.sent-tech.ca
+  # (OIDC discovery there provides jwks_uri; exact path confirmed at client mint).
+  # Still awaiting from architect at merge/prod-promote: the minted PUBLIC+PKCE
+  # client_id (registered IdP-side; the RS only needs issuer+JWKS+audience here).
+  # Do NOT fold 40/41 into kustomization.yaml until architect confirms the client
+  # is minted and the auth build is rolled (see immo-mcp-remote-deploy-BLOCKERS.md).
+  IMMO_MCP_OAUTH_ISSUER: "https://auth.sent-tech.ca"
   # Canonical resource URI = token audience. Deliberately scoped to the /mcp
   # path (not the bare origin), so a token minted for this resource cannot be
   # replayed against the unrelated radar-api/radar-ui surface on the same host.
