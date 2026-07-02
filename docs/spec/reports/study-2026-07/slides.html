@@ -38,7 +38,7 @@
     .tag { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:3px 9px; border-radius:999px; border:1px solid var(--line); }
     .tag.eff{ color:var(--ok); border-color:rgba(52,211,153,.4); }
     .tag.proj{ color:var(--accent); border-color:rgba(56,189,248,.4); }
-    .tag.cons{ color:var(--warn); border-color:rgba(251,191,36,.4); }
+    .tag.att{ color:var(--warn); border-color:rgba(251,191,36,.4); }
     .pageno { position:absolute; bottom:20px; right:8vw; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; }
     .flow { font-size:clamp(15px,1.5vw,20px); color:var(--muted); line-height:1.9; }
     .lead { font-size:clamp(19px,2.1vw,27px); color:var(--fg); max-width:32ch; }
@@ -49,10 +49,10 @@
 
   <!-- 1 -->
   <section>
-    <div class="kicker">Rapport d'étude — 2026-07</div>
+    <div class="kicker">Rapport d'étude — 2026-07-02</div>
     <h1>Radar Immobilier</h1>
     <p class="lead muted">Faisabilité data, réalisations fonctionnelles, code &amp; intégration.<br/>Une lecture rigoureuse : <span class="ok">effectif</span> vs <span class="accent">projeté</span>.</p>
-    <span class="pageno">01 / 15</span>
+    <span class="pageno">01 / 16</span>
   </section>
 
   <!-- 2 -->
@@ -61,17 +61,17 @@
     <h2>Deux axes, trois qualifications</h2>
     <div class="grid-2">
       <div>
-        <p><strong>Axe couverture</strong> — les 30 villes prioritaires (focus&nbsp;30) et les 1104 municipalités cibles.</p>
-        <p><strong>Axe qualité</strong> — citation groundée, code de zone exact, lot rattaché : ce qui rend la donnée <em>utilisable</em>.</p>
+        <p><strong>Axe couverture</strong> — les 30 villes prioritaires (focus&nbsp;30) vs les 1104 municipalités cibles.</p>
+        <p><strong>Axe profondeur de preuve</strong> — 33 opportunités témoins suivies de bout en bout (signal → document → zone → grille → lot) vs l'échelle visée de 5000+ couples ville × signal.</p>
       </div>
       <div>
         <p><span class="tag eff">effectif</span> mesuré réellement, à une date.</p>
         <p><span class="tag proj">projeté</span> extrapolation crédible, non encore réalisée.</p>
-        <p><span class="tag cons">à consolider</span> mesuré mais dépendant d'une canonisation / d'un job à rejouer.</p>
+        <p><span class="tag att">en attente</span> dépend d'une donnée / livraison externe identifiée et demandée.</p>
       </div>
     </div>
     <p class="muted" style="margin-top:22px">Aucune métrique présentée comme acquise si elle ne l'est pas. Mesures reproductibles, sources datées en annexe.</p>
-    <span class="pageno">02 / 15</span>
+    <span class="pageno">02 / 16</span>
   </section>
 
   <!-- 3 -->
@@ -80,43 +80,49 @@
     <h2>Chiffres clés <span class="muted" style="font-size:.5em">(mesures 28 juin – 2 juillet 2026)</span></h2>
     <div class="grid">
       <div class="card"><div class="metric ok">978 / 1104</div><div class="label">signaux extraits (v2.3) — focus <strong>25 / 30</strong> ; le graphe = <em>méthode d'extraction</em> <span class="tag eff">effectif</span></div></div>
-      <div class="card"><div class="metric ok">29 / 30</div><div class="label">zonage geo servi sur le focus 30 — ~485 / 1106 province <span class="tag eff">live 2026-07-02</span></div></div>
-      <div class="card"><div class="metric accent">30 / 30</div><div class="label">lots geo servis sur le focus 30 — ~1102 / 1106 province <span class="tag eff">live 2026-07-02</span></div></div>
-      <div class="card"><div class="metric ok">59,2 %</div><div class="label">rappel mapper signal → zone (meilleur état) <span class="tag eff">effectif</span></div></div>
-      <div class="card"><div class="metric violet">2 / 4</div><div class="label">vues produit pleinement fonctionnelles</div></div>
-      <div class="card"><div class="metric bad">97</div><div class="label">villes cibles <em>sans aucune</em> donnée brute <span class="tag eff">effectif</span></div></div>
+      <div class="card"><div class="metric ok">29 / 30</div><div class="label">zonage geo servi sur le focus 30 — 568 / 1106 province ; lots <strong>30 / 30</strong> (~1102 / 1106) <span class="tag eff">live 2026-07-02</span></div></div>
+      <div class="card"><div class="metric ok">97,9 %</div><div class="label">des 15 510 lots de Salaberry-de-Valleyfield portent leurs normes de grille (pilote) <span class="tag eff">effectif</span></div></div>
+      <div class="card"><div class="metric accent">97,5 %</div><div class="label">exactitude de la dérivation « 4+ logements » sur 3171 lots vs l'application de référence <span class="tag eff">effectif</span></div></div>
+      <div class="card"><div class="metric violet">MCP live</div><div class="label">connecteur claude.ai en production (OAuth 2.1/PKCE, validé e2e) + 4 outils de données brutes <span class="tag eff">effectif</span></div></div>
+      <div class="card"><div class="metric warn">59,2 %</div><div class="label">rappel signal → zone (meilleur état mesuré, 55 villes) — le goulot de consistance <span class="tag eff">effectif</span></div></div>
     </div>
-    <span class="pageno">03 / 15</span>
+    <span class="pageno">03 / 16</span>
   </section>
 
   <!-- 4 -->
   <section>
-    <div class="kicker">Data</div>
+    <div class="kicker">Data — état par couche</div>
     <h2>Effectif vs projeté</h2>
     <table>
       <tr><th>Couche</th><th>Focus 30</th><th>Province ≈1104</th><th>Condition d'extension</th></tr>
-      <tr><td><strong>PV scrapé</strong> — recueil brut</td><td>27 / 30 <span class="tag eff">eff.</span></td><td>~1007 / 1104</td><td>scraping des ~97 villes sans brut</td></tr>
-      <tr><td><strong>Signaux extraits</strong> (v2.3)</td><td>25 / 30 <span class="tag eff">eff.</span></td><td>978 / 1104</td><td>re-grounding des ~30 v2.2 ; le graphe = <em>méthode d'extraction</em></td></tr>
-      <tr><td><strong>Zonage servi</strong> (geo)</td><td>29 / 30 <span class="tag eff">live</span></td><td>~485 / 1106</td><td>canonisation 1 collection / ville + pull PG</td></tr>
-      <tr><td><strong>Lots servis</strong> (geo)</td><td>30 / 30 <span class="tag eff">live</span></td><td>~1102 / 1106</td><td>pull PG borné (bbox)</td></tr>
-      <tr><td>Signaux exploitables</td><td colspan="2">si citation groundée</td><td>modèle spécialisé + gate qualité</td></tr>
+      <tr><td><strong>PV scrapés</strong> — recueil brut (~3272 documents)</td><td>27 / 30 <span class="tag eff">eff.</span></td><td>~1007 / 1104</td><td>scraping des ~97 villes sans brut</td></tr>
+      <tr><td><strong>Signaux extraits</strong> (v2.3)</td><td>25 / 30 <span class="tag eff">eff.</span></td><td>978 / 1104</td><td>re-grounding des ~30 v2.2 ; citation vérifiable 56/70 → cible 100 %</td></tr>
+      <tr><td><strong>Zonage servi</strong> (geo)</td><td>29 / 30 <span class="tag eff">live</span></td><td>568 / 1106</td><td>canonisation 1 collection / ville + pull PG</td></tr>
+      <tr><td><strong>Grilles de zonage</strong> (normes verbatim)</td><td colspan="2">pilote Salaberry : 97,9 % des 15 510 lots <span class="tag eff">eff.</span></td><td>alignement 4 villes de référence + exposition API géo</td></tr>
+      <tr><td><strong>Lots servis</strong> (cadastre MRNF, CC-BY)</td><td>30 / 30 <span class="tag eff">live</span></td><td>~1102 / 1106</td><td>pull PG borné (bbox)</td></tr>
+      <tr><td>Données nominatives (propriétaires)</td><td colspan="2"><span class="tag att">en attente</span> acquisition cadrée (fichier client), non lancée</td><td>base légale + gouvernance dédiées</td></tr>
+      <tr><td>Aires TOD (PMAD/CMM)</td><td colspan="2"><span class="tag att">en attente</span> incrément demandé au fournisseur géo</td><td>4 villes de référence en priorité</td></tr>
     </table>
     <p class="muted" style="margin-top:18px">Projection 1104 <span class="ok">quasi acquise</span> pour les lots (source normalisée) ; <span class="warn">conditionnelle</span> pour zonage, grilles, PV scannés.</p>
-    <span class="pageno">04 / 15</span>
+    <span class="pageno">04 / 16</span>
   </section>
 
   <!-- 5 -->
   <section>
-    <div class="kicker">Focus 30</div>
-    <h2>Banc de validation E2E</h2>
-    <p class="flow">documents → graphes → signaux → projection → API → interface → rapprochement géographique</p>
-    <ul>
-      <li>Faisabilité <strong>fonctionnelle</strong> de la chaîne démontrée de bout en bout.</li>
-      <li>Complétude <strong>hétérogène</strong> : PV scrapé 27/30, signaux v2.3 25/30, zonage geo <span class="ok">29/30</span> &amp; lots 30/30 (live) ; le goulot restant = la consistance signal↔zone.</li>
-      <li>Consistance des signaux : run déterministe des 30 v2.2 résiduelles → <span class="warn">1 publié, 29 bloquées</span> (22 sans réf. groundée, 6 sans description, 1 structurel).</li>
-      <li>Rigueur volontaire : le gate v2.3 <strong>refuse une citation non vérifiable</strong>.</li>
-    </ul>
-    <span class="pageno">05 / 15</span>
+    <div class="kicker">Validation</div>
+    <h2>Les deux bancs E2E</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3 class="accent">Banc « signaux » — 30 villes focus</h3>
+        <p class="label">Chaîne <strong>signaux → zones → lots</strong> (banlieues de Montréal). Difficulté centrale : le rapprochement <strong>signaux↔zones</strong> — 14/30 villes citent une zone ; rappel ~60 % (proxy) / 47–59 % (55 villes). Causes : libellés de zones des PV vs codes servis ; non-matchs <em>attendus</em> (zones proposées).</p>
+      </div>
+      <div class="card">
+        <h3 class="ok">Banc « parité produit » — 4 villes de référence</h3>
+        <p class="label">Delson, Sainte-Catherine, Saint-Constant, Candiac : l'expérience produit (lots/zones, filtres, fiche lot) confrontée à <strong>l'application de référence du partenaire</strong>. Ex. : dérivation « 4+ logements » à <strong>97,5 %</strong> d'exactitude sur 3171 lots.</p>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:18px">Axe profondeur : <strong>33 opportunités témoins</strong> prouvées de bout en bout (signal → document → zone → grille → lot) ; échelle cible <strong>5000+</strong> couples ville × signal — l'écart est le chantier de généralisation.</p>
+    <span class="pageno">05 / 16</span>
   </section>
 
   <!-- 6 -->
@@ -137,12 +143,12 @@
         <div class="card"><div class="metric ok">978 / 1104</div><div class="label">signaux extraits v2.3 — focus <strong>25 / 30</strong> <span class="tag eff">effectif</span></div></div>
         <p class="muted" style="margin-top:14px">Reliquat <strong>128 villes</strong> = ~30 v2.2 à re-grounder + ~97 sans aucune donnée brute (scraping préalable).</p>
         <div class="card" style="margin-top:14px;border-color:rgba(251,191,36,.4)">
-          <h3 class="warn" style="margin-bottom:6px">Grounding = 100 % attendu (dette)</h3>
-          <p class="label">Focus <strong>56 / 70 groundés</strong> → les <strong class="warn">14 restants</strong> sont une <strong>dette</strong> : passe de <strong>cleansing</strong> (re-grounder depuis le PDF réel, ou purger si non substantiable). La cible n'est pas « 80 % », c'est <strong class="ok">100 % ou rien</strong> — un signal non groundé <em>n'existe pas</em>.</p>
+          <h3 class="warn" style="margin-bottom:6px">Citation vérifiable = 100 % attendu</h3>
+          <p class="label">Focus <strong>56 / 70 signaux</strong> à citation vérifiable → les <strong class="warn">14 restants</strong> passent en <strong>cleansing</strong> : re-grounder depuis le PDF réel, ou purger si non substantiable. La cible n'est pas « 80 % », c'est <strong class="ok">100 %</strong> — un signal sans citation vérifiable ne doit pas être présenté.</p>
         </div>
       </div>
     </div>
-    <span class="pageno">06 / 15</span>
+    <span class="pageno">06 / 16</span>
   </section>
 
   <!-- 7 -->
@@ -150,28 +156,27 @@
     <div class="kicker">Geo — zonage</div>
     <h2>La couche critique</h2>
     <div class="grid">
-      <div class="card"><div class="metric small warn">~506</div><div class="label">collections <code>qc-zonage-*</code> — dont ~200 fragments ArcGIS ignorés</div></div>
-      <div class="card"><div class="metric small ok">~485 / 1106</div><div class="label">couverture par match ville <span class="tag eff">live 2026-07-02</span></div></div>
-      <div class="card"><div class="metric small ok">29 / 30</div><div class="label">focus 30 servi (seul <code>lile-dorval</code> manque) ; lots <strong>30 / 30</strong></div></div>
+      <div class="card"><div class="metric small ok">568 / 1106</div><div class="label">couverture par match ville ; focus <strong>29 / 30</strong> (seul <code>lile-dorval</code> manque) <span class="tag eff">live 2026-07-02</span></div></div>
+      <div class="card"><div class="metric small ok">645 zones</div><div class="label">Salaberry-de-Valleyfield : <strong>96,3 %</strong> de correspondance au règlement officiel, <strong>0 trou spatial</strong> <span class="tag eff">effectif</span></div></div>
+      <div class="card"><div class="metric small warn">~506</div><div class="label">collections <code>qc-zonage-*</code> — dont ~200 fragments ; canonisation « 1 collection / ville » à mener</div></div>
     </div>
-    <h3 style="margin-top:22px">Sources par méthode d'acquisition <span class="muted" style="font-size:.6em;font-weight:400">(comptes à confirmer avec geo)</span></h3>
+    <h3 style="margin-top:22px">Quatre méthodes d'acquisition</h3>
     <table>
-      <tr><th>Méthode</th><th>Ce que c'est</th><th>Villes (focus 30 · province)</th></tr>
-      <tr><td><strong>ArcGIS</strong></td><td>feature-layers / services ArcGIS municipaux</td><td class="muted"><em>à confirmer avec geo</em></td></tr>
-      <tr><td><strong>GeoNet</strong></td><td>portail / harvest GeoNet</td><td class="muted"><em>à confirmer avec geo</em></td></tr>
-      <tr><td><strong>CKAN — Données Québec</strong></td><td>catalogue ouvert provincial (manifestes CKAN)</td><td class="muted"><em>à confirmer avec geo</em></td></tr>
-      <tr><td><strong>PDF</strong></td><td>plan de zonage officiel → recalage géoréférencé (OCR / points de contrôle)</td><td class="muted"><em>à confirmer avec geo</em></td></tr>
+      <tr><th>Méthode</th><th>Ce que c'est</th></tr>
+      <tr><td><strong>ArcGIS</strong></td><td>feature-layers / services ArcGIS municipaux (géométries exposées)</td></tr>
+      <tr><td><strong>GeoNet</strong></td><td>portails géographiques municipaux moissonnés</td></tr>
+      <tr><td><strong>Contournements dédiés (« obscura »)</strong></td><td>sources difficiles (portails protégés, rendus dynamiques) via un composant d'acquisition spécialisé</td></tr>
+      <tr><td><strong>PDF + recalage géoréférencé</strong></td><td>plans officiels PDF calés sur le cadastre quand la géométrie n'est pas exposée</td></tr>
     </table>
     <ul style="margin-top:14px">
       <li>Champs de code hétérogènes : <code>zone_code</code>, <code>NumZone</code>, <code>NO_ZONAGE</code>, <code>ETIQUETTE</code>. Priorité : <strong>canoniser 1 collection / ville</strong> + <strong>puller en PG</strong>.</li>
-      <li>Mesure « atome sweep » <span class="bad">écartée</span> (buggée) ; source fiable = API directe. Les chiffres zonage de juin sont <strong>périmés</strong> — geo a depuis livré (focus 7→29/30).</li>
     </ul>
-    <span class="pageno">07 / 15</span>
+    <span class="pageno">07 / 16</span>
   </section>
 
   <!-- 8 -->
   <section>
-    <div class="kicker">Mapper signal ↔ zone</div>
+    <div class="kicker">Rapprochement signal ↔ zone</div>
     <h2>Rappel mesuré, trois fois</h2>
     <div class="grid">
       <div class="card"><div class="metric warn">47,3 %</div><div class="label">live strict : 52 / 110 codes</div></div>
@@ -179,44 +184,46 @@
       <div class="card"><div class="metric ok">59,2 %</div><div class="label">final immo + geo : 71 / 120</div></div>
     </div>
     <ul style="margin-top:16px">
+      <li><strong>14 / 30</strong> villes du focus citent une zone dans leurs signaux ; proxy focus ~60 % (28/47).</li>
       <li>Causes de non-match : <span class="bad">gap-data 63,8 %</span> · champ-non-lu 19 % · écart-schéma 17,2 % · zéro-tête <strong>0 %</strong> (hypothèse réfutée).</li>
-      <li><strong>~81 % du déficit résiduel n'est pas corrigeable côté application</strong> : extraction trop grossière (famille <code>H1</code> vs <code>H1-30</code>) ou couche geo divergente.</li>
-      <li>Le mapper lit une <strong>projection PostgreSQL/PostGIS</strong> (peuplée par le pull), pas la couche live — le recall est aujourd'hui <strong>plafonné par l'état du PG</strong> (pull encore limité), pas par geo : le levier est de <strong>puller le focus 29/30 en PG</strong>.</li>
+      <li><strong>~81 % du déficit résiduel n'est pas corrigeable côté application</strong> : extraction trop grossière (famille <code>H1</code> vs <code>H1-30</code>) ou couche geo divergente ; une part des non-matchs est <em>attendue</em> (zones proposées).</li>
+      <li>Le rapprochement lit une <strong>projection PostgreSQL/PostGIS</strong> (peuplée par le pull) — le rappel est aujourd'hui <strong>plafonné par l'état du PG</strong>, pas par geo : le levier est de <strong>puller le focus 29/30 en PG</strong>.</li>
     </ul>
-    <span class="pageno">08 / 15</span>
+    <span class="pageno">08 / 16</span>
   </section>
 
   <!-- 9 -->
   <section>
-    <div class="kicker">Grilles d'évaluation</div>
+    <div class="kicker">Grilles de zonage (normes)</div>
     <h2>Preuve d'abord, pas résumé</h2>
     <div class="grid-2">
       <div>
-        <p><span class="ok">Conserver</span> le moteur OCR spécialisé <strong>(Mistral OCR&nbsp;4)</strong> sur les documents complexes.</p>
-        <p><span class="warn">Prudence</span> sur la <strong>complétion (completion Mistral)</strong> : <strong>mesurer et borner l'écart d'erreur avant tout usage réglementaire</strong>.</p>
+        <div class="card"><div class="metric ok">97,9 %</div><div class="label">des <strong>15 510 lots</strong> de Salaberry-de-Valleyfield portent leurs normes (hauteur, marges, densité) — mapping lot → zone → normes complet <span class="tag eff">pilote</span></div></div>
+        <p class="muted" style="margin-top:14px">Alignement en cours sur les <strong>4 villes de référence</strong> ; <strong>exposition des normes dans l'API géo</strong> en cours — le déclencheur du « 4+ fondé grille ».</p>
       </div>
       <div>
+        <p><span class="ok">Conserver</span> le moteur OCR spécialisé <strong>(Mistral OCR&nbsp;4)</strong> sur les documents complexes.</p>
+        <p><span class="warn">Prudence</span> sur la <strong>complétion (completion Mistral)</strong> : <strong>mesurer et borner l'écart d'erreur avant tout usage réglementaire</strong>.</p>
         <ul class="muted">
           <li>Une grille reconstruite peut être plausible et fausse sur une valeur critique (hauteur, densité, usage).</li>
-          <li>Liens de grille hétérogènes et non lus : <code>LienGrille</code>, <code>URL_GRILLE</code>, <code>GRILLE_URL</code>.</li>
           <li>Cible : extraction structurée avec preuve — cellule, page, citation, table, champ.</li>
         </ul>
       </div>
     </div>
-    <span class="pageno">09 / 15</span>
+    <span class="pageno">09 / 16</span>
   </section>
 
   <!-- 10 -->
   <section>
-    <div class="kicker">Lots &amp; PII</div>
+    <div class="kicker">Lots &amp; données nominatives</div>
     <h2>Cadastre exploitable, sans propriétaire</h2>
     <ul>
-      <li>Numéro de lot + géométrie : donnée publique utile au scoring et à la visualisation.</li>
-      <li><strong>Aucun propriétaire exposé</strong> ; propriétés client limitées à <code>noLot</code> + <code>citySlug</code>.</li>
-      <li>Tests anti-PII en place (un test à <span class="warn">recaler</span> : ajout d'un score dérivé public, pas une fuite).</li>
-      <li>Couche la <span class="ok">plus industrialisable</span> (~1103 collections) ; risque = volumétrie, mémoire, pagination, fréquence.</li>
+      <li>Cadastre <strong>public (MRNF, licence CC-BY)</strong> : numéro de lot + géométrie — <strong>30 / 30</strong> focus, ~1102 / 1106 province <span class="tag eff">live</span>.</li>
+      <li>Salaberry-de-Valleyfield : <strong>100 % des lots assignés à une zone</strong> (jointure par code, sinon spatiale par centroïde).</li>
+      <li><strong>Aucun propriétaire exposé</strong> ; propriétés client limitées au strict nécessaire ; tests anti-PII en place (recalage en cours : champs dérivés publics, pas des données personnelles).</li>
+      <li>Données nominatives : <span class="tag att">en attente</span> — acquisition légitime (fichier client) cadrée, non lancée.</li>
     </ul>
-    <span class="pageno">10 / 15</span>
+    <span class="pageno">10 / 16</span>
   </section>
 
   <!-- 11 -->
@@ -225,19 +232,36 @@
     <h2>Réalisations fonctionnelles</h2>
     <div class="grid">
       <div class="card"><h3 class="ok">Signaux — fonctionnel</h3><p class="label">Carte MapLibre GL, choroplèthe, filtres persistés, citations, détail ville.</p></div>
-      <div class="card"><h3 class="ok">Sources — fonctionnel</h3><p class="label">Consolidation maturité + qualité, <code>hasZonage</code>, état vide explicite quand la donnée manque.</p></div>
-      <div class="card"><h3 class="warn">Évaluation — partiel</h3><p class="label">Lots SVG scorés (cap 200), fiche lot ; marques en lecture seule, pas de MapLibre.</p></div>
+      <div class="card"><h3 class="ok">Sources — fonctionnel, fiabilisé</h3><p class="label">Consolidation maturité + qualité, <code>hasZonage</code>, état vide explicite ; indicateurs de chargement par requête + anti-course.</p></div>
+      <div class="card"><h3 class="ok">Évaluation — parité livrée</h3><p class="label">Lots + zones jointes (geo live), filtres combinés 4+/TOD/priorité/usage/superficie, colorisation hiérarchique, fiche lot enrichie. Marques en lecture seule.</p></div>
       <div class="card"><h3 class="warn">Opportunités — démo</h3><p class="label">Entonnoir sur fixture statique — <strong>pas</strong> la carte lots branchée API réelle.</p></div>
     </div>
-    <p class="muted" style="margin-top:16px">17 fonctionnalités cibles : <span class="ok">2 livrées</span> · <span class="warn">5 partielles</span> · <span class="bad">10 planifiées</span>. Tests UI : 680 (669 pass, 1 rouge à recaler).</p>
-    <span class="pageno">11 / 15</span>
+    <p class="muted" style="margin-top:16px">17 fonctionnalités cibles (référentiel de l'application de référence du partenaire) : <span class="ok">3 livrées</span> · <span class="warn">5 partielles</span> · <span class="bad">9 planifiées</span>. Tests UI : 680 (669 pass, 1 rouge à recaler — anti-PII périmé).</p>
+    <span class="pageno">11 / 16</span>
   </section>
 
   <!-- 12 -->
   <section>
+    <div class="kicker">Livraisons du 2 juillet</div>
+    <h2>Assistant, 4+, parité carte</h2>
+    <div class="grid-2">
+      <div>
+        <div class="card"><h3 class="violet">Connecteur MCP claude.ai — live</h3><p class="label">OAuth 2.1/PKCE en production, enrôlement par utilisateur, validé e2e. <strong>4 outils de données brutes</strong> : zones/lots GeoJSON bornés (indicateurs 4+/TOD), grilles &amp; PV PDF → représentations ad hoc dans l'assistant.</p></div>
+        <div class="card" style="margin-top:14px"><h3 class="ok">Dérivation « 4+ logements » par lot</h3><p class="label">Jointure zone par code sinon centroïde ; normes réelles sinon heuristique explicite. <strong>97,5 %</strong> d'exactitude sur <strong>3171 lots</strong> vs l'application de référence.</p></div>
+      </div>
+      <div>
+        <div class="card"><h3 class="accent">Parité carte</h3><p class="label">Filtres 4+/TOD/priorité/usage/superficie, colorisation hiérarchique (vert 4+, bleu TOD, ambre priorité, hors-filtre estompé), fiche lot enrichie (adresse, façade estimée, normes verbatim).</p></div>
+        <div class="card" style="margin-top:14px"><h3>Cas difficiles résolus</h3><p class="label">Jointure spatiale lot↔zone sans code porté (centroïde, méthode tracée) · serveur MCP autonome avec test de démarrage au build · expressions cartographiques robustes sur données vides + anti-course.</p></div>
+      </div>
+    </div>
+    <span class="pageno">12 / 16</span>
+  </section>
+
+  <!-- 13 -->
+  <section>
     <div class="kicker">Architecture</div>
     <h2>Modulaire &amp; réversible</h2>
-    <p class="flow">sources → acquisition/scraping → OCR/extraction/graphify → graphe + citations → PostgreSQL/PostGIS → API domaine → UI → intégrations</p>
+    <p class="flow">sources → acquisition/scraping → OCR/extraction/graphify → graphe + citations → PostgreSQL/PostGIS → API domaine → UI → intégrations (connecteur MCP)</p>
     <div class="grid-2">
       <div><ul>
         <li>Monorepo : API, UI, bibliothèques de domaine, jobs.</li>
@@ -245,15 +269,15 @@
         <li>Fournisseurs OCR / LLM interchangeables ; projection rejouable.</li>
       </ul></div>
       <div><ul>
-        <li>Couche d'identité <strong>OAuth réversible</strong> sans toucher au domaine.</li>
+        <li>Couches d'identité <strong>OAuth réversibles</strong> (app + connecteur MCP) sans toucher au domaine.</li>
         <li>Villes « dures » <span class="bad">documentées</span> (anti-bot, sites sans PDF, périmètres non résolus).</li>
         <li>Preuve PDF : archive objet sondée d'abord, repli sur store de métadonnées.</li>
       </ul></div>
     </div>
-    <span class="pageno">12 / 15</span>
+    <span class="pageno">13 / 16</span>
   </section>
 
-  <!-- 13 -->
+  <!-- 14 -->
   <section>
     <div class="kicker">Utilisation de l'IA</div>
     <h2>Mixture of agents</h2>
@@ -266,13 +290,13 @@
       <tr><td>Grounding verbatim (anti-hallucination)</td><td>modèle de raisonnement rapide</td><td>—</td></tr>
     </table>
     <p class="muted" style="margin-top:16px">Un produit, un relit : le <strong>consensus</strong> croise les points de vue sur les décisions difficiles. <span class="ok">Gates déterministes</span> pour publier ; métriques &amp; citations pour arbitrer ; humains pour valider le métier.</p>
-    <span class="pageno">13 / 15</span>
+    <span class="pageno">14 / 16</span>
   </section>
 
-  <!-- 14 -->
+  <!-- 15 -->
   <section>
     <div class="kicker">Exploitation &amp; coûts</div>
-    <h2>Industrialiser sans sur-vendre</h2>
+    <h2>Industrialiser en maîtrisant les coûts</h2>
     <div class="grid-2">
       <div>
         <h3>Coût au siège</h3>
@@ -289,24 +313,24 @@
         </ul>
       </div>
     </div>
-    <p class="muted" style="margin-top:18px">Chiffrage détaillé (immo LLM/infra · geo · geo-quebec) <span class="tag cons">à consolider</span> — en attente des relevés <strong>agent-stats</strong>, <strong>k8s</strong> et <strong>geo</strong>.</p>
-    <span class="pageno">14 / 15</span>
+    <p class="muted" style="margin-top:18px">Chiffrage détaillé (immo LLM/infra · geo · geo-quebec) <span class="tag att">en attente</span> — relevés <strong>agent-stats</strong>, <strong>k8s</strong> et <strong>geo</strong> demandés, format aligné facturation.</p>
+    <span class="pageno">15 / 16</span>
   </section>
 
-  <!-- 15 -->
+  <!-- 16 -->
   <section>
     <div class="kicker">Conclusion</div>
     <h2>Prochaine étape : focus 30 complet</h2>
     <ol>
-      <li>Prioriser le focus 30 : zonage/lots geo désormais à <strong class="ok">29/30 &amp; 30/30</strong> — les <strong>puller en PG</strong> puis remonter la consistance signal↔zone (le vrai goulot).</li>
-      <li>Stabiliser les jobs récurrents (corriger puis réactiver les refresh).</li>
-      <li>Canoniser les collections zonage — 1 par ville.</li>
-      <li>Améliorer modèle signaux + grounding, et construire le mapping rues/zones.</li>
-      <li>Finaliser lots / opportunités (carte réelle, écriture des marques, filtres métier).</li>
-      <li>Publier un tableau de bord de couverture <strong>effectif vs projeté</strong>.</li>
+      <li>Prioriser le focus 30 : zonage/lots geo à <strong class="ok">29/30 &amp; 30/30</strong> — les <strong>puller en PG</strong> puis remonter la consistance signal↔zone (le vrai goulot).</li>
+      <li>Passe de <strong>cleansing grounding</strong> : 100 % de signaux à citation vérifiable (56/70 aujourd'hui).</li>
+      <li>Généraliser les <strong>grilles de normes</strong> : 4 villes de référence alignées sur le pilote Salaberry + exposition API — le « 4+ fondé grille ».</li>
+      <li>Stabiliser les jobs récurrents et canoniser les collections zonage (1 / ville).</li>
+      <li>Intégrer les acquisitions <span class="tag att">en attente</span> : aires TOD, données nominatives (gouvernance dédiée).</li>
+      <li>Finaliser lots / opportunités (carte réelle, écriture des marques) ; tableau de bord de couverture <strong>effectif vs projeté</strong>.</li>
     </ol>
     <p class="muted" style="margin-top:18px">Le potentiel 1104 est atteignable par itérations. La valeur du socle tient à sa <strong>discipline de vérité</strong> : gates déterministes, citations obligatoires, mesures reproductibles, limites documentées.</p>
-    <span class="pageno">15 / 15</span>
+    <span class="pageno">16 / 16</span>
   </section>
 
 </main>
