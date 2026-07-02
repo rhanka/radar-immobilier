@@ -45,14 +45,28 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     expect(expr).toContain(SCORE_STOPS[SCORE_STOPS.length - 1].fallback);
   });
 
-  it("builds a Signaux fill expression that highlights 4+∩TOD before score ramp", () => {
+  it("builds the Signaux fill hierarchy: signal > priorité (ambre) > 4+ (vert) > TOD (bleu) > neutre (gris)", () => {
     const expr = signauxLotFillColorExpression(null);
     expect(expr[0]).toBe("case");
-    expect(JSON.stringify(expr)).toContain("multifamilial4plus");
-    expect(JSON.stringify(expr)).toContain("tod");
-    expect(expr[5]).toEqual(["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]]);
-    expect(expr[6]).toBe("#16a34a");
-    expect(expr[expr.length - 1]).toEqual(lotFillColorExpression(null));
+    // 1-2. projections signal (direct rouge, hérité ambre)
+    expect(expr[1]).toEqual(["==", ["get", "signalProjection"], "direct"]);
+    expect(expr[2]).toBe("#ef4444");
+    expect(expr[4]).toBe("#d97706");
+    // 3. priorité = flag OU 4+∧TOD → ambre (token warning)
+    expect(expr[5]).toEqual([
+      "any",
+      ["==", ["get", "priorite"], true],
+      ["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]],
+    ]);
+    expect(expr[6]).toBe("#d97706");
+    // 4. multifamilial 4+ seul → vert (token success)
+    expect(expr[7]).toEqual(["==", ["get", "multifamilial4plus"], true]);
+    expect(expr[8]).toBe("#16a34a");
+    // 5. TOD seul → bleu (token info)
+    expect(expr[9]).toEqual(["==", ["get", "tod"], true]);
+    expect(expr[10]).toBe("#2563eb");
+    // 6. neutre → gris discret (token text-muted), PAS la rampe score.
+    expect(expr[expr.length - 1]).toBe("#64748b");
   });
 
   it("opacity expression boosts priorité lots", () => {

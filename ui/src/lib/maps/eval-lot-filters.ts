@@ -126,6 +126,25 @@ export function isPriorite(properties: LotProperties): boolean {
   return isQuatrePlus(properties) && isTod(properties);
 }
 
+/**
+ * Opacité PAR DÉFAUT d'un lot selon la hiérarchie concurrente (mécanique
+ * getLotOpacity) : les lots à flags ressortent en permanence, sans filtre
+ * actif — priorité 0.5 > 4+ 0.4 > TOD 0.25 > neutre 0.15 (substrat discret).
+ */
+export const LOT_HIERARCHY_OPACITY = {
+  priorite: 0.5,
+  quatrePlus: 0.4,
+  tod: 0.25,
+  neutral: 0.15,
+} as const;
+
+export function lotHierarchyOpacity(properties: LotProperties): number {
+  if (isPriorite(properties)) return LOT_HIERARCHY_OPACITY.priorite;
+  if (isQuatrePlus(properties)) return LOT_HIERARCHY_OPACITY.quatrePlus;
+  if (isTod(properties)) return LOT_HIERARCHY_OPACITY.tod;
+  return LOT_HIERARCHY_OPACITY.neutral;
+}
+
 /** Retire les accents pour comparer des libellés FR de façon robuste. */
 function foldLabel(value: string): string {
   return value

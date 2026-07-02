@@ -42,6 +42,11 @@ export interface LotProperties {
   tod?: boolean;
   /** Flag multifamilial 4+ — carte-steve uniquement. */
   multifamilial4plus?: boolean;
+  /**
+   * Source honnête du flag 4+ quand l'API l'expose ("grille" = norme extraite
+   * de la grille de zonage ; "heuristique" = dérivation par type de zone).
+   */
+  multifamilial4plusSource?: string | null;
   /** Flag priorité calculé par la source (carte-steve) quand exposé. */
   priorite?: boolean | null;
   /**
@@ -323,6 +328,10 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.multifamilial4plus,
     properties.multifamilial_4plus,
   ]);
+  const multifamilial4plusSource = firstString([
+    properties.multifamilial4plusSource,
+    properties.multifamilial_4plus_source,
+  ]);
   const priorite = firstBoolean([properties.priorite, properties.priority]);
   const superficieM2 = firstNumber([
     properties.superficieM2,
@@ -394,6 +403,7 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     ...(isRue !== null ? { isRue } : {}),
     ...(tod !== null ? { tod } : {}),
     ...(multifamilial4plus !== null ? { multifamilial4plus } : {}),
+    ...(multifamilial4plusSource !== null ? { multifamilial4plusSource } : {}),
     ...(priorite !== null ? { priorite } : {}),
     ...(adresse !== null ? { adresse } : {}),
     ...(facadeM !== null ? { facadeM } : {}),

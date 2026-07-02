@@ -69,6 +69,12 @@ export const SIGNAL_INHERITED_FALLBACK = "#d97706";
 /** Token DS pour le critère CS-L1: multifamilial 4+ ∩ TOD. */
 export const LOT_4PLUS_TOD_TOKEN = "--st-semantic-feedback-success";
 export const LOT_4PLUS_TOD_FALLBACK = "#16a34a";
+/** Token DS pour le périmètre TOD seul (hiérarchie concurrente : bleu). */
+export const LOT_TOD_TOKEN = "--st-semantic-feedback-info";
+export const LOT_TOD_FALLBACK = "#2563eb";
+/** Token DS d'un lot neutre — aucun flag 4+/TOD/priorité (gris discret). */
+export const LOT_NEUTRAL_TOKEN = "--st-semantic-text-muted";
+export const LOT_NEUTRAL_FALLBACK = "#64748b";
 /** Token DS du contour de lot ordinaire. */
 export const DEFAULT_LINE_TOKEN = "--st-semantic-action-primary";
 export const DEFAULT_LINE_FALLBACK = "#2563eb";
@@ -89,6 +95,26 @@ export function resolveToken(token: string, fallback: string, el?: Element | nul
 }
 
 /**
+ * Résout un token pour une expression MAPLIBRE. MapLibre ne parse que
+ * hex/rgb(a)/hsl(a)/noms CSS — les espaces couleur modernes (`oklch()`,
+ * `lab()`, `color()`) que certains thèmes DS emploient (ex.
+ * `--st-semantic-action-primary: oklch(…)` en sent-tech) font échouer la
+ * CRÉATION de la couche (« Could not parse color »). Dans ce cas on replie sur
+ * la valeur DOCUMENTÉE du token — toujours une valeur de token DS, jamais une
+ * couleur inventée.
+ */
+export function resolveMapColor(
+  token: string,
+  fallback: string,
+  el?: Element | null,
+): string {
+  const value = resolveToken(token, fallback, el).trim();
+  return /^(#|rgba?\(|hsla?\()/i.test(value) || /^[a-z]+$/i.test(value)
+    ? value
+    : fallback;
+}
+
+/**
  * Construit l'expression MapLibre `interpolate` qui colorie un lot par sa
  * propriété `potentialScore` ∈ [0,10], avec les couleurs RÉSOLUES depuis les
  * tokens DS de `el`.
@@ -100,30 +126,40 @@ export function resolveToken(token: string, fallback: string, el?: Element | nul
 export function lotFillColorExpression(el?: Element | null): StyleExpression {
   const expr: unknown[] = ["interpolate", ["linear"], ["coalesce", ["get", "potentialScore"], 0]];
   for (const s of SCORE_STOPS) {
-    expr.push(s.stop, resolveToken(s.token, s.fallback, el));
+    expr.push(s.stop, resolveMapColor(s.token, s.fallback, el));
   }
   return expr;
 }
 
 
 /**
- * Couleur de remplissage Signaux pour les lots.
+ * Couleur de remplissage Signaux pour les lots — hiérarchie CONCURRENTE
+ * (parité carte de référence, mécanique getLotColor) :
  *
- * Ordre produit :
  * 1. signal direct / hérité : le focus de signal reste prioritaire ;
- * 2. CS-L1 : intersection multifamilial 4+ ∩ TOD surlignée par token DS ;
- * 3. sinon rampe data-driven du score potentiel 0–10.
+ * 2. priorité (flag `priorite` OU 4+ ∩ TOD) → ambre (token warning) ;
+ * 3. multifamilial 4+ → vert (token success) ;
+ * 4. périmètre TOD → bleu (token info) ;
+ * 5. neutre → gris discret (token text-muted).
+ *
+ * La colorisation est PERMANENTE (pas seulement quand un filtre est actif) :
+ * en ouvrant une ville, les lots 4+/TOD/priorité ressortent immédiatement.
  */
 export function signauxLotFillColorExpression(el?: Element | null): StyleExpression {
+  const isTrue = (prop: string): unknown[] => ["==", ["get", prop], true];
   return [
     "case",
     ["==", ["get", "signalProjection"], "direct"],
-    resolveToken(SIGNAL_DIRECT_TOKEN, SIGNAL_DIRECT_FALLBACK, el),
+    resolveMapColor(SIGNAL_DIRECT_TOKEN, SIGNAL_DIRECT_FALLBACK, el),
     ["==", ["get", "signalProjection"], "inherited"],
-    resolveToken(SIGNAL_INHERITED_TOKEN, SIGNAL_INHERITED_FALLBACK, el),
-    ["all", ["==", ["get", "multifamilial4plus"], true], ["==", ["get", "tod"], true]],
-    resolveToken(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, el),
-    lotFillColorExpression(el),
+    resolveMapColor(SIGNAL_INHERITED_TOKEN, SIGNAL_INHERITED_FALLBACK, el),
+    ["any", isTrue("priorite"), ["all", isTrue("multifamilial4plus"), isTrue("tod")]],
+    resolveMapColor(PRIORITY_LINE_TOKEN, PRIORITY_LINE_FALLBACK, el),
+    isTrue("multifamilial4plus"),
+    resolveMapColor(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, el),
+    isTrue("tod"),
+    resolveMapColor(LOT_TOD_TOKEN, LOT_TOD_FALLBACK, el),
+    resolveMapColor(LOT_NEUTRAL_TOKEN, LOT_NEUTRAL_FALLBACK, el),
   ];
 }
 
@@ -137,8 +173,8 @@ export function lotLineColorExpression(el?: Element | null): StyleExpression {
   return [
     "case",
     ["get", "priorite"],
-    resolveToken(PRIORITY_LINE_TOKEN, PRIORITY_LINE_FALLBACK, el),
-    resolveToken(DEFAULT_LINE_TOKEN, DEFAULT_LINE_FALLBACK, el),
+    resolveMapColor(PRIORITY_LINE_TOKEN, PRIORITY_LINE_FALLBACK, el),
+    resolveMapColor(DEFAULT_LINE_TOKEN, DEFAULT_LINE_FALLBACK, el),
   ];
 }
 
