@@ -3,10 +3,11 @@
    * SourceConsole — onglet « Console » de la vue Source, RECONSTRUIT sur le VRAI
    * endpoint /api/source/coverage (l'ancienne Console est supprimée).
    *
-   * Table tri-état par ville (L1 raw · L2 graphe · L4 zonage · L5 lots), triée
-   * pires statuts d'abord (l'action en tête), filtrable par statut, avec
-   * scorecard détaillée au clic. Honnête de bout en bout : aucune couche n'est
-   * « verified » sans preuve live ; une ville sans couverture reste « absent ».
+   * Table tri-état par ville (PV collectés · données structurées · signaux
+   * extraits · zonage servi · lots servis), triée pires statuts d'abord
+   * (l'action en tête), filtrable par statut, avec scorecard détaillée au clic.
+   * Honnête de bout en bout : aucune couche n'est « verified » sans preuve
+   * live ; une ville sans couverture reste « absent ».
    */
   import { Alert, Badge } from "@sentropic/design-system-svelte";
   import { Terminal, RefreshCw, Search } from "@lucide/svelte";
@@ -48,6 +49,7 @@
     return (
       c.l1Raw.state !== "absent" ||
       c.l2Graph.state !== "absent" ||
+      c.signals.state !== "absent" ||
       c.l4Zonage.state !== "absent" ||
       c.l5Lots.state !== "absent"
     );
@@ -76,13 +78,15 @@
     return true;
   });
 
-  // Couches affichées en mini-cellules (ordre L1 → L5).
+  // Couches affichées en mini-cellules (ordre de la chaîne qualité, copy
+  // client neutre — pas de jargon interne L1/L2/…).
   function layerStates(c: CityCoverage): { key: string; label: string; state: CoverageState }[] {
     return [
-      { key: "l1", label: "L1", state: c.l1Raw.state },
-      { key: "l2", label: "L2", state: c.l2Graph.state },
-      { key: "l4", label: "L4", state: c.l4Zonage.state },
-      { key: "l5", label: "L5", state: c.l5Lots.state },
+      { key: "pv", label: "PV collectés", state: c.l1Raw.state },
+      { key: "graph", label: "Données structurées", state: c.l2Graph.state },
+      { key: "signaux", label: "Signaux extraits", state: c.signals.state },
+      { key: "zonage", label: "Zonage servi", state: c.l4Zonage.state },
+      { key: "lots", label: "Lots servis", state: c.l5Lots.state },
     ];
   }
 </script>
@@ -167,10 +171,11 @@
           <thead class="sticky top-0 z-10 bg-slate-100 text-slate-500">
             <tr>
               <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Ville</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L1</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L2</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L4</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L5</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="PV collectés">PV</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Données structurées">Données</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Signaux extraits">Signaux</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Zonage servi">Zonage</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Lots servis">Lots</th>
               <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Couverture</th>
             </tr>
           </thead>
@@ -211,7 +216,7 @@
             {/each}
             {#if filtered.length === 0}
               <tr>
-                <td colspan="6" class="px-4 py-6 text-center text-slate-400">
+                <td colspan="7" class="px-4 py-6 text-center text-slate-400">
                   Aucune ville ne correspond au filtre.
                 </td>
               </tr>
