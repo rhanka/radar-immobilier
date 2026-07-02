@@ -8,7 +8,7 @@
  * (noLot, géométrie, score). Aucun nom de propriétaire ni PII n'est traité.
  */
 
-import type { LotFeature } from "$lib/maps/lots-client.js";
+import type { LotFeature, LotProperties } from "$lib/maps/lots-client.js";
 
 // ── Centroïde ──────────────────────────────────────────────────────────────────
 
@@ -175,4 +175,54 @@ export function scoreLabel(score: number | null | undefined): string {
   if (score >= 4) return "Moyen";
   if (score >= 1) return "Faible";
   return "Nul";
+}
+
+/**
+ * Score de potentiel réellement ÉVALUÉ d'un lot, ou null quand il ne l'est pas.
+ *
+ * `lots-client` renvoie toujours un `potentialScore` numérique (0 par défaut),
+ * accompagné d'un `potentialScoreStatus` : "scored" (fourni par la source),
+ * "fallback" (dérivé d'indicateurs zone/flags) ou "unavailable" (aucune donnée).
+ * Retourne null — l'UI affiche « non évalué », jamais « 0.0/10 » — quand :
+ *   - status "unavailable" (le 0 est un placeholder, pas une mesure) ;
+ *   - status "fallback" avec score 0 : la dérivation n'a trouvé AUCUNE évidence
+ *     positive (zone sans densité ni type porteur) — ce 0 n'est pas une mesure.
+ * Un score numérique legacy sans statut est conservé (compat sources
+ * historiques), de même qu'un vrai 0 MESURÉ ("scored").
+ */
+export function evaluatedLotScore(
+  props: Pick<LotProperties, "potentialScore" | "potentialScoreStatus">,
+): number | null {
+  const score = props.potentialScore;
+  if (typeof score !== "number" || !Number.isFinite(score)) return null;
+  if (props.potentialScoreStatus === "unavailable") return null;
+  if (props.potentialScoreStatus === "fallback" && score <= 0) return null;
+  return score;
+}
+
+// ── Champs enrichis de la fiche/carte lot ──────────────────────────────────────
+
+/**
+ * Code de zone affichable d'un lot : `zoneCode` plat (collection OGC / join
+ * #314) sinon le code porté par l'objet `zone` joint. null si la source
+ * n'expose aucun code — aucune invention.
+ */
+export function lotZoneCode(
+  props: Pick<LotProperties, "zoneCode" | "zone">,
+): string | null {
+  return props.zoneCode ?? props.zone?.code ?? null;
+}
+
+// ── Formatage partagé (LotFichePanel + carte lot du panneau Signaux) ───────────
+
+/** Superficie en m² arrondie, locale fr-CA ; « — » discret quand absente. */
+export function formatArea(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `${Math.round(value).toLocaleString("fr-CA")} m²`;
+}
+
+/** Booléen client-facing : « Oui » / « Non » ; « — » discret quand absent. */
+export function formatYesNo(value: boolean | null | undefined): string {
+  if (value === undefined || value === null) return "—";
+  return value ? "Oui" : "Non";
 }

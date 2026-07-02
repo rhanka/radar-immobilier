@@ -39,6 +39,16 @@
     mergeDesignatedZones,
     zoneRefComparableKey,
   } from "$lib/maps/signaux-map-geo.js";
+  import {
+    evaluatedLotScore,
+    formatArea,
+    formatYesNo,
+    lotZoneCode,
+  } from "$lib/components/maps/lot-fiche-utils.js";
+  import {
+    zoneKindStyle,
+    ZONE_KIND_NEUTRAL,
+  } from "$lib/maps/zone-kind-style.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -120,13 +130,31 @@
    * mais absentes de la couche cadastrale (ex. rezonage futur "A16"/"I93").
    * Une zone désignée sans polygone est listée (badge « géométrie geo
    * manquante ») au lieu d'être masquée : le polygone ne sert qu'à la carte.
+   *
+   * DÉDUP par code : les collections réelles portent des codes dupliqués
+   * (polygones disjoints d'une même zone réglementaire, ex. Salaberry
+   * C-186 ×2) — une seule fiche par zone, la carte rend tous les polygones.
    */
-  $: zones = mergeDesignatedZones(
-    zonesResponse?.featureCollection.features ?? [],
-    detailNodes,
-    activeCitySlug,
+  $: zones = dedupeZonesByCode(
+    mergeDesignatedZones(
+      zonesResponse?.featureCollection.features ?? [],
+      detailNodes,
+      activeCitySlug,
+    ),
   );
   $: lots = lotsResponse?.featureCollection.features ?? [];
+
+  function dedupeZonesByCode(zoneFeatures: GeoZoneFeature[]): GeoZoneFeature[] {
+    const seen = new Set<string>();
+    const out: GeoZoneFeature[] = [];
+    for (const zone of zoneFeatures) {
+      const key = `${zone.properties.citySlug}/${zone.properties.code}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(zone);
+    }
+    return out;
+  }
 
   // ── #4 — Filtrage zones/lots selon filtre actif ────────────────────────────
   /**
@@ -398,9 +426,110 @@
     return `${Math.round(value * 100)} %`;
   }
 
+  /**
+   * Score de potentiel AFFICHABLE (« x.x/10 ») — null quand le score n'est pas
+   * évalué (`potentialScoreStatus: "unavailable"`) : on n'affiche jamais un
+   * « 0.0/10 » placeholder comme s'il était mesuré (copy « non évalué »).
+   */
   function lotScore(lot: LotFeature): string | null {
-    const score = lot.properties.potentialScore;
-    return typeof score === "number" ? `${score.toFixed(1)}/10` : null;
+    const score = evaluatedLotScore(lot.properties);
+    return score !== null ? `${score.toFixed(1)}/10` : null;
+  }
+
+  /**
+   * Type de zone joint quand il est réellement précisé par la source.
+   * « non précisé » / « AUTRE » = placeholders internes → rangée masquée
+   * (copy client neutre, pas de jargon).
+   */
+  function lotZoneKind(lot: LotFeature): string | null {
+    const kind = lot.properties.zone?.kind;
+    if (!kind) return null;
+    const folded = kind.trim().toLowerCase();
+    return folded === "non précisé" || folded === "autre" ? null : kind;
+  }
+
+  /**
+   * Flag 4+ client-facing : « Oui/Non », suffixé de sa source honnête
+   * (« grille » = norme extraite ; « heuristique » = dérivation par type de
+   * zone) quand l'API l'expose. « — » discret quand absent.
+   */
+  function lot4Plus(lot: LotFeature): string {
+    const flag = lot.properties.multifamilial4plus;
+    const text = formatYesNo(flag);
+    const source = lot.properties.multifamilial4plusSource;
+    return flag !== undefined && source ? `${text} · ${source}` : text;
+  }
+
+  // ── Contrat d'interaction zone ↔ lot ↔ signal ─────────────────────────────
+  // État d'ouverture des accordéons Zones/Signaux : les liens croisés (badge
+  // zone d'un lot, signal citant une zone) déplient le bucket cible pour que
+  // la fiche focusée soit VISIBLE.
+  let zonesBucketOpen = false;
+  let signalsBucketOpen = false;
+
+  /** Type (kind) résolu de la zone — null si indéterminé (affiché « — »). */
+  function zoneTypeLabel(zone: GeoZoneFeature): string | null {
+    const style = zoneKindStyle(zone.properties.kind ?? null, zone.properties.code);
+    return style === ZONE_KIND_NEUTRAL ? null : style.label;
+  }
+
+  /**
+   * Nombre de lots joints à la zone : `lotCount` de l'endpoint quand présent,
+   * sinon jointure par code (zoneCode des items lots #314). `lotFeatures` est
+   * passé EXPLICITEMENT (réactivité des {@const} dans un each keyed).
+   */
+  function zoneLotCount(zone: GeoZoneFeature, lotFeatures: LotFeature[]): number {
+    if (zone.properties.lotCount > 0) return zone.properties.lotCount;
+    const key = zoneRefComparableKey(zone.properties.code);
+    if (key.length === 0) return 0;
+    let count = 0;
+    for (const lot of lotFeatures) {
+      const code = lotZoneCode(lot.properties);
+      if (code && zoneRefComparableKey(code) === key) count += 1;
+    }
+    return count;
+  }
+
+  /** Signaux de la ville citant cette zone (lien signal↔zone existant). */
+  function signalsCitingZone(
+    zone: GeoZoneFeature,
+    nodes: GraphSignalNode[],
+  ): GraphSignalNode[] {
+    const key = zoneRefComparableKey(zone.properties.code);
+    if (key.length === 0) return [];
+    return nodes.filter((node) =>
+      extractSignalZoneRefs(node).some((code) => zoneRefComparableKey(code) === key),
+    );
+  }
+
+  /** Zone (feature) correspondant au code joint d'un lot — remontée lot → zone. */
+  function zoneFeatureForLot(
+    lot: LotFeature,
+    zoneFeatures: GeoZoneFeature[],
+  ): GeoZoneFeature | null {
+    const code = lotZoneCode(lot.properties);
+    if (!code) return null;
+    const key = zoneRefComparableKey(code);
+    if (key.length === 0) return null;
+    return (
+      zoneFeatures.find((z) => zoneRefComparableKey(z.properties.code) === key) ?? null
+    );
+  }
+
+  /** Badge zone d'un lot → déplie le bucket Zones et focalise la fiche zone. */
+  function openZoneDetail(zone: GeoZoneFeature): void {
+    const key = zoneKey(zone);
+    if (!key) return;
+    zonesBucketOpen = true;
+    toggleEntity(key);
+  }
+
+  /** Signal citant une zone → déplie le bucket Signaux et focalise sa fiche. */
+  function openSignalDetail(node: GraphSignalNode): void {
+    const key = signalKey(node);
+    if (!key) return;
+    signalsBucketOpen = true;
+    toggleEntity(key);
   }
 </script>
 
@@ -527,8 +656,8 @@
         </div>
       </details>
 
-      <!-- #8 : pas d'attribut open → replié par défaut -->
-      <details class="sel-bucket">
+      <!-- #8 : replié par défaut ; s'ouvre aussi via un lien croisé zone→signal -->
+      <details class="sel-bucket" bind:open={signalsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Signaux</span>
           <!-- #6 : "–" pendant le chargement ; filtré/total si filtre actif -->
@@ -718,8 +847,8 @@
         </div>
       </details>
 
-      <!-- #8 : pas d'attribut open → replié par défaut -->
-      <details class="sel-bucket">
+      <!-- #8 : replié par défaut ; s'ouvre aussi via le badge zone d'un lot -->
+      <details class="sel-bucket" bind:open={zonesBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Zones</span>
           <!-- #6 : "–" pendant le chargement de la couche ZONES -->
@@ -777,10 +906,19 @@
                     <span class="sel-entity-type">{zone.properties.code}</span>
                   </button>
                   {#if zoneVisual.focused}
+                    <!-- Détail ZONE (contrat d'interaction) : code, type (kind),
+                         lots joints, grille PDF, signaux citant la zone. -->
+                    {@const citing = signalsCitingZone(zone, detailNodes)}
                     <div class="sel-entity-detail">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Code</span>
                         <code class="entity-meta-val">{zone.properties.code}</code>
+                        <span class="entity-meta-key">Type</span>
+                        {#if zoneTypeLabel(zone)}
+                          <span class="entity-meta-val">{zoneTypeLabel(zone)}</span>
+                        {:else}
+                          <span class="entity-meta-val entity-meta-val--missing">—</span>
+                        {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{zoneSourceLabel(zone)}</span>
                         <span class="entity-meta-key">Géométrie</span>
@@ -788,7 +926,39 @@
                         <span class="entity-meta-key">Confiance</span>
                         <span class="entity-meta-val">{confidencePct(zone.properties.confidence)}</span>
                         <span class="entity-meta-key">Lots liés</span>
-                        <span class="entity-meta-val">{zone.properties.lotCount}</span>
+                        <span class="entity-meta-val">{formatNumber(zoneLotCount(zone, lots))}</span>
+                      </div>
+                      {#if zone.properties.grillePdfUrl}
+                        <a
+                          class="zone-grille-link"
+                          href={zone.properties.grillePdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                          Grille de zonage PDF
+                        </a>
+                      {/if}
+                      <div class="zone-signals">
+                        <span class="doc-refs-label">Signaux citant la zone</span>
+                        {#if citing.length === 0}
+                          <p class="doc-refs-empty">Aucun signal ne cite cette zone.</p>
+                        {:else}
+                          <ul class="zone-signal-list">
+                            {#each citing as node (node.id)}
+                              <li>
+                                <button
+                                  type="button"
+                                  class="zone-signal-link"
+                                  on:click={() => openSignalDetail(node)}
+                                  title="Ouvrir la fiche du signal"
+                                >
+                                  {node.label}
+                                </button>
+                              </li>
+                            {/each}
+                          </ul>
+                        {/if}
                       </div>
                     </div>
                   {/if}
@@ -843,24 +1013,63 @@
                     <span class="sel-entity-type">{lotScore(lot) ?? "lot"}</span>
                   </button>
                   {#if lotVisual.focused}
+                    <!-- Carte lot enrichie (#314) : zone (code, badge cliquable →
+                         détail zone), 4+, superficie, TOD/priorité si présents.
+                         Champs absents = « — » discret ; score non évalué =
+                         « non évalué », jamais « 0.0/10 ». -->
+                    {@const lotZoneFeature = zoneFeatureForLot(lot, zones)}
                     <div class="sel-entity-detail">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Lot</span>
                         <code class="entity-meta-val">{lot.properties.noLot}</code>
-                        {#if lot.properties.superficieM2 !== undefined && lot.properties.superficieM2 !== null}
-                          <span class="entity-meta-key">Superficie</span>
-                          <span class="entity-meta-val">{lot.properties.superficieM2} m²</span>
+                        <span class="entity-meta-key">Zone</span>
+                        {#if lotZoneFeature}
+                          <span class="entity-meta-val">
+                            <button
+                              type="button"
+                              class="lot-zone-badge"
+                              on:click={() => openZoneDetail(lotZoneFeature)}
+                              title="Ouvrir le détail de la zone"
+                            >
+                              {lotZoneCode(lot.properties) ?? lotZoneFeature.properties.code}
+                            </button>
+                          </span>
+                        {:else if lotZoneCode(lot.properties)}
+                          <code class="entity-meta-val">{lotZoneCode(lot.properties)}</code>
+                        {:else}
+                          <span class="entity-meta-val entity-meta-val--missing">—</span>
                         {/if}
+                        {#if lotZoneKind(lot)}
+                          <span class="entity-meta-key">Type de zone</span>
+                          <span class="entity-meta-val">{lotZoneKind(lot)}</span>
+                        {/if}
+                        <span class="entity-meta-key">Multifamilial 4+</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={lot.properties.multifamilial4plus === undefined}
+                        >
+                          {lot4Plus(lot)}
+                        </span>
+                        <span class="entity-meta-key">Superficie</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={lot.properties.superficieM2 === undefined || lot.properties.superficieM2 === null}
+                        >
+                          {formatArea(lot.properties.superficieM2)}
+                        </span>
+                        {#if lot.properties.tod !== undefined}
+                          <span class="entity-meta-key">Périmètre TOD</span>
+                          <span class="entity-meta-val">{formatYesNo(lot.properties.tod)}</span>
+                        {/if}
+                        {#if lot.properties.priorite !== undefined && lot.properties.priorite !== null}
+                          <span class="entity-meta-key">Priorité</span>
+                          <span class="entity-meta-val">{formatYesNo(lot.properties.priorite)}</span>
+                        {/if}
+                        <span class="entity-meta-key">Potentiel</span>
                         {#if lotScore(lot)}
-                          <span class="entity-meta-key">Potentiel</span>
                           <span class="entity-meta-val">{lotScore(lot)}</span>
-                        {/if}
-                        {#if lot.properties.zone}
-                          <span class="entity-meta-key">Zone</span>
-                          <span class="entity-meta-val">{lot.properties.zone.kind}</span>
-                        {:else if lot.properties.zoneCode}
-                          <span class="entity-meta-key">Zone</span>
-                          <span class="entity-meta-val">{lot.properties.zoneCode}</span>
+                        {:else}
+                          <span class="entity-meta-val entity-meta-val--missing">non évalué</span>
                         {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</span>
@@ -1409,5 +1618,77 @@
     margin: 0.4rem 0 0.5rem;
     font-size: var(--signaux-fs-body);
     font-style: italic;
+  }
+
+  /* ── Contrat d'interaction zone ↔ lot ↔ signal ─────────────────────────── */
+
+  /* Badge zone cliquable de la carte lot : remonte au détail de la zone. */
+  .lot-zone-badge {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #99f6e4;
+    border-radius: var(--st-radius-sm, 4px);
+    background: #f0fdfa;
+    color: #0f766e;
+    cursor: pointer;
+    font-family: var(--st-font-mono, ui-monospace, monospace);
+    font-size: var(--signaux-fs-small);
+    font-weight: 650;
+    padding: 0.05rem 0.4rem;
+  }
+
+  .lot-zone-badge:hover {
+    background: #ccfbf1;
+  }
+
+  /* Lien grille PDF de la fiche zone. */
+  .zone-grille-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    border: 1px solid #14b8a6;
+    border-radius: var(--st-radius-sm, 4px);
+    background: #f0fdfa;
+    color: #0f766e;
+    font-size: var(--signaux-fs-small);
+    font-weight: 650;
+    padding: 0.2rem 0.55rem;
+    text-decoration: none;
+  }
+
+  .zone-grille-link:hover {
+    background: #ccfbf1;
+  }
+
+  /* Signaux citant la zone (fiche zone). */
+  .zone-signals {
+    margin-top: 0.55rem;
+    border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    padding-top: 0.5rem;
+  }
+
+  .zone-signal-list {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .zone-signal-link {
+    border: 0;
+    background: transparent;
+    color: #0f766e;
+    cursor: pointer;
+    font-size: var(--signaux-fs-small);
+    font-weight: 600;
+    padding: 0;
+    text-align: left;
+    line-height: 1.35;
+  }
+
+  .zone-signal-link:hover {
+    text-decoration: underline;
   }
 </style>
