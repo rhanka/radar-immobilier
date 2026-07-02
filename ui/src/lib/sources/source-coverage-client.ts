@@ -92,16 +92,21 @@ export async function fetchSourceCoverage(
  *   substantié), absent → gris neutre (rien de connu). JAMAIS de score continu.
  */
 export const STATE_COLOR: Record<CoverageState, string> = {
-  verified: "#16a34a", // green-600 — vérifié live
-  declared: "#f59e0b", // amber-500 — déclaré non substantié
-  absent: "#cbd5e1", // slate-300 — absent (neutre, PAS du vert)
+  verified: "#16a34a", // green-600 — « Servi »
+  declared: "#f59e0b", // amber-500 — « Partiel »
+  absent: "#cbd5e1", // slate-300 — « Non couvert » (neutre, PAS du vert)
 };
 
-/** Libellé tri-état pour badges / légende / scorecard (français, honnête). */
+/**
+ * Libellé CLIENT tri-état (badges / légende / scorecard). Copy produit neutre —
+ * aucun jargon interne. La rigueur reste la même (couleur = pire état réel),
+ * seuls les MOTS changent :
+ *   verified → « Servi », declared → « Partiel », absent → « Non couvert ».
+ */
 export const STATE_LABEL: Record<CoverageState, string> = {
-  verified: "vérifié live",
-  declared: "déclaré non substantié",
-  absent: "absent",
+  verified: "Servi",
+  declared: "Partiel",
+  absent: "Non couvert",
 };
 
 /** Tonalité DS du badge tri-état (success/warning/neutral). */
@@ -142,6 +147,16 @@ export function colorForCity(city: CityCoverage): string {
 export function buildFillColorExpression(
   cities: CityCoverage[],
 ): ExpressionSpecification {
+  // Sans couverture (chargement / erreur / réponse vide) on NE PEUT PAS bâtir un
+  // `match` valide : MapLibre exige au moins une paire label→couleur, et un
+  // `["match", input, fallback]` sans paire est REJETÉ (« Expected at least 4
+  // arguments »). Poser cette expression invalide sur `cities-fill` fait échouer
+  // la couche → aucun aplat ne se peint. On retombe donc sur une COULEUR
+  // CONSTANTE « absent » (gris neutre) : valeur de paint valide ET honnête (tout
+  // est « Non couvert » tant qu'on n'a pas la donnée, jamais de vert fabriqué).
+  if (cities.length === 0) {
+    return STATE_COLOR.absent as unknown as ExpressionSpecification;
+  }
   const expr: unknown[] = ["match", ["get", "citySlug"]];
   for (const city of cities) {
     expr.push(city.citySlug, STATE_COLOR[city.worstStatus]);
