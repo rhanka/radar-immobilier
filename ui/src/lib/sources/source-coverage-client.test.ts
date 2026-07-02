@@ -8,7 +8,7 @@
  *   - `declared` ≠ `verified` ≠ `absent` (trois couleurs distinctes).
  *   - headline = totals EXACTS de l'endpoint (jamais recalculé/arrondi).
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createExpression } from "@maplibre/maplibre-gl-style-spec";
 import {
   STATE_COLOR,
@@ -22,6 +22,7 @@ import {
   countCheapZonageCompletions,
   countCheapLotsCompletions,
   sortCitiesForConsole,
+  fetchCityGrilles,
   type CityCoverage,
   type CoverageState,
   type CoverageTotals,
@@ -37,8 +38,9 @@ function makeCity(overrides: Partial<CityCoverage> = {}): CityCoverage {
     priorityRank: null,
     l1Raw: { state: "absent", count: 0, freshness: "unknown" },
     l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-    l4Zonage: { state: "absent", served: false, freshness: "unknown" },
-    l5Lots: { state: "absent", served: false, freshness: "unknown" },
+    signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+    l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
+    l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     worstStatus: "absent",
     nextMarginalGain: null,
     ...overrides,
@@ -76,8 +78,9 @@ describe("tri-état : trois couleurs DISTINCTES", () => {
     const city = makeCity({
       l1Raw: { state: "verified", count: 3, freshness: "fresh" },
       l2Graph: { state: "verified", ontologyVersion: "2.3", freshness: "fresh" },
-      l4Zonage: { state: "verified", served: true, freshness: "fresh" },
-      l5Lots: { state: "declared", served: false, freshness: "unknown" },
+      signals: { state: "verified", count: 12, withCitation: 9, freshness: "fresh" },
+      l4Zonage: { state: "verified", served: true, servedBy: "geo", freshness: "fresh" },
+      l5Lots: { state: "declared", served: false, servedBy: null, freshness: "unknown" },
       worstStatus: "declared",
     });
     expect(colorForCity(city)).toBe(STATE_COLOR.declared);
@@ -179,16 +182,20 @@ describe("focus-30 highlight", () => {
 
 describe("headline province", () => {
   const totals: CoverageTotals = {
-    cities: 1104,
+    cities: 1106,
     l1Raw: 274,
     l2Graph: 197,
-    l4Zonage: 33,
-    l5Lots: 12,
+    signals: 31,
+    l4Zonage: 561,
+    l5Lots: 1102,
   };
 
   it("formatProvinceHeadline reprend les totals EXACTS sans recalcul", () => {
+    // Les chiffres zonage/lots viennent du LISTING LIVE geo (BUG « 70/1106
+    // zonage servi » alors que geo sert 500+ zonages / ~1102 lots) : le
+    // headline reflète les totals de l'endpoint, JAMAIS un recalcul local.
     expect(formatProvinceHeadline(totals)).toBe(
-      "197/1104 graphés · 33/1104 zonage servi · 12/1104 lots servis",
+      "197/1106 graphés · 561/1106 zonage servi · 1102/1106 lots servis",
     );
   });
 
@@ -200,10 +207,10 @@ describe("headline province", () => {
       makeCity({ citySlug: "d", nextMarginalGain: null }),
     ];
     const headline = buildProvinceHeadline({ totals, cities });
-    expect(headline.cities).toBe(1104);
+    expect(headline.cities).toBe(1106);
     expect(headline.l2Graph).toBe(197);
-    expect(headline.l4Zonage).toBe(33);
-    expect(headline.l5Lots).toBe(12);
+    expect(headline.l4Zonage).toBe(561);
+    expect(headline.l5Lots).toBe(1102);
     expect(headline.cheapZonage).toBe(2);
   });
 
@@ -241,5 +248,43 @@ describe("sortCitiesForConsole", () => {
     const before = cities.map((c) => c.citySlug);
     sortCitiesForConsole(cities);
     expect(cities.map((c) => c.citySlug)).toEqual(before);
+  });
+});
+
+// ── 6. Détail grilles de zonage (lazy, live) ─────────────────────────────────
+
+describe("fetchCityGrilles", () => {
+  it("appelle l'endpoint par ville et retourne le contrat tel quel", async () => {
+    const payload = {
+      citySlug: "saint-hippolyte",
+      available: true,
+      zoneCount: 3,
+      zonesWithGrille: 1,
+      zonesWithNormes: 1,
+      covered: 2,
+      state: "declared" as const,
+    };
+    const fetchImpl = vi.fn(async () =>
+      new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    ) as unknown as typeof fetch;
+
+    const result = await fetchCityGrilles("saint-hippolyte", fetchImpl);
+    expect(result).toEqual(payload);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "/api/source/coverage/saint-hippolyte/grilles",
+      expect.objectContaining({ headers: { Accept: "application/json" } }),
+    );
+  });
+
+  it("lève en cas d'échec HTTP (état « donnée indisponible » honnête côté vue)", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response("{}", { status: 502 }),
+    ) as unknown as typeof fetch;
+    await expect(fetchCityGrilles("ville-x", fetchImpl)).rejects.toThrow(
+      "source-coverage grilles HTTP 502",
+    );
   });
 });
