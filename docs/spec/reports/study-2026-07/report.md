@@ -45,30 +45,40 @@ Les limites principales, **assumées sans survente** :
 
 - disponibilité inégale des sources municipales ; ~97 villes cibles n'ont **aucune** donnée brute
   collectée (scraping préalable bloqué), et certaines villes résistent durablement au scraping ;
-- couverture zonage géographique encore très faible sur le focus 30 (**3/30 [à consolider]**) ;
+- consistance **signal↔zone** encore faible (recall #74 ~60 %, et **16/30** villes ne citent aucune zone) ; le zonage/lots geo est désormais **fort** (29/30, 30/30) mais **pas encore matérialisé en PG** (pull à lancer) ;
 - rappel signal ↔ zone **mesuré à ~59 %** dans son meilleur état actuel, dont ~81 % du déficit
   résiduel n'est pas corrigeable côté application ;
 - besoin de modèles/prompts spécialisés et d'un mapping fin rues/zones/lots ;
 - exploitation encore partielle : jobs geo one-shot/daily en place mais **cronjobs de refresh
   suspendus** pour des raisons de coût (FinOps), en attente de correction de la cause racine.
 
-### Chiffres clés (au 28–29 juin 2026)
+### Chiffres clés — deux axes : **Focus 30** (villes démo prioritaires) vs **Province ≈1104**
 
-| Indicateur | Effectif | Projeté / cible | Qualification |
+La lecture se fait toujours sur **deux périmètres distincts** : les **30 villes focus** (banlieues MTL
+prioritaires, le banc de démonstration E2E) et la **province ≈1104** (hors Montréal/Laval). Un même
+indicateur a **deux valeurs** — ne jamais les additionner.
+
+| Dimension (par couche) | **Focus 30** | **Province ≈1104** | Statut |
 |---|---:|---:|---|
-| Municipalités cibles | 1104 | 1104 | référentiel |
-| Graphes v2.3 publiés | ~976–978 / 1104 (≈ 88 %) | proche de 1104 | **[effectif]** ; reste 128 villes |
-| Villes cibles sans aucune donnée brute | 97 | 0 | **[effectif]** ; préalable scraping |
-| Collections zonage exposées | ~506 `qc-zonage-*` | 1 collection canonique / ville | **[à consolider]** (fragments ArcGIS) |
-| Couverture zonage par match ville | ~234 / 1104 · **3 / 30** focus | extension progressive | **[à consolider]** |
-| Collections lots cadastre | ~1103 | quasi provincial | **[effectif]** côté API geo |
-| Rappel mapper signal → zone | **47,3 % → 57,3 % → 59,2 %** | plafond immo ~57–59 % atteint | **[effectif]** (3 mesures datées) |
-| Vues produit | 2 fonctionnelles / 2 partielles | 4 complètes | **[effectif]** |
+| Graphe présent (v2.3) | **25 / 30** | **978 / 1104** | **[effectif]** |
+| Signaux groundés page/bbox | **56 / 70** (80 %) | — | **[effectif]** (mesure S3) |
+| **Zonage servi (geo)** | **29 / 30** | **~485 / 1106** | **[effectif — live 2026-07-02]** |
+| **Lots servis (geo)** | **30 / 30** | **~1102 / 1106** | **[effectif — live 2026-07-02]** |
+| Villes citant ≥1 zone (signaux) | **14 / 30** | — | **[effectif]** — vrai goulot |
+| Consistance signal↔zone #74 (recall) | **~60 %** (proxy) | 47–59 % (55 villes) | **[à consolider]** (vrai mapper à relancer sur PG peuplé) |
 
-La projection 1104 est **crédible** pour les couches dont la source publique est normalisée
-(lots/cadastre notamment) et **conditionnelle** pour les couches municipales non standardisées
-(zonage, grilles, règlements, PV scannés). La prochaine étape n'est pas une preuve de concept
-supplémentaire, mais une **consolidation priorisée sur le focus 30**.
+> **Bascule récente (geo)** : le zonage focus est passé de **7/30 → 29/30** (livraison geo ; seul
+> `lile-dorval`, micro-île, manque) et les lots à **30/30**. La **carte Évaluation en profite déjà
+> en live** (passthrough OGC). En revanche la **vue Source / le mapper #74 lisent le PostgreSQL**
+> peuplé par le *pull* — encore limité à ~7 villes — d'où le recall #74 **plafonné par l'état du PG**,
+> pas par geo : le levier est de **puller les 29/30 en PG** (jobs `populate-geo` prêts). Le **3/30**
+> et le **~234/1104** de l'investigation de juin sont donc **périmés**.
+
+La projection 1104 est **quasi acquise** pour lots/cadastre (source publique normalisée),
+**bien engagée** pour le zonage servi (**~485/1106**, à canoniser), et **conditionnée à notre
+extraction signal** pour la consistance E2E. La prochaine étape n'est pas une preuve de concept
+supplémentaire, mais une **consolidation priorisée sur le focus 30** (puller le zonage/lots en PG,
+remonter la consistance signal↔zone).
 
 ---
 
@@ -87,7 +97,7 @@ la couche.
 |---|---|---|
 | Graphes / signaux | chaîne opérationnelle ; reliquat v2.2 traité partiellement | socle exploitable ; certains cas exigent re-grounding depuis le PDF |
 | Citations | présentes et affichables quand le graphe est groundé | qualité critique : **aucune citation non vérifiable ne doit être publiée** |
-| Zonage geo | **3 / 30 [à consolider]** villes avec collection zonage servie | principal trou de la démo sur le focus |
+| Zonage geo | **29 / 30** villes servies **[live 2026-07-02]** (lots **30/30**) | fort côté geo ; reste à **puller en PG** pour le mapper / la vue Source |
 | Lots cadastre | couche disponible à large échelle, sans donnée propriétaire | base solide pour le scoring et la visualisation lot |
 | Résolution signal → zone | rappel réel mesuré, améliorable par lecture de champs et acquisition | faisable, mais dépend du schéma geo et de la précision d'extraction |
 | UI | Signaux et Sources fonctionnelles ; Évaluation partielle ; Opportunités en démo | produit **consultable**, pas encore outil complet de prospection multi-couches |
@@ -118,7 +128,8 @@ Le potentiel cible est réel, mais ne doit pas être confondu avec l'effectif li
 | Municipalités cibles | 1104 | 1104 | référentiel stable + suivi de couverture |
 | Graphes v2.3 | **~976–978 [effectif]** | proche de 1104 | scraping des ~97 villes sans brut + re-grounding des ~30 v2.2 |
 | Lots cadastre | **~1103 collections [effectif]** côté geo | quasi provincial | jobs bornés (bbox, pagination, mémoire) |
-| Zonage | **~234 / 1104 [à consolider]**, focus 30 faible | extension progressive | canonisation 1 collection/ville + priorisation focus 30 |
+| Zonage servi | **~485 / 1106 [live 2026-07]**, focus **29 / 30** | extension progressive | canonisation 1 collection/ville + **pull PG** |
+| Lots servis | **~1102 / 1106**, focus **30 / 30** | quasi provincial | pull PG borné (bbox) |
 | Signaux exploitables | fonction des PV disponibles et du grounding | extensible par ville | modèle spécialisé, citation obligatoire, contrôle qualité |
 
 La projection 1104 est donc **crédible et quasi acquise** pour les lots/cadastre (source publique
@@ -213,8 +224,8 @@ Mesures directes sur l'API geo (28–29 juin), **à consolider** :
 - **~506 collections `qc-zonage-*`** exposées **[effectif]** — mais dont ~200 sont des fragments
   ArcGIS ré-attribués (`-arcgis`, `-affectation`, `-piia`, schémas de plan) que le mapper ne
   requête jamais (il construit `qc-zonage-<slug>` en dur) ;
-- couverture par match de ville autour de **~234 / 1104 [à consolider]** ;
-- focus 30 : seulement **3 / 30 [à consolider]** ;
+- couverture par match de ville **~485 / 1106 [live 2026-07-02]** (a crû depuis les ~234 de juin, geo a livré) ;
+- focus 30 : **29 / 30** (seul `lile-dorval`, micro-île, manque ; lots **30/30**) ;
 - ces chiffres varient selon la stratégie de matching, car plusieurs collections représentent des
   fragments, affectations, PIIA ou variantes ArcGIS d'une même ville.
 
@@ -541,7 +552,7 @@ maturité des sources** et de **visualiser des lots scorés** sur les villes cou
 La prochaine étape n'est pas une preuve de concept supplémentaire, mais une **consolidation
 priorisée**, dans cet ordre :
 
-1. **prioriser le focus 30** avec toutes les couches nécessaires (zonage en tête, aujourd'hui 3/30) ;
+1. **prioriser le focus 30** : zonage/lots geo désormais à **29/30 & 30/30** — les **puller en PG** puis remonter la **consistance signal↔zone** (le vrai goulot) ;
 2. **stabiliser les jobs récurrents** (corriger puis réactiver les CronJobs de refresh) ;
 3. **canoniser les collections zonage** (une collection par ville) pour un comptage et un mapping
    stables ;
@@ -565,9 +576,11 @@ limites documentées.
 | Focus 30 v2.2 résiduel | 1 publié (saint-césaire), 29 bloquées | effectif | `2.3-finition-progress.md` | 28 juin |
 | Grounding hallucination | ex. 12/12 identifiants orphelins sur une ville | effectif | `2.3-finition-progress.md` | 28 juin |
 | Collections zonage | ~506 `qc-zonage-*` (dont ~200 fragments ArcGIS) | à consolider | `zones-geo-30-investigation.md`, `wp3-mapper-recall-2026-06-28.md` | 28–29 juin |
-| Couverture zonage | ~234 / 1104 par match | à consolider | `zones-geo-30-investigation.md` | 28 juin |
-| Focus 30 zonage | 3 / 30 | à consolider | idem | 28 juin |
-| Collections lots | ~1103 | effectif (API geo) | idem | 28 juin |
+| Couverture zonage province | ~234/1104 (juin) → **~485 / 1106** | effectif (live) | mesure directe API geo `/collections` | **2 juillet** |
+| **Focus 30 zonage servi** | 3/30 (juin) → **29 / 30** | effectif (live) | idem (seul `lile-dorval` manque) | **2 juillet** |
+| **Focus 30 lots servis** | **30 / 30** | effectif (live) | idem | **2 juillet** |
+| **Focus 30 consistance signaux** | graphe 27/30 · v2.3 25/30 · signaux 70 · groundés 56/70 (80 %) · villes citant ≥1 zone 14/30 · recall #74 proxy 28/47 (60 %) | effectif (proxy) | mesure S3 graphes + croisement geo | **2 juillet** |
+| Collections lots province | ~1103 → **~1102 / 1106** | effectif (API geo) | idem | **2 juillet** |
 | Rappel mapper (live) | 52 / 110 = 47,3 % | effectif | `wp3-mapper-recall-2026-06-28.md` | 28 juin |
 | Rappel mapper (fix applicatif) | 63 / 110 = 57,3 % | effectif | idem | 28 juin |
 | Rappel mapper (final immo+geo) | 71 / 120 = 59,2 % | effectif | idem, §6 | 29 juin |
