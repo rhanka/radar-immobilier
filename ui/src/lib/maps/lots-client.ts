@@ -14,6 +14,7 @@
  * Quand non disponible (endpoint non enrichi) : undefined.
  */
 import { resolveLotPotentialScore } from "./lot-potential-visual.js";
+import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 /** Properties d'un lot cadastral (uniquement données publiques non-PII). */
 export interface LotProperties {
@@ -115,6 +116,10 @@ export interface FetchLotsOptions {
   limit?: number;
   bbox?: [number, number, number, number];
   baseUrl?: string;
+  /** Signal d'annulation externe (anti-course au changement de ville). */
+  signal?: AbortSignal;
+  /** Timeout requête (ms). Défaut : `DEFAULT_REQUEST_TIMEOUT_MS`. */
+  timeoutMs?: number;
 }
 
 interface OgcFeatureCollection {
@@ -157,7 +162,10 @@ export async function fetchLots(
   opts: FetchLotsOptions = {},
 ): Promise<LotsResponse> {
   const url = resolveLotsUrl(citySlug, opts);
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url, {
+    signal: opts.signal,
+    timeoutMs: opts.timeoutMs,
+  });
   const collectionId = lotsCollectionId(citySlug);
   if (res.status === 404) {
     return {

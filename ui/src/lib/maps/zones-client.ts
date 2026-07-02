@@ -26,6 +26,7 @@
 // que dupliquée pour garantir que la couche zonage et l'extracteur de refs de
 // signal parlent EXACTEMENT le même langage de comparaison.
 import { zoneRefComparableKey } from "./signaux-map-geo.js";
+import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 /** Properties d'une zone d'urbanisme (données publiques de zonage). */
 export interface ZoneProperties {
@@ -86,6 +87,10 @@ export interface FetchZonesOptions {
   limit?: number;
   bbox?: [number, number, number, number];
   baseUrl?: string;
+  /** Signal d'annulation externe (anti-course au changement de ville). */
+  signal?: AbortSignal;
+  /** Timeout requête (ms). Défaut : `DEFAULT_REQUEST_TIMEOUT_MS`. */
+  timeoutMs?: number;
 }
 
 interface OgcFeatureCollection {
@@ -129,7 +134,10 @@ export async function fetchZones(
   opts: FetchZonesOptions = {},
 ): Promise<ZonesResponse> {
   const url = resolveZonesUrl(citySlug, opts);
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url, {
+    signal: opts.signal,
+    timeoutMs: opts.timeoutMs,
+  });
   const collectionId = zonesCollectionId(citySlug);
   if (res.status === 404) {
     return {

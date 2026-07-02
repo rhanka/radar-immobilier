@@ -77,6 +77,15 @@ export interface SignalDetailResponse {
   events: DesignationEventDetail[];
 }
 
+import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
+
+export interface FetchSignalDetailOptions {
+  /** Signal d'annulation externe (anti-course au changement de ville). */
+  signal?: AbortSignal;
+  /** Timeout requête (ms). Défaut : `DEFAULT_REQUEST_TIMEOUT_MS`. */
+  timeoutMs?: number;
+}
+
 export function resolveSignalDetailUrl(
   citySlug: string,
   baseUrl = import.meta.env.VITE_API_BASE_URL,
@@ -95,9 +104,13 @@ export function resolveSignalDetailUrl(
 export async function fetchSignalDetail(
   citySlug: string,
   baseUrl = import.meta.env.VITE_API_BASE_URL,
+  opts: FetchSignalDetailOptions = {},
 ): Promise<SignalDetailResponse> {
   const url = resolveSignalDetailUrl(citySlug, baseUrl);
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url, {
+    signal: opts.signal,
+    timeoutMs: opts.timeoutMs,
+  });
   if (!res.ok) throw new Error(`signals/detail HTTP ${res.status}`);
   const body = (await res.json()) as SignalDetailResponse;
   if (!body.ok) throw new Error("signals/detail: api returned ok=false");

@@ -9,6 +9,7 @@
  *   - headline = totals EXACTS de l'endpoint (jamais recalculé/arrondi).
  */
 import { describe, expect, it } from "vitest";
+import { createExpression } from "@maplibre/maplibre-gl-style-spec";
 import {
   STATE_COLOR,
   colorForState,
@@ -110,9 +111,37 @@ describe("buildFillColorExpression — anti-survente", () => {
     expect(unknownColor).not.toBe(STATE_COLOR.verified);
   });
 
-  it("le fallback de l'expression est la couleur absent (dernier élément)", () => {
-    const expr = buildFillColorExpression([]) as unknown[];
+  it("le fallback de l'expression (non vide) est la couleur absent (dernier élément)", () => {
+    const expr = buildFillColorExpression([
+      makeCity({ citySlug: "connue", worstStatus: "verified" }),
+    ]) as unknown[];
     expect(expr[expr.length - 1]).toBe(STATE_COLOR.absent);
+  });
+
+  // ── Régression BUG carte vide : jamais de `match` sans paire (invalide) ──────
+  it("sans couverture (liste vide) : couleur CONSTANTE absent, pas un match cassé", () => {
+    // Un `["match", input, fallback]` sans paire est REJETÉ par MapLibre et fait
+    // échouer la couche `cities-fill` → aucun aplat. On peint donc tout en
+    // « Non couvert » (gris) via une couleur constante, honnête et VALIDE.
+    const expr = buildFillColorExpression([]);
+    expect(expr).toBe(STATE_COLOR.absent);
+  });
+
+  it("l'expression fill-color est TOUJOURS un paint MapLibre valide (vide ET peuplée)", () => {
+    const cases: Record<string, ReturnType<typeof buildFillColorExpression>> = {
+      empty: buildFillColorExpression([]),
+      populated: buildFillColorExpression([
+        makeCity({ citySlug: "a", worstStatus: "verified" }),
+        makeCity({ citySlug: "b", worstStatus: "declared" }),
+        makeCity({ citySlug: "c", worstStatus: "absent" }),
+      ]),
+    };
+    for (const [name, expr] of Object.entries(cases)) {
+      // `createExpression` valide l'arité du `match` : un `["match", input,
+      // fallback]` sans paire (l'ancien bug) est rejeté (result === "error").
+      const parsed = createExpression(expr);
+      expect(parsed.result, `${name}: ${JSON.stringify(parsed)}`).toBe("success");
+    }
   });
 });
 

@@ -63,11 +63,11 @@
 
   // ── Légende 3 états (overlay socle) ────────────────────────────────────────
   const legend: GeoMapLegend = {
-    title: "Pire statut honnête",
+    title: "Couverture par ville",
     items: [
       { color: STATE_COLOR.verified, label: STATE_LABEL.verified },
       { color: STATE_COLOR.declared, label: STATE_LABEL.declared },
-      { color: STATE_COLOR.absent, label: `${STATE_LABEL.absent} / inconnu` },
+      { color: STATE_COLOR.absent, label: STATE_LABEL.absent },
     ],
   };
 
@@ -157,13 +157,13 @@
             <p class="text-xs text-amber-800">
               <span class="font-bold tabular-nums">{headline.cheapZonage}</span>
               ville{headline.cheapZonage !== 1 ? "s" : ""} graphée{headline.cheapZonage !== 1 ? "s" : ""}
-              sans zonage servi — complétions « cheap » à portée.
+              sans zonage servi — complétions rapides à portée.
             </p>
           </div>
         {/if}
 
         <p class="text-xs text-slate-400">
-          Cliquez une ville pour le détail tri-état (L1 raw · L2 graphe · L4 zonage · L5 lots).
+          Cliquez une ville pour le détail de sa couverture (documents · données · zonage · lots).
         </p>
       </div>
     {/if}
@@ -173,7 +173,7 @@
   <svelte:fragment slot="controls-footer">
     <div class="p-4">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Légende — pire statut honnête
+        Couverture par ville
       </p>
       <ul class="space-y-1">
         {#each legend.items as item (item.label)}
@@ -210,7 +210,7 @@
           <p class="font-semibold text-slate-700">{headlineText}</p>
           {#if headline.cheapZonage > 0}
             <p class="mt-0.5 text-amber-700">
-              {headline.cheapZonage} complétion{headline.cheapZonage !== 1 ? "s" : ""} zonage « cheap »
+              {headline.cheapZonage} complétion{headline.cheapZonage !== 1 ? "s" : ""} zonage rapide{headline.cheapZonage !== 1 ? "s" : ""}
             </p>
           {/if}
         </div>
@@ -227,10 +227,10 @@
         <div>
           <MapPin class="mx-auto mb-3 h-8 w-8 text-slate-300" aria-hidden="true" />
           <p class="text-sm text-slate-400">
-            Cliquez une ville pour voir sa scorecard qualité (tri-état honnête).
+            Cliquez une ville pour voir le détail de sa couverture.
           </p>
           <p class="mt-2 text-xs text-slate-300">
-            Vert = vérifié live · ambre = déclaré non substantié · gris = absent.
+            Vert = servi · ambre = partiel · gris = non couvert.
           </p>
         </div>
       </div>

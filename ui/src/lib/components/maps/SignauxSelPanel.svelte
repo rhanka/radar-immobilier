@@ -44,8 +44,12 @@
   export let detailNodes: GraphSignalNode[] = [];
   export let detailLoading = false;
   export let detailError: string | null = null;
-  export let geoLoading = false;
-  export let geoError: string | null = null;
+  // Waiters PAR COUCHE : zones et lots ont chacun leur propre état
+  // chargement/erreur (découplés — l'échec de l'un n'affecte pas l'autre).
+  export let zonesLoading = false;
+  export let zonesError: string | null = null;
+  export let lotsLoading = false;
+  export let lotsError: string | null = null;
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
   export let selectionState: SelectionBucketState = createSelectionBucketState();
@@ -53,6 +57,10 @@
   export let activeSubsetKey = "";
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
+  /** « Réessayer » — recharge le détail signaux (couche panneau droit). */
+  export let onRetryDetail: () => void = () => {};
+  /** « Réessayer » — recharge les couches géo (zones + lots). */
+  export let onRetryGeo: () => void = () => {};
   // onFocusKey retiré (#9) : SignauxSelPanel n'appelle plus directement le focus ;
   // c'est toggleBucketKey dans le parent qui gère focus + sélection atomiquement.
   export let onOpenDocument: (ref: SignalDocRef) => void = () => {};
@@ -437,17 +445,17 @@
         {#if zonesUnavailableReason}
           <Badge tone="neutral">zones non configurées</Badge>
         {:else}
-          <!-- #6 : "–" pendant le chargement géo -->
-          <Badge tone={geoLoading ? "neutral" : configuredZoneCount > 0 ? "info" : "neutral"}>
-            {geoLoading ? "–" : zoneBadgeText}
+          <!-- #6 : "–" pendant le chargement de la couche ZONES -->
+          <Badge tone={zonesLoading ? "neutral" : zonesError ? "warning" : configuredZoneCount > 0 ? "info" : "neutral"}>
+            {zonesLoading ? "–" : zonesError ? "n/d" : zoneBadgeText}
           </Badge>
         {/if}
         {#if lotsUnavailableReason}
           <Badge tone="neutral">lots non configurés</Badge>
         {:else}
-          <!-- #6 : "–" pendant le chargement géo -->
-          <Badge tone={geoLoading ? "neutral" : lotTotalCount > 0 ? "success" : "neutral"}>
-            {geoLoading ? "–" : formatCount(lotTotalCount, "lot", "lots")}
+          <!-- #6 : "–" pendant le chargement de la couche LOTS -->
+          <Badge tone={lotsLoading ? "neutral" : lotsError ? "warning" : lotTotalCount > 0 ? "success" : "neutral"}>
+            {lotsLoading ? "–" : lotsError ? "n/d" : formatCount(lotTotalCount, "lot", "lots")}
           </Badge>
         {/if}
       </div>
@@ -456,11 +464,28 @@
     {#if detailError}
       <div class="sel-alert">
         <Alert tone="error" title="Signaux indisponibles" message={detailError} />
+        <button type="button" class="sel-retry" on:click={onRetryDetail}>
+          <RefreshCw class="h-3 w-3" aria-hidden="true" />
+          Réessayer
+        </button>
       </div>
     {/if}
-    {#if geoError}
+    {#if zonesError}
       <div class="sel-alert">
-        <Alert tone="warning" title="Zones/lots indisponibles" message={geoError} />
+        <Alert tone="warning" title="Zones indisponibles" message={zonesError} />
+        <button type="button" class="sel-retry" on:click={onRetryGeo}>
+          <RefreshCw class="h-3 w-3" aria-hidden="true" />
+          Réessayer
+        </button>
+      </div>
+    {/if}
+    {#if lotsError}
+      <div class="sel-alert">
+        <Alert tone="warning" title="Lots indisponibles" message={lotsError} />
+        <button type="button" class="sel-retry" on:click={onRetryGeo}>
+          <RefreshCw class="h-3 w-3" aria-hidden="true" />
+          Réessayer
+        </button>
       </div>
     {/if}
 
@@ -697,10 +722,12 @@
       <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Zones</span>
-          <!-- #6 : "–" pendant le chargement géo -->
+          <!-- #6 : "–" pendant le chargement de la couche ZONES -->
           <span class="rail-row-count">
-            {geoLoading
+            {zonesLoading
               ? "–"
+              : zonesError
+              ? "n/d"
               : zonesUnavailableReason
               ? "n/d"
               : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
@@ -711,10 +738,15 @@
           </span>
         </summary>
         <div class="sel-entities">
-          {#if geoLoading}
+          {#if zonesLoading}
             <div class="sel-loading">
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
-              <span>Chargement zones/lots…</span>
+              <span>Chargement des zones…</span>
+            </div>
+          {:else if zonesError}
+            <div class="sel-loading">
+              <span>Zones indisponibles.</span>
+              <button type="button" class="sel-retry sel-retry--inline" on:click={onRetryGeo}>Réessayer</button>
             </div>
           {:else if zonesUnavailableReason}
             <p class="sel-empty">{zonesUnavailableReason}</p>
@@ -770,14 +802,19 @@
       <details class="sel-bucket">
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Lots</span>
-          <!-- #6 : "–" pendant le chargement géo -->
-          <span class="rail-row-count">{geoLoading ? "–" : lotsUnavailableReason ? "n/d" : formatNumber(lotTotalCount)}</span>
+          <!-- #6 : "–" pendant le chargement de la couche LOTS -->
+          <span class="rail-row-count">{lotsLoading ? "–" : lotsError ? "n/d" : lotsUnavailableReason ? "n/d" : formatNumber(lotTotalCount)}</span>
         </summary>
         <div class="sel-entities">
-          {#if geoLoading}
+          {#if lotsLoading}
             <div class="sel-loading">
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
-              <span>Chargement zones/lots…</span>
+              <span>Chargement des lots…</span>
+            </div>
+          {:else if lotsError}
+            <div class="sel-loading">
+              <span>Lots indisponibles.</span>
+              <button type="button" class="sel-retry sel-retry--inline" on:click={onRetryGeo}>Réessayer</button>
             </div>
           {:else if lotsUnavailableReason}
             <p class="sel-empty">{lotsUnavailableReason}</p>
@@ -917,6 +954,30 @@
 
   .sel-alert {
     padding: 0.5rem 0.85rem 0;
+  }
+
+  /* « Réessayer » par couche : action neutre, discrète, sous l'alerte. */
+  .sel-retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0.35rem 0 0;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    border-radius: var(--st-radius-sm, 4px);
+    background: transparent;
+    color: var(--st-semantic-text-secondary, #64748b);
+    font-size: var(--signaux-fs-small);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .sel-retry:hover {
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+  }
+
+  .sel-retry--inline {
+    margin: 0;
   }
 
   .sel-city-head {

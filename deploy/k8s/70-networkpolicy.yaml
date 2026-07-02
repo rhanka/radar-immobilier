@@ -156,3 +156,40 @@ spec:
       ports:
         - protocol: TCP
           port: 9000
+---
+# ADDITIVE: let public Traefik traffic reach the immo MCP HTTP server
+# (40-immo-mcp-http-deploy.yaml + 41-immo-mcp-ingress.yaml).
+#
+# Same rationale as `allow-traefik-to-ui` above: the poc-k8s operator baseline
+# NetworkPolicy only opens Traefik -> {component: api}:3000, so under the
+# namespace's default-deny ingress, Traefik -> {component: mcp}:8848 is
+# DROPPED without this policy — the public /mcp (and PRM well-known) Ingress
+# paths would resolve and route but every request would hang/be refused
+# before reaching the pod. PREPARED, NOT APPLIED — required before
+# 41-immo-mcp-ingress.yaml is applied (see docs/spec/mcp/immo-mcp-remote-deploy.md).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-immo-mcp
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: mcp
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: mcp
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8848
