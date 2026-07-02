@@ -7,7 +7,8 @@
    *    jamais un score 0-100, jamais de vert fabriqué) ;
    *  - périmètre province 1104 + surbrillance focus-30 (D3, toggle de segments) ;
    *  - headline province en overlay (D7) + insight « complétions cheap » ;
-   *  - clic ville → scorecard tri-état L1/L2/L4/L5 (D6) dans le panneau droit ;
+   *  - clic ville → scorecard tri-état de la chaîne qualité complète (PV ·
+   *    données · signaux · zonage · grilles · lots, D6) dans le panneau droit ;
    *  - légende 3 états (overlay du socle).
    *
    * La VUE ne porte que les données + expressions métier ; toute la mécanique
@@ -93,8 +94,9 @@
       priorityRank: null,
       l1Raw: { state: "absent", count: 0, freshness: "unknown" },
       l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-      l4Zonage: { state: "absent", served: false, freshness: "unknown" },
-      l5Lots: { state: "absent", served: false, freshness: "unknown" },
+      signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+      l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
+      l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
       worstStatus: "absent",
       nextMarginalGain: null,
     };
@@ -163,7 +165,7 @@
         {/if}
 
         <p class="text-xs text-slate-400">
-          Cliquez une ville pour le détail de sa couverture (documents · données · zonage · lots).
+          Cliquez une ville pour le détail de sa couverture (PV · données · signaux · zonage · grilles · lots).
         </p>
       </div>
     {/if}

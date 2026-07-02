@@ -3,10 +3,14 @@
  * de données e2e, choropleth honnête).
  *
  * Contrat : GET /api/source/coverage (api/src/routes/source-coverage.ts). Chaque
- * couche (L1 raw / L2 graphe / L4 zonage servi / L5 lots servis) est un TRI-ÉTAT
- *   - `verified` : substantié LIVE (preuve en base au moment de la requête).
+ * couche (PV collectés / données structurées / signaux extraits / zonage servi /
+ * lots servis) est un TRI-ÉTAT
+ *   - `verified` : substantié LIVE (preuve en base OU collection listée live
+ *                  par l'API géo au moment de la requête).
  *   - `declared` : déclaré mais NON substantié (statut annoncé, rien en base).
  *   - `absent`   : rien de connu.
+ * Zonage/lots « servis » sont mesurés sur le LISTING LIVE de l'API géo (ce que
+ * la carte sert réellement), avec repli honnête sur le store local.
  *
  * Anti-survente (D2) : la couleur de ville = le PIRE statut honnête de sa chaîne
  * (`worstStatus`). JAMAIS un score 0-100, JAMAIS de vert fabriqué. Une ville sans
@@ -31,9 +35,20 @@ export interface GraphCell {
   freshness: Freshness;
 }
 
+export interface SignalsCell {
+  state: CoverageState;
+  /** Signaux projetés en base (Signal + DesignationEvent). */
+  count: number;
+  /** Dont porteurs d'une citation/extrait vérifiable. */
+  withCitation: number;
+  freshness: Freshness;
+}
+
 export interface GeoCell {
   state: CoverageState;
   served: boolean;
+  /** Preuve du servi : listing live de l'API géo (`geo`) ou store local. */
+  servedBy: "geo" | "local" | null;
   freshness: Freshness;
 }
 
@@ -44,6 +59,7 @@ export interface CityCoverage {
   priorityRank: number | null;
   l1Raw: RawCell;
   l2Graph: GraphCell;
+  signals: SignalsCell;
   l4Zonage: GeoCell;
   l5Lots: GeoCell;
   worstStatus: CoverageState;
@@ -54,6 +70,7 @@ export interface CoverageTotals {
   cities: number;
   l1Raw: number;
   l2Graph: number;
+  signals: number;
   l4Zonage: number;
   l5Lots: number;
 }
@@ -82,6 +99,40 @@ export async function fetchSourceCoverage(
     throw new Error(`source-coverage HTTP ${res.status}`);
   }
   return (await res.json()) as CoverageResponse;
+}
+
+// ── Détail grilles de zonage par ville (lazy, mesuré LIVE côté API) ──────────
+
+/**
+ * Contrat : GET /api/source/coverage/:citySlug/grilles. `available: false` =
+ * l'API géo est injoignable (état « donnée indisponible » HONNÊTE, jamais un
+ * faux « Non couvert »). Donnée éparse aujourd'hui : `state: "absent"` signifie
+ * réellement « aucune grille publiée sur les zones servies ».
+ */
+export interface CityGrilles {
+  citySlug: string;
+  available: boolean;
+  zoneCount?: number;
+  zonesWithGrille?: number;
+  zonesWithNormes?: number;
+  /** Zones portant une grille OU des normes réelles. */
+  covered?: number;
+  state?: CoverageState;
+}
+
+/** Récupère le détail grilles d'une ville. Lève en cas d'échec HTTP. */
+export async function fetchCityGrilles(
+  citySlug: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<CityGrilles> {
+  const res = await fetchImpl(
+    `${COVERAGE_URL}/${encodeURIComponent(citySlug)}/grilles`,
+    { headers: { Accept: "application/json" } },
+  );
+  if (!res.ok) {
+    throw new Error(`source-coverage grilles HTTP ${res.status}`);
+  }
+  return (await res.json()) as CityGrilles;
 }
 
 // ── Tri-état : couleurs + libellés (3 états DISTINCTS, D2) ────────────────────

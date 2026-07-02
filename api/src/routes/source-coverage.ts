@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { isNotNull, isNull, sql } from "drizzle-orm";
+import { and, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { QC_MUNICIPALITIES, getGeoSourceInventory } from "@radar/sources";
 import type { ScrapeStatusSourceT, ScrapeStatusT } from "@radar/domain";
 import type { Database } from "../db/client.js";
@@ -7,13 +7,19 @@ import type { ObjectStore } from "../storage/object-store.js";
 import { graphNodes, lotVersions, zoneVersions } from "../db/schema.js";
 import { readAll } from "../services/scrape-status/store.js";
 import { mergeWithDerived } from "../services/scrape-status/derive.js";
+import { DEFAULT_OGC_BASE_URL } from "../services/geo/ogc-pull.js";
+import {
+  zoneGrillePdfUrl,
+  zoneNormes,
+} from "../services/geo/lot-zone-enrichment.js";
 
 /**
  * GET /api/source/coverage — couverture qualité de données par ville,
  * lecture BULK set-based, province-wide (~1104 villes).
  *
  * Honnêteté (D6, anti-survente) : chaque cellule est un TRI-ÉTAT —
- *   - `verified` : substantié LIVE (lignes réelles en base / fixture capturée).
+ *   - `verified` : substantié LIVE (lignes réelles en base / collection listée
+ *                  live par l'API geo / fixture capturée).
  *   - `declared` : déclaré mais NON substantié (statut annoncé, source connue
  *                  mais pas ingérée, aucune ligne en base).
  *   - `absent`   : rien de connu.
@@ -22,15 +28,41 @@ import { mergeWithDerived } from "../services/scrape-status/derive.js";
  *
  * Réutilise les agrégateurs existants (D5) — pas de job batch, pas de table
  * nouvelle, pas de scan S3 raw live, pas de 1104 appels per-city :
- *   - L1 raw    : statut DÉRIVÉ scrape-status (mergeWithDerived, en mémoire).
- *   - L2 graph  : un GROUP BY city_slug sur graph_nodes.
- *   - L4 zonage : un GROUP BY city_slug sur zone_versions (versions courantes).
- *   - L5 lots   : un GROUP BY city_slug sur lot_versions (versions courantes).
- * Soit 3 requêtes agrégées set-based + une lecture scrape-status, point.
+ *   - L1 raw     : statut DÉRIVÉ scrape-status (mergeWithDerived, en mémoire).
+ *   - L2 graph   : un GROUP BY city_slug sur graph_nodes.
+ *   - Signaux    : un GROUP BY city_slug sur graph_nodes (Signal +
+ *                  DesignationEvent) avec la part portant une citation/extrait
+ *                  vérifiable (props/citation/excerpt/refs, mêmes clés que la
+ *                  route graph-signals).
+ *   - L4 zonage / L5 lots : « servi » = la collection `qc-zonage-<slug>` /
+ *                  `qc-lots-<slug>` est présente dans le LISTING LIVE de l'API
+ *                  geo (`${geo}/collections`, UNE seule requête pour toute la
+ *                  province, cache TTL ~10 min) OU une géométrie locale existe
+ *                  en base (le store local est prioritaire dans la route
+ *                  /api/geo/collections). C'est ce que la carte SERT réellement
+ *                  — le PG local seul sous-estimait massivement (70/1106 alors
+ *                  que geo sert 500+ zonages). Repli honnête : listing
+ *                  injoignable → statut PG local seul (dégradé, jamais de 5xx).
+ * Soit 4 requêtes agrégées set-based + une lecture scrape-status + un GET
+ * listing geo (caché), point.
+ *
+ * GET /api/source/coverage/:citySlug/grilles — détail LAZY par ville :
+ * présence de grilles de zonage (grillePdfUrl) / normes (densité, usages) sur
+ * les zones SERVIES LIVE par geo. Donnée éparse aujourd'hui : « Non couvert »
+ * honnête quand absente ; `available: false` quand geo est injoignable (jamais
+ * de faux « Non couvert »).
  */
 
 const DEFAULT_STALE_AFTER_DAYS = 180;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** TTL du cache du listing live des collections geo (1 requête pour tout). */
+const GEO_LISTING_TTL_MS = 10 * 60_000;
+/** TTL raccourci après un échec du listing (retente vite, sans marteler geo). */
+const GEO_LISTING_FAILURE_TTL_MS = 60_000;
+/** TTL du cache grilles par ville + borne d'entrées (purge complète au-delà). */
+const GRILLES_TTL_MS = 5 * 60_000;
+const GRILLES_CACHE_MAX = 64;
 
 /**
  * Sources « raw » (L1) = toutes les sources scrape-status SAUF `zonage`
@@ -57,6 +89,12 @@ export interface SourceCoverageDeps {
   db?: Database;
   now?: () => number;
   staleAfterDays?: number;
+  /** fetch injectable (tests / proxys). Défaut : fetch global. */
+  fetchImpl?: typeof fetch;
+  /** Base OGC geo (défaut GEO_OGC_BASE_URL ?? api.geo.sent-tech.ca). */
+  geoBaseUrl?: string;
+  /** Override du TTL du cache listing geo (tests). */
+  geoListingTtlMs?: number;
 }
 
 interface RawCell {
@@ -71,9 +109,20 @@ interface GraphCell {
   freshness: Freshness;
 }
 
+interface SignalsCell {
+  state: CoverageState;
+  /** Signaux projetés en base (Signal + DesignationEvent). */
+  count: number;
+  /** Dont porteurs d'une citation/extrait vérifiable. */
+  withCitation: number;
+  freshness: Freshness;
+}
+
 interface GeoCell {
   state: CoverageState;
   served: boolean;
+  /** Preuve du servi : listing live geo (`geo`) ou store local (`local`). */
+  servedBy: "geo" | "local" | null;
   freshness: Freshness;
 }
 
@@ -84,6 +133,7 @@ interface CityCoverage {
   priorityRank: number | null;
   l1Raw: RawCell;
   l2Graph: GraphCell;
+  signals: SignalsCell;
   l4Zonage: GeoCell;
   l5Lots: GeoCell;
   worstStatus: CoverageState;
@@ -96,6 +146,7 @@ interface CoverageResponse {
     cities: number;
     l1Raw: number;
     l2Graph: number;
+    signals: number;
     l4Zonage: number;
     l5Lots: number;
   };
@@ -108,22 +159,109 @@ interface GraphAgg {
   ontologyVersion: string | null;
 }
 
+interface SignalAgg {
+  signalCount: number;
+  withCitation: number;
+  lastCreatedAt: string | null;
+}
+
 interface GeoAgg {
   currentVersions: number;
   withGeometry: number;
   lastKnownFrom: string | null;
 }
 
+/** Listing live des collections geo, indexé par slug (préfixes exacts). */
+interface GeoLiveListing {
+  zonage: Set<string>;
+  lots: Set<string>;
+}
+
+/** Réponse du détail grilles par ville (endpoint lazy). */
+export interface CityGrillesResponse {
+  citySlug: string;
+  /** false = geo injoignable (dégradé honnête, PAS un « Non couvert »). */
+  available: boolean;
+  zoneCount?: number;
+  zonesWithGrille?: number;
+  zonesWithNormes?: number;
+  /** Zones portant une grille OU des normes réelles. */
+  covered?: number;
+  state?: CoverageState;
+}
+
 export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
   const app = new Hono();
+  const fetchImpl = deps.fetchImpl ?? fetch;
+  const nowFn = deps.now ?? (() => Date.now());
+  const resolveBase = (): string =>
+    (
+      deps.geoBaseUrl ??
+      process.env["GEO_OGC_BASE_URL"] ??
+      DEFAULT_OGC_BASE_URL
+    ).replace(/\/$/, "");
+
+  // ── Listing live geo : UNE requête pour toute la province, cache TTL ────────
+  let listingCache: {
+    expiresAt: number;
+    value: Promise<GeoLiveListing | null>;
+  } | null = null;
+
+  async function loadLiveListing(): Promise<GeoLiveListing | null> {
+    try {
+      const res = await fetchImpl(`${resolveBase()}/collections?f=json`);
+      if (!res.ok) return null;
+      const body = (await res.json()) as { collections?: unknown };
+      if (!body || !Array.isArray(body.collections)) return null;
+      const zonage = new Set<string>();
+      const lots = new Set<string>();
+      for (const item of body.collections) {
+        if (typeof item !== "object" || item === null) continue;
+        const id = (item as { id?: unknown }).id;
+        if (typeof id !== "string") continue;
+        // Correspondance EXACTE `qc-zonage-<slug>` / `qc-lots-<slug>` : les
+        // variantes suffixées (ex. `…-arcgis`) ne matchent aucun slug de
+        // municipalité et sont naturellement exclues (la carte requête par slug).
+        if (id.startsWith("qc-zonage-")) {
+          zonage.add(id.slice("qc-zonage-".length));
+        } else if (id.startsWith("qc-lots-")) {
+          lots.add(id.slice("qc-lots-".length));
+        }
+      }
+      return { zonage, lots };
+    } catch {
+      return null;
+    }
+  }
+
+  function getLiveListing(): Promise<GeoLiveListing | null> {
+    const now = nowFn();
+    if (listingCache && listingCache.expiresAt > now) return listingCache.value;
+    const ttl = deps.geoListingTtlMs ?? GEO_LISTING_TTL_MS;
+    const value = loadLiveListing().then((listing) => {
+      if (listing === null) {
+        // Échec : TTL raccourci pour retenter vite sans marteler geo.
+        listingCache = {
+          expiresAt: nowFn() + Math.min(ttl, GEO_LISTING_FAILURE_TTL_MS),
+          value: Promise.resolve(null),
+        };
+      }
+      return listing;
+    });
+    listingCache = { expiresAt: now + ttl, value };
+    return value;
+  }
 
   app.get("/api/source/coverage", async (c) => {
-    const nowMs = (deps.now ?? (() => Date.now()))();
+    const nowMs = nowFn();
     const staleMs =
       (deps.staleAfterDays ?? DEFAULT_STALE_AFTER_DAYS) * MS_PER_DAY;
 
-    // ── L1 raw : statut scrape-status dérivé (en mémoire, pas de scan S3) ──
-    const stored = await readAll(deps.store);
+    // ── L1 raw (scrape-status, mémoire) + listing live geo (caché) ───────────
+    const [stored, listing] = await Promise.all([
+      readAll(deps.store),
+      getLiveListing(),
+    ]);
     const scrapeStatuses = mergeWithDerived(stored);
     const rawByCity = new Map<string, ScrapeStatusT[]>();
     for (const rec of scrapeStatuses) {
@@ -133,13 +271,14 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
       rawByCity.set(rec.citySlug, list);
     }
 
-    // ── L2/L4/L5 : agrégats set-based GROUP BY city_slug (ou vide sans db) ──
-    const { graphByCity, zoneByCity, lotByCity } = deps.db
+    // ── L2/L4/L5/signaux : agrégats set-based GROUP BY city_slug ─────────────
+    const { graphByCity, zoneByCity, lotByCity, signalByCity } = deps.db
       ? await loadBulkAggregates(deps.db)
       : {
           graphByCity: new Map<string, GraphAgg>(),
           zoneByCity: new Map<string, GeoAgg>(),
           lotByCity: new Map<string, GeoAgg>(),
+          signalByCity: new Map<string, SignalAgg>(),
         };
 
     const cities: CityCoverage[] = QC_MUNICIPALITIES.map((mun) => {
@@ -153,19 +292,30 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         nowMs,
         staleMs,
       );
+      const signals = buildSignalsCell(
+        signalByCity.get(mun.slug),
+        l2Graph,
+        nowMs,
+        staleMs,
+      );
       const l4Zonage = buildGeoCell(
         zoneByCity.get(mun.slug),
         inventory?.zonage,
+        listing ? listing.zonage.has(mun.slug) : null,
         nowMs,
         staleMs,
       );
       const l5Lots = buildGeoCell(
         lotByCity.get(mun.slug),
         inventory?.lots,
+        listing ? listing.lots.has(mun.slug) : null,
         nowMs,
         staleMs,
       );
 
+      // worstStatus reste la chaîne cœur L1→L2→L4→L5 (couleur carte) : les
+      // couches annexes (signaux, grilles — éparses aujourd'hui) informent le
+      // détail ville sans repeindre la province en gris.
       const worstStatus = worstOf([
         l1Raw.state,
         l2Graph.state,
@@ -180,6 +330,7 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         priorityRank: mun.priorityRank,
         l1Raw,
         l2Graph,
+        signals,
         l4Zonage,
         l5Lots,
         worstStatus,
@@ -191,6 +342,7 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
       cities: cities.length,
       l1Raw: cities.filter((x) => x.l1Raw.state === "verified").length,
       l2Graph: cities.filter((x) => x.l2Graph.state === "verified").length,
+      signals: cities.filter((x) => x.signals.state === "verified").length,
       l4Zonage: cities.filter((x) => x.l4Zonage.state === "verified").length,
       l5Lots: cities.filter((x) => x.l5Lots.state === "verified").length,
     };
@@ -204,17 +356,128 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
     return c.json(body);
   });
 
+  // ── Détail grilles par ville (lazy, cache TTL, live geo) ───────────────────
+  const grillesCache = new Map<
+    string,
+    { expiresAt: number; value: Promise<CityGrillesResponse | null> }
+  >();
+
+  async function loadCityGrilles(
+    citySlug: string,
+  ): Promise<CityGrillesResponse | null> {
+    const collectionId = `qc-zonage-${citySlug}`;
+    const url =
+      `${resolveBase()}/collections/${encodeURIComponent(collectionId)}` +
+      `/items?limit=10000&f=json`;
+    let res: Response;
+    try {
+      res = await fetchImpl(url);
+    } catch {
+      return null;
+    }
+    if (res.status === 404) {
+      // Pas de collection zonage live → pas de zones → pas de grilles (honnête).
+      return {
+        citySlug,
+        available: true,
+        zoneCount: 0,
+        zonesWithGrille: 0,
+        zonesWithNormes: 0,
+        covered: 0,
+        state: "absent",
+      };
+    }
+    if (!res.ok) return null;
+    let body: unknown;
+    try {
+      body = await res.json();
+    } catch {
+      return null;
+    }
+    const features = Array.isArray((body as { features?: unknown }).features)
+      ? ((body as { features: unknown[] }).features)
+      : [];
+
+    let zonesWithGrille = 0;
+    let zonesWithNormes = 0;
+    let covered = 0;
+    for (const feature of features) {
+      const rawProps =
+        typeof feature === "object" && feature !== null
+          ? (feature as { properties?: unknown }).properties
+          : null;
+      const props =
+        typeof rawProps === "object" && rawProps !== null
+          ? (rawProps as Record<string, unknown>)
+          : {};
+      const hasGrille = zoneGrillePdfUrl(props) !== null;
+      const normes = zoneNormes(props);
+      const hasNormes = normes.densiteLogHa !== null || normes.usages.length > 0;
+      if (hasGrille) zonesWithGrille += 1;
+      if (hasNormes) zonesWithNormes += 1;
+      if (hasGrille || hasNormes) covered += 1;
+    }
+
+    const zoneCount = features.length;
+    const state: CoverageState =
+      covered === 0
+        ? "absent"
+        : covered >= zoneCount
+          ? "verified"
+          : "declared";
+    return {
+      citySlug,
+      available: true,
+      zoneCount,
+      zonesWithGrille,
+      zonesWithNormes,
+      covered,
+      state,
+    };
+  }
+
+  app.get("/api/source/coverage/:citySlug/grilles", async (c) => {
+    const citySlug = c.req.param("citySlug");
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(citySlug)) {
+      return c.json({ ok: false, error: "invalid_city_slug" }, 404);
+    }
+    const now = nowFn();
+    const cached = grillesCache.get(citySlug);
+    let promise: Promise<CityGrillesResponse | null>;
+    if (cached && cached.expiresAt > now) {
+      promise = cached.value;
+    } else {
+      if (grillesCache.size >= GRILLES_CACHE_MAX) grillesCache.clear();
+      promise = loadCityGrilles(citySlug);
+      grillesCache.set(citySlug, {
+        expiresAt: now + GRILLES_TTL_MS,
+        value: promise,
+      });
+    }
+    const result = await promise;
+    if (result === null) {
+      // geo injoignable : pas de cache d'échec long, dégradé honnête.
+      grillesCache.delete(citySlug);
+      const degraded: CityGrillesResponse = { citySlug, available: false };
+      return c.json(degraded);
+    }
+    return c.json(result);
+  });
+
   return app;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Agrégats set-based (3 requêtes GROUP BY city_slug, jamais 1104 per-city)
+// Agrégats set-based (4 requêtes GROUP BY city_slug, jamais 1104 per-city)
+// Ordre STABLE (les tests mockent la file dans cet ordre) :
+//   1. graph  2. zones  3. lots  4. signaux
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function loadBulkAggregates(db: Database): Promise<{
   graphByCity: Map<string, GraphAgg>;
   zoneByCity: Map<string, GeoAgg>;
   lotByCity: Map<string, GeoAgg>;
+  signalByCity: Map<string, SignalAgg>;
 }> {
   const graphRows = await db
     .select({
@@ -251,6 +514,42 @@ async function loadBulkAggregates(db: Database): Promise<{
     .where(isNull(lotVersions.knownTo))
     .groupBy(lotVersions.citySlug);
 
+  // Signaux projetés (Signal + DesignationEvent) + part avec citation/extrait
+  // vérifiable — mêmes clés d'évidence que la route graph-signals (props ou
+  // props.properties : citation/excerpt ; items de props.refs : citation/excerpt).
+  const signalRows = await db
+    .select({
+      citySlug: graphNodes.citySlug,
+      signalCount: sql<number>`count(*)::int`,
+      withCitation: sql<number>`(count(*) filter (where
+        coalesce(
+          ${graphNodes.props} ->> 'citation',
+          ${graphNodes.props} -> 'properties' ->> 'citation',
+          ${graphNodes.props} ->> 'excerpt',
+          ${graphNodes.props} -> 'properties' ->> 'excerpt'
+        ) is not null
+        or (
+          jsonb_typeof(${graphNodes.props} -> 'refs') = 'array'
+          and exists (
+            select 1
+            from jsonb_array_elements(${graphNodes.props} -> 'refs') as ref
+            where jsonb_typeof(ref.value) = 'object'
+              and coalesce(ref.value ->> 'citation', ref.value ->> 'excerpt')
+                is not null
+          )
+        )
+      ))::int`,
+      lastCreatedAt: sql<string | null>`max(${graphNodes.createdAt})`,
+    })
+    .from(graphNodes)
+    .where(
+      and(
+        inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
+        isNotNull(graphNodes.citySlug),
+      ),
+    )
+    .groupBy(graphNodes.citySlug);
+
   const graphByCity = new Map<string, GraphAgg>();
   for (const row of graphRows) {
     if (!row.citySlug) continue;
@@ -281,7 +580,17 @@ async function loadBulkAggregates(db: Database): Promise<{
     });
   }
 
-  return { graphByCity, zoneByCity, lotByCity };
+  const signalByCity = new Map<string, SignalAgg>();
+  for (const row of signalRows) {
+    if (!row.citySlug) continue;
+    signalByCity.set(row.citySlug, {
+      signalCount: Number(row.signalCount ?? 0),
+      withCitation: Number(row.withCitation ?? 0),
+      lastCreatedAt: toIsoOrNull(row.lastCreatedAt),
+    });
+  }
+
+  return { graphByCity, zoneByCity, lotByCity, signalByCity };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -337,18 +646,59 @@ function buildGraphCell(
   return { state, ontologyVersion: agg?.ontologyVersion ?? null, freshness };
 }
 
+/**
+ * Signaux extraits : `verified` = des signaux projetés existent en base (preuve
+ * live). Ville structurée (L2 non-absent) mais sans signal projeté = `declared`
+ * (la chaîne a atteint la structuration, la projection signaux n'est pas
+ * substantiée). Rien de connu = `absent`. Jamais de vert fabriqué.
+ */
+function buildSignalsCell(
+  agg: SignalAgg | undefined,
+  l2Graph: GraphCell,
+  nowMs: number,
+  staleMs: number,
+): SignalsCell {
+  const count = agg?.signalCount ?? 0;
+  const withCitation = agg?.withCitation ?? 0;
+
+  let state: CoverageState;
+  if (count > 0) state = "verified";
+  else if (l2Graph.state !== "absent") state = "declared";
+  else state = "absent";
+
+  const freshness = freshnessLevel(
+    agg?.lastCreatedAt ?? null,
+    nowMs,
+    staleMs,
+    count > 0,
+  );
+
+  return { state, count, withCitation, freshness };
+}
+
 function buildGeoCell(
   agg: GeoAgg | undefined,
   descriptor: { availability: string } | undefined,
+  liveServed: boolean | null,
   nowMs: number,
   staleMs: number,
 ): GeoCell {
   const currentVersions = agg?.currentVersions ?? 0;
   const withGeometry = agg?.withGeometry ?? 0;
-  // « servi » = au moins une géométrie réellement disponible pour la carte.
-  const served = withGeometry > 0;
+  // « servi » = la collection est LISTÉE LIVE par l'API geo (ce que la carte
+  // sert réellement) OU une géométrie locale existe (store local prioritaire
+  // dans /api/geo/collections). `liveServed === null` = listing injoignable →
+  // repli honnête sur le seul store local (dégradé, jamais de vert fabriqué).
+  const servedLive = liveServed === true;
+  const servedLocal = withGeometry > 0;
+  const served = servedLive || servedLocal;
+  const servedBy: GeoCell["servedBy"] = servedLive
+    ? "geo"
+    : servedLocal
+      ? "local"
+      : null;
 
-  // Source d'inventaire connue mais pas (encore) ingérée = déclaré.
+  // Source d'inventaire connue mais pas (encore) servie = déclaré.
   const inventoryDeclared =
     descriptor !== undefined &&
     descriptor.availability !== "unknown" &&
@@ -359,17 +709,19 @@ function buildGeoCell(
   else if (currentVersions > 0 || inventoryDeclared) state = "declared";
   else state = "absent";
 
-  // « complet » = toutes les versions courantes portent une géométrie.
+  // Fraîcheur : datée par le store local quand il existe ; une collection
+  // servie LIVE est prouvée à la requête (listing ≤ TTL) → `fresh`.
   const complete =
-    served && currentVersions > 0 && withGeometry >= currentVersions;
-  const freshness = freshnessLevel(
+    servedLocal && currentVersions > 0 && withGeometry >= currentVersions;
+  let freshness = freshnessLevel(
     agg?.lastKnownFrom ?? null,
     nowMs,
     staleMs,
     complete,
   );
+  if (servedLive && freshness === "unknown") freshness = "fresh";
 
-  return { state, served, freshness };
+  return { state, served, servedBy, freshness };
 }
 
 /**
