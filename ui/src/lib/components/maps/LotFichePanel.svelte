@@ -1,30 +1,26 @@
 <script lang="ts">
   /**
-   * LotFichePanel — Fiche lot complète — CS-L2 (S-2).
+   * LotFichePanel — Fiche lot complète — CS-L2 (S-2), enrichie parité CS-L6.
    *
-   * Affiche, au clic sur un lot dans la vue Évaluation, les données
-   * publiques du lot (cadastre + score de potentiel).
-   *
-   * ## Champs affichés (tous publics, anti-PII Loi 25)
-   * - Cadastre : noLot (NO_LOT MRNF), superficieM2 (non disponible depuis MRNF
-   *   allégé — géométrie déjà sur la carte)
-   * - Score de potentiel : potentialScore (0–10, distinct du 0-5 T2)
-   * - Lien Google Maps (lat/lon centroïde du lot)
-   * - Zone notes : placeholder CS-L3 (pas d'implémentation ici)
+   * Affiche, au clic sur un lot dans la vue Évaluation, TOUTES les données
+   * publiques que les propriétés du lot portent :
+   * - Cadastre : noLot, adresse civique (quand la source l'expose — donnée
+   *   publique du rôle, identifie la propriété, jamais une personne),
+   *   superficie, façade (mesurée par la source, sinon ESTIMÉE depuis la
+   *   géométrie — cf. estimatedFacadeM, méthode documentée).
+   * - Zonage & critères : zone (code + type + usages + lien grille PDF via le
+   *   join zone↔lot), périmètre TOD Oui/Non, multifamilial 4+ Oui/Non.
+   * - Rôle d'évaluation (champs publics) : usage/catégorie, valeurs, nb
+   *   logements/étages, année de construction.
+   * - Score de potentiel (0–10) + lien Google Maps.
    *
    * ## Anti-PII strict (Loi 25)
-   * Le cadastre allégé MRNF ne contient QUE le NO_LOT.
-   * Aucun nom de propriétaire, aucune adresse, aucune PII n'est
-   * affichée — le backend ne les expose pas.
+   * Aucun nom de propriétaire ni donnée personnelle. L'adresse civique du LOT
+   * est une donnée publique du rôle d'évaluation (elle identifie la propriété).
    *
-   * ## Champs NON affichés ici (données non disponibles sans backend enrichi)
-   * - Rôle MAMH (usageCode, valeurs d'évaluation, densité) : nécessite
-   *   l'extraction rôle MAMH — non disponible dans le cadastre allégé MRNF.
-   * - ZoneVersion (kind, usages, densiteLogHa) : non retourné par l'endpoint
-   *   /api/geo/:city/lots actuellement (ni zone code ni lien grille PDF).
-   * Ces données sont prévues par SPEC_DESIGN_DATA_MODEL §1.1–1.4 mais
-   * l'endpoint ne les expose pas encore — anti-invention : on n'affiche
-   * que ce qui existe réellement dans la réponse.
+   * ## Dégradé honnête
+   * Chaque champ absent affiche « — » (copy neutre) ou omet sa rangée —
+   * on n'affiche que ce que la source expose réellement, sans invention.
    *
    * ## Mobile
    * Sur < 768 px le panneau est affiché via Drawer DS. La version DS courante
@@ -36,6 +32,7 @@
   import type { LotFeature } from "$lib/maps/lots-client.js";
   import {
     centroid,
+    estimatedFacadeM,
     googleMapsUrl,
     googleStreetViewUrl,
     scoreTone,
@@ -87,6 +84,36 @@
   $: zoneCode = lot?.properties.zoneCode ?? zone?.code;
   $: grillePdfUrl = lot?.properties.grillePdfUrl ?? zone?.grillePdfUrl;
   $: lotCentroid = lot ? centroid(lot) : null;
+  // Adresse civique du lot (donnée publique du rôle — jamais un propriétaire).
+  $: adresse = lot?.properties.adresse ?? null;
+  // Façade : mesurée par la source quand exposée, sinon estimée depuis la
+  // géométrie (petit côté du rectangle englobant orienté minimal).
+  $: facadeMesuree = lot?.properties.facadeM ?? null;
+  $: facadeEstimee = lot && facadeMesuree === null ? estimatedFacadeM(lot) : null;
+  $: profondeurM = lot?.properties.profondeurM ?? null;
+  // Critères ciblage (booléens quand la source les expose, sinon undefined).
+  $: todFlag = lot?.properties.tod;
+  $: quatrePlusFlag = lot?.properties.multifamilial4plus;
+  $: hasCriteres = todFlag !== undefined || quatrePlusFlag !== undefined;
+  // Description verbatim de la zone (ex. « Min 16 log · 6 étages · Mixte »).
+  $: zoneDescription = lot?.properties.zoneDescription ?? null;
+  // Normes de zonage verbatim (grille) quand la source les expose.
+  $: normes = lot?.properties.normes ?? null;
+  $: normesRows = (normes
+    ? ([
+        ["Hauteur", normes.hauteur],
+        ["Étages", normes.etages],
+        ["Marge avant", normes.margeAvant],
+        ["Marge arrière", normes.margeArriere],
+        ["Marge latérale", normes.margeLaterale],
+        ["Densité", normes.densite],
+      ] as Array<[string, string | null | undefined]>)
+    : []
+  ).filter((row): row is [string, string] => row[1] != null);
+  // Libellé de source honnête selon le mode.
+  $: sourceLabel = mode === "simulation"
+    ? "Rôle d'évaluation 2022 · zonage municipal"
+    : "Cadastre allégé MRNF";
   let prospectLoading = false;
   let prospectError: string | null = null;
   let prospectMarks: ProspectMark[] = [];
@@ -122,17 +149,27 @@
   }
 
   function formatArea(value: number | null | undefined): string {
-    if (value === null || value === undefined) return "non disponible";
+    if (value === null || value === undefined) return "—";
     return `${Math.round(value).toLocaleString("fr-CA")} m²`;
   }
 
   function formatMoney(value: number | null | undefined): string {
-    if (value === null || value === undefined) return "non disponible";
+    if (value === null || value === undefined) return "—";
     return new Intl.NumberFormat("fr-CA", {
       style: "currency",
       currency: "CAD",
       maximumFractionDigits: 0,
     }).format(value);
+  }
+
+  function formatMeters(value: number | null | undefined): string {
+    if (value === null || value === undefined) return "—";
+    return `${value.toLocaleString("fr-CA", { maximumFractionDigits: 1 })} m`;
+  }
+
+  function formatYesNo(value: boolean | undefined): string {
+    if (value === undefined) return "—";
+    return value ? "Oui" : "Non";
   }
 
   async function loadProspectState(noLotValue: string, citySlugValue: string): Promise<void> {
@@ -222,7 +259,7 @@
     <Drawer
       open={drawerOpen}
       title="Fiche lot {noLot}"
-      description="Cadastre allégé MRNF · Anti-PII Loi 25"
+      description="{sourceLabel} · Anti-PII Loi 25"
       side="right"
       closeLabel="Fermer la fiche lot"
       onclose={onClose}
@@ -230,9 +267,12 @@
     >
       {#snippet children()}
         <div class="space-y-4" data-testid="lot-fiche-panel-mobile-body">
-          <!-- N° lot -->
+          <!-- N° lot + adresse -->
           <p class="text-xs text-slate-500">
             N° lot : <span class="font-mono font-semibold text-slate-900" data-testid="fiche-nolot-mobile">{noLot}</span>
+            {#if adresse}
+              <span class="block text-slate-700" data-testid="fiche-adresse-mobile">{adresse}</span>
+            {/if}
           </p>
 
           <!-- Score -->
@@ -287,6 +327,9 @@
           <p class="font-mono text-base font-bold text-teal-900 truncate" data-testid="fiche-nolot">
             {noLot}
           </p>
+          {#if adresse}
+            <p class="text-xs text-teal-700 truncate" data-testid="fiche-adresse-header">{adresse}</p>
+          {/if}
         </div>
       </div>
       <button
@@ -315,17 +358,34 @@
           <dd class="font-mono font-medium text-slate-900" data-testid="fiche-nolot-dd">
             {noLot}
           </dd>
-          <dt class="text-slate-500">Source</dt>
-          <dd class="text-slate-700">Cadastre allégé MRNF</dd>
+          {#if adresse}
+            <dt class="text-slate-500">Adresse</dt>
+            <dd class="text-slate-700" data-testid="fiche-adresse">{adresse}</dd>
+          {/if}
           {#if lot?.properties.citySlug}
             <dt class="text-slate-500">Ville</dt>
             <dd class="text-slate-700">{cityName || lot.properties.citySlug}</dd>
           {/if}
           <dt class="text-slate-500">Superficie</dt>
-          <dd class:text-slate-700={superficieM2 !== undefined && superficieM2 !== null} class:text-slate-400={superficieM2 === undefined || superficieM2 === null} class:italic={superficieM2 === undefined || superficieM2 === null} class="text-xs">
+          <dd class:text-slate-700={superficieM2 !== undefined && superficieM2 !== null} class:text-slate-400={superficieM2 === undefined || superficieM2 === null} class="text-xs">
             {formatArea(superficieM2)}
           </dd>
+          <dt class="text-slate-500">{facadeMesuree !== null ? "Façade" : "Façade estimée"}</dt>
+          <dd class="text-xs text-slate-700" data-testid="fiche-facade">
+            {facadeMesuree !== null ? formatMeters(facadeMesuree) : formatMeters(facadeEstimee)}
+          </dd>
+          {#if profondeurM !== null}
+            <dt class="text-slate-500">Profondeur</dt>
+            <dd class="text-xs text-slate-700" data-testid="fiche-profondeur">{formatMeters(profondeurM)}</dd>
+          {/if}
+          <dt class="text-slate-500">Source</dt>
+          <dd class="text-slate-700">{sourceLabel}</dd>
         </dl>
+        {#if facadeMesuree === null && facadeEstimee !== null}
+          <p class="mt-1 text-xs text-slate-400" data-testid="fiche-facade-methode">
+            Façade estimée depuis la géométrie du lot (petit côté du rectangle englobant orienté).
+          </p>
+        {/if}
       </section>
 
       <!-- Section Score de potentiel ──────────────────────────────────────── -->
@@ -357,13 +417,32 @@
             data-testid="fiche-score-na"
           >
             <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-500" aria-hidden="true" />
-            <p>
-              Score non disponible — l'endpoint n'a pas encore reçu le contexte de zone
-              (feat/api-score-potentiel-lot).
-            </p>
+            <p>Score non disponible pour ce lot.</p>
           </div>
         {/if}
       </section>
+
+      <!-- Section Critères ciblage (TOD, multifamilial 4+) ─────────────────── -->
+      {#if hasCriteres}
+        <section aria-labelledby="section-criteres">
+          <h3
+            id="section-criteres"
+            class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+          >
+            Critères ciblage
+          </h3>
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-slate-100 bg-white px-3 py-2 text-sm" data-testid="fiche-criteres">
+            <dt class="text-slate-500">Périmètre TOD</dt>
+            <dd data-testid="fiche-tod">
+              <Badge tone={todFlag ? "info" : "neutral"} class="text-xs">{formatYesNo(todFlag)}</Badge>
+            </dd>
+            <dt class="text-slate-500">Multifamilial 4+</dt>
+            <dd data-testid="fiche-4plus">
+              <Badge tone={quatrePlusFlag ? "success" : "neutral"} class="text-xs">{formatYesNo(quatrePlusFlag)}</Badge>
+            </dd>
+          </dl>
+        </section>
+      {/if}
 
       <!-- Section Rôle MAMH (champs publics) ──────────────────────────────── -->
       <section aria-labelledby="section-role">
@@ -376,9 +455,9 @@
         {#if valuation}
           <dl class="grid grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-slate-100 bg-white px-3 py-2 text-sm" data-testid="fiche-role">
             <dt class="text-slate-500">Usage</dt>
-            <dd class="text-slate-700">{valuation.usageCode ?? lot.properties.usageCode ?? "non disponible"}</dd>
+            <dd class="text-slate-700">{valuation.usageCode ?? lot.properties.usageCode ?? "—"}</dd>
             <dt class="text-slate-500">Catégorie</dt>
-            <dd class="text-slate-700">{valuation.categorie ?? "non disponible"}</dd>
+            <dd class="text-slate-700" data-testid="fiche-categorie">{valuation.categorie ?? "—"}</dd>
             <dt class="text-slate-500">Valeur totale</dt>
             <dd class="text-slate-700">{formatMoney(valuation.valeurTotale)}</dd>
             <dt class="text-slate-500">Terrain</dt>
@@ -386,20 +465,18 @@
             <dt class="text-slate-500">Bâtiment</dt>
             <dd class="text-slate-700">{formatMoney(valuation.valeurBatiment)}</dd>
             <dt class="text-slate-500">Logements / étages</dt>
-            <dd class="text-slate-700">{valuation.nbLogements ?? "?"} / {valuation.nbEtages ?? "?"}</dd>
+            <dd class="text-slate-700">{valuation.nbLogements ?? "—"} / {valuation.nbEtages ?? "—"}</dd>
+            <dt class="text-slate-500">Année de construction</dt>
+            <dd class="text-slate-700" data-testid="fiche-annee">{valuation.anneeConstruction ?? "—"}</dd>
           </dl>
-          <p class="mt-1.5 text-xs text-slate-400">Champs publics seulement; aucun propriétaire/adresse nominative.</p>
+          <p class="mt-1.5 text-xs text-slate-400">Champs publics seulement; aucun nom de propriétaire.</p>
         {:else}
           <div
             class="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
             data-testid="fiche-role-na"
           >
             <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
-            <p>
-              Données rôle MAMH non disponibles (usageCode, valeurTotale, valeurTerrain,
-              valeurBatiment, densité) — extraction rôle non réalisée pour cette ville.
-              Seuls les champs publics seront affichés (aucun nom de propriétaire — Loi 25).
-            </p>
+            <p>Données du rôle d'évaluation non disponibles pour ce lot.</p>
           </div>
         {/if}
       </section>
@@ -412,18 +489,35 @@
         >
           Zone (règlement de zonage)
         </h3>
-        {#if zone || zoneCode || grillePdfUrl}
+        {#if zone || zoneCode || grillePdfUrl || zoneDescription || normesRows.length > 0}
           <div class="space-y-2 rounded-lg border border-slate-100 bg-white px-3 py-2" data-testid="fiche-zone">
             <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
               <dt class="text-slate-500">Code zone</dt>
-              <dd class="font-mono text-slate-700">{zoneCode ?? "non disponible"}</dd>
+              <dd class="font-mono text-slate-700" data-testid="fiche-zone-code">{zoneCode ?? "—"}</dd>
               <dt class="text-slate-500">Type</dt>
-              <dd class="text-slate-700">{zone?.kind ?? "non disponible"}</dd>
+              <dd class="text-slate-700">{zone?.kind && zone.kind !== "non précisé" ? zone.kind : "—"}</dd>
               <dt class="text-slate-500">Densité</dt>
-              <dd class="text-slate-700">{zone?.densiteLogHa ?? "non disponible"}{zone?.densiteLogHa !== null && zone?.densiteLogHa !== undefined ? " log/ha" : ""}</dd>
+              <dd class="text-slate-700">{zone?.densiteLogHa ?? "—"}{zone?.densiteLogHa !== null && zone?.densiteLogHa !== undefined ? " log/ha" : ""}</dd>
               <dt class="text-slate-500">Usages</dt>
-              <dd class="text-slate-700">{zone?.usages?.length ? zone.usages.join(", ") : "non disponible"}</dd>
+              <dd class="text-slate-700">{zone?.usages?.length ? zone.usages.join(", ") : "—"}</dd>
+              {#if zoneDescription}
+                <dt class="text-slate-500">Description</dt>
+                <dd class="text-slate-700" data-testid="fiche-zone-desc">{zoneDescription}</dd>
+              {/if}
             </dl>
+            {#if normesRows.length > 0}
+              <div class="border-t border-slate-100 pt-2" data-testid="fiche-normes">
+                <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Normes de la grille
+                </p>
+                <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                  {#each normesRows as [label, value] (label)}
+                    <dt class="text-slate-500">{label}</dt>
+                    <dd class="text-slate-700">{value}</dd>
+                  {/each}
+                </dl>
+              </div>
+            {/if}
             {#if grillePdfUrl}
               <a
                 href={grillePdfUrl}
@@ -443,11 +537,7 @@
             data-testid="fiche-zone-na"
           >
             <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
-            <p>
-              ZoneVersion non disponible (kind, usages, densiteLogHa) — le lot-zone
-              resolution n'est pas encore retourné par l'endpoint.
-              Le lien grille PDF sera affiché ici lorsque disponible (artefact source A2/B2).
-            </p>
+            <p>Informations de zonage non disponibles pour ce lot.</p>
           </div>
         {/if}
       </section>
@@ -619,7 +709,7 @@
       <!-- Note anti-PII ───────────────────────────────────────────────────── -->
       <p class="text-xs text-slate-300 border-t border-slate-100 pt-3">
         Anti-PII (Loi 25) : aucun nom de propriétaire ni donnée personnelle n'est affichée.
-        Données cadastrales publiques MRNF.
+        Données publiques (cadastre et rôle d'évaluation).
       </p>
     </div>
     </div>
