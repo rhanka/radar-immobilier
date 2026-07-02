@@ -22,6 +22,7 @@
   import RejectedView from "$lib/components/auth/RejectedView.svelte";
   import LoginView from "$lib/components/auth/LoginView.svelte";
   import AdminView from "$lib/components/admin/AdminView.svelte";
+  import RapportView from "$lib/components/rapport/RapportView.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
@@ -211,6 +212,10 @@
              comme onglet de la vue Évaluation (WP4). On route donc vers
              EvaluationMapView avec l'onglet « Grilles de score » pré-sélectionné. -->
         <EvaluationMapView initialTab="grilles" />
+      {:else if activeView === "rapport"}
+        <!-- Rapport d'étude — route discrète #/rapport (contenu
+             docs/spec/reports/study-2026-07 compilé au build, rendu tokens DS). -->
+        <RapportView />
       {:else if activeView === "ontologie"}
         <ReconciliationView />
       {:else if activeView === "coordination"}

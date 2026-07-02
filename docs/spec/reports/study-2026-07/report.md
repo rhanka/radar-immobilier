@@ -1,13 +1,16 @@
 # Rapport d'étude — Radar Immobilier
 
-Date : 2026-07-01
+Date : 2026-07-02
 Statut : étude de faisabilité et de livraison, version consolidée pour relecture client.
-Périmètre de mesure : graphes S3 et API geo mesurés les 28–29 juin 2026 ; surface produit et tests lus sur la baseline de branche ; jobs d'exploitation lus dans les manifests Kubernetes au 1er juillet 2026.
+Périmètre de mesure : graphes S3 et API geo mesurés du 28 juin au 2 juillet 2026 ; surface produit
+et tests lus sur la baseline de branche ; jobs d'exploitation lus dans les manifests Kubernetes au
+1er juillet 2026 ; livraisons produit du 2 juillet intégrées (connecteur assistant, dérivation
+« 4+ logements », parité carte).
 
 > **Note de lecture — effectif vs projeté.** Chaque chiffre est qualifié :
 > **[effectif]** = mesuré réellement sur les données ou le code à une date donnée ;
 > **[projeté]** = extrapolation crédible mais non encore réalisée ;
-> **[à consolider]** = mesure obtenue mais dépendante d'une canonisation ou d'un job non encore rejoué.
+> **[en attente]** = dépend d'une donnée ou d'une livraison externe identifiée et demandée.
 > Aucune métrique n'est présentée comme acquise si elle ne l'est pas. Les mesures reposent sur des
 > commandes bornées et reproductibles, documentées dans les rapports internes cités en annexe.
 
@@ -18,15 +21,18 @@ Périmètre de mesure : graphes S3 et API geo mesurés les 28–29 juin 2026 ; s
 Le socle livré démontre la faisabilité d'une chaîne bout-en-bout reliant des sources municipales
 hétérogènes à une expérience produit exploitable : collecte documentaire, extraction de signaux
 réglementaires, structuration en graphe avec citations, projection en base géospatiale, API de
-domaine, vues cartographiques et vue de consolidation des données. La chaîne fonctionne
-aujourd'hui de bout en bout sur un large ensemble de municipalités et sert de banc de démonstration.
+domaine, vues cartographiques, vue de consolidation des données et connecteur assistant (MCP). La
+chaîne fonctionne aujourd'hui de bout en bout sur un large ensemble de municipalités et sert de
+banc de démonstration.
 
 La lecture doit se faire sur **deux axes indissociables** :
 
-- l'axe **de couverture** : ce qui est **effectif** sur les 30 villes prioritaires (focus 30) et
-  sur les 1104 municipalités cibles, versus ce qui est **projeté** ;
-- l'axe **de qualité** : la profondeur et la vérifiabilité de chaque couche (citation groundée,
-  code de zone exact, lot rattaché), qui conditionne l'usage réel du produit.
+- l'axe **de couverture** : ce qui est **effectif** sur les **30 villes prioritaires** (focus 30)
+  versus les **1104 municipalités cibles** de la province ;
+- l'axe **de profondeur de preuve** : les **33 opportunités témoins** suivies de bout en bout
+  (signal → document → zone → grille → lot) versus l'échelle visée de **plus de 5000** couples
+  ville × signal. C'est la vérifiabilité de chaque couche (citation, code de zone exact, lot
+  rattaché, norme verbatim) qui conditionne l'usage réel du produit.
 
 Les acquis principaux, **effectifs** :
 
@@ -35,339 +41,315 @@ Les acquis principaux, **effectifs** :
    de citation vérifiable** en version 2.3 ;
 2. une couche géographique qui ingère zonage et lots cadastraux depuis une API géospatiale, les
    projette en PostgreSQL/PostGIS, et résout des références signal → zone/lot ;
-3. une application exposant **quatre vues** — Signaux, Sources, Évaluation, Opportunités — dont deux
-   pleinement fonctionnelles et deux partielles ;
-4. une architecture modulaire, à responsabilités séparées, où sources, geo, domaine, API, UI,
-   intégrations et jobs d'exploitation sont découplés ;
-5. une première industrialisation via jobs Kubernetes one-shot et récurrents.
+3. une couche **grilles de zonage** naissante : les normes réglementaires (hauteur, marges,
+   densité) extraites verbatim et rattachées aux lots — pilote validé sur Salaberry-de-Valleyfield
+   (**97,9 % des 15 510 lots** portent leurs normes) ;
+4. une application exposant **quatre vues** — Signaux, Sources, Évaluation, Opportunités — dont la
+   vue Évaluation désormais alignée sur l'application de référence du partenaire (filtres
+   combinés, colorisation hiérarchique, fiche lot enrichie) ;
+5. un **connecteur assistant (MCP) en production** : l'application est interrogeable depuis
+   claude.ai, avec authentification par utilisateur et outils de données brutes ;
+6. une architecture modulaire, à responsabilités séparées, où sources, geo, domaine, API, UI,
+   intégrations et jobs d'exploitation sont découplés, avec une première industrialisation via
+   jobs Kubernetes.
 
-Les limites principales, **assumées sans survente** :
+Les limites principales, **assumées et documentées** :
 
 - disponibilité inégale des sources municipales ; ~97 villes cibles n'ont **aucune** donnée brute
   collectée (scraping préalable bloqué), et certaines villes résistent durablement au scraping ;
-- consistance **signal↔zone** encore faible (recall #74 ~60 %, et **16/30** villes ne citent aucune zone) ; le zonage/lots geo est désormais **fort** (29/30, 30/30) mais **pas encore matérialisé en PG** (pull à lancer) ;
-- rappel signal ↔ zone **mesuré à ~59 %** dans son meilleur état actuel, dont ~81 % du déficit
-  résiduel n'est pas corrigeable côté application ;
-- besoin de modèles/prompts spécialisés et d'un mapping fin rues/zones/lots ;
+- consistance **signal↔zone** encore faible : **14/30** villes du focus citent une zone dans
+  leurs signaux ; rappel ~60 % (proxy focus) et 47–59 % mesuré sur 55 villes — c'est le principal
+  chantier de qualité (cf. §1.7) ;
+- grounding des signaux à compléter : **56/70** signaux du focus portent une citation vérifiable ;
+  la cible est **100 %** (passe de cleansing planifiée) ;
+- données nominatives (propriétaires) et aires TOD **[en attente]** — acquisitions cadrées mais
+  non livrées ;
 - exploitation encore partielle : jobs geo one-shot/daily en place mais **cronjobs de refresh
   suspendus** pour des raisons de coût (FinOps), en attente de correction de la cause racine.
 
 ### Ontologie du signal — versions v2.2 et v2.3 (à lire avant les chiffres)
 
-Les signaux sont extraits des PV selon un **schéma d'ontologie versionné**. Deux versions apparaissent
-dans ce rapport :
+Les signaux sont extraits des PV selon un **schéma d'ontologie versionné**. Deux versions
+apparaissent dans ce rapport :
 
-- **v2.2** — schéma antérieur : entités et relations correctement extraites, mais **grounding partiel**
-  (la citation source est parfois absente, ou pointe un identifiant de document non retrouvé).
-- **v2.3** — schéma courant : ajoute une **contrainte de qualité forte** — chaque signal doit porter une
-  **citation vérifiable** (page/passage du PV réel, verbatim) et franchir des **contrôles de
-  publication** qui rejettent toute citation non substantiée.
+- **v2.2** — schéma antérieur : entités et relations correctement extraites, mais **grounding
+  partiel** (la citation source est parfois absente, ou pointe un identifiant de document non
+  retrouvé).
+- **v2.3** — schéma courant : ajoute une **contrainte de qualité forte** — chaque signal doit
+  porter une **citation vérifiable** (page/passage du PV réel, verbatim) et franchir des
+  **contrôles de publication** qui rejettent toute citation non substantiée.
 
-Le passage **v2.2 → v2.3** est un **durcissement de la preuve** (pas un simple changement de format) :
-il publie *moins* de signaux, mais chaque signal publié est **traçable jusqu'au document**.
+Le passage **v2.2 → v2.3** est un **durcissement de la preuve** (pas un simple changement de
+format) : il publie *moins* de signaux, mais chaque signal publié est **traçable jusqu'au
+document**.
 
-### Chiffres clés — deux axes : **Focus 30** (villes démo prioritaires) vs **Province ≈1104**
+### Chiffres clés — deux périmètres : **Focus 30** vs **Province ≈1104**
 
-La lecture se fait toujours sur **deux périmètres distincts** : les **30 villes focus** (banlieues MTL
-prioritaires, le banc de démonstration E2E) et la **province ≈1104** (hors Montréal/Laval). Un même
-indicateur a **deux valeurs** — ne jamais les additionner.
+La lecture se fait toujours sur **deux périmètres distincts** : les **30 villes focus** (banlieues
+de la région de Montréal, le banc de démonstration E2E) et la **province ≈1104** (hors
+Montréal/Laval). Un même indicateur a **deux valeurs** — ne jamais les additionner.
 
 Les couches sont **distinctes** : le **PV scrapé** est le substrat brut ; les **signaux** en sont
-extraits (le graphe v2.3 est la *méthode de parsing*, pas une finalité). Un signal n'a de valeur que
-**groundé** (rattaché à une citation vérifiable).
+extraits (le graphe v2.3 est la *méthode de parsing*, pas une finalité). Un signal n'a de valeur
+que rattaché à une **citation vérifiable**.
 
 | Couche (finalité) | **Focus 30** | **Province ≈1104** | Statut |
 |---|---:|---:|---|
-| **PV scrapé** — recueil brut | **27 / 30** | **~1007 / 1104** | **[effectif]** — préalable ; 3 focus (brossard, kirkland, lile-dorval) sans brut |
+| **PV scrapés** — recueil brut (~3272 documents) | **27 / 30** | **~1007 / 1104** | **[effectif]** — préalable ; 3 focus (brossard, kirkland, lile-dorval) sans brut |
 | **Signaux extraits** (v2.3) | **25 / 30** | **978 / 1104** | **[effectif]** — le graphe = *méthode d'extraction*, pas la finalité |
-| **Signaux groundés** (citation vérifiable) | **56 / 70** — cible **100 %** | — | **[effectif]** — **14 signaux à cleanser** (purge/re-ground, cf. §1.A.3) |
+| **Signaux à citation vérifiable** | **56 / 70** — cible **100 %** | — | **[effectif]** — **14 signaux à traiter** (purge/re-ground, cf. §1.2) |
 | **Zonage servi** (geo) | **29 / 30** | **~485 / 1106** | **[effectif — live 2026-07-02]** |
-| **Lots servis** (geo) | **30 / 30** | **~1102 / 1106** | **[effectif — live 2026-07-02]** |
+| **Grilles de zonage** (normes verbatim) | pilote validé — Salaberry : **97,9 % des 15 510 lots** avec normes | alignement 4 villes de référence en cours | **[effectif — pilote]** |
+| **Lots servis** (cadastre MRNF) | **30 / 30** | **~1102 / 1106** | **[effectif — live 2026-07-02]** |
+| Données nominatives (propriétaires) | — | — | **[en attente]** — acquisition cadrée, non lancée |
+| Aires TOD (PMAD/CMM) | 4 villes de référence demandées en priorité | — | **[en attente]** — incrément demandé au fournisseur géo |
 | Signaux **désignant une zone** | **14 / 30** | — | **[effectif]** — vrai goulot de consistance |
-| Consistance signal↔zone (#74, recall) | **~60 %** (proxy) | 47–59 % (55 villes) | **[à consolider]** (mapper à relancer sur PG peuplé) |
+| Consistance signal↔zone (rappel) | **~60 %** (proxy) | 47–59 % (55 villes) | **[effectif]** — à re-mesurer sur PG peuplé |
 
 > **Bascule récente (geo)** : le zonage focus est passé de **7/30 → 29/30** (livraison geo ; seul
 > `lile-dorval`, micro-île, manque) et les lots à **30/30**. La **carte Évaluation en profite déjà
-> en live** (passthrough OGC). En revanche la **vue Source / le mapper #74 lisent le PostgreSQL**
-> peuplé par le *pull* — encore limité à ~7 villes — d'où le recall #74 **plafonné par l'état du PG**,
-> pas par geo : le levier est de **puller les 29/30 en PG** (jobs `populate-geo` prêts). Le **3/30**
-> et le **~234/1104** de l'investigation de juin sont donc **périmés**.
+> en live** (passthrough OGC). En revanche la **vue Sources et le rapprochement signal↔zone
+> lisent le PostgreSQL** peuplé par le *pull* — encore limité à ~7 villes — d'où un rappel
+> **plafonné par l'état du PG**, pas par geo : le levier est de **puller les 29/30 en PG** (jobs
+> `populate-geo` prêts).
 
-La projection 1104 est **quasi acquise** pour lots/cadastre (source publique normalisée),
-**bien engagée** pour le zonage servi (**~485/1106**, à canoniser), et **conditionnée à notre
-extraction signal** pour la consistance E2E. La prochaine étape n'est pas une preuve de concept
-supplémentaire, mais une **consolidation priorisée sur le focus 30** (puller le zonage/lots en PG,
-remonter la consistance signal↔zone).
+### Les deux bancs E2E
 
----
+Deux bancs de validation complémentaires structurent la démonstration :
 
-# 1 — Faisabilité data, à consolider avec geo
+1. **Le banc « signaux » — les 30 villes focus** (banlieues de la région de Montréal) : il
+   éprouve la chaîne **signaux → zones → lots**. La difficulté centrale y est le **rapprochement
+   signaux↔zones** : 14/30 villes citent une zone dans leurs signaux, et le rappel mesuré est de
+   ~60 % (proxy focus) / 47–59 % (mesuré sur 55 villes). Les causes sont identifiées : les
+   libellés de zones dans les PV diffèrent des codes servis par la couche géo, et une part des
+   non-matchs est **attendue** (zones *proposées*, non encore en vigueur dans le zonage courant).
+2. **Le banc « parité produit » — les 4 villes de l'application de référence du partenaire**
+   (Delson, Sainte-Catherine, Saint-Constant, Candiac) : il éprouve l'expérience produit —
+   visualisation lots/zones, filtres, fiche lot — contre une référence mesurable. Exemple : la
+   dérivation « 4+ logements » par lot atteint **97,5 % d'exactitude** mesurée contre
+   l'application de référence sur **3171 lots** (cf. §2.D).
 
-## 1.A — Synthèse
-
-### 1.A.1 — Focus 30 : toutes les couches et consistance des signaux
-
-Le focus 30 (banlieues prioritaires de la région de Montréal) sert de banc de validation E2E :
-`documents → graphes → signaux → projection → API → interface → rapprochement géographique`. La
-faisabilité **fonctionnelle** de la chaîne est démontrée ; la **complétude** reste hétérogène selon
-la couche.
-
-| Couche | État observé sur le focus 30 | Lecture étude |
-|---|---|---|
-| Graphes / signaux | chaîne opérationnelle ; reliquat v2.2 traité partiellement | socle exploitable ; certains cas exigent re-grounding depuis le PDF |
-| Citations | présentes et affichables quand le graphe est groundé | qualité critique : **aucune citation non vérifiable ne doit être publiée** |
-| Zonage geo | **29 / 30** villes servies **[live 2026-07-02]** (lots **30/30**) | fort côté geo ; reste à **puller en PG** pour le mapper / la vue Source |
-| Lots cadastre | couche disponible à large échelle, sans donnée propriétaire | base solide pour le scoring et la visualisation lot |
-| Résolution signal → zone | rappel réel mesuré, améliorable par lecture de champs et acquisition | faisable, mais dépend du schéma geo et de la précision d'extraction |
-| UI | Signaux et Sources fonctionnelles ; Évaluation partielle ; Opportunités en démo | produit **consultable**, pas encore outil complet de prospection multi-couches |
-
-**Consistance des signaux — points mesurés :**
-
-- Sur le run de finition graphify v2.3, le total publié s'établit autour de **976–978 / 1104**
-  municipalités cibles **[effectif]** (mesure fraîche S3 du 28 juin : 976 dans la cible ; 978 après
-  publication de saint-césaire dans le run réel). Le reliquat de **128 villes** se décompose en
-  **~30 graphes v2.2 résiduels** (à re-grounder) et **~97 villes sans aucune donnée brute**
-  (scraping préalable requis, hors périmètre 2.3).
-- Le run déterministe sur les 30 villes v2.2 résiduelles n'a pu publier que **1 / 30**
-  (saint-césaire) **[effectif]** : 29 restent bloquées, dont **22** sans référence de signal
-  groundée et **6** sans description de signal, **1** structurellement invalide. Cette rigueur est
-  **volontaire** : le gate v2.3 refuse de publier une citation non vérifiable.
-- L'audit de grounding a révélé que certaines baselines v2.2 portaient des citations
-  **partiellement hallucinées** (ex. une ville avec 12/12 identifiants de document orphelins,
-  absents du brut). La vraie voie retenue lit le **PDF réel** (extraction texte + citation verbatim,
-  found:false si le passage est absent) et bloque toute fabrication. C'est le bon compromis :
-  **moins de volume publié, meilleure confiance**.
-
-### 1.A.2 — Potentiel cible sur les 1104 municipalités
-
-Le potentiel cible est réel, mais ne doit pas être confondu avec l'effectif livré.
-
-| Dimension | Effectif observé / disponible | Potentiel projeté | Condition de passage à l'échelle |
-|---|---|---|---|
-| Municipalités cibles | 1104 | 1104 | référentiel stable + suivi de couverture |
-| Graphes v2.3 | **~976–978 [effectif]** | proche de 1104 | scraping des ~97 villes sans brut + re-grounding des ~30 v2.2 |
-| Lots cadastre | **~1103 collections [effectif]** côté geo | quasi provincial | jobs bornés (bbox, pagination, mémoire) |
-| Zonage servi | **~485 / 1106 [live 2026-07]**, focus **29 / 30** | extension progressive | canonisation 1 collection/ville + **pull PG** |
-| Lots servis | **~1102 / 1106**, focus **30 / 30** | quasi provincial | pull PG borné (bbox) |
-| Signaux exploitables | fonction des PV disponibles et du grounding | extensible par ville | modèle spécialisé, citation obligatoire, contrôle qualité |
-
-La projection 1104 est donc **crédible et quasi acquise** pour les lots/cadastre (source publique
-normalisée), **atteignable par itérations** pour les graphes/signaux (dépend du scraping et du
-grounding), et **conditionnée à une canonisation** pour le zonage.
-
-### 1.A.3 — Limites et préconisations
-
-#### Limites des signaux
-
-Les signaux sont la couche la plus utile au métier, et la plus sensible :
-
-- les PV et règlements sont hétérogènes (PDF scannés, tables mal extraites, formats instables) ;
-- des graphes anciens peuvent porter des citations faibles ou non groundées ;
-- un signal « famille de zone » (`H1`) ne suffit pas toujours à retrouver la sous-zone exacte
-  (`H1-30`) ;
-- un signal de **zone proposée** ou de **règlement en cours** peut légitimement ne pas exister dans
-  la couche zonage courante (non-match **attendu**, pas une erreur).
-
-> **Grounding = 100 % attendu (dette de qualité).** Un signal **non groundé n'existe pas** : sans
-> citation vérifiable, il ne doit pas être présenté. L'état focus est **56/70 groundés** → les
-> **~14 restants** sont une **dette** à traiter par une **passe de cleansing** : soit **re-grounder**
-> depuis le PDF réel (retrouver la citation verbatim), soit **purger** le signal s'il n'est pas
-> substantiable. La cible n'est pas « 80 % », c'est **100 % ou rien**.
-
-**Préconisations :**
-
-1. **passe de cleansing grounding** : viser **100 %** — re-grounder ou purger les signaux non
-   substantiables (aucun signal sans citation vérifiable en production) ;
-2. **spécialiser le modèle de détection** des signaux réglementaires plutôt que de compter sur un
-   modèle généraliste ;
-3. introduire un **score de confiance par signal** : citation, date, type, zone, lot, source, état
-   du règlement ;
-4. séparer explicitement signaux **constatés**, signaux **inférés** et **opportunités projetées**.
-
-#### Jobs récurrents
-
-Trois jobs Kubernetes industrialisent la chaîne geo **[effectif]** :
-
-- `radar-populate-geo` (one-shot) : pull zones/lots puis résolution des références ;
-- `radar-populate-geo` en CronJob : rafraîchissement récurrent ;
-- `radar-run-geo-mapper` : relance du mapper seul.
-
-**Honnêteté d'exploitation :** deux CronJobs de refresh applicatif (`radar-refresh-scrape` et
-`radar-refresh-projection`) sont **actuellement suspendus** (`suspend: true`) **[effectif]** : ils
-échouaient chaque nuit et réveillaient un pool de calcul burst à la demande, avec un coût
-injustifié tant que la cause racine (secret/schéma) n'est pas corrigée. Un nettoyage automatique
-(`ttlSecondsAfterFinished`) a été ajouté. C'est une **décision FinOps assumée**, pas une capacité
-manquante : la réactivation est un simple `suspend: false` après correction.
-
-**Préconisations :** journaliser les résultats par ville et par couche ; publier un tableau de bord
-de fraîcheur ; conserver les échecs par cause (source absente, schéma inconnu, timeout, OOM,
-mismatch) ; **borner les lots par ville et par bbox** pour éviter les extractions provinciales
-accidentelles.
-
-#### Optimisations prioritaires
-
-1. **modèle signaux** : prompts/schémas dédiés par famille (PPCMOI, dérogations, rezonage, PIIA,
-   TOD, usages, densité) ;
-2. **mapping rues / zones** : relier adresse, toponyme, rue, lot et zone — **couche encore faible**,
-   c'est le principal levier de précision restant ;
-3. **canonisation zonage** : réduire les fragments ArcGIS/Geo* à **une** collection canonique/ville ;
-4. **normalisation des grilles** : détecter le champ porteur du code de zone et le lien de grille ;
-5. **contrôle qualité** : métriques automatiques de rappel, précision, taux de citation et couverture.
+Sur l'axe de profondeur, **33 opportunités témoins** servent de banc de preuve bout en bout
+(signal → document → zone → grille → lot) ; l'échelle cible est de **plus de 5000** couples
+ville × signal — l'écart entre les deux est le chantier de généralisation.
 
 ---
 
-## 1.B — Détail par layer
+# 1 — Données : état par couche
 
-### 1.B.a — Zonage : méthode, proportions projetées et limites
+Cette section décrit chaque couche de données séparément — de la plus brute (documents) à la plus
+raffinée (normes par lot) — avec, pour chacune : la méthode d'acquisition, l'état mesuré, et les
+limites.
 
-#### Méthode
+## 1.1 — PV (procès-verbaux)
 
-La couche zonage est acquise par **plusieurs méthodes distinctes** (une ville peut relever d'une ou
-de plusieurs). La **répartition par méthode** est **à consolider avec geo** (demande envoyée) :
+**Ce que c'est** : le substrat brut — procès-verbaux de conseils municipaux, avis publics et
+règlements, collectés par scraping configuré par ville et archivés en stockage objet (adressage
+par contenu, preuve conservée).
 
-| Méthode d'acquisition | Ce que c'est | Villes couvertes (focus 30 · province) |
-|---|---|---:|
-| **ArcGIS** | feature-layers / services ArcGIS municipaux (ou ré-attribués) | *à confirmer avec geo* |
-| **GeoNet** | portail / harvest GeoNet (nom exact à confirmer) | *à confirmer avec geo* |
-| **CKAN — Données Québec** | catalogue ouvert provincial (manifestes CKAN) | *à confirmer avec geo* |
-| **PDF (recalage géoréférencé)** | plan de zonage PDF officiel → géoréférencement (points de contrôle / OCR) quand la géométrie n'est pas exposée | *à confirmer avec geo* |
+**État mesuré [effectif]** :
+
+- **~3272 documents bruts** scrapés et archivés ;
+- **~1007 / 1104** municipalités disposent d'un substrat documentaire ;
+- focus 30 : **27 / 30** (brossard, kirkland et lile-dorval n'ont encore aucun brut).
+
+**Limites** : ~97 villes cibles n'ont aucune donnée brute (portails protégés, sites sans PDF
+exploitable, périmètres non résolus — ces cas sont classés dans un manifeste des villes
+difficiles) ; certaines villes exigeront des contournements dédiés ou un rattrapage manuel.
+
+## 1.2 — Signaux
+
+**Ce que c'est** : les signaux réglementaires (rezonage, PPCMOI, dérogations, consultations…)
+extraits des PV. L'extraction passe par les **graphes v2.3** — le graphe est la *méthode de
+parsing*, pas la finalité : la finalité est un signal daté, typé, cité et localisable.
+
+**État mesuré [effectif]** :
+
+- **978 / 1104** municipalités ont des signaux extraits (v2.3) ; focus 30 : **25 / 30**
+  (saint-constant et saint-philippe encore en v2.2) ;
+- sur le focus : **70 signaux**, dont **56 avec citation vérifiable** (page/passage verbatim du
+  PV réel) ;
+- le reliquat provincial de **128 villes** se décompose en **~30 graphes v2.2 résiduels** (à
+  re-grounder) et **~97 villes sans aucune donnée brute** (préalable scraping, cf. §1.1).
+
+**Cible qualité — 100 % de citations vérifiables.** Un signal sans citation vérifiable ne doit
+pas être présenté. Les **14 signaux** du focus qui n'en portent pas encore sont traités par une
+**passe de cleansing** : soit **re-grounder** depuis le PDF réel (retrouver la citation verbatim),
+soit **purger** le signal s'il n'est pas substantiable. La cible n'est pas « 80 % », c'est
+**100 %**.
+
+**Rigueur mesurée** : le run déterministe sur les 30 villes v2.2 résiduelles n'a publié que
+**1 / 30** (saint-césaire) — 29 restent bloquées (22 sans référence groundée, 6 sans description,
+1 structurellement invalide). Cette rigueur est **volontaire** : le gate v2.3 refuse de publier
+une citation non vérifiable. L'audit a d'ailleurs montré que certaines baselines v2.2 portaient
+des citations **partiellement fabriquées** (ex. une ville avec 12/12 identifiants de document
+introuvables dans le brut) ; la voie retenue lit le **PDF réel** et marque `found:false` quand le
+passage est absent. **Moins de volume publié, meilleure confiance.**
+
+## 1.3 — Zones géographiques — par méthode d'acquisition
+
+**Ce que c'est** : les polygones de zonage municipaux (la zone `H-609-4` et sa géométrie), acquis
+par le partenaire géospatial puis servis via API OGC et projetés en PostgreSQL/PostGIS.
+
+**Méthodes d'acquisition** — une ville peut relever d'une ou de plusieurs :
+
+| Méthode | Ce que c'est |
+|---|---|
+| **ArcGIS** | feature-layers / services ArcGIS municipaux (géométries exposées directement) |
+| **GeoNet** | portails géographiques municipaux moissonnés |
+| **Contournements dédiés (« obscura »)** | sources difficiles (portails protégés, rendus dynamiques) traitées par un composant d'acquisition spécialisé |
+| **PDF + recalage géoréférencé** | plans de zonage officiels PDF, géoréférencés et calés sur le cadastre quand la géométrie n'est pas exposée |
 
 Après acquisition (quelle que soit la méthode) : mapping standard côté geo → ingestion dans
 `zone_versions` + **normalisation des codes de zone** pour permettre le rapprochement signal↔zone.
 
-L'ingestion (`ogc-pull`) interroge l'API géospatiale, pagine les collections `qc-zonage-<ville>` et
-`qc-lots-<ville>`, et **upsert** zones et lots dans PostgreSQL/PostGIS. Le service `populate-geo`
-enchaîne acquisition des polygones, normalisation des codes, upsert dans `zone_versions`, puis
-résolution des références géographiques depuis les signaux.
+**État mesuré [effectif — live 2026-07-02]** :
 
-> **Point d'architecture honnête — geo « live » vs projection PG.** Le rapprochement signal → zone
-> **ne requête pas** l'API géospatiale en direct : il lit la **projection PostgreSQL/PostGIS locale**
-> (`zone_versions` / `lot_versions`, via `ST_AsGeoJSON`). L'API géospatiale live n'est sollicitée que
-> par l'étape d'**ingestion** qui **peuple** ces tables. En conséquence, la fraîcheur du zonage servi
-> dépend du **dernier job de pull réussi**, pas d'un accès temps réel. C'est un choix de robustesse
-> (indépendance vis-à-vis d'un tiers, requêtes géospatiales performantes), mais il **impose des jobs
-> de rafraîchissement fiables** — cf. la suspension FinOps ci-dessus.
+- **~485 / 1106** villes servies en zonage ; focus 30 : **29 / 30** (seul `lile-dorval`,
+  micro-île, manque) ;
+- **exemple validé — Salaberry-de-Valleyfield** : **645 zones** servies, **96,3 % de
+  correspondance** avec le règlement officiel, **0 trou spatial** ;
+- ~506 collections `qc-zonage-*` exposées, dont ~200 fragments (variantes ArcGIS, affectations,
+  PIIA) non requêtés par le rapprochement — la canonisation à **une collection par ville** reste
+  le chantier de stabilité du comptage.
 
-#### Proportions projetées
+> **Point d'architecture — geo « live » vs projection PG.** Le rapprochement signal → zone ne
+> requête pas l'API géospatiale en direct : il lit la **projection PostgreSQL/PostGIS locale**
+> (`zone_versions` / `lot_versions`), peuplée par l'étape d'**ingestion**. La fraîcheur du zonage
+> rapproché dépend donc du **dernier job de pull réussi**. C'est un choix de robustesse
+> (indépendance vis-à-vis d'un tiers, requêtes géospatiales performantes), qui impose en
+> contrepartie des jobs de rafraîchissement fiables (cf. §1.8). La carte Évaluation, elle, lit la
+> couche geo **en direct** (passthrough OGC) et bénéficie immédiatement du 29/30.
 
-Mesures directes sur l'API geo (28–29 juin), **à consolider** :
+**Limites** : nommage non canonique des collections ; plusieurs couches par ville (zonage,
+affectation, grille, PIIA, plan d'urbanisme) ; champs de code hétérogènes (`zone_code`, `code`,
+`NumZone`, `NO_ZONAGE`, `ETIQUETTE`…) ; granularité différente entre signal et couche (famille
+`H1` vs sous-zone `H1-30`) ; nécessité de conserver l'historique temporel des règlements (zones
+proposées, entrées en vigueur).
 
-- **~506 collections `qc-zonage-*`** exposées **[effectif]** — mais dont ~200 sont des fragments
-  ArcGIS ré-attribués (`-arcgis`, `-affectation`, `-piia`, schémas de plan) que le mapper ne
-  requête jamais (il construit `qc-zonage-<slug>` en dur) ;
-- couverture par match de ville **~485 / 1106 [live 2026-07-02]** (a crû depuis les ~234 de juin, geo a livré) ;
-- focus 30 : **29 / 30** (seul `lile-dorval`, micro-île, manque ; lots **30/30**) ;
-- ces chiffres varient selon la stratégie de matching, car plusieurs collections représentent des
-  fragments, affectations, PIIA ou variantes ArcGIS d'une même ville.
+## 1.4 — Grilles de zonage (normes)
 
-> **Fiabilité de la mesure :** une mesure antérieure issue d'un balayage S3 (« atome sweep »)
-> sous-comptait grossièrement (3/1104 zonage, 320/1104 lots) : elle est **écartée** comme buggée.
-> La source fiable est la **mesure directe de l'API** (211–234/1104). Le comptage zonage ne sera
-> stable qu'après réduction à **une collection canonique par ville**.
+**Ce que c'est** : les grilles des usages et normes — la couche qui transforme une zone en
+**règles constructibles** : usages permis, hauteur, marges, densité, contraintes. C'est le levier
+de la qualification « 4+ logements fondée sur la grille » (et non sur une heuristique).
 
-#### Limites potentielles
+**Méthode** : extraction des normes **verbatim** depuis les grilles officielles (valeur exacte,
+cellule, page), rattachement zone → normes, puis mapping **lot → zone → normes**.
 
-- nommage non canonique des collections ;
-- plusieurs couches par ville (zonage, affectation, grille, PIIA, plan d'urbanisme) ;
-- champs de code de zone hétérogènes : `zone_code`, `code`, `NumZone`, `NO_ZONAGE`, `ETIQUETTE`,
-  `Zone`, `zone_`… certains **non lus** par sensibilité à la casse (corrigé, cf. mapper) ;
-- granularité différente entre signal et couche (famille `H1` vs sous-zone `H1-30`) ;
-- collections « fausses grilles » (couche d'affectation vide, numéros de lot au lieu de codes de
-  zone) exposées à tort sous le préfixe `qc-zonage-` ;
-- nécessité de conserver l'historique temporel des règlements (zones proposées, entrées en vigueur).
+**État mesuré [effectif — pilote]** :
 
-### 1.B.b — Grilles d'évaluation
-
-Les grilles d'évaluation permettent de passer d'un signal à une opportunité : usages permis,
-densité, hauteur, marges, contraintes et potentiel constructible.
-
-**Constat :** les grilles sont souvent dans des PDF ou des champs-liens hétérogènes ; le lien de
-grille varie d'une ville à l'autre (`LienGrille`, `URL_GRILLE`, `GRILLE_URL`, `Grille`) et n'est pas
-lu aujourd'hui ; la reconstruction textuelle peut introduire des erreurs quand elle résume ou
-recompose des tableaux réglementaires.
+- **Salaberry-de-Valleyfield** : **97,9 % des 15 510 lots** portent leurs normes (hauteur,
+  marges, densité), mapping lot → zone → normes complet ;
+- **alignement en cours** sur les 4 villes de l'application de référence du partenaire (Delson,
+  Sainte-Catherine, Saint-Constant, Candiac) ;
+- **exposition des normes dans l'API géo en cours** — c'est le déclencheur du « 4+ fondé
+  grille » côté produit.
 
 **Recommandation IA — prudente et explicite :**
 
-- **conserver le moteur OCR spécialisé (Mistral OCR 4)** pour l'OCR, où il donne de bons résultats
-  sur les documents complexes ;
-- **rester prudent avec la complétion (completion Mistral)** sur la reconstruction réglementaire :
-  **mesurer et borner l'écart d'erreur avant tout usage à portée réglementaire**. Une grille
-  reconstruite par complétion peut paraître plausible tout en étant fausse sur une valeur critique
-  (hauteur, densité, usage) — inacceptable pour une décision d'investissement ;
+- **conserver le moteur OCR spécialisé (Mistral OCR 4)** pour l'OCR, où il donne de bons
+  résultats sur les documents complexes ;
+- **rester prudent avec la complétion (completion Mistral)** sur la reconstruction
+  réglementaire : **mesurer et borner l'écart d'erreur avant tout usage à portée réglementaire**.
+  Une grille reconstruite par complétion peut paraître plausible tout en étant fausse sur une
+  valeur critique (hauteur, densité, usage) — inacceptable pour une décision d'investissement ;
 - préférer une **extraction structurée avec preuve** : cellule, page, citation, table, champ ;
 - produire les grilles en mode **« preuve d'abord »** plutôt qu'en mode résumé.
 
-### 1.B.c — Lots, cadastre et données PII
+## 1.5 — Lots (cadastre) et données nominatives
 
-La couche lots s'appuie sur le cadastre public, avec bornage strict par commune / bbox. Elle est
-essentielle pour afficher les parcelles, scorer un potentiel, lier un signal de zone aux lots
-concernés et préparer des workflows de prospection.
+**Ce que c'est** : les parcelles cadastrales — numéro de lot et géométrie — issues du **cadastre
+public (MRNF, licence CC-BY)**, avec bornage strict par commune / bbox.
 
-**Conformité — point central :** la donnée utilisée est **géométrique et cadastrale** (numéro de lot
-et géométrie), **sans propriétaire**. Le pipeline maintient cette séparation :
+**État mesuré [effectif — live 2026-07-02]** :
+
+- **~1102 / 1106** villes servies en lots ; focus 30 : **30 / 30** ;
+- sur Salaberry-de-Valleyfield : **100 % des lots assignés à une zone** (jointure par code de
+  zone, sinon jointure spatiale par centroïde — cf. §2.E).
+
+**Données nominatives (propriétaires) : [en attente].** La donnée servie aujourd'hui est
+**géométrique et cadastrale uniquement, sans propriétaire**. Une acquisition légitime (fichier
+fourni par le client, base légale et gouvernance dédiées) est **cadrée mais non lancée**. Le
+pipeline maintient la séparation :
 
 - pas d'enrichissement propriétaire sans base légale et gouvernance spécifiques ;
 - pas d'affichage de donnée personnelle ;
-- **tests anti-PII côté UI/API** : un test vérifie que les propriétés exposées d'un lot se limitent
-  à `noLot` et `citySlug`. Ce test est actuellement **à recaler** car un champ dérivé public
-  (`potentialScore`, un score, pas une donnée personnelle) a été ajouté aux propriétés — c'est un
-  test périmé à élargir, **pas une fuite** ;
-- limitation stricte des propriétés exposées au client.
+- **tests anti-PII côté UI/API** : un test vérifie que les propriétés exposées d'un lot se
+  limitent au strict nécessaire. Ce test est en cours de recalage suite à l'ajout de champs
+  dérivés publics (score, indicateurs 4+/TOD — des attributs calculés, pas des données
+  personnelles).
 
-La couverture lots (**~1103 collections [effectif]**) est **nettement plus industrialisable** que le
-zonage, car la source est normalisée. Les contraintes sont surtout techniques : pagination, mémoire,
-bbox, coûts et fréquence de rafraîchissement.
+## 1.6 — TOD (aires de transit)
 
-### 1.B.d — Détection des signaux : méthode graphify / entités
+**Ce que c'est** : les aires TOD (transit-oriented development) du PMAD/CMM — un critère majeur
+de qualification des lots (densification près des points de transport).
 
-Le pipeline graphify transforme des documents municipaux en entités : sources et documents, signaux
-réglementaires, événements de désignation, zones, citations et références, et relations
-documentaires.
+**État : [en attente].** L'incrément a été **demandé au fournisseur géo**, avec les 4 villes de
+l'application de référence en priorité. Côté produit, le filtre TOD et la colorisation associée
+sont **déjà câblés** (cf. §2.D) et s'activeront à réception de la donnée.
 
-La version **v2.3** renforce la contrainte de qualité : **citation obligatoire et grounding
-vérifiable**. Le grounding lit le PDF réel (extraction texte + citation verbatim), et marque
-`found:false` quand le passage est absent plutôt que de fabriquer une citation.
-
-**Risques identifiés [effectif] :**
-
-- citations anciennes potentiellement faibles ou hallucinées sur certaines baselines v2.2 ;
-- identifiants de document orphelins dans certains graphes ;
-- signaux sans description ou sans référence groundée (cause de blocage majoritaire du reliquat) ;
-- extraction trop grossière des codes de zone (famille au lieu de sous-zone) ;
-- PV disponibles mais pipeline de re-grounding/re-scraping encore à compléter pour une partie du
-  reliquat.
-
-**Préconisations :** maintenir un gate de publication strict ; enrichir chaque signal (type, phase,
-date, effet réglementaire, cible géographique) ; utiliser un modèle/prompt expert par famille de
-signal ; mesurer régulièrement précision, rappel et taux de citation vérifiable.
-
-#### Rappel signal ↔ zone — mesure réelle et honnête
+## 1.7 — Consistance signal↔zone : la mesure de référence
 
 Le rapprochement signal → zone a été mesuré **trois fois**, sans extrapolation, sur le périmètre
 strict des villes ayant à la fois des signaux désignant une zone et une collection zonage servie :
 
 | Mesure | Rappel | Périmètre | Date |
 |---|---:|---|---|
-| Live (mapper tel quel) | **52 / 110 = 47,3 %** | 55 villes d'intersection | 28 juin |
+| Live (rapprochement tel quel) | **52 / 110 = 47,3 %** | 55 villes d'intersection | 28 juin |
 | Après fix applicatif (lecture des champs de zone non-candidats) | **63 / 110 = 57,3 %** (+9,1 pts) | idem | 28 juin |
 | Re-mesure finale (corrections applicatives + geo) | **71 / 120 = 59,2 %** | 55 villes, logique de champ finale | 29 juin |
 
-Détails utiles à la décision :
+Sur le focus 30, le proxy courant est de **~60 %** (28/47). Détails utiles à la décision :
 
 - répartition des causes de non-match : **gap-data 63,8 %**, champ-non-lu 19,0 %, écart-schéma
-  17,2 %, format-zéro-tête **0,0 %** (l'hypothèse d'un décalage de zéros de tête est **réfutée** sur
-  la donnée réelle) ;
-- **~81 % du déficit résiduel n'est pas corrigeable côté application** : il relève d'une extraction
-  d'entités trop grossière (famille `H1` au lieu de `H1-30`) ou de couches geo divergentes (couche
-  d'affectation servie au lieu de la grille) ;
+  17,2 %, format-zéro-tête **0,0 %** (hypothèse réfutée sur la donnée réelle) ;
+- **~81 % du déficit résiduel n'est pas corrigeable côté application** : il relève d'une
+  extraction d'entités trop grossière (famille `H1` au lieu de `H1-30`) ou de couches geo
+  divergentes (couche d'affectation servie au lieu de la grille) ;
+- une part des non-matchs est **attendue et légitime** : un signal de **zone proposée** ou de
+  **règlement en cours** peut ne pas exister dans le zonage courant ;
 - le **plafond de rappel atteignable côté application seule est ~57–59 %** ; aller au-delà exige
-  l'acquisition des vraies grilles réglementaires (geo) et l'affinage de la granularité d'extraction
-  (graphify). Le fix applicatif a débloqué des villes entières (par exemple rimouski 0→5/5,
+  l'acquisition des vraies grilles réglementaires (geo) et l'affinage de la granularité
+  d'extraction (graphify). Le fix applicatif a débloqué des villes entières (rimouski 0→5/5,
   saint-hyacinthe 0→4/4).
 
 Lecture étude : la normalisation et la jointure côté application sont **saines** ; le levier de
-progression restant est **hors application** (données geo + granularité d'extraction), ce qui doit
-guider la priorisation.
+progression restant est **hors application** (données geo + granularité d'extraction), ce qui
+doit guider la priorisation.
+
+## 1.8 — Exploitation, limites transverses et préconisations
+
+### Jobs récurrents
+
+Trois jobs Kubernetes industrialisent la chaîne geo **[effectif]** :
+
+- `radar-populate-geo` (one-shot) : pull zones/lots puis résolution des références ;
+- `radar-populate-geo` en CronJob : rafraîchissement récurrent ;
+- `radar-run-geo-mapper` : relance du rapprochement seul.
+
+Deux CronJobs de refresh applicatif (`radar-refresh-scrape` et `radar-refresh-projection`) sont
+**actuellement suspendus** (`suspend: true`) **[effectif]** : ils échouaient chaque nuit et
+réveillaient un pool de calcul à la demande, avec un coût injustifié tant que la cause racine
+(secret/schéma) n'est pas corrigée. Un nettoyage automatique (`ttlSecondsAfterFinished`) a été
+ajouté. C'est une **décision FinOps assumée**, pas une capacité manquante : la réactivation est un
+simple `suspend: false` après correction.
+
+### Préconisations
+
+1. **passe de cleansing grounding** : viser **100 %** de signaux à citation vérifiable —
+   re-grounder ou purger (aucun signal sans citation vérifiable en production) ;
+2. **spécialiser le modèle de détection** des signaux réglementaires (prompts/schémas dédiés par
+   famille : PPCMOI, dérogations, rezonage, PIIA, TOD, usages, densité) ;
+3. **mapping rues / zones** : relier adresse, toponyme, rue, lot et zone — couche encore faible,
+   principal levier de précision restant ;
+4. **canonisation zonage** : réduire les fragments à **une** collection canonique par ville ;
+5. **normalisation des grilles** : généraliser l'extraction des normes verbatim et son exposition
+   API (pilote Salaberry validé) ;
+6. **contrôle qualité** : métriques automatiques de rappel, précision, taux de citation et
+   couverture ; journaliser les résultats par ville et par couche ; publier un tableau de bord de
+   fraîcheur ; conserver les échecs par cause ; **borner les extractions** (bbox, pagination) ;
+7. **score de confiance par signal** (citation, date, type, zone, lot, source, état du règlement)
+   et séparation explicite signaux **constatés** / **inférés** / **opportunités projetées**.
 
 ---
 
@@ -377,7 +359,7 @@ Quatre vues officielles sont câblées dans la navigation : **Signaux**, **Oppor
 **Évaluation**, **Sources**. Un socle cartographique partagé (`GeoCityMapBase`) a été extrait et
 alimente les vues MapLibre.
 
-## 2.A — Vue géographique : ville, zones, lots
+## 2.A — Vues cartographiques : ville, zones, lots
 
 ![Vue géographique — zonage servi : Longueuil, 2085 zones rendues sur la carte + légende des types de signal réglementaire (rezonage, dérogation, PPCMOI, PIIA…).](assets/geo-zones-longueuil.png)
 
@@ -392,39 +374,47 @@ alimente les vues MapLibre.
 - **3 filtres de type de signal** (`z | m | p`), **persistés dans l'URL et le stockage local** ;
 - recherche de villes dans le rail ; légende épinglée ; affichage des citations et du contexte.
 
-Limite : la précision lot/zone dépend du mapper signal → zone et de la couverture geo (cf. §1.B.d).
+Limite : la précision lot/zone dépend du rapprochement signal → zone et de la couverture geo
+(cf. §1.7).
 
-### Évaluation — **partiel, fonctionnel mais non migré**
+### Évaluation — **alignée sur l'application de référence (livraison du 2 juillet)**
 
-![Évaluation — Delson : 200 lots cadastraux MRNF, signal « Rezonage résidentiel » (zone H-609-4, règl. 150-49, Confiance Haute), et grille d'évaluation /100 en affichage HONNÊTE « Données partielles » (axes non substantiés marqués ? / N/A).](assets/uat-delson-carte-eval-200lots.png)
+![Évaluation — Delson : 200 lots cadastraux MRNF, signal « Rezonage résidentiel » (zone H-609-4, règl. 150-49, Confiance Haute), et grille d'évaluation /100 en affichage « Données partielles » (axes non substantiés marqués ? / N/A).](assets/uat-delson-carte-eval-200lots.png)
 
-*Vue Évaluation — Delson (200 lots) : lots cadastraux, signal réglementaire relié, et grille /100 avec affichage honnête des axes non encore mesurés (pas de faux score).*
+*Vue Évaluation — Delson : lots cadastraux, signal réglementaire relié, et grille /100 avec affichage explicite des axes non encore mesurés (pas de faux score).*
 
-- drilldown ville → **lots cadastraux rendus en SVG**, coloriés par **score de potentiel** ;
-- **plafond de rendu à 200 lots** (`limit: 200` ; zones chargées à `limit: 500`) ;
-- buckets de score, fiche lot, liens cartes externes (Google Maps / Street View) ;
-- marques/prospects **en lecture seule** (aucune écriture depuis l'UI aujourd'hui).
+- carte des **lots cadastraux avec zones jointes** (couche geo live, passthrough OGC) ;
+- **filtres combinés** dans le panneau données : 4+ logements, TOD, priorité, usages, superficie
+  minimale ;
+- **colorisation hiérarchique** : vert (4+), bleu (TOD), ambre (priorité), lots hors filtre
+  estompés ;
+- **fiche lot enrichie** : adresse, superficie, **façade estimée** (méthode géométrique
+  documentée), zone et **normes verbatim** quand disponibles, liens cartes externes ;
+- buckets de score et grilles de score (onglet dédié) ; marques/prospects **en lecture seule**
+  (écriture à venir).
 
-Limites : pas encore de carte MapLibre lots + zonage cible ; couche TOD non ingérée ; écriture des
-marques/notes et « mini-formulaire en vente » à finaliser ; filtres combinés usage × potentiel ×
-superficie à compléter.
+Limites restantes : aires TOD **[en attente]** du fournisseur géo (filtre câblé) ; écriture des
+marques/notes et « mini-formulaire en vente » à finaliser.
 
-### Sources — **fonctionnel**
+### Sources — **fonctionnel, fiabilisé**
 
 Vue de consolidation (« grand filet ») :
 
 - villes coloriées par **maturité de recueil** (choroplèthe sur `GeoCityMapBase`) ;
 - distinction `hasZonage`, statut par source (graphifié / scrappé / identifié / erreur) ;
 - panneau qualité des données et détail par ville ;
-- **dégradation honnête** : état vide explicite si la donnée est absente.
+- état vide **explicite** si la donnée est absente (aucune couverture affichée sans donnée) ;
+- **fiabilisation du chargement** (livraison récente) : indicateurs de chargement par requête
+  (zones/lots/signaux) et protection anti-course (les réponses obsolètes sont abandonnées).
 
-Elle s'appuie sur `/api/scrape-status`, la couverture qualité par ville et `/api/signals/by-city`.
+Elle s'appuie sur `/api/scrape-status`, la couverture qualité par ville et
+`/api/signals/by-city`.
 
 ## 2.B — Signaux : filtrage, citations, affichage
 
-![Signaux — fil de triage (tri par score /10 ou priorité, filtre par statut) + assistant conversationnel ; badge honnête « 6/6 signals (3 réels + 3 exemples) ».](assets/uat-07-signaux-view.png)
+![Signaux — fil de triage (tri par score /10 ou priorité, filtre par statut) + assistant conversationnel ; compteur « 6/6 signals (3 réels + 3 exemples) » distinguant signaux réels et exemples.](assets/uat-07-signaux-view.png)
 
-*Vue Signaux — fil de triage, tri/filtre, assistant conversationnel. Le compteur distingue honnêtement signaux réels et exemples.*
+*Vue Signaux — fil de triage, tri/filtre, assistant conversationnel. Le compteur distingue signaux réels et exemples.*
 
 ![Signal — vue détail d'un signal (type, zone, indicateurs, contexte).](assets/uat-08-signal-detail.png)
 
@@ -437,44 +427,88 @@ document ? quelle page / citation ? quel type ? quelle zone / lot / rue ? quelle
 produit couvre les premiers éléments ; la **confiance** et la **liaison fine zone/lot** restent à
 renforcer.
 
-La preuve documentaire est disponible : un viewer PDF (pdf.js) affiche le document source à partir
-d'une archive objet. La route de service **sonde d'abord l'archive de scraping** (PDF PV stockés en
-adressage par contenu) puis **retombe** sur un store de métadonnées — mécanisme de repli utile quand
-la source d'origine est complexe ou indisponible.
+La preuve documentaire est disponible : un viewer PDF (pdf.js) affiche le document source à
+partir d'une archive objet. La route de service **sonde d'abord l'archive de scraping** (PDF PV
+stockés en adressage par contenu) puis **retombe** sur un store de métadonnées — mécanisme de
+repli utile quand la source d'origine est complexe ou indisponible.
 
-## 2.C — Vue données : consolidation
+## 2.C — Vue données : consolidation et couverture produit
 
 ![Opportunités — entonnoir de dossiers (phases de qualification, score /100 par dossier).](assets/uat-10-opportunites.png)
 
 *Vue Opportunités — entonnoir de dossiers par phase (données de démonstration à ce stade ; la carte lots/opportunités branchée sur l'API réelle reste à finaliser).*
 
 La vue Sources / Données consolide l'état de collecte et de qualité. C'est une réalisation
-importante car elle **évite de vendre une couverture théorique non vérifiée**. Elle a vocation à
-devenir le **tableau de bord de pilotage** : couverture raw, graph, zonage, lots ; fraîcheur des
-jobs ; erreurs par source ; villes bloquées ; qualité des citations.
+importante car elle **distingue la couverture vérifiée de la couverture théorique**. Elle a
+vocation à devenir le **tableau de bord de pilotage** : couverture raw, graph, zonage, lots ;
+fraîcheur des jobs ; erreurs par source ; villes bloquées ; qualité des citations.
 
-### Couverture des 17 fonctionnalités cibles (référentiel Steve)
+### Couverture des 17 fonctionnalités cibles (référentiel de l'application de référence du partenaire)
 
-Sur les 17 fonctionnalités du cahier des charges produit **[effectif, lecture code + tests]** :
+Sur les 17 fonctionnalités du cahier des charges produit **[effectif, lecture code + tests,
+mise à jour 2 juillet]** :
 
-- **Livré : 2** — pastilles réglementaires (signaux automatiques) et dashboard multi-villes (vue
-  Sources) ;
-- **Partiel : 5** — scoring lots (sans TOD ni carte Opportunités MapLibre), fiche lot (sans
-  formulaire « en vente »), marques équipe (**lecture seule**, pas d'écriture), authentification
-  (livrée ; synchronisation temps réel et export/import JSON absents), fiche mobile (tiroir latéral,
-  pas encore bottom-sheet) ;
-- **Absent / planifié : 10** — export CSV, filtres combinés, couches environnementales, recherche
-  adresse/lot, sélection multiple batch, labels par zoom, flux annonces, lookup code postal, éditeur
-  de zonage manuel, marquage batch de zone.
+- **Livré : 3** — pastilles réglementaires (signaux automatiques), dashboard multi-villes (vue
+  Sources), et **filtres combinés** (4+/TOD/priorité/usage/superficie — livrés le 2 juillet) ;
+- **Partiel : 5** — scoring lots (aires TOD en attente, carte Opportunités MapLibre à faire),
+  fiche lot (enrichie le 2 juillet : adresse, façade estimée, normes verbatim ; formulaire « en
+  vente » manquant), marques équipe (**lecture seule**, pas d'écriture), authentification (livrée ;
+  synchronisation temps réel et export/import JSON absents), fiche mobile (tiroir latéral, pas
+  encore bottom-sheet) ;
+- **Absent / planifié : 9** — export CSV, couches environnementales, recherche adresse/lot,
+  sélection multiple batch, labels par zoom, flux annonces, lookup code postal, éditeur de zonage
+  manuel, marquage batch de zone.
 
-> **Point d'honnêteté produit :** la vue **Opportunités** de la navigation est aujourd'hui un
-> **entonnoir de dossiers de démonstration** (fixture statique), **pas** la carte lots/zonage/scoring
-> branchée sur l'API réelle. La carte lots scorée existe côté **Évaluation**. La carte Opportunités
-> réelle reste à faire.
+> **Point de transparence produit :** la vue **Opportunités** de la navigation est aujourd'hui un
+> **entonnoir de dossiers de démonstration** (fixture statique), **pas** la carte
+> lots/zonage/scoring branchée sur l'API réelle. La carte lots scorée et filtrée existe côté
+> **Évaluation**. La carte Opportunités réelle reste à faire.
 
 **Tests :** la suite UI compte **680 tests** (**669 passent**, 1 échoue, 10 à écrire, 10 ignorés)
-**[effectif]**. Le sous-ensemble logique lots/fiche/prospect/scoring est **au vert (86/86)**. Le seul
-test rouge est le test anti-PII périmé décrit au §1.B.c, à recaler avant fusion.
+**[effectif, 28 juin]**. Le sous-ensemble logique lots/fiche/prospect/scoring est **au vert
+(86/86)**. Le seul test rouge est le test anti-PII à recaler décrit au §1.5.
+
+## 2.D — Livraisons du 2 juillet
+
+Quatre livraisons produit ont été intégrées le 2 juillet :
+
+1. **Connecteur assistant (MCP) pour claude.ai — en production.** Un serveur MCP avec
+   authentification **OAuth 2.1/PKCE** est déployé et **validé de bout en bout** : chaque
+   utilisateur enrôle sa propre connexion depuis claude.ai et interroge les données de
+   l'application (signaux, couverture, sources) depuis l'assistant. S'y ajoutent **4 outils de
+   données brutes** — zones et lots **GeoJSON** (requêtes bornées, avec indicateurs 4+/TOD par
+   lot), grilles et procès-verbaux **PDF** — qui permettent à l'assistant de produire des
+   représentations ad hoc (cartes, tableaux, synthèses) à la demande.
+2. **Dérivation « 4+ logements » par lot.** Chaque lot est qualifié constructible « 4 logements
+   et plus » par jointure avec sa zone (par code de zone, sinon par jointure spatiale au
+   centroïde), en s'appuyant sur les **normes réelles de la grille quand elles sont disponibles**
+   et sinon sur une **heuristique explicitement signalée comme telle**. Exactitude mesurée :
+   **97,5 %** contre l'application de référence du partenaire, sur **3171 lots**. L'exposition
+   des normes dans l'API géo (§1.4) fera converger ce chiffre vers le « 4+ fondé grille ».
+3. **Parité carte.** Filtres combinés 4+/TOD/priorité/usage/superficie, colorisation
+   hiérarchique (vert 4+, bleu TOD, ambre priorité, hors-filtre estompé), fiche lot enrichie
+   (adresse, façade estimée par méthode géométrique documentée, normes verbatim) — cf. §2.A.
+4. **Vue Sources fiabilisée.** Couverture qualité par ville, indicateurs de chargement par
+   requête et protection anti-course sur les chargements de couches.
+
+## 2.E — Cas difficiles résolus
+
+Trois exemples de problèmes non triviaux résolus pendant la période, illustrant la profondeur
+technique du socle :
+
+- **Jointure spatiale lot↔zone sans code porté.** Dans plusieurs villes, les lots cadastraux ne
+  portent pas le code de leur zone. La résolution joint alors chaque lot à sa zone **par
+  inclusion spatiale de son centroïde** dans le polygone de zone — avec repli documenté et
+  indicateur de méthode, pour ne jamais présenter une jointure spatiale comme une jointure
+  exacte. Résultat : 100 % des lots de Salaberry-de-Valleyfield assignés à une zone.
+- **Serveur MCP autonome et vérifié au build.** Le connecteur assistant est empaqueté en image
+  autonome (aucune dépendance externe au démarrage) avec un **test de démarrage intégré à la
+  construction** : si le serveur ne démarre pas, l'image ne se construit pas — l'échec est
+  détecté avant tout déploiement.
+- **Robustesse cartographique sur données vides.** Les expressions de style de la carte
+  (filtres, colorisation) devenaient invalides quand une couche arrivait vide ; elles sont
+  désormais construites pour rester valides sur toute forme de données, et les chargements
+  concurrents sont protégés contre les courses (les réponses périmées sont abandonnées).
 
 ---
 
@@ -499,7 +533,7 @@ API domaine
         ↓
 Application UI
         ↓
-Intégrations assistées (MCP)
+Intégrations assistées (connecteur MCP)
 ```
 
 Le dépôt est un **monorepo** à espaces de travail : API, UI et bibliothèques de domaine
@@ -524,10 +558,11 @@ Cette séparation permet :
 
 **Réversibilité des couches d'identité (OAuth) :** l'authentification repose sur un flux OIDC
 standard (`authorization_code` + PKCE) et une session applicative auto-portée ; l'interface de
-domaine reste stable pendant que la couche d'identité évolue. Cette couche transverse n'est pas le
-cœur de l'étude ; l'important est qu'elle soit **réversible** : le produit fonctionne avec ou sans
-elle, et son durcissement (session durable, refresh silencieux, persistance du consentement) est un
-chantier identifié et cadré, indépendant du domaine métier.
+domaine reste stable pendant que la couche d'identité évolue. Le **connecteur assistant (MCP)**
+réutilise la même discipline : OAuth 2.1/PKCE, enrôlement par utilisateur, aucune donnée exposée
+sans authentification. Cette couche transverse est **réversible** : le produit fonctionne avec ou
+sans elle, et son durcissement (session durable, refresh silencieux, persistance du consentement)
+est un chantier identifié et cadré, indépendant du domaine métier.
 
 ## 3.B — Utilisation de l'IA : mixture of agents (consensus)
 
@@ -546,9 +581,9 @@ consensus est le mécanisme central — il attrape les erreurs qu'un agent seul 
 
 Le **consensus multi-agents** (un agent produit, un autre relit/arbitre ; profils Claude 4.8 xhigh
 et Codex 5.5 xhigh en doubles comptes) sert à **croiser les points de vue** et à sécuriser les
-décisions difficiles. La difficulté n'est pas seulement de générer du code, mais de **coordonner des
-couches hétérogènes, valider les faits et éviter la survente des métriques** — d'où le recours
-systématique au consensus plutôt qu'à une réponse unique.
+décisions difficiles. La difficulté n'est pas seulement de générer du code, mais de **coordonner
+des couches hétérogènes, valider les faits et garantir l'exactitude des métriques** — d'où le
+recours systématique au consensus plutôt qu'à une réponse unique.
 
 **Principe à conserver :** l'IA accélère extraction, mapping, tests et rédaction ; des **gates
 déterministes** décident de ce qui est publié ; les **métriques et citations** arbitrent ; les
@@ -562,13 +597,13 @@ déterministes** décident de ce qui est publié ; les **métriques et citations
 - PostgreSQL / PostGIS (projection géospatiale) ;
 - jobs Kubernetes (backfill, refresh, mapper) ;
 - stockage objet S3 (documents, PV en adressage par contenu, graphes) ;
-- CDN / distribution du front ; application web.
+- CDN / distribution du front ; application web ; serveur MCP (connecteur assistant).
 
 Les jobs geo permettent de passer d'une exécution manuelle à une exploitation : one-shot pour
-backfill ou relance, CronJob pour rafraîchissement, mapper autonome pour recalculer les résolutions.
-Comme indiqué au §1.A.3, deux CronJobs de refresh applicatif sont **suspendus pour raison de coût**
-en attendant la correction de leur cause racine — l'exploitation est donc **amorcée mais pas encore
-pleinement stabilisée**.
+backfill ou relance, CronJob pour rafraîchissement, mapper autonome pour recalculer les
+résolutions. Comme indiqué au §1.8, deux CronJobs de refresh applicatif sont **suspendus pour
+raison de coût** en attendant la correction de leur cause racine — l'exploitation est donc
+**amorcée mais pas encore pleinement stabilisée**.
 
 ### Projection des coûts et des tokens — coût au siège vs coût complet
 
@@ -613,25 +648,32 @@ Demandes h2a envoyées à **agent-stats** (tokens/coût immo), **poc-k8s** (infr
 
 # Conclusion et feuille de route
 
-La faisabilité est **démontrée** : les briques data, geo, graphe, API et UI existent et
-communiquent. Le produit permet déjà de **consulter des signaux avec citations**, d'**inspecter la
-maturité des sources** et de **visualiser des lots scorés** sur les villes couvertes.
+La faisabilité est **démontrée** : les briques data, geo, graphe, API, UI et connecteur assistant
+existent et communiquent. Le produit permet déjà de **consulter des signaux avec citations**,
+d'**inspecter la maturité des sources**, de **filtrer et visualiser des lots qualifiés** (4+,
+priorité) sur les villes couvertes, et d'**interroger les données depuis claude.ai**.
 
 La prochaine étape n'est pas une preuve de concept supplémentaire, mais une **consolidation
 priorisée**, dans cet ordre :
 
-1. **prioriser le focus 30** : zonage/lots geo désormais à **29/30 & 30/30** — les **puller en PG** puis remonter la **consistance signal↔zone** (le vrai goulot) ;
-2. **stabiliser les jobs récurrents** (corriger puis réactiver les CronJobs de refresh) ;
-3. **canoniser les collections zonage** (une collection par ville) pour un comptage et un mapping
-   stables ;
-4. **améliorer le modèle de signaux et le grounding**, et **construire la couche mapping rues/zones** ;
-5. **finaliser les vues lots / opportunités** (carte réelle, écriture des marques, filtres métier) ;
-6. **publier un tableau de bord de couverture honnête** distinguant effectif et projeté.
+1. **prioriser le focus 30** : zonage/lots geo désormais à **29/30 & 30/30** — les **puller en
+   PG** puis remonter la **consistance signal↔zone** (le vrai goulot) ;
+2. **passe de cleansing grounding** : atteindre 100 % de signaux à citation vérifiable sur le
+   focus (56/70 aujourd'hui) ;
+3. **généraliser les grilles de normes** : aligner les 4 villes de l'application de référence sur
+   le pilote Salaberry (97,9 % des lots avec normes) et exposer les normes dans l'API géo — le
+   « 4+ fondé grille » ;
+4. **stabiliser les jobs récurrents** (corriger puis réactiver les refresh) et **canoniser les
+   collections zonage** (une par ville) ;
+5. **intégrer les acquisitions en attente** : aires TOD (fournisseur géo) et données nominatives
+   (fichier client, gouvernance dédiée) ;
+6. **finaliser les vues lots / opportunités** (carte Opportunités réelle, écriture des marques) et
+   **publier un tableau de bord de couverture** distinguant effectif et projeté.
 
-Le potentiel 1104 est **atteignable par itérations**, en séparant clairement ce qui est **effectif**
-de ce qui est **projeté**. La valeur du socle actuel tient autant à ce qu'il produit qu'à sa
-**discipline de vérité** : gates déterministes, citations obligatoires, mesures reproductibles et
-limites documentées.
+Le potentiel 1104 est **atteignable par itérations**, en séparant clairement ce qui est
+**effectif** de ce qui est **projeté**. La valeur du socle actuel tient autant à ce qu'il produit
+qu'à sa **discipline de vérité** : gates déterministes, citations obligatoires, mesures
+reproductibles et limites documentées.
 
 ---
 
@@ -639,25 +681,31 @@ limites documentées.
 
 | Sujet | Mesure | Qualification | Source interne | Date |
 |---|---|---|---|---|
+| Documents bruts scrapés (PV) | ~3272 documents | effectif | mesure S3 / manifeste scraping | 2 juillet |
 | Graphes v2.3 | ~976 (dans cible) à 978 (après publication) / 1104 | effectif | `2.3-completude-1105-FRESH.md`, `2.3-finition-progress.md` | 28 juin |
 | Reliquat v2.3 | 128 villes (~30 v2.2 + ~97 sans brut) | effectif | idem | 28 juin |
 | Focus 30 v2.2 résiduel | 1 publié (saint-césaire), 29 bloquées | effectif | `2.3-finition-progress.md` | 28 juin |
-| Grounding hallucination | ex. 12/12 identifiants orphelins sur une ville | effectif | `2.3-finition-progress.md` | 28 juin |
-| Collections zonage | ~506 `qc-zonage-*` (dont ~200 fragments ArcGIS) | à consolider | `zones-geo-30-investigation.md`, `wp3-mapper-recall-2026-06-28.md` | 28–29 juin |
-| Couverture zonage province | ~234/1104 (juin) → **~485 / 1106** | effectif (live) | mesure directe API geo `/collections` | **2 juillet** |
-| **Focus 30 zonage servi** | 3/30 (juin) → **29 / 30** | effectif (live) | idem (seul `lile-dorval` manque) | **2 juillet** |
-| **Focus 30 lots servis** | **30 / 30** | effectif (live) | idem | **2 juillet** |
+| Grounding fabriqué (v2.2) | ex. 12/12 identifiants de document introuvables sur une ville | effectif | `2.3-finition-progress.md` | 28 juin |
+| Collections zonage | ~506 `qc-zonage-*` (dont ~200 fragments ArcGIS) | effectif | `zones-geo-30-investigation.md`, `wp3-mapper-recall-2026-06-28.md` | 28–29 juin |
+| Couverture zonage province | ~234/1104 (juin) → **~485 / 1106** | effectif (live) | mesure directe API geo `/collections` | 2 juillet |
+| **Focus 30 zonage servi** | 3/30 (juin) → **29 / 30** | effectif (live) | idem (seul `lile-dorval` manque) | 2 juillet |
+| **Focus 30 lots servis** | **30 / 30** | effectif (live) | idem | 2 juillet |
+| Zonage Salaberry-de-Valleyfield | **645 zones ; 96,3 % de correspondance au règlement officiel ; 0 trou spatial** | effectif | validation geo (recalage/contrôle) | 2 juillet |
+| Grilles de normes — Salaberry | **97,9 % des 15 510 lots** avec normes (hauteur, marges, densité) | effectif (pilote) | pipeline grilles (extraction verbatim) | 2 juillet |
+| Lots → zone — Salaberry | **100 %** des lots assignés à une zone | effectif | jointure code + centroïde | 2 juillet |
+| Dérivation « 4+ logements » | **97,5 %** d'exactitude sur **3171 lots** | effectif | comparaison vs application de référence | 2 juillet |
+| Connecteur MCP claude.ai | OAuth 2.1/PKCE en production, validé e2e ; 4 outils données brutes | effectif | déploiement k8s + tests e2e | 2 juillet |
 | Focus 30 — PV scrapé (recueil brut) | **27 / 30** | effectif | mesure S3 | 2 juillet |
 | Focus 30 — signaux extraits (v2.3) | **25 / 30** | effectif | mesure S3 | 2 juillet |
-| Focus 30 — signaux groundés (cible 100 %) | **56 / 70** | effectif | mesure S3 | 2 juillet |
+| Focus 30 — signaux à citation vérifiable (cible 100 %) | **56 / 70** | effectif | mesure S3 | 2 juillet |
 | Focus 30 — signaux désignant une zone | **14 / 30** | effectif | mesure S3 | 2 juillet |
-| Focus 30 — recall #74 (proxy) | **28 / 47 = 60 %** | proxy | S3 + croisement geo | 2 juillet |
-| Collections lots province | ~1103 → **~1102 / 1106** | effectif (API geo) | idem | **2 juillet** |
+| Focus 30 — rappel signal↔zone (proxy) | **28 / 47 = 60 %** | proxy | S3 + croisement geo | 2 juillet |
+| Collections lots province | ~1103 → **~1102 / 1106** | effectif (API geo) | idem | 2 juillet |
 | Rappel mapper (live) | 52 / 110 = 47,3 % | effectif | `wp3-mapper-recall-2026-06-28.md` | 28 juin |
 | Rappel mapper (fix applicatif) | 63 / 110 = 57,3 % | effectif | idem | 28 juin |
 | Rappel mapper (final immo+geo) | 71 / 120 = 59,2 % | effectif | idem, §6 | 29 juin |
 | Causes de non-match | gap-data 63,8 % · champ-non-lu 19 % · écart-schéma 17,2 % · zéro-tête 0 % | effectif | idem | 28 juin |
-| Vues produit | 2 fonctionnelles / 2 partielles ; 2 livré · 5 partiel · 10 absent (17 features) | effectif | `wp4-produit-coverage.md` | 28 juin |
+| Vues produit | 3 livré · 5 partiel · 9 absent (17 features) | effectif | `wp4-produit-coverage.md` + livraisons du 2 juillet | 2 juillet |
 | Tests UI | 680 (669 pass, 1 fail, 10 todo, 10 skip) | effectif | idem | 28 juin |
 | Jobs geo | populate-geo one-shot + CronJob, run-geo-mapper | effectif | `deploy/k8s/35a/35b/35` | 1er juillet |
 | CronJobs refresh | suspendus (`suspend: true`, FinOps) | effectif | `deploy/k8s/34-refresh-cronjob.yaml` | 1er juillet |
