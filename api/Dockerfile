@@ -82,17 +82,27 @@ RUN npm install --no-save esbuild@0.24.0 \
   "// SECOND, separate build call for packages/immo-mcp: its outbase ('src')" \
   "// is NOT under api/src, so it cannot share the entryPoints array above" \
   "// (outbase/entryNames there assume everything lives under api/src)." \
-  "// packages/immo-mcp has no @radar/* workspace deps of its own, so this" \
-  "// marks EVERY bare specifier external (resolved from node_modules at" \
-  "// runtime, same as the api build does for its own non-@radar/* deps)." \
+  "// UNLIKE the api build, this bundles EVERY dependency INTO the output" \
+  "// (only node: builtins stay external via platform:'node'). Rationale: the" \
+  "// previous external-everything variant crash-looped in prod with" \
+  "// ERR_MODULE_NOT_FOUND @sentropic/mcp-auth — the runtime stage's hoisted" \
+  "// node_modules did not carry immo-mcp's deps. A self-contained bundle" \
+  "// removes the runtime node_modules dependency entirely (and the boot" \
+  "// smoke below fails the IMAGE BUILD, not prod, if resolution regresses)." \
   "await build({" \
   "  entryPoints: ['packages/immo-mcp/src/server-http.ts']," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src'," \
   "  logLevel: 'info'," \
-  "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => ({ path: a.path, external: true })); } }]," \
+  "  banner: { js: 'import { createRequire as __cr } from \"node:module\"; const require = __cr(import.meta.url);' }," \
   "});" > /workspace/esbuild.mjs \
  && node /workspace/esbuild.mjs
+# Fail-fast boot smoke for the immo-mcp bundle: run it with mock env; exit 124
+# (killed by timeout ⇒ the server booted and stayed listening) is SUCCESS, any
+# early exit (e.g. ERR_MODULE_NOT_FOUND at import time) fails the image build.
+RUN IMMO_MCP_OAUTH_ISSUER=https://idp.example IMMO_MCP_OAUTH_RESOURCE=https://immo.example/mcp \
+    IMMO_MCP_HTTP_PORT=18848 IMMO_MCP_DATA_MODE=mock \
+    timeout 5 node packages/immo-mcp/dist/server-http.js; test $? -eq 124
 
 FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production
