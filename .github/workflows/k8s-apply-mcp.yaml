@@ -43,10 +43,19 @@ jobs:
             -f deploy/k8s/41-immo-mcp-ingress.yaml \
             -f deploy/k8s/70-networkpolicy.yaml
 
+      # `kubectl apply` alone does NOT redeploy when only the :latest image
+      # changed (the Deployment spec is unchanged). Force a restart so
+      # dispatching this workflow == deploying the freshly pushed MCP image
+      # (imagePullPolicy: Always re-pulls). RBAC: radar-ci-deployer has patch
+      # on deployments.
+      - name: Restart deployment (pull the new image)
+        run: |
+          kubectl -n "$NAMESPACE" rollout restart deploy/radar-immo-mcp
+
       - name: Wait for rollout
         run: |
           kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s
-          kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/component=immo-mcp -o wide
+          kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/component=mcp -o wide
 
       - name: Smoke check PRM through the pod
         run: |
