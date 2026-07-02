@@ -348,6 +348,10 @@ alimente les vues MapLibre.
 
 ## 2.A — Vue géographique : ville, zones, lots
 
+![Vue géographique — zonage servi : Longueuil, 2085 zones rendues sur la carte + légende des types de signal réglementaire (rezonage, dérogation, PPCMOI, PIIA…).](assets/geo-zones-longueuil.png)
+
+*Vue Géo — Longueuil : 2085 zones de zonage rendues (couche geo servie live), légende par type de signal réglementaire.*
+
 ### Signaux — **fonctionnel**
 
 - carte **MapLibre GL** sur socle `GeoCityMapBase` ;
@@ -360,6 +364,10 @@ alimente les vues MapLibre.
 Limite : la précision lot/zone dépend du mapper signal → zone et de la couverture geo (cf. §1.B.d).
 
 ### Évaluation — **partiel, fonctionnel mais non migré**
+
+![Évaluation — Delson : 200 lots cadastraux MRNF, signal « Rezonage résidentiel » (zone H-609-4, règl. 150-49, Confiance Haute), et grille d'évaluation /100 en affichage HONNÊTE « Données partielles » (axes non substantiés marqués ? / N/A).](assets/uat-delson-carte-eval-200lots.png)
+
+*Vue Évaluation — Delson (200 lots) : lots cadastraux, signal réglementaire relié, et grille /100 avec affichage honnête des axes non encore mesurés (pas de faux score).*
 
 - drilldown ville → **lots cadastraux rendus en SVG**, coloriés par **score de potentiel** ;
 - **plafond de rendu à 200 lots** (`limit: 200` ; zones chargées à `limit: 500`) ;
@@ -383,6 +391,14 @@ Elle s'appuie sur `/api/scrape-status`, la couverture qualité par ville et `/ap
 
 ## 2.B — Signaux : filtrage, citations, affichage
 
+![Signaux — fil de triage (tri par score /10 ou priorité, filtre par statut) + assistant conversationnel ; badge honnête « 6/6 signals (3 réels + 3 exemples) ».](assets/uat-07-signaux-view.png)
+
+*Vue Signaux — fil de triage, tri/filtre, assistant conversationnel. Le compteur distingue honnêtement signaux réels et exemples.*
+
+![Signal — vue détail d'un signal (type, zone, indicateurs, contexte).](assets/uat-08-signal-detail.png)
+
+*Détail d'un signal — type, zone citée, indicateurs et contexte source.*
+
 Les signaux disposent déjà d'une expérience consultable : catégorisation par type, filtre dans la
 vue, citation affichable, chemin vers le document source quand disponible, contextualisation par
 ville. Le point clef est la **traçabilité** ; un signal doit répondre à : quelle ville ? quel
@@ -396,6 +412,10 @@ adressage par contenu) puis **retombe** sur un store de métadonnées — mécan
 la source d'origine est complexe ou indisponible.
 
 ## 2.C — Vue données : consolidation
+
+![Opportunités — entonnoir de dossiers (phases de qualification, score /100 par dossier).](assets/uat-10-opportunites.png)
+
+*Vue Opportunités — entonnoir de dossiers par phase (données de démonstration à ce stade ; la carte lots/opportunités branchée sur l'API réelle reste à finaliser).*
 
 La vue Sources / Données consolide l'état de collecte et de qualité. C'est une réalisation
 importante car elle **évite de vendre une couverture théorique non vérifiée**. Elle a vocation à
