@@ -49,6 +49,8 @@ const VALID_VIEWS = new Set<string>([
   "ontologie",
   "coordination",
   "backlog",
+  // Rapport d'étude (route discrète, hors nav principale)
+  "rapport",
   // WP6 — Kanban WorkPackages (projection 4 niveaux)
   "kanban",
   // G3 — Vue géo intégration
