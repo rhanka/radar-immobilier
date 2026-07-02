@@ -13,6 +13,7 @@ import { fromRemoteJwks } from "@sentropic/oauth-verify";
 import type { AccessTokenClaims, TokenKeySource } from "@sentropic/oauth-verify";
 import { IMMO_SCOPES, type ImmoMcpAuthContext } from "./auth-context.js";
 import { createDataSource, type ImmoDataSource } from "./data-source.js";
+import { createRawDataSource, type RawDataSource } from "./raw-data.js";
 import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
 import { registerTools } from "./tools.js";
 
@@ -31,7 +32,9 @@ import { registerTools } from "./tools.js";
  *   - stdio  → `resolveAuthContext(env)` (claims stubbed from env)
  *   - http   → claims of a validated bearer token (this file's `authContextFromMcp`).
  *
- * Data stays MOCK here (cadrage v0): the real radar API is NOT wired in the remote POC.
+ * v0 domain data stays MOCK here (cadrage v0): `ImmoDataSource`'s http mode is NOT
+ * wired in the remote POC. The RAW-DATA seam (raw-data.ts — zones/lots GeoJSON,
+ * grille & PV PDFs) IS wired to the real radar API when RADAR_API_BASE_URL is set.
  */
 
 const DEFAULT_SUPPORTED_SCOPES = `${IMMO_SCOPES.read} ${IMMO_SCOPES.search} ${IMMO_SCOPES.documentsRead}`;
@@ -113,9 +116,13 @@ export function authContextFromMcp(
   return ctx;
 }
 
-function buildHttpScopedServer(auth: ImmoMcpAuthContext, data: ImmoDataSource): McpServer {
+function buildHttpScopedServer(
+  auth: ImmoMcpAuthContext,
+  data: ImmoDataSource,
+  raw: RawDataSource,
+): McpServer {
   const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
-  registerTools(server, { auth, data });
+  registerTools(server, { auth, data, raw });
   return server;
 }
 
@@ -123,6 +130,12 @@ function buildHttpScopedServer(auth: ImmoMcpAuthContext, data: ImmoDataSource): 
 export interface ImmoHttpDeps {
   /** Override the data source (default = `createDataSource({})` → MockDataSource). */
   data?: ImmoDataSource;
+  /**
+   * Override the raw-data source (default = `createRawDataSource({})` →
+   * MockRawDataSource). `main()` passes the env-derived source so the
+   * deployed pod reaches the radar API when RADAR_API_BASE_URL is set.
+   */
+  raw?: RawDataSource;
   /** Override the token key source (default = remote JWKS off the issuer/jwksUri). */
   keySource?: TokenKeySource;
 }
@@ -140,6 +153,7 @@ interface SessionEntry {
  */
 export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {}): Hono {
   const data = deps.data ?? createDataSource({});
+  const raw = deps.raw ?? createRawDataSource({});
 
   const mcpAuthConfig: McpAuthConfig = {
     resource: config.resource,
@@ -190,7 +204,7 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
       audience: config.resource,
       dataMode: data.mode === "http" ? "real" : "simulation",
     });
-    const server = buildHttpScopedServer(auth, data);
+    const server = buildHttpScopedServer(auth, data, raw);
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       enableJsonResponse: true,
@@ -212,12 +226,16 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
 async function main(): Promise<void> {
   const config = loadHttpConfig(process.env);
-  const app = createImmoHttpApp(config);
+  // v0 domain data stays MOCK in the remote POC (createDataSource({}) default),
+  // but the raw-data seam IS env-wired: with RADAR_API_BASE_URL set (in-cluster:
+  // http://radar-api:3000) the 4 raw tools serve REAL zones/lots/PDF URLs.
+  const raw = createRawDataSource(process.env);
+  const app = createImmoHttpApp(config, { raw });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(
     `[immo-mcp-http] listening port=${config.port} resource=${config.resource} ` +
-      `issuer=${config.issuer} dataMode=${config.dataMode} ` +
+      `issuer=${config.issuer} dataMode=${config.dataMode} rawMode=${raw.mode} ` +
       `requiredScopes=${config.requiredScopes.join(",")}\n`,
   );
 }

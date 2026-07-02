@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { resolveAuthContext } from "./auth-context.js";
 import { createDataSource } from "./data-source.js";
+import { createRawDataSource } from "./raw-data.js";
 import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
 import { registerTools } from "./tools.js";
 
@@ -17,8 +18,9 @@ export { IMMO_MCP_NAME, IMMO_MCP_VERSION };
 export function buildImmoServer(env: NodeJS.ProcessEnv = process.env): McpServer {
   const auth = resolveAuthContext(env); // stub now, OAuth-ready
   const data = createDataSource(env); // mock (default) | http seam
+  const raw = createRawDataSource(env); // mock (default) | radar API (RADAR_API_BASE_URL)
   const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
-  registerTools(server, { auth, data });
+  registerTools(server, { auth, data, raw });
   return server;
 }
 
