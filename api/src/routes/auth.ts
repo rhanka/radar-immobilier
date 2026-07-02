@@ -489,7 +489,23 @@ export function authRoute(
   return app;
 }
 
-/** Path prefixes that stay public even when auth is enabled. */
+/**
+ * Path prefixes that stay public even when auth is enabled.
+ *
+ * The two data prefixes serve PUBLIC data by construction and are consumed
+ * server-side by the immo-mcp pod (no browser session to present):
+ *  - `/api/geo/collections` — OGC passthrough of public zonage/lots layers
+ *    (collections qc-zonage-<ville> et qc-lots-<ville> only, anti-SSRF;
+ *    « Loi 25 : zonage/lots publics,
+ *    aucune PII propriétaire » — see routes/geo-collections.ts). Session-gating
+ *    it would 401 the in-cluster immo-mcp raw tools (get_zones_geojson/
+ *    get_lots_geojson) which fetch it with a plain server-side fetch.
+ *  - `/api/documents/raw` — archived PUBLIC municipal documents (PV) from the
+ *    scrape CAS; refs are bounded to `raw/` keys by normalizeRawRef (no meta
+ *    sidecars, no traversal — see services/sources/document-resolver.ts).
+ *    Public so the URL handed out by immo-mcp `get_pv_pdf` is fetchable by the
+ *    MCP client, mirroring the geo-owned S3 archive direction.
+ */
 const PUBLIC_PREFIXES = [
   "/health",
   "/api/v1/auth/login",
@@ -497,6 +513,8 @@ const PUBLIC_PREFIXES = [
   "/api/v1/auth/oauth/callback",
   "/api/v1/auth/logout",
   "/api/v1/auth/me",
+  "/api/geo/collections",
+  "/api/documents/raw",
 ];
 
 function isPublicPath(path: string): boolean {

@@ -193,3 +193,37 @@ spec:
       ports:
         - protocol: TCP
           port: 8848
+---
+# ADDITIVE: let the immo MCP pod reach the api on :3000 (mirror of
+# `allow-ui-to-api` above, scoped to the mcp pod).
+#
+# The immo-mcp raw-data tools (get_zones_geojson / get_lots_geojson /
+# get_grille_pdf / get_pv_pdf) fetch the radar api server-side at
+# RADAR_API_BASE_URL=http://radar-api:3000 (40-immo-mcp-http-deploy.yaml).
+# The operator baseline only opens Traefik (+ kube-system) -> api:3000; under
+# the namespace default-deny, the SAME-NAMESPACE mcp -> api hop is DROPPED, so
+# every raw-tool call would hang before reaching the api without this policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-immo-mcp-to-api
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: api
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: api
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: mcp
+      ports:
+        - protocol: TCP
+          port: 3000

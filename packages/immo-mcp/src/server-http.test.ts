@@ -140,6 +140,48 @@ describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
     const payload = JSON.parse(text) as { count: number; lots: { city: string }[] };
     expect(payload.count).toBeGreaterThan(0);
     expect(payload.lots[0]?.city).toBe("longueuil");
+
+    // The raw-data tools are registered on the SAME shared factory: tools/list
+    // over HTTP must expose them, and a bounded GeoJSON call must round-trip.
+    const listRes = await postMcp(
+      { jsonrpc: "2.0", id: 3, method: "tools/list" },
+      { token, sessionId },
+    );
+    expect(listRes.status).toBe(200);
+    const listBody = (await listRes.json()) as {
+      result?: { tools?: { name: string }[] };
+    };
+    const names = (listBody.result?.tools ?? []).map((t) => t.name);
+    for (const expected of [
+      "get_zones_geojson",
+      "get_lots_geojson",
+      "get_grille_pdf",
+      "get_pv_pdf",
+    ]) {
+      expect(names).toContain(expected);
+    }
+
+    const lotsRes = await postMcp(
+      {
+        jsonrpc: "2.0",
+        id: 4,
+        method: "tools/call",
+        params: { name: "get_lots_geojson", arguments: { city: "longueuil", limit: 2 } },
+      },
+      { token, sessionId },
+    );
+    expect(lotsRes.status).toBe(200);
+    const lotsBody = (await lotsRes.json()) as {
+      result?: { content?: { type: string; text?: string }[] };
+    };
+    const lotsPayload = JSON.parse(lotsBody.result?.content?.[0]?.text ?? "{}") as {
+      featureCollection: { type: string; features: unknown[] };
+      numberReturned: number;
+      truncated: boolean;
+    };
+    expect(lotsPayload.featureCollection.type).toBe("FeatureCollection");
+    expect(lotsPayload.numberReturned).toBe(2);
+    expect(lotsPayload.truncated).toBe(true); // 3 mock lots > limit 2 — bound reported
   });
 
   it("(c) rejects a token with the wrong audience (401 invalid_token)", async () => {
