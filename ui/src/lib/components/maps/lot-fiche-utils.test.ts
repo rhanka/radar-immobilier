@@ -9,6 +9,7 @@
 import { describe, it, expect } from "vitest";
 import {
   centroid,
+  estimatedFacadeM,
   googleMapsUrl,
   googleStreetViewUrl,
   scoreTone,
@@ -223,5 +224,70 @@ describe("LotProperties.potentialScore (type guard)", () => {
 
   it("scoreLabel(5) → 'Moyen'", () => {
     expect(scoreLabel(5)).toBe("Moyen");
+  });
+});
+
+// ── estimatedFacadeM ───────────────────────────────────────────────────────────
+
+describe("estimatedFacadeM", () => {
+  const LAT = 45.4;
+  const M_PER_DEG_LAT = 111320;
+  const M_PER_DEG_LON = 111320 * Math.cos((LAT * Math.PI) / 180);
+
+  /** Rectangle w×h mètres (axes lon/lat), coin SW à (-73.5, LAT). */
+  function rectRing(wM: number, hM: number): number[][] {
+    const dLon = wM / M_PER_DEG_LON;
+    const dLat = hM / M_PER_DEG_LAT;
+    return [
+      [-73.5, LAT],
+      [-73.5 + dLon, LAT],
+      [-73.5 + dLon, LAT + dLat],
+      [-73.5, LAT + dLat],
+      [-73.5, LAT],
+    ];
+  }
+
+  it("façade = petit côté du rectangle englobant orienté (20 m × 40 m → ≈20 m)", () => {
+    const facade = estimatedFacadeM(makePolygonFeature("1", rectRing(20, 40)));
+    expect(facade).not.toBeNull();
+    expect(facade!).toBeGreaterThan(19);
+    expect(facade!).toBeLessThan(21);
+  });
+
+  it("insensible à l'orientation (rectangle tourné de 30°)", () => {
+    // Rectangle 15 m × 60 m tourné de 30° autour de son coin SW.
+    const wM = 15, hM = 60, theta = Math.PI / 6;
+    const cos = Math.cos(theta), sin = Math.sin(theta);
+    const cornersM: Array<[number, number]> = [
+      [0, 0],
+      [wM * cos, wM * sin],
+      [wM * cos - hM * sin, wM * sin + hM * cos],
+      [-hM * sin, hM * cos],
+      [0, 0],
+    ];
+    const ring = cornersM.map(([x, y]) => [
+      -73.5 + x / M_PER_DEG_LON,
+      LAT + y / M_PER_DEG_LAT,
+    ]);
+    const facade = estimatedFacadeM(makePolygonFeature("2", ring));
+    expect(facade).not.toBeNull();
+    expect(facade!).toBeGreaterThan(14);
+    expect(facade!).toBeLessThan(16);
+  });
+
+  it("retourne null pour géométrie absente ou dégénérée", () => {
+    const noGeom: LotFeature = {
+      type: "Feature",
+      geometry: null,
+      properties: { noLot: "3" },
+    };
+    expect(estimatedFacadeM(noGeom)).toBeNull();
+    // Ligne (aire nulle)
+    const line = makePolygonFeature("4", [
+      [-73.5, LAT],
+      [-73.499, LAT],
+      [-73.5, LAT],
+    ]);
+    expect(estimatedFacadeM(line)).toBeNull();
   });
 });

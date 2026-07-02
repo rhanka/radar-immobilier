@@ -73,7 +73,20 @@ const MOCK_OGC_LOTS_OK = {
         zone: "H-431",
         tod: true,
         multifamilial_4plus: true,
+        priorite: true,
         superficie_m2_calculee: 712.9,
+        // Champs publics du rôle, noms BRUTS carte de référence CS-L6.
+        adresse: "12 rue Principale",
+        facade_m: 18.2,
+        profondeur_m: 39.1,
+        categorie: "Résidentiel",
+        cubf: "1000",
+        val_totale: 385000,
+        val_terrain: 120000,
+        val_batiment: 265000,
+        nb_logements_role: 4,
+        annee_construction: "1987",
+        zone_desc: "Min 16 log \u00b7 6 \u00e9tages \u00b7 Mixte",
       },
     },
   ],
@@ -149,8 +162,75 @@ describe("fetchLots", () => {
       zoneCode: "H-431",
       tod: true,
       multifamilial4plus: true,
+      priorite: true,
       superficieM2: 712.9,
+      adresse: "12 rue Principale",
+      facadeM: 18.2,
+      profondeurM: 39.1,
+      zoneDescription: "Min 16 log \u00b7 6 \u00e9tages \u00b7 Mixte",
+      usageCode: "1000",
+      valuation: {
+        usageCode: "1000",
+        categorie: "Résidentiel",
+        valeurTotale: 385000,
+        valeurTerrain: 120000,
+        valeurBatiment: 265000,
+        nbLogements: 4,
+        anneeConstruction: 1987,
+      },
     });
+  });
+
+  it("traite les placeholders de zone (N/D) comme absence honnête", async () => {
+    const body = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { NO_LOT: "2 181 127", zone: "N/D" },
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("delson", { baseUrl: "" });
+    expect(res.featureCollection.features[0].properties.zoneCode).toBeUndefined();
+  });
+
+  it("normalise les normes verbatim (objet dédié ou champs à plat)", async () => {
+    const body = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: {
+            NO_LOT: "1",
+            normes: { hauteur: "9,0 m", marge_avant: "6 m", densite: 35 },
+          },
+        },
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { NO_LOT: "2", hauteur_max: "2 étages" },
+        },
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { NO_LOT: "3" },
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("salaberry-de-valleyfield", { baseUrl: "" });
+    const [a, b, c] = res.featureCollection.features.map((f) => f.properties);
+    expect(a.normes).toMatchObject({ hauteur: "9,0 m", margeAvant: "6 m", densite: "35" });
+    expect(b.normes).toMatchObject({ hauteur: "2 étages" });
+    expect(c.normes).toBeUndefined();
   });
 
   it("still accepts legacy LotsResponse bodies used by older mocks", async () => {
@@ -206,15 +286,27 @@ describe("fetchLots", () => {
     const res = await fetchLots("saint-eustache", { baseUrl: "" });
     for (const f of res.featureCollection.features) {
       const keys = Object.keys(f.properties);
-      // Public display fields only — no owner/address/name/raw geo ids.
+      // Public display fields only — no owner name, no raw geo ids.
+      // `adresse` = adresse civique du LOT (donnée publique du rôle,
+      // identifie la propriété — jamais une personne).
       for (const k of keys) {
         expect([
           "noLot",
           "citySlug",
           "zoneCode",
+          "zoneDescription",
           "tod",
           "multifamilial4plus",
+          "priorite",
+          "adresse",
+          "facadeM",
+          "profondeurM",
           "superficieM2",
+          "usageCode",
+          "valuation",
+          "normes",
+          "zone",
+          "grillePdfUrl",
           "potentialScore",
           "potentialScoreStatus",
           "potentialScoreSource",
