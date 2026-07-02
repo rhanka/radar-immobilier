@@ -98,7 +98,7 @@ que rattaché à une **citation vérifiable**.
 | **PV scrapés** — recueil brut (~3272 documents) | **27 / 30** | **~1007 / 1104** | **[effectif]** — préalable ; 3 focus (brossard, kirkland, lile-dorval) sans brut |
 | **Signaux extraits** (v2.3) | **25 / 30** | **978 / 1104** | **[effectif]** — le graphe = *méthode d'extraction*, pas la finalité |
 | **Signaux à citation vérifiable** | **56 / 70** — cible **100 %** | — | **[effectif]** — **14 signaux à traiter** (purge/re-ground, cf. §1.2) |
-| **Zonage servi** (geo) | **29 / 30** | **~485 / 1106** | **[effectif — live 2026-07-02]** |
+| **Zonage servi** (geo) | **29 / 30** | **568 / 1106** | **[effectif — live 2026-07-02]** |
 | **Grilles de zonage** (normes verbatim) | pilote validé — Salaberry : **97,9 % des 15 510 lots** avec normes | alignement 4 villes de référence en cours | **[effectif — pilote]** |
 | **Lots servis** (cadastre MRNF) | **30 / 30** | **~1102 / 1106** | **[effectif — live 2026-07-02]** |
 | Données nominatives (propriétaires) | — | — | **[en attente]** — acquisition cadrée, non lancée |
@@ -205,7 +205,7 @@ Après acquisition (quelle que soit la méthode) : mapping standard côté geo �
 
 **État mesuré [effectif — live 2026-07-02]** :
 
-- **~485 / 1106** villes servies en zonage ; focus 30 : **29 / 30** (seul `lile-dorval`,
+- **568 / 1106** villes servies en zonage ; focus 30 : **29 / 30** (seul `lile-dorval`,
   micro-île, manque) ;
 - **exemple validé — Salaberry-de-Valleyfield** : **645 zones** servies, **96,3 % de
   correspondance** avec le règlement officiel, **0 trou spatial** ;
@@ -687,7 +687,7 @@ reproductibles et limites documentées.
 | Focus 30 v2.2 résiduel | 1 publié (saint-césaire), 29 bloquées | effectif | `2.3-finition-progress.md` | 28 juin |
 | Grounding fabriqué (v2.2) | ex. 12/12 identifiants de document introuvables sur une ville | effectif | `2.3-finition-progress.md` | 28 juin |
 | Collections zonage | ~506 `qc-zonage-*` (dont ~200 fragments ArcGIS) | effectif | `zones-geo-30-investigation.md`, `wp3-mapper-recall-2026-06-28.md` | 28–29 juin |
-| Couverture zonage province | ~234/1104 (juin) → **~485 / 1106** | effectif (live) | mesure directe API geo `/collections` | 2 juillet |
+| Couverture zonage province | ~234/1104 (juin) → **568 / 1106** | effectif (live) | mesure directe API geo `/collections` | 2 juillet |
 | **Focus 30 zonage servi** | 3/30 (juin) → **29 / 30** | effectif (live) | idem (seul `lile-dorval` manque) | 2 juillet |
 | **Focus 30 lots servis** | **30 / 30** | effectif (live) | idem | 2 juillet |
 | Zonage Salaberry-de-Valleyfield | **645 zones ; 96,3 % de correspondance au règlement officiel ; 0 trou spatial** | effectif | validation geo (recalage/contrôle) | 2 juillet |
