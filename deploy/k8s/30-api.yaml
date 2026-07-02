@@ -140,20 +140,31 @@ spec:
             # out-of-band in the namespace.
             - name: SCW_TEM_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-tem-credentials, key: SCW_TEM_SECRET_KEY, optional: true } }
+          # startupProbe dédié : depuis que radar-api:latest embarque aussi le
+          # bundle immo-mcp, le boot est plus lent — la liveness tuait le pod
+          # pendant le démarrage (exit 137 en boucle, constaté en prod le
+          # 2026-07-02, diagnostic poc-k8s). La startupProbe couvre jusqu'à
+          # 30×5s = 150s de démarrage ; la liveness ne s'applique qu'après.
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 30
           readinessProbe:
             httpGet: { path: /health, port: http }
-            initialDelaySeconds: 10
             periodSeconds: 10
-            timeoutSeconds: 3
+            timeoutSeconds: 5
             failureThreshold: 6
           livenessProbe:
             httpGet: { path: /health, port: http }
-            initialDelaySeconds: 30
             periodSeconds: 20
-            timeoutSeconds: 3
+            timeoutSeconds: 5
+            failureThreshold: 4
           resources:
-            requests: { cpu: 75m, memory: 160Mi }
-            limits: { cpu: 300m, memory: 384Mi }
+            requests: { cpu: 100m, memory: 256Mi }
+            # 384Mi étranglait l'app depuis l'alourdissement de l'image (quota
+            # namespace élargi par poc-k8s le 2026-07-02 pour permettre ceci).
+            limits: { cpu: 500m, memory: 768Mi }
 ---
 apiVersion: v1
 kind: Service
