@@ -33,6 +33,8 @@
   import {
     centroid,
     estimatedFacadeM,
+    formatArea,
+    formatYesNo,
     googleMapsUrl,
     googleStreetViewUrl,
     scoreTone,
@@ -148,11 +150,7 @@
     }
   }
 
-  function formatArea(value: number | null | undefined): string {
-    if (value === null || value === undefined) return "—";
-    return `${Math.round(value).toLocaleString("fr-CA")} m²`;
-  }
-
+  // formatArea / formatYesNo : partagés via lot-fiche-utils (carte lot Signaux).
   function formatMoney(value: number | null | undefined): string {
     if (value === null || value === undefined) return "—";
     return new Intl.NumberFormat("fr-CA", {
@@ -165,11 +163,6 @@
   function formatMeters(value: number | null | undefined): string {
     if (value === null || value === undefined) return "—";
     return `${value.toLocaleString("fr-CA", { maximumFractionDigits: 1 })} m`;
-  }
-
-  function formatYesNo(value: boolean | undefined): string {
-    if (value === undefined) return "—";
-    return value ? "Oui" : "Non";
   }
 
   async function loadProspectState(noLotValue: string, citySlugValue: string): Promise<void> {
