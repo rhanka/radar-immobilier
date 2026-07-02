@@ -25,6 +25,10 @@ COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring
 COPY packages/radar-sources packages/radar-sources
 COPY ui ui
+# La vue #/rapport (ui/src/lib/components/rapport/rapport-content.ts) importe
+# le rapport d'étude par `?raw` depuis docs/ — sans cette copie, `vite build`
+# échoue en image (« Could not resolve …/report.md?raw »).
+COPY docs/spec/reports/study-2026-07 docs/spec/reports/study-2026-07
 RUN npm run build --workspace=ui
 
 # Unprivileged nginx (listens on 8080, matches deploy/k8s/50-ui.yaml). The
