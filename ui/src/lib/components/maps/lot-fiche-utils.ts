@@ -47,6 +47,108 @@ export function googleStreetViewUrl(lat: number, lon: number): string {
   return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat.toFixed(6)},${lon.toFixed(6)}`;
 }
 
+// ── Façade estimée ─────────────────────────────────────────────────────────────
+
+/**
+ * Façade estimée du lot en mètres, calculée depuis la géométrie publique.
+ *
+ * ## Méthode (documentée — estimation géométrique, pas une mesure d'arpenteur)
+ * 1. L'anneau extérieur du polygone est projeté en mètres par approximation
+ *    équirectangulaire locale (1° lat ≈ 111 320 m ; 1° lon ≈ 111 320 × cos(lat)).
+ *    Erreur négligeable à l'échelle d'un lot (< 0,1 %).
+ * 2. Enveloppe convexe (chaîne monotone d'Andrew).
+ * 3. Rectangle englobant ORIENTÉ minimal (rotating calipers : pour chaque arête
+ *    de l'enveloppe, on mesure le rectangle aligné sur cette arête et on garde
+ *    celui d'aire minimale).
+ * 4. La façade = le PETIT côté de ce rectangle : un lot résidentiel typique
+ *    présente sa face étroite sur rue.
+ *
+ * Fiabilité : bonne pour les lots quadrilatéraux réguliers (l'immense
+ * majorité) ; indicative pour les formes en L ou en drapeau. Quand la source
+ * expose une façade MESURÉE (`facadeM`), celle-ci doit être préférée.
+ *
+ * Retourne null si la géométrie est absente, dégénérée (< 3 points distincts)
+ * ou d'aire nulle — aucune invention.
+ */
+export function estimatedFacadeM(feature: LotFeature): number | null {
+  const geom = feature.geometry;
+  if (!geom || geom.type !== "Polygon") return null;
+  const ring = (geom.coordinates as number[][][])[0];
+  if (!ring || ring.length < 3) return null;
+
+  // 1. Projection locale en mètres.
+  const lat0 = ring.reduce((s, p) => s + p[1], 0) / ring.length;
+  const mPerDegLat = 111320;
+  const mPerDegLon = 111320 * Math.cos((lat0 * Math.PI) / 180);
+  const pts: Array<[number, number]> = ring.map((p) => [
+    p[0] * mPerDegLon,
+    p[1] * mPerDegLat,
+  ]);
+
+  // 2. Enveloppe convexe.
+  const hull = convexHull(pts);
+  if (hull.length < 3) return null;
+
+  // 3. Rectangle orienté minimal (rotating calipers sur les arêtes du hull).
+  let best: { area: number; w: number; h: number } | null = null;
+  for (let i = 0; i < hull.length; i++) {
+    const [x1, y1] = hull[i];
+    const [x2, y2] = hull[(i + 1) % hull.length];
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    if (len === 0) continue;
+    const ux = dx / len;
+    const uy = dy / len;
+    let minU = Infinity, maxU = -Infinity, minV = Infinity, maxV = -Infinity;
+    for (const [x, y] of hull) {
+      const u = x * ux + y * uy;
+      const v = -x * uy + y * ux;
+      if (u < minU) minU = u;
+      if (u > maxU) maxU = u;
+      if (v < minV) minV = v;
+      if (v > maxV) maxV = v;
+    }
+    const w = maxU - minU;
+    const h = maxV - minV;
+    const area = w * h;
+    if (best === null || area < best.area) best = { area, w, h };
+  }
+  if (!best || best.area <= 0) return null;
+
+  // 4. Façade = petit côté du rectangle minimal.
+  const facade = Math.min(best.w, best.h);
+  return Math.round(facade * 10) / 10;
+}
+
+/** Enveloppe convexe (chaîne monotone d'Andrew), points (x,y) en mètres. */
+function convexHull(points: Array<[number, number]>): Array<[number, number]> {
+  const unique = Array.from(
+    new Map(points.map((p) => [`${p[0]},${p[1]}`, p])).values(),
+  ).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (unique.length < 3) return unique;
+  const cross = (o: [number, number], a: [number, number], b: [number, number]) =>
+    (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower: Array<[number, number]> = [];
+  for (const p of unique) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+      lower.pop();
+    }
+    lower.push(p);
+  }
+  const upper: Array<[number, number]> = [];
+  for (let i = unique.length - 1; i >= 0; i--) {
+    const p = unique[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+      upper.pop();
+    }
+    upper.push(p);
+  }
+  lower.pop();
+  upper.pop();
+  return lower.concat(upper);
+}
+
 // ── Score de potentiel ─────────────────────────────────────────────────────────
 
 /**
