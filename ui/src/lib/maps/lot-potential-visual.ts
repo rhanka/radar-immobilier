@@ -7,7 +7,7 @@ export interface LotPotentialScoreResolution {
   reason: string;
 }
 
-type ZoneKind = "H" | "C" | "U" | "I" | "P" | "A" | "CONS" | "REC" | "MIXTE" | "AUTRE";
+export type ZoneKind = "H" | "C" | "U" | "I" | "P" | "A" | "CONS" | "REC" | "MIXTE" | "AUTRE";
 
 const RESIDENTIAL_KINDS = new Set<ZoneKind>(["H", "MIXTE"]);
 const RECONVERTIBLE_KINDS = new Set<ZoneKind>(["C", "U", "I"]);
@@ -102,7 +102,11 @@ function readZoneObject(value: unknown): { kind: ZoneKind; densiteLogHa: number 
   };
 }
 
-function kindFromZoneCode(zoneCode: string | null): ZoneKind | null {
+/**
+ * Kind canonique dérivé du préfixe d'un code de zone (H-, C-, I-, M-…).
+ * Exporté : sert aussi à la teinte des aplats de zone (zone-kind-style).
+ */
+export function kindFromZoneCode(zoneCode: string | null): ZoneKind | null {
   if (!zoneCode) return null;
   const code = zoneCode.trim();
   if (!code || code === "N/D") return null;

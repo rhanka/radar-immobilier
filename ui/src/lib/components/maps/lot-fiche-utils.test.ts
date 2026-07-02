@@ -10,8 +10,12 @@ import { describe, it, expect } from "vitest";
 import {
   centroid,
   estimatedFacadeM,
+  evaluatedLotScore,
+  formatArea,
+  formatYesNo,
   googleMapsUrl,
   googleStreetViewUrl,
+  lotZoneCode,
   scoreTone,
   scoreLabel,
 } from "./lot-fiche-utils.js";
@@ -289,5 +293,66 @@ describe("estimatedFacadeM", () => {
       [-73.5, LAT],
     ]);
     expect(estimatedFacadeM(line)).toBeNull();
+  });
+});
+
+// ── Champs enrichis + formatage partagé (carte lot Signaux, PR #314/#315) ─────
+
+describe("evaluatedLotScore — jamais un 0 placeholder présenté comme mesuré", () => {
+  it("score évalué (scored/fallback) → retourné tel quel", () => {
+    expect(evaluatedLotScore({ potentialScore: 7.5, potentialScoreStatus: "scored" })).toBe(7.5);
+    expect(evaluatedLotScore({ potentialScore: 4, potentialScoreStatus: "fallback" })).toBe(4);
+    expect(evaluatedLotScore({ potentialScore: 0, potentialScoreStatus: "scored" })).toBe(0);
+  });
+
+  it("status unavailable → null (l'UI affiche « non évalué », pas « 0.0/10 »)", () => {
+    expect(evaluatedLotScore({ potentialScore: 0, potentialScoreStatus: "unavailable" })).toBeNull();
+  });
+
+  it("fallback à 0 (dérivation sans évidence positive) → null, pas un faux « 0.0/10 »", () => {
+    expect(evaluatedLotScore({ potentialScore: 0, potentialScoreStatus: "fallback" })).toBeNull();
+  });
+
+  it("score numérique legacy sans statut → retourné (compat sources historiques)", () => {
+    expect(evaluatedLotScore({ potentialScore: 6 })).toBe(6);
+  });
+
+  it("score absent/non-numérique → null", () => {
+    expect(evaluatedLotScore({})).toBeNull();
+    expect(evaluatedLotScore({ potentialScore: null })).toBeNull();
+  });
+});
+
+describe("lotZoneCode — zoneCode plat prioritaire, sinon zone jointe", () => {
+  it("préfère le zoneCode plat de la collection", () => {
+    expect(
+      lotZoneCode({ zoneCode: "H-431", zone: { kind: "H", usages: [], densiteLogHa: null, code: "C-1" } }),
+    ).toBe("H-431");
+  });
+
+  it("retombe sur le code de l'objet zone joint", () => {
+    expect(
+      lotZoneCode({ zone: { kind: "H", usages: [], densiteLogHa: null, code: "C-403" } }),
+    ).toBe("C-403");
+  });
+
+  it("aucun code exposé → null (aucune invention)", () => {
+    expect(lotZoneCode({})).toBeNull();
+    expect(lotZoneCode({ zone: { kind: "H", usages: [], densiteLogHa: null } })).toBeNull();
+  });
+});
+
+describe("formatArea / formatYesNo — copy client neutre, « — » discret", () => {
+  it("formatArea arrondit en m² et rend « — » quand absent", () => {
+    expect(formatArea(850.4)).toBe("850 m²");
+    expect(formatArea(null)).toBe("—");
+    expect(formatArea(undefined)).toBe("—");
+  });
+
+  it("formatYesNo rend Oui/Non et « — » quand absent", () => {
+    expect(formatYesNo(true)).toBe("Oui");
+    expect(formatYesNo(false)).toBe("Non");
+    expect(formatYesNo(undefined)).toBe("—");
+    expect(formatYesNo(null)).toBe("—");
   });
 });
