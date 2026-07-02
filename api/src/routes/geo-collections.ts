@@ -21,6 +21,43 @@
  *
  * Erreurs réseau / geo indisponible => 502 honnête (jamais de crash).
  *
+ * ## Contrat d'enrichissement des items LOTS (P0 parité carte Steve)
+ *
+ * Pour les collections `qc-lots-<city>`, chaque feature.properties est enrichie
+ * server-side par jointure avec la collection zonage de la même ville
+ * (`qc-zonage-<city>`, store local puis proxy, index caché 5 min). Les
+ * propriétés BRUTES de la source sont toujours conservées ; les champs suivants
+ * sont AJOUTÉS uniquement quand ils sont dérivables (anti-invention — jamais de
+ * valeur fabriquée, champ ABSENT sinon) :
+ *
+ *   - `zone`        — { code: string, kind: ZoneKind canonique ("H"|"MIXTE"|"C"|
+ *                     "I"|"P"|"A"|"CONS"|"REC"|"U"|"AUTRE"), densiteLogHa:
+ *                     number|null (RÉELLE, null si la source zonage ne la porte
+ *                     pas), usages: string[] (RÉELS, [] sinon), grillePdfUrl:
+ *                     string|null }. Présent si et seulement si la zone est jointe.
+ *   - `zoneCode`    — code de zone affiché de la zone jointe (ex. "H-241").
+ *   - `zoneJoin`    — provenance de la jointure : "code" (code de zone explicite
+ *                     porté par le lot) | "centroid" (centroïde du lot dans le
+ *                     polygone de zone). Présent si zone jointe.
+ *   - `multifamilial4plus` — boolean, dérivé de la zone jointe
+ *                     (scoring/zone-allows-4plus.ts : densité réelle > 20 log/ha
+ *                     ou usages multi → grille ; sinon heuristique par kind,
+ *                     MIXTE → true). Présent si zone jointe.
+ *   - `multifamilial4plusSource` — "grille" | "heuristique" (source honnête de
+ *                     la dérivation). Présent si `multifamilial4plus` présent.
+ *   - `tod`         — boolean, UNIQUEMENT si la source lots porte déjà la donnée
+ *                     (tod/inTod/in_tod). Jamais fabriqué : les collections live
+ *                     n'ont pas de périmètre TOD aujourd'hui → champ absent.
+ *   - `priorite`    — boolean = multifamilial4plus ∧ tod. Présent UNIQUEMENT si
+ *                     les deux existent.
+ *   - `superficieM2`— m² : valeur de la source si présente, sinon calculée depuis
+ *                     la géométrie publique (services/geo/superficie.ts).
+ *
+ * Zonage de la ville indisponible (404/erreur) → items lots servis SANS champs
+ * zone/flags (jamais d'échec de la requête lots pour autant).
+ * L'UI consomme ces champs tels quels via LotProperties
+ * (ui/src/lib/maps/lots-client.ts) — ne pas renommer sans synchroniser.
+ *
  * Loi 25 : zonage/lots publics, aucune PII propriétaire.
  */
 
@@ -32,6 +69,12 @@ import {
   type GeoFeatureCollection,
 } from "../services/geo/geo-features.js";
 import { DEFAULT_OGC_BASE_URL } from "../services/geo/ogc-pull.js";
+import {
+  buildZoneIndex,
+  enrichLotFeatures,
+  type EnrichFeature,
+  type ZoneIndex,
+} from "../services/geo/lot-zone-enrichment.js";
 
 /** Collection OGC parsée : nature (zonage|lots) + ville. */
 interface ParsedCollection {
@@ -107,10 +150,85 @@ function applyLimit(fc: GeoFeatureCollection, rawLimit: string | undefined): Geo
   return { type: "FeatureCollection", features: fc.features.slice(0, limit) };
 }
 
+/** TTL du cache d'index zonage par ville (jointure lots↔zones). */
+const ZONE_INDEX_TTL_MS = 5 * 60_000;
+/** Borne du cache d'index zonage (villes). Au-delà : purge complète (simple). */
+const ZONE_INDEX_CACHE_MAX = 32;
+
 export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
   const app = new Hono();
   const localResolver = deps.localResolver ?? makeDbLocalResolver(deps.db);
   const fetchImpl = deps.fetchImpl ?? fetch;
+
+  const resolveBase = (): string =>
+    (
+      deps.baseUrl ??
+      process.env["GEO_OGC_BASE_URL"] ??
+      DEFAULT_OGC_BASE_URL
+    ).replace(/\/$/, "");
+
+  // ── Index zonage par ville (cache TTL, promesse partagée anti-doublon) ─────
+  const zoneIndexCache = new Map<
+    string,
+    { expiresAt: number; value: Promise<ZoneIndex | null> }
+  >();
+
+  async function loadZoneIndex(citySlug: string): Promise<ZoneIndex | null> {
+    const collectionId = `qc-zonage-${citySlug}`;
+    // 1. Store local (même priorité que la route elle-même)
+    try {
+      const local = await localResolver({
+        collectionId,
+        kind: "zonage",
+        citySlug,
+      });
+      if (local && local.features.length > 0) {
+        return buildZoneIndex({ features: local.features as EnrichFeature[] });
+      }
+    } catch {
+      // PG indisponible → on tente le proxy.
+    }
+    // 2. Proxy vers l'API geo (zonage complet : ~100-300 zones par ville)
+    const url =
+      `${resolveBase()}/collections/${encodeURIComponent(collectionId)}` +
+      `/items?limit=10000&f=json`;
+    const res = await fetchImpl(url);
+    if (!res.ok) return null;
+    const body = (await res.json()) as { features?: unknown };
+    if (!body || !Array.isArray(body.features)) return null;
+    return buildZoneIndex({ features: body.features as EnrichFeature[] });
+  }
+
+  function getZoneIndex(citySlug: string): Promise<ZoneIndex | null> {
+    const now = Date.now();
+    const cached = zoneIndexCache.get(citySlug);
+    if (cached && cached.expiresAt > now) return cached.value;
+    if (zoneIndexCache.size >= ZONE_INDEX_CACHE_MAX) zoneIndexCache.clear();
+    const value = loadZoneIndex(citySlug).catch(() => null);
+    zoneIndexCache.set(citySlug, { expiresAt: now + ZONE_INDEX_TTL_MS, value });
+    return value;
+  }
+
+  /**
+   * Enrichit les features lots avec la zone jointe + flags dérivés.
+   * Ne jette JAMAIS : en cas d'erreur, les features brutes sont servies.
+   */
+  async function enrichIfLots<T extends { features: unknown }>(
+    parsed: ParsedCollection,
+    fc: T,
+  ): Promise<T> {
+    if (parsed.kind !== "lots" || !Array.isArray(fc.features)) return fc;
+    try {
+      const index = await getZoneIndex(parsed.citySlug);
+      const { features } = enrichLotFeatures(
+        fc.features as EnrichFeature[],
+        index,
+      );
+      return { ...fc, features };
+    } catch {
+      return fc; // Enrichissement en échec → passthrough brut (jamais de 5xx).
+    }
+  }
 
   app.get("/api/geo/collections/:id/items", async (c) => {
     const id = c.req.param("id");
@@ -127,9 +245,12 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
       const local = await localResolver(parsed);
       if (local && local.features.length > 0) {
         const limited = applyLimit(local, c.req.query("limit"));
+        const enriched = await enrichIfLots(parsed, {
+          features: limited.features,
+        });
         return c.json({
           type: "FeatureCollection",
-          features: limited.features,
+          features: enriched.features,
           numberMatched: local.features.length,
           numberReturned: limited.features.length,
         });
@@ -141,11 +262,7 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
     }
 
     // ── 2. Fallback proxy server-side vers l'API geo OGC ───────────────────────
-    const base = (
-      deps.baseUrl ??
-      process.env["GEO_OGC_BASE_URL"] ??
-      DEFAULT_OGC_BASE_URL
-    ).replace(/\/$/, "");
+    const base = resolveBase();
     const qs = buildPassthroughQuery(c);
     const url = `${base}/collections/${encodeURIComponent(id)}/items?${qs}`;
 
@@ -185,8 +302,10 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
       );
     }
 
-    // FeatureCollection OGC renvoyée telle quelle.
-    return c.json(body as Record<string, unknown>);
+    // FeatureCollection OGC : lots enrichis (zone + flags), zonage tel quel.
+    const fc = body as Record<string, unknown> & { features: unknown };
+    const enriched = await enrichIfLots(parsed, fc);
+    return c.json(enriched);
   });
 
   return app;

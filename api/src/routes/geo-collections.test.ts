@@ -203,6 +203,230 @@ describe("store local indisponible", () => {
     });
     const res = await app.request("/api/geo/collections/qc-lots-delson/items");
     expect(res.status).toBe(200);
-    expect(calls).toHaveLength(1);
+    // 2 fetchs : la collection lots + le zonage pour l'enrichissement.
+    expect(calls.some((u) => u.includes("/collections/qc-lots-delson/items"))).toBe(true);
+  });
+});
+
+// ─── Enrichissement des lots (zone + flags dérivés) ──────────────────────────
+
+/** Carré [minX,minY]-[maxX,maxY] en Polygon GeoJSON. */
+function square(minX: number, minY: number, maxX: number, maxY: number) {
+  return {
+    type: "Polygon",
+    coordinates: [
+      [
+        [minX, minY],
+        [maxX, minY],
+        [maxX, maxY],
+        [minX, maxY],
+        [minX, minY],
+      ],
+    ],
+  };
+}
+
+/** Réplique la forme live api.geo.sent-tech.ca (2026-07). */
+const LIVE_LOTS_FC = {
+  type: "FeatureCollection",
+  numberMatched: 1,
+  numberReturned: 1,
+  features: [
+    {
+      type: "Feature",
+      geometry: square(-73.556, 45.349, -73.555, 45.35),
+      properties: {
+        NO_LOT: "6 057 912",
+        geoId: "ca/qc/lot/6-057-912",
+        name: "6 057 912",
+        code: "6 057 912",
+        level: "locality",
+        country: "CA",
+        noLot: "6 057 912",
+      },
+    },
+  ],
+};
+
+const LIVE_ZONAGE_FC = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      geometry: square(-73.6, 45.3, -73.5, 45.4),
+      properties: { zone_code: "M-209", prefix: "M", kind: "mixed-use" },
+    },
+  ],
+};
+
+/** fetch mock routé par collection (lots vs zonage). */
+function makeCollectionsFetch(handlers: {
+  lots?: { status: number; body?: unknown };
+  zonage?: { status: number; body?: unknown };
+}): { fn: typeof fetch; calls: string[] } {
+  const calls: string[] = [];
+  const fn = (async (url: string | URL | Request) => {
+    const u = String(url);
+    calls.push(u);
+    const target = u.includes("qc-zonage-") ? handlers.zonage : handlers.lots;
+    if (!target) return new Response(null, { status: 404 });
+    return new Response(
+      target.body !== undefined ? JSON.stringify(target.body) : null,
+      { status: target.status, headers: { "content-type": "application/json" } },
+    );
+  }) as unknown as typeof fetch;
+  return { fn, calls };
+}
+
+describe("enrichissement lots via zonage (chemin proxy)", () => {
+  it("joint la zone par centroïde et dérive multifamilial4plus + zone{...}", async () => {
+    const { fn } = makeCollectionsFetch({
+      lots: { status: 200, body: LIVE_LOTS_FC },
+      zonage: { status: 200, body: LIVE_ZONAGE_FC },
+    });
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: fn,
+      baseUrl: "https://geo.example",
+    });
+
+    const res = await app.request("/api/geo/collections/qc-lots-delson/items?limit=10");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      numberMatched: number;
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    expect(body.numberMatched).toBe(1); // champs OGC du body préservés
+
+    const props = body.features[0]!.properties;
+    // Bruts conservés
+    expect(props["NO_LOT"]).toBe("6 057 912");
+    // Enrichis (contrat JSDoc de la route)
+    expect(props["zoneCode"]).toBe("M-209");
+    expect(props["zoneJoin"]).toBe("centroid");
+    expect(props["zone"]).toEqual({
+      code: "M-209",
+      kind: "MIXTE",
+      densiteLogHa: null,
+      usages: [],
+      grillePdfUrl: null,
+    });
+    expect(props["multifamilial4plus"]).toBe(true);
+    expect(props["multifamilial4plusSource"]).toBe("heuristique");
+    // tod absent des données live → jamais fabriqué, priorite absent aussi
+    expect("tod" in props).toBe(false);
+    expect("priorite" in props).toBe(false);
+    // superficieM2 calculée depuis la géométrie publique
+    expect(typeof props["superficieM2"]).toBe("number");
+  });
+
+  it("zonage indisponible (404) → lots servis SANS champs zone, statut 200", async () => {
+    const { fn } = makeCollectionsFetch({
+      lots: { status: 200, body: LIVE_LOTS_FC },
+      zonage: { status: 404 },
+    });
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: fn,
+      baseUrl: "https://geo.example",
+    });
+
+    const res = await app.request("/api/geo/collections/qc-lots-candiac/items");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    const props = body.features[0]!.properties;
+    expect("zone" in props).toBe(false);
+    expect("multifamilial4plus" in props).toBe(false);
+    expect(props["NO_LOT"]).toBe("6 057 912");
+  });
+
+  it("le zonage est mis en cache : 2 requêtes lots → 1 seul fetch zonage", async () => {
+    const { fn, calls } = makeCollectionsFetch({
+      lots: { status: 200, body: LIVE_LOTS_FC },
+      zonage: { status: 200, body: LIVE_ZONAGE_FC },
+    });
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: fn,
+      baseUrl: "https://geo.example",
+    });
+
+    await app.request("/api/geo/collections/qc-lots-delson/items");
+    await app.request("/api/geo/collections/qc-lots-delson/items");
+    const zonageCalls = calls.filter((u) => u.includes("qc-zonage-delson"));
+    expect(zonageCalls).toHaveLength(1);
+  });
+
+  it("les collections zonage restent servies telles quelles (non enrichies)", async () => {
+    const { fn } = makeCollectionsFetch({
+      zonage: { status: 200, body: LIVE_ZONAGE_FC },
+    });
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: fn,
+      baseUrl: "https://geo.example",
+    });
+    const res = await app.request("/api/geo/collections/qc-zonage-delson/items");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    expect(body.features[0]!.properties).toEqual(
+      LIVE_ZONAGE_FC.features[0]!.properties,
+    );
+  });
+});
+
+describe("enrichissement lots via zonage (chemin store local)", () => {
+  it("lots locaux + zonage local → zone jointe par centroïde", async () => {
+    const localLots = {
+      type: "FeatureCollection" as const,
+      features: [
+        {
+          type: "Feature" as const,
+          geometry: square(-73.556, 45.349, -73.555, 45.35),
+          properties: {
+            featureKind: "lot",
+            noLot: "1234567",
+            citySlug: "delson",
+            zoneCode: null,
+          },
+        },
+      ],
+    };
+    const localZonage = {
+      type: "FeatureCollection" as const,
+      features: [
+        {
+          type: "Feature" as const,
+          geometry: square(-73.6, 45.3, -73.5, 45.4),
+          properties: {
+            featureKind: "zone",
+            zoneCode: "H-101",
+            zoneUsage: "zonage",
+            citySlug: "delson",
+          },
+        },
+      ],
+    };
+    const localResolver: LocalCollectionResolver = async (parsed) =>
+      parsed.kind === "lots" ? localLots : localZonage;
+    const { fn, calls } = makeOkFetch();
+    const app = geoCollectionsRoute({ localResolver, fetchImpl: fn });
+
+    const res = await app.request("/api/geo/collections/qc-lots-delson/items");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    const props = body.features[0]!.properties;
+    expect(props["zoneCode"]).toBe("H-101");
+    expect(props["zone"]).toMatchObject({ code: "H-101", kind: "H" });
+    // H sans grille → false, heuristique (sous-couverture honnête)
+    expect(props["multifamilial4plus"]).toBe(false);
+    expect(props["multifamilial4plusSource"]).toBe("heuristique");
+    expect(calls).toHaveLength(0); // tout servi depuis le store local
   });
 });
