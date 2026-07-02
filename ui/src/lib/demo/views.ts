@@ -26,6 +26,8 @@ export type DemoView =
   | "ontologie"
   | "coordination"
   | "backlog"
+  // Rapport d'étude (contenu docs/spec/reports/study-2026-07 compilé au build)
+  | "rapport"
   // ── WP6 — Kanban WorkPackages (projection 4 niveaux) ───────────────────────
   | "kanban"
   // ── G3 — Vue géo intégration ───────────────────────────────────────────────
