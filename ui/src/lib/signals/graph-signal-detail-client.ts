@@ -7,6 +7,12 @@
  * Anti-invention: returns 404 when no signal nodes exist for the city.
  */
 
+import {
+  fetchWithTimeout,
+  RequestTimeoutError,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from "$lib/net/fetch-with-timeout.js";
+
 export type EvidenceMissingField =
   | "description"
   | "citation"
@@ -517,17 +523,25 @@ export interface GraphSignalDetailResponse {
   nodes: GraphSignalNode[];
 }
 
+export interface FetchGraphSignalDetailOptions {
+  /**
+   * Signal d'annulation externe (anti-course). Distinct du timeout interne :
+   * un abort externe (changement de ville) relève une `AbortError` — la réponse
+   * périmée est IGNORÉE par l'appelant, pas transformée en erreur affichée.
+   */
+  signal?: AbortSignal;
+}
+
 export async function fetchGraphSignalDetail(
   citySlug: string,
   baseUrl = "",
-  timeoutMs = 15_000,
+  timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+  opts: FetchGraphSignalDetailOptions = {},
 ): Promise<GraphSignalDetailResponse> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}`,
-      { signal: controller.signal },
+      { signal: opts.signal, timeoutMs },
     );
     if (!res.ok) {
       // 404 = ville sans signaux dans la DB — état vide honnête
@@ -538,11 +552,11 @@ export async function fetchGraphSignalDetail(
     }
     return res.json();
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
+    // Timeout interne → message dédié (contrat historique). Un abort EXTERNE
+    // (AbortError) est relevé tel quel pour que l'appelant ignore la réponse.
+    if (err instanceof RequestTimeoutError) {
       throw new Error(`graph-signals/${citySlug}: timeout after ${timeoutMs}ms`);
     }
     throw err;
-  } finally {
-    clearTimeout(timeoutId);
   }
 }
