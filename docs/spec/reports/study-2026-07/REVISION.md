@@ -4,6 +4,15 @@
 > partie « 1 — Faisabilité data » n'est pas CONSOLIDÉE** (consigne explicite).
 > Statut : ☐ à faire · ◐ en cours (données externes) · ☑ fait.
 
+**État 2026-07-02 (appliqué par le conducteur, agents opus rate-limités) :**
+- ☑ **R1** (PV/Signaux séparés) · ☑ **R2** (grounding 100 %+cleansing) · ☑ **R3** (v2.2/v2.3 introduits) ·
+  ☑ **R4** (annexe éclatée) · ☑ **R5** (sources zonage multi-lignes ArcGIS/GeoNet/CKAN/PDF) ·
+  ☑ **R7** (mixture of **agents** + consensus).
+- ◐ **R6** (coûts) : structure + placeholders posés, **en attente agent-stats / k8s / geo** (h2a envoyés).
+- ◐ **R8** (consolidation finale) : après réception coûts + geo-quebec + comptes zonage-par-méthode.
+- ⚠ **slides.html à re-synchroniser** sur report.md avant présentation.
+- **NE PAS re-présenter** avant consolidation complète (consigne principal).
+
 ## R1 — Séparer PV et Signaux (couches distinctes) ☐
 Le graphe **n'est pas la finalité**, c'est la **méthode de parsing** du signal.
 Dans la table Focus-30/1104 et partout : **une ligne PV scrapé (recueil brut)**, **une
