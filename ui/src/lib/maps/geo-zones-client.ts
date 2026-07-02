@@ -1,4 +1,5 @@
 import type { GeoJsonGeometry } from "./cadastre-geojson-source.js";
+import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 export type GeoZoneResolutionStatus = "official" | "fallback" | "missing";
 export type GeoZoneGeometryStatus =
@@ -50,6 +51,10 @@ export interface FetchGeoZonesOptions {
   limit?: number;
   bbox?: [number, number, number, number];
   baseUrl?: string;
+  /** Signal d'annulation externe (anti-course au changement de ville). */
+  signal?: AbortSignal;
+  /** Timeout requête (ms). Défaut : `DEFAULT_REQUEST_TIMEOUT_MS`. */
+  timeoutMs?: number;
 }
 
 export function resolveGeoZonesUrl(
@@ -71,7 +76,10 @@ export async function fetchGeoZones(
   citySlug: string,
   opts: FetchGeoZonesOptions = {},
 ): Promise<GeoZonesResponse> {
-  const res = await fetch(resolveGeoZonesUrl(citySlug, opts));
+  const res = await fetchWithTimeout(resolveGeoZonesUrl(citySlug, opts), {
+    signal: opts.signal,
+    timeoutMs: opts.timeoutMs,
+  });
   if (!res.ok) {
     throw new Error(`geo-zones HTTP ${res.status} for ${citySlug}`);
   }
