@@ -17,6 +17,8 @@ import {
   evalLotFillColor,
   evalLotPaint,
   evalHierarchyLegend,
+  lotHierarchyOpacity,
+  LOT_HIERARCHY_OPACITY,
   EVAL_MARKED_FALLBACK,
   EVAL_PRIORITE_FALLBACK,
   EVAL_4PLUS_FALLBACK,
@@ -242,5 +244,29 @@ describe("evalHierarchyLegend", () => {
       "Périmètre TOD",
     ]);
     expect(legend[1].color).toBe(EVAL_PRIORITE_FALLBACK);
+  });
+});
+
+// ── Opacité par défaut de la hiérarchie (mécanique concurrente getLotOpacity) ─
+
+describe("lotHierarchyOpacity — colorisation permanente sans filtre", () => {
+  it("priorité (flag ou 4+∧TOD) → 0.5", () => {
+    expect(lotHierarchyOpacity({ noLot: "1", priorite: true })).toBe(0.5);
+    expect(
+      lotHierarchyOpacity({ noLot: "1", multifamilial4plus: true, tod: true }),
+    ).toBe(0.5);
+  });
+
+  it("multifamilial 4+ seul → 0.4", () => {
+    expect(lotHierarchyOpacity({ noLot: "1", multifamilial4plus: true })).toBe(0.4);
+  });
+
+  it("TOD seul → 0.25", () => {
+    expect(lotHierarchyOpacity({ noLot: "1", tod: true })).toBe(0.25);
+  });
+
+  it("aucun flag → 0.15 (substrat discret, jamais masqué)", () => {
+    expect(lotHierarchyOpacity({ noLot: "1" })).toBe(0.15);
+    expect(LOT_HIERARCHY_OPACITY.neutral).toBe(0.15);
   });
 });
