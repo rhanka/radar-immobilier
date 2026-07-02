@@ -25,6 +25,7 @@
     RefreshCw,
     Layers,
     FileText,
+    SlidersHorizontal,
   } from "@lucide/svelte";
   import { Badge, Alert } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -49,7 +50,32 @@
   import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
   import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
   import { loadLiveSignals } from "$lib/signals/signals-live.js";
-  import { colorForScore } from "$lib/maps/score-color-scale.js";
+  import {
+    resolveToken,
+    LOT_4PLUS_TOD_TOKEN,
+    LOT_4PLUS_TOD_FALLBACK,
+  } from "$lib/maps/score-color-scale.js";
+  import {
+    buildZoneIndex,
+    enrichLotWithZone,
+    lotZoneKey,
+  } from "$lib/maps/lot-zone-join.js";
+  import { zoneRefComparableKey } from "$lib/maps/signaux-map-geo.js";
+  import {
+    EVAL_CATEGORIES,
+    USAGE_GROUPS,
+    isDefaultEvalFilter,
+    lotMatchesEvalFilter,
+    countEvalMatches,
+    evalLotPaint,
+    evalCategoryLabel,
+    isQuatrePlus,
+    isTod,
+    isPriorite,
+    type EvalCategory,
+    type EvalLotFilter,
+    type UsageGroup,
+  } from "$lib/maps/eval-lot-filters.js";
   import {
     activeMarketMark,
     activePipelineMark,
@@ -177,6 +203,31 @@
   let prospectMarksError: string | null = null;
   let prospectMarks: ProspectMark[] = [];
   let prospectFilter: ProspectStatus | "all" | "unmarked" = "all";
+
+  // ── Filtres carte (parité carte de référence) ──────────────────────────────
+  // Catégorie EXCLUSIVE × usages ADDITIFS × superficie min. Chaque changement
+  // ne fait que recalculer le STYLE des lots (aucun refetch) : les non-matchés
+  // restent visibles mais estompés (cf. eval-lot-filters).
+  let evalCategory: EvalCategory = "all";
+  let evalUsages: UsageGroup[] = [];
+  let superficieMin = 0;
+  $: evalFilter = {
+    category: evalCategory,
+    usages: new Set(evalUsages),
+    superficieMin,
+  } satisfies EvalLotFilter;
+
+  function toggleUsage(usage: UsageGroup): void {
+    evalUsages = evalUsages.includes(usage)
+      ? evalUsages.filter((u) => u !== usage)
+      : [...evalUsages, usage];
+  }
+
+  function resetEvalFilter(): void {
+    evalCategory = "all";
+    evalUsages = [];
+    superficieMin = 0;
+  }
 
   // ── State changements de zonage ──────────────────────────────────────────
   let zonageLoading = false;
@@ -315,6 +366,7 @@
 
   function selectEvalCity(city: (typeof EVAL_CITIES)[0]): void {
     selectedEvalCity = city;
+    resetEvalFilter();
     // Supersède TOUTE requête en vol de la ville précédente.
     const lease = evalGuard.lease();
     void loadLots(city.slug, lease);
@@ -419,9 +471,14 @@
   }
 
   $: lotsBbox = computeLotsBbox(lotsFC.features);
-  $: polygonFeatures = lotsFC.features.filter(
-    (f) => f.geometry && f.geometry.type === "Polygon" && !f.properties.isRue,
-  );
+  // ── JOIN zone↔lot (pur, aucun refetch) ────────────────────────────────────
+  // Index zone.code → zone construit depuis la couche zonage déjà chargée ;
+  // chaque lot portant un zoneCode est enrichi de sa zone (code, kind, usages,
+  // grille PDF) — priorité aux valeurs déjà fournies par l'API sur le lot.
+  $: zoneIndex = buildZoneIndex(zonePolygonFeatures);
+  $: polygonFeatures = lotsFC.features
+    .filter((f) => f.geometry && f.geometry.type === "Polygon" && !f.properties.isRue)
+    .map((f) => enrichLotWithZone(f, zoneIndex));
   let prospectMarksByLot = new Map<string, ProspectMark[]>();
   $: {
     prospectMarksByLot = new Map<string, ProspectMark[]>();
@@ -472,6 +529,40 @@
     ? extendBboxWithZones(lotsBbox, zonePolygonFeatures)
     : lotsBbox;
 
+  // ── Filtres carte : compteurs + zones 4+ surlignées ───────────────────────
+  $: evalFilterActive = !isDefaultEvalFilter(evalFilter);
+  $: evalMatchedCount = countEvalMatches(filteredPolygonFeatures, evalFilter);
+  $: evalCategoryCounts = {
+    all: polygonFeatures.length,
+    quatrePlus: polygonFeatures.filter((f) => isQuatrePlus(f.properties)).length,
+    tod: polygonFeatures.filter((f) => isTod(f.properties)).length,
+    priorite: polygonFeatures.filter((f) => isPriorite(f.properties)).length,
+  } as Record<EvalCategory, number>;
+  // Résumé lisible du filtre actif (légende).
+  $: evalFilterSummary = [
+    evalCategory !== "all" ? evalCategoryLabel(evalCategory) : null,
+    evalUsages.length > 0
+      ? evalUsages
+          .map((u) => USAGE_GROUPS.find((g) => g.id === u)?.label ?? u)
+          .join(", ")
+      : null,
+    superficieMin > 0 ? `≥ ${superficieMin.toLocaleString("fr-CA")} m²` : null,
+  ]
+    .filter((part): part is string => part !== null)
+    .join(" · ");
+  // Zones contenant au moins un lot 4+ (via le join zoneCode) — surlignées
+  // quand le filtre 4+/Priorité est actif.
+  $: fourPlusZoneKeys =
+    evalCategory === "quatrePlus" || evalCategory === "priorite"
+      ? new Set(
+          polygonFeatures
+            .filter((f) => isQuatrePlus(f.properties))
+            .map((f) => lotZoneKey(f.properties))
+            .filter((key): key is string => key !== null),
+        )
+      : new Set<string>();
+  const fourPlusZoneColor = resolveToken(LOT_4PLUS_TOD_TOKEN, LOT_4PLUS_TOD_FALLBACK, null);
+
   // ── Indicateurs réactifs ──────────────────────────────────────────────────
   $: isLoadingEval = lotsLoading || zonageLoading;
   $: hasZonage = zonageEvents.length > 0;
@@ -481,20 +572,6 @@
   $: fallbackScoreCount = polygonFeatures.filter((f) => f.properties.potentialScoreStatus === "fallback").length;
   $: unavailableScoreCount = polygonFeatures.filter((f) => f.properties.potentialScoreStatus === "unavailable").length;
 
-  function lotScore(feature: LotFeature): number {
-    const score = feature.properties.potentialScore;
-    return typeof score === "number" && Number.isFinite(score) ? score : 0;
-  }
-
-  function lotFill(feature: LotFeature): string {
-    return colorForScore(lotScore(feature), null);
-  }
-
-  function lotOpacity(feature: LotFeature, selected: boolean, hovered: boolean): string {
-    if (selected) return "0.78";
-    if (hovered) return "0.75";
-    return lotScore(feature) > 0 ? "0.62" : "0.34";
-  }
 </script>
 
 <div class="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -893,6 +970,96 @@
                   {/each}
                 </div>
               </div>
+
+              <!-- ── Filtres zonage & lots (état réglementaire actuel) ────────
+                   Panneau côté DONNÉES zones-lots (droite) — distinct des
+                   filtres de signaux (rail gauche = ce qui bouge). Catégorie
+                   EXCLUSIVE × usage ADDITIF × superficie min : chaque
+                   changement ne fait que repeindre la carte (aucun refetch),
+                   les lots hors filtre restent visibles mais estompés. -->
+              <div class="border-t border-slate-100 px-4 py-2" data-testid="eval-map-filters">
+                <div class="mb-1 flex items-center justify-between gap-2">
+                  <p class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <SlidersHorizontal class="h-3 w-3" aria-hidden="true" />
+                    Filtres zonage & lots
+                  </p>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500" data-testid="eval-filter-count">
+                      <span class="font-semibold tabular-nums text-slate-700">{evalMatchedCount}</span>/{filteredPolygonFeatures.length} lot{filteredPolygonFeatures.length !== 1 ? "s" : ""}
+                    </span>
+                    {#if evalFilterActive}
+                      <button
+                        type="button"
+                        class="text-xs font-medium text-teal-600 hover:text-teal-800"
+                        on:click={resetEvalFilter}
+                        data-testid="eval-filter-reset"
+                      >
+                        Réinitialiser
+                      </button>
+                    {/if}
+                  </div>
+                </div>
+
+                <!-- Catégorie exclusive -->
+                <div class="mb-2 flex flex-wrap gap-1.5" role="group" aria-label="Filtre de ciblage (exclusif)">
+                  {#each EVAL_CATEGORIES as cat (cat.id)}
+                    <button
+                      type="button"
+                      class={`rounded-full border px-2 py-1 text-xs transition-colors ${
+                        evalCategory === cat.id
+                          ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                      }`}
+                      on:click={() => { evalCategory = cat.id; }}
+                      aria-pressed={evalCategory === cat.id}
+                      data-testid={`eval-filter-${cat.id}`}
+                    >
+                      {cat.label}
+                      <span class="tabular-nums text-slate-400">{evalCategoryCounts[cat.id]}</span>
+                    </button>
+                  {/each}
+                </div>
+
+                <!-- Usage (toggle additif) -->
+                <div class="mb-2 flex flex-wrap gap-1.5" role="group" aria-label="Filtre d'usage (additif)">
+                  {#each USAGE_GROUPS as usage (usage.id)}
+                    {@const isActive = evalUsages.includes(usage.id)}
+                    <button
+                      type="button"
+                      class={`rounded-full border px-2 py-1 text-xs transition-colors ${
+                        isActive
+                          ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
+                          : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                      }`}
+                      on:click={() => toggleUsage(usage.id)}
+                      aria-pressed={isActive}
+                      data-testid={`eval-usage-${usage.id}`}
+                    >
+                      {usage.label}
+                    </button>
+                  {/each}
+                </div>
+
+                <!-- Superficie minimale -->
+                <div class="flex items-center gap-3">
+                  <label class="shrink-0 text-xs text-slate-500" for="eval-superficie-min">
+                    Superficie min.
+                  </label>
+                  <input
+                    id="eval-superficie-min"
+                    type="range"
+                    min="0"
+                    max="5000"
+                    step="50"
+                    bind:value={superficieMin}
+                    class="min-w-0 flex-1 accent-teal-600"
+                    data-testid="eval-superficie-slider"
+                  />
+                  <span class="shrink-0 text-xs tabular-nums text-slate-600">
+                    {superficieMin > 0 ? `≥ ${superficieMin.toLocaleString("fr-CA")} m²` : "Toutes"}
+                  </span>
+                </div>
+              </div>
             {/if}
 
             {#if lotsLoading}
@@ -941,16 +1108,18 @@
                   {#each zonePolygonFeatures as zone (zone.properties.code)}
                     {@const zRings = zone.geometry?.coordinates as number[][][] | undefined}
                     {@const isMatched = matchedZoneCodes.has(zone.properties.code)}
+                    {@const isFourPlusZone = fourPlusZoneKeys.has(zoneRefComparableKey(zone.properties.code))}
                     {#if zRings && zRings.length > 0}
                       <polygon
                         points={ringToPoints(zRings[0], mapBbox)}
-                        fill={isMatched ? "#f59e0b" : "none"}
-                        fill-opacity={isMatched ? "0.25" : "0"}
-                        stroke={isMatched ? "#d97706" : "#94a3b8"}
-                        stroke-width={isMatched ? "1.6" : "0.6"}
-                        stroke-dasharray={isMatched ? "none" : "3 2"}
+                        fill={isMatched ? "#f59e0b" : isFourPlusZone ? fourPlusZoneColor : "none"}
+                        fill-opacity={isMatched ? "0.25" : isFourPlusZone ? "0.12" : "0"}
+                        stroke={isMatched ? "#d97706" : isFourPlusZone ? fourPlusZoneColor : "#94a3b8"}
+                        stroke-width={isMatched ? "1.6" : isFourPlusZone ? "1.4" : "0.6"}
+                        stroke-dasharray={isMatched || isFourPlusZone ? "none" : "3 2"}
+                        data-zone-highlight={isFourPlusZone ? "4plus" : undefined}
                       >
-                        <title>Zone {zone.properties.code}{isMatched ? " (citée par le signal)" : ""}{zone.properties.grillePdfUrl ? " — grille PDF disponible" : ""}</title>
+                        <title>Zone {zone.properties.code}{isMatched ? " (citée par le signal)" : ""}{isFourPlusZone ? " — contient des lots multifamiliaux 4+" : ""}{zone.properties.grillePdfUrl ? " — grille PDF disponible" : ""}</title>
                       </polygon>
                     {/if}
                   {/each}
@@ -963,7 +1132,13 @@
                   {@const lotMarks = prospectMarksByLot.get(lotKey(feature.properties.noLot, feature.properties.citySlug ?? selectedEvalCity?.slug ?? "")) ?? []}
                   {@const lotPipelineMark = activePipelineMark(lotMarks)}
                   {@const lotMarketMark = activeMarketMark(lotMarks)}
-                  {@const scoreFill = lotFill(feature)}
+                  {@const paint = evalLotPaint(feature.properties, {
+                    matched: lotMatchesEvalFilter(feature.properties, evalFilter),
+                    selected: isLotSelected,
+                    hovered: isHovered,
+                    marked: !!(lotPipelineMark || lotMarketMark),
+                    el: null,
+                  })}
                   {#if rings && rings.length > 0}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -980,10 +1155,11 @@
                     >
                       <polygon
                         points={ringToPoints(rings[0], mapBbox)}
-                        fill={isLotSelected ? "#0d9488" : scoreFill}
-                        stroke={isLotSelected ? "#0d9488" : scoreFill}
-                        stroke-width={isLotSelected ? "1.5" : "0.8"}
-                        fill-opacity={lotOpacity(feature, isLotSelected, isHovered)}
+                        fill={isLotSelected ? "#0d9488" : paint.fill}
+                        stroke={isLotSelected ? "#0d9488" : paint.stroke}
+                        stroke-width={paint.strokeWidth}
+                        stroke-opacity={paint.strokeOpacity}
+                        fill-opacity={paint.fillOpacity}
                       />
                       {#if (isHovered || isLotSelected) && rings[0].length > 0}
                         {@const cx = rings[0].reduce((s, p) => s + projX(p[0], mapBbox), 0) / rings[0].length}
@@ -1007,6 +1183,10 @@
               <MapLegend
                 fallbackCount={fallbackScoreCount}
                 unavailableCount={unavailableScoreCount}
+                showHierarchy={true}
+                matchedCount={evalFilterActive ? evalMatchedCount : null}
+                totalCount={evalFilterActive ? filteredPolygonFeatures.length : null}
+                activeFilterLabel={evalFilterActive ? evalFilterSummary : null}
               />
 
               <!-- Fiche lot complète — CS-L2 -->

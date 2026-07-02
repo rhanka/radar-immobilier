@@ -42,6 +42,18 @@ export interface LotProperties {
   tod?: boolean;
   /** Flag multifamilial 4+ — carte-steve uniquement. */
   multifamilial4plus?: boolean;
+  /** Flag priorité calculé par la source (carte-steve) quand exposé. */
+  priorite?: boolean | null;
+  /**
+   * Adresse civique du LOT (donnée publique du rôle d'évaluation) quand la
+   * source l'expose. Identifie la propriété, pas une personne — aucun nom de
+   * propriétaire n'est jamais exposé (Loi 25).
+   */
+  adresse?: string | null;
+  /** Façade mesurée par la source (m) quand exposée. */
+  facadeM?: number | null;
+  /** Profondeur mesurée par la source (m) quand exposée. */
+  profondeurM?: number | null;
   /** Surface calculée par l'API depuis la géométrie publique, en m². */
   superficieM2?: number | null;
   /** Usage public résolu quand disponible; null sinon. */
@@ -57,6 +69,20 @@ export interface LotProperties {
     nbEtages?: number | null;
     anneeConstruction?: number | null;
   } | null;
+  /**
+   * Normes de zonage VERBATIM portées par le lot quand la source geo les
+   * expose (extraction de la grille de zonage : hauteur, étages, marges,
+   * densité). Valeurs textuelles telles qu'extraites — aucune conversion
+   * inventée ; null/absent quand la grille n'est pas extraite.
+   */
+  normes?: {
+    hauteur?: string | null;
+    etages?: string | null;
+    margeAvant?: string | null;
+    margeArriere?: string | null;
+    margeLaterale?: string | null;
+    densite?: string | null;
+  } | null;
   /** Zone résolue pour le lot quand disponible; null sinon. */
   zone?: {
     kind: string;
@@ -67,6 +93,11 @@ export interface LotProperties {
   } | null;
   /** Raw zone code/group from an OGC lot collection when present. */
   zoneCode?: string | null;
+  /**
+   * Description verbatim de la zone portée par le lot quand la source
+   * l'expose (ex. « Min 16 log · 6 étages · Mixte »). Texte tel quel.
+   */
+  zoneDescription?: string | null;
   /** Lien direct vers la grille PDF quand exposé hors objet zone. */
   grillePdfUrl?: string | null;
   /**
@@ -292,11 +323,21 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.multifamilial4plus,
     properties.multifamilial_4plus,
   ]);
+  const priorite = firstBoolean([properties.priorite, properties.priority]);
   const superficieM2 = firstNumber([
     properties.superficieM2,
     properties.superficie_m2,
     properties.superficie_m2_calculee,
   ]);
+  // Adresse civique du lot (rôle public) — jamais de nom de propriétaire.
+  const adresse = firstString([
+    properties.adresse,
+    properties.address,
+    properties.adresse_civique,
+    properties.adresseCivique,
+  ]);
+  const facadeM = firstNumber([properties.facadeM, properties.facade_m]);
+  const profondeurM = firstNumber([properties.profondeurM, properties.profondeur_m]);
   const usageCode = firstString([
     properties.usageCode,
     properties.usage_code,
@@ -304,13 +345,24 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
   ]);
   const valuation = normalizeValuation(properties.valuation, usageCode, properties);
   const zone = normalizeZone(properties.zone, properties);
-  const zoneCode = firstString([
+  const normes = normalizeNormes(properties.normes ?? properties.norms, properties);
+  const rawZoneCode = firstString([
     properties.zoneCode,
     properties.zone_code,
     properties.zoneCodeRaw,
     properties.zone_code_raw,
     typeof properties.zone === "string" ? properties.zone : null,
   ]) ?? zone?.code ?? null;
+  // Placeholders "pas de zone" fréquents dans les sources → null honnête.
+  const zoneCode = rawZoneCode && ["N/D", "ND", "N/A", "NA", "-"].includes(rawZoneCode.toUpperCase())
+    ? null
+    : rawZoneCode;
+  const zoneDescription = firstString([
+    properties.zoneDescription,
+    properties.zone_description,
+    properties.zoneDesc,
+    properties.zone_desc,
+  ]);
   const grillePdfUrl = firstString([
     properties.grillePdfUrl,
     properties.grille_pdf_url,
@@ -342,11 +394,17 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     ...(isRue !== null ? { isRue } : {}),
     ...(tod !== null ? { tod } : {}),
     ...(multifamilial4plus !== null ? { multifamilial4plus } : {}),
+    ...(priorite !== null ? { priorite } : {}),
+    ...(adresse !== null ? { adresse } : {}),
+    ...(facadeM !== null ? { facadeM } : {}),
+    ...(profondeurM !== null ? { profondeurM } : {}),
     ...(superficieM2 !== null ? { superficieM2 } : {}),
     ...(usageCode !== null ? { usageCode } : {}),
     ...(valuation !== undefined ? { valuation } : {}),
+    ...(normes !== undefined ? { normes } : {}),
     ...(zone !== undefined ? { zone } : {}),
     ...(zoneCode !== null ? { zoneCode } : {}),
+    ...(zoneDescription !== null ? { zoneDescription } : {}),
     ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
   };
 }
@@ -392,6 +450,32 @@ function normalizeZone(
   };
 }
 
+/**
+ * Normes de zonage VERBATIM (grille) — extraction tolérante.
+ *
+ * Les champs peuvent arriver dans un objet `normes` dédié ou à plat sur les
+ * properties selon la source geo. Les valeurs sont gardées TELLES QUELLES
+ * (texte verbatim de la grille) ; un nombre est rendu en chaîne, rien n'est
+ * converti ni interprété. undefined quand aucune norme n'est exposée.
+ */
+function normalizeNormes(
+  value: unknown,
+  fallback: Record<string, unknown> = {},
+): LotProperties["normes"] | undefined {
+  const record = typeof value === "object" && value !== null && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : fallback;
+  const normes = {
+    hauteur: firstVerbatim([record.hauteur, record.hauteur_max, record.hauteurMax, record.hauteur_verbatim]),
+    etages: firstVerbatim([record.etages, record.etagesMax, record.etages_max, record.nb_etages_max]),
+    margeAvant: firstVerbatim([record.margeAvant, record.marge_avant, record.marge_avant_m]),
+    margeArriere: firstVerbatim([record.margeArriere, record.marge_arriere, record.marge_arriere_m]),
+    margeLaterale: firstVerbatim([record.margeLaterale, record.marge_laterale, record.marges_laterales]),
+    densite: firstVerbatim([record.densite, record.densite_verbatim, record.densiteLogHa, record.densite_log_ha]),
+  };
+  return Object.values(normes).some((v) => v !== null) ? normes : undefined;
+}
+
 function normalizeValuation(
   value: unknown,
   fallbackUsageCode: string | null,
@@ -400,13 +484,16 @@ function normalizeValuation(
   const record = typeof value === "object" && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
     : fallback;
+  // Candidats supplémentaires : noms de champs BRUTS de la carte de référence
+  // CS-L6 (val_totale, nb_logements_role, utilisation…) pour que la fiche ne
+  // soit jamais vide quand la source les expose sous ces noms.
   const valuation = {
     usageCode: firstString([record.usageCode, record.usage_code, record.cubf]) ?? fallbackUsageCode,
-    categorie: firstString([record.categorie, record.category, record.usageLabel, record.usage_label]),
-    valeurTotale: firstNumber([record.valeurTotale, record.valeur_totale, record.totalValue, record.total_value]),
-    valeurTerrain: firstNumber([record.valeurTerrain, record.valeur_terrain, record.landValue, record.land_value]),
-    valeurBatiment: firstNumber([record.valeurBatiment, record.valeur_batiment, record.buildingValue, record.building_value]),
-    nbLogements: firstNumber([record.nbLogements, record.nb_logements, record.logements, record.dwellingCount]),
+    categorie: firstString([record.categorie, record.category, record.usageLabel, record.usage_label, record.utilisation]),
+    valeurTotale: firstNumber([record.valeurTotale, record.valeur_totale, record.totalValue, record.total_value, record.val_totale]),
+    valeurTerrain: firstNumber([record.valeurTerrain, record.valeur_terrain, record.landValue, record.land_value, record.val_terrain]),
+    valeurBatiment: firstNumber([record.valeurBatiment, record.valeur_batiment, record.buildingValue, record.building_value, record.val_batiment]),
+    nbLogements: firstNumber([record.nbLogements, record.nb_logements, record.logements, record.dwellingCount, record.nb_logements_role]),
     nbEtages: firstNumber([record.nbEtages, record.nb_etages, record.etages, record.floorCount]),
     anneeConstruction: firstNumber([record.anneeConstruction, record.annee_construction, record.yearBuilt, record.year_built]),
   };
@@ -435,6 +522,16 @@ function firstString(values: readonly unknown[]): string | null {
   for (const value of values) {
     const parsed = readString(value);
     if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
+/** Valeur verbatim : chaîne non vide telle quelle, nombre fini rendu en chaîne. */
+function firstVerbatim(values: readonly unknown[]): string | null {
+  for (const value of values) {
+    const parsed = readString(value);
+    if (parsed !== null) return parsed;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
   }
   return null;
 }
