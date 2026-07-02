@@ -34,6 +34,8 @@
     PILOT_CITY_SLUG,
   } from "$lib/maps/maps-data.js";
   import { fetchLots, type LotFeatureCollection, type LotFeature, type LotsResponse } from "$lib/maps/lots-client.js";
+  import { RequestGuard, type RequestLease } from "$lib/net/request-guard.js";
+  import { isAbortError } from "$lib/net/fetch-with-timeout.js";
   import {
     fetchZones,
     matchZonesToSignal,
@@ -222,23 +224,31 @@
   // ── Mode carte-steve détecté depuis la réponse API ────────────────────────
   $: isCarteSteve = lotsResponse?.source === "carte-steve" || lotsResponse?.mode === "carte-steve";
 
-  // ── Chargement des lots ────────────────────────────────────────────────────
+  // ── Chargement des couches (anti-course + timeout) ─────────────────────────
+  // Une SEULE garde « dernière requête gagne » pour les 4 couches d'une ville :
+  // au changement rapide de ville, les réponses en retard sont ignorées (jeton)
+  // ET avortées (signal). Chaque couche garde son propre waiter/erreur : l'échec
+  // de l'une n'affecte pas l'affichage des autres. Timeout borné côté clients.
+  const evalGuard = new RequestGuard();
 
-  async function loadProspectMarks(citySlug: string): Promise<void> {
+  async function loadProspectMarks(citySlug: string, lease: RequestLease): Promise<void> {
     prospectMarksLoading = true;
     prospectMarksError = null;
     prospectMarks = [];
     prospectFilter = "all";
     try {
-      prospectMarks = await fetchProspectMarksForZone(citySlug);
+      const marks = await fetchProspectMarksForZone(citySlug, undefined, { signal: lease.signal });
+      if (!lease.isCurrent()) return;
+      prospectMarks = marks;
     } catch (e) {
-      prospectMarksError = e instanceof Error ? e.message : "Marques indisponibles";
+      if (!lease.isCurrent() || isAbortError(e)) return;
+      prospectMarksError = "Marques indisponibles.";
     } finally {
-      prospectMarksLoading = false;
+      if (lease.isCurrent()) prospectMarksLoading = false;
     }
   }
 
-  async function loadLots(citySlug: string): Promise<void> {
+  async function loadLots(citySlug: string, lease: RequestLease): Promise<void> {
     lotsLoading = true;
     lotsError = null;
     lotsFC = { type: "FeatureCollection", features: [] };
@@ -246,63 +256,71 @@
     selectedLot = null;
     hoveredLot = null;
     try {
-      const res = await fetchLots(citySlug, { limit: 200 });
+      const res = await fetchLots(citySlug, { limit: 200, signal: lease.signal });
+      if (!lease.isCurrent()) return;
       lotsResponse = res;
       lotsFC = res.featureCollection;
       if (!res.ok) {
         lotsError = res.reason ?? "Source lots non disponible pour cette ville.";
       }
     } catch (e) {
-      lotsError = e instanceof Error ? e.message : "Erreur de chargement des lots";
+      if (!lease.isCurrent() || isAbortError(e)) return;
+      lotsError = "Lots indisponibles.";
       lotsFC = { type: "FeatureCollection", features: [] };
     } finally {
-      lotsLoading = false;
+      if (lease.isCurrent()) lotsLoading = false;
     }
   }
 
   // ── Chargement des changements de zonage ───────────────────────────────────
 
-  async function loadZonage(citySlug: string): Promise<void> {
+  async function loadZonage(citySlug: string, lease: RequestLease): Promise<void> {
     zonageLoading = true;
     zonageError = null;
     zonageEvents = [];
     try {
-      const res = await fetchSignalDetail(citySlug);
+      const res = await fetchSignalDetail(citySlug, undefined, { signal: lease.signal });
+      if (!lease.isCurrent()) return;
       zonageEvents = res.events;
     } catch (e) {
+      if (!lease.isCurrent() || isAbortError(e)) return;
       // 404 / city not seeded → honest empty state, not an error banner
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("404") || msg.includes("ok=false")) {
         zonageEvents = [];
       } else {
-        zonageError = msg;
+        zonageError = "Changements de zonage indisponibles.";
       }
     } finally {
-      zonageLoading = false;
+      if (lease.isCurrent()) zonageLoading = false;
     }
   }
 
   // ── Chargement de la couche zonage géo (gated) ────────────────────────────
-  async function loadZones(citySlug: string): Promise<void> {
+  async function loadZones(citySlug: string, lease: RequestLease): Promise<void> {
     zonesFC = { type: "FeatureCollection", features: [] };
     // Inerte tant que le drapeau d'activation est faux : aucun appel réseau.
     if (!ZONES_LAYER_ENABLED) return;
     try {
-      const res = await fetchZones(citySlug, { limit: 500 });
+      const res = await fetchZones(citySlug, { limit: 500, signal: lease.signal });
+      if (!lease.isCurrent()) return;
       // 404 (collection pas encore servie) → ok=false → features:[] → no-op.
       zonesFC = res.featureCollection;
     } catch {
-      // État honnête : on garde la couche vide en cas d'erreur réseau.
+      // État honnête : on garde la couche vide en cas d'erreur/annulation réseau.
+      if (!lease.isCurrent()) return;
       zonesFC = { type: "FeatureCollection", features: [] };
     }
   }
 
   function selectEvalCity(city: (typeof EVAL_CITIES)[0]): void {
     selectedEvalCity = city;
-    void loadLots(city.slug);
-    void loadZonage(city.slug);
-    void loadProspectMarks(city.slug);
-    void loadZones(city.slug);
+    // Supersède TOUTE requête en vol de la ville précédente.
+    const lease = evalGuard.lease();
+    void loadLots(city.slug, lease);
+    void loadZonage(city.slug, lease);
+    void loadProspectMarks(city.slug, lease);
+    void loadZones(city.slug, lease);
   }
 
   // ── Sélection automatique de la 1re ville lors du changement de filtre ────
@@ -316,11 +334,8 @@
   onMount(() => {
     const first = filteredCities[0];
     if (first) {
-      selectedEvalCity = first;
-      void loadLots(first.slug);
-      void loadZonage(first.slug);
-      void loadProspectMarks(first.slug);
-      void loadZones(first.slug);
+      // Passe par selectEvalCity → garde anti-course commune (evalGuard).
+      selectEvalCity(first);
     }
     void loadSignalEntries();
   });
