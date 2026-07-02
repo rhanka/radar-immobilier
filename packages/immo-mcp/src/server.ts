@@ -5,10 +5,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { resolveAuthContext } from "./auth-context.js";
 import { createDataSource } from "./data-source.js";
+import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
 import { registerTools } from "./tools.js";
 
-export const IMMO_MCP_NAME = "immo";
-export const IMMO_MCP_VERSION = "0.0.1";
+export { IMMO_MCP_NAME, IMMO_MCP_VERSION };
 
 /**
  * Builds a fully wired immo MCP server from env (auth stub + data source seam).

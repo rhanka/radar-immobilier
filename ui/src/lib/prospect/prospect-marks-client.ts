@@ -6,6 +6,8 @@
  * jamais propriétaire/adresse personnelle.
  */
 
+import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
+
 export type ProspectDimension = "pipeline" | "marche";
 export type PipelineStatus = "favori" | "ecarte" | "sollicite" | "lettre_envoyee";
 export type MarketStatus = "en_vente";
@@ -143,8 +145,12 @@ export async function fetchProspectMarksForLot(
 export async function fetchProspectMarksForZone(
   citySlug: string,
   baseUrl?: string,
+  opts: { signal?: AbortSignal; timeoutMs?: number } = {},
 ): Promise<ProspectMark[]> {
-  const res = await fetch(apiUrl(`/api/v1/prospects/zones/${encodeURIComponent(citySlug)}/marks`, baseUrl));
+  const res = await fetchWithTimeout(
+    apiUrl(`/api/v1/prospects/zones/${encodeURIComponent(citySlug)}/marks`, baseUrl),
+    { signal: opts.signal, timeoutMs: opts.timeoutMs },
+  );
   if (!res.ok) throw new Error(`prospect zone marks HTTP ${res.status}`);
   const body = (await res.json()) as { ok?: boolean; marks?: ProspectMark[] };
   if (!body.ok) throw new Error("prospect zone marks: api returned ok=false");

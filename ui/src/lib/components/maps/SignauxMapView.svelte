@@ -59,6 +59,11 @@
     type LotFeatureCollection,
     type LotsResponse,
   } from "$lib/maps/lots-client.js";
+  import { RequestGuard } from "$lib/net/request-guard.js";
+  import {
+    isAbortError,
+    DEFAULT_REQUEST_TIMEOUT_MS,
+  } from "$lib/net/fetch-with-timeout.js";
   import {
     createSelectionBucketState,
     makeKey,
@@ -132,11 +137,24 @@
   let detailLoading = false;
   let detailError: string | null = null;
   let detailNodes: GraphSignalNode[] = [];
-  let geoLoading = false;
-  let geoError: string | null = null;
+  // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
+  // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
+  // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
+  let zonesLoading = false;
+  let zonesError: string | null = null;
+  let lotsLoading = false;
+  let lotsError: string | null = null;
   let geoNotices: string[] = [];
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
+
+  // ── Gardes anti-course (dernière requête gagne) ───────────────────────────
+  // Deux ressources distinctes, superséd­ées ATOMIQUEMENT au changement de
+  // ville : le détail (panneau droit) et les couches géo (zones+lots). Une
+  // réponse en retard d'une ville précédente est ignorée (jeton) ET avortée
+  // (AbortController) — elle ne peint jamais la mauvaise ville.
+  const detailGuard = new RequestGuard();
+  const geoGuard = new RequestGuard();
   let activeDocument: SignalDocRef | null = null;
   let activeEvidence:
     | {
@@ -514,8 +532,6 @@
     }
     selectedCity = entry;
     detailNodes = [];
-    detailError = null;
-    detailLoading = true;
     geoNotices = [];
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
@@ -523,46 +539,78 @@
       focusedKey: cityKey,
       expandedKeys: [cityKey],
     });
-    void loadGeoForCity(entry.municipality.slug);
 
     // flyTo sur la carte (centroïde de la ville)
     flyToCity(entry);
 
+    // Les 3 couches partent EN PARALLÈLE, chacune avec son propre waiter et sa
+    // propre garde anti-course : détail (panneau droit) + zones + lots.
+    void loadDetailForCity(entry.municipality.slug);
+    void loadGeoForCity(entry.municipality.slug);
+  }
+
+  /**
+   * Charge le détail signaux (panneau droit) d'une ville avec garde anti-course
+   * et timeout. Une réponse en retard/annulée (changement de ville) est ignorée ;
+   * un échec bascule la couche en état d'erreur SANS toucher aux zones/lots.
+   */
+  async function loadDetailForCity(citySlug: string): Promise<void> {
+    const lease = detailGuard.lease();
+    detailLoading = true;
+    detailError = null;
     try {
-      const res = await fetchGraphSignalDetail(entry.municipality.slug);
-      if (selectedCity?.municipality.slug !== entry.municipality.slug) return;
+      const res = await fetchGraphSignalDetail(citySlug, "", DEFAULT_REQUEST_TIMEOUT_MS, {
+        signal: lease.signal,
+      });
+      if (!lease.isCurrent()) return; // réponse périmée → on ignore
       if (!res.ok && res.nodes.length === 0) {
-        // 404 — ville sans signaux graphify (état vide honnête)
+        // 404 — ville sans signaux graphify (état vide honnête, pas une erreur)
         detailNodes = [];
         detailError = null;
         return;
       }
       detailNodes = res.nodes;
       // Alimenter le cache multi-villes et accumuler les types connus
-      detailCache.set(entry.municipality.slug, res.nodes);
+      detailCache.set(citySlug, res.nodes);
       const newTypes = res.nodes.map((n) => n.type);
       knownNodeTypes = Array.from(new Set([...knownNodeTypes, ...newTypes])).sort();
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
-      // quel signal ouvrir (clic dans le panneau droit). L'auto-focus créait
-      // un paradoxe accordéon : le 1er clic sur un signal pré-focusé le fermait
-      // au lieu de l'ouvrir, rendant le détail inaccessible.
-      // Recolorer les aplats : la peinture choroplèthe est réactive (prop
-      // fillColorExpression) ; on rafraîchit les couches zone/lot ici.
+      // quel signal ouvrir (clic dans le panneau droit).
       updateGeoLayers();
     } catch (e) {
+      // Abort (changement de ville) → réponse périmée à ignorer, pas une erreur.
+      if (!lease.isCurrent() || isAbortError(e)) return;
       console.warn("Signal detail load failed:", e);
-      detailError = "Donnée indisponible pour les signaux de cette ville.";
+      detailError = "Signaux indisponibles.";
     } finally {
-      detailLoading = false;
+      if (lease.isCurrent()) detailLoading = false;
     }
   }
 
+  /** « Réessayer » du panneau : recharge uniquement le détail signaux. */
+  function retryDetail(): void {
+    if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
+  }
+
+  /** « Réessayer » de la carte : recharge uniquement les couches zones+lots. */
+  function retryGeo(): void {
+    if (selectedCity) void loadGeoForCity(selectedCity.municipality.slug);
+  }
+
   function clearSelection(options: { recenter?: boolean } = {}): void {
+    // Supersède TOUTE requête en vol (détail + zones + lots) : aucune réponse
+    // en retard ne repeindra la carte après « Fermer ».
+    detailGuard.cancel();
+    geoGuard.cancel();
     selectedCity = null;
     pendingRouteZoneKey = null;
     detailNodes = [];
     detailError = null;
-    geoError = null;
+    detailLoading = false;
+    zonesError = null;
+    lotsError = null;
+    zonesLoading = false;
+    lotsLoading = false;
     geoNotices = [];
     zonesResponse = null;
     lotsResponse = null;
@@ -956,77 +1004,133 @@
     });
   }
 
+  /**
+   * Lecture des réponses géo committées. Le type de retour est ANNOTÉ pour
+   * casser le flow-narrowing de TS : dans `loadGeoForCity`, `zonesResponse` est
+   * (ré)assigné dans des closures async que l'analyse de flux ne suit pas, si
+   * bien qu'un accès direct après `await` le verrait comme `null`.
+   */
+  function committedGeoResponses(): {
+    zones: GeoZonesResponse | null;
+    lots: LotsResponse | null;
+  } {
+    return { zones: zonesResponse, lots: lotsResponse };
+  }
+
+  /**
+   * Charge les couches géo (zones + lots) d'une ville.
+   *
+   * Chaque couche est une TÂCHE INDÉPENDANTE : son waiter (`zonesLoading` /
+   * `lotsLoading`) se résout dès QUE SA réponse arrive (pas de couplage : lots
+   * n'attend pas zones). Garde anti-course commune (`geoGuard`) : au changement
+   * de ville, les réponses en retard sont ignorées (jeton) ET avortées (signal).
+   * Timeout borné côté clients → un échec bascule la couche en erreur SANS
+   * casser l'autre.
+   */
   async function loadGeoForCity(citySlug: string): Promise<void> {
-    geoLoading = true;
-    geoError = null;
+    const lease = geoGuard.lease();
+    zonesLoading = true;
+    zonesError = null;
+    lotsLoading = true;
+    lotsError = null;
     geoNotices = [];
     zonesResponse = null;
     lotsResponse = null;
     updateGeoLayers();
-    const errors: string[] = [];
+    // Notices accumulées par couche (affichage honnête « fallback / vide »).
     const notices: string[] = [];
-    const [zonesResult, lotsResult] = await Promise.allSettled([
-        fetchGeoZones(citySlug, { fallback: "lots", limit: 500 }),
-        fetchLots(citySlug, { limit: 500 }),
-      ]);
+    const publishNotices = () => {
+      if (lease.isCurrent()) geoNotices = [...notices];
+    };
 
-    if (zonesResult.status === "fulfilled") {
-      const entry = allEntries.find((item) => item.municipality.slug === citySlug);
-      const withFallback = withCityFallbackZone(zonesResult.value, {
-        citySlug,
-        cityName: entry?.municipality.name ?? citySlug,
-        geometry: mapApi?.getCityBoundary(citySlug) ?? null,
-      });
-      zonesResponse = withFallback.response;
-      if (withFallback.created) {
-        notices.push(
-          (mapApi?.hasCityBoundary(citySlug) ?? false)
-            ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
-            : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
-        );
-      } else if (zonesResult.value.resolutionStatus === "fallback") {
-        notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
+    // ── Couche ZONES (waiter propre) ─────────────────────────────────────────
+    const zonesTask = (async () => {
+      try {
+        const value = await fetchGeoZones(citySlug, {
+          fallback: "lots",
+          limit: 500,
+          signal: lease.signal,
+        });
+        if (!lease.isCurrent()) return;
+        const entry = allEntries.find((item) => item.municipality.slug === citySlug);
+        const withFallback = withCityFallbackZone(value, {
+          citySlug,
+          cityName: entry?.municipality.name ?? citySlug,
+          geometry: mapApi?.getCityBoundary(citySlug) ?? null,
+        });
+        zonesResponse = withFallback.response;
+        if (withFallback.created) {
+          notices.push(
+            (mapApi?.hasCityBoundary(citySlug) ?? false)
+              ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
+              : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
+          );
+        } else if (value.resolutionStatus === "fallback") {
+          notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
+        }
+      } catch (err) {
+        // Abort (changement de ville) → réponse périmée à ignorer.
+        if (!lease.isCurrent() || isAbortError(err)) return;
+        const message = err instanceof Error ? err.message : "zones indisponibles";
+        // 404 = collection non configurée → état vide honnête, PAS une erreur.
+        if (message.includes("geo-zones HTTP 404")) {
+          zonesResponse = emptyUnconfiguredZones(citySlug);
+        } else {
+          zonesError = "Zones indisponibles.";
+        }
+      } finally {
+        if (lease.isCurrent()) {
+          zonesLoading = false;
+          publishNotices();
+          updateGeoLayers();
+        }
       }
-    } else {
-      const message =
-        zonesResult.reason instanceof Error
-          ? zonesResult.reason.message
-          : "zones indisponibles";
-      if (message.includes("geo-zones HTTP 404")) {
-        zonesResponse = emptyUnconfiguredZones(citySlug);
-      } else {
-        errors.push(message);
-      }
-    }
+    })();
 
-    if (lotsResult.status === "fulfilled") {
-      lotsResponse = lotsResult.value;
-      if (!lotsResult.value.ok || lotsResult.value.source === "none") {
-        notices.push(
-          lotsResult.value.reason
-            ? `Lots non configurés : ${lotsResult.value.reason}`
-            : "Lots non configurés pour cette ville.",
-        );
-      } else if (lotsResult.value.featureCollection.features.length === 0) {
-        notices.push("Lots configurés, mais aucun lot dans la réponse.");
+    // ── Couche LOTS (waiter propre) ──────────────────────────────────────────
+    const lotsTask = (async () => {
+      try {
+        const value = await fetchLots(citySlug, { limit: 500, signal: lease.signal });
+        if (!lease.isCurrent()) return;
+        lotsResponse = value;
+        if (!value.ok || value.source === "none") {
+          notices.push(
+            value.reason
+              ? `Lots non configurés : ${value.reason}`
+              : "Lots non configurés pour cette ville.",
+          );
+        } else if (value.featureCollection.features.length === 0) {
+          notices.push("Lots configurés, mais aucun lot dans la réponse.");
+        }
+      } catch (err) {
+        if (!lease.isCurrent() || isAbortError(err)) return;
+        console.warn("Lots load failed:", err);
+        lotsError = "Lots indisponibles.";
+      } finally {
+        if (lease.isCurrent()) {
+          lotsLoading = false;
+          publishNotices();
+          updateGeoLayers();
+        }
       }
-    } else {
-      console.warn("Lots load failed:", lotsResult.reason);
-      errors.push("Lots : donnée indisponible.");
-    }
+    })();
 
-    geoError = errors.length > 0 ? errors.join(" · ") : null;
-    geoNotices = notices;
-    geoLoading = false;
-    updateGeoLayers();
+    await Promise.allSettled([zonesTask, lotsTask]);
+    if (!lease.isCurrent()) return; // ville changée entre-temps → on abandonne
+    publishNotices();
 
     // 2.4 — Ville sans zones configurées → bascule par défaut sur le 1er lot.
+    // Relecture via accesseur (type de retour annoté) : les assignations de
+    // zonesResponse/lotsResponse vivent dans les closures async ci-dessus, que
+    // l'analyse de flux TS ne re-widen pas — un accès direct serait narrow à
+    // `null`/`never`. L'accesseur casse ce narrowing.
+    const { zones: zonesNow, lots: lotsNow } = committedGeoResponses();
     const noZones =
-      !zonesResponse ||
-      zonesResponse.zoneCount === 0 ||
-      zonesResponse.featureCollection.features.length === 0;
-    const firstLot = lotsResponse?.featureCollection.features[0] ?? null;
-    if (noZones && firstLot && selectedCity?.municipality.slug === citySlug) {
+      !zonesNow ||
+      zonesNow.zoneCount === 0 ||
+      zonesNow.featureCollection.features.length === 0;
+    const firstLot = lotsNow?.featureCollection.features[0] ?? null;
+    if (noZones && firstLot && lease.isCurrent()) {
       const key = lotSelectionKey(
         firstLot.properties.noLot,
         firstLot.properties.citySlug ?? citySlug,
@@ -1123,13 +1227,27 @@
     onReady={handleMapReady}
   >
     <svelte:fragment slot="overlay-top-left">
-      {#if selectedCity && (geoLoading || geoNotices.length > 0 || geoError)}
-        <div class="max-w-sm rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
-          {#if geoLoading}
-            <p class="m-0 font-semibold text-slate-500">Chargement zones/lots…</p>
+      {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0)}
+        <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
+          <!-- Waiter PAR COUCHE : chacune affiche son propre état. -->
+          {#if zonesLoading}
+            <p class="m-0 font-semibold text-slate-500">Chargement des zones…</p>
           {/if}
-          {#if geoError}
-            <p class="m-0 text-amber-700">{geoError}</p>
+          {#if lotsLoading}
+            <p class="m-0 font-semibold text-slate-500">Chargement des lots…</p>
+          {/if}
+          <!-- Erreur PAR COUCHE : neutre + « Réessayer » ; n'affecte pas l'autre. -->
+          {#if zonesError}
+            <p class="m-0 flex items-center gap-2 text-amber-700">
+              <span>Zones indisponibles.</span>
+              <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryGeo}>Réessayer</button>
+            </p>
+          {/if}
+          {#if lotsError}
+            <p class="m-0 flex items-center gap-2 text-amber-700">
+              <span>Lots indisponibles.</span>
+              <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryGeo}>Réessayer</button>
+            </p>
           {/if}
           {#each geoNotices as notice (notice)}
             <p class="m-0 text-slate-600">{notice}</p>
@@ -1174,8 +1292,10 @@
       {detailNodes}
       {detailLoading}
       {detailError}
-      {geoLoading}
-      {geoError}
+      {zonesLoading}
+      {zonesError}
+      {lotsLoading}
+      {lotsError}
       {zonesResponse}
       {lotsResponse}
       {selectionState}
@@ -1184,6 +1304,8 @@
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
+      onRetryDetail={retryDetail}
+      onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
     />
