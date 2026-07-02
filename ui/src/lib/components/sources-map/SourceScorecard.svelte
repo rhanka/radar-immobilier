@@ -2,10 +2,9 @@
   /**
    * SourceScorecard — scorecard qualité de données d'UNE ville (D6).
    *
-   * Affiche les 4 couches de la chaîne en TRI-ÉTAT honnête, avec preuve
-   * (compte / version d'ontologie / servi) + fraîcheur :
-   *   L1 raw      · L2 graphe · L4 zonage servi · L5 lots servis
-   * Chaque ligne : badge `vérifié live` / `déclaré non substantié` / `absent`.
+   * Affiche les 4 couches de la chaîne en tri-état, avec preuve + fraîcheur :
+   *   L1 documents · L2 données structurées · L4 zonage · L5 lots cadastraux
+   * Chaque ligne : badge « Servi » / « Partiel » / « Non couvert » (copy client).
    * Jamais de « vert » fabriqué : la tonalité suit l'état réel de la cellule.
    *
    * Réutilisé par la carte (panneau au clic) ET la Console (ligne dépliée).
@@ -27,47 +26,47 @@
   $: rows = [
     {
       key: "l1",
-      label: "L1 · Raw documentaire",
+      label: "L1 · Documents collectés",
       cell: city.l1Raw,
       evidence:
         city.l1Raw.state === "verified"
-          ? `${city.l1Raw.count} source${city.l1Raw.count !== 1 ? "s" : ""} recueillie${city.l1Raw.count !== 1 ? "s" : ""}`
+          ? `${city.l1Raw.count} document${city.l1Raw.count !== 1 ? "s" : ""} collecté${city.l1Raw.count !== 1 ? "s" : ""}`
           : city.l1Raw.state === "declared"
-            ? "annoncé, non recueilli"
-            : "rien de connu",
+            ? "source identifiée, non collectée"
+            : "aucune donnée",
     },
     {
       key: "l2",
-      label: "L2 · Graphe ontologie",
+      label: "L2 · Données structurées",
       cell: city.l2Graph,
       evidence:
         city.l2Graph.state === "verified"
-          ? `ontologie ${city.l2Graph.ontologyVersion ?? "?"}`
+          ? "données structurées"
           : city.l2Graph.state === "declared"
-            ? "graphifié annoncé, 0 nœud en base"
-            : "non graphifié",
+            ? "annoncé, non structuré"
+            : "non structuré",
     },
     {
       key: "l4",
-      label: "L4 · Zonage servi",
+      label: "L4 · Zonage",
       cell: city.l4Zonage,
       evidence:
         city.l4Zonage.state === "verified"
-          ? "géométrie servie"
+          ? "zonage disponible"
           : city.l4Zonage.state === "declared"
-            ? "source connue, non servie"
-            : "absent",
+            ? "source identifiée, non publiée"
+            : "aucune donnée",
     },
     {
       key: "l5",
-      label: "L5 · Lots servis",
+      label: "L5 · Lots cadastraux",
       cell: city.l5Lots,
       evidence:
         city.l5Lots.state === "verified"
-          ? "lots servis"
+          ? "lots disponibles"
           : city.l5Lots.state === "declared"
-            ? "source connue, non servie"
-            : "absent",
+            ? "source identifiée, non publiée"
+            : "aucune donnée",
     },
   ];
 </script>
@@ -96,7 +95,7 @@
     </div>
     <div class="flex shrink-0 items-center gap-2">
       <Badge tone={STATE_BADGE_TONE[city.worstStatus]} class="text-xs">
-        Pire&nbsp;: {STATE_LABEL[city.worstStatus]}
+        Couverture&nbsp;: {STATE_LABEL[city.worstStatus]}
       </Badge>
       {#if onClose}
         <button
@@ -135,9 +134,9 @@
   {#if city.nextMarginalGain}
     <div class="border-t border-slate-100 bg-teal-50 px-4 py-2.5">
       <p class="text-xs text-teal-800">
-        <span class="font-semibold">Prochain gain marginal&nbsp;:</span>
-        compléter le {city.nextMarginalGain === "zonage" ? "zonage" : "service des lots"}
-        (ville graphée — complétion « cheap »).
+        <span class="font-semibold">Prochaine étape&nbsp;:</span>
+        compléter le {city.nextMarginalGain === "zonage" ? "zonage" : "cadastre"}
+        (donnée déjà structurée).
       </p>
     </div>
   {/if}

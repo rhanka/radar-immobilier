@@ -38,9 +38,9 @@
   const FILTERS: { value: Filter; label: string }[] = [
     { value: "actives", label: "Actives" },
     { value: "all", label: "Toutes" },
-    { value: "verified", label: "Vérifiées" },
-    { value: "declared", label: "Déclarées" },
-    { value: "absent", label: "Absentes" },
+    { value: "verified", label: "Servies" },
+    { value: "declared", label: "Partielles" },
+    { value: "absent", label: "Non couvertes" },
   ];
 
   /** Une ville est « active » si au moins une couche n'est pas absent. */
@@ -171,7 +171,7 @@
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L2</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L4</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">L5</th>
-              <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Pire statut</th>
+              <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Couverture</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 bg-white">
@@ -229,7 +229,7 @@
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <p class="text-sm text-slate-400">
-          {headlineText || "Sélectionnez une ville pour sa scorecard tri-état."}
+          {headlineText || "Sélectionnez une ville pour le détail de sa couverture."}
         </p>
       </div>
     {/if}
