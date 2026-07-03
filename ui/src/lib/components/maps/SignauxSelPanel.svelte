@@ -2,8 +2,10 @@
   /**
    * SignauxSelPanel — right selection bucket for the Signaux map.
    *
-   * The left rail keeps navigation light; this panel owns detailed cards for
-   * selected entities: cities, graph signals, zones and lots.
+   * The left rail keeps navigation light (cities list + filters); this panel
+   * owns the SELECTION context only: active city header + detailed cards for
+   * graph signals, zones and lots. No "Villes" bucket and no data filter here
+   * — both live in the left rail.
    */
   import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
@@ -239,9 +241,6 @@
     lotsResponse && !lotsResponse.ok
       ? lotsResponse.reason ?? "Lots non configurés dans l'API geo."
       : null;
-  $: cityKey = selectedCity
-    ? safeKey("municipality", selectedCity.municipality.slug)
-    : null;
 
   function safeKey(kind: "municipality" | "signal" | "zone" | "lot", id: string): SelectionKey | null {
     try {
@@ -856,47 +855,6 @@
         </div>
       </details>
 
-      <!-- C7 — « Filtre Zones et Lots » : SOUS le bucket Signaux, AU-DESSUS de
-           Villes. Le contenu (LotDataFilterPanel) est fourni par le parent. -->
-      <slot name="filters" />
-
-      <details class="sel-bucket" open>
-        <summary class="sel-bucket-head">
-          <span class="sel-bucket-name">Villes</span>
-          <span class="rail-row-count">1</span>
-        </summary>
-        <div class="sel-entities">
-          {#if cityKey}
-            {@const cityVisual = visual(selectionState, cityKey)}
-            <button
-              type="button"
-              class="sel-entity-head"
-              class:sel-entity-head--selected={cityVisual.selected}
-              class:sel-entity-head--focused={cityVisual.focused}
-              class:sel-entity-head--dimmed={cityVisual.dimmed}
-              on:click={() => toggleEntity(cityKey)}
-            >
-              <span class="sel-entity-label">{selectedCity.municipality.name}</span>
-              <span class="sel-entity-toggle" aria-hidden="true">▾</span>
-            </button>
-            {#if cityVisual.focused}
-              <div class="sel-entity-detail">
-                <div class="entity-meta">
-                  <span class="entity-meta-key">Slug</span>
-                  <code class="entity-meta-val">{selectedCity.municipality.slug}</code>
-                  {#if selectedCity.municipality.mrc}
-                    <span class="entity-meta-key">MRC</span>
-                    <span class="entity-meta-val">{selectedCity.municipality.mrc}</span>
-                  {/if}
-                  <span class="entity-meta-key">Signaux</span>
-                  <span class="entity-meta-val">{selectedCity.signalCount6m}</span>
-                </div>
-              </div>
-            {/if}
-          {/if}
-        </div>
-      </details>
-
       <!-- #8 : replié par défaut ; s'ouvre aussi via le badge zone d'un lot -->
       <details class="sel-bucket" bind:open={zonesBucketOpen}>
         <summary class="sel-bucket-head">
@@ -1428,13 +1386,6 @@
     font-size: var(--signaux-fs-caption);
   }
 
-  /* #10 — l'indicateur de toggle reste discret, aligné à gauche dans la colonne */
-  .sel-entity-toggle {
-    font-size: var(--signaux-fs-caption);
-    color: var(--st-semantic-text-muted, #94a3b8);
-    align-self: flex-end;
-    margin-top: 0.1rem;
-  }
 
   .sel-entity-detail {
     padding: 0.45rem 0.85rem 0.65rem 1.15rem;
