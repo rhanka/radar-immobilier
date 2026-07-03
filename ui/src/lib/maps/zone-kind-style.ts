@@ -47,10 +47,14 @@ export const ZONE_KIND_STYLES: Record<Exclude<ZoneKind, "AUTRE">, ZoneKindStyle>
   U: { token: "--st-semantic-data-category8", fallback: "#FF9DA7", label: "Utilité publique" },
 };
 
-/** Teinte neutre d'une zone au kind irrésolu (gris discret, token DS). */
+/**
+ * Teinte neutre d'une zone au kind irrésolu — BLANC (parité référence C2) :
+ * « Type non déterminé » utilise le blanc comme teinte de base, pas le gris.
+ * Le survol la grise légèrement (cf. hover-paint).
+ */
 export const ZONE_KIND_NEUTRAL: ZoneKindStyle = {
-  token: "--st-semantic-text-muted",
-  fallback: "#64748b",
+  token: "--st-semantic-surface-default",
+  fallback: "#ffffff",
   label: "Type non déterminé",
 };
 

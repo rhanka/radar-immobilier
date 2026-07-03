@@ -31,6 +31,8 @@ export interface GeoZoneProperties {
   grillePdfUrl?: string;
   /** UI-derived : couleur résolue de l'aplat par kind (peinture MapLibre) — jamais persistée. */
   kindColor?: string;
+  /** UI-derived : zone SÉLECTIONNÉE (exergue orange C3) — jamais persistée. */
+  isSelected?: boolean;
 }
 
 export interface GeoZoneFeature {

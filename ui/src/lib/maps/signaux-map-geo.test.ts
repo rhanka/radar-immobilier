@@ -5,6 +5,7 @@ import type { GeoZoneFeature, GeoZonesResponse } from "./geo-zones-client.js";
 import type { LotFeatureCollection } from "./lots-client.js";
 import {
   decorateLotsWithSignalProjection,
+  decorateSelectedFlag,
   extractSignalLotRefs,
   extractSignalZoneRefs,
   extractSignalZoneRefsDetailed,
@@ -432,5 +433,35 @@ describe("decorateLotsWithSignalProjection", () => {
 
     expect(decorated.features.map((feature) => feature.properties.signalProjection ?? "none"))
       .toEqual(["inherited", "inherited", "direct"]);
+  });
+});
+
+// ── C3 — decorateSelectedFlag (exergue orange de la sélection carte) ──────────
+
+describe("decorateSelectedFlag", () => {
+  it("marque isSelected UNIQUEMENT sur les features désignées", () => {
+    const lots: LotFeatureCollection = {
+      type: "FeatureCollection",
+      features: [
+        { type: "Feature", geometry: null, properties: { noLot: "L-1" } },
+        { type: "Feature", geometry: null, properties: { noLot: "L-2" } },
+      ],
+    };
+    const decorated = decorateSelectedFlag(
+      lots,
+      (props) => props.noLot === "L-2",
+    );
+    expect(decorated.features[0].properties.isSelected).toBe(false);
+    expect(decorated.features[1].properties.isSelected).toBe(true);
+    // Immutabilité : la collection d'origine n'est pas mutée.
+    expect(lots.features[0].properties.isSelected).toBeUndefined();
+  });
+
+  it("collection vide : retour identique (aucune allocation inutile)", () => {
+    const empty: LotFeatureCollection = {
+      type: "FeatureCollection",
+      features: [],
+    };
+    expect(decorateSelectedFlag(empty, () => true)).toBe(empty);
   });
 });

@@ -72,9 +72,13 @@ export const LOT_4PLUS_TOD_FALLBACK = "#16a34a";
 /** Token DS pour le périmètre TOD seul (hiérarchie concurrente : bleu). */
 export const LOT_TOD_TOKEN = "--st-semantic-feedback-info";
 export const LOT_TOD_FALLBACK = "#2563eb";
-/** Token DS d'un lot neutre — aucun flag 4+/TOD/priorité (gris discret). */
-export const LOT_NEUTRAL_TOKEN = "--st-semantic-text-muted";
-export const LOT_NEUTRAL_FALLBACK = "#64748b";
+/**
+ * Token DS d'un lot neutre — aucun flag 4+/TOD/priorité. BLANC (parité carte de
+ * référence C2) : le substrat « Sans indicateur » est blanc, pas gris, pour
+ * faire ressortir les teintes des flags. Le hover le grise (cf. hover-paint).
+ */
+export const LOT_NEUTRAL_TOKEN = "--st-semantic-surface-default";
+export const LOT_NEUTRAL_FALLBACK = "#ffffff";
 /** Token DS du contour de lot ordinaire. */
 export const DEFAULT_LINE_TOKEN = "--st-semantic-action-primary";
 export const DEFAULT_LINE_FALLBACK = "#2563eb";

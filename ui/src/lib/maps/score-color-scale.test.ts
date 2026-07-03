@@ -65,8 +65,8 @@ describe("score-color-scale — DS-token-driven ramp", () => {
     // 5. TOD seul → bleu (token info)
     expect(expr[9]).toEqual(["==", ["get", "tod"], true]);
     expect(expr[10]).toBe("#2563eb");
-    // 6. neutre → gris discret (token text-muted), PAS la rampe score.
-    expect(expr[expr.length - 1]).toBe("#64748b");
+    // 6. neutre → BLANC (C2, token surface-default), PAS la rampe score.
+    expect(expr[expr.length - 1]).toBe("#ffffff");
   });
 
   it("opacity expression boosts priorité lots", () => {
