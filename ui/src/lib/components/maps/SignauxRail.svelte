@@ -14,8 +14,9 @@
    *      signaux s'affichent à DROITE (SignauxSelPanel, bucket « Signaux »),
    *      PAS inline dans le rail (accordéon signaux supprimé).
    *
-   * Slot `filters` : « Filtre Zones et Lots » (LotDataFilterPanel) fourni par
-   * le parent, intercalé ENTRE la section Signaux et la section Villes.
+   * Les filtres DONNÉES zones/lots ne vivent PLUS ici (bloc autonome « Filtre
+   * Zones et Lots » supprimé) : ils sont portés par les en-têtes des
+   * accordéons Zones et Lots du drawer droit (SignauxSelPanel).
    *
    * Anti-invention : aucun appel API ici, tout par props.
    *
@@ -283,13 +284,9 @@
       </div>
     </details>
 
-    <!-- ── « Filtre Zones et Lots » : ENTRE Signaux et Villes ──────────────── -->
-    <!-- Contenu (LotDataFilterPanel) fourni par le parent — même logique de
-         filtrage que depuis le drawer droit (zéro refetch), seule la position
-         dans le layout change. -->
-    <slot name="filters" />
-
     <!-- ── Section 2 : Villes (recherche + liste plate sélectionnable) ─────── -->
+    <!-- (Le bloc « Filtre Zones et Lots » qui vivait ici a été déplacé dans le
+         drawer droit : en-têtes des accordéons Zones et Lots.) -->
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
