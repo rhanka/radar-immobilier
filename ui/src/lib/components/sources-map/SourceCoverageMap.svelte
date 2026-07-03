@@ -2,31 +2,38 @@
   /**
    * SourceCoverageMap — onglet « Couverture » de la vue Source.
    *
-   * Carte choroplèthe qualité de données sur le socle partagé GeoCityMapBase :
-   *  - couleur = statut agrégé honnête par ville (D2 : Servi = couches cœur
-   *    complètes / Partiel = au moins une couche servie / Non couvert = rien ;
-   *    jamais un score 0-100, jamais de vert fabriqué) ;
-   *  - périmètre province 1104 + surbrillance focus-30 (D3, toggle de segments) ;
-   *  - headline province en overlay (D7) + insight « complétions cheap » ;
-   *  - clic ville → scorecard tri-état de la chaîne qualité complète (PV ·
-   *    signaux · zones · normes · lots · TOD, D6) dans le panneau droit ;
-   *  - légende 3 états UNIQUE (overlay du socle carte, pas de doublon rail).
+   * MÊME mode d'interaction que la vue Signaux (socle carto partagé
+   * GeoCityMapBase + structure rail gauche / carte / drawer droit), la vue ne
+   * différant que sur :
+   *   - le CRITÈRE DE FILTRAGE du rail : radio EXCLUSIF à 3 portées
+   *     (« Focus QA : 4 villes » / « 30 villes à signaux » / « Toutes » —
+   *     coverage-scope) au lieu des 3 cases à cocher de Signaux. La portée
+   *     remplace l'ancien toggle « Province (1104) / Focus 30 » de la carte ;
+   *   - le DRAWER droit : scorecard de couverture de la ville sélectionnée
+   *     (SourceScorecard — PV · signaux · zones · normes · lots · TOD) au lieu
+   *     des accordéons Signaux/Zones/Lots ;
+   *   - la SÉMANTIQUE de coloration : tri-état honnête Servi / Partiel /
+   *     Non couvert (D2 : jamais un score 0-100, jamais de vert fabriqué).
+   *
+   * Drill au clic ville (parité Signaux) : sélection + cadrage caméra sur le
+   * contour + chargement des ZONES (résolution tiérée signaux-zones-loader,
+   * fallback contour ville honnête) ; segmented-control Province / Ville /
+   * Zone partagé (geo-drill) ; clic zone → sélection exclusive + zoom bbox.
    *
    * La VUE ne porte que les données + expressions métier ; toute la mécanique
-   * carto (MapLibre, drill, caméra) vit dans le socle (NE PAS le ré-altérer).
+   * carto (MapLibre, caméra, échafaudage des couches) vit dans le socle.
    */
-  import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { MapPin, RefreshCw } from "@lucide/svelte";
+  import { Alert } from "@sentropic/design-system-svelte";
+  import { MapPin } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import GeoCityMapBase, {
     type GeoCityMapApi,
-    type GeoSegment,
     type GeoMapLegend,
   } from "$lib/components/maps/GeoCityMapBase.svelte";
+  import SourcesRail from "./SourcesRail.svelte";
   import SourceScorecard from "./SourceScorecard.svelte";
   import {
     buildFillColorExpression,
-    buildFocusOpacityExpression,
     buildProvinceHeadline,
     formatProvinceHeadline,
     STATE_COLOR,
@@ -34,8 +41,62 @@
     type CityCoverage,
     type CoverageResponse,
   } from "$lib/sources/source-coverage-client.js";
-  import { geometryBounds } from "$lib/maps/geometry-bounds.js";
+  import {
+    buildScopeOpacityExpression,
+    DEFAULT_COVERAGE_SCOPE,
+    type CoverageScope,
+  } from "$lib/sources/coverage-scope.js";
+  import {
+    buildDrillSegments,
+    computeDrillLevel,
+    zonesConfigured,
+  } from "$lib/maps/geo-drill.js";
+  import {
+    emptyUnconfiguredZones,
+    loadSignauxZones,
+  } from "$lib/maps/signaux-zones-loader.js";
+  import type {
+    GeoZoneFeature,
+    GeoZoneFeatureCollection,
+    GeoZonesResponse,
+  } from "$lib/maps/geo-zones-client.js";
+  import {
+    decorateSelectedFlag,
+    fallbackZoneCode,
+    withCityFallbackZone,
+    CITY_FALLBACK_ZONE_PREFIX,
+    FILTER_DIMMED_OPACITY,
+  } from "$lib/maps/signaux-map-geo.js";
+  import {
+    decorateZonesWithKindColor,
+    zoneKindLegend,
+    ZONE_KIND_NEUTRAL,
+  } from "$lib/maps/zone-kind-style.js";
+  import {
+    withHoverNeutralTint,
+    withHoverOpacityBoost,
+  } from "$lib/maps/hover-paint.js";
+  import {
+    resolveMapColor,
+    LOT_NEUTRAL_TOKEN,
+    LOT_NEUTRAL_FALLBACK,
+  } from "$lib/maps/score-color-scale.js";
+  import {
+    geometryBounds,
+    QUEBEC_PROVINCE_BOUNDS,
+  } from "$lib/maps/geometry-bounds.js";
+  import { RequestGuard } from "$lib/net/request-guard.js";
+  import { isAbortError } from "$lib/net/fetch-with-timeout.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
+
+  const EMPTY_ZONES: GeoZoneFeatureCollection = {
+    type: "FeatureCollection",
+    features: [],
+  };
+  const EMPTY_LOTS: { type: "FeatureCollection"; features: unknown[] } = {
+    type: "FeatureCollection",
+    features: [],
+  };
 
   export let cities: CityCoverage[] = [];
   export let response: CoverageResponse | null = null;
@@ -46,39 +107,25 @@
   // ── Carte (socle) ──────────────────────────────────────────────────────────
   let mapApi: GeoCityMapApi | null = null;
 
-  // ── Focus-30 : highlight visuel (pas un recompute, D3) ─────────────────────
-  const SEG_PROVINCE = "Province (1104)";
-  const SEG_FOCUS = "Focus 30";
-  let focusOnly = false;
-  $: geoSegments = [{ label: SEG_PROVINCE }, { label: SEG_FOCUS }] as GeoSegment[];
-  $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
-  function handleSegmentClick(label: string): void {
-    focusOnly = label === SEG_FOCUS;
+  // ── Portée (rail gauche, radio EXCLUSIF) — remplace le toggle Focus 30 ─────
+  /** Défaut « Toutes » = comportement Province historique. */
+  let scope: CoverageScope = DEFAULT_COVERAGE_SCOPE;
+
+  function handleScopeChange(next: CoverageScope): void {
+    scope = next;
   }
 
-  // ── Expressions choroplèthe (couleur = pire statut, opacité = focus) ───────
-  $: fillColorExpression = buildFillColorExpression(cities);
-  $: fillOpacityExpression = buildFocusOpacityExpression(
-    cities,
-    focusOnly,
-  ) as ExpressionSpecification | number;
-
-  // ── Légende 3 états (overlay socle) ────────────────────────────────────────
-  const legend: GeoMapLegend = {
-    title: "Couverture par ville",
-    items: [
-      { color: STATE_COLOR.verified, label: STATE_LABEL.verified },
-      { color: STATE_COLOR.declared, label: STATE_LABEL.declared },
-      { color: STATE_COLOR.absent, label: STATE_LABEL.absent },
-    ],
-  };
-
-  // ── Headline province (D7) ─────────────────────────────────────────────────
-  $: headline = response ? buildProvinceHeadline(response) : null;
-  $: headlineText = response ? formatProvinceHeadline(response.totals) : "";
-
-  // ── Sélection ville → scorecard ────────────────────────────────────────────
+  // ── Sélection ville + zone (drill, parité Signaux) ─────────────────────────
   let selectedCity: CityCoverage | null = null;
+  let selectedZoneCode: string | null = null;
+
+  // ── Couche ZONES de la ville sélectionnée (waiter propre + anti-course) ────
+  let zonesLoading = false;
+  let zonesError: string | null = null;
+  let zonesResponse: GeoZonesResponse | null = null;
+  let geoNotices: string[] = [];
+  const geoGuard = new RequestGuard();
+
   const cityBySlug = new Map<string, CityCoverage>();
   $: {
     cityBySlug.clear();
@@ -105,78 +152,344 @@
     };
   }
 
+  // ── Expressions choroplèthe ────────────────────────────────────────────────
+  // Couleur = pire statut honnête (sémantique COUVERTURE, propre à Sources).
+  // Opacité : sans sélection → la PORTÉE active surligne ses villes (le reste
+  // atténué) ; ville sélectionnée → aplats quasi transparents (les zones du
+  // drill se lisent — parité Signaux 0.06 / 0.1 / 0.08).
+  $: fillColorExpression = buildFillColorExpression(cities);
+  $: fillOpacityExpression = (selectedCity
+    ? buildSelectedCityOpacityExpression(cities, selectedCity.citySlug)
+    : buildScopeOpacityExpression(cities, scope)) as
+    | ExpressionSpecification
+    | number;
+
+  function buildSelectedCityOpacityExpression(
+    all: CityCoverage[],
+    activeSlug: string,
+  ): ExpressionSpecification | number {
+    if (all.length === 0) return 0.08;
+    const expr: unknown[] = ["match", ["get", "citySlug"]];
+    for (const city of all) {
+      expr.push(city.citySlug, city.citySlug === activeSlug ? 0.06 : 0.1);
+    }
+    expr.push(0.08);
+    return expr as ExpressionSpecification;
+  }
+
+  // ── Légende (overlay socle) : couverture au niveau province, zonage drillé ─
+  const coverageLegend: GeoMapLegend = {
+    title: "Couverture par ville",
+    items: [
+      { color: STATE_COLOR.verified, label: STATE_LABEL.verified },
+      { color: STATE_COLOR.declared, label: STATE_LABEL.declared },
+      { color: STATE_COLOR.absent, label: STATE_LABEL.absent },
+    ],
+  };
+
+  /** Kinds réellement présents dans les zones de la ville active. */
+  $: zoneLegendEntries = selectedCity
+    ? zoneKindLegend(
+        (zonesResponse?.featureCollection.features ?? [])
+          .filter((f) => !f.properties.code.startsWith(CITY_FALLBACK_ZONE_PREFIX))
+          .map((f) => ({ kind: f.properties.kind ?? null, code: f.properties.code })),
+        null,
+      )
+    : [];
+
+  $: legend = selectedCity
+    ? zoneLegendEntries.length > 0
+      ? ({ title: "Zonage", items: zoneLegendEntries } as GeoMapLegend)
+      : null
+    : coverageLegend;
+
+  // ── Drill segmenté Province / Ville / Zone (logique partagée geo-drill) ────
+  $: geoSegments = buildDrillSegments({
+    hasSelectedCity: selectedCity !== null,
+    zonesConfigured: zonesConfigured(zonesResponse),
+  });
+  $: activeSegment = computeDrillLevel({
+    hasSelectedCity: selectedCity !== null,
+    hasZoneSelection: selectedZoneCode !== null,
+  });
+
+  /**
+   * Clic sur le segmented-control (parité Signaux) :
+   * Province → désélection (retour vue globale, dézoom)
+   * Ville → désélectionner la zone, conserver la ville
+   * Zone → sélectionner la première zone disponible (si configurées)
+   */
+  function handleSegmentClick(label: string): void {
+    if (label === activeSegment) return;
+    if (label === "Province") {
+      clearSelection();
+      return;
+    }
+    if (!selectedCity) return;
+    if (label === "Ville") {
+      selectedZoneCode = null;
+      updateZoneLayers();
+      return;
+    }
+    const zones = zonesResponse?.featureCollection.features ?? [];
+    if (zones.length === 0) return; // zones non configurées — rien à faire
+    selectZone(zones[0].properties.code);
+  }
+
+  // ── Headline province (D7) ─────────────────────────────────────────────────
+  $: headline = response ? buildProvinceHeadline(response) : null;
+  $: headlineText = response ? formatProvinceHeadline(response.totals) : "";
+
+  // ── Sélection ville → drawer scorecard + drill zones ───────────────────────
   function handleCityClick(slug: string): void {
-    selectedCity = cityBySlug.get(slug) ?? syntheticAbsentCity(slug);
+    if (selectedCity?.citySlug === slug) return;
+    selectCity(cityBySlug.get(slug) ?? syntheticAbsentCity(slug));
+  }
+
+  /** Sélection depuis le rail (même chemin que le clic carte). */
+  function handleRailSelect(city: CityCoverage): void {
+    if (selectedCity?.citySlug === city.citySlug) return;
+    selectCity(city);
+  }
+
+  function selectCity(city: CityCoverage): void {
+    selectedCity = city;
+    selectedZoneCode = null;
     // Cadrage caméra sur le contour de la ville (parité Signaux). Repli : si le
     // contour n'est pas en cache (géométrie absente), on ne force pas la caméra.
+    fitCityBounds(city.citySlug);
+    void loadZonesForCity(city.citySlug);
+  }
+
+  function fitCityBounds(slug: string): void {
     const boundary = mapApi?.getCityBoundary(slug) ?? null;
     const bounds = geometryBounds(boundary);
     if (bounds) mapApi?.fitMapToBounds(bounds, { maxZoom: 11 });
   }
 
+  function clearSelection(options: { recenter?: boolean } = {}): void {
+    // Supersède toute requête zones en vol : aucune réponse en retard ne
+    // repeindra la carte après « Fermer ».
+    geoGuard.cancel();
+    selectedCity = null;
+    selectedZoneCode = null;
+    zonesResponse = null;
+    zonesError = null;
+    zonesLoading = false;
+    geoNotices = [];
+    updateZoneLayers();
+    if (options.recenter !== false) flyToProvince();
+  }
+
+  /** Retour à l'échelle province : cadrage EXACT du primo-chargement (C9). */
+  function flyToProvince(): void {
+    if (mapApi?.resetToInitialView({ duration: 800 })) return;
+    mapApi?.fitMapToBounds(QUEBEC_PROVINCE_BOUNDS, { maxZoom: 7, duration: 800 });
+  }
+
+  // ── Sélection de zone (exclusive) + zoom bbox (parité Signaux #12) ─────────
+  function selectZone(code: string): void {
+    selectedZoneCode = code;
+    updateZoneLayers();
+    zoomToZone(code);
+  }
+
+  /** Clic aplat zone → bascule la sélection de zone. */
+  function handleZoneClick(zone: { citySlug: string; code: string }): void {
+    if (selectedZoneCode === zone.code) {
+      selectedZoneCode = null;
+      updateZoneLayers();
+      return;
+    }
+    selectZone(zone.code);
+  }
+
+  function zoomToZone(code: string): void {
+    const feature = zonesResponse?.featureCollection.features.find(
+      (f) => f.properties.code === code,
+    );
+    const bounds = geometryBounds(feature?.geometry ?? null);
+    if (bounds) {
+      mapApi?.fitMapToBounds(bounds);
+      return;
+    }
+    // Repli : zone sans géométrie → recadre sur la ville sélectionnée.
+    if (selectedCity) fitCityBounds(selectedCity.citySlug);
+  }
+
+  // ── Chargement ZONES (résolution tiérée + fallback contour, anti-course) ───
+  async function loadZonesForCity(citySlug: string): Promise<void> {
+    const lease = geoGuard.lease();
+    zonesLoading = true;
+    zonesError = null;
+    zonesResponse = null;
+    geoNotices = [];
+    updateZoneLayers();
+    const notices: string[] = [];
+    try {
+      const loaded = await loadSignauxZones(citySlug, { signal: lease.signal });
+      if (!lease.isCurrent()) return;
+      if (loaded.tier !== "none" && loaded.response) {
+        zonesResponse = loaded.response;
+        if (
+          loaded.tier === "endpoint" &&
+          loaded.response.resolutionStatus === "fallback"
+        ) {
+          notices.push("Zones dérivées des lots : géométrie officielle non configurée.");
+        }
+      } else if (!loaded.response) {
+        // Endpoint ET collection non configurés → état vide honnête.
+        zonesResponse = emptyUnconfiguredZones(citySlug);
+        notices.push("Zones non configurées pour cette ville.");
+      } else {
+        const withFallback = withCityFallbackZone(loaded.response, {
+          citySlug,
+          cityName: selectedCity?.cityName ?? citySlug,
+          geometry: mapApi?.getCityBoundary(citySlug) ?? null,
+        });
+        zonesResponse = withFallback.response;
+        if (withFallback.created) {
+          notices.push(
+            (mapApi?.hasCityBoundary(citySlug) ?? false)
+              ? `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sur le contour ville.`
+              : `Zones non configurées : fallback ${fallbackZoneCode(citySlug)} sans géométrie disponible.`,
+          );
+        }
+      }
+    } catch (err) {
+      // Abort (changement de ville) → réponse périmée à ignorer.
+      if (!lease.isCurrent() || isAbortError(err)) return;
+      console.warn("Zones load failed:", err);
+      zonesError = "Zones indisponibles.";
+    } finally {
+      if (lease.isCurrent()) {
+        zonesLoading = false;
+        geoNotices = [...notices];
+        updateZoneLayers();
+      }
+    }
+  }
+
+  /** « Réessayer » : recharge uniquement la couche zones. */
+  function retryZones(): void {
+    if (selectedCity) void loadZonesForCity(selectedCity.citySlug);
+  }
+
+  // ── Peinture des aplats zone (teintes par kind + sélection exclusive) ──────
+  const ZONE_BASE_OPACITY = 0.25;
+  const ZONE_FALLBACK_OPACITY = 0.15;
+  const ZONE_SELECTED_OPACITY = 0.85;
+  // C6 — plancher d'opacité au SURVOL (teinte accentuée, jamais réduite).
+  const ZONE_HOVER_MIN_OPACITY = 0.55;
+
+  function buildZoneOpacityExpression(
+    zones: GeoZoneFeature[],
+  ): ExpressionSpecification | number {
+    // Un `match` MapLibre sans branche est invalide : couche vide → constante.
+    if (zones.length === 0) return ZONE_BASE_OPACITY;
+    const hasZoneSelection = selectedZoneCode !== null;
+    const expr: unknown[] = ["match", ["get", "code"]];
+    // Codes DUPLIQUÉS dans les collections réelles : une seule branche par code.
+    const seenCodes = new Set<string>();
+    for (const zone of zones) {
+      const code = zone.properties.code;
+      if (seenCodes.has(code)) continue;
+      seenCodes.add(code);
+      let opacity: number;
+      if (hasZoneSelection) {
+        // La zone sélectionnée ressort ; les autres s'estompent (l'exergue
+        // orange est portée par la couche highlight du socle).
+        opacity =
+          code === selectedZoneCode
+            ? ZONE_SELECTED_OPACITY
+            : FILTER_DIMMED_OPACITY;
+      } else {
+        opacity = code.startsWith(CITY_FALLBACK_ZONE_PREFIX)
+          ? ZONE_FALLBACK_OPACITY
+          : ZONE_BASE_OPACITY;
+      }
+      expr.push(code, opacity);
+    }
+    expr.push(hasZoneSelection ? FILTER_DIMMED_OPACITY : ZONE_BASE_OPACITY);
+    return expr as ExpressionSpecification;
+  }
+
+  /**
+   * (Re)peint la couche zones via le socle (aucun lot dans la vue Sources —
+   * le drill montre les ZONES de la ville, la sémantique lots reste à Signaux).
+   * No-op tant que la carte n'est pas prête.
+   */
+  function updateZoneLayers(): void {
+    if (!mapApi) return;
+    const zones = zonesResponse?.featureCollection ?? EMPTY_ZONES;
+    const el = mapApi.themeElement;
+    // Sélection exclusive : décore `isSelected` (exergue orange du socle).
+    const zonesForPaint = decorateSelectedFlag(
+      decorateZonesWithKindColor(zones, new Set(), el),
+      (props) => selectedZoneCode !== null && props.code === selectedZoneCode,
+    );
+    const zoneNeutralColor = resolveMapColor(
+      ZONE_KIND_NEUTRAL.token,
+      ZONE_KIND_NEUTRAL.fallback,
+      el,
+    );
+    const lotNeutralColor = resolveMapColor(
+      LOT_NEUTRAL_TOKEN,
+      LOT_NEUTRAL_FALLBACK,
+      el,
+    );
+    mapApi.syncGeoLayers({
+      zones: zonesForPaint,
+      lots: EMPTY_LOTS,
+      // Parité SignauxMapView.zoneKindFillColorExpression : teinte par kind
+      // portée par la propriété décorée `kindColor`, repli neutre.
+      zoneFillColor: withHoverNeutralTint(
+        ["coalesce", ["get", "kindColor"], lotNeutralColor],
+        zoneNeutralColor,
+      ),
+      zoneFillOpacity: withHoverOpacityBoost(
+        buildZoneOpacityExpression(zones.features),
+        ZONE_HOVER_MIN_OPACITY,
+      ),
+      // Couche lots vide : expressions constantes valides (jamais peintes).
+      lotFillColor: lotNeutralColor,
+      lotFillOpacity: 0,
+      lotLineColor: lotNeutralColor,
+    });
+  }
+
   function handleMapReady(api: GeoCityMapApi): void {
     mapApi = api;
+    // Si une ville était déjà sélectionnée avant que la carte soit prête, le
+    // cadrage est parti dans le vide — on cadre maintenant (parité Signaux).
+    if (selectedCity) fitCityBounds(selectedCity.citySlug);
+    updateZoneLayers();
   }
 </script>
 
-<ViewLayout controlsWidth="w-72" selWidth="w-96">
-  <!-- ── Bande gauche : titre + insight actionnable ────────────────────────── -->
+<ViewLayout controlsWidth="w-80" selWidth="w-96">
+  <!-- ── RAIL gauche : portée (radio exclusif) + liste plate de villes ────── -->
   <svelte:fragment slot="controls">
-    <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-      <h1 class="flex items-center gap-2 text-sm font-bold text-slate-900">
-        <MapPin class="h-4 w-4 text-teal-600" aria-hidden="true" />
-        Couverture qualité
-      </h1>
-      <button
-        type="button"
-        aria-label="Actualiser"
-        class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-        on:click={onReload}
-        disabled={loading}
-      >
-        <RefreshCw class={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
-      </button>
-    </div>
-
     {#if error}
       <div class="p-4">
         <Alert tone="error" title="Couverture indisponible" message={error} />
       </div>
-    {:else if loading}
-      <div class="p-4 text-sm text-slate-400">Chargement de la couverture…</div>
-    {:else if headline}
-      <div class="space-y-3 p-4" data-testid="coverage-insight">
-        <div class="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2.5">
-          <p class="text-xs font-semibold uppercase tracking-wide text-teal-600">
-            Province ({headline.cities} villes)
-          </p>
-          <ul class="mt-1.5 space-y-1 text-sm text-teal-900">
-            <li><span class="font-bold tabular-nums">{headline.l2Graph}</span>/{headline.cities} graphés</li>
-            <li><span class="font-bold tabular-nums">{headline.l4Zonage}</span>/{headline.cities} zonage servi</li>
-            <li><span class="font-bold tabular-nums">{headline.l5Lots}</span>/{headline.cities} lots servis</li>
-          </ul>
-        </div>
-
-        {#if headline.cheapZonage > 0}
-          <div class="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2.5" data-testid="cheap-completions">
-            <p class="text-xs text-amber-800">
-              <span class="font-bold tabular-nums">{headline.cheapZonage}</span>
-              ville{headline.cheapZonage !== 1 ? "s" : ""} graphée{headline.cheapZonage !== 1 ? "s" : ""}
-              sans zonage servi — complétions rapides à portée.
-            </p>
-          </div>
-        {/if}
-
-        <p class="text-xs text-slate-400">
-          Cliquez une ville pour le détail de sa couverture (PV · signaux · zones · normes · lots · TOD).
-        </p>
-      </div>
     {/if}
+    <SourcesRail
+      {cities}
+      selectedSlug={selectedCity?.citySlug ?? null}
+      {loading}
+      dataUnavailable={error !== null}
+      {scope}
+      onScopeChange={handleScopeChange}
+      onSelectCity={handleRailSelect}
+      onRefresh={onReload}
+    />
   </svelte:fragment>
 
-  <!-- ── Canvas : carte choroplèthe (socle) ───────────────────────────────── -->
-  <!-- La légende « Couverture par ville » est UNIQUE : overlay du socle carte
-       (prop `legend` de GeoCityMapBase), pas de doublon dans le rail gauche. -->
+  <!-- ── CANVAS : carte choroplèthe (socle partagé) ────────────────────────── -->
+  <!-- La légende est UNIQUE (overlay du socle) : couverture au niveau province,
+       zonage quand une ville est drillée. -->
   <GeoCityMapBase
     {fillColorExpression}
     {fillOpacityExpression}
@@ -185,11 +498,12 @@
     {activeSegment}
     onSegmentClick={handleSegmentClick}
     onCityClick={handleCityClick}
+    onZoneClick={handleZoneClick}
     {legend}
     onReady={handleMapReady}
   >
     <svelte:fragment slot="overlay-top-left">
-      {#if headline}
+      {#if !selectedCity && headline}
         <div
           class="max-w-md rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-sm"
           data-testid="province-headline"
@@ -202,13 +516,30 @@
           {/if}
         </div>
       {/if}
+      {#if selectedCity && (zonesLoading || zonesError || geoNotices.length > 0)}
+        <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
+          <!-- Waiter/erreur/notices de la couche zones (parité Signaux). -->
+          {#if zonesLoading}
+            <p class="m-0 font-semibold text-slate-500">Chargement des zones…</p>
+          {/if}
+          {#if zonesError}
+            <p class="m-0 flex items-center gap-2 text-amber-700">
+              <span>Zones indisponibles.</span>
+              <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryZones}>Réessayer</button>
+            </p>
+          {/if}
+          {#each geoNotices as notice (notice)}
+            <p class="m-0 text-slate-600">{notice}</p>
+          {/each}
+        </div>
+      {/if}
     </svelte:fragment>
   </GeoCityMapBase>
 
-  <!-- ── Panneau droit : scorecard de la ville cliquée (D6) ────────────────── -->
+  <!-- ── DRAWER droit : scorecard couverture de la ville sélectionnée (D6) ── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} onClose={() => { selectedCity = null; }} />
+      <SourceScorecard city={selectedCity} onClose={() => clearSelection()} />
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <div>
