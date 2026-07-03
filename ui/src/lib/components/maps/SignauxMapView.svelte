@@ -5,7 +5,8 @@
    * Layout ws-shell (graphify) :
    *   RAIL (menu gauche w-80) | CANVAS (carte MapLibre) | SEL (panneau droit w-80)
    *
-   * - Rail gauche : SignauxRail (recherche + facets + accordéon natif)
+   * - Rail gauche : SignauxRail (recherche + facets + accordéon natif) +
+   *   « Filtre Zones et Lots » (LotDataFilterPanel) entre Signaux et Villes
    * - Canvas : MapLibre GL aplats choroplèthe + flyTo au clic ville
    * - Sel droit : SignauxSelPanel (détail ville + nœuds par type)
    * - Légende épinglée en bas du rail (slot controls-footer ViewLayout)
@@ -266,8 +267,9 @@
     updateGeoLayers();
   }
 
-  // ── Filtre DONNÉES zones-lots (parité #315, rail droit) ────────────────────
-  // Distinct du filtre de SIGNAUX z|m|p (rail gauche) : celui-ci filtre les
+  // ── Filtre DONNÉES zones-lots (parité #315, rail GAUCHE — entre Signaux
+  // et Villes) ────────────────────────────────────────────────────────────
+  // Distinct du filtre de SIGNAUX z|m|p (même rail) : celui-ci filtre les
   // données cadastrales/zonage de la ville active. ZÉRO refetch : chaque
   // changement ne fait que recalculer les expressions de peinture.
   let lotDataFilter: EvalLotFilter = {
@@ -1450,7 +1452,20 @@
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
-    />
+    >
+      <!-- « Filtre Zones et Lots » — ENTRE la section Signaux et la section
+           Villes du rail gauche. Même composant / mêmes props qu'avant (zéro
+           refetch) : le filtre pilote toujours la peinture des lots. -->
+      <svelte:fragment slot="filters">
+        {#if selectedCity}
+          <LotDataFilterPanel
+            lots={displayedLots.features}
+            filter={lotDataFilter}
+            onChange={handleLotDataFilterChange}
+          />
+        {/if}
+      </svelte:fragment>
+    </SignauxRail>
   </svelte:fragment>
 
   <!-- ── CANVAS : carte (socle GeoCityMapBase) ────────────────────────────── -->
@@ -1588,8 +1603,9 @@
     {/if}
   </GeoCityMapBase>
 
-  <!-- ── SEL droit : sélection + « Filtre Zones et Lots » (C7 : dans le drawer,
-       sous le bucket Signaux, au-dessus de Villes) ─────────────────────────── -->
+  <!-- ── SEL droit : contexte de sélection UNIQUEMENT (Ville active +
+       Signaux / Zones / Lots). Le « Filtre Zones et Lots » vit dans le rail
+       GAUCHE (entre Signaux et Villes). ──────────────────────────────────── -->
   <svelte:fragment slot="sel">
     <SignauxSelPanel
       {selectedCity}
@@ -1612,16 +1628,6 @@
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
-    >
-      <svelte:fragment slot="filters">
-        {#if selectedCity}
-          <LotDataFilterPanel
-            lots={displayedLots.features}
-            filter={lotDataFilter}
-            onChange={handleLotDataFilterChange}
-          />
-        {/if}
-      </svelte:fragment>
-    </SignauxSelPanel>
+    />
   </svelte:fragment>
 </ViewLayout>
