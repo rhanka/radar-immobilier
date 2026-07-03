@@ -29,6 +29,7 @@
   import {
     createSelectionBucketState,
     makeKey,
+    parseKey,
     selectionVisualState,
     type SelectionBucketState,
     type SelectionKey,
@@ -41,6 +42,7 @@
   } from "$lib/maps/signaux-map-geo.js";
   import {
     evaluatedLotScore,
+    facadeDisplay,
     formatArea,
     formatYesNo,
     lotZoneCode,
@@ -203,7 +205,30 @@
       : filteredZoneCodeSet
         ? `${visibleZoneCount}/${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`
         : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
-  $: visibleLots = filteredLots.slice(0, 80);
+  /** C4 — n° du lot focusé (fiche ouverte), pour l'inclure dans la liste capée. */
+  $: focusedLotNo = (() => {
+    const key = selectionState.focusedKey;
+    if (!key) return null;
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== "lot") return null;
+    const sep = parsed.id.indexOf("/");
+    return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
+  })();
+  // Cap DOM à 80 fiches, mais le lot FOCUSÉ (clic carte, C4) est TOUJOURS
+  // rendu : s'il dépasse le cap, il est remonté en tête de liste.
+  $: visibleLots = ensureFocusedLotVisible(filteredLots, focusedLotNo);
+
+  function ensureFocusedLotVisible(
+    all: LotFeature[],
+    noLot: string | null,
+  ): LotFeature[] {
+    const capped = all.slice(0, 80);
+    if (!noLot || capped.some((lot) => lot.properties.noLot === noLot)) {
+      return capped;
+    }
+    const focused = all.find((lot) => lot.properties.noLot === noLot);
+    return focused ? [focused, ...capped] : capped;
+  }
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
@@ -461,11 +486,32 @@
   }
 
   // ── Contrat d'interaction zone ↔ lot ↔ signal ─────────────────────────────
-  // État d'ouverture des accordéons Zones/Signaux : les liens croisés (badge
-  // zone d'un lot, signal citant une zone) déplient le bucket cible pour que
-  // la fiche focusée soit VISIBLE.
+  // État d'ouverture des accordéons Zones/Signaux/Lots : les liens croisés
+  // (badge zone d'un lot, signal citant une zone) ET la sélection carte (C4)
+  // déplient le bucket cible pour que la fiche focusée soit VISIBLE.
   let zonesBucketOpen = false;
   let signalsBucketOpen = false;
+  let lotsBucketOpen = false;
+
+  // C4 — la sélection carte ouvre la FICHE dans le drawer : quand le focus
+  // désigne une zone / un lot / un signal, on déplie son bucket et on scrolle
+  // la fiche en vue (détail complet, pas un simple survol).
+  let bucketsEl: HTMLDivElement | null = null;
+  $: void revealFocusedEntity(selectionState.focusedKey);
+  async function revealFocusedEntity(key: SelectionKey | null): Promise<void> {
+    if (!key) return;
+    const parsed = parseKey(key);
+    if (!parsed) return;
+    if (parsed.kind === "zone") zonesBucketOpen = true;
+    else if (parsed.kind === "lot") lotsBucketOpen = true;
+    else if (parsed.kind === "signal") signalsBucketOpen = true;
+    else return;
+    await tick();
+    const el = bucketsEl?.querySelector<HTMLElement>(
+      `[data-entity-key="${cssAttrEscape(key)}"]`,
+    );
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
   /** Type (kind) résolu de la zone — null si indéterminé (affiché « — »). */
   function zoneTypeLabel(zone: GeoZoneFeature): string | null {
@@ -618,44 +664,7 @@
       </div>
     {/if}
 
-    <div class="sel-buckets">
-      <details class="sel-bucket" open>
-        <summary class="sel-bucket-head">
-          <span class="sel-bucket-name">Villes</span>
-          <span class="rail-row-count">1</span>
-        </summary>
-        <div class="sel-entities">
-          {#if cityKey}
-            {@const cityVisual = visual(selectionState, cityKey)}
-            <button
-              type="button"
-              class="sel-entity-head"
-              class:sel-entity-head--selected={cityVisual.selected}
-              class:sel-entity-head--focused={cityVisual.focused}
-              class:sel-entity-head--dimmed={cityVisual.dimmed}
-              on:click={() => toggleEntity(cityKey)}
-            >
-              <span class="sel-entity-label">{selectedCity.municipality.name}</span>
-              <span class="sel-entity-toggle" aria-hidden="true">▾</span>
-            </button>
-            {#if cityVisual.focused}
-              <div class="sel-entity-detail">
-                <div class="entity-meta">
-                  <span class="entity-meta-key">Slug</span>
-                  <code class="entity-meta-val">{selectedCity.municipality.slug}</code>
-                  {#if selectedCity.municipality.mrc}
-                    <span class="entity-meta-key">MRC</span>
-                    <span class="entity-meta-val">{selectedCity.municipality.mrc}</span>
-                  {/if}
-                  <span class="entity-meta-key">Signaux</span>
-                  <span class="entity-meta-val">{selectedCity.signalCount6m}</span>
-                </div>
-              </div>
-            {/if}
-          {/if}
-        </div>
-      </details>
-
+    <div class="sel-buckets" bind:this={bucketsEl}>
       <!-- #8 : replié par défaut ; s'ouvre aussi via un lien croisé zone→signal -->
       <details class="sel-bucket" bind:open={signalsBucketOpen}>
         <summary class="sel-bucket-head">
@@ -847,6 +856,47 @@
         </div>
       </details>
 
+      <!-- C7 — « Filtre Zones et Lots » : SOUS le bucket Signaux, AU-DESSUS de
+           Villes. Le contenu (LotDataFilterPanel) est fourni par le parent. -->
+      <slot name="filters" />
+
+      <details class="sel-bucket" open>
+        <summary class="sel-bucket-head">
+          <span class="sel-bucket-name">Villes</span>
+          <span class="rail-row-count">1</span>
+        </summary>
+        <div class="sel-entities">
+          {#if cityKey}
+            {@const cityVisual = visual(selectionState, cityKey)}
+            <button
+              type="button"
+              class="sel-entity-head"
+              class:sel-entity-head--selected={cityVisual.selected}
+              class:sel-entity-head--focused={cityVisual.focused}
+              class:sel-entity-head--dimmed={cityVisual.dimmed}
+              on:click={() => toggleEntity(cityKey)}
+            >
+              <span class="sel-entity-label">{selectedCity.municipality.name}</span>
+              <span class="sel-entity-toggle" aria-hidden="true">▾</span>
+            </button>
+            {#if cityVisual.focused}
+              <div class="sel-entity-detail">
+                <div class="entity-meta">
+                  <span class="entity-meta-key">Slug</span>
+                  <code class="entity-meta-val">{selectedCity.municipality.slug}</code>
+                  {#if selectedCity.municipality.mrc}
+                    <span class="entity-meta-key">MRC</span>
+                    <span class="entity-meta-val">{selectedCity.municipality.mrc}</span>
+                  {/if}
+                  <span class="entity-meta-key">Signaux</span>
+                  <span class="entity-meta-val">{selectedCity.signalCount6m}</span>
+                </div>
+              </div>
+            {/if}
+          {/if}
+        </div>
+      </details>
+
       <!-- #8 : replié par défaut ; s'ouvre aussi via le badge zone d'un lot -->
       <details class="sel-bucket" bind:open={zonesBucketOpen}>
         <summary class="sel-bucket-head">
@@ -891,7 +941,7 @@
               {@const key = zoneKey(zone)}
               {#if key}
                 {@const zoneVisual = visual(selectionState, key)}
-                <div class="sel-entity-bar">
+                <div class="sel-entity-bar" data-entity-key={key}>
                   <button
                     type="button"
                     class="sel-entity-head"
@@ -969,7 +1019,7 @@
         </div>
       </details>
 
-      <details class="sel-bucket">
+      <details class="sel-bucket" bind:open={lotsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Lots</span>
           <!-- #6 : "–" pendant le chargement de la couche LOTS -->
@@ -1000,7 +1050,7 @@
               {@const key = lotKey(lot)}
               {#if key}
                 {@const lotVisual = visual(selectionState, key)}
-                <div class="sel-entity-bar">
+                <div class="sel-entity-bar" data-entity-key={key}>
                   <button
                     type="button"
                     class="sel-entity-head"
@@ -1043,6 +1093,24 @@
                           <span class="entity-meta-key">Type de zone</span>
                           <span class="entity-meta-val">{lotZoneKind(lot)}</span>
                         {/if}
+                        <!-- C5 — fiche enrichie : adresse + code postal (« — »
+                             tant que geo ne les expose pas — câblés pour
+                             remonter dès l'arrivée de la propriété). -->
+                        <span class="entity-meta-key">Adresse</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={!lot.properties.adresse}
+                          title={lot.properties.adresse ?? undefined}
+                        >
+                          {lot.properties.adresse ?? "—"}
+                        </span>
+                        <span class="entity-meta-key">Code postal</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={!lot.properties.codePostal}
+                        >
+                          {lot.properties.codePostal ?? "—"}
+                        </span>
                         <span class="entity-meta-key">Multifamilial 4+</span>
                         <span
                           class="entity-meta-val"
@@ -1056,6 +1124,15 @@
                           class:entity-meta-val--missing={lot.properties.superficieM2 === undefined || lot.properties.superficieM2 === null}
                         >
                           {formatArea(lot.properties.superficieM2)}
+                        </span>
+                        <!-- C5 — façade : mesurée par la source sinon estimée
+                             depuis la géométrie publique (lot-fiche-utils). -->
+                        <span class="entity-meta-key">Façade</span>
+                        <span
+                          class="entity-meta-val"
+                          class:entity-meta-val--missing={facadeDisplay(lot) === "—"}
+                        >
+                          {facadeDisplay(lot)}
                         </span>
                         {#if lot.properties.tod !== undefined}
                           <span class="entity-meta-key">Périmètre TOD</span>
