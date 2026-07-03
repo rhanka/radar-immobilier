@@ -574,3 +574,33 @@ function readString(value: unknown): string | null {
 function uniqueStrings(values: readonly string[]): string[] {
   return Array.from(new Set(values));
 }
+
+// ── C3 — décoration `isSelected` (exergue orange des sélections carte) ────────
+
+/**
+ * Marque `properties.isSelected` sur les features d'une collection GeoJSON.
+ * Consommé par les couches d'exergue du socle (filtre `isSelected == true`,
+ * contour orange fluo). Générique zones/lots : le prédicat reçoit les
+ * properties et décide (une seule sélection à la fois — C3).
+ */
+export function decorateSelectedFlag<
+  C extends {
+    type: "FeatureCollection";
+    features: Array<{ properties: { isSelected?: boolean } }>;
+  },
+>(
+  collection: C,
+  isSelected: (properties: C["features"][number]["properties"]) => boolean,
+): C {
+  if (collection.features.length === 0) return collection;
+  return {
+    ...collection,
+    features: collection.features.map((feature) => ({
+      ...feature,
+      properties: {
+        ...feature.properties,
+        isSelected: isSelected(feature.properties),
+      },
+    })) as C["features"],
+  };
+}

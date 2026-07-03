@@ -58,7 +58,7 @@
     loadSignauxZones,
   } from "$lib/maps/signaux-zones-loader.js";
   import {
-    fetchLots,
+    fetchAllLots,
     type LotFeatureCollection,
     type LotsResponse,
   } from "$lib/maps/lots-client.js";
@@ -72,6 +72,7 @@
     makeKey,
     parseKey,
     setFocus,
+    toggleExclusiveSelection,
     toggleSelection,
     type SelectionBucketState,
     type SelectionKey,
@@ -86,6 +87,7 @@
   } from "$lib/router/router.js";
   import {
     decorateLotsWithSignalProjection,
+    decorateSelectedFlag,
     extractSignalLotRefs,
     extractSignalZoneRefs,
     fallbackZoneCode,
@@ -96,6 +98,10 @@
     CITY_FALLBACK_ZONE_PREFIX,
     FILTER_DIMMED_OPACITY,
   } from "$lib/maps/signaux-map-geo.js";
+  import {
+    withHoverNeutralTint,
+    withHoverOpacityBoost,
+  } from "$lib/maps/hover-paint.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
   import {
     lotLineColorExpression,
@@ -124,6 +130,7 @@
   import {
     decorateZonesWithKindColor,
     zoneKindLegend,
+    ZONE_KIND_NEUTRAL,
   } from "$lib/maps/zone-kind-style.js";
   import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
   import LotDataFilterPanel from "$lib/components/maps/LotDataFilterPanel.svelte";
@@ -333,14 +340,6 @@
       : EMPTY_LOTS;
   }
 
-  function hasSelectedKind(kind: string): boolean {
-    if (selectionState.focusedKey?.startsWith(`${kind}:`)) return true;
-    for (const key of selectionState.selectedKeys) {
-      if (key.startsWith(`${kind}:`)) return true;
-    }
-    return false;
-  }
-
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
   /** Nœuds filtrés selon la clé active — miroir côté carte de SignauxSelPanel. */
@@ -371,18 +370,30 @@
     ? navSignals.findIndex((n) => n.id === activeEvidence!.nodeId)
     : -1;
 
-  $: activeGeoLevel = hasSelectedKind("zone")
-    ? "Zone"
-    : selectedCity
-      ? "Ville"
-      : "Province";
+  /**
+   * Niveau géo ACTIF du drill (Province / Ville / Zone). Les dépendances
+   * (`selectionState`, `selectedCity`) sont passées EN PARAMÈTRES — même
+   * contrat que `visual()` dans SignauxSelPanel : en mode legacy Svelte 5,
+   * une dépendance lue seulement DANS le corps d'une fonction laisse le
+   * réactif périmé (le segment restait « Province » après un deep-link ville,
+   * rendant le clic « Province » — et donc le dézoom C9 — inopérant).
+   */
+  function computeGeoLevel(
+    state: SelectionBucketState,
+    city: CityMapEntry | null,
+  ): string {
+    const zoneSelected =
+      state.focusedKey?.startsWith("zone:") ||
+      [...state.selectedKeys].some((key) => key.startsWith("zone:"));
+    if (zoneSelected) return "Zone";
+    return city ? "Ville" : "Province";
+  }
 
-  /** True si la ville sélectionnée a des zones géo configurées (pas juste un fallback vide). */
-  $: zonesConfigured = !!(
-    zonesResponse &&
-    zonesResponse.zoneCount > 0 &&
-    zonesResponse.featureCollection.features.length > 0
-  );
+  // PAS de `$: activeGeoLevel = …` : ce statement est déclaré AVANT le
+  // `$: applyGeoRoute(...)` qui assigne selectedCity pendant le flush — en
+  // legacy Svelte 5 il resterait périmé (« Province » après un deep-link
+  // ville). Le niveau actif est donc évalué à la demande : dans le TEMPLATE
+  // (expression re-rendue à chaque invalidation) et au clic de segment.
 
   $: if (geoRoute && allEntries.length > 0) {
     void applyGeoRoute(geoRoute);
@@ -504,17 +515,31 @@
     ] as ExpressionSpecification;
   }
 
-  /** Segments du drill Province / Ville / Zone (Zone grisée si non configurée). */
-  $: zoneDrillDisabled = selectedCity !== null && !zonesConfigured;
-  $: geoSegments = [
-    { label: "Province" },
-    { label: "Ville" },
-    {
-      label: "Zone",
-      disabled: zoneDrillDisabled,
-      ariaLabel: zoneDrillDisabled ? "Zone (zones non configurées)" : "Zone",
-    },
-  ] as GeoSegment[];
+  /**
+   * Segments du drill Province / Ville / Zone (Zone grisée si non configurée).
+   * Fonction PURE évaluée dans le template (mêmes raisons que computeGeoLevel :
+   * un `$:` déclaré avant applyGeoRoute resterait périmé après un deep-link).
+   */
+  function buildGeoSegments(
+    city: CityMapEntry | null,
+    zonesRes: GeoZonesResponse | null,
+  ): GeoSegment[] {
+    const configured = !!(
+      zonesRes &&
+      zonesRes.zoneCount > 0 &&
+      zonesRes.featureCollection.features.length > 0
+    );
+    const zoneDisabled = city !== null && !configured;
+    return [
+      { label: "Province" },
+      { label: "Ville" },
+      {
+        label: "Zone",
+        disabled: zoneDisabled,
+        ariaLabel: zoneDisabled ? "Zone (zones non configurées)" : "Zone",
+      },
+    ];
+  }
 
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
   $: if (mapReady && filteredDetailNodes !== undefined) {
@@ -569,10 +594,12 @@
   }
 
   /**
-   * #13 — Retour à l'échelle province : cadre la caméra sur l'étendue du Québec.
-   * Symétrique de `flyToCity` / `zoomToZone` pour la transition « Province ».
+   * #13 / C9 — Retour à l'échelle province : restaure le CADRAGE EXACT du
+   * primo-chargement (viewport mémorisé par le socle). Repli défensif :
+   * fitBounds sur l'étendue du Québec si rien n'a été capturé.
    */
   function flyToProvince(): void {
+    if (mapApi?.resetToInitialView({ duration: 800 })) return;
     mapApi?.fitMapToBounds(QUEBEC_PROVINCE_BOUNDS, { maxZoom: 7, duration: 800 });
   }
 
@@ -604,6 +631,10 @@
   function handleMapReady(api: GeoCityMapApi): void {
     mapApi = api;
     mapReady = true;
+    // Restauration d'URL (deep-link /geo/city/…) : si une ville est déjà
+    // sélectionnée quand la carte devient prête, le flyTo de selectCity est
+    // parti dans le vide (mapApi encore null) — on cadre la ville maintenant.
+    if (selectedCity) flyToCity(selectedCity);
   }
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
@@ -728,6 +759,8 @@
    * Zone → sélectionner la première zone disponible (si zones configurées)
    */
   function handleGeoLevelClick(level: string): void {
+    // Niveau actif recalculé AU CLIC (jamais périmé — cf. computeGeoLevel).
+    const activeGeoLevel = computeGeoLevel(selectionState, selectedCity);
     if (level === activeGeoLevel) return;
     if (level === "Province") {
       // Dézoom → vue province (bug #4). On REMET L'URL au niveau `region` (en
@@ -775,9 +808,11 @@
       // Re-clic sur l'item focusé → referme le détail, conserve la sélection.
       selectionState = setFocus(selectionState, null);
     } else {
-      // Clic sur un autre item → l'ajouter aux sélectionnés si absent, puis focaliser.
+      // Clic sur un autre item → l'ajouter aux sélectionnés si absent, puis
+      // focaliser. C3 : zone/lot passent par la sélection EXCLUSIVE (une seule
+      // sélection géo à la fois) ; signaux/ville gardent la sélection multi.
       if (!selectionState.selectedKeys.has(key)) {
-        selectionState = toggleSelection(selectionState, key);
+        selectionState = toggleExclusiveSelection(selectionState, key);
       }
       selectionState = setFocus(selectionState, key);
     }
@@ -921,7 +956,9 @@
 
   function toggleMapSelection(key: SelectionKey): void {
     const wasSelected = selectionState.selectedKeys.has(key);
-    selectionState = toggleSelection(selectionState, key);
+    // C3 — sélection EXCLUSIVE : une seule zone OU un seul lot à la fois
+    // (sélectionner un lot désélectionne la zone et réciproquement).
+    selectionState = toggleExclusiveSelection(selectionState, key);
     selectionState = setFocus(selectionState, wasSelected ? null : key);
     if (!wasSelected) {
       syncRouteForSelectionKey(key);
@@ -980,7 +1017,8 @@
 
   function selectBucketKey(key: SelectionKey): void {
     if (!selectionState.selectedKeys.has(key)) {
-      selectionState = toggleSelection(selectionState, key);
+      // C3 — sélection exclusive pour les clés géo (zone/lot).
+      selectionState = toggleExclusiveSelection(selectionState, key);
     }
     selectionState = setFocus(selectionState, key);
     updateGeoLayers();
@@ -1004,7 +1042,20 @@
 
   function syncRouteForSelectionKey(key: SelectionKey): void {
     const parsed = parseKey(key);
-    if (!parsed || parsed.kind !== "zone") return;
+    if (!parsed) return;
+    // C3 — sélectionner un LOT désélectionne la zone : si l'URL est au niveau
+    // zone, on la ramène au niveau ville (cohérence URL ↔ sélection exclusive).
+    if (parsed.kind === "lot") {
+      if (geoRoute?.level === "zone") {
+        navigateToGeoRoute({
+          level: "city",
+          citySlug: geoRoute.citySlug,
+          state: { mode: geoRoute.state.mode ?? "signal" },
+        });
+      }
+      return;
+    }
+    if (parsed.kind !== "zone") return;
     const separatorIndex = parsed.id.indexOf("/");
     if (separatorIndex <= 0 || separatorIndex === parsed.id.length - 1) return;
     const citySlug = parsed.id.slice(0, separatorIndex);
@@ -1020,6 +1071,9 @@
   // ── Opacités des aplats zone (teintes DOUCES : les lots restent lisibles) ──
   const ZONE_BASE_OPACITY = 0.25;
   const ZONE_FALLBACK_OPACITY = 0.15;
+  // C6 — planchers d'opacité au SURVOL (teinte accentuée, jamais réduite).
+  const ZONE_HOVER_MIN_OPACITY = 0.55;
+  const LOT_HOVER_MIN_OPACITY = 0.5;
   /** Zones contenant des lots 4+ quand le filtre données 4+/Priorité est actif. */
   const ZONE_4PLUS_HIGHLIGHT_OPACITY = 0.45;
 
@@ -1047,8 +1101,9 @@
       if (hasSignalFocus) {
         opacity = signalZoneRefs.has(code) ? 0.85 : 0.15;
       } else if (hasZoneSelection) {
-        // Une zone est sélectionnée : elle ressort, les autres s'estompent.
-        opacity = geoKeys.has(key) ? 0.65 : 0.12;
+        // C3 — la zone sélectionnée ressort (teinte accentuée), les autres
+        // s'estompent ; l'exergue orange est portée par la couche highlight.
+        opacity = geoKeys.has(key) ? 0.85 : 0.12;
       } else if (fourPlusKeys.has(zoneRefComparableKey(code))) {
         opacity = ZONE_4PLUS_HIGHLIGHT_OPACITY;
       } else {
@@ -1149,20 +1204,50 @@
     // Élément monté sous le ThemeProvider (= conteneur carte du socle) pour
     // résoudre les tokens DS des expressions de couleur zone/lot (parité stricte).
     const el = mapApi.themeElement;
+    // C3 — clés géo sélectionnées : décorent `isSelected` (exergue orange du
+    // socle) sur la zone OU le lot sélectionné (sélection exclusive).
+    const geoKeys = geoSelectedKeys(selectionState);
     // Teinte par kind portée PAR FEATURE (kindColor) : robuste aux codes
     // dupliqués et aux données arrivant après la création de la couche.
-    const zonesForPaint = decorateZonesWithKindColor(
-      zones,
-      computeFourPlusZoneKeys(),
+    const zonesForPaint = decorateSelectedFlag(
+      decorateZonesWithKindColor(zones, computeFourPlusZoneKeys(), el),
+      (props) =>
+        geoKeys.has(makeKey("zone", `${props.citySlug}/${props.code}`)),
+    );
+    const citySlug = selectedCity?.municipality.slug ?? null;
+    const lotsForPaint = decorateSelectedFlag(lots, (props) => {
+      const slug = props.citySlug ?? citySlug;
+      return slug !== null && slug !== undefined
+        ? geoKeys.has(makeKey("lot", `${slug}/${props.noLot}`))
+        : false;
+    });
+    // C6 — survol : teinte accentuée (opacité remontée) ; les teintes BLANCHES
+    // (« Type non déterminé », « Sans indicateur ») virent au gris clair.
+    const zoneNeutralColor = resolveMapColor(
+      ZONE_KIND_NEUTRAL.token,
+      ZONE_KIND_NEUTRAL.fallback,
       el,
     );
+    const lotNeutralColor = resolveMapColor(LOT_NEUTRAL_TOKEN, LOT_NEUTRAL_FALLBACK, el);
     mapApi.syncGeoLayers({
       zones: zonesForPaint,
-      lots,
-      zoneFillColor: zoneKindFillColorExpression(el),
-      zoneFillOpacity: buildZoneOpacityExpression(zones.features),
-      lotFillColor: signauxLotFillColorExpression(el),
-      lotFillOpacity: buildLotOpacityExpression(lots),
+      lots: lotsForPaint,
+      zoneFillColor: withHoverNeutralTint(
+        zoneKindFillColorExpression(el),
+        zoneNeutralColor,
+      ),
+      zoneFillOpacity: withHoverOpacityBoost(
+        buildZoneOpacityExpression(zones.features),
+        ZONE_HOVER_MIN_OPACITY,
+      ),
+      lotFillColor: withHoverNeutralTint(
+        signauxLotFillColorExpression(el),
+        lotNeutralColor,
+      ),
+      lotFillOpacity: withHoverOpacityBoost(
+        buildLotOpacityExpression(lots),
+        LOT_HOVER_MIN_OPACITY,
+      ),
       lotLineColor: lotLineColorExpression(el),
     });
   }
@@ -1258,9 +1343,19 @@
     })();
 
     // ── Couche LOTS (waiter propre) ──────────────────────────────────────────
+    // C8 — TOUS les lots de la ville (parité référence) : pagination OGC
+    // multi-pages fusionnée (fetchAllLots), peinte PROGRESSIVEMENT à chaque
+    // page reçue. Garde anti-course inchangée (lease + AbortSignal).
     const lotsTask = (async () => {
       try {
-        const value = await fetchLots(citySlug, { limit: 500, signal: lease.signal });
+        const value = await fetchAllLots(citySlug, {
+          signal: lease.signal,
+          onPage: (partial) => {
+            if (!lease.isCurrent()) return;
+            lotsResponse = partial;
+            updateGeoLayers();
+          },
+        });
         if (!lease.isCurrent()) return;
         lotsResponse = value;
         if (!value.ok || value.source === "none") {
@@ -1335,7 +1430,7 @@
   });
 </script>
 
-<ViewLayout controlsWidth="w-80" stickyControlsFooter selWidth="w-80">
+<ViewLayout controlsWidth="w-80" selWidth="w-80">
   <!-- ── RAIL gauche : recherche + facets + accordéon villes ─────────────── -->
   <svelte:fragment slot="controls">
     {#if loadError}
@@ -1358,12 +1453,33 @@
     />
   </svelte:fragment>
 
-  <!-- Légende épinglée en bas du rail : choroplèthe signaux + hiérarchie lots
-       + teintes de zonage (kinds réellement présents dans la ville active). -->
-  <svelte:fragment slot="controls-footer">
-    <div class="space-y-3 p-4">
+  <!-- ── CANVAS : carte (socle GeoCityMapBase) ────────────────────────────── -->
+  <!--
+    La couleur choroplèthe = nb de signaux (fillColorExpression). Le socle porte
+    l'init MapLibre, le drill segmenté, la caméra et l'échafaudage zone/lot ;
+    cette vue ne pilote que les données + expressions métier. Iso-comportement.
+  -->
+  <GeoCityMapBase
+    basemap="neutral-gray"
+    {fillColorExpression}
+    {fillOpacityExpression}
+    activeCitySlug={selectedCity?.municipality.slug ?? null}
+    segments={buildGeoSegments(selectedCity, zonesResponse)}
+    activeSegment={computeGeoLevel(selectionState, selectedCity)}
+    onSegmentClick={handleGeoLevelClick}
+    onCityClick={handleCityClick}
+    onZoneClick={handleZoneClick}
+    onLotClick={handleLotClick}
+    onReady={handleMapReady}
+  >
+    <!-- C1 — LÉGENDES SUR LA CARTE (comme la vue Sources), plus dans le rail.
+         Ville active : bloc « Zonage » AU-DESSUS du bloc « Lots ». -->
+    <svelte:fragment slot="overlay-bottom-left">
       {#if !selectedCity}
-        <div>
+        <div
+          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+          data-testid="map-legend-signaux"
+        >
           <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
           <ul class="space-y-1">
             {#each [
@@ -1380,7 +1496,26 @@
           </ul>
         </div>
       {:else}
-        <div>
+        {#if zoneLegendEntries.length > 0}
+          <div
+            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            data-testid="map-legend-zonage"
+          >
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
+            <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
+              {#each zoneLegendEntries as item (item.label)}
+                <li class="flex items-center gap-2 text-xs text-slate-600">
+                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                  {item.label}
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+        <div
+          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+          data-testid="map-legend-lots"
+        >
           <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</p>
           <ul class="space-y-1">
             {#each lotLegendEntries as item (item.label)}
@@ -1391,41 +1526,9 @@
             {/each}
           </ul>
         </div>
-        {#if zoneLegendEntries.length > 0}
-          <div>
-            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
-            <ul class="grid grid-cols-2 gap-x-2 gap-y-1">
-              {#each zoneLegendEntries as item (item.label)}
-                <li class="flex items-center gap-2 text-xs text-slate-600">
-                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
-                  {item.label}
-                </li>
-              {/each}
-            </ul>
-          </div>
-        {/if}
       {/if}
-    </div>
-  </svelte:fragment>
+    </svelte:fragment>
 
-  <!-- ── CANVAS : carte (socle GeoCityMapBase) ────────────────────────────── -->
-  <!--
-    La couleur choroplèthe = nb de signaux (fillColorExpression). Le socle porte
-    l'init MapLibre, le drill segmenté, la caméra et l'échafaudage zone/lot ;
-    cette vue ne pilote que les données + expressions métier. Iso-comportement.
-  -->
-  <GeoCityMapBase
-    {fillColorExpression}
-    {fillOpacityExpression}
-    activeCitySlug={selectedCity?.municipality.slug ?? null}
-    segments={geoSegments}
-    activeSegment={activeGeoLevel}
-    onSegmentClick={handleGeoLevelClick}
-    onCityClick={handleCityClick}
-    onZoneClick={handleZoneClick}
-    onLotClick={handleLotClick}
-    onReady={handleMapReady}
-  >
     <svelte:fragment slot="overlay-top-left">
       {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0)}
         <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
@@ -1485,56 +1588,40 @@
     {/if}
   </GeoCityMapBase>
 
-  <!-- ── SEL droit : filtres DONNÉES zones-lots (parité #315) + sélection ──── -->
+  <!-- ── SEL droit : sélection + « Filtre Zones et Lots » (C7 : dans le drawer,
+       sous le bucket Signaux, au-dessus de Villes) ─────────────────────────── -->
   <svelte:fragment slot="sel">
-    <div class="sel-stack">
-      {#if selectedCity}
-        <LotDataFilterPanel
-          lots={displayedLots.features}
-          filter={lotDataFilter}
-          onChange={handleLotDataFilterChange}
-        />
-      {/if}
-      <div class="sel-stack-body">
-        <SignauxSelPanel
-          {selectedCity}
-          {detailNodes}
-          {detailLoading}
-          {detailError}
-          {zonesLoading}
-          {zonesError}
-          {lotsLoading}
-          {lotsError}
-          {zonesResponse}
-          {lotsResponse}
-          {selectionState}
-          {activeSubsetKey}
-          onClear={() => clearSelection()}
-          onToggleKey={toggleBucketKey}
-          onOpenDocument={openDocument}
-          onOpenEvidence={openEvidence}
-          onRetryDetail={retryDetail}
-          onRetryGeo={retryGeo}
-          hoveredSignalId={hoveredEvidenceSignalId}
-          onHoverSignal={setHoveredEvidenceSignal}
-        />
-      </div>
-    </div>
+    <SignauxSelPanel
+      {selectedCity}
+      {detailNodes}
+      {detailLoading}
+      {detailError}
+      {zonesLoading}
+      {zonesError}
+      {lotsLoading}
+      {lotsError}
+      {zonesResponse}
+      {lotsResponse}
+      {selectionState}
+      {activeSubsetKey}
+      onClear={() => clearSelection()}
+      onToggleKey={toggleBucketKey}
+      onOpenDocument={openDocument}
+      onOpenEvidence={openEvidence}
+      onRetryDetail={retryDetail}
+      onRetryGeo={retryGeo}
+      hoveredSignalId={hoveredEvidenceSignalId}
+      onHoverSignal={setHoveredEvidenceSignal}
+    >
+      <svelte:fragment slot="filters">
+        {#if selectedCity}
+          <LotDataFilterPanel
+            lots={displayedLots.features}
+            filter={lotDataFilter}
+            onChange={handleLotDataFilterChange}
+          />
+        {/if}
+      </svelte:fragment>
+    </SignauxSelPanel>
   </svelte:fragment>
 </ViewLayout>
-
-<style>
-  /* Rail droit : filtres données (haut, hauteur fixe) + panneau Sélection
-     (reste de la hauteur, scroll interne). */
-  .sel-stack {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-  }
-
-  .sel-stack-body {
-    flex: 1;
-    min-height: 0;
-  }
-</style>
