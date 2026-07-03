@@ -33,6 +33,7 @@
     navigateTo,
     initRouter,
   } from "$lib/router/router.js";
+  import { initEvaluationBetaShortcut } from "$lib/state/beta.js";
 
   // Vue par défaut : pilotée par le routeur (synchronisé avec l'URL hash)
   $: activeView = $activeRouteView;
@@ -141,14 +142,32 @@
 
   // Cleanup du listener popstate du routeur
   let cleanupRouter: (() => void) | undefined;
+  // Cleanup du raccourci beta global (Ctrl+Shift+X — révèle Évaluation)
+  let cleanupBetaShortcut: (() => void) | undefined;
 
   onMount(async () => {
     cleanupRouter = initRouter();
+    // Raccourci beta GLOBAL (monté une fois, comme le routeur) : Ctrl+Shift+X
+    // bascule le flag `radar.beta.evaluation` (persisté) qui révèle/masque
+    // l'entrée « Évaluation » dans TopNav. Effets de navigation :
+    //   - à l'activation, on route directement vers la vue Évaluation
+    //     (feedback immédiat de la feature révélée) ;
+    //   - à la désactivation, si on est SUR Évaluation, on revient à Signaux
+    //     (pour ne pas rester sur une vue désormais masquée de la nav — la
+    //     route #/evaluation reste néanmoins valide en accès direct).
+    cleanupBetaShortcut = initEvaluationBetaShortcut((enabled) => {
+      if (enabled) {
+        navigateTo("evaluation");
+      } else if (activeView === "evaluation") {
+        navigateTo("signaux");
+      }
+    });
     await authStore.checkSession();
   });
 
   onDestroy(() => {
     cleanupRouter?.();
+    cleanupBetaShortcut?.();
   });
 </script>
 
