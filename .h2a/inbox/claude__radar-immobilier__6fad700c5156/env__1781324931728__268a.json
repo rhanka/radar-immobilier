@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781324931728:268a",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0 — LOT 1 (24 grosses villes deja sur SCW) a 3/4+ (a1 5/6). Verif post-upload OK (les agents confirment graph/<slug>/latest.json ontology_version 2.0 via get-graph). Belles extractions: saint-jean-sur-richelieu (PIIA 250 logements + reserve fonciere Vieux-St-Jean), saint-amable (rezonage CEN+CPTAQ), saint-mathieu-de-beloeil 36n, sainte-marthe-sur-le-lac (scission M-316->M-317). Petit defaut: 1 agent a uploade aussi pv/<slug>/ (raw) -> pollution stockage benigne (graph/ correct), je purge pv/ en fin de run. Avancement ~24/575. J enchaine lot 2 (re-graphify-ready). NE re-projette pas PG."
+  },
+  "createdAt": "2026-06-13T04:28:51.728Z"
+}

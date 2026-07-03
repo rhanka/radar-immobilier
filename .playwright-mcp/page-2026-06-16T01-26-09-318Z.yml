@@ -1,0 +1,83 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner "Navigation principale" [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Primary" [ref=e8]:
+        - generic [ref=e9]:
+          - button "Signaux" [ref=e10] [cursor=pointer]:
+            - img [ref=e11]
+            - text: Signaux
+          - button "Opportunités" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+            - text: Opportunités
+          - button "Évaluation" [ref=e14] [cursor=pointer]:
+            - img [ref=e15]
+            - text: Évaluation
+          - button "Sources" [ref=e16] [cursor=pointer]:
+            - img [ref=e17]
+            - text: Sources
+          - button "Admin/Dev" [ref=e19] [cursor=pointer]:
+            - img [ref=e20]
+            - text: Admin/Dev
+            - img [ref=e21]
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Afficher les données carte Steve" [ref=e26] [cursor=pointer]: Réel
+        - generic "admin@sent-tech.ca" [ref=e28]: Admin
+        - button "Se déconnecter" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - text: Déconnexion
+    - generic [ref=e32]:
+      - complementary [ref=e33]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Signaux · Villes
+              - button "Actualiser" [disabled] [ref=e39]:
+                - img [ref=e40]
+            - generic [ref=e41]: Chargement…
+          - generic [ref=e42]:
+            - group [ref=e43]:
+              - generic "Signaux" [ref=e44] [cursor=pointer]:
+                - generic [ref=e45]: ▸
+                - generic [ref=e46]: Signaux
+              - generic [ref=e47]:
+                - generic [ref=e49] [cursor=pointer]:
+                  - checkbox "Zonage uniquement" [checked] [ref=e50]
+                  - generic [ref=e51]: Zonage uniquement
+                - generic [ref=e53] [cursor=pointer]:
+                  - checkbox "Multifamilial 4+" [ref=e54]
+                  - generic [ref=e55]:
+                    - text: Multifamilial 4+
+                    - generic [ref=e56]: nb unités ≥ 4 ou intensité haute
+                - generic [ref=e58] [cursor=pointer]:
+                  - checkbox "Signaux précoces" [ref=e59]
+                  - generic [ref=e60]:
+                    - text: Signaux précoces (approx.)
+                    - generic [ref=e61]: avis de motion / 1er projet
+            - group [ref=e62]:
+              - generic "Villes" [ref=e63] [cursor=pointer]:
+                - generic [ref=e64]: ▸
+                - generic [ref=e65]: Villes
+              - generic [ref=e66]:
+                - generic [ref=e70]:
+                  - img [ref=e72]
+                  - searchbox "Rechercher une ville" [ref=e75]
+                - list
+        - generic [ref=e77]:
+          - paragraph [ref=e78]: Légende — signaux / ville
+          - list [ref=e79]:
+            - listitem [ref=e80]: 6+ signaux
+            - listitem [ref=e82]: 3–5 signaux
+            - listitem [ref=e84]: 1–2 signaux
+            - listitem [ref=e86]: Aucun signal (0)
+      - generic [ref=e88]:
+        - generic [ref=e93]: Chargement de la carte…
+        - complementary [ref=e94]:
+          - generic [ref=e95]:
+            - generic [ref=e97]: SÉLECTION
+            - paragraph [ref=e98]: Cliquez sur une ville dans la liste ou sur la carte pour voir ses signaux.
+  - button "Ouvrir l'assistant radar" [ref=e99] [cursor=pointer]:
+    - img [ref=e100]

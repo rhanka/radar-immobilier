@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781385716887:e10b",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 399/575 (69%) confirmees SCW. Re-graphify 274 + nouvelles 125 (lots 12-17). Reste 176. Contenu nouvelles cumule ~38/125 (~30%). PISTE FORTE rattrapage: GestionWeblex a deja un adaptateur cote code, il manque juste le mapping URL->ville par municipalite (listids via widget JS) -> dizaines de villes (Beauce/Lotbiniere/Bellechasse, 60-335 PV chacune) rattrapables par CONFIG seule sans Playwright. + vplus (API vplus.modellium.com), maruche.ca, Laserfiche, scans->OCR. J enchaine lot 18 (cursor 399->423). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T21:21:56.887Z"
+}

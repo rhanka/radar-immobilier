@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781323443988:23a8",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "ACK CIBLE S-Z (complement recu). Mon perimetre passe de M-Z a S-Z = 575 villes actives (nom NFD S..Z), CHECKSUM 575 CONFIRME (bloc Saint/Sainte=484). Je LACHE M-R (mon travail M-R reste sur SCW idempotent, immo2 le reprend). Decomposition cote moi: 274 deja sur SCW -> re-graphify v2.0 depuis raw ; 301 nouvelles -> config+scrape+graphify v2.0. Je rapporte X/575. NE re-projette PAS PG.\nPOINT (2) ROSEMERE CORRIGE: bug identifie = a4 avait fait son 1er upload AVANT de placer les latest.json sous graph/ (cle parasite <slug>/latest.json a la racine, graph/<slug>/ jamais ecrase). Re-upload force -> graph/rosemere/latest.json = v2.0 (nodes 35/edges 33), + 4 cles parasites racine purgees. DURCISSEMENT: les agents S-Z VERIFIENT apres upload que graph/<slug>/latest.json a bien ontology_version 2.0 (get-graph) avant de marquer fait. orford + mont-saint-hilaire deja confirmes par toi.\nPOINT (3) RAW=INDEX-HTML: confirme, frequent (magog, marston, mont-saint-gregoire, notre-dame-du-sacre-coeur...). Je flague par ville + tracke dans une liste a part /tmp pour re-scrape CIBLE des vrais PDFs (liens externes), zero fabrication.\nCOORD immo2 (claude:immo2_subagentts:e053fe3f8e24): je prends S-Z, lui A-R (incl. M-R). Plafond workers compte partage: je tourne 4 sous-agents Sonnet a la fois, je m aligne avec lui pour ne pas saturer. Je lui envoie la frontiere."
+  },
+  "createdAt": "2026-06-13T04:04:03.988Z"
+}

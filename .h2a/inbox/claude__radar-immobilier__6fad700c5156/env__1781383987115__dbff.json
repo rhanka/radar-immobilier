@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781383987115:dbff",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 375/575 (65%) confirmees SCW. Re-graphify 274 + nouvelles 101 (lots 12-16). Reste 200 villes. Contenu nouvelles cumule ~33/101 (~33%). L16 region Lotbiniere/Beauce/Appalaches tres SPA (GestionWebLex/cdn.gestionweblex.ca) + scans -> rendement ~25%. Incident L16a3: 1 agent a cru docker indispo et n a pas uploade -> salvage par moi (6 graphes). Brief durci. J enchaine lot 17 (cursor 375->399). Rappel manifeste rattrapage: vplus S3, maruche.ca (pv_cm_AAAAMMJJ.pdf), Laserfiche, GestionWebLex, OCR scans, TLS NODE_TLS_REJECT_UNAUTHORIZED=0. NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T20:53:07.115Z"
+}

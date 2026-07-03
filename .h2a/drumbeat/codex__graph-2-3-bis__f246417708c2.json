@@ -1,0 +1,11 @@
+{
+  "instance": "codex:graph-2-3-bis:f246417708c2",
+  "workStatus": "working",
+  "stoppedAt": "2026-06-18T14:49:40.953Z",
+  "launchContext": {
+    "cwd": "/home/antoinefa/src/radar-immobilier",
+    "command": "autonomous graphify lot B recovery",
+    "resumeCommand": "continue autonomous baseline fetch/status for 432 cities from tmp/graphify-v23-h2a-graph-2-3-bis-20260618T123941Z"
+  },
+  "relanceCount": 0
+}

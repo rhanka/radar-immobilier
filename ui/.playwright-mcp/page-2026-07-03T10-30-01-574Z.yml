@@ -1,0 +1,424 @@
+- generic:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - navigation:
+                - generic [ref=f8e9]:
+                  - generic:
+                    - link:
+                      - /url: /new
+                      - img
+                  - generic [ref=f8e10]:
+                    - button [disabled]:
+                      - generic:
+                        - generic:
+                          - generic: 
+                          - generic: 
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - link:
+                          - /url: /new
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic: 
+                  - generic:
+                    - generic:
+                      - generic:
+                        - link:
+                          - /url: /recents
+                          - generic:
+                            - generic: 
+                          - text: Discussions
+                      - generic:
+                        - link:
+                          - /url: /projects
+                          - generic:
+                            - generic: 
+                          - text: Projets
+                      - generic:
+                        - generic:
+                          - link:
+                            - /url: /artifacts
+                            - generic:
+                              - generic: 
+                      - generic:
+                        - link:
+                          - /url: /customize
+                          - generic:
+                            - generic: 
+                    - generic:
+                      - generic:
+                        - generic:
+                          - heading [level=2]:
+                            - button [expanded]:
+                              - generic: 
+                      - list:
+                        - listitem:
+                          - generic:
+                            - link:
+                              - /url: /code
+                              - generic:
+                                - generic:
+                                  - generic: 
+                        - listitem:
+                          - generic:
+                            - generic:
+                              - link:
+                                - /url: /design?via=web_sidebar_products
+                                - generic:
+                                  - generic:
+                                    - generic: 
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - heading [level=2]:
+                                - button [expanded]:
+                                  - generic: 
+                            - list:
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/3eb08206-8668-4fb6-be10-d3c0ffea704b
+                                    - generic: Accès aux données du MCP radar immobilier
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/8fe6a319-e288-4512-a783-06ed17929238
+                                    - generic: Vérifier si le contact de Jiho Kang est légitime
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/fbb64f75-cb81-4e90-bbb7-50ece6bd26f9
+                                    - generic: Comparaison des meilleurs OCR pour zonage immobilier
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/61153b5b-e26d-42d6-a3f5-c63fdb0a37d9
+                                    - generic: Top
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/f4d68614-cbfd-43a9-afee-ef3eda46fb2a
+                                    - generic: Traitement d'une éraflure au visage
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/5746a42a-e04b-4f68-8670-59842733ec0b
+                                    - generic: Livre blanc IA pour la stratégie digitale Airbus Nord Amérique
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/a6d8fc73-251d-4828-b1d7-9f607b661367
+                                    - generic: COMAC aéronautique et technologies émergentes
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/60c4ec15-0aac-4780-bb81-513541dfc97f
+                                    - generic: Test
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/7c417ad0-887a-47ef-91f4-027c4e0606dd
+                                    - generic: Test message
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/dcb25a71-43ec-4a1c-84ba-2b8975259846
+                                    - generic: Vérification de fonctionnement
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/97abd340-c1a5-45da-9a9d-d7639b3aaa64
+                                    - generic: Vérification de fonctionnement
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/40930c5f-1123-4eac-a99d-ab5ec363f269
+                                    - generic: Quotas et débats
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/35df48c6-f8ae-4c8b-91e3-c87398d459f3
+                                    - generic: Sans titre
+                                    - text: Sans titre
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/15dd05bf-55c7-4aaa-bd27-9f7fcf4e160c
+                                    - generic: Sans titre
+                                    - text: Sans titre
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/810f8b42-4e00-412f-9334-b805dbc91fdb
+                                    - generic: Limitations légales d'un NDA
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/747a4192-4053-406f-b488-ea177bea347a
+                                    - generic: Épuisement des tokens
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/82557649-61c1-4ca1-afa4-25f6ff2cc7d4
+                                    - generic: Comparaison workstation dev 32Go RAM
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/16384194-8763-452a-8c1e-05f38bd53145
+                                    - generic: Coût mensuel de Gemma 4 QAT en tokens
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/80178101-cfa4-4974-8af6-30a68c0f772f
+                                    - generic: Vérification des tokens disponibles
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/f9e1ea13-fd72-405e-b2c7-500f5b3abd22
+                                    - generic: Sans titre
+                                    - text: Sans titre
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/b77cf619-4ac1-4f1a-8120-b2f5d948fa67
+                                    - generic: Schéma architecture GCP avec pods et lab données
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/e575111e-36fb-44be-9b07-24e1bc7994cf
+                                    - generic: Vérification des transactions Wave
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/928da50a-abfb-4bff-85e2-fe31f60b0bd1
+                                    - generic: Évaluation rationalisée des cas d'usage Gemini
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/bef81743-6d15-42ca-b8b2-124292611606
+                                    - generic: Entraîner un LLM pour le reasoning
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/c2e48849-0142-41fe-802a-08abbf9f059b
+                                    - generic: Monter Google Drive dans un répertoire pour CLI
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/d51cb2ee-19db-4c92-9069-222e3f119bc5
+                                    - generic: Afficher les lignes cachées dans Claude CLI
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/5af6d281-b44b-4fdf-9bee-48b901c59a78
+                                    - generic: Ontologies du parfum
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/77e4417b-0516-4475-9359-5a91b84d0609
+                                    - generic: Compatibilité OData MCP V4 avec ECC6
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/29802e0c-266d-4611-97a8-0bf286fa0d43
+                                    - generic: Utiliser Claude Cowork
+                              - listitem:
+                                - generic:
+                                  - link:
+                                    - /url: /chat/9afa982d-4fa4-49ad-a97d-20710df297d7
+                                    - generic: Intégrer des données externes dans les dashboards ClickUp
+                            - generic:
+                              - link:
+                                - /url: /recents
+                                - img
+                  - generic:
+                    - generic:
+                      - generic:
+                        - link:
+                          - /url: /downloads
+                          - generic:
+                            - generic:
+                              - generic: 
+                  - generic:
+                    - generic:
+                      - button:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: FA
+                        - generic:
+                          - img
+            - main:
+              - generic:
+                - generic:
+                  - generic:
+                    - navigation:
+                      - generic:
+                        - button:
+                          - generic:
+                            - generic:
+                              - img
+                        - generic: Personnaliser
+                      - generic:
+                        - link:
+                          - /url: /customize/skills
+                          - generic:
+                            - generic:
+                              - img
+                          - generic: Compétences
+                        - link:
+                          - /url: /customize/connectors
+                          - generic:
+                            - generic:
+                              - img
+                          - generic: Connecteurs
+                        - generic:
+                          - generic:
+                            - separator
+                            - generic:
+                              - generic: Plugins personnels
+                              - button:
+                                - generic:
+                                  - generic: 
+                            - generic:
+                              - paragraph: Donnez à Claude une expertise de niveau professionnel avec des plugins
+                              - button:
+                                - generic: Parcourir les plugins
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - heading [level=2]: Connecteurs
+                            - generic:
+                              - button:
+                                - generic:
+                                  - generic:
+                                    - img
+                              - button:
+                                - generic:
+                                  - generic:
+                                    - img
+                          - generic:
+                            - radiogroup:
+                              - radio [checked]: Tous
+                              - radio [checked]
+                              - radio: Connecté
+                              - radio
+                              - radio: Non connecté
+                              - radio
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - button [expanded]:
+                                    - generic:
+                                      - generic:
+                                        - img
+                                    - generic: Web
+                                - generic:
+                                  - generic:
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - generic: ClickUp
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - img
+                                      - generic:
+                                        - generic:
+                                          - generic: Gmail
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - img
+                                      - generic:
+                                        - generic:
+                                          - generic: Google Drive
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - generic: HubSpot
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - img
+                                      - generic:
+                                        - generic:
+                                          - generic: Intégration GitHub
+                              - generic:
+                                - generic:
+                                  - button [expanded]:
+                                    - generic:
+                                      - generic:
+                                        - img
+                                    - generic: Non connecté
+                                - generic:
+                                  - generic:
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - generic:
+                                            - paragraph: R
+                                      - generic:
+                                        - generic:
+                                          - generic: Radar immobilier
+                                          - generic:
+                                            - generic: PERSONNALISÉ
+                                      - generic:
+                                        - generic:
+                                          - img
+                                        - generic: Problème de connexion
+                                    - button:
+                                      - generic:
+                                        - generic:
+                                          - generic:
+                                            - paragraph: W
+                                      - generic:
+                                        - generic:
+                                          - generic: WaveApp
+                                          - generic:
+                                            - generic: PERSONNALISÉ
+                                      - generic:
+                                        - generic:
+                                          - img
+                                        - generic: Problème de connexion
+                        - generic:
+                          - generic:
+                            - generic:
+                              - button [expanded]:
+                                - generic:
+                                  - generic:
+                                    - img
+                            - generic:
+                              - generic:
+                                - paragraph: R
+                            - button:
+                              - generic: https://immo.sent-tech.ca/mcp
+                              - generic:
+                                - generic:
+                                  - img
+                                - generic:
+                                  - generic:
+                                    - img
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - img
+                                - generic: Problème de connexion
+                              - paragraph: La connexion a expiré. Vous pouvez vous reconnecter pour vous authentifier à nouveau.
+                            - button:
+                              - generic: Connecter
+      - list
+  - menu "Plus d'options pour Radar immobilier" [active] [ref=f8e1226]:
+    - menuitem "Supprimer" [ref=f8e1227] [cursor=pointer]

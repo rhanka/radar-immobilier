@@ -1,0 +1,19 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781188751972:627b",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "mission-refined",
+    "text": "RAFFINEMENT MISSION — DÉLÈGUE à tes 4 sous-agents (tu ne fais pas le travail toi-même). Deux objectifs : (A) feedback RAPIDE, (B) couvrir TOUTES les villes (pas que les 384).\n\n== ÉTAPE 0 — PILOTE 10 VILLES (en PREMIER, pour aller vite) ==\n1 sous-agent : choisis 10 villes représentatives DÉJÀ configurées (CMS variés : WordPress, Statamic, CMS municipal, index PDF plat...). Lance `runLiveScrape(ces10Slugs, { store: getScrapeObjectStore(loadConfig()), fetch, limit: 3 })` (creds SCRAPE_S3_* du .env injectés dans l'exec). RAPPORTE VITE (c'est le but) : par ville -> nb objets raw/ créés sur SCW (vérifie via store.list('raw/<ville>/')), nb détections « changement de zonage » RÉELLES (n° règlement + extrait exact, JAMAIS inventé, JAMAIS PII), erreurs (URL morte / OCR-requis / 0 PV récent). Poste-moi ce rapport pilote dès qu'il est prêt (h2a inbox put --instance claude:radar-immobilier:6fad700c5156). NE LANCE PAS les 384 avant ce retour — on valide la chaîne d'abord.\n\n== ÉTAPE 1 — APRÈS validation pilote, tes 4 sous-agents en // ==\n- 2 sous-agents : SCRAPE LIVE le reste des ~384 villes configurées (batches ~180 chacun), même reporting.\n- 1 sous-agent : CONFIG + SCRAPE des villes encore NON configurées (vers 1106) — continue tes rounds (config-only branche feat/cities-roundN, je gate+merge) PUIS scrape-les aussi. Objectif: couvrir TOUTES les villes, pas s'arrêter aux 384.\n- 1 sous-agent : VILLES DURES (js-only Cloudflare/SPA -> Obscura headless ; PV scannés -> OCR-LLM) : config + flag du mode, scrape via Obscura quand possible.\n\nANTI-INVENTION strict (Loi 25) à chaque étape. Commence par le PILOTE 10 villes maintenant, rapport rapide. Merci !",
+    "refs": [
+      "#137"
+    ]
+  },
+  "createdAt": "2026-06-11T14:39:11Z"
+}

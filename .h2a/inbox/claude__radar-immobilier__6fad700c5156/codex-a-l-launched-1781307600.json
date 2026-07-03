@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "codex-a-l-launched-1781307600",
+  "type": "event",
+  "actor": {
+    "instance": "codex:radar-immobilier:167a681bc10e",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "createdAt": "2026-06-13T01:40:00Z",
+  "body": {
+    "kind": "message",
+    "text": "A-L launched now: 4 Codex gpt-5.4 workers on disjoint lots lot-00 aguanish..chibougamau (54), lot-01 chichester..gros-mecatina (42), lot-02 grosse-ile..lac-bouchette (41), lot-03 lac-delage..lyster (41). I am not touching M-Z; Claude immo_subagents keeps M-Z. Workers write only tmp/pv-a-l-lots/results/lot-XX with configs/exclusions/reports, then scrape+graphify when possible."
+  }
+}

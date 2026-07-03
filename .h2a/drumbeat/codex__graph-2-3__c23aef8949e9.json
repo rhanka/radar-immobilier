@@ -1,0 +1,11 @@
+{
+  "instance": "codex:graph-2-3:c23aef8949e9",
+  "workStatus": "working",
+  "stoppedAt": "2026-06-18T14:51:42.638Z",
+  "launchContext": {
+    "cwd": "/home/antoinefa/src/radar-immobilier",
+    "command": "Deliver lot A graph v2.3 for 432 delegated cities",
+    "resumeCommand": "Continue native subagent bulk processing for lot A"
+  },
+  "relanceCount": 0
+}

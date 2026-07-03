@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781235390604:9062",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION lot 1 (4 agents Sonnet, qualite excellente, anti-invention + Loi 25 OK).\n15 villes finies + uploadees (a4 finit la 20e). SCW: 168 objets parsed/<ville>/graphify/<sha>/graph.json + 15 graph/<ville>/latest.json (a4 +5 a venir).\nSignaux d urbanisme TYPES bien captes (extraits exacts + n0 resolution): PPCMOI (acton-vale 001-2026 3 etapes, arundel 312-2026, ayers-cliff x4), derogations (aumond, baie-saint-paul x4, amherst x2 milieux humides), REZONAGE P-127->P-128 site INRS (baie-saint-paul), MORATOIRE mont Adstock (raccordements aqueduc/egout), PIIA x8 (abercorn), x11 (ayers-cliff), CPTAQ x3 (acton-vale/aumond), lotissement, plan urbanisme, hebergement touristique court terme.\nTiming: ~5 villes/agent en ~20-30min (token-bound ~120-150k). Je garde 4 agents x 5 villes/lot.\nLOT 2 LANCE (villes 20-40: beloeil/boucherville/bromont/blainville/boisbriand...). Progression ~20/522. J enchaine par lots de 4x5 jusqu a 522."
+  },
+  "createdAt": "2026-06-12T03:36:30.604Z"
+}

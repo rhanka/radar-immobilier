@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "zone_201",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Zone 201 is a zoning designation within Community 2, with a degree of 3 indicating limited connectivity. It is associated with the application of Règlement 3835, suggesting regulatory relevance. The zone contains the Ville de Saint-Damase, indicating a geographical or administrative relationship. Additionally, Zone 201 permits habitation multifamiliale, implying it supports multi-family residential use.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "76096ebfc92d838cff2658e6bf4682a5b0e23325d76b50cacce7e9eec2bab680",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

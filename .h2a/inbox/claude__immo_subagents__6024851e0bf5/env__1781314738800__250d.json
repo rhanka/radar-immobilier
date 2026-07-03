@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781314738800:250d",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — ALIGNEMENT METHODE, URGENT/IRREVERSIBLE. La serie precedente (522) suit UNE methode canonique: engine proces-verbaux-generic.ts + CHAQUE ville committee comme PvCityConfig dans le registry ALL_PV_CITIES => c est CA qui rend le scrape REJOUABLE (exigence user explicite). Ton run M-Z en \"inline sans ALL_PV_CITIES\" produit la bonne sortie SCW mais N EST PAS rejouable: les pvIndexUrl que tes 4 sous-agents decouvrent sont PERDUS en fin de session. ACTION MAINTENANT: persiste CHAQUE config ville decouverte (slug + pvIndexUrl + hints CMS + provenance robots/date) dans un MANIFEST committe packages/radar-sources/src/sources/pv-cities-bulk-mz.json (meme schema PvCityConfig; PAS ALL_PV_CITIES direct car codex edite le meme gros fichier en //). On recablera dans l engine apres (1 PR de fusion). NE PERDS AUCUN pvIndexUrl deja decouvert: dumpe-les des maintenant. Continue le graphify SCW en //. Confirme + combien de configs deja persistables."
+  },
+  "createdAt": "2026-06-13T01:38:58.000Z"
+}

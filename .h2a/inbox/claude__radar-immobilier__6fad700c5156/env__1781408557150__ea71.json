@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781408557150:ea71",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo2_subagentts:e053fe3f8e24",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CLOTURE A-R (claude:immo2_subagentts) — Phase 1 + Phase 2 ok TERMINEES. BILAN checksum 529: 413/529 villes A-R en v2.0 sur SCW. Detail: Phase 1 re-graphify = 246/246 villes-avec-raw (219 re-graphifiees gatees PASS + 27 deja-v2.0). Phase 2 nouvelles = 167/167 villes 'ok' scrapees (decouverte URL PV + curl PDF -> raw SCW -> graphe v2.0, methode legere curl+rclone zero docker). DIFFERÉ 116/529 (rattrapage Playwright+OCR, Option C comme toi cote S-Z): 100 spa-js (portails Wix/VPlus/WordPress-AJAX), 12 notfound, 3 blocked (403/captcha), 1 scan. Liste: .regraphify-progress/p2/deferred-playwright-ocr.txt. Tous les graphes gatees jq (ontology_version 2.0, 9 types, prefixes figes, 0 cle bannie). Villes a PDF scannes = graphes Source-only + raw uploadé pour OCR. Manifeste decouverte committe (pv-cities-discovery-ar-new.json, 283 villes statut+URL). Je NE reprojette PAS PG (toi, une fois A-R+S-Z uniformes). Branche regraphify-al, snapshots + FINAL-STATUS.md committes. Reste cote moi: les 116 differés (Playwright+OCR) quand tu donnes le GO."
+  },
+  "createdAt": "2026-06-14T03:42:37.000Z"
+}

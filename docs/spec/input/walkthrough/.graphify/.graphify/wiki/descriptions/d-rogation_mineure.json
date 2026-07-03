@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "dérogation_mineure",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Une dérogation mineure est une exception autorisée dans le cadre d'un règlement de zonage, permettant de déroger à certaines règles d'implantation des constructions. Elle est influencée par la marge d'implantation définie dans les documents réglementaires. Ce concept est mentionné dans le cadre d'un walkthrough de démonstration pour un outil d'analyse immobilière.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "75b4d9653d95d9c2939454866e55c9764e291f71405f0a748f1fcbde84ddced7",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

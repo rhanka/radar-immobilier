@@ -1,0 +1,295 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e3]:
+    - generic [ref=f1e6]:
+      - navigation [ref=f1e8]:
+        - generic [ref=f1e9]:
+          - generic:
+            - link:
+              - /url: /new
+              - img
+          - button [ref=f1e11] [cursor=pointer]:
+            - generic [ref=f1e14]:
+              - generic [ref=f1e15]: 
+              - generic [ref=f1e16]: 
+        - generic [ref=f1e17]:
+          - link [ref=f1e21] [cursor=pointer]:
+            - /url: /new
+            - generic [ref=f1e26]: 
+          - generic [ref=f1e27]:
+            - generic [ref=f1e28]:
+              - link [ref=f1e30] [cursor=pointer]:
+                - /url: /recents
+                - generic [ref=f1e32]: 
+                - text: Discussions
+              - link [ref=f1e34] [cursor=pointer]:
+                - /url: /projects
+                - generic [ref=f1e36]: 
+                - text: Projets
+              - link [ref=f1e39] [cursor=pointer]:
+                - /url: /artifacts
+                - generic [ref=f1e41]: 
+              - link [ref=f1e43] [cursor=pointer]:
+                - /url: /customize
+                - generic [ref=f1e45]: 
+            - generic [ref=f1e46]:
+              - generic [ref=f1e47]:
+                - generic:
+                  - heading [level=2]:
+                    - button [expanded]:
+                      - generic: 
+              - list [ref=f1e48]:
+                - listitem [ref=f1e49]:
+                  - link [ref=f1e51] [cursor=pointer]:
+                    - /url: /code
+                    - generic [ref=f1e54]: 
+                - listitem [ref=f1e55]:
+                  - link [ref=f1e58] [cursor=pointer]:
+                    - /url: /design?via=web_sidebar_products
+                    - generic [ref=f1e61]: 
+            - generic [ref=f1e65]:
+              - generic:
+                - heading [level=2]:
+                  - button [expanded]:
+                    - generic: 
+              - list [ref=f1e66]:
+                - listitem [ref=f1e67]:
+                  - link [ref=f1e69] [cursor=pointer]:
+                    - /url: /chat/3eb08206-8668-4fb6-be10-d3c0ffea704b
+                    - generic [ref=f1e70]: Accès aux données du MCP radar immobilier
+                - listitem [ref=f1e71]:
+                  - link [ref=f1e73] [cursor=pointer]:
+                    - /url: /chat/8fe6a319-e288-4512-a783-06ed17929238
+                    - generic [ref=f1e74]: Vérifier si le contact de Jiho Kang est légitime
+                - listitem [ref=f1e75]:
+                  - link [ref=f1e77] [cursor=pointer]:
+                    - /url: /chat/fbb64f75-cb81-4e90-bbb7-50ece6bd26f9
+                    - generic [ref=f1e78]: Comparaison des meilleurs OCR pour zonage immobilier
+                - listitem [ref=f1e79]:
+                  - link [ref=f1e81] [cursor=pointer]:
+                    - /url: /chat/61153b5b-e26d-42d6-a3f5-c63fdb0a37d9
+                    - generic [ref=f1e82]: Top
+                - listitem [ref=f1e83]:
+                  - link [ref=f1e85] [cursor=pointer]:
+                    - /url: /chat/f4d68614-cbfd-43a9-afee-ef3eda46fb2a
+                    - generic [ref=f1e86]: Traitement d'une éraflure au visage
+                - listitem [ref=f1e87]:
+                  - link [ref=f1e89] [cursor=pointer]:
+                    - /url: /chat/5746a42a-e04b-4f68-8670-59842733ec0b
+                    - generic [ref=f1e90]: Livre blanc IA pour la stratégie digitale Airbus Nord Amérique
+                - listitem [ref=f1e91]:
+                  - link [ref=f1e93] [cursor=pointer]:
+                    - /url: /chat/a6d8fc73-251d-4828-b1d7-9f607b661367
+                    - generic [ref=f1e94]: COMAC aéronautique et technologies émergentes
+                - listitem [ref=f1e95]:
+                  - link [ref=f1e97] [cursor=pointer]:
+                    - /url: /chat/60c4ec15-0aac-4780-bb81-513541dfc97f
+                    - generic [ref=f1e98]: Test
+                - listitem [ref=f1e99]:
+                  - link [ref=f1e101] [cursor=pointer]:
+                    - /url: /chat/7c417ad0-887a-47ef-91f4-027c4e0606dd
+                    - generic [ref=f1e102]: Test message
+                - listitem [ref=f1e103]:
+                  - link [ref=f1e105] [cursor=pointer]:
+                    - /url: /chat/dcb25a71-43ec-4a1c-84ba-2b8975259846
+                    - generic [ref=f1e106]: Vérification de fonctionnement
+                - listitem [ref=f1e107]:
+                  - link [ref=f1e109] [cursor=pointer]:
+                    - /url: /chat/97abd340-c1a5-45da-9a9d-d7639b3aaa64
+                    - generic [ref=f1e110]: Vérification de fonctionnement
+                - listitem [ref=f1e111]:
+                  - link [ref=f1e113] [cursor=pointer]:
+                    - /url: /chat/40930c5f-1123-4eac-a99d-ab5ec363f269
+                    - generic [ref=f1e114]: Quotas et débats
+                - listitem [ref=f1e115]:
+                  - link [ref=f1e117] [cursor=pointer]:
+                    - /url: /chat/35df48c6-f8ae-4c8b-91e3-c87398d459f3
+                    - generic [ref=f1e118]: Sans titre
+                    - text: Sans titre
+                - listitem [ref=f1e119]:
+                  - link [ref=f1e121] [cursor=pointer]:
+                    - /url: /chat/15dd05bf-55c7-4aaa-bd27-9f7fcf4e160c
+                    - generic [ref=f1e122]: Sans titre
+                    - text: Sans titre
+                - listitem [ref=f1e123]:
+                  - link [ref=f1e125] [cursor=pointer]:
+                    - /url: /chat/810f8b42-4e00-412f-9334-b805dbc91fdb
+                    - generic [ref=f1e126]: Limitations légales d'un NDA
+                - listitem [ref=f1e127]:
+                  - link [ref=f1e129] [cursor=pointer]:
+                    - /url: /chat/747a4192-4053-406f-b488-ea177bea347a
+                    - generic [ref=f1e130]: Épuisement des tokens
+                - listitem [ref=f1e131]:
+                  - link [ref=f1e133] [cursor=pointer]:
+                    - /url: /chat/82557649-61c1-4ca1-afa4-25f6ff2cc7d4
+                    - generic [ref=f1e134]: Comparaison workstation dev 32Go RAM
+                - listitem [ref=f1e135]:
+                  - link [ref=f1e137] [cursor=pointer]:
+                    - /url: /chat/16384194-8763-452a-8c1e-05f38bd53145
+                    - generic [ref=f1e138]: Coût mensuel de Gemma 4 QAT en tokens
+                - listitem [ref=f1e139]:
+                  - link [ref=f1e141] [cursor=pointer]:
+                    - /url: /chat/80178101-cfa4-4974-8af6-30a68c0f772f
+                    - generic [ref=f1e142]: Vérification des tokens disponibles
+                - listitem [ref=f1e143]:
+                  - link [ref=f1e145] [cursor=pointer]:
+                    - /url: /chat/f9e1ea13-fd72-405e-b2c7-500f5b3abd22
+                    - generic [ref=f1e146]: Sans titre
+                    - text: Sans titre
+                - listitem [ref=f1e147]:
+                  - link [ref=f1e149] [cursor=pointer]:
+                    - /url: /chat/b77cf619-4ac1-4f1a-8120-b2f5d948fa67
+                    - generic [ref=f1e150]: Schéma architecture GCP avec pods et lab données
+                - listitem [ref=f1e151]:
+                  - link [ref=f1e153] [cursor=pointer]:
+                    - /url: /chat/e575111e-36fb-44be-9b07-24e1bc7994cf
+                    - generic [ref=f1e154]: Vérification des transactions Wave
+                - listitem [ref=f1e155]:
+                  - link [ref=f1e157] [cursor=pointer]:
+                    - /url: /chat/928da50a-abfb-4bff-85e2-fe31f60b0bd1
+                    - generic [ref=f1e158]: Évaluation rationalisée des cas d'usage Gemini
+                - listitem [ref=f1e159]:
+                  - link [ref=f1e161] [cursor=pointer]:
+                    - /url: /chat/bef81743-6d15-42ca-b8b2-124292611606
+                    - generic [ref=f1e162]: Entraîner un LLM pour le reasoning
+                - listitem [ref=f1e163]:
+                  - link [ref=f1e165] [cursor=pointer]:
+                    - /url: /chat/c2e48849-0142-41fe-802a-08abbf9f059b
+                    - generic [ref=f1e166]: Monter Google Drive dans un répertoire pour CLI
+                - listitem [ref=f1e167]:
+                  - link [ref=f1e169] [cursor=pointer]:
+                    - /url: /chat/d51cb2ee-19db-4c92-9069-222e3f119bc5
+                    - generic [ref=f1e170]: Afficher les lignes cachées dans Claude CLI
+                - listitem [ref=f1e171]:
+                  - link [ref=f1e173] [cursor=pointer]:
+                    - /url: /chat/5af6d281-b44b-4fdf-9bee-48b901c59a78
+                    - generic [ref=f1e174]: Ontologies du parfum
+                - listitem [ref=f1e175]:
+                  - link [ref=f1e177] [cursor=pointer]:
+                    - /url: /chat/77e4417b-0516-4475-9359-5a91b84d0609
+                    - generic [ref=f1e178]: Compatibilité OData MCP V4 avec ECC6
+                - listitem [ref=f1e179]:
+                  - link [ref=f1e181] [cursor=pointer]:
+                    - /url: /chat/29802e0c-266d-4611-97a8-0bf286fa0d43
+                    - generic [ref=f1e182]: Utiliser Claude Cowork
+                - listitem [ref=f1e183]:
+                  - link [ref=f1e185] [cursor=pointer]:
+                    - /url: /chat/9afa982d-4fa4-49ad-a97d-20710df297d7
+                    - generic [ref=f1e186]: Intégrer des données externes dans les dashboards ClickUp
+              - link [ref=f1e188] [cursor=pointer]:
+                - /url: /recents
+                - img [ref=f1e189]
+          - link [ref=f1e195] [cursor=pointer]:
+            - /url: /downloads
+            - generic [ref=f1e198]: 
+          - button [ref=f1e201] [cursor=pointer]:
+            - generic [ref=f1e205]: FA
+            - img [ref=f1e208]
+      - main [ref=f1e210]:
+        - main [ref=f1e213]:
+          - generic [ref=f1e218]:
+            - img [ref=f1e222]
+            - generic [ref=f1e224]: Bon vendredi, Fabien
+          - generic [ref=f1e226]:
+            - group [ref=f1e229]:
+              - status
+              - generic [ref=f1e232]:
+                - generic [ref=f1e233]:
+                  - generic [ref=f1e234]:
+                    - textbox [ref=f1e235]:
+                      - paragraph [ref=f1e236]
+                    - status [ref=f1e237]
+                  - generic:
+                    - generic: Comment puis-je vous aider ?
+                - generic [ref=f1e238]:
+                  - button [ref=f1e241] [cursor=pointer]:
+                    - generic [ref=f1e244]: 
+                  - button [ref=f1e248] [cursor=pointer]:
+                    - generic [ref=f1e250]: Opus 4.8 Élevé
+                    - generic [ref=f1e251]: 
+                  - generic [ref=f1e253]:
+                    - button [ref=f1e255] [cursor=pointer]:
+                      - generic [ref=f1e257]: 
+                    - button [ref=f1e258] [cursor=pointer]:
+                      - generic [ref=f1e260]: 
+                  - button [ref=f1e264] [cursor=pointer]:
+                    - img [ref=f1e267]
+              - generic:
+                - status
+            - list "Catégories de prompts" [ref=f1e276]:
+              - listitem [ref=f1e277]:
+                - button "Écrire" [ref=f1e278] [cursor=pointer]:
+                  - generic [ref=f1e280]:
+                    - img [ref=f1e282]
+                    - generic [ref=f1e284]: Écrire
+              - listitem [ref=f1e285]:
+                - button "Apprendre" [ref=f1e286] [cursor=pointer]:
+                  - generic [ref=f1e288]:
+                    - img [ref=f1e290]
+                    - generic [ref=f1e292]: Apprendre
+              - listitem [ref=f1e293]:
+                - button "Code" [ref=f1e294] [cursor=pointer]:
+                  - generic [ref=f1e296]:
+                    - img [ref=f1e298]
+                    - generic [ref=f1e300]: Code
+              - listitem [ref=f1e301]:
+                - button "Depuis Drive" [ref=f1e302] [cursor=pointer]:
+                  - generic [ref=f1e304]:
+                    - img [ref=f1e306]
+                    - generic [ref=f1e313]: Depuis Drive
+              - listitem [ref=f1e314]:
+                - button "Depuis Gmail" [ref=f1e315] [cursor=pointer]:
+                  - generic [ref=f1e317]:
+                    - img [ref=f1e319]
+                    - generic [ref=f1e325]: Depuis Gmail
+        - button [ref=f1e329] [cursor=pointer]:
+          - img [ref=f1e331]
+    - list
+  - dialog "Paramètres" [ref=f1e339]:
+    - navigation "Paramètres" [ref=f1e340]:
+      - heading "Paramètres" [level=2] [ref=f1e341]
+      - button [ref=f1e343] [cursor=pointer]:
+        - generic [ref=f1e344]:
+          - generic [ref=f1e345]: 
+          - textbox "Rechercher dans les paramètres" [active] [ref=f1e346]:
+            - /placeholder: Rechercher
+      - generic [ref=f1e347]:
+        - generic [ref=f1e348]: Paramètres
+        - list [ref=f1e349]:
+          - listitem [ref=f1e350]:
+            - button "Général" [ref=f1e351] [cursor=pointer]:
+              - generic [ref=f1e352]: 
+              - generic [ref=f1e353]: Général
+          - listitem [ref=f1e354]:
+            - button "Compte" [ref=f1e355] [cursor=pointer]:
+              - generic [ref=f1e356]: 
+              - generic [ref=f1e357]: Compte
+          - listitem [ref=f1e358]:
+            - button "Confidentialité" [ref=f1e359] [cursor=pointer]:
+              - generic [ref=f1e360]: 
+              - generic [ref=f1e361]: Confidentialité
+          - listitem [ref=f1e362]:
+            - button "Facturation" [ref=f1e363] [cursor=pointer]:
+              - generic [ref=f1e364]: 
+              - generic [ref=f1e365]: Facturation
+          - listitem [ref=f1e366]:
+            - button "Utilisation" [ref=f1e367] [cursor=pointer]:
+              - generic [ref=f1e368]: 
+              - generic [ref=f1e369]: Utilisation
+          - listitem [ref=f1e370]:
+            - button "Capacités" [ref=f1e371] [cursor=pointer]:
+              - generic [ref=f1e372]: 
+              - generic [ref=f1e373]: Capacités
+          - listitem [ref=f1e374]:
+            - button "Connecteurs" [ref=f1e375] [cursor=pointer]:
+              - generic [ref=f1e376]: 
+              - generic [ref=f1e377]: Connecteurs
+          - listitem [ref=f1e378]:
+            - button "Claude Code" [ref=f1e379] [cursor=pointer]:
+              - generic [ref=f1e380]: 
+              - generic [ref=f1e381]: Claude Code
+          - listitem [ref=f1e382]:
+            - button "Claude dans Chrome" [ref=f1e383] [cursor=pointer]:
+              - generic [ref=f1e384]: 
+              - generic [ref=f1e385]: Claude dans Chrome
+    - button "Fermer" [ref=f1e388] [cursor=pointer]:
+      - generic [ref=f1e391]: 

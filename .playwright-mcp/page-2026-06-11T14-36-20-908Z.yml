@@ -1,0 +1,384 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6]:
+    - generic:
+      - generic:
+        - img
+      - generic:
+        - tooltip "H-104"
+        - tooltip "H-111"
+        - tooltip "H-105"
+        - tooltip "H-113"
+        - tooltip "H-112"
+        - tooltip "P-107"
+        - tooltip "H-132"
+        - tooltip "CGS-101"
+        - tooltip "P-106"
+        - tooltip "MS-100"
+        - tooltip "P-114"
+        - tooltip "M-131"
+        - tooltip "C-115"
+        - tooltip "CGS-102"
+        - tooltip "P-108"
+        - tooltip "P-110"
+        - tooltip "H-109"
+        - tooltip "MS-201"
+        - tooltip "CGS-103"
+        - tooltip "H-247"
+        - tooltip "H-248"
+        - tooltip "H-207"
+        - tooltip "H-211"
+        - tooltip "H-210"
+        - tooltip "H-212"
+        - tooltip "H-213"
+        - tooltip "H-208"
+        - tooltip "P-209"
+        - tooltip "MS-250"
+        - tooltip "MS-251"
+        - tooltip "MS-202"
+        - tooltip "H-214"
+        - tooltip "P-215"
+        - tooltip "H-218"
+        - tooltip "MS-203"
+        - tooltip "H-216"
+        - tooltip "C-204"
+        - tooltip "H-205"
+        - tooltip "H-219"
+        - tooltip "H-221"
+        - tooltip "H-220"
+        - tooltip "H-223"
+        - tooltip "H-222"
+        - tooltip "H-228"
+        - tooltip "MS-228"
+        - tooltip "MS-227"
+        - tooltip "MS-226"
+        - tooltip "MS-225"
+        - tooltip "MS-305"
+        - tooltip "MS-224"
+        - tooltip "MS-217"
+        - tooltip "MS-301"
+        - tooltip "H-302"
+        - tooltip "H-303"
+        - tooltip "H-306"
+        - tooltip "MS-331"
+        - tooltip "MS-310"
+        - tooltip "MS-309"
+        - tooltip "C-304"
+        - tooltip "MS-318"
+        - tooltip "MS-319"
+        - tooltip "H-313"
+        - tooltip "M-315"
+        - tooltip "P-314"
+        - tooltip "H-308"
+        - tooltip "H-317"
+        - tooltip "H-316"
+        - tooltip "I-401"
+        - tooltip "CO-402"
+        - tooltip "CO-119"
+        - tooltip "P-116"
+        - tooltip "H-117"
+        - tooltip "H-229"
+        - tooltip "H-230"
+        - tooltip "H-231"
+        - tooltip "H-232"
+        - tooltip "H-235"
+        - tooltip "H-260"
+        - tooltip "H-236"
+        - tooltip "H-237"
+        - tooltip "H-239"
+        - tooltip "P-240"
+        - tooltip "H-241"
+        - tooltip "M-242"
+        - tooltip "MS-320"
+        - tooltip "MS-321"
+        - tooltip "MS-322"
+        - tooltip "MS-324"
+        - tooltip "A-701"
+        - tooltip "H-408"
+        - tooltip "H-409"
+        - tooltip "H-410"
+        - tooltip "P-412"
+        - tooltip "H-411"
+        - tooltip "H-403"
+        - tooltip "MS-416"
+        - tooltip "CO-404"
+        - tooltip "H-406"
+        - tooltip "P-407"
+        - tooltip "H-415"
+        - tooltip "MS-405"
+        - tooltip "P-121"
+        - tooltip "H-120"
+        - tooltip "P-413"
+        - tooltip "H-127"
+        - tooltip "H-122"
+        - tooltip "H-118"
+        - tooltip "H-419"
+        - tooltip "H-421"
+        - tooltip "H-420"
+        - tooltip "H-128"
+        - tooltip "H-123"
+        - tooltip "P-129"
+        - tooltip "P-130"
+        - tooltip "P-234"
+        - tooltip "H-124"
+        - tooltip "H-125"
+        - tooltip "H-126"
+        - tooltip "H-233"
+        - tooltip "H-243"
+        - tooltip "H-244"
+        - tooltip "H-245"
+        - tooltip "H-246"
+        - tooltip "P-261"
+        - tooltip "MS-249"
+        - tooltip "MS-326"
+        - tooltip "P-325"
+        - tooltip "H-417"
+        - tooltip "H-418"
+        - tooltip "H-501"
+        - tooltip "H-502"
+        - tooltip "H-508"
+        - tooltip "H-503"
+        - tooltip "H-504"
+        - tooltip "H-509"
+        - tooltip "MS-505"
+        - tooltip "MS-552"
+        - tooltip "MS-601"
+        - tooltip "ID-R1.10"
+        - tooltip "H-425"
+        - tooltip "H-426"
+        - tooltip "C-427"
+        - tooltip "H-423"
+        - tooltip "H-428"
+        - tooltip "H-422"
+        - tooltip "H-510"
+        - tooltip "H-436"
+        - tooltip "H-424"
+        - tooltip "C-545"
+        - tooltip "H-511"
+        - tooltip "H-512"
+        - tooltip "H-513"
+        - tooltip "H-514"
+        - tooltip "H-515"
+        - tooltip "P-506"
+        - tooltip "P-516"
+        - tooltip "P-517"
+        - tooltip "H-518"
+        - tooltip "H-519"
+        - tooltip "H-520"
+        - tooltip "H-522"
+        - tooltip "P-523"
+        - tooltip "MS-602"
+        - tooltip "M-521"
+        - tooltip "H-526"
+        - tooltip "H-550"
+        - tooltip "H-551"
+        - tooltip "M-525"
+        - tooltip "P-527"
+        - tooltip "M-622"
+        - tooltip "M-621"
+        - tooltip "P-603"
+        - tooltip "H-605"
+        - tooltip "H-606"
+        - tooltip "H-604"
+        - tooltip "P-607"
+        - tooltip "H-608"
+        - tooltip "H-609"
+        - tooltip "H-624"
+        - tooltip "H-610"
+        - tooltip "H-623"
+        - tooltip "H-616"
+        - tooltip "P-612"
+        - tooltip "P-611"
+        - tooltip "H-613"
+        - tooltip "H-617"
+        - tooltip "H-618"
+        - tooltip "H-619"
+        - tooltip "H-614"
+        - tooltip "H-615"
+        - tooltip "H-620"
+        - tooltip "ID-R1.11"
+        - tooltip "P-430"
+        - tooltip "H-429"
+        - tooltip "C-432"
+        - tooltip "C-434"
+        - tooltip "H-433"
+        - tooltip "H-435"
+        - tooltip "H-437"
+        - tooltip "H-544"
+        - tooltip "H-532"
+        - tooltip "H-533"
+        - tooltip "H-625"
+        - tooltip "H-529"
+        - tooltip "H-530"
+        - tooltip "H-536"
+        - tooltip "C-531"
+        - tooltip "P-534"
+        - tooltip "P-540"
+        - tooltip "P-541"
+        - tooltip "H-535"
+        - tooltip "H-539"
+        - tooltip "H-542"
+        - tooltip "H-537"
+        - tooltip "H-637"
+        - tooltip "C-543"
+        - tooltip "M-538"
+        - tooltip "M-528"
+        - tooltip "MS-638"
+        - tooltip "M-631"
+        - tooltip "H-627"
+        - tooltip "P-626"
+        - tooltip "P-628"
+        - tooltip "P-636"
+        - tooltip "H-635"
+        - tooltip "H-633"
+        - tooltip "H-630"
+        - tooltip "H-640"
+        - tooltip "M-629"
+        - tooltip "P-634"
+        - tooltip "A-702"
+        - tooltip "A-704"
+        - tooltip "A-713"
+        - tooltip "A-731"
+        - tooltip "A-730"
+        - tooltip "A-703"
+        - tooltip "A-714"
+        - tooltip "A-715"
+        - tooltip "A-716"
+        - tooltip "A-717"
+        - tooltip "A-712"
+        - tooltip "A-711"
+        - tooltip "A-722"
+        - tooltip "A-724"
+        - tooltip "A-710"
+        - tooltip "A-709"
+        - tooltip "A-723"
+        - tooltip "A-721"
+        - tooltip "ID-R1.7"
+        - tooltip "ID-R1.6"
+        - tooltip "ID-R1.2"
+        - tooltip "ID-R1.3"
+        - tooltip "ID-R1.4"
+        - tooltip "ID-R1.5"
+        - tooltip "ID-R1.1"
+        - tooltip "ID-R1.8"
+        - tooltip "ID-R1.9"
+        - tooltip "ID-R3.3"
+        - tooltip "ID-R3.1"
+        - tooltip "A-725"
+        - tooltip "A-718"
+        - tooltip "A-726"
+        - tooltip "ID-R3.2"
+        - tooltip "A-732"
+        - tooltip "A-707"
+    - generic:
+      - generic [ref=e10521]:
+        - button "Zoom in" [ref=e10522] [cursor=pointer]: +
+        - button "Zoom out" [ref=e10523] [cursor=pointer]: −
+      - generic [ref=e10524]:
+        - link "Leaflet" [ref=e10525] [cursor=pointer]:
+          - /url: https://leafletjs.com
+          - img [ref=e10526]
+          - text: Leaflet
+        - text: "| © OpenStreetMap contributors © CARTO"
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - link "◀" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - heading "🏙️ Outil de développement" [level=2] [ref=e11]
+      - button "✕" [ref=e12] [cursor=pointer]
+    - generic [ref=e13]: Ville de Saint-Constant
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: 11 261
+        - generic [ref=e17]: Lots total
+      - generic [ref=e18]:
+        - generic [ref=e19]: "642"
+        - generic [ref=e20]: Zones 4+ logements
+      - generic [ref=e21]:
+        - generic [ref=e22]: 5 287
+        - generic [ref=e23]: Dans périmètre TOD
+      - generic [ref=e24]:
+        - generic [ref=e25]: "0"
+        - generic [ref=e26]: ⭐ Priorité max (4+ & TOD)
+    - separator [ref=e27]
+    - generic [ref=e29]: 👆 Cliquez sur un lot pour voir ses détails
+  - generic [ref=e30]:
+    - generic [ref=e31] [cursor=pointer]:
+      - heading "🔍 Filtres & Outils" [level=4] [ref=e32]
+      - generic [ref=e33]:
+        - generic "Synchronisation active" [ref=e10530]: EN DIRECT
+        - button "◀" [ref=e34]
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - generic: 🔍
+        - textbox "Rechercher une adresse ou un no de lot…" [ref=e37]
+      - generic [ref=e38] [cursor=pointer]:
+        - generic [ref=e39]: 📍 Pastilles
+        - button "▾" [ref=e40]
+      - generic [ref=e41]:
+        - button "＋ Ajouter une pastille" [ref=e42] [cursor=pointer]
+        - generic [ref=e10533]: Aucune pastille — cliquez ＋ pour en ajouter
+      - generic [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: 🔍 Zonage / Potentiel
+        - button "▾" [ref=e45]
+      - generic [ref=e46]:
+        - button "Tous les lots" [ref=e47] [cursor=pointer]
+        - button "🟢 Zones 4+ seulement" [ref=e48] [cursor=pointer]
+        - button "🔵 Dans TOD seulement" [ref=e49] [cursor=pointer]
+        - button "⭐ Priorité (4+ & TOD)" [ref=e50] [cursor=pointer]
+        - button "⭐ Mes favoris" [ref=e51] [cursor=pointer]: ⭐ Mes favoris
+        - button "❌ Non retenus" [ref=e52] [cursor=pointer]: ❌ Non retenus
+        - button "🏷️ En vente" [ref=e53] [cursor=pointer]: 🏷️ En vente
+        - generic [ref=e54]:
+          - generic [ref=e55]: "❌ Ville inconnue : \"saint-constant\". Villes disponibles : delson, sainte-catherine"
+          - button "↺" [ref=e56] [cursor=pointer]
+        - button "📬 Sollicités" [ref=e57] [cursor=pointer]: 📬 Sollicités
+        - button "✉️ À lettre" [ref=e58] [cursor=pointer]: ✉️ À lettre
+        - button "✉️ Exporter lettres → CSV" [ref=e59] [cursor=pointer]
+        - button "💾 Exporter toutes mes données" [ref=e60] [cursor=pointer]
+        - generic [ref=e61] [cursor=pointer]: 📂 Importer mes données
+        - link "✏️ Éditeur de zones" [ref=e62] [cursor=pointer]:
+          - /url: "#"
+        - button "☑ Sélection multiple" [ref=e64] [cursor=pointer]
+      - generic [ref=e65] [cursor=pointer]:
+        - generic [ref=e66]: 🏗️ Usage actuel
+        - button "▾" [ref=e67]
+      - generic [ref=e68]:
+        - button "🏠 Résidentiel" [ref=e69] [cursor=pointer]
+        - button "🏢 Multi-logements" [ref=e70] [cursor=pointer]
+        - button "🛍️ Commercial" [ref=e71] [cursor=pointer]
+        - button "🏭 Industriel" [ref=e72] [cursor=pointer]
+        - button "⚡ Mixte" [ref=e73] [cursor=pointer]
+        - button "🌳 Public / Institutionnel" [ref=e74] [cursor=pointer]
+        - button "⬜ Vacant / Terrain nu" [ref=e75] [cursor=pointer]
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - text: "Superficie min :"
+            - strong [ref=e78]: "0"
+            - text: m²
+          - slider [ref=e79]: "0"
+      - generic [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]: 🌿 Couches environnementales
+        - button "▾" [ref=e82]
+      - generic [ref=e83]:
+        - button "Milieux humides" [ref=e84] [cursor=pointer]: Milieux humides
+        - button "Zones inondables (BDZI)" [ref=e86] [cursor=pointer]: Zones inondables (BDZI)
+        - button "Vue satellite" [ref=e88] [cursor=pointer]: Vue satellite
+        - button "Zones agricoles (CPTAQ)" [ref=e90] [cursor=pointer]: Zones agricoles (CPTAQ)
+        - button "N° civiques (zoom 15+)" [ref=e92] [cursor=pointer]: N° civiques (zoom 15+)
+      - generic [ref=e94] [cursor=pointer]:
+        - generic [ref=e95]: 🗺️ Légende
+        - button "▾" [ref=e96]
+      - generic [ref=e97]:
+        - generic [ref=e98]: ⭐ Zone 4+ dans TOD
+        - generic [ref=e100]: Zone 4+ logements
+        - generic [ref=e102]: Dans périmètre TOD
+        - generic [ref=e104]: Autres zones
+        - generic [ref=e106]: Périmètre TOD
+        - generic [ref=e108]:
+          - text: Limite
+          - generic [ref=e10534]: Saint-Constant
+        - generic [ref=e110]: ⭐ Favori
+        - generic [ref=e112]: ✓ Vérifié
+        - generic [ref=e114]: 📬 Sollicité
+        - generic [ref=e116]: Règlement 901 · Valider avec la Ville

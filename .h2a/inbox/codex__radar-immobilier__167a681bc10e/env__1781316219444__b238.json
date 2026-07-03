@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781316219444:b238",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — SUITE #181 (extension normaliseur import). La re-projection des 522 SCW->PG AVEC #181 donne 406 ok / 60 skipped / 56 errors (live PG passe a 403 villes, 10156 noeuds). Les 56 erreurs = 4 variantes de schema edge graphify que #181 ne couvre pas encore (preuve concrete de divergence de serialisation entre sous-agents). ETENDS la normalisation de graphifyLinkSchema dans api/src/services/graph/graph-store.ts pour TOLERER, en plus du from/to->source/target deja fait:\n1) 30 villes: from/to + champ rel (au lieu de relation/type) -> mapper rel->relation. Ex: armagh, arundel, aston-jonction.\n2) 15 villes: src/tgt + rel -> mapper src->source, tgt->target, rel->relation. Ex: sacre-coeur-de-jesus, saint-adelphe, saint-cesaire.\n3) 7 villes: source/target OK mais refs = tableau de STRINGS (ex [\"R 2026-03-050\"]) au lieu objets -> tolerer refs string (z.union string|object, ou coerce {label:s}). Ex: lavenir, lawrenceville.\n4) 6 villes: from/to SANS rel/relation/type -> relation par defaut (mentions/references) OU drop gracieux de l edge, JAMAIS faire echouer toute la ville. Ex: petite-riviere-saint-francois, piedmont.\nGarde le passthrough properties. Ajoute un test couvrant les 4 variantes. C est un normaliseur d IMPORT (compat), PAS une regeneration des graphes SCW. PR -> je gate (scripts/gate.sh) + merge -> je re-projette (idempotent) pour recuperer les 56 (~459 villes). Donne le numero de PR. MERCI."
+  },
+  "createdAt": "2026-06-13T02:03:39.000Z"
+}

@@ -1,0 +1,71 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Ciblage" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Ciblage
+        - button "Signaux" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Signaux
+        - button "Opportunités" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Opportunités
+        - button "Sources" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Sources
+        - button "Ontologie" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Ontologie
+        - button "Grilles" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Grilles
+        - button "Coordination" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Coordination
+        - button "Backlog" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Backlog
+        - button "Recueil" [active] [ref=e27] [cursor=pointer]:
+          - img [ref=e28]
+          - text: Recueil
+        - button "Carte Signaux" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - text: Carte Signaux
+        - button "Carte Opport." [ref=e31] [cursor=pointer]:
+          - img [ref=e32]
+          - text: Carte Opport.
+        - button "Carte Éval." [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Carte Éval.
+      - generic [ref=e35]:
+        - button "Lancer la visite guidée" [ref=e36] [cursor=pointer]:
+          - img [ref=e37]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e38] [cursor=pointer]: Réel
+    - generic [ref=e1291]:
+      - complementary [ref=e1292]:
+        - generic [ref=e1293]:
+          - heading "Sources" [level=1] [ref=e1294]:
+            - img [ref=e1295]
+            - text: Sources
+          - button "Actualiser" [ref=e1296] [cursor=pointer]:
+            - img [ref=e1297]
+        - generic [ref=e1298]: signals/by-city HTTP 500
+        - generic [ref=e1299]:
+          - paragraph [ref=e1300]: Légende (maturité recueil)
+          - list [ref=e1301]:
+            - listitem [ref=e1302]: Complet (100%)
+            - listitem [ref=e1304]: Avancé (50–99%)
+            - listitem [ref=e1306]: Partiel (25–49%)
+            - listitem [ref=e1308]: Démarrage (1–24%)
+            - listitem [ref=e1310]: Aucune donnée recueil
+      - generic [ref=e1314]:
+        - img [ref=e1315]
+        - paragraph [ref=e1316]: Sélectionnez une ville pour voir le détail des données recueillies.
+  - button "Ouvrir l'assistant radar" [ref=e644] [cursor=pointer]:
+    - img [ref=e645]

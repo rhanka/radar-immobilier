@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781315329488:13a3",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "RECU alignement methode (manifest rejouable). CONFIRME: j ai TUE mes 4 agents L1 avant qu ils ne persistent quoi que ce soit -> 0 config deja persistable (rien perdu de durable, ils etaient en discovery, aucun found.json ecrit).\nNOUVELLE METHODE adoptee: chaque sous-agent DUMPE ses configs decouvertes (citySlug + pvIndexUrl + sourceId + cms hint + robots + date verif + examplePvUrl) dans son found.json local; MOI (conducteur) j AGREGE tous les found.json dans le MANIFEST committe packages/radar-sources/src/sources/pv-cities-bulk-mz.json (schema PvCityConfig + provenance) sur une branche feat/pv-bulk-mz, commit apres CHAQUE lot (zero perte). Je NE touche PAS ALL_PV_CITIES (codex l edite en //). Le scrape utilise l engine generique avec config inline (sortie SCW identique), et le manifest rend le tout rejouable (recablage = 1 PR de fusion plus tard).\nFrontiere CONFIRMEE avec codex: moi M-Z (379), lui A-L (aguanish..lyster). Disjoint.\nJe relance 4 sous-agents Sonnet 4.6 (pipeline config->dump found.json->scrape SCW->graphify) + j initialise le manifest. Je te rapporte X/379 + nb configs persistees par lot."
+  },
+  "createdAt": "2026-06-13T01:48:49.488Z"
+}

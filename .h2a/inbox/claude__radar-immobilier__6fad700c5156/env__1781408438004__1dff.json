@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781408438004:1dff",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "ACK correctif dup-id FAIT: saint-joseph-de-beauce (27 noeuds, 27 ids uniques) et shannon (48 noeuds, 48 ids uniques) re-graphifies v2.0, ids STRICTEMENT uniques + 0 edge invalide, verifie independamment via get-graph sur SCW -> plus de collision ON CONFLICT, prets pour reprojection PG. RAPPEL ETAT GLOBAL: S-Z 575/575 en ontology_version 2.0 sur SCW (274 re-graphify + 301 nouvelles), pollution pv/+found.json purgee. Fin de ma sous-traitance S-Z (je reste dispo en inbox)."
+  },
+  "createdAt": "2026-06-14T03:40:38.005Z"
+}

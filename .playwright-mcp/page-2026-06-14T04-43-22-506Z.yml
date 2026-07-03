@@ -1,0 +1,552 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic:
+      - banner:
+        - generic [ref=e7]:
+          - link "Ville de Marieville" [ref=e8] [cursor=pointer]:
+            - /url: /fr
+            - img "Ville de Marieville" [ref=e9]
+          - generic [ref=e10]:
+            - generic [ref=e11] [cursor=pointer]:
+              - button "Toggle Navigation" [ref=e12]
+              - generic [ref=e14]: Menu
+            - generic [ref=e16] [cursor=pointer]:
+              - img [ref=e18]
+              - text: Recherche
+            - img [ref=e22] [cursor=pointer]
+        - generic [ref=e27]:
+          - link "Ville de Marieville" [ref=e28] [cursor=pointer]:
+            - /url: /fr
+            - img "Ville de Marieville" [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31] [cursor=pointer]:
+              - button "Toggle Navigation" [ref=e32]
+              - text: Menu
+            - generic [ref=e35] [cursor=pointer]:
+              - img [ref=e37]
+              - text: Recherche
+        - generic:
+          - generic:
+            - generic:
+              - heading "Liens rapides" [level=3]
+              - list:
+                - listitem:
+                  - link "Bureau d'accueil citoyen":
+                    - /url: /fr/services-aux-citoyens/bureau-d-accueil-citoyen
+                - listitem:
+                  - link "Bibliothèque":
+                    - /url: /fr/loisirs-et-culture/bibliotheque
+                - listitem:
+                  - link "Collectes et dépôts":
+                    - /url: /fr/services-aux-citoyens/collectes-et-depots
+                - listitem:
+                  - link "Demande de permis":
+                    - /url: /fr/services-aux-citoyens/permis
+                - listitem:
+                  - link "Système d’alertes automatisées":
+                    - /url: /fr/services-aux-citoyens/securite-civile-et-incendie/systeme-d-alertes-automatisees
+                - listitem:
+                  - link "Répertoire des entreprises":
+                    - /url: /fr/repertoire-des-entreprises
+                - listitem:
+                  - link "Répertoire des organismes":
+                    - /url: /fr/repertoire-des-organismes
+                - listitem:
+                  - link "Réglementation":
+                    - /url: /fr/services-aux-citoyens/reglements-municipaux
+                - listitem:
+                  - link "Rôle d'évaluation":
+                    - /url: /fr/services-aux-citoyens/taxation-et-evaluation
+    - generic [ref=e40]:
+      - generic [ref=e42]: La ville
+      - generic [ref=e43]:
+        - list [ref=e46]:
+          - listitem [ref=e47]:
+            - link "Conseil municipal" [ref=e48] [cursor=pointer]:
+              - /url: /fr/la-ville/conseil-municipal
+            - list [ref=e49]:
+              - listitem [ref=e50]:
+                - link "Séances du conseil" [ref=e51] [cursor=pointer]:
+                  - /url: /fr/la-ville/conseil-municipal/seances-du-conseil
+                  - generic [ref=e52]: Séances du conseil
+              - listitem [ref=e53]:
+                - link "Comités et représentation" [ref=e54] [cursor=pointer]:
+                  - /url: /fr/la-ville/conseil-municipal/comites-et-representation
+                  - generic [ref=e55]: Comités et représentation
+              - listitem [ref=e56]:
+                - link "Élections" [ref=e57] [cursor=pointer]:
+                  - /url: /fr/la-ville/conseil-municipal/elections
+                  - generic [ref=e58]: Élections
+              - listitem [ref=e59]:
+                - link "Rémunération des élus" [ref=e60] [cursor=pointer]:
+                  - /url: /fr/la-ville/conseil-municipal/remuneration-des-elus
+                  - generic [ref=e61]: Rémunération des élus
+              - listitem [ref=e62]:
+                - link "Districts électoraux" [ref=e63] [cursor=pointer]:
+                  - /url: /fr/la-ville/conseil-municipal/districts-electoraux
+                  - generic [ref=e64]: Districts électoraux
+          - listitem [ref=e65]:
+            - link "Conseil municipal" [ref=e66] [cursor=pointer]:
+              - /url: /fr/la-ville/conseil-municipal
+          - listitem [ref=e67]:
+            - link "Gestion contractuelle" [ref=e68] [cursor=pointer]:
+              - /url: /fr/la-ville/gestion-contractuelle
+          - listitem [ref=e69]:
+            - link "Langue et communication officielle" [ref=e70] [cursor=pointer]:
+              - /url: /fr/la-ville/langue-et-communication-officielle
+          - listitem [ref=e71]:
+            - link "Communications" [ref=e72] [cursor=pointer]:
+              - /url: /fr/la-ville/communications
+          - listitem [ref=e73]:
+            - link "Finances publiques" [ref=e74] [cursor=pointer]:
+              - /url: /fr/la-ville/finances-publiques
+          - listitem [ref=e75]:
+            - link "Politiques et plans d'action" [ref=e76] [cursor=pointer]:
+              - /url: /fr/la-ville/politiques-et-plans-d-action
+          - listitem [ref=e77]:
+            - link "Offres d'emploi" [ref=e78] [cursor=pointer]:
+              - /url: /fr/la-ville/offres-d-emploi
+          - listitem [ref=e79]:
+            - link "Identité municipale" [ref=e80] [cursor=pointer]:
+              - /url: /fr/la-ville/identite-municipale
+          - listitem [ref=e81]:
+            - link "Appels d'offres" [ref=e82] [cursor=pointer]:
+              - /url: /fr/la-ville/appels-d-offres
+          - listitem [ref=e83]:
+            - link "Avis publics" [ref=e84] [cursor=pointer]:
+              - /url: /fr/la-ville/avis-publics
+          - listitem [ref=e85]:
+            - link "Découvrir Marieville" [ref=e86] [cursor=pointer]:
+              - /url: /fr/decouvrir-marieville
+          - listitem [ref=e87]:
+            - link "Grands projets" [ref=e88] [cursor=pointer]:
+              - /url: /fr/la-ville/grands-projets
+          - listitem [ref=e89]:
+            - link "Consultations publiques" [ref=e90] [cursor=pointer]:
+              - /url: /fr/la-ville/consultations-publiques
+        - generic [ref=e91]:
+          - list [ref=e94]:
+            - listitem [ref=e95]:
+              - link "Accueil" [ref=e96] [cursor=pointer]:
+                - /url: /fr
+            - listitem [ref=e97]:
+              - link "La ville" [ref=e98] [cursor=pointer]:
+                - /url: /fr/la-ville
+            - listitem [ref=e99]:
+              - link "Conseil municipal" [ref=e100] [cursor=pointer]:
+                - /url: /fr/la-ville/conseil-municipal
+            - listitem [ref=e101]: Séances du conseil
+          - generic [ref=e102]:
+            - heading "Séances du conseil" [level=1] [ref=e103]
+            - heading "Les séances du conseil sont les moments où les élus se rassemblent pour prendre des décisions dans l’intérêt de la ville, sous forme de règlement ou de résolution." [level=2] [ref=e104]
+            - paragraph [ref=e105]: Les membres du conseil se réunissent une fois par mois en séances ordinaires et, lorsque la situation le requiert, en séances extraordinaires. Le maire ou, en cas d’absence, le maire ou la mairesse suppléant(e), préside chaque séance à laquelle participent les élus ainsi que la greffière et le directeur général de la Ville.
+            - paragraph [ref=e106]:
+              - text: Les séances du conseil ont lieu à l’hôtel de ville situé au 682, rue Saint-Charles. Les séances ordinaires sont diffusées en direct sur la
+              - link "page Facebook officielle de la Ville" [ref=e107] [cursor=pointer]:
+                - /url: https://www.facebook.com/villedemarieville
+              - text: . Les captations vidéos sont rendues disponibles pour visionnement en différé dès le lendemain sur cette page du site Web.
+            - generic [ref=e108]:
+              - heading "Périodes de questions +" [level=3] [ref=e109] [cursor=pointer]
+              - generic:
+                - paragraph [ref=e110]: Les séances sont un outil démocratique important puisque tout citoyen peut intervenir lors des périodes de questions, au début et à la fin de la séance. Les questions doivent porter sur un sujet d’intérêt public municipal qui relève de la compétence de la Ville.
+                - paragraph [ref=e111]:
+                  - generic [ref=e112]:
+                    - text: "1"
+                    - superscript [ref=e113]: re
+                    - text: "période de questions : en début de séance"
+                  - text: Disponible uniquement pour les citoyens présents à l’endroit physique où se déroule la séance.
+                - paragraph [ref=e114]:
+                  - generic [ref=e115]:
+                    - text: "2"
+                    - superscript [ref=e116]: e
+                    - text: "période de questions : en fin de séance"
+                  - text: Ouverte aux citoyens s’adressant au conseil par le biais de la page Facebook de la Ville (diffusion en direct) et à ceux qui se trouvent dans la salle.
+                - paragraph [ref=e117]:
+                  - text: Les demandes peuvent également être adressées par la poste au 682, rue Saint-Charles, ou par courriel à
+                  - link "greffe@ville.marieville.qc.ca" [ref=e118] [cursor=pointer]:
+                    - /url: mailto:greffe@ville.marieville.qc.ca
+                  - text: jusqu’à 16 h 30 le jour de la séance.
+            - generic [ref=e119]:
+              - heading "Question jeunesse (5-17 ans) +" [level=3] [ref=e120] [cursor=pointer]
+              - generic:
+                - paragraph:
+                  - img [ref=e121]
+                - paragraph [ref=e122]
+                - paragraph [ref=e123]: Tu es un(e) jeune qui s’intéresse à la vie démocratique de sa ville? Le conseil municipal de la Ville de Marieville t’offre l’opportunité de t’exprimer en posant une question sur un sujet qui t’intéresse et qui relève des compétences de la Ville.
+                - paragraph [ref=e124]: "Les municipalités ont plusieurs responsabilités et la vie citoyenne est un sujet bien large, mais voici quelques exemples de sujets qui pourraient piquer ta curiosité : les loisirs, les bâtiments, les routes, la sécurité et l’environnement."
+                - paragraph [ref=e125]: Pour soumettre une question, tu dois être âgé entre 5 et 17 ans et être domicilié sur le territoire de Marieville.
+                - list [ref=e126]:
+                  - listitem [ref=e127]: Tu dois formuler ta question par écrit, inscrire ton prénom, ton adresse de résidence ainsi qu’une adresse courriel. L’adresse courriel peut être celle de ton père, de ta mère ou de ton tuteur.
+                  - listitem [ref=e128]: "Envoie ta question à la Ville au plus tard le 15 du mois pour la séance ordinaire du mois suivant :"
+                  - list [ref=e129]:
+                    - listitem [ref=e130]:
+                      - text: par courriel à
+                      - link "greffe@ville.marieville.qc.ca" [ref=e131] [cursor=pointer]:
+                        - /url: mailto:greffe@ville.marieville.qc.ca
+                    - listitem [ref=e132]: sur la messagerie Facebook de la Ville de Marieville
+                    - listitem [ref=e133]: en personne au 682, rue St-Charles.
+                - paragraph [ref=e134]: Les questions jeunesse reçues seront soumises au conseil lors d’une réunion de travail et une question sera retenue et présentée à la séance ordinaire suivante. Si ta question est choisie, un membre du conseil y répondra durant la première période de questions de la séance. Il faut savoir, par contre, que le conseil n’est pas tenu de répondre à toutes les questions qui lui sont transmises.
+            - generic [ref=e135]:
+              - heading "Documentation +" [level=3] [ref=e136] [cursor=pointer]
+              - paragraph [ref=e137]:
+                - generic [ref=e138]:
+                  - text: Le Service du greffe rend disponibles les
+                  - strong [ref=e139]: projets d’ordres du jour
+                  - text: et les
+                  - strong [ref=e140]: projets de règlements
+                  - text: quelques jours avant chaque séance ordinaire sur le site Web et à l’hôtel de ville. Les
+                  - strong [ref=e141]: procès-verbaux
+                  - text: ne sont rendus publics qu'après leur adoption par le conseil à la séance subséquente.
+                - text: La documentation reste accessible sur le site Web pour une durée de 12 mois. Pour consulter les documents de séances antérieures, adressez-vous au
+                - link "Service du greffe" [ref=e142] [cursor=pointer]:
+                  - /url: /fr/la-ville/coordonnees-des-services-municipaux
+                - text: .
+            - heading "Séances ordinaires" [level=5] [ref=e143]
+            - paragraph [ref=e144]:
+              - text: Les prochaines séances ordinaires se tiendront à 19 h 30
+              - generic [ref=e145]:
+                - text: les mardis 14 juillet, 4 août, 15 septembre, 6 octobre, 3 novembre et 1
+                - superscript [ref=e146]: er
+                - text: décembre 2026.
+            - generic [ref=e147]:
+              - heading "2 juin 2026 +" [level=3] [ref=e148] [cursor=pointer]
+              - generic:
+                - link "Ordre du jour" [ref=e149] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/ordre du jour/20260602_ODJ_Seance.pdf
+                - iframe [ref=e150]:
+                  - generic "Lecteur vidéo YouTube" [ref=f15e3]
+                - paragraph [ref=e151]:
+                  - strong [ref=e152]: Projets
+                  - strong [ref=e153]: de règlements
+                  - strong
+                - paragraph [ref=e154]:
+                  - link "1066-32-26 • Règlement modifiant le règlement 1066-05 intitulé \"Règlement de zonage\" afin d'autoriser l'habitation trifamiliale et multifamiliale dans la zone \"habitation\" H-55 (9.1.1)" [ref=e155] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1066-32-26_H-55 (2).pdf
+                  - link "1267-1-26 • Règlement modifiant le règlement numéro 1267-23 intitulé \"Règlement relatif aux taux du droit de mutation applicable aux transferts dont la base d'imposition excède 500 000 $ et au droit supplétif (9.1.2)" [ref=e156] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1267-1-26_Taux impostion droits mutation (1).pdf
+                  - link "1302-26 • Règlement décrétant une dépens n'excédant pas 613 738 $ et un emprunt de 613 738 $ pour le prolongement de la rue Ouellette (9.1.3)" [ref=e157] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1302-26_Prolongement_Ouellette (1).pdf
+            - generic [ref=e158]:
+              - heading "5 mai 2026 +" [level=3] [ref=e159] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e160] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260505_PV_Seance.pdf
+                - iframe [ref=e161]:
+                  - generic "Lecteur vidéo YouTube" [ref=f16e3]
+                - paragraph [ref=e162]:
+                  - strong [ref=e163]: Projets
+                  - strong [ref=e164]: de règlements
+                  - strong
+                - paragraph [ref=e165]:
+                  - link "1066-32-26 - Règlement modifiant le règlement 1066-05 intitulé \"Règlement de zonage\" afin d'autoriser l'habitation trifamiliale et multifamiliale dans la zone \"habitation\" H-55" [ref=e166] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1066-32-26_H-55 (1).pdf
+                  - link "1267-1-26 - Règlement modifiant le règlement numéro 1267-23 intitulé \"Règlement relatif aux taux du droit de mutation applicable aux transferts dont la base d'imposition excède 500 000 $ et au droit supplétif" [ref=e167] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1267-1-26_Taux impostion droits mutation.pdf
+                  - link "1302-26 - Règlement décrétant une dépense n'excédant pas 613 738 $ et un emprunt de 613 738 $ pour les travaux de prolongement de la rue Ouellette" [ref=e168] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1302-26_Prolongement_Ouellette.pdf
+            - generic [ref=e169]:
+              - heading "7 avril 2026 +" [level=3] [ref=e170] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e171] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260407_PV_Seance.pdf
+                - iframe [ref=e172]:
+                  - generic "Lecteur vidéo YouTube" [ref=f17e3]
+                - paragraph [ref=e173]:
+                  - strong [ref=e174]: Projets
+                  - strong [ref=e175]: de règlements
+                - paragraph [ref=e176]:
+                  - link "1066-32-26 - Règlement modifiant le règlement numéro 1066-05 intitulé \"Règlement de zonage\" afin d'autoriser l'habitation trifamiliale et multifamilale dans la zone \"habitation\" H-55" [ref=e177] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1066-32-26_H-55.pdf
+                  - link "1301-26 - Règlement relatif au financement par mode de tarification de certains biens, services et activités dispensés par la Ville" [ref=e178] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1301-26_Tarification.pdf
+            - generic [ref=e179]:
+              - heading "10 mars 2026 +" [level=3] [ref=e180] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e181] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260310_PV_Seance.pdf
+                - iframe [ref=e182]:
+                  - generic "Lecteur vidéo YouTube" [ref=f18e3]
+                - paragraph [ref=e183]:
+                  - strong [ref=e184]: Projets
+                  - strong [ref=e185]: de règlements
+                - paragraph [ref=e186]:
+                  - link "1299-26 - Règlement décrétant une dépense et un emprunt pour les travaux de réfection de deux terrains de baseball au parc des loisirs" [ref=e187] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1299-26_Emprunt_Terrains_baseball.pdf
+                  - link "1301-26 - Règlement relatif au financement par mode de tarification de certains biens, services et activités dispensés par la Ville" [ref=e188] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1301-26_Tarification_AM.pdf
+            - generic [ref=e189]:
+              - heading "3 février 2026 +" [level=3] [ref=e190] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e191] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260203_PV_Seance.pdf
+                - paragraph [ref=e192]:
+                  - iframe [ref=e193]:
+                    - generic "Lecteur vidéo YouTube" [ref=f19e3]
+                - paragraph [ref=e194]:
+                  - strong [ref=e195]: Projets
+                  - strong [ref=e196]: de règlements
+                - link "1298-26 - Règlement relatif à l'établissement d'un lieu de retour des contenants consignés sur le eterritoire de la Ville de Marieville" [ref=e197] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1298-26_Consignaction (1).pdf
+            - generic [ref=e198]:
+              - heading "13 janvier 2026 +" [level=3] [ref=e199] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e200] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260113_PV_Seance.pdf
+                - iframe [ref=e201]:
+                  - generic "Lecteur vidéo YouTube" [ref=f20e3]
+                - paragraph [ref=e202]:
+                  - strong [ref=e203]: Projets
+                  - strong [ref=e204]: de règlements
+                - paragraph [ref=e205]:
+                  - link "1293-26 - Règlement d'emprunt décrétant l'acquisition de véhicules et autorisant un emprunt n'excédant pas 514 373 $ pour en défrayer les coûts (parapluie)" [ref=e206] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1293-26_Emprunt_parapluis_vehicules.pdf
+                  - link "1297-26 - Règlement décrétant le code d'éthique et de déontologie des élus municipaux de la Ville de Marieville" [ref=e207] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1297-26_Code ethique et deontologie_Elus municipaux (1).pdf
+                  - link "1298-26 - Règlement relatif à l'établissement d'un lieu de retour des contenants consignés sur le territoire de la Ville" [ref=e208] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1298-26_Consignaction.pdf
+            - generic [ref=e209]:
+              - heading "9 décembre 2025 +" [level=3] [ref=e210] [cursor=pointer]
+              - link "Procès-verbal" [ref=e211] [cursor=pointer]:
+                - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20251209_PV.pdf
+              - generic:
+                - iframe [ref=e212]:
+                  - generic "Lecteur vidéo YouTube" [ref=f21e3]
+                - paragraph [ref=e213]:
+                  - strong [ref=e214]: Projets
+                  - strong [ref=e215]: de règlements
+                - paragraph [ref=e216]:
+                  - link "1292-25 - Règlement relatif au Comité consultatif d'urbanisme" [ref=e217] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1292-25_CCU.pdf
+                  - link "1295-25 - Règlement entérinant les prévisions budgétaires pour l'exercice financier 2026 de la SECT'eau" [ref=e218] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1295-25_Budget_2026_SECT'eau.pdf
+                  - link "1296-25 - Règlement concernant l'imposition des taux de taxation, compensations et tarifs pour l'exercice financier 2026" [ref=e219] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1296-25_Taxes 2026.pdf
+                  - link "1297-26 - Règlement décrétant le code d'éthique et de déontologie des élus municipaux de la Ville de Marieville" [ref=e220] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1297-26_Code ethique et deontologie_Elus municipaux.pdf
+            - generic [ref=e221]:
+              - heading "18 novembre 2025 +" [level=3] [ref=e222] [cursor=pointer]
+              - link "Procès-verbal" [ref=e223] [cursor=pointer]:
+                - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20251118_PV.pdf
+              - generic:
+                - iframe [ref=e224]:
+                  - generic "Lecteur vidéo YouTube" [ref=f22e3]
+                - paragraph [ref=e225]:
+                  - strong [ref=e226]: Projets
+                  - strong [ref=e227]: de règlements
+                - paragraph [ref=e228]:
+                  - link "1292-25 - Règlement relatif au Comité consultatif d'urbanisme" [ref=e229] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/ordre du jour/1292-25 ProjetReg CCU_Final.pdf
+            - generic [ref=e230]:
+              - heading "1er octobre 2025 +" [level=3] [ref=e231] [cursor=pointer]:
+                - text: "1"
+                - superscript [ref=e232]: er
+                - text: octobre 2025 +
+              - link "Procès-verbal" [ref=e233] [cursor=pointer]:
+                - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20251001_PV.pdf
+              - generic:
+                - iframe [ref=e234]:
+                  - generic "Lecteur vidéo YouTube" [ref=f23e3]
+                - paragraph [ref=e235]:
+                  - strong [ref=e236]: Projets
+                  - strong [ref=e237]: de règlements
+                - paragraph [ref=e238]:
+                  - link "1107-25-25 — Tarification de certains biens, services et activités dispensés par la Ville de Marieville" [ref=e239] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1107-25-25_Tarification.pdf
+                  - link "1290-25 — Éclairage de rues par lampadaires privés pour les secteurs non desservis par de l'éclairage public" [ref=e240] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1290-25_Lampadaires prives.pdf
+            - generic [ref=e241]:
+              - heading "16 septembre 2025 +" [level=3] [ref=e242] [cursor=pointer]
+              - generic:
+                - link "Procès verbal" [ref=e243] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20250916_PV.pdf
+                - paragraph [ref=e244]:
+                  - strong [ref=e245]: Projets
+                  - strong [ref=e246]: de règlements
+                - paragraph [ref=e247]:
+                  - link "No 1289-25 • Emprunt pour la réfection des vestiaires et l’acquisition de déshumidificateurs à l’aréna Julien-Beauregard" [ref=e248] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-09-12_no-1289-25_refection-vestiaires-acquisition-deshumidificateur-arena.pdf
+                    - text: "N"
+                    - superscript [ref=e249]: o
+                    - text: 1289-25 • Emprunt pour la réfection des vestiaires et l’acquisition de déshumidificateurs à l’aréna Julien-Beauregard
+                  - link "No 1289-25 • Emprunt pour la réfection des vestiaires et l’acquisition de déshumidificateurs à l’aréna Julien-Beauregard" [ref=e250] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-09-12_no-1289-25_refection-vestiaires-acquisition-deshumidificateur-arena.pdf
+                    - text: "N"
+                    - superscript [ref=e251]: o
+                    - text: 1289-25 • Emprunt pour la réfection des vestiaires et l’acquisition de déshumidificateurs à l’aréna Julien-Beauregard
+                  - link "No 1291-25 • Emprunt pour l’acquisition de matériel informatique et d’ameublement non intégré pour la nouvelle bibliothèque et le nouveau centre communautaire" [ref=e252] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-09-12_no-1291-25_emprunt-materiel-non-integre-bibliotheque.pdf
+                    - text: "N"
+                    - superscript [ref=e253]: o
+                    - text: 1291-25 • Emprunt pour l’acquisition de matériel informatique et d’ameublement non intégré pour la nouvelle bibliothèque et le nouveau centre communautaire
+                  - link "No 1107-25-25 • Règlement modifiant le règlement 1107-08 relatif au financement par mode de tarification de certains biens, services et activités" [ref=e254] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-09-12_no-1107-25-25_tarification-biens-services-activites.pdf
+                    - text: "N"
+                    - superscript [ref=e255]: o
+                    - text: 1107-25-25 • Règlement modifiant le règlement 1107-08 relatif au financement par mode de tarification de certains biens, services et activités
+                  - link "No 1290-25 • Élairage de rues par lampadaires privés pour les secteurs non desservis par de l’éclairage public" [ref=e256] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-09-12_no-1290-25_lampadaires-prives.pdf
+                    - text: "N"
+                    - superscript [ref=e257]: o
+                    - text: 1290-25 • Élairage de rues par lampadaires privés pour les secteurs non desservis par de l’éclairage public
+                  - strong
+            - generic [ref=e258]:
+              - heading "12 août 2025 +" [level=3] [ref=e259] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e260] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20250812_PV.pdf
+                - iframe [ref=e261]:
+                  - generic "Lecteur vidéo YouTube" [ref=f24e3]
+                - paragraph [ref=e262]:
+                  - strong [ref=e263]: Projets
+                  - strong [ref=e264]: de règlements
+                  - link "1289-25 — Règlement d'emprunt pour les travaux d'agrandissement et de réaménagement des vestiaires ainsi que l'acquisition et l'installation de deux déshumidificateurs à l'aréna Julien-Beauregard (9.2.1)" [ref=e265] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1289-25_Acquisition déshumidificateurs.pdf
+                  - link "1291-25 — Règlement d'emprunt pour l'acquisition de matériel informatique et d'ameublement non intégré pour la nouvelle bibliothèque et le nouveau centre communautaire (9.2.2)" [ref=e266] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1291-25_emprunt_matériel non intégré -bibliohtèques.pdf
+            - generic [ref=e267]:
+              - heading "8 juillet 2025 +" [level=3] [ref=e268] [cursor=pointer]
+              - generic:
+                - link "Procès-verbal" [ref=e269] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20250708_PV.pdf
+                - iframe [ref=e270]:
+                  - generic "Lecteur vidéo YouTube" [ref=f25e3]
+                - paragraph [ref=e271]:
+                  - strong [ref=e272]: Projets
+                  - strong [ref=e273]: de règlements
+                  - link "1066-31-25 - Règlement modifiant le règlement 1066-05 intitulé \"Règlement de zonage\" afin d'encadrer les usages complémentaires à un terrain de camping (9.1.1)" [ref=e274] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1066-31-25_terrains camping.pdf
+                  - link "1227-5-25 - Règlement harmonisé concernant la circulation et le stationnement dans la Ville de Marieville (9.1.2)" [ref=e275] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/1227-5-25_Circulation et stationnement.pdf
+                    - text: 1227-5-25 - Règlement harmonisé concernant la circulation et le stationnement dans la Ville de Marieville (9.1.2)
+            - heading "Séances extraordinaires" [level=5] [ref=e276]
+            - generic [ref=e277]:
+              - heading "31 mars 2026 +" [level=3] [ref=e278] [cursor=pointer]
+              - paragraph [ref=e279]:
+                - link "Procès-verbal" [ref=e280] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260331_PV_Seance_Extra.pdf
+            - generic [ref=e281]:
+              - heading "24 mars 2026 +" [level=3] [ref=e282] [cursor=pointer]
+              - paragraph [ref=e283]:
+                - link "Procès-verbal" [ref=e284] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260224_PV_Seance_Extra.pdf
+            - generic [ref=e285]:
+              - heading "24 février 2026 +" [level=3] [ref=e286] [cursor=pointer]
+              - paragraph [ref=e287]:
+                - link "Procès-verbal" [ref=e288] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20260324_PV_Seance_Extra.pdf
+            - generic [ref=e289]:
+              - heading "16 décembre 2025 +" [level=3] [ref=e290] [cursor=pointer]
+              - generic:
+                - paragraph [ref=e291]:
+                  - strong [ref=e292]: 19 h 30 - Budget 2026
+                  - link "Ordre du jour" [ref=e293] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-ODJ-EX_2025-12-12_seance-extraordinaire-2025-12-16_budget.pdf
+                - iframe [ref=e294]:
+                  - generic "Lecteur vidéo YouTube" [ref=f26e3]
+                - paragraph:
+                  - strong [ref=e295]: 20 h - Taxation et tarification 2026, autres sujets
+                  - link "Ordre du jour" [ref=e296] [cursor=pointer]:
+                    - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-ODJ-EX_2025-12-12_seance-extraordinaire-2025-12-16_taxation-tarification.pdf
+                - iframe [ref=e297]:
+                  - generic "Lecteur vidéo YouTube" [ref=f27e3]
+                - link "1296-25 • Taxation et tarification" [ref=e298] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-12-12_no-1296-25_taxation-tarification.pdf
+                - link "1293-26 • Emprun pour acquisition de véhicules (parapluie)" [ref=e299] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-12-12_no-1293-26_emprunt-vehicules-parapluie.pdf
+                - link "1295-25 • Budget 2026 de la SECT'EAU" [ref=e300] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Documents/DO-REG-EX-Projet_2025-12-12_no-1295-25_budget-SECTEAU.pdf
+            - generic [ref=e301]:
+              - heading "2 décembre 2025 +" [level=3] [ref=e302] [cursor=pointer]
+              - paragraph [ref=e303]:
+                - link "Procès-verbal" [ref=e304] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20251202_PV_extra-2.pdf
+            - generic [ref=e305]:
+              - heading "1er octobre 2025 +" [level=3] [ref=e306] [cursor=pointer]:
+                - text: "1"
+                - superscript [ref=e307]: er
+                - text: octobre 2025 +
+              - paragraph [ref=e308]:
+                - link "Procès-verbal" [ref=e309] [cursor=pointer]:
+                  - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20251001_PV_extra_PQI.pdf
+                - text: • PQI 2026-2030
+                - iframe [ref=e310]:
+                  - generic "Lecteur vidéo YouTube" [ref=f28e3]
+            - generic [ref=e311]:
+              - heading "26 août 2025 +" [level=3] [ref=e312] [cursor=pointer]
+              - link "Procès-verbal" [ref=e313] [cursor=pointer]:
+                - /url: /Fichiers/7e968aba-192a-e911-9b4c-00155d1b0914/Sites/97d2ac04-1a2a-e911-9b4c-00155d1b0914/Greffe/procès-verbaux/20250826_PV_extra.pdf
+  - generic [ref=e314]:
+    - link [ref=e315] [cursor=pointer]:
+      - /url: /fr/la-ville/communications/infolettres
+      - img [ref=e317]
+      - img [ref=e403]
+      - img [ref=e435]
+    - contentinfo [ref=e449]:
+      - generic [ref=e451]:
+        - generic [ref=e452]:
+          - link "Marieville" [ref=e453] [cursor=pointer]:
+            - /url: /fr
+            - img "Marieville" [ref=e454]
+          - link "682, rue Saint-Charles Marieville (Québec) J3M 1P9" [ref=e455] [cursor=pointer]:
+            - /url: https://www.google.com/maps/place/682+Rue+Saint-Charles,+Marieville,+QC+J3M+1P9
+            - text: 682, rue Saint-Charles
+            - text: Marieville (Québec) J3M 1P9
+          - link "450 460-4444" [ref=e456] [cursor=pointer]:
+            - /url: tel:4504604444
+          - link "communications@ville.marieville.qc.ca" [ref=e457] [cursor=pointer]:
+            - /url: mailto:communications@ville.marieville.qc.ca
+        - generic [ref=e458]:
+          - link [ref=e459] [cursor=pointer]:
+            - /url: https://mrcrouville.qc.ca/
+            - img [ref=e460]
+          - link [ref=e461] [cursor=pointer]:
+            - /url: /fr/services-aux-citoyens/environnement/les-fleurons-du-quebec
+            - img [ref=e462]
+        - generic [ref=e463]:
+          - generic [ref=e464]:
+            - generic [ref=e465]:
+              - generic [ref=e466]: Suivez-nous
+              - list [ref=e467]:
+                - listitem [ref=e468]:
+                  - link "Facebook" [ref=e469] [cursor=pointer]:
+                    - /url: https://www.facebook.com/villedemarieville
+                    - img "Facebook" [ref=e470]
+            - link "Nous joindre" [ref=e472] [cursor=pointer]:
+              - /url: /fr/nous-joindre
+          - list [ref=e474]:
+            - listitem [ref=e475]:
+              - link "Note légale|" [ref=e476] [cursor=pointer]:
+                - /url: /fr/note-legale
+            - listitem [ref=e477]:
+              - link "Accessibilité|" [ref=e478] [cursor=pointer]:
+                - /url: /fr/accessibilite
+            - listitem [ref=e479]:
+              - link "Confidentialité|" [ref=e480] [cursor=pointer]:
+                - /url: /fr/confidentialite
+            - listitem [ref=e481]:
+              - link "Plan de site" [ref=e482] [cursor=pointer]:
+                - /url: /fr/plan-de-site
+          - link [ref=e483] [cursor=pointer]:
+            - /url: https://acces.marieville.ca/accueil
+            - img [ref=e484]
+        - generic [ref=e485]:
+          - paragraph [ref=e486]: © Ville de Marieville. Tous droits réservés.
+          - paragraph [ref=e487]:
+            - text: "Conception Web ::"
+            - link "LANEC" [ref=e488] [cursor=pointer]:
+              - /url: https://lanec.com
+            - generic [ref=e489]: "|"
+            - text: Propulsé par
+            - link [ref=e490] [cursor=pointer]:
+              - /url: https://maruche.ca
+              - img [ref=e491]
+  - generic [ref=e500]:
+    - generic [ref=e501]: Nous respectons votre vie privée.
+    - generic [ref=e502]:
+      - generic [ref=e503]: Ce site Web utilise des fichiers témoins (cookies) pour améliorer votre expérience de navigation et mieux comprendre son utilisation. En cliquant sur « Tout accepter », vous consentez à l’utilisation des fichiers témoins.
+      - link "Politique de confidentialité" [ref=e504] [cursor=pointer]:
+        - /url: /fr/confidentialite
+    - generic [ref=e505]:
+      - generic [ref=e506] [cursor=pointer]: Personnaliser
+      - generic [ref=e507] [cursor=pointer]: Tout rejeter
+      - generic [ref=e508] [cursor=pointer]: Tout accepter

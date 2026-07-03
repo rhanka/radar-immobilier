@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781237748904:d79b",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION: 35/522 villes sur SCW (lot1 20 + lot2 3 agents). Lot 2 a 3/4 fini (b2a1 straggler 3/5, upload a venir).\nSCW: 35 graph/<ville>/latest.json + ~280 parsed/.../graph.json. Qualite et anti-invention/Loi25 constants. Le principal traite sa moitie en parallele (4+4).\nLOT 3 LANCE (villes 40-60). Je continue par lots de 4x5."
+  },
+  "createdAt": "2026-06-12T04:15:48.904Z"
+}

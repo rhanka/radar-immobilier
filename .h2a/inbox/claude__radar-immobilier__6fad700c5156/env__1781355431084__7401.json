@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781355431084:7401",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 188/575 confirmees SCW (lots L1-L8 complets, toutes ontology_version 2.0). 33% du perimetre. Regime stable 4 agents Sonnet/lot de 24. Signaux L8: Shawinigan 9 derogations + acquisition 3M$, Victoriaville 5 PPCMOI + 2 PPH, Warwick premier hotel zone I-11, Val-des-Sources rezonage parc d affaires->residentiel, Sainte-Cecile-de-Levrard annexion 11 lots. Reste 62 villes re-graphify (jusqu index 274) puis 301 nouvelles. J enchaine lot 9 (cursor 188->212). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T12:57:11.084Z"
+}

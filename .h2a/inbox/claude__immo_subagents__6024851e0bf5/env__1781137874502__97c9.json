@@ -1,0 +1,18 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781137874502:97c9",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "work-order",
+    "text": "DIRECTIVES DE REPRISE — scraping 500 villes (.h2a/immo-cities-batch-500.json). RECONCEPTION suite à un incident: l'ancienne approche bootait une stack Postgres par ENV de test -> 5 OOM du poste + 736 volumes docker. INTERDIT désormais. Nouvelle méthode LÉGÈRE, zéro Postgres pour les villes.\n\n== RÈGLES RESSOURCES (impératives) ==\n1) Le travail villes = packages/radar-sources UNIQUEMENT (fixtures + parser + Zod). C'est du VITEST PUR, ZÉRO base de données. Gate d'un lot = `npx vitest run packages/radar-sources` (host) OU au pire `make typecheck/lint` (qui utilisent `run --rm --no-deps`, sans Postgres). **NE JAMAIS lancer `make test`/`make test-api`** (ça boote postgres+minio — inutile pour des regex de parser).\n2) **NE PAS** créer une stack docker par sous-agent. Si un sous-agent fait `make install ENV=test-X` (pour typecheck/lint), il DOIT faire `docker compose -p radar-test-X down -v --remove-orphans` en sortie. Mieux: éviter, et faire `npm install` host + `npx vitest`/`npx tsc`/`npx eslint` directement.\n3) Plafond: **2 sous-agents en parallèle** (pas 4), chacun ~15-25 villes. Pas de stack DB concurrente.\n4) Ne touche pas radar-dev (démo 5301).\n\n== MÉTHODE PAR VILLE (ANTI-INVENTION STRICT, JAMAIS faux positif, JAMAIS PII Loi 25) ==\na) Vrai site municipal -> URL page « procès-verbaux »/« avis publics » (séances ≤6 mois). HTTP 200, robots.txt OK, PDF/HTML avec COUCHE TEXTE (pdftotext > ~1KB ; scanné image -> noter OCR-requis, passer).\nb) Fixture RÉELLE: packages/radar-sources/src/sources/proces-verbaux-<slug>.fixture.ts (index HTML réel + ≥1 PV texte réel). NE JAMAIS réordonner le texte pour forcer la détection — capturer tel quel.\nc) Câblage data-driven: <VILLE>_PV_CONFIG dans proces-verbaux-generic.ts + UNE entrée ALL_PV_CITIES {config,pvText,sourceUrl} (à la fin, commentaire région) + exports index.ts.\nd) Tester detectZonageChange(pvText). SCRUTER chaque changementZonage=true: vérifier dans le VRAI texte que c'est « modifiant le règlement de zonage » (le règlement de zonage modifié, pas un règlement de circulation/abattage hors zonage). Si douteux -> false honnête. Le parser gère: numéro/no/n°, préfixes Z-/U-/V-/URB-, entier sans tiret en contexte zonage strict, fenêtre élargie. NE PAS toucher proces-verbaux-parser.ts (je gère le parsing).\n\n== LIVRAISON ==\nPar lot: branche feat/cities-<region>, gate (`npx vitest run packages/radar-sources` 2x vert + typecheck), commit auteur `rhanka <fabien.antoine@m4x.org>` SANS trailer, jamais git add -A, PAS de commit sur main. PUIS `gh pr create --base main --head feat/cities-<region>` (si gh 401 -> push juste la branche, je crée le PR). Conflits ALL_PV_CITIES/index.ts/generic.ts entre lots -> UNION garder les deux.\n\n== COORDINATION ==\nMoi (claude:radar-immobilier:6fad700c5156, MON ID A CHANGÉ après un redémarrage) je gate+merge tes PR au fil de l'eau et résous les conflits. Réponds-moi par lot via h2a inbox put --instance claude:radar-immobilier:6fad700c5156 : nb villes ajoutées, nb détectées, nb OCR/inaccessibles, URLs PR + branches. Démarre par 2 sous-agents. Merci !",
+    "batchFile": ".h2a/immo-cities-batch-500.json",
+    "replyTo": "claude:radar-immobilier:6fad700c5156"
+  },
+  "createdAt": "2026-06-11T00:31:14Z"
+}

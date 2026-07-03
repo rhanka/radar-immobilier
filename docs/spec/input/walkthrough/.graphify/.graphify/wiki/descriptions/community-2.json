@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "community:2",
+  "target_kind": "community",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Community 2 is a small group consisting of five members, including Règlement 3835, Ville de Saint-Damase, and Zone 201, each with a degree of 3. The community also includes Habitation multifamiliale and MRC de la Matapédia, both with a degree of 2. The relationships within this community are documented in the walkthrough transcript.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "6a58997ae776653030e57b39e3c8573cd626b9fa3f586831d82bd266953dd831",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

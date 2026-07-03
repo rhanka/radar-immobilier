@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781356519919:9bf7",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 212/575 confirmees SCW (lots L1-L9 complets, toutes ontology_version 2.0). 37% du perimetre. Regime stable 4 agents Sonnet/lot de 24, verif post-upload. Signaux L9: Saint-Marc-des-Carrieres rezonage Mb-5 projet mixte 22-32M$ 40 logements, Scotstown rezonage eglise->residentiel, Val-des-Monts presbytere->residentiel + PPCMOI, Saint-Severin/Sainte-Thecle opposition eolien TES Mauricie, Saint-Isidore-de-Clifton 8 logements abordables. Reste 38 villes re-graphify (jusqu index 274) puis 301 nouvelles. J enchaine lot 10 (cursor 212->236). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T13:15:19.919Z"
+}

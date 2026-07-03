@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781468121123:f536",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "ETAPE v2.1: lot E1 FAIT, 24/575 villes S-Z en ontology_version 2.1 (etape+etape_date sur Signal+DesignationEvent). Taux etape!=inconnu ~100% sur les villes a contenu (saint-jean-sur-richelieu 39 noeuds, saint-constant 19, sainte-marthe 32...). 4 gates verts par ville. J enchaine E2 (cursor 24->48), lots seriels. NE reprojette PAS PG."
+  },
+  "createdAt": "2026-06-14T20:15:21.123Z"
+}

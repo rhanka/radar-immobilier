@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>graphify - /home/antoinefa/src/radar-immobilier/docs/spec/input/walkthrough/.graphify/.graphify/graph.html</title>
+<script src="https://unpkg.com/vis-network@9.1.6/standalone/umd/vis-network.min.js" integrity="sha384-Ux6phic9PEHJ38YtrijhkzyJ8yQlH8i/+buBR8s3mAZOJrP1gwyvAcIYl3GWtpX1" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --ws-surface: #ffffff;
+    --ws-surface-2: #f5f6f8;
+    --ws-border: #d6d8df;
+    --ws-text: #1a1d2a;
+    --ws-text-muted: #5b6271;
+    --ws-accent: #2F5A8A;
+    --ws-danger: #B2432D;
+    --ws-success: #3F7A39;
+    --ws-warning: #B9601E;
+    --ws-font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --ws-font-family-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --ws-font-size-sm: 12px;
+    --ws-font-size-md: 14px;
+    --ws-font-size-lg: 16px;
+    --ws-line-height-tight: 1.25;
+    --ws-line-height-normal: 1.5;
+    --ws-space-0: 0;
+    --ws-space-1: 4px;
+    --ws-space-2: 8px;
+    --ws-space-3: 12px;
+    --ws-space-4: 16px;
+    --ws-space-5: 24px;
+    --ws-space-6: 32px;
+    --ws-space-7: 48px;
+    --ws-radius-sm: 4px;
+    --ws-radius-md: 6px;
+    --ws-radius-lg: 10px;
+    --ws-shadow-card: 0 1px 2px rgba(15,17,26,0.08), 0 2px 4px rgba(15,17,26,0.05);
+    --ws-shadow-popover: 0 4px 12px rgba(15,17,26,0.12), 0 8px 24px rgba(15,17,26,0.08);
+    --ws-outline: 3px solid;
+    --ws-outline-offset: 2px;
+    --ws-outline-color: #A05E00;
+    --graph-overlay: rgba(15, 23, 42, 0.45);
+    --graph-focus-shadow: rgba(78, 121, 167, 0.55);
+    --graph-weak-text: var(--ws-text-muted);
+    --graph-muted-strong: var(--ws-text-muted);
+    --graph-node-label: var(--ws-text);
+    --graph-neighbor-border: var(--ws-border);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--ws-surface); color: var(--ws-text); font-family: var(--ws-font-family-sans); display: flex; height: 100vh; overflow: hidden; }
+  /* Skip link visible only on focus, lets keyboard users jump past the canvas. */
+  .skip-link { position: absolute; top: -40px; left: var(--ws-space-2); background: var(--ws-accent); color: #fff; padding: var(--ws-space-1) var(--ws-space-3); border-radius: 0 0 var(--ws-radius-sm) var(--ws-radius-sm); z-index: 1000; text-decoration: none; }
+  .skip-link:focus { top: 0; }
+  /* Visually hidden but exposed to screen readers. */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  /* Focus visible everywhere, WCAG-compliant outline. */
+  :focus-visible { outline: var(--ws-outline); outline-offset: var(--ws-outline-offset); outline-color: var(--ws-outline-color); box-shadow: 0 0 0 4px var(--graph-focus-shadow); }
+  #graph { flex: 1; outline: none; background: var(--ws-surface); }
+  #graph:focus-visible { box-shadow: inset 0 0 0 3px var(--ws-outline-color); }
+  #sidebar { width: 280px; background: var(--ws-surface-2); border-left: 1px solid var(--ws-border); display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: var(--ws-space-3); border-bottom: 1px solid var(--ws-border); }
+  #search { width: 100%; background: var(--ws-surface); border: 1px solid var(--ws-border); color: var(--ws-text); padding: 7px 10px; border-radius: var(--ws-radius-md); font-size: 13px; outline: none; }
+  #search:focus { border-color: var(--ws-accent); }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid var(--ws-border); display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: var(--ws-radius-sm); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover, .search-item:focus { background: var(--ws-border); }
+  #info-panel { padding: 14px; border-bottom: 1px solid var(--ws-border); min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: var(--ws-text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: var(--ws-text); line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: var(--ws-text); }
+  #info-content .empty { color: var(--graph-weak-text); font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid var(--graph-neighbor-border); }
+  .neighbor-link:hover, .neighbor-link:focus { background: var(--ws-border); }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: var(--ws-space-3); }
+  #legend-wrap h3 { font-size: 13px; color: var(--ws-text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: var(--ws-radius-sm); font-size: 12px; }
+  .legend-item:hover, .legend-item:focus-within { background: var(--ws-border); padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.45; } /* WCAG: bumped from 0.35 for better contrast in dimmed state */
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-cb { accent-color: var(--ws-accent); cursor: pointer; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: var(--graph-muted-strong); font-size: 11px; }
+  #legend-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 11px; color: var(--ws-text-muted); }
+  #legend-controls label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  #stats { padding: 10px 14px; border-top: 1px solid var(--ws-border); font-size: 11px; color: var(--graph-muted-strong); }
+  /* Help overlay modal. */
+  #help-button { position: fixed; bottom: 12px; right: 296px; width: 36px; height: 36px; border-radius: 50%; background: var(--ws-border); color: var(--ws-text); border: 1px solid var(--ws-border); font-size: 16px; font-weight: bold; cursor: pointer; z-index: 100; }
+  #help-button:hover, #help-button:focus { background: var(--ws-surface-2); }
+  #help-overlay { display: none; position: fixed; inset: 0; background: var(--graph-overlay); z-index: 200; align-items: center; justify-content: center; }
+  #help-overlay.open { display: flex; }
+  #help-modal { background: var(--ws-surface-2); color: var(--ws-text); padding: 24px 28px; border-radius: var(--ws-radius-lg); max-width: 480px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--ws-border); }
+  #help-modal h2 { font-size: 16px; margin-bottom: 12px; }
+  #help-modal kbd { background: var(--ws-surface); border: 1px solid var(--ws-border); border-radius: 3px; padding: 1px 6px; font-family: var(--ws-font-family-mono); font-size: 12px; }
+  #help-modal dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 12px 0; font-size: 13px; }
+  #help-modal dt { color: var(--ws-outline-color); }
+  #help-close { float: right; background: none; border: none; color: var(--ws-text-muted); font-size: 18px; cursor: pointer; }
+  #help-close:hover, #help-close:focus { color: var(--ws-text); }
+  /* High-contrast mode (system preference + manual toggle). */
+  @media (prefers-contrast: more) {
+    body, #sidebar, #search { background: #000; color: #fff; }
+    #search { border-color: #fff; }
+    #info-content .empty, .legend-count, #stats { color: #ddd; }
+  }
+  body.high-contrast { background: #000; color: #fff; }
+  body.high-contrast #sidebar, body.high-contrast #search, body.high-contrast #help-modal { background: #000; color: #fff; }
+  body.high-contrast #search { border-color: #fff; }
+  body.high-contrast #info-content .empty, body.high-contrast .legend-count, body.high-contrast #stats { color: #ddd; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#sidebar">Skip to controls</a>
+<div id="live-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="graph" aria-label="Graphify knowledge graph"></div>
+<aside id="sidebar" aria-label="Graph controls">
+  <div id="search-wrap">
+    <label for="search" class="sr-only">Search nodes</label>
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off"
+           role="combobox" aria-controls="search-results" aria-expanded="false" aria-autocomplete="list">
+    <div id="search-results" role="listbox" aria-label="Search results"></div>
+  </div>
+  <section id="info-panel" aria-labelledby="info-heading">
+    <h3 id="info-heading">Node Info</h3>
+    <div id="info-content" aria-live="polite"><span class="empty">Click a node to inspect it</span></div>
+  </section>
+  <section id="legend-wrap" aria-labelledby="legend-heading">
+    <h3 id="legend-heading">Communities</h3>
+    <div id="legend-controls">
+      <label><input id="select-all-cb" type="checkbox" checked> <span>Select all</span></label>
+      <button id="contrast-toggle" type="button" aria-pressed="false" aria-label="Toggle high contrast">HC</button>
+    </div>
+    <div id="legend" role="group" aria-label="Community filters"></div>
+    <h3 id="shapes-heading" style="margin-top:14px">Shapes</h3>
+    <ul id="shape-legend" aria-labelledby="shapes-heading" style="list-style:none;padding:0;margin:0;font-size:12px;color:var(--ws-text-muted)">
+      <li>● dot &mdash; code</li>
+      <li><span style="display:inline-block;width:10px;height:10px;background:var(--ws-text-muted);vertical-align:middle"></span> square (filled) &mdash; test</li>
+      <li>▲ triangle &mdash; config (yaml/toml/...)</li>
+      <li>◆ diamond &mdash; type definition (.d.ts)</li>
+      <li><span style="display:inline-block;width:10px;height:10px;border:1px solid var(--ws-text-muted);background:transparent;vertical-align:middle"></span> box (outline) &mdash; document / paper / concept</li>
+      <li>★ star &mdash; image</li>
+      <li>⬢ hexagon &mdash; video</li>
+    </ul>
+    <h3 id="relations-heading" style="margin-top:14px">Edges</h3>
+    <ul id="relation-legend" aria-labelledby="relations-heading" style="list-style:none;padding:0;margin:0;font-size:12px;color:var(--ws-text-muted)">
+      <li>━━━━ solid &mdash; calls / strong (EXTRACTED)</li>
+      <li>┄┄┄┄ dashed &mdash; imports_from / imports / re_exports</li>
+      <li>┈┈┈┈ dotted &mdash; tested_by / validated_by</li>
+      <li>━ ━ ━ long-dash &mdash; inherits / implements</li>
+      <li style="opacity:0.6">··· faded &mdash; INFERRED / AMBIGUOUS</li>
+    </ul>
+  </section>
+  <div id="stats" role="status">19 nodes &middot; 27 edges &middot; 4 communities</div>
+</aside>
+<button id="help-button" type="button" aria-label="Open keyboard help (F1)" aria-haspopup="dialog" aria-controls="help-overlay">?</button>
+<div id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title" aria-hidden="true">
+  <div id="help-modal">
+    <button id="help-close" type="button" aria-label="Close help">&times;</button>
+    <h2 id="help-title">Keyboard shortcuts</h2>
+    <dl>
+      <dt><kbd>Tab</kbd></dt><dd>Cycle focus between controls</dd>
+      <dt><kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>Pan the graph (graph focused)</dd>
+      <dt><kbd>+</kbd> / <kbd>-</kbd></dt><dd>Zoom in / out (graph focused)</dd>
+      <dt><kbd>Enter</kbd></dt><dd>Select hovered or focused node</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Deselect / close help</dd>
+      <dt><kbd>F1</kbd> / <kbd>?</kbd></dt><dd>Toggle this help</dd>
+      <dt><kbd>HC</kbd> button</dt><dd>Toggle high-contrast theme</dd>
+    </dl>
+    <p style="font-size:12px;color:var(--ws-text-muted);margin-top:8px">Search input announces match counts; selecting a node announces its community and degree.</p>
+  </div>
+</div>
+<script>
+const RAW_NODES = [{"id":"radar_demo_transcript","label":"Walkthrough démo radar-immobilier — transcript","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":40,"font":{"size":12,"color":"#1a1d2a"},"title":"Walkthrough démo radar-immobilier — transcript","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"document","shape":"box","degree":13},{"id":"voxtral_mini_latest","label":"Mistral Voxtral (voxtral-mini-latest)","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"Mistral Voxtral (voxtral-mini-latest)","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":1},{"id":"rad_ar_i_mmo_dmo_recording","label":"rad-ar i-mmo dmo - 2026_06_09 17_49 EDT - Recording.mp4","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"rad-ar i-mmo dmo - 2026_06_09 17_49 EDT - Recording.mp4","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"document","shape":"box","degree":1},{"id":"procès_verbal","label":"Procès-verbal municipal","color":{"background":"rgba(0,0,0,0)","border":"#F28E2B","highlight":{"background":"#ffffff","border":"#F28E2B"}},"size":21.5,"font":{"size":12,"color":"#1a1d2a"},"title":"Procès-verbal municipal","community":1,"community_name":"Community 1","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":5},{"id":"zonage_change","label":"Changement de zonage","color":{"background":"rgba(0,0,0,0)","border":"#F28E2B","highlight":{"background":"#ffffff","border":"#F28E2B"}},"size":16.9,"font":{"size":12,"color":"#1a1d2a"},"title":"Changement de zonage","community":1,"community_name":"Community 1","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":3},{"id":"dérogation_mineure","label":"Dérogation mineure","color":{"background":"rgba(0,0,0,0)","border":"#76B7B2","highlight":{"background":"#ffffff","border":"#76B7B2"}},"size":16.9,"font":{"size":12,"color":"#1a1d2a"},"title":"Dérogation mineure","community":3,"community_name":"Community 3","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":3},{"id":"avis_public","label":"Avis public municipal","color":{"background":"rgba(0,0,0,0)","border":"#F28E2B","highlight":{"background":"#ffffff","border":"#F28E2B"}},"size":14.6,"font":{"size":12,"color":"#1a1d2a"},"title":"Avis public municipal","community":1,"community_name":"Community 1","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":2},{"id":"règlement_zonage","label":"Règlement de zonage","color":{"background":"rgba(0,0,0,0)","border":"#F28E2B","highlight":{"background":"#ffffff","border":"#F28E2B"}},"size":23.8,"font":{"size":12,"color":"#1a1d2a"},"title":"Règlement de zonage","community":1,"community_name":"Community 1","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":6},{"id":"ville_saint_damase","label":"Ville de Saint-Damase","color":{"background":"rgba(0,0,0,0)","border":"#E15759","highlight":{"background":"#ffffff","border":"#E15759"}},"size":16.9,"font":{"size":12,"color":"#1a1d2a"},"title":"Ville de Saint-Damase","community":2,"community_name":"Community 2","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":3},{"id":"mrc_matapedia","label":"MRC de la Matapédia","color":{"background":"rgba(0,0,0,0)","border":"#E15759","highlight":{"background":"#ffffff","border":"#E15759"}},"size":14.6,"font":{"size":12,"color":"#1a1d2a"},"title":"MRC de la Matapédia","community":2,"community_name":"Community 2","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":2},{"id":"carte_interactive_zonage","label":"Carte interactive de zonage","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"Carte interactive de zonage","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":1},{"id":"scraper_procès_verbal","label":"Scraper de procès-verbaux","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"Scraper de procès-verbaux","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":1},{"id":"vidéo_meeting_municipal","label":"Vidéo de réunion municipale","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"Vidéo de réunion municipale","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":1},{"id":"youtube_transcript","label":"Transcription YouTube","color":{"background":"rgba(0,0,0,0)","border":"#4E79A7","highlight":{"background":"#ffffff","border":"#4E79A7"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"Transcription YouTube","community":0,"community_name":"Community 0","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":1},{"id":"zone_201","label":"Zone 201","color":{"background":"rgba(0,0,0,0)","border":"#E15759","highlight":{"background":"#ffffff","border":"#E15759"}},"size":16.9,"font":{"size":12,"color":"#1a1d2a"},"title":"Zone 201","community":2,"community_name":"Community 2","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":3},{"id":"règlement_3835","label":"Règlement 3835","color":{"background":"rgba(0,0,0,0)","border":"#E15759","highlight":{"background":"#ffffff","border":"#E15759"}},"size":16.9,"font":{"size":12,"color":"#1a1d2a"},"title":"Règlement 3835","community":2,"community_name":"Community 2","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":3},{"id":"habitation_multifamiliale","label":"Habitation multifamiliale","color":{"background":"rgba(0,0,0,0)","border":"#E15759","highlight":{"background":"#ffffff","border":"#E15759"}},"size":14.6,"font":{"size":12,"color":"#1a1d2a"},"title":"Habitation multifamiliale","community":2,"community_name":"Community 2","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":2},{"id":"marge_implantation","label":"Marge d'implantation","color":{"background":"rgba(0,0,0,0)","border":"#76B7B2","highlight":{"background":"#ffffff","border":"#76B7B2"}},"size":12.3,"font":{"size":0,"color":"#1a1d2a"},"title":"Marge d'implantation","community":3,"community_name":"Community 3","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":1},{"id":"avis_de_motion","label":"Avis de motion","color":{"background":"rgba(0,0,0,0)","border":"#F28E2B","highlight":{"background":"#ffffff","border":"#F28E2B"}},"size":14.6,"font":{"size":12,"color":"#1a1d2a"},"title":"Avis de motion","community":1,"community_name":"Community 1","source_file":"walkthrough-transcript.md","file_type":"concept","shape":"box","degree":2}];
+const RAW_EDGES = [{"from":"radar_demo_transcript","to":"voxtral_mini_latest","label":"utilise","title":"utilise [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"utilise"},{"from":"radar_demo_transcript","to":"rad_ar_i_mmo_dmo_recording","label":"contient","title":"contient [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"contient"},{"from":"radar_demo_transcript","to":"procès_verbal","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"zonage_change","label":"discute","title":"discute [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"discute"},{"from":"radar_demo_transcript","to":"dérogation_mineure","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"avis_public","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"règlement_zonage","label":"discute","title":"discute [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"discute"},{"from":"radar_demo_transcript","to":"ville_saint_damase","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"mrc_matapedia","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"carte_interactive_zonage","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"scraper_procès_verbal","label":"propose","title":"propose [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"propose"},{"from":"radar_demo_transcript","to":"vidéo_meeting_municipal","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"radar_demo_transcript","to":"youtube_transcript","label":"mentionne","title":"mentionne [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"mentionne"},{"from":"procès_verbal","to":"zonage_change","label":"contient","title":"contient [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"contient"},{"from":"procès_verbal","to":"avis_public","label":"contient","title":"contient [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"contient"},{"from":"procès_verbal","to":"règlement_zonage","label":"contient","title":"contient [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"contient"},{"from":"procès_verbal","to":"avis_de_motion","label":"contient","title":"contient [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"contient"},{"from":"zonage_change","to":"règlement_zonage","label":"implique","title":"implique [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"implique"},{"from":"dérogation_mineure","to":"règlement_zonage","label":"modifie","title":"modifie [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"modifie"},{"from":"ville_saint_damase","to":"mrc_matapedia","label":"appartient_à","title":"appartient_à [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"appartient_à"},{"from":"ville_saint_damase","to":"zone_201","label":"contient","title":"contient [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"contient"},{"from":"règlement_3835","to":"règlement_zonage","label":"est_un","title":"est_un [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"est_un"},{"from":"règlement_3835","to":"habitation_multifamiliale","label":"autorise","title":"autorise [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"autorise"},{"from":"règlement_3835","to":"zone_201","label":"applique_à","title":"applique_à [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"applique_à"},{"from":"habitation_multifamiliale","to":"zone_201","label":"est_permise_dans","title":"est_permise_dans [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"est_permise_dans"},{"from":"marge_implantation","to":"dérogation_mineure","label":"est_affectée_par","title":"est_affectée_par [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"est_affectée_par"},{"from":"avis_de_motion","to":"règlement_zonage","label":"précède","title":"précède [EXTRACTED]","dashes":false,"width":2,"color":{"color":"#5b6271","highlight":"#2F5A8A","hover":"#2F5A8A","opacity":0.7},"confidence":"EXTRACTED","relation":"précède"}];
+const LEGEND = [{"cid":0,"color":"#4E79A7","label":"Community 0","count":7},{"cid":1,"color":"#F28E2B","label":"Community 1","count":5},{"cid":2,"color":"#E15759","label":"Community 2","count":5},{"cid":3,"color":"#76B7B2","label":"Community 3","count":2}];
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  shape: n.shape || 'dot',
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+  _shape: n.shape || 'dot',
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+container.setAttribute('role', 'application');
+container.setAttribute('tabindex', '0');
+container.setAttribute('aria-label', 'Graphify knowledge graph. Use arrow keys to pan, plus and minus to zoom, F1 for help.');
+const liveRegion = document.getElementById('live-status');
+function announce(message) {
+  if (liveRegion) liveRegion.textContent = message;
+}
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: { enabled: true, speed: { x: 10, y: 10, zoom: 0.05 }, bindToWindow: false },
+  },
+  nodes: { borderWidth: 1.5 },  /* shape comes from per-node n.shape */
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : 'var(--ws-border)';
+    return `<span class="neighbor-link" style="border-left-color:${color}" onclick="focusNode('${nid}')">${nb ? nb.label : nid}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${n.label}</b></div>
+    <div class="field">Type: ${n._file_type || 'unknown'} <span style="color:var(--ws-text-muted);font-size:11px">(shape: ${n._shape})</span></div>
+    <div class="field">Community: ${n._community_name}</div>
+    <div class="field">Source: ${n._source_file || '-'}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:var(--ws-text-muted);font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
+  }
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+    const n = nodesDS.get(params.nodes[0]);
+    if (n) announce(`Selected ${n.label}, in community ${n._community_name}, ${n._degree} connection(s).`);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+  }
+});
+network.on('selectNode', params => {
+  if (params.nodes.length > 0) {
+    const n = nodesDS.get(params.nodes[0]);
+    if (n) announce(`Selected ${n.label}, in community ${n._community_name}, ${n._degree} connection(s).`);
+  }
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+const normalizeSearch = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+searchInput.addEventListener('input', () => {
+  const q = normalizeSearch(searchInput.value).trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; announce(''); return; }
+  const totalMatches = RAW_NODES.filter(n => normalizeSearch(n.label).includes(q)).length;
+  const matches = RAW_NODES.filter(n => normalizeSearch(n.label).includes(q)).slice(0, 20);
+  if (!matches.length) {
+    searchResults.style.display = 'none';
+    announce('No nodes match the search.');
+    return;
+  }
+  searchResults.style.display = 'block';
+  announce(`Found ${totalMatches} node(s) matching "${q}". Showing first ${matches.length}.`);
+  matches.forEach(n => {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.setAttribute('aria-label', `Focus node ${n.label}`);
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+      announce(`Focused on ${n.label}.`);
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+const selectAllCb = document.getElementById('select-all-cb');
+function updateSelectAllState() {
+  const total = LEGEND.length;
+  const hidden = hiddenCommunities.size;
+  selectAllCb.checked = hidden === 0;
+  selectAllCb.indeterminate = hidden > 0 && hidden < total;
+}
+function toggleAllCommunities(hide) {
+  document.querySelectorAll('.legend-item').forEach(item => {
+    hide ? item.classList.add('dimmed') : item.classList.remove('dimmed');
+  });
+  document.querySelectorAll('.legend-cb').forEach(cb => {
+    cb.checked = !hide;
+  });
+  LEGEND.forEach(c => {
+    if (hide) hiddenCommunities.add(c.cid); else hiddenCommunities.delete(c.cid);
+  });
+  const updates = RAW_NODES.map(n => ({ id: n.id, hidden: hide }));
+  nodesDS.update(updates);
+  updateSelectAllState();
+}
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.className = 'legend-cb';
+  cb.checked = true;
+  cb.addEventListener('change', e => {
+    e.stopPropagation();
+    if (cb.checked) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: !cb.checked }));
+    nodesDS.update(updates);
+    updateSelectAllState();
+  });
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.prepend(cb);
+  item.onclick = e => {
+    if (e.target === cb) return;
+    cb.checked = !cb.checked;
+    cb.dispatchEvent(new Event('change'));
+  };
+  legendEl.appendChild(item);
+});
+selectAllCb.addEventListener('change', () => {
+  toggleAllCommunities(!selectAllCb.checked);
+});
+updateSelectAllState();
+
+// Help overlay (F1 / ? toggle).
+const helpButton = document.getElementById('help-button');
+const helpOverlay = document.getElementById('help-overlay');
+const helpClose = document.getElementById('help-close');
+function toggleHelp(open) {
+  if (open === undefined) open = !helpOverlay.classList.contains('open');
+  if (open) {
+    helpOverlay.classList.add('open');
+    helpOverlay.setAttribute('aria-hidden', 'false');
+    helpClose.focus();
+  } else {
+    helpOverlay.classList.remove('open');
+    helpOverlay.setAttribute('aria-hidden', 'true');
+    helpButton.focus();
+  }
+}
+helpButton.addEventListener('click', () => toggleHelp(true));
+helpClose.addEventListener('click', () => toggleHelp(false));
+helpOverlay.addEventListener('click', (e) => { if (e.target === helpOverlay) toggleHelp(false); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'F1' || (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName))) {
+    e.preventDefault();
+    toggleHelp();
+  } else if (e.key === 'Escape' && helpOverlay.classList.contains('open')) {
+    toggleHelp(false);
+  } else if (e.key === 'Escape' && network.getSelectedNodes().length > 0) {
+    network.unselectAll();
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+    announce('Selection cleared.');
+  }
+});
+
+// High-contrast toggle.
+const contrastBtn = document.getElementById('contrast-toggle');
+if (contrastBtn) {
+  contrastBtn.addEventListener('click', () => {
+    document.body.classList.toggle('high-contrast');
+    const on = document.body.classList.contains('high-contrast');
+    contrastBtn.setAttribute('aria-pressed', String(on));
+    announce(on ? 'High contrast mode enabled.' : 'High contrast mode disabled.');
+  });
+}
+
+// Initial announce so screen readers know what loaded.
+announce(`Graph loaded: ${RAW_NODES.length} node(s), ${RAW_EDGES.length} edge(s) across ${LEGEND.length} community(ies).`);
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [];
+function drawHyperedges() {
+    const canvas = network.canvas.frame.canvas;
+    const ctx = canvas.getContext('2d');
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        // Draw convex hull as filled polygon
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const scale = network.getScale();
+        const offset = network.getViewPosition();
+        const canvasWidth = canvas.clientWidth || canvas.width;
+        const canvasHeight = canvas.clientHeight || canvas.height;
+        const toCanvas = (p) => ({
+            x: (p.x - offset.x) * scale + canvasWidth / 2,
+            y: (p.y - offset.y) * scale + canvasHeight / 2
+        });
+        const pts = positions.map(toCanvas);
+        // Expand hull slightly
+        const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+        const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+        const expanded = pts.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+}
+network.on('afterDrawing', drawHyperedges);
+</script>
+</body>
+</html>

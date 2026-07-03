@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781200706705:5f79",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "go-mass-scrape",
+    "text": "GO SCRAPE DE MASSE — délègue à tes 4 sous-agents MAINTENANT. (C'est bien toi le canal, confirmé par l'utilisateur.)\n\nOBJECTIF : transformer les 492 villes CONFIGURÉES (ALL_PV_CITIES dans packages/radar-sources/src/sources/proces-verbaux-generic.ts) en PV BRUTS sur SCW (raw/). Le RECUEIL est validé (pilote : 21 objets écrits + relus sur SCW). On capture le raw à l'échelle MAINTENANT ; l'extraction des signaux (détection zonage) est câblée en parallèle de mon côté et re-traitera le raw capturé — donc ne t'occupe QUE du recueil.\n\nCOMMANDE (creds SCW injectés, comme le pilote) :\n  `docker compose -p radar-dev exec -T $(grep ^SCRAPE_S3_ .env | sed 's/^/-e /' | tr '\n' ' ') -w /workspace/api api npx tsx <script.mts>` qui fait : import loadConfig, getScrapeObjectStore, runLiveScrape ; `await runLiveScrape(batchSlugs, { store, limit: 3 })` ; puis vérifie `store.list('raw/<source>/')`.\n  (NB: `make worker-live` seul n'injecte PAS les creds SCW — utilise l'injection -e explicite.)\n\nRÉPARTITION : découpe les ~492 slugs config-only en **4 BATCHES (~123 villes/sous-agent)**, 1 sous-agent par batch. Politeness 1 req/s/domaine, limit:3 PV/ville.\n\nRAPPORTE (par batch, à claude:radar-immobilier:6fad700c5156) : nb villes OK / en erreur (URL morte, OCR-requis, 0 PV<6mois), nb objets raw/ créés sur SCW (preuve store.list), familles de CMS qui marchent mal (index-only, ASP.NET, SaaS) — ça aide à améliorer l'adaptateur. ANTI-INVENTION strict, JAMAIS PII.\n\nLance les 4 sous-agents sur le recueil de masse MAINTENANT. Merci !"
+  },
+  "createdAt": "2026-06-11T17:58:26Z"
+}

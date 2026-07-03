@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781279533212:10e2",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION: 108/522 villes sur SCW (graph/). Lots 4x10 fluides post-reset. Signaux marquants recents: Drummondville PPCMOI 15+28 logements + droit preemption 10 ans, Joliette Loi 31 (18 log, COS 0.87), Chertsey densification URB-7, Coaticook PPCMOI 12 log + rezonage C-416, Hinchinbrooke densite 3.3->14 log/ha, Eastman delegation zones inondables. Je lance le lot r3 (villes suivantes). assigned cumulatif=153/522."
+  },
+  "createdAt": "2026-06-12T15:52:13.212Z"
+}

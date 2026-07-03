@@ -1,0 +1,251 @@
+- generic [active] [ref=e1]:
+  - region "We value your privacy" [ref=e2]:
+    - generic [ref=e4]:
+      - heading "Nous respectons votre vie privée." [level=2] [ref=e5]
+      - generic [ref=e6]:
+        - paragraph [ref=e8]: Nous utilisons des cookies pour améliorer votre expérience de navigation, diffuser des publicités ou des contenus personnalisés et analyser notre trafic. En cliquant sur « Tout accepter », vous consentez à notre utilisation des cookies.
+        - generic [ref=e9]:
+          - button "Personnaliser" [ref=e10] [cursor=pointer]
+          - button "Tout rejeter" [ref=e11] [cursor=pointer]
+          - button "Accepter tout" [ref=e12] [cursor=pointer]
+  - link "Passer au contenu" [ref=e13] [cursor=pointer]:
+    - /url: "#content"
+  - generic [ref=e15]:
+    - banner [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e20]:
+          - navigation "Menu secondaire" [ref=e21]:
+            - list:
+              - listitem [ref=e22]:
+                - link "Accueil" [ref=e23] [cursor=pointer]:
+                  - /url: https://www.st-damase.qc.ca/
+                  - generic [ref=e24]: Accueil
+              - listitem [ref=e25]:
+                - link "Nous joindre" [ref=e26] [cursor=pointer]:
+                  - /url: https://www.st-damase.qc.ca/nous-joindre/
+                  - generic [ref=e27]: Nous joindre
+              - listitem [ref=e28]:
+                - link [ref=e29] [cursor=pointer]:
+                  - /url: https://www.facebook.com/Municipalit%C3%A9-St-Damase-757840330981820/
+                  - generic [ref=e31]: 
+          - text: 
+        - generic [ref=e33]:
+          - link "Municipalité de Saint-Damase Logo" [ref=e35] [cursor=pointer]:
+            - /url: https://www.st-damase.qc.ca/
+            - img "Municipalité de Saint-Damase Logo" [ref=e36]
+          - navigation "Menu principal" [ref=e37]:
+            - list [ref=e38]:
+              - listitem [ref=e39] [cursor=pointer]:
+                - link "ÉLECTIONS" [ref=e40]:
+                  - /url: https://www.st-damase.qc.ca/election/
+                  - generic [ref=e41]: ÉLECTIONS
+              - listitem [ref=e42] [cursor=pointer]:
+                - link "GESTION MUNICIPALE" [ref=e43]:
+                  - /url: "#"
+                  - generic [ref=e44]: GESTION MUNICIPALE
+              - listitem [ref=e45] [cursor=pointer]:
+                - link "SERVICES MUNICIPAUX" [ref=e46]:
+                  - /url: "#"
+                  - generic [ref=e47]: SERVICES MUNICIPAUX
+              - listitem [ref=e48] [cursor=pointer]:
+                - link "VIVRE À SAINT-DAMASE" [ref=e49]:
+                  - /url: "#"
+                  - generic [ref=e50]: VIVRE À SAINT-DAMASE
+              - listitem [ref=e51] [cursor=pointer]:
+                - button "Recherche" [ref=e52]: 
+          - text:    -  -- -- -- -- -  -- -- -- -- -- --  -  -- -- -- -- -- -- -- -- -  -- -- -- -  -- -- --  -  -- -- -- -- -- -  -- -- -- -- -  -- -- -- -- -  -- --
+    - region "Page Title Bar" [ref=e53]
+    - main [ref=e57]:
+      - generic [ref=e58]:
+        - generic [ref=e63]:
+          - generic [ref=e66]:
+            - heading "Calendrier des séances régulières du conseil 2026" [level=1] [ref=e67]:
+              - text: Calendrier
+              - text: des séances régulières du conseil 2026
+            - paragraph [ref=e68]:
+              - strong [ref=e69]: Débutant à 19 h 30
+              - strong [ref=e70]: au 115, rue Saint-Étienne
+            - list [ref=e71]:
+              - listitem [ref=e72]: 20 janvier
+              - listitem [ref=e73]: 3 février
+              - listitem [ref=e74]: 3 mars
+              - listitem [ref=e75]: 7 avril
+              - listitem [ref=e76]: 5 mai
+              - listitem [ref=e77]: 2 juin
+              - listitem [ref=e78]: 7 juillet
+              - listitem [ref=e79]: 4 août
+              - listitem [ref=e80]: 1er septembre
+              - listitem [ref=e81]: 6 octobre
+              - listitem [ref=e82]: 3 novembre
+              - listitem [ref=e83]: 1er décembre
+            - paragraph [ref=e84]: "** Peut être sujet à changement **"
+          - generic [ref=e88]:
+            - generic [ref=e91]:
+              - heading "Vous avez des questions pour votre Conseil?" [level=2] [ref=e93]
+              - paragraph [ref=e95]:
+                - text: Veuillez les faire parvenir via notre formulaire en
+                - link "cliquant ici" [ref=e96] [cursor=pointer]:
+                  - /url: https://www.st-damase.qc.ca/
+                - text: ", au plus tard, le lundi précédant la séance, jusqu’à 16 h 30."
+            - heading "Procès-verbaux (pdf) N.B. Les procès-verbaux sont adoptés à la séance du mois suivant." [level=1] [ref=e98]:
+              - paragraph [ref=e99]: Procès-verbaux (pdf)
+              - paragraph [ref=e100]: N.B. Les procès-verbaux sont adoptés à la séance du mois suivant.
+            - generic [ref=e102]:
+              - heading "Procès-verbaux 2026" [level=4] [ref=e105]:
+                - button "Procès-verbaux 2026" [ref=e106] [cursor=pointer]:
+                  - generic [ref=e107]:
+                    - text: 
+                    - generic [ref=e108]: 
+                  - generic [ref=e109]: Procès-verbaux 2026
+              - heading "Procès-verbaux 2025" [level=4] [ref=e112]:
+                - button "Procès-verbaux 2025" [ref=e113] [cursor=pointer]:
+                  - generic [ref=e114]:
+                    - text: 
+                    - generic [ref=e115]: 
+                  - generic [ref=e116]: Procès-verbaux 2025
+              - heading "Procès-verbaux 2024" [level=4] [ref=e119]:
+                - button "Procès-verbaux 2024" [ref=e120] [cursor=pointer]:
+                  - generic [ref=e121]:
+                    - text: 
+                    - generic [ref=e122]: 
+                  - generic [ref=e123]: Procès-verbaux 2024
+              - heading "Procès-verbaux 2023" [level=4] [ref=e126]:
+                - button "Procès-verbaux 2023" [ref=e127] [cursor=pointer]:
+                  - generic [ref=e128]:
+                    - text: 
+                    - generic [ref=e129]: 
+                  - generic [ref=e130]: Procès-verbaux 2023
+              - heading "Procès-verbaux 2022" [level=4] [ref=e133]:
+                - button "Procès-verbaux 2022" [ref=e134] [cursor=pointer]:
+                  - generic [ref=e135]:
+                    - text: 
+                    - generic [ref=e136]: 
+                  - generic [ref=e137]: Procès-verbaux 2022
+              - heading "Procès-verbaux 2021" [level=4] [ref=e140]:
+                - button "Procès-verbaux 2021" [ref=e141] [cursor=pointer]:
+                  - generic [ref=e142]:
+                    - text: 
+                    - generic [ref=e143]: 
+                  - generic [ref=e144]: Procès-verbaux 2021
+              - heading "Procès-Verbaux 2020" [level=4] [ref=e147]:
+                - button "Procès-Verbaux 2020" [ref=e148] [cursor=pointer]:
+                  - generic [ref=e149]:
+                    - text: 
+                    - generic [ref=e150]: 
+                  - generic [ref=e151]: Procès-Verbaux 2020
+              - heading "Procès-verbaux 2019" [level=4] [ref=e154]:
+                - button "Procès-verbaux 2019" [ref=e155] [cursor=pointer]:
+                  - generic [ref=e156]:
+                    - text: 
+                    - generic [ref=e157]: 
+                  - generic [ref=e158]: Procès-verbaux 2019
+              - heading "Procès-verbaux 2018" [level=4] [ref=e161]:
+                - button "Procès-verbaux 2018" [ref=e162] [cursor=pointer]:
+                  - generic [ref=e163]:
+                    - text: 
+                    - generic [ref=e164]: 
+                  - generic [ref=e165]: Procès-verbaux 2018
+              - heading "Procès-verbaux 2017" [level=4] [ref=e168]:
+                - button "Procès-verbaux 2017" [ref=e169] [cursor=pointer]:
+                  - generic [ref=e170]:
+                    - text: 
+                    - generic [ref=e171]: 
+                  - generic [ref=e172]: Procès-verbaux 2017
+              - heading "Procès-verbaux 2016" [level=4] [ref=e175]:
+                - button "Procès-verbaux 2016" [ref=e176] [cursor=pointer]:
+                  - generic [ref=e177]:
+                    - text: 
+                    - generic [ref=e178]: 
+                  - generic [ref=e179]: Procès-verbaux 2016
+        - complementary [ref=e180]:
+          - generic [ref=e181]:
+            - heading "Gestion municipale" [level=4] [ref=e183]
+            - list [ref=e185]:
+              - listitem [ref=e186]:
+                - link " CONSEIL MUNICIPAL" [ref=e187] [cursor=pointer]:
+                  - /url: "#"
+                - list [ref=e188]:
+                  - listitem [ref=e189]:
+                    - link " Mot du Maire" [ref=e190] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/mot-du-maire/
+                  - listitem [ref=e191]:
+                    - link " Présentation du conseil" [ref=e192] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/presentation-du-conseil/
+                  - listitem [ref=e193]:
+                    - link " Procès-verbaux, calendrier des séances et ordre du jour" [ref=e194] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/proces-verbaux/
+                  - listitem [ref=e195]:
+                    - link " Les armoiries" [ref=e196] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/les-armoiries/
+                  - listitem [ref=e197]:
+                    - link " ÉLECTIONS" [ref=e198] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/election/
+              - listitem [ref=e199]:
+                - link " INFORMATION" [ref=e200] [cursor=pointer]:
+                  - /url: "#"
+                - list [ref=e201]:
+                  - listitem [ref=e202]:
+                    - link " Avis public" [ref=e203] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/avis-public/
+                  - listitem [ref=e204]:
+                    - link " Finance et taxation" [ref=e205] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/finance-et-taxation/
+                  - listitem [ref=e206]:
+                    - link " Règlement contractuelle et gestion des contrats" [ref=e207] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/politique-contractuelle/
+                  - listitem [ref=e208]:
+                    - link " Règlementation" [ref=e209] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/reglementation/
+                  - listitem [ref=e210]:
+                    - link " Rôle d’évaluation en ligne" [ref=e211] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/role-devaluation-en-ligne/
+                  - listitem [ref=e212]:
+                    - link " Emploi" [ref=e213] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/emploi/
+                  - listitem [ref=e214]:
+                    - link " Politiques" [ref=e215] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/politiques/
+    - generic [ref=e216]:
+      - contentinfo [ref=e217]:
+        - generic [ref=e219]:
+          - generic [ref=e220]:
+            - generic [ref=e221]:
+              - heading "MUNICIPALITÉ DE SAINT-DAMASE" [level=4] [ref=e222]
+              - generic [ref=e223]:
+                - paragraph [ref=e224]:
+                  - text: 115, rue Saint-Étienne
+                  - text: Saint-Damase Qc J0H 1J0
+                - paragraph [ref=e225]:
+                  - text: "Tél. : 450-797-3341"
+                  - text: "Téléc. : 450-797-3543"
+                - paragraph [ref=e226]:
+                  - strong [ref=e227]:
+                    - link "Politique de confidentialité" [ref=e228] [cursor=pointer]:
+                      - /url: https://www.st-damase.qc.ca/politique-de-confidentialite/
+            - generic [ref=e229]:
+              - heading "Programme barils de pluie" [level=4] [ref=e230]
+              - generic [ref=e232]:
+                - link "Facebook" [ref=e233] [cursor=pointer]:
+                  - /url: https://www.facebook.com/Municipalit%C3%A9-St-Damase-757840330981820/
+                  - text: 
+                - link "Mail" [ref=e234] [cursor=pointer]:
+                  - /url: mailto:info@st-damase.qc.ca
+                  - text: 
+          - generic [ref=e236]:
+            - heading "Abonnez-vous à notre infolettre" [level=4] [ref=e237]
+            - generic [ref=e239]:
+              - textbox "Prénom *" [ref=e241]
+              - textbox "Nom *" [ref=e243]
+              - textbox "Courriel *" [ref=e245]
+              - button "Je m’abonne !" [ref=e247]
+      - contentinfo [ref=e249]:
+        - paragraph [ref=e254]: Copyright © Municipalité de Saint-Damase | Tous droits réservés.
+  - region "Aller en haut":
+    - link " Aller en haut":
+      - /url: "#"
+      - text: 
+      - generic: Aller en haut
+  - iframe [ref=e257]:
+    - generic [ref=f2e6]:
+      - text: protection par
+      - strong [ref=f2e7]: reCAPTCHA

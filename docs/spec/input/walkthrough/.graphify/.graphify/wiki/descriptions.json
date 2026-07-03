@@ -1,0 +1,275 @@
+{
+  "schema": "graphify_wiki_description_index_v1",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "prompt_version": "wiki-description-v1",
+  "nodes": {
+    "radar_demo_transcript": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "radar_demo_transcript",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Ce nœud représente un transcript d'une démo radar-immobilier discutant des changements de zonage et des règlements associés. Il mentionne des outils comme la carte interactive de zonage et des documents municipaux tels que les avis publics, les procès-verbaux et les dérogations mineures. La vidéo de la réunion municipale et la transcription YouTube sont également référencées. Le transcript aborde des entités comme la MRC de la Matapédia et la Ville de Saint-Damase.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "f1f2ebd5f00b42a8867b3bba2351b46a15ca7a4741139e030b0de1364a35f047",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "règlement_zonage": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "règlement_zonage",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Le règlement de zonage est un document réglementaire encadrant l'utilisation du sol et les règles d'urbanisme applicables à un territoire. Il est discuté dans le cadre d'une démonstration radar-immobilier, où son rôle dans la gestion des changements d'affectation des terrains est évoqué. Ce règlement est lié à d'autres textes comme le Règlement 3835, qui en constitue une composante ou une référence. Il interagit avec des procédures telles que les dérogations mineures, les avis de motion et les procès-verbaux municipaux, reflétant son intégration dans les processus décisionnels locaux. Son application implique des modifications ou des précisions sur les règles de zonage en vigueur.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "9e028841ce95ad8559334c26d6a651cef4d2dae6f838f19d0df911c5f1c06fac",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "procès_verbal": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "procès_verbal",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Le procès-verbal municipal est un document officiel consignant les décisions, débats et résolutions adoptés lors des séances du conseil municipal. Il contient notamment des avis de motion, des avis publics, des changements de zonage et des règlements de zonage. Ce document sert de référence pour les actions futures et les communications officielles de la municipalité. Il est mentionné dans le cadre d'un walkthrough de démonstration radar-immobilier, indiquant son utilisation dans des processus décisionnels ou consultatifs.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.85,
+      "cache_key": "f7906a1b5c37c5ba47f5ccd79979185b344b1e71add811a20ba26a2e2c6cf00c",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "dérogation_mineure": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "dérogation_mineure",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Une dérogation mineure est une exception autorisée dans le cadre d'un règlement de zonage, permettant de déroger à certaines règles d'implantation des constructions. Elle est influencée par la marge d'implantation définie dans les documents réglementaires. Ce concept est mentionné dans le cadre d'un walkthrough de démonstration pour un outil d'analyse immobilière.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "75b4d9653d95d9c2939454866e55c9764e291f71405f0a748f1fcbde84ddced7",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "règlement_3835": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "règlement_3835",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Le Règlement 3835 est un règlement de zonage appliqué à la Zone 201, définissant les règles d'utilisation du sol dans cette zone. Il autorise spécifiquement l'habitation multifamiliale dans le cadre de ses dispositions. Ce règlement s'inscrit dans la catégorie des règlements de zonage, structurant ainsi l'aménagement urbain selon des normes précises.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "33d7edbf4524b8b80dae237cc2d89f1590c6de8eebba7f7a945bdf16fbaa9b06",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "ville_saint_damase": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "ville_saint_damase",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Ville de Saint-Damase est une municipalité située dans la MRC de la Matapédia. Elle contient la Zone 201, un secteur identifié dans les données locales. La ville est mentionnée dans un walkthrough de démonstration pour un outil radar-immobilier.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "727d2573590a44b7ff4879f9b48f0b43ebf530dd4a8ba32fa42cdd0218a7fc39",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "zonage_change": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "zonage_change",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Le changement de zonage désigne une modification des règles d'utilisation du sol dans une municipalité, souvent formalisée par un règlement spécifique. Ce processus peut être discuté ou analysé dans des documents comme des procès-verbaux municipaux ou des démonstrations techniques. Il implique généralement l'application ou l'adaptation d'un règlement de zonage existant pour répondre à des besoins urbanistiques ou réglementaires.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.85,
+      "cache_key": "e6d54ac3c58d0b8de2a10b866d09ae149e2fdb755225531c6e443ef392c80ba3",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "zone_201": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "zone_201",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Zone 201 is a zoning designation within Community 2, with a degree of 3 indicating limited connectivity. It is associated with the application of Règlement 3835, suggesting regulatory relevance. The zone contains the Ville de Saint-Damase, indicating a geographical or administrative relationship. Additionally, Zone 201 permits habitation multifamiliale, implying it supports multi-family residential use.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "76096ebfc92d838cff2658e6bf4682a5b0e23325d76b50cacce7e9eec2bab680",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "avis_public": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "avis_public",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "L'avis public municipal est un document administratif local qui contient ou mentionne des informations officielles. Il est associé à des procès-verbaux municipaux, comme en témoigne un transcript de démo radar-immobilier. Ce type de document relève généralement de la communauté 1 et est référencé dans des sources comme walkthrough-transcript.md.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "f3c7e729aea4ab492e16ee6672e9545cbc22ee8bd15a32ce4f31935bdd3ee965",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "mrc_matapedia": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "mrc_matapedia",
+      "target_kind": "node",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "The MRC de la Matapédia is a regional county municipality (MRC) located in Quebec, Canada. It is part of Community 2 in the Graphify knowledge graph. The MRC de la Matapédia is associated with the Ville de Saint-Damase, indicating a jurisdictional or administrative relationship. It is also mentioned in the context of a radar-immobilier demo walkthrough transcript, suggesting relevance to real estate or property data analysis.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "64a98fb99e083a7293118d584a40c3b6298cf8197bc4ce8783313fef68c42e22",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    }
+  },
+  "communities": {
+    "0": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "community:0",
+      "target_kind": "community",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Community 0 is a small group of 7 members focused on real estate and municipal data. The community's activities include a radar demo for real estate, an interactive zoning map, and recordings of meetings. Members also engage with tools like a municipal council meeting video, a verbatim minutes scraper, and YouTube transcriptions. The group appears to leverage AI models such as Mistral Voxtral for processing or analysis.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "1af54c0fefadac5c4cabb04c8dca640dba665ead32907180a76f4ace073aff01",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "1": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "community:1",
+      "target_kind": "community",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Community 1 is a small group of 5 members focused on municipal governance and zoning regulations. The community's discussions prominently feature zoning bylaws, municipal minutes, and zoning change proposals. Topics such as zoning regulations and public notices are central to its activities. The group's interactions are documented in a walkthrough transcript.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "6c75694a96f44da6f831a85b1f2cd55155ce3b56e3461ce513ce4bdebfcb9204",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "2": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "community:2",
+      "target_kind": "community",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Community 2 is a small group consisting of five members, including Règlement 3835, Ville de Saint-Damase, and Zone 201, each with a degree of 3. The community also includes Habitation multifamiliale and MRC de la Matapédia, both with a degree of 2. The relationships within this community are documented in the walkthrough transcript.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "6a58997ae776653030e57b39e3c8573cd626b9fa3f586831d82bd266953dd831",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    },
+    "3": {
+      "schema": "graphify_wiki_description_v1",
+      "target_id": "community:3",
+      "target_kind": "community",
+      "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+      "status": "generated",
+      "description": "Community 3 consists of two members: Dérogation mineure and Marge d'implantation. Dérogation mineure has a degree of 3, indicating a higher level of interaction or connection within the community. Marge d'implantation has a degree of 1, suggesting a more limited role or fewer connections. The community is documented in the walkthrough transcript.",
+      "evidence_refs": [
+        "walkthrough-transcript.md"
+      ],
+      "confidence": 0.79,
+      "cache_key": "453ec463a62dc5cbb40a3e46c5dc1fb272100501525b4906272ea44ea287c453",
+      "generator": {
+        "mode": "direct",
+        "provider": "mistral",
+        "model": "mistral-small-2603",
+        "prompt_version": "wiki-description-v1"
+      }
+    }
+  }
+}

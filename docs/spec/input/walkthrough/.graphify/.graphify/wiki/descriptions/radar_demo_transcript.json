@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "radar_demo_transcript",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Ce nœud représente un transcript d'une démo radar-immobilier discutant des changements de zonage et des règlements associés. Il mentionne des outils comme la carte interactive de zonage et des documents municipaux tels que les avis publics, les procès-verbaux et les dérogations mineures. La vidéo de la réunion municipale et la transcription YouTube sont également référencées. Le transcript aborde des entités comme la MRC de la Matapédia et la Ville de Saint-Damase.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "f1f2ebd5f00b42a8867b3bba2351b46a15ca7a4741139e030b0de1364a35f047",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

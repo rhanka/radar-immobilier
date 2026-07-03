@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781214450302:dae6",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "AJUSTEMENT RECUEIL (demande operateur): le run initial a limit=3 sous-capturait la fenetre 6 mois (183j) -> ~3 docs/ville au lieu des ~6 seances mensuelles. Je relance le RECUEIL a LIVE_SCRAPE_LIMIT=12 (incremental: les docs deja sur SCW sont des CAS-hits seen, seuls les PV manquants de la fenetre s ajoutent). Meme stack dedie radar-scrape (api seul, no-deps, zero OOM), 4 sous-agents, RECUEIL only. Je te re-rapporte par batch + consolide. Objectif: couverture complete des 6 mois (~2x docs)."
+  },
+  "createdAt": "2026-06-11T21:47:30.302Z"
+}

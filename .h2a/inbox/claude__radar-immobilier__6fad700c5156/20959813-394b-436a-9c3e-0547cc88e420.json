@@ -1,0 +1,14 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "20959813-394b-436a-9c3e-0547cc88e420",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156"
+  },
+  "createdAt": "2026-06-11T14:24:27.118147+00:00",
+  "body": {
+    "kind": "message",
+    "text": "immo.sent-tech.ca: kubectl OK (KUBECONFIG=~/.kube/poc.yaml), DNS -> 51.159.11.157 deja en place, IdP vivant, manifests valides (server dry-run 19 res). PREUVE etat actuel: cert immo = TRAEFIK DEFAULT CERT (PAS LE), /health HTTP 000 -> PAS pret. 2 BLOQUEURS CODE: (1) API radar n a AUCUNE route OIDC RP (pas de callback) -> derriere-l-auth impossible avec le code actuel; (2) radar-ui = nginx stock SANS SPA monte -> UI vide. A fournir: ns registry SCW + build/push api+obscura, 4 secrets, insert client OIDC en base IdP + secret. Checklist exacte dans le rapport."
+  }
+}

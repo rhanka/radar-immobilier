@@ -1,0 +1,3002 @@
+[
+{
+"slug": "westmount",
+"name": "Westmount",
+"mrc": null,
+"distanceToMtlKm": 3.2
+},
+{
+"slug": "saint-lambert",
+"name": "Saint-Lambert",
+"mrc": null,
+"distanceToMtlKm": 4.7
+},
+{
+"slug": "hampstead",
+"name": "Hampstead",
+"mrc": null,
+"distanceToMtlKm": 6.5
+},
+{
+"slug": "mont-royal",
+"name": "Mont-Royal",
+"mrc": null,
+"distanceToMtlKm": 6.6
+},
+{
+"slug": "montreal-ouest",
+"name": "Montréal-Ouest",
+"mrc": null,
+"distanceToMtlKm": 8.4
+},
+{
+"slug": "cote-saint-luc",
+"name": "Côte-Saint-Luc",
+"mrc": null,
+"distanceToMtlKm": 8.6
+},
+{
+"slug": "longueuil",
+"name": "Longueuil",
+"mrc": null,
+"distanceToMtlKm": 10.4
+},
+{
+"slug": "brossard",
+"name": "Brossard",
+"mrc": null,
+"distanceToMtlKm": 10.7
+},
+{
+"slug": "candiac",
+"name": "Candiac",
+"mrc": "Roussillon",
+"distanceToMtlKm": 14.4
+},
+{
+"slug": "montreal-est",
+"name": "Montréal-Est",
+"mrc": null,
+"distanceToMtlKm": 14.5
+},
+{
+"slug": "dorval",
+"name": "Dorval",
+"mrc": null,
+"distanceToMtlKm": 15.4
+},
+{
+"slug": "lile-dorval",
+"name": "L'Île-Dorval",
+"mrc": null,
+"distanceToMtlKm": 15.6
+},
+{
+"slug": "saint-bruno-de-montarville",
+"name": "Saint-Bruno-de-Montarville",
+"mrc": null,
+"distanceToMtlKm": 17.8
+},
+{
+"slug": "carignan",
+"name": "Carignan",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 19.1
+},
+{
+"slug": "dollard-des-ormeaux",
+"name": "Dollard-Des Ormeaux",
+"mrc": null,
+"distanceToMtlKm": 19.5
+},
+{
+"slug": "pointe-claire",
+"name": "Pointe-Claire",
+"mrc": null,
+"distanceToMtlKm": 19.8
+},
+{
+"slug": "saint-philippe",
+"name": "Saint-Philippe",
+"mrc": "Roussillon",
+"distanceToMtlKm": 19.9
+},
+{
+"slug": "saint-mathieu",
+"name": "Saint-Mathieu",
+"mrc": "Roussillon",
+"distanceToMtlKm": 21.1
+},
+{
+"slug": "saint-basile-le-grand",
+"name": "Saint-Basile-le-Grand",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 22.9
+},
+{
+"slug": "chambly",
+"name": "Chambly",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 23.2
+},
+{
+"slug": "kirkland",
+"name": "Kirkland",
+"mrc": null,
+"distanceToMtlKm": 24.1
+},
+{
+"slug": "bois-des-filion",
+"name": "Bois-des-Filion",
+"mrc": "Thérèse-De Blainville",
+"distanceToMtlKm": 24.2
+},
+{
+"slug": "saint-isidore--roussillon",
+"name": "Saint-Isidore",
+"mrc": "Roussillon",
+"distanceToMtlKm": 24.2
+},
+{
+"slug": "beaconsfield",
+"name": "Beaconsfield",
+"mrc": null,
+"distanceToMtlKm": 24.4
+},
+{
+"slug": "lery",
+"name": "Léry",
+"mrc": "Roussillon",
+"distanceToMtlKm": 25.3
+},
+{
+"slug": "mercier",
+"name": "Mercier",
+"mrc": "Roussillon",
+"distanceToMtlKm": 25.5
+},
+{
+"slug": "saint-mathias-sur-richelieu",
+"name": "Saint-Mathias-sur-Richelieu",
+"mrc": "Rouville",
+"distanceToMtlKm": 26.8
+},
+{
+"slug": "saint-mathieu-de-beloeil",
+"name": "Saint-Mathieu-de-Beloeil",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 27.0
+},
+{
+"slug": "saint-amable",
+"name": "Saint-Amable",
+"mrc": "Marguerite-D'Youville",
+"distanceToMtlKm": 27.2
+},
+{
+"slug": "terrebonne",
+"name": "Terrebonne",
+"mrc": "Les Moulins",
+"distanceToMtlKm": 27.2
+},
+{
+"slug": "otterburn-park",
+"name": "Otterburn Park",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 28.2
+},
+{
+"slug": "richelieu",
+"name": "Richelieu",
+"mrc": "Rouville",
+"distanceToMtlKm": 28.5
+},
+{
+"slug": "baie-durfe",
+"name": "Baie-D'Urfé",
+"mrc": null,
+"distanceToMtlKm": 28.8
+},
+{
+"slug": "sainte-marthe-sur-le-lac",
+"name": "Sainte-Marthe-sur-le-Lac",
+"mrc": "Deux-Montagnes",
+"distanceToMtlKm": 28.9
+},
+{
+"slug": "saint-jean-sur-richelieu",
+"name": "Saint-Jean-sur-Richelieu",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 29.5
+},
+{
+"slug": "notre-dame-de-lile-perrot",
+"name": "Notre-Dame-de-l'Île-Perrot",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 29.7
+},
+{
+"slug": "repentigny",
+"name": "Repentigny",
+"mrc": "L'Assomption",
+"distanceToMtlKm": 29.8
+},
+{
+"slug": "saint-edouard",
+"name": "Saint-Édouard",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 29.8
+},
+{
+"slug": "sainte-anne-de-bellevue",
+"name": "Sainte-Anne-de-Bellevue",
+"mrc": null,
+"distanceToMtlKm": 29.8
+},
+{
+"slug": "saint-michel",
+"name": "Saint-Michel",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 30.0
+},
+{
+"slug": "blainville",
+"name": "Blainville",
+"mrc": "Thérèse-De Blainville",
+"distanceToMtlKm": 30.2
+},
+{
+"slug": "pointe-calumet",
+"name": "Pointe-Calumet",
+"mrc": "Deux-Montagnes",
+"distanceToMtlKm": 31.0
+},
+{
+"slug": "senneville",
+"name": "Senneville",
+"mrc": null,
+"distanceToMtlKm": 31.8
+},
+{
+"slug": "marieville",
+"name": "Marieville",
+"mrc": "Rouville",
+"distanceToMtlKm": 32.8
+},
+{
+"slug": "lile-perrot",
+"name": "L'Île-Perrot",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 32.9
+},
+{
+"slug": "vercheres",
+"name": "Verchères",
+"mrc": "Marguerite-D'Youville",
+"distanceToMtlKm": 33.0
+},
+{
+"slug": "saint-marc-sur-richelieu",
+"name": "Saint-Marc-sur-Richelieu",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 33.4
+},
+{
+"slug": "sainte-anne-des-plaines",
+"name": "Sainte-Anne-des-Plaines",
+"mrc": "Thérèse-De Blainville",
+"distanceToMtlKm": 35.0
+},
+{
+"slug": "saint-urbain-premier",
+"name": "Saint-Urbain-Premier",
+"mrc": "Beauharnois-Salaberry",
+"distanceToMtlKm": 35.0
+},
+{
+"slug": "terrasse-vaudreuil",
+"name": "Terrasse-Vaudreuil",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 35.1
+},
+{
+"slug": "saint-joseph-du-lac",
+"name": "Saint-Joseph-du-Lac",
+"mrc": "Deux-Montagnes",
+"distanceToMtlKm": 35.2
+},
+{
+"slug": "saint-jean-baptiste",
+"name": "Saint-Jean-Baptiste",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 35.2
+},
+{
+"slug": "calixa-lavallee",
+"name": "Calixa-Lavallée",
+"mrc": "Marguerite-D'Youville",
+"distanceToMtlKm": 35.4
+},
+{
+"slug": "lile-cadieux",
+"name": "L'Île-Cadieux",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 35.4
+},
+{
+"slug": "pointe-des-cascades",
+"name": "Pointe-des-Cascades",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 35.6
+},
+{
+"slug": "saint-charles-sur-richelieu",
+"name": "Saint-Charles-sur-Richelieu",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 36.7
+},
+{
+"slug": "napierville",
+"name": "Napierville",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 37.1
+},
+{
+"slug": "vaudreuil-sur-le-lac",
+"name": "Vaudreuil-sur-le-Lac",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 37.5
+},
+{
+"slug": "saint-blaise-sur-richelieu",
+"name": "Saint-Blaise-sur-Richelieu",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 37.6
+},
+{
+"slug": "mont-saint-gregoire",
+"name": "Mont-Saint-Grégoire",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 37.9
+},
+{
+"slug": "sainte-madeleine",
+"name": "Sainte-Madeleine",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 38.2
+},
+{
+"slug": "saint-cyprien-de-napierville",
+"name": "Saint-Cyprien-de-Napierville",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 38.4
+},
+{
+"slug": "saint-patrice-de-sherrington",
+"name": "Saint-Patrice-de-Sherrington",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 38.6
+},
+{
+"slug": "saint-roch-de-lachigan",
+"name": "Saint-Roch-de-l'Achigan",
+"mrc": "Montcalm",
+"distanceToMtlKm": 38.8
+},
+{
+"slug": "sainte-angele-de-monnoir",
+"name": "Sainte-Angèle-de-Monnoir",
+"mrc": "Rouville",
+"distanceToMtlKm": 38.8
+},
+{
+"slug": "lepiphanie",
+"name": "L'Épiphanie",
+"mrc": "L'Assomption",
+"distanceToMtlKm": 39.2
+},
+{
+"slug": "oka",
+"name": "Oka",
+"mrc": "Deux-Montagnes",
+"distanceToMtlKm": 39.2
+},
+{
+"slug": "sainte-marie-madeleine",
+"name": "Sainte-Marie-Madeleine",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 39.5
+},
+{
+"slug": "saint-etienne-de-beauharnois",
+"name": "Saint-Étienne-de-Beauharnois",
+"mrc": "Beauharnois-Salaberry",
+"distanceToMtlKm": 39.5
+},
+{
+"slug": "sainte-clotilde",
+"name": "Sainte-Clotilde",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 39.8
+},
+{
+"slug": "rougemont",
+"name": "Rougemont",
+"mrc": "Rouville",
+"distanceToMtlKm": 40.4
+},
+{
+"slug": "saint-roch-ouest",
+"name": "Saint-Roch-Ouest",
+"mrc": "Montcalm",
+"distanceToMtlKm": 40.5
+},
+{
+"slug": "saint-sulpice",
+"name": "Saint-Sulpice",
+"mrc": "L'Assomption",
+"distanceToMtlKm": 40.6
+},
+{
+"slug": "howick",
+"name": "Howick",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 41.3
+},
+{
+"slug": "sainte-anne-de-sabrevois",
+"name": "Sainte-Anne-de-Sabrevois",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 41.9
+},
+{
+"slug": "saint-lin-laurentides",
+"name": "Saint-Lin-Laurentides",
+"mrc": "Montcalm",
+"distanceToMtlKm": 42.6
+},
+{
+"slug": "saint-damase--les-maskoutains",
+"name": "Saint-Damase",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 43.3
+},
+{
+"slug": "saint-antoine-sur-richelieu",
+"name": "Saint-Antoine-sur-Richelieu",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 43.6
+},
+{
+"slug": "saint-denis-sur-richelieu",
+"name": "Saint-Denis-sur-Richelieu",
+"mrc": "La Vallée-du-Richelieu",
+"distanceToMtlKm": 44.0
+},
+{
+"slug": "tres-saint-sacrement",
+"name": "Très-Saint-Sacrement",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 44.0
+},
+{
+"slug": "la-presentation",
+"name": "La Présentation",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 44.3
+},
+{
+"slug": "sainte-brigide-diberville",
+"name": "Sainte-Brigide-d'Iberville",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 44.4
+},
+{
+"slug": "saint-esprit",
+"name": "Saint-Esprit",
+"mrc": "Montcalm",
+"distanceToMtlKm": 45.4
+},
+{
+"slug": "saint-valentin",
+"name": "Saint-Valentin",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 45.5
+},
+{
+"slug": "sainte-sophie",
+"name": "Sainte-Sophie",
+"mrc": "La Rivière-du-Nord",
+"distanceToMtlKm": 45.7
+},
+{
+"slug": "hudson",
+"name": "Hudson",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 45.7
+},
+{
+"slug": "saint-alexandre",
+"name": "Saint-Alexandre",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 46.0
+},
+{
+"slug": "saint-chrysostome",
+"name": "Saint-Chrysostome",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 46.2
+},
+{
+"slug": "hemmingford--les-jardins-de-napierville",
+"name": "Hemmingford",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 46.6
+},
+{
+"slug": "saint-cesaire",
+"name": "Saint-Césaire",
+"mrc": "Rouville",
+"distanceToMtlKm": 46.6
+},
+{
+"slug": "saint-paul-de-lile-aux-noix",
+"name": "Saint-Paul-de-l'Île-aux-Noix",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 46.6
+},
+{
+"slug": "saint-louis-de-gonzague--beauharnois-salaberry",
+"name": "Saint-Louis-de-Gonzague",
+"mrc": "Beauharnois-Salaberry",
+"distanceToMtlKm": 46.7
+},
+{
+"slug": "saint-lazare",
+"name": "Saint-Lazare",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 47.6
+},
+{
+"slug": "saint-bernard-de-lacolle",
+"name": "Saint-Bernard-de-Lacolle",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 48.0
+},
+{
+"slug": "saint-alexis",
+"name": "Saint-Alexis",
+"mrc": "Montcalm",
+"distanceToMtlKm": 48.1
+},
+{
+"slug": "sainte-marie-salome",
+"name": "Sainte-Marie-Salomé",
+"mrc": "Montcalm",
+"distanceToMtlKm": 48.3
+},
+{
+"slug": "contrecoeur",
+"name": "Contrecoeur",
+"mrc": "Marguerite-D'Youville",
+"distanceToMtlKm": 48.7
+},
+{
+"slug": "henryville",
+"name": "Henryville",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 49.1
+},
+{
+"slug": "saint-jerome",
+"name": "Saint-Jérôme",
+"mrc": "La Rivière-du-Nord",
+"distanceToMtlKm": 49.2
+},
+{
+"slug": "saint-placide",
+"name": "Saint-Placide",
+"mrc": "Deux-Montagnes",
+"distanceToMtlKm": 49.4
+},
+{
+"slug": "saint-jacques",
+"name": "Saint-Jacques",
+"mrc": "Montcalm",
+"distanceToMtlKm": 50.3
+},
+{
+"slug": "hemmingford--les-jardins-de-napierville--2",
+"name": "Hemmingford",
+"mrc": "Les Jardins-de-Napierville",
+"distanceToMtlKm": 50.6
+},
+{
+"slug": "saint-colomban",
+"name": "Saint-Colomban",
+"mrc": "La Rivière-du-Nord",
+"distanceToMtlKm": 50.9
+},
+{
+"slug": "saint-hyacinthe",
+"name": "Saint-Hyacinthe",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 51.1
+},
+{
+"slug": "lacolle",
+"name": "Lacolle",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 51.4
+},
+{
+"slug": "saint-sebastien--le-haut-richelieu",
+"name": "Saint-Sébastien",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 51.8
+},
+{
+"slug": "saint-paul",
+"name": "Saint-Paul",
+"mrc": "Joliette",
+"distanceToMtlKm": 52.1
+},
+{
+"slug": "saint-pie",
+"name": "Saint-Pie",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 52.1
+},
+{
+"slug": "havelock",
+"name": "Havelock",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 52.2
+},
+{
+"slug": "sainte-sabine--brome-missisquoi",
+"name": "Sainte-Sabine",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 52.4
+},
+{
+"slug": "saint-bernard-de-michaudville",
+"name": "Saint-Bernard-de-Michaudville",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 52.7
+},
+{
+"slug": "crabtree",
+"name": "Crabtree",
+"mrc": "Joliette",
+"distanceToMtlKm": 52.9
+},
+{
+"slug": "sainte-julienne",
+"name": "Sainte-Julienne",
+"mrc": "Montcalm",
+"distanceToMtlKm": 53.4
+},
+{
+"slug": "farnham",
+"name": "Farnham",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 53.4
+},
+{
+"slug": "saint-paul-dabbotsford",
+"name": "Saint-Paul-d'Abbotsford",
+"mrc": "Rouville",
+"distanceToMtlKm": 54.0
+},
+{
+"slug": "saint-clet",
+"name": "Saint-Clet",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 54.0
+},
+{
+"slug": "saint-roch-de-richelieu",
+"name": "Saint-Roch-de-Richelieu",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 54.0
+},
+{
+"slug": "saint-jude",
+"name": "Saint-Jude",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 54.2
+},
+{
+"slug": "noyan",
+"name": "Noyan",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 54.4
+},
+{
+"slug": "ormstown",
+"name": "Ormstown",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 54.5
+},
+{
+"slug": "ange-gardien",
+"name": "Ange-Gardien",
+"mrc": "Rouville",
+"distanceToMtlKm": 54.5
+},
+{
+"slug": "saint-ours",
+"name": "Saint-Ours",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 55.1
+},
+{
+"slug": "prevost",
+"name": "Prévost",
+"mrc": "La Rivière-du-Nord",
+"distanceToMtlKm": 55.4
+},
+{
+"slug": "saint-stanislas-de-kostka",
+"name": "Saint-Stanislas-de-Kostka",
+"mrc": "Beauharnois-Salaberry",
+"distanceToMtlKm": 55.6
+},
+{
+"slug": "saint-calixte",
+"name": "Saint-Calixte",
+"mrc": "Montcalm",
+"distanceToMtlKm": 55.8
+},
+{
+"slug": "saint-barnabe-sud",
+"name": "Saint-Barnabé-Sud",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 55.8
+},
+{
+"slug": "notre-dame-de-stanbridge",
+"name": "Notre-Dame-de-Stanbridge",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 56.0
+},
+{
+"slug": "franklin",
+"name": "Franklin",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 56.9
+},
+{
+"slug": "saint-pierre",
+"name": "Saint-Pierre",
+"mrc": "Joliette",
+"distanceToMtlKm": 57.2
+},
+{
+"slug": "saint-liguori",
+"name": "Saint-Liguori",
+"mrc": "Montcalm",
+"distanceToMtlKm": 57.3
+},
+{
+"slug": "saint-hippolyte",
+"name": "Saint-Hippolyte",
+"mrc": "La Rivière-du-Nord",
+"distanceToMtlKm": 57.3
+},
+{
+"slug": "venise-en-quebec",
+"name": "Venise-en-Québec",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 57.7
+},
+{
+"slug": "clarenceville",
+"name": "Clarenceville",
+"mrc": "Le Haut-Richelieu",
+"distanceToMtlKm": 57.7
+},
+{
+"slug": "joliette",
+"name": "Joliette",
+"mrc": "Joliette",
+"distanceToMtlKm": 57.9
+},
+{
+"slug": "saint-dominique",
+"name": "Saint-Dominique",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 58.1
+},
+{
+"slug": "sainte-marthe",
+"name": "Sainte-Marthe",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 58.3
+},
+{
+"slug": "pike-river",
+"name": "Pike River",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 58.3
+},
+{
+"slug": "rigaud",
+"name": "Rigaud",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 58.4
+},
+{
+"slug": "lanoraie",
+"name": "Lanoraie",
+"mrc": "D'Autray",
+"distanceToMtlKm": 58.5
+},
+{
+"slug": "sainte-anne-des-lacs",
+"name": "Sainte-Anne-des-Lacs",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 58.5
+},
+{
+"slug": "saint-andre-dargenteuil",
+"name": "Saint-André-d'Argenteuil",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 58.6
+},
+{
+"slug": "lachute",
+"name": "Lachute",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 59.6
+},
+{
+"slug": "saint-louis",
+"name": "Saint-Louis",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 59.7
+},
+{
+"slug": "saint-simon",
+"name": "Saint-Simon",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 60.3
+},
+{
+"slug": "saint-thomas",
+"name": "Saint-Thomas",
+"mrc": "Joliette",
+"distanceToMtlKm": 60.5
+},
+{
+"slug": "gore",
+"name": "Gore",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 60.6
+},
+{
+"slug": "stanbridge-station",
+"name": "Stanbridge Station",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 60.7
+},
+{
+"slug": "saint-charles-borromee",
+"name": "Saint-Charles-Borromée",
+"mrc": "Joliette",
+"distanceToMtlKm": 60.9
+},
+{
+"slug": "saint-ignace-de-stanbridge",
+"name": "Saint-Ignace-de-Stanbridge",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 61.0
+},
+{
+"slug": "mille-isles",
+"name": "Mille-Isles",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 61.1
+},
+{
+"slug": "piedmont",
+"name": "Piedmont",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 61.5
+},
+{
+"slug": "saint-alphonse-de-granby",
+"name": "Saint-Alphonse-de-Granby",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 61.5
+},
+{
+"slug": "saint-zotique",
+"name": "Saint-Zotique",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 61.8
+},
+{
+"slug": "sainte-barbe",
+"name": "Sainte-Barbe",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 61.9
+},
+{
+"slug": "bedford--brome-missisquoi--2",
+"name": "Bedford",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 62.3
+},
+{
+"slug": "bedford--brome-missisquoi",
+"name": "Bedford",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 62.4
+},
+{
+"slug": "notre-dame-des-prairies",
+"name": "Notre-Dame-des-Prairies",
+"mrc": "Joliette",
+"distanceToMtlKm": 62.4
+},
+{
+"slug": "pointe-fortune",
+"name": "Pointe-Fortune",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 62.8
+},
+{
+"slug": "sainte-victoire-de-sorel",
+"name": "Sainte-Victoire-de-Sorel",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 62.8
+},
+{
+"slug": "saint-polycarpe",
+"name": "Saint-Polycarpe",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 62.9
+},
+{
+"slug": "rawdon",
+"name": "Rawdon",
+"mrc": "Matawinie",
+"distanceToMtlKm": 63.4
+},
+{
+"slug": "tres-saint-redempteur",
+"name": "Très-Saint-Rédempteur",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 63.6
+},
+{
+"slug": "saint-sauveur",
+"name": "Saint-Sauveur",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 63.8
+},
+{
+"slug": "sainte-cecile-de-milton",
+"name": "Sainte-Cécile-de-Milton",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 63.8
+},
+{
+"slug": "saint-liboire",
+"name": "Saint-Liboire",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 64.6
+},
+{
+"slug": "saint-ambroise-de-kildare",
+"name": "Saint-Ambroise-de-Kildare",
+"mrc": "Joliette",
+"distanceToMtlKm": 64.7
+},
+{
+"slug": "granby",
+"name": "Granby",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 65.1
+},
+{
+"slug": "saint-hugues",
+"name": "Saint-Hugues",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 65.3
+},
+{
+"slug": "hinchinbrooke",
+"name": "Hinchinbrooke",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 65.4
+},
+{
+"slug": "saint-marcel-de-richelieu",
+"name": "Saint-Marcel-de-Richelieu",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 65.5
+},
+{
+"slug": "brigham",
+"name": "Brigham",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 66.1
+},
+{
+"slug": "huntingdon",
+"name": "Huntingdon",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 66.4
+},
+{
+"slug": "saint-valerien-de-milton",
+"name": "Saint-Valérien-de-Milton",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 66.7
+},
+{
+"slug": "stanbridge-east",
+"name": "Stanbridge East",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 66.8
+},
+{
+"slug": "sainte-elisabeth",
+"name": "Sainte-Élisabeth",
+"mrc": "D'Autray",
+"distanceToMtlKm": 66.8
+},
+{
+"slug": "sorel-tracy",
+"name": "Sorel-Tracy",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 67.0
+},
+{
+"slug": "saint-armand",
+"name": "Saint-Armand",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 67.1
+},
+{
+"slug": "massueville",
+"name": "Massueville",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 67.1
+},
+{
+"slug": "riviere-beaudette",
+"name": "Rivière-Beaudette",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 67.2
+},
+{
+"slug": "notre-dame-de-lourdes--joliette",
+"name": "Notre-Dame-de-Lourdes",
+"mrc": "Joliette",
+"distanceToMtlKm": 67.3
+},
+{
+"slug": "sainte-adele",
+"name": "Sainte-Adèle",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 67.4
+},
+{
+"slug": "saint-aime",
+"name": "Saint-Aimé",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 67.5
+},
+{
+"slug": "sainte-justine-de-newton",
+"name": "Sainte-Justine-de-Newton",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 67.9
+},
+{
+"slug": "saint-robert",
+"name": "Saint-Robert",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 67.9
+},
+{
+"slug": "sainte-marcelline-de-kildare",
+"name": "Sainte-Marcelline-de-Kildare",
+"mrc": "Matawinie",
+"distanceToMtlKm": 68.7
+},
+{
+"slug": "east-farnham",
+"name": "East Farnham",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 68.7
+},
+{
+"slug": "saint-telesphore",
+"name": "Saint-Télesphore",
+"mrc": "Vaudreuil-Soulanges",
+"distanceToMtlKm": 69.1
+},
+{
+"slug": "saint-joseph-de-sorel",
+"name": "Saint-Joseph-de-Sorel",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 69.2
+},
+{
+"slug": "sainte-helene-de-bagot",
+"name": "Sainte-Hélène-de-Bagot",
+"mrc": "Les Maskoutains",
+"distanceToMtlKm": 69.5
+},
+{
+"slug": "morin-heights",
+"name": "Morin-Heights",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 69.7
+},
+{
+"slug": "sainte-genevieve-de-berthier",
+"name": "Sainte-Geneviève-de-Berthier",
+"mrc": "D'Autray",
+"distanceToMtlKm": 70.2
+},
+{
+"slug": "wentworth",
+"name": "Wentworth",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 70.4
+},
+{
+"slug": "esterel",
+"name": "Estérel",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 70.4
+},
+{
+"slug": "cowansville",
+"name": "Cowansville",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 70.7
+},
+{
+"slug": "godmanchester",
+"name": "Godmanchester",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 70.8
+},
+{
+"slug": "upton",
+"name": "Upton",
+"mrc": "Acton",
+"distanceToMtlKm": 70.9
+},
+{
+"slug": "brownsburg-chatham",
+"name": "Brownsburg-Chatham",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 70.9
+},
+{
+"slug": "berthierville",
+"name": "Berthierville",
+"mrc": "D'Autray",
+"distanceToMtlKm": 70.9
+},
+{
+"slug": "saint-ignace-de-loyola",
+"name": "Saint-Ignace-de-Loyola",
+"mrc": "D'Autray",
+"distanceToMtlKm": 71.3
+},
+{
+"slug": "sainte-anne-de-sorel",
+"name": "Sainte-Anne-de-Sorel",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 71.6
+},
+{
+"slug": "sainte-melanie",
+"name": "Sainte-Mélanie",
+"mrc": "Joliette",
+"distanceToMtlKm": 71.7
+},
+{
+"slug": "bromont",
+"name": "Bromont",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 72.0
+},
+{
+"slug": "roxton-pond",
+"name": "Roxton Pond",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 72.5
+},
+{
+"slug": "sainte-marguerite-du-lac-masson",
+"name": "Sainte-Marguerite-du-Lac-Masson",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 73.0
+},
+{
+"slug": "dunham",
+"name": "Dunham",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 73.1
+},
+{
+"slug": "chertsey",
+"name": "Chertsey",
+"mrc": "Matawinie",
+"distanceToMtlKm": 73.2
+},
+{
+"slug": "val-morin",
+"name": "Val-Morin",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 73.6
+},
+{
+"slug": "saint-guillaume",
+"name": "Saint-Guillaume",
+"mrc": "Drummond",
+"distanceToMtlKm": 74.5
+},
+{
+"slug": "saint-david",
+"name": "Saint-David",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 74.8
+},
+{
+"slug": "elgin",
+"name": "Elgin",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 75.0
+},
+{
+"slug": "saint-anicet",
+"name": "Saint-Anicet",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 75.0
+},
+{
+"slug": "saint-eugene",
+"name": "Saint-Eugène",
+"mrc": "Drummond",
+"distanceToMtlKm": 75.3
+},
+{
+"slug": "saint-felix-de-valois",
+"name": "Saint-Félix-de-Valois",
+"mrc": "Matawinie",
+"distanceToMtlKm": 75.4
+},
+{
+"slug": "yamaska",
+"name": "Yamaska",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 75.8
+},
+{
+"slug": "saint-alphonse-rodriguez",
+"name": "Saint-Alphonse-Rodriguez",
+"mrc": "Matawinie",
+"distanceToMtlKm": 75.9
+},
+{
+"slug": "saint-norbert",
+"name": "Saint-Norbert",
+"mrc": "D'Autray",
+"distanceToMtlKm": 76.5
+},
+{
+"slug": "la-visitation-de-lile-dupas",
+"name": "La Visitation-de-l'Île-Dupas",
+"mrc": "D'Autray",
+"distanceToMtlKm": 76.5
+},
+{
+"slug": "entrelacs",
+"name": "Entrelacs",
+"mrc": "Matawinie",
+"distanceToMtlKm": 77.2
+},
+{
+"slug": "wentworth-nord",
+"name": "Wentworth-Nord",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 77.3
+},
+{
+"slug": "val-david",
+"name": "Val-David",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 77.4
+},
+{
+"slug": "frelighsburg",
+"name": "Frelighsburg",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 77.9
+},
+{
+"slug": "saint-nazaire-dacton",
+"name": "Saint-Nazaire-d'Acton",
+"mrc": "Acton",
+"distanceToMtlKm": 78.4
+},
+{
+"slug": "saint-adolphe-dhoward",
+"name": "Saint-Adolphe-d'Howard",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 79.0
+},
+{
+"slug": "saint-gerard-majella",
+"name": "Saint-Gérard-Majella",
+"mrc": "Pierre-De Saurel",
+"distanceToMtlKm": 79.5
+},
+{
+"slug": "sainte-beatrix",
+"name": "Sainte-Béatrix",
+"mrc": "Matawinie",
+"distanceToMtlKm": 79.7
+},
+{
+"slug": "acton-vale",
+"name": "Acton Vale",
+"mrc": "Acton",
+"distanceToMtlKm": 79.8
+},
+{
+"slug": "shefford",
+"name": "Shefford",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 80.0
+},
+{
+"slug": "saint-cuthbert",
+"name": "Saint-Cuthbert",
+"mrc": "D'Autray",
+"distanceToMtlKm": 80.3
+},
+{
+"slug": "saint-theodore-dacton",
+"name": "Saint-Théodore-d'Acton",
+"mrc": "Acton",
+"distanceToMtlKm": 80.4
+},
+{
+"slug": "saint-joachim-de-shefford",
+"name": "Saint-Joachim-de-Shefford",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 81.7
+},
+{
+"slug": "roxton-falls",
+"name": "Roxton Falls",
+"mrc": "Acton",
+"distanceToMtlKm": 81.7
+},
+{
+"slug": "grenville",
+"name": "Grenville",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 81.7
+},
+{
+"slug": "saint-edmond-de-grantham",
+"name": "Saint-Edmond-de-Grantham",
+"mrc": "Drummond",
+"distanceToMtlKm": 81.9
+},
+{
+"slug": "saint-cleophas-de-brandon",
+"name": "Saint-Cléophas-de-Brandon",
+"mrc": "D'Autray",
+"distanceToMtlKm": 82.0
+},
+{
+"slug": "roxton",
+"name": "Roxton",
+"mrc": "Acton",
+"distanceToMtlKm": 82.1
+},
+{
+"slug": "lac-des-seize-iles",
+"name": "Lac-des-Seize-Îles",
+"mrc": "Les Pays-d'en-Haut",
+"distanceToMtlKm": 82.8
+},
+{
+"slug": "saint-jean-de-matha",
+"name": "Saint-Jean-de-Matha",
+"mrc": "Matawinie",
+"distanceToMtlKm": 82.9
+},
+{
+"slug": "saint-francois-du-lac",
+"name": "Saint-François-du-Lac",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 82.9
+},
+{
+"slug": "saint-barthelemy",
+"name": "Saint-Barthélemy",
+"mrc": "D'Autray",
+"distanceToMtlKm": 82.9
+},
+{
+"slug": "waterloo",
+"name": "Waterloo",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 83.2
+},
+{
+"slug": "warden",
+"name": "Warden",
+"mrc": "La Haute-Yamaska",
+"distanceToMtlKm": 83.4
+},
+{
+"slug": "lac-brome",
+"name": "Lac-Brome",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 83.4
+},
+{
+"slug": "saint-germain-de-grantham",
+"name": "Saint-Germain-de-Grantham",
+"mrc": "Drummond",
+"distanceToMtlKm": 84.0
+},
+{
+"slug": "saint-pie-de-guire",
+"name": "Saint-Pie-de-Guire",
+"mrc": "Drummond",
+"distanceToMtlKm": 84.3
+},
+{
+"slug": "sainte-agathe-des-monts",
+"name": "Sainte-Agathe-des-Monts",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 85.3
+},
+{
+"slug": "brome",
+"name": "Brome",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 85.5
+},
+{
+"slug": "saint-bonaventure",
+"name": "Saint-Bonaventure",
+"mrc": "Drummond",
+"distanceToMtlKm": 86.1
+},
+{
+"slug": "saint-come",
+"name": "Saint-Côme",
+"mrc": "Matawinie",
+"distanceToMtlKm": 86.7
+},
+{
+"slug": "sainte-lucie-des-laurentides",
+"name": "Sainte-Lucie-des-Laurentides",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 87.0
+},
+{
+"slug": "abercorn",
+"name": "Abercorn",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 87.3
+},
+{
+"slug": "dundee",
+"name": "Dundee",
+"mrc": "Le Haut-Saint-Laurent",
+"distanceToMtlKm": 87.6
+},
+{
+"slug": "grenville-sur-la-rouge",
+"name": "Grenville-sur-la-Rouge",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 87.9
+},
+{
+"slug": "wickham",
+"name": "Wickham",
+"mrc": "Drummond",
+"distanceToMtlKm": 88.1
+},
+{
+"slug": "saint-gabriel-de-brandon",
+"name": "Saint-Gabriel-de-Brandon",
+"mrc": "D'Autray",
+"distanceToMtlKm": 88.3
+},
+{
+"slug": "pierreville",
+"name": "Pierreville",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 88.4
+},
+{
+"slug": "montcalm",
+"name": "Montcalm",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 88.9
+},
+{
+"slug": "ivry-sur-le-lac",
+"name": "Ivry-sur-le-Lac",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 88.9
+},
+{
+"slug": "maskinonge",
+"name": "Maskinongé",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 88.9
+},
+{
+"slug": "bethanie",
+"name": "Béthanie",
+"mrc": "Acton",
+"distanceToMtlKm": 89.0
+},
+{
+"slug": "sutton",
+"name": "Sutton",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 89.8
+},
+{
+"slug": "saint-majorique-de-grantham",
+"name": "Saint-Majorique-de-Grantham",
+"mrc": "Drummond",
+"distanceToMtlKm": 90.3
+},
+{
+"slug": "notre-dame-de-la-merci",
+"name": "Notre-Dame-de-la-Merci",
+"mrc": "Matawinie",
+"distanceToMtlKm": 90.5
+},
+{
+"slug": "sainte-christine",
+"name": "Sainte-Christine",
+"mrc": "Acton",
+"distanceToMtlKm": 90.6
+},
+{
+"slug": "lantier",
+"name": "Lantier",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 90.7
+},
+{
+"slug": "sainte-anne-de-la-rochelle",
+"name": "Sainte-Anne-de-la-Rochelle",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 90.8
+},
+{
+"slug": "saint-elphege",
+"name": "Saint-Elphège",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 90.8
+},
+{
+"slug": "saint-justin",
+"name": "Saint-Justin",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 91.3
+},
+{
+"slug": "saint-gabriel",
+"name": "Saint-Gabriel",
+"mrc": "D'Autray",
+"distanceToMtlKm": 91.3
+},
+{
+"slug": "stukely-sud",
+"name": "Stukely-Sud",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 92.1
+},
+{
+"slug": "lefebvre",
+"name": "Lefebvre",
+"mrc": "Drummond",
+"distanceToMtlKm": 92.5
+},
+{
+"slug": "saint-damien",
+"name": "Saint-Damien",
+"mrc": "Matawinie",
+"distanceToMtlKm": 92.7
+},
+{
+"slug": "harrington",
+"name": "Harrington",
+"mrc": "Argenteuil",
+"distanceToMtlKm": 93.0
+},
+{
+"slug": "bolton-ouest",
+"name": "Bolton-Ouest",
+"mrc": "Brome-Missisquoi",
+"distanceToMtlKm": 93.0
+},
+{
+"slug": "sainte-emelie-de-lenergie",
+"name": "Sainte-Émélie-de-l'Énergie",
+"mrc": "Matawinie",
+"distanceToMtlKm": 93.4
+},
+{
+"slug": "barkmere",
+"name": "Barkmere",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 93.4
+},
+{
+"slug": "drummondville",
+"name": "Drummondville",
+"mrc": "Drummond",
+"distanceToMtlKm": 94.8
+},
+{
+"slug": "mont-blanc",
+"name": "Mont-Blanc",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 94.9
+},
+{
+"slug": "valcourt--le-val-saint-francois",
+"name": "Valcourt",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 94.9
+},
+{
+"slug": "saint-didace",
+"name": "Saint-Didace",
+"mrc": "D'Autray",
+"distanceToMtlKm": 95.0
+},
+{
+"slug": "lawrenceville",
+"name": "Lawrenceville",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 95.5
+},
+{
+"slug": "saint-zephirin-de-courval",
+"name": "Saint-Zéphirin-de-Courval",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 95.9
+},
+{
+"slug": "sainte-ursule",
+"name": "Sainte-Ursule",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 96.3
+},
+{
+"slug": "arundel",
+"name": "Arundel",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 96.4
+},
+{
+"slug": "louiseville",
+"name": "Louiseville",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 96.8
+},
+{
+"slug": "saint-etienne-de-bolton",
+"name": "Saint-Étienne-de-Bolton",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 97.2
+},
+{
+"slug": "saint-edouard-de-maskinonge",
+"name": "Saint-Édouard-de-Maskinongé",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 97.3
+},
+{
+"slug": "baie-du-febvre",
+"name": "Baie-du-Febvre",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 97.4
+},
+{
+"slug": "valcourt--le-val-saint-francois--2",
+"name": "Valcourt",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 97.6
+},
+{
+"slug": "maricourt",
+"name": "Maricourt",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 97.8
+},
+{
+"slug": "durham-sud",
+"name": "Durham-Sud",
+"mrc": "Drummond",
+"distanceToMtlKm": 98.0
+},
+{
+"slug": "bonsecours",
+"name": "Bonsecours",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 100.2
+},
+{
+"slug": "eastman",
+"name": "Eastman",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 100.3
+},
+{
+"slug": "fassett",
+"name": "Fassett",
+"mrc": "Papineau",
+"distanceToMtlKm": 100.4
+},
+{
+"slug": "saint-cyrille-de-wendover",
+"name": "Saint-Cyrille-de-Wendover",
+"mrc": "Drummond",
+"distanceToMtlKm": 101.2
+},
+{
+"slug": "la-visitation-de-yamaska",
+"name": "La Visitation-de-Yamaska",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 101.2
+},
+{
+"slug": "bolton-est",
+"name": "Bolton-Est",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 101.3
+},
+{
+"slug": "huberdeau",
+"name": "Huberdeau",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 101.3
+},
+{
+"slug": "val-des-lacs",
+"name": "Val-des-Lacs",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 101.4
+},
+{
+"slug": "lavenir",
+"name": "L'Avenir",
+"mrc": "Drummond",
+"distanceToMtlKm": 101.9
+},
+{
+"slug": "sainte-brigitte-des-saults",
+"name": "Sainte-Brigitte-des-Saults",
+"mrc": "Drummond",
+"distanceToMtlKm": 102.8
+},
+{
+"slug": "saint-leon-le-grand--maskinonge",
+"name": "Saint-Léon-le-Grand",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 103.1
+},
+{
+"slug": "notre-dame-de-bonsecours",
+"name": "Notre-Dame-de-Bonsecours",
+"mrc": "Papineau",
+"distanceToMtlKm": 104.0
+},
+{
+"slug": "sainte-angele-de-premont",
+"name": "Sainte-Angèle-de-Prémont",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 104.5
+},
+{
+"slug": "saint-donat--matawinie",
+"name": "Saint-Donat",
+"mrc": "Matawinie",
+"distanceToMtlKm": 104.6
+},
+{
+"slug": "potton",
+"name": "Potton",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 104.9
+},
+{
+"slug": "ulverton",
+"name": "Ulverton",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 104.9
+},
+{
+"slug": "boileau",
+"name": "Boileau",
+"mrc": "Papineau",
+"distanceToMtlKm": 105.0
+},
+{
+"slug": "racine",
+"name": "Racine",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 105.7
+},
+{
+"slug": "brebeuf",
+"name": "Brébeuf",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 105.8
+},
+{
+"slug": "notre-dame-du-bon-conseil--drummond--2",
+"name": "Notre-Dame-du-Bon-Conseil",
+"mrc": "Drummond",
+"distanceToMtlKm": 106.0
+},
+{
+"slug": "yamachiche",
+"name": "Yamachiche",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 106.4
+},
+{
+"slug": "mandeville",
+"name": "Mandeville",
+"mrc": "D'Autray",
+"distanceToMtlKm": 106.6
+},
+{
+"slug": "austin",
+"name": "Austin",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 106.6
+},
+{
+"slug": "sainte-perpetue--nicolet-yamaska",
+"name": "Sainte-Perpétue",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 107.1
+},
+{
+"slug": "saint-severe",
+"name": "Saint-Sévère",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 107.5
+},
+{
+"slug": "orford",
+"name": "Orford",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 107.6
+},
+{
+"slug": "sainte-monique--nicolet-yamaska",
+"name": "Sainte-Monique",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 108.1
+},
+{
+"slug": "nicolet",
+"name": "Nicolet",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 108.3
+},
+{
+"slug": "mont-tremblant",
+"name": "Mont-Tremblant",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 108.4
+},
+{
+"slug": "saint-benoit-du-lac",
+"name": "Saint-Benoît-du-Lac",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 108.4
+},
+{
+"slug": "montebello",
+"name": "Montebello",
+"mrc": "Papineau",
+"distanceToMtlKm": 108.7
+},
+{
+"slug": "saint-lucien",
+"name": "Saint-Lucien",
+"mrc": "Drummond",
+"distanceToMtlKm": 108.9
+},
+{
+"slug": "melbourne",
+"name": "Melbourne",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 109.5
+},
+{
+"slug": "notre-dame-du-bon-conseil--drummond",
+"name": "Notre-Dame-du-Bon-Conseil",
+"mrc": "Drummond",
+"distanceToMtlKm": 109.6
+},
+{
+"slug": "saint-paulin",
+"name": "Saint-Paulin",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 110.9
+},
+{
+"slug": "amherst",
+"name": "Amherst",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 111.2
+},
+{
+"slug": "kingsbury",
+"name": "Kingsbury",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 111.9
+},
+{
+"slug": "saint-felix-de-kingsey",
+"name": "Saint-Félix-de-Kingsey",
+"mrc": "Drummond",
+"distanceToMtlKm": 112.1
+},
+{
+"slug": "saint-alexis-des-monts",
+"name": "Saint-Alexis-des-Monts",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 112.4
+},
+{
+"slug": "grand-saint-esprit",
+"name": "Grand-Saint-Esprit",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 112.5
+},
+{
+"slug": "richmond",
+"name": "Richmond",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 112.5
+},
+{
+"slug": "saint-barnabe",
+"name": "Saint-Barnabé",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 113.0
+},
+{
+"slug": "namur",
+"name": "Namur",
+"mrc": "Papineau",
+"distanceToMtlKm": 113.4
+},
+{
+"slug": "magog",
+"name": "Magog",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 113.8
+},
+{
+"slug": "lac-superieur",
+"name": "Lac-Supérieur",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 113.9
+},
+{
+"slug": "papineauville",
+"name": "Papineauville",
+"mrc": "Papineau",
+"distanceToMtlKm": 114.1
+},
+{
+"slug": "notre-dame-de-la-paix",
+"name": "Notre-Dame-de-la-Paix",
+"mrc": "Papineau",
+"distanceToMtlKm": 114.2
+},
+{
+"slug": "saint-leonard-daston",
+"name": "Saint-Léonard-d'Aston",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 114.2
+},
+{
+"slug": "stanstead--memphremagog",
+"name": "Stanstead",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 115.3
+},
+{
+"slug": "saint-zenon",
+"name": "Saint-Zénon",
+"mrc": "Matawinie",
+"distanceToMtlKm": 115.5
+},
+{
+"slug": "charette",
+"name": "Charette",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 115.6
+},
+{
+"slug": "saint-denis-de-brompton",
+"name": "Saint-Denis-de-Brompton",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 115.9
+},
+{
+"slug": "saint-emile-de-suffolk",
+"name": "Saint-Émile-de-Suffolk",
+"mrc": "Papineau",
+"distanceToMtlKm": 116.0
+},
+{
+"slug": "sainte-clotilde-de-horton",
+"name": "Sainte-Clotilde-de-Horton",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 116.4
+},
+{
+"slug": "cleveland",
+"name": "Cleveland",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 117.0
+},
+{
+"slug": "sainte-seraphine",
+"name": "Sainte-Séraphine",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 117.0
+},
+{
+"slug": "la-conception",
+"name": "La Conception",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 117.2
+},
+{
+"slug": "lac-tremblant-nord",
+"name": "Lac-Tremblant-Nord",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 118.2
+},
+{
+"slug": "saint-celestin--nicolet-yamaska",
+"name": "Saint-Célestin",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 118.2
+},
+{
+"slug": "saint-andre-avellin",
+"name": "Saint-André-Avellin",
+"mrc": "Papineau",
+"distanceToMtlKm": 118.3
+},
+{
+"slug": "saint-francois-xavier-de-brompton",
+"name": "Saint-François-Xavier-de-Brompton",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 118.3
+},
+{
+"slug": "saint-celestin--nicolet-yamaska--2",
+"name": "Saint-Célestin",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 119.2
+},
+{
+"slug": "plaisance",
+"name": "Plaisance",
+"mrc": "Papineau",
+"distanceToMtlKm": 119.8
+},
+{
+"slug": "ogden",
+"name": "Ogden",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 120.4
+},
+{
+"slug": "cheneville",
+"name": "Chénéville",
+"mrc": "Papineau",
+"distanceToMtlKm": 120.7
+},
+{
+"slug": "saint-etienne-des-gres",
+"name": "Saint-Étienne-des-Grès",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 120.7
+},
+{
+"slug": "trois-rivieres",
+"name": "Trois-Rivières",
+"mrc": null,
+"distanceToMtlKm": 121.0
+},
+{
+"slug": "kingsey-falls",
+"name": "Kingsey Falls",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 121.2
+},
+{
+"slug": "saint-elie-de-caxton",
+"name": "Saint-Élie-de-Caxton",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 121.5
+},
+{
+"slug": "saint-wenceslas",
+"name": "Saint-Wenceslas",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 121.7
+},
+{
+"slug": "lac-des-plages",
+"name": "Lac-des-Plages",
+"mrc": "Papineau",
+"distanceToMtlKm": 121.8
+},
+{
+"slug": "sainte-catherine-de-hatley",
+"name": "Sainte-Catherine-de-Hatley",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 122.1
+},
+{
+"slug": "saint-samuel",
+"name": "Saint-Samuel",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 122.3
+},
+{
+"slug": "windsor",
+"name": "Windsor",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 122.6
+},
+{
+"slug": "sainte-elizabeth-de-warwick",
+"name": "Sainte-Élizabeth-de-Warwick",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 123.0
+},
+{
+"slug": "sainte-eulalie",
+"name": "Sainte-Eulalie",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 123.2
+},
+{
+"slug": "ayers-cliff",
+"name": "Ayer's Cliff",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 124.2
+},
+{
+"slug": "danville",
+"name": "Danville",
+"mrc": "Les Sources",
+"distanceToMtlKm": 124.2
+},
+{
+"slug": "labelle",
+"name": "Labelle",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 124.9
+},
+{
+"slug": "val-joli",
+"name": "Val-Joli",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 124.9
+},
+{
+"slug": "sherbrooke",
+"name": "Sherbrooke",
+"mrc": null,
+"distanceToMtlKm": 125.7
+},
+{
+"slug": "saint-albert",
+"name": "Saint-Albert",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 126.2
+},
+{
+"slug": "ripon",
+"name": "Ripon",
+"mrc": "Papineau",
+"distanceToMtlKm": 126.3
+},
+{
+"slug": "north-hatley",
+"name": "North Hatley",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 126.4
+},
+{
+"slug": "stanstead--memphremagog--2",
+"name": "Stanstead",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 126.6
+},
+{
+"slug": "saint-boniface",
+"name": "Saint-Boniface",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 126.7
+},
+{
+"slug": "saint-claude",
+"name": "Saint-Claude",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 127.1
+},
+{
+"slug": "aston-jonction",
+"name": "Aston-Jonction",
+"mrc": "Nicolet-Yamaska",
+"distanceToMtlKm": 127.2
+},
+{
+"slug": "stanstead-est",
+"name": "Stanstead-Est",
+"mrc": "Coaticook",
+"distanceToMtlKm": 127.3
+},
+{
+"slug": "lac-simon",
+"name": "Lac-Simon",
+"mrc": "Papineau",
+"distanceToMtlKm": 128.3
+},
+{
+"slug": "saint-sixte",
+"name": "Saint-Sixte",
+"mrc": "Papineau",
+"distanceToMtlKm": 128.6
+},
+{
+"slug": "hatley-township-municipality",
+"name": "Hatley (township municipality)",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 129.1
+},
+{
+"slug": "lochaber",
+"name": "Lochaber",
+"mrc": "Papineau",
+"distanceToMtlKm": 129.2
+},
+{
+"slug": "hatley",
+"name": "Hatley",
+"mrc": "Memphrémagog",
+"distanceToMtlKm": 129.6
+},
+{
+"slug": "val-des-sources",
+"name": "Val-des-Sources",
+"mrc": "Les Sources",
+"distanceToMtlKm": 129.6
+},
+{
+"slug": "becancour",
+"name": "Bécancour",
+"mrc": "Bécancour",
+"distanceToMtlKm": 129.9
+},
+{
+"slug": "notre-dame-du-mont-carmel",
+"name": "Notre-Dame-du-Mont-Carmel",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 130.2
+},
+{
+"slug": "saint-valere",
+"name": "Saint-Valère",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 130.8
+},
+{
+"slug": "thurso",
+"name": "Thurso",
+"mrc": "Papineau",
+"distanceToMtlKm": 130.9
+},
+{
+"slug": "warwick",
+"name": "Warwick",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 131.7
+},
+{
+"slug": "saint-sylvere",
+"name": "Saint-Sylvère",
+"mrc": "Bécancour",
+"distanceToMtlKm": 131.8
+},
+{
+"slug": "tingwick",
+"name": "Tingwick",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 132.7
+},
+{
+"slug": "barnston-ouest",
+"name": "Barnston-Ouest",
+"mrc": "Coaticook",
+"distanceToMtlKm": 133.5
+},
+{
+"slug": "la-macaza",
+"name": "La Macaza",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 133.6
+},
+{
+"slug": "saint-maurice",
+"name": "Saint-Maurice",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 133.8
+},
+{
+"slug": "la-minerve",
+"name": "La Minerve",
+"mrc": "Les Laurentides",
+"distanceToMtlKm": 133.8
+},
+{
+"slug": "shawinigan",
+"name": "Shawinigan",
+"mrc": null,
+"distanceToMtlKm": 134.2
+},
+{
+"slug": "waterville",
+"name": "Waterville",
+"mrc": "Coaticook",
+"distanceToMtlKm": 134.2
+},
+{
+"slug": "saint-georges-de-windsor",
+"name": "Saint-Georges-de-Windsor",
+"mrc": "Les Sources",
+"distanceToMtlKm": 134.3
+},
+{
+"slug": "saint-mathieu-du-parc",
+"name": "Saint-Mathieu-du-Parc",
+"mrc": "Maskinongé",
+"distanceToMtlKm": 135.2
+},
+{
+"slug": "saint-michel-des-saints",
+"name": "Saint-Michel-des-Saints",
+"mrc": "Matawinie",
+"distanceToMtlKm": 135.4
+},
+{
+"slug": "lochaber-partie-ouest",
+"name": "Lochaber-Partie-Ouest",
+"mrc": "Papineau",
+"distanceToMtlKm": 135.4
+},
+{
+"slug": "daveluyville",
+"name": "Daveluyville",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 135.5
+},
+{
+"slug": "maddington-falls",
+"name": "Maddington Falls",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 136.6
+},
+{
+"slug": "mayo",
+"name": "Mayo",
+"mrc": "Papineau",
+"distanceToMtlKm": 137.4
+},
+{
+"slug": "victoriaville",
+"name": "Victoriaville",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 138.7
+},
+{
+"slug": "montpellier",
+"name": "Montpellier",
+"mrc": "Papineau",
+"distanceToMtlKm": 139.0
+},
+{
+"slug": "stoke",
+"name": "Stoke",
+"mrc": "Le Val-Saint-François",
+"distanceToMtlKm": 139.2
+},
+{
+"slug": "compton",
+"name": "Compton",
+"mrc": "Coaticook",
+"distanceToMtlKm": 139.8
+},
+{
+"slug": "champlain",
+"name": "Champlain",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 139.8
+},
+{
+"slug": "saint-rosaire",
+"name": "Saint-Rosaire",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 140.0
+},
+{
+"slug": "wotton",
+"name": "Wotton",
+"mrc": "Les Sources",
+"distanceToMtlKm": 140.3
+},
+{
+"slug": "duhamel",
+"name": "Duhamel",
+"mrc": "Papineau",
+"distanceToMtlKm": 140.8
+},
+{
+"slug": "saint-luc-de-vincennes",
+"name": "Saint-Luc-de-Vincennes",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 140.8
+},
+{
+"slug": "ascot-corner",
+"name": "Ascot Corner",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 141.0
+},
+{
+"slug": "saint-remi-de-tingwick",
+"name": "Saint-Rémi-de-Tingwick",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 141.1
+},
+{
+"slug": "sainte-marie-de-blandford",
+"name": "Sainte-Marie-de-Blandford",
+"mrc": "Bécancour",
+"distanceToMtlKm": 142.1
+},
+{
+"slug": "coaticook",
+"name": "Coaticook",
+"mrc": "Coaticook",
+"distanceToMtlKm": 142.6
+},
+{
+"slug": "mulgrave-et-derry",
+"name": "Mulgrave-et-Derry",
+"mrc": "Papineau",
+"distanceToMtlKm": 143.3
+},
+{
+"slug": "saint-christophe-darthabaska",
+"name": "Saint-Christophe-d'Arthabaska",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 143.4
+},
+{
+"slug": "lemieux",
+"name": "Lemieux",
+"mrc": "Bécancour",
+"distanceToMtlKm": 144.4
+},
+{
+"slug": "saint-narcisse",
+"name": "Saint-Narcisse",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 145.8
+},
+{
+"slug": "saint-adrien",
+"name": "Saint-Adrien",
+"mrc": "Les Sources",
+"distanceToMtlKm": 146.5
+},
+{
+"slug": "saint-camille",
+"name": "Saint-Camille",
+"mrc": "Les Sources",
+"distanceToMtlKm": 146.8
+},
+{
+"slug": "saint-louis-de-blandford",
+"name": "Saint-Louis-de-Blandford",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 147.2
+},
+{
+"slug": "chesterville",
+"name": "Chesterville",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 147.9
+},
+{
+"slug": "lange-gardien--les-collines-de-loutaouais",
+"name": "L'Ange-Gardien",
+"mrc": "Les Collines-de-l'Outaouais",
+"distanceToMtlKm": 148.1
+},
+{
+"slug": "westbury",
+"name": "Westbury",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 148.2
+},
+{
+"slug": "cookshire-eaton",
+"name": "Cookshire-Eaton",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 148.6
+},
+{
+"slug": "east-angus",
+"name": "East Angus",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 148.6
+},
+{
+"slug": "martinville",
+"name": "Martinville",
+"mrc": "Coaticook",
+"distanceToMtlKm": 148.7
+},
+{
+"slug": "herouxville",
+"name": "Hérouxville",
+"mrc": "Mékinac",
+"distanceToMtlKm": 148.9
+},
+{
+"slug": "sainte-genevieve-de-batiscan",
+"name": "Sainte-Geneviève-de-Batiscan",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 149.2
+},
+{
+"slug": "batiscan",
+"name": "Batiscan",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 149.4
+},
+{
+"slug": "princeville",
+"name": "Princeville",
+"mrc": "L'Érable",
+"distanceToMtlKm": 150.4
+},
+{
+"slug": "dixville",
+"name": "Dixville",
+"mrc": "Coaticook",
+"distanceToMtlKm": 150.6
+},
+{
+"slug": "saint-norbert-darthabaska",
+"name": "Saint-Norbert-d'Arthabaska",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 150.7
+},
+{
+"slug": "sainte-edwidge-de-clifton",
+"name": "Sainte-Edwidge-de-Clifton",
+"mrc": "Coaticook",
+"distanceToMtlKm": 151.1
+},
+{
+"slug": "notre-dame-de-ham",
+"name": "Notre-Dame-de-Ham",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 151.3
+},
+{
+"slug": "lascension",
+"name": "L'Ascension",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 151.7
+},
+{
+"slug": "saint-pierre-les-becquets",
+"name": "Saint-Pierre-les-Becquets",
+"mrc": "Bécancour",
+"distanceToMtlKm": 152.0
+},
+{
+"slug": "sainte-cecile-de-levrard",
+"name": "Sainte-Cécile-de-Lévrard",
+"mrc": "Bécancour",
+"distanceToMtlKm": 152.6
+},
+{
+"slug": "sainte-sophie-de-levrard",
+"name": "Sainte-Sophie-de-Lévrard",
+"mrc": "Bécancour",
+"distanceToMtlKm": 152.7
+},
+{
+"slug": "nominingue",
+"name": "Nominingue",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 152.7
+},
+{
+"slug": "saint-stanislas--des-chenaux",
+"name": "Saint-Stanislas",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 153.4
+},
+{
+"slug": "saint-severin--mekinac",
+"name": "Saint-Séverin",
+"mrc": "Mékinac",
+"distanceToMtlKm": 153.5
+},
+{
+"slug": "grandes-piles",
+"name": "Grandes-Piles",
+"mrc": "Mékinac",
+"distanceToMtlKm": 153.9
+},
+{
+"slug": "dudswell",
+"name": "Dudswell",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 153.9
+},
+{
+"slug": "manseau",
+"name": "Manseau",
+"mrc": "Bécancour",
+"distanceToMtlKm": 154.1
+},
+{
+"slug": "riviere-rouge",
+"name": "Rivière-Rouge",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 154.8
+},
+{
+"slug": "ham-nord",
+"name": "Ham-Nord",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 155.4
+},
+{
+"slug": "sainte-helene-de-chester",
+"name": "Sainte-Hélène-de-Chester",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 156.5
+},
+{
+"slug": "ham-sud",
+"name": "Ham-Sud",
+"mrc": "Les Sources",
+"distanceToMtlKm": 157.0
+},
+{
+"slug": "saint-tite",
+"name": "Saint-Tite",
+"mrc": "Mékinac",
+"distanceToMtlKm": 157.1
+},
+{
+"slug": "notre-dame-de-la-salette",
+"name": "Notre-Dame-de-la-Salette",
+"mrc": "Papineau",
+"distanceToMtlKm": 157.2
+},
+{
+"slug": "val-des-bois",
+"name": "Val-des-Bois",
+"mrc": "Papineau",
+"distanceToMtlKm": 157.2
+},
+{
+"slug": "saint-hermenegilde",
+"name": "Saint-Herménégilde",
+"mrc": "Coaticook",
+"distanceToMtlKm": 158.0
+},
+{
+"slug": "saint-roch-de-mekinac",
+"name": "Saint-Roch-de-Mékinac",
+"mrc": "Mékinac",
+"distanceToMtlKm": 158.7
+},
+{
+"slug": "saint-prosper-de-champlain",
+"name": "Saint-Prosper-de-Champlain",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 159.3
+},
+{
+"slug": "plessisville",
+"name": "Plessisville",
+"mrc": "L'Érable",
+"distanceToMtlKm": 159.6
+},
+{
+"slug": "sainte-sophie-dhalifax",
+"name": "Sainte-Sophie-d'Halifax",
+"mrc": "L'Érable",
+"distanceToMtlKm": 160.5
+},
+{
+"slug": "saint-fortunat",
+"name": "Saint-Fortunat",
+"mrc": "Les Appalaches",
+"distanceToMtlKm": 160.8
+},
+{
+"slug": "sainte-anne-de-la-perade",
+"name": "Sainte-Anne-de-la-Pérade",
+"mrc": "Des Chenaux",
+"distanceToMtlKm": 161.4
+},
+{
+"slug": "deschaillons-sur-saint-laurent",
+"name": "Deschaillons-sur-Saint-Laurent",
+"mrc": "Bécancour",
+"distanceToMtlKm": 161.5
+},
+{
+"slug": "fortierville",
+"name": "Fortierville",
+"mrc": "Bécancour",
+"distanceToMtlKm": 161.6
+},
+{
+"slug": "parisville",
+"name": "Parisville",
+"mrc": "Bécancour",
+"distanceToMtlKm": 161.8
+},
+{
+"slug": "sainte-francoise--becancour",
+"name": "Sainte-Françoise",
+"mrc": "Bécancour",
+"distanceToMtlKm": 162.3
+},
+{
+"slug": "notre-dame-de-lourdes--lerable",
+"name": "Notre-Dame-de-Lourdes",
+"mrc": "L'Érable",
+"distanceToMtlKm": 162.4
+},
+{
+"slug": "saint-adelphe",
+"name": "Saint-Adelphe",
+"mrc": "Mékinac",
+"distanceToMtlKm": 162.5
+},
+{
+"slug": "saints-martyrs-canadiens",
+"name": "Saints-Martyrs-Canadiens",
+"mrc": "Arthabaska",
+"distanceToMtlKm": 162.8
+},
+{
+"slug": "gatineau",
+"name": "Gatineau",
+"mrc": null,
+"distanceToMtlKm": 163.0
+},
+{
+"slug": "villeroy",
+"name": "Villeroy",
+"mrc": "L'Érable",
+"distanceToMtlKm": 163.2
+},
+{
+"slug": "bury",
+"name": "Bury",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 163.8
+},
+{
+"slug": "saint-isidore-de-clifton",
+"name": "Saint-Isidore-de-Clifton",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 164.2
+},
+{
+"slug": "saint-malo",
+"name": "Saint-Malo",
+"mrc": "Coaticook",
+"distanceToMtlKm": 164.4
+},
+{
+"slug": "val-des-monts",
+"name": "Val-des-Monts",
+"mrc": "Les Collines-de-l'Outaouais",
+"distanceToMtlKm": 165.6
+},
+{
+"slug": "notre-dame-du-laus",
+"name": "Notre-Dame-du-Laus",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 165.7
+},
+{
+"slug": "saint-ferdinand",
+"name": "Saint-Ferdinand",
+"mrc": "L'Érable",
+"distanceToMtlKm": 165.9
+},
+{
+"slug": "newport",
+"name": "Newport",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 166.0
+},
+{
+"slug": "east-hereford",
+"name": "East Hereford",
+"mrc": "Coaticook",
+"distanceToMtlKm": 166.2
+},
+{
+"slug": "weedon",
+"name": "Weedon",
+"mrc": "Le Haut-Saint-François",
+"distanceToMtlKm": 166.3
+},
+{
+"slug": "lac-saguay",
+"name": "Lac-Saguay",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 166.8
+},
+{
+"slug": "saint-julien",
+"name": "Saint-Julien",
+"mrc": "Les Appalaches",
+"distanceToMtlKm": 167.3
+},
+{
+"slug": "saint-venant-de-paquette",
+"name": "Saint-Venant-de-Paquette",
+"mrc": "Coaticook",
+"distanceToMtlKm": 167.4
+},
+{
+"slug": "saint-jacques-le-majeur-de-wolfestown",
+"name": "Saint-Jacques-le-Majeur-de-Wolfestown",
+"mrc": "Les Appalaches",
+"distanceToMtlKm": 167.6
+},
+{
+"slug": "sainte-thecle",
+"name": "Sainte-Thècle",
+"mrc": "Mékinac",
+"distanceToMtlKm": 167.7
+},
+{
+"slug": "saint-casimir",
+"name": "Saint-Casimir",
+"mrc": "Portneuf",
+"distanceToMtlKm": 169.6
+},
+{
+"slug": "bowman",
+"name": "Bowman",
+"mrc": "Papineau",
+"distanceToMtlKm": 170.1
+},
+{
+"slug": "kiamika",
+"name": "Kiamika",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 170.7
+},
+{
+"slug": "saint-pierre-baptiste",
+"name": "Saint-Pierre-Baptiste",
+"mrc": "L'Érable",
+"distanceToMtlKm": 171.1
+},
+{
+"slug": "leclercville",
+"name": "Leclercville",
+"mrc": "Lotbinière",
+"distanceToMtlKm": 171.2
+},
+{
+"slug": "laurierville",
+"name": "Laurierville",
+"mrc": "L'Érable",
+"distanceToMtlKm": 171.6
+},
+{
+"slug": "cantley",
+"name": "Cantley",
+"mrc": "Les Collines-de-l'Outaouais",
+"distanceToMtlKm": 171.8
+},
+{
+"slug": "beaulac-garthby",
+"name": "Beaulac-Garthby",
+"mrc": "Les Appalaches",
+"distanceToMtlKm": 172.4
+},
+{
+"slug": "saint-thuribe",
+"name": "Saint-Thuribe",
+"mrc": "Portneuf",
+"distanceToMtlKm": 173.0
+},
+{
+"slug": "denholm",
+"name": "Denholm",
+"mrc": "La Vallée-de-la-Gatineau",
+"distanceToMtlKm": 173.1
+},
+{
+"slug": "irlande",
+"name": "Irlande",
+"mrc": "Les Appalaches",
+"distanceToMtlKm": 173.2
+},
+{
+"slug": "val-alain",
+"name": "Val-Alain",
+"mrc": "Lotbinière",
+"distanceToMtlKm": 173.3
+},
+{
+"slug": "lac-du-cerf",
+"name": "Lac-du-Cerf",
+"mrc": "Antoine-Labelle",
+"distanceToMtlKm": 173.7
+},
+{
+"slug": "deschambault-grondines",
+"name": "Deschambault-Grondines",
+"mrc": "Portneuf",
+"distanceToMtlKm": 173.9
+}
+]

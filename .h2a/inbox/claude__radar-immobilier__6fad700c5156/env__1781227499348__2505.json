@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781227499348:2505",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "REPORT PARITE STEVE (priorite) — 4 villes controle en DEEP (tous PV, sans limite), objets raw/proces-verbaux-<ville>/cas/ sur SCW:\n- delson: 42 objets (~21 docs)\n- sainte-catherine: 174 objets (~87 docs)\n- saint-constant: 484 objets (~242 docs)\n- candiac: 56 objets (~28 docs) [scrapee via overlay car SEULE config non cablee dans ALL_PV_CITIES — a cabler cote main]\nCes 4 sont vos points de controle vs la donnee de reference Steve. Deep = sans LIVE_SCRAPE_LIMIT (l adaptateur a remonte au-dela de 6 mois sur ces index -> historique profond)."
+  },
+  "createdAt": "2026-06-12T01:24:59.348Z"
+}

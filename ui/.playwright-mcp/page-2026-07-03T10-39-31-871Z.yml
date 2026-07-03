@@ -1,0 +1,306 @@
+- generic [ref=f19e3]:
+  - generic [ref=f19e6]:
+    - navigation "Barre latérale" [ref=f19e8]:
+      - generic [ref=f19e9]:
+        - generic:
+          - link "Accueil":
+            - /url: /new
+            - img "Claude"
+        - button "Ouvrir la barre latérale" [ref=f19e11] [cursor=pointer]:
+          - generic [ref=f19e14]:
+            - generic [ref=f19e15]: 
+            - generic [ref=f19e16]: 
+      - generic [ref=f19e17]:
+        - link "Nouvelle conversation" [ref=f19e21] [cursor=pointer]:
+          - /url: /new
+          - generic [ref=f19e22]:
+            - generic [ref=f19e26]: 
+            - generic:
+              - generic: Nouvelle conversation
+        - generic [ref=f19e27]:
+          - generic [ref=f19e28]:
+            - link "Discussions" [ref=f19e30] [cursor=pointer]:
+              - /url: /recents
+              - generic:
+                - generic [ref=f19e32]: 
+                - generic:
+                  - generic: Discussions
+            - link "Projets" [ref=f19e34] [cursor=pointer]:
+              - /url: /projects
+              - generic:
+                - generic [ref=f19e36]: 
+                - generic:
+                  - generic: Projets
+            - link "Artéfacts" [ref=f19e39] [cursor=pointer]:
+              - /url: /artifacts
+              - generic:
+                - generic [ref=f19e41]: 
+                - generic:
+                  - generic: Artéfacts
+            - link "Personnaliser" [ref=f19e43] [cursor=pointer]:
+              - /url: /customize
+              - generic:
+                - generic [ref=f19e45]: 
+                - generic:
+                  - generic: Personnaliser
+          - generic [ref=f19e46]:
+            - generic [ref=f19e47]:
+              - generic:
+                - heading [level=2]:
+                  - button [expanded]:
+                    - generic: 
+            - list [ref=f19e48]:
+              - listitem [ref=f19e49]:
+                - link "Code" [ref=f19e51] [cursor=pointer]:
+                  - /url: /code
+                  - generic [ref=f19e54]: 
+              - listitem [ref=f19e55]:
+                - link "Design" [ref=f19e58] [cursor=pointer]:
+                  - /url: /design?via=web_sidebar_products
+                  - generic [ref=f19e61]: 
+          - generic [ref=f19e65]:
+            - generic:
+              - heading [level=2]:
+                - button [expanded]:
+                  - generic: 
+            - list [ref=f19e66]:
+              - listitem [ref=f19e521]:
+                - generic [ref=f19e522]:
+                  - link [ref=f19e523] [cursor=pointer]:
+                    - /url: /chat/da5e84ce-d45c-4640-b2e7-599025e0c57b
+                    - generic [ref=f19e524]: Lots multifamiliaux 4+ à Delson
+                  - button [ref=f19e526] [cursor=pointer]:
+                    - generic [ref=f19e529]: 
+              - listitem [ref=f19e67]:
+                - link [ref=f19e69] [cursor=pointer]:
+                  - /url: /chat/3eb08206-8668-4fb6-be10-d3c0ffea704b
+                  - generic [ref=f19e70]: Accès aux données du MCP radar immobilier
+              - listitem [ref=f19e71]:
+                - link [ref=f19e73] [cursor=pointer]:
+                  - /url: /chat/8fe6a319-e288-4512-a783-06ed17929238
+                  - generic [ref=f19e74]: Vérifier si le contact de Jiho Kang est légitime
+              - listitem [ref=f19e75]:
+                - link [ref=f19e77] [cursor=pointer]:
+                  - /url: /chat/fbb64f75-cb81-4e90-bbb7-50ece6bd26f9
+                  - generic [ref=f19e78]: Comparaison des meilleurs OCR pour zonage immobilier
+              - listitem [ref=f19e79]:
+                - link [ref=f19e81] [cursor=pointer]:
+                  - /url: /chat/61153b5b-e26d-42d6-a3f5-c63fdb0a37d9
+                  - generic [ref=f19e82]: Top
+              - listitem [ref=f19e83]:
+                - link [ref=f19e85] [cursor=pointer]:
+                  - /url: /chat/f4d68614-cbfd-43a9-afee-ef3eda46fb2a
+                  - generic [ref=f19e86]: Traitement d'une éraflure au visage
+              - listitem [ref=f19e87]:
+                - link [ref=f19e89] [cursor=pointer]:
+                  - /url: /chat/5746a42a-e04b-4f68-8670-59842733ec0b
+                  - generic [ref=f19e90]: Livre blanc IA pour la stratégie digitale Airbus Nord Amérique
+              - listitem [ref=f19e91]:
+                - link [ref=f19e93] [cursor=pointer]:
+                  - /url: /chat/a6d8fc73-251d-4828-b1d7-9f607b661367
+                  - generic [ref=f19e94]: COMAC aéronautique et technologies émergentes
+              - listitem [ref=f19e95]:
+                - link [ref=f19e97] [cursor=pointer]:
+                  - /url: /chat/60c4ec15-0aac-4780-bb81-513541dfc97f
+                  - generic [ref=f19e98]: Test
+              - listitem [ref=f19e99]:
+                - link [ref=f19e101] [cursor=pointer]:
+                  - /url: /chat/7c417ad0-887a-47ef-91f4-027c4e0606dd
+                  - generic [ref=f19e102]: Test message
+              - listitem [ref=f19e103]:
+                - link [ref=f19e105] [cursor=pointer]:
+                  - /url: /chat/dcb25a71-43ec-4a1c-84ba-2b8975259846
+                  - generic [ref=f19e106]: Vérification de fonctionnement
+              - listitem [ref=f19e107]:
+                - link [ref=f19e109] [cursor=pointer]:
+                  - /url: /chat/97abd340-c1a5-45da-9a9d-d7639b3aaa64
+                  - generic [ref=f19e110]: Vérification de fonctionnement
+              - listitem [ref=f19e111]:
+                - link [ref=f19e113] [cursor=pointer]:
+                  - /url: /chat/40930c5f-1123-4eac-a99d-ab5ec363f269
+                  - generic [ref=f19e114]: Quotas et débats
+              - listitem [ref=f19e115]:
+                - link [ref=f19e117] [cursor=pointer]:
+                  - /url: /chat/35df48c6-f8ae-4c8b-91e3-c87398d459f3
+                  - generic [ref=f19e118]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f19e119]:
+                - link [ref=f19e121] [cursor=pointer]:
+                  - /url: /chat/15dd05bf-55c7-4aaa-bd27-9f7fcf4e160c
+                  - generic [ref=f19e122]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f19e123]:
+                - link [ref=f19e125] [cursor=pointer]:
+                  - /url: /chat/810f8b42-4e00-412f-9334-b805dbc91fdb
+                  - generic [ref=f19e126]: Limitations légales d'un NDA
+              - listitem [ref=f19e127]:
+                - link [ref=f19e129] [cursor=pointer]:
+                  - /url: /chat/747a4192-4053-406f-b488-ea177bea347a
+                  - generic [ref=f19e130]: Épuisement des tokens
+              - listitem [ref=f19e131]:
+                - link [ref=f19e133] [cursor=pointer]:
+                  - /url: /chat/82557649-61c1-4ca1-afa4-25f6ff2cc7d4
+                  - generic [ref=f19e134]: Comparaison workstation dev 32Go RAM
+              - listitem [ref=f19e135]:
+                - link [ref=f19e137] [cursor=pointer]:
+                  - /url: /chat/16384194-8763-452a-8c1e-05f38bd53145
+                  - generic [ref=f19e138]: Coût mensuel de Gemma 4 QAT en tokens
+              - listitem [ref=f19e139]:
+                - link [ref=f19e141] [cursor=pointer]:
+                  - /url: /chat/80178101-cfa4-4974-8af6-30a68c0f772f
+                  - generic [ref=f19e142]: Vérification des tokens disponibles
+              - listitem [ref=f19e143]:
+                - link [ref=f19e145] [cursor=pointer]:
+                  - /url: /chat/f9e1ea13-fd72-405e-b2c7-500f5b3abd22
+                  - generic [ref=f19e146]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f19e147]:
+                - link [ref=f19e149] [cursor=pointer]:
+                  - /url: /chat/b77cf619-4ac1-4f1a-8120-b2f5d948fa67
+                  - generic [ref=f19e150]: Schéma architecture GCP avec pods et lab données
+              - listitem [ref=f19e151]:
+                - link [ref=f19e153] [cursor=pointer]:
+                  - /url: /chat/e575111e-36fb-44be-9b07-24e1bc7994cf
+                  - generic [ref=f19e154]: Vérification des transactions Wave
+              - listitem [ref=f19e155]:
+                - link [ref=f19e157] [cursor=pointer]:
+                  - /url: /chat/928da50a-abfb-4bff-85e2-fe31f60b0bd1
+                  - generic [ref=f19e158]: Évaluation rationalisée des cas d'usage Gemini
+              - listitem [ref=f19e159]:
+                - link [ref=f19e161] [cursor=pointer]:
+                  - /url: /chat/bef81743-6d15-42ca-b8b2-124292611606
+                  - generic [ref=f19e162]: Entraîner un LLM pour le reasoning
+              - listitem [ref=f19e163]:
+                - link [ref=f19e165] [cursor=pointer]:
+                  - /url: /chat/c2e48849-0142-41fe-802a-08abbf9f059b
+                  - generic [ref=f19e166]: Monter Google Drive dans un répertoire pour CLI
+              - listitem [ref=f19e167]:
+                - link [ref=f19e169] [cursor=pointer]:
+                  - /url: /chat/d51cb2ee-19db-4c92-9069-222e3f119bc5
+                  - generic [ref=f19e170]: Afficher les lignes cachées dans Claude CLI
+              - listitem [ref=f19e171]:
+                - link [ref=f19e173] [cursor=pointer]:
+                  - /url: /chat/5af6d281-b44b-4fdf-9bee-48b901c59a78
+                  - generic [ref=f19e174]: Ontologies du parfum
+              - listitem [ref=f19e175]:
+                - link [ref=f19e177] [cursor=pointer]:
+                  - /url: /chat/77e4417b-0516-4475-9359-5a91b84d0609
+                  - generic [ref=f19e178]: Compatibilité OData MCP V4 avec ECC6
+              - listitem [ref=f19e179]:
+                - link [ref=f19e181] [cursor=pointer]:
+                  - /url: /chat/29802e0c-266d-4611-97a8-0bf286fa0d43
+                  - generic [ref=f19e182]: Utiliser Claude Cowork
+              - listitem [ref=f19e183]:
+                - link [ref=f19e185] [cursor=pointer]:
+                  - /url: /chat/9afa982d-4fa4-49ad-a97d-20710df297d7
+                  - generic [ref=f19e186]: Intégrer des données externes dans les dashboards ClickUp
+            - link [ref=f19e188] [cursor=pointer]:
+              - /url: /recents
+              - img [ref=f19e189]
+        - link "Obtenir des applications et extensions" [ref=f19e195] [cursor=pointer]:
+          - /url: /downloads
+          - generic [ref=f19e198]: 
+        - button "Fabien ANTOINE, Paramètres" [ref=f19e201] [cursor=pointer]:
+          - generic [ref=f19e205]: FA
+          - generic:
+            - generic [ref=f19e206]:
+              - generic: Fabien ANTOINE
+              - generic: Plan Max
+            - img [ref=f19e208]
+    - main [ref=f19e210]:
+      - generic [ref=f19e532]:
+        - generic [ref=f19e533]:
+          - generic [ref=f19e538]:
+            - button "Lots multifamiliaux 4+ à Delson, renommer le chat" [ref=f19e539]:
+              - generic [ref=f19e542]: Lots multifamiliaux 4+ à Delson
+            - button "Plus d'options pour Lots multifamiliaux 4+ à Delson" [ref=f19e543] [cursor=pointer]:
+              - generic [ref=f19e546]: 
+          - generic [ref=f19e549]:
+            - status [ref=f19e550]: Claude répond.
+            - feed "Messages de la conversation" [ref=f19e552]:
+              - paragraph [ref=f19e553]: Utilisez les touches fléchées haut et bas pour naviguer entre les messages.
+              - generic [ref=f19e554]:
+                - article "Message 1 sur 2" [ref=f19e556]:
+                  - generic [ref=f19e559]:
+                    - 'heading "Vous avez dit : Avec le connecteur Radar immobilier, récupère les lots multifamiliaux 4+ (only4Plus) à Delson." [level=2] [ref=f19e560]'
+                    - generic [ref=f19e561]:
+                      - paragraph [ref=f19e566]: Avec le connecteur Radar immobilier, récupère les lots multifamiliaux 4+ (only4Plus) à Delson. Combien y en a-t-il et donne-moi quelques numéros de lot en exemple ?
+                      - toolbar "Actions du message" [ref=f19e569]:
+                        - generic [ref=f19e570]: 06:38
+                        - button "Modifier" [ref=f19e572] [cursor=pointer]:
+                          - generic [ref=f19e575]: 
+                        - button "Copier" [ref=f19e576] [cursor=pointer]:
+                          - generic [ref=f19e579]:
+                            - generic [ref=f19e580]: 
+                            - generic [ref=f19e581]: 
+                - article "Message en cours de génération" [ref=f19e583]:
+                  - generic [ref=f19e590]:
+                    - generic [ref=f19e593]:
+                      - button "Décodé structure de données GeoJSON imbriquée" [ref=f19e765] [cursor=pointer]:
+                        - img [ref=f19e766]
+                        - paragraph [ref=f19e705]: R
+                        - generic [ref=f19e768]:
+                          - generic [ref=f19e769]: Décodé structure de données GeoJSON imbriquée
+                          - img [ref=f19e772]
+                      - status [ref=f19e609]: Décodé structure de données GeoJSON imbriquée
+                    - generic [ref=f19e612]:
+                      - generic [ref=f19e780]:
+                        - generic [ref=f19e781]:
+                          - img [ref=f19e784]
+                          - button "Inspecter la structure du GeoJSON et compter les lots" [ref=f19e788] [cursor=pointer]:
+                            - generic [ref=f19e790]: Inspecter la structure du GeoJSON et compter les lots
+                        - button "Script" [ref=f19e796] [cursor=pointer]:
+                          - generic [ref=f19e797]: Script
+                      - generic [ref=f19e807]:
+                        - generic [ref=f19e808]:
+                          - img [ref=f19e811]
+                          - button "Comprendre la structure racine (liste)" [ref=f19e815] [cursor=pointer]:
+                            - generic [ref=f19e817]: Comprendre la structure racine (liste)
+                        - button "Script" [ref=f19e823] [cursor=pointer]:
+                          - generic [ref=f19e824]: Script
+                      - generic [ref=f19e834]:
+                        - generic [ref=f19e835]:
+                          - img [ref=f19e838]
+                          - button "Exécution de la commande" [ref=f19e842] [cursor=pointer]:
+                            - generic [ref=f19e844]: Exécution de la commande
+                        - button "Script" [ref=f19e850] [cursor=pointer]:
+                          - generic [ref=f19e851]: Script
+            - generic [ref=f19e644]:
+              - button:
+                - generic:
+                  - img
+              - group [ref=f19e646]:
+                - status [ref=f19e648]:
+                  - generic [ref=f19e652]:
+                    - generic [ref=f19e653]: Souhaitez-vous être averti lorsque Claude répond ?
+                    - generic [ref=f19e654]:
+                      - button "Notifier" [ref=f19e655] [cursor=pointer]:
+                        - generic [ref=f19e657]: Notifier
+                      - button "Ignorer" [ref=f19e658] [cursor=pointer]:
+                        - generic [ref=f19e659]: 
+                - status
+                - generic [ref=f19e662]:
+                  - generic [ref=f19e664]:
+                    - textbox "Écrivez votre invite à Claude." [active] [ref=f19e665]:
+                      - paragraph [ref=f19e666]: Écrire un message…
+                    - status [ref=f19e667]
+                  - generic [ref=f19e668]:
+                    - button "Ajouter des fichiers, des connecteurs et plus" [ref=f19e671] [cursor=pointer]:
+                      - generic [ref=f19e674]: 
+                    - 'button "Modèle : Opus 4.8 Élevé" [ref=f19e678] [cursor=pointer]':
+                      - generic [ref=f19e680]: Opus 4.8 Élevé
+                      - generic [ref=f19e681]: 
+                    - generic [ref=f19e683]:
+                      - button "Paramètres" [ref=f19e685] [cursor=pointer]:
+                        - generic [ref=f19e687]: 
+                      - button "Appuyez et maintenez pour enregistrer" [ref=f19e688] [cursor=pointer]:
+                        - generic [ref=f19e690]: 
+                    - button "Arrêter la réponse" [ref=f19e693] [cursor=pointer]:
+                      - generic [ref=f19e694]: 
+              - note [ref=f19e695]:
+                - link "Claude est une IA et peut faire des erreurs. Veuillez vérifier les réponses." [ref=f19e696] [cursor=pointer]:
+                  - /url: https://support.anthropic.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on
+        - button "Fichiers" [ref=f19e855] [cursor=pointer]:
+          - generic [ref=f19e858]: 
+  - region "Notifications (F8)":
+    - list

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781362648705:e261",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — 2 villes a RE-GRAPHIFY (bug id duplique). L intégration SCW->PG signale 2 erreurs: saint-joseph-de-beauce et shannon ont un NOEUD avec id DUPLIQUE dans leur graph/<ville>/latest.json -> collision ON CONFLICT, donnees partielles en PG (27 et 32 noeuds). Probleme cote graphify (pas import). Les deux sont en S-Z (S) = ton perimetre. Re-graphify-les proprement (ids uniques, contrat v2.0) quand tu peux. Sinon RAS, l integration tourne bien (527 villes en PG). Merci."
+  },
+  "createdAt": "2026-06-13T14:57:28.000Z"
+}

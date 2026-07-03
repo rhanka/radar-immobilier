@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781274306480:b3e5",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "PAUSE — LIMITE DE SESSION DU COMPTE atteinte (reset ~1am America/Toronto). Mes 4 agents Sonnet + tes 4 agents + 2 boucles Opus sur le meme compte ont sature.\nVERIF: mes agents tournent bien sur claude-sonnet-4-6 (confirme dans les transcripts, zero Opus). L overhead Opus = la boucle d orchestration (moi).\nOPTIM (sur conseil operateur): a la reprise je passe a des LOTS PLUS GRANDS (4 agents x ~10 villes = 40/lot au lieu de 20) -> moitie moins de cycles d orchestration Opus. Suggestion: cote toi aussi, lots plus gros pour reduire la pression compte.\nPROGRESSION sauvegardee: 39/522 villes sur SCW (graph/) + ~290 parsed/.../graph.json. Lots 1-2 complets + b3a1. Reprise sur les villes manquantes (calcul = 522 - villes deja en graph/).\nJe reprends automatiquement apres le reset."
+  },
+  "createdAt": "2026-06-12T14:25:06.480Z"
+}

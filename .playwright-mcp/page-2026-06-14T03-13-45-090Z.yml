@@ -1,0 +1,538 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner "Navigation principale" [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Primary" [ref=e8]:
+        - generic [ref=e9]:
+          - button "Signaux" [ref=e10] [cursor=pointer]:
+            - img [ref=e11]
+            - text: Signaux
+          - button "Opportunités" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+            - text: Opportunités
+          - button "Évaluation" [ref=e14] [cursor=pointer]:
+            - img [ref=e15]
+            - text: Évaluation
+          - button "Sources" [ref=e16] [cursor=pointer]:
+            - img [ref=e17]
+            - text: Sources
+          - button "Admin/Dev" [ref=e19] [cursor=pointer]:
+            - img [ref=e20]
+            - text: Admin/Dev
+            - img [ref=e21]
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Afficher les données carte Steve" [ref=e26] [cursor=pointer]: Réel
+        - generic "admin@sent-tech.ca" [ref=e28]: Admin
+        - button "Se déconnecter" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - text: Déconnexion
+    - generic [ref=e32]:
+      - complementary [ref=e33]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - generic [ref=e37]:
+              - generic [ref=e38]: Signaux · Villes
+              - button "Actualiser" [ref=e39] [cursor=pointer]:
+                - img [ref=e40]
+            - generic [ref=e44]:
+              - img [ref=e46]
+              - searchbox "Rechercher une ville" [ref=e49]
+            - generic [ref=e50]: 3729 signals · 671 villes
+          - list [ref=e51]:
+            - listitem [ref=e52]:
+              - group [ref=e53]:
+                - generic "▸ Pointe-Claire 29" [ref=e54] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e56]: Pointe-Claire
+                  - generic [ref=e57]: "29"
+            - listitem [ref=e58]:
+              - group [ref=e59]:
+                - generic "▸ Léry Roussillon 28" [ref=e60] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e62]:
+                    - text: Léry
+                    - generic [ref=e63]: Roussillon
+                  - generic [ref=e64]: "28"
+            - listitem [ref=e65]:
+              - group [ref=e66]:
+                - generic "▸ L'Île-Perrot Vaudreuil-Soulanges 23" [ref=e67] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e69]:
+                    - text: L'Île-Perrot
+                    - generic [ref=e70]: Vaudreuil-Soulanges
+                  - generic [ref=e71]: "23"
+            - listitem [ref=e72]:
+              - group [ref=e73]:
+                - generic "▸ L'Islet L'Islet 22" [ref=e74] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e76]:
+                    - text: L'Islet
+                    - generic [ref=e77]: L'Islet
+                  - generic [ref=e78]: "22"
+            - listitem [ref=e79]:
+              - group [ref=e80]:
+                - generic "▸ Plessisville L'Érable 21" [ref=e81] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e83]:
+                    - text: Plessisville
+                    - generic [ref=e84]: L'Érable
+                  - generic [ref=e85]: "21"
+            - listitem [ref=e86]:
+              - group [ref=e87]:
+                - generic "▸ Brownsburg-Chatham Argenteuil 20" [ref=e88] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e90]:
+                    - text: Brownsburg-Chatham
+                    - generic [ref=e91]: Argenteuil
+                  - generic [ref=e92]: "20"
+            - listitem [ref=e93]:
+              - group [ref=e94]:
+                - generic "▸ Potton Memphrémagog 18" [ref=e95] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e97]:
+                    - text: Potton
+                    - generic [ref=e98]: Memphrémagog
+                  - generic [ref=e99]: "18"
+            - listitem [ref=e100]:
+              - group [ref=e101]:
+                - generic "▸ Delson Roussillon 17" [ref=e102] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e104]:
+                    - text: Delson
+                    - generic [ref=e105]: Roussillon
+                  - generic [ref=e106]: "17"
+            - listitem [ref=e107]:
+              - group [ref=e108]:
+                - generic "▸ Carignan La Vallée-du-Richelieu 17" [ref=e109] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e111]:
+                    - text: Carignan
+                    - generic [ref=e112]: La Vallée-du-Richelieu
+                  - generic [ref=e113]: "17"
+            - listitem [ref=e114]:
+              - group [ref=e115]:
+                - generic "▸ Charlemagne L'Assomption 17" [ref=e116] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e118]:
+                    - text: Charlemagne
+                    - generic [ref=e119]: L'Assomption
+                  - generic [ref=e120]: "17"
+            - listitem [ref=e121]:
+              - group [ref=e122]:
+                - generic "▸ Vaudreuil-Dorion Vaudreuil-Soulanges 17" [ref=e123] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e125]:
+                    - text: Vaudreuil-Dorion
+                    - generic [ref=e126]: Vaudreuil-Soulanges
+                  - generic [ref=e127]: "17"
+            - listitem [ref=e128]:
+              - group [ref=e129]:
+                - generic "▸ Beaconsfield 16" [ref=e130] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e132]: Beaconsfield
+                  - generic [ref=e133]: "16"
+            - listitem [ref=e134]:
+              - group [ref=e135]:
+                - generic "▸ Boisbriand Thérèse-De Blainville 16" [ref=e136] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e138]:
+                    - text: Boisbriand
+                    - generic [ref=e139]: Thérèse-De Blainville
+                  - generic [ref=e140]: "16"
+            - listitem [ref=e141]:
+              - group [ref=e142]:
+                - generic "▸ Richelieu Rouville 16" [ref=e143] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e145]:
+                    - text: Richelieu
+                    - generic [ref=e146]: Rouville
+                  - generic [ref=e147]: "16"
+            - listitem [ref=e148]:
+              - group [ref=e149]:
+                - generic "▸ Saint-Hippolyte La Rivière-du-Nord 16" [ref=e150] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e152]:
+                    - text: Saint-Hippolyte
+                    - generic [ref=e153]: La Rivière-du-Nord
+                  - generic [ref=e154]: "16"
+            - listitem [ref=e155]:
+              - group [ref=e156]:
+                - generic "▸ Lachute Argenteuil 16" [ref=e157] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e159]:
+                    - text: Lachute
+                    - generic [ref=e160]: Argenteuil
+                  - generic [ref=e161]: "16"
+            - listitem [ref=e162]:
+              - group [ref=e163]:
+                - generic "▸ Ayer's Cliff Memphrémagog 16" [ref=e164] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e166]:
+                    - text: Ayer's Cliff
+                    - generic [ref=e167]: Memphrémagog
+                  - generic [ref=e168]: "16"
+            - listitem [ref=e169]:
+              - group [ref=e170]:
+                - generic "▸ Sainte-Adèle Les Pays-d'en-Haut 15" [ref=e171] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e173]:
+                    - text: Sainte-Adèle
+                    - generic [ref=e174]: Les Pays-d'en-Haut
+                  - generic [ref=e175]: "15"
+            - listitem [ref=e176]:
+              - group [ref=e177]:
+                - generic "▸ Victoriaville Arthabaska 15" [ref=e178] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e180]:
+                    - text: Victoriaville
+                    - generic [ref=e181]: Arthabaska
+                  - generic [ref=e182]: "15"
+            - listitem [ref=e183]:
+              - group [ref=e184]:
+                - generic "▸ La Prairie Roussillon 14" [ref=e185] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e187]:
+                    - text: La Prairie
+                    - generic [ref=e188]: Roussillon
+                  - generic [ref=e189]: "14"
+            - listitem [ref=e190]:
+              - group [ref=e191]:
+                - generic "▸ McMasterville La Vallée-du-Richelieu 14" [ref=e192] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e194]:
+                    - text: McMasterville
+                    - generic [ref=e195]: La Vallée-du-Richelieu
+                  - generic [ref=e196]: "14"
+            - listitem [ref=e197]:
+              - group [ref=e198]:
+                - generic "▸ Saint-Eustache Deux-Montagnes 14" [ref=e199] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e201]:
+                    - text: Saint-Eustache
+                    - generic [ref=e202]: Deux-Montagnes
+                  - generic [ref=e203]: "14"
+            - listitem [ref=e204]:
+              - group [ref=e205]:
+                - generic "▸ Lac-Supérieur Les Laurentides 14" [ref=e206] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e208]:
+                    - text: Lac-Supérieur
+                    - generic [ref=e209]: Les Laurentides
+                  - generic [ref=e210]: "14"
+            - listitem [ref=e211]:
+              - group [ref=e212]:
+                - generic "▸ Barnston-Ouest Coaticook 14" [ref=e213] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e215]:
+                    - text: Barnston-Ouest
+                    - generic [ref=e216]: Coaticook
+                  - generic [ref=e217]: "14"
+            - listitem [ref=e218]:
+              - group [ref=e219]:
+                - generic "▸ Shawinigan 14" [ref=e220] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e222]: Shawinigan
+                  - generic [ref=e223]: "14"
+            - listitem [ref=e224]:
+              - group [ref=e225]:
+                - generic "▸ Dorval 13" [ref=e226] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e228]: Dorval
+                  - generic [ref=e229]: "13"
+            - listitem [ref=e230]:
+              - group [ref=e231]:
+                - generic "▸ Lorraine Thérèse-De Blainville 13" [ref=e232] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e234]:
+                    - text: Lorraine
+                    - generic [ref=e235]: Thérèse-De Blainville
+                  - generic [ref=e236]: "13"
+            - listitem [ref=e237]:
+              - group [ref=e238]:
+                - generic "▸ Mirabel 13" [ref=e239] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e241]: Mirabel
+                  - generic [ref=e242]: "13"
+            - listitem [ref=e243]:
+              - group [ref=e244]:
+                - generic "▸ Sainte-Barbe Le Haut-Saint-Laurent 13" [ref=e245] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e247]:
+                    - text: Sainte-Barbe
+                    - generic [ref=e248]: Le Haut-Saint-Laurent
+                  - generic [ref=e249]: "13"
+            - listitem [ref=e250]:
+              - group [ref=e251]:
+                - generic "▸ Granby La Haute-Yamaska 13" [ref=e252] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e254]:
+                    - text: Granby
+                    - generic [ref=e255]: La Haute-Yamaska
+                  - generic [ref=e256]: "13"
+            - listitem [ref=e257]:
+              - group [ref=e258]:
+                - generic "▸ Shefford La Haute-Yamaska 13" [ref=e259] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e261]:
+                    - text: Shefford
+                    - generic [ref=e262]: La Haute-Yamaska
+                  - generic [ref=e263]: "13"
+            - listitem [ref=e264]:
+              - group [ref=e265]:
+                - generic "▸ Abercorn Brome-Missisquoi 13" [ref=e266] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e268]:
+                    - text: Abercorn
+                    - generic [ref=e269]: Brome-Missisquoi
+                  - generic [ref=e270]: "13"
+            - listitem [ref=e271]:
+              - group [ref=e272]:
+                - generic "▸ Drummondville Drummond 13" [ref=e273] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e275]:
+                    - text: Drummondville
+                    - generic [ref=e276]: Drummond
+                  - generic [ref=e277]: "13"
+            - listitem [ref=e278]:
+              - group [ref=e279]:
+                - generic "▸ Mont-Tremblant Les Laurentides 13" [ref=e280] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e282]:
+                    - text: Mont-Tremblant
+                    - generic [ref=e283]: Les Laurentides
+                  - generic [ref=e284]: "13"
+            - listitem [ref=e285]:
+              - group [ref=e286]:
+                - generic "▸ Labelle Les Laurentides 13" [ref=e287] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e289]:
+                    - text: Labelle
+                    - generic [ref=e290]: Les Laurentides
+                  - generic [ref=e291]: "13"
+            - listitem [ref=e292]:
+              - group [ref=e293]:
+                - generic "▸ Warwick Arthabaska 13" [ref=e294] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e296]:
+                    - text: Warwick
+                    - generic [ref=e297]: Arthabaska
+                  - generic [ref=e298]: "13"
+            - listitem [ref=e299]:
+              - group [ref=e300]:
+                - generic "▸ Montmagny Montmagny 13" [ref=e301] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e303]:
+                    - text: Montmagny
+                    - generic [ref=e304]: Montmagny
+                  - generic [ref=e305]: "13"
+            - listitem [ref=e306]:
+              - group [ref=e307]:
+                - generic "▸ Sainte-Anne-des-Plaines Thérèse-De Blainville 12" [ref=e308] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e310]:
+                    - text: Sainte-Anne-des-Plaines
+                    - generic [ref=e311]: Thérèse-De Blainville
+                  - generic [ref=e312]: "12"
+            - listitem [ref=e313]:
+              - group [ref=e314]:
+                - generic "▸ Pointe-des-Cascades Vaudreuil-Soulanges 12" [ref=e315] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e317]:
+                    - text: Pointe-des-Cascades
+                    - generic [ref=e318]: Vaudreuil-Soulanges
+                  - generic [ref=e319]: "12"
+            - listitem [ref=e320]:
+              - group [ref=e321]:
+                - generic "▸ Contrecoeur Marguerite-D'Youville 12" [ref=e322] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e324]:
+                    - text: Contrecoeur
+                    - generic [ref=e325]: Marguerite-D'Youville
+                  - generic [ref=e326]: "12"
+            - listitem [ref=e327]:
+              - group [ref=e328]:
+                - generic "▸ Coteau-du-Lac Vaudreuil-Soulanges 12" [ref=e329] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e331]:
+                    - text: Coteau-du-Lac
+                    - generic [ref=e332]: Vaudreuil-Soulanges
+                  - generic [ref=e333]: "12"
+            - listitem [ref=e334]:
+              - group [ref=e335]:
+                - generic "▸ Montcalm Les Laurentides 12" [ref=e336] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e338]:
+                    - text: Montcalm
+                    - generic [ref=e339]: Les Laurentides
+                  - generic [ref=e340]: "12"
+            - listitem [ref=e341]:
+              - group [ref=e342]:
+                - generic "▸ Mont-Blanc Les Laurentides 12" [ref=e343] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e345]:
+                    - text: Mont-Blanc
+                    - generic [ref=e346]: Les Laurentides
+                  - generic [ref=e347]: "12"
+            - listitem [ref=e348]:
+              - group [ref=e349]:
+                - generic "▸ Saint-Cyrille-de-Wendover Drummond 12" [ref=e350] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e352]:
+                    - text: Saint-Cyrille-de-Wendover
+                    - generic [ref=e353]: Drummond
+                  - generic [ref=e354]: "12"
+            - listitem [ref=e355]:
+              - group [ref=e356]:
+                - generic "▸ Orford Memphrémagog 12" [ref=e357] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e359]:
+                    - text: Orford
+                    - generic [ref=e360]: Memphrémagog
+                  - generic [ref=e361]: "12"
+            - listitem [ref=e362]:
+              - group [ref=e363]:
+                - generic "▸ Saint-Maurice Des Chenaux 12" [ref=e364] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e366]:
+                    - text: Saint-Maurice
+                    - generic [ref=e367]: Des Chenaux
+                  - generic [ref=e368]: "12"
+            - listitem [ref=e369]:
+              - group [ref=e370]:
+                - generic "▸ Saint-Apollinaire Lotbinière 12" [ref=e371] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e373]:
+                    - text: Saint-Apollinaire
+                    - generic [ref=e374]: Lotbinière
+                  - generic [ref=e375]: "12"
+            - listitem [ref=e376]:
+              - group [ref=e377]:
+                - generic "▸ Rosemère Thérèse-De Blainville 11" [ref=e378] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e380]:
+                    - text: Rosemère
+                    - generic [ref=e381]: Thérèse-De Blainville
+                  - generic [ref=e382]: "11"
+            - listitem [ref=e383]:
+              - group [ref=e384]:
+                - generic "▸ Bois-des-Filion Thérèse-De Blainville 11" [ref=e385] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e387]:
+                    - text: Bois-des-Filion
+                    - generic [ref=e388]: Thérèse-De Blainville
+                  - generic [ref=e389]: "11"
+            - listitem [ref=e390]:
+              - group [ref=e391]:
+                - generic "▸ Mercier Roussillon 11" [ref=e392] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e394]:
+                    - text: Mercier
+                    - generic [ref=e395]: Roussillon
+                  - generic [ref=e396]: "11"
+            - listitem [ref=e397]:
+              - group [ref=e398]:
+                - generic "▸ Deux-Montagnes Deux-Montagnes 11" [ref=e399] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e401]:
+                    - text: Deux-Montagnes
+                    - generic [ref=e402]: Deux-Montagnes
+                  - generic [ref=e403]: "11"
+            - listitem [ref=e404]:
+              - group [ref=e405]:
+                - generic "▸ Pincourt Vaudreuil-Soulanges 11" [ref=e406] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e408]:
+                    - text: Pincourt
+                    - generic [ref=e409]: Vaudreuil-Soulanges
+                  - generic [ref=e410]: "11"
+            - listitem [ref=e411]:
+              - group [ref=e412]:
+                - generic "▸ Joliette Joliette 11" [ref=e413] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e415]:
+                    - text: Joliette
+                    - generic [ref=e416]: Joliette
+                  - generic [ref=e417]: "11"
+            - listitem [ref=e418]:
+              - group [ref=e419]:
+                - generic "▸ L'Avenir Drummond 11" [ref=e420] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e422]:
+                    - text: L'Avenir
+                    - generic [ref=e423]: Drummond
+                  - generic [ref=e424]: "11"
+            - listitem [ref=e425]:
+              - group [ref=e426]:
+                - generic "▸ Notre-Dame-du-Mont-Carmel Des Chenaux 11" [ref=e427] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e429]:
+                    - text: Notre-Dame-du-Mont-Carmel
+                    - generic [ref=e430]: Des Chenaux
+                  - generic [ref=e431]: "11"
+            - listitem [ref=e432]:
+              - group [ref=e433]:
+                - generic "▸ Mont-Laurier Antoine-Labelle 11" [ref=e434] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e436]:
+                    - text: Mont-Laurier
+                    - generic [ref=e437]: Antoine-Labelle
+                  - generic [ref=e438]: "11"
+            - listitem [ref=e439]:
+              - group [ref=e440]:
+                - generic "▸ Saint-Raymond Portneuf 11" [ref=e441] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e443]:
+                    - text: Saint-Raymond
+                    - generic [ref=e444]: Portneuf
+                  - generic [ref=e445]: "11"
+            - listitem [ref=e446]:
+              - group [ref=e447]:
+                - generic "▸ Baie-Saint-Paul Charlevoix 11" [ref=e448] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e450]:
+                    - text: Baie-Saint-Paul
+                    - generic [ref=e451]: Charlevoix
+                  - generic [ref=e452]: "11"
+            - listitem [ref=e453]:
+              - group [ref=e454]:
+                - generic "▸ Les Éboulements Charlevoix 11" [ref=e455] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e457]:
+                    - text: Les Éboulements
+                    - generic [ref=e458]: Charlevoix
+                  - generic [ref=e459]: "11"
+            - listitem [ref=e460]:
+              - group [ref=e461]:
+                - generic "▸ L'Ascension-de-Notre-Seigneur Lac-Saint-Jean-Est 11" [ref=e462] [cursor=pointer]:
+                  - text: ▸
+                  - generic [ref=e464]:
+                    - text: L'Ascension-de-Notre-Seigneur
+                    - generic [ref=e465]: Lac-Saint-Jean-Est
+                  - generic [ref=e466]: "11"
+        - generic [ref=e468]:
+          - paragraph [ref=e469]: Légende — signaux / ville
+          - list [ref=e470]:
+            - listitem [ref=e471]: 6+ signaux
+            - listitem [ref=e473]: 3–5 signaux
+            - listitem [ref=e475]: 1–2 signaux
+            - listitem [ref=e477]: Aucun signal (0)
+      - generic [ref=e479]:
+        - generic [ref=e481]:
+          - generic [ref=e482]:
+            - region "Map" [ref=e484]
+            - group [ref=e487]:
+              - generic "Toggle attribution" [ref=e488]
+              - generic [ref=e489]:
+                - text: © OpenStreetMap contributors |
+                - link "MapLibre" [ref=e490] [cursor=pointer]:
+                  - /url: https://maplibre.org/
+          - generic [ref=e492]: Chargement de la carte…
+        - complementary [ref=e493]:
+          - generic [ref=e494]:
+            - generic [ref=e496]: SÉLECTION
+            - paragraph [ref=e497]: Cliquez sur une ville dans la liste ou sur la carte pour voir ses signaux.
+  - button "Ouvrir l'assistant radar" [ref=e498] [cursor=pointer]:
+    - img [ref=e499]

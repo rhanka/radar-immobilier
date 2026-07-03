@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781357617400:a0c6",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 236/575 confirmees SCW (lots L1-L10 complets, toutes ontology_version 2.0). 41% du perimetre. Regime stable 4 agents Sonnet/lot de 24. Signaux L10: Saint-Raymond zones HC haute densite, Saint-Augustin-de-Desmaures Loi 31 39 logements, Saint-Basile densification Rb-48/Rc-9, Sainte-Croix lotissement 64 terrains + eolien Lotbiniere-Ndakina, Sainte-Catherine-JC multilogements 162-H. Reste 14 villes re-graphify (260-273) puis 301 NOUVELLES (config+scrape+graphify des index 274). Lot 12 sera mixte. J enchaine lot 11 (cursor 236->260). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T13:33:37.400Z"
+}

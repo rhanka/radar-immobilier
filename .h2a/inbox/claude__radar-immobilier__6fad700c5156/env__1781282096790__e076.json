@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781282096790:e076",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION 137/522 villes sur SCW. Lots 4x10 fluides. Lot r4 lance. Signaux recents: Lachute 5 PPCMOI (20 log Hamford), Lac-Sergent parc solaire 11MW rezonage 2-F->30-P, Granby rezonage 1450-1453, Harrington contribution parcs 7.5%+exclusion milieux humides. Pas de saturation cote moi (merci ta limite a 3 agents)."
+  },
+  "createdAt": "2026-06-12T16:34:56.790Z"
+}

@@ -1,0 +1,140 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "Dossier Citoyen" [ref=e7] [cursor=pointer]:
+        - /url: https://chandler.appvoila.com
+        - generic [ref=e8]: Dossier Citoyen
+      - link [ref=e10] [cursor=pointer]:
+        - /url: https://www.facebook.com/pages/Ville-de-Chandler/188054827893640?fref=ts
+        - img [ref=e11]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - link [ref=e14] [cursor=pointer]:
+          - /url: https://www.villedechandler.com
+        - link [ref=e15] [cursor=pointer]:
+          - /url: https://www.villedechandler.com/village-relais
+        - img "Ville de Chandler – Une Mer de possibilités" [ref=e16]
+      - navigation:
+        - list [ref=e17]:
+          - listitem [ref=e18]:
+            - link "Accueil" [ref=e19] [cursor=pointer]:
+              - /url: https://www.villedechandler.com/
+          - listitem [ref=e20]:
+            - link "Citoyens" [ref=e21] [cursor=pointer]:
+              - /url: https://www.villedechandler.com/citoyens/
+          - listitem [ref=e22]:
+            - link "Touristes" [ref=e23] [cursor=pointer]:
+              - /url: https://activitymessenger.com/org/4563/page/lIgJac4/tourisme-chandler
+          - listitem [ref=e24]:
+            - link "Gens d’affaires" [ref=e25] [cursor=pointer]:
+              - /url: https://www.villedechandler.com/gens-daffaires/
+          - listitem [ref=e26]:
+            - link "Sports et loisirs" [ref=e27] [cursor=pointer]:
+              - /url: https://www.villedechandler.com/sports-loisirs/sports-loisirs/
+          - listitem [ref=e28]:
+            - link "Nous joindre" [ref=e29] [cursor=pointer]:
+              - /url: https://www.villedechandler.com/joindre/
+  - generic [ref=e31]:
+    - link "Un mer de possibilités ! Mairie, assemblées municipales et services municipaux" [ref=e33] [cursor=pointer]:
+      - /url: https://www.villedechandler.com/citoyens/mairie-administration-services-municipaux/
+      - heading "Un mer de possibilités !" [level=1] [ref=e34]
+      - heading "Mairie, assemblées municipales et" [level=2] [ref=e35]:
+        - generic [ref=e36]: Mairie, assemblées municipales et
+      - heading "services municipaux" [level=2] [ref=e37]:
+        - generic [ref=e38]: services municipaux
+    - link [ref=e39] [cursor=pointer]:
+      - /url: https://www.villedechandler.com/citoyens/mairie-administration-services-municipaux/
+      - img [ref=e40]
+  - link "Inscription aux activités en ligne" [ref=e44] [cursor=pointer]:
+    - /url: https://www.loisirschandler.com
+  - generic [ref=e45]:
+    - heading "Actualités" [level=2] [ref=e46]:
+      - link "Actualités" [ref=e47] [cursor=pointer]:
+        - /url: https://www.villedechandler.com/actualites/
+    - generic [ref=e48]:
+      - generic [ref=e50]:
+        - 'heading "Un plant à la fois : Restaurer l’habitat du poisson | 01/06/2026" [level=3] [ref=e51]':
+          - 'link "Un plant à la fois : Restaurer l’habitat du poisson | 01/06/2026" [ref=e52] [cursor=pointer]':
+            - /url: https://www.villedechandler.com/un-plant-a-la-fois-restaurer-lhabitat-du-poisson/
+        - paragraph [ref=e54]: Au cours des dernières décennies, la superficie de l’herbier de zostère du barachois de Grand Pabos a progressivement diminué, notamment en raison des activités humaines. Afin de soutenir la reprise naturelle de cet habitat fragile, des travaux de restauration ont…
+      - generic [ref=e55] [cursor=pointer]: 
+      - generic [ref=e56] [cursor=pointer]: 
+  - contentinfo [ref=e57]:
+    - link "APPLICATION MOBILE « DÉCOUVRIR CHANDLER » Visionnez les albums photos créés par les citoyens, vacanciers et gens d’affaires de Chandler ou téléchargez l’application sur votre téléphone intelligent." [ref=e60] [cursor=pointer]:
+      - /url: https://www.villedechandler.com/decouvrir-chandler/
+      - heading "APPLICATION MOBILE « DÉCOUVRIR CHANDLER »" [level=1] [ref=e61]
+      - paragraph [ref=e62]:
+        - text: Visionnez les albums photos créés par les citoyens, vacanciers et gens d’affaires de Chandler
+        - text: ou téléchargez l’application sur votre téléphone intelligent.
+    - generic [ref=e64]:
+      - img [ref=e65]
+      - img [ref=e66]
+      - img [ref=e67]
+      - img [ref=e68]
+    - generic [ref=e69]:
+      - generic:
+        - generic [ref=e70]:
+          - heading "Nous joindre" [level=2] [ref=e71]
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - heading "Ville de Chandler" [level=3] [ref=e74]
+              - paragraph [ref=e75]: 35, rue Commerciale Ouest
+              - paragraph [ref=e76]: Chandler (Québec)
+              - paragraph [ref=e77]: G0C 1K0
+            - generic [ref=e78]:
+              - link " hdvchan@villechandler.com" [ref=e80] [cursor=pointer]:
+                - /url: mailto:hdvchan@villechandler.com
+                - generic [ref=e81]: 
+                - text: hdvchan@villechandler.com
+              - generic [ref=e82]:
+                - generic [ref=e83]: 
+                - text: 418 689-2221
+              - generic [ref=e84]:
+                - generic [ref=e85]: 
+                - text: 418 689-3073
+        - navigation [ref=e86]:
+          - heading "Accès rapide" [level=2] [ref=e87]
+          - generic [ref=e88]:
+            - heading "Citoyens" [level=3] [ref=e89]
+            - list [ref=e90]:
+              - listitem [ref=e91]:
+                - link "Arts et culture" [ref=e92] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/sports-loisirs/arts-culture/
+              - listitem [ref=e93]:
+                - link "Chandler et ses quartiers" [ref=e94] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/?page_id=19
+              - listitem [ref=e95]:
+                - link "Éducation et jeunesse" [ref=e96] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/citoyens/education-jeunesse/
+          - generic [ref=e97]:
+            - heading "Touristes" [level=3] [ref=e98]
+            - list [ref=e99]:
+              - listitem [ref=e100]:
+                - link "Activités et attraits" [ref=e101] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/touristes/activites-attraits/
+              - listitem [ref=e102]:
+                - link "Hébergement, restaurants et bars" [ref=e103] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/?page_id=41
+              - listitem [ref=e104]:
+                - link "Transport" [ref=e105] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/?page_id=43
+          - generic [ref=e106]:
+            - heading "Gens d'affaires" [level=3] [ref=e107]
+            - list [ref=e108]:
+              - listitem [ref=e109]:
+                - link "Avantages et infrastructures" [ref=e110] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/gens-daffaires/avantages-infrastructures/
+              - listitem [ref=e111]:
+                - link "Développement et diversification" [ref=e112] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/gens-daffaires/developpement-diversification/
+              - listitem [ref=e113]:
+                - link "Organisations de développement économique" [ref=e114] [cursor=pointer]:
+                  - /url: https://www.villedechandler.com/gens-daffaires/organisations-developpement-economique/
+      - generic [ref=e115]:
+        - generic:
+          - link [ref=e117] [cursor=pointer]:
+            - /url: https://www.facebook.com/pages/Ville-de-Chandler/188054827893640?fref=ts
+          - paragraph [ref=e119]:
+            - text: © 2026 - Ville de Chandler - Réalisé par
+            - link "Jolifish" [ref=e120] [cursor=pointer]:
+              - /url: http://jolifish.com

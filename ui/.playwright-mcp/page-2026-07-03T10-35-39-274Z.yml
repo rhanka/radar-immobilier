@@ -1,0 +1,933 @@
+- generic [ref=f16e3]:
+  - generic [ref=f16e6]:
+    - navigation "Barre latérale" [ref=f16e8]:
+      - generic [ref=f16e9]:
+        - generic:
+          - link "Accueil":
+            - /url: /new
+            - img "Claude"
+        - generic [ref=f16e10]:
+          - button "Ouvrir la barre latérale" [disabled]:
+            - generic:
+              - generic:
+                - generic: 
+                - generic: 
+      - generic [ref=f16e11]:
+        - link "Nouvelle conversation" [ref=f16e15] [cursor=pointer]:
+          - /url: /new
+          - generic [ref=f16e16]:
+            - generic [ref=f16e20]: 
+            - generic:
+              - generic: Nouvelle conversation
+        - generic [ref=f16e21]:
+          - generic [ref=f16e22]:
+            - link "Discussions" [ref=f16e24] [cursor=pointer]:
+              - /url: /recents
+              - generic:
+                - generic [ref=f16e26]: 
+                - generic:
+                  - generic: Discussions
+            - link "Projets" [ref=f16e28] [cursor=pointer]:
+              - /url: /projects
+              - generic:
+                - generic [ref=f16e30]: 
+                - generic:
+                  - generic: Projets
+            - link "Artéfacts" [ref=f16e33] [cursor=pointer]:
+              - /url: /artifacts
+              - generic:
+                - generic [ref=f16e35]: 
+                - generic:
+                  - generic: Artéfacts
+            - link "Personnaliser" [ref=f16e37] [cursor=pointer]:
+              - /url: /customize
+              - generic:
+                - generic [ref=f16e39]: 
+                - generic:
+                  - generic: Personnaliser
+          - generic [ref=f16e40]:
+            - generic [ref=f16e41]:
+              - generic:
+                - heading [level=2]:
+                  - button [expanded]:
+                    - generic: 
+            - list [ref=f16e42]:
+              - listitem [ref=f16e43]:
+                - link "Code" [ref=f16e45] [cursor=pointer]:
+                  - /url: /code
+                  - generic [ref=f16e48]: 
+              - listitem [ref=f16e49]:
+                - link "Design" [ref=f16e52] [cursor=pointer]:
+                  - /url: /design?via=web_sidebar_products
+                  - generic [ref=f16e55]: 
+          - generic [ref=f16e59]:
+            - generic:
+              - heading [level=2]:
+                - button [expanded]:
+                  - generic: 
+            - list [ref=f16e60]:
+              - listitem [ref=f16e61]:
+                - link [ref=f16e63] [cursor=pointer]:
+                  - /url: /chat/3eb08206-8668-4fb6-be10-d3c0ffea704b
+                  - generic [ref=f16e64]: Accès aux données du MCP radar immobilier
+              - listitem [ref=f16e65]:
+                - link [ref=f16e67] [cursor=pointer]:
+                  - /url: /chat/8fe6a319-e288-4512-a783-06ed17929238
+                  - generic [ref=f16e68]: Vérifier si le contact de Jiho Kang est légitime
+              - listitem [ref=f16e69]:
+                - link [ref=f16e71] [cursor=pointer]:
+                  - /url: /chat/fbb64f75-cb81-4e90-bbb7-50ece6bd26f9
+                  - generic [ref=f16e72]: Comparaison des meilleurs OCR pour zonage immobilier
+              - listitem [ref=f16e73]:
+                - link [ref=f16e75] [cursor=pointer]:
+                  - /url: /chat/61153b5b-e26d-42d6-a3f5-c63fdb0a37d9
+                  - generic [ref=f16e76]: Top
+              - listitem [ref=f16e77]:
+                - link [ref=f16e79] [cursor=pointer]:
+                  - /url: /chat/f4d68614-cbfd-43a9-afee-ef3eda46fb2a
+                  - generic [ref=f16e80]: Traitement d'une éraflure au visage
+              - listitem [ref=f16e81]:
+                - link [ref=f16e83] [cursor=pointer]:
+                  - /url: /chat/5746a42a-e04b-4f68-8670-59842733ec0b
+                  - generic [ref=f16e84]: Livre blanc IA pour la stratégie digitale Airbus Nord Amérique
+              - listitem [ref=f16e85]:
+                - link [ref=f16e87] [cursor=pointer]:
+                  - /url: /chat/a6d8fc73-251d-4828-b1d7-9f607b661367
+                  - generic [ref=f16e88]: COMAC aéronautique et technologies émergentes
+              - listitem [ref=f16e89]:
+                - link [ref=f16e91] [cursor=pointer]:
+                  - /url: /chat/60c4ec15-0aac-4780-bb81-513541dfc97f
+                  - generic [ref=f16e92]: Test
+              - listitem [ref=f16e93]:
+                - link [ref=f16e95] [cursor=pointer]:
+                  - /url: /chat/7c417ad0-887a-47ef-91f4-027c4e0606dd
+                  - generic [ref=f16e96]: Test message
+              - listitem [ref=f16e97]:
+                - link [ref=f16e99] [cursor=pointer]:
+                  - /url: /chat/dcb25a71-43ec-4a1c-84ba-2b8975259846
+                  - generic [ref=f16e100]: Vérification de fonctionnement
+              - listitem [ref=f16e101]:
+                - link [ref=f16e103] [cursor=pointer]:
+                  - /url: /chat/97abd340-c1a5-45da-9a9d-d7639b3aaa64
+                  - generic [ref=f16e104]: Vérification de fonctionnement
+              - listitem [ref=f16e105]:
+                - link [ref=f16e107] [cursor=pointer]:
+                  - /url: /chat/40930c5f-1123-4eac-a99d-ab5ec363f269
+                  - generic [ref=f16e108]: Quotas et débats
+              - listitem [ref=f16e109]:
+                - link [ref=f16e111] [cursor=pointer]:
+                  - /url: /chat/35df48c6-f8ae-4c8b-91e3-c87398d459f3
+                  - generic [ref=f16e112]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f16e113]:
+                - link [ref=f16e115] [cursor=pointer]:
+                  - /url: /chat/15dd05bf-55c7-4aaa-bd27-9f7fcf4e160c
+                  - generic [ref=f16e116]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f16e117]:
+                - link [ref=f16e119] [cursor=pointer]:
+                  - /url: /chat/810f8b42-4e00-412f-9334-b805dbc91fdb
+                  - generic [ref=f16e120]: Limitations légales d'un NDA
+              - listitem [ref=f16e121]:
+                - link [ref=f16e123] [cursor=pointer]:
+                  - /url: /chat/747a4192-4053-406f-b488-ea177bea347a
+                  - generic [ref=f16e124]: Épuisement des tokens
+              - listitem [ref=f16e125]:
+                - link [ref=f16e127] [cursor=pointer]:
+                  - /url: /chat/82557649-61c1-4ca1-afa4-25f6ff2cc7d4
+                  - generic [ref=f16e128]: Comparaison workstation dev 32Go RAM
+              - listitem [ref=f16e129]:
+                - link [ref=f16e131] [cursor=pointer]:
+                  - /url: /chat/16384194-8763-452a-8c1e-05f38bd53145
+                  - generic [ref=f16e132]: Coût mensuel de Gemma 4 QAT en tokens
+              - listitem [ref=f16e133]:
+                - link [ref=f16e135] [cursor=pointer]:
+                  - /url: /chat/80178101-cfa4-4974-8af6-30a68c0f772f
+                  - generic [ref=f16e136]: Vérification des tokens disponibles
+              - listitem [ref=f16e137]:
+                - link [ref=f16e139] [cursor=pointer]:
+                  - /url: /chat/f9e1ea13-fd72-405e-b2c7-500f5b3abd22
+                  - generic [ref=f16e140]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f16e141]:
+                - link [ref=f16e143] [cursor=pointer]:
+                  - /url: /chat/b77cf619-4ac1-4f1a-8120-b2f5d948fa67
+                  - generic [ref=f16e144]: Schéma architecture GCP avec pods et lab données
+              - listitem [ref=f16e145]:
+                - link [ref=f16e147] [cursor=pointer]:
+                  - /url: /chat/e575111e-36fb-44be-9b07-24e1bc7994cf
+                  - generic [ref=f16e148]: Vérification des transactions Wave
+              - listitem [ref=f16e149]:
+                - link [ref=f16e151] [cursor=pointer]:
+                  - /url: /chat/928da50a-abfb-4bff-85e2-fe31f60b0bd1
+                  - generic [ref=f16e152]: Évaluation rationalisée des cas d'usage Gemini
+              - listitem [ref=f16e153]:
+                - link [ref=f16e155] [cursor=pointer]:
+                  - /url: /chat/bef81743-6d15-42ca-b8b2-124292611606
+                  - generic [ref=f16e156]: Entraîner un LLM pour le reasoning
+              - listitem [ref=f16e157]:
+                - link [ref=f16e159] [cursor=pointer]:
+                  - /url: /chat/c2e48849-0142-41fe-802a-08abbf9f059b
+                  - generic [ref=f16e160]: Monter Google Drive dans un répertoire pour CLI
+              - listitem [ref=f16e161]:
+                - link [ref=f16e163] [cursor=pointer]:
+                  - /url: /chat/d51cb2ee-19db-4c92-9069-222e3f119bc5
+                  - generic [ref=f16e164]: Afficher les lignes cachées dans Claude CLI
+              - listitem [ref=f16e165]:
+                - link [ref=f16e167] [cursor=pointer]:
+                  - /url: /chat/5af6d281-b44b-4fdf-9bee-48b901c59a78
+                  - generic [ref=f16e168]: Ontologies du parfum
+              - listitem [ref=f16e169]:
+                - link [ref=f16e171] [cursor=pointer]:
+                  - /url: /chat/77e4417b-0516-4475-9359-5a91b84d0609
+                  - generic [ref=f16e172]: Compatibilité OData MCP V4 avec ECC6
+              - listitem [ref=f16e173]:
+                - link [ref=f16e175] [cursor=pointer]:
+                  - /url: /chat/29802e0c-266d-4611-97a8-0bf286fa0d43
+                  - generic [ref=f16e176]: Utiliser Claude Cowork
+              - listitem [ref=f16e177]:
+                - link [ref=f16e179] [cursor=pointer]:
+                  - /url: /chat/9afa982d-4fa4-49ad-a97d-20710df297d7
+                  - generic [ref=f16e180]: Intégrer des données externes dans les dashboards ClickUp
+            - link [ref=f16e182] [cursor=pointer]:
+              - /url: /recents
+              - img [ref=f16e183]
+        - link "Obtenir des applications et extensions" [ref=f16e189] [cursor=pointer]:
+          - /url: /downloads
+          - generic [ref=f16e192]: 
+        - button "Fabien ANTOINE, Paramètres" [ref=f16e195] [cursor=pointer]:
+          - generic [ref=f16e199]: FA
+          - generic:
+            - generic [ref=f16e200]:
+              - generic: Fabien ANTOINE
+              - generic: Plan Max
+            - img [ref=f16e202]
+    - main [ref=f16e204]:
+      - generic [ref=f16e207]:
+        - navigation [ref=f16e208]:
+          - generic [ref=f16e209]:
+            - button "Retour" [ref=f16e210] [cursor=pointer]:
+              - img [ref=f16e214]
+            - generic [ref=f16e216]: Personnaliser
+          - generic [ref=f16e217]:
+            - link "Compétences" [ref=f16e218] [cursor=pointer]:
+              - /url: /customize/skills
+              - img [ref=f16e221]
+              - generic [ref=f16e224]: Compétences
+            - link "Connecteurs" [ref=f16e225] [cursor=pointer]:
+              - /url: /customize/connectors
+              - img [ref=f16e228]
+              - generic [ref=f16e231]: Connecteurs
+            - generic [ref=f16e233]:
+              - separator [ref=f16e234]
+              - generic [ref=f16e235]:
+                - generic [ref=f16e236]: Plugins personnels
+                - button "Ajouter un plugin" [ref=f16e237] [cursor=pointer]:
+                  - generic [ref=f16e240]: 
+              - generic [ref=f16e241]:
+                - paragraph [ref=f16e242]: Donnez à Claude une expertise de niveau professionnel avec des plugins
+                - button "Parcourir les plugins" [ref=f16e243] [cursor=pointer]:
+                  - generic [ref=f16e245]: Parcourir les plugins
+        - generic [ref=f16e247]:
+          - generic [ref=f16e248]:
+            - generic [ref=f16e249]:
+              - heading "Connecteurs" [level=2] [ref=f16e250]
+              - generic [ref=f16e251]:
+                - button "Rechercher des connecteurs" [ref=f16e252] [cursor=pointer]:
+                  - img [ref=f16e256]
+                - button "Ajouter un connecteur" [ref=f16e258] [cursor=pointer]:
+                  - img [ref=f16e262]
+            - radiogroup "Filtrer par statut" [ref=f16e265]:
+              - radio "Tous" [checked] [ref=f16e267] [cursor=pointer]
+              - radio [checked] [ref=f16e268]
+              - radio "Connecté" [ref=f16e269] [cursor=pointer]
+              - radio [ref=f16e270]
+              - radio "Non connecté" [ref=f16e271] [cursor=pointer]
+              - radio [ref=f16e272]
+            - generic [ref=f16e274]:
+              - generic [ref=f16e275]:
+                - button "Web" [expanded] [ref=f16e277] [cursor=pointer]:
+                  - img [ref=f16e280]
+                  - generic [ref=f16e282]: Web
+                - generic [ref=f16e284]:
+                  - button "ClickUp" [ref=f16e285] [cursor=pointer]:
+                    - generic [ref=f16e290]: ClickUp
+                  - button "Gmail icon Gmail" [ref=f16e291] [cursor=pointer]:
+                    - img "Gmail icon" [ref=f16e294]
+                    - generic [ref=f16e297]: Gmail
+                  - button "Google Drive icon Google Drive" [ref=f16e298] [cursor=pointer]:
+                    - img "Google Drive icon" [ref=f16e301]
+                    - generic [ref=f16e304]: Google Drive
+                  - button "HubSpot" [ref=f16e305] [cursor=pointer]:
+                    - generic [ref=f16e310]: HubSpot
+                  - button "Intégration GitHub" [ref=f16e311] [cursor=pointer]:
+                    - img [ref=f16e314]
+                    - generic [ref=f16e318]: Intégration GitHub
+                  - button "R Radar immobilier PERSONNALISÉ" [ref=f16e319] [cursor=pointer]:
+                    - paragraph [ref=f16e323]: R
+                    - generic [ref=f16e325]:
+                      - generic [ref=f16e326]: Radar immobilier
+                      - generic [ref=f16e328]: PERSONNALISÉ
+              - generic [ref=f16e330]:
+                - button "Non connecté" [expanded] [ref=f16e332] [cursor=pointer]:
+                  - img [ref=f16e335]
+                  - generic [ref=f16e337]: Non connecté
+                - button "W WaveApp PERSONNALISÉ Problème de connexion" [ref=f16e340] [cursor=pointer]:
+                  - paragraph [ref=f16e344]: W
+                  - generic [ref=f16e346]:
+                    - generic [ref=f16e347]: WaveApp
+                    - generic [ref=f16e349]: PERSONNALISÉ
+                  - generic [ref=f16e350]:
+                    - img [ref=f16e352]
+                    - generic [ref=f16e354]: Problème de connexion
+          - generic [ref=f16e356]:
+            - generic [ref=f16e357]:
+              - heading "ClickUp" [level=2] [ref=f16e361]
+              - generic [ref=f16e362]:
+                - button "Déconnecter" [ref=f16e364] [cursor=pointer]:
+                  - generic [ref=f16e366]: Déconnecter
+                - button "Plus d'options pour ClickUp" [ref=f16e367] [cursor=pointer]:
+                  - img [ref=f16e371]
+            - paragraph [ref=f16e375]: The ClickUp connector enables secure, real-time interaction between AI agents like Claude and your ClickUp workspace. Unlock powerful AI-driven automation by connecting your favorite AI tools directly to ClickUp tasks, docs, Chat, and more.
+            - region "Autorisations des outils Choisissez quand Claude est autorisé à utiliser ces outils." [ref=f16e378]:
+              - generic [ref=f16e380]:
+                - generic [ref=f16e381]: Autorisations des outils
+                - paragraph [ref=f16e382]: Choisissez quand Claude est autorisé à utiliser ces outils.
+              - group "Outils en lecture seule" [ref=f16e383]:
+                - generic [ref=f16e384]:
+                  - button "Outils en lecture seule 22" [expanded] [ref=f16e385] [cursor=pointer]:
+                    - img [ref=f16e388]
+                    - generic [ref=f16e390]: Outils en lecture seule
+                    - generic [ref=f16e392]: "22"
+                  - button "Permission globale pour le groupe" [ref=f16e393] [cursor=pointer]:
+                    - generic [ref=f16e395]:
+                      - generic [ref=f16e396]: 
+                      - text: Nécessite une approbation
+                      - generic [ref=f16e397]: 
+                - generic [ref=f16e398]:
+                  - group "Filter Tasks" [ref=f16e399]:
+                    - generic [ref=f16e401]: Filter Tasks
+                    - radiogroup "Filter Tasks" [ref=f16e403]:
+                      - radio "Toujours autoriser" [ref=f16e405] [cursor=pointer]:
+                        - generic [ref=f16e406]: 
+                      - radio [ref=f16e407]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e408] [cursor=pointer]:
+                        - generic [ref=f16e409]: 
+                      - radio [checked] [ref=f16e410]
+                      - radio "Bloqué" [ref=f16e411] [cursor=pointer]:
+                        - generic [ref=f16e412]: 
+                      - radio [ref=f16e413]
+                  - group "Find Member by Name" [ref=f16e414]:
+                    - generic [ref=f16e416]: Find Member by Name
+                    - radiogroup "Find Member by Name" [ref=f16e418]:
+                      - radio "Toujours autoriser" [ref=f16e420] [cursor=pointer]:
+                        - generic [ref=f16e421]: 
+                      - radio [ref=f16e422]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e423] [cursor=pointer]:
+                        - generic [ref=f16e424]: 
+                      - radio [checked] [ref=f16e425]
+                      - radio "Bloqué" [ref=f16e426] [cursor=pointer]:
+                        - generic [ref=f16e427]: 
+                      - radio [ref=f16e428]
+                  - group "Get Bulk Tasks Time in Status" [ref=f16e429]:
+                    - generic [ref=f16e431]: Get Bulk Tasks Time in Status
+                    - radiogroup "Get Bulk Tasks Time in Status" [ref=f16e433]:
+                      - radio "Toujours autoriser" [ref=f16e435] [cursor=pointer]:
+                        - generic [ref=f16e436]: 
+                      - radio [ref=f16e437]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e438] [cursor=pointer]:
+                        - generic [ref=f16e439]: 
+                      - radio [checked] [ref=f16e440]
+                      - radio "Bloqué" [ref=f16e441] [cursor=pointer]:
+                        - generic [ref=f16e442]: 
+                      - radio [ref=f16e443]
+                  - group "Get Chat Channel Messages" [ref=f16e444]:
+                    - generic [ref=f16e446]: Get Chat Channel Messages
+                    - radiogroup "Get Chat Channel Messages" [ref=f16e448]:
+                      - radio "Toujours autoriser" [ref=f16e450] [cursor=pointer]:
+                        - generic [ref=f16e451]: 
+                      - radio [ref=f16e452]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e453] [cursor=pointer]:
+                        - generic [ref=f16e454]: 
+                      - radio [checked] [ref=f16e455]
+                      - radio "Bloqué" [ref=f16e456] [cursor=pointer]:
+                        - generic [ref=f16e457]: 
+                      - radio [ref=f16e458]
+                  - group "Get Chat Channels" [ref=f16e459]:
+                    - generic [ref=f16e461]: Get Chat Channels
+                    - radiogroup "Get Chat Channels" [ref=f16e463]:
+                      - radio "Toujours autoriser" [ref=f16e465] [cursor=pointer]:
+                        - generic [ref=f16e466]: 
+                      - radio [ref=f16e467]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e468] [cursor=pointer]:
+                        - generic [ref=f16e469]: 
+                      - radio [checked] [ref=f16e470]
+                      - radio "Bloqué" [ref=f16e471] [cursor=pointer]:
+                        - generic [ref=f16e472]: 
+                      - radio [ref=f16e473]
+                  - group "Get Chat Message Replies" [ref=f16e474]:
+                    - generic [ref=f16e476]: Get Chat Message Replies
+                    - radiogroup "Get Chat Message Replies" [ref=f16e478]:
+                      - radio "Toujours autoriser" [ref=f16e480] [cursor=pointer]:
+                        - generic [ref=f16e481]: 
+                      - radio [ref=f16e482]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e483] [cursor=pointer]:
+                        - generic [ref=f16e484]: 
+                      - radio [checked] [ref=f16e485]
+                      - radio "Bloqué" [ref=f16e486] [cursor=pointer]:
+                        - generic [ref=f16e487]: 
+                      - radio [ref=f16e488]
+                  - group "Get Current Time Entry" [ref=f16e489]:
+                    - generic [ref=f16e491]: Get Current Time Entry
+                    - radiogroup "Get Current Time Entry" [ref=f16e493]:
+                      - radio "Toujours autoriser" [ref=f16e495] [cursor=pointer]:
+                        - generic [ref=f16e496]: 
+                      - radio [ref=f16e497]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e498] [cursor=pointer]:
+                        - generic [ref=f16e499]: 
+                      - radio [checked] [ref=f16e500]
+                      - radio "Bloqué" [ref=f16e501] [cursor=pointer]:
+                        - generic [ref=f16e502]: 
+                      - radio [ref=f16e503]
+                  - group "Get Custom Fields" [ref=f16e504]:
+                    - generic [ref=f16e506]: Get Custom Fields
+                    - radiogroup "Get Custom Fields" [ref=f16e508]:
+                      - radio "Toujours autoriser" [ref=f16e510] [cursor=pointer]:
+                        - generic [ref=f16e511]: 
+                      - radio [ref=f16e512]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e513] [cursor=pointer]:
+                        - generic [ref=f16e514]: 
+                      - radio [checked] [ref=f16e515]
+                      - radio "Bloqué" [ref=f16e516] [cursor=pointer]:
+                        - generic [ref=f16e517]: 
+                      - radio [ref=f16e518]
+                  - group "Get Document Pages" [ref=f16e519]:
+                    - generic [ref=f16e521]: Get Document Pages
+                    - radiogroup "Get Document Pages" [ref=f16e523]:
+                      - radio "Toujours autoriser" [ref=f16e525] [cursor=pointer]:
+                        - generic [ref=f16e526]: 
+                      - radio [ref=f16e527]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e528] [cursor=pointer]:
+                        - generic [ref=f16e529]: 
+                      - radio [checked] [ref=f16e530]
+                      - radio "Bloqué" [ref=f16e531] [cursor=pointer]:
+                        - generic [ref=f16e532]: 
+                      - radio [ref=f16e533]
+                  - group "Get Folder" [ref=f16e534]:
+                    - generic [ref=f16e536]: Get Folder
+                    - radiogroup "Get Folder" [ref=f16e538]:
+                      - radio "Toujours autoriser" [ref=f16e540] [cursor=pointer]:
+                        - generic [ref=f16e541]: 
+                      - radio [ref=f16e542]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e543] [cursor=pointer]:
+                        - generic [ref=f16e544]: 
+                      - radio [checked] [ref=f16e545]
+                      - radio "Bloqué" [ref=f16e546] [cursor=pointer]:
+                        - generic [ref=f16e547]: 
+                      - radio [ref=f16e548]
+                  - group "Get List" [ref=f16e549]:
+                    - generic [ref=f16e551]: Get List
+                    - radiogroup "Get List" [ref=f16e553]:
+                      - radio "Toujours autoriser" [ref=f16e555] [cursor=pointer]:
+                        - generic [ref=f16e556]: 
+                      - radio [ref=f16e557]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e558] [cursor=pointer]:
+                        - generic [ref=f16e559]: 
+                      - radio [checked] [ref=f16e560]
+                      - radio "Bloqué" [ref=f16e561] [cursor=pointer]:
+                        - generic [ref=f16e562]: 
+                      - radio [ref=f16e563]
+                  - group "Get Task" [ref=f16e564]:
+                    - generic [ref=f16e566]: Get Task
+                    - radiogroup "Get Task" [ref=f16e568]:
+                      - radio "Toujours autoriser" [ref=f16e570] [cursor=pointer]:
+                        - generic [ref=f16e571]: 
+                      - radio [ref=f16e572]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e573] [cursor=pointer]:
+                        - generic [ref=f16e574]: 
+                      - radio [checked] [ref=f16e575]
+                      - radio "Bloqué" [ref=f16e576] [cursor=pointer]:
+                        - generic [ref=f16e577]: 
+                      - radio [ref=f16e578]
+                  - group "Get Task Comments" [ref=f16e579]:
+                    - generic [ref=f16e581]: Get Task Comments
+                    - radiogroup "Get Task Comments" [ref=f16e583]:
+                      - radio "Toujours autoriser" [ref=f16e585] [cursor=pointer]:
+                        - generic [ref=f16e586]: 
+                      - radio [ref=f16e587]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e588] [cursor=pointer]:
+                        - generic [ref=f16e589]: 
+                      - radio [checked] [ref=f16e590]
+                      - radio "Bloqué" [ref=f16e591] [cursor=pointer]:
+                        - generic [ref=f16e592]: 
+                      - radio [ref=f16e593]
+                  - group "Get Task Time in Status" [ref=f16e594]:
+                    - generic [ref=f16e596]: Get Task Time in Status
+                    - radiogroup "Get Task Time in Status" [ref=f16e598]:
+                      - radio "Toujours autoriser" [ref=f16e600] [cursor=pointer]:
+                        - generic [ref=f16e601]: 
+                      - radio [ref=f16e602]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e603] [cursor=pointer]:
+                        - generic [ref=f16e604]: 
+                      - radio [checked] [ref=f16e605]
+                      - radio "Bloqué" [ref=f16e606] [cursor=pointer]:
+                        - generic [ref=f16e607]: 
+                      - radio [ref=f16e608]
+                  - group "Get Threaded Comments" [ref=f16e609]:
+                    - generic [ref=f16e611]: Get Threaded Comments
+                    - radiogroup "Get Threaded Comments" [ref=f16e613]:
+                      - radio "Toujours autoriser" [ref=f16e615] [cursor=pointer]:
+                        - generic [ref=f16e616]: 
+                      - radio [ref=f16e617]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e618] [cursor=pointer]:
+                        - generic [ref=f16e619]: 
+                      - radio [checked] [ref=f16e620]
+                      - radio "Bloqué" [ref=f16e621] [cursor=pointer]:
+                        - generic [ref=f16e622]: 
+                      - radio [ref=f16e623]
+                  - group "Get Time Entries" [ref=f16e624]:
+                    - generic [ref=f16e626]: Get Time Entries
+                    - radiogroup "Get Time Entries" [ref=f16e628]:
+                      - radio "Toujours autoriser" [ref=f16e630] [cursor=pointer]:
+                        - generic [ref=f16e631]: 
+                      - radio [ref=f16e632]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e633] [cursor=pointer]:
+                        - generic [ref=f16e634]: 
+                      - radio [checked] [ref=f16e635]
+                      - radio "Bloqué" [ref=f16e636] [cursor=pointer]:
+                        - generic [ref=f16e637]: 
+                      - radio [ref=f16e638]
+                  - group "Get Workspace Hierarchy" [ref=f16e639]:
+                    - generic [ref=f16e641]: Get Workspace Hierarchy
+                    - radiogroup "Get Workspace Hierarchy" [ref=f16e643]:
+                      - radio "Toujours autoriser" [ref=f16e645] [cursor=pointer]:
+                        - generic [ref=f16e646]: 
+                      - radio [ref=f16e647]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e648] [cursor=pointer]:
+                        - generic [ref=f16e649]: 
+                      - radio [checked] [ref=f16e650]
+                      - radio "Bloqué" [ref=f16e651] [cursor=pointer]:
+                        - generic [ref=f16e652]: 
+                      - radio [ref=f16e653]
+                  - group "Get Workspace Members" [ref=f16e654]:
+                    - generic [ref=f16e656]: Get Workspace Members
+                    - radiogroup "Get Workspace Members" [ref=f16e658]:
+                      - radio "Toujours autoriser" [ref=f16e660] [cursor=pointer]:
+                        - generic [ref=f16e661]: 
+                      - radio [ref=f16e662]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e663] [cursor=pointer]:
+                        - generic [ref=f16e664]: 
+                      - radio [checked] [ref=f16e665]
+                      - radio "Bloqué" [ref=f16e666] [cursor=pointer]:
+                        - generic [ref=f16e667]: 
+                      - radio [ref=f16e668]
+                  - group "List Document Pages" [ref=f16e669]:
+                    - generic [ref=f16e671]: List Document Pages
+                    - radiogroup "List Document Pages" [ref=f16e673]:
+                      - radio "Toujours autoriser" [ref=f16e675] [cursor=pointer]:
+                        - generic [ref=f16e676]: 
+                      - radio [ref=f16e677]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e678] [cursor=pointer]:
+                        - generic [ref=f16e679]: 
+                      - radio [checked] [ref=f16e680]
+                      - radio "Bloqué" [ref=f16e681] [cursor=pointer]:
+                        - generic [ref=f16e682]: 
+                      - radio [ref=f16e683]
+                  - group "Resolve Assignees" [ref=f16e684]:
+                    - generic [ref=f16e686]: Resolve Assignees
+                    - radiogroup "Resolve Assignees" [ref=f16e688]:
+                      - radio "Toujours autoriser" [ref=f16e690] [cursor=pointer]:
+                        - generic [ref=f16e691]: 
+                      - radio [ref=f16e692]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e693] [cursor=pointer]:
+                        - generic [ref=f16e694]: 
+                      - radio [checked] [ref=f16e695]
+                      - radio "Bloqué" [ref=f16e696] [cursor=pointer]:
+                        - generic [ref=f16e697]: 
+                      - radio [ref=f16e698]
+                  - group "Search Workspace" [ref=f16e699]:
+                    - generic [ref=f16e701]: Search Workspace
+                    - radiogroup "Search Workspace" [ref=f16e703]:
+                      - radio "Toujours autoriser" [ref=f16e705] [cursor=pointer]:
+                        - generic [ref=f16e706]: 
+                      - radio [ref=f16e707]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e708] [cursor=pointer]:
+                        - generic [ref=f16e709]: 
+                      - radio [checked] [ref=f16e710]
+                      - radio "Bloqué" [ref=f16e711] [cursor=pointer]:
+                        - generic [ref=f16e712]: 
+                      - radio [ref=f16e713]
+                  - group "Search Reminders" [ref=f16e714]:
+                    - generic [ref=f16e716]: Search Reminders
+                    - radiogroup "Search Reminders" [ref=f16e718]:
+                      - radio "Toujours autoriser" [ref=f16e720] [cursor=pointer]:
+                        - generic [ref=f16e721]: 
+                      - radio [ref=f16e722]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e723] [cursor=pointer]:
+                        - generic [ref=f16e724]: 
+                      - radio [checked] [ref=f16e725]
+                      - radio "Bloqué" [ref=f16e726] [cursor=pointer]:
+                        - generic [ref=f16e727]: 
+                      - radio [ref=f16e728]
+              - group "Outils d'écriture/suppression" [ref=f16e729]:
+                - generic [ref=f16e730]:
+                  - button "Outils d'écriture/suppression 29" [expanded] [ref=f16e731] [cursor=pointer]:
+                    - img [ref=f16e734]
+                    - generic [ref=f16e736]: Outils d'écriture/suppression
+                    - generic [ref=f16e738]: "29"
+                  - button "Permission globale pour le groupe" [ref=f16e739] [cursor=pointer]:
+                    - generic [ref=f16e741]:
+                      - generic [ref=f16e742]: 
+                      - text: Nécessite une approbation
+                      - generic [ref=f16e743]: 
+                - generic [ref=f16e744]:
+                  - group "Add Tag to Task" [ref=f16e745]:
+                    - generic [ref=f16e747]: Add Tag to Task
+                    - radiogroup "Add Tag to Task" [ref=f16e749]:
+                      - radio "Toujours autoriser" [ref=f16e751] [cursor=pointer]:
+                        - generic [ref=f16e752]: 
+                      - radio [ref=f16e753]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e754] [cursor=pointer]:
+                        - generic [ref=f16e755]: 
+                      - radio [checked] [ref=f16e756]
+                      - radio "Bloqué" [ref=f16e757] [cursor=pointer]:
+                        - generic [ref=f16e758]: 
+                      - radio [ref=f16e759]
+                  - group "Add Task Dependency" [ref=f16e760]:
+                    - generic [ref=f16e762]: Add Task Dependency
+                    - radiogroup "Add Task Dependency" [ref=f16e764]:
+                      - radio "Toujours autoriser" [ref=f16e766] [cursor=pointer]:
+                        - generic [ref=f16e767]: 
+                      - radio [ref=f16e768]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e769] [cursor=pointer]:
+                        - generic [ref=f16e770]: 
+                      - radio [checked] [ref=f16e771]
+                      - radio "Bloqué" [ref=f16e772] [cursor=pointer]:
+                        - generic [ref=f16e773]: 
+                      - radio [ref=f16e774]
+                  - group "Add Task Link" [ref=f16e775]:
+                    - generic [ref=f16e777]: Add Task Link
+                    - radiogroup "Add Task Link" [ref=f16e779]:
+                      - radio "Toujours autoriser" [ref=f16e781] [cursor=pointer]:
+                        - generic [ref=f16e782]: 
+                      - radio [ref=f16e783]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e784] [cursor=pointer]:
+                        - generic [ref=f16e785]: 
+                      - radio [checked] [ref=f16e786]
+                      - radio "Bloqué" [ref=f16e787] [cursor=pointer]:
+                        - generic [ref=f16e788]: 
+                      - radio [ref=f16e789]
+                  - group "Add Task to List" [ref=f16e790]:
+                    - generic [ref=f16e792]: Add Task to List
+                    - radiogroup "Add Task to List" [ref=f16e794]:
+                      - radio "Toujours autoriser" [ref=f16e796] [cursor=pointer]:
+                        - generic [ref=f16e797]: 
+                      - radio [ref=f16e798]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e799] [cursor=pointer]:
+                        - generic [ref=f16e800]: 
+                      - radio [checked] [ref=f16e801]
+                      - radio "Bloqué" [ref=f16e802] [cursor=pointer]:
+                        - generic [ref=f16e803]: 
+                      - radio [ref=f16e804]
+                  - group "Add Time Entry" [ref=f16e805]:
+                    - generic [ref=f16e807]: Add Time Entry
+                    - radiogroup "Add Time Entry" [ref=f16e809]:
+                      - radio "Toujours autoriser" [ref=f16e811] [cursor=pointer]:
+                        - generic [ref=f16e812]: 
+                      - radio [ref=f16e813]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e814] [cursor=pointer]:
+                        - generic [ref=f16e815]: 
+                      - radio [checked] [ref=f16e816]
+                      - radio "Bloqué" [ref=f16e817] [cursor=pointer]:
+                        - generic [ref=f16e818]: 
+                      - radio [ref=f16e819]
+                  - group "Attach Task File" [ref=f16e820]:
+                    - generic [ref=f16e822]: Attach Task File
+                    - radiogroup "Attach Task File" [ref=f16e824]:
+                      - radio "Toujours autoriser" [ref=f16e826] [cursor=pointer]:
+                        - generic [ref=f16e827]: 
+                      - radio [ref=f16e828]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e829] [cursor=pointer]:
+                        - generic [ref=f16e830]: 
+                      - radio [checked] [ref=f16e831]
+                      - radio "Bloqué" [ref=f16e832] [cursor=pointer]:
+                        - generic [ref=f16e833]: 
+                      - radio [ref=f16e834]
+                  - group "Create Comment" [ref=f16e835]:
+                    - generic [ref=f16e837]: Create Comment
+                    - radiogroup "Create Comment" [ref=f16e839]:
+                      - radio "Toujours autoriser" [ref=f16e841] [cursor=pointer]:
+                        - generic [ref=f16e842]: 
+                      - radio [ref=f16e843]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e844] [cursor=pointer]:
+                        - generic [ref=f16e845]: 
+                      - radio [checked] [ref=f16e846]
+                      - radio "Bloqué" [ref=f16e847] [cursor=pointer]:
+                        - generic [ref=f16e848]: 
+                      - radio [ref=f16e849]
+                  - group "Create Document" [ref=f16e850]:
+                    - generic [ref=f16e852]: Create Document
+                    - radiogroup "Create Document" [ref=f16e854]:
+                      - radio "Toujours autoriser" [ref=f16e856] [cursor=pointer]:
+                        - generic [ref=f16e857]: 
+                      - radio [ref=f16e858]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e859] [cursor=pointer]:
+                        - generic [ref=f16e860]: 
+                      - radio [checked] [ref=f16e861]
+                      - radio "Bloqué" [ref=f16e862] [cursor=pointer]:
+                        - generic [ref=f16e863]: 
+                      - radio [ref=f16e864]
+                  - group "Create Document Page" [ref=f16e865]:
+                    - generic [ref=f16e867]: Create Document Page
+                    - radiogroup "Create Document Page" [ref=f16e869]:
+                      - radio "Toujours autoriser" [ref=f16e871] [cursor=pointer]:
+                        - generic [ref=f16e872]: 
+                      - radio [ref=f16e873]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e874] [cursor=pointer]:
+                        - generic [ref=f16e875]: 
+                      - radio [checked] [ref=f16e876]
+                      - radio "Bloqué" [ref=f16e877] [cursor=pointer]:
+                        - generic [ref=f16e878]: 
+                      - radio [ref=f16e879]
+                  - group "Create Folder" [ref=f16e880]:
+                    - generic [ref=f16e882]: Create Folder
+                    - radiogroup "Create Folder" [ref=f16e884]:
+                      - radio "Toujours autoriser" [ref=f16e886] [cursor=pointer]:
+                        - generic [ref=f16e887]: 
+                      - radio [ref=f16e888]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e889] [cursor=pointer]:
+                        - generic [ref=f16e890]: 
+                      - radio [checked] [ref=f16e891]
+                      - radio "Bloqué" [ref=f16e892] [cursor=pointer]:
+                        - generic [ref=f16e893]: 
+                      - radio [ref=f16e894]
+                  - group "Create List" [ref=f16e895]:
+                    - generic [ref=f16e897]: Create List
+                    - radiogroup "Create List" [ref=f16e899]:
+                      - radio "Toujours autoriser" [ref=f16e901] [cursor=pointer]:
+                        - generic [ref=f16e902]: 
+                      - radio [ref=f16e903]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e904] [cursor=pointer]:
+                        - generic [ref=f16e905]: 
+                      - radio [checked] [ref=f16e906]
+                      - radio "Bloqué" [ref=f16e907] [cursor=pointer]:
+                        - generic [ref=f16e908]: 
+                      - radio [ref=f16e909]
+                  - group "Create List in Folder" [ref=f16e910]:
+                    - generic [ref=f16e912]: Create List in Folder
+                    - radiogroup "Create List in Folder" [ref=f16e914]:
+                      - radio "Toujours autoriser" [ref=f16e916] [cursor=pointer]:
+                        - generic [ref=f16e917]: 
+                      - radio [ref=f16e918]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e919] [cursor=pointer]:
+                        - generic [ref=f16e920]: 
+                      - radio [checked] [ref=f16e921]
+                      - radio "Bloqué" [ref=f16e922] [cursor=pointer]:
+                        - generic [ref=f16e923]: 
+                      - radio [ref=f16e924]
+                  - group "Create Reminder" [ref=f16e925]:
+                    - generic [ref=f16e927]: Create Reminder
+                    - radiogroup "Create Reminder" [ref=f16e929]:
+                      - radio "Toujours autoriser" [ref=f16e931] [cursor=pointer]:
+                        - generic [ref=f16e932]: 
+                      - radio [ref=f16e933]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e934] [cursor=pointer]:
+                        - generic [ref=f16e935]: 
+                      - radio [checked] [ref=f16e936]
+                      - radio "Bloqué" [ref=f16e937] [cursor=pointer]:
+                        - generic [ref=f16e938]: 
+                      - radio [ref=f16e939]
+                  - group "Create Task" [ref=f16e940]:
+                    - generic [ref=f16e942]: Create Task
+                    - radiogroup "Create Task" [ref=f16e944]:
+                      - radio "Toujours autoriser" [ref=f16e946] [cursor=pointer]:
+                        - generic [ref=f16e947]: 
+                      - radio [ref=f16e948]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e949] [cursor=pointer]:
+                        - generic [ref=f16e950]: 
+                      - radio [checked] [ref=f16e951]
+                      - radio "Bloqué" [ref=f16e952] [cursor=pointer]:
+                        - generic [ref=f16e953]: 
+                      - radio [ref=f16e954]
+                  - group "Delete Task" [ref=f16e955]:
+                    - generic [ref=f16e957]: Delete Task
+                    - radiogroup "Delete Task" [ref=f16e959]:
+                      - radio "Toujours autoriser" [ref=f16e961] [cursor=pointer]:
+                        - generic [ref=f16e962]: 
+                      - radio [ref=f16e963]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e964] [cursor=pointer]:
+                        - generic [ref=f16e965]: 
+                      - radio [checked] [ref=f16e966]
+                      - radio "Bloqué" [ref=f16e967] [cursor=pointer]:
+                        - generic [ref=f16e968]: 
+                      - radio [ref=f16e969]
+                  - group "Merge Tasks" [ref=f16e970]:
+                    - generic [ref=f16e972]: Merge Tasks
+                    - radiogroup "Merge Tasks" [ref=f16e974]:
+                      - radio "Toujours autoriser" [ref=f16e976] [cursor=pointer]:
+                        - generic [ref=f16e977]: 
+                      - radio [ref=f16e978]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e979] [cursor=pointer]:
+                        - generic [ref=f16e980]: 
+                      - radio [checked] [ref=f16e981]
+                      - radio "Bloqué" [ref=f16e982] [cursor=pointer]:
+                        - generic [ref=f16e983]: 
+                      - radio [ref=f16e984]
+                  - group "Move Task" [ref=f16e985]:
+                    - generic [ref=f16e987]: Move Task
+                    - radiogroup "Move Task" [ref=f16e989]:
+                      - radio "Toujours autoriser" [ref=f16e991] [cursor=pointer]:
+                        - generic [ref=f16e992]: 
+                      - radio [ref=f16e993]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e994] [cursor=pointer]:
+                        - generic [ref=f16e995]: 
+                      - radio [checked] [ref=f16e996]
+                      - radio "Bloqué" [ref=f16e997] [cursor=pointer]:
+                        - generic [ref=f16e998]: 
+                      - radio [ref=f16e999]
+                  - group "Remove Tag from Task" [ref=f16e1000]:
+                    - generic [ref=f16e1002]: Remove Tag from Task
+                    - radiogroup "Remove Tag from Task" [ref=f16e1004]:
+                      - radio "Toujours autoriser" [ref=f16e1006] [cursor=pointer]:
+                        - generic [ref=f16e1007]: 
+                      - radio [ref=f16e1008]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1009] [cursor=pointer]:
+                        - generic [ref=f16e1010]: 
+                      - radio [checked] [ref=f16e1011]
+                      - radio "Bloqué" [ref=f16e1012] [cursor=pointer]:
+                        - generic [ref=f16e1013]: 
+                      - radio [ref=f16e1014]
+                  - group "Remove Task Dependency" [ref=f16e1015]:
+                    - generic [ref=f16e1017]: Remove Task Dependency
+                    - radiogroup "Remove Task Dependency" [ref=f16e1019]:
+                      - radio "Toujours autoriser" [ref=f16e1021] [cursor=pointer]:
+                        - generic [ref=f16e1022]: 
+                      - radio [ref=f16e1023]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1024] [cursor=pointer]:
+                        - generic [ref=f16e1025]: 
+                      - radio [checked] [ref=f16e1026]
+                      - radio "Bloqué" [ref=f16e1027] [cursor=pointer]:
+                        - generic [ref=f16e1028]: 
+                      - radio [ref=f16e1029]
+                  - group "Remove Task from List" [ref=f16e1030]:
+                    - generic [ref=f16e1032]: Remove Task from List
+                    - radiogroup "Remove Task from List" [ref=f16e1034]:
+                      - radio "Toujours autoriser" [ref=f16e1036] [cursor=pointer]:
+                        - generic [ref=f16e1037]: 
+                      - radio [ref=f16e1038]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1039] [cursor=pointer]:
+                        - generic [ref=f16e1040]: 
+                      - radio [checked] [ref=f16e1041]
+                      - radio "Bloqué" [ref=f16e1042] [cursor=pointer]:
+                        - generic [ref=f16e1043]: 
+                      - radio [ref=f16e1044]
+                  - group "Remove Task Link" [ref=f16e1045]:
+                    - generic [ref=f16e1047]: Remove Task Link
+                    - radiogroup "Remove Task Link" [ref=f16e1049]:
+                      - radio "Toujours autoriser" [ref=f16e1051] [cursor=pointer]:
+                        - generic [ref=f16e1052]: 
+                      - radio [ref=f16e1053]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1054] [cursor=pointer]:
+                        - generic [ref=f16e1055]: 
+                      - radio [checked] [ref=f16e1056]
+                      - radio "Bloqué" [ref=f16e1057] [cursor=pointer]:
+                        - generic [ref=f16e1058]: 
+                      - radio [ref=f16e1059]
+                  - group "Send Chat Message" [ref=f16e1060]:
+                    - generic [ref=f16e1062]: Send Chat Message
+                    - radiogroup "Send Chat Message" [ref=f16e1064]:
+                      - radio "Toujours autoriser" [ref=f16e1066] [cursor=pointer]:
+                        - generic [ref=f16e1067]: 
+                      - radio [ref=f16e1068]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1069] [cursor=pointer]:
+                        - generic [ref=f16e1070]: 
+                      - radio [checked] [ref=f16e1071]
+                      - radio "Bloqué" [ref=f16e1072] [cursor=pointer]:
+                        - generic [ref=f16e1073]: 
+                      - radio [ref=f16e1074]
+                  - group "Start Time Tracking" [ref=f16e1075]:
+                    - generic [ref=f16e1077]: Start Time Tracking
+                    - radiogroup "Start Time Tracking" [ref=f16e1079]:
+                      - radio "Toujours autoriser" [ref=f16e1081] [cursor=pointer]:
+                        - generic [ref=f16e1082]: 
+                      - radio [ref=f16e1083]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1084] [cursor=pointer]:
+                        - generic [ref=f16e1085]: 
+                      - radio [checked] [ref=f16e1086]
+                      - radio "Bloqué" [ref=f16e1087] [cursor=pointer]:
+                        - generic [ref=f16e1088]: 
+                      - radio [ref=f16e1089]
+                  - group "Stop Time Tracking" [ref=f16e1090]:
+                    - generic [ref=f16e1092]: Stop Time Tracking
+                    - radiogroup "Stop Time Tracking" [ref=f16e1094]:
+                      - radio "Toujours autoriser" [ref=f16e1096] [cursor=pointer]:
+                        - generic [ref=f16e1097]: 
+                      - radio [ref=f16e1098]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1099] [cursor=pointer]:
+                        - generic [ref=f16e1100]: 
+                      - radio [checked] [ref=f16e1101]
+                      - radio "Bloqué" [ref=f16e1102] [cursor=pointer]:
+                        - generic [ref=f16e1103]: 
+                      - radio [ref=f16e1104]
+                  - group "Update Document Page" [ref=f16e1105]:
+                    - generic [ref=f16e1107]: Update Document Page
+                    - radiogroup "Update Document Page" [ref=f16e1109]:
+                      - radio "Toujours autoriser" [ref=f16e1111] [cursor=pointer]:
+                        - generic [ref=f16e1112]: 
+                      - radio [ref=f16e1113]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1114] [cursor=pointer]:
+                        - generic [ref=f16e1115]: 
+                      - radio [checked] [ref=f16e1116]
+                      - radio "Bloqué" [ref=f16e1117] [cursor=pointer]:
+                        - generic [ref=f16e1118]: 
+                      - radio [ref=f16e1119]
+                  - group "Update Folder" [ref=f16e1120]:
+                    - generic [ref=f16e1122]: Update Folder
+                    - radiogroup "Update Folder" [ref=f16e1124]:
+                      - radio "Toujours autoriser" [ref=f16e1126] [cursor=pointer]:
+                        - generic [ref=f16e1127]: 
+                      - radio [ref=f16e1128]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1129] [cursor=pointer]:
+                        - generic [ref=f16e1130]: 
+                      - radio [checked] [ref=f16e1131]
+                      - radio "Bloqué" [ref=f16e1132] [cursor=pointer]:
+                        - generic [ref=f16e1133]: 
+                      - radio [ref=f16e1134]
+                  - group "Update List" [ref=f16e1135]:
+                    - generic [ref=f16e1137]: Update List
+                    - radiogroup "Update List" [ref=f16e1139]:
+                      - radio "Toujours autoriser" [ref=f16e1141] [cursor=pointer]:
+                        - generic [ref=f16e1142]: 
+                      - radio [ref=f16e1143]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1144] [cursor=pointer]:
+                        - generic [ref=f16e1145]: 
+                      - radio [checked] [ref=f16e1146]
+                      - radio "Bloqué" [ref=f16e1147] [cursor=pointer]:
+                        - generic [ref=f16e1148]: 
+                      - radio [ref=f16e1149]
+                  - group "Update Reminder" [ref=f16e1150]:
+                    - generic [ref=f16e1152]: Update Reminder
+                    - radiogroup "Update Reminder" [ref=f16e1154]:
+                      - radio "Toujours autoriser" [ref=f16e1156] [cursor=pointer]:
+                        - generic [ref=f16e1157]: 
+                      - radio [ref=f16e1158]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1159] [cursor=pointer]:
+                        - generic [ref=f16e1160]: 
+                      - radio [checked] [ref=f16e1161]
+                      - radio "Bloqué" [ref=f16e1162] [cursor=pointer]:
+                        - generic [ref=f16e1163]: 
+                      - radio [ref=f16e1164]
+                  - group "Update Task" [ref=f16e1165]:
+                    - generic [ref=f16e1167]: Update Task
+                    - radiogroup "Update Task" [ref=f16e1169]:
+                      - radio "Toujours autoriser" [ref=f16e1171] [cursor=pointer]:
+                        - generic [ref=f16e1172]: 
+                      - radio [ref=f16e1173]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1174] [cursor=pointer]:
+                        - generic [ref=f16e1175]: 
+                      - radio [checked] [ref=f16e1176]
+                      - radio "Bloqué" [ref=f16e1177] [cursor=pointer]:
+                        - generic [ref=f16e1178]: 
+                      - radio [ref=f16e1179]
+  - region "Notifications (F8)":
+    - list

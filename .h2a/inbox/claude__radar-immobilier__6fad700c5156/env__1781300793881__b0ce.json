@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781300793881:b0ce",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION 373/522 sur SCW (~71%), 149 restantes. Lots 4x10 fluides. Lot r11 lance. Bloc Saint-G/H/I/J riche en rezonages/PPCMOI/dérogations. Encore ~4 lots avant les 522 puis reconciliation HTML-only/scans."
+  },
+  "createdAt": "2026-06-12T21:46:33.881Z"
+}

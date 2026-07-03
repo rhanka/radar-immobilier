@@ -1,0 +1,708 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "" [ref=e4] [cursor=pointer]:
+      - /url: "#"
+    - generic [ref=e6]:
+      - searchbox "Mots clés" [ref=e7]
+      - button "Rechercher" [ref=e8] [cursor=pointer]
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - generic [ref=e13]: Y vivre
+        - generic [ref=e15]: Respirer le grand air et le bonheur. Plein air, vie culturelle, événements d’envergure internationale et vie économique font la renommée de son dynamisme renouvelé. Outre la quiétude et la sécurité, les résidents y trouvent toutes les commodités d’une grande ville en plus de profiter de l’immensité du majestueux lac Saint-Jean.
+      - generic [ref=e16]:
+        - link "" [ref=e18] [cursor=pointer]:
+          - /url: "#"
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - generic [ref=e21] [cursor=pointer]:
+              - generic [ref=e22]: Information générale
+              - generic [ref=e23]: 
+            - generic:
+              - link "Information générale Historique et information " [ref=e24] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/historique
+                - generic [ref=e25]:
+                  - generic [ref=e26]: Information générale
+                  - generic [ref=e27]: Historique et information
+                - generic [ref=e28]: 
+              - link "Information générale Mission, vision et valeurs " [ref=e29] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/mission-vision-et-valeurs
+                - generic [ref=e30]:
+                  - generic [ref=e31]: Information générale
+                  - generic [ref=e32]: Mission, vision et valeurs
+                - generic [ref=e33]: 
+              - link "Information générale Structure organisationnelle et organigramme " [ref=e34] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/structure-organisationnelle-et-organigramme
+                - generic [ref=e35]:
+                  - generic [ref=e36]: Information générale
+                  - generic [ref=e37]: Structure organisationnelle et organigramme
+                - generic [ref=e38]: 
+              - link "Information générale Accès à l'information " [ref=e39] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/acces-a-linformation
+                - generic [ref=e40]:
+                  - generic [ref=e41]: Information générale
+                  - generic [ref=e42]: Accès à l'information
+                - generic [ref=e43]: 
+              - link "Information générale Conseil municipal " [ref=e44] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/conseil-municipal
+                - generic [ref=e45]:
+                  - generic [ref=e46]: Information générale
+                  - generic [ref=e47]: Conseil municipal
+                - generic [ref=e48]: 
+              - link "Information générale Assemblées du conseil municipal " [ref=e49] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/assemblees-du-conseil-municipal
+                - generic [ref=e50]:
+                  - generic [ref=e51]: Information générale
+                  - generic [ref=e52]: Assemblées du conseil municipal
+                - generic [ref=e53]: 
+              - link "Information générale Maires et directeurs / directrice " [ref=e54] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/maires-et-directeurs
+                - generic [ref=e55]:
+                  - generic [ref=e56]: Information générale
+                  - generic [ref=e57]: Maires et directeurs / directrice
+                - generic [ref=e58]: 
+              - link "Information générale Communauté bleue " [ref=e59] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/communaute-bleue
+                - generic [ref=e60]:
+                  - generic [ref=e61]: Information générale
+                  - generic [ref=e62]: Communauté bleue
+                - generic [ref=e63]: 
+              - link "Information générale Plaintes et requêtes " [ref=e64] [cursor=pointer]:
+                - /url: /y-vivre/information-generale/plaintes-et-requetes
+                - generic [ref=e65]:
+                  - generic [ref=e66]: Information générale
+                  - generic [ref=e67]: Plaintes et requêtes
+                - generic [ref=e68]: 
+          - generic [ref=e69]:
+            - generic [ref=e70] [cursor=pointer]:
+              - generic [ref=e71]: Sports et loisirs, culture et bibliothèque
+              - generic [ref=e72]: 
+            - generic:
+              - link "Sports et loisirs, culture et bibliothèque Sports et loisirs " [ref=e73] [cursor=pointer]:
+                - /url: /y-vivre/sports-et-loisirs-culture-et-bibliotheque/sports-et-loisirs
+                - generic [ref=e74]:
+                  - generic [ref=e75]: Sports et loisirs, culture et bibliothèque
+                  - generic [ref=e76]: Sports et loisirs
+                - generic [ref=e77]: 
+              - link "Sports et loisirs, culture et bibliothèque Culture " [ref=e78] [cursor=pointer]:
+                - /url: /y-vivre/sports-et-loisirs-culture-et-bibliotheque/culture
+                - generic [ref=e79]:
+                  - generic [ref=e80]: Sports et loisirs, culture et bibliothèque
+                  - generic [ref=e81]: Culture
+                - generic [ref=e82]: 
+              - link "Sports et loisirs, culture et bibliothèque Bibliothèque " [ref=e83] [cursor=pointer]:
+                - /url: /y-vivre/sports-et-loisirs-culture-et-bibliotheque/bibliotheque
+                - generic [ref=e84]:
+                  - generic [ref=e85]: Sports et loisirs, culture et bibliothèque
+                  - generic [ref=e86]: Bibliothèque
+                - generic [ref=e87]: 
+              - link "Sports et loisirs, culture et bibliothèque Politiques d’inscription et de remboursement " [ref=e88] [cursor=pointer]:
+                - /url: /y-vivre/sports-et-loisirs-culture-et-bibliotheque/politiques-dinscription-et-de-remboursement
+                - generic [ref=e89]:
+                  - generic [ref=e90]: Sports et loisirs, culture et bibliothèque
+                  - generic [ref=e91]: Politiques d’inscription et de remboursement
+                - generic [ref=e92]: 
+              - link "Sports et loisirs, culture et bibliothèque Camp de jour " [ref=e93] [cursor=pointer]:
+                - /url: /y-vivre/sports-et-loisirs-culture-et-bibliotheque/camps-de-jour
+                - generic [ref=e94]:
+                  - generic [ref=e95]: Sports et loisirs, culture et bibliothèque
+                  - generic [ref=e96]: Camp de jour
+                - generic [ref=e97]: 
+              - link "Sports et loisirs, culture et bibliothèque Bottin des ressources culturelles " [ref=e98] [cursor=pointer]:
+                - /url: /y-vivre/sports-et-loisirs-culture-et-bibliotheque/bottin-des-ressources-culturelles
+                - generic [ref=e99]:
+                  - generic [ref=e100]: Sports et loisirs, culture et bibliothèque
+                  - generic [ref=e101]: Bottin des ressources culturelles
+                - generic [ref=e102]: 
+          - generic [ref=e103]:
+            - generic [ref=e104] [cursor=pointer]:
+              - generic [ref=e105]: Famille et communautaire
+              - generic [ref=e106]: 
+            - generic:
+              - link "Famille et communautaire La famille à Roberval " [ref=e107] [cursor=pointer]:
+                - /url: /y-vivre/famille-et-communautaire/la-famille-a-roberval
+                - generic [ref=e108]:
+                  - generic [ref=e109]: Famille et communautaire
+                  - generic [ref=e110]: La famille à Roberval
+                - generic [ref=e111]: 
+              - link "Famille et communautaire Dans ma rue, on joue! " [ref=e112] [cursor=pointer]:
+                - /url: /y-vivre/famille-et-communautaire/dans-ma-rue-on-joue
+                - generic [ref=e113]:
+                  - generic [ref=e114]: Famille et communautaire
+                  - generic [ref=e115]: Dans ma rue, on joue!
+                - generic [ref=e116]: 
+              - link "Famille et communautaire Mobilité urbaine et sécurité " [ref=e117] [cursor=pointer]:
+                - /url: /y-vivre/famille-et-communautaire/mobilite-urbaine-et-securite
+                - generic [ref=e118]:
+                  - generic [ref=e119]: Famille et communautaire
+                  - generic [ref=e120]: Mobilité urbaine et sécurité
+                - generic [ref=e121]: 
+              - link "Famille et communautaire Bottin des organismes " [ref=e122] [cursor=pointer]:
+                - /url: /y-vivre/famille-et-communautaire/bottin-des-organismes
+                - generic [ref=e123]:
+                  - generic [ref=e124]: Famille et communautaire
+                  - generic [ref=e125]: Bottin des organismes
+                - generic [ref=e126]: 
+              - link "Famille et communautaire Liste des parcs " [ref=e127] [cursor=pointer]:
+                - /url: /y-vivre/famille-et-communautaire/listes-des-parcs
+                - generic [ref=e128]:
+                  - generic [ref=e129]: Famille et communautaire
+                  - generic [ref=e130]: Liste des parcs
+                - generic [ref=e131]: 
+              - link "Famille et communautaire Corridors scolaires " [ref=e132] [cursor=pointer]:
+                - /url: /y-vivre/famille-et-communautaire/corridors-scolaires
+                - generic [ref=e133]:
+                  - generic [ref=e134]: Famille et communautaire
+                  - generic [ref=e135]: Corridors scolaires
+                - generic [ref=e136]: 
+          - generic [ref=e137]:
+            - generic [ref=e138] [cursor=pointer]:
+              - generic [ref=e139]: Spectacles et activités
+              - generic [ref=e140]: 
+            - generic:
+              - link "Calendrier des activités Programmation des activités " [ref=e141] [cursor=pointer]:
+                - /url: /y-vivre/calendrier-des-activites/programmation-des-activites
+                - generic [ref=e142]:
+                  - generic [ref=e143]: Calendrier des activités
+                  - generic [ref=e144]: Programmation des activités
+                - generic [ref=e145]: 
+              - link "Calendrier des activités Spectacles " [ref=e146] [cursor=pointer]:
+                - /url: /y-vivre/calendrier-des-activites/spectacles
+                - generic [ref=e147]:
+                  - generic [ref=e148]: Calendrier des activités
+                  - generic [ref=e149]: Spectacles
+                - generic [ref=e150]: 
+              - link "Calendrier des activités Expositions " [ref=e151] [cursor=pointer]:
+                - /url: /y-vivre/calendrier-des-activites/expositions
+                - generic [ref=e152]:
+                  - generic [ref=e153]: Calendrier des activités
+                  - generic [ref=e154]: Expositions
+                - generic [ref=e155]: 
+          - generic [ref=e156]:
+            - generic [ref=e157] [cursor=pointer]:
+              - generic [ref=e158]: Services aux citoyens
+              - generic [ref=e159]: 
+            - generic:
+              - link "Services aux citoyens Services municipaux " [ref=e160] [cursor=pointer]:
+                - /url: /y-vivre/services-aux-citoyens/services-municipaux
+                - generic [ref=e161]:
+                  - generic [ref=e162]: Services aux citoyens
+                  - generic [ref=e163]: Services municipaux
+                - generic [ref=e164]: 
+              - link "Services aux citoyens Transport collectif " [ref=e165] [cursor=pointer]:
+                - /url: /y-vivre/services-aux-citoyens/transport-collectif
+                - generic [ref=e166]:
+                  - generic [ref=e167]: Services aux citoyens
+                  - generic [ref=e168]: Transport collectif
+                - generic [ref=e169]: 
+              - link "Services aux citoyens Gestion des matières résiduelles " [ref=e170] [cursor=pointer]:
+                - /url: /y-vivre/services-aux-citoyens/gestion-des-matieres-residuelles
+                - generic [ref=e171]:
+                  - generic [ref=e172]: Services aux citoyens
+                  - generic [ref=e173]: Gestion des matières résiduelles
+                - generic [ref=e174]: 
+              - link "Services aux citoyens Subventions et programmes " [ref=e175] [cursor=pointer]:
+                - /url: /y-vivre/services-aux-citoyens/subventions-et-programmes
+                - generic [ref=e176]:
+                  - generic [ref=e177]: Services aux citoyens
+                  - generic [ref=e178]: Subventions et programmes
+                - generic [ref=e179]: 
+              - link "Documentation " [ref=e180] [cursor=pointer]:
+                - /url: "#"
+                - generic [ref=e182]: Documentation
+                - generic [ref=e183]: 
+          - generic [ref=e184]:
+            - generic [ref=e185] [cursor=pointer]:
+              - generic [ref=e186]: Nouveaux arrivants
+              - generic [ref=e187]: 
+            - generic:
+              - link "Nouveaux arrivants Pourquoi choisir Roberval " [ref=e188] [cursor=pointer]:
+                - /url: /y-vivre/nouveaux-arrivants/choisir-roberval
+                - generic [ref=e189]:
+                  - generic [ref=e190]: Nouveaux arrivants
+                  - generic [ref=e191]: Pourquoi choisir Roberval
+                - generic [ref=e192]: 
+              - link "Nouveaux arrivants Vie familiale " [ref=e193] [cursor=pointer]:
+                - /url: /y-vivre/nouveaux-arrivants/vie-familiale
+                - generic [ref=e194]:
+                  - generic [ref=e195]: Nouveaux arrivants
+                  - generic [ref=e196]: Vie familiale
+                - generic [ref=e197]: 
+              - link "Nouveaux arrivants Vie professionnelle " [ref=e198] [cursor=pointer]:
+                - /url: /y-vivre/nouveaux-arrivants/vie-professionnelle
+                - generic [ref=e199]:
+                  - generic [ref=e200]: Nouveaux arrivants
+                  - generic [ref=e201]: Vie professionnelle
+                - generic [ref=e202]: 
+    - generic [ref=e203]:
+      - generic [ref=e204]:
+        - generic [ref=e206]: La visiter
+        - generic [ref=e208]: Pouvoir vivre tout simplement, en profitant pleinement de chaque moment et de la multitude de possibilités qu’offre notre territoire.
+      - generic [ref=e209]:
+        - link "" [ref=e211] [cursor=pointer]:
+          - /url: "#"
+        - generic [ref=e213]:
+          - generic [ref=e214] [cursor=pointer]:
+            - generic [ref=e215]: Visiter Roberval
+            - generic [ref=e216]: 
+          - generic [ref=e217]:
+            - link "La visiter Visiter Roberval " [ref=e218] [cursor=pointer]:
+              - /url: /la-visiter/visiter-roberval
+              - generic [ref=e219]:
+                - generic [ref=e220]: La visiter
+                - generic [ref=e221]: Visiter Roberval
+              - generic [ref=e222]: 
+            - link "La visiter Attraits touristiques " [ref=e223] [cursor=pointer]:
+              - /url: /la-visiter/attraits-touristiques
+              - generic [ref=e224]:
+                - generic [ref=e225]: La visiter
+                - generic [ref=e226]: Attraits touristiques
+              - generic [ref=e227]: 
+            - link "La visiter Carte interactive " [ref=e228] [cursor=pointer]:
+              - /url: /carte-interactive
+              - generic [ref=e229]:
+                - generic [ref=e230]: La visiter
+                - generic [ref=e231]: Carte interactive
+              - generic [ref=e232]: 
+            - link "La visiter Photos/Vidéos " [ref=e233] [cursor=pointer]:
+              - /url: /photos
+              - generic [ref=e234]:
+                - generic [ref=e235]: La visiter
+                - generic [ref=e236]: Photos/Vidéos
+              - generic [ref=e237]: 
+    - text:                                
+  - generic [ref=e240]:
+    - link [ref=e241] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e242]:
+      - generic [ref=e243]:
+        - generic [ref=e244]:
+          - link "À propos" [ref=e245] [cursor=pointer]:
+            - /url: /a-propos
+            - generic [ref=e246]: À propos
+          - link "Nouvelles" [ref=e247] [cursor=pointer]:
+            - /url: /nouvelles
+            - generic [ref=e248]: Nouvelles
+          - link "Documentation" [ref=e249] [cursor=pointer]:
+            - /url: /documentation/avis-publics
+            - generic [ref=e250]: Documentation
+          - link "Emplois" [ref=e251] [cursor=pointer]:
+            - /url: /offres-emploi
+            - generic [ref=e252]: Emplois
+          - link "Carte interactive" [ref=e253] [cursor=pointer]:
+            - /url: /carte-interactive
+            - generic [ref=e254]: Carte interactive
+          - link "Services en ligne" [ref=e255] [cursor=pointer]:
+            - /url: https://www.ville.roberval.qc.ca#online_services
+            - generic [ref=e256]: Services en ligne
+          - link "Photos/Vidéos" [ref=e257] [cursor=pointer]:
+            - /url: /photos
+            - generic [ref=e258]: Photos/Vidéos
+          - link "Objets promotionnels" [ref=e259] [cursor=pointer]:
+            - /url: /objets-promotionnels
+            - generic [ref=e260]: Objets promotionnels
+          - link "Nous joindre" [ref=e261] [cursor=pointer]:
+            - /url: /nous-joindre
+            - generic [ref=e262]: Nous joindre
+        - link "" [ref=e263] [cursor=pointer]:
+          - /url: "#"
+      - generic [ref=e264]:
+        - generic [ref=e265]:
+          - link "Y vivre " [ref=e266] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e267]: Y vivre
+            - generic [ref=e268]: 
+          - link "La visiter " [ref=e269] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e270]: La visiter
+            - generic [ref=e271]: 
+          - link "Y investir " [ref=e272] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e273]: Y investir
+            - generic [ref=e274]: 
+        - text: 
+  - generic [ref=e275]:
+    - img "SEAO" [ref=e276]
+    - generic [ref=e277]:
+      - generic [ref=e278]: Documentation
+      - heading "Documentation" [level=1] [ref=e280]
+  - generic [ref=e281]:
+    - generic [ref=e282]:
+      - generic [ref=e284]: Documentation
+      - generic [ref=e287]:
+        - generic [ref=e288] [cursor=pointer]:
+          - generic [ref=e289]: Documentation
+          - generic [ref=e290]: 
+        - generic:
+          - link "Avis publics " [ref=e291] [cursor=pointer]:
+            - /url: /documentation/avis-publics
+            - generic [ref=e293]: Avis publics
+            - generic [ref=e294]: 
+          - link "Documents financiers " [ref=e295] [cursor=pointer]:
+            - /url: /documentation/documents-financiers
+            - generic [ref=e297]: Documents financiers
+            - generic [ref=e298]: 
+          - link "Ordres du jour et calendrier " [ref=e299] [cursor=pointer]:
+            - /url: /documentation/ordres-du-jour-et-calendrier
+            - generic [ref=e301]: Ordres du jour et calendrier
+            - generic [ref=e302]: 
+          - link "Politiques diverses " [ref=e303] [cursor=pointer]:
+            - /url: /documentation/politiques-diverses
+            - generic [ref=e305]: Politiques diverses
+            - generic [ref=e306]: 
+          - link "Procès verbaux " [ref=e307] [cursor=pointer]:
+            - /url: /documentation/proces-verbaux
+            - generic [ref=e309]: Procès verbaux
+            - generic [ref=e310]: 
+          - link "Projets de règlements " [ref=e311] [cursor=pointer]:
+            - /url: /documentation/projets-de-reglements
+            - generic [ref=e313]: Projets de règlements
+            - generic [ref=e314]: 
+          - link "Rapports " [ref=e315] [cursor=pointer]:
+            - /url: /documentation/rapports
+            - generic [ref=e317]: Rapports
+            - generic [ref=e318]: 
+          - link "Règlements municipaux " [ref=e319] [cursor=pointer]:
+            - /url: /documentation/reglements-municipaux
+            - generic [ref=e321]: Règlements municipaux
+            - generic [ref=e322]: 
+    - generic [ref=e325]:
+      - heading "Procès verbaux" [level=2] [ref=e328]
+      - generic [ref=e330]:
+        - generic [ref=e331]:
+          - text: 
+          - link "Suivant " [ref=e332] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e333]: Suivant
+            - generic [ref=e334]: 
+        - generic [ref=e335]:
+          - link " Procès verbal - Séance ordinaire du 19 mai 2026 Publié le 25/05/26" [ref=e337] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/6a145567852a1ce705190131_20260519%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e338]: 
+            - generic [ref=e339]: Procès verbal - Séance ordinaire du 19 mai 2026
+            - generic [ref=e340]:
+              - generic [ref=e341]: Publié le
+              - generic [ref=e342]: 25/05/26
+          - link " Procès verbal - Séance extraordinaire du 30 avril 2026 Publié le 20/05/26" [ref=e344] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/6a0ddac2d82d3d6410f56871_20260430%20-%20Proc%C3%A8s-verbal%20%20(Extraordinaire).pdf
+            - generic [ref=e345]: 
+            - generic [ref=e346]: Procès verbal - Séance extraordinaire du 30 avril 2026
+            - generic [ref=e347]:
+              - generic [ref=e348]: Publié le
+              - generic [ref=e349]: 20/05/26
+          - link " Procès verbal - Séance ordinaire du 27 avril 2026 Publié le 05/05/26" [ref=e351] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/69f9de8a6c679e16a4c547ac_20260427%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e352]: 
+            - generic [ref=e353]: Procès verbal - Séance ordinaire du 27 avril 2026
+            - generic [ref=e354]:
+              - generic [ref=e355]: Publié le
+              - generic [ref=e356]: 05/05/26
+          - link " Procès verbal - Séance ordinaire du 7 avril 2026 Publié le 29/04/26" [ref=e358] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/69f2398ae0cccddbb07a32f4_20260407%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e359]: 
+            - generic [ref=e360]: Procès verbal - Séance ordinaire du 7 avril 2026
+            - generic [ref=e361]:
+              - generic [ref=e362]: Publié le
+              - generic [ref=e363]: 29/04/26
+          - link " Procès verbal - Séance ordinaire du 16 mars 2026 Publié le 13/04/26" [ref=e365] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/69dcdab606ee479b540f37e4_20260316%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e366]: 
+            - generic [ref=e367]: Procès verbal - Séance ordinaire du 16 mars 2026
+            - generic [ref=e368]:
+              - generic [ref=e369]: Publié le
+              - generic [ref=e370]: 13/04/26
+          - link " Procès verbal - Séance ordinaire du 9 février 2026 Publié le 17/03/26" [ref=e372] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/69c15f922cd2112b28553bf8_20260209%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e373]: 
+            - generic [ref=e374]: Procès verbal - Séance ordinaire du 9 février 2026
+            - generic [ref=e375]:
+              - generic [ref=e376]: Publié le
+              - generic [ref=e377]: 17/03/26
+          - link " Procès verbal - Séance ordinaire du 19 janvier 2026 Publié le 10/02/26" [ref=e379] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/69931e7a470d35e5c7f0a728_20260119%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e380]: 
+            - generic [ref=e381]: Procès verbal - Séance ordinaire du 19 janvier 2026
+            - generic [ref=e382]:
+              - generic [ref=e383]: Publié le
+              - generic [ref=e384]: 10/02/26
+          - link " Procès verbal - Séance ordinaire du 18 décembre 2025 Publié le 20/01/26" [ref=e386] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/696fed08da29c1ce4ac66dce_20251218%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e387]: 
+            - generic [ref=e388]: Procès verbal - Séance ordinaire du 18 décembre 2025
+            - generic [ref=e389]:
+              - generic [ref=e390]: Publié le
+              - generic [ref=e391]: 20/01/26
+          - link " Procès verbal - Séance ordinaire du 15 décembre 2025 Publié le 22/12/25" [ref=e393] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/698f565d96a1c1d44781f357_20251215%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e394]: 
+            - generic [ref=e395]: Procès verbal - Séance ordinaire du 15 décembre 2025
+            - generic [ref=e396]:
+              - generic [ref=e397]: Publié le
+              - generic [ref=e398]: 22/12/25
+          - link " Procès verbal - Séance extraordinaire du 15 décembre 2025 Publié le 22/12/25" [ref=e400] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/69494051c8ccc07659e4537a_20251215%20-%20Proc%C3%A8s-verbal%20(Extraordinaire).pdf
+            - generic [ref=e401]: 
+            - generic [ref=e402]: Procès verbal - Séance extraordinaire du 15 décembre 2025
+            - generic [ref=e403]:
+              - generic [ref=e404]: Publié le
+              - generic [ref=e405]: 22/12/25
+          - link " Procès verbal - Séance ordinaire du 24 novembre 2025 Publié le 16/12/25" [ref=e407] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/6941ae653bb57dd9ef83bd22_20251124%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e408]: 
+            - generic [ref=e409]: Procès verbal - Séance ordinaire du 24 novembre 2025
+            - generic [ref=e410]:
+              - generic [ref=e411]: Publié le
+              - generic [ref=e412]: 16/12/25
+          - link " Procès verbal - Séance ordinaire du 1er octobre 2025 Publié le 25/11/25" [ref=e414] [cursor=pointer]:
+            - /url: https://cdn.prod.website-files.com/6080273d177cf149a1a96a00/6926033e6281cfc50bd8d9c4_20251001%20-%20Proc%C3%A8s-verbal.pdf
+            - generic [ref=e415]: 
+            - generic [ref=e416]: Procès verbal - Séance ordinaire du 1er octobre 2025
+            - generic [ref=e417]:
+              - generic [ref=e418]: Publié le
+              - generic [ref=e419]: 25/11/25
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+          - generic: 
+        - generic [ref=e420]:
+          - text: 
+          - link "Suivant " [ref=e421] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e422]: Suivant
+            - generic [ref=e423]: 
+  - generic [ref=e424]:
+    - generic [ref=e425]:
+      - generic [ref=e426]:
+        - generic [ref=e427]:
+          - link [ref=e428] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=e429]: Choisir de s’établir à Roberval, c’est s’offrir un rythme de vie trépidant dans un environnement sain et sécuritaire.
+        - generic [ref=e430]:
+          - generic [ref=e431]: Explorer
+          - link "Y vivre " [ref=e432] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e433]: Y vivre
+            - generic [ref=e434]: 
+          - link "La visiter " [ref=e435] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e436]: La visiter
+            - generic [ref=e437]: 
+          - link "Y investir " [ref=e438] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e439]: Y investir
+            - generic [ref=e440]: 
+        - generic [ref=e441]:
+          - generic [ref=e442]: Aide
+          - link "Accueil" [ref=e443] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e444]: Accueil
+          - link "Documentation" [ref=e445] [cursor=pointer]:
+            - /url: https://www.roberval.ca/documentation/avis-publics
+            - generic [ref=e446]: Documentation
+          - link "Nous joindre" [ref=e447] [cursor=pointer]:
+            - /url: /nous-joindre
+            - generic [ref=e448]: Nous joindre
+          - link "Politique de confidentialité" [ref=e449] [cursor=pointer]:
+            - /url: /politique-de-confidentialite
+            - generic [ref=e450]: Politique de confidentialité
+        - generic [ref=e451]:
+          - generic [ref=e452]: Visiter
+          - generic [ref=e453]:
+            - strong [ref=e454]: Hôtel de Ville
+            - text: 851, boulevard St-Joseph
+            - text: Roberval (Québec)
+            - text: G8H 2L6
+          - generic [ref=e455]: Joindre
+          - link "418 275-0202 Urgence soir et fin de semaine 418-671-1629" [ref=e456] [cursor=pointer]:
+            - /url: tel:14182750202
+            - generic [ref=e457]:
+              - text: 418 275-0202
+              - text: Urgence soir et fin de semaine 418-671-1629
+          - link "vroberval@roberval.ca" [ref=e458] [cursor=pointer]:
+            - /url: "mailto:vrobervalroberval.ca "
+            - generic [ref=e459]: vroberval@roberval.ca
+        - generic [ref=e460]:
+          - generic [ref=e461]: Suivre
+          - link " Facebook" [ref=e462] [cursor=pointer]:
+            - /url: https://www.facebook.com/villederoberval/
+            - generic [ref=e463]: 
+            - generic [ref=e464]: Facebook
+          - link " Instagram" [ref=e465] [cursor=pointer]:
+            - /url: https://www.instagram.com/villeroberval/
+            - generic [ref=e466]: 
+            - generic [ref=e467]: Instagram
+      - generic [ref=e469]:
+        - generic [ref=e471]: 2023 Ville de Roberval © Tous droits réservés
+        - generic [ref=e473]:
+          - text: Conception
+          - link "Eckinox" [ref=e474] [cursor=pointer]:
+            - /url: https://eckinox.ca
+            - strong [ref=e475]: Eckinox
+    - generic [ref=e477]:
+      - generic [ref=e478]:
+        - text: En cliquant sur « Accepter », vous acceptez le stockage de cookies sur votre appareil pour améliorer la navigation sur le site, analyser l'utilisation du site et contribuer à nos efforts marketing. Consultez notre
+        - link "Politique de confidentialité" [ref=e479] [cursor=pointer]:
+          - /url: /politique-de-confidentialite
+        - text: pour plus d'informations.
+      - generic [ref=e480]:
+        - button "Refuser" [ref=e481] [cursor=pointer]
+        - button "Accepter" [ref=e482] [cursor=pointer]
+        - button "Paramètres" [ref=e483] [cursor=pointer]

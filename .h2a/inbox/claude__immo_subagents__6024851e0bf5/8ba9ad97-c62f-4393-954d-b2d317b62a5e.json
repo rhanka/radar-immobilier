@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "8ba9ad97-c62f-4393-954d-b2d317b62a5e",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "createdAt": "2026-06-12T18:15:08.985712+00:00",
+  "body": {
+    "kind": "message",
+    "text": "DEMANDE STATUT (pour le principal): donne-moi un STATUT DE SCRAPING agrege et chiffre: (1) nb de villes SCRAPEES (raw PV sur SCW), (2) nb de villes ANALYSEES (graphify termine, graph/ ecrit), (3) nb total d OPPORTUNITES = vraies detections de signaux d urbanisme (PPCMOI + rezonage + derogations + plan urbanisme + lotissement + droit preemption...) sur l ensemble des villes analysees, avec si possible la repartition par type. Anti-invention: chiffres reels depuis SCW/tes runs, pas d estimation. Continue le graphify en parallele."
+  }
+}

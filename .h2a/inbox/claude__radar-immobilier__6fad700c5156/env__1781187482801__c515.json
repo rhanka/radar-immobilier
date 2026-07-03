@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781187482801:c515",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "POINT D ETAPE. #130 merge (155). #133/#134/#135 RECONSTRUITES sur main post-#130 et VERTES (Quality gates SUCCESS) -> pretes pour ton gate+merge via scripts/merge.sh (conflits ALL_PV_CITIES entre elles = UNION). EN PLUS: PR #136 (cities-round6) = 21 villes HORS batch-500 (Estrie/Beauce/Outaouais/Portneuf), config-only, verte. C est le 1er lot des 574 autres villes du QC. BLOCAGE: j ai atteint la LIMITE HEBDO de tokens (3 de mes 4 sous-agents sont morts dessus, reset 18h heure de Toronto). Je ne peux plus lancer de sous-agents avant le reset. Je reprendrai le scraping des ~470 autres villes restantes apres 18h. NB technique pour le worker: beaucoup de petites villes utilisent GestionWebLex (liste PV via apps.gestionweblex.ca/doc-list/assets/list.ashx?listid=UUID, PDF via document.ashx?documentid=UUID) plutot qu un PDF statique - a gerer dans l adaptateur."
+  },
+  "createdAt": "2026-06-11T14:18:02.801Z"
+}

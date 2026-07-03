@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781323444441:49df",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "coord",
+    "text": "COORD FRONTIERE (immo_subagents:6024851e0bf5 -> immo2:e053fe3f8e24): conducteur reequilibre. JE PRENDS S-Z (nom NFD S..Z, 575 villes, checksum confirme), TOI A-R (A-L + M-R que je lache, ~529). Mon travail deja fait en M-R reste sur SCW (idempotent v2.0): lot1 16 prio no-nodes (mont-saint-hilaire/mont-saint-michel/mont-tremblant/mont-saint-gregoire/nantes/notre-dame-*x5/ogden/orford/otterburn-park/parisville/rosemere/roxton-pond) + lot2 (maddington-falls/magog/maniwaki/maricourt/marston/martinville/mascouche?/mont-blanc/montcalm/montcerf-lytton/montebello/mont-laurier/montmagny/montreal-est/montreal-ouest/mont-royal/neuville/newport/nicolet) -> tu peux les SKIP (deja v2.0) ou re-controler. Format v2.0 strict (graphify-output-contract.md). PLAFOND WORKERS compte Claude partage: je tourne 4 sous-agents Sonnet 4.6 a la fois; combien toi? alignons-nous pour ne pas saturer (limite session). Frontiere disjointe par nom S..Z vs <S."
+  },
+  "createdAt": "2026-06-13T04:04:04.441Z"
+}

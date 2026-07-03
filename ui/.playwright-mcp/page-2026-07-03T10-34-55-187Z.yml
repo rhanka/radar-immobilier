@@ -1,0 +1,209 @@
+- generic [ref=f13e3]:
+  - generic [ref=f13e6]:
+    - navigation "Sidebar" [ref=f13e8]:
+      - generic [ref=f13e9]:
+        - generic:
+          - link "Home":
+            - /url: /new
+            - img "Claude"
+        - generic [ref=f13e10]:
+          - button "Open sidebar" [disabled]:
+            - generic:
+              - generic:
+                - generic: 
+                - generic: 
+      - generic [ref=f13e11]:
+        - link "New chat" [ref=f13e15] [cursor=pointer]:
+          - /url: /new
+          - generic [ref=f13e16]:
+            - generic [ref=f13e20]: 
+            - generic:
+              - generic: New chat
+        - generic [ref=f13e21]:
+          - generic [ref=f13e22]:
+            - link "Chats" [ref=f13e24] [cursor=pointer]:
+              - /url: /recents
+              - generic:
+                - generic [ref=f13e26]: 
+                - generic:
+                  - generic: Chats
+            - link "Projects" [ref=f13e28] [cursor=pointer]:
+              - /url: /projects
+              - generic:
+                - generic [ref=f13e30]: 
+                - generic:
+                  - generic: Projects
+            - link "Artifacts" [ref=f13e33] [cursor=pointer]:
+              - /url: /artifacts
+              - generic:
+                - generic [ref=f13e35]: 
+                - generic:
+                  - generic: Artifacts
+            - link "Customize" [ref=f13e37] [cursor=pointer]:
+              - /url: /customize
+              - generic:
+                - generic [ref=f13e39]: 
+                - generic:
+                  - generic: Customize
+          - generic [ref=f13e40]:
+            - generic [ref=f13e41]:
+              - generic:
+                - heading [level=2]:
+                  - button [expanded]:
+                    - generic: 
+            - list [ref=f13e42]:
+              - listitem [ref=f13e43]:
+                - link "Code" [ref=f13e45] [cursor=pointer]:
+                  - /url: /code
+                  - generic [ref=f13e48]: 
+              - listitem [ref=f13e49]:
+                - link "Design" [ref=f13e52] [cursor=pointer]:
+                  - /url: /design?via=web_sidebar_products
+                  - generic [ref=f13e55]: 
+          - generic [ref=f13e59]:
+            - generic:
+              - heading [level=2]:
+                - button [expanded]:
+                  - generic: 
+            - list [ref=f13e60]:
+              - listitem [ref=f13e61]:
+                - link [ref=f13e63] [cursor=pointer]:
+                  - /url: /chat/3eb08206-8668-4fb6-be10-d3c0ffea704b
+                  - generic [ref=f13e64]: Accès aux données du MCP radar immobilier
+              - listitem [ref=f13e65]:
+                - link [ref=f13e67] [cursor=pointer]:
+                  - /url: /chat/8fe6a319-e288-4512-a783-06ed17929238
+                  - generic [ref=f13e68]: Vérifier si le contact de Jiho Kang est légitime
+              - listitem [ref=f13e69]:
+                - link [ref=f13e71] [cursor=pointer]:
+                  - /url: /chat/fbb64f75-cb81-4e90-bbb7-50ece6bd26f9
+                  - generic [ref=f13e72]: Comparaison des meilleurs OCR pour zonage immobilier
+              - listitem [ref=f13e73]:
+                - link [ref=f13e75] [cursor=pointer]:
+                  - /url: /chat/61153b5b-e26d-42d6-a3f5-c63fdb0a37d9
+                  - generic [ref=f13e76]: Top
+              - listitem [ref=f13e77]:
+                - link [ref=f13e79] [cursor=pointer]:
+                  - /url: /chat/f4d68614-cbfd-43a9-afee-ef3eda46fb2a
+                  - generic [ref=f13e80]: Traitement d'une éraflure au visage
+              - listitem [ref=f13e81]:
+                - link [ref=f13e83] [cursor=pointer]:
+                  - /url: /chat/5746a42a-e04b-4f68-8670-59842733ec0b
+                  - generic [ref=f13e84]: Livre blanc IA pour la stratégie digitale Airbus Nord Amérique
+              - listitem [ref=f13e85]:
+                - link [ref=f13e87] [cursor=pointer]:
+                  - /url: /chat/a6d8fc73-251d-4828-b1d7-9f607b661367
+                  - generic [ref=f13e88]: COMAC aéronautique et technologies émergentes
+              - listitem [ref=f13e89]:
+                - link [ref=f13e91] [cursor=pointer]:
+                  - /url: /chat/60c4ec15-0aac-4780-bb81-513541dfc97f
+                  - generic [ref=f13e92]: Test
+              - listitem [ref=f13e93]:
+                - link [ref=f13e95] [cursor=pointer]:
+                  - /url: /chat/7c417ad0-887a-47ef-91f4-027c4e0606dd
+                  - generic [ref=f13e96]: Test message
+              - listitem [ref=f13e97]:
+                - link [ref=f13e99] [cursor=pointer]:
+                  - /url: /chat/dcb25a71-43ec-4a1c-84ba-2b8975259846
+                  - generic [ref=f13e100]: Vérification de fonctionnement
+              - listitem [ref=f13e101]:
+                - link [ref=f13e103] [cursor=pointer]:
+                  - /url: /chat/97abd340-c1a5-45da-9a9d-d7639b3aaa64
+                  - generic [ref=f13e104]: Vérification de fonctionnement
+              - listitem [ref=f13e105]:
+                - link [ref=f13e107] [cursor=pointer]:
+                  - /url: /chat/40930c5f-1123-4eac-a99d-ab5ec363f269
+                  - generic [ref=f13e108]: Quotas et débats
+              - listitem [ref=f13e109]:
+                - link [ref=f13e111] [cursor=pointer]:
+                  - /url: /chat/35df48c6-f8ae-4c8b-91e3-c87398d459f3
+                  - generic [ref=f13e112]: Untitled
+                  - text: Untitled
+              - listitem [ref=f13e113]:
+                - link [ref=f13e115] [cursor=pointer]:
+                  - /url: /chat/15dd05bf-55c7-4aaa-bd27-9f7fcf4e160c
+                  - generic [ref=f13e116]: Untitled
+                  - text: Untitled
+              - listitem [ref=f13e117]:
+                - link [ref=f13e119] [cursor=pointer]:
+                  - /url: /chat/810f8b42-4e00-412f-9334-b805dbc91fdb
+                  - generic [ref=f13e120]: Limitations légales d'un NDA
+              - listitem [ref=f13e121]:
+                - link [ref=f13e123] [cursor=pointer]:
+                  - /url: /chat/747a4192-4053-406f-b488-ea177bea347a
+                  - generic [ref=f13e124]: Épuisement des tokens
+              - listitem [ref=f13e125]:
+                - link [ref=f13e127] [cursor=pointer]:
+                  - /url: /chat/82557649-61c1-4ca1-afa4-25f6ff2cc7d4
+                  - generic [ref=f13e128]: Comparaison workstation dev 32Go RAM
+              - listitem [ref=f13e129]:
+                - link [ref=f13e131] [cursor=pointer]:
+                  - /url: /chat/16384194-8763-452a-8c1e-05f38bd53145
+                  - generic [ref=f13e132]: Coût mensuel de Gemma 4 QAT en tokens
+              - listitem [ref=f13e133]:
+                - link [ref=f13e135] [cursor=pointer]:
+                  - /url: /chat/80178101-cfa4-4974-8af6-30a68c0f772f
+                  - generic [ref=f13e136]: Vérification des tokens disponibles
+              - listitem [ref=f13e137]:
+                - link [ref=f13e139] [cursor=pointer]:
+                  - /url: /chat/f9e1ea13-fd72-405e-b2c7-500f5b3abd22
+                  - generic [ref=f13e140]: Untitled
+                  - text: Untitled
+              - listitem [ref=f13e141]:
+                - link [ref=f13e143] [cursor=pointer]:
+                  - /url: /chat/b77cf619-4ac1-4f1a-8120-b2f5d948fa67
+                  - generic [ref=f13e144]: Schéma architecture GCP avec pods et lab données
+              - listitem [ref=f13e145]:
+                - link [ref=f13e147] [cursor=pointer]:
+                  - /url: /chat/e575111e-36fb-44be-9b07-24e1bc7994cf
+                  - generic [ref=f13e148]: Vérification des transactions Wave
+              - listitem [ref=f13e149]:
+                - link [ref=f13e151] [cursor=pointer]:
+                  - /url: /chat/928da50a-abfb-4bff-85e2-fe31f60b0bd1
+                  - generic [ref=f13e152]: Évaluation rationalisée des cas d'usage Gemini
+              - listitem [ref=f13e153]:
+                - link [ref=f13e155] [cursor=pointer]:
+                  - /url: /chat/bef81743-6d15-42ca-b8b2-124292611606
+                  - generic [ref=f13e156]: Entraîner un LLM pour le reasoning
+              - listitem [ref=f13e157]:
+                - link [ref=f13e159] [cursor=pointer]:
+                  - /url: /chat/c2e48849-0142-41fe-802a-08abbf9f059b
+                  - generic [ref=f13e160]: Monter Google Drive dans un répertoire pour CLI
+              - listitem [ref=f13e161]:
+                - link [ref=f13e163] [cursor=pointer]:
+                  - /url: /chat/d51cb2ee-19db-4c92-9069-222e3f119bc5
+                  - generic [ref=f13e164]: Afficher les lignes cachées dans Claude CLI
+              - listitem [ref=f13e165]:
+                - link [ref=f13e167] [cursor=pointer]:
+                  - /url: /chat/5af6d281-b44b-4fdf-9bee-48b901c59a78
+                  - generic [ref=f13e168]: Ontologies du parfum
+              - listitem [ref=f13e169]:
+                - link [ref=f13e171] [cursor=pointer]:
+                  - /url: /chat/77e4417b-0516-4475-9359-5a91b84d0609
+                  - generic [ref=f13e172]: Compatibilité OData MCP V4 avec ECC6
+              - listitem [ref=f13e173]:
+                - link [ref=f13e175] [cursor=pointer]:
+                  - /url: /chat/29802e0c-266d-4611-97a8-0bf286fa0d43
+                  - generic [ref=f13e176]: Utiliser Claude Cowork
+              - listitem [ref=f13e177]:
+                - link [ref=f13e179] [cursor=pointer]:
+                  - /url: /chat/9afa982d-4fa4-49ad-a97d-20710df297d7
+                  - generic [ref=f13e180]: Intégrer des données externes dans les dashboards ClickUp
+            - link [ref=f13e182] [cursor=pointer]:
+              - /url: /recents
+              - img [ref=f13e183]
+        - link "Get apps and extensions" [ref=f13e189] [cursor=pointer]:
+          - /url: /downloads
+          - generic [ref=f13e192]: 
+        - button "Fabien ANTOINE, Settings" [ref=f13e195] [cursor=pointer]:
+          - generic [ref=f13e199]: FA
+          - generic:
+            - generic [ref=f13e200]:
+              - generic: Fabien ANTOINE
+              - generic: Max plan
+            - img [ref=f13e202]
+    - main [ref=f13e204]:
+      - generic [ref=f13e205]:
+        - status
+  - region "Notifications (F8)":
+    - list

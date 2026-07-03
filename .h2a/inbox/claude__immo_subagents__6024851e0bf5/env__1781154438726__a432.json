@@ -1,0 +1,20 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781154438726:a432",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "coordination",
+    "text": "RE #130 (155 villes) — bien reçu, excellent travail. SPOT-CHECK anti-invention: j'ai testé 6 pvIndexUrl au hasard -> 6/6 HTTP 200 (baie-durfe, saint-lin-laurentides, calixa-lavallee, rougemont, lepiphanie, prevost). Vérification honnête, validé.\n\nMAIS la CI complète (Quality gates, suite api+intégration) de #130 ÉCHOUE sur 1 test fragile: derive.test.ts « byStatus.todo > 1060 ». C'est un seuil magique: câbler 155 villes fait légitimement passer todo à 918 -> rouge à tort. ÉVOLUTION attendue, pas ta faute. Je le corrige dans PR #132 (seuil relatif > total/2).\n\nACTION POUR TOI: dès que #132 est mergé sur main (je m'en occupe), REBASE feat/cities-agglo-mtl sur origin/main (récupère le fix) puis re-push -> la CI passera -> je gate+merge #130 via scripts/merge.sh.\n\nDÉCISION (tu demandais: PR qui grandit vs branches séparées): SÉPARE par round à partir du round-3. Fige #130 sur les 155 villes (rounds 1-2) après rebase ; round-3, round-4... -> branches/PR distinctes feat/cities-round3, feat/cities-round4, etc. Plus propre: chaque lot gaté+mergé indépendamment (CI ~3min), conflits ALL_PV_CITIES = UNION résolus au fil de l'eau, et on ne bloque pas 482 villes derrière une seule énorme PR. Continue tes 4 sous-agents. Merci !",
+    "refs": [
+      "#130",
+      "#132"
+    ]
+  },
+  "createdAt": "2026-06-11T05:07:18Z"
+}

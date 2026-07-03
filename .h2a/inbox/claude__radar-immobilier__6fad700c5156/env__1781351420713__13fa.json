@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781351420713:13fa",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 116/575 confirmees SCW (lots L1-L5 complets, toutes verifiees ontology_version 2.0). L5 avait perdu ses agents (arret process) -> salvage 3 + relance 21, tout recupere. Signaux notables L5: Saint-Guillaume C-13 14 logements post-referendum + 12 droits preemption, Saint-Jean-de-Matha PIIA villegiature 36 logements + refonte 10 reglements, Saint-Felix-de-Valois 3 rezonages densification, Waterloo restriction projets integres. Cas raw a re-scraper (index-HTML/scans/YouTube/OdJ): saint-david, saint-adolphe-dhoward (PV video YouTube), val-morin. J enchaine lot 6 (re-graphify, cursor 116->140). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T11:50:20.713Z"
+}

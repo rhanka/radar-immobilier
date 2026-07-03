@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781400312948:d3e2",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 495/575 (86%) confirmees SCW. Re-graphify 274 + nouvelles 221 (lots 12-21). Reste 80 (~3 lots, dernier <24). Contenu nouvelles cumule ~93/221 (~42%). NB senneterre Ville et Paroisse = 2 munis distinctes (pas doublon). J enchaine lot 22 (cursor 495->519). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-14T01:25:12.949Z"
+}

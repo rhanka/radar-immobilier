@@ -1,0 +1,5 @@
+- generic [ref=e6]:
+  - generic [ref=e7]:
+    - heading "Radar Immobilier" [level=2] [ref=e8]
+    - paragraph [ref=e9]: Connectez-vous avec votre identité Sentropic pour accéder à l'application.
+  - button "Se connecter" [ref=e11] [cursor=pointer]

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781227220602:30df",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "COUVERTURE 550 — PROGRESSION (agents 1 et 3 finis, foreground OK, 0 timeout).\nAgent 3: 110/110. 45 new + 62 seen + 3 error. 605 docs. Preuve SCW: ogden 21, rosemere 38, saint-cuthbert 26 objets.\nErreurs ag3 (3): saint-alphonse-rodriguez (reseau), saint-bernard (404), saint-damase (reseau).\nCUMUL: agents 1+3 = 220/550 villes couvertes, ~1174 docs comptes (90 new, 122 seen, 8 error). Agents 2/4/5 + 3 Steve deep (candiac 28 deja) en cours."
+  },
+  "createdAt": "2026-06-12T01:20:20.603Z"
+}

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781157812187:b522",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "REPORT FINAL — GRAND FILET TERMINE. PR #130 (draft) https://github.com/rhanka/radar-immobilier/pull/130, branche feat/cities-agglo-mtl, 7 commits. TOTAL = 363 villes CONFIG-ONLY ajoutees a ALL_PV_CITIES (config seule, ni fixture ni pvText), en plus des 36 golden existantes. Les ~482 villes du batch ont toutes ete traitees (6 rounds de 4 sous-agents // + tail). Gate vert a chaque commit: tsc -p packages/radar-sources = 0 ; vitest 7 tests de cablage = 370 verts. ECARTEES HONNETEMENT (~120, non cablees, cause tracee dans les notes des sous-agents): js-only (portails SPA VPlus/Modellium/Wix/GestionWeblex/Laserfiche, Cloudflare) ; ocr-required (PV scannes image, pdftotext<30o) ; no-pv-page ; inaccessible (sites morts/TLS) ; perimes >6 mois. PREUVE anti-invention: chaque pvIndexUrl verifiee live HTTP 200 le 2026-06-11 + >=1 PV a couche texte confirme pdftotext>1KB + robots verifie (table dans la description PR + notes par ville). CAVEATS a arbitrer cote worker: ~5 villes ont robots Disallow /docs/ ou /wp-content/uploads/ sur le chemin PV (saint-fortunat, notre-dame-de-la-salette, saint-basile-le-grand, east-farnham deja exclus). IMPORTANT: j ai travaille dans un WORKTREE ISOLE (../radar-immobilier-immo-lots) pour ne pas ecraser ton checkout sur main; conflits ALL_PV_CITIES/generic.ts/index.ts avec tes branches -> UNION (garder les deux). QUESTION: veux-tu que je passe le PR #130 en ready (gh pr ready 130), ou preferes-tu gate+merge (harness verify) toi-meme au fil de l eau ? Je reste disponible pour un nouveau work-order (ex: relancer les js-only avec un rendu headless Playwright, ou OCR les scans). Merci !"
+  },
+  "createdAt": "2026-06-11T06:03:32.187Z"
+}

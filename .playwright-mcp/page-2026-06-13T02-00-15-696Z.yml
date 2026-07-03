@@ -1,0 +1,214 @@
+- generic [active] [ref=e1]:
+  - dialog "Gérer le consentement" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]: Gérer le consentement
+      - text: 
+    - generic [ref=e6]: Pour offrir les meilleures expériences, nous utilisons des technologies telles que les cookies pour stocker et/ou accéder aux informations des appareils. Le fait de consentir à ces technologies nous permettra de traiter des données telles que le comportement de navigation ou les ID uniques sur ce site. Le fait de ne pas consentir ou de retirer son consentement peut avoir un effet négatif sur certaines caractéristiques et fonctions.
+    - generic [ref=e7]:
+      - button "Accepter" [ref=e8] [cursor=pointer]
+      - button "Refuser" [ref=e9] [cursor=pointer]
+      - button "Voir les préférences" [ref=e10] [cursor=pointer]
+    - list [ref=e12]:
+      - listitem [ref=e13]:
+        - link "Politique de cookies" [ref=e14] [cursor=pointer]:
+          - /url: https://leseboulements.com/politique-de-cookies-ca/
+      - listitem [ref=e15]:
+        - link "Déclaration de confidentialité" [ref=e16] [cursor=pointer]:
+          - /url: https://leseboulements.com/vie-municipale/nous-joindre/#politiques
+      - listitem
+  - banner [ref=e17]:
+    - generic [ref=e19]:
+      - link "Municipalité Les Éboulements" [ref=e20] [cursor=pointer]:
+        - /url: https://leseboulements.com
+        - img "Municipalité Les Éboulements" [ref=e21]
+      - generic [ref=e22]:
+        - link [ref=e23] [cursor=pointer]:
+          - /url: https://www.facebook.com/municipalitedeseboulements
+          - img [ref=e24]
+        - link [ref=e26] [cursor=pointer]:
+          - /url: mailto:municipalite@leseboulements.com
+          - img [ref=e27]
+        - link [ref=e30] [cursor=pointer]:
+          - /url: https://www.addtoany.com/share#url=https%3A%2F%2Fleseboulements.com%2Fvie-municipale%2Fmunicipalite%2Fseances-du-conseil-et-proces-verbaux%2F&title=S%C3%A9ances%20du%20conseil%20et%20proc%C3%A8s-verbaux%20-%20Municipalit%C3%A9%20Les%20%C3%89boulements
+          - img [ref=e31]
+      - link [ref=e33] [cursor=pointer]:
+        - /url: javascript:;
+        - img [ref=e34]
+      - generic [ref=e40] [cursor=pointer]: MENU
+    - navigation:
+      - generic:
+        - generic:          
+    - text:          
+  - main [ref=e42]:
+    - generic [ref=e43]:
+      - img "pile dossiers" [ref=e44]
+      - generic [ref=e45]:
+        - generic [ref=e47]:
+          - link "Accueil" [ref=e49] [cursor=pointer]:
+            - /url: https://leseboulements.com/
+          - text: •
+          - link "Vie municipale" [ref=e51] [cursor=pointer]:
+            - /url: https://leseboulements.com/vie-municipale/
+          - text: •
+          - link "Municipalité" [ref=e53] [cursor=pointer]:
+            - /url: https://leseboulements.com/vie-municipale/municipalite/
+          - text: • Séances du conseil et procès-verbaux
+        - generic [ref=e54]: Séances du conseil et procès-verbaux
+    - generic [ref=e55]:
+      - paragraph [ref=e57]: Prochaine séance du conseil
+      - generic [ref=e58]:
+        - paragraph [ref=e59]: lundi, 6 juillet 2026
+        - paragraph [ref=e60]: 20h00
+        - paragraph [ref=e61]:
+          - text: Édifice municipal
+          - text: Salle du Club de la FADOQ – 2335, route du Fleuve, Les Éboulements
+    - generic [ref=e63]:
+      - paragraph [ref=e64]: Séances à venir
+      - generic [ref=e65]:
+        - generic [ref=e67]:
+          - strong [ref=e68]: "10"
+          - generic [ref=e69]: août
+        - generic [ref=e71]:
+          - strong [ref=e72]: "14"
+          - generic [ref=e73]: septembre
+        - generic [ref=e75]:
+          - strong [ref=e76]: "5"
+          - generic [ref=e77]: octobre
+        - generic [ref=e79]:
+          - strong [ref=e80]: "9"
+          - generic [ref=e81]: novembre
+        - generic [ref=e83]:
+          - strong [ref=e84]: "7"
+          - generic [ref=e85]: décembre
+    - generic [ref=e87]:
+      - generic [ref=e89]:
+        - paragraph [ref=e90]: La personne élue au poste de maire préside généralement les séances publiques. Les membres du conseil, la direction générale et la direction générale adjointe de la Municipalité participent également aux séances. Des séances extraordinaires peuvent être convoquées et se tenir à un endroit différent de celui des séances ordinaires.
+        - paragraph [ref=e91]: Le conseil municipal des Éboulements se réunit généralement le premier lundi de chaque mois. Les séances se tiennent à la salle du Club de la FADOQ, dans l’édifice municipal situé au 2335 route du Fleuve, Les Éboulements. Lorsque le lundi est un jour férié, la réunion est remise au lendemain à la même heure. L’ordre du jour est publié sur notre site Internet le vendredi qui précède la séance. Des copies sont disponibles à la salle de réunion le soir même.
+        - paragraph [ref=e92]:
+          - strong [ref=e93]: Règlement de régie interne des séances du conseil municipal
+          - text: "Le conseil municipal s’est doté d’un règlement pour diriger la conduite des débats du conseil municipal et pour maintenir l’ordre et la bienséance pendant les séances publiques. Certaines dispositions encadrent spécifiquement le déroulement de la période de questions. Pour consulter le règlement 283-24 sur la régie interne des séances du conseil municipal, cliquer sur le lien suivant :"
+        - link "Règlement de régie interne des séances 283-24" [ref=e96] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2025/07/03-Adoption-Reglement-283-24-Regie-interne.pdf
+      - generic [ref=e98]:
+        - paragraph [ref=e99]: Un dossier vous préoccupe?
+        - paragraph [ref=e100]: Les citoyens qui souhaitent poser des questions aux élus municipaux peuvent le faire sur place, durant la période de questions à chacune des séances.
+        - paragraph [ref=e101]: Il est également possible de soumettre par écrit ses questions en utilisant nos coordonnées.
+        - link "Nous joindre" [ref=e104] [cursor=pointer]:
+          - /url: https://leseboulements.com/vie-municipale/nous-joindre/
+    - generic [ref=e105]:
+      - paragraph [ref=e106]: Procès-verbaux
+      - paragraph [ref=e107]: "2026"
+      - paragraph [ref=e108]: "Consulter les procès-verbaux 2026 du conseil de la Municipalité :"
+      - generic [ref=e109]:
+        - paragraph [ref=e111]: Juin 2026
+        - link [ref=e112] [cursor=pointer]:
+          - /url: ""
+          - img [ref=e113]
+      - generic [ref=e117]:
+        - paragraph [ref=e119]: Mai 2026
+        - link [ref=e120] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/06/2026-05-11-Seance-ordinaire.pdf
+          - img [ref=e121]
+      - generic [ref=e125]:
+        - paragraph [ref=e127]: Avril 2026 - Séance extraordinaire
+        - link [ref=e128] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/05/2026-04-27-Seance-extraordinaire.pdf
+          - img [ref=e129]
+      - generic [ref=e133]:
+        - paragraph [ref=e135]: Avril 2026
+        - link [ref=e136] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/04/2026-04-13-Seance-ordinaire.pdf
+          - img [ref=e137]
+      - generic [ref=e141]:
+        - paragraph [ref=e143]: Mars 2026 - Séance extraordinaire
+        - link [ref=e144] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/04/2026-03-16-Seance-extraordinaire.pdf
+          - img [ref=e145]
+      - generic [ref=e149]:
+        - paragraph [ref=e151]: Mars 2026
+        - link [ref=e152] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/03/2026-03-09-Seance-ordinaire.pdf
+          - img [ref=e153]
+      - generic [ref=e157]:
+        - paragraph [ref=e159]: Février 2026 - Séance extraordinaire
+        - link [ref=e160] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/04/2026-02-23-Seance-extraordinaire.pdf
+          - img [ref=e161]
+      - generic [ref=e165]:
+        - paragraph [ref=e167]: Février 2026
+        - link [ref=e168] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/02/2026-02-09-Seance-ordinaire.pdf
+          - img [ref=e169]
+      - generic [ref=e173]:
+        - paragraph [ref=e175]: Janvier 2026 - Séance extraordinaire
+        - link [ref=e176] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/02/2026-01-26-Seance-extraordinaire.pdf
+          - img [ref=e177]
+      - generic [ref=e181]:
+        - paragraph [ref=e183]: Janvier 2026 - Budget
+        - link [ref=e184] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/02/2026-01-26-Seance-extraordinaire-du-budget.pdf
+          - img [ref=e185]
+      - generic [ref=e189]:
+        - paragraph [ref=e191]: Janvier 2026
+        - link [ref=e192] [cursor=pointer]:
+          - /url: https://leseboulements.com/wp-content/uploads/2026/02/2026-01-12-Seance-ordinaire.pdf
+          - img [ref=e193]
+      - generic [ref=e197]:
+        - generic [ref=e199] [cursor=pointer]: "2025"
+        - generic [ref=e201] [cursor=pointer]: "2024"
+        - generic [ref=e203] [cursor=pointer]: "2023"
+        - generic [ref=e205] [cursor=pointer]: "2022"
+  - contentinfo [ref=e207]:
+    - generic [ref=e209]:
+      - generic [ref=e210]:
+        - generic [ref=e211]:
+          - paragraph [ref=e213]:
+            - img "Municipalité Les Éboulements" [ref=e214]
+          - generic [ref=e215]:
+            - paragraph [ref=e216]:
+              - link "418 489-2988" [ref=e217] [cursor=pointer]:
+                - /url: tel:4184892988
+            - paragraph [ref=e218]:
+              - text: 2335, route du Fleuve
+              - text: Les Éboulements, QC G0A 2M0
+              - link "municipalite@leseboulements.com" [ref=e219] [cursor=pointer]:
+                - /url: mailto:municipalite@leseboulements.com
+            - paragraph [ref=e220]:
+              - link "Nous joindre" [ref=e221] [cursor=pointer]:
+                - /url: /vie-municipale/nous-joindre/
+        - generic [ref=e222]:
+          - link [ref=e223] [cursor=pointer]:
+            - /url: https://www.fleuronsduquebec.com/municipalites/?s=747&t=1
+          - link "Plus beaux villages" [ref=e224] [cursor=pointer]:
+            - /url: https://plusbeauxvillages.ca/villages/les-eboulements/
+            - img "Plus beaux villages" [ref=e225]
+          - link "facebook" [ref=e226] [cursor=pointer]:
+            - /url: https://www.facebook.com/municipalitedeseboulements
+            - img "facebook" [ref=e227]
+        - generic [ref=e229]:
+          - generic [ref=e230]:
+            - generic [ref=e231]: Danger d’incendie
+            - img "SOPFEU logo" [ref=e233]
+          - generic [ref=e234]:
+            - generic [ref=e235]:
+              - paragraph [ref=e236]: "Prévision pour:"
+              - paragraph [ref=e238]: Charlevoix
+              - generic [ref=e239]:
+                - strong [ref=e242]: Bas
+                - generic [ref=e246]:
+                  - strong [ref=e248]: Modéré
+                  - img [ref=e251]
+                - strong [ref=e255]: Élevé
+                - strong [ref=e261]: Très Élevé
+                - strong [ref=e267]: Extrême
+            - link "Voir sur la carte" [ref=e272] [cursor=pointer]:
+              - /url: https://sopfeu.qc.ca/carte/zone-charlevoix?showFireDanger=true&utm_source=partenaires&utm_medium=widget
+              - text: Voir sur la carte
+              - img [ref=e274]
+      - generic [ref=e276]:
+        - link "Confidentialité et accès à l’information" [ref=e278] [cursor=pointer]:
+          - /url: /vie-municipale/nous-joindre/#politiques
+        - generic [ref=e279]: Municipalité Les Éboulements © 2026 Tous droits réservés
+        - 'link "Réalisation : Axe Création" [ref=e281] [cursor=pointer]':
+          - /url: https://www.axecreation.com/

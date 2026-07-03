@@ -1,0 +1,40 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - generic [ref=e3]:
+          - button "Zoom in" [ref=e4] [cursor=pointer]: +
+          - button "Zoom out" [ref=e5] [cursor=pointer]: −
+        - generic [ref=e6]:
+          - link "Draw a polygon" [ref=e9] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e10]: Draw a polygon
+          - generic [ref=e12]:
+            - link "Edit layers" [ref=e13]:
+              - /url: "#"
+              - generic [ref=e14]: Edit layers
+            - link "Delete layers" [ref=e15]:
+              - /url: "#"
+              - generic [ref=e16]: Delete layers
+      - link "Leaflet" [ref=e18] [cursor=pointer]:
+        - /url: https://leafletjs.com
+        - img [ref=e19]
+        - text: Leaflet
+  - generic [ref=e23]:
+    - heading "✏️ Éditeur de zones" [level=2] [ref=e24]
+    - generic [ref=e25]: Chargement…
+    - generic [ref=e26]:
+      - text: 1. Ouvre le plan de zonage PDF de la ville dans un autre onglet.
+      - text: 2. Clique Dessiner une zone et trace le polygone sur la carte.
+      - text: "3. Entre le code de zone (ex : H-308) et clique OK."
+      - text: 4. Répète pour toutes les zones. Puis Exporter.
+    - button "✏️ Dessiner une zone" [ref=e27] [cursor=pointer]
+    - button "🔧 Modifier un polygone" [ref=e28] [cursor=pointer]
+    - button "🗑️ Supprimer un polygone" [ref=e29] [cursor=pointer]
+    - generic [ref=e31]: "Zones dessinées (0) :"
+    - generic [ref=e32]: Aucune zone encore dessinée.
+    - button "💾 Exporter les zones (JSON)" [ref=e34] [cursor=pointer]
+    - button "📂 Importer des zones existantes" [ref=e35] [cursor=pointer]
+    - button "🗑️ Tout effacer" [ref=e36] [cursor=pointer]
+    - button "📄 Plan zonage Sainte-Catherine (PDF)" [ref=e38] [cursor=pointer]
+    - button "📋 Grilles de zonage — site ville" [ref=e39] [cursor=pointer]

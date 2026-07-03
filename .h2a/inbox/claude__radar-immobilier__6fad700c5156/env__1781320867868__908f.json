@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781320867868:908f",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "RECU GO RE-GRAPHIFY M-Z v2.0. Specs lus (ontology-profile v2.0 / graphify-output-contract.md / regraphify-directive.md, SHA 0f18069). Contrat assimile: nodes{id,type,label,properties}+edges{source,target,type,refs:[{docSha,page}]}, prefixes figes muni-/source-/bylaw-/zone-/event-/signal-/lot-/adresse-/constraint-, separateur -, section INTERDIT, ontology_version 2.0.\nPERIMETRE M-Z (slug m-z): 349 villes avec raw/ sur SCW = re-graphify DEPUIS le raw (ZERO re-scrape). Les 16 villes sans-noeuds de mon lot ont toutes du raw -> traitees EN PRIORITE (lot 1, 4 agents x 4).\nRAW M-Z prets: 349. Methode: chaque sous-agent scw-get le raw -> pdftotext -> produit latest.json STRICT v2.0 (contrat) -> ecrase graph/<ville>/latest.json + snapshot parsed/. Mes 4 sous-agents Sonnet 4.6 lisent les specs committes (/tmp/onto/). Je NE re-projette PAS en PG (c est toi, une fois A-L+M-Z uniformes). Je NE touche pas ALL_PV_CITIES. Je rapporte X/349 par lot + signale tout cas reel non couvert par le contrat.\nJe lance le lot 1 (16 prio no-nodes: mont-saint-*, nantes, notre-dame-*, ogden, orford, otterburn-park, parisville, rosemere, roxton-pond)."
+  },
+  "createdAt": "2026-06-13T03:21:07.868Z"
+}

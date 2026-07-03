@@ -1,0 +1,21 @@
+**Status: done**  
+Implémentation commitée, avec vérification automatisée partielle bloquée par l’environnement Docker Compose.
+
+Changements principaux:
+- Ajout d’un resolver UI `lot-potential-visual` pour produire un score lot 0-10 depuis `potentialScore`, zone, TOD, 4+, `priorite`, ou état `unavailable`.
+- Normalisation de `fetchLots` pour exposer `potentialScoreStatus/source/reason`.
+- Colorisation de la carte lots dans `EvaluationMapView` via la rampe `potentialScore`.
+- Légende remplacée par une légende score 0-10 avec compteurs fallback/non disponible.
+- Fiche lot enrichie avec raison de score/fallback et zone/code quand disponible.
+
+Commits:
+- `0734fa9 feat(ui): resolve lot potential score fallback`
+- `c72a924 feat(ui): color lots by potential score`
+
+Checks:
+- `git diff --check` OK
+- `git diff --check HEAD~2..HEAD` OK
+- `make test-ui ... ENV=test-cs-l1-scoring` bloqué avant exécution: `docker compose` indisponible.
+- Retry avec `DOCKER_COMPOSE=docker-compose` bloqué: `docker-compose` absent.
+
+Aucun `BLOCKED.md`: pas de décision produit/UAT requise, seulement un blocage outillage local pour les tests.

@@ -1,0 +1,265 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic:
+      - banner:
+        - generic [ref=e7]:
+          - link "Ville de Marieville" [ref=e8] [cursor=pointer]:
+            - /url: /fr
+            - img "Ville de Marieville" [ref=e9]
+          - generic [ref=e10]:
+            - generic [ref=e11] [cursor=pointer]:
+              - button "Toggle Navigation" [ref=e12]
+              - generic [ref=e14]: Menu
+            - generic [ref=e16] [cursor=pointer]:
+              - img [ref=e18]
+              - text: Recherche
+            - img [ref=e22] [cursor=pointer]
+        - generic [ref=e27]:
+          - link "Ville de Marieville" [ref=e28] [cursor=pointer]:
+            - /url: /fr
+            - img "Ville de Marieville" [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31] [cursor=pointer]:
+              - button "Toggle Navigation" [ref=e32]
+              - text: Menu
+            - generic [ref=e35] [cursor=pointer]:
+              - img [ref=e37]
+              - text: Recherche
+        - generic:
+          - generic:
+            - generic:
+              - heading "Liens rapides" [level=3]
+              - list:
+                - listitem:
+                  - link "Bureau d'accueil citoyen":
+                    - /url: /fr/services-aux-citoyens/bureau-d-accueil-citoyen
+                - listitem:
+                  - link "Bibliothèque":
+                    - /url: /fr/loisirs-et-culture/bibliotheque
+                - listitem:
+                  - link "Collectes et dépôts":
+                    - /url: /fr/services-aux-citoyens/collectes-et-depots
+                - listitem:
+                  - link "Demande de permis":
+                    - /url: /fr/services-aux-citoyens/permis
+                - listitem:
+                  - link "Système d’alertes automatisées":
+                    - /url: /fr/services-aux-citoyens/securite-civile-et-incendie/systeme-d-alertes-automatisees
+                - listitem:
+                  - link "Répertoire des entreprises":
+                    - /url: /fr/repertoire-des-entreprises
+                - listitem:
+                  - link "Répertoire des organismes":
+                    - /url: /fr/repertoire-des-organismes
+                - listitem:
+                  - link "Réglementation":
+                    - /url: /fr/services-aux-citoyens/reglements-municipaux
+                - listitem:
+                  - link "Rôle d'évaluation":
+                    - /url: /fr/services-aux-citoyens/taxation-et-evaluation
+    - generic [ref=e39]:
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - img "Plus qu'un lieu de résidence, un millieu de vie!" [ref=e47]
+          - link "Découvrir la ville" [ref=e49] [cursor=pointer]:
+            - /url: /fr/decouvrir-marieville
+        - generic [ref=e50]:
+          - heading "Trouvez ce que vous cherchez" [level=2] [ref=e51]
+          - generic [ref=e54]:
+            - textbox "Que cherchez-vous?" [ref=e56]
+            - generic [ref=e57]:
+              - link "Accès Marieville" [ref=e58] [cursor=pointer]:
+                - /url: https://acces.marieville.ca/accueil
+              - link "Avis publics" [ref=e59] [cursor=pointer]:
+                - /url: /fr/la-ville/avis-publics
+              - link "Bibliothèque" [ref=e60] [cursor=pointer]:
+                - /url: /fr/loisirs-et-culture/bibliotheque
+              - link "Bureau d'accueil citoyen" [ref=e61] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/bureau-d-accueil-citoyen
+              - link "Camps de jour" [ref=e62] [cursor=pointer]:
+                - /url: /fr/loisirs-et-culture/camps-de-jour
+              - link "Collectes" [ref=e63] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/collectes-et-depots
+              - link "Emplois" [ref=e64] [cursor=pointer]:
+                - /url: /fr/la-ville/offres-d-emploi
+              - link "Fêtons l'été" [ref=e65] [cursor=pointer]:
+                - /url: /fr/la-ville/communications/publications#programme-des-activites
+              - link "Grands projets" [ref=e66] [cursor=pointer]:
+                - /url: /fr/la-ville/grands-projets
+              - link "Permis" [ref=e67] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/permis
+              - link "Séances du conseil" [ref=e68] [cursor=pointer]:
+                - /url: /fr/la-ville/conseil-municipal/seances-du-conseil
+              - link "Règlements" [ref=e69] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/reglements-municipaux
+              - link "Taxation et évaluation" [ref=e70] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/taxation-et-evaluation
+              - link "Travaux" [ref=e71] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/reseau-routier/info-travaux
+        - img [ref=e74] [cursor=pointer]
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - heading "À la une" [level=2] [ref=e78]
+            - link "+ Voir toutes les actualités" [ref=e80] [cursor=pointer]:
+              - /url: /fr/actualites
+          - generic [ref=e83]:
+            - link "12 juin 2026 Offres d’emploi de commis à la bibliothèque" [ref=e85] [cursor=pointer]:
+              - /url: /fr/actualites/2026/offres-d-emploi-de-commis-a-la-bibliotheque
+              - img [ref=e87]
+              - generic [ref=e88]:
+                - generic [ref=e89]: 12 juin 2026
+                - heading "Offres d’emploi de commis à la bibliothèque" [level=3] [ref=e90]
+            - link "12 juin 2026 Travaux d’amélioration du drainage pluvial – Entraves à la circulation du 15 au 19 juin" [ref=e92] [cursor=pointer]:
+              - /url: /fr/actualites/2026/travaux-d-amelioration-du-drainage-pluvial-entraves-a-la-circulation-du-15-au-19-juin
+              - img [ref=e94]
+              - generic [ref=e95]:
+                - generic [ref=e96]: 12 juin 2026
+                - heading "Travaux d’amélioration du drainage pluvial – Entraves à la circulation du 15 au 19 juin" [level=3] [ref=e97]
+          - text: +
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - heading "Au calendrier" [level=2] [ref=e100]
+            - link "+ Voir tous les événements" [ref=e102] [cursor=pointer]:
+              - /url: /fr/evenements
+          - generic [ref=e103]:
+            - link "Le 17 juin 2026 Mini-conte en pyjama" [ref=e105] [cursor=pointer]:
+              - /url: /fr/evenements/859/mini-conte-en-pyjama
+              - img [ref=e107]
+              - generic [ref=e108]:
+                - generic [ref=e110]: Le 17 juin 2026
+                - heading "Mini-conte en pyjama" [level=3] [ref=e111]
+            - link "Le 21 juin 2026 Yoga en plein air" [ref=e113] [cursor=pointer]:
+              - /url: /fr/evenements/912/yoga-en-plein-air
+              - img [ref=e115]
+              - generic [ref=e116]:
+                - generic [ref=e118]: Le 21 juin 2026
+                - heading "Yoga en plein air" [level=3] [ref=e119]
+            - link "Le 24 juin 2026 Congé de la fête nationale du Québec" [ref=e121] [cursor=pointer]:
+              - /url: /fr/evenements/922/conge-de-la-fete-nationale-du-quebec
+              - img [ref=e123]
+              - generic [ref=e124]:
+                - generic [ref=e126]: Le 24 juin 2026
+                - heading "Congé de la fête nationale du Québec" [level=3] [ref=e127]
+          - text: +
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - link "Événements" [ref=e133] [cursor=pointer]:
+              - /url: /fr/loisirs-et-culture/activites-et-evenements
+              - heading "Événements" [level=3] [ref=e134]
+            - generic [ref=e135]:
+              - link "Plaintes et requêtes Formulaire en ligne" [ref=e136] [cursor=pointer]:
+                - /url: https://marieville.edemandes.com/fr/create
+                - img [ref=e137]
+                - heading "Plaintes et requêtes" [level=3] [ref=e150]
+                - paragraph [ref=e151]: Formulaire en ligne
+              - link "Rôle d'évaluation" [ref=e152] [cursor=pointer]:
+                - /url: /fr/services-aux-citoyens/taxation-et-evaluation
+                - heading "Rôle d'évaluation" [level=3] [ref=e153]
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - link "Revitalisation du centre-ville" [ref=e156] [cursor=pointer]:
+                - /url: /fr/centre-ville/revitalisation-du-centre-ville
+                - heading "Revitalisation du centre-ville" [level=3] [ref=e157]:
+                  - text: Revitalisation
+                  - text: du centre-ville
+              - link "Explorer la ville Voir sur la carte interactive" [ref=e158] [cursor=pointer]:
+                - /url: /fr/carte-interactive
+                - img [ref=e159]
+                - heading "Explorer la ville" [level=3] [ref=e163]
+                - paragraph [ref=e164]: Voir sur la carte interactive
+            - link "Opportunités d'affaires à Marieville" [ref=e166] [cursor=pointer]:
+              - /url: /fr/vie-economique/opportunites-d-affaires-a-marieville
+              - heading "Opportunités d'affaires à Marieville" [level=3] [ref=e167]
+          - generic [ref=e168]:
+            - link "Demande de permis Tout ce que vous devez savoir pour réaliser vos travaux." [ref=e170] [cursor=pointer]:
+              - /url: /fr/services-aux-citoyens/permis
+              - img [ref=e171]
+              - heading "Demande de permis" [level=3] [ref=e177]
+              - paragraph [ref=e178]: Tout ce que vous devez savoir pour réaliser vos travaux.
+            - link "Alertes automatisées" [ref=e180] [cursor=pointer]:
+              - /url: /fr/services-aux-citoyens/securite-civile-et-incendie/systeme-d-alertes-automatisees
+              - img [ref=e181]
+              - heading "Alertes automatisées" [level=3] [ref=e185]:
+                - text: Alertes
+                - text: automatisées
+          - link "Règlements municipaux" [ref=e188] [cursor=pointer]:
+            - /url: /fr/services-aux-citoyens/reglements-municipaux
+            - heading "Règlements municipaux" [level=3] [ref=e189]:
+              - text: Règlements
+              - text: municipaux
+  - generic [ref=e190]:
+    - link [ref=e191] [cursor=pointer]:
+      - /url: /fr/la-ville/communications/infolettres
+      - img [ref=e193]
+      - img [ref=e279]
+      - img [ref=e311]
+    - contentinfo [ref=e325]:
+      - generic [ref=e327]:
+        - generic [ref=e328]:
+          - link "Marieville" [ref=e329] [cursor=pointer]:
+            - /url: /fr
+            - img "Marieville" [ref=e330]
+          - link "682, rue Saint-Charles Marieville (Québec) J3M 1P9" [ref=e331] [cursor=pointer]:
+            - /url: https://www.google.com/maps/place/682+Rue+Saint-Charles,+Marieville,+QC+J3M+1P9
+            - text: 682, rue Saint-Charles
+            - text: Marieville (Québec) J3M 1P9
+          - link "450 460-4444" [ref=e332] [cursor=pointer]:
+            - /url: tel:4504604444
+          - link "communications@ville.marieville.qc.ca" [ref=e333] [cursor=pointer]:
+            - /url: mailto:communications@ville.marieville.qc.ca
+        - generic [ref=e334]:
+          - link [ref=e335] [cursor=pointer]:
+            - /url: https://mrcrouville.qc.ca/
+            - img [ref=e336]
+          - link [ref=e337] [cursor=pointer]:
+            - /url: /fr/services-aux-citoyens/environnement/les-fleurons-du-quebec
+            - img [ref=e338]
+        - generic [ref=e339]:
+          - generic [ref=e340]:
+            - generic [ref=e341]:
+              - generic [ref=e342]: Suivez-nous
+              - list [ref=e343]:
+                - listitem [ref=e344]:
+                  - link "Facebook" [ref=e345] [cursor=pointer]:
+                    - /url: https://www.facebook.com/villedemarieville
+                    - img "Facebook" [ref=e346]
+            - link "Nous joindre" [ref=e348] [cursor=pointer]:
+              - /url: /fr/nous-joindre
+          - list [ref=e350]:
+            - listitem [ref=e351]:
+              - link "Note légale|" [ref=e352] [cursor=pointer]:
+                - /url: /fr/note-legale
+            - listitem [ref=e353]:
+              - link "Accessibilité|" [ref=e354] [cursor=pointer]:
+                - /url: /fr/accessibilite
+            - listitem [ref=e355]:
+              - link "Confidentialité|" [ref=e356] [cursor=pointer]:
+                - /url: /fr/confidentialite
+            - listitem [ref=e357]:
+              - link "Plan de site" [ref=e358] [cursor=pointer]:
+                - /url: /fr/plan-de-site
+          - link [ref=e359] [cursor=pointer]:
+            - /url: https://acces.marieville.ca/accueil
+            - img [ref=e360]
+        - generic [ref=e361]:
+          - paragraph [ref=e362]: © Ville de Marieville. Tous droits réservés.
+          - paragraph [ref=e363]:
+            - text: "Conception Web ::"
+            - link "LANEC" [ref=e364] [cursor=pointer]:
+              - /url: https://lanec.com
+            - generic [ref=e365]: "|"
+            - text: Propulsé par
+            - link [ref=e366] [cursor=pointer]:
+              - /url: https://maruche.ca
+              - img [ref=e367]
+  - generic [ref=e376]:
+    - generic [ref=e377]: Nous respectons votre vie privée.
+    - generic [ref=e378]:
+      - generic [ref=e379]: Ce site Web utilise des fichiers témoins (cookies) pour améliorer votre expérience de navigation et mieux comprendre son utilisation. En cliquant sur « Tout accepter », vous consentez à l’utilisation des fichiers témoins.
+      - link "Politique de confidentialité" [ref=e380] [cursor=pointer]:
+        - /url: /fr/confidentialite
+    - generic [ref=e381]:
+      - generic [ref=e382] [cursor=pointer]: Personnaliser
+      - generic [ref=e383] [cursor=pointer]: Tout rejeter
+      - generic [ref=e384] [cursor=pointer]: Tout accepter
