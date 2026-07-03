@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ScrapeStatusT } from "@radar/domain";
-import { sourceCoverageRoute } from "./source-coverage.js";
+import {
+  computeCoverageStatus,
+  sourceCoverageRoute,
+  type CoverageStatusInput,
+} from "./source-coverage.js";
 import { createApp } from "../app.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
@@ -37,7 +41,9 @@ interface CityCoverage {
   l2Graph: GraphCell;
   signals: SignalsCell;
   l4Zonage: GeoCell;
+  normes: CoverageCell;
   l5Lots: GeoCell;
+  tod: GeoCell;
   worstStatus: "verified" | "declared" | "absent";
   nextMarginalGain: "zonage" | "lots" | null;
 }
@@ -189,6 +195,13 @@ describe("GET /api/source/coverage", () => {
     expect(sample.l4Zonage).toHaveProperty("served");
     expect(sample.l4Zonage).toHaveProperty("servedBy");
     expect(sample.l5Lots).toHaveProperty("served");
+    // Couches explicites du détail ville : normes (grilles) + TOD.
+    expect(sample.normes).toMatchObject({
+      state: expect.any(String),
+      freshness: expect.any(String),
+    });
+    expect(sample.tod).toHaveProperty("served");
+    expect(sample.tod).toHaveProperty("servedBy");
     expect(sample).toHaveProperty("worstStatus");
     expect(sample).toHaveProperty("nextMarginalGain");
 
@@ -256,7 +269,7 @@ describe("GET /api/source/coverage", () => {
     expect(empty?.worstStatus).toBe("absent");
   });
 
-  it("sets worstStatus to the most-behind step (L1 verified but downstream absent → absent)", async () => {
+  it("worstStatus: a single served layer (PV only) → Partiel, never green, never grey", async () => {
     const store = makeMemStore();
     await upsert(
       store,
@@ -273,8 +286,27 @@ describe("GET /api/source/coverage", () => {
     expect(brossard.l2Graph.state).toBe("absent");
     expect(brossard.l4Zonage.state).toBe("absent");
     expect(brossard.l5Lots.state).toBe("absent");
-    // Anti-survente: a single verified step never paints the city green.
-    expect(brossard.worstStatus).toBe("absent");
+    // Anti-survente: a single served layer never paints the city green — but a
+    // partially covered city is HONESTLY orange (Partiel), not grey.
+    expect(brossard.worstStatus).toBe("declared");
+  });
+
+  it("worstStatus: lots+zonage served live but no PV/signals → Partiel (province reality)", async () => {
+    const store = makeMemStore();
+    const fetchImpl = listingFetch([
+      "qc-zonage-tadoussac",
+      "qc-lots-tadoussac",
+    ]);
+    const body = await request({ store, db: makeDb([]), fetchImpl });
+
+    // La grande majorité de la province est dans ce cas : couches géo servies
+    // (listing live) mais PV/signaux absents → Partiel (orange), pas gris.
+    const tadoussac = cityOf(body, "tadoussac");
+    expect(tadoussac.l4Zonage.state).toBe("verified");
+    expect(tadoussac.l5Lots.state).toBe("verified");
+    expect(tadoussac.l1Raw.state).toBe("absent");
+    expect(tadoussac.signals.state).toBe("absent");
+    expect(tadoussac.worstStatus).toBe("declared");
   });
 
   // ── BUG 1 : « servi » = listing LIVE geo, pas le seul PG local ─────────────
@@ -366,6 +398,91 @@ describe("GET /api/source/coverage", () => {
     expect(hippolyte.l5Lots.served).toBe(false);
   });
 
+  // ── Couche TOD : listing live geo (qc-tod-<slug>), aucun store local ───────
+
+  it("serves the TOD layer from the live listing (qc-tod-<slug>), absent otherwise", async () => {
+    const store = makeMemStore();
+    const fetchImpl = listingFetch(["qc-tod-brossard", "qc-lots-brossard"]);
+    const body = await request({ store, db: makeDb([]), fetchImpl });
+
+    const brossard = cityOf(body, "brossard");
+    expect(brossard.tod).toMatchObject({
+      state: "verified",
+      served: true,
+      servedBy: "geo",
+      freshness: "fresh",
+    });
+
+    // Pas de collection qc-tod-<slug> → absent honnête (jamais de vert fabriqué).
+    const hippolyte = cityOf(body, "saint-hippolyte");
+    expect(hippolyte.tod).toMatchObject({
+      state: "absent",
+      served: false,
+      servedBy: null,
+    });
+  });
+
+  // ── Couche normes (grilles) : reprise de la mesure lazy quand chaude ───────
+
+  it("normes: absent by default (bulk never measures), picks up the warm lazy grilles measure", async () => {
+    const store = makeMemStore();
+    // fetch qui sert le LISTING (collections) ET les items zonage (grilles).
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/items")) {
+        return new Response(
+          JSON.stringify({
+            type: "FeatureCollection",
+            features: [
+              { properties: { zone_code: "H-1", URL_GRILLE: "https://x/h1.pdf" } },
+              { properties: { zone_code: "H-2" } }, // sans grille ni normes
+            ],
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          collections: [{ id: "qc-zonage-salaberry-de-valleyfield" }],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    const app = sourceCoverageRoute({
+      store,
+      db: makeDb([]),
+      now: NOW,
+      fetchImpl,
+    });
+
+    // Cache froid : la cellule bulk est `absent` (aucune grille prouvée à date).
+    const cold = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(cold, "salaberry-de-valleyfield").normes.state).toBe("absent");
+
+    // Mesure lazy du détail ville (1 grille / 2 zones → declared)…
+    const grillesRes = await app.request(
+      "/api/source/coverage/salaberry-de-valleyfield/grilles",
+    );
+    expect(
+      ((await grillesRes.json()) as CityGrillesResponse).state,
+    ).toBe("declared");
+
+    // …reprise par le bulk tant qu'elle est chaude (jamais de fetch per-city).
+    const warm = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    const valleyfield = cityOf(warm, "salaberry-de-valleyfield");
+    expect(valleyfield.normes).toMatchObject({
+      state: "declared",
+      freshness: "fresh",
+    });
+    // Les autres villes restent absent (pas de mesure).
+    expect(cityOf(warm, "brossard").normes.state).toBe("absent");
+  });
+
   // ── Signaux extraits (projection PG + part avec citation vérifiable) ────────
 
   it("exposes the signals layer with citation share from the graph projection", async () => {
@@ -428,7 +545,7 @@ describe("GET /api/source/coverage", () => {
     expect(brossard.signals.state).toBe("absent");
   });
 
-  it("keeps worstStatus on the core L1/L2/L4/L5 chain (annex layers do not repaint the map)", async () => {
+  it("worstStatus: core layers complete (PV+signaux+zonage+lots) → Servi even without normes/TOD", async () => {
     const store = makeMemStore();
     await upsert(
       store,
@@ -450,7 +567,53 @@ describe("GET /api/source/coverage", () => {
       ],
       [],
       [],
-      [], // signaux non projetés → cellule declared
+      [
+        {
+          citySlug: "salaberry-de-valleyfield",
+          signalCount: 12,
+          withCitation: 9,
+          lastCreatedAt: RECENT,
+        },
+      ],
+    ]);
+    const fetchImpl = listingFetch([
+      "qc-zonage-salaberry-de-valleyfield",
+      "qc-lots-salaberry-de-valleyfield",
+    ]);
+    const body = await request({ store, db, fetchImpl });
+
+    const valleyfield = cityOf(body, "salaberry-de-valleyfield");
+    expect(valleyfield.signals.state).toBe("verified");
+    // Couches ANNEXES éparses (normes, TOD) absentes : elles ne bloquent pas
+    // le « Servi » — la chaîne cœur complète garde la ville verte.
+    expect(valleyfield.normes.state).toBe("absent");
+    expect(valleyfield.tod.state).toBe("absent");
+    expect(valleyfield.worstStatus).toBe("verified");
+  });
+
+  it("worstStatus: graphified city with served geo but signals not projected → Partiel (core incomplete)", async () => {
+    const store = makeMemStore();
+    await upsert(
+      store,
+      scrapeStatus({
+        citySlug: "salaberry-de-valleyfield",
+        source: "conseils-municipaux",
+        status: "graphified",
+        lastRunAt: RECENT.toISOString(),
+      }),
+    );
+    const db = makeDb([
+      [
+        {
+          citySlug: "salaberry-de-valleyfield",
+          nodeCount: 40,
+          lastCreatedAt: RECENT,
+          ontologyVersion: "v2.3",
+        },
+      ],
+      [],
+      [],
+      [], // signaux non projetés → cellule declared (couche cœur incomplète)
     ]);
     const fetchImpl = listingFetch([
       "qc-zonage-salaberry-de-valleyfield",
@@ -460,8 +623,8 @@ describe("GET /api/source/coverage", () => {
 
     const valleyfield = cityOf(body, "salaberry-de-valleyfield");
     expect(valleyfield.signals.state).toBe("declared");
-    // Chaîne cœur toute verte → la ville reste verte sur la carte.
-    expect(valleyfield.worstStatus).toBe("verified");
+    // Signaux non servis = couverture PARTIELLE (honnête), pas un faux vert.
+    expect(valleyfield.worstStatus).toBe("declared");
   });
 
   // ── Prochain gain marginal (D7) sur les flags « servi » corrigés ───────────
@@ -587,6 +750,97 @@ describe("GET /api/source/coverage", () => {
     const body = (await res.json()) as CoverageResponse;
     expect(body.totals.cities).toBe(body.cities.length);
     expect(cityOf(body, "brossard").l1Raw.state).toBe("verified");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Statut agrégé tri-état (couleur carte) — unit tests PURS
+//   Servi = couches cœur complètes · Partiel = au moins une couche servie ·
+//   Non couvert = rien de servi.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("computeCoverageStatus (tri-état agrégé)", () => {
+  function statusInput(
+    overrides: Partial<CoverageStatusInput> = {},
+  ): CoverageStatusInput {
+    return {
+      l1Raw: "absent",
+      l2Graph: "absent",
+      signals: "absent",
+      l4Zonage: "absent",
+      normes: "absent",
+      l5Lots: "absent",
+      tod: "absent",
+      ...overrides,
+    };
+  }
+
+  it("lots seuls servis → Partiel (declared), jamais gris", () => {
+    expect(computeCoverageStatus(statusInput({ l5Lots: "verified" }))).toBe(
+      "declared",
+    );
+  });
+
+  it("toutes les couches cœur servies (PV+signaux+zonage+lots) → Servi (verified)", () => {
+    expect(
+      computeCoverageStatus(
+        statusInput({
+          l1Raw: "verified",
+          signals: "verified",
+          l4Zonage: "verified",
+          l5Lots: "verified",
+        }),
+      ),
+    ).toBe("verified");
+  });
+
+  it("rien de connu → Non couvert (absent)", () => {
+    expect(computeCoverageStatus(statusInput())).toBe("absent");
+  });
+
+  it("statuts seulement déclarés (rien de servi) → Non couvert (anti-survente)", () => {
+    expect(
+      computeCoverageStatus(
+        statusInput({ l1Raw: "declared", l4Zonage: "declared" }),
+      ),
+    ).toBe("absent");
+  });
+
+  it("cœur incomplet (zonage servi mais pas lots, ou graphé mais pas lots) → Partiel", () => {
+    expect(
+      computeCoverageStatus(
+        statusInput({ l1Raw: "verified", l4Zonage: "verified" }),
+      ),
+    ).toBe("declared");
+    expect(
+      computeCoverageStatus(
+        statusInput({ l1Raw: "verified", l2Graph: "verified" }),
+      ),
+    ).toBe("declared");
+  });
+
+  it("couche annexe seule servie (TOD ou normes) → Partiel", () => {
+    expect(computeCoverageStatus(statusInput({ tod: "verified" }))).toBe(
+      "declared",
+    );
+    expect(computeCoverageStatus(statusInput({ normes: "verified" }))).toBe(
+      "declared",
+    );
+  });
+
+  it("couches annexes absentes (normes/TOD épars) ne bloquent JAMAIS le Servi", () => {
+    expect(
+      computeCoverageStatus(
+        statusInput({
+          l1Raw: "verified",
+          signals: "verified",
+          l4Zonage: "verified",
+          l5Lots: "verified",
+          normes: "absent",
+          tod: "absent",
+        }),
+      ),
+    ).toBe("verified");
   });
 });
 

@@ -3,18 +3,22 @@
  * de données e2e, choropleth honnête).
  *
  * Contrat : GET /api/source/coverage (api/src/routes/source-coverage.ts). Chaque
- * couche (PV collectés / données structurées / signaux extraits / zonage servi /
- * lots servis) est un TRI-ÉTAT
+ * couche (PV collectés / signaux extraits / zones servies / normes (grilles) /
+ * lots (cadastre) / TOD) est un TRI-ÉTAT
  *   - `verified` : substantié LIVE (preuve en base OU collection listée live
  *                  par l'API géo au moment de la requête).
  *   - `declared` : déclaré mais NON substantié (statut annoncé, rien en base).
  *   - `absent`   : rien de connu.
- * Zonage/lots « servis » sont mesurés sur le LISTING LIVE de l'API géo (ce que
- * la carte sert réellement), avec repli honnête sur le store local.
+ * Zonage/lots/TOD « servis » sont mesurés sur le LISTING LIVE de l'API géo (ce
+ * que la carte sert réellement), avec repli honnête sur le store local.
  *
- * Anti-survente (D2) : la couleur de ville = le PIRE statut honnête de sa chaîne
- * (`worstStatus`). JAMAIS un score 0-100, JAMAIS de vert fabriqué. Une ville sans
- * couverture connue est `absent` (gris neutre), pas une erreur, pas du vert.
+ * Statut agrégé (`worstStatus`, couleur carte + badge « Couverture ») :
+ *   - `verified` (« Servi »)       : couches CŒUR (PV, signaux, zonage, lots)
+ *                                    toutes substantiées live.
+ *   - `declared` (« Partiel »)     : au moins une couche servie, pas toutes.
+ *   - `absent`   (« Non couvert ») : aucune couche servie.
+ * Anti-survente (D2) : JAMAIS un score 0-100, JAMAIS de vert fabriqué. Une ville
+ * sans couverture connue est `absent` (gris neutre), pas une erreur, pas du vert.
  */
 import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
@@ -52,6 +56,16 @@ export interface GeoCell {
   freshness: Freshness;
 }
 
+/**
+ * Normes (grilles de zonage) au niveau bulk : `absent` tant qu'aucune grille
+ * n'est prouvée (la mesure fine reste LAZY au détail ville — donnée éparse,
+ * « Non couvert » majoritaire honnête).
+ */
+export interface NormesCell {
+  state: CoverageState;
+  freshness: Freshness;
+}
+
 export interface CityCoverage {
   citySlug: string;
   cityName: string;
@@ -61,7 +75,10 @@ export interface CityCoverage {
   l2Graph: GraphCell;
   signals: SignalsCell;
   l4Zonage: GeoCell;
+  normes: NormesCell;
   l5Lots: GeoCell;
+  /** Périmètres TOD servis (collection `qc-tod-<slug>` du listing live géo). */
+  tod: GeoCell;
   worstStatus: CoverageState;
   nextMarginalGain: "zonage" | "lots" | null;
 }
@@ -138,9 +155,9 @@ export async function fetchCityGrilles(
 // ── Tri-état : couleurs + libellés (3 états DISTINCTS, D2) ────────────────────
 
 /**
- * Couleur de l'aplat ville = pire statut honnête. Trois couleurs DISTINCTES :
- *   verified → vert (substantié live), declared → ambre (déclaré non
- *   substantié), absent → gris neutre (rien de connu). JAMAIS de score continu.
+ * Couleur de l'aplat ville = statut agrégé honnête. Trois couleurs DISTINCTES :
+ *   verified → vert (couches cœur complètes), declared → ambre (couverture
+ *   partielle), absent → gris neutre (rien de servi). JAMAIS de score continu.
  */
 export const STATE_COLOR: Record<CoverageState, string> = {
   verified: "#16a34a", // green-600 — « Servi »
@@ -182,16 +199,16 @@ export function colorForState(state: CoverageState): string {
   return STATE_COLOR[state];
 }
 
-/** Couleur de l'aplat d'une ville = couleur de son PIRE statut honnête. */
+/** Couleur de l'aplat d'une ville = couleur de son statut agrégé honnête. */
 export function colorForCity(city: CityCoverage): string {
   return STATE_COLOR[city.worstStatus];
 }
 
-// ── Expression choroplèthe MapLibre (couleur = pire statut) ───────────────────
+// ── Expression choroplèthe MapLibre (couleur = statut agrégé) ─────────────────
 
 /**
- * Expression `fill-color` MapLibre : `match` sur `citySlug` → couleur du pire
- * statut honnête de la ville. Le fallback est la couleur `absent` : une ville
+ * Expression `fill-color` MapLibre : `match` sur `citySlug` → couleur du statut
+ * agrégé honnête de la ville. Le fallback est la couleur `absent` : une ville
  * présente dans le geojson mais ABSENTE de la couverture est peinte `absent`
  * (honnête), jamais en vert, jamais en erreur.
  */
