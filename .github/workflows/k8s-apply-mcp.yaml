@@ -55,7 +55,7 @@ jobs:
 
       - name: Wait for rollout
         run: |
-          kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=300s
           kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=300s
           kubectl -n "$NAMESPACE" get pods -l app.kubernetes.io/component=mcp -o wide
 
