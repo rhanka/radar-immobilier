@@ -19,6 +19,12 @@ export function createDb(config: AppConfig): DbHandle {
     user: config.POSTGRES_USER,
     password: config.POSTGRES_PASSWORD,
     database: config.POSTGRES_DB,
+    // Bound the connection wait so an unreachable Postgres fails fast instead of
+    // hanging checkDb()/requests until the k8s probe timeout kills the pod
+    // (crash-loop cause C2, radar-api-memory-study-2026-07-02.md). Small pool:
+    // the api is I/O-light per request and runs on ½ core.
+    connectionTimeoutMillis: 3000,
+    max: 5,
   });
   const db = drizzle(pool, { schema });
   return { db, pool };
