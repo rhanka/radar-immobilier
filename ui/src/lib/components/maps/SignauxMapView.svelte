@@ -5,8 +5,9 @@
    * Layout ws-shell (graphify) :
    *   RAIL (menu gauche w-80) | CANVAS (carte MapLibre) | SEL (panneau droit w-80)
    *
-   * - Rail gauche : SignauxRail (recherche + facets + accordéon natif) +
-   *   « Filtre Zones et Lots » (LotDataFilterPanel) entre Signaux et Villes
+   * - Rail gauche : SignauxRail (recherche + facets + liste plate de villes) +
+   *   « Filtre Zones et Lots » (LotDataFilterPanel) entre Signaux et Villes ;
+   *   les signaux de la ville active vivent à DROITE (bucket « Signaux »)
    * - Canvas : MapLibre GL aplats choroplèthe + flyTo au clic ville
    * - Sel droit : SignauxSelPanel (détail ville + nœuds par type)
    * - Légende épinglée en bas du rail (slot controls-footer ViewLayout)
@@ -200,9 +201,7 @@
   }
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
-  // ── Cache multi-villes : types vus + nœuds par ville ──────────────────────
-  /** Accumule les types de nœuds vus au fil des villes cliquées. */
-  let knownNodeTypes: string[] = [];
+  // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
   let appliedGeoRouteKey: string | null = null;
@@ -700,10 +699,8 @@
         return;
       }
       detailNodes = res.nodes;
-      // Alimenter le cache multi-villes et accumuler les types connus
+      // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
-      const newTypes = res.nodes.map((n) => n.type);
-      knownNodeTypes = Array.from(new Set([...knownNodeTypes, ...newTypes])).sort();
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
       // quel signal ouvrir (clic dans le panneau droit).
       updateGeoLayers();
@@ -1443,11 +1440,8 @@
     <SignauxRail
       entries={allEntries}
       selectedSlug={selectedCity?.municipality.slug ?? null}
-      {detailNodes}
-      {knownNodeTypes}
       {loading}
       dataUnavailable={loadError !== null}
-      {detailLoading}
       initialSubsetKey={activeSubsetKey}
       onSelectCity={selectCity}
       onRefresh={load}
