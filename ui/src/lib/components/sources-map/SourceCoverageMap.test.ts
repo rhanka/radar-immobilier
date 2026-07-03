@@ -121,6 +121,7 @@ function city(
   cityName: string,
   priorityRank: number | null,
   worstStatus: CoverageState = "absent",
+  signalCount = 3,
 ): CityCoverage {
   return {
     citySlug,
@@ -129,7 +130,12 @@ function city(
     priorityRank,
     l1Raw: { state: "verified", count: 9, freshness: "fresh" },
     l2Graph: { state: "verified", ontologyVersion: "2.2", freshness: "fresh" },
-    signals: { state: "verified", count: 3, withCitation: 2, freshness: "fresh" },
+    signals: {
+      state: signalCount > 0 ? "verified" : "absent",
+      count: signalCount,
+      withCitation: signalCount > 0 ? 2 : 0,
+      freshness: signalCount > 0 ? "fresh" : "unknown",
+    },
     // served: false → la scorecard NE déclenche PAS le fetch lazy des grilles.
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     normes: { state: "absent", freshness: "unknown" },
@@ -140,11 +146,13 @@ function city(
   };
 }
 
+// Portée « 30 villes à signaux » = présence de signaux (plus priorityRank) :
+// rimouski a 0 signal → exclue du focus30 même si listée en « Toutes ».
 const CITIES: CityCoverage[] = [
-  city("delson", "Delson", 12, "declared"),
-  city("sainte-catherine", "Sainte-Catherine", 20, "verified"),
-  city("la-prairie", "La Prairie", 5, "absent"),
-  city("rimouski", "Rimouski", 480, "verified"),
+  city("delson", "Delson", 12, "declared", 17),
+  city("sainte-catherine", "Sainte-Catherine", 20, "verified", 16),
+  city("la-prairie", "La Prairie", 5, "absent", 14),
+  city("rimouski", "Rimouski", 480, "verified", 0),
 ];
 
 const RESPONSE: CoverageResponse = {
@@ -332,13 +340,15 @@ describe("SourceCoverageMap — la portée pilote la liste ET la carte", () => {
     expect(expr).toContain(0.18);
   });
 
-  it("radio « 30 villes à signaux » → rang ≤ 30 listées, expression focus-30", async () => {
+  it("radio « 30 villes à signaux » → villes à signaux listées, expression focus-30", async () => {
     const { container, getByTestId } = renderView();
     const radios = getAllByRole(container, "radio") as HTMLInputElement[];
     await fireEvent.click(radios[1]); // « 30 villes à signaux »
 
     const rows = container.querySelectorAll("button.rail-city-row");
-    expect(rows.length).toBe(3); // la-prairie(5) · delson(12) · sainte-catherine(20)
+    // delson(17) · sainte-catherine(16) · la-prairie(14) ont des signaux ;
+    // rimouski (0 signal) est exclue MALGRÉ sa présence en « Toutes ».
+    expect(rows.length).toBe(3);
 
     const expr = JSON.parse(
       getByTestId("stub-map").dataset.fillOpacity ?? "null",

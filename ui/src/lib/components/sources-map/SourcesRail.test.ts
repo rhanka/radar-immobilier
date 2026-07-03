@@ -16,12 +16,13 @@ import type {
 
 afterEach(() => cleanup());
 
-/** Fixture minimale — slug/nom/MRC/rang/pire statut suffisent au rail. */
+/** Fixture minimale — slug/nom/MRC/rang/pire statut + nb de signaux (focus30). */
 function city(
   citySlug: string,
   cityName: string,
   priorityRank: number | null,
   worstStatus: CoverageState = "absent",
+  signalCount = 0,
 ): CityCoverage {
   return {
     citySlug,
@@ -30,7 +31,12 @@ function city(
     priorityRank,
     l1Raw: { state: "absent", count: 0, freshness: "unknown" },
     l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-    signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+    signals: {
+      state: signalCount > 0 ? "verified" : "absent",
+      count: signalCount,
+      withCitation: 0,
+      freshness: signalCount > 0 ? "fresh" : "unknown",
+    },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     normes: { state: "absent", freshness: "unknown" },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
@@ -40,13 +46,14 @@ function city(
   };
 }
 
-// delson + sainte-catherine = villes QA (REFERENCE_CITIES) ; la-prairie =
-// focus-30 seulement ; rimouski = hors portées restreintes.
+// delson + sainte-catherine = villes QA (REFERENCE_CITIES), à signaux ;
+// la-prairie = à signaux seulement (focus30) ; rimouski = 0 signal → hors
+// focus30 (présence de signaux, plus priorityRank).
 const CITIES: CityCoverage[] = [
-  city("delson", "Delson", 12, "declared"),
-  city("sainte-catherine", "Sainte-Catherine", 20, "verified"),
-  city("la-prairie", "La Prairie", 5, "absent"),
-  city("rimouski", "Rimouski", 480, "verified"),
+  city("delson", "Delson", 12, "declared", 17),
+  city("sainte-catherine", "Sainte-Catherine", 20, "verified", 16),
+  city("la-prairie", "La Prairie", 5, "absent", 14),
+  city("rimouski", "Rimouski", 480, "verified", 0),
 ];
 
 function renderRail(
@@ -136,9 +143,10 @@ describe("SourcesRail — la liste de villes reflète la portée", () => {
     ]);
   });
 
-  it("« 30 villes à signaux » → seules les villes rang ≤ 30", () => {
+  it("« 30 villes à signaux » → seules les villes À SIGNAUX (Rimouski 0 signal exclue)", () => {
     const { container } = renderRail({ scope: "focus30" });
     const rows = cityRows(container);
+    // delson (17), sainte-catherine (16), la-prairie (14) ont des signaux.
     expect(rows.length).toBe(3);
     expect(rows.map((r) => r.textContent?.includes("Rimouski"))).not.toContain(true);
   });
