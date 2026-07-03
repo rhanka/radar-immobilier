@@ -234,17 +234,80 @@ export function buildFillColorExpression(
   return expr as ExpressionSpecification;
 }
 
-/** Une ville est-elle dans le focus-30 (priorityRank ≤ 30) ? (D3) */
-export function isFocusCity(city: CityCoverage): boolean {
-  return city.priorityRank !== null && city.priorityRank <= 30;
+// ── Focus 30 = les 30 villes À SIGNAUX (présence de signaux, PAS la proximité) ─
+
+/**
+ * Taille du périmètre « Focus 30 » (carte Couverture + Console).
+ */
+export const FOCUS_CITY_COUNT = 30;
+
+/**
+ * Périmètre « Focus 30 » calculé sur les DONNÉES de couverture.
+ *
+ * DÉFINITION (corrigée 2026-07, bug signalé par Steve) : le focus-30 = les 30
+ * villes qui ONT des signaux projetés (`signals.count > 0` — Signal +
+ * DesignationEvent, la matière de la vue Signaux et de ses 3 filtres
+ * zonage / multifamilial 4+ / précoce), classées par NOMBRE de signaux
+ * décroissant. Ce n'est PLUS `priorityRank ≤ 30` (proximité de Montréal) :
+ * ce critère incluait des villes proches SANS aucun signal (ex. Kirkland,
+ * Brossard — 0 signal) et excluait des villes à signaux éloignées
+ * (ex. Mont-Tremblant, 13 signaux, rang proximité 351).
+ *
+ * Une ville sans signal n'est JAMAIS focus, quel que soit son priorityRank.
+ * La portée « Focus QA : 4 villes » (REFERENCE_CITIES de la carte Steve) est
+ * un périmètre distinct et n'est pas affectée.
+ */
+export interface FocusScope {
+  /** Slugs du focus (top `FOCUS_CITY_COUNT` villes à signaux). */
+  slugs: ReadonlySet<string>;
+  /** Rang 1..N par nombre de signaux (villes à signaux uniquement). */
+  rankBySlug: ReadonlyMap<string, number>;
+}
+
+/**
+ * Construit le périmètre focus depuis la réponse de couverture :
+ * villes `signals.count > 0`, triées par `signals.count` décroissant
+ * (tie-break : priorityRank croissant puis nom — ordre STABLE), tronquées à
+ * `limit`. Réponse vide / aucune ville à signaux → focus vide (honnête).
+ */
+export function computeFocusScope(
+  cities: CityCoverage[],
+  limit: number = FOCUS_CITY_COUNT,
+): FocusScope {
+  const withSignals = cities
+    .filter((c) => c.signals.count > 0)
+    .sort((a, b) => {
+      if (b.signals.count !== a.signals.count) {
+        return b.signals.count - a.signals.count;
+      }
+      const ra = a.priorityRank ?? Number.POSITIVE_INFINITY;
+      const rb = b.priorityRank ?? Number.POSITIVE_INFINITY;
+      if (ra !== rb) return ra - rb;
+      return a.cityName.localeCompare(b.cityName, "fr");
+    });
+  const rankBySlug = new Map<string, number>();
+  withSignals.forEach((c, i) => rankBySlug.set(c.citySlug, i + 1));
+  return {
+    slugs: new Set(withSignals.slice(0, limit).map((c) => c.citySlug)),
+    rankBySlug,
+  };
+}
+
+/**
+ * Une ville est-elle dans le focus-30 ? Critère : PRÉSENCE DE SIGNAUX (top 30
+ * par `signals.count` via `computeFocusScope`), plus jamais `priorityRank ≤ 30`.
+ */
+export function isFocusCity(city: CityCoverage, scope: FocusScope): boolean {
+  return scope.slugs.has(city.citySlug);
 }
 
 /**
  * Expression `fill-opacity` MapLibre. Deux régimes (D3) :
  *   - `focusOnly=false` (Province) : opacité uniforme, les 1104 villes visibles.
- *   - `focusOnly=true`  (Focus 30) : surbrillance des villes priorityRank ≤ 30
- *     (opaques), le reste de la province atténué. C'est un HIGHLIGHT visuel
- *     (pas un recompute, pas un filtre de données).
+ *   - `focusOnly=true`  (Focus 30) : surbrillance des 30 villes À SIGNAUX
+ *     (`computeFocusScope`, top 30 par nombre de signaux), le reste de la
+ *     province atténué. C'est un HIGHLIGHT visuel (pas un recompute, pas un
+ *     filtre de données).
  */
 export function buildFocusOpacityExpression(
   cities: CityCoverage[],
@@ -256,9 +319,13 @@ export function buildFocusOpacityExpression(
   if (!focusOnly) {
     return PROVINCE_OPACITY as unknown as ExpressionSpecification;
   }
+  const scope = computeFocusScope(cities);
   const expr: unknown[] = ["match", ["get", "citySlug"]];
   for (const city of cities) {
-    expr.push(city.citySlug, isFocusCity(city) ? FOCUS_OPACITY : DIMMED_OPACITY);
+    expr.push(
+      city.citySlug,
+      isFocusCity(city, scope) ? FOCUS_OPACITY : DIMMED_OPACITY,
+    );
   }
   // Villes hors couverture : atténuées en mode focus (elles ne sont pas focus).
   expr.push(DIMMED_OPACITY);
@@ -318,8 +385,10 @@ const WORST_RANK: Record<CoverageState, number> = {
 
 /**
  * Ordre Console : pires statuts d'abord (absent < declared < verified), puis
- * focus-30 (priorityRank) avant le reste, puis alpha. Met en avant les villes
- * qui demandent une action, sans cacher l'honnêteté du tri-état.
+ * proximité (priorityRank) avant le reste, puis alpha. Met en avant les villes
+ * qui demandent une action, sans cacher l'honnêteté du tri-état. NB : le
+ * priorityRank n'est ici qu'un ordre d'affichage secondaire — le périmètre
+ * « Focus 30 », lui, se base sur la présence de signaux (computeFocusScope).
  */
 export function sortCitiesForConsole(cities: CityCoverage[]): CityCoverage[] {
   return [...cities].sort((a, b) => {

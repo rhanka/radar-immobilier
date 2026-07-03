@@ -17,6 +17,7 @@ import {
   buildFillColorExpression,
   buildFocusOpacityExpression,
   isFocusCity,
+  computeFocusScope,
   buildProvinceHeadline,
   formatProvinceHeadline,
   countCheapZonageCompletions,
@@ -150,26 +151,91 @@ describe("buildFillColorExpression — anti-survente", () => {
   });
 });
 
-// ── 3. Focus-30 : highlight visuel, pas un recompute (D3) ─────────────────────
+// ── 3. Focus-30 : les 30 villes À SIGNAUX (présence de signaux, PAS proximité) ─
 
-describe("focus-30 highlight", () => {
-  it("isFocusCity : rank ≤ 30 oui ; rank null/>30 non", () => {
-    expect(isFocusCity(makeCity({ priorityRank: 1 }))).toBe(true);
-    expect(isFocusCity(makeCity({ priorityRank: 30 }))).toBe(true);
-    expect(isFocusCity(makeCity({ priorityRank: 31 }))).toBe(false);
-    expect(isFocusCity(makeCity({ priorityRank: null }))).toBe(false);
+describe("focus-30 = villes à signaux (computeFocusScope)", () => {
+  /** Ville avec `count` signaux projetés (cellule signaux cohérente). */
+  function makeSignalCity(
+    slug: string,
+    count: number,
+    priorityRank: number | null = null,
+  ): CityCoverage {
+    return makeCity({
+      citySlug: slug,
+      cityName: slug,
+      priorityRank,
+      signals: {
+        state: count > 0 ? "verified" : "absent",
+        count,
+        withCitation: 0,
+        freshness: count > 0 ? "fresh" : "unknown",
+      },
+    });
+  }
+
+  it("bug Steve : ville proche SANS signal JAMAIS focus, ville à signaux LOIN focus", () => {
+    // Ancien critère (priorityRank ≤ 30) : Kirkland (rang 30, 0 signal) était
+    // focus et Mont-Tremblant (rang 351, 13 signaux) ne l'était pas. Corrigé :
+    // le focus se base sur la PRÉSENCE de signaux.
+    const kirkland = makeSignalCity("kirkland", 0, 30);
+    const tremblant = makeSignalCity("mont-tremblant", 13, 351);
+    const scope = computeFocusScope([kirkland, tremblant]);
+    expect(isFocusCity(kirkland, scope)).toBe(false);
+    expect(isFocusCity(tremblant, scope)).toBe(true);
+  });
+
+  it("priorityRank 1 sans signal : pas focus (le rang proximité ne compte plus)", () => {
+    const scope = computeFocusScope([
+      makeSignalCity("proche-sans-signal", 0, 1),
+      makeSignalCity("loin-avec-signal", 2, 900),
+    ]);
+    expect(scope.slugs.has("proche-sans-signal")).toBe(false);
+    expect(scope.slugs.has("loin-avec-signal")).toBe(true);
+  });
+
+  it("tronque aux 30 villes au PLUS de signaux (rang par signalCount)", () => {
+    // 35 villes à signaux (1..35 signaux) : le focus = les 30 plus fournies.
+    const cities = Array.from({ length: 35 }, (_, i) =>
+      makeSignalCity(`v${String(i + 1).padStart(2, "0")}`, i + 1),
+    );
+    const scope = computeFocusScope(cities);
+    expect(scope.slugs.size).toBe(30);
+    expect(scope.slugs.has("v35")).toBe(true); // la plus fournie
+    expect(scope.slugs.has("v06")).toBe(true); // 30e par nb de signaux
+    expect(scope.slugs.has("v05")).toBe(false); // 31e : hors focus
+    expect(scope.rankBySlug.get("v35")).toBe(1);
+    expect(scope.rankBySlug.get("v06")).toBe(30);
+  });
+
+  it("moins de 30 villes à signaux → focus = TOUTES les villes à signaux, rien d'inventé", () => {
+    const scope = computeFocusScope([
+      makeSignalCity("a", 3),
+      makeSignalCity("b", 1),
+      makeSignalCity("zero", 0),
+    ]);
+    expect(scope.slugs.size).toBe(2);
+    expect(scope.slugs.has("zero")).toBe(false);
+  });
+
+  it("égalité de signaux : tie-break priorityRank croissant (ordre stable)", () => {
+    const scope = computeFocusScope([
+      makeSignalCity("loin", 5, 400),
+      makeSignalCity("proche", 5, 10),
+    ]);
+    expect(scope.rankBySlug.get("proche")).toBe(1);
+    expect(scope.rankBySlug.get("loin")).toBe(2);
   });
 
   it("mode Province : opacité uniforme (number), pas d'expression par ville", () => {
-    const cities = [makeCity({ citySlug: "a", priorityRank: 1 })];
+    const cities = [makeSignalCity("a", 4, 1)];
     const op = buildFocusOpacityExpression(cities, false);
     expect(typeof op).toBe("number");
   });
 
-  it("mode Focus 30 : focus opaque, hors-focus atténué, fallback atténué", () => {
+  it("mode Focus 30 : ville à signaux opaque, sans signal atténuée, fallback atténué", () => {
     const cities = [
-      makeCity({ citySlug: "focus", priorityRank: 5 }),
-      makeCity({ citySlug: "horsfocus", priorityRank: 800 }),
+      makeSignalCity("focus", 13, 351), // à signaux, loin → focus
+      makeSignalCity("horsfocus", 0, 5), // proche, 0 signal → atténuée
     ];
     const expr = buildFocusOpacityExpression(cities, true) as unknown[];
     const focusOp = colorFromExpression(expr, "focus") as unknown as number;

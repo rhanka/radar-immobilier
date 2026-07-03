@@ -4,9 +4,11 @@
  * Vérifie :
  *   1. Défaut = Province : toutes les villes (actives) sont listées, le segment
  *      « Province (1104) » est pressé.
- *   2. Focus 30 actif : SEULES les villes focus (priorityRank ≤ 30, même
- *      critère `isFocusCity` que le toggle de la carte Couverture) restent
- *      listées ; les hors-focus (rank > 30 ou null) disparaissent.
+ *   2. Focus 30 actif : SEULES les villes À SIGNAUX (`computeFocusScope`, même
+ *      critère que le toggle de la carte Couverture) restent listées ; les
+ *      villes SANS signal disparaissent MÊME proches de Montréal (bug Steve :
+ *      l'ancien critère priorityRank ≤ 30 gardait Kirkland/Brossard sans signal
+ *      et excluait Mont-Tremblant, 13 signaux, rang proximité 351).
  *   3. Le périmètre se COMBINE aux filtres existants (statut + recherche).
  *   4. Retour Province : la liste complète revient.
  *
@@ -44,6 +46,7 @@ function makeCity(
   slug: string,
   name: string,
   priorityRank: number | null,
+  signalCount = 0,
 ): CityCoverage {
   return {
     citySlug: slug,
@@ -52,7 +55,12 @@ function makeCity(
     priorityRank,
     l1Raw: { state: "verified", count: 3, freshness: "fresh" },
     l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-    signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+    signals: {
+      state: signalCount > 0 ? "verified" : "absent",
+      count: signalCount,
+      withCitation: 0,
+      freshness: signalCount > 0 ? "fresh" : "unknown",
+    },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     normes: { state: "absent", freshness: "unknown" },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
@@ -62,15 +70,17 @@ function makeCity(
   };
 }
 
-// 3 villes focus (rank ≤ 30) + 2 hors-focus (rank > 30 / rank null).
+// 3 villes À SIGNAUX (focus — dont Mont-Tremblant, LOIN : rang proximité 351)
+// + 2 villes SANS signal (hors-focus MÊME proches : Kirkland rang 30, Brossard
+// rang 12 — l'ancien critère proximité les gardait à tort).
 const FOCUS_CITIES = [
-  makeCity("longueuil", "Longueuil", 1),
-  makeCity("brossard", "Brossard", 12),
-  makeCity("chambly", "Chambly", 30),
+  makeCity("mont-tremblant", "Mont-Tremblant", 351, 13),
+  makeCity("saint-eustache", "Saint-Eustache", 55, 221),
+  makeCity("lery", "Léry", 35, 28),
 ];
 const NON_FOCUS_CITIES = [
-  makeCity("delson", "Delson", 45),
-  makeCity("st-damase", "Saint-Damase", null),
+  makeCity("kirkland", "Kirkland", 30, 0),
+  makeCity("brossard", "Brossard", 12, 0),
 ];
 const CITIES = [...FOCUS_CITIES, ...NON_FOCUS_CITIES];
 
@@ -111,14 +121,16 @@ describe("SourceConsole — périmètre Province / Focus 30", () => {
     );
   });
 
-  it("Focus 30 actif : SEULES les villes focus (priorityRank ≤ 30) sont listées", async () => {
+  it("Focus 30 actif : SEULES les villes À SIGNAUX sont listées (bug Steve corrigé)", async () => {
     const { container, getByRole, getByTestId } = renderConsole();
     await fireEvent.click(getByRole("button", { name: "Focus 30" }));
 
     expect(getByRole("button", { name: "Focus 30" }).getAttribute("aria-pressed")).toBe("true");
     const names = listedCityNames(container);
     expect(names.sort()).toEqual(FOCUS_CITIES.map((c) => c.cityName).sort());
-    // Aucune hors-focus (rank > 30 ou null) ne doit rester.
+    // Mont-Tremblant (13 signaux, rang proximité 351) EST focus.
+    expect(names).toContain("Mont-Tremblant");
+    // Aucune ville SANS signal ne reste, même proche (Kirkland 30, Brossard 12).
     for (const c of NON_FOCUS_CITIES) expect(names).not.toContain(c.cityName);
     // Compteur cohérent avec le périmètre filtré.
     expect(getByTestId("console-count").textContent).toContain("3 villes");
@@ -127,9 +139,9 @@ describe("SourceConsole — périmètre Province / Focus 30", () => {
   it("le périmètre se combine à la recherche existante", async () => {
     const { container, getByRole, getByPlaceholderText } = renderConsole();
     await fireEvent.click(getByRole("button", { name: "Focus 30" }));
-    // « Delson » est hors-focus : la recherche ne doit RIEN retourner en Focus 30.
+    // « Kirkland » est hors-focus (0 signal) : la recherche ne retourne RIEN en Focus 30.
     await fireEvent.input(getByPlaceholderText("Rechercher une ville / MRC…"), {
-      target: { value: "delson" },
+      target: { value: "kirkland" },
     });
     expect(listedCityNames(container)).toEqual([]);
     expect(within(container).getByText("Aucune ville ne correspond au filtre.")).toBeTruthy();

@@ -18,6 +18,7 @@
     sortCitiesForConsole,
     formatProvinceHeadline,
     buildProvinceHeadline,
+    computeFocusScope,
     isFocusCity,
     STATE_COLOR,
     STATE_LABEL,
@@ -40,13 +41,15 @@
 
   // ── Périmètre : Province / Focus 30 (parité onglet « Couverture ») ─────────
   // Mêmes intitulés que le toggle de la carte Couverture ; même critère
-  // (`isFocusCity`, priorityRank ≤ 30) — ici c'est un FILTRE de lignes (la
-  // carte, elle, atténue sans filtrer). Défaut : Province, comme la carte.
+  // (`computeFocusScope` : les 30 villes À SIGNAUX, classées par nombre de
+  // signaux — plus jamais priorityRank ≤ 30) — ici c'est un FILTRE de lignes
+  // (la carte, elle, atténue sans filtrer). Défaut : Province, comme la carte.
   const SEG_PROVINCE = "Province (1104)";
   const SEG_FOCUS = "Focus 30";
   const SEGMENTS = [SEG_PROVINCE, SEG_FOCUS] as const;
   let focusOnly = false;
   $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
+  $: focusScope = computeFocusScope(cities);
 
   const FILTERS: { value: Filter; label: string }[] = [
     { value: "actives", label: "Actives" },
@@ -74,8 +77,8 @@
 
   $: sorted = sortCitiesForConsole(cities);
   $: filtered = sorted.filter((c) => {
-    // Périmètre Focus 30 : s'applique EN PLUS des filtres statut + recherche.
-    if (focusOnly && !isFocusCity(c)) return false;
+    // Périmètre Focus 30 (villes à signaux) : EN PLUS des filtres statut + recherche.
+    if (focusOnly && !isFocusCity(c, focusScope)) return false;
     if (filter === "actives") {
       if (!isActive(c)) return false;
     } else if (filter !== "all" && c.worstStatus !== filter) {
@@ -235,8 +238,9 @@
                 <td class="px-4 py-2">
                   <div class="flex items-center gap-2">
                     <span class="font-medium text-slate-800">{city.cityName}</span>
-                    {#if isFocusCity(city)}
-                      <Badge tone="info" class="text-[10px]">#{city.priorityRank}</Badge>
+                    {#if isFocusCity(city, focusScope)}
+                      <!-- Rang par NOMBRE DE SIGNAUX (critère focus), pas la proximité. -->
+                      <Badge tone="info" class="text-[10px]">#{focusScope.rankBySlug.get(city.citySlug)}</Badge>
                     {/if}
                   </div>
                   {#if city.mrc}
@@ -276,7 +280,7 @@
   <!-- ── Panneau droit : scorecard détaillée ──────────────────────────────── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} onClose={() => { selectedCity = null; }} />
+      <SourceScorecard city={selectedCity} {focusScope} onClose={() => { selectedCity = null; }} />
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <p class="text-sm text-slate-400">

@@ -25,6 +25,7 @@
   import type { RailCityItem } from "$lib/maps/rail-city-items.js";
   import {
     colorForCity,
+    computeFocusScope,
     STATE_BADGE_TONE,
     STATE_LABEL,
     type CityCoverage,
@@ -58,11 +59,14 @@
   export let onRefresh: () => void = () => {};
 
   // ── Liste des villes de la portée ──────────────────────────────────────────
+  // Périmètre « 30 villes à signaux » relatif au classement province-wide :
+  // calculé UNE fois puis passé au prédicat par ville (jamais recalculé/ville).
+  $: focusScope = computeFocusScope(cities);
   // #5 (parité Signaux) : la ville sélectionnée reste listée même hors portée.
   $: scopedCities = cities
     .filter(
       (city) =>
-        cityInScope(city, scope) ||
+        cityInScope(city, scope, focusScope) ||
         (selectedSlug !== null && city.citySlug === selectedSlug),
     )
     .sort(compareCities);
