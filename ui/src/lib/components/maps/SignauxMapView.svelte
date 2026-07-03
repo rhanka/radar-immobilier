@@ -87,6 +87,11 @@
     type GeoLevel,
   } from "$lib/maps/geo-level-navigation.js";
   import {
+    buildDrillSegments,
+    computeDrillLevel,
+    zonesConfigured,
+  } from "$lib/maps/geo-drill.js";
+  import {
     navigateToGeoRoute,
     type GeoRoute,
   } from "$lib/router/router.js";
@@ -400,11 +405,15 @@
     state: SelectionBucketState,
     city: CityMapEntry | null,
   ): string {
+    // Projection de l'état bucket vers la logique de drill PARTAGÉE (geo-drill,
+    // mutualisée avec la vue Sources/Couverture).
     const zoneSelected =
       state.focusedKey?.startsWith("zone:") ||
       [...state.selectedKeys].some((key) => key.startsWith("zone:"));
-    if (zoneSelected) return "Zone";
-    return city ? "Ville" : "Province";
+    return computeDrillLevel({
+      hasSelectedCity: city !== null,
+      hasZoneSelection: !!zoneSelected,
+    });
   }
 
   // PAS de `$: activeGeoLevel = …` : ce statement est déclaré AVANT le
@@ -542,21 +551,11 @@
     city: CityMapEntry | null,
     zonesRes: GeoZonesResponse | null,
   ): GeoSegment[] {
-    const configured = !!(
-      zonesRes &&
-      zonesRes.zoneCount > 0 &&
-      zonesRes.featureCollection.features.length > 0
-    );
-    const zoneDisabled = city !== null && !configured;
-    return [
-      { label: "Province" },
-      { label: "Ville" },
-      {
-        label: "Zone",
-        disabled: zoneDisabled,
-        ariaLabel: zoneDisabled ? "Zone (zones non configurées)" : "Zone",
-      },
-    ];
+    // Segments du drill PARTAGÉS (geo-drill, mutualisés avec Sources/Couverture).
+    return buildDrillSegments({
+      hasSelectedCity: city !== null,
+      zonesConfigured: zonesConfigured(zonesRes),
+    });
   }
 
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
