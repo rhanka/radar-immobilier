@@ -2,16 +2,17 @@
   /**
    * SourceScorecard — scorecard qualité de données d'UNE ville (D6).
    *
-   * Affiche la CHAÎNE QUALITÉ COMPLÈTE en tri-état, avec preuve + fraîcheur :
-   *   PV collectés · Données structurées · Signaux extraits (+ part avec
-   *   citation vérifiable) · Zonage servi · Grilles de zonage · Lots servis
-   * Chaque ligne : badge « Servi » / « Partiel » / « Non couvert » (copy client
-   * neutre). Jamais de « vert » fabriqué : la tonalité suit l'état réel.
+   * Une ligne par COUCHE RÉELLE, en tri-état avec preuve + fraîcheur, dans
+   * l'ordre : PV collectés · Signaux extraits (+ part avec citation
+   * vérifiable) · Zones servies · Normes (grilles) · Lots (cadastre) ·
+   * Périmètres TOD. Chaque ligne : badge « Servi » / « Partiel » /
+   * « Non couvert » (copy client neutre). Jamais de « vert » fabriqué : la
+   * tonalité suit l'état réel.
    *
-   * La ligne « Grilles de zonage » est mesurée LAZY (live, côté API) à la
+   * La ligne « Normes (grilles) » est mesurée LAZY (live, côté API) à la
    * sélection de la ville : donnée éparse aujourd'hui, « Non couvert » honnête
    * quand absente, « donnée indisponible » (jamais un faux gris) quand l'API
-   * géo est injoignable.
+   * géo est injoignable. TOD vient du listing live géo (`qc-tod-<slug>`).
    *
    * Réutilisé par la carte (panneau au clic) ET la Console (ligne dépliée).
    */
@@ -83,17 +84,6 @@
             : "aucune donnée",
     },
     {
-      key: "graph",
-      label: "Données structurées",
-      cell: city.l2Graph,
-      evidence:
-        city.l2Graph.state === "verified"
-          ? "données structurées"
-          : city.l2Graph.state === "declared"
-            ? "annoncé, non structuré"
-            : "non structuré",
-    },
-    {
       key: "signaux",
       label: "Signaux extraits",
       cell: city.signals,
@@ -105,16 +95,22 @@
             : "aucun signal extrait",
     },
     {
-      key: "zonage",
-      label: "Zonage servi",
+      key: "zones",
+      label: "Zones servies",
       cell: city.l4Zonage,
-      evidence: geoEvidence(city.l4Zonage, "zonage servi"),
+      evidence: geoEvidence(city.l4Zonage, "zones servies"),
     },
     {
       key: "lots",
-      label: "Lots servis",
+      label: "Lots (cadastre)",
       cell: city.l5Lots,
       evidence: geoEvidence(city.l5Lots, "lots servis"),
+    },
+    {
+      key: "tod",
+      label: "Périmètres TOD",
+      cell: city.tod,
+      evidence: geoEvidence(city.tod, "périmètres TOD servis"),
     },
   ];
 
@@ -178,13 +174,13 @@
   <ul class="divide-y divide-slate-100" data-testid="scorecard-rows">
     {#each rows as row (row.key)}
       {#if row.key === "lots"}
-        <!-- Grilles de zonage : ligne LAZY (live), insérée avant les lots -->
+        <!-- Normes (grilles) : ligne LAZY (live), insérée entre zones et lots -->
         <li
           class="flex items-center justify-between gap-3 px-4 py-2.5"
           data-testid="scorecard-grilles"
         >
           <div class="min-w-0">
-            <p class="text-xs font-semibold text-slate-700">Grilles de zonage</p>
+            <p class="text-xs font-semibold text-slate-700">Normes (grilles)</p>
             <p class="text-xs text-slate-400">{grillesEvidence}</p>
           </div>
           <div class="flex shrink-0 flex-col items-end gap-0.5">

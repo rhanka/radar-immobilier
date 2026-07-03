@@ -43,8 +43,24 @@ import {
  *                  — le PG local seul sous-estimait massivement (70/1106 alors
  *                  que geo sert 500+ zonages). Repli honnête : listing
  *                  injoignable → statut PG local seul (dégradé, jamais de 5xx).
+ *   - TOD        : « servi » = collection `qc-tod-<slug>` dans le MÊME listing
+ *                  live (aucun store local aujourd'hui) ; listing injoignable →
+ *                  `absent` (dégradé honnête, jamais de vert fabriqué).
+ *   - Normes     : reprise de la mesure grilles LAZY (endpoint /:citySlug/grilles)
+ *                  quand elle est chaude en cache ; sinon `absent` honnête
+ *                  (aucune grille prouvée à date — jamais mesuré en bulk).
  * Soit 4 requêtes agrégées set-based + une lecture scrape-status + un GET
  * listing geo (caché), point.
+ *
+ * Statut agrégé par ville (`worstStatus`, couleur carte) — tri-état client :
+ *   - « Servi »       (`verified`) : les couches CŒUR (PV, signaux, zonage,
+ *                     lots) sont TOUTES substantiées live.
+ *   - « Partiel »     (`declared`) : AU MOINS une couche (cœur ou annexe) est
+ *                     servie, mais pas toutes les couches cœur.
+ *   - « Non couvert » (`absent`)   : aucune couche servie.
+ * Les couches annexes (graphe, normes/grilles, TOD — éparses aujourd'hui)
+ * comptent pour « Partiel » mais ne bloquent jamais le « Servi » (honnête sans
+ * repeindre la province en gris). Voir computeCoverageStatus (unit-testée).
  *
  * GET /api/source/coverage/:citySlug/grilles — détail LAZY par ville :
  * présence de grilles de zonage (grillePdfUrl) / normes (densité, usages) sur
@@ -77,12 +93,6 @@ const RAW_SOURCES: readonly ScrapeStatusSourceT[] = [
 
 type CoverageState = "verified" | "declared" | "absent";
 type Freshness = "fresh" | "partial" | "stale" | "unknown";
-
-const STATE_RANK: Record<CoverageState, number> = {
-  absent: 0,
-  declared: 1,
-  verified: 2,
-};
 
 export interface SourceCoverageDeps {
   store: ObjectStore;
@@ -126,6 +136,16 @@ interface GeoCell {
   freshness: Freshness;
 }
 
+/**
+ * Normes (grilles de zonage) au niveau bulk : reprend la mesure LAZY du détail
+ * ville (endpoint grilles) quand elle est chaude en cache ; sinon `absent`
+ * honnête (« aucune grille prouvée à date »), jamais un vert fabriqué.
+ */
+interface NormesCell {
+  state: CoverageState;
+  freshness: Freshness;
+}
+
 interface CityCoverage {
   citySlug: string;
   cityName: string;
@@ -135,7 +155,9 @@ interface CityCoverage {
   l2Graph: GraphCell;
   signals: SignalsCell;
   l4Zonage: GeoCell;
+  normes: NormesCell;
   l5Lots: GeoCell;
+  tod: GeoCell;
   worstStatus: CoverageState;
   nextMarginalGain: "zonage" | "lots" | null;
 }
@@ -175,6 +197,7 @@ interface GeoAgg {
 interface GeoLiveListing {
   zonage: Set<string>;
   lots: Set<string>;
+  tod: Set<string>;
 }
 
 /** Réponse du détail grilles par ville (endpoint lazy). */
@@ -215,20 +238,24 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
       if (!body || !Array.isArray(body.collections)) return null;
       const zonage = new Set<string>();
       const lots = new Set<string>();
+      const tod = new Set<string>();
       for (const item of body.collections) {
         if (typeof item !== "object" || item === null) continue;
         const id = (item as { id?: unknown }).id;
         if (typeof id !== "string") continue;
-        // Correspondance EXACTE `qc-zonage-<slug>` / `qc-lots-<slug>` : les
-        // variantes suffixées (ex. `…-arcgis`) ne matchent aucun slug de
-        // municipalité et sont naturellement exclues (la carte requête par slug).
+        // Correspondance EXACTE `qc-zonage-<slug>` / `qc-lots-<slug>` /
+        // `qc-tod-<slug>` : les variantes suffixées (ex. `…-arcgis`) ne matchent
+        // aucun slug de municipalité et sont naturellement exclues (la carte
+        // requête par slug).
         if (id.startsWith("qc-zonage-")) {
           zonage.add(id.slice("qc-zonage-".length));
         } else if (id.startsWith("qc-lots-")) {
           lots.add(id.slice("qc-lots-".length));
+        } else if (id.startsWith("qc-tod-")) {
+          tod.add(id.slice("qc-tod-".length));
         }
       }
-      return { zonage, lots };
+      return { zonage, lots, tod };
     } catch {
       return null;
     }
@@ -312,16 +339,20 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         nowMs,
         staleMs,
       );
+      const tod = buildTodCell(listing ? listing.tod.has(mun.slug) : null);
+      const normes = buildNormesCell(mun.slug, nowMs);
 
-      // worstStatus reste la chaîne cœur L1→L2→L4→L5 (couleur carte) : les
-      // couches annexes (signaux, grilles — éparses aujourd'hui) informent le
-      // détail ville sans repeindre la province en gris.
-      const worstStatus = worstOf([
-        l1Raw.state,
-        l2Graph.state,
-        l4Zonage.state,
-        l5Lots.state,
-      ]);
+      // Statut agrégé (couleur carte) : Servi = couches cœur complètes,
+      // Partiel = au moins une couche servie, Non couvert = rien de servi.
+      const worstStatus = computeCoverageStatus({
+        l1Raw: l1Raw.state,
+        l2Graph: l2Graph.state,
+        signals: signals.state,
+        l4Zonage: l4Zonage.state,
+        normes: normes.state,
+        l5Lots: l5Lots.state,
+        tod: tod.state,
+      });
 
       return {
         citySlug: mun.slug,
@@ -332,7 +363,9 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         l2Graph,
         signals,
         l4Zonage,
+        normes,
         l5Lots,
+        tod,
         worstStatus,
         nextMarginalGain: computeNextMarginalGain(l2Graph, l4Zonage, l5Lots),
       };
@@ -357,10 +390,33 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
   });
 
   // ── Détail grilles par ville (lazy, cache TTL, live geo) ───────────────────
-  const grillesCache = new Map<
-    string,
-    { expiresAt: number; value: Promise<CityGrillesResponse | null> }
-  >();
+  // `resolved` = dernière valeur résolue de la promesse : lisible en SYNCHRONE
+  // par le bulk (cellule normes) sans jamais déclencher de mesure per-city.
+  interface GrillesCacheEntry {
+    expiresAt: number;
+    value: Promise<CityGrillesResponse | null>;
+    resolved?: CityGrillesResponse | null;
+  }
+  const grillesCache = new Map<string, GrillesCacheEntry>();
+
+  /**
+   * Cellule « Normes (grilles) » du bulk : reprend la mesure grilles LAZY quand
+   * elle est chaude en cache (mesurée live au détail ville, TTL court) ; sinon
+   * `absent` HONNÊTE (« aucune grille prouvée à date »). Jamais de fetch
+   * per-city ici : le bulk reste set-based + un listing.
+   */
+  function buildNormesCell(citySlug: string, nowMs: number): NormesCell {
+    const cached = grillesCache.get(citySlug);
+    const measured =
+      cached && cached.expiresAt > nowMs && cached.resolved?.available
+        ? cached.resolved
+        : null;
+    if (measured?.state) {
+      // Mesurée live il y a ≤ TTL → prouvée à la requête.
+      return { state: measured.state, freshness: "fresh" };
+    }
+    return { state: "absent", freshness: "unknown" };
+  }
 
   async function loadCityGrilles(
     citySlug: string,
@@ -449,9 +505,14 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
     } else {
       if (grillesCache.size >= GRILLES_CACHE_MAX) grillesCache.clear();
       promise = loadCityGrilles(citySlug);
-      grillesCache.set(citySlug, {
+      const entry: GrillesCacheEntry = {
         expiresAt: now + GRILLES_TTL_MS,
         value: promise,
+      };
+      grillesCache.set(citySlug, entry);
+      // Stash de la valeur résolue pour lecture synchrone par le bulk (normes).
+      void promise.then((value) => {
+        entry.resolved = value;
       });
     }
     const result = await promise;
@@ -725,6 +786,22 @@ function buildGeoCell(
 }
 
 /**
+ * Couche TOD : « servi » = collection `qc-tod-<slug>` dans le listing LIVE geo
+ * (aucun store local aujourd'hui). Listing injoignable (`liveServed === null`)
+ * → `absent` (dégradé honnête, jamais de vert fabriqué). Une collection servie
+ * live est prouvée à la requête (listing ≤ TTL) → `fresh`.
+ */
+function buildTodCell(liveServed: boolean | null): GeoCell {
+  const served = liveServed === true;
+  return {
+    state: served ? "verified" : "absent",
+    served,
+    servedBy: served ? "geo" : null,
+    freshness: served ? "fresh" : "unknown",
+  };
+}
+
+/**
  * D7 — prochain gain marginal : ville graphifiée (L2 substantié) MAIS sans
  * zonage/lots servis = complétion « cheap ». Le graphe est le prérequis : si la
  * ville n'est pas encore graphifiée live, le prochain gain n'est pas cheap → null.
@@ -740,11 +817,37 @@ function computeNextMarginalGain(
   return null;
 }
 
-function worstOf(states: CoverageState[]): CoverageState {
-  return states.reduce<CoverageState>(
-    (worst, s) => (STATE_RANK[s] < STATE_RANK[worst] ? s : worst),
-    "verified",
-  );
+/** États des couches d'une ville pour le statut agrégé (couleur carte). */
+export interface CoverageStatusInput {
+  l1Raw: CoverageState;
+  l2Graph: CoverageState;
+  signals: CoverageState;
+  l4Zonage: CoverageState;
+  normes: CoverageState;
+  l5Lots: CoverageState;
+  tod: CoverageState;
+}
+
+/**
+ * Statut agrégé tri-état d'une ville (couleur carte, badge « Couverture ») :
+ *   - `verified` (« Servi »)       : les couches CŒUR — PV (l1Raw), signaux,
+ *     zonage (l4), lots (l5) — sont TOUTES substantiées live.
+ *   - `declared` (« Partiel »)     : AU MOINS une couche (cœur ou annexe) est
+ *     servie, mais pas toutes les couches cœur.
+ *   - `absent`   (« Non couvert ») : AUCUNE couche servie (un statut seulement
+ *     déclaré ne compte pas — anti-survente, rien n'est réellement servi).
+ * Les couches annexes (graphe l2, normes/grilles, TOD — éparses aujourd'hui)
+ * comptent pour « Partiel » mais ne bloquent jamais le « Servi » : une ville
+ * cœur-complète reste verte même sans grille ni périmètre TOD publiés.
+ */
+export function computeCoverageStatus(
+  input: CoverageStatusInput,
+): CoverageState {
+  const core = [input.l1Raw, input.signals, input.l4Zonage, input.l5Lots];
+  if (core.every((s) => s === "verified")) return "verified";
+  const all = [...core, input.l2Graph, input.normes, input.tod];
+  if (all.some((s) => s === "verified")) return "declared";
+  return "absent";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
