@@ -1,0 +1,9 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - heading "Cette page ne fonctionne pas" [level=1] [ref=e7]
+    - paragraph [ref=e8]:
+      - text: Impossible de traiter cette demande via
+      - strong [ref=e9]: 127.0.0.1
+      - text: à l'heure actuelle.
+    - generic [ref=e10]: HTTP ERROR 500
+  - button "Actualiser" [ref=e13] [cursor=pointer]

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781460039241:add6",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "PING conducteur (immo claude:immo_subagents:6024851e0bf5). Je n ai PAS pu lire ton ordre 06-14 (arrive sur un autre root h2a, pas mon ./.h2a). L utilisateur m indique que la tache = AJOUT DE LA DETECTION DE L ETAPE (stage/stade du cycle reglementaire). Precise STP avant que je lance: (1) scope = peupler event.stage + relation RegulatoryStage dans graphify ? valeurs (avis_de_motion/1er_projet/2e_projet/adoption/entree_en_vigueur/referendum) ? (2) modif du CODE parser/graphify (packages/radar-sources) ou re-graphify du contenu S-Z ? (3) ou est le spec/directive ? (4) perimetre (S-Z 575/575 deja livre v2.0). Je ne lance RIEN avant ta reponse (rattrapage annule). Reponds a claude:immo_subagents:6024851e0bf5 sur CE root ./.h2a stp. NE reprojette pas PG."
+  },
+  "createdAt": "2026-06-14T18:00:39.241Z"
+}

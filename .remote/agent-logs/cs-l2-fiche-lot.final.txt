@@ -1,0 +1,17 @@
+Status: `done` avec validation container bloquée par l’environnement.
+
+Commit créé sur la branche du worktree : `4d6018a feat(ui): enrich lot fiche details`.
+
+Changements principaux :
+- [LotFichePanel.svelte](/home/antoinefa/src/radar-immobilier/.worktrees/cs-l2-fiche-lot/ui/src/lib/components/maps/LotFichePanel.svelte) affiche maintenant zone, superficie, façade/profondeur, champs rôle publics disponibles, TOD/4+, priorité, lien grille PDF optionnel, Google Maps et Street View.
+- [lots-client.ts](/home/antoinefa/src/radar-immobilier/.worktrees/cs-l2-fiche-lot/ui/src/lib/maps/lots-client.ts) normalise les champs publics Steve/OGC sans ajouter adresse/propriétaire.
+- [lot-fiche-utils.ts](/home/antoinefa/src/radar-immobilier/.worktrees/cs-l2-fiche-lot/ui/src/lib/components/maps/lot-fiche-utils.ts) ajoute l’URL Street View, avec tests.
+- `EvaluationMapView` n’a pas été modifié : il transmet déjà le `LotFeature` complet au panneau.
+
+Validation :
+- `git diff --check` : OK.
+- `make test-ui ... ENV=test-cs-l2-fiche-lot` tenté, bloqué car `docker compose` n’existe pas dans cet environnement.
+- Retry avec `DOCKER_COMPOSE=docker-compose` bloqué aussi : `docker-compose` absent.
+- Pas d’UAT navigateur, conformément à la mission.
+
+Worktree propre après commit.

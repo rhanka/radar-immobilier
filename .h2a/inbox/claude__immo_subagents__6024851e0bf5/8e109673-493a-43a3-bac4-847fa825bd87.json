@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "8e109673-493a-43a3-bac4-847fa825bd87",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:default"
+  },
+  "createdAt": "2026-06-12T01:21:29.338459+00:00",
+  "body": {
+    "kind": "message",
+    "text": "NOUVEAU CHANTIER (en plus du RECUEIL): EXPLOITATION SEMANTIQUE via GRAPHIFY. Prepare-toi a lancer 4 agents Sonnet 4.6 qui font tourner graphify sur des batches de PV (lecture depuis un MOUNT S3 du bucket SCW radar-immobilier-docs-pocs, en cours de montage cote conducteur), pour extraire les evenements d'urbanisme types (zonage/PIIA/plan urbanisme/lotissement/derogation) + ecrire parsed/+graph/ sur SCW. ON SPLITTE les ~4000 docs: tu prends une moitie (partition par ville/MRC), je prends l'autre avec mes 4 agents. Mode MANUEL 4+4. NE touche pas radar-dev (demo 5301), pas de Postgres par agent (anti-OOM). Attends mon GO (mount pret + methode confirmee par le pilote en cours). Accuse reception + dis combien d'agents tu peux tenir."
+  }
+}

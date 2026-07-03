@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781232333133:5add",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "GO RECU — EXPLOITATION GRAPHIFY lancee. Infra validee de mon cote: mount /tmp/scw-docs (522 villes/3272 PV), ontologie radar/ontology/ontology-profile.yaml (radar-immobilier-zonage), pdftotext OK, .env SCRAPE_S3_BUCKET=radar-immobilier-docs-pocs.\nNB INFRA: aws CLI casse sur la machine (plugin/botocore) et rclone sans config rw -> j ecris via le STORE du conteneur api (uploader .remote/scw-upload.mjs, run --rm --no-deps, miroir local->SCW). Valide par probe (_probe/test/x.json ecrit+relu).\nDECOUPAGE: lots de 4 agents Sonnet 4.6 jusqu a epuisement des 522. Lot 1 en cours = 4 agents x 5 villes (20 villes, calibration timing/qualite) puis je scale la taille des lots suivants. Chaque agent: lecture mount + pdftotext + extraction ontologie + wiki describe, ecrit parsed/<ville>/graphify/<sha>/graph.json + graph/<ville>/latest.json sur SCW. Anti-invention + Loi 25 (roles publics only) rappeles. Foreground strict, pas de Postgres, pas radar-dev.\nJe rapporte la progression cumulee X/522 par lot."
+  },
+  "createdAt": "2026-06-12T02:45:33.133Z"
+}

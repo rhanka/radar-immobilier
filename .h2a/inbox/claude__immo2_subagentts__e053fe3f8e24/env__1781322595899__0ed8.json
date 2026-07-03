@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781322595899:0ed8",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — PERIMETRE A-L -> A-R, EXHAUSTIF (correction couverture). Probleme detecte: l ancien split couvrait ~la moitie seulement. Ton lot devient A-R = TOUTES les municipalites ACTIVES (excluded falsy) de packages/radar-sources/src/geo/municipalities.qc.json dont le NOM normalise NFD commence par A..R. CHECKSUM: tu DOIS obtenir EXACTEMENT 529 villes (si ton filtre donne autre chose, ping-moi). Decomposition: ~246 deja sur SCW graph/ -> RE-GRAPHIFY depuis le raw au format v2.0 (ecrase latest.json) ; ~283 NOUVELLES -> config+scrape+graphify v2.0. Tu GAGNES M-R (M,N,O,P,Q,R = 173 villes, precedemment cote immo) — certaines M-R sont deja v2.0 sur SCW (ex orford, mont-saint-hilaire): si latest.json deja v2.0, SKIP. Frontiere avec immo = S (immo = S-Z). RAPPORTE X/529 a chaque lot pour audit de couverture. Persiste configs scrape dans pv-cities-bulk.json. NE reprojette pas PG. Plafond workers concurrents partage avec immo."
+  },
+  "createdAt": "2026-06-13T03:49:55.000Z"
+}

@@ -1,0 +1,435 @@
+- generic [ref=f16e3]:
+  - generic [ref=f16e6]:
+    - navigation "Barre latérale" [ref=f16e8]:
+      - generic [ref=f16e9]:
+        - generic:
+          - link "Accueil":
+            - /url: /new
+            - img "Claude"
+        - generic [ref=f16e10]:
+          - button "Ouvrir la barre latérale" [disabled]:
+            - generic:
+              - generic:
+                - generic: 
+                - generic: 
+      - generic [ref=f16e11]:
+        - link "Nouvelle conversation" [ref=f16e15] [cursor=pointer]:
+          - /url: /new
+          - generic [ref=f16e16]:
+            - generic [ref=f16e20]: 
+            - generic:
+              - generic: Nouvelle conversation
+        - generic [ref=f16e21]:
+          - generic [ref=f16e22]:
+            - link "Discussions" [ref=f16e24] [cursor=pointer]:
+              - /url: /recents
+              - generic:
+                - generic [ref=f16e26]: 
+                - generic:
+                  - generic: Discussions
+            - link "Projets" [ref=f16e28] [cursor=pointer]:
+              - /url: /projects
+              - generic:
+                - generic [ref=f16e30]: 
+                - generic:
+                  - generic: Projets
+            - link "Artéfacts" [ref=f16e33] [cursor=pointer]:
+              - /url: /artifacts
+              - generic:
+                - generic [ref=f16e35]: 
+                - generic:
+                  - generic: Artéfacts
+            - link "Personnaliser" [ref=f16e37] [cursor=pointer]:
+              - /url: /customize
+              - generic:
+                - generic [ref=f16e39]: 
+                - generic:
+                  - generic: Personnaliser
+          - generic [ref=f16e40]:
+            - generic [ref=f16e41]:
+              - generic:
+                - heading [level=2]:
+                  - button [expanded]:
+                    - generic: 
+            - list [ref=f16e42]:
+              - listitem [ref=f16e43]:
+                - link "Code" [ref=f16e45] [cursor=pointer]:
+                  - /url: /code
+                  - generic [ref=f16e48]: 
+              - listitem [ref=f16e49]:
+                - link "Design" [ref=f16e52] [cursor=pointer]:
+                  - /url: /design?via=web_sidebar_products
+                  - generic [ref=f16e55]: 
+          - generic [ref=f16e59]:
+            - generic:
+              - heading [level=2]:
+                - button [expanded]:
+                  - generic: 
+            - list [ref=f16e60]:
+              - listitem [ref=f16e61]:
+                - link [ref=f16e63] [cursor=pointer]:
+                  - /url: /chat/3eb08206-8668-4fb6-be10-d3c0ffea704b
+                  - generic [ref=f16e64]: Accès aux données du MCP radar immobilier
+              - listitem [ref=f16e65]:
+                - link [ref=f16e67] [cursor=pointer]:
+                  - /url: /chat/8fe6a319-e288-4512-a783-06ed17929238
+                  - generic [ref=f16e68]: Vérifier si le contact de Jiho Kang est légitime
+              - listitem [ref=f16e69]:
+                - link [ref=f16e71] [cursor=pointer]:
+                  - /url: /chat/fbb64f75-cb81-4e90-bbb7-50ece6bd26f9
+                  - generic [ref=f16e72]: Comparaison des meilleurs OCR pour zonage immobilier
+              - listitem [ref=f16e73]:
+                - link [ref=f16e75] [cursor=pointer]:
+                  - /url: /chat/61153b5b-e26d-42d6-a3f5-c63fdb0a37d9
+                  - generic [ref=f16e76]: Top
+              - listitem [ref=f16e77]:
+                - link [ref=f16e79] [cursor=pointer]:
+                  - /url: /chat/f4d68614-cbfd-43a9-afee-ef3eda46fb2a
+                  - generic [ref=f16e80]: Traitement d'une éraflure au visage
+              - listitem [ref=f16e81]:
+                - link [ref=f16e83] [cursor=pointer]:
+                  - /url: /chat/5746a42a-e04b-4f68-8670-59842733ec0b
+                  - generic [ref=f16e84]: Livre blanc IA pour la stratégie digitale Airbus Nord Amérique
+              - listitem [ref=f16e85]:
+                - link [ref=f16e87] [cursor=pointer]:
+                  - /url: /chat/a6d8fc73-251d-4828-b1d7-9f607b661367
+                  - generic [ref=f16e88]: COMAC aéronautique et technologies émergentes
+              - listitem [ref=f16e89]:
+                - link [ref=f16e91] [cursor=pointer]:
+                  - /url: /chat/60c4ec15-0aac-4780-bb81-513541dfc97f
+                  - generic [ref=f16e92]: Test
+              - listitem [ref=f16e93]:
+                - link [ref=f16e95] [cursor=pointer]:
+                  - /url: /chat/7c417ad0-887a-47ef-91f4-027c4e0606dd
+                  - generic [ref=f16e96]: Test message
+              - listitem [ref=f16e97]:
+                - link [ref=f16e99] [cursor=pointer]:
+                  - /url: /chat/dcb25a71-43ec-4a1c-84ba-2b8975259846
+                  - generic [ref=f16e100]: Vérification de fonctionnement
+              - listitem [ref=f16e101]:
+                - link [ref=f16e103] [cursor=pointer]:
+                  - /url: /chat/97abd340-c1a5-45da-9a9d-d7639b3aaa64
+                  - generic [ref=f16e104]: Vérification de fonctionnement
+              - listitem [ref=f16e105]:
+                - link [ref=f16e107] [cursor=pointer]:
+                  - /url: /chat/40930c5f-1123-4eac-a99d-ab5ec363f269
+                  - generic [ref=f16e108]: Quotas et débats
+              - listitem [ref=f16e109]:
+                - link [ref=f16e111] [cursor=pointer]:
+                  - /url: /chat/35df48c6-f8ae-4c8b-91e3-c87398d459f3
+                  - generic [ref=f16e112]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f16e113]:
+                - link [ref=f16e115] [cursor=pointer]:
+                  - /url: /chat/15dd05bf-55c7-4aaa-bd27-9f7fcf4e160c
+                  - generic [ref=f16e116]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f16e117]:
+                - link [ref=f16e119] [cursor=pointer]:
+                  - /url: /chat/810f8b42-4e00-412f-9334-b805dbc91fdb
+                  - generic [ref=f16e120]: Limitations légales d'un NDA
+              - listitem [ref=f16e121]:
+                - link [ref=f16e123] [cursor=pointer]:
+                  - /url: /chat/747a4192-4053-406f-b488-ea177bea347a
+                  - generic [ref=f16e124]: Épuisement des tokens
+              - listitem [ref=f16e125]:
+                - link [ref=f16e127] [cursor=pointer]:
+                  - /url: /chat/82557649-61c1-4ca1-afa4-25f6ff2cc7d4
+                  - generic [ref=f16e128]: Comparaison workstation dev 32Go RAM
+              - listitem [ref=f16e129]:
+                - link [ref=f16e131] [cursor=pointer]:
+                  - /url: /chat/16384194-8763-452a-8c1e-05f38bd53145
+                  - generic [ref=f16e132]: Coût mensuel de Gemma 4 QAT en tokens
+              - listitem [ref=f16e133]:
+                - link [ref=f16e135] [cursor=pointer]:
+                  - /url: /chat/80178101-cfa4-4974-8af6-30a68c0f772f
+                  - generic [ref=f16e136]: Vérification des tokens disponibles
+              - listitem [ref=f16e137]:
+                - link [ref=f16e139] [cursor=pointer]:
+                  - /url: /chat/f9e1ea13-fd72-405e-b2c7-500f5b3abd22
+                  - generic [ref=f16e140]: Sans titre
+                  - text: Sans titre
+              - listitem [ref=f16e141]:
+                - link [ref=f16e143] [cursor=pointer]:
+                  - /url: /chat/b77cf619-4ac1-4f1a-8120-b2f5d948fa67
+                  - generic [ref=f16e144]: Schéma architecture GCP avec pods et lab données
+              - listitem [ref=f16e145]:
+                - link [ref=f16e147] [cursor=pointer]:
+                  - /url: /chat/e575111e-36fb-44be-9b07-24e1bc7994cf
+                  - generic [ref=f16e148]: Vérification des transactions Wave
+              - listitem [ref=f16e149]:
+                - link [ref=f16e151] [cursor=pointer]:
+                  - /url: /chat/928da50a-abfb-4bff-85e2-fe31f60b0bd1
+                  - generic [ref=f16e152]: Évaluation rationalisée des cas d'usage Gemini
+              - listitem [ref=f16e153]:
+                - link [ref=f16e155] [cursor=pointer]:
+                  - /url: /chat/bef81743-6d15-42ca-b8b2-124292611606
+                  - generic [ref=f16e156]: Entraîner un LLM pour le reasoning
+              - listitem [ref=f16e157]:
+                - link [ref=f16e159] [cursor=pointer]:
+                  - /url: /chat/c2e48849-0142-41fe-802a-08abbf9f059b
+                  - generic [ref=f16e160]: Monter Google Drive dans un répertoire pour CLI
+              - listitem [ref=f16e161]:
+                - link [ref=f16e163] [cursor=pointer]:
+                  - /url: /chat/d51cb2ee-19db-4c92-9069-222e3f119bc5
+                  - generic [ref=f16e164]: Afficher les lignes cachées dans Claude CLI
+              - listitem [ref=f16e165]:
+                - link [ref=f16e167] [cursor=pointer]:
+                  - /url: /chat/5af6d281-b44b-4fdf-9bee-48b901c59a78
+                  - generic [ref=f16e168]: Ontologies du parfum
+              - listitem [ref=f16e169]:
+                - link [ref=f16e171] [cursor=pointer]:
+                  - /url: /chat/77e4417b-0516-4475-9359-5a91b84d0609
+                  - generic [ref=f16e172]: Compatibilité OData MCP V4 avec ECC6
+              - listitem [ref=f16e173]:
+                - link [ref=f16e175] [cursor=pointer]:
+                  - /url: /chat/29802e0c-266d-4611-97a8-0bf286fa0d43
+                  - generic [ref=f16e176]: Utiliser Claude Cowork
+              - listitem [ref=f16e177]:
+                - link [ref=f16e179] [cursor=pointer]:
+                  - /url: /chat/9afa982d-4fa4-49ad-a97d-20710df297d7
+                  - generic [ref=f16e180]: Intégrer des données externes dans les dashboards ClickUp
+            - link [ref=f16e182] [cursor=pointer]:
+              - /url: /recents
+              - img [ref=f16e183]
+        - link "Obtenir des applications et extensions" [ref=f16e189] [cursor=pointer]:
+          - /url: /downloads
+          - generic [ref=f16e192]: 
+        - button "Fabien ANTOINE, Paramètres" [ref=f16e195] [cursor=pointer]:
+          - generic [ref=f16e199]: FA
+          - generic:
+            - generic [ref=f16e200]:
+              - generic: Fabien ANTOINE
+              - generic: Plan Max
+            - img [ref=f16e202]
+    - main [ref=f16e204]:
+      - generic [ref=f16e207]:
+        - navigation [ref=f16e208]:
+          - generic [ref=f16e209]:
+            - button "Retour" [ref=f16e210] [cursor=pointer]:
+              - img [ref=f16e214]
+            - generic [ref=f16e216]: Personnaliser
+          - generic [ref=f16e217]:
+            - link "Compétences" [ref=f16e218] [cursor=pointer]:
+              - /url: /customize/skills
+              - img [ref=f16e221]
+              - generic [ref=f16e224]: Compétences
+            - link "Connecteurs" [ref=f16e225] [cursor=pointer]:
+              - /url: /customize/connectors
+              - img [ref=f16e228]
+              - generic [ref=f16e231]: Connecteurs
+            - generic [ref=f16e233]:
+              - separator [ref=f16e234]
+              - generic [ref=f16e235]:
+                - generic [ref=f16e236]: Plugins personnels
+                - button "Ajouter un plugin" [ref=f16e237] [cursor=pointer]:
+                  - generic [ref=f16e240]: 
+              - generic [ref=f16e241]:
+                - paragraph [ref=f16e242]: Donnez à Claude une expertise de niveau professionnel avec des plugins
+                - button "Parcourir les plugins" [ref=f16e243] [cursor=pointer]:
+                  - generic [ref=f16e245]: Parcourir les plugins
+        - generic [ref=f16e247]:
+          - generic [ref=f16e248]:
+            - generic [ref=f16e249]:
+              - heading "Connecteurs" [level=2] [ref=f16e250]
+              - generic [ref=f16e251]:
+                - button "Rechercher des connecteurs" [ref=f16e252] [cursor=pointer]:
+                  - img [ref=f16e256]
+                - button "Ajouter un connecteur" [ref=f16e258] [cursor=pointer]:
+                  - img [ref=f16e262]
+            - radiogroup "Filtrer par statut" [ref=f16e265]:
+              - radio "Tous" [checked] [ref=f16e267] [cursor=pointer]
+              - radio [checked] [ref=f16e268]
+              - radio "Connecté" [ref=f16e269] [cursor=pointer]
+              - radio [ref=f16e270]
+              - radio "Non connecté" [ref=f16e271] [cursor=pointer]
+              - radio [ref=f16e272]
+            - generic [ref=f16e274]:
+              - generic [ref=f16e275]:
+                - button "Web" [expanded] [ref=f16e277] [cursor=pointer]:
+                  - img [ref=f16e280]
+                  - generic [ref=f16e282]: Web
+                - generic [ref=f16e284]:
+                  - button "ClickUp" [ref=f16e285] [cursor=pointer]:
+                    - generic [ref=f16e290]: ClickUp
+                  - button "Gmail icon Gmail" [ref=f16e291] [cursor=pointer]:
+                    - img "Gmail icon" [ref=f16e294]
+                    - generic [ref=f16e297]: Gmail
+                  - button "Google Drive icon Google Drive" [ref=f16e298] [cursor=pointer]:
+                    - img "Google Drive icon" [ref=f16e301]
+                    - generic [ref=f16e304]: Google Drive
+                  - button "HubSpot" [ref=f16e305] [cursor=pointer]:
+                    - generic [ref=f16e310]: HubSpot
+                  - button "Intégration GitHub" [ref=f16e311] [cursor=pointer]:
+                    - img [ref=f16e314]
+                    - generic [ref=f16e318]: Intégration GitHub
+                  - button "R Radar immobilier PERSONNALISÉ" [ref=f16e319] [cursor=pointer]:
+                    - paragraph [ref=f16e323]: R
+                    - generic [ref=f16e325]:
+                      - generic [ref=f16e326]: Radar immobilier
+                      - generic [ref=f16e328]: PERSONNALISÉ
+              - generic [ref=f16e330]:
+                - button "Non connecté" [expanded] [ref=f16e332] [cursor=pointer]:
+                  - img [ref=f16e335]
+                  - generic [ref=f16e337]: Non connecté
+                - button "W WaveApp PERSONNALISÉ Problème de connexion" [ref=f16e340] [cursor=pointer]:
+                  - paragraph [ref=f16e344]: W
+                  - generic [ref=f16e346]:
+                    - generic [ref=f16e347]: WaveApp
+                    - generic [ref=f16e349]: PERSONNALISÉ
+                  - generic [ref=f16e350]:
+                    - img [ref=f16e352]
+                    - generic [ref=f16e354]: Problème de connexion
+          - generic [ref=f16e1180]:
+            - generic [ref=f16e1181]:
+              - generic [ref=f16e1182]:
+                - paragraph [ref=f16e1185]: R
+                - heading "Radar immobilier" [level=2] [ref=f16e1187]
+              - generic [ref=f16e1188]:
+                - button "Déconnecter" [ref=f16e1190] [cursor=pointer]:
+                  - generic [ref=f16e1192]: Déconnecter
+                - button "Plus d'options pour Radar immobilier" [ref=f16e1193] [cursor=pointer]:
+                  - img [ref=f16e1197]
+            - button "Copier l’URL du serveur" [ref=f16e1199] [cursor=pointer]:
+              - generic [ref=f16e1200]: https://immo.sent-tech.ca/mcp
+              - generic [ref=f16e1201]:
+                - img [ref=f16e1203]
+                - img [ref=f16e1207]
+            - region "Autorisations des outils Choisissez quand Claude est autorisé à utiliser ces outils." [ref=f16e1211]:
+              - generic [ref=f16e1213]:
+                - generic [ref=f16e1214]: Autorisations des outils
+                - paragraph [ref=f16e1215]: Choisissez quand Claude est autorisé à utiliser ces outils.
+              - group "Autres outils" [ref=f16e1216]:
+                - generic [ref=f16e1217]:
+                  - button "Autres outils 10" [expanded] [ref=f16e1218] [cursor=pointer]:
+                    - img [ref=f16e1221]
+                    - generic [ref=f16e1223]: Autres outils
+                    - generic [ref=f16e1225]: "10"
+                  - button "Permission globale pour le groupe" [ref=f16e1226] [cursor=pointer]:
+                    - generic [ref=f16e1228]:
+                      - generic [ref=f16e1229]: 
+                      - text: Personnalisé
+                      - generic [ref=f16e1230]: 
+                - generic [ref=f16e1231]:
+                  - group "Get grille de zonage PDF" [ref=f16e1232]:
+                    - generic [ref=f16e1234]: Get grille de zonage PDF
+                    - radiogroup "Get grille de zonage PDF" [ref=f16e1236]:
+                      - radio "Toujours autoriser" [ref=f16e1238] [cursor=pointer]:
+                        - generic [ref=f16e1239]: 
+                      - radio [ref=f16e1240]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1241] [cursor=pointer]:
+                        - generic [ref=f16e1242]: 
+                      - radio [checked] [ref=f16e1243]
+                      - radio "Bloqué" [ref=f16e1244] [cursor=pointer]:
+                        - generic [ref=f16e1245]: 
+                      - radio [ref=f16e1246]
+                  - group "Get lot card" [ref=f16e1247]:
+                    - generic [ref=f16e1249]: Get lot card
+                    - radiogroup "Get lot card" [ref=f16e1251]:
+                      - radio "Toujours autoriser" [checked] [ref=f16e1253] [cursor=pointer]:
+                        - generic [ref=f16e1254]: 
+                      - radio [checked] [ref=f16e1255]
+                      - radio "Nécessite une approbation" [ref=f16e1256] [cursor=pointer]:
+                        - generic [ref=f16e1257]: 
+                      - radio [ref=f16e1258]
+                      - radio "Bloqué" [ref=f16e1259] [cursor=pointer]:
+                        - generic [ref=f16e1260]: 
+                      - radio [ref=f16e1261]
+                  - group "Get lots GeoJSON" [ref=f16e1262]:
+                    - generic [ref=f16e1264]: Get lots GeoJSON
+                    - radiogroup "Get lots GeoJSON" [ref=f16e1266]:
+                      - radio "Toujours autoriser" [ref=f16e1268] [cursor=pointer]:
+                        - generic [ref=f16e1269]: 
+                      - radio [ref=f16e1270]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1271] [cursor=pointer]:
+                        - generic [ref=f16e1272]: 
+                      - radio [checked] [ref=f16e1273]
+                      - radio "Bloqué" [ref=f16e1274] [cursor=pointer]:
+                        - generic [ref=f16e1275]: 
+                      - radio [ref=f16e1276]
+                  - group "Get opportunity dossier" [ref=f16e1277]:
+                    - generic [ref=f16e1279]: Get opportunity dossier
+                    - radiogroup "Get opportunity dossier" [ref=f16e1281]:
+                      - radio "Toujours autoriser" [ref=f16e1283] [cursor=pointer]:
+                        - generic [ref=f16e1284]: 
+                      - radio [ref=f16e1285]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1286] [cursor=pointer]:
+                        - generic [ref=f16e1287]: 
+                      - radio [checked] [ref=f16e1288]
+                      - radio "Bloqué" [ref=f16e1289] [cursor=pointer]:
+                        - generic [ref=f16e1290]: 
+                      - radio [ref=f16e1291]
+                  - group "Get PV source PDF" [ref=f16e1292]:
+                    - generic [ref=f16e1294]: Get PV source PDF
+                    - radiogroup "Get PV source PDF" [ref=f16e1296]:
+                      - radio "Toujours autoriser" [ref=f16e1298] [cursor=pointer]:
+                        - generic [ref=f16e1299]: 
+                      - radio [ref=f16e1300]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1301] [cursor=pointer]:
+                        - generic [ref=f16e1302]: 
+                      - radio [checked] [ref=f16e1303]
+                      - radio "Bloqué" [ref=f16e1304] [cursor=pointer]:
+                        - generic [ref=f16e1305]: 
+                      - radio [ref=f16e1306]
+                  - group "Get zones GeoJSON" [ref=f16e1307]:
+                    - generic [ref=f16e1309]: Get zones GeoJSON
+                    - radiogroup "Get zones GeoJSON" [ref=f16e1311]:
+                      - radio "Toujours autoriser" [ref=f16e1313] [cursor=pointer]:
+                        - generic [ref=f16e1314]: 
+                      - radio [ref=f16e1315]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1316] [cursor=pointer]:
+                        - generic [ref=f16e1317]: 
+                      - radio [checked] [ref=f16e1318]
+                      - radio "Bloqué" [ref=f16e1319] [cursor=pointer]:
+                        - generic [ref=f16e1320]: 
+                      - radio [ref=f16e1321]
+                  - group "List documents" [ref=f16e1322]:
+                    - generic [ref=f16e1324]: List documents
+                    - radiogroup "List documents" [ref=f16e1326]:
+                      - radio "Toujours autoriser" [ref=f16e1328] [cursor=pointer]:
+                        - generic [ref=f16e1329]: 
+                      - radio [ref=f16e1330]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1331] [cursor=pointer]:
+                        - generic [ref=f16e1332]: 
+                      - radio [checked] [ref=f16e1333]
+                      - radio "Bloqué" [ref=f16e1334] [cursor=pointer]:
+                        - generic [ref=f16e1335]: 
+                      - radio [ref=f16e1336]
+                  - group "Read document excerpt" [ref=f16e1337]:
+                    - generic [ref=f16e1339]: Read document excerpt
+                    - radiogroup "Read document excerpt" [ref=f16e1341]:
+                      - radio "Toujours autoriser" [ref=f16e1343] [cursor=pointer]:
+                        - generic [ref=f16e1344]: 
+                      - radio [ref=f16e1345]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1346] [cursor=pointer]:
+                        - generic [ref=f16e1347]: 
+                      - radio [checked] [ref=f16e1348]
+                      - radio "Bloqué" [ref=f16e1349] [cursor=pointer]:
+                        - generic [ref=f16e1350]: 
+                      - radio [ref=f16e1351]
+                  - group "Search lots" [ref=f16e1352]:
+                    - generic [ref=f16e1354]: Search lots
+                    - radiogroup "Search lots" [ref=f16e1356]:
+                      - radio "Toujours autoriser" [ref=f16e1358] [cursor=pointer]:
+                        - generic [ref=f16e1359]: 
+                      - radio [ref=f16e1360]
+                      - radio "Nécessite une approbation" [checked] [ref=f16e1361] [cursor=pointer]:
+                        - generic [ref=f16e1362]: 
+                      - radio [checked] [ref=f16e1363]
+                      - radio "Bloqué" [ref=f16e1364] [cursor=pointer]:
+                        - generic [ref=f16e1365]: 
+                      - radio [ref=f16e1366]
+                  - group "Search signals" [ref=f16e1367]:
+                    - generic [ref=f16e1369]: Search signals
+                    - radiogroup "Search signals" [ref=f16e1371]:
+                      - radio "Toujours autoriser" [checked] [ref=f16e1373] [cursor=pointer]:
+                        - generic [ref=f16e1374]: 
+                      - radio [checked] [ref=f16e1375]
+                      - radio "Nécessite une approbation" [ref=f16e1376] [cursor=pointer]:
+                        - generic [ref=f16e1377]: 
+                      - radio [ref=f16e1378]
+                      - radio "Bloqué" [ref=f16e1379] [cursor=pointer]:
+                        - generic [ref=f16e1380]: 
+                      - radio [ref=f16e1381]
+  - region "Notifications (F8)":
+    - list

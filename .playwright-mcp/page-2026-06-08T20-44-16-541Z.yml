@@ -1,0 +1,160 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Signaux" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Signaux
+        - button "Opportunités" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Opportunités
+        - button "Sources" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Sources
+        - button "Ontologie" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Ontologie
+        - button "Grilles" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Grilles
+        - button "Coordination" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Coordination
+        - button "Backlog" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Backlog
+      - generic [ref=e25]:
+        - button "Lancer la visite guidée" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e28] [cursor=pointer]: Réel
+    - generic [ref=e31]:
+      - complementary [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Tri
+            - generic [ref=e36]:
+              - button "Par score /10" [ref=e37] [cursor=pointer]
+              - generic [ref=e38]:
+                - button "Par priorité VISION" [ref=e39] [cursor=pointer]
+                - button "Explication des deux tris" [ref=e40] [cursor=pointer]:
+                  - img [ref=e41]
+          - generic [ref=e42]:
+            - paragraph [ref=e43]: Filtre
+            - generic [ref=e45]:
+              - generic [ref=e46]: Filtrer par statut
+              - combobox "Filtrer par statut" [ref=e47]:
+                - option "Tous" [selected]
+                - option "Nouveau"
+                - option "À approfondir"
+                - option "Surveillance"
+                - option "Écarté"
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: 6 / 6 signals
+            - paragraph [ref=e50]: (3 réels + 3 exemples)
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - paragraph [ref=e54]: Signaux de triage
+          - heading "Fil de signaux" [level=1] [ref=e55]
+          - paragraph [ref=e56]: Score de signal = valeur /10 (priorité par type, VISION §6) + confiance (Haute / Moyenne / Faible), distinct du score d'opportunité (/100). Ces deux axes ne sont jamais multipliés.
+        - status [ref=e58]:
+          - generic [ref=e59]:
+            - 'heading "Mode réel : 3 signals confirmés." [level=2] [ref=e60]'
+            - paragraph [ref=e61]: Basculez en simulation pour voir les exemples de calibration.
+        - generic [ref=e62]:
+          - button "Rezonage résidentiel Règl. 150-49,Zone H-609-4 Valeur 10/10 Confiance Haute À approfondir 25 févr. 2026" [ref=e64] [cursor=pointer]:
+            - img [ref=e66]
+            - generic [ref=e67]:
+              - paragraph [ref=e69]: Rezonage résidentiel
+              - paragraph [ref=e70]: Règl. 150-49,Zone H-609-4
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e71]:
+              - generic [ref=e72]: Valeur
+              - generic [ref=e73]: 10/10
+            - generic "Confiance (qualité de la détection)" [ref=e76]:
+              - generic [ref=e77]: Confiance
+              - generic [ref=e78]: Haute
+            - generic [ref=e80]: À approfondir
+            - generic [ref=e81]: 25 févr. 2026
+          - button "Rezonage résidentiel Règl. 150-51,Zone H-521 Valeur 10/10 Confiance Haute À approfondir 22 avr. 2026" [ref=e83] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e86]:
+              - paragraph [ref=e88]: Rezonage résidentiel
+              - paragraph [ref=e89]: Règl. 150-51,Zone H-521
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e90]:
+              - generic [ref=e91]: Valeur
+              - generic [ref=e92]: 10/10
+            - generic "Confiance (qualité de la détection)" [ref=e95]:
+              - generic [ref=e96]: Confiance
+              - generic [ref=e97]: Haute
+            - generic [ref=e99]: À approfondir
+            - generic [ref=e100]: 22 avr. 2026
+          - button "Rezonage résidentiel Règl. 150-49-1,Zone H-143/H-143-1 Valeur 10/10 Confiance Moyenne À approfondir 22 avr. 2026" [ref=e102] [cursor=pointer]:
+            - img [ref=e104]
+            - generic [ref=e105]:
+              - paragraph [ref=e107]: Rezonage résidentiel
+              - paragraph [ref=e108]: Règl. 150-49-1,Zone H-143/H-143-1
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e109]:
+              - generic [ref=e110]: Valeur
+              - generic [ref=e111]: 10/10
+            - generic "Confiance (qualité de la détection)" [ref=e114]:
+              - generic [ref=e115]: Confiance
+              - generic [ref=e116]: Moyenne
+            - generic [ref=e118]: À approfondir
+            - generic [ref=e119]: 22 avr. 2026
+          - button "CPTAQ Exemple (simulation) Règl. 150-44,Zone A-118 Valeur 8/10 Confiance Moyenne Nouveau 1 mai 2026" [ref=e121] [cursor=pointer]:
+            - img [ref=e123]
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - paragraph [ref=e126]:
+                  - button "CPTAQ" [ref=e128]
+                - generic [ref=e129]: Exemple (simulation)
+              - paragraph [ref=e130]: Règl. 150-44,Zone A-118
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e131]:
+              - generic [ref=e132]: Valeur
+              - generic [ref=e133]: 8/10
+            - generic "Confiance (qualité de la détection)" [ref=e136]:
+              - generic [ref=e137]: Confiance
+              - generic [ref=e138]: Moyenne
+            - generic [ref=e140]: Nouveau
+            - generic [ref=e141]: 1 mai 2026
+          - button "PPCMOI Exemple (simulation) Zone C-627 Valeur 7/10 Confiance Faible Surveillance 10 mai 2026" [ref=e143] [cursor=pointer]:
+            - img [ref=e145]
+            - generic [ref=e146]:
+              - generic [ref=e147]:
+                - paragraph [ref=e148]:
+                  - button "PPCMOI" [ref=e150]
+                - generic [ref=e151]: Exemple (simulation)
+              - paragraph [ref=e152]: Zone C-627
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e153]:
+              - generic [ref=e154]: Valeur
+              - generic [ref=e155]: 7/10
+            - generic "Confiance (qualité de la détection)" [ref=e158]:
+              - generic [ref=e159]: Confiance
+              - generic [ref=e160]: Faible
+            - generic [ref=e162]: Surveillance
+            - generic [ref=e163]: 10 mai 2026
+          - button "Dérogation pertinente Exemple (simulation) Zone H-516 Valeur Filtre Confiance Moyenne Écarté 15 mai 2026" [ref=e165] [cursor=pointer]:
+            - img [ref=e167]
+            - generic [ref=e168]:
+              - generic [ref=e169]:
+                - paragraph [ref=e170]: Dérogation pertinente
+                - generic [ref=e171]: Exemple (simulation)
+              - paragraph [ref=e172]: Zone H-516
+            - 'generic "Dérogation : filtre pur, pas de score /10 (VISION §6)" [ref=e173]':
+              - generic [ref=e174]: Valeur
+              - generic [ref=e175]: Filtre
+            - generic "Confiance (qualité de la détection)" [ref=e176]:
+              - generic [ref=e177]: Confiance
+              - generic [ref=e178]: Moyenne
+            - generic [ref=e180]: Écarté
+            - generic [ref=e181]: 15 mai 2026
+        - alert [ref=e183]:
+          - generic [ref=e184]:
+            - heading "Provenance des signaux" [level=2] [ref=e185]
+            - paragraph [ref=e186]: 3 signals réels (avis de consultation publique vérifiés, règlements 150-49, 150-49-1, 150-51) et 3 exemples (marqués Exemple (simulation)). Les exemples illustrent des types de signaux non encore détectés dans les données réelles et restent visibles dans tous les modes.
+  - button "Ouvrir l'assistant radar" [ref=e187] [cursor=pointer]:
+    - img [ref=e188]

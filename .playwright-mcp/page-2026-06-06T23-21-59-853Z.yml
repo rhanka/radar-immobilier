@@ -1,0 +1,156 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Signaux" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Signaux
+        - button "Opportunités" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Opportunités
+        - button "Sources" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Sources
+        - button "Grilles" [active] [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Grilles
+        - button "Coordination" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Coordination
+        - button "Backlog" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Backlog
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e26] [cursor=pointer]: Réel
+    - generic [ref=e1067]:
+      - complementary [ref=e1068]:
+        - generic [ref=e1069]:
+          - generic [ref=e1070]:
+            - paragraph [ref=e1071]: Type de score
+            - generic [ref=e1072]:
+              - button "Tri de signal (/10)" [pressed] [ref=e1073] [cursor=pointer]
+              - button "Score d'opportunité (/100)" [ref=e1074] [cursor=pointer]
+          - generic [ref=e1075]:
+            - paragraph [ref=e1076]: Description
+            - paragraph [ref=e1077]: "Valeur /10 attribuée à chaque signal selon son TYPE (priorité réglementaire), affichée avec une confiance distincte. Valeur et confiance ne sont jamais multipliées. Sert à trier le flux de signaux entrants. Référence : VISION.md §6."
+      - generic [ref=e1079]:
+        - generic [ref=e1080]:
+          - paragraph [ref=e1081]: "Référence : modele de score"
+          - heading "Grilles de score" [level=1] [ref=e1082]
+          - paragraph [ref=e1083]: "Le modele utilise deux mesures distinctes : le tri de signal (/10, par type) et le score d'opportunite (/100, composite multi-axes). Elles ne sont jamais combinées."
+        - status [ref=e1085]:
+          - 'heading "Tri de signal : valeur /10 par type (VISION §6)" [level=2] [ref=e1087]'
+        - generic [ref=e1088]:
+          - paragraph:
+            - text: Chaque signal recoit une valeur /10 selon son
+            - strong [ref=e1089]: TYPE
+            - text: (priorite reglementaire), affichee avec une confiance. La valeur et la confiance sont affichees separement et ne sont jamais multipliees. Les
+            - strong [ref=e1090]: derogations
+            - text: "sont un filtre pur (VISION) : elles ne recoivent pas de score /10 et n'entrent pas dans le tri."
+        - generic [ref=e1091]:
+          - generic [ref=e1092]:
+            - generic [ref=e1093]: Type de signal
+            - generic [ref=e1094]: Valeur /10
+            - generic [ref=e1095]: Role
+          - generic [ref=e1096]:
+            - generic [ref=e1097]:
+              - generic [ref=e1098]: Zonage residentiel
+              - generic [ref=e1099]: 10 /10
+              - generic [ref=e1101]: Tri
+            - generic [ref=e1102]:
+              - button "CPTAQ" [ref=e1105]
+              - generic [ref=e1106]: 8 /10
+              - generic [ref=e1108]: Tri
+            - generic [ref=e1109]:
+              - button "PPCMOI" [ref=e1112]
+              - generic [ref=e1113]: 7 /10
+              - generic [ref=e1115]: Tri
+            - generic [ref=e1116]:
+              - generic [ref=e1117]: Plan d'urbanisme
+              - generic [ref=e1118]: 7 /10
+              - generic [ref=e1120]: Tri
+            - generic [ref=e1121]:
+              - generic [ref=e1122]: Consultation publique
+              - generic [ref=e1123]: 6 /10
+              - generic [ref=e1125]: Tri
+            - generic [ref=e1126]:
+              - generic [ref=e1127]: Modification de grille
+              - generic [ref=e1128]: 6 /10
+              - generic [ref=e1130]: Tri
+            - generic [ref=e1131]:
+              - generic [ref=e1132]: Derogation (pertinente ou non)
+              - generic [ref=e1134]: Filtre pur
+              - generic [ref=e1136]: Pas de score
+        - generic [ref=e1137]:
+          - paragraph:
+            - strong [ref=e1138]: "Lecture :"
+            - text: Un signal de type "Zonage residentiel" a une valeur de priorite de 10/10 independamment de sa confiance. La confiance (haute / moyenne / faible) est affichee separement dans la vue Signaux. Elle ne modifie pas la valeur du signal ; elle indique la solidite de la preuve.
+          - paragraph: "Référence : VISION.md §6 (priorites par type)"
+  - complementary "Assistant radar (ancre)" [ref=e643]:
+    - generic [ref=e645]:
+      - button "Passer en fenetre flottante" [ref=e646] [cursor=pointer]:
+        - img [ref=e647]
+      - button "Fermer le chat" [ref=e648] [cursor=pointer]:
+        - img [ref=e649]
+    - region "Assistant radar" [ref=e651]:
+      - navigation "Assistant radar" [ref=e653]:
+        - button "Chat" [pressed] [ref=e654] [cursor=pointer]
+        - button "Taches" [ref=e655] [cursor=pointer]
+      - generic [ref=e657]:
+        - generic [ref=e658]:
+          - generic [ref=e659]:
+            - paragraph [ref=e660]: Assistant radar
+            - paragraph [ref=e661]: Questionner les signaux et piloter le backlog
+          - combobox "Modele" [ref=e663]:
+            - option "Sonnet 4.6" [selected]
+            - option "Opus 4.7"
+            - option "Command A"
+            - option "Command A R."
+            - option "Gemini 3.5 Flash"
+            - option "Gemini 3.1 Flash Lite"
+            - option "Mistral Small 4"
+            - option "Magistral Medium"
+            - option "GPT-5.5"
+            - option "GPT-5.4 Nano"
+            - option "GPT-4.1 Nano"
+        - generic [ref=e672]:
+          - generic [ref=e673]:
+            - generic [ref=e674]: Bonjour, resume le signal le plus prioritaire
+            - generic [ref=e675]:
+              - button "Copier" [ref=e676] [cursor=pointer]:
+                - img [ref=e677]
+              - button "Modifier" [ref=e678] [cursor=pointer]:
+                - img [ref=e679]
+          - generic [ref=e680]:
+            - img [ref=e682]
+            - generic [ref=e683]:
+              - paragraph [ref=e684]: Assistant radar
+              - generic [ref=e688]:
+                - paragraph [ref=e689]: Je n'ai pas accès aux données actuelles du radar immobilier de Salaberry-de-Valleyfield (signaux, priorités, lots, zones, etc.). Je ne peux donc pas résumer le signal le plus prioritaire sans risquer d'inventer des informations.
+                - paragraph [ref=e690]: "Pour obtenir ce résumé, je vous suggère de :"
+                - paragraph [ref=e691]: Consulter directement le radar et me partager les données du signal prioritaire, je pourrai alors vous en faire un résumé. Me fournir les détails (zone, type de signal, indicateurs concernés), et je vous aiderai à les synthétiser.
+                - paragraph [ref=e692]: Avez-vous des données à me soumettre ?
+              - generic [ref=e693]:
+                - button "Copier" [ref=e694] [cursor=pointer]:
+                  - img [ref=e695]
+                - button "Regenerer" [ref=e696] [cursor=pointer]:
+                  - img [ref=e697]
+                - button "chat.feedback.useful" [ref=e698] [cursor=pointer]:
+                  - img [ref=e699]
+                - button "chat.feedback.notUseful" [ref=e700] [cursor=pointer]:
+                  - img [ref=e701]
+        - generic [ref=e667]:
+          - list "Contexte de la conversation" [ref=e1063]:
+            - listitem [ref=e1064]:
+              - generic "Rezonage résidentiel · Règl. 150-49 · H-609-4" [ref=e1065]
+          - generic [ref=e668]:
+            - textbox "Questionner ce signal" [ref=e669]
+            - button [disabled] [ref=e670]:
+              - img [ref=e671]

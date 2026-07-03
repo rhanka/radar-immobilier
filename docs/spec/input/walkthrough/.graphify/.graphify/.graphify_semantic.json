@@ -1,0 +1,317 @@
+{
+  "nodes": [
+    {
+      "id": "radar_demo_transcript",
+      "label": "Walkthrough démo radar-immobilier — transcript",
+      "file_type": "document",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "voxtral_mini_latest",
+      "label": "Mistral Voxtral (voxtral-mini-latest)",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "rad_ar_i_mmo_dmo_recording",
+      "label": "rad-ar i-mmo dmo - 2026_06_09 17_49 EDT - Recording.mp4",
+      "file_type": "document",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "procès_verbal",
+      "label": "Procès-verbal municipal",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "zonage_change",
+      "label": "Changement de zonage",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "dérogation_mineure",
+      "label": "Dérogation mineure",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "avis_public",
+      "label": "Avis public municipal",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "règlement_zonage",
+      "label": "Règlement de zonage",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "ville_saint_damase",
+      "label": "Ville de Saint-Damase",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "mrc_matapedia",
+      "label": "MRC de la Matapédia",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "carte_interactive_zonage",
+      "label": "Carte interactive de zonage",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "scraper_procès_verbal",
+      "label": "Scraper de procès-verbaux",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "vidéo_meeting_municipal",
+      "label": "Vidéo de réunion municipale",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "youtube_transcript",
+      "label": "Transcription YouTube",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "zone_201",
+      "label": "Zone 201",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "règlement_3835",
+      "label": "Règlement 3835",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "habitation_multifamiliale",
+      "label": "Habitation multifamiliale",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "marge_implantation",
+      "label": "Marge d'implantation",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "id": "avis_de_motion",
+      "label": "Avis de motion",
+      "file_type": "concept",
+      "source_file": "walkthrough-transcript.md"
+    }
+  ],
+  "edges": [
+    {
+      "source": "radar_demo_transcript",
+      "target": "voxtral_mini_latest",
+      "relation": "utilise",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "rad_ar_i_mmo_dmo_recording",
+      "relation": "contient",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "procès_verbal",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "zonage_change",
+      "relation": "discute",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "dérogation_mineure",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "avis_public",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "règlement_zonage",
+      "relation": "discute",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "ville_saint_damase",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "mrc_matapedia",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "carte_interactive_zonage",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "scraper_procès_verbal",
+      "relation": "propose",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "vidéo_meeting_municipal",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "radar_demo_transcript",
+      "target": "youtube_transcript",
+      "relation": "mentionne",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "procès_verbal",
+      "target": "zonage_change",
+      "relation": "contient",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "procès_verbal",
+      "target": "avis_public",
+      "relation": "contient",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "procès_verbal",
+      "target": "règlement_zonage",
+      "relation": "contient",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "procès_verbal",
+      "target": "avis_de_motion",
+      "relation": "contient",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "zonage_change",
+      "target": "règlement_zonage",
+      "relation": "implique",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "dérogation_mineure",
+      "target": "règlement_zonage",
+      "relation": "modifie",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "ville_saint_damase",
+      "target": "mrc_matapedia",
+      "relation": "appartient_à",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "ville_saint_damase",
+      "target": "zone_201",
+      "relation": "contient",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "règlement_3835",
+      "target": "règlement_zonage",
+      "relation": "est_un",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "règlement_3835",
+      "target": "habitation_multifamiliale",
+      "relation": "autorise",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "règlement_3835",
+      "target": "zone_201",
+      "relation": "applique_à",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "habitation_multifamiliale",
+      "target": "zone_201",
+      "relation": "est_permise_dans",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "marge_implantation",
+      "target": "dérogation_mineure",
+      "relation": "est_affectée_par",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    },
+    {
+      "source": "avis_de_motion",
+      "target": "règlement_zonage",
+      "relation": "précède",
+      "confidence": "EXTRACTED",
+      "source_file": "walkthrough-transcript.md"
+    }
+  ],
+  "hyperedges": [],
+  "canonical_entities": [],
+  "mentions": [],
+  "occurrences": [],
+  "evidence": [],
+  "mappings": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,341 @@
+- generic [active] [ref=e1]:
+  - region "Nous respectons votre vie privée." [ref=e2]:
+    - generic [ref=e4]:
+      - heading "Nous respectons votre vie privée." [level=1] [ref=e5]
+      - generic [ref=e6]:
+        - paragraph [ref=e8]: Nous utilisons des cookies pour améliorer votre expérience de navigation, diffuser des publicités ou des contenus personnalisés et analyser notre trafic. En cliquant sur « Tout accepter », vous consentez à notre utilisation des cookies.
+        - generic [ref=e9]:
+          - button "Personnaliser" [ref=e10] [cursor=pointer]
+          - button "Tout rejeter" [ref=e11] [cursor=pointer]
+          - button "Accepter tout" [ref=e12] [cursor=pointer]
+  - link "Aller au contenu" [ref=e13] [cursor=pointer]:
+    - /url: "#main"
+  - link "Passer au contenu principal" [ref=e14] [cursor=pointer]:
+    - /url: "#contenu"
+  - menubar "Menu principale du site" [ref=e15]:
+    - generic [ref=e16]:
+      - menuitem "Retour à la page d'accueil de Victoriaville" [ref=e17] [cursor=pointer]:
+        - img "Victoriaville" [ref=e18]
+      - generic [ref=e58]:
+        - menuitem "Ouvrir la recherche" [ref=e60] [cursor=pointer]:
+          - img [ref=e61]
+        - menuitem "Page - Accueil" [ref=e64] [cursor=pointer]:
+          - img [ref=e65]
+          - text: Menu
+        - menuitem "Page Emplois" [ref=e67] [cursor=pointer]: Emplois
+        - menuitem "Page Nous joindre" [ref=e68] [cursor=pointer]: Nous joindre
+        - menuitem "Page MonDossier Victo" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+          - text: MonDossier Victo
+  - main [ref=e75]:
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - navigation "Fil d'Ariane" [ref=e79]:
+          - link "Retour à l'accueil du site" [ref=e80] [cursor=pointer]:
+            - /url: https://victoriaville.ca/
+            - img [ref=e81]
+          - img [ref=e84]
+          - link "Retour à la page Conseil municipal" [ref=e87] [cursor=pointer]:
+            - /url: https://victoriaville.ca/conseil-municipal-et-elections
+            - text: Conseil municipal
+          - img [ref=e89]
+          - generic [ref=e91]: Séances du conseil et procès-verbaux
+        - heading "Séances du conseil et procès-verbaux" [level=1] [ref=e92]:
+          - img [ref=e93]
+          - generic [ref=e96]: Séances du conseil et procès-verbaux
+        - paragraph [ref=e97]: Horaire, ordre du jour et détails pour assister ou visionner les séances du conseil municipal à venir. Accès aux procès-verbaux et vidéos des séances passées.
+      - navigation [ref=e98]:
+        - 'link "Section : Séances à venir" [ref=e99] [cursor=pointer]':
+          - /url: https://victoriaville.ca/conseil-municipal-et-elections/seances-du-conseil-et-proces-verbaux
+          - text: Séances à venir
+        - 'link "Section : Séances passées" [ref=e100] [cursor=pointer]':
+          - /url: https://victoriaville.ca/conseil-municipal-et-elections/seances-du-conseil-et-proces-verbaux/passees
+          - text: Séances passées
+      - img [ref=e101]
+    - generic [ref=e119]:
+      - generic [ref=e120]:
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - heading "Assister, suivre ou poser une question" [level=1] [ref=e123]
+            - paragraph [ref=e124]:
+              - text: Les séances ordinaires du Conseil sont diffusées en direct à la TVCBF et webdiffusées en simultané sur la page Facebook et la chaîne YouTube de la Ville. Vous pouvez poser une question sur tout sujet relevant de la Ville.
+              - text: Les séances extraordinaires ne sont pas diffusées, mais on peut y assister et poser une question, uniquement sur les points à l’ordre du jour.
+              - text: "À noter : l’ordre du jour est disponible le vendredi après-midi précédant une séance."
+          - complementary [ref=e125]:
+            - generic [ref=e126]:
+              - heading "Webdiffusion en direct" [level=3] [ref=e127]
+              - generic [ref=e128]:
+                - link "Lien externe - Voir sur Facebook" [ref=e129] [cursor=pointer]:
+                  - /url: https://www.facebook.com/villedevicto/live_videos
+                  - img [ref=e130]
+                  - text: Facebook
+                - link "Lien externe - Voir sur Youtube" [ref=e133] [cursor=pointer]:
+                  - /url: https://www.youtube.com/playlist?list=PL9sz5Oc585lI-MfCiyF5jApfmTzKMHXJ1
+                  - img [ref=e134]
+                  - text: YouTube
+              - generic [ref=e136]:
+                - link "Toutes les nouvelles" [ref=e137] [cursor=pointer]:
+                  - /url: "#seances"
+                  - text: Détails de la prochaine séance
+                  - img [ref=e138]
+                - link "Toutes les nouvelles" [ref=e142] [cursor=pointer]:
+                  - /url: https://victoriaville.ca/conseil-municipal-et-elections/poser-une-question-a-la-prochaine-seance
+                  - text: Poser une question au conseil
+                  - img [ref=e143]
+                - link "Toutes les nouvelles" [ref=e147] [cursor=pointer]:
+                  - /url: "#accordionGroupfaq-702"
+                  - text: Foire aux questions
+                  - img [ref=e148]
+                - link "Toutes les nouvelles" [ref=e152] [cursor=pointer]:
+                  - /url: https://www.youtube.com/playlist?list=PL9sz5Oc585lI-MfCiyF5jApfmTzKMHXJ1
+                  - text: Revoir les séances précédentes
+                  - img [ref=e153]
+        - generic [ref=e158]:
+          - generic [ref=e159]:
+            - heading "Prochaine séance" [level=2] [ref=e160]
+            - article [ref=e161]:
+              - time [ref=e163]: Lundi 6 Juillet 2026 - 18h
+              - generic [ref=e164]:
+                - generic [ref=e165]:
+                  - heading "Type de séance" [level=3] [ref=e166]:
+                    - img [ref=e167]
+                    - text: Type de séance
+                  - paragraph [ref=e170]: Séance Ordinaire
+                - generic [ref=e171]:
+                  - heading "Lieu" [level=3] [ref=e172]:
+                    - img [ref=e173]
+                    - text: Lieu
+                  - paragraph [ref=e176]: Hôtel de ville de Victoriaville
+                  - link "Localiser sur Google Maps" [ref=e177] [cursor=pointer]:
+                    - /url: https://www.google.com/maps/search/1 Rue Notre Dame O, Victoriaville, QC G6P 6T2
+                - generic [ref=e178]:
+                  - generic [ref=e179]:
+                    - text: Ordre du jour à venir
+                    - img [ref=e180]
+                  - generic [ref=e183]:
+                    - text: Procès-verbal à venir
+                    - img [ref=e184]
+          - generic [ref=e187]:
+            - heading "Autres séances à venir" [level=2] [ref=e188]
+            - generic [ref=e189]:
+              - article [ref=e190]:
+                - time [ref=e192]: Lundi 10 Août 2026 - 18h
+                - generic [ref=e193]:
+                  - generic [ref=e194]:
+                    - heading "Type de séance" [level=3] [ref=e195]:
+                      - img [ref=e196]
+                      - text: Type de séance
+                    - paragraph [ref=e199]: Séance Ordinaire
+                  - generic [ref=e200]:
+                    - heading "Lieu" [level=3] [ref=e201]:
+                      - img [ref=e202]
+                      - text: Lieu
+                    - paragraph [ref=e205]: Hôtel de ville de Victoriaville
+                    - link "Localiser sur Google Maps" [ref=e206] [cursor=pointer]:
+                      - /url: https://www.google.com/maps/search/1 Rue Notre Dame O, Victoriaville, QC G6P 6T2
+                  - generic [ref=e207]:
+                    - generic [ref=e208]:
+                      - text: Ordre du jour à venir
+                      - img [ref=e209]
+                    - generic [ref=e212]:
+                      - text: Procès-verbal à venir
+                      - img [ref=e213]
+              - article [ref=e216]:
+                - time [ref=e218]: Mardi 8 Septembre 2026 - 18h
+                - generic [ref=e219]:
+                  - generic [ref=e220]:
+                    - heading "Type de séance" [level=3] [ref=e221]:
+                      - img [ref=e222]
+                      - text: Type de séance
+                    - paragraph [ref=e225]: Séance Ordinaire
+                  - generic [ref=e226]:
+                    - heading "Lieu" [level=3] [ref=e227]:
+                      - img [ref=e228]
+                      - text: Lieu
+                    - paragraph [ref=e231]: Hôtel de ville de Victoriaville
+                    - link "Localiser sur Google Maps" [ref=e232] [cursor=pointer]:
+                      - /url: https://www.google.com/maps/search/1 Rue Notre Dame O, Victoriaville, QC G6P 6T2
+                  - generic [ref=e233]:
+                    - generic [ref=e234]:
+                      - text: Ordre du jour à venir
+                      - img [ref=e235]
+                    - generic [ref=e238]:
+                      - text: Procès-verbal à venir
+                      - img [ref=e239]
+              - article [ref=e242]:
+                - time [ref=e244]: Mardi 6 Octobre 2026 - 18h
+                - generic [ref=e245]:
+                  - generic [ref=e246]:
+                    - heading "Type de séance" [level=3] [ref=e247]:
+                      - img [ref=e248]
+                      - text: Type de séance
+                    - paragraph [ref=e251]: Séance Ordinaire
+                  - generic [ref=e252]:
+                    - heading "Lieu" [level=3] [ref=e253]:
+                      - img [ref=e254]
+                      - text: Lieu
+                    - paragraph [ref=e257]: Hôtel de ville de Victoriaville
+                    - link "Localiser sur Google Maps" [ref=e258] [cursor=pointer]:
+                      - /url: https://www.google.com/maps/search/1 Rue Notre Dame O, Victoriaville, QC G6P 6T2
+                  - generic [ref=e259]:
+                    - generic [ref=e260]:
+                      - text: Ordre du jour à venir
+                      - img [ref=e261]
+                    - generic [ref=e264]:
+                      - text: Procès-verbal à venir
+                      - img [ref=e265]
+              - article [ref=e268]:
+                - time [ref=e270]: Mardi 3 Novembre 2026 - 18h
+                - generic [ref=e271]:
+                  - generic [ref=e272]:
+                    - heading "Type de séance" [level=3] [ref=e273]:
+                      - img [ref=e274]
+                      - text: Type de séance
+                    - paragraph [ref=e277]: Séance Ordinaire
+                  - generic [ref=e278]:
+                    - heading "Lieu" [level=3] [ref=e279]:
+                      - img [ref=e280]
+                      - text: Lieu
+                    - paragraph [ref=e283]: Hôtel de ville de Victoriaville
+                    - link "Localiser sur Google Maps" [ref=e284] [cursor=pointer]:
+                      - /url: https://www.google.com/maps/search/1 Rue Notre Dame O, Victoriaville, QC G6P 6T2
+                  - generic [ref=e285]:
+                    - generic [ref=e286]:
+                      - text: Ordre du jour à venir
+                      - img [ref=e287]
+                    - generic [ref=e290]:
+                      - text: Procès-verbal à venir
+                      - img [ref=e291]
+          - link "Voir plus de résultats" [ref=e294] [cursor=pointer]:
+            - /url: https://victoriaville.ca/conseil-municipal-et-elections/seances-du-conseil-et-proces-verbaux/p2
+      - generic [ref=e299]:
+        - heading "Questions fréquentes" [level=2] [ref=e300]
+        - region "Comment puis-je poser une question au conseil municipal?" [ref=e301]:
+          - button "Comment puis-je poser une question au conseil municipal?" [ref=e302] [cursor=pointer]:
+            - text: Comment puis-je poser une question au conseil municipal?
+            - img [ref=e303]
+          - generic:
+            - paragraph [ref=e305]:
+              - strong [ref=e306]: Séance ordinaire
+              - text: ": vous pouvez poser une question sur tout sujet relevant de la Ville."
+            - paragraph [ref=e307]:
+              - strong [ref=e308]: Séance extraordinaire
+              - text: ": les questions doivent porter uniquement sur les sujets à l’ordre du jour (règlement municipal no 1504-2023)."
+            - paragraph [ref=e309]: "Pour poser une question sur place, présentez-vous à la porte #2 de l’hôtel de ville dès 17h30, le jour de la séance."
+            - paragraph [ref=e310]:
+              - text: Pour poser une question en ligne,
+              - link "remplissez le formulaire" [ref=e311] [cursor=pointer]:
+                - /url: https://mondossier.victoriaville.ca/s/requetes/city-formulaire/a0EON000004kqir2AA/
+              - text: avant midi, le jour de la séance.
+            - paragraph [ref=e312]:
+              - link "En savoir plus" [ref=e313] [cursor=pointer]:
+                - /url: https://victoriaville.ca/conseil-municipal-et-elections/poser-une-question-a-la-prochaine-seance
+            - paragraph [ref=e314]:
+              - text: À noter que les questions doivent porter sur des sujets d’intérêt public et respecter les règles de civilité. Les questions personnelles ou diffamatoires ne seront pas retenues. Pour plus d'informations, consulter le
+              - link "Règlement de la période de questions" [ref=e315] [cursor=pointer]:
+                - /url: https://d16k40le270owi.cloudfront.net/Documents/service-juridique/reglements/deroulement-periode-questions.pdf
+              - text: .
+        - region "Les séances sont-elles accessibles aux personnes sourdes?" [ref=e316]:
+          - button "Les séances sont-elles accessibles aux personnes sourdes?" [ref=e317] [cursor=pointer]:
+            - text: Les séances sont-elles accessibles aux personnes sourdes?
+            - img [ref=e318]
+          - generic:
+            - paragraph [ref=e320]: Tel qu’inscrit au Plan d’action de la politique d’accessibilité universelle, toutes les séances publiques du Conseil télédiffusées bénéficient du travail d’interprètes en langage des signes.
+            - paragraph [ref=e321]: Cette mesure s’ajoute aux nombreux efforts pour rendre les séances publiques accessibles. Notre politique d’accessibilité universelle continue ainsi ses efforts depuis 1999 de favoriser une meilleure qualité de vie pour l'ensemble de nos citoyens.
+        - region "Quelle est la différence entre une séance ordinaire et extraordinaire?" [ref=e322]:
+          - button "Quelle est la différence entre une séance ordinaire et extraordinaire?" [ref=e323] [cursor=pointer]:
+            - text: Quelle est la différence entre une séance ordinaire et extraordinaire?
+            - img [ref=e324]
+          - generic:
+            - paragraph [ref=e326]: Une séance ordinaire est planifiée et couvre les sujets courants. Elle est télédiffusée à la Télévision communautaire des Bois-Francs et webdiffusée en simultané sur la page Facebook et la chaîne YouTube de la Ville. La période de questions peut porter sur tout sujet relevant de la Ville.
+            - paragraph [ref=e327]: Une séance extraordinaire est convoquée au besoin. Elle n’est pas télédiffusée ni webdiffusée, et les questions du public présent doivent porter uniquement sur les sujets à l’ordre du jour.
+  - contentinfo [ref=e328]:
+    - generic [ref=e329]:
+      - generic [ref=e330]:
+        - img [ref=e332]
+        - button "Revenir en haut de la page" [ref=e372] [cursor=pointer]:
+          - text: Haut de page
+          - img [ref=e373]
+      - generic [ref=e376]:
+        - generic [ref=e377]:
+          - list [ref=e378]:
+            - listitem [ref=e379]:
+              - 'link "Lien de la page : Nous joindre" [ref=e380] [cursor=pointer]':
+                - /url: https://victoriaville.ca/a-propos-de-la-ville/nous-joindre
+                - text: Nous joindre
+                - img [ref=e381]
+            - listitem [ref=e383]:
+              - 'link "Lien de la page : Emplois" [ref=e384] [cursor=pointer]':
+                - /url: https://victoriaville.ca/communications-et-emplois/travailler-a-ville-de-victoriaville
+                - text: Emplois
+                - img [ref=e385]
+            - listitem [ref=e387]:
+              - 'link "Lien de la page : Média" [ref=e388] [cursor=pointer]':
+                - /url: https://victoriaville.ca/communications-et-emplois/relations-avec-les-medias
+                - text: Média
+                - img [ref=e389]
+            - listitem [ref=e391]:
+              - 'link "Lien de la page : Signaler un problème" [ref=e392] [cursor=pointer]':
+                - /url: https://victoriaville.ca/signaler-un-probleme
+                - text: Signaler un problème
+                - img [ref=e393]
+            - listitem [ref=e395]:
+              - 'link "Lien de la page : Faire une demande, s’inscrire, payer..." [ref=e396] [cursor=pointer]':
+                - /url: https://victoriaville.ca/faire-une-demande
+                - text: Faire une demande, s’inscrire, payer...
+                - img [ref=e397]
+            - listitem [ref=e399]:
+              - 'link "Lien de la page : Centre d''aide - MonDossier Victo" [ref=e400] [cursor=pointer]':
+                - /url: https://victoriaville.ca/communications-et-emplois/centre-aide
+                - text: Centre d'aide - MonDossier Victo
+                - img [ref=e401]
+          - generic [ref=e403]:
+            - 'link "Visiter la page externe : Facebook Victoriaville" [ref=e404] [cursor=pointer]':
+              - /url: https://www.facebook.com/villedevicto
+              - img [ref=e405]
+            - 'link "Visiter la page externe : Facebook Victoriaville" [ref=e408] [cursor=pointer]':
+              - /url: https://www.facebook.com/loisirsetculturevicto
+              - img [ref=e409]
+            - 'link "Visiter la page externe : Facebook Victoriaville" [ref=e412] [cursor=pointer]':
+              - /url: https://www.facebook.com/bibliothequesvicto
+              - img [ref=e413]
+            - 'link "Visiter la page externe : Instagram Victoriaville" [ref=e416] [cursor=pointer]':
+              - /url: https://www.instagram.com/villedevicto/
+              - img [ref=e417]
+            - 'link "Visiter la page externe : Linkedin Victoriaville" [ref=e421] [cursor=pointer]':
+              - /url: https://www.linkedin.com/company/ville-de-victoriaville/
+              - img [ref=e422]
+            - 'link "Visiter la page externe : Youtube Victoriaville" [ref=e425] [cursor=pointer]':
+              - /url: https://www.youtube.com/@VilledeVictoriaville
+              - img [ref=e426]
+            - 'link "Visiter la page externe : Flickr Victoriaville" [ref=e429] [cursor=pointer]':
+              - /url: https://www.flickr.com/photos/villedevicto
+              - img [ref=e430]
+            - 'link "Visiter la page externe : Developpement web Victoriaville" [ref=e432] [cursor=pointer]':
+              - /url: https://vic.to/netiquette
+              - img [ref=e433]
+        - group "Infolettre" [ref=e439]:
+          - generic [ref=e440]: Infolettre
+          - generic [ref=e441]: Pour ne rien manquer! Abonnez-vous à l’infolettre et recevez les actualités et nouveautés de la Ville dans votre boîte courriel à chaque semaine.
+          - generic [ref=e442]:
+            - textbox "Pour ne rien manquer! Abonnez-vous à l’infolettre et recevez les actualités et nouveautés de la Ville dans votre boîte courriel à chaque semaine." [ref=e443]:
+              - /placeholder: exemple@exemple.ca
+            - button "Envoyer l'infolettre" [ref=e444] [cursor=pointer]:
+              - img [ref=e445]
+      - generic [ref=e448]:
+        - paragraph [ref=e449]: © 2026 — Ville de Victoriaville. Tous droits réservés
+        - generic [ref=e450]:
+          - 'link "Lien de la page : Accessibilité" [ref=e451] [cursor=pointer]':
+            - /url: https://victoriaville.ca/accessibilite
+            - text: Accessibilité
+          - 'link "Lien de la page : Accès à l’information" [ref=e452] [cursor=pointer]':
+            - /url: https://victoriaville.ca/acces-information
+            - text: Accès à l’information
+          - 'link "Lien de la page : Confidentialité" [ref=e453] [cursor=pointer]':
+            - /url: https://victoriaville.ca/confidentialite
+            - text: Confidentialité
+          - 'link "Lien de la page : Conditions d’utilisation" [ref=e454] [cursor=pointer]':
+            - /url: https://victoriaville.ca/conditions-utilisation
+            - text: Conditions d’utilisation
+  - iframe [ref=e455]:
+    

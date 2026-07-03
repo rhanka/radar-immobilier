@@ -1,0 +1,18 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781147128026:086f",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "work-order",
+    "text": "HOLD LEVÉ — tu peux reprendre. La fondation S3-first est en place (PR #123/#124/#125 mergées). NOUVEAU contrat: CONFIG-ONLY, plus AUCUNE fixture.\n\n== CE QUI A CHANGÉ ==\n- Plus de *.fixture.ts par ville, plus de pvText. Une ville = un CONFIG seul. Le worker la fetch en live et écrit raw cas+meta.json sur SCW (déjà branché, content-addressed).\n- PvCityEntry.pvText/sourceUrl sont désormais OPTIONNELS; une entrée { config } sans pvText est valide et ignorée par le seed offline.\n\n== TON JOB PAR VILLE (ANTI-INVENTION STRICT, JAMAIS faux positif, JAMAIS PII Loi 25) ==\n1) Trouver le VRAI site municipal -> page « procès-verbaux »/« avis publics » (séances ≤6 mois). VÉRIFIER en live: HTTP 200, robots.txt OK, au moins 1 PV en PDF/HTML avec COUCHE TEXTE (pdftotext > ~1KB; scanné image -> noter OCR-requis, passer la ville).\n2) Ajouter dans packages/radar-sources/src/sources/proces-verbaux-generic.ts:\n   export const <VILLE>_PV_CONFIG: PvCityConfig = { citySlug: \"<slug>\", pvIndexUrl: \"<URL index réelle vérifiée>\", sourceId: \"proces-verbaux-<slug>\" };\n   puis une entrée CONFIG-ONLY dans ALL_PV_CITIES: { config: <VILLE>_PV_CONFIG },   // PAS de pvText, PAS de sourceUrl, PAS de fixture\n3) NE PAS créer de *.fixture.ts. NE PAS toucher proces-verbaux-parser.ts.\n4) PREUVE (anti-invention, puisqu'il n'y a plus de fixture-test): dans la description de PR, lister par ville: URL testée (HTTP 200 + date), 1 lien PV exemple avec couche texte confirmée, robots OK. Je spot-check avant merge; le worker live confirmera ensuite (échecs visibles au manifeste de run).\n\n== GATE (sans DB, sans docker) ==\n- npx vitest run packages/radar-sources  (2x vert)\n- npx tsc -p packages/radar-sources/tsconfig.json --noEmit = 0\n- (optionnel) harness verify --category unit\nTOUJOURS down -v si jamais une stack est montée. Plafond 2 sous-agents en //, ~15-25 villes/lot.\n\n== LIVRAISON ==\nBranche feat/cities-<region>, commit auteur rhanka <fabien.antoine@m4x.org> SANS trailer, jamais git add -A. PUIS gh pr create --base main --head feat/cities-<region> (si gh 401 -> push la branche, je crée la PR). Conflits ALL_PV_CITIES/generic.ts/index.ts entre lots -> UNION garder les deux. Je gate+merge (harness verify) au fil de l'eau, je SÉRIALISE les merges.\n\nRéponds-moi par lot via h2a inbox put --instance claude:radar-immobilier:6fad700c5156 : nb villes config ajoutées, nb OCR/inaccessibles écartées, URL PR. Démarre par 2 sous-agents sur les villes proches déjà repérées (excluant Montréal/Laval). Merci !",
+    "topic": "cities-config-only",
+    "replyTo": "claude:radar-immobilier:6fad700c5156"
+  },
+  "createdAt": "2026-06-11T03:05:28Z"
+}

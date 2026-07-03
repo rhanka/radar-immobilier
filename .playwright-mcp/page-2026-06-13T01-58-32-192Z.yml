@@ -1,0 +1,242 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Logo" [ref=e4] [cursor=pointer]:
+      - /url: /
+      - img "Logo" [ref=e5]
+    - link "Choisir Chapais" [ref=e6] [cursor=pointer]:
+      - /url: /choisir-chapais/
+    - button [ref=e7] [cursor=pointer]:
+      - img [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - img "Chapais 111 km pencarte" [ref=e12]
+        - generic [ref=e13]:
+          - heading "Bienvenue à chapais Le nord. Le vrai." [level=1] [ref=e14]:
+            - text: Bienvenue à chapais
+            - text: Le nord. Le vrai.
+          - generic [ref=e15]:
+            - textbox "Que cherchez-vous?" [ref=e16]
+            - button [ref=e17] [cursor=pointer]:
+              - img [ref=e18]
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - heading "Actualités" [level=1] [ref=e23]
+          - separator [ref=e24]
+        - generic [ref=e26]:
+          - 'link "Appel d''offres public 2026-02 : Collecte porte-à-porte et le transport local des déchets Appel d''offres | 5 juin 2026 Appel d''offres public 2026-02 : Collecte porte-à-porte et le transport local des déchets La Ville de Chapais demande des soumissions pour la collecte porte-à-porte et le transport local des déchets, pour un contrat débutant le 1er août 2026 et se terminant le 31 décembre 2029. Lire l''article" [ref=e27] [cursor=pointer]':
+            - /url: /actualite/appel-doffres-public-2026-02-collecte-porte-a-porte-et-le-transport-local-des-dechets/
+            - generic [ref=e28]:
+              - 'img "Appel d''offres public 2026-02 : Collecte porte-à-porte et le transport local des déchets" [ref=e29]'
+              - generic [ref=e30]:
+                - generic [ref=e31]:
+                  - generic [ref=e32]: Appel d'offres
+                  - text: "|"
+                  - generic [ref=e33]: 5 juin 2026
+                - 'heading "Appel d''offres public 2026-02 : Collecte porte-à-porte et le transport local des déchets" [level=4] [ref=e34]'
+                - paragraph [ref=e35]: La Ville de Chapais demande des soumissions pour la collecte porte-à-porte et le transport local des déchets, pour un contrat débutant le 1er août 2026 et se terminant le 31 décembre 2029.
+                - generic [ref=e37]: Lire l'article
+          - link "Collecte des gros rebuts résidentiels Inscription obligatoire | 2 juin 2026 Collecte des gros rebuts résidentiels La Ville de Chapais vous informe que la collecte des gros rebuts aura lieu le mardi 2 juin 2026. Lire l'article" [ref=e39] [cursor=pointer]:
+            - /url: /actualite/collecte-des-gros-rebuts-residentiels/
+            - generic [ref=e40]:
+              - img "Collecte des gros rebuts résidentiels" [ref=e41]
+              - generic [ref=e42]:
+                - generic [ref=e43]:
+                  - generic [ref=e44]: Inscription obligatoire
+                  - text: "|"
+                  - generic [ref=e45]: 2 juin 2026
+                - heading "Collecte des gros rebuts résidentiels" [level=4] [ref=e46]
+                - paragraph [ref=e47]: La Ville de Chapais vous informe que la collecte des gros rebuts aura lieu le mardi 2 juin 2026.
+                - generic [ref=e49]: Lire l'article
+          - link "Travaux de reboisement dans les lignes coupe-feu – Interdiction de circulation comuniqué | 28 mai 2026 Travaux de reboisement dans les lignes coupe-feu – Interdiction de circulation Travaux de reboisement prochainement réalisés dans les anciennes lignes d’arrêt mécanisées aménagées lors des feux de forêt de 2023. Lire l'article" [ref=e51] [cursor=pointer]:
+            - /url: /actualite/travaux-de-reboisement-dans-les-lignes-coupe-feu-interdiction-de-circulation/
+            - generic [ref=e52]:
+              - img "Travaux de reboisement dans les lignes coupe-feu – Interdiction de circulation" [ref=e53]
+              - generic [ref=e54]:
+                - generic [ref=e55]:
+                  - generic [ref=e56]: comuniqué
+                  - text: "|"
+                  - generic [ref=e57]: 28 mai 2026
+                - heading "Travaux de reboisement dans les lignes coupe-feu – Interdiction de circulation" [level=4] [ref=e58]
+                - paragraph [ref=e59]: Travaux de reboisement prochainement réalisés dans les anciennes lignes d’arrêt mécanisées aménagées lors des feux de forêt de 2023.
+                - generic [ref=e61]: Lire l'article
+        - link "Toutes les actualités" [ref=e63] [cursor=pointer]:
+          - /url: /actualite/
+      - generic [ref=e65]:
+        - generic [ref=e66]:
+          - heading "Accès rapide" [level=1] [ref=e67]
+          - separator [ref=e68]
+        - generic [ref=e70]:
+          - link "Nous joindre" [ref=e71] [cursor=pointer]:
+            - /url: /nous-joindre/
+            - generic [ref=e72]: Nous joindre
+          - link "Horaire des collectes" [ref=e73] [cursor=pointer]:
+            - /url: /horaire-des-collectes/
+            - generic [ref=e74]: Horaire des collectes
+          - link "Plaintes et requêtes" [ref=e75] [cursor=pointer]:
+            - /url: /plaintes-et-requetes/
+            - generic [ref=e76]: Plaintes et requêtes
+          - link "Calendrier des évènements" [ref=e77] [cursor=pointer]:
+            - /url: /calendrier-des-evenements/
+            - generic [ref=e78]: Calendrier des évènements
+          - link "Évaluation foncière" [ref=e79] [cursor=pointer]:
+            - /url: /evaluation-fonciere/
+            - generic [ref=e80]: Évaluation foncière
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - heading "Événements" [level=1] [ref=e83]
+          - separator [ref=e84]
+        - generic [ref=e86]:
+          - link "Soirée de jeux de société et quizz Soirée de jeux de société et quizz 12 juin 2026, 18:30 Salle communautaire Détails de l'évènement" [ref=e87] [cursor=pointer]:
+            - /url: /calendrier-des-evenements/soiree-de-jeux-de-societe-et-quizz/
+            - generic [ref=e88]:
+              - img "Soirée de jeux de société et quizz" [ref=e89]
+              - generic [ref=e90]:
+                - heading "Soirée de jeux de société et quizz" [level=4] [ref=e91]
+                - list [ref=e92]:
+                  - listitem [ref=e93]:
+                    - img [ref=e94]
+                    - generic [ref=e96]: 12 juin 2026, 18:30
+                  - listitem [ref=e97]:
+                    - img [ref=e98]
+                    - generic [ref=e101]: Salle communautaire
+                - generic [ref=e103]: Détails de l'évènement
+          - 'link "Demi-marathon Chapais Opémiska Demi-marathon Chapais Opémiska 14 juin 2026, 08:00 Départ : École Le Filon Détails de l''évènement" [ref=e105] [cursor=pointer]':
+            - /url: /calendrier-des-evenements/demi-marathon-chapais-opemiska/
+            - generic [ref=e106]:
+              - img "Demi-marathon Chapais Opémiska" [ref=e107]
+              - generic [ref=e108]:
+                - heading "Demi-marathon Chapais Opémiska" [level=4] [ref=e109]
+                - list [ref=e110]:
+                  - listitem [ref=e111]:
+                    - img [ref=e112]
+                    - generic [ref=e114]: 14 juin 2026, 08:00
+                  - listitem [ref=e115]:
+                    - img [ref=e116]
+                    - generic [ref=e119]: "Départ : École Le Filon"
+                - generic [ref=e121]: Détails de l'évènement
+          - link "Festival du doré Baie-James Festival du doré Baie-James 25 juin 2026, 07:00 au 4 juil. 2026, 23:30 Débarcadaire du lac Opémisca Détails de l'évènement" [ref=e123] [cursor=pointer]:
+            - /url: /calendrier-des-evenements/festival-du-dore-baie-james/
+            - generic [ref=e124]:
+              - img "Festival du doré Baie-James" [ref=e125]
+              - generic [ref=e126]:
+                - heading "Festival du doré Baie-James" [level=4] [ref=e127]
+                - list [ref=e128]:
+                  - listitem [ref=e129]:
+                    - img [ref=e130]
+                    - generic [ref=e132]: 25 juin 2026, 07:00 au 4 juil. 2026, 23:30
+                  - listitem [ref=e133]:
+                    - img [ref=e134]
+                    - generic [ref=e137]: Débarcadaire du lac Opémisca
+                - generic [ref=e139]: Détails de l'évènement
+        - link "Tous les événements" [ref=e141] [cursor=pointer]:
+          - /url: /calendrier-des-evenements/
+  - contentinfo [ref=e142]:
+    - generic [ref=e143]:
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - img "Logo" [ref=e146]
+          - generic [ref=e147]:
+            - img [ref=e148]
+            - generic [ref=e151]: 145 boul. Springer, c.p. 380 Chapais (QC) G0W 1H0
+          - link "(418) 745-2511" [ref=e152] [cursor=pointer]:
+            - /url: tel:(418) 745-2511
+            - img [ref=e153]
+            - generic [ref=e155]: (418) 745-2511
+          - link "info@villedechapais.com" [ref=e156] [cursor=pointer]:
+            - /url: mailto:info@villedechapais.com
+            - img [ref=e157]
+            - generic [ref=e160]: info@villedechapais.com
+        - generic [ref=e161]:
+          - heading "Menus" [level=4] [ref=e162]
+          - list [ref=e163]:
+            - listitem [ref=e164]:
+              - link "Accueil" [ref=e165] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e166]:
+              - link "Ville" [ref=e167] [cursor=pointer]:
+                - /url: /ville/
+            - listitem [ref=e168]:
+              - link "Citoyens" [ref=e169] [cursor=pointer]:
+                - /url: /citoyens/
+            - listitem [ref=e170]:
+              - link "Sports, loisirs & culture" [ref=e171] [cursor=pointer]:
+                - /url: /sports-loisirs-et-culture/
+            - listitem [ref=e172]:
+              - link "Rechercher dans le site" [ref=e173] [cursor=pointer]:
+                - /url: /recherche/
+        - generic [ref=e174]:
+          - heading "Accès rapide" [level=4] [ref=e175]
+          - list [ref=e176]:
+            - listitem [ref=e177]:
+              - link "Nous joindre" [ref=e178] [cursor=pointer]:
+                - /url: /nous-joindre/
+            - listitem [ref=e179]:
+              - link "Horaire des collectes" [ref=e180] [cursor=pointer]:
+                - /url: /horaire-des-collectes/
+            - listitem [ref=e181]:
+              - link "Plaintes et requêtes" [ref=e182] [cursor=pointer]:
+                - /url: /plaintes-et-requetes/
+            - listitem [ref=e183]:
+              - link "Calendrier des évènements" [ref=e184] [cursor=pointer]:
+                - /url: /calendrier-des-evenements/
+            - listitem [ref=e185]:
+              - link "Évaluation foncière" [ref=e186] [cursor=pointer]:
+                - /url: /evaluation-fonciere/
+        - generic [ref=e187]:
+          - generic [ref=e188]:
+            - heading "S'inscrire à l'infolettre" [level=4] [ref=e189]
+            - paragraph [ref=e190]: Inscrivez-vous pour être au courant de nos nouveautés
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - textbox "monadresse@courriel.com" [ref=e193]
+              - button "S'inscrire" [ref=e194] [cursor=pointer]
+            - generic [ref=e195]: "*Vous pouvez vous désabonner à tout moment"
+          - link "Suivez nous sur facebook !" [ref=e196] [cursor=pointer]:
+            - /url: https://www.facebook.com/villedechapais
+            - img [ref=e197]
+            - generic [ref=e199]: Suivez nous sur facebook !
+      - separator [ref=e200]
+    - generic [ref=e202]:
+      - generic [ref=e203]: Tous droits réservés - Ville de Chapais
+      - generic [ref=e204]: //
+      - generic [ref=e205]:
+        - text: Conception Web -
+        - link "GNITIC" [ref=e206] [cursor=pointer]:
+          - /url: https://gnitic.com
+      - generic [ref=e207]: //
+      - link "Politique de confidentialité" [ref=e208] [cursor=pointer]:
+        - /url: /politique-de-confidentialite/
+  - generic [ref=e209]:
+    - generic [ref=e210]:
+      - generic [ref=e211]:
+        - heading "Paramètres des Cookies" [level=3] [ref=e212]
+        - paragraph [ref=e213]: Gérer vos préférences sur les Cookies.
+      - generic [ref=e214]:
+        - generic [ref=e215]:
+          - generic [ref=e216]:
+            - generic [ref=e217]: Cookies nécéssaires au fonctionnement
+            - generic [ref=e218]: Ces cookies sont nécessaires pour le fonctionnement du site web.
+          - switch "Cookies nécéssaires au fonctionnement Ces cookies sont nécessaires pour le fonctionnement du site web." [disabled] [ref=e219]
+        - generic [ref=e220]:
+          - generic [ref=e221]:
+            - generic [ref=e222]: Cookies fonctionnels
+            - generic [ref=e223]: Ces cookies permettent d'améliorer les fonctionnalités du site web.
+          - switch "Cookies fonctionnels Ces cookies permettent d'améliorer les fonctionnalités du site web." [checked] [ref=e224] [cursor=pointer]
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - generic [ref=e227]: Cookies de performance
+            - generic [ref=e228]: Ces cookies permettent d'améliorer les performances du site web.
+          - switch "Cookies de performance Ces cookies permettent d'améliorer les performances du site web." [ref=e229] [cursor=pointer]
+        - paragraph [ref=e230]:
+          - text: Voir la
+          - link "Politique de confidentialité" [ref=e231] [cursor=pointer]:
+            - /url: /politique-de-confidentialite/
+          - text: pour plus d'informations.
+      - generic [ref=e232]:
+        - button "Sauvegarder" [ref=e233] [cursor=pointer]
+        - button "Tout accepter" [ref=e234] [cursor=pointer]
+    - button [ref=e235] [cursor=pointer]:
+      - img [ref=e236]
+  - region "Notifications alt+T"
+  - alert [ref=e238]

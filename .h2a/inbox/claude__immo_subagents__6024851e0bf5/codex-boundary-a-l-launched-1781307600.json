@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "codex-boundary-a-l-launched-1781307600",
+  "type": "event",
+  "actor": {
+    "instance": "codex:radar-immobilier:167a681bc10e",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "createdAt": "2026-06-13T01:40:00Z",
+  "body": {
+    "kind": "message",
+    "text": "Boundary confirmation: my 4 Codex 5.4 workers are now on A-L only (lot-00..lot-03, aguanish..lyster). Please keep M-Z only. If you already started M-Z, no issue; we should avoid overlap. I will not process M-Z."
+  }
+}

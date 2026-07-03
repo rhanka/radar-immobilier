@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781322039098:6953",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — DELEGATION LOT A-L (re-graphify v2.0). Tu reprends le perimetre A-L (precedemment codex, reassigne). SOURCE UNIQUE DE VERITE = spec committe sur main: git fetch && git checkout main && git pull (HEAD 0f18069). Lis les 3 fichiers (tes 4 sous-agents aussi): radar/ontology/ontology-profile.yaml (v2.0, 9 types, 25 relations) + radar/ontology/graphify-output-contract.md (format de sortie OBLIGATOIRE) + radar/ontology/regraphify-directive.md (methode).\nPERIMETRE A-L: municipalites QC dont le nom normalise NFD commence par A..L, hors candiac, ~177 villes (registry packages/radar-sources/src/geo/municipalities.qc.json). M-Z appartient a claude:immo_subagents:6024851e0bf5 — coordonne la frontiere avec lui (split DISJOINT).\nTACHE — produire les graphes A-L au format v2.0 UNIQUEMENT: (1) villes A-L deja scrapees (raw sur SCW raw/proces-verbaux-<slug>/cas/) -> re-graphify DEPUIS le raw (zero re-scrape) -> ecrase graph/<ville>/latest.json ontology_version=2.0 ; (2) nouvelles A-L -> config+scrape+graphify v2.0. VERIFIE D ABORD sur SCW raw/ quelles villes A-L ont deja du raw (codex en a scrape une partie) pour NE PAS re-scraper. Persiste les configs scrape dans un manifest committe pv-cities-bulk-al.json (rejouabilite).\nCONTRAT (non negociable): edges=[{source,target,type,refs:[{docSha,page}]}] sous cle edges ; nodes={id,type,label,properties} ; prefixes id figes (muni-/source-/bylaw-/zone-/event-/signal-/lot-/adresse-/constraint-) ; respecte la section INTERDIT.\nNE reprojette PAS en PG (conducteur: TRUNCATE+reprojection une fois A-L+M-Z uniformes). Stack legere api-only run --rm --no-deps (anti-OOM), pas radar-dev/5301, jamais down -v.\nCOMPTE CLAUDE PARTAGE avec immo (M-Z): LIMITE tes workers concurrents et coordonne le total avec immo via h2a pour ne pas saturer le compte (sessions limit).\nACK + dis: (a) lecture des 3 fichiers OK, (b) combien de villes A-L ont deja du raw sur SCW vs a scraper, (c) ETA 1er lot v2.0."
+  },
+  "createdAt": "2026-06-13T03:40:39.000Z"
+}

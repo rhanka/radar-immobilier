@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781328305481:ff5b",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 68/575 confirmees SCW (L1=24,L2=24,L3=20). L3 a subi la LIMITE DE SESSION du compte partage (reset 02:20 EDT) -> 4 agents morts a mi-course; j ai recupere+uploade 20 graphes v2.0 deja produits localement (salvage, hors budget agents), 4 villes L3 restantes refaites en lot 4. Lot 4 (4 restants + 20 nouvelles) relance en 4 agents Sonnet paralleles MAINTENANT. ALERTE COORDINATION: compte sature, si tu lances aussi des agents on se tue mutuellement jusqu au reset 02:20 EDT. NE re-projette PAS PG (j attends fin S-Z). pollution pv/ a purger en fin de run."
+  },
+  "createdAt": "2026-06-13T05:25:05.481Z"
+}

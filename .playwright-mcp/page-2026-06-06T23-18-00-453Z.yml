@@ -1,0 +1,538 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Signaux" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Signaux
+        - button "Opportunités" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Opportunités
+        - button "Sources" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Sources
+        - button "Grilles" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Grilles
+        - button "Coordination" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Coordination
+        - button "Backlog" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Backlog
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e26] [cursor=pointer]: Réel
+    - generic [ref=e29]:
+      - complementary [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - paragraph [ref=e33]: Municipalite cible
+            - generic [ref=e35]:
+              - generic [ref=e36]: Municipalite cible
+              - combobox "Municipalite cible" [ref=e37]:
+                - option "Salaberry-de-Valleyfield" [selected]
+                - option "Vaudreuil-Dorion"
+                - option "Beauharnois"
+                - option "Chateauguay"
+                - option "Saint-Constant"
+                - option "Mercier"
+                - option "Saint-Jean-sur-Richelieu"
+                - option "Sorel-Tracy"
+            - paragraph [ref=e38]:
+              - text: "Ville selectionnee :"
+              - strong [ref=e39]: Salaberry-de-Valleyfield
+          - generic [ref=e40]:
+            - paragraph [ref=e41]: Contexte pilote
+            - paragraph [ref=e42]: Chaque ville a son propre corpus de sources et de signaux historiques. La retro-analyse initiale peuple le radar avant le relais par les scans quotidiens.
+          - generic [ref=e43]:
+            - paragraph [ref=e44]: Recap rapide
+            - generic [ref=e45]:
+              - generic [ref=e46]:
+                - term [ref=e47]: Sources activees
+                - definition [ref=e48]: "7"
+              - generic [ref=e49]:
+                - term [ref=e50]: Fenetre retro-analyse
+                - definition [ref=e51]: 24 mois
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - paragraph [ref=e55]: Onboarding
+          - 'heading "Onboarding : Salaberry-de-Valleyfield" [level=1] [ref=e56]'
+          - paragraph [ref=e57]: "Configurez les sources a activer pour la municipalite, puis lancez la retro-analyse initiale : cela peuplera le radar avec les signaux historiques avant que les scans quotidiens ne prennent le relais."
+        - generic [ref=e58]:
+          - 'heading "Etape 1 : sources a activer pour Salaberry-de-Valleyfield" [level=2] [ref=e59]'
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - generic [ref=e63]: Prioritaire (prete a activer)
+                - generic [ref=e64]: 7 sources
+              - generic [ref=e65]:
+                - generic [ref=e66]:
+                  - generic [ref=e68]:
+                    - switch "Activer pour cette ville" [checked] [ref=e69]
+                    - generic [ref=e73]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Avis publics - Valleyfield
+                    - paragraph: Detecte les avis de derogation, PPCMOI et consultations publiques avant qu'ils ne soient connus du marche.
+                    - generic:
+                      - generic [ref=e78]: Prioritaire (prete a activer)
+                      - generic [ref=e79]: Signal reglementaire
+                      - generic [ref=e80]: Apprentissage historique
+                - generic [ref=e81]:
+                  - generic [ref=e83]:
+                    - switch "Activer pour cette ville" [checked] [ref=e84]
+                    - generic [ref=e88]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Reglements d'urbanisme - Valleyfield
+                    - paragraph: Relie les numeros de reglement aux impacts reels sur la densification et le zonage.
+                    - generic:
+                      - generic [ref=e93]: Prioritaire (prete a activer)
+                      - generic [ref=e94]: Signal reglementaire
+                      - generic [ref=e95]: Reduction faux positifs
+                - generic [ref=e96]:
+                  - generic [ref=e98]:
+                    - switch "Activer pour cette ville" [checked] [ref=e99]
+                    - generic [ref=e103]: Activer pour cette ville
+                  - generic:
+                    - paragraph:
+                      - button "PPCMOI" [ref=e107]
+                      - text: "- Valleyfield"
+                    - paragraph: Capte les projets negocies hors-zonage ordinaire, tres avant la decision finale.
+                    - generic:
+                      - generic [ref=e110]: Prioritaire (prete a activer)
+                      - generic [ref=e111]: Signal reglementaire
+                      - generic [ref=e112]: Ancrage foncier
+                - generic [ref=e113]:
+                  - generic [ref=e115]:
+                    - switch "Activer pour cette ville" [checked] [ref=e116]
+                    - generic [ref=e120]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Roles d'evaluation fonciere - MAMH
+                    - paragraph: Ancre chaque signal sur une parcelle reelle avec valeur, usage et superficie.
+                    - generic:
+                      - generic [ref=e125]: Prioritaire (prete a activer)
+                      - generic [ref=e126]: Ancrage foncier
+                      - generic [ref=e127]: Validation marche
+                - generic [ref=e128]:
+                  - generic [ref=e130]:
+                    - switch "Activer pour cette ville" [checked] [ref=e131]
+                    - generic [ref=e135]: Activer pour cette ville
+                  - generic:
+                    - paragraph:
+                      - button "CPTAQ" [ref=e139]
+                      - text: zone agricole
+                    - paragraph: Elimine les faux positifs sur des terrains bloques par la zone agricole protegee.
+                    - generic:
+                      - generic [ref=e142]: Prioritaire (prete a activer)
+                      - generic [ref=e143]: Filtre de contrainte
+                      - generic [ref=e144]: Reduction faux positifs
+                - generic [ref=e145]:
+                  - generic [ref=e147]:
+                    - switch "Activer pour cette ville" [checked] [ref=e148]
+                    - generic [ref=e152]: Activer pour cette ville
+                  - generic:
+                    - paragraph:
+                      - button "CPTAQ" [ref=e156]
+                      - text: decisions
+                    - paragraph: Transforme un simple blocage en opportunite si une decision d'autorisation existe.
+                    - generic:
+                      - generic [ref=e159]: Prioritaire (prete a activer)
+                      - generic [ref=e160]: Filtre de contrainte
+                      - generic [ref=e161]: Reduction faux positifs
+                - generic [ref=e162]:
+                  - generic [ref=e164]:
+                    - switch "Activer pour cette ville" [checked] [ref=e165]
+                    - generic [ref=e169]: Activer pour cette ville
+                  - generic:
+                    - paragraph: StatCan Census Profile 2021
+                    - paragraph: Profil demografique et socio-economique de la municipalite pour le narratif client.
+                    - generic:
+                      - generic [ref=e174]: Prioritaire (prete a activer)
+                      - generic [ref=e175]: Contexte strategique
+                      - generic [ref=e176]: Validation marche
+            - generic [ref=e177]:
+              - generic [ref=e178]:
+                - generic [ref=e179]: A qualifier (acces a valider)
+                - generic [ref=e180]: 5 sources
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - generic [ref=e184]:
+                    - switch "Activer pour cette ville" [ref=e185]
+                    - generic [ref=e189]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Videos YouTube du conseil - Valleyfield
+                    - paragraph: Acces aux discussions a la source avant la publication des proces-verbaux officiels.
+                    - generic:
+                      - generic [ref=e194]: A qualifier (acces a valider)
+                      - generic [ref=e195]: Signal reglementaire
+                      - generic [ref=e196]: Apprentissage historique
+                - generic [ref=e197]:
+                  - generic [ref=e199]:
+                    - switch "Activer pour cette ville" [ref=e200]
+                    - generic [ref=e204]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Cadastre / Infolot
+                    - paragraph: Geometrie des parcelles et identification cadastrale pour l'assemblage foncier.
+                    - generic:
+                      - generic [ref=e209]: A qualifier (acces a valider)
+                      - generic [ref=e210]: Ancrage foncier
+                      - generic [ref=e211]: Reduction faux positifs
+                - generic [ref=e212]:
+                  - generic [ref=e214]:
+                    - switch "Activer pour cette ville" [ref=e215]
+                    - generic [ref=e219]: Activer pour cette ville
+                  - generic:
+                    - paragraph: JLR
+                    - paragraph: Transactions, historique de propriete et donnees de marche pour la validation.
+                    - generic:
+                      - generic [ref=e224]: A qualifier (acces a valider)
+                      - generic [ref=e225]: Validation marche
+                      - generic [ref=e226]: Ancrage foncier
+                - generic [ref=e227]:
+                  - generic [ref=e229]:
+                    - switch "Activer pour cette ville" [ref=e230]
+                    - generic [ref=e234]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Centris / MLS
+                    - paragraph: Inscriptions et absorption du marche si un acces partenarial est obtenu.
+                    - generic:
+                      - generic [ref=e239]: A qualifier (acces a valider)
+                      - generic [ref=e240]: Validation marche
+                - generic [ref=e241]:
+                  - generic [ref=e243]:
+                    - switch "Activer pour cette ville" [ref=e244]
+                    - generic [ref=e248]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Permis de construction - Valleyfield
+                    - paragraph: Valide si les signaux anterieurs ont debouche sur des permis reels.
+                    - generic:
+                      - generic [ref=e253]: A qualifier (acces a valider)
+                      - generic [ref=e254]: Validation marche
+                      - generic [ref=e255]: Apprentissage historique
+            - generic [ref=e256]:
+              - generic [ref=e257]:
+                - generic [ref=e258]: Plus tard
+                - generic [ref=e259]: 18 sources
+              - generic [ref=e260]:
+                - generic [ref=e261]:
+                  - generic [ref=e263]:
+                    - switch "Activer pour cette ville" [ref=e264]
+                    - generic [ref=e268]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Seances du conseil - Valleyfield
+                    - paragraph: Reconstruit le cycle de vie des dossiers a partir des ordres du jour et des proces-verbaux.
+                    - generic:
+                      - generic [ref=e273]: Plus tard
+                      - generic [ref=e274]: Apprentissage historique
+                      - generic [ref=e275]: Signal reglementaire
+                - generic [ref=e276]:
+                  - generic [ref=e278]:
+                    - switch "Activer pour cette ville" [ref=e279]
+                    - generic [ref=e283]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Avis et reglements - MRC Beauharnois-Salaberry
+                    - paragraph: Signaux reglementaires regionaux qui peuvent preceder les changements a l'echelle municipale.
+                    - generic:
+                      - generic [ref=e288]: Plus tard
+                      - generic [ref=e289]: Signal reglementaire
+                      - generic [ref=e290]: Contexte strategique
+                - generic [ref=e291]:
+                  - generic [ref=e293]:
+                    - switch "Activer pour cette ville" [ref=e294]
+                    - generic [ref=e298]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Schema d'amenagement - MRCBHS
+                    - paragraph: Contexte de planification a long terme pour qualifier la pression de densification.
+                    - generic:
+                      - generic [ref=e303]: Plus tard
+                      - generic [ref=e304]: Contexte strategique
+                      - generic [ref=e305]: Reduction faux positifs
+                - generic [ref=e306]:
+                  - generic [ref=e308]:
+                    - switch "Activer pour cette ville" [ref=e309]
+                    - generic [ref=e313]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Conseil des maires - MRCBHS
+                    - paragraph: Orientations de gouvernance regionale utiles pour contextualiser les dossiers locaux.
+                    - generic:
+                      - generic [ref=e318]: Plus tard
+                      - generic [ref=e319]: Contexte strategique
+                      - generic [ref=e320]: Apprentissage historique
+                - generic [ref=e321]:
+                  - generic [ref=e323]:
+                    - switch "Activer pour cette ville" [ref=e324]
+                    - generic [ref=e328]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Donnees Quebec catalog
+                    - paragraph: Plomberie de decouverte de jeux de donnees publics (MAMH, CPTAQ, BDZI, etc.).
+                    - generic:
+                      - generic [ref=e333]: Plus tard
+                      - generic [ref=e334]: Ancrage foncier
+                      - generic [ref=e335]: Filtre de contrainte
+                - generic [ref=e336]:
+                  - generic [ref=e338]:
+                    - switch "Activer pour cette ville" [ref=e339]
+                    - generic [ref=e343]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Adresses Quebec / IGO geocoder
+                    - paragraph: Normalise les adresses textuelles en coordonnees geospatiales pour le scoring.
+                    - generic:
+                      - generic [ref=e348]: Plus tard
+                      - generic [ref=e349]: Ancrage foncier
+                      - generic [ref=e350]: Reduction faux positifs
+                - generic [ref=e351]:
+                  - generic [ref=e353]:
+                    - switch "Activer pour cette ville" [ref=e354]
+                    - generic [ref=e358]: Activer pour cette ville
+                  - generic:
+                    - paragraph:
+                      - button "BDZI" [ref=e362]
+                      - text: flood zones
+                    - paragraph: Reduit les faux positifs sur les terrains en zone inondable.
+                    - generic:
+                      - generic [ref=e365]: Plus tard
+                      - generic [ref=e366]: Filtre de contrainte
+                      - generic [ref=e367]: Reduction faux positifs
+                - generic [ref=e368]:
+                  - generic [ref=e370]:
+                    - switch "Activer pour cette ville" [ref=e371]
+                    - generic [ref=e375]: Activer pour cette ville
+                  - generic:
+                    - paragraph:
+                      - button "GRHQ" [ref=e379]
+                      - text: hydrography
+                    - paragraph: Bandes riveraines et proximite hydrique pour les obligations de recul reglementaire.
+                    - generic:
+                      - generic [ref=e382]: Plus tard
+                      - generic [ref=e383]: Filtre de contrainte
+                      - generic [ref=e384]: Reduction faux positifs
+                - generic [ref=e385]:
+                  - generic [ref=e387]:
+                    - switch "Activer pour cette ville" [ref=e388]
+                    - generic [ref=e392]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Zonage municipal open data
+                    - paragraph: Couche de zonage publiee par les villes qui la rendent disponible en acces libre.
+                    - generic:
+                      - generic [ref=e397]: Plus tard
+                      - generic [ref=e398]: Signal reglementaire
+                      - generic [ref=e399]: Reduction faux positifs
+                - generic [ref=e400]:
+                  - generic [ref=e402]:
+                    - switch "Activer pour cette ville" [ref=e403]
+                    - generic [ref=e407]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Zonage plans et grilles - Valleyfield
+                    - paragraph: Grilles et plans de zonage officiels pour valider le potentiel de densification.
+                    - generic:
+                      - generic [ref=e412]: Plus tard
+                      - generic [ref=e413]: Reduction faux positifs
+                      - generic [ref=e414]: Signal reglementaire
+                - generic [ref=e415]:
+                  - generic [ref=e417]:
+                    - switch "Activer pour cette ville" [ref=e418]
+                    - generic [ref=e422]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Transactions immobilieres
+                    - paragraph: Contexte de marche historique pour relier signaux reglementaires et repricing.
+                    - generic:
+                      - generic [ref=e427]: Plus tard
+                      - generic [ref=e428]: Validation marche
+                      - generic [ref=e429]: Apprentissage historique
+                - generic [ref=e430]:
+                  - generic [ref=e432]:
+                    - switch "Activer pour cette ville" [ref=e433]
+                    - generic [ref=e437]: Activer pour cette ville
+                  - generic:
+                    - paragraph: StatCan WDS socio-economic tables
+                    - paragraph: Indicateurs statistiques approfondis apres validation des metriques prioritaires.
+                    - generic:
+                      - generic [ref=e442]: Plus tard
+                      - generic [ref=e443]: Contexte strategique
+                      - generic [ref=e444]: Validation marche
+                - generic [ref=e445]:
+                  - generic [ref=e447]:
+                    - switch "Activer pour cette ville" [ref=e448]
+                    - generic [ref=e452]: Activer pour cette ville
+                  - generic:
+                    - paragraph: INFC/HICC projects
+                    - paragraph: Investissements publics federaux pouvant catalyser la densification locale.
+                    - generic:
+                      - generic [ref=e457]: Plus tard
+                      - generic [ref=e458]: Contexte strategique
+                      - generic [ref=e459]: Apprentissage historique
+                - generic [ref=e460]:
+                  - generic [ref=e462]:
+                    - switch "Activer pour cette ville" [ref=e463]
+                    - generic [ref=e467]: Activer pour cette ville
+                  - generic:
+                    - paragraph: MTMD travaux routiers
+                    - paragraph: Travaux routiers comme catalyseurs de timing pour les secteurs adjacents.
+                    - generic:
+                      - generic [ref=e472]: Plus tard
+                      - generic [ref=e473]: Contexte strategique
+                - generic [ref=e474]:
+                  - generic [ref=e476]:
+                    - switch "Activer pour cette ville" [ref=e477]
+                    - generic [ref=e481]: Activer pour cette ville
+                  - generic:
+                    - paragraph: MTMD reseau routier RTSS
+                    - paragraph: Hierarchie routiere pour le contexte d'accessibilite et de scoring de proximite.
+                    - generic:
+                      - generic [ref=e486]: Plus tard
+                      - generic [ref=e487]: Contexte strategique
+                - generic [ref=e488]:
+                  - generic [ref=e490]:
+                    - switch "Activer pour cette ville" [ref=e491]
+                    - generic [ref=e495]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Exo GTFS transit service
+                    - paragraph: Accessibilite en transport en commun pour la demande residentiellement dense.
+                    - generic:
+                      - generic [ref=e500]: Plus tard
+                      - generic [ref=e501]: Contexte strategique
+                      - generic [ref=e502]: Validation marche
+                - generic [ref=e503]:
+                  - generic [ref=e505]:
+                    - switch "Activer pour cette ville" [ref=e506]
+                    - generic [ref=e510]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Salaberry info travaux/projets
+                    - paragraph: Projets et travaux locaux pour le narratif 'pourquoi ce secteur, pourquoi maintenant'.
+                    - generic:
+                      - generic [ref=e515]: Plus tard
+                      - generic [ref=e516]: Contexte strategique
+                      - generic [ref=e517]: Apprentissage historique
+                - generic [ref=e518]:
+                  - generic [ref=e520]:
+                    - switch "Activer pour cette ville" [ref=e521]
+                    - generic [ref=e525]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Orthophotos / imagery
+                    - paragraph: Validation visuelle des friches, terrains vacants et sites sous-utilises.
+                    - generic:
+                      - generic [ref=e530]: Plus tard
+                      - generic [ref=e531]: Reduction faux positifs
+                      - generic [ref=e532]: Contexte strategique
+            - generic [ref=e533]:
+              - generic [ref=e534]:
+                - generic [ref=e535]: Verification manuelle
+                - generic [ref=e536]: 1 source
+              - generic [ref=e538]:
+                - generic [ref=e540]:
+                  - switch "Activer pour cette ville" [ref=e541]
+                  - generic [ref=e545]: Activer pour cette ville
+                - generic:
+                  - paragraph: Registre foncier du Quebec
+                  - paragraph: Due diligence proprietaire et charges legales sur les parcelles cibles.
+                  - generic:
+                    - generic [ref=e550]: Verification manuelle
+                    - generic [ref=e551]: Ancrage foncier
+                    - generic [ref=e552]: Validation marche
+            - generic [ref=e553]:
+              - generic [ref=e554]:
+                - generic [ref=e555]: Hors perimetre
+                - generic [ref=e556]: 3 sources
+              - generic [ref=e557]:
+                - generic [ref=e558]:
+                  - generic [ref=e560]:
+                    - switch "Activer pour cette ville" [ref=e561]
+                    - generic [ref=e565]: Activer pour cette ville
+                  - generic:
+                    - paragraph: Construction permits open data
+                    - paragraph: Permis de construction publics pour les villes qui les exposent en acces libre.
+                    - generic:
+                      - generic [ref=e570]: Hors perimetre
+                      - generic [ref=e571]: Validation marche
+                      - generic [ref=e572]: Apprentissage historique
+                - generic [ref=e573]:
+                  - generic [ref=e575]:
+                    - switch "Activer pour cette ville" [ref=e576]
+                    - generic [ref=e580]: Activer pour cette ville
+                  - generic:
+                    - paragraph: StatCan core public infrastructure assets
+                    - paragraph: Contexte macroeconomique sur les actifs d'infrastructure publique.
+                    - generic:
+                      - generic [ref=e585]: Hors perimetre
+                      - generic [ref=e586]: Contexte strategique
+                - generic [ref=e587]:
+                  - generic [ref=e589]:
+                    - switch "Activer pour cette ville" [ref=e590]
+                    - generic [ref=e594]: Activer pour cette ville
+                  - generic:
+                    - paragraph: ARTM grands projets
+                    - paragraph: Grands projets de transport a l'echelle regionale (faible pertinence Valleyfield).
+                    - generic:
+                      - generic [ref=e599]: Hors perimetre
+                      - generic [ref=e600]: Contexte strategique
+        - generic [ref=e601]:
+          - generic:
+            - img [ref=e603]
+            - heading "Retro-analyse initiale" [level=2] [ref=e604]
+          - paragraph: "L'onboarding commence par une retro-analyse historique : toutes les sources selectionnees sont parcourues sur la fenetre choisie pour reconstituer les signaux passes. Les scans quotidiens prennent ensuite le relais automatiquement."
+          - generic:
+            - generic [ref=e608]:
+              - generic [ref=e609]: Fenetre retro-analyse
+              - combobox "Fenetre retro-analyse" [ref=e610]:
+                - option "12 mois"
+                - option "24 mois" [selected]
+                - option "36 mois"
+            - generic [ref=e611]: "(defaut : 24 mois)"
+          - generic [ref=e612]:
+            - paragraph: Estimation indicative
+            - paragraph: ~112 signaux
+            - paragraph: 7 sources x 24 mois, estimation illustrative uniquement, non garantie. Le volume reel depend de l'activite de chaque source.
+          - paragraph: Apres la retro-analyse, chaque source activee passe en scan quotidien automatique.
+        - generic [ref=e617]:
+          - heading "Recap de configuration" [level=3] [ref=e618]
+          - generic [ref=e619]:
+            - generic [ref=e620]:
+              - term: Ville
+              - definition: Salaberry-de-Valleyfield
+            - generic [ref=e623]:
+              - term: Sources activees
+              - definition: "7"
+            - generic [ref=e626]:
+              - term: Fenetre retro-analyse
+              - definition: 24 mois
+        - button "Lancer l'onboarding" [ref=e630] [cursor=pointer]:
+          - img [ref=e631]
+          - text: Lancer l'onboarding
+  - complementary "Assistant radar (ancre)" [ref=e643]:
+    - generic [ref=e645]:
+      - button "Passer en fenetre flottante" [ref=e646] [cursor=pointer]:
+        - img [ref=e647]
+      - button "Fermer le chat" [ref=e648] [cursor=pointer]:
+        - img [ref=e649]
+    - region "Assistant radar" [ref=e651]:
+      - navigation "Assistant radar" [ref=e653]:
+        - button "Chat" [pressed] [ref=e654] [cursor=pointer]
+        - button "Taches" [ref=e655] [cursor=pointer]
+      - generic [ref=e657]:
+        - generic [ref=e658]:
+          - generic [ref=e659]:
+            - paragraph [ref=e660]: Assistant radar
+            - paragraph [ref=e661]: Questionner les signaux et piloter le backlog
+          - combobox "Modele" [ref=e663]:
+            - option "Sonnet 4.6" [selected]
+            - option "Opus 4.7"
+            - option "Command A"
+            - option "Command A R."
+            - option "Gemini 3.5 Flash"
+            - option "Gemini 3.1 Flash Lite"
+            - option "Mistral Small 4"
+            - option "Magistral Medium"
+            - option "GPT-5.5"
+            - option "GPT-5.4 Nano"
+            - option "GPT-4.1 Nano"
+        - paragraph [ref=e666]: "Posez une question sur les signaux, les contraintes reglementaires ou une fiche d'opportunite. Vous pouvez aussi demander d'ajouter une demande au backlog (ex. « Ajoute une demande : carte interactive »)."
+        - generic [ref=e668]:
+          - textbox "Questionner ce signal" [active] [ref=e669]
+          - button [disabled] [ref=e670]:
+            - img [ref=e671]

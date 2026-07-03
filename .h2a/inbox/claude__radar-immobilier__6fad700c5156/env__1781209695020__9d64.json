@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781209695020:9d64",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "final-report",
+    "text": "RAPPORT FINAL — filet \"autres villes\" CONFIG-ONLY (sous-traitant claude:immo_subagents:6024851e0bf5).\n\nCOUVERTURE: 574/574 villes du registre geo hors batch-500 et hors 36 golden ont ete TENTEES (100%). Avec batch-500 + 36 golden, couverture complete du registre geo (~1106).\n\nCABLAGE: ~646 villes config-only au total une fois les PRs mergees (main=480 + 5 PRs cities en attente). Chaque ville = PvCityConfig + entree ALL_PV_CITIES, SANS fixture ni pvText (le worker live fetch + ecrit le brut au CAS/S3). Contrat S3-first respecte.\n\nPRs CITIES EN ATTENTE DE GATE+MERGE (toutes UNION sur ALL_PV_CITIES, rebase a toi): #146 (round9, 34), #150 (round11, 28), #153 (round12, 44), #154 (round13, 34), #156 (round14, 26). Gate local vert sur chacune (tsc=0 + vitest scope agglo-mtl-N). Rounds anterieurs (6-8,10 + initiaux #130/#133/#134/#135/#136/#144/#145/#148) deja mergees dans main.\n\nVENTILATION DES ECARTEES (rendement decroissant en region eloignee):\n- js-only (rendu client, hors perimetre config-direct): Portail-citoyen/B2, Modellium/VPlus (Angular SPA shell 2630o), iDesign doc-list, gestionweblex doc-list, Webflow, Wix, portail Matapedia-les-Plateaux (ancres diese). Categorie la plus nombreuse.\n- ocr-required: PV scannes sans couche texte (pdftotext <250o). Tres frequent sur Inforoute *.ao.ca (Abitibi-Ouest) et Cote-Nord WordPress.\n- perime: aucun PV <6 mois (sites figes, fusions municipales ex. Ville de La Pocatiere 2025-09-03, archives arretees).\n- no-pv-page: site OK sans PV publie (seances video YouTube; TNO/tutelle CMQ publiant des ordonnances: Caniapiscau, Schefferville, Cote-Nord-du-Golfe).\n- inaccessible/http-only: DNS mort, domaine parque, homonyme non resolu, ou http seul (contrat exige https).\n\nANTI-INVENTION: discipline stricte. Pieges d homonymie tranches et documentes (ex: saint-damase.com Matapedia vs st-damase.qc.ca Monterege; clermont.ao.ca Abitibi vs Charlevoix; stsimeon.ca Bonaventure vs Charlevoix; grosse-ile station quarantaine vs municipalite des Iles; amos.quebec vs amos.qc.ca; st-moise.com vs st-moise.ca hallucine; eeyou-istchee=gouv regional cri; blanc-sablon/grosse-ile=portails touristiques ecartes). Aucune URL inventee: en cas de doute -> inaccessible.\n\nNOTE INFRA: au round12 le volume nomme radar-root-node-modules etait vide (down -v) -> npm ci pour restaurer le gate. Une slice (round13 S1, 25 villes) perdue a un crash de session Linux -> relancee et cablee au round14. Aucune perte de couverture.\n\nFILET TERMINE. Plus de villes a traiter. En attente de gate+merge des 5 PRs par tes soins, ou d un nouvel ordre."
+  },
+  "createdAt": "2026-06-11T20:28:15.020Z"
+}

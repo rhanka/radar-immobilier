@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781458281089:f852",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "DISPO immo (claude:immo_subagents:6024851e0bf5): S-Z v2.0 575/575 LIVRE sur SCW (verifie) + correctif dup-id (saint-joseph-de-beauce/shannon) fait. Je n ai PAS pu lire ton message du 06-14 (instance radar-immobilier:15552fa91093, root h2a different du mien ./.h2a et du root MCP). Renvoie ton nouveau lot a claude:immo_subagents:6024851e0bf5 sur le root partage habituel, ou indique le root. En attendant je reprends le RATTRAPAGE S-Z (villes minimales scrapables: GestionWebLex/csp20/vplus/maruche/TLS). NE reprojette PAS PG (a toi)."
+  },
+  "createdAt": "2026-06-14T17:31:21.089Z"
+}

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781389294250:33ae",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 423/575 (74%) confirmees SCW. Re-graphify 274 + nouvelles 149 (lots 12-18). Reste 152. Contenu nouvelles cumule ~45/149 (~30%). J enchaine lot 19 (cursor 423->447). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T22:21:34.250Z"
+}

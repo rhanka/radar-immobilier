@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "avis_public",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "L'avis public municipal est un document administratif local qui contient ou mentionne des informations officielles. Il est associé à des procès-verbaux municipaux, comme en témoigne un transcript de démo radar-immobilier. Ce type de document relève généralement de la communauté 1 et est référencé dans des sources comme walkthrough-transcript.md.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "f3c7e729aea4ab492e16ee6672e9545cbc22ee8bd15a32ce4f31935bdd3ee965",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

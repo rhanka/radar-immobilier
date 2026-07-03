@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "7e5b1484-2475-4ab6-9aac-a21aa4bc38f1",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "createdAt": "2026-06-12T02:20:33.850906+00:00",
+  "body": {
+    "kind": "message",
+    "text": "FAN-OUT GRAPHIFY (ordre du principal): parcours graphify Sonnet 4.6 sur l'ENSEMBLE des docs collectes (522 villes / 3272 PV sur SCW), MAINTENANT, par LOTS DE 4 AGENTS paralleles jusqu'a epuisement. Sonnet a de la marge rate-limit (Opus mourait en 68s). Pas de Postgres par agent (anti-OOM), pas radar-dev (demo 5301), jamais down -v la demo. Reporte la progression cumulee X/522 par batch.\n\nSUBSTRAT: mount S3 deja industrialise -> `./scripts/mount-scw.sh` monte les PV en lecture seule sous /tmp/scw-docs/raw/proces-verbaux-<ville>/cas/*.pdf (+ .meta.json). Ecritures de resultats: via client S3 avec creds .env SCRAPE_S3_* (PAS via le mount read-only).\n\n=== PROMPT TEMPLATE (1 agent = 1 partition ; instancie 4 en parallele, remplis PARTITION) ===\nradar-immobilier. Parsing semantique graphify d'un LOT de PV. Modele: SONNET 4.6. Reponds en FRANCAIS. Anti-invention STRICT (chaque noeud/arete = extrait exact + n. de resolution). LOI 25: roles PUBLICS uniquement (maire/conseillers/greffier en fonction), JAMAIS de PII de particuliers (proprietaires/citoyens/locataires). isolation worktree SI tu commits, sinon no-commit + sortie /tmp.\n\nPARTITION (a remplir): villes = [<slug1>, <slug2>, ...]  (~N villes/agent, disjointes des 3 autres agents du lot)\n\nONTOLOGIE: applique le profil committe `radar/ontology/ontology-profile.yaml` (id radar-immobilier-zonage). NB: le CLI @sentropic/graphify n'est PAS un extracteur standalone -> execute le protocole de la SKILL graphify (~/.claude/skills/graphify/SKILL.md): extraction entites/relations selon l'ontologie PUIS `wiki describe --mode direct` (regle: jamais les labels seuls).\n\nPOUR CHAQUE PV (sous /tmp/scw-docs/raw/proces-verbaux-<ville>/cas/*.pdf):\n1. pdftotext (poppler) -> texte.\n2. Extraction selon l'ontologie: noeuds Source/Municipality/Zone/Bylaw/DesignationEvent/Lot/Adresse/Constraint/Signal + relations amends/rezones/raises_signal/targets_lot/constrains/derived_from/mentions/located_in. Capte les changements d'urbanisme TYPES: zonage, PIIA, plan d'urbanisme, lotissement, derogation, PPCMOI, usage conditionnel.\n3. `wiki describe --mode direct` (descriptions des noeuds cles).\n4. Ecris sur SCW (client S3, creds .env): `parsed/{ville}/graphify/{docSha}/graph.json` + agrege `graph/{ville}/latest.json`. [ces ecritures alimentent la projection PG -> la vue graphe d'immo (A.3.1) ET closent le trou S3-replay du graphe]\n\nREPORT (fin): par ville -> nb PV traites, nb noeuds/aretes, nb signaux d'urbanisme types (qq extraits exacts), cles SCW ecrites. Si rate-limit: dis a quelle ville/PV tu t'arretes (reprise).\n=== FIN TEMPLATE ===\n\nAccuse reception + dis combien d'agents tu tiens en parallele et le decoupage des 522 villes en lots de 4."
+  }
+}

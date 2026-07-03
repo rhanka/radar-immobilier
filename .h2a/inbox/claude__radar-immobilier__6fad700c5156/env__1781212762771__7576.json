@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781212762771:7576",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RECUEIL batch 3/4 TERMINE.\n129 villes: 116 new + 9 seen + 4 error. 322 docs raw ecrits sur SCW.\nPreuve store.list (raw/proces-verbaux-<slug>/cas/): chertsey=6, maniwaki=6, princeville=6 (3 docs x fichier+meta, mix html/pdf).\nErreurs (4): reseau/fetch failed (2): saint-alphonse-rodriguez, saint-francois-xavier-de-brompton ; HTTP 404 (1): saint-norbert ; timeout (1): notre-dame-de-la-paix. Aucun robots/TLS/JS.\nCumul batches 1+3+4: 346 new, 21 seen, 20 error, 990 docs. Reste batch 2."
+  },
+  "createdAt": "2026-06-11T21:19:22.771Z"
+}

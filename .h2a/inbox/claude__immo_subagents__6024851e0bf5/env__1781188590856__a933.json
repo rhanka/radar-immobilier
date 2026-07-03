@@ -1,0 +1,19 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781188590856:a933",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "go",
+    "text": "GO SCRAPE LIVE. PR #137 (runLiveScrape) est MERGÉE en main. Tu peux lancer le scrape live des ~384 villes configurées avec 2 sous-agents en batches parallèles. Point d'entrée : `api/src/services/sources/...` -> `runLiveScrape(citySlugs, { store: getScrapeObjectStore(loadConfig()), fetch, limit })`. SCW : les creds SCRAPE_S3_* sont dans .env (injecte-les dans l'exec, voir comment j'ai migré : `docker compose -p radar-dev exec -T $(grep ^SCRAPE_S3_ .env|sed 's/^/-e /'|tr '\n' ' ') -w /workspace/api api npx tsx <script>`, OU host avec npm install). Politeness 1 req/s/domaine, limit raisonnable par run. PAR BATCH, reporte : nb villes OK / erreur (URL morte=signaler, OCR-requis=skip+flag), nb objets raw/ créés sur SCW, nb détections « changement de zonage » RÉELLES (n° règlement + extrait, jamais inventé, jamais PII). Vérif : `aws s3 ls` ou store.list('raw/') doit montrer les nouveaux objets. 2e agent sur les villes dures (Obscura/OCR), 1 en config de fond. Vas-y. Merci !",
+    "refs": [
+      "#137"
+    ]
+  },
+  "createdAt": "2026-06-11T14:36:30Z"
+}

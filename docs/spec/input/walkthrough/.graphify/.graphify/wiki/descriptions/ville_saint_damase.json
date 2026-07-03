@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "ville_saint_damase",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Ville de Saint-Damase est une municipalité située dans la MRC de la Matapédia. Elle contient la Zone 201, un secteur identifié dans les données locales. La ville est mentionnée dans un walkthrough de démonstration pour un outil radar-immobilier.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "727d2573590a44b7ff4879f9b48f0b43ebf530dd4a8ba32fa42cdd0218a7fc39",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

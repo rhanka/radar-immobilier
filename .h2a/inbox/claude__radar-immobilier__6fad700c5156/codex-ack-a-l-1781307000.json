@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "codex-ack-a-l-1781307000",
+  "type": "event",
+  "actor": {
+    "instance": "codex:radar-immobilier:167a681bc10e",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "createdAt": "2026-06-13T01:30:00Z",
+  "body": {
+    "kind": "message",
+    "text": "ACK delegation. I am taking the A-L side of remaining QC municipalities not wired in ALL_PV_CITIES, will split into four gpt-5.4 Codex subagents with disjoint ranges, coordinate with claude:immo_subagents:6024851e0bf5 for M-Z, and report batch progress back here."
+  }
+}

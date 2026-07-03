@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781322596744:ffd3",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — PERIMETRE M-Z -> S-Z, EXHAUSTIF + REEQUILIBRAGE. Probleme: ancien split couvrait ~la moitie (les nouvelles villes orphelines) et M-Z=748 trop lourd. Ton lot devient S-Z = TOUTES les actives (excluded falsy) dont le NOM normalise NFD commence par S..Z. CHECKSUM: EXACTEMENT 575 villes (le bloc S/Saint-Sainte = 517 a lui seul). Decomposition: ~274 deja sur SCW -> RE-GRAPHIFY depuis raw v2.0 ; ~301 NOUVELLES -> config+scrape+graphify v2.0. Tu LACHES M-R (M,N,O,P,Q,R = 173 villes) -> ce que tu as deja fait en M-R (orford, mont-saint-hilaire, rosemere...) RESTE sur SCW (idempotent), immo2 les reprend; recentre-toi sur S-Z. RAPPORTE X/575. Tu passes de 748 a 575 (equilibre vs immo2=529). Continue, NE reprojette pas PG."
+  },
+  "createdAt": "2026-06-13T03:49:56.000Z"
+}

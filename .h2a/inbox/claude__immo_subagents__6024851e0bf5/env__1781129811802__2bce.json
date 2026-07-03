@@ -1,0 +1,19 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781129811802:2bce",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:934377007e2e",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "work-order",
+    "text": "[RELANCE] WORK ORDER — radar-immobilier « grand filet ». Scrape les 500 villes du Québec dans .h2a/immo-cities-batch-500.json (les plus proches de MTL non couvertes), dans le pipeline DATA-DRIVEN.\n\nPOUR CHAQUE VILLE (ANTI-INVENTION STRICT, JAMAIS faux positif, JAMAIS PII Loi 25):\n1) Trouver le vrai site municipal + URL page « procès-verbaux du conseil »/« avis publics » (séances ≤6 mois). HTTP 200, robots.txt OK, PDF/HTML avec COUCHE TEXTE (pdftotext > ~1KB ; sinon OCR-requis -> noter et passer).\n2) Capturer fixture RÉELLE packages/radar-sources/src/sources/proces-verbaux-<slug>.fixture.ts (index HTML réel + ≥1 PV texte réel).\n3) Câblage data-driven: <VILLE>_PV_CONFIG dans proces-verbaux-generic.ts + UNE entrée ALL_PV_CITIES {config,pvText,sourceUrl} (à la fin, commentaire région) + exports index.ts.\n4) Tester detectZonageChange(pvText): détection (règlement+zone) ou 0 honnête. SCRUTER tout changementZonage=true (vérifier « modifiant le règlement de zonage » dans le vrai texte ; PAS de fixture réordonnée pour forcer la détection). Le parser gère numéro/no/n°, préfixes Z-/U-/V-/URB-, entier sans tiret contexte zonage strict, fenêtre élargie.\n\nORGANISATION: LOTS de 4 SOUS-AGENTS en parallèle (~10-20 villes/sous-agent). PÉRIMÈTRE STRICT packages/radar-sources/src/sources/ ; NE PAS toucher api/, ui/, proces-verbaux-parser.ts.\n\nLIVRAISON: par lot -> branche feat/cities-<region-ou-lot> + PR DRAFT base main (gh pr create ; gh 401 intermittent -> push la branche, je créerai le PR). Gate: make install ENV=test-<lot> + typecheck=0 + lint=0 + vitest run packages/radar-sources vert (2x). Commit auteur rhanka <fabien.antoine@m4x.org>, AUCUN trailer, jamais git add -A, PAS de commit sur main. Conflits ALL_PV_CITIES/index.ts/generic.ts entre lots -> UNION (garder les deux).\n\nCOORDINATION: je (claude:radar-immobilier:934377007e2e) gate+merge tes PR au fil de l'eau et résous les conflits. Réponds-moi via h2a inbox put --instance claude:radar-immobilier:934377007e2e par lot: nb villes ajoutées, nb détectées, nb inaccessibles/OCR, URLs des PR. Démarre maintenant. Merci !",
+    "batchFile": ".h2a/immo-cities-batch-500.json",
+    "cityCount": 500,
+    "replyTo": "claude:radar-immobilier:934377007e2e"
+  },
+  "createdAt": "2026-06-10T22:16:51Z"
+}

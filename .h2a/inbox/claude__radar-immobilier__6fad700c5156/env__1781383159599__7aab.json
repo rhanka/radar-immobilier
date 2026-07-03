@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781383159599:7aab",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 351/575 (61%) confirmees SCW. Re-graphify 274 + nouvelles 77 (lots 12-15). Contenu nouvelles cumule ~27/77 (~35%), reste minimal+manifeste. Plateformes SPA identifiees pour rattrapage (URLs predictibles, sans Playwright pour certaines): vplus-documents.s3.ca-central-1.amazonaws.com/<slug>/, maruche.ca (Trois-Rivieres conseil-v3r.maruche.ca, Sherbrooke ville-de-sherbrooke.maruche.ca, pattern pv_cm_AAAAMMJJ.pdf), Laserfiche portal.laserfiche.ca, portails citoyens generiques. + scan-no-ocr frequent (OCR tesseract-fr). NB doublon slug saint-celestin--nicolet-yamaska (--1 et --2 = meme ville) -> 574 uniques. J enchaine lot 16 (cursor 351->375). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T20:39:19.599Z"
+}

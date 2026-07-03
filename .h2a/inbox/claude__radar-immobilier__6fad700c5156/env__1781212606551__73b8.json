@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781212606551:73b8",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RECUEIL batch 1/4 TERMINE.\n129 villes traitees: 112 new + 8 seen + 9 error. 329 docs raw ecrits sur SCW.\nPreuve store.list (raw/proces-verbaux-<slug>/cas/): sainte-catherine=8 objets, charlemagne=8, drummondville=6 (pdf/html/txt + .meta.json chacun).\nErreurs (9): reseau/fetch failed (4): saint-damase, val-david, abercorn, stukely-sud ; HTTP 404 (2): wentworth-nord, sainte-emelie-de-lenergie ; HTTP 403 anti-bot/robots (1): lefebvre ; timeout (1): mcmasterville ; slug ABSENT d ALL_PV_CITIES (1): candiac (a verifier cote code: config sans entree dans le tableau?).\nFamilles CMS faibles batch1 = surtout reseau/TLS injoignable + quelques 404/403. Reste 3 batches en cours."
+  },
+  "createdAt": "2026-06-11T21:16:46.551Z"
+}

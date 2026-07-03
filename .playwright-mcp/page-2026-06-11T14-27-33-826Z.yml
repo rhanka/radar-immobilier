@@ -1,0 +1,101 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - heading "Chargement…" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Récupération de data/sainte-catherine.json…
+  - generic [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - link "◀" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - heading "🏙️ Outil de développement" [level=2] [ref=e11]
+      - button "✕" [ref=e12] [cursor=pointer]
+    - generic [ref=e13]: Chargement…
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: —
+        - generic [ref=e17]: Lots total
+      - generic [ref=e18]:
+        - generic [ref=e19]: —
+        - generic [ref=e20]: Zones 4+ logements
+      - generic [ref=e21]:
+        - generic [ref=e22]: —
+        - generic [ref=e23]: Dans périmètre TOD
+      - generic [ref=e24]:
+        - generic [ref=e25]: —
+        - generic [ref=e26]: ⭐ Priorité max (4+ & TOD)
+    - separator [ref=e27]
+    - generic [ref=e29]: 👆 Cliquez sur un lot pour voir ses détails
+  - generic [ref=e30]:
+    - generic [ref=e31] [cursor=pointer]:
+      - heading "🔍 Filtres & Outils" [level=4] [ref=e32]
+      - button "◀" [ref=e34]
+    - generic [ref=e35]:
+      - generic [ref=e36]:
+        - generic: 🔍
+        - textbox "Rechercher une adresse ou un no de lot…" [ref=e37]
+      - generic [ref=e38] [cursor=pointer]:
+        - generic [ref=e39]: 📍 Pastilles
+        - button "▾" [ref=e40]
+      - button "＋ Ajouter une pastille" [ref=e42] [cursor=pointer]
+      - generic [ref=e43] [cursor=pointer]:
+        - generic [ref=e44]: 🔍 Zonage / Potentiel
+        - button "▾" [ref=e45]
+      - generic [ref=e46]:
+        - button "Tous les lots" [ref=e47] [cursor=pointer]
+        - button "🟢 Zones 4+ seulement" [ref=e48] [cursor=pointer]
+        - button "🔵 Dans TOD seulement" [ref=e49] [cursor=pointer]
+        - button "⭐ Priorité (4+ & TOD)" [ref=e50] [cursor=pointer]
+        - button "⭐ Mes favoris" [ref=e51] [cursor=pointer]: ⭐ Mes favoris
+        - button "❌ Non retenus" [ref=e52] [cursor=pointer]: ❌ Non retenus
+        - button "🏷️ En vente" [ref=e53] [cursor=pointer]: 🏷️ En vente
+        - generic [ref=e54]:
+          - generic [ref=e55]: Chargement des annonces…
+          - button "↺" [ref=e56] [cursor=pointer]
+        - button "📬 Sollicités" [ref=e57] [cursor=pointer]: 📬 Sollicités
+        - button "✉️ À lettre" [ref=e58] [cursor=pointer]: ✉️ À lettre
+        - button "✉️ Exporter lettres → CSV" [ref=e59] [cursor=pointer]
+        - button "💾 Exporter toutes mes données" [ref=e60] [cursor=pointer]
+        - generic [ref=e61] [cursor=pointer]: 📂 Importer mes données
+        - link "✏️ Éditeur de zones" [ref=e62] [cursor=pointer]:
+          - /url: "#"
+        - button "☑ Sélection multiple" [ref=e64] [cursor=pointer]
+      - generic [ref=e65] [cursor=pointer]:
+        - generic [ref=e66]: 🏗️ Usage actuel
+        - button "▾" [ref=e67]
+      - generic [ref=e68]:
+        - button "🏠 Résidentiel" [ref=e69] [cursor=pointer]
+        - button "🏢 Multi-logements" [ref=e70] [cursor=pointer]
+        - button "🛍️ Commercial" [ref=e71] [cursor=pointer]
+        - button "🏭 Industriel" [ref=e72] [cursor=pointer]
+        - button "⚡ Mixte" [ref=e73] [cursor=pointer]
+        - button "🌳 Public / Institutionnel" [ref=e74] [cursor=pointer]
+        - button "⬜ Vacant / Terrain nu" [ref=e75] [cursor=pointer]
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - text: "Superficie min :"
+            - strong [ref=e78]: "0"
+            - text: m²
+          - slider [ref=e79]: "0"
+      - generic [ref=e80] [cursor=pointer]:
+        - generic [ref=e81]: 🌿 Couches environnementales
+        - button "▾" [ref=e82]
+      - generic [ref=e83]:
+        - button "Milieux humides" [ref=e84] [cursor=pointer]: Milieux humides
+        - button "Zones inondables (BDZI)" [ref=e86] [cursor=pointer]: Zones inondables (BDZI)
+        - button "Vue satellite" [ref=e88] [cursor=pointer]: Vue satellite
+        - button "Zones agricoles (CPTAQ)" [ref=e90] [cursor=pointer]: Zones agricoles (CPTAQ)
+        - button "N° civiques (zoom 15+)" [ref=e92] [cursor=pointer]: N° civiques (zoom 15+)
+      - generic [ref=e94] [cursor=pointer]:
+        - generic [ref=e95]: 🗺️ Légende
+        - button "▾" [ref=e96]
+      - generic [ref=e97]:
+        - generic [ref=e98]: ⭐ Zone 4+ dans TOD
+        - generic [ref=e100]: Zone 4+ logements
+        - generic [ref=e102]: Dans périmètre TOD
+        - generic [ref=e104]: Autres zones
+        - generic [ref=e106]: Périmètre TOD
+        - generic [ref=e108]: Limite
+        - generic [ref=e110]: ⭐ Favori
+        - generic [ref=e112]: ✓ Vérifié
+        - generic [ref=e114]: 📬 Sollicité
+        - generic [ref=e116]: Règlement 901 · Valider avec la Ville

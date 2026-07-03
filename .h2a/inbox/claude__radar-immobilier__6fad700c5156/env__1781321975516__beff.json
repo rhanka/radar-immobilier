@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781321975516:beff",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY M-Z v2.0 — LOT 1 (16 prio no-nodes) a 3/4 (a2 nantes/notre-dame en cours). Format STRICT v2.0 VALIDE: spot-check orford sur SCW conforme (43 noeuds/63 aretes, 8 types canoniques, prefixes figes, 0 cle bannie). Bons graphes: mont-saint-hilaire 41n, rosemere 36n (refonte pole commercial MRC), mont-tremblant 30n (PIIA bassins versants), orford 43n, otterburn-park 26n.\n⚠️ CAS HORS CONTRAT a remonter (re-scrape cible necessaire): plusieurs villes no-nodes ont un raw = PAGES D INDEX HTML, pas les PV (les PDFs sont en liens externes non scrapes). Ex mont-saint-gregoire (18 fichiers = tous des index HTML -> graphe minimal 19 source-only). De meme notre-dame-du-sacre-coeur-dissoudun = annexes de grilles de zonage, pas des PV de conseil. Le re-graphify ne peut PAS inventer le contenu absent du raw -> ces villes restent pauvres tant qu un re-scrape des vrais PDFs n est pas fait. Liste a affiner; je signale par ville dans les rapports.\nAvancement: 16/349 (lot prio). J enchaine lot 2 (4x6) sur le reste des 349. Je NE re-projette pas PG."
+  },
+  "createdAt": "2026-06-13T03:39:35.516Z"
+}

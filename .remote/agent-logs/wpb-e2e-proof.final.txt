@@ -1,0 +1,23 @@
+**Statut: partial**
+
+J’ai livré l’outil reproductible et committé les artefacts, mais je n’ai pas pu générer le rapport live des 33 opportunités dans ce shell faute de Compose/DB accessible.
+
+Fichiers changés:
+- [report-opportunity-proof.ts](/home/antoinefa/src/radar-immobilier/.worktrees/wpb-e2e-proof/api/src/scripts/report-opportunity-proof.ts) — 129 lignes, commit `5bfa905`
+- [BLOCKED.md](/home/antoinefa/src/radar-immobilier/.worktrees/wpb-e2e-proof/BLOCKED.md) — 42 lignes, commit `169ab6e`
+
+Le script lit Postgres en read-only (`graph_nodes`, `graph_edges`, `geo_resolutions`, `zone_versions`, `lot_versions`, `opportunity_dossiers`), filtre les priorités `z|m|p` avec les helpers existants, puis sort la complétude `Signal -> citation -> PDF/rawRef/page/bbox -> zone -> lots -> grille` en Markdown ou JSON. Il échoue si moins de 33 priorités sont présentes, sauf `--allow-partial`.
+
+Commande exacte à lancer dans un environnement Compose avec projection graph/geo chargée:
+
+```bash
+make exec-api CMD="npx tsx src/scripts/report-opportunity-proof.ts --limit 33" ENV=wpb-e2e-proof
+```
+
+Vérifications:
+- `git diff --check` OK
+- contrôle ASCII OK
+- `make typecheck ENV=wpb-e2e-proof` bloqué avant TypeScript: `docker compose` indisponible (`unknown shorthand flag: 'f' in -f`)
+- UAT non lancée, conformément à la mission
+
+Arbre git final propre.

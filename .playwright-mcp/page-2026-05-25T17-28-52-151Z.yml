@@ -1,0 +1,406 @@
+- generic [ref=e4]:
+  - navigation [ref=e5]:
+    - generic [ref=e6]: Radar immobilier
+    - generic [ref=e7]:
+      - button "Radar (démo)" [ref=e8] [cursor=pointer]:
+        - img [ref=e9]
+        - text: Radar (démo)
+      - button "Comparaison des agents" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+        - text: Comparaison des agents
+      - button "Revue des sources" [active] [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+        - text: Revue des sources
+  - generic [ref=e388]:
+    - banner [ref=e389]:
+      - generic [ref=e390]:
+        - generic [ref=e391]:
+          - paragraph [ref=e392]: Proposition client - sources
+          - heading "Revue valeur / complexite des sources" [level=1] [ref=e393]
+          - paragraph [ref=e394]: "Lecture alignee sur la VISION: signaux faibles, faux positifs, apprentissage historique, couts d'acces et attendus client."
+        - generic [ref=e395]:
+          - generic [ref=e396]:
+            - button "Evaluation sources" [ref=e397] [cursor=pointer]
+            - button "Challenge agents" [ref=e398] [cursor=pointer]
+          - button "Radar demo" [ref=e399] [cursor=pointer]:
+            - img [ref=e400]
+            - text: Radar demo
+    - main [ref=e401]:
+      - generic [ref=e402]:
+        - generic [ref=e403]:
+          - generic [ref=e404]:
+            - img [ref=e405]
+            - heading "Critères et acronymes" [level=2] [ref=e406]
+          - generic [ref=e407]:
+            - button "PPCMOI" [ref=e409] [cursor=pointer]
+            - button "Signal faible" [ref=e411] [cursor=pointer]
+            - button "Précision" [ref=e413] [cursor=pointer]
+            - button "Rappel" [ref=e415] [cursor=pointer]
+            - button "Faux positif" [ref=e417] [cursor=pointer]
+            - button "Friction d'accès" [ref=e419] [cursor=pointer]
+            - button "Risque légal" [ref=e421] [cursor=pointer]
+            - button "Complexité coût" [ref=e423] [cursor=pointer]
+            - button "CPTAQ" [ref=e425] [cursor=pointer]
+            - button "MAMH" [ref=e427] [cursor=pointer]
+            - button "MRC" [ref=e429] [cursor=pointer]
+            - button "BDZI" [ref=e431] [cursor=pointer]
+            - button "GRHQ" [ref=e433] [cursor=pointer]
+            - button "CKAN" [ref=e435] [cursor=pointer]
+            - button "WMS/WFS" [ref=e437] [cursor=pointer]
+            - button "GTFS" [ref=e439] [cursor=pointer]
+            - button "MLS / SIA" [ref=e441] [cursor=pointer]
+        - generic [ref=e442]:
+          - generic [ref=e443]:
+            - generic [ref=e444]:
+              - heading "Cadran sources" [level=2] [ref=e445]
+              - paragraph [ref=e446]: Valeur potentielle vs complexite incluant acces, risque legal et cout.
+            - generic [ref=e447]:
+              - generic [ref=e448]: "Y: valeur business"
+              - generic [ref=e449]: "X: complexite/cout"
+          - generic [ref=e452]:
+            - generic [ref=e455]: Complexite faible
+            - generic [ref=e456]: Complexite elevee
+            - generic [ref=e457]: Valeur elevee
+            - generic [ref=e458]: Valeur faible
+            - generic [ref=e459]: Priorite immediate
+            - generic [ref=e460]: Valeur forte, acces a qualifier
+            - generic [ref=e461]: Contexte opportuniste
+            - generic [ref=e462]: A eviter en Phase 1
+            - button "Avis publics - Valleyfield, valeur 5/5, complexite 1.35/5" [pressed] [ref=e463] [cursor=pointer]: "1"
+            - button "Reglements d'urbanisme - Valleyfield, valeur 5/5, complexite 1.70/5" [ref=e464] [cursor=pointer]: "2"
+            - button "PPCMOI - Valleyfield, valeur 5/5, complexite 1.70/5" [ref=e465] [cursor=pointer]: "3"
+            - button "Seances du conseil - Valleyfield, valeur 4/5, complexite 1.70/5" [ref=e466] [cursor=pointer]: "4"
+            - button "Videos YouTube du conseil - Valleyfield, valeur 5/5, complexite 3.30/5" [ref=e467] [cursor=pointer]: "5"
+            - button "Avis et reglements - MRC Beauharnois-Salaberry, valeur 3/5, complexite 1.95/5" [ref=e468] [cursor=pointer]: "6"
+            - button "Schema d'amenagement - MRCBHS, valeur 3/5, complexite 1.70/5" [ref=e469] [cursor=pointer]: "7"
+            - button "Conseil des maires - MRCBHS, valeur 3/5, complexite 1.70/5" [ref=e470] [cursor=pointer]: "8"
+            - button "Donnees Quebec catalog, valeur 2/5, complexite 1.35/5" [ref=e471] [cursor=pointer]: "9"
+            - button "Roles d'evaluation fonciere - MAMH, valeur 5/5, complexite 2.45/5" [ref=e472] [cursor=pointer]: "10"
+            - button "Adresses Quebec / IGO geocoder, valeur 2/5, complexite 1.35/5" [ref=e473] [cursor=pointer]: "11"
+            - button "CPTAQ zone agricole, valeur 4/5, complexite 1.90/5" [ref=e474] [cursor=pointer]: "12"
+            - button "CPTAQ decisions, valeur 5/5, complexite 2.45/5" [ref=e475] [cursor=pointer]: "13"
+            - button "BDZI flood zones, valeur 3/5, complexite 2.10/5" [ref=e476] [cursor=pointer]: "14"
+            - button "GRHQ hydrography, valeur 3/5, complexite 1.90/5" [ref=e477] [cursor=pointer]: "15"
+            - button "Zonage municipal open data, valeur 3/5, complexite 2.30/5" [ref=e478] [cursor=pointer]: "16"
+            - button "Zonage plans et grilles - Valleyfield, valeur 5/5, complexite 2.80/5" [ref=e479] [cursor=pointer]: "17"
+            - button "Cadastre / Infolot, valeur 5/5, complexite 4.00/5" [ref=e480] [cursor=pointer]: "18"
+            - button "Registre foncier du Quebec, valeur 5/5, complexite 4.80/5" [ref=e481] [cursor=pointer]: "19"
+            - button "JLR, valeur 5/5, complexite 4.65/5" [ref=e482] [cursor=pointer]: "20"
+            - button "Centris / MLS, valeur 4/5, complexite 4.65/5" [ref=e483] [cursor=pointer]: "21"
+            - button "Transactions immobilieres, valeur 4/5, complexite 4.00/5" [ref=e484] [cursor=pointer]: "22"
+            - button "Permis de construction - Valleyfield, valeur 4/5, complexite 3.90/5" [ref=e485] [cursor=pointer]: "23"
+            - button "Construction permits open data, valeur 2/5, complexite 1.95/5" [ref=e486] [cursor=pointer]: "24"
+            - button "StatCan Census Profile 2021, valeur 4/5, complexite 1.35/5" [ref=e487] [cursor=pointer]: "25"
+            - button "StatCan WDS socio-economic tables, valeur 3/5, complexite 1.70/5" [ref=e488] [cursor=pointer]: "26"
+            - button "StatCan core public infrastructure assets, valeur 1/5, complexite 1.00/5" [ref=e489] [cursor=pointer]: "27"
+            - button "INFC/HICC projects, valeur 3/5, complexite 1.35/5" [ref=e490] [cursor=pointer]: "28"
+            - button "MTMD travaux routiers, valeur 3/5, complexite 1.35/5" [ref=e491] [cursor=pointer]: "29"
+            - button "MTMD reseau routier RTSS, valeur 2/5, complexite 1.35/5" [ref=e492] [cursor=pointer]: "30"
+            - button "Exo GTFS transit service, valeur 3/5, complexite 1.70/5" [ref=e493] [cursor=pointer]: "31"
+            - button "Salaberry info travaux/projets, valeur 3/5, complexite 2.25/5" [ref=e494] [cursor=pointer]: "32"
+            - button "ARTM grands projets, valeur 1/5, complexite 1.70/5" [ref=e495] [cursor=pointer]: "33"
+            - button "Orthophotos / imagery, valeur 3/5, complexite 2.90/5" [ref=e496] [cursor=pointer]: "34"
+          - generic [ref=e497]:
+            - paragraph [ref=e498]: Source active
+            - paragraph [ref=e499]: Avis publics - Valleyfield
+            - paragraph [ref=e500]: 1.35 · Priorite immediate
+          - generic [ref=e501]:
+            - button "1 Avis publics - Valleyfield" [ref=e502] [cursor=pointer]:
+              - generic [ref=e503]: "1"
+              - generic [ref=e504]: Avis publics - Valleyfield
+            - button "2 Reglements d'urbanisme - Valleyfield" [ref=e505] [cursor=pointer]:
+              - generic [ref=e506]: "2"
+              - generic [ref=e507]: Reglements d'urbanisme - Valleyfield
+            - button "3 PPCMOI - Valleyfield" [ref=e508] [cursor=pointer]:
+              - generic [ref=e509]: "3"
+              - generic [ref=e510]: PPCMOI - Valleyfield
+            - button "4 Seances du conseil - Valleyfield" [ref=e511] [cursor=pointer]:
+              - generic [ref=e512]: "4"
+              - generic [ref=e513]: Seances du conseil - Valleyfield
+            - button "5 Videos YouTube du conseil - Valleyfield" [ref=e514] [cursor=pointer]:
+              - generic [ref=e515]: "5"
+              - generic [ref=e516]: Videos YouTube du conseil - Valleyfield
+            - button "6 Avis et reglements - MRC Beauharnois-Salaberry" [ref=e517] [cursor=pointer]:
+              - generic [ref=e518]: "6"
+              - generic [ref=e519]: Avis et reglements - MRC Beauharnois-Salaberry
+            - button "7 Schema d'amenagement - MRCBHS" [ref=e520] [cursor=pointer]:
+              - generic [ref=e521]: "7"
+              - generic [ref=e522]: Schema d'amenagement - MRCBHS
+            - button "8 Conseil des maires - MRCBHS" [ref=e523] [cursor=pointer]:
+              - generic [ref=e524]: "8"
+              - generic [ref=e525]: Conseil des maires - MRCBHS
+            - button "9 Donnees Quebec catalog" [ref=e526] [cursor=pointer]:
+              - generic [ref=e527]: "9"
+              - generic [ref=e528]: Donnees Quebec catalog
+            - button "10 Roles d'evaluation fonciere - MAMH" [ref=e529] [cursor=pointer]:
+              - generic [ref=e530]: "10"
+              - generic [ref=e531]: Roles d'evaluation fonciere - MAMH
+            - button "11 Adresses Quebec / IGO geocoder" [ref=e532] [cursor=pointer]:
+              - generic [ref=e533]: "11"
+              - generic [ref=e534]: Adresses Quebec / IGO geocoder
+            - button "12 CPTAQ zone agricole" [ref=e535] [cursor=pointer]:
+              - generic [ref=e536]: "12"
+              - generic [ref=e537]: CPTAQ zone agricole
+            - button "13 CPTAQ decisions" [ref=e538] [cursor=pointer]:
+              - generic [ref=e539]: "13"
+              - generic [ref=e540]: CPTAQ decisions
+            - button "14 BDZI flood zones" [ref=e541] [cursor=pointer]:
+              - generic [ref=e542]: "14"
+              - generic [ref=e543]: BDZI flood zones
+            - button "15 GRHQ hydrography" [ref=e544] [cursor=pointer]:
+              - generic [ref=e545]: "15"
+              - generic [ref=e546]: GRHQ hydrography
+            - button "16 Zonage municipal open data" [ref=e547] [cursor=pointer]:
+              - generic [ref=e548]: "16"
+              - generic [ref=e549]: Zonage municipal open data
+            - button "17 Zonage plans et grilles - Valleyfield" [ref=e550] [cursor=pointer]:
+              - generic [ref=e551]: "17"
+              - generic [ref=e552]: Zonage plans et grilles - Valleyfield
+            - button "18 Cadastre / Infolot" [ref=e553] [cursor=pointer]:
+              - generic [ref=e554]: "18"
+              - generic [ref=e555]: Cadastre / Infolot
+            - button "19 Registre foncier du Quebec" [ref=e556] [cursor=pointer]:
+              - generic [ref=e557]: "19"
+              - generic [ref=e558]: Registre foncier du Quebec
+            - button "20 JLR" [ref=e559] [cursor=pointer]:
+              - generic [ref=e560]: "20"
+              - generic [ref=e561]: JLR
+            - button "21 Centris / MLS" [ref=e562] [cursor=pointer]:
+              - generic [ref=e563]: "21"
+              - generic [ref=e564]: Centris / MLS
+            - button "22 Transactions immobilieres" [ref=e565] [cursor=pointer]:
+              - generic [ref=e566]: "22"
+              - generic [ref=e567]: Transactions immobilieres
+            - button "23 Permis de construction - Valleyfield" [ref=e568] [cursor=pointer]:
+              - generic [ref=e569]: "23"
+              - generic [ref=e570]: Permis de construction - Valleyfield
+            - button "24 Construction permits open data" [ref=e571] [cursor=pointer]:
+              - generic [ref=e572]: "24"
+              - generic [ref=e573]: Construction permits open data
+            - button "25 StatCan Census Profile 2021" [ref=e574] [cursor=pointer]:
+              - generic [ref=e575]: "25"
+              - generic [ref=e576]: StatCan Census Profile 2021
+            - button "26 StatCan WDS socio-economic tables" [ref=e577] [cursor=pointer]:
+              - generic [ref=e578]: "26"
+              - generic [ref=e579]: StatCan WDS socio-economic tables
+            - button "27 StatCan core public infrastructure assets" [ref=e580] [cursor=pointer]:
+              - generic [ref=e581]: "27"
+              - generic [ref=e582]: StatCan core public infrastructure assets
+            - button "28 INFC/HICC projects" [ref=e583] [cursor=pointer]:
+              - generic [ref=e584]: "28"
+              - generic [ref=e585]: INFC/HICC projects
+            - button "29 MTMD travaux routiers" [ref=e586] [cursor=pointer]:
+              - generic [ref=e587]: "29"
+              - generic [ref=e588]: MTMD travaux routiers
+            - button "30 MTMD reseau routier RTSS" [ref=e589] [cursor=pointer]:
+              - generic [ref=e590]: "30"
+              - generic [ref=e591]: MTMD reseau routier RTSS
+            - button "31 Exo GTFS transit service" [ref=e592] [cursor=pointer]:
+              - generic [ref=e593]: "31"
+              - generic [ref=e594]: Exo GTFS transit service
+            - button "32 Salaberry info travaux/projets" [ref=e595] [cursor=pointer]:
+              - generic [ref=e596]: "32"
+              - generic [ref=e597]: Salaberry info travaux/projets
+            - button "33 ARTM grands projets" [ref=e598] [cursor=pointer]:
+              - generic [ref=e599]: "33"
+              - generic [ref=e600]: ARTM grands projets
+            - button "34 Orthophotos / imagery" [ref=e601] [cursor=pointer]:
+              - generic [ref=e602]: "34"
+              - generic [ref=e603]: Orthophotos / imagery
+        - generic [ref=e604]:
+          - generic [ref=e605]:
+            - generic [ref=e606]:
+              - paragraph [ref=e607]: Deep dive source
+              - heading "Avis publics - Valleyfield" [level=2] [ref=e608]
+              - paragraph [ref=e609]: Municipal signal
+            - generic [ref=e610]:
+              - paragraph [ref=e611]: Reco
+              - paragraph [ref=e612]: Construire maintenant
+          - generic [ref=e613]:
+            - generic [ref=e614]:
+              - paragraph [ref=e615]: Valeur
+              - paragraph [ref=e616]: 5/5
+            - generic [ref=e617]:
+              - paragraph [ref=e618]: Complexite
+              - paragraph [ref=e619]: 1.35/5
+            - generic [ref=e620]:
+              - paragraph [ref=e621]: Acces
+              - paragraph [ref=e622]: Public gratuit
+            - generic [ref=e623]:
+              - paragraph [ref=e624]: Cout
+              - paragraph [ref=e625]: 0 abonnement
+          - paragraph [ref=e626]: Public municipal page; storage/OCR/LLM costs only.
+          - generic [ref=e627]:
+            - generic [ref=e628]:
+              - heading "Pourquoi ce placement" [level=3] [ref=e629]
+              - generic [ref=e630]:
+                - generic [ref=e632]:
+                  - generic [ref=e633]:
+                    - paragraph [ref=e634]: Signal faible
+                    - paragraph [ref=e635]: Detection avant que l'opportunite soit evidente.
+                  - generic [ref=e636]: 5/5
+                - generic [ref=e640]:
+                  - generic [ref=e641]:
+                    - paragraph [ref=e642]: Precision
+                    - paragraph [ref=e643]: Adresse, lot, zone, dossier ou reglement actionnable.
+                  - generic [ref=e644]: 4/5
+                - generic [ref=e648]:
+                  - generic [ref=e649]:
+                    - paragraph [ref=e650]: Rappel
+                    - paragraph [ref=e651]: Capacite a ne pas rater les variantes et suites de dossier.
+                  - generic [ref=e652]: 5/5
+                - generic [ref=e656]:
+                  - generic [ref=e657]:
+                    - paragraph [ref=e658]: Anti faux positifs
+                    - paragraph [ref=e659]: Capacite a invalider les pistes seduisantes mais bloquees.
+                  - generic [ref=e660]: 2/5
+                - generic [ref=e664]:
+                  - generic [ref=e665]:
+                    - paragraph [ref=e666]: Apprentissage passe
+                    - paragraph [ref=e667]: Capacite a retrouver des patterns avant/apres historiques.
+                  - generic [ref=e668]: 5/5
+            - generic [ref=e671]:
+              - heading "Complexite a lever" [level=3] [ref=e672]
+              - generic [ref=e673]:
+                - generic [ref=e675]:
+                  - generic [ref=e676]:
+                    - paragraph [ref=e677]: Technique
+                    - paragraph [ref=e678]: Parsing, geospatial, OCR, NLP, graph linking.
+                  - generic [ref=e679]: 2/5
+                - generic [ref=e683]:
+                  - generic [ref=e684]:
+                    - paragraph [ref=e685]: Acces
+                    - paragraph [ref=e686]: Compte, API, export, fournisseur ou flux municipal.
+                  - generic [ref=e687]: 1/5
+                - generic [ref=e691]:
+                  - generic [ref=e692]:
+                    - paragraph [ref=e693]: Legal
+                    - paragraph [ref=e694]: Licence, ToS, donnees personnelles, reutilisation.
+                  - generic [ref=e695]: 1/5
+                - generic [ref=e699]:
+                  - generic [ref=e700]:
+                    - paragraph [ref=e701]: Cout
+                    - paragraph [ref=e702]: Abonnement, document, transcription, stockage ou LLM.
+                  - generic [ref=e703]: 1/5
+          - generic [ref=e706]:
+            - generic [ref=e707]: Signal reglementaire
+            - generic [ref=e708]: Apprentissage historique
+          - generic [ref=e709]:
+            - generic [ref=e710]:
+              - heading "Fait" [level=3] [ref=e711]
+              - list [ref=e712]:
+                - listitem [ref=e713]: BR05 identified real Valleyfield public notices for derogations, PPCMOI, consultations, registers, and referendum approval.
+            - generic [ref=e714]:
+              - heading "A faire (reco)" [level=3] [ref=e715]
+              - list [ref=e716]:
+                - listitem [ref=e717]: Build BR07 list/fetch/hash/PDF extraction and classify notices against the VISION densification priorities.
+            - generic [ref=e718]:
+              - heading "Attendus client" [level=3] [ref=e719]
+              - list [ref=e720]:
+                - listitem [ref=e721]: Confirm that early municipal notice detection is the first proposal proof point.
+                - listitem [ref=e722]: Set tolerance for alert noise so minor derogations such as sheds, fences, and small accessory items do not flood the radar.
+          - generic [ref=e723]:
+            - generic [ref=e724]:
+              - generic [ref=e725]:
+                - img [ref=e726]
+                - heading "Argument valeur" [level=3] [ref=e727]
+              - paragraph [ref=e728]: "Best first weak-signal source: it is official, current, public, and directly tied to zoning/PPCMOI events."
+            - generic [ref=e729]:
+              - generic [ref=e730]:
+                - img [ref=e731]
+                - heading "Audit contradictoire" [level=3] [ref=e732]
+              - paragraph [ref=e733]: "Not enough alone: titles and PDFs can hide the real impact behind bylaw numbers and need linking to regulations."
+          - generic [ref=e734]:
+            - heading "Illustrations concretes" [level=3] [ref=e735]
+            - link "Avis publics page Public HTML archive with PDF notices including PPCMOI and zoning amendment notices." [ref=e737] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/avis-publics
+              - generic [ref=e738]:
+                - text: Avis publics page
+                - img [ref=e739]
+              - generic [ref=e740]: Public HTML archive with PDF notices including PPCMOI and zoning amendment notices.
+      - generic [ref=e741]:
+        - generic [ref=e742]:
+          - generic [ref=e743]:
+            - img [ref=e744]
+            - heading "Mode revue ecran" [level=2] [ref=e745]
+          - paragraph [ref=e746]: "Cette v0 est faite pour etre corrigee visuellement: placement des sources, libelles, couts, attendus client et exemples concrets."
+        - complementary [ref=e747]:
+          - generic [ref=e748]:
+            - generic [ref=e749]:
+              - generic [ref=e750]:
+                - paragraph [ref=e751]: Source selectionnee
+                - heading "Avis publics - Valleyfield" [level=2] [ref=e752]
+              - generic [ref=e753]: 5/5
+            - generic [ref=e754]:
+              - generic [ref=e755]:
+                - heading "Fait" [level=3] [ref=e756]
+                - paragraph [ref=e757]: BR05 identified real Valleyfield public notices for derogations, PPCMOI, consultations, registers, and referendum approval.
+              - generic [ref=e758]:
+                - heading "A faire (reco)" [level=3] [ref=e759]
+                - paragraph [ref=e760]: Build BR07 list/fetch/hash/PDF extraction and classify notices against the VISION densification priorities.
+              - generic [ref=e761]:
+                - heading "Attendus client" [level=3] [ref=e762]
+                - paragraph [ref=e763]: Confirm that early municipal notice detection is the first proposal proof point.
+          - generic [ref=e764]:
+            - generic [ref=e765]:
+              - img [ref=e766]
+              - heading "Synthese reco" [level=2] [ref=e767]
+            - generic [ref=e768]:
+              - generic [ref=e769]:
+                - term [ref=e770]: Construire maintenant
+                - definition [ref=e771]: "7"
+              - generic [ref=e772]:
+                - term [ref=e773]: Qualifier l'acces
+                - definition [ref=e774]: "5"
+              - generic [ref=e775]:
+                - term [ref=e776]: Construire plus tard
+                - definition [ref=e777]: "18"
+              - generic [ref=e778]:
+                - term [ref=e779]: Manuel / drop
+                - definition [ref=e780]: "4"
+          - generic [ref=e781]:
+            - generic [ref=e782]:
+              - img [ref=e783]
+              - heading "Acces et couts a qualifier" [level=2] [ref=e784]
+            - generic [ref=e785]:
+              - button "JLR Feed partenaire - Devis requis" [ref=e786] [cursor=pointer]:
+                - generic [ref=e787]: JLR
+                - generic [ref=e788]: Feed partenaire - Devis requis
+              - button "Videos YouTube du conseil - Valleyfield API publique - Cout variable a cadrer" [ref=e789] [cursor=pointer]:
+                - generic [ref=e790]: Videos YouTube du conseil - Valleyfield
+                - generic [ref=e791]: API publique - Cout variable a cadrer
+              - button "Cadastre / Infolot Acces payant - Devis requis" [ref=e792] [cursor=pointer]:
+                - generic [ref=e793]: Cadastre / Infolot
+                - generic [ref=e794]: Acces payant - Devis requis
+              - button "Registre foncier du Quebec Manuel payant - Frais par verification" [ref=e795] [cursor=pointer]:
+                - generic [ref=e796]: Registre foncier du Quebec
+                - generic [ref=e797]: Manuel payant - Frais par verification
+              - button "Centris / MLS Feed partenaire - Devis requis" [ref=e798] [cursor=pointer]:
+                - generic [ref=e799]: Centris / MLS
+                - generic [ref=e800]: Feed partenaire - Devis requis
+              - button "Transactions immobilieres Acces payant - Devis requis" [ref=e801] [cursor=pointer]:
+                - generic [ref=e802]: Transactions immobilieres
+                - generic [ref=e803]: Acces payant - Devis requis
+          - generic [ref=e804]:
+            - generic [ref=e805]:
+              - img [ref=e806]
+              - heading "A construire en premier" [level=2] [ref=e807]
+            - generic [ref=e808]:
+              - button "Avis publics - Valleyfield Build BR07 list/fetch/hash/PDF extraction and classify notices against the VISION densification priorities." [ref=e809] [cursor=pointer]:
+                - text: Avis publics - Valleyfield
+                - generic [ref=e810]: Build BR07 list/fetch/hash/PDF extraction and classify notices against the VISION densification priorities.
+              - button "Reglements d'urbanisme - Valleyfield Link notice bylaw numbers to regulation pages and extract amendment chains." [ref=e811] [cursor=pointer]:
+                - text: Reglements d'urbanisme - Valleyfield
+                - generic [ref=e812]: Link notice bylaw numbers to regulation pages and extract amendment chains.
+              - button "PPCMOI - Valleyfield After avis-publics extraction, reconstruct PPCMOI lifecycle by address, project number, and stage." [ref=e813] [cursor=pointer]:
+                - text: PPCMOI - Valleyfield
+                - generic [ref=e814]: After avis-publics extraction, reconstruct PPCMOI lifecycle by address, project number, and stage.
+              - button "Roles d'evaluation fonciere - MAMH Confirm dictionary/XSD path, stream large files, and normalize caviarded fields." [ref=e815] [cursor=pointer]:
+                - text: Roles d'evaluation fonciere - MAMH
+                - generic [ref=e816]: Confirm dictionary/XSD path, stream large files, and normalize caviarded fields.
+              - button "CPTAQ zone agricole Add spatial intersection caveats and downgrade opportunities affected by agricultural zoning." [ref=e817] [cursor=pointer]:
+                - text: CPTAQ zone agricole
+                - generic [ref=e818]: Add spatial intersection caveats and downgrade opportunities affected by agricultural zoning.
+              - button "CPTAQ decisions Link notice dossiers to decision summaries and status history so denials and authorizations can qualify opportunity ranking immediately." [ref=e819] [cursor=pointer]:
+                - text: CPTAQ decisions
+                - generic [ref=e820]: Link notice dossiers to decision summaries and status history so denials and authorizations can qualify opportunity ranking immediately.

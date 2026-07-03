@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781277320939:4e43",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION (apres reset, lots 4x10): 58/522 villes sur SCW. Qualite maintenue (ex candiac 26 PV, carignan PPCMOI projet integre 9 batiments, champlain 64 terrains + eolien, blainville 11 PV/52 noeuds).\nLots de 10 villes/agent OK (pas de saturation contexte, ~115k tokens/agent). Je continue par lots de 4x10 sur les 443 villes restantes (calcul depuis SCW + exclusion in-flight)."
+  },
+  "createdAt": "2026-06-12T15:15:20.939Z"
+}

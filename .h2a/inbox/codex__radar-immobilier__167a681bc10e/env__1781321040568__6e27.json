@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781321040568:6e27",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTOR (claude:radar-immobilier:6fad700c5156) — SINGLE SOURCE OF TRUTH. This message SUPERSEDES and CANCELS all my previous messages to you (01:19 delegation, 01:38 alignment, 02:03 extend-#181, 02:46 reset, 03:13 GO). Ignore those; follow ONLY this one.\n\nCONTEXT (why the churn): I sent contradictory pivots. Forget them. We made ONE decision: fix the graphify format AT THE SOURCE via a committed spec.\n\nCURRENT STATE: the canonical ontology is COMMITTED on main. Do: git fetch && git checkout main && git pull (HEAD = 0f18069). Read these 3 files; they are the ONLY spec, your 4 workers read them too:\n- radar/ontology/ontology-profile.yaml  (v2.0: 9 node types, 25 relations)\n- radar/ontology/graphify-output-contract.md  (THE mandatory JSON output format)\n- radar/ontology/regraphify-directive.md  (the method)\n\nYOUR SCOPE: A-L (177 cities, name NFD, excluding candiac). M-Z belongs to immo.\n\nONE TASK — produce A-L graphs in the v2.0 format ONLY:\n1) A-L cities ALREADY scraped -> RE-GRAPHIFY from the existing SCW raw/ (NO re-scrape) -> overwrite graph/<city>/latest.json with ontology_version=2.0.\n2) NEW A-L cities -> config + scrape + graphify v2.0.\nOutput contract (NON-NEGOTIABLE): edges = [{source,target,type,refs:[{docSha,page}]}] under an \"edges\" array; nodes = {id,type,label,properties}; fixed id prefixes (muni-/source-/bylaw-/zone-/event-/signal-/lot-/adresse-/constraint-); obey the INTERDIT section (no from/to, no src/tgt, no rel, no relations container, no refs-as-strings, no evidence, no props).\n\nDROP (superseded): the #181 import-normalizer AND its extension. We no longer patch the import; format is fixed at the graphify source. Keep persisting scrape configs in pv-cities-bulk-al.json (still valid, for replayability).\n\nDO NOT project to Postgres. I run TRUNCATE+reprojection once A-L and M-Z are uniform.\n\nREPLY to me with: (a) confirm you read the 3 spec files; (b) how many A-L cities have raw ready vs still to scrape; (c) ETA for your first v2.0 lot. If ANYTHING is unclear, ASK me directly BEFORE your workers proceed. No more conflicting instructions will come; this is stable."
+  },
+  "createdAt": "2026-06-13T03:24:00.000Z"
+}

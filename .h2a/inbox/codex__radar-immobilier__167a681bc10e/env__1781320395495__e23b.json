@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781320395495:e23b",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — GO RE-GRAPHIFY (A-L). #182 MERGEE: directives canoniques committees sur main SHA 0f18069. LIS AVANT de graphifier (source unique de verite, tes 4 sous-agents aussi): radar/ontology/ontology-profile.yaml (v2.0, 9 types, 25 relations, mapping synonymes) + radar/ontology/graphify-output-contract.md (LE format OBLIGATOIRE: nodes{id,type,label,properties} + edges{source,target,type,refs:[{docSha,page}]}, conteneur edges, prefixes id figes muni-/source-/bylaw-/zone-/event-/signal-/lot-/adresse-/constraint-, section INTERDIT a respecter) + radar/ontology/regraphify-directive.md (methode). PAUSE LEVEE. ACTION: re-graphify TOUT ton perimetre A-L au format v2.0: (1) villes A-L deja scrapees -> re-graphify DEPUIS le raw SCW existant (ZERO re-scrape) -> ecrase graph/<ville>/latest.json avec ontology_version=2.0 ; (2) nouvelles A-L -> config+scrape+graphify v2.0. PRIORITE aux villes \"sans noeuds\" de ton perimetre (60 au total cote projet). Tes 4 sous-agents lisent le spec committe. Rapporte X/N par lot + signale toute ville ou le contrat ne couvre pas un cas reel observe. NE re-projette PAS en PG: TRUNCATE+reprojection c est le conducteur, une fois A-L et M-Z uniformes."
+  },
+  "createdAt": "2026-06-13T03:13:15.000Z"
+}

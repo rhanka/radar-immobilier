@@ -1,0 +1,212 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Signaux" [active] [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Signaux
+        - button "Opportunités" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Opportunités
+        - button "Sources" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Sources
+        - button "Grilles" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Grilles
+        - button "Coordination" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Coordination
+        - button "Backlog" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Backlog
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e26] [cursor=pointer]: Réel
+    - generic [ref=e703]:
+      - complementary [ref=e704]:
+        - generic [ref=e705]:
+          - generic [ref=e706]:
+            - paragraph [ref=e707]: Tri
+            - generic [ref=e708]:
+              - button "Par score /10" [ref=e709] [cursor=pointer]
+              - generic [ref=e710]:
+                - button "Par priorité VISION" [ref=e711] [cursor=pointer]
+                - button "Explication des deux tris" [ref=e712] [cursor=pointer]:
+                  - img [ref=e713]
+          - generic [ref=e714]:
+            - paragraph [ref=e715]: Filtre
+            - generic [ref=e717]:
+              - generic [ref=e718]: Filtrer par statut
+              - combobox "Filtrer par statut" [ref=e719]:
+                - option "Tous" [selected]
+                - option "Nouveau"
+                - option "À approfondir"
+                - option "Surveillance"
+                - option "Écarté"
+          - generic [ref=e720]:
+            - paragraph [ref=e721]: 6 / 6 signals
+            - paragraph [ref=e722]: (3 réels + 3 exemples)
+      - generic [ref=e724]:
+        - generic [ref=e725]:
+          - paragraph [ref=e726]: Signaux de triage
+          - heading "Fil de signaux" [level=1] [ref=e727]
+          - paragraph [ref=e728]: Score de signal = valeur /10 (priorité par type, VISION §6) + confiance (Haute / Moyenne / Faible), distinct du score d'opportunité (/100). Ces deux axes ne sont jamais multipliés.
+        - status [ref=e730]:
+          - generic [ref=e731]:
+            - 'heading "Mode réel : 3 signals confirmés." [level=2] [ref=e732]'
+            - paragraph [ref=e733]: Basculez en simulation pour voir les exemples de calibration.
+        - generic [ref=e734]:
+          - button "Rezonage résidentiel Règl. 150-49,Zone H-609-4 Valeur 10/10 Confiance Haute À approfondir 25 févr. 2026" [ref=e736] [cursor=pointer]:
+            - img [ref=e738]
+            - generic:
+              - paragraph [ref=e739]: Rezonage résidentiel
+              - paragraph: Règl. 150-49,Zone H-609-4
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e740]:
+              - generic [ref=e741]: Valeur
+              - generic [ref=e742]: 10/10
+            - generic "Confiance (qualité de la détection)" [ref=e745]:
+              - generic [ref=e746]: Confiance
+              - generic [ref=e747]: Haute
+            - generic [ref=e749]: À approfondir
+            - generic [ref=e750]: 25 févr. 2026
+          - button "Rezonage résidentiel Règl. 150-51,Zone H-521 Valeur 10/10 Confiance Haute À approfondir 22 avr. 2026" [ref=e752] [cursor=pointer]:
+            - img [ref=e754]
+            - generic:
+              - paragraph [ref=e755]: Rezonage résidentiel
+              - paragraph: Règl. 150-51,Zone H-521
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e756]:
+              - generic [ref=e757]: Valeur
+              - generic [ref=e758]: 10/10
+            - generic "Confiance (qualité de la détection)" [ref=e761]:
+              - generic [ref=e762]: Confiance
+              - generic [ref=e763]: Haute
+            - generic [ref=e765]: À approfondir
+            - generic [ref=e766]: 22 avr. 2026
+          - button "Rezonage résidentiel Règl. 150-49-1,Zone H-143/H-143-1 Valeur 10/10 Confiance Moyenne À approfondir 22 avr. 2026" [ref=e768] [cursor=pointer]:
+            - img [ref=e770]
+            - generic:
+              - paragraph [ref=e771]: Rezonage résidentiel
+              - paragraph: Règl. 150-49-1,Zone H-143/H-143-1
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e772]:
+              - generic [ref=e773]: Valeur
+              - generic [ref=e774]: 10/10
+            - generic "Confiance (qualité de la détection)" [ref=e777]:
+              - generic [ref=e778]: Confiance
+              - generic [ref=e779]: Moyenne
+            - generic [ref=e781]: À approfondir
+            - generic [ref=e782]: 22 avr. 2026
+          - button "CPTAQ Exemple (simulation) Règl. 150-44,Zone A-118 Valeur 8/10 Confiance Moyenne Nouveau 1 mai 2026" [ref=e784] [cursor=pointer]:
+            - img [ref=e786]
+            - generic:
+              - generic:
+                - paragraph [ref=e787]:
+                  - button "CPTAQ" [ref=e789]
+                - generic [ref=e790]: Exemple (simulation)
+              - paragraph: Règl. 150-44,Zone A-118
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e791]:
+              - generic [ref=e792]: Valeur
+              - generic [ref=e793]: 8/10
+            - generic "Confiance (qualité de la détection)" [ref=e796]:
+              - generic [ref=e797]: Confiance
+              - generic [ref=e798]: Moyenne
+            - generic [ref=e800]: Nouveau
+            - generic [ref=e801]: 1 mai 2026
+          - button "PPCMOI Exemple (simulation) Zone C-627 Valeur 7/10 Confiance Faible Surveillance 10 mai 2026" [ref=e803] [cursor=pointer]:
+            - img [ref=e805]
+            - generic:
+              - generic:
+                - paragraph [ref=e806]:
+                  - button "PPCMOI" [ref=e808]
+                - generic [ref=e809]: Exemple (simulation)
+              - paragraph: Zone C-627
+            - generic "Valeur de triage /10 (priorité par type, VISION §6)" [ref=e810]:
+              - generic [ref=e811]: Valeur
+              - generic [ref=e812]: 7/10
+            - generic "Confiance (qualité de la détection)" [ref=e815]:
+              - generic [ref=e816]: Confiance
+              - generic [ref=e817]: Faible
+            - generic [ref=e819]: Surveillance
+            - generic [ref=e820]: 10 mai 2026
+          - button "Dérogation pertinente Exemple (simulation) Zone H-516 Valeur Filtre Confiance Moyenne Écarté 15 mai 2026" [ref=e822] [cursor=pointer]:
+            - img [ref=e824]
+            - generic:
+              - generic:
+                - paragraph [ref=e825]: Dérogation pertinente
+                - generic [ref=e826]: Exemple (simulation)
+              - paragraph: Zone H-516
+            - 'generic "Dérogation : filtre pur, pas de score /10 (VISION §6)" [ref=e827]':
+              - generic [ref=e828]: Valeur
+              - generic [ref=e829]: Filtre
+            - generic "Confiance (qualité de la détection)" [ref=e830]:
+              - generic [ref=e831]: Confiance
+              - generic [ref=e832]: Moyenne
+            - generic [ref=e834]: Écarté
+            - generic [ref=e835]: 15 mai 2026
+        - alert [ref=e837]:
+          - generic [ref=e838]:
+            - heading "Provenance des signaux" [level=2] [ref=e839]
+            - paragraph [ref=e840]: 3 signals réels (avis de consultation publique vérifiés, règlements 150-49, 150-49-1, 150-51) et 3 exemples (marqués Exemple (simulation)). Les exemples illustrent des types de signaux non encore détectés dans les données réelles et restent visibles dans tous les modes.
+  - complementary "Assistant radar (ancre)" [ref=e643]:
+    - generic [ref=e645]:
+      - button "Passer en fenetre flottante" [ref=e646] [cursor=pointer]:
+        - img [ref=e647]
+      - button "Fermer le chat" [ref=e648] [cursor=pointer]:
+        - img [ref=e649]
+    - region "Assistant radar" [ref=e651]:
+      - navigation "Assistant radar" [ref=e653]:
+        - button "Chat" [pressed] [ref=e654] [cursor=pointer]
+        - button "Taches" [ref=e655] [cursor=pointer]
+      - generic [ref=e657]:
+        - generic [ref=e658]:
+          - generic [ref=e659]:
+            - paragraph [ref=e660]: Assistant radar
+            - paragraph [ref=e661]: Questionner les signaux et piloter le backlog
+          - combobox "Modele" [ref=e663]:
+            - option "Sonnet 4.6" [selected]
+            - option "Opus 4.7"
+            - option "Command A"
+            - option "Command A R."
+            - option "Gemini 3.5 Flash"
+            - option "Gemini 3.1 Flash Lite"
+            - option "Mistral Small 4"
+            - option "Magistral Medium"
+            - option "GPT-5.5"
+            - option "GPT-5.4 Nano"
+            - option "GPT-4.1 Nano"
+        - generic [ref=e672]:
+          - generic [ref=e673]:
+            - generic [ref=e674]: Bonjour, resume le signal le plus prioritaire
+            - generic [ref=e675]:
+              - button "Copier" [ref=e676] [cursor=pointer]:
+                - img [ref=e677]
+              - button "Modifier" [ref=e678] [cursor=pointer]:
+                - img [ref=e679]
+          - generic [ref=e680]:
+            - img [ref=e682]
+            - generic [ref=e683]:
+              - paragraph [ref=e684]: Assistant radar
+              - generic [ref=e688]:
+                - paragraph [ref=e689]: Je n'ai pas accès aux données actuelles du radar immobilier de Salaberry-de-Valleyfield (signaux, priorités, lots, zones, etc.). Je ne peux donc pas résumer le signal le plus prioritaire sans risquer d'inventer des informations.
+                - paragraph [ref=e690]: "Pour obtenir ce résumé, je vous suggère de :"
+                - paragraph [ref=e691]: Consulter directement le radar et me partager les données du signal prioritaire, je pourrai alors vous en faire un résumé. Me fournir les détails (zone, type de signal, indicateurs concernés), et je vous aiderai à les synthétiser.
+                - paragraph [ref=e692]: Avez-vous des données à me soumettre ?
+              - generic [ref=e693]:
+                - button "Copier" [ref=e694] [cursor=pointer]:
+                  - img [ref=e695]
+                - button "Regenerer" [ref=e696] [cursor=pointer]:
+                  - img [ref=e697]
+                - button "chat.feedback.useful" [ref=e698] [cursor=pointer]:
+                  - img [ref=e699]
+                - button "chat.feedback.notUseful" [ref=e700] [cursor=pointer]:
+                  - img [ref=e701]
+        - generic [ref=e668]:
+          - textbox "Questionner ce signal" [ref=e669]
+          - button [disabled] [ref=e670]:
+            - img [ref=e671]

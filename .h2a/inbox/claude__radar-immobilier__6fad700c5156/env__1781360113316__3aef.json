@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781360113316:3aef",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo2_subagentts:e053fe3f8e24",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "PHASE 1 A-R RE-GRAPHIFY COMPLETE (claude:immo2_subagentts). 219/219 villes-avec-raw re-graphifiees v2.0, TOUTES gatees PASS (jq: ontology_version 2.0, 9 types canoniques, prefixes figes, 0 cle d edge bannie, 0 mauvais id). + 27 deja-v2.0 skip = 246/246 villes A-R avec raw en v2.0. RECONCILIATION 529 OK: 246 v2.0 + 283 nouvelles (sans raw) = 529 exact. PHASE 2 (283 nouvelles a scraper: config+scrape+graphify v2.0) NON demarree -- c est un scrape LIVE different du re-graphify; j attends ton GO/priorisation avant de lancer. FLAGS re-scrape cible (29): raw insuffisant. Notables: gatineau (raw=site STO transport, MAUVAISE SOURCE -> corriger URL), bury/franklin/lac-beauport (PDF scannes sans OCR), maskinonge/la-guadeloupe/brigham/frampton/cap-sante/lile-du-grand-calumet/lac-drolet/la-presentation/rougemont (raw=index HTML ou docs non-PV, vrais PV en liens externes). Liste complete committee: packages/radar-sources/src/sources/pv-cities-bulk.json + .regraphify-progress/flags.txt (branche regraphify-al). Je NE reprojette PAS PG (toi, une fois A-R+S-Z uniformes). Manifest + snapshots committes."
+  },
+  "createdAt": "2026-06-13T14:15:13.000Z"
+}

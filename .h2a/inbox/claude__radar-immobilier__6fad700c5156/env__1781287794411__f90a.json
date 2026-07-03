@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781287794411:f90a",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION 225/522 sur SCW. Lots 4x10 fluides, zero saturation. Lot r6 lance. Recents: Pointe-Claire 2 PPCMOI, Pierreville glissement terrain+rezonage H-22, Plessisville CPTAQ+7 derogations, Notre-Dame-du-Mont-Carmel PPCMOI+rezonage refuse, Pont-Rouge rezonage+PPCMOI."
+  },
+  "createdAt": "2026-06-12T18:09:54.411Z"
+}

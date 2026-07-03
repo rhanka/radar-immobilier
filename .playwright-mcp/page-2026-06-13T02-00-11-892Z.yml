@@ -1,0 +1,273 @@
+- generic [active] [ref=e1]:
+  - dialog "Gestion de vos préférences" [ref=e2]:
+    - generic [ref=e3]:
+      - img "Ville de Beauharnois" [ref=e5]
+      - generic [ref=e6]: Gestion de vos préférences
+      - button "Fermer la boîte de dialogue" [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+    - paragraph [ref=e12]: Pour offrir les meilleures expériences, nous utilisons des technologies comme les cookies pour stocker et/ou accéder aux informations de l'appareil. Le fait de consentir à ces technologies nous permettra de traiter des données telles que le comportement de navigation ou des identifiants uniques sur ce site. Ne pas consentir ou retirer son consentement peut avoir des effets négatifs sur certaines fonctionnalités.
+    - generic [ref=e13]:
+      - button "Accepter" [ref=e14] [cursor=pointer]
+      - button "Refuser" [ref=e15] [cursor=pointer]
+      - button "Voir les préférences" [ref=e16] [cursor=pointer]
+    - list [ref=e18]:
+      - listitem
+      - listitem [ref=e19]:
+        - link "Politique de confidentialité" [ref=e20] [cursor=pointer]:
+          - /url: https://ville.beauharnois.qc.ca/politique
+      - listitem
+  - button "Ouvrir le menu d'accessibilité" [ref=e22] [cursor=pointer]:
+    - img [ref=e24]
+    - generic [ref=e28]: Open accessibility menu
+  - link "Passer au contenu principal" [ref=e29] [cursor=pointer]:
+    - /url: "#brx-content"
+  - link "Passer au pied de page" [ref=e30] [cursor=pointer]:
+    - /url: "#brx-footer"
+  - banner [ref=e31]:
+    - button "Fermer" [ref=e33] [cursor=pointer]:
+      - generic [ref=e34]: Fermer
+      - generic [ref=e36]: 
+    - generic [ref=e37]: Recherche en cours...
+    - generic [ref=e39]:
+      - link "Ville de Beauharnois" [ref=e41] [cursor=pointer]:
+        - /url: https://ville.beauharnois.qc.ca
+        - img "Ville de Beauharnois" [ref=e42]
+      - generic [ref=e44]:
+        - button "Basculer la recherche" [ref=e46] [cursor=pointer]:
+          - generic [ref=e47]: 
+        - button "Navigation" [ref=e48] [cursor=pointer]:
+          - generic [ref=e49]: 
+  - main [ref=e50]:
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - navigation "breadcrumbs" [ref=e54]:
+          - list [ref=e55]:
+            - listitem [ref=e56]:
+              - link "Accueil" [ref=e57] [cursor=pointer]:
+                - /url: https://ville.beauharnois.qc.ca
+            - listitem [ref=e58]:
+              - link "La Ville" [ref=e59] [cursor=pointer]:
+                - /url: https://ville.beauharnois.qc.ca/la-ville
+            - listitem [ref=e60]:
+              - link "Administration et vie démocratique" [ref=e61] [cursor=pointer]:
+                - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique
+            - listitem [ref=e62]:
+              - generic [ref=e63]: Séances du conseil
+        - heading "Séances du conseil" [level=1] [ref=e64]
+      - figure [ref=e66]:
+        - img "Une femme et son chien dans la neige" [ref=e67]
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - generic [ref=e70]:
+          - heading "Calendrier des séances de l'année 2026" [level=2] [ref=e71]
+          - paragraph [ref=e72]: La séance du conseil municipal se tiendra à 19 h dans la salle des délibérations de l’hôtel de ville de Beauharnois, située au 660, rue Ellice, à Beauharnois.
+        - generic [ref=e73]:
+          - heading "Dates des prochaines séances" [level=3] [ref=e74]
+          - list [ref=e75]:
+            - listitem [ref=e76]:
+              - generic [ref=e77]: 
+              - paragraph [ref=e78]: 7 juillet 2026
+            - listitem [ref=e79]:
+              - generic [ref=e80]: 
+              - paragraph [ref=e81]: 18 août 2026
+            - listitem [ref=e82]:
+              - generic [ref=e83]: 
+              - paragraph [ref=e84]: 8 septembre 2026
+            - listitem [ref=e85]:
+              - generic [ref=e86]: 
+              - paragraph [ref=e87]: 13 octobre 2026
+            - listitem [ref=e88]:
+              - generic [ref=e89]: 
+              - paragraph [ref=e90]: 10 novembre 2026
+            - listitem [ref=e91]:
+              - generic [ref=e92]: 
+              - paragraph [ref=e93]: 8 décembre 2026
+      - generic [ref=e95]:
+        - heading "Vous avez une question à adresser au conseil municipal?" [level=2] [ref=e96]:
+          - strong [ref=e97]: Vous avez une question à adresser au conseil municipal?
+        - paragraph
+        - paragraph [ref=e98]: Il est maintenant possible de nous la transmettre en ligne avant la séance. Cliquez sur le bouton ci-dessous pour soumettre votre question.
+        - link "Soumettre une question" [ref=e101] [cursor=pointer]:
+          - /url: https://airtable.com/appsGtkKvx8KTSzuc/shrRs3t8Ig08A13wl
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - heading "Ordres du jour et procès verbaux" [level=3] [ref=e105]
+        - search "Filtrer" [ref=e106]:
+          - generic [ref=e107]:
+            - paragraph [ref=e108]: Années
+            - combobox "Filtrer par sujets" [ref=e109] [cursor=pointer]:
+              - option "Toutes les années" [selected]
+              - option "2025"
+              - option "2026"
+          - generic [ref=e110]:
+            - paragraph [ref=e111]: Mois
+            - combobox "Filtrer par sujets" [ref=e112] [cursor=pointer]:
+              - option "Tous les mois" [selected]
+              - option "Janvier"
+              - option "Février"
+              - option "Mars"
+              - option "Avril"
+              - option "Mai"
+              - option "Juin"
+              - option "Juillet"
+              - option "Août"
+              - option "Septembre"
+              - option "Octobre"
+              - option "Novembre"
+              - option "Décembre"
+      - button "Séance ordinaire du 9 juin 2026 " [ref=e116] [cursor=pointer]:
+        - heading "Séance ordinaire du 9 juin 2026" [level=4] [ref=e117]
+        - generic [ref=e118]: 
+        - text: 
+      - button "Séance ordinaire du 12 mai 2026 " [ref=e122] [cursor=pointer]:
+        - heading "Séance ordinaire du 12 mai 2026" [level=4] [ref=e123]
+        - generic [ref=e124]: 
+        - text: 
+      - button "Séance ordinaire du 14 avril 2026 " [ref=e128] [cursor=pointer]:
+        - heading "Séance ordinaire du 14 avril 2026" [level=4] [ref=e129]
+        - generic [ref=e130]: 
+        - text: 
+      - button "Séance ordinaire du 10 mars 2026 " [ref=e134] [cursor=pointer]:
+        - heading "Séance ordinaire du 10 mars 2026" [level=4] [ref=e135]
+        - generic [ref=e136]: 
+        - text: 
+      - button "Séance ordinaire du 10 février 2026 " [ref=e140] [cursor=pointer]:
+        - heading "Séance ordinaire du 10 février 2026" [level=4] [ref=e141]
+        - generic [ref=e142]: 
+        - text: 
+      - button "Séance ordinaire du 13 janvier 2026 " [ref=e146] [cursor=pointer]:
+        - heading "Séance ordinaire du 13 janvier 2026" [level=4] [ref=e147]
+        - generic [ref=e148]: 
+        - text: 
+      - button "Séance extraordinaire du 9 décembre 2025 " [ref=e152] [cursor=pointer]:
+        - heading "Séance extraordinaire du 9 décembre 2025" [level=4] [ref=e153]
+        - generic [ref=e154]: 
+        - text: 
+      - button "Séance ordinaire du 9 décembre 2025 " [ref=e158] [cursor=pointer]:
+        - heading "Séance ordinaire du 9 décembre 2025" [level=4] [ref=e159]
+        - generic [ref=e160]: 
+        - text: 
+      - button "Séance ordinaire du 11 novembre 2025 " [ref=e164] [cursor=pointer]:
+        - heading "Séance ordinaire du 11 novembre 2025" [level=4] [ref=e165]
+        - generic [ref=e166]: 
+        - text: 
+      - button "Séance ordinaire du 1er octobre 2025 " [ref=e170] [cursor=pointer]:
+        - heading "Séance ordinaire du 1er octobre 2025" [level=4] [ref=e171]
+        - generic [ref=e172]: 
+        - text: 
+      - button "Séance ordinaire 9 septembre 2025 " [ref=e176] [cursor=pointer]:
+        - heading "Séance ordinaire 9 septembre 2025" [level=4] [ref=e177]
+        - generic [ref=e178]: 
+        - text: 
+      - button "Séance ordinaire 19 août 2025 " [ref=e182] [cursor=pointer]:
+        - heading "Séance ordinaire 19 août 2025" [level=4] [ref=e183]
+        - generic [ref=e184]: 
+        - text: 
+      - navigation "Pagination" [ref=e186]:
+        - list [ref=e187]:
+          - listitem [ref=e188]:
+            - generic [ref=e189]: "1"
+          - listitem [ref=e190]:
+            - link "2" [ref=e191] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique/seances-du-conseil/page/2
+          - listitem [ref=e192]:
+            - link "Page suivante" [ref=e193] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique/seances-du-conseil/page/2
+              - text: →
+  - button "Ouvrir le formulaire pour envoyer un avis" [ref=e194] [cursor=pointer]:
+    - img [ref=e195]
+    - text: Laissez-nous votre avis
+  - contentinfo [ref=e198]:
+    - generic [ref=e200]:
+      - generic [ref=e201]:
+        - generic [ref=e202]: INFOLETTRE
+        - heading "Restez branché à l’actualité de Beauharnois." [level=2] [ref=e203]
+        - generic [ref=e204]: Recevez directement dans votre boîte courriel les nouvelles, événements, avis importants, travaux, activités et informations utiles de la Ville.
+      - generic [ref=e206]:
+        - group [ref=e207]:
+          - textbox "Courriel" [ref=e208]:
+            - /placeholder: Inscrivez votre courriel
+        - button "S'abonner" [ref=e210] [cursor=pointer]:
+          - generic [ref=e211]: S'abonner
+    - region "footer" [ref=e212]:
+      - generic [ref=e213]:
+        - figure [ref=e215]:
+          - link "Ville de Beauharnois" [ref=e216] [cursor=pointer]:
+            - /url: https://ville.beauharnois.qc.ca
+            - img "Ville de Beauharnois" [ref=e217]
+        - generic [ref=e218]:
+          - generic [ref=e219]:
+            - generic [ref=e221]:
+              - heading "Hôtel de ville" [level=4] [ref=e222]
+              - generic [ref=e224]: 660, rue Ellice, bureau 100, Beauharnois (Québec) J6N 1Y1
+              - generic [ref=e225]:
+                - generic [ref=e226]:
+                  - generic [ref=e227]: "Tél.:"
+                  - link "Par téléphone" [ref=e228] [cursor=pointer]:
+                    - /url: tel:450 429-3546
+                    - text: 450 429-3546
+                - link "Par courriel" [ref=e229] [cursor=pointer]:
+                  - /url: mailto:info@ville.beauharnois.qc.ca
+                  - text: info@ville.beauharnois.qc.ca
+            - generic [ref=e231]:
+              - heading "Suivez-nous" [level=4] [ref=e232]
+              - list [ref=e234]:
+                - listitem [ref=e235]:
+                  - link "Lien" [ref=e236] [cursor=pointer]:
+                    - /url: https://www.facebook.com/villebeauharnois/?locale=fr_CA
+                    - img [ref=e237]
+                - listitem [ref=e239]:
+                  - link "Lien" [ref=e240] [cursor=pointer]:
+                    - /url: https://www.instagram.com/villedebeauharnois/?hl=en
+                    - img [ref=e241]
+                - listitem [ref=e243]:
+                  - link "Lien" [ref=e244] [cursor=pointer]:
+                    - /url: https://ca.linkedin.com/company/ville-de-beauharnois
+                    - img [ref=e245]
+                - listitem [ref=e247]:
+                  - link "Lien" [ref=e248] [cursor=pointer]:
+                    - /url: https://www.youtube.com/@villedebeauharnois7476
+                    - img [ref=e249]
+          - generic [ref=e252]:
+            - navigation [ref=e254]:
+              - list [ref=e255]:
+                - listitem [ref=e256]:
+                  - link "La Ville" [ref=e257] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/la-ville
+                - listitem [ref=e258]:
+                  - link "Services à la population" [ref=e259] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/services-a-la-population
+                - listitem [ref=e260]:
+                  - link "Loisirs, culture et vie communautaire" [ref=e261] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/loisirs-culture-et-vie-communautaire
+            - navigation [ref=e263]:
+              - list [ref=e264]:
+                - listitem [ref=e265]:
+                  - link "Emplois" [ref=e266] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique/emplois
+                - listitem [ref=e267]:
+                  - link "Avis publics" [ref=e268] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/avis-publics
+                - listitem [ref=e269]:
+                  - link "Carte interactive" [ref=e270] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/carte-interactive
+                - listitem [ref=e271]:
+                  - link "Nous joindre" [ref=e272] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/nous-joindre
+    - generic [ref=e274]:
+      - generic [ref=e276]: © Tous droits réservés Ville de Beauharnois 2026
+      - navigation "Legal" [ref=e277]:
+        - list [ref=e278]:
+          - listitem [ref=e279]:
+            - link "Lien" [ref=e280] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/politique
+              - text: Politique de confidentialité
+          - listitem
+    - button "Retour vers le haut" [ref=e281] [cursor=pointer]:
+      - img [ref=e282]
+      - img [ref=e287]
+  - region:
+    - generic:
+      - tabpanel "1 of 1"
+    - tablist "Select a slide to show":
+      - tab "Go to slide 1" [selected] [ref=e289] [cursor=pointer]

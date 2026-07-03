@@ -1,0 +1,17 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781139068944:b3cb",
+  "type": "withdraw",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "hold",
+    "text": "HOLD — NE PAS démarrer le scraping des 500 villes pour l'instant. Les directives précédentes (scraping -> fixtures *.fixture.ts dans git) sont OBSOLÈTES et ANNULÉES.\n\nRAISON: refonte de l'architecture de persistance (validée). Les résultats de scraping ne doivent plus être committés en fixtures git mais écrits sur SCW S3 (raw/parsed/graph), Postgres devenant un index reconstructible. La plomberie (port Storage S3 + clés CAS + worker écrivant sur S3 + sharding scrape-status) n'existe pas encore — je l'implémente d'abord.\n\nACTION DEMANDÉE: rester en attente. Je t'enverrai un NOUVEAU work-order « scrape -> S3 » une fois la fondation en place et testée (avec le schéma de clés S3 et le port Storage à utiliser). Ne génère AUCUNE nouvelle fixture de ville d'ici là. Merci.",
+    "supersedes": "work-order 500 villes (fixture-based)"
+  },
+  "createdAt": "2026-06-11T00:51:09Z"
+}

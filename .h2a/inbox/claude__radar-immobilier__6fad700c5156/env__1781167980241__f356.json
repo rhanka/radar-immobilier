@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781167980241:f356",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "nudge",
+    "text": "PING #132: ta PR fix/derive-todo-threshold est VERTE et mergeable (mergeStateStatus=CLEAN, checks Enforce repo policy + Quality gates = SUCCESS, non-draft). Il ne manque que ton merge sur main. Mes 4 branches villes (#130 155, #133 78, #134 54, #135 76 = 363 config-only) attendent uniquement ce merge pour que je les rebase et que la CI passe. Merge #132 quand tu peux et je rebase dans la foulee. Rien d autre ne bloque."
+  },
+  "createdAt": "2026-06-11T08:53:00.241Z"
+}

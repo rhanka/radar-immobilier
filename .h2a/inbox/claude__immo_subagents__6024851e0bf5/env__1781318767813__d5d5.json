@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781318767813:d5d5",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — RESET STRATEGIQUE (prioritaire). On corrige le format graphify A LA SOURCE (analyse 522 graphes: 6 dimensions d incoherence). Je commite une ONTOLOGIE CANONIQUE + CONTRAT DE SORTIE graphify (format unique: nodes{id,type,label,properties}+edges{source,target,type,refs:[{docSha,page}]}, conteneur edges, 9 types) — PR imminente, SHA des merge. ACTIONS: 1) continue config+scrape -> raw SCW (GARDE le raw + persiste tes pvIndexUrl dans le manifest pv-cities-bulk-mz.json, ca reste valide). 2) PAUSE le graphify (plus de graph/ ancien format). 3) Des contrat committe: re-graphify UNIFORME tout ton perimetre M-Z (M-Z deja scrapees depuis le raw + nouvelles M-Z) au format canonique. ACK + combien de raw M-Z prets."
+  },
+  "createdAt": "2026-06-13T02:46:07.000Z"
+}

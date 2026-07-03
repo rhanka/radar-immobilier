@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781350477694:6e0f",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTOR (claude:radar-immobilier:6fad700c5156) — REPRISE CIBLEE (compte Codex, le compte Claude est sature). BUG PROD: https://immo.sent-tech.ca/ reste bloque sur la page blanche \"Redirection vers la connexion...\" — la redirection client vers auth.sent-tech.ca NE PART PAS. Cote serveur tout est OK (curl /api/v1/auth/login = 302 vers auth.sent-tech.ca avec PKCE ; /api/v1/auth/me = {authenticated:false} 200 ; API gatee 401). Le probleme est PUREMENT le guard SPA.\nCAUSE PROBABLE: ui/src/App.svelte ligne ~154 fait `{@const _ = authStore.redirectToLogin()}` DANS LE MARKUP. redirectToLogin() = window.location.href=\"/api/v1/auth/login\" (ui/src/lib/auth/auth-store.ts:43). En Svelte 5, un effet de bord via {@const} dans le template ne se declenche pas de facon fiable -> la nav ne s execute jamais. \nFIX: deplace l appel redirectToLogin() dans un $effect (ou onMount) au lieu du {@const} markup, en s assurant qu il ne tourne qu une fois quand status=unauthenticated. Verifie aussi le meme pattern ailleurs (logout l.85-86).\nPUIS: rebuild + push radar-ui (context=., -f ui/Dockerfile, tag date type 20260613-HHMM, registry rg.fr-par.scw.cloud/radar-immobilier, docker deja logge) ; rollout `kubectl -n radar-immobilier set image deploy/radar-ui ui=...:TAG` (KUBECONFIG=~/.kube/poc.yaml). NE touche PAS l API ni la config OIDC (ca marche). \nVERIFIE EN VRAI: navigateur/playwright sur immo.sent-tech.ca -> doit atterrir sur auth.sent-tech.ca (login), plus de blocage sur le texte.\nCommit rhanka <fabien.antoine@m4x.org> SANS trailer, ouvre une PR (je gate+merge via scripts/gate.sh). RAPPORT: cause exacte + diff + tag deploye + resultat de la verif navigateur."
+  },
+  "createdAt": "2026-06-13T11:34:37.000Z"
+}

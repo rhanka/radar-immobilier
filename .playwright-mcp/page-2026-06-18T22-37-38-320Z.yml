@@ -1,0 +1,55 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner "Navigation principale" [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Primary" [ref=e8]:
+        - generic [ref=e9]:
+          - button "Signaux" [ref=e10] [cursor=pointer]:
+            - img [ref=e11]
+            - text: Signaux
+          - button "Opportunités" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+            - text: Opportunités
+          - button "Évaluation" [ref=e14] [cursor=pointer]:
+            - img [ref=e15]
+            - text: Évaluation
+          - button "Sources" [ref=e16] [cursor=pointer]:
+            - img [ref=e17]
+            - text: Sources
+          - button "Outils" [ref=e19] [cursor=pointer]:
+            - img [ref=e20]
+            - text: Outils
+            - img [ref=e21]
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Afficher les données carte Steve" [ref=e26] [cursor=pointer]:
+          - generic [ref=e27]: Réel
+        - generic "admin@sent-tech.ca" [ref=e28]: Admin
+        - button "Se déconnecter" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - text: Déconnexion
+    - generic [ref=e32]:
+      - complementary [ref=e33]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - img [ref=e37]
+            - generic [ref=e38]: Vue Géo
+          - generic [ref=e39]:
+            - generic [ref=e40]: Municipalité
+            - generic [ref=e41]:
+              - combobox "Municipalité" [ref=e42]:
+                - option "Choisir une ville…" [disabled]
+                - option "Longueuil (2085 zones)" [selected]
+                - option "Gatineau (1871 zones)"
+                - option "Levis (1715 zones)"
+              - img
+          - generic [ref=e43]:
+            - img [ref=e44]
+            - text: Chargement…
+      - generic [ref=e48]:
+        - img [ref=e49]
+        - text: Chargement des données géo…
+  - button "Ouvrir l'assistant radar" [ref=e50] [cursor=pointer]:
+    - img [ref=e51]

@@ -1,0 +1,20 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781209066363:1715",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "PR #154 cities-round13 creee (draft): 34 villes config-only (Gaspesie/Baie-des-Chaleurs/Cote-Nord/Matapedia/Matane/Abitibi-Ouest). Inclut villes-centres Baie-Comeau, Matane, Amqui, La Sarre, Matagami, Sainte-Anne-des-Monts, Bonaventure, Carleton-sur-Mer, Port-Cartier, Paspebiac. Gate local vert tsc=0 + vitest 35 passed. Ecartees: js-only (Modellium/VPlus, Portail-citoyen/B2, portail Matapedia-Plateaux ancres JS, Wix), ocr-required (Inforoute *.ao.ca scans), perime, no-pv-page, domaines parques. Homonymes tranches (clermont.ao.ca Abitibi vs Charlevoix, stsimeon.ca Bonaventure vs Charlevoix, st-lambert.ao.ca Abitibi vs Monterege, saintefelicite Matanie vs L-Islet). NOTE: 1 slice (S1 Metis/Matapedia/Abitibi-Ouest, 25 villes) perdue au crash session Linux -> relancee, sera cablee dans round14 (DERNIER round) avec les 24 dernieres villes. UNION attendue sur ALL_PV_CITIES. Avancement: 550/574 tentees, ~619 villes cablees sur 13 PRs. Round14 = fin du filet, report final suivra.",
+    "refs": {
+      "pr": 154,
+      "branch": "feat/cities-round13"
+    }
+  },
+  "createdAt": "2026-06-11T20:17:46.363Z"
+}

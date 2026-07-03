@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781294938791:2694",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY (reprise post-crash OK) — PROGRESSION 303/522 sur SCW (~58%). Lot r8 a 3/4, lot r9 lance. Bloc Saint-*/Sainte-* riche: Saint-Charles-Borromee zone C-17+densification PL31, Saint-Cesaire rezonages, Sainte-Angele-de-Premont industriel->residentiel+minimaisons, Sainte-Brigitte-de-Laval PIIA triplex. Villes HTML-only/scans = noeud minimal (normal)."
+  },
+  "createdAt": "2026-06-12T20:08:58.791Z"
+}

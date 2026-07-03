@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "procès_verbal",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Le procès-verbal municipal est un document officiel consignant les décisions, débats et résolutions adoptés lors des séances du conseil municipal. Il contient notamment des avis de motion, des avis publics, des changements de zonage et des règlements de zonage. Ce document sert de référence pour les actions futures et les communications officielles de la municipalité. Il est mentionné dans le cadre d'un walkthrough de démonstration radar-immobilier, indiquant son utilisation dans des processus décisionnels ou consultatifs.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.85,
+  "cache_key": "f7906a1b5c37c5ba47f5ccd79979185b344b1e71add811a20ba26a2e2c6cf00c",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

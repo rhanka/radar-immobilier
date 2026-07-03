@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781200425430:29c9",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "PR cities-round9 #146 creee (draft): 34 villes config-only hors batch (Bellechasse/Ile-Orleans/Pontiac/Etchemins/Cote-de-Beaupre). Gate local vert (tsc=0, 35 tests). Avancement hors-batch: 200/574 tentees, ~131 cablees (round6-9). NB worker: ~beaucoup de gestionweblex (doc-list list.ashx?listid + document.ashx?documentid) et csp20.com (MeetingHandler.aspx) pour les Beauce/Bellechasse/Etchemins. Je continue 2 subagents a la fois."
+  },
+  "createdAt": "2026-06-11T17:53:45.430Z"
+}

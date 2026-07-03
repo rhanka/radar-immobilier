@@ -1,0 +1,293 @@
+- generic [active] [ref=e1]:
+  - dialog "Gestion de vos préférences" [ref=e2]:
+    - generic [ref=e3]:
+      - img "Ville de Beauharnois" [ref=e5]
+      - generic [ref=e6]: Gestion de vos préférences
+      - button "Fermer la boîte de dialogue" [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+    - paragraph [ref=e12]: Pour offrir les meilleures expériences, nous utilisons des technologies comme les cookies pour stocker et/ou accéder aux informations de l'appareil. Le fait de consentir à ces technologies nous permettra de traiter des données telles que le comportement de navigation ou des identifiants uniques sur ce site. Ne pas consentir ou retirer son consentement peut avoir des effets négatifs sur certaines fonctionnalités.
+    - generic [ref=e13]:
+      - button "Accepter" [ref=e14] [cursor=pointer]
+      - button "Refuser" [ref=e15] [cursor=pointer]
+      - button "Voir les préférences" [ref=e16] [cursor=pointer]
+    - list [ref=e18]:
+      - listitem:
+        - link:
+          - /url: https://ville.beauharnois.qc.ca/plan-directeur-des-transports-actifs-velo-quebec
+      - listitem [ref=e19]:
+        - link "Politique de confidentialité" [ref=e20] [cursor=pointer]:
+          - /url: https://ville.beauharnois.qc.ca/politique
+      - listitem
+  - button "Ouvrir le menu d'accessibilité" [ref=e22] [cursor=pointer]:
+    - img [ref=e24]
+    - generic [ref=e28]: Open accessibility menu
+  - link "Passer au contenu principal" [ref=e29] [cursor=pointer]:
+    - /url: "#brx-content"
+  - link "Passer au pied de page" [ref=e30] [cursor=pointer]:
+    - /url: "#brx-footer"
+  - banner [ref=e31]:
+    - button "Fermer" [ref=e33] [cursor=pointer]:
+      - generic [ref=e34]: Fermer
+      - generic [ref=e36]: 
+    - generic [ref=e37]: Recherche en cours...
+    - generic [ref=e39]:
+      - link "Ville de Beauharnois" [ref=e41] [cursor=pointer]:
+        - /url: https://ville.beauharnois.qc.ca
+        - img "Ville de Beauharnois" [ref=e42]
+      - generic [ref=e44]:
+        - button "Basculer la recherche" [ref=e46] [cursor=pointer]:
+          - generic [ref=e47]: 
+        - button "Navigation" [ref=e48] [cursor=pointer]:
+          - generic [ref=e49]: 
+  - main [ref=e50]:
+    - generic [ref=e53]:
+      - paragraph [ref=e54]: Bienvenue à Beauharnois
+      - heading "Investir, grandir et s’épanouir" [level=1] [ref=e55]:
+        - text: Investir, grandir
+        - text: et s’épanouir
+      - search "Search" [ref=e57]:
+        - generic [ref=e59]:
+          - searchbox "Search" [ref=e61]
+          - button "Search" [ref=e62] [cursor=pointer]
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - heading "Accès rapides" [level=2] [ref=e65]
+        - paragraph [ref=e67]: Retrouvez ici les informations les plus consultées pour accéder rapidement à ce que vous cherchez.
+      - generic [ref=e68]:
+        - generic [ref=e70]:
+          - img [ref=e72]
+          - heading "Lien" [level=3] [ref=e75]:
+            - link "Lien" [ref=e76] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique/seances-du-conseil
+              - text: Séances du conseil
+        - generic [ref=e78]:
+          - img [ref=e80]
+          - heading "Lien" [level=3] [ref=e83]:
+            - link "Lien" [ref=e84] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/services-a-la-population/collectes-et-ecocentre
+              - text: Collectes et écocentre
+        - generic [ref=e86]:
+          - img [ref=e88]
+          - heading "Lien" [level=3] [ref=e92]:
+            - link "Lien" [ref=e93] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/services-a-la-population/sevices-en-ligne/faire-une-demande-de-permis
+              - text: Faire une demande de permis
+        - generic [ref=e95]:
+          - img [ref=e97]
+          - heading "Lien" [level=3] [ref=e99]:
+            - link "Lien" [ref=e100] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/services-a-la-population/sevices-en-ligne/reglementation
+              - text: Règlements municipaux
+        - generic [ref=e102]:
+          - img [ref=e104]
+          - heading "Lien" [level=3] [ref=e111]:
+            - link "Lien" [ref=e112] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique/emplois
+              - text: Emplois
+        - generic [ref=e114]:
+          - img [ref=e116]
+          - heading "Lien" [level=3] [ref=e119]:
+            - link "Lien" [ref=e120] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/carte-interactive
+              - text: Carte interactive
+    - generic [ref=e121]:
+      - heading "Actualités" [level=2] [ref=e123]
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - generic [ref=e127]:
+            - list [ref=e128]:
+              - listitem [ref=e129]:
+                - generic [ref=e130]: Actualités
+            - figure [ref=e131]
+            - generic [ref=e133]:
+              - heading "Lien" [level=3] [ref=e134]:
+                - link "Lien" [ref=e135] [cursor=pointer]:
+                  - /url: https://ville.beauharnois.qc.ca/la-ville/decouvrir-beauharnois/actualites/beauharnois-celebre-le-talent-de-sa-releve-et-devoile-la-nouvelle-identite-visuelle-de-son-ecole-de-danse/
+                  - text: Beauharnois célèbre le talent de sa relève et dévoile la nouvelle identité visuelle de son école de danse
+              - generic [ref=e136]:
+                - paragraph [ref=e138]: 2 juin
+                - generic [ref=e140]: 
+          - generic [ref=e142]:
+            - list [ref=e143]:
+              - listitem [ref=e144]:
+                - generic [ref=e145]: Actualités
+            - figure [ref=e146]
+            - generic [ref=e148]:
+              - heading "Lien" [level=3] [ref=e149]:
+                - link "Lien" [ref=e150] [cursor=pointer]:
+                  - /url: https://ville.beauharnois.qc.ca/la-ville/decouvrir-beauharnois/actualites/une-serie-de-capsules-video-pour-mieux-comprendre-le-processus-de-permis-et-dinspection/
+                  - text: Une série de capsules vidéo pour mieux comprendre le processus de permis et d’inspection
+              - generic [ref=e151]:
+                - paragraph [ref=e153]: 28 mai
+                - generic [ref=e155]: 
+          - generic [ref=e157]:
+            - list [ref=e158]:
+              - listitem [ref=e159]:
+                - generic [ref=e160]: Actualités
+              - listitem [ref=e161]:
+                - generic [ref=e162]: Innovation
+            - figure [ref=e163]
+            - generic [ref=e165]:
+              - heading "Lien" [level=3] [ref=e166]:
+                - link "Lien" [ref=e167] [cursor=pointer]:
+                  - /url: https://ville.beauharnois.qc.ca/la-ville/decouvrir-beauharnois/actualites/beauharnois-devoile-son-nouveau-site-web-une-experience-modernisee-intuitive-et-en-constante-evolution/
+                  - text: "Beauharnois dévoile son nouveau site Web : Une expérience modernisée, intuitive et en constante évolution"
+              - generic [ref=e168]:
+                - paragraph [ref=e170]: 26 mai
+                - generic [ref=e172]: 
+        - link "lien" [ref=e174] [cursor=pointer]:
+          - /url: https://ville.beauharnois.qc.ca/la-ville/decouvrir-beauharnois/actualites
+          - text: Toutes les actualités
+    - generic [ref=e177]:
+      - heading "Vivre notre rive" [level=2] [ref=e178]
+      - paragraph [ref=e179]: Une vision ambitieuse pour reconnecter la Ville à sa rive
+      - link "Lien" [ref=e180] [cursor=pointer]:
+        - /url: https://ville.beauharnois.qc.ca/la-ville
+        - text: En savoir plus
+    - generic [ref=e181]:
+      - generic [ref=e183]:
+        - heading "Événements" [level=2] [ref=e184]
+        - link "Lien" [ref=e185] [cursor=pointer]:
+          - /url: https://ville.beauharnois.qc.ca/loisirs-culture-et-vie-communautaire/calendrier-des-evenements
+          - text: Tous les événements
+      - generic [ref=e186]:
+        - article "Blog Section 5" [ref=e188]:
+          - figure [ref=e189]
+          - generic [ref=e190]:
+            - heading "Fête nationale" [level=4] [ref=e191]:
+              - link "Fête nationale" [ref=e192] [cursor=pointer]:
+                - /url: https://ville.beauharnois.qc.ca/loisirs-culture-et-vie-communautaire/calendrier-des-evenements/fete-nationale
+            - generic [ref=e194]:
+              - paragraph [ref=e195]: 24 juin
+              - paragraph [ref=e196]: De 15 h à 22 h
+              - paragraph [ref=e197]: Parc Bourcier
+              - generic [ref=e198]: 
+        - article "Blog Section 5" [ref=e200]:
+          - figure [ref=e201]
+          - generic [ref=e202]:
+            - heading "Patinage libre à roulettes" [level=4] [ref=e203]:
+              - link "Patinage libre à roulettes" [ref=e204] [cursor=pointer]:
+                - /url: https://ville.beauharnois.qc.ca/loisirs-culture-et-vie-communautaire/calendrier-des-evenements/patinage-libre-a-roulettes
+            - generic [ref=e206]:
+              - paragraph [ref=e207]: 28 juin
+              - paragraph [ref=e208]: De 13 h à 16 h
+              - paragraph [ref=e209]: Aréna André-Richard
+              - generic [ref=e210]: 
+        - article "Blog Section 5" [ref=e212]:
+          - figure [ref=e213]
+          - generic [ref=e214]:
+            - heading "Mise en forme" [level=4] [ref=e215]:
+              - link "Mise en forme" [ref=e216] [cursor=pointer]:
+                - /url: https://ville.beauharnois.qc.ca/loisirs-culture-et-vie-communautaire/calendrier-des-evenements/mise-en-forme
+            - generic [ref=e218]:
+              - paragraph [ref=e219]: 6 juillet
+              - paragraph [ref=e220]: De 18 h à 19 h
+              - paragraph [ref=e221]: Parc Sauvé
+              - generic [ref=e222]: 
+    - generic [ref=e224]:
+      - img "Un port" [ref=e225]
+      - generic [ref=e226]:
+        - generic [ref=e227]:
+          - paragraph [ref=e228]: Visitez Beauharnois
+          - heading "Une ville en transformation qui mise sur son potentiel riverain, sa vitalité culturelle et la qualité de son milieu de vie" [level=2] [ref=e229]
+        - generic [ref=e230]: Entre rives vivantes, nature accessible et milieu de vie en pleine évolution, Beauharnois est une ville qui se réinvente tout en restant profondément ancrée dans son histoire. Que vous soyez de passage ou d’ici, laissez-vous surprendre par un territoire qui invite à ralentir, à explorer et à se reconnecter à l’essentiel.
+        - link "Lien" [ref=e231] [cursor=pointer]:
+          - /url: https://ville.beauharnois.qc.ca/la-ville
+          - text: En savoir plus
+  - button "Ouvrir le formulaire pour envoyer un avis" [ref=e232] [cursor=pointer]:
+    - img [ref=e233]
+    - text: Laissez-nous votre avis
+  - contentinfo [ref=e236]:
+    - generic [ref=e238]:
+      - generic [ref=e239]:
+        - generic [ref=e240]: INFOLETTRE
+        - heading "Restez branché à l’actualité de Beauharnois." [level=2] [ref=e241]
+        - generic [ref=e242]: Recevez directement dans votre boîte courriel les nouvelles, événements, avis importants, travaux, activités et informations utiles de la Ville.
+      - generic [ref=e244]:
+        - group [ref=e245]:
+          - textbox "Courriel" [ref=e246]:
+            - /placeholder: Inscrivez votre courriel
+        - button "S'abonner" [ref=e248] [cursor=pointer]:
+          - generic [ref=e249]: S'abonner
+    - region "footer" [ref=e250]:
+      - generic [ref=e251]:
+        - figure [ref=e253]:
+          - link "Ville de Beauharnois" [ref=e254] [cursor=pointer]:
+            - /url: https://ville.beauharnois.qc.ca
+            - img "Ville de Beauharnois" [ref=e255]
+        - generic [ref=e256]:
+          - generic [ref=e257]:
+            - generic [ref=e259]:
+              - heading "Hôtel de ville" [level=4] [ref=e260]
+              - generic [ref=e262]: 660, rue Ellice, bureau 100, Beauharnois (Québec) J6N 1Y1
+              - generic [ref=e263]:
+                - generic [ref=e264]:
+                  - generic [ref=e265]: "Tél.:"
+                  - link "Par téléphone" [ref=e266] [cursor=pointer]:
+                    - /url: tel:450 429-3546
+                    - text: 450 429-3546
+                - link "Par courriel" [ref=e267] [cursor=pointer]:
+                  - /url: mailto:info@ville.beauharnois.qc.ca
+                  - text: info@ville.beauharnois.qc.ca
+            - generic [ref=e269]:
+              - heading "Suivez-nous" [level=4] [ref=e270]
+              - list [ref=e272]:
+                - listitem [ref=e273]:
+                  - link "Lien" [ref=e274] [cursor=pointer]:
+                    - /url: https://www.facebook.com/villebeauharnois/?locale=fr_CA
+                    - img [ref=e275]
+                - listitem [ref=e277]:
+                  - link "Lien" [ref=e278] [cursor=pointer]:
+                    - /url: https://www.instagram.com/villedebeauharnois/?hl=en
+                    - img [ref=e279]
+                - listitem [ref=e281]:
+                  - link "Lien" [ref=e282] [cursor=pointer]:
+                    - /url: https://ca.linkedin.com/company/ville-de-beauharnois
+                    - img [ref=e283]
+                - listitem [ref=e285]:
+                  - link "Lien" [ref=e286] [cursor=pointer]:
+                    - /url: https://www.youtube.com/@villedebeauharnois7476
+                    - img [ref=e287]
+          - generic [ref=e290]:
+            - navigation [ref=e292]:
+              - list [ref=e293]:
+                - listitem [ref=e294]:
+                  - link "La Ville" [ref=e295] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/la-ville
+                - listitem [ref=e296]:
+                  - link "Services à la population" [ref=e297] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/services-a-la-population
+                - listitem [ref=e298]:
+                  - link "Loisirs, culture et vie communautaire" [ref=e299] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/loisirs-culture-et-vie-communautaire
+            - navigation [ref=e301]:
+              - list [ref=e302]:
+                - listitem [ref=e303]:
+                  - link "Emplois" [ref=e304] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/la-ville/administration-et-vie-democratique/emplois
+                - listitem [ref=e305]:
+                  - link "Avis publics" [ref=e306] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/avis-publics
+                - listitem [ref=e307]:
+                  - link "Carte interactive" [ref=e308] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/carte-interactive
+                - listitem [ref=e309]:
+                  - link "Nous joindre" [ref=e310] [cursor=pointer]:
+                    - /url: https://ville.beauharnois.qc.ca/nous-joindre
+    - generic [ref=e312]:
+      - generic [ref=e314]: © Tous droits réservés Ville de Beauharnois 2026
+      - navigation "Legal" [ref=e315]:
+        - list [ref=e316]:
+          - listitem [ref=e317]:
+            - link "Lien" [ref=e318] [cursor=pointer]:
+              - /url: https://ville.beauharnois.qc.ca/politique
+              - text: Politique de confidentialité
+          - listitem
+    - button "Retour vers le haut" [ref=e319] [cursor=pointer]:
+      - img [ref=e320]
+      - img [ref=e325]
+  - region:
+    - generic:
+      - tabpanel "1 of 1"
+    - tablist "Select a slide to show":
+      - tab "Go to slide 1" [selected] [ref=e327] [cursor=pointer]

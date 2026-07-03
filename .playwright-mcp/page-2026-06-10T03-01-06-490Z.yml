@@ -1,0 +1,164 @@
+- generic [active] [ref=e1]:
+  - link "Accéder au contenu principal" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e4]:
+    - link "Accueil" [ref=e6] [cursor=pointer]:
+      - /url: https://www.ville.valleyfield.qc.ca
+      - img [ref=e7]
+    - generic [ref=e9]:
+      - button "7 Alertes" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+        - img
+        - generic [ref=e13]: "7"
+      - generic [ref=e16]:
+        - generic [ref=e17]:
+          - heading "Alertes" [level=3] [ref=e18]
+          - img [ref=e19]
+        - generic [ref=e21]:
+          - article [ref=e22]:
+            - generic [ref=e23]:
+              - time [ref=e24]: 2 juin 2026
+              - text: Publié à 16h06 • Mis à jour le 9 juin 2026 à 9h50
+            - heading "Chemin du golf et Chemin du Bord-de-l'Eau" [level=3] [ref=e25]:
+              - link "Chemin du golf et Chemin du Bord-de-l'Eau" [ref=e26] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/info-travaux/chemin-du-golf-et-chemin-du-bord-de-leau
+            - paragraph [ref=e28]: "Zone des travaux Boul. Bord-de-l'Eau : entre la rue Murielle et le Chemin du GolfChemin du Golf : entre le boulvevard Hébert et boul. Bord-de-l'Eau Dates 25 mai au 7 août 2026 (approx.)À noter En rai..."
+            - link "Lire la suite" [ref=e30] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/info-travaux/chemin-du-golf-et-chemin-du-bord-de-leau
+          - article [ref=e31]:
+            - generic [ref=e32]:
+              - time [ref=e33]: 20 juin 2025
+              - text: Publié à 9h41 • Mis à jour le 8 juin 2026 à 10h07
+            - heading "Entraves à la circulation - Fête nationale" [level=3] [ref=e34]:
+              - link "Entraves à la circulation - Fête nationale" [ref=e35] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/alertes/entraves-a-la-circulation-fete-nationale-2
+            - paragraph [ref=e37]: En raison du défilé de la Fête nationale, des entraves à la circulation routière sont à prévoir à compter de 18 h le 24 juin....
+            - link "Lire la suite" [ref=e39] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/alertes/entraves-a-la-circulation-fete-nationale-2
+          - article [ref=e40]:
+            - generic [ref=e41]:
+              - time [ref=e42]: 4 mai 2026
+              - text: Publié à 11h11 • Mis à jour le 2 juin 2026 à 16h06
+            - heading "Travaux d'aménagements, de voirie et de chaussée - Été 2026" [level=3] [ref=e43]:
+              - link "Travaux d'aménagements, de voirie et de chaussée - Été 2026" [ref=e44] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/info-travaux/travaux-damenagements-ete-2026
+            - paragraph [ref=e46]: Le Service de l'ingénierie de la Ville planifie chaque année des travaux d'aménagements, de rénovation de voirie et de réfection de chaussée dans différents secteurs du territoire. Pour l'été 2026, di...
+            - link "Lire la suite" [ref=e48] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/info-travaux/travaux-damenagements-ete-2026
+          - article [ref=e49]:
+            - generic [ref=e50]:
+              - time [ref=e51]: 25 avril 2025
+              - text: Publié à 11h51 • Mis à jour le 27 mai 2026 à 11h59
+            - heading "Entretien du territoire - Nettoyage et rinçage" [level=3] [ref=e52]:
+              - link "Entretien du territoire - Nettoyage et rinçage" [ref=e53] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/info-travaux/entretien
+            - paragraph [ref=e55]: Avec l’arrivée du beau temps, la Ville de Salaberry-de-Valleyfield amorce officiellement ses opérations de nettoyage, rinçage et pavage sur l’ensemble du territoire. Nos équipes seront donc visibles d...
+            - link "Lire la suite" [ref=e57] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/info-travaux/entretien
+          - article [ref=e58]:
+            - generic [ref=e59]:
+              - time [ref=e60]: 19 mai 2026
+              - text: Publié à 14h09 • Mis à jour à 14h22
+            - heading "Piétonnisation de la rue du Marché" [level=3] [ref=e61]:
+              - link "Piétonnisation de la rue du Marché" [ref=e62] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/alertes/pietonnisation-de-la-rue-du-marche
+            - paragraph [ref=e64]: La rue du Marché sera fermée à la circulation entre Saint-Thomas et Nicholson du 19 mai au 20 septembre inclusivement Si vous aviez l’habitude d’emprunter ce tronçon, prévoyez quelques minutes supplém...
+            - link "Lire la suite" [ref=e66] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/alertes/pietonnisation-de-la-rue-du-marche
+          - article [ref=e67]:
+            - generic [ref=e68]:
+              - time [ref=e69]: 6 mai 2026
+              - text: Publié à 14h58 • Mis à jour à 15h51
+            - heading "Fermeture de rue - Rue Victoria" [level=3] [ref=e70]:
+              - link "Fermeture de rue - Rue Victoria" [ref=e71] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/info-travaux/fermeture-de-rue-rue-victoria
+            - paragraph [ref=e73]: Veuillez prendre note que la rue Victoria sera fermée à compter du 7 mai 2026, pour une durée approximative de six (6) semaines, en raison de travaux de réfection de la voirie :retrait des bordures ex...
+            - link "Lire la suite" [ref=e75] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/info-travaux/fermeture-de-rue-rue-victoria
+          - article [ref=e76]:
+            - generic [ref=e77]:
+              - time [ref=e78]: 23 juin 2025
+              - text: Publié à 12h14 • Mis à jour le 11 mars 2026 à 11h41
+            - heading "Réfection des ponts situés sur la route 132 - Ponts Masson" [level=3] [ref=e79]:
+              - link "Réfection des ponts situés sur la route 132 - Ponts Masson" [ref=e80] [cursor=pointer]:
+                - /url: https://www.ville.valleyfield.qc.ca/info-travaux/refection-des-ponts-situes-sur-la-route-132-ponts-masson
+            - paragraph [ref=e82]: Mise à jour - 11 mars 2026 Le ministère des Transports et de la Mobilité durable vous informe que la réouverture saisonnière des deux ponts situés dans l’axe de la route 132, au-dessus de la rivière S...
+            - link "Lire la suite" [ref=e84] [cursor=pointer]:
+              - /url: https://www.ville.valleyfield.qc.ca/info-travaux/refection-des-ponts-situes-sur-la-route-132-ponts-masson
+      - link "Espace citoyen (Ouvre dans un nouvel onglet)" [ref=e85] [cursor=pointer]:
+        - /url: https://citoyen.valleyfield.ca/accueil
+        - img [ref=e86]
+      - button "Recherche" [ref=e88] [cursor=pointer]:
+        - img [ref=e89]
+        - img
+      - search [ref=e93]:
+        - textbox "Recherche" [ref=e95]
+        - button "Recherche" [ref=e96] [cursor=pointer]:
+          - img [ref=e97]
+      - button "Menu" [ref=e99] [cursor=pointer]:
+        - generic [ref=e100]: Menu
+      - generic [ref=e102]: ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸ ▸
+  - banner [ref=e103]:
+    - generic [ref=e109]: Ville de Salaberry-de-Valleyfield
+    - generic [ref=e113]:
+      - heading "Désolé, mauvais chemin!" [level=1] [ref=e115]
+      - img [ref=e116]
+  - main [ref=e118]:
+    - generic [ref=e123]: Cette page n'existe pas. Veuillez utiliser le menu principal pour naviguer
+  - contentinfo [ref=e124]:
+    - generic [ref=e127]:
+      - generic [ref=e129]:
+        - link "Infolettre" [ref=e130] [cursor=pointer]:
+          - /url: https://www.ville.valleyfield.qc.ca/infolettre
+        - link "Contactez-nous" [ref=e131] [cursor=pointer]:
+          - /url: https://www.ville.valleyfield.qc.ca/services-municipaux
+      - generic [ref=e133]:
+        - link "facebook (Ouvre dans un nouvel onglet)" [ref=e134] [cursor=pointer]:
+          - /url: https://www.facebook.com/Valleyfield
+          - generic [ref=e135]: facebook
+          - generic [ref=e136]: (Ouvre dans un nouvel onglet)
+          - img [ref=e137]
+        - link "linkedin (Ouvre dans un nouvel onglet)" [ref=e139] [cursor=pointer]:
+          - /url: https://www.linkedin.com/company/ville-de-salaberry-de-valleyfield/
+          - generic [ref=e140]: linkedin
+          - generic [ref=e141]: (Ouvre dans un nouvel onglet)
+          - img [ref=e142]
+        - link "instagram (Ouvre dans un nouvel onglet)" [ref=e144] [cursor=pointer]:
+          - /url: https://www.instagram.com/ville.valleyfield/
+          - generic [ref=e145]: instagram
+          - generic [ref=e146]: (Ouvre dans un nouvel onglet)
+          - img [ref=e147]
+        - link "youtube (Ouvre dans un nouvel onglet)" [ref=e149] [cursor=pointer]:
+          - /url: https://www.youtube.com/user/VilleValleyfield
+          - generic [ref=e150]: youtube
+          - generic [ref=e151]: (Ouvre dans un nouvel onglet)
+          - img [ref=e152]
+        - link "flickr (Ouvre dans un nouvel onglet)" [ref=e154] [cursor=pointer]:
+          - /url: https://www.flickr.com/photos/130707913@N08/
+          - generic [ref=e155]: flickr
+          - generic [ref=e156]: (Ouvre dans un nouvel onglet)
+          - img [ref=e157]
+        - link "vimeo (Ouvre dans un nouvel onglet)" [ref=e159] [cursor=pointer]:
+          - /url: https://vimeo.com/valleyfield
+          - generic [ref=e160]: vimeo
+          - generic [ref=e161]: (Ouvre dans un nouvel onglet)
+          - img [ref=e162]
+    - generic [ref=e165]:
+      - img [ref=e169]
+      - generic [ref=e173]:
+        - link "Espace citoyen (Ouvre dans un nouvel onglet)" [ref=e174] [cursor=pointer]:
+          - /url: https://citoyen.valleyfield.ca/accueil
+          - img [ref=e175]
+          - generic [ref=e177]: Espace citoyen
+          - generic [ref=e178]: (Ouvre dans un nouvel onglet)
+        - generic [ref=e179]:
+          - link "Conditions d'utilisation" [ref=e180] [cursor=pointer]:
+            - /url: https://www.ville.valleyfield.qc.ca/conditions-dutilisation
+          - link "Politique de confidentialité" [ref=e181] [cursor=pointer]:
+            - /url: https://www.ville.valleyfield.qc.ca/politique-de-confidentialite
+          - generic [ref=e182]: © Ville de Salaberry-de-Valleyfield
+          - link "3e joueur (Ouvre dans un nouvel onglet)" [ref=e183] [cursor=pointer]:
+            - /url: https://www.troisieme.ca
+            - img [ref=e184]
+            - generic [ref=e186]: 3e joueur
+            - generic [ref=e187]: (Ouvre dans un nouvel onglet)

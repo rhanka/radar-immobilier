@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "2db67061-ad5b-4a80-bbac-f8101e9ca415",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:default"
+  },
+  "createdAt": "2026-06-13T01:19:16.349549+00:00",
+  "body": {
+    "kind": "message",
+    "text": "DELEGATION (conducteur): on monte vers 1000+ villes. Les 522 sont faites. PREND L'AUTRE MOITIE des villes QC restantes (non dans ALL_PV_CITIES) -> CONFIG + SCRAPE + GRAPHIFY, en 4 sous-agents Sonnet 4.6. PARTITION: TOI = municipalites M-Z ; codex:radar-immobilier:167a681bc10e fait A-L. Coordonne avec codex (h2a) pour un split 50/50 DISJOINT. Meme pipeline (config -> scrape raw SCW -> graphify -> graph/<ville>/latest.json). Contraintes habituelles: 1 stack leger api-only (pas Postgres/sous-agent = anti-OOM), pas le projet radar-dev (5301 intouchable), jamais down -v la demo. La projection SCW->PG des graphes est geree de mon cote (subagent en cours). Rapporte X/[ton lot] par batch."
+  }
+}
