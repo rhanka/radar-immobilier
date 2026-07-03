@@ -21,6 +21,13 @@ export interface HealthDeps {
 export function healthRoute(deps: HealthDeps): Hono {
   const app = new Hono();
 
+  // Liveness — process-only, NO dependency probe. The k8s startupProbe and
+  // livenessProbe hit THIS (not /health): a Postgres/S3 hiccup must NOT get
+  // the pod killed (it only removes it from the LB via readiness on /health).
+  // Coupling liveness to a dependency turns a dependency blip into an app
+  // crash-loop (exit 137) — see docs/spec/reports/radar-api-memory-study-2026-07-02.md.
+  app.get("/livez", (c) => c.json({ status: "ok" }, 200));
+
   app.get("/health", async (c) => {
     const [db, objectStore] = await Promise.all([
       deps.checkDb().catch((e): ProbeResult => ({ ok: false, detail: String(e) })),

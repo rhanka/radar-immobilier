@@ -21,7 +21,11 @@ data:
   NODE_ENV: "production"
   PORT: "3000"
   # IPv4-first DNS on the IPv4-only POC egress path (mirrors sentropic 30-api).
-  NODE_OPTIONS: "--dns-result-order=ipv4first"
+  # --max-old-space-size borne le vieux-espace V8 SOUS la limite cgroup (768Mi) :
+  # sans lui, V8 se cale à ~2Go et le RSS dépasse la limite AVANT que V8 ne GC →
+  # OOMKill (exit 137). 512 laisse ~256Mi pour natif/buffers sous 768Mi et
+  # convertit l'OOMKill en pression GC gérée (étude crashloop 2026-07-02).
+  NODE_OPTIONS: "--dns-result-order=ipv4first --max-old-space-size=512"
   POSTGRES_HOST: "radar-postgres"
   POSTGRES_PORT: "5432"
   # In-cluster MinIO (25-minio.yaml). Replace with an external SCW S3 endpoint
@@ -140,13 +144,14 @@ spec:
             # out-of-band in the namespace.
             - name: SCW_TEM_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-tem-credentials, key: SCW_TEM_SECRET_KEY, optional: true } }
-          # startupProbe dédié : depuis que radar-api:latest embarque aussi le
-          # bundle immo-mcp, le boot est plus lent — la liveness tuait le pod
-          # pendant le démarrage (exit 137 en boucle, constaté en prod le
-          # 2026-07-02, diagnostic poc-k8s). La startupProbe couvre jusqu'à
-          # 30×5s = 150s de démarrage ; la liveness ne s'applique qu'après.
+          # Probes DÉCOUPLÉES des dépendances (étude crashloop 2026-07-02, C2) :
+          # startup + liveness tapent /livez (process vivant, SANS DB/S3) — un
+          # hoquet Postgres/S3 ne doit PAS tuer le pod. Seule la readiness tape
+          # /health (DB+S3) : en cas de panne dépendance, le pod sort du LB
+          # (readiness) au lieu d'être tué en boucle (liveness). La startupProbe
+          # couvre jusqu'à 30×5s = 150s de démarrage.
           startupProbe:
-            httpGet: { path: /health, port: http }
+            httpGet: { path: /livez, port: http }
             periodSeconds: 5
             timeoutSeconds: 5
             failureThreshold: 30
@@ -156,7 +161,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 6
           livenessProbe:
-            httpGet: { path: /health, port: http }
+            httpGet: { path: /livez, port: http }
             periodSeconds: 20
             timeoutSeconds: 5
             failureThreshold: 4
