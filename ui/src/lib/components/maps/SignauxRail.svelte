@@ -9,7 +9,10 @@
    *      - Toggle « Signaux précoces » (DÉFAUT OFF) — axe ANTICIPATION
    *      Les trois toggles sont COMBINABLES ; la base de comptage est
    *      l'intersection des filtres actifs.
-   *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
+   *   2. « Villes » : recherche + liste PLATE sélectionnable → flyTo.
+   *      Cliquer une ville la sélectionne (highlight + ville active) ; ses
+   *      signaux s'affichent à DROITE (SignauxSelPanel, bucket « Signaux »),
+   *      PAS inline dans le rail (accordéon signaux supprimé).
    *
    * Slot `filters` : « Filtre Zones et Lots » (LotDataFilterPanel) fourni par
    * le parent, intercalé ENTRE la section Signaux et la section Villes.
@@ -28,24 +31,16 @@
     Checkbox,
   } from "@sentropic/design-system-svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
-  import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
-  import { filterNodesBySubset } from "$lib/signals/graph-signal-filter.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
-  /** Nœuds de détail de la ville sélectionnée. */
-  export let detailNodes: GraphSignalNode[] = [];
-  /** Tous les nœuds vus (cache multi-villes pour les types connus). */
-  export let knownNodeTypes: string[] = [];
   /** Chargement de la liste principale. */
   export let loading = false;
   /** Signal data failed to load; avoid rendering a fake zero state. */
   export let dataUnavailable = false;
-  /** Chargement du détail de ville. */
-  export let detailLoading = false;
 
   /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
   export let initialSubsetKey = "z|m|p";
@@ -56,18 +51,6 @@
   /** Appelé pour actualiser les données. */
   export let onRefresh: () => void = () => {};
   export let onFilterChange: (subsetKey: string) => void = () => {};
-
-  // ── Palette 12 couleurs par type (identique graphify) ─────────────────────
-  const TYPE_PALETTE = [
-    "#4f7cac", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#14b8a6",
-    "#f97316", "#64748b", "#ec4899", "#22c55e", "#3b82f6", "#a855f7",
-  ] as const;
-
-  function typeColor(nodeType: string): string {
-    let h = 0;
-    for (let i = 0; i < nodeType.length; i++) h = (h * 31 + nodeType.charCodeAt(i)) >>> 0;
-    return TYPE_PALETTE[h % TYPE_PALETTE.length];
-  }
 
   /**
    * Mappe le compte de signaux actifs vers un tone StatusDot DS.
@@ -114,23 +97,6 @@
     multi4plus = initialSubsetKey.includes("m");
     precoceOnly = initialSubsetKey.includes("p");
   }
-
-  /** Types disponibles = union des types connus (multi-villes) + types actuels. */
-  $: allKnownTypes = Array.from(
-    new Set([...knownNodeTypes, ...detailNodes.map((n) => n.type)])
-  ).sort();
-
-  /** Compteur par type (nœuds de la ville sélectionnée — filtre secondaire). */
-  $: countByType = detailNodes.reduce(
-    (acc, n) => {
-      acc[n.type] = (acc[n.type] ?? 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
-  /** Nœuds filtrés (affichage dans le drawer gauche — même filtre que le panneau droit). */
-  $: filteredNodes = filterNodesBySubset(detailNodes, activeKey);
 
   /** Construit la clé subsetCounts à partir des 3 flags — fonction PURE. */
   function buildKey(z: boolean, m: boolean, p: boolean): string {
@@ -323,7 +289,7 @@
          dans le layout change. -->
     <slot name="filters" />
 
-    <!-- ── Section 2 : Villes (recherche + sous-accordéon) ─────────────────── -->
+    <!-- ── Section 2 : Villes (recherche + liste plate sélectionnable) ─────── -->
     <details class="rail-section-acc" open>
       <summary class="rail-section-summary">
         <span class="rail-section-chevron" aria-hidden="true">▸</span>
@@ -342,7 +308,9 @@
           />
         </div>
 
-        <!-- Liste villes avec sous-accordéon natif (<details>) -->
+        <!-- Liste PLATE de villes : cliquer sélectionne (highlight + vol carte).
+             Les signaux de la ville active vivent à DROITE (SignauxSelPanel →
+             bucket « Signaux ») — plus d'accordéon inline ici. -->
         <ul class="rail-city-list" role="list">
           {#if sortedEntries.length === 0 && !loading}
             <li class="rail-empty">
@@ -357,87 +325,27 @@
               {@const isSelected = selectedSlug === entry.municipality.slug}
               {@const activeCount = countFor(entry, activeKey)}
               <li>
-                <!-- Sous-accordéon natif <details> (pattern ws-acc — Vague 2/3) -->
-                <details
-                  class="ws-acc ws-acc--compact"
-                  open={isSelected}
+                <button
+                  type="button"
+                  class="rail-city-row"
+                  class:rail-city-row--active={isSelected}
+                  aria-pressed={isSelected}
+                  on:click={() => onSelectCity(entry)}
                 >
-                  <summary
-                    class="ws-acc-summary"
-                    class:ws-acc-summary--active={isSelected}
-                    on:click|preventDefault={() => onSelectCity(entry)}
-                  >
-                    <span class={`rail-status-dot rail-status-dot--${signalTone(activeCount)}`} aria-hidden="true"></span>
-                    <span class="rail-row-label">
-                      {entry.municipality.name}
-                      {#if entry.municipality.mrc}
-                        <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
-                      {/if}
-                    </span>
-                    <!-- Badge DS tonal sans override — remplace rail-row-count -->
-                    {#if activeCount > 0}
-                      <Badge tone="warning" aria-label="{activeCount} signaux">{activeCount}</Badge>
-                    {:else}
-                      <Badge tone="neutral">0</Badge>
+                  <span class={`rail-status-dot rail-status-dot--${signalTone(activeCount)}`} aria-hidden="true"></span>
+                  <span class="rail-row-label">
+                    {entry.municipality.name}
+                    {#if entry.municipality.mrc}
+                      <span class="rail-row-sublabel">{entry.municipality.mrc}</span>
                     {/if}
-                  </summary>
-
-                  <!-- Contenu sous-accordéon : signaux filtrés de la ville -->
-                  {#if isSelected}
-                    <div class="ws-acc-body">
-                      {#if detailLoading}
-                        <div class="rail-loading-row">
-                          <!-- SVG spinner inline — zéro lucide -->
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="spin"
-                            aria-hidden="true"
-                          >
-                            <polyline points="23 4 23 10 17 10"></polyline>
-                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                          </svg>
-                          Chargement…
-                        </div>
-                      {:else if filteredNodes.length === 0 && detailNodes.length === 0}
-                        <p class="rail-detail-empty">Aucun signal indexé pour cette ville.</p>
-                      {:else if filteredNodes.length === 0}
-                        <p class="rail-detail-empty">Tous les types sont masqués.</p>
-                      {:else}
-                        <ul class="space-y-1" role="list">
-                          {#each filteredNodes.slice(0, 10) as node (node.id)}
-                            <li class="signal-item">
-                              <!--
-                                Pastille type-couleur : typeColor() retourne une couleur de palette
-                                12 couleurs, non mappable proprement sur les tones DS.
-                              -->
-                              <span
-                                class="rail-type-dot"
-                                style={`--type-color: ${typeColor(node.type)}`}
-                                aria-hidden="true"
-                              ></span>
-                              <span class="min-w-0">
-                                <span class="signal-label">{node.label}</span>
-                                <span class="signal-type">{node.type}</span>
-                              </span>
-                            </li>
-                          {/each}
-                          {#if filteredNodes.length > 10}
-                            <li class="rail-detail-empty rail-detail-more">
-                              +{filteredNodes.length - 10} autres…
-                            </li>
-                          {/if}
-                        </ul>
-                      {/if}
-                    </div>
+                  </span>
+                  <!-- Badge DS tonal sans override — compteur de signaux de la ville -->
+                  {#if activeCount > 0}
+                    <Badge tone="warning" aria-label="{activeCount} signaux">{activeCount}</Badge>
+                  {:else}
+                    <Badge tone="neutral">0</Badge>
                   {/if}
-                </details>
+                </button>
               </li>
             {/each}
           {/if}
@@ -503,8 +411,7 @@
     background: var(--st-semantic-border-subtle, #e2e8f0);
   }
 
-  .rail-status-dot,
-  .rail-type-dot {
+  .rail-status-dot {
     display: inline-block;
     width: 0.625rem;
     height: 0.625rem;
@@ -524,10 +431,6 @@
     background: var(--st-semantic-error, #ef4444);
   }
 
-  .rail-type-dot {
-    background: var(--type-color);
-  }
-
   /* ── Compteur global ── */
   .rail-global-count {
     padding: 0 1rem 0.5rem;
@@ -544,7 +447,7 @@
     color: var(--st-semantic-text-primary);
   }
 
-  /* ── Spin animation (refresh + detail loading) ── */
+  /* ── Spin animation (bouton refresh) ── */
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
@@ -654,95 +557,27 @@
     color: var(--st-semantic-text-muted);
   }
 
-  /* ── Loading inline (detail) ── */
-  .rail-loading-row {
+  /* ── Ligne ville PLATE (liste sélectionnable, plus d'accordéon) ── */
+  .rail-city-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 0;
-    font-size: var(--signaux-fs-small);
-    color: var(--st-semantic-text-muted);
-  }
-
-  /* ── Accordéon natif ws-acc (sous-accordéon villes — Vague 2/3) ── */
-  :global(.ws-acc > summary) {
-    list-style: none;
-    cursor: pointer;
-  }
-
-  :global(.ws-acc > summary::-webkit-details-marker) {
-    display: none;
-  }
-
-  .ws-acc-summary {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    width: 100%;
     padding: 0.45rem 1rem;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    font: inherit;
     cursor: pointer;
     user-select: none;
     transition: background 0.1s;
   }
 
-  .ws-acc-summary:hover {
+  .rail-city-row:hover {
     background: var(--st-semantic-surface-subtle);
   }
 
-  .ws-acc-summary--active {
+  .rail-city-row--active {
     background: var(--st-semantic-surface-selected, var(--st-semantic-surface-subtle));
-  }
-
-  /* Chevron via ::before */
-  .ws-acc-summary::before {
-    content: "▸";
-    font-size: var(--signaux-fs-caption);
-    color: var(--st-semantic-text-muted);
-    transition: transform 0.12s ease;
-    flex-shrink: 0;
-  }
-
-  details[open] > .ws-acc-summary::before {
-    transform: rotate(90deg);
-  }
-
-  .ws-acc-body {
-    padding: 0.3rem 1rem 0.5rem 1.75rem;
-  }
-
-  /* ── Signal item dans le sous-accordéon ── */
-  .signal-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.4rem;
-    padding: 0.25rem 0;
-  }
-
-  .signal-label {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: var(--signaux-fs-small);
-    font-weight: 500;
-    color: var(--st-semantic-text-primary);
-    line-height: 1.35;
-  }
-
-  .signal-type {
-    display: block;
-    font-size: var(--signaux-fs-small);
-    color: var(--st-semantic-text-muted);
-    font-family: var(--st-font-mono, ui-monospace, monospace);
-  }
-
-  .rail-detail-empty {
-    font-size: var(--signaux-fs-small);
-    color: var(--st-semantic-text-muted);
-    font-style: italic;
-    padding: 0.25rem 0;
-  }
-
-  .rail-detail-more {
-    padding-left: 1rem;
   }
 </style>
