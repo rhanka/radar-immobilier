@@ -541,6 +541,7 @@ describe("protect middleware", () => {
   ): Hono {
     const app = new Hono();
     app.use("*", protect(auth, db ? { db } : {}));
+    app.get("/livez", (c) => c.json({ status: "ok" }));
     app.get("/health", (c) => c.json({ status: "ok" }));
     app.get("/api/protected", (c) => c.json({ secret: true }));
     app.get("/api/geo/collections/:id/items", (c) => c.json({ type: "FeatureCollection" }));
@@ -558,6 +559,12 @@ describe("protect middleware", () => {
   it("lets /health through even when auth is enabled", async () => {
     const app = appWith(AUTH_ON);
     const res = await app.request("/health");
+    expect(res.status).toBe(200);
+  });
+
+  it("lets /livez through even when auth is enabled (k8s liveness must not 401)", async () => {
+    const app = appWith(AUTH_ON);
+    const res = await app.request("/livez");
     expect(res.status).toBe(200);
   });
 
