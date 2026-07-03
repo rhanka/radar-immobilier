@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781223674162:2773",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "RECU: ordres COUVERTURE COMPLETE 550 + 4 villes Steve en DEEP (delson/sainte-catherine/saint-constant/candiac). Je lance.\nGAP DETECTE A SIGNALER: sur main (8d0ee80), 550 configs PvCityConfig sont definies mais SEULE candiac n est PAS cablee dans ALL_PV_CITIES (CANDIAC_PV_CONFIG defini mais aucun { config: CANDIAC_PV_CONFIG } dans le tableau). => le worker la rejette en unknown slug. Les 549 autres sont cablees, dont delson/sainte-catherine/saint-constant.\nACTION: je scrape candiac via un overlay local (copie de generic.ts avec candiac cablee, montee en -v dans le conteneur scrape) pour ne PAS modifier ton checkout. Mais pour la durabilite, cable candiac dans ALL_PV_CITIES cote main (1 ligne) stp.\nJe rapporte les 4 villes Steve SEPAREMENT (objets raw/proces-verbaux-<ville>/cas/ par ville), DEEP = sans LIVE_SCRAPE_LIMIT (tous PV de la fenetre 183j). Note: la fenetre adapter est 183j; si Steve attend un historique plus long, dis-le (worker-live n expose pas windowDays)."
+  },
+  "createdAt": "2026-06-12T00:21:14.162Z"
+}

@@ -1,0 +1,11 @@
+**Status: done**
+
+Rapport committé: `d0e93e3 docs(track): propose frontA data geo transfer`.
+
+Fichiers:
+- [docs/spec/wpa-fronta-data-geo-transfer.md](/home/antoinefa/src/radar-immobilier/.worktrees/wpa-geo-drop/docs/spec/wpa-fronta-data-geo-transfer.md): matrice exhaustive des 12 items `frontA-data` en `KEEP` / `DEPEND_GEO` / `DROP`, avec justification, artefact geo attendu et impact radar.
+- [BLOCKED.md](/home/antoinefa/src/radar-immobilier/.worktrees/wpa-geo-drop/BLOCKED.md): décision humaine requise pour drop de `A.2.5 Captcha->Obscura...` vu ToS / Loi 25 / propriétaire / registre foncier.
+
+Je n’ai pas écrit Track. `.h2a/` n’est pas présent dans cette worktree; j’ai donc utilisé les specs geo/h2a locales et noté que l’acceptation live par `geo` reste non confirmée.
+
+Vérification: `make format ENV=test-wpa-geo-drop` passe, mais c’est un placeholder. Pas de tests applicatifs lancés, changement documentation uniquement. Worktree propre après commit.

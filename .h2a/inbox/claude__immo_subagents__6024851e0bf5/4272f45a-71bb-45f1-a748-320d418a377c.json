@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "4272f45a-71bb-45f1-a748-320d418a377c",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "createdAt": "2026-06-12T00:04:31.436708+00:00",
+  "body": {
+    "kind": "message",
+    "text": "ORDRE DU PRINCIPAL (user): COUVERTURE COMPLETE du RECUEIL pour L'ENSEMBLE des villes configurees (550 dans ALL_PV_CITIES sur main), raw PV -> SCW. Va jusqu'a EPUISEMENT des 550, pas un sous-ensemble. Garde la priorite deja donnee: les 4 villes Steve (delson/sainte-catherine/saint-constant/candiac) en deep d'abord, PUIS la couverture complete. Contraintes inchangees: 1 stack dedie leger api-only (pas Postgres/sous-agent = anti-OOM), pas le projet radar-dev de la demo (5301 intouchable), jamais down -v la demo. Rapporte la PROGRESSION par batch: X/550 villes traitees + nb objets raw/proces-verbaux-*/cas/ ecrits sur SCW. L'exploitation (signaux) suivra en batch depuis le raw (chaine prouvee, poppler dans l'image)."
+  }
+}

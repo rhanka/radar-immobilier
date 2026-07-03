@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "community:3",
+  "target_kind": "community",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Community 3 consists of two members: Dérogation mineure and Marge d'implantation. Dérogation mineure has a degree of 3, indicating a higher level of interaction or connection within the community. Marge d'implantation has a degree of 1, suggesting a more limited role or fewer connections. The community is documented in the walkthrough transcript.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "453ec463a62dc5cbb40a3e46c5dc1fb272100501525b4906272ea44ea287c453",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

@@ -1,0 +1,273 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - heading [level=6] [ref=e7]:
+      - generic [ref=e8]:
+        - strong
+    - 'heading "Adresse : 69, rue de la Grande-Coulée Lejeune (Québec) G0L 1S0" [level=6] [ref=e9]':
+      - strong [ref=e11]
+      - strong [ref=e13]: "Adresse : 69, rue de la Grande-Coulée Lejeune (Québec) G0L 1S0"
+    - heading [level=6] [ref=e14]
+    - heading "Heure d'ouverture" [level=6] [ref=e15]:
+      - strong [ref=e17]:
+        - generic [ref=e18]: Heure d'ouverture
+    - heading "Lundi au Jeudi" [level=6] [ref=e19]:
+      - strong [ref=e22]: Lundi au Jeudi
+    - heading "8h à 12h 13h à 16h" [level=6] [ref=e23]:
+      - strong [ref=e26]: 8h à 12h 13h à 16h
+    - heading "Vendredi" [level=6] [ref=e27]:
+      - strong [ref=e30]: Vendredi
+    - heading "8h à 12h" [level=6] [ref=e31]:
+      - strong [ref=e34]: 8h à 12h
+    - 'heading "Tél: 418-855-2428 poste 3" [level=6] [ref=e35]':
+      - strong [ref=e38]: "Tél: 418-855-2428 poste 3"
+    - 'heading "Fax: 418-855-2428" [level=6] [ref=e39]':
+      - strong [ref=e42]: "Fax: 418-855-2428"
+    - paragraph [ref=e43]:
+      - generic [ref=e45]:
+        - strong [ref=e46]
+        - text: "Courriel :"
+        - strong [ref=e47]: info@municipalitelejeune.ca
+    - paragraph [ref=e48]
+    - paragraph [ref=e49]
+  - generic [ref=e50]:
+    - link "2026" [ref=e52] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Janvier" [ref=e54] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202026-01-12.pdf
+    - link "Février" [ref=e56] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202026-02-02.pdf
+    - link "Mars" [ref=e58] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202026-03-02.pdf
+    - link "Avril" [ref=e60] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202026-04-07.pdf
+    - link "Mai" [ref=e62] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202026-05-04.pdf
+    - link "Juin" [ref=e64] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Juillet" [ref=e66] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Août" [ref=e68] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Septembre" [ref=e70] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Octobre" [ref=e72] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Novembre" [ref=e74] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Décembre" [ref=e76] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "État financier" [ref=e78] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Spécial Budget 2027" [ref=e80] [cursor=pointer]:
+      - /url: javascript:void(0)
+  - generic [ref=e81]:
+    - link "2025" [ref=e83] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Janvier" [ref=e85] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-01-14.pdf
+    - link "Février" [ref=e87] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-02-03.pdf
+    - link "Mars" [ref=e89] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-03-03.pdf
+    - link "Avril" [ref=e91] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-04-07.pdf
+    - link "Mai" [ref=e93] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-05-05.pdf
+    - link "Juin" [ref=e95] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-06-02.pdf
+    - link "Juillet" [ref=e97] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-07-07.pdf
+    - link "Août" [ref=e99] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-08-11.pdf
+    - link "Septembre" [ref=e101] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-09-02.pdf
+    - link "Octobre" [ref=e103] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-10-02.pdf
+    - link "Novembre" [ref=e105] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-11-10.pdf
+    - link "Décembre" [ref=e107] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-12-01.pdf
+    - link "État financier" [ref=e109] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202025-05-27%20spéciale%20états%20financiers%202024.pdf
+    - link "Spécial Budget 2026" [ref=e111] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/PV%20SPÉCIAL_Budget_2026%20_15%20déc2025.pdf
+  - generic [ref=e112]:
+    - link "2024" [ref=e114] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Janvier" [ref=e116] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-01-09.pdf
+    - link "Février" [ref=e118] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-02-05.pdf
+    - link "Mars" [ref=e120] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-03-04.pdf
+    - link "Avril" [ref=e122] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-04-02.pdf
+    - link "Mai" [ref=e124] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-05-06.pdf
+    - link "Juin" [ref=e126] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-06-03.pdf
+    - link "Juillet" [ref=e128] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-07-02.pdf
+    - link "Août" [ref=e130] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-08-05.pdf
+    - link "Septembre" [ref=e132] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-09-03.pdf
+    - link "Octobre" [ref=e134] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-10-07.pdf
+    - link "Novembre" [ref=e136] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-11-04.pdf
+    - link "Décembre" [ref=e138] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-12-02.pdf
+    - link "État financier" [ref=e140] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202024-0%20sp%C3%A9ciale%20%C3%A9tats%20financiers%202023.pdf
+    - link "Spécial Budget 2025" [ref=e142] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/PV%20SPÉCIAL_Budget_2025%20_16%20déc2024.pdf
+  - generic [ref=e143]:
+    - link "2023" [ref=e145] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Janvier" [ref=e147] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-01-09.pdf
+    - link "Février" [ref=e149] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-02-06.pdf
+    - link "Mars" [ref=e151] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-03-06.pdf
+    - link "Avril" [ref=e153] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-04-03.pdf
+    - link "Mai" [ref=e155] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-05-01.pdf
+    - link "Juin" [ref=e157] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-06-05.pdf
+    - link "Juillet" [ref=e159] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-07-04.pdf
+    - link "Août" [ref=e161] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-08-07.pdf
+    - link "Septembre" [ref=e163] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-09-05.pdf
+    - link "Octobre" [ref=e165] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202023-10-02.pdf
+    - link "Novembre" [ref=e167] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202023-11-06.pdf
+    - link "Décembre" [ref=e169] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202023-12-04.pdf
+    - link "État financier" [ref=e171] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202023-05-23%20sp%C3%A9ciale%20%C3%A9tats%20financiers%202022.pdf
+    - link "Spécial Budget 2024" [ref=e173] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/PV%20SP%C3%89CIAL_Budget_2024%20_18%20d%C3%A9c2023.pdf
+  - generic [ref=e174]:
+    - link "Janvier" [ref=e176] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2022-01-10.pdf
+    - link "Février" [ref=e178] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2022-02-07.pdf
+    - link "Mars" [ref=e180] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2022-03-07.pdf
+    - link "Audio" [ref=e182] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2022_01_10_20_02_41.mp3
+    - link "Avril" [ref=e184] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2022-04-04.pdf
+    - link "Audio" [ref=e186] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Conseille%207%20fe%CC%81vrier.m4a
+    - link "Mai" [ref=e188] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2022-05-02.pdf
+    - link "Juin" [ref=e190] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-06-06%202022.pdf
+    - link "Juillet" [ref=e192] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-07-04%202022.pdf
+    - link "Août" [ref=e194] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-08-08.pdf
+    - link "Septembre" [ref=e196] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-09-06.pdf
+    - link "Octobre" [ref=e198] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-10-03.pdf
+    - link "Novembre" [ref=e200] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-11-07.pdf
+    - link "Décembre" [ref=e202] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-12-05.pdf
+    - link "État financier" [ref=e204] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc-verb.%202022-05-04%20sp%C3%A9ciale%20%C3%A9tats%20financiers%202021.pdf
+    - link "Spécial Budget 2023" [ref=e206] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/PV%20SP%C3%89CIAL_Budget_2023%20_15%20d%C3%A9c2022.pdf
+    - link "2022" [ref=e208] [cursor=pointer]:
+      - /url: javascript:void(0)
+  - generic [ref=e209]:
+    - link "2021" [ref=e211] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Janvier" [ref=e213] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-01-11.pdf
+    - link "Audio" [ref=e215] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/2021_01_12_19_03_11.mp3
+    - link "Février" [ref=e217] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-02-01.pdf
+    - link "Audio" [ref=e219] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/2021_02_01_19_43_44.mp3
+    - link "Mars" [ref=e221] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc%C3%A8s%20Verb-2021-03-01.pdf
+    - link "Audio" [ref=e223] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/2021_03_01_19_46_35.mp3
+    - link "Avril" [ref=e225] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-04-06.pdf
+    - link "Audio" [ref=e227] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/2021_04_06_20_02_16.mp3
+    - link "Mai" [ref=e229] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-05-03.pdf
+    - link "Audio" [ref=e231] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021_05_03_20_02_00.mp3
+    - link "Juin" [ref=e233] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proc%C3%A8s%20Verb-2021-06-07.pdf
+    - link "Audio" [ref=e235] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/2021_06_07_20_06_54.mp3
+    - link "Juillet" [ref=e237] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-07-05.pdf
+    - link "Août" [ref=e239] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2021-08-09.pdf
+    - link "Septembre" [ref=e241] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2021-09-07.pdf
+    - link "Octobre" [ref=e243] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-10-04.pdf
+    - link "Novembre" [ref=e245] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/Proc%C3%A8s%20Verb-2021-11-01.pdf
+    - link "Décembre" [ref=e247] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/Proc%C3%A8s%20Verb-2021-12-06.pdf
+    - link "État financier" [ref=e249] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/Proc-verb.%202021-03-22%20sp%C3%A9ciale%20%C3%A9tats%20financiers%202020.pdf
+    - link "Audio" [ref=e251] [cursor=pointer]:
+      - /url: https://municipalitelejeune.com/2021%20Proces-verbaux/2021_03_22_19_45_37.mp3
+    - link "Spécial Budget 2022" [ref=e253] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/PV%20SP%C3%89CIAL_Budget_2022%20_20%20d%C3%A9c2021.pdf
+    - link "Audio" [ref=e255] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/2021_12_20_19_06_06.mp3
+    - link "Règlement Taxation 2022" [ref=e257] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/PV%20SP%C3%89CIAL_Adoption%20r%C3%A8glement%20%23238%20Taxation%202022%20.pdf
+    - link "Audio" [ref=e259] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2021%20Proces-verbaux/2021_12_20_19_28_11.mp3
+  - generic [ref=e260]:
+    - link "2020" [ref=e262] [cursor=pointer]:
+      - /url: javascript:void(0)
+    - link "Janvier" [ref=e264] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-01-13.pdf
+    - link "Février" [ref=e266] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-02-03.pdf
+    - link "Mars" [ref=e268] [cursor=pointer]:
+      - /url: http://
+    - link "Avril" [ref=e270] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-04-06.pdf
+    - link "Mai" [ref=e272] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-05-04.pdf
+    - link "Juin" [ref=e274] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-06-01.pdf
+    - link "Décembre" [ref=e276] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proc%C3%A8s%20Verb-2020-12-07.pdf
+    - link "Novembre" [ref=e278] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proc%C3%A8s%20Verb-2020-11-02.pdf
+    - link "Octobre" [ref=e280] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proc%C3%A8s%20Verb-2020-10-05.pdf
+    - link "Septembre" [ref=e282] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-09-08.pdf
+    - link "Août" [ref=e284] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-08-17-.pdf
+    - link "Juillet" [ref=e286] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proces-Verb-2020-07-06.pdf
+    - link "État financier" [ref=e288] [cursor=pointer]:
+      - /url: http://http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/Proc-verb.%202020-03-11%20sp%C3%A9ciale%20%C3%A9tats%20financiers%202019.pdf
+    - link "Spécial Budget 2021" [ref=e290] [cursor=pointer]:
+      - /url: http://municipalitelejeune.com/2020%20Proc%C3%A8s-verbaux%20/PV%20SP%C3%89CIAL_Budget_2021%20_17%20d%C3%A9c2020.pdf
+  - paragraph [ref=e293]: © Municipalité de Lejeune 2026

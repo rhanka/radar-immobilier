@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781382013083:4225",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 327/575 (57%) confirmees SCW. Re-graphify 274 + nouvelles 53 (lots 12-14). L14: 24/24 v2.0, 10 contenu reel (~42%). Findings adaptateur (a transmettre dev conducteur pour rattrapage): (1) un PDF 404 dans l index plante TOUT le recueil generique (fragiliser->skip 404) ; (2) certains sites exigent User-Agent Chrome+Referer (403 sinon) ; (3) pattern ancre /include/fichier.php?id= non reconnu par looksLikeDocumentHref ; (4) TLS auto-signe -> NODE_TLS_REJECT_UNAUTHORIZED=0 ; (5) gros gisement: portails SPA vplus -> PV sur vplus-documents.s3.ca-central-1.amazonaws.com/<slug>/ (enumeration S3 = rattrapage SANS Playwright) ; (6) scan-no-ocr frequent -> OCR tesseract-fr. J enchaine lot 15 (cursor 327->351). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T20:20:13.083Z"
+}

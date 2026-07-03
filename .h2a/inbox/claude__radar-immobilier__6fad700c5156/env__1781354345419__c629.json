@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781354345419:c629",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 164/575 confirmees SCW (lots L1-L7 complets, toutes ontology_version 2.0). 29% du perimetre. Regime stable 4 agents Sonnet/lot de 24, verif post-upload systematique. Signaux notables L7: Saint-Donat PPCMOI Le Remi 54 logements abordables, Windsor PPCMOI 24 logements refuse, Stanstead usages conditionnels gravieres, forte activite CPTAQ rurale (Saint-Wenceslas autoroute 55). Reste 86 villes re-graphify (jusqu index 274) puis 301 nouvelles. J enchaine lot 8 (cursor 164->188). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T12:39:05.419Z"
+}

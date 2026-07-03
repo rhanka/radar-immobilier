@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "00ad5eca-97f6-4fbd-a12e-d026ad3ddadb",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "createdAt": "2026-06-11T20:58:17.996367+00:00",
+  "body": {
+    "kind": "message",
+    "text": "PRIORITE PARITE (ordre du principal): front-load EN PREMIER et EN PROFONDEUR le RECUEIL des 4 villes de Steve -> delson, sainte-catherine, saint-constant, candiac (Roussillon/CMM). Profondeur = TOUS leurs PV (pas seulement l'index), raw vers SCW. Ce sont nos POINTS DE CONTROLE de parite vs la donnee de reference Steve (table de controle en cours de spec). Rapporte le batch de ces 4 villes SEPAREMENT (nb objets raw/proces-verbaux-<ville>/cas/ par ville sur SCW). Puis poursuis le reste des 512. Contraintes inchangees: 1 stack dedie leger api-only, pas de Postgres/sous-agent (anti-OOM), jamais down -v la demo 5301."
+  }
+}

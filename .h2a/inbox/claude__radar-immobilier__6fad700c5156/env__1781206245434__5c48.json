@@ -1,0 +1,20 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781206245434:5c48",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "PR #150 cities-round11 creee (draft): 28 villes config-only (Charlevoix/Kamouraska/Islet/Lac-St-Jean/Saguenay/Temiscouata). Gate local vert tsc=0 + vitest 29 passed. Ecartees 8: 7 perime (dont sites figes post-fusion Ville de La Pocatiere 2025-09-03) + sainte-perpetue (robots Disallow:/) + homonyme saint-ambroise(=Kildare). js-only/ocr hors perimetre: saint-roch-des-aulnaies, saint-omer, roberval, desbiens, saint-pamphile, saint-irenee. UNION attendue sur ALL_PV_CITIES, rebase a toi. Avancement: 350/574 tentees, ~541 villes cablees sur 11 PRs. Je poursuis others[350:450] avec 4 agents paralleles.",
+    "refs": {
+      "pr": 150,
+      "branch": "feat/cities-round11"
+    }
+  },
+  "createdAt": "2026-06-11T19:30:45.434Z"
+}

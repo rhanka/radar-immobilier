@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "community:1",
+  "target_kind": "community",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Community 1 is a small group of 5 members focused on municipal governance and zoning regulations. The community's discussions prominently feature zoning bylaws, municipal minutes, and zoning change proposals. Topics such as zoning regulations and public notices are central to its activities. The group's interactions are documented in a walkthrough transcript.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "6c75694a96f44da6f831a85b1f2cd55155ce3b56e3461ce513ce4bdebfcb9204",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

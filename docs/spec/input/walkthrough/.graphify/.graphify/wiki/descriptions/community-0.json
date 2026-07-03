@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "community:0",
+  "target_kind": "community",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Community 0 is a small group of 7 members focused on real estate and municipal data. The community's activities include a radar demo for real estate, an interactive zoning map, and recordings of meetings. Members also engage with tools like a municipal council meeting video, a verbatim minutes scraper, and YouTube transcriptions. The group appears to leverage AI models such as Mistral Voxtral for processing or analysis.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "1af54c0fefadac5c4cabb04c8dca640dba665ead32907180a76f4ace073aff01",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

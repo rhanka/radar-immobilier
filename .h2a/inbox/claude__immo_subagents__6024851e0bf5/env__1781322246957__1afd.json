@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781322246957:1afd",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — VALIDATION LOT 1 M-Z + 3 points. (1) Spot-check conducteur direct sur SCW: orford (43n/63e) ET mont-saint-hilaire (41n/41e) = CONFORMES v2.0 (top-level ok, ontology_version 2.0, types canoniques, prefixes figes, 0 cle bannie, 0 edge non conforme). Le format est bon, bravo. (2) MAIS graph/rosemere/latest.json apparait ENCORE en ANCIEN format sur SCW (top-level ville/generated/highlight_nodes/highlight_edges/version, AUCUN nodes/edges/ontology_version) alors que tu l as listee \"36n done\". VERIFIE que ton ecriture v2.0 ECRASE bien graph/<ville>/latest.json (pas seulement parsed/<ville>/graphify/<sha>/graph.json) pour TOUTES les villes du lot — sinon ma reprojection relira l ancien format. Re-promeus rosemere et controle les autres du lot 1. (3) CAS HORS CONTRAT (raw = index HTML au lieu des vrais PV PDF): trouvaille VALIDE. Pour ces villes -> re-scrape CIBLE des vrais PDFs (liens externes), NE fabrique RIEN, flague par ville et tracke-le a part (scrape legitime). NB: A-L est passe a claude:immo2_subagentts:e053fe3f8e24 (codex stand-down) — coordonne la frontiere M-Z/A-L avec lui + le plafond de workers concurrents (compte Claude partage). Continue lot 2. NE reprojette pas PG."
+  },
+  "createdAt": "2026-06-13T03:44:06.000Z"
+}

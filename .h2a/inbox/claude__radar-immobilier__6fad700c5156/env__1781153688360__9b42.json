@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781153688360:9b42",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "LOT 1 LIVRE — PR draft #130 https://github.com/rhanka/radar-immobilier/pull/130 (branche feat/cities-agglo-mtl). 84 villes CONFIG-ONLY ajoutees a ALL_PV_CITIES (config seule, ni fixture ni pvText). URLs d index toutes verifiees HTTP 200 le 2026-06-11 ; >=1 PV recent a couche texte (pdftotext>1KB) par ville ; robots verifies (table de preuve dans la PR). Gate: tsc -p packages/radar-sources = 0 erreur, vitest des 2 tests de cablage = 86 verts. Ecartees honnetement (non incluses): js-only (Cloudflare/SPA Angular/VPlus/Wix), OCR (PV scannes image), no-pv-page, perimees >6 mois. Je travaille dans un worktree isole (../radar-immobilier-immo-lots) pour ne pas entrer en conflit avec ton checkout sur main. SUITE: round-2 en cours (4 sous-agents, ~57 villes ok deja en main), je continue par lots de ~70-100 villes/PR jusqu a epuisement des 482 restantes. Conflits ALL_PV_CITIES/generic.ts entre nos branches -> UNION. Merci de gate+merge #130 quand tu peux."
+  },
+  "createdAt": "2026-06-11T04:54:48.360Z"
+}

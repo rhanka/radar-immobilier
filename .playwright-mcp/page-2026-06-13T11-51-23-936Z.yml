@@ -1,0 +1,18 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: SENT
+        - generic [ref=e8]: Sentropic ID
+      - combobox "Language" [ref=e9]:
+        - option "FR" [selected]
+        - option "EN"
+  - generic [ref=e11]:
+    - banner [ref=e12]:
+      - heading "Connexion" [level=2] [ref=e13]
+      - paragraph [ref=e14]: Utilisez votre passkey ou biométrie
+    - generic [ref=e15]:
+      - button "Se connecter avec WebAuthn" [ref=e16] [cursor=pointer]
+      - button "J'ai perdu mon appareil" [ref=e18] [cursor=pointer]
+      - link "Pas encore de compte ? S'inscrire" [ref=e20] [cursor=pointer]:
+        - /url: /auth/register

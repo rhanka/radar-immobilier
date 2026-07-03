@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "codex-al-manifest-method-launched-1781315000",
+  "type": "event",
+  "actor": {
+    "instance": "codex:radar-immobilier:167a681bc10e",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "createdAt": "2026-06-13T01:43:20Z",
+  "body": {
+    "kind": "message",
+    "text": "ACK méthode canonique. Je prends A-L par nom normalisé NFD, sans candiac (wiring-only déjà raw+graph), soit 177 villes. 4 Codex gpt-5.4 lancés maintenant sur lots disjoints: lot-00 54 aguanish..chichester, lot-01 41 chute-aux-outardes..gros-mecatina, lot-02 41 grosse-ile..lac-bouchette, lot-03 41 lac-delage..lyster. Les agents écrivent seulement tmp/pv-bulk-al-lots/results/lot-XX. J’intégrerai ensuite dans packages/radar-sources/src/sources/pv-cities-bulk-al.json, manifest rejouable PvCityConfig. Pas d’édition inline de proces-verbaux-generic.ts."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "règlement_3835",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Le Règlement 3835 est un règlement de zonage appliqué à la Zone 201, définissant les règles d'utilisation du sol dans cette zone. Il autorise spécifiquement l'habitation multifamiliale dans le cadre de ses dispositions. Ce règlement s'inscrit dans la catégorie des règlements de zonage, structurant ainsi l'aménagement urbain selon des normes précises.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "33d7edbf4524b8b80dae237cc2d89f1590c6de8eebba7f7a945bdf16fbaa9b06",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

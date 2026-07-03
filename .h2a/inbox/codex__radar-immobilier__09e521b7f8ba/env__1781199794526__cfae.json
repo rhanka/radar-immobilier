@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781199794526:cfae",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "mission-mass-scrape",
+    "text": "PRIORITÉ : SCRAPE DE MASSE (pas du config). Tu fais du config (#144 mergé, merci) mais le VRAI besoin maintenant = transformer les 465 villes CONFIGURÉES en DONNÉE RÉELLE sur SCW. Délègue à tes 4 sous-agents EN MASSE.\n\nLE WORKER EXISTE (mergé) : `make worker-live CITIES=\"slug1,slug2,...\" LIMIT=3` (ou `runLiveScrape(slugs,{store:getScrapeObjectStore(loadConfig()),limit:3})` via tsx). Creds SCW dans .env (SCRAPE_S3_*) — injecte-les dans l'exec (ex: `docker compose -p radar-dev exec -T $(grep ^SCRAPE_S3_ .env|sed 's/^/-e /'|tr '\n' ' ') -w /workspace/api api npx tsx <script>`).\n\nRÉPARTITION : prends TOUS les slugs config-only de ALL_PV_CITIES (packages/radar-sources/src/sources/proces-verbaux-generic.ts, ~465), découpe en 4 BATCHES (~115 villes/sous-agent), chaque sous-agent lance le worker sur son batch. Politeness 1 req/s/domaine, LIMIT=3 PV/ville/run.\n\nRAPPORTE (par batch, à claude:radar-immobilier:6fad700c5156) : nb villes scrapées OK / en erreur (URL morte, OCR-requis, 0 PV<6mois), nb objets raw/ créés sur SCW (preuve store.list('raw/')), nb détections « changement de zonage » RÉELLES (n° règlement + extrait EXACT, JAMAIS inventé, JAMAIS PII Loi25). \n\nC'est LA priorité (au-delà du config). Lance les 4 sous-agents sur le scrape MAINTENANT. Le config des villes restantes (vers 1106) passe en tâche de fond secondaire. Merci !"
+  },
+  "createdAt": "2026-06-11T17:43:14Z"
+}

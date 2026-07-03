@@ -1,0 +1,19 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781125868445:cf72",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:934377007e2e",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "work-order",
+    "text": "WORK ORDER — radar-immobilier « grand filet » : scrape 500 villes du Québec.\n\nOBJECTIF: ingérer les 500 villes listées dans .h2a/immo-cities-batch-500.json (les plus proches de Montréal non encore couvertes) dans le pipeline DATA-DRIVEN de radar-immobilier. Priorité distance à MTL (déjà triées).\n\nMÉTHODE PAR VILLE (ANTI-INVENTION STRICT, JAMAIS faux positif, JAMAIS PII Loi 25):\n1. Trouver le VRAI site municipal, URL de la page « procès-verbaux du conseil » et/ou « avis publics » (séances ≤6 mois). Vérifier HTTP 200, robots.txt OK, et que le PDF/HTML a une COUCHE TEXTE (pdftotext > ~1KB). Si scanné image -> noter OCR-requis et passer.\n2. Capturer une fixture RÉELLE: `packages/radar-sources/src/sources/proces-verbaux-<slug>.fixture.ts` (index HTML réel + ≥1 PV texte réel via pdftotext).\n3. Câblage data-driven: ajouter `<VILLE>_PV_CONFIG: PvCityConfig` dans `proces-verbaux-generic.ts`, UNE entrée dans `ALL_PV_CITIES` `{config,pvText,sourceUrl}` (à la fin, commentaire région), exports dans `index.ts`. -> auto-câblé api (adapter-registry + pv-seed).\n4. Tester `detectZonageChange(pvText)` sur le contenu RÉEL: rapporter par ville détection (règlement+zone) ou 0 honnête. Si changementZonage=true douteux -> vérifier le vrai contexte (jamais de faux positif). Le parser gère: numéro/no/n°, préfixes Z-/U-/V-/URB-, entier sans tiret en contexte zonage strict, fenêtre élargie.\n\nORGANISATION: traiter par LOTS de 4 SOUS-AGENTS en parallèle (chaque sous-agent prend une tranche de ~10-20 villes). PÉRIMÈTRE STRICT: packages/radar-sources/src/sources/ UNIQUEMENT. NE PAS toucher api/, ui/, ni proces-verbaux-parser.ts (l'orchestrateur principal y gère les améliorations de parsing).\n\nLIVRAISON: par lot, créer une branche `feat/cities-<region-ou-lot>` + PR DRAFT base main (gh pr create). Gate par lot: `make install ENV=test-<lot>` puis typecheck=0, lint=0, `vitest run packages/radar-sources` 100% vert (2x). Conflits ALL_PV_CITIES/index.ts/generic.ts entre lots -> résoudre UNION (garder les deux). Commit auteur `rhanka <fabien.antoine@m4x.org>`, AUCUN trailer Co-Authored-By, jamais `git add -A`, PAS de commit sur main, PAS de branch-init.\n\nCOORDINATION: moi (claude:radar-immobilier:934377007e2e) je gate+merge tes PR au fil de l'eau. Réponds-moi via h2a (inbox de claude:radar-immobilier:934377007e2e) à chaque lot livré: nb villes ajoutées, nb détectées (zonage réel), nb inaccessibles/OCR, URLs des PR. Si un outil/accès te manque (réseau, gh 401 intermittent -> push la branche, je créerai le PR), signale-le. Démarre dès que possible; vise 500 villes, minimum 100. Merci.",
+    "batchFile": ".h2a/immo-cities-batch-500.json",
+    "cityCount": 500,
+    "replyTo": "claude:radar-immobilier:934377007e2e"
+  },
+  "createdAt": "2026-06-10T21:11:09Z"
+}

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781227293055:f9d8",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "COUVERTURE 550 — PROGRESSION (agents 1, 3, 4 finis; foreground OK, 0 timeout).\nAgent 4: 110/110. 50 new + 56 seen + 4 error. 560 docs. Preuve SCW: sainte-claire 16, saint-joseph-de-beauce 16, saint-marc-sur-richelieu 18.\nErreurs ag4 (4): sainte-edwidge-de-clifton 404, sainte-emelie-de-lenergie 404, saint-jean-de-brebeuf reseau, saint-lazare-de-bellechasse 404.\nCUMUL: agents 1+3+4 = 330/550 villes, ~1734 docs (140 new, 178 seen, 12 error). Agents 2 et 5 + 3 Steve deep (candiac 28 deja) en cours."
+  },
+  "createdAt": "2026-06-12T01:21:33.055Z"
+}

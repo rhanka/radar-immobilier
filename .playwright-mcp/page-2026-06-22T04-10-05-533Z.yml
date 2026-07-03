@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e8]:
+          - img [ref=e10]
+          - generic [ref=e11]:
+            - generic [ref=e12]: Radar
+            - generic [ref=e13]: immobilier
+        - navigation "Primary" [ref=e14]:
+          - button "Signaux" [ref=e15] [cursor=pointer]
+          - button "Évaluation" [ref=e16] [cursor=pointer]
+          - button "Sources" [ref=e17] [cursor=pointer]
+          - button "Admin" [ref=e19] [cursor=pointer]:
+            - img [ref=e20]
+            - text: Admin
+            - img [ref=e21]
+        - button "Compte de Admin" [ref=e24] [cursor=pointer]:
+          - generic [ref=e25]: A
+          - generic [ref=e27]: Admin
+          - img [ref=e28]
+    - generic [ref=e30]:
+      - complementary [ref=e31]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e36]: Signaux · Villes
+              - button "Actualiser" [disabled] [ref=e37]:
+                - img [ref=e38]
+            - generic [ref=e41]: Chargement…
+          - generic [ref=e43]:
+            - group [ref=e44]:
+              - generic "Signaux" [ref=e45] [cursor=pointer]:
+                - generic [ref=e46]: ▸
+                - generic [ref=e47]: Signaux
+              - generic [ref=e48]:
+                - generic [ref=e50] [cursor=pointer]:
+                  - checkbox "Zonage uniquement" [checked] [ref=e51]
+                  - generic [ref=e53]: Zonage uniquement
+                - generic [ref=e55] [cursor=pointer]:
+                  - checkbox "Multifamilial 4+ nb unités ≥ 4 ou intensité haute" [checked] [ref=e56]
+                  - generic [ref=e57]:
+                    - generic [ref=e58]: Multifamilial 4+
+                    - generic [ref=e59]: nb unités ≥ 4 ou intensité haute
+                - generic [ref=e61] [cursor=pointer]:
+                  - checkbox "Signaux précoces avis de motion / 1er projet" [checked] [ref=e62]
+                  - generic [ref=e63]:
+                    - generic [ref=e64]: Signaux précoces
+                    - generic [ref=e65]: avis de motion / 1er projet
+            - group [ref=e66]:
+              - generic "Villes" [ref=e67] [cursor=pointer]:
+                - generic [ref=e68]: ▸
+                - generic [ref=e69]: Villes
+              - generic [ref=e70]:
+                - generic [ref=e74]:
+                  - img [ref=e76]
+                  - searchbox "Rechercher une ville" [ref=e77]
+                - list
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Légende — signaux / ville
+          - list [ref=e81]:
+            - listitem [ref=e82]: 6+ signaux
+            - listitem [ref=e84]: 3–5 signaux
+            - listitem [ref=e86]: 1–2 signaux
+            - listitem [ref=e88]: Aucun signal (0)
+      - generic [ref=e90]:
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - region "Map" [ref=e95]
+            - group [ref=e98]:
+              - generic "Toggle attribution" [ref=e99]
+              - link "MapLibre" [ref=e101] [cursor=pointer]:
+                - /url: https://maplibre.org/
+          - generic [ref=e103]:
+            - button "Province" [pressed] [ref=e104] [cursor=pointer]
+            - button "Ville" [ref=e105] [cursor=pointer]
+            - button "Zone" [ref=e106] [cursor=pointer]
+          - generic [ref=e108]: Chargement de la carte…
+        - complementary [ref=e109]:
+          - generic [ref=e110]:
+            - generic [ref=e112]: Sélection
+            - paragraph [ref=e113]: Cliquez sur une ville dans la liste ou sur la carte pour constituer le bucket.
+  - button "Ouvrir l'assistant radar" [ref=e114] [cursor=pointer]:
+    - img [ref=e115]

@@ -1,0 +1,511 @@
+- generic [active] [ref=e1]:
+  - region "We value your privacy" [ref=e2]:
+    - generic [ref=e4]:
+      - heading "Nous respectons votre vie privée." [level=2] [ref=e5]
+      - generic [ref=e6]:
+        - paragraph [ref=e8]: Nous utilisons des cookies pour améliorer votre expérience de navigation, diffuser des publicités ou des contenus personnalisés et analyser notre trafic. En cliquant sur « Tout accepter », vous consentez à notre utilisation des cookies.
+        - generic [ref=e9]:
+          - button "Personnaliser" [ref=e10] [cursor=pointer]
+          - button "Tout rejeter" [ref=e11] [cursor=pointer]
+          - button "Accepter tout" [ref=e12] [cursor=pointer]
+  - generic [ref=e13]:
+    - generic [ref=e14]:
+      - link "Skip to content" [ref=e15] [cursor=pointer]:
+        - /url: "#content_start"
+      - navigation "Liens rapides" [ref=e16]:
+        - generic [ref=e18]:
+          - list [ref=e19]:
+            - listitem [ref=e20]:
+              - 'link "Video: Pont Rouge" [ref=e21] [cursor=pointer]':
+                - /url: https://mansfield-pontefract.com/pont-rouge-video/
+            - listitem [ref=e22]:
+              - link "Élections municipales 2025" [ref=e23] [cursor=pointer]:
+                - /url: https://mansfield-pontefract.com/elections-municipales-2025/
+            - listitem [ref=e24]:
+              - link "Recyclage et ordures" [ref=e25] [cursor=pointer]:
+                - /url: https://mansfield-pontefract.com/residents/recyclage-et-ordure/
+            - listitem [ref=e26]:
+              - link "Événements" [ref=e27] [cursor=pointer]:
+                - /url: https://mansfield-pontefract.com/evenements/
+            - listitem [ref=e28]:
+              - link "Alerte citoyens" [ref=e29] [cursor=pointer]:
+                - /url: https://mansfield-pontefract.com/residents/alerte-citoyens/
+          - list [ref=e30]:
+            - listitem [ref=e31]:
+              - link "Open Search Window" [ref=e32] [cursor=pointer]:
+                - /url: ""
+                - generic [ref=e33]: 
+      - generic [ref=e34]:
+        - link "Mansfield et Pontefract" [ref=e36] [cursor=pointer]:
+          - /url: https://mansfield-pontefract.com/
+          - img "Mansfield et Pontefract" [ref=e37]
+        - generic [ref=e38]:
+          - text: 
+          - navigation "Main Menu" [ref=e39]:
+            - menubar [ref=e40]:
+              - menuitem "MUNICIPALITÉ ↓ NOTRE MUNICIPALITÉ Mansfield-et-Pontefract Histoire de la municipalité ADMINISTRATION Conseil municipal Réunions du conseil Annuaire des employés Règlements Contrats et appels d’offres Carrières Avis publics" [ref=e41]:
+                - link "MUNICIPALITÉ ↓" [ref=e42] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/la-municipalite/
+                - list [ref=e43]:
+                  - menuitem "NOTRE MUNICIPALITÉ Mansfield-et-Pontefract Histoire de la municipalité" [ref=e44]:
+                    - heading "NOTRE MUNICIPALITÉ" [level=4] [ref=e46]
+                    - list [ref=e47]:
+                      - listitem [ref=e48]:
+                        - link "Mansfield-et-Pontefract" [ref=e49] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/a-propos-mansfield-et-pontefract/
+                      - listitem [ref=e50]:
+                        - link "Histoire de la municipalité" [ref=e51] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/histoire-de-mansfield-et-pontefract/
+                  - menuitem "ADMINISTRATION Conseil municipal Réunions du conseil Annuaire des employés Règlements Contrats et appels d’offres Carrières Avis publics" [ref=e52]:
+                    - heading "ADMINISTRATION" [level=4] [ref=e54]
+                    - list [ref=e55]:
+                      - listitem [ref=e56]:
+                        - link "Conseil municipal" [ref=e57] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/conseil-municipal/
+                      - listitem [ref=e58]:
+                        - link "Réunions du conseil" [ref=e59] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/proces-verbal-de-la-reunion-du-conseil/
+                      - listitem [ref=e60]:
+                        - link "Annuaire des employés" [ref=e61] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/annuaire-des-employes/
+                      - listitem [ref=e62]:
+                        - link "Règlements" [ref=e63] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/reglements/
+                      - listitem [ref=e64]:
+                        - link "Contrats et appels d’offres" [ref=e65] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/entreprises/contrats-et-appels-doffres/
+                      - listitem [ref=e66]:
+                        - link "Carrières" [ref=e67] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/carrieres/
+                      - listitem [ref=e68]:
+                        - link "Avis publics" [ref=e69] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/la-municipalite/avis-publics/
+              - menuitem "RÉSIDENTS ↓ PROPRIÉTÉ Évaluation foncière Payer des taxes ou des factures diverses Recyclage et ordures Travaux publics SERVICES Service de police et d’urgence Service d’incendie Services de santé Écoles Bibliothèque Parc Amyotte Alerte citoyens" [ref=e70]:
+                - link "RÉSIDENTS ↓" [ref=e71] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/residents/
+                - list [ref=e72]:
+                  - menuitem "PROPRIÉTÉ Évaluation foncière Payer des taxes ou des factures diverses Recyclage et ordures Travaux publics" [ref=e73]:
+                    - heading "PROPRIÉTÉ" [level=4] [ref=e75]
+                    - list [ref=e76]:
+                      - listitem [ref=e77]:
+                        - link "Évaluation foncière" [ref=e78] [cursor=pointer]:
+                          - /url: https://mrcpontiac.qc.ca/residents/evaluation-des-biens/
+                      - listitem [ref=e79]:
+                        - link "Payer des taxes ou des factures diverses" [ref=e80] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/payer-des-taxes/
+                      - listitem [ref=e81]:
+                        - link "Recyclage et ordures" [ref=e82] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/recyclage-et-ordure/
+                      - listitem [ref=e83]:
+                        - link "Travaux publics" [ref=e84] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/travaux-publics/
+                  - menuitem "SERVICES Service de police et d’urgence Service d’incendie Services de santé Écoles Bibliothèque Parc Amyotte Alerte citoyens" [ref=e85]:
+                    - link "SERVICES" [ref=e86] [cursor=pointer]:
+                      - /url: "#"
+                      - heading "SERVICES" [level=4] [ref=e87]
+                    - list [ref=e88]:
+                      - listitem [ref=e89]:
+                        - link "Service de police et d’urgence" [ref=e90] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/services-de-police-et-durgence/
+                      - listitem [ref=e91]:
+                        - link "Service d’incendie" [ref=e92] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/services-incendie/
+                      - listitem [ref=e93]:
+                        - link "Services de santé" [ref=e94] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/service-sante/
+                      - listitem [ref=e95]:
+                        - link "Écoles" [ref=e96] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/ecoles/
+                      - listitem [ref=e97]:
+                        - link "Bibliothèque" [ref=e98] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/bibliotheque-municipale/
+                      - listitem [ref=e99]:
+                        - link "Parc Amyotte" [ref=e100] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/parc-amyotte/
+                      - listitem [ref=e101]:
+                        - link "Alerte citoyens" [ref=e102] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/residents/alerte-citoyens/
+              - menuitem "ENTREPRISES ↓ Développement économique Développement touristique Développement culturel Développement agricole Soutien et financement À Propos de la SADC Financement Services Événements À Propos de la Chambre Annuaire des Membres Membres à Mansfield Événements Shop Le Pontiac Devenir un membre" [ref=e103]:
+                - link "ENTREPRISES ↓" [ref=e104] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/entreprises/
+                - list [ref=e105]:
+                  - menuitem "Développement économique Développement touristique Développement culturel Développement agricole Soutien et financement" [ref=e106]:
+                    - link [ref=e107] [cursor=pointer]:
+                      - /url: http://www.mrcpontiac.qc.ca
+                      - img [ref=e108]
+                    - list [ref=e109]:
+                      - listitem [ref=e110]:
+                        - link "Développement économique" [ref=e111] [cursor=pointer]:
+                          - /url: https://mrcpontiac.qc.ca/entreprises/developpement-economique/
+                      - listitem [ref=e112]:
+                        - link "Développement touristique" [ref=e113] [cursor=pointer]:
+                          - /url: https://mrcpontiac.qc.ca/entreprises/tourisme/
+                      - listitem [ref=e114]:
+                        - link "Développement culturel" [ref=e115] [cursor=pointer]:
+                          - /url: https://mrcpontiac.qc.ca/entreprises/loisirs/
+                      - listitem [ref=e116]:
+                        - link "Développement agricole" [ref=e117] [cursor=pointer]:
+                          - /url: https://mrcpontiac.qc.ca/entreprises/agriculture/
+                      - listitem [ref=e118]:
+                        - link "Soutien et financement" [ref=e119] [cursor=pointer]:
+                          - /url: https://mrcpontiac.qc.ca/entreprises/entrepreneuriat/
+                  - menuitem "À Propos de la SADC Financement Services Événements" [ref=e120]:
+                    - link [ref=e121] [cursor=pointer]:
+                      - /url: http://www.sadcpontiac.ca
+                      - img [ref=e122]
+                    - list [ref=e123]:
+                      - listitem [ref=e124]:
+                        - link "À Propos de la SADC" [ref=e125] [cursor=pointer]:
+                          - /url: https://sadcpontiac.ca/la-sadc/
+                      - listitem [ref=e126]:
+                        - link "Financement" [ref=e127] [cursor=pointer]:
+                          - /url: https://sadcpontiac.ca/financement/
+                      - listitem [ref=e128]:
+                        - link "Services" [ref=e129] [cursor=pointer]:
+                          - /url: https://sadcpontiac.ca/services/
+                      - listitem [ref=e130]:
+                        - link "Événements" [ref=e131] [cursor=pointer]:
+                          - /url: https://sadcpontiac.ca/evenements/
+                  - menuitem "À Propos de la Chambre Annuaire des Membres Membres à Mansfield Événements Shop Le Pontiac Devenir un membre" [ref=e132]:
+                    - link [ref=e133] [cursor=pointer]:
+                      - /url: http://www.pontiacchamberofcommerce.ca/fr/
+                      - img [ref=e134]
+                    - list [ref=e135]:
+                      - listitem [ref=e136]:
+                        - link "À Propos de la Chambre" [ref=e137] [cursor=pointer]:
+                          - /url: https://pontiacchamberofcommerce.ca/fr/la-chambre/
+                      - listitem [ref=e138]:
+                        - link "Annuaire des Membres" [ref=e139] [cursor=pointer]:
+                          - /url: https://pontiacchamberofcommerce.ca/fr/membres/
+                      - listitem [ref=e140]:
+                        - link "Membres à Mansfield" [ref=e141] [cursor=pointer]:
+                          - /url: https://pontiacchamberofcommerce.ca/fr/municipality/mansfield-et-pontefract-fr/
+                      - listitem [ref=e142]:
+                        - link "Événements" [ref=e143] [cursor=pointer]:
+                          - /url: https://pontiacchamberofcommerce.ca/fr/evenements/
+                      - listitem [ref=e144]:
+                        - link "Shop Le Pontiac" [ref=e145] [cursor=pointer]:
+                          - /url: https://pontiacchamberofcommerce.ca/fr/shop-le-pontiac/
+                      - listitem [ref=e146]:
+                        - link "Devenir un membre" [ref=e147] [cursor=pointer]:
+                          - /url: https://pontiacchamberofcommerce.ca/fr/devenir-membre/
+              - menuitem "VISITEURS ↓ PARTENAIRES Pont Marchand Maison Bryson Halte routière Parc des Chutes Coulonge Festival Country Mansfield en fête Aventure Coulonge Esprit Rafting Aventure Helianthe Cycloparc PPJ Domes Natural Resting Point Art Pontiac Événements Destination Pontiac 14,000 Raisons Carte touristique Vanlife Route 148 La Route Tap et Cork La Route de la Poutine du Pontiac Les Chemins d’Eau Association Tourism Pontiac Guide gastronomique Chercheurs de nature Hébergement Devenir membre" [ref=e148]:
+                - link "VISITEURS ↓" [ref=e149] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/visiteurs/
+                - list [ref=e150]:
+                  - menuitem "PARTENAIRES Pont Marchand Maison Bryson Halte routière Parc des Chutes Coulonge Festival Country Mansfield en fête Aventure Coulonge Esprit Rafting Aventure Helianthe Cycloparc PPJ Domes Natural Resting Point Art Pontiac Événements" [ref=e151]:
+                    - heading "PARTENAIRES" [level=4] [ref=e153]
+                    - list [ref=e154]:
+                      - listitem [ref=e155]:
+                        - link "Pont Marchand" [ref=e156] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/visiteurs/pont-marchand/
+                      - listitem [ref=e157]:
+                        - link "Maison Bryson" [ref=e158] [cursor=pointer]:
+                          - /url: https://maisonbryson.com/
+                      - listitem [ref=e159]:
+                        - link "Halte routière" [ref=e160] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/visiteurs/tourisme/
+                      - listitem [ref=e161]:
+                        - link "Parc des Chutes Coulonge" [ref=e162] [cursor=pointer]:
+                          - /url: https://chutescoulonge.ca/
+                      - listitem [ref=e163]:
+                        - link "Festival Country" [ref=e164] [cursor=pointer]:
+                          - /url: https://www.festivalcountryfcm.com/
+                      - listitem [ref=e165]:
+                        - link "Mansfield en fête" [ref=e166] [cursor=pointer]:
+                          - /url: https://www.facebook.com/profile.php?id=100064446116236
+                      - listitem [ref=e167]:
+                        - link "Aventure Coulonge" [ref=e168] [cursor=pointer]:
+                          - /url: https://aventurecoulonge.ca/
+                      - listitem [ref=e169]:
+                        - link "Esprit Rafting" [ref=e170] [cursor=pointer]:
+                          - /url: https://whitewater.ca/
+                      - listitem [ref=e171]:
+                        - link "Aventure Helianthe" [ref=e172] [cursor=pointer]:
+                          - /url: https://www.cooperativehelianthe.com/
+                      - listitem [ref=e173]:
+                        - link "Cycloparc PPJ" [ref=e174] [cursor=pointer]:
+                          - /url: https://www.cycloparcppj.org/
+                      - listitem [ref=e175]:
+                        - link "Domes Natural Resting Point" [ref=e176] [cursor=pointer]:
+                          - /url: https://www.facebook.com/p/Natural-Resting-Point-Lakeside-Glamping-100075907156158/
+                      - listitem [ref=e177]:
+                        - link "Art Pontiac" [ref=e178] [cursor=pointer]:
+                          - /url: https://artpontiac.com/fr/
+                      - listitem [ref=e179]:
+                        - link "Événements" [ref=e180] [cursor=pointer]:
+                          - /url: https://mansfield-pontefract.com/evenements/
+                  - menuitem "Destination Pontiac 14,000 Raisons Carte touristique Vanlife Route 148 La Route Tap et Cork La Route de la Poutine du Pontiac Les Chemins d’Eau" [ref=e181]:
+                    - link "Destination Pontiac" [ref=e182] [cursor=pointer]:
+                      - /url: http://www.destinationpontiac.ca
+                      - img "Destination Pontiac" [ref=e183]
+                    - list [ref=e184]:
+                      - listitem [ref=e185]:
+                        - link "14,000 Raisons" [ref=e186] [cursor=pointer]:
+                          - /url: https://destinationpontiac.ca/14000-raisons/
+                      - listitem [ref=e187]:
+                        - link "Carte touristique" [ref=e188] [cursor=pointer]:
+                          - /url: https://destinationpontiac.ca/tourisme/
+                      - listitem [ref=e189]:
+                        - link "Vanlife Route 148" [ref=e190] [cursor=pointer]:
+                          - /url: https://destinationpontiac.ca/tourisme/route148/
+                      - listitem [ref=e191]:
+                        - link "La Route Tap et Cork" [ref=e192] [cursor=pointer]:
+                          - /url: https://destinationpontiac.ca/tourisme/route-tap-cork/
+                      - listitem [ref=e193]:
+                        - link "La Route de la Poutine du Pontiac" [ref=e194] [cursor=pointer]:
+                          - /url: https://destinationpontiac.ca/tourisme/route-de-la-poutine-pontiac/
+                      - listitem [ref=e195]:
+                        - link "Les Chemins d’Eau" [ref=e196] [cursor=pointer]:
+                          - /url: https://destinationpontiac.ca/tourisme/les-chemins-d-eau/
+                  - menuitem "Association Tourism Pontiac Guide gastronomique Chercheurs de nature Hébergement Devenir membre" [ref=e197]:
+                    - link "Association Tourism Pontiac" [ref=e198] [cursor=pointer]:
+                      - /url: https://www.explorepontiac.ca/fr
+                      - img "Association Tourism Pontiac" [ref=e199]
+                    - list [ref=e200]:
+                      - listitem [ref=e201]:
+                        - link "Guide gastronomique" [ref=e202] [cursor=pointer]:
+                          - /url: https://www.explorepontiac.ca/fr/foodieguide
+                      - listitem [ref=e203]:
+                        - link "Chercheurs de nature" [ref=e204] [cursor=pointer]:
+                          - /url: https://www.explorepontiac.ca/fr/natureseeker
+                      - listitem [ref=e205]:
+                        - link "Hébergement" [ref=e206] [cursor=pointer]:
+                          - /url: https://www.explorepontiac.ca/fr/stayawhile
+                      - listitem [ref=e207]:
+                        - link "Devenir membre" [ref=e208] [cursor=pointer]:
+                          - /url: https://www.explorepontiac.ca/fr/membership
+              - listitem [ref=e209]:
+                - link "CONTACTEZ NOUS" [ref=e210] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/contactez-la-municipalite/
+              - listitem [ref=e211]:
+                - link "Passer à ENGLISH" [ref=e212] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/en/the-municipality/council-meeting-minutes/
+                  - text: ENGLISH
+    - generic [ref=e213]:
+      - generic [ref=e214]:
+        - heading "Procès-verbal de la réunion du Conseil" [level=1] [ref=e220]
+        - generic [ref=e224]:
+          - generic [ref=e227]:
+            - paragraph [ref=e232]: Les réunions du conseil municipal de Mansfield-et-Pontefract constituent une plate-forme essentielle pour discuter et décider de l’avenir de la municipalité. Organisé le premier ou le deuxième mercredi de chaque mois à 20h, ces réunions sont ouvertes au public, ce qui favorise la transparence et l’implication de la communauté. Les résidents sont encouragés à y assister pour se tenir informés de la réglementation locale, des projets de développement et des initiatives communautaires. Le conseil municipal s’engage à répondre aux besoins et aux préoccupations des habitants de Mansfield-et-Pontefract, en veillant à ce que notre communauté continue de prospérer.
+            - heading "." [level=2] [ref=e235]
+          - generic [ref=e238]:
+            - generic [ref=e240]:
+              - heading "Réunions à venir" [level=2] [ref=e243]
+              - paragraph [ref=e246]: Voici la liste des prochaines réunions du conseil municipal. Ces réunions débutent à 20h00 et sont ouvertes au public.
+              - generic [ref=e251]: No Events
+            - generic [ref=e253]:
+              - heading "Réunions précédentes et procès-verbaux" [level=2] [ref=e256]
+              - paragraph [ref=e259]: Vous trouverez ci-dessous les ordres du jour et les procès-verbaux des dernières réunions du conseil. Pour obtenir une copie des procès-verbaux du conseil antérieurs à 2024, n’hésitez pas à nous contacter.
+              - generic [ref=e264]:
+                - listitem [ref=e265]:
+                  - link "mai 6, 2026" [ref=e266] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2026-05-06/
+                - listitem [ref=e267]:
+                  - link "avril 8, 2026" [ref=e268] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2026-04-08/
+                - listitem [ref=e269]:
+                  - link "avril 1, 2026" [ref=e270] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-2026-04-01/
+                - listitem [ref=e271]:
+                  - link "mars 11, 2026" [ref=e272] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2026-03-11/
+                - listitem [ref=e273]:
+                  - link "février 4, 2026" [ref=e274] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2026-02-04/
+                - listitem [ref=e275]:
+                  - link "janvier 7, 2026" [ref=e276] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2026-01-07/
+                - listitem [ref=e277]:
+                  - link "décembre 18, 2025" [ref=e278] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-budgetaire-2025-12-18/
+                - listitem [ref=e279]:
+                  - link "décembre 10, 2025" [ref=e280] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2025-12-10/
+                - listitem [ref=e281]:
+                  - link "novembre 26, 2025" [ref=e282] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-2025-11-26/
+                - listitem [ref=e283]:
+                  - link "novembre 12, 2025" [ref=e284] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2025-11-12/
+                - listitem [ref=e285]:
+                  - link "octobre 1, 2025" [ref=e286] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-du-conseil-municipal-2025-10-01/
+                - listitem [ref=e287]:
+                  - link "septembre 16, 2025" [ref=e288] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-2025-09-16/
+                - listitem [ref=e289]:
+                  - link "septembre 10, 2025" [ref=e290] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-5/
+                - listitem [ref=e291]:
+                  - link "août 13, 2025" [ref=e292] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-8/
+                - listitem [ref=e293]:
+                  - link "juillet 9, 2025" [ref=e294] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-7/
+                - listitem [ref=e295]:
+                  - link "juin 4, 2025" [ref=e296] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil/
+                - listitem [ref=e297]:
+                  - link "mai 7, 2025" [ref=e298] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-6/
+                - listitem [ref=e299]:
+                  - link "avril 23, 2025" [ref=e300] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-8/
+                - listitem [ref=e301]:
+                  - link "avril 2, 2025" [ref=e302] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-5/
+                - listitem [ref=e303]:
+                  - link "mars 5, 2025" [ref=e304] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-4/
+                - listitem [ref=e305]:
+                  - link "février 26, 2025" [ref=e306] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-7/
+                - listitem [ref=e307]:
+                  - link "février 5, 2025" [ref=e308] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-3/
+                - listitem [ref=e309]:
+                  - link "janvier 16, 2025" [ref=e310] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-6/
+                - listitem [ref=e311]:
+                  - link "janvier 8, 2025" [ref=e312] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-2/
+                - listitem [ref=e313]:
+                  - link "décembre 19, 2024" [ref=e314] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-budget/
+                - listitem [ref=e315]:
+                  - link "décembre 5, 2024" [ref=e316] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-decembre-2024/
+                - listitem [ref=e317]:
+                  - link "novembre 6, 2024" [ref=e318] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-novembre-2024/
+                - listitem [ref=e319]:
+                  - link "octobre 9, 2024" [ref=e320] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-octobre-2024/
+                - listitem [ref=e321]:
+                  - link "octobre 2, 2024" [ref=e322] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-extraordinaire-octobre-2024/
+                - listitem [ref=e323]:
+                  - link "septembre 11, 2024" [ref=e324] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-septembre-2024/
+                - listitem [ref=e325]:
+                  - link "août 22, 2024" [ref=e326] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-4/
+                - listitem [ref=e327]:
+                  - link "août 7, 2024" [ref=e328] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-aout-2024/
+                - listitem [ref=e329]:
+                  - link "juillet 10, 2024" [ref=e330] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-juillet-2024/
+                - listitem [ref=e331]:
+                  - link "juin 5, 2024" [ref=e332] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-juin-2024/
+                - listitem [ref=e333]:
+                  - link "mai 27, 2024" [ref=e334] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale-2/
+                - listitem [ref=e335]:
+                  - link "mai 8, 2024" [ref=e336] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-mai-2024/
+                - listitem [ref=e337]:
+                  - link "avril 10, 2024" [ref=e338] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-du-conseil-avril-2024/
+                - listitem [ref=e339]:
+                  - link "mars 13, 2024" [ref=e340] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-des-conseils-2024-04-03/
+                - listitem [ref=e341]:
+                  - link "février 7, 2024" [ref=e342] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-des-conseils-fevrier-2024/
+                - listitem [ref=e343]:
+                  - link "janvier 17, 2024" [ref=e344] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/reunion-speciale/
+                - listitem [ref=e345]:
+                  - link "janvier 10, 2024" [ref=e346] [cursor=pointer]:
+                    - /url: https://mansfield-pontefract.com/events/seance-des-conseils-2024-02-07/
+      - generic [ref=e347]:
+        - generic:
+          - generic [ref=e348]:
+            - link "Mansfield et Pontefract" [ref=e350] [cursor=pointer]:
+              - /url: https://mansfield-pontefract.com/
+              - img "Mansfield et Pontefract" [ref=e351]
+            - generic [ref=e353]:
+              - heading "Municipality of Mansfield-et-Pontefract" [level=4] [ref=e354]
+              - paragraph [ref=e355]:
+                - text: 314 rue Principale • Mansfield • Québec • J0X 1R0
+                - text: "Phone: (819) 683-2944 • Fax: 819-683-3590"
+                - text: "Email:"
+                - link "mansfield@mrcpontiac.qc.ca" [ref=e356] [cursor=pointer]:
+                  - /url: mailto:mansfield@mrcpontiac.qc.ca
+                - text: Monday to Friday, 8h – 12h and 13h – 16h
+              - paragraph [ref=e357]:
+                - link "Village Relais Quebec - Mansfield-et-Pontefract et Fort Coulonge" [ref=e358] [cursor=pointer]:
+                  - /url: https://www.villages-relais.qc.ca/fr/village/mansfield-et-fort-coulonge/
+                  - img "Village Relais Quebec - Mansfield-et-Pontefract et Fort Coulonge" [ref=e359]
+            - search [ref=e360]:
+              - strong [ref=e362]: Je cherche
+              - generic [ref=e363]:
+                - searchbox "Je cherche" [ref=e364]
+                - button "Recherche" [ref=e365] [cursor=pointer]
+          - generic [ref=e368]:
+            - heading "Liens rapides" [level=4] [ref=e369]
+            - list [ref=e371]:
+              - listitem [ref=e372]:
+                - link "Accueil" [ref=e373] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/
+              - listitem [ref=e374]:
+                - link "La municipalité" [ref=e375] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/la-municipalite/
+              - listitem [ref=e376]:
+                - link "Résidents" [ref=e377] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/residents/
+              - listitem [ref=e378]:
+                - link "Entreprises" [ref=e379] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/entreprises/
+              - listitem [ref=e380]:
+                - link "Visiteurs" [ref=e381] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/visiteurs/
+              - listitem [ref=e382]:
+                - link "Contactez nous" [ref=e383] [cursor=pointer]:
+                  - /url: https://mansfield-pontefract.com/contactez-la-municipalite/
+          - generic [ref=e384]:
+            - heading "Favoris" [level=4] [ref=e385]
+            - list [ref=e386]:
+              - listitem [ref=e387]:
+                - link "DestinationPontiac.ca" [ref=e388] [cursor=pointer]:
+                  - /url: http://www.destinationpontiac.ca
+              - listitem [ref=e389]:
+                - link "Association Pontiac Tourism" [ref=e390] [cursor=pointer]:
+                  - /url: http://www.explorepontiac.ca
+              - listitem [ref=e391]:
+                - link "SADC Pontiac" [ref=e392] [cursor=pointer]:
+                  - /url: http://www.sadcpontiac.ca
+              - listitem [ref=e393]:
+                - link "Chambre de Commerce du Pontiac" [ref=e394] [cursor=pointer]:
+                  - /url: http://www.pontiacchamberofcommerce.ca
+              - listitem [ref=e395]:
+                - link "ShopLePontiac.ca" [ref=e396] [cursor=pointer]:
+                  - /url: http://www.shoplepontiac.ca
+        - generic [ref=e398]:
+          - generic:
+            - heading [level=2]
+            - generic:
+              - list: 
+        - generic [ref=e400]:
+          - list [ref=e401]:
+            - listitem [ref=e402]:
+              - link "Politique de confidentialité" [ref=e403] [cursor=pointer]:
+                - /url: https://mansfield-pontefract.com/contactez-la-municipalite/privacy-policy/
+          - generic [ref=e404]:
+            - text: Copyright © Municipalité de Mansfield-et-Pontefract
+            - text: Design by
+            - link "Calumet Media." [ref=e405] [cursor=pointer]:
+              - /url: http://www.calumetmedia.ca
+      - generic:
+        - search [ref=e406]:
+          - generic [ref=e407]: "Search for:"
+          - textbox "Search for:" [ref=e408]: I am looking for...
+          - button "Search" [ref=e409] [cursor=pointer]
+        - link " Close Search Window" [ref=e410] [cursor=pointer]:
+          - /url: ""
+          - generic [ref=e411]: 
+          - generic [ref=e412]: Close Search Window
+  - generic [ref=e413]: desktop

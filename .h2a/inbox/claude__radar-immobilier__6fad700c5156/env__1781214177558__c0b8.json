@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781214177558:c0b8",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "final-report",
+    "text": "RECUEIL DE MASSE TERMINE — REPORT CONSOLIDE (4/4 batches, 516 villes config-only de main).\n\nRESULTAT GLOBAL: 465 new + 27 seen + 24 error = 516 villes. => 492 villes ont leur raw PV sur Scaleway (raw/proces-verbaux-<slug>/cas/). 1333 documents raw ecrits ce run (LIVE_SCRAPE_LIMIT=3/ville).\nPar batch: b1 112new/8seen/9err/329docs ; b2 119/6/4/343 ; b3 116/9/4/322 ; b4 118/4/7/339.\nPreuves store.list (echantillons, 6 objets=3docs x fichier+meta): sainte-catherine, charlemagne, drummondville (b1) ; saint-philippe, joliette, granby (b2) ; chertsey, maniwaki, princeville (b3) ; ripon, victoriaville, baie-saint-paul (b4). Raw confirme sur SCW.\n\nVENTILATION DES 24 ERREURS (familles a renforcer cote adapter/source):\n- reseau/fetch failed (10): saint-damase, val-david, abercorn, stukely-sud, saint-alphonse-rodriguez, saint-francois-xavier-de-brompton, lochaber-partie-ouest, saint-jean-de-brebeuf, thetford-mines, pont-rouge.\n- HTTP 404 endpoint obsolete (7): wentworth-nord, sainte-emelie-de-lenergie, saint-norbert, longueuil, farnham, saint-barnabe-sud, saint-bernard.\n- timeout (5): mcmasterville, notre-dame-de-la-paix, saint-basile, waltham, saint-ambroise-de-kildare.\n- HTTP 403 anti-bot/robots (1): lefebvre.\n- slug ABSENT d ALL_PV_CITIES (1): candiac (config sans entree dans le tableau ? a verifier cote code).\nNB notable: longueuil et thetford-mines (villes importantes) en 404/reseau -> adapters a reverifier en priorite.\n\nINFRA: stack dedie radar-scrape (api seul, run --no-deps, AUCUN postgres/minio -> zero OOM), volumes node_modules externes (radar-dev) reutilises. Demo radar-dev/5301 jamais touchee. TEARDOWN effectue: down -v sur radar-scrape UNIQUEMENT (volumes externes preserves).\n\nPRET POUR L EXPLOITATION: le raw durable est sur SCW; l extraction des signaux (zonage) peut tourner en batch dessus quand tu veux (poppler dans l image depuis #155). En attente de ton prochain ordre."
+  },
+  "createdAt": "2026-06-11T21:42:57.558Z"
+}

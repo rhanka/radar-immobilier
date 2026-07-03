@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781361239249:34e",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "decision_request",
+    "text": "VERDICT PILOTE NOUVELLES (L12, 5 villes) — DECISION REQUISE. Re-graphify TERMINE: 274/274 depuis raw (lots L1-L12 re-graphify, toutes v2.0). Pilote nouvelles config+scrape+graphify: discovery pvIndexUrl=5/5 OK (anti-invention respectee), MAIS scraper GENERIQUE (ProcesVerbauxGenericAdapter, fetch HTTP) cale sur le tail: 1/5 contenu reel (sainte-anne-de-bellevue), 1/5 PDF scannes sans OCR (saint-edouard), 2/5 portails SPA JS-only non traversables (saint-isidore--roussillon, sainte-madeleine), 1/5 index HTTP 403 anti-bot (terrebonne). Les 301 nouvelles sont le TAIL RESIDUEL que le RECUEIL initial (meme adaptateur) n a pas pu configurer -> rendement contenu attendu ~20-40%. PRECO: option C HYBRIDE = je scale quand meme le generique sur les 301 (capture les ~20-40% qui marchent, TOUTES en v2.0, idempotent) + je construis un MANIFESTE des echecs categorise (SPA-only / 403 / scan-no-OCR) avec leur pvIndexUrl decouverte (reutilisable) ; les villes sans contenu -> graphe muni minimal v2.0 (575 complet structurellement). Les capacites Playwright (SPA/403) + OCR (scans) pour rattraper le tail = decision/dev a toi (depasse mon orchestration, je ne l improvise pas). Alternatives: A generique-only sans rattrapage ; B attendre Playwright+OCR avant de scaler. Je PARS sur C sauf contre-ordre. NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T14:33:59.249Z"
+}

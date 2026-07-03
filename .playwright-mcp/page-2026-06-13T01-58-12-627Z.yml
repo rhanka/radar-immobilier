@@ -1,0 +1,746 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e7]:
+        - link "Municipalité de Chelsea" [ref=e10] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr
+          - img "Municipalité de Chelsea" [ref=e11]
+        - generic [ref=e12]:
+          - generic:    
+          - generic [ref=e13]:
+            - text: Résidents                          Loisirs et culture              Développement et affaires   Votre municipalité             
+            - generic [ref=e14]:
+              - list [ref=e15]:
+                - listitem [ref=e16]:
+                  - link [ref=e17] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                    - generic [ref=e18]: 
+                - listitem [ref=e19]:
+                  - link "Résidents" [ref=e20] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                - listitem [ref=e21]:
+                  - link "Loisirs et culture" [ref=e22] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                - listitem [ref=e23]:
+                  - link "Développement et affaires" [ref=e24] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                - listitem [ref=e25]:
+                  - link "Votre municipalité" [ref=e26] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                - listitem [ref=e27]:
+                  - link "Actualités" [ref=e28] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/actualites
+                - listitem [ref=e29]:
+                  - link "Collectes" [ref=e30] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/calendrier
+                - listitem [ref=e31]:
+                  - link "Emplois" [ref=e32] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/emplois
+                - listitem [ref=e33]:
+                  - link "Médias" [ref=e34] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/medias
+                - listitem [ref=e35]:
+                  - link "Appels d’offres et contrats" [ref=e36] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/appels-doffres-et-contrats
+                - listitem [ref=e37]:
+                  - link "Publications" [ref=e38] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/publications
+                - listitem [ref=e39]:
+                  - link "Contactez-nous" [ref=e40] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/contactez-nous
+                - listitem [ref=e41]:
+                  - link "Liens rapides" [ref=e42] [cursor=pointer]:
+                    - /url: javascript:void(0);
+                - listitem [ref=e43]:
+                  - link "Pivot" [ref=e44] [cursor=pointer]:
+                    - /url: https://pivot.chelsea.ca/fr
+              - listitem [ref=e45]:
+                - link "Politique de confidentialité" [ref=e46] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/download_file/view/5704
+            - generic [ref=e47]:
+              - generic [ref=e48]:
+                - link "En" [ref=e49] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/switch_language/1/186/5796
+                - list [ref=e50]:
+                  - listitem [ref=e51]:
+                    - link [ref=e52] [cursor=pointer]:
+                      - /url: https://www.instagram.com/municipalite.chelsea/
+                      - generic [ref=e53]: 
+                  - listitem [ref=e54]:
+                    - link [ref=e55] [cursor=pointer]:
+                      - /url: https://www.facebook.com/municipalite.chelsea/
+                      - generic [ref=e56]: 
+                - generic [ref=e58]:
+                  - generic [ref=e61] [cursor=pointer]: 
+                  - text: 
+              - link "Menu " [ref=e62] [cursor=pointer]:
+                - /url: javascript:void(0);
+                - text: Menu
+                - generic [ref=e63]: 
+      - generic [ref=e64]:
+        - generic [ref=e67]:
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - heading "Bienvenue à Chelsea" [level=1] [ref=e75]:
+                - text: Bienvenue
+                - text: à Chelsea
+              - generic [ref=e78]:
+                - textbox "Qu" [ref=e79]
+                - button "" [ref=e80] [cursor=pointer]:
+                  - generic [ref=e81]: 
+            - generic [ref=e82]:
+              - heading "À ne pas manquer" [level=2] [ref=e83]
+              - generic [ref=e84]:
+                - generic [ref=e85]: 27 juin
+                - link "Découvrez le pickleball!" [ref=e87] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/programmation-activites-et-evenements/activites-types/decouvrez-le-pickleball
+              - generic [ref=e88]:
+                - generic [ref=e89]: 7 juillet
+                - link "Séance ordinaire du conseil" [ref=e91] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/seances-du-conseil
+          - generic [ref=e95]:
+            - generic [ref=e97]:
+              - generic [ref=e100]:
+                - generic [ref=e102]:
+                  - heading [level=1] [ref=e103]: Avis public
+                  - paragraph [ref=e104]:
+                    - link [ref=e105] [cursor=pointer]:
+                      - /url: https://www.chelsea.ca/application/files/6217/7670/9274/Avis_de_promulgation_REG_1380-26.pdf
+                      - text: 17 avril – Avis de promulgation - Le conseil de la Municipalité de Chelsea a, à sa séance ordinaire tenue le 7 avril 2026, adopté le règlement numéro 1380-26 – Règlement pour édicter les normes applicables aux membres du conseil municipal de Chelsea – Code d’éthique et de déontologie en matière municipale.
+                - link [ref=e107] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                  - paragraph [ref=e108]: Tous les avis publics
+              - tabpanel [ref=e109]:
+                - generic [ref=e111]:
+                  - generic [ref=e113]:
+                    - heading "Avis public" [level=1] [ref=e114]
+                    - paragraph [ref=e115]:
+                      - 'link "23 avril - Avis public - Dérogation mineure - Avis est donné que le conseil municipal statuera lors de la prochaine séance ordinaire qui se tiendra le mardi, 5 mai 2026, sur la demande de dérogation mineure suivante : 15, chemin Jenness (lot 3 031 663) – Marge latérale gauche pour l’implantation d’un abri à bois" [ref=e116] [cursor=pointer]':
+                        - /url: https://www.chelsea.ca/application/files/9517/7698/4694/Avis_public_-_Dero_mineure_15_chemin_Jenness.pdf
+                  - link "Tous les avis publics" [ref=e118] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                    - paragraph [ref=e119]: Tous les avis publics
+              - tabpanel [ref=e120]:
+                - generic [ref=e122]:
+                  - generic [ref=e124]:
+                    - heading [level=1] [ref=e125]: Avis public
+                    - paragraph [ref=e126]:
+                      - link [ref=e127] [cursor=pointer]:
+                        - /url: https://www.chelsea.ca/application/files/6517/7670/9396/Avis_de_promulgation_REG_1379-26.pdf
+                        - text: 17 avril – Avis de promulgation - Le conseil de la Municipalité de Chelsea a, à sa séance extraordinaire tenue le 13 avril 2026, adopté le règlement numéro 1379-26 – Règlement concernant la régie interne du conseil.
+                  - link [ref=e129] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                    - paragraph [ref=e130]: Tous les avis publics
+              - tabpanel [ref=e131]:
+                - generic [ref=e133]:
+                  - generic [ref=e135]:
+                    - heading [level=1] [ref=e136]: Avis public
+                    - paragraph [ref=e137]:
+                      - link [ref=e138] [cursor=pointer]:
+                        - /url: https://www.chelsea.ca/application/files/6217/7670/9274/Avis_de_promulgation_REG_1380-26.pdf
+                        - text: 17 avril – Avis de promulgation - Le conseil de la Municipalité de Chelsea a, à sa séance ordinaire tenue le 7 avril 2026, adopté le règlement numéro 1380-26 – Règlement pour édicter les normes applicables aux membres du conseil municipal de Chelsea – Code d’éthique et de déontologie en matière municipale.
+                  - link [ref=e140] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                    - paragraph [ref=e141]: Tous les avis publics
+              - generic [ref=e144]:
+                - generic [ref=e146]:
+                  - heading [level=1] [ref=e147]: Avis public
+                  - paragraph [ref=e148]:
+                    - link [ref=e149] [cursor=pointer]:
+                      - /url: https://www.chelsea.ca/application/files/9517/7698/4694/Avis_public_-_Dero_mineure_15_chemin_Jenness.pdf
+                      - text: "23 avril - Avis public - Dérogation mineure - Avis est donné que le conseil municipal statuera lors de la prochaine séance ordinaire qui se tiendra le mardi, 5 mai 2026, sur la demande de dérogation mineure suivante : 15, chemin Jenness (lot 3 031 663) – Marge latérale gauche pour l’implantation d’un abri à bois"
+                - link [ref=e151] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                  - paragraph [ref=e152]: Tous les avis publics
+              - generic [ref=e155]:
+                - generic [ref=e157]:
+                  - heading [level=1] [ref=e158]: Avis public
+                  - paragraph [ref=e159]:
+                    - link [ref=e160] [cursor=pointer]:
+                      - /url: https://www.chelsea.ca/application/files/6517/7670/9396/Avis_de_promulgation_REG_1379-26.pdf
+                      - text: 17 avril – Avis de promulgation - Le conseil de la Municipalité de Chelsea a, à sa séance extraordinaire tenue le 13 avril 2026, adopté le règlement numéro 1379-26 – Règlement concernant la régie interne du conseil.
+                - link [ref=e162] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                  - paragraph [ref=e163]: Tous les avis publics
+              - generic [ref=e166]:
+                - generic [ref=e168]:
+                  - heading [level=1] [ref=e169]: Avis public
+                  - paragraph [ref=e170]:
+                    - link [ref=e171] [cursor=pointer]:
+                      - /url: https://www.chelsea.ca/application/files/6217/7670/9274/Avis_de_promulgation_REG_1380-26.pdf
+                      - text: 17 avril – Avis de promulgation - Le conseil de la Municipalité de Chelsea a, à sa séance ordinaire tenue le 7 avril 2026, adopté le règlement numéro 1380-26 – Règlement pour édicter les normes applicables aux membres du conseil municipal de Chelsea – Code d’éthique et de déontologie en matière municipale.
+                - link [ref=e173] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+                  - paragraph [ref=e174]: Tous les avis publics
+            - tablist [ref=e175]:
+              - tab "1 of 3" [selected] [ref=e176] [cursor=pointer]: "1"
+              - tab "2 of 3" [ref=e177] [cursor=pointer]: "2"
+              - tab "3 of 3" [ref=e178] [cursor=pointer]: "3"
+        - link [ref=e179] [cursor=pointer]:
+          - /url: "#infolettre"
+    - generic [ref=e180]:
+      - generic [ref=e185]:
+        - link "Collectes" [ref=e187] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/travaux-publics/matieres-residuelles
+          - img [ref=e189]
+          - text: Collectes
+        - link "Bibliothèque" [ref=e191] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/bibliotheque
+          - img [ref=e193]
+          - text: Bibliothèque
+        - link "Permis" [ref=e195] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/urbanisme-et-developpement-durable/permis-et-certificats
+          - img [ref=e197]
+          - text: Permis
+        - link "Voie Verte Chelsea" [ref=e199] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/sentier-communautaire
+          - img [ref=e201]
+          - text: Voie Verte Chelsea
+        - link "Info-travaux" [ref=e203] [cursor=pointer]:
+          - /url: https://pivot.chelsea.ca/fr/info-travaux
+          - img [ref=e205]
+          - text: Info-travaux
+        - link "Plan d'urbanisme et règlements" [ref=e207] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/urbanisme-et-developpement-durable/reglements-durbanisme
+          - img [ref=e209]
+          - text: Plan d'urbanisme et règlements
+        - link "Comités" [ref=e211] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/votre-municipalite/comites
+          - img [ref=e213]
+          - text: Comités
+        - link "Dossiers en cours" [ref=e215] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/dossiers-en-cours
+          - img [ref=e217]
+          - text: Dossiers en cours
+        - link "Rôle d'évaluation" [ref=e219] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/finance/formulaires
+          - img [ref=e221]
+          - text: Rôle d'évaluation
+        - link "Séances du conseil" [ref=e223] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/votre-municipalite/seances-du-conseil
+          - img [ref=e225]
+          - text: Séances du conseil
+      - generic [ref=e231]:
+        - heading "Actualités" [level=1] [ref=e233]
+        - generic [ref=e234]:
+          - generic [ref=e237]:
+            - generic [ref=e239]:
+              - generic [ref=e242]:
+                - heading "Mot du maire – Juin 2026" [level=2] [ref=e243]:
+                  - link "Mot du maire – Juin 2026" [ref=e244] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/actualites/mot-du-maire-juin-2026
+                - paragraph [ref=e245]: Au cours des dernières semaines, la Municipalité a poursuivi plusieurs projets importants
+                - link "Lire plus" [ref=e247] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/actualites/mot-du-maire-juin-2026
+              - generic [ref=e248]: 3 juin 2026
+            - generic [ref=e250]:
+              - generic [ref=e253]:
+                - heading "Un nouveau quai public au parc Farm Point" [level=2] [ref=e254]:
+                  - link "Un nouveau quai public au parc Farm Point" [ref=e255] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/actualites/un-nouveau-quai-public-au-parc-farm-point
+                - paragraph [ref=e256]: La Municipalité de Chelsea a procédé à l’installation d’un quai municipal accessible au public au parc Farm Point.
+                - link "Lire plus" [ref=e258] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/actualites/un-nouveau-quai-public-au-parc-farm-point
+              - generic [ref=e259]: 2 juin 2026
+            - generic [ref=e261]:
+              - generic [ref=e264]:
+                - heading "Collecte de sang à Chelsea - Héma-Québec a besoin de vous" [level=2] [ref=e265]:
+                  - link "Collecte de sang à Chelsea - Héma-Québec a besoin de vous" [ref=e266] [cursor=pointer]:
+                    - /url: https://www.chelsea.ca/fr/actualites/collecte-de-sang-chelsea-hema-quebec-besoin-de-vous
+                - paragraph [ref=e267]: Le Service de sécurité incendie, en partenariat avec Héma-Québec, vous invite a sa deuxième collecte de sang de l'année le mercredi 17 juin 2026 au Centre Meredith.
+                - link "Lire plus" [ref=e269] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/actualites/collecte-de-sang-chelsea-hema-quebec-besoin-de-vous
+              - generic [ref=e270]: 2 juin 2026
+            - generic [ref=e272]:
+              - generic [ref=e275]:
+                - 'heading "Usine d’eau potable : des mesures concrètes pour améliorer le service" [level=2] [ref=e276]':
+                  - 'link "Usine d’eau potable : des mesures concrètes pour améliorer le service" [ref=e277] [cursor=pointer]':
+                    - /url: https://www.chelsea.ca/fr/actualites/usine-deau-potable-des-mesures-concretes-pour-ameliorer-le-service
+                - paragraph [ref=e278]: La Municipalité procède à la mise en œuvre de son plan d’action pour réduire les épisodes d’avis d’ébullition qui incommodent les citoyens et répondre à la pression croissante sur l’usine d’eau…
+                - link "Lire plus" [ref=e280] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/actualites/usine-deau-potable-des-mesures-concretes-pour-ameliorer-le-service
+              - generic [ref=e281]: 2 juin 2026
+          - paragraph [ref=e285]:
+            - link "Voir toutes les actualités" [ref=e287] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/actualites
+      - generic [ref=e293]:
+        - link "Espace citoyen +" [ref=e294] [cursor=pointer]:
+          - /url: https://pivot.chelsea.ca/fr
+          - text: Espace citoyen
+          - generic [ref=e295]: +
+        - link "Consultations publiques +" [ref=e296] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/fr/residents/consultations-publiques
+          - text: Consultations publiques
+          - generic [ref=e297]: +
+        - 'link "Indice de risque Danger d’incendie SOPFEU logo Prévision pour: Gatineau Bas Modéré Élevé Très Élevé Extrême Voir sur la carte +" [ref=e298] [cursor=pointer]':
+          - /url: https://www.chelsea.ca/fr/residents/service-municipaux/securite-incendie/brulage
+          - text: Indice de risque
+          - generic [ref=e299]:
+            - generic [ref=e300]:
+              - generic [ref=e301]: Danger d’incendie
+              - generic [ref=e302]:
+                - img "SOPFEU logo"
+            - generic [ref=e303]:
+              - generic [ref=e304]:
+                - paragraph [ref=e305]: "Prévision pour:"
+                - paragraph [ref=e307]: Gatineau
+                - generic [ref=e308]:
+                  - generic [ref=e309]:
+                    - strong [ref=e311]: Bas
+                    - img [ref=e314]
+                  - strong [ref=e318]: Modéré
+                  - strong [ref=e324]: Élevé
+                  - strong [ref=e330]: Très Élevé
+                  - strong [ref=e336]: Extrême
+              - link "Voir sur la carte" [ref=e341]:
+                - /url: https://sopfeu.qc.ca/carte/zone-gatineau?showFireDanger=true&utm_source=partenaires&utm_medium=widget
+                - text: Voir sur la carte
+                - img [ref=e343]
+          - generic [ref=e345]: +
+      - generic [ref=e351]:
+        - heading "Calendrier" [level=1] [ref=e353]
+        - generic [ref=e356]:
+          - generic [ref=e357]:
+            - button "Previous" [ref=e358] [cursor=pointer]
+            - generic [ref=e360]:
+              - generic [ref=e362]:
+                - generic [ref=e363]:
+                  - generic [ref=e364]: "04"
+                  - generic [ref=e365]: mercredi nov. 2026
+                - img [ref=e367]
+                - generic [ref=e369] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e371]:
+                - generic [ref=e372]:
+                  - generic [ref=e373]: "01"
+                  - generic [ref=e374]: mardi déc. 2026
+                - img [ref=e376]
+                - generic [ref=e378] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e380]:
+                - generic [ref=e381]:
+                  - generic [ref=e382]: "02"
+                  - generic [ref=e383]: mercredi déc. 2026
+                - img [ref=e385]
+                - generic [ref=e387] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e389]:
+                - generic [ref=e390]:
+                  - generic [ref=e391]: "17"
+                  - generic [ref=e392]: mercredi juin 2026
+                - img [ref=e394]
+                - generic [ref=e396] [cursor=pointer]: Collecte de sang
+              - generic [ref=e398]:
+                - generic [ref=e399]:
+                  - generic [ref=e400]: "27"
+                  - generic [ref=e401]:
+                    - text: samedi
+                    - text: juin 2026
+                - img "Découvrez le Pickleball!" [ref=e403]
+                - generic [ref=e405] [cursor=pointer]: Découvrez le Pickleball!
+              - generic [ref=e407]:
+                - generic [ref=e408]:
+                  - generic [ref=e409]: "07"
+                  - generic [ref=e410]:
+                    - text: mardi
+                    - text: juil. 2026
+                - img "Séance ordinaire du conseil" [ref=e412]
+                - generic [ref=e414] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e416]:
+                - generic [ref=e417]:
+                  - generic [ref=e418]: "08"
+                  - generic [ref=e419]: mercredi juil. 2026
+                - img [ref=e421]
+                - generic [ref=e423] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e425]:
+                - generic [ref=e426]:
+                  - generic [ref=e427]: "18"
+                  - generic [ref=e428]: mardi août 2026
+                - img [ref=e430]
+                - generic [ref=e432] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e434]:
+                - generic [ref=e435]:
+                  - generic [ref=e436]: "19"
+                  - generic [ref=e437]: mercredi août 2026
+                - img [ref=e439]
+                - generic [ref=e441] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e443]:
+                - generic [ref=e444]:
+                  - generic [ref=e445]: "15"
+                  - generic [ref=e446]: mardi sept. 2026
+                - img [ref=e448]
+                - generic [ref=e450] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e452]:
+                - generic [ref=e453]:
+                  - generic [ref=e454]: "16"
+                  - generic [ref=e455]: mercredi sept. 2026
+                - img [ref=e457]
+                - generic [ref=e459] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e461]:
+                - generic [ref=e462]:
+                  - generic [ref=e463]: "06"
+                  - generic [ref=e464]: mardi oct. 2026
+                - img [ref=e466]
+                - generic [ref=e468] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e470]:
+                - generic [ref=e471]:
+                  - generic [ref=e472]: "07"
+                  - generic [ref=e473]: mercredi oct. 2026
+                - img [ref=e475]
+                - generic [ref=e477] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e479]:
+                - generic [ref=e480]:
+                  - generic [ref=e481]: "03"
+                  - generic [ref=e482]: mardi nov. 2026
+                - img [ref=e484]
+                - generic [ref=e486] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e488]:
+                - generic [ref=e489]:
+                  - generic [ref=e490]: "04"
+                  - generic [ref=e491]: mercredi nov. 2026
+                - img [ref=e493]
+                - generic [ref=e495] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e497]:
+                - generic [ref=e498]:
+                  - generic [ref=e499]: "01"
+                  - generic [ref=e500]: mardi déc. 2026
+                - img [ref=e502]
+                - generic [ref=e504] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e506]:
+                - generic [ref=e507]:
+                  - generic [ref=e508]: "02"
+                  - generic [ref=e509]: mercredi déc. 2026
+                - img [ref=e511]
+                - generic [ref=e513] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e515]:
+                - generic [ref=e516]:
+                  - generic [ref=e517]: "17"
+                  - generic [ref=e518]: mercredi juin 2026
+                - img [ref=e520]
+                - generic [ref=e522] [cursor=pointer]: Collecte de sang
+              - generic [ref=e524]:
+                - generic [ref=e525]:
+                  - generic [ref=e526]: "27"
+                  - generic [ref=e527]: samedi juin 2026
+                - img [ref=e529]
+                - generic [ref=e531] [cursor=pointer]: Découvrez le Pickleball!
+              - generic [ref=e533]:
+                - generic [ref=e534]:
+                  - generic [ref=e535]: "07"
+                  - generic [ref=e536]: mardi juil. 2026
+                - img [ref=e538]
+                - generic [ref=e540] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e542]:
+                - generic [ref=e543]:
+                  - generic [ref=e544]: "08"
+                  - generic [ref=e545]: mercredi juil. 2026
+                - img [ref=e547]
+                - generic [ref=e549] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e551]:
+                - generic [ref=e552]:
+                  - generic [ref=e553]: "18"
+                  - generic [ref=e554]: mardi août 2026
+                - img [ref=e556]
+                - generic [ref=e558] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e560]:
+                - generic [ref=e561]:
+                  - generic [ref=e562]: "19"
+                  - generic [ref=e563]: mercredi août 2026
+                - img [ref=e565]
+                - generic [ref=e567] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e569]:
+                - generic [ref=e570]:
+                  - generic [ref=e571]: "15"
+                  - generic [ref=e572]: mardi sept. 2026
+                - img [ref=e574]
+                - generic [ref=e576] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e578]:
+                - generic [ref=e579]:
+                  - generic [ref=e580]: "16"
+                  - generic [ref=e581]: mercredi sept. 2026
+                - img [ref=e583]
+                - generic [ref=e585] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e587]:
+                - generic [ref=e588]:
+                  - generic [ref=e589]: "06"
+                  - generic [ref=e590]: mardi oct. 2026
+                - img [ref=e592]
+                - generic [ref=e594] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e596]:
+                - generic [ref=e597]:
+                  - generic [ref=e598]: "07"
+                  - generic [ref=e599]: mercredi oct. 2026
+                - img [ref=e601]
+                - generic [ref=e603] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e605]:
+                - generic [ref=e606]:
+                  - generic [ref=e607]: "03"
+                  - generic [ref=e608]: mardi nov. 2026
+                - img [ref=e610]
+                - generic [ref=e612] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e614]:
+                - generic [ref=e615]:
+                  - generic [ref=e616]: "04"
+                  - generic [ref=e617]: mercredi nov. 2026
+                - img [ref=e619]
+                - generic [ref=e621] [cursor=pointer]: Rencontre du CCU
+              - generic [ref=e623]:
+                - generic [ref=e624]:
+                  - generic [ref=e625]: "01"
+                  - generic [ref=e626]: mardi déc. 2026
+                - img [ref=e628]
+                - generic [ref=e630] [cursor=pointer]: Séance ordinaire du conseil
+              - generic [ref=e632]:
+                - generic [ref=e633]:
+                  - generic [ref=e634]: "02"
+                  - generic [ref=e635]: mercredi déc. 2026
+                - img [ref=e637]
+                - generic [ref=e639] [cursor=pointer]: Rencontre du CCU
+            - button "Next" [ref=e640] [cursor=pointer]
+          - link "Voir le calendrier complet" [ref=e642] [cursor=pointer]:
+            - /url: https://www.chelsea.ca/fr/calendrier
+      - generic [ref=e650]:
+        - generic [ref=e652]:
+          - heading "Abonnez-vous à notre infolettre !" [level=1] [ref=e653]:
+            - text: Abonnez-vous
+            - text: à notre infolettre !
+          - paragraph [ref=e654]: Restez à l’affût des dernières nouvelles de la Municipalité! Inscrivez-vous à notre infolettre et recevez par courriel l'actualité municipale, les activités culturelles et plus encore!
+        - generic [ref=e659]:
+          - generic [ref=e660]:
+            - generic [ref=e661]: Nom*
+            - textbox "Nom*" [ref=e662]:
+              - /placeholder: Nom
+          - generic [ref=e663]:
+            - generic [ref=e664]: Courriel*
+            - textbox "Courriel*" [ref=e665]:
+              - /placeholder: Courriel
+          - button "M'abonner" [ref=e667] [cursor=pointer]
+          - generic [ref=e668]:
+            - link "Email marketing" [ref=e669] [cursor=pointer]:
+              - /url: https://www.cyberimpact.com
+            - link "Cyberimpact" [ref=e670] [cursor=pointer]:
+              - /url: https://www.cyberimpact.com
+    - contentinfo [ref=e672]:
+      - navigation [ref=e677]:
+        - tablist [ref=e678]:
+          - listitem [ref=e679]:
+            - link "Résidents" [ref=e680] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/residents
+            - list [ref=e681]:
+              - listitem [ref=e682]:
+                - link "Accès à la rivière" [ref=e683] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/acces-la-riviere
+              - listitem [ref=e684]:
+                - link "Compteurs d'eau" [ref=e685] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/compteurs-deau
+              - listitem [ref=e686]:
+                - link "Concours de photos" [ref=e687] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/concours-de-photos
+              - listitem [ref=e688]:
+                - link "Consultations publiques" [ref=e689] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/consultations-publiques
+              - listitem [ref=e690]:
+                - link "Nouveaux résidents" [ref=e691] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/nouveaux-residents
+              - listitem [ref=e692]:
+                - link "Programmes et subventions" [ref=e693] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/programmes-et-subventions
+              - listitem [ref=e694]:
+                - link "Santé" [ref=e695] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/sante
+              - listitem [ref=e696]:
+                - link "Sécurité publique" [ref=e697] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/securite-publique
+              - listitem [ref=e698]:
+                - link "Vitesse" [ref=e699] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/vitesse
+              - listitem [ref=e700]:
+                - link "Dossiers en cours" [ref=e701] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/dossiers-en-cours
+          - listitem [ref=e702]:
+            - link "Loisirs et culture" [ref=e703] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/loisirs-culture
+            - list [ref=e704]:
+              - listitem [ref=e705]:
+                - link "Activités annuelles" [ref=e706] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/programmation-activites-et-evenements/activites-types
+              - listitem [ref=e707]:
+                - link "Art public et patrimoine" [ref=e708] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/espaces-publics-pour-le-loisir/art-public-patrimoine
+              - listitem [ref=e709]:
+                - link "Bénévolat" [ref=e710] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/benevolat
+              - listitem [ref=e711]:
+                - link "Centres communautaires" [ref=e712] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/espaces-publics-pour-le-loisir/centres-communautaires
+              - listitem [ref=e713]:
+                - link "La Fab sur Mill" [ref=e714] [cursor=pointer]:
+                  - /url: https://www.lafabsurmill.ca/fr/
+              - listitem [ref=e715]:
+                - link "Location de salles et de terrains" [ref=e716] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/location-de-salles-et-de-terrains
+              - listitem [ref=e717]:
+                - link "Organismes reconnus" [ref=e718] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/soutien-aux-organismes-reconnus
+              - listitem [ref=e719]:
+                - link "Parcs, patinoires et quai" [ref=e720] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/espaces-publics-pour-le-loisir/parcs
+              - listitem [ref=e721]:
+                - link "Sentiers et pistes cyclables" [ref=e722] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/espaces-publics-pour-le-loisir/sentiers-et-pistes-cyclables
+              - listitem [ref=e723]:
+                - link "Tenir un événement ou une activité" [ref=e724] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/loisirs-culture/organiser-une-activite
+              - listitem [ref=e725]:
+                - link "Terrains sportifs" [ref=e726] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/loisirs-culture-et-vie-communautaire/espaces-publics-pour-le-loisir/terrains-sportifs
+              - listitem [ref=e727]:
+                - link "Quoi faire à Chelsea" [ref=e728] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/calendrier/quoi-faire-a-chelsea
+          - listitem [ref=e729]:
+            - link "Développement et affaires" [ref=e730] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/developpement-et-affaire
+            - list [ref=e731]:
+              - listitem [ref=e732]:
+                - link "Appels d'offres et contrats" [ref=e733] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/developpement-et-affaire/appels-doffres-et-contrats
+              - listitem [ref=e734]:
+                - link "Permis et certificats - Affaires" [ref=e735] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/developpement-et-affaire/permis
+          - listitem [ref=e736]:
+            - link "Votre municipalité" [ref=e737] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/votre-municipalite
+            - list [ref=e738]:
+              - listitem [ref=e739]:
+                - link "Accès aux documents" [ref=e740] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/acces-aux-documents
+              - listitem [ref=e741]:
+                - link "Avis publics" [ref=e742] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/avis-public
+              - listitem [ref=e743]:
+                - link "Budget" [ref=e744] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux/finance/budget
+              - listitem [ref=e745]:
+                - link "Comités" [ref=e746] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/comites
+              - listitem [ref=e747]:
+                - link "Conseil municipal" [ref=e748] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/conseil-municipal-et-comites
+              - listitem [ref=e749]:
+                - link "Demande de réclamation" [ref=e750] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/demande-de-reclamation
+              - listitem [ref=e751]:
+                - link "Droit de préemption" [ref=e752] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/droit-de-preemption
+              - listitem [ref=e753]:
+                - link "Histoire" [ref=e754] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/histoire
+              - listitem [ref=e755]:
+                - link "Plan stratégique" [ref=e756] [cursor=pointer]:
+                  - /url: https://chelsea2040.ca/
+              - listitem [ref=e757]:
+                - link "Politiques et plans d'action" [ref=e758] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/politiques-et-reglements
+              - listitem [ref=e759]:
+                - link "Règlements municipaux" [ref=e760] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/reglements-municipaux
+              - listitem [ref=e761]:
+                - link "Séances du conseil" [ref=e762] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/votre-municipalite/seances-du-conseil
+              - listitem [ref=e763]:
+                - link "Services municipaux" [ref=e764] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/residents/service-municipaux
+          - listitem [ref=e765]:
+            - link "Actualités" [ref=e766] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/actualites
+          - listitem [ref=e767]:
+            - link "Collectes" [ref=e768] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/calendrier
+          - listitem [ref=e769]:
+            - link "Emplois" [ref=e770] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/emplois
+          - listitem [ref=e771]:
+            - link "Médias" [ref=e772] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/medias
+          - listitem [ref=e773]:
+            - link "Appels d’offres et contrats" [ref=e774] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/appels-doffres-et-contrats
+          - listitem [ref=e775]:
+            - link "Publications" [ref=e776] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/publications
+          - listitem [ref=e777]:
+            - link "Contactez-nous" [ref=e778] [cursor=pointer]:
+              - /url: https://www.chelsea.ca/fr/contactez-nous
+          - listitem [ref=e779]:
+            - link "Liens rapides" [ref=e780] [cursor=pointer]:
+              - /url: http://transcollines.ca/
+            - list [ref=e781]:
+              - listitem [ref=e782]:
+                - link "Transcollines" [ref=e783] [cursor=pointer]:
+                  - /url: http://transcollines.ca/
+              - listitem [ref=e784]:
+                - link "Centre Meredith" [ref=e785] [cursor=pointer]:
+                  - /url: https://fr.centremeredith.ca/
+              - listitem [ref=e786]:
+                - link "Police" [ref=e787] [cursor=pointer]:
+                  - /url: http://sp.mrcdescollinesdeloutaouais.qc.ca/
+              - listitem [ref=e788]:
+                - link "MRC des Collines-de-l'Outaouais" [ref=e789] [cursor=pointer]:
+                  - /url: https://www.mrcdescollinesdeloutaouais.qc.ca/
+              - listitem [ref=e790]:
+                - link "Politique de confidentialité" [ref=e791] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/download_file/5704/0
+              - listitem [ref=e792] [cursor=pointer]:
+                - link "Paramètres de confidentialité" [ref=e793]:
+                  - /url: "#open-tonik-privacy-modal"
+          - listitem [ref=e794]:
+            - link [ref=e795] [cursor=pointer]:
+              - /url: https://pivot.chelsea.ca/fr
+              - img [ref=e796]
+          - listitem [ref=e797]:
+            - list [ref=e798]:
+              - listitem [ref=e799]:
+                - link [ref=e800] [cursor=pointer]:
+                  - /url: https://www.facebook.com/municipalite.chelsea/
+                  - generic [ref=e801]: 
+              - listitem [ref=e802]:
+                - link [ref=e803] [cursor=pointer]:
+                  - /url: https://www.instagram.com/municipalite.chelsea/
+                  - generic [ref=e804]: 
+              - listitem
+              - listitem [ref=e805]:
+                - link "English" [ref=e806] [cursor=pointer]:
+                  - /url: https://www.chelsea.ca/fr/switch_language/1/186/2890
+      - generic [ref=e812]:
+        - generic:
+          - paragraph [ref=e814]:
+            - strong [ref=e815]: Adresse
+            - text: 100, chemin d'Old Chelsea
+            - text: Chelsea (Québec) J9B 1C1
+          - paragraph [ref=e817]:
+            - strong [ref=e818]: Téléphone
+            - text: 819 827-1124
+          - paragraph [ref=e820]:
+            - strong [ref=e821]: Courriel
+            - link "info@chelsea.ca" [ref=e822] [cursor=pointer]:
+              - /url: javascript:sendEmail('info','chelsea.ca','','')
+          - paragraph [ref=e824]:
+            - strong [ref=e825]: Télécopieur
+            - text: 819 827-2672
+      - generic [ref=e829]:
+        - generic [ref=e831]: 2026 - Tous droits réservés. © Municipalité de Chelsea
+        - link "Tonik Web Studio" [ref=e835] [cursor=pointer]:
+          - /url: http://www.tonikwebstudio.com/
+          - img "Tonik Web Studio" [ref=e836]
+  - generic [ref=e838]:
+    - generic [ref=e839]:
+      - paragraph [ref=e840]: Respect de la vie privée
+      - paragraph [ref=e842]:
+        - text: En acceptant de nous partager certaines informations de navigation, vous nous aidez à nous améliorer et à vous offrir une expérience de navigation optimale.
+        - link "Politique de confidentialité" [ref=e843] [cursor=pointer]:
+          - /url: https://www.chelsea.ca/download_file/view/5704
+    - generic [ref=e844]:
+      - button "Rejeter tout" [ref=e845] [cursor=pointer]
+      - button "Personnaliser" [ref=e846] [cursor=pointer]
+      - button "Accepter tout" [ref=e847] [cursor=pointer]
+    - link "Propulsé par Tonik Web Studio" [ref=e849] [cursor=pointer]:
+      - /url: https://www.tonikwebstudio.com/
+      - text: Propulsé par
+      - img "Tonik Web Studio" [ref=e850]

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "7d6aad24-f13e-49f3-9168-d81c9f596090",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "createdAt": "2026-06-12T15:26:27.862663+00:00",
+  "body": {
+    "kind": "message",
+    "text": "SYNC OK — aligne sur 522 villes (mon compte SCW = ton 522). Ta progression graphify notee (excellent: PPCMOI/derogations/rezonage INRS/PIIA, extraits+resolutions). CAUSE DES MORTS D AGENTS CONFIRMEE = saturation du COMPTE PARTAGE (tes 4 + mes 4 + boucles Opus). PLAN: TU continues le graphify jusqu a epuisement des 522 (lots plus gros 4x10 comme tu proposes, parfait); MOI je limite a ~3 agents Sonnet dev (infra+ecrans: deploy-fix 502, carto MapLibre, indexation graphe) pour NE PAS re-saturer. GO pour finir les 522. Le graph/<ville>/latest.json que tu ecris alimente bien la vue graphe immo (A.3.1) -> on garde ce format. Reporte la progression cumulee X/522 + signale si tu sens la saturation revenir (je reduirai mes agents)."
+  }
+}

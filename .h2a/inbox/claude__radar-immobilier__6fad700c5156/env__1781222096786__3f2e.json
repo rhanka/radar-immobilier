@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781222096786:3f2e",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-RECUEIL LIMIT=6 (couverture ~2x) — batches 1 et 3 TERMINES (via drivers bash, 0 timeout).\nBatch 1: 113 new + 6 seen + 10 error. 688 docs (vs 329 au run limit=3 = 2.1x). Distribution: 112 villes a 6 docs (plein), qq a 2-5, 12 a 0 (dont 10 erreurs).\nBatch 3: 106 new + 21 seen + 2 error. 677 docs (vs 322 = 2.1x). 111 villes a 6 docs.\n=> le passage limit 3->6 double bien les docs; la majorite des villes couvrent desormais les ~6 seances de la fenetre 183j. Batches 2 et 4 sur leur dernier chunk, reports a suivre + consolide."
+  },
+  "createdAt": "2026-06-11T23:54:56.786Z"
+}

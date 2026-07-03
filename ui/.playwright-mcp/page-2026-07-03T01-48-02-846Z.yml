@@ -1,0 +1,96 @@
+- generic [ref=f4e3]:
+  - generic [ref=f4e4]:
+    - banner [ref=f4e6]:
+      - generic [ref=f4e7]:
+        - link "Radar immobilier" [ref=f4e9] [cursor=pointer]:
+          - /url: "#/signaux"
+          - img "Radar" [ref=f4e10]
+          - generic [ref=f4e11]:
+            - generic [ref=f4e12]: Radar
+            - generic [ref=f4e13]: immobilier
+        - navigation "Primary" [ref=f4e14]:
+          - link "Signaux" [ref=f4e15] [cursor=pointer]:
+            - /url: "#/signaux"
+          - link "Évaluation" [ref=f4e16] [cursor=pointer]:
+            - /url: "#/evaluation"
+          - link "Sources" [ref=f4e17] [cursor=pointer]:
+            - /url: "#/sources"
+        - generic [ref=f4e19]:
+          - button "Mode sombre" [ref=f4e20] [cursor=pointer]:
+            - img [ref=f4e21]
+          - button "Changer de langue" [ref=f4e23] [cursor=pointer]:
+            - img [ref=f4e24]
+            - generic [ref=f4e25]: FR
+            - img [ref=f4e26]
+          - button "Se connecter" [ref=f4e28] [cursor=pointer]:
+            - img [ref=f4e29]
+    - generic [ref=f4e33]:
+      - complementary [ref=f4e34]:
+        - generic [ref=f4e35]:
+          - generic [ref=f4e36]:
+            - generic [ref=f4e37]:
+              - generic [ref=f4e38]: Signaux · Villes
+              - button "Actualiser" [ref=f4e39] [cursor=pointer]:
+                - img [ref=f4e40]
+            - generic [ref=f4e43]: 0 signaux · 0 villes
+          - generic [ref=f4e45]:
+            - group [ref=f4e46]:
+              - generic "Signaux" [ref=f4e47] [cursor=pointer]:
+                - generic [ref=f4e48]: ▸
+                - generic [ref=f4e49]: Signaux
+              - generic [ref=f4e50]:
+                - generic [ref=f4e51]:
+                  - generic [ref=f4e52] [cursor=pointer]:
+                    - checkbox "Zonage uniquement" [checked] [ref=f4e53]
+                    - generic [ref=f4e55]: Zonage uniquement
+                  - generic [ref=f4e56]: "0"
+                - generic [ref=f4e57]:
+                  - generic [ref=f4e58] [cursor=pointer]:
+                    - checkbox "Multifamilial 4+ nb unités ≥ 4 ou intensité haute" [checked] [ref=f4e59]
+                    - generic [ref=f4e60]:
+                      - generic [ref=f4e61]: Multifamilial 4+
+                      - generic [ref=f4e62]: nb unités ≥ 4 ou intensité haute
+                  - generic [ref=f4e63]: "0"
+                - generic [ref=f4e64]:
+                  - generic [ref=f4e65] [cursor=pointer]:
+                    - checkbox "Signaux précoces avis de motion / 1er projet" [checked] [ref=f4e66]
+                    - generic [ref=f4e67]:
+                      - generic [ref=f4e68]: Signaux précoces
+                      - generic [ref=f4e69]: avis de motion / 1er projet
+                  - generic [ref=f4e70]: "0"
+            - group [ref=f4e71]:
+              - generic "Villes" [ref=f4e72] [cursor=pointer]:
+                - generic [ref=f4e73]: ▸
+                - generic [ref=f4e74]: Villes
+              - generic [ref=f4e75]:
+                - generic [ref=f4e79]:
+                  - img [ref=f4e81]
+                  - searchbox "Rechercher une ville" [ref=f4e82]
+                - list [ref=f4e83]:
+                  - listitem [ref=f4e84]: Aucune donnée disponible
+      - generic [ref=f4e85]:
+        - generic [ref=f4e87]:
+          - generic [ref=f4e88]:
+            - region "Map" [ref=f4e90]
+            - group [ref=f4e93]:
+              - generic "Toggle attribution" [ref=f4e94]
+              - link "MapLibre" [ref=f4e96] [cursor=pointer]:
+                - /url: https://maplibre.org/
+          - generic [ref=f4e98]:
+            - button "Province" [pressed] [ref=f4e99] [cursor=pointer]
+            - button "Ville" [ref=f4e100] [cursor=pointer]
+            - button "Zone" [ref=f4e101] [cursor=pointer]
+          - generic [ref=f4e103]:
+            - paragraph [ref=f4e104]: Légende — signaux / ville
+            - list [ref=f4e105]:
+              - listitem [ref=f4e106]: 6+ signaux
+              - listitem [ref=f4e108]: 3–5 signaux
+              - listitem [ref=f4e110]: 1–2 signaux
+              - listitem [ref=f4e112]: Aucun signal (0)
+          - generic [ref=f4e115]: Chargement de la carte…
+        - complementary [ref=f4e116]:
+          - generic [ref=f4e117]:
+            - generic [ref=f4e119]: Sélection
+            - paragraph [ref=f4e120]: Cliquez sur une ville dans la liste ou sur la carte pour constituer le bucket.
+  - button "Ouvrir l'assistant radar" [ref=f4e121] [cursor=pointer]:
+    - img [ref=f4e122]

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781313917328:d038",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "RECU delegation 1000+ villes. Mon lot = M-Z restantes (geo registry 1106 - 550 cablees - exclues) = 379 villes ; codex A-L = 177. NB DESEQUILIBRE: le split par nom M-Z me donne 379 (vs 177 codex) a cause des nombreux Saint-/Sainte- (S). Split DISJOINT garanti (prefixe nom). Si tu veux ~50/50, je peux ceder a codex une tranche (ex: les Saint-* / Sainte-*), dis-moi. Sinon je prends les 379 M-Z.\nPIPELINE par ville: CONFIG (discovery pvIndexUrl, anti-invention) -> SCRAPE raw SCW (adapter generique inline, pas besoin de ALL_PV_CITIES) -> GRAPHIFY (graph/<ville>/latest.json). Stack leger api-only run --rm --no-deps (zero postgres/OOM), pas radar-dev/5301, jamais down -v. 4 sous-agents Sonnet 4.6, lots, jusqu a epuisement. Je rapporte X/379 par batch.\nJe lance la prep (helpers scrape-adhoc + scw-get) puis le 1er lot (top priorityRank: Terrebonne, Repentigny, Mercier, Marieville, Oka...)."
+  },
+  "createdAt": "2026-06-13T01:25:17.328Z"
+}

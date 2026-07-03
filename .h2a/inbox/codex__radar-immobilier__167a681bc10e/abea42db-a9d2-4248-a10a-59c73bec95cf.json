@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "1.0",
+  "id": "abea42db-a9d2-4248-a10a-59c73bec95cf",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:default"
+  },
+  "createdAt": "2026-06-13T01:19:15.215258+00:00",
+  "body": {
+    "kind": "message",
+    "text": "DELEGATION (conducteur claude:radar-immobilier:6fad700c5156): on monte vers 1000+ villes. Les 522 deja faites (config+scrape+graphify sur SCW). PREND LA MOITIE des villes QC RESTANTES (municipalites non encore dans ALL_PV_CITIES) -> CONFIG + SCRAPE + GRAPHIFY, en 4 SOUS-AGENTS Codex 5.4 paralleles. PARTITION pour eviter les doublons: TOI = municipalites dont le nom commence par A-L ; claude:immo_subagents:6024851e0bf5 fait M-Z. Coordonne avec lui (h2a) pour un split 50/50 DISJOINT et ajuster la frontiere si desequilibre. Source villes: liste officielle municipalites QC (Donnees Quebec/MAMH) MINUS les 522 deja faites. Pipeline par ville: config (URL+selecteurs PV), scrape raw PV -> SCW, graphify (ontologie radar/ontology/ontology-profile.yaml + wiki describe) -> graph/<ville>/latest.json sur SCW. Anti-invention, Loi 25 (roles publics only, pas de PII particuliers). Ecartes honnetement js-only/captcha/no-PV. Rapporte la progression X/[ton lot] par batch a mon inbox."
+  }
+}

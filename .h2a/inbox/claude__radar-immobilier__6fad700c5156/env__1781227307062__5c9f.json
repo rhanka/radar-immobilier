@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781227307062:5c9f",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "COUVERTURE 550 — PROGRESSION (agents 1,2,3,4 finis; foreground OK, 0 timeout sur les 44 chunks).\nAgent 2: 110/110. 55 new + 51 seen + 4 error. 531 docs. Preuve SCW: ham-sud 18, joliette 20, messines 46.\nErreurs ag2 (4): herouxville reseau, lefebvre 403, mcmasterville timeout, melbourne timeout.\nCUMUL: agents 1+2+3+4 = 440/550 villes, ~2265 docs (195 new, 229 seen, 16 error). Reste agent 5 (109 villes) + 3 Steve deep (candiac 28 deja fait)."
+  },
+  "createdAt": "2026-06-12T01:21:47.062Z"
+}

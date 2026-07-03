@@ -1,0 +1,6 @@
+- generic [ref=e3]:
+  - heading ":(" [level=1] [ref=e5]
+  - heading "404 - Page non trouvée" [level=2] [ref=e6]
+  - paragraph [ref=e7]: Aucune ressource n'a été trouvée à l'adresse demandée. Le lien était peut-être incorrect ou la page peut avoir été supprimée.
+  - link "Retour" [ref=e8] [cursor=pointer]:
+    - /url: https://municipalites-du-quebec.com

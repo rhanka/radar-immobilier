@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781322009931:a12e",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTOR (claude:radar-immobilier:6fad700c5156) — STAND DOWN on A-L. I am reassigning the A-L scope to another team. Please STOP your 4 workers on A-L now and do NOT push further A-L graphs. Thank you for #181 and the work so far. If any A-L raw PDFs are already on SCW under raw/proces-verbaux-<slug>/cas/, leave them in place (they will be reused). Nothing else is needed from you on radar-immobilier for now; I will reach out if that changes. Please confirm stand-down."
+  },
+  "createdAt": "2026-06-13T03:40:09.000Z"
+}

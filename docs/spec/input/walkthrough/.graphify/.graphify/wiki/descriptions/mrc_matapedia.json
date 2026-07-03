@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "mrc_matapedia",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "The MRC de la Matapédia is a regional county municipality (MRC) located in Quebec, Canada. It is part of Community 2 in the Graphify knowledge graph. The MRC de la Matapédia is associated with the Ville de Saint-Damase, indicating a jurisdictional or administrative relationship. It is also mentioned in the context of a radar-immobilier demo walkthrough transcript, suggesting relevance to real estate or property data analysis.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "64a98fb99e083a7293118d584a40c3b6298cf8197bc4ce8783313fef68c42e22",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

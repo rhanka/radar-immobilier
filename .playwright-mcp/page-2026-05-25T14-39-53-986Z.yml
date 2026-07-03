@@ -1,0 +1,97 @@
+- generic [ref=e1]:
+  - link "Ignorer et passer au contenu" [ref=e3] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e7]:
+    - generic [ref=e9]:
+      - navigation "Barre latérale":
+        - generic:
+          - generic:
+            - generic:
+              - button "Ouvrir la barre latérale":
+                - img
+        - generic:
+          - generic:
+            - link "Nouveau chat":
+              - /url: /
+              - generic:
+                - img
+              - generic: Nouveau chat
+          - generic:
+            - button "Rechercher dans les chats":
+              - generic:
+                - img
+              - generic: Rechercher dans les chats
+          - generic:
+            - button "Récents":
+              - generic:
+                - img
+              - generic: Récents
+        - generic:
+          - generic:
+            - button "Ouvrir le menu du profil"
+      - generic [ref=e10]:
+        - heading "Historique de chat" [level=2] [ref=e11]
+        - generic [ref=e12]:
+          - navigation "Historique de chat" [ref=e13]:
+            - generic [ref=e16]:
+              - link "Dom." [ref=e17] [cursor=pointer]:
+                - /url: /
+                - generic [ref=e18]: ChatGPT
+              - button "Fermer la barre latérale" [expanded] [ref=e20]:
+                - img [ref=e21]
+            - list [ref=e24]:
+              - listitem [ref=e25]:
+                - link "Nouveau chat" [ref=e26] [cursor=pointer]:
+                  - /url: /
+                  - img [ref=e28]
+                  - generic [ref=e31]: Nouveau chat
+              - listitem [ref=e32]:
+                - button "Rechercher dans les chats" [ref=e33] [cursor=pointer]:
+                  - img [ref=e35]
+                  - generic [ref=e38]: Rechercher dans les chats
+            - link "Bibliothèque" [ref=e39] [cursor=pointer]:
+              - /url: /library
+              - img [ref=e41]
+              - generic [ref=e44]: Bibliothèque
+            - link "Applications" [ref=e45] [cursor=pointer]:
+              - /url: /apps
+              - img [ref=e47]
+              - generic [ref=e50]: Applications
+            - link "Codex" [ref=e51] [cursor=pointer]:
+              - /url: /codex
+              - generic [ref=e52]:
+                - img [ref=e54]
+                - generic [ref=e57]: Codex
+              - img [ref=e59]
+            - generic [ref=e62] [cursor=pointer]:
+              - img [ref=e64]
+              - generic [ref=e67]: Plus
+          - button "Fabien Antoine Pro, ouvrir le menu du profil" [ref=e71] [cursor=pointer]:
+            - generic [ref=e75]:
+              - generic [ref=e77]: Fabien Antoine
+              - generic [ref=e80]: Pro
+            - button "Télécharger des applications" [ref=e83]:
+              - img [ref=e85]
+    - generic [ref=e88]:
+      - banner:
+        - button "Activer le chat éphémère" [ref=e94] [cursor=pointer]:
+          - img [ref=e95]
+      - main [ref=e97]:
+        - generic [ref=e100]:
+          - generic:
+            - generic:
+              - button:
+                - img
+          - generic [ref=e106]:
+            - generic [ref=e110]:
+              - button "Ajouter des fichiers et plus encore" [ref=e113] [cursor=pointer]:
+                - img
+              - textbox "Discuter avec ChatGPT" [active] [ref=e116]:
+                - /placeholder: Envoyer un message à ChatGPT
+              - button "Envoyer le prompt" [disabled] [ref=e120]:
+                - img [ref=e121]
+            - button [ref=e123]
+            - button [ref=e124]
+          - generic [ref=e130]: ChatGPT peut faire des erreurs. Envisagez de vérifier les informations importantes.
+  - alert [ref=e131]
+  - status [ref=e132]

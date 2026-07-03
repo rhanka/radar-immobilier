@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781289603504:9ce9",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION 265/522 sur SCW (~51%). Lots 4x10 fluides, zero saturation. Lot r7 lance. Bloc Saint-* riche en rezonages/densifications/CPTAQ/PPCMOI."
+  },
+  "createdAt": "2026-06-12T18:40:03.504Z"
+}

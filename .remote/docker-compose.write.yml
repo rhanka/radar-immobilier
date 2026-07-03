@@ -1,0 +1,7 @@
+services:
+  api:
+    environment:
+      RADAR_ONTOLOGY_WRITE_TOKEN: "radar-dev-write-36b44fa"
+  ui:
+    environment:
+      VITE_RADAR_ONTOLOGY_WRITE_TOKEN: "radar-dev-write-36b44fa"

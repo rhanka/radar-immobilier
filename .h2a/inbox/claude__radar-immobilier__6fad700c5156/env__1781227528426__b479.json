@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781227528426:b479",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "final-report",
+    "text": "COUVERTURE 550 — REPORT CONSOLIDE (couverture complete atteinte).\n550/550 villes couvertes: 549 cablees via 5 sous-agents (limit6, foreground, 0 timeout sur 55 chunks) + candiac (overlay, deep).\nSous-agents (549 villes): ~251 new + ~274 seen (incremental CAS) + 24 error. Par agent: ag1 110(569 docs), ag2 110(531), ag3 110(605), ag4 110(560), ag5 109(466).\n4 villes Steve en DEEP (tous PV): delson 21, sainte-catherine 87, saint-constant 242, candiac 28 docs.\nBILAN SCW GLOBAL: 10528 objets = ~5264 docs PV sur Scaleway (raw/proces-verbaux-*/cas/). ~4x le run initial (1333 docs limit3).\n24 erreurs source-side (reseau/404/403/timeout) reparties, relancables ulterieurement (pas de pb pipeline/creds).\nRAPPEL: candiac = SEULE config non cablee dans ALL_PV_CITIES sur main -> a cabler (1 ligne) pour durabilite; je l ai scrapee via overlay.\nStack radar-scrape: teardown des qu un dernier job deep (bmw0yl7l9) a confirme fini (down -v sur radar-scrape uniquement, demo jamais touchee). Raw pret pour l EXPLOITATION (signaux)."
+  },
+  "createdAt": "2026-06-12T01:25:28.426Z"
+}

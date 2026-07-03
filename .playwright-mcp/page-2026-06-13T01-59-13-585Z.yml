@@ -1,0 +1,1106 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - main [ref=e6]:
+      - generic [ref=e10]:
+        - button "Hamburger Site Navigation Icon" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+        - separator [ref=e20]
+    - region [ref=e22]:
+      - generic [ref=e25]:
+        - heading "2026" [level=1] [ref=e27]:
+          - generic [ref=e29]: "2026"
+        - generic [ref=e30]:
+          - generic [ref=e32]:
+            - paragraph [ref=e33]: PV 12 janvier 2026 (pdf)
+            - link "Download" [ref=e34] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/3f1b82ec-6120-40a4-9de2-3c5f95d216b1/PV%2012%20JANVIER%202026.pdf?ver=1779886533270
+          - generic [ref=e36]:
+            - paragraph [ref=e37]: PV 19 janvier 2026 taxation (pdf)
+            - link "Download" [ref=e38] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/196bd337-41e5-4abc-a7d8-7ab94d97b878/PV%2019%20JANVIER%202026.pdf?ver=1779886533270
+          - generic [ref=e40]:
+            - paragraph [ref=e41]: PV 09 février 2026 (pdf)
+            - link "Download" [ref=e42] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/dbe604bb-0937-42bd-86c9-09e650fd014e/PV%2009%20F%C3%89VRIER%202026.pdf?ver=1779886533270
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: PV 9 mars 2026 (pdf)
+            - link "Download" [ref=e46] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/3c86e5d3-d613-4526-8aab-040ee95e562a/S%C3%A9ance%20du%2009%20mars%202026.%20mis%20en%20page.pdf?ver=1779886533270
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: PV 30 mars 2026 extra (pdf)
+            - link "Download" [ref=e50] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/32fdef30-45a4-4c37-8671-04831c12a482/S%C3%A9ance%20du%2030%20mars%202026%20mis%20en%20page.pdf?ver=1779886533270
+          - generic [ref=e52]:
+            - paragraph [ref=e53]: PV 13 avril 2026 (pdf)
+            - link "Download" [ref=e54] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/f14777fc-389f-4f74-9671-8c8c08485a47/S%C3%A9ance%20ordinaire%20du%2013%20avril%202026%20(2).pdf?ver=1779886533270
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: PV 20 avril 2026 (pdf)
+            - link "Download" [ref=e58] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/4ed81bc8-99b8-4220-b3a7-74bb0dea639c/S%C3%A9ance%20extraordinaire%20du%2020%20avril%202026.pdf?ver=1779886533270
+    - region [ref=e60]:
+      - generic [ref=e63]:
+        - heading "2025" [level=2] [ref=e65]:
+          - generic [ref=e67]: "2025"
+        - generic [ref=e68]:
+          - generic [ref=e70]:
+            - paragraph [ref=e71]: PV 13 janvier 2025 (pdf)
+            - link "Download" [ref=e72] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/c93349fe-7d51-4536-87a4-294bb6c737ad/PV_20250113.pdf?ver=1779886533323
+          - generic [ref=e74]:
+            - paragraph [ref=e75]: PV 10 février 2025 (pdf)
+            - link "Download" [ref=e76] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/29365d4e-2e09-4edf-be7c-933bb7ef6291/PV_20250210.pdf?ver=1779886533323
+          - generic [ref=e78]:
+            - paragraph [ref=e79]: PV 10 mars 2025 (pdf)
+            - link "Download" [ref=e80] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/578884f2-df11-4a3c-a33e-c851295d4ecc/PV20250310.pdf?ver=1779886533323
+          - generic [ref=e82]:
+            - paragraph [ref=e83]: PV 14 avril 2025 (pdf)
+            - link "Download" [ref=e84] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/27bb5e42-e925-4e0e-b628-69398381eb62/PV20250414.pdf?ver=1779886533323
+          - generic [ref=e86]:
+            - paragraph [ref=e87]: PV 12 mai 2025 (pdf)
+            - link "Download" [ref=e88] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/982e0256-dfa1-488f-a718-726ea0937c90/PV20250512.pdf?ver=1779886533323
+          - generic [ref=e90]:
+            - paragraph [ref=e91]: PV 30 mai 2025 Extra (pdf)
+            - link "Download" [ref=e92] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/e48575fd-07b3-456a-82e5-617783b93ad3/PV20250530.pdf?ver=1779886533323
+          - generic [ref=e94]:
+            - paragraph [ref=e95]: PV 9 juin 2025 (pdf)
+            - link "Download" [ref=e96] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/133331aa-99e2-4fa3-88ff-b1e7fe015e91/PV20250609.pdf?ver=1779886533323
+          - generic [ref=e98]:
+            - paragraph [ref=e99]: PV 7 juillet 2025 (doc)
+            - link "Download" [ref=e100] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/50aafa31-818c-4709-b724-4082c94d6f64/3.%20PV20250707.doc?ver=1779886533323
+          - generic [ref=e102]:
+            - paragraph [ref=e103]: PV 6 août 2025 Extra (pdf)
+            - link "Download" [ref=e104] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/16256b0d-da03-4303-a72e-6574a15d8d54/PV20250806.pdf?ver=1779886533323
+          - generic [ref=e106]:
+            - paragraph [ref=e107]: PV 18 août 2025 (pdf)
+            - link "Download" [ref=e108] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/d94c0d95-ff7d-44df-a3ff-b316d8269138/PV20250818.pdf?ver=1779886533323
+          - generic [ref=e110]:
+            - paragraph [ref=e111]: PV 8 septembre 2025 (pdf)
+            - link "Download" [ref=e112] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/b00dc08f-62d7-4613-8c5c-d18f99284b49/PV20250908.pdf?ver=1779886533323
+          - generic [ref=e114]:
+            - paragraph [ref=e115]: PV 1 octobre 2025 (pdf)
+            - link "Download" [ref=e116] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/415bf421-22b9-446e-960c-a2151e3b49e2/PV20251001.pdf?ver=1779886533323
+          - generic [ref=e118]:
+            - paragraph [ref=e119]: PV 17 novembre 2025 (pdf)
+            - link "Download" [ref=e120] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/bd5d02c5-d0e9-42f8-af8d-8d15e3519c8a/PV%2017%20NOVEMBRE%202025.pdf?ver=1779886533323
+          - generic [ref=e122]:
+            - paragraph [ref=e123]: PV 8 décembre 2025 (pdf)
+            - link "Download" [ref=e124] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1ecadc62-f6a0-43c9-83b5-6af116f65087/PV%2008%20D%C3%89CEMBRE%202025.pdf?ver=1779886533323
+          - generic [ref=e126]:
+            - paragraph [ref=e127]: PV 8 décembre 2025 Budget (pdf)
+            - link "Download" [ref=e128] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/bca1ea08-e0e8-4d76-b994-cb430720238d/PV%2008%20D%C3%89CEMBRE%202025%20BUDGET.pdf?ver=1779886533323
+    - region [ref=e130]:
+      - generic [ref=e133]:
+        - heading "2024" [level=2] [ref=e135]:
+          - generic [ref=e137]: "2024"
+        - generic [ref=e138]:
+          - generic [ref=e140]:
+            - paragraph [ref=e141]: PV 15 janvier 2024 (pdf)
+            - link "Download" [ref=e142] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/6b1deb6b-f461-4a1c-a854-c1245ff53c0d/PV_20240115.pdf?ver=1779886533405
+          - generic [ref=e144]:
+            - paragraph [ref=e145]: PV 12 février 2024 (pdf)
+            - link "Download" [ref=e146] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/7aae722a-4907-4850-a452-e5fea28a0bb1/PV_20240212.pdf?ver=1779886533405
+          - generic [ref=e148]:
+            - paragraph [ref=e149]: PV 11 mars 2024 (pdf)
+            - link "Download" [ref=e150] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/44b8d706-0988-4699-a778-a1651cfb0f3c/PV_20240311.pdf?ver=1779886533405
+          - generic [ref=e152]:
+            - paragraph [ref=e153]: PV 8 avril 2024 (pdf)
+            - link "Download" [ref=e154] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/6c925ba2-3bd9-4ba3-a794-d04019fbbc74/PV_20240408.pdf?ver=1779886533405
+          - generic [ref=e156]:
+            - paragraph [ref=e157]: PV 29 avril 2024 Extra (pdf)
+            - link "Download" [ref=e158] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/69e4d1af-3c3b-4710-b502-03bd02c9d5dd/PV_20240429.pdf?ver=1779886533405
+          - generic [ref=e160]:
+            - paragraph [ref=e161]: PV 13 mai 2024 (pdf)
+            - link "Download" [ref=e162] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/ed163d12-af3b-4e90-b32d-97909c738687/PV_20240513.pdf?ver=1779886533405
+          - generic [ref=e164]:
+            - paragraph [ref=e165]: PV 10 juin 2024 (pdf)
+            - link "Download" [ref=e166] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/cdc8c09c-4b97-4463-b201-09aaa21d0d72/PV_20240610.pdf?ver=1779886533405
+          - generic [ref=e168]:
+            - paragraph [ref=e169]: PV 2 juillet 2024 (pdf)
+            - link "Download" [ref=e170] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/136d47bb-b52f-43ad-958f-58104ae83303/PV_20240702.pdf?ver=1779886533405
+          - generic [ref=e172]:
+            - paragraph [ref=e173]: PV 19 août 2024 (pdf)
+            - link "Download" [ref=e174] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/6a7542b1-7f6e-4534-ad02-505b0e6de6b6/PV_20240819.pdf?ver=1779886533405
+          - generic [ref=e176]:
+            - paragraph [ref=e177]: PV 9 septembre 2024 (pdf)
+            - link "Download" [ref=e178] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/7b49c587-f227-4c33-8356-e136ce595130/PV_20240909.pdf?ver=1779886533405
+          - generic [ref=e180]:
+            - paragraph [ref=e181]: PV 18 septembre 2024 (pdf)
+            - link "Download" [ref=e182] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/7d8a748e-e058-495b-aefa-e15e82207518/PV_20240918.pdf?ver=1779886533405
+          - generic [ref=e184]:
+            - paragraph [ref=e185]: PV 11 novembre 2024 (pdf)
+            - link "Download" [ref=e186] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/176b35ba-7310-4dae-899f-b27f16715fa0/PV_20241111.pdf?ver=1779886533405
+          - generic [ref=e188]:
+            - paragraph [ref=e189]: PV 9 décembre 2024 (pdf)
+            - link "Download" [ref=e190] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/7a7746e9-a1c1-4cd0-a978-0f41cbbc82b8/PV_20241209.pdf?ver=1779886533405
+          - generic [ref=e192]:
+            - paragraph [ref=e193]: PV 11 décembre 2024 Extra BUDGETPTI (pdf)
+            - link "Download" [ref=e194] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/df6db0fc-5dc0-4477-81d3-b7d7ca09f3a9/PV_20241211_BUDGETPTI.pdf?ver=1779886533405
+          - generic [ref=e196]:
+            - paragraph [ref=e197]: PV 11 décembre 2024 Extra TAXATION (pdf)
+            - link "Download" [ref=e198] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/68d04593-347c-4037-9033-8afa56deb74c/PV_20241211_TAXATION.pdf?ver=1779886533405
+    - region [ref=e200]:
+      - generic [ref=e203]:
+        - heading "2023" [level=2] [ref=e205]:
+          - generic [ref=e207]: "2023"
+        - generic [ref=e208]:
+          - generic [ref=e210]:
+            - paragraph [ref=e211]: PV 28 juin 2023 EXTRA (pdf)
+            - link "Download" [ref=e212] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2028%20juin%202023%20EXTRA.pdf?ver=1779886533516
+          - generic [ref=e214]:
+            - paragraph [ref=e215]: PV 19 juin 2023 (pdf)
+            - link "Download" [ref=e216] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2019%20juin%202023.pdf?ver=1779886533516
+          - generic [ref=e218]:
+            - paragraph [ref=e219]: PV 24 mai 2023 EXTRA (pdf)
+            - link "Download" [ref=e220] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2024%20mai%202023%20EXTRA%20non%20sign%C3%A9%20par%20DG%20(mag).pdf?ver=1779886533516
+          - generic [ref=e222]:
+            - paragraph [ref=e223]: PV 15 mai 2023 (pdf)
+            - link "Download" [ref=e224] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2015%20mai%202023%20non%20sign%C3%A9%20par%20DG%20(mag).pdf?ver=1779886533516
+          - generic [ref=e226]:
+            - paragraph [ref=e227]: PV 17 avril 2023 (pdf)
+            - link "Download" [ref=e228] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2017%20avril%202023%20non%20sign%C3%A9%20par%20DG%20(mag).pdf?ver=1779886533516
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: PV 20 mars 2023 (pdf)
+            - link "Download" [ref=e232] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20mars%202023.pdf?ver=1779886533516
+          - generic [ref=e234]:
+            - paragraph [ref=e235]: PV 8 mars 2023 EXTRA (pdf)
+            - link "Download" [ref=e236] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20mars%202023%20EXTRA.pdf?ver=1779886533516
+          - generic [ref=e238]:
+            - paragraph [ref=e239]: PV 20 février 2023 (pdf)
+            - link "Download" [ref=e240] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20f%C3%A9vrier%202023.pdf?ver=1779886533516
+          - generic [ref=e242]:
+            - paragraph [ref=e243]: PV 16 janvier 2023 (pdf)
+            - link "Download" [ref=e244] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2016%20janvier%202023.pdf?ver=1779886533516
+          - generic [ref=e246]:
+            - paragraph [ref=e247]: PV 10 juillet 2023 (pdf)
+            - link "Download" [ref=e248] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/fd36665d-5a0a-402e-8249-92a386a1b1cf/PV20230710.pdf?ver=1779886533516
+          - generic [ref=e250]:
+            - paragraph [ref=e251]: PV 31 juillet 2023 EXTRA (pdf)
+            - link "Download" [ref=e252] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/41eff254-d899-4016-9f0d-973668280d0f/PV20230731%20EXTRA.pdf?ver=1779886533516
+          - generic [ref=e254]:
+            - paragraph [ref=e255]: PV 28 août 2023 (pdf)
+            - link "Download" [ref=e256] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/e9ab28c1-035e-4c84-8fa5-b38fadd6be91/PV20230828.pdf?ver=1779886533516
+          - generic [ref=e258]:
+            - paragraph [ref=e259]: PV 18 septembre 2023 (pdf)
+            - link "Download" [ref=e260] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/46468059-8ff0-4cd9-a13b-c1012671a355/PV20230918.pdf?ver=1779886533516
+          - generic [ref=e262]:
+            - paragraph [ref=e263]: PV 16 octobre 2023 (pdf)
+            - link "Download" [ref=e264] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/40d22fa1-a715-44f4-b577-438cb7f02036/PV%2016%20octobre%202023.pdf?ver=1779886533516
+          - generic [ref=e266]:
+            - paragraph [ref=e267]: PV 20 novembre 2023 (pdf)
+            - link "Download" [ref=e268] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/caa37c16-6c45-4474-adf6-d200526b1b60/PV20231120.pdf?ver=1779886533516
+    - region [ref=e270]:
+      - generic [ref=e273]:
+        - heading "2023 (suite)" [level=2] [ref=e275]:
+          - generic [ref=e277]: 2023 (suite)
+        - generic [ref=e278]:
+          - generic [ref=e280]:
+            - paragraph [ref=e281]: PV 11 décembre 2023 Extra (pdf)
+            - link "Download" [ref=e282] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/aef86cc2-7f91-41a1-b6ff-499737803dd9/PV20231211%20Extra.pdf?ver=1779886533638
+          - generic [ref=e284]:
+            - paragraph [ref=e285]: PV 13 décembre 2023 Extra Règlement de taxation (pdf)
+            - link "Download" [ref=e286] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/56695d2c-2ffe-4b96-b201-6b4a83abc243/PV20231213%20%20Extra%20R%C3%A8glement%20de%20taxation.pdf?ver=1779886533639
+          - generic [ref=e288]:
+            - paragraph [ref=e289]: PV 13 décembre 2023 Extra Budget (pdf)
+            - link "Download" [ref=e290] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/0f152ef6-8ec1-484b-a138-6e87dbd72336/PV20231213%20Extra%20Budget.pdf?ver=1779886533639
+          - generic [ref=e292]:
+            - paragraph [ref=e293]: PV 18 décembre 2023 (pdf)
+            - link "Download" [ref=e294] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/b56e2e3c-9a59-4a3e-ab44-c1ed95a3a47e/PV20231218.pdf?ver=1779886533639
+    - region [ref=e296]:
+      - generic [ref=e299]:
+        - paragraph [ref=e302]: "2022"
+        - generic [ref=e303]:
+          - generic [ref=e305]:
+            - paragraph [ref=e306]: PV 22 décembre 2022 EXTRA RÈGLEMENT DE TAXATION (pdf)
+            - link "Download" [ref=e307] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2022%20d%C3%A9cembre%202022%20EXTRA%20R%C3%88GLEMENT%20DE%20TAXATIO.pdf?ver=1779886533680
+          - generic [ref=e309]:
+            - paragraph [ref=e310]: PV 22 décembre 2022 EXTRA BUDGET (pdf)
+            - link "Download" [ref=e311] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2022%20d%C3%A9cembre%202022%20EXTRA%20BUDGET.pdf?ver=1779886533680
+          - generic [ref=e313]:
+            - paragraph [ref=e314]: PV 19 décembre 2022 (pdf)
+            - link "Download" [ref=e315] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2019%20d%C3%A9cembre%202022.pdf?ver=1779886533680
+          - generic [ref=e317]:
+            - paragraph [ref=e318]: PV 14 décembre 2022 extra (pdf)
+            - link "Download" [ref=e319] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2014%20d%C3%A9cembre%202022%20extra.pdf?ver=1779886533680
+          - generic [ref=e321]:
+            - paragraph [ref=e322]: PV 21 novembre 2022 (pdf)
+            - link "Download" [ref=e323] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2021%20novembre%202022.pdf?ver=1779886533680
+          - generic [ref=e325]:
+            - paragraph [ref=e326]: PV 17 octobre 2022 (pdf)
+            - link "Download" [ref=e327] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2017%20octobre%202022.pdf?ver=1779886533680
+          - generic [ref=e329]:
+            - paragraph [ref=e330]: PV 19 septembre 2022 (pdf)
+            - link "Download" [ref=e331] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2019%20septembre%202022.pdf?ver=1779886533680
+    - region [ref=e333]:
+      - generic [ref=e337]:
+        - generic [ref=e339]:
+          - paragraph [ref=e340]: PV 22 août 2022 (pdf)
+          - link "Download" [ref=e341] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2022%20ao%C3%BBt%202022.pdf?ver=1779886533728
+        - generic [ref=e343]:
+          - paragraph [ref=e344]: PV 11 juillet 2022 (pdf)
+          - link "Download" [ref=e345] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20juillet%202022.pdf?ver=1779886533728
+        - generic [ref=e347]:
+          - paragraph [ref=e348]: PV 20 juin 2022 (pdf)
+          - link "Download" [ref=e349] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20juin%202022.pdf?ver=1779886533728
+        - generic [ref=e351]:
+          - paragraph [ref=e352]: PV 8 juin 2022 extra (pdf)
+          - link "Download" [ref=e353] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20juin%202022%20extra.pdf?ver=1779886533728
+        - generic [ref=e355]:
+          - paragraph [ref=e356]: PV 30 mai 2022 extra (pdf)
+          - link "Download" [ref=e357] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2030%20mai%202022%20extra.pdf?ver=1779886533728
+        - generic [ref=e359]:
+          - paragraph [ref=e360]: PV 16 mai 2022 (pdf)
+          - link "Download" [ref=e361] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2016%20mai%202022.pdf?ver=1779886533728
+        - generic [ref=e363]:
+          - paragraph [ref=e364]: PV 19 avril 2022 (pdf)
+          - link "Download" [ref=e365] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2019%20avril%202022.pdf?ver=1779886533728
+        - generic [ref=e367]:
+          - paragraph [ref=e368]: PV 21 mars 2022 (pdf)
+          - link "Download" [ref=e369] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2021%20mars%202022.pdf?ver=1779886533728
+        - generic [ref=e371]:
+          - paragraph [ref=e372]: PV 16 mars 2022 extra (pdf)
+          - link "Download" [ref=e373] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2016%20mars%202022%20extra.pdf?ver=1779886533728
+        - generic [ref=e375]:
+          - paragraph [ref=e376]: PV 21 février 2022 (pdf)
+          - link "Download" [ref=e377] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2021%20f%C3%A9vrier%202022.pdf?ver=1779886533728
+        - generic [ref=e379]:
+          - paragraph [ref=e380]: PV 7 février 2022 EXTRA (pdf)
+          - link "Download" [ref=e381] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%207%20f%C3%A9vrier%202022%20EXTRA.pdf?ver=1779886533728
+        - generic [ref=e383]:
+          - paragraph [ref=e384]: PV 20 janvier 2022 EXTRA RÈGLEMENT DE TAXATION (pdf)
+          - link "Download" [ref=e385] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20janvier%202022%20EXTRA%20R%C3%88GLEMENT%20DE%20TAXATION.pdf?ver=1779886533728
+        - generic [ref=e387]:
+          - paragraph [ref=e388]: PV 20 janvier 2022 EXTRA BUDGET (pdf)
+          - link "Download" [ref=e389] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20janvier%202022%20EXTRA%20BUDGET.pdf?ver=1779886533728
+        - generic [ref=e391]:
+          - paragraph [ref=e392]: PV 20 janvier 2022 EXTRA ACHAT DE TUYAUX À LA VILLE DE QUÉBEC (pdf)
+          - link "Download" [ref=e393] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20janvier%202022%20EXTRA%20ACHAT%20DE%20TUYAUX%20%C3%80%20LA%20.pdf?ver=1779886533728
+        - generic [ref=e395]:
+          - paragraph [ref=e396]: PV 17 janvier 2022 (pdf)
+          - link "Download" [ref=e397] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2017%20janvier%202022.pdf?ver=1779886533728
+    - region [ref=e399]:
+      - generic [ref=e402]:
+        - paragraph [ref=e405]: "2021"
+        - generic [ref=e406]:
+          - generic [ref=e408]:
+            - paragraph [ref=e409]: PV 20 décembre 2021 extra (pdf)
+            - link "Download" [ref=e410] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2020%20d%C3%A9cembre%202021%20extra.pdf?ver=1779886533817
+          - generic [ref=e412]:
+            - paragraph [ref=e413]: PV 13 décembre 2021 (pdf)
+            - link "Download" [ref=e414] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2013%20d%C3%A9cembre%202021.pdf?ver=1779886533817
+          - generic [ref=e416]:
+            - paragraph [ref=e417]: PV 22 novembre 2021 (pdf)
+            - link "Download" [ref=e418] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2022%20novembre%202021.pdf?ver=1779886533817
+          - generic [ref=e420]:
+            - paragraph [ref=e421]: PV 4 octobre 2021 (pdf)
+            - link "Download" [ref=e422] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%204%20octobre%202021.pdf?ver=1779886533817
+    - region [ref=e424]:
+      - generic [ref=e428]:
+        - link "Download PV 27 septembre 2021 extra" [ref=e430] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2027%20septembre%202021%20extra.pdf?ver=1779886533849
+          - generic [ref=e431]:
+            - generic [ref=e432]: PV 27 septembre 2021 extra (pdf)
+            - button "Download" [ref=e433]:
+              - img [ref=e434]
+              - generic [ref=e436]: Download
+        - link "Download PV 15 septembre 2021 extra" [ref=e438] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2015%20septembre%202021%20extra.pdf?ver=1779886533849
+          - generic [ref=e439]:
+            - generic [ref=e440]: PV 15 septembre 2021 extra (pdf)
+            - button "Download" [ref=e441]:
+              - img [ref=e442]
+              - generic [ref=e444]: Download
+        - link "Download PV 13 septembre 2021" [ref=e446] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2013%20septembre%202021.pdf?ver=1779886533849
+          - generic [ref=e447]:
+            - generic [ref=e448]: PV 13 septembre 2021 (pdf)
+            - button "Download" [ref=e449]:
+              - img [ref=e450]
+              - generic [ref=e452]: Download
+        - link "Download PV 16 août 2021" [ref=e454] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2016%20ao%C3%BBt%202021.pdf?ver=1779886533849
+          - generic [ref=e455]:
+            - generic [ref=e456]: PV 16 août 2021 (pdf)
+            - button "Download" [ref=e457]:
+              - img [ref=e458]
+              - generic [ref=e460]: Download
+        - link "Download PV 5 juillet 2021" [ref=e462] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%205%20juillet%202021.pdf?ver=1779886533849
+          - generic [ref=e463]:
+            - generic [ref=e464]: PV 5 juillet 2021 (pdf)
+            - button "Download" [ref=e465]:
+              - img [ref=e466]
+              - generic [ref=e468]: Download
+        - link "Download PV 21 juin 2021 extra" [ref=e470] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2021%20juin%202021%20extra.pdf?ver=1779886533849
+          - generic [ref=e471]:
+            - generic [ref=e472]: PV 21 juin 2021 extra (pdf)
+            - button "Download" [ref=e473]:
+              - img [ref=e474]
+              - generic [ref=e476]: Download
+        - link "Download PV 14 juin 2021" [ref=e478] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2014%20juin%202021.pdf?ver=1779886533849
+          - generic [ref=e479]:
+            - generic [ref=e480]: PV 14 juin 2021 (pdf)
+            - button "Download" [ref=e481]:
+              - img [ref=e482]
+              - generic [ref=e484]: Download
+        - link "Download PV 17 mai 2021 extra" [ref=e486] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2017%20mai%202021%20extra.pdf?ver=1779886533849
+          - generic [ref=e487]:
+            - generic [ref=e488]: PV 17 mai 2021 extra (pdf)
+            - button "Download" [ref=e489]:
+              - img [ref=e490]
+              - generic [ref=e492]: Download
+        - link "Download PV 10 mai 2021" [ref=e494] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2010%20mai%202021.pdf?ver=1779886533849
+          - generic [ref=e495]:
+            - generic [ref=e496]: PV 10 mai 2021 (pdf)
+            - button "Download" [ref=e497]:
+              - img [ref=e498]
+              - generic [ref=e500]: Download
+        - link "Download PV 12 avril 2021" [ref=e502] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2012%20avril%202021.pdf?ver=1779886533849
+          - generic [ref=e503]:
+            - generic [ref=e504]: PV 12 avril 2021 (pdf)
+            - button "Download" [ref=e505]:
+              - img [ref=e506]
+              - generic [ref=e508]: Download
+        - link "Download PV 8 mars 2021 séance ordinaire" [ref=e510] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20mars%202021%20s%C3%A9ance%20ordinaire.pdf?ver=1779886533849
+          - generic [ref=e511]:
+            - generic [ref=e512]: PV 8 mars 2021 séance ordinaire (pdf)
+            - button "Download" [ref=e513]:
+              - img [ref=e514]
+              - generic [ref=e516]: Download
+        - link "Download PV 5 mars 2021 séance extra" [ref=e518] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%205%20mars%202021%20s%C3%A9ance%20extra.pdf?ver=1779886533849
+          - generic [ref=e519]:
+            - generic [ref=e520]: PV 5 mars 2021 séance extra (pdf)
+            - button "Download" [ref=e521]:
+              - img [ref=e522]
+              - generic [ref=e524]: Download
+        - link "Download PV 15 février 2021 séance extra FIMEAU" [ref=e526] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2015%20f%C3%A9vrier%202021%20s%C3%A9ance%20extra%20FIMEAU.pdf?ver=1779886533849
+          - generic [ref=e527]:
+            - generic [ref=e528]: PV 15 février 2021 séance extra FIMEAU (pdf)
+            - button "Download" [ref=e529]:
+              - img [ref=e530]
+              - generic [ref=e532]: Download
+        - link "Download PV 8 février 2021 séance ordinaire" [ref=e534] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20f%C3%A9vrier%202021%20s%C3%A9ance%20ordinaire.pdf?ver=1779886533849
+          - generic [ref=e535]:
+            - generic [ref=e536]: PV 8 février 2021 séance ordinaire (pdf)
+            - button "Download" [ref=e537]:
+              - img [ref=e538]
+              - generic [ref=e540]: Download
+        - link "Download PV 11 janvier 2021 séance ordinaire" [ref=e542] [cursor=pointer]:
+          - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20janvier%202021%20s%C3%A9ance%20ordinaire.pdf?ver=1779886533849
+          - generic [ref=e543]:
+            - generic [ref=e544]: PV 11 janvier 2021 séance ordinaire (pdf)
+            - button "Download" [ref=e545]:
+              - img [ref=e546]
+              - generic [ref=e548]: Download
+    - region [ref=e550]:
+      - generic [ref=e553]:
+        - paragraph [ref=e556]:
+          - strong [ref=e558]: "2020"
+        - generic [ref=e559]:
+          - generic [ref=e561]:
+            - paragraph [ref=e562]: PV 22 octobre 2020 Extra (pdf)
+            - link "Download" [ref=e563] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20extra%2022%20octobre%202020.pdf?ver=1779886533972
+          - generic [ref=e565]:
+            - paragraph [ref=e566]: PV 13 octobre 2020 (pdf)
+            - link "Download" [ref=e567] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2013%20octobre%202020.pdf?ver=1779886533973
+          - generic [ref=e569]:
+            - paragraph [ref=e570]: PV 14 septembre 2020 (pdf)
+            - link "Download" [ref=e571] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2014%20septembre%202020.pdf?ver=1779886533973
+          - generic [ref=e573]:
+            - paragraph [ref=e574]: PV 17 aout 2020 (pdf)
+            - link "Download" [ref=e575] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2017%20aout%202020.pdf?ver=1779886533973
+          - generic [ref=e577]:
+            - paragraph [ref=e578]: PV extraordinaire 9 juillet 2020 (pdf)
+            - link "Download" [ref=e579] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20extraordinaire%209%20juillet%202020.pdf?ver=1779886533973
+          - generic [ref=e581]:
+            - paragraph [ref=e582]: PV 6 juillet 2020 (pdf)
+            - link "Download" [ref=e583] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%206%20juillet%202020.pdf?ver=1779886533973
+          - generic [ref=e585]:
+            - paragraph [ref=e586]: PV extraordinaire 17 juin 2020 (pdf)
+            - link "Download" [ref=e587] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20extraordinaire%2017%20juin%202020.pdf?ver=1779886533973
+          - generic [ref=e589]:
+            - paragraph [ref=e590]: PV 8 juin 2020 (pdf)
+            - link "Download" [ref=e591] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20juin%202020.pdf?ver=1779886533973
+          - generic [ref=e593]:
+            - paragraph [ref=e594]: PV 11 mai 2020 (pdf)
+            - link "Download" [ref=e595] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20mai%202020.pdf?ver=1779886533973
+          - generic [ref=e597]:
+            - paragraph [ref=e598]: PV extraordinaire 27 avril 2020 (pdf)
+            - link "Download" [ref=e599] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20extraordinaire%2027%20avril%202020.pdf?ver=1779886533973
+          - generic [ref=e601]:
+            - paragraph [ref=e602]: PV extraordinaire 16 avril 2020 (pdf)
+            - link "Download" [ref=e603] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20extraordinaire%2016%20avril%202020.pdf?ver=1779886533973
+          - generic [ref=e605]:
+            - paragraph [ref=e606]: PV 14 avril 2020 (pdf)
+            - link "Download" [ref=e607] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2014%20avril%202020.pdf?ver=1779886533973
+          - generic [ref=e609]:
+            - paragraph [ref=e610]: PV 9 mars 2020 (pdf)
+            - link "Download" [ref=e611] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%209%20mars%202020.pdf?ver=1779886533973
+          - generic [ref=e613]:
+            - paragraph [ref=e614]: PV 10 février 2020 (pdf)
+            - link "Download" [ref=e615] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2010%20f%C3%A9vrier%202020.pdf?ver=1779886533973
+          - generic [ref=e617]:
+            - paragraph [ref=e618]: PV 13 janvier 2020 (pdf)
+            - link "Download" [ref=e619] [cursor=pointer]:
+              - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2013%20janvier%202020.pdf?ver=1779886533973
+    - region [ref=e621]:
+      - generic [ref=e624]:
+        - generic [ref=e625]:
+          - heading [level=2] [ref=e626]
+          - paragraph [ref=e629]:
+            - strong [ref=e631]: "2019"
+        - generic [ref=e632]:
+          - link "Download PV extraordinaire budget 19 décembre 2019" [ref=e634] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PVextraordinairebudget19%20d%C3%A9cembre%202020.pdf?ver=1779886534057
+            - generic [ref=e635]:
+              - generic [ref=e636]: PV extraordinaire budget 19 décembre 2019 (pdf)
+              - button "Download" [ref=e637]:
+                - img [ref=e638]
+                - generic [ref=e640]: Download
+          - link "Download PV extraordinaire reg taxes 19 décembre 2019" [ref=e642] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20%20extraordinaire%20reg%20taxes%2019%20d%C3%A9cembre%202019.pdf?ver=1779886534057
+            - generic [ref=e643]:
+              - generic [ref=e644]: PV extraordinaire reg taxes 19 décembre 2019 (pdf)
+              - button "Download" [ref=e645]:
+                - img [ref=e646]
+                - generic [ref=e648]: Download
+          - link "Download PV extraordinaire 16 décembre 2019" [ref=e650] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20%20extraordinaire%2016%20d%C3%A9cembre%202019.pdf?ver=1779886534057
+            - generic [ref=e651]:
+              - generic [ref=e652]: PV extraordinaire 16 décembre 2019 (pdf)
+              - button "Download" [ref=e653]:
+                - img [ref=e654]
+                - generic [ref=e656]: Download
+          - link "Download PV 9 décembre 2019" [ref=e658] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%209%20d%C3%A9cembre%202019.pdf?ver=1779886534057
+            - generic [ref=e659]:
+              - generic [ref=e660]: PV 9 décembre 2019 (pdf)
+              - button "Download" [ref=e661]:
+                - img [ref=e662]
+                - generic [ref=e664]: Download
+    - region [ref=e666]:
+      - generic [ref=e669]:
+        - paragraph [ref=e672]:
+          - generic [ref=e673]:
+            - strong [ref=e674]: "2019"
+            - text: (suite)
+        - generic [ref=e675]:
+          - link "Download PV 11 novembre 2019" [ref=e677] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20novembre%202019.pdf?ver=1779886534113
+            - generic [ref=e678]:
+              - generic [ref=e679]: PV 11 novembre 2019 (pdf)
+              - button "Download" [ref=e680]:
+                - img [ref=e681]
+                - generic [ref=e683]: Download
+          - link "Download PV 15 octobre 2019" [ref=e685] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2015%20octobre%202019.pdf?ver=1779886534113
+            - generic [ref=e686]:
+              - generic [ref=e687]: PV 15 octobre 2019 (pdf)
+              - button "Download" [ref=e688]:
+                - img [ref=e689]
+                - generic [ref=e691]: Download
+          - link "Download PV 9 septembre 2019" [ref=e693] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%209%20septembre%202019.pdf?ver=1779886534113
+            - generic [ref=e694]:
+              - generic [ref=e695]: PV 9 septembre 2019 (pdf)
+              - button "Download" [ref=e696]:
+                - img [ref=e697]
+                - generic [ref=e699]: Download
+          - link "Download PV 11 juillet 2019 extra" [ref=e701] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20juillet%202019%20extra.pdf?ver=1779886534113
+            - generic [ref=e702]:
+              - generic [ref=e703]: PV 11 juillet 2019 extra (pdf)
+              - button "Download" [ref=e704]:
+                - img [ref=e705]
+                - generic [ref=e707]: Download
+          - link "Download PV 8 juillet 2019" [ref=e709] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20juillet%202019.pdf?ver=1779886534113
+            - generic [ref=e710]:
+              - generic [ref=e711]: PV 8 juillet 2019 (pdf)
+              - button "Download" [ref=e712]:
+                - img [ref=e713]
+                - generic [ref=e715]: Download
+          - link "Download PV 26 juin 2019 extra" [ref=e717] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%20extra%2026%20juin%202019.pdf?ver=1779886534113
+            - generic [ref=e718]:
+              - generic [ref=e719]: PV 26 juin 2019 extra (pdf)
+              - button "Download" [ref=e720]:
+                - img [ref=e721]
+                - generic [ref=e723]: Download
+          - link "Download PV 10 juin 2019" [ref=e725] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2010%20juin%202019.pdf?ver=1779886534113
+            - generic [ref=e726]:
+              - generic [ref=e727]: PV 10 juin 2019 (pdf)
+              - button "Download" [ref=e728]:
+                - img [ref=e729]
+                - generic [ref=e731]: Download
+          - link "Download PV 13 mai 2019" [ref=e733] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2013%20mai%202019.doc?ver=1779886534113
+            - generic [ref=e734]:
+              - generic [ref=e735]: PV 13 mai 2019 (doc)
+              - button "Download" [ref=e736]:
+                - img [ref=e737]
+                - generic [ref=e739]: Download
+          - link "Download PV 8 avril 2019" [ref=e741] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%208%20avril%202019.pdf?ver=1779886534113
+            - generic [ref=e742]:
+              - generic [ref=e743]: PV 8 avril 2019 (pdf)
+              - button "Download" [ref=e744]:
+                - img [ref=e745]
+                - generic [ref=e747]: Download
+          - link "Download PV 11 mars 2019" [ref=e749] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20mars%202019.pdf?ver=1779886534113
+            - generic [ref=e750]:
+              - generic [ref=e751]: PV 11 mars 2019 (pdf)
+              - button "Download" [ref=e752]:
+                - img [ref=e753]
+                - generic [ref=e755]: Download
+          - link "Download PV 11 février 2019" [ref=e757] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2011%20f%C3%A9vrier%202019.pdf?ver=1779886534113
+            - generic [ref=e758]:
+              - generic [ref=e759]: PV 11 février 2019 (pdf)
+              - button "Download" [ref=e760]:
+                - img [ref=e761]
+                - generic [ref=e763]: Download
+          - link "Download PV 14 janvier 2019" [ref=e765] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2014%20janvier%202019.pdf?ver=1779886534113
+            - generic [ref=e766]:
+              - generic [ref=e767]: PV 14 janvier 2019 (pdf)
+              - button "Download" [ref=e768]:
+                - img [ref=e769]
+                - generic [ref=e771]: Download
+          - link "Download PV 14 janvier 2019 extra" [ref=e773] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%2014%20janvier%202019%20extraordinaire.pdf?ver=1779886534113
+            - generic [ref=e774]:
+              - generic [ref=e775]: PV 14 janvier 2019 extra (pdf)
+              - button "Download" [ref=e776]:
+                - img [ref=e777]
+                - generic [ref=e779]: Download
+          - link "Download PV 9 décembre 2019" [ref=e781] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/PV%209%20d%C3%A9cembre%202019.pdf?ver=1779886534113
+            - generic [ref=e782]:
+              - generic [ref=e783]: PV 9 décembre 2019 (pdf)
+              - button "Download" [ref=e784]:
+                - img [ref=e785]
+                - generic [ref=e787]: Download
+    - region [ref=e789]:
+      - generic [ref=e792]:
+        - paragraph [ref=e795]:
+          - strong [ref=e797]: "2018"
+        - generic [ref=e798]:
+          - link "Download PV 17 décembre 2018 extra" [ref=e800] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1d1eip7nn_819560.pdf?ver=1779886534263
+            - generic [ref=e801]:
+              - generic [ref=e802]: PV 17 décembre 2018 extra (pdf)
+              - button "Download" [ref=e803]:
+                - img [ref=e804]
+                - generic [ref=e806]: Download
+          - link "Download PV 10 décembre 2018" [ref=e808] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1d1eio9b2_133987.pdf?ver=1779886534263
+            - generic [ref=e809]:
+              - generic [ref=e810]: PV 10 décembre 2018 (pdf)
+              - button "Download" [ref=e811]:
+                - img [ref=e812]
+                - generic [ref=e814]: Download
+          - link "Download PV 12 novembre 2018" [ref=e816] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1d1bvtq3g_861030.pdf?ver=1779886534263
+            - generic [ref=e817]:
+              - generic [ref=e818]: PV 12 novembre 2018 (pdf)
+              - button "Download" [ref=e819]:
+                - img [ref=e820]
+                - generic [ref=e822]: Download
+          - link "Download PV 9 octobre 2018 (pdf)" [ref=e824] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cuudn7t7_349494.pdf?ver=1779886534263
+            - generic [ref=e825]:
+              - generic [ref=e826]: PV 9 octobre 2018 (pdf) (pdf)
+              - button "Download" [ref=e827]:
+                - img [ref=e828]
+                - generic [ref=e830]: Download
+          - link "Download PV 10 septembre 2018" [ref=e832] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed4fh9_546283.pdf?ver=1779886534263
+            - generic [ref=e833]:
+              - generic [ref=e834]: PV 10 septembre 2018 (pdf)
+              - button "Download" [ref=e835]:
+                - img [ref=e836]
+                - generic [ref=e838]: Download
+          - link "Download PV 16 juillet 2018 extra" [ref=e840] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed51dr_36041.pdf?ver=1779886534263
+            - generic [ref=e841]:
+              - generic [ref=e842]: PV 16 juillet 2018 extra (pdf)
+              - button "Download" [ref=e843]:
+                - img [ref=e844]
+                - generic [ref=e846]: Download
+          - link "Download PV 9 juillet 2018" [ref=e848] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1d1c03nio_477535.pdf?ver=1779886534263
+            - generic [ref=e849]:
+              - generic [ref=e850]: PV 9 juillet 2018 (pdf)
+              - button "Download" [ref=e851]:
+                - img [ref=e852]
+                - generic [ref=e854]: Download
+          - link "Download PV 11 juin 2018" [ref=e856] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed5agn_97893.pdf?ver=1779886534263
+            - generic [ref=e857]:
+              - generic [ref=e858]: PV 11 juin 2018 (pdf)
+              - button "Download" [ref=e859]:
+                - img [ref=e860]
+                - generic [ref=e862]: Download
+          - link "Download PV 14 mai 2018" [ref=e864] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed5jm4_974777.pdf?ver=1779886534263
+            - generic [ref=e865]:
+              - generic [ref=e866]: PV 14 mai 2018 (pdf)
+              - button "Download" [ref=e867]:
+                - img [ref=e868]
+                - generic [ref=e870]: Download
+          - link "Download PV 9 avril 2018" [ref=e872] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed670q_948993.pdf?ver=1779886534263
+            - generic [ref=e873]:
+              - generic [ref=e874]: PV 9 avril 2018 (pdf)
+              - button "Download" [ref=e875]:
+                - img [ref=e876]
+                - generic [ref=e878]: Download
+          - link "Download PV 12 mars 2018" [ref=e880] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed6ih0_666927.pdf?ver=1779886534263
+            - generic [ref=e881]:
+              - generic [ref=e882]: PV 12 mars 2018 (pdf)
+              - button "Download" [ref=e883]:
+                - img [ref=e884]
+                - generic [ref=e886]: Download
+          - link "Download PV 12 février 2018" [ref=e888] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed6ptq_161835.pdf?ver=1779886534263
+            - generic [ref=e889]:
+              - generic [ref=e890]: PV 12 février 2018 (pdf)
+              - button "Download" [ref=e891]:
+                - img [ref=e892]
+                - generic [ref=e894]: Download
+          - link "Download PV 15 janvier 2018" [ref=e896] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed76ds_979922.pdf?ver=1779886534263
+            - generic [ref=e897]:
+              - generic [ref=e898]: PV 15 janvier 2018 (pdf)
+              - button "Download" [ref=e899]:
+                - img [ref=e900]
+                - generic [ref=e902]: Download
+          - link "Download PV 15 janvier 2018 extra" [ref=e904] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed76ds_425034.pdf?ver=1779886534263
+            - generic [ref=e905]:
+              - generic [ref=e906]: PV 15 janvier 2018 extra (pdf)
+              - button "Download" [ref=e907]:
+                - img [ref=e908]
+                - generic [ref=e910]: Download
+          - link "Download PV 15 janvier 2018 extra budget" [ref=e912] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqed76dt_124253.pdf?ver=1779886534263
+            - generic [ref=e913]:
+              - generic [ref=e914]: PV 15 janvier 2018 extra budget (pdf)
+              - button "Download" [ref=e915]:
+                - img [ref=e916]
+                - generic [ref=e918]: Download
+    - region [ref=e920]:
+      - generic [ref=e923]:
+        - paragraph [ref=e926]:
+          - strong [ref=e928]: "2017"
+        - generic [ref=e929]:
+          - link "Download PV 10 janvier 2017" [ref=e931] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedo4mr_922448.pdf?ver=1779886534419
+            - generic [ref=e932]:
+              - generic [ref=e933]: PV 10 janvier 2017 (pdf)
+              - button "Download" [ref=e934]:
+                - img [ref=e935]
+                - generic [ref=e937]: Download
+          - link "Download PV 13 février 2017" [ref=e939] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqednt43_655867.pdf?ver=1779886534419
+            - generic [ref=e940]:
+              - generic [ref=e941]: PV 13 février 2017 (pdf)
+              - button "Download" [ref=e942]:
+                - img [ref=e943]
+                - generic [ref=e945]: Download
+          - link "Download PV 13 mars 2017" [ref=e947] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedphc5_258393.pdf?ver=1779886534419
+            - generic [ref=e948]:
+              - generic [ref=e949]: PV 13 mars 2017 (pdf)
+              - button "Download" [ref=e950]:
+                - img [ref=e951]
+                - generic [ref=e953]: Download
+          - link "Download PV 10 avril 2017" [ref=e955] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedmue3_106858.pdf?ver=1779886534419
+            - generic [ref=e956]:
+              - generic [ref=e957]: PV 10 avril 2017 (pdf)
+              - button "Download" [ref=e958]:
+                - img [ref=e959]
+                - generic [ref=e961]: Download
+          - link "Download PV 8 mai 2017" [ref=e963] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedp5tf_68977.pdf?ver=1779886534419
+            - generic [ref=e964]:
+              - generic [ref=e965]: PV 8 mai 2017 (pdf)
+              - button "Download" [ref=e966]:
+                - img [ref=e967]
+                - generic [ref=e969]: Download
+          - link "Download PV 12 juin 2017" [ref=e971] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedp0fc_412240.pdf?ver=1779886534419
+            - generic [ref=e972]:
+              - generic [ref=e973]: PV 12 juin 2017 (pdf)
+              - button "Download" [ref=e974]:
+                - img [ref=e975]
+                - generic [ref=e977]: Download
+          - link "Download PV 28 juin 2017 extra" [ref=e979] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedp0fd_824676.pdf?ver=1779886534419
+            - generic [ref=e980]:
+              - generic [ref=e981]: PV 28 juin 2017 extra (pdf)
+              - button "Download" [ref=e982]:
+                - img [ref=e983]
+                - generic [ref=e985]: Download
+          - link "Download PV 10 juillet 2017 extra" [ref=e987] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedoblv_242296.pdf?ver=1779886534419
+            - generic [ref=e988]:
+              - generic [ref=e989]: PV 10 juillet 2017 extra (pdf)
+              - button "Download" [ref=e990]:
+                - img [ref=e991]
+                - generic [ref=e993]: Download
+          - link "Download PV 14 août 2017" [ref=e995] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedmb1j_158304.pdf?ver=1779886534419
+            - generic [ref=e996]:
+              - generic [ref=e997]: PV 14 août 2017 (pdf)
+              - button "Download" [ref=e998]:
+                - img [ref=e999]
+                - generic [ref=e1001]: Download
+          - link "Download PV 11 septembre 2017" [ref=e1003] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedpvtr_132969.pdf?ver=1779886534419
+            - generic [ref=e1004]:
+              - generic [ref=e1005]: PV 11 septembre 2017 (pdf)
+              - button "Download" [ref=e1006]:
+                - img [ref=e1007]
+                - generic [ref=e1009]: Download
+          - link "Download PV 27 septembre 2017 extra" [ref=e1011] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedpvtr_120562.pdf?ver=1779886534419
+            - generic [ref=e1012]:
+              - generic [ref=e1013]: PV 27 septembre 2017 extra (pdf)
+              - button "Download" [ref=e1014]:
+                - img [ref=e1015]
+                - generic [ref=e1017]: Download
+          - link "Download PV 13 novembre 2017" [ref=e1019] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedpp23_125499.pdf?ver=1779886534419
+            - generic [ref=e1020]:
+              - generic [ref=e1021]: PV 13 novembre 2017 (pdf)
+              - button "Download" [ref=e1022]:
+                - img [ref=e1023]
+                - generic [ref=e1025]: Download
+          - link "Download PV 11 décembre 2017" [ref=e1027] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqednifv_524368.pdf?ver=1779886534419
+            - generic [ref=e1028]:
+              - generic [ref=e1029]: PV 11 décembre 2017 (pdf)
+              - button "Download" [ref=e1030]:
+                - img [ref=e1031]
+                - generic [ref=e1033]: Download
+          - link "Download PV 19 décembre 2017 extra" [ref=e1035] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqednifv_288648.pdf?ver=1779886534419
+            - generic [ref=e1036]:
+              - generic [ref=e1037]: PV 19 décembre 2017 extra (pdf)
+              - button "Download" [ref=e1038]:
+                - img [ref=e1039]
+                - generic [ref=e1041]: Download
+    - region [ref=e1043]:
+      - generic [ref=e1046]:
+        - paragraph [ref=e1049]:
+          - strong [ref=e1051]: "2016"
+        - generic [ref=e1052]:
+          - link "Download PV 11 janvier 2016" [ref=e1054] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedvpu8_115309.pdf?ver=1779886534578
+            - generic [ref=e1055]:
+              - generic [ref=e1056]: PV 11 janvier 2016 (pdf)
+              - button "Download" [ref=e1057]:
+                - img [ref=e1058]
+                - generic [ref=e1060]: Download
+          - link "Download PV 8 février 2016" [ref=e1062] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedvitr_309914.pdf?ver=1779886534578
+            - generic [ref=e1063]:
+              - generic [ref=e1064]: PV 8 février 2016 (pdf)
+              - button "Download" [ref=e1065]:
+                - img [ref=e1066]
+                - generic [ref=e1068]: Download
+          - link "Download PV 14 mars 2016" [ref=e1070] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee0qqe_753540.pdf?ver=1779886534578
+            - generic [ref=e1071]:
+              - generic [ref=e1072]: PV 14 mars 2016 (pdf)
+              - button "Download" [ref=e1073]:
+                - img [ref=e1074]
+                - generic [ref=e1076]: Download
+          - link "Download PV 11 avril 2016" [ref=e1078] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedus8d_15723.pdf?ver=1779886534578
+            - generic [ref=e1079]:
+              - generic [ref=e1080]: PV 11 avril 2016 (pdf)
+              - button "Download" [ref=e1081]:
+                - img [ref=e1082]
+                - generic [ref=e1084]: Download
+          - link "Download PV 9 mai 2016" [ref=e1086] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee0g3g_87178.pdf?ver=1779886534579
+            - generic [ref=e1087]:
+              - generic [ref=e1088]: PV 9 mai 2016 (pdf)
+              - button "Download" [ref=e1089]:
+                - img [ref=e1090]
+                - generic [ref=e1092]: Download
+          - link "Download PV 13 juin 2016" [ref=e1094] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee079j_89219.pdf?ver=1779886534579
+            - generic [ref=e1095]:
+              - generic [ref=e1096]: PV 13 juin 2016 (pdf)
+              - button "Download" [ref=e1097]:
+                - img [ref=e1098]
+                - generic [ref=e1100]: Download
+          - link "Download PV 11 juillet 2016" [ref=e1102] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedvvg8_288274.pdf?ver=1779886534579
+            - generic [ref=e1103]:
+              - generic [ref=e1104]: PV 11 juillet 2016 (pdf)
+              - button "Download" [ref=e1105]:
+                - img [ref=e1106]
+                - generic [ref=e1108]: Download
+          - link "Download PV 8 août 2016" [ref=e1110] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedun94_812737.pdf?ver=1779886534579
+            - generic [ref=e1111]:
+              - generic [ref=e1112]: PV 8 août 2016 (pdf)
+              - button "Download" [ref=e1113]:
+                - img [ref=e1114]
+                - generic [ref=e1116]: Download
+          - link "Download PV 12 septembre 2016" [ref=e1118] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee1g8m_53275.pdf?ver=1779886534579
+            - generic [ref=e1119]:
+              - generic [ref=e1120]: PV 12 septembre 2016 (pdf)
+              - button "Download" [ref=e1121]:
+                - img [ref=e1122]
+                - generic [ref=e1124]: Download
+          - link "Download PV 11 octobre 2016" [ref=e1126] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee19n5_441109.pdf?ver=1779886534579
+            - generic [ref=e1127]:
+              - generic [ref=e1128]: PV 11 octobre 2016 (pdf)
+              - button "Download" [ref=e1129]:
+                - img [ref=e1130]
+                - generic [ref=e1132]: Download
+          - link "Download PV 14 novembre 2016" [ref=e1134] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee133d_245923.pdf?ver=1779886534579
+            - generic [ref=e1135]:
+              - generic [ref=e1136]: PV 14 novembre 2016 (pdf)
+              - button "Download" [ref=e1137]:
+                - img [ref=e1138]
+                - generic [ref=e1140]: Download
+          - link "Download PV 14 décembre 2016" [ref=e1142] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedv5b1_113603.pdf?ver=1779886534579
+            - generic [ref=e1143]:
+              - generic [ref=e1144]: PV 14 décembre 2016 (pdf)
+              - button "Download" [ref=e1145]:
+                - img [ref=e1146]
+                - generic [ref=e1148]: Download
+          - link "Download PV 20 décembre 2016 extra budget" [ref=e1150] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqedv5b2_948798.pdf?ver=1779886534579
+            - generic [ref=e1151]:
+              - generic [ref=e1152]: PV 20 décembre 2016 extra budget (pdf)
+              - button "Download" [ref=e1153]:
+                - img [ref=e1154]
+                - generic [ref=e1156]: Download
+    - region [ref=e1158]:
+      - generic [ref=e1161]:
+        - paragraph [ref=e1164]:
+          - strong [ref=e1166]: "2015"
+        - generic [ref=e1167]:
+          - link "Download PV 12 janvier 2015" [ref=e1169] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee2tno_62009.pdf?ver=1779886534702
+            - generic [ref=e1170]:
+              - generic [ref=e1171]: PV 12 janvier 2015 (pdf)
+              - button "Download" [ref=e1172]:
+                - img [ref=e1173]
+                - generic [ref=e1175]: Download
+          - link "Download PV 9 fevrier 2015" [ref=e1177] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee2oc3_647154.pdf?ver=1779886534702
+            - generic [ref=e1178]:
+              - generic [ref=e1179]: PV 9 fevrier 2015 (pdf)
+              - button "Download" [ref=e1180]:
+                - img [ref=e1181]
+                - generic [ref=e1183]: Download
+          - link "Download PV 9 mars 2015" [ref=e1185] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee3pf1_222640.pdf?ver=1779886534702
+            - generic [ref=e1186]:
+              - generic [ref=e1187]: PV 9 mars 2015 (pdf)
+              - button "Download" [ref=e1188]:
+                - img [ref=e1189]
+                - generic [ref=e1191]: Download
+          - link "Download PV 13 avril 2015" [ref=e1193] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee2c6k_346156.pdf?ver=1779886534702
+            - generic [ref=e1194]:
+              - generic [ref=e1195]: PV 13 avril 2015 (pdf)
+              - button "Download" [ref=e1196]:
+                - img [ref=e1197]
+                - generic [ref=e1199]: Download
+          - link "Download PV 11 mai 2015" [ref=e1201] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee3e0q_193782.pdf?ver=1779886534702
+            - generic [ref=e1202]:
+              - generic [ref=e1203]: PV 11 mai 2015 (pdf)
+              - button "Download" [ref=e1204]:
+                - img [ref=e1205]
+                - generic [ref=e1207]: Download
+          - link "Download PV 8 juin 2015" [ref=e1209] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee380h_989353.pdf?ver=1779886534702
+            - generic [ref=e1210]:
+              - generic [ref=e1211]: PV 8 juin 2015 (pdf)
+              - button "Download" [ref=e1212]:
+                - img [ref=e1213]
+                - generic [ref=e1215]: Download
+          - link "Download PV 13 juillet 2015" [ref=e1217] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee337p_58057.pdf?ver=1779886534702
+            - generic [ref=e1218]:
+              - generic [ref=e1219]: PV 13 juillet 2015 (pdf)
+              - button "Download" [ref=e1220]:
+                - img [ref=e1221]
+                - generic [ref=e1223]: Download
+          - link "Download PV 10 septembre 2015 extra" [ref=e1225] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee4eio_671836.pdf?ver=1779886534702
+            - generic [ref=e1226]:
+              - generic [ref=e1227]: PV 10 septembre 2015 extra (pdf)
+              - button "Download" [ref=e1228]:
+                - img [ref=e1229]
+                - generic [ref=e1231]: Download
+          - link "Download PV 14 septembre 2015" [ref=e1233] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee4ein_729900.pdf?ver=1779886534702
+            - generic [ref=e1234]:
+              - generic [ref=e1235]: PV 14 septembre 2015 (pdf)
+              - button "Download" [ref=e1236]:
+                - img [ref=e1237]
+                - generic [ref=e1239]: Download
+          - link "Download PV 24 septembre 2015 extra" [ref=e1241] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee4eip_404797.pdf?ver=1779886534702
+            - generic [ref=e1242]:
+              - generic [ref=e1243]: PV 24 septembre 2015 extra (pdf)
+              - button "Download" [ref=e1244]:
+                - img [ref=e1245]
+                - generic [ref=e1247]: Download
+          - link "Download PV 13 octobre 2015" [ref=e1249] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee454v_976727.pdf?ver=1779886534702
+            - generic [ref=e1250]:
+              - generic [ref=e1251]: PV 13 octobre 2015 (pdf)
+              - button "Download" [ref=e1252]:
+                - img [ref=e1253]
+                - generic [ref=e1255]: Download
+          - link "Download PV 9 novembre 2015" [ref=e1257] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee3uhd_327548.pdf?ver=1779886534702
+            - generic [ref=e1258]:
+              - generic [ref=e1259]: PV 9 novembre 2015 (pdf)
+              - button "Download" [ref=e1260]:
+                - img [ref=e1261]
+                - generic [ref=e1263]: Download
+          - link "Download PV 14 décembre 2015" [ref=e1265] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee2j9m_461154.pdf?ver=1779886534702
+            - generic [ref=e1266]:
+              - generic [ref=e1267]: PV 14 décembre 2015 (pdf)
+              - button "Download" [ref=e1268]:
+                - img [ref=e1269]
+                - generic [ref=e1271]: Download
+          - link "Download PV 16 décembre 2015 extra budget" [ref=e1273] [cursor=pointer]:
+            - /url: //img1.wsimg.com/blobby/go/8253d17d-b9f3-483e-a664-90420a47224c/downloads/1cqee2j9m_857533.pdf?ver=1779886534702
+            - generic [ref=e1274]:
+              - generic [ref=e1275]: PV 16 décembre 2015 extra budget (pdf)
+              - button "Download" [ref=e1276]:
+                - img [ref=e1277]
+                - generic [ref=e1279]: Download
+    - contentinfo [ref=e1281]:
+      - generic [ref=e1286]:
+        - paragraph [ref=e1289]: Copyright © 2018 Municipalité des Bergeronnes - Tous droits réservés.
+        - link "Facebook Social Link" [ref=e1292] [cursor=pointer]:
+          - /url: https://www.facebook.com/municipalitedesbergeronnes
+          - img [ref=e1293]
+        - generic [ref=e1298]:
+          - paragraph [ref=e1299]: Powered by
+          - link [ref=e1300] [cursor=pointer]:
+            - /url: https://www.godaddy.com/websites/website-builder?isc=pwugc&utm_source=wsb&utm_medium=applications&utm_campaign=en-ca_corp_applications_base
+            - img [ref=e1301]
+  - button "TrustedSite Certified" [ref=e1306] [cursor=pointer]

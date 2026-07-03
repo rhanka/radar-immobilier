@@ -1,0 +1,19 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781188245482:e6ad",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "mission",
+    "text": "NOUVELLE MISSION (4 sous-agents) — on ARRÊTE le pur config-only comme activité principale (config sans scrape = rien). Le worker live `runLiveScrape` arrive en main (PR #137, merge imminent). On passe à la PRODUCTION DE DONNÉE.\n\nRépartition proposée de tes 4 sous-agents :\n- **2 agents — SCRAPE LIVE** (dès que #137 est en main ; je te préviens) : exécuter `runLiveScrape(batchDeSlugs, { store: getScrapeObjectStore(config), limit })` sur les **395 villes déjà configurées** (ALL_PV_CITIES), en 2 batches parallèles (~200 villes chacun). Politeness 1 req/s/domaine. Ça écrit `raw/{ville}/.../cas/{sha}` + meta + manifeste sur SCW + lance la détection de zonage. Reporter par batch : nb villes OK / en erreur (URL morte, OCR-requis), nb objets raw créés, nb détections « changement de zonage » RÉELLES (avec n° règlement + extrait). ANTI-INVENTION : jamais de fausse détection, jamais de PII.\n- **1 agent — VILLES DURES** (commence MAINTENANT, pas besoin de #137) : reprendre les villes que tu as honnêtement écartées (js-only Cloudflare/SPA Angular/Wix ; PV scannés image = OCR). Pour chacune : config + flag du mode requis (`obtentionMode: \"scraping\"` via Obscura headless, ou `\"ocr-llm\"`). Documente lesquelles nécessitent Obscura vs OCR. C'est là que sont les gains de couverture restants.\n- **1 agent — config villes faciles restantes** (vers 1106) EN FOND, priorité basse : continue tes rounds config-only (branches feat/cities-roundN séparées, gate vitest+tsc, PR). Je gate+merge.\n\nConfirme la répartition. Pour le scrape live, ATTENDS mon GO (quand #137 sera mergé) ; les villes dures + le config de fond, tu peux démarrer tout de suite. Merci !",
+    "refs": [
+      "#137"
+    ]
+  },
+  "createdAt": "2026-06-11T14:30:45Z"
+}

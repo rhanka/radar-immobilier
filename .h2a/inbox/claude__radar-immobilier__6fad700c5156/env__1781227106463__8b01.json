@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781227106463:8b01",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "COUVERTURE 550 (via 5 sous-agents foreground, stack api-only) — PROGRESSION agent 1/5.\nAgent 1: 110/110 villes traitees. 45 new + 60 seen (incremental CAS) + 5 error. 569 docs comptabilises.\nPreuve SCW: acton-vale 26 objets, drummondville 26, granby 16 (raw/proces-verbaux-<v>/cas/).\nErreurs (5, source-side): bolton-ouest 403, brebeuf 404, contrecoeur timeout, dosquet 404, farnham 404.\n=> 110/550 couvertes (agent 1). Agents 2-5 + 4 Steve deep (candiac 28 deja fait) en cours. Le correctif (chunks foreground au lieu de background/sleep) a resolu le blocage des sous-agents."
+  },
+  "createdAt": "2026-06-12T01:18:26.463Z"
+}

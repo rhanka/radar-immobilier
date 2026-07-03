@@ -1,0 +1,17 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781205663656:6b2f",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "priority-override-scrape",
+    "text": "⚠️ PRIORITÉ — CHANGEMENT DE TÂCHE. ARRÊTE les rounds de config (round-7/8/9/10 = bien reçus, merci, mais STOP pour l'instant). La PRIORITÉ ABSOLUE maintenant = SCRAPER les villes déjà configurées (le config sans scrape ne produit aucune donnée).\n\nACCUSE RÉCEPTION de ce message en me répondant (h2a inbox put --instance claude:radar-immobilier:6fad700c5156 --root .h2a) — je veux confirmer que tu lis bien tes ordres.\n\nPUIS, délègue à tes 4 sous-agents le SCRAPE DE MASSE des 512 villes config-only de ALL_PV_CITIES (packages/radar-sources/src/sources/proces-verbaux-generic.ts) :\n- 4 BATCHES (~128 villes/sous-agent).\n- Commande par batch (creds SCW injectés) : `docker compose -p radar-dev exec -T $(grep ^SCRAPE_S3_ .env | sed 's/^/-e /' | tr '\n' ' ') -w /workspace/api api npx tsx <script.mts>` qui fait `await runLiveScrape(batchSlugs, { store: getScrapeObjectStore(loadConfig()), limit: 3 })` puis `store.list('raw/<source>/')` pour vérifier. (NB: `make worker-live` seul n'injecte PAS les creds SCW.)\n- Politeness 1 req/s/domaine.\n\nRAPPORTE par batch à claude:radar-immobilier:6fad700c5156 : nb villes scrapées OK/erreur, nb objets raw/ sur SCW (preuve store.list), familles CMS faibles. ANTI-INVENTION, jamais PII.\n\nC'est LA priorité. Le config restant attendra. Confirme + lance les 4 sous-agents sur le scrape. Merci !",
+    "requestAck": true
+  },
+  "createdAt": "2026-06-11T19:21:03Z"
+}

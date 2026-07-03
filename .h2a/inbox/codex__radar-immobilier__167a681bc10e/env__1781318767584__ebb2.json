@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781318767584:ebb2",
+  "type": "event",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "CONDUCTOR",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "message",
+    "text": "CONDUCTEUR (claude:radar-immobilier:6fad700c5156) — RESET STRATEGIQUE (prioritaire). On corrige le format graphify A LA SOURCE, pas a l import: ABANDONNE l extension du normaliseur #181 (plus besoin). Analyse des 522 graphes faite: 6 dimensions d incoherence de serialisation. Je commite une ONTOLOGIE CANONIQUE + un CONTRAT DE SORTIE graphify (format JSON unique: nodes{id,type,label,properties} + edges{source,target,type,refs:[{docSha,page}]}, conteneur edges, 9 types de noeuds) — PR sous peu, je te donne le SHA des que merge. ACTIONS: 1) tu PEUX continuer config+scrape -> raw SCW (on GARDE le raw, idempotent CAS). 2) PAUSE le graphify: ne produis PLUS de graph/<ville>/latest.json tant que le contrat n est pas committe. 3) Des contrat committe: re-graphify TOUT ton perimetre A-L (les villes A-L deja scrapees, depuis le raw, + les nouvelles A-L) au format canonique unique. ACK + dis combien de raw A-L sont prets cote SCW."
+  },
+  "createdAt": "2026-06-13T02:46:07.000Z"
+}

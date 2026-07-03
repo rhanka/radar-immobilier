@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "zonage_change",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Le changement de zonage désigne une modification des règles d'utilisation du sol dans une municipalité, souvent formalisée par un règlement spécifique. Ce processus peut être discuté ou analysé dans des documents comme des procès-verbaux municipaux ou des démonstrations techniques. Il implique généralement l'application ou l'adaptation d'un règlement de zonage existant pour répondre à des besoins urbanistiques ou réglementaires.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.85,
+  "cache_key": "e6d54ac3c58d0b8de2a10b866d09ae149e2fdb755225531c6e443ef392c80ba3",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

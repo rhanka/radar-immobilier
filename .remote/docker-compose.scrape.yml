@@ -1,0 +1,11 @@
+# Override pour le RECUEIL de masse (projet dedie radar-scrape).
+# Reutilise les volumes node_modules deja peuples (du projet radar-dev) en EXTERNE
+# pour eviter un npm ci, sans demarrer la demo ni Postgres/minio (run --no-deps).
+# `down -v` sur radar-scrape ne supprime PAS ces volumes externes.
+volumes:
+  radar-root-node-modules:
+    external: true
+    name: radar-dev_radar-root-node-modules
+  radar-api-node-modules:
+    external: true
+    name: radar-dev_radar-api-node-modules

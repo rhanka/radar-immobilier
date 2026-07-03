@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781298025141:3593",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "EXPLOITATION GRAPHIFY — PROGRESSION 333/522 sur SCW (~64%), 189 restantes. Lots 4x10 fluides post-crash. Lot r10 lance. Recents riches: Saint-Constant (219 PV, PPCMOI 20+42 log, zone C-439), Saint-Cuthbert PPCMOI 48 log, Sainte-Marguerite PPCMOI 4x7 log, Sainte-Julie multifamilial."
+  },
+  "createdAt": "2026-06-12T21:00:25.141Z"
+}

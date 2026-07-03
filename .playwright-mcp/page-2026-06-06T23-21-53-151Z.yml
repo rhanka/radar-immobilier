@@ -1,0 +1,463 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Signaux" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Signaux
+        - button "Opportunités" [active] [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Opportunités
+        - button "Sources" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Sources
+        - button "Grilles" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Grilles
+        - button "Coordination" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Coordination
+        - button "Backlog" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Backlog
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e26] [cursor=pointer]: Réel
+    - generic [ref=e857]:
+      - complementary [ref=e858]:
+        - generic [ref=e859]:
+          - paragraph [ref=e860]: Opportunités · 1 dossier
+          - generic [ref=e861]:
+            - generic "Rezonage résidentiel · Règl. 150-49 · H-609-4" [ref=e862]: "Filtré : Rezonage résidentiel · Règl. 150-49 · H-609-4"
+            - button "Tout afficher" [ref=e863] [cursor=pointer]
+          - button "Sélectionnée Zone H-609-4 — densification boisée conditionnelle Secteur Champlain / Saint-Jean-Baptiste / Salaberry, Salaberry-de-Valleyfield H-609-4 72/100 Qualifier En attente de preuve (surveillance)" [ref=e864] [cursor=pointer]:
+            - generic [ref=e866]:
+              - generic [ref=e867]:
+                - img [ref=e869]
+                - generic [ref=e870]: Sélectionnée
+              - paragraph [ref=e871]: Zone H-609-4 — densification boisée conditionnelle
+              - paragraph [ref=e872]: Secteur Champlain / Saint-Jean-Baptiste / Salaberry, Salaberry-de-Valleyfield
+              - generic [ref=e873]:
+                - generic [ref=e874]: H-609-4
+                - generic [ref=e875]: 72/100
+                - generic [ref=e876]: Qualifier
+                - generic [ref=e877]: En attente de preuve (surveillance)
+      - generic [ref=e879]:
+        - generic [ref=e880]:
+          - navigation "Fil d'Ariane" [ref=e881]: Opportunités / Valleyfield / Zone H-609-4 — densification boisée conditionnelle
+          - heading "Zone H-609-4 — densification boisée conditionnelle" [level=1] [ref=e882]
+          - paragraph [ref=e883]: Secteur Champlain / Saint-Jean-Baptiste / Salaberry, Salaberry-de-Valleyfield · Dossier d'opportunité foncière, entonnoir PROCESS 6 phases, preuves tracées.
+        - generic [ref=e885]:
+          - generic:
+            - navigation "Fil d'ariane":
+              - generic [ref=e886]: Opportunités
+              - img [ref=e887]
+              - generic: Zone H-609-4 — densification boisée conditionnelle
+            - heading "Zone H-609-4 — densification boisée conditionnelle" [level=1]
+            - paragraph: Secteur Champlain / Saint-Jean-Baptiste / Salaberry, Salaberry-de-Valleyfield
+            - generic:
+              - generic [ref=e888]: Zone H-609-4
+              - generic [ref=e889]: Règl. 150-49
+              - generic [ref=e890]: 5 lots
+              - generic [ref=e891]: En attente de preuve (surveillance)
+          - status [ref=e892]:
+            - generic [ref=e893]:
+              - 'heading "Mode réel : seules les preuves vérifiées (fait) sont retenues" [level=2] [ref=e894]'
+              - paragraph [ref=e895]: Les hypothèses et données non disponibles sont exclues de cet affichage, cohérent avec le scoring.
+          - generic:
+            - 'heading "Faisceau de preuves : 6 phases" [level=2]'
+            - generic:
+              - generic [ref=e896]:
+                - generic [ref=e897]:
+                  - heading "Signal" [level=1] [ref=e899]
+                  - generic [ref=e900]: 4 indices
+                - generic:
+                  - generic [ref=e901]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e902]: Avis public — assemblée de consultation règl. 150-49/150-50
+                          - link "Source" [ref=e903] [cursor=pointer]:
+                            - /url: https://dua3m7xvptjbw.cloudfront.net/documents/avis/AP_150-49_150-50_assemblee_consultation.pdf
+                            - img [ref=e904]
+                            - text: Source
+                        - paragraph: "Séance 10 fév. 2026; assemblée publique 11 mars 2026 (reportée au 23 mars); objet: encadrer urbanisation durable zones boisées. Zone H-609-4 créée à même H-609."
+                        - paragraph: 2026-02-25 · download
+                      - generic [ref=e905]:
+                        - generic [ref=e906]: Fait
+                        - generic [ref=e907]: confiance haute
+                  - generic [ref=e908]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e909]: Avis public — demande approbation référendaire 150-49/150-50 (2e projet)
+                          - link "Source" [ref=e910] [cursor=pointer]:
+                            - /url: https://dua3m7xvptjbw.cloudfront.net/documents/avis/AP_personnes_interessees_referendum_150-49_150-50.pdf
+                            - img [ref=e911]
+                            - text: Source
+                        - paragraph: 2e projet adopté 24 mars 2026. Période référendaire ouverte ~1-9 avril 2026. Articles 4-16 susceptibles d'approbation référendaire. Densité base 0,5 log/ha; option 50 log/ha si ≥30 % terrain conservé (usage Conservation).
+                        - paragraph: 2026-04-01 · download
+                      - generic [ref=e912]:
+                        - generic [ref=e913]: Fait
+                        - generic [ref=e914]: confiance haute
+                  - generic [ref=e915]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e916]: Règlement 150-49 — art. 12.7 (texte normatif zone H-609-4)
+                          - link "Source" [ref=e917] [cursor=pointer]:
+                            - /url: https://dua3m7xvptjbw.cloudfront.net/documents/reglements/Reglement-150-49-residuel.pdf
+                            - img [ref=e918]
+                            - text: Source
+                        - paragraph: "Zone H-609-4: ouverture rue publique prohibée sauf si densité modulée selon proportion milieux naturels protégés (PIIA règl.153). Option 12.7.1: 50 log/ha si ≥30 % en Conservation. Bande continue min 20 % du terrain, profondeur ≥10 m et ≥1000 m²."
+                        - paragraph: 2026-05-25 · download
+                      - generic [ref=e919]:
+                        - generic [ref=e920]: Fait
+                        - generic [ref=e921]: confiance haute
+                  - generic [ref=e922]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e923]: YouTube — séances conseil municipal Valleyfield 2026 (transcription règl. 150-49)
+                          - link "Source" [ref=e924] [cursor=pointer]:
+                            - /url: https://www.youtube.com/@VilleValleyfield
+                            - img [ref=e925]
+                            - text: Source
+                        - paragraph: "Transcriptions des séances 2026 non obtenues. Bloquer API YouTube (cookie requis). Méthode alternative: yt-dlp + Whisper ou Playwright/Obscura. Tier-B-partial."
+                        - paragraph: 2026-05-25 · transcription
+                        - paragraph: non vérifié en mode réel
+                      - generic [ref=e926]:
+                        - generic [ref=e927]: N/D
+                        - generic [ref=e928]: confiance faible
+              - generic [ref=e929]:
+                - generic [ref=e930]:
+                  - heading "Ancrage" [level=1] [ref=e932]
+                  - generic [ref=e933]: 3 indices
+                - generic:
+                  - generic [ref=e934]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e935]: Rôle d'évaluation foncière 2026 — municipalité 70052 (XML 27 Mo)
+                          - link "Source" [ref=e936] [cursor=pointer]:
+                            - /url: https://donneesouvertes.affmunqc.net/role/RL70052_2026.xml
+                            - img [ref=e937]
+                            - text: Source
+                        - paragraph: "5 lots RU identifiés sur rues SALABERRY/SAINT-JEAN-BAPTISTE/CHAMPLAIN/LALONDE/BESNER: NO_LOT 4516943 (14990m², 1311600$), 3818335 (8561m², 2254300$), 4516958 (3443m², 842600$), 3817581 (1645m², 259100$), 3817940 (1139m², 216400$). 1308 enregistrements totaux sur ces rues: 0 TE (terrain libre). Rôle 2026 date réf. 2024-07-01."
+                        - paragraph: 2026-05-25 · download
+                      - generic [ref=e938]:
+                        - generic [ref=e939]: Fait
+                        - generic [ref=e940]: confiance haute
+                  - generic [ref=e941]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e942]: Cadastre allégé du Québec — API REST (présence 15/15 lots vérifiés)
+                          - link "Source" [ref=e943] [cursor=pointer]:
+                            - /url: https://geo.environnement.gouv.qc.ca/donnees/rest/services/Reference/Cadastre_allege/MapServer/0
+                            - img [ref=e944]
+                            - text: Source
+                        - paragraph: Tous les 5 lots vérifiés présents dans le cadastre allégé via requête REST ESRI (HTTP 200). Géométrie disponible en EPSG:3857.
+                        - paragraph: 2026-05-25 · api
+                      - generic [ref=e945]:
+                        - generic [ref=e946]: Fait
+                        - generic [ref=e947]: confiance haute
+                  - generic [ref=e948]:
+                    - generic:
+                      - generic:
+                        - paragraph [ref=e949]: Correspondance lot ↔ zone H-609-4 (hypothèse par nom de rue)
+                        - paragraph: Lots sélectionnés par correspondance nom de rue (champ RL0101Gx du rôle) avec les rues citées dans les briefs de l'opportunité. Le rôle ne contient pas directement le code de zone. L'intersection géométrique exacte nécessite le plan Annexe B du règl. 150-49 (PDF disponible, non parsé). Polygones de zone H-609-4 non disponibles en open data vectoriel.
+                        - paragraph: 2026-05-25 · manual
+                        - paragraph: non vérifié en mode réel
+                      - generic [ref=e950]:
+                        - generic [ref=e951]: Hypothèse
+                        - generic [ref=e952]: confiance moyenne
+              - generic [ref=e953]:
+                - generic [ref=e954]:
+                  - heading "Contraintes" [level=1] [ref=e956]
+                  - generic [ref=e957]: 3 indices
+                - generic:
+                  - generic [ref=e958]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e959]: BDZI — zones inondables (REST ArcGIS layer 22) — H-609-4
+                          - link "Source" [ref=e960] [cursor=pointer]:
+                            - /url: https://www.servicesgeo.enviroweb.gouv.qc.ca/donnees/rest/services/Public/Themes_publics/MapServer/22/query
+                            - img [ref=e961]
+                            - text: Source
+                        - paragraph: 0 polygone BDZI retourné dans la bbox ville Valleyfield et bbox élargie région. Aucune zone inondable BDZI intersectant H-609-4. Les ZIS de 2019 (partiellement levées déc. 2019) visaient des parcs publics, non les zones résidentielles ciblées.
+                        - paragraph: 2026-05-25 · api
+                      - generic [ref=e962]:
+                        - generic [ref=e963]: Fait
+                        - generic [ref=e964]: confiance haute
+                  - generic [ref=e965]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e966]: GRHQ — hydrographie (REST layer 104) — secteur H-609-4
+                          - link "Source" [ref=e967] [cursor=pointer]:
+                            - /url: https://www.servicesgeo.enviroweb.gouv.qc.ca/donnees/rest/services/Public/Themes_publics/MapServer/104/query
+                            - img [ref=e968]
+                            - text: Source
+                        - paragraph: 328 éléments hydrographiques dans la bbox ville entière. Aucun grand plan d'eau (≥5 ha) identifié spécifiquement dans la sous-bbox H-609-4. Présence probable de ruisseaux/fossés urbains. Contrainte GRHQ moindre que Grande-Île.
+                        - paragraph: 2026-05-25 · api
+                      - generic [ref=e969]:
+                        - generic [ref=e970]: Fait
+                        - generic [ref=e971]: confiance moyenne
+                  - generic [ref=e972]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e973]: CPTAQ — zone agricole A-939 (Feuillet-1 + Zones-A-150-44.pdf) adjacente à H-609
+                          - link "Source" [ref=e974] [cursor=pointer]:
+                            - /url: https://dua3m7xvptjbw.cloudfront.net/documents/reglements/Reglement-150-codifie-Annexe-A-Zones-A-Agricoles-150-44.pdf
+                            - img [ref=e975]
+                            - text: Source
+                        - paragraph: Zone A-939 (ancienne A-1103/Ag2, LPTA actif) observée adjacente à H-609 sur Feuillet-1. L'appartenance précise de H-609-4 à la sous-zone mitoyenne de A-939 n'est pas confirmée géométriquement (polygones vectoriels non disponibles). Si lots H-609-4 touchent A-939, une demande CPTAQ est requise avant subdivision/développement.
+                        - paragraph: 2026-05-25 · download
+                        - paragraph: non vérifié en mode réel
+                      - generic [ref=e976]:
+                        - generic [ref=e977]: Hypothèse
+                        - generic [ref=e978]: confiance moyenne
+              - generic [ref=e979]:
+                - generic [ref=e980]:
+                  - heading "Marché" [level=1] [ref=e982]
+                  - generic [ref=e983]: 3 indices
+                - generic:
+                  - generic [ref=e984]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e985]: NeoMedia — permis de construction résidentiels MRC Beauharnois-Salaberry 2024
+                          - link "Source" [ref=e986] [cursor=pointer]:
+                            - /url: https://www.neomedia.com/vaudreuil-soulanges/actualites/valleyfield/636153/2024-croissance-des-permis-de-construction-residentielle-dans-la-mrc-de-beauharnois-salaberry
+                            - img [ref=e987]
+                            - text: Source
+                        - paragraph: 948 nouvelles unités résidentielles MRC 2024 (+22 % vs 2023, 79 % multirésidentiel). Investissements totaux 421 M$. Données propres à Salaberry-de-Valleyfield non disponibles (article MRC global).
+                        - paragraph: 2026-05-25 · scraping
+                      - generic [ref=e988]:
+                        - generic [ref=e989]: Fait
+                        - generic [ref=e990]: confiance haute
+                  - generic [ref=e991]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e992]: Ville Valleyfield — projets résidentiels en développement
+                          - link "Source" [ref=e993] [cursor=pointer]:
+                            - /url: https://www.ville.valleyfield.qc.ca/projets-residentiels-et-multifamiliaux
+                            - img [ref=e994]
+                            - text: Source
+                        - paragraph: "Projets actifs: Écoquartier Champlain (Champlain, condos/unifamilial/multifamilial/commercial), Quartier urbain 395 (Champlain), Projet Marleau 53 unités (Champlain). Aucun projet explicitement en zone H-609-4."
+                        - paragraph: 2026-05-25 · scraping
+                      - generic [ref=e995]:
+                        - generic [ref=e996]: Fait
+                        - generic [ref=e997]: confiance moyenne
+                  - generic [ref=e998]:
+                    - generic:
+                      - generic:
+                        - paragraph [ref=e999]: JLR / Centris — transactions notariées et prix médians par zone
+                        - paragraph: Données payantes (JLR, Centris/MLS). Non accessibles sans abonnement. Gap documenté Tier C.
+                        - paragraph: 2026-05-25 · manual
+                        - paragraph: non vérifié en mode réel
+                      - generic [ref=e1000]:
+                        - generic [ref=e1001]: N/D
+                        - generic [ref=e1002]: confiance faible
+              - generic [ref=e1003]:
+                - generic [ref=e1004]:
+                  - heading "Contexte" [level=1] [ref=e1006]
+                  - generic [ref=e1007]: 2 indices
+                - generic:
+                  - generic [ref=e1008]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e1009]: Statistique Canada — Recensement 2021 — Salaberry-de-Valleyfield
+                          - link "Source" [ref=e1010] [cursor=pointer]:
+                            - /url: https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/page.cfm?Lang=E&SearchText=Salaberry-de-Valleyfield&GENDERlist=1,2,3&STATISTIClist=1&DGUIDlist=2021A00052470052&HEADERlist=0
+                            - img [ref=e1011]
+                            - text: Source
+                        - paragraph: "Population 2021: 42 787 (+5 % vs 2016). 20 073 logements privés occupés. Revenu médian ménages après impôt 54 800 $. Propriétaires 55,3 %, locataires 44,7 %. Âge médian 48,3 ans. Note: pages StatCan retournent 404 en accès direct (mai 2026); valeurs indexées via Google."
+                        - paragraph: 2026-05-25 · scraping
+                      - generic [ref=e1012]:
+                        - generic [ref=e1013]: Fait
+                        - generic [ref=e1014]: confiance moyenne
+                  - generic [ref=e1015]:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - paragraph [ref=e1016]: INFOSuroit — PADTC transport collectif Valleyfield 574 762 $
+                          - link "Source" [ref=e1017] [cursor=pointer]:
+                            - /url: https://www.infosuroit.com/pres-de-600-000-dollars-a-salaberry-de-valleyfield-pour-le-transport-collectif/
+                            - img [ref=e1018]
+                            - text: Source
+                        - paragraph: "Programme PADTC: 574 762 $ annoncés le 16 déc. 2024 pour renforcer le réseau TC. Améliore l'accessibilité du secteur résidentiel."
+                        - paragraph: 2026-05-25 · scraping
+                      - generic [ref=e1019]:
+                        - generic [ref=e1020]: Fait
+                        - generic [ref=e1021]: confiance haute
+              - generic [ref=e1022]:
+                - generic [ref=e1023]:
+                  - heading "Scoring" [level=1] [ref=e1025]
+                  - generic [ref=e1026]: 1 indice
+                - generic [ref=e1027]:
+                  - generic:
+                    - generic:
+                      - paragraph [ref=e1028]: Synthèse scoring — H-609-4 règl. 150-49
+                      - paragraph: potentiel=4 (fort potentiel réglementaire, conditionnel PIIA+boisé), risque=3 (CPTAQ A-939 hypothèse, pas d'inondable), timing=3 (référendaire ouvert ~avr. 2026, résultat inconnu), faisabilite=2 (0 TE, zone bâtie, assemblage requis), marche=3 (MRC +22 %, Champlain actif). scoreGlobal=3.15.
+                      - paragraph: 2026-05-25 · manual
+                      - paragraph: non vérifié en mode réel
+                    - generic [ref=e1029]:
+                      - generic [ref=e1030]: Hypothèse
+                      - generic [ref=e1031]: confiance moyenne
+          - generic [ref=e1032]:
+            - heading "Score agrégé PROCESS" [level=2] [ref=e1033]
+            - generic:
+              - generic [ref=e1034]: 72/100
+              - generic [ref=e1035]: (3.60/5)
+              - generic [ref=e1036]: Partiel (marché non disponible)
+              - generic [ref=e1037]: Qualifier avec expert
+            - generic:
+              - generic [ref=e1038]:
+                - paragraph: Potentiel réglementaire
+                - paragraph: 4/5
+                - paragraph: Poids 30 %
+              - generic [ref=e1039]:
+                - paragraph: Risque de contrainte
+                - paragraph: À confirmer, exclu en mode réel
+                - paragraph: 3/5 (hypothèse)
+                - paragraph: Poids 20 %
+              - generic [ref=e1040]:
+                - paragraph: Timing
+                - paragraph: 3/5
+                - paragraph: Poids 20 %
+              - generic [ref=e1041]:
+                - paragraph: Faisabilité foncière
+                - paragraph: À confirmer, exclu en mode réel
+                - paragraph: 2/5 (hypothèse)
+                - paragraph: Poids 15 %
+              - generic [ref=e1042]:
+                - paragraph: Valeur marché
+                - paragraph: Non disponible
+                - paragraph: Poids 15 %
+            - generic [ref=e1043]:
+              - paragraph: Recommandation
+              - paragraph: Surveiller — fort potentiel réglementaire (50 log/ha avec PIIA) mais la zone est entièrement bâtie (0 terrain libre au rôle 2026), l'assemblage est coûteux, et l'issue référendaire du règl. 150-49 n'est pas confirmée. À qualifier avec expert foncier une fois le règlement adopté définitivement et un lot d'assemblage identifié.
+          - generic:
+            - heading "Chronologie des preuves" [level=2] [ref=e1044]
+            - list [ref=e1045]:
+              - listitem:
+                - paragraph: 2026-02-25
+                - paragraph: Signal · Avis public — assemblée de consultation règl. 150-49/150-50
+              - listitem:
+                - paragraph: 2026-04-01
+                - paragraph: Signal · Avis public — demande approbation référendaire 150-49/150-50 (2e projet)
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Signal · Règlement 150-49 — art. 12.7 (texte normatif zone H-609-4)
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Signal · YouTube — séances conseil municipal Valleyfield 2026 (transcription règl. 150-49)
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Ancrage · Rôle d'évaluation foncière 2026 — municipalité 70052 (XML 27 Mo)
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Ancrage · Cadastre allégé du Québec — API REST (présence 15/15 lots vérifiés)
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Ancrage · Correspondance lot ↔ zone H-609-4 (hypothèse par nom de rue)
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Contraintes · BDZI — zones inondables (REST ArcGIS layer 22) — H-609-4
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Contraintes · GRHQ — hydrographie (REST layer 104) — secteur H-609-4
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Contraintes · CPTAQ — zone agricole A-939 (Feuillet-1 + Zones-A-150-44.pdf) adjacente à H-609
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Marché · NeoMedia — permis de construction résidentiels MRC Beauharnois-Salaberry 2024
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Marché · Ville Valleyfield — projets résidentiels en développement
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Marché · JLR / Centris — transactions notariées et prix médians par zone
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Contexte · Statistique Canada — Recensement 2021 — Salaberry-de-Valleyfield
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Contexte · INFOSuroit — PADTC transport collectif Valleyfield 574 762 $
+              - listitem:
+                - paragraph: 2026-05-25
+                - paragraph: Scoring · Synthèse scoring — H-609-4 règl. 150-49
+  - complementary "Assistant radar (ancre)" [ref=e643]:
+    - generic [ref=e645]:
+      - button "Passer en fenetre flottante" [ref=e646] [cursor=pointer]:
+        - img [ref=e647]
+      - button "Fermer le chat" [ref=e648] [cursor=pointer]:
+        - img [ref=e649]
+    - region "Assistant radar" [ref=e651]:
+      - navigation "Assistant radar" [ref=e653]:
+        - button "Chat" [pressed] [ref=e654] [cursor=pointer]
+        - button "Taches" [ref=e655] [cursor=pointer]
+      - generic [ref=e657]:
+        - generic [ref=e658]:
+          - generic [ref=e659]:
+            - paragraph [ref=e660]: Assistant radar
+            - paragraph [ref=e661]: Questionner les signaux et piloter le backlog
+          - combobox "Modele" [ref=e663]:
+            - option "Sonnet 4.6" [selected]
+            - option "Opus 4.7"
+            - option "Command A"
+            - option "Command A R."
+            - option "Gemini 3.5 Flash"
+            - option "Gemini 3.1 Flash Lite"
+            - option "Mistral Small 4"
+            - option "Magistral Medium"
+            - option "GPT-5.5"
+            - option "GPT-5.4 Nano"
+            - option "GPT-4.1 Nano"
+        - generic [ref=e672]:
+          - generic [ref=e673]:
+            - generic [ref=e674]: Bonjour, resume le signal le plus prioritaire
+            - generic [ref=e675]:
+              - button "Copier" [ref=e676] [cursor=pointer]:
+                - img [ref=e677]
+              - button "Modifier" [ref=e678] [cursor=pointer]:
+                - img [ref=e679]
+          - generic [ref=e680]:
+            - img [ref=e682]
+            - generic [ref=e683]:
+              - paragraph [ref=e684]: Assistant radar
+              - generic [ref=e688]:
+                - paragraph [ref=e689]: Je n'ai pas accès aux données actuelles du radar immobilier de Salaberry-de-Valleyfield (signaux, priorités, lots, zones, etc.). Je ne peux donc pas résumer le signal le plus prioritaire sans risquer d'inventer des informations.
+                - paragraph [ref=e690]: "Pour obtenir ce résumé, je vous suggère de :"
+                - paragraph [ref=e691]: Consulter directement le radar et me partager les données du signal prioritaire, je pourrai alors vous en faire un résumé. Me fournir les détails (zone, type de signal, indicateurs concernés), et je vous aiderai à les synthétiser.
+                - paragraph [ref=e692]: Avez-vous des données à me soumettre ?
+              - generic [ref=e693]:
+                - button "Copier" [ref=e694] [cursor=pointer]:
+                  - img [ref=e695]
+                - button "Regenerer" [ref=e696] [cursor=pointer]:
+                  - img [ref=e697]
+                - button "chat.feedback.useful" [ref=e698] [cursor=pointer]:
+                  - img [ref=e699]
+                - button "chat.feedback.notUseful" [ref=e700] [cursor=pointer]:
+                  - img [ref=e701]
+        - generic [ref=e667]:
+          - list "Contexte de la conversation" [ref=e1063]:
+            - listitem [ref=e1064]:
+              - generic "Rezonage résidentiel · Règl. 150-49 · H-609-4" [ref=e1065]
+          - generic [ref=e668]:
+            - textbox "Questionner ce signal" [ref=e669]
+            - button [disabled] [ref=e670]:
+              - img [ref=e671]

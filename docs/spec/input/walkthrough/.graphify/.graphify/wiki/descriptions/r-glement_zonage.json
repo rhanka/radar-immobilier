@@ -1,0 +1,19 @@
+{
+  "schema": "graphify_wiki_description_v1",
+  "target_id": "règlement_zonage",
+  "target_kind": "node",
+  "graph_hash": "87782f734787a455c53e0f538d50ce40184a267f3f77dad5a4b41b5cea50c419",
+  "status": "generated",
+  "description": "Le règlement de zonage est un document réglementaire encadrant l'utilisation du sol et les règles d'urbanisme applicables à un territoire. Il est discuté dans le cadre d'une démonstration radar-immobilier, où son rôle dans la gestion des changements d'affectation des terrains est évoqué. Ce règlement est lié à d'autres textes comme le Règlement 3835, qui en constitue une composante ou une référence. Il interagit avec des procédures telles que les dérogations mineures, les avis de motion et les procès-verbaux municipaux, reflétant son intégration dans les processus décisionnels locaux. Son application implique des modifications ou des précisions sur les règles de zonage en vigueur.",
+  "evidence_refs": [
+    "walkthrough-transcript.md"
+  ],
+  "confidence": 0.79,
+  "cache_key": "9e028841ce95ad8559334c26d6a651cef4d2dae6f838f19d0df911c5f1c06fac",
+  "generator": {
+    "mode": "direct",
+    "provider": "mistral",
+    "model": "mistral-small-2603",
+    "prompt_version": "wiki-description-v1"
+  }
+}

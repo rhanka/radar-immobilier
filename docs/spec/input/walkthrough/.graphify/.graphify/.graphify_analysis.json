@@ -1,0 +1,188 @@
+{
+  "communities": {
+    "0": [
+      "carte_interactive_zonage",
+      "rad_ar_i_mmo_dmo_recording",
+      "radar_demo_transcript",
+      "scraper_procès_verbal",
+      "vidéo_meeting_municipal",
+      "voxtral_mini_latest",
+      "youtube_transcript"
+    ],
+    "1": [
+      "avis_de_motion",
+      "avis_public",
+      "procès_verbal",
+      "règlement_zonage",
+      "zonage_change"
+    ],
+    "2": [
+      "habitation_multifamiliale",
+      "mrc_matapedia",
+      "règlement_3835",
+      "ville_saint_damase",
+      "zone_201"
+    ],
+    "3": [
+      "dérogation_mineure",
+      "marge_implantation"
+    ]
+  },
+  "cohesion": {
+    "0": 0.2857142857142857,
+    "1": 0.6,
+    "2": 0.5,
+    "3": 1
+  },
+  "gods": [
+    {
+      "id": "radar_demo_transcript",
+      "label": "Walkthrough démo radar-immobilier — transcript",
+      "edges": 13,
+      "degree": 13
+    },
+    {
+      "id": "règlement_zonage",
+      "label": "Règlement de zonage",
+      "edges": 6,
+      "degree": 6
+    },
+    {
+      "id": "procès_verbal",
+      "label": "Procès-verbal municipal",
+      "edges": 5,
+      "degree": 5
+    },
+    {
+      "id": "zonage_change",
+      "label": "Changement de zonage",
+      "edges": 3,
+      "degree": 3
+    },
+    {
+      "id": "dérogation_mineure",
+      "label": "Dérogation mineure",
+      "edges": 3,
+      "degree": 3
+    },
+    {
+      "id": "ville_saint_damase",
+      "label": "Ville de Saint-Damase",
+      "edges": 3,
+      "degree": 3
+    },
+    {
+      "id": "zone_201",
+      "label": "Zone 201",
+      "edges": 3,
+      "degree": 3
+    },
+    {
+      "id": "règlement_3835",
+      "label": "Règlement 3835",
+      "edges": 3,
+      "degree": 3
+    },
+    {
+      "id": "avis_public",
+      "label": "Avis public municipal",
+      "edges": 2,
+      "degree": 2
+    },
+    {
+      "id": "mrc_matapedia",
+      "label": "MRC de la Matapédia",
+      "edges": 2,
+      "degree": 2
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Walkthrough démo radar-immobilier — transcript",
+      "target": "Procès-verbal municipal",
+      "source_files": [
+        "walkthrough-transcript.md",
+        "walkthrough-transcript.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "mentionne",
+      "note": "Bridges community 0 → community 1"
+    },
+    {
+      "source": "Walkthrough démo radar-immobilier — transcript",
+      "target": "Dérogation mineure",
+      "source_files": [
+        "walkthrough-transcript.md",
+        "walkthrough-transcript.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "mentionne",
+      "note": "Bridges community 0 → community 3"
+    },
+    {
+      "source": "Walkthrough démo radar-immobilier — transcript",
+      "target": "Ville de Saint-Damase",
+      "source_files": [
+        "walkthrough-transcript.md",
+        "walkthrough-transcript.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "mentionne",
+      "note": "Bridges community 0 → community 2"
+    },
+    {
+      "source": "Dérogation mineure",
+      "target": "Règlement de zonage",
+      "source_files": [
+        "walkthrough-transcript.md",
+        "walkthrough-transcript.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "modifie",
+      "note": "Bridges community 3 → community 1"
+    },
+    {
+      "source": "Règlement 3835",
+      "target": "Règlement de zonage",
+      "source_files": [
+        "walkthrough-transcript.md",
+        "walkthrough-transcript.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "est_un",
+      "note": "Bridges community 2 → community 1"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `Walkthrough démo radar-immobilier — transcript` connect `Community 0` to `Community 1`, `Community 3`, `Community 2`?",
+      "why": "High betweenness centrality (0.723) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Règlement de zonage` connect `Community 1` to `Community 0`, `Community 3`, `Community 2`?",
+      "why": "High betweenness centrality (0.227) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Dérogation mineure` connect `Community 3` to `Community 0`, `Community 1`?",
+      "why": "High betweenness centrality (0.111) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Mistral Voxtral (voxtral-mini-latest)`, `rad-ar i-mmo dmo - 2026_06_09 17_49 EDT - Recording.mp4`, `Carte interactive de zonage` to the rest of the system?",
+      "why": "7 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ],
+  "labels": {
+    "0": "Community 0",
+    "1": "Community 1",
+    "2": "Community 2",
+    "3": "Community 3"
+  },
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

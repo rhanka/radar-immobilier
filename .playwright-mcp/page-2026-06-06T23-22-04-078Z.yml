@@ -1,0 +1,574 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Signaux" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Signaux
+        - button "Opportunités" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Opportunités
+        - button "Sources" [active] [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Sources
+        - button "Grilles" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Grilles
+        - button "Coordination" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Coordination
+        - button "Backlog" [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Backlog
+      - generic [ref=e23]:
+        - button "Lancer la visite guidée" [ref=e24] [cursor=pointer]:
+          - img [ref=e25]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e26] [cursor=pointer]: Réel
+    - generic [ref=e1140]:
+      - complementary [ref=e1141]:
+        - generic [ref=e1142]:
+          - generic [ref=e1143]:
+            - paragraph [ref=e1144]: Sources & opérations
+            - generic [ref=e1145]:
+              - button "Qualification" [ref=e1146] [cursor=pointer]:
+                - img [ref=e1147]
+                - text: Qualification
+              - button "Approfondissement" [ref=e1148] [cursor=pointer]:
+                - img [ref=e1149]
+                - text: Approfondissement
+              - button "Contribution" [ref=e1150] [cursor=pointer]:
+                - img [ref=e1151]
+                - text: Contribution
+              - button "Jobs" [ref=e1152] [cursor=pointer]:
+                - img [ref=e1153]
+                - text: Jobs
+              - button "Automatisation" [ref=e1154] [cursor=pointer]:
+                - img [ref=e1155]
+                - text: Automatisation
+          - generic [ref=e1156]:
+            - paragraph [ref=e1157]: À propos de cet onglet
+            - paragraph [ref=e1158]: Évaluation et priorisation du catalogue de sources.
+      - generic [ref=e1160]:
+        - generic [ref=e1161]:
+          - heading "Qualification" [level=1] [ref=e1162]
+          - paragraph [ref=e1163]: Évaluation et priorisation du catalogue de sources.
+        - generic [ref=e1164]:
+          - generic [ref=e1165]:
+            - generic [ref=e1166]:
+              - generic [ref=e1167]:
+                - heading "Cadran sources" [level=1] [ref=e1168]
+                - paragraph [ref=e1169]: Valeur potentielle vs complexite incluant acces, risque legal et cout.
+              - generic [ref=e1170]:
+                - generic: "Y: valeur business"
+                - generic: "X: complexite/cout"
+            - generic [ref=e1171]:
+              - generic:
+                - generic:
+                  - generic [ref=e1173]: Complexite faible
+                  - generic [ref=e1174]: Complexite elevee
+                  - generic [ref=e1175]: Valeur elevee
+                  - generic [ref=e1176]: Valeur faible
+                  - generic [ref=e1177]: Priorite immediate
+                  - generic [ref=e1178]: Valeur forte, acces a qualifier
+                  - generic [ref=e1179]: Contexte opportuniste
+                  - generic [ref=e1180]: A eviter en Phase 1
+                  - button "Avis publics - Valleyfield, valeur 5/5, complexite 1.35/5" [pressed] [ref=e1181] [cursor=pointer]: "1"
+                  - button "Reglements d'urbanisme - Valleyfield, valeur 5/5, complexite 1.70/5" [ref=e1182] [cursor=pointer]: "2"
+                  - button "PPCMOI - Valleyfield, valeur 5/5, complexite 1.70/5" [ref=e1183] [cursor=pointer]: "3"
+                  - button "Seances du conseil - Valleyfield, valeur 4/5, complexite 1.70/5" [ref=e1184] [cursor=pointer]: "4"
+                  - button "Videos YouTube du conseil - Valleyfield, valeur 5/5, complexite 3.30/5" [ref=e1185] [cursor=pointer]: "5"
+                  - button "Avis et reglements - MRC Beauharnois-Salaberry, valeur 3/5, complexite 1.95/5" [ref=e1186] [cursor=pointer]: "6"
+                  - button "Schema d'amenagement - MRCBHS, valeur 3/5, complexite 1.70/5" [ref=e1187] [cursor=pointer]: "7"
+                  - button "Conseil des maires - MRCBHS, valeur 3/5, complexite 1.70/5" [ref=e1188] [cursor=pointer]: "8"
+                  - button "Donnees Quebec catalog, valeur 2/5, complexite 1.35/5" [ref=e1189] [cursor=pointer]: "9"
+                  - button "Roles d'evaluation fonciere - MAMH, valeur 5/5, complexite 2.45/5" [ref=e1190] [cursor=pointer]: "10"
+                  - button "Adresses Quebec / IGO geocoder, valeur 2/5, complexite 1.35/5" [ref=e1191] [cursor=pointer]: "11"
+                  - button "CPTAQ zone agricole, valeur 4/5, complexite 1.90/5" [ref=e1192] [cursor=pointer]: "12"
+                  - button "CPTAQ decisions, valeur 5/5, complexite 2.45/5" [ref=e1193] [cursor=pointer]: "13"
+                  - button "BDZI flood zones, valeur 3/5, complexite 2.10/5" [ref=e1194] [cursor=pointer]: "14"
+                  - button "GRHQ hydrography, valeur 3/5, complexite 1.90/5" [ref=e1195] [cursor=pointer]: "15"
+                  - button "Zonage municipal open data, valeur 3/5, complexite 2.30/5" [ref=e1196] [cursor=pointer]: "16"
+                  - button "Zonage plans et grilles - Valleyfield, valeur 5/5, complexite 2.80/5" [ref=e1197] [cursor=pointer]: "17"
+                  - button "Cadastre / Infolot, valeur 5/5, complexite 4.00/5" [ref=e1198] [cursor=pointer]: "18"
+                  - button "Registre foncier du Quebec, valeur 5/5, complexite 4.80/5" [ref=e1199] [cursor=pointer]: "19"
+                  - button "JLR, valeur 5/5, complexite 4.65/5" [ref=e1200] [cursor=pointer]: "20"
+                  - button "Centris / MLS, valeur 4/5, complexite 4.65/5" [ref=e1201] [cursor=pointer]: "21"
+                  - button "Transactions immobilieres, valeur 4/5, complexite 4.00/5" [ref=e1202] [cursor=pointer]: "22"
+                  - button "Permis de construction - Valleyfield, valeur 4/5, complexite 3.90/5" [ref=e1203] [cursor=pointer]: "23"
+                  - button "Construction permits open data, valeur 2/5, complexite 1.95/5" [ref=e1204] [cursor=pointer]: "24"
+                  - button "StatCan Census Profile 2021, valeur 4/5, complexite 1.35/5" [ref=e1205] [cursor=pointer]: "25"
+                  - button "StatCan WDS socio-economic tables, valeur 3/5, complexite 1.70/5" [ref=e1206] [cursor=pointer]: "26"
+                  - button "StatCan core public infrastructure assets, valeur 1/5, complexite 1.00/5" [ref=e1207] [cursor=pointer]: "27"
+                  - button "INFC/HICC projects, valeur 3/5, complexite 1.35/5" [ref=e1208] [cursor=pointer]: "28"
+                  - button "MTMD travaux routiers, valeur 3/5, complexite 1.35/5" [ref=e1209] [cursor=pointer]: "29"
+                  - button "MTMD reseau routier RTSS, valeur 2/5, complexite 1.35/5" [ref=e1210] [cursor=pointer]: "30"
+                  - button "Exo GTFS transit service, valeur 3/5, complexite 1.70/5" [ref=e1211] [cursor=pointer]: "31"
+                  - button "Salaberry info travaux/projets, valeur 3/5, complexite 2.25/5" [ref=e1212] [cursor=pointer]: "32"
+                  - button "ARTM grands projets, valeur 1/5, complexite 1.70/5" [ref=e1213] [cursor=pointer]: "33"
+                  - button "Orthophotos / imagery, valeur 3/5, complexite 2.90/5" [ref=e1214] [cursor=pointer]: "34"
+            - generic [ref=e1215]:
+              - paragraph: Source active
+              - paragraph: Avis publics - Valleyfield
+              - paragraph: 1.35 · Priorite immediate
+            - generic [ref=e1216]:
+              - button "1 Avis publics - Valleyfield" [ref=e1217] [cursor=pointer]:
+                - generic [ref=e1218]: "1"
+                - generic: Avis publics - Valleyfield
+              - button "2 Reglements d'urbanisme - Valleyfield" [ref=e1219] [cursor=pointer]:
+                - generic [ref=e1220]: "2"
+                - generic: Reglements d'urbanisme - Valleyfield
+              - button "3 PPCMOI - Valleyfield" [ref=e1221] [cursor=pointer]:
+                - generic [ref=e1222]: "3"
+                - generic: PPCMOI - Valleyfield
+              - button "4 Seances du conseil - Valleyfield" [ref=e1223] [cursor=pointer]:
+                - generic [ref=e1224]: "4"
+                - generic: Seances du conseil - Valleyfield
+              - button "5 Videos YouTube du conseil - Valleyfield" [ref=e1225] [cursor=pointer]:
+                - generic [ref=e1226]: "5"
+                - generic: Videos YouTube du conseil - Valleyfield
+              - button "6 Avis et reglements - MRC Beauharnois-Salaberry" [ref=e1227] [cursor=pointer]:
+                - generic [ref=e1228]: "6"
+                - generic: Avis et reglements - MRC Beauharnois-Salaberry
+              - button "7 Schema d'amenagement - MRCBHS" [ref=e1229] [cursor=pointer]:
+                - generic [ref=e1230]: "7"
+                - generic: Schema d'amenagement - MRCBHS
+              - button "8 Conseil des maires - MRCBHS" [ref=e1231] [cursor=pointer]:
+                - generic [ref=e1232]: "8"
+                - generic: Conseil des maires - MRCBHS
+              - button "9 Donnees Quebec catalog" [ref=e1233] [cursor=pointer]:
+                - generic [ref=e1234]: "9"
+                - generic: Donnees Quebec catalog
+              - button "10 Roles d'evaluation fonciere - MAMH" [ref=e1235] [cursor=pointer]:
+                - generic [ref=e1236]: "10"
+                - generic: Roles d'evaluation fonciere - MAMH
+              - button "11 Adresses Quebec / IGO geocoder" [ref=e1237] [cursor=pointer]:
+                - generic [ref=e1238]: "11"
+                - generic: Adresses Quebec / IGO geocoder
+              - button "12 CPTAQ zone agricole" [ref=e1239] [cursor=pointer]:
+                - generic [ref=e1240]: "12"
+                - generic: CPTAQ zone agricole
+              - button "13 CPTAQ decisions" [ref=e1241] [cursor=pointer]:
+                - generic [ref=e1242]: "13"
+                - generic: CPTAQ decisions
+              - button "14 BDZI flood zones" [ref=e1243] [cursor=pointer]:
+                - generic [ref=e1244]: "14"
+                - generic: BDZI flood zones
+              - button "15 GRHQ hydrography" [ref=e1245] [cursor=pointer]:
+                - generic [ref=e1246]: "15"
+                - generic: GRHQ hydrography
+              - button "16 Zonage municipal open data" [ref=e1247] [cursor=pointer]:
+                - generic [ref=e1248]: "16"
+                - generic: Zonage municipal open data
+              - button "17 Zonage plans et grilles - Valleyfield" [ref=e1249] [cursor=pointer]:
+                - generic [ref=e1250]: "17"
+                - generic: Zonage plans et grilles - Valleyfield
+              - button "18 Cadastre / Infolot" [ref=e1251] [cursor=pointer]:
+                - generic [ref=e1252]: "18"
+                - generic: Cadastre / Infolot
+              - button "19 Registre foncier du Quebec" [ref=e1253] [cursor=pointer]:
+                - generic [ref=e1254]: "19"
+                - generic: Registre foncier du Quebec
+              - button "20 JLR" [ref=e1255] [cursor=pointer]:
+                - generic [ref=e1256]: "20"
+                - generic: JLR
+              - button "21 Centris / MLS" [ref=e1257] [cursor=pointer]:
+                - generic [ref=e1258]: "21"
+                - generic: Centris / MLS
+              - button "22 Transactions immobilieres" [ref=e1259] [cursor=pointer]:
+                - generic [ref=e1260]: "22"
+                - generic: Transactions immobilieres
+              - button "23 Permis de construction - Valleyfield" [ref=e1261] [cursor=pointer]:
+                - generic [ref=e1262]: "23"
+                - generic: Permis de construction - Valleyfield
+              - button "24 Construction permits open data" [ref=e1263] [cursor=pointer]:
+                - generic [ref=e1264]: "24"
+                - generic: Construction permits open data
+              - button "25 StatCan Census Profile 2021" [ref=e1265] [cursor=pointer]:
+                - generic [ref=e1266]: "25"
+                - generic: StatCan Census Profile 2021
+              - button "26 StatCan WDS socio-economic tables" [ref=e1267] [cursor=pointer]:
+                - generic [ref=e1268]: "26"
+                - generic: StatCan WDS socio-economic tables
+              - button "27 StatCan core public infrastructure assets" [ref=e1269] [cursor=pointer]:
+                - generic [ref=e1270]: "27"
+                - generic: StatCan core public infrastructure assets
+              - button "28 INFC/HICC projects" [ref=e1271] [cursor=pointer]:
+                - generic [ref=e1272]: "28"
+                - generic: INFC/HICC projects
+              - button "29 MTMD travaux routiers" [ref=e1273] [cursor=pointer]:
+                - generic [ref=e1274]: "29"
+                - generic: MTMD travaux routiers
+              - button "30 MTMD reseau routier RTSS" [ref=e1275] [cursor=pointer]:
+                - generic [ref=e1276]: "30"
+                - generic: MTMD reseau routier RTSS
+              - button "31 Exo GTFS transit service" [ref=e1277] [cursor=pointer]:
+                - generic [ref=e1278]: "31"
+                - generic: Exo GTFS transit service
+              - button "32 Salaberry info travaux/projets" [ref=e1279] [cursor=pointer]:
+                - generic [ref=e1280]: "32"
+                - generic: Salaberry info travaux/projets
+              - button "33 ARTM grands projets" [ref=e1281] [cursor=pointer]:
+                - generic [ref=e1282]: "33"
+                - generic: ARTM grands projets
+              - button "34 Orthophotos / imagery" [ref=e1283] [cursor=pointer]:
+                - generic [ref=e1284]: "34"
+                - generic: Orthophotos / imagery
+          - generic [ref=e1285]:
+            - generic [ref=e1286]:
+              - paragraph: Prioritaire (prete a activer)
+              - paragraph [ref=e1287]: "7"
+            - generic [ref=e1288]:
+              - paragraph: A qualifier (acces a valider)
+              - paragraph [ref=e1289]: "5"
+            - generic [ref=e1290]:
+              - paragraph: Plus tard
+              - paragraph [ref=e1291]: "18"
+            - generic [ref=e1292]:
+              - paragraph: Verification manuelle
+              - paragraph [ref=e1293]: "1"
+            - generic [ref=e1294]:
+              - paragraph: Hors perimetre
+              - paragraph [ref=e1295]: "3"
+          - generic [ref=e1296]:
+            - generic [ref=e1297]:
+              - heading "Catalogue sources (34)" [level=1] [ref=e1298]
+              - generic [ref=e1299]: Cliquer une source pour déplier son détail
+            - generic [ref=e1300]:
+              - button "Avis publics - Valleyfield Municipal signal Construire maintenant Public gratuit 0 abonnement" [ref=e1302] [cursor=pointer]:
+                - img [ref=e1304]
+                - generic:
+                  - generic: Avis publics - Valleyfield
+                  - generic: Municipal signal
+                - generic [ref=e1305]: Construire maintenant
+                - generic [ref=e1306]: Public gratuit
+                - generic [ref=e1307]: 0 abonnement
+              - button "Reglements d'urbanisme - Valleyfield Municipal context Construire maintenant Public gratuit 0 abonnement" [ref=e1309] [cursor=pointer]:
+                - img [ref=e1311]
+                - generic:
+                  - generic: Reglements d'urbanisme - Valleyfield
+                  - generic: Municipal context
+                - generic [ref=e1312]: Construire maintenant
+                - generic [ref=e1313]: Public gratuit
+                - generic [ref=e1314]: 0 abonnement
+              - button "PPCMOI - Valleyfield Municipal signal Construire maintenant Public gratuit 0 abonnement" [ref=e1316] [cursor=pointer]:
+                - img [ref=e1318]
+                - generic:
+                  - generic: PPCMOI - Valleyfield
+                  - generic: Municipal signal
+                - generic [ref=e1319]: Construire maintenant
+                - generic [ref=e1320]: Public gratuit
+                - generic [ref=e1321]: 0 abonnement
+              - button "Seances du conseil - Valleyfield Municipal deliberation Construire plus tard Public gratuit 0 abonnement" [ref=e1323] [cursor=pointer]:
+                - img [ref=e1325]
+                - generic:
+                  - generic: Seances du conseil - Valleyfield
+                  - generic: Municipal deliberation
+                - generic [ref=e1326]: Construire plus tard
+                - generic [ref=e1327]: Public gratuit
+                - generic [ref=e1328]: 0 abonnement
+              - button "Videos YouTube du conseil - Valleyfield Municipal deliberation Qualifier l'acces API publique Cout variable a cadrer" [ref=e1330] [cursor=pointer]:
+                - img [ref=e1332]
+                - generic:
+                  - generic: Videos YouTube du conseil - Valleyfield
+                  - generic: Municipal deliberation
+                - generic [ref=e1333]: Qualifier l'acces
+                - generic [ref=e1334]: API publique
+                - generic [ref=e1335]: Cout variable a cadrer
+              - button "Avis et reglements - MRC Beauharnois-Salaberry Regional planning Construire plus tard Public gratuit 0 abonnement" [ref=e1337] [cursor=pointer]:
+                - img [ref=e1339]
+                - generic:
+                  - generic: Avis et reglements - MRC Beauharnois-Salaberry
+                  - generic: Regional planning
+                - generic [ref=e1340]: Construire plus tard
+                - generic [ref=e1341]: Public gratuit
+                - generic [ref=e1342]: 0 abonnement
+              - button "Schema d'amenagement - MRCBHS Regional planning Construire plus tard Public gratuit 0 abonnement" [ref=e1344] [cursor=pointer]:
+                - img [ref=e1346]
+                - generic:
+                  - generic: Schema d'amenagement - MRCBHS
+                  - generic: Regional planning
+                - generic [ref=e1347]: Construire plus tard
+                - generic [ref=e1348]: Public gratuit
+                - generic [ref=e1349]: 0 abonnement
+              - button "Conseil des maires - MRCBHS Regional planning Construire plus tard Public gratuit 0 abonnement" [ref=e1351] [cursor=pointer]:
+                - img [ref=e1353]
+                - generic:
+                  - generic: Conseil des maires - MRCBHS
+                  - generic: Regional planning
+                - generic [ref=e1354]: Construire plus tard
+                - generic [ref=e1355]: Public gratuit
+                - generic [ref=e1356]: 0 abonnement
+              - button "Donnees Quebec catalog Open-data discovery Construire plus tard API publique 0 abonnement" [ref=e1358] [cursor=pointer]:
+                - img [ref=e1360]
+                - generic:
+                  - generic: Donnees Quebec catalog
+                  - generic: Open-data discovery
+                - generic [ref=e1361]: Construire plus tard
+                - generic [ref=e1362]: API publique
+                - generic [ref=e1363]: 0 abonnement
+              - button "Roles d'evaluation fonciere - MAMH Parcel and value anchor Construire maintenant Public gratuit 0 abonnement" [ref=e1365] [cursor=pointer]:
+                - img [ref=e1367]
+                - generic:
+                  - generic: Roles d'evaluation fonciere - MAMH
+                  - generic: Parcel and value anchor
+                - generic [ref=e1368]: Construire maintenant
+                - generic [ref=e1369]: Public gratuit
+                - generic [ref=e1370]: 0 abonnement
+              - button "Adresses Quebec / IGO geocoder Geocoding Construire plus tard API publique 0 abonnement" [ref=e1372] [cursor=pointer]:
+                - img [ref=e1374]
+                - generic:
+                  - generic: Adresses Quebec / IGO geocoder
+                  - generic: Geocoding
+                - generic [ref=e1375]: Construire plus tard
+                - generic [ref=e1376]: API publique
+                - generic [ref=e1377]: 0 abonnement
+              - button "CPTAQ zone agricole Constraint Construire maintenant Public gratuit 0 abonnement" [ref=e1379] [cursor=pointer]:
+                - img [ref=e1381]
+                - generic:
+                  - generic: CPTAQ zone agricole
+                  - generic: Constraint
+                - generic [ref=e1382]: Construire maintenant
+                - generic [ref=e1383]: Public gratuit
+                - generic [ref=e1384]: 0 abonnement
+              - button "CPTAQ decisions Constraint Construire maintenant Public gratuit 0 abonnement" [ref=e1386] [cursor=pointer]:
+                - img [ref=e1388]
+                - generic:
+                  - generic: CPTAQ decisions
+                  - generic: Constraint
+                - generic [ref=e1389]: Construire maintenant
+                - generic [ref=e1390]: Public gratuit
+                - generic [ref=e1391]: 0 abonnement
+              - button "BDZI flood zones Constraint Construire plus tard API publique 0 abonnement" [ref=e1393] [cursor=pointer]:
+                - img [ref=e1395]
+                - generic:
+                  - generic: BDZI flood zones
+                  - generic: Constraint
+                - generic [ref=e1396]: Construire plus tard
+                - generic [ref=e1397]: API publique
+                - generic [ref=e1398]: 0 abonnement
+              - button "GRHQ hydrography Constraint Construire plus tard API publique 0 abonnement" [ref=e1400] [cursor=pointer]:
+                - img [ref=e1402]
+                - generic:
+                  - generic: GRHQ hydrography
+                  - generic: Constraint
+                - generic [ref=e1403]: Construire plus tard
+                - generic [ref=e1404]: API publique
+                - generic [ref=e1405]: 0 abonnement
+              - button "Zonage municipal open data Open-data zoning Construire plus tard API publique 0 abonnement" [ref=e1407] [cursor=pointer]:
+                - img [ref=e1409]
+                - generic:
+                  - generic: Zonage municipal open data
+                  - generic: Open-data zoning
+                - generic [ref=e1410]: Construire plus tard
+                - generic [ref=e1411]: API publique
+                - generic [ref=e1412]: 0 abonnement
+              - button "Zonage plans et grilles - Valleyfield Municipal context Construire plus tard Public gratuit 0 abonnement" [ref=e1414] [cursor=pointer]:
+                - img [ref=e1416]
+                - generic:
+                  - generic: Zonage plans et grilles - Valleyfield
+                  - generic: Municipal context
+                - generic [ref=e1417]: Construire plus tard
+                - generic [ref=e1418]: Public gratuit
+                - generic [ref=e1419]: 0 abonnement
+              - button "Cadastre / Infolot Parcel geometry Qualifier l'acces Acces payant Devis requis" [ref=e1421] [cursor=pointer]:
+                - img [ref=e1423]
+                - generic:
+                  - generic: Cadastre / Infolot
+                  - generic: Parcel geometry
+                - generic [ref=e1424]: Qualifier l'acces
+                - generic [ref=e1425]: Acces payant
+                - generic [ref=e1426]: Devis requis
+              - button "Registre foncier du Quebec Ownership due diligence Verification manuelle Manuel payant Frais par verification" [ref=e1428] [cursor=pointer]:
+                - img [ref=e1430]
+                - generic:
+                  - generic: Registre foncier du Quebec
+                  - generic: Ownership due diligence
+                - generic [ref=e1431]: Verification manuelle
+                - generic [ref=e1432]: Manuel payant
+                - generic [ref=e1433]: Frais par verification
+              - button "JLR Paid market data Qualifier l'acces Feed partenaire Devis requis" [ref=e1435] [cursor=pointer]:
+                - img [ref=e1437]
+                - generic:
+                  - generic: JLR
+                  - generic: Paid market data
+                - generic [ref=e1438]: Qualifier l'acces
+                - generic [ref=e1439]: Feed partenaire
+                - generic [ref=e1440]: Devis requis
+              - button "Centris / MLS Paid market data Qualifier l'acces Feed partenaire Devis requis" [ref=e1442] [cursor=pointer]:
+                - img [ref=e1444]
+                - generic:
+                  - generic: Centris / MLS
+                  - generic: Paid market data
+                - generic [ref=e1445]: Qualifier l'acces
+                - generic [ref=e1446]: Feed partenaire
+                - generic [ref=e1447]: Devis requis
+              - button "Transactions immobilieres Market validation Construire plus tard Acces payant Devis requis" [ref=e1449] [cursor=pointer]:
+                - img [ref=e1451]
+                - generic:
+                  - generic: Transactions immobilieres
+                  - generic: Market validation
+                - generic [ref=e1452]: Construire plus tard
+                - generic [ref=e1453]: Acces payant
+                - generic [ref=e1454]: Devis requis
+              - button "Permis de construction - Valleyfield Municipal market validation Qualifier l'acces Acces client/municipal Devis requis" [ref=e1456] [cursor=pointer]:
+                - img [ref=e1458]
+                - generic:
+                  - generic: Permis de construction - Valleyfield
+                  - generic: Municipal market validation
+                - generic [ref=e1459]: Qualifier l'acces
+                - generic [ref=e1460]: Acces client/municipal
+                - generic [ref=e1461]: Devis requis
+              - button "Construction permits open data Market validation Sortir Phase 1 API publique 0 abonnement" [ref=e1463] [cursor=pointer]:
+                - img [ref=e1465]
+                - generic:
+                  - generic: Construction permits open data
+                  - generic: Market validation
+                - generic [ref=e1466]: Sortir Phase 1
+                - generic [ref=e1467]: API publique
+                - generic [ref=e1468]: 0 abonnement
+              - button "StatCan Census Profile 2021 Socio-economic context Construire maintenant API publique 0 abonnement" [ref=e1470] [cursor=pointer]:
+                - img [ref=e1472]
+                - generic:
+                  - generic: StatCan Census Profile 2021
+                  - generic: Socio-economic context
+                - generic [ref=e1473]: Construire maintenant
+                - generic [ref=e1474]: API publique
+                - generic [ref=e1475]: 0 abonnement
+              - button "StatCan WDS socio-economic tables Socio-economic context Construire plus tard API publique 0 abonnement" [ref=e1477] [cursor=pointer]:
+                - img [ref=e1479]
+                - generic:
+                  - generic: StatCan WDS socio-economic tables
+                  - generic: Socio-economic context
+                - generic [ref=e1480]: Construire plus tard
+                - generic [ref=e1481]: API publique
+                - generic [ref=e1482]: 0 abonnement
+              - button "StatCan core public infrastructure assets Infrastructure context Sortir Phase 1 API publique 0 abonnement" [ref=e1484] [cursor=pointer]:
+                - img [ref=e1486]
+                - generic:
+                  - generic: StatCan core public infrastructure assets
+                  - generic: Infrastructure context
+                - generic [ref=e1487]: Sortir Phase 1
+                - generic [ref=e1488]: API publique
+                - generic [ref=e1489]: 0 abonnement
+              - button "INFC/HICC projects Infrastructure catalyst Construire plus tard Public gratuit 0 abonnement" [ref=e1491] [cursor=pointer]:
+                - img [ref=e1493]
+                - generic:
+                  - generic: INFC/HICC projects
+                  - generic: Infrastructure catalyst
+                - generic [ref=e1494]: Construire plus tard
+                - generic [ref=e1495]: Public gratuit
+                - generic [ref=e1496]: 0 abonnement
+              - button "MTMD travaux routiers Transport context Construire plus tard API publique 0 abonnement" [ref=e1498] [cursor=pointer]:
+                - img [ref=e1500]
+                - generic:
+                  - generic: MTMD travaux routiers
+                  - generic: Transport context
+                - generic [ref=e1501]: Construire plus tard
+                - generic [ref=e1502]: API publique
+                - generic [ref=e1503]: 0 abonnement
+              - button "MTMD reseau routier RTSS Transport context Construire plus tard API publique 0 abonnement" [ref=e1505] [cursor=pointer]:
+                - img [ref=e1507]
+                - generic:
+                  - generic: MTMD reseau routier RTSS
+                  - generic: Transport context
+                - generic [ref=e1508]: Construire plus tard
+                - generic [ref=e1509]: API publique
+                - generic [ref=e1510]: 0 abonnement
+              - button "Exo GTFS transit service Transit context Construire plus tard Public gratuit 0 abonnement" [ref=e1512] [cursor=pointer]:
+                - img [ref=e1514]
+                - generic:
+                  - generic: Exo GTFS transit service
+                  - generic: Transit context
+                - generic [ref=e1515]: Construire plus tard
+                - generic [ref=e1516]: Public gratuit
+                - generic [ref=e1517]: 0 abonnement
+              - button "Salaberry info travaux/projets Local infrastructure Construire plus tard Public gratuit 0 abonnement" [ref=e1519] [cursor=pointer]:
+                - img [ref=e1521]
+                - generic:
+                  - generic: Salaberry info travaux/projets
+                  - generic: Local infrastructure
+                - generic [ref=e1522]: Construire plus tard
+                - generic [ref=e1523]: Public gratuit
+                - generic [ref=e1524]: 0 abonnement
+              - button "ARTM grands projets Transit projects Sortir Phase 1 Public gratuit 0 abonnement" [ref=e1526] [cursor=pointer]:
+                - img [ref=e1528]
+                - generic:
+                  - generic: ARTM grands projets
+                  - generic: Transit projects
+                - generic [ref=e1529]: Sortir Phase 1
+                - generic [ref=e1530]: Public gratuit
+                - generic [ref=e1531]: 0 abonnement
+              - button "Orthophotos / imagery Visual validation Construire plus tard API publique Cout variable bas" [ref=e1533] [cursor=pointer]:
+                - img [ref=e1535]
+                - generic:
+                  - generic: Orthophotos / imagery
+                  - generic: Visual validation
+                - generic [ref=e1536]: Construire plus tard
+                - generic [ref=e1537]: API publique
+                - generic [ref=e1538]: Cout variable bas
+  - complementary "Assistant radar (ancre)" [ref=e643]:
+    - generic [ref=e645]:
+      - button "Passer en fenetre flottante" [ref=e646] [cursor=pointer]:
+        - img [ref=e647]
+      - button "Fermer le chat" [ref=e648] [cursor=pointer]:
+        - img [ref=e649]
+    - region "Assistant radar" [ref=e651]:
+      - navigation "Assistant radar" [ref=e653]:
+        - button "Chat" [pressed] [ref=e654] [cursor=pointer]
+        - button "Taches" [ref=e655] [cursor=pointer]
+      - generic [ref=e657]:
+        - generic [ref=e658]:
+          - generic [ref=e659]:
+            - paragraph [ref=e660]: Assistant radar
+            - paragraph [ref=e661]: Questionner les signaux et piloter le backlog
+          - combobox "Modele" [ref=e663]:
+            - option "Sonnet 4.6" [selected]
+            - option "Opus 4.7"
+            - option "Command A"
+            - option "Command A R."
+            - option "Gemini 3.5 Flash"
+            - option "Gemini 3.1 Flash Lite"
+            - option "Mistral Small 4"
+            - option "Magistral Medium"
+            - option "GPT-5.5"
+            - option "GPT-5.4 Nano"
+            - option "GPT-4.1 Nano"
+        - generic [ref=e672]:
+          - generic [ref=e673]:
+            - generic [ref=e674]: Bonjour, resume le signal le plus prioritaire
+            - generic [ref=e675]:
+              - button "Copier" [ref=e676] [cursor=pointer]:
+                - img [ref=e677]
+              - button "Modifier" [ref=e678] [cursor=pointer]:
+                - img [ref=e679]
+          - generic [ref=e680]:
+            - img [ref=e682]
+            - generic [ref=e683]:
+              - paragraph [ref=e684]: Assistant radar
+              - generic [ref=e688]:
+                - paragraph [ref=e689]: Je n'ai pas accès aux données actuelles du radar immobilier de Salaberry-de-Valleyfield (signaux, priorités, lots, zones, etc.). Je ne peux donc pas résumer le signal le plus prioritaire sans risquer d'inventer des informations.
+                - paragraph [ref=e690]: "Pour obtenir ce résumé, je vous suggère de :"
+                - paragraph [ref=e691]: Consulter directement le radar et me partager les données du signal prioritaire, je pourrai alors vous en faire un résumé. Me fournir les détails (zone, type de signal, indicateurs concernés), et je vous aiderai à les synthétiser.
+                - paragraph [ref=e692]: Avez-vous des données à me soumettre ?
+              - generic [ref=e693]:
+                - button "Copier" [ref=e694] [cursor=pointer]:
+                  - img [ref=e695]
+                - button "Regenerer" [ref=e696] [cursor=pointer]:
+                  - img [ref=e697]
+                - button "chat.feedback.useful" [ref=e698] [cursor=pointer]:
+                  - img [ref=e699]
+                - button "chat.feedback.notUseful" [ref=e700] [cursor=pointer]:
+                  - img [ref=e701]
+        - generic [ref=e667]:
+          - list "Contexte de la conversation" [ref=e1063]:
+            - listitem [ref=e1064]:
+              - generic "Rezonage résidentiel · Règl. 150-49 · H-609-4" [ref=e1065]
+          - generic [ref=e668]:
+            - textbox "Questionner ce signal" [ref=e669]
+            - button [disabled] [ref=e670]:
+              - img [ref=e671]

@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781211514135:e81c",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "ack",
+    "text": "RECUEIL LANCE — conforme a tes contraintes.\nStack: projet dedie radar-scrape (PAS radar-dev). Conteneur api SEUL via run --rm --no-deps -> AUCUN Postgres ni minio demarre (zero OOM). Volumes node_modules reutilises en EXTERNE (du projet radar-dev) -> pas de npm ci. Demo 5301 intouchee. RADAR_ONTOLOGY_WRITE_TOKEN via override write; creds SCRAPE_S3_* injectes par -e.\nSmoke valide: salaberry-de-valleyfield -> new puis seen; store.list raw/proces-verbaux-salaberry-de-valleyfield/cas/ = 2 objets sur SCW.\n4 sous-agents en parallele, 129 villes chacun (516 villes config-only de main), LIVE_SCRAPE_LIMIT=3, RECUEIL only (pas d exploit). Decoupe en chunks de 20 pour rester sous les timeouts.\nJe te rapporte PAR BATCH des le retour de chaque sous-agent: villes new/seen/error, total docs, preuve store.list (raw/proces-verbaux-*/cas/), familles CMS faibles.\nA la fin: down -v UNIQUEMENT sur radar-scrape (jamais la demo, jamais -v sur radar-dev)."
+  },
+  "createdAt": "2026-06-11T20:58:34.136Z"
+}

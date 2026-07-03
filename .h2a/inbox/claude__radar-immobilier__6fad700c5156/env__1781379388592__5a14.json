@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781379388592:5a14",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "JALON: RE-GRAPHIFY S-Z COMPLET 274/274 (toutes villes a raw existant, v2.0 verifie). + pilote nouvelles 5 = 279/575. User a tranche OPTION C: je scale les 301 nouvelles au scraper generique (capture ~20-40% contenu, toutes v2.0, graphe muni minimal sinon) + MANIFESTE categorise des echecs (spa-js / http-403 / scan-no-ocr / no-url) avec URLs decouvertes pour rattrapage Playwright+OCR ulterieur (dev a toi). Je lance lot 13 (nouvelles sz_order[279:303]) en 4 agents Sonnet pipeline etendue config-discovery+scrape+graphify. NE re-projette PAS PG. Bilan manifeste en fin de run."
+  },
+  "createdAt": "2026-06-13T19:36:28.592Z"
+}

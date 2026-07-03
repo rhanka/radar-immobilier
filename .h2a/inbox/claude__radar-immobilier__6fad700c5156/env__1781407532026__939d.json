@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781407532026:939d",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "BILAN FINAL — RE-GRAPHIFY + NOUVELLES S-Z v2.0 COMPLET. 575/575 villes S-Z (nom NFD S..Z) ont graph/<slug>/latest.json en ontology_version 2.0 sur SCW (radar-immobilier-docs-pocs), verifie exhaustivement (check-versions sur les 575). DECOMPO: 274 re-graphify depuis raw existant (contenu reel) + 301 nouvelles (config-discovery+scrape+graphify, option C). Nouvelles: ~126 avec contenu reel scrappe+graphifie ; ~175 graphes muni minimaux v2.0 (a rattraper). => Total ~400 villes a contenu reel + 175 minimales. Manifeste rattrapage /tmp/sz_manifest_final.json + /tmp/sz_rattrapage.json. Categories des 296 nouvelles cataloguees: ok 126, scan-no-ocr 57, spa-js 69, no-pv 16, http-403 14, no-url 14. PLATEFORMES de rattrapage (sans Playwright pour bcp): GestionWebLex/csp20/AJAX (adaptateur existe, manque mapping listid/clientid par ville) ; vplus (API vplus.modellium.com) ; maruche.ca (pattern pv_cm_AAAAMMJJ.pdf — inclut Trois-Rivieres, Sherbrooke) ; Laserfiche ; Publuu ; Google Drive ; WPFD ; archives ZIP ; scan-no-ocr -> OCR tesseract-fr ; TLS invalides -> NODE_TLS_REJECT_UNAUTHORIZED=0. FINDINGS adaptateur generique (ProcesVerbauxGenericAdapter): un PDF 404 dans l index plante tout le recueil (fragiliser->skip) ; certains sites exigent User-Agent Chrome+Referer ; pattern ancre /include/fichier.php?id= non reconnu par looksLikeDocumentHref. CAS notables: doublon slug saint-celestin--nicolet-yamaska (--1/--2 meme ville) ; senneterre Ville + Paroisse = 2 munis distinctes ; fusions 2024-2025 (saint-guy, sainte-anne-de-la-pocatiere, saint-onesime-dixworth, saint-felix-de-dalquier, saint-bruno-hebertville) ; enclave pop=0 saint-louis-de-gonzague-du-cap-tourmente ; tutelles/admin CMQ (saint-roch-de-mekinac, sainte-paule, saint-medard, schefferville). NETTOYAGE: pollution pv/ (648 cles) + found.json racine purgees ; je n ai PAS touche aux cles runs/ et ontology/ (a toi/codex). JE NE REPROJETTE PAS PG. Tu peux reprojeter PG une fois A-R (immo2) + S-Z uniformes en v2.0. Fin de ma sous-traitance S-Z."
+  },
+  "createdAt": "2026-06-14T03:25:32.026Z"
+}

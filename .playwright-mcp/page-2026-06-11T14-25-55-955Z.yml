@@ -1,0 +1,64 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: 🗺️
+    - generic [ref=e4]:
+      - heading "Plateforme d'analyse immobilière" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Rive-Sud de Montréal · Québec
+  - generic [ref=e7]:
+    - textbox "🔍 Rechercher une ville…" [ref=e9]:
+      - /placeholder: 🔍  Rechercher une ville…
+    - generic [ref=e10]: Villes disponibles
+    - generic [ref=e11]:
+      - generic [ref=e12] [cursor=pointer]:
+        - generic [ref=e13]: Delson
+        - generic [ref=e14]: Montérégie — Rive-Sud
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - generic [ref=e17]: 3 213
+            - generic [ref=e18]: Lots
+          - generic [ref=e19]:
+            - generic [ref=e20]: 8 000
+            - generic [ref=e21]: Habitants
+        - generic [ref=e22]: ✅ Disponible
+        - link "Ouvrir la carte →" [ref=e23]:
+          - /url: carte.html?ville=delson&v=1781187955807
+      - generic [ref=e24] [cursor=pointer]:
+        - generic [ref=e25]: Sainte-Catherine
+        - generic [ref=e26]: Montérégie — Rive-Sud
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: 5 615
+            - generic [ref=e30]: Lots
+          - generic [ref=e31]:
+            - generic [ref=e32]: 18 000
+            - generic [ref=e33]: Habitants
+        - generic [ref=e34]: ✅ Disponible
+        - link "Ouvrir la carte →" [ref=e35]:
+          - /url: carte.html?ville=sainte-catherine&v=1781187955807
+      - generic [ref=e36] [cursor=pointer]:
+        - generic [ref=e37]: Saint-Constant
+        - generic [ref=e38]: Montérégie — Rive-Sud
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - generic [ref=e41]: 11 261
+            - generic [ref=e42]: Lots
+          - generic [ref=e43]:
+            - generic [ref=e44]: 25 000
+            - generic [ref=e45]: Habitants
+        - generic [ref=e46]: ✅ Disponible
+        - link "Ouvrir la carte →" [ref=e47]:
+          - /url: carte.html?ville=saint-constant&v=1781187955807
+      - generic [ref=e48] [cursor=pointer]:
+        - generic [ref=e49]: Candiac
+        - generic [ref=e50]: Montérégie — Rive-Sud
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]: 7 190
+            - generic [ref=e54]: Lots
+          - generic [ref=e55]:
+            - generic [ref=e56]: 23 000
+            - generic [ref=e57]: Habitants
+        - generic [ref=e58]: ✅ Disponible
+        - link "Ouvrir la carte →" [ref=e59]:
+          - /url: carte.html?ville=candiac&v=1781187955807
+  - contentinfo [ref=e60]: "Plateforme privée — Guillaume Chaperon · Données cadastrales : MERN Québec"

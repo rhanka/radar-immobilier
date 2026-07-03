@@ -1,0 +1,9 @@
+{
+  "instance": "codex:graph-2-3:c23aef8949e9",
+  "scope": "scope:graph-2-3",
+  "reason": "Lot A graph v2.3 native subagent smoke blocked: 6 missing-baseline-latest because S3/minio unavailable, 2 baselines are radar_graphify_extract_v1 not ontology_version 2.2",
+  "needs": "Provide working baseline/S3 access for graph/<city>/latest.json 2.2, or confirm radar_graphify_extract_v1 is an acceptable migration source",
+  "raisedAt": "2026-06-18T14:47:17.784Z",
+  "resolvedAt": "2026-06-18T14:49:11.219Z",
+  "resolvedBy": "codex:conductor-radar:374057bcfcfa"
+}

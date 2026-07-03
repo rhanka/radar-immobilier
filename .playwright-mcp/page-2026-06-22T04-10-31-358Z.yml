@@ -1,0 +1,339 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e8]:
+          - img [ref=e10]
+          - generic [ref=e11]:
+            - generic [ref=e12]: Radar
+            - generic [ref=e13]: immobilier
+        - navigation "Primary" [ref=e14]:
+          - button "Signaux" [ref=e15] [cursor=pointer]
+          - button "Évaluation" [ref=e16] [cursor=pointer]
+          - button "Sources" [ref=e17] [cursor=pointer]
+          - button "Admin" [ref=e19] [cursor=pointer]:
+            - img [ref=e20]
+            - text: Admin
+            - img [ref=e21]
+        - button "Compte de Admin" [ref=e24] [cursor=pointer]:
+          - generic [ref=e25]: A
+          - generic [ref=e27]: Admin
+          - img [ref=e28]
+    - generic [ref=e30]:
+      - complementary [ref=e31]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e36]: Signaux · Villes
+              - button "Actualiser" [ref=e37] [cursor=pointer]:
+                - img [ref=e38]
+            - generic [ref=e41]: 33 signaux · 31 villes
+          - generic [ref=e43]:
+            - group [ref=e44]:
+              - generic "Signaux" [ref=e45] [cursor=pointer]:
+                - generic [ref=e46]: ▸
+                - generic [ref=e47]: Signaux
+              - generic [ref=e48]:
+                - generic [ref=e49]:
+                  - generic [ref=e50] [cursor=pointer]:
+                    - checkbox "Zonage uniquement" [checked] [ref=e51]
+                    - generic [ref=e53]: Zonage uniquement
+                  - generic [ref=e116]: "33"
+                - generic [ref=e54]:
+                  - generic [ref=e55] [cursor=pointer]:
+                    - checkbox "Multifamilial 4+ nb unités ≥ 4 ou intensité haute" [checked] [ref=e56]
+                    - generic [ref=e57]:
+                      - generic [ref=e58]: Multifamilial 4+
+                      - generic [ref=e59]: nb unités ≥ 4 ou intensité haute
+                  - generic [ref=e117]: "33"
+                - generic [ref=e60]:
+                  - generic [ref=e61] [cursor=pointer]:
+                    - checkbox "Signaux précoces avis de motion / 1er projet" [checked] [ref=e62]
+                    - generic [ref=e63]:
+                      - generic [ref=e64]: Signaux précoces
+                      - generic [ref=e65]: avis de motion / 1er projet
+                  - generic [ref=e118]: "33"
+            - group [ref=e66]:
+              - generic "Villes" [ref=e67] [cursor=pointer]:
+                - generic [ref=e68]: ▸
+                - generic [ref=e69]: Villes
+              - generic [ref=e70]:
+                - generic [ref=e74]:
+                  - img [ref=e76]
+                  - searchbox "Rechercher une ville" [ref=e77]
+                - list [ref=e119]:
+                  - listitem [ref=e120]:
+                    - group [ref=e121]:
+                      - generic "▸ Mont-Tremblant Les Laurentides 2 signaux" [ref=e122] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e124]:
+                          - text: Mont-Tremblant
+                          - generic [ref=e125]: Les Laurentides
+                        - generic "2 signaux" [ref=e126]: "2"
+                  - listitem [ref=e127]:
+                    - group [ref=e128]:
+                      - generic "▸ Saint-Frédéric Beauce-Centre 2 signaux" [ref=e129] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e131]:
+                          - text: Saint-Frédéric
+                          - generic [ref=e132]: Beauce-Centre
+                        - generic "2 signaux" [ref=e133]: "2"
+                  - listitem [ref=e134]:
+                    - group [ref=e135]:
+                      - generic "▸ Sainte-Catherine Roussillon 1 signaux" [ref=e136] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e138]:
+                          - text: Sainte-Catherine
+                          - generic [ref=e139]: Roussillon
+                        - generic "1 signaux" [ref=e140]: "1"
+                  - listitem [ref=e141]:
+                    - group [ref=e142]:
+                      - generic "▸ Rosemère Thérèse-De Blainville 1 signaux" [ref=e143] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e145]:
+                          - text: Rosemère
+                          - generic [ref=e146]: Thérèse-De Blainville
+                        - generic "1 signaux" [ref=e147]: "1"
+                  - listitem [ref=e148]:
+                    - group [ref=e149]:
+                      - generic "▸ Saint-Mathieu-de-Beloeil La Vallée-du-Richelieu 1 signaux" [ref=e150] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e152]:
+                          - text: Saint-Mathieu-de-Beloeil
+                          - generic [ref=e153]: La Vallée-du-Richelieu
+                        - generic "1 signaux" [ref=e154]: "1"
+                  - listitem [ref=e155]:
+                    - group [ref=e156]:
+                      - generic "▸ Saint-Amable Marguerite-D'Youville 1 signaux" [ref=e157] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e159]:
+                          - text: Saint-Amable
+                          - generic [ref=e160]: Marguerite-D'Youville
+                        - generic "1 signaux" [ref=e161]: "1"
+                  - listitem [ref=e162]:
+                    - group [ref=e163]:
+                      - generic "▸ Mont-Saint-Hilaire La Vallée-du-Richelieu 1 signaux" [ref=e164] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e166]:
+                          - text: Mont-Saint-Hilaire
+                          - generic [ref=e167]: La Vallée-du-Richelieu
+                        - generic "1 signaux" [ref=e168]: "1"
+                  - listitem [ref=e169]:
+                    - group [ref=e170]:
+                      - generic "▸ Hemmingford Les Jardins-de-Napierville 1 signaux" [ref=e171] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e173]:
+                          - text: Hemmingford
+                          - generic [ref=e174]: Les Jardins-de-Napierville
+                        - generic "1 signaux" [ref=e175]: "1"
+                  - listitem [ref=e176]:
+                    - group [ref=e177]:
+                      - generic "▸ Saint-Stanislas-de-Kostka Beauharnois-Salaberry 1 signaux" [ref=e178] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e180]:
+                          - text: Saint-Stanislas-de-Kostka
+                          - generic [ref=e181]: Beauharnois-Salaberry
+                        - generic "1 signaux" [ref=e182]: "1"
+                  - listitem [ref=e183]:
+                    - group [ref=e184]:
+                      - generic "▸ Saint-Charles-Borromée Joliette 1 signaux" [ref=e185] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e187]:
+                          - text: Saint-Charles-Borromée
+                          - generic [ref=e188]: Joliette
+                        - generic "1 signaux" [ref=e189]: "1"
+                  - listitem [ref=e190]:
+                    - group [ref=e191]:
+                      - generic "▸ Sainte-Cécile-de-Milton La Haute-Yamaska 1 signaux" [ref=e192] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e194]:
+                          - text: Sainte-Cécile-de-Milton
+                          - generic [ref=e195]: La Haute-Yamaska
+                        - generic "1 signaux" [ref=e196]: "1"
+                  - listitem [ref=e197]:
+                    - group [ref=e198]:
+                      - generic "▸ Cowansville Brome-Missisquoi 1 signaux" [ref=e199] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e201]:
+                          - text: Cowansville
+                          - generic [ref=e202]: Brome-Missisquoi
+                        - generic "1 signaux" [ref=e203]: "1"
+                  - listitem [ref=e204]:
+                    - group [ref=e205]:
+                      - generic "▸ Waterloo La Haute-Yamaska 1 signaux" [ref=e206] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e208]:
+                          - text: Waterloo
+                          - generic [ref=e209]: La Haute-Yamaska
+                        - generic "1 signaux" [ref=e210]: "1"
+                  - listitem [ref=e211]:
+                    - group [ref=e212]:
+                      - generic "▸ Sutton Brome-Missisquoi 1 signaux" [ref=e213] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e215]:
+                          - text: Sutton
+                          - generic [ref=e216]: Brome-Missisquoi
+                        - generic "1 signaux" [ref=e217]: "1"
+                  - listitem [ref=e218]:
+                    - group [ref=e219]:
+                      - generic "▸ Plaisance Papineau 1 signaux" [ref=e220] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e222]:
+                          - text: Plaisance
+                          - generic [ref=e223]: Papineau
+                        - generic "1 signaux" [ref=e224]: "1"
+                  - listitem [ref=e225]:
+                    - group [ref=e226]:
+                      - generic "▸ Saint-Boniface Maskinongé 1 signaux" [ref=e227] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e229]:
+                          - text: Saint-Boniface
+                          - generic [ref=e230]: Maskinongé
+                        - generic "1 signaux" [ref=e231]: "1"
+                  - listitem [ref=e232]:
+                    - group [ref=e233]:
+                      - generic "▸ Champlain Des Chenaux 1 signaux" [ref=e234] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e236]:
+                          - text: Champlain
+                          - generic [ref=e237]: Des Chenaux
+                        - generic "1 signaux" [ref=e238]: "1"
+                  - listitem [ref=e239]:
+                    - group [ref=e240]:
+                      - generic "▸ Coaticook Coaticook 1 signaux" [ref=e241] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e243]:
+                          - text: Coaticook
+                          - generic [ref=e244]: Coaticook
+                        - generic "1 signaux" [ref=e245]: "1"
+                  - listitem [ref=e246]:
+                    - group [ref=e247]:
+                      - generic "▸ Notre-Dame-de-Lourdes L'Érable 1 signaux" [ref=e248] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e250]:
+                          - text: Notre-Dame-de-Lourdes
+                          - generic [ref=e251]: L'Érable
+                        - generic "1 signaux" [ref=e252]: "1"
+                  - listitem [ref=e253]:
+                    - group [ref=e254]:
+                      - generic "▸ Chelsea Les Collines-de-l'Outaouais 1 signaux" [ref=e255] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e257]:
+                          - text: Chelsea
+                          - generic [ref=e258]: Les Collines-de-l'Outaouais
+                        - generic "1 signaux" [ref=e259]: "1"
+                  - listitem [ref=e260]:
+                    - group [ref=e261]:
+                      - generic "▸ Stratford Le Granit 1 signaux" [ref=e262] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e264]:
+                          - text: Stratford
+                          - generic [ref=e265]: Le Granit
+                        - generic "1 signaux" [ref=e266]: "1"
+                  - listitem [ref=e267]:
+                    - group [ref=e268]:
+                      - generic "▸ Saint-Gilbert Portneuf 1 signaux" [ref=e269] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e271]:
+                          - text: Saint-Gilbert
+                          - generic [ref=e272]: Portneuf
+                        - generic "1 signaux" [ref=e273]: "1"
+                  - listitem [ref=e274]:
+                    - group [ref=e275]:
+                      - generic "▸ Neuville Portneuf 1 signaux" [ref=e276] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e278]:
+                          - text: Neuville
+                          - generic [ref=e279]: Portneuf
+                        - generic "1 signaux" [ref=e280]: "1"
+                  - listitem [ref=e281]:
+                    - group [ref=e282]:
+                      - generic "▸ Saint-Raymond Portneuf 1 signaux" [ref=e283] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e285]:
+                          - text: Saint-Raymond
+                          - generic [ref=e286]: Portneuf
+                        - generic "1 signaux" [ref=e287]: "1"
+                  - listitem [ref=e288]:
+                    - group [ref=e289]:
+                      - generic "▸ Saint-Come-Liniere Beauce-Sartigan 1 signaux" [ref=e290] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e292]:
+                          - text: Saint-Come-Liniere
+                          - generic [ref=e293]: Beauce-Sartigan
+                        - generic "1 signaux" [ref=e294]: "1"
+                  - listitem [ref=e295]:
+                    - group [ref=e296]:
+                      - generic "▸ Saint-Raphaël Bellechasse 1 signaux" [ref=e297] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e299]:
+                          - text: Saint-Raphaël
+                          - generic [ref=e300]: Bellechasse
+                        - generic "1 signaux" [ref=e301]: "1"
+                  - listitem [ref=e302]:
+                    - group [ref=e303]:
+                      - generic "▸ Petite-Rivière-Saint-François Charlevoix 1 signaux" [ref=e304] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e306]:
+                          - text: Petite-Rivière-Saint-François
+                          - generic [ref=e307]: Charlevoix
+                        - generic "1 signaux" [ref=e308]: "1"
+                  - listitem [ref=e309]:
+                    - group [ref=e310]:
+                      - generic "▸ Alma Lac-Saint-Jean-Est 1 signaux" [ref=e311] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e313]:
+                          - text: Alma
+                          - generic [ref=e314]: Lac-Saint-Jean-Est
+                        - generic "1 signaux" [ref=e315]: "1"
+                  - listitem [ref=e316]:
+                    - group [ref=e317]:
+                      - generic "▸ Preissac Abitibi 1 signaux" [ref=e318] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e320]:
+                          - text: Preissac
+                          - generic [ref=e321]: Abitibi
+                        - generic "1 signaux" [ref=e322]: "1"
+                  - listitem [ref=e323]:
+                    - group [ref=e324]:
+                      - generic "▸ Rimouski Rimouski-Neigette 1 signaux" [ref=e325] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e327]:
+                          - text: Rimouski
+                          - generic [ref=e328]: Rimouski-Neigette
+                        - generic "1 signaux" [ref=e329]: "1"
+                  - listitem [ref=e330]:
+                    - group [ref=e331]:
+                      - generic "▸ La Sarre Abitibi-Ouest 1 signaux" [ref=e332] [cursor=pointer]:
+                        - text: ▸
+                        - generic [ref=e334]:
+                          - text: La Sarre
+                          - generic [ref=e335]: Abitibi-Ouest
+                        - generic "1 signaux" [ref=e336]: "1"
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Légende — signaux / ville
+          - list [ref=e81]:
+            - listitem [ref=e82]: 6+ signaux
+            - listitem [ref=e84]: 3–5 signaux
+            - listitem [ref=e86]: 1–2 signaux
+            - listitem [ref=e88]: Aucun signal (0)
+      - generic [ref=e90]:
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - region "Map" [ref=e95]
+            - group [ref=e98]:
+              - generic "Toggle attribution" [ref=e99]
+              - generic [ref=e100]:
+                - text: © OpenStreetMap contributors |
+                - link "MapLibre" [ref=e337] [cursor=pointer]:
+                  - /url: https://maplibre.org/
+          - generic [ref=e103]:
+            - button "Province" [pressed] [ref=e104] [cursor=pointer]
+            - button "Ville" [ref=e105] [cursor=pointer]
+            - button "Zone" [ref=e106] [cursor=pointer]
+        - complementary [ref=e109]:
+          - generic [ref=e110]:
+            - generic [ref=e112]: Sélection
+            - paragraph [ref=e113]: Cliquez sur une ville dans la liste ou sur la carte pour constituer le bucket.
+  - button "Ouvrir l'assistant radar" [ref=e114] [cursor=pointer]:
+    - img [ref=e115]

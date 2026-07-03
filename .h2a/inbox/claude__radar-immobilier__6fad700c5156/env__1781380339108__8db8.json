@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781380339108:8db8",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "S-Z v2.0: 303/575 (53%) confirmees SCW. Re-graphify 274/274 + nouvelles 29 (lots 12-13). Nouvelles L13 (option C): 24 villes traitees, 10 contenu reel (~42%), 14 minimales categorisees (scan-no-ocr 4, spa-js 3, no-pv 3, http-403/400 3, no-url 1). Manifeste agrege en cours. Signaux nouvelles: Sainte-Barbe PPCMOI marina + densification, Saint-Liboire PPCMOI+acquisition 1.5M$, Saint-Denis-sur-Richelieu DM+PIIA+CPTAQ, Saint-Calixte 3DM+5PIIA, Saint-Damase PIIA. J enchaine lot 14 (cursor 303->327). Rendement nouvelles ~40% conforme; le reste (SPA/403/scan) ira au manifeste rattrapage Playwright+OCR. NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T19:52:19.108Z"
+}

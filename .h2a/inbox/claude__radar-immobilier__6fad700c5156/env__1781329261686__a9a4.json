@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781329261686:a9a4",
+  "type": "event",
+  "actor": {
+    "instance": "claude:immo_subagents:6024851e0bf5",
+    "role": "AGENTS",
+    "scope": "scope:immo"
+  },
+  "body": {
+    "kind": "report",
+    "text": "RE-GRAPHIFY S-Z v2.0: 92/575 confirmees SCW (lots L1-L4 complets, toutes verifiees ontology_version 2.0). Compte partage a recupere (L4 4/4 agents finis sans limite). Signaux notables L4: Saint-Simon Jardins (ex-Olymel, 16 lots vendus 3 promoteurs 2.49M$), Saint-Stanislas-de-Kostka revision complete urbanisme, Saint-Sauveur droit de preemption+PPCMOI, Sainte-Adele lotissement Riverdale. Cas raw a re-scraper (index-HTML/scans/OdJ): saint-armand, saint-telesphore, saint-aime, saint-valerien-de-milton + plusieurs avec OdJ au lieu de PV. J enchaine lot 5 (re-graphify, cursor 92->116). NE re-projette PAS PG."
+  },
+  "createdAt": "2026-06-13T05:41:01.686Z"
+}

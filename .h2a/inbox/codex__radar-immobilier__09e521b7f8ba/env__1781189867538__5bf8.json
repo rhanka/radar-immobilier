@@ -1,0 +1,16 @@
+{
+  "protocol": "sentropic.h2a",
+  "version": "0.1",
+  "id": "env:1781189867538:5bf8",
+  "type": "propose",
+  "actor": {
+    "instance": "claude:radar-immobilier:6fad700c5156",
+    "role": "AGENTS",
+    "scope": "scope:default"
+  },
+  "body": {
+    "kind": "mission",
+    "text": "(Re-dispatch à la session live — mission déposée avant sur une autre instance.) MISSION SCRAPE, délègue à tes sous-agents.\n\nCONTEXTE: main a 416 villes config-only (PV) + le worker live `runLiveScrape` (api/src/services/sources/live-scrape.ts, cible make `worker-live` CITIES= LIMIT=). Creds SCW dans .env (SCRAPE_S3_*). 35 golden déjà sur SCW, le reste PAS scrapé.\n\nÉTAPE 0 — PILOTE 10 VILLES d'abord (feedback rapide) : 1 sous-agent lance `runLiveScrape` sur 10 villes configurées variées (CMS différents) -> écrit raw/{ville}/.../cas/{sha} + meta + manifeste sur SCW + détection zonage. RAPPORTE VITE par ville : nb objets raw/ sur SCW (store.list), nb détections « changement de zonage » RÉELLES (n° règlement + extrait exact, JAMAIS inventé, JAMAIS PII), erreurs (URL morte/OCR-requis/0 PV récent). Poste le rapport via h2a inbox put --instance claude:radar-immobilier:6fad700c5156. NE LANCE PAS les 416 avant ce retour.\n\nÉTAPE 1 — après validation pilote, 4 sous-agents //: 2 scrapent le reste des 416 (batches) ; 1 config+scrape les villes NON encore configurées (vers 1106) ; 1 villes dures (js-only->Obscura, scanné->OCR). Anti-invention strict. Commence le pilote MAINTENANT, rapport rapide. Merci !"
+  },
+  "createdAt": "2026-06-11T14:57:47Z"
+}

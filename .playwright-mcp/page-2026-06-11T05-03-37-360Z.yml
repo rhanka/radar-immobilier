@@ -1,0 +1,114 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e7]: Radar immobilier
+      - navigation "Navigation principale" [ref=e8]:
+        - button "Onboarding" [ref=e9] [cursor=pointer]:
+          - img [ref=e10]
+          - text: Onboarding
+        - button "Ciblage" [ref=e11] [cursor=pointer]:
+          - img [ref=e12]
+          - text: Ciblage
+        - button "Signaux" [ref=e13] [cursor=pointer]:
+          - img [ref=e14]
+          - text: Signaux
+        - button "Opportunités" [ref=e15] [cursor=pointer]:
+          - img [ref=e16]
+          - text: Opportunités
+        - button "Sources" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - text: Sources
+        - button "Ontologie" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - text: Ontologie
+        - button "Grilles" [active] [ref=e21] [cursor=pointer]:
+          - img [ref=e22]
+          - text: Grilles
+        - button "Coordination" [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - text: Coordination
+        - button "Backlog" [ref=e25] [cursor=pointer]:
+          - img [ref=e26]
+          - text: Backlog
+        - button "Recueil" [ref=e27] [cursor=pointer]:
+          - img [ref=e28]
+          - text: Recueil
+        - button "Carte Signaux" [ref=e29] [cursor=pointer]:
+          - img [ref=e30]
+          - text: Carte Signaux
+        - button "Carte Opport." [ref=e31] [cursor=pointer]:
+          - img [ref=e32]
+          - text: Carte Opport.
+        - button "Carte Éval." [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Carte Éval.
+      - generic [ref=e35]:
+        - button "Lancer la visite guidée" [ref=e36] [cursor=pointer]:
+          - img [ref=e37]
+          - text: Visite guidée
+        - button "Passer en mode simulation" [ref=e38] [cursor=pointer]: Réel
+    - generic [ref=e1215]:
+      - complementary [ref=e1216]:
+        - generic [ref=e1217]:
+          - generic [ref=e1218]:
+            - paragraph [ref=e1219]: Type de score
+            - generic [ref=e1220]:
+              - button "Tri de signal (/10)" [pressed] [ref=e1221] [cursor=pointer]
+              - button "Score d'opportunité (/100)" [ref=e1222] [cursor=pointer]
+          - generic [ref=e1223]:
+            - paragraph [ref=e1224]: Description
+            - paragraph [ref=e1225]: "Valeur /10 attribuée à chaque signal selon son TYPE (priorité réglementaire), affichée avec une confiance distincte. Valeur et confiance ne sont jamais multipliées. Sert à trier le flux de signaux entrants. Référence : VISION.md §6."
+      - generic [ref=e1227]:
+        - generic [ref=e1228]:
+          - paragraph [ref=e1229]: "Référence : modele de score"
+          - heading "Grilles de score" [level=1] [ref=e1230]
+          - paragraph [ref=e1231]: "Le modele utilise deux mesures distinctes : le tri de signal (/10, par type) et le score d'opportunite (/100, composite multi-axes). Elles ne sont jamais combinées."
+        - status [ref=e1233]:
+          - 'heading "Tri de signal : valeur /10 par type (VISION §6)" [level=2] [ref=e1235]'
+        - paragraph [ref=e1237]:
+          - text: Chaque signal recoit une valeur /10 selon son
+          - strong [ref=e1238]: TYPE
+          - text: (priorite reglementaire), affichee avec une confiance. La valeur et la confiance sont affichees separement et ne sont jamais multipliees. Les
+          - strong [ref=e1239]: derogations
+          - text: "sont un filtre pur (VISION) : elles ne recoivent pas de score /10 et n'entrent pas dans le tri."
+        - generic [ref=e1240]:
+          - generic [ref=e1241]:
+            - generic [ref=e1242]: Type de signal
+            - generic [ref=e1243]: Valeur /10
+            - generic [ref=e1244]: Role
+          - generic [ref=e1245]:
+            - generic [ref=e1246]:
+              - generic [ref=e1247]: Zonage residentiel
+              - generic [ref=e1248]: 10 /10
+              - generic [ref=e1250]: Tri
+            - generic [ref=e1251]:
+              - button "CPTAQ" [ref=e1254]
+              - generic [ref=e1255]: 8 /10
+              - generic [ref=e1257]: Tri
+            - generic [ref=e1258]:
+              - button "PPCMOI" [ref=e1261]
+              - generic [ref=e1262]: 7 /10
+              - generic [ref=e1264]: Tri
+            - generic [ref=e1265]:
+              - generic [ref=e1266]: Plan d'urbanisme
+              - generic [ref=e1267]: 7 /10
+              - generic [ref=e1269]: Tri
+            - generic [ref=e1270]:
+              - generic [ref=e1271]: Consultation publique
+              - generic [ref=e1272]: 6 /10
+              - generic [ref=e1274]: Tri
+            - generic [ref=e1275]:
+              - generic [ref=e1276]: Modification de grille
+              - generic [ref=e1277]: 6 /10
+              - generic [ref=e1279]: Tri
+            - generic [ref=e1280]:
+              - generic [ref=e1281]: Derogation (pertinente ou non)
+              - generic [ref=e1283]: Filtre pur
+              - generic [ref=e1285]: Pas de score
+        - generic [ref=e1286]:
+          - paragraph [ref=e1287]:
+            - strong [ref=e1288]: "Lecture :"
+            - text: Un signal de type "Zonage residentiel" a une valeur de priorite de 10/10 independamment de sa confiance. La confiance (haute / moyenne / faible) est affichee separement dans la vue Signaux. Elle ne modifie pas la valeur du signal ; elle indique la solidite de la preuve.
+          - paragraph [ref=e1289]: "Référence : VISION.md §6 (priorites par type)"
+  - button "Ouvrir l'assistant radar" [ref=e644] [cursor=pointer]:
+    - img [ref=e645]
