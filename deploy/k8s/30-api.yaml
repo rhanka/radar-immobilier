@@ -103,7 +103,12 @@ spec:
       serviceAccountName: radar-app
       containers:
         - name: api
-          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:main-8909943-pdfgeo
+          # :latest (comme radar-immo-mcp) — un tag FIGÉ ici faisait reverter
+          # radar-api sur une vieille image à chaque `kubectl apply` du workflow
+          # k8s-apply-mcp, annulant le `set image` du CD (pod bloqué pré-#326,
+          # /livez 401 ; diag poc-k8s 2026-07-03). Avec :latest + Always, l'apply
+          # + rollout restart tire toujours la dernière image publiée par le CD.
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
           ports:
             - name: http
