@@ -66,7 +66,7 @@
 
 <details class="ldf" open data-testid="signaux-data-filters">
   <summary class="ldf-head">
-    <span class="ldf-name">Filtres données</span>
+    <span class="ldf-name">Filtre Zones et Lots</span>
     <span class="ldf-count" data-testid="signaux-filter-count">
       <strong>{matchedCount.toLocaleString("fr-CA")}</strong>/{lots.length.toLocaleString("fr-CA")}
     </span>

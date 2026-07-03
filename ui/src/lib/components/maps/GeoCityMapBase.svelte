@@ -58,6 +58,12 @@
       bounds: LngLatBoundsTuple,
       options?: { maxZoom?: number; duration?: number },
     ): void;
+    /**
+     * C9 — restaure le CADRAGE INITIAL (centre + zoom du primo-chargement),
+     * capturé une fois la carte chargée. Retour Province / désélection.
+     * Retourne false si aucun viewport initial n'a pu être capturé.
+     */
+    resetToInitialView(options?: { duration?: number }): boolean;
     /** (Re)peint les couches zone/lot à partir des données + expressions fournies. */
     syncGeoLayers(input: GeoLayersInput): void;
     /** Géométrie du contour municipal mis en cache au chargement (ou `null`). */
@@ -90,7 +96,16 @@
    */
   import { onMount, onDestroy } from "svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
+  import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
+
+  // ── Props : fond de carte ──────────────────────────────────────────────────
+  /**
+   * Style du fond (C10) : `"osm"` = raster OSM classique ; `"neutral-gray"` =
+   * fond GRIS neutre (raster OSM désaturé et éclairci sur aplat gris) qui fait
+   * ressortir zones/lots, façon carte de référence.
+   */
+  export let basemap: "osm" | "neutral-gray" = "osm";
 
   // ── Props : choroplèthe villes ─────────────────────────────────────────────
   /** Expression MapLibre `fill-color` de la couche `cities-fill` (obligatoire). */
@@ -122,6 +137,8 @@
   export let onSegmentClick: (label: string) => void = () => {};
   /** Légende overlay paramétrable. `null` ⇒ aucune légende rendue par le socle. */
   export let legend: GeoMapLegend | null = null;
+  /** C3 — couleur de l'exergue des features sélectionnées (orange fluo). */
+  export let selectionHighlightColor = "#ff6d00";
 
   // ── Props : cycle de vie ───────────────────────────────────────────────────
   /** Appelé une fois la carte prête, avec l'API impérative du socle. */
@@ -132,6 +149,10 @@
   let mapInstance: unknown = null;
   let mapReady = false;
   const cityBoundaryBySlug = new Map<string, GeoJsonGeometry>();
+  // C9 — mémoire du cadrage initial (capturé au `load`, restauré à la demande).
+  const viewportMemory = createViewportMemory();
+  // C6 — id de la feature survolée par source (feature-state hover).
+  const hoveredFeatureIdBySource = new Map<string, number | string>();
 
   // Vue par défaut : Québec (cible commune Signaux / Source).
   const INITIAL_CENTER: [number, number] = [-73.5, 45.7];
@@ -232,6 +253,30 @@
     });
   }
 
+  /**
+   * C9 — restaure le cadrage du primo-chargement (même centre, même zoom).
+   * No-op (false) si la carte n'est pas prête ou si rien n'a été capturé.
+   */
+  function resetToInitialView(options: { duration?: number } = {}): boolean {
+    if (!mapInstance || !mapReady) return false;
+    const initial = viewportMemory.initial();
+    if (!initial) return false;
+    (
+      mapInstance as {
+        flyTo: (o: {
+          center: [number, number];
+          zoom: number;
+          duration: number;
+        }) => void;
+      }
+    ).flyTo({
+      center: initial.center,
+      zoom: initial.zoom,
+      duration: options.duration ?? 800,
+    });
+    return true;
+  }
+
   function getCityBoundary(slug: string): GeoJsonGeometry | null {
     return cityBoundaryBySlug.get(slug) ?? null;
   }
@@ -278,6 +323,63 @@
     m.on("mouseleave", "selected-lots-fill", () => {
       m.getCanvas().style.cursor = "";
     });
+
+    // C6 — survol : pose `feature-state.hover` sur la feature sous le curseur
+    // (les sources sont créées avec generateId). Les expressions de peinture
+    // du consommateur (hover-paint) réagissent à cet état — teinte accentuée,
+    // blanc → gris clair. Les LOTS priment visuellement : quand le curseur est
+    // sur un lot, la zone en dessous n'est pas marquée survolée.
+    registerHoverState("selected-zones-fill", "selected-zones");
+    registerHoverState("selected-lots-fill", "selected-lots");
+  }
+
+  /** C6 — câble mousemove/mouseleave d'une couche vers feature-state.hover. */
+  function registerHoverState(layerId: string, sourceId: string): void {
+    const m = mapInstance as {
+      on: (
+        event: string,
+        layer: string,
+        handler: (e: { features?: Array<{ id?: number | string }> }) => void,
+      ) => void;
+    };
+    m.on("mousemove", layerId, (e) => {
+      const id = e.features?.[0]?.id;
+      if (id === undefined) return;
+      if (hoveredFeatureIdBySource.get(sourceId) === id) return;
+      clearHoverState(sourceId);
+      setHoverFeatureState(sourceId, id, true);
+      hoveredFeatureIdBySource.set(sourceId, id);
+    });
+    m.on("mouseleave", layerId, () => {
+      clearHoverState(sourceId);
+    });
+  }
+
+  function setHoverFeatureState(
+    sourceId: string,
+    id: number | string,
+    hover: boolean,
+  ): void {
+    (
+      mapInstance as {
+        setFeatureState: (
+          target: { source: string; id: number | string },
+          state: { hover: boolean },
+        ) => void;
+      }
+    ).setFeatureState({ source: sourceId, id }, { hover });
+  }
+
+  /** Efface l'état hover courant d'une source (souris sortie / data resync). */
+  function clearHoverState(sourceId: string): void {
+    const previous = hoveredFeatureIdBySource.get(sourceId);
+    if (previous === undefined) return;
+    try {
+      setHoverFeatureState(sourceId, previous, false);
+    } catch {
+      // Source retirée entre-temps : rien à nettoyer.
+    }
+    hoveredFeatureIdBySource.delete(sourceId);
   }
 
   function syncGeoLayers(input: GeoLayersInput): void {
@@ -294,9 +396,12 @@
 
     const zoneSource = m.getSource("selected-zones");
     if (zoneSource?.setData) {
+      // C6 — les ids générés changent avec la donnée : purge l'état hover.
+      clearHoverState("selected-zones");
       zoneSource.setData(zones);
     } else if (!zoneSource) {
-      m.addSource("selected-zones", { type: "geojson", data: zones });
+      // generateId : requis pour le feature-state hover (C6).
+      m.addSource("selected-zones", { type: "geojson", data: zones, generateId: true });
     }
     if (!m.getLayer("selected-zones-fill")) {
       m.addLayer({
@@ -322,12 +427,30 @@
         },
       });
     }
+    // C3 — exergue ORANGE FLUO de la zone sélectionnée (contour épais, façon
+    // référence). Filtre data-driven sur la propriété décorée `isSelected`.
+    if (!m.getLayer("selected-zones-highlight")) {
+      m.addLayer({
+        id: "selected-zones-highlight",
+        type: "line",
+        source: "selected-zones",
+        filter: ["==", ["get", "isSelected"], true],
+        paint: {
+          "line-color": selectionHighlightColor,
+          "line-width": 3.5,
+          "line-opacity": 1,
+        },
+      });
+    }
 
     const lotSource = m.getSource("selected-lots");
     if (lotSource?.setData) {
+      // C6 — les ids générés changent avec la donnée : purge l'état hover.
+      clearHoverState("selected-lots");
       lotSource.setData(lots);
     } else if (!lotSource) {
-      m.addSource("selected-lots", { type: "geojson", data: lots });
+      // generateId : requis pour le feature-state hover (C6).
+      m.addSource("selected-lots", { type: "geojson", data: lots, generateId: true });
     }
     if (!m.getLayer("selected-lots-fill")) {
       m.addLayer({
@@ -350,6 +473,20 @@
           "line-color": input.lotLineColor,
           "line-width": 0.4,
           "line-opacity": 0.35,
+        },
+      });
+    }
+    // C3 — exergue ORANGE FLUO du lot sélectionné (au-dessus des contours).
+    if (!m.getLayer("selected-lots-highlight")) {
+      m.addLayer({
+        id: "selected-lots-highlight",
+        type: "line",
+        source: "selected-lots",
+        filter: ["==", ["get", "isSelected"], true],
+        paint: {
+          "line-color": selectionHighlightColor,
+          "line-width": 3,
+          "line-opacity": 1,
         },
       });
     }
@@ -376,6 +513,7 @@
     return {
       flyTo,
       fitMapToBounds,
+      resetToInitialView,
       syncGeoLayers,
       getCityBoundary,
       hasCityBoundary,
@@ -390,6 +528,36 @@
     if (!mapContainer) return;
     try {
       const maplibre = (await import("maplibre-gl")).default;
+      // C10 — fond « neutral-gray » : aplat gris + raster OSM DÉSATURÉ
+      // (saturation -1) et éclairci, pour faire ressortir zones/lots façon
+      // carte de référence. Aucune dépendance tuiles supplémentaire.
+      const baseLayers =
+        basemap === "neutral-gray"
+          ? [
+              {
+                id: "neutral-background",
+                type: "background" as const,
+                paint: { "background-color": "#e8eaed" },
+              },
+              {
+                id: "osm-background",
+                type: "raster" as const,
+                source: "osm-tiles",
+                paint: {
+                  "raster-opacity": 0.45,
+                  "raster-saturation": -1,
+                  "raster-brightness-min": 0.35,
+                },
+              },
+            ]
+          : [
+              {
+                id: "osm-background",
+                type: "raster" as const,
+                source: "osm-tiles",
+                paint: { "raster-opacity": 0.6 },
+              },
+            ];
       const m = new maplibre.Map({
         container: mapContainer,
         style: {
@@ -402,14 +570,7 @@
               attribution: "© OpenStreetMap contributors",
             },
           },
-          layers: [
-            {
-              id: "osm-background",
-              type: "raster",
-              source: "osm-tiles",
-              paint: { "raster-opacity": 0.6 },
-            },
-          ],
+          layers: baseLayers,
         },
         center: INITIAL_CENTER,
         zoom: INITIAL_ZOOM,
@@ -504,6 +665,13 @@
         });
 
         mapReady = true;
+        // C9 — capture le cadrage du primo-chargement (restauré au retour
+        // Province / à la désélection via resetToInitialView).
+        const center = m.getCenter();
+        viewportMemory.captureOnce({
+          center: [center.lng, center.lat],
+          zoom: m.getZoom(),
+        });
         applyCitiesFillPaint();
         registerGeoLayerInteractions(m);
         onReady(buildApi());
@@ -559,6 +727,15 @@
         </div>
       {/if}
       <slot name="overlay-top-left" />
+    </div>
+  {/if}
+
+  <!-- C1 — légendes posées SUR LA CARTE par le consommateur (blocs multiples,
+       ex. Zonage au-dessus de Lots) : slot bottom-left, complémentaire de la
+       prop `legend` (vue Sources). -->
+  {#if $$slots["overlay-bottom-left"]}
+    <div class="absolute bottom-3 left-3 z-10 flex max-w-xs flex-col gap-2">
+      <slot name="overlay-bottom-left" />
     </div>
   {/if}
 

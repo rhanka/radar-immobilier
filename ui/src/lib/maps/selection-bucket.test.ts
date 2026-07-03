@@ -11,6 +11,7 @@ import {
   selectionVisualState,
   setFocus,
   setHover,
+  toggleExclusiveSelection,
   toggleExpansion,
   toggleSelection,
 } from "./selection-bucket.js";
@@ -118,6 +119,66 @@ describe("selection bucket state", () => {
     expect(collapsed.expandedKeys.has(zoneKey)).toBe(false);
     expect(expanded.expandedKeys).not.toBe(hovered.expandedKeys);
     expect(collapsed.expandedKeys).not.toBe(expanded.expandedKeys);
+  });
+});
+
+// ── C3 — sélection EXCLUSIVE zone/lot (une seule sélection géo à la fois) ─────
+describe("toggleExclusiveSelection", () => {
+  const cityKey = makeKey("municipality", "salaberry-de-valleyfield");
+  const zoneKey = makeKey("zone", "salaberry-de-valleyfield/H-609");
+  const otherZoneKey = makeKey("zone", "salaberry-de-valleyfield/C-186");
+  const lotKey = makeKey("lot", "salaberry-de-valleyfield/4 516 943");
+
+  it("sélectionner un LOT désélectionne la ZONE active (et réciproquement)", () => {
+    const withZone = toggleExclusiveSelection(
+      createSelectionBucketState(),
+      zoneKey,
+    );
+    expect(withZone.selectedKeys.has(zoneKey)).toBe(true);
+
+    const withLot = toggleExclusiveSelection(withZone, lotKey);
+    expect(withLot.selectedKeys.has(lotKey)).toBe(true);
+    expect(withLot.selectedKeys.has(zoneKey)).toBe(false);
+
+    const backToZone = toggleExclusiveSelection(withLot, otherZoneKey);
+    expect(backToZone.selectedKeys.has(otherZoneKey)).toBe(true);
+    expect(backToZone.selectedKeys.has(lotKey)).toBe(false);
+  });
+
+  it("remplace une zone sélectionnée par la nouvelle zone (jamais deux zones)", () => {
+    const first = toggleExclusiveSelection(createSelectionBucketState(), zoneKey);
+    const second = toggleExclusiveSelection(first, otherZoneKey);
+    expect(second.selectedKeys.has(zoneKey)).toBe(false);
+    expect(second.selectedKeys.has(otherZoneKey)).toBe(true);
+    expect(second.selectedKeys.size).toBe(1);
+  });
+
+  it("re-cliquer l'élément sélectionné le désélectionne (toggle)", () => {
+    const selected = toggleExclusiveSelection(
+      createSelectionBucketState(),
+      lotKey,
+    );
+    const deselected = toggleExclusiveSelection(selected, lotKey);
+    expect(deselected.selectedKeys.has(lotKey)).toBe(false);
+    expect(deselected.selectedKeys.size).toBe(0);
+  });
+
+  it("CONSERVE la sélection de la ville active (kind non exclusif)", () => {
+    const base = createSelectionBucketState({ selectedKeys: [cityKey] });
+    const withZone = toggleExclusiveSelection(base, zoneKey);
+    const withLot = toggleExclusiveSelection(withZone, lotKey);
+    expect(withLot.selectedKeys.has(cityKey)).toBe(true);
+    expect(withLot.selectedKeys.has(lotKey)).toBe(true);
+    expect(withLot.selectedKeys.has(zoneKey)).toBe(false);
+  });
+
+  it("retombe sur toggleSelection multi pour les kinds non exclusifs (signal)", () => {
+    const signalA = makeKey("signal", "sig-1");
+    const signalB = makeKey("signal", "sig-2");
+    const first = toggleExclusiveSelection(createSelectionBucketState(), signalA);
+    const second = toggleExclusiveSelection(first, signalB);
+    expect(second.selectedKeys.has(signalA)).toBe(true);
+    expect(second.selectedKeys.has(signalB)).toBe(true);
   });
 });
 

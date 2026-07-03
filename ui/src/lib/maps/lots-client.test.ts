@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
+  fetchAllLots,
   fetchLots,
   lotsCollectionId,
   resolveLotsUrl,
@@ -314,5 +315,147 @@ describe("fetchLots", () => {
         ]).toContain(k);
       }
     }
+  });
+});
+
+// ── C8 — fetchAllLots : pagination OGC multi-pages fusionnée ──────────────────
+
+function ogcFeature(noLot: string): Record<string, unknown> {
+  return {
+    type: "Feature",
+    geometry: null,
+    properties: { noLot },
+  };
+}
+
+function ogcPage(
+  noLots: string[],
+  numberMatched: number,
+): Record<string, unknown> {
+  return {
+    type: "FeatureCollection",
+    features: noLots.map(ogcFeature),
+    numberMatched,
+    numberReturned: noLots.length,
+  };
+}
+
+/** Stub fetch qui sert des pages OGC par offset, et journalise les URLs. */
+function stubPagedFetch(pagesByOffset: Record<string, unknown>): string[] {
+  const urls: string[] = [];
+  vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+    const url = String(input);
+    urls.push(url);
+    const offset = new URL(url, "http://localhost").searchParams.get("offset") ?? "0";
+    const body = pagesByOffset[offset] ?? ogcPage([], 0);
+    return new Response(JSON.stringify(body), { status: 200 });
+  });
+  return urls;
+}
+
+describe("fetchAllLots", () => {
+  it("charge TOUTES les pages quand l'upstream plafonne la taille de page", async () => {
+    const urls = stubPagedFetch({
+      "0": ogcPage(["L-1", "L-2"], 5),
+      "2": ogcPage(["L-3", "L-4"], 5),
+      "4": ogcPage(["L-5"], 5),
+    });
+    const pages: number[] = [];
+    const res = await fetchAllLots("delson", {
+      baseUrl: "",
+      pageLimit: 2,
+      onPage: (partial) => pages.push(partial.featureCollection.features.length),
+    });
+    expect(res.ok).toBe(true);
+    expect(res.featureCollection.features.map((f) => f.properties.noLot)).toEqual([
+      "L-1",
+      "L-2",
+      "L-3",
+      "L-4",
+      "L-5",
+    ]);
+    expect(res.numberMatched).toBe(5);
+    expect(res.numberReturned).toBe(5);
+    // Chargement PROGRESSIF : le callback voit la fusion grossir page à page.
+    expect(pages).toEqual([2, 4, 5]);
+    expect(urls).toHaveLength(3);
+    expect(urls[1]).toContain("offset=2");
+    expect(urls[2]).toContain("offset=4");
+  });
+
+  it("s'arrête sans boucle quand le serveur IGNORE offset (store local)", async () => {
+    // Le store local rejoue la même première page quel que soit l'offset.
+    const samePage = ogcPage(["L-1", "L-2"], 5);
+    const urls = stubPagedFetch({ "0": samePage, "2": samePage, "4": samePage });
+    const res = await fetchAllLots("delson", { baseUrl: "", pageLimit: 2 });
+    // Dédup par noLot : la page rejouée n'ajoute rien → arrêt net.
+    expect(res.featureCollection.features).toHaveLength(2);
+    expect(urls.length).toBe(2);
+  });
+
+  it("une seule requête suffit quand tout tient dans la première page", async () => {
+    const urls = stubPagedFetch({ "0": ogcPage(["L-1", "L-2", "L-3"], 3) });
+    const res = await fetchAllLots("delson", { baseUrl: "", pageLimit: 100 });
+    expect(res.featureCollection.features).toHaveLength(3);
+    expect(urls).toHaveLength(1);
+    expect(urls[0]).not.toContain("offset=");
+  });
+
+  it("dédoublonne par noLot les pages qui se chevauchent", async () => {
+    const urls = stubPagedFetch({
+      "0": ogcPage(["L-1", "L-2"], 3),
+      "2": ogcPage(["L-2", "L-3"], 3),
+    });
+    const res = await fetchAllLots("delson", { baseUrl: "", pageLimit: 2 });
+    expect(res.featureCollection.features.map((f) => f.properties.noLot)).toEqual([
+      "L-1",
+      "L-2",
+      "L-3",
+    ]);
+    expect(urls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("retourne la réponse honnête ok=false quand la collection est absente", async () => {
+    vi.stubGlobal("fetch", async () => new Response("not found", { status: 404 }));
+    const res = await fetchAllLots("ville-inconnue", { baseUrl: "" });
+    expect(res.ok).toBe(false);
+    expect(res.source).toBe("none");
+    expect(res.featureCollection.features).toHaveLength(0);
+  });
+});
+
+// ── C5 — code postal câblé (remonte dès que geo l'expose) ─────────────────────
+
+describe("codePostal (C5)", () => {
+  it("normalise code_postal snake_case", async () => {
+    const body = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { noLot: "L-9", code_postal: "J6S 4V2" },
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("delson", { baseUrl: "" });
+    expect(res.featureCollection.features[0].properties.codePostal).toBe("J6S 4V2");
+  });
+
+  it("absent → undefined (fiche affiche « — », aucune invention)", async () => {
+    const body = {
+      type: "FeatureCollection",
+      features: [
+        { type: "Feature", geometry: null, properties: { noLot: "L-10" } },
+      ],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("delson", { baseUrl: "" });
+    expect(res.featureCollection.features[0].properties.codePostal).toBeUndefined();
   });
 });
