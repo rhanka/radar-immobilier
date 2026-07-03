@@ -2,10 +2,21 @@
   /**
    * SignauxSelPanel — right selection bucket for the Signaux map.
    *
-   * The left rail keeps navigation light (cities list + filters); this panel
-   * owns the SELECTION context only: active city header + detailed cards for
-   * graph signals, zones and lots. No "Villes" bucket and no data filter here
-   * — both live in the left rail.
+   * The left rail keeps navigation light (cities list + signal facets); this
+   * panel owns the SELECTION context: active city header + detailed cards for
+   * graph signals, zones and lots.
+   *
+   * Filtres DONNÉES (remplacent le bloc autonome « Filtre Zones et Lots » du
+   * rail gauche, supprimé) : chaque accordéon porte SON en-tête de filtre
+   * au-dessus de sa liste —
+   *   - LOTS : filtres lot existants (`eval-lot-filters`, réutilisés) —
+   *     catégorie exclusive + usages additifs + superficie min ;
+   *   - ZONES : filtre par TYPE de zone (`zone-kind-filter`, catégories de la
+   *     légende zonage) en chips additives.
+   * L'état des filtres vit dans le PARENT (il pilote la peinture carte, zéro
+   * refetch) : fermer un accordéon masque son en-tête (details natif) mais NE
+   * réinitialise PAS son filtre — le compteur « N/M » du bandeau d'accordéon
+   * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
@@ -53,6 +64,20 @@
     zoneKindStyle,
     ZONE_KIND_NEUTRAL,
   } from "$lib/maps/zone-kind-style.js";
+  import {
+    DEFAULT_EVAL_FILTER,
+    isDefaultEvalFilter,
+    lotMatchesEvalFilter,
+    type EvalLotFilter,
+  } from "$lib/maps/eval-lot-filters.js";
+  import {
+    DEFAULT_ZONE_KIND_FILTER,
+    isDefaultZoneKindFilter,
+    zoneMatchesKindFilter,
+    type ZoneKindFilter,
+  } from "$lib/maps/zone-kind-filter.js";
+  import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
+  import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -69,6 +94,14 @@
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   /** #3 — Clé de filtre active (ex. "z", "z|m", "") propagée depuis SignauxMapView. */
   export let activeSubsetKey = "";
+  // ── Filtres DONNÉES par accordéon (état PORTÉ PAR LE PARENT : il pilote la
+  // peinture carte — zéro refetch ; il persiste quand l'accordéon se ferme). ──
+  /** Filtre lots (catégorie/usages/superficie) — en-tête de l'accordéon Lots. */
+  export let lotFilter: EvalLotFilter = DEFAULT_EVAL_FILTER;
+  export let onLotFilterChange: (filter: EvalLotFilter) => void = () => {};
+  /** Filtre par TYPE de zone (kind) — en-tête de l'accordéon Zones. */
+  export let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+  export let onZoneKindFilterChange: (filter: ZoneKindFilter) => void = () => {};
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
   /** « Réessayer » — recharge le détail signaux (couche panneau droit). */
@@ -188,23 +221,58 @@
     return noLots.size > 0 ? noLots : null;
   })();
 
-  /** Zones filtrées : uniquement celles liées aux signaux filtrés (si filtre actif et résultats). */
-  $: filteredZones = filteredZoneCodeSet
+  /** Zones liées aux signaux filtrés (si filtre signaux actif et résultats). */
+  $: subsetFilteredZones = filteredZoneCodeSet
     ? zones.filter((z) => filteredZoneCodeSet!.has(zoneRefComparableKey(z.properties.code)))
     : zones;
+
+  // ── Filtre par TYPE de zone (en-tête de l'accordéon Zones) ────────────────
+  $: zoneKindFilterActive = !isDefaultZoneKindFilter(zoneKindFilter);
+  /** Zones listées = filtre signaux ∩ filtre type. */
+  $: filteredZones = zoneKindFilterActive
+    ? subsetFilteredZones.filter((z) =>
+        zoneMatchesKindFilter(z.properties.kind ?? null, z.properties.code, zoneKindFilter),
+      )
+    : subsetFilteredZones;
+  /**
+   * Entrée (kind/code) de l'en-tête de filtre — base = TOUTES les zones
+   * affichables de la ville, pas la liste réduite par le filtre signaux : le
+   * filtre TYPE pilote la peinture de TOUTE la couche carte, ses chips et son
+   * compteur N/M doivent donc refléter la couche entière (miroir carte).
+   */
+  $: zoneFilterInput = zones.map((z) => ({
+    kind: z.properties.kind ?? null,
+    code: z.properties.code,
+  }));
 
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
   $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
 
+  // ── Filtre LOTS (en-tête de l'accordéon Lots — eval-lot-filters réutilisé) ─
+  $: lotFilterActive = !isDefaultEvalFilter(lotFilter);
+  /** Lots listés = filtre signaux ∩ filtre lots. */
+  $: evalFilteredLots = lotFilterActive
+    ? filteredLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
+    : filteredLots;
+  /**
+   * Compteur N/M de l'en-tête + bandeau : base = TOUS les lots chargés (comme
+   * l'ex-panneau autonome), car le filtre peint TOUTE la couche carte — pas
+   * seulement la liste réduite par le filtre signaux (miroir carte).
+   */
+  $: lotMatchedCount = lotFilterActive
+    ? lots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter)).length
+    : lots.length;
+
   // Total = zones réellement affichables (couche cadastrale + zones désignées
   // par les signaux), pas seulement le zoneCount de la couche géo.
   $: configuredZoneCount = zones.length;
-  /** Nombre de zones visibles selon le filtre actif. */
-  $: visibleZoneCount = filteredZoneCodeSet ? filteredZones.length : configuredZoneCount;
+  /** Nombre de zones visibles selon les filtres actifs (signaux et/ou type). */
+  $: visibleZoneCount =
+    filteredZoneCodeSet || zoneKindFilterActive ? filteredZones.length : configuredZoneCount;
   $: zoneBadgeText =
     zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
       ? "zones non configurées"
-      : filteredZoneCodeSet
+      : filteredZoneCodeSet || zoneKindFilterActive
         ? `${visibleZoneCount}/${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`
         : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
   /** C4 — n° du lot focusé (fiche ouverte), pour l'inclure dans la liste capée. */
@@ -217,26 +285,53 @@
     return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
   })();
   // Cap DOM à 80 fiches, mais le lot FOCUSÉ (clic carte, C4) est TOUJOURS
-  // rendu : s'il dépasse le cap, il est remonté en tête de liste.
-  $: visibleLots = ensureFocusedLotVisible(filteredLots, focusedLotNo);
+  // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
+  // sur un lot estompé de la carte), il est remonté en tête de liste — la
+  // sélection carte → fiche n'est jamais cassée par un filtre.
+  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, filteredLots);
 
   function ensureFocusedLotVisible(
-    all: LotFeature[],
+    shown: LotFeature[],
     noLot: string | null,
+    lookup: LotFeature[] = shown,
   ): LotFeature[] {
-    const capped = all.slice(0, 80);
+    const capped = shown.slice(0, 80);
     if (!noLot || capped.some((lot) => lot.properties.noLot === noLot)) {
       return capped;
     }
-    const focused = all.find((lot) => lot.properties.noLot === noLot);
+    const focused = lookup.find((lot) => lot.properties.noLot === noLot);
     return focused ? [focused, ...capped] : capped;
+  }
+
+  // Même contrat pour les ZONES : la zone focusée (clic carte / badge lot)
+  // reste listée même si le filtre par type l'écarte.
+  $: focusedZoneCode = (() => {
+    const key = selectionState.focusedKey;
+    if (!key) return null;
+    const parsed = parseKey(key);
+    if (!parsed || parsed.kind !== "zone") return null;
+    const sep = parsed.id.indexOf("/");
+    return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
+  })();
+  $: visibleZones = ensureFocusedZoneVisible(filteredZones, focusedZoneCode, subsetFilteredZones);
+
+  function ensureFocusedZoneVisible(
+    shown: GeoZoneFeature[],
+    code: string | null,
+    lookup: GeoZoneFeature[],
+  ): GeoZoneFeature[] {
+    if (!code || shown.some((zone) => zone.properties.code === code)) return shown;
+    const focused = lookup.find((zone) => zone.properties.code === code);
+    return focused ? [focused, ...shown] : shown;
   }
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
       : null;
   $: lotTotalCount = filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
-  $: hiddenLotCount = Math.max(0, lotTotalCount - visibleLots.length);
+  /** Total de la LISTE affichée (filtre lots appliqué) — base du cap DOM 80. */
+  $: lotListTotal = lotFilterActive ? evalFilteredLots.length : lotTotalCount;
+  $: hiddenLotCount = Math.max(0, lotListTotal - visibleLots.length);
   $: lotsUnavailableReason =
     lotsResponse && !lotsResponse.ok
       ? lotsResponse.reason ?? "Lots non configurés dans l'API geo."
@@ -869,7 +964,7 @@
               ? "n/d"
               : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
               ? "fallback"
-              : filteredZoneCodeSet
+              : filteredZoneCodeSet || zoneKindFilterActive
               ? `${visibleZoneCount}/${configuredZoneCount}`
               : configuredZoneCount}
           </span>
@@ -889,13 +984,26 @@
             <p class="sel-empty">{zonesUnavailableReason}</p>
           {:else if zones.length === 0}
             <p class="sel-empty">Aucune zone géométrique disponible.</p>
-          {:else if filteredZones.length === 0}
-            <p class="sel-empty">Aucune zone liée aux signaux du filtre actif.</p>
           {:else}
+            <!-- En-tête de filtre par TYPE de zone — AU-DESSUS de la liste,
+                 visible quand l'accordéon est ouvert. Rendu même quand le
+                 filtre vide la liste (sinon impossible de le désactiver). -->
+            <ZoneFilterHeader
+              zones={zoneFilterInput}
+              filter={zoneKindFilter}
+              onChange={onZoneKindFilterChange}
+            />
+            {#if visibleZones.length === 0}
+              <p class="sel-empty">
+                {zoneKindFilterActive
+                  ? "Aucune zone du type sélectionné."
+                  : "Aucune zone liée aux signaux du filtre actif."}
+              </p>
+            {:else}
             {#if zonesResponse?.warnings.includes("lot-union-fallback-is-visual-only")}
               <p class="sel-warning">Fallback visuel : les zones sont dérivées de groupes de lots.</p>
             {/if}
-            {#each filteredZones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
+            {#each visibleZones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
               {@const key = zoneKey(zone)}
               {#if key}
                 {@const zoneVisual = visual(selectionState, key)}
@@ -973,6 +1081,7 @@
                 </div>
               {/if}
             {/each}
+            {/if}
           {/if}
         </div>
       </details>
@@ -980,8 +1089,19 @@
       <details class="sel-bucket" bind:open={lotsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Lots</span>
-          <!-- #6 : "–" pendant le chargement de la couche LOTS -->
-          <span class="rail-row-count">{lotsLoading ? "–" : lotsError ? "n/d" : lotsUnavailableReason ? "n/d" : formatNumber(lotTotalCount)}</span>
+          <!-- #6 : "–" pendant le chargement ; « N/M » quand le filtre lots
+               est actif (reste visible accordéon fermé — état persistant). -->
+          <span class="rail-row-count">
+            {lotsLoading
+              ? "–"
+              : lotsError
+              ? "n/d"
+              : lotsUnavailableReason
+              ? "n/d"
+              : lotFilterActive
+              ? `${formatNumber(lotMatchedCount)}/${formatNumber(lots.length)}`
+              : formatNumber(lotTotalCount)}
+          </span>
         </summary>
         <div class="sel-entities">
           {#if lotsLoading}
@@ -999,9 +1119,21 @@
           {:else if lots.length === 0}
             <p class="sel-empty">Aucun lot retourné par la collection geo.</p>
           {:else}
+            <!-- En-tête de filtre LOTS (eval-lot-filters réutilisé) — AU-DESSUS
+                 de la liste, visible quand l'accordéon est ouvert. Rendu même
+                 quand le filtre vide la liste (pour pouvoir le désactiver).
+                 Base = TOUS les lots chargés (miroir de la peinture carte). -->
+            <LotFilterHeader
+              {lots}
+              filter={lotFilter}
+              onChange={onLotFilterChange}
+            />
+            {#if visibleLots.length === 0}
+              <p class="sel-empty">Aucun lot ne correspond aux filtres actifs.</p>
+            {:else}
             {#if hiddenLotCount > 0}
               <p class="sel-warning">
-                {formatNumber(visibleLots.length)} lots affichés sur {formatNumber(lotTotalCount)} disponibles.
+                {formatNumber(visibleLots.length)} lots affichés sur {formatNumber(lotListTotal)} disponibles.
               </p>
             {/if}
             {#each visibleLots as lot (lot.properties.noLot)}
@@ -1118,6 +1250,7 @@
                 </div>
               {/if}
             {/each}
+            {/if}
           {/if}
         </div>
       </details>
