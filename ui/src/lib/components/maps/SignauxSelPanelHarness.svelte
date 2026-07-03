@@ -20,12 +20,33 @@
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
+  import {
+    DEFAULT_EVAL_FILTER,
+    type EvalLotFilter,
+  } from "$lib/maps/eval-lot-filters.js";
+  import {
+    DEFAULT_ZONE_KIND_FILTER,
+    type ZoneKindFilter,
+  } from "$lib/maps/zone-kind-filter.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
+
+  // Miroir des filtres DONNÉES du parent (SignauxMapView) : l'état vit ici et
+  // les en-têtes des accordéons remontent le nouveau filtre par callback.
+  export let lotFilter: EvalLotFilter = DEFAULT_EVAL_FILTER;
+  export let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+
+  function handleLotFilterChange(next: EvalLotFilter): void {
+    lotFilter = next;
+  }
+
+  function handleZoneKindFilterChange(next: ZoneKindFilter): void {
+    zoneKindFilter = next;
+  }
 
   // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic).
   function toggleBucketKey(key: SelectionKey): void {
@@ -47,5 +68,9 @@
   {selectionState}
   {zonesResponse}
   {lotsResponse}
+  {lotFilter}
+  onLotFilterChange={handleLotFilterChange}
+  {zoneKindFilter}
+  onZoneKindFilterChange={handleZoneKindFilterChange}
   onToggleKey={toggleBucketKey}
 />

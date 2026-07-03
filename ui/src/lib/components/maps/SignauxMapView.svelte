@@ -5,11 +5,14 @@
    * Layout ws-shell (graphify) :
    *   RAIL (menu gauche w-80) | CANVAS (carte MapLibre) | SEL (panneau droit w-80)
    *
-   * - Rail gauche : SignauxRail (recherche + facets + liste plate de villes) +
-   *   « Filtre Zones et Lots » (LotDataFilterPanel) entre Signaux et Villes ;
-   *   les signaux de la ville active vivent à DROITE (bucket « Signaux »)
+   * - Rail gauche : SignauxRail (recherche + facets signaux + liste plate de
+   *   villes) ; les signaux de la ville active vivent à DROITE (bucket
+   *   « Signaux »)
    * - Canvas : MapLibre GL aplats choroplèthe + flyTo au clic ville
-   * - Sel droit : SignauxSelPanel (détail ville + nœuds par type)
+   * - Sel droit : SignauxSelPanel (détail ville + nœuds par type) ; les
+   *   filtres DONNÉES vivent en EN-TÊTE des accordéons Zones (par type de
+   *   zone) et Lots (catégorie/usages/superficie) — l'état des deux filtres
+   *   est porté ICI car il pilote la peinture carte (zéro refetch)
    * - Légende épinglée en bas du rail (slot controls-footer ViewLayout)
    *
    * Garde-fous Phase 1 :
@@ -134,8 +137,12 @@
     zoneKindLegend,
     ZONE_KIND_NEUTRAL,
   } from "$lib/maps/zone-kind-style.js";
+  import {
+    zoneKindFilterOpacity,
+    DEFAULT_ZONE_KIND_FILTER,
+    type ZoneKindFilter,
+  } from "$lib/maps/zone-kind-filter.js";
   import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
-  import LotDataFilterPanel from "$lib/components/maps/LotDataFilterPanel.svelte";
   import {
     geometryBounds,
     QUEBEC_PROVINCE_BOUNDS,
@@ -266,11 +273,14 @@
     updateGeoLayers();
   }
 
-  // ── Filtre DONNÉES zones-lots (parité #315, rail GAUCHE — entre Signaux
-  // et Villes) ────────────────────────────────────────────────────────────
-  // Distinct du filtre de SIGNAUX z|m|p (même rail) : celui-ci filtre les
-  // données cadastrales/zonage de la ville active. ZÉRO refetch : chaque
-  // changement ne fait que recalculer les expressions de peinture.
+  // ── Filtres DONNÉES par accordéon (drawer DROIT — en-têtes des buckets
+  // Zones et Lots de SignauxSelPanel) ────────────────────────────────────
+  // Distincts du filtre de SIGNAUX z|m|p (rail gauche) : ceux-ci filtrent les
+  // données cadastrales/zonage de la ville active. L'état vit ICI (pas dans le
+  // panneau) car il pilote la peinture carte. ZÉRO refetch : chaque changement
+  // ne fait que recalculer les expressions de peinture. Fermer un accordéon ne
+  // réinitialise PAS son filtre (le compteur N/M du bandeau reste visible).
+  /** Filtre LOTS (catégorie exclusive × usages additifs × superficie min). */
   let lotDataFilter: EvalLotFilter = {
     category: "all",
     usages: new Set(),
@@ -281,8 +291,15 @@
     lotDataFilter = next;
   }
 
-  // Recalque la peinture quand le filtre données change (assignation ci-dessus).
-  $: if (mapReady && lotDataFilter) {
+  /** Filtre par TYPE de zone (chips additives — catégories de la légende). */
+  let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+
+  function handleZoneKindFilterChange(next: ZoneKindFilter): void {
+    zoneKindFilter = next;
+  }
+
+  // Recalque la peinture quand un filtre données change (assignations ci-dessus).
+  $: if (mapReady && lotDataFilter && zoneKindFilter) {
     updateGeoLayers();
   }
 
@@ -1096,6 +1113,13 @@
       if (seenCodes.has(code)) continue;
       seenCodes.add(code);
       const key = zoneSelectionKey(zone);
+      // Filtre par TYPE de zone (en-tête accordéon Zones) : matchée accentuée,
+      // hors-filtre estompée mais visible — null quand le filtre est inactif.
+      const kindOpacity = zoneKindFilterOpacity(
+        zone.properties.kind ?? null,
+        code,
+        zoneKindFilter,
+      );
       let opacity: number;
       if (hasSignalFocus) {
         opacity = signalZoneRefs.has(code) ? 0.85 : 0.15;
@@ -1103,6 +1127,10 @@
         // C3 — la zone sélectionnée ressort (teinte accentuée), les autres
         // s'estompent ; l'exergue orange est portée par la couche highlight.
         opacity = geoKeys.has(key) ? 0.85 : 0.12;
+      } else if (kindOpacity !== null) {
+        // Même mécanique que le filtre lots (#315) : la peinture est pilotée
+        // par le filtre, aucune zone n'est retirée de la carte.
+        opacity = kindOpacity;
       } else if (fourPlusKeys.has(zoneRefComparableKey(code))) {
         opacity = ZONE_4PLUS_HIGHLIGHT_OPACITY;
       } else {
@@ -1437,6 +1465,9 @@
         {loadError} — aucun compteur n’est affiché pour éviter un faux zéro.
       </div>
     {/if}
+    <!-- Plus de panneau autonome « Filtre Zones et Lots » ici : les filtres
+         données vivent dans le drawer droit (en-têtes des accordéons Zones
+         et Lots de SignauxSelPanel). -->
     <SignauxRail
       entries={allEntries}
       selectedSlug={selectedCity?.municipality.slug ?? null}
@@ -1446,20 +1477,7 @@
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
-    >
-      <!-- « Filtre Zones et Lots » — ENTRE la section Signaux et la section
-           Villes du rail gauche. Même composant / mêmes props qu'avant (zéro
-           refetch) : le filtre pilote toujours la peinture des lots. -->
-      <svelte:fragment slot="filters">
-        {#if selectedCity}
-          <LotDataFilterPanel
-            lots={displayedLots.features}
-            filter={lotDataFilter}
-            onChange={handleLotDataFilterChange}
-          />
-        {/if}
-      </svelte:fragment>
-    </SignauxRail>
+    />
   </svelte:fragment>
 
   <!-- ── CANVAS : carte (socle GeoCityMapBase) ────────────────────────────── -->
@@ -1597,9 +1615,9 @@
     {/if}
   </GeoCityMapBase>
 
-  <!-- ── SEL droit : contexte de sélection UNIQUEMENT (Ville active +
-       Signaux / Zones / Lots). Le « Filtre Zones et Lots » vit dans le rail
-       GAUCHE (entre Signaux et Villes). ──────────────────────────────────── -->
+  <!-- ── SEL droit : contexte de sélection (Ville active + Signaux / Zones /
+       Lots). Les filtres DONNÉES vivent en EN-TÊTE des accordéons Zones et
+       Lots ; leur état est porté ici (peinture carte, zéro refetch). ─────── -->
   <svelte:fragment slot="sel">
     <SignauxSelPanel
       {selectedCity}
@@ -1614,6 +1632,10 @@
       {lotsResponse}
       {selectionState}
       {activeSubsetKey}
+      lotFilter={lotDataFilter}
+      onLotFilterChange={handleLotDataFilterChange}
+      {zoneKindFilter}
+      onZoneKindFilterChange={handleZoneKindFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
