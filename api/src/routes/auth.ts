@@ -507,6 +507,11 @@ export function authRoute(
  *    MCP client, mirroring the geo-owned S3 archive direction.
  */
 const PUBLIC_PREFIXES = [
+  // k8s probes must be reachable WITHOUT auth: the (unauthenticated) kubelet
+  // probe hits these directly. /livez behind the OIDC guard returned 401 → the
+  // startupProbe failed → pod killed in a loop (poc-k8s diag 2026-07-03). Both
+  // /health (readiness) and /livez (liveness/startup) stay public.
+  "/livez",
   "/health",
   "/api/v1/auth/login",
   "/api/v1/auth/enroll",
