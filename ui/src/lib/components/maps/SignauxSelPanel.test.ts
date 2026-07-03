@@ -279,8 +279,10 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
     expect(badge.textContent).toContain("H-431");
 
     await fireEvent.click(badge);
-    // Détail zone ouvert : type dérivé du code (H- → Habitation) + section signaux.
-    expect(queryByText("Habitation")).not.toBeNull();
+    // Détail zone ouvert : type dérivé du code (H- → Habitation) + section
+    // signaux. Sélecteur précisé : la chip « Habitation » de l'en-tête de
+    // filtre par type (accordéon Zones) porte le même libellé.
+    expect(queryByText("Habitation", { selector: ".entity-meta-val" })).not.toBeNull();
     expect(queryByText("Signaux citant la zone")).not.toBeNull();
     expect(queryByText("Aucun signal ne cite cette zone.")).not.toBeNull();
   });
@@ -306,5 +308,167 @@ describe("SignauxSelPanel — détail zone : signaux citant la zone", () => {
     });
     await fireEvent.click(link);
     expect(queryByText("Premier signal de zonage.")).not.toBeNull();
+  });
+});
+
+// ── En-têtes de filtre des accordéons Zones / Lots (drawer droit) ────────────
+// Le bloc autonome « Filtre Zones et Lots » du rail gauche est supprimé :
+// chaque accordéon porte SON filtre au-dessus de sa liste. L'état vit dans le
+// parent (Harness = miroir de SignauxMapView) — il pilote aussi la peinture.
+
+function makeLot(noLot: string, extra: Record<string, unknown> = {}): LotFeature {
+  return {
+    type: "Feature",
+    geometry: null,
+    properties: { noLot, citySlug: "delson", ...extra },
+  } as LotFeature;
+}
+
+describe("SignauxSelPanel — accordéon LOTS : en-tête de filtre au-dessus de la liste", () => {
+  const lots = [
+    makeLot("100", { multifamilial4plus: true, superficieM2: 900 }),
+    makeLot("200", { superficieM2: 400 }),
+    makeLot("300", { tod: true, superficieM2: 2000 }),
+  ];
+
+  it("rend l'en-tête (catégories exclusives + usages + superficie) avec compteur N/M", () => {
+    const { getByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+
+    expect(getByTestId("signaux-lot-filter-header")).toBeTruthy();
+    // Filtre par défaut : tous les lots matchent (3/3).
+    expect(getByTestId("signaux-filter-count").textContent).toContain("3");
+    expect(getByTestId("signaux-filter-all")).toBeTruthy();
+    expect(getByTestId("signaux-filter-quatrePlus")).toBeTruthy();
+    expect(getByTestId("signaux-filter-tod")).toBeTruthy();
+    expect(getByTestId("signaux-filter-priorite")).toBeTruthy();
+    expect(getByTestId("signaux-usage-residentiel")).toBeTruthy();
+    expect(getByTestId("signaux-superficie-slider")).toBeTruthy();
+  });
+
+  it("chip « 4+ logements » : la liste ne montre que les lots 4+ et le compteur passe à 1/3", async () => {
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+
+    await fireEvent.click(getByTestId("signaux-filter-quatrePlus"));
+
+    expect(queryByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("200", { selector: ".sel-entity-label" })).toBeNull();
+    expect(queryByText("300", { selector: ".sel-entity-label" })).toBeNull();
+    expect(getByTestId("signaux-filter-count").textContent).toBe("1/3");
+    // Filtre actif → « Réinitialiser » disponible, et il restaure la liste.
+    await fireEvent.click(getByTestId("signaux-filter-reset"));
+    expect(queryByText("200", { selector: ".sel-entity-label" })).not.toBeNull();
+  });
+
+  it("le lot FOCUSÉ (fiche ouverte) reste listé même s'il est écarté par le filtre", async () => {
+    const { getByText, getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+
+    // Ouvre la fiche du lot 200 (non-4+), puis filtre « 4+ logements ».
+    await fireEvent.click(getByText("200", { selector: ".sel-entity-label" }));
+    await fireEvent.click(getByTestId("signaux-filter-quatrePlus"));
+
+    // Sélection carte → fiche jamais cassée par un filtre : 200 reste visible.
+    expect(queryByText("200", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("300", { selector: ".sel-entity-label" })).toBeNull();
+  });
+});
+
+describe("SignauxSelPanel — accordéon ZONES : filtre par TYPE de zone", () => {
+  it("chips = types présents uniquement (catégories de la légende), avec compte", () => {
+    const { getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431", "H-102", "C-186"]),
+      },
+    });
+
+    expect(getByTestId("signaux-zone-filter-header")).toBeTruthy();
+    expect(getByTestId("signaux-zone-kind-H").textContent).toContain("Habitation");
+    expect(getByTestId("signaux-zone-kind-H").textContent).toContain("2");
+    expect(getByTestId("signaux-zone-kind-C").textContent).toContain("Commercial");
+    // Aucun type Agricole dans les zones → pas de chip (comme la légende).
+    expect(queryByTestId("signaux-zone-kind-A")).toBeNull();
+  });
+
+  it("sélection additive : « Habitation » ne montre que H-*, + « Commercial » = union ; compteur N/M", async () => {
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431", "C-186"]),
+      },
+    });
+
+    // Filtre « Habitation » : seule H-431 reste listée (1/2).
+    await fireEvent.click(getByTestId("signaux-zone-kind-H"));
+    expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("C-186", { selector: ".sel-entity-label" })).toBeNull();
+    expect(getByTestId("signaux-zone-filter-count").textContent).toBe("1/2");
+
+    // + « Commercial » (ADDITIF) : l'union H ∪ C = les deux zones (2/2).
+    await fireEvent.click(getByTestId("signaux-zone-kind-C"));
+    expect(queryByText("C-186", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(getByTestId("signaux-zone-filter-count").textContent).toBe("2/2");
+
+    // Réinitialiser (filtre actif) → tout revient.
+    await fireEvent.click(getByTestId("signaux-zone-kind-H"));
+    await fireEvent.click(getByTestId("signaux-zone-kind-C"));
+    expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
+  });
+
+  it("filtre qui vide la liste : l'en-tête reste rendu (désactivable) + copy neutre", async () => {
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431"]),
+      },
+    });
+
+    // H présent ; en ajoutant seulement… rien d'autre : on coche H puis on
+    // le décoche via Réinitialiser après avoir vérifié l'état vide sur C.
+    await fireEvent.click(getByTestId("signaux-zone-kind-H"));
+    expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
+
+    // Décocher H → filtre vide → tout matche à nouveau.
+    await fireEvent.click(getByTestId("signaux-zone-kind-H"));
+    expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
+  });
+
+  it("la zone FOCUSÉE reste listée même si le filtre type l'écarte", async () => {
+    const { getByText, getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431", "C-186"]),
+      },
+    });
+
+    // Ouvre la fiche de C-186, puis filtre « Habitation » (écarte C-186).
+    await fireEvent.click(getByText("C-186", { selector: ".sel-entity-label" }));
+    await fireEvent.click(getByTestId("signaux-zone-kind-H"));
+
+    // Sélection → fiche jamais cassée : C-186 (focusée) reste listée.
+    expect(queryByText("C-186", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
   });
 });
