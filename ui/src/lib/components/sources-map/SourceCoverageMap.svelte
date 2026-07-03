@@ -3,13 +3,14 @@
    * SourceCoverageMap — onglet « Couverture » de la vue Source.
    *
    * Carte choroplèthe qualité de données sur le socle partagé GeoCityMapBase :
-   *  - couleur = PIRE statut honnête par ville (D2 : verified/declared/absent,
+   *  - couleur = statut agrégé honnête par ville (D2 : Servi = couches cœur
+   *    complètes / Partiel = au moins une couche servie / Non couvert = rien ;
    *    jamais un score 0-100, jamais de vert fabriqué) ;
    *  - périmètre province 1104 + surbrillance focus-30 (D3, toggle de segments) ;
    *  - headline province en overlay (D7) + insight « complétions cheap » ;
    *  - clic ville → scorecard tri-état de la chaîne qualité complète (PV ·
-   *    données · signaux · zonage · grilles · lots, D6) dans le panneau droit ;
-   *  - légende 3 états (overlay du socle).
+   *    signaux · zones · normes · lots · TOD, D6) dans le panneau droit ;
+   *  - légende 3 états UNIQUE (overlay du socle carte, pas de doublon rail).
    *
    * La VUE ne porte que les données + expressions métier ; toute la mécanique
    * carto (MapLibre, drill, caméra) vit dans le socle (NE PAS le ré-altérer).
@@ -96,7 +97,9 @@
       l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
       signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
       l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
+      normes: { state: "absent", freshness: "unknown" },
       l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
+      tod: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
       worstStatus: "absent",
       nextMarginalGain: null,
     };
@@ -116,7 +119,7 @@
   }
 </script>
 
-<ViewLayout controlsWidth="w-72" stickyControlsFooter selWidth="w-96">
+<ViewLayout controlsWidth="w-72" selWidth="w-96">
   <!-- ── Bande gauche : titre + insight actionnable ────────────────────────── -->
   <svelte:fragment slot="controls">
     <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
@@ -165,33 +168,15 @@
         {/if}
 
         <p class="text-xs text-slate-400">
-          Cliquez une ville pour le détail de sa couverture (PV · données · signaux · zonage · grilles · lots).
+          Cliquez une ville pour le détail de sa couverture (PV · signaux · zones · normes · lots · TOD).
         </p>
       </div>
     {/if}
   </svelte:fragment>
 
-  <!-- Légende épinglée en bas de la bande -->
-  <svelte:fragment slot="controls-footer">
-    <div class="p-4">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Couverture par ville
-      </p>
-      <ul class="space-y-1">
-        {#each legend.items as item (item.label)}
-          <li class="flex items-center gap-2 text-xs text-slate-600">
-            <span
-              class="h-3 w-3 shrink-0 rounded-sm border border-slate-300"
-              style="background-color: {item.color};"
-            ></span>
-            {item.label}
-          </li>
-        {/each}
-      </ul>
-    </div>
-  </svelte:fragment>
-
   <!-- ── Canvas : carte choroplèthe (socle) ───────────────────────────────── -->
+  <!-- La légende « Couverture par ville » est UNIQUE : overlay du socle carte
+       (prop `legend` de GeoCityMapBase), pas de doublon dans le rail gauche. -->
   <GeoCityMapBase
     {fillColorExpression}
     {fillOpacityExpression}
