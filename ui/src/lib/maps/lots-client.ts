@@ -55,6 +55,12 @@ export interface LotProperties {
    * propriétaire n'est jamais exposé (Loi 25).
    */
   adresse?: string | null;
+  /**
+   * Code postal du lot quand la source geo l'expose (demande envoyée à geo —
+   * C5). Câblé côté client pour remonter automatiquement dès que la propriété
+   * arrive ; « — » dans la fiche en attendant.
+   */
+  codePostal?: string | null;
   /** Façade mesurée par la source (m) quand exposée. */
   facadeM?: number | null;
   /** Profondeur mesurée par la source (m) quand exposée. */
@@ -113,6 +119,8 @@ export interface LotProperties {
   lotVersionId?: string | null;
   /** UI-derived projection state for signal mode; not persisted by the API. */
   signalProjection?: "direct" | "inherited" | "none";
+  /** UI-derived : lot SÉLECTIONNÉ (exergue orange C3) — jamais persisté. */
+  isSelected?: boolean;
 }
 
 export interface LotGeometry {
@@ -150,6 +158,8 @@ export interface LotsResponse {
 
 export interface FetchLotsOptions {
   limit?: number;
+  /** Décalage OGC (pagination multi-pages, cf. fetchAllLots). */
+  offset?: number;
   bbox?: [number, number, number, number];
   baseUrl?: string;
   /** Signal d'annulation externe (anti-course au changement de ville). */
@@ -180,6 +190,9 @@ export function resolveLotsUrl(
   const path = `/api/geo/collections/${encodeURIComponent(lotsCollectionId(citySlug))}/items`;
   const params = new URLSearchParams();
   if (opts.limit !== undefined) params.set("limit", String(opts.limit));
+  if (opts.offset !== undefined && opts.offset > 0) {
+    params.set("offset", String(opts.offset));
+  }
   if (opts.bbox) params.set("bbox", opts.bbox.join(","));
   const qs = params.toString();
   return `${base}${path}${qs ? `?${qs}` : ""}`;
@@ -245,6 +258,105 @@ export async function fetchLots(
     numberMatched: body.numberMatched ?? features.length,
     numberReturned: body.numberReturned ?? features.length,
     featureCollection: { type: "FeatureCollection", features },
+  };
+}
+
+export interface FetchAllLotsOptions extends Omit<FetchLotsOptions, "limit" | "offset"> {
+  /**
+   * Taille de page demandée. Grande par défaut (10 000) : le store local sert
+   * TOUT en une page (il ignore `offset`), et un serveur OGC qui plafonne
+   * (ex. 1 000) déclenche la pagination par `offset` ci-dessous.
+   */
+  pageLimit?: number;
+  /** Garde-fou : nombre maximal de pages chargées. */
+  maxPages?: number;
+  /**
+   * Callback de chargement PROGRESSIF : reçoit après chaque page la réponse
+   * FUSIONNÉE (features dédupliquées par noLot) — la carte peut peindre au fil
+   * de l'eau sans attendre la dernière page.
+   */
+  onPage?: (partial: LotsResponse, pageIndex: number) => void;
+}
+
+/**
+ * Charge TOUS les lots d'une ville (C8 — parité référence : la carte affiche
+ * l'intégralité, pas une page de 500).
+ *
+ * Stratégie multi-pages tolérante aux deux serveurs réels :
+ *  - store local API : ignore `offset` mais sert tout sous `pageLimit` → une
+ *    seule page suffit ; si une page suivante ne produit AUCUN lot nouveau
+ *    (offset ignoré), on s'arrête — jamais de boucle infinie ;
+ *  - passthrough OGC : plafonne `limit` côté upstream → pages successives par
+ *    `offset = nb de lots fusionnés`, jusqu'à `numberMatched`.
+ *
+ * Les pages sont FUSIONNÉES avec déduplication par `noLot` (clé d'identité des
+ * couches carto et des matchs MapLibre). L'annulation (signal) et le timeout
+ * de `fetchLots` s'appliquent à chaque page — une réponse périmée lève et le
+ * garde anti-course de l'appelant l'ignore.
+ */
+export async function fetchAllLots(
+  citySlug: string,
+  opts: FetchAllLotsOptions = {},
+): Promise<LotsResponse> {
+  const pageLimit = opts.pageLimit ?? 10_000;
+  const maxPages = opts.maxPages ?? 30;
+  const seen = new Set<string>();
+  const merged: LotFeature[] = [];
+  let last: LotsResponse | null = null;
+
+  for (let page = 0; page < maxPages; page++) {
+    const res = await fetchLots(citySlug, {
+      ...opts,
+      limit: pageLimit,
+      offset: merged.length,
+    });
+    // Ville sans collection (ok=false) : réponse honnête telle quelle en
+    // première page ; sinon on garde ce qui est déjà fusionné.
+    if (!res.ok) {
+      if (page === 0) return res;
+      break;
+    }
+    let added = 0;
+    for (const feature of res.featureCollection.features) {
+      const noLot = feature.properties.noLot;
+      if (seen.has(noLot)) continue;
+      seen.add(noLot);
+      merged.push(feature);
+      added += 1;
+    }
+    last = res;
+    const snapshot = mergedSnapshot(res, merged);
+    opts.onPage?.(snapshot, page);
+    const matched = res.numberMatched ?? merged.length;
+    const pageIsFull = res.featureCollection.features.length >= pageLimit;
+    // Stop : page sans nouveauté (offset ignoré / fin réelle), ou total atteint
+    // sur une page non pleine (une page pleine peut cacher une suite).
+    if (added === 0) break;
+    if (merged.length >= matched && !pageIsFull) break;
+  }
+
+  if (!last) {
+    return {
+      ok: false,
+      citySlug,
+      source: "none",
+      reason: "Aucune page de lots chargée.",
+      collectionId: lotsCollectionId(citySlug),
+      numberMatched: 0,
+      numberReturned: 0,
+      featureCollection: EMPTY_LOTS,
+    };
+  }
+  return mergedSnapshot(last, merged);
+}
+
+/** Réponse fusionnée : features dédupliquées + compteurs honnêtes. */
+function mergedSnapshot(base: LotsResponse, merged: LotFeature[]): LotsResponse {
+  return {
+    ...base,
+    featureCollection: { type: "FeatureCollection", features: [...merged] },
+    numberReturned: merged.length,
+    numberMatched: Math.max(base.numberMatched ?? 0, merged.length),
   };
 }
 
@@ -345,6 +457,13 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.adresse_civique,
     properties.adresseCivique,
   ]);
+  // Code postal (C5) — câblé côté client, remonte dès que geo l'expose.
+  const codePostal = firstString([
+    properties.codePostal,
+    properties.code_postal,
+    properties.postalCode,
+    properties.postal_code,
+  ]);
   const facadeM = firstNumber([properties.facadeM, properties.facade_m]);
   const profondeurM = firstNumber([properties.profondeurM, properties.profondeur_m]);
   const usageCode = firstString([
@@ -406,6 +525,7 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     ...(multifamilial4plusSource !== null ? { multifamilial4plusSource } : {}),
     ...(priorite !== null ? { priorite } : {}),
     ...(adresse !== null ? { adresse } : {}),
+    ...(codePostal !== null ? { codePostal } : {}),
     ...(facadeM !== null ? { facadeM } : {}),
     ...(profondeurM !== null ? { profondeurM } : {}),
     ...(superficieM2 !== null ? { superficieM2 } : {}),

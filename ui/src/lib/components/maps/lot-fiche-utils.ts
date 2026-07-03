@@ -226,3 +226,27 @@ export function formatYesNo(value: boolean | null | undefined): string {
   if (value === undefined || value === null) return "—";
   return value ? "Oui" : "Non";
 }
+
+/**
+ * Façade affichable d'un lot (C5) : la façade MESURÉE par la source prime ;
+ * sinon l'ESTIMATION géométrique (`estimatedFacadeM`), affichée honnêtement
+ * comme telle (« ≈ … m (estimée) ») ; « — » discret quand ni l'une ni l'autre.
+ */
+export function facadeDisplay(feature: LotFeature): string {
+  const measured = feature.properties.facadeM;
+  if (typeof measured === "number" && Number.isFinite(measured) && measured > 0) {
+    return `${formatMeters(measured)} m`;
+  }
+  const estimated = estimatedFacadeM(feature);
+  if (estimated !== null && estimated > 0) {
+    return `≈ ${formatMeters(estimated)} m (estimée)`;
+  }
+  return "—";
+}
+
+/** Longueur en mètres, 1 décimale max, locale fr-CA. */
+function formatMeters(value: number): string {
+  return (Math.round(value * 10) / 10).toLocaleString("fr-CA", {
+    maximumFractionDigits: 1,
+  });
+}

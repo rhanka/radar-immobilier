@@ -120,6 +120,39 @@ export function removeSelection(
   };
 }
 
+/** Kinds GÉO soumis à la sélection exclusive (C3) : zone et lot. */
+export const EXCLUSIVE_GEO_KINDS: readonly BucketKind[] = ["zone", "lot"];
+
+/**
+ * Sélection EXCLUSIVE d'un élément géo (C3 — parité référence) : une seule
+ * zone OU un seul lot sélectionné à la fois. Sélectionner un lot désélectionne
+ * la zone active (et réciproquement) ; re-cliquer l'élément sélectionné le
+ * désélectionne. Les clés hors kinds exclusifs (municipalité, signal) sont
+ * CONSERVÉES — la ville active reste sélectionnée.
+ */
+export function toggleExclusiveSelection(
+  state: SelectionBucketState,
+  key: SelectionKey,
+  exclusiveKinds: readonly BucketKind[] = EXCLUSIVE_GEO_KINDS,
+): SelectionBucketState {
+  const parsed = parseKey(key);
+  if (!parsed || !exclusiveKinds.includes(parsed.kind)) {
+    return toggleSelection(state, key);
+  }
+  if (state.selectedKeys.has(key)) {
+    // Re-clic sur l'élément sélectionné → désélection simple.
+    return removeSelection(state, key);
+  }
+  // Purge de TOUTE sélection géo précédente (zone/lot), puis sélection unique.
+  let next = state;
+  for (const kind of exclusiveKinds) {
+    next = clearSelectionGroup(next, kind);
+  }
+  const selectedKeys = new Set(next.selectedKeys);
+  selectedKeys.add(key);
+  return { ...next, selectedKeys };
+}
+
 export function clearSelectionGroup(
   state: SelectionBucketState,
   kind: BucketKind,

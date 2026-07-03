@@ -10,6 +10,7 @@ import { describe, it, expect } from "vitest";
 import {
   centroid,
   estimatedFacadeM,
+  facadeDisplay,
   evaluatedLotScore,
   formatArea,
   formatYesNo,
@@ -354,5 +355,58 @@ describe("formatArea / formatYesNo — copy client neutre, « — » discret", (
     expect(formatYesNo(false)).toBe("Non");
     expect(formatYesNo(undefined)).toBe("—");
     expect(formatYesNo(null)).toBe("—");
+  });
+});
+
+// ── C5 — facadeDisplay (fiche lot : mesurée > estimée > « — ») ────────────────
+
+describe("facadeDisplay", () => {
+  const LAT = 45.4;
+  const M_PER_DEG_LAT = 111320;
+  const M_PER_DEG_LON = 111320 * Math.cos((LAT * Math.PI) / 180);
+
+  function rectRing(wM: number, hM: number): number[][] {
+    const dLon = wM / M_PER_DEG_LON;
+    const dLat = hM / M_PER_DEG_LAT;
+    return [
+      [-73.5, LAT],
+      [-73.5 + dLon, LAT],
+      [-73.5 + dLon, LAT + dLat],
+      [-73.5, LAT + dLat],
+      [-73.5, LAT],
+    ];
+  }
+
+  it("préfère la façade MESURÉE par la source (sans mention estimée)", () => {
+    const lot: LotFeature = {
+      type: "Feature",
+      geometry: { type: "Polygon", coordinates: [rectRing(20, 40)] },
+      properties: { noLot: "F-1", facadeM: 18.25 },
+    };
+    const display = facadeDisplay(lot);
+    expect(display).toContain("18,3");
+    expect(display).toContain("m");
+    expect(display).not.toContain("estimée");
+  });
+
+  it("retombe sur l'ESTIMATION géométrique, affichée comme telle", () => {
+    const lot: LotFeature = {
+      type: "Feature",
+      geometry: { type: "Polygon", coordinates: [rectRing(20, 40)] },
+      properties: { noLot: "F-2" },
+    };
+    const display = facadeDisplay(lot);
+    expect(display).toMatch(/^≈ /u);
+    expect(display).toContain("(estimée)");
+    expect(display).toContain("20");
+  });
+
+  it("« — » discret sans mesure ni géométrie exploitable", () => {
+    const lot: LotFeature = {
+      type: "Feature",
+      geometry: null,
+      properties: { noLot: "F-3" },
+    };
+    expect(facadeDisplay(lot)).toBe("—");
   });
 });
