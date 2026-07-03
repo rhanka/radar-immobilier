@@ -26,9 +26,17 @@
     fetchCityGrilles,
     type CityCoverage,
     type CityGrilles,
+    type FocusScope,
   } from "$lib/sources/source-coverage-client.js";
 
   export let city: CityCoverage;
+  /**
+   * Périmètre focus-30 (villes à signaux) calculé par le parent depuis la
+   * couverture complète (`computeFocusScope`). Null = badge focus masqué
+   * (le scorecard seul ne peut pas décider — le critère est relatif au
+   * classement province-wide par nombre de signaux).
+   */
+  export let focusScope: FocusScope | null = null;
   /** Si fourni, affiche un bouton de fermeture (panneau latéral de carte). */
   export let onClose: (() => void) | null = null;
 
@@ -142,7 +150,7 @@
           aria-hidden="true"
         ></span>
         <h3 class="truncate text-sm font-bold text-slate-900">{city.cityName}</h3>
-        {#if isFocusCity(city)}
+        {#if focusScope && isFocusCity(city, focusScope)}
           <Badge tone="info" class="text-xs">Focus 30</Badge>
         {/if}
       </div>

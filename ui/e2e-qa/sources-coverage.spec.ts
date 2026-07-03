@@ -67,7 +67,10 @@ function coverageCity(
   };
 }
 
-// 4 villes QA (REFERENCE_CITIES) + 4 focus-30 + 2 hors portées restreintes.
+// 10 villes. Portée « 30 villes à signaux » = présence de signaux (le fixture
+// couple 0 signal ⇔ worstStatus "absent") : la-prairie/candiac/rimouski (absent)
+// ont 0 signal → HORS focus30 malgré un bon rang ; sainte-sophie (rang 44, LOIN)
+// a des signaux → DANS focus30 (bug Steve : plus de critère priorityRank ≤ 30).
 const CITIES = [
   coverageCity("longueuil", "Longueuil", "Longueuil", 3, "verified"),
   coverageCity("la-prairie", "La Prairie", "Roussillon", 5, "absent"),
@@ -83,7 +86,8 @@ const CITIES = [
 
 const COVERAGE_RESPONSE = {
   generatedAt: "2026-07-01T00:00:00Z",
-  totals: { cities: 10, l1Raw: 8, l2Graph: 8, signals: 8, l4Zonage: 8, l5Lots: 3 },
+  // 7 villes ont des signaux (les 3 « absent » — la-prairie/candiac/rimouski — 0).
+  totals: { cities: 10, l1Raw: 8, l2Graph: 8, signals: 7, l4Zonage: 8, l5Lots: 3 },
   cities: CITIES,
 };
 
@@ -238,12 +242,18 @@ test.describe("Sources/Couverture — mode d'interaction Signaux", () => {
       path: testInfo.outputPath("c1-portee-focus-qa-4-villes.png"),
     });
 
-    // (c2) Portée « 30 villes à signaux » → rang ≤ 30 (8 villes fixture).
+    // (c2) Portée « 30 villes à signaux » → villes À SIGNAUX (présence de
+    // signaux, plus priorityRank). 7 villes de la fixture ont des signaux.
     await radios.nth(1).check();
     await expect(radios.nth(1)).toBeChecked();
     await expect(radios.nth(0)).not.toBeChecked();
-    await expect(cityRows(page)).toHaveCount(8);
-    await expect(page.locator("button.rail-city-row", { hasText: "Sainte-Sophie" })).toHaveCount(0);
+    await expect(cityRows(page)).toHaveCount(7);
+    // Bug Steve corrigé : Sainte-Sophie (rang 44, LOIN) est listée car elle a
+    // des signaux (l'ancien rang ≤ 30 l'excluait à tort).
+    await expect(page.locator("button.rail-city-row", { hasText: "Sainte-Sophie" })).toHaveCount(1);
+    // Villes proches SANS signal exclues (l'ancien rang ≤ 30 les gardait) :
+    await expect(page.locator("button.rail-city-row", { hasText: "La Prairie" })).toHaveCount(0);
+    await expect(page.locator("button.rail-city-row", { hasText: "Candiac" })).toHaveCount(0);
     await page.waitForTimeout(1000);
     await page.screenshot({
       path: testInfo.outputPath("c2-portee-30-villes.png"),
