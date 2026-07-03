@@ -18,6 +18,7 @@
     sortCitiesForConsole,
     formatProvinceHeadline,
     buildProvinceHeadline,
+    isFocusCity,
     STATE_COLOR,
     STATE_LABEL,
     STATE_BADGE_TONE,
@@ -36,6 +37,16 @@
   let filter: Filter = "actives";
   let query = "";
   let selectedCity: CityCoverage | null = null;
+
+  // ── Périmètre : Province / Focus 30 (parité onglet « Couverture ») ─────────
+  // Mêmes intitulés que le toggle de la carte Couverture ; même critère
+  // (`isFocusCity`, priorityRank ≤ 30) — ici c'est un FILTRE de lignes (la
+  // carte, elle, atténue sans filtrer). Défaut : Province, comme la carte.
+  const SEG_PROVINCE = "Province (1104)";
+  const SEG_FOCUS = "Focus 30";
+  const SEGMENTS = [SEG_PROVINCE, SEG_FOCUS] as const;
+  let focusOnly = false;
+  $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
 
   const FILTERS: { value: Filter; label: string }[] = [
     { value: "actives", label: "Actives" },
@@ -63,6 +74,8 @@
 
   $: sorted = sortCitiesForConsole(cities);
   $: filtered = sorted.filter((c) => {
+    // Périmètre Focus 30 : s'applique EN PLUS des filtres statut + recherche.
+    if (focusOnly && !isFocusCity(c)) return false;
     if (filter === "actives") {
       if (!isActive(c)) return false;
     } else if (filter !== "all" && c.worstStatus !== filter) {
@@ -127,6 +140,33 @@
         </p>
       </div>
     {/if}
+
+    <!-- Périmètre Province / Focus 30 — même control segmenté que la carte
+         Couverture (intitulés et style identiques), mais en FILTRE de lignes. -->
+    <div class="border-b border-slate-100 px-4 py-3">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Périmètre</p>
+      <div
+        class="inline-flex w-fit overflow-hidden rounded border border-slate-200 bg-white text-xs shadow-sm"
+        role="group"
+        aria-label="Périmètre des villes listées"
+        data-testid="console-scope"
+      >
+        {#each SEGMENTS as seg (seg)}
+          <button
+            type="button"
+            class={`px-2.5 py-1 font-semibold transition-colors ${
+              activeSegment === seg
+                ? "bg-slate-900 text-white"
+                : "cursor-pointer text-slate-600 hover:bg-slate-100"
+            }`}
+            aria-pressed={activeSegment === seg}
+            on:click={() => { focusOnly = seg === SEG_FOCUS; }}
+          >
+            {seg}
+          </button>
+        {/each}
+      </div>
+    </div>
 
     <div class="px-4 py-3">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Filtrer</p>
@@ -195,7 +235,7 @@
                 <td class="px-4 py-2">
                   <div class="flex items-center gap-2">
                     <span class="font-medium text-slate-800">{city.cityName}</span>
-                    {#if city.priorityRank !== null && city.priorityRank <= 30}
+                    {#if isFocusCity(city)}
                       <Badge tone="info" class="text-[10px]">#{city.priorityRank}</Badge>
                     {/if}
                   </div>
