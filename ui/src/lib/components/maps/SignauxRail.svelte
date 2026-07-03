@@ -11,6 +11,9 @@
    *      l'intersection des filtres actifs.
    *   2. « Villes » : recherche + sous-accordéon par ville → flyTo
    *
+   * Slot `filters` : « Filtre Zones et Lots » (LotDataFilterPanel) fourni par
+   * le parent, intercalé ENTRE la section Signaux et la section Villes.
+   *
    * Anti-invention : aucun appel API ici, tout par props.
    *
    * Vague 1 DS (0.34.47+) : Overline · IconButton · Checkbox (desc+trailing) ·
@@ -313,6 +316,12 @@
         </div>
       </div>
     </details>
+
+    <!-- ── « Filtre Zones et Lots » : ENTRE Signaux et Villes ──────────────── -->
+    <!-- Contenu (LotDataFilterPanel) fourni par le parent — même logique de
+         filtrage que depuis le drawer droit (zéro refetch), seule la position
+         dans le layout change. -->
+    <slot name="filters" />
 
     <!-- ── Section 2 : Villes (recherche + sous-accordéon) ─────────────────── -->
     <details class="rail-section-acc" open>
