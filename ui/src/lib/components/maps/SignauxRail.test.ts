@@ -14,6 +14,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, fireEvent, cleanup, getAllByRole } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
+import type { CityMapEntry } from "$lib/maps/maps-data.js";
 
 afterEach(() => cleanup());
 
@@ -130,5 +131,87 @@ describe("SignauxRail — toggle filtre", () => {
     const lastCall = calls[calls.length - 1];
     expect(lastCall).not.toContain("m");
     expect(lastCall).toContain("z");
+  });
+});
+
+// ── Liste PLATE de villes (accordéon signaux SUPPRIMÉ du rail gauche) ────────
+// Les signaux de la ville active vivent à DROITE (SignauxSelPanel → bucket
+// « Signaux »), plus jamais inline sous la ligne ville du rail.
+
+/** Fixture minimale CityMapEntry — seuls slug/name/mrc + subsetCounts comptent ici. */
+function cityEntry(slug: string, name: string, mrc: string, count: number): CityMapEntry {
+  const subsetCounts: Record<string, number> = {};
+  for (const key of ["", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"]) {
+    subsetCounts[key] = count;
+  }
+  return {
+    municipality: {
+      slug,
+      name,
+      mrc,
+    } as CityMapEntry["municipality"],
+    signalCount6m: count,
+    subsetCounts,
+  };
+}
+
+function renderRailWithCities(selectedSlug: string | null, onSelectCity?: (e: CityMapEntry) => void) {
+  return render(SignauxRail, {
+    props: {
+      // MRC distinctes VOLONTAIREMENT : le sous-libellé MRC est rendu dans la
+      // ligne, un find() par texte ne doit matcher qu'une seule ville.
+      entries: [
+        cityEntry("salaberry-de-valleyfield", "Salaberry-de-Valleyfield", "MRC-Test-A", 7),
+        cityEntry("beauharnois", "Beauharnois", "MRC-Test-B", 3),
+      ],
+      selectedSlug,
+      initialSubsetKey: "z|m|p",
+      onSelectCity: onSelectCity ?? (() => {}),
+    },
+  });
+}
+
+describe("SignauxRail — liste plate de villes (sans accordéon signaux)", () => {
+  it("les villes sont rendues en lignes plates (boutons), sans <details> par ville", () => {
+    const { container } = renderRailWithCities("salaberry-de-valleyfield");
+    const list = container.querySelector(".rail-city-list");
+    expect(list).not.toBeNull();
+    // Lignes plates : un bouton par ville
+    const rows = list!.querySelectorAll("button.rail-city-row");
+    expect(rows.length).toBe(2);
+    // Plus AUCUN accordéon par ville dans la liste
+    expect(list!.querySelectorAll("details").length).toBe(0);
+  });
+
+  it("la ville sélectionnée est mise en évidence, SANS signaux inline en dessous", () => {
+    const { container } = renderRailWithCities("salaberry-de-valleyfield");
+    const active = container.querySelector(".rail-city-row--active");
+    expect(active).not.toBeNull();
+    expect(active!.textContent).toContain("Salaberry-de-Valleyfield");
+    // Aucun rendu inline de signaux (ancien accordéon) nulle part dans le rail
+    expect(container.querySelector(".ws-acc")).toBeNull();
+    expect(container.querySelector(".ws-acc-body")).toBeNull();
+    expect(container.querySelector(".signal-item")).toBeNull();
+  });
+
+  it("cliquer une ville appelle onSelectCity avec l'entrée correspondante", async () => {
+    const spy = vi.fn();
+    const { container } = renderRailWithCities(null, spy);
+    const rows = container.querySelectorAll<HTMLButtonElement>("button.rail-city-row");
+    const beauharnois = Array.from(rows).find((r) => r.textContent?.includes("Beauharnois"));
+    expect(beauharnois).toBeDefined();
+
+    await fireEvent.click(beauharnois!);
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0].municipality.slug).toBe("beauharnois");
+  });
+
+  it("le badge compteur de signaux reste affiché à droite de la ligne ville", () => {
+    const { container } = renderRailWithCities(null);
+    const rows = Array.from(container.querySelectorAll("button.rail-city-row"));
+    const valleyfield = rows.find((r) => r.textContent?.includes("Salaberry-de-Valleyfield"));
+    expect(valleyfield).toBeDefined();
+    expect(valleyfield!.textContent).toContain("7");
   });
 });
