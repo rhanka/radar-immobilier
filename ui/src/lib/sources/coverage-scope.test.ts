@@ -1,8 +1,9 @@
 /**
  * coverage-scope — portées EXCLUSIVES de la vue Sources/Couverture :
  * « Focus QA : 4 villes » (REFERENCE_CITIES) / « 30 villes à signaux »
- * (isFocusCity) / « Toutes ». La portée filtre la LISTE et pilote la
- * COLORATION carte (expression d'opacité) — les deux sont testées ici.
+ * (présence de signaux, `computeFocusScope`/`isFocusCity` — PLUS priorityRank
+ * ≤ 30) / « Toutes ». La portée filtre la LISTE et pilote la COLORATION carte
+ * (expression d'opacité) — les deux sont testées ici.
  */
 import { describe, it, expect } from "vitest";
 import { REFERENCE_CITIES } from "$lib/maps/reference-cities.js";
@@ -18,11 +19,20 @@ import {
 } from "./coverage-scope.js";
 import {
   buildFocusOpacityExpression,
+  computeFocusScope,
   type CityCoverage,
 } from "./source-coverage-client.js";
 
-/** Fixture minimale — seuls citySlug/priorityRank comptent pour la portée. */
-function city(citySlug: string, priorityRank: number | null): CityCoverage {
+/**
+ * Fixture minimale — citySlug + NOMBRE DE SIGNAUX pilotent la portée focus30
+ * (présence de signaux, plus priorityRank). priorityRank ne sert que de
+ * tie-break au classement par signaux.
+ */
+function city(
+  citySlug: string,
+  priorityRank: number | null,
+  signalCount = 0,
+): CityCoverage {
   return {
     citySlug,
     cityName: citySlug,
@@ -30,7 +40,12 @@ function city(citySlug: string, priorityRank: number | null): CityCoverage {
     priorityRank,
     l1Raw: { state: "absent", count: 0, freshness: "unknown" },
     l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-    signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+    signals: {
+      state: signalCount > 0 ? "verified" : "absent",
+      count: signalCount,
+      withCitation: 0,
+      freshness: signalCount > 0 ? "fresh" : "unknown",
+    },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     normes: { state: "absent", freshness: "unknown" },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
@@ -40,12 +55,12 @@ function city(citySlug: string, priorityRank: number | null): CityCoverage {
   };
 }
 
-// delson est QA ET focus-30 ; la-prairie est focus-30 seulement ;
-// rimouski est hors des deux portées restreintes.
-const delson = city("delson", 12);
-const laPrairie = city("la-prairie", 5);
-const rimouski = city("rimouski", 480);
-const sansRang = city("montreal", null);
+// delson : QA ET à signaux (focus30). la-prairie : à signaux seulement.
+// rimouski : proche-ish mais 0 signal → hors focus30. montreal : 0 signal.
+const delson = city("delson", 12, 17);
+const laPrairie = city("la-prairie", 5, 14);
+const rimouski = city("rimouski", 480, 0);
+const sansRang = city("montreal", null, 0);
 const ALL = [laPrairie, delson, rimouski, sansRang];
 
 describe("QA_REFERENCE_SLUGS — dérivée de la constante canonique", () => {
@@ -91,11 +106,26 @@ describe("filtre de LISTE par portée", () => {
     ]);
   });
 
-  it("focus30 → priorityRank ≤ 30 (rang null exclu)", () => {
+  it("focus30 → villes À SIGNAUX (0 signal exclu, ordre d'entrée préservé)", () => {
+    // delson (17) et la-prairie (14) ont des signaux ; rimouski/montreal 0.
     expect(filterCitiesByScope(ALL, "focus30").map((c) => c.citySlug)).toEqual([
       "la-prairie",
       "delson",
     ]);
+  });
+
+  it("bug Steve : ville à signaux LOIN focus30 ; ville proche SANS signal exclue", () => {
+    // Mont-Tremblant : 13 signaux, priorityRank 351 (loin) → focus30.
+    // Kirkland : 0 signal, priorityRank 30 (proche) → JAMAIS focus30.
+    const tremblant = city("mont-tremblant", 351, 13);
+    const kirkland = city("kirkland", 30, 0);
+    const set = [tremblant, kirkland];
+    expect(filterCitiesByScope(set, "focus30").map((c) => c.citySlug)).toEqual([
+      "mont-tremblant",
+    ]);
+    const focusScope = computeFocusScope(set);
+    expect(cityInScope(tremblant, "focus30", focusScope)).toBe(true);
+    expect(cityInScope(kirkland, "focus30", focusScope)).toBe(false);
   });
 
   it("all → tout le monde (ordre préservé)", () => {
@@ -103,8 +133,12 @@ describe("filtre de LISTE par portée", () => {
   });
 
   it("cityInScope/countCitiesInScope cohérents avec le filtre", () => {
-    expect(cityInScope(sansRang, "focus30")).toBe(false);
+    const focusScope = computeFocusScope(ALL);
+    expect(cityInScope(sansRang, "focus30", focusScope)).toBe(false);
     expect(cityInScope(sansRang, "all")).toBe(true);
+    // Sans focusScope fourni, focus30 est indécidable → false (jamais un faux vrai).
+    expect(cityInScope(delson, "focus30")).toBe(false);
+    expect(cityInScope(delson, "focus30", focusScope)).toBe(true);
     expect(countCitiesInScope(ALL, "qa4")).toBe(1);
     expect(countCitiesInScope(ALL, "focus30")).toBe(2);
     expect(countCitiesInScope(ALL, "all")).toBe(4);

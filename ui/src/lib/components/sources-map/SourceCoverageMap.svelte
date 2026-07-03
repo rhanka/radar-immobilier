@@ -34,6 +34,7 @@
   import SourceScorecard from "./SourceScorecard.svelte";
   import {
     buildFillColorExpression,
+    computeFocusScope,
     buildProvinceHeadline,
     formatProvinceHeadline,
     STATE_COLOR,
@@ -114,6 +115,9 @@
   function handleScopeChange(next: CoverageScope): void {
     scope = next;
   }
+  // Périmètre « 30 villes à signaux » (présence de signaux, PAS priorityRank ≤ 30) :
+  // partagé par la portée focus30 (coverage-scope) et le badge Focus 30 du drawer.
+  $: focusScope = computeFocusScope(cities);
 
   // ── Sélection ville + zone (drill, parité Signaux) ─────────────────────────
   let selectedCity: CityCoverage | null = null;
@@ -539,7 +543,7 @@
   <!-- ── DRAWER droit : scorecard couverture de la ville sélectionnée (D6) ── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} onClose={() => clearSelection()} />
+      <SourceScorecard city={selectedCity} {focusScope} onClose={() => clearSelection()} />
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <div>
