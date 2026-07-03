@@ -95,8 +95,17 @@
    * `syncGeoLayers`.
    */
   import { onMount, onDestroy } from "svelte";
+  import { Ruler } from "@lucide/svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
+  import {
+    buildMeasureLineData,
+    buildMeasurePointsData,
+    formatDistanceFr,
+    lastSegmentMeters,
+    totalDistanceMeters,
+    type LngLatTuple,
+  } from "$lib/maps/measure.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   // ── Props : fond de carte ──────────────────────────────────────────────────
@@ -153,6 +162,21 @@
   const viewportMemory = createViewportMemory();
   // C6 — id de la feature survolée par source (feature-state hover).
   const hoveredFeatureIdBySource = new Map<string, number | string>();
+
+  // ── Outil « mesurer une distance » (façon Google Maps) ─────────────────────
+  // Mode mesure ACTIF : chaque clic ajoute un sommet ; une polyligne relie les
+  // sommets ; double-clic / Échap / re-clic du bouton = terminer (fige la
+  // mesure sans l'effacer et réactive l'interaction normale) ; « Effacer »
+  // remet à zéro (sources/couches retirées proprement).
+  const MEASURE_LINE_ID = "measure-line";
+  const MEASURE_POINTS_ID = "measure-points";
+  /** Couleur du tracé de mesure (hex requis par MapLibre — feedback-info DS). */
+  const MEASURE_COLOR = "#2563eb";
+  let measureActive = false;
+  let measurePoints: LngLatTuple[] = [];
+
+  $: measureTotalLabel = formatDistanceFr(totalDistanceMeters(measurePoints));
+  $: measureSegmentLabel = formatDistanceFr(lastSegmentMeters(measurePoints));
 
   // Vue par défaut : Québec (cible commune Signaux / Source).
   const INITIAL_CENTER: [number, number] = [-73.5, 45.7];
@@ -295,6 +319,7 @@
     getCanvas: () => HTMLCanvasElement;
   }): void {
     m.on("click", "selected-zones-fill", (e) => {
+      if (measureActive) return; // mode mesure : les clics servent à mesurer
       const props = e.features?.[0]?.properties;
       const citySlug = readString(props?.citySlug);
       const code = readString(props?.code);
@@ -304,6 +329,7 @@
     });
 
     m.on("click", "selected-lots-fill", (e) => {
+      if (measureActive) return; // mode mesure : les clics servent à mesurer
       const props = e.features?.[0]?.properties;
       const noLot = readString(props?.noLot);
       if (!noLot) return;
@@ -312,15 +338,19 @@
     });
 
     m.on("mouseenter", "selected-zones-fill", () => {
+      if (measureActive) return; // conserve le crosshair de mesure
       m.getCanvas().style.cursor = "pointer";
     });
     m.on("mouseleave", "selected-zones-fill", () => {
+      if (measureActive) return;
       m.getCanvas().style.cursor = "";
     });
     m.on("mouseenter", "selected-lots-fill", () => {
+      if (measureActive) return; // conserve le crosshair de mesure
       m.getCanvas().style.cursor = "pointer";
     });
     m.on("mouseleave", "selected-lots-fill", () => {
+      if (measureActive) return;
       m.getCanvas().style.cursor = "";
     });
 
@@ -507,6 +537,153 @@
       "line-color",
       input.lotLineColor,
     );
+
+    // Les couches zone/lot viennent d'être (re)posées : la mesure reste dessus.
+    ensureMeasureLayersOnTop();
+  }
+
+  // ── Outil mesure : mécanique carte ─────────────────────────────────────────
+  function setMapCursor(cursor: string): void {
+    if (!mapInstance) return;
+    (
+      mapInstance as { getCanvas: () => HTMLCanvasElement }
+    ).getCanvas().style.cursor = cursor;
+  }
+
+  /** (Re)pose sources + couches `measure-line`/`measure-points` et les met à jour. */
+  function syncMeasureLayers(): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      getSource: (id: string) => { setData?: (data: unknown) => void } | undefined;
+      addSource: (id: string, source: unknown) => void;
+      addLayer: (layer: unknown) => void;
+    };
+    const lineData = buildMeasureLineData(measurePoints);
+    const pointsData = buildMeasurePointsData(measurePoints);
+
+    const lineSource = m.getSource(MEASURE_LINE_ID);
+    if (lineSource?.setData) {
+      lineSource.setData(lineData);
+    } else if (!lineSource) {
+      m.addSource(MEASURE_LINE_ID, { type: "geojson", data: lineData });
+    }
+    const pointsSource = m.getSource(MEASURE_POINTS_ID);
+    if (pointsSource?.setData) {
+      pointsSource.setData(pointsData);
+    } else if (!pointsSource) {
+      m.addSource(MEASURE_POINTS_ID, { type: "geojson", data: pointsData });
+    }
+
+    if (!m.getLayer(MEASURE_LINE_ID)) {
+      m.addLayer({
+        id: MEASURE_LINE_ID,
+        type: "line",
+        source: MEASURE_LINE_ID,
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": MEASURE_COLOR,
+          "line-width": 2.5,
+          "line-dasharray": [1.5, 1.25],
+        },
+      });
+    }
+    if (!m.getLayer(MEASURE_POINTS_ID)) {
+      m.addLayer({
+        id: MEASURE_POINTS_ID,
+        type: "circle",
+        source: MEASURE_POINTS_ID,
+        paint: {
+          "circle-radius": 4.5,
+          "circle-color": "#ffffff",
+          "circle-stroke-color": MEASURE_COLOR,
+          "circle-stroke-width": 2,
+        },
+      });
+    }
+    ensureMeasureLayersOnTop();
+  }
+
+  /**
+   * Garde le tracé de mesure AU-DESSUS des couches zone/lot : `syncGeoLayers`
+   * ajoute ses couches en fin de pile, ce qui recouvrirait la mesure.
+   */
+  function ensureMeasureLayersOnTop(): void {
+    if (!mapInstance) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      moveLayer: (id: string) => void;
+    };
+    // moveLayer sans beforeId ⇒ envoie la couche au sommet de la pile.
+    if (m.getLayer(MEASURE_LINE_ID)) m.moveLayer(MEASURE_LINE_ID);
+    if (m.getLayer(MEASURE_POINTS_ID)) m.moveLayer(MEASURE_POINTS_ID);
+  }
+
+  /** Effacer : remise à zéro + retrait PROPRE des sources/couches de mesure. */
+  function clearMeasure(): void {
+    measurePoints = [];
+    if (!mapInstance) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      removeLayer: (id: string) => void;
+      getSource: (id: string) => unknown;
+      removeSource: (id: string) => void;
+    };
+    for (const id of [MEASURE_POINTS_ID, MEASURE_LINE_ID]) {
+      if (m.getLayer(id)) m.removeLayer(id);
+      if (m.getSource(id)) m.removeSource(id);
+    }
+  }
+
+  function enterMeasureMode(): void {
+    measureActive = true;
+    setMapCursor("crosshair");
+  }
+
+  /** Terminer/figer : sort du mode SANS effacer, réactive l'interaction normale. */
+  function exitMeasureMode(): void {
+    measureActive = false;
+    setMapCursor("");
+  }
+
+  function toggleMeasureMode(): void {
+    if (measureActive) exitMeasureMode();
+    else enterMeasureMode();
+  }
+
+  /** Échap = terminer la mesure (parité bouton / double-clic). */
+  function handleMeasureKeydown(event: KeyboardEvent): void {
+    if (!measureActive || event.key !== "Escape") return;
+    exitMeasureMode();
+  }
+
+  function addMeasurePoint(point: LngLatTuple): void {
+    measurePoints = [...measurePoints, point];
+    syncMeasureLayers();
+  }
+
+  /** Câble clic (ajout de sommet) + double-clic (terminer, zoom neutralisé). */
+  function registerMeasureInteractions(m: {
+    on: (
+      event: string,
+      handler: (e: {
+        lngLat: { lng: number; lat: number };
+        originalEvent?: MouseEvent;
+        preventDefault: () => void;
+      }) => void,
+    ) => void;
+  }): void {
+    m.on("click", (e) => {
+      if (!measureActive) return;
+      // Second clic d'un double-clic (detail ≥ 2) : ne pas dupliquer le sommet.
+      if ((e.originalEvent?.detail ?? 1) > 1) return;
+      addMeasurePoint([e.lngLat.lng, e.lngLat.lat]);
+    });
+    m.on("dblclick", (e) => {
+      if (!measureActive) return;
+      e.preventDefault(); // neutralise le double-click zoom en mode mesure
+      exitMeasureMode();
+    });
   }
 
   function buildApi(): GeoCityMapApi {
@@ -645,6 +822,7 @@
 
         // Interaction clic sur les aplats villes
         m.on("click", "cities-fill", (e) => {
+          if (measureActive) return; // mode mesure : les clics servent à mesurer
           const features = e.features;
           if (!features || features.length === 0) return;
           const props = features[0].properties as { citySlug?: string };
@@ -654,6 +832,7 @@
         });
 
         m.on("mousemove", "cities-fill", (e) => {
+          if (measureActive) return; // conserve le crosshair de mesure
           const props = e.features?.[0]?.properties as
             | { citySlug?: string }
             | undefined;
@@ -661,6 +840,7 @@
             activeCitySlug === props?.citySlug ? "" : "pointer";
         });
         m.on("mouseleave", "cities-fill", () => {
+          if (measureActive) return;
           m.getCanvas().style.cursor = "";
         });
 
@@ -674,6 +854,7 @@
         });
         applyCitiesFillPaint();
         registerGeoLayerInteractions(m);
+        registerMeasureInteractions(m);
         onReady(buildApi());
       });
 
@@ -695,8 +876,53 @@
   });
 </script>
 
+<svelte:window onkeydown={handleMeasureKeydown} />
+
 <div class="relative h-full w-full overflow-hidden">
   <div bind:this={mapContainer} class="absolute inset-0"></div>
+
+  <!-- ── Contrôles carte (haut-droit) : outil « mesurer une distance » ────── -->
+  <div class="absolute right-3 top-3 z-10 flex flex-col items-end gap-2">
+    <button
+      type="button"
+      class="measure-toggle"
+      class:measure-toggle-active={measureActive}
+      aria-pressed={measureActive}
+      aria-label="Mesurer une distance"
+      title="Mesurer une distance"
+      data-testid="measure-toggle"
+      onclick={toggleMeasureMode}
+    >
+      <Ruler size={16} aria-hidden="true" />
+    </button>
+
+    {#if measureActive || measurePoints.length > 0}
+      <div class="measure-panel" data-testid="measure-panel">
+        <p class="measure-overline">Mesure</p>
+        {#if measurePoints.length === 0}
+          <p class="measure-hint">Cliquez sur la carte pour ajouter des points.</p>
+        {:else}
+          <p class="measure-total" data-testid="measure-total">
+            Distance : {measureTotalLabel}
+          </p>
+          {#if measurePoints.length >= 2}
+            <p class="measure-segment">Dernier segment : {measureSegmentLabel}</p>
+          {/if}
+          {#if measureActive}
+            <p class="measure-hint">Double-clic ou Échap pour terminer.</p>
+          {/if}
+          <button
+            type="button"
+            class="measure-clear"
+            data-testid="measure-clear"
+            onclick={clearMeasure}
+          >
+            Effacer
+          </button>
+        {/if}
+      </div>
+    {/if}
+  </div>
 
   {#if segments.length > 0 || $$slots["overlay-top-left"]}
     <div
@@ -772,3 +998,78 @@
 
   <slot />
 </div>
+
+<style>
+  /* Outil mesure — style DS (tokens --st-*, replis slate cohérents du repo). */
+  .measure-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-secondary, #475569);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+  }
+  .measure-toggle:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+  .measure-toggle-active,
+  .measure-toggle-active:hover {
+    background: var(--st-semantic-action-primary, #2563eb);
+    border-color: var(--st-semantic-action-primary, #2563eb);
+    color: var(--st-semantic-action-primaryText, #fff);
+  }
+
+  .measure-panel {
+    min-width: 10.5rem;
+    max-width: 14rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-default, rgb(255 255 255 / 0.95));
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .measure-overline {
+    font-size: var(--st-component-label-fontSize, 0.6875rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--st-semantic-text-muted, #94a3b8);
+  }
+  .measure-total {
+    font-size: var(--st-component-body-sm-fontSize, 0.8125rem);
+    font-weight: 600;
+    color: var(--st-semantic-text-primary, #0f172a);
+  }
+  .measure-segment {
+    font-size: var(--st-component-caption-fontSize, 0.6875rem);
+    color: var(--st-semantic-text-secondary, #475569);
+  }
+  .measure-hint {
+    font-size: var(--st-component-caption-fontSize, 0.6875rem);
+    color: var(--st-semantic-text-muted, #94a3b8);
+  }
+  .measure-clear {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--st-component-caption-fontSize, 0.6875rem);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .measure-clear:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
+  }
+</style>
