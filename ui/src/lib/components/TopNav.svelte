@@ -7,6 +7,7 @@
   } from "@sentropic/design-system-svelte";
   import type { DemoView } from "$lib/demo/views.js";
   import type { AuthState } from "$lib/auth/auth-store.js";
+  import { evaluationBeta } from "$lib/state/beta.js";
 
   export let activeView: DemoView;
   /**
@@ -27,22 +28,32 @@
 
   $: isAdmin = authState?.user?.isAdmin === true;
 
-  /** 3 vues principales — navigation visible, grand public. */
-  const mainItems: { id: DemoView; label: string }[] = [
+  /**
+   * Vues principales — navigation visible, grand public.
+   * « Évaluation » est marquée `beta` : pas assez aboutie pour la nav par
+   * défaut, elle est MASQUÉE tant que le flag beta (Ctrl+Shift+X, persisté
+   * localStorage — voir $lib/state/beta.ts) n'est pas activé. La route
+   * `#/evaluation` reste valide dans tous les cas (router.ts).
+   */
+  const mainItems: { id: DemoView; label: string; beta?: boolean }[] = [
     { id: "signaux", label: "Signaux" },
-    { id: "evaluation", label: "Évaluation" },
+    { id: "evaluation", label: "Évaluation", beta: true },
     { id: "sources", label: "Sources" },
   ];
+
+  /** Entrées visibles : les entrées `beta` n'apparaissent que flag activé. */
+  $: visibleItems = mainItems.filter((item) => !item.beta || $evaluationBeta);
 
   /**
    * Nav AppChrome (0-custo) : chaque vue principale devient un `AppChromeNavItem`
    * `{ label, href, active }`. Le href est un lien HASH SPA (`#/<view>`) — le
    * routeur radar (router.ts) écoute `hashchange` et met à jour `activeRouteView`
-   * au clic. La nav top-level se limite STRICTEMENT à Signaux/Évaluation/Sources :
-   * « Grilles » et « Console sources » ne sont plus dans le header (ils migrent
-   * respectivement sous Évaluation et Sources, hors de ce composant).
+   * au clic. La nav top-level se limite STRICTEMENT à Signaux/(Évaluation si
+   * beta)/Sources : « Grilles » et « Console sources » ne sont plus dans le
+   * header (ils migrent respectivement sous Évaluation et Sources, hors de ce
+   * composant).
    */
-  $: navItems = mainItems.map(
+  $: navItems = visibleItems.map(
     (item): AppChromeNavItem => ({
       label: item.label,
       href: `#/${item.id}`,
@@ -193,5 +204,24 @@
       position: absolute;
       transform: translateX(-50%);
     }
+  }
+
+  /* ── Indicateur « bêta » sur l'entrée Évaluation ───────────────────────────
+     L'entrée n'existe dans le DOM que flag beta activé (Ctrl+Shift+X) : le
+     badge ne s'affiche donc que quand elle est révélée. `AppChromeNavItem` ne
+     porte qu'un `label: string` (pas de slot/badge natif) : on pose l'étiquette
+     en ::after sur le lien DS, scopé `.topnav-chrome` + href — mêmes classes
+     utilitaires publiées que le patch nav-center ci-dessus. Tokens DS
+     (couleurs/rayon/espacement sémantiques) avec repli neutre. */
+  :global(.topnav-chrome .st-appHeader__navLink[href="#/evaluation"]::after) {
+    border: 1px solid var(--st-semantic-border-subtle, #d4d4d8);
+    border-radius: var(--st-radius-sm, 4px);
+    color: var(--st-semantic-text-secondary, #6b7280);
+    content: "bêta";
+    font-size: 0.7em;
+    line-height: 1;
+    margin-left: var(--st-spacing-1, 4px);
+    padding: 1px var(--st-spacing-1, 4px) 2px;
+    vertical-align: middle;
   }
 </style>
