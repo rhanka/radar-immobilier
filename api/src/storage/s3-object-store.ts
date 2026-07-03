@@ -91,7 +91,18 @@ export class S3ObjectStore implements ObjectStore {
     try {
       await this.checkBucket();
     } catch {
-      await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
+      try {
+        await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
+      } catch (e) {
+        // On a shared MinIO/S3 namespace the bucket may already exist (created
+        // by a peer between our check and create) — that's success, not an
+        // error. Only a genuine create failure should propagate. (poc-k8s
+        // flagged the `BucketAlreadyExists` warn noise at boot, 2026-07-03.)
+        const name = (e as { name?: string })?.name ?? "";
+        if (name !== "BucketAlreadyExists" && name !== "BucketAlreadyOwnedByYou") {
+          throw e;
+        }
+      }
     }
   }
 }
