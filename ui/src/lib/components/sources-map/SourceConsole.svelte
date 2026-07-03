@@ -3,11 +3,12 @@
    * SourceConsole — onglet « Console » de la vue Source, RECONSTRUIT sur le VRAI
    * endpoint /api/source/coverage (l'ancienne Console est supprimée).
    *
-   * Table tri-état par ville (PV collectés · données structurées · signaux
-   * extraits · zonage servi · lots servis), triée pires statuts d'abord
-   * (l'action en tête), filtrable par statut, avec scorecard détaillée au clic.
-   * Honnête de bout en bout : aucune couche n'est « verified » sans preuve
-   * live ; une ville sans couverture reste « absent ».
+   * Table tri-état par ville, une colonne par COUCHE RÉELLE (PV · Signaux ·
+   * Zones · Normes (grilles) · Lots (cadastre) · TOD · Couverture), triée pires
+   * statuts d'abord (l'action en tête), filtrable par statut, avec scorecard
+   * détaillée au clic. Honnête de bout en bout : aucune couche n'est
+   * « verified » sans preuve live ; une ville sans couverture reste « absent »
+   * (Normes et TOD sont éparses aujourd'hui → « Non couvert » majoritaire).
    */
   import { Alert, Badge } from "@sentropic/design-system-svelte";
   import { Terminal, RefreshCw, Search } from "@lucide/svelte";
@@ -51,7 +52,9 @@
       c.l2Graph.state !== "absent" ||
       c.signals.state !== "absent" ||
       c.l4Zonage.state !== "absent" ||
-      c.l5Lots.state !== "absent"
+      c.normes.state !== "absent" ||
+      c.l5Lots.state !== "absent" ||
+      c.tod.state !== "absent"
     );
   }
 
@@ -78,15 +81,17 @@
     return true;
   });
 
-  // Couches affichées en mini-cellules (ordre de la chaîne qualité, copy
-  // client neutre — pas de jargon interne L1/L2/…).
+  // Couches affichées en mini-cellules : une colonne = une COUCHE RÉELLE, dans
+  // l'ordre PV · Signaux · Zones · Normes (grilles) · Lots (cadastre) · TOD
+  // (copy client neutre — pas de jargon interne L1/L2/…).
   function layerStates(c: CityCoverage): { key: string; label: string; state: CoverageState }[] {
     return [
       { key: "pv", label: "PV collectés", state: c.l1Raw.state },
-      { key: "graph", label: "Données structurées", state: c.l2Graph.state },
       { key: "signaux", label: "Signaux extraits", state: c.signals.state },
-      { key: "zonage", label: "Zonage servi", state: c.l4Zonage.state },
-      { key: "lots", label: "Lots servis", state: c.l5Lots.state },
+      { key: "zones", label: "Zones servies", state: c.l4Zonage.state },
+      { key: "normes", label: "Normes (grilles de zonage)", state: c.normes.state },
+      { key: "lots", label: "Lots (cadastre)", state: c.l5Lots.state },
+      { key: "tod", label: "Périmètres TOD", state: c.tod.state },
     ];
   }
 </script>
@@ -171,11 +176,12 @@
           <thead class="sticky top-0 z-10 bg-slate-100 text-slate-500">
             <tr>
               <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Ville</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="PV collectés">PV</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Données structurées">Données</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Procès-verbaux et documents collectés">PV</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Signaux extraits">Signaux</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Zonage servi">Zonage</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Lots servis">Lots</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Zones de zonage servies">Zones</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Normes (grilles de zonage)">Normes (grilles)</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Lots (cadastre) servis">Lots (cadastre)</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Périmètres TOD servis">TOD</th>
               <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Couverture</th>
             </tr>
           </thead>
@@ -216,7 +222,7 @@
             {/each}
             {#if filtered.length === 0}
               <tr>
-                <td colspan="7" class="px-4 py-6 text-center text-slate-400">
+                <td colspan="8" class="px-4 py-6 text-center text-slate-400">
                   Aucune ville ne correspond au filtre.
                 </td>
               </tr>
