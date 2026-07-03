@@ -89,7 +89,7 @@
       cell: city.signals,
       evidence:
         city.signals.state === "verified"
-          ? `${city.signals.count} signal${city.signals.count !== 1 ? "aux" : ""} · ${city.signals.withCitation} avec citation vérifiable`
+          ? `${city.signals.count} ${city.signals.count !== 1 ? "signaux" : "signal"} · ${city.signals.withCitation} avec citation vérifiable`
           : city.signals.state === "declared"
             ? "données structurées, signaux non projetés"
             : "aucun signal extrait",
