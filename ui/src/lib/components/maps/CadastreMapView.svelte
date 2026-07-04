@@ -15,8 +15,9 @@
    * `interpolate` sur `potentialScore` — le moteur GPU interpole, ce qui rend
    * >200 lots (jusqu'à ~11k) là où l'ancien rendu SVG capait à 200.
    *
-   * Anti-PII (Loi 25) : on n'affiche que `noLot` (NO_LOT cadastral public) ;
-   * aucune adresse, aucun propriétaire.
+   * Anti-PII (Loi 25) : `noLot` (NO_LOT cadastral public) + adresse civique et
+   * code postal du LOT quand la source geo les sert (données publiques du rôle
+   * — identifient la propriété, jamais une personne). Aucun propriétaire.
    *
    * Score de potentiel par lot : dérivé placeholder LOCAL (cf.
    * `cadastre-geojson-source.ts deriveLotPotentialScore`).
@@ -38,6 +39,7 @@
     ZONE_LABEL_MINZOOM,
     type LegendEntry,
   } from "$lib/maps/score-color-scale.js";
+  import { formatArea, formatLength } from "$lib/components/maps/lot-fiche-utils.js";
 
   /** Slug de la ville de référence à charger (mode:simulation). */
   export let citySlug: string;
@@ -329,9 +331,32 @@
           {#if selectedLot.categorie}
             <div class="flex justify-between gap-2"><dt>Catégorie</dt><dd>{selectedLot.categorie}</dd></div>
           {/if}
-          {#if selectedLot.superficieM2}
-            <div class="flex justify-between gap-2"><dt>Superficie</dt><dd>{Math.round(selectedLot.superficieM2)} m²</dd></div>
-          {/if}
+          <!-- Champs servis par geo : valeur quand servie, « — » honnête sinon
+               (aucun calcul immo). Adresse/code postal = données publiques du
+               rôle (identifient la propriété, jamais une personne). -->
+          <div class="flex justify-between gap-2">
+            <dt>Adresse</dt>
+            <dd class:text-slate-300={!selectedLot.adresse} data-testid="lot-detail-adresse">{selectedLot.adresse ?? "—"}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt>Code postal</dt>
+            <dd class:text-slate-300={!selectedLot.codePostal} data-testid="lot-detail-code-postal">{selectedLot.codePostal ?? "—"}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt>Superficie</dt>
+            <dd
+              class:text-slate-300={selectedLot.superficieM2 === null || selectedLot.superficieM2 === undefined}
+              data-testid="lot-detail-superficie"
+            >{formatArea(selectedLot.superficieM2)}</dd>
+          </div>
+          <!-- Façade : canonique geo (frontage_m) prioritaire, sinon mesure source. -->
+          <div class="flex justify-between gap-2">
+            <dt>Façade</dt>
+            <dd
+              class:text-slate-300={(selectedLot.frontageM ?? selectedLot.facadeM) == null}
+              data-testid="lot-detail-facade"
+            >{formatLength(selectedLot.frontageM ?? selectedLot.facadeM)}</dd>
+          </div>
           <div class="flex justify-between gap-2">
             <dt>Potentiel</dt>
             <dd class="font-semibold">{Math.round(selectedLot.potentialScore * 100)}%</dd>

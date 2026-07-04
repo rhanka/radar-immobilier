@@ -32,6 +32,9 @@ const harnessInput = qaHarness
       "focus-scope": fileURLToPath(
         new URL("./e2e-qa/harness/focus-scope.html", import.meta.url),
       ),
+      "lot-fiche-geo": fileURLToPath(
+        new URL("./e2e-qa/harness/lot-fiche-geo.html", import.meta.url),
+      ),
     }
   : undefined;
 
