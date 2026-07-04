@@ -107,7 +107,10 @@
     Eye,
     Search,
   } from "@lucide/svelte";
-  import { findCitationInPage } from "$lib/signals/pdf-citation-match.js";
+  import {
+    findCitationInPage,
+    itemsOverlappingRanges,
+  } from "$lib/signals/pdf-citation-match.js";
   import type {
     OverlaySignal,
     OverlayNavSignal,
@@ -705,12 +708,15 @@
     const match = findCitationInPage(pageText, signal.excerpt);
     if (!match) return false;
 
-    // Surligne tout item qui chevauche l'intervalle [match.start, match.end).
-    // Mémorise le 1er rectangle pour y ancrer le badge ID du signal.
+    // Surligne tout item qui chevauche AU MOINS une plage du match. La citation
+    // peut correspondre à PLUSIEURS passages disjoints de la page (élisions
+    // « […] » de graphify, en-tête de résolution + décision) : chaque plage de
+    // `match.ranges` produit ses marques. Mémorise le 1er rectangle pour y
+    // ancrer le badge ID du signal.
     let firstMark: HTMLElement | null = null;
     let drewOne = false;
-    for (const { start, end, item } of offsets) {
-      if (end <= match.start || start >= match.end) continue;
+    for (const itemIndex of itemsOverlappingRanges(offsets, match.ranges)) {
+      const { item } = offsets[itemIndex]!;
       const [, b, , d, e, f] = item.transform;
       // POSITION : projetée dans l'espace viewport via viewport.transform, qui
       // intègre DÉJÀ `renderScale` (pdf.js : Util.transform). Pas de *scale ici.
