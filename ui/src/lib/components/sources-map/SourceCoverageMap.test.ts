@@ -122,6 +122,7 @@ function city(
   priorityRank: number | null,
   worstStatus: CoverageState = "absent",
   signalCount = 3,
+  prioritySignals = 0,
 ): CityCoverage {
   return {
     citySlug,
@@ -134,6 +135,7 @@ function city(
       state: signalCount > 0 ? "verified" : "absent",
       count: signalCount,
       withCitation: signalCount > 0 ? 2 : 0,
+      priority: prioritySignals,
       freshness: signalCount > 0 ? "fresh" : "unknown",
     },
     // served: false → la scorecard NE déclenche PAS le fetch lazy des grilles.
@@ -146,13 +148,14 @@ function city(
   };
 }
 
-// Portée « 30 villes à signaux » = présence de signaux (plus priorityRank) :
-// rimouski a 0 signal → exclue du focus30 même si listée en « Toutes ».
+// Portée « Villes à signaux précoces » = villes portant ≥ 1 signal PRIORITAIRE
+// z∩m∩p (ni proximité, ni volume brut) : rimouski a 12 signaux mais 0
+// prioritaire → exclue du focus30 même si listée en « Toutes ».
 const CITIES: CityCoverage[] = [
-  city("delson", "Delson", 12, "declared", 17),
-  city("sainte-catherine", "Sainte-Catherine", 20, "verified", 16),
-  city("la-prairie", "La Prairie", 5, "absent", 14),
-  city("rimouski", "Rimouski", 480, "verified", 0),
+  city("delson", "Delson", 12, "declared", 17, 1),
+  city("sainte-catherine", "Sainte-Catherine", 20, "verified", 16, 1),
+  city("la-prairie", "La Prairie", 5, "absent", 14, 1),
+  city("rimouski", "Rimouski", 480, "verified", 12, 0),
 ];
 
 const RESPONSE: CoverageResponse = {
@@ -340,14 +343,15 @@ describe("SourceCoverageMap — la portée pilote la liste ET la carte", () => {
     expect(expr).toContain(0.18);
   });
 
-  it("radio « 30 villes à signaux » → villes à signaux listées, expression focus-30", async () => {
+  it("radio « Villes à signaux précoces » → villes à signal prioritaire listées, expression focus", async () => {
     const { container, getByTestId } = renderView();
     const radios = getAllByRole(container, "radio") as HTMLInputElement[];
-    await fireEvent.click(radios[1]); // « 30 villes à signaux »
+    await fireEvent.click(radios[1]); // « Villes à signaux précoces »
 
     const rows = container.querySelectorAll("button.rail-city-row");
-    // delson(17) · sainte-catherine(16) · la-prairie(14) ont des signaux ;
-    // rimouski (0 signal) est exclue MALGRÉ sa présence en « Toutes ».
+    // delson · sainte-catherine · la-prairie portent 1 signal prioritaire
+    // z∩m∩p ; rimouski (12 signaux, 0 prioritaire) est exclue MALGRÉ son
+    // volume — le focus n'est pas un top-N par nombre de signaux.
     expect(rows.length).toBe(3);
 
     const expr = JSON.parse(
