@@ -1,17 +1,19 @@
 # Ajouter le connecteur « Radar immobilier » sur claude.ai
 
-Guide utilisateur — environ 5 minutes. Ce connecteur permet à Claude d'interroger
-directement les données du **Radar immobilier** (lots cadastraux, zonage, signaux
-réglementaires, procès-verbaux) pendant une conversation, en langage naturel.
+Guide utilisateur — environ 5 minutes.
+
+## 1. Ce que fait le connecteur
+
+Ce connecteur permet à Claude d'interroger directement les données du **Radar
+immobilier** (lots cadastraux, zonage, signaux réglementaires, procès-verbaux)
+pendant une conversation, en langage naturel.
 
 Le connecteur est un **serveur MCP distant** (Model Context Protocol) hébergé par
 l'équipe. La connexion est sécurisée par **OAuth** (client public + PKCE, sans secret
 à saisir) : à la première connexion, Claude vous redirige vers `auth.sent-tech.ca`
 pour vous authentifier et accorder les autorisations en lecture.
 
----
-
-## 1. Prérequis
+## 2. Prérequis
 
 - Un compte **claude.ai** payant : **Pro, Max, Team ou Enterprise**.
   (Les connecteurs personnalisés ne sont pas disponibles sur le plan gratuit.)
@@ -20,7 +22,7 @@ pour vous authentifier et accorder les autorisations en lecture.
 - Un compte **sentropic** valide sur `auth.sent-tech.ca` (fourni par l'équipe),
   utilisé pour la connexion OAuth.
 
-## 2. Paramètres à préparer
+## 3. Paramètres à préparer
 
 | Champ | Valeur |
 |---|---|
@@ -36,7 +38,7 @@ pour vous authentifier et accorder les autorisations en lecture.
 
 ---
 
-## 3. Ouvrir la page des connecteurs
+## 4. Ouvrir la page des connecteurs
 
 Dans claude.ai, ouvrir **Personnaliser → Connecteurs**
 (URL directe : `https://claude.ai/customize/connectors`).
@@ -46,25 +48,9 @@ La colonne de gauche liste vos connecteurs, regroupés en **Web / connectés** e
 
 ![Liste des connecteurs dans Personnaliser → Connecteurs](assets/immo-01-connectors-list.png)
 
-## 4. (Le cas échéant) supprimer un connecteur existant
-
-Si un connecteur « Radar immobilier » existe déjà mais est cassé (état
-**« Problème de connexion / La connexion a expiré »**), le plus simple pour repartir
-proprement est de le supprimer puis de le recréer.
-
-Cliquer sur le connecteur pour ouvrir son panneau de détail : on y voit son URL et son
-état de connexion.
-
-![Détail du connecteur Radar immobilier — connexion expirée](assets/immo-02-radar-before-delete.png)
-
-En haut à droite du panneau, ouvrir le menu **« … » (Plus d'options)** →
-**Supprimer**, puis confirmer dans la boîte de dialogue **« Supprimer Radar
-immobilier ? »**. Le connecteur disparaît de la liste.
-
-![La liste après suppression du connecteur](assets/immo-03-after-delete.png)
-
-> Vous pouvez sauter cette étape si aucun connecteur « Radar immobilier » n'est
-> encore présent.
+> Si un connecteur « Radar immobilier » **défaillant ou expiré** figure déjà dans
+> la liste, supprimez-le d'abord : voir la procédure en
+> [section 11 (Dépannage)](#11-dépannage).
 
 ## 5. Ajouter le connecteur personnalisé
 
@@ -218,7 +204,8 @@ Quelques autres questions typiques :
   sans espace, et le **secret** doit rester **vide**.
 - **« Problème de connexion / La connexion a expiré »** — la session OAuth a expiré :
   rouvrir le connecteur et cliquer **Connecter** pour ré-autoriser. Si le problème
-  persiste, **supprimer** puis **recréer** le connecteur (sections 4–6).
+  persiste, **supprimer** puis **recréer** le connecteur (procédure de suppression
+  ci-dessous, puis sections 5–6).
 - **401 après connexion** — les autorisations n'ont pas été accordées : refaire le
   flux et **accepter** les scopes.
 - **Le connecteur n'apparaît pas / n'est pas utilisé dans une conversation** —
@@ -229,6 +216,26 @@ Quelques autres questions typiques :
 - **Réponse GeoJSON tronquée** (`truncated=true`) ou « réponse trop grande » —
   demandez à Claude de **resserrer le bbox** ou de **réduire `limit`** (voir les
   bornes en section 9.3).
+
+### Si vous avez déjà un connecteur « Radar immobilier » défaillant ou expiré : supprimez-le d'abord
+
+Si un connecteur « Radar immobilier » existe déjà mais est cassé (état
+**« Problème de connexion / La connexion a expiré »**), le plus simple pour repartir
+proprement est de le supprimer puis de le recréer.
+
+Cliquer sur le connecteur pour ouvrir son panneau de détail : on y voit son URL et son
+état de connexion.
+
+![Détail du connecteur Radar immobilier — connexion expirée](assets/immo-02-radar-before-delete.png)
+
+En haut à droite du panneau, ouvrir le menu **« … » (Plus d'options)** →
+**Supprimer**, puis confirmer dans la boîte de dialogue **« Supprimer Radar
+immobilier ? »**. Le connecteur disparaît de la liste.
+
+![La liste après suppression du connecteur](assets/immo-03-after-delete.png)
+
+Recréez ensuite le connecteur en suivant les sections 5 (ajout) et 6 (autorisation
+OAuth).
 
 ## 12. Références
 
