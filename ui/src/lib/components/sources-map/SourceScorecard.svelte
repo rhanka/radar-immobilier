@@ -31,10 +31,10 @@
 
   export let city: CityCoverage;
   /**
-   * Périmètre focus-30 (villes à signaux) calculé par le parent depuis la
-   * couverture complète (`computeFocusScope`). Null = badge focus masqué
-   * (le scorecard seul ne peut pas décider — le critère est relatif au
-   * classement province-wide par nombre de signaux).
+   * Périmètre focus (villes à signaux PRIORITAIRES z∩m∩p — zonage ∩
+   * multifamilial 4+ ∩ précoce) calculé par le parent depuis la couverture
+   * complète (`computeFocusScope`). Null = badge focus masqué (le scorecard
+   * seul ne décide pas — le périmètre est calculé une fois au niveau liste).
    */
   export let focusScope: FocusScope | null = null;
   /** Si fourni, affiche un bouton de fermeture (panneau latéral de carte). */
@@ -97,7 +97,10 @@
       cell: city.signals,
       evidence:
         city.signals.state === "verified"
-          ? `${city.signals.count} ${city.signals.count !== 1 ? "signaux" : "signal"} · ${city.signals.withCitation} avec citation vérifiable`
+          ? `${city.signals.count} ${city.signals.count !== 1 ? "signaux" : "signal"} · ${city.signals.withCitation} avec citation vérifiable` +
+            ((city.signals.priority ?? 0) > 0
+              ? ` · ${city.signals.priority} prioritaire${city.signals.priority !== 1 ? "s" : ""} (zonage · 4+ · précoce)`
+              : "")
           : city.signals.state === "declared"
             ? "données structurées, signaux non projetés"
             : "aucun signal extrait",
@@ -151,7 +154,8 @@
         ></span>
         <h3 class="truncate text-sm font-bold text-slate-900">{city.cityName}</h3>
         {#if focusScope && isFocusCity(city, focusScope)}
-          <Badge tone="info" class="text-xs">Focus 30</Badge>
+          <!-- La ville porte ≥ 1 signal prioritaire z∩m∩p (cohorte « 33 »). -->
+          <Badge tone="info" class="text-xs">Signaux précoces</Badge>
         {/if}
       </div>
       <p class="mt-0.5 text-xs text-slate-500">

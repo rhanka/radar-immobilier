@@ -8,7 +8,9 @@
    * à la place des 3 cases à cocher combinables de Signaux :
    *   - « Focus QA : 4 villes »  (REFERENCE_CITIES — Delson, Sainte-Catherine,
    *     Saint-Constant, Candiac)
-   *   - « 30 villes à signaux »  (isFocusCity, priorityRank ≤ 30)
+   *   - « Villes à signaux précoces »  (computeFocusScope/isFocusCity : villes
+   *     portant ≥ 1 signal PRIORITAIRE z∩m∩p — zonage ∩ multifamilial 4+ ∩
+   *     précoce, la cohorte « 33 »)
    *   - « Toutes »               (défaut — province entière)
    *
    * La portée choisie filtre la liste de villes ET la coloration carte
@@ -59,7 +61,7 @@
   export let onRefresh: () => void = () => {};
 
   // ── Liste des villes de la portée ──────────────────────────────────────────
-  // Périmètre « 30 villes à signaux » relatif au classement province-wide :
+  // Périmètre « Villes à signaux précoces » (signaux prioritaires z∩m∩p) :
   // calculé UNE fois puis passé au prédicat par ville (jamais recalculé/ville).
   $: focusScope = computeFocusScope(cities);
   // #5 (parité Signaux) : la ville sélectionnée reste listée même hors portée.

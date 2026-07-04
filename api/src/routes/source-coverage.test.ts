@@ -97,22 +97,59 @@ function makeMemStore(): ObjectStore {
 }
 
 /**
- * DB mock: the route runs exactly four aggregated GROUP BY queries, in order
- * graph → zones → lots → signals. Each resolves the next array in the queue
- * (missing entries resolve to []). The chain select().from().where().groupBy()
- * mirrors the route's bulk reads.
+ * DB mock: the route runs five bulk queries, in order graph → zones → lots →
+ * signals → priority signal NODES (`listCitiesWithSignalNodes`, awaited at
+ * `.where()` — no groupBy: the z∩m∩p classification runs in TS on raw node
+ * rows { citySlug, type, category, label, nbUnitesMax, intensite, description,
+ * etapeAnnote }). Each query resolves the next array in the queue (missing
+ * entries resolve to []). The chain is BOTH groupBy-resolvable and thenable to
+ * mirror the two read shapes.
  */
 function makeDb(queue: Record<string, unknown>[][]): Database {
   let idx = 0;
+  const next = () => {
+    const result = queue[idx] ?? [];
+    idx += 1;
+    return result;
+  };
   const chain: Record<string, unknown> = {};
   chain.from = () => chain;
   chain.where = () => chain;
-  chain.groupBy = () => {
-    const result = queue[idx] ?? [];
-    idx += 1;
-    return Promise.resolve(result);
-  };
+  chain.groupBy = () => Promise.resolve(next());
+  // Awaiting the builder directly (query without groupBy) resolves the queue too.
+  chain.then = (resolve: (rows: Record<string, unknown>[]) => unknown) =>
+    Promise.resolve(next()).then(resolve);
   return { select: () => chain } as unknown as Database;
+}
+
+/**
+ * Raw signal-node row for the priority (z∩m∩p) query — the shape
+ * `listCitiesWithSignalNodes` selects. Defaults build a NON-priority Signal;
+ * override category/nbUnitesMax/etapeAnnote to flip the z/m/p flags.
+ */
+function signalNodeRow(
+  citySlug: string,
+  patch: Partial<{
+    type: string;
+    category: string | null;
+    label: string;
+    nbUnitesMax: string | null;
+    intensite: string | null;
+    description: string | null;
+    etapeAnnote: string | null;
+  }> = {},
+): Record<string, unknown> {
+  return {
+    citySlug,
+    type: "Signal",
+    category: null,
+    label: "Signal de test",
+    nbUnitesMax: null,
+    intensite: null,
+    description: null,
+    etapeAnnote: null,
+    ...patch,
+  };
 }
 
 /** Offline par défaut : les tests unitaires ne touchent JAMAIS le réseau. */
@@ -190,6 +227,8 @@ describe("GET /api/source/coverage", () => {
       state: expect.any(String),
       count: expect.any(Number),
       withCitation: expect.any(Number),
+      // Signaux PRIORITAIRES z∩m∩p (cohorte « 33 ») — critère du focus client.
+      priority: expect.any(Number),
       freshness: expect.any(String),
     });
     expect(sample.l4Zonage).toHaveProperty("served");
@@ -506,6 +545,25 @@ describe("GET /api/source/coverage", () => {
           lastCreatedAt: RECENT,
         },
       ],
+      // Nœuds bruts pour le compte PRIORITAIRE z∩m∩p : 1 signal satisfait les
+      // 3 flags (zonage + 6 logements + étape précoce annotée), les 2 autres
+      // n'en satisfont qu'une partie → priority = 1, pas 3.
+      [
+        signalNodeRow("salaberry-de-valleyfield", {
+          category: "rezonage",
+          nbUnitesMax: "6",
+          etapeAnnote: "avis_motion",
+        }),
+        signalNodeRow("salaberry-de-valleyfield", {
+          category: "rezonage",
+          etapeAnnote: "avis_motion", // zonage + précoce mais PAS multi 4+
+        }),
+        signalNodeRow("salaberry-de-valleyfield", {
+          category: "rezonage",
+          nbUnitesMax: "8", // zonage + multi 4+ mais PAS précoce
+          etapeAnnote: "adoption_reglement",
+        }),
+      ],
     ]);
     const body = await request({ store, db });
 
@@ -514,8 +572,48 @@ describe("GET /api/source/coverage", () => {
       state: "verified",
       count: 12,
       withCitation: 9,
+      priority: 1,
     });
     expect(body.totals.signals).toBe(1);
+    // Ville sans nœud prioritaire → priority 0 (jamais inventé).
+    expect(cityOf(body, "brossard").signals.priority).toBe(0);
+  });
+
+  it("priority (z∩m∩p) : DesignationEvent précoce à intensité haute compte, ville sans flags reste à 0", async () => {
+    const store = makeMemStore();
+    const db = makeDb([
+      [],
+      [],
+      [],
+      [
+        { citySlug: "mont-tremblant", signalCount: 13, withCitation: 7, lastCreatedAt: RECENT },
+        { citySlug: "lyster", signalCount: 400, withCitation: 0, lastCreatedAt: RECENT },
+      ],
+      [
+        // DesignationEvent = toujours zonage, mais JAMAIS multi 4+ → pas prioritaire.
+        signalNodeRow("mont-tremblant", {
+          type: "DesignationEvent",
+          etapeAnnote: "avis_motion",
+          intensite: "haute",
+        }),
+        // Signal zonage ∩ multi 4+ (intensité haute) ∩ précoce → prioritaire.
+        signalNodeRow("mont-tremblant", {
+          category: "modification_zonage",
+          intensite: "haute",
+          etapeAnnote: "projet_reglement",
+        }),
+        // Beaucoup de volume mais aucun flag → lyster reste à 0.
+        signalNodeRow("lyster", { category: null }),
+      ],
+    ]);
+    const body = await request({ store, db });
+
+    expect(cityOf(body, "mont-tremblant").signals.priority).toBe(1);
+    // Le VOLUME (400 signaux) ne fabrique pas de prioritaire.
+    expect(cityOf(body, "lyster").signals).toMatchObject({
+      count: 400,
+      priority: 0,
+    });
   });
 
   it("signals: structured city without projected signals is declared, unknown city absent", async () => {
