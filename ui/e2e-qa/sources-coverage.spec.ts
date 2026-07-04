@@ -6,9 +6,11 @@ import { mockAuthenticated } from "./_helpers";
  *
  * Comportement RENDU vérifié (pas de marqueurs de bundle) :
  *   1. Rail gauche = sélecteur RADIO MUTUELLEMENT EXCLUSIF à 3 portées
- *      (« Focus QA : 4 villes » / « 30 villes à signaux » / « Toutes ») +
- *      liste plate de villes — « Toutes » par défaut (l'ancien toggle
- *      « Province (1104) / Focus 30 » de la carte a disparu).
+ *      (« Focus QA : 4 villes » / « Villes à signaux précoces » / « Toutes »)
+ *      + liste plate de villes — « Toutes » par défaut (l'ancien toggle
+ *      « Province (1104) / Focus 30 » de la carte a disparu). La portée focus
+ *      = villes portant ≥ 1 signal PRIORITAIRE z∩m∩p (zonage ∩ multifamilial
+ *      4+ ∩ précoce) — ni proximité, ni volume brut de signaux.
  *   2. Chaque portée change la LISTE de villes (et la coloration carte).
  *   3. Sélection d'une ville (rail) → drawer droit = scorecard de couverture
  *      (SourceScorecard : PV · Signaux · Zones · Normes · Lots · TOD +
@@ -44,6 +46,7 @@ function coverageCity(
   mrc: string,
   priorityRank: number | null,
   worstStatus: CoverageState,
+  prioritySignals = 0,
 ) {
   return {
     citySlug,
@@ -57,6 +60,7 @@ function coverageCity(
     signals: cell(worstStatus === "absent" ? "absent" : "verified", {
       count: worstStatus === "absent" ? 0 : 3,
       withCitation: worstStatus === "absent" ? 0 : 2,
+      priority: prioritySignals,
     }),
     l4Zonage: geoCell(worstStatus === "absent" ? "absent" : "verified"),
     normes: cell("absent"),
@@ -67,21 +71,25 @@ function coverageCity(
   };
 }
 
-// 10 villes. Portée « 30 villes à signaux » = présence de signaux (le fixture
-// couple 0 signal ⇔ worstStatus "absent") : la-prairie/candiac/rimouski (absent)
-// ont 0 signal → HORS focus30 malgré un bon rang ; sainte-sophie (rang 44, LOIN)
-// a des signaux → DANS focus30 (bug Steve : plus de critère priorityRank ≤ 30).
+// 10 villes. Portée « Villes à signaux précoces » = villes portant ≥ 1 signal
+// PRIORITAIRE z∩m∩p (champ `signals.priority`) : la-prairie/candiac/rimouski
+// (absent) ont 0 signal → HORS focus30 malgré un bon rang ; longueuil a des
+// signaux (3) mais 0 prioritaire → HORS focus30 (le volume brut ne compte pas) ;
+// sainte-sophie (rang 44, LOIN) porte 1 prioritaire → DANS focus30
+// (bug Steve : plus de critère priorityRank ≤ 30, plus de top-N par volume).
 const CITIES = [
-  coverageCity("longueuil", "Longueuil", "Longueuil", 3, "verified"),
-  coverageCity("la-prairie", "La Prairie", "Roussillon", 5, "absent"),
-  coverageCity("brossard", "Brossard", "Longueuil", 8, "declared"),
-  coverageCity("delson", "Delson", "Roussillon", 12, "declared"),
-  coverageCity("chateauguay", "Châteauguay", "Roussillon", 15, "declared"),
-  coverageCity("sainte-catherine", "Sainte-Catherine", "Roussillon", 20, "verified"),
-  coverageCity("saint-constant", "Saint-Constant", "Roussillon", 22, "declared"),
-  coverageCity("candiac", "Candiac", "Roussillon", 25, "absent"),
-  coverageCity("sainte-sophie", "Sainte-Sophie", "La Rivière-du-Nord", 44, "declared"),
-  coverageCity("rimouski", "Rimouski", "Rimouski-Neigette", null, "absent"),
+  coverageCity("longueuil", "Longueuil", "Longueuil", 3, "verified", 0),
+  coverageCity("la-prairie", "La Prairie", "Roussillon", 5, "absent", 0),
+  // MRC fixture ≠ « Longueuil » pour que le sélecteur hasText "Longueuil"
+  // (exclusion du focus) ne matche QUE la ville Longueuil elle-même.
+  coverageCity("brossard", "Brossard", "Roussillon", 8, "declared", 1),
+  coverageCity("delson", "Delson", "Roussillon", 12, "declared", 1),
+  coverageCity("chateauguay", "Châteauguay", "Roussillon", 15, "declared", 1),
+  coverageCity("sainte-catherine", "Sainte-Catherine", "Roussillon", 20, "verified", 1),
+  coverageCity("saint-constant", "Saint-Constant", "Roussillon", 22, "declared", 1),
+  coverageCity("candiac", "Candiac", "Roussillon", 25, "absent", 0),
+  coverageCity("sainte-sophie", "Sainte-Sophie", "La Rivière-du-Nord", 44, "declared", 1),
+  coverageCity("rimouski", "Rimouski", "Rimouski-Neigette", null, "absent", 0),
 ];
 
 const COVERAGE_RESPONSE = {
@@ -201,7 +209,7 @@ test.describe("Sources/Couverture — mode d'interaction Signaux", () => {
     await expect(radios).toHaveCount(3);
     // Libellés des 3 portées.
     await expect(page.getByText("Focus QA : 4 villes")).toBeVisible();
-    await expect(page.getByText("30 villes à signaux")).toBeVisible();
+    await expect(page.getByText("Villes à signaux précoces")).toBeVisible();
     // Défaut : « Toutes » cochée SEULE.
     await expect(radios.nth(0)).not.toBeChecked();
     await expect(radios.nth(1)).not.toBeChecked();
@@ -242,21 +250,23 @@ test.describe("Sources/Couverture — mode d'interaction Signaux", () => {
       path: testInfo.outputPath("c1-portee-focus-qa-4-villes.png"),
     });
 
-    // (c2) Portée « 30 villes à signaux » → villes À SIGNAUX (présence de
-    // signaux, plus priorityRank). 7 villes de la fixture ont des signaux.
+    // (c2) Portée « Villes à signaux précoces » → villes portant ≥ 1 signal
+    // PRIORITAIRE z∩m∩p. 6 villes de la fixture en portent un.
     await radios.nth(1).check();
     await expect(radios.nth(1)).toBeChecked();
     await expect(radios.nth(0)).not.toBeChecked();
-    await expect(cityRows(page)).toHaveCount(7);
-    // Bug Steve corrigé : Sainte-Sophie (rang 44, LOIN) est listée car elle a
-    // des signaux (l'ancien rang ≤ 30 l'excluait à tort).
+    await expect(cityRows(page)).toHaveCount(6);
+    // Bug Steve corrigé : Sainte-Sophie (rang 44, LOIN) est listée car elle
+    // porte un signal prioritaire (l'ancien rang ≤ 30 l'excluait à tort).
     await expect(page.locator("button.rail-city-row", { hasText: "Sainte-Sophie" })).toHaveCount(1);
     // Villes proches SANS signal exclues (l'ancien rang ≤ 30 les gardait) :
     await expect(page.locator("button.rail-city-row", { hasText: "La Prairie" })).toHaveCount(0);
     await expect(page.locator("button.rail-city-row", { hasText: "Candiac" })).toHaveCount(0);
+    // Le VOLUME ne suffit pas : Longueuil (3 signaux, 0 prioritaire) exclue.
+    await expect(page.locator("button.rail-city-row", { hasText: "Longueuil" })).toHaveCount(0);
     await page.waitForTimeout(1000);
     await page.screenshot({
-      path: testInfo.outputPath("c2-portee-30-villes.png"),
+      path: testInfo.outputPath("c2-portee-villes-signaux-precoces.png"),
     });
 
     // (c3) Retour « Toutes » → liste complète restaurée.

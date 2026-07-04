@@ -39,13 +39,15 @@
   let query = "";
   let selectedCity: CityCoverage | null = null;
 
-  // ── Périmètre : Province / Focus 30 (parité onglet « Couverture ») ─────────
-  // Mêmes intitulés que le toggle de la carte Couverture ; même critère
-  // (`computeFocusScope` : les 30 villes À SIGNAUX, classées par nombre de
-  // signaux — plus jamais priorityRank ≤ 30) — ici c'est un FILTRE de lignes
-  // (la carte, elle, atténue sans filtrer). Défaut : Province, comme la carte.
+  // ── Périmètre : Province / Villes à signaux précoces (parité « Couverture ») ─
+  // Mêmes intitulés que le radio de la carte Couverture ; même critère
+  // (`computeFocusScope` : les villes portant ≥ 1 signal PRIORITAIRE z∩m∩p —
+  // zonage ∩ multifamilial 4+ ∩ précoce, la cohorte « 33 » de l'axe
+  // « 30 villes / 33 signaux précoces ». Ni priorityRank ≤ 30, ni top 30 par
+  // volume) — ici c'est un FILTRE de lignes (la carte, elle, atténue sans
+  // filtrer). Défaut : Province, comme la carte.
   const SEG_PROVINCE = "Province (1104)";
-  const SEG_FOCUS = "Focus 30";
+  const SEG_FOCUS = "Villes à signaux précoces";
   const SEGMENTS = [SEG_PROVINCE, SEG_FOCUS] as const;
   let focusOnly = false;
   $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
@@ -77,7 +79,8 @@
 
   $: sorted = sortCitiesForConsole(cities);
   $: filtered = sorted.filter((c) => {
-    // Périmètre Focus 30 (villes à signaux) : EN PLUS des filtres statut + recherche.
+    // Périmètre focus (villes à signaux prioritaires z∩m∩p) : EN PLUS des
+    // filtres statut + recherche.
     if (focusOnly && !isFocusCity(c, focusScope)) return false;
     if (filter === "actives") {
       if (!isActive(c)) return false;
@@ -144,8 +147,8 @@
       </div>
     {/if}
 
-    <!-- Périmètre Province / Focus 30 — même control segmenté que la carte
-         Couverture (intitulés et style identiques), mais en FILTRE de lignes. -->
+    <!-- Périmètre Province / Villes à signaux précoces — même control segmenté
+         que la carte Couverture (intitulés identiques), mais en FILTRE de lignes. -->
     <div class="border-b border-slate-100 px-4 py-3">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Périmètre</p>
       <div
@@ -239,7 +242,8 @@
                   <div class="flex items-center gap-2">
                     <span class="font-medium text-slate-800">{city.cityName}</span>
                     {#if isFocusCity(city, focusScope)}
-                      <!-- Rang par NOMBRE DE SIGNAUX (critère focus), pas la proximité. -->
+                      <!-- Rang par nb de signaux PRIORITAIRES z∩m∩p (critère focus),
+                           ni proximité, ni volume brut de signaux. -->
                       <Badge tone="info" class="text-[10px]">#{focusScope.rankBySlug.get(city.citySlug)}</Badge>
                     {/if}
                   </div>

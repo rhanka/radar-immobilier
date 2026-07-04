@@ -39,7 +39,7 @@ function makeCity(overrides: Partial<CityCoverage> = {}): CityCoverage {
     priorityRank: null,
     l1Raw: { state: "absent", count: 0, freshness: "unknown" },
     l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-    signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+    signals: { state: "absent", count: 0, withCitation: 0, priority: 0, freshness: "unknown" },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     normes: { state: "absent", freshness: "unknown" },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
@@ -81,7 +81,7 @@ describe("tri-état : trois couleurs DISTINCTES", () => {
     const city = makeCity({
       l1Raw: { state: "verified", count: 3, freshness: "fresh" },
       l2Graph: { state: "verified", ontologyVersion: "2.3", freshness: "fresh" },
-      signals: { state: "verified", count: 12, withCitation: 9, freshness: "fresh" },
+      signals: { state: "verified", count: 12, withCitation: 9, priority: 1, freshness: "fresh" },
       l4Zonage: { state: "verified", served: true, servedBy: "geo", freshness: "fresh" },
       l5Lots: { state: "declared", served: false, servedBy: null, freshness: "unknown" },
       worstStatus: "declared",
@@ -151,14 +151,19 @@ describe("buildFillColorExpression — anti-survente", () => {
   });
 });
 
-// ── 3. Focus-30 : les 30 villes À SIGNAUX (présence de signaux, PAS proximité) ─
+// ── 3. Focus : les villes portant les signaux PRIORITAIRES z∩m∩p ─────────────
+// Axe de reporting « 30 villes / 33 signaux précoces » : le focus = l'ensemble
+// des villes DISTINCTES avec ≥ 1 signal prioritaire (zonage ∩ multifamilial 4+
+// ∩ précoce, `signals.priority`). Ni priorityRank ≤ 30 (1er bug, proximité),
+// ni top 30 par NOMBRE de signaux (2e bug, volume brut).
 
-describe("focus-30 = villes à signaux (computeFocusScope)", () => {
-  /** Ville avec `count` signaux projetés (cellule signaux cohérente). */
+describe("focus = villes à signaux PRIORITAIRES z∩m∩p (computeFocusScope)", () => {
+  /** Ville avec `count` signaux projetés dont `priority` prioritaires z∩m∩p. */
   function makeSignalCity(
     slug: string,
     count: number,
     priorityRank: number | null = null,
+    priority = 0,
   ): CityCoverage {
     return makeCity({
       citySlug: slug,
@@ -168,80 +173,93 @@ describe("focus-30 = villes à signaux (computeFocusScope)", () => {
         state: count > 0 ? "verified" : "absent",
         count,
         withCitation: 0,
+        priority,
         freshness: count > 0 ? "fresh" : "unknown",
       },
     });
   }
 
-  it("bug Steve : ville proche SANS signal JAMAIS focus, ville à signaux LOIN focus", () => {
+  it("bug Steve : ville proche SANS signal JAMAIS focus, ville à signal prioritaire LOIN focus", () => {
     // Ancien critère (priorityRank ≤ 30) : Kirkland (rang 30, 0 signal) était
-    // focus et Mont-Tremblant (rang 351, 13 signaux) ne l'était pas. Corrigé :
-    // le focus se base sur la PRÉSENCE de signaux.
-    const kirkland = makeSignalCity("kirkland", 0, 30);
-    const tremblant = makeSignalCity("mont-tremblant", 13, 351);
+    // focus et Mont-Tremblant (rang 351, 2 signaux prioritaires z∩m∩p mesurés
+    // le 2026-07-03) ne l'était pas. Corrigé : le focus se base sur les
+    // signaux PRIORITAIRES portés.
+    const kirkland = makeSignalCity("kirkland", 0, 30, 0);
+    const tremblant = makeSignalCity("mont-tremblant", 13, 351, 2);
     const scope = computeFocusScope([kirkland, tremblant]);
     expect(isFocusCity(kirkland, scope)).toBe(false);
     expect(isFocusCity(tremblant, scope)).toBe(true);
   });
 
-  it("priorityRank 1 sans signal : pas focus (le rang proximité ne compte plus)", () => {
+  it("le VOLUME de signaux ne suffit pas : 400 signaux sans prioritaire → PAS focus", () => {
+    // 2e bug (corrigé ici) : le focus n'est PAS un top-N par nombre de
+    // signaux. Lyster (400 signaux, 0 prioritaire — chiffres réels S3
+    // 2026-07-03) n'est pas focus ; Sutton (5 signaux dont 1 prioritaire) l'est.
+    const lyster = makeSignalCity("lyster", 400, 550, 0);
+    const sutton = makeSignalCity("sutton", 5, 288, 1);
+    const scope = computeFocusScope([lyster, sutton]);
+    expect(isFocusCity(lyster, scope)).toBe(false);
+    expect(isFocusCity(sutton, scope)).toBe(true);
+  });
+
+  it("priorityRank 1 sans signal prioritaire : pas focus (la proximité ne compte plus)", () => {
     const scope = computeFocusScope([
-      makeSignalCity("proche-sans-signal", 0, 1),
-      makeSignalCity("loin-avec-signal", 2, 900),
+      makeSignalCity("proche-sans-signal", 0, 1, 0),
+      makeSignalCity("loin-avec-prioritaire", 2, 900, 1),
     ]);
     expect(scope.slugs.has("proche-sans-signal")).toBe(false);
-    expect(scope.slugs.has("loin-avec-signal")).toBe(true);
+    expect(scope.slugs.has("loin-avec-prioritaire")).toBe(true);
   });
 
-  it("tronque aux 30 villes au PLUS de signaux (rang par signalCount)", () => {
-    // 35 villes à signaux (1..35 signaux) : le focus = les 30 plus fournies.
+  it("AUCUNE troncature : l'ensemble suit la donnée (35 villes prioritaires → 35 focus)", () => {
+    // Le focus n'est PAS forcé à 30 : c'est l'ensemble des villes portant les
+    // signaux prioritaires (~30 mesurées sur données réelles, jamais tronqué).
     const cities = Array.from({ length: 35 }, (_, i) =>
-      makeSignalCity(`v${String(i + 1).padStart(2, "0")}`, i + 1),
+      makeSignalCity(`v${String(i + 1).padStart(2, "0")}`, i + 2, null, 1),
     );
     const scope = computeFocusScope(cities);
-    expect(scope.slugs.size).toBe(30);
-    expect(scope.slugs.has("v35")).toBe(true); // la plus fournie
-    expect(scope.slugs.has("v06")).toBe(true); // 30e par nb de signaux
-    expect(scope.slugs.has("v05")).toBe(false); // 31e : hors focus
-    expect(scope.rankBySlug.get("v35")).toBe(1);
-    expect(scope.rankBySlug.get("v06")).toBe(30);
+    expect(scope.slugs.size).toBe(35);
   });
 
-  it("moins de 30 villes à signaux → focus = TOUTES les villes à signaux, rien d'inventé", () => {
+  it("rang = nb de signaux PRIORITAIRES décroissant (tie-break : total, rang, nom)", () => {
     const scope = computeFocusScope([
-      makeSignalCity("a", 3),
-      makeSignalCity("b", 1),
-      makeSignalCity("zero", 0),
+      makeSignalCity("un-prioritaire", 22, 100, 1),
+      makeSignalCity("deux-prioritaires", 4, 400, 2),
+      makeSignalCity("un-prioritaire-moins-fourni", 5, 100, 1),
     ]);
-    expect(scope.slugs.size).toBe(2);
-    expect(scope.slugs.has("zero")).toBe(false);
+    expect(scope.rankBySlug.get("deux-prioritaires")).toBe(1);
+    expect(scope.rankBySlug.get("un-prioritaire")).toBe(2);
+    expect(scope.rankBySlug.get("un-prioritaire-moins-fourni")).toBe(3);
   });
 
-  it("égalité de signaux : tie-break priorityRank croissant (ordre stable)", () => {
-    const scope = computeFocusScope([
-      makeSignalCity("loin", 5, 400),
-      makeSignalCity("proche", 5, 10),
-    ]);
-    expect(scope.rankBySlug.get("proche")).toBe(1);
-    expect(scope.rankBySlug.get("loin")).toBe(2);
+  it("payload ancien (sans champ priority) → focus vide, rien d'inventé", () => {
+    const legacy = makeSignalCity("legacy", 12, 10, 0);
+    // Simule une réponse d'API antérieure au champ `priority`.
+    delete (legacy.signals as Partial<CityCoverage["signals"]>).priority;
+    const scope = computeFocusScope([legacy]);
+    expect(scope.slugs.size).toBe(0);
+    expect(isFocusCity(legacy, scope)).toBe(false);
   });
 
   it("mode Province : opacité uniforme (number), pas d'expression par ville", () => {
-    const cities = [makeSignalCity("a", 4, 1)];
+    const cities = [makeSignalCity("a", 4, 1, 1)];
     const op = buildFocusOpacityExpression(cities, false);
     expect(typeof op).toBe("number");
   });
 
-  it("mode Focus 30 : ville à signaux opaque, sans signal atténuée, fallback atténué", () => {
+  it("mode focus : ville à signal prioritaire opaque, les autres atténuées, fallback atténué", () => {
     const cities = [
-      makeSignalCity("focus", 13, 351), // à signaux, loin → focus
-      makeSignalCity("horsfocus", 0, 5), // proche, 0 signal → atténuée
+      makeSignalCity("focus", 13, 351, 2), // prioritaire, loin → focus
+      makeSignalCity("volume-sans-prioritaire", 400, 5, 0), // volume brut → atténuée
+      makeSignalCity("horsfocus", 0, 5, 0), // proche, 0 signal → atténuée
     ];
     const expr = buildFocusOpacityExpression(cities, true) as unknown[];
     const focusOp = colorFromExpression(expr, "focus") as unknown as number;
+    const volumeOp = colorFromExpression(expr, "volume-sans-prioritaire") as unknown as number;
     const dimOp = colorFromExpression(expr, "horsfocus") as unknown as number;
     const fallbackOp = expr[expr.length - 1] as number;
     expect(focusOp).toBeGreaterThan(dimOp);
+    expect(volumeOp).toBe(dimOp);
     expect(fallbackOp).toBe(dimOp);
   });
 });
