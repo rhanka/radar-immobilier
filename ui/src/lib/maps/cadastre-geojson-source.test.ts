@@ -71,9 +71,58 @@ describe("mapCadastreCityToLayers — Delson snapshot", () => {
     expect(todOnly?.properties.potentialScore).toBe(0.45);
   });
 
-  it("never leaks PII: no `adresse` field on mapped lot props", () => {
+  // ── Champs lot servis par geo (superficie réelle / façade canonique /
+  // adresse / code postal) — consommés tels quels, null honnête quand absents.
+  it("préfère la superficie RÉELLE geo (superficie_m2) à la calculée", () => {
+    const full = layers.lots.features.find((f) => f.properties.noLot === "2181127");
+    expect(full?.properties.superficieM2).toBe(1180.2);
+  });
+
+  it("repli superficie_m2_calculee quand superficie_m2 absent", () => {
+    const calc = layers.lots.features.find((f) => f.properties.noLot === "2181200");
+    expect(calc?.properties.superficieM2).toBe(980);
+  });
+
+  it("aucune superficie servie → null (fiche « — », AUCUN calcul immo)", () => {
+    const raw: CadastreRawCity = {
+      meta: { slug: "x", nom: "X" },
+      lots: {
+        type: "FeatureCollection",
+        features: [{
+          type: "Feature" as const,
+          properties: { NO_LOT: "S-1" },
+          geometry: { type: "Polygon", coordinates: [[[0, 0], [0, 1], [1, 1], [0, 0]]] },
+        }],
+      },
+    };
+    const out = mapCadastreCityToLayers(raw);
+    expect(out.lots.features[0].properties.superficieM2).toBeNull();
+  });
+
+  it("façade : frontage_m canonique geo → frontageM ; facade_m source → facadeM ; absents → null", () => {
+    const full = layers.lots.features.find((f) => f.properties.noLot === "2181127");
+    expect(full?.properties.frontageM).toBe(22.9);
+    expect(full?.properties.facadeM).toBe(28);
+    const bare = layers.lots.features.find((f) => f.properties.noLot === "2181200");
+    expect(bare?.properties.frontageM).toBeNull();
+    expect(bare?.properties.facadeM).toBeNull();
+  });
+
+  it("adresse / code postal publics remontés verbatim ; absents → null", () => {
+    const full = layers.lots.features.find((f) => f.properties.noLot === "2181127");
+    expect(full?.properties.adresse).toBe("123 rue des Érables");
+    expect(full?.properties.codePostal).toBe("J5B 1B4");
+    const bare = layers.lots.features.find((f) => f.properties.noLot === "2181200");
+    expect(bare?.properties.adresse).toBeNull();
+    expect(bare?.properties.codePostal).toBeNull();
+  });
+
+  it("anti-PII : jamais de nom de propriétaire sur les props mappées", () => {
+    // La fixture porte un champ `proprietaire` volontairement — il ne doit
+    // JAMAIS être mappé. L'adresse civique/code postal du LOT sont des
+    // données publiques du rôle (identifient la propriété, pas une personne).
     for (const f of layers.lots.features) {
-      expect(Object.keys(f.properties)).not.toContain("adresse");
+      expect(Object.keys(f.properties)).not.toContain("proprietaire");
     }
   });
 

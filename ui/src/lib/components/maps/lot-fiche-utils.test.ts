@@ -13,6 +13,7 @@ import {
   facadeDisplay,
   evaluatedLotScore,
   formatArea,
+  formatLength,
   formatYesNo,
   googleMapsUrl,
   googleStreetViewUrl,
@@ -355,6 +356,13 @@ describe("formatArea / formatYesNo — copy client neutre, « — » discret", (
     expect(formatYesNo(false)).toBe("Non");
     expect(formatYesNo(undefined)).toBe("—");
     expect(formatYesNo(null)).toBe("—");
+  });
+
+  it("formatLength rend « X m » (1 décimale, fr-CA) et « — » quand absent", () => {
+    expect(formatLength(22.94)).toBe("22,9 m");
+    expect(formatLength(28)).toBe("28 m");
+    expect(formatLength(null)).toBe("—");
+    expect(formatLength(undefined)).toBe("—");
   });
 });
 

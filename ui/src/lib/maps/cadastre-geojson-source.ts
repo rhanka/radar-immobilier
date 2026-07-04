@@ -20,9 +20,11 @@
  * `CadastreRawLotProps` ci-dessous.
  *
  * ── Anti-PII (Loi 25) ─────────────────────────────────────────────────────────
- * Le GeoJSON peut porter un champ `adresse` (adressage civique). On NE le mappe
- * PAS et le snapshot fixture committé ne le contient pas. `NO_LOT` est un numéro
- * cadastral public (MERN) — conservé. Aucun nom de personne, aucun propriétaire.
+ * `NO_LOT` est un numéro cadastral public (MERN) — conservé. `adresse` et
+ * `code_postal` sont des données PUBLIQUES du rôle d'évaluation : elles
+ * identifient la propriété, jamais une personne (décision : servies par geo,
+ * consommées telles quelles). Aucun nom de personne, aucun propriétaire —
+ * un champ `proprietaire` présent dans l'input n'est JAMAIS mappé.
  *
  * ── Mode:carte-steve ──────────────────────────────────────────────────────────
  * Les villes de la carte Steve sont rendues en `mode:"carte-steve"` : ce sont
@@ -34,9 +36,11 @@
 // ── Schéma source brut (GeoJSON cadastral) ────────────────────────────────────
 // On type uniquement les champs qu'on lit. Tout le reste est ignoré.
 
-/** Propriétés d'un lot dans le GeoJSON cadastral (sous-ensemble lu — sans `adresse`). */
+/** Propriétés d'un lot dans le GeoJSON cadastral (sous-ensemble lu). */
 export interface CadastreRawLotProps {
   NO_LOT?: string;
+  /** Superficie RÉELLE du lot servie par geo (aire, m²) — prime sur la calculée. */
+  superficie_m2?: number;
   superficie_m2_calculee?: number;
   zone?: string;
   categorie?: string;
@@ -52,10 +56,16 @@ export interface CadastreRawLotProps {
   val_terrain?: number;
   val_batiment?: number;
   nb_etages?: string;
+  /** Façade CANONIQUE du lot servie par geo (m) — prime sur facade_m. */
+  frontage_m?: number;
   facade_m?: number;
   profondeur_m?: number;
   is_rue?: boolean;
-  // `adresse` peut exister dans l'input mais N'EST PAS lue (anti-PII).
+  /** Adresse civique du LOT (donnée publique du rôle — jamais une personne). */
+  adresse?: string;
+  /** Code postal du lot servi par geo. */
+  code_postal?: string;
+  // Tout champ nominatif (ex. `proprietaire`) N'EST JAMAIS lu (anti-PII).
 }
 
 export interface GeoJsonGeometry {
@@ -114,7 +124,20 @@ export interface LotLayerProps {
   tod: boolean;
   priorite: boolean;
   zoneDesc: string;
-  superficieM2: number;
+  /**
+   * Superficie RÉELLE du lot (m²) : `superficie_m2` servie par geo, sinon
+   * `superficie_m2_calculee` de la source. null quand aucune n'est servie —
+   * la fiche affiche « — » (AUCUN calcul immo, aucune invention).
+   */
+  superficieM2: number | null;
+  /** Façade CANONIQUE geo (`frontage_m`), null quand non servie. */
+  frontageM: number | null;
+  /** Façade mesurée par la source (`facade_m`), null quand non servie. */
+  facadeM: number | null;
+  /** Adresse civique du lot (donnée publique du rôle), null quand non servie. */
+  adresse: string | null;
+  /** Code postal du lot servi par geo, null quand non servi. */
+  codePostal: string | null;
   nbLogementsRole: number;
   potentialScore: number; // [0,1]
   /** `true` quand le score vient du placeholder local (pas de l'API canonique). */
@@ -187,6 +210,14 @@ function asNumber(v: unknown, fallback = 0): number {
 function asBool(v: unknown): boolean {
   return v === true;
 }
+/** Nombre servi, ou null honnête quand absent/invalide — aucune invention. */
+function asNumberOrNull(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+/** Chaîne non vide servie, ou null honnête quand absente. */
+function asStringOrNull(v: unknown): string | null {
+  return typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
+}
 
 export interface MapCadastreOptions {
   mode?: LayerMode;
@@ -247,7 +278,12 @@ export function mapCadastreCityToLayers(
         tod,
         priorite,
         zoneDesc: asString(p.zone_desc),
-        superficieM2: asNumber(p.superficie_m2_calculee),
+        // Superficie RÉELLE geo prioritaire ; null honnête quand rien n'est servi.
+        superficieM2: asNumberOrNull(p.superficie_m2) ?? asNumberOrNull(p.superficie_m2_calculee),
+        frontageM: asNumberOrNull(p.frontage_m),
+        facadeM: asNumberOrNull(p.facade_m),
+        adresse: asStringOrNull(p.adresse),
+        codePostal: asStringOrNull(p.code_postal),
         nbLogementsRole: asNumber(p.nb_logements_role),
         potentialScore: clamp01(scoreFn(p)),
         scorePlaceholder: usingPlaceholder,
