@@ -7,6 +7,7 @@ import {
   type LotsResponse,
   type LotFeature,
 } from "./lots-client.js";
+import { facadeDisplay } from "$lib/components/maps/lot-fiche-utils.js";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -457,5 +458,78 @@ describe("codePostal (C5)", () => {
     );
     const res = await fetchLots("delson", { baseUrl: "" });
     expect(res.featureCollection.features[0].properties.codePostal).toBeUndefined();
+  });
+});
+
+// ── Façade canonique geo (frontage_m) ─────────────────────────────────────────
+// Décision : la façade CANONIQUE du lot est servie par geo (`frontage_m`).
+// Elle est mappée sur `facadeM` (champ consommé par la fiche) et PRIME sur la
+// `facade_m` de la source — la fiche l'affiche alors SANS mention « estimée ».
+
+async function fetchSingleLot(
+  properties: Record<string, unknown>,
+  geometry: Record<string, unknown> | null = null,
+): Promise<LotsResponse> {
+  const body = {
+    type: "FeatureCollection",
+    features: [{ type: "Feature", geometry, properties }],
+  };
+  vi.stubGlobal("fetch", async () =>
+    new Response(JSON.stringify(body), { status: 200 }),
+  );
+  return fetchLots("delson", { baseUrl: "" });
+}
+
+describe("frontage_m — façade canonique servie par geo", () => {
+  it("normalise frontage_m vers facadeM", async () => {
+    const res = await fetchSingleLot({ noLot: "L-20", frontage_m: 22.9 });
+    expect(res.featureCollection.features[0].properties.facadeM).toBe(22.9);
+  });
+
+  it("préfère frontage_m (canonique geo) à facade_m (source)", async () => {
+    const res = await fetchSingleLot({
+      noLot: "L-21",
+      frontage_m: 22.9,
+      facade_m: 18.2,
+    });
+    expect(res.featureCollection.features[0].properties.facadeM).toBe(22.9);
+  });
+
+  it("repli facade_m source quand frontage_m absent", async () => {
+    const res = await fetchSingleLot({ noLot: "L-22", facade_m: 18.2 });
+    expect(res.featureCollection.features[0].properties.facadeM).toBe(18.2);
+  });
+
+  it("aucune façade servie → undefined (repli estimation immo côté fiche)", async () => {
+    const res = await fetchSingleLot({ noLot: "L-23" });
+    expect(res.featureCollection.features[0].properties.facadeM).toBeUndefined();
+  });
+
+  it("fiche : frontage_m présent → façade affichée SANS « estimée » ; absent → estimation « ≈ … (estimée) »", async () => {
+    // Petit rectangle ~20 m × 40 m (approx. équirectangulaire à 45,4° N).
+    const dLon = 20 / (111320 * Math.cos((45.4 * Math.PI) / 180));
+    const dLat = 40 / 111320;
+    const geometry = {
+      type: "Polygon",
+      coordinates: [[
+        [-73.5, 45.4],
+        [-73.5 + dLon, 45.4],
+        [-73.5 + dLon, 45.4 + dLat],
+        [-73.5, 45.4 + dLat],
+        [-73.5, 45.4],
+      ]],
+    };
+    const withFrontage = await fetchSingleLot(
+      { noLot: "L-24", frontage_m: 22.9 },
+      geometry,
+    );
+    const canonical = facadeDisplay(withFrontage.featureCollection.features[0]);
+    expect(canonical).toContain("22,9");
+    expect(canonical).not.toContain("estimée");
+
+    const withoutFrontage = await fetchSingleLot({ noLot: "L-25" }, geometry);
+    const estimated = facadeDisplay(withoutFrontage.featureCollection.features[0]);
+    expect(estimated).toMatch(/^≈ /u);
+    expect(estimated).toContain("(estimée)");
   });
 });
