@@ -1,7 +1,9 @@
 /**
  * QA léger — SourcesRail : sélecteur RADIO de portée MUTUELLEMENT EXCLUSIF
- * (« Focus QA : 4 villes » / « 30 villes à signaux » / « Toutes ») + liste
- * plate de villes filtrée par la portée (parité d'interaction SignauxRail).
+ * (« Focus QA : 4 villes » / « Villes à signaux précoces » / « Toutes ») +
+ * liste plate de villes filtrée par la portée (parité d'interaction
+ * SignauxRail). La portée focus = villes portant ≥ 1 signal PRIORITAIRE z∩m∩p
+ * (zonage ∩ multifamilial 4+ ∩ précoce) — ni proximité, ni volume brut.
  *
  * Aucun docker, aucune API. jsdom + @testing-library/svelte.
  */
@@ -16,13 +18,14 @@ import type {
 
 afterEach(() => cleanup());
 
-/** Fixture minimale — slug/nom/MRC/rang/pire statut + nb de signaux (focus30). */
+/** Fixture minimale — slug/nom/MRC/rang/pire statut + signaux (dont prioritaires z∩m∩p). */
 function city(
   citySlug: string,
   cityName: string,
   priorityRank: number | null,
   worstStatus: CoverageState = "absent",
   signalCount = 0,
+  prioritySignals = 0,
 ): CityCoverage {
   return {
     citySlug,
@@ -35,6 +38,7 @@ function city(
       state: signalCount > 0 ? "verified" : "absent",
       count: signalCount,
       withCitation: 0,
+      priority: prioritySignals,
       freshness: signalCount > 0 ? "fresh" : "unknown",
     },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
@@ -46,14 +50,14 @@ function city(
   };
 }
 
-// delson + sainte-catherine = villes QA (REFERENCE_CITIES), à signaux ;
-// la-prairie = à signaux seulement (focus30) ; rimouski = 0 signal → hors
-// focus30 (présence de signaux, plus priorityRank).
+// delson + sainte-catherine = villes QA (REFERENCE_CITIES), à signaux dont
+// 1 prioritaire z∩m∩p ; la-prairie = 1 prioritaire (focus30) ; rimouski-volume
+// = 12 signaux SANS prioritaire → hors focus30 (le volume brut ne compte pas).
 const CITIES: CityCoverage[] = [
-  city("delson", "Delson", 12, "declared", 17),
-  city("sainte-catherine", "Sainte-Catherine", 20, "verified", 16),
-  city("la-prairie", "La Prairie", 5, "absent", 14),
-  city("rimouski", "Rimouski", 480, "verified", 0),
+  city("delson", "Delson", 12, "declared", 17, 1),
+  city("sainte-catherine", "Sainte-Catherine", 20, "verified", 16, 1),
+  city("la-prairie", "La Prairie", 5, "absent", 14, 1),
+  city("rimouski", "Rimouski", 480, "verified", 12, 0),
 ];
 
 function renderRail(
@@ -100,7 +104,7 @@ describe("SourcesRail — radio de portée MUTUELLEMENT EXCLUSIF", () => {
     // Radios natifs partageant le même name → exclusivité garantie.
     expect(new Set([qa.name, focus.name, all.name]).size).toBe(1);
     expect(container.textContent).toContain("Focus QA : 4 villes");
-    expect(container.textContent).toContain("30 villes à signaux");
+    expect(container.textContent).toContain("Villes à signaux précoces");
     expect(container.textContent).toContain("Toutes");
   });
 
@@ -112,7 +116,7 @@ describe("SourcesRail — radio de portée MUTUELLEMENT EXCLUSIF", () => {
     expect(all.checked).toBe(false);
   });
 
-  it("cocher « 30 villes à signaux » → onScopeChange('focus30'), une fois", async () => {
+  it("cocher « Villes à signaux précoces » → onScopeChange('focus30'), une fois", async () => {
     const spy = vi.fn();
     const { container } = renderRail({ onScopeChange: spy });
     const [, focus] = getScopeRadios(container);
@@ -143,10 +147,11 @@ describe("SourcesRail — la liste de villes reflète la portée", () => {
     ]);
   });
 
-  it("« 30 villes à signaux » → seules les villes À SIGNAUX (Rimouski 0 signal exclue)", () => {
+  it("« Villes à signaux précoces » → seules les villes à signal PRIORITAIRE (Rimouski 12 signaux, 0 prioritaire, exclue)", () => {
     const { container } = renderRail({ scope: "focus30" });
     const rows = cityRows(container);
-    // delson (17), sainte-catherine (16), la-prairie (14) ont des signaux.
+    // delson, sainte-catherine, la-prairie portent 1 signal prioritaire z∩m∩p ;
+    // rimouski a du volume (12 signaux) mais 0 prioritaire → exclue.
     expect(rows.length).toBe(3);
     expect(rows.map((r) => r.textContent?.includes("Rimouski"))).not.toContain(true);
   });
