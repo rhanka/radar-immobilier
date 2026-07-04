@@ -6,21 +6,26 @@
  *                 (carte Steve : Delson, Sainte-Catherine, Saint-Constant,
  *                 Candiac). Source de vérité : `REFERENCE_CITIES`
  *                 ($lib/maps/reference-cities) — AUCUN slug re-hardcodé ici.
- *   - "focus30" : « 30 villes à signaux » — même critère que le Focus 30 de la
- *                 Console : les 30 villes qui ONT des signaux (présence de
- *                 signaux, classement par nombre de signaux — `computeFocusScope`
- *                 / `isFocusCity`), PLUS JAMAIS priorityRank ≤ 30 (proximité de
- *                 Montréal). Une ville sans signal n'est jamais focus, même
- *                 proche ; une ville à signaux éloignée (ex. Mont-Tremblant) l'est.
+ *   - "focus30" : « Villes à signaux précoces » — même critère que le focus de
+ *                 la Console : les villes qui PORTENT au moins un signal
+ *                 PRIORITAIRE z∩m∩p (zonage ∩ multifamilial 4+ ∩ précoce,
+ *                 `signals.priority > 0` — la cohorte « 33 » de l'axe
+ *                 « 30 villes / 33 signaux précoces » ; `computeFocusScope` /
+ *                 `isFocusCity`). Ni priorityRank ≤ 30 (proximité de Montréal),
+ *                 ni top 30 par volume de signaux : une ville sans signal
+ *                 prioritaire n'est jamais focus, même très fournie en signaux ;
+ *                 une ville à 1 signal prioritaire l'est, même éloignée
+ *                 (ex. Mont-Tremblant). L'id interne "focus30" est conservé
+ *                 (compat) mais l'ensemble est DATA-DRIVEN (~30 villes, jamais
+ *                 forcé à 30).
  *   - "all"     : « Toutes » — la province entière (1104/1106). DÉFAUT —
  *                 comportement « Province » historique de la carte Couverture.
  *
  * La portée pilote À LA FOIS la liste de villes du rail (filtre) et la
  * coloration carte (surbrillance d'opacité : villes de la portée opaques, le
- * reste atténué — même mécanique que l'ancien toggle Focus 30, D3 : un
- * HIGHLIGHT, pas un recompute). Le périmètre focus30 étant RELATIF au classement
- * province-wide par nombre de signaux, les fonctions au niveau liste calculent
- * un `FocusScope` (`computeFocusScope`) et le passent au prédicat par ville.
+ * reste atténué — même mécanique que l'ancien toggle focus, D3 : un HIGHLIGHT,
+ * pas un recompute). Les fonctions au niveau liste calculent un `FocusScope`
+ * (`computeFocusScope`) UNE fois et le passent au prédicat par ville.
  */
 import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 import { REFERENCE_CITIES } from "$lib/maps/reference-cities.js";
@@ -56,8 +61,8 @@ export const COVERAGE_SCOPE_OPTIONS: CoverageScopeOption[] = [
   },
   {
     value: "focus30",
-    label: "30 villes à signaux",
-    helperText: "top 30 par nombre de signaux",
+    label: "Villes à signaux précoces",
+    helperText: "signaux prioritaires : zonage · 4+ · précoce",
   },
   {
     value: "all",
@@ -77,11 +82,10 @@ export function isQaReferenceCity(
  * Prédicat d'appartenance d'une ville à une portée.
  *
  * `focusScope` (issu de `computeFocusScope(cities)`) est REQUIS pour trancher
- * la portée « focus30 » : l'appartenance est RELATIVE au classement
- * province-wide par nombre de signaux, une ville seule ne peut pas décider.
- * Absent (null) → focus30 renvoie false (aucun classement fourni). Les portées
- * "qa4"/"all" l'ignorent. Les fonctions au niveau liste calculent le scope une
- * fois et le passent ici (jamais de recalcul par ville).
+ * la portée « focus30 » (villes à signaux prioritaires z∩m∩p) : le périmètre
+ * est calculé UNE fois au niveau liste et passé ici (jamais de recalcul par
+ * ville). Absent (null) → focus30 renvoie false (aucun périmètre fourni,
+ * jamais un faux vrai). Les portées "qa4"/"all" l'ignorent.
  */
 export function cityInScope(
   city: CityCoverage,
@@ -113,7 +117,7 @@ export function countCitiesInScope(
 
 // ── Coloration carte par portée ───────────────────────────────────────────────
 // Constantes IDENTIQUES à `buildFocusOpacityExpression` (source-coverage-client)
-// dont cette expression généralise le régime Focus 30 aux 3 portées — la parité
+// dont cette expression généralise le régime focus aux 3 portées — la parité
 // est ÉPINGLÉE par test (coverage-scope.test.ts).
 const PROVINCE_OPACITY = 0.62;
 const SCOPE_OPACITY = 0.88;
@@ -122,8 +126,9 @@ const DIMMED_OPACITY = 0.18;
 /**
  * Expression `fill-opacity` MapLibre par portée :
  *   - "all"      : opacité uniforme (toutes les villes visibles) ;
- *   - "focus30"  : les 30 villes À SIGNAUX (computeFocusScope) opaques, le reste
- *                  atténué — parité épinglée avec `buildFocusOpacityExpression` ;
+ *   - "focus30"  : les villes à signaux PRIORITAIRES z∩m∩p (computeFocusScope)
+ *                  opaques, le reste atténué — parité épinglée avec
+ *                  `buildFocusOpacityExpression` ;
  *   - "qa4"      : les 4 villes QA opaques, le reste atténué.
  * Villes hors couverture (fallback) : atténuées dès qu'une portée restreinte
  * est active (elles n'en font pas partie).

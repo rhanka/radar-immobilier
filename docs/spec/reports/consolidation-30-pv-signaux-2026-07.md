@@ -9,6 +9,171 @@ haversine depuis le centre de MTL dans
 et des villes À signaux mais éloignées (ex. Mont-Tremblant, ville pilote
 grounding) en étaient exclues.
 
+> **AMENDEMENT 2026-07-03 (2e correction de définition).** Le premier fix
+> (PR #343) avait remplacé la proximité par un **top 30 par NOMBRE de
+> signaux** (`signals.count`), ce qui était ENCORE faux : le focus n'est pas
+> un top-N par volume. La définition invariante de l'axe de reporting
+> « **30 villes / 33 signaux précoces** » (aussi « 33 vs 5000+ ») est : **le
+> focus = l'ensemble des villes DISTINCTES qui portent les signaux
+> PRIORITAIRES z∩m∩p** — zonage ∩ multifamilial 4+ ∩ précoce, la cohorte
+> « 33 » WPB-E2E. Voir la section « Correction de définition » ci-dessous ;
+> les sections « top-30 par volume » d'origine sont conservées pour trace et
+> marquées DÉPASSÉES.
+
+## Correction de définition (2026-07-03) : le focus = les villes des 33 signaux prioritaires
+
+### La définition établie (retrouvée, avec sources)
+
+L'axe de reporting du principal est « **30 villes / 33 signaux précoces** ».
+Le « 33 » y est DÉFINI — ce n'est ni un top-N ni un volume :
+
+- `docs/spec/SPEC_CONSOLIDATED_2026-07.md` §1.2 : « **Axe PROFONDEUR DE
+  PREUVE — 33 E2E vs 5000+.** *33* = cohorte « opportunités témoins » suivies
+  bout-en-bout (signal → document → zone → grille → lot), périmètre WPB-E2E
+  des **33 opportunités prioritaires `z∩m∩p`** ».
+- `docs/spec/reports/wp6-focus-rollup.md` : « focus:33 — opportunités preuve
+  E2E **z∩m∩p** (cible WPB-E2E) ».
+- Filtre opérationnel : `api/src/scripts/report-opportunity-proof.ts`
+  (`--limit 33`) — sélectionne les nœuds Signal/DesignationEvent satisfaisant
+  `isZonageSignal ∧ isMulti4Plus ∧ isPrecoceSignal`.
+- La vue Signaux avec ses 3 filtres actifs (zonage ∩ multifamilial 4+ ∩
+  précoce = subset `z|m|p` de `listCitiesWithSignalNodes`) affiche ce même
+  périmètre — c'est le « **32 signaux qualifiés sur 30 villes** » du rapport
+  de livraison (mesure PG prod, début juillet).
+
+Concrètement, un signal est PRIORITAIRE ssi (helpers canoniques de
+`api/src/services/graph/graph-store.ts`) :
+
+- **z** (zonage) : `DesignationEvent`, ou `Signal` avec `category` OU `etape`
+  ∈ ZONAGE_CATEGORIES (rezonage, dérogation, PIIA, PPCMOI, …) ;
+- **m** (multifamilial 4+) : `nb_unites_max ≥ 4` ou `intensite = 'haute'`
+  (Signal uniquement) ;
+- **p** (précoce) : `etape` ∈ {avis_motion, projet_reglement} (annotée v2.1,
+  sinon repli `deriveEtape(label, description)`).
+
+**Le focus-30 = les villes DISTINCTES qui portent ces signaux prioritaires.**
+Ce n'est PAS un classement : ni `priorityRank ≤ 30` (1er bug, proximité), ni
+« top 30 par nombre de signaux » (2e bug, introduit par le premier fix #343).
+L'ensemble est data-driven ; sa taille suit la donnée (~30) et n'est jamais
+forcée à 30.
+
+### Mesure réelle (S3 canonique, 2026-07-03)
+
+Même méthode que la mesure d'origine ci-dessous (graphes
+`graph/<slug>/latest.json`, helpers z/m/p RÉELS importés de `graph-store.ts`,
+pas une réplique), clés canoniques uniquement :
+
+| Mesure | Valeur |
+|---|---:|
+| Graphes canoniques `graph/<slug>/latest.json` | 1 007 |
+| Villes avec ≥ 1 signal | 723 |
+| Total signaux (Signal + DesignationEvent) | 7 202 (z = 5 755, m = 199, p = 1 335) |
+| **Signaux PRIORITAIRES z∩m∩p** | **33** |
+| **Villes distinctes porteuses (= le focus)** | **31** |
+
+Les deux variantes de classification (`isZonageSignal` 3-args avec repli
+`etape`, comme la vue Signaux, vs 2-args comme `report-opportunity-proof.ts`)
+donnent le MÊME compte (33/31) : les ensembles `etape` zonage et `etape`
+précoce sont disjoints, le repli ne joue pas dans l'intersection.
+
+Les 31 villes du focus (rang = nb de signaux prioritaires, puis volume) :
+
+| # | Ville | z∩m∩p | Signaux |
+|---|-------|------:|--------:|
+| 1 | Mont-Tremblant (`mont-tremblant`) | 2 | 13 |
+| 2 | Saint-Frédéric (`saint-frederic`) | 2 | 4 |
+| 3 | Saint-Mathieu-de-Beloeil (`saint-mathieu-de-beloeil`) | 1 | 22 |
+| 4 | Sainte-Catherine (`sainte-catherine`) | 1 | 16 |
+| 5 | Saint-Amable (`saint-amable`) | 1 | 15 |
+| 6 | Rimouski (`rimouski`) | 1 | 12 |
+| 7 | Rosemère (`rosemere`) | 1 | 11 |
+| 8 | Saint-Raymond (`saint-raymond`) | 1 | 11 |
+| 9 | Champlain (`champlain`) | 1 | 10 |
+| 10 | Saint-Côme-Linière (`saint-come-liniere`) | 1 | 9 |
+| 11 | Coaticook (`coaticook`) | 1 | 8 |
+| 12 | Mont-Saint-Hilaire (`mont-saint-hilaire`) | 1 | 8 |
+| 13 | Saint-Stanislas-de-Kostka (`saint-stanislas-de-kostka`) | 1 | 8 |
+| 14 | Cowansville (`cowansville`) | 1 | 7 |
+| 15 | Lévis (`levis`) | 1 | 7 |
+| 16 | Petite-Rivière-Saint-François (`petite-riviere-saint-francois`) | 1 | 7 |
+| 17 | Plaisance (`plaisance`) | 1 | 7 |
+| 18 | Saint-Raphaël (`saint-raphael`) | 1 | 7 |
+| 19 | Alma (`alma`) | 1 | 6 |
+| 20 | Chelsea (`chelsea`) | 1 | 6 |
+| 21 | Hemmingford (`hemmingford--les-jardins-de-napierville--2`) | 1 | 6 |
+| 22 | Saint-Boniface (`saint-boniface`) | 1 | 6 |
+| 23 | Saint-Charles-Borromée (`saint-charles-borromee`) | 1 | 6 |
+| 24 | Sainte-Cécile-de-Milton (`sainte-cecile-de-milton`) | 1 | 6 |
+| 25 | La Sarre (`la-sarre`) | 1 | 5 |
+| 26 | Notre-Dame-de-Lourdes (`notre-dame-de-lourdes--lerable`) | 1 | 5 |
+| 27 | Preissac (`preissac`) | 1 | 5 |
+| 28 | Saint-Gilbert (`saint-gilbert`) | 1 | 5 |
+| 29 | Sutton (`sutton`) | 1 | 5 |
+| 30 | Neuville (`neuville`) | 1 | 4 |
+| 31 | Stratford (`stratford`) | 1 | 4 |
+
+Aucune ville du top-30 « par volume » du premier fix (Lyster 400 signaux,
+Grand-Remous 331, …) ne porte le moindre signal prioritaire : le classement
+par volume mettait en avant 30 villes qui ne recoupent PAS la cohorte « 33 »
+(0 ville commune entre les deux ensembles).
+
+### L'écart des comptes (documenté, pas forcé)
+
+Trois chiffres coexistent, aucun n'est « faux » :
+
+- **33 signaux / 31 villes** : mesure S3 canonique du 2026-07-03 (ce rapport).
+  Le « 33 » de l'axe tombe exactement ; le compte de villes mesuré est **31**,
+  pas 30 — l'ensemble est data-driven et bouge avec les re-scrapes/re-graphify.
+- **32 signaux / 30 villes** : compte live de la vue Signaux (PG de prod)
+  capturé dans le rapport de livraison du 19 juin – 3 juillet — la projection
+  PG était légèrement en retrait du S3 au moment de la capture.
+- **27 signaux / 10 villes** : l'audit `wp3-33-anomalies` porte sur un
+  échantillon (10 villes prioritaires), pas sur la cohorte entière —
+  l'avertissement du SPEC_CONSOLIDATED (§1.2) le dit explicitement.
+
+### Réponse explicite : Brossard, Kirkland, L'Île-Dorval
+
+Les 3 villes « trous » de l'ancien focus proximité n'ont **ni PV, ni signal,
+ni a fortiori signal prioritaire**. Elles étaient dans le focus UNIQUEMENT par
+l'artefact du bug proximité (`priorityRank` 8, 30, 16). Avec la définition
+corrigée, elles sont **hors focus PAR CONSTRUCTION** — il n'y a RIEN à
+récupérer pour le focus : le périmètre est défini par les 33 signaux
+prioritaires et leurs 31 villes porteuses, il ne dépend d'aucune de ces 3
+villes. (Leur scrape reste un fond de tâche de COUVERTURE province — cf. R3 —
+sans lien avec le focus.)
+
+### Le fix de définition v2 (code, 2026-07-03)
+
+- **API** `api/src/routes/source-coverage.ts` : la cellule `signals` de
+  `GET /api/source/coverage` expose désormais `priority` = nb de signaux
+  z∩m∩p de la ville (`listCitiesWithSignalNodes(db)`, subset `z|m|p` — la
+  MÊME classification que la vue Signaux, une seule source de vérité).
+- **Client** `ui/src/lib/sources/source-coverage-client.ts` :
+  `computeFocusScope(cities)` = TOUTES les villes `signals.priority > 0`
+  (aucune troncature, plus de `FOCUS_CITY_COUNT`) ; rang = nb de signaux
+  prioritaires décroissant (tie-break volume, priorityRank, nom).
+- **Libellés** : radio « 30 villes à signaux » → « **Villes à signaux
+  précoces** » (helper « signaux prioritaires : zonage · 4+ · précoce ») ;
+  segment Console « Focus 30 » → « Villes à signaux précoces » ; badge
+  scorecard « Focus 30 » → « Signaux précoces » ; la scorecard affiche
+  « n prioritaires (zonage · 4+ · précoce) » dans la ligne Signaux.
+- « **Focus QA : 4 villes** » (REFERENCE_CITIES) : INCHANGÉ.
+- Tests mis au vrai critère (villes porteuses de signaux prioritaires, PAS
+  top-N) : `source-coverage-client.test.ts`, `coverage-scope.test.ts`,
+  `SourceConsole.test.ts`, `SourcesRail.test.ts`, `SourceCoverageMap.test.ts`,
+  `source-coverage.test.ts` (API), harnais Playwright
+  `focus-scope.harness.spec.ts` + `sources-coverage.spec.ts` — chacun épingle
+  aussi le cas « gros volume sans prioritaire → JAMAIS focus » (Lyster).
+
+### Parasites S3 constatés pendant la mesure (à purger — conducteur)
+
+Depuis la mesure du matin, **~110 graphes parasites** sont apparus sous le
+double préfixe `graph/graph/<slug>/latest.json` (en plus des parasites R2
+déjà connus). Danger : `project-graph-from-s3.ts` (mode complet) prend
+`parts[1]` comme citySlug → ces objets se projetteraient TOUS sous le slug
+`graph`, en s'écrasant l'un l'autre. Action : purge du préfixe
+`graph/graph/` (ou fix du writer qui a doublé le préfixe).
+
 ## Méthode de mesure (chiffres réels, mesurés le 2026-07-03)
 
 - **Source de vérité signaux** : graphes projetés S3 SCW
@@ -46,10 +211,16 @@ grounding) en étaient exclues.
 | Villes avec PV mais 0 signal projeté (graphe présent, rien détecté) | 107 |
 | Seuil d'entrée du top-30 par signaux | 24 signaux |
 
-## Le vrai focus-30 « villes à signaux » (rang = nombre de signaux)
+## [DÉPASSÉ — premier fix #343] Top-30 « villes à signaux » (rang = nombre de signaux)
 
-Critère corrigé : villes avec `signals.count > 0`, classées par nombre de
-signaux décroissant (tie-break : priorityRank croissant, puis nom), top 30.
+> **DÉPASSÉ (amendement 2026-07-03)** : ce classement par VOLUME de signaux
+> était le premier fix, lui-même erroné — le focus n'est pas un top-N. La
+> définition corrigée (villes des 33 signaux prioritaires z∩m∩p) est en tête
+> de rapport. Table conservée pour trace : AUCUNE de ces 30 villes « à
+> volume » ne porte de signal prioritaire.
+
+Critère du premier fix : villes avec `signals.count > 0`, classées par nombre
+de signaux décroissant (tie-break : priorityRank croissant, puis nom), top 30.
 **Verdict consolidation : les 30 villes ont TOUTES ≥ 1 PV PDF archivé ET des
 signaux** — aucun trou dans le nouveau focus-30.
 
@@ -86,7 +257,7 @@ signaux** — aucun trou dans le nouveau focus-30.
 | 29 | Saint-Esprit (`saint-esprit`) | 26 | 26 | 0 | 3 | 5 | 111 | OK |
 | 30 | Saint-Michel (`saint-michel`) | 24 | 24 | 0 | 8 | 7 | 60 | OK |
 
-## L'ancien focus-30 « proximité » vs le réel — le delta
+## L'ancien focus-30 « proximité » vs le top-30 par volume — le delta [trace du premier fix]
 
 **29 des 30 villes sortent** ; seule Pointe-Claire (29 signaux) reste. Trois
 villes de l'ancien focus n'ont **NI PV NI SIGNAL** (le trou de consolidation
@@ -126,23 +297,25 @@ aucun signal (3 PV).
 | 29 | Varennes (`varennes`) | 8 | 11 | SORT — rang signaux insuffisant |
 | 30 | Kirkland (`kirkland`) | 0 | 0 | **SORT — NI PV NI SIGNAL** |
 
-NB : les villes qui « sortent » du focus-30 restent visibles en mode Province
-et restent dans le périmètre « villes à signaux » (725 villes) — le focus-30
-n'est qu'une loupe sur les 30 mieux fournies.
+NB : les villes qui « sortent » du focus restent visibles en mode Province.
+(Depuis l'amendement : le focus n'est NI ce top-30 par volume NI la proximité —
+c'est l'ensemble des villes portant les signaux prioritaires z∩m∩p.)
 
 ### Cas Mont-Tremblant (ville pilote grounding)
 
-Mesuré : **13 signaux** (z = 13, m = 2, p = 7), **5 PV PDF** archivés. Ancien
-rang proximité : **351** (exclue du focus alors que des villes à 0 signal y
-étaient). Avec le critère corrigé, Mont-Tremblant est dans le périmètre
-« villes à signaux » au **rang 80/725 par nombre de signaux** — mieux classée
-que 19 des 30 villes de l'ancien focus, mais pas dans le top-30 en volume
-brut (seuil : 24 signaux). Le bug d'EXCLUSION (0 signal devant elle) est
-corrigé ; si le principal veut Mont-Tremblant dans les 30 affichées, c'est un
-choix de curation (épinglage pilote), pas de définition — à trancher côté
-produit.
+Mesuré : **13 signaux** (z = 13, m = 2, p = 7), dont **2 signaux prioritaires
+z∩m∩p**, **5 PV PDF** archivés. Ancien rang proximité : **351** (exclue du
+focus alors que des villes à 0 signal y étaient) ; le top-30 par volume du
+premier fix l'excluait AUSSI (rang 80/723 par volume, seuil 24 signaux) — et
+proposait un « épinglage de curation » pour l'y remettre. **Avec la définition
+corrigée, la question ne se pose plus : Mont-Tremblant porte 2 signaux
+prioritaires → rang 1 du focus, par définition, sans curation.**
 
-## Le fix de définition (code)
+## [DÉPASSÉ — premier fix #343] Le fix de définition v1 (code)
+
+> **DÉPASSÉ (amendement 2026-07-03)** : remplacé par le fix v2 (villes des
+> signaux prioritaires z∩m∩p, champ `signals.priority` de l'API) décrit en
+> tête de rapport. Conservé pour trace.
 
 `ui/src/lib/sources/source-coverage-client.ts` :
 
@@ -248,8 +421,24 @@ recontrôler ; le focus-30 UI s'auto-corrigera (critère data-driven).
 
 ## Gate
 
+Premier fix (#343) :
+
 - `svelte-check` : 1 erreur préexistante sur origin/main
   (`SignalPdfOverlay.svelte`, typage pdfjs, fichier non touché) — **0 nouvelle
   erreur**.
 - `vitest` suites touchées : `source-coverage-client.test.ts` (21) +
   `SourceConsole.test.ts` (4) + suites voisines `sources/` — 38/38 verts.
+
+Fix v2 (amendement 2026-07-03, définition « signaux prioritaires ») :
+
+- `svelte-check` : **0 nouvelle erreur** (la même préexistante
+  `SignalPdfOverlay.svelte`).
+- `vitest` UI : `source-coverage-client.test.ts` (22) + `coverage-scope.test.ts`
+  (13) + `SourceConsole/SourcesRail/SourceCoverageMap.test.ts` (25) —
+  **60/60 verts**.
+- `vitest` API : `source-coverage.test.ts` — **30/30 verts** (dont 2 tests du
+  compte `priority` z∩m∩p sur nœuds bruts).
+- Playwright HEADLESS jetable (ports 4317/4318, jamais le Chrome utilisateur) :
+  `sources-coverage.spec.ts` **3/3** + `focus-scope.harness.spec.ts` **3/3** —
+  rendu réel : Mont-Tremblant (2 prioritaires) listée, Kirkland/Brossard
+  (0 signal) ET Lyster (400 signaux, 0 prioritaire) exclues.

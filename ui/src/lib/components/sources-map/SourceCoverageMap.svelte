@@ -6,8 +6,8 @@
    * GeoCityMapBase + structure rail gauche / carte / drawer droit), la vue ne
    * différant que sur :
    *   - le CRITÈRE DE FILTRAGE du rail : radio EXCLUSIF à 3 portées
-   *     (« Focus QA : 4 villes » / « 30 villes à signaux » / « Toutes » —
-   *     coverage-scope) au lieu des 3 cases à cocher de Signaux. La portée
+   *     (« Focus QA : 4 villes » / « Villes à signaux précoces » / « Toutes »
+   *     — coverage-scope) au lieu des 3 cases à cocher de Signaux. La portée
    *     remplace l'ancien toggle « Province (1104) / Focus 30 » de la carte ;
    *   - le DRAWER droit : scorecard de couverture de la ville sélectionnée
    *     (SourceScorecard — PV · signaux · zones · normes · lots · TOD) au lieu
@@ -115,8 +115,9 @@
   function handleScopeChange(next: CoverageScope): void {
     scope = next;
   }
-  // Périmètre « 30 villes à signaux » (présence de signaux, PAS priorityRank ≤ 30) :
-  // partagé par la portée focus30 (coverage-scope) et le badge Focus 30 du drawer.
+  // Périmètre « Villes à signaux précoces » (signaux prioritaires z∩m∩p — ni
+  // priorityRank ≤ 30, ni top 30 par volume) : partagé par la portée focus30
+  // (coverage-scope) et le badge « Signaux précoces » du drawer.
   $: focusScope = computeFocusScope(cities);
 
   // ── Sélection ville + zone (drill, parité Signaux) ─────────────────────────
@@ -146,7 +147,7 @@
       priorityRank: null,
       l1Raw: { state: "absent", count: 0, freshness: "unknown" },
       l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
-      signals: { state: "absent", count: 0, withCitation: 0, freshness: "unknown" },
+      signals: { state: "absent", count: 0, withCitation: 0, priority: 0, freshness: "unknown" },
       l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
       normes: { state: "absent", freshness: "unknown" },
       l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },

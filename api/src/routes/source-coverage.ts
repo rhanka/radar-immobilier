@@ -5,6 +5,7 @@ import type { ScrapeStatusSourceT, ScrapeStatusT } from "@radar/domain";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import { graphNodes, lotVersions, zoneVersions } from "../db/schema.js";
+import { listCitiesWithSignalNodes } from "../services/graph/graph-store.js";
 import { readAll } from "../services/scrape-status/store.js";
 import { mergeWithDerived } from "../services/scrape-status/derive.js";
 import { DEFAULT_OGC_BASE_URL } from "../services/geo/ogc-pull.js";
@@ -33,7 +34,10 @@ import {
  *   - Signaux    : un GROUP BY city_slug sur graph_nodes (Signal +
  *                  DesignationEvent) avec la part portant une citation/extrait
  *                  vérifiable (props/citation/excerpt/refs, mêmes clés que la
- *                  route graph-signals).
+ *                  route graph-signals) + le compte de signaux PRIORITAIRES
+ *                  z∩m∩p par ville (`listCitiesWithSignalNodes`, la MÊME
+ *                  classification que la vue Signaux et que la cohorte « 33 »
+ *                  de l'axe de reporting — zonage ∩ multifamilial 4+ ∩ précoce).
  *   - L4 zonage / L5 lots : « servi » = la collection `qc-zonage-<slug>` /
  *                  `qc-lots-<slug>` est présente dans le LISTING LIVE de l'API
  *                  geo (`${geo}/collections`, UNE seule requête pour toute la
@@ -49,7 +53,8 @@ import {
  *   - Normes     : reprise de la mesure grilles LAZY (endpoint /:citySlug/grilles)
  *                  quand elle est chaude en cache ; sinon `absent` honnête
  *                  (aucune grille prouvée à date — jamais mesuré en bulk).
- * Soit 4 requêtes agrégées set-based + une lecture scrape-status + un GET
+ * Soit 4 requêtes agrégées set-based + une requête province-wide par nœud
+ * signal (classification z/m/p en TS) + une lecture scrape-status + un GET
  * listing geo (caché), point.
  *
  * Statut agrégé par ville (`worstStatus`, couleur carte) — tri-état client :
@@ -125,6 +130,13 @@ interface SignalsCell {
   count: number;
   /** Dont porteurs d'une citation/extrait vérifiable. */
   withCitation: number;
+  /**
+   * Dont signaux PRIORITAIRES z∩m∩p : zonage ∩ multifamilial 4+ ∩ précoce
+   * (subsetCounts["z|m|p"] de `listCitiesWithSignalNodes` — la cohorte « 33 »
+   * de l'axe de reporting « 30 villes / 33 signaux précoces »). C'est ce compte
+   * qui définit le périmètre focus côté client (`computeFocusScope`).
+   */
+  priority: number;
   freshness: Freshness;
 }
 
@@ -184,6 +196,8 @@ interface GraphAgg {
 interface SignalAgg {
   signalCount: number;
   withCitation: number;
+  /** Signaux prioritaires z∩m∩p (zonage ∩ multifamilial 4+ ∩ précoce). */
+  priorityCount: number;
   lastCreatedAt: string | null;
 }
 
@@ -529,9 +543,12 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Agrégats set-based (4 requêtes GROUP BY city_slug, jamais 1104 per-city)
+// Agrégats set-based (5 requêtes, jamais 1104 per-city)
 // Ordre STABLE (les tests mockent la file dans cet ordre) :
-//   1. graph  2. zones  3. lots  4. signaux
+//   1. graph  2. zones  3. lots  4. signaux  5. signaux prioritaires z∩m∩p
+//   (la 5e est `listCitiesWithSignalNodes` — une requête province-wide par
+//   nœud signal, classée en TS : mêmes helpers que la vue Signaux, y compris
+//   les replis `etape`/`deriveEtape` impossibles en SQL pur)
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function loadBulkAggregates(db: Database): Promise<{
@@ -641,12 +658,22 @@ async function loadBulkAggregates(db: Database): Promise<{
     });
   }
 
+  // Signaux PRIORITAIRES z∩m∩p par ville : classification canonique de la vue
+  // Signaux (`listCitiesWithSignalNodes`), subsetCounts["z|m|p"]. C'est le
+  // périmètre focus (« villes à signaux précoces ») — la cohorte « 33 ».
+  const prioritySignalCities = await listCitiesWithSignalNodes(db);
+  const priorityBySlug = new Map<string, number>();
+  for (const entry of prioritySignalCities) {
+    priorityBySlug.set(entry.citySlug, entry.subsetCounts["z|m|p"] ?? 0);
+  }
+
   const signalByCity = new Map<string, SignalAgg>();
   for (const row of signalRows) {
     if (!row.citySlug) continue;
     signalByCity.set(row.citySlug, {
       signalCount: Number(row.signalCount ?? 0),
       withCitation: Number(row.withCitation ?? 0),
+      priorityCount: priorityBySlug.get(row.citySlug) ?? 0,
       lastCreatedAt: toIsoOrNull(row.lastCreatedAt),
     });
   }
@@ -721,6 +748,7 @@ function buildSignalsCell(
 ): SignalsCell {
   const count = agg?.signalCount ?? 0;
   const withCitation = agg?.withCitation ?? 0;
+  const priority = agg?.priorityCount ?? 0;
 
   let state: CoverageState;
   if (count > 0) state = "verified";
@@ -734,7 +762,7 @@ function buildSignalsCell(
     count > 0,
   );
 
-  return { state, count, withCitation, freshness };
+  return { state, count, withCitation, priority, freshness };
 }
 
 function buildGeoCell(
