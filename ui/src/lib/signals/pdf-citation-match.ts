@@ -4,28 +4,53 @@
  *
  * Contexte : les graphes graphify ne portent presque jamais de `bbox`. La preuve
  * doit néanmoins surligner le passage cité. La citation EXISTE (c'est l'« extrait
- * cité » du panneau de droite, produit par pdftotext au grounding), donc elle est
- * présente verbatim — à la normalisation près (espaces, accents, ligatures,
- * césures de fin de ligne) — dans la couche texte de la page.
+ * cité » du panneau de droite, produit au grounding), donc elle est présente
+ * verbatim — à la normalisation près — dans la couche texte de la page.
+ *
+ * Constats MESURÉS sur PV réels (Saint-Amable, 12 échecs sur 15 avec l'ancien
+ * algorithme « fenêtre de mots sur texte espacé ») :
+ *   a. pdf.js découpe les nombres à tirets en items séparés (« 712-46-2026 » →
+ *      « 712 », « - », « 46 »…) et le composant joint les items par une espace →
+ *      le texte de page contient « 712 - 46 - 2026 », voire « 05 2 - 03 - 26 »
+ *      (item coupé en plein chiffre). Tout numéro de règlement/résolution cassait
+ *      la fenêtre de mots.
+ *   b. Les citations graphify contiennent des ÉLISIONS — explicites (« […] »,
+ *      « [...] ») ou implicites (en-tête de résolution + décision, sans les
+ *      CONSIDÉRANT intermédiaires) : la citation est PLUSIEURS passages disjoints
+ *      de la page, jamais une seule sous-chaîne contiguë.
+ *   c. Le seuil d'acceptation exigeait 40 % de couverture d'une SEULE fenêtre
+ *      contiguë : un préfixe véridique de 24 mots (sur 65) était rejeté.
  *
  * Stratégie, sans aucune dépendance pdf.js (logique pure, testable offline) :
- *   1. Normaliser citation et texte de page de la même façon, en conservant pour
- *      le texte de page une table de correspondance index normalisé → index brut.
- *   2. Chercher la citation normalisée comme sous-chaîne ; si absente, retomber
- *      sur la plus longue fenêtre de mots consécutifs de la citation qui matche
- *      (robustesse aux coupures OCR/pdftotext et aux têtes/queues bruitées).
- *   3. Restituer l'intervalle [start, end] dans le texte BRUT de la page, que le
- *      composant convertit en spans surlignés.
+ *   1. SQUELETTE : normaliser page et citation en retirant TOUS les espaces et
+ *      les tirets (avec table index squelette → index brut pour la page). Le
+ *      match devient insensible à la tokenisation pdf.js (espaces artificiels
+ *      dans les mots/nombres) et aux césures de fin de ligne.
+ *   2. SEGMENTS : chercher la plus longue fenêtre de mots consécutifs de la
+ *      citation présente dans le squelette, puis RÉCURSER sur les mots restants
+ *      (avant/après) → plusieurs plages surlignables (élisions couvertes).
+ *   3. ACCEPTATION : couverture cumulée ≥ minCoverage OU une fenêtre « forte »
+ *      (≥ strongWords mots consécutifs, quasi impossible par hasard). Chaque
+ *      fenêtre individuelle reste ≥ minWords pour ne pas surligner une amorce
+ *      générique (bug #83).
  */
 
 /** Intervalle de caractères dans le texte brut de la page (fin exclusive). */
-export interface CitationMatch {
-  /** Index de début dans le texte brut concaténé de la page. */
+export interface CitationRange {
   start: number;
-  /** Index de fin (exclusif) dans le texte brut concaténé de la page. */
   end: number;
-  /** Fraction de la citation (en mots) effectivement retrouvée, dans [0, 1]. */
+}
+
+/** Résultat d'appariement : plages brutes surlignables + couverture. */
+export interface CitationMatch {
+  /** Début de la PREMIÈRE plage (ordre de page) — rétrocompat mono-plage. */
+  start: number;
+  /** Fin (exclusive) de la première plage — rétrocompat mono-plage. */
+  end: number;
+  /** Fraction de la citation (en mots) couverte par les plages, dans [0, 1]. */
   coverage: number;
+  /** TOUTES les plages surlignables, triées par position dans la page. */
+  ranges: CitationRange[];
 }
 
 /**
@@ -44,118 +69,191 @@ export function normalizeForMatch(input: string): string {
     .replace(/[‘’‚‛′]/gu, "'") // apostrophes typographiques
     .replace(/[“”„‟″]/gu, '"') // guillemets
     .replace(/[‐-―]/gu, "-") // tirets unicode → -
+    .replace(/­/gu, "-") // tiret conditionnel (césure) → -
     .toLowerCase()
     .replace(/\s+/gu, " ")
     .trim();
 }
 
 /**
- * Construit le texte normalisé d'une page + la table de correspondance des index
- * normalisés vers les index bruts (pour retrouver l'intervalle d'origine).
+ * Marqueurs d'ÉLISION insérés par graphify dans les citations (« […] »,
+ * « [...] », « (...) », « ... » isolé) : retirés avant le découpage en mots —
+ * ils n'existent jamais dans la page et scinderaient artificiellement les
+ * fenêtres tout en dégradant la couverture.
  */
-function buildNormalizedIndex(raw: string): { normalized: string; map: number[] } {
-  const normalizedChars: string[] = [];
+const ELLIPSIS_MARKERS = /\[[\s.…]*\]|\([\s.…]*\)|(?:^|(?<=\s))(?:\.{3,}|…)(?=\s|$)/gu;
+
+/**
+ * Construit le SQUELETTE d'un texte : caractères normalisés SANS espaces ni
+ * tirets, plus la table de correspondance index squelette → index brut. Retirer
+ * les espaces rend le match insensible aux items pdf.js joints par des espaces
+ * (« qu e la » ≡ « que la ») ; retirer les tirets absorbe à la fois les nombres
+ * éclatés (« 712 - 46 - 2026 » ≡ « 712-46-2026 ») et les césures de fin de
+ * ligne (« modifica- tion » ≡ « modification »).
+ */
+function buildSkeletonIndex(raw: string): { skeleton: string; map: number[] } {
+  const chars: string[] = [];
   const map: number[] = [];
-  let prevWasSpace = true; // évite l'espace de tête
   for (let i = 0; i < raw.length; i++) {
     const ch = raw[i]!;
-    // Les espaces (et tout blanc) sont détectés sur le caractère BRUT :
-    // `normalizeForMatch` applique un `.trim()` qui réduirait un blanc isolé à "".
-    if (/\s/u.test(ch)) {
-      if (prevWasSpace) continue;
-      normalizedChars.push(" ");
-      map.push(i);
-      prevWasSpace = true;
-      continue;
-    }
+    if (/\s/u.test(ch)) continue; // espaces : jamais dans le squelette
     const norm = normalizeForMatch(ch);
-    if (norm.length === 0) {
-      // caractère qui disparaît à la normalisation (diacritique combinant seul,
-      // césure…) : on l'absorbe dans le caractère précédent.
-      continue;
-    }
+    if (norm.length === 0) continue; // diacritique combinant seul, etc.
     // une ligature peut produire plusieurs caractères (ex. œ→oe) : tous pointent sur i
     for (const c of norm) {
-      normalizedChars.push(c);
+      if (c === "-" || c === " ") continue; // tirets/espaces issus de la normalisation
+      chars.push(c);
       map.push(i);
     }
-    prevWasSpace = false;
   }
-  // retire l'espace de queue éventuel
-  while (normalizedChars.length > 0 && normalizedChars[normalizedChars.length - 1] === " ") {
-    normalizedChars.pop();
-    map.pop();
-  }
-  return { normalized: normalizedChars.join(""), map };
+  return { skeleton: chars.join(""), map };
+}
+
+/** Squelette d'une suite de mots normalisés (mêmes règles que la page). */
+function wordsSkeleton(words: readonly string[], from: number, to: number): string {
+  return words.slice(from, to).join("").replace(/-/gu, "");
+}
+
+/** Fenêtre de mots consécutifs [at, at+len) trouvée à `skelIdx` du squelette. */
+interface MatchedWindow {
+  at: number;
+  len: number;
+  skelIdx: number;
+  skelLen: number;
 }
 
 /**
- * Cherche la citation `excerpt` dans le texte brut `pageText` et retourne
- * l'intervalle brut surlignable, ou `null` si rien d'exploitable.
+ * Cherche la citation `excerpt` dans le texte brut `pageText` et retourne les
+ * plages brutes surlignables, ou `null` si rien d'exploitable.
  *
- * - Match exact (normalisé) d'abord.
- * - Sinon, plus longue séquence de mots consécutifs de la citation présente dans
- *   la page : on érode la citation par les bords (queue puis tête) jusqu'à
- *   trouver une fenêtre d'au moins `minWords` mots. Couvre les cas où pdftotext a
- *   coupé/bruité le début ou la fin de la citation.
+ * - Découpe la citation en mots (marqueurs d'élision retirés).
+ * - Trouve la plus longue fenêtre de mots consécutifs dont le squelette est
+ *   présent dans le squelette de la page, puis récurse sur les restes → chaque
+ *   segment réellement présent (autour d'une élision, d'une troncature ou d'un
+ *   bruit OCR) produit sa propre plage.
+ * - Accepte si la couverture cumulée atteint `minCoverage` OU si une fenêtre
+ *   d'au moins `strongWords` mots consécutifs existe (préfixe long véridique
+ *   d'une citation longue). Toute fenêtre reste ≥ `minWords` (anti bug #83 :
+ *   une amorce générique de 4-5 mots ne déclenche jamais de surlignage).
  */
 export function findCitationInPage(
   pageText: string,
   excerpt: string,
-  options: { minWords?: number; minCoverage?: number } = {},
+  options: { minWords?: number; minCoverage?: number; strongWords?: number } = {},
 ): CitationMatch | null {
-  // minWords relevé de 4 → 6 : une fenêtre de 4 mots génériques (« ATTENDU QUE
-  // la municipalité ») se retrouve sur PLUSIEURS pages d'un PV et générait des
-  // surlignages parasites (bug #83). Exiger une fenêtre plus longue ET une
-  // couverture minimale rend le fallback spécifique au passage réellement cité.
   const minWords = options.minWords ?? 6;
   const minCoverage = options.minCoverage ?? 0.4;
+  const strongWords = options.strongWords ?? 10;
+  // Borne de coût : une fenêtre n'a pas besoin de dépasser 60 mots pour être
+  // unique ; la récursion couvre le reste d'une citation plus longue.
+  const MAX_WINDOW = 60;
 
-  const cleanExcerpt = normalizeForMatch(excerpt);
-  if (cleanExcerpt.length === 0) return null;
-  const totalWords = cleanExcerpt.split(" ").filter(Boolean);
-  if (totalWords.length === 0) return null;
+  const cleanExcerpt = normalizeForMatch(excerpt).replace(ELLIPSIS_MARKERS, " ");
+  const words = cleanExcerpt.split(" ").filter(Boolean);
+  if (words.length === 0) return null;
 
-  const { normalized, map } = buildNormalizedIndex(pageText);
-  if (normalized.length === 0) return null;
+  const { skeleton, map } = buildSkeletonIndex(pageText);
+  if (skeleton.length === 0) return null;
 
-  const toRawRange = (normStart: number, normEnd: number): CitationMatch | null => {
-    if (normStart < 0 || normEnd <= normStart || normEnd > map.length) return null;
-    const rawStart = map[normStart]!;
-    const rawEnd = (map[normEnd - 1] ?? rawStart) + 1;
-    return { start: rawStart, end: rawEnd, coverage: 0 };
+  // Plus longue fenêtre présente commençant au mot i : binaire sur la longueur
+  // (un préfixe d'une sous-chaîne présente est présent → monotone).
+  const longestAt = (i: number, maxLen: number): { len: number; skelIdx: number } => {
+    if (skeleton.indexOf(wordsSkeleton(words, i, i + minWords)) < 0) {
+      return { len: 0, skelIdx: -1 };
+    }
+    let lo = minWords;
+    let hi = maxLen;
+    while (lo < hi) {
+      const mid = Math.ceil((lo + hi) / 2);
+      if (skeleton.indexOf(wordsSkeleton(words, i, i + mid)) >= 0) lo = mid;
+      else hi = mid - 1;
+    }
+    return { len: lo, skelIdx: skeleton.indexOf(wordsSkeleton(words, i, i + lo)) };
   };
 
-  // 1) Match exact normalisé.
-  const exactIdx = normalized.indexOf(cleanExcerpt);
-  if (exactIdx >= 0) {
-    const range = toRawRange(exactIdx, exactIdx + cleanExcerpt.length);
-    if (range) return { ...range, coverage: 1 };
+  // Segmentation récursive gloutonne : meilleure fenêtre, puis restes.
+  const windows: MatchedWindow[] = [];
+  const search = (from: number, to: number): void => {
+    if (to - from < minWords) return;
+    let best: MatchedWindow | null = null;
+    for (let i = from; i + minWords <= to; i++) {
+      const { len, skelIdx } = longestAt(i, Math.min(to - i, MAX_WINDOW));
+      if (len >= minWords && (best === null || len > best.len)) {
+        best = { at: i, len, skelIdx, skelLen: wordsSkeleton(words, i, i + len).length };
+      }
+    }
+    if (!best) return;
+    windows.push(best);
+    search(from, best.at);
+    search(best.at + best.len, to);
+  };
+  search(0, words.length);
+  if (windows.length === 0) return null;
+
+  const matchedWords = windows.reduce((acc, w) => acc + w.len, 0);
+  const longestWindow = windows.reduce((acc, w) => Math.max(acc, w.len), 0);
+  const coverage = Math.min(1, matchedWords / words.length);
+  // ACCEPTATION : couverture suffisante OU fenêtre forte. Un match faible ET
+  // court (ex. 6 mots génériques d'une citation de 30) reste rejeté (bug #83).
+  if (coverage < minCoverage && longestWindow < strongWords) return null;
+
+  // GARDE DE JETON DISCRIMINANT (anti-boilerplate) : deux résolutions d'un même
+  // corpus partagent de longues formules identiques (« modifiant le règlement
+  // de zonage … afin de modifier les limites de la zone », « avis de motion et
+  // adoption du premier projet »…) — MESURÉ : la citation d'un AUTRE règlement
+  // atteint 74 % de couverture par simple accumulation de boilerplate. Ce qui
+  // distingue le bon passage, ce sont les IDENTIFIANTS (nos de règlement, de
+  // résolution, de lot, codes de zone : mots porteurs de chiffres). Si la
+  // citation en contient, on exige qu'au moins la MOITIÉ soit couverte par les
+  // fenêtres matchées (mesuré : 83-100 % pour les 15 vrais matchs Saint-Amable,
+  // 20 % pour le parasite — seul le no du règlement de base, partagé, matchait).
+  const identifierIdx = words.reduce<number[]>((acc, w, i) => {
+    if (/\d/u.test(w)) acc.push(i);
+    return acc;
+  }, []);
+  if (identifierIdx.length > 0) {
+    const covered = identifierIdx.filter((i) =>
+      windows.some((w) => i >= w.at && i < w.at + w.len),
+    ).length;
+    if (covered / identifierIdx.length < 0.5) return null;
   }
 
-  // 2) Plus longue fenêtre de mots consécutifs présente dans la page.
-  //    On essaie des sous-séquences [i, j) de la citation, de la plus longue à la
-  //    plus courte, par fenêtre glissante décroissante. Borne le coût en limitant
-  //    la longueur de citation considérée.
-  const maxWindow = Math.min(totalWords.length, 60);
-  for (let windowLen = maxWindow; windowLen >= minWords; windowLen--) {
-    for (let i = 0; i + windowLen <= totalWords.length; i++) {
-      const candidate = totalWords.slice(i, i + windowLen).join(" ");
-      const idx = normalized.indexOf(candidate);
-      if (idx >= 0) {
-        const range = toRawRange(idx, idx + candidate.length);
-        if (range) {
-          const coverage = windowLen / totalWords.length;
-          // ET (pas OU) : la fenêtre doit être assez longue ET couvrir une part
-          // significative de la citation. Le `||` précédent acceptait toute
-          // fenêtre de `minWords` mots, même générique → faux positifs multi-pages.
-          if (coverage >= minCoverage && windowLen >= minWords) {
-            return { ...range, coverage };
-          }
-        }
+  const ranges: CitationRange[] = [];
+  for (const w of windows) {
+    if (w.skelIdx < 0 || w.skelLen === 0 || w.skelIdx + w.skelLen > map.length) continue;
+    ranges.push({ start: map[w.skelIdx]!, end: map[w.skelIdx + w.skelLen - 1]! + 1 });
+  }
+  if (ranges.length === 0) return null;
+  ranges.sort((a, b) => a.start - b.start);
+
+  return { start: ranges[0]!.start, end: ranges[0]!.end, coverage, ranges };
+}
+
+/** Intervalle [start, end) d'un item de la couche texte pdf.js dans le texte de page. */
+export interface ItemSpan {
+  start: number;
+  end: number;
+}
+
+/**
+ * Indices des items de la couche texte chevauchant AU MOINS une plage du match
+ * (déduplicés, ordre croissant). C'est la géométrie du surlignage : le viewer
+ * dessine une marque par item retourné. Extrait ici (logique pure) pour être
+ * testable avec une couche texte simulée, sans pdf.js ni DOM.
+ */
+export function itemsOverlappingRanges(
+  items: readonly ItemSpan[],
+  ranges: readonly CitationRange[],
+): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]!;
+    for (const range of ranges) {
+      if (item.end > range.start && item.start < range.end) {
+        out.push(i);
+        break;
       }
     }
   }
-
-  return null;
+  return out;
 }
