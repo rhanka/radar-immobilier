@@ -61,7 +61,12 @@ export interface LotProperties {
    * arrive ; « — » dans la fiche en attendant.
    */
   codePostal?: string | null;
-  /** Façade mesurée par la source (m) quand exposée. */
+  /**
+   * Façade du lot (m). La valeur CANONIQUE servie par geo (`frontage_m`)
+   * prime ; à défaut la `facade_m` mesurée par la source. La fiche l'affiche
+   * sans mention « estimée » ; quand absente, l'UI retombe sur l'estimation
+   * géométrique (`estimatedFacadeM`), étiquetée comme telle.
+   */
   facadeM?: number | null;
   /** Profondeur mesurée par la source (m) quand exposée. */
   profondeurM?: number | null;
@@ -464,7 +469,14 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.postalCode,
     properties.postal_code,
   ]);
-  const facadeM = firstNumber([properties.facadeM, properties.facade_m]);
+  // Façade : la valeur CANONIQUE geo (`frontage_m`) prime sur la `facade_m`
+  // de la source — affichée sans « estimée » dès que geo la sert.
+  const facadeM = firstNumber([
+    properties.frontageM,
+    properties.frontage_m,
+    properties.facadeM,
+    properties.facade_m,
+  ]);
   const profondeurM = firstNumber([properties.profondeurM, properties.profondeur_m]);
   const usageCode = firstString([
     properties.usageCode,
