@@ -27,6 +27,7 @@ interface GraphCell extends CoverageCell {
 interface SignalsCell extends CoverageCell {
   count: number;
   withCitation: number;
+  priority: number;
 }
 interface GeoCell extends CoverageCell {
   served: boolean;
