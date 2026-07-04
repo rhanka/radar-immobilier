@@ -228,7 +228,9 @@ export function formatYesNo(value: boolean | null | undefined): string {
 }
 
 /**
- * Façade affichable d'un lot (C5) : la façade MESURÉE par la source prime ;
+ * Façade affichable d'un lot (C5) : la façade SERVIE prime — `facadeM` porte
+ * la valeur canonique geo (`frontage_m`) ou à défaut la mesure de la source
+ * (`facade_m`), cf. mapping lots-client — affichée sans mention « estimée » ;
  * sinon l'ESTIMATION géométrique (`estimatedFacadeM`), affichée honnêtement
  * comme telle (« ≈ … m (estimée) ») ; « — » discret quand ni l'une ni l'autre.
  */
@@ -249,4 +251,10 @@ function formatMeters(value: number): string {
   return (Math.round(value * 10) / 10).toLocaleString("fr-CA", {
     maximumFractionDigits: 1,
   });
+}
+
+/** Longueur affichable : « X m » (1 décimale, fr-CA) ; « — » discret quand absente. */
+export function formatLength(value: number | null | undefined): string {
+  if (value === null || value === undefined) return "—";
+  return `${formatMeters(value)} m`;
 }

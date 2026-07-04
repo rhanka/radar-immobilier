@@ -1,5 +1,5 @@
 {
-  "_note": "Snapshot fixture MINIMAL de Delson (mode:simulation) pour tests offline du loader cadastre-geojson-source. Géométries simplifiées (carrés ~quelques m), pas de PII (aucun champ `adresse`, NO_LOT cadastral public uniquement). Couvre les 4 cas de score (priorite / 4+ / tod / autre) + 1 emprise is_rue exclue + 1 lot sans geometry ignoré.",
+  "_note": "Snapshot fixture MINIMAL de Delson (mode:simulation) pour tests offline du loader cadastre-geojson-source. Géométries simplifiées (carrés ~quelques m). Anti-PII : aucun nom de propriétaire ; `adresse`/`code_postal` sont des données PUBLIQUES du rôle (identifient la propriété, pas une personne) — servies par geo, consommées telles quelles. Le lot 2181127 porte les 4 champs geo (superficie_m2 réelle, frontage_m canonique, adresse, code_postal) ; 2181200 n'en porte aucun (repli/« — »). Couvre les 4 cas de score (priorite / 4+ / tod / autre) + 1 emprise is_rue exclue + 1 lot sans geometry ignoré.",
   "meta": {
     "nom": "Delson",
     "slug": "delson",
@@ -23,6 +23,7 @@
           "categorie": "Multi-logements",
           "cubf": "5100",
           "utilisation": "Logement multifamilial",
+          "superficie_m2": 1180.2,
           "superficie_m2_calculee": 1240.5,
           "nb_logements_role": 6,
           "nb_etages": "3",
@@ -30,12 +31,15 @@
           "val_totale": 850000,
           "val_terrain": 220000,
           "val_batiment": 630000,
+          "frontage_m": 22.9,
           "facade_m": 28,
           "profondeur_m": 44,
           "multifamilial_4plus": true,
           "tod": true,
           "priorite": true,
-          "adresse": "MASQUE-PII"
+          "adresse": "123 rue des Érables",
+          "code_postal": "J5B 1B4",
+          "proprietaire": "JAMAIS-MAPPE-PII"
         },
         "geometry": {
           "type": "Polygon",
