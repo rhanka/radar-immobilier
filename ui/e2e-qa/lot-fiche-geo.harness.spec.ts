@@ -2,15 +2,18 @@ import { expect, test, type Page } from "@playwright/test";
 
 /**
  * QA NAVIGATEUR — consommation des propriétés servies par GEO sur la fiche lot
- * (panneau Signaux) : `superficie_m2` (aire réelle), `frontage_m` (façade
- * canonique), `adresse`, `code_postal`.
+ * (panneau Signaux) : `surface_m2` (aire réelle du polygone — l'ancien nom
+ * `superficie_m2` n'a JAMAIS été servi, bug #350), `frontage_m` (façade
+ * canonique), `adresse`, `code_postal` (FSA 3 caractères), normes foldées
+ * par lot (`<norme>_value`/`_unit`) et `in_tod`.
  *
  * Le harnais stubbe la collection OGC `qc-lots-ville-qa` avec une réponse
  * BRUTE (snake_case geo) et passe par le VRAI mapping `fetchLots` :
  *   - lot `full`  → la fiche s'allume : superficie réelle « 650 m² », façade
- *     canonique « 22,9 m » SANS mention « estimée », adresse et code postal ;
- *   - lot `empty` → « — » honnête (aucun calcul immo de superficie) ; façade
- *     en repli ESTIMATION immo, étiquetée « ≈ … (estimée) ».
+ *     canonique « 22,9 m » SANS mention « estimée », adresse, code postal FSA
+ *     « J3Y (secteur) », normes verbatim (valeur + unité), TOD « Oui » ;
+ *   - lot `empty` → « — » honnête partout (aucun calcul immo, aucune norme
+ *     inventée) ; façade en repli ESTIMATION immo, étiquetée « ≈ … (estimée) ».
  */
 
 const HARNESS = "/e2e-qa/harness/lot-fiche-geo.html";
@@ -33,11 +36,11 @@ async function ficheEntries(page: Page): Promise<Record<string, string>> {
   });
 }
 
-test.describe("Fiche lot × propriétés geo (superficie/frontage/adresse/code postal)", () => {
-  test("lot avec les 4 champs geo → fiche allumée, façade canonique sans « estimée »", async ({
+test.describe("Fiche lot × propriétés geo (surface_m2/frontage/adresse/code postal/normes)", () => {
+  test("lot avec champs geo → fiche allumée : surface_m2, FSA, normes verbatim", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 460, height: 900 });
+    await page.setViewportSize({ width: 460, height: 1100 });
     await page.goto(`${HARNESS}?lot=full`);
 
     // La fiche du lot pré-focusé s'ouvre (accordéon Lots déplié automatiquement).
@@ -45,14 +48,28 @@ test.describe("Fiche lot × propriétés geo (superficie/frontage/adresse/code p
 
     const entries = await ficheEntries(page);
     expect(entries["Lot"]).toBe("1 000 001");
-    // Les 4 champs servis par geo, affichés tels quels (copy neutre).
+    // Champs servis par geo, affichés tels quels (copy neutre).
     expect(entries["Adresse"]).toBe("123 rue des Érables");
-    expect(entries["Code postal"]).toBe("J5B 1B4");
+    // FSA 3 caractères → affiché tel quel + libellé discret « (secteur) ».
+    expect(entries["Code postal"]).toBe("J3Y (secteur)");
+    // `surface_m2` (aire réelle) → Superficie arrondie, format fr-CA.
     expect(entries["Superficie"]).toBe("650 m²");
     expect(entries["Façade"]).toBe("22,9 m");
     // Façade CANONIQUE geo : jamais présentée comme une estimation.
     expect(entries["Façade"]).not.toContain("estimée");
     expect(entries["Façade"]).not.toContain("≈");
+    // `in_tod` geo foldé sur le badge TOD.
+    expect(entries["Périmètre TOD"]).toBe("Oui");
+    // Normes foldées par lot : valeur + unité VERBATIM quand servies —
+    // « Façade min »/« Superficie min » = NORMES, distinctes de la façade
+    // réelle (22,9 m) et de l'aire réelle (650 m²).
+    expect(entries["Hauteur max"]).toBe("12.5 m");
+    expect(entries["Densité"]).toBe("35 log/ha");
+    expect(entries["Façade min"]).toBe("15");
+    expect(entries["Superficie min"]).toBe("460 m²");
+    expect(entries["Marge avant"]).toBe("6");
+    expect(entries["Marge latérale"]).toBe("2");
+    expect(entries["Marge arrière"]).toBe("7.5");
 
     await page.screenshot({ path: `${SHOT_DIR}/lot-fiche-geo-full.png`, fullPage: true });
   });
@@ -60,7 +77,7 @@ test.describe("Fiche lot × propriétés geo (superficie/frontage/adresse/code p
   test("lot sans champs geo → « — » honnête, façade en repli estimation immo", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 460, height: 900 });
+    await page.setViewportSize({ width: 460, height: 1100 });
     await page.goto(`${HARNESS}?lot=empty`);
 
     await expect(page.locator(".sel-entity-detail")).toBeVisible({ timeout: 10_000 });
@@ -75,6 +92,18 @@ test.describe("Fiche lot × propriétés geo (superficie/frontage/adresse/code p
     expect(entries["Façade"]).toMatch(/^≈ /u);
     expect(entries["Façade"]).toContain("(estimée)");
     expect(entries["Façade"]).toContain("20");
+    // Aucune norme servie → chaque ligne « Normes de zonage » à « — ».
+    for (const label of [
+      "Hauteur max",
+      "Densité",
+      "Façade min",
+      "Superficie min",
+      "Marge avant",
+      "Marge latérale",
+      "Marge arrière",
+    ]) {
+      expect(entries[label]).toBe("—");
+    }
 
     await page.screenshot({ path: `${SHOT_DIR}/lot-fiche-geo-empty.png`, fullPage: true });
   });

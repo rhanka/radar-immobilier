@@ -73,14 +73,30 @@ describe("mapCadastreCityToLayers — Delson snapshot", () => {
 
   // ── Champs lot servis par geo (superficie réelle / façade canonique /
   // adresse / code postal) — consommés tels quels, null honnête quand absents.
-  it("préfère la superficie RÉELLE geo (superficie_m2) à la calculée", () => {
+  it("préfère la superficie RÉELLE geo (surface_m2, aire du polygone) à la calculée", () => {
     const full = layers.lots.features.find((f) => f.properties.noLot === "2181127");
     expect(full?.properties.superficieM2).toBe(1180.2);
   });
 
-  it("repli superficie_m2_calculee quand superficie_m2 absent", () => {
+  it("repli superficie_m2_calculee quand surface_m2 absent", () => {
     const calc = layers.lots.features.find((f) => f.properties.noLot === "2181200");
     expect(calc?.properties.superficieM2).toBe(980);
+  });
+
+  it("le nom MORT superficie_m2 n'est PLUS lu (geo sert surface_m2 — bug #350)", () => {
+    const raw: CadastreRawCity = {
+      meta: { slug: "x", nom: "X" },
+      lots: {
+        type: "FeatureCollection",
+        features: [{
+          type: "Feature" as const,
+          properties: { NO_LOT: "DEAD-1", superficie_m2: 999 } as never,
+          geometry: { type: "Polygon", coordinates: [[[0, 0], [0, 1], [1, 1], [0, 0]]] },
+        }],
+      },
+    };
+    const out = mapCadastreCityToLayers(raw);
+    expect(out.lots.features[0].properties.superficieM2).toBeNull();
   });
 
   it("aucune superficie servie → null (fiche « — », AUCUN calcul immo)", () => {
@@ -108,13 +124,51 @@ describe("mapCadastreCityToLayers — Delson snapshot", () => {
     expect(bare?.properties.facadeM).toBeNull();
   });
 
-  it("adresse / code postal publics remontés verbatim ; absents → null", () => {
+  it("adresse / code postal (FSA 3 caractères) remontés verbatim ; absents → null", () => {
     const full = layers.lots.features.find((f) => f.properties.noLot === "2181127");
     expect(full?.properties.adresse).toBe("123 rue des Érables");
-    expect(full?.properties.codePostal).toBe("J5B 1B4");
+    expect(full?.properties.codePostal).toBe("J5B");
     const bare = layers.lots.features.find((f) => f.properties.noLot === "2181200");
     expect(bare?.properties.adresse).toBeNull();
     expect(bare?.properties.codePostal).toBeNull();
+  });
+
+  // ── Normes de zonage foldées par lot (contrat geo `<norme>_value`/`_unit`,
+  // verbatim-or-null) — « valeur unité » quand l'unité est servie, valeur
+  // seule sinon, null quand rien n'est servi (fiche « — », rien d'inventé).
+  it("normes foldées : valeur + unité verbatim quand servies", () => {
+    const full = layers.lots.features.find((f) => f.properties.noLot === "2181127");
+    expect(full?.properties.normes).toEqual({
+      hauteur: "12.5 m",
+      densite: "35 log/ha",
+      frontageMin: "15",
+      superficieMin: "460 m²",
+      margeAvant: "6",
+      margeLaterale: "2",
+      margeArriere: "7.5",
+    });
+  });
+
+  it("aucune norme servie → normes null (fiche « — », aucune invention)", () => {
+    const bare = layers.lots.features.find((f) => f.properties.noLot === "2181200");
+    expect(bare?.properties.normes).toBeNull();
+  });
+
+  it("in_tod (geo) foldé sur le flag TOD", () => {
+    const raw: CadastreRawCity = {
+      meta: { slug: "x", nom: "X" },
+      lots: {
+        type: "FeatureCollection",
+        features: [{
+          type: "Feature" as const,
+          properties: { NO_LOT: "TOD-1", in_tod: true },
+          geometry: { type: "Polygon", coordinates: [[[0, 0], [0, 1], [1, 1], [0, 0]]] },
+        }],
+      },
+    };
+    const out = mapCadastreCityToLayers(raw);
+    expect(out.lots.features[0].properties.tod).toBe(true);
+    expect(out.counts.tod).toBe(1);
   });
 
   it("anti-PII : jamais de nom de propriétaire sur les props mappées", () => {
