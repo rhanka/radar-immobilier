@@ -44,6 +44,7 @@ interface CityCoverage {
   l4Zonage: GeoCell;
   normes: CoverageCell;
   l5Lots: GeoCell;
+  lotFields: CoverageCell;
   tod: GeoCell;
   worstStatus: "verified" | "declared" | "absent";
   nextMarginalGain: "zonage" | "lots" | null;
@@ -235,8 +236,12 @@ describe("GET /api/source/coverage", () => {
     expect(sample.l4Zonage).toHaveProperty("served");
     expect(sample.l4Zonage).toHaveProperty("servedBy");
     expect(sample.l5Lots).toHaveProperty("served");
-    // Couches explicites du détail ville : normes (grilles) + TOD.
+    // Couches explicites du détail ville : normes (grilles) + champs lot + TOD.
     expect(sample.normes).toMatchObject({
+      state: expect.any(String),
+      freshness: expect.any(String),
+    });
+    expect(sample.lotFields).toMatchObject({
       state: expect.any(String),
       freshness: expect.any(String),
     });
@@ -1048,5 +1053,188 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
       "/api/source/coverage/Ville%20Pas%20Slug/grilles",
     );
     expect(bad.status).toBe(404);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Détail champs LOT enrichis par ville (lazy, live geo)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface CityLotFieldsBody {
+  citySlug: string;
+  available: boolean;
+  totalLots?: number | null;
+  sampleSize?: number;
+  sampled?: boolean;
+  fields?: Record<
+    "superficie" | "adresse" | "codePostal" | "normes",
+    { count: number; pct: number; state: string }
+  >;
+  state?: string;
+}
+
+describe("GET /api/source/coverage/:citySlug/lot-fields", () => {
+  function lotFieldsApp(
+    fetchImpl: typeof fetch,
+  ): ReturnType<typeof sourceCoverageRoute> {
+    return sourceCoverageRoute({
+      store: makeMemStore(),
+      now: NOW,
+      fetchImpl,
+    });
+  }
+
+  /** fetch items servant `count` lots identiques + numberMatched. */
+  function lotsFetch(
+    properties: Record<string, unknown>,
+    total: number,
+  ): typeof fetch {
+    return vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(String(input), "http://geo.test");
+      const offset = Number(url.searchParams.get("offset") ?? "0");
+      const limit = Number(url.searchParams.get("limit") ?? "0");
+      const count = Math.max(0, Math.min(limit, total - offset));
+      return new Response(
+        JSON.stringify({
+          type: "FeatureCollection",
+          features: Array.from({ length: count }, () => ({ properties })),
+          numberMatched: total,
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as unknown as typeof fetch;
+  }
+
+  it("ville enrichie (Delson-like) : les 4 champs à 100 % → verified", async () => {
+    const app = lotFieldsApp(
+      lotsFetch(
+        {
+          surface_m2: 6116.71,
+          adresse: "225 chemin Saint-Francois-Xavier",
+          code_postal: "J5B",
+          densite_value: 45,
+        },
+        300,
+      ),
+    );
+    const res = await app.request("/api/source/coverage/delson/lot-fields");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as CityLotFieldsBody;
+    expect(body).toMatchObject({
+      citySlug: "delson",
+      available: true,
+      totalLots: 300,
+      sampleSize: 300,
+      sampled: false,
+      state: "verified",
+    });
+    expect(body.fields?.superficie).toMatchObject({ pct: 100, state: "verified" });
+    expect(body.fields?.adresse).toMatchObject({ pct: 100, state: "verified" });
+    expect(body.fields?.codePostal).toMatchObject({ pct: 100, state: "verified" });
+    expect(body.fields?.normes).toMatchObject({ pct: 100, state: "verified" });
+  });
+
+  it("ville non enrichie (Mont-Tremblant-like) : 0 % partout → absent, échantillon déclaré", async () => {
+    const app = lotFieldsApp(lotsFetch({ NO_LOT: "1 234 567" }, 9000));
+    const res = await app.request(
+      "/api/source/coverage/mont-tremblant/lot-fields",
+    );
+    const body = (await res.json()) as CityLotFieldsBody;
+    expect(body).toMatchObject({
+      available: true,
+      totalLots: 9000,
+      sampleSize: 450, // échantillon stratifié borné, jamais 9000 fetchés
+      sampled: true,
+      state: "absent",
+    });
+    expect(body.fields?.superficie).toMatchObject({ pct: 0, state: "absent" });
+    expect(body.fields?.adresse).toMatchObject({ pct: 0, state: "absent" });
+  });
+
+  it("geo injoignable → available:false (jamais un faux 0 %), 404 → zéros honnêtes", async () => {
+    const resDown = await lotFieldsApp(offlineFetch).request(
+      "/api/source/coverage/ville-x/lot-fields",
+    );
+    expect((await resDown.json()) as CityLotFieldsBody).toMatchObject({
+      citySlug: "ville-x",
+      available: false,
+    });
+
+    const notFound = vi.fn(async () =>
+      new Response("nf", { status: 404 }),
+    ) as unknown as typeof fetch;
+    const res404 = await lotFieldsApp(notFound).request(
+      "/api/source/coverage/ville-sans-lots/lot-fields",
+    );
+    expect((await res404.json()) as CityLotFieldsBody).toMatchObject({
+      available: true,
+      totalLots: 0,
+      state: "absent",
+    });
+  });
+
+  it("cache le résultat per-city (TTL) et rejette les slugs malformés", async () => {
+    const fetchImpl = lotsFetch({ surface_m2: 100 }, 50);
+    const app = lotFieldsApp(fetchImpl);
+    await app.request("/api/source/coverage/ville-a/lot-fields");
+    await app.request("/api/source/coverage/ville-a/lot-fields");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+
+    const bad = await app.request(
+      "/api/source/coverage/Ville%20Pas%20Slug/lot-fields",
+    );
+    expect(bad.status).toBe(404);
+  });
+
+  it("bulk lotFields: absent par défaut, reprend la mesure lazy chaude (jamais de fetch per-city au bulk)", async () => {
+    // fetch qui sert le LISTING (collections) ET les items lots.
+    const fetchImpl = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/items")) {
+        return new Response(
+          JSON.stringify({
+            type: "FeatureCollection",
+            features: [
+              { properties: { surface_m2: 500, adresse: "1 rue A", code_postal: "J5B" } },
+              { properties: { surface_m2: 300 } }, // sans adresse/CP/normes
+            ],
+            numberMatched: 2,
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({ collections: [{ id: "qc-lots-delson" }] }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    }) as typeof fetch;
+
+    const app = sourceCoverageRoute({
+      store: makeMemStore(),
+      db: makeDb([]),
+      now: NOW,
+      fetchImpl,
+    });
+
+    // Cache froid : cellule bulk `absent` (jamais mesuré en bulk).
+    const cold = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(cold, "delson").lotFields.state).toBe("absent");
+
+    // Mesure lazy per-city (partielle → declared)…
+    const lazy = await app.request("/api/source/coverage/delson/lot-fields");
+    expect(((await lazy.json()) as CityLotFieldsBody).state).toBe("declared");
+
+    // …reprise par le bulk tant qu'elle est chaude.
+    const warm = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(warm, "delson").lotFields).toMatchObject({
+      state: "declared",
+      freshness: "fresh",
+    });
+    // Les autres villes restent absent (pas de mesure).
+    expect(cityOf(warm, "brossard").lotFields.state).toBe("absent");
   });
 });
