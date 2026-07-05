@@ -70,6 +70,7 @@
       c.l4Zonage.state !== "absent" ||
       c.normes.state !== "absent" ||
       c.l5Lots.state !== "absent" ||
+      (c.lotFields?.state ?? "absent") !== "absent" ||
       c.tod.state !== "absent"
     );
   }
@@ -101,8 +102,11 @@
   });
 
   // Couches affichées en mini-cellules : une colonne = une COUCHE RÉELLE, dans
-  // l'ordre PV · Signaux · Zones · Normes (grilles) · Lots (cadastre) · TOD
-  // (copy client neutre — pas de jargon interne L1/L2/…).
+  // l'ordre PV · Signaux · Zones · Normes (grilles) · Lots (cadastre) ·
+  // Champs lot · TOD (copy client neutre — pas de jargon interne L1/L2/…).
+  // « Champs lot » = superficie/adresse/code postal/normes foldées servis par
+  // geo — mesure LAZY per-city reprise par le bulk quand elle est chaude
+  // (même contrat que Normes) ; « Non couvert » tant que rien n'est mesuré.
   function layerStates(c: CityCoverage): { key: string; label: string; state: CoverageState }[] {
     return [
       { key: "pv", label: "PV collectés", state: c.l1Raw.state },
@@ -110,6 +114,11 @@
       { key: "zones", label: "Zones servies", state: c.l4Zonage.state },
       { key: "normes", label: "Normes (grilles de zonage)", state: c.normes.state },
       { key: "lots", label: "Lots (cadastre)", state: c.l5Lots.state },
+      {
+        key: "champs-lot",
+        label: "Champs lot (superficie · adresse · code postal · normes)",
+        state: c.lotFields?.state ?? "absent",
+      },
       { key: "tod", label: "Périmètres TOD", state: c.tod.state },
     ];
   }
@@ -227,6 +236,7 @@
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Zones de zonage servies">Zones</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Normes (grilles de zonage)">Normes (grilles)</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Lots (cadastre) servis">Lots (cadastre)</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Champs lot enrichis (superficie, adresse, code postal, normes)">Champs lot</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Périmètres TOD servis">TOD</th>
               <th class="px-4 py-2 text-left font-semibold uppercase tracking-wide">Couverture</th>
             </tr>
@@ -270,7 +280,7 @@
             {/each}
             {#if filtered.length === 0}
               <tr>
-                <td colspan="8" class="px-4 py-6 text-center text-slate-400">
+                <td colspan="9" class="px-4 py-6 text-center text-slate-400">
                   Aucune ville ne correspond au filtre.
                 </td>
               </tr>

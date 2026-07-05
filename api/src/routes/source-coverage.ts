@@ -13,6 +13,10 @@ import {
   zoneGrillePdfUrl,
   zoneNormes,
 } from "../services/geo/lot-zone-enrichment.js";
+import {
+  measureCityLotFields,
+  type CityLotFieldsResponse,
+} from "../services/geo/lot-fields-coverage.js";
 
 /**
  * GET /api/source/coverage — couverture qualité de données par ville,
@@ -72,6 +76,15 @@ import {
  * les zones SERVIES LIVE par geo. Donnée éparse aujourd'hui : « Non couvert »
  * honnête quand absente ; `available: false` quand geo est injoignable (jamais
  * de faux « Non couvert »).
+ *
+ * GET /api/source/coverage/:citySlug/lot-fields — détail LAZY par ville :
+ * couverture des champs LOT enrichis servis par geo sur `qc-lots-<slug>`
+ * (superficie réelle `surface_m2`, adresse, code postal FSA, normes foldées).
+ * Mesure par le service `lot-fields-coverage` (échantillon stratifié déclaré
+ * quand > 450 lots, % honnêtes, verbatim-or-null) ; `available: false` quand
+ * geo est injoignable. Le bulk expose la cellule `lotFields` UNIQUEMENT depuis
+ * cette mesure lazy quand elle est chaude en cache (même contrat que normes) —
+ * cette couche est INFORMATIVE : elle n'entre PAS dans `worstStatus`.
  */
 
 const DEFAULT_STALE_AFTER_DAYS = 180;
@@ -158,6 +171,17 @@ interface NormesCell {
   freshness: Freshness;
 }
 
+/**
+ * Champs LOT enrichis (superficie/adresse/CP/normes foldées) au niveau bulk :
+ * reprend la mesure LAZY per-city (endpoint lot-fields) quand elle est chaude
+ * en cache ; sinon `absent` honnête (jamais mesuré en bulk — le bulk reste
+ * set-based + un listing). Couche INFORMATIVE : n'entre pas dans worstStatus.
+ */
+interface LotFieldsCell {
+  state: CoverageState;
+  freshness: Freshness;
+}
+
 interface CityCoverage {
   citySlug: string;
   cityName: string;
@@ -169,6 +193,7 @@ interface CityCoverage {
   l4Zonage: GeoCell;
   normes: NormesCell;
   l5Lots: GeoCell;
+  lotFields: LotFieldsCell;
   tod: GeoCell;
   worstStatus: CoverageState;
   nextMarginalGain: "zonage" | "lots" | null;
@@ -355,6 +380,7 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
       );
       const tod = buildTodCell(listing ? listing.tod.has(mun.slug) : null);
       const normes = buildNormesCell(mun.slug, nowMs);
+      const lotFields = buildLotFieldsCell(mun.slug, nowMs);
 
       // Statut agrégé (couleur carte) : Servi = couches cœur complètes,
       // Partiel = au moins une couche servie, Non couvert = rien de servi.
@@ -379,6 +405,7 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         l4Zonage,
         normes,
         l5Lots,
+        lotFields,
         tod,
         worstStatus,
         nextMarginalGain: computeNextMarginalGain(l2Graph, l4Zonage, l5Lots),
@@ -534,6 +561,67 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
       // geo injoignable : pas de cache d'échec long, dégradé honnête.
       grillesCache.delete(citySlug);
       const degraded: CityGrillesResponse = { citySlug, available: false };
+      return c.json(degraded);
+    }
+    return c.json(result);
+  });
+
+  // ── Détail champs LOT enrichis par ville (lazy, cache TTL, live geo) ────────
+  // Même mécanique que grilles : `resolved` lisible en SYNCHRONE par le bulk
+  // (cellule lotFields) sans jamais déclencher de mesure per-city au bulk.
+  interface LotFieldsCacheEntry {
+    expiresAt: number;
+    value: Promise<CityLotFieldsResponse | null>;
+    resolved?: CityLotFieldsResponse | null;
+  }
+  const lotFieldsCache = new Map<string, LotFieldsCacheEntry>();
+
+  /**
+   * Cellule « Champs lot » du bulk : reprend la mesure lot-fields LAZY quand
+   * elle est chaude en cache ; sinon `absent` honnête (jamais mesuré en bulk).
+   * Couche INFORMATIVE : n'entre pas dans worstStatus.
+   */
+  function buildLotFieldsCell(citySlug: string, nowMs: number): LotFieldsCell {
+    const cached = lotFieldsCache.get(citySlug);
+    const measured =
+      cached && cached.expiresAt > nowMs && cached.resolved?.available
+        ? cached.resolved
+        : null;
+    if (measured?.state) {
+      // Mesurée live il y a ≤ TTL → prouvée à la requête.
+      return { state: measured.state, freshness: "fresh" };
+    }
+    return { state: "absent", freshness: "unknown" };
+  }
+
+  app.get("/api/source/coverage/:citySlug/lot-fields", async (c) => {
+    const citySlug = c.req.param("citySlug");
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(citySlug)) {
+      return c.json({ ok: false, error: "invalid_city_slug" }, 404);
+    }
+    const now = nowFn();
+    const cached = lotFieldsCache.get(citySlug);
+    let promise: Promise<CityLotFieldsResponse | null>;
+    if (cached && cached.expiresAt > now) {
+      promise = cached.value;
+    } else {
+      if (lotFieldsCache.size >= GRILLES_CACHE_MAX) lotFieldsCache.clear();
+      promise = measureCityLotFields(citySlug, resolveBase(), fetchImpl);
+      const entry: LotFieldsCacheEntry = {
+        expiresAt: now + GRILLES_TTL_MS,
+        value: promise,
+      };
+      lotFieldsCache.set(citySlug, entry);
+      // Stash de la valeur résolue pour lecture synchrone par le bulk.
+      void promise.then((value) => {
+        entry.resolved = value;
+      });
+    }
+    const result = await promise;
+    if (result === null) {
+      // geo injoignable : pas de cache d'échec long, dégradé honnête.
+      lotFieldsCache.delete(citySlug);
+      const degraded: CityLotFieldsResponse = { citySlug, available: false };
       return c.json(degraded);
     }
     return c.json(result);
