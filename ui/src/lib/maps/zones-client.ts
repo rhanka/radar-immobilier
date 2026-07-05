@@ -40,6 +40,12 @@ export interface ZoneProperties {
    */
   kind?: string | null;
   /**
+   * Libellé d'affectation du sol quand l'API le fournit (ex. « Conservation »,
+   * « CV - Résidentielle de faible densité » — mesuré sur qc-zonage-mont-tremblant).
+   * Candidats : affectation, Affectation, AFFECTATION. null si absent.
+   */
+  affectation?: string | null;
+  /**
    * Usages autorisés listés par l'API quand disponibles (tableau de chaînes).
    * Candidats : usages (array|csv), usage. undefined si absent.
    */
@@ -290,6 +296,14 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
     properties.zoneKind,
     properties.zone_kind,
   ]);
+  // Libellé d'affectation du sol (plans d'urbanisme/MRC) — servi par geo sur
+  // les collections récentes (ex. mont-tremblant : kind="CO" + affectation=
+  // "Conservation"). Résolu en PRIORITÉ par la teinte de zone (zone-kind-style).
+  const affectation = firstString([
+    properties.affectation,
+    properties.Affectation,
+    properties.AFFECTATION,
+  ]);
   const usages = normalizeUsages(properties.usages ?? properties.usage);
   // Lien grille PDF — nom de champ hétérogène selon la source geo (catalogue #74).
   const grillePdfUrl = firstString([
@@ -304,6 +318,7 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
 
   return {
     ...(kind !== null ? { kind } : {}),
+    ...(affectation !== null ? { affectation } : {}),
     ...(usages !== undefined ? { usages } : {}),
     ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
   };
