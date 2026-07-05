@@ -14,9 +14,11 @@ import {
   evaluatedLotScore,
   formatArea,
   formatLength,
+  formatPostalCode,
   formatYesNo,
   googleMapsUrl,
   googleStreetViewUrl,
+  lotNormesRows,
   lotZoneCode,
   scoreTone,
   scoreLabel,
@@ -416,5 +418,72 @@ describe("facadeDisplay", () => {
       properties: { noLot: "F-3" },
     };
     expect(facadeDisplay(lot)).toBe("—");
+  });
+});
+
+// ── Code postal FSA (3 caractères) — affiché tel quel + « (secteur) » ─────────
+
+describe("formatPostalCode — FSA 3 caractères servi par geo", () => {
+  it("FSA 3 caractères (ex. « J3Y ») → affiché tel quel avec « (secteur) »", () => {
+    expect(formatPostalCode("J3Y")).toBe("J3Y (secteur)");
+  });
+
+  it("code complet 6 caractères → affiché tel quel, sans libellé", () => {
+    expect(formatPostalCode("J5B 1B4")).toBe("J5B 1B4");
+  });
+
+  it("absent → « — » discret (aucune invention)", () => {
+    expect(formatPostalCode(null)).toBe("—");
+    expect(formatPostalCode(undefined)).toBe("—");
+    expect(formatPostalCode("")).toBe("—");
+  });
+});
+
+// ── Normes de zonage foldées par lot (fiche : verbatim ou « — ») ──────────────
+
+describe("lotNormesRows — normes servies par geo, « — » quand null", () => {
+  it("chaque norme servie est rendue verbatim (valeur + unité)", () => {
+    const rows = lotNormesRows({
+      hauteur: "12.5 m",
+      densite: "35 log/ha",
+      frontageMin: "15",
+      superficieMin: "460 m²",
+      margeAvant: "6",
+      margeLaterale: "2",
+      margeArriere: "7.5",
+    });
+    expect(rows).toEqual([
+      ["Hauteur max", "12.5 m"],
+      ["Densité", "35 log/ha"],
+      ["Façade min", "15"],
+      ["Superficie min", "460 m²"],
+      ["Marge avant", "6"],
+      ["Marge latérale", "2"],
+      ["Marge arrière", "7.5"],
+    ]);
+  });
+
+  it("normes null/absentes → toutes les lignes à « — » (aucune invention)", () => {
+    for (const rows of [lotNormesRows(null), lotNormesRows(undefined), lotNormesRows({})]) {
+      expect(rows).toHaveLength(7);
+      expect(rows.every(([, value]) => value === "—")).toBe(true);
+    }
+  });
+
+  it("normes partielles → servies verbatim, manquantes à « — »", () => {
+    const rows = lotNormesRows({ hauteur: "10 m" });
+    expect(rows[0]).toEqual(["Hauteur max", "10 m"]);
+    expect(rows.slice(1).every(([, value]) => value === "—")).toBe(true);
+  });
+});
+
+// ── formatArea — milliers fr-CA (ex. lot Delson 6 116,71 m² → « 6 117 m² ») ───
+
+describe("formatArea — séparateur de milliers fr-CA", () => {
+  it("6116.71 → « 6 117 m² » (arrondi, groupement fr-CA)", () => {
+    const expected = `${(6117).toLocaleString("fr-CA")} m²`;
+    expect(formatArea(6116.71)).toBe(expected);
+    // Le groupement fr-CA sépare bien les milliers (6 117, jamais 6117).
+    expect(formatArea(6116.71)).not.toBe("6117 m²");
   });
 });

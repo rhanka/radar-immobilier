@@ -1,5 +1,5 @@
 {
-  "_note": "Snapshot fixture MINIMAL de Delson (mode:simulation) pour tests offline du loader cadastre-geojson-source. Géométries simplifiées (carrés ~quelques m). Anti-PII : aucun nom de propriétaire ; `adresse`/`code_postal` sont des données PUBLIQUES du rôle (identifient la propriété, pas une personne) — servies par geo, consommées telles quelles. Le lot 2181127 porte les 4 champs geo (superficie_m2 réelle, frontage_m canonique, adresse, code_postal) ; 2181200 n'en porte aucun (repli/« — »). Couvre les 4 cas de score (priorite / 4+ / tod / autre) + 1 emprise is_rue exclue + 1 lot sans geometry ignoré.",
+  "_note": "Snapshot fixture MINIMAL de Delson (mode:simulation) pour tests offline du loader cadastre-geojson-source. Géométries simplifiées (carrés ~quelques m). Anti-PII : aucun nom de propriétaire ; `adresse`/`code_postal` sont des données PUBLIQUES du rôle (identifient la propriété, pas une personne) — servies par geo, consommées telles quelles. Le lot 2181127 porte les champs geo (surface_m2 = aire réelle du polygone, frontage_m canonique, adresse, code_postal en FSA 3 caractères, normes foldées `<norme>_value`/`<norme>_unit`) ; 2181200 n'en porte aucun (repli/« — »). Couvre les 4 cas de score (priorite / 4+ / tod / autre) + 1 emprise is_rue exclue + 1 lot sans geometry ignoré.",
   "meta": {
     "nom": "Delson",
     "slug": "delson",
@@ -23,7 +23,7 @@
           "categorie": "Multi-logements",
           "cubf": "5100",
           "utilisation": "Logement multifamilial",
-          "superficie_m2": 1180.2,
+          "surface_m2": 1180.2,
           "superficie_m2_calculee": 1240.5,
           "nb_logements_role": 6,
           "nb_etages": "3",
@@ -38,7 +38,18 @@
           "tod": true,
           "priorite": true,
           "adresse": "123 rue des Érables",
-          "code_postal": "J5B 1B4",
+          "code_postal": "J5B",
+          "hauteur_max_value": 12.5,
+          "hauteur_max_unit": "m",
+          "densite_value": 35,
+          "densite_unit": "log/ha",
+          "frontage_min_value": 15,
+          "superficie_min_value": 460,
+          "superficie_min_unit": "m²",
+          "marge_avant_min_value": 6,
+          "marge_laterale_min_value": 2,
+          "marge_arriere_min_value": 7.5,
+          "in_tod": true,
           "proprietaire": "JAMAIS-MAPPE-PII"
         },
         "geometry": {
