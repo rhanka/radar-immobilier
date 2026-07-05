@@ -301,6 +301,7 @@ describe("fetchLots", () => {
           "multifamilial4plus",
           "priorite",
           "adresse",
+          "codePostal",
           "facadeM",
           "profondeurM",
           "superficieM2",
@@ -425,7 +426,44 @@ describe("fetchAllLots", () => {
   });
 });
 
-// ── C5 — code postal câblé (remonte dès que geo l'expose) ─────────────────────
+// ── Superficie RÉELLE servie par geo : `surface_m2` (aire du polygone, m²) ────
+// `superficie_m2` était un nom MORT jamais servi par geo (bug de mapping #350).
+
+describe("superficieM2 ← surface_m2 (geo)", () => {
+  async function mapLot(properties: Record<string, unknown>) {
+    const body = {
+      type: "FeatureCollection",
+      features: [{ type: "Feature", geometry: null, properties: { noLot: "L-S", ...properties } }],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("delson", { baseUrl: "" });
+    return res.featureCollection.features[0].properties;
+  }
+
+  it("surface_m2 servi → superficie affichée (mappé sur superficieM2)", async () => {
+    const props = await mapLot({ surface_m2: 6116.71 });
+    expect(props.superficieM2).toBe(6116.71);
+  });
+
+  it("surface_m2 PRIME sur la superficie calculée de la source", async () => {
+    const props = await mapLot({ surface_m2: 6116.71, superficie_m2_calculee: 5000 });
+    expect(props.superficieM2).toBe(6116.71);
+  });
+
+  it("absent → undefined (fiche « — », AUCUN calcul immo)", async () => {
+    const props = await mapLot({});
+    expect(props.superficieM2).toBeUndefined();
+  });
+
+  it("le nom MORT superficie_m2 n'est PLUS lu (jamais servi par geo)", async () => {
+    const props = await mapLot({ superficie_m2: 999 });
+    expect(props.superficieM2).toBeUndefined();
+  });
+});
+
+// ── Code postal servi par geo (FSA 3 caractères, affiché tel quel) ────────────
 
 describe("codePostal (C5)", () => {
   it("normalise code_postal snake_case", async () => {
@@ -446,6 +484,24 @@ describe("codePostal (C5)", () => {
     expect(res.featureCollection.features[0].properties.codePostal).toBe("J6S 4V2");
   });
 
+  it("FSA 3 caractères servi par geo (ex. « J3Y ») → remonté tel quel", async () => {
+    const body = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { noLot: "L-11", code_postal: "J3Y" },
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("longueuil", { baseUrl: "" });
+    expect(res.featureCollection.features[0].properties.codePostal).toBe("J3Y");
+  });
+
   it("absent → undefined (fiche affiche « — », aucune invention)", async () => {
     const body = {
       type: "FeatureCollection",
@@ -458,6 +514,75 @@ describe("codePostal (C5)", () => {
     );
     const res = await fetchLots("delson", { baseUrl: "" });
     expect(res.featureCollection.features[0].properties.codePostal).toBeUndefined();
+  });
+});
+
+// ── Normes de zonage foldées par lot (contrat geo `<norme>_value`/`_unit`) ────
+// geo sert les normes par lot via zone_code, verbatim-or-null. La paire
+// valeur/unité est composée « valeur unité » ; valeur seule quand l'unité
+// n'est pas servie ; rien d'inventé quand rien n'est servi.
+
+describe("normes foldées par lot (geo)", () => {
+  async function mapLot(properties: Record<string, unknown>) {
+    const body = {
+      type: "FeatureCollection",
+      features: [{ type: "Feature", geometry: null, properties: { noLot: "L-N", ...properties } }],
+    };
+    vi.stubGlobal("fetch", async () =>
+      new Response(JSON.stringify(body), { status: 200 }),
+    );
+    const res = await fetchLots("delson", { baseUrl: "" });
+    return res.featureCollection.features[0].properties;
+  }
+
+  it("compose valeur + unité verbatim (hauteur_max_value/_unit, densite_value/_unit)", async () => {
+    const props = await mapLot({
+      hauteur_max_value: 12.5,
+      hauteur_max_unit: "m",
+      densite_value: 35,
+      densite_unit: "log/ha",
+    });
+    expect(props.normes?.hauteur).toBe("12.5 m");
+    expect(props.normes?.densite).toBe("35 log/ha");
+  });
+
+  it("valeur seule quand l'unité n'est pas servie (aucune unité inventée)", async () => {
+    const props = await mapLot({
+      frontage_min_value: 15,
+      superficie_min_value: 460,
+      marge_avant_min_value: 6,
+      marge_laterale_min_value: 2,
+      marge_arriere_min_value: 7.5,
+    });
+    expect(props.normes?.frontageMin).toBe("15");
+    expect(props.normes?.superficieMin).toBe("460");
+    expect(props.normes?.margeAvant).toBe("6");
+    expect(props.normes?.margeLaterale).toBe("2");
+    expect(props.normes?.margeArriere).toBe("7.5");
+  });
+
+  it("superficie_min (NORME) reste DISTINCTE de surface_m2 (aire réelle)", async () => {
+    const props = await mapLot({
+      surface_m2: 6116.71,
+      superficie_min_value: 460,
+      superficie_min_unit: "m²",
+      frontage_m: 22.9,
+      frontage_min_value: 15,
+    });
+    expect(props.superficieM2).toBe(6116.71);
+    expect(props.normes?.superficieMin).toBe("460 m²");
+    expect(props.facadeM).toBe(22.9);
+    expect(props.normes?.frontageMin).toBe("15");
+  });
+
+  it("in_tod (geo) foldé sur le flag TOD", async () => {
+    const props = await mapLot({ in_tod: true });
+    expect(props.tod).toBe(true);
+  });
+
+  it("aucune norme servie → normes undefined (fiche « — »)", async () => {
+    const props = await mapLot({});
+    expect(props.normes).toBeUndefined();
   });
 });
 
