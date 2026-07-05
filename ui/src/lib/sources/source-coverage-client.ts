@@ -73,6 +73,17 @@ export interface NormesCell {
   freshness: Freshness;
 }
 
+/**
+ * Champs LOT enrichis (superficie/adresse/code postal/normes foldées) au niveau
+ * bulk : `absent` tant que la mesure lazy per-city (endpoint lot-fields) n'est
+ * pas chaude côté API — même contrat que `normes`. Couche INFORMATIVE : elle
+ * n'entre pas dans `worstStatus`.
+ */
+export interface LotFieldsCell {
+  state: CoverageState;
+  freshness: Freshness;
+}
+
 export interface CityCoverage {
   citySlug: string;
   cityName: string;
@@ -84,6 +95,11 @@ export interface CityCoverage {
   l4Zonage: GeoCell;
   normes: NormesCell;
   l5Lots: GeoCell;
+  /**
+   * Champs lot enrichis — OPTIONNEL (défensif : payload antérieur au contrat
+   * lot-fields → traité comme `absent`).
+   */
+  lotFields?: LotFieldsCell;
   /** Périmètres TOD servis (collection `qc-tod-<slug>` du listing live géo). */
   tod: GeoCell;
   worstStatus: CoverageState;
@@ -157,6 +173,85 @@ export async function fetchCityGrilles(
     throw new Error(`source-coverage grilles HTTP ${res.status}`);
   }
   return (await res.json()) as CityGrilles;
+}
+
+// ── Détail champs LOT enrichis par ville (lazy, mesuré LIVE côté API) ─────────
+
+/** Taux d'un champ lot : compte, % honnête (1..99 si partiel), tri-état. */
+export interface LotFieldRate {
+  count: number;
+  pct: number;
+  state: CoverageState;
+}
+
+/**
+ * Contrat : GET /api/source/coverage/:citySlug/lot-fields. Couverture des
+ * champs LOT enrichis servis par geo sur `qc-lots-<slug>` : superficie réelle
+ * (`surface_m2`), adresse, code postal (FSA), normes foldées au lot
+ * (hauteur/densité/façade/superficie min/marges). `available: false` = geo
+ * injoignable (état « donnée indisponible » HONNÊTE, jamais un faux 0 %).
+ * `sampled: true` = mesure sur ÉCHANTILLON stratifié (les % sont estimés) —
+ * la méthode est déclarée, jamais masquée.
+ */
+export interface CityLotFields {
+  citySlug: string;
+  available: boolean;
+  totalLots?: number | null;
+  sampleSize?: number;
+  sampled?: boolean;
+  fields?: {
+    superficie: LotFieldRate;
+    adresse: LotFieldRate;
+    codePostal: LotFieldRate;
+    normes: LotFieldRate;
+  };
+  state?: CoverageState;
+}
+
+/** Récupère le détail champs lot d'une ville. Lève en cas d'échec HTTP. */
+export async function fetchCityLotFields(
+  citySlug: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<CityLotFields> {
+  const res = await fetchImpl(
+    `${COVERAGE_URL}/${encodeURIComponent(citySlug)}/lot-fields`,
+    { headers: { Accept: "application/json" } },
+  );
+  if (!res.ok) {
+    throw new Error(`source-coverage lot-fields HTTP ${res.status}`);
+  }
+  return (await res.json()) as CityLotFields;
+}
+
+/**
+ * Évidence client d'un taux de champ lot (copy neutre, % honnête) :
+ *   100 % → « 100 % des lots » ; 0 % → « 0 % — non enrichi » ;
+ *   partiel → « 70 % des lots ». Le % vient de l'API (déjà borné 1..99 quand
+ *   partiel — jamais un « 100 % » fabriqué par arrondi).
+ */
+export function lotFieldEvidence(rate: LotFieldRate): string {
+  if (rate.state === "absent") return "0 % — non enrichi";
+  return `${rate.pct} % des lots`;
+}
+
+/**
+ * Note de MÉTHODE de la mesure champs lot (honnête sur l'échantillonnage) :
+ * exhaustive → « mesuré sur les N lots servis » ; échantillon → « échantillon
+ * de N lots sur M ». Null si la mesure n'est pas disponible.
+ */
+export function lotFieldsMethodNote(lf: CityLotFields): string | null {
+  if (!lf.available || lf.sampleSize === undefined || lf.sampleSize === 0) {
+    return null;
+  }
+  const n = lf.sampleSize.toLocaleString("fr-CA");
+  if (lf.sampled) {
+    const total =
+      typeof lf.totalLots === "number"
+        ? ` sur ${lf.totalLots.toLocaleString("fr-CA")}`
+        : "";
+    return `échantillon de ${n} lots${total}`;
+  }
+  return `mesuré sur les ${n} lots servis`;
 }
 
 // ── Tri-état : couleurs + libellés (3 états DISTINCTS, D2) ────────────────────
