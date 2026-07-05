@@ -35,6 +35,9 @@ const harnessInput = qaHarness
       "lot-fiche-geo": fileURLToPath(
         new URL("./e2e-qa/harness/lot-fiche-geo.html", import.meta.url),
       ),
+      "lot-fields": fileURLToPath(
+        new URL("./e2e-qa/harness/lot-fields.html", import.meta.url),
+      ),
     }
   : undefined;
 
