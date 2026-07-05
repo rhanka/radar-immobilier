@@ -1,8 +1,11 @@
 /**
  * Harnais QA — fiche lot du panneau Signaux alimentée par les propriétés
  * SERVIES PAR GEO sur la collection OGC `qc-lots-<slug>` :
- * `superficie_m2` (aire réelle), `frontage_m` (façade canonique), `adresse`
- * et `code_postal`.
+ * `surface_m2` (aire réelle du polygone — l'ancien nom `superficie_m2`
+ * n'a JAMAIS été servi, bug de mapping #350), `frontage_m` (façade
+ * canonique), `adresse`, `code_postal` (FSA 3 caractères, ex. « J3Y »),
+ * plus les NORMES foldées par lot via zone_code (`<norme>_value`/`_unit`,
+ * verbatim-or-null) et `in_tod`.
  *
  * PREUVE DE CONSOMMATION BOUT-EN-BOUT : le harnais stubbe `fetch` avec une
  * réponse OGC brute (noms snake_case côté geo) puis passe par le VRAI
@@ -10,8 +13,8 @@
  * court-circuit du mapping.
  *
  * Deux lots pilotés par `?lot=` :
- *   - `full`  : les 4 champs geo présents → la fiche s'allume (superficie
- *     réelle, façade canonique SANS « estimée », adresse, code postal) ;
+ *   - `full`  : champs geo présents → la fiche s'allume (superficie réelle,
+ *     façade canonique SANS « estimée », adresse, code postal FSA, normes) ;
  *   - `empty` : aucun champ servi → « — » honnête partout, façade en repli
  *     ESTIMATION géométrique immo étiquetée « ≈ … (estimée) ».
  *
@@ -66,12 +69,26 @@ const OGC_LOTS = {
       properties: {
         noLot: NO_LOT_FULL,
         zone_code: "H-12",
-        // Les 4 propriétés servies par geo (décision : GEO les sert, l'immo
-        // les CONSOMME — aucun calcul immo).
-        superficie_m2: 650.4,
+        // Propriétés servies par geo (décision : GEO les sert, l'immo les
+        // CONSOMME — aucun calcul immo). `surface_m2` = aire réelle du
+        // polygone ; `code_postal` = FSA 3 caractères (secteur).
+        surface_m2: 650.4,
         frontage_m: 22.9,
         adresse: "123 rue des Érables",
-        code_postal: "J5B 1B4",
+        code_postal: "J3Y",
+        // Normes foldées par lot via zone_code (`<norme>_value`/`_unit`,
+        // verbatim-or-null) + flag TOD `in_tod`.
+        hauteur_max_value: 12.5,
+        hauteur_max_unit: "m",
+        densite_value: 35,
+        densite_unit: "log/ha",
+        frontage_min_value: 15,
+        superficie_min_value: 460,
+        superficie_min_unit: "m²",
+        marge_avant_min_value: 6,
+        marge_laterale_min_value: 2,
+        marge_arriere_min_value: 7.5,
+        in_tod: true,
       },
     },
     {

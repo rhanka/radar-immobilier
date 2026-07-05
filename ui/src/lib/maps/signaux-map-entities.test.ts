@@ -103,6 +103,7 @@ function cadastreLayers(): CadastreCityLayers {
             facadeM: null,
             adresse: null,
             codePostal: null,
+            normes: null,
             nbLogementsRole: 2,
             potentialScore: 0.7,
             scorePlaceholder: true,
