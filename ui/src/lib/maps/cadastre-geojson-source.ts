@@ -39,13 +39,19 @@
 /** Propriétés d'un lot dans le GeoJSON cadastral (sous-ensemble lu). */
 export interface CadastreRawLotProps {
   NO_LOT?: string;
-  /** Superficie RÉELLE du lot servie par geo (aire, m²) — prime sur la calculée. */
-  superficie_m2?: number;
+  /**
+   * Superficie RÉELLE du lot servie par geo (aire du polygone, m²) — prime
+   * sur la calculée. Nom de champ geo : `surface_m2` (l'ancien nom
+   * `superficie_m2` n'a JAMAIS été servi — bug de mapping #350).
+   */
+  surface_m2?: number;
   superficie_m2_calculee?: number;
   zone?: string;
   categorie?: string;
   multifamilial_4plus?: boolean;
   tod?: boolean;
+  /** Flag TOD servi par geo (`in_tod`) — foldé sur le même badge que `tod`. */
+  in_tod?: boolean;
   priorite?: boolean;
   zone_desc?: string;
   cubf?: string;
@@ -63,8 +69,29 @@ export interface CadastreRawLotProps {
   is_rue?: boolean;
   /** Adresse civique du LOT (donnée publique du rôle — jamais une personne). */
   adresse?: string;
-  /** Code postal du lot servi par geo. */
+  /**
+   * Code postal du lot servi par geo en FSA 3 caractères (ex. « J3Y » —
+   * secteur postal, PAS le code 6 caractères licencié Postes Canada).
+   */
   code_postal?: string;
+  // Normes de zonage foldées par lot (servies par geo via zone_code) :
+  // paires `<norme>_value` / `<norme>_unit`, verbatim-or-null.
+  hauteur_max_value?: number | string;
+  hauteur_max_unit?: string;
+  densite_value?: number | string;
+  densite_unit?: string;
+  /** Façade MIN normée — DISTINCTE de la façade réelle `frontage_m`. */
+  frontage_min_value?: number | string;
+  frontage_min_unit?: string;
+  /** Superficie MIN normée — DISTINCTE de l'aire réelle `surface_m2`. */
+  superficie_min_value?: number | string;
+  superficie_min_unit?: string;
+  marge_avant_min_value?: number | string;
+  marge_avant_min_unit?: string;
+  marge_laterale_min_value?: number | string;
+  marge_laterale_min_unit?: string;
+  marge_arriere_min_value?: number | string;
+  marge_arriere_min_unit?: string;
   // Tout champ nominatif (ex. `proprietaire`) N'EST JAMAIS lu (anti-PII).
 }
 
@@ -125,9 +152,10 @@ export interface LotLayerProps {
   priorite: boolean;
   zoneDesc: string;
   /**
-   * Superficie RÉELLE du lot (m²) : `superficie_m2` servie par geo, sinon
-   * `superficie_m2_calculee` de la source. null quand aucune n'est servie —
-   * la fiche affiche « — » (AUCUN calcul immo, aucune invention).
+   * Superficie RÉELLE du lot (m²) : `surface_m2` servie par geo (aire du
+   * polygone), sinon `superficie_m2_calculee` de la source. null quand
+   * aucune n'est servie — la fiche affiche « — » (AUCUN calcul immo,
+   * aucune invention).
    */
   superficieM2: number | null;
   /** Façade CANONIQUE geo (`frontage_m`), null quand non servie. */
@@ -136,8 +164,24 @@ export interface LotLayerProps {
   facadeM: number | null;
   /** Adresse civique du lot (donnée publique du rôle), null quand non servie. */
   adresse: string | null;
-  /** Code postal du lot servi par geo, null quand non servi. */
+  /** Code postal servi par geo (FSA 3 caractères, ex. « J3Y »), null sinon. */
   codePostal: string | null;
+  /**
+   * Normes de zonage foldées par lot (servies par geo via `zone_code`),
+   * verbatim-or-null — « valeur unité » quand l'unité est servie, la valeur
+   * seule sinon. null quand aucune norme n'est servie (fiche « — »).
+   * `superficieMin`/`frontageMin` sont des NORMES de grille — distinctes de
+   * l'aire réelle `superficieM2` et de la façade réelle `frontageM`.
+   */
+  normes: {
+    hauteur: string | null;
+    densite: string | null;
+    frontageMin: string | null;
+    superficieMin: string | null;
+    margeAvant: string | null;
+    margeLaterale: string | null;
+    margeArriere: string | null;
+  } | null;
   nbLogementsRole: number;
   potentialScore: number; // [0,1]
   /** `true` quand le score vient du placeholder local (pas de l'API canonique). */
@@ -218,6 +262,38 @@ function asNumberOrNull(v: unknown): number | null {
 function asStringOrNull(v: unknown): string | null {
   return typeof v === "string" && v.trim().length > 0 ? v.trim() : null;
 }
+/** Valeur verbatim : chaîne non vide telle quelle, nombre fini rendu en chaîne. */
+function asVerbatimOrNull(v: unknown): string | null {
+  if (typeof v === "number" && Number.isFinite(v)) return String(v);
+  return asStringOrNull(v);
+}
+/**
+ * Norme geo « valeur + unité » (verbatim-or-null) : compose la paire
+ * `<norme>_value`/`<norme>_unit` quand les deux sont servies, la valeur seule
+ * sinon — aucune unité inventée. null quand la valeur n'est pas servie.
+ */
+function normeWithUnit(value: unknown, unit: unknown): string | null {
+  const v = asVerbatimOrNull(value);
+  if (v === null) return null;
+  const u = asStringOrNull(unit);
+  return u ? `${v} ${u}` : v;
+}
+/**
+ * Normes de zonage foldées d'un lot (contrat geo via `zone_code`) → bloc
+ * `normes` de nos props. null quand AUCUNE norme n'est servie.
+ */
+function mapLotNormes(p: CadastreRawLotProps): LotLayerProps["normes"] {
+  const normes = {
+    hauteur: normeWithUnit(p.hauteur_max_value, p.hauteur_max_unit),
+    densite: normeWithUnit(p.densite_value, p.densite_unit),
+    frontageMin: normeWithUnit(p.frontage_min_value, p.frontage_min_unit),
+    superficieMin: normeWithUnit(p.superficie_min_value, p.superficie_min_unit),
+    margeAvant: normeWithUnit(p.marge_avant_min_value, p.marge_avant_min_unit),
+    margeLaterale: normeWithUnit(p.marge_laterale_min_value, p.marge_laterale_min_unit),
+    margeArriere: normeWithUnit(p.marge_arriere_min_value, p.marge_arriere_min_unit),
+  };
+  return Object.values(normes).some((v) => v !== null) ? normes : null;
+}
 
 export interface MapCadastreOptions {
   mode?: LayerMode;
@@ -262,7 +338,8 @@ export function mapCadastreCityToLayers(
     if (excludeRue && asBool(p.is_rue)) continue;
     if (!f.geometry) continue;
     const fourPlus = asBool(p.multifamilial_4plus);
-    const tod = asBool(p.tod);
+    // Flag TOD : `tod` de la source OU `in_tod` servi par geo (même sémantique).
+    const tod = asBool(p.tod) || asBool(p.in_tod);
     const priorite = asBool(p.priorite);
     if (fourPlus) nFourPlus++;
     if (tod) nTod++;
@@ -278,12 +355,14 @@ export function mapCadastreCityToLayers(
         tod,
         priorite,
         zoneDesc: asString(p.zone_desc),
-        // Superficie RÉELLE geo prioritaire ; null honnête quand rien n'est servi.
-        superficieM2: asNumberOrNull(p.superficie_m2) ?? asNumberOrNull(p.superficie_m2_calculee),
+        // Superficie RÉELLE geo (`surface_m2`) prioritaire ; null honnête
+        // quand rien n'est servi.
+        superficieM2: asNumberOrNull(p.surface_m2) ?? asNumberOrNull(p.superficie_m2_calculee),
         frontageM: asNumberOrNull(p.frontage_m),
         facadeM: asNumberOrNull(p.facade_m),
         adresse: asStringOrNull(p.adresse),
         codePostal: asStringOrNull(p.code_postal),
+        normes: mapLotNormes(p),
         nbLogementsRole: asNumber(p.nb_logements_role),
         potentialScore: clamp01(scoreFn(p)),
         scorePlaceholder: usingPlaceholder,

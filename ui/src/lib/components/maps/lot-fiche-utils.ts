@@ -227,6 +227,53 @@ export function formatYesNo(value: boolean | null | undefined): string {
   return value ? "Oui" : "Non";
 }
 
+/** FSA : secteur postal à 3 caractères (ex. « J3Y ») — pas le code complet. */
+const FSA_ONLY_RE = /^[A-Za-z]\d[A-Za-z]$/u;
+
+/**
+ * Code postal affichable d'un lot : la valeur servie TELLE QUELLE ; quand geo
+ * ne sert que le secteur à 3 caractères (FSA, ex. « J3Y »), un libellé discret
+ * « (secteur) » précise que ce n'est pas le code complet — copy neutre.
+ * « — » quand absent.
+ */
+export function formatPostalCode(value: string | null | undefined): string {
+  if (!value) return "—";
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return "—";
+  return FSA_ONLY_RE.test(trimmed) ? `${trimmed} (secteur)` : trimmed;
+}
+
+/** Bloc normes affichable (structurel — lots-client OU cadastre-geojson-source). */
+export interface LotNormesDisplay {
+  hauteur?: string | null;
+  densite?: string | null;
+  frontageMin?: string | null;
+  superficieMin?: string | null;
+  margeAvant?: string | null;
+  margeLaterale?: string | null;
+  margeArriere?: string | null;
+}
+
+/**
+ * Lignes « Normes de zonage » de la fiche lot : [libellé, valeur servie ou
+ * « — »]. Normes foldées par lot (servies par geo via zone_code), affichées
+ * VERBATIM — jamais de valeur inventée. « Façade min »/« Superficie min »
+ * sont des NORMES de grille, distinctes de la façade/superficie réelles.
+ */
+export function lotNormesRows(
+  normes: LotNormesDisplay | null | undefined,
+): Array<[string, string]> {
+  return [
+    ["Hauteur max", normes?.hauteur ?? "—"],
+    ["Densité", normes?.densite ?? "—"],
+    ["Façade min", normes?.frontageMin ?? "—"],
+    ["Superficie min", normes?.superficieMin ?? "—"],
+    ["Marge avant", normes?.margeAvant ?? "—"],
+    ["Marge latérale", normes?.margeLaterale ?? "—"],
+    ["Marge arrière", normes?.margeArriere ?? "—"],
+  ];
+}
+
 /**
  * Façade affichable d'un lot (C5) : la façade SERVIE prime — `facadeM` porte
  * la valeur canonique geo (`frontage_m`) ou à défaut la mesure de la source
