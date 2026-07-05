@@ -165,6 +165,26 @@ describe("geoZonesResponseFromCollection", () => {
     expect(props.grillePdfUrl).toBe("https://example.org/grille-c18.pdf");
     expect(props.label).toContain("C-18");
   });
+
+  it("transmet l'affectation (mont-tremblant) — le label lisible la préfère au code kind", () => {
+    const collection = collectionOf(1);
+    collection.featureCollection.features = [
+      {
+        ...zoneFeature("CO-939"),
+        properties: {
+          code: "CO-939",
+          citySlug: CITY,
+          kind: "CO",
+          affectation: "Conservation",
+        },
+      },
+    ];
+    const adapted = geoZonesResponseFromCollection(collection);
+    const props = adapted.featureCollection.features[0].properties;
+    expect(props.kind).toBe("CO");
+    expect(props.affectation).toBe("Conservation");
+    expect(props.label).toBe("CO-939 — Conservation");
+  });
 });
 
 // ── Résolution tiérée ─────────────────────────────────────────────────────────

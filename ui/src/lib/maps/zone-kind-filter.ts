@@ -67,14 +67,15 @@ export function isDefaultZoneKindFilter(filter: ZoneKindFilter): boolean {
 }
 
 /**
- * Groupe de filtre d'une zone, résolu depuis son kind/code via la MÊME
- * résolution tolérante que la légende (`canonicalZoneKind`).
+ * Groupe de filtre d'une zone, résolu depuis son affectation/kind/code via la
+ * MÊME résolution tolérante que la légende (`canonicalZoneKind`).
  */
 export function zoneKindGroupId(
   kind: string | null | undefined,
   code: string | null | undefined,
+  affectation?: string | null,
 ): ZoneKindGroupId {
-  const canonical: StyledZoneKind | null = canonicalZoneKind(kind, code);
+  const canonical: StyledZoneKind | null = canonicalZoneKind(kind, code, affectation);
   if (canonical === null) return "UNRESOLVED";
   if (canonical === "CONS" || canonical === "REC") return "CONS_REC";
   return canonical;
@@ -85,19 +86,22 @@ export function zoneMatchesKindFilter(
   kind: string | null | undefined,
   code: string | null | undefined,
   filter: ZoneKindFilter,
+  affectation?: string | null,
 ): boolean {
   if (filter.size === 0) return true;
-  return filter.has(zoneKindGroupId(kind, code));
+  return filter.has(zoneKindGroupId(kind, code, affectation));
 }
 
 /** Compte les zones matchées (compteur « N / M » de l'en-tête de filtre). */
 export function countZoneKindMatches(
-  zones: ReadonlyArray<{ kind?: string | null; code: string }>,
+  zones: ReadonlyArray<{ kind?: string | null; code: string; affectation?: string | null }>,
   filter: ZoneKindFilter,
 ): number {
   let count = 0;
   for (const zone of zones) {
-    if (zoneMatchesKindFilter(zone.kind ?? null, zone.code, filter)) count += 1;
+    if (zoneMatchesKindFilter(zone.kind ?? null, zone.code, filter, zone.affectation ?? null)) {
+      count += 1;
+    }
   }
   return count;
 }
@@ -108,11 +112,11 @@ export function countZoneKindMatches(
  * (`zoneKindLegend`) : on ne propose pas de filtre sans zone derrière.
  */
 export function zoneKindGroupCounts(
-  zones: ReadonlyArray<{ kind?: string | null; code: string }>,
+  zones: ReadonlyArray<{ kind?: string | null; code: string; affectation?: string | null }>,
 ): ReadonlyMap<ZoneKindGroupId, number> {
   const counts = new Map<ZoneKindGroupId, number>();
   for (const zone of zones) {
-    const id = zoneKindGroupId(zone.kind ?? null, zone.code);
+    const id = zoneKindGroupId(zone.kind ?? null, zone.code, zone.affectation ?? null);
     counts.set(id, (counts.get(id) ?? 0) + 1);
   }
   return counts;
@@ -135,9 +139,10 @@ export function zoneKindFilterOpacity(
   kind: string | null | undefined,
   code: string | null | undefined,
   filter: ZoneKindFilter,
+  affectation?: string | null,
 ): number | null {
   if (filter.size === 0) return null;
-  return zoneMatchesKindFilter(kind, code, filter)
+  return zoneMatchesKindFilter(kind, code, filter, affectation)
     ? ZONE_KIND_FILTER_MATCH_OPACITY
     : ZONE_KIND_FILTER_DIMMED_OPACITY;
 }

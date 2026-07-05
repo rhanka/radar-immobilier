@@ -79,14 +79,24 @@ export function geoZonesResponseFromCollection(
         source: "official-zone",
         lotCount: 0,
         lots: [],
-        // kind/grille transmis TELS QUELS quand la collection les expose —
-        // la teinte par kind (zone-kind-style) et la fiche zone les consomment.
+        // kind/affectation/grille transmis TELS QUELS quand la collection les
+        // expose — la teinte par famille (zone-kind-style, affectation en
+        // priorité) et la fiche zone les consomment.
         ...(feature.properties.kind ? { kind: feature.properties.kind } : {}),
+        ...(feature.properties.affectation
+          ? { affectation: feature.properties.affectation }
+          : {}),
         ...(feature.properties.grillePdfUrl
           ? { grillePdfUrl: feature.properties.grillePdfUrl }
           : {}),
-        ...(feature.properties.kind
-          ? { label: `${feature.properties.code} — ${feature.properties.kind}` }
+        // Label lisible : le libellé d'affectation prime sur le code kind
+        // ("CO-939 — Conservation" plutôt que "CO-939 — CO").
+        ...(feature.properties.affectation || feature.properties.kind
+          ? {
+              label: `${feature.properties.code} — ${
+                feature.properties.affectation ?? feature.properties.kind
+              }`,
+            }
           : {}),
       },
     }),
