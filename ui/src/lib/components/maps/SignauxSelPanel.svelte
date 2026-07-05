@@ -231,7 +231,12 @@
   /** Zones listées = filtre signaux ∩ filtre type. */
   $: filteredZones = zoneKindFilterActive
     ? subsetFilteredZones.filter((z) =>
-        zoneMatchesKindFilter(z.properties.kind ?? null, z.properties.code, zoneKindFilter),
+        zoneMatchesKindFilter(
+          z.properties.kind ?? null,
+          z.properties.code,
+          zoneKindFilter,
+          z.properties.affectation ?? null,
+        ),
       )
     : subsetFilteredZones;
   /**
@@ -243,6 +248,7 @@
   $: zoneFilterInput = zones.map((z) => ({
     kind: z.properties.kind ?? null,
     code: z.properties.code,
+    affectation: z.properties.affectation ?? null,
   }));
 
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
@@ -609,7 +615,11 @@
 
   /** Type (kind) résolu de la zone — null si indéterminé (affiché « — »). */
   function zoneTypeLabel(zone: GeoZoneFeature): string | null {
-    const style = zoneKindStyle(zone.properties.kind ?? null, zone.properties.code);
+    const style = zoneKindStyle(
+      zone.properties.kind ?? null,
+      zone.properties.code,
+      zone.properties.affectation ?? null,
+    );
     return style === ZONE_KIND_NEUTRAL ? null : style.label;
   }
 

@@ -7,10 +7,14 @@
  * Parité concurrente (vue Signaux) : les zones ne sont plus des contours gris
  * uniformes mais des aplats doux distincts par famille, sous les lots colorés
  * par flags. Le kind est résolu de façon TOLÉRANTE :
- *   1. libellé `kind` de la source quand présent (« habitation », « commerce »,
- *      lettre canonique…) ;
- *   2. sinon préfixe du code de zone (H-, C-, I-, A-… — `kindFromZoneCode`) ;
- *   3. sinon teinte neutre (gris discret) — aucune invention.
+ *   1. libellé `affectation` de la source quand présent — le plus fiable
+ *      (« Conservation », « CV - Résidentielle de faible densité »…) ;
+ *   2. sinon `kind` de la source : libellé (« habitation », « mixed-use »…),
+ *      lettre canonique, ou code court de la taxonomie geo (« CO », « Rv »,
+ *      « Af/b »… — `kindFromZoneCode`) ;
+ *   3. sinon tokens du code de zone (H-431, CO-939… — `kindFromZoneCode`) ;
+ *   4. sinon teinte neutre « Type non déterminé » (gris clair honnête,
+ *      PAS blanc invisible) — aucune invention.
  */
 
 import { kindFromZoneCode, type ZoneKind } from "./lot-potential-visual.js";
@@ -48,50 +52,107 @@ export const ZONE_KIND_STYLES: Record<Exclude<ZoneKind, "AUTRE">, ZoneKindStyle>
 };
 
 /**
- * Teinte neutre d'une zone au kind irrésolu — BLANC (parité référence C2) :
- * « Type non déterminé » utilise le blanc comme teinte de base, pas le gris.
- * Le survol la grise légèrement (cf. hover-paint).
+ * Teinte neutre d'une zone au kind irrésolu — gris clair HONNÊTE (« Type non
+ * déterminé ») : un aplat blanc est invisible sur fond de carte clair et se
+ * confond avec « pas de zonage ». Token surface-hover (gris slate léger, même
+ * fallback que le reste du repo), survol grisé plus franc (cf. hover-paint).
  */
 export const ZONE_KIND_NEUTRAL: ZoneKindStyle = {
-  token: "--st-semantic-surface-default",
-  fallback: "#ffffff",
+  token: "--st-semantic-surface-hover",
+  fallback: "#f1f5f9",
   label: "Type non déterminé",
 };
 
 /** Kind canonique porté par les styles (AUTRE exclu : rendu neutre). */
 export type StyledZoneKind = Exclude<ZoneKind, "AUTRE">;
 
+/** Pliage de libellé : accents retirés, majuscules, espaces bordure retirés. */
+function foldLabel(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toUpperCase()
+    .trim();
+}
+
 /**
- * Résout le kind canonique d'une zone depuis son libellé `kind` (tolérant aux
- * variantes FR : « habitation », « résidentiel », « commerce »…) puis, à
- * défaut, depuis le préfixe de son code (H-431 → H). null si irrésolu.
+ * Règles mot-clé → kind, appliquées SEGMENT par segment (ordre = priorité).
+ * Taxonomie MESURÉE sur les collections geo `qc-zonage-*` (2026-07) : libellés
+ * d'affectation FR (« Conservation et récréation », « Villégiature faunique »,
+ * « Récréative et espace vert-Conservation »…) et kinds EN des villes du focus
+ * (residential, mixed-use, institutional…).
+ */
+const LABEL_SEGMENT_RULES: ReadonlyArray<{
+  kind: StyledZoneKind;
+  keywords: readonly string[];
+}> = [
+  // Villégiature = habitat de villégiature (résidentiel saisonnier) — AVANT la
+  // famille conservation pour que « Villégiature faunique » reste Habitation.
+  { kind: "H", keywords: ["VILLEGIATURE"] },
+  { kind: "CONS", keywords: ["CONSERV", "ECOLOG", "FAUNIQ", "PROTEC"] },
+  { kind: "REC", keywords: ["RECRE", "LOISIR", "TOURIST", "ESPACE VERT", "PLEIN AIR"] },
+  { kind: "H", keywords: ["HABIT", "RESID"] },
+  // « Utilité publique » contient PUBL : UTIL doit primer.
+  { kind: "U", keywords: ["UTIL"] },
+  { kind: "P", keywords: ["PUBL", "INSTIT", "COMMUNAUT", "GOUVERN"] },
+  { kind: "C", keywords: ["COMMERC"] },
+  { kind: "I", keywords: ["INDUS", "EXTRACT"] },
+  { kind: "A", keywords: ["AGRIC", "AGRO", "FOREST"] },
+  // En dernier : « mixte » qualifie souvent une famille nommée plus haut
+  // (« Industrielle mixte » → I) ; seul un libellé mixte « pur » tombe ici
+  // (« Mixte », « Mixité de faible intensité », « Centralité urbaine »).
+  { kind: "MIXTE", keywords: ["MIX", "CENTRALIT"] },
+];
+
+function kindFromLabelSegment(segment: string): StyledZoneKind | null {
+  if (!segment) return null;
+  for (const rule of LABEL_SEGMENT_RULES) {
+    if (rule.keywords.some((keyword) => segment.includes(keyword))) return rule.kind;
+  }
+  return null;
+}
+
+/**
+ * Kind canonique depuis un LIBELLÉ (affectation ou kind textuel). Les libellés
+ * composites « Primaire-Sous-type » (« Forestière-Secteur de villégiature »,
+ * « CV - Résidentielle de faible densité ») sont résolus segment par segment :
+ * le premier segment résolu — l'affectation PRIMAIRE — l'emporte ; un préfixe
+ * de secteur inconnu (« CV », « VA ») est simplement sauté. null si irrésolu.
+ */
+function kindFromLabel(label: string | null | undefined): StyledZoneKind | null {
+  if (!label || label.trim().length === 0) return null;
+  const segments = foldLabel(label).split(/[-–—/]/);
+  for (const segment of segments) {
+    const resolved = kindFromLabelSegment(segment.trim());
+    if (resolved) return resolved;
+  }
+  return null;
+}
+
+/**
+ * Résout le kind canonique d'une zone, dans l'ordre de fiabilité :
+ *   1. libellé `affectation` (« Conservation » → CONS, « CV - Résidentielle
+ *      de faible densité » → H…) ;
+ *   2. `kind` source : lettre canonique (« H »), libellé (« habitation »,
+ *      « mixed-use »), ou code court de la taxonomie geo (« CO », « Rv »,
+ *      « Af/b » — `kindFromZoneCode`) ;
+ *   3. tokens du code de zone (H-431 → H, CO-939 → CONS).
+ * null si irrésolu (teinte neutre, aucune invention).
  */
 export function canonicalZoneKind(
   kind: string | null | undefined,
   code: string | null | undefined,
+  affectation?: string | null,
 ): StyledZoneKind | null {
+  const fromAffectation = kindFromLabel(affectation);
+  if (fromAffectation) return fromAffectation;
   if (kind && kind.trim().length > 0) {
-    const folded = kind
-      .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
-      .toUpperCase()
-      .trim();
+    const folded = foldLabel(kind);
     if (folded in ZONE_KIND_STYLES) return folded as StyledZoneKind;
-    if (folded.startsWith("HABIT") || folded.startsWith("RESID")) return "H";
-    if (folded.startsWith("MIXT")) return "MIXTE";
-    if (folded.startsWith("COMM")) return "C";
-    if (folded.startsWith("INDUS")) return "I";
-    if (
-      folded.startsWith("PUBL") ||
-      folded.startsWith("INSTIT") ||
-      folded.startsWith("COMMUNAUT")
-    ) {
-      return "P";
-    }
-    if (folded.startsWith("AGRIC")) return "A";
-    if (folded.startsWith("CONSERV")) return "CONS";
-    if (folded.startsWith("RECRE") || folded.startsWith("LOISIR")) return "REC";
-    if (folded.startsWith("UTIL")) return "U";
+    const fromKindLabel = kindFromLabel(kind);
+    if (fromKindLabel) return fromKindLabel;
+    const fromKindCode = kindFromZoneCode(kind);
+    if (fromKindCode !== null && fromKindCode !== "AUTRE") return fromKindCode;
   }
   const fromCode = code ? kindFromZoneCode(code) : null;
   return fromCode !== null && fromCode !== "AUTRE" ? fromCode : null;
@@ -101,8 +162,9 @@ export function canonicalZoneKind(
 export function zoneKindStyle(
   kind: string | null | undefined,
   code: string | null | undefined,
+  affectation?: string | null,
 ): ZoneKindStyle {
-  const canonical = canonicalZoneKind(kind, code);
+  const canonical = canonicalZoneKind(kind, code, affectation);
   return canonical ? ZONE_KIND_STYLES[canonical] : ZONE_KIND_NEUTRAL;
 }
 
@@ -111,8 +173,9 @@ export function zoneKindColor(
   kind: string | null | undefined,
   code: string | null | undefined,
   el?: Element | null,
+  affectation?: string | null,
 ): string {
-  const style = zoneKindStyle(kind, code);
+  const style = zoneKindStyle(kind, code, affectation);
   return resolveMapColor(style.token, style.fallback, el);
 }
 
@@ -146,7 +209,12 @@ export function decorateZonesWithKindColor(
           zoneRefComparableKey(feature.properties.code),
         )
           ? highlightColor
-          : zoneKindColor(feature.properties.kind, feature.properties.code, el),
+          : zoneKindColor(
+              feature.properties.kind,
+              feature.properties.code,
+              el,
+              feature.properties.affectation,
+            ),
       },
     })),
   };
@@ -163,13 +231,13 @@ export interface ZoneKindLegendEntry {
  * une entrée neutre unique en fin de liste.
  */
 export function zoneKindLegend(
-  zones: ReadonlyArray<{ kind?: string | null; code: string }>,
+  zones: ReadonlyArray<{ kind?: string | null; code: string; affectation?: string | null }>,
   el?: Element | null,
 ): ZoneKindLegendEntry[] {
   const seen = new Set<StyledZoneKind>();
   let hasNeutral = false;
   for (const zone of zones) {
-    const canonical = canonicalZoneKind(zone.kind ?? null, zone.code);
+    const canonical = canonicalZoneKind(zone.kind ?? null, zone.code, zone.affectation ?? null);
     if (canonical) seen.add(canonical);
     else hasNeutral = true;
   }

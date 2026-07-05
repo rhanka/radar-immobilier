@@ -197,7 +197,11 @@
     ? zoneKindLegend(
         (zonesResponse?.featureCollection.features ?? [])
           .filter((f) => !f.properties.code.startsWith(CITY_FALLBACK_ZONE_PREFIX))
-          .map((f) => ({ kind: f.properties.kind ?? null, code: f.properties.code })),
+          .map((f) => ({
+            kind: f.properties.kind ?? null,
+            code: f.properties.code,
+            affectation: f.properties.affectation ?? null,
+          })),
         null,
       )
     : [];
