@@ -103,22 +103,95 @@ function readZoneObject(value: unknown): { kind: ZoneKind; densiteLogHa: number 
 }
 
 /**
- * Kind canonique dérivé du préfixe d'un code de zone (H-, C-, I-, M-…).
+ * Codes courts de famille de zonage → kind canonique. Couvre les préfixes
+ * réglementaires QC historiques (H-, C-, I-, CONS-…) ET la taxonomie servie
+ * par geo, MESURÉE sur les collections `qc-zonage-*` (2026-07 : Mont-Tremblant
+ * + échantillon de 80 collections) : CO/CR/CF/CFA conservation, VP/VF/V/TV
+ * villégiature (résidentiel saisonnier), TO/RE/REC récréotouristique, AG/AF/FO
+ * agro-forestier, EX extraction, IN industriel, PU public, HA/RA/RB/RC/RV
+ * résidentiel, suffixes des codes à secteur CV-/VA- (RF/RMF/RFM/RTF
+ * résidentiel, CA/CCM commercial, MF/MXT/CU mixte, IND industriel).
+ * Aucune entrée inventée.
+ */
+const ZONE_CODE_TOKEN_KINDS: Record<string, ZoneKind> = {
+  // Habitation (résidentiel + villégiature)
+  H: "H",
+  HA: "H",
+  R: "H",
+  RA: "H",
+  RB: "H",
+  RC: "H",
+  RM: "H",
+  RV: "H",
+  RF: "H",
+  RFM: "H",
+  RMF: "H",
+  RTF: "H",
+  V: "H",
+  VP: "H",
+  VF: "H",
+  TV: "H",
+  VILL: "H",
+  // Mixte
+  M: "MIXTE",
+  MS: "MIXTE",
+  MXTV: "MIXTE",
+  MXT: "MIXTE",
+  MF: "MIXTE",
+  CU: "MIXTE",
+  // Commercial
+  C: "C",
+  CM: "C",
+  CA: "C",
+  CCM: "C",
+  // Industriel (extraction incluse : carrières/sablières)
+  I: "I",
+  ID: "I",
+  IN: "I",
+  IND: "I",
+  EX: "I",
+  // Utilité publique
+  U: "U",
+  // Public / institutionnel
+  P: "P",
+  PU: "P",
+  CGS: "P",
+  // Agricole / agro-forestier
+  A: "A",
+  AG: "A",
+  AF: "A",
+  FO: "A",
+  // Conservation (corridors fauniques et conservation forestière inclus)
+  CONS: "CONS",
+  CONSERVATION: "CONS",
+  CO: "CONS",
+  CR: "CONS",
+  CF: "CONS",
+  CFA: "CONS",
+  // Récréation / touristique
+  REC: "REC",
+  RE: "REC",
+  TO: "REC",
+};
+
+/**
+ * Kind canonique dérivé des TOKENS alphabétiques d'un code de zone : le code
+ * est découpé sur tout séparateur non alphabétique (« CO-939 » → [CO],
+ * « CV-RF-2 » → [CV, RF], « Af/b » → [AF, B]) et le PREMIER token connu de la
+ * table gagne — ce qui résout aussi les codes à préfixe de secteur
+ * (CV-/VA-/ST- de Mont-Tremblant : le secteur est inconnu, le suffixe porte la
+ * famille). Insensible à la casse. null si aucun token connu (aucune invention).
  * Exporté : sert aussi à la teinte des aplats de zone (zone-kind-style).
  */
 export function kindFromZoneCode(zoneCode: string | null): ZoneKind | null {
   if (!zoneCode) return null;
-  const code = zoneCode.trim();
+  const code = zoneCode.trim().toUpperCase();
   if (!code || code === "N/D") return null;
-  if (/^(H|RM|R)-/i.test(code)) return "H";
-  if (/^(M|MS|MXTV)-/i.test(code)) return "MIXTE";
-  if (/^C-/i.test(code)) return "C";
-  if (/^(I|ID)-/i.test(code)) return "I";
-  if (/^U-/i.test(code)) return "U";
-  if (/^(P|CGS)-/i.test(code)) return "P";
-  if (/^A-/i.test(code)) return "A";
-  if (/^(CONS|CONSERVATION)-/i.test(code)) return "CONS";
-  if (/^REC-/i.test(code)) return "REC";
+  const tokens = code.split(/[^A-Z]+/).filter((token) => token.length > 0);
+  for (const token of tokens) {
+    const kind = ZONE_CODE_TOKEN_KINDS[token];
+    if (kind) return kind;
+  }
   return null;
 }
 

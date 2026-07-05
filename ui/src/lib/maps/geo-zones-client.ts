@@ -24,9 +24,16 @@ export interface GeoZoneProperties {
   label?: string;
   /**
    * Famille/kind de la zone quand la source l'expose (ex. "habitation",
-   * lettre canonique "H") — sert à la teinte des aplats (zone-kind-style).
+   * lettre canonique "H", code court geo "CO") — sert à la teinte des aplats
+   * (zone-kind-style).
    */
   kind?: string | null;
+  /**
+   * Libellé d'affectation du sol quand la source l'expose (ex. « Conservation »,
+   * « CV - Résidentielle de faible densité ») — résolu en PRIORITÉ pour la
+   * teinte par famille (zone-kind-style), plus fiable que le code `kind`.
+   */
+  affectation?: string | null;
   /** Lien grille de zonage PDF quand la source l'expose (preuve). */
   grillePdfUrl?: string;
   /** UI-derived : couleur résolue de l'aplat par kind (peinture MapLibre) — jamais persistée. */

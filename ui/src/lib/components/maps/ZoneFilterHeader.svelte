@@ -21,8 +21,12 @@
     type ZoneKindGroupId,
   } from "$lib/maps/zone-kind-filter.js";
 
-  /** Zones de la ville active (kind + code suffisent au filtre). */
-  export let zones: ReadonlyArray<{ kind?: string | null; code: string }> = [];
+  /** Zones de la ville active (affectation/kind + code suffisent au filtre). */
+  export let zones: ReadonlyArray<{
+    kind?: string | null;
+    code: string;
+    affectation?: string | null;
+  }> = [];
   export let filter: ZoneKindFilter;
   export let onChange: (filter: ZoneKindFilter) => void = () => {};
 
