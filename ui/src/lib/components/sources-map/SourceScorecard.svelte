@@ -24,8 +24,12 @@
     colorForCity,
     isFocusCity,
     fetchCityGrilles,
+    fetchCityLotFields,
+    lotFieldEvidence,
+    lotFieldsMethodNote,
     type CityCoverage,
     type CityGrilles,
+    type CityLotFields,
     type FocusScope,
   } from "$lib/sources/source-coverage-client.js";
 
@@ -63,6 +67,32 @@
       if (grillesForSlug === c.citySlug) grillesError = true;
     } finally {
       if (grillesForSlug === c.citySlug) grillesLoading = false;
+    }
+  }
+
+  // ── Champs lot enrichis (superficie/adresse/CP/normes) : lazy aussi ────────
+  let lotFields: CityLotFields | null = null;
+  let lotFieldsLoading = false;
+  let lotFieldsError = false;
+  let lotFieldsForSlug = "";
+
+  $: void loadLotFields(city);
+
+  async function loadLotFields(c: CityCoverage): Promise<void> {
+    if (lotFieldsForSlug === c.citySlug) return;
+    lotFieldsForSlug = c.citySlug;
+    lotFields = null;
+    lotFieldsError = false;
+    // Lots non servis → pas de champs lot : aucun appel réseau.
+    if (!c.l5Lots.served) return;
+    lotFieldsLoading = true;
+    try {
+      const result = await fetchCityLotFields(c.citySlug);
+      if (lotFieldsForSlug === c.citySlug) lotFields = result;
+    } catch {
+      if (lotFieldsForSlug === c.citySlug) lotFieldsError = true;
+    } finally {
+      if (lotFieldsForSlug === c.citySlug) lotFieldsLoading = false;
     }
   }
 
@@ -124,6 +154,28 @@
       evidence: geoEvidence(city.tod, "périmètres TOD servis"),
     },
   ];
+
+  // Lignes « champs lot » (états async distincts, honnêtes). Les 4 taux
+  // viennent de l'API (mesure live sur `qc-lots-<slug>`, % honnêtes 1..99
+  // quand partiels, méthode d'échantillonnage DÉCLARÉE).
+  $: lotFieldsResolved =
+    lotFields !== null && lotFields.available && lotFields.fields !== undefined;
+  $: lotFieldRows =
+    lotFieldsResolved && lotFields?.fields
+      ? [
+          { key: "superficie", label: "Superficie", rate: lotFields.fields.superficie },
+          { key: "adresse", label: "Adresse", rate: lotFields.fields.adresse },
+          { key: "code-postal", label: "Code postal", rate: lotFields.fields.codePostal },
+          { key: "normes", label: "Normes lot", rate: lotFields.fields.normes },
+        ]
+      : null;
+  $: lotFieldsNote =
+    lotFieldsResolved && lotFields ? lotFieldsMethodNote(lotFields) : null;
+  $: lotFieldsPendingText = lotFieldsLoading
+    ? "vérification en cours…"
+    : lotFieldsError || (lotFields !== null && !lotFields.available)
+      ? "donnée indisponible pour l'instant"
+      : "vérification en cours…";
 
   // Évidence + libellé de la ligne grilles (états async distincts, honnêtes).
   $: grillesResolved = grilles !== null && grilles.available;
@@ -225,6 +277,45 @@
           </span>
         </div>
       </li>
+      {#if row.key === "lots"}
+        <!-- Champs lot enrichis : détail LAZY (live) sous la ligne cadastre.
+             4 taux honnêtes mesurés sur les lots servis par geo — s'AJOUTE aux
+             couches existantes, ne remplace rien. -->
+        <li class="px-4 py-2.5" data-testid="scorecard-lot-fields">
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-xs font-semibold text-slate-700">
+              Champs lot (superficie · adresse · code postal · normes)
+            </p>
+            {#if lotFieldsNote}
+              <span class="shrink-0 text-xs text-slate-400">{lotFieldsNote}</span>
+            {/if}
+          </div>
+          {#if !city.l5Lots.served}
+            <p class="mt-1 text-xs text-slate-400">aucune donnée</p>
+          {:else if lotFieldRows}
+            <ul class="mt-1.5 space-y-1.5">
+              {#each lotFieldRows as field (field.key)}
+                <li
+                  class="flex items-center justify-between gap-3"
+                  data-testid={`lot-field-${field.key}`}
+                >
+                  <p class="min-w-0 pl-3 text-xs text-slate-600">{field.label}</p>
+                  <div class="flex shrink-0 items-center gap-2">
+                    <span class="text-xs tabular-nums text-slate-500">
+                      {lotFieldEvidence(field.rate)}
+                    </span>
+                    <Badge tone={STATE_BADGE_TONE[field.rate.state]} class="text-xs">
+                      {STATE_LABEL[field.rate.state]}
+                    </Badge>
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          {:else}
+            <p class="mt-1 text-xs text-slate-400">{lotFieldsPendingText}</p>
+          {/if}
+        </li>
+      {/if}
     {/each}
   </ul>
 
