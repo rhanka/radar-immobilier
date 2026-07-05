@@ -4,7 +4,20 @@ Mesure LIVE de l'API geo OGC (2026-07-05), échantillon 20 lots/collection (esti
 Collections qc-lots mesurées : **187** sur 1102 listées (914 en erreur/timeout, 1 vides).
 Collections de grilles servies `qc-zonage-norms-*` : **519** (batch geo en cours).
 
-## Agrégats
+
+> ⚠️ **PORTÉE / HONNÊTETÉ.** Ce rapport est un balayage CLIENT (curl) des collections
+> geo. L'API geo **limite les rafales** : sur 1102 collections, seules **187 ont
+> répondu de façon fiable** (914 timeouts) — donc ces agrégats sont **INDICATIFS,
+> PAS exhaustifs** (échantillon biaisé vers les collections rapides).
+>
+> **La vraie couverture exhaustive par ville se lit dans la vue Sources** (indicateurs
+> Superficie/Adresse/CP/Normes, PR #353) : ils calculent la couverture de CHAQUE ville
+> **côté serveur, à la demande**. Pour un agrégat province fiable en un coup, la bonne
+> voie = un **batch serveur** (l'API `source-coverage` itérant QC_MUNICIPALITIES) ou un
+> **agrégat fourni par geo**, pas un balayage client. Recommandation : ne pas se fier aux
+> chiffres ci-dessous comme vérité province, mais aux indicateurs par ville.
+
+## Agrégats (INDICATIFS — échantillon 187/1102)
 | Champ | ≥90% | ≥50% | =0% |
 |---|---:|---:|---:|
 | Superficie (surface_m2) | 55 | 55 | 132 |
@@ -12,7 +25,7 @@ Collections de grilles servies `qc-zonage-norms-*` : **519** (batch geo en cours
 | Code postal | 55 | 55 | 132 |
 | Normes lot (hauteur_max) | 6 | 11 | 176 |
 
-**Lecture** : {agg('surface_m2',90)}/{tot} villes ont la superficie à ≥90%, **{len(zsurf)} à 0%** (non enrichies côté geo).
+**Lecture** : sur les 187 collections ayant répondu, la plupart sont à 0% (non encore enrichies côté geo) ; les 4 villes cibles + focus sont à ~100%.
 
 ## Villes à 0% de superficie — backlog d'enrichissement geo
 
