@@ -24,7 +24,11 @@ import {
   countCheapLotsCompletions,
   sortCitiesForConsole,
   fetchCityGrilles,
+  fetchCityLotFields,
+  lotFieldEvidence,
+  lotFieldsMethodNote,
   type CityCoverage,
+  type CityLotFields,
   type CoverageState,
   type CoverageTotals,
 } from "./source-coverage-client.js";
@@ -372,5 +376,106 @@ describe("fetchCityGrilles", () => {
     await expect(fetchCityGrilles("ville-x", fetchImpl)).rejects.toThrow(
       "source-coverage grilles HTTP 502",
     );
+  });
+});
+
+// ── Champs lot enrichis (superficie/adresse/CP/normes) ───────────────────────
+
+describe("fetchCityLotFields", () => {
+  it("appelle l'endpoint par ville et retourne le contrat tel quel", async () => {
+    const payload: CityLotFields = {
+      citySlug: "delson",
+      available: true,
+      totalLots: 3330,
+      sampleSize: 450,
+      sampled: true,
+      fields: {
+        superficie: { count: 450, pct: 100, state: "verified" },
+        adresse: { count: 450, pct: 100, state: "verified" },
+        codePostal: { count: 450, pct: 100, state: "verified" },
+        normes: { count: 315, pct: 70, state: "declared" },
+      },
+      state: "declared",
+    };
+    const fetchImpl = vi.fn(async () =>
+      new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    ) as unknown as typeof fetch;
+
+    const result = await fetchCityLotFields("delson", fetchImpl);
+    expect(result).toEqual(payload);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "/api/source/coverage/delson/lot-fields",
+      expect.objectContaining({ headers: { Accept: "application/json" } }),
+    );
+  });
+
+  it("lève en cas d'échec HTTP (état « donnée indisponible » honnête côté vue)", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response("{}", { status: 502 }),
+    ) as unknown as typeof fetch;
+    await expect(fetchCityLotFields("ville-x", fetchImpl)).rejects.toThrow(
+      "source-coverage lot-fields HTTP 502",
+    );
+  });
+});
+
+describe("lotFieldEvidence (copy client, % honnête)", () => {
+  it("100 % → « 100 % des lots », partiel → « N % des lots », 0 → « non enrichi »", () => {
+    expect(
+      lotFieldEvidence({ count: 450, pct: 100, state: "verified" }),
+    ).toBe("100 % des lots");
+    expect(lotFieldEvidence({ count: 315, pct: 70, state: "declared" })).toBe(
+      "70 % des lots",
+    );
+    expect(lotFieldEvidence({ count: 13, pct: 3, state: "declared" })).toBe(
+      "3 % des lots",
+    );
+    expect(lotFieldEvidence({ count: 0, pct: 0, state: "absent" })).toBe(
+      "0 % — non enrichi",
+    );
+  });
+});
+
+describe("lotFieldsMethodNote (méthode déclarée, jamais masquée)", () => {
+  it("mesure exhaustive → « mesuré sur les N lots servis »", () => {
+    expect(
+      lotFieldsMethodNote({
+        citySlug: "delson",
+        available: true,
+        totalLots: 330,
+        sampleSize: 330,
+        sampled: false,
+      }),
+    ).toBe("mesuré sur les 330 lots servis");
+  });
+
+  it("échantillon → « échantillon de N lots sur M »", () => {
+    const note = lotFieldsMethodNote({
+      citySlug: "longueuil",
+      available: true,
+      totalLots: 90000,
+      sampleSize: 450,
+      sampled: true,
+    });
+    // toLocaleString fr-CA : séparateur de milliers (espace insécable).
+    expect(note).toMatch(/^échantillon de 450 lots sur 90.000$/);
+  });
+
+  it("mesure indisponible ou vide → null (pas de note fabriquée)", () => {
+    expect(
+      lotFieldsMethodNote({ citySlug: "ville-x", available: false }),
+    ).toBeNull();
+    expect(
+      lotFieldsMethodNote({
+        citySlug: "ville-y",
+        available: true,
+        totalLots: 0,
+        sampleSize: 0,
+        sampled: false,
+      }),
+    ).toBeNull();
   });
 });
