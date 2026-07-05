@@ -39,7 +39,13 @@
     ZONE_LABEL_MINZOOM,
     type LegendEntry,
   } from "$lib/maps/score-color-scale.js";
-  import { formatArea, formatLength } from "$lib/components/maps/lot-fiche-utils.js";
+  import {
+    formatArea,
+    formatLength,
+    formatPostalCode,
+    formatYesNo,
+    lotNormesRows,
+  } from "$lib/components/maps/lot-fiche-utils.js";
 
   /** Slug de la ville de référence à charger (mode:simulation). */
   export let citySlug: string;
@@ -194,11 +200,19 @@
         });
 
         // ── Interaction : clic lot → détail (noLot uniquement, anti-PII) ──
-        // MapLibre type features[].properties est { [name: string]: any } ;
-        // on caste vers LotLayerProps via unknown pour garder la sûreté de type côté svelte.
+        // MapLibre type features[].properties est { [name: string]: any } ET
+        // sérialise les propriétés IMBRIQUÉES (ex. `normes`) en chaînes JSON
+        // dans les features cliquées : on relit donc le lot dans NOS couches
+        // JS (source de vérité typée) via son noLot ; repli sur les props
+        // MapLibre (plates) si introuvable.
         m.on("click", LOT_FILL, (e: import("maplibre-gl").MapMouseEvent & { features?: import("maplibre-gl").MapGeoJSONFeature[] }) => {
           const f = e.features?.[0];
-          if (f) selectedLot = f.properties as unknown as LotLayerProps;
+          if (!f) return;
+          const flat = f.properties as unknown as LotLayerProps;
+          const fromLayers = resolved?.lots.features.find(
+            (lf) => lf.properties.noLot === flat.noLot,
+          );
+          selectedLot = fromLayers?.properties ?? flat;
         });
         m.on("mouseenter", LOT_FILL, () => {
           (m.getCanvas() as HTMLCanvasElement).style.cursor = "pointer";
@@ -338,9 +352,11 @@
             <dt>Adresse</dt>
             <dd class:text-slate-300={!selectedLot.adresse} data-testid="lot-detail-adresse">{selectedLot.adresse ?? "—"}</dd>
           </div>
+          <!-- Code postal : FSA 3 caractères servi par geo (ex. « J3Y ») —
+               affiché tel quel avec libellé discret « (secteur) ». -->
           <div class="flex justify-between gap-2">
             <dt>Code postal</dt>
-            <dd class:text-slate-300={!selectedLot.codePostal} data-testid="lot-detail-code-postal">{selectedLot.codePostal ?? "—"}</dd>
+            <dd class:text-slate-300={!selectedLot.codePostal} data-testid="lot-detail-code-postal">{formatPostalCode(selectedLot.codePostal)}</dd>
           </div>
           <div class="flex justify-between gap-2">
             <dt>Superficie</dt>
@@ -358,9 +374,26 @@
             >{formatLength(selectedLot.frontageM ?? selectedLot.facadeM)}</dd>
           </div>
           <div class="flex justify-between gap-2">
+            <dt>Périmètre TOD</dt>
+            <dd data-testid="lot-detail-tod">{formatYesNo(selectedLot.tod)}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
             <dt>Potentiel</dt>
             <dd class="font-semibold">{Math.round(selectedLot.potentialScore * 100)}%</dd>
           </div>
+        </dl>
+        <!-- Normes de zonage foldées par lot (servies par geo via zone_code) :
+             valeur + unité VERBATIM quand servies, « — » sinon — JAMAIS de
+             valeur inventée. « Façade min »/« Superficie min » = NORMES de
+             grille, distinctes de la façade/superficie réelles ci-dessus. -->
+        <p class="mt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Normes de zonage</p>
+        <dl class="mt-1 space-y-1 text-slate-600" data-testid="lot-detail-normes">
+          {#each lotNormesRows(selectedLot.normes) as [label, value] (label)}
+            <div class="flex justify-between gap-2">
+              <dt>{label}</dt>
+              <dd class:text-slate-300={value === "—"}>{value}</dd>
+            </div>
+          {/each}
         </dl>
         {#if selectedLot.scorePlaceholder}
           <p class="mt-2 text-[10px] leading-tight text-amber-600">

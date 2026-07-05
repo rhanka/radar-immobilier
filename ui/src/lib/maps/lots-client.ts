@@ -56,9 +56,9 @@ export interface LotProperties {
    */
   adresse?: string | null;
   /**
-   * Code postal du lot quand la source geo l'expose (demande envoyée à geo —
-   * C5). Câblé côté client pour remonter automatiquement dès que la propriété
-   * arrive ; « — » dans la fiche en attendant.
+   * Code postal du lot servi par geo en FSA 3 caractères (ex. « J3Y » —
+   * secteur postal, PAS le code 6 caractères licencié Postes Canada).
+   * Affiché tel quel ; « — » quand non servi.
    */
   codePostal?: string | null;
   /**
@@ -70,7 +70,10 @@ export interface LotProperties {
   facadeM?: number | null;
   /** Profondeur mesurée par la source (m) quand exposée. */
   profondeurM?: number | null;
-  /** Surface calculée par l'API depuis la géométrie publique, en m². */
+  /**
+   * Superficie RÉELLE du lot en m² : `surface_m2` servie par geo (aire du
+   * polygone, ~100 % des lots), sinon `superficie_m2_calculee` de la source.
+   */
   superficieM2?: number | null;
   /** Usage public résolu quand disponible; null sinon. */
   usageCode?: string | null;
@@ -87,9 +90,13 @@ export interface LotProperties {
   } | null;
   /**
    * Normes de zonage VERBATIM portées par le lot quand la source geo les
-   * expose (extraction de la grille de zonage : hauteur, étages, marges,
-   * densité). Valeurs textuelles telles qu'extraites — aucune conversion
-   * inventée ; null/absent quand la grille n'est pas extraite.
+   * expose (normes foldées par lot via `zone_code` : hauteur max, étages,
+   * marges min, densité, façade min, superficie min). geo les sert en paires
+   * `<norme>_value`/`<norme>_unit` (verbatim-or-null) ; valeurs telles
+   * qu'extraites — aucune conversion inventée ; null/absent quand la grille
+   * n'est pas extraite. NE PAS confondre `superficieMin` (NORME de zonage)
+   * avec `superficieM2` (aire réelle `surface_m2`), ni `frontageMin` (norme)
+   * avec `facadeM` (façade réelle `frontage_m`).
    */
   normes?: {
     hauteur?: string | null;
@@ -98,6 +105,10 @@ export interface LotProperties {
     margeArriere?: string | null;
     margeLaterale?: string | null;
     densite?: string | null;
+    /** Façade MIN normée (norme de grille — distincte de la façade réelle). */
+    frontageMin?: string | null;
+    /** Superficie MIN normée (norme de grille — distincte de l'aire réelle). */
+    superficieMin?: string | null;
   } | null;
   /** Zone résolue pour le lot quand disponible; null sinon. */
   zone?: {
@@ -450,9 +461,13 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.multifamilial_4plus_source,
   ]);
   const priorite = firstBoolean([properties.priorite, properties.priority]);
+  // Superficie RÉELLE du lot servie par geo : `surface_m2` (aire du polygone,
+  // m², ~100 % des lots). `superficie_m2` était un nom MORT (jamais servi par
+  // geo — bug de mapping #350) : il n'est plus lu. Repli honnête sur la
+  // `superficie_m2_calculee` de la source quand geo ne sert rien.
   const superficieM2 = firstNumber([
     properties.superficieM2,
-    properties.superficie_m2,
+    properties.surface_m2,
     properties.superficie_m2_calculee,
   ]);
   // Adresse civique du lot (rôle public) — jamais de nom de propriétaire.
@@ -462,7 +477,8 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
     properties.adresse_civique,
     properties.adresseCivique,
   ]);
-  // Code postal (C5) — câblé côté client, remonte dès que geo l'expose.
+  // Code postal servi par geo en FSA 3 caractères (ex. « J3Y » — secteur,
+  // PAS le code 6 caractères licencié Postes Canada) — affiché tel quel.
   const codePostal = firstString([
     properties.codePostal,
     properties.code_postal,
@@ -607,15 +623,45 @@ function normalizeNormes(
   const record = typeof value === "object" && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
     : fallback;
+  // Contrat geo (normes foldées par lot via zone_code, verbatim-or-null) :
+  // paires `<norme>_value` (+ `<norme>_unit` quand l'unité est servie) — la
+  // paire geo PRIME sur les anciens noms plats. Aucune valeur inventée.
   const normes = {
-    hauteur: firstVerbatim([record.hauteur, record.hauteur_max, record.hauteurMax, record.hauteur_verbatim]),
+    hauteur: normeWithUnit(record, "hauteur_max_value", "hauteur_max_unit")
+      ?? firstVerbatim([record.hauteur, record.hauteur_max, record.hauteurMax, record.hauteur_verbatim]),
     etages: firstVerbatim([record.etages, record.etagesMax, record.etages_max, record.nb_etages_max]),
-    margeAvant: firstVerbatim([record.margeAvant, record.marge_avant, record.marge_avant_m]),
-    margeArriere: firstVerbatim([record.margeArriere, record.marge_arriere, record.marge_arriere_m]),
-    margeLaterale: firstVerbatim([record.margeLaterale, record.marge_laterale, record.marges_laterales]),
-    densite: firstVerbatim([record.densite, record.densite_verbatim, record.densiteLogHa, record.densite_log_ha]),
+    margeAvant: normeWithUnit(record, "marge_avant_min_value", "marge_avant_min_unit")
+      ?? firstVerbatim([record.margeAvant, record.marge_avant, record.marge_avant_m]),
+    margeArriere: normeWithUnit(record, "marge_arriere_min_value", "marge_arriere_min_unit")
+      ?? firstVerbatim([record.margeArriere, record.marge_arriere, record.marge_arriere_m]),
+    margeLaterale: normeWithUnit(record, "marge_laterale_min_value", "marge_laterale_min_unit")
+      ?? firstVerbatim([record.margeLaterale, record.marge_laterale, record.marges_laterales]),
+    densite: normeWithUnit(record, "densite_value", "densite_unit")
+      ?? firstVerbatim([record.densite, record.densite_verbatim, record.densiteLogHa, record.densite_log_ha]),
+    // Façade MIN normée — DISTINCTE de la façade réelle `frontage_m`.
+    frontageMin: normeWithUnit(record, "frontage_min_value", "frontage_min_unit")
+      ?? firstVerbatim([record.frontageMin, record.frontage_min]),
+    // Superficie MIN normée — DISTINCTE de l'aire réelle `surface_m2`.
+    superficieMin: normeWithUnit(record, "superficie_min_value", "superficie_min_unit")
+      ?? firstVerbatim([record.superficieMin, record.superficie_min]),
   };
   return Object.values(normes).some((v) => v !== null) ? normes : undefined;
+}
+
+/**
+ * Norme geo « valeur + unité » : compose `<norme>_value` avec `<norme>_unit`
+ * quand les deux sont servis, la valeur seule sinon (verbatim-or-null —
+ * aucune unité inventée). null quand la valeur n'est pas servie.
+ */
+function normeWithUnit(
+  record: Record<string, unknown>,
+  valueKey: string,
+  unitKey: string,
+): string | null {
+  const value = firstVerbatim([record[valueKey]]);
+  if (value === null) return null;
+  const unit = readString(record[unitKey]);
+  return unit ? `${value} ${unit}` : value;
 }
 
 function normalizeValuation(

@@ -57,7 +57,9 @@
     evaluatedLotScore,
     facadeDisplay,
     formatArea,
+    formatPostalCode,
     formatYesNo,
+    lotNormesRows,
     lotZoneCode,
   } from "$lib/components/maps/lot-fiche-utils.js";
   import {
@@ -1193,9 +1195,10 @@
                           <span class="entity-meta-key">Type de zone</span>
                           <span class="entity-meta-val">{lotZoneKind(lot)}</span>
                         {/if}
-                        <!-- C5 — fiche enrichie : adresse + code postal (« — »
-                             tant que geo ne les expose pas — câblés pour
-                             remonter dès l'arrivée de la propriété). -->
+                        <!-- Adresse + code postal servis par geo : adresse
+                             civique du rôle (« — » quand non résolue) ; code
+                             postal en FSA 3 caractères (ex. « J3Y ») affiché
+                             tel quel avec libellé discret « (secteur) ». -->
                         <span class="entity-meta-key">Adresse</span>
                         <span
                           class="entity-meta-val"
@@ -1209,7 +1212,7 @@
                           class="entity-meta-val"
                           class:entity-meta-val--missing={!lot.properties.codePostal}
                         >
-                          {lot.properties.codePostal ?? "—"}
+                          {formatPostalCode(lot.properties.codePostal)}
                         </span>
                         <span class="entity-meta-key">Multifamilial 4+</span>
                         <span
@@ -1242,6 +1245,21 @@
                           <span class="entity-meta-key">Priorité</span>
                           <span class="entity-meta-val">{formatYesNo(lot.properties.priorite)}</span>
                         {/if}
+                        <!-- Normes de zonage foldées par lot (servies par geo
+                             via zone_code) : valeur + unité VERBATIM quand
+                             servies, « — » sinon — JAMAIS de valeur inventée.
+                             « Façade min »/« Superficie min » = NORMES de
+                             grille, distinctes de Façade/Superficie réelles. -->
+                        <span class="entity-meta-section">Normes de zonage</span>
+                        {#each lotNormesRows(lot.properties.normes) as [label, value] (label)}
+                          <span class="entity-meta-key">{label}</span>
+                          <span
+                            class="entity-meta-val"
+                            class:entity-meta-val--missing={value === "—"}
+                          >
+                            {value}
+                          </span>
+                        {/each}
                         <span class="entity-meta-key">Potentiel</span>
                         {#if lotScore(lot)}
                           <span class="entity-meta-val">{lotScore(lot)}</span>
@@ -1603,6 +1621,18 @@
     font-size: var(--signaux-fs-caption);
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+
+  /* En-tête de sous-section de la fiche lot (ex. « Normes de zonage ») —
+     s'étend sur les deux colonnes de la grille entity-meta. */
+  .entity-meta-section {
+    grid-column: 1 / -1;
+    margin-top: 0.35rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-overline);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   .entity-meta-val {
