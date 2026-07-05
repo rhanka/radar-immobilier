@@ -144,6 +144,29 @@ describe("fetchZones", () => {
     expect(a16.properties.kind).toBe("agricole"); // depuis `categorie`
   });
 
+  it("extrait l'affectation servie par geo (profil mont-tremblant : kind=CO + affectation)", async () => {
+    vi.stubGlobal("fetch", async () =>
+      new Response(
+        JSON.stringify({
+          type: "FeatureCollection",
+          features: [
+            makeZonePolygon({
+              zone_code: "CO-939",
+              kind: "CO",
+              affectation: "Conservation",
+            }),
+          ],
+        }),
+        { status: 200 },
+      ),
+    );
+    const res = await fetchZones("mont-tremblant", { baseUrl: "" });
+    const zone = res.featureCollection.features[0]!;
+    expect(zone.properties.code).toBe("CO-939");
+    expect(zone.properties.kind).toBe("CO");
+    expect(zone.properties.affectation).toBe("Conservation");
+  });
+
   it("drops features without any resolvable code (no false zone)", async () => {
     vi.stubGlobal("fetch", async () =>
       new Response(
