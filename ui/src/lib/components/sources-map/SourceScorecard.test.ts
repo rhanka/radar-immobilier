@@ -72,12 +72,26 @@ function makeCity(slug: string, name: string, lotsServed: boolean): CityCoverage
   };
 }
 
-/** Stub fetch : sert le payload lot-fields donné, compte les appels. */
+/** Réponse cohérence PAR DÉFAUT des tests hors-sujet : aucun snapshot (honnête). */
+const EMPTY_CONSISTENCY = { generatedAt: null, cities: [] };
+
+/**
+ * Stub fetch : sert le payload lot-fields donné, compte les appels. Sert
+ * aussi `/api/source/consistency` (fetch systématique de SourceScorecard,
+ * WP3 LOT1) avec un snapshot vide par défaut — ces tests portent sur les
+ * champs lot, pas sur la cohérence.
+ */
 function stubLotFieldsFetch(payload: CityLotFields) {
   const fetchStub = vi.fn(async (input: RequestInfo | URL) => {
     const url = String(input);
     if (url.includes("/lot-fields")) {
       return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (url.includes("/api/source/consistency")) {
+      return new Response(JSON.stringify(EMPTY_CONSISTENCY), {
         status: 200,
         headers: { "content-type": "application/json" },
       });
@@ -169,8 +183,17 @@ describe("SourceScorecard — champs lot enrichis (tri-état + % honnête)", () 
   });
 
   it("lots non servis : « aucune donnée », aucun appel réseau lot-fields", async () => {
-    const fetchStub = vi.fn(async () => {
-      throw new Error("ne doit pas être appelé");
+    // La cohérence E2E (WP3 LOT1) fait TOUJOURS un fetch batch au montage
+    // (indépendant de l'état lots) — seul l'appel /lot-fields doit être absent.
+    const fetchStub = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/source/consistency")) {
+        return new Response(JSON.stringify(EMPTY_CONSISTENCY), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      throw new Error(`appel réseau inattendu : ${url}`);
     });
     vi.stubGlobal("fetch", fetchStub);
 
@@ -182,6 +205,136 @@ describe("SourceScorecard — champs lot enrichis (tri-état + % honnête)", () 
     expect(getByTestId("scorecard-lot-fields").textContent).toContain(
       "aucune donnée",
     );
-    expect(fetchStub).not.toHaveBeenCalled();
+    expect(
+      fetchStub.mock.calls.some((call) => String(call[0]).includes("/lot-fields")),
+    ).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WP3 LOT1 — section « Cohérence E2E » (lane SÉPARÉE de la couverture, 2e
+// badge). Verrouille : ville mesurée (focus-30) affiche les 2 arêtes E0/E1 +
+// fraîcheur batch ; ville SANS snapshot -> « Non mesuré » honnête (jamais un
+// faux 0/100 %), jamais « Non couvert » (réservé à la couverture).
+// ─────────────────────────────────────────────────────────────────────────────
+describe("SourceScorecard — Cohérence E2E (WP3 LOT1)", () => {
+  /** Stub fetch dédié à la section cohérence (aucun appel lot-fields/grilles attendu ici). */
+  function stubConsistencyFetch(
+    body: { generatedAt: string | null; cities: Array<{ citySlug: string; consistency: unknown }> },
+  ) {
+    const fetchStub = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/api/source/consistency")) {
+        return new Response(JSON.stringify(body), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      throw new Error(`appel réseau inattendu : ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchStub);
+    return fetchStub;
+  }
+
+  it("ville focus-30 mesurée (coherent) : 2 arêtes + fraction fiable + fraîcheur batch PG", async () => {
+    stubConsistencyFetch({
+      generatedAt: "2026-07-05T00:00:00.000Z",
+      cities: [
+        {
+          citySlug: "mont-tremblant",
+          consistency: {
+            citySlug: "mont-tremblant",
+            mode: "batch-pg",
+            generatedAt: "2026-07-05T00:00:00.000Z",
+            state: "coherent",
+            edges: {
+              pvSignal: { num: 20, denom: 20, rate: 1, status: "measured" },
+              signalZone: {
+                num: 9,
+                denom: 10,
+                rate: 0.9,
+                status: "measured",
+                reliableNum: 6,
+                reliableRate: 0.6667,
+                applicability: { num: 8, denom: 20, rate: 0.4, status: "measured" },
+              },
+            },
+            blockers: [],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("mont-tremblant", "Mont-Tremblant", true) },
+    });
+    await flush();
+
+    const block = getByTestId("scorecard-consistency");
+    expect(block.textContent).toContain("Cohérence E2E");
+    expect(getByTestId("consistency-state-badge").textContent).toContain("Cohérent");
+    expect(getByTestId("consistency-pv-signal").textContent).toContain("20/20");
+    expect(getByTestId("consistency-signal-zone").textContent).toContain("9/10");
+    expect(getByTestId("consistency-signal-zone").textContent).toContain("67 %");
+    expect(getByTestId("consistency-freshness").textContent).toContain("batch PG");
+    expect(block.textContent).not.toContain("Non couvert");
+  });
+
+  it("ville SANS snapshot : « Non mesuré » honnête, jamais un faux 0/100 %", async () => {
+    stubConsistencyFetch({ generatedAt: null, cities: [] });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("ville-hors-focus30", "Ville Hors Focus 30", false) },
+    });
+    await flush();
+
+    const block = getByTestId("scorecard-consistency");
+    expect(getByTestId("consistency-state-badge").textContent).toContain("Non mesuré");
+    expect(getByTestId("consistency-pv-signal").textContent).toContain("non mesuré");
+    expect(getByTestId("consistency-signal-zone").textContent).toContain("non mesuré");
+    expect(getByTestId("consistency-freshness").textContent).toContain(
+      "aucun snapshot pour cette ville",
+    );
+    expect(block.textContent).not.toContain("Non couvert");
+    expect(block.textContent).not.toContain("100 %");
+  });
+
+  it("bloqueur : ligne dédiée affichée quand la ville en a au moins un", async () => {
+    stubConsistencyFetch({
+      generatedAt: "2026-07-05T00:00:00.000Z",
+      cities: [
+        {
+          citySlug: "sutton",
+          consistency: {
+            citySlug: "sutton",
+            mode: "batch-pg",
+            generatedAt: "2026-07-05T00:00:00.000Z",
+            state: "partial",
+            edges: {
+              pvSignal: { num: 8, denom: 10, rate: 0.8, status: "measured" },
+              signalZone: {
+                num: 0,
+                denom: 0,
+                rate: null,
+                status: "non_mesure",
+                reliableNum: 0,
+                reliableRate: null,
+                applicability: { num: 0, denom: 10, rate: 0, status: "measured" },
+              },
+            },
+            blockers: ["Signal sans citation", "PG non pullé"],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("sutton", "Sutton", false) },
+    });
+    await flush();
+
+    expect(getByTestId("consistency-state-badge").textContent).toContain("À qualifier");
+    expect(getByTestId("consistency-blocker").textContent).toContain("Signal sans citation");
+    expect(getByTestId("consistency-blocker").textContent).toContain("PG non pullé");
   });
 });
