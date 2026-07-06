@@ -47,6 +47,7 @@ resources:
   # 31/32/33 = Jobs one-shot (projection, projection-only, scrape) appliqués À LA
   # MAIN par le conducteur (kubectl apply -f), pas dans le bundle permanent.
   - 34-refresh-cronjob.yaml
+  - 35-consistency-snapshot-cronjob.yaml
   - 35-obscura.yaml
   - 40-maildev.yaml
   - 50-ui.yaml

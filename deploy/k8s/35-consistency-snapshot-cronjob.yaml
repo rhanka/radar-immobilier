@@ -1,0 +1,73 @@
+# consistency-snapshot-cronjob.yaml — WP3 cohérence E2E (LOT 1.5)
+#
+# Matérialise chaque nuit le snapshot batch PG `consistency_snapshots` utilisé par
+# la section Sources → « Cohérence E2E » (E0 PV→signaux + E1 signaux→zones).
+#
+# Cadence : 04:45 UTC, APRÈS `radar-refresh-projection` (04:30 UTC) car E0 lit
+# `graph_nodes` projetés en PG. Le job reste SUSPENDU tant que les refreshs
+# nightly 34-* sont suspendus (FinOps 2026-07-01) : réactiver ensemble.
+#
+# Dépendance honnête : E1 lit exclusivement la sortie du mapper #74
+# (`run-geo-mapper.ts` → `geo_resolutions`/`geo_unresolved`). Ce mapper n'est PAS
+# dans la chaîne nightly `34-refresh-cronjob.yaml` à ce stade : tant qu'il n'a pas
+# tourné en prod, le snapshot écrit `non_mesure` pour signal→zone (pas de chiffre
+# fabriqué). Ajouter le mapper #74 au nightly est un lot distinct.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-consistency-snapshot
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: consistency-snapshot
+spec:
+  suspend: true
+  schedule: "45 4 * * *"
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 3600
+      activeDeadlineSeconds: 900
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: radar-immobilier
+            # IMPORTANT : la NetworkPolicy allow-graph-projection-to-postgres
+            # autorise le component=graph-projection à joindre postgres:5432.
+            # Le snapshot lit/écrit PG dans la chaîne projection → même label pod.
+            app.kubernetes.io/component: graph-projection
+        spec:
+          restartPolicy: Never
+          serviceAccountName: radar-app
+          containers:
+            - name: consistency-snapshot
+              image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+              imagePullPolicy: Always
+              workingDir: /workspace/api
+              command: ["node", "dist/services/consistency/run-consistency-snapshot.js"]
+              envFrom:
+                - configMapRef:
+                    name: radar-api
+              env:
+                - name: NODE_OPTIONS
+                  value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+                - name: SCOPE
+                  value: "focus30"
+                - name: POSTGRES_USER
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+                - name: POSTGRES_PASSWORD
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+                - name: POSTGRES_DB
+                  valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+                - name: DATABASE_URL
+                  value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+              resources:
+                requests: { cpu: 50m, memory: 96Mi }
+                limits: { cpu: 150m, memory: 256Mi }

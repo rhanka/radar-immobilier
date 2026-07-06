@@ -1,0 +1,61 @@
+# consistency-snapshot-job.yaml — one-shot manuel de première population WP3.
+#
+# À appliquer manuellement après déploiement/migration :
+#   kubectl -n radar-immobilier apply -f deploy/k8s/35-consistency-snapshot-job.yaml
+#   kubectl -n radar-immobilier logs -f job/radar-consistency-snapshot-once
+#
+# Non inclus dans `kustomization.yaml` (même convention que 31/32/33/35-run-*).
+# Supprimer/recréer ou renommer `metadata.name` pour relancer.
+#
+# Honnêteté : E1 signal→zone restera `non_mesure` si le mapper #74 n'a pas déjà
+# peuplé `geo_resolutions`/`geo_unresolved` en prod.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-consistency-snapshot-once
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: consistency-snapshot
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        # IMPORTANT : la NetworkPolicy allow-graph-projection-to-postgres
+        # autorise le component=graph-projection à joindre postgres:5432.
+        # Le snapshot lit/écrit PG dans la chaîne projection → même label pod.
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: consistency-snapshot
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "dist/services/consistency/run-consistency-snapshot.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: SCOPE
+              value: "focus30"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: DATABASE_URL
+              value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
