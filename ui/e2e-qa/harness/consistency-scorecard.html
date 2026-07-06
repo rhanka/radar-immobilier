@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QA harness — Cohérence E2E (SourceScorecard, WP3 LOT1)</title>
+  </head>
+  <body>
+    <div style="display: flex; gap: 24px; padding: 24px; background: #f8fafc; min-height: 100vh; align-items: flex-start;">
+      <div
+        id="harness-measured"
+        data-testid="harness-measured"
+        style="width: 420px; border: 1px solid #e2e8f0; background: #ffffff;"
+      ></div>
+      <div
+        id="harness-unmeasured"
+        data-testid="harness-unmeasured"
+        style="width: 420px; border: 1px solid #e2e8f0; background: #ffffff;"
+      ></div>
+    </div>
+    <script type="module" src="./consistency-scorecard-main.ts"></script>
+  </body>
+</html>
