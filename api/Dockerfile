@@ -73,6 +73,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/populate-geo.ts'," \
   "    'api/src/scripts/pull-geo-ogc.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
+  "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
   "  ]," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
   "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
