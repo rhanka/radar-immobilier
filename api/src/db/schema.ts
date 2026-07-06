@@ -642,6 +642,30 @@ export const geoUnresolved = pgTable(
   }),
 );
 
+// ═══════════════════════════════════════════════════════════════════════════
+// WP3 LOT1 — Cohérence E2E : snapshot batch PG par ville (E0 PV↔signal,
+// E1 signal↔zone). Un run du job réécrit la ligne de chaque ville ciblée
+// (upsert sur city_slug) ; `payload` porte le contrat `CityConsistency`
+// complet (edges/état/bloqueurs — cf. services/consistency/consistency-calc.ts),
+// `state`/`generated_at` sont dupliqués en colonnes pour un tri/filtre SQL bon
+// marché sans parser le JSON. Mode batch PG uniquement (JAMAIS 1104 requêtes
+// live) — cf. docs/spec/reports/DESIGN_E2E_CONSISTENCY_SOURCES.md.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export const consistencySnapshots = pgTable(
+  "consistency_snapshots",
+  {
+    citySlug: text("city_slug").primaryKey(),
+    generatedAt: timestamp("generated_at", { withTimezone: true }).notNull(),
+    state: text("state").notNull(), // 'coherent' | 'partial' | 'unmeasured'
+    payload: jsonb("payload").notNull(), // CityConsistency (edges, blockers, mode)
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byState: index("consistency_snapshots_state_idx").on(t.state),
+  }),
+);
+
 /**
  * Invitations envoyées par l'admin — associe un email à un token opaque.
  * Quand le user invité se logue via OIDC avec l'email correspondant, son
@@ -694,4 +718,6 @@ export const schema = {
   // G1 — Géo-mapper
   geoResolutions,
   geoUnresolved,
+  // WP3 LOT1 — Cohérence E2E
+  consistencySnapshots,
 };

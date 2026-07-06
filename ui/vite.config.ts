@@ -38,6 +38,9 @@ const harnessInput = qaHarness
       "lot-fields": fileURLToPath(
         new URL("./e2e-qa/harness/lot-fields.html", import.meta.url),
       ),
+      "consistency-scorecard": fileURLToPath(
+        new URL("./e2e-qa/harness/consistency-scorecard.html", import.meta.url),
+      ),
     }
   : undefined;
 
