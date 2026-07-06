@@ -16,6 +16,7 @@
    *
    * Réutilisé par la carte (panneau au clic) ET la Console (ligne dépliée).
    */
+  import { onMount } from "svelte";
   import { Badge } from "@sentropic/design-system-svelte";
   import {
     STATE_LABEL,
@@ -32,6 +33,16 @@
     type CityLotFields,
     type FocusScope,
   } from "$lib/sources/source-coverage-client.js";
+  import {
+    fetchSourceConsistency,
+    getCityConsistency,
+    formatEdgeCount,
+    formatReliablePct,
+    formatConsistencyFreshness,
+    CONSISTENCY_STATE_LABEL,
+    CONSISTENCY_STATE_BADGE_TONE,
+    type ConsistencyResponse,
+  } from "$lib/sources/source-consistency-client.js";
 
   export let city: CityCoverage;
   /**
@@ -95,6 +106,35 @@
       if (lotFieldsForSlug === c.citySlug) lotFieldsLoading = false;
     }
   }
+
+  // ── Cohérence E2E (WP3 LOT1) : snapshot BATCH, un seul fetch partagé par
+  // TOUTES les villes (jamais un fetch par ville — mode batch-pg, pas live).
+  // Chargé une fois au montage ; la ville active est dérivée du même snapshot.
+  let consistencyResponse: ConsistencyResponse | null = null;
+  let consistencyLoading = false;
+  let consistencyError = false;
+  let consistencyRequested = false;
+
+  async function loadConsistency(): Promise<void> {
+    if (consistencyRequested) return;
+    consistencyRequested = true;
+    consistencyLoading = true;
+    try {
+      consistencyResponse = await fetchSourceConsistency();
+    } catch {
+      consistencyError = true;
+    } finally {
+      consistencyLoading = false;
+    }
+  }
+
+  onMount(() => {
+    void loadConsistency();
+  });
+
+  $: cityConsistency = getCityConsistency(city.citySlug, consistencyResponse);
+  $: consistencyReliablePct = formatReliablePct(cityConsistency.edges.signalZone);
+  $: consistencyFreshnessText = formatConsistencyFreshness(cityConsistency);
 
   function geoEvidence(
     cell: CityCoverage["l4Zonage"],
@@ -318,6 +358,52 @@
       {/if}
     {/each}
   </ul>
+
+  <!-- Cohérence E2E (WP3 LOT1) — SOUS la couverture, 2e badge SÉPARÉ (jamais
+       un remplacement de « Couverture »). PV↔signal (E0) + signal↔zone (E1)
+       uniquement à ce lot ; zone↔grille/zone↔lot viendront ensuite. -->
+  <div
+    class="border-t border-slate-200 px-4 py-3"
+    data-testid="scorecard-consistency"
+  >
+    <div class="flex items-center justify-between gap-2">
+      <p class="text-xs font-semibold text-slate-700">Cohérence E2E</p>
+      <Badge
+        tone={consistencyLoading ? "neutral" : CONSISTENCY_STATE_BADGE_TONE[cityConsistency.state]}
+        class="text-xs"
+        data-testid="consistency-state-badge"
+      >
+        {consistencyLoading ? "—" : CONSISTENCY_STATE_LABEL[cityConsistency.state]}
+      </Badge>
+    </div>
+    {#if consistencyLoading}
+      <p class="mt-1.5 text-xs text-slate-400">vérification en cours…</p>
+    {:else if consistencyError}
+      <p class="mt-1.5 text-xs text-slate-400">donnée indisponible pour l'instant</p>
+    {:else}
+      <ul class="mt-1.5 space-y-1" data-testid="scorecard-consistency-edges">
+        <li class="text-xs text-slate-600" data-testid="consistency-pv-signal">
+          PV → signaux&nbsp;:
+          <span class="tabular-nums">{formatEdgeCount(cityConsistency.edges.pvSignal)}</span>
+        </li>
+        <li class="text-xs text-slate-600" data-testid="consistency-signal-zone">
+          signaux → zones&nbsp;:
+          <span class="tabular-nums">{formatEdgeCount(cityConsistency.edges.signalZone)}</span>
+          {#if consistencyReliablePct}
+            <span class="text-slate-400">(dont fiables {consistencyReliablePct})</span>
+          {/if}
+        </li>
+        {#if cityConsistency.blockers.length > 0}
+          <li class="text-xs text-amber-700" data-testid="consistency-blocker">
+            {cityConsistency.blockers.join(" · ")}
+          </li>
+        {/if}
+      </ul>
+      <p class="mt-1.5 text-xs text-slate-400" data-testid="consistency-freshness">
+        {consistencyFreshnessText}
+      </p>
+    {/if}
+  </div>
 
   <!-- Prochaine étape (D7) -->
   {#if city.nextMarginalGain}
