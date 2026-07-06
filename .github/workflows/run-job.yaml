@@ -1,0 +1,90 @@
+# run-job — lance un Job one-shot du namespace radar-immobilier, à la demande.
+#
+# Pourquoi : les Jobs one-shot (mapper #74, snapshot cohérence, projection,
+# migration) ne sont PAS dans kustomization ; historiquement il fallait un
+# `kubectl apply` manuel (opérateur poc-k8s). Ce workflow rend ces jobs
+# AUTO-SERVIS par le conducteur via `gh workflow run`, avec la même credential
+# KUBE_CONFIG_DATA que le CD — plus besoin de pinger l'opérateur par job.
+#
+# Trigger : manuel (workflow_dispatch), input `job`.
+#
+# RBAC requis : radar-ci-deployer doit avoir create/get/list/watch/delete sur
+# `batch/jobs` + get/list sur pods/pods-log (lecture des logs). Si le RBAC ne
+# couvre pas encore batch/jobs, l'étape `apply` échoue en Forbidden — c'est le
+# signal précis à transmettre à poc-k8s (extension RBAC durable).
+name: Run one-shot job
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Quel job one-shot lancer"
+        required: true
+        type: choice
+        options:
+          - mapper
+          - snapshot
+          - projection
+
+concurrency:
+  group: run-job-${{ github.event.inputs.job }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NAMESPACE: radar-immobilier
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl -n "$NAMESPACE" get deploy radar-api >/dev/null
+
+      - name: Resolve manifest + job name
+        id: resolve
+        run: |
+          case "${{ github.event.inputs.job }}" in
+            mapper)
+              echo "file=deploy/k8s/35-run-geo-mapper-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-run-geo-mapper" >> "$GITHUB_OUTPUT" ;;
+            snapshot)
+              echo "file=deploy/k8s/35-consistency-snapshot-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-consistency-snapshot-once" >> "$GITHUB_OUTPUT" ;;
+            projection)
+              echo "file=deploy/k8s/32-graph-projection-only-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-graph-projection-only" >> "$GITHUB_OUTPUT" ;;
+            *)
+              echo "job inconnu"; exit 1 ;;
+          esac
+
+      # Jobs are immutable : on supprime une éventuelle instance précédente avant
+      # de ré-appliquer (sinon `apply` échoue sur un Job terminé/existant).
+      - name: Apply job (delete previous, then apply)
+        run: |
+          kubectl -n "$NAMESPACE" delete job "${{ steps.resolve.outputs.name }}" --ignore-not-found
+          kubectl -n "$NAMESPACE" apply -f "${{ steps.resolve.outputs.file }}"
+
+      - name: Wait for completion
+        run: |
+          set +e
+          kubectl -n "$NAMESPACE" wait "job/${{ steps.resolve.outputs.name }}" \
+            --for=condition=complete --timeout=900s
+          RC=$?
+          if [ $RC -ne 0 ]; then
+            echo "::warning::job non 'complete' dans le délai — logs ci-dessous pour diagnostic"
+          fi
+          exit 0
+
+      - name: Job logs (diagnostic)
+        run: |
+          kubectl -n "$NAMESPACE" logs "job/${{ steps.resolve.outputs.name }}" --tail=80 || true
+          echo "--- status ---"
+          kubectl -n "$NAMESPACE" get "job/${{ steps.resolve.outputs.name }}" -o wide || true
