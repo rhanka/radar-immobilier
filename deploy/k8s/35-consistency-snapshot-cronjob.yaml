@@ -69,5 +69,5 @@ spec:
                 - name: DATABASE_URL
                   value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
               resources:
-                requests: { cpu: 50m, memory: 96Mi }
+                requests: { cpu: 5m, memory: 96Mi }
                 limits: { cpu: 150m, memory: 256Mi }
