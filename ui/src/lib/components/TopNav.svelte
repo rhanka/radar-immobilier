@@ -127,7 +127,7 @@
     + nom « Radar » + sous-titre « immobilier »), rendu nativement par AppChrome.
   - Nav : `nav` = AppChromeNavItem[] (liens hash SPA `#/<view>`, état actif via
     `active`) — Signaux/Évaluation/Sources UNIQUEMENT. SPA préservée : router.ts
-    écoute `hashchange`. CENTRÉE (KO nav-center) : voir la note CSS plus bas.
+    écoute `hashchange`. CENTRÉE via `navAlign="center"` natif AppChrome.
   - Mode couleur / langue : NATIFS (colorMode/locale + callbacks). `data-theme`
     posé par `onColorModeChange`.
   - Identité : snippet `identity` = IdentityMenu DS en mode `compact` (avatar
@@ -150,6 +150,7 @@
   brandLabel="Radar immobilier"
   nav={navItems}
   navLabel="Navigation principale"
+  navAlign="center"
   {colorMode}
   onColorModeChange={handleColorModeChange}
   colorModeLabels={{ light: "Mode clair", dark: "Mode sombre", auto: "Mode auto" }}
@@ -180,38 +181,12 @@
 </AppChrome>
 
 <style>
-  /* ── Nav centrée (KO nav-center) ───────────────────────────────────────────
-     AppChrome n'EXPOSE PAS `navAlign` : il embarque `AppHeader` en interne mais
-     ne forwarde PAS la prop (AppHeader, lui, a bien `navAlign="start" | "center"`).
-     On reproduit donc À L'IDENTIQUE le mode `navAlign="center"` PUBLIÉ du DS —
-     `position:relative` sur la barre + `position:absolute; left:50%;
-     translateX(-50%)` sur le <nav> — au lieu d'inventer une mise en page. Le
-     `class="topnav-chrome"` posé sur AppChrome (→ `<div class="st-appChrome
-     topnav-chrome">`) sert d'ancre de scoping ; les classes ciblées sont les
-     classes utilitaires DS publiées.
-     Restreint à ≥768px : sous le seuil la zone utilitaire bascule en burger
-     (comportement AppChrome natif) — inutile et risqué de centrer en absolu.
-     ÉCART D'API rapporté : AppChrome devrait forwarder `navAlign` à son
-     AppHeader (sinon tout consommateur voulant une nav centrée doit ce patch). */
-  @media (min-width: 768px) {
-    :global(.topnav-chrome .st-appHeader__bar) {
-      position: relative;
-    }
-
-    :global(.topnav-chrome .st-appHeader__nav) {
-      flex: 0 0 auto;
-      left: 50%;
-      position: absolute;
-      transform: translateX(-50%);
-    }
-  }
-
   /* ── Indicateur « bêta » sur l'entrée Évaluation ───────────────────────────
      L'entrée n'existe dans le DOM que flag beta activé (Ctrl+Shift+X) : le
      badge ne s'affiche donc que quand elle est révélée. `AppChromeNavItem` ne
      porte qu'un `label: string` (pas de slot/badge natif) : on pose l'étiquette
      en ::after sur le lien DS, scopé `.topnav-chrome` + href — mêmes classes
-     utilitaires publiées que le patch nav-center ci-dessus. Tokens DS
+     utilitaires publiées de l'AppHeader DS. Tokens DS
      (couleurs/rayon/espacement sémantiques) avec repli neutre. */
   :global(.topnav-chrome .st-appHeader__navLink[href="#/evaluation"]::after) {
     border: 1px solid var(--st-semantic-border-subtle, #d4d4d8);
