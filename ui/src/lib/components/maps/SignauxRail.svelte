@@ -27,6 +27,7 @@
    * ZÉRO checkbox/search bespoke.
    */
   import { Badge, Checkbox } from "@sentropic/design-system-svelte";
+  import { subsetDisplayCount } from "$lib/signals/graph-signal-filter.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -143,9 +144,16 @@
   // → emitFilterChange), qui est la seule source légitime d'écriture URL+LS.
 
   // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
-  /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
+  /**
+   * Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée.
+   *
+   * Lit via `subsetDisplayCount` (« p » neutralisé) pour que le rail ÉGALE le
+   * nombre de signaux réellement affichés dans le panneau (`filterNodesBySubset`,
+   * qui ne masque jamais sur « p »). Sans ça, un « p » actif faisait lire la
+   * cohorte restrictive z∩m∩p (rail=1) au lieu de z∩m (panneau=2).
+   */
   function countFor(entry: CityMapEntry, key: string): number {
-    return entry.subsetCounts[key] ?? 0;
+    return subsetDisplayCount(entry.subsetCounts, key);
   }
 
   // ── Liste de villes (la recherche + le plafond vivent dans RailCityList) ──
