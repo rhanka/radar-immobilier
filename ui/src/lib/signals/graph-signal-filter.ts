@@ -98,3 +98,38 @@ export function filterNodesBySubset(
   if (!subsetKey) return nodes;
   return nodes.filter((n) => nodeMatchesSubset(n, subsetKey));
 }
+
+/**
+ * Clé d'AFFICHAGE dérivée d'une clé de sous-ensemble, pour lire un compteur
+ * agrégé (`subsetCounts`) de façon COHÉRENTE avec ce que le panneau/carte
+ * affiche réellement (`nodeMatchesSubset` / `filterNodesBySubset`).
+ *
+ * L'axe « p » (précoce) est NEUTRE à l'affichage : `nodeMatchesSubset` ne
+ * masque jamais sur « p » (contrat documenté + testé — le panneau montre les
+ * signaux précoces ET non précoces). Or `subsetCounts["z|m|p"]` est, lui,
+ * RESTRICTIF (z∩m∩p) car calculé côté serveur pour la cohorte « 33 » /
+ * focus30 (source-coverage). Lire `subsetCounts[activeKey]` avec un « p » actif
+ * faisait donc SOUS-COMPTER le rail (z∩m∩p = 1) par rapport au panneau (z∩m = 2).
+ *
+ * On retire « p » de la clé de LECTURE pour égaler le panneau, SANS toucher au
+ * calcul serveur : la cohorte restrictive reste disponible via
+ * `subsetCounts["z|m|p"]` pour source-coverage.
+ */
+export function displaySubsetKey(subsetKey: string): string {
+  return subsetKey
+    .split("|")
+    .filter((flag) => flag === "z" || flag === "m")
+    .join("|");
+}
+
+/**
+ * Compteur d'affichage d'une ville : `subsetCounts` lu à la clé d'affichage
+ * (« p » neutralisé). Garantit l'égalité rail/carte ↔ panneau
+ * (`filterNodesBySubset`) pour toute clé active.
+ */
+export function subsetDisplayCount(
+  subsetCounts: Record<string, number>,
+  subsetKey: string,
+): number {
+  return subsetCounts[displaySubsetKey(subsetKey)] ?? 0;
+}
