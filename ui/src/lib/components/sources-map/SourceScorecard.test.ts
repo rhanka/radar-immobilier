@@ -278,6 +278,202 @@ describe("SourceScorecard — Cohérence E2E (WP3 LOT1)", () => {
     expect(getByTestId("consistency-signal-zone").textContent).toContain("67 %");
     expect(getByTestId("consistency-freshness").textContent).toContain("batch PG");
     expect(block.textContent).not.toContain("Non couvert");
+    // Payload SANS zoneGrid (avant LOT2) -> normalisé en "non mesuré", pas de crash.
+    expect(getByTestId("consistency-zone-grid").textContent).toContain("non mesuré");
+  });
+
+  // ── WP3 LOT2 — E2 zone↔grille : ligne dédiée « zones → grilles » ───────────
+  it("arête zoneGrid OK (>=50 %) : compte + libellé « OK »", async () => {
+    stubConsistencyFetch({
+      generatedAt: "2026-07-10T00:00:00.000Z",
+      cities: [
+        {
+          citySlug: "saint-raymond",
+          consistency: {
+            citySlug: "saint-raymond",
+            mode: "batch-pg",
+            generatedAt: "2026-07-10T00:00:00.000Z",
+            state: "coherent",
+            edges: {
+              pvSignal: { num: 20, denom: 20, rate: 1, status: "measured" },
+              signalZone: {
+                num: 9,
+                denom: 10,
+                rate: 0.9,
+                status: "measured",
+                reliableNum: 9,
+                reliableRate: 1,
+                applicability: { num: 8, denom: 20, rate: 0.4, status: "measured" },
+              },
+              zoneGrid: {
+                num: 323,
+                denom: 350,
+                rate: 0.9229,
+                status: "measured",
+                state: "ok",
+                staleZoningSource: false,
+              },
+            },
+            blockers: [],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("saint-raymond", "Saint-Raymond", true) },
+    });
+    await flush();
+
+    const row = getByTestId("consistency-zone-grid");
+    expect(row.textContent).toContain("323/350");
+    expect(row.textContent).toContain("OK");
+  });
+
+  it("arête zoneGrid millésime-disjoint (Mont-Tremblant mocké) : grille servie mais 0 % mappé", async () => {
+    // Mock délibéré pour QA/démonstration honnête de l'état "millésime
+    // disjoint" (rappel exactement 0 alors que la grille EST servie) — ne
+    // reflète pas nécessairement la mesure live du jour (cf.
+    // docs/reports/coherence-zones-normes-focus30_2026-07.md, mont-tremblant
+    // y est mesuré à 8 % = "partiel" ; ce mock illustre spécifiquement le cas
+    // 0 % strict, distinct mais apparenté).
+    stubConsistencyFetch({
+      generatedAt: "2026-07-10T00:00:00.000Z",
+      cities: [
+        {
+          citySlug: "mont-tremblant",
+          consistency: {
+            citySlug: "mont-tremblant",
+            mode: "batch-pg",
+            generatedAt: "2026-07-10T00:00:00.000Z",
+            state: "coherent",
+            edges: {
+              pvSignal: { num: 20, denom: 20, rate: 1, status: "measured" },
+              signalZone: {
+                num: 9,
+                denom: 10,
+                rate: 0.9,
+                status: "measured",
+                reliableNum: 9,
+                reliableRate: 1,
+                applicability: { num: 8, denom: 20, rate: 0.4, status: "measured" },
+              },
+              zoneGrid: {
+                num: 0,
+                denom: 626,
+                rate: 0,
+                status: "measured",
+                state: "millesime-disjoint",
+                staleZoningSource: false,
+              },
+            },
+            blockers: [],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("mont-tremblant", "Mont-Tremblant", true) },
+    });
+    await flush();
+
+    const row = getByTestId("consistency-zone-grid");
+    expect(row.textContent).toContain("0/626");
+    expect(row.textContent).toContain("Millésime disjoint");
+    expect(row.textContent).not.toContain("Non couvert");
+  });
+
+  it("arête zoneGrid millésime-disjoint AVEC source confirmée -> « Ancien zonage servi »", async () => {
+    stubConsistencyFetch({
+      generatedAt: "2026-07-10T00:00:00.000Z",
+      cities: [
+        {
+          citySlug: "mont-tremblant",
+          consistency: {
+            citySlug: "mont-tremblant",
+            mode: "batch-pg",
+            generatedAt: "2026-07-10T00:00:00.000Z",
+            state: "coherent",
+            edges: {
+              pvSignal: { num: 20, denom: 20, rate: 1, status: "measured" },
+              signalZone: {
+                num: 9,
+                denom: 10,
+                rate: 0.9,
+                status: "measured",
+                reliableNum: 9,
+                reliableRate: 1,
+                applicability: { num: 8, denom: 20, rate: 0.4, status: "measured" },
+              },
+              zoneGrid: {
+                num: 0,
+                denom: 626,
+                rate: 0,
+                status: "measured",
+                state: "millesime-disjoint",
+                staleZoningSource: true,
+              },
+            },
+            blockers: [],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("mont-tremblant", "Mont-Tremblant", true) },
+    });
+    await flush();
+
+    expect(getByTestId("consistency-zone-grid").textContent).toContain("Ancien zonage servi");
+  });
+
+  it("arête zoneGrid absente (grille 404) -> « Grille absente »", async () => {
+    stubConsistencyFetch({
+      generatedAt: "2026-07-10T00:00:00.000Z",
+      cities: [
+        {
+          citySlug: "champlain",
+          consistency: {
+            citySlug: "champlain",
+            mode: "batch-pg",
+            generatedAt: "2026-07-10T00:00:00.000Z",
+            state: "coherent",
+            edges: {
+              pvSignal: { num: 5, denom: 5, rate: 1, status: "measured" },
+              signalZone: {
+                num: 3,
+                denom: 3,
+                rate: 1,
+                status: "measured",
+                reliableNum: 3,
+                reliableRate: 1,
+                applicability: { num: 3, denom: 5, rate: 0.6, status: "measured" },
+              },
+              zoneGrid: {
+                num: 0,
+                denom: 65,
+                rate: 0,
+                status: "measured",
+                state: "absente",
+                staleZoningSource: false,
+              },
+            },
+            blockers: [],
+          },
+        },
+      ],
+    });
+
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeCity("champlain", "Champlain", true) },
+    });
+    await flush();
+
+    const row = getByTestId("consistency-zone-grid");
+    expect(row.textContent).toContain("0/65");
+    expect(row.textContent).toContain("Grille absente");
   });
 
   it("ville SANS snapshot : « Non mesuré » honnête, jamais un faux 0/100 %", async () => {
