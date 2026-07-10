@@ -254,9 +254,18 @@ function applyMetadata(ref: GraphSignalDocRef, meta: DocumentMetadata | null): G
   };
 }
 
+/**
+ * Enrichit chaque doc-ref avec ses métadonnées d'object store (S3), de manière
+ * RÉSILIENTE PAR DOC-REF : si `findDocumentMetadata` jette pour UNE ref (objet
+ * S3 manquant, erreur réseau, ref malformée), on DÉGRADE cette ref seule via
+ * `applyMetadata(ref, null)` (fallback rawRef→documentUrl) au lieu de faire
+ * rejeter tout le `Promise.all` — ce qui remontait en 500 « Signaux
+ * indisponibles » pour toute la ville. L'échec est journalisé côté serveur.
+ */
 async function enrichDocRefs(
   store: ObjectStore,
   refs: readonly GraphSignalDocRef[],
+  onError?: (ref: GraphSignalDocRef, error: unknown) => void,
 ): Promise<GraphSignalDocRef[]> {
   const cache = new Map<string, Promise<DocumentMetadata | null>>();
 
@@ -272,17 +281,28 @@ async function enrichDocRefs(
           }),
         );
       }
-      return applyMetadata(ref, await cache.get(key)!);
+      try {
+        return applyMetadata(ref, await cache.get(key)!);
+      } catch (error) {
+        onError?.(ref, error);
+        // Dégradation best-effort : ref non enrichie (le fallback
+        // rawRef→documentUrl reste appliqué), jamais un rejet propagé.
+        return applyMetadata(ref, null);
+      }
     }),
   );
 }
 
-async function toGraphSignalCard(
-  store: ObjectStore,
+/**
+ * Construit la carte à partir de doc-refs DÉJÀ résolues (enrichies ou
+ * dégradées). Fonction pure et synchrone : aucun accès store, donc ne jette
+ * pas — elle sert aussi au repli par-nœud.
+ */
+function buildSignalCard(
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
-): Promise<GraphSignalCard> {
+  docRefs: GraphSignalDocRef[],
+): GraphSignalCard {
   const props = (node.props ?? {}) as Record<string, unknown>;
-  const docRefs = await enrichDocRefs(store, extractDocRefs(props, node.sourceRef));
   const firstPublishedAt =
     docRefs.find((ref) => ref.publishedAt !== undefined)?.publishedAt ?? null;
   const evidence = mergeEvidenceWithDocRefs(
@@ -307,6 +327,40 @@ async function toGraphSignalCard(
     evidence,
     props,
   };
+}
+
+async function toGraphSignalCard(
+  store: ObjectStore,
+  node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+  citySlug?: string,
+): Promise<GraphSignalCard> {
+  const props = (node.props ?? {}) as Record<string, unknown>;
+  const docRefs = await enrichDocRefs(
+    store,
+    extractDocRefs(props, node.sourceRef),
+    (ref, error) => {
+      console.error(
+        `[graph-signals] doc-ref enrichment failed (city=${citySlug ?? node.citySlug ?? "?"} node=${node.id} ref=${ref.rawRef ?? ref.docSha}):`,
+        error,
+      );
+    },
+  );
+  return buildSignalCard(node, docRefs);
+}
+
+/**
+ * Repli PAR NŒUD : si la construction d'une carte échoue malgré la résilience
+ * par doc-ref (cas non prévu), on renvoie quand même la carte sans enrichissement
+ * S3 plutôt que de faire tomber toute la ville. Aucun accès store.
+ */
+function toDegradedSignalCard(
+  node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+): GraphSignalCard {
+  const props = (node.props ?? {}) as Record<string, unknown>;
+  const docRefs = extractDocRefs(props, node.sourceRef).map((ref) =>
+    applyMetadata(ref, null),
+  );
+  return buildSignalCard(node, docRefs);
 }
 
 export type EvidenceMissingField =
@@ -694,11 +748,25 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
   // GET /api/graph-signals/:city
   app.get("/api/graph-signals/:city", async (c) => {
     const city = c.req.param("city");
+    // Un échec ici (DB down) est non-récupérable → 5xx légitime. L'enrichissement
+    // documentaire, lui, est best-effort et NE DOIT PAS produire de 5xx.
     const nodes = await getSignalNodesForCity(deps.db, city);
     if (nodes.length === 0) {
       return c.json({ ok: false, error: "no_signal_nodes", citySlug: city }, 404);
     }
-    const mapped = await Promise.all(nodes.map((n) => toGraphSignalCard(deps.store, n)));
+    // Résilience PAR NŒUD : un nœud dont la construction échoue est dégradé
+    // (carte sans enrichissement S3) plutôt que de faire tomber toute la ville.
+    const mapped = await Promise.all(
+      nodes.map((n) =>
+        toGraphSignalCard(deps.store, n, city).catch((error) => {
+          console.error(
+            `[graph-signals] signal card build failed (city=${city} node=${n.id}):`,
+            error,
+          );
+          return toDegradedSignalCard(n);
+        }),
+      ),
+    );
     return c.json({ ok: true, citySlug: city, nodes: mapped });
   });
 
