@@ -1,6 +1,7 @@
 /**
- * WP3 LOT1 — Job batch : calcule et matérialise le snapshot de cohérence E2E
- * (E0 PV↔signal, E1 signal↔zone) par ville dans `consistency_snapshots`.
+ * WP3 LOT1+LOT2 — Job batch : calcule et matérialise le snapshot de cohérence
+ * E2E (E0 PV↔signal, E1 signal↔zone, E2 zone↔grille) par ville dans
+ * `consistency_snapshots`.
  *
  * Usage (régénérer le snapshot) :
  *   DATABASE_URL="postgres://radar:...@127.0.0.1:5434/radar" \
@@ -13,18 +14,26 @@
  *   CITIES="mont-tremblant,rimouski"  — restreint aux villes listées (prime sur SCOPE).
  *   SCOPE="province"                 — toutes les villes QC_MUNICIPALITIES
  *                                       (au lieu du focus-30 par défaut).
+ *   SKIP_ZONE_GRID="1"               — désactive la mesure LIVE E2 (utile hors
+ *                                       réseau/OGC injoignable) ; E2 ressort
+ *                                       honnêtement `non_mesure`, E0/E1 inchangés.
  *
  * Déploiement prod : `deploy/k8s/35-consistency-snapshot-cronjob.yaml`
  * exécute `node dist/services/consistency/run-consistency-snapshot.js` après la
  * projection nightly. IMPORTANT : E1 dépend de la sortie du mapper #74
  * (`run-geo-mapper.ts`). Si `geo_resolutions`/`geo_unresolved` sont vides, le
- * job écrit honnêtement `non_mesure` pour l'arête signal→zone.
+ * job écrit honnêtement `non_mesure` pour l'arête signal→zone. E2 dépend de
+ * l'API geo OGC LIVE (`api.geo.sent-tech.ca`, `qc-zonage-<slug>` +
+ * `qc-zonage-norms-<slug>`) — 2 requêtes/ville espacées + retries
+ * (`load-zone-grid-raw.ts`) ; une ville dont la mesure échoue après retries
+ * ressort honnêtement `non_mesure` pour E2 sans bloquer les autres villes ni
+ * E0/E1.
  *
  * Périmètre par défaut : FOCUS-30 (villes `priorityRank` 1..30 — cf.
  * docs/spec/SPEC_CONSOLIDATED_2026-07.md §1.2, `QC_MUNICIPALITIES` déjà triée
  * priorityRank ascendant). Idempotent : upsert sur city_slug, un run réécrit
- * chaque ligne avec la mesure la plus récente. Aucune ré-extraction : lit
- * exclusivement la sortie déjà produite par le mapper #74
+ * chaque ligne avec la mesure la plus récente. Aucune ré-extraction : E0/E1
+ * lisent exclusivement la sortie déjà produite par le mapper #74
  * (`run-geo-mapper.ts` → `geo_resolutions`/`geo_unresolved`) — si le mapper
  * n'a jamais tourné pour une ville, celle-ci ressort `non_mesure` (E1) sans
  * rien fabriquer.
@@ -35,7 +44,8 @@ import pg from "pg";
 import * as schema from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
 import { loadCityConsistencyRawInputs } from "./load-consistency-raw.js";
-import { deriveCityConsistency } from "./consistency-calc.js";
+import { loadZoneGridRawInputs } from "./load-zone-grid-raw.js";
+import { deriveCityConsistency, type ZoneGridRawInput } from "./consistency-calc.js";
 import { writeConsistencySnapshots } from "./consistency-snapshot-store.js";
 
 const DATABASE_URL =
@@ -47,6 +57,12 @@ const CITIES_FILTER = process.env["CITIES"]
   : null;
 const SCOPE = process.env["SCOPE"] ?? "focus30";
 const FOCUS_30_SIZE = 30;
+const SKIP_ZONE_GRID = process.env["SKIP_ZONE_GRID"] === "1";
+
+const zoneGridLogger = {
+  info: (obj: unknown, msg?: string) => console.log(msg ?? "load-zone-grid-raw", obj),
+  warn: (obj: unknown, msg?: string) => console.warn(msg ?? "load-zone-grid-raw", obj),
+};
 
 
 interface GeoMapperDiagnostics {
@@ -115,27 +131,50 @@ async function main(): Promise<void> {
   try {
     const cities = targetCities();
     const scopeLabel = CITIES_FILTER && CITIES_FILTER.length > 0 ? "CITIES" : SCOPE;
-    console.log(`=== Snapshot cohérence E2E (WP3 LOT1) — ${cities.length} ville(s), scope=${scopeLabel} ===`);
+    console.log(`=== Snapshot cohérence E2E (WP3 LOT1+LOT2) — ${cities.length} ville(s), scope=${scopeLabel} ===`);
 
     const diagnostics = await loadGeoMapperDiagnostics(db);
     logGeoMapperDiagnostics(diagnostics);
 
     const rawInputs = await loadCityConsistencyRawInputs(db, cities);
+
+    // E2 zone↔grille : mesure LIVE OGC, bornée au même scope que E0/E1
+    // (focus-30 par défaut). SKIP_ZONE_GRID=1 pour désactiver (réseau/OGC
+    // injoignable) — E2 ressort honnêtement non_mesure, E0/E1 inchangés.
+    let zoneGridMap = new Map<string, ZoneGridRawInput>();
+    if (SKIP_ZONE_GRID) {
+      console.warn("SKIP_ZONE_GRID=1 : mesure E2 zone→grille désactivée, toutes les villes ressortent non_mesure.");
+    } else {
+      console.log(`E2 zone→grille : mesure OGC live démarrée (${cities.length} ville(s), ~2 requêtes/ville espacées)…`);
+      zoneGridMap = await loadZoneGridRawInputs(cities, { logger: zoneGridLogger });
+    }
+
     const generatedAt = new Date().toISOString();
-    const consistencies = rawInputs.map((raw) => deriveCityConsistency(raw, generatedAt));
+    const consistencies = rawInputs.map((raw) =>
+      deriveCityConsistency(raw, generatedAt, zoneGridMap.get(raw.citySlug)),
+    );
 
     await writeConsistencySnapshots(db, consistencies);
 
     const byState = { coherent: 0, partial: 0, unmeasured: 0 };
     const byE1 = { measured: 0, non_applicable: 0, non_mesure: 0 };
+    const byE2 = { ok: 0, partiel: 0, "millesime-disjoint": 0, absente: 0, "zonage-absent": 0, non_mesure: 0 };
+    let staleZoningCount = 0;
     for (const c of consistencies) {
       byState[c.state] += 1;
       byE1[c.edges.signalZone.status] += 1;
+      byE2[c.edges.zoneGrid.state] += 1;
+      if (c.edges.zoneGrid.staleZoningSource) staleZoningCount += 1;
     }
     console.log(
       `Écrit ${consistencies.length} snapshot(s) — ` +
         `state: coherent=${byState.coherent} partial=${byState.partial} unmeasured=${byState.unmeasured}; ` +
         `E1 signal→zone: measured=${byE1.measured} non_applicable=${byE1.non_applicable} non_mesure=${byE1.non_mesure}`,
+    );
+    console.log(
+      `E2 zone→grille — ok=${byE2.ok} partiel=${byE2.partiel} millesime-disjoint=${byE2["millesime-disjoint"]} ` +
+        `absente=${byE2.absente} zonage-absent=${byE2["zonage-absent"]} non_mesure=${byE2.non_mesure} ` +
+        `stale-source=${staleZoningCount}`,
     );
   } finally {
     await pool.end();

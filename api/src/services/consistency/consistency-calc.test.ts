@@ -5,11 +5,26 @@ import {
   computeConsistencyState,
   computeEdgeMetric,
   deriveCityConsistency,
+  deriveZoneGridEdge,
   unmeasuredCityConsistency,
   type CityConsistencyRawInput,
+  type ZoneGridRawInput,
 } from "./consistency-calc.js";
 
 const GENERATED_AT = "2026-07-06T00:00:00.000Z";
+
+function zoneGridInput(patch: Partial<ZoneGridRawInput> = {}): ZoneGridRawInput {
+  return {
+    citySlug: "mont-tremblant",
+    measured: true,
+    zoneCodeCount: 100,
+    gridCollectionFound: true,
+    gridCodeCount: 80,
+    matchedCodeCount: 60,
+    staleZoningSource: false,
+    ...patch,
+  };
+}
 
 function baseInput(patch: Partial<CityConsistencyRawInput> = {}): CityConsistencyRawInput {
   return {
@@ -272,5 +287,162 @@ describe("unmeasuredCityConsistency", () => {
     expect(result.edges.pvSignal.rate).toBeNull();
     expect(result.edges.signalZone.rate).toBeNull();
     expect(result.edges.signalZone.applicability.rate).toBeNull();
+  });
+
+  it("inclut zoneGrid non_mesure (E2 LOT2) — jamais un faux zéro/vert", () => {
+    const result = unmeasuredCityConsistency("ville-hors-focus30");
+    expect(result.edges.zoneGrid).toEqual({
+      num: 0,
+      denom: 0,
+      rate: null,
+      status: "non_mesure",
+      state: "non_mesure",
+      staleZoningSource: false,
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WP3 LOT2 — E2 zone↔grille. Reprend la méthode du rapport focus-30 :
+// rappel = |Z∩G| / |Z|, dénominateur EXPLICITE, statuts dédiés
+// absente/millésime-disjoint/zonage-absent (jamais un chiffre fabriqué).
+// ─────────────────────────────────────────────────────────────────────────────
+describe("deriveZoneGridEdge — E2 zoneGrid", () => {
+  it("job E2 jamais tourné pour la ville -> non_mesure, PAS non_applicable", () => {
+    const result = deriveZoneGridEdge(zoneGridInput({ measured: false }));
+    expect(result.status).toBe("non_mesure");
+    expect(result.state).toBe("non_mesure");
+    expect(result.rate).toBeNull();
+  });
+
+  it("Z vide (aucune zone servie) -> zonage-absent, non_applicable, JAMAIS 100 %", () => {
+    const result = deriveZoneGridEdge(
+      zoneGridInput({ zoneCodeCount: 0, matchedCodeCount: 0 }),
+    );
+    expect(result.status).toBe("non_applicable");
+    expect(result.state).toBe("zonage-absent");
+    expect(result.rate).toBeNull();
+    expect(result.denom).toBe(0);
+  });
+
+  it("grille 404 (collection absente) -> statut dédié 'absente', mesure honnête à 0", () => {
+    const result = deriveZoneGridEdge(
+      zoneGridInput({
+        zoneCodeCount: 626,
+        gridCollectionFound: false,
+        gridCodeCount: 0,
+        matchedCodeCount: 0,
+      }),
+    );
+    expect(result.state).toBe("absente");
+    // Mesure RÉELLE (rate=0, measured) — pas "non-mesurable" : le zonage est
+    // servi (Z=626), c'est bien la grille qui manque.
+    expect(result.status).toBe("measured");
+    expect(result.num).toBe(0);
+    expect(result.denom).toBe(626);
+    expect(result.rate).toBe(0);
+  });
+
+  it("grille trouvée mais vide (0 code) -> traité comme 'absente' (rien à mapper)", () => {
+    const result = deriveZoneGridEdge(
+      zoneGridInput({
+        zoneCodeCount: 50,
+        gridCollectionFound: true,
+        gridCodeCount: 0,
+        matchedCodeCount: 0,
+      }),
+    );
+    expect(result.state).toBe("absente");
+    expect(result.rate).toBe(0);
+  });
+
+  it("grille SERVIE mais rappel = 0 exactement -> millésime-disjoint (pas absente)", () => {
+    // Cas Mont-Tremblant du rapport (millésime récent vs ancien) : la grille
+    // existe et porte des codes, mais aucun ne recoupe le zonage servi.
+    const result = deriveZoneGridEdge(
+      zoneGridInput({
+        zoneCodeCount: 626,
+        gridCollectionFound: true,
+        gridCodeCount: 54,
+        matchedCodeCount: 0,
+      }),
+    );
+    expect(result.state).toBe("millesime-disjoint");
+    expect(result.status).toBe("measured");
+    expect(result.num).toBe(0);
+    expect(result.denom).toBe(626);
+    expect(result.rate).toBe(0);
+  });
+
+  it("rappel mesuré > 0 mais < 50 % -> partiel", () => {
+    const result = deriveZoneGridEdge(
+      zoneGridInput({ zoneCodeCount: 626, matchedCodeCount: 51 }), // 51/626 ≈ 8 %
+    );
+    expect(result.state).toBe("partiel");
+    expect(result.rate).toBeCloseTo(51 / 626);
+  });
+
+  it("rappel mesuré >= 50 % -> ok", () => {
+    const result = deriveZoneGridEdge(
+      zoneGridInput({ zoneCodeCount: 104, matchedCodeCount: 95 }), // 91 %
+    );
+    expect(result.state).toBe("ok");
+    expect(result.rate).toBeCloseTo(95 / 104);
+  });
+
+  it("rappel exactement au seuil (50 %) -> ok (seuil inclusif)", () => {
+    const result = deriveZoneGridEdge(
+      zoneGridInput({ zoneCodeCount: 100, matchedCodeCount: 50 }),
+    );
+    expect(result.state).toBe("ok");
+  });
+
+  it("staleZoningSource se propage tel quel, indépendamment du taux mesuré", () => {
+    const highRecall = deriveZoneGridEdge(
+      zoneGridInput({ zoneCodeCount: 100, matchedCodeCount: 90, staleZoningSource: true }),
+    );
+    expect(highRecall.state).toBe("ok");
+    expect(highRecall.staleZoningSource).toBe(true);
+
+    const notMeasured = deriveZoneGridEdge(
+      zoneGridInput({ measured: false, staleZoningSource: true }),
+    );
+    // non_mesure : le flag est quand même reporté tel quel (pas de perte
+    // d'information), même si l'arête n'a pas de mesure exploitable.
+    expect(notMeasured.staleZoningSource).toBe(true);
+  });
+});
+
+describe("deriveCityConsistency — intégration zoneGrid (E2 LOT2)", () => {
+  const baseE0E1 = (): CityConsistencyRawInput => ({
+    citySlug: "mont-tremblant",
+    publishedSignals: 10,
+    groundedSignals: 10,
+    zoneChainMapped: true,
+    matchedZoneDesignations: 5,
+    reliableMatchedZoneDesignations: 5,
+    zoneDesignations: 5,
+    zoneDesignatingSignals: 5,
+  });
+
+  it("zoneGridInput omis -> edges.zoneGrid non_mesure, E0/E1 inchangés (rétro-compat)", () => {
+    const result = deriveCityConsistency(baseE0E1(), GENERATED_AT);
+    expect(result.edges.zoneGrid.status).toBe("non_mesure");
+    expect(result.edges.zoneGrid.state).toBe("non_mesure");
+    // E0/E1 pas affectés par l'absence de mesure E2.
+    expect(result.edges.pvSignal.status).toBe("measured");
+    expect(result.edges.signalZone.status).toBe("measured");
+  });
+
+  it("zoneGridInput fourni -> edges.zoneGrid porte la mesure, state global E0/E1 INCHANGÉ", () => {
+    const result = deriveCityConsistency(
+      baseE0E1(),
+      GENERATED_AT,
+      zoneGridInput({ zoneCodeCount: 626, gridCollectionFound: true, gridCodeCount: 54, matchedCodeCount: 0 }),
+    );
+    expect(result.edges.zoneGrid.state).toBe("millesime-disjoint");
+    // Le tri-état global (coherent/partial/unmeasured) reste E0/E1 UNIQUEMENT
+    // à ce lot — zoneGrid n'est pas (encore) un bloqueur du maillon faible.
+    expect(result.state).toBe("coherent");
   });
 });
