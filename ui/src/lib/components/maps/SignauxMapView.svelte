@@ -112,7 +112,7 @@
     withHoverNeutralTint,
     withHoverOpacityBoost,
   } from "$lib/maps/hover-paint.js";
-  import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import { nodeMatchesSubset, subsetDisplayCount } from "$lib/signals/graph-signal-filter.js";
   import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
@@ -475,9 +475,10 @@
 
   /**
    * Expression MapLibre "match" pour colorier les polygones par citySlug
-   * selon le compte actif exact (subsetCounts[subsetKey]). Les dépendances
-   * sont passées en PARAMÈTRES (pas lues en variable libre) pour que Svelte
-   * suive correctement le recalcul réactif de la prop choroplèthe.
+   * selon le compte actif (via `subsetDisplayCount` : « p » neutralisé pour
+   * égaler le panneau/rail — cf. graph-signal-filter). Les dépendances sont
+   * passées en PARAMÈTRES (pas lues en variable libre) pour que Svelte suive
+   * correctement le recalcul réactif de la prop choroplèthe.
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
@@ -485,7 +486,7 @@
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = (e.subsetCounts[subsetKey] ?? 0);
+      const count = subsetDisplayCount(e.subsetCounts, subsetKey);
       expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data

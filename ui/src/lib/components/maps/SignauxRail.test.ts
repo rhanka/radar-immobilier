@@ -215,3 +215,46 @@ describe("SignauxRail — liste plate de villes (sans accordéon signaux)", () =
     expect(valleyfield!.textContent).toContain("7");
   });
 });
+
+// ── Cohérence compteur rail ↔ panneau (axe « précoce » neutre) ────────────────
+//
+// Régression du bug « rail sous-compte » : sous la clé défaut "z|m|p", le rail
+// lisait subsetCounts["z|m|p"] (cohorte RESTRICTIVE z∩m∩p) alors que le panneau
+// affiche z∩m (« p » ne masque pas). Rosemère : rail=1 vs panneau=2. Le rail
+// doit désormais afficher le compte p-neutre (= panneau).
+
+/**
+ * Entrée « discordante » : subsetCounts où z|m = 2 mais z|m|p = 1 (un signal
+ * z∩m NON précoce). Reproduit rosemère / mont-saint-hilaire (panneau=2, rail=1).
+ */
+function discordantEntry(): CityMapEntry {
+  return {
+    municipality: {
+      slug: "rosemere",
+      name: "Rosemere",
+      mrc: "MRC Discordante",
+    } as CityMapEntry["municipality"],
+    signalCount6m: 2,
+    subsetCounts: { "": 2, z: 2, m: 2, p: 1, "z|m": 2, "z|p": 1, "m|p": 1, "z|m|p": 1 },
+  };
+}
+
+describe("SignauxRail — cohérence compteur rail ↔ panneau", () => {
+  it("badge ville = compte p-neutre (z|m=2), PAS la cohorte restrictive z|m|p=1", () => {
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [discordantEntry()],
+        selectedSlug: null,
+        initialSubsetKey: "z|m|p",
+        onSelectCity: () => {},
+      },
+    });
+    const row = Array.from(container.querySelectorAll("button.rail-city-row")).find(
+      (r) => r.textContent?.includes("Rosemere"),
+    );
+    expect(row).toBeDefined();
+    // Rail = 2 (= panneau z∩m). Le 1 (restrictif z∩m∩p) était le bug.
+    expect(row!.textContent).toContain("2");
+    expect(row!.textContent).not.toContain("1");
+  });
+});
