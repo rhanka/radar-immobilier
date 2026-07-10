@@ -57,6 +57,28 @@ class MemoryStore implements ObjectStore {
   }
 }
 
+/**
+ * Store qui simule une PANNE object-store (S3) pour toute clé contenant
+ * `poison` : `head`/`get`/`list` jettent. Reproduit le cas prod « objet S3
+ * manquant / réseau qui casse » à l'origine du 500 « Signaux indisponibles »
+ * (les clés saines passent normalement via le MemoryStore parent).
+ */
+class FlakyStore extends MemoryStore {
+  constructor(private readonly poison: string) {
+    super();
+  }
+
+  override async head(key: string): Promise<ObjectInfo | null> {
+    if (key.includes(this.poison)) throw new Error(`S3 head failed for ${key}`);
+    return super.head(key);
+  }
+
+  override async get(key: string): Promise<Uint8Array> {
+    if (key.includes(this.poison)) throw new Error(`S3 get failed for ${key}`);
+    return super.get(key);
+  }
+}
+
 async function seedPdf(store: ObjectStore) {
   const record = buildRawDocumentRecord({
     source: "proces-verbaux-drummondville",
@@ -338,5 +360,104 @@ describe("GET /api/graph-signals/:city", () => {
     expect(evidence.citation).toBe("Le conseil donne un avis de motion.");
     expect(evidence.completeness.hasPdfLink).toBe(true);
     expect(evidence.completeness.missing).toEqual(["description", "documentDate", "page", "bbox"]);
+  });
+
+  // ── Régression : bug prod « Signaux indisponibles » (Sainte-Catherine) ──
+  // Le rail gauche compte 1 signal (endpoint by-city), mais le panneau ville
+  // renvoyait 500 dès qu'UNE doc-ref jetait à l'enrichissement (objet S3
+  // manquant/réseau). Le fix rend l'enrichissement best-effort : la ville
+  // renvoie quand même sa carte (200), doc-ref dégradée, PAS de 500.
+  it("returns 200 with a degraded card when a doc-ref enrichment throws (no 500 for the whole city)", async () => {
+    const rawRef = "raw/proces-verbaux-sainte-catherine/cas/deadbeef.pdf";
+    const node = makeNode("sig-sc-001", "sainte-catherine", "Signal", {
+      description: "Avis de motion — modification du règlement de zonage.",
+      refs: [
+        {
+          rawRef,
+          excerpt: "Le conseil donne un avis de motion.",
+          page: 4,
+        },
+      ],
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([
+      node,
+    ] as unknown as ReturnType<typeof makeNode>[]);
+
+    // L'enrichissement de CETTE ref jette (head/get S3 sur clé "sainte-catherine").
+    const store = new FlakyStore("sainte-catherine");
+    const app = freshRoute(store);
+    const res = await app.request("/api/graph-signals/sainte-catherine");
+
+    // Avant le fix : 500 (Promise.all rejeté) → bandeau « Signaux indisponibles ».
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      ok: boolean;
+      citySlug: string;
+      nodes: Array<{
+        id: string;
+        description: string | null;
+        docRefs: Array<{
+          rawRef?: string;
+          documentUrl?: string;
+          excerpt?: string;
+          contentType?: string;
+          fetchedAt?: string;
+        }>;
+      }>;
+    };
+    expect(body.ok).toBe(true);
+    expect(body.citySlug).toBe("sainte-catherine");
+    expect(body.nodes).toHaveLength(1);
+    expect(body.nodes[0]!.id).toBe("sig-sc-001");
+    expect(body.nodes[0]!.description).toBe(
+      "Avis de motion — modification du règlement de zonage.",
+    );
+    // La doc-ref est présente mais NON enrichie (pas de métadonnée S3) : le
+    // fallback rawRef→documentUrl reste appliqué, l'excerpt est conservé.
+    const docRef = body.nodes[0]!.docRefs[0]!;
+    expect(docRef.rawRef).toBe(rawRef);
+    expect(docRef.documentUrl).toBe(
+      `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}`,
+    );
+    expect(docRef.excerpt).toBe("Le conseil donne un avis de motion.");
+    expect(docRef.contentType).toBeUndefined();
+    expect(docRef.fetchedAt).toBeUndefined();
+  });
+
+  it("keeps a healthy signal enriched while degrading a sibling whose enrichment throws", async () => {
+    const store = new FlakyStore("sainte-catherine");
+    const healthyRecord = await seedPdf(store); // clé "drummondville" → saine
+    const brokenRawRef = "raw/proces-verbaux-sainte-catherine/cas/cafe01.pdf";
+    const nodes = [
+      makeNode("sig-ok", "sainte-catherine", "Signal", {
+        refs: [{ rawRef: healthyRecord.storageKey, excerpt: "Citation saine." }],
+      }),
+      makeNode("sig-ko", "sainte-catherine", "Signal", {
+        refs: [{ rawRef: brokenRawRef, excerpt: "Citation dégradée." }],
+      }),
+    ];
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      nodes as unknown as ReturnType<typeof makeNode>[],
+    );
+
+    const app = freshRoute(store);
+    const res = await app.request("/api/graph-signals/sainte-catherine");
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      nodes: Array<{
+        id: string;
+        docRefs: Array<{ sourceUrl?: string; rawRef?: string; contentType?: string }>;
+      }>;
+    };
+    expect(body.nodes).toHaveLength(2);
+    const ok = body.nodes.find((n) => n.id === "sig-ok")!;
+    const ko = body.nodes.find((n) => n.id === "sig-ko")!;
+    // Le nœud sain est enrichi (sourceUrl + contentType issus de la métadonnée).
+    expect(ok.docRefs[0]!.sourceUrl).toBe("https://drummondville.ca/pv/2026-05-12.pdf");
+    expect(ok.docRefs[0]!.contentType).toBe("application/pdf");
+    // Le nœud cassé est dégradé mais présent (rawRef conservé, pas de métadonnée).
+    expect(ko.docRefs[0]!.rawRef).toBe(brokenRawRef);
+    expect(ko.docRefs[0]!.contentType).toBeUndefined();
   });
 });
