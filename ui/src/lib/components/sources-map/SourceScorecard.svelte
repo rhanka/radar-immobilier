@@ -39,6 +39,7 @@
     formatEdgeCount,
     formatReliablePct,
     formatConsistencyFreshness,
+    formatZoneGridState,
     CONSISTENCY_STATE_LABEL,
     CONSISTENCY_STATE_BADGE_TONE,
     type ConsistencyResponse,
@@ -135,6 +136,13 @@
   $: cityConsistency = getCityConsistency(city.citySlug, consistencyResponse);
   $: consistencyReliablePct = formatReliablePct(cityConsistency.edges.signalZone);
   $: consistencyFreshnessText = formatConsistencyFreshness(cityConsistency);
+  // E2 zone→grille (WP3 LOT2) : libellé honnête affiché seulement quand une
+  // mesure réelle existe (measured) — évite de dupliquer "non applicable"/
+  // "non mesuré" déjà rendus par formatEdgeCount pour zonage-absent/non_mesure.
+  $: zoneGridStateLabel =
+    cityConsistency.edges.zoneGrid.status === "measured"
+      ? formatZoneGridState(cityConsistency.edges.zoneGrid)
+      : null;
 
   function geoEvidence(
     cell: CityCoverage["l4Zonage"],
@@ -391,6 +399,13 @@
           <span class="tabular-nums">{formatEdgeCount(cityConsistency.edges.signalZone)}</span>
           {#if consistencyReliablePct}
             <span class="text-slate-400">(dont fiables {consistencyReliablePct})</span>
+          {/if}
+        </li>
+        <li class="text-xs text-slate-600" data-testid="consistency-zone-grid">
+          zones → grilles&nbsp;:
+          <span class="tabular-nums">{formatEdgeCount(cityConsistency.edges.zoneGrid)}</span>
+          {#if zoneGridStateLabel}
+            <span class="text-slate-400">({zoneGridStateLabel})</span>
           {/if}
         </li>
         {#if cityConsistency.blockers.length > 0}
