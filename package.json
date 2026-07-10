@@ -20,7 +20,8 @@
     "node": ">=24"
   },
   "overrides": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.0.0",
+    "vite": "^6.4.3"
   },
   "scripts": {
     "data:polygons": "node --experimental-strip-types radar/data-prep/fetch-municipal-polygons.ts"
