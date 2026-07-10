@@ -26,7 +26,7 @@
     "@sentropic/graphify": "^0.10.0",
     "@sentropic/h2a": "^0.26.1",
     "@sentropic/llm-mesh": "^0.1.2",
-    "drizzle-orm": "^0.32.0",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.5.0",
     "jose": "^6.2.3",
     "pg": "^8.12.0",
@@ -35,9 +35,9 @@
   },
   "devDependencies": {
     "@types/pg": "^8.11.6",
-    "drizzle-kit": "^0.23.0",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.16.0",
     "typescript": "5.4.5",
-    "vitest": "^1.6.0"
+    "vitest": "^3.2.6"
   }
 }
