@@ -924,7 +924,7 @@
                           </blockquote>
                         {:else}
                           <p class="doc-refs-empty">
-                            Citation/extrait absent dans cette version graphify.
+                            Citation/extrait non disponible pour ce signal.
                           </p>
                         {/if}
 
