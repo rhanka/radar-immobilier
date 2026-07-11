@@ -191,7 +191,7 @@
       <Alert
         tone="info"
         title="Aucune opportunité disponible."
-        message="Les opportunités sont dérivées des DesignationEvent de l'état projet ontologie. Aucun état projet n'a encore été généré pour les villes du périmètre."
+        message="Aucune opportunité n'a encore été détectée pour les villes du périmètre."
       />
 
     {:else}
