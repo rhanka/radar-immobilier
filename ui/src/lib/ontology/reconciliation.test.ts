@@ -290,7 +290,7 @@ describe("applyOntologyPatch (write-core client)", () => {
       entities: [{ ...lot, status: "candidate" }],
       candidates: [],
     };
-    const fetchImpl = vi.fn<Parameters<typeof fetch>, Promise<Response>>(
+    const fetchImpl = vi.fn<(...args: Parameters<typeof fetch>) => Promise<Response>>(
       async () => jsonRes(applied),
     );
     const res = await applyOntologyPatch(

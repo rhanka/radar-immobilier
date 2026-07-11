@@ -67,7 +67,7 @@ describe("streamChatTurns tool loop", () => {
 
     // The tool was executed with the streamed arguments.
     expect(executeTool).toHaveBeenCalledTimes(1);
-    expect(executeTool.mock.calls[0][0]).toMatchObject({
+    expect(executeTool.mock.calls[0]![0]).toMatchObject({
       name: "ajouter_demande",
       argumentsText: '{"titre":"Test ÉV16"}',
     });
