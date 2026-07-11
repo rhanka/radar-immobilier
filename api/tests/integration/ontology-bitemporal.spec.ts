@@ -18,6 +18,37 @@ const { db, pool } = createDb(loadConfig());
 
 const CANON = `zone::test::wp5v1::${Date.now()}`;
 
+/**
+ * drizzle-orm ≥0.44 wraps a failed query in an Error whose message is
+ * `Failed query: …` and moves the original PostgreSQL error onto `.cause`
+ * (occasionally nested). Walk the cause chain and return the first link that
+ * carries a PostgreSQL SQLSTATE `code`, plus its `constraint`/`message`, so
+ * assertions can target the real DB error instead of the wrapper wording.
+ */
+function pgCause(
+  err: unknown,
+): { code?: string; constraint?: string; message?: string } | null {
+  let cur: unknown = err;
+  for (let depth = 0; depth < 10 && cur != null; depth++) {
+    const link = cur as {
+      code?: unknown;
+      constraint?: unknown;
+      message?: unknown;
+      cause?: unknown;
+    };
+    if (typeof link.code === "string") {
+      return {
+        code: link.code,
+        constraint:
+          typeof link.constraint === "string" ? link.constraint : undefined,
+        message: typeof link.message === "string" ? link.message : undefined,
+      };
+    }
+    cur = link.cause;
+  }
+  return null;
+}
+
 afterAll(async () => {
   await db.delete(zoneVersions).where(sql`canonical_id = ${CANON}`);
   await pool.end();
@@ -64,9 +95,13 @@ describe("WP5-V1 ontology bitemporal migration", () => {
       rawRef: "raw/avis/salaberry/2024/y.pdf.sha",
     });
 
-    // An overlapping open version for the SAME canonical must be excluded.
-    await expect(
-      db.insert(zoneVersions).values({
+    // An overlapping open version for the SAME canonical must be rejected by the
+    // btree_gist EXCLUDE constraint. Assert the REAL PostgreSQL exclusion
+    // violation (SQLSTATE 23P01) on the named constraint — reached through the
+    // drizzle `.cause` chain — not the wrapper's `Failed query: …` wording.
+    const thrown = await db
+      .insert(zoneVersions)
+      .values({
         canonicalId: CANON,
         citySlug: "salaberry-de-valleyfield",
         codeAffiche: "H-609-4",
@@ -75,7 +110,19 @@ describe("WP5-V1 ontology bitemporal migration", () => {
         validTo: null,
         knownFrom: new Date("2025-02-02T00:00:00.000Z"),
         rawRef: "raw/avis/salaberry/2025/z.pdf.sha",
-      }),
-    ).rejects.toThrow(/exclusion|overlap|zone_versions_no_overlap/i);
+      })
+      .then(
+        () => undefined,
+        (e: unknown) => e,
+      );
+
+    expect(thrown, "overlapping insert should have been rejected").toBeInstanceOf(
+      Error,
+    );
+    const pg = pgCause(thrown);
+    expect(pg?.code).toBe("23P01"); // exclusion_violation
+    expect(pg?.constraint ?? pg?.message ?? "").toContain(
+      "zone_versions_no_overlap",
+    );
   });
 });
