@@ -885,7 +885,7 @@
               <div class="rounded-lg border border-slate-100 bg-slate-50 p-3 text-center" data-testid="zonage-empty">
                 <p class="text-xs text-slate-400">Aucun changement de zonage disponible.</p>
                 <p class="mt-0.5 text-xs text-slate-300">
-                  Les données proviennent des DesignationEvent de l'état projet ontologie.
+                  Aucun signal de zonage n'a encore été détecté pour ces villes.
                 </p>
               </div>
             {:else}
