@@ -1467,7 +1467,7 @@
   <svelte:fragment slot="controls">
     {#if loadError}
       <div class="px-4 py-2 text-xs text-red-600 border-b border-red-100 bg-red-50">
-        {loadError} — aucun compteur n’est affiché pour éviter un faux zéro.
+        {loadError} — les compteurs sont masqués tant que les données ne sont pas chargées.
       </div>
     {/if}
     <!-- Plus de panneau autonome « Filtre Zones et Lots » ici : les filtres
