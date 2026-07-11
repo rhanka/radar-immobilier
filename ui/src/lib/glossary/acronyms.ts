@@ -86,6 +86,24 @@ export const ACRONYMS: Record<string, AcronymEntry> = {
     definition:
       "Loi québécoise (anciennement projet de loi 64) qui renforce les obligations des entreprises en matière de protection des renseignements personnels, en s'alignant sur les standards internationaux (RGPD).",
   },
+  RCI: {
+    term: "RCI",
+    full: "Règlement de contrôle intérimaire",
+    definition:
+      "Règlement municipal ou régional qui gèle temporairement certains usages ou constructions pendant la révision de la planification urbaine. Sa levée peut rouvrir le développement d'un secteur.",
+  },
+  PPU: {
+    term: "PPU",
+    full: "Programme particulier d'urbanisme",
+    definition:
+      "Composante du plan d'urbanisme qui précise l'aménagement d'un secteur donné (affectations, densités, hauteurs). Il accompagne souvent une densification planifiée.",
+  },
+  PU: {
+    term: "PU",
+    full: "Plan d'urbanisme",
+    definition:
+      "Document de planification qui établit les grandes orientations d'aménagement et de développement de l'ensemble du territoire d'une municipalité.",
+  },
 };
 
 /**
