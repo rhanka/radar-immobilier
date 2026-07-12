@@ -20,6 +20,7 @@ import {
   googleStreetViewUrl,
   lotNormesRows,
   lotZoneCode,
+  reglementProvenance,
   scoreTone,
   scoreLabel,
 } from "./lot-fiche-utils.js";
@@ -474,6 +475,67 @@ describe("lotNormesRows — normes servies par geo, « — » quand null", () =>
     const rows = lotNormesRows({ hauteur: "10 m" });
     expect(rows[0]).toEqual(["Hauteur max", "10 m"]);
     expect(rows.slice(1).every(([, value]) => value === "—")).toBe(true);
+  });
+});
+
+// ── Provenance du règlement porteur de la norme (contrat d'affichage) ─────────
+
+describe("reglementProvenance — provenance du règlement en vigueur", () => {
+  const baseZone = { kind: "H", usages: [], densiteLogHa: null };
+
+  it("aucune zone jointe → null (pas de ligne de provenance)", () => {
+    expect(reglementProvenance(null)).toBeNull();
+    expect(reglementProvenance(undefined)).toBeNull();
+  });
+
+  it("numéro + millésime + url → « Règl. {n} ({m}) » cliquable", () => {
+    expect(
+      reglementProvenance({
+        ...baseZone,
+        reglementNumero: "2008-102",
+        reglementMillesime: 2008,
+        reglementUrl: "https://ville.qc.ca/reglements/2008-102.pdf",
+      }),
+    ).toEqual({
+      text: "Règl. 2008-102 (2008)",
+      url: "https://ville.qc.ca/reglements/2008-102.pdf",
+    });
+  });
+
+  it("millésime null → parenthèses omises", () => {
+    expect(
+      reglementProvenance({
+        ...baseZone,
+        reglementNumero: "1926-26",
+        reglementMillesime: null,
+      }),
+    ).toEqual({ text: "Règl. 1926-26", url: null });
+  });
+
+  it("page source non-null → ajoutée discrètement (« · p. X »)", () => {
+    expect(
+      reglementProvenance({
+        ...baseZone,
+        reglementNumero: "2008-102",
+        reglementMillesime: 2008,
+        reglementPageSource: "12",
+      }),
+    ).toEqual({ text: "Règl. 2008-102 (2008) · p. 12", url: null });
+  });
+
+  it("numéro null → « Règlement non renseigné » (jamais deviné)", () => {
+    expect(
+      reglementProvenance({ ...baseZone, reglementNumero: null }),
+    ).toEqual({ text: "Règlement non renseigné", url: null });
+  });
+
+  it("url null → aucun lien (url = null dans le retour)", () => {
+    const provenance = reglementProvenance({
+      ...baseZone,
+      reglementNumero: "2008-102",
+      reglementUrl: null,
+    });
+    expect(provenance?.url).toBeNull();
   });
 });
 
