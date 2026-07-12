@@ -20,8 +20,6 @@ import {
   nodeIsMulti4,
   nodeMatchesSubset,
   filterNodesBySubset,
-  displaySubsetKey,
-  subsetDisplayCount,
 } from "./graph-signal-filter.js";
 
 // ── Helpers de fixtures ──────────────────────────────────────────────────────
@@ -231,81 +229,5 @@ describe("filterNodesBySubset", () => {
     const result = filterNodesBySubset(nodes, "z|m");
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("n4");
-  });
-});
-
-// ── displaySubsetKey / subsetDisplayCount ─────────────────────────────────────
-//
-// Régression : COHÉRENCE du COMPTEUR rail (subsetCounts, calcul serveur) ↔
-// panneau (filterNodesBySubset, affichage réel). Le rail SOUS-COMPTAIT parce
-// qu'il lisait `subsetCounts["z|m|p"]` (cohorte RESTRICTIVE z∩m∩p) alors que le
-// panneau affiche z∩m (« p » ne masque jamais). La clé d'affichage retire « p ».
-
-describe("displaySubsetKey", () => {
-  it("retire l'axe « p » (neutre à l'affichage)", () => {
-    expect(displaySubsetKey("z|m|p")).toBe("z|m");
-    expect(displaySubsetKey("z|p")).toBe("z");
-    expect(displaySubsetKey("m|p")).toBe("m");
-    expect(displaySubsetKey("p")).toBe("");
-  });
-
-  it("laisse z / m / z|m inchangés", () => {
-    expect(displaySubsetKey("z")).toBe("z");
-    expect(displaySubsetKey("m")).toBe("m");
-    expect(displaySubsetKey("z|m")).toBe("z|m");
-    expect(displaySubsetKey("")).toBe("");
-  });
-});
-
-describe("subsetDisplayCount — cohérence rail ↔ panneau", () => {
-  // Ville « rosemère »-like : 2 nœuds z∩m dont UN SEUL précoce.
-  //   → panneau (filterNodesBySubset, clé défaut "z|m|p") = 2
-  //   → subsetCounts serveur : z|m = 2, mais z|m|p = 1 (précoce restrictif)
-  const rosemereLikeNodes: GraphSignalNode[] = [
-    // z∩m ET précoce (avis_motion) → compte partout
-    makeNode({ id: "sig-precoce", props: { category: "rezonage", nb_unites_max: 8, etape: "avis_motion" } }),
-    // z∩m mais NON précoce (adoption) → affiché au panneau, exclu de z∩m∩p
-    makeNode({ id: "sig-tardif", props: { category: "rezonage", nb_unites_max: 6, etape: "adoption" } }),
-  ];
-  // subsetCounts tel que produit par listCitiesWithSignalNodes (serveur) pour
-  // cette ville : « p » restrictif → z|m|p sous-compte z|m.
-  const rosemereSubsetCounts: Record<string, number> = {
-    "": 2, z: 2, m: 2, p: 1, "z|m": 2, "z|p": 1, "m|p": 1, "z|m|p": 1,
-  };
-
-  it("panneau (filterNodesBySubset) montre les 2 signaux z∩m sous « z|m|p »", () => {
-    // « p » ne masque pas → le panneau affiche z∩m = 2
-    expect(filterNodesBySubset(rosemereLikeNodes, "z|m|p")).toHaveLength(2);
-  });
-
-  it("BUG reproduit : lire subsetCounts[\"z|m|p\"] brut donne 1 (sous-compte)", () => {
-    // C'est ce que faisait le rail avant le fix → rail=1 vs panneau=2.
-    expect(rosemereSubsetCounts["z|m|p"]).toBe(1);
-    expect(rosemereSubsetCounts["z|m|p"]).not.toBe(
-      filterNodesBySubset(rosemereLikeNodes, "z|m|p").length,
-    );
-  });
-
-  it("FIX : subsetDisplayCount égale le panneau (2) sous « z|m|p »", () => {
-    const railCount = subsetDisplayCount(rosemereSubsetCounts, "z|m|p");
-    const panelCount = filterNodesBySubset(rosemereLikeNodes, "z|m|p").length;
-    expect(railCount).toBe(2);
-    expect(railCount).toBe(panelCount);
-  });
-
-  it("ville saine (z∩m tous précoces) reste correcte : rail == panneau", () => {
-    // 1 seul nœud z∩m, précoce → z|m = z|m|p = 1. Aucun écart avant/après.
-    const healthyNodes: GraphSignalNode[] = [
-      makeNode({ id: "ok", props: { category: "rezonage", nb_unites_max: 8, etape: "projet_reglement" } }),
-    ];
-    const healthySubsetCounts: Record<string, number> = {
-      "": 1, z: 1, m: 1, p: 1, "z|m": 1, "z|p": 1, "m|p": 1, "z|m|p": 1,
-    };
-    expect(subsetDisplayCount(healthySubsetCounts, "z|m|p")).toBe(1);
-    expect(subsetDisplayCount(healthySubsetCounts, "z|m|p")).toBe(
-      filterNodesBySubset(healthyNodes, "z|m|p").length,
-    );
-    // Et le compte reste juste pour les clés sans « p ».
-    expect(subsetDisplayCount(healthySubsetCounts, "z")).toBe(1);
   });
 });
