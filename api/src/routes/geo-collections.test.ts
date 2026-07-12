@@ -310,6 +310,10 @@ describe("enrichissement lots via zonage (chemin proxy)", () => {
       densiteLogHa: null,
       usages: [],
       grillePdfUrl: null,
+      reglementNumero: null,
+      reglementMillesime: null,
+      reglementPageSource: null,
+      reglementUrl: null,
     });
     expect(props["multifamilial4plus"]).toBe(true);
     expect(props["multifamilial4plusSource"]).toBe("heuristique");
