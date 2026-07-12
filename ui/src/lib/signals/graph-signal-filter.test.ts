@@ -18,6 +18,7 @@ import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   nodeIsZonage,
   nodeIsMulti4,
+  nodeIsResidentielPertinent,
   nodeMatchesSubset,
   filterNodesBySubset,
 } from "./graph-signal-filter.js";
@@ -146,6 +147,55 @@ describe("nodeIsMulti4", () => {
   });
 });
 
+// ── nodeIsResidentielPertinent ───────────────────────────────────────────────
+
+describe("nodeIsResidentielPertinent", () => {
+  it("catégorie résidentielle → true", () => {
+    expect(nodeIsResidentielPertinent(signalWithCategory("densification"))).toBe(true);
+    expect(nodeIsResidentielPertinent(signalWithCategory("logement_abordable"))).toBe(true);
+  });
+
+  it("marqueur texte résidentiel (label) → true", () => {
+    expect(
+      nodeIsResidentielPertinent(makeNode({ label: "Rezonage résidentiel multifamilial" })),
+    ).toBe(true);
+  });
+
+  it("marqueur texte résidentiel (description) → true", () => {
+    expect(
+      nodeIsResidentielPertinent(
+        makeNode({ props: { description: "Immeuble à logements de 8 unités" } }),
+      ),
+    ).toBe(true);
+  });
+
+  it("non résidentiel explicite → false (industriel/commercial/camping/enviro)", () => {
+    expect(nodeIsResidentielPertinent(makeNode({ label: "Agrandissement du parc industriel" }))).toBe(false);
+    expect(nodeIsResidentielPertinent(makeNode({ label: "Nouvelle zone commerciale" }))).toBe(false);
+    expect(nodeIsResidentielPertinent(makeNode({ label: "Projet de camping" }))).toBe(false);
+    expect(
+      nodeIsResidentielPertinent(makeNode({ props: { description: "Protection des milieux humides" } })),
+    ).toBe(false);
+  });
+
+  it("mixte (résidentiel + commercial) → true (opportunité)", () => {
+    expect(
+      nodeIsResidentielPertinent(makeNode({ label: "Rezonage de commercial à résidentiel" })),
+    ).toBe(true);
+  });
+
+  it("indéterminé (aucun marqueur) → true (conservé, anti-faux-négatif)", () => {
+    expect(nodeIsResidentielPertinent(makeNode({ label: "Avis de motion 2025-11" }))).toBe(true);
+    expect(nodeIsResidentielPertinent(makeNode({}))).toBe(true);
+  });
+
+  it("« complexe » ne matche PAS « plex » (borne \\b)", () => {
+    expect(nodeIsResidentielPertinent(makeNode({ label: "Complexe sportif municipal" }))).toBe(true);
+    // « triplex » matche bien résidentiel (contrôle positif).
+    expect(nodeIsResidentielPertinent(makeNode({ label: "Construction d'un triplex" }))).toBe(true);
+  });
+});
+
 // ── nodeMatchesSubset ─────────────────────────────────────────────────────────
 
 describe("nodeMatchesSubset", () => {
@@ -174,6 +224,25 @@ describe("nodeMatchesSubset", () => {
   it('"p" → tout passe (heuristique non masquante)', () => {
     expect(nodeMatchesSubset(plainNode, "p")).toBe(true);
     expect(nodeMatchesSubset(zonageNode, "p")).toBe(true);
+  });
+
+  it('"r" → masque le bruit non résidentiel, garde résidentiel + indéterminé', () => {
+    const residentiel = makeNode({ label: "Rezonage résidentiel" });
+    const industriel = makeNode({ label: "Parc industriel" });
+    const indetermine = makeNode({ label: "Avis de motion 2025-11" });
+    expect(nodeMatchesSubset(residentiel, "r")).toBe(true);
+    expect(nodeMatchesSubset(indetermine, "r")).toBe(true); // anti-faux-négatif
+    expect(nodeMatchesSubset(industriel, "r")).toBe(false);
+  });
+
+  it('"z|r" → intersection zonage ET (non explicitement non résidentiel)', () => {
+    // DesignationEvent zonage mais texte industriel → exclu par r.
+    const deIndustriel = makeNode({ id: "de-ind", type: "DesignationEvent", label: "Zone industrielle" });
+    expect(nodeMatchesSubset(deIndustriel, "z")).toBe(true);
+    expect(nodeMatchesSubset(deIndustriel, "z|r")).toBe(false);
+    // Signal zonage + résidentiel → passe.
+    const zonageResidentiel = makeNode({ props: { category: "rezonage" }, label: "Habitation multifamiliale" });
+    expect(nodeMatchesSubset(zonageResidentiel, "z|r")).toBe(true);
   });
 
   it('"z|m" → intersection : seulement zonage ET multi4+ passe', () => {

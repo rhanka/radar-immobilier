@@ -8,7 +8,9 @@
    *      - Toggle « Zonage uniquement » (DÉFAUT ON) — filtre PRIMAIRE
    *      - Toggle « Multifamilial 4+ » (DÉFAUT OFF) — axe DIMENSION
    *      - Toggle « Signaux précoces » (DÉFAUT OFF) — axe ANTICIPATION
-   *      Les trois toggles sont COMBINABLES ; la base de comptage est
+   *      - Toggle « Résidentiel pertinent » (DÉFAUT OFF) — axe PERTINENCE
+   *        (masque le bruit non résidentiel ; garde résidentiel + indéterminé)
+   *      Les quatre toggles sont COMBINABLES ; la base de comptage est
    *      l'intersection des filtres actifs.
    *   2. Section « Villes » : recherche + liste PLATE sélectionnable → flyTo.
    *      Cliquer une ville la sélectionne (highlight + ville active) ; ses
@@ -84,6 +86,14 @@
   let precoceOnly = initialSubsetKey.includes("p");
 
   /**
+   * Résidentiel pertinent (DÉFAUT OFF — axe PERTINENCE) :
+   *   filtre sur la clé "r" de subsetCounts. Masque le bruit EXPLICITEMENT non
+   *   résidentiel (industriel / commercial / camping / environnemental) ; les
+   *   signaux résidentiels ET indéterminés restent visibles (anti-faux-négatif).
+   */
+  let residentielOnly = initialSubsetKey.includes("r");
+
+  /**
    * RESYNC au reload/navigation (bug #3) : `initialSubsetKey` est piloté par le
    * parent qui le recalcule au onMount (URL > localStorage > défaut). Les trois
    * `let` ci-dessus n'étant initialisés QU'UNE fois, ils restaient figés sur le
@@ -97,14 +107,16 @@
     zonageOnly = initialSubsetKey.includes("z");
     multi4plus = initialSubsetKey.includes("m");
     precoceOnly = initialSubsetKey.includes("p");
+    residentielOnly = initialSubsetKey.includes("r");
   }
 
-  /** Construit la clé subsetCounts à partir des 3 flags — fonction PURE. */
-  function buildKey(z: boolean, m: boolean, p: boolean): string {
+  /** Construit la clé subsetCounts à partir des 4 flags — fonction PURE. */
+  function buildKey(z: boolean, m: boolean, p: boolean, r: boolean): string {
     const parts: string[] = [];
     if (z) parts.push("z");
     if (m) parts.push("m");
     if (p) parts.push("p");
+    if (r) parts.push("r");
     return parts.join("|");
   }
 
@@ -114,10 +126,10 @@
    * toggles « cachés » dans son corps → Svelte ne voyait aucune dépendance,
    * donc les $: total/villes/tri/filtre ne re-tournaient jamais.)
    */
-  $: activeKey = buildKey(zonageOnly, multi4plus, precoceOnly);
+  $: activeKey = buildKey(zonageOnly, multi4plus, precoceOnly, residentielOnly);
 
   function emitFilterChange(): void {
-    onFilterChange(buildKey(zonageOnly, multi4plus, precoceOnly));
+    onFilterChange(buildKey(zonageOnly, multi4plus, precoceOnly, residentielOnly));
   }
 
   function toggleZonageOnly(): void {
@@ -132,6 +144,11 @@
 
   function togglePrecoceOnly(): void {
     precoceOnly = !precoceOnly;
+    emitFilterChange();
+  }
+
+  function toggleResidentielOnly(): void {
+    residentielOnly = !residentielOnly;
     emitFilterChange();
   }
 
@@ -191,11 +208,13 @@
 
   // ── Badges « funnel » RÉACTIFS : compte si on ajoute ce toggle à l'actif ──
   $: badgeZonage = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(true, multi4plus, precoceOnly)), 0);
+    (s, e) => s + countFor(e, buildKey(true, multi4plus, precoceOnly, residentielOnly)), 0);
   $: badgeMulti = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, true, precoceOnly)), 0);
+    (s, e) => s + countFor(e, buildKey(zonageOnly, true, precoceOnly, residentielOnly)), 0);
   $: badgePrecoce = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, true)), 0);
+    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, true, residentielOnly)), 0);
+  $: badgeResidentiel = entries.reduce(
+    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, precoceOnly, true)), 0);
 </script>
 
 <RailShell title="Signaux · Villes" {loading} {onRefresh}>
@@ -241,7 +260,7 @@
     </div>
 
     <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
-    <div class="axis-toggle-row axis-toggle-row--last">
+    <div class="axis-toggle-row">
       <Checkbox
         label="Signaux précoces"
         helperText="avis de motion / 1er projet"
@@ -250,6 +269,21 @@
       />
       {#if !loading}
         <Badge tone="success">{badgePrecoce}</Badge>
+      {/if}
+    </div>
+
+    <!-- Toggle « Résidentiel pertinent » — axe PERTINENCE (OFF par défaut) :
+         masque le bruit non résidentiel (industriel / commercial / camping /
+         environnemental) ; garde résidentiel + indéterminé. -->
+    <div class="axis-toggle-row axis-toggle-row--last">
+      <Checkbox
+        label="Résidentiel pertinent"
+        helperText="masque le bruit non résidentiel"
+        checked={residentielOnly}
+        onchange={toggleResidentielOnly}
+      />
+      {#if !loading}
+        <Badge tone="info">{badgeResidentiel}</Badge>
       {/if}
     </div>
   </RailSection>
