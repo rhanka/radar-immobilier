@@ -37,6 +37,7 @@
     formatYesNo,
     googleMapsUrl,
     googleStreetViewUrl,
+    reglementProvenance,
     scoreTone,
     scoreLabel,
   } from "$lib/components/maps/lot-fiche-utils.js";
@@ -85,6 +86,10 @@
   $: zone = lot?.properties.zone;
   $: zoneCode = lot?.properties.zoneCode ?? zone?.code;
   $: grillePdfUrl = lot?.properties.grillePdfUrl ?? zone?.grillePdfUrl;
+  // Provenance du règlement en vigueur qui porte la norme de la zone jointe :
+  // « Règl. {numero} ({millesime}) » + lien source, ou « Règlement non
+  // renseigné » quand geo ne sert pas de numéro (jamais deviné).
+  $: reglement = reglementProvenance(zone);
   $: lotCentroid = lot ? centroid(lot) : null;
   // Adresse civique du lot (donnée publique du rôle — jamais un propriétaire).
   $: adresse = lot?.properties.adresse ?? null;
@@ -509,6 +514,29 @@
                     <dd class="text-slate-700">{value}</dd>
                   {/each}
                 </dl>
+              </div>
+            {/if}
+            {#if reglement}
+              <div class="border-t border-slate-100 pt-2" data-testid="fiche-reglement">
+                <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Provenance du règlement
+                </p>
+                {#if reglement.url}
+                  <a
+                    href={reglement.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"
+                    data-testid="fiche-reglement-link"
+                  >
+                    <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    {reglement.text}
+                  </a>
+                {:else}
+                  <p class="text-sm text-slate-700" data-testid="fiche-reglement-text">
+                    {reglement.text}
+                  </p>
+                {/if}
               </div>
             {/if}
             {#if grillePdfUrl}
