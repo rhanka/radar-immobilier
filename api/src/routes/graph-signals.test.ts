@@ -148,12 +148,24 @@ describe("GET /api/graph-signals/by-city", () => {
       {
         citySlug: "drummondville",
         signalCount: 5,
-        subsetCounts: { "": 5, "z": 4, "m": 2, "p": 1, "z|m": 2, "z|p": 1, "m|p": 0, "z|m|p": 0 },
+        // 16 clés {z,m,p,r} ; ici « tout résidentiel-pertinent » (X|r := X) —
+        // mock monotone valide (l'axe r ne retire aucun signal).
+        subsetCounts: {
+          "": 5, "z": 4, "m": 2, "p": 1, "r": 5,
+          "z|m": 2, "z|p": 1, "z|r": 4, "m|p": 0, "m|r": 2, "p|r": 1,
+          "z|m|p": 0, "z|m|r": 2, "z|p|r": 1, "m|p|r": 0,
+          "z|m|p|r": 0,
+        },
       },
       {
         citySlug: "saint-constant",
         signalCount: 3,
-        subsetCounts: { "": 3, "z": 1, "m": 0, "p": 0, "z|m": 0, "z|p": 0, "m|p": 0, "z|m|p": 0 },
+        subsetCounts: {
+          "": 3, "z": 1, "m": 0, "p": 0, "r": 3,
+          "z|m": 0, "z|p": 0, "z|r": 1, "m|p": 0, "m|r": 0, "p|r": 0,
+          "z|m|p": 0, "z|m|r": 0, "z|p|r": 0, "m|p|r": 0,
+          "z|m|p|r": 0,
+        },
       },
     ]);
 

@@ -29,8 +29,8 @@ export interface CityMapEntry {
    */
   signalCount6m: number;
   /**
-   * Exact intersection counts for each subset of {z, m, p} flags.
-   * Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+   * Exact intersection counts for each subset of {z, m, p, r} flags.
+   * Keys: "", "z", "m", "p", "r", "z|m", … up to "z|m|p|r" (16 keys).
    * Value = nb signals satisfying ALL flags in the key.
    * Empty record when city has no signal data.
    */
