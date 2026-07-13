@@ -14,7 +14,7 @@
 import { Hono, type Context, type MiddlewareHandler } from "hono";
 import { getCookie, setCookie, deleteCookie } from "hono/cookie";
 import { eq } from "drizzle-orm";
-import type { JWTVerifyGetKey } from "jose";
+import { createRemoteJWKSet, type JWTVerifyGetKey } from "jose";
 import type { AuthConfig } from "../config.js";
 import {
   SESSION_COOKIE_NAME,
@@ -29,6 +29,7 @@ import {
   createAuthFlowState,
   exchangeCode,
   fetchDiscovery,
+  verifyAccessToken,
   verifyIdToken,
   type FetchLike,
   type OidcDiscovery,
@@ -510,9 +511,9 @@ export function authRoute(
  * so the MCP serves signals under the REAL, per-user identity (D4). The
  * immo-mcp `search_signals` tool forwards the current user's own bearer token
  * (see packages/immo-mcp/src/data-source.ts) rather than a shared machine
- * credential — the per-user acceptance on THIS side (bearer validation in
- * `protect`) is the remaining architect/IdP-gated step; until it lands the route
- * returns 401 to an unauthenticated caller.
+ * credential, and `protect` (below) ACCEPTS that user bearer — verified against
+ * OUR IdP JWKS, audience-bounded, approved-account — so the call is per-user
+ * end-to-end. An unauthenticated caller still gets 401.
  */
 const PUBLIC_PREFIXES = [
   // k8s probes must be reachable WITHOUT auth: the (unauthenticated) kubelet
@@ -536,18 +537,60 @@ function isPublicPath(path: string): boolean {
   );
 }
 
+/** Extract the raw bearer token from an `Authorization: Bearer <jwt>` header. */
+function extractBearerToken(header: string | undefined): string | undefined {
+  if (!header) return undefined;
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  return match ? match[1]!.trim() : undefined;
+}
+
+/** Radar account status for a `sub`, or `null` when no account row exists. */
+async function fetchAccountStatus(db: Database, sub: string): Promise<string | null> {
+  const rows = await db
+    .select({ status: accountUsers.status })
+    .from(accountUsers)
+    .where(eq(accountUsers.sub, sub))
+    .limit(1);
+  return rows.length > 0 ? rows[0]!.status : null;
+}
+
 /**
  * Session-protect middleware. When `auth.enabled` is false it is a no-op
- * (local dev / tests stay open). When enabled, it requires a valid session
- * cookie on every non-public route: browser navigations get a 302 to /login,
- * API/XHR requests get a 401 JSON (the SPA can then redirect). The verified
- * session is exposed on the context as `c.get("session")`.
+ * (local dev / tests stay open). When enabled, every non-public route requires
+ * an authenticated identity, resolved in this priority:
+ *   1. a valid radar session cookie (browsers), OR
+ *   2. a per-user IdP bearer token (D4, option A) — the immo-mcp pod forwards
+ *      the CURRENT user's OWN access token (`Authorization: Bearer`), verified
+ *      against OUR IdP JWKS, audience bounded to our origin + `${origin}/mcp`,
+ *      then authorised against the approved-accounts table. This NEVER opens a
+ *      route publicly; the token is never logged.
+ * Browser navigations without an identity get a 302 to /login; API/XHR get a
+ * 401 JSON. The verified identity is exposed on the context as `c.get("session")`.
  */
 export function protect(
   auth: AuthConfig,
-  options: { now?: () => number; db?: Database } = {},
+  options: {
+    now?: () => number;
+    db?: Database;
+    /**
+     * JWKS key getter used to verify a USER bearer token. Defaults to a cached
+     * remote JWKS off `auth.jwksUri`. Injectable so tests verify a test-signed
+     * JWT against a local key without hitting the network.
+     */
+    bearerGetKey?: JWTVerifyGetKey;
+  } = {},
 ): MiddlewareHandler {
   const nowFn = options.now ?? (() => Date.now());
+  // Lazily built + cached across requests. Never constructed for a disabled or
+  // empty-issuer config (the bearer path is unreachable then).
+  let bearerKeyGetter = options.bearerGetKey;
+  const resolveBearerKeyGetter = (): JWTVerifyGetKey | null => {
+    if (bearerKeyGetter) return bearerKeyGetter;
+    if (auth.jwksUri === "") return null;
+    bearerKeyGetter = createRemoteJWKSet(new URL(auth.jwksUri));
+    return bearerKeyGetter;
+  };
+
   return async (c, next) => {
     if (!auth.enabled) return next();
 
@@ -562,36 +605,57 @@ export function protect(
         })
       : null;
 
-    if (!session) {
-      if (isBrowserNavigation(c.req.header("accept"))) {
-        return c.redirect("/api/v1/auth/login", 302);
+    if (session) {
+      if (options.db) {
+        const status = await fetchAccountStatus(options.db, session.sub);
+        if (status !== null && status !== "approved") {
+          return c.json({ error: "account_not_approved", status }, 403);
+        }
       }
-      return c.json({ error: "unauthenticated" }, 401);
+      // Sliding re-mint on every approved protected request: a user actively
+      // navigating the app keeps their 15-day window rolling without ever
+      // returning to the IdP. No-op until the session crosses its half-life.
+      await maybeSlideSession(c, auth, session, nowFn());
+      c.set("session" as never, session as never);
+      return next();
     }
 
-    if (options.db) {
-      const rows = await options.db
-        .select()
-        .from(accountUsers)
-        .where(eq(accountUsers.sub, session.sub))
-        .limit(1);
-      if (rows.length > 0 && rows[0]!.status !== "approved") {
-        return c.json(
-          {
-            error: "account_not_approved",
-            status: rows[0]!.status,
-          },
-          403,
-        );
+    // No valid radar session cookie — try a per-user IdP bearer (D4, option A).
+    const bearer = extractBearerToken(c.req.header("authorization"));
+    if (bearer) {
+      const getKey = resolveBearerKeyGetter();
+      let sub: string | null = null;
+      if (getKey) {
+        try {
+          // Signature (JWKS) + iss + exp + aud-allowlist + sub are all enforced.
+          const claims = await verifyAccessToken(bearer, {
+            issuer: auth.issuer,
+            audiences: auth.bearerAudiences,
+            getKey,
+            now: nowFn(),
+          });
+          sub = claims.sub;
+        } catch {
+          sub = null; // invalid / expired / wrong iss / wrong aud → treat as no id
+        }
       }
+      if (!sub) return c.json({ error: "unauthenticated" }, 401);
+
+      // Per-user authorisation: a bearer may carry ANY IdP user, so require an
+      // APPROVED radar account (stricter than the cookie path, where an unknown
+      // sub cannot exist because the session was minted for an enrolled user).
+      if (!options.db) return c.json({ error: "unauthenticated" }, 401);
+      const status = await fetchAccountStatus(options.db, sub);
+      if (status !== "approved") {
+        return c.json({ error: "account_not_approved", status: status ?? "unknown" }, 403);
+      }
+      c.set("session" as never, { sub, via: "bearer" } as never);
+      return next();
     }
 
-    // Sliding re-mint on every approved protected request: a user actively
-    // navigating the app keeps their 15-day window rolling without ever
-    // returning to the IdP. No-op until the session crosses its half-life.
-    await maybeSlideSession(c, auth, session, nowFn());
-
-    c.set("session" as never, session as never);
-    return next();
+    if (isBrowserNavigation(c.req.header("accept"))) {
+      return c.redirect("/api/v1/auth/login", 302);
+    }
+    return c.json({ error: "unauthenticated" }, 401);
   };
 }
