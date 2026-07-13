@@ -71,15 +71,19 @@ describe("HttpDataSource.searchSignals (the fix — REAL signals)", () => {
     return new HttpDataSource({ baseUrl: BASE, fetchImpl });
   }
 
-  it("hits GET /api/graph-signals/<slug> and returns >=1 real signal", async () => {
+  it("hits GET /api/graph-signals/<slug>, forwards the USER token, returns >=1 real signal", async () => {
     const fetchImpl = vi.fn(async () => apiResponse([signalNode()]));
-    const out = await source(fetchImpl as unknown as typeof fetch).searchSignals({
-      city: "Mont-Tremblant", // mixed case + accent → normalised to slug
-      limit: 20,
-    });
+    const out = await source(fetchImpl as unknown as typeof fetch).searchSignals(
+      { city: "Mont-Tremblant", limit: 20 }, // mixed case + accent → normalised to slug
+      { accessToken: "user-token-xyz" }, // per-user identity (D4)
+    );
 
-    const url = String((fetchImpl.mock.calls[0] as unknown[])[0]);
+    const call = fetchImpl.mock.calls[0] as unknown[];
+    const url = String(call[0]);
     expect(url).toBe(`${BASE}/api/graph-signals/mont-tremblant`);
+    // The user's OWN bearer is forwarded so the api applies per-user auth.
+    const init = call[1] as { headers?: Record<string, string> };
+    expect(init.headers?.authorization).toBe("Bearer user-token-xyz");
 
     expect(out).toHaveLength(1);
     const sig = out[0]!;
@@ -140,6 +144,28 @@ describe("HttpDataSource.searchSignals (the fix — REAL signals)", () => {
     await expect(
       source(fetchImpl as unknown as typeof fetch).searchSignals({ city: "x", limit: 20 }),
     ).rejects.toThrow(/radar_api_error:500/);
+  });
+
+  it("sends NO Authorization header when the user is not authenticated", async () => {
+    // No accessToken → no header → the protected api will 401 (never anonymous data).
+    const fetchImpl = vi.fn(async () => new Response("{}", { status: 401 }));
+    await expect(
+      source(fetchImpl as unknown as typeof fetch).searchSignals({ city: "x", limit: 20 }),
+    ).rejects.toThrow(/unauthenticated/);
+    const init = (fetchImpl.mock.calls[0] as unknown[])[1] as { headers?: Record<string, string> };
+    expect(init.headers?.authorization).toBeUndefined();
+  });
+
+  it("maps a 401/403 (rejected user token) to an explicit unauthenticated error", async () => {
+    for (const status of [401, 403]) {
+      const fetchImpl = vi.fn(async () => new Response("{}", { status }));
+      await expect(
+        source(fetchImpl as unknown as typeof fetch).searchSignals(
+          { city: "mont-tremblant", limit: 20 },
+          { accessToken: "expired-or-wrong" },
+        ),
+      ).rejects.toThrow(/unauthenticated/);
+    }
   });
 
   it("the other v0 domain tools remain not_wired_yet (honest limit)", async () => {

@@ -68,6 +68,16 @@ export interface DocumentExcerpt {
 }
 
 /**
+ * Per-call caller identity, threaded from the tool layer's auth CONTEXT (never
+ * from LLM/tool arguments). Lets a source act under the CURRENT user's identity
+ * — e.g. forward their bearer token to the radar API (D4, per-user auth).
+ */
+export interface DataSourceCallContext {
+  /** Raw OAuth access token of the current user, when one was presented. */
+  accessToken?: string | undefined;
+}
+
+/**
  * The contract every backing source must satisfy. v0 ships `MockDataSource`;
  * phase 2 swaps in `HttpDataSource` (radar API) WITHOUT touching the tool
  * signatures or the auth layer.
@@ -76,7 +86,7 @@ export interface ImmoDataSource {
   readonly mode: "mock" | "http";
   searchLots(args: SearchLotsArgs): Promise<MockLot[]>;
   getLotCard(args: GetLotCardArgs): Promise<LotCard | null>;
-  searchSignals(args: SearchSignalsArgs): Promise<MockSignal[]>;
+  searchSignals(args: SearchSignalsArgs, ctx?: DataSourceCallContext): Promise<MockSignal[]>;
   getOpportunityDossier(args: GetOpportunityDossierArgs): Promise<OpportunityDossier | null>;
   listDocuments(args: ListDocumentsArgs): Promise<MockDocument[]>;
   /** Returns the RAW document body (redaction is applied by the tool layer). */
@@ -227,10 +237,15 @@ export interface HttpDataSourceOptions {
  *
  * `searchSignals` is WIRED to the REAL feed — `GET /api/graph-signals/:city`, the
  * SAME endpoint the web app reads (api/src/routes/graph-signals.ts) — so the MCP
- * and the app serve the SAME signals (consistency decision D12). That route is a
- * PUBLIC data prefix (api/src/routes/auth.ts PUBLIC_PREFIXES) reachable
- * server-side by this pod without a session, exactly like the raw geo/documents
- * seam (raw-data.ts).
+ * and the app serve the SAME signals (consistency decision D12).
+ *
+ * PER-USER AUTH (D4): that route is SESSION-PROTECTED (NOT a public prefix). We
+ * forward the CURRENT user's OWN bearer token (ctx.accessToken, verified upstream
+ * by the MCP resource server) as `Authorization: Bearer`, so the radar API sees
+ * the real user identity — never a shared machine credential. A 401/403 upstream
+ * is surfaced as an explicit `unauthenticated` error (connect your account).
+ * NOTE: the radar API accepting a user bearer here is architect/IdP-gated
+ * (bearer validation in api `protect`); until it lands the call returns 401.
  *
  * The other v0 domain tools (lots, opportunities, documents) are NOT wired yet:
  * they throw `not_wired_yet`. Real lots/zones/PV are already served by the
@@ -261,22 +276,39 @@ export class HttpDataSource implements ImmoDataSource {
   }
 
   /**
-   * REAL signals from `GET /api/graph-signals/:city`. A 404 (the city has no
-   * signal node) maps to an EMPTY list, not an error (anti-invention). The
-   * etape/query/limit filters are applied client-side, mirroring
-   * MockDataSource.searchSignals so the tool contract is identical.
+   * REAL signals from `GET /api/graph-signals/:city`, called under the CURRENT
+   * user's identity: `ctx.accessToken` is forwarded as `Authorization: Bearer`
+   * (per-user auth, D4). A 404 (the city has no signal node) maps to an EMPTY
+   * list, not an error (anti-invention). A 401/403 is surfaced as an explicit
+   * `unauthenticated` error. The etape/query/limit filters are applied
+   * client-side, mirroring MockDataSource.searchSignals so the tool contract is
+   * identical.
    */
-  async searchSignals(args: SearchSignalsArgs): Promise<MockSignal[]> {
+  async searchSignals(
+    args: SearchSignalsArgs,
+    ctx: DataSourceCallContext = {},
+  ): Promise<MockSignal[]> {
     const slug = citySlug(args.city);
     const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}`;
+    // Forward the user's OWN token so the api applies its normal per-user auth.
+    const headers: Record<string, string> = { accept: "application/json" };
+    if (ctx.accessToken) headers.authorization = `Bearer ${ctx.accessToken}`;
     let res: Response;
     try {
-      res = await this.fetchImpl(url);
+      res = await this.fetchImpl(url, { headers });
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
       throw new Error(`radar_api_unreachable: GET ${url} (${detail})`);
     }
     if (res.status === 404) return []; // no signal nodes for this city → honest empty
+    if (res.status === 401 || res.status === 403) {
+      // The api rejected the (missing/invalid/expired) user token. Never invent
+      // data — tell the caller to (re)authenticate their account in the MCP client.
+      throw new Error(
+        `unauthenticated: /api/graph-signals requires the user to be authenticated ` +
+          `(status ${res.status}). Connect your account in the MCP client and retry.`,
+      );
+    }
     if (!res.ok) throw new Error(`radar_api_error:${res.status} GET ${url}`);
     const body = (await res.json()) as ApiGraphSignalsResponse;
     const nodes = Array.isArray(body.nodes) ? body.nodes : [];
