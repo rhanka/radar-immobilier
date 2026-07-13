@@ -117,6 +117,10 @@ const envSchema = z.object({
   /** IdP issuer origin, e.g. https://auth.sent-tech.ca. Discovery is at
    * `${issuer}/.well-known/openid-configuration`. */
   SENTROPIC_IDP_ISSUER: optStr(z.string().url()),
+  /** Optional explicit JWKS URI of OUR IdP (used to verify user bearer tokens
+   * presented on the api, e.g. by the immo-mcp per-user path). Defaults to
+   * `${issuer}/.well-known/jwks.json` (the sentropic IdP convention). */
+  SENTROPIC_IDP_JWKS_URI: optStr(z.string().url()),
   /** This app's registered oauth_clients id at the IdP. */
   SENTROPIC_OAUTH_CLIENT_ID: optStr(z.string().min(1)),
   /** Confidential client secret (client_secret_basic). Secret. */
@@ -242,6 +246,19 @@ export interface AuthConfig {
   readonly sessionTtlSeconds: number;
   /** Absolute ceiling (seconds) past which the session stops sliding. */
   readonly sessionAbsoluteTtlSeconds: number;
+  /**
+   * JWKS URI of OUR IdP, used to verify a USER access token presented as a
+   * bearer on the api (per-user MCP path, D4). Defaults to
+   * `${issuer}/.well-known/jwks.json`. Empty when auth is disabled.
+   */
+  readonly jwksUri: string;
+  /**
+   * Allowlist of `aud` values accepted on a user bearer token: the api origin
+   * AND `${origin}/mcp` (the immo-mcp resource). Bounded to our own origin so a
+   * token minted for another audience/resource is rejected. Empty when auth is
+   * disabled.
+   */
+  readonly bearerAudiences: string[];
 }
 
 /**
@@ -264,17 +281,28 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
     redirectUri !== "" &&
     sessionSecret !== "";
 
+  const issuerNoSlash = issuer.replace(/\/$/, "");
+  const appBaseUrlNoSlash = appBaseUrl.replace(/\/$/, "");
+  const jwksUri =
+    config.SENTROPIC_IDP_JWKS_URI ??
+    (issuerNoSlash !== "" ? `${issuerNoSlash}/.well-known/jwks.json` : "");
+  // Bounded to OUR origin: the api itself and the immo-mcp resource `${origin}/mcp`.
+  const bearerAudiences =
+    appBaseUrlNoSlash !== "" ? [appBaseUrlNoSlash, `${appBaseUrlNoSlash}/mcp`] : [];
+
   return {
     enabled,
-    issuer: issuer.replace(/\/$/, ""),
+    issuer: issuerNoSlash,
     clientId,
     clientSecret,
     redirectUri,
     scopes: config.SENTROPIC_OAUTH_SCOPES,
-    appBaseUrl: appBaseUrl.replace(/\/$/, ""),
+    appBaseUrl: appBaseUrlNoSlash,
     sessionSecret,
     sessionTtlSeconds: config.SESSION_TTL_SECONDS,
     sessionAbsoluteTtlSeconds: config.SESSION_ABSOLUTE_TTL_SECONDS,
+    jwksUri,
+    bearerAudiences,
   };
 }
 
