@@ -34,8 +34,12 @@ enregistrées. Les scopes `immo:notes:write` / `immo:decisions:propose` /
 - **Anti-PII** : `redact()` scrub emails / téléphones / tokens d'invitation /
   identifiants de session ; `read_document_excerpt` y passe tout extrait.
 - **Mock-first + seam** : `createDataSource()` renvoie `MockDataSource` par
-  défaut ; `IMMO_MCP_DATA_MODE=http` + `RADAR_API_BASE_URL` sélectionnera
-  `HttpDataSource` (non câblé en v0).
+  défaut ; avec `RADAR_API_BASE_URL` (même variable que le seam raw-data), il
+  renvoie `HttpDataSource` dont **`search_signals` est câblé au vrai flux**
+  `GET /api/graph-signals/:city` (les MÊMES signaux que l'app web — D12). Les
+  autres tools de domaine (`search_lots`, `get_lot_card`,
+  `get_opportunity_dossier`, `list_documents`, `read_document_excerpt`) restent
+  `not_wired_yet` (les lots/zones/PV réels passent par les tools raw-data).
 
 ## Build / test / preuve
 
@@ -91,8 +95,8 @@ L'entrée `immo` suit exactement le même contrat stdio :
 
 | Var | Défaut | Rôle |
 |-----|--------|------|
-| `IMMO_MCP_DATA_MODE` | `mock` | `mock` (fixtures) \| `http` (API radar, phase 2) |
-| `RADAR_API_BASE_URL` | — | requis seulement si `DATA_MODE=http` |
+| `IMMO_MCP_DATA_MODE` | `mock` | libellé `dataMode` (audit/log) : `http` → `real`, sinon `simulation`. Ne pilote **pas** la sélection de source. |
+| `RADAR_API_BASE_URL` | — | **pilote la sélection** : présent → `HttpDataSource` (signaux réels + tools raw-data) ; absent → mocks |
 | `IMMO_MCP_AUTH_STUB_SUB` | `demo-user` | claim `sub` (stub, **stdio uniquement**) |
 | `IMMO_MCP_AUTH_STUB_TENANT` | `radar` | claim `tenantId` (stub, **stdio uniquement**) |
 | `IMMO_MCP_AUTH_STUB_SCOPES` | `immo:read immo:search immo:documents:read` | scopes accordés (stub, **stdio uniquement**) |

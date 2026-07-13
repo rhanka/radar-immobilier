@@ -9,6 +9,7 @@ import {
   type MockOpportunity,
   type MockSignal,
 } from "./mocks.js";
+import { citySlug } from "./raw-data.js";
 
 export interface SearchLotsArgs {
   city: string;
@@ -148,42 +149,157 @@ export class MockDataSource implements ImmoDataSource {
   }
 }
 
+// ── Real radar-API shapes consumed by HttpDataSource.searchSignals ──────────
+// Kept in sync MANUALLY with api/src/routes/graph-signals.ts (immo-mcp does NOT
+// depend on the api workspace — same discipline as raw-data.ts). Only the fields
+// we normalise are declared; every other field on the card is ignored.
+interface ApiGraphSignalDocRef {
+  docSha?: string;
+  excerpt?: string;
+}
+interface ApiGraphSignalNode {
+  id: string;
+  type?: string;
+  label?: string;
+  citySlug?: string | null;
+  sourceRef?: string | null;
+  description?: string | null;
+  publishedAt?: string | null;
+  docRefs?: ApiGraphSignalDocRef[];
+  props?: Record<string, unknown>;
+}
+interface ApiGraphSignalsResponse {
+  ok?: boolean;
+  citySlug?: string;
+  nodes?: ApiGraphSignalNode[];
+}
+
+/** `props.properties` (graphify extraction metadata) as a safe record. */
+function signalProperties(props: Record<string, unknown> | undefined): Record<string, unknown> {
+  const nested = props?.["properties"];
+  return typeof nested === "object" && nested !== null && !Array.isArray(nested)
+    ? (nested as Record<string, unknown>)
+    : {};
+}
+
+/** First non-empty trimmed string among candidates, else "" (never invents). */
+function firstStr(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) return value.trim();
+  }
+  return "";
+}
+
 /**
- * Phase-2 seam: real radar API behind `RADAR_API_BASE_URL`.
+ * Normalise a REAL graph-signals card (api/src/routes/graph-signals.ts) into the
+ * domain `MockSignal` shape the tool layer already returns. Missing fields become
+ * "" / null — NEVER fabricated (anti-invention, cf. MASTER "Ne rien inventer").
+ */
+export function toMockSignal(node: ApiGraphSignalNode, fallbackCity: string): MockSignal {
+  const props = node.props ?? {};
+  const p = signalProperties(props);
+  const firstDoc = Array.isArray(node.docRefs) ? node.docRefs[0] : undefined;
+  return {
+    id: node.id,
+    city: firstStr(node.citySlug, fallbackCity),
+    // Prefer the semantic category (e.g. "derogation_mineure"); fall back to the
+    // graph node type ("Signal" / "DesignationEvent").
+    type: firstStr(p["category"], node.type),
+    etape: firstStr(p["etape"]),
+    etape_date: firstStr(p["etape_date"], p["date"], node.publishedAt),
+    reglement_number: firstStr(p["reglement_number"]),
+    zone_ref: firstStr(p["zone_ref"], p["zone"]),
+    no_lot: firstStr(p["no_lot"]) || null,
+    summary: firstStr(node.description, node.label, p["description"], p["summary"]),
+    source_document_id: firstStr(node.sourceRef, firstDoc?.docSha),
+  };
+}
+
+export interface HttpDataSourceOptions {
+  /** In-cluster/internal radar API base, e.g. http://radar-api:3000. */
+  baseUrl: string;
+  /** Injectable for tests (default: global fetch). */
+  fetchImpl?: typeof fetch;
+}
+
+/**
+ * Real radar API behind `RADAR_API_BASE_URL` (in-cluster: http://radar-api:3000).
  *
- * NOT exercised in v0 (selected only when IMMO_MCP_DATA_MODE=http). It maps
- * each tool to the documented radar endpoints (cf. cadrage §A.4). The shapes
- * are normalised back to the same domain types so the tool layer is unchanged.
- * Left as explicit `not_wired_yet` until the API + PII classification land,
- * to avoid emitting unredacted real data prematurely.
+ * `searchSignals` is WIRED to the REAL feed — `GET /api/graph-signals/:city`, the
+ * SAME endpoint the web app reads (api/src/routes/graph-signals.ts) — so the MCP
+ * and the app serve the SAME signals (consistency decision D12). That route is a
+ * PUBLIC data prefix (api/src/routes/auth.ts PUBLIC_PREFIXES) reachable
+ * server-side by this pod without a session, exactly like the raw geo/documents
+ * seam (raw-data.ts).
+ *
+ * The other v0 domain tools (lots, opportunities, documents) are NOT wired yet:
+ * they throw `not_wired_yet`. Real lots/zones/PV are already served by the
+ * raw-data tools; wiring the remaining domain tools is tracked separately.
  */
 export class HttpDataSource implements ImmoDataSource {
   readonly mode = "http" as const;
-  constructor(private readonly baseUrl: string) {}
+  private readonly baseUrl: string;
+  private readonly fetchImpl: typeof fetch;
+
+  constructor(opts: HttpDataSourceOptions) {
+    this.baseUrl = opts.baseUrl.replace(/\/$/, "");
+    this.fetchImpl = opts.fetchImpl ?? fetch;
+  }
 
   private notWired(endpoint: string): never {
     throw new Error(
       `not_wired_yet:http_data_source ${endpoint} base=${this.baseUrl} ` +
-        "(phase 2: wire radar API + PII classification before enabling DATA_MODE=http)",
+        "(only search_signals is wired to the real radar API in this seam)",
     );
   }
 
   async searchLots(_args: SearchLotsArgs): Promise<MockLot[]> {
-    return this.notWired("GET /api/geo/:city/lots");
+    return this.notWired("GET /api/geo/:city/lots (use get_lots_geojson)");
   }
   async getLotCard(_args: GetLotCardArgs): Promise<LotCard | null> {
     return this.notWired("GET /api/geo/:city/lots?no_lot=");
   }
-  async searchSignals(_args: SearchSignalsArgs): Promise<MockSignal[]> {
-    return this.notWired("GET /api/graph-signals/:city");
+
+  /**
+   * REAL signals from `GET /api/graph-signals/:city`. A 404 (the city has no
+   * signal node) maps to an EMPTY list, not an error (anti-invention). The
+   * etape/query/limit filters are applied client-side, mirroring
+   * MockDataSource.searchSignals so the tool contract is identical.
+   */
+  async searchSignals(args: SearchSignalsArgs): Promise<MockSignal[]> {
+    const slug = citySlug(args.city);
+    const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}`;
+    let res: Response;
+    try {
+      res = await this.fetchImpl(url);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`radar_api_unreachable: GET ${url} (${detail})`);
+    }
+    if (res.status === 404) return []; // no signal nodes for this city → honest empty
+    if (!res.ok) throw new Error(`radar_api_error:${res.status} GET ${url}`);
+    const body = (await res.json()) as ApiGraphSignalsResponse;
+    const nodes = Array.isArray(body.nodes) ? body.nodes : [];
+    const signals = nodes.map((n) => toMockSignal(n, slug));
+
+    const q = args.query ? norm(args.query) : null;
+    return signals
+      .filter((s) => (args.etape ? norm(s.etape) === norm(args.etape) : true))
+      .filter((s) =>
+        q
+          ? norm(`${s.summary} ${s.type} ${s.reglement_number} ${s.zone_ref}`).includes(q)
+          : true,
+      )
+      .slice(0, args.limit);
   }
+
   async getOpportunityDossier(
     _args: GetOpportunityDossierArgs,
   ): Promise<OpportunityDossier | null> {
     return this.notWired("GET /api/opportunites + /api/signals/:city/detail");
   }
   async listDocuments(_args: ListDocumentsArgs): Promise<MockDocument[]> {
-    return this.notWired("GET /api/documents/raw");
+    return this.notWired("GET /api/documents/raw (list)");
   }
   async readDocumentBody(_documentId: string): Promise<{ title: string; text: string } | null> {
     return this.notWired("GET /api/documents/raw (bounded excerpt)");
@@ -191,16 +307,14 @@ export class HttpDataSource implements ImmoDataSource {
 }
 
 /**
- * Factory selecting the source from env. Mock is the safe default; `http`
- * requires an explicit opt-in AND a base URL.
+ * Factory: `RADAR_API_BASE_URL` set → `HttpDataSource` (real signals from the
+ * radar API); unset → `MockDataSource` (deterministic fixtures). Mirrors
+ * `createRawDataSource` so BOTH the domain and raw seams flip on the SAME env
+ * var — no more `IMMO_MCP_DATA_MODE=http` gate that left `searchSignals` a
+ * `not_wired_yet` stub in prod (root cause of the MCP-returns-0-signals bug).
  */
 export function createDataSource(env: NodeJS.ProcessEnv): ImmoDataSource {
-  if (env.IMMO_MCP_DATA_MODE === "http") {
-    const base = env.RADAR_API_BASE_URL;
-    if (!base) {
-      throw new Error("config_error: IMMO_MCP_DATA_MODE=http requires RADAR_API_BASE_URL");
-    }
-    return new HttpDataSource(base);
-  }
+  const base = env.RADAR_API_BASE_URL;
+  if (base) return new HttpDataSource({ baseUrl: base });
   return new MockDataSource();
 }
