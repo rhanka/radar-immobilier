@@ -75,20 +75,24 @@ data:
   IMMO_MCP_HTTP_PORT: "8848"
   # "http" → dataMode "real" in loadHttpConfig / audit context. Source SELECTION
   # is keyed off RADAR_API_BASE_URL (below), same var as the raw seam: with it
-  # set, `search_signals` is WIRED to the REAL /api/graph-signals/:city feed (the
-  # SAME signals the web app reads — D12). The other v0 DOMAIN tools (search_lots,
+  # set, `search_signals` targets the REAL /api/graph-signals/:city feed (the SAME
+  # signals the web app reads — D12). The other v0 DOMAIN tools (search_lots,
   # get_lot_card, get_opportunity_dossier, list_documents, read_document_excerpt)
   # remain not_wired_yet (real lots/zones/PV are served by the raw tools below).
   IMMO_MCP_DATA_MODE: "http"
   # ── Real radar-API wiring (search_signals + the 4 raw-data tools) ──────────
-  # Setting RADAR_API_BASE_URL switches `search_signals` AND the raw tools
+  # Setting RADAR_API_BASE_URL points `search_signals` AND the raw tools
   # (get_zones_geojson / get_lots_geojson / get_grille_pdf / get_pv_pdf —
-  # packages/immo-mcp/src/{data-source,raw-data}.ts) to the REAL radar API
+  # packages/immo-mcp/src/{data-source,raw-data}.ts) at the REAL radar API
   # (in-cluster Service, 30-api.yaml). Requires the additive NetworkPolicy
   # `allow-immo-mcp-to-api` (70-networkpolicy.yaml): under the namespace
-  # default-deny, the mcp -> api:3000 hop is otherwise DROPPED. The routes the
-  # tools call (/api/graph-signals, /api/geo/collections, /api/documents/raw) are
-  # PUBLIC_PREFIXES in the api (api/src/routes/auth.ts): public data, no session.
+  # default-deny, the mcp -> api:3000 hop is otherwise DROPPED.
+  #  - raw tools call /api/geo/collections + /api/documents/raw → PUBLIC_PREFIXES
+  #    (api/src/routes/auth.ts): public data, no session.
+  #  - search_signals calls /api/graph-signals which is SESSION-PROTECTED (D4):
+  #    it forwards the CURRENT USER's own bearer token (no machine credential, no
+  #    env secret here). The api ACCEPTING that user bearer is the remaining
+  #    architect/IdP-gated step; until then search_signals returns 401.
   RADAR_API_BASE_URL: "http://radar-api:3000"
   # Public base used in the URLs handed back to the MCP client (get_pv_pdf):
   # the nginx ui pod proxies /api/* on this host to radar-api (50-ui.yaml).

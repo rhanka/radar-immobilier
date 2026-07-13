@@ -17,6 +17,14 @@ export interface ImmoMcpAuthContext {
   workspaces: string[];
   dataMode: "real" | "simulation";
   audience: string;
+  /**
+   * The RAW OAuth access token of the CURRENT user (verified upstream by the
+   * MCP resource server). Carried here — never from tool arguments — so a
+   * data source can forward the user's OWN identity to the radar API
+   * (`Authorization: Bearer`), keeping every call PER-USER (D4). Absent on the
+   * stdio stub path (no bearer) and whenever no token was presented.
+   */
+  accessToken?: string;
 }
 
 /** Scopes recognised by the immo provider (cf. cadrage v0). */

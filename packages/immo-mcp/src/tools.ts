@@ -169,7 +169,11 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     },
     guarded(ctx, "search_signals", IMMO_SCOPES.search, async (args) => {
-      const signals = await ctx.data.searchSignals(args);
+      // Per-user auth (D4): forward the CURRENT user's token (from the verified
+      // auth CONTEXT, never from args) so the api applies its normal per-user auth.
+      const signals = await ctx.data.searchSignals(args, {
+        accessToken: ctx.auth.accessToken,
+      });
       return jsonResult({ city: args.city, count: signals.length, signals });
     }),
   );
