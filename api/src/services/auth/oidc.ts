@@ -241,3 +241,41 @@ export async function verifyIdToken(
   if (typeof claims.email === "string") out.email = claims.email;
   return out;
 }
+
+/** Verified USER access-token claims we act on (per-user MCP path). */
+export interface VerifiedAccessToken {
+  sub: string;
+}
+
+/**
+ * Verify a USER access token (bearer) presented on the api against OUR IdP JWKS.
+ *
+ * Mandatory checks (D4, option A): valid signature (`getKey`, the IdP JWKS),
+ * `iss` == our IdP, `exp` not passed (both enforced by `jose.jwtVerify`), `aud`
+ * in the bounded allowlist `audiences` (jose matches ANY aud value), and a
+ * non-empty `sub`. Unlike `verifyIdToken` there is NO nonce and the audience is
+ * the resource allowlist (api origin + `${origin}/mcp`), NOT the client_id.
+ *
+ * The token is NEVER logged. `getKey` is injectable so tests verify a
+ * test-signed JWT against a local key; production passes a cached
+ * `createRemoteJWKSet(<jwksUri>)`.
+ */
+export async function verifyAccessToken(
+  accessToken: string,
+  opts: {
+    issuer: string;
+    audiences: string[];
+    getKey: JWTVerifyGetKey;
+    now?: number;
+  },
+): Promise<VerifiedAccessToken> {
+  const { payload } = await jwtVerify(accessToken, opts.getKey, {
+    issuer: opts.issuer,
+    audience: opts.audiences,
+    ...(opts.now !== undefined ? { currentDate: new Date(opts.now) } : {}),
+  });
+  if (typeof payload.sub !== "string" || payload.sub === "") {
+    throw new Error("access_token missing sub");
+  }
+  return { sub: payload.sub };
+}

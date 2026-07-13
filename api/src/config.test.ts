@@ -84,6 +84,23 @@ describe("loadConfig", () => {
       expect(auth.issuer).toBe("https://auth.example.test");
       expect(auth.clientId).toBe("radar-immobilier");
     });
+
+    it("derives the IdP JWKS URI and the bearer audience allowlist (per-user MCP, D4)", () => {
+      const auth = resolveAuthConfig(loadConfig(OIDC_ENV));
+      expect(auth.jwksUri).toBe("https://auth.example.test/.well-known/jwks.json");
+      // api origin + `${origin}/mcp` (the immo-mcp resource), bounded to our origin.
+      expect(auth.bearerAudiences).toEqual([
+        "https://immo.example.test",
+        "https://immo.example.test/mcp",
+      ]);
+    });
+
+    it("honours an explicit SENTROPIC_IDP_JWKS_URI override", () => {
+      const auth = resolveAuthConfig(
+        loadConfig({ ...OIDC_ENV, SENTROPIC_IDP_JWKS_URI: "https://auth.example.test/keys" }),
+      );
+      expect(auth.jwksUri).toBe("https://auth.example.test/keys");
+    });
   });
 
   describe("session lifetime (durable session — wp5 §B)", () => {
