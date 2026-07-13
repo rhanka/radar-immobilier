@@ -32,9 +32,12 @@ import { registerTools } from "./tools.js";
  *   - stdio  → `resolveAuthContext(env)` (claims stubbed from env)
  *   - http   → claims of a validated bearer token (this file's `authContextFromMcp`).
  *
- * v0 domain data stays MOCK here (cadrage v0): `ImmoDataSource`'s http mode is NOT
- * wired in the remote POC. The RAW-DATA seam (raw-data.ts — zones/lots GeoJSON,
- * grille & PV PDFs) IS wired to the real radar API when RADAR_API_BASE_URL is set.
+ * Domain data: `search_signals` is WIRED to the real radar API (the same
+ * `GET /api/graph-signals/:city` feed the web app reads) when RADAR_API_BASE_URL
+ * is set — so the MCP and the app serve the SAME signals (D12). The other v0
+ * domain tools (lots/opportunities/documents) remain `not_wired_yet`. The
+ * RAW-DATA seam (raw-data.ts — zones/lots GeoJSON, grille & PV PDFs) is likewise
+ * wired to the real radar API when RADAR_API_BASE_URL is set.
  */
 
 const DEFAULT_SUPPORTED_SCOPES = `${IMMO_SCOPES.read} ${IMMO_SCOPES.search} ${IMMO_SCOPES.documentsRead}`;
@@ -98,7 +101,7 @@ function asStringArray(value: unknown): string[] | null {
  */
 export function authContextFromMcp(
   mcpAuth: McpAuthContext,
-  opts: { audience: string; dataMode: "real" | "simulation" },
+  opts: { audience: string; dataMode: "real" | "simulation"; accessToken?: string | undefined },
 ): ImmoMcpAuthContext {
   const claims: AccessTokenClaims = mcpAuth.claims;
   const ctx: ImmoMcpAuthContext = {
@@ -113,7 +116,17 @@ export function authContextFromMcp(
   };
   const orgId = claims["org_id"];
   if (typeof orgId === "string") ctx.orgId = orgId;
+  // Carry the RAW verified user token so a data source can act PER-USER (D4):
+  // forward the user's own bearer to the radar API instead of a machine cred.
+  if (opts.accessToken) ctx.accessToken = opts.accessToken;
   return ctx;
+}
+
+/** Extract the raw bearer token from an `Authorization: Bearer <token>` header. */
+export function extractBearerToken(header: string | undefined | null): string | undefined {
+  if (!header) return undefined;
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  return match ? match[1]!.trim() : undefined;
 }
 
 function buildHttpScopedServer(
@@ -200,9 +213,16 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     // No session yet: only a POST (the `initialize` request) may open one.
     if (c.req.method !== "POST") return jsonRpcError(c, 400, "Missing mcp-session-id header");
 
+    // Capture the RAW verified bearer so tools can act PER-USER (D4). The MCP
+    // resource server already verified it on THIS request; we only pass it
+    // through to the data source (which forwards it to the radar API). NOTE:
+    // captured at session `initialize` time and reused for the session's tools —
+    // a token that expires mid-session would need a fresh session (documented
+    // limitation of the per-session auth model).
     const auth = authContextFromMcp(getMcpAuthContext(c), {
       audience: config.resource,
       dataMode: data.mode === "http" ? "real" : "simulation",
+      accessToken: extractBearerToken(c.req.header("authorization")),
     });
     const server = buildHttpScopedServer(auth, data, raw);
     const transport = new WebStandardStreamableHTTPServerTransport({
@@ -226,17 +246,22 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
 async function main(): Promise<void> {
   const config = loadHttpConfig(process.env);
-  // v0 domain data stays MOCK in the remote POC (createDataSource({}) default),
-  // but the raw-data seam IS env-wired: with RADAR_API_BASE_URL set (in-cluster:
-  // http://radar-api:3000) the 4 raw tools serve REAL zones/lots/PDF URLs.
+  // BOTH seams are env-wired from the REAL process env (in-cluster:
+  // RADAR_API_BASE_URL=http://radar-api:3000). The domain source now serves REAL
+  // signals through search_signals (createDataSource keys off RADAR_API_BASE_URL,
+  // same var as the raw seam); the raw seam serves REAL zones/lots/PDF URLs.
+  // Passing `data` explicitly is REQUIRED: createImmoHttpApp's default is the
+  // env-less mock (createDataSource({})), which was the wiring that pinned prod
+  // to mock signals.
+  const data = createDataSource(process.env);
   const raw = createRawDataSource(process.env);
-  const app = createImmoHttpApp(config, { raw });
+  const app = createImmoHttpApp(config, { data, raw });
   const { serve } = await import("@hono/node-server");
   serve({ fetch: app.fetch, port: config.port });
   process.stderr.write(
     `[immo-mcp-http] listening port=${config.port} resource=${config.resource} ` +
-      `issuer=${config.issuer} dataMode=${config.dataMode} rawMode=${raw.mode} ` +
-      `requiredScopes=${config.requiredScopes.join(",")}\n`,
+      `issuer=${config.issuer} dataMode=${config.dataMode} domainMode=${data.mode} ` +
+      `rawMode=${raw.mode} requiredScopes=${config.requiredScopes.join(",")}\n`,
   );
 }
 

@@ -2,8 +2,15 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { SignJWT, generateKeyPair } from "jose";
 import type { KeyLike } from "jose";
 import type { TokenKeySource } from "@sentropic/oauth-verify";
-import { createImmoHttpApp, type ImmoHttpConfig } from "./server-http.js";
+import { createImmoHttpApp, extractBearerToken, type ImmoHttpConfig } from "./server-http.js";
 import type { Hono } from "hono";
+import type {
+  DataSourceCallContext,
+  ImmoDataSource,
+  SearchSignalsArgs,
+} from "./data-source.js";
+import { MockDataSource } from "./data-source.js";
+import type { MockSignal } from "./mocks.js";
 
 // Resource-server settings under test. `resource` == the token `aud` (single-audience model).
 const ISSUER = "https://auth.test.local";
@@ -212,5 +219,81 @@ describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
     );
     expect(res.status).toBe(401);
     expect(res.headers.get("www-authenticate") ?? "").toContain('error="invalid_token"');
+  });
+});
+
+describe("extractBearerToken", () => {
+  it("parses 'Bearer <token>' (case-insensitive), else undefined", () => {
+    expect(extractBearerToken("Bearer abc.def.ghi")).toBe("abc.def.ghi");
+    expect(extractBearerToken("bearer   xyz")).toBe("xyz");
+    expect(extractBearerToken(undefined)).toBeUndefined();
+    expect(extractBearerToken(null)).toBeUndefined();
+    expect(extractBearerToken("Basic abc")).toBeUndefined();
+    expect(extractBearerToken("")).toBeUndefined();
+  });
+});
+
+describe("per-user token propagation (D4) through the transport", () => {
+  // A data source that records the per-call caller context so we can assert the
+  // CURRENT user's own token reached search_signals (never a machine credential).
+  class RecordingDataSource extends MockDataSource {
+    lastAccessToken: string | undefined | null = null;
+    override async searchSignals(
+      args: SearchSignalsArgs,
+      ctx: DataSourceCallContext = {},
+    ): Promise<MockSignal[]> {
+      this.lastAccessToken = ctx.accessToken;
+      return [
+        {
+          id: "sig-x",
+          city: args.city,
+          type: "rezonage",
+          etape: "avis_motion",
+          etape_date: "2026-01-01",
+          reglement_number: "R-1",
+          zone_ref: "H-1",
+          no_lot: null,
+          summary: "signal réel",
+          source_document_id: "doc-1",
+        },
+      ];
+    }
+  }
+
+  it("forwards the verified user bearer to search_signals", async () => {
+    const data: ImmoDataSource & { lastAccessToken: string | undefined | null } =
+      new RecordingDataSource();
+    const scopedApp = createImmoHttpApp(CONFIG, { keySource, data });
+    const token = await signToken();
+
+    const initRes = await scopedApp.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "0" } },
+      }),
+    });
+    const sessionId = initRes.headers.get("mcp-session-id");
+    await scopedApp.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }),
+    });
+    const callRes = await scopedApp.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "tools/call",
+        params: { name: "search_signals", arguments: { city: "mont-tremblant" } },
+      }),
+    });
+    expect(callRes.status).toBe(200);
+    // The raw JWT presented on the request is what reached the data source.
+    expect(data.lastAccessToken).toBe(token);
   });
 });

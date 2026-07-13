@@ -17,11 +17,18 @@ name: Build & push images
 # it cannot read Secrets or touch any other namespace. There is no GitOps
 # controller (Argo/Flux) on this cluster, so `kubectl set image` is not reverted.
 #
+# The deploy job also rolls `radar-immo-mcp` (the remote MCP server) to the same
+# radar-api sha — it runs the SAME radar-api image, so without this it drifted on
+# :latest and served stale code (mock signals). The step is guarded (skips if the
+# mcp Deployment is absent, since 40/41 are applied out-of-band via
+# k8s-apply-mcp.yaml rather than kustomization.yaml).
+#
 # To roll back or deploy by hand, the same commands still work with a full
 # kubeconfig:
-#   kubectl -n radar-immobilier set image deploy/radar-api  api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
-#   kubectl -n radar-immobilier set image deploy/radar-ui   ui=rg.fr-par.scw.cloud/radar-immobilier/radar-ui:<sha>
-#   kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui
+#   kubectl -n radar-immobilier set image deploy/radar-api       api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#   kubectl -n radar-immobilier set image deploy/radar-ui        ui=rg.fr-par.scw.cloud/radar-immobilier/radar-ui:<sha>
+#   kubectl -n radar-immobilier set image deploy/radar-immo-mcp  mcp=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#   kubectl -n radar-immobilier rollout status deploy/radar-api deploy/radar-ui deploy/radar-immo-mcp
 
 on:
   push:
@@ -173,12 +180,27 @@ jobs:
             api="${IMAGE_PREFIX}/radar-api:${SHA}"
           kubectl -n "$NAMESPACE" set image deploy/radar-ui \
             ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
+          # radar-immo-mcp runs the SAME radar-api image (container `mcp`, see
+          # deploy/k8s/40-immo-mcp-http-deploy.yaml). It was never rolled by CD, so
+          # it drifted on radar-api:latest and served STALE code (e.g. mock
+          # signals). Pin it to the pushed sha too. Guarded: the mcp Deployment is
+          # applied out-of-band (k8s-apply-mcp.yaml, not in kustomization.yaml) —
+          # if it is absent, skip rather than fail the api/ui rollout.
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp \
+              mcp="${IMAGE_PREFIX}/radar-api:${SHA}"
+          else
+            echo "radar-immo-mcp Deployment absent — skipping mcp roll"
+          fi
 
       - name: Wait for rollouts
         run: |
           set -eu
           kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
           kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=180s
+          fi
 
       - name: Summary
         if: always()
