@@ -242,10 +242,10 @@ export interface HttpDataSourceOptions {
  * PER-USER AUTH (D4): that route is SESSION-PROTECTED (NOT a public prefix). We
  * forward the CURRENT user's OWN bearer token (ctx.accessToken, verified upstream
  * by the MCP resource server) as `Authorization: Bearer`, so the radar API sees
- * the real user identity — never a shared machine credential. A 401/403 upstream
+ * the real user identity — never a shared machine credential. The radar API
+ * ACCEPTS this user bearer (api `protect`: verified against the IdP JWKS,
+ * audience-bounded, approved-account) → per-user end-to-end. A 401/403 upstream
  * is surfaced as an explicit `unauthenticated` error (connect your account).
- * NOTE: the radar API accepting a user bearer here is architect/IdP-gated
- * (bearer validation in api `protect`); until it lands the call returns 401.
  *
  * The other v0 domain tools (lots, opportunities, documents) are NOT wired yet:
  * they throw `not_wired_yet`. Real lots/zones/PV are already served by the

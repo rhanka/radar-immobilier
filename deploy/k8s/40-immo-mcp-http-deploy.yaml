@@ -91,8 +91,10 @@ data:
   #    (api/src/routes/auth.ts): public data, no session.
   #  - search_signals calls /api/graph-signals which is SESSION-PROTECTED (D4):
   #    it forwards the CURRENT USER's own bearer token (no machine credential, no
-  #    env secret here). The api ACCEPTING that user bearer is the remaining
-  #    architect/IdP-gated step; until then search_signals returns 401.
+  #    env secret here). The api ACCEPTS that user bearer (option A): it verifies
+  #    it against OUR IdP JWKS (derived from SENTROPIC_IDP_ISSUER on radar-api,
+  #    30-api.yaml — no new env), audience bounded to the app origin + `${origin}/mcp`,
+  #    then authorises the approved account → per-user, end-to-end.
   RADAR_API_BASE_URL: "http://radar-api:3000"
   # Public base used in the URLs handed back to the MCP client (get_pv_pdf):
   # the nginx ui pod proxies /api/* on this host to radar-api (50-ui.yaml).
