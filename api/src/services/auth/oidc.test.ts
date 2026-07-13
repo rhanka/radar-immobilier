@@ -24,6 +24,8 @@ const AUTH: AuthConfig = {
   sessionSecret: "session-secret",
   sessionTtlSeconds: 3600,
   sessionAbsoluteTtlSeconds: 7200,
+  jwksUri: "https://auth.example.test/.well-known/jwks.json",
+  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
 };
 
 const DISCOVERY: OidcDiscovery = {
