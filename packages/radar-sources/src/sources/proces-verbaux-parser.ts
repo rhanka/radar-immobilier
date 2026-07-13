@@ -52,6 +52,34 @@ export type PvIndexItemT = z.infer<typeof PvIndexItem>;
 // Detection result
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * One habitation/densification segment surfaced by `scanHabitationSignals`.
+ *
+ * The whole PV is walked — every numbered agenda point AND every appended annexe —
+ * so a signal buried under a SECONDARY point (e.g. point 5.9) or in an annexe
+ * (e.g. ANNEXE L) is returned instead of stopping at the first match. Each entry
+ * is anchored to its locator and carries a verbatim citation (anti-invention: the
+ * citation is real bytes, the keywords are matched verbatim).
+ */
+export const PvHabitationSignal = z.object({
+  /**
+   * Where the segment sits in the document structure:
+   *  - "point"    — a numbered agenda point ("5.9", "37").
+   *  - "annexe"   — an appended annexe section ("L", "A-1").
+   *  - "document" — unlabelled body text before the first locator.
+   */
+  locator: z.enum(["point", "annexe", "document"]),
+  /** Verbatim locator label: the point number ("5.9"), the annexe letter ("L"), or "" for document-level. */
+  reference: z.string(),
+  /** ~240-char verbatim excerpt centred on the first habitation keyword hit in this segment. */
+  citation: z.string(),
+  /** Distinct habitation/densification keywords matched verbatim in this segment. */
+  keywords: z.array(z.string()),
+  /** Inline "annexe X" cross-references found inside this segment (e.g. point 5.9 → ["L"]). */
+  annexeRefs: z.array(z.string()),
+});
+export type PvHabitationSignalT = z.infer<typeof PvHabitationSignal>;
+
 /** Result of `detectZonageChange` applied to the plain text of one PV. */
 export const ZonageChangeDetection = z.object({
   /**
@@ -100,6 +128,18 @@ export const ZonageChangeDetection = z.object({
    * the motion.  Null when absent (anti-invention).
    */
   densiteAutorisee: z.string().nullable(),
+  /**
+   * FULL-DOCUMENT scan of every habitation/densification segment (numbered
+   * points + annexes), produced by `scanHabitationSignals`. This does NOT stop
+   * at the first "avis de motion": it surfaces every point/annexe that carries a
+   * habitation signal (zonage, logements, multilogement, densité, lotissement,
+   * dérogation, PPCMOI…), so a signal under a secondary point (5.9) or an annexe
+   * (L) is never lost. Empty array when nothing matches.
+   *
+   * Backward-compatible: defaults to `[]` so any object parsed without the field
+   * still validates.
+   */
+  habitationSegments: z.array(PvHabitationSignal).default([]),
 });
 export type ZonageChangeDetectionT = z.infer<typeof ZonageChangeDetection>;
 
@@ -850,6 +890,210 @@ function filterNewReglements(
  */
 const AVIS_MOTION_PAST_TENSE_RE = /avis\s+de\s+motion\s+a\s+[eé]t[eé]\s+donn[eé]/i;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Full-document habitation/densification scanner
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Numbered agenda-point locator, DOTTED form ("3.1", "5.9", "5.9.1").
+ *
+ * Matches a line-leading dotted number followed by whitespace or end-of-line.
+ * The first group is 1–3 digits (so a 4-digit resolution id / year like
+ * "2026-07-139" is never mistaken for a point). Multiline (`m`).
+ */
+const PV_POINT_DOTTED_LOCATOR_RE = /^[ \t]*(\d{1,3}(?:\.\d{1,3})+)\.?(?=[ \t]|$)/gm;
+
+/**
+ * Numbered agenda-point locator, INTEGER form ("37.", "5.").
+ *
+ * Requires the trailing period AND inline heading content, so a bare page number
+ * or lot count on its own line is never captured. Multiline (`m`).
+ */
+const PV_POINT_INT_LOCATOR_RE = /^[ \t]*(\d{1,3})\.(?=[ \t]+\S)/gm;
+
+/**
+ * Appended-annexe SECTION header locator ("ANNEXE L", "Annexe « L »", "Annexe A-1").
+ *
+ * Line-anchored on purpose: only a real annexe heading opens an annexe segment.
+ * Inline "à l'annexe L" references (captured separately as `annexeRefs`) must NOT
+ * steal the anchor from the point that cites them. Group 1 is the annexe label.
+ */
+const PV_ANNEXE_LOCATOR_RE = /^[ \t]*annexes?\s+«?\s*([A-Za-z](?:-?\d{1,3})?)\s*»?/gim;
+
+/**
+ * Inline "annexe X" cross-reference (NOT line-anchored). Used to attach the
+ * annexe(s) a point refers to (e.g. point 5.9 → ["L"]). Group 1 is the label.
+ */
+const PV_ANNEXE_INLINE_RE = /\bannexes?\s+«?\s*([A-Za-z](?:-?\d{1,3})?)\s*»?/gi;
+
+/**
+ * Habitation / densification keywords, high-recall by design.
+ *
+ * Steve's finding was a RECALL failure: the real residential-densification signal
+ * sat under a secondary point / annexe and was never surfaced. This pattern casts
+ * a wide net across the terms that flag a residential opportunity in Québec PVs —
+ * zonage, logements, multilogement, densité, lotissement, dérogation, PPCMOI,
+ * conditional uses, grille des usages — while the citation kept alongside each hit
+ * makes every match auditable (anti-invention: no fabrication, verbatim bytes).
+ */
+const HABITATION_KEYWORDS_RE = new RegExp(
+  [
+    // zonage / urbanisme
+    "zonage",
+    "r[eè]glement\\s+d['’]urbanisme",
+    "grille\\s+des?\\s+(?:usages|sp[eé]cifications)",
+    // logement / densité
+    "multi\\s*[-–]?\\s*logements?",
+    "logements?\\s+(?:multiples?|locatifs?|abordables?|sociaux)",
+    "\\d+\\s+logements?",
+    "logement\\s+multifamilial",
+    "densification",
+    "densit[eé]",
+    // typologies
+    "habitation\\s+(?:multifamiliale|bifamiliale|trifamiliale|collective)",
+    "(?:bi|tri|quadri|multi)familiale?",
+    "duplex",
+    "triplex",
+    "quadruplex",
+    "multiplex",
+    "maison\\s+de\\s+chambres",
+    // lotissement / subdivision
+    "lotissement",
+    "subdivision",
+    "morcellement",
+    // dérogation / PPCMOI / usages conditionnels
+    "d[eé]rogation\\s+mineure",
+    "ppcmoi",
+    "projet\\s+particulier\\s+de\\s+(?:construction|modification)",
+    "usage\\s+conditionnel",
+  ].join("|"),
+  "gi",
+);
+
+interface PvLocatorAnchor {
+  index: number;
+  locator: "point" | "annexe";
+  reference: string;
+}
+
+/**
+ * Scan the WHOLE plain text of a PV and return every habitation/densification
+ * segment, anchored to its numbered point or annexe, each with a verbatim
+ * citation. Unlike `detectZonageChange` (which only follows the "avis de motion →
+ * règlement de zonage" chain and effectively stops at that pattern), this walks
+ * the entire document so a signal buried under a secondary point (e.g. 5.9) or in
+ * an annexe (e.g. ANNEXE L) is surfaced instead of lost.
+ *
+ * Algorithm:
+ *   1. Collect every point/annexe locator anchor, sorted by position.
+ *   2. Find every verbatim habitation keyword hit.
+ *   3. Bind each hit to its enclosing anchor (the last anchor before the hit);
+ *      hits before any anchor are "document"-level.
+ *   4. Emit ONE segment per anchor that has ≥1 hit, carrying the distinct
+ *      keywords, a citation centred on the first hit, and any inline annexe
+ *      cross-references found within the segment's span.
+ *
+ * Pure + side-effect-free; never throws.
+ */
+export function scanHabitationSignals(pvText: string): PvHabitationSignalT[] {
+  if (!pvText) return [];
+
+  // 1. Collect anchors (points + annexe headers), sorted by index.
+  const anchors: PvLocatorAnchor[] = [];
+  const collect = (
+    re: RegExp,
+    locator: "point" | "annexe",
+    normalize: (s: string) => string = (s) => s,
+  ): void => {
+    for (const m of pvText.matchAll(new RegExp(re.source, re.flags))) {
+      if (m[1] != null && m.index != null) {
+        anchors.push({ index: m.index, locator, reference: normalize(m[1]) });
+      }
+    }
+  };
+  collect(PV_POINT_DOTTED_LOCATOR_RE, "point");
+  collect(PV_POINT_INT_LOCATOR_RE, "point");
+  collect(PV_ANNEXE_LOCATOR_RE, "annexe", (s) => s.toUpperCase());
+  anchors.sort((a, b) => a.index - b.index);
+
+  // Find the anchor enclosing a given text position (last anchor at/before it).
+  const anchorAt = (pos: number): PvLocatorAnchor | null => {
+    let found: PvLocatorAnchor | null = null;
+    for (const a of anchors) {
+      if (a.index <= pos) found = a;
+      else break;
+    }
+    return found;
+  };
+
+  // 2 + 3. Group habitation keyword hits by enclosing anchor.
+  interface Group {
+    anchor: PvLocatorAnchor | null;
+    firstHitIndex: number;
+    keywords: Map<string, string>; // lowercased → verbatim
+  }
+  const groups = new Map<number, Group>(); // key: anchor.index, -1 for document-level
+
+  for (const m of pvText.matchAll(new RegExp(HABITATION_KEYWORDS_RE.source, "gi"))) {
+    const term = m[0];
+    if (term == null || m.index == null) continue;
+    const anchor = anchorAt(m.index);
+    const key = anchor ? anchor.index : -1;
+    let group = groups.get(key);
+    if (!group) {
+      group = { anchor, firstHitIndex: m.index, keywords: new Map() };
+      groups.set(key, group);
+    }
+    const norm = term.replace(/\s+/g, " ").trim();
+    if (!group.keywords.has(norm.toLowerCase())) {
+      group.keywords.set(norm.toLowerCase(), norm);
+    }
+  }
+
+  // 4. Emit one segment per group, in document order.
+  const anchorEnd = (anchor: PvLocatorAnchor | null): number => {
+    if (!anchor) {
+      // Document-level span: up to the first anchor (or end of text).
+      return anchors.length > 0 && anchors[0] ? anchors[0].index : pvText.length;
+    }
+    const next = anchors.find((a) => a.index > anchor.index);
+    return next ? next.index : pvText.length;
+  };
+
+  const out: PvHabitationSignalT[] = [];
+  const ordered = Array.from(groups.values()).sort(
+    (a, b) => a.firstHitIndex - b.firstHitIndex,
+  );
+  for (const group of ordered) {
+    const start = group.anchor ? group.anchor.index : 0;
+    const end = anchorEnd(group.anchor);
+    const spanText = pvText.slice(start, end);
+
+    // Inline annexe cross-references found within the segment span.
+    const annexeRefs: string[] = [];
+    for (const am of spanText.matchAll(new RegExp(PV_ANNEXE_INLINE_RE.source, "gi"))) {
+      if (am[1]) {
+        const label = am[1].toUpperCase();
+        if (!annexeRefs.includes(label)) annexeRefs.push(label);
+      }
+    }
+    // Do not list the annexe's own header label as a self cross-reference.
+    const selfRef = group.anchor?.locator === "annexe" ? group.anchor.reference : null;
+
+    out.push(
+      PvHabitationSignal.parse({
+        locator: group.anchor?.locator ?? "document",
+        reference: group.anchor?.reference ?? "",
+        citation: trimExcerpt(pvText, group.firstHitIndex, 240),
+        keywords: Array.from(group.keywords.values()),
+        annexeRefs: annexeRefs.filter((r) => r !== selfRef),
+      }),
+    );
+  }
+
+  return out;
+}
+
 /**
  * Detect "avis de motion → changement de zonage" in the plain text of a PV.
  *
@@ -994,5 +1238,9 @@ export function detectZonageChange(pvText: string): ZonageChangeDetectionT {
     excerpts,
     zoneRefs: Array.from(new Set(allZoneRefs)),
     densiteAutorisee,
+    // Full-document scan (all points + annexes): does NOT stop at the first
+    // avis de motion, so a habitation signal under a secondary point (5.9) or an
+    // annexe (L) is surfaced instead of lost.
+    habitationSegments: scanHabitationSignals(pvText),
   });
 }
