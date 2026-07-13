@@ -117,6 +117,17 @@ export interface LotProperties {
     densiteLogHa: number | null;
     code?: string | null;
     grillePdfUrl?: string | null;
+    /**
+     * Provenance du règlement en vigueur qui porte la norme (zone de norme,
+     * servie par geo via `qc-zonage-norms-<slug>`). Valeurs RÉELLES — null
+     * quand la source ne les porte pas ; jamais devinées. La fiche affiche
+     * « Règl. {numero} ({millesime}) » + lien source, ou « Règlement non
+     * renseigné » quand le numéro est absent.
+     */
+    reglementNumero?: string | null;
+    reglementMillesime?: number | null;
+    reglementPageSource?: string | null;
+    reglementUrl?: string | null;
   } | null;
   /** Raw zone code/group from an OGC lot collection when present. */
   zoneCode?: string | null;
@@ -597,14 +608,55 @@ function normalizeZone(
     fallback.grillePdfUrl,
     fallback.grille_pdf_url,
   ]);
+  // Provenance du règlement porteur (zone de norme) — verbatim-or-null, jamais
+  // devinée. Numéro/URL en chaîne, millésime en nombre, page verbatim.
+  const reglementNumero = firstString([
+    record.reglementNumero,
+    record.reglement_numero,
+    fallback.reglementNumero,
+    fallback.reglement_numero,
+  ]);
+  const reglementMillesime = firstNumber([
+    record.reglementMillesime,
+    record.reglement_millesime,
+    fallback.reglementMillesime,
+    fallback.reglement_millesime,
+  ]);
+  const reglementPageSource = firstVerbatim([
+    record.reglementPageSource,
+    record.reglement_page_source,
+    fallback.reglementPageSource,
+    fallback.reglement_page_source,
+  ]);
+  const reglementUrl = firstString([
+    record.reglementUrl,
+    record.reglement_url,
+    fallback.reglementUrl,
+    fallback.reglement_url,
+  ]);
 
-  if (!kind && !code && densiteLogHa === null && rawUsages.length === 0 && !grillePdfUrl) return undefined;
+  if (
+    !kind &&
+    !code &&
+    densiteLogHa === null &&
+    rawUsages.length === 0 &&
+    !grillePdfUrl &&
+    !reglementNumero &&
+    reglementMillesime === null &&
+    !reglementPageSource &&
+    !reglementUrl
+  )
+    return undefined;
   return {
     kind: kind ?? "non précisé",
     usages: rawUsages.map(String),
     densiteLogHa,
     ...(code !== null ? { code } : {}),
     ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
+    ...(reglementNumero !== null ? { reglementNumero } : {}),
+    ...(reglementMillesime !== null ? { reglementMillesime } : {}),
+    ...(reglementPageSource !== null ? { reglementPageSource } : {}),
+    ...(reglementUrl !== null ? { reglementUrl } : {}),
   };
 }
 
