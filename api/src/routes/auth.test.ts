@@ -550,6 +550,9 @@ describe("protect middleware", () => {
     return app;
   }
 
+  // D4 (per-user auth): the graph-signals feed is NOT public — the MCP must
+  // present the user's own identity. Kept protected on purpose.
+
   it("is a no-op when auth is disabled", async () => {
     const app = appWith(AUTH_OFF);
     const res = await app.request("/api/protected");
@@ -586,13 +589,13 @@ describe("protect middleware", () => {
     expect(res.status).toBe(200);
   });
 
-  it("lets the public graph-signals feed through even when auth is enabled", async () => {
-    // Public municipal signal feed consumed server-side by the immo-mcp pod
-    // (search_signals, no session): see PUBLIC_PREFIXES comment in auth.ts (D12).
+  it("keeps /api/graph-signals PROTECTED (401 without session) — per-user auth, D4", async () => {
+    // NOT a public prefix: the MCP must serve signals under the real user
+    // identity (forwarded user bearer), never anonymously.
     const app = appWith(AUTH_ON);
     const res = await app.request("/api/graph-signals/mont-tremblant");
-    expect(res.status).toBe(200);
-    expect((await res.json()).ok).toBe(true);
+    expect(res.status).toBe(401);
+    expect((await res.json()).error).toBe("unauthenticated");
   });
 
   it("does NOT open sibling api routes beyond the public data prefixes", async () => {
