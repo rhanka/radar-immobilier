@@ -492,7 +492,7 @@ export function authRoute(
 /**
  * Path prefixes that stay public even when auth is enabled.
  *
- * The three data prefixes serve PUBLIC data by construction and are consumed
+ * The two data prefixes serve PUBLIC data by construction and are consumed
  * server-side by the immo-mcp pod (no browser session to present):
  *  - `/api/geo/collections` — OGC passthrough of public zonage/lots layers
  *    (collections qc-zonage-<ville> et qc-lots-<ville> only, anti-SSRF;
@@ -505,15 +505,14 @@ export function authRoute(
  *    sidecars, no traversal — see services/sources/document-resolver.ts).
  *    Public so the URL handed out by immo-mcp `get_pv_pdf` is fetchable by the
  *    MCP client, mirroring the geo-owned S3 archive direction.
- *  - `/api/graph-signals` — read-only feed of public municipal regulatory
- *    signals (Signal/DesignationEvent graph nodes) with citations into the
- *    already-public PV archive; anti-PII by construction (municipal regulation,
- *    not persons — see routes/graph-signals.ts + MASTER scoring/PII policy).
- *    Public so the in-cluster immo-mcp `search_signals` tool (a plain
- *    server-side fetch, no session) serves the SAME signals as the web app —
- *    consistency decision D12. NOTE: this also exposes the signal feed on the
- *    public origin; the alternative (a dedicated MCP service token) is deferred,
- *    consistent with the existing geo/documents public-prefix pattern.
+ *
+ * `/api/graph-signals` is DELIBERATELY NOT public: it stays session-protected
+ * so the MCP serves signals under the REAL, per-user identity (D4). The
+ * immo-mcp `search_signals` tool forwards the current user's own bearer token
+ * (see packages/immo-mcp/src/data-source.ts) rather than a shared machine
+ * credential — the per-user acceptance on THIS side (bearer validation in
+ * `protect`) is the remaining architect/IdP-gated step; until it lands the route
+ * returns 401 to an unauthenticated caller.
  */
 const PUBLIC_PREFIXES = [
   // k8s probes must be reachable WITHOUT auth: the (unauthenticated) kubelet
@@ -529,7 +528,6 @@ const PUBLIC_PREFIXES = [
   "/api/v1/auth/me",
   "/api/geo/collections",
   "/api/documents/raw",
-  "/api/graph-signals",
 ];
 
 function isPublicPath(path: string): boolean {
