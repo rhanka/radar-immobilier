@@ -31,6 +31,8 @@ import {
   isMulti4Plus,
   isPrecoceSignal,
   buildSubsetKey,
+  classifyResidentielPertinence,
+  isResidentielPertinent,
   ETAPE_ORDER,
   ETAPES_PRECOCES,
   type GraphifyNode,
@@ -1065,10 +1067,90 @@ describe("buildSubsetKey", () => {
   it('retourne "z" quand z seul', () => {
     expect(buildSubsetKey(true, false, false)).toBe("z");
   });
-  it('retourne "z|m|p" quand tous les flags', () => {
+  it('retourne "z|m|p" quand tous les flags {z,m,p}', () => {
     expect(buildSubsetKey(true, true, true)).toBe("z|m|p");
   });
   it('retourne "m|p" quand m et p', () => {
     expect(buildSubsetKey(false, true, true)).toBe("m|p");
+  });
+  // Axe `r` (4e flag optionnel — rétro-compat : r=false ≡ modèle {z,m,p}).
+  it('r=false (par défaut) ≡ clé {z,m,p} historique', () => {
+    expect(buildSubsetKey(true, true, true, false)).toBe("z|m|p");
+    expect(buildSubsetKey(false, false, false, false)).toBe("");
+  });
+  it('retourne "r" quand r seul', () => {
+    expect(buildSubsetKey(false, false, false, true)).toBe("r");
+  });
+  it('retourne "z|r" quand z et r', () => {
+    expect(buildSubsetKey(true, false, false, true)).toBe("z|r");
+  });
+  it('retourne "z|m|p|r" quand tous les 4 flags (ordre canonique z<m<p<r)', () => {
+    expect(buildSubsetKey(true, true, true, true)).toBe("z|m|p|r");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. Pertinence résidentielle — classifyResidentielPertinence / isResidentielPertinent
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("classifyResidentielPertinence", () => {
+  it("catégorie résidentielle → residentiel", () => {
+    expect(classifyResidentielPertinence("densification", null, null)).toBe("residentiel");
+    expect(classifyResidentielPertinence("logement_abordable", null, null)).toBe("residentiel");
+  });
+
+  it("marqueur texte résidentiel (label ou description) → residentiel", () => {
+    expect(classifyResidentielPertinence(null, "Rezonage résidentiel", null)).toBe("residentiel");
+    expect(classifyResidentielPertinence(null, null, "Projet d'habitation multifamiliale")).toBe("residentiel");
+    expect(classifyResidentielPertinence(null, "Densification du secteur", null)).toBe("residentiel");
+    expect(classifyResidentielPertinence(null, "Immeuble à logements de 12 unités", null)).toBe("residentiel");
+  });
+
+  it("marqueur non résidentiel explicite (industriel/commercial/camping/enviro) → non_residentiel", () => {
+    expect(classifyResidentielPertinence(null, "Agrandissement du parc industriel", null)).toBe("non_residentiel");
+    expect(classifyResidentielPertinence(null, "Nouvelle zone commerciale", null)).toBe("non_residentiel");
+    expect(classifyResidentielPertinence(null, "Projet de camping municipal", null)).toBe("non_residentiel");
+    expect(classifyResidentielPertinence(null, null, "Protection des milieux humides et zone inondable")).toBe("non_residentiel");
+    expect(classifyResidentielPertinence(null, "Exploitation agricole", null)).toBe("non_residentiel");
+  });
+
+  it("mixte (résidentiel ET non résidentiel) → residentiel (opportunité)", () => {
+    // Conversion « de commercial à résidentiel » ou usage mixte : reste pertinent.
+    expect(
+      classifyResidentielPertinence(null, "Rezonage de commercial à résidentiel", null),
+    ).toBe("residentiel");
+    expect(
+      classifyResidentielPertinence(null, "Zone d'usage mixte commercial et habitation", null),
+    ).toBe("residentiel");
+  });
+
+  it("aucun marqueur reconnu → indetermine (anti-invention, pas de faux négatif)", () => {
+    expect(classifyResidentielPertinence(null, "Avis de motion 2025-11", null)).toBe("indetermine");
+    expect(classifyResidentielPertinence(null, null, null)).toBe("indetermine");
+    expect(classifyResidentielPertinence("rezonage", "Modification du règlement", null)).toBe("indetermine");
+  });
+
+  it("« plex » borné : « complexe » ne matche PAS résidentiel", () => {
+    // \bplex\b protège contre « complexe sportif ».
+    expect(classifyResidentielPertinence(null, "Complexe sportif municipal", null)).toBe("indetermine");
+    expect(classifyResidentielPertinence(null, "Construction d'un triplex", null)).toBe("residentiel");
+  });
+});
+
+describe("isResidentielPertinent — prédicat de filtre (axe r)", () => {
+  it("résidentiel → true", () => {
+    expect(isResidentielPertinent("densification", null, null)).toBe(true);
+    expect(isResidentielPertinent(null, "Habitation multifamiliale", null)).toBe(true);
+  });
+
+  it("non résidentiel explicite → false", () => {
+    expect(isResidentielPertinent(null, "Parc industriel", null)).toBe(false);
+    expect(isResidentielPertinent(null, "Zone commerciale", null)).toBe(false);
+    expect(isResidentielPertinent(null, null, "Camping et milieux humides")).toBe(false);
+  });
+
+  it("indéterminé → true (conservé, anti-faux-négatif)", () => {
+    expect(isResidentielPertinent(null, "Avis de motion 2025-11", null)).toBe(true);
+    expect(isResidentielPertinent(null, null, null)).toBe(true);
   });
 });
