@@ -30,6 +30,9 @@
  *     ("grille" | "heuristique") — voir scoring/zone-allows-4plus.ts.
  *   - `zone.densiteLogHa` / `zone.usages` : valeurs RÉELLES de la source de
  *     zonage uniquement (null / [] quand absentes — jamais l'estimation).
+ *   - `zone.reglement{Numero,Millesime,PageSource,Url}` : provenance RÉELLE du
+ *     règlement porté par la zone de norme (`qc-zonage-norms-<slug>`) — chaque
+ *     champ null quand la source ne le porte pas ; jamais deviné.
  */
 
 import { normalizeZoneCode } from "./extract-refs.js";
@@ -75,6 +78,15 @@ export interface ZoneIndexEntry {
   usages: string[];
   /** Lien grille PDF si la source le porte (URL_GRILLE…) ; null sinon. */
   grillePdfUrl: string | null;
+  /**
+   * Provenance du règlement en vigueur qui porte la norme (zone de norme,
+   * `qc-zonage-norms-<slug>`). Valeurs RÉELLES — null quand la source ne les
+   * porte pas ; jamais fabriquées.
+   */
+  reglementNumero: string | null;
+  reglementMillesime: number | null;
+  reglementPageSource: string | null;
+  reglementUrl: string | null;
   /** Géométrie pour la jointure spatiale ; null si absente. */
   geometry: EnrichGeometry | null;
   /** Bbox pré-calculée de la géométrie ; null si géométrie absente. */
@@ -131,6 +143,16 @@ function firstNumber(values: readonly unknown[]): number | null {
       const parsed = Number(value);
       if (Number.isFinite(parsed)) return parsed;
     }
+  }
+  return null;
+}
+
+/** Valeur verbatim : chaîne non vide telle quelle, nombre fini rendu en chaîne. */
+function firstVerbatim(values: readonly unknown[]): string | null {
+  for (const value of values) {
+    const parsed = readString(value);
+    if (parsed !== null) return parsed;
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
   }
   return null;
 }
@@ -194,6 +216,51 @@ export function zoneGrillePdfUrl(
     props["URL_GRILLE"],
     props["url_grille"],
   ]);
+}
+
+/** Provenance du règlement portée par une zone de norme (grille). */
+export interface ZoneReglementProvenance {
+  /** Numéro de règlement (ex. "2008-102") ; null si non renseigné. */
+  numero: string | null;
+  /** Millésime du règlement (ex. 2008) ; null si absent. */
+  millesime: number | null;
+  /** Page source dans le PDF (verbatim) ; null si absente. */
+  pageSource: string | null;
+  /** Lien PDF source du règlement ; null si absent. */
+  url: string | null;
+}
+
+/**
+ * Provenance du règlement portée par les properties d'une zone (zone de norme,
+ * `qc-zonage-norms-<slug>`). Jamais inventée : chaque champ est null quand la
+ * source ne le porte pas. Source de vérité UNIQUE, réutilisée par l'index de
+ * jointure et par le payload lot servi au front.
+ */
+export function zoneReglementProvenance(
+  props: Record<string, unknown>,
+): ZoneReglementProvenance {
+  return {
+    numero: firstString([
+      props["reglementNumero"],
+      props["reglement_numero"],
+      props["REGLEMENT_NUMERO"],
+    ]),
+    millesime: firstNumber([
+      props["reglementMillesime"],
+      props["reglement_millesime"],
+      props["REGLEMENT_MILLESIME"],
+    ]),
+    pageSource: firstVerbatim([
+      props["reglementPageSource"],
+      props["reglement_page_source"],
+      props["REGLEMENT_PAGE_SOURCE"],
+    ]),
+    url: firstString([
+      props["reglementUrl"],
+      props["reglement_url"],
+      props["REGLEMENT_URL"],
+    ]),
+  };
 }
 
 /**
@@ -286,6 +353,7 @@ export function buildZoneIndex(fc: {
     const bbox = geometryBbox(geometry);
 
     const normes = zoneNormes(props);
+    const provenance = zoneReglementProvenance(props);
     const entry: ZoneIndexEntry = {
       code,
       codeNorm,
@@ -293,6 +361,10 @@ export function buildZoneIndex(fc: {
       densiteLogHa: normes.densiteLogHa,
       usages: normes.usages,
       grillePdfUrl: zoneGrillePdfUrl(props),
+      reglementNumero: provenance.numero,
+      reglementMillesime: provenance.millesime,
+      reglementPageSource: provenance.pageSource,
+      reglementUrl: provenance.url,
       geometry,
       bbox,
       bboxArea: bbox ? (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) : 0,
@@ -550,6 +622,10 @@ export function enrichLotFeatures(
         densiteLogHa: zone.densiteLogHa,
         usages: zone.usages,
         grillePdfUrl: zone.grillePdfUrl,
+        reglementNumero: zone.reglementNumero,
+        reglementMillesime: zone.reglementMillesime,
+        reglementPageSource: zone.reglementPageSource,
+        reglementUrl: zone.reglementUrl,
       };
       props["zoneJoin"] = zoneJoin;
       props["multifamilial4plus"] = derived.allows4Plus;

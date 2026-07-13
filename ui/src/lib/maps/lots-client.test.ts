@@ -658,3 +658,56 @@ describe("frontage_m — façade canonique servie par geo", () => {
     expect(estimated).toContain("(estimée)");
   });
 });
+
+// ── Provenance du règlement porteur (zone de norme) mappée sur zone{...} ───────
+
+describe("provenance du règlement (zone de norme) → zone{reglement*}", () => {
+  it("mappe l'objet zone servi par geo (snake_case) vers camelCase", async () => {
+    const res = await fetchSingleLot({
+      noLot: "R-1",
+      zone: {
+        code: "H-241",
+        kind: "H",
+        usages: [],
+        densiteLogHa: null,
+        grillePdfUrl: null,
+        reglement_numero: "2008-102",
+        reglement_millesime: 2008,
+        reglement_page_source: "12",
+        reglement_url: "https://ville.qc.ca/reglements/2008-102.pdf",
+      },
+    });
+    const zone = res.featureCollection.features[0].properties.zone;
+    expect(zone).toMatchObject({
+      reglementNumero: "2008-102",
+      reglementMillesime: 2008,
+      reglementPageSource: "12",
+      reglementUrl: "https://ville.qc.ca/reglements/2008-102.pdf",
+    });
+  });
+
+  it("provenance à plat sur les properties (fallback) → foldée dans zone", async () => {
+    const res = await fetchSingleLot({
+      noLot: "R-2",
+      zone_code: "H-9",
+      reglement_numero: "1926-26",
+      reglement_url: "https://x/1926-26.pdf",
+    });
+    const zone = res.featureCollection.features[0].properties.zone;
+    expect(zone).toMatchObject({
+      reglementNumero: "1926-26",
+      reglementUrl: "https://x/1926-26.pdf",
+    });
+    expect(zone?.reglementMillesime ?? null).toBeNull();
+  });
+
+  it("aucune provenance servie → aucun champ reglement* (anti-invention)", async () => {
+    const res = await fetchSingleLot({
+      noLot: "R-3",
+      zone: { code: "H-1", kind: "H", usages: [], densiteLogHa: null },
+    });
+    const zone = res.featureCollection.features[0].properties.zone;
+    expect(zone?.reglementNumero).toBeUndefined();
+    expect(zone?.reglementUrl).toBeUndefined();
+  });
+});

@@ -34,7 +34,11 @@
  *                     "I"|"P"|"A"|"CONS"|"REC"|"U"|"AUTRE"), densiteLogHa:
  *                     number|null (RÉELLE, null si la source zonage ne la porte
  *                     pas), usages: string[] (RÉELS, [] sinon), grillePdfUrl:
- *                     string|null }. Présent si et seulement si la zone est jointe.
+ *                     string|null, reglementNumero: string|null,
+ *                     reglementMillesime: number|null, reglementPageSource:
+ *                     string|null, reglementUrl: string|null (provenance RÉELLE
+ *                     du règlement porteur — zone de norme qc-zonage-norms-<slug> ;
+ *                     jamais devinée) }. Présent si et seulement si la zone est jointe.
  *   - `zoneCode`    — code de zone affiché de la zone jointe (ex. "H-241").
  *   - `zoneJoin`    — provenance de la jointure : "code" (code de zone explicite
  *                     porté par le lot) | "centroid" (centroïde du lot dans le
