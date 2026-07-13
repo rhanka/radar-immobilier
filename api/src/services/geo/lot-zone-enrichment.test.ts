@@ -9,6 +9,7 @@ import {
   buildZoneIndex,
   enrichLotFeatures,
   lotCentroid,
+  zoneReglementProvenance,
   type EnrichFeature,
 } from "./lot-zone-enrichment.js";
 
@@ -134,6 +135,75 @@ describe("buildZoneIndex", () => {
     });
     expect(index.byCodeNorm.get("H-500")!.densiteLogHa).toBe(65);
   });
+
+  it("lit la provenance du règlement (zone de norme) quand la source la porte", () => {
+    const index = buildZoneIndex({
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: {
+            zone_code: "H-600",
+            reglement_numero: "2008-102",
+            reglement_millesime: 2008,
+            reglement_page_source: "12",
+            reglement_url: "https://ville.qc.ca/reglements/2008-102.pdf",
+          },
+        },
+      ],
+    });
+    const zone = index.byCodeNorm.get("H-600")!;
+    expect(zone.reglementNumero).toBe("2008-102");
+    expect(zone.reglementMillesime).toBe(2008);
+    expect(zone.reglementPageSource).toBe("12");
+    expect(zone.reglementUrl).toBe("https://ville.qc.ca/reglements/2008-102.pdf");
+  });
+
+  it("provenance du règlement : chaque champ null quand la source ne le porte pas", () => {
+    const index = buildZoneIndex({
+      features: [
+        { type: "Feature", geometry: null, properties: { zone_code: "H-700" } },
+      ],
+    });
+    const zone = index.byCodeNorm.get("H-700")!;
+    expect(zone.reglementNumero).toBeNull();
+    expect(zone.reglementMillesime).toBeNull();
+    expect(zone.reglementPageSource).toBeNull();
+    expect(zone.reglementUrl).toBeNull();
+  });
+});
+
+// ─── zoneReglementProvenance (lecteur direct) ─────────────────────────────────
+
+describe("zoneReglementProvenance", () => {
+  it("lit les clés snake_case et camelCase (numéro sans millésime possible)", () => {
+    expect(
+      zoneReglementProvenance({
+        reglementNumero: "1926-26",
+        reglement_url: "https://x/1926-26.pdf",
+      }),
+    ).toEqual({
+      numero: "1926-26",
+      millesime: null,
+      pageSource: null,
+      url: "https://x/1926-26.pdf",
+    });
+  });
+
+  it("rend la page source verbatim (nombre → chaîne)", () => {
+    expect(zoneReglementProvenance({ reglement_page_source: 42 }).pageSource).toBe(
+      "42",
+    );
+  });
+
+  it("aucune clé de provenance → tout null (anti-invention)", () => {
+    expect(zoneReglementProvenance({ zone_code: "H-9" })).toEqual({
+      numero: null,
+      millesime: null,
+      pageSource: null,
+      url: null,
+    });
+  });
 });
 
 // ─── lotCentroid ──────────────────────────────────────────────────────────────
@@ -193,6 +263,10 @@ describe("enrichLotFeatures — jointure par centroïde (cas live : lot sans cod
       densiteLogHa: null,
       usages: [],
       grillePdfUrl: null,
+      reglementNumero: null,
+      reglementMillesime: null,
+      reglementPageSource: null,
+      reglementUrl: null,
     });
     expect(props["multifamilial4plus"]).toBe(true);
     expect(props["multifamilial4plusSource"]).toBe("heuristique");
@@ -237,6 +311,36 @@ describe("enrichLotFeatures — jointure par code explicite", () => {
     expect(stats.joinedByCode).toBe(1);
     expect(props["zoneJoin"]).toBe("code");
     expect(props["zoneCode"]).toBe("H-241");
+  });
+});
+
+describe("enrichLotFeatures — provenance du règlement propagée dans zone{...}", () => {
+  const index = buildZoneIndex({
+    features: [
+      {
+        type: "Feature",
+        geometry: square(-73.6, 45.3, -73.5, 45.4),
+        properties: {
+          zone_code: "H-241",
+          kind: "residential",
+          reglement_numero: "2008-102",
+          reglement_millesime: 2008,
+          reglement_url: "https://ville.qc.ca/reglements/2008-102.pdf",
+        },
+      },
+    ] as EnrichFeature[],
+  });
+
+  it("le payload zone lot porte la provenance réelle (numéro, millésime, url)", () => {
+    const lot = liveLot("4 000 001", square(-73.556, 45.349, -73.555, 45.35));
+    const { features } = enrichLotFeatures([lot], index);
+    const zone = features[0]!.properties!["zone"] as Record<string, unknown>;
+    expect(zone["reglementNumero"]).toBe("2008-102");
+    expect(zone["reglementMillesime"]).toBe(2008);
+    expect(zone["reglementPageSource"]).toBeNull();
+    expect(zone["reglementUrl"]).toBe(
+      "https://ville.qc.ca/reglements/2008-102.pdf",
+    );
   });
 });
 

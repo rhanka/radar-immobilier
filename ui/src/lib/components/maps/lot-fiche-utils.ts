@@ -213,6 +213,42 @@ export function lotZoneCode(
   return props.zoneCode ?? props.zone?.code ?? null;
 }
 
+// ── Provenance du règlement porteur de la norme (zone de norme) ────────────────
+
+/** Provenance affichable du règlement (texte + lien source optionnel). */
+export interface ReglementProvenanceDisplay {
+  /** Texte : « Règl. 2008-102 (2008) · p. 12 » ou « Règlement non renseigné ». */
+  text: string;
+  /** Lien PDF source quand présent ; null sinon (aucun lien rendu). */
+  url: string | null;
+}
+
+/**
+ * Provenance affichable du règlement en vigueur qui porte la norme de la zone
+ * jointe (zone de norme servie par geo). Contrat anti-invention :
+ *   - numéro présent → « Règl. {numero} » (+ « ({millesime}) » si le millésime
+ *     est non-null, + « · p. {page} » si la page source est non-null) ;
+ *   - numéro null → « Règlement non renseigné » (copy neutre — JAMAIS un numéro
+ *     deviné) ;
+ *   - `url` présent → lien source ouvrable ; `url` null → aucun lien.
+ * Retourne null quand aucune zone n'est jointe (pas de ligne de provenance).
+ */
+export function reglementProvenance(
+  zone: LotProperties["zone"] | null | undefined,
+): ReglementProvenanceDisplay | null {
+  if (!zone) return null;
+  const url = zone.reglementUrl ?? null;
+  const numero = zone.reglementNumero ?? null;
+  if (!numero) return { text: "Règlement non renseigné", url };
+
+  let text = `Règl. ${numero}`;
+  const millesime = zone.reglementMillesime;
+  if (millesime !== null && millesime !== undefined) text += ` (${millesime})`;
+  const page = zone.reglementPageSource ?? null;
+  if (page) text += ` · p. ${page}`;
+  return { text, url };
+}
+
 // ── Formatage partagé (LotFichePanel + carte lot du panneau Signaux) ───────────
 
 /** Superficie en m² arrondie, locale fr-CA ; « — » discret quand absente. */
