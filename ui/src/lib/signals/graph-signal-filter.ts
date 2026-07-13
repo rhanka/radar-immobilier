@@ -50,19 +50,6 @@ export function nodeIsZonage(node: GraphSignalNode): boolean {
   return etape !== null && ZONAGE_CATEGORIES_CLIENT.has(etape);
 }
 
-export function nodeIsMulti4(node: GraphSignalNode): boolean {
-  const nested = nodeProps(node);
-  const nbUnites = nested.nb_unites_max ?? nested.nbUnitesMax;
-  if (typeof nbUnites === "string") {
-    const parsed = parseFloat(nbUnites);
-    if (!isNaN(parsed) && parsed >= 4) return true;
-  }
-  if (typeof nbUnites === "number" && nbUnites >= 4) return true;
-  return (
-    typeof nested.intensite === "string" && nested.intensite === "haute"
-  );
-}
-
 // ── Pertinence résidentielle (axe `r`) ───────────────────────────────────────
 // Miroir CLIENT de classifyResidentielPertinence / isResidentielPertinent côté
 // API (graph-store.ts). Garder les DEUX listes de marqueurs synchronisées : la
@@ -117,11 +104,13 @@ export function nodeIsResidentielPertinent(node: GraphSignalNode): boolean {
  * `subsetKey` est une clé combinant les axes actifs :
  *   ""     → aucun filtre, tout passe
  *   "z"    → zonage uniquement
- *   "m"    → multifamilial 4+ uniquement
  *   "p"    → signaux précoces (heuristique légère, ne masque pas)
  *   "r"    → pertinence résidentielle (masque le bruit non résidentiel explicite)
- *   "z|m"  → intersection zonage ET multi4+
+ *   "z|p"  → intersection zonage ET signaux précoces (p reste non masquant)
  *   …etc.
+ *
+ * Les flags inconnus sont ignorés afin que d'anciennes clés persistées ne
+ * puissent pas réactiver un filtre retiré.
  */
 export function nodeMatchesSubset(
   node: GraphSignalNode,
@@ -130,7 +119,6 @@ export function nodeMatchesSubset(
   if (!subsetKey) return true;
   const flags = subsetKey.split("|");
   if (flags.includes("z") && !nodeIsZonage(node)) return false;
-  if (flags.includes("m") && !nodeIsMulti4(node)) return false;
   // "r" (pertinence résidentielle) — retire UNIQUEMENT le bruit explicitement
   // non résidentiel ; résidentiel + indéterminé passent (anti-faux-négatif).
   if (flags.includes("r") && !nodeIsResidentielPertinent(node)) return false;
