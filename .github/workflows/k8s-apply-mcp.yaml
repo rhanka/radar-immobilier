@@ -1,12 +1,25 @@
 # k8s-apply-mcp — one-shot manual deploy of the immo-mcp HTTP resources.
 #
-# Why a dedicated workflow: build-push-images.yml only does `kubectl set image`
-# on the EXISTING radar-api/radar-ui deployments — it never applies new
-# manifests. The immo-mcp Deployment/Service/Ingress (deploy/k8s/40-41) are
-# deliberately NOT in kustomization.yaml until the IdP handover completes
-# (see deploy/k8s/40-immo-mcp-http-deploy.yaml header). This workflow applies
-# exactly those files (plus the NetworkPolicy update) using the same
-# KUBE_CONFIG_DATA credential as the CD.
+# Why a dedicated workflow: the immo-mcp Deployment/Service/Ingress
+# (deploy/k8s/40-41) are deliberately NOT in kustomization.yaml until the IdP
+# handover completes (see deploy/k8s/40-immo-mcp-http-deploy.yaml header), so
+# they cannot go through the normal kustomize apply path. This workflow is
+# still the ONLY thing that (a) performs the FIRST bootstrap apply (before the
+# Deployment exists — build-push-images.yml's own config-durability step
+# skips itself until then), (b) applies 41-immo-mcp-ingress.yaml and the
+# NetworkPolicy update, which build-push-images.yml never touches, and
+# (c) forces a rollout restart + smoke check on demand, e.g. when only the
+# `:latest` image or the ConfigMap changed without a git-sha bump on
+# radar-api (a plain `kubectl apply` does not restart pods in that case).
+#
+# Since 2026-07 (fix/cd-immo-mcp-config-durable), build-push-images.yml's
+# `deploy` job ALSO re-applies 40-immo-mcp-http-deploy.yaml (ConfigMap +
+# Deployment only) on every push to `main`, once this workflow has bootstrapped
+# the Deployment at least once — so ordinary config drift (the original
+# incident: IMMO_MCP_DATA_MODE/RADAR_API_BASE_URL silently reverted) now
+# self-heals on the next `main` push instead of requiring this manual
+# dispatch. Run this workflow by hand for the initial bootstrap, for
+# ingress/networkpolicy changes, or to force an immediate restart.
 #
 # Trigger: manual only (workflow_dispatch).
 name: Apply immo-mcp manifests

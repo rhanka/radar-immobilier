@@ -23,8 +23,27 @@ name: Build & push images
 # mcp Deployment is absent, since 40/41 are applied out-of-band via
 # k8s-apply-mcp.yaml rather than kustomization.yaml).
 #
+# CONFIG DURABILITY (incident 2026-07-13): `kubectl set image` only patches the
+# image field — it never reasserts `deploy/k8s/40-immo-mcp-http-deploy.yaml`'s
+# ConfigMap (`IMMO_MCP_DATA_MODE`, `RADAR_API_BASE_URL`, …) or the Deployment's
+# `envFrom`. Previously the ONLY thing that ever re-applied that manifest was
+# the manual, human-triggered `k8s-apply-mcp.yaml` workflow, so any out-of-band
+# drift on the live ConfigMap/Deployment (e.g. a hand kubectl-edit, or a stale
+# apply) silently survived every ordinary push to `main` — exactly what caused
+# the pod to fall back to mock mode in prod. The `deploy` job below now also
+# runs `kubectl apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml` (guarded the
+# same way as the image roll: only once the Deployment already exists, i.e.
+# after the first manual bootstrap via k8s-apply-mcp.yaml) BEFORE the sha
+# set-image step, on every deploy — so config drift self-heals within one
+# `main` push instead of waiting for someone to remember the manual workflow.
+# Ordering matters: 40-immo-mcp-http-deploy.yaml pins the container to the
+# fixed `:latest` tag, so applying it AFTER the sha set-image would clobber the
+# just-pinned sha back to `:latest`; applying it BEFORE means the following
+# set-image step is always the last word on which image tag actually runs.
+#
 # To roll back or deploy by hand, the same commands still work with a full
 # kubeconfig:
+#   kubectl -n radar-immobilier apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
 #   kubectl -n radar-immobilier set image deploy/radar-api       api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
 #   kubectl -n radar-immobilier set image deploy/radar-ui        ui=rg.fr-par.scw.cloud/radar-immobilier/radar-ui:<sha>
 #   kubectl -n radar-immobilier set image deploy/radar-immo-mcp  mcp=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
@@ -145,6 +164,13 @@ jobs:
     env:
       NAMESPACE: radar-immobilier
     steps:
+      - name: Checkout
+        # Needed to `kubectl apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml`
+        # below (the config-durability step) — earlier steps here only ran
+        # `kubectl set image` by literal deployment/container name and never
+        # needed repo files.
+        uses: actions/checkout@v4
+
       - name: Short SHA
         id: vars
         # Same short-sha the build job tags with (GITHUB_SHA::7), so the deploy
@@ -170,6 +196,23 @@ jobs:
           chmod 600 "$HOME/.kube/config"
           # Scoped SA can read deployments in this namespace; fail fast if not.
           kubectl -n "$NAMESPACE" get deploy radar-api radar-ui >/dev/null
+
+      - name: Apply immo-mcp declarative config
+        # MUST run before "Roll deployments to pushed sha": see the file header
+        # ("CONFIG DURABILITY") for why the ordering (apply, then set-image)
+        # keeps the config in sync WITHOUT clobbering the sha this run just
+        # pushed. Guarded exactly like the mcp set-image step below — 40 is
+        # deliberately not in kustomization.yaml yet (IdP cadrage gap), so this
+        # only re-syncs an already-bootstrapped Deployment; it never performs
+        # the first go-live (that stays a deliberate manual
+        # k8s-apply-mcp.yaml dispatch).
+        run: |
+          set -eu
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
+          else
+            echo "radar-immo-mcp Deployment absent — skipping immo-mcp config apply"
+          fi
 
       - name: Roll deployments to pushed sha
         env:
