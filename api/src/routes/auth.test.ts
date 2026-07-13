@@ -546,6 +546,7 @@ describe("protect middleware", () => {
     app.get("/api/protected", (c) => c.json({ secret: true }));
     app.get("/api/geo/collections/:id/items", (c) => c.json({ type: "FeatureCollection" }));
     app.get("/api/documents/raw", (c) => c.json({ ok: true }));
+    app.get("/api/graph-signals/:city", (c) => c.json({ ok: true, nodes: [] }));
     return app;
   }
 
@@ -585,7 +586,16 @@ describe("protect middleware", () => {
     expect(res.status).toBe(200);
   });
 
-  it("does NOT open sibling api routes beyond the two public data prefixes", async () => {
+  it("lets the public graph-signals feed through even when auth is enabled", async () => {
+    // Public municipal signal feed consumed server-side by the immo-mcp pod
+    // (search_signals, no session): see PUBLIC_PREFIXES comment in auth.ts (D12).
+    const app = appWith(AUTH_ON);
+    const res = await app.request("/api/graph-signals/mont-tremblant");
+    expect(res.status).toBe(200);
+    expect((await res.json()).ok).toBe(true);
+  });
+
+  it("does NOT open sibling api routes beyond the public data prefixes", async () => {
     const app = appWith(AUTH_ON);
     // Prefix matching is segment-exact: neither /api/geo nor /api/documents root.
     expect((await app.request("/api/protected")).status).toBe(401);
