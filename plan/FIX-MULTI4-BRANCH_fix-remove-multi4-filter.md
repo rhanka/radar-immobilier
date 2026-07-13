@@ -61,6 +61,6 @@ axes and restrictive server-provided subset counts.
   - [x] Lot gate: `make lint ENV=test-remove-multi4-filter` and `make test-ui ENV=test-remove-multi4-filter`.
 
 - [ ] **Lot 2 — Publish**
-  - [ ] Commit only scoped files with the repository identity.
-  - [ ] Push `fix/remove-multi4-filter` and open a PR targeting `main`.
+  - [x] Commit only scoped files with the repository identity.
+  - [x] Push `fix/remove-multi4-filter` and open PR #373 targeting `main`.
   - [ ] Verify CI status where available; do not merge.
