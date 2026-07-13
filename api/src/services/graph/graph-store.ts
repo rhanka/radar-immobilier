@@ -1167,21 +1167,139 @@ export function isMulti4Plus(
   return false;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PERTINENCE RÉSIDENTIELLE — filtre de bruit non-résidentiel (I2 / S2)
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Les 8 clés de sous-ensemble possibles pour {z, m, p}.
- * Ordre canonique : z < m < p (flags triés).
+ * Classification de la pertinence « densification résidentielle » d'un signal.
+ *
+ * Retour métier (Steve) : ~4 villes sur 30 sont du BRUIT PUR pour un développeur
+ * résidentiel (parc industriel, zone commerciale, camping, milieux humides /
+ * zones inondables / environnemental). On étiquette donc chaque signal pour
+ * pouvoir MASQUER ce bruit sans perdre les signaux réels.
+ *
+ *   - `residentiel`     : marqueur résidentiel/densification explicite.
+ *   - `non_residentiel` : marqueur non-résidentiel explicite ET aucun marqueur
+ *                         résidentiel (mixte = opportunité → reste résidentiel).
+ *   - `indetermine`     : aucun marqueur reconnu → dans le DOUTE on NE tranche
+ *                         PAS (anti-invention, pas de faux négatif silencieux).
+ */
+export type ResidentielPertinence = "residentiel" | "non_residentiel" | "indetermine";
+
+/**
+ * Catégories (props.properties.category / etape annotée) intrinsèquement
+ * résidentielles. Élargir ce tableau suffit à ajuster la classification.
+ */
+export const RESIDENTIEL_CATEGORIES: readonly string[] = [
+  "densification",
+  "developpement_residentiel",
+  "logement",
+  "logement_abordable",
+  "habitation",
+];
+const RESIDENTIEL_CATEGORIES_SET = new Set(RESIDENTIEL_CATEGORIES);
+
+/**
+ * Marqueurs TEXTE résidentiels (label + description, normalisés minuscule sans
+ * accents). Verbatim, haute précision — pas de mot ambigu (« maison » nu exclu :
+ * « maison de la culture » n'est pas de l'habitation ; « plex » borné par \b
+ * pour ne pas matcher « complexe »).
+ */
+const RESIDENTIEL_MARKERS_RE =
+  /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement|multi-logement|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densification|duplex|triplex|quadruplex|plex|condominium|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte)\b/;
+
+/**
+ * Marqueurs TEXTE non-résidentiels (bruit pour un développeur résidentiel). Ne
+ * tranchent `non_residentiel` QUE si AUCUN marqueur résidentiel n'est présent
+ * (un rezonage « de commercial à résidentiel » ou un usage mixte reste une
+ * opportunité). `agricole` est inclus mais protégé par la même règle : une
+ * exclusion CPTAQ « à des fins résidentielles » porte le marqueur résidentiel.
+ */
+const NON_RESIDENTIEL_MARKERS_RE =
+  /\b(?:industriel(?:le)?s?|parc industriel|zone industrielle|commercial(?:e)?s?|centre commercial|camping|agricole|exploitation agricole|terres? agricoles?|environnement(?:al(?:e)?)?|milieux? humides?|zone inondable|plaine inondable|inondable|conservation|bande riveraine|riveraine|eolien(?:ne)?s?|minier(?:e)?s?|carriere|graviere|sabliere|entreposage|entrepot|stationnement)\b/;
+
+/** Normalise un texte : minuscule + suppression des accents (é→e, è→e…). */
+function foldText(raw: string): string {
+  return raw
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
+/**
+ * Classifie la pertinence résidentielle d'un signal à partir de sa catégorie et
+ * de son texte libre (label + description). Priorité au résidentiel (le mixte et
+ * les conversions « X → résidentiel » sont des opportunités). Défaut prudent :
+ * `indetermine` — jamais un faux `non_residentiel` silencieux.
+ */
+export function classifyResidentielPertinence(
+  category: string | null | undefined,
+  label: string | null | undefined,
+  description: string | null | undefined,
+): ResidentielPertinence {
+  if (category && RESIDENTIEL_CATEGORIES_SET.has(category)) return "residentiel";
+  const text = foldText(`${label ?? ""} ${description ?? ""}`);
+  if (RESIDENTIEL_MARKERS_RE.test(text)) return "residentiel";
+  if (NON_RESIDENTIEL_MARKERS_RE.test(text)) return "non_residentiel";
+  return "indetermine";
+}
+
+/**
+ * Prédicat du FILTRE de pertinence résidentielle (axe `r`).
+ *
+ * Anti-faux-négatif : le filtre ne retire QUE le bruit EXPLICITEMENT non
+ * résidentiel. Un signal `residentiel` OU `indetermine` PASSE (on ne masque
+ * jamais un signal dans le doute) ; seul `non_residentiel` est écarté.
+ */
+export function isResidentielPertinent(
+  category: string | null | undefined,
+  label: string | null | undefined,
+  description: string | null | undefined,
+): boolean {
+  return classifyResidentielPertinence(category, label, description) !== "non_residentiel";
+}
+
+/**
+ * Les 16 clés de sous-ensemble possibles pour {z, m, p, r}.
+ * Ordre canonique : z < m < p < r (flags triés).
  * Valeur = nb de signaux satisfaisant TOUS les flags de la clé (intersection exacte).
  */
-export type SubsetKey = "" | "z" | "m" | "p" | "z|m" | "z|p" | "m|p" | "z|m|p";
+export type SubsetKey =
+  | ""
+  | "z" | "m" | "p" | "r"
+  | "z|m" | "z|p" | "z|r" | "m|p" | "m|r" | "p|r"
+  | "z|m|p" | "z|m|r" | "z|p|r" | "m|p|r"
+  | "z|m|p|r";
 
-/** Construit la clé de sous-ensemble à partir d'un ensemble de flags actifs. */
-export function buildSubsetKey(z: boolean, m: boolean, p: boolean): SubsetKey {
+/**
+ * Construit la clé de sous-ensemble à partir des flags actifs.
+ *
+ * `r` (pertinence résidentielle) est un 4e axe OPTIONNEL : quand il vaut `false`
+ * la sortie est identique au modèle {z,m,p} historique (rétro-compatibilité des
+ * appelants à 3 arguments et des clés déjà persistées en URL/localStorage).
+ */
+export function buildSubsetKey(z: boolean, m: boolean, p: boolean, r = false): SubsetKey {
   const parts: string[] = [];
   if (z) parts.push("z");
   if (m) parts.push("m");
   if (p) parts.push("p");
+  if (r) parts.push("r");
   return parts.join("|") as SubsetKey;
 }
+
+/**
+ * Les 16 combinaisons de flags {z,m,p,r} (bitmask) — source unique pour
+ * `emptySubsetCounts` et l'accumulation par ville (évite les typos d'un tableau
+ * littéral de 16 lignes).
+ */
+const SUBSET_FLAG_COMBOS: ReadonlyArray<[boolean, boolean, boolean, boolean]> =
+  Array.from({ length: 16 }, (_unused, mask) => [
+    (mask & 1) !== 0,
+    (mask & 2) !== 0,
+    (mask & 4) !== 0,
+    (mask & 8) !== 0,
+  ]);
 
 /**
  * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
@@ -1204,14 +1322,17 @@ export function isPrecoceSignal(
  *
  * Each city entry includes:
  *   - signalCount  : total count (all signals, all flags)
- *   - subsetCounts : exact intersection counts for each subset of {z, m, p} flags.
- *                    Keys: "", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"
+ *   - subsetCounts : exact intersection counts for each subset of {z, m, p, r} flags.
+ *                    Keys: "", "z", "m", "p", "r", "z|m", … up to "z|m|p|r" (16 keys).
  *                    Value = nb signals satisfying ALL flags in the key.
  *                    isZonage (z) = DesignationEvent OR (Signal + category ∈ ZONAGE_CATEGORIES)
  *                    isMulti4 (m) = nb_unites_max ≥ 4 OR intensite = 'haute'
  *                    isPrecoce (p) = etape ∈ {avis_motion, projet_reglement}
  *                      (prefers props->'properties'->>'etape' annotation when present,
  *                       falls back to deriveEtape heuristic)
+ *                    isResidentielPertinent (r) = NOT explicitly non-residential
+ *                      (keeps residential + indeterminate; drops industriel/
+ *                       commercial/camping/environnemental noise — anti-false-negative)
  */
 export async function listCitiesWithSignalNodes(
   db: Database,
@@ -1241,9 +1362,11 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  /** Initialise un subsetCounts vide pour une ville. */
+  /** Initialise un subsetCounts vide pour une ville (16 clés {z,m,p,r}). */
   function emptySubsetCounts(): Record<SubsetKey, number> {
-    return { "": 0, "z": 0, "m": 0, "p": 0, "z|m": 0, "z|p": 0, "m|p": 0, "z|m|p": 0 };
+    const out = {} as Record<SubsetKey, number>;
+    for (const [z, m, p, r] of SUBSET_FLAG_COMBOS) out[buildSubsetKey(z, m, p, r)] = 0;
+    return out;
   }
 
   // Aggregate into per-city entries in application code.
@@ -1270,21 +1393,16 @@ export async function listCitiesWithSignalNodes(
     const z = isZonageSignal(row.type, row.category, row.etapeAnnote);
     const m = isMulti4Plus(row.type, row.nbUnitesMax, row.intensite);
     const p = isPrecoceSignal(row.etapeAnnote, row.label, row.description);
+    // r — pertinence résidentielle : true SAUF bruit explicitement non résidentiel
+    // (category ou etape sert de repli de catégorie ; label+description en texte).
+    const r = isResidentielPertinent(row.category ?? row.etapeAnnote, row.label, row.description);
 
     // Incrémente TOUS les sous-ensembles dont les flags sont satisfaits par ce signal.
-    // Un signal avec (z=true, m=false, p=true) contribue à : "", "z", "p", "z|p"
-    for (const [kZ, kM, kP] of [
-      [false, false, false],
-      [true,  false, false],
-      [false, true,  false],
-      [false, false, true ],
-      [true,  true,  false],
-      [true,  false, true ],
-      [false, true,  true ],
-      [true,  true,  true ],
-    ] as [boolean, boolean, boolean][]) {
-      if ((!kZ || z) && (!kM || m) && (!kP || p)) {
-        const key = buildSubsetKey(kZ, kM, kP);
+    // Un signal avec (z=true, m=false, p=true, r=true) contribue à :
+    // "", "z", "p", "r", "z|p", "z|r", "p|r", "z|p|r".
+    for (const [kZ, kM, kP, kR] of SUBSET_FLAG_COMBOS) {
+      if ((!kZ || z) && (!kM || m) && (!kP || p) && (!kR || r)) {
+        const key = buildSubsetKey(kZ, kM, kP, kR);
         entry.subsetCounts[key] += 1;
       }
     }
