@@ -2,8 +2,8 @@
  * QA léger — SignauxRail : état initial des filtres et callbacks onFilterChange.
  *
  * Vérifie :
- *   1. Par défaut (initialSubsetKey="z|m|p"), les 3 checkboxes sont cochées.
- *   2. Avec initialSubsetKey="", les 3 checkboxes sont décochées.
+ *   1. Par défaut (initialSubsetKey="z|p"), Zonage et Précoce sont cochées.
+ *   2. Avec initialSubsetKey="", les 3 axes visibles sont décochés.
  *   3. Avec initialSubsetKey="z", seul Zonage est coché.
  *   4. onFilterChange N'EST PAS appelé au montage (post-#283 : pas de
  *      ré-émission de la clé restaurée → pas d'écrasement du filtre au reload).
@@ -18,7 +18,7 @@ import type { CityMapEntry } from "$lib/maps/maps-data.js";
 
 afterEach(() => cleanup());
 
-function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) => void) {
+function renderRail(initialSubsetKey = "z|p", onFilterChange?: (key: string) => void) {
   return render(SignauxRail, {
     props: {
       entries: [],
@@ -29,56 +29,61 @@ function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) =
 }
 
 /**
- * Récupère les 3 checkboxes de filtre dans l'ordre attendu : [zonage, multi4, précoce].
- * getByLabelText avec "Multifamilial 4+" échoue à cause du "+" interprété comme
- * modificateur regex. On utilise getAllByRole("checkbox") à la place.
+ * Récupère les 3 axes visibles dans l'ordre attendu : [zonage, précoce,
+ * résidentiel].
  */
 function getFilterCheckboxes(container: HTMLElement): [HTMLInputElement, HTMLInputElement, HTMLInputElement] {
   const checkboxes = getAllByRole(container, "checkbox") as HTMLInputElement[];
-  // Les 3 checkboxes de filtre sont les 3 premières dans le rail (zonage, multi4, précoce).
+  // Les 3 checkboxes de filtre sont les 3 premières dans le rail.
   return [checkboxes[0], checkboxes[1], checkboxes[2]];
 }
 
 describe("SignauxRail — état initial des filtres", () => {
-  it("initialSubsetKey=z|m|p → les 3 checkboxes sont cochées par défaut", () => {
-    const { container } = renderRail("z|m|p");
-    const [zonage, multi, precoce] = getFilterCheckboxes(container);
+  it("initialSubsetKey=z|p → Zonage et Précoce sont cochées", () => {
+    const { container } = renderRail("z|p");
+    const [zonage, precoce, residentiel] = getFilterCheckboxes(container);
     expect(zonage.checked).toBe(true);
-    expect(multi.checked).toBe(true);
     expect(precoce.checked).toBe(true);
+    expect(residentiel.checked).toBe(false);
   });
 
-  it("initialSubsetKey='' → les 3 checkboxes sont décochées", () => {
+  it("initialSubsetKey='' → les 3 axes visibles sont décochés", () => {
     const { container } = renderRail("");
-    const [zonage, multi, precoce] = getFilterCheckboxes(container);
+    const [zonage, precoce, residentiel] = getFilterCheckboxes(container);
     expect(zonage.checked).toBe(false);
-    expect(multi.checked).toBe(false);
     expect(precoce.checked).toBe(false);
+    expect(residentiel.checked).toBe(false);
   });
 
   it("initialSubsetKey='z' → seul Zonage est coché", () => {
     const { container } = renderRail("z");
-    const [zonage, multi, precoce] = getFilterCheckboxes(container);
+    const [zonage, precoce, residentiel] = getFilterCheckboxes(container);
     expect(zonage.checked).toBe(true);
-    expect(multi.checked).toBe(false);
     expect(precoce.checked).toBe(false);
+    expect(residentiel.checked).toBe(false);
   });
 
-  it("initialSubsetKey='z|m' → Zonage et Multi sont cochés, Précoces non", () => {
+  it("initialSubsetKey='z|m' → l’ancien axe est ignoré", () => {
     const { container } = renderRail("z|m");
-    const [zonage, multi, precoce] = getFilterCheckboxes(container);
+    const [zonage, precoce, residentiel] = getFilterCheckboxes(container);
     expect(zonage.checked).toBe(true);
-    expect(multi.checked).toBe(true);
     expect(precoce.checked).toBe(false);
+    expect(residentiel.checked).toBe(false);
   });
 
-  it("onFilterChange N'EST PAS appelé au montage (clé restaurée z|m|p non ré-émise)", () => {
+  it("le panneau n’expose plus le filtre Multifamilial 4+", () => {
+    const { container } = renderRail();
+    expect(container.textContent).not.toContain("Multifamilial 4+");
+    expect(getFilterCheckboxes(container)).toHaveLength(3);
+  });
+
+  it("onFilterChange N'EST PAS appelé au montage (clé restaurée z|p non ré-émise)", () => {
     // Contrat post-#283 : au mount, le composant NE propage PLUS la clé active.
     // Ré-émettre `initialSubsetKey` écraserait le filtre que le parent vient de
     // restaurer (URL > localStorage), d'où la perte du filtre au reload/Ctrl+R.
     // La propagation ne doit venir QUE d'un toggle utilisateur (cf. bloc suivant).
     const spy = vi.fn();
-    renderRail("z|m|p", spy);
+    renderRail("z|p", spy);
     expect(spy).not.toHaveBeenCalled();
   });
 
@@ -93,7 +98,7 @@ describe("SignauxRail — état initial des filtres", () => {
 describe("SignauxRail — toggle filtre", () => {
   it("décocher Zonage → onFilterChange appelé avec clé sans 'z'", async () => {
     const calls: string[] = [];
-    const { container } = renderRail("z|m|p", (key) => calls.push(key));
+    const { container } = renderRail("z|p", (key) => calls.push(key));
 
     const [zonageCheckbox] = getFilterCheckboxes(container);
     expect(zonageCheckbox.checked).toBe(true);
@@ -103,8 +108,7 @@ describe("SignauxRail — toggle filtre", () => {
     // Le dernier appel doit ne pas contenir "z"
     const lastCall = calls[calls.length - 1];
     expect(lastCall).not.toContain("z");
-    // Mais doit encore contenir m et p
-    expect(lastCall).toContain("m");
+    // Mais doit encore contenir p
     expect(lastCall).toContain("p");
   });
 
@@ -121,16 +125,46 @@ describe("SignauxRail — toggle filtre", () => {
     expect(lastCall).not.toContain("p");
   });
 
-  it("décocher Multi → onFilterChange appelé sans 'm'", async () => {
+  it("décocher Précoce → onFilterChange appelé sans 'p' ni 'm'", async () => {
     const calls: string[] = [];
-    const { container } = renderRail("z|m|p", (key) => calls.push(key));
+    const { container } = renderRail("z|p", (key) => calls.push(key));
 
-    const [, multiCheckbox] = getFilterCheckboxes(container);
-    await fireEvent.click(multiCheckbox);
+    const [, precoceCheckbox] = getFilterCheckboxes(container);
+    await fireEvent.click(precoceCheckbox);
 
     const lastCall = calls[calls.length - 1];
-    expect(lastCall).not.toContain("m");
+    expect(lastCall).not.toContain("p");
     expect(lastCall).toContain("z");
+  });
+});
+
+describe("SignauxRail — compteurs restrictifs", () => {
+  it("compte Signaux précoces avec la clé exacte z|p", () => {
+    const entry: CityMapEntry = {
+      municipality: {
+        slug: "valleyfield",
+        name: "Valleyfield",
+        mrc: "MRC-Test",
+      } as CityMapEntry["municipality"],
+      signalCount6m: 99,
+      subsetCounts: {
+        "": 99,
+        z: 7,
+        p: 11,
+        "z|p": 2,
+      },
+    };
+
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [entry],
+        initialSubsetKey: "z|p",
+      },
+    });
+
+    expect(container.textContent).toMatch(/2\s+signaux/);
+    expect(container.textContent).not.toMatch(/7\s+signaux/);
+    expect(container.textContent).not.toMatch(/11\s+signaux/);
   });
 });
 
@@ -141,7 +175,7 @@ describe("SignauxRail — toggle filtre", () => {
 /** Fixture minimale CityMapEntry — seuls slug/name/mrc + subsetCounts comptent ici. */
 function cityEntry(slug: string, name: string, mrc: string, count: number): CityMapEntry {
   const subsetCounts: Record<string, number> = {};
-  for (const key of ["", "z", "m", "p", "z|m", "z|p", "m|p", "z|m|p"]) {
+  for (const key of ["", "z", "p", "r", "z|p", "z|r", "p|r", "z|p|r"]) {
     subsetCounts[key] = count;
   }
   return {
@@ -165,7 +199,7 @@ function renderRailWithCities(selectedSlug: string | null, onSelectCity?: (e: Ci
         cityEntry("beauharnois", "Beauharnois", "MRC-Test-B", 3),
       ],
       selectedSlug,
-      initialSubsetKey: "z|m|p",
+      initialSubsetKey: "z|p",
       onSelectCity: onSelectCity ?? (() => {}),
     },
   });
