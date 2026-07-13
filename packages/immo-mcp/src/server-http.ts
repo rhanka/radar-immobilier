@@ -101,7 +101,7 @@ function asStringArray(value: unknown): string[] | null {
  */
 export function authContextFromMcp(
   mcpAuth: McpAuthContext,
-  opts: { audience: string; dataMode: "real" | "simulation" },
+  opts: { audience: string; dataMode: "real" | "simulation"; accessToken?: string | undefined },
 ): ImmoMcpAuthContext {
   const claims: AccessTokenClaims = mcpAuth.claims;
   const ctx: ImmoMcpAuthContext = {
@@ -116,7 +116,17 @@ export function authContextFromMcp(
   };
   const orgId = claims["org_id"];
   if (typeof orgId === "string") ctx.orgId = orgId;
+  // Carry the RAW verified user token so a data source can act PER-USER (D4):
+  // forward the user's own bearer to the radar API instead of a machine cred.
+  if (opts.accessToken) ctx.accessToken = opts.accessToken;
   return ctx;
+}
+
+/** Extract the raw bearer token from an `Authorization: Bearer <token>` header. */
+export function extractBearerToken(header: string | undefined | null): string | undefined {
+  if (!header) return undefined;
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  return match ? match[1]!.trim() : undefined;
 }
 
 function buildHttpScopedServer(
@@ -203,9 +213,16 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     // No session yet: only a POST (the `initialize` request) may open one.
     if (c.req.method !== "POST") return jsonRpcError(c, 400, "Missing mcp-session-id header");
 
+    // Capture the RAW verified bearer so tools can act PER-USER (D4). The MCP
+    // resource server already verified it on THIS request; we only pass it
+    // through to the data source (which forwards it to the radar API). NOTE:
+    // captured at session `initialize` time and reused for the session's tools —
+    // a token that expires mid-session would need a fresh session (documented
+    // limitation of the per-session auth model).
     const auth = authContextFromMcp(getMcpAuthContext(c), {
       audience: config.resource,
       dataMode: data.mode === "http" ? "real" : "simulation",
+      accessToken: extractBearerToken(c.req.header("authorization")),
     });
     const server = buildHttpScopedServer(auth, data, raw);
     const transport = new WebStandardStreamableHTTPServerTransport({
