@@ -6,11 +6,10 @@
    * RailCityList — mutualisées avec la vue Sources/Couverture) :
    *   1. Section « Signaux » (ouverte par défaut) :
    *      - Toggle « Zonage uniquement » (DÉFAUT ON) — filtre PRIMAIRE
-   *      - Toggle « Multifamilial 4+ » (DÉFAUT OFF) — axe DIMENSION
    *      - Toggle « Signaux précoces » (DÉFAUT OFF) — axe ANTICIPATION
    *      - Toggle « Résidentiel pertinent » (DÉFAUT OFF) — axe PERTINENCE
    *        (masque le bruit non résidentiel ; garde résidentiel + indéterminé)
-   *      Les quatre toggles sont COMBINABLES ; la base de comptage est
+   *      Les trois toggles sont COMBINABLES ; la base de comptage est
    *      l'intersection des filtres actifs.
    *   2. Section « Villes » : recherche + liste PLATE sélectionnable → flyTo.
    *      Cliquer une ville la sélectionne (highlight + ville active) ; ses
@@ -46,7 +45,7 @@
   export let dataUnavailable = false;
 
   /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
-  export let initialSubsetKey = "z|m|p";
+  export let initialSubsetKey = "z|p";
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
@@ -74,12 +73,6 @@
   let zonageOnly = initialSubsetKey.includes("z");
 
   /**
-   * Multifamilial 4+ (DÉFAUT OFF — axe DIMENSION) :
-   *   filtre sur la clé "m" de subsetCounts
-   */
-  let multi4plus = initialSubsetKey.includes("m");
-
-  /**
    * Signaux précoces (DÉFAUT OFF — axe ANTICIPATION) :
    *   filtre sur la clé "p" de subsetCounts
    */
@@ -105,16 +98,14 @@
   $: if (initialSubsetKey !== appliedInitialKey) {
     appliedInitialKey = initialSubsetKey;
     zonageOnly = initialSubsetKey.includes("z");
-    multi4plus = initialSubsetKey.includes("m");
     precoceOnly = initialSubsetKey.includes("p");
     residentielOnly = initialSubsetKey.includes("r");
   }
 
-  /** Construit la clé subsetCounts à partir des 4 flags — fonction PURE. */
-  function buildKey(z: boolean, m: boolean, p: boolean, r: boolean): string {
+  /** Construit la clé subsetCounts à partir des axes sélectionnables. */
+  function buildKey(z: boolean, p: boolean, r: boolean): string {
     const parts: string[] = [];
     if (z) parts.push("z");
-    if (m) parts.push("m");
     if (p) parts.push("p");
     if (r) parts.push("r");
     return parts.join("|");
@@ -126,19 +117,14 @@
    * toggles « cachés » dans son corps → Svelte ne voyait aucune dépendance,
    * donc les $: total/villes/tri/filtre ne re-tournaient jamais.)
    */
-  $: activeKey = buildKey(zonageOnly, multi4plus, precoceOnly, residentielOnly);
+  $: activeKey = buildKey(zonageOnly, precoceOnly, residentielOnly);
 
   function emitFilterChange(): void {
-    onFilterChange(buildKey(zonageOnly, multi4plus, precoceOnly, residentielOnly));
+    onFilterChange(buildKey(zonageOnly, precoceOnly, residentielOnly));
   }
 
   function toggleZonageOnly(): void {
     zonageOnly = !zonageOnly;
-    emitFilterChange();
-  }
-
-  function toggleMulti4plus(): void {
-    multi4plus = !multi4plus;
     emitFilterChange();
   }
 
@@ -156,8 +142,9 @@
   // Ce bloc réactif tirait au MONTAGE avec la clé par défaut et écrasait le
   // filtre que le parent venait de restaurer depuis l'URL (perte au reload).
   // La propagation vers le parent vient désormais UNIQUEMENT d'un toggle
-  // utilisateur explicite (toggleZonageOnly / toggleMulti4plus / togglePrecoceOnly
-  // → emitFilterChange), qui est la seule source légitime d'écriture URL+LS.
+  // utilisateur explicite (toggleZonageOnly / togglePrecoceOnly /
+  // toggleResidentielOnly → emitFilterChange), qui est la seule source
+  // légitime d'écriture URL+LS.
 
   // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
   /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
@@ -208,13 +195,11 @@
 
   // ── Badges « funnel » RÉACTIFS : compte si on ajoute ce toggle à l'actif ──
   $: badgeZonage = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(true, multi4plus, precoceOnly, residentielOnly)), 0);
-  $: badgeMulti = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, true, precoceOnly, residentielOnly)), 0);
+    (s, e) => s + countFor(e, buildKey(true, precoceOnly, residentielOnly)), 0);
   $: badgePrecoce = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, true, residentielOnly)), 0);
+    (s, e) => s + countFor(e, buildKey(zonageOnly, true, residentielOnly)), 0);
   $: badgeResidentiel = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, multi4plus, precoceOnly, true)), 0);
+    (s, e) => s + countFor(e, buildKey(zonageOnly, precoceOnly, true)), 0);
 </script>
 
 <RailShell title="Signaux · Villes" {loading} {onRefresh}>
@@ -243,19 +228,6 @@
       />
       {#if !loading}
         <Badge tone="info">{badgeZonage}</Badge>
-      {/if}
-    </div>
-
-    <!-- Toggle « Multifamilial 4+ » — axe DIMENSION (OFF par défaut) -->
-    <div class="axis-toggle-row">
-      <Checkbox
-        label="Multifamilial 4+"
-        helperText="nb unités ≥ 4 ou intensité haute"
-        checked={multi4plus}
-        onchange={toggleMulti4plus}
-      />
-      {#if !loading}
-        <Badge tone="warning">{badgeMulti}</Badge>
       {/if}
     </div>
 
@@ -306,7 +278,7 @@
 </RailShell>
 
 <style>
-  /* ── Toggles axes (Zonage / Dimension / Anticipation) ── */
+  /* ── Toggles axes (Zonage / Anticipation / Pertinence) ── */
   .axis-toggle-row {
     display: flex;
     align-items: center;
