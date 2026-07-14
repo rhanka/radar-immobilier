@@ -17,6 +17,7 @@
 
 import { Hono } from "hono";
 import {
+  classifyGraphNodeVivierV2,
   getSignalNodesForCity,
   listCitiesWithSignalNodes,
 } from "../services/graph/graph-store.js";
@@ -67,6 +68,7 @@ export interface GraphSignalCard {
   publishedAt: string | null;
   docRefs: GraphSignalDocRef[];
   evidence: SignalEvidence;
+  classification: ReturnType<typeof classifyGraphNodeVivierV2>;
   props: Record<string, unknown>;
 }
 
@@ -313,6 +315,17 @@ function buildSignalCard(
     docRefs,
     firstPublishedAt,
   );
+  const properties = nestedProperties(props);
+  const classification = classifyGraphNodeVivierV2({
+    id: node.id,
+    type: node.type,
+    category: firstString(properties, ["category"]) ?? firstString(props, ["category"]),
+    label: node.label,
+    description: nodeDescription(props),
+    etapeAnnote: firstString(properties, ["etape"]) ?? firstString(props, ["etape"]),
+    props,
+    sourceRef: node.sourceRef,
+  });
 
   return {
     id: node.id,
@@ -325,6 +338,7 @@ function buildSignalCard(
     publishedAt: firstPublishedAt,
     docRefs,
     evidence,
+    classification,
     props,
   };
 }
