@@ -3,6 +3,7 @@ import {
   NORMATIVE_VALUE_KEYS,
   REGLEMENT_KEYS,
   hasRecognizedValue,
+  measureNormesCoverage,
   normalizeNormValue,
 } from "./normes-keys.js";
 
@@ -38,5 +39,44 @@ describe("normes-keys", () => {
     expect(
       hasRecognizedValue({ reglement_url: " ", other: "35" }, REGLEMENT_KEYS),
     ).toBe(false);
+  });
+
+  it("joins normalized explicit codes and counts duplicate served features", () => {
+    const counters = measureNormesCoverage(
+      [
+        {
+          properties: {
+            zone_code: "H 2",
+            URL_GRILLE: "https://x/grille.pdf",
+            usages: ["h1"],
+          },
+        },
+        { properties: { zone_code: "h–2" } },
+        { properties: { zone_code: "C-3" } },
+      ],
+      [
+        { properties: { zone_code: "H-2", reglement_url: "https://x/r.pdf" } },
+        { properties: { zone_code: "h 2", reglement_numero: "901" } },
+        { properties: { zone_code: "C–3", densite_value: 35 } },
+        { properties: { zone_code: "X-9", densite_value: 99 } },
+      ],
+    );
+
+    expect(counters).toEqual({
+      zonesWithGrille: 1,
+      zonesWithReglement: 2,
+      zonesWithLegacyNormes: 1,
+      zonesWithNormativeValues: 1,
+      covered: 3,
+    });
+  });
+
+  it("never treats a shared opaque feature id as zone-code evidence", () => {
+    expect(
+      measureNormesCoverage(
+        [{ id: "shared", properties: { zone_code: "H-1" } }],
+        [{ id: "shared", properties: { reglement_url: "https://x/r.pdf" } }],
+      ),
+    ).toMatchObject({ zonesWithReglement: 0, covered: 0 });
   });
 });
