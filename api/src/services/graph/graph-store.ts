@@ -18,6 +18,18 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
+import {
+  computeLegacySubsetCounts,
+  computeVivierV2,
+  classifyVivierSignal,
+  type VivierSignalInput,
+} from "./vivier-v2.js";
+
+export {
+  classifyVivierSignal,
+  computeLegacySubsetCounts,
+  computeVivierV2,
+} from "./vivier-v2.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Zod schema for graphify graph.json
@@ -1301,6 +1313,34 @@ const SUBSET_FLAG_COMBOS: ReadonlyArray<[boolean, boolean, boolean, boolean]> =
     (mask & 8) !== 0,
   ]);
 
+export interface GraphSignalClassificationInput {
+  id: string;
+  type: string;
+  category: string | null;
+  label: string | null;
+  description: string | null;
+  etapeAnnote: string | null;
+  props: unknown;
+  sourceRef: string | null;
+}
+
+/** Build the versioned classification from the same graph row used by A/B counts. */
+export function classifyGraphNodeVivierV2(
+  input: GraphSignalClassificationInput,
+): ReturnType<typeof classifyVivierSignal> {
+  const signal: VivierSignalInput = {
+    id: input.id,
+    type: input.type,
+    category: input.category,
+    label: input.label,
+    description: input.description,
+    etape: input.etapeAnnote,
+    props: input.props,
+    sourceRef: input.sourceRef,
+  };
+  return classifyVivierSignal(signal);
+}
+
 /**
  * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
  *
@@ -1318,33 +1358,117 @@ export function isPrecoceSignal(
 
 /**
  * Count Signal + DesignationEvent nodes per city in graph_nodes.
- * Returns only cities that have at least one such node.
  *
- * Each city entry includes:
- *   - signalCount  : total count (all signals, all flags)
- *   - subsetCounts : exact intersection counts for each subset of {z, m, p, r} flags.
- *                    Keys: "", "z", "m", "p", "r", "z|m", … up to "z|m|p|r" (16 keys).
- *                    Value = nb signals satisfying ALL flags in the key.
- *                    isZonage (z) = DesignationEvent OR (Signal + category ∈ ZONAGE_CATEGORIES)
- *                    isMulti4 (m) = nb_unites_max ≥ 4 OR intensite = 'haute'
- *                    isPrecoce (p) = etape ∈ {avis_motion, projet_reglement}
- *                      (prefers props->'properties'->>'etape' annotation when present,
- *                       falls back to deriveEtape heuristic)
- *                    isResidentielPertinent (r) = NOT explicitly non-residential
- *                      (keeps residential + indeterminate; drops industriel/
- *                       commercial/camping/environnemental noise — anti-false-negative)
+ * The query is one projection. Each row is classified once for the new
+ * contract and contributes to the unchanged legacy rail from the same row;
+ * there is no A/B data fork. `vivierV2Counts.stageCounts` only counts
+ * `qualified` rows.
  */
-export async function listCitiesWithSignalNodes(
-  db: Database,
-): Promise<Array<{
+export interface GraphSignalProjectionRow {
+  id: string;
+  citySlug: string | null;
+  type: string;
+  category: string | null;
+  label: string;
+  nbUnitesMax: string | null;
+  intensite: string | null;
+  description: string | null;
+  etapeAnnote: string | null;
+  props: unknown;
+  sourceRef: string | null;
+}
+
+export interface CitySignalCounts {
   citySlug: string;
   signalCount: number;
   subsetCounts: Record<SubsetKey, number>;
-}>> {
-  // One row per individual signal node (no count grouping in SQL) so we can
-  // compute the 3 boolean flags per-signal and accumulate into subsetCounts.
+  vivierV2Counts: ReturnType<typeof computeVivierV2>["counts"];
+}
+
+/** Aggregate one projection in both rails. Pure so A/B parity is testable. */
+export function aggregateGraphSignalProjectionRows(
+  rows: readonly GraphSignalProjectionRow[],
+): CitySignalCounts[] {
+  function emptySubsetCounts(): Record<SubsetKey, number> {
+    const out = {} as Record<SubsetKey, number>;
+    for (const [z, m, p, r] of SUBSET_FLAG_COMBOS) out[buildSubsetKey(z, m, p, r)] = 0;
+    return out;
+  }
+
+  const byCity = new Map<string, {
+    signalCount: number;
+    subsetCounts: Record<SubsetKey, number>;
+    signals: VivierSignalInput[];
+  }>();
+
+  for (const row of rows) {
+    if (!row.citySlug) continue;
+    if (!byCity.has(row.citySlug)) {
+      byCity.set(row.citySlug, {
+        signalCount: 0,
+        subsetCounts: emptySubsetCounts(),
+        signals: [],
+      });
+    }
+    const entry = byCity.get(row.citySlug)!;
+    entry.signalCount += 1;
+    entry.signals.push({
+      id: row.id,
+      type: row.type,
+      category: row.category,
+      label: row.label,
+      description: row.description,
+      etape: row.etapeAnnote,
+      nbUnitesMax: row.nbUnitesMax,
+      intensite: row.intensite,
+      props: row.props,
+      sourceRef: row.sourceRef,
+    });
+  }
+
+  return Array.from(byCity.entries()).map(([citySlug, data]) => {
+    const legacySubsetCounts = computeLegacySubsetCounts(data.signals);
+    for (const key of Object.keys(legacySubsetCounts) as Array<keyof typeof legacySubsetCounts>) {
+      data.subsetCounts[key] = legacySubsetCounts[key];
+    }
+
+    // Preserve the existing r intersections while keeping the z|m|p rail
+    // exactly equal to computeLegacySubsetCounts on this same input.
+    for (const signal of data.signals) {
+      const r = isResidentielPertinent(
+        signal.category ?? signal.etape,
+        signal.label ?? null,
+        signal.description ?? null,
+      );
+      if (!r) continue;
+      const z = isZonageSignal(signal.type, signal.category, signal.etape);
+      const m = isMulti4Plus(signal.type, signal.nbUnitesMax, signal.intensite);
+      const p = isPrecoceSignal(signal.etape, signal.label, signal.description);
+      for (const [kZ, kM, kP, kR] of SUBSET_FLAG_COMBOS) {
+        if (kR && (!kZ || z) && (!kM || m) && (!kP || p)) {
+          data.subsetCounts[buildSubsetKey(kZ, kM, kP, true)] += 1;
+        }
+      }
+    }
+
+    const v2 = computeVivierV2(data.signals);
+    return {
+      citySlug,
+      signalCount: data.signalCount,
+      subsetCounts: data.subsetCounts,
+      vivierV2Counts: v2.counts,
+    };
+  });
+}
+
+export async function listCitiesWithSignalNodes(
+  db: Database,
+): Promise<CitySignalCounts[]> {
+  // One row per individual signal node (no count grouping in SQL) so both
+  // contracts are derived from the same source projection.
   const rows = await db
     .select({
+      id: graphNodes.id,
       citySlug: graphNodes.citySlug,
       type: graphNodes.type,
       category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
@@ -1353,6 +1477,8 @@ export async function listCitiesWithSignalNodes(
       intensite: sql<string | null>`${graphNodes.props}->'properties'->>'intensite'`,
       description: sql<string | null>`${graphNodes.props}->'properties'->>'description'`,
       etapeAnnote: sql<string | null>`${graphNodes.props}->'properties'->>'etape'`,
+      props: graphNodes.props,
+      sourceRef: graphNodes.sourceRef,
     })
     .from(graphNodes)
     .where(
@@ -1362,57 +1488,7 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  /** Initialise un subsetCounts vide pour une ville (16 clés {z,m,p,r}). */
-  function emptySubsetCounts(): Record<SubsetKey, number> {
-    const out = {} as Record<SubsetKey, number>;
-    for (const [z, m, p, r] of SUBSET_FLAG_COMBOS) out[buildSubsetKey(z, m, p, r)] = 0;
-    return out;
-  }
-
-  // Aggregate into per-city entries in application code.
-  const byCity = new Map<string, {
-    signalCount: number;
-    subsetCounts: Record<SubsetKey, number>;
-  }>();
-
-  for (const row of rows) {
-    if (!row.citySlug) continue;
-    if (!byCity.has(row.citySlug)) {
-      byCity.set(row.citySlug, {
-        signalCount: 0,
-        subsetCounts: emptySubsetCounts(),
-      });
-    }
-    const entry = byCity.get(row.citySlug)!;
-    entry.signalCount += 1;
-
-    // Calcule les 3 flags booléens pour CE signal individuel.
-    // #4 — `etapeAnnote` (props.properties.etape) sert de repli quand `category`
-    // est NULL (cas majoritaire en prod) pour ne pas masquer des signaux de
-    // zonage légitimes.
-    const z = isZonageSignal(row.type, row.category, row.etapeAnnote);
-    const m = isMulti4Plus(row.type, row.nbUnitesMax, row.intensite);
-    const p = isPrecoceSignal(row.etapeAnnote, row.label, row.description);
-    // r — pertinence résidentielle : true SAUF bruit explicitement non résidentiel
-    // (category ou etape sert de repli de catégorie ; label+description en texte).
-    const r = isResidentielPertinent(row.category ?? row.etapeAnnote, row.label, row.description);
-
-    // Incrémente TOUS les sous-ensembles dont les flags sont satisfaits par ce signal.
-    // Un signal avec (z=true, m=false, p=true, r=true) contribue à :
-    // "", "z", "p", "r", "z|p", "z|r", "p|r", "z|p|r".
-    for (const [kZ, kM, kP, kR] of SUBSET_FLAG_COMBOS) {
-      if ((!kZ || z) && (!kM || m) && (!kP || p) && (!kR || r)) {
-        const key = buildSubsetKey(kZ, kM, kP, kR);
-        entry.subsetCounts[key] += 1;
-      }
-    }
-  }
-
-  return Array.from(byCity.entries()).map(([citySlug, data]) => ({
-    citySlug,
-    signalCount: data.signalCount,
-    subsetCounts: data.subsetCounts,
-  }));
+  return aggregateGraphSignalProjectionRows(rows);
 }
 
 /**
