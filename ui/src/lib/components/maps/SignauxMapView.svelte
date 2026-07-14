@@ -220,26 +220,33 @@
   let pendingRouteZoneKey: string | null = null;
 
   // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
-  /** Clé active = combinaison des toggles actifs : "", "z", "m", "p", "z|m", etc. */
-  const FILTER_DEFAULT = "z|m|p";
+  /** Clé active = combinaison des axes sélectionnables : "", "z", "p", etc. */
+  const FILTER_DEFAULT = "z|p";
+  const FILTER_FLAGS = ["z", "p", "r"] as const;
   const FILTER_LS_KEY = "signaux-filter-subset";
-  let activeSubsetKey = FILTER_DEFAULT; // défaut : 3 filtres cochés
+  let activeSubsetKey = FILTER_DEFAULT; // défaut : zonage + signaux précoces
+
+  /** Retire les anciens flags et rétablit l'ordre des clés serveur. */
+  function normalizeSubsetKey(raw: string): string {
+    const flags = new Set(raw.split("|"));
+    return FILTER_FLAGS.filter((flag) => flags.has(flag)).join("|");
+  }
 
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
-   * Priorité : URL (filter.subset) > localStorage > défaut (z|m|p).
+   * Priorité : URL (filter.subset) > localStorage > défaut (z|p).
    * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
-   * Ex : filters={"subset":["z","m"]} → subsetKey="z|m"
+   * Les flags non sélectionnables des anciennes URLs sont ignorés.
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
     if (route) {
       const values = route.state.filters["subset"] ?? [];
-      if (values.length > 0) return values.join("|");
+      if (values.length > 0) return normalizeSubsetKey(values.join("|"));
     }
     // Repli localStorage
     if (typeof localStorage !== "undefined") {
       const stored = localStorage.getItem(FILTER_LS_KEY);
-      if (stored && stored.trim().length > 0) return stored.trim();
+      if (stored && stored.trim().length > 0) return normalizeSubsetKey(stored.trim());
     }
     return FILTER_DEFAULT;
   }
@@ -247,15 +254,16 @@
   function handleFilterChange(
     subsetKey: string,
   ): void {
-    activeSubsetKey = subsetKey;
+    const normalizedSubsetKey = normalizeSubsetKey(subsetKey);
+    activeSubsetKey = normalizedSubsetKey;
     // Persiste le filtre dans localStorage
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem(FILTER_LS_KEY, subsetKey);
+      localStorage.setItem(FILTER_LS_KEY, normalizedSubsetKey);
     }
     // Persiste le filtre dans l'URL (remplace sans ajouter à l'historique)
     const currentRoute = geoRoute;
     if (currentRoute) {
-      const subsetValues = subsetKey ? subsetKey.split("|") : [];
+      const subsetValues = normalizedSubsetKey ? normalizedSubsetKey.split("|") : [];
       const newFilters: Record<string, string[]> = subsetValues.length > 0 ? { subset: subsetValues } : {};
       const newState = { ...currentRoute.state, filters: newFilters };
       if (currentRoute.level === "zone") {
@@ -280,7 +288,7 @@
 
   // ── Filtres DONNÉES par accordéon (drawer DROIT — en-têtes des buckets
   // Zones et Lots de SignauxSelPanel) ────────────────────────────────────
-  // Distincts du filtre de SIGNAUX z|m|p (rail gauche) : ceux-ci filtrent les
+  // Distincts du filtre de SIGNAUX z|p (rail gauche) : ceux-ci filtrent les
   // données cadastrales/zonage de la ville active. L'état vit ICI (pas dans le
   // panneau) car il pilote la peinture carte. ZÉRO refetch : chaque changement
   // ne fait que recalculer les expressions de peinture. Fermer un accordéon ne
@@ -372,12 +380,11 @@
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
-   * #4 — Le filtre RESTREINT réellement l'ensemble quand il porte un axe « z »
-   * (zonage) ou « m » (multifamilial). L'axe « p » (précoce) est neutre côté
-   * client (ne masque rien) → il ne déclenche pas d'atténuation carto.
+   * #4 — Le filtre RESTREINT réellement l'ensemble quand il porte l'axe « z »
+   * (zonage). L'axe « p » (précoce) est neutre côté client (ne masque rien)
+   * → il ne déclenche pas d'atténuation carto.
    */
-  $: filterActive =
-    activeSubsetKey.includes("z") || activeSubsetKey.includes("m");
+  $: filterActive = activeSubsetKey.includes("z");
   /** True si au moins un lot affiché porte une projection de signal (#4). */
   $: hasProjectedLot = displayedLots.features.some(
     (lot) => (lot.properties.signalProjection ?? "none") !== "none",
