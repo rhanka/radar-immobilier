@@ -50,3 +50,77 @@ export function hasRecognizedValue(
 ): boolean {
   return keys.some((key) => normalizeNormValue(props[key]) !== null);
 }
+
+export interface NormesCoverageCounters {
+  zonesWithGrille: number;
+  zonesWithReglement: number;
+  zonesWithLegacyNormes: number;
+  zonesWithNormativeValues: number;
+  covered: number;
+}
+
+function featureProps(feature: unknown): Record<string, unknown> {
+  const props =
+    typeof feature === "object" && feature !== null
+      ? (feature as { properties?: unknown }).properties
+      : null;
+  return typeof props === "object" && props !== null
+    ? (props as Record<string, unknown>)
+    : {};
+}
+
+function explicitZoneCode(props: Record<string, unknown>): string | null {
+  const code = normalizeZoneCode(extractZoneCode(props));
+  return code.length > 0 ? code : null;
+}
+
+function hasLegacyNormes(props: Record<string, unknown>): boolean {
+  const normes = zoneNormes(props);
+  return normes.densiteLogHa !== null || normes.usages.length > 0;
+}
+
+/** Count evidence existentially for each served zone feature. */
+export function measureNormesCoverage(
+  servedZoneFeatures: unknown[],
+  geoNormeFeatures: unknown[],
+): NormesCoverageCounters {
+  const geoNormesByCode = new Map<string, Record<string, unknown>[]>();
+  for (const feature of geoNormeFeatures) {
+    const props = featureProps(feature);
+    const code = explicitZoneCode(props);
+    if (!code) continue;
+    const evidence = geoNormesByCode.get(code) ?? [];
+    evidence.push(props);
+    geoNormesByCode.set(code, evidence);
+  }
+
+  const result: NormesCoverageCounters = {
+    zonesWithGrille: 0,
+    zonesWithReglement: 0,
+    zonesWithLegacyNormes: 0,
+    zonesWithNormativeValues: 0,
+    covered: 0,
+  };
+  for (const feature of servedZoneFeatures) {
+    const props = featureProps(feature);
+    const code = explicitZoneCode(props);
+    const evidence = [props, ...(code ? (geoNormesByCode.get(code) ?? []) : [])];
+    const grille = evidence.some((item) => zoneGrillePdfUrl(item) !== null);
+    const reglement = evidence.some((item) =>
+      hasRecognizedValue(item, REGLEMENT_KEYS),
+    );
+    const legacy = evidence.some(hasLegacyNormes);
+    const values = evidence.some((item) =>
+      hasRecognizedValue(item, NORMATIVE_VALUE_KEYS),
+    );
+    if (grille) result.zonesWithGrille += 1;
+    if (reglement) result.zonesWithReglement += 1;
+    if (legacy) result.zonesWithLegacyNormes += 1;
+    if (values) result.zonesWithNormativeValues += 1;
+    if (grille || reglement || legacy || values) result.covered += 1;
+  }
+  return result;
+}
+import { normalizeZoneCode } from "./extract-refs.js";
+import { extractZoneCode } from "./ogc-pull.js";
+import { zoneGrillePdfUrl, zoneNormes } from "./lot-zone-enrichment.js";
