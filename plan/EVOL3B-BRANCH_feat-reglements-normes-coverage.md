@@ -71,7 +71,7 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Confirm the API counter matrix, completeness semantics, and unavailable-versus-absent mapping before implementation.
 
 - [ ] **Lot 1 — Deterministic API coverage contract**
-  - [ ] Add one shared allowlist/normalization source for regulation keys and normative value keys.
+  - [x] Add one shared allowlist/normalization source for regulation keys and normative value keys.
   - [ ] Measure coverage per served zoning feature and join live `qc-zonage-norms-*` evidence only to matching normalized zone codes.
   - [ ] Expose `numberMatched`, `complete`, `zonesWithGrille`, `zonesWithReglement`, `zonesWithLegacyNormes`, `zonesWithNormativeValues`, and union `covered`.
   - [ ] Keep unavailable/malformed geo distinct from business absence and block `verified` when the measurement is incomplete.
