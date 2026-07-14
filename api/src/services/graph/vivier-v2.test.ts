@@ -62,8 +62,14 @@ describe("server vivier_v2 computation", () => {
   it("computes v2 and legacy z|m|p counts from the same input", () => {
     const signals = [
       signal({ id: "qualified", category: "ppcmoi", nbUnitesMax: "8" }),
-      signal({ id: "unknown", category: null, etape: null, label: "Avis de motion", description: null }),
-      signal({ id: "non-zoning", category: "vente", etape: null, label: "Projet résidentiel" }),
+      signal({
+        id: "unknown",
+        category: null,
+        etape: "consultation_publique",
+        label: "Avis de motion",
+        description: null,
+      }),
+      signal({ id: "non-zoning", category: "vente_terrain", etape: null, label: "Projet résidentiel" }),
     ];
     const v2 = computeVivierV2(signals);
     const legacy = computeLegacySubsetCounts(signals);
@@ -73,6 +79,9 @@ describe("server vivier_v2 computation", () => {
     expect(v2.counts.qualified).toBe(1);
     expect(v2.counts.residentialUnknown).toBe(1);
     expect(v2.counts.excludedByReason.hors_zonage).toBe(1);
+    expect(v2.classifications[1]?.classification.zonage.valeur).toBe("indetermine");
+    expect(v2.classifications[1]?.classification.exclusion_reason).toBeNull();
+    expect(v2.classifications[2]?.classification.zonage.valeur).toBe("non");
     expect(legacy[""]).toBe(3);
     expect(legacy.z).toBe(1);
     expect(legacy["z|m|p"]).toBe(0);

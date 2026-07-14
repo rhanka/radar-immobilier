@@ -62,6 +62,13 @@ const LEGACY_SUBSET_KEYS: readonly LegacySubsetKey[] = [
   "z|m|p",
 ];
 
+const NON_ZONAGE_CATEGORIES = new Set([
+  "acquisition_fonciere",
+  "infrastructure",
+  "vente_terrain",
+  "vente_institutionnelle",
+]);
+
 function record(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -143,10 +150,21 @@ function classificationFromZonage(
         : "isZonageSignal:etape";
     return { valeur: "oui" as const, source, confiance: 0.95 };
   }
-  if (category === null && etapeAnnote === null) {
-    return { valeur: "indetermine" as const, source: "isZonageSignal:missing", confiance: 0 };
+  if (category !== null && NON_ZONAGE_CATEGORIES.has(category)) {
+    return {
+      valeur: "non" as const,
+      source: "isZonageSignal:category_non_zonage",
+      confiance: 0.95,
+    };
   }
-  return { valeur: "non" as const, source: "isZonageSignal:no_match", confiance: 0.8 };
+  if (etapeAnnote !== null && NON_ZONAGE_CATEGORIES.has(etapeAnnote)) {
+    return {
+      valeur: "non" as const,
+      source: "isZonageSignal:etape_non_zonage",
+      confiance: 0.95,
+    };
+  }
+  return { valeur: "indetermine" as const, source: "isZonageSignal:no_positive_evidence", confiance: 0 };
 }
 
 const etapeFromRaw: Record<string, VivierEtape> = {
