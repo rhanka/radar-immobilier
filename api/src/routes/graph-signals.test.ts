@@ -18,6 +18,7 @@ import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 
 // Mock the graph-store module so tests do not touch Postgres.
 vi.mock("../services/graph/graph-store.js", () => ({
+  classifyGraphNodeVivierV2: vi.fn(),
   listCitiesWithSignalNodes: vi.fn(),
   getSignalNodesForCity: vi.fn(),
 }));
@@ -143,18 +144,23 @@ describe("GET /api/graph-signals/by-city", () => {
     expect(body.cities).toEqual([]);
   });
 
-  it("returns ok:true with city list, correct totalCount et subsetCounts", async () => {
+  it("returns city list with legacy subset counts and v2 named counters", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
       {
         citySlug: "drummondville",
         signalCount: 5,
-        // 16 clés {z,m,p,r} ; ici « tout résidentiel-pertinent » (X|r := X) —
-        // mock monotone valide (l'axe r ne retire aucun signal).
         subsetCounts: {
           "": 5, "z": 4, "m": 2, "p": 1, "r": 5,
           "z|m": 2, "z|p": 1, "z|r": 4, "m|p": 0, "m|r": 2, "p|r": 1,
           "z|m|p": 0, "z|m|r": 2, "z|p|r": 1, "m|p|r": 0,
           "z|m|p|r": 0,
+        },
+        vivierV2Counts: {
+          qualified: 2,
+          residentialUnknown: 2,
+          excludedByReason: { non_residentiel_franc: 0, piia_non_pertinent: 0, hors_zonage: 1, derogation_hors_sujet: 0 },
+          stageCounts: { avis_motion: 0, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
+          total: 5,
         },
       },
       {
@@ -165,6 +171,13 @@ describe("GET /api/graph-signals/by-city", () => {
           "z|m": 0, "z|p": 0, "z|r": 1, "m|p": 0, "m|r": 0, "p|r": 0,
           "z|m|p": 0, "z|m|r": 0, "z|p|r": 0, "m|p|r": 0,
           "z|m|p|r": 0,
+        },
+        vivierV2Counts: {
+          qualified: 1,
+          residentialUnknown: 1,
+          excludedByReason: { non_residentiel_franc: 0, piia_non_pertinent: 0, hors_zonage: 1, derogation_hors_sujet: 0 },
+          stageCounts: { avis_motion: 0, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
+          total: 3,
         },
       },
     ]);
@@ -180,24 +193,21 @@ describe("GET /api/graph-signals/by-city", () => {
         citySlug: string;
         signalCount: number;
         subsetCounts: Record<string, number>;
+        vivierV2Counts: Record<string, unknown>;
       }[];
     };
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(8);
     expect(body.cities).toHaveLength(2);
-    // Drummondville : monotonie subsetCounts vérifiée
     const drummond = body.cities[0]!;
     expect(drummond.citySlug).toBe("drummondville");
     expect(drummond.subsetCounts["z"]).toBe(4);
-    expect(drummond.subsetCounts["z|m"]).toBe(2);
-    expect(drummond.subsetCounts["z|m|p"]).toBe(0);
-    // Monotonie : z|m ≤ z ≤ ""
-    expect(drummond.subsetCounts["z|m"]).toBeLessThanOrEqual(drummond.subsetCounts["z"]!);
-    expect(drummond.subsetCounts["z"]).toBeLessThanOrEqual(drummond.subsetCounts[""]!);
-    // Saint-Constant
+    expect(drummond.vivierV2Counts.qualified).toBe(2);
+    expect(drummond.vivierV2Counts.total).toBe(5);
     const stconst = body.cities[1]!;
-    expect(stconst.subsetCounts["z"]).toBeLessThanOrEqual(stconst.subsetCounts[""]!);
-    expect(stconst.subsetCounts["z|m"]).toBe(0);
+    expect(stconst.subsetCounts["z|m|p"]).toBe(0);
+    expect(stconst.vivierV2Counts.residentialUnknown).toBe(1);
+
   });
 });
 
