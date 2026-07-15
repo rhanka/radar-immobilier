@@ -3,13 +3,17 @@ import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   A_SUBSET_KEY,
   canOpenProjectedSignal,
-  detailCountForCity,
+  clearVivierCityTransientState,
+  countForVivierCity,
+  initialVivierSubsetKey,
+  reconcileVivierRouteSubset,
   TRANSITION_SUBSET_KEY,
   modeFromSubsetKey,
   projectNodesForVivierMode,
   reconcileVivierSelection,
   retainProjectedSignalId,
   routeSubsetKey,
+  validateVivierProjectionAuthority,
   vivierRouteKey,
 } from "./vivier-view-mode.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
@@ -80,11 +84,26 @@ describe("Vivier A / transition view contract", () => {
     }
   });
 
-  it("uses selected-city detail counts instead of conflicting by-city counts", () => {
+  it("uses only node-validated selected-city counts", () => {
     const entry = { municipality: { slug: "sutton" }, subsetCounts: { "z|m|p": 99, "z|p": 88 } };
-    expect(detailCountForCity(entry, "sutton", SUTTON_AUTHORITY, "a")).toBe(1);
-    expect(detailCountForCity(entry, "sutton", SUTTON_AUTHORITY, "transition")).toBe(2);
-    expect(detailCountForCity(entry, "sutton", null, "a")).toBeNull();
+    const validated = validateVivierProjectionAuthority(SUTTON_RAW, SUTTON_AUTHORITY);
+    expect(countForVivierCity(entry, "sutton", validated, "a")).toBe(1);
+    expect(countForVivierCity(entry, "sutton", validated, "transition")).toBe(2);
+    expect(countForVivierCity(entry, "sutton", null, "a")).toBeNull();
+  });
+
+  it("validates A and transition independently and never trusts raw counts", () => {
+    const entry = { municipality: { slug: "sutton" }, subsetCounts: { "z|m|p": 99, "z|p": 88 } };
+    const authority = {
+      ...SUTTON_AUTHORITY,
+      a: { count: 1, signalIds: ["wrong-a-id"] },
+    };
+    const validated = validateVivierProjectionAuthority(SUTTON_RAW, authority);
+
+    expect(validated.a).toEqual({ available: false, count: null, nodes: [] });
+    expect(validated.transition.count).toBe(2);
+    expect(countForVivierCity(entry, "sutton", validated, "a")).toBeNull();
+    expect(countForVivierCity(entry, "sutton", validated, "transition")).toBe(2);
   });
 
   it("resynchronizes route mode and keys route identity by A/T", () => {
@@ -95,7 +114,26 @@ describe("Vivier A / transition view contract", () => {
     });
     expect(routeSubsetKey(route(["z", "m", "p"]))).toBe("z|m|p");
     expect(routeSubsetKey(route(["z", "p"]))).toBe("z|p");
+    expect(routeSubsetKey(route([]))).toBeNull();
+    expect(routeSubsetKey(route(["z"]))).toBe("z|m|p");
+    expect(reconcileVivierRouteSubset(route([]), "z|p")).toBe("z|p");
+    expect(initialVivierSubsetKey(route([]), "z|p")).toBe("z|p");
     expect(vivierRouteKey(route(["z", "m", "p"]))).not.toBe(vivierRouteKey(route(["z", "p"])));
+  });
+
+  it("clears evidence and hover when navigating to another city in the same mode", () => {
+    const state = {
+      activeEvidence: { nodeId: "old-signal" },
+      activeDocument: { docSha: "old-doc" },
+      hoveredEvidenceSignalId: "old-signal",
+    };
+
+    expect(clearVivierCityTransientState("sutton", "coaticook", state)).toEqual({
+      activeEvidence: null,
+      activeDocument: null,
+      hoveredEvidenceSignalId: null,
+    });
+    expect(clearVivierCityTransientState("sutton", "sutton", state)).toBe(state);
   });
 
   it("drops excluded signal selection and focus on a mode switch", () => {
