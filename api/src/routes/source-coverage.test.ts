@@ -21,7 +21,15 @@ interface CoverageCell {
 interface NormesCell extends CoverageCell {
   measured?: boolean;
   available?: boolean | null;
-  error?: "geo_unreachable" | "invalid_response";
+  error?: "geo-unreachable" | "invalid-response";
+  zoneCount?: number;
+  numberMatched?: number | null;
+  complete?: boolean;
+  zonesWithGrille?: number;
+  zonesWithReglement?: number;
+  zonesWithLegacyNormes?: number;
+  zonesWithNormativeValues?: number;
+  covered?: number;
 }
 interface RawCell extends CoverageCell {
   count: number;
@@ -69,7 +77,7 @@ interface CoverageResponse {
 interface CityGrillesResponse {
   citySlug: string;
   available: boolean;
-  error?: "geo_unreachable" | "invalid_response";
+  error?: "geo-unreachable" | "invalid-response";
   zoneCount?: number;
   numberMatched?: number | null;
   complete?: boolean;
@@ -538,6 +546,14 @@ describe("GET /api/source/coverage", () => {
       freshness: "fresh",
       measured: true,
       available: true,
+      zoneCount: 2,
+      numberMatched: null,
+      complete: true,
+      zonesWithGrille: 1,
+      zonesWithReglement: 0,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 0,
+      covered: 1,
     });
     expect(cityOf(warm, "brossard").normes.measured).toBe(false);
   });
@@ -566,7 +582,35 @@ describe("GET /api/source/coverage", () => {
     expect(cityOf(body, "brossard").normes).toMatchObject({
       measured: true,
       available: false,
-      error: "geo_unreachable",
+      error: "geo-unreachable",
+    });
+  });
+
+  it("normes: bounds cached failures with the same finite discipline", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) =>
+      String(input).includes("/items")
+        ? new Response("unavailable", { status: 503 })
+        : new Response(JSON.stringify({ collections: [] }), {
+            headers: { "content-type": "application/json" },
+          }),
+    ) as unknown as typeof fetch;
+    const app = sourceCoverageRoute({
+      store: makeMemStore(),
+      db: makeDb([]),
+      now: NOW,
+      fetchImpl,
+    });
+
+    await app.request("/api/source/coverage/brossard/grilles");
+    for (let index = 0; index < 64; index += 1) {
+      await app.request(`/api/source/coverage/cache-${index}/grilles`);
+    }
+    const body = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(body, "brossard").normes).toMatchObject({
+      measured: false,
+      available: null,
     });
   });
 
@@ -1156,7 +1200,7 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     expect((await resDown.json()) as CityGrillesResponse).toMatchObject({
       citySlug: "ville-x",
       available: false,
-      error: "geo_unreachable",
+      error: "geo-unreachable",
     });
 
     const serverError = vi.fn(async () =>
@@ -1167,7 +1211,7 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     );
     expect((await res503.json()) as CityGrillesResponse).toMatchObject({
       available: false,
-      error: "geo_unreachable",
+      error: "geo-unreachable",
     });
 
     const malformed = vi.fn(async () =>
@@ -1182,7 +1226,7 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     expect((await malformedRes.json()) as CityGrillesResponse).toEqual({
       citySlug: "ville-malformee",
       available: false,
-      error: "invalid_response",
+      error: "invalid-response",
     });
   });
 
