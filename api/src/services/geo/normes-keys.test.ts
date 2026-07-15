@@ -9,9 +9,17 @@ import {
 } from "./normes-keys.js";
 
 describe("normes-keys", () => {
-  it("recognizes the sourced regulation and normative fields", () => {
-    expect(REGLEMENT_KEYS).toContain("reglement_url");
-    expect(REGLEMENT_KEYS).toContain("reglement_numero");
+  it("uses the exact regulation allowlist from the wire contract", () => {
+    expect(REGLEMENT_KEYS).toEqual([
+      "reglement_url",
+      "reglement_numero",
+      "reglement_millesime",
+      "reglement_page_source",
+      "Reglement",
+      "REGLEMENT",
+      "url_reglement",
+      "URL_REGLEMENT",
+    ]);
     expect(NORMATIVE_VALUE_KEYS).toContain("densite_value");
     expect(NORMATIVE_VALUE_KEYS).toContain("hauteur_min_value");
   });
@@ -79,6 +87,28 @@ describe("normes-keys", () => {
         [{ id: "shared", properties: { reglement_url: "https://x/r.pdf" } }],
       ),
     ).toMatchObject({ zonesWithReglement: 0, covered: 0 });
+  });
+
+  it("merges duplicate auxiliary flags before counting duplicate served features", () => {
+    const counters = measureNormesCoverage(
+      [
+        { properties: { zone_code: "H-1" } },
+        { properties: { zone_code: "h–1" } },
+      ],
+      [
+        { properties: { zone_code: "H-1", Reglement: "901" } },
+        { properties: { zone_code: "H–1", hauteur_max_value: 12 } },
+        { properties: { zone_code: "h-1", URL_GRILLE: "https://x/grid.pdf" } },
+      ],
+    );
+
+    expect(counters).toEqual({
+      zonesWithGrille: 2,
+      zonesWithReglement: 2,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 2,
+      covered: 2,
+    });
   });
 
   it("distinguishes incomplete pages, missing collections and invalid payloads", async () => {
