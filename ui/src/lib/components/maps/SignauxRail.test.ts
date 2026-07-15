@@ -90,6 +90,20 @@ describe("SignauxRail — A / transition", () => {
     expect(container.textContent).toMatch(/2\s+signaux/);
     expect(container.textContent).not.toContain("88");
   });
+
+  it("shows selected projection unavailable instead of a by-city zero", () => {
+    const entry: CityMapEntry = {
+      municipality: { slug: "sutton", name: "Sutton", mrc: "Brome-Missisquoi" } as CityMapEntry["municipality"],
+      signalCount6m: 5,
+      subsetCounts: { "": 5, "z|m|p": 0, "z|p": 0 },
+    };
+    const { container } = render(SignauxRail, {
+      props: { entries: [entry], selectedSlug: "sutton", selectedLegacyProjection: null },
+    });
+    expect(container.textContent).toContain("Données des signaux indisponibles");
+    expect(container.textContent).toContain("n/d");
+    expect(container.textContent).not.toContain("0 signal");
+  });
 });
 
 // ── Liste PLATE de villes (accordéon signaux SUPPRIMÉ du rail gauche) ────────
