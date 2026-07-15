@@ -23,6 +23,7 @@
    */
   import { Badge, Radio } from "@sentropic/design-system-svelte";
   import {
+    detailCountForCity,
     modeFromSubsetKey,
     subsetKeyForMode,
     type VivierViewMode,
@@ -32,12 +33,15 @@
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
   import type { RailCityItem } from "$lib/maps/rail-city-items.js";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
+  import type { LegacyZmpProjection } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
+  /** Detail response is authoritative for the selected city's A/T counts. */
+  export let selectedLegacyProjection: LegacyZmpProjection | null = null;
   /** Chargement de la liste principale. */
   export let loading = false;
   /** Signal data failed to load; avoid rendering a fake zero state. */
@@ -85,8 +89,13 @@
 
   // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
   /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
-  function countFor(entry: CityMapEntry, key: string): number {
-    return entry.subsetCounts[key] ?? 0;
+  function countFor(entry: CityMapEntry, key: string): number | null {
+    return detailCountForCity(
+      entry,
+      selectedSlug,
+      selectedLegacyProjection,
+      modeFromSubsetKey(key),
+    );
   }
 
   // ── Liste de villes (la recherche + le plafond vivent dans RailCityList) ──
@@ -96,9 +105,9 @@
     .filter((e) => {
       const isSelected =
         selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return countFor(e, activeKey) > 0 || isSelected;
+      return (countFor(e, activeKey) ?? 0) > 0 || isSelected;
     })
-    .sort((a, b) => countFor(b, activeKey) - countFor(a, activeKey));
+    .sort((a, b) => (countFor(b, activeKey) ?? -1) - (countFor(a, activeKey) ?? -1));
 
   /** Projection générique consommée par la liste partagée RailCityList. */
   function toRailItem(entry: CityMapEntry, key: string): RailCityItem {
@@ -107,9 +116,11 @@
       slug: entry.municipality.slug,
       name: entry.municipality.name,
       sublabel: entry.municipality.mrc ?? null,
-      dotTone: signalTone(activeCount),
+      dotTone: signalTone(activeCount ?? 0),
       badge:
-        activeCount > 0
+        activeCount === null
+          ? { label: "n/d", tone: "neutral" }
+          : activeCount > 0
           ? {
               label: String(activeCount),
               tone: "warning",
@@ -127,11 +138,20 @@
   }
 
   // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
-  $: totalSignals = entries.reduce((s, e) => s + countFor(e, activeKey), 0);
-  $: citiesWithSignals = entries.filter((e) => countFor(e, activeKey) > 0).length;
+  function totalFor(key: string): number | null {
+    const counts = entries.map((entry) => countFor(entry, key));
+    return counts.some((count) => count === null)
+      ? null
+      : (counts as number[]).reduce((sum, count) => sum + count, 0);
+  }
 
-  $: countA = entries.reduce((sum, entry) => sum + countFor(entry, "z|m|p"), 0);
-  $: countTransition = entries.reduce((sum, entry) => sum + countFor(entry, "z|p"), 0);
+  $: totalSignals = totalFor(activeKey);
+  $: citiesWithSignals = totalSignals === null
+    ? null
+    : entries.filter((e) => (countFor(e, activeKey) ?? 0) > 0).length;
+
+  $: countA = totalFor("z|m|p");
+  $: countTransition = totalFor("z|p");
 </script>
 
 <RailShell title="Signaux · Villes" {loading} {onRefresh}>
@@ -139,7 +159,7 @@
   <svelte:fragment slot="count">
     {#if loading}
       <span class="rail-muted">Chargement…</span>
-    {:else if dataUnavailable}
+    {:else if dataUnavailable || totalSignals === null || citiesWithSignals === null}
       <span class="font-semibold text-slate-700">Données des signaux indisponibles</span>
     {:else}
       <span class="rail-count-strong">{totalSignals}</span>
@@ -153,11 +173,11 @@
     <div role="radiogroup" aria-label="Mode du vivier">
       <div class="axis-toggle-row">
         <Radio name="vivier-mode" label="Vivier A · référence" helperText="zonage + multifamilial 4+ + précoce" value="a" checked={activeMode === "a"} onchange={() => selectMode("a")} />
-        {#if !loading}<Badge tone="info">{countA}</Badge>{/if}
+        {#if !loading}<Badge tone="info">{countA ?? "n/d"}</Badge>{/if}
       </div>
       <div class="axis-toggle-row axis-toggle-row--last">
         <Radio name="vivier-mode" label="Transition vers B" helperText="non final · zonage + précoce" value="transition" checked={activeMode === "transition"} onchange={() => selectMode("transition")} />
-        {#if !loading}<Badge tone="warning">{countTransition}</Badge>{/if}
+        {#if !loading}<Badge tone="warning">{countTransition ?? "n/d"}</Badge>{/if}
       </div>
     </div>
   </RailSection>
