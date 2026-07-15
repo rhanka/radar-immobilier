@@ -13,7 +13,7 @@ import { mockAuthenticated } from "./_helpers";
  *      4+ ∩ précoce) — ni proximité, ni volume brut de signaux.
  *   2. Chaque portée change la LISTE de villes (et la coloration carte).
  *   3. Sélection d'une ville (rail) → drawer droit = scorecard de couverture
- *      (SourceScorecard : PV · Signaux · Zones · Normes · Lots · TOD +
+ *      (SourceScorecard : PV · Signaux · Zones · Règlements & normes · Lots · TOD +
  *      fraîcheur + prochaine étape) ET drill zones sur la carte (segmented
  *      Province / Ville / Zone du socle partagé).
  *   4. Segment « Zone » → sélection de zone (niveau Zone actif).
@@ -153,9 +153,13 @@ const DELSON_GRILLES = {
   citySlug: "delson",
   available: true,
   zoneCount: 3,
+  numberMatched: 3,
+  complete: true,
   zonesWithGrille: 1,
-  zonesWithNormes: 0,
-  covered: 1,
+  zonesWithReglement: 1,
+  zonesWithLegacyNormes: 0,
+  zonesWithNormativeValues: 2,
+  covered: 2,
   state: "declared",
 };
 
@@ -297,7 +301,7 @@ test.describe("Sources/Couverture — mode d'interaction Signaux", () => {
       "PV collectés",
       "Signaux extraits",
       "Zones servies",
-      "Normes (grilles)",
+      "Règlements & normes",
       "Lots (cadastre)",
       "Périmètres TOD",
     ]) {
@@ -308,8 +312,10 @@ test.describe("Sources/Couverture — mode d'interaction Signaux", () => {
     // partie stable de la preuve.
     await expect(scorecard).toContainText("2 avec citation vérifiable");
     await expect(scorecard).toContainText("fraîcheur");
-    // Grilles mesurées LAZY (fixture : 1/3 couverte) + prochaine étape.
-    await expect(scorecard).toContainText("1/3 zones avec grille ou normes");
+    // Preuves règlementaires mesurées LAZY + prochaine étape.
+    await expect(scorecard).toContainText("1/3 source règlementaire");
+    await expect(scorecard).toContainText("2/3 valeurs normatives");
+    await expect(scorecard).toContainText("1/3 grille PDF");
     await expect(scorecard).toContainText("Prochaine étape");
 
     // ── Drill : segment « Ville » actif, « Zone » ACTIVÉ (zones configurées) ──
