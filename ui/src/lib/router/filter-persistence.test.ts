@@ -3,10 +3,9 @@
  *
  * La logique subsetKeyFromRoute vit dans SignauxMapView.svelte (privée), mais
  * le contrat observable est :
- *   1. parseGeoQuery lit les valeurs de filter.subset ; la clé de signal
- *      ignore les axes retirés
+ *   1. parseGeoQuery lit les valeurs de filter.subset
  *   2. localStorage["signaux-filter-subset"] est lu en repli si pas d'URL
- *   3. Le défaut (aucune URL, aucun localStorage) est "z|p"
+ *   3. Le défaut est A (`z|m|p`) ; seul `z|p` explicite active la transition
  *
  * Ce test valide le contrat en utilisant directement parseGeoQuery (exporté).
  *
@@ -14,16 +13,15 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { parseGeoQuery, normalizeGeoRouteState } from "./geo-route.js";
+import { modeFromSubsetKey, subsetKeyForMode } from "$lib/signals/vivier-view-mode.js";
 
 // ── Helpers ────────────────────────────────────────────────────────��─────────
 
 const FILTER_LS_KEY = "signaux-filter-subset";
-const FILTER_DEFAULT = "z|p";
-const FILTER_FLAGS = ["z", "p", "r"] as const;
+const FILTER_DEFAULT = "z|m|p";
 
-function normalizeSubsetKey(raw: string): string {
-  const flags = new Set(raw.split("|"));
-  return FILTER_FLAGS.filter((flag) => flags.has(flag)).join("|");
+function canonicalSubsetKey(raw: string): string {
+  return subsetKeyForMode(modeFromSubsetKey(raw));
 }
 
 /**
@@ -33,11 +31,11 @@ function normalizeSubsetKey(raw: string): string {
 function subsetKeyFromRoute(route: ReturnType<typeof parseGeoQuery> | null): string {
   if (route) {
     const values = route.filters["subset"] ?? [];
-    if (values.length > 0) return normalizeSubsetKey(values.join("|"));
+    if (values.length > 0) return canonicalSubsetKey(values.join("|"));
   }
   if (typeof localStorage !== "undefined") {
     const stored = localStorage.getItem(FILTER_LS_KEY);
-    if (stored && stored.trim().length > 0) return normalizeSubsetKey(stored.trim());
+    if (stored && stored.trim().length > 0) return canonicalSubsetKey(stored.trim());
   }
   return FILTER_DEFAULT;
 }
@@ -85,46 +83,52 @@ describe("parseGeoQuery — lecture filter.subset", () => {
 // ── subsetKeyFromRoute : priorité URL > localStorage > défaut ────────────────
 
 describe("subsetKeyFromRoute — priorité URL > localStorage > défaut", () => {
-  it("URL avec subset=['z','m'] → l’ancien axe est ignoré", () => {
+  it("URL hybride z|m revient à A", () => {
     const state = parseGeoQuery("?filter.subset=z&filter.subset=m");
-    expect(subsetKeyFromRoute(state)).toBe("z");
+    expect(subsetKeyFromRoute(state)).toBe("z|m|p");
   });
 
-  it("URL avec subset=['z','m','p'] → clé canonique 'z|p'", () => {
+  it("URL A exacte reste z|m|p sans coercition", () => {
     const state = parseGeoQuery("?filter.subset=z&filter.subset=m&filter.subset=p");
+    expect(subsetKeyFromRoute(state)).toBe("z|m|p");
+  });
+
+  it("URL transition exacte z|p gagne sur localStorage A", () => {
+    localStorage.setItem(FILTER_LS_KEY, "z|m|p");
+    const state = parseGeoQuery("?filter.subset=z&filter.subset=p");
     expect(subsetKeyFromRoute(state)).toBe("z|p");
   });
 
-  it("URL avec subset=['z'] → clé 'z' (ignore localStorage)", () => {
+  it("URL invalide revient à A et garde priorité sur localStorage", () => {
     localStorage.setItem(FILTER_LS_KEY, "m");
     const state = parseGeoQuery("?filter.subset=z");
-    expect(subsetKeyFromRoute(state)).toBe("z");
+    expect(subsetKeyFromRoute(state)).toBe("z|m|p");
   });
 
-  it("pas de subset dans URL, localStorage='z' → clé 'z'", () => {
+  it("localStorage invalide revient à A", () => {
     localStorage.setItem(FILTER_LS_KEY, "z");
     const state = parseGeoQuery("?mode=real");
-    expect(subsetKeyFromRoute(state)).toBe("z");
+    expect(subsetKeyFromRoute(state)).toBe("z|m|p");
   });
 
-  it("pas de subset dans URL, localStorage='z|m' → clé 'z'", () => {
+  it("localStorage hybride revient à A", () => {
     localStorage.setItem(FILTER_LS_KEY, "z|m");
     const emptyFiltersState = normalizeGeoRouteState({});
-    expect(subsetKeyFromRoute(emptyFiltersState)).toBe("z");
+    expect(subsetKeyFromRoute(emptyFiltersState)).toBe("z|m|p");
   });
 
-  it("pas de subset dans URL, aucun localStorage → défaut 'z|p'", () => {
+  it("pas de subset dans URL, aucun localStorage → A", () => {
     const emptyFiltersState = normalizeGeoRouteState({});
     expect(subsetKeyFromRoute(emptyFiltersState)).toBe(FILTER_DEFAULT);
   });
 
-  it("route=null → défaut 'z|p'", () => {
+  it("route=null → A", () => {
     expect(subsetKeyFromRoute(null)).toBe(FILTER_DEFAULT);
   });
 
-  it("route=null, localStorage='z' → 'z'", () => {
+  it("route=null, localStorage invalide → A", () => {
     localStorage.setItem(FILTER_LS_KEY, "z");
-    expect(subsetKeyFromRoute(null)).toBe("z");
+    expect(subsetKeyFromRoute(null)).toBe("z|m|p");
   });
 
   it("localStorage vide (espace seul) → ignoré, retourne défaut", () => {
