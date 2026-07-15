@@ -17,6 +17,7 @@ import { render, cleanup, within } from "@testing-library/svelte";
 import SourceScorecard from "./SourceScorecard.svelte";
 import type {
   CityCoverage,
+  CityGrilles,
   CityLotFields,
 } from "$lib/sources/source-coverage-client.js";
 
@@ -72,6 +73,19 @@ function makeCity(slug: string, name: string, lotsServed: boolean): CityCoverage
   };
 }
 
+function makeZonedCity(slug: string): CityCoverage {
+  return {
+    ...makeCity(slug, "Ville Zonée", false),
+    l4Zonage: {
+      state: "verified",
+      served: true,
+      servedBy: "geo",
+      freshness: "fresh",
+    },
+    worstStatus: "declared",
+  };
+}
+
 /** Réponse cohérence PAR DÉFAUT des tests hors-sujet : aucun snapshot (honnête). */
 const EMPTY_CONSISTENCY = { generatedAt: null, cities: [] };
 
@@ -107,6 +121,125 @@ async function flush(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
   await Promise.resolve();
 }
+
+function stubGrillesFetch(payload: CityGrilles) {
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    const body = url.includes("/grilles") ? payload : EMPTY_CONSISTENCY;
+    return new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  }));
+}
+
+async function renderGrilles(payload: CityGrilles): Promise<HTMLElement> {
+  stubGrillesFetch(payload);
+  const { getByTestId } = render(SourceScorecard, {
+    props: { city: makeZonedCity(payload.citySlug) },
+  });
+  await flush();
+  return getByTestId("scorecard-grilles");
+}
+
+describe("SourceScorecard — Règlements & normes", () => {
+  it("détaille les quatre preuves sans qualifier un effet densifiant", async () => {
+    const row = await renderGrilles({
+      citySlug: "complete",
+      available: true,
+      zoneCount: 4,
+      numberMatched: 4,
+      complete: true,
+      zonesWithGrille: 1,
+      zonesWithReglement: 1,
+      zonesWithLegacyNormes: 1,
+      zonesWithNormativeValues: 2,
+      covered: 4,
+      state: "verified",
+    });
+
+    expect(row.textContent).toContain("Règlements & normes");
+    expect(row.textContent).toContain("1/4 source règlementaire");
+    expect(row.textContent).toContain("2/4 valeurs normatives");
+    expect(row.textContent).toContain("1/4 normes historiques");
+    expect(row.textContent).toContain("1/4 grille PDF");
+    expect(row.textContent).toContain("Servi");
+    expect(row.textContent).toContain(
+      "Ne qualifie pas l'effet densifiant ; delta ancien↔nouveau requis.",
+    );
+    expect(row.textContent).not.toContain("Densifie");
+  });
+
+  it("rend l'échec Geo comme indisponible, jamais comme non couvert", async () => {
+    const row = await renderGrilles({
+      citySlug: "geo-down",
+      available: false,
+      error: "geo_unreachable",
+    });
+
+    expect(row.textContent).toContain("Geo indisponible");
+    expect(row.textContent).toContain("Indisponible");
+    expect(row.textContent).not.toContain("Non couvert");
+  });
+
+  it("déclare un échantillon incomplet même sans preuve reconnue", async () => {
+    const row = await renderGrilles({
+      citySlug: "partial",
+      available: true,
+      zoneCount: 1,
+      numberMatched: 4,
+      complete: false,
+      zonesWithGrille: 0,
+      zonesWithReglement: 0,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 0,
+      covered: 0,
+      state: "declared",
+    });
+
+    expect(row.textContent).toContain("Mesure incomplète 1/4");
+    expect(row.textContent).toContain("aucune preuve dans l’échantillon");
+    expect(row.textContent).toContain("Partiel");
+  });
+
+  it("distingue zéro zone servie d'une absence de preuve", async () => {
+    const row = await renderGrilles({
+      citySlug: "no-zones",
+      available: true,
+      zoneCount: 0,
+      numberMatched: 0,
+      complete: true,
+      zonesWithGrille: 0,
+      zonesWithReglement: 0,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 0,
+      covered: 0,
+      state: "absent",
+    });
+
+    expect(row.textContent).toContain("Aucune zone servie");
+    expect(row.textContent).toContain("Non couvert");
+  });
+
+  it("décrit l'absence complète comme absence de preuve reconnue", async () => {
+    const row = await renderGrilles({
+      citySlug: "no-evidence",
+      available: true,
+      zoneCount: 2,
+      numberMatched: 2,
+      complete: true,
+      zonesWithGrille: 0,
+      zonesWithReglement: 0,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 0,
+      covered: 0,
+      state: "absent",
+    });
+
+    expect(row.textContent).toContain("Aucune preuve reconnue servie sur 2 zones");
+    expect(row.textContent).not.toContain("aucune grille publiée");
+  });
+});
 
 describe("SourceScorecard — champs lot enrichis (tri-état + % honnête)", () => {
   it("ville enrichie : 100 % affichés par champ, normes partielles honnêtes, méthode déclarée", async () => {
