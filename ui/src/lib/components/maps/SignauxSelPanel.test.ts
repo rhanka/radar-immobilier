@@ -69,6 +69,21 @@ const NODES: GraphSignalNode[] = [
 afterEach(() => cleanup());
 
 describe("SignauxSelPanel — clic signal → fiche détail", () => {
+  it("shows unavailable without a false zero or empty-state message", () => {
+    const { container } = render(Harness, {
+      props: {
+        selectedCity: makeCity("sutton", "Sutton"),
+        detailNodes: [],
+        detailError: "Projection du vivier indisponible.",
+      },
+    });
+
+    expect(container.textContent).toContain("Signaux indisponibles");
+    expect(container.textContent).toContain("n/d");
+    expect(container.textContent).not.toContain("0 signal");
+    expect(container.textContent).not.toContain("Aucun signal indexé");
+  });
+
   it("ouvre la fiche du 1er signal au clic (description + Evidence + bouton source)", async () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: NODES },

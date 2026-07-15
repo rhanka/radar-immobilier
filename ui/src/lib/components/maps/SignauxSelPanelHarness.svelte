@@ -31,6 +31,7 @@
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
+  export let detailError: string | null = null;
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
@@ -65,6 +66,7 @@
 <SignauxSelPanel
   {selectedCity}
   {detailNodes}
+  {detailError}
   {selectionState}
   {zonesResponse}
   {lotsResponse}
