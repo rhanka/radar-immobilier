@@ -49,7 +49,7 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
 ## Feedback Loop
 - [x] `decision` — Conductor selected exact server-classified option 1 before test/code.
 - [x] `BRHOTFIXA-EX1` — Reason: rail counts already use server `z/m/p` classification while detail cards do not expose those exact flags; impact: add read-only legacy flags produced by the same pure classifier; rollback: remove the additive response field and UI consumption.
-- [ ] `attention` — A client-only restoration is rejected because refs `0140601` and `34a9d4e` prove `p` was neutralized in the detail panel while remaining restrictive in server counts.
+- [x] `attention` — A client-only restoration is rejected because refs `0140601` and `34a9d4e` prove `p` was neutralized in the detail panel while remaining restrictive in server counts.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick**
@@ -66,17 +66,17 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Prove regression refs: `0140601` neutralizes `p` for display parity; `34a9d4e` restores exact server counts without restoring detail parity; `08e6eeb` then coerces `z|m|p` to `z|p`.
   - [x] Define isolated test environment and scope boundaries.
 
-- [ ] **Lot 1 — Coherent A and labelled transition**
+- [x] **Lot 1 — Coherent A and labelled transition**
   - [x] Add red Sutton contract fixture: raw `5`, transition `z|p=2`, A `z|m|p=1`; assert rail count equals detail IDs in each mode.
   - [x] Add red persistence tests: empty/invalid state defaults to A; exact legacy `z|m|p` remains A; only explicit transition state selects `z|p`.
-  - [ ] Add red rail tests: A is selected by default and immutable; transition is explicitly labelled non-final; no free-form axis combination or Vivier v2 label is exposed.
+  - [x] Add red rail tests: A is selected by default and immutable; transition is explicitly labelled non-final; no free-form axis combination or Vivier v2 label is exposed.
   - [x] Under `BRHOTFIXA-EX1`, expose server-produced legacy `z/m/p` flags per detail card from the same pure classifier used by aggregate counts.
   - [x] Filter detail IDs only from server legacy flags; remove the duplicated client `z/m/p` predicate for these modes.
   - [x] Persist only the two canonical modes through URL and localStorage; unsupported historical hybrids resolve to A.
-  - [ ] Lot gate: `make test-ui SCOPE=src/lib/signals/vivier-view-mode.test.ts ENV=test-vivier-a-zmp`.
-  - [ ] Lot gate: focused UI filter/rail tests and focused API graph/vivier tests with `ENV=test-vivier-a-zmp` last.
-  - [ ] Lot gate: `make typecheck ENV=test-vivier-a-zmp` and `make lint ENV=test-vivier-a-zmp`.
-  - [ ] Commit atomically via selective staging and `make commit` under 150 changed lines, or split tests/implementation into separate atomic commits if required.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/signals/vivier-view-mode.test.ts ENV=test-vivier-a-zmp`.
+  - [x] Lot gate: focused UI filter/rail tests and focused API graph/vivier tests with `ENV=test-vivier-a-zmp` last.
+  - [x] Lot gate: `make typecheck ENV=test-vivier-a-zmp` and `make lint ENV=test-vivier-a-zmp`.
+  - [x] Commit atomically via selective staging and `make commit` under 150 changed lines, or split tests/implementation into separate atomic commits if required.
 
 - [ ] **Lot 2 — Review handoff**
   - [ ] Run Harness scope/branch verification without writing Track.
