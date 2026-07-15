@@ -3,7 +3,7 @@
  * d'interaction que Signaux (socle stubé, loader zones mocké) :
  *
  *   1. DRAWER droit = scorecard de couverture (SourceScorecard) de la ville
- *      sélectionnée — mêmes lignes PV · Signaux · Zones · Normes · Lots · TOD.
+ *      sélectionnée — mêmes lignes PV · Signaux · Zones · Règlements & normes · Lots · TOD.
  *   2. Sélection ville (carte OU rail) → drill ZONES : chargement tiéré +
  *      peinture des aplats via le socle + segmented Province/Ville/Zone.
  *   3. Radio de PORTÉE (exclusif) → filtre la liste de villes ET la
@@ -214,7 +214,7 @@ describe("SourceCoverageMap — drawer droit = carte de couverture", () => {
       "PV collectés",
       "Signaux extraits",
       "Zones servies",
-      "Normes (grilles)",
+      "Règlements & normes",
       "Lots (cadastre)",
       "Périmètres TOD",
     ]) {
