@@ -138,6 +138,38 @@ describe("normes-keys", () => {
       10,
       vi.fn(async () => new Response("{}")) as unknown as typeof fetch,
     );
-    expect(invalid).toEqual({ ok: false, error: "invalid_response" });
+    expect(invalid).toEqual({ ok: false, error: "invalid-response" });
+  });
+
+  it("normalizes invalid matched counts and accepts counts below feature length", async () => {
+    const load = (numberMatched: unknown) =>
+      loadGeoFeatureCollection(
+        "https://geo.test",
+        "qc-zonage-ville",
+        10,
+        vi.fn(async () =>
+          new Response(JSON.stringify({ features: [{}, {}], numberMatched }), {
+            headers: { "content-type": "application/json" },
+          }),
+        ) as unknown as typeof fetch,
+      );
+
+    for (const invalid of [-1, 1.5, Number.POSITIVE_INFINITY, "2"]) {
+      await expect(load(invalid)).resolves.toMatchObject({
+        ok: true,
+        numberMatched: null,
+        complete: true,
+      });
+    }
+    await expect(load(1)).resolves.toMatchObject({
+      ok: true,
+      numberMatched: 1,
+      complete: true,
+    });
+    await expect(load(3)).resolves.toMatchObject({
+      ok: true,
+      numberMatched: 3,
+      complete: false,
+    });
   });
 });
