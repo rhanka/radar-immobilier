@@ -310,8 +310,6 @@
    */
   export let resolveHoverCard: (id: string) => HoverCardData | null = () => null;
   /** Actions de la hover-card (footer). */
-  export let onMakeCurrent: (id: string) => void = () => {};
-  export let onAddToFilter: (id: string) => void = () => {};
 
   let hoverCard: HoverCardData | null = null;
   let hoverCardAnchor: { x: number; y: number; flipUp: boolean } | null = null;
@@ -1342,29 +1340,6 @@
         {/each}
       </div>
 
-      <div class="pdf-hovercard-footer">
-        <button
-          type="button"
-          class="pdf-hovercard-action pdf-hovercard-action--primary"
-          on:click={() => {
-            const id = hoverCard?.id;
-            closeHoverCardNow();
-            if (id) onMakeCurrent(id);
-          }}
-        >
-          Voir comme courant
-        </button>
-        <button
-          type="button"
-          class="pdf-hovercard-action"
-          on:click={() => {
-            const id = hoverCard?.id;
-            if (id) onAddToFilter(id);
-          }}
-        >
-          Ajouter au filtre
-        </button>
-      </div>
     </div>
   {/if}
 </div>
@@ -2093,30 +2068,4 @@
     color: #475569;
   }
 
-  .pdf-hovercard-footer {
-    display: flex;
-    gap: 0.4rem;
-    padding-top: 0.15rem;
-  }
-
-  .pdf-hovercard-action {
-    flex: 1;
-    height: 1.8rem;
-    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
-    border-radius: var(--st-radius-sm, 4px);
-    background: var(--st-semantic-surface-default, #fff);
-    color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.72rem;
-    font-weight: 650;
-    cursor: pointer;
-  }
-
-  .pdf-hovercard-action:hover {
-    background: var(--st-semantic-surface-hover, #f1f5f9);
-  }
-
-  .pdf-hovercard-action--primary {
-    border-color: var(--st-semantic-border-strong, #0f766e);
-    color: var(--st-semantic-text-link, #0f766e);
-  }
 </style>
