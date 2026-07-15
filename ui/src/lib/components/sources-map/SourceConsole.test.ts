@@ -107,11 +107,18 @@ const RESPONSE: CoverageResponse = {
   cities: CITIES,
 };
 
-function renderConsole(cities = CITIES) {
+function responseFor(
+  cities: CityCoverage[],
+  generatedAt = RESPONSE.generatedAt,
+): CoverageResponse {
+  return { ...RESPONSE, generatedAt, cities };
+}
+
+function renderConsole(cities = CITIES, generatedAt = RESPONSE.generatedAt) {
   return render(SourceConsole, {
     props: {
       cities,
-      response: { ...RESPONSE, cities },
+      response: responseFor(cities, generatedAt),
       loading: false,
       error: null,
       onReload: () => {},
@@ -199,7 +206,7 @@ describe("SourceConsole — Règlements & normes", () => {
     expect(container.textContent).not.toMatch(/densifie/i);
   });
 
-  it("opens an accessible four-counter description with Enter and Space", async () => {
+  it("opens and dismisses a 24px detailed control from the keyboard", async () => {
     const measured: CityCoverage = {
       ...makeCity("mesuree", "Ville Mesurée", null),
       normes: {
@@ -222,6 +229,8 @@ describe("SourceConsole — Règlements & normes", () => {
       name: "Règlements & normes : Servi",
     });
 
+    expect(control.className).toContain("h-6");
+    expect(control.className).toContain("w-6");
     expect(control.getAttribute("aria-expanded")).toBe("false");
     await fireEvent.keyDown(control, { key: "Enter" });
     const tooltip = getByRole("tooltip");
@@ -232,8 +241,39 @@ describe("SourceConsole — Règlements & normes", () => {
     expect(tooltip.textContent).toContain("1/4 grilles PDF");
     expect(tooltip.textContent).toContain("delta ancien↔nouveau requis");
 
-    await fireEvent.keyDown(control, { key: " " });
+    await fireEvent.keyDown(control, { key: "Escape" });
     expect(queryByRole("tooltip")).toBeNull();
+    await fireEvent.keyDown(control, { key: " " });
+    expect(getByRole("tooltip")).toBeTruthy();
+    await fireEvent.blur(control);
+    expect(queryByRole("tooltip")).toBeNull();
+  });
+
+  it("announces zero served zones without four misleading zero ratios", async () => {
+    const zeroZones: CityCoverage = {
+      ...makeCity("zero-zones", "Ville Sans Zones", null),
+      normes: {
+        state: "absent",
+        freshness: "fresh",
+        measured: true,
+        available: true,
+        zoneCount: 0,
+        numberMatched: 0,
+        complete: true,
+        zonesWithGrille: 0,
+        zonesWithReglement: 0,
+        zonesWithLegacyNormes: 0,
+        zonesWithNormativeValues: 0,
+        covered: 0,
+      },
+    };
+    const { getByRole } = renderConsole([zeroZones]);
+    const control = getByRole("button", {
+      name: "Règlements & normes : Aucune zone servie",
+    });
+    await fireEvent.keyDown(control, { key: "Enter" });
+    expect(getByRole("tooltip").textContent).toContain("Aucune zone servie");
+    expect(getByRole("tooltip").textContent).not.toContain("0/0");
   });
 
   it("replaces Non mesuré with the scorecard lazy success immediately", async () => {
@@ -252,11 +292,15 @@ describe("SourceConsole — Règlements & normes", () => {
     };
     stubConsoleFetch(payload);
     const city = zonedCity(payload.citySlug, "Transition OK");
-    const { getByRole, getByText } = renderConsole([city]);
+    const { getByRole } = renderConsole([city]);
     expect(getByRole("button", { name: /Non mesuré/ })).toBeTruthy();
 
-    await fireEvent.click(getByText("Transition OK"));
+    const cityControl = getByRole("button", {
+      name: "Ouvrir la couverture de Transition OK",
+    });
+    await fireEvent.keyDown(cityControl, { key: "Enter" });
     await flushConsole();
+    expect(cityControl.getAttribute("aria-expanded")).toBe("true");
     expect(getByRole("button", { name: /Règlements & normes : Servi/ })).toBeTruthy();
   });
 
@@ -268,12 +312,100 @@ describe("SourceConsole — Règlements & normes", () => {
     };
     stubConsoleFetch(payload);
     const city = zonedCity(payload.citySlug, "Transition Fail");
-    const { getByRole, getByText } = renderConsole([city]);
+    const { getByRole } = renderConsole([city]);
     expect(getByRole("button", { name: /Non mesuré/ })).toBeTruthy();
 
-    await fireEvent.click(getByText("Transition Fail"));
+    await fireEvent.keyDown(
+      getByRole("button", {
+        name: "Ouvrir la couverture de Transition Fail",
+      }),
+      { key: "Enter" },
+    );
     await flushConsole();
     expect(getByRole("button", { name: /Règlements & normes : Indisponible/ })).toBeTruthy();
+  });
+
+  it("drops a verified overlay when refresh returns a newer failure", async () => {
+    const lazy: CityGrilles = {
+      citySlug: "refresh-verified",
+      available: true,
+      zoneCount: 1,
+      numberMatched: 1,
+      complete: true,
+      zonesWithGrille: 0,
+      zonesWithReglement: 1,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 0,
+      covered: 1,
+      state: "verified",
+    };
+    stubConsoleFetch(lazy);
+    const original = zonedCity(lazy.citySlug, "Refresh Verified");
+    const view = renderConsole([original], "2026-07-01T00:00:00Z");
+    await fireEvent.keyDown(
+      view.getByRole("button", { name: "Ouvrir la couverture de Refresh Verified" }),
+      { key: "Enter" },
+    );
+    await flushConsole();
+    expect(view.getByRole("button", { name: /Règlements & normes : Servi/ })).toBeTruthy();
+
+    const refreshed: CityCoverage = {
+      ...original,
+      normes: {
+        state: "absent",
+        freshness: "unknown",
+        measured: true,
+        available: false,
+        error: "geo-unreachable",
+      },
+    };
+    await view.rerender({
+      cities: [refreshed],
+      response: responseFor([refreshed], "2026-07-02T00:00:00Z"),
+    });
+    expect(view.getByRole("button", { name: /Indisponible/ })).toBeTruthy();
+    expect(view.queryByRole("button", { name: /Règlements & normes : Servi/ })).toBeNull();
+  });
+
+  it("drops an error overlay when refresh returns newer verified bulk data", async () => {
+    const lazy: CityGrilles = {
+      citySlug: "refresh-error",
+      available: false,
+      error: "invalid-response",
+    };
+    stubConsoleFetch(lazy);
+    const original = zonedCity(lazy.citySlug, "Refresh Error");
+    const view = renderConsole([original], "2026-07-01T00:00:00Z");
+    await fireEvent.keyDown(
+      view.getByRole("button", { name: "Ouvrir la couverture de Refresh Error" }),
+      { key: "Enter" },
+    );
+    await flushConsole();
+    expect(view.getByRole("button", { name: /Indisponible/ })).toBeTruthy();
+
+    const refreshed: CityCoverage = {
+      ...original,
+      normes: {
+        state: "verified",
+        freshness: "fresh",
+        measured: true,
+        available: true,
+        zoneCount: 1,
+        numberMatched: 1,
+        complete: true,
+        zonesWithGrille: 1,
+        zonesWithReglement: 0,
+        zonesWithLegacyNormes: 0,
+        zonesWithNormativeValues: 0,
+        covered: 1,
+      },
+    };
+    await view.rerender({
+      cities: [refreshed],
+      response: responseFor([refreshed], "2026-07-01T00:00:00Z"),
+    });
+    expect(view.getByRole("button", { name: /Règlements & normes : Servi/ })).toBeTruthy();
+    expect(view.queryByRole("button", { name: /Indisponible/ })).toBeNull();
   });
 });
 
