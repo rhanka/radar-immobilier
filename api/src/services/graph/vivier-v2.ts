@@ -111,6 +111,13 @@ function firstString(records: readonly Record<string, unknown>[], keys: readonly
   return null;
 }
 
+/** Match PostgreSQL JSONB `->>` for the scalar fields used by legacy Z/M/P. */
+function legacyJsonbText(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
 function firstNumber(records: readonly Record<string, unknown>[], keys: readonly string[]): number | null {
   for (const candidate of records) {
     for (const key of keys) {
@@ -149,12 +156,12 @@ export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalI
   return {
     id: node.id,
     type: node.type,
-    category: firstString([properties], ["category"]),
+    category: legacyJsonbText(properties.category),
     label: node.label ?? null,
-    description: firstString([properties], ["description"]),
-    etape: firstString([properties], ["etape"]),
-    nbUnitesMax: firstString([properties], ["nb_unites_max"]),
-    intensite: firstString([properties], ["intensite"]),
+    description: legacyJsonbText(properties.description),
+    etape: legacyJsonbText(properties.etape),
+    nbUnitesMax: legacyJsonbText(properties.nb_unites_max),
+    intensite: legacyJsonbText(properties.intensite),
     sourceRef: node.sourceRef ?? null,
   };
 }

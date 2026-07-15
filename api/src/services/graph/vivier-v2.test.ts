@@ -42,6 +42,30 @@ describe("server vivier_v2 computation", () => {
     });
     expect(classifyLegacyZmpSignal(input).flags).toEqual({ z: false, m: false, p: false });
   });
+
+  it("reproduces JSONB text extraction for legacy scalar values", () => {
+    const input = extractLegacyZmpInput({
+      id: "scalar-values",
+      type: "Signal",
+      props: {
+        properties: {
+          category: " ppcmoi ",
+          description: false,
+          etape: "projet_reglement",
+          nb_unites_max: 12,
+          intensite: null,
+        },
+      },
+    });
+
+    expect(input).toMatchObject({
+      category: " ppcmoi ",
+      description: "false",
+      etape: "projet_reglement",
+      nbUnitesMax: "12",
+      intensite: null,
+    });
+  });
   it("classifies Sutton legacy memberships once for counts and detail IDs", () => {
     const suton = [
       signal({ id: "sutton-a", category: "rezonage", etape: "avis_motion", nbUnitesMax: "8" }),
