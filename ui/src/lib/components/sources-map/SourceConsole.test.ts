@@ -231,6 +231,14 @@ describe("SourceConsole — Règlements & normes", () => {
 
     expect(control.className).toContain("h-6");
     expect(control.className).toContain("w-6");
+    expect(control.className).toContain("bg-transparent");
+    expect(control.className).toContain("border-0");
+    expect(control.getAttribute("style") ?? "").not.toContain("background-color");
+    const swatch = control.querySelector('span[aria-hidden="true"]');
+    expect(swatch).toBeTruthy();
+    expect(swatch?.className).toContain("h-3");
+    expect(swatch?.className).toContain("w-3");
+    expect(swatch?.getAttribute("style")).toContain("background-color");
     expect(control.getAttribute("aria-expanded")).toBe("false");
     await fireEvent.keyDown(control, { key: "Enter" });
     const tooltip = getByRole("tooltip");
