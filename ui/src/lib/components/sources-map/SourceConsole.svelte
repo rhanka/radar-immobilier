@@ -43,6 +43,19 @@
   let selectedCity: CityCoverage | null = null;
   let expandedNormesSlug: string | null = null;
   let normesOverlay: Record<string, NormesCell> = {};
+  let overlayResponse = response;
+  let overlayGeneratedAt = response?.generatedAt ?? null;
+
+  $: if (
+    response !== overlayResponse ||
+    (response?.generatedAt ?? null) !== overlayGeneratedAt
+  ) {
+    overlayResponse = response;
+    overlayGeneratedAt = response?.generatedAt ?? null;
+    normesOverlay = {};
+    expandedNormesSlug = null;
+    selectedCity = null;
+  }
 
   // ── Périmètre : Province / Villes à signaux précoces (parité « Couverture ») ─
   // Mêmes intitulés que le radio de la carte Couverture ; même critère
@@ -137,7 +150,9 @@
       ? { color: STATE_COLOR.absent, status: "Non mesuré" }
       : c.normes.available === false
         ? { color: STATE_COLOR.declared, status: "Indisponible" }
-        : { color: STATE_COLOR[c.normes.state], status: STATE_LABEL[c.normes.state] };
+        : c.normes.zoneCount === 0
+          ? { color: STATE_COLOR.absent, status: "Aucune zone servie" }
+          : { color: STATE_COLOR[c.normes.state], status: STATE_LABEL[c.normes.state] };
     return [
       layerDisplay("pv", "PV collectés", c.l1Raw.state),
       layerDisplay("signaux", "Signaux extraits", c.signals.state),
@@ -164,6 +179,7 @@
   function normesDescription(cell: NormesCell): string {
     if (cell.measured !== true) return "Mesure non effectuée.";
     if (cell.available === false) return `Geo indisponible. ${NORMES_DISCLAIMER}`;
+    if (cell.zoneCount === 0) return `Aucune zone servie. ${NORMES_DISCLAIMER}`;
     const n = cell.zoneCount ?? 0;
     const incomplete = cell.complete === false ? "Mesure geo incomplète. " : "";
     return (
@@ -179,10 +195,29 @@
   }
 
   function handleNormesKeydown(event: KeyboardEvent, citySlug: string): void {
+    if (event.key === "Escape") {
+      expandedNormesSlug = null;
+      return;
+    }
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
     event.stopPropagation();
     toggleNormes(citySlug);
+  }
+
+  function closeNormes(citySlug: string): void {
+    if (expandedNormesSlug === citySlug) expandedNormesSlug = null;
+  }
+
+  function toggleSelectedCity(city: CityCoverage): void {
+    selectedCity = selectedCity?.citySlug === city.citySlug ? null : city;
+  }
+
+  function handleCityKeydown(event: KeyboardEvent, city: CityCoverage): void {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSelectedCity(city);
   }
 
   function handleGrillesResolved(result: CityGrilles): void {
@@ -315,12 +350,20 @@
             {#each filtered as city (city.citySlug)}
               {@const isSelected = selectedCity?.citySlug === city.citySlug}
               <tr
-                class={`cursor-pointer transition-colors ${isSelected ? "bg-teal-50" : "hover:bg-slate-50"}`}
-                on:click={() => { selectedCity = isSelected ? null : city; }}
+                class={`transition-colors ${isSelected ? "bg-teal-50" : "hover:bg-slate-50"}`}
               >
                 <td class="px-4 py-2">
                   <div class="flex items-center gap-2">
-                    <span class="font-medium text-slate-800">{city.cityName}</span>
+                    <button
+                      type="button"
+                      class="font-medium text-slate-800 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      aria-expanded={isSelected}
+                      aria-label={`Ouvrir la couverture de ${city.cityName}`}
+                      on:click={() => toggleSelectedCity(city)}
+                      on:keydown={(event) => handleCityKeydown(event, city)}
+                    >
+                      {city.cityName}
+                    </button>
                     {#if isFocusCity(city, focusScope)}
                       <!-- Rang par nb de signaux PRIORITAIRES z∩m∩p (critère focus),
                            ni proximité, ni volume brut de signaux. -->
@@ -337,7 +380,7 @@
                       {@const tooltipId = `normes-detail-${city.citySlug}`}
                       <button
                         type="button"
-                        class="inline-block h-4 w-4 rounded-sm border border-slate-300 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        class="inline-block h-6 w-6 rounded-sm border border-slate-300 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
                         style="background-color: {layer.color};"
                         aria-label={`${layer.label} : ${layer.status}`}
                         aria-expanded={expandedNormesSlug === city.citySlug}
@@ -345,6 +388,7 @@
                         aria-describedby={expandedNormesSlug === city.citySlug ? tooltipId : undefined}
                         on:click|stopPropagation={() => toggleNormes(city.citySlug)}
                         on:keydown={(event) => handleNormesKeydown(event, city.citySlug)}
+                        on:blur={() => closeNormes(city.citySlug)}
                       ></button>
                       {#if expandedNormesSlug === city.citySlug}
                         <span
