@@ -23,7 +23,10 @@
     STATE_COLOR,
     STATE_LABEL,
     STATE_BADGE_TONE,
+    normesCellFromCityGrilles,
     type CityCoverage,
+    type CityGrilles,
+    type NormesCell,
     type CoverageResponse,
     type CoverageState,
   } from "$lib/sources/source-coverage-client.js";
@@ -38,6 +41,8 @@
   let filter: Filter = "actives";
   let query = "";
   let selectedCity: CityCoverage | null = null;
+  let expandedNormesSlug: string | null = null;
+  let normesOverlay: Record<string, NormesCell> = {};
 
   // ── Périmètre : Province / Villes à signaux précoces (parité « Couverture ») ─
   // Mêmes intitulés que le radio de la carte Couverture ; même critère
@@ -51,7 +56,11 @@
   const SEGMENTS = [SEG_PROVINCE, SEG_FOCUS] as const;
   let focusOnly = false;
   $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
-  $: focusScope = computeFocusScope(cities);
+  $: displayCities = cities.map((city) => {
+    const normes = normesOverlay[city.citySlug];
+    return normes ? { ...city, normes } : city;
+  });
+  $: focusScope = computeFocusScope(displayCities);
 
   const FILTERS: { value: Filter; label: string }[] = [
     { value: "actives", label: "Actives" },
@@ -78,7 +87,7 @@
   $: headline = response ? buildProvinceHeadline(response) : null;
   $: headlineText = response ? formatProvinceHeadline(response.totals) : "";
 
-  $: sorted = sortCitiesForConsole(cities);
+  $: sorted = sortCitiesForConsole(displayCities);
   $: filtered = sorted.filter((c) => {
     // Périmètre focus (villes à signaux prioritaires z∩m∩p) : EN PLUS des
     // filtres statut + recherche.
@@ -112,6 +121,7 @@
     label: string;
     color: string;
     status: string;
+    description?: string;
   };
 
   function layerDisplay(
@@ -132,7 +142,12 @@
       layerDisplay("pv", "PV collectés", c.l1Raw.state),
       layerDisplay("signaux", "Signaux extraits", c.signals.state),
       layerDisplay("zones", "Zones servies", c.l4Zonage.state),
-      { key: "normes", label: "Règlements & normes", ...normes },
+      {
+        key: "normes",
+        label: "Règlements & normes",
+        description: normesDescription(c.normes),
+        ...normes,
+      },
       layerDisplay("lots", "Lots (cadastre)", c.l5Lots.state),
       layerDisplay(
         "champs-lot",
@@ -141,6 +156,41 @@
       ),
       layerDisplay("tod", "Périmètres TOD", c.tod.state),
     ];
+  }
+
+  const NORMES_DISCLAIMER =
+    "Ne qualifie pas l'effet densifiant ; delta ancien↔nouveau requis.";
+
+  function normesDescription(cell: NormesCell): string {
+    if (cell.measured !== true) return "Mesure non effectuée.";
+    if (cell.available === false) return `Geo indisponible. ${NORMES_DISCLAIMER}`;
+    const n = cell.zoneCount ?? 0;
+    const incomplete = cell.complete === false ? "Mesure geo incomplète. " : "";
+    return (
+      `${incomplete}${cell.zonesWithReglement ?? 0}/${n} sources règlementaires · ` +
+      `${cell.zonesWithNormativeValues ?? 0}/${n} valeurs normatives · ` +
+      `${cell.zonesWithLegacyNormes ?? 0}/${n} normes historiques · ` +
+      `${cell.zonesWithGrille ?? 0}/${n} grilles PDF. ${NORMES_DISCLAIMER}`
+    );
+  }
+
+  function toggleNormes(citySlug: string): void {
+    expandedNormesSlug = expandedNormesSlug === citySlug ? null : citySlug;
+  }
+
+  function handleNormesKeydown(event: KeyboardEvent, citySlug: string): void {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleNormes(citySlug);
+  }
+
+  function handleGrillesResolved(result: CityGrilles): void {
+    const normes = normesCellFromCityGrilles(result);
+    normesOverlay = { ...normesOverlay, [result.citySlug]: normes };
+    if (selectedCity?.citySlug === result.citySlug) {
+      selectedCity = { ...selectedCity, normes };
+    }
   }
 </script>
 
@@ -282,13 +332,37 @@
                   {/if}
                 </td>
                 {#each layerStates(city) as layer (layer.key)}
-                  <td class="px-2 py-2 text-center">
-                    <span
-                      class="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle"
-                      style="background-color: {layer.color};"
-                      title={`${layer.label} : ${layer.status}`}
-                      aria-label={`${layer.label} : ${layer.status}`}
-                    ></span>
+                  <td class="relative px-2 py-2 text-center">
+                    {#if layer.key === "normes"}
+                      {@const tooltipId = `normes-detail-${city.citySlug}`}
+                      <button
+                        type="button"
+                        class="inline-block h-4 w-4 rounded-sm border border-slate-300 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        style="background-color: {layer.color};"
+                        aria-label={`${layer.label} : ${layer.status}`}
+                        aria-expanded={expandedNormesSlug === city.citySlug}
+                        aria-controls={tooltipId}
+                        aria-describedby={expandedNormesSlug === city.citySlug ? tooltipId : undefined}
+                        on:click|stopPropagation={() => toggleNormes(city.citySlug)}
+                        on:keydown={(event) => handleNormesKeydown(event, city.citySlug)}
+                      ></button>
+                      {#if expandedNormesSlug === city.citySlug}
+                        <span
+                          id={tooltipId}
+                          role="tooltip"
+                          class="absolute left-1/2 top-full z-20 w-72 -translate-x-1/2 rounded bg-slate-900 p-2 text-left text-xs normal-case text-white shadow-lg"
+                        >
+                          {layer.description}
+                        </span>
+                      {/if}
+                    {:else}
+                      <span
+                        class="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle"
+                        style="background-color: {layer.color};"
+                        title={`${layer.label} : ${layer.status}`}
+                        aria-label={`${layer.label} : ${layer.status}`}
+                      ></span>
+                    {/if}
                   </td>
                 {/each}
                 <td class="px-4 py-2">
@@ -314,7 +388,12 @@
   <!-- ── Panneau droit : scorecard détaillée ──────────────────────────────── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} {focusScope} onClose={() => { selectedCity = null; }} />
+      <SourceScorecard
+        city={selectedCity}
+        {focusScope}
+        onGrillesResolved={handleGrillesResolved}
+        onClose={() => { selectedCity = null; }}
+      />
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <p class="text-sm text-slate-400">
