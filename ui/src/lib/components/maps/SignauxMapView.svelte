@@ -115,15 +115,18 @@
   } from "$lib/maps/hover-paint.js";
   import {
     A_SUBSET_KEY,
-    canOpenProjectedSignal,
-    detailCountForCity,
+    clearVivierCityTransientState,
+    countForVivierCity,
+    initialVivierSubsetKey,
     modeFromSubsetKey,
     projectNodesForVivierMode,
+    reconcileVivierRouteSubset,
     reconcileVivierSelection,
     retainProjectedSignalId,
-    routeSubsetKey,
     subsetKeyForMode,
+    validateVivierProjectionAuthority,
     vivierRouteKey,
+    type ValidatedVivierProjections,
   } from "$lib/signals/vivier-view-mode.js";
   import {
     lotLineColorExpression,
@@ -259,16 +262,10 @@
    * Tout état vide, ancien ou hybride revient à A sans coercer A vers T.
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
-    if (route) {
-      const values = route.state.filters["subset"] ?? [];
-      if (values.length > 0) return subsetKeyForMode(modeFromSubsetKey(values.join("|")));
-    }
-    // Repli localStorage
-    if (typeof localStorage !== "undefined") {
-      const stored = localStorage.getItem(FILTER_LS_KEY);
-      if (stored && stored.trim().length > 0) return subsetKeyForMode(modeFromSubsetKey(stored.trim()));
-    }
-    return FILTER_DEFAULT;
+    const stored = typeof localStorage === "undefined"
+      ? null
+      : localStorage.getItem(FILTER_LS_KEY);
+    return initialVivierSubsetKey(route, stored);
   }
 
   function handleFilterChange(
@@ -394,11 +391,11 @@
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
   $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
-  $: detailProjection = projectNodesForVivierMode(
+  $: validatedDetailProjections = validateVivierProjectionAuthority(
     detailNodes,
     detailLegacyProjection,
-    activeViewMode,
   );
+  $: detailProjection = validatedDetailProjections[activeViewMode];
   $: filteredDetailNodes = detailProjection.nodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
@@ -516,14 +513,14 @@
     entries: CityMapEntry[],
     subsetKey: string,
     activeCitySlug: string | null,
-    authority: LegacyZmpProjection | null,
+    projections: ValidatedVivierProjections,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = detailCountForCity(
+      const count = countForVivierCity(
         e,
         activeCitySlug,
-        authority,
+        projections,
         modeFromSubsetKey(subsetKey),
       );
       expr.push(e.municipality.slug, count === null ? "#94a3b8" : signalCountColor(count));
@@ -564,7 +561,7 @@
     allEntries,
     activeSubsetKey,
     selectedCity?.municipality.slug ?? null,
-    detailLegacyProjection,
+    validatedDetailProjections,
   );
   $: fillOpacityExpression = buildFillOpacityExpression(
     allEntries,
@@ -712,6 +709,14 @@
     if (selectedCity?.municipality.slug === entry.municipality.slug) {
       return;
     }
+    const transients = clearVivierCityTransientState(
+      selectedCity?.municipality.slug ?? null,
+      entry.municipality.slug,
+      { activeEvidence, activeDocument, hoveredEvidenceSignalId },
+    );
+    activeEvidence = transients.activeEvidence;
+    activeDocument = transients.activeDocument;
+    hoveredEvidenceSignalId = transients.hoveredEvidenceSignalId;
     if (syncUrl) {
       // Conserver le filtre actif dans la nouvelle route ville
       const subsetValues = activeSubsetKey ? activeSubsetKey.split("|") : [];
@@ -814,6 +819,7 @@
     lotsResponse = null;
     activeDocument = null;
     activeEvidence = null;
+    hoveredEvidenceSignalId = null;
     selectionState = createSelectionBucketState();
     updateGeoLayers();
     // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
@@ -992,24 +998,6 @@
     return buildHoverCard(node, color);
   }
 
-  /** Ouvre seulement un signal encore inclus dans la projection active. */
-  function makeSignalCurrent(id: string): void {
-    if (!canOpenProjectedSignal(id, filteredDetailNodes)) return;
-    const node = filteredDetailNodes.find((n) => n.id === id);
-    if (!node) return;
-    openEvidence({
-      title: node.label,
-      evidence: extractSignalEvidence(node),
-      node,
-    });
-  }
-
-  /** Le viewer ne peut jamais réintroduire un signal exclu du mode fixe A/T. */
-  function addSignalToFilter(id: string): void {
-    if (!canOpenProjectedSignal(id, filteredDetailNodes)) return;
-    makeSignalCurrent(id);
-  }
-
   function zoneSelectionKey(zone: GeoZoneFeature): SelectionKey {
     return makeKey("zone", `${zone.properties.citySlug}/${zone.properties.code}`);
   }
@@ -1050,7 +1038,7 @@
     const key = vivierRouteKey(route);
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
-    applyActiveSubsetKey(routeSubsetKey(route));
+    applyActiveSubsetKey(reconcileVivierRouteSubset(route, activeSubsetKey));
 
     if (route.level === "region") {
       // Au montage / restauration d'URL, la carte démarre déjà au niveau
@@ -1525,7 +1513,7 @@
       {loading}
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
-      selectedLegacyProjection={detailLegacyProjection}
+      selectedVivierProjections={validatedDetailProjections}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
@@ -1660,8 +1648,6 @@
         onSignalHover={setHoveredEvidenceSignal}
         hoveredSignalId={hoveredEvidenceSignalId}
         {resolveHoverCard}
-        onMakeCurrent={makeSignalCurrent}
-        onAddToFilter={addSignalToFilter}
         onClose={closeEvidence}
       />
     {/if}
