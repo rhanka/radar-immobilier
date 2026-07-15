@@ -48,7 +48,7 @@ const byCity = (
 const detail = (
   citySlug: string,
   nodes: GraphSignalDetailResponse["nodes"],
-): GraphSignalDetailResponse => ({ ok: true, citySlug, nodes });
+): GraphSignalDetailResponse => ({ ok: true, citySlug, legacyProjection: null, nodes });
 
 const makeNode = (
   id: string,
