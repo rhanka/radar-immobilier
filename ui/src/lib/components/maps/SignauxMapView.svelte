@@ -112,7 +112,12 @@
     withHoverNeutralTint,
     withHoverOpacityBoost,
   } from "$lib/maps/hover-paint.js";
-  import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import {
+    A_SUBSET_KEY,
+    modeFromSubsetKey,
+    projectNodesForVivierMode,
+    subsetKeyForMode,
+  } from "$lib/signals/vivier-view-mode.js";
   import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
@@ -219,34 +224,26 @@
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
-  // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
-  /** Clé active = combinaison des axes sélectionnables : "", "z", "p", etc. */
-  const FILTER_DEFAULT = "z|p";
-  const FILTER_FLAGS = ["z", "p", "r"] as const;
+  // ── Projection globale A / transition ────────────────────────────────────
+  const FILTER_DEFAULT: string = A_SUBSET_KEY;
   const FILTER_LS_KEY = "signaux-filter-subset";
-  let activeSubsetKey = FILTER_DEFAULT; // défaut : zonage + signaux précoces
-
-  /** Retire les anciens flags et rétablit l'ordre des clés serveur. */
-  function normalizeSubsetKey(raw: string): string {
-    const flags = new Set(raw.split("|"));
-    return FILTER_FLAGS.filter((flag) => flags.has(flag)).join("|");
-  }
+  let activeSubsetKey: string = FILTER_DEFAULT;
 
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
-   * Priorité : URL (filter.subset) > localStorage > défaut (z|p).
+   * Priorité : URL > localStorage > A. Seul `z|p` sélectionne la transition.
    * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
-   * Les flags non sélectionnables des anciennes URLs sont ignorés.
+   * Tout état vide, ancien ou hybride revient à A sans coercer A vers T.
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
     if (route) {
       const values = route.state.filters["subset"] ?? [];
-      if (values.length > 0) return normalizeSubsetKey(values.join("|"));
+      if (values.length > 0) return subsetKeyForMode(modeFromSubsetKey(values.join("|")));
     }
     // Repli localStorage
     if (typeof localStorage !== "undefined") {
       const stored = localStorage.getItem(FILTER_LS_KEY);
-      if (stored && stored.trim().length > 0) return normalizeSubsetKey(stored.trim());
+      if (stored && stored.trim().length > 0) return subsetKeyForMode(modeFromSubsetKey(stored.trim()));
     }
     return FILTER_DEFAULT;
   }
@@ -254,7 +251,7 @@
   function handleFilterChange(
     subsetKey: string,
   ): void {
-    const normalizedSubsetKey = normalizeSubsetKey(subsetKey);
+    const normalizedSubsetKey = subsetKeyForMode(modeFromSubsetKey(subsetKey));
     activeSubsetKey = normalizedSubsetKey;
     // Persiste le filtre dans localStorage
     if (typeof localStorage !== "undefined") {
@@ -373,16 +370,18 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
-  /** Nœuds filtrés selon la clé active — miroir côté carte de SignauxSelPanel. */
-  $: filteredDetailNodes = activeSubsetKey
-    ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
-    : detailNodes;
+  $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
+  $: detailProjection = projectNodesForVivierMode(detailNodes, activeViewMode);
+  $: filteredDetailNodes = detailProjection.nodes;
+  $: effectiveDetailError = detailError ?? (
+    !detailLoading && detailNodes.length > 0 && !detailProjection.available
+      ? "Projection du vivier indisponible (contrat serveur incompatible)."
+      : null
+  );
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
-   * #4 — Le filtre RESTREINT réellement l'ensemble quand il porte l'axe « z »
-   * (zonage). L'axe « p » (précoce) est neutre côté client (ne masque rien)
-   * → il ne déclenche pas d'atténuation carto.
+   * Both fixed projections restrict the raw signal set.
    */
   $: filterActive = activeSubsetKey.includes("z");
   /** True si au moins un lot affiché porte une projection de signal (#4). */
@@ -878,7 +877,7 @@
       detailNodes,
       payload.evidence.rawRef,
       // #4 — marque les co-PV signaux HORS-FILTRE (peints en slate par le viewer).
-      (n) => nodeMatchesSubset(n, activeSubsetKey),
+      (n) => filteredDetailNodes.some((candidate) => candidate.id === n.id),
     );
     activeEvidence = {
       title: payload.title,
@@ -1632,9 +1631,9 @@
   <svelte:fragment slot="sel">
     <SignauxSelPanel
       {selectedCity}
-      {detailNodes}
+      detailNodes={filteredDetailNodes}
       {detailLoading}
-      {detailError}
+      detailError={effectiveDetailError}
       {zonesLoading}
       {zonesError}
       {lotsLoading}
@@ -1642,7 +1641,7 @@
       {zonesResponse}
       {lotsResponse}
       {selectionState}
-      {activeSubsetKey}
+      activeSubsetKey=""
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}

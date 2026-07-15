@@ -67,12 +67,12 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Define isolated test environment and scope boundaries.
 
 - [ ] **Lot 1 — Coherent A and labelled transition**
-  - [ ] Add red Sutton contract fixture: raw `5`, transition `z|p=2`, A `z|m|p=1`; assert rail count equals detail IDs in each mode.
-  - [ ] Add red persistence tests: empty/invalid state defaults to A; exact legacy `z|m|p` remains A; only explicit transition state selects `z|p`.
+  - [x] Add red Sutton contract fixture: raw `5`, transition `z|p=2`, A `z|m|p=1`; assert rail count equals detail IDs in each mode.
+  - [x] Add red persistence tests: empty/invalid state defaults to A; exact legacy `z|m|p` remains A; only explicit transition state selects `z|p`.
   - [ ] Add red rail tests: A is selected by default and immutable; transition is explicitly labelled non-final; no free-form axis combination or Vivier v2 label is exposed.
   - [x] Under `BRHOTFIXA-EX1`, expose server-produced legacy `z/m/p` flags per detail card from the same pure classifier used by aggregate counts.
   - [x] Filter detail IDs only from server legacy flags; remove the duplicated client `z/m/p` predicate for these modes.
-  - [ ] Persist only the two canonical modes through URL and localStorage; unsupported historical hybrids resolve to A.
+  - [x] Persist only the two canonical modes through URL and localStorage; unsupported historical hybrids resolve to A.
   - [ ] Lot gate: `make test-ui SCOPE=src/lib/signals/vivier-view-mode.test.ts ENV=test-vivier-a-zmp`.
   - [ ] Lot gate: focused UI filter/rail tests and focused API graph/vivier tests with `ENV=test-vivier-a-zmp` last.
   - [ ] Lot gate: `make typecheck ENV=test-vivier-a-zmp` and `make lint ENV=test-vivier-a-zmp`.
