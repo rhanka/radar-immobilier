@@ -56,6 +56,9 @@ Expose live geo regulation references and normative values in Source coverage wi
 - [x] `accept` — Apply the consensus corrections: exact allowlists, linear evidence aggregation, normalized completeness/errors, warm bulk counters, and bounded failure caching.
 - [x] `accept` — Keep Console and scorecard synchronized through a typed local overlay; expose the existing regulation cell as a keyboard-operable detailed control.
 - [x] `accept` — Use generic `Mesure geo incomplète` because the wire exposes zoning `numberMatched` but no auxiliary matched counter.
+- [x] `accept` — Invalidate lazy regulation overlays on new bulk response identity or generation and close stale detail state.
+- [x] `accept` — Use semantic city activation plus a ≥24px regulation control with Enter/Space, Escape, and blur behavior.
+- [x] `accept` — Render zero-zone measurement as `Aucune zone servie` without 0/0 evidence ratios.
 - [x] `defer` — Exhaustive E2E state matrix: `make test-e2e` is a placeholder; focused API/client/component behavior tests are required and complete in this correction lot.
 
 ## Orchestration Mode (AI-selected)
@@ -100,6 +103,13 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Synchronize lazy scorecard resolution into the Console for success and failure.
   - [x] Cover auxiliary truncation with generic incomplete wording and focused transition tests.
   - [x] Run every affected focused make test with `ENV=test-reglements-normes` last.
+
+- [x] **Lot 2c — Refresh and keyboard reconciliation**
+  - [x] Invalidate verified/error overlays when a fresher or replaced bulk response arrives.
+  - [x] Open city scorecards through a semantic keyboard-operable control and preserve lazy success/failure transitions.
+  - [x] Meet the 24px regulation target and close detail on Escape or blur.
+  - [x] Keep zero-zone wording consistent without misleading 0/0 counters.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
 
 - [ ] **Lot 3 — Branch gates and live acceptance evidence**
   - [ ] Run `make typecheck ENV=test-reglements-normes`.
