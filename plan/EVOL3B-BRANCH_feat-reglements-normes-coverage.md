@@ -59,6 +59,7 @@ Expose live geo regulation references and normative values in Source coverage wi
 - [x] `accept` — Invalidate lazy regulation overlays on new bulk response identity or generation and close stale detail state.
 - [x] `accept` — Use semantic city activation plus a ≥24px regulation control with Enter/Space, Escape, and blur behavior.
 - [x] `accept` — Render zero-zone measurement as `Aucune zone servie` without 0/0 evidence ratios.
+- [x] `accept` — Reject in-flight lazy results whose selection epoch, bulk response identity, or generation is stale.
 - [x] `defer` — Exhaustive E2E state matrix: `make test-e2e` is a placeholder; focused API/client/component behavior tests are required and complete in this correction lot.
 
 ## Orchestration Mode (AI-selected)
@@ -109,6 +110,12 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Open city scorecards through a semantic keyboard-operable control and preserve lazy success/failure transitions.
   - [x] Meet the 24px regulation target and close detail on Escape or blur.
   - [x] Keep zero-zone wording consistent without misleading 0/0 counters.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
+
+- [x] **Lot 2d — In-flight lazy refresh guard**
+  - [x] Capture the selection epoch, bulk response identity, and generation for each lazy scorecard request.
+  - [x] Ignore stale success and failure results after a refreshed bulk payload replaces their generation.
+  - [x] Cover both race directions with deferred Promise tests.
   - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
 
 - [ ] **Lot 3 — Branch gates and live acceptance evidence**
