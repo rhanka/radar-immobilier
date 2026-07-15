@@ -61,6 +61,9 @@ Expose live geo regulation references and normative values in Source coverage wi
 - [x] `accept` — Render zero-zone measurement as `Aucune zone servie` without 0/0 evidence ratios.
 - [x] `accept` — Reject in-flight lazy results whose selection epoch, bulk response identity, or generation is stale.
 - [x] `accept` — Keep the regulation hit target at 24px while aligning its 12px status glyph with the Zones glyph.
+- [x] `accept` — Reconcile two independent review voices and accept the targeted regulation swatch visual check.
+- [x] `attention` — Treat live coverage/absence and UI-state checks as technical evidence, not global product acceptance.
+- [x] `defer` — Integrated product UAT is not applicable in the non-representative local environment; run it in a representative 719-city environment with explicit product finality and an acceptance checklist.
 - [x] `defer` — Exhaustive E2E state matrix: `make test-e2e` is a placeholder; focused API/client/component behavior tests are required and complete in this correction lot.
 
 ## Orchestration Mode (AI-selected)
@@ -69,7 +72,8 @@ Expose live geo regulation references and normative values in Source coverage wi
 - Rationale: API and UI share one small wire contract; independent reviewers remain read-only until the implementation lot is ready.
 
 ## UAT Management (in orchestration context)
-- UAT is presented only from the root checkout on fixed `ENV=dev` ports after the branch is committed and review-ready.
+- Targeted visual checks provide scoped technical evidence only; the regulation swatch check passed.
+- Integrated product UAT is N/A in local `ENV=dev`, which does not represent the intended 719-city outcome; defer it to a representative environment with explicit product finality and an acceptance checklist.
 - Branch/lane agents must not start or modify the root UAT stack.
 
 ## Plan / Todo (lot-based)
@@ -139,8 +143,8 @@ Expose live geo regulation references and normative values in Source coverage wi
     - E2E: NON EXECUTED placeholder; remains explicitly deferred.
 
 - [ ] **Lot 4 — Consensus review, UAT, and delivery**
-  - [ ] Obtain at least two independent review voices and reconcile findings.
-  - [ ] Present commit-identical UAT on root `http://localhost:5301` with stable `ENV=dev` data.
-  - [ ] Verify the `Règlements & normes` row on a live-covered city and the unavailable/absent distinction.
+  - [x] Obtain two independent review voices and reconcile findings.
+  - [x] Record the targeted regulation swatch visual check as passed and integrated product UAT as N/A locally and deferred to a representative environment.
+  - [x] Record live coverage/absence and UI-state checks as technical evidence only, not global product acceptance.
   - [ ] Push the branch and open a draft PR with Track item and acceptance evidence.
   - [ ] Verify CI green; merge only by merge commit and preserve the branch.
