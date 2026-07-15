@@ -72,9 +72,9 @@ Expose live geo regulation references and normative values in Source coverage wi
 
 - [ ] **Lot 1 — Deterministic API coverage contract**
   - [x] Add one shared allowlist/normalization source for regulation keys and normative value keys.
-  - [ ] Measure coverage per served zoning feature and join live `qc-zonage-norms-*` evidence only to matching normalized zone codes.
-  - [ ] Expose `numberMatched`, `complete`, `zonesWithGrille`, `zonesWithReglement`, `zonesWithLegacyNormes`, `zonesWithNormativeValues`, and union `covered`.
-  - [ ] Keep unavailable/malformed geo distinct from business absence and block `verified` when the measurement is incomplete.
+  - [x] Measure coverage per served zoning feature and join live `qc-zonage-norms-*` evidence only to matching normalized zone codes.
+  - [x] Expose `numberMatched`, `complete`, `zonesWithGrille`, `zonesWithReglement`, `zonesWithLegacyNormes`, `zonesWithNormativeValues`, and union `covered`.
+  - [x] Keep unavailable/malformed geo distinct from business absence and block `verified` when the measurement is incomplete.
   - [ ] Add focused tests for regulation-only, normative values, unmatched codes, truncation, malformed geo, and no `effet_densifiant` fabrication.
   - [ ] Lot gate: `make test-api SCOPE=src/routes/source-coverage.test.ts ENV=test-reglements-normes`.
   - [ ] Commit only Lot 1 files plus this plan update.
