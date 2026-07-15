@@ -62,8 +62,10 @@ Expose live geo regulation references and normative values in Source coverage wi
 - [x] `accept` — Reject in-flight lazy results whose selection epoch, bulk response identity, or generation is stale.
 - [x] `accept` — Keep the regulation hit target at 24px while aligning its 12px status glyph with the Zones glyph.
 - [x] `accept` — Reconcile two independent review voices and accept the targeted regulation swatch visual check.
+- [x] `accept` — Publish draft PR #375 and pass Branch policy run `29381914629` plus CI run `29381914628` on implementation HEAD `8d46a26`.
 - [x] `attention` — Treat live coverage/absence and UI-state checks as technical evidence, not global product acceptance.
 - [x] `defer` — Integrated product UAT is not applicable in the non-representative local environment; run it in a representative 719-city environment with explicit product finality and an acceptance checklist.
+- [x] `defer` — Do not merge in this lane; preserve the branch and use a merge commit only.
 - [x] `defer` — Exhaustive E2E state matrix: `make test-e2e` is a placeholder; focused API/client/component behavior tests are required and complete in this correction lot.
 
 ## Orchestration Mode (AI-selected)
@@ -142,9 +144,13 @@ Expose live geo regulation references and normative values in Source coverage wi
     - Harness: `check scope`, `check branch`, and `verify` static/unit/integration PASS C1/C2.
     - E2E: NON EXECUTED placeholder; remains explicitly deferred.
 
-- [ ] **Lot 4 — Consensus review, UAT, and delivery**
+- [x] **Lot 4 — Consensus review, UAT, and delivery**
   - [x] Obtain two independent review voices and reconcile findings.
   - [x] Record the targeted regulation swatch visual check as passed and integrated product UAT as N/A locally and deferred to a representative environment.
   - [x] Record live coverage/absence and UI-state checks as technical evidence only, not global product acceptance.
-  - [ ] Push the branch and open a draft PR with Track item and acceptance evidence.
-  - [ ] Verify CI green; merge only by merge commit and preserve the branch.
+  - [x] Push the implementation branch and open draft PR [#375](https://github.com/rhanka/radar-immobilier/pull/375) with Track item and acceptance evidence.
+  - [x] Verify CI green and record the merge policy without executing the merge.
+  - Delivery evidence:
+    - Draft PR #375 is mergeable; Branch policy run `29381914629` and CI run `29381914628` passed on HEAD `8d46a26`.
+    - Comparison to `main`: +8/diverged, with no conflict or blocker; no synchronization is required.
+    - Merge was not executed; merge commit only, preserve the branch.
