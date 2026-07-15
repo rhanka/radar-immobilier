@@ -1,17 +1,13 @@
 /** Regulation provenance fields recognized on live geo zone properties. */
 export const REGLEMENT_KEYS = [
+  "reglement_url",
   "reglement_numero",
   "reglement_millesime",
   "reglement_page_source",
-  "reglement_url",
-  "reglementNumero",
-  "reglementMillesime",
-  "reglementPageSource",
-  "reglementUrl",
-  "REGLEMENT_NUMERO",
-  "REGLEMENT_MILLESIME",
-  "REGLEMENT_PAGE_SOURCE",
-  "REGLEMENT_URL",
+  "Reglement",
+  "REGLEMENT",
+  "url_reglement",
+  "URL_REGLEMENT",
 ] as const;
 
 /** Explicit normative value fields recognized on live geo zone properties. */
@@ -154,19 +150,44 @@ function hasLegacyNormes(props: Record<string, unknown>): boolean {
   return normes.densiteLogHa !== null || normes.usages.length > 0;
 }
 
+interface EvidenceFlags {
+  grille: boolean;
+  reglement: boolean;
+  legacy: boolean;
+  values: boolean;
+}
+
+function evidenceFlags(props: Record<string, unknown>): EvidenceFlags {
+  return {
+    grille: zoneGrillePdfUrl(props) !== null,
+    reglement: hasRecognizedValue(props, REGLEMENT_KEYS),
+    legacy: hasLegacyNormes(props),
+    values: hasRecognizedValue(props, NORMATIVE_VALUE_KEYS),
+  };
+}
+
+function mergeEvidence(left: EvidenceFlags, right: EvidenceFlags): EvidenceFlags {
+  return {
+    grille: left.grille || right.grille,
+    reglement: left.reglement || right.reglement,
+    legacy: left.legacy || right.legacy,
+    values: left.values || right.values,
+  };
+}
+
 /** Count evidence existentially for each served zone feature. */
 export function measureNormesCoverage(
   servedZoneFeatures: unknown[],
   geoNormeFeatures: unknown[],
 ): NormesCoverageCounters {
-  const geoNormesByCode = new Map<string, Record<string, unknown>[]>();
+  const geoNormesByCode = new Map<string, EvidenceFlags>();
   for (const feature of geoNormeFeatures) {
     const props = featureProps(feature);
     const code = explicitZoneCode(props);
     if (!code) continue;
-    const evidence = geoNormesByCode.get(code) ?? [];
-    evidence.push(props);
-    geoNormesByCode.set(code, evidence);
+    const flags = evidenceFlags(props);
+    const existing = geoNormesByCode.get(code);
+    geoNormesByCode.set(code, existing ? mergeEvidence(existing, flags) : flags);
   }
 
   const result: NormesCoverageCounters = {
@@ -179,15 +200,11 @@ export function measureNormesCoverage(
   for (const feature of servedZoneFeatures) {
     const props = featureProps(feature);
     const code = explicitZoneCode(props);
-    const evidence = [props, ...(code ? (geoNormesByCode.get(code) ?? []) : [])];
-    const grille = evidence.some((item) => zoneGrillePdfUrl(item) !== null);
-    const reglement = evidence.some((item) =>
-      hasRecognizedValue(item, REGLEMENT_KEYS),
-    );
-    const legacy = evidence.some(hasLegacyNormes);
-    const values = evidence.some((item) =>
-      hasRecognizedValue(item, NORMATIVE_VALUE_KEYS),
-    );
+    const own = evidenceFlags(props);
+    const auxiliary = code ? geoNormesByCode.get(code) : undefined;
+    const { grille, reglement, legacy, values } = auxiliary
+      ? mergeEvidence(own, auxiliary)
+      : own;
     if (grille) result.zonesWithGrille += 1;
     if (reglement) result.zonesWithReglement += 1;
     if (legacy) result.zonesWithLegacyNormes += 1;
