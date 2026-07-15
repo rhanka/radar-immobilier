@@ -17,6 +17,7 @@
 
 import { Hono } from "hono";
 import {
+  classifyGraphNodeLegacyZmp,
   classifyGraphNodeVivierV2,
   getSignalNodesForCity,
   listCitiesWithSignalNodes,
@@ -69,6 +70,7 @@ export interface GraphSignalCard {
   docRefs: GraphSignalDocRef[];
   evidence: SignalEvidence;
   classification: ReturnType<typeof classifyGraphNodeVivierV2>;
+  legacySubset: ReturnType<typeof classifyGraphNodeLegacyZmp>;
   props: Record<string, unknown>;
 }
 
@@ -326,6 +328,16 @@ function buildSignalCard(
     props,
     sourceRef: node.sourceRef,
   });
+  const legacySubset = classifyGraphNodeLegacyZmp({
+    id: node.id,
+    type: node.type,
+    category: firstString(properties, ["category"]) ?? firstString(props, ["category"]),
+    label: node.label,
+    description: nodeDescription(props),
+    etapeAnnote: firstString(properties, ["etape"]) ?? firstString(props, ["etape"]),
+    props,
+    sourceRef: node.sourceRef,
+  });
 
   return {
     id: node.id,
@@ -339,6 +351,7 @@ function buildSignalCard(
     docRefs,
     evidence,
     classification,
+    legacySubset,
     props,
   };
 }

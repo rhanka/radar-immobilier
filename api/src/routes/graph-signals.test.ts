@@ -18,6 +18,11 @@ import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 
 // Mock the graph-store module so tests do not touch Postgres.
 vi.mock("../services/graph/graph-store.js", () => ({
+  classifyGraphNodeLegacyZmp: vi.fn((input: { id: string }) => ({
+    version: "legacy-zmp-v1",
+    signalId: input.id,
+    flags: { z: true, m: true, p: true },
+  })),
   classifyGraphNodeVivierV2: vi.fn(),
   listCitiesWithSignalNodes: vi.fn(),
   getSignalNodesForCity: vi.fn(),
@@ -243,7 +248,13 @@ describe("GET /api/graph-signals/:city", () => {
     const body = (await res.json()) as {
       ok: boolean;
       citySlug: string;
-      nodes: { id: string; type: string; label: string; createdAt: string | null }[];
+      nodes: Array<{
+        id: string;
+        type: string;
+        label: string;
+        createdAt: string | null;
+        legacySubset: { version: string; signalId: string; flags: { z: boolean; m: boolean; p: boolean } };
+      }>;
     };
     expect(body.ok).toBe(true);
     expect(body.citySlug).toBe("drummondville");
@@ -251,6 +262,11 @@ describe("GET /api/graph-signals/:city", () => {
     expect(body.nodes[0]!.id).toBe("sig-001");
     expect(body.nodes[0]!.type).toBe("Signal");
     expect(body.nodes[1]!.type).toBe("DesignationEvent");
+    expect(body.nodes[0]!.legacySubset).toEqual({
+      version: "legacy-zmp-v1",
+      signalId: "sig-001",
+      flags: { z: true, m: true, p: true },
+    });
     // createdAt is serialized to ISO string
     expect(body.nodes[0]!.createdAt).toBe("2025-03-15T10:00:00.000Z");
   });

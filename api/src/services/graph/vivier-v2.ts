@@ -51,6 +51,14 @@ export type LegacySubsetKey =
   | "m|p"
   | "z|m|p";
 
+export const LEGACY_ZMP_VERSION = "legacy-zmp-v1" as const;
+
+export interface LegacyZmpMembership {
+  version: typeof LEGACY_ZMP_VERSION;
+  signalId: string;
+  flags: Readonly<{ z: boolean; m: boolean; p: boolean }>;
+}
+
 const LEGACY_SUBSET_KEYS: readonly LegacySubsetKey[] = [
   "",
   "z",
@@ -303,21 +311,32 @@ function emptyLegacyCounts(): Record<LegacySubsetKey, number> {
   return Object.fromEntries(LEGACY_SUBSET_KEYS.map((key) => [key, 0])) as Record<LegacySubsetKey, number>;
 }
 
+/** The immutable legacy A/T predicates, classified once for counts and IDs. */
+export function classifyLegacyZmpSignal(signal: VivierSignalInput): LegacyZmpMembership {
+  const records = graphRecords(signal);
+  const category = signal.category ?? firstString(records, ["category"]);
+  const etape = signal.etape ?? firstString(records, ["etape"]);
+  const label = signal.label ?? firstString(records, ["label"]) ?? "";
+  const description = signal.description ?? firstString(records, ["description"]) ?? null;
+  const nbUnitesMax = signal.nbUnitesMax ?? firstString(records, ["nb_unites_max"]);
+  const intensite = signal.intensite ?? firstString(records, ["intensite"]);
+  return {
+    version: LEGACY_ZMP_VERSION,
+    signalId: signal.id,
+    flags: {
+      z: isZonageSignal(signal.type, category, etape),
+      m: isMulti4Plus(signal.type, nbUnitesMax, intensite),
+      p: isPrecoceSignal(etape, label, description),
+    },
+  };
+}
+
 export function computeLegacySubsetCounts(
   signals: readonly VivierSignalInput[],
 ): Record<LegacySubsetKey, number> {
   const counts = emptyLegacyCounts();
   for (const signal of signals) {
-    const category = signal.category ?? firstString(graphRecords(signal), ["category"]);
-    const etape = signal.etape ?? firstString(graphRecords(signal), ["etape"]);
-    const label = signal.label ?? firstString(graphRecords(signal), ["label"]) ?? "";
-    const description = signal.description ?? firstString(graphRecords(signal), ["description"]) ?? null;
-    const nbUnitesMax = signal.nbUnitesMax ?? firstString(graphRecords(signal), ["nb_unites_max"]);
-    const intensite = signal.intensite ?? firstString(graphRecords(signal), ["intensite"]);
-    const z = isZonageSignal(signal.type, category, etape);
-    const m = isMulti4Plus(signal.type, nbUnitesMax, intensite);
-    const p = isPrecoceSignal(etape, label, description);
-    const flags: Record<"z" | "m" | "p", boolean> = { z, m, p };
+    const flags = classifyLegacyZmpSignal(signal).flags;
     for (const key of LEGACY_SUBSET_KEYS) {
       if (key === "") {
         counts[key] += 1;
