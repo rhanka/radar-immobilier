@@ -79,6 +79,6 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Commit atomically via selective staging and `make commit` under 150 changed lines, or split tests/implementation into separate atomic commits if required.
 
 - [ ] **Lot 2 — Review handoff**
-  - [ ] Run Harness scope/branch verification without writing Track.
-  - [ ] Report exact diff, test evidence, remaining UAT requirement, and no push/PR/merge/deploy.
+  - [x] Run Harness scope/branch verification without writing Track.
+  - [x] Report exact diff, test evidence, remaining UAT requirement, and no push/PR/merge/deploy.
   - [ ] Await consensus review before any publication action.
