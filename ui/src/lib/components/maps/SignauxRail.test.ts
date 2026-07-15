@@ -70,16 +70,9 @@ describe("SignauxRail — A / transition", () => {
       props: {
         entries: [entry],
         selectedSlug: "sutton",
-        selectedLegacyProjection: {
-          version: "legacy-zmp-v1",
-          a: { count: 1, signalIds: ["signal-sutton-refonte-zonage-2026"] },
-          transition: {
-            count: 2,
-            signalIds: [
-              "event-sutton-refonte-reglementaire-2026-05-27",
-              "signal-sutton-refonte-zonage-2026",
-            ],
-          },
+        selectedVivierProjections: {
+          a: { available: true, count: 1, nodes: [] },
+          transition: { available: true, count: 2, nodes: [] },
         },
       },
     });
@@ -98,11 +91,39 @@ describe("SignauxRail — A / transition", () => {
       subsetCounts: { "": 5, "z|m|p": 0, "z|p": 0 },
     };
     const { container } = render(SignauxRail, {
-      props: { entries: [entry], selectedSlug: "sutton", selectedLegacyProjection: null },
+      props: { entries: [entry], selectedSlug: "sutton", selectedVivierProjections: null },
     });
     expect(container.textContent).toContain("Données des signaux indisponibles");
     expect(container.textContent).toContain("n/d");
     expect(container.textContent).not.toContain("0 signal");
+  });
+
+  it("renders each selected-city mode badge from its own validation result", () => {
+    const entry = cityEntry("sutton", "Sutton", "Brome-Missisquoi", 99);
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [entry],
+        selectedSlug: "sutton",
+        selectedVivierProjections: {
+          a: { available: false, count: null, nodes: [] },
+          transition: { available: true, count: 2, nodes: [] },
+        },
+      },
+    });
+    const rows = container.querySelectorAll(".axis-toggle-row");
+    expect(rows[0]?.textContent).toContain("n/d");
+    expect(rows[0]?.textContent).not.toContain("99");
+    expect(rows[1]?.textContent).toContain("2");
+  });
+
+  it("shows unavailable badges instead of aggregate zeros after a load error", () => {
+    const { container } = render(SignauxRail, {
+      props: { entries: [], dataUnavailable: true },
+    });
+    const rows = container.querySelectorAll(".axis-toggle-row");
+    expect(rows[0]?.textContent).toContain("n/d");
+    expect(rows[1]?.textContent).toContain("n/d");
+    expect(container.textContent).not.toContain(">0<");
   });
 });
 

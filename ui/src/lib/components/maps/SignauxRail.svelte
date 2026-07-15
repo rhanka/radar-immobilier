@@ -23,9 +23,10 @@
    */
   import { Badge, Radio } from "@sentropic/design-system-svelte";
   import {
-    detailCountForCity,
+    countForVivierCity,
     modeFromSubsetKey,
     subsetKeyForMode,
+    type ValidatedVivierProjections,
     type VivierViewMode,
   } from "$lib/signals/vivier-view-mode.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
@@ -33,15 +34,14 @@
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
   import type { RailCityItem } from "$lib/maps/rail-city-items.js";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
-  import type { LegacyZmpProjection } from "$lib/signals/graph-signal-detail-client.js";
 
   // ── Props ──────────────────────────────────────────────────────────────────
   /** Toutes les entrées villes (avec signalCount6m et subsetCounts). */
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
-  /** Detail response is authoritative for the selected city's A/T counts. */
-  export let selectedLegacyProjection: LegacyZmpProjection | null = null;
+  /** Node-validated detail projections are authoritative for the selected city. */
+  export let selectedVivierProjections: ValidatedVivierProjections | null = null;
   /** Chargement de la liste principale. */
   export let loading = false;
   /** Signal data failed to load; avoid rendering a fake zero state. */
@@ -89,11 +89,18 @@
 
   // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
   /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
-  function countFor(entry: CityMapEntry, key: string): number | null {
-    return detailCountForCity(
+  function countFor(
+    entry: CityMapEntry,
+    key: string,
+    currentSelectedSlug: string | null,
+    projections: ValidatedVivierProjections | null,
+    unavailable: boolean,
+  ): number | null {
+    if (unavailable) return null;
+    return countForVivierCity(
       entry,
-      selectedSlug,
-      selectedLegacyProjection,
+      currentSelectedSlug,
+      projections,
       modeFromSubsetKey(key),
     );
   }
@@ -105,13 +112,22 @@
     .filter((e) => {
       const isSelected =
         selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return (countFor(e, activeKey) ?? 0) > 0 || isSelected;
+      return (countFor(e, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? 0) > 0 || isSelected;
     })
-    .sort((a, b) => (countFor(b, activeKey) ?? -1) - (countFor(a, activeKey) ?? -1));
+    .sort((a, b) =>
+      (countFor(b, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? -1) -
+      (countFor(a, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? -1)
+    );
 
   /** Projection générique consommée par la liste partagée RailCityList. */
-  function toRailItem(entry: CityMapEntry, key: string): RailCityItem {
-    const activeCount = countFor(entry, key);
+  function toRailItem(
+    entry: CityMapEntry,
+    key: string,
+    currentSelectedSlug: string | null,
+    projections: ValidatedVivierProjections | null,
+    unavailable: boolean,
+  ): RailCityItem {
+    const activeCount = countFor(entry, key, currentSelectedSlug, projections, unavailable);
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -130,7 +146,9 @@
     };
   }
 
-  $: railItems = sortedEntries.map((entry) => toRailItem(entry, activeKey));
+  $: railItems = sortedEntries.map((entry) =>
+    toRailItem(entry, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable)
+  );
 
   function handleSelectSlug(slug: string): void {
     const entry = entries.find((e) => e.municipality.slug === slug);
@@ -138,20 +156,31 @@
   }
 
   // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
-  function totalFor(key: string): number | null {
-    const counts = entries.map((entry) => countFor(entry, key));
+  function totalFor(
+    key: string,
+    currentEntries: CityMapEntry[],
+    currentSelectedSlug: string | null,
+    projections: ValidatedVivierProjections | null,
+    unavailable: boolean,
+  ): number | null {
+    if (unavailable) return null;
+    const counts = currentEntries.map((entry) =>
+      countFor(entry, key, currentSelectedSlug, projections, unavailable)
+    );
     return counts.some((count) => count === null)
       ? null
       : (counts as number[]).reduce((sum, count) => sum + count, 0);
   }
 
-  $: totalSignals = totalFor(activeKey);
+  $: totalSignals = totalFor(activeKey, entries, selectedSlug, selectedVivierProjections, dataUnavailable);
   $: citiesWithSignals = totalSignals === null
     ? null
-    : entries.filter((e) => (countFor(e, activeKey) ?? 0) > 0).length;
+    : entries.filter((e) =>
+      (countFor(e, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? 0) > 0
+    ).length;
 
-  $: countA = totalFor("z|m|p");
-  $: countTransition = totalFor("z|p");
+  $: countA = totalFor("z|m|p", entries, selectedSlug, selectedVivierProjections, dataUnavailable);
+  $: countTransition = totalFor("z|p", entries, selectedSlug, selectedVivierProjections, dataUnavailable);
 </script>
 
 <RailShell title="Signaux · Villes" {loading} {onRefresh}>
