@@ -118,12 +118,18 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Cover both race directions with deferred Promise tests.
   - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
 
-- [ ] **Lot 3 — Branch gates and live acceptance evidence**
-  - [ ] Run `make typecheck ENV=test-reglements-normes`.
-  - [ ] Run `make lint ENV=test-reglements-normes`.
-  - [ ] Run all focused API/UI tests affected by the contract.
-  - [ ] Verify live payload behavior for at least one city with `qc-zonage-norms-*` and record exact measured counters without hard-coding them as permanent facts.
-  - [ ] Run `harness check scope` and `harness verify` categories required by the profile.
+- [x] **Lot 3 — Branch gates and live acceptance evidence**
+  - [x] Run `make typecheck ENV=test-reglements-normes`.
+  - [x] Run `make lint ENV=test-reglements-normes`.
+  - [x] Run all focused API/UI tests affected by the contract.
+  - [x] Verify live payload behavior for at least one city with `qc-zonage-norms-*` and record exact measured counters without hard-coding them as permanent facts.
+  - [x] Run `harness check scope` and `harness verify` categories required by the profile.
+  - Acceptance evidence (2026-07-14, America/Toronto):
+    - Typecheck and lint: PASS.
+    - Focused tests: PASS 118/118 (API 8 + 40; client 29; Console 13; scorecard 17; map 11).
+    - Live point-in-time snapshot, not a permanent product fact: HTTP 200; `zoneCount`/`numberMatched` 645/645; `complete: true`; `zonesWithReglement` 621; `zonesWithNormativeValues` 563; `zonesWithGrille`/`zonesWithLegacyNormes` 0/0; state `declared`.
+    - Harness: `check scope`, `check branch`, and `verify` static/unit/integration PASS C1/C2.
+    - E2E: NON EXECUTED placeholder; remains explicitly deferred.
 
 - [ ] **Lot 4 — Consensus review, UAT, and delivery**
   - [ ] Obtain at least two independent review voices and reconcile findings.
