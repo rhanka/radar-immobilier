@@ -407,8 +407,7 @@
                       {@const tooltipId = `normes-detail-${city.citySlug}`}
                       <button
                         type="button"
-                        class="inline-block h-6 w-6 rounded-sm border border-slate-300 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        style="background-color: {layer.color};"
+                        class="inline-flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
                         aria-label={`${layer.label} : ${layer.status}`}
                         aria-expanded={expandedNormesSlug === city.citySlug}
                         aria-controls={tooltipId}
@@ -416,7 +415,13 @@
                         on:click|stopPropagation={() => toggleNormes(city.citySlug)}
                         on:keydown={(event) => handleNormesKeydown(event, city.citySlug)}
                         on:blur={() => closeNormes(city.citySlug)}
-                      ></button>
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="inline-block h-3 w-3 rounded-sm border border-slate-300"
+                          style="background-color: {layer.color};"
+                        ></span>
+                      </button>
                       {#if expandedNormesSlug === city.citySlug}
                         <span
                           id={tooltipId}
