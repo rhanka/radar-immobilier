@@ -127,3 +127,10 @@ export function retainProjectedSignalId(
 ): string | null {
   return id !== null && allowedIds.has(id) ? id : null;
 }
+
+export function canOpenProjectedSignal(
+  id: string,
+  nodes: readonly GraphSignalNode[],
+): boolean {
+  return nodes.some((node) => node.id === id);
+}
