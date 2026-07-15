@@ -59,6 +59,20 @@ export interface LegacyZmpMembership {
   flags: Readonly<{ z: boolean; m: boolean; p: boolean }>;
 }
 
+export interface LegacyZmpProjection {
+  version: typeof LEGACY_ZMP_VERSION;
+  a: { count: number; signalIds: string[] };
+  transition: { count: number; signalIds: string[] };
+}
+
+export interface LegacyGraphNodeInput {
+  id: string;
+  type: string;
+  label?: string | null;
+  props?: unknown;
+  sourceRef?: string | null;
+}
+
 const LEGACY_SUBSET_KEYS: readonly LegacySubsetKey[] = [
   "",
   "z",
@@ -127,6 +141,22 @@ function graphRecords(signal: VivierSignalInput): Record<string, unknown>[] {
     .filter(Array.isArray)
     .flatMap((value) => value!.map(record));
   return [...refs, nested, props];
+}
+
+/** Reproduce the 8fe75cd legacy SQL projection: only props.properties fields. */
+export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalInput {
+  const properties = record(record(node.props).properties);
+  return {
+    id: node.id,
+    type: node.type,
+    category: firstString([properties], ["category"]),
+    label: node.label ?? null,
+    description: firstString([properties], ["description"]),
+    etape: firstString([properties], ["etape"]),
+    nbUnitesMax: firstString([properties], ["nb_unites_max"]),
+    intensite: firstString([properties], ["intensite"]),
+    sourceRef: node.sourceRef ?? null,
+  };
 }
 
 function classificationFromResidentiel(
@@ -313,13 +343,12 @@ function emptyLegacyCounts(): Record<LegacySubsetKey, number> {
 
 /** The immutable legacy A/T predicates, classified once for counts and IDs. */
 export function classifyLegacyZmpSignal(signal: VivierSignalInput): LegacyZmpMembership {
-  const records = graphRecords(signal);
-  const category = signal.category ?? firstString(records, ["category"]);
-  const etape = signal.etape ?? firstString(records, ["etape"]);
-  const label = signal.label ?? firstString(records, ["label"]) ?? "";
-  const description = signal.description ?? firstString(records, ["description"]) ?? null;
-  const nbUnitesMax = signal.nbUnitesMax ?? firstString(records, ["nb_unites_max"]);
-  const intensite = signal.intensite ?? firstString(records, ["intensite"]);
+  const category = signal.category ?? null;
+  const etape = signal.etape ?? null;
+  const label = signal.label ?? "";
+  const description = signal.description ?? null;
+  const nbUnitesMax = signal.nbUnitesMax ?? null;
+  const intensite = signal.intensite ?? null;
   return {
     version: LEGACY_ZMP_VERSION,
     signalId: signal.id,
@@ -328,6 +357,22 @@ export function classifyLegacyZmpSignal(signal: VivierSignalInput): LegacyZmpMem
       m: isMulti4Plus(signal.type, nbUnitesMax, intensite),
       p: isPrecoceSignal(etape, label, description),
     },
+  };
+}
+
+export function buildLegacyZmpProjection(
+  memberships: readonly LegacyZmpMembership[],
+): LegacyZmpProjection {
+  const aIds = memberships
+    .filter(({ flags }) => flags.z && flags.m && flags.p)
+    .map(({ signalId }) => signalId);
+  const transitionIds = memberships
+    .filter(({ flags }) => flags.z && flags.p)
+    .map(({ signalId }) => signalId);
+  return {
+    version: LEGACY_ZMP_VERSION,
+    a: { count: aIds.length, signalIds: aIds },
+    transition: { count: transitionIds.length, signalIds: transitionIds },
   };
 }
 
