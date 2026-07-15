@@ -40,6 +40,7 @@
   import {
     fetchGraphSignalDetail,
     type GraphSignalNode,
+    type LegacyZmpProjection,
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
@@ -114,9 +115,14 @@
   } from "$lib/maps/hover-paint.js";
   import {
     A_SUBSET_KEY,
+    detailCountForCity,
     modeFromSubsetKey,
     projectNodesForVivierMode,
+    reconcileVivierSelection,
+    retainProjectedSignalId,
+    routeSubsetKey,
     subsetKeyForMode,
+    vivierRouteKey,
   } from "$lib/signals/vivier-view-mode.js";
   import {
     lotLineColorExpression,
@@ -181,6 +187,7 @@
   let detailLoading = false;
   let detailError: string | null = null;
   let detailNodes: GraphSignalNode[] = [];
+  let detailLegacyProjection: LegacyZmpProjection | null = null;
   // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
   // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
   // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
@@ -229,6 +236,21 @@
   const FILTER_LS_KEY = "signaux-filter-subset";
   let activeSubsetKey: string = FILTER_DEFAULT;
 
+  function applyActiveSubsetKey(subsetKey: string): void {
+    const normalized = subsetKeyForMode(modeFromSubsetKey(subsetKey));
+    activeSubsetKey = normalized;
+    const projection = projectNodesForVivierMode(
+      detailNodes,
+      detailLegacyProjection,
+      modeFromSubsetKey(normalized),
+    );
+    const allowedIds = new Set(projection.nodes.map((node) => node.id));
+    selectionState = reconcileVivierSelection(selectionState, allowedIds);
+    const evidenceId = retainProjectedSignalId(activeEvidence?.nodeId ?? null, allowedIds);
+    if (activeEvidence && evidenceId === null) activeEvidence = null;
+    hoveredEvidenceSignalId = retainProjectedSignalId(hoveredEvidenceSignalId, allowedIds);
+  }
+
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
    * Priorité : URL > localStorage > A. Seul `z|p` sélectionne la transition.
@@ -252,7 +274,7 @@
     subsetKey: string,
   ): void {
     const normalizedSubsetKey = subsetKeyForMode(modeFromSubsetKey(subsetKey));
-    activeSubsetKey = normalizedSubsetKey;
+    applyActiveSubsetKey(normalizedSubsetKey);
     // Persiste le filtre dans localStorage
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(FILTER_LS_KEY, normalizedSubsetKey);
@@ -371,7 +393,11 @@
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
   $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
-  $: detailProjection = projectNodesForVivierMode(detailNodes, activeViewMode);
+  $: detailProjection = projectNodesForVivierMode(
+    detailNodes,
+    detailLegacyProjection,
+    activeViewMode,
+  );
   $: filteredDetailNodes = detailProjection.nodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
@@ -488,11 +514,18 @@
   function buildFillColorExpression(
     entries: CityMapEntry[],
     subsetKey: string,
+    activeCitySlug: string | null,
+    authority: LegacyZmpProjection | null,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = (e.subsetCounts[subsetKey] ?? 0);
-      expr.push(e.municipality.slug, signalCountColor(count));
+      const count = detailCountForCity(
+        e,
+        activeCitySlug,
+        authority,
+        modeFromSubsetKey(subsetKey),
+      );
+      expr.push(e.municipality.slug, count === null ? "#94a3b8" : signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
     return expr as ExpressionSpecification;
@@ -526,7 +559,12 @@
    * référencées ici afin que Svelte recalcule la peinture exactement quand
    * l'ancien `updateFillColors()` impératif était déclenché.
    */
-  $: fillColorExpression = buildFillColorExpression(allEntries, activeSubsetKey);
+  $: fillColorExpression = buildFillColorExpression(
+    allEntries,
+    activeSubsetKey,
+    selectedCity?.municipality.slug ?? null,
+    detailLegacyProjection,
+  );
   $: fillOpacityExpression = buildFillOpacityExpression(
     allEntries,
     selectedCity?.municipality.slug ?? null,
@@ -687,6 +725,7 @@
     }
     selectedCity = entry;
     detailNodes = [];
+    detailLegacyProjection = null;
     geoNotices = [];
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
@@ -713,6 +752,7 @@
     const lease = detailGuard.lease();
     detailLoading = true;
     detailError = null;
+    detailLegacyProjection = null;
     try {
       const res = await fetchGraphSignalDetail(citySlug, "", DEFAULT_REQUEST_TIMEOUT_MS, {
         signal: lease.signal,
@@ -721,10 +761,12 @@
       if (!res.ok && res.nodes.length === 0) {
         // 404 — ville sans signaux graphify (état vide honnête, pas une erreur)
         detailNodes = [];
+        detailLegacyProjection = null;
         detailError = null;
         return;
       }
       detailNodes = res.nodes;
+      detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
@@ -735,6 +777,7 @@
       if (!lease.isCurrent() || isAbortError(e)) return;
       console.warn("Signal detail load failed:", e);
       detailError = "Signaux indisponibles.";
+      detailLegacyProjection = null;
     } finally {
       if (lease.isCurrent()) detailLoading = false;
     }
@@ -758,6 +801,7 @@
     selectedCity = null;
     pendingRouteZoneKey = null;
     detailNodes = [];
+    detailLegacyProjection = null;
     detailError = null;
     detailLoading = false;
     zonesError = null;
@@ -947,9 +991,9 @@
     return buildHoverCard(node, color);
   }
 
-  /** #4 — « Voir comme courant » : ouvre ce signal hors-filtre dans le viewer. */
+  /** Ouvre seulement un signal encore inclus dans la projection active. */
   function makeSignalCurrent(id: string): void {
-    const node = detailNodes.find((n) => n.id === id);
+    const node = filteredDetailNodes.find((n) => n.id === id);
     if (!node) return;
     openEvidence({
       title: node.label,
@@ -958,15 +1002,9 @@
     });
   }
 
-  /**
-   * #4 — « Ajouter au filtre » : le signal est hors-filtre (il échoue z/m).
-   * DÉFAUT SOBRE retenu : on relâche le filtre (clé vide → tous les signaux
-   * visibles) pour que ce signal apparaisse dans la liste/nav, puis on le rend
-   * courant. Alternative écartée (ajouter dynamiquement un axe) : 'p' est neutre
-   * et z/m ne se « décochent » pas par signal sans casser le sens du filtre.
-   */
+  /** Le viewer ne peut jamais réintroduire un signal exclu du mode fixe A/T. */
   function addSignalToFilter(id: string): void {
-    handleFilterChange("");
+    if (!filteredDetailNodes.some((node) => node.id === id)) return;
     makeSignalCurrent(id);
   }
 
@@ -1006,16 +1044,11 @@
     zoomToZone(parsed.id.slice(0, sep), parsed.id.slice(sep + 1));
   }
 
-  function routeKey(route: GeoRoute): string {
-    if (route.level === "region") return `region:${route.region}:${route.state.mode}`;
-    if (route.level === "city") return `city:${route.citySlug}:${route.state.mode}`;
-    return `zone:${route.citySlug}:${route.zoneKey}:${route.state.mode}`;
-  }
-
   async function applyGeoRoute(route: GeoRoute): Promise<void> {
-    const key = routeKey(route);
+    const key = vivierRouteKey(route);
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
+    applyActiveSubsetKey(routeSubsetKey(route));
 
     if (route.level === "region") {
       // Au montage / restauration d'URL, la carte démarre déjà au niveau
@@ -1075,7 +1108,10 @@
         navigateToGeoRoute({
           level: "city",
           citySlug: geoRoute.citySlug,
-          state: { mode: geoRoute.state.mode ?? "signal" },
+          state: {
+            mode: geoRoute.state.mode ?? "signal",
+            filters: { subset: activeSubsetKey.split("|") },
+          },
         });
       }
       return;
@@ -1089,7 +1125,10 @@
       level: "zone",
       citySlug,
       zoneKey,
-      state: { mode: geoRoute?.state.mode ?? "signal" },
+      state: {
+        mode: geoRoute?.state.mode ?? "signal",
+        filters: { subset: activeSubsetKey.split("|") },
+      },
     });
   }
 
@@ -1460,7 +1499,7 @@
     // Restaurer le filtre depuis l'URL au premier chargement
     const initialSubsetKey = subsetKeyFromRoute(geoRoute);
     if (initialSubsetKey !== activeSubsetKey) {
-      activeSubsetKey = initialSubsetKey;
+      applyActiveSubsetKey(initialSubsetKey);
     }
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
@@ -1484,6 +1523,7 @@
       {loading}
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
+      selectedLegacyProjection={detailLegacyProjection}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
