@@ -4,15 +4,14 @@
    *
    * Une ligne par COUCHE RÉELLE, en tri-état avec preuve + fraîcheur, dans
    * l'ordre : PV collectés · Signaux extraits (+ part avec citation
-   * vérifiable) · Zones servies · Normes (grilles) · Lots (cadastre) ·
+   * vérifiable) · Zones servies · Règlements & normes · Lots (cadastre) ·
    * Périmètres TOD. Chaque ligne : badge « Servi » / « Partiel » /
    * « Non couvert » (copy client neutre). Jamais de « vert » fabriqué : la
    * tonalité suit l'état réel.
    *
-   * La ligne « Normes (grilles) » est mesurée LAZY (live, côté API) à la
-   * sélection de la ville : donnée éparse aujourd'hui, « Non couvert » honnête
-   * quand absente, « donnée indisponible » (jamais un faux gris) quand l'API
-   * géo est injoignable. TOD vient du listing live géo (`qc-tod-<slug>`).
+   * La ligne « Règlements & normes » est mesurée LAZY (live, côté API) à la
+   * sélection de la ville. Complétude, absence mesurée et indisponibilité Geo
+   * restent distinctes. TOD vient du listing live géo (`qc-tod-<slug>`).
    *
    * Réutilisé par la carte (panneau au clic) ET la Console (ligne dépliée).
    */
@@ -225,20 +224,49 @@
       ? "donnée indisponible pour l'instant"
       : "vérification en cours…";
 
-  // Évidence + libellé de la ligne grilles (états async distincts, honnêtes).
-  $: grillesResolved = grilles !== null && grilles.available;
-  $: grillesState =
-    grillesResolved && grilles?.state ? grilles.state : null;
+  type AvailableGrilles = Extract<CityGrilles, { available: true }>;
+
+  function evidenceCounts(result: AvailableGrilles): string {
+    const n = result.zoneCount;
+    const source = `${result.zonesWithReglement}/${n} source${result.zonesWithReglement === 1 ? "" : "s"} règlementaire${result.zonesWithReglement === 1 ? "" : "s"}`;
+    const values = `${result.zonesWithNormativeValues}/${n} valeur${result.zonesWithNormativeValues === 1 ? "" : "s"} normative${result.zonesWithNormativeValues === 1 ? "" : "s"}`;
+    const legacy = `${result.zonesWithLegacyNormes}/${n} normes historiques`;
+    const grid = `${result.zonesWithGrille}/${n} grille${result.zonesWithGrille === 1 ? "" : "s"} PDF`;
+    return `${source} · ${values} · ${legacy} · ${grid}`;
+  }
+
+  function grillesResultEvidence(result: AvailableGrilles): string {
+    if (result.zoneCount === 0) return "Aucune zone servie";
+    if (!result.complete) {
+      const matched = result.numberMatched ?? "?";
+      const noEvidence = result.covered === 0
+        ? " · aucune preuve dans l’échantillon"
+        : "";
+      return `Mesure incomplète ${result.zoneCount}/${matched} · ${evidenceCounts(result)}${noEvidence}`;
+    }
+    if (result.covered === 0) {
+      return `Aucune preuve reconnue servie sur ${result.zoneCount} zone${result.zoneCount === 1 ? "" : "s"}`;
+    }
+    return evidenceCounts(result);
+  }
+
+  // Évidence + libellé de la ligne règlements/normes (états async honnêtes).
+  $: grillesResolved = grilles?.available === true ? grilles : null;
+  $: grillesUnavailable =
+    grillesError || (grilles !== null && !grilles.available);
+  $: grillesState = !city.l4Zonage.served
+    ? "absent" as const
+    : grillesResolved
+      ? grillesResolved.complete ? grillesResolved.state : "declared" as const
+      : null;
   $: grillesEvidence = !city.l4Zonage.served
-    ? "aucune donnée"
+    ? "Aucune zone servie"
     : grillesLoading
       ? "vérification en cours…"
-      : grillesError || (grilles !== null && !grilles.available)
-        ? "donnée indisponible pour l'instant"
-        : grillesResolved && grilles
-          ? (grilles.covered ?? 0) > 0
-            ? `${grilles.covered}/${grilles.zoneCount} zones avec grille ou normes`
-            : "aucune grille publiée"
+      : grillesUnavailable
+        ? "Geo indisponible"
+        : grillesResolved
+          ? grillesResultEvidence(grillesResolved)
           : "vérification en cours…";
 </script>
 
@@ -286,24 +314,30 @@
   <ul class="divide-y divide-slate-100" data-testid="scorecard-rows">
     {#each rows as row (row.key)}
       {#if row.key === "lots"}
-        <!-- Normes (grilles) : ligne LAZY (live), insérée entre zones et lots -->
+        <!-- Règlements & normes : ligne LAZY, entre zones et lots. -->
         <li
           class="flex items-center justify-between gap-3 px-4 py-2.5"
           data-testid="scorecard-grilles"
         >
           <div class="min-w-0">
-            <p class="text-xs font-semibold text-slate-700">Normes (grilles)</p>
+            <p class="text-xs font-semibold text-slate-700">Règlements & normes</p>
             <p class="text-xs text-slate-400">{grillesEvidence}</p>
+            <p class="text-xs text-slate-400">
+              Ne qualifie pas l'effet densifiant ; delta ancien↔nouveau requis.
+            </p>
           </div>
           <div class="flex shrink-0 flex-col items-end gap-0.5">
-            {#if grillesState}
+            {#if grillesUnavailable}
+              <Badge tone="warning" class="text-xs">Indisponible</Badge>
+              <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
+            {:else if !city.l4Zonage.served}
+              <Badge tone="neutral" class="text-xs">{STATE_LABEL.absent}</Badge>
+              <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
+            {:else if grillesState}
               <Badge tone={STATE_BADGE_TONE[grillesState]} class="text-xs">
                 {STATE_LABEL[grillesState]}
               </Badge>
               <span class="text-xs text-slate-400">fraîcheur&nbsp;: à jour</span>
-            {:else if !city.l4Zonage.served}
-              <Badge tone="neutral" class="text-xs">{STATE_LABEL.absent}</Badge>
-              <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
             {:else}
               <Badge tone="neutral" class="text-xs">—</Badge>
               <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
@@ -433,7 +467,7 @@
     <div class="border-t border-slate-100 bg-teal-50 px-4 py-2.5">
       <p class="text-xs text-teal-800">
         <span class="font-semibold">Prochaine étape&nbsp;:</span>
-        compléter les grilles de zonage (donnée attendue de la source géo).
+        compléter les règlements et normes (donnée attendue de la source géo).
       </p>
     </div>
   {/if}
