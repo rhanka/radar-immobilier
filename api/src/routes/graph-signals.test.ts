@@ -17,21 +17,25 @@ import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 
 // Mock the graph-store module so tests do not touch Postgres.
-vi.mock("../services/graph/graph-store.js", () => ({
-  classifyGraphNodeLegacyZmp: vi.fn((input: { id: string }) => ({
-    version: "legacy-zmp-v1",
-    signalId: input.id,
-    flags: { z: true, m: true, p: true },
-  })),
-  classifyGraphNodeVivierV2: vi.fn(),
-  listCitiesWithSignalNodes: vi.fn(),
-  getSignalNodesForCity: vi.fn(),
-}));
+vi.mock("../services/graph/graph-store.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../services/graph/graph-store.js")>();
+  return {
+    ...actual,
+    listCitiesWithSignalNodes: vi.fn(),
+    getSignalNodesForCity: vi.fn(),
+  };
+});
 
 import {
+  buildNodeRow,
   listCitiesWithSignalNodes,
   getSignalNodesForCity,
 } from "../services/graph/graph-store.js";
+import {
+  SUTTON_A_IDS,
+  SUTTON_LEGACY_GRAPH_NODES,
+  SUTTON_TRANSITION_IDS,
+} from "../services/graph/sutton-legacy.fixture.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -265,10 +269,35 @@ describe("GET /api/graph-signals/:city", () => {
     expect(body.nodes[0]!.legacySubset).toEqual({
       version: "legacy-zmp-v1",
       signalId: "sig-001",
-      flags: { z: true, m: true, p: true },
+      flags: { z: false, m: false, p: false },
     });
     // createdAt is serialized to ISO string
     expect(body.nodes[0]!.createdAt).toBe("2025-03-15T10:00:00.000Z");
+  });
+
+  it("returns the real Sutton A/T IDs and counts from the detail authority", async () => {
+    const nodes = SUTTON_LEGACY_GRAPH_NODES.map((node) => ({
+      ...buildNodeRow(node, "sutton"),
+      createdAt: new Date("2026-07-14T00:00:00Z"),
+      updatedAt: new Date("2026-07-14T00:00:00Z"),
+    }));
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(nodes as Awaited<ReturnType<typeof getSignalNodesForCity>>);
+
+    const res = await freshRoute().request("/api/graph-signals/sutton");
+    const body = (await res.json()) as {
+      legacyProjection: {
+        version: string;
+        a: { count: number; signalIds: string[] };
+        transition: { count: number; signalIds: string[] };
+      };
+    };
+
+    expect(res.status).toBe(200);
+    expect(body.legacyProjection).toEqual({
+      version: "legacy-zmp-v1",
+      a: { count: 1, signalIds: SUTTON_A_IDS },
+      transition: { count: 2, signalIds: SUTTON_TRANSITION_IDS },
+    });
   });
 
   it("returns ok:true with props and sourceRef when present", async () => {
