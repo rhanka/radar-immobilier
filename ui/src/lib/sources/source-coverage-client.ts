@@ -3,7 +3,7 @@
  * de données e2e, choropleth honnête).
  *
  * Contrat : GET /api/source/coverage (api/src/routes/source-coverage.ts). Chaque
- * couche (PV collectés / signaux extraits / zones servies / normes (grilles) /
+ * couche (PV collectés / signaux extraits / zones servies / règlements & normes /
  * lots (cadastre) / TOD) est un TRI-ÉTAT
  *   - `verified` : substantié LIVE (preuve en base OU collection listée live
  *                  par l'API géo au moment de la requête).
@@ -64,13 +64,15 @@ export interface GeoCell {
 }
 
 /**
- * Normes (grilles de zonage) au niveau bulk : `absent` tant qu'aucune grille
- * n'est prouvée (la mesure fine reste LAZY au détail ville — donnée éparse,
- * « Non couvert » majoritaire honnête).
+ * Règlements & normes au niveau bulk. The lazy measurement metadata keeps a
+ * cold cache distinct from a measured absence or geo failure.
  */
 export interface NormesCell {
   state: CoverageState;
   freshness: Freshness;
+  measured?: boolean;
+  available?: boolean | null;
+  error?: CityGrillesError;
 }
 
 /**
@@ -149,16 +151,23 @@ export async function fetchSourceCoverage(
  * faux « Non couvert »). Donnée éparse aujourd'hui : `state: "absent"` signifie
  * réellement « aucune grille publiée sur les zones servies ».
  */
-export interface CityGrilles {
-  citySlug: string;
-  available: boolean;
-  zoneCount?: number;
-  zonesWithGrille?: number;
-  zonesWithNormes?: number;
-  /** Zones portant une grille OU des normes réelles. */
-  covered?: number;
-  state?: CoverageState;
-}
+export type CityGrillesError = "geo_unreachable" | "invalid_response";
+
+export type CityGrilles =
+  | { citySlug: string; available: false; error: CityGrillesError }
+  | {
+      citySlug: string;
+      available: true;
+      zoneCount: number;
+      numberMatched: number | null;
+      complete: boolean;
+      zonesWithGrille: number;
+      zonesWithReglement: number;
+      zonesWithLegacyNormes: number;
+      zonesWithNormativeValues: number;
+      covered: number;
+      state: CoverageState;
+    };
 
 /** Récupère le détail grilles d'une ville. Lève en cas d'échec HTTP. */
 export async function fetchCityGrilles(
