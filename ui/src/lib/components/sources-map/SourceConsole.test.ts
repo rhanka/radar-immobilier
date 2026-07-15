@@ -17,11 +17,12 @@
  *
  * Environnement jsdom — aucun docker, aucune API (données fabriquées).
  */
-import { describe, it, expect, afterEach, beforeAll } from "vitest";
+import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
 import { render, cleanup, fireEvent, within } from "@testing-library/svelte";
 import SourceConsole from "./SourceConsole.svelte";
 import type {
   CityCoverage,
+  CityGrilles,
   CoverageResponse,
 } from "$lib/sources/source-coverage-client.js";
 
@@ -42,7 +43,10 @@ beforeAll(() => {
   });
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 /** Ville fabriquée : ACTIVE (PV vérifiés) pour passer le filtre « Actives ». */
 function makeCity(
@@ -67,7 +71,12 @@ function makeCity(
       freshness: signalCount > 0 ? "fresh" : "unknown",
     },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
-    normes: { state: "absent", freshness: "unknown" },
+    normes: {
+      state: "absent",
+      freshness: "unknown",
+      measured: false,
+      available: null,
+    },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     tod: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     worstStatus: "declared",
@@ -178,7 +187,7 @@ describe("SourceConsole — Règlements & normes", () => {
         freshness: "unknown",
         measured: true,
         available: false,
-        error: "geo_unreachable",
+        error: "geo-unreachable",
       },
     };
     const { container, getByRole, queryByRole } = renderConsole([cold, unavailable]);
@@ -189,4 +198,109 @@ describe("SourceConsole — Règlements & normes", () => {
     expect(container.querySelectorAll('[aria-label="Règlements & normes : Indisponible"]')).toHaveLength(1);
     expect(container.textContent).not.toMatch(/densifie/i);
   });
+
+  it("opens an accessible four-counter description with Enter and Space", async () => {
+    const measured: CityCoverage = {
+      ...makeCity("mesuree", "Ville Mesurée", null),
+      normes: {
+        state: "verified",
+        freshness: "fresh",
+        measured: true,
+        available: true,
+        zoneCount: 4,
+        numberMatched: 4,
+        complete: true,
+        zonesWithGrille: 1,
+        zonesWithReglement: 2,
+        zonesWithLegacyNormes: 1,
+        zonesWithNormativeValues: 3,
+        covered: 4,
+      },
+    };
+    const { getByRole, queryByRole } = renderConsole([measured]);
+    const control = getByRole("button", {
+      name: "Règlements & normes : Servi",
+    });
+
+    expect(control.getAttribute("aria-expanded")).toBe("false");
+    await fireEvent.keyDown(control, { key: "Enter" });
+    const tooltip = getByRole("tooltip");
+    expect(control.getAttribute("aria-expanded")).toBe("true");
+    expect(tooltip.textContent).toContain("2/4 sources règlementaires");
+    expect(tooltip.textContent).toContain("3/4 valeurs normatives");
+    expect(tooltip.textContent).toContain("1/4 normes historiques");
+    expect(tooltip.textContent).toContain("1/4 grilles PDF");
+    expect(tooltip.textContent).toContain("delta ancien↔nouveau requis");
+
+    await fireEvent.keyDown(control, { key: " " });
+    expect(queryByRole("tooltip")).toBeNull();
+  });
+
+  it("replaces Non mesuré with the scorecard lazy success immediately", async () => {
+    const payload: CityGrilles = {
+      citySlug: "transition-ok",
+      available: true,
+      zoneCount: 1,
+      numberMatched: 1,
+      complete: true,
+      zonesWithGrille: 0,
+      zonesWithReglement: 1,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 1,
+      covered: 1,
+      state: "verified",
+    };
+    stubConsoleFetch(payload);
+    const city = zonedCity(payload.citySlug, "Transition OK");
+    const { getByRole, getByText } = renderConsole([city]);
+    expect(getByRole("button", { name: /Non mesuré/ })).toBeTruthy();
+
+    await fireEvent.click(getByText("Transition OK"));
+    await flushConsole();
+    expect(getByRole("button", { name: /Règlements & normes : Servi/ })).toBeTruthy();
+  });
+
+  it("replaces Non mesuré with the scorecard lazy failure immediately", async () => {
+    const payload: CityGrilles = {
+      citySlug: "transition-fail",
+      available: false,
+      error: "invalid-response",
+    };
+    stubConsoleFetch(payload);
+    const city = zonedCity(payload.citySlug, "Transition Fail");
+    const { getByRole, getByText } = renderConsole([city]);
+    expect(getByRole("button", { name: /Non mesuré/ })).toBeTruthy();
+
+    await fireEvent.click(getByText("Transition Fail"));
+    await flushConsole();
+    expect(getByRole("button", { name: /Règlements & normes : Indisponible/ })).toBeTruthy();
+  });
 });
+
+function zonedCity(slug: string, name: string): CityCoverage {
+  return {
+    ...makeCity(slug, name, null),
+    l4Zonage: {
+      state: "verified",
+      served: true,
+      servedBy: "geo",
+      freshness: "fresh",
+    },
+  };
+}
+
+function stubConsoleFetch(payload: CityGrilles): void {
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+    const body = String(input).includes("/grilles")
+      ? payload
+      : { generatedAt: null, cities: [] };
+    return new Response(JSON.stringify(body), {
+      headers: { "content-type": "application/json" },
+    });
+  }));
+}
+
+async function flushConsole(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await Promise.resolve();
+}
