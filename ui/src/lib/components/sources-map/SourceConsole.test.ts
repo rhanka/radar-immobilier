@@ -325,6 +325,52 @@ describe("SourceConsole — Règlements & normes", () => {
     expect(getByRole("button", { name: /Règlements & normes : Indisponible/ })).toBeTruthy();
   });
 
+  it("ignores an in-flight lazy success after a refreshed bulk failure", async () => {
+    const resolveLazy = stubDeferredConsoleFetch();
+    const original = zonedCity("refresh-in-flight", "Refresh In Flight");
+    const view = renderConsole([original], "2026-07-01T00:00:00Z");
+    await fireEvent.keyDown(
+      view.getByRole("button", { name: "Ouvrir la couverture de Refresh In Flight" }),
+      { key: "Enter" },
+    );
+    await flushConsole();
+    expect(vi.mocked(fetch).mock.calls.some(([url]) => String(url).includes("/grilles"))).toBe(true);
+
+    const refreshed: CityCoverage = {
+      ...original,
+      normes: {
+        state: "declared",
+        freshness: "unknown",
+        measured: true,
+        available: false,
+        error: "geo-unreachable",
+      },
+    };
+    await view.rerender({
+      cities: [refreshed],
+      response: responseFor([refreshed], "2026-07-02T00:00:00Z"),
+    });
+    expect(view.getByRole("button", { name: /Règlements & normes : Indisponible/ })).toBeTruthy();
+
+    resolveLazy({
+      citySlug: original.citySlug,
+      available: true,
+      zoneCount: 1,
+      numberMatched: 1,
+      complete: true,
+      zonesWithGrille: 0,
+      zonesWithReglement: 1,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 1,
+      covered: 1,
+      state: "verified",
+    });
+    await flushConsole();
+
+    expect(view.getByRole("button", { name: /Règlements & normes : Indisponible/ })).toBeTruthy();
+    expect(view.queryByRole("button", { name: /Règlements & normes : Servi/ })).toBeNull();
+  });
+
   it("drops a verified overlay when refresh returns a newer failure", async () => {
     const lazy: CityGrilles = {
       citySlug: "refresh-verified",
@@ -429,6 +475,22 @@ function stubConsoleFetch(payload: CityGrilles): void {
     return new Response(JSON.stringify(body), {
       headers: { "content-type": "application/json" },
     });
+  }));
+}
+
+function stubDeferredConsoleFetch(): (payload: CityGrilles) => void {
+  let resolveGrilles!: (response: Response) => void;
+  const grillesResponse = new Promise<Response>((resolve) => {
+    resolveGrilles = resolve;
+  });
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+    if (String(input).includes("/grilles")) return grillesResponse;
+    return new Response(JSON.stringify({ generatedAt: null, cities: [] }), {
+      headers: { "content-type": "application/json" },
+    });
+  }));
+  return (payload) => resolveGrilles(new Response(JSON.stringify(payload), {
+    headers: { "content-type": "application/json" },
   }));
 }
 

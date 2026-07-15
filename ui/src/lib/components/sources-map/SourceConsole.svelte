@@ -45,6 +45,8 @@
   let normesOverlay: Record<string, NormesCell> = {};
   let overlayResponse = response;
   let overlayGeneratedAt = response?.generatedAt ?? null;
+  let selectionEpoch = 0;
+  let selectedGrillesResolved: ((result: CityGrilles) => void) | null = null;
 
   $: if (
     response !== overlayResponse ||
@@ -54,7 +56,7 @@
     overlayGeneratedAt = response?.generatedAt ?? null;
     normesOverlay = {};
     expandedNormesSlug = null;
-    selectedCity = null;
+    closeSelectedCity();
   }
 
   // ── Périmètre : Province / Villes à signaux précoces (parité « Couverture ») ─
@@ -210,7 +212,23 @@
   }
 
   function toggleSelectedCity(city: CityCoverage): void {
-    selectedCity = selectedCity?.citySlug === city.citySlug ? null : city;
+    if (selectedCity?.citySlug === city.citySlug) {
+      closeSelectedCity();
+      return;
+    }
+    const epoch = ++selectionEpoch;
+    const expectedResponse = response;
+    const expectedGeneratedAt = response?.generatedAt ?? null;
+    selectedGrillesResolved = (result) => {
+      handleGrillesResolved(result, epoch, expectedResponse, expectedGeneratedAt);
+    };
+    selectedCity = city;
+  }
+
+  function closeSelectedCity(): void {
+    selectionEpoch += 1;
+    selectedGrillesResolved = null;
+    selectedCity = null;
   }
 
   function handleCityKeydown(event: KeyboardEvent, city: CityCoverage): void {
@@ -220,12 +238,21 @@
     toggleSelectedCity(city);
   }
 
-  function handleGrillesResolved(result: CityGrilles): void {
+  function handleGrillesResolved(
+    result: CityGrilles,
+    epoch: number,
+    expectedResponse: CoverageResponse | null,
+    expectedGeneratedAt: string | null,
+  ): void {
+    if (
+      epoch !== selectionEpoch ||
+      response !== expectedResponse ||
+      (response?.generatedAt ?? null) !== expectedGeneratedAt ||
+      selectedCity?.citySlug !== result.citySlug
+    ) return;
     const normes = normesCellFromCityGrilles(result);
     normesOverlay = { ...normesOverlay, [result.citySlug]: normes };
-    if (selectedCity?.citySlug === result.citySlug) {
-      selectedCity = { ...selectedCity, normes };
-    }
+    selectedCity = { ...selectedCity, normes };
   }
 </script>
 
@@ -435,8 +462,8 @@
       <SourceScorecard
         city={selectedCity}
         {focusScope}
-        onGrillesResolved={handleGrillesResolved}
-        onClose={() => { selectedCity = null; }}
+        onGrillesResolved={selectedGrillesResolved}
+        onClose={closeSelectedCity}
       />
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
