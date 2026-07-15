@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   NORMATIVE_VALUE_KEYS,
   REGLEMENT_KEYS,
   hasRecognizedValue,
+  loadGeoFeatureCollection,
   measureNormesCoverage,
   normalizeNormValue,
 } from "./normes-keys.js";
@@ -78,5 +79,35 @@ describe("normes-keys", () => {
         [{ id: "shared", properties: { reglement_url: "https://x/r.pdf" } }],
       ),
     ).toMatchObject({ zonesWithReglement: 0, covered: 0 });
+  });
+
+  it("distinguishes incomplete pages, missing collections and invalid payloads", async () => {
+    const page = await loadGeoFeatureCollection(
+      "https://geo.test",
+      "qc-zonage-ville",
+      1,
+      vi.fn(async () =>
+        new Response(JSON.stringify({ features: [{}] }), {
+          headers: { "content-type": "application/json" },
+        }),
+      ) as unknown as typeof fetch,
+    );
+    expect(page).toMatchObject({ ok: true, complete: false, numberMatched: null });
+
+    const missing = await loadGeoFeatureCollection(
+      "https://geo.test",
+      "qc-zonage-ville",
+      10,
+      vi.fn(async () => new Response("{}", { status: 404 })) as unknown as typeof fetch,
+    );
+    expect(missing).toMatchObject({ ok: true, found: false, complete: true });
+
+    const invalid = await loadGeoFeatureCollection(
+      "https://geo.test",
+      "qc-zonage-ville",
+      10,
+      vi.fn(async () => new Response("{}")) as unknown as typeof fetch,
+    );
+    expect(invalid).toEqual({ ok: false, error: "invalid_response" });
   });
 });
