@@ -18,6 +18,11 @@ interface CoverageCell {
   state: "verified" | "declared" | "absent";
   freshness: "fresh" | "partial" | "stale" | "unknown";
 }
+interface NormesCell extends CoverageCell {
+  measured?: boolean;
+  available?: boolean | null;
+  error?: "geo_unreachable" | "invalid_response";
+}
 interface RawCell extends CoverageCell {
   count: number;
 }
@@ -42,7 +47,7 @@ interface CityCoverage {
   l2Graph: GraphCell;
   signals: SignalsCell;
   l4Zonage: GeoCell;
-  normes: CoverageCell;
+  normes: NormesCell;
   l5Lots: GeoCell;
   lotFields: CoverageCell;
   tod: GeoCell;
@@ -501,11 +506,14 @@ describe("GET /api/source/coverage", () => {
       fetchImpl,
     });
 
-    // Cache froid : la cellule bulk est `absent` (aucune grille prouvée à date).
+    // Cache froid : l'état métier reste neutre car aucune mesure n'a eu lieu.
     const cold = (await (
       await app.request("/api/source/coverage")
     ).json()) as CoverageResponse;
-    expect(cityOf(cold, "salaberry-de-valleyfield").normes.state).toBe("absent");
+    expect(cityOf(cold, "salaberry-de-valleyfield").normes).toMatchObject({
+      measured: false,
+      available: null,
+    });
 
     // Mesure lazy du détail ville (1 grille / 2 zones → declared)…
     const grillesRes = await app.request(
@@ -523,9 +531,38 @@ describe("GET /api/source/coverage", () => {
     expect(valleyfield.normes).toMatchObject({
       state: "declared",
       freshness: "fresh",
+      measured: true,
+      available: true,
     });
-    // Les autres villes restent absent (pas de mesure).
-    expect(cityOf(warm, "brossard").normes.state).toBe("absent");
+    expect(cityOf(warm, "brossard").normes.measured).toBe(false);
+  });
+
+  it("normes: preserves an unavailable lazy measurement separately from cold cache", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).includes("/items")) {
+        return new Response("unavailable", { status: 503 });
+      }
+      return new Response(JSON.stringify({ collections: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+    const app = sourceCoverageRoute({
+      store: makeMemStore(),
+      db: makeDb([]),
+      now: NOW,
+      fetchImpl,
+    });
+
+    await app.request("/api/source/coverage/brossard/grilles");
+    const body = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(body, "brossard").normes).toMatchObject({
+      measured: true,
+      available: false,
+      error: "geo_unreachable",
+    });
   });
 
   // ── Signaux extraits (projection PG + part avec citation vérifiable) ────────
