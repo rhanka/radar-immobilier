@@ -13,31 +13,22 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { parseGeoQuery, normalizeGeoRouteState } from "./geo-route.js";
-import { modeFromSubsetKey, subsetKeyForMode } from "$lib/signals/vivier-view-mode.js";
+import {
+  initialVivierSubsetKey,
+  reconcileVivierRouteSubset,
+} from "$lib/signals/vivier-view-mode.js";
+import type { GeoRoute } from "./geo-route.js";
 
 // ── Helpers ────────────────────────────────────────────────────────��─────────
 
 const FILTER_LS_KEY = "signaux-filter-subset";
 const FILTER_DEFAULT = "z|m|p";
 
-function canonicalSubsetKey(raw: string): string {
-  return subsetKeyForMode(modeFromSubsetKey(raw));
-}
-
-/**
- * Réplique du contrat subsetKeyFromRoute de SignauxMapView.
- * Source de vérité : SignauxMapView.svelte.
- */
 function subsetKeyFromRoute(route: ReturnType<typeof parseGeoQuery> | null): string {
-  if (route) {
-    const values = route.filters["subset"] ?? [];
-    if (values.length > 0) return canonicalSubsetKey(values.join("|"));
-  }
-  if (typeof localStorage !== "undefined") {
-    const stored = localStorage.getItem(FILTER_LS_KEY);
-    if (stored && stored.trim().length > 0) return canonicalSubsetKey(stored.trim());
-  }
-  return FILTER_DEFAULT;
+  const geoRoute: GeoRoute | null = route
+    ? { level: "region", region: "quebec", state: route }
+    : null;
+  return initialVivierSubsetKey(geoRoute, localStorage.getItem(FILTER_LS_KEY));
 }
 
 beforeEach(() => {
@@ -115,6 +106,16 @@ describe("subsetKeyFromRoute — priorité URL > localStorage > défaut", () => 
     localStorage.setItem(FILTER_LS_KEY, "z|m");
     const emptyFiltersState = normalizeGeoRouteState({});
     expect(subsetKeyFromRoute(emptyFiltersState)).toBe("z|m|p");
+  });
+
+  it("reload sans subset URL conserve la transition localStorage après chargement", () => {
+    localStorage.setItem(FILTER_LS_KEY, "z|p");
+    const state = normalizeGeoRouteState({});
+    const route: GeoRoute = { level: "region", region: "quebec", state };
+    const initial = initialVivierSubsetKey(route, localStorage.getItem(FILTER_LS_KEY));
+
+    expect(initial).toBe("z|p");
+    expect(reconcileVivierRouteSubset(route, initial)).toBe("z|p");
   });
 
   it("pas de subset dans URL, aucun localStorage → A", () => {
