@@ -55,7 +55,7 @@ export interface NormesCoverageCounters {
   covered: number;
 }
 
-export type GeoNormesError = "geo_unreachable" | "invalid_response";
+export type GeoNormesError = "geo-unreachable" | "invalid-response";
 export type GeoFeatureCollectionResult =
   | {
       ok: true;
@@ -80,7 +80,7 @@ export async function loadGeoFeatureCollection(
   try {
     response = await fetchImpl(url);
   } catch {
-    return { ok: false, error: "geo_unreachable" };
+    return { ok: false, error: "geo-unreachable" };
   }
   if (response.status === 404) {
     return {
@@ -91,33 +91,29 @@ export async function loadGeoFeatureCollection(
       complete: true,
     };
   }
-  if (!response.ok) return { ok: false, error: "geo_unreachable" };
+  if (!response.ok) return { ok: false, error: "geo-unreachable" };
 
   let body: unknown;
   try {
     body = await response.json();
   } catch {
-    return { ok: false, error: "invalid_response" };
+    return { ok: false, error: "invalid-response" };
   }
   if (typeof body !== "object" || body === null) {
-    return { ok: false, error: "invalid_response" };
+    return { ok: false, error: "invalid-response" };
   }
   const features = (body as { features?: unknown }).features;
   if (!Array.isArray(features)) {
-    return { ok: false, error: "invalid_response" };
+    return { ok: false, error: "invalid-response" };
   }
   const rawMatched = (body as { numberMatched?: unknown }).numberMatched;
   const numberMatched =
-    rawMatched === undefined || rawMatched === null
-      ? null
-      : typeof rawMatched === "number" &&
-          Number.isInteger(rawMatched) &&
-          rawMatched >= features.length
-        ? rawMatched
-        : undefined;
-  if (numberMatched === undefined) {
-    return { ok: false, error: "invalid_response" };
-  }
+    typeof rawMatched === "number" &&
+    Number.isFinite(rawMatched) &&
+    Number.isInteger(rawMatched) &&
+    rawMatched >= 0
+      ? rawMatched
+      : null;
   return {
     ok: true,
     found: true,
@@ -126,7 +122,7 @@ export async function loadGeoFeatureCollection(
     complete:
       numberMatched === null
         ? features.length < limit
-        : numberMatched === features.length,
+        : numberMatched <= features.length,
   };
 }
 
