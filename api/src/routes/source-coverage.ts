@@ -177,6 +177,14 @@ interface NormesCell {
   /** null before measurement; false for a measured geo failure. */
   available: boolean | null;
   error?: CityGrillesError;
+  zoneCount?: number;
+  numberMatched?: number | null;
+  complete?: boolean;
+  zonesWithGrille?: number;
+  zonesWithReglement?: number;
+  zonesWithLegacyNormes?: number;
+  zonesWithNormativeValues?: number;
+  covered?: number;
 }
 
 /**
@@ -471,7 +479,11 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
    */
   function buildNormesCell(citySlug: string, nowMs: number): NormesCell {
     const cached = grillesCache.get(citySlug);
-    const failure = grillesFailures.get(citySlug);
+    let failure = grillesFailures.get(citySlug);
+    if (failure && failure.expiresAt <= nowMs) {
+      grillesFailures.delete(citySlug);
+      failure = undefined;
+    }
     const measured =
       cached && cached.expiresAt > nowMs && cached.resolved
         ? cached.resolved
@@ -484,6 +496,14 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         freshness: "fresh",
         measured: true,
         available: true,
+        zoneCount: measured.zoneCount,
+        numberMatched: measured.numberMatched,
+        complete: measured.complete,
+        zonesWithGrille: measured.zonesWithGrille,
+        zonesWithReglement: measured.zonesWithReglement,
+        zonesWithLegacyNormes: measured.zonesWithLegacyNormes,
+        zonesWithNormativeValues: measured.zonesWithNormativeValues,
+        covered: measured.covered,
       };
     }
     if (measured && !measured.available) {
@@ -587,10 +607,13 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
     if (!result.available) {
       // Keep failure metadata briefly for the bulk cell, but retry lazy calls.
       grillesCache.delete(citySlug);
+      if (grillesFailures.size >= GRILLES_CACHE_MAX) grillesFailures.clear();
       grillesFailures.set(citySlug, {
         expiresAt: nowFn() + GRILLES_FAILURE_TTL_MS,
         value: result,
       });
+    } else {
+      grillesFailures.delete(citySlug);
     }
     return c.json(result);
   });
