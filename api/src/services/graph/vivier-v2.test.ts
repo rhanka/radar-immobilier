@@ -4,6 +4,7 @@ import {
   classifyVivierSignal,
   computeLegacySubsetCounts,
   computeVivierV2,
+  extractLegacyZmpInput,
   type VivierSignalInput,
 } from "./vivier-v2.js";
 
@@ -18,6 +19,29 @@ const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput =
 });
 
 describe("server vivier_v2 computation", () => {
+  it("reads legacy fields only from props.properties", () => {
+    const input = extractLegacyZmpInput({
+      id: "strict",
+      type: "Signal",
+      label: "Adoption ordinaire",
+      props: {
+        category: "rezonage",
+        etape: "projet_reglement",
+        intensite: "haute",
+        refs: [{ category: "rezonage", etape: "avis_motion", nb_unites_max: "12" }],
+        properties: { category: "vente_terrain", etape: "adoption" },
+      },
+      sourceRef: null,
+    });
+
+    expect(input).toMatchObject({
+      category: "vente_terrain",
+      etape: "adoption",
+      nbUnitesMax: null,
+      intensite: null,
+    });
+    expect(classifyLegacyZmpSignal(input).flags).toEqual({ z: false, m: false, p: false });
+  });
   it("classifies Sutton legacy memberships once for counts and detail IDs", () => {
     const suton = [
       signal({ id: "sutton-a", category: "rezonage", etape: "avis_motion", nbUnitesMax: "8" }),
