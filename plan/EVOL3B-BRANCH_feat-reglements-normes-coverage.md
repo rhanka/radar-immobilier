@@ -53,6 +53,10 @@ Expose live geo regulation references and normative values in Source coverage wi
 - [x] `attention` — Preserve unrelated dirty root changes; never copy them wholesale into this lane.
 - [x] `attention` — Batch any questions; do not interrupt implementation for non-blocking choices already resolved by spec §11.
 - [ ] `attention` — Report any need to widen scope before changing an unlisted path.
+- [x] `accept` — Apply the consensus corrections: exact allowlists, linear evidence aggregation, normalized completeness/errors, warm bulk counters, and bounded failure caching.
+- [x] `accept` — Keep Console and scorecard synchronized through a typed local overlay; expose the existing regulation cell as a keyboard-operable detailed control.
+- [x] `accept` — Use generic `Mesure geo incomplète` because the wire exposes zoning `numberMatched` but no auxiliary matched counter.
+- [x] `defer` — Exhaustive E2E state matrix: `make test-e2e` is a placeholder; focused API/client/component behavior tests are required and complete in this correction lot.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + bounded delegated lots**
@@ -87,6 +91,15 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceScorecard.test.ts ENV=test-reglements-normes`.
   - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
   - [x] Commit only Lot 2 files plus this plan update.
+
+- [x] **Lot 2b — Consensus correction pass**
+  - [x] Version the final ≤150-line contract in `SPEC_UI_REGLEMENTS_GEO_LIVE.md` §11.
+  - [x] Align exact keys, linear duplicate aggregation, page completeness, and hyphenated wire errors.
+  - [x] Propagate warm counters and bound both success and failure cache lanes.
+  - [x] Add an accessible regulation control with four counters and the anti-invention disclaimer.
+  - [x] Synchronize lazy scorecard resolution into the Console for success and failure.
+  - [x] Cover auxiliary truncation with generic incomplete wording and focused transition tests.
+  - [x] Run every affected focused make test with `ENV=test-reglements-normes` last.
 
 - [ ] **Lot 3 — Branch gates and live acceptance evidence**
   - [ ] Run `make typecheck ENV=test-reglements-normes`.
