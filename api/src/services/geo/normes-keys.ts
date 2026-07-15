@@ -59,6 +59,81 @@ export interface NormesCoverageCounters {
   covered: number;
 }
 
+export type GeoNormesError = "geo_unreachable" | "invalid_response";
+export type GeoFeatureCollectionResult =
+  | {
+      ok: true;
+      found: boolean;
+      features: unknown[];
+      numberMatched: number | null;
+      complete: boolean;
+    }
+  | { ok: false; error: GeoNormesError };
+
+/** Load and validate one bounded OGC page used by the lazy coverage measure. */
+export async function loadGeoFeatureCollection(
+  baseUrl: string,
+  collectionId: string,
+  limit: number,
+  fetchImpl: typeof fetch,
+): Promise<GeoFeatureCollectionResult> {
+  const url =
+    `${baseUrl}/collections/${encodeURIComponent(collectionId)}` +
+    `/items?limit=${limit}&f=json`;
+  let response: Response;
+  try {
+    response = await fetchImpl(url);
+  } catch {
+    return { ok: false, error: "geo_unreachable" };
+  }
+  if (response.status === 404) {
+    return {
+      ok: true,
+      found: false,
+      features: [],
+      numberMatched: 0,
+      complete: true,
+    };
+  }
+  if (!response.ok) return { ok: false, error: "geo_unreachable" };
+
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    return { ok: false, error: "invalid_response" };
+  }
+  if (typeof body !== "object" || body === null) {
+    return { ok: false, error: "invalid_response" };
+  }
+  const features = (body as { features?: unknown }).features;
+  if (!Array.isArray(features)) {
+    return { ok: false, error: "invalid_response" };
+  }
+  const rawMatched = (body as { numberMatched?: unknown }).numberMatched;
+  const numberMatched =
+    rawMatched === undefined || rawMatched === null
+      ? null
+      : typeof rawMatched === "number" &&
+          Number.isInteger(rawMatched) &&
+          rawMatched >= features.length
+        ? rawMatched
+        : undefined;
+  if (numberMatched === undefined) {
+    return { ok: false, error: "invalid_response" };
+  }
+  return {
+    ok: true,
+    found: true,
+    features,
+    numberMatched,
+    complete:
+      numberMatched === null
+        ? features.length < limit
+        : numberMatched === features.length,
+  };
+}
+
 function featureProps(feature: unknown): Record<string, unknown> {
   const props =
     typeof feature === "object" && feature !== null
