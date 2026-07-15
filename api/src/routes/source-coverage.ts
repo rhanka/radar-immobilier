@@ -98,6 +98,7 @@ const GEO_LISTING_FAILURE_TTL_MS = 60_000;
 /** TTL du cache grilles par ville + borne d'entrées (purge complète au-delà). */
 const GRILLES_TTL_MS = 5 * 60_000;
 const GRILLES_CACHE_MAX = 64;
+const GRILLES_FAILURE_TTL_MS = 60_000;
 const GEO_ITEMS_LIMIT = 10_000;
 
 /**
@@ -171,6 +172,11 @@ interface GeoCell {
 interface NormesCell {
   state: CoverageState;
   freshness: Freshness;
+  /** false means the lazy measurement has never run for this city. */
+  measured: boolean;
+  /** null before measurement; false for a measured geo failure. */
+  available: boolean | null;
+  error?: CityGrillesError;
 }
 
 /**
@@ -452,6 +458,10 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
     resolved?: CityGrillesResponse;
   }
   const grillesCache = new Map<string, GrillesCacheEntry>();
+  const grillesFailures = new Map<
+    string,
+    { expiresAt: number; value: CityGrillesResponse }
+  >();
 
   /**
    * Cellule « Normes (grilles) » du bulk : reprend la mesure grilles LAZY quand
@@ -461,14 +471,36 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
    */
   function buildNormesCell(citySlug: string, nowMs: number): NormesCell {
     const cached = grillesCache.get(citySlug);
+    const failure = grillesFailures.get(citySlug);
     const measured =
-      cached && cached.expiresAt > nowMs && cached.resolved?.available
+      cached && cached.expiresAt > nowMs && cached.resolved
         ? cached.resolved
-        : null;
-    if (measured?.state) {
-      return { state: measured.state, freshness: "fresh" };
+        : failure && failure.expiresAt > nowMs
+          ? failure.value
+          : null;
+    if (measured?.available) {
+      return {
+        state: measured.state,
+        freshness: "fresh",
+        measured: true,
+        available: true,
+      };
     }
-    return { state: "absent", freshness: "unknown" };
+    if (measured && !measured.available) {
+      return {
+        state: "absent",
+        freshness: "unknown",
+        measured: true,
+        available: false,
+        error: measured.error,
+      };
+    }
+    return {
+      state: "absent",
+      freshness: "unknown",
+      measured: false,
+      available: null,
+    };
   }
 
   async function loadCityGrilles(citySlug: string): Promise<CityGrillesResponse> {
@@ -553,8 +585,12 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
     }
     const result = await promise;
     if (!result.available) {
-      // Retry the next lazy request rather than caching a geo failure.
+      // Keep failure metadata briefly for the bulk cell, but retry lazy calls.
       grillesCache.delete(citySlug);
+      grillesFailures.set(citySlug, {
+        expiresAt: nowFn() + GRILLES_FAILURE_TTL_MS,
+        value: result,
+      });
     }
     return c.json(result);
   });
