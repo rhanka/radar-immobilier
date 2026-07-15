@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   A_SUBSET_KEY,
+  canOpenProjectedSignal,
   detailCountForCity,
   TRANSITION_SUBSET_KEY,
   modeFromSubsetKey,
@@ -112,5 +113,7 @@ describe("Vivier A / transition view contract", () => {
     expect(next.expandedKeys.has(excluded)).toBe(false);
     expect(retainProjectedSignalId("sutton-t", new Set(["sutton-a"]))).toBeNull();
     expect(retainProjectedSignalId("sutton-a", new Set(["sutton-a"]))).toBe("sutton-a");
+    expect(canOpenProjectedSignal("sutton-t", [SUTTON_RAW[0]!])).toBe(false);
+    expect(canOpenProjectedSignal("sutton-a", [SUTTON_RAW[0]!])).toBe(true);
   });
 });

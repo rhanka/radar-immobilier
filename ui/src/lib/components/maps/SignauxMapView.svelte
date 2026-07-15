@@ -115,6 +115,7 @@
   } from "$lib/maps/hover-paint.js";
   import {
     A_SUBSET_KEY,
+    canOpenProjectedSignal,
     detailCountForCity,
     modeFromSubsetKey,
     projectNodesForVivierMode,
@@ -993,6 +994,7 @@
 
   /** Ouvre seulement un signal encore inclus dans la projection active. */
   function makeSignalCurrent(id: string): void {
+    if (!canOpenProjectedSignal(id, filteredDetailNodes)) return;
     const node = filteredDetailNodes.find((n) => n.id === id);
     if (!node) return;
     openEvidence({
@@ -1004,7 +1006,7 @@
 
   /** Le viewer ne peut jamais réintroduire un signal exclu du mode fixe A/T. */
   function addSignalToFilter(id: string): void {
-    if (!filteredDetailNodes.some((node) => node.id === id)) return;
+    if (!canOpenProjectedSignal(id, filteredDetailNodes)) return;
     makeSignalCurrent(id);
   }
 
