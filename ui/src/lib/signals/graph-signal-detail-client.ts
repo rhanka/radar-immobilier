@@ -515,6 +515,11 @@ export interface GraphSignalNode {
   docRefs?: SignalDocRef[];
   props: Record<string, unknown>;
   evidence?: SignalEvidence;
+  legacySubset?: {
+    version: "legacy-zmp-v1";
+    signalId: string;
+    flags: { z: boolean; m: boolean; p: boolean };
+  };
 }
 
 export interface GraphSignalDetailResponse {
