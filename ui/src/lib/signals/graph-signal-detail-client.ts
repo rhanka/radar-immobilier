@@ -522,9 +522,16 @@ export interface GraphSignalNode {
   };
 }
 
+export interface LegacyZmpProjection {
+  version: "legacy-zmp-v1";
+  a: { count: number; signalIds: string[] };
+  transition: { count: number; signalIds: string[] };
+}
+
 export interface GraphSignalDetailResponse {
   ok: boolean;
   citySlug: string;
+  legacyProjection: LegacyZmpProjection | null;
   nodes: GraphSignalNode[];
 }
 
@@ -551,7 +558,7 @@ export async function fetchGraphSignalDetail(
     if (!res.ok) {
       // 404 = ville sans signaux dans la DB — état vide honnête
       if (res.status === 404) {
-        return { ok: false, citySlug, nodes: [] };
+        return { ok: false, citySlug, legacyProjection: null, nodes: [] };
       }
       throw new Error(`graph-signals/${citySlug}: ${res.status}`);
     }
