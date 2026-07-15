@@ -63,7 +63,11 @@ function coverageCity(
       priority: prioritySignals,
     }),
     l4Zonage: geoCell(worstStatus === "absent" ? "absent" : "verified"),
-    normes: cell("absent"),
+    normes: {
+      ...cell("absent"),
+      measured: false,
+      available: null,
+    },
     l5Lots: geoCell(worstStatus),
     tod: geoCell("absent"),
     worstStatus,

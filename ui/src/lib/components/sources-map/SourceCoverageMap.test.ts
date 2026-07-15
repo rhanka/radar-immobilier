@@ -140,7 +140,12 @@ function city(
     },
     // served: false → la scorecard NE déclenche PAS le fetch lazy des grilles.
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
-    normes: { state: "absent", freshness: "unknown" },
+    normes: {
+      state: "absent",
+      freshness: "unknown",
+      measured: false,
+      available: null,
+    },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     tod: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     worstStatus,
