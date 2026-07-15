@@ -19,10 +19,14 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
   - `ui/src/lib/components/maps/SignauxRail.svelte`
   - `ui/src/lib/components/maps/SignauxRail.test.ts`
+  - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
+  - `ui/src/lib/components/maps/SignauxSelPanel.test.ts`
+  - `ui/src/lib/components/maps/SignauxSelPanelHarness.svelte`
   - `ui/src/lib/router/filter-persistence.test.ts`
   - `ui/src/lib/signals/graph-signal-filter.ts`
   - `ui/src/lib/signals/graph-signal-filter.test.ts`
   - `ui/src/lib/signals/graph-signal-detail-client.ts`
+  - `ui/src/lib/signals/signals-live.test.ts`
   - `ui/src/lib/signals/vivier-view-mode.ts`
   - `ui/src/lib/signals/vivier-view-mode.test.ts`
 - **Forbidden Paths (must not change in this branch)**:
@@ -40,6 +44,8 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - `api/src/services/graph/vivier-v2.ts`
   - `api/src/services/graph/vivier-v2.test.ts`
   - `api/src/services/graph/graph-store.ts`
+  - `api/src/services/graph/graph-store.test.ts`
+  - `api/src/services/graph/sutton-legacy.fixture.ts`
   - `api/src/routes/graph-signals.ts`
   - `api/src/routes/graph-signals.test.ts`
 - **Exception process**:
@@ -50,6 +56,10 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
 - [x] `decision` — Conductor selected exact server-classified option 1 before test/code.
 - [x] `BRHOTFIXA-EX1` — Reason: rail counts already use server `z/m/p` classification while detail cards do not expose those exact flags; impact: add read-only legacy flags produced by the same pure classifier; rollback: remove the additive response field and UI consumption.
 - [x] `attention` — A client-only restoration is rejected because refs `0140601` and `34a9d4e` prove `p` was neutralized in the detail panel while remaining restrictive in server counts.
+- [x] `review/no-go` — Consensus review rejected publication until strict legacy inputs, selected-city detail authority, route resync, transient-state invalidation, malformed-payload fail-closed handling, and honest unavailable states were proven.
+- [x] `decision` — For the selected city, `GET /api/graph-signals/:city` is the sole observable authority for A/T counts and IDs through versioned `legacyProjection`; by-city counts remain for non-selected cities only.
+- [x] `decision` — Existing internal Vivier v2 / `r` computations remain untouched and unexposed; their removal is explicitly outside this hotfix.
+- [ ] `G1` — Global immutable snapshot identity is a separate publication gate owned by the conductor; this hotfix proves per-response A/T coherence but does not claim global snapshot identity.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick**
@@ -78,7 +88,20 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Lot gate: `make typecheck ENV=test-vivier-a-zmp` and `make lint ENV=test-vivier-a-zmp`.
   - [x] Commit atomically via selective staging and `make commit` under 150 changed lines, or split tests/implementation into separate atomic commits if required.
 
-- [ ] **Lot 2 — Review handoff**
+- [x] **Lot 2 — Consensus correction loop**
+  - [x] Capture red tests: API `2` expected failures with `103` passes; UI `8` expected failures with `40` passes.
+  - [x] Extract legacy inputs exactly like reference `8fe75cd`: graph identity fields plus legacy category/description/etape/units/intensity only from `props.properties`.
+  - [x] Add the five real Sutton graph records and prove normalized aggregate/detail parity: raw `5`, A IDs `1`, transition IDs `2`.
+  - [x] Return common-version `legacyProjection` with exact A/T counts and IDs from the detail response.
+  - [x] Make selected-city rail, panel, and map consume detail authority; reject missing, malformed, or inconsistent flags/projection without fallback.
+  - [x] Key geo routes by A/T and resynchronize mode on route/popstate changes.
+  - [x] On mode change, purge excluded focus/evidence/hover and prevent viewer actions from reopening excluded signals.
+  - [x] Replace false zero/empty copy with explicit unavailable states.
+  - [x] Targeted API gate: `105` passed, `7` DB-bound skipped.
+  - [x] Targeted UI gate: `49` passed.
+  - [x] Static gates: typecheck `0` errors (`7` pre-existing Svelte warnings), lint clean.
+
+- [ ] **Lot 3 — Review handoff**
   - [x] Run Harness scope/branch verification without writing Track.
   - [x] Report exact diff, test evidence, remaining UAT requirement, and no push/PR/merge/deploy.
   - [ ] Await consensus review before any publication action.
