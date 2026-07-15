@@ -1,6 +1,6 @@
 # SPEC — Live geo regulations and norms coverage
 
-Date: 2026-07-14  
+Date: 2026-07-14
 Track: `01KXGYVG85VWDB9ES9XVC0X25T` — Lot3b EVOL-VIVIER-V2
 ## 1. Problem
 
