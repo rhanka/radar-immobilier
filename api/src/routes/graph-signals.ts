@@ -19,6 +19,7 @@ import { Hono } from "hono";
 import {
   classifyGraphNodeLegacyZmp,
   classifyGraphNodeVivierV2,
+  buildLegacyZmpProjection,
   getSignalNodesForCity,
   listCitiesWithSignalNodes,
 } from "../services/graph/graph-store.js";
@@ -331,10 +332,7 @@ function buildSignalCard(
   const legacySubset = classifyGraphNodeLegacyZmp({
     id: node.id,
     type: node.type,
-    category: firstString(properties, ["category"]) ?? firstString(props, ["category"]),
     label: node.label,
-    description: nodeDescription(props),
-    etapeAnnote: firstString(properties, ["etape"]) ?? firstString(props, ["etape"]),
     props,
     sourceRef: node.sourceRef,
   });
@@ -794,7 +792,10 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
         }),
       ),
     );
-    return c.json({ ok: true, citySlug: city, nodes: mapped });
+    const legacyProjection = buildLegacyZmpProjection(
+      mapped.map((node) => node.legacySubset),
+    );
+    return c.json({ ok: true, citySlug: city, legacyProjection, nodes: mapped });
   });
 
   return app;
