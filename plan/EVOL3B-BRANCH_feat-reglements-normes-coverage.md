@@ -60,6 +60,7 @@ Expose live geo regulation references and normative values in Source coverage wi
 - [x] `accept` — Use semantic city activation plus a ≥24px regulation control with Enter/Space, Escape, and blur behavior.
 - [x] `accept` — Render zero-zone measurement as `Aucune zone servie` without 0/0 evidence ratios.
 - [x] `accept` — Reject in-flight lazy results whose selection epoch, bulk response identity, or generation is stale.
+- [x] `accept` — Keep the regulation hit target at 24px while aligning its 12px status glyph with the Zones glyph.
 - [x] `defer` — Exhaustive E2E state matrix: `make test-e2e` is a placeholder; focused API/client/component behavior tests are required and complete in this correction lot.
 
 ## Orchestration Mode (AI-selected)
@@ -116,6 +117,12 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Capture the selection epoch, bulk response identity, and generation for each lazy scorecard request.
   - [x] Ignore stale success and failure results after a refreshed bulk payload replaces their generation.
   - [x] Cover both race directions with deferred Promise tests.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
+
+- [x] **Lot 2e — UAT regulation swatch alignment**
+  - [x] Preserve the semantic transparent 24px control and its focus, keyboard, tooltip, and lazy behavior.
+  - [x] Move status color and border to an aria-hidden 12px swatch aligned with the Zones glyph.
+  - [x] Verify outer/inner styling and all 13 Console interactions.
   - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
 
 - [x] **Lot 3 — Branch gates and live acceptance evidence**
