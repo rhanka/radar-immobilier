@@ -349,8 +349,12 @@ describe("fetchCityGrilles", () => {
       citySlug: "saint-hippolyte",
       available: true,
       zoneCount: 3,
+      numberMatched: 3,
+      complete: true,
       zonesWithGrille: 1,
-      zonesWithNormes: 1,
+      zonesWithReglement: 1,
+      zonesWithLegacyNormes: 1,
+      zonesWithNormativeValues: 1,
       covered: 2,
       state: "declared" as const,
     };
