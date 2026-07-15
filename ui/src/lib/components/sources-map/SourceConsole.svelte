@@ -4,11 +4,11 @@
    * endpoint /api/source/coverage (l'ancienne Console est supprimée).
    *
    * Table tri-état par ville, une colonne par COUCHE RÉELLE (PV · Signaux ·
-   * Zones · Normes (grilles) · Lots (cadastre) · TOD · Couverture), triée pires
+   * Zones · Règlements & normes · Lots (cadastre) · TOD · Couverture), triée pires
    * statuts d'abord (l'action en tête), filtrable par statut, avec scorecard
    * détaillée au clic. Honnête de bout en bout : aucune couche n'est
    * « verified » sans preuve live ; une ville sans couverture reste « absent »
-   * (Normes et TOD sont éparses aujourd'hui → « Non couvert » majoritaire).
+   * (les règlements/normes et TOD sont épars aujourd'hui).
    */
   import { Alert, Badge } from "@sentropic/design-system-svelte";
   import { Terminal, RefreshCw, Search } from "@lucide/svelte";
@@ -102,24 +102,44 @@
   });
 
   // Couches affichées en mini-cellules : une colonne = une COUCHE RÉELLE, dans
-  // l'ordre PV · Signaux · Zones · Normes (grilles) · Lots (cadastre) ·
+  // l'ordre PV · Signaux · Zones · Règlements & normes · Lots (cadastre) ·
   // Champs lot · TOD (copy client neutre — pas de jargon interne L1/L2/…).
   // « Champs lot » = superficie/adresse/code postal/normes foldées servis par
   // geo — mesure LAZY per-city reprise par le bulk quand elle est chaude
-  // (même contrat que Normes) ; « Non couvert » tant que rien n'est mesuré.
-  function layerStates(c: CityCoverage): { key: string; label: string; state: CoverageState }[] {
+  // (même contrat que Règlements & normes).
+  type LayerDisplay = {
+    key: string;
+    label: string;
+    color: string;
+    status: string;
+  };
+
+  function layerDisplay(
+    key: string,
+    label: string,
+    state: CoverageState,
+  ): LayerDisplay {
+    return { key, label, color: STATE_COLOR[state], status: STATE_LABEL[state] };
+  }
+
+  function layerStates(c: CityCoverage): LayerDisplay[] {
+    const normes = c.normes.measured !== true
+      ? { color: STATE_COLOR.absent, status: "Non mesuré" }
+      : c.normes.available === false
+        ? { color: STATE_COLOR.declared, status: "Indisponible" }
+        : { color: STATE_COLOR[c.normes.state], status: STATE_LABEL[c.normes.state] };
     return [
-      { key: "pv", label: "PV collectés", state: c.l1Raw.state },
-      { key: "signaux", label: "Signaux extraits", state: c.signals.state },
-      { key: "zones", label: "Zones servies", state: c.l4Zonage.state },
-      { key: "normes", label: "Normes (grilles de zonage)", state: c.normes.state },
-      { key: "lots", label: "Lots (cadastre)", state: c.l5Lots.state },
-      {
-        key: "champs-lot",
-        label: "Champs lot (superficie · adresse · code postal · normes)",
-        state: c.lotFields?.state ?? "absent",
-      },
-      { key: "tod", label: "Périmètres TOD", state: c.tod.state },
+      layerDisplay("pv", "PV collectés", c.l1Raw.state),
+      layerDisplay("signaux", "Signaux extraits", c.signals.state),
+      layerDisplay("zones", "Zones servies", c.l4Zonage.state),
+      { key: "normes", label: "Règlements & normes", ...normes },
+      layerDisplay("lots", "Lots (cadastre)", c.l5Lots.state),
+      layerDisplay(
+        "champs-lot",
+        "Champs lot (superficie · adresse · code postal · normes)",
+        c.lotFields?.state ?? "absent",
+      ),
+      layerDisplay("tod", "Périmètres TOD", c.tod.state),
     ];
   }
 </script>
@@ -234,7 +254,7 @@
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Procès-verbaux et documents collectés">PV</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Signaux extraits">Signaux</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Zones de zonage servies">Zones</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Normes (grilles de zonage)">Normes (grilles)</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">Règlements & normes</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Lots (cadastre) servis">Lots (cadastre)</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Champs lot enrichis (superficie, adresse, code postal, normes)">Champs lot</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Périmètres TOD servis">TOD</th>
@@ -265,9 +285,9 @@
                   <td class="px-2 py-2 text-center">
                     <span
                       class="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle"
-                      style="background-color: {STATE_COLOR[layer.state]};"
-                      title={`${layer.label} : ${STATE_LABEL[layer.state]}`}
-                      aria-label={`${layer.label} : ${STATE_LABEL[layer.state]}`}
+                      style="background-color: {layer.color};"
+                      title={`${layer.label} : ${layer.status}`}
+                      aria-label={`${layer.label} : ${layer.status}`}
                     ></span>
                   </td>
                 {/each}

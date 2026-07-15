@@ -98,11 +98,11 @@ const RESPONSE: CoverageResponse = {
   cities: CITIES,
 };
 
-function renderConsole() {
+function renderConsole(cities = CITIES) {
   return render(SourceConsole, {
     props: {
-      cities: CITIES,
-      response: RESPONSE,
+      cities,
+      response: { ...RESPONSE, cities },
       loading: false,
       error: null,
       onReload: () => {},
@@ -165,5 +165,28 @@ describe("SourceConsole — périmètre Province / Villes à signaux précoces",
     expect(listedCityNames(container).sort()).toEqual(
       CITIES.map((c) => c.cityName).sort(),
     );
+  });
+});
+
+describe("SourceConsole — Règlements & normes", () => {
+  it("conserve une seule colonne et distingue cache froid et échec geo", () => {
+    const cold = makeCity("froide", "Ville Froide", null);
+    const unavailable: CityCoverage = {
+      ...makeCity("indisponible", "Ville Indisponible", null),
+      normes: {
+        state: "declared",
+        freshness: "unknown",
+        measured: true,
+        available: false,
+        error: "geo_unreachable",
+      },
+    };
+    const { container, getByRole, queryByRole } = renderConsole([cold, unavailable]);
+
+    expect(getByRole("columnheader", { name: "Règlements & normes" })).toBeTruthy();
+    expect(queryByRole("columnheader", { name: "Normes (grilles)" })).toBeNull();
+    expect(container.querySelectorAll('[aria-label="Règlements & normes : Non mesuré"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[aria-label="Règlements & normes : Indisponible"]')).toHaveLength(1);
+    expect(container.textContent).not.toMatch(/densifie/i);
   });
 });
