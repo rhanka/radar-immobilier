@@ -17,6 +17,7 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
 - **Allowed Paths (implementation scope)**:
   - `plan/HOTFIXA-BRANCH_fix-vivier-a-zmp-default.md`
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
+  - `ui/src/lib/components/maps/SignalPdfOverlay.svelte`
   - `ui/src/lib/components/maps/SignauxRail.svelte`
   - `ui/src/lib/components/maps/SignauxRail.test.ts`
   - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
@@ -45,6 +46,7 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - `api/src/services/graph/vivier-v2.test.ts`
   - `api/src/services/graph/graph-store.ts`
   - `api/src/services/graph/graph-store.test.ts`
+  - `api/src/services/graph/coaticook-legacy.fixture.ts`
   - `api/src/services/graph/sutton-legacy.fixture.ts`
   - `api/src/routes/graph-signals.ts`
   - `api/src/routes/graph-signals.test.ts`
@@ -59,7 +61,7 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
 - [x] `review/no-go` — Consensus review rejected publication until strict legacy inputs, selected-city detail authority, route resync, transient-state invalidation, malformed-payload fail-closed handling, and honest unavailable states were proven.
 - [x] `decision` — For the selected city, `GET /api/graph-signals/:city` is the sole observable authority for A/T counts and IDs through versioned `legacyProjection`; by-city counts remain for non-selected cities only.
 - [x] `decision` — Existing internal Vivier v2 / `r` computations remain untouched and unexposed; their removal is explicitly outside this hotfix.
-- [ ] `G1` — Global immutable snapshot identity is a separate publication gate owned by the conductor; this hotfix proves per-response A/T coherence but does not claim global snapshot identity.
+- [ ] `G1` — Global snapshot identity does not block this selected-city coherence hotfix. It blocks any claim that A is globally immutable or reproducible until the conductor supplies a publication-wide snapshot identity.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick**
@@ -102,6 +104,14 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Static gates: typecheck `0` errors (`7` pre-existing Svelte warnings), lint clean.
 
 - [ ] **Lot 3 — Review handoff**
+  - [x] Capture final-review red tests: API `2` expected failures with `95` passes and `7` skips; UI `18` expected failures with `18` passes.
+  - [x] Reproduce JSONB scalar text extraction and lock the real Coaticook numeric-unit signal to A (`z/m/p=true`, A count `1`).
+  - [x] Validate selected-city A and transition independently against detail nodes; consume only validated counts in rail, map, and panel.
+  - [x] Preserve localStorage transition mode when the route omits subset; keep explicit invalid subsets canonicalized to A.
+  - [x] Render unavailable aggregate and selected-city states as `n/d`, never as a fabricated zero.
+  - [x] Purge evidence, document, and hover transients on city navigation; remove impossible hover actions for out-of-projection signals.
+  - [x] Final-review focused greens: API `107` passed and `7` skipped; UI `54` passed.
+  - [x] Final-review static gates: typecheck `0` errors (`7` pre-existing Svelte warnings); lint clean.
   - [x] Run Harness scope/branch verification without writing Track.
   - [x] Report exact diff, test evidence, remaining UAT requirement, and no push/PR/merge/deploy.
   - [ ] Await consensus review before any publication action.
