@@ -54,6 +54,8 @@
   export let focusScope: FocusScope | null = null;
   /** Si fourni, affiche un bouton de fermeture (panneau latéral de carte). */
   export let onClose: (() => void) | null = null;
+  /** Receives the resolved lazy result so a parent bulk view can update. */
+  export let onGrillesResolved: ((result: CityGrilles) => void) | null = null;
 
   // ── Grilles de zonage : vérification lazy à la sélection ───────────────────
   let grilles: CityGrilles | null = null;
@@ -73,9 +75,19 @@
     grillesLoading = true;
     try {
       const result = await fetchCityGrilles(c.citySlug);
-      if (grillesForSlug === c.citySlug) grilles = result;
+      if (grillesForSlug === c.citySlug) {
+        grilles = result;
+        onGrillesResolved?.(result);
+      }
     } catch {
-      if (grillesForSlug === c.citySlug) grillesError = true;
+      if (grillesForSlug === c.citySlug) {
+        grillesError = true;
+        onGrillesResolved?.({
+          citySlug: c.citySlug,
+          available: false,
+          error: "geo-unreachable",
+        });
+      }
     } finally {
       if (grillesForSlug === c.citySlug) grillesLoading = false;
     }
@@ -238,11 +250,10 @@
   function grillesResultEvidence(result: AvailableGrilles): string {
     if (result.zoneCount === 0) return "Aucune zone servie";
     if (!result.complete) {
-      const matched = result.numberMatched ?? "?";
       const noEvidence = result.covered === 0
         ? " · aucune preuve dans l’échantillon"
         : "";
-      return `Mesure incomplète ${result.zoneCount}/${matched} · ${evidenceCounts(result)}${noEvidence}`;
+      return `Mesure geo incomplète · ${evidenceCounts(result)}${noEvidence}`;
     }
     if (result.covered === 0) {
       return `Aucune preuve reconnue servie sur ${result.zoneCount} zone${result.zoneCount === 1 ? "" : "s"}`;
@@ -339,7 +350,7 @@
               </Badge>
               <span class="text-xs text-slate-400">fraîcheur&nbsp;: à jour</span>
             {:else}
-              <Badge tone="neutral" class="text-xs">—</Badge>
+              <Badge tone="neutral" class="text-xs">En cours</Badge>
               <span class="text-xs text-slate-400">fraîcheur&nbsp;: —</span>
             {/if}
           </div>

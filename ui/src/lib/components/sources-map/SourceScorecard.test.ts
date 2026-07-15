@@ -59,7 +59,12 @@ function makeCity(slug: string, name: string, lotsServed: boolean): CityCoverage
       freshness: "unknown",
     },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
-    normes: { state: "absent", freshness: "unknown" },
+    normes: {
+      state: "absent",
+      freshness: "unknown",
+      measured: false,
+      available: null,
+    },
     l5Lots: {
       state: lotsServed ? "verified" : "absent",
       served: lotsServed,
@@ -133,10 +138,13 @@ function stubGrillesFetch(payload: CityGrilles) {
   }));
 }
 
-async function renderGrilles(payload: CityGrilles): Promise<HTMLElement> {
+async function renderGrilles(
+  payload: CityGrilles,
+  onGrillesResolved: ((result: CityGrilles) => void) | null = null,
+): Promise<HTMLElement> {
   stubGrillesFetch(payload);
   const { getByTestId } = render(SourceScorecard, {
-    props: { city: makeZonedCity(payload.citySlug) },
+    props: { city: makeZonedCity(payload.citySlug), onGrillesResolved },
   });
   await flush();
   return getByTestId("scorecard-grilles");
@@ -174,7 +182,7 @@ describe("SourceScorecard — Règlements & normes", () => {
     const row = await renderGrilles({
       citySlug: "geo-down",
       available: false,
-      error: "geo_unreachable",
+      error: "geo-unreachable",
     });
 
     expect(row.textContent).toContain("Geo indisponible");
@@ -182,12 +190,12 @@ describe("SourceScorecard — Règlements & normes", () => {
     expect(row.textContent).not.toContain("Non couvert");
   });
 
-  it("déclare un échantillon incomplet même sans preuve reconnue", async () => {
+  it("uses generic wording when auxiliary evidence may be truncated", async () => {
     const row = await renderGrilles({
       citySlug: "partial",
       available: true,
       zoneCount: 1,
-      numberMatched: 4,
+      numberMatched: 1,
       complete: false,
       zonesWithGrille: 0,
       zonesWithReglement: 0,
@@ -197,7 +205,8 @@ describe("SourceScorecard — Règlements & normes", () => {
       state: "declared",
     });
 
-    expect(row.textContent).toContain("Mesure incomplète 1/4");
+    expect(row.textContent).toContain("Mesure geo incomplète");
+    expect(row.textContent).not.toContain("Mesure incomplète 1/1");
     expect(row.textContent).toContain("aucune preuve dans l’échantillon");
     expect(row.textContent).toContain("Partiel");
   });
@@ -238,6 +247,39 @@ describe("SourceScorecard — Règlements & normes", () => {
 
     expect(row.textContent).toContain("Aucune preuve reconnue servie sur 2 zones");
     expect(row.textContent).not.toContain("aucune grille publiée");
+  });
+
+  it("reports the resolved lazy result to its parent", async () => {
+    const onResolved = vi.fn();
+    await renderGrilles(
+      {
+        citySlug: "callback",
+        available: false,
+        error: "invalid-response",
+      },
+      onResolved,
+    );
+    expect(onResolved).toHaveBeenCalledWith({
+      citySlug: "callback",
+      available: false,
+      error: "invalid-response",
+    });
+  });
+
+  it("labels an unresolved lazy request as in progress", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).includes("/grilles")) {
+        return await new Promise<Response>(() => {});
+      }
+      return new Response(JSON.stringify(EMPTY_CONSISTENCY), {
+        headers: { "content-type": "application/json" },
+      });
+    }));
+    const { getByTestId } = render(SourceScorecard, {
+      props: { city: makeZonedCity("loading") },
+    });
+    await Promise.resolve();
+    expect(getByTestId("scorecard-grilles").textContent).toContain("En cours");
   });
 });
 
