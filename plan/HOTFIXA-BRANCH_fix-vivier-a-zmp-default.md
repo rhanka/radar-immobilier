@@ -61,6 +61,8 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
 - [x] `review/no-go` — Consensus review rejected publication until strict legacy inputs, selected-city detail authority, route resync, transient-state invalidation, malformed-payload fail-closed handling, and honest unavailable states were proven.
 - [x] `decision` — For the selected city, `GET /api/graph-signals/:city` is the sole observable authority for A/T counts and IDs through versioned `legacyProjection`; by-city counts remain for non-selected cities only.
 - [x] `decision` — Existing internal Vivier v2 / `r` computations remain untouched and unexposed; their removal is explicitly outside this hotfix.
+- [x] `review/go-1` — Final independent verdict 1 is GO on `2be78e8`: API `107` passed with `7` DB-bound skips, UI `54` passed, typecheck reported `0` errors, and lint was clean.
+- [x] `review/go-2` — Final independent verdict 2 is GO on `2be78e8`: selected-city A/T coherence and fail-closed behavior have no remaining blocker within hotfix scope.
 - [ ] `G1` — Global snapshot identity does not block this selected-city coherence hotfix. It blocks any claim that A is globally immutable or reproducible until the conductor supplies a publication-wide snapshot identity.
 
 ## Orchestration Mode (AI-selected)
@@ -103,7 +105,7 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Targeted UI gate: `49` passed.
   - [x] Static gates: typecheck `0` errors (`7` pre-existing Svelte warnings), lint clean.
 
-- [ ] **Lot 3 — Review handoff**
+- [x] **Lot 3 — Review handoff**
   - [x] Capture final-review red tests: API `2` expected failures with `95` passes and `7` skips; UI `18` expected failures with `18` passes.
   - [x] Reproduce JSONB scalar text extraction and lock the real Coaticook numeric-unit signal to A (`z/m/p=true`, A count `1`).
   - [x] Validate selected-city A and transition independently against detail nodes; consume only validated counts in rail, map, and panel.
@@ -114,4 +116,4 @@ Restore the immutable Vivier A projection (`z|m|p`) as the default on every sign
   - [x] Final-review static gates: typecheck `0` errors (`7` pre-existing Svelte warnings); lint clean.
   - [x] Run Harness scope/branch verification without writing Track.
   - [x] Report exact diff, test evidence, remaining UAT requirement, and no push/PR/merge/deploy.
-  - [ ] Await consensus review before any publication action.
+  - [x] Complete consensus review with two final GO verdicts on `2be78e8`; retain `G1` only as a non-blocking hotfix residual and a blocker for global immutability/reproducibility claims.
