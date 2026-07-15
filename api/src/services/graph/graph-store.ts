@@ -21,6 +21,7 @@ import { QC_MUNICIPALITIES } from "@radar/sources";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
+  classifyLegacyZmpSignal,
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
@@ -1339,6 +1340,22 @@ export function classifyGraphNodeVivierV2(
     sourceRef: input.sourceRef,
   };
   return classifyVivierSignal(signal);
+}
+
+/** Build legacy membership from the same graph card input as aggregate counts. */
+export function classifyGraphNodeLegacyZmp(
+  input: GraphSignalClassificationInput,
+): ReturnType<typeof classifyLegacyZmpSignal> {
+  return classifyLegacyZmpSignal({
+    id: input.id,
+    type: input.type,
+    category: input.category,
+    label: input.label,
+    description: input.description,
+    etape: input.etapeAnnote,
+    props: input.props,
+    sourceRef: input.sourceRef,
+  });
 }
 
 /**

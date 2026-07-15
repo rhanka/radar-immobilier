@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyLegacyZmpSignal,
   classifyVivierSignal,
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -17,6 +18,26 @@ const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput =
 });
 
 describe("server vivier_v2 computation", () => {
+  it("classifies Sutton legacy memberships once for counts and detail IDs", () => {
+    const suton = [
+      signal({ id: "sutton-a", category: "rezonage", etape: "avis_motion", nbUnitesMax: "8" }),
+      signal({ id: "sutton-t", category: "rezonage", etape: "avis_motion", nbUnitesMax: "2" }),
+      signal({ id: "sutton-z", category: "rezonage", etape: "adoption", nbUnitesMax: "2" }),
+      signal({ id: "sutton-m", category: "vente_terrain", etape: "adoption", nbUnitesMax: "8" }),
+      signal({ id: "sutton-raw", category: "vente_terrain", etape: "adoption", nbUnitesMax: "2" }),
+    ];
+
+    const memberships = suton.map(classifyLegacyZmpSignal);
+    const counts = computeLegacySubsetCounts(suton);
+
+    expect(memberships.filter((item) => item.flags.z && item.flags.m && item.flags.p).map((item) => item.signalId)).toEqual(["sutton-a"]);
+    expect(memberships.filter((item) => item.flags.z && item.flags.p).map((item) => item.signalId)).toEqual(["sutton-a", "sutton-t"]);
+    expect(counts[""]).toBe(5);
+    expect(counts["z|m|p"]).toBe(1);
+    expect(counts["z|p"]).toBe(2);
+    expect(memberships.every((item) => item.version === "legacy-zmp-v1")).toBe(true);
+  });
+
   it("uses the graph-store zonage helper and keeps missing evidence indeterminate", () => {
     const etapeFallback = classifyVivierSignal(
       signal({ category: null, etape: "rezonage", label: "Avis de motion" }),
