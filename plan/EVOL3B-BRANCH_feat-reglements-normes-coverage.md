@@ -79,14 +79,14 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Lot gate: `make test-api SCOPE=src/routes/source-coverage.test.ts ENV=test-reglements-normes`.
   - [x] Commit only Lot 1 files plus this plan update.
 
-- [ ] **Lot 2 — Source Console and scorecard evidence**
-  - [ ] Rename the existing layer to `Règlements & normes` without adding a separate column.
-  - [ ] Render understandable evidence for regulation sources, normative values, legacy norms, grids, incompleteness, and geo unavailability.
-  - [ ] Ensure no `densifie` badge or claim appears from regulation/norm fields alone.
-  - [ ] Update focused component/client tests and stale QA expectations.
-  - [ ] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceScorecard.test.ts ENV=test-reglements-normes`.
-  - [ ] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
-  - [ ] Commit only Lot 2 files plus this plan update.
+- [x] **Lot 2 — Source Console and scorecard evidence**
+  - [x] Rename the existing layer to `Règlements & normes` without adding a separate column.
+  - [x] Render understandable evidence for regulation sources, normative values, legacy norms, grids, incompleteness, and geo unavailability.
+  - [x] Ensure no `densifie` badge or claim appears from regulation/norm fields alone.
+  - [x] Update focused component/client tests and stale QA expectations.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceScorecard.test.ts ENV=test-reglements-normes`.
+  - [x] Lot gate: `make test-ui SCOPE=src/lib/components/sources-map/SourceConsole.test.ts ENV=test-reglements-normes`.
+  - [x] Commit only Lot 2 files plus this plan update.
 
 - [ ] **Lot 3 — Branch gates and live acceptance evidence**
   - [ ] Run `make typecheck ENV=test-reglements-normes`.
