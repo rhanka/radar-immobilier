@@ -10,9 +10,10 @@ import { readAll } from "../services/scrape-status/store.js";
 import { mergeWithDerived } from "../services/scrape-status/derive.js";
 import { DEFAULT_OGC_BASE_URL } from "../services/geo/ogc-pull.js";
 import {
-  zoneGrillePdfUrl,
-  zoneNormes,
-} from "../services/geo/lot-zone-enrichment.js";
+  loadGeoFeatureCollection,
+  measureNormesCoverage,
+  type GeoNormesError,
+} from "../services/geo/normes-keys.js";
 import {
   measureCityLotFields,
   type CityLotFieldsResponse,
@@ -97,6 +98,7 @@ const GEO_LISTING_FAILURE_TTL_MS = 60_000;
 /** TTL du cache grilles par ville + borne d'entrées (purge complète au-delà). */
 const GRILLES_TTL_MS = 5 * 60_000;
 const GRILLES_CACHE_MAX = 64;
+const GEO_ITEMS_LIMIT = 10_000;
 
 /**
  * Sources « raw » (L1) = toutes les sources scrape-status SAUF `zonage`
@@ -239,18 +241,29 @@ interface GeoLiveListing {
   tod: Set<string>;
 }
 
-/** Réponse du détail grilles par ville (endpoint lazy). */
-export interface CityGrillesResponse {
-  citySlug: string;
-  /** false = geo injoignable (dégradé honnête, PAS un « Non couvert »). */
-  available: boolean;
-  zoneCount?: number;
-  zonesWithGrille?: number;
-  zonesWithNormes?: number;
-  /** Zones portant une grille OU des normes réelles. */
-  covered?: number;
-  state?: CoverageState;
-}
+export type CityGrillesError = GeoNormesError;
+
+/** Réponse du détail règlements/normes par ville (endpoint lazy). */
+export type CityGrillesResponse =
+  | {
+      citySlug: string;
+      available: false;
+      error: CityGrillesError;
+    }
+  | {
+      citySlug: string;
+      available: true;
+      zoneCount: number;
+      numberMatched: number | null;
+      complete: boolean;
+      zonesWithGrille: number;
+      zonesWithReglement: number;
+      zonesWithLegacyNormes: number;
+      zonesWithNormativeValues: number;
+      /** Union of evidence predicates, counted once per served zone feature. */
+      covered: number;
+      state: CoverageState;
+    };
 
 export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
   const app = new Hono();
@@ -435,8 +448,8 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
   // par le bulk (cellule normes) sans jamais déclencher de mesure per-city.
   interface GrillesCacheEntry {
     expiresAt: number;
-    value: Promise<CityGrillesResponse | null>;
-    resolved?: CityGrillesResponse | null;
+    value: Promise<CityGrillesResponse>;
+    resolved?: CityGrillesResponse;
   }
   const grillesCache = new Map<string, GrillesCacheEntry>();
 
@@ -453,82 +466,64 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
         ? cached.resolved
         : null;
     if (measured?.state) {
-      // Mesurée live il y a ≤ TTL → prouvée à la requête.
       return { state: measured.state, freshness: "fresh" };
     }
     return { state: "absent", freshness: "unknown" };
   }
 
-  async function loadCityGrilles(
-    citySlug: string,
-  ): Promise<CityGrillesResponse | null> {
-    const collectionId = `qc-zonage-${citySlug}`;
-    const url =
-      `${resolveBase()}/collections/${encodeURIComponent(collectionId)}` +
-      `/items?limit=10000&f=json`;
-    let res: Response;
-    try {
-      res = await fetchImpl(url);
-    } catch {
-      return null;
-    }
-    if (res.status === 404) {
-      // Pas de collection zonage live → pas de zones → pas de grilles (honnête).
+  async function loadCityGrilles(citySlug: string): Promise<CityGrillesResponse> {
+    const zonage = await loadGeoFeatureCollection(
+      resolveBase(),
+      `qc-zonage-${citySlug}`,
+      GEO_ITEMS_LIMIT,
+      fetchImpl,
+    );
+    if (!zonage.ok) return { citySlug, available: false, error: zonage.error };
+    if (!zonage.found) {
       return {
         citySlug,
         available: true,
         zoneCount: 0,
+        numberMatched: 0,
+        complete: true,
         zonesWithGrille: 0,
-        zonesWithNormes: 0,
+        zonesWithReglement: 0,
+        zonesWithLegacyNormes: 0,
+        zonesWithNormativeValues: 0,
         covered: 0,
         state: "absent",
       };
     }
-    if (!res.ok) return null;
-    let body: unknown;
-    try {
-      body = await res.json();
-    } catch {
-      return null;
-    }
-    const features = Array.isArray((body as { features?: unknown }).features)
-      ? ((body as { features: unknown[] }).features)
-      : [];
 
-    let zonesWithGrille = 0;
-    let zonesWithNormes = 0;
-    let covered = 0;
-    for (const feature of features) {
-      const rawProps =
-        typeof feature === "object" && feature !== null
-          ? (feature as { properties?: unknown }).properties
-          : null;
-      const props =
-        typeof rawProps === "object" && rawProps !== null
-          ? (rawProps as Record<string, unknown>)
-          : {};
-      const hasGrille = zoneGrillePdfUrl(props) !== null;
-      const normes = zoneNormes(props);
-      const hasNormes = normes.densiteLogHa !== null || normes.usages.length > 0;
-      if (hasGrille) zonesWithGrille += 1;
-      if (hasNormes) zonesWithNormes += 1;
-      if (hasGrille || hasNormes) covered += 1;
+    const geoNormes = await loadGeoFeatureCollection(
+      resolveBase(),
+      `qc-zonage-norms-${citySlug}`,
+      GEO_ITEMS_LIMIT,
+      fetchImpl,
+    );
+    if (!geoNormes.ok) {
+      return { citySlug, available: false, error: geoNormes.error };
     }
 
-    const zoneCount = features.length;
+    const counters = measureNormesCoverage(zonage.features, geoNormes.features);
+
+    const zoneCount = zonage.features.length;
+    const complete = zonage.complete && geoNormes.complete;
     const state: CoverageState =
-      covered === 0
-        ? "absent"
-        : covered >= zoneCount
-          ? "verified"
-          : "declared";
+      !complete
+        ? "declared"
+        : counters.covered === 0
+          ? "absent"
+          : zoneCount > 0 && counters.covered >= zoneCount
+            ? "verified"
+            : "declared";
     return {
       citySlug,
       available: true,
       zoneCount,
-      zonesWithGrille,
-      zonesWithNormes,
-      covered,
+      numberMatched: zonage.numberMatched,
+      complete,
+      ...counters,
       state,
     };
   }
@@ -540,7 +535,7 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
     }
     const now = nowFn();
     const cached = grillesCache.get(citySlug);
-    let promise: Promise<CityGrillesResponse | null>;
+    let promise: Promise<CityGrillesResponse>;
     if (cached && cached.expiresAt > now) {
       promise = cached.value;
     } else {
@@ -557,11 +552,9 @@ export function sourceCoverageRoute(deps: SourceCoverageDeps): Hono {
       });
     }
     const result = await promise;
-    if (result === null) {
-      // geo injoignable : pas de cache d'échec long, dégradé honnête.
+    if (!result.available) {
+      // Retry the next lazy request rather than caching a geo failure.
       grillesCache.delete(citySlug);
-      const degraded: CityGrillesResponse = { citySlug, available: false };
-      return c.json(degraded);
     }
     return c.json(result);
   });
