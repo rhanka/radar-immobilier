@@ -59,6 +59,37 @@ describe("SignauxRail — A / transition", () => {
     expect(calls).toEqual(["z|p"]);
     expect(container.textContent).toMatch(/2\s+signaux/);
   });
+
+  it("uses selected-city detail authority instead of conflicting by-city counts", async () => {
+    const entry: CityMapEntry = {
+      municipality: { slug: "sutton", name: "Sutton", mrc: "Brome-Missisquoi" } as CityMapEntry["municipality"],
+      signalCount6m: 5,
+      subsetCounts: { "": 5, "z|m|p": 99, "z|p": 88 },
+    };
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [entry],
+        selectedSlug: "sutton",
+        selectedLegacyProjection: {
+          version: "legacy-zmp-v1",
+          a: { count: 1, signalIds: ["signal-sutton-refonte-zonage-2026"] },
+          transition: {
+            count: 2,
+            signalIds: [
+              "event-sutton-refonte-reglementaire-2026-05-27",
+              "signal-sutton-refonte-zonage-2026",
+            ],
+          },
+        },
+      },
+    });
+
+    expect(container.textContent).toMatch(/1\s+signal/);
+    expect(container.textContent).not.toContain("99");
+    await fireEvent.click(getModeRadios(container)[1]);
+    expect(container.textContent).toMatch(/2\s+signaux/);
+    expect(container.textContent).not.toContain("88");
+  });
 });
 
 // ── Liste PLATE de villes (accordéon signaux SUPPRIMÉ du rail gauche) ────────
