@@ -70,14 +70,14 @@ Expose live geo regulation references and normative values in Source coverage wi
   - [x] Audit `/tmp/handover-immo.md` and the root dirty diff without modifying root files.
   - [x] Confirm the API counter matrix, completeness semantics, and unavailable-versus-absent mapping before implementation.
 
-- [ ] **Lot 1 — Deterministic API coverage contract**
+- [x] **Lot 1 — Deterministic API coverage contract**
   - [x] Add one shared allowlist/normalization source for regulation keys and normative value keys.
   - [x] Measure coverage per served zoning feature and join live `qc-zonage-norms-*` evidence only to matching normalized zone codes.
   - [x] Expose `numberMatched`, `complete`, `zonesWithGrille`, `zonesWithReglement`, `zonesWithLegacyNormes`, `zonesWithNormativeValues`, and union `covered`.
   - [x] Keep unavailable/malformed geo distinct from business absence and block `verified` when the measurement is incomplete.
-  - [ ] Add focused tests for regulation-only, normative values, unmatched codes, truncation, malformed geo, and no `effet_densifiant` fabrication.
-  - [ ] Lot gate: `make test-api SCOPE=src/routes/source-coverage.test.ts ENV=test-reglements-normes`.
-  - [ ] Commit only Lot 1 files plus this plan update.
+  - [x] Add focused tests for regulation-only, normative values, unmatched codes, truncation, malformed geo, and no `effet_densifiant` fabrication.
+  - [x] Lot gate: `make test-api SCOPE=src/routes/source-coverage.test.ts ENV=test-reglements-normes`.
+  - [x] Commit only Lot 1 files plus this plan update.
 
 - [ ] **Lot 2 — Source Console and scorecard evidence**
   - [ ] Rename the existing layer to `Règlements & normes` without adding a separate column.
