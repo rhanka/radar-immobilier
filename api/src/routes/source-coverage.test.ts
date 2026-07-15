@@ -1032,7 +1032,7 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
         {
           properties: { zone_code: "H-1", URL_GRILLE: "https://x/g.pdf", usages: ["h1"] },
         },
-        { properties: { zone_code: "H 2" } },
+        { properties: { zone_code: "H–2" } },
         { properties: { zone_code: "C-3" } },
         { properties: { zone_code: "A-4" } },
       ],
@@ -1156,15 +1156,45 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     expect((await resDown.json()) as CityGrillesResponse).toMatchObject({
       citySlug: "ville-x",
       available: false,
+      error: "geo_unreachable",
+    });
+
+    const serverError = vi.fn(async () =>
+      new Response("unavailable", { status: 503 }),
+    ) as unknown as typeof fetch;
+    const res503 = await grillesApp(serverError).request(
+      "/api/source/coverage/ville-503/grilles",
+    );
+    expect((await res503.json()) as CityGrillesResponse).toMatchObject({
+      available: false,
+      error: "geo_unreachable",
+    });
+
+    const malformed = vi.fn(async () =>
+      new Response(JSON.stringify({ numberMatched: 1 }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    ) as unknown as typeof fetch;
+    const malformedRes = await grillesApp(malformed).request(
+      "/api/source/coverage/ville-malformee/grilles",
+    );
+    expect((await malformedRes.json()) as CityGrillesResponse).toEqual({
+      citySlug: "ville-malformee",
+      available: false,
+      error: "invalid_response",
     });
   });
 
   it("caches the per-city result (TTL) and rejects malformed slugs", async () => {
-    const fetchImpl = itemsFetch([{ properties: { zone_code: "H-1" } }]);
+    const fetchImpl = collectionsFetch(
+      [{ properties: { zone_code: "H-1" } }],
+      null,
+    );
     const app = grillesApp(fetchImpl);
     await app.request("/api/source/coverage/ville-a/grilles");
     await app.request("/api/source/coverage/ville-a/grilles");
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
 
     const bad = await app.request(
       "/api/source/coverage/Ville%20Pas%20Slug/grilles",
