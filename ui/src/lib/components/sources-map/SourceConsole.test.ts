@@ -371,6 +371,50 @@ describe("SourceConsole — Règlements & normes", () => {
     expect(view.queryByRole("button", { name: /Règlements & normes : Servi/ })).toBeNull();
   });
 
+  it("ignores an in-flight lazy failure after refreshed verified bulk data", async () => {
+    const resolveLazy = stubDeferredConsoleFetch();
+    const original = zonedCity("refresh-in-flight-error", "Refresh In Flight Error");
+    const view = renderConsole([original], "2026-07-01T00:00:00Z");
+    await fireEvent.keyDown(
+      view.getByRole("button", { name: "Ouvrir la couverture de Refresh In Flight Error" }),
+      { key: "Enter" },
+    );
+    await flushConsole();
+
+    const refreshed: CityCoverage = {
+      ...original,
+      normes: {
+        state: "verified",
+        freshness: "fresh",
+        measured: true,
+        available: true,
+        zoneCount: 1,
+        numberMatched: 1,
+        complete: true,
+        zonesWithGrille: 1,
+        zonesWithReglement: 0,
+        zonesWithLegacyNormes: 0,
+        zonesWithNormativeValues: 0,
+        covered: 1,
+      },
+    };
+    await view.rerender({
+      cities: [refreshed],
+      response: responseFor([refreshed], "2026-07-02T00:00:00Z"),
+    });
+    expect(view.getByRole("button", { name: /Règlements & normes : Servi/ })).toBeTruthy();
+
+    resolveLazy({
+      citySlug: original.citySlug,
+      available: false,
+      error: "geo-unreachable",
+    });
+    await flushConsole();
+
+    expect(view.getByRole("button", { name: /Règlements & normes : Servi/ })).toBeTruthy();
+    expect(view.queryByRole("button", { name: /Règlements & normes : Indisponible/ })).toBeNull();
+  });
+
   it("drops a verified overlay when refresh returns a newer failure", async () => {
     const lazy: CityGrilles = {
       citySlug: "refresh-verified",
