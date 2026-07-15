@@ -73,6 +73,14 @@ export interface NormesCell {
   measured?: boolean;
   available?: boolean | null;
   error?: CityGrillesError;
+  zoneCount?: number;
+  numberMatched?: number | null;
+  complete?: boolean;
+  zonesWithGrille?: number;
+  zonesWithReglement?: number;
+  zonesWithLegacyNormes?: number;
+  zonesWithNormativeValues?: number;
+  covered?: number;
 }
 
 /**
@@ -151,7 +159,7 @@ export async function fetchSourceCoverage(
  * faux « Non couvert »). Donnée éparse aujourd'hui : `state: "absent"` signifie
  * réellement « aucune grille publiée sur les zones servies ».
  */
-export type CityGrillesError = "geo_unreachable" | "invalid_response";
+export type CityGrillesError = "geo-unreachable" | "invalid-response";
 
 export type CityGrilles =
   | { citySlug: string; available: false; error: CityGrillesError }
@@ -168,6 +176,33 @@ export type CityGrilles =
       covered: number;
       state: CoverageState;
     };
+
+/** Project a resolved lazy result into the matching warm bulk cell shape. */
+export function normesCellFromCityGrilles(result: CityGrilles): NormesCell {
+  if (!result.available) {
+    return {
+      state: "absent",
+      freshness: "unknown",
+      measured: true,
+      available: false,
+      error: result.error,
+    };
+  }
+  return {
+    state: result.state,
+    freshness: "fresh",
+    measured: true,
+    available: true,
+    zoneCount: result.zoneCount,
+    numberMatched: result.numberMatched,
+    complete: result.complete,
+    zonesWithGrille: result.zonesWithGrille,
+    zonesWithReglement: result.zonesWithReglement,
+    zonesWithLegacyNormes: result.zonesWithLegacyNormes,
+    zonesWithNormativeValues: result.zonesWithNormativeValues,
+    covered: result.covered,
+  };
+}
 
 /** Récupère le détail grilles d'une ville. Lève en cas d'échec HTTP. */
 export async function fetchCityGrilles(
