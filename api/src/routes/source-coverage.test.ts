@@ -18,6 +18,19 @@ interface CoverageCell {
   state: "verified" | "declared" | "absent";
   freshness: "fresh" | "partial" | "stale" | "unknown";
 }
+interface NormesCell extends CoverageCell {
+  measured?: boolean;
+  available?: boolean | null;
+  error?: "geo-unreachable" | "invalid-response";
+  zoneCount?: number;
+  numberMatched?: number | null;
+  complete?: boolean;
+  zonesWithGrille?: number;
+  zonesWithReglement?: number;
+  zonesWithLegacyNormes?: number;
+  zonesWithNormativeValues?: number;
+  covered?: number;
+}
 interface RawCell extends CoverageCell {
   count: number;
 }
@@ -42,7 +55,7 @@ interface CityCoverage {
   l2Graph: GraphCell;
   signals: SignalsCell;
   l4Zonage: GeoCell;
-  normes: CoverageCell;
+  normes: NormesCell;
   l5Lots: GeoCell;
   lotFields: CoverageCell;
   tod: GeoCell;
@@ -64,9 +77,14 @@ interface CoverageResponse {
 interface CityGrillesResponse {
   citySlug: string;
   available: boolean;
+  error?: "geo-unreachable" | "invalid-response";
   zoneCount?: number;
+  numberMatched?: number | null;
+  complete?: boolean;
   zonesWithGrille?: number;
-  zonesWithNormes?: number;
+  zonesWithLegacyNormes?: number;
+  zonesWithReglement?: number;
+  zonesWithNormativeValues?: number;
   covered?: number;
   state?: "verified" | "declared" | "absent";
 }
@@ -501,11 +519,14 @@ describe("GET /api/source/coverage", () => {
       fetchImpl,
     });
 
-    // Cache froid : la cellule bulk est `absent` (aucune grille prouvée à date).
+    // Cache froid : l'état métier reste neutre car aucune mesure n'a eu lieu.
     const cold = (await (
       await app.request("/api/source/coverage")
     ).json()) as CoverageResponse;
-    expect(cityOf(cold, "salaberry-de-valleyfield").normes.state).toBe("absent");
+    expect(cityOf(cold, "salaberry-de-valleyfield").normes).toMatchObject({
+      measured: false,
+      available: null,
+    });
 
     // Mesure lazy du détail ville (1 grille / 2 zones → declared)…
     const grillesRes = await app.request(
@@ -523,9 +544,74 @@ describe("GET /api/source/coverage", () => {
     expect(valleyfield.normes).toMatchObject({
       state: "declared",
       freshness: "fresh",
+      measured: true,
+      available: true,
+      zoneCount: 2,
+      numberMatched: null,
+      complete: true,
+      zonesWithGrille: 1,
+      zonesWithReglement: 0,
+      zonesWithLegacyNormes: 0,
+      zonesWithNormativeValues: 0,
+      covered: 1,
     });
-    // Les autres villes restent absent (pas de mesure).
-    expect(cityOf(warm, "brossard").normes.state).toBe("absent");
+    expect(cityOf(warm, "brossard").normes.measured).toBe(false);
+  });
+
+  it("normes: preserves an unavailable lazy measurement separately from cold cache", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).includes("/items")) {
+        return new Response("unavailable", { status: 503 });
+      }
+      return new Response(JSON.stringify({ collections: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }) as unknown as typeof fetch;
+    const app = sourceCoverageRoute({
+      store: makeMemStore(),
+      db: makeDb([]),
+      now: NOW,
+      fetchImpl,
+    });
+
+    await app.request("/api/source/coverage/brossard/grilles");
+    const body = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(body, "brossard").normes).toMatchObject({
+      measured: true,
+      available: false,
+      error: "geo-unreachable",
+    });
+  });
+
+  it("normes: bounds cached failures with the same finite discipline", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) =>
+      String(input).includes("/items")
+        ? new Response("unavailable", { status: 503 })
+        : new Response(JSON.stringify({ collections: [] }), {
+            headers: { "content-type": "application/json" },
+          }),
+    ) as unknown as typeof fetch;
+    const app = sourceCoverageRoute({
+      store: makeMemStore(),
+      db: makeDb([]),
+      now: NOW,
+      fetchImpl,
+    });
+
+    await app.request("/api/source/coverage/brossard/grilles");
+    for (let index = 0; index < 64; index += 1) {
+      await app.request(`/api/source/coverage/cache-${index}/grilles`);
+    }
+    const body = (await (
+      await app.request("/api/source/coverage")
+    ).json()) as CoverageResponse;
+    expect(cityOf(body, "brossard").normes).toMatchObject({
+      measured: false,
+      available: null,
+    });
   });
 
   // ── Signaux extraits (projection PG + part avec citation vérifiable) ────────
@@ -961,21 +1047,46 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     });
   }
 
-  function itemsFetch(features: unknown[]): typeof fetch {
-    return vi.fn(async () =>
-      new Response(JSON.stringify({ type: "FeatureCollection", features }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
-    ) as unknown as typeof fetch;
+  function collectionResponse(features: unknown[], numberMatched?: number): Response {
+    return new Response(
+      JSON.stringify({ type: "FeatureCollection", features, numberMatched }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
   }
 
-  it("counts zones carrying a grille PDF or real normes (partial → declared)", async () => {
-    const fetchImpl = itemsFetch([
-      { properties: { zone_code: "H-1", URL_GRILLE: "https://x/grille-h1.pdf" } },
-      { properties: { zone_code: "H-2", usages_permis: "h1;h2", densite: "35" } },
-      { properties: { zone_code: "C-1" } }, // ni grille ni normes
-    ]);
+  function collectionsFetch(
+    zones: unknown[],
+    normes: unknown[] | null,
+    zoneMatched?: number,
+    normesMatched?: number,
+  ): typeof fetch {
+    return vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).includes("qc-zonage-norms-")) {
+        return normes === null
+          ? new Response("{}", { status: 404 })
+          : collectionResponse(normes, normesMatched);
+      }
+      return collectionResponse(zones, zoneMatched);
+    }) as unknown as typeof fetch;
+  }
+
+  it("counts each evidence kind once per served zone and ignores unmatched codes", async () => {
+    const fetchImpl = collectionsFetch(
+      [
+        {
+          properties: { zone_code: "H-1", URL_GRILLE: "https://x/g.pdf", usages: ["h1"] },
+        },
+        { properties: { zone_code: "H–2" } },
+        { properties: { zone_code: "C-3" } },
+        { properties: { zone_code: "A-4" } },
+      ],
+      [
+        { properties: { zone_code: "h-2", reglement_url: "https://x/r.pdf" } },
+        { properties: { zone_code: "C–3", densite_value: "35,5" } },
+        { properties: { zone_code: "X-9", reglement_numero: "unmatched" } },
+      ],
+      4,
+    );
     const app = grillesApp(fetchImpl);
     const res = await app.request(
       "/api/source/coverage/saint-hippolyte/grilles",
@@ -985,40 +1096,87 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     expect(body).toMatchObject({
       citySlug: "saint-hippolyte",
       available: true,
-      zoneCount: 3,
+      zoneCount: 4,
+      numberMatched: 4,
+      complete: true,
       zonesWithGrille: 1,
-      zonesWithNormes: 1,
+      zonesWithLegacyNormes: 1,
+      zonesWithReglement: 1,
+      zonesWithNormativeValues: 1,
+      covered: 3,
+      state: "declared",
+    });
+    expect(body).not.toHaveProperty("effet_densifiant");
+  });
+
+  it("verifies only when every served zone is covered by a complete measurement", async () => {
+    const fetchImpl = collectionsFetch(
+      [{ properties: { zone_code: "H-1" } }, { properties: { zone_code: "H-2" } }],
+      [{ properties: { zone_code: "H-1", reglement_url: "https://x/1" } },
+        { properties: { zone_code: "H-2", densite_value: 40 } }],
+    );
+
+    const res = await grillesApp(fetchImpl).request(
+      "/api/source/coverage/ville-a/grilles",
+    );
+    expect((await res.json()) as CityGrillesResponse).toMatchObject({
+      complete: true,
       covered: 2,
+      state: "verified",
+    });
+  });
+
+  it("keeps incomplete zero-evidence measurements partial instead of absent", async () => {
+    const fetchImpl = collectionsFetch([{ properties: { zone_code: "H-1" } }], null, 2);
+
+    const res = await grillesApp(fetchImpl).request(
+      "/api/source/coverage/ville-a/grilles",
+    );
+    expect((await res.json()) as CityGrillesResponse).toMatchObject({
+      zoneCount: 1,
+      numberMatched: 2,
+      complete: false,
+      covered: 0,
       state: "declared",
     });
   });
 
-  it("all zones covered → verified; none → absent (honest, no fabricated green)", async () => {
-    const covered = itemsFetch([
-      { properties: { zone_code: "H-1", grillePdfUrl: "https://x/1.pdf" } },
-      { properties: { zone_code: "H-2", usages: ["h1"] } },
-    ]);
-    const bare = itemsFetch([
-      { properties: { zone_code: "H-1" } },
-      { properties: { zone_code: "H-2" } },
-    ]);
+  it("marks the overall measurement incomplete when auxiliary evidence is truncated", async () => {
+    const fetchImpl = collectionsFetch(
+      [{ properties: { zone_code: "H-1" } }],
+      [{ properties: { zone_code: "H-1", reglement_numero: "901" } }],
+      1,
+      2,
+    );
 
-    const resCovered = await grillesApp(covered).request(
+    const res = await grillesApp(fetchImpl).request(
       "/api/source/coverage/ville-a/grilles",
     );
-    expect(((await resCovered.json()) as CityGrillesResponse).state).toBe(
-      "verified",
-    );
-
-    const resBare = await grillesApp(bare).request(
-      "/api/source/coverage/ville-b/grilles",
-    );
-    const bareBody = (await resBare.json()) as CityGrillesResponse;
-    expect(bareBody.state).toBe("absent");
-    expect(bareBody.covered).toBe(0);
+    expect((await res.json()) as CityGrillesResponse).toMatchObject({
+      complete: false,
+      covered: 1,
+      state: "declared",
+    });
   });
 
-  it("collection 404 → available with zero zones (absent), geo unreachable → available:false", async () => {
+  it("treats a limit-sized response without numberMatched as incomplete", async () => {
+    const features = Array.from({ length: 10_000 }, (_, index) => ({
+      properties: { zone_code: `H-${index}` },
+    }));
+    const fetchImpl = collectionsFetch(features, null);
+
+    const res = await grillesApp(fetchImpl).request(
+      "/api/source/coverage/ville-a/grilles",
+    );
+    expect((await res.json()) as CityGrillesResponse).toMatchObject({
+      zoneCount: 10_000,
+      numberMatched: null,
+      complete: false,
+      state: "declared",
+    });
+  });
+
+  it("distinguishes business absence, malformed geo and unavailable geo", async () => {
     const notFound = vi.fn(async () =>
       new Response("{}", { status: 404 }),
     ) as unknown as typeof fetch;
@@ -1029,8 +1187,11 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     expect((await res404.json()) as CityGrillesResponse).toMatchObject({
       available: true,
       zoneCount: 0,
+      numberMatched: 0,
+      complete: true,
       state: "absent",
     });
+    expect(notFound).toHaveBeenCalledTimes(1);
 
     const resDown = await grillesApp(offlineFetch).request(
       "/api/source/coverage/ville-x/grilles",
@@ -1039,15 +1200,45 @@ describe("GET /api/source/coverage/:citySlug/grilles", () => {
     expect((await resDown.json()) as CityGrillesResponse).toMatchObject({
       citySlug: "ville-x",
       available: false,
+      error: "geo-unreachable",
+    });
+
+    const serverError = vi.fn(async () =>
+      new Response("unavailable", { status: 503 }),
+    ) as unknown as typeof fetch;
+    const res503 = await grillesApp(serverError).request(
+      "/api/source/coverage/ville-503/grilles",
+    );
+    expect((await res503.json()) as CityGrillesResponse).toMatchObject({
+      available: false,
+      error: "geo-unreachable",
+    });
+
+    const malformed = vi.fn(async () =>
+      new Response(JSON.stringify({ numberMatched: 1 }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    ) as unknown as typeof fetch;
+    const malformedRes = await grillesApp(malformed).request(
+      "/api/source/coverage/ville-malformee/grilles",
+    );
+    expect((await malformedRes.json()) as CityGrillesResponse).toEqual({
+      citySlug: "ville-malformee",
+      available: false,
+      error: "invalid-response",
     });
   });
 
   it("caches the per-city result (TTL) and rejects malformed slugs", async () => {
-    const fetchImpl = itemsFetch([{ properties: { zone_code: "H-1" } }]);
+    const fetchImpl = collectionsFetch(
+      [{ properties: { zone_code: "H-1" } }],
+      null,
+    );
     const app = grillesApp(fetchImpl);
     await app.request("/api/source/coverage/ville-a/grilles");
     await app.request("/api/source/coverage/ville-a/grilles");
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
 
     const bad = await app.request(
       "/api/source/coverage/Ville%20Pas%20Slug/grilles",

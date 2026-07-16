@@ -4,11 +4,11 @@
    * endpoint /api/source/coverage (l'ancienne Console est supprimée).
    *
    * Table tri-état par ville, une colonne par COUCHE RÉELLE (PV · Signaux ·
-   * Zones · Normes (grilles) · Lots (cadastre) · TOD · Couverture), triée pires
+   * Zones · Règlements & normes · Lots (cadastre) · TOD · Couverture), triée pires
    * statuts d'abord (l'action en tête), filtrable par statut, avec scorecard
    * détaillée au clic. Honnête de bout en bout : aucune couche n'est
    * « verified » sans preuve live ; une ville sans couverture reste « absent »
-   * (Normes et TOD sont éparses aujourd'hui → « Non couvert » majoritaire).
+   * (les règlements/normes et TOD sont épars aujourd'hui).
    */
   import { Alert, Badge } from "@sentropic/design-system-svelte";
   import { Terminal, RefreshCw, Search } from "@lucide/svelte";
@@ -23,7 +23,10 @@
     STATE_COLOR,
     STATE_LABEL,
     STATE_BADGE_TONE,
+    normesCellFromCityGrilles,
     type CityCoverage,
+    type CityGrilles,
+    type NormesCell,
     type CoverageResponse,
     type CoverageState,
   } from "$lib/sources/source-coverage-client.js";
@@ -38,6 +41,23 @@
   let filter: Filter = "actives";
   let query = "";
   let selectedCity: CityCoverage | null = null;
+  let expandedNormesSlug: string | null = null;
+  let normesOverlay: Record<string, NormesCell> = {};
+  let overlayResponse = response;
+  let overlayGeneratedAt = response?.generatedAt ?? null;
+  let selectionEpoch = 0;
+  let selectedGrillesResolved: ((result: CityGrilles) => void) | null = null;
+
+  $: if (
+    response !== overlayResponse ||
+    (response?.generatedAt ?? null) !== overlayGeneratedAt
+  ) {
+    overlayResponse = response;
+    overlayGeneratedAt = response?.generatedAt ?? null;
+    normesOverlay = {};
+    expandedNormesSlug = null;
+    closeSelectedCity();
+  }
 
   // ── Périmètre : Province / Villes à signaux précoces (parité « Couverture ») ─
   // Mêmes intitulés que le radio de la carte Couverture ; même critère
@@ -51,7 +71,11 @@
   const SEGMENTS = [SEG_PROVINCE, SEG_FOCUS] as const;
   let focusOnly = false;
   $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
-  $: focusScope = computeFocusScope(cities);
+  $: displayCities = cities.map((city) => {
+    const normes = normesOverlay[city.citySlug];
+    return normes ? { ...city, normes } : city;
+  });
+  $: focusScope = computeFocusScope(displayCities);
 
   const FILTERS: { value: Filter; label: string }[] = [
     { value: "actives", label: "Actives" },
@@ -78,7 +102,7 @@
   $: headline = response ? buildProvinceHeadline(response) : null;
   $: headlineText = response ? formatProvinceHeadline(response.totals) : "";
 
-  $: sorted = sortCitiesForConsole(cities);
+  $: sorted = sortCitiesForConsole(displayCities);
   $: filtered = sorted.filter((c) => {
     // Périmètre focus (villes à signaux prioritaires z∩m∩p) : EN PLUS des
     // filtres statut + recherche.
@@ -102,25 +126,133 @@
   });
 
   // Couches affichées en mini-cellules : une colonne = une COUCHE RÉELLE, dans
-  // l'ordre PV · Signaux · Zones · Normes (grilles) · Lots (cadastre) ·
+  // l'ordre PV · Signaux · Zones · Règlements & normes · Lots (cadastre) ·
   // Champs lot · TOD (copy client neutre — pas de jargon interne L1/L2/…).
   // « Champs lot » = superficie/adresse/code postal/normes foldées servis par
   // geo — mesure LAZY per-city reprise par le bulk quand elle est chaude
-  // (même contrat que Normes) ; « Non couvert » tant que rien n'est mesuré.
-  function layerStates(c: CityCoverage): { key: string; label: string; state: CoverageState }[] {
+  // (même contrat que Règlements & normes).
+  type LayerDisplay = {
+    key: string;
+    label: string;
+    color: string;
+    status: string;
+    description?: string;
+  };
+
+  function layerDisplay(
+    key: string,
+    label: string,
+    state: CoverageState,
+  ): LayerDisplay {
+    return { key, label, color: STATE_COLOR[state], status: STATE_LABEL[state] };
+  }
+
+  function layerStates(c: CityCoverage): LayerDisplay[] {
+    const normes = c.normes.measured !== true
+      ? { color: STATE_COLOR.absent, status: "Non mesuré" }
+      : c.normes.available === false
+        ? { color: STATE_COLOR.declared, status: "Indisponible" }
+        : c.normes.zoneCount === 0
+          ? { color: STATE_COLOR.absent, status: "Aucune zone servie" }
+          : { color: STATE_COLOR[c.normes.state], status: STATE_LABEL[c.normes.state] };
     return [
-      { key: "pv", label: "PV collectés", state: c.l1Raw.state },
-      { key: "signaux", label: "Signaux extraits", state: c.signals.state },
-      { key: "zones", label: "Zones servies", state: c.l4Zonage.state },
-      { key: "normes", label: "Normes (grilles de zonage)", state: c.normes.state },
-      { key: "lots", label: "Lots (cadastre)", state: c.l5Lots.state },
+      layerDisplay("pv", "PV collectés", c.l1Raw.state),
+      layerDisplay("signaux", "Signaux extraits", c.signals.state),
+      layerDisplay("zones", "Zones servies", c.l4Zonage.state),
       {
-        key: "champs-lot",
-        label: "Champs lot (superficie · adresse · code postal · normes)",
-        state: c.lotFields?.state ?? "absent",
+        key: "normes",
+        label: "Règlements & normes",
+        description: normesDescription(c.normes),
+        ...normes,
       },
-      { key: "tod", label: "Périmètres TOD", state: c.tod.state },
+      layerDisplay("lots", "Lots (cadastre)", c.l5Lots.state),
+      layerDisplay(
+        "champs-lot",
+        "Champs lot (superficie · adresse · code postal · normes)",
+        c.lotFields?.state ?? "absent",
+      ),
+      layerDisplay("tod", "Périmètres TOD", c.tod.state),
     ];
+  }
+
+  const NORMES_DISCLAIMER =
+    "Ne qualifie pas l'effet densifiant ; delta ancien↔nouveau requis.";
+
+  function normesDescription(cell: NormesCell): string {
+    if (cell.measured !== true) return "Mesure non effectuée.";
+    if (cell.available === false) return `Geo indisponible. ${NORMES_DISCLAIMER}`;
+    if (cell.zoneCount === 0) return `Aucune zone servie. ${NORMES_DISCLAIMER}`;
+    const n = cell.zoneCount ?? 0;
+    const incomplete = cell.complete === false ? "Mesure geo incomplète. " : "";
+    return (
+      `${incomplete}${cell.zonesWithReglement ?? 0}/${n} sources règlementaires · ` +
+      `${cell.zonesWithNormativeValues ?? 0}/${n} valeurs normatives · ` +
+      `${cell.zonesWithLegacyNormes ?? 0}/${n} normes historiques · ` +
+      `${cell.zonesWithGrille ?? 0}/${n} grilles PDF. ${NORMES_DISCLAIMER}`
+    );
+  }
+
+  function toggleNormes(citySlug: string): void {
+    expandedNormesSlug = expandedNormesSlug === citySlug ? null : citySlug;
+  }
+
+  function handleNormesKeydown(event: KeyboardEvent, citySlug: string): void {
+    if (event.key === "Escape") {
+      expandedNormesSlug = null;
+      return;
+    }
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleNormes(citySlug);
+  }
+
+  function closeNormes(citySlug: string): void {
+    if (expandedNormesSlug === citySlug) expandedNormesSlug = null;
+  }
+
+  function toggleSelectedCity(city: CityCoverage): void {
+    if (selectedCity?.citySlug === city.citySlug) {
+      closeSelectedCity();
+      return;
+    }
+    const epoch = ++selectionEpoch;
+    const expectedResponse = response;
+    const expectedGeneratedAt = response?.generatedAt ?? null;
+    selectedGrillesResolved = (result) => {
+      handleGrillesResolved(result, epoch, expectedResponse, expectedGeneratedAt);
+    };
+    selectedCity = city;
+  }
+
+  function closeSelectedCity(): void {
+    selectionEpoch += 1;
+    selectedGrillesResolved = null;
+    selectedCity = null;
+  }
+
+  function handleCityKeydown(event: KeyboardEvent, city: CityCoverage): void {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSelectedCity(city);
+  }
+
+  function handleGrillesResolved(
+    result: CityGrilles,
+    epoch: number,
+    expectedResponse: CoverageResponse | null,
+    expectedGeneratedAt: string | null,
+  ): void {
+    if (
+      epoch !== selectionEpoch ||
+      response !== expectedResponse ||
+      (response?.generatedAt ?? null) !== expectedGeneratedAt ||
+      selectedCity?.citySlug !== result.citySlug
+    ) return;
+    const normes = normesCellFromCityGrilles(result);
+    normesOverlay = { ...normesOverlay, [result.citySlug]: normes };
+    selectedCity = { ...selectedCity, normes };
   }
 </script>
 
@@ -234,7 +366,7 @@
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Procès-verbaux et documents collectés">PV</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Signaux extraits">Signaux</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Zones de zonage servies">Zones</th>
-              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Normes (grilles de zonage)">Normes (grilles)</th>
+              <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide">Règlements & normes</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Lots (cadastre) servis">Lots (cadastre)</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Champs lot enrichis (superficie, adresse, code postal, normes)">Champs lot</th>
               <th class="px-2 py-2 text-center font-semibold uppercase tracking-wide" title="Périmètres TOD servis">TOD</th>
@@ -245,12 +377,20 @@
             {#each filtered as city (city.citySlug)}
               {@const isSelected = selectedCity?.citySlug === city.citySlug}
               <tr
-                class={`cursor-pointer transition-colors ${isSelected ? "bg-teal-50" : "hover:bg-slate-50"}`}
-                on:click={() => { selectedCity = isSelected ? null : city; }}
+                class={`transition-colors ${isSelected ? "bg-teal-50" : "hover:bg-slate-50"}`}
               >
                 <td class="px-4 py-2">
                   <div class="flex items-center gap-2">
-                    <span class="font-medium text-slate-800">{city.cityName}</span>
+                    <button
+                      type="button"
+                      class="font-medium text-slate-800 underline-offset-2 hover:underline focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      aria-expanded={isSelected}
+                      aria-label={`Ouvrir la couverture de ${city.cityName}`}
+                      on:click={() => toggleSelectedCity(city)}
+                      on:keydown={(event) => handleCityKeydown(event, city)}
+                    >
+                      {city.cityName}
+                    </button>
                     {#if isFocusCity(city, focusScope)}
                       <!-- Rang par nb de signaux PRIORITAIRES z∩m∩p (critère focus),
                            ni proximité, ni volume brut de signaux. -->
@@ -262,13 +402,43 @@
                   {/if}
                 </td>
                 {#each layerStates(city) as layer (layer.key)}
-                  <td class="px-2 py-2 text-center">
-                    <span
-                      class="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle"
-                      style="background-color: {STATE_COLOR[layer.state]};"
-                      title={`${layer.label} : ${STATE_LABEL[layer.state]}`}
-                      aria-label={`${layer.label} : ${STATE_LABEL[layer.state]}`}
-                    ></span>
+                  <td class="relative px-2 py-2 text-center">
+                    {#if layer.key === "normes"}
+                      {@const tooltipId = `normes-detail-${city.citySlug}`}
+                      <button
+                        type="button"
+                        class="inline-flex h-6 w-6 items-center justify-center border-0 bg-transparent p-0 align-middle focus:outline-none focus:ring-2 focus:ring-teal-500"
+                        aria-label={`${layer.label} : ${layer.status}`}
+                        aria-expanded={expandedNormesSlug === city.citySlug}
+                        aria-controls={tooltipId}
+                        aria-describedby={expandedNormesSlug === city.citySlug ? tooltipId : undefined}
+                        on:click|stopPropagation={() => toggleNormes(city.citySlug)}
+                        on:keydown={(event) => handleNormesKeydown(event, city.citySlug)}
+                        on:blur={() => closeNormes(city.citySlug)}
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="inline-block h-3 w-3 rounded-sm border border-slate-300"
+                          style="background-color: {layer.color};"
+                        ></span>
+                      </button>
+                      {#if expandedNormesSlug === city.citySlug}
+                        <span
+                          id={tooltipId}
+                          role="tooltip"
+                          class="absolute left-1/2 top-full z-20 w-72 -translate-x-1/2 rounded bg-slate-900 p-2 text-left text-xs normal-case text-white shadow-lg"
+                        >
+                          {layer.description}
+                        </span>
+                      {/if}
+                    {:else}
+                      <span
+                        class="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle"
+                        style="background-color: {layer.color};"
+                        title={`${layer.label} : ${layer.status}`}
+                        aria-label={`${layer.label} : ${layer.status}`}
+                      ></span>
+                    {/if}
                   </td>
                 {/each}
                 <td class="px-4 py-2">
@@ -294,7 +464,12 @@
   <!-- ── Panneau droit : scorecard détaillée ──────────────────────────────── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} {focusScope} onClose={() => { selectedCity = null; }} />
+      <SourceScorecard
+        city={selectedCity}
+        {focusScope}
+        onGrillesResolved={selectedGrillesResolved}
+        onClose={closeSelectedCity}
+      />
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <p class="text-sm text-slate-400">

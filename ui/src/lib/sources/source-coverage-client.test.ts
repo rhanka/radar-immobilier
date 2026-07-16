@@ -24,6 +24,7 @@ import {
   countCheapLotsCompletions,
   sortCitiesForConsole,
   fetchCityGrilles,
+  normesCellFromCityGrilles,
   fetchCityLotFields,
   lotFieldEvidence,
   lotFieldsMethodNote,
@@ -45,7 +46,12 @@ function makeCity(overrides: Partial<CityCoverage> = {}): CityCoverage {
     l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
     signals: { state: "absent", count: 0, withCitation: 0, priority: 0, freshness: "unknown" },
     l4Zonage: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
-    normes: { state: "absent", freshness: "unknown" },
+    normes: {
+      state: "absent",
+      freshness: "unknown",
+      measured: false,
+      available: null,
+    },
     l5Lots: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     tod: { state: "absent", served: false, servedBy: null, freshness: "unknown" },
     worstStatus: "absent",
@@ -349,8 +355,12 @@ describe("fetchCityGrilles", () => {
       citySlug: "saint-hippolyte",
       available: true,
       zoneCount: 3,
+      numberMatched: 3,
+      complete: true,
       zonesWithGrille: 1,
-      zonesWithNormes: 1,
+      zonesWithReglement: 1,
+      zonesWithLegacyNormes: 1,
+      zonesWithNormativeValues: 1,
       covered: 2,
       state: "declared" as const,
     };
@@ -376,6 +386,39 @@ describe("fetchCityGrilles", () => {
     await expect(fetchCityGrilles("ville-x", fetchImpl)).rejects.toThrow(
       "source-coverage grilles HTTP 502",
     );
+  });
+
+  it("projects final lazy counters into the warm bulk cell", () => {
+    expect(
+      normesCellFromCityGrilles({
+        citySlug: "ville-x",
+        available: true,
+        zoneCount: 3,
+        numberMatched: 3,
+        complete: true,
+        zonesWithGrille: 1,
+        zonesWithReglement: 2,
+        zonesWithLegacyNormes: 0,
+        zonesWithNormativeValues: 2,
+        covered: 3,
+        state: "verified",
+      }),
+    ).toMatchObject({
+      measured: true,
+      available: true,
+      zoneCount: 3,
+      complete: true,
+      zonesWithReglement: 2,
+      zonesWithNormativeValues: 2,
+      state: "verified",
+    });
+    expect(
+      normesCellFromCityGrilles({
+        citySlug: "ville-x",
+        available: false,
+        error: "geo-unreachable",
+      }),
+    ).toMatchObject({ measured: true, available: false, error: "geo-unreachable" });
   });
 });
 
