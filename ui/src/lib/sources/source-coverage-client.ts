@@ -3,7 +3,7 @@
  * de données e2e, choropleth honnête).
  *
  * Contrat : GET /api/source/coverage (api/src/routes/source-coverage.ts). Chaque
- * couche (PV collectés / signaux extraits / zones servies / normes (grilles) /
+ * couche (PV collectés / signaux extraits / zones servies / règlements & normes /
  * lots (cadastre) / TOD) est un TRI-ÉTAT
  *   - `verified` : substantié LIVE (preuve en base OU collection listée live
  *                  par l'API géo au moment de la requête).
@@ -64,13 +64,23 @@ export interface GeoCell {
 }
 
 /**
- * Normes (grilles de zonage) au niveau bulk : `absent` tant qu'aucune grille
- * n'est prouvée (la mesure fine reste LAZY au détail ville — donnée éparse,
- * « Non couvert » majoritaire honnête).
+ * Règlements & normes au niveau bulk. The lazy measurement metadata keeps a
+ * cold cache distinct from a measured absence or geo failure.
  */
 export interface NormesCell {
   state: CoverageState;
   freshness: Freshness;
+  measured?: boolean;
+  available?: boolean | null;
+  error?: CityGrillesError;
+  zoneCount?: number;
+  numberMatched?: number | null;
+  complete?: boolean;
+  zonesWithGrille?: number;
+  zonesWithReglement?: number;
+  zonesWithLegacyNormes?: number;
+  zonesWithNormativeValues?: number;
+  covered?: number;
 }
 
 /**
@@ -149,15 +159,49 @@ export async function fetchSourceCoverage(
  * faux « Non couvert »). Donnée éparse aujourd'hui : `state: "absent"` signifie
  * réellement « aucune grille publiée sur les zones servies ».
  */
-export interface CityGrilles {
-  citySlug: string;
-  available: boolean;
-  zoneCount?: number;
-  zonesWithGrille?: number;
-  zonesWithNormes?: number;
-  /** Zones portant une grille OU des normes réelles. */
-  covered?: number;
-  state?: CoverageState;
+export type CityGrillesError = "geo-unreachable" | "invalid-response";
+
+export type CityGrilles =
+  | { citySlug: string; available: false; error: CityGrillesError }
+  | {
+      citySlug: string;
+      available: true;
+      zoneCount: number;
+      numberMatched: number | null;
+      complete: boolean;
+      zonesWithGrille: number;
+      zonesWithReglement: number;
+      zonesWithLegacyNormes: number;
+      zonesWithNormativeValues: number;
+      covered: number;
+      state: CoverageState;
+    };
+
+/** Project a resolved lazy result into the matching warm bulk cell shape. */
+export function normesCellFromCityGrilles(result: CityGrilles): NormesCell {
+  if (!result.available) {
+    return {
+      state: "absent",
+      freshness: "unknown",
+      measured: true,
+      available: false,
+      error: result.error,
+    };
+  }
+  return {
+    state: result.state,
+    freshness: "fresh",
+    measured: true,
+    available: true,
+    zoneCount: result.zoneCount,
+    numberMatched: result.numberMatched,
+    complete: result.complete,
+    zonesWithGrille: result.zonesWithGrille,
+    zonesWithReglement: result.zonesWithReglement,
+    zonesWithLegacyNormes: result.zonesWithLegacyNormes,
+    zonesWithNormativeValues: result.zonesWithNormativeValues,
+    covered: result.covered,
+  };
 }
 
 /** Récupère le détail grilles d'une ville. Lève en cas d'échec HTTP. */
