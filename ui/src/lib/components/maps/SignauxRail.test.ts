@@ -1,4 +1,4 @@
-/** SignauxRail A/B mode and flat city-list contracts. */
+/** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, fireEvent, cleanup, getAllByRole } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
@@ -12,6 +12,7 @@ function vivierCounts(
   qualified: number,
   residentialUnknown = 0,
   excluded = 0,
+  stageCounts?: Partial<VivierV2Counts["stageCounts"]>,
 ): VivierV2Counts {
   return {
     qualified,
@@ -30,6 +31,7 @@ function vivierCounts(
       adoption: 0,
       entree_vigueur: 0,
       inconnu: 0,
+      ...stageCounts,
     },
     total: qualified + residentialUnknown + excluded,
   };
@@ -45,12 +47,22 @@ function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) =
   });
 }
 
-function getModeRadios(container: HTMLElement): [HTMLInputElement, HTMLInputElement] {
-  const radios = getAllByRole(container, "radio") as HTMLInputElement[];
-  return [radios[0]!, radios[1]!];
+function getTabs(container: HTMLElement): [HTMLButtonElement, HTMLButtonElement] {
+  const tabs = getAllByRole(container, "tab") as HTMLButtonElement[];
+  return [tabs[0]!, tabs[1]!];
 }
 
-/** Sutton : 1 signal en A, 2 qualifiés en B (B retire le gate multi4). */
+/** Les checkboxes du panneau de tab actif (axes du vivier). */
+function toggleBoxes(container: HTMLElement): HTMLInputElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLInputElement>(".vivier-toggles input[type=checkbox]"),
+  );
+}
+
+/**
+ * Sutton : subsetCounts distincts par clé A (z|m|p → 1, z|p → 2, z|m → 4),
+ * et un vivier v2 dont seule une partie est précoce (2 qualifiés, 1 précoce).
+ */
 const SUTTON: CityMapEntry = {
   municipality: {
     slug: "sutton",
@@ -58,42 +70,57 @@ const SUTTON: CityMapEntry = {
     mrc: "Brome-Missisquoi",
   } as CityMapEntry["municipality"],
   signalCount6m: 5,
-  subsetCounts: { "": 5, "z|m|p": 1, "z|p": 2 },
-  vivierV2Counts: vivierCounts(2, 7, 3),
+  subsetCounts: { "": 5, "z|m|p": 1, "z|p": 2, "z|m": 4, z: 5 },
+  vivierV2Counts: vivierCounts(2, 7, 3, { avis_motion: 1, adoption: 1 }),
 };
 
-describe("SignauxRail — A / B", () => {
-  it("defaults empty or invalid state to immutable A", () => {
-    const { container } = renderRail("");
-    const [a, b] = getModeRadios(container);
-    expect(a.checked).toBe(true);
-    expect(b.checked).toBe(false);
-  });
-
-  it("restores A from a retired z|p key instead of selecting B", () => {
-    const { container } = renderRail("z|p");
-    const [a, b] = getModeRadios(container);
-    expect(a.checked).toBe(true);
-    expect(b.checked).toBe(false);
-  });
-
-  it("offers A and B, and drops the retired transition mode", () => {
+describe("SignauxRail — tabs A / B", () => {
+  it("offers A and B as tabs, A active by default, no retired transition mode", () => {
     const { container } = renderRail();
-    expect(container.textContent).toContain("Vivier A · référence");
-    expect(container.textContent).toContain("Vivier B");
-    expect(container.textContent).toContain("zonage + résidentiel");
+    const [a, b] = getTabs(container);
+    expect(a.textContent).toContain("Vivier A · référence");
+    expect(b.textContent).toContain("Vivier B");
+    expect(a.getAttribute("aria-selected")).toBe("true");
+    expect(b.getAttribute("aria-selected")).toBe("false");
     expect(container.textContent).not.toContain("Transition vers B");
     expect(container.textContent).not.toContain("non final");
-    expect(container.textContent).not.toContain("Résidentiel pertinent");
   });
 
-  it("does not rewrite restored A on mount", () => {
+  it("defaults an empty or invalid key to tab A", () => {
+    const { container } = renderRail("");
+    const [a, b] = getTabs(container);
+    expect(a.getAttribute("aria-selected")).toBe("true");
+    expect(b.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("resolves the retired z|p key to tab A, never B", () => {
+    const { container } = renderRail("z|p");
+    const [a, b] = getTabs(container);
+    expect(a.getAttribute("aria-selected")).toBe("true");
+    expect(b.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("does not emit a filter change on mount", () => {
     const spy = vi.fn();
     renderRail("z|m|p", spy);
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it("switches to B on the explicit vivier-v2 key and counts from vivierV2Counts", async () => {
+  it("shows A's three combinable axes checked by default (z|m|p)", () => {
+    const { container } = render(SignauxRail, {
+      props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
+    });
+    const boxes = toggleBoxes(container);
+    expect(boxes).toHaveLength(3);
+    expect(boxes.every((box) => box.checked)).toBe(true);
+    expect(container.textContent).toContain("Zonage");
+    expect(container.textContent).toContain("Multifamilial 4+");
+    expect(container.textContent).toContain("Précoce");
+    // Défaut A = subsetCounts["z|m|p"] = 1.
+    expect(container.textContent).toMatch(/1\s+signal/);
+  });
+
+  it("recomposes the A key when an axis is unchecked and reads subsetCounts", async () => {
     const calls: string[] = [];
     const { container } = render(SignauxRail, {
       props: {
@@ -102,17 +129,73 @@ describe("SignauxRail — A / B", () => {
         onFilterChange: (key: string) => calls.push(key),
       },
     });
-    // A : subsetCounts["z|m|p"].
+    // Décocher « Multifamilial 4+ » → z|p → subsetCounts["z|p"] = 2.
+    const boxes = toggleBoxes(container);
+    await fireEvent.click(boxes[1]!);
+    expect(calls.at(-1)).toBe("z|p");
+    expect(container.textContent).toMatch(/2\s+signaux/);
+
+    // Puis décocher « Précoce » aussi → z → subsetCounts["z"] = 5.
+    await fireEvent.click(toggleBoxes(container)[2]!);
+    expect(calls.at(-1)).toBe("z");
+    expect(container.textContent).toMatch(/5\s+signaux/);
+  });
+
+  it("switches to B on the tab and counts from vivierV2Counts.qualified", async () => {
+    const calls: string[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "z|m|p",
+        onFilterChange: (key: string) => calls.push(key),
+      },
+    });
+    // A : subsetCounts["z|m|p"] = 1.
     expect(container.textContent).toMatch(/1\s+signal/);
 
-    await fireEvent.click(getModeRadios(container)[1]);
+    await fireEvent.click(getTabs(container)[1]);
 
     expect(calls).toEqual(["vivier-v2"]);
-    // B : vivierV2Counts.qualified, jamais un sous-ensemble z|p.
+    // B : vivierV2Counts.qualified = 2, jamais un sous-ensemble z|p.
     expect(container.textContent).toMatch(/2\s+signaux/);
   });
 
-  it("shows B's three counts side by side and never a merged total", async () => {
+  it("shows B with zonage/résidentiel locked-on and précoce unchecked", async () => {
+    const { container } = render(SignauxRail, {
+      props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
+    });
+    const boxes = toggleBoxes(container);
+    expect(boxes).toHaveLength(3);
+    // Zonage + Résidentiel définissent B : cochés, verrouillés.
+    expect(boxes[0]!.checked).toBe(true);
+    expect(boxes[0]!.disabled).toBe(true);
+    expect(boxes[1]!.checked).toBe(true);
+    expect(boxes[1]!.disabled).toBe(true);
+    // Précoce : décoché par défaut, actionnable.
+    expect(boxes[2]!.checked).toBe(false);
+    expect(boxes[2]!.disabled).toBe(false);
+    expect(container.textContent).toContain("zonage + résidentiel");
+  });
+
+  it("restricts B to precoce stages when the axis is checked", async () => {
+    const calls: string[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "vivier-v2",
+        onFilterChange: (key: string) => calls.push(key),
+      },
+    });
+    // B par défaut : qualified = 2.
+    expect(container.textContent).toMatch(/2\s+signaux/);
+
+    // Cocher « Précoce » → vivier-v2|p → stageCounts précoce = 1.
+    await fireEvent.click(toggleBoxes(container)[2]!);
+    expect(calls.at(-1)).toBe("vivier-v2|p");
+    expect(container.textContent).toMatch(/1\s+signal/);
+  });
+
+  it("shows B's three counts side by side and never a merged total", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
     });
@@ -148,7 +231,7 @@ describe("SignauxRail — A / B", () => {
     ]);
   });
 
-  it("hides the B-only exclusions while A is active", () => {
+  it("hides the B-only panel while A is active", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
     });
@@ -160,9 +243,7 @@ describe("SignauxRail — A / B", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [], dataUnavailable: true },
     });
-    const rows = container.querySelectorAll(".axis-toggle-row");
-    expect(rows[0]?.textContent).toContain("n/d");
-    expect(rows[1]?.textContent).toContain("n/d");
+    expect(container.textContent).toContain("Données des signaux indisponibles");
     expect(container.textContent).not.toContain(">0<");
   });
 });
