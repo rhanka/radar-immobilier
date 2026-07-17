@@ -314,6 +314,8 @@ describe("enrichissement lots via zonage (chemin proxy)", () => {
       reglementMillesime: null,
       reglementPageSource: null,
       reglementUrl: null,
+      usageDominant: null,
+      usageDominantSource: null,
     });
     expect(props["multifamilial4plus"]).toBe(true);
     expect(props["multifamilial4plusSource"]).toBe("heuristique");
