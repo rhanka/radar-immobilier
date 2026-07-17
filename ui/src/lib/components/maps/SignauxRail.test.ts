@@ -60,62 +60,6 @@ describe("SignauxRail — A / transition", () => {
     expect(container.textContent).toMatch(/2\s+signaux/);
   });
 
-  it("uses selected-city detail authority instead of conflicting by-city counts", async () => {
-    const entry: CityMapEntry = {
-      municipality: { slug: "sutton", name: "Sutton", mrc: "Brome-Missisquoi" } as CityMapEntry["municipality"],
-      signalCount6m: 5,
-      subsetCounts: { "": 5, "z|m|p": 99, "z|p": 88 },
-    };
-    const { container } = render(SignauxRail, {
-      props: {
-        entries: [entry],
-        selectedSlug: "sutton",
-        selectedVivierProjections: {
-          a: { available: true, count: 1, nodes: [] },
-          transition: { available: true, count: 2, nodes: [] },
-        },
-      },
-    });
-
-    expect(container.textContent).toMatch(/1\s+signal/);
-    expect(container.textContent).not.toContain("99");
-    await fireEvent.click(getModeRadios(container)[1]);
-    expect(container.textContent).toMatch(/2\s+signaux/);
-    expect(container.textContent).not.toContain("88");
-  });
-
-  it("shows selected projection unavailable instead of a by-city zero", () => {
-    const entry: CityMapEntry = {
-      municipality: { slug: "sutton", name: "Sutton", mrc: "Brome-Missisquoi" } as CityMapEntry["municipality"],
-      signalCount6m: 5,
-      subsetCounts: { "": 5, "z|m|p": 0, "z|p": 0 },
-    };
-    const { container } = render(SignauxRail, {
-      props: { entries: [entry], selectedSlug: "sutton", selectedVivierProjections: null },
-    });
-    expect(container.textContent).toContain("Données des signaux indisponibles");
-    expect(container.textContent).toContain("n/d");
-    expect(container.textContent).not.toContain("0 signal");
-  });
-
-  it("renders each selected-city mode badge from its own validation result", () => {
-    const entry = cityEntry("sutton", "Sutton", "Brome-Missisquoi", 99);
-    const { container } = render(SignauxRail, {
-      props: {
-        entries: [entry],
-        selectedSlug: "sutton",
-        selectedVivierProjections: {
-          a: { available: false, count: null, nodes: [] },
-          transition: { available: true, count: 2, nodes: [] },
-        },
-      },
-    });
-    const rows = container.querySelectorAll(".axis-toggle-row");
-    expect(rows[0]?.textContent).toContain("n/d");
-    expect(rows[0]?.textContent).not.toContain("99");
-    expect(rows[1]?.textContent).toContain("2");
-  });
-
   it("shows unavailable badges instead of aggregate zeros after a load error", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [], dataUnavailable: true },

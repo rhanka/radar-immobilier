@@ -126,7 +126,6 @@
     subsetKeyForMode,
     validateVivierProjectionAuthority,
     vivierRouteKey,
-    type ValidatedVivierProjections,
   } from "$lib/signals/vivier-view-mode.js";
   import {
     lotLineColorExpression,
@@ -508,22 +507,18 @@
    * selon le compte actif exact (subsetCounts[subsetKey]). Les dépendances
    * sont passées en PARAMÈTRES (pas lues en variable libre) pour que Svelte
    * suive correctement le recalcul réactif de la prop choroplèthe.
+   *
+   * La couleur ne dépend QUE des comptes bulk : sélectionner une ville ne
+   * repeint pas son polygone (la sélection est portée par l'opacité).
    */
   function buildFillColorExpression(
     entries: CityMapEntry[],
     subsetKey: string,
-    activeCitySlug: string | null,
-    projections: ValidatedVivierProjections,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = countForVivierCity(
-        e,
-        activeCitySlug,
-        projections,
-        modeFromSubsetKey(subsetKey),
-      );
-      expr.push(e.municipality.slug, count === null ? "#94a3b8" : signalCountColor(count));
+      const count = countForVivierCity(e, modeFromSubsetKey(subsetKey));
+      expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
     return expr as ExpressionSpecification;
@@ -552,17 +547,13 @@
   }
 
   /**
-   * Expressions choroplèthe passées EN PROPS au socle. Les dépendances
-   * (allEntries, activeSubsetKey, selectedCity, selectionState) sont
+   * Expressions choroplèthe passées EN PROPS au socle. Les dépendances sont
    * référencées ici afin que Svelte recalcule la peinture exactement quand
-   * l'ancien `updateFillColors()` impératif était déclenché.
+   * l'ancien `updateFillColors()` impératif était déclenché : la COULEUR ne
+   * dépend que de (allEntries, activeSubsetKey), l'OPACITÉ porte seule la
+   * sélection (selectedCity, selectionState).
    */
-  $: fillColorExpression = buildFillColorExpression(
-    allEntries,
-    activeSubsetKey,
-    selectedCity?.municipality.slug ?? null,
-    validatedDetailProjections,
-  );
+  $: fillColorExpression = buildFillColorExpression(allEntries, activeSubsetKey);
   $: fillOpacityExpression = buildFillOpacityExpression(
     allEntries,
     selectedCity?.municipality.slug ?? null,
@@ -1513,7 +1504,6 @@
       {loading}
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
-      selectedVivierProjections={validatedDetailProjections}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
