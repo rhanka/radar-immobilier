@@ -111,6 +111,64 @@ describe("SignauxSelPanel — badge PIIA lié", () => {
   });
 });
 
+describe("SignauxSelPanel — vue B : raison de rang + effet densifiant honnête", () => {
+  function bNode(
+    id: string,
+    label: string,
+    cls: GraphSignalNode["classification"],
+  ): GraphSignalNode {
+    const signal = makeSignal(id, label, "Signal du vivier v2.");
+    signal.classification = cls;
+    return signal;
+  }
+
+  it("affiche la raison NEUTRE (instrument + étape) par signal en mode B", () => {
+    const refonte = bNode("sig-refonte", "Refonte réglementaire secteur centre", {
+      ...piiaClassification(),
+      instrument: "refonte",
+      etape: "projet_reglement",
+    } as GraphSignalNode["classification"]);
+
+    const { container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [refonte],
+        vivierBMode: true,
+      },
+    });
+
+    expect(container.textContent).toContain("Refonte, projet de règlement");
+    // Copy neutre : aucun jargon interne exposé.
+    expect(container.textContent).not.toContain("bucket");
+    expect(container.textContent).not.toContain("projet_reglement");
+  });
+
+  it("effet densifiant inconnu → « à qualifier » (jamais une valeur inventée)", () => {
+    const inconnu = bNode("sig-inconnu", "Rezonage H-431", piiaClassification());
+    const { container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [inconnu],
+        vivierBMode: true,
+      },
+    });
+    expect(container.textContent).toContain("Effet densifiant : à qualifier");
+  });
+
+  it("mode A (vivierBMode=false) : NI raison NI effet densifiant rendus", () => {
+    const node = bNode("sig-a", "Avis de motion règlement zonage H-431", piiaClassification());
+    const { container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [node],
+        vivierBMode: false,
+      },
+    });
+    expect(container.textContent).not.toContain("Effet densifiant");
+    expect(container.textContent).not.toContain("à qualifier");
+  });
+});
+
 describe("SignauxSelPanel — clic signal → fiche détail", () => {
   it("shows unavailable without a false zero or empty-state message", () => {
     const { container } = render(Harness, {

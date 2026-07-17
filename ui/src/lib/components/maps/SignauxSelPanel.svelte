@@ -34,6 +34,11 @@
     isPiiaLie,
     PIIA_LIE_BADGE,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import {
+    isEffetDensifiantUnknown,
+    vivierEffetDensifiantLabel,
+    vivierRankReasonLabel,
+  } from "$lib/signals/vivier-b-ranking.js";
   import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import type {
     GeoZoneFeature,
@@ -101,6 +106,12 @@
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   /** #3 — Clé de filtre active (ex. "z", "z|m", "") propagée depuis SignauxMapView. */
   export let activeSubsetKey = "";
+  /**
+   * Vue B (vivier v2) active : la liste des signaux est TRIÉE par le comparateur
+   * déterministe du domaine (côté parent), et chaque fiche porte sa RAISON de
+   * rang + le statut d'effet densifiant. En A, aucun de ces éléments n'est rendu.
+   */
+  export let vivierBMode = false;
   // ── Filtres DONNÉES par accordéon (état PORTÉ PAR LE PARENT : il pilote la
   // peinture carte — zéro refetch ; il persiste quand l'accordéon se ferme). ──
   /** Filtre lots (catégorie/usages/superficie) — en-tête de l'accordéon Lots. */
@@ -837,6 +848,25 @@
                     {/if}
                     <span class="sel-entity-type">{nodeTypeLabel(node.type)}</span>
                   </button>
+
+                  {#if vivierBMode && node.classification}
+                    <!-- Vue B : POURQUOI ce signal est à ce rang. Copy NEUTRE
+                         (instrument + étape), lisible sans ouvrir la fiche. Le
+                         statut d'effet densifiant est HONNÊTE : « à qualifier »
+                         quand inconnu (invariant D10), jamais une valeur
+                         inventée ni présentée comme favorable. -->
+                    <div class="signal-rank-row">
+                      <span class="signal-rank-reason">
+                        {vivierRankReasonLabel(node.classification)}
+                      </span>
+                      <Badge
+                        tone={isEffetDensifiantUnknown(node.classification) ? "neutral" : "info"}
+                        size="sm"
+                      >
+                        Effet densifiant : {vivierEffetDensifiantLabel(node.classification)}
+                      </Badge>
+                    </div>
+                  {/if}
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
@@ -1634,6 +1664,22 @@
     font-size: var(--signaux-fs-caption);
     font-weight: 600;
     white-space: nowrap;
+  }
+
+  /* Vue B : ligne « raison du rang » sous le libellé du signal. Discrète,
+     toujours visible (pas besoin d'ouvrir la fiche pour savoir pourquoi). */
+  .signal-rank-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    padding: 0.1rem 0.85rem 0.35rem 0.85rem;
+  }
+
+  .signal-rank-reason {
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-caption);
+    font-weight: 600;
   }
 
   .entity-summary {
