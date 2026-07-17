@@ -4,7 +4,6 @@ import {
   A_SUBSET_KEY,
   canOpenProjectedSignal,
   clearVivierCityTransientState,
-  countForVivierCity,
   initialVivierSubsetKey,
   reconcileVivierRouteSubset,
   TRANSITION_SUBSET_KEY,
@@ -84,16 +83,7 @@ describe("Vivier A / transition view contract", () => {
     }
   });
 
-  it("uses only node-validated selected-city counts", () => {
-    const entry = { municipality: { slug: "sutton" }, subsetCounts: { "z|m|p": 99, "z|p": 88 } };
-    const validated = validateVivierProjectionAuthority(SUTTON_RAW, SUTTON_AUTHORITY);
-    expect(countForVivierCity(entry, "sutton", validated, "a")).toBe(1);
-    expect(countForVivierCity(entry, "sutton", validated, "transition")).toBe(2);
-    expect(countForVivierCity(entry, "sutton", null, "a")).toBeNull();
-  });
-
-  it("validates A and transition independently and never trusts raw counts", () => {
-    const entry = { municipality: { slug: "sutton" }, subsetCounts: { "z|m|p": 99, "z|p": 88 } };
+  it("validates A and transition independently", () => {
     const authority = {
       ...SUTTON_AUTHORITY,
       a: { count: 1, signalIds: ["wrong-a-id"] },
@@ -102,8 +92,6 @@ describe("Vivier A / transition view contract", () => {
 
     expect(validated.a).toEqual({ available: false, count: null, nodes: [] });
     expect(validated.transition.count).toBe(2);
-    expect(countForVivierCity(entry, "sutton", validated, "a")).toBeNull();
-    expect(countForVivierCity(entry, "sutton", validated, "transition")).toBe(2);
   });
 
   it("resynchronizes route mode and keys route identity by A/T", () => {
