@@ -10,6 +10,7 @@ import {
   enrichLotFeatures,
   lotCentroid,
   zoneReglementProvenance,
+  zoneUsageDominant,
   type EnrichFeature,
 } from "./lot-zone-enrichment.js";
 
@@ -171,6 +172,63 @@ describe("buildZoneIndex", () => {
     expect(zone.reglementPageSource).toBeNull();
     expect(zone.reglementUrl).toBeNull();
   });
+
+  it("lit l'usage dominant + sa source quand la source les porte", () => {
+    const index = buildZoneIndex({
+      features: [
+        {
+          type: "Feature",
+          geometry: null,
+          properties: {
+            zone_code: "H-800",
+            usage_dominant: "residentiel",
+            usage_dominant_source: "zone-nomenclature",
+          },
+        },
+      ],
+    });
+    const zone = index.byCodeNorm.get("H-800")!;
+    expect(zone.usageDominant).toBe("residentiel");
+    expect(zone.usageDominantSource).toBe("zone-nomenclature");
+  });
+
+  it("usage dominant absent → null (aucune classification inventée)", () => {
+    const index = buildZoneIndex({
+      features: [
+        { type: "Feature", geometry: null, properties: { zone_code: "H-810" } },
+      ],
+    });
+    const zone = index.byCodeNorm.get("H-810")!;
+    expect(zone.usageDominant).toBeNull();
+    expect(zone.usageDominantSource).toBeNull();
+  });
+});
+
+// ─── zoneUsageDominant (lecteur direct) ───────────────────────────────────────
+
+describe("zoneUsageDominant", () => {
+  it("lit usage_dominant + usage_dominant_source (passthrough verbatim)", () => {
+    expect(
+      zoneUsageDominant({
+        usage_dominant: "agricole",
+        usage_dominant_source: "zone-nomenclature",
+      }),
+    ).toEqual({ value: "agricole", source: "zone-nomenclature" });
+  });
+
+  it("valeur servie sans source → source null", () => {
+    expect(zoneUsageDominant({ usage_dominant: "commercial" })).toEqual({
+      value: "commercial",
+      source: null,
+    });
+  });
+
+  it("aucune clé → value/source null (anti-invention)", () => {
+    expect(zoneUsageDominant({ zone_code: "H-9" })).toEqual({
+      value: null,
+      source: null,
+    });
+  });
 });
 
 // ─── zoneReglementProvenance (lecteur direct) ─────────────────────────────────
@@ -267,6 +325,8 @@ describe("enrichLotFeatures — jointure par centroïde (cas live : lot sans cod
       reglementMillesime: null,
       reglementPageSource: null,
       reglementUrl: null,
+      usageDominant: null,
+      usageDominantSource: null,
     });
     expect(props["multifamilial4plus"]).toBe(true);
     expect(props["multifamilial4plusSource"]).toBe("heuristique");
@@ -341,6 +401,48 @@ describe("enrichLotFeatures — provenance du règlement propagée dans zone{...
     expect(zone["reglementUrl"]).toBe(
       "https://ville.qc.ca/reglements/2008-102.pdf",
     );
+  });
+});
+
+describe("enrichLotFeatures — usage dominant propagé dans zone{...}", () => {
+  const index = buildZoneIndex({
+    features: [
+      {
+        type: "Feature",
+        geometry: square(-73.6, 45.3, -73.5, 45.4),
+        properties: {
+          zone_code: "H-241",
+          kind: "residential",
+          usage_dominant: "residentiel",
+          usage_dominant_source: "zone-nomenclature",
+        },
+      },
+    ] as EnrichFeature[],
+  });
+
+  it("le payload zone lot porte l'usage dominant réel + sa source", () => {
+    const lot = liveLot("5 000 001", square(-73.556, 45.349, -73.555, 45.35));
+    const { features } = enrichLotFeatures([lot], index);
+    const zone = features[0]!.properties!["zone"] as Record<string, unknown>;
+    expect(zone["usageDominant"]).toBe("residentiel");
+    expect(zone["usageDominantSource"]).toBe("zone-nomenclature");
+  });
+
+  it("usage dominant absent de la source → null dans le payload (jamais inventé)", () => {
+    const bareIndex = buildZoneIndex({
+      features: [
+        {
+          type: "Feature",
+          geometry: square(-73.6, 45.3, -73.5, 45.4),
+          properties: { zone_code: "H-241", kind: "residential" },
+        },
+      ] as EnrichFeature[],
+    });
+    const lot = liveLot("5 000 002", square(-73.556, 45.349, -73.555, 45.35));
+    const { features } = enrichLotFeatures([lot], bareIndex);
+    const zone = features[0]!.properties!["zone"] as Record<string, unknown>;
+    expect(zone["usageDominant"]).toBeNull();
+    expect(zone["usageDominantSource"]).toBeNull();
   });
 });
 

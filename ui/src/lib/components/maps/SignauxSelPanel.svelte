@@ -65,6 +65,7 @@
     formatYesNo,
     lotNormesRows,
     lotZoneCode,
+    usageDominantDisplay,
   } from "$lib/components/maps/lot-fiche-utils.js";
   import {
     zoneKindStyle,
@@ -1213,6 +1214,13 @@
                         {#if lotZoneKind(lot)}
                           <span class="entity-meta-key">Type de zone</span>
                           <span class="entity-meta-val">{lotZoneKind(lot)}</span>
+                        {/if}
+                        <!-- Usage dominant servi par geo (`qc-zonage-<slug>`) :
+                             valeur RÉELLE + sa source ; rangée masquée quand geo
+                             ne le sert pas (jamais une classification inventée). -->
+                        {#if usageDominantDisplay(lot.properties.zone)}
+                          <span class="entity-meta-key">Usage dominant</span>
+                          <span class="entity-meta-val">{usageDominantDisplay(lot.properties.zone)}</span>
                         {/if}
                         <!-- Adresse + code postal servis par geo : adresse
                              civique du rôle (« — » quand non résolue) ; code

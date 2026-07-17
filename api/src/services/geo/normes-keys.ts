@@ -15,11 +15,27 @@ export const NORMATIVE_VALUE_KEYS = [
   "densite_value",
   "hauteur_min_value",
   "hauteur_max_value",
+  // Façade minimale : `qc-zonage-norms-<slug>` sert `frontage_min_value`, tandis
+  // que `qc-zonage-<slug>` (normes foldées sur la zone) sert `facade_min_value`.
+  // Les deux sont reconnus (alias défensif — geo prévoit peut-être un
+  // renommage), sans supposer lequel une ville donnée expose.
   "frontage_min_value",
+  "facade_min_value",
   "superficie_min_value",
   "marge_avant_min_value",
   "marge_laterale_min_value",
   "marge_arriere_min_value",
+] as const;
+
+/**
+ * Usage dominant d'une zone tel que servi par `qc-zonage-<slug>` (mesuré live
+ * sur 222 villes) — le champ et sa source. Passthrough d'AFFICHAGE consommé par
+ * l'enrichissement lot↔zone, jamais une classification dérivée.
+ */
+export const USAGE_DOMINANT_KEYS = ["usage_dominant", "usageDominant"] as const;
+export const USAGE_DOMINANT_SOURCE_KEYS = [
+  "usage_dominant_source",
+  "usageDominantSource",
 ] as const;
 
 /** Normalize sourced evidence verbatim-or-null, without deriving semantics. */

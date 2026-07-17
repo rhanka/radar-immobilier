@@ -711,3 +711,48 @@ describe("provenance du règlement (zone de norme) → zone{reglement*}", () => 
     expect(zone?.reglementUrl).toBeUndefined();
   });
 });
+
+describe("usage dominant (qc-zonage) → zone{usageDominant,usageDominantSource}", () => {
+  it("mappe l'objet zone servi par geo (snake_case) vers camelCase", async () => {
+    const res = await fetchSingleLot({
+      noLot: "U-1",
+      zone: {
+        code: "AD-1",
+        kind: "A",
+        usages: [],
+        densiteLogHa: null,
+        usage_dominant: "agricole",
+        usage_dominant_source: "zone-nomenclature",
+      },
+    });
+    const zone = res.featureCollection.features[0].properties.zone;
+    expect(zone).toMatchObject({
+      usageDominant: "agricole",
+      usageDominantSource: "zone-nomenclature",
+    });
+  });
+
+  it("usage dominant à plat sur les properties (fallback) → foldé dans zone", async () => {
+    const res = await fetchSingleLot({
+      noLot: "U-2",
+      zone_code: "H-9",
+      usage_dominant: "residentiel",
+      usage_dominant_source: "zone-nomenclature",
+    });
+    const zone = res.featureCollection.features[0].properties.zone;
+    expect(zone).toMatchObject({
+      usageDominant: "residentiel",
+      usageDominantSource: "zone-nomenclature",
+    });
+  });
+
+  it("aucun usage dominant servi → aucun champ (anti-invention)", async () => {
+    const res = await fetchSingleLot({
+      noLot: "U-3",
+      zone: { code: "H-1", kind: "H", usages: [], densiteLogHa: null },
+    });
+    const zone = res.featureCollection.features[0].properties.zone;
+    expect(zone?.usageDominant).toBeUndefined();
+    expect(zone?.usageDominantSource).toBeUndefined();
+  });
+});
