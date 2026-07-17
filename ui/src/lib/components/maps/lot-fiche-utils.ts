@@ -249,6 +249,43 @@ export function reglementProvenance(
   return { text, url };
 }
 
+// ── Usage dominant de la zone (passthrough d'affichage) ────────────────────────
+
+/**
+ * Étiquette client neutre d'une source de usage dominant. Les valeurs connues
+ * sont traduites en copy produit (pas de jargon interne) ; toute source inconnue
+ * est rendue verbatim. null quand aucune source n'est servie.
+ */
+export function usageDominantSourceLabel(
+  source: string | null | undefined,
+): string | null {
+  if (!source) return null;
+  const trimmed = source.trim();
+  if (trimmed.length === 0) return null;
+  const KNOWN: Record<string, string> = {
+    "zone-nomenclature": "nomenclature de zone",
+    grille: "grille de zonage",
+    grid: "grille de zonage",
+  };
+  return KNOWN[trimmed.toLowerCase()] ?? trimmed;
+}
+
+/**
+ * Ligne « Usage dominant » affichable de la zone jointe : la valeur RÉELLE
+ * servie par geo (`qc-zonage-<slug>`), suivie de sa source entre parenthèses
+ * quand elle est servie — ex. « résidentiel (nomenclature de zone) ». null
+ * quand geo ne sert aucun usage dominant (aucune ligne rendue — copy neutre,
+ * jamais une valeur inventée).
+ */
+export function usageDominantDisplay(
+  zone: LotProperties["zone"] | null | undefined,
+): string | null {
+  const value = zone?.usageDominant?.trim();
+  if (!value) return null;
+  const source = usageDominantSourceLabel(zone?.usageDominantSource);
+  return source ? `${value} (${source})` : value;
+}
+
 // ── Formatage partagé (LotFichePanel + carte lot du panneau Signaux) ───────────
 
 /** Superficie en m² arrondie, locale fr-CA ; « — » discret quand absente. */
