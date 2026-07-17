@@ -51,6 +51,28 @@ export type LegacySubsetKey =
   | "m|p"
   | "z|m|p";
 
+export const LEGACY_ZMP_VERSION = "legacy-zmp-v1" as const;
+
+export interface LegacyZmpMembership {
+  version: typeof LEGACY_ZMP_VERSION;
+  signalId: string;
+  flags: Readonly<{ z: boolean; m: boolean; p: boolean }>;
+}
+
+export interface LegacyZmpProjection {
+  version: typeof LEGACY_ZMP_VERSION;
+  a: { count: number; signalIds: string[] };
+  transition: { count: number; signalIds: string[] };
+}
+
+export interface LegacyGraphNodeInput {
+  id: string;
+  type: string;
+  label?: string | null;
+  props?: unknown;
+  sourceRef?: string | null;
+}
+
 const LEGACY_SUBSET_KEYS: readonly LegacySubsetKey[] = [
   "",
   "z",
@@ -89,6 +111,13 @@ function firstString(records: readonly Record<string, unknown>[], keys: readonly
   return null;
 }
 
+/** Match PostgreSQL JSONB `->>` for the scalar fields used by legacy Z/M/P. */
+function legacyJsonbText(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
 function firstNumber(records: readonly Record<string, unknown>[], keys: readonly string[]): number | null {
   for (const candidate of records) {
     for (const key of keys) {
@@ -119,6 +148,22 @@ function graphRecords(signal: VivierSignalInput): Record<string, unknown>[] {
     .filter(Array.isArray)
     .flatMap((value) => value!.map(record));
   return [...refs, nested, props];
+}
+
+/** Reproduce the 8fe75cd legacy SQL projection: only props.properties fields. */
+export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalInput {
+  const properties = record(record(node.props).properties);
+  return {
+    id: node.id,
+    type: node.type,
+    category: legacyJsonbText(properties.category),
+    label: node.label ?? null,
+    description: legacyJsonbText(properties.description),
+    etape: legacyJsonbText(properties.etape),
+    nbUnitesMax: legacyJsonbText(properties.nb_unites_max),
+    intensite: legacyJsonbText(properties.intensite),
+    sourceRef: node.sourceRef ?? null,
+  };
 }
 
 function classificationFromResidentiel(
@@ -303,21 +348,47 @@ function emptyLegacyCounts(): Record<LegacySubsetKey, number> {
   return Object.fromEntries(LEGACY_SUBSET_KEYS.map((key) => [key, 0])) as Record<LegacySubsetKey, number>;
 }
 
+/** The immutable legacy A/T predicates, classified once for counts and IDs. */
+export function classifyLegacyZmpSignal(signal: VivierSignalInput): LegacyZmpMembership {
+  const category = signal.category ?? null;
+  const etape = signal.etape ?? null;
+  const label = signal.label ?? "";
+  const description = signal.description ?? null;
+  const nbUnitesMax = signal.nbUnitesMax ?? null;
+  const intensite = signal.intensite ?? null;
+  return {
+    version: LEGACY_ZMP_VERSION,
+    signalId: signal.id,
+    flags: {
+      z: isZonageSignal(signal.type, category, etape),
+      m: isMulti4Plus(signal.type, nbUnitesMax, intensite),
+      p: isPrecoceSignal(etape, label, description),
+    },
+  };
+}
+
+export function buildLegacyZmpProjection(
+  memberships: readonly LegacyZmpMembership[],
+): LegacyZmpProjection {
+  const aIds = memberships
+    .filter(({ flags }) => flags.z && flags.m && flags.p)
+    .map(({ signalId }) => signalId);
+  const transitionIds = memberships
+    .filter(({ flags }) => flags.z && flags.p)
+    .map(({ signalId }) => signalId);
+  return {
+    version: LEGACY_ZMP_VERSION,
+    a: { count: aIds.length, signalIds: aIds },
+    transition: { count: transitionIds.length, signalIds: transitionIds },
+  };
+}
+
 export function computeLegacySubsetCounts(
   signals: readonly VivierSignalInput[],
 ): Record<LegacySubsetKey, number> {
   const counts = emptyLegacyCounts();
   for (const signal of signals) {
-    const category = signal.category ?? firstString(graphRecords(signal), ["category"]);
-    const etape = signal.etape ?? firstString(graphRecords(signal), ["etape"]);
-    const label = signal.label ?? firstString(graphRecords(signal), ["label"]) ?? "";
-    const description = signal.description ?? firstString(graphRecords(signal), ["description"]) ?? null;
-    const nbUnitesMax = signal.nbUnitesMax ?? firstString(graphRecords(signal), ["nb_unites_max"]);
-    const intensite = signal.intensite ?? firstString(graphRecords(signal), ["intensite"]);
-    const z = isZonageSignal(signal.type, category, etape);
-    const m = isMulti4Plus(signal.type, nbUnitesMax, intensite);
-    const p = isPrecoceSignal(etape, label, description);
-    const flags: Record<"z" | "m" | "p", boolean> = { z, m, p };
+    const flags = classifyLegacyZmpSignal(signal).flags;
     for (const key of LEGACY_SUBSET_KEYS) {
       if (key === "") {
         counts[key] += 1;

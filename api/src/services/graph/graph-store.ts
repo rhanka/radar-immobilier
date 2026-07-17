@@ -21,6 +21,8 @@ import { QC_MUNICIPALITIES } from "@radar/sources";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
+  extractLegacyZmpInput,
+  classifyLegacyZmpSignal,
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
@@ -29,6 +31,7 @@ export {
   classifyVivierSignal,
   computeLegacySubsetCounts,
   computeVivierV2,
+  buildLegacyZmpProjection,
 } from "./vivier-v2.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1341,6 +1344,13 @@ export function classifyGraphNodeVivierV2(
   return classifyVivierSignal(signal);
 }
 
+/** Build legacy membership from the same graph card input as aggregate counts. */
+export function classifyGraphNodeLegacyZmp(
+  input: Pick<GraphSignalClassificationInput, "id" | "type" | "label" | "props" | "sourceRef">,
+): ReturnType<typeof classifyLegacyZmpSignal> {
+  return classifyLegacyZmpSignal(extractLegacyZmpInput(input));
+}
+
 /**
  * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
  *
@@ -1368,12 +1378,12 @@ export interface GraphSignalProjectionRow {
   id: string;
   citySlug: string | null;
   type: string;
-  category: string | null;
+  category?: string | null;
   label: string;
-  nbUnitesMax: string | null;
-  intensite: string | null;
-  description: string | null;
-  etapeAnnote: string | null;
+  nbUnitesMax?: string | null;
+  intensite?: string | null;
+  description?: string | null;
+  etapeAnnote?: string | null;
   props: unknown;
   sourceRef: string | null;
 }
@@ -1399,6 +1409,7 @@ export function aggregateGraphSignalProjectionRows(
     signalCount: number;
     subsetCounts: Record<SubsetKey, number>;
     signals: VivierSignalInput[];
+    legacySignals: VivierSignalInput[];
   }>();
 
   for (const row of rows) {
@@ -1408,6 +1419,7 @@ export function aggregateGraphSignalProjectionRows(
         signalCount: 0,
         subsetCounts: emptySubsetCounts(),
         signals: [],
+        legacySignals: [],
       });
     }
     const entry = byCity.get(row.citySlug)!;
@@ -1415,19 +1427,20 @@ export function aggregateGraphSignalProjectionRows(
     entry.signals.push({
       id: row.id,
       type: row.type,
-      category: row.category,
+      category: row.category ?? null,
       label: row.label,
-      description: row.description,
-      etape: row.etapeAnnote,
-      nbUnitesMax: row.nbUnitesMax,
-      intensite: row.intensite,
+      description: row.description ?? null,
+      etape: row.etapeAnnote ?? null,
+      nbUnitesMax: row.nbUnitesMax ?? null,
+      intensite: row.intensite ?? null,
       props: row.props,
       sourceRef: row.sourceRef,
     });
+    entry.legacySignals.push(extractLegacyZmpInput(row));
   }
 
   return Array.from(byCity.entries()).map(([citySlug, data]) => {
-    const legacySubsetCounts = computeLegacySubsetCounts(data.signals);
+    const legacySubsetCounts = computeLegacySubsetCounts(data.legacySignals);
     for (const key of Object.keys(legacySubsetCounts) as Array<keyof typeof legacySubsetCounts>) {
       data.subsetCounts[key] = legacySubsetCounts[key];
     }

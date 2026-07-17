@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  classifyLegacyZmpSignal,
   classifyVivierSignal,
   computeLegacySubsetCounts,
   computeVivierV2,
+  extractLegacyZmpInput,
   type VivierSignalInput,
 } from "./vivier-v2.js";
 
@@ -17,6 +19,73 @@ const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput =
 });
 
 describe("server vivier_v2 computation", () => {
+  it("reads legacy fields only from props.properties", () => {
+    const input = extractLegacyZmpInput({
+      id: "strict",
+      type: "Signal",
+      label: "Adoption ordinaire",
+      props: {
+        category: "rezonage",
+        etape: "projet_reglement",
+        intensite: "haute",
+        refs: [{ category: "rezonage", etape: "avis_motion", nb_unites_max: "12" }],
+        properties: { category: "vente_terrain", etape: "adoption" },
+      },
+      sourceRef: null,
+    });
+
+    expect(input).toMatchObject({
+      category: "vente_terrain",
+      etape: "adoption",
+      nbUnitesMax: null,
+      intensite: null,
+    });
+    expect(classifyLegacyZmpSignal(input).flags).toEqual({ z: false, m: false, p: false });
+  });
+
+  it("reproduces JSONB text extraction for legacy scalar values", () => {
+    const input = extractLegacyZmpInput({
+      id: "scalar-values",
+      type: "Signal",
+      props: {
+        properties: {
+          category: " ppcmoi ",
+          description: false,
+          etape: "projet_reglement",
+          nb_unites_max: 12,
+          intensite: null,
+        },
+      },
+    });
+
+    expect(input).toMatchObject({
+      category: " ppcmoi ",
+      description: "false",
+      etape: "projet_reglement",
+      nbUnitesMax: "12",
+      intensite: null,
+    });
+  });
+  it("classifies Sutton legacy memberships once for counts and detail IDs", () => {
+    const suton = [
+      signal({ id: "sutton-a", category: "rezonage", etape: "avis_motion", nbUnitesMax: "8" }),
+      signal({ id: "sutton-t", category: "rezonage", etape: "avis_motion", nbUnitesMax: "2" }),
+      signal({ id: "sutton-z", category: "rezonage", etape: "adoption", nbUnitesMax: "2" }),
+      signal({ id: "sutton-m", category: "vente_terrain", etape: "adoption", nbUnitesMax: "8" }),
+      signal({ id: "sutton-raw", category: "vente_terrain", etape: "adoption", nbUnitesMax: "2" }),
+    ];
+
+    const memberships = suton.map(classifyLegacyZmpSignal);
+    const counts = computeLegacySubsetCounts(suton);
+
+    expect(memberships.filter((item) => item.flags.z && item.flags.m && item.flags.p).map((item) => item.signalId)).toEqual(["sutton-a"]);
+    expect(memberships.filter((item) => item.flags.z && item.flags.p).map((item) => item.signalId)).toEqual(["sutton-a", "sutton-t"]);
+    expect(counts[""]).toBe(5);
+    expect(counts["z|m|p"]).toBe(1);
+    expect(counts["z|p"]).toBe(2);
+    expect(memberships.every((item) => item.version === "legacy-zmp-v1")).toBe(true);
+  });
+
   it("uses the graph-store zonage helper and keeps missing evidence indeterminate", () => {
     const etapeFallback = classifyVivierSignal(
       signal({ category: null, etape: "rezonage", label: "Avis de motion" }),
