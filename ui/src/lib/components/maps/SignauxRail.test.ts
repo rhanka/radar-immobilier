@@ -1,10 +1,41 @@
-/** SignauxRail A/transition mode and flat city-list contracts. */
+/** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, fireEvent, cleanup, getAllByRole } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
+import type { VivierV2Counts } from "@radar/domain";
 
 afterEach(() => cleanup());
+
+/** Comptes v2 serveur : total = qualified + residentialUnknown + Σ exclusions. */
+function vivierCounts(
+  qualified: number,
+  residentialUnknown = 0,
+  excluded = 0,
+  stageCounts?: Partial<VivierV2Counts["stageCounts"]>,
+): VivierV2Counts {
+  return {
+    qualified,
+    residentialUnknown,
+    excludedByReason: {
+      non_residentiel_franc: excluded,
+      piia_non_pertinent: 0,
+      hors_zonage: 0,
+      derogation_hors_sujet: 0,
+    },
+    stageCounts: {
+      avis_motion: qualified,
+      projet_reglement: 0,
+      consultation_publique: 0,
+      second_projet: 0,
+      adoption: 0,
+      entree_vigueur: 0,
+      inconnu: 0,
+      ...stageCounts,
+    },
+    total: qualified + residentialUnknown + excluded,
+  };
+}
 
 function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) => void) {
   return render(SignauxRail, {
@@ -16,57 +47,203 @@ function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) =
   });
 }
 
-function getModeRadios(container: HTMLElement): [HTMLInputElement, HTMLInputElement] {
-  const radios = getAllByRole(container, "radio") as HTMLInputElement[];
-  return [radios[0]!, radios[1]!];
+function getTabs(container: HTMLElement): [HTMLButtonElement, HTMLButtonElement] {
+  const tabs = getAllByRole(container, "tab") as HTMLButtonElement[];
+  return [tabs[0]!, tabs[1]!];
 }
 
-describe("SignauxRail — A / transition", () => {
-  it("defaults empty or invalid state to immutable A", () => {
-    const { container } = renderRail("");
-    const [a, transition] = getModeRadios(container);
-    expect(a.checked).toBe(true);
-    expect(transition.checked).toBe(false);
-  });
+/** Les checkboxes du panneau de tab actif (axes du vivier). */
+function toggleBoxes(container: HTMLElement): HTMLInputElement[] {
+  return Array.from(
+    container.querySelectorAll<HTMLInputElement>(".vivier-toggles input[type=checkbox]"),
+  );
+}
 
-  it("labels transition as non-final and exposes no free-form axes or Vivier v2", () => {
+/**
+ * Sutton : subsetCounts distincts par clé A (z|m|p → 1, z|p → 2, z|m → 4),
+ * et un vivier v2 dont seule une partie est précoce (2 qualifiés, 1 précoce).
+ */
+const SUTTON: CityMapEntry = {
+  municipality: {
+    slug: "sutton",
+    name: "Sutton",
+    mrc: "Brome-Missisquoi",
+  } as CityMapEntry["municipality"],
+  signalCount6m: 5,
+  subsetCounts: { "": 5, "z|m|p": 1, "z|p": 2, "z|m": 4, z: 5 },
+  vivierV2Counts: vivierCounts(2, 7, 3, { avis_motion: 1, adoption: 1 }),
+};
+
+describe("SignauxRail — tabs A / B", () => {
+  it("offers A and B as tabs, A active by default, no retired transition mode", () => {
     const { container } = renderRail();
-    expect(container.textContent).toContain("Vivier A · référence");
-    expect(container.textContent).toContain("Transition vers B");
-    expect(container.textContent).toContain("non final");
-    expect(container.textContent).not.toContain("Résidentiel pertinent");
-    expect(container.textContent).not.toContain("Zonage uniquement");
-    expect(container.textContent).not.toContain("Vivier v2");
+    const [a, b] = getTabs(container);
+    expect(a.textContent).toContain("Vivier A · référence");
+    expect(b.textContent).toContain("Vivier B");
+    expect(a.getAttribute("aria-selected")).toBe("true");
+    expect(b.getAttribute("aria-selected")).toBe("false");
+    expect(container.textContent).not.toContain("Transition vers B");
+    expect(container.textContent).not.toContain("non final");
   });
 
-  it("does not rewrite restored A on mount", () => {
+  it("defaults an empty or invalid key to tab A", () => {
+    const { container } = renderRail("");
+    const [a, b] = getTabs(container);
+    expect(a.getAttribute("aria-selected")).toBe("true");
+    expect(b.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("resolves the retired z|p key to tab A, never B", () => {
+    const { container } = renderRail("z|p");
+    const [a, b] = getTabs(container);
+    expect(a.getAttribute("aria-selected")).toBe("true");
+    expect(b.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("does not emit a filter change on mount", () => {
     const spy = vi.fn();
     renderRail("z|m|p", spy);
     expect(spy).not.toHaveBeenCalled();
   });
-  it("switches only to exact transition z|p and keeps Sutton count parity", async () => {
-    const calls: string[] = [];
-    const entry: CityMapEntry = {
-      municipality: { slug: "sutton", name: "Sutton", mrc: "Brome-Missisquoi" } as CityMapEntry["municipality"],
-      signalCount6m: 5,
-      subsetCounts: { "": 5, "z|m|p": 1, "z|p": 2 },
-    };
+
+  it("shows A's three combinable axes checked by default (z|m|p)", () => {
     const { container } = render(SignauxRail, {
-      props: { entries: [entry], initialSubsetKey: "z|m|p", onFilterChange: (key) => calls.push(key) },
+      props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
     });
+    const boxes = toggleBoxes(container);
+    expect(boxes).toHaveLength(3);
+    expect(boxes.every((box) => box.checked)).toBe(true);
+    expect(container.textContent).toContain("Zonage");
+    expect(container.textContent).toContain("Multifamilial 4+");
+    expect(container.textContent).toContain("Précoce");
+    // Défaut A = subsetCounts["z|m|p"] = 1.
     expect(container.textContent).toMatch(/1\s+signal/);
-    await fireEvent.click(getModeRadios(container)[1]);
-    expect(calls).toEqual(["z|p"]);
+  });
+
+  it("recomposes the A key when an axis is unchecked and reads subsetCounts", async () => {
+    const calls: string[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "z|m|p",
+        onFilterChange: (key: string) => calls.push(key),
+      },
+    });
+    // Décocher « Multifamilial 4+ » → z|p → subsetCounts["z|p"] = 2.
+    const boxes = toggleBoxes(container);
+    await fireEvent.click(boxes[1]!);
+    expect(calls.at(-1)).toBe("z|p");
     expect(container.textContent).toMatch(/2\s+signaux/);
+
+    // Puis décocher « Précoce » aussi → z → subsetCounts["z"] = 5.
+    await fireEvent.click(toggleBoxes(container)[2]!);
+    expect(calls.at(-1)).toBe("z");
+    expect(container.textContent).toMatch(/5\s+signaux/);
+  });
+
+  it("switches to B on the tab and counts from vivierV2Counts.qualified", async () => {
+    const calls: string[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "z|m|p",
+        onFilterChange: (key: string) => calls.push(key),
+      },
+    });
+    // A : subsetCounts["z|m|p"] = 1.
+    expect(container.textContent).toMatch(/1\s+signal/);
+
+    await fireEvent.click(getTabs(container)[1]);
+
+    expect(calls).toEqual(["vivier-v2"]);
+    // B : vivierV2Counts.qualified = 2, jamais un sous-ensemble z|p.
+    expect(container.textContent).toMatch(/2\s+signaux/);
+  });
+
+  it("shows B with zonage/résidentiel locked-on and précoce unchecked", async () => {
+    const { container } = render(SignauxRail, {
+      props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
+    });
+    const boxes = toggleBoxes(container);
+    expect(boxes).toHaveLength(3);
+    // Zonage + Résidentiel définissent B : cochés, verrouillés.
+    expect(boxes[0]!.checked).toBe(true);
+    expect(boxes[0]!.disabled).toBe(true);
+    expect(boxes[1]!.checked).toBe(true);
+    expect(boxes[1]!.disabled).toBe(true);
+    // Précoce : décoché par défaut, actionnable.
+    expect(boxes[2]!.checked).toBe(false);
+    expect(boxes[2]!.disabled).toBe(false);
+    expect(container.textContent).toContain("zonage + résidentiel");
+  });
+
+  it("restricts B to precoce stages when the axis is checked", async () => {
+    const calls: string[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "vivier-v2",
+        onFilterChange: (key: string) => calls.push(key),
+      },
+    });
+    // B par défaut : qualified = 2.
+    expect(container.textContent).toMatch(/2\s+signaux/);
+
+    // Cocher « Précoce » → vivier-v2|p → stageCounts précoce = 1.
+    await fireEvent.click(toggleBoxes(container)[2]!);
+    expect(calls.at(-1)).toBe("vivier-v2|p");
+    expect(container.textContent).toMatch(/1\s+signal/);
+  });
+
+  it("shows B's three counts side by side and never a merged total", () => {
+    const { container } = render(SignauxRail, {
+      props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
+    });
+    const counts = container.querySelector(".vivier-b-counts");
+    expect(counts).not.toBeNull();
+    expect(counts!.textContent).toMatch(/2\s*retenus/);
+    expect(counts!.textContent).toMatch(/7\s*à confirmer/);
+    expect(counts!.textContent).toMatch(/3\s*exclus/);
+    // Copy produit neutre : aucun jargon interne.
+    expect(container.textContent).not.toMatch(/honnête|pire statut|anti-survente/i);
+  });
+
+  it("checks both B exclusions by default and reports each toggle", async () => {
+    const changes: unknown[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "vivier-v2",
+        onExclusionsChange: (next: unknown) => changes.push(next),
+      },
+    });
+    const boxes = Array.from(
+      container.querySelectorAll<HTMLInputElement>(".vivier-b-exclusions input[type=checkbox]"),
+    );
+    expect(boxes).toHaveLength(2);
+    expect(boxes.every((box) => box.checked)).toBe(true);
+    expect(container.textContent).toContain("Exclure PIIA sans projet résidentiel");
+    expect(container.textContent).toContain("Exclure dérogations mineures");
+
+    await fireEvent.click(boxes[0]!);
+    expect(changes).toEqual([
+      { piiaSansProjetResidentiel: false, derogationsMineures: true },
+    ]);
+  });
+
+  it("hides the B-only panel while A is active", () => {
+    const { container } = render(SignauxRail, {
+      props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
+    });
+    expect(container.querySelector(".vivier-b-exclusions")).toBeNull();
+    expect(container.querySelector(".vivier-b-counts")).toBeNull();
   });
 
   it("shows unavailable badges instead of aggregate zeros after a load error", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [], dataUnavailable: true },
     });
-    const rows = container.querySelectorAll(".axis-toggle-row");
-    expect(rows[0]?.textContent).toContain("n/d");
-    expect(rows[1]?.textContent).toContain("n/d");
+    expect(container.textContent).toContain("Données des signaux indisponibles");
     expect(container.textContent).not.toContain(">0<");
   });
 });
@@ -75,7 +252,7 @@ describe("SignauxRail — A / transition", () => {
 // Les signaux de la ville active vivent à DROITE (SignauxSelPanel → bucket
 // « Signaux »), plus jamais inline sous la ligne ville du rail.
 
-/** Fixture minimale CityMapEntry — seuls slug/name/mrc + subsetCounts comptent ici. */
+/** Fixture minimale CityMapEntry — seuls slug/name/mrc + comptes importent ici. */
 function cityEntry(slug: string, name: string, mrc: string, count: number): CityMapEntry {
   const subsetCounts: Record<string, number> = {};
   for (const key of ["", "z|p", "z|m|p"]) {
@@ -89,6 +266,7 @@ function cityEntry(slug: string, name: string, mrc: string, count: number): City
     } as CityMapEntry["municipality"],
     signalCount6m: count,
     subsetCounts,
+    vivierV2Counts: vivierCounts(count),
   };
 }
 
@@ -102,7 +280,7 @@ function renderRailWithCities(selectedSlug: string | null, onSelectCity?: (e: Ci
         cityEntry("beauharnois", "Beauharnois", "MRC-Test-B", 3),
       ],
       selectedSlug,
-      initialSubsetKey: "z|p",
+      initialSubsetKey: "z|m|p",
       onSelectCity: onSelectCity ?? (() => {}),
     },
   });
