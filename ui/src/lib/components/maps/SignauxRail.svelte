@@ -4,13 +4,7 @@
    *
    * Composé sur les briques de rail PARTAGÉES (RailShell / RailSection /
    * RailCityList — mutualisées avec la vue Sources/Couverture) :
-   *   1. Section « Signaux » (ouverte par défaut) :
-   *      - Toggle « Zonage uniquement » (DÉFAUT ON) — filtre PRIMAIRE
-   *      - Toggle « Signaux précoces » (DÉFAUT OFF) — axe ANTICIPATION
-   *      - Toggle « Résidentiel pertinent » (DÉFAUT OFF) — axe PERTINENCE
-   *        (masque le bruit non résidentiel ; garde résidentiel + indéterminé)
-   *      Les trois toggles sont COMBINABLES ; la base de comptage est
-   *      l'intersection des filtres actifs.
+   *   1. Section « Signaux » : mode A historique ou transition non finale.
    *   2. Section « Villes » : recherche + liste PLATE sélectionnable → flyTo.
    *      Cliquer une ville la sélectionne (highlight + ville active) ; ses
    *      signaux s'affichent à DROITE (SignauxSelPanel, bucket « Signaux »),
@@ -27,7 +21,14 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/search bespoke.
    */
-  import { Badge, Checkbox } from "@sentropic/design-system-svelte";
+  import { Badge, Radio } from "@sentropic/design-system-svelte";
+  import {
+    countForVivierCity,
+    modeFromSubsetKey,
+    subsetKeyForMode,
+    type ValidatedVivierProjections,
+    type VivierViewMode,
+  } from "$lib/signals/vivier-view-mode.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -39,13 +40,15 @@
   export let entries: CityMapEntry[] = [];
   /** Ville actuellement sélectionnée. */
   export let selectedSlug: string | null = null;
+  /** Node-validated detail projections are authoritative for the selected city. */
+  export let selectedVivierProjections: ValidatedVivierProjections | null = null;
   /** Chargement de la liste principale. */
   export let loading = false;
   /** Signal data failed to load; avoid rendering a fake zero state. */
   export let dataUnavailable = false;
 
   /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
-  export let initialSubsetKey = "z|p";
+  export let initialSubsetKey = "z|m|p";
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
@@ -65,91 +68,41 @@
     return "error";
   }
 
-  // ── Toggles — filtres combinables TOP-DOWN ──────────────────────────────────
-  /**
-   * Zonage uniquement (DÉFAUT ON) :
-   *   filtre sur la clé "z" de subsetCounts
-   */
-  let zonageOnly = initialSubsetKey.includes("z");
-
-  /**
-   * Signaux précoces (DÉFAUT OFF — axe ANTICIPATION) :
-   *   filtre sur la clé "p" de subsetCounts
-   */
-  let precoceOnly = initialSubsetKey.includes("p");
-
-  /**
-   * Résidentiel pertinent (DÉFAUT OFF — axe PERTINENCE) :
-   *   filtre sur la clé "r" de subsetCounts. Masque le bruit EXPLICITEMENT non
-   *   résidentiel (industriel / commercial / camping / environnemental) ; les
-   *   signaux résidentiels ET indéterminés restent visibles (anti-faux-négatif).
-   */
-  let residentielOnly = initialSubsetKey.includes("r");
-
-  /**
-   * RESYNC au reload/navigation (bug #3) : `initialSubsetKey` est piloté par le
-   * parent qui le recalcule au onMount (URL > localStorage > défaut). Les trois
-   * `let` ci-dessus n'étant initialisés QU'UNE fois, ils restaient figés sur le
-   * défaut quand le parent restaurait un filtre depuis l'URL → cases désyncs.
-   * Ce bloc applique toute nouvelle `initialSubsetKey` aux cases (sans boucle :
-   * il ne propage rien, il ne fait que refléter la source de vérité du parent).
-   */
-  let appliedInitialKey = initialSubsetKey;
-  $: if (initialSubsetKey !== appliedInitialKey) {
-    appliedInitialKey = initialSubsetKey;
-    zonageOnly = initialSubsetKey.includes("z");
-    precoceOnly = initialSubsetKey.includes("p");
-    residentielOnly = initialSubsetKey.includes("r");
+  let activeMode: VivierViewMode = modeFromSubsetKey(initialSubsetKey);
+  let lastInitialKey = initialSubsetKey;
+  $: if (initialSubsetKey !== lastInitialKey) {
+    lastInitialKey = initialSubsetKey;
+    activeMode = modeFromSubsetKey(initialSubsetKey);
   }
 
-  /** Construit la clé subsetCounts à partir des axes sélectionnables. */
-  function buildKey(z: boolean, p: boolean, r: boolean): string {
-    const parts: string[] = [];
-    if (z) parts.push("z");
-    if (p) parts.push("p");
-    if (r) parts.push("r");
-    return parts.join("|");
-  }
+  $: activeKey = subsetKeyForMode(activeMode);
 
-  /**
-   * Clé active RÉACTIVE : dépend DIRECTEMENT des 3 toggles → Svelte la
-   * recalcule à chaque toggle. (Le bug venait d'une fonction qui lisait les
-   * toggles « cachés » dans son corps → Svelte ne voyait aucune dépendance,
-   * donc les $: total/villes/tri/filtre ne re-tournaient jamais.)
-   */
-  $: activeKey = buildKey(zonageOnly, precoceOnly, residentielOnly);
-
-  function emitFilterChange(): void {
-    onFilterChange(buildKey(zonageOnly, precoceOnly, residentielOnly));
-  }
-
-  function toggleZonageOnly(): void {
-    zonageOnly = !zonageOnly;
-    emitFilterChange();
-  }
-
-  function togglePrecoceOnly(): void {
-    precoceOnly = !precoceOnly;
-    emitFilterChange();
-  }
-
-  function toggleResidentielOnly(): void {
-    residentielOnly = !residentielOnly;
-    emitFilterChange();
+  function selectMode(mode: VivierViewMode): void {
+    activeMode = mode;
+    onFilterChange(subsetKeyForMode(mode));
   }
 
   // NOTE (bug #3) : on ne propage PLUS via un `$: onFilterChange(activeKey)`.
   // Ce bloc réactif tirait au MONTAGE avec la clé par défaut et écrasait le
   // filtre que le parent venait de restaurer depuis l'URL (perte au reload).
-  // La propagation vers le parent vient désormais UNIQUEMENT d'un toggle
-  // utilisateur explicite (toggleZonageOnly / togglePrecoceOnly /
-  // toggleResidentielOnly → emitFilterChange), qui est la seule source
-  // légitime d'écriture URL+LS.
+  // La propagation vient uniquement d'une sélection de mode explicite.
 
   // ── Compteur actif par ville = subsetCounts[clé] ──────────────────────────
   /** Helper non-réactif : compte d'une ville pour une clé subsetCounts donnée. */
-  function countFor(entry: CityMapEntry, key: string): number {
-    return entry.subsetCounts[key] ?? 0;
+  function countFor(
+    entry: CityMapEntry,
+    key: string,
+    currentSelectedSlug: string | null,
+    projections: ValidatedVivierProjections | null,
+    unavailable: boolean,
+  ): number | null {
+    if (unavailable) return null;
+    return countForVivierCity(
+      entry,
+      currentSelectedSlug,
+      projections,
+      modeFromSubsetKey(key),
+    );
   }
 
   // ── Liste de villes (la recherche + le plafond vivent dans RailCityList) ──
@@ -159,20 +112,31 @@
     .filter((e) => {
       const isSelected =
         selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return countFor(e, activeKey) > 0 || isSelected;
+      return (countFor(e, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? 0) > 0 || isSelected;
     })
-    .sort((a, b) => countFor(b, activeKey) - countFor(a, activeKey));
+    .sort((a, b) =>
+      (countFor(b, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? -1) -
+      (countFor(a, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? -1)
+    );
 
   /** Projection générique consommée par la liste partagée RailCityList. */
-  function toRailItem(entry: CityMapEntry, key: string): RailCityItem {
-    const activeCount = countFor(entry, key);
+  function toRailItem(
+    entry: CityMapEntry,
+    key: string,
+    currentSelectedSlug: string | null,
+    projections: ValidatedVivierProjections | null,
+    unavailable: boolean,
+  ): RailCityItem {
+    const activeCount = countFor(entry, key, currentSelectedSlug, projections, unavailable);
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
       sublabel: entry.municipality.mrc ?? null,
-      dotTone: signalTone(activeCount),
+      dotTone: signalTone(activeCount ?? 0),
       badge:
-        activeCount > 0
+        activeCount === null
+          ? { label: "n/d", tone: "neutral" }
+          : activeCount > 0
           ? {
               label: String(activeCount),
               tone: "warning",
@@ -182,7 +146,9 @@
     };
   }
 
-  $: railItems = sortedEntries.map((entry) => toRailItem(entry, activeKey));
+  $: railItems = sortedEntries.map((entry) =>
+    toRailItem(entry, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable)
+  );
 
   function handleSelectSlug(slug: string): void {
     const entry = entries.find((e) => e.municipality.slug === slug);
@@ -190,16 +156,31 @@
   }
 
   // ── Compteurs globaux (réactifs : référencent activeKey directement) ──────
-  $: totalSignals = entries.reduce((s, e) => s + countFor(e, activeKey), 0);
-  $: citiesWithSignals = entries.filter((e) => countFor(e, activeKey) > 0).length;
+  function totalFor(
+    key: string,
+    currentEntries: CityMapEntry[],
+    currentSelectedSlug: string | null,
+    projections: ValidatedVivierProjections | null,
+    unavailable: boolean,
+  ): number | null {
+    if (unavailable) return null;
+    const counts = currentEntries.map((entry) =>
+      countFor(entry, key, currentSelectedSlug, projections, unavailable)
+    );
+    return counts.some((count) => count === null)
+      ? null
+      : (counts as number[]).reduce((sum, count) => sum + count, 0);
+  }
 
-  // ── Badges « funnel » RÉACTIFS : compte si on ajoute ce toggle à l'actif ──
-  $: badgeZonage = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(true, precoceOnly, residentielOnly)), 0);
-  $: badgePrecoce = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, true, residentielOnly)), 0);
-  $: badgeResidentiel = entries.reduce(
-    (s, e) => s + countFor(e, buildKey(zonageOnly, precoceOnly, true)), 0);
+  $: totalSignals = totalFor(activeKey, entries, selectedSlug, selectedVivierProjections, dataUnavailable);
+  $: citiesWithSignals = totalSignals === null
+    ? null
+    : entries.filter((e) =>
+      (countFor(e, activeKey, selectedSlug, selectedVivierProjections, dataUnavailable) ?? 0) > 0
+    ).length;
+
+  $: countA = totalFor("z|m|p", entries, selectedSlug, selectedVivierProjections, dataUnavailable);
+  $: countTransition = totalFor("z|p", entries, selectedSlug, selectedVivierProjections, dataUnavailable);
 </script>
 
 <RailShell title="Signaux · Villes" {loading} {onRefresh}>
@@ -207,7 +188,7 @@
   <svelte:fragment slot="count">
     {#if loading}
       <span class="rail-muted">Chargement…</span>
-    {:else if dataUnavailable}
+    {:else if dataUnavailable || totalSignals === null || citiesWithSignals === null}
       <span class="font-semibold text-slate-700">Données des signaux indisponibles</span>
     {:else}
       <span class="rail-count-strong">{totalSignals}</span>
@@ -216,47 +197,17 @@
     {/if}
   </svelte:fragment>
 
-  <!-- ── Section 1 : Signaux — filtres combinables ───────────────────────── -->
+  <!-- ── Section 1 : projection A / transition explicite ─────────────────── -->
   <RailSection label="Signaux">
-    <!-- Toggle « Zonage uniquement » — filtre PRIMAIRE, activé par défaut -->
-    <!-- Checkbox DS : label + description + trailing Badge tonal -->
-    <div class="axis-toggle-row">
-      <Checkbox
-        label="Zonage uniquement"
-        checked={zonageOnly}
-        onchange={toggleZonageOnly}
-      />
-      {#if !loading}
-        <Badge tone="info">{badgeZonage}</Badge>
-      {/if}
-    </div>
-
-    <!-- Toggle « Signaux précoces » — axe ANTICIPATION (OFF par défaut) -->
-    <div class="axis-toggle-row">
-      <Checkbox
-        label="Signaux précoces"
-        helperText="avis de motion / 1er projet"
-        checked={precoceOnly}
-        onchange={togglePrecoceOnly}
-      />
-      {#if !loading}
-        <Badge tone="success">{badgePrecoce}</Badge>
-      {/if}
-    </div>
-
-    <!-- Toggle « Résidentiel pertinent » — axe PERTINENCE (OFF par défaut) :
-         masque le bruit non résidentiel (industriel / commercial / camping /
-         environnemental) ; garde résidentiel + indéterminé. -->
-    <div class="axis-toggle-row axis-toggle-row--last">
-      <Checkbox
-        label="Résidentiel pertinent"
-        helperText="masque le bruit non résidentiel"
-        checked={residentielOnly}
-        onchange={toggleResidentielOnly}
-      />
-      {#if !loading}
-        <Badge tone="info">{badgeResidentiel}</Badge>
-      {/if}
+    <div role="radiogroup" aria-label="Mode du vivier">
+      <div class="axis-toggle-row">
+        <Radio name="vivier-mode" label="Vivier A · référence" helperText="zonage + multifamilial 4+ + précoce" value="a" checked={activeMode === "a"} onchange={() => selectMode("a")} />
+        {#if !loading}<Badge tone="info">{countA ?? "n/d"}</Badge>{/if}
+      </div>
+      <div class="axis-toggle-row axis-toggle-row--last">
+        <Radio name="vivier-mode" label="Transition vers B" helperText="non final · zonage + précoce" value="transition" checked={activeMode === "transition"} onchange={() => selectMode("transition")} />
+        {#if !loading}<Badge tone="warning">{countTransition ?? "n/d"}</Badge>{/if}
+      </div>
     </div>
   </RailSection>
 
@@ -278,7 +229,7 @@
 </RailShell>
 
 <style>
-  /* ── Toggles axes (Zonage / Anticipation / Pertinence) ── */
+  /* ── Modes A / transition ── */
   .axis-toggle-row {
     display: flex;
     align-items: center;
@@ -292,15 +243,15 @@
     margin-bottom: 0.25rem;
   }
 
-  /* Checkbox DS prend l'espace restant ; le badge reste en trailing flex-shrink:0 */
+  /* Radio DS takes the remaining space; the badge stays trailing. */
   .axis-toggle-row :global(.st-choice) {
     flex: 1;
     min-width: 0;
-    /* Bug 3 : réduire la taille du label via le token DS Checkbox */
+    /* Compact rail typography through the DS choice token. */
     --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
 
-  /* Bug 3 : réduire la taille du helper text (sous-libellé) des filtres */
+  /* Compact helper text. */
   .axis-toggle-row :global(.st-choice__help) {
     font-size: var(--rail-fs-small, 0.75rem);
   }

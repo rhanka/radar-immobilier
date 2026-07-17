@@ -714,9 +714,11 @@
       {/if}
       <div class="sel-pill-row">
         <!-- #6 : "–" pendant le chargement du détail ; badges filtré/total (#improvement) -->
-        <Badge tone={detailLoading ? "neutral" : (signalIsFiltered ? filteredSignalCount : totalSignalCount) > 0 ? "warning" : "neutral"}>
+        <Badge tone={detailLoading || detailError ? "neutral" : (signalIsFiltered ? filteredSignalCount : totalSignalCount) > 0 ? "warning" : "neutral"}>
           {#if detailLoading}
             –
+          {:else if detailError}
+            n/d
           {:else if signalIsFiltered}
             {filteredSignalCount}/{totalSignalCount} signal{totalSignalCount !== 1 ? "aux" : ""}
           {:else}
@@ -777,7 +779,7 @@
           <span class="sel-bucket-name">Signaux</span>
           <!-- #6 : "–" pendant le chargement ; filtré/total si filtre actif -->
           <span class="rail-row-count">
-            {#if detailLoading}–{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
+            {#if detailLoading}–{:else if detailError}n/d{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
           </span>
         </summary>
         <div class="sel-entities" bind:this={entityListEl}>
@@ -786,6 +788,8 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement des signaux…</span>
             </div>
+          {:else if detailError}
+            <p class="sel-empty">Projection des signaux indisponible.</p>
           {:else if filteredDetailNodes.length === 0}
             <p class="sel-empty">Aucun signal indexé pour cette ville.</p>
           {:else}
