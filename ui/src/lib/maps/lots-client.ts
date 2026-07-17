@@ -128,6 +128,15 @@ export interface LotProperties {
     reglementMillesime?: number | null;
     reglementPageSource?: string | null;
     reglementUrl?: string | null;
+    /**
+     * Usage dominant RÉEL de la zone servi par geo (`qc-zonage-<slug>`, mesuré
+     * live sur 222 villes) — passthrough d'affichage, null quand la source ne
+     * le porte pas (jamais une classification dérivée). La fiche l'affiche
+     * « Usage dominant : {valeur} » (+ sa source quand servie).
+     */
+    usageDominant?: string | null;
+    /** Source du usage dominant (ex. « zone-nomenclature ») quand servie. */
+    usageDominantSource?: string | null;
   } | null;
   /** Raw zone code/group from an OGC lot collection when present. */
   zoneCode?: string | null;
@@ -634,6 +643,20 @@ function normalizeZone(
     fallback.reglementUrl,
     fallback.reglement_url,
   ]);
+  // Usage dominant servi par geo (`qc-zonage-<slug>`) — passthrough d'affichage,
+  // null quand absent (jamais une classification dérivée).
+  const usageDominant = firstString([
+    record.usageDominant,
+    record.usage_dominant,
+    fallback.usageDominant,
+    fallback.usage_dominant,
+  ]);
+  const usageDominantSource = firstString([
+    record.usageDominantSource,
+    record.usage_dominant_source,
+    fallback.usageDominantSource,
+    fallback.usage_dominant_source,
+  ]);
 
   if (
     !kind &&
@@ -644,7 +667,9 @@ function normalizeZone(
     !reglementNumero &&
     reglementMillesime === null &&
     !reglementPageSource &&
-    !reglementUrl
+    !reglementUrl &&
+    !usageDominant &&
+    !usageDominantSource
   )
     return undefined;
   return {
@@ -657,6 +682,8 @@ function normalizeZone(
     ...(reglementMillesime !== null ? { reglementMillesime } : {}),
     ...(reglementPageSource !== null ? { reglementPageSource } : {}),
     ...(reglementUrl !== null ? { reglementUrl } : {}),
+    ...(usageDominant !== null ? { usageDominant } : {}),
+    ...(usageDominantSource !== null ? { usageDominantSource } : {}),
   };
 }
 
