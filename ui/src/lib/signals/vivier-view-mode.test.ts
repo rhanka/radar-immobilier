@@ -2,13 +2,19 @@ import { describe, expect, it } from "vitest";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   A_SUBSET_KEY,
+  aFlagsFromKey,
+  B_PRECOCE_SUBSET_KEY,
   B_SUBSET_KEY,
   canOpenProjectedSignal,
   clearVivierCityTransientState,
   countForVivierCity,
+  DEFAULT_A_FLAGS,
   initialVivierSubsetKey,
+  keyForVivierB,
+  keyFromAFlags,
   reconcileVivierRouteSubset,
   modeFromSubsetKey,
+  projectNodesForVivierKey,
   projectNodesForVivierMode,
   reconcileVivierSelection,
   retainProjectedSignalId,
@@ -29,14 +35,15 @@ function classification(
   residentiel: TriState,
   exclusionReason: string | null = null,
   instrument = "rezonage",
+  etape = "avis_motion",
 ) {
   return {
     zonage: { valeur: zonage, source: "test", confiance: 0.95 },
     residentiel: { valeur: residentiel, source: "test", confiance: 0.9 },
     effet_densifiant: "inconnu",
     instrument,
-    etape: "avis_motion",
-    etapes_historique: ["avis_motion"],
+    etape,
+    etapes_historique: [etape],
     exclusion_reason: exclusionReason,
     provenance: { extrait: "" },
     confiance: 0.9,
@@ -78,23 +85,46 @@ const SUTTON_AUTHORITY = {
 };
 
 describe("Vivier A / B view contract", () => {
-  it("keeps A as the default and only leaves it on the explicit B key", () => {
+  it("keeps A as the default and only leaves it on an explicit B key", () => {
     expect(modeFromSubsetKey(null)).toBe("a");
     expect(modeFromSubsetKey("")).toBe("a");
     expect(modeFromSubsetKey("z|m|p")).toBe("a");
     expect(modeFromSubsetKey("z")).toBe("a");
+    expect(modeFromSubsetKey("z|p")).toBe("a");
     expect(modeFromSubsetKey("vivier-v2")).toBe("b");
+    // La restriction précoce de B reste B (jeton opaque dérivé).
+    expect(modeFromSubsetKey("vivier-v2|p")).toBe("b");
     expect(A_SUBSET_KEY).toBe("z|m|p");
     expect(B_SUBSET_KEY).toBe("vivier-v2");
+    expect(B_PRECOCE_SUBSET_KEY).toBe("vivier-v2|p");
     expect(subsetKeyForMode("a")).toBe("z|m|p");
     expect(subsetKeyForMode("b")).toBe("vivier-v2");
   });
 
-  it("resolves the retired z|p transition key back to A", () => {
-    // z|p était la régression de prod (#375) : plus aucune clé ne l'active.
+  it("composes the A key from combinable axes (default z|m|p)", () => {
+    expect(DEFAULT_A_FLAGS).toEqual({ z: true, m: true, p: true });
+    expect(keyFromAFlags(DEFAULT_A_FLAGS)).toBe("z|m|p");
+    // Décocher multi 4+ recompose la clé (retour du mécanisme d'avant #376).
+    expect(keyFromAFlags({ z: true, m: false, p: true })).toBe("z|p");
+    expect(keyFromAFlags({ z: true, m: true, p: false })).toBe("z|m");
+    expect(keyFromAFlags({ z: true, m: false, p: false })).toBe("z");
+    // Tout décocher → clé vide (tous les signaux).
+    expect(keyFromAFlags({ z: false, m: false, p: false })).toBe("");
+    // Round-trip clé → axes → clé.
+    for (const key of ["z|m|p", "z|p", "z|m", "m|p", "z", "m", "p", ""]) {
+      expect(keyFromAFlags(aFlagsFromKey(key))).toBe(key);
+    }
+  });
+
+  it("maps the B precoce axis to its opaque key", () => {
+    expect(keyForVivierB(false)).toBe("vivier-v2");
+    expect(keyForVivierB(true)).toBe("vivier-v2|p");
+  });
+
+  it("resolves the retired z|p transition key to mode A", () => {
+    // z|p était la régression de prod (#375) : elle reste A, jamais B.
     for (const legacy of ["z|p", "p|z", "z|m", "m|p", "transition"]) {
       expect(modeFromSubsetKey(legacy)).toBe("a");
-      expect(subsetKeyForMode(modeFromSubsetKey(legacy))).toBe(A_SUBSET_KEY);
     }
   });
 
@@ -111,18 +141,56 @@ describe("Vivier A / B view contract", () => {
     expect(b.count).toBe(3);
   });
 
+  it("projects A sub-selections by relaxing the composed axes", () => {
+    // z|m|p (défaut) = la projection EXACTE validée par l'autorité serveur.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "z|m|p").nodes.map((n) => n.id))
+      .toEqual(["sutton-a"]);
+    // Décocher multi 4+ → z|p → tous les z ∩ p (sémantique superset de subsetCounts).
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "z|p").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t"]);
+    // z seul → tout signal zonage.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "z").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    // Clé vide → aucun filtre → tous les signaux.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "").count).toBe(5);
+  });
+
+  it("restricts B to precoce stages when the axis is checked", () => {
+    // Un vivier qualifié mêlant étapes précoces et tardives.
+    const nodes = [
+      node("q-avis", true, false, true, classification("oui", "oui", null, "rezonage", "avis_motion")),
+      node("q-projet", true, false, true, classification("oui", "oui", null, "rezonage", "projet_reglement")),
+      node("q-adoption", true, false, false, classification("oui", "oui", null, "rezonage", "adoption")),
+    ];
+    // vivier-v2 = tout le qualifié.
+    expect(projectNodesForVivierKey(nodes, null, "vivier-v2").nodes.map((n) => n.id))
+      .toEqual(["q-avis", "q-projet", "q-adoption"]);
+    // vivier-v2|p = qualifié ∩ précoce (avis_motion / projet_reglement).
+    expect(projectNodesForVivierKey(nodes, null, "vivier-v2|p").nodes.map((n) => n.id))
+      .toEqual(["q-avis", "q-projet"]);
+  });
+
   it("marks B unavailable rather than inventing a client classification", () => {
     const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
-    expect(projectNodesForVivierMode([unclassified], SUTTON_AUTHORITY, "b")).toEqual({
+    expect(projectNodesForVivierKey([unclassified], SUTTON_AUTHORITY, "vivier-v2")).toEqual({
+      available: false,
+      count: null,
+      nodes: [],
+    });
+    expect(projectNodesForVivierKey([unclassified], SUTTON_AUTHORITY, "vivier-v2|p")).toEqual({
       available: false,
       count: null,
       nodes: [],
     });
   });
 
-  it("marks the projection unavailable instead of using a client fallback", () => {
+  it("marks a composed A projection unavailable instead of using a client fallback", () => {
     const incompatible = { ...SUTTON_RAW[0]!, legacySubset: undefined };
-    expect(projectNodesForVivierMode([incompatible], SUTTON_AUTHORITY, "a")).toEqual({ available: false, count: null, nodes: [] });
+    expect(projectNodesForVivierKey([incompatible], SUTTON_AUTHORITY, "z|m|p"))
+      .toEqual({ available: false, count: null, nodes: [] });
+    // Une sous-sélection sur un nœud sans flags serveur reste indisponible.
+    expect(projectNodesForVivierKey([incompatible], SUTTON_AUTHORITY, "z|p"))
+      .toEqual({ available: false, count: null, nodes: [] });
   });
 
   it("fails closed without throwing for null or partial flags", () => {
@@ -145,9 +213,9 @@ describe("Vivier A / B view contract", () => {
     expect(validated.b.count).toBe(3);
   });
 
-  it("reads A from subsetCounts and B from the server's vivierV2Counts", () => {
+  it("reads A from subsetCounts (by composed key) and B from vivierV2Counts", () => {
     const entry = {
-      subsetCounts: { "z|m|p": 3, "z|p": 88 },
+      subsetCounts: { "z|m|p": 3, "z|p": 88, z: 120, "": 200 },
       vivierV2Counts: {
         qualified: 12,
         residentialUnknown: 40,
@@ -158,11 +226,11 @@ describe("Vivier A / B view contract", () => {
           derogation_hors_sujet: 0,
         },
         stageCounts: {
-          avis_motion: 12,
-          projet_reglement: 0,
-          consultation_publique: 0,
+          avis_motion: 7,
+          projet_reglement: 2,
+          consultation_publique: 1,
           second_projet: 0,
-          adoption: 0,
+          adoption: 2,
           entree_vigueur: 0,
           inconnu: 0,
         },
@@ -170,10 +238,19 @@ describe("Vivier A / B view contract", () => {
       },
     };
 
-    expect(countForVivierCity(entry, "a")).toBe(3);
-    expect(countForVivierCity(entry, "b")).toBe(12);
+    // A lit la clé composée directement (défaut et sous-sélections).
+    expect(countForVivierCity(entry, "z|m|p")).toBe(3);
+    expect(countForVivierCity(entry, "z|p")).toBe(88);
+    expect(countForVivierCity(entry, "z")).toBe(120);
+    expect(countForVivierCity(entry, "")).toBe(200);
+    // Une clé A absente des comptes bulk n'invente rien → 0 (la ville ne saute pas).
+    expect(countForVivierCity(entry, "m|p")).toBe(0);
+    // B = qualified ; B précoce = somme des étapes précoces de stageCounts.
+    expect(countForVivierCity(entry, "vivier-v2")).toBe(12);
+    expect(countForVivierCity(entry, "vivier-v2|p")).toBe(9);
     // Une ville sans comptes v2 n'invente pas un vivier.
-    expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "b")).toBe(0);
+    expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "vivier-v2")).toBe(0);
+    expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "vivier-v2|p")).toBe(0);
 
     // Les trois compteurs restent séparés : aucun total ne les fond.
     expect(sumVivierBCounts([entry, entry])).toEqual({
