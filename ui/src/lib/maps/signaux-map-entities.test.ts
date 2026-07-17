@@ -26,6 +26,7 @@ function city(slug = CITY_SLUG, signalCount6m = 1): CityMapEntry {
     } as CityMapEntry["municipality"],
     signalCount6m,
     subsetCounts: { "": signalCount6m },
+    vivierV2Counts: null,
   };
 }
 

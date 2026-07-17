@@ -119,14 +119,18 @@
     countForVivierCity,
     initialVivierSubsetKey,
     modeFromSubsetKey,
-    projectNodesForVivierMode,
+    projectNodesForVivierKey,
     reconcileVivierRouteSubset,
     reconcileVivierSelection,
     retainProjectedSignalId,
     subsetKeyForMode,
-    validateVivierProjectionAuthority,
     vivierRouteKey,
   } from "$lib/signals/vivier-view-mode.js";
+  import {
+    applyVivierBExclusions,
+    DEFAULT_VIVIER_B_EXCLUSIONS,
+    type VivierBExclusions,
+  } from "$lib/signals/vivier-b-display-filter.js";
   import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
@@ -234,31 +238,63 @@
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
-  // ── Projection globale A / transition ────────────────────────────────────
+  // ── Projection globale A / B ─────────────────────────────────────────────
   const FILTER_DEFAULT: string = A_SUBSET_KEY;
   const FILTER_LS_KEY = "signaux-filter-subset";
   let activeSubsetKey: string = FILTER_DEFAULT;
 
+  /**
+   * Exclusions d'AFFICHAGE de la vue B. Elles ne touchent ni la classification
+   * serveur ni les compteurs : elles ne font que masquer.
+   */
+  let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
+
+  /** Les nœuds réellement affichés : projection de la clé LIVE, puis exclusions B. */
+  function visibleNodesFor(
+    nodes: GraphSignalNode[],
+    authority: unknown,
+    subsetKey: string,
+    exclusions: VivierBExclusions,
+  ): GraphSignalNode[] {
+    const mode = modeFromSubsetKey(subsetKey);
+    const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
+    return mode === "b" ? applyVivierBExclusions(projected, exclusions) : projected;
+  }
+
   function applyActiveSubsetKey(subsetKey: string): void {
-    const normalized = subsetKeyForMode(modeFromSubsetKey(subsetKey));
-    activeSubsetKey = normalized;
-    const projection = projectNodesForVivierMode(
-      detailNodes,
-      detailLegacyProjection,
-      modeFromSubsetKey(normalized),
+    // Clé LIVE composée conservée TELLE QUELLE (axes de A / précoce de B) : elle
+    // pilote carte + détail. La normalisation en clé de mode n'a lieu qu'à la
+    // PERSISTANCE (handleFilterChange / écritures d'URL), jamais sur l'état vif.
+    activeSubsetKey = subsetKey;
+    reconcileToVisibleNodes();
+  }
+
+  /** Un signal masqué ne doit rester ni sélectionné, ni survolé, ni ouvert. */
+  function reconcileToVisibleNodes(): void {
+    const allowedIds = new Set(
+      visibleNodesFor(
+        detailNodes,
+        detailLegacyProjection,
+        activeSubsetKey,
+        vivierBExclusions,
+      ).map((node) => node.id),
     );
-    const allowedIds = new Set(projection.nodes.map((node) => node.id));
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
     const evidenceId = retainProjectedSignalId(activeEvidence?.nodeId ?? null, allowedIds);
     if (activeEvidence && evidenceId === null) activeEvidence = null;
     hoveredEvidenceSignalId = retainProjectedSignalId(hoveredEvidenceSignalId, allowedIds);
   }
 
+  function handleExclusionsChange(next: VivierBExclusions): void {
+    vivierBExclusions = next;
+    reconcileToVisibleNodes();
+  }
+
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
-   * Priorité : URL > localStorage > A. Seul `z|p` sélectionne la transition.
+   * Priorité : URL > localStorage > A. Seule la clé B explicite sélectionne B.
    * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
-   * Tout état vide, ancien ou hybride revient à A sans coercer A vers T.
+   * Tout état vide, ancien ou hybride (dont l'ancien `z|p`) revient à A.
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
     const stored = typeof localStorage === "undefined"
@@ -270,17 +306,20 @@
   function handleFilterChange(
     subsetKey: string,
   ): void {
-    const normalizedSubsetKey = subsetKeyForMode(modeFromSubsetKey(subsetKey));
-    applyActiveSubsetKey(normalizedSubsetKey);
-    // Persiste le filtre dans localStorage
+    // La clé LIVE (composée) pilote carte + détail…
+    applyActiveSubsetKey(subsetKey);
+    // …mais SEULE la clé de MODE est persistée (défaut du tab). La sous-sélection
+    // vive (axes A décochés, précoce B) reste une lentille de session : au reload
+    // le tab repart de son défaut (défaut A = z|m|p ; `z|p` jamais collant).
+    const persistKey = subsetKeyForMode(modeFromSubsetKey(subsetKey));
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem(FILTER_LS_KEY, normalizedSubsetKey);
+      localStorage.setItem(FILTER_LS_KEY, persistKey);
     }
     // Persiste le filtre dans l'URL (remplace sans ajouter à l'historique)
     const currentRoute = geoRoute;
     if (currentRoute) {
-      const subsetValues = normalizedSubsetKey ? normalizedSubsetKey.split("|") : [];
-      const newFilters: Record<string, string[]> = subsetValues.length > 0 ? { subset: subsetValues } : {};
+      const subsetValues = persistKey.split("|");
+      const newFilters: Record<string, string[]> = { subset: subsetValues };
       const newState = { ...currentRoute.state, filters: newFilters };
       if (currentRoute.level === "zone") {
         navigateToGeoRoute(
@@ -390,12 +429,30 @@
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
   $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
-  $: validatedDetailProjections = validateVivierProjectionAuthority(
+  /**
+   * Clé de MODE dérivée (z|m|p / vivier-v2) : c'est ELLE qu'on persiste et qu'on
+   * renvoie au rail, jamais la clé LIVE composée — sinon `z|p` redeviendrait
+   * collant. Le rail en re-dérive ses axes (idempotent).
+   */
+  $: persistedSubsetKey = subsetKeyForMode(activeViewMode);
+  /**
+   * Détail projeté selon la clé LIVE composée : A applique les axes cochés,
+   * B restreint aux précoces si l'axe est coché. `z|m|p` reste la projection
+   * EXACTE validée par l'autorité serveur (aucune régression du vivier).
+   */
+  $: detailProjection = projectNodesForVivierKey(
     detailNodes,
     detailLegacyProjection,
+    activeSubsetKey,
   );
-  $: detailProjection = validatedDetailProjections[activeViewMode];
-  $: filteredDetailNodes = detailProjection.nodes;
+  /**
+   * La liste affichée = la projection de la clé LIVE, puis (en B seulement) les
+   * exclusions d'affichage. Le retrait du garde-fou `m` de A est compensé par
+   * la sous-sélection d'axes, sans jamais reclasser un signal.
+   */
+  $: filteredDetailNodes = activeViewMode === "b"
+    ? applyVivierBExclusions(detailProjection.nodes, vivierBExclusions)
+    : detailProjection.nodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -404,9 +461,10 @@
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
-   * Both fixed projections restrict the raw signal set.
+   * Les deux vues (A comme B) restreignent le jeu brut de signaux.
+   * (Ne pas tester `includes("z")` : la clé de B n'est pas un jeu de flags.)
    */
-  $: filterActive = activeSubsetKey.includes("z");
+  $: filterActive = activeViewMode === "a" || activeViewMode === "b";
   /** True si au moins un lot affiché porte une projection de signal (#4). */
   $: hasProjectedLot = displayedLots.features.some(
     (lot) => (lot.properties.signalProjection ?? "none") !== "none",
@@ -517,7 +575,7 @@
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = countForVivierCity(e, modeFromSubsetKey(subsetKey));
+      const count = countForVivierCity(e, subsetKey);
       expr.push(e.municipality.slug, signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
@@ -709,14 +767,14 @@
     activeDocument = transients.activeDocument;
     hoveredEvidenceSignalId = transients.hoveredEvidenceSignalId;
     if (syncUrl) {
-      // Conserver le filtre actif dans la nouvelle route ville
-      const subsetValues = activeSubsetKey ? activeSubsetKey.split("|") : [];
+      // Conserver le MODE actif (A/B) dans la nouvelle route ville. On persiste
+      // la clé de mode, pas la sous-sélection LIVE (défaut A = z|m|p au reload).
       navigateToGeoRoute({
         level: "city",
         citySlug: entry.municipality.slug,
         state: {
           mode: geoRoute?.state.mode ?? "signal",
-          filters: subsetValues.length > 0 ? { subset: subsetValues } : {},
+          filters: { subset: persistedSubsetKey.split("|") },
         },
       });
     }
@@ -843,7 +901,7 @@
         current: activeGeoLevel as GeoLevel,
         hasSelectedCity: !!selectedCity,
         mode: geoRoute?.state.mode,
-        subsetKey: activeSubsetKey,
+        subsetKey: persistedSubsetKey,
       });
       if (nav) navigateToGeoRoute(nav);
       // Filet local immédiat (au cas où la route n'aurait pas changé d'identité,
@@ -1091,7 +1149,7 @@
           citySlug: geoRoute.citySlug,
           state: {
             mode: geoRoute.state.mode ?? "signal",
-            filters: { subset: activeSubsetKey.split("|") },
+            filters: { subset: persistedSubsetKey.split("|") },
           },
         });
       }
@@ -1108,7 +1166,7 @@
       zoneKey,
       state: {
         mode: geoRoute?.state.mode ?? "signal",
-        filters: { subset: activeSubsetKey.split("|") },
+        filters: { subset: persistedSubsetKey.split("|") },
       },
     });
   }
@@ -1504,9 +1562,11 @@
       {loading}
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
+      exclusions={vivierBExclusions}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
+      onExclusionsChange={handleExclusionsChange}
     />
   </svelte:fragment>
 
