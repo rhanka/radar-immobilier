@@ -21,13 +21,19 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/search bespoke.
    */
-  import { Badge, Radio } from "@sentropic/design-system-svelte";
+  import { Badge, Checkbox, Radio } from "@sentropic/design-system-svelte";
   import {
+    A_SUBSET_KEY,
     countForVivierCity,
     modeFromSubsetKey,
     subsetKeyForMode,
+    sumVivierBCounts,
     type VivierViewMode,
   } from "$lib/signals/vivier-view-mode.js";
+  import {
+    DEFAULT_VIVIER_B_EXCLUSIONS,
+    type VivierBExclusions,
+  } from "$lib/signals/vivier-b-display-filter.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -47,12 +53,22 @@
   /** Clé de filtre initiale (restaurée depuis l'URL au rechargement de page). */
   export let initialSubsetKey = "z|m|p";
 
+  /** Exclusions d'affichage de la vue B (cochées par défaut, décochables). */
+  export let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
+
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
   export let onSelectCity: (entry: CityMapEntry) => void = () => {};
   /** Appelé pour actualiser les données. */
   export let onRefresh: () => void = () => {};
   export let onFilterChange: (subsetKey: string) => void = () => {};
+  /** Appelé quand une exclusion d'affichage de B est cochée/décochée. */
+  export let onExclusionsChange: (next: VivierBExclusions) => void = () => {};
+
+  function setExclusion(patch: Partial<VivierBExclusions>): void {
+    exclusions = { ...exclusions, ...patch };
+    onExclusionsChange(exclusions);
+  }
 
   /**
    * Mappe le compte de signaux actifs vers un tone StatusDot DS.
@@ -166,8 +182,15 @@
     ? null
     : entries.filter((e) => (countFor(e, activeKey, dataUnavailable) ?? 0) > 0).length;
 
-  $: countA = totalFor("z|m|p", entries, dataUnavailable);
-  $: countTransition = totalFor("z|p", entries, dataUnavailable);
+  $: countA = totalFor(A_SUBSET_KEY, entries, dataUnavailable);
+
+  /**
+   * Les trois compteurs de B, jamais fondus en un total unique : le vivier
+   * qualifié, ce qui reste à confirmer, et ce que le serveur a exclu.
+   * Ils décrivent la CLASSIFICATION serveur — les exclusions d'affichage
+   * ci-dessous ne les déplacent pas (masquer n'est pas reclasser).
+   */
+  $: countsB = dataUnavailable ? null : sumVivierBCounts(entries);
 </script>
 
 <RailShell title="Signaux · Villes" {loading} {onRefresh}>
@@ -184,17 +207,49 @@
     {/if}
   </svelte:fragment>
 
-  <!-- ── Section 1 : projection A / transition explicite ─────────────────── -->
+  <!-- ── Section 1 : vue A (défaut) ou vue B (vivier v2) ─────────────────── -->
   <RailSection label="Signaux">
     <div role="radiogroup" aria-label="Mode du vivier">
       <div class="axis-toggle-row">
         <Radio name="vivier-mode" label="Vivier A · référence" helperText="zonage + multifamilial 4+ + précoce" value="a" checked={activeMode === "a"} onchange={() => selectMode("a")} />
         {#if !loading}<Badge tone="info">{countA ?? "n/d"}</Badge>{/if}
       </div>
-      <div class="axis-toggle-row axis-toggle-row--last">
-        <Radio name="vivier-mode" label="Transition vers B" helperText="non final · zonage + précoce" value="transition" checked={activeMode === "transition"} onchange={() => selectMode("transition")} />
-        {#if !loading}<Badge tone="warning">{countTransition ?? "n/d"}</Badge>{/if}
+      <div class="axis-toggle-row" class:axis-toggle-row--last={activeMode !== "b"}>
+        <Radio name="vivier-mode" label="Vivier B" helperText="zonage + résidentiel" value="b" checked={activeMode === "b"} onchange={() => selectMode("b")} />
+        {#if !loading}<Badge tone="info">{countsB?.qualified ?? "n/d"}</Badge>{/if}
       </div>
+
+      {#if activeMode === "b"}
+        <!-- Les trois états de B, affichés ensemble : un total unique
+             masquerait ce qui reste à confirmer. -->
+        <div class="vivier-b-counts">
+          <span class="vivier-b-count">
+            <span class="rail-count-strong">{countsB?.qualified ?? "n/d"}</span> retenus
+          </span>
+          <span class="vivier-b-count">
+            <span class="rail-count-strong">{countsB?.residentialUnknown ?? "n/d"}</span> à confirmer
+          </span>
+          <span class="vivier-b-count">
+            <span class="rail-count-strong">{countsB?.excluded ?? "n/d"}</span> exclus
+          </span>
+        </div>
+
+        <div class="vivier-b-exclusions">
+          <Checkbox
+            label="Exclure PIIA sans projet résidentiel"
+            description="Un PIIA portant un projet résidentiel reste affiché."
+            checked={exclusions.piiaSansProjetResidentiel}
+            onchange={(event) =>
+              setExclusion({ piiaSansProjetResidentiel: event.currentTarget.checked })}
+          />
+          <Checkbox
+            label="Exclure dérogations mineures"
+            checked={exclusions.derogationsMineures}
+            onchange={(event) =>
+              setExclusion({ derogationsMineures: event.currentTarget.checked })}
+          />
+        </div>
+      {/if}
     </div>
   </RailSection>
 
@@ -216,7 +271,42 @@
 </RailShell>
 
 <style>
-  /* ── Modes A / transition ── */
+  /* ── Trois compteurs de B (retenus · à confirmer · exclus) ── */
+  .vivier-b-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: var(--rail-fs-small, 0.75rem);
+    color: var(--st-semantic-text-muted);
+  }
+
+  .vivier-b-count + .vivier-b-count::before {
+    content: "·";
+    margin-right: 0.5rem;
+    color: var(--st-semantic-border-subtle);
+  }
+
+  /* ── Exclusions d'affichage de B ── */
+  .vivier-b-exclusions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-top: 1px solid var(--st-semantic-border-subtle);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .vivier-b-exclusions :global(.st-choice) {
+    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
+  }
+
+  .vivier-b-exclusions :global(.st-choice__help),
+  .vivier-b-exclusions :global(.st-choice__desc) {
+    font-size: var(--rail-fs-small, 0.75rem);
+  }
+
+  /* ── Modes A / B ── */
   .axis-toggle-row {
     display: flex;
     align-items: center;

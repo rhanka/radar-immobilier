@@ -5,7 +5,7 @@
  * le contrat observable est :
  *   1. parseGeoQuery lit les valeurs de filter.subset
  *   2. localStorage["signaux-filter-subset"] est lu en repli si pas d'URL
- *   3. Le défaut est A (`z|m|p`) ; seul `z|p` explicite active la transition
+ *   3. Le défaut est A (`z|m|p`) ; seule la clé `vivier-v2` explicite active B
  *
  * Ce test valide le contrat en utilisant directement parseGeoQuery (exporté).
  *
@@ -84,10 +84,16 @@ describe("subsetKeyFromRoute — priorité URL > localStorage > défaut", () => 
     expect(subsetKeyFromRoute(state)).toBe("z|m|p");
   });
 
-  it("URL transition exacte z|p gagne sur localStorage A", () => {
+  it("URL B exacte gagne sur localStorage A", () => {
     localStorage.setItem(FILTER_LS_KEY, "z|m|p");
+    const state = parseGeoQuery("?filter.subset=vivier-v2");
+    expect(subsetKeyFromRoute(state)).toBe("vivier-v2");
+  });
+
+  it("URL z|p retirée revient à A (régression #375 non réactivable)", () => {
+    localStorage.setItem(FILTER_LS_KEY, "vivier-v2");
     const state = parseGeoQuery("?filter.subset=z&filter.subset=p");
-    expect(subsetKeyFromRoute(state)).toBe("z|p");
+    expect(subsetKeyFromRoute(state)).toBe("z|m|p");
   });
 
   it("URL invalide revient à A et garde priorité sur localStorage", () => {
@@ -108,14 +114,24 @@ describe("subsetKeyFromRoute — priorité URL > localStorage > défaut", () => 
     expect(subsetKeyFromRoute(emptyFiltersState)).toBe("z|m|p");
   });
 
-  it("reload sans subset URL conserve la transition localStorage après chargement", () => {
+  it("reload sans subset URL conserve B depuis localStorage après chargement", () => {
+    localStorage.setItem(FILTER_LS_KEY, "vivier-v2");
+    const state = normalizeGeoRouteState({});
+    const route: GeoRoute = { level: "region", region: "quebec", state };
+    const initial = initialVivierSubsetKey(route, localStorage.getItem(FILTER_LS_KEY));
+
+    expect(initial).toBe("vivier-v2");
+    expect(reconcileVivierRouteSubset(route, initial)).toBe("vivier-v2");
+  });
+
+  it("une préférence z|p stockée retombe sur A au reload", () => {
     localStorage.setItem(FILTER_LS_KEY, "z|p");
     const state = normalizeGeoRouteState({});
     const route: GeoRoute = { level: "region", region: "quebec", state };
     const initial = initialVivierSubsetKey(route, localStorage.getItem(FILTER_LS_KEY));
 
-    expect(initial).toBe("z|p");
-    expect(reconcileVivierRouteSubset(route, initial)).toBe("z|p");
+    expect(initial).toBe("z|m|p");
+    expect(reconcileVivierRouteSubset(route, initial)).toBe("z|m|p");
   });
 
   it("pas de subset dans URL, aucun localStorage → A", () => {

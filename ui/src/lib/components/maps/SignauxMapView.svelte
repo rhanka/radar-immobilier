@@ -128,6 +128,11 @@
     vivierRouteKey,
   } from "$lib/signals/vivier-view-mode.js";
   import {
+    applyVivierBExclusions,
+    DEFAULT_VIVIER_B_EXCLUSIONS,
+    type VivierBExclusions,
+  } from "$lib/signals/vivier-b-display-filter.js";
+  import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
     resolveToken,
@@ -234,31 +239,61 @@
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
-  // ── Projection globale A / transition ────────────────────────────────────
+  // ── Projection globale A / B ─────────────────────────────────────────────
   const FILTER_DEFAULT: string = A_SUBSET_KEY;
   const FILTER_LS_KEY = "signaux-filter-subset";
   let activeSubsetKey: string = FILTER_DEFAULT;
 
+  /**
+   * Exclusions d'AFFICHAGE de la vue B. Elles ne touchent ni la classification
+   * serveur ni les compteurs : elles ne font que masquer.
+   */
+  let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
+
+  /** Les nœuds réellement affichés : projection du mode, puis exclusions de B. */
+  function visibleNodesFor(
+    nodes: GraphSignalNode[],
+    authority: unknown,
+    subsetKey: string,
+    exclusions: VivierBExclusions,
+  ): GraphSignalNode[] {
+    const mode = modeFromSubsetKey(subsetKey);
+    const projected = projectNodesForVivierMode(nodes, authority, mode).nodes;
+    return mode === "b" ? applyVivierBExclusions(projected, exclusions) : projected;
+  }
+
   function applyActiveSubsetKey(subsetKey: string): void {
     const normalized = subsetKeyForMode(modeFromSubsetKey(subsetKey));
     activeSubsetKey = normalized;
-    const projection = projectNodesForVivierMode(
-      detailNodes,
-      detailLegacyProjection,
-      modeFromSubsetKey(normalized),
+    reconcileToVisibleNodes();
+  }
+
+  /** Un signal masqué ne doit rester ni sélectionné, ni survolé, ni ouvert. */
+  function reconcileToVisibleNodes(): void {
+    const allowedIds = new Set(
+      visibleNodesFor(
+        detailNodes,
+        detailLegacyProjection,
+        activeSubsetKey,
+        vivierBExclusions,
+      ).map((node) => node.id),
     );
-    const allowedIds = new Set(projection.nodes.map((node) => node.id));
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
     const evidenceId = retainProjectedSignalId(activeEvidence?.nodeId ?? null, allowedIds);
     if (activeEvidence && evidenceId === null) activeEvidence = null;
     hoveredEvidenceSignalId = retainProjectedSignalId(hoveredEvidenceSignalId, allowedIds);
   }
 
+  function handleExclusionsChange(next: VivierBExclusions): void {
+    vivierBExclusions = next;
+    reconcileToVisibleNodes();
+  }
+
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
-   * Priorité : URL > localStorage > A. Seul `z|p` sélectionne la transition.
+   * Priorité : URL > localStorage > A. Seule la clé B explicite sélectionne B.
    * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
-   * Tout état vide, ancien ou hybride revient à A sans coercer A vers T.
+   * Tout état vide, ancien ou hybride (dont l'ancien `z|p`) revient à A.
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
     const stored = typeof localStorage === "undefined"
@@ -395,7 +430,14 @@
     detailLegacyProjection,
   );
   $: detailProjection = validatedDetailProjections[activeViewMode];
-  $: filteredDetailNodes = detailProjection.nodes;
+  /**
+   * La liste affichée = la projection du mode, puis (en B seulement) les
+   * exclusions d'affichage. Le retrait du garde-fou `m` de A est compensé ici,
+   * sans jamais reclasser un signal.
+   */
+  $: filteredDetailNodes = activeViewMode === "b"
+    ? applyVivierBExclusions(detailProjection.nodes, vivierBExclusions)
+    : detailProjection.nodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -404,9 +446,10 @@
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
-   * Both fixed projections restrict the raw signal set.
+   * Les deux vues (A comme B) restreignent le jeu brut de signaux.
+   * (Ne pas tester `includes("z")` : la clé de B n'est pas un jeu de flags.)
    */
-  $: filterActive = activeSubsetKey.includes("z");
+  $: filterActive = activeViewMode === "a" || activeViewMode === "b";
   /** True si au moins un lot affiché porte une projection de signal (#4). */
   $: hasProjectedLot = displayedLots.features.some(
     (lot) => (lot.properties.signalProjection ?? "none") !== "none",
@@ -1504,9 +1547,11 @@
       {loading}
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
+      exclusions={vivierBExclusions}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
+      onExclusionsChange={handleExclusionsChange}
     />
   </svelte:fragment>
 

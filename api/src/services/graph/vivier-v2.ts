@@ -62,7 +62,6 @@ export interface LegacyZmpMembership {
 export interface LegacyZmpProjection {
   version: typeof LEGACY_ZMP_VERSION;
   a: { count: number; signalIds: string[] };
-  transition: { count: number; signalIds: string[] };
 }
 
 export interface LegacyGraphNodeInput {
@@ -367,19 +366,22 @@ export function classifyLegacyZmpSignal(signal: VivierSignalInput): LegacyZmpMem
   };
 }
 
+/**
+ * Projection A (z∩m∩p) — la seule projection legacy encore servie.
+ *
+ * La projection `transition` (z∩p) a été retirée avec le mode « Transition
+ * vers B » de l'UI : c'était la régression de prod corrigée par #375, et
+ * B (vivier v2) la remplace. Aucun consommateur ne la lit plus.
+ */
 export function buildLegacyZmpProjection(
   memberships: readonly LegacyZmpMembership[],
 ): LegacyZmpProjection {
   const aIds = memberships
     .filter(({ flags }) => flags.z && flags.m && flags.p)
     .map(({ signalId }) => signalId);
-  const transitionIds = memberships
-    .filter(({ flags }) => flags.z && flags.p)
-    .map(({ signalId }) => signalId);
   return {
     version: LEGACY_ZMP_VERSION,
     a: { count: aIds.length, signalIds: aIds },
-    transition: { count: transitionIds.length, signalIds: transitionIds },
   };
 }
 

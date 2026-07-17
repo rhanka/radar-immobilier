@@ -30,6 +30,10 @@
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import {
+    isPiiaLie,
+    PIIA_LIE_BADGE,
+  } from "$lib/signals/vivier-b-display-filter.js";
   import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import type {
     GeoZoneFeature,
@@ -819,6 +823,17 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{node.label}</span>
+                    {#if isPiiaLie(node)}
+                      <!-- PIIA porteur d'un projet résidentiel prouvé : gardé,
+                           mais annoncé comme instrument indirect (confiance
+                           faible), pas comme un rezonage. -->
+                      <span
+                        class="signal-piia-badge"
+                        title="PIIA rattaché à un projet résidentiel (unités ou logements cités) — instrument indirect, à confirmer."
+                      >
+                        {PIIA_LIE_BADGE}
+                      </span>
+                    {/if}
                     <span class="sel-entity-type">{nodeTypeLabel(node.type)}</span>
                   </button>
 
@@ -1599,6 +1614,18 @@
     color: var(--st-semantic-warning-text, #92400e);
     font-size: var(--signaux-fs-caption);
     font-weight: 700;
+  }
+
+  /* PIIA lié : ton INFO discret — le signal est gardé, pas mis en avant. */
+  .signal-piia-badge {
+    flex-shrink: 0;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: var(--st-semantic-info-surface, #e0f2fe);
+    color: var(--st-semantic-info-text, #075985);
+    font-size: var(--signaux-fs-caption);
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   .entity-summary {

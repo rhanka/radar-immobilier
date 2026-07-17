@@ -5,9 +5,18 @@
  * (graphify pipeline, ~197 villes), NOT the old ontology project-state.
  */
 
+import type { VivierV2Counts } from "@radar/domain";
+
 export interface GraphSignalCityItem {
   citySlug: string;
   signalCount: number;
+  /**
+   * Comptes du vivier v2 (vue B), calculés par le serveur dans la MÊME passe
+   * que `subsetCounts` (`aggregateGraphSignalProjectionRows`), sur la même
+   * donnée. Invariant : total = qualified + residentialUnknown + Σ exclusions.
+   * Absent des réponses d'un serveur antérieur au contrat vivier v2.
+   */
+  vivierV2Counts?: VivierV2Counts;
   /**
    * Exact intersection counts for each subset of {z, m, p, r} flags.
    * Keys: "", "z", "m", "p", "r", "z|m", … up to "z|m|p|r" (16 keys).
