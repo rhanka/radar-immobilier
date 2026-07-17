@@ -36,6 +36,7 @@ function makeCity(slug = "delson", name = "Delson"): CityMapEntry {
     municipality: makeMunicipality(slug, name),
     signalCount6m: 2,
     subsetCounts: {},
+    vivierV2Counts: null,
   };
 }
 
@@ -66,7 +67,49 @@ const NODES: GraphSignalNode[] = [
   makeSignal("sig-2", "Approbation règlement zonage H-521", "Second signal de zonage."),
 ];
 
+/** Classification serveur d'un PIIA (instrument piia, résidentiel oui). */
+function piiaClassification(): GraphSignalNode["classification"] {
+  return {
+    zonage: { valeur: "oui", source: "test", confiance: 0.95 },
+    residentiel: { valeur: "oui", source: "test", confiance: 0.9 },
+    effet_densifiant: "inconnu",
+    instrument: "piia",
+    etape: "avis_motion",
+    etapes_historique: ["avis_motion"],
+    exclusion_reason: null,
+    provenance: { extrait: "" },
+    confiance: 0.9,
+  } as unknown as GraphSignalNode["classification"];
+}
+
 afterEach(() => cleanup());
+
+describe("SignauxSelPanel — badge PIIA lié", () => {
+  it("marque un PIIA à projet résidentiel prouvé, sans le masquer", () => {
+    const austin = makeSignal(
+      "signal-austin-piia-densification-impasse-renard",
+      "PIIA densification impasse Renard",
+      "Construction d'un bâtiment résidentiel comportant quatre logements.",
+    );
+    austin.classification = piiaClassification();
+    austin.props = { ...austin.props, nb_unites_max: 4 };
+
+    const { container, queryByText } = render(Harness, {
+      props: { selectedCity: makeCity("austin", "Austin"), detailNodes: [austin] },
+    });
+
+    // Le signal reste listé (exclure tout PIIA l'aurait écarté).
+    expect(queryByText("PIIA densification impasse Renard")).not.toBeNull();
+    expect(container.textContent).toContain("PIIA lié · confiance faible");
+  });
+
+  it("n'affiche aucun badge PIIA sur un signal de zonage ordinaire", () => {
+    const { container } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: NODES },
+    });
+    expect(container.textContent).not.toContain("PIIA lié");
+  });
+});
 
 describe("SignauxSelPanel — clic signal → fiche détail", () => {
   it("shows unavailable without a false zero or empty-state message", () => {
