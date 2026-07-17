@@ -40,6 +40,7 @@
   import {
     fetchGraphSignalDetail,
     type GraphSignalNode,
+    type LegacyZmpProjection,
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
@@ -112,7 +113,21 @@
     withHoverNeutralTint,
     withHoverOpacityBoost,
   } from "$lib/maps/hover-paint.js";
-  import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
+  import {
+    A_SUBSET_KEY,
+    clearVivierCityTransientState,
+    countForVivierCity,
+    initialVivierSubsetKey,
+    modeFromSubsetKey,
+    projectNodesForVivierMode,
+    reconcileVivierRouteSubset,
+    reconcileVivierSelection,
+    retainProjectedSignalId,
+    subsetKeyForMode,
+    validateVivierProjectionAuthority,
+    vivierRouteKey,
+    type ValidatedVivierProjections,
+  } from "$lib/signals/vivier-view-mode.js";
   import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
@@ -176,6 +191,7 @@
   let detailLoading = false;
   let detailError: string | null = null;
   let detailNodes: GraphSignalNode[] = [];
+  let detailLegacyProjection: LegacyZmpProjection | null = null;
   // ── Waiters PAR COUCHE (zones / lots indépendants) ────────────────────────
   // Chaque couche porte SON propre état chargement + erreur : l'échec ou la
   // lenteur de l'une n'affecte JAMAIS l'affichage de l'autre.
@@ -219,43 +235,44 @@
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
-  // ── Filtre GLOBAL (axes combinables) ──────────────────────────────────────
-  /** Clé active = combinaison des axes sélectionnables : "", "z", "p", etc. */
-  const FILTER_DEFAULT = "z|p";
-  const FILTER_FLAGS = ["z", "p", "r"] as const;
+  // ── Projection globale A / transition ────────────────────────────────────
+  const FILTER_DEFAULT: string = A_SUBSET_KEY;
   const FILTER_LS_KEY = "signaux-filter-subset";
-  let activeSubsetKey = FILTER_DEFAULT; // défaut : zonage + signaux précoces
+  let activeSubsetKey: string = FILTER_DEFAULT;
 
-  /** Retire les anciens flags et rétablit l'ordre des clés serveur. */
-  function normalizeSubsetKey(raw: string): string {
-    const flags = new Set(raw.split("|"));
-    return FILTER_FLAGS.filter((flag) => flags.has(flag)).join("|");
+  function applyActiveSubsetKey(subsetKey: string): void {
+    const normalized = subsetKeyForMode(modeFromSubsetKey(subsetKey));
+    activeSubsetKey = normalized;
+    const projection = projectNodesForVivierMode(
+      detailNodes,
+      detailLegacyProjection,
+      modeFromSubsetKey(normalized),
+    );
+    const allowedIds = new Set(projection.nodes.map((node) => node.id));
+    selectionState = reconcileVivierSelection(selectionState, allowedIds);
+    const evidenceId = retainProjectedSignalId(activeEvidence?.nodeId ?? null, allowedIds);
+    if (activeEvidence && evidenceId === null) activeEvidence = null;
+    hoveredEvidenceSignalId = retainProjectedSignalId(hoveredEvidenceSignalId, allowedIds);
   }
 
   /**
    * Restaure la clé filtre depuis l'URL au chargement.
-   * Priorité : URL (filter.subset) > localStorage > défaut (z|p).
+   * Priorité : URL > localStorage > A. Seul `z|p` sélectionne la transition.
    * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
-   * Les flags non sélectionnables des anciennes URLs sont ignorés.
+   * Tout état vide, ancien ou hybride revient à A sans coercer A vers T.
    */
   function subsetKeyFromRoute(route: GeoRoute | null): string {
-    if (route) {
-      const values = route.state.filters["subset"] ?? [];
-      if (values.length > 0) return normalizeSubsetKey(values.join("|"));
-    }
-    // Repli localStorage
-    if (typeof localStorage !== "undefined") {
-      const stored = localStorage.getItem(FILTER_LS_KEY);
-      if (stored && stored.trim().length > 0) return normalizeSubsetKey(stored.trim());
-    }
-    return FILTER_DEFAULT;
+    const stored = typeof localStorage === "undefined"
+      ? null
+      : localStorage.getItem(FILTER_LS_KEY);
+    return initialVivierSubsetKey(route, stored);
   }
 
   function handleFilterChange(
     subsetKey: string,
   ): void {
-    const normalizedSubsetKey = normalizeSubsetKey(subsetKey);
-    activeSubsetKey = normalizedSubsetKey;
+    const normalizedSubsetKey = subsetKeyForMode(modeFromSubsetKey(subsetKey));
+    applyActiveSubsetKey(normalizedSubsetKey);
     // Persiste le filtre dans localStorage
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(FILTER_LS_KEY, normalizedSubsetKey);
@@ -373,16 +390,22 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
-  /** Nœuds filtrés selon la clé active — miroir côté carte de SignauxSelPanel. */
-  $: filteredDetailNodes = activeSubsetKey
-    ? detailNodes.filter((n) => nodeMatchesSubset(n, activeSubsetKey))
-    : detailNodes;
+  $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
+  $: validatedDetailProjections = validateVivierProjectionAuthority(
+    detailNodes,
+    detailLegacyProjection,
+  );
+  $: detailProjection = validatedDetailProjections[activeViewMode];
+  $: filteredDetailNodes = detailProjection.nodes;
+  $: effectiveDetailError = detailError ?? (
+    !detailLoading && detailNodes.length > 0 && !detailProjection.available
+      ? "Projection du vivier indisponible (contrat serveur incompatible)."
+      : null
+  );
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
-   * #4 — Le filtre RESTREINT réellement l'ensemble quand il porte l'axe « z »
-   * (zonage). L'axe « p » (précoce) est neutre côté client (ne masque rien)
-   * → il ne déclenche pas d'atténuation carto.
+   * Both fixed projections restrict the raw signal set.
    */
   $: filterActive = activeSubsetKey.includes("z");
   /** True si au moins un lot affiché porte une projection de signal (#4). */
@@ -489,11 +512,18 @@
   function buildFillColorExpression(
     entries: CityMapEntry[],
     subsetKey: string,
+    activeCitySlug: string | null,
+    projections: ValidatedVivierProjections,
   ): ExpressionSpecification {
     const expr: unknown[] = ["match", ["get", "citySlug"]];
     for (const e of entries) {
-      const count = (e.subsetCounts[subsetKey] ?? 0);
-      expr.push(e.municipality.slug, signalCountColor(count));
+      const count = countForVivierCity(
+        e,
+        activeCitySlug,
+        projections,
+        modeFromSubsetKey(subsetKey),
+      );
+      expr.push(e.municipality.slug, count === null ? "#94a3b8" : signalCountColor(count));
     }
     expr.push("#e2e8f0"); // fallback pour villes sans data
     return expr as ExpressionSpecification;
@@ -527,7 +557,12 @@
    * référencées ici afin que Svelte recalcule la peinture exactement quand
    * l'ancien `updateFillColors()` impératif était déclenché.
    */
-  $: fillColorExpression = buildFillColorExpression(allEntries, activeSubsetKey);
+  $: fillColorExpression = buildFillColorExpression(
+    allEntries,
+    activeSubsetKey,
+    selectedCity?.municipality.slug ?? null,
+    validatedDetailProjections,
+  );
   $: fillOpacityExpression = buildFillOpacityExpression(
     allEntries,
     selectedCity?.municipality.slug ?? null,
@@ -674,6 +709,14 @@
     if (selectedCity?.municipality.slug === entry.municipality.slug) {
       return;
     }
+    const transients = clearVivierCityTransientState(
+      selectedCity?.municipality.slug ?? null,
+      entry.municipality.slug,
+      { activeEvidence, activeDocument, hoveredEvidenceSignalId },
+    );
+    activeEvidence = transients.activeEvidence;
+    activeDocument = transients.activeDocument;
+    hoveredEvidenceSignalId = transients.hoveredEvidenceSignalId;
     if (syncUrl) {
       // Conserver le filtre actif dans la nouvelle route ville
       const subsetValues = activeSubsetKey ? activeSubsetKey.split("|") : [];
@@ -688,6 +731,7 @@
     }
     selectedCity = entry;
     detailNodes = [];
+    detailLegacyProjection = null;
     geoNotices = [];
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
@@ -714,6 +758,7 @@
     const lease = detailGuard.lease();
     detailLoading = true;
     detailError = null;
+    detailLegacyProjection = null;
     try {
       const res = await fetchGraphSignalDetail(citySlug, "", DEFAULT_REQUEST_TIMEOUT_MS, {
         signal: lease.signal,
@@ -722,10 +767,12 @@
       if (!res.ok && res.nodes.length === 0) {
         // 404 — ville sans signaux graphify (état vide honnête, pas une erreur)
         detailNodes = [];
+        detailLegacyProjection = null;
         detailError = null;
         return;
       }
       detailNodes = res.nodes;
+      detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
@@ -736,6 +783,7 @@
       if (!lease.isCurrent() || isAbortError(e)) return;
       console.warn("Signal detail load failed:", e);
       detailError = "Signaux indisponibles.";
+      detailLegacyProjection = null;
     } finally {
       if (lease.isCurrent()) detailLoading = false;
     }
@@ -759,6 +807,7 @@
     selectedCity = null;
     pendingRouteZoneKey = null;
     detailNodes = [];
+    detailLegacyProjection = null;
     detailError = null;
     detailLoading = false;
     zonesError = null;
@@ -770,6 +819,7 @@
     lotsResponse = null;
     activeDocument = null;
     activeEvidence = null;
+    hoveredEvidenceSignalId = null;
     selectionState = createSelectionBucketState();
     updateGeoLayers();
     // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
@@ -878,7 +928,7 @@
       detailNodes,
       payload.evidence.rawRef,
       // #4 — marque les co-PV signaux HORS-FILTRE (peints en slate par le viewer).
-      (n) => nodeMatchesSubset(n, activeSubsetKey),
+      (n) => filteredDetailNodes.some((candidate) => candidate.id === n.id),
     );
     activeEvidence = {
       title: payload.title,
@@ -948,29 +998,6 @@
     return buildHoverCard(node, color);
   }
 
-  /** #4 — « Voir comme courant » : ouvre ce signal hors-filtre dans le viewer. */
-  function makeSignalCurrent(id: string): void {
-    const node = detailNodes.find((n) => n.id === id);
-    if (!node) return;
-    openEvidence({
-      title: node.label,
-      evidence: extractSignalEvidence(node),
-      node,
-    });
-  }
-
-  /**
-   * #4 — « Ajouter au filtre » : le signal est hors-filtre (il échoue z/m).
-   * DÉFAUT SOBRE retenu : on relâche le filtre (clé vide → tous les signaux
-   * visibles) pour que ce signal apparaisse dans la liste/nav, puis on le rend
-   * courant. Alternative écartée (ajouter dynamiquement un axe) : 'p' est neutre
-   * et z/m ne se « décochent » pas par signal sans casser le sens du filtre.
-   */
-  function addSignalToFilter(id: string): void {
-    handleFilterChange("");
-    makeSignalCurrent(id);
-  }
-
   function zoneSelectionKey(zone: GeoZoneFeature): SelectionKey {
     return makeKey("zone", `${zone.properties.citySlug}/${zone.properties.code}`);
   }
@@ -1007,16 +1034,11 @@
     zoomToZone(parsed.id.slice(0, sep), parsed.id.slice(sep + 1));
   }
 
-  function routeKey(route: GeoRoute): string {
-    if (route.level === "region") return `region:${route.region}:${route.state.mode}`;
-    if (route.level === "city") return `city:${route.citySlug}:${route.state.mode}`;
-    return `zone:${route.citySlug}:${route.zoneKey}:${route.state.mode}`;
-  }
-
   async function applyGeoRoute(route: GeoRoute): Promise<void> {
-    const key = routeKey(route);
+    const key = vivierRouteKey(route);
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
+    applyActiveSubsetKey(reconcileVivierRouteSubset(route, activeSubsetKey));
 
     if (route.level === "region") {
       // Au montage / restauration d'URL, la carte démarre déjà au niveau
@@ -1076,7 +1098,10 @@
         navigateToGeoRoute({
           level: "city",
           citySlug: geoRoute.citySlug,
-          state: { mode: geoRoute.state.mode ?? "signal" },
+          state: {
+            mode: geoRoute.state.mode ?? "signal",
+            filters: { subset: activeSubsetKey.split("|") },
+          },
         });
       }
       return;
@@ -1090,7 +1115,10 @@
       level: "zone",
       citySlug,
       zoneKey,
-      state: { mode: geoRoute?.state.mode ?? "signal" },
+      state: {
+        mode: geoRoute?.state.mode ?? "signal",
+        filters: { subset: activeSubsetKey.split("|") },
+      },
     });
   }
 
@@ -1461,7 +1489,7 @@
     // Restaurer le filtre depuis l'URL au premier chargement
     const initialSubsetKey = subsetKeyFromRoute(geoRoute);
     if (initialSubsetKey !== activeSubsetKey) {
-      activeSubsetKey = initialSubsetKey;
+      applyActiveSubsetKey(initialSubsetKey);
     }
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
@@ -1485,6 +1513,7 @@
       {loading}
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
+      selectedVivierProjections={validatedDetailProjections}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
@@ -1619,8 +1648,6 @@
         onSignalHover={setHoveredEvidenceSignal}
         hoveredSignalId={hoveredEvidenceSignalId}
         {resolveHoverCard}
-        onMakeCurrent={makeSignalCurrent}
-        onAddToFilter={addSignalToFilter}
         onClose={closeEvidence}
       />
     {/if}
@@ -1632,9 +1659,9 @@
   <svelte:fragment slot="sel">
     <SignauxSelPanel
       {selectedCity}
-      {detailNodes}
+      detailNodes={filteredDetailNodes}
       {detailLoading}
-      {detailError}
+      detailError={effectiveDetailError}
       {zonesLoading}
       {zonesError}
       {lotsLoading}
@@ -1642,7 +1669,7 @@
       {zonesResponse}
       {lotsResponse}
       {selectionState}
-      {activeSubsetKey}
+      activeSubsetKey=""
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}

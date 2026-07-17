@@ -31,6 +31,8 @@ import {
   isMulti4Plus,
   isPrecoceSignal,
   buildSubsetKey,
+  aggregateGraphSignalProjectionRows,
+  classifyGraphNodeLegacyZmp,
   classifyResidentielPertinence,
   isResidentielPertinent,
   ETAPE_ORDER,
@@ -38,6 +40,15 @@ import {
   type GraphifyNode,
   type GraphifyLink,
 } from "./graph-store.js";
+import {
+  SUTTON_A_IDS,
+  SUTTON_LEGACY_GRAPH_NODES,
+  SUTTON_TRANSITION_IDS,
+} from "./sutton-legacy.fixture.js";
+import {
+  COATICOOK_A_IDS,
+  COATICOOK_LEGACY_GRAPH_NODES,
+} from "./coaticook-legacy.fixture.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -98,6 +109,34 @@ describe("buildNodeRow", () => {
     const row = buildNodeRow(node, null);
     expect(row.type).toBe("concept");
     expect(row.citySlug).toBeNull();
+  });
+});
+
+describe("Sutton immutable legacy projection", () => {
+  it("keeps normalized aggregate counts and detail IDs identical", () => {
+    const rows = SUTTON_LEGACY_GRAPH_NODES.map((node) => buildNodeRow(node, "sutton"));
+    const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
+    const memberships = rows.map(classifyGraphNodeLegacyZmp);
+    const aIds = memberships.filter(({ flags }) => flags.z && flags.m && flags.p).map(({ signalId }) => signalId);
+    const transitionIds = memberships.filter(({ flags }) => flags.z && flags.p).map(({ signalId }) => signalId);
+
+    expect(rows).toHaveLength(5);
+    expect(aIds).toEqual(SUTTON_A_IDS);
+    expect(transitionIds).toEqual(SUTTON_TRANSITION_IDS);
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(aIds.length);
+    expect(aggregate.subsetCounts["z|p"]).toBe(transitionIds.length);
+  });
+});
+
+describe("Coaticook immutable legacy projection", () => {
+  it("keeps numeric nb_unites_max from the real snapshot in A", () => {
+    const rows = COATICOOK_LEGACY_GRAPH_NODES.map((node) => buildNodeRow(node, "coaticook"));
+    const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
+    const membership = classifyGraphNodeLegacyZmp(rows[0]!);
+
+    expect(membership.flags).toEqual({ z: true, m: true, p: true });
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(1);
+    expect([membership.signalId]).toEqual(COATICOOK_A_IDS);
   });
 });
 
