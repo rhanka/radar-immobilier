@@ -12,7 +12,7 @@
  */
 
 import { prioritizedCities } from "@radar/sources/municipalities";
-import type { MunicipalityT } from "@radar/domain";
+import type { MunicipalityT, VivierV2Counts } from "@radar/domain";
 import type { GraphSignalCityItem } from "$lib/signals/graph-signals-by-city-client.js";
 
 /**
@@ -35,6 +35,12 @@ export interface CityMapEntry {
    * Empty record when city has no signal data.
    */
   subsetCounts: Record<string, number>;
+  /**
+   * Comptes du vivier v2 (vue B) servis par l'API pour cette ville.
+   * `null` quand la ville est absente de la réponse — jamais des zéros
+   * fabriqués (une ville sans données n'est pas une ville à zéro qualifié).
+   */
+  vivierV2Counts: VivierV2Counts | null;
 }
 
 /**
@@ -61,11 +67,15 @@ export function buildCityMapEntries(
   const subsetCountsBySlug = new Map<string, Record<string, number>>(
     graphItems.map((item) => [item.citySlug, item.subsetCounts]),
   );
+  const vivierV2CountsBySlug = new Map<string, VivierV2Counts | undefined>(
+    graphItems.map((item) => [item.citySlug, item.vivierV2Counts]),
+  );
 
   return cities.slice(0, limit).map((m) => ({
     municipality: m,
     signalCount6m: signalCountBySlug.get(m.slug) ?? 0,
     subsetCounts: subsetCountsBySlug.get(m.slug) ?? {},
+    vivierV2Counts: vivierV2CountsBySlug.get(m.slug) ?? null,
   }));
 }
 

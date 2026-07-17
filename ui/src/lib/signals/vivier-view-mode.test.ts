@@ -2,23 +2,54 @@ import { describe, expect, it } from "vitest";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   A_SUBSET_KEY,
+  B_SUBSET_KEY,
   canOpenProjectedSignal,
   clearVivierCityTransientState,
+  countForVivierCity,
   initialVivierSubsetKey,
   reconcileVivierRouteSubset,
-  TRANSITION_SUBSET_KEY,
   modeFromSubsetKey,
   projectNodesForVivierMode,
   reconcileVivierSelection,
   retainProjectedSignalId,
   routeSubsetKey,
+  subsetKeyForMode,
+  sumVivierBCounts,
   validateVivierProjectionAuthority,
   vivierRouteKey,
 } from "./vivier-view-mode.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
 import { normalizeGeoRouteState, type GeoRoute } from "$lib/router/geo-route.js";
 
-function node(id: string, z: boolean, m: boolean, p: boolean): GraphSignalNode {
+type TriState = "oui" | "non" | "indetermine";
+
+/** Une classification `vivier_v2` serveur minimale mais réaliste. */
+function classification(
+  zonage: TriState,
+  residentiel: TriState,
+  exclusionReason: string | null = null,
+  instrument = "rezonage",
+) {
+  return {
+    zonage: { valeur: zonage, source: "test", confiance: 0.95 },
+    residentiel: { valeur: residentiel, source: "test", confiance: 0.9 },
+    effet_densifiant: "inconnu",
+    instrument,
+    etape: "avis_motion",
+    etapes_historique: ["avis_motion"],
+    exclusion_reason: exclusionReason,
+    provenance: { extrait: "" },
+    confiance: 0.9,
+  } as unknown as GraphSignalNode["classification"];
+}
+
+function node(
+  id: string,
+  z: boolean,
+  m: boolean,
+  p: boolean,
+  vivier = classification("oui", "oui"),
+): GraphSignalNode {
   return {
     id,
     type: "Signal",
@@ -27,6 +58,7 @@ function node(id: string, z: boolean, m: boolean, p: boolean): GraphSignalNode {
     sourceRef: null,
     createdAt: null,
     props: {},
+    classification: vivier,
     legacySubset: { version: "legacy-zmp-v1", signalId: id, flags: { z, m, p } },
   };
 }
@@ -35,36 +67,57 @@ const SUTTON_RAW = [
   node("sutton-a", true, true, true),
   node("sutton-t", true, false, true),
   node("sutton-z", true, false, false),
-  node("sutton-m", false, true, false),
-  node("sutton-raw", false, false, false),
+  // Résidentiel indéterminé → « à confirmer », donc hors de B.
+  node("sutton-m", false, true, false, classification("oui", "indetermine")),
+  // Exclu par le serveur → hors de B.
+  node("sutton-raw", false, false, false, classification("oui", "non", "non_residentiel_franc")),
 ];
 const SUTTON_AUTHORITY = {
   version: "legacy-zmp-v1" as const,
   a: { count: 1, signalIds: ["sutton-a"] },
-  transition: { count: 2, signalIds: ["sutton-a", "sutton-t"] },
 };
 
-describe("Vivier A / transition view contract", () => {
-  it("keeps A as the default and never coerces exact legacy z|m|p", () => {
+describe("Vivier A / B view contract", () => {
+  it("keeps A as the default and only leaves it on the explicit B key", () => {
     expect(modeFromSubsetKey(null)).toBe("a");
     expect(modeFromSubsetKey("")).toBe("a");
     expect(modeFromSubsetKey("z|m|p")).toBe("a");
-    expect(modeFromSubsetKey("z|p")).toBe("transition");
-    expect(modeFromSubsetKey("p|z")).toBe("transition");
     expect(modeFromSubsetKey("z")).toBe("a");
+    expect(modeFromSubsetKey("vivier-v2")).toBe("b");
     expect(A_SUBSET_KEY).toBe("z|m|p");
-    expect(TRANSITION_SUBSET_KEY).toBe("z|p");
+    expect(B_SUBSET_KEY).toBe("vivier-v2");
+    expect(subsetKeyForMode("a")).toBe("z|m|p");
+    expect(subsetKeyForMode("b")).toBe("vivier-v2");
   });
 
-  it("projects exact Sutton IDs with rail-count parity in both modes", () => {
+  it("resolves the retired z|p transition key back to A", () => {
+    // z|p était la régression de prod (#375) : plus aucune clé ne l'active.
+    for (const legacy of ["z|p", "p|z", "z|m", "m|p", "transition"]) {
+      expect(modeFromSubsetKey(legacy)).toBe("a");
+      expect(subsetKeyForMode(modeFromSubsetKey(legacy))).toBe(A_SUBSET_KEY);
+    }
+  });
+
+  it("projects exact Sutton IDs for A and server-qualified nodes for B", () => {
     const a = projectNodesForVivierMode(SUTTON_RAW, SUTTON_AUTHORITY, "a");
-    const transition = projectNodesForVivierMode(SUTTON_RAW, SUTTON_AUTHORITY, "transition");
+    const b = projectNodesForVivierMode(SUTTON_RAW, SUTTON_AUTHORITY, "b");
 
     expect(SUTTON_RAW).toHaveLength(5);
     expect(a).toEqual({ available: true, count: 1, nodes: [SUTTON_RAW[0]] });
-    expect(transition).toEqual({ available: true, count: 2, nodes: [SUTTON_RAW[0], SUTTON_RAW[1]] });
     expect(a.nodes.map((item) => item.id)).toEqual(["sutton-a"]);
-    expect(transition.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t"]);
+    // B = zonage oui ∩ résidentiel oui ∩ sans exclusion : ni le « à confirmer »
+    // ni l'exclu ne passent, et B ignore le gate multi4 de A.
+    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    expect(b.count).toBe(3);
+  });
+
+  it("marks B unavailable rather than inventing a client classification", () => {
+    const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
+    expect(projectNodesForVivierMode([unclassified], SUTTON_AUTHORITY, "b")).toEqual({
+      available: false,
+      count: null,
+      nodes: [],
+    });
   });
 
   it("marks the projection unavailable instead of using a client fallback", () => {
@@ -83,30 +136,70 @@ describe("Vivier A / transition view contract", () => {
     }
   });
 
-  it("validates A and transition independently", () => {
-    const authority = {
-      ...SUTTON_AUTHORITY,
-      a: { count: 1, signalIds: ["wrong-a-id"] },
-    };
+  it("validates A and B independently", () => {
+    const authority = { ...SUTTON_AUTHORITY, a: { count: 1, signalIds: ["wrong-a-id"] } };
     const validated = validateVivierProjectionAuthority(SUTTON_RAW, authority);
 
+    // Une autorité A corrompue n'entraîne pas B, qui a sa propre source.
     expect(validated.a).toEqual({ available: false, count: null, nodes: [] });
-    expect(validated.transition.count).toBe(2);
+    expect(validated.b.count).toBe(3);
   });
 
-  it("resynchronizes route mode and keys route identity by A/T", () => {
+  it("reads A from subsetCounts and B from the server's vivierV2Counts", () => {
+    const entry = {
+      subsetCounts: { "z|m|p": 3, "z|p": 88 },
+      vivierV2Counts: {
+        qualified: 12,
+        residentialUnknown: 40,
+        excludedByReason: {
+          non_residentiel_franc: 2,
+          piia_non_pertinent: 1,
+          hors_zonage: 3,
+          derogation_hors_sujet: 0,
+        },
+        stageCounts: {
+          avis_motion: 12,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        total: 58,
+      },
+    };
+
+    expect(countForVivierCity(entry, "a")).toBe(3);
+    expect(countForVivierCity(entry, "b")).toBe(12);
+    // Une ville sans comptes v2 n'invente pas un vivier.
+    expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "b")).toBe(0);
+
+    // Les trois compteurs restent séparés : aucun total ne les fond.
+    expect(sumVivierBCounts([entry, entry])).toEqual({
+      qualified: 24,
+      residentialUnknown: 80,
+      excluded: 12,
+    });
+  });
+
+  it("resynchronizes route mode and keys route identity by A/B", () => {
     const route = (subset: string[]): GeoRoute => ({
       level: "city",
       citySlug: "sutton",
       state: normalizeGeoRouteState({ filters: { subset } }),
     });
     expect(routeSubsetKey(route(["z", "m", "p"]))).toBe("z|m|p");
-    expect(routeSubsetKey(route(["z", "p"]))).toBe("z|p");
+    expect(routeSubsetKey(route(["vivier-v2"]))).toBe("vivier-v2");
     expect(routeSubsetKey(route([]))).toBeNull();
     expect(routeSubsetKey(route(["z"]))).toBe("z|m|p");
-    expect(reconcileVivierRouteSubset(route([]), "z|p")).toBe("z|p");
-    expect(initialVivierSubsetKey(route([]), "z|p")).toBe("z|p");
-    expect(vivierRouteKey(route(["z", "m", "p"]))).not.toBe(vivierRouteKey(route(["z", "p"])));
+    // Une vieille URL/préférence z|p retombe sur A, jamais sur B.
+    expect(routeSubsetKey(route(["z", "p"]))).toBe("z|m|p");
+    expect(reconcileVivierRouteSubset(route([]), "z|p")).toBe("z|m|p");
+    expect(initialVivierSubsetKey(route([]), "z|p")).toBe("z|m|p");
+    expect(initialVivierSubsetKey(route([]), "vivier-v2")).toBe("vivier-v2");
+    expect(initialVivierSubsetKey(null, null)).toBe(A_SUBSET_KEY);
+    expect(vivierRouteKey(route(["z", "m", "p"]))).not.toBe(vivierRouteKey(route(["vivier-v2"])));
   });
 
   it("clears evidence and hover when navigating to another city in the same mode", () => {
