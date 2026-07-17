@@ -131,6 +131,7 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
     lotLineColorExpression,
     signauxLotFillColorExpression,
@@ -447,11 +448,19 @@
   );
   /**
    * La liste affichée = la projection de la clé LIVE, puis (en B seulement) les
-   * exclusions d'affichage. Le retrait du garde-fou `m` de A est compensé par
-   * la sous-sélection d'axes, sans jamais reclasser un signal.
+   * exclusions d'affichage PUIS le tri déterministe `compareVivier`. Le retrait
+   * du garde-fou `m` de A est compensé par la sous-sélection d'axes, sans jamais
+   * reclasser un signal.
+   *
+   * En B, on TRIE ce qui reste après exclusion (on n'ordonne que le visible) :
+   * le mur de signaux devient une liste priorisée (éligibilité → effet
+   * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
+   * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
   $: filteredDetailNodes = activeViewMode === "b"
-    ? applyVivierBExclusions(detailProjection.nodes, vivierBExclusions)
+    ? rankVivierBNodes(
+        applyVivierBExclusions(detailProjection.nodes, vivierBExclusions),
+      )
     : detailProjection.nodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
@@ -1720,6 +1729,7 @@
       {lotsResponse}
       {selectionState}
       activeSubsetKey=""
+      vivierBMode={activeViewMode === "b"}
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}
