@@ -34,7 +34,6 @@ import {
 import {
   SUTTON_A_IDS,
   SUTTON_LEGACY_GRAPH_NODES,
-  SUTTON_TRANSITION_IDS,
 } from "../services/graph/sutton-legacy.fixture.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -288,16 +287,17 @@ describe("GET /api/graph-signals/:city", () => {
       legacyProjection: {
         version: string;
         a: { count: number; signalIds: string[] };
-        transition: { count: number; signalIds: string[] };
       };
     };
 
     expect(res.status).toBe(200);
+    // Seule A subsiste : la projection `transition` (z|p) est retirée avec le
+    // mode « Transition vers B » de l'UI, remplacé par B (vivier v2).
     expect(body.legacyProjection).toEqual({
       version: "legacy-zmp-v1",
       a: { count: 1, signalIds: SUTTON_A_IDS },
-      transition: { count: 2, signalIds: SUTTON_TRANSITION_IDS },
     });
+    expect(body.legacyProjection).not.toHaveProperty("transition");
   });
 
   it("returns ok:true with props and sourceRef when present", async () => {

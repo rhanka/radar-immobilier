@@ -7,6 +7,8 @@
  * Anti-invention: returns 404 when no signal nodes exist for the city.
  */
 
+import type { VivierV2 } from "@radar/domain";
+
 import {
   fetchWithTimeout,
   RequestTimeoutError,
@@ -515,6 +517,12 @@ export interface GraphSignalNode {
   docRefs?: SignalDocRef[];
   props: Record<string, unknown>;
   evidence?: SignalEvidence;
+  /**
+   * Classification `vivier_v2` posée PAR LE SERVEUR (même passe que
+   * `vivierV2Counts` de /by-city). Source de vérité de la vue B : le client
+   * la lit, ne la recalcule jamais.
+   */
+  classification?: VivierV2;
   legacySubset?: {
     version: "legacy-zmp-v1";
     signalId: string;
@@ -525,7 +533,6 @@ export interface GraphSignalNode {
 export interface LegacyZmpProjection {
   version: "legacy-zmp-v1";
   a: { count: number; signalIds: string[] };
-  transition: { count: number; signalIds: string[] };
 }
 
 export interface GraphSignalDetailResponse {
