@@ -97,17 +97,25 @@ export function validateVivierProjectionAuthority(
   };
 }
 
+/**
+ * Compte affiché/trié par ville, TOUJOURS le compte bulk du serveur.
+ *
+ * Le bulk n'est pas une estimation : `listCitiesWithSignalNodes` et
+ * `getSignalNodesForCity` lisent la même table `graph_nodes`, avec le même
+ * filtre de type, et dérivent leurs flags du même `classifyLegacyZmpSignal` —
+ * le détail n'ajoute qu'un `WHERE city_slug = X`. La projection détail
+ * n'apporte que les `signalIds` (vérification item par item), utiles à la
+ * LISTE et aux PREUVES, pas à un badge qui n'affiche qu'un nombre.
+ *
+ * Substituer la projection au bulk pour la ville sélectionnée rendait donc
+ * `null` le temps du fetch, ce qui éjectait la ville du rail (tri à -1 sous
+ * les villes à 0, puis coupe au plafond) avant son retour ~1 s plus tard.
+ */
 export function countForVivierCity(
-  entry: { municipality: { slug: string }; subsetCounts: Record<string, number> },
-  selectedSlug: string | null,
-  projections: ValidatedVivierProjections | null,
+  entry: { subsetCounts: Record<string, number> },
   mode: VivierViewMode,
-): number | null {
-  if (entry.municipality.slug !== selectedSlug) {
-    return entry.subsetCounts[subsetKeyForMode(mode)] ?? 0;
-  }
-  const projection = projections?.[mode];
-  return projection?.available ? projection.count : null;
+): number {
+  return entry.subsetCounts[subsetKeyForMode(mode)] ?? 0;
 }
 
 export function routeSubsetKey(route: GeoRoute): string | null {
