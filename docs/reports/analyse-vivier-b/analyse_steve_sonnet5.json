@@ -1,0 +1,203 @@
+{
+  "couverture_criteres": [
+    {
+      "critere_steve": "P1 — changement de zonage résidentiel / modification de grille (10/10)",
+      "capte": "partiel",
+      "ou": "champ category = rezonage|modification_zonage ; le mot « grille » n'existe qu'en texte libre (descr/citation), aucun champ grille_ref",
+      "n_avec": 232,
+      "n_sans": 500,
+      "preuve_ids": ["signal-saint-honore-rezonage-224m-hebergement", "signal-charlemagne-rezonage-cr12-commercial-rddc", "signal-chertsey-densification-perimetre-urbain"],
+      "commentaire": "Sur les 732 du corpus (strate1), 232 ont category rezonage/modification_zonage (31,7%), mais seulement 20/232 mentionnent explicitement « grille » en texte — aucun champ structuré ne capte la grille elle-même."
+    },
+    {
+      "critere_steve": "P2 — PPCMOI, exceptions ciblées / précédent réglementaire (7/10)",
+      "capte": "partiel",
+      "ou": "etape=ppcmoi capte le stade ; category=ppcmoi ne classe qu'une minorité des mêmes signaux",
+      "n_avec": 30,
+      "n_sans": 96,
+      "preuve_ids": ["event-lachute-ppcmoi-hc415-multilogements-2026", "signal-acton-vale-ppcmoi-001-2026-densification"],
+      "commentaire": "Sur les 732 du corpus, 126 signaux ont etape=ppcmoi mais seuls 30 (23,8%) ont category=ppcmoi renseignée ; 82 (65,1%) ont category=null malgré un etape ppcmoi explicite, ex. event-lachute-ppcmoi-hc415-multilogements-2026 (12 unités en texte, category null)."
+    },
+    {
+      "critere_steve": "P3 — Dérogations mineures : retenir densité/hauteur/marges/stationnement/logements/multifamilial/usages, filtrer cabanons/clôtures",
+      "capte": "partiel",
+      "ou": "etape=derogation_mineure capte le stade, mais aucun champ ne distingue « à retenir » de « à filtrer » — seulement des mots-clés en texte libre",
+      "n_avec": 20,
+      "n_sans": 60,
+      "preuve_ids": ["event-metis-sur-mer-derogation-6595276-2024-09-09", "event-mont-saint-hilaire-derogation-615-montagne-2026-06-01", "event-saint-germain-de-grantham-derog-2026-006-210-paradis"],
+      "commentaire": "Sur l'échantillon de 80 dérogations mineures (strate3), 20/80 portent un mot-clé « à retenir » (marge, hauteur, stationnement, logement, multifamilial, usage), 8/80 ne portent que des mots-clés « à filtrer » (garage/clôture/piscine/remise), 52/80 restent ambigus faute de mot-clé ; dans le vivier déjà qualifié (strate1, 130 dérogations mineures), 0 mentionnent cabanon/clôture, preuve que le filtre zonage∩résidentiel élimine déjà l'essentiel du bruit évident en amont."
+    },
+    {
+      "critere_steve": "P4 — CPTAQ, dézonage agricole → résidentiel (8/10)",
+      "capte": "non",
+      "ou": "aucune valeur category=cptaq n'existe ; l'information n'est présente que dans l'id (naming) ou en texte libre (descr/citation)",
+      "n_avec": 18,
+      "n_sans": 714,
+      "preuve_ids": ["signal-kazabazua-cptaq-lot5497359", "signal-sutton-cptaq-terres-agricoles-2026", "signal-dosquet-cptaq-lot-6274449", "signal-saint-marcel-de-richelieu-cptaq-perimetre"],
+      "commentaire": "Sur les 732 du corpus, 18 signaux évoquent CPTAQ (via id et/ou descr/citation) mais 0 ont category=\"cptaq\" — la Priorité 4 explicite de Steve (8/10) n'a aucune classe structurée dédiée."
+    },
+    {
+      "critere_steve": "§4.1 Avis publics — projets de règlements, consultations publiques",
+      "capte": "oui",
+      "ou": "champ etape (projet_reglement=24, second_projet=23, consultation_publique=6, avis_motion=56, adoption=86, entree_vigueur=3)",
+      "n_avec": 198,
+      "n_sans": 534,
+      "preuve_ids": ["event-saint-jean-baptiste-rezonage-1011-26-am", "event-saint-jean-baptiste-adoption-1011-26"],
+      "commentaire": "Sur les 732 du corpus, 198 signaux portent un etape de cycle réglementaire (avis_motion/projet_reglement/second_projet/consultation_publique/adoption/entree_vigueur), ce qui capte le stade mais pas le lien entre étapes d'un même dossier (voir angle mort §4.4/§4.2)."
+    },
+    {
+      "critere_steve": "§4.2/§7 — Relier les PV et décisions dans le temps, dossier qui évolue sur plusieurs séances",
+      "capte": "partiel",
+      "ou": "reconstructible seulement par recoupement texte (même numéro de règlement/lot dans descr) ; aucun champ dossier_id ou reglement_ref",
+      "n_avec": "non_mesuré",
+      "n_sans": "non_mesuré",
+      "preuve_ids": ["event-saint-jean-baptiste-rezonage-1011-26-am", "event-saint-jean-baptiste-adoption-1011-26", "event-contrecoeur-piia-2026-008-lot-6546172", "signal-contrecoeur-multilogement-28-logements"],
+      "commentaire": "Cas concret : à Saint-Jean-Baptiste, le règlement 1011-26 (zone R-2) est suivi d'avis_motion à adoption via deux ids distincts reliés seulement par le texte ; à Contrecœur, le même dossier (lot 6 546 172, PIIA 2026-008, 28 logements) existe en 2 ids (event- et signal-) sans champ de liaison — je ne peux pas mesurer un taux car aucun champ ne matérialise ce lien, seule l'inspection texte le révèle."
+    },
+    {
+      "critere_steve": "§4.3 — Vidéos YouTube des conseils municipaux (détecter, transcrire, relier)",
+      "capte": "non",
+      "ou": "aucune mention, aucun champ",
+      "n_avec": 0,
+      "n_sans": 881,
+      "preuve_ids": [],
+      "commentaire": "Sur les 881 signaux du corpus (strate1+2+3), 0 occurrence de « vidéo » ou « youtube » dans descr/citation — angle mort total, aucune preuve positive ni négative disponible au-delà de cette absence."
+    },
+    {
+      "critere_steve": "§4.4 — Documents réglementaires et numéros de dossiers, reconstruire le contexte complet",
+      "capte": "partiel",
+      "ou": "le numéro de règlement apparaît en texte libre (descr/citation) uniquement ; aucun champ reglement_number/dossier_id dans le schéma exposé (id, ville, category, etape, nb_unites_max, intensite, descr, citation)",
+      "n_avec": 91,
+      "n_sans": 641,
+      "preuve_ids": ["event-lachute-ppcmoi-hc415-multilogements-2026", "event-sainte-therese-ppcmoi-2026-002", "event-saint-jean-baptiste-rezonage-1011-26-am"],
+      "commentaire": "Sur les 732 du corpus, 91 signaux (12,4%) contiennent un numéro de règlement identifiable par motif dans descr ou citation, mais ce numéro n'est jamais extrait en champ structuré — l'information « existe dans le texte mais pas en champ »."
+    },
+    {
+      "critere_steve": "§4.5 — Rétroanalyse historique ≥2 ans",
+      "capte": "non_mesuré",
+      "ou": "aucun champ date/timestamp dans le schéma ; seule une année est parfois lisible dans l'id",
+      "n_avec": 437,
+      "n_sans": 444,
+      "preuve_ids": ["signal-dolbeau-mistassini-derog-logements-franciscaines-2024"],
+      "commentaire": "Sur les 881 ids du corpus, 437 contiennent un token d'année identifiable (2023:3, 2024:12, 2025:90, 2026:346) — la profondeur réelle est donc quasi entièrement 2025-2026 (436/437, soit 99,8% des ids datés) ; sans champ date structuré, la couverture des 2 ans exigés n'est pas mesurable rigoureusement, seulement indiciaire."
+    },
+    {
+      "critere_steve": "§5/§6P1 — Compréhension du langage municipal, formulations indirectes (amendement, révision urbanistique, requalification)",
+      "capte": "partiel",
+      "ou": "présent en texte libre (descr/citation) ; category=null pour 335/732 signaux qui dépendent alors uniquement de l'etape",
+      "n_avec": 14,
+      "n_sans": 718,
+      "preuve_ids": ["signal-chertsey-densification-perimetre-urbain", "signal-saint-boniface-densification-zone317", "signal-fermont-densification-multifamiliale-2025"],
+      "commentaire": "Sur les 732 du corpus, 14 signaux emploient explicitement amendement/révision urbanistique/requalification, mais 335/732 (45,8%) ont category=null — la reconnaissance des formulations indirectes n'est pas structurellement fiabilisée par un champ dédié."
+    },
+    {
+      "critere_steve": "§6 — Preuve chiffrée de densification (nombre de logements)",
+      "capte": "partiel",
+      "ou": "champ nb_unites_max existe mais n'est rempli que sur une minorité ; le nombre est souvent présent en texte (descr/citation) sans être reporté au champ",
+      "n_avec": 116,
+      "n_sans": 616,
+      "preuve_ids": ["event-lassomption-ppcmoi-15-2026", "event-saint-jean-de-matha-piia-lot6651580-projet-integre-2026-05-06", "event-contrecoeur-piia-2026-008-lot-6546172"],
+      "commentaire": "Sur les 732 du corpus, nb_unites_max est renseigné pour 116 (15,8%) ; 87 (11,9%) ont nb_unites_max=null alors qu'un nombre de logements est explicite en texte — le cas event-contrecoeur-piia-2026-008-lot-6546172 (28 logements en descr, champ null) a un doublon signal-contrecoeur-multilogement-28-logements avec nb_unites_max=\"28\", prouvant que l'extraction est possible mais pas systématique."
+    },
+    {
+      "critere_steve": "§6 — Scoring / intensité de l'opportunité",
+      "capte": "non",
+      "ou": "champ intensite existe mais très peu renseigné",
+      "n_avec": 123,
+      "n_sans": 758,
+      "preuve_ids": ["signal-ange-gardien-densification-colombes", "signal-begin-mine-first-phosphate-2026", "signal-saint-henri-densification-34C"],
+      "commentaire": "Sur les 881 signaux du corpus, intensite est renseignée pour 123 (14%, dont 75 « haute », 42 « moyenne », 3 « faible », 3 « basse ») et null pour 758 (86%) — le scoring visé par Steve (section 6) n'est pas encore un mécanisme fiable sur ce corpus."
+    }
+  ],
+  "angles_morts": [
+    {
+      "critere_steve": "§4.3 Vidéos YouTube des conseils municipaux — détecter, transcrire, extraire, relier aux dossiers",
+      "pourquoi_non_capte": "Aucune source vidéo n'apparaît dans le corpus ; les 3 strates ne contiennent que du texte issu d'avis/PV/dérogations écrits.",
+      "preuve_ou_absence": "0/881 occurrence de « vidéo » ou « youtube » dans descr/citation sur l'ensemble des 3 strates — absence totale, pas seulement un défaut de champ."
+    },
+    {
+      "critere_steve": "P4 — CPTAQ comme classe de priorité dédiée (8/10)",
+      "pourquoi_non_capte": "category n'a jamais la valeur cptaq ; les 18 mentions trouvées viennent de l'id (naming manuel) ou de mots dans descr/citation, jamais d'une classification structurée.",
+      "preuve_ou_absence": "18/732 signaux mentionnent CPTAQ en texte ou id (ex. signal-kazabazua-cptaq-lot5497359, signal-sutton-cptaq-terres-agricoles-2026) mais category distinct list ne contient jamais « cptaq » (18 valeurs distinctes recensées, aucune n'est cptaq)."
+    },
+    {
+      "critere_steve": "§4.4/§4.5/§7 — Reconstruire le contexte complet d'un dossier à travers ses étapes et son historique",
+      "pourquoi_non_capte": "Aucun champ dossier_id/reglement_ref/date ne relie deux enregistrements du même dossier réel ; le lien n'est visible qu'en relisant descr/citation manuellement.",
+      "preuve_ou_absence": "Cas Contrecœur (lot 6 546 172) : 3 ids distincts pour le même PIIA 2026-008 (event-contrecoeur-piia-2026-008-lot-6546172 avec category=null, nb_unites_max=null ; signal-contrecoeur-multilogement-28-logements avec category=piia, nb_unites_max=\"28\") — le système ne relie pas ses propres enregistrements du même fait."
+    }
+  ],
+  "elements_complementaires": [
+    {
+      "quoi": "Extraction/backfill du nombre de logements (nb_unites_max) depuis descr/citation quand le champ est null",
+      "pourquoi": "C'est la preuve chiffrée de densification la plus directement actionnable pour Steve (section 6) ; elle existe souvent en texte libre mais n'est pas reportée au champ.",
+      "deja_dans_le_texte": true,
+      "cible": "graphify 3.4",
+      "preuve_ids": ["event-lassomption-ppcmoi-15-2026", "event-saint-jean-de-matha-piia-lot6651580-projet-integre-2026-05-06", "signal-saint-jean-de-matha-piia-projet-integre-36-logements", "event-campbells-bay-dm-stationnement-ringrose"],
+      "gain_estime": "débloque potentiellement une partie des 87/732 signaux qualifiés (11,9% sur le corpus) où le compte est déjà dans le texte, plus une partie des 40 PIIA-sans-champ échantillonnés (au moins 1/40 avec compte explicite, ex. 36 logements)"
+    },
+    {
+      "quoi": "Champ structuré reglement_number / dossier_ref pour relier les enregistrements d'un même règlement/dossier à travers ses étapes",
+      "pourquoi": "Steve demande explicitement (§4.4) de relier les documents entre eux et reconstruire le contexte complet ; aujourd'hui ce lien n'existe qu'en texte libre (numéro de règlement mentionné dans descr/citation).",
+      "deja_dans_le_texte": true,
+      "cible": "graphify 3.4",
+      "preuve_ids": ["event-saint-jean-baptiste-rezonage-1011-26-am", "event-saint-jean-baptiste-adoption-1011-26", "event-lachute-ppcmoi-hc415-multilogements-2026"],
+      "gain_estime": "sur les 732 du corpus, 91 signaux (12,4%) portent déjà un numéro de règlement en texte, exploitable pour du chaînage sans nouvelle collecte"
+    },
+    {
+      "quoi": "Classification (category) des enregistrements de type DesignationEvent (préfixe id « event- »), aujourd'hui presque jamais classés",
+      "pourquoi": "Ces enregistrements portent l'etape (piia/ppcmoi/derogation_mineure) mais restent hors des priorités P1-P4 de Steve faute de category, alors que le même fait est parfois classé côté « signal- ».",
+      "deja_dans_le_texte": false,
+      "cible": "graphify 3.4",
+      "preuve_ids": ["event-lachute-ppcmoi-hc415-multilogements-2026", "event-contrecoeur-piia-2026-008-lot-6546172", "event-saint-jean-baptiste-rezonage-1011-26-am"],
+      "gain_estime": "sur les 732 du corpus, 279/283 ids « event- » (98,6%) ont category=null contre 56/449 ids « signal- » (12,5%) — reclasser les event- rapprocherait la couverture P1-P4 de son plafond réel"
+    },
+    {
+      "quoi": "Déduplication event/signal du même dossier réel avant présentation à Steve",
+      "pourquoi": "Le même fait terrain peut apparaître sous 2 ids distincts avec des champs différents (l'un enrichi, l'autre pas), ce qui crée du bruit de comptage et une fausse impression de deux opportunités.",
+      "deja_dans_le_texte": false,
+      "cible": "graphify 3.4",
+      "preuve_ids": ["event-contrecoeur-piia-2026-008-lot-6546172", "signal-contrecoeur-multilogement-28-logements", "event-campbells-bay-dm-stationnement-ringrose", "signal-campbells-bay-derogation-stationnement-ringrose"],
+      "gain_estime": "sur l'échantillon de 120 signaux du gisement (strate3), 16/120 (13,3%) portent un id déjà présent dans les 732 du vivier qualifié — une partie du « gisement » à trancher est en fait déjà couverte ailleurs"
+    },
+    {
+      "quoi": "Retour au texte source (PV/citation complète) pour les 20/40 PIIA-sans-champ dont le descr est un simple stub adresse sans aucun mot-clé de densification",
+      "pourquoi": "Une partie du gisement PIIA-sans-champ n'est ni du bruit prouvé ni un projet prouvé — c'est juste illisible avec les champs actuels ; la citation est vide dans 20/40 cas.",
+      "deja_dans_le_texte": false,
+      "cible": "scraping",
+      "preuve_ids": ["signal-sainte-anne-de-sorel-piia-36-lachapelle", "signal-shefford-piia-2026-04-14", "signal-sainte-martine-piia-0006"],
+      "gain_estime": "sur l'échantillon de 40 PIIA-sans-champ, 20 (50%) ont une citation vide — remonter au PV source pourrait convertir une partie de ces 168 PIIA-sans-champ (population totale, non extrapolée) en signaux exploitables"
+    }
+  ],
+  "bruit": [
+    {
+      "type": "Dérogations mineures sans lien densification (garage, clôture, piscine, remise) sans aucun mot-clé de densité/hauteur/marge/stationnement/logement/multifamilial/usage",
+      "sur_echantillon": "8/80 dérogations mineures",
+      "recuperable_par": "jamais",
+      "exemples_ids": ["event-saint-germain-de-grantham-derog-2026-006-210-paradis", "event-dunham-dm-26-02-c", "event-roxton-falls-derogation-2026-05-04-matricule-8440"]
+    },
+    {
+      "type": "PIIA-sans-champ réduits à un stub adresse sans aucun contenu de projet (citation vide, descr = « Signal : PIIA — adresse — Ville »)",
+      "sur_echantillon": "20/40 PIIA-sans-champ",
+      "recuperable_par": "scraping",
+      "exemples_ids": ["signal-shefford-piia-2026-04-14", "signal-sainte-anne-de-sorel-piia-8-marie-napoleon", "signal-sainte-martine-piia-0006"]
+    },
+    {
+      "type": "Doublons event-/signal- du même dossier réel (même lot/adresse) avec champs incohérents entre les deux copies",
+      "sur_echantillon": "16/120 signaux de l'échantillon gisement déjà présents dans le vivier qualifié de 732 ; 3 paires event-/signal- identifiées explicitement dans le corpus",
+      "recuperable_par": "graphify 3.4",
+      "exemples_ids": ["event-contrecoeur-piia-2026-008-lot-6546172", "signal-contrecoeur-multilogement-28-logements", "event-campbells-bay-dm-stationnement-ringrose", "signal-campbells-bay-derogation-stationnement-ringrose"]
+    },
+    {
+      "type": "Dérogations mineures ambiguës : ni mot-clé « à retenir » ni « à filtrer », descr trop générique pour trancher",
+      "sur_echantillon": "52/80 dérogations mineures (dont 27/80 à citation vide)",
+      "recuperable_par": "graphify 3.4",
+      "exemples_ids": ["signal-derogation-mineure-2026-04-086", "event-saint-mathieu-du-parc-derogation-3501-presquile", "event-adstock-derogation-16-rue-lachance"]
+    }
+  ],
+  "verdict_gisement": "Sur l'échantillon fourni, le gisement n'est ni du pur bruit ni un vivier de vrais projets illisibles homogène : il se scinde en trois blocs mesurés. Un premier bloc (8/80 dérogations mineures) est du bruit avéré (garage/clôture/piscine sans aucun signal de densité), conforme à la définition même de Steve des éléments « à filtrer ». Un deuxième bloc (20/80 dérogations + 10/40 PIIA-sans-champ) contient des signaux de densification réels mais non chiffrés en champ, dont au moins 3 exemples (event-saint-jean-de-matha-piia-lot6651580, event-contrecoeur-piia-2026-008-lot-6546172, event-lassomption-ppcmoi-15-2026) portent un nombre de logements explicite en texte alors que nb_unites_max reste null — la preuve que l'extraction réussit ailleurs sur des cas identiques (16/120 signaux de cet échantillon existent même en double dans le vivier déjà qualifié). Le troisième bloc, le plus large (52/80 dérogations ambiguës + 20/40 PIIA-sans-champ à citation vide), n'est ni bruit ni projet prouvé : c'est un déficit d'extraction/texte-source, à trancher au cas par cas, pas à écarter en masse.",
+  "top_3_leviers": [
+    "Backfill nb_unites_max depuis descr/citation par extraction ciblée (graphify 3.4) — cas déjà prouvés sur 87/732 signaux qualifiés et au moins 3 cas dans l'échantillon gisement où le nombre de logements est explicite en texte mais absent du champ",
+    "Reclasser systématiquement les enregistrements « event- » (98,6% de category null sur 732, contre 12,5% côté « signal- ») et dédupliquer les paires event-/signal- du même dossier (cas Contrecœur, Campbell's Bay) pour éviter le double comptage et fiabiliser les priorités P1-P4",
+    "Créer un champ structuré reglement_number/dossier_ref pour relier les étapes d'un même dossier dans le temps (§4.2/§4.4), exploitable immédiatement sur 91/732 signaux qui portent déjà un numéro de règlement en texte, et instrumenter une classe CPTAQ dédiée (0 aujourd'hui malgré 18 mentions textuelles) et l'ingestion vidéo YouTube (0/881, angle mort total)"
+  ]
+}
