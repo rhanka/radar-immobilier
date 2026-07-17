@@ -40,6 +40,7 @@
     reglementProvenance,
     scoreTone,
     scoreLabel,
+    usageDominantDisplay,
   } from "$lib/components/maps/lot-fiche-utils.js";
   import {
     activeMarketMark,
@@ -90,6 +91,9 @@
   // « Règl. {numero} ({millesime}) » + lien source, ou « Règlement non
   // renseigné » quand geo ne sert pas de numéro (jamais deviné).
   $: reglement = reglementProvenance(zone);
+  // Usage dominant servi par geo (`qc-zonage-<slug>`) — « résidentiel
+  // (nomenclature de zone) » ; null (aucune ligne) quand geo ne le sert pas.
+  $: usageDominant = usageDominantDisplay(zone);
   $: lotCentroid = lot ? centroid(lot) : null;
   // Adresse civique du lot (donnée publique du rôle — jamais un propriétaire).
   $: adresse = lot?.properties.adresse ?? null;
@@ -498,6 +502,10 @@
               <dd class="text-slate-700">{zone?.densiteLogHa ?? "—"}{zone?.densiteLogHa !== null && zone?.densiteLogHa !== undefined ? " log/ha" : ""}</dd>
               <dt class="text-slate-500">Usages</dt>
               <dd class="text-slate-700">{zone?.usages?.length ? zone.usages.join(", ") : "—"}</dd>
+              {#if usageDominant}
+                <dt class="text-slate-500">Usage dominant</dt>
+                <dd class="text-slate-700" data-testid="fiche-usage-dominant">{usageDominant}</dd>
+              {/if}
               {#if zoneDescription}
                 <dt class="text-slate-500">Description</dt>
                 <dd class="text-slate-700" data-testid="fiche-zone-desc">{zoneDescription}</dd>

@@ -23,6 +23,8 @@ import {
   reglementProvenance,
   scoreTone,
   scoreLabel,
+  usageDominantDisplay,
+  usageDominantSourceLabel,
 } from "./lot-fiche-utils.js";
 import type { LotFeature } from "$lib/maps/lots-client.js";
 
@@ -536,6 +538,63 @@ describe("reglementProvenance — provenance du règlement en vigueur", () => {
       reglementUrl: null,
     });
     expect(provenance?.url).toBeNull();
+  });
+});
+
+// ── usageDominantDisplay — usage dominant servi par geo, honnête ──────────────
+
+describe("usageDominantDisplay — usage dominant de la zone (passthrough)", () => {
+  const baseZone = { kind: "H", usages: [], densiteLogHa: null };
+
+  it("aucune zone / aucun usage dominant → null (pas de ligne inventée)", () => {
+    expect(usageDominantDisplay(null)).toBeNull();
+    expect(usageDominantDisplay(undefined)).toBeNull();
+    expect(usageDominantDisplay({ ...baseZone })).toBeNull();
+    expect(usageDominantDisplay({ ...baseZone, usageDominant: "  " })).toBeNull();
+  });
+
+  it("valeur + source connue → « valeur (source humanisée) »", () => {
+    expect(
+      usageDominantDisplay({
+        ...baseZone,
+        usageDominant: "residentiel",
+        usageDominantSource: "zone-nomenclature",
+      }),
+    ).toBe("residentiel (nomenclature de zone)");
+  });
+
+  it("valeur sans source → valeur seule (aucune source inventée)", () => {
+    expect(
+      usageDominantDisplay({ ...baseZone, usageDominant: "agricole" }),
+    ).toBe("agricole");
+  });
+
+  it("source inconnue → rendue verbatim (jamais masquée)", () => {
+    expect(
+      usageDominantDisplay({
+        ...baseZone,
+        usageDominant: "commercial",
+        usageDominantSource: "override-manuel",
+      }),
+    ).toBe("commercial (override-manuel)");
+  });
+});
+
+describe("usageDominantSourceLabel — copy neutre, verbatim si inconnue", () => {
+  it("source connue → libellé produit neutre", () => {
+    expect(usageDominantSourceLabel("zone-nomenclature")).toBe(
+      "nomenclature de zone",
+    );
+  });
+
+  it("source vide/absente → null", () => {
+    expect(usageDominantSourceLabel(null)).toBeNull();
+    expect(usageDominantSourceLabel("")).toBeNull();
+    expect(usageDominantSourceLabel("   ")).toBeNull();
+  });
+
+  it("source inconnue → verbatim", () => {
+    expect(usageDominantSourceLabel("autre-source")).toBe("autre-source");
   });
 });
 

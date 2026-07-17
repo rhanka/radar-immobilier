@@ -33,9 +33,16 @@
  *   - `zone.reglement{Numero,Millesime,PageSource,Url}` : provenance RÉELLE du
  *     règlement porté par la zone de norme (`qc-zonage-norms-<slug>`) — chaque
  *     champ null quand la source ne le porte pas ; jamais deviné.
+ *   - `zone.usageDominant` / `zone.usageDominantSource` : usage dominant RÉEL
+ *     servi par `qc-zonage-<slug>` — passthrough d'affichage, null quand absent
+ *     (jamais une classification dérivée).
  */
 
 import { normalizeZoneCode } from "./extract-refs.js";
+import {
+  USAGE_DOMINANT_KEYS,
+  USAGE_DOMINANT_SOURCE_KEYS,
+} from "./normes-keys.js";
 import {
   zoneKindFromCode,
   canonicalKindFromSimKind,
@@ -87,6 +94,13 @@ export interface ZoneIndexEntry {
   reglementMillesime: number | null;
   reglementPageSource: string | null;
   reglementUrl: string | null;
+  /**
+   * Usage dominant RÉEL de la zone (`qc-zonage-<slug>`) si la source le porte ;
+   * null sinon. Passthrough d'affichage, jamais une classification dérivée.
+   */
+  usageDominant: string | null;
+  /** Source du usage dominant (ex. "zone-nomenclature") ; null si absente. */
+  usageDominantSource: string | null;
   /** Géométrie pour la jointure spatiale ; null si absente. */
   geometry: EnrichGeometry | null;
   /** Bbox pré-calculée de la géométrie ; null si géométrie absente. */
@@ -263,6 +277,30 @@ export function zoneReglementProvenance(
   };
 }
 
+/** Usage dominant d'une zone + sa source (verbatim-or-null). */
+export interface ZoneUsageDominant {
+  /** Usage dominant tel que servi (ex. "residentiel", "agricole") ; null sinon. */
+  value: string | null;
+  /** Source du usage dominant (ex. "zone-nomenclature") ; null sinon. */
+  source: string | null;
+}
+
+/**
+ * Usage dominant porté par les properties d'une zone (`qc-zonage-<slug>`).
+ * Passthrough d'AFFICHAGE honnête : value/source null quand la source ne les
+ * porte pas — jamais une classification dérivée. Clés reconnues centralisées
+ * dans normes-keys (source de vérité UNIQUE, réutilisée par l'index et le
+ * payload lot servi au front).
+ */
+export function zoneUsageDominant(
+  props: Record<string, unknown>,
+): ZoneUsageDominant {
+  return {
+    value: firstString(USAGE_DOMINANT_KEYS.map((key) => props[key])),
+    source: firstString(USAGE_DOMINANT_SOURCE_KEYS.map((key) => props[key])),
+  };
+}
+
 /**
  * Normes RÉELLES portées par les properties d'une zone (densité log/ha +
  * usages). Jamais inventées : densité null / usages [] quand la source ne les
@@ -354,6 +392,7 @@ export function buildZoneIndex(fc: {
 
     const normes = zoneNormes(props);
     const provenance = zoneReglementProvenance(props);
+    const usageDominant = zoneUsageDominant(props);
     const entry: ZoneIndexEntry = {
       code,
       codeNorm,
@@ -365,6 +404,8 @@ export function buildZoneIndex(fc: {
       reglementMillesime: provenance.millesime,
       reglementPageSource: provenance.pageSource,
       reglementUrl: provenance.url,
+      usageDominant: usageDominant.value,
+      usageDominantSource: usageDominant.source,
       geometry,
       bbox,
       bboxArea: bbox ? (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) : 0,
@@ -626,6 +667,8 @@ export function enrichLotFeatures(
         reglementMillesime: zone.reglementMillesime,
         reglementPageSource: zone.reglementPageSource,
         reglementUrl: zone.reglementUrl,
+        usageDominant: zone.usageDominant,
+        usageDominantSource: zone.usageDominantSource,
       };
       props["zoneJoin"] = zoneJoin;
       props["multifamilial4plus"] = derived.allows4Plus;
