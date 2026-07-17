@@ -159,16 +159,33 @@ function signalNodeRow(
     etapeAnnote: string | null;
   }> = {},
 ): Record<string, unknown> {
-  return {
+  const row = {
     citySlug,
     type: "Signal",
-    category: null,
+    category: null as string | null,
     label: "Signal de test",
-    nbUnitesMax: null,
-    intensite: null,
-    description: null,
-    etapeAnnote: null,
+    nbUnitesMax: null as string | null,
+    intensite: null as string | null,
+    description: null as string | null,
+    etapeAnnote: null as string | null,
     ...patch,
+  };
+  // `listCitiesWithSignalNodes` ne lit qu'une seule source : `props`. Les colonnes
+  // plates de la projection en sont DÉRIVÉES en SQL
+  // (`props->'properties'->>'category'`, …), donc elles ne peuvent jamais diverger
+  // de `props` en production. La fixture reproduit cet invariant : sans `props`,
+  // elle modélisait une ligne que le SQL ne peut pas produire.
+  return {
+    ...row,
+    props: {
+      properties: {
+        category: row.category,
+        description: row.description,
+        etape: row.etapeAnnote,
+        nb_unites_max: row.nbUnitesMax,
+        intensite: row.intensite,
+      },
+    },
   };
 }
 
@@ -671,7 +688,7 @@ describe("GET /api/source/coverage", () => {
     expect(cityOf(body, "brossard").signals.priority).toBe(0);
   });
 
-  it("priority (z∩m∩p) : DesignationEvent précoce à intensité haute compte, ville sans flags reste à 0", async () => {
+  it("priority (z∩m∩p) : DesignationEvent précoce à intensité haute NE compte PAS, ville sans flags reste à 0", async () => {
     const store = makeMemStore();
     const db = makeDb([
       [],
