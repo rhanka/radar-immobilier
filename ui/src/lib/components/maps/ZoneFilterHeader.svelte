@@ -20,6 +20,8 @@
     type ZoneKindFilter,
     type ZoneKindGroupId,
   } from "$lib/maps/zone-kind-filter.js";
+  import { type ZoneMillesimeFilter } from "$lib/maps/zone-millesime-filter.js";
+  import ZoneMillesimeSelect from "$lib/components/maps/ZoneMillesimeSelect.svelte";
 
   /** Zones de la ville active (affectation/kind + code suffisent au filtre). */
   export let zones: ReadonlyArray<{
@@ -29,6 +31,15 @@
   }> = [];
   export let filter: ZoneKindFilter;
   export let onChange: (filter: ZoneKindFilter) => void = () => {};
+
+  /**
+   * Base de calcul du sélecteur de millésime = TOUTES les zones de la ville
+   * (jamais la couche déjà filtrée par millésime). Le sélecteur se masque
+   * lui-même tant qu'il n'y a pas ≥ 2 millésimes servis (dégradé honnête).
+   */
+  export let millesimeZones: ReadonlyArray<{ reglementMillesime?: string | null }> = [];
+  export let millesimeFilter: ZoneMillesimeFilter = null;
+  export let onMillesimeChange: (filter: ZoneMillesimeFilter) => void = () => {};
 
   $: filterActive = !isDefaultZoneKindFilter(filter);
   $: matchedCount = countZoneKindMatches(zones, filter);
@@ -65,6 +76,13 @@
       </button>
     {/if}
   </div>
+
+  <!-- Millésime du zonage (exclusif) — masqué tant qu'un seul millésime servi -->
+  <ZoneMillesimeSelect
+    zones={millesimeZones}
+    filter={millesimeFilter}
+    onChange={onMillesimeChange}
+  />
 
   <!-- Types de zone additifs (vide = tous) — catégories de la légende zonage -->
   <div class="fh-chips" role="group" aria-label="Filtre par type de zone (additif)">
