@@ -588,3 +588,189 @@ describe("SignauxSelPanel — accordéon ZONES : filtre par TYPE de zone", () =>
     expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
   });
 });
+
+// ── m7 — accordéon Règlements (entre Signaux et Zones) ───────────────────────
+
+describe("SignauxSelPanel — m7 accordéon Règlements", () => {
+  it("liste le règlement cité par les signaux (numéro + bouton PDF)", () => {
+    const { getByText, queryByText } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: NODES },
+    });
+    expect(getByText("Règlements")).not.toBeNull();
+    // NODES citent tous « 1926-26 » → une entrée de règlement.
+    expect(queryByText("1926-26")).not.toBeNull();
+    expect(queryByText("Voir le PDF")).not.toBeNull();
+  });
+
+  it("« Voir le PDF » appelle onOpenSource (titre = « Règlement <numéro> »)", async () => {
+    const calls: Array<{ title: string; sourceUrl: string | null }> = [];
+    const { getByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: NODES,
+        onOpenSource: (p: { title: string; sourceUrl: string | null }) =>
+          calls.push(p),
+      },
+    });
+    await fireEvent.click(getByText("Voir le PDF"));
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.title).toBe("Règlement 1926-26");
+  });
+
+  it("aucun règlement cité → état vide honnête (rien de fabriqué)", () => {
+    const noReg: GraphSignalNode = {
+      id: "no-reg",
+      type: "DesignationEvent",
+      label: "Signal sans règlement",
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: null,
+      props: { description: "x", zone_ref: "H-431" },
+    };
+    const { getByText, queryByText } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [noReg] },
+    });
+    expect(getByText("Règlements")).not.toBeNull();
+    expect(
+      queryByText("Aucun règlement cité par les signaux de cette ville."),
+    ).not.toBeNull();
+  });
+});
+
+// ── m8 — source de la zone (type + ouverture) ────────────────────────────────
+
+describe("SignauxSelPanel — m8 source de la zone", () => {
+  function zonesWithGrille(code: string, grillePdfUrl: string): GeoZonesResponse {
+    const base = makeZonesResponse([code]);
+    base.featureCollection.features[0]!.properties.grillePdfUrl = grillePdfUrl;
+    return base;
+  }
+
+  it("fiche zone : type de source mentionné + ouverture en viewer (grille servie)", async () => {
+    const calls: Array<{ title: string; sourceUrl: string | null }> = [];
+    const { getByText, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithGrille(
+          "H-431",
+          "https://ville.qc.ca/grille-h431.pdf",
+        ),
+        onOpenSource: (p: { title: string; sourceUrl: string | null }) =>
+          calls.push(p),
+      },
+    });
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    // m8.2 — le type de source est mentionné.
+    expect(queryByText("Type de source")).not.toBeNull();
+    // m8.1 — la source est ouvrable dans le viewer partagé.
+    await fireEvent.click(getByText("Ouvrir la source (PDF)"));
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.sourceUrl).toBe("https://ville.qc.ca/grille-h431.pdf");
+  });
+
+  it("fiche zone sans URL servie : type affiché, note « source non ouvrable »", async () => {
+    const { getByText, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431"]),
+      },
+    });
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(queryByText("Type de source")).not.toBeNull();
+    expect(queryByText(/Source non ouvrable/)).not.toBeNull();
+  });
+});
+
+// ── m6 — axe millésime du zonage (fiche + sélecteur masqué mono-cohorte) ──────
+
+describe("SignauxSelPanel — m6 millésime du zonage", () => {
+  /** Zones avec millésime + n° de règlement PAR ZONE (axe millésime). */
+  function zonesWithMillesime(
+    entries: Array<{ code: string; millesime?: string | null; numero?: string | null }>,
+  ): GeoZonesResponse {
+    const base = makeZonesResponse(entries.map((e) => e.code));
+    entries.forEach((e, i) => {
+      const props = base.featureCollection.features[i]!.properties;
+      if (e.millesime !== undefined) props.reglementMillesime = e.millesime;
+      if (e.numero !== undefined) props.reglementNumero = e.numero;
+    });
+    return base;
+  }
+
+  it("fiche zone : affiche « Millésime · règl. » quand geo le sert, SANS écraser le Type de source (m8)", async () => {
+    const { getByText, queryByText, getByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithMillesime([
+          { code: "CO-939", millesime: "2008", numero: "2008-102" },
+        ]),
+      },
+    });
+    await fireEvent.click(getByText("CO-939", { selector: ".sel-entity-label" }));
+    // Ligne millésime visible (valeur combinée « 2008 · règl. 2008-102 »).
+    expect(getByTestId("zone-reglement-millesime").textContent).toContain("2008");
+    expect(getByTestId("zone-reglement-millesime").textContent).toContain("règl. 2008-102");
+    // m8 non régressé : la ligne « Type de source » reste présente.
+    expect(queryByText("Type de source")).not.toBeNull();
+  });
+
+  it("fiche zone : aucune ligne millésime fabriquée quand geo ne sert rien", async () => {
+    const { getByText, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431"]),
+      },
+    });
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("zone-reglement-millesime")).toBeNull();
+  });
+
+  it("sélecteur MASQUÉ tant qu'une seule cohorte est servie (MT = tout 2008)", () => {
+    const { queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithMillesime([
+          { code: "CO-939", millesime: "2008", numero: "2008-102" },
+          { code: "H-431", millesime: "2008", numero: "2008-102" },
+        ]),
+      },
+    });
+    expect(queryByTestId("signaux-zone-millesime-select")).toBeNull();
+  });
+
+  it("sélecteur VISIBLE dès ≥ 2 millésimes ; choisir un millésime restreint la liste + le compteur N/M", async () => {
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithMillesime([
+          { code: "H-2008", millesime: "2008", numero: "2008-102" },
+          { code: "H-2020", millesime: "2020", numero: "2020-07" },
+          { code: "C-2020", millesime: "2020", numero: "2020-07" },
+        ]),
+      },
+    });
+
+    const select = getByTestId("signaux-zone-millesime-select").querySelector("select");
+    expect(select).not.toBeNull();
+
+    // Sélectionne le millésime 2008 (exclusif) → seule H-2008 reste listée ; la
+    // couche de type est restreinte au millésime (compteur du header 1/1 :
+    // les chips de type reflètent millesimeFilteredZones, pas les 3 zones).
+    await fireEvent.change(select!, { target: { value: "2008" } });
+    expect(queryByText("H-2008", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("H-2020", { selector: ".sel-entity-label" })).toBeNull();
+    expect(queryByText("C-2020", { selector: ".sel-entity-label" })).toBeNull();
+    expect(getByTestId("signaux-zone-filter-count").textContent).toBe("1/1");
+
+    // Retour « Tous les millésimes » → toutes les zones reviennent (3/3).
+    await fireEvent.change(select!, { target: { value: "__all__" } });
+    expect(queryByText("H-2020", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(getByTestId("signaux-zone-filter-count").textContent).toBe("3/3");
+  });
+});

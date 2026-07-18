@@ -78,8 +78,8 @@ describe("SignauxRail — tabs A / B", () => {
   it("offers A and B as tabs, A active by default, no retired transition mode", () => {
     const { container } = renderRail();
     const [a, b] = getTabs(container);
-    expect(a.textContent).toContain("Vivier A · référence");
-    expect(b.textContent).toContain("Vivier B");
+    expect(a.textContent).toContain("Référence A");
+    expect(b.textContent).toContain("Nouveau B");
     expect(a.getAttribute("aria-selected")).toBe("true");
     expect(b.getAttribute("aria-selected")).toBe("false");
     expect(container.textContent).not.toContain("Transition vers B");
@@ -116,6 +116,8 @@ describe("SignauxRail — tabs A / B", () => {
     expect(container.textContent).toContain("Zonage");
     expect(container.textContent).toContain("Multifamilial 4+");
     expect(container.textContent).toContain("Précoce");
+    // m1.1 : le texte d'aide « Combinez les axes… » a été retiré.
+    expect(container.textContent).not.toContain("Combinez les axes du vivier de référence");
     // Défaut A = subsetCounts["z|m|p"] = 1.
     expect(container.textContent).toMatch(/1\s+signal/);
   });
@@ -160,21 +162,41 @@ describe("SignauxRail — tabs A / B", () => {
     expect(container.textContent).toMatch(/2\s+signaux/);
   });
 
-  it("shows B with zonage/résidentiel locked-on and précoce unchecked", async () => {
+  it("shows B's three axes all toggleable (defaults Z✓ R✓ P✗), none locked (m1.4)", async () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
     });
     const boxes = toggleBoxes(container);
     expect(boxes).toHaveLength(3);
-    // Zonage + Résidentiel définissent B : cochés, verrouillés.
+    // Zonage ✓, Résidentiel ✓, Précoce ✗ — et AUCUNE case verrouillée/grisée.
     expect(boxes[0]!.checked).toBe(true);
-    expect(boxes[0]!.disabled).toBe(true);
     expect(boxes[1]!.checked).toBe(true);
-    expect(boxes[1]!.disabled).toBe(true);
-    // Précoce : décoché par défaut, actionnable.
     expect(boxes[2]!.checked).toBe(false);
-    expect(boxes[2]!.disabled).toBe(false);
-    expect(container.textContent).toContain("zonage + résidentiel");
+    expect(boxes.every((box) => box.disabled)).toBe(false);
+    expect(boxes.some((box) => box.disabled)).toBe(false);
+    expect(container.textContent).toContain("Zonage");
+    expect(container.textContent).toContain("Résidentiel");
+    expect(container.textContent).toContain("Précoce");
+    // m1.2 : plus de ligne résumé « zonage + résidentiel ».
+    expect(container.textContent).not.toContain("zonage + résidentiel");
+  });
+
+  it("recomposes the B key when an axis is unchecked (m1.4)", async () => {
+    const calls: string[] = [];
+    const { container } = render(SignauxRail, {
+      props: {
+        entries: [SUTTON],
+        initialSubsetKey: "vivier-v2",
+        onFilterChange: (key: string) => calls.push(key),
+      },
+    });
+    const boxes = toggleBoxes(container);
+    // Décocher « Résidentiel » (2e case) → vivier-v2|-r.
+    await fireEvent.click(boxes[1]!);
+    expect(calls.at(-1)).toBe("vivier-v2|-r");
+    // Puis décocher « Zonage » (1re case) → vivier-v2|-z|-r.
+    await fireEvent.click(toggleBoxes(container)[0]!);
+    expect(calls.at(-1)).toBe("vivier-v2|-z|-r");
   });
 
   it("restricts B to precoce stages when the axis is checked", async () => {
@@ -195,15 +217,15 @@ describe("SignauxRail — tabs A / B", () => {
     expect(container.textContent).toMatch(/1\s+signal/);
   });
 
-  it("shows B's three counts side by side and never a merged total", () => {
+  it("drops the B counts line and keeps neutral copy (m1.5)", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
     });
-    const counts = container.querySelector(".vivier-b-counts");
-    expect(counts).not.toBeNull();
-    expect(counts!.textContent).toMatch(/2\s*retenus/);
-    expect(counts!.textContent).toMatch(/7\s*à confirmer/);
-    expect(counts!.textContent).toMatch(/3\s*exclus/);
+    // m1.5 : la mention « retenus · à confirmer · exclus » a disparu.
+    expect(container.querySelector(".vivier-b-counts")).toBeNull();
+    expect(container.textContent).not.toMatch(/retenus/);
+    expect(container.textContent).not.toMatch(/à confirmer/);
+    expect(container.textContent).not.toMatch(/exclus/);
     // Copy produit neutre : aucun jargon interne.
     expect(container.textContent).not.toMatch(/honnête|pire statut|anti-survente/i);
   });
@@ -224,6 +246,8 @@ describe("SignauxRail — tabs A / B", () => {
     expect(boxes.every((box) => box.checked)).toBe(true);
     expect(container.textContent).toContain("Exclure PIIA sans projet résidentiel");
     expect(container.textContent).toContain("Exclure dérogations mineures");
+    // m1.3 : la phrase d'aide confusante a été retirée.
+    expect(container.textContent).not.toContain("Un PIIA portant un projet résidentiel reste affiché");
 
     await fireEvent.click(boxes[0]!);
     expect(changes).toEqual([
@@ -236,7 +260,7 @@ describe("SignauxRail — tabs A / B", () => {
       props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
     });
     expect(container.querySelector(".vivier-b-exclusions")).toBeNull();
-    expect(container.querySelector(".vivier-b-counts")).toBeNull();
+    expect(container.textContent).not.toContain("Exclure PIIA sans projet résidentiel");
   });
 
   it("shows unavailable badges instead of aggregate zeros after a load error", () => {

@@ -149,6 +149,15 @@
   /** C3 — couleur de l'exergue des features sélectionnées (orange fluo). */
   export let selectionHighlightColor = "#ff6d00";
 
+  // ── Props : libellés sur les polygones (m5) ────────────────────────────────
+  // Affiche le n° de lot / le n° de zone directement sur les aplats (couches
+  // symbol dédiées). Désactivés par défaut (les polygones sont denses) ; le
+  // consommateur porte l'état (persisté en session) et le bascule via ces props.
+  /** Affiche le n° de lot (`noLot`) au centre des aplats de lot. */
+  export let showLotLabels = false;
+  /** Affiche le n° de zone (`code`) au centre des aplats de zone. */
+  export let showZoneLabels = false;
+
   // ── Props : cycle de vie ───────────────────────────────────────────────────
   /** Appelé une fois la carte prête, avec l'API impérative du socle. */
   export let onReady: (api: GeoCityMapApi) => void = () => {};
@@ -412,6 +421,36 @@
     hoveredFeatureIdBySource.delete(sourceId);
   }
 
+  /**
+   * m5 — Applique la visibilité des couches de libellés (n° lot / n° zone).
+   * No-op tant que les couches n'existent pas (avant le 1er `syncGeoLayers`).
+   */
+  function applyLabelVisibility(lots: boolean, zones: boolean): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      setLayoutProperty: (layer: string, prop: string, value: unknown) => void;
+    };
+    if (m.getLayer("selected-lots-label")) {
+      m.setLayoutProperty(
+        "selected-lots-label",
+        "visibility",
+        lots ? "visible" : "none",
+      );
+    }
+    if (m.getLayer("selected-zones-label")) {
+      m.setLayoutProperty(
+        "selected-zones-label",
+        "visibility",
+        zones ? "visible" : "none",
+      );
+    }
+  }
+
+  // Bascule la visibilité des libellés quand les props changent (sans re-sync
+  // complet des couches).
+  $: if (mapReady) applyLabelVisibility(showLotLabels, showZoneLabels);
+
   function syncGeoLayers(input: GeoLayersInput): void {
     if (!mapInstance || !mapReady) return;
     const m = mapInstance as {
@@ -420,6 +459,7 @@
       addSource: (id: string, source: unknown) => void;
       addLayer: (layer: unknown) => void;
       setPaintProperty: (layer: string, prop: string, value: unknown) => void;
+      setLayoutProperty: (layer: string, prop: string, value: unknown) => void;
     };
 
     const { zones, lots } = input;
@@ -520,6 +560,55 @@
         },
       });
     }
+
+    // m5 — LIBELLÉS sur les polygones (au-dessus des aplats/contours). Couches
+    // symbol dédiées, masquées par défaut (`visibility` piloté par les props).
+    // La gestion de collision de MapLibre (text-optional + placement au point)
+    // déleste automatiquement les étiquettes qui se chevauchent : le rendu reste
+    // lisible même sur des centaines de lots.
+    if (!m.getLayer("selected-zones-label")) {
+      m.addLayer({
+        id: "selected-zones-label",
+        type: "symbol",
+        source: "selected-zones",
+        // La zone de repli (contour ville, code `fallback:<slug>`) n'a pas de
+        // n° de zone signifiant : on ne l'étiquette pas.
+        filter: ["!=", ["slice", ["get", "code"], 0, 9], "fallback:"],
+        layout: {
+          "text-field": ["get", "code"],
+          "text-size": 11,
+          "text-anchor": "center",
+          "text-optional": true,
+          visibility: showZoneLabels ? "visible" : "none",
+        },
+        paint: {
+          "text-color": "#0f172a",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1.5,
+        },
+      });
+    }
+    if (!m.getLayer("selected-lots-label")) {
+      m.addLayer({
+        id: "selected-lots-label",
+        type: "symbol",
+        source: "selected-lots",
+        layout: {
+          "text-field": ["get", "noLot"],
+          "text-size": 10,
+          "text-anchor": "center",
+          "text-optional": true,
+          visibility: showLotLabels ? "visible" : "none",
+        },
+        paint: {
+          "text-color": "#0f172a",
+          "text-halo-color": "#ffffff",
+          "text-halo-width": 1.5,
+        },
+      });
+    }
+    // Garantit la cohérence visibilité ↔ props quand les couches préexistent.
+    applyLabelVisibility(showLotLabels, showZoneLabels);
 
     m.setPaintProperty(
       "selected-zones-fill",

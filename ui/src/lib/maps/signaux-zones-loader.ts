@@ -89,6 +89,14 @@ export function geoZonesResponseFromCollection(
         ...(feature.properties.grillePdfUrl
           ? { grillePdfUrl: feature.properties.grillePdfUrl }
           : {}),
+        // Millésime + n° de règlement porteur PAR ZONE (axe millésime) —
+        // transmis tels quels quand geo les sert ; jamais fabriqués.
+        ...(feature.properties.reglementMillesime
+          ? { reglementMillesime: feature.properties.reglementMillesime }
+          : {}),
+        ...(feature.properties.reglementNumero
+          ? { reglementNumero: feature.properties.reglementNumero }
+          : {}),
         // Label lisible : le libellé d'affectation prime sur le code kind
         // ("CO-939 — Conservation" plutôt que "CO-939 — CO").
         ...(feature.properties.affectation || feature.properties.kind
