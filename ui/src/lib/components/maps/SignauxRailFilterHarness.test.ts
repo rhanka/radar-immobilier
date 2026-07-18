@@ -10,6 +10,8 @@ import { describe, it, expect, afterEach } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import Harness from "./SignauxRailFilterHarness.svelte";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+import type { CityMapEntry } from "$lib/maps/maps-data.js";
+import type { VivierV2Counts } from "@radar/domain";
 
 afterEach(() => cleanup());
 
@@ -89,5 +91,90 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     // Décocher « Résidentiel » (2e axe) → le « à confirmer » entre dans la liste.
     await fireEvent.click(axisBoxes(container)[1]!);
     expect(getByTestId("visible-count").textContent).toBe("2");
+  });
+});
+
+/** Comptes v2 bulk serveur : total = qualified + residentialUnknown + Σ exclusions. */
+function bulkVivierCounts(qualified: number): VivierV2Counts {
+  return {
+    qualified,
+    residentialUnknown: 0,
+    excludedByReason: {
+      non_residentiel_franc: 0,
+      piia_non_pertinent: 0,
+      hors_zonage: 0,
+      derogation_hors_sujet: 0,
+    },
+    stageCounts: {
+      avis_motion: qualified,
+      projet_reglement: 0,
+      consultation_publique: 0,
+      second_projet: 0,
+      adoption: 0,
+      entree_vigueur: 0,
+      inconnu: 0,
+    },
+    total: qualified,
+  };
+}
+
+function westmountEntry(qualifiedBulk: number): CityMapEntry {
+  return {
+    municipality: {
+      slug: "westmount",
+      name: "Westmount",
+      mrc: "Montréal",
+    } as CityMapEntry["municipality"],
+    signalCount6m: qualifiedBulk,
+    subsetCounts: {},
+    vivierV2Counts: bulkVivierCounts(qualifiedBulk),
+  };
+}
+
+describe("m1.7 — the rail BADGE of the SELECTED city must track the visible list, not the stale bulk count", () => {
+  it("badge starts at the exclusion-filtered count and rises as exclusions are unchecked, never the static bulk", async () => {
+    // Bulk serveur (vivierV2Counts.qualified) = 3 : les 3 nœuds SONT qualifiés
+    // côté serveur (zonage oui ∩ résidentiel oui ∩ pas d'exclusion serveur).
+    // C'est la lentille d'AFFICHAGE cliente (exclusions PIIA/dérogation) qui,
+    // par défaut, n'en montre qu'1 — exactement le cas Westmount « 5 » du bug.
+    const detailNodes = [
+      node("rezonage-qualifie", "rezonage"),
+      node("piia-sans-projet", "piia"), // masqué par défaut (exclusion PIIA)
+      node("derogation-mineure", "derogation"), // masqué par défaut (exclusion dérogations)
+    ];
+    const { container, getByTestId } = render(Harness, {
+      props: {
+        entries: [westmountEntry(3)],
+        detailNodes,
+        initialSubsetKey: "vivier-v2",
+        selectedSlug: "westmount",
+      },
+    });
+
+    function badgeRow(): HTMLElement {
+      const row = Array.from(container.querySelectorAll("button.rail-city-row")).find((r) =>
+        r.textContent?.includes("Westmount"),
+      );
+      expect(row).toBeDefined();
+      return row as HTMLElement;
+    }
+
+    // Défaut : 2 exclusions actives → seul le rezonage est visible (1), PAS le
+    // bulk serveur (3). La ligne du rail doit afficher "1", jamais "3".
+    expect(getByTestId("visible-count").textContent).toBe("1");
+    expect(badgeRow().textContent).toContain("1");
+    expect(badgeRow().textContent).not.toContain("3");
+
+    const boxes = exclusionBoxes(container);
+    // Décocher « Exclure PIIA sans projet résidentiel » → 2, le badge SUIT.
+    await fireEvent.click(boxes[0]!);
+    expect(getByTestId("visible-count").textContent).toBe("2");
+    expect(badgeRow().textContent).toContain("2");
+
+    // Décocher « Exclure dérogations mineures » → 3, badge = bulk (convergence
+    // attendue : sans exclusion, le vivier v2 qualifié EST les 3 nœuds).
+    await fireEvent.click(boxes[1]!);
+    expect(getByTestId("visible-count").textContent).toBe("3");
+    expect(badgeRow().textContent).toContain("3");
   });
 });

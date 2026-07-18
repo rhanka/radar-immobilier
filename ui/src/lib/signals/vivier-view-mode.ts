@@ -52,11 +52,16 @@ export interface BAxes {
 }
 
 /**
- * Défaut B : zonage ✓, résidentiel ✓, précoce ✗ — soit EXACTEMENT le vivier v2
- * qualifié (zonage oui ∩ résidentiel oui ∩ sans exclusion serveur). Décocher un
- * axe RELÂCHE le filtre (comme en A), sans jamais toucher la classification.
+ * Défaut B : zonage ✓, résidentiel ✓, précoce ✓ — le vivier v2 qualifié
+ * (zonage oui ∩ résidentiel oui ∩ sans exclusion serveur), RESTREINT aux
+ * étapes précoces dès l'ouverture du tab. Décocher un axe RELÂCHE le filtre
+ * (comme en A), sans jamais toucher la classification.
+ *
+ * m1 (RED confirmé en e2e) : le tab B s'ouvrait avec Précoce DÉCOCHÉ, ce qui
+ * noyait l'utilisateur dans tout le vivier qualifié dès l'entrée dans B. Le
+ * produit veut Précoce coché par défaut — cohérent avec le garde-fou attendu.
  */
-export const DEFAULT_B_AXES: BAxes = { z: true, r: true, p: false };
+export const DEFAULT_B_AXES: BAxes = { z: true, r: true, p: true };
 
 /** Étapes considérées « précoces » par le vivier v2 (parité `isPrecoceSignal`). */
 const PRECOCE_ETAPES = new Set(["avis_motion", "projet_reglement"]);
