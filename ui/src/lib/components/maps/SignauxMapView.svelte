@@ -133,6 +133,11 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import {
+    defaultDateRange,
+    filterNodesByEtapeDate,
+    type SignalDateRange,
+  } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
     lotLineColorExpression,
@@ -299,16 +304,36 @@
    */
   let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
 
-  /** Les nœuds réellement affichés : projection de la clé LIVE, puis exclusions B. */
+  /**
+   * m2 — Plage de dates ACTIVE (défaut : 6 derniers mois). C'est le PREMIER
+   * filtre du pipeline d'affichage : il restreint la population de base sur
+   * `etape_date` AVANT la projection A/B et les exclusions. Lentille cliente,
+   * jamais une reclassification serveur. Partagée A/B (une seule plage).
+   */
+  let dateRange: SignalDateRange = defaultDateRange();
+
+  /**
+   * Les nœuds réellement affichés : plage de dates (première lentille), puis
+   * exclusions B.
+   *
+   * La PROJECTION reste calculée sur la population brute AUTHORITATIVE : en A par
+   * défaut (`z|m|p`), `projectLegacyVivierA` VALIDE le jeu contre les IDs exacts
+   * du serveur — date-filtrer en amont casserait ce contrat (jeu partiel → «
+   * projection indisponible »). La plage est donc la 1re lentille d'AFFICHAGE
+   * appliquée à cette population authoritative ; le résultat (date ∩ projection ∩
+   * exclusions) est identique à un date-puis-projection, sans casser la garde.
+   */
   function visibleNodesFor(
     nodes: GraphSignalNode[],
     authority: unknown,
     subsetKey: string,
     exclusions: VivierBExclusions,
+    range: SignalDateRange,
   ): GraphSignalNode[] {
     const mode = modeFromSubsetKey(subsetKey);
     const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
-    return mode === "b" ? applyVivierBExclusions(projected, exclusions) : projected;
+    const dated = filterNodesByEtapeDate(projected, range);
+    return mode === "b" ? applyVivierBExclusions(dated, exclusions) : dated;
   }
 
   function applyActiveSubsetKey(subsetKey: string): void {
@@ -327,6 +352,7 @@
         detailLegacyProjection,
         activeSubsetKey,
         vivierBExclusions,
+        dateRange,
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
@@ -338,6 +364,18 @@
   function handleExclusionsChange(next: VivierBExclusions): void {
     vivierBExclusions = next;
     reconcileToVisibleNodes();
+  }
+
+  /**
+   * m2 — Changement de plage de dates (preset ou plage custom). La plage étant
+   * le premier filtre du pipeline, on réconcilie la sélection aux nœuds encore
+   * visibles puis on repeint la carte. `dateRange` étant lu par le bloc réactif
+   * `filteredDetailNodes`, la liste du panneau et les aplats se recalculent.
+   */
+  function handleDateRangeChange(next: SignalDateRange): void {
+    dateRange = next;
+    reconcileToVisibleNodes();
+    updateGeoLayers();
   }
 
   /**
@@ -520,11 +558,19 @@
    * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
+  // m2 — La PLAGE DE DATES est la première lentille d'affichage : elle restreint
+  // la population projetée (authoritative) sur `etape_date` AVANT les exclusions
+  // B et le tri. Elle définit ainsi la population de base que les axes A/B et les
+  // exclusions affinent ensuite. Voir `visibleNodesFor` pour le contrat serveur.
+  $: dateScopedProjectionNodes = filterNodesByEtapeDate(
+    detailProjection.nodes,
+    dateRange,
+  );
   $: filteredDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
-        applyVivierBExclusions(detailProjection.nodes, vivierBExclusions),
+        applyVivierBExclusions(dateScopedProjectionNodes, vivierBExclusions),
       )
-    : detailProjection.nodes;
+    : dateScopedProjectionNodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -1742,10 +1788,12 @@
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
+      {dateRange}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
+      onDateRangeChange={handleDateRangeChange}
     />
   </svelte:fragment>
 
