@@ -217,6 +217,17 @@
   const detailGuard = new RequestGuard();
   const geoGuard = new RequestGuard();
   let activeDocument: SignalDocRef | null = null;
+  // m7 / m8 — source documentaire générique ouverte dans le viewer partagé
+  // (règlement PDF, grille de zonage, source de zone). Distincte de
+  // `activeEvidence` (preuve d'un signal, avec navigation multi-signaux).
+  let activeSource:
+    | {
+        title: string;
+        sourceUrl: string | null;
+        rawRef: string | null;
+        page: number | null;
+      }
+    | null = null;
   let activeEvidence:
     | {
         title: string;
@@ -819,6 +830,7 @@
     );
     activeEvidence = transients.activeEvidence;
     activeDocument = transients.activeDocument;
+    activeSource = null;
     hoveredEvidenceSignalId = transients.hoveredEvidenceSignalId;
     if (syncUrl) {
       // Conserver le MODE actif (A/B) dans la nouvelle route ville. On persiste
@@ -922,6 +934,7 @@
     lotsResponse = null;
     activeDocument = null;
     activeEvidence = null;
+    activeSource = null;
     hoveredEvidenceSignalId = null;
     selectionState = createSelectionBucketState();
     updateGeoLayers();
@@ -1012,10 +1025,37 @@
 
   function openDocument(ref: SignalDocRef): void {
     activeDocument = ref;
+    activeSource = null;
   }
 
   function closeDocument(): void {
     activeDocument = null;
+  }
+
+  /**
+   * m7 / m8 — ouvre une SOURCE documentaire générique dans le viewer partagé
+   * (SignalPdfOverlay) : règlement PDF, grille de zonage, source de zone. Le
+   * viewer décide seul PDF vs iframe selon l'URL. Un seul overlay à la fois :
+   * on referme la preuve signal + le doc overlay pour éviter l'empilement.
+   */
+  function openSource(payload: {
+    title: string;
+    sourceUrl: string | null;
+    rawRef?: string | null;
+    page?: number | null;
+  }): void {
+    activeSource = {
+      title: payload.title,
+      sourceUrl: payload.sourceUrl ?? null,
+      rawRef: payload.rawRef ?? null,
+      page: payload.page ?? null,
+    };
+    activeEvidence = null;
+    activeDocument = null;
+  }
+
+  function closeSource(): void {
+    activeSource = null;
   }
 
   function openEvidence(payload: {
@@ -1042,8 +1082,9 @@
     // #91 — synchro bidirectionnelle : ouvrir/déplacer le viewer focalise AUSSI
     // la fiche correspondante à droite (elle se déplie + scrolle en miroir).
     syncRightPaneFocus(payload.node.id);
-    // Ferme le doc overlay si ouvert pour éviter deux overlays superposés
+    // Ferme le doc overlay + la source générique pour éviter deux overlays superposés
     activeDocument = null;
+    activeSource = null;
   }
 
   /**
@@ -1794,6 +1835,18 @@
         onClose={closeEvidence}
       />
     {/if}
+    {#if activeSource}
+      <!-- m7 / m8 — viewer partagé pour une source générique (règlement PDF,
+           grille de zonage, source de zone). Pas de navigation multi-signaux :
+           navSignals vide → la rangée de nav du viewer reste masquée. -->
+      <SignalPdfOverlay
+        title={activeSource.title}
+        sourceUrl={activeSource.sourceUrl}
+        rawRef={activeSource.rawRef}
+        page={activeSource.page}
+        onClose={closeSource}
+      />
+    {/if}
   </GeoCityMapBase>
 
   <!-- ── SEL droit : contexte de sélection (Ville active + Signaux / Zones /
@@ -1822,6 +1875,7 @@
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
+      onOpenSource={openSource}
       onRetryDetail={retryDetail}
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}

@@ -90,6 +90,11 @@
   } from "$lib/maps/zone-kind-filter.js";
   import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
+  import {
+    aggregateReglements,
+    type ReglementEntry,
+  } from "$lib/maps/signaux-reglements.js";
+  import { describeZoneSource } from "$lib/maps/zone-source.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -133,6 +138,18 @@
     title: string;
     evidence: SignalEvidence;
     node: GraphSignalNode;
+  }) => void = () => {};
+  /**
+   * m7 / m8 — ouvre une SOURCE documentaire générique (règlement PDF, grille de
+   * zonage PDF, source de zone) dans le viewer partagé. Le viewer décide seul
+   * PDF vs iframe selon l'URL (looksLikePdf). `rawRef` (interne, same-origin)
+   * est préféré pour un rendu PDF quand il est disponible.
+   */
+  export let onOpenSource: (payload: {
+    title: string;
+    sourceUrl: string | null;
+    rawRef?: string | null;
+    page?: number | null;
   }) => void = () => {};
   /**
    * #86 — cross-highlight signal ↔ fiche. `hoveredSignalId` est l'id du signal
@@ -198,6 +215,14 @@
     ),
   );
   $: lots = lotsResponse?.featureCollection.features ?? [];
+
+  /**
+   * m7 — Règlements de la ville, dérivés des SIGNAUX affichés (numéro cité +
+   * zones référencées + preuve documentaire) et des grilles PDF des zones
+   * liées. Aucun endpoint dédié ne sert une liste de règlements par ville (cf.
+   * note PR) : on ne fabrique rien, on agrège ce qui est déjà servi.
+   */
+  $: reglements = aggregateReglements(filteredDetailNodes, zones);
 
   function dedupeZonesByCode(zoneFeatures: GeoZoneFeature[]): GeoZoneFeature[] {
     const seen = new Set<string>();
@@ -610,6 +635,8 @@
   let zonesBucketOpen = false;
   let signalsBucketOpen = false;
   let lotsBucketOpen = false;
+  // m7 — accordéon Règlements (entre Signaux et Zones), replié par défaut.
+  let reglementsBucketOpen = false;
 
   // C4 — la sélection carte ouvre la FICHE dans le drawer : quand le focus
   // désigne une zone / un lot / un signal, on déplie son bucket et on scrolle
@@ -698,6 +725,58 @@
     if (!key) return;
     signalsBucketOpen = true;
     toggleEntity(key);
+  }
+
+  // ── m7 — Règlements ─────────────────────────────────────────────────────────
+  /** Signal représentatif (porteur de preuve) d'un règlement, s'il existe. */
+  function reglementEvidenceNode(entry: ReglementEntry): GraphSignalNode | null {
+    if (!entry.evidenceNodeId) return null;
+    return detailNodes.find((n) => n.id === entry.evidenceNodeId) ?? null;
+  }
+
+  /**
+   * Visualise le PDF/source d'un règlement : on ouvre la SOURCE documentaire du
+   * signal représentatif (le PV/document qui porte la citation du règlement)
+   * dans le viewer partagé. rawRef same-origin en priorité (rendu PDF fiable).
+   */
+  function openReglementSource(entry: ReglementEntry): void {
+    const node = reglementEvidenceNode(entry);
+    if (!node) return;
+    const evidence = signalEvidence(node);
+    onOpenSource({
+      title: `Règlement ${entry.number}`,
+      sourceUrl: evidence.documentUrl ?? evidence.sourceUrl,
+      rawRef: evidence.rawRef,
+      page: evidence.page,
+    });
+  }
+
+  /** Ouvre une grille de zonage PDF liée à un règlement dans le viewer. */
+  function openGrillePdf(url: string, title: string): void {
+    onOpenSource({ title, sourceUrl: url, rawRef: null, page: null });
+  }
+
+  /** Chip zone d'un règlement → ouvre la fiche zone si la zone existe. */
+  function openZoneByCode(code: string): void {
+    const key = zoneRefComparableKey(code);
+    if (key.length === 0) return;
+    const zone = zones.find(
+      (z) => zoneRefComparableKey(z.properties.code) === key,
+    );
+    if (zone) openZoneDetail(zone);
+  }
+
+  // ── m8 — Source de la zone ──────────────────────────────────────────────────
+  /** Ouvre la source ouvrable d'une zone (grille PDF servie) dans le viewer. */
+  function openZoneSource(zone: GeoZoneFeature): void {
+    const descriptor = describeZoneSource(zone.properties);
+    if (!descriptor.openUrl) return;
+    onOpenSource({
+      title: `Zone ${zone.properties.code} — source`,
+      sourceUrl: descriptor.openUrl,
+      rawRef: null,
+      page: null,
+    });
   }
 </script>
 
@@ -1012,6 +1091,88 @@
         </div>
       </details>
 
+      <!-- m7 — RÈGLEMENTS : accordéon ENTRE Signaux et Zones. Dérivés des
+           signaux (numéro de règlement cité + zones + preuve). Le module ouvre
+           le PDF du règlement dans le viewer partagé (réutilisé). -->
+      <details class="sel-bucket" bind:open={reglementsBucketOpen}>
+        <summary class="sel-bucket-head">
+          <span class="sel-bucket-name">Règlements</span>
+          <span class="rail-row-count">
+            {detailLoading ? "–" : reglements.length}
+          </span>
+        </summary>
+        <div class="sel-entities">
+          {#if detailLoading}
+            <div class="sel-loading">
+              <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
+              <span>Chargement des règlements…</span>
+            </div>
+          {:else if reglements.length === 0}
+            <p class="sel-empty">
+              Aucun règlement cité par les signaux de cette ville.
+            </p>
+          {:else}
+            {#each reglements as reg (reg.key)}
+              <div class="sel-entity-bar">
+                <div class="reglement-row">
+                  <div class="reglement-head">
+                    <code class="reglement-number">{reg.number}</code>
+                    <span class="reglement-count">
+                      {formatSignalCount(reg.signalCount)}
+                    </span>
+                  </div>
+                  {#if reg.zoneCodes.length > 0}
+                    <div class="reglement-zones">
+                      <span class="reglement-zones-label">Zones</span>
+                      {#each reg.zoneCodes as code (code)}
+                        <button
+                          type="button"
+                          class="lot-zone-badge"
+                          on:click={() => openZoneByCode(code)}
+                          title="Ouvrir le détail de la zone"
+                        >
+                          {code}
+                        </button>
+                      {/each}
+                    </div>
+                  {/if}
+                  <div class="reglement-actions">
+                    {#if reg.evidenceNodeId}
+                      <button
+                        type="button"
+                        class="doc-ref-button"
+                        on:click={() => openReglementSource(reg)}
+                        title="Visualiser le document source du règlement"
+                      >
+                        <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                        Voir le PDF
+                      </button>
+                    {:else}
+                      <span class="reglement-nosrc">
+                        <FileX class="h-3.5 w-3.5" aria-hidden="true" />
+                        Document source non relié
+                      </span>
+                    {/if}
+                    {#each reg.grillePdfUrls as url (url)}
+                      <button
+                        type="button"
+                        class="doc-ref-button"
+                        on:click={() =>
+                          openGrillePdf(url, `Grille de zonage — ${reg.number}`)}
+                        title="Ouvrir la grille de zonage PDF"
+                      >
+                        <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                        Grille PDF
+                      </button>
+                    {/each}
+                  </div>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
+      </details>
+
       <!-- #8 : replié par défaut ; s'ouvre aussi via le badge zone d'un lot -->
       <details class="sel-bucket" bind:open={zonesBucketOpen}>
         <summary class="sel-bucket-head">
@@ -1087,6 +1248,7 @@
                     <!-- Détail ZONE (contrat d'interaction) : code, type (kind),
                          lots joints, grille PDF, signaux citant la zone. -->
                     {@const citing = signalsCitingZone(zone, detailNodes)}
+                    {@const zoneSource = describeZoneSource(zone.properties)}
                     <div class="sel-entity-detail">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Code</span>
@@ -1099,6 +1261,10 @@
                         {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{zoneSourceLabel(zone)}</span>
+                        <!-- m8.2 — type de source dérivé (recalage / GeoJSON dans
+                             PDF / site / …) mappé depuis source+géométrie+confiance. -->
+                        <span class="entity-meta-key">Type de source</span>
+                        <span class="entity-meta-val">{zoneSource.label}</span>
                         <span class="entity-meta-key">Géométrie</span>
                         <span class="entity-meta-val">{zoneGeometryLabel(zone)}</span>
                         <span class="entity-meta-key">Confiance</span>
@@ -1106,17 +1272,37 @@
                         <span class="entity-meta-key">Lots liés</span>
                         <span class="entity-meta-val">{formatNumber(zoneLotCount(zone, lots))}</span>
                       </div>
-                      {#if zone.properties.grillePdfUrl}
-                        <a
-                          class="zone-grille-link"
-                          href={zone.properties.grillePdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <FileText class="h-3.5 w-3.5" aria-hidden="true" />
-                          Grille de zonage PDF
-                        </a>
-                      {/if}
+                      <!-- m8.1 — source de la zone OUVRABLE dans le viewer
+                           partagé : PDF si l'URL est un PDF, iframe sinon (le
+                           viewer décide). Aujourd'hui seule la grille PDF est
+                           servie ; site/screenshot restent un ask geo (note PR). -->
+                      <div class="zone-source-actions">
+                        {#if zoneSource.openUrl}
+                          <button
+                            type="button"
+                            class="doc-ref-button"
+                            on:click={() => openZoneSource(zone)}
+                            title="Ouvrir la source de la zone dans le viewer"
+                          >
+                            <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                            Ouvrir la source ({zoneSource.openKind === "pdf"
+                              ? "PDF"
+                              : "site"})
+                          </button>
+                        {:else}
+                          <p class="doc-refs-empty">
+                            Source non ouvrable : aucune URL de source servie pour
+                            cette zone.
+                          </p>
+                        {/if}
+                        {#if zoneSource.approximate}
+                          <p class="zone-source-note">
+                            Provenance affichée par défaut ; la distinction site /
+                            GeoJSON dans PDF / recalage n'est pas encore fournie par
+                            la source.
+                          </p>
+                        {/if}
+                      </div>
                       <div class="zone-signals">
                         <span class="doc-refs-label">Signaux citant la zone</span>
                         {#if citing.length === 0}
@@ -1927,24 +2113,78 @@
     background: #ccfbf1;
   }
 
-  /* Lien grille PDF de la fiche zone. */
-  .zone-grille-link {
+  /* m8 — bloc d'ouverture de la source de la zone (viewer partagé). */
+  .zone-source-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+  }
+
+  .zone-source-note {
+    margin: 0;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  /* m7 — ligne de règlement de l'accordéon Règlements. */
+  .reglement-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .reglement-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .reglement-number {
+    color: var(--st-semantic-text-secondary, #334155);
+    font-family: var(--st-font-mono, ui-monospace, monospace);
+    font-size: var(--signaux-fs-body);
+    font-weight: 700;
+  }
+
+  .reglement-count {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+    white-space: nowrap;
+  }
+
+  .reglement-zones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .reglement-zones-label {
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .reglement-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .reglement-nosrc {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    margin-top: 0.5rem;
-    border: 1px solid #14b8a6;
-    border-radius: var(--st-radius-sm, 4px);
-    background: #f0fdfa;
-    color: #0f766e;
-    font-size: var(--signaux-fs-small);
-    font-weight: 650;
-    padding: 0.2rem 0.55rem;
-    text-decoration: none;
-  }
-
-  .zone-grille-link:hover {
-    background: #ccfbf1;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+    font-style: italic;
   }
 
   /* Signaux citant la zone (fiche zone). */
