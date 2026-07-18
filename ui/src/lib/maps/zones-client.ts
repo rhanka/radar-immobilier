@@ -56,6 +56,19 @@ export interface ZoneProperties {
    * undefined si absent.
    */
   grillePdfUrl?: string;
+  /**
+   * Millésime (année) du règlement de zonage PORTEUR de la zone quand la source
+   * l'expose (ex. "2008"). Candidats : reglement_millesime, reglementMillesime,
+   * REGLEMENT_MILLESIME, millesime, Millesime. null si absent — AUCUNE invention
+   * (aujourd'hui une seule cohorte par ville, cf. note ask geo dans la PR).
+   */
+  reglementMillesime?: string | null;
+  /**
+   * Numéro du règlement de zonage porteur (ex. "2008-102") quand la source
+   * l'expose. Candidats : reglement_numero, reglementNumero, REGLEMENT_NUMERO,
+   * reglement_number, reglementNumber. null si absent.
+   */
+  reglementNumero?: string | null;
 }
 
 export interface ZoneGeometry {
@@ -315,12 +328,33 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
     properties.grille,
     properties.lien_grille,
   ]);
+  // Millésime + numéro du règlement de zonage porteur PAR ZONE (axe millésime).
+  // Coercition string-or-number : le millésime peut arriver en nombre (2008) ou
+  // en chaîne ("2008") selon la source geo — on garde une chaîne d'affichage.
+  const reglementMillesime = firstStringLike([
+    properties.reglement_millesime,
+    properties.reglementMillesime,
+    properties.REGLEMENT_MILLESIME,
+    properties.Reglement_Millesime,
+    properties.millesime,
+    properties.Millesime,
+  ]);
+  const reglementNumero = firstStringLike([
+    properties.reglement_numero,
+    properties.reglementNumero,
+    properties.REGLEMENT_NUMERO,
+    properties.Reglement_Numero,
+    properties.reglement_number,
+    properties.reglementNumber,
+  ]);
 
   return {
     ...(kind !== null ? { kind } : {}),
     ...(affectation !== null ? { affectation } : {}),
     ...(usages !== undefined ? { usages } : {}),
     ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
+    ...(reglementMillesime !== null ? { reglementMillesime } : {}),
+    ...(reglementNumero !== null ? { reglementNumero } : {}),
   };
 }
 
@@ -359,6 +393,20 @@ function readString(value: unknown): string | null {
 
 function firstString(values: readonly unknown[]): string | null {
   for (const value of values) {
+    const parsed = readString(value);
+    if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
+/**
+ * Comme `firstString`, mais accepte aussi un NOMBRE fini (converti en chaîne) —
+ * pour les champs qui peuvent arriver numériques ou textuels selon la source geo
+ * (ex. millésime servi `2008` vs `"2008"`). N'invente rien : ignore null/vide.
+ */
+function firstStringLike(values: readonly unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
     const parsed = readString(value);
     if (parsed !== null) return parsed;
   }

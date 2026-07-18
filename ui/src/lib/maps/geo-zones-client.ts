@@ -36,6 +36,13 @@ export interface GeoZoneProperties {
   affectation?: string | null;
   /** Lien grille de zonage PDF quand la source l'expose (preuve). */
   grillePdfUrl?: string;
+  /**
+   * Millésime (année) du règlement de zonage porteur PAR ZONE quand la source
+   * l'expose (ex. "2008") — axe millésime de la fiche/filtre. null si absent.
+   */
+  reglementMillesime?: string | null;
+  /** Numéro du règlement de zonage porteur (ex. "2008-102") quand la source l'expose. */
+  reglementNumero?: string | null;
   /** UI-derived : couleur résolue de l'aplat par kind (peinture MapLibre) — jamais persistée. */
   kindColor?: string;
   /** UI-derived : zone SÉLECTIONNÉE (exergue orange C3) — jamais persistée. */
