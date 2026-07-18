@@ -41,6 +41,14 @@
   // les en-têtes des accordéons remontent le nouveau filtre par callback.
   export let lotFilter: EvalLotFilter = DEFAULT_EVAL_FILTER;
   export let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+  // m7 / m8 — passe-plat du callback d'ouverture de source (viewer partagé) pour
+  // que les tests observent le payload (règlement PDF / source de zone).
+  export let onOpenSource: (payload: {
+    title: string;
+    sourceUrl: string | null;
+    rawRef?: string | null;
+    page?: number | null;
+  }) => void = () => {};
 
   function handleLotFilterChange(next: EvalLotFilter): void {
     lotFilter = next;
@@ -77,4 +85,5 @@
   {zoneKindFilter}
   onZoneKindFilterChange={handleZoneKindFilterChange}
   onToggleKey={toggleBucketKey}
+  {onOpenSource}
 />
