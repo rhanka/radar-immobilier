@@ -5,6 +5,7 @@ import {
   aFlagsFromKey,
   B_PRECOCE_SUBSET_KEY,
   B_SUBSET_KEY,
+  bAxesFromVivierKey,
   canOpenProjectedSignal,
   clearVivierCityTransientState,
   countForVivierCity,
@@ -116,9 +117,29 @@ describe("Vivier A / B view contract", () => {
     }
   });
 
-  it("maps the B precoce axis to its opaque key", () => {
-    expect(keyForVivierB(false)).toBe("vivier-v2");
-    expect(keyForVivierB(true)).toBe("vivier-v2|p");
+  it("composes the B key from its three axes (opaque namespace, back-compatible)", () => {
+    // Défaut Zonage ✓ Résidentiel ✓ Précoce ✗ = la clé historique `vivier-v2`.
+    expect(keyForVivierB({ z: true, r: true, p: false })).toBe("vivier-v2");
+    // Le seul axe précoce reste la clé historique `vivier-v2|p`.
+    expect(keyForVivierB({ z: true, r: true, p: true })).toBe("vivier-v2|p");
+    // Décocher un axe ajoute un jeton de relâchement, toujours dans le namespace B.
+    expect(keyForVivierB({ z: true, r: false, p: false })).toBe("vivier-v2|-r");
+    expect(keyForVivierB({ z: false, r: true, p: false })).toBe("vivier-v2|-z");
+    expect(keyForVivierB({ z: false, r: false, p: true })).toBe("vivier-v2|-z|-r|p");
+    // Toutes ces clés relèvent bien du mode B.
+    for (const key of ["vivier-v2", "vivier-v2|p", "vivier-v2|-r", "vivier-v2|-z|-r|p"]) {
+      expect(modeFromSubsetKey(key)).toBe("b");
+    }
+    // Round-trip clé → axes → clé.
+    for (const axes of [
+      { z: true, r: true, p: false },
+      { z: true, r: true, p: true },
+      { z: true, r: false, p: false },
+      { z: false, r: true, p: true },
+      { z: false, r: false, p: false },
+    ]) {
+      expect(bAxesFromVivierKey(keyForVivierB(axes))).toEqual(axes);
+    }
   });
 
   it("resolves the retired z|p transition key to mode A", () => {
@@ -168,6 +189,28 @@ describe("Vivier A / B view contract", () => {
     // vivier-v2|p = qualifié ∩ précoce (avis_motion / projet_reglement).
     expect(projectNodesForVivierKey(nodes, null, "vivier-v2|p").nodes.map((n) => n.id))
       .toEqual(["q-avis", "q-projet"]);
+  });
+
+  it("relaxes B when the résidentiel or zonage axis is unchecked (m1.4)", () => {
+    // SUTTON_RAW : sutton-m est « à confirmer » (résidentiel indéterminé, non
+    // exclu), sutton-raw est exclu par le serveur (jamais montré).
+    // Défaut (zonage ✓ résidentiel ✓ précoce ✗) = le vivier qualifié.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    // Décocher « Résidentiel » (vivier-v2|-r) RELÂCHE l'exigence résidentiel :
+    // le « à confirmer » réapparaît, l'exclu serveur reste écarté.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-r").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    // Décocher « Zonage » (vivier-v2|-z) : ici tous portent zonage oui → même set
+    // que le défaut, l'exclu serveur reste écarté.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    // Décocher zonage ET résidentiel : tout le classifié non exclu par le serveur.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(4);
+    // Un axe B relâché n'invente aucune classification : sans classification → indispo.
+    const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
+    expect(projectNodesForVivierKey([unclassified], SUTTON_AUTHORITY, "vivier-v2|-r"))
+      .toEqual({ available: false, count: null, nodes: [] });
   });
 
   it("marks B unavailable rather than inventing a client classification", () => {
@@ -277,6 +320,25 @@ describe("Vivier A / B view contract", () => {
     expect(initialVivierSubsetKey(route([]), "vivier-v2")).toBe("vivier-v2");
     expect(initialVivierSubsetKey(null, null)).toBe(A_SUBSET_KEY);
     expect(vivierRouteKey(route(["z", "m", "p"]))).not.toBe(vivierRouteKey(route(["vivier-v2"])));
+  });
+
+  it("preserves the LIVE sub-selection across a same-mode city navigation (m1.8)", () => {
+    // La route ville ne porte QUE la clé de MODE (ex. `vivier-v2`) : la
+    // sous-sélection vive (précoce, axes B/A relâchés) n'y est jamais persistée.
+    // Naviguer vers une autre ville ne doit donc PAS écraser cet état vif.
+    const route = (subset: string[]): GeoRoute => ({
+      level: "city",
+      citySlug: "sutton",
+      state: normalizeGeoRouteState({ filters: { subset } }),
+    });
+    // B : précoce coché survit à la navigation ville (le bug : il se décochait).
+    expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "vivier-v2|p")).toBe("vivier-v2|p");
+    // B : axe relâché (résidentiel décoché) survit aussi.
+    expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "vivier-v2|-r")).toBe("vivier-v2|-r");
+    // A : une sous-sélection d'axes (multi 4+ décoché) survit de même.
+    expect(reconcileVivierRouteSubset(route(["z", "m", "p"]), "z|p")).toBe("z|p");
+    // Un VRAI changement de mode (deep-link A→B) repart du défaut du tab B.
+    expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "z|p")).toBe("vivier-v2");
   });
 
   it("clears evidence and hover when navigating to another city in the same mode", () => {

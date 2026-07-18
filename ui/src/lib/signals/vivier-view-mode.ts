@@ -39,6 +39,25 @@ export interface AFlags {
 /** Défaut A : les trois axes cochés → clé `z|m|p` (le vivier de référence). */
 export const DEFAULT_A_FLAGS: AFlags = { z: true, m: true, p: true };
 
+/**
+ * Les trois axes combinables de B, tous côté AFFICHAGE (lecture serveur, jamais
+ * une reclassification). `z`/`r` exigent respectivement zonage `oui` et
+ * résidentiel `oui` ; `p` restreint aux étapes précoces. Cochés/décochés
+ * librement, comme les axes de A.
+ */
+export interface BAxes {
+  z: boolean;
+  r: boolean;
+  p: boolean;
+}
+
+/**
+ * Défaut B : zonage ✓, résidentiel ✓, précoce ✗ — soit EXACTEMENT le vivier v2
+ * qualifié (zonage oui ∩ résidentiel oui ∩ sans exclusion serveur). Décocher un
+ * axe RELÂCHE le filtre (comme en A), sans jamais toucher la classification.
+ */
+export const DEFAULT_B_AXES: BAxes = { z: true, r: true, p: false };
+
 /** Étapes considérées « précoces » par le vivier v2 (parité `isPrecoceSignal`). */
 const PRECOCE_ETAPES = new Set(["avis_motion", "projet_reglement"]);
 
@@ -62,21 +81,40 @@ export function aFlagsFromKey(key: string): AFlags {
   return { z: parts.has("z"), m: parts.has("m"), p: parts.has("p") };
 }
 
-/** Clé B selon l'axe précoce (coché → `vivier-v2|p`, sinon `vivier-v2`). */
-export function keyForVivierB(precoce: boolean): string {
-  return precoce ? B_PRECOCE_SUBSET_KEY : B_SUBSET_KEY;
+/**
+ * Clé LIVE composée de B à partir de ses trois axes.
+ *
+ * Grammaire OPAQUE, préfixe `vivier-v2`, rétro-compatible : le défaut reste
+ * `vivier-v2` et le seul axe précoce reste `vivier-v2|p`. Un axe DÉcoché ajoute
+ * un jeton de relâchement (`-z`, `-r`). Comme tout le vocabulaire est préfixé
+ * `vivier-v2`, aucune combinaison d'axes A (z/m/p) ne peut le produire par
+ * accident, et la persistance (clé de MODE) l'écrase toujours à `vivier-v2`.
+ */
+export function keyForVivierB(axes: BAxes): string {
+  const parts: string[] = [B_SUBSET_KEY];
+  if (!axes.z) parts.push("-z");
+  if (!axes.r) parts.push("-r");
+  if (axes.p) parts.push("p");
+  return parts.join("|");
+}
+
+/** Lit les trois axes d'une clé B (`vivier-v2|-r|p` → {z:true,r:false,p:true}). */
+export function bAxesFromVivierKey(key: string): BAxes {
+  const parts = new Set(key.split("|"));
+  return { z: !parts.has("-z"), r: !parts.has("-r"), p: parts.has("p") };
 }
 
 /**
  * A vs B, à partir de la clé LIVE (composée).
  *
  * Tout le vocabulaire z/m/p (y compris l'ancienne régression `z|p` de #375, et
- * la clé vide) reste A. Seuls les jetons opaques `vivier-v2` / `vivier-v2|p`
- * basculent en B — aucune composition de flags ne peut les produire par accident.
+ * la clé vide) reste A. Seules les clés du namespace opaque `vivier-v2` (défaut,
+ * `vivier-v2|p`, `vivier-v2|-r`, …) basculent en B — aucune composition de flags
+ * A (z/m/p) ne peut les produire par accident.
  */
 export function modeFromSubsetKey(raw: string | null | undefined): VivierViewMode {
-  const key = raw?.trim();
-  return key === B_SUBSET_KEY || key === B_PRECOCE_SUBSET_KEY ? "b" : "a";
+  const first = (raw?.trim() ?? "").split("|")[0];
+  return first === B_SUBSET_KEY ? "b" : "a";
 }
 
 /**
@@ -257,8 +295,40 @@ export function projectPrecoceVivierNodes(
 }
 
 /**
- * Projection LIVE à partir de la clé composée (axes de A / précoce de B).
- * A : composition z/m/p ; B : qualifié, restreint aux précoces si `vivier-v2|p`.
+ * B avec sous-sélection : les trois axes DÉcochés relâchent le filtre.
+ *
+ * Base = les nœuds classifiés NON exclus par le serveur (`exclusion_reason ===
+ * null`) — les nœuds « exclus » restent hors de B en toutes circonstances.
+ * Sur cette base, chaque axe COCHÉ ajoute une exigence lue sur la classification
+ * serveur : `z` → zonage `oui`, `r` → résidentiel `oui`, `p` → étape précoce.
+ *
+ * Le défaut {z,r,p} = {✓,✓,✗} reproduit EXACTEMENT `projectQualifiedVivierNodes`
+ * (le vivier v2 qualifié). Décocher `r` révèle le « à confirmer » (résidentiel
+ * indéterminé), décocher `z` le hors-zonage `oui` résidentiel : on RELIT des
+ * champs serveur, on n'en réécrit aucun. Un seul nœud sans classification rend
+ * la projection indisponible plutôt que partielle.
+ */
+export function projectComposedVivierB(
+  nodes: GraphSignalNode[],
+  axes: BAxes,
+): VivierProjectionResult {
+  if (!nodes.every(hasVivierClassification)) {
+    return { available: false, count: null, nodes: [] };
+  }
+  const projected = nodes.filter((node) => {
+    const c = node.classification!;
+    if (c.exclusion_reason !== null) return false;
+    if (axes.z && c.zonage.valeur !== "oui") return false;
+    if (axes.r && c.residentiel.valeur !== "oui") return false;
+    if (axes.p && !isPrecoceVivierNode(node)) return false;
+    return true;
+  });
+  return { available: true, count: projected.length, nodes: projected };
+}
+
+/**
+ * Projection LIVE à partir de la clé composée (axes de A / axes de B).
+ * A : composition z/m/p ; B : composition zonage/résidentiel/précoce.
  */
 export function projectNodesForVivierKey(
   nodes: GraphSignalNode[],
@@ -266,9 +336,7 @@ export function projectNodesForVivierKey(
   subsetKey: string,
 ): VivierProjectionResult {
   if (modeFromSubsetKey(subsetKey) === "b") {
-    return subsetKey === B_PRECOCE_SUBSET_KEY
-      ? projectPrecoceVivierNodes(nodes)
-      : projectQualifiedVivierNodes(nodes);
+    return projectComposedVivierB(nodes, bAxesFromVivierKey(subsetKey));
   }
   return projectComposedVivierA(nodes, authority, subsetKey);
 }
@@ -319,7 +387,11 @@ export function countForVivierCity(
   if (modeFromSubsetKey(subsetKey) === "b") {
     const counts = entry.vivierV2Counts;
     if (!counts) return 0;
-    return subsetKey === B_PRECOCE_SUBSET_KEY
+    // Le badge ville reste le compte SERVEUR : `qualified`, ou la somme des
+    // étapes précoces quand l'axe est coché. Relâcher zonage/résidentiel est une
+    // lentille d'affichage — elle ne déplace pas le compte serveur (parité avec
+    // l'axe précoce et les exclusions : masquer/élargir n'est pas reclasser).
+    return bAxesFromVivierKey(subsetKey).p
       ? counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement
       : counts.qualified;
   }
@@ -373,7 +445,19 @@ export function reconcileVivierRouteSubset(
   route: GeoRoute,
   currentSubsetKey: string,
 ): string {
-  return routeSubsetKey(route) ?? subsetKeyForMode(modeFromSubsetKey(currentSubsetKey));
+  const routeKey = routeSubsetKey(route);
+  if (routeKey === null) {
+    return subsetKeyForMode(modeFromSubsetKey(currentSubsetKey));
+  }
+  // La route ne porte QUE la clé de MODE (la sous-sélection LIVE — axes A
+  // décochés, axes B relâchés / précoce — n'est jamais persistée). Une simple
+  // navigation ville ne doit donc pas ÉCRASER cette sous-sélection vive : si la
+  // clé LIVE courante relève DÉJÀ du même mode que la route, on la conserve
+  // telle quelle (m1.8 : l'état des cases persiste au changement de ville). Un
+  // vrai changement de mode (deep-link A↔B) repart, lui, du défaut du tab.
+  return modeFromSubsetKey(currentSubsetKey) === modeFromSubsetKey(routeKey)
+    ? currentSubsetKey
+    : routeKey;
 }
 
 export function vivierRouteKey(route: GeoRoute): string {
