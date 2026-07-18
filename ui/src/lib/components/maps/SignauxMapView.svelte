@@ -21,7 +21,7 @@
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount } from "svelte";
-  import { Checkbox } from "@sentropic/design-system-svelte";
+  import { Button, ButtonGroup } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
   import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
@@ -260,31 +260,29 @@
   }
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
-  // ── m5 — Libellés sur la carte (n° de lot / n° de zone) ───────────────────
-  // Toggles portés ICI (ils pilotent des couches symbol du socle) et bascu­lés
-  // depuis les légendes Lots / Zones. Défaut MASQUÉ (les aplats sont denses),
-  // mais PERSISTANT en session (localStorage) : une fois activé, l'affichage
-  // « par défaut en vue ville » tient au fil des villes et des rechargements.
-  const LOT_LABELS_LS_KEY = "signaux-show-lot-labels";
-  const ZONE_LABELS_LS_KEY = "signaux-show-zone-labels";
-  let showLotLabels = false;
-  let showZoneLabels = false;
+  // ── m5 / UAT round2 — Libellés sur la carte (n° de zone / n° de lot) ──────
+  // UNE SEULE bascule EXCLUSIVE (jamais les deux affichés à la fois) : elle
+  // pilote les deux couches symbol du socle (showZoneLabels/showLotLabels y
+  // restent 2 props indépendantes — le socle n'est pas touché — mais cette
+  // vue garantit qu'une SEULE des deux est vraie). Défaut = n° de zone
+  // AFFICHÉ (retour UAT round2 : « parfait pour les numéros de zone, coche
+  // par défaut »). PERSISTANT en session (localStorage) : le choix tient au
+  // fil des villes et des rechargements.
+  type LegendLabelMode = "zone" | "lot";
+  const LEGEND_LABEL_MODE_LS_KEY = "signaux-legend-label-mode";
+  let legendLabelMode: LegendLabelMode = "zone";
+  $: showZoneLabels = legendLabelMode === "zone";
+  $: showLotLabels = legendLabelMode === "lot";
 
-  function readLabelPref(key: string): boolean {
-    return typeof localStorage !== "undefined" && localStorage.getItem(key) === "1";
+  function readLegendLabelModePref(): LegendLabelMode {
+    if (typeof localStorage === "undefined") return "zone";
+    return localStorage.getItem(LEGEND_LABEL_MODE_LS_KEY) === "lot" ? "lot" : "zone";
   }
-  function persistLabelPref(key: string, value: boolean): void {
+  function setLegendLabelMode(mode: LegendLabelMode): void {
+    legendLabelMode = mode;
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem(key, value ? "1" : "0");
+      localStorage.setItem(LEGEND_LABEL_MODE_LS_KEY, mode);
     }
-  }
-  function setShowLotLabels(value: boolean): void {
-    showLotLabels = value;
-    persistLabelPref(LOT_LABELS_LS_KEY, value);
-  }
-  function setShowZoneLabels(value: boolean): void {
-    showZoneLabels = value;
-    persistLabelPref(ZONE_LABELS_LS_KEY, value);
   }
 
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
@@ -1762,9 +1760,9 @@
     if (initialSubsetKey !== activeSubsetKey) {
       applyActiveSubsetKey(initialSubsetKey);
     }
-    // m5 — restaurer les préférences d'affichage des libellés (persistance session).
-    showLotLabels = readLabelPref(LOT_LABELS_LS_KEY);
-    showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY);
+    // m5 / UAT round2 — restaurer la préférence d'affichage des libellés
+    // (persistance session). Défaut = zone si rien de persisté.
+    legendLabelMode = readLegendLabelModePref();
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
@@ -1865,14 +1863,6 @@
                 </li>
               {/each}
             </ul>
-            <!-- m5 — toggle DS : affiche/masque le n° de zone sur les aplats. -->
-            <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-zone-labels-toggle">
-              <Checkbox
-                label="N° de zone"
-                checked={showZoneLabels}
-                onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
-              />
-            </div>
           </div>
         {/if}
         <div
@@ -1888,14 +1878,37 @@
               </li>
             {/each}
           </ul>
-          <!-- m5 — toggle DS : affiche/masque le n° de lot sur les aplats. -->
-          <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-lot-labels-toggle">
-            <Checkbox
-              label="N° de lot"
-              checked={showLotLabels}
-              onchange={(event) => setShowLotLabels(event.currentTarget.checked)}
-            />
-          </div>
+        </div>
+        <!-- UAT round2 — UNE SEULE bascule EXCLUSIVE n° de zone / n° de lot
+             (remplace les 2 cases indépendantes). Segmented control DS
+             (ButtonGroup attached + Button, même idiome que le sélecteur de
+             plage de dates m2). Typo du libellé alignée sur les autres
+             entrées de légende (text-xs / slate-600) via les tokens DS de
+             taille/couleur du bouton, cf. <style> ci-dessous. -->
+        <div
+          class="legend-number-toggle rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+          data-testid="legend-number-toggle"
+        >
+          <ButtonGroup attached size="sm" label="Affichage des numéros sur la carte">
+            <Button
+              size="sm"
+              variant={legendLabelMode === "zone" ? "primary" : "ghost"}
+              aria-pressed={legendLabelMode === "zone"}
+              data-testid="legend-number-toggle-zone"
+              onclick={() => setLegendLabelMode("zone")}
+            >
+              N° de zone
+            </Button>
+            <Button
+              size="sm"
+              variant={legendLabelMode === "lot" ? "primary" : "ghost"}
+              aria-pressed={legendLabelMode === "lot"}
+              data-testid="legend-number-toggle-lot"
+              onclick={() => setLegendLabelMode("lot")}
+            >
+              N° de lot
+            </Button>
+          </ButtonGroup>
         </div>
       {/if}
     </svelte:fragment>
@@ -2005,3 +2018,24 @@
     />
   </svelte:fragment>
 </ViewLayout>
+
+<style>
+  /* UAT round2 — typo du libellé de la bascule zone#/lot# ALIGNÉE sur les
+     autres entrées de légende (text-xs text-slate-600, cf. les <li> de
+     zoneLegendEntries/lotLegendEntries ci-dessus). Le Button DS applique par
+     défaut une taille sm = 0.875rem (text-sm) et, en ghost, la couleur du
+     lien sémantique — ni l'une ni l'autre ne correspond au reste de la
+     légende. On les recale via les tokens DS de composant (mêmes tokens que
+     `.date-range-filter :global(.st-button)` dans DateRangeFilter.svelte),
+     SCOPÉS à ce contrôle : la taille s'applique aux deux segments (une
+     bascule garde une taille de police constante quel que soit l'état actif/
+     inactif) ; la couleur ne recale QUE le segment inactif (ghost) — le
+     segment actif garde l'emphase DS (primary), cohérente avec le reste de
+     l'app (ex. le drill Province/Ville/Zone du socle carte). */
+  .legend-number-toggle :global(.st-button) {
+    --st-component-button-anatomy-density-sm-fontSize: 0.75rem;
+  }
+  .legend-number-toggle :global(.st-button--ghost) {
+    --st-semantic-text-link: #475569;
+  }
+</style>
