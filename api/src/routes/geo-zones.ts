@@ -15,6 +15,7 @@ import {
   isSimulationCity,
 } from "../services/geo/simulation/simulation-provider.js";
 import { officialZonesForCityFromDb } from "../services/geo/zone-provider-db.js";
+import { resolveZonesSource, type ZonesSource } from "../services/geo/zones-source.js";
 import {
   normalizeZonesAndLots,
   type GeoJsonGeometry,
@@ -45,6 +46,17 @@ export interface GeoZonesDeps {
   fetchImpl?: typeof fetch;
   officialZoneProvider?: OfficialZoneProvider;
   lotProvider?: ZoneLotProvider;
+  /**
+   * Source de géométrie du zonage (zero-copy géo #73 lot 1). Défaut = env
+   * `GEO_ZONES_SOURCE` (`live`). En `live`, la FORME des zones ne vient PLUS du
+   * PG store-local (`zone_versions`) : elle est servie par le live geo via la
+   * route collection (`/api/geo/collections/qc-zonage-<city>/items`). Cet
+   * endpoint garde alors son seul rôle de JOIN zone→lots (projection
+   * « inherited » / lot-union fallback). En `pg`, la géométrie PG redevient
+   * primaire (rollback). Les zones de simulation (carte-steve) sont conservées
+   * dans les deux modes (ce ne sont pas du store-local périmé).
+   */
+  zonesSource?: ZonesSource;
 }
 
 function parseLimit(rawLimit: string | undefined): number | Response {
@@ -96,7 +108,13 @@ async function officialZonesForCity(
   }
   const simulationZones = simulationOfficialZones(citySlug);
   if (simulationZones.length > 0) return simulationZones;
-  if (deps.db) return officialZonesForCityFromDb(deps.db, citySlug);
+  // Zero-copy géo #73 : sous `live`, la géométrie zonage NE vient PLUS du PG
+  // store-local ici — le rendu des formes de zones passe par le live geo (route
+  // collection). Cet endpoint ne conserve que son rôle de join zone→lots. En
+  // `pg`, on restaure la géométrie PG comme source primaire (rollback).
+  if (resolveZonesSource(deps.zonesSource) === "pg" && deps.db) {
+    return officialZonesForCityFromDb(deps.db, citySlug);
+  }
   return [];
 }
 
