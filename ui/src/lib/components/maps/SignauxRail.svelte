@@ -45,6 +45,11 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import {
+    defaultDateRange,
+    type SignalDateRange,
+  } from "$lib/signals/signal-date-filter.js";
+  import DateRangeFilter from "$lib/components/maps/DateRangeFilter.svelte";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -72,6 +77,13 @@
   /** Exclusions d'affichage de la vue B (cochées par défaut, décochables). */
   export let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
 
+  /**
+   * Plage de dates ACTIVE (défaut : 6 derniers mois). Portée par le parent (elle
+   * pilote la population de base de la carte + du détail) et rendue À
+   * L'IDENTIQUE dans les deux panneaux A/B pour garantir la parité.
+   */
+  export let dateRange: SignalDateRange = defaultDateRange();
+
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
   export let onSelectCity: (entry: CityMapEntry) => void = () => {};
@@ -81,6 +93,8 @@
   export let onFilterChange: (subsetKey: string) => void = () => {};
   /** Appelé quand une exclusion d'affichage de B est cochée/décochée. */
   export let onExclusionsChange: (next: VivierBExclusions) => void = () => {};
+  /** Appelé quand la plage de dates change (preset ou plage custom). */
+  export let onDateRangeChange: (next: SignalDateRange) => void = () => {};
 
   function setExclusion(patch: Partial<VivierBExclusions>): void {
     exclusions = { ...exclusions, ...patch };
@@ -245,6 +259,9 @@
      Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
 {#snippet panelA()}
   <div class="vivier-panel">
+    <!-- m2 — PREMIER contrôle : plage de dates (population de base), au-dessus
+         de la ligne des axes. Miroir identique dans le panneau B. -->
+    <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
     <div class="vivier-toggles">
       <Checkbox
         label="Zonage"
@@ -267,6 +284,9 @@
 
 {#snippet panelB()}
   <div class="vivier-panel">
+    <!-- m2 — Miroir À L'IDENTIQUE du filtre de plage de dates du panneau A
+         (parité A/B) : premier contrôle, au-dessus des axes. -->
+    <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
