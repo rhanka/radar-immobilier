@@ -21,6 +21,7 @@
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount } from "svelte";
+  import { Checkbox } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
   import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
@@ -102,6 +103,7 @@
     extractSignalLotRefs,
     extractSignalZoneRefs,
     fallbackZoneCode,
+    findLotBounds,
     opacityForSelectionKey,
     withCityFallbackZone,
     filterDimsProjection,
@@ -232,6 +234,33 @@
     hoveredEvidenceSignalId = id;
   }
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
+
+  // ── m5 — Libellés sur la carte (n° de lot / n° de zone) ───────────────────
+  // Toggles portés ICI (ils pilotent des couches symbol du socle) et bascu­lés
+  // depuis les légendes Lots / Zones. Défaut MASQUÉ (les aplats sont denses),
+  // mais PERSISTANT en session (localStorage) : une fois activé, l'affichage
+  // « par défaut en vue ville » tient au fil des villes et des rechargements.
+  const LOT_LABELS_LS_KEY = "signaux-show-lot-labels";
+  const ZONE_LABELS_LS_KEY = "signaux-show-zone-labels";
+  let showLotLabels = false;
+  let showZoneLabels = false;
+
+  function readLabelPref(key: string): boolean {
+    return typeof localStorage !== "undefined" && localStorage.getItem(key) === "1";
+  }
+  function persistLabelPref(key: string, value: boolean): void {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(key, value ? "1" : "0");
+    }
+  }
+  function setShowLotLabels(value: boolean): void {
+    showLotLabels = value;
+    persistLabelPref(LOT_LABELS_LS_KEY, value);
+  }
+  function setShowZoneLabels(value: boolean): void {
+    showZoneLabels = value;
+    persistLabelPref(ZONE_LABELS_LS_KEY, value);
+  }
 
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
@@ -715,6 +744,22 @@
   }
 
   /**
+   * m4 — Cadre la caméra sur le LOT cliqué (clic carte). Sélectionner un autre
+   * lot AJUSTE au nouveau lot ; on ne refit JAMAIS sur la zone parente (rester
+   * au niveau lot). Lot sans géométrie exploitable → on NE bouge PAS la caméra
+   * (pas de repli vers la zone : le zoom reste stable au niveau lot).
+   */
+  function zoomToLot(citySlug: string, noLot: string): void {
+    const bounds = findLotBounds(
+      displayedLots,
+      citySlug,
+      noLot,
+      selectedCity?.municipality.slug ?? null,
+    );
+    if (bounds) mapApi?.fitMapToBounds(bounds);
+  }
+
+  /**
    * #13 / C9 — Retour à l'échelle province : restaure le CADRAGE EXACT du
    * primo-chargement (viewport mémorisé par le socle). Repli défensif :
    * fitBounds sur l'étendue du Québec si rien n'a été capturé.
@@ -1074,22 +1119,40 @@
     if (!wasSelected) {
       syncRouteForSelectionKey(key);
       // #12 — zoom sur la zone qu'on vient de sélectionner (pas au déselect).
-      zoomToSelectionKey(key);
+      // m4 — un clic carte sur un LOT ajuste la caméra AU lot cliqué (fitLot),
+      // jamais un refit sur la zone parente : sélectionner un autre lot reste
+      // au niveau lot.
+      zoomToSelectionKey(key, { fitLot: true });
     }
     updateGeoLayers();
   }
 
   /**
-   * #12 — Si la clé désigne une zone, cadre la caméra sur son étendue. Centralisé
+   * #12 / m4 — Cadre la caméra sur l'étendue de la clé sélectionnée. Centralisé
    * ici pour que tous les chemins de sélection de zone (clic carte, segmented
    * control « Zone », restauration d'URL) zooment de façon cohérente.
+   *
+   * Les LOTS ne sont cadrés que sur demande explicite (`fitLot`), càd un clic
+   * carte sur un lot (m4) : on ajuste alors la caméra AU lot cliqué. Les autres
+   * chemins de sélection de lot (auto-sélection du 1er lot d'une ville sans
+   * zones) ne zooment PAS, pour ne pas plonger dans un lot arbitraire à
+   * l'ouverture d'une ville.
    */
-  function zoomToSelectionKey(key: SelectionKey): void {
+  function zoomToSelectionKey(
+    key: SelectionKey,
+    options: { fitLot?: boolean } = {},
+  ): void {
     const parsed = parseKey(key);
-    if (!parsed || parsed.kind !== "zone") return;
+    if (!parsed || (parsed.kind !== "zone" && parsed.kind !== "lot")) return;
     const sep = parsed.id.indexOf("/");
     if (sep <= 0 || sep === parsed.id.length - 1) return;
-    zoomToZone(parsed.id.slice(0, sep), parsed.id.slice(sep + 1));
+    const citySlug = parsed.id.slice(0, sep);
+    const ref = parsed.id.slice(sep + 1);
+    if (parsed.kind === "zone") {
+      zoomToZone(citySlug, ref);
+    } else if (options.fitLot) {
+      zoomToLot(citySlug, ref);
+    }
   }
 
   async function applyGeoRoute(route: GeoRoute): Promise<void> {
@@ -1549,6 +1612,9 @@
     if (initialSubsetKey !== activeSubsetKey) {
       applyActiveSubsetKey(initialSubsetKey);
     }
+    // m5 — restaurer les préférences d'affichage des libellés (persistance session).
+    showLotLabels = readLabelPref(LOT_LABELS_LS_KEY);
+    showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY);
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
@@ -1589,6 +1655,8 @@
     basemap="neutral-gray"
     {fillColorExpression}
     {fillOpacityExpression}
+    {showLotLabels}
+    {showZoneLabels}
     activeCitySlug={selectedCity?.municipality.slug ?? null}
     segments={buildGeoSegments(selectedCity, zonesResponse)}
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
@@ -1636,6 +1704,14 @@
                 </li>
               {/each}
             </ul>
+            <!-- m5 — toggle DS : affiche/masque le n° de zone sur les aplats. -->
+            <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-zone-labels-toggle">
+              <Checkbox
+                label="N° de zone"
+                checked={showZoneLabels}
+                onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
+              />
+            </div>
           </div>
         {/if}
         <div
@@ -1651,6 +1727,14 @@
               </li>
             {/each}
           </ul>
+          <!-- m5 — toggle DS : affiche/masque le n° de lot sur les aplats. -->
+          <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-lot-labels-toggle">
+            <Checkbox
+              label="N° de lot"
+              checked={showLotLabels}
+              onchange={(event) => setShowLotLabels(event.currentTarget.checked)}
+            />
+          </div>
         </div>
       {/if}
     </svelte:fragment>
