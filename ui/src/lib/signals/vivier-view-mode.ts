@@ -90,8 +90,8 @@ export function aFlagsFromKey(key: string): AFlags {
  * Clé LIVE composée de B à partir de ses trois axes.
  *
  * Grammaire OPAQUE, préfixe `vivier-v2`, rétro-compatible : le défaut reste
- * `vivier-v2` et le seul axe précoce reste `vivier-v2|p`. Un axe DÉcoché ajoute
- * un jeton de relâchement (`-z`, `-r`). Comme tout le vocabulaire est préfixé
+ * `vivier-v2` et l'axe précoce explicite reste `vivier-v2|p`. Un axe DÉcoché
+ * ajoute un jeton de relâchement (`-z`, `-r`, `-p`). Comme tout le vocabulaire est préfixé
  * `vivier-v2`, aucune combinaison d'axes A (z/m/p) ne peut le produire par
  * accident, et la persistance (clé de MODE) l'écrase toujours à `vivier-v2`.
  */
@@ -99,14 +99,27 @@ export function keyForVivierB(axes: BAxes): string {
   const parts: string[] = [B_SUBSET_KEY];
   if (!axes.z) parts.push("-z");
   if (!axes.r) parts.push("-r");
-  if (axes.p) parts.push("p");
+  // `vivier-v2` alone is the canonical mode/default. `-p` is live-only: it
+  // represents an explicit session opt-out and is collapsed before URL/storage.
+  if (!axes.p) parts.push("-p");
+  else parts.push("p");
   return parts.join("|");
 }
 
-/** Lit les trois axes d'une clé B (`vivier-v2|-r|p` → {z:true,r:false,p:true}). */
+/**
+ * Lit les axes d'une clé B. `vivier-v2` est une clé de MODE, sans axes
+ * explicites : elle prend donc le défaut produit courant (Précoce inclus).
+ * Le suffixe `-p` exprime explicitement le relâchement de Précoce. Les clés
+ * explicites historiques qui portent déjà des axes restent interprétables.
+ */
 export function bAxesFromVivierKey(key: string): BAxes {
-  const parts = new Set(key.split("|"));
-  return { z: !parts.has("-z"), r: !parts.has("-r"), p: parts.has("p") };
+  const parts = new Set(key.split("|").filter(Boolean));
+  const hasExplicitAxes = [...parts].some((part) => part !== B_SUBSET_KEY);
+  return {
+    z: !parts.has("-z"),
+    r: !parts.has("-r"),
+    p: hasExplicitAxes ? parts.has("p") && !parts.has("-p") : DEFAULT_B_AXES.p,
+  };
 }
 
 /**
