@@ -166,8 +166,17 @@
   import {
     zoneKindFilterOpacity,
     DEFAULT_ZONE_KIND_FILTER,
+    ZONE_KIND_FILTER_DIMMED_OPACITY,
+    ZONE_KIND_FILTER_MATCH_OPACITY,
     type ZoneKindFilter,
   } from "$lib/maps/zone-kind-filter.js";
+  import {
+    zoneMillesimeFilterOpacity,
+    ZONE_MILLESIME_FILTER_DIMMED_OPACITY,
+    DEFAULT_ZONE_MILLESIME_FILTER,
+    type ZoneMillesimeFilter,
+  } from "$lib/maps/zone-millesime-filter.js";
+  import ZoneMillesimeSelect from "$lib/components/maps/ZoneMillesimeSelect.svelte";
   import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
   import {
     geometryBounds,
@@ -407,8 +416,22 @@
     zoneKindFilter = next;
   }
 
+  /**
+   * Filtre par MILLÉSIME de zonage (exclusif — un seul millésime à la fois).
+   * Défaut « tous » (`null`). Réinitialisé au changement de ville (selectCity)
+   * pour ne jamais estomper une nouvelle ville avec un millésime périmé.
+   */
+  let zoneMillesimeFilter: ZoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
+
+  function handleZoneMillesimeFilterChange(next: ZoneMillesimeFilter): void {
+    zoneMillesimeFilter = next;
+  }
+
   // Recalque la peinture quand un filtre données change (assignations ci-dessus).
-  $: if (mapReady && lotDataFilter && zoneKindFilter) {
+  // `zoneMillesimeFilter !== undefined` référence la variable (toujours vrai :
+  // string|null jamais undefined) pour que Svelte suive la dépendance SANS
+  // exiger une valeur truthy (null = « tous » est un état actif légitime).
+  $: if (mapReady && lotDataFilter && zoneKindFilter && zoneMillesimeFilter !== undefined) {
     updateGeoLayers();
   }
 
@@ -725,6 +748,15 @@
       )
     : [];
 
+  /**
+   * Base du sélecteur de millésime de la légende = TOUTES les zones servies
+   * (jamais filtrées) : le sélecteur se masque lui-même tant qu'il n'y a pas
+   * ≥ 2 millésimes (dégradé honnête, jamais mono-option).
+   */
+  $: zoneMillesimeLegendInput = (
+    zonesResponse?.featureCollection.features ?? []
+  ).map((f) => ({ reglementMillesime: f.properties.reglementMillesime ?? null }));
+
   /** flyTo sur le centroïde WGS-84 de la ville (MunicipalityT.lon/lat). */
   function flyToCity(entry: CityMapEntry): void {
     mapApi?.flyTo({
@@ -848,6 +880,9 @@
     detailNodes = [];
     detailLegacyProjection = null;
     geoNotices = [];
+    // Millésime exclusif : un choix d'une ville précédente n'a aucun sens sur la
+    // nouvelle couche → retour à « tous » (dégradé honnête, jamais tout estompé).
+    zoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
       selectedKeys: [cityKey],
@@ -1293,6 +1328,26 @@
   /** Zones contenant des lots 4+ quand le filtre données 4+/Priorité est actif. */
   const ZONE_4PLUS_HIGHLIGHT_OPACITY = 0.45;
 
+  /**
+   * Compose les opacités des filtres de zone TYPE (additif) et MILLÉSIME
+   * (exclusif). `null` = filtre inactif. Résultat :
+   *  - les deux inactifs → `null` (la hiérarchie d'opacité existante s'applique) ;
+   *  - au moins un actif → estompé si UN filtre actif écarte la zone, sinon
+   *    accentué (une zone doit passer TOUS les filtres actifs pour ressortir).
+   */
+  function composeZoneFilterOpacity(
+    kindOpacity: number | null,
+    millesimeOpacity: number | null,
+  ): number | null {
+    if (kindOpacity === null && millesimeOpacity === null) return null;
+    const dimmed =
+      kindOpacity === ZONE_KIND_FILTER_DIMMED_OPACITY ||
+      millesimeOpacity === ZONE_MILLESIME_FILTER_DIMMED_OPACITY;
+    return dimmed
+      ? ZONE_KIND_FILTER_DIMMED_OPACITY
+      : ZONE_KIND_FILTER_MATCH_OPACITY;
+  }
+
   function buildZoneOpacityExpression(
     zones = zonesResponse?.featureCollection.features ?? EMPTY_ZONES.features,
     signalZoneRefs: ReadonlySet<string> = focusedSignalZoneRefs,
@@ -1313,14 +1368,22 @@
       if (seenCodes.has(code)) continue;
       seenCodes.add(code);
       const key = zoneSelectionKey(zone);
-      // Filtre par TYPE de zone (en-tête accordéon Zones) : matchée accentuée,
-      // hors-filtre estompée mais visible — null quand le filtre est inactif.
+      // Filtres de zone (en-tête accordéon Zones) — matchée accentuée,
+      // hors-filtre estompée mais visible ; null quand le filtre est inactif.
+      // TYPE (additif) et MILLÉSIME (exclusif) se COMPOSENT : une zone n'est
+      // accentuée que si elle passe TOUS les filtres actifs ; estompée dès
+      // qu'un filtre actif l'écarte. Aucune zone n'est retirée de la carte.
       const kindOpacity = zoneKindFilterOpacity(
         zone.properties.kind ?? null,
         code,
         zoneKindFilter,
         zone.properties.affectation ?? null,
       );
+      const millesimeOpacity = zoneMillesimeFilterOpacity(
+        zone.properties.reglementMillesime ?? null,
+        zoneMillesimeFilter,
+      );
+      const filterOpacity = composeZoneFilterOpacity(kindOpacity, millesimeOpacity);
       let opacity: number;
       if (hasSignalFocus) {
         opacity = signalZoneRefs.has(code) ? 0.85 : 0.15;
@@ -1328,10 +1391,10 @@
         // C3 — la zone sélectionnée ressort (teinte accentuée), les autres
         // s'estompent ; l'exergue orange est portée par la couche highlight.
         opacity = geoKeys.has(key) ? 0.85 : 0.12;
-      } else if (kindOpacity !== null) {
+      } else if (filterOpacity !== null) {
         // Même mécanique que le filtre lots (#315) : la peinture est pilotée
-        // par le filtre, aucune zone n'est retirée de la carte.
-        opacity = kindOpacity;
+        // par le(s) filtre(s), aucune zone n'est retirée de la carte.
+        opacity = filterOpacity;
       } else if (fourPlusKeys.has(zoneRefComparableKey(code))) {
         opacity = ZONE_4PLUS_HIGHLIGHT_OPACITY;
       } else {
@@ -1737,6 +1800,15 @@
             data-testid="map-legend-zonage"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
+            <!-- m6 — sélecteur de millésime (exclusif), masqué tant qu'un seul
+                 millésime est servi pour la ville (dégradé honnête). -->
+            <div class="mb-2">
+              <ZoneMillesimeSelect
+                zones={zoneMillesimeLegendInput}
+                filter={zoneMillesimeFilter}
+                onChange={handleZoneMillesimeFilterChange}
+              />
+            </div>
             <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
               {#each zoneLegendEntries as item (item.label)}
                 <li class="flex items-center gap-2 text-xs text-slate-600">
@@ -1871,6 +1943,8 @@
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}
       onZoneKindFilterChange={handleZoneKindFilterChange}
+      {zoneMillesimeFilter}
+      onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
