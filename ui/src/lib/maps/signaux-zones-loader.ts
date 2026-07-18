@@ -8,14 +8,19 @@
  * `qc-zonage-<slug>` via le passthrough `/api/geo/collections/...`
  * (ex. 645 zones réelles pour salaberry-de-valleyfield).
  *
- * Ordre de résolution (du plus riche au plus pauvre) :
- *   1. endpoint `/api/geo/:citySlug/zones` (fallback=lots) — porte le join
- *      zone→lots (projection « inherited » des signaux) quand configuré ;
- *   2. collection OGC `qc-zonage-<slug>` (passthrough) — vraies géométries de
- *      zonage (aplats + codes), sans join lots ;
+ * Ordre de résolution (zero-copy géo #73 lot 1 — LIVE GEO d'abord pour la FORME
+ * des zones) :
+ *   1. collection OGC `qc-zonage-<slug>` (passthrough `/api/geo/collections/...`)
+ *      — géométrie de zonage du LIVE GEO (aplats + codes + millésime/règlement).
+ *      Correctif de fraîcheur : la forme des zones ne vient PLUS de la géométrie
+ *      PG store-local périmée (ex. Sutton `P-1/939 arcgis`) tant que geo sert la
+ *      cohorte à jour (95 zones `RUR-*, CONS-*, H-* geopdf-esri`) ;
+ *   2. endpoint `/api/geo/:citySlug/zones` (fallback=lots) — FALLBACK quand la
+ *      collection live geo est absente : porte le join zone→lots (projection
+ *      « inherited » / lot-union) et les zones de simulation (carte-steve) ;
  *   3. rien — l'appelant applique le fallback contour ville
- *      (`withCityFallbackZone`), désormais réservé au cas où la collection est
- *      VRAIMENT absente.
+ *      (`withCityFallbackZone`), réservé au cas où NI la collection NI l'endpoint
+ *      ne servent de zones.
  *
  * Anti-course : le `signal` de l'appelant est propagé aux deux clients
  * (fetch-with-timeout) ; une réponse périmée est avortée, jamais peinte.
@@ -150,10 +155,17 @@ export interface LoadSignauxZonesOptions {
 /**
  * Charge la couche zonage d'une ville pour la vue Signaux, en tiers.
  *
- * Erreurs : un 404 de l'endpoint N'EST PAS une erreur (on tente la collection) ;
- * un 404 de la collection non plus (`ok:false` du client → tier "none").
- * Toute autre erreur (réseau, timeout, abort) REMONTE telle quelle — l'appelant
- * la distingue via `isAbortError` et bascule la couche en état d'erreur.
+ * LIVE-FIRST (zero-copy géo #73 lot 1) : la collection OGC (live geo) est
+ * interrogée EN PREMIER pour la FORME des zones ; l'endpoint de résolution PG
+ * n'est plus qu'un fallback (join zone→lots / simulation) quand la collection
+ * live geo est absente. Quand la collection sert des zones, l'endpoint n'est pas
+ * appelé (le join lots-inherited n'est pas peuplé pour les vraies villes
+ * aujourd'hui — lot_zone_resolution à venir).
+ *
+ * Erreurs : un 404 de la collection N'EST PAS une erreur (`ok:false` du client →
+ * on tente l'endpoint) ; un 404 de l'endpoint non plus (→ tier "none"). Toute
+ * autre erreur (réseau, timeout, abort) REMONTE telle quelle — l'appelant la
+ * distingue via `isAbortError` et bascule la couche en état d'erreur.
  */
 export async function loadSignauxZones(
   citySlug: string,
@@ -162,29 +174,7 @@ export async function loadSignauxZones(
   const fetchResolved = opts.fetchResolvedZones ?? fetchGeoZones;
   const fetchCollection = opts.fetchZonesCollection ?? fetchZones;
 
-  // ── 1. Endpoint de résolution API (join zone→lots quand configuré) ─────────
-  let resolved: GeoZonesResponse | null = null;
-  try {
-    resolved = await fetchResolved(citySlug, {
-      fallback: "lots",
-      limit: opts.endpointLimit ?? ZONES_ENDPOINT_LIMIT,
-      signal: opts.signal,
-    });
-  } catch (err) {
-    // 404 = ville inconnue de l'endpoint → PAS une erreur : on tente la
-    // collection OGC. Toute autre erreur (réseau/timeout/abort) remonte.
-    const message = err instanceof Error ? err.message : "";
-    if (!message.includes("geo-zones HTTP 404")) throw err;
-  }
-  if (
-    resolved &&
-    resolved.zoneCount > 0 &&
-    resolved.featureCollection.features.length > 0
-  ) {
-    return { response: resolved, tier: "endpoint" };
-  }
-
-  // ── 2. Collection OGC qc-zonage-<slug> (passthrough) ───────────────────────
+  // ── 1. Collection OGC qc-zonage-<slug> (live geo) — FORME des zones ────────
   const collection = await fetchCollection(citySlug, {
     limit: opts.collectionLimit ?? ZONES_COLLECTION_LIMIT,
     signal: opts.signal,
@@ -194,6 +184,28 @@ export async function loadSignauxZones(
       response: geoZonesResponseFromCollection(collection),
       tier: "collection",
     };
+  }
+
+  // ── 2. Endpoint de résolution API (fallback : join zone→lots / simulation) ─
+  let resolved: GeoZonesResponse | null = null;
+  try {
+    resolved = await fetchResolved(citySlug, {
+      fallback: "lots",
+      limit: opts.endpointLimit ?? ZONES_ENDPOINT_LIMIT,
+      signal: opts.signal,
+    });
+  } catch (err) {
+    // 404 = ville inconnue de l'endpoint → PAS une erreur : tier "none" (contour
+    // à l'appelant). Toute autre erreur (réseau/timeout/abort) remonte.
+    const message = err instanceof Error ? err.message : "";
+    if (!message.includes("geo-zones HTTP 404")) throw err;
+  }
+  if (
+    resolved &&
+    resolved.zoneCount > 0 &&
+    resolved.featureCollection.features.length > 0
+  ) {
+    return { response: resolved, tier: "endpoint" };
   }
 
   // ── 3. Vraiment rien : fallback contour ville à l'appelant ─────────────────
