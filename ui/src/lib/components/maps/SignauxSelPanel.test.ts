@@ -588,3 +588,97 @@ describe("SignauxSelPanel — accordéon ZONES : filtre par TYPE de zone", () =>
     expect(queryByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
   });
 });
+
+// ── m7 — accordéon Règlements (entre Signaux et Zones) ───────────────────────
+
+describe("SignauxSelPanel — m7 accordéon Règlements", () => {
+  it("liste le règlement cité par les signaux (numéro + bouton PDF)", () => {
+    const { getByText, queryByText } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: NODES },
+    });
+    expect(getByText("Règlements")).not.toBeNull();
+    // NODES citent tous « 1926-26 » → une entrée de règlement.
+    expect(queryByText("1926-26")).not.toBeNull();
+    expect(queryByText("Voir le PDF")).not.toBeNull();
+  });
+
+  it("« Voir le PDF » appelle onOpenSource (titre = « Règlement <numéro> »)", async () => {
+    const calls: Array<{ title: string; sourceUrl: string | null }> = [];
+    const { getByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: NODES,
+        onOpenSource: (p: { title: string; sourceUrl: string | null }) =>
+          calls.push(p),
+      },
+    });
+    await fireEvent.click(getByText("Voir le PDF"));
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.title).toBe("Règlement 1926-26");
+  });
+
+  it("aucun règlement cité → état vide honnête (rien de fabriqué)", () => {
+    const noReg: GraphSignalNode = {
+      id: "no-reg",
+      type: "DesignationEvent",
+      label: "Signal sans règlement",
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: null,
+      props: { description: "x", zone_ref: "H-431" },
+    };
+    const { getByText, queryByText } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [noReg] },
+    });
+    expect(getByText("Règlements")).not.toBeNull();
+    expect(
+      queryByText("Aucun règlement cité par les signaux de cette ville."),
+    ).not.toBeNull();
+  });
+});
+
+// ── m8 — source de la zone (type + ouverture) ────────────────────────────────
+
+describe("SignauxSelPanel — m8 source de la zone", () => {
+  function zonesWithGrille(code: string, grillePdfUrl: string): GeoZonesResponse {
+    const base = makeZonesResponse([code]);
+    base.featureCollection.features[0]!.properties.grillePdfUrl = grillePdfUrl;
+    return base;
+  }
+
+  it("fiche zone : type de source mentionné + ouverture en viewer (grille servie)", async () => {
+    const calls: Array<{ title: string; sourceUrl: string | null }> = [];
+    const { getByText, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithGrille(
+          "H-431",
+          "https://ville.qc.ca/grille-h431.pdf",
+        ),
+        onOpenSource: (p: { title: string; sourceUrl: string | null }) =>
+          calls.push(p),
+      },
+    });
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    // m8.2 — le type de source est mentionné.
+    expect(queryByText("Type de source")).not.toBeNull();
+    // m8.1 — la source est ouvrable dans le viewer partagé.
+    await fireEvent.click(getByText("Ouvrir la source (PDF)"));
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.sourceUrl).toBe("https://ville.qc.ca/grille-h431.pdf");
+  });
+
+  it("fiche zone sans URL servie : type affiché, note « source non ouvrable »", async () => {
+    const { getByText, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431"]),
+      },
+    });
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(queryByText("Type de source")).not.toBeNull();
+    expect(queryByText(/Source non ouvrable/)).not.toBeNull();
+  });
+});
