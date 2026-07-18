@@ -143,7 +143,7 @@ describe("SignauxRail — tabs A / B", () => {
     expect(container.textContent).toMatch(/5\s+signaux/);
   });
 
-  it("switches to B on the tab and counts from vivierV2Counts.qualified", async () => {
+  it("switches to B on the tab and counts precoce stages (m1 default Précoce✓)", async () => {
     const calls: string[] = [];
     const { container } = render(SignauxRail, {
       props: {
@@ -157,9 +157,10 @@ describe("SignauxRail — tabs A / B", () => {
 
     await fireEvent.click(getTabs(container)[1]);
 
-    expect(calls).toEqual(["vivier-v2"]);
-    // B : vivierV2Counts.qualified = 2, jamais un sous-ensemble z|p.
-    expect(container.textContent).toMatch(/2\s+signaux/);
+    // m1 : le défaut B est désormais Zonage✓ Résidentiel✓ Précoce✓ → "vivier-v2|p".
+    expect(calls).toEqual(["vivier-v2|p"]);
+    // B précoce : stageCounts.avis_motion + projet_reglement = 1 + 0 = 1.
+    expect(container.textContent).toMatch(/1\s+signal/);
   });
 
   it("shows B's three axes all toggleable (defaults Z✓ R✓ P✗), none locked (m1.4)", async () => {
