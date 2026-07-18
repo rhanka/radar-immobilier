@@ -167,6 +167,39 @@ describe("fetchZones", () => {
     expect(zone.properties.affectation).toBe("Conservation");
   });
 
+  it("extrait le millésime + n° de règlement servis PAR ZONE (axe millésime)", async () => {
+    vi.stubGlobal("fetch", async () =>
+      new Response(
+        JSON.stringify({
+          type: "FeatureCollection",
+          features: [
+            // Millésime servi en chaîne + numéro (profil Mont-Tremblant réel).
+            makeZonePolygon({
+              zone_code: "CO-939",
+              reglement_millesime: "2008",
+              reglement_numero: "2008-102",
+            }),
+            // Millésime servi en NOMBRE (coercition string) + variante de casse.
+            makeZonePolygon({ zone_code: "H-431", Millesime: 2020, REGLEMENT_NUMERO: "2020-07" }),
+            // Aucun règlement servi → rien fabriqué (undefined).
+            makeZonePolygon({ zone_code: "C-18" }),
+          ],
+        }),
+        { status: 200 },
+      ),
+    );
+    const res = await fetchZones("mont-tremblant", { baseUrl: "" });
+    const [co, h, c] = res.featureCollection.features;
+    expect(co!.properties.reglementMillesime).toBe("2008");
+    expect(co!.properties.reglementNumero).toBe("2008-102");
+    // Nombre coercé en chaîne d'affichage.
+    expect(h!.properties.reglementMillesime).toBe("2020");
+    expect(h!.properties.reglementNumero).toBe("2020-07");
+    // Anti-invention : aucun champ posé quand la source ne sert rien.
+    expect(c!.properties.reglementMillesime).toBeUndefined();
+    expect(c!.properties.reglementNumero).toBeUndefined();
+  });
+
   it("drops features without any resolvable code (no false zone)", async () => {
     vi.stubGlobal("fetch", async () =>
       new Response(

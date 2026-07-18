@@ -10,6 +10,7 @@ import {
   extractSignalZoneRefs,
   extractSignalZoneRefsDetailed,
   fallbackZoneCode,
+  findLotBounds,
   mergeDesignatedZones,
   normalizeZoneCodeRef,
   normalizeLotNoRef,
@@ -463,5 +464,90 @@ describe("decorateSelectedFlag", () => {
       features: [],
     };
     expect(decorateSelectedFlag(empty, () => true)).toBe(empty);
+  });
+});
+
+describe("findLotBounds — m4 (cadrage AU lot cliqué, jamais la zone parente)", () => {
+  function lotsFixture(): LotFeatureCollection {
+    return {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [-74.10, 45.25],
+                [-74.09, 45.25],
+                [-74.09, 45.26],
+                [-74.10, 45.26],
+                [-74.10, 45.25],
+              ],
+            ],
+          },
+          properties: { noLot: "4 516 943", citySlug: CITY_SLUG },
+        },
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [-73.50, 45.50],
+                [-73.49, 45.50],
+                [-73.49, 45.51],
+                [-73.50, 45.51],
+                [-73.50, 45.50],
+              ],
+            ],
+          },
+          // Lot sans citySlug explicite → résolu via le fallback ville active.
+          properties: { noLot: "4 516 944" },
+        },
+        {
+          type: "Feature",
+          geometry: null,
+          properties: { noLot: "no-geom", citySlug: CITY_SLUG },
+        },
+      ],
+    };
+  }
+
+  it("renvoie la bbox du lot ciblé (résolu par citySlug + noLot)", () => {
+    const bounds = findLotBounds(lotsFixture(), CITY_SLUG, "4 516 943");
+    expect(bounds).toEqual([
+      [-74.10, 45.25],
+      [-74.09, 45.26],
+    ]);
+  });
+
+  it("cible un AUTRE lot → bbox du nouveau lot (ajuste au lot, pas à la zone)", () => {
+    const lots = lotsFixture();
+    const first = findLotBounds(lots, CITY_SLUG, "4 516 943");
+    const second = findLotBounds(lots, CITY_SLUG, "4 516 944", CITY_SLUG);
+    expect(second).toEqual([
+      [-73.50, 45.50],
+      [-73.49, 45.51],
+    ]);
+    // Deux lots distincts → deux cadrages distincts (aucun repli commun).
+    expect(second).not.toEqual(first);
+  });
+
+  it("résout un lot sans citySlug via le fallback ville active", () => {
+    const bounds = findLotBounds(lotsFixture(), CITY_SLUG, "4 516 944", CITY_SLUG);
+    expect(bounds).not.toBeNull();
+  });
+
+  it("lot absent → null (l'appelant NE bouge PAS la caméra)", () => {
+    expect(findLotBounds(lotsFixture(), CITY_SLUG, "9 999 999")).toBeNull();
+  });
+
+  it("lot sans géométrie → null (reste au niveau lot, pas de repli zone)", () => {
+    expect(findLotBounds(lotsFixture(), CITY_SLUG, "no-geom")).toBeNull();
+  });
+
+  it("mauvaise ville → null (pas de faux match cross-ville)", () => {
+    expect(findLotBounds(lotsFixture(), "autre-ville", "4 516 943")).toBeNull();
   });
 });

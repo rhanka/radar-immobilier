@@ -28,6 +28,10 @@
     DEFAULT_ZONE_KIND_FILTER,
     type ZoneKindFilter,
   } from "$lib/maps/zone-kind-filter.js";
+  import {
+    DEFAULT_ZONE_MILLESIME_FILTER,
+    type ZoneMillesimeFilter,
+  } from "$lib/maps/zone-millesime-filter.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -41,6 +45,15 @@
   // les en-têtes des accordéons remontent le nouveau filtre par callback.
   export let lotFilter: EvalLotFilter = DEFAULT_EVAL_FILTER;
   export let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+  export let zoneMillesimeFilter: ZoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
+  // m7 / m8 — passe-plat du callback d'ouverture de source (viewer partagé) pour
+  // que les tests observent le payload (règlement PDF / source de zone).
+  export let onOpenSource: (payload: {
+    title: string;
+    sourceUrl: string | null;
+    rawRef?: string | null;
+    page?: number | null;
+  }) => void = () => {};
 
   function handleLotFilterChange(next: EvalLotFilter): void {
     lotFilter = next;
@@ -48,6 +61,10 @@
 
   function handleZoneKindFilterChange(next: ZoneKindFilter): void {
     zoneKindFilter = next;
+  }
+
+  function handleZoneMillesimeFilterChange(next: ZoneMillesimeFilter): void {
+    zoneMillesimeFilter = next;
   }
 
   // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic).
@@ -76,5 +93,8 @@
   onLotFilterChange={handleLotFilterChange}
   {zoneKindFilter}
   onZoneKindFilterChange={handleZoneKindFilterChange}
+  {zoneMillesimeFilter}
+  onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
   onToggleKey={toggleBucketKey}
+  {onOpenSource}
 />
