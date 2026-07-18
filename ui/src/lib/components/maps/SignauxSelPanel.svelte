@@ -88,6 +88,12 @@
     zoneMatchesKindFilter,
     type ZoneKindFilter,
   } from "$lib/maps/zone-kind-filter.js";
+  import {
+    DEFAULT_ZONE_MILLESIME_FILTER,
+    isDefaultZoneMillesimeFilter,
+    zoneMatchesMillesime,
+    type ZoneMillesimeFilter,
+  } from "$lib/maps/zone-millesime-filter.js";
   import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
   import {
@@ -125,6 +131,10 @@
   /** Filtre par TYPE de zone (kind) — en-tête de l'accordéon Zones. */
   export let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
   export let onZoneKindFilterChange: (filter: ZoneKindFilter) => void = () => {};
+  // Filtre par MILLÉSIME de zonage (exclusif) — même état partagé que la carte.
+  export let zoneMillesimeFilter: ZoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
+  export let onZoneMillesimeFilterChange: (filter: ZoneMillesimeFilter) => void =
+    () => {};
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
   /** « Réessayer » — recharge le détail signaux (couche panneau droit). */
@@ -269,11 +279,28 @@
     ? zones.filter((z) => filteredZoneCodeSet!.has(zoneRefComparableKey(z.properties.code)))
     : zones;
 
+  // ── Filtre par MILLÉSIME de zonage (exclusif) — EN AMONT du filtre type ────
+  // Le millésime restreint la couche AVANT le type : la liste, les chips de type
+  // et leurs comptes reflètent le millésime retenu (miroir strict de la carte).
+  $: zoneMillesimeFilterActive = !isDefaultZoneMillesimeFilter(zoneMillesimeFilter);
+  /** Couche entière restreinte au millésime retenu (base des chips de type). */
+  $: layerMillesimeZones = zoneMillesimeFilterActive
+    ? zones.filter((z) =>
+        zoneMatchesMillesime(z.properties.reglementMillesime ?? null, zoneMillesimeFilter),
+      )
+    : zones;
+  /** Liste (filtre signaux) restreinte au millésime retenu. */
+  $: subsetMillesimeZones = zoneMillesimeFilterActive
+    ? subsetFilteredZones.filter((z) =>
+        zoneMatchesMillesime(z.properties.reglementMillesime ?? null, zoneMillesimeFilter),
+      )
+    : subsetFilteredZones;
+
   // ── Filtre par TYPE de zone (en-tête de l'accordéon Zones) ────────────────
   $: zoneKindFilterActive = !isDefaultZoneKindFilter(zoneKindFilter);
-  /** Zones listées = filtre signaux ∩ filtre type. */
+  /** Zones listées = filtre signaux ∩ millésime ∩ type. */
   $: filteredZones = zoneKindFilterActive
-    ? subsetFilteredZones.filter((z) =>
+    ? subsetMillesimeZones.filter((z) =>
         zoneMatchesKindFilter(
           z.properties.kind ?? null,
           z.properties.code,
@@ -281,17 +308,25 @@
           z.properties.affectation ?? null,
         ),
       )
-    : subsetFilteredZones;
+    : subsetMillesimeZones;
   /**
-   * Entrée (kind/code) de l'en-tête de filtre — base = TOUTES les zones
-   * affichables de la ville, pas la liste réduite par le filtre signaux : le
-   * filtre TYPE pilote la peinture de TOUTE la couche carte, ses chips et son
-   * compteur N/M doivent donc refléter la couche entière (miroir carte).
+   * Entrée (kind/code) de l'en-tête de filtre — base = toutes les zones de la
+   * ville RESTREINTES au millésime retenu (pas la liste réduite par le filtre
+   * signaux) : le filtre TYPE pilote la peinture de TOUTE la couche carte, ses
+   * chips et son compteur N/M doivent donc refléter la couche du millésime.
    */
-  $: zoneFilterInput = zones.map((z) => ({
+  $: zoneFilterInput = layerMillesimeZones.map((z) => ({
     kind: z.properties.kind ?? null,
     code: z.properties.code,
     affectation: z.properties.affectation ?? null,
+  }));
+  /**
+   * Base du sélecteur de millésime = TOUTES les zones de la ville (jamais la
+   * couche déjà filtrée par millésime, sinon le sélecteur se masquerait après un
+   * choix). Le sélecteur reste masqué tant qu'il n'y a pas ≥ 2 millésimes servis.
+   */
+  $: zoneMillesimeInput = zones.map((z) => ({
+    reglementMillesime: z.properties.reglementMillesime ?? null,
   }));
 
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
@@ -315,13 +350,15 @@
   // Total = zones réellement affichables (couche cadastrale + zones désignées
   // par les signaux), pas seulement le zoneCount de la couche géo.
   $: configuredZoneCount = zones.length;
-  /** Nombre de zones visibles selon les filtres actifs (signaux et/ou type). */
-  $: visibleZoneCount =
-    filteredZoneCodeSet || zoneKindFilterActive ? filteredZones.length : configuredZoneCount;
+  /** true si un filtre RESTREINT la liste des zones (signaux, type ou millésime). */
+  $: zoneListFiltered =
+    Boolean(filteredZoneCodeSet) || zoneKindFilterActive || zoneMillesimeFilterActive;
+  /** Nombre de zones visibles selon les filtres actifs (signaux, type et/ou millésime). */
+  $: visibleZoneCount = zoneListFiltered ? filteredZones.length : configuredZoneCount;
   $: zoneBadgeText =
     zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
       ? "zones non configurées"
-      : filteredZoneCodeSet || zoneKindFilterActive
+      : zoneListFiltered
         ? `${visibleZoneCount}/${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`
         : `${configuredZoneCount} zone${configuredZoneCount !== 1 ? "s" : ""}`;
   /** C4 — n° du lot focusé (fiche ouverte), pour l'inclure dans la liste capée. */
@@ -656,6 +693,25 @@
       `[data-entity-key="${cssAttrEscape(key)}"]`,
     );
     if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  /**
+   * Millésime + n° de règlement de zonage PORTÉ PAR LA ZONE quand geo les sert
+   * (ex. « 2008 · règl. 2008-102 »). Contrat anti-invention : rien n'est rendu
+   * quand la source ne fournit ni l'un ni l'autre (villes en store-local
+   * aujourd'hui — pas de colonne millésime en base, cf. note ask geo). La clé
+   * s'adapte : « Millésime » quand l'année est servie, sinon « Règlement ».
+   */
+  function zoneReglementRow(
+    zone: GeoZoneFeature,
+  ): { key: string; value: string } | null {
+    const millesime = readString(zone.properties.reglementMillesime);
+    const numero = readString(zone.properties.reglementNumero);
+    if (!millesime && !numero) return null;
+    const parts: string[] = [];
+    if (millesime) parts.push(millesime);
+    if (numero) parts.push(`règl. ${numero}`);
+    return { key: millesime ? "Millésime" : "Règlement", value: parts.join(" · ") };
   }
 
   /** Type (kind) résolu de la zone — null si indéterminé (affiché « — »). */
@@ -1187,7 +1243,7 @@
               ? "n/d"
               : zonesResponse?.resolutionStatus === "fallback" && configuredZoneCount === 0
               ? "fallback"
-              : filteredZoneCodeSet || zoneKindFilterActive
+              : zoneListFiltered
               ? `${visibleZoneCount}/${configuredZoneCount}`
               : configuredZoneCount}
           </span>
@@ -1215,11 +1271,14 @@
               zones={zoneFilterInput}
               filter={zoneKindFilter}
               onChange={onZoneKindFilterChange}
+              millesimeZones={zoneMillesimeInput}
+              millesimeFilter={zoneMillesimeFilter}
+              onMillesimeChange={onZoneMillesimeFilterChange}
             />
             {#if visibleZones.length === 0}
               <p class="sel-empty">
-                {zoneKindFilterActive
-                  ? "Aucune zone du type sélectionné."
+                {zoneKindFilterActive || zoneMillesimeFilterActive
+                  ? "Aucune zone du filtre sélectionné."
                   : "Aucune zone liée aux signaux du filtre actif."}
               </p>
             {:else}
@@ -1249,6 +1308,7 @@
                          lots joints, grille PDF, signaux citant la zone. -->
                     {@const citing = signalsCitingZone(zone, detailNodes)}
                     {@const zoneSource = describeZoneSource(zone.properties)}
+                    {@const zoneReg = zoneReglementRow(zone)}
                     <div class="sel-entity-detail">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Code</span>
@@ -1258,6 +1318,14 @@
                           <span class="entity-meta-val">{zoneTypeLabel(zone)}</span>
                         {:else}
                           <span class="entity-meta-val entity-meta-val--missing">—</span>
+                        {/if}
+                        <!-- m6 — millésime + n° de règlement PAR ZONE (axe
+                             millésime) ; rendu seulement quand geo le sert. -->
+                        {#if zoneReg}
+                          <span class="entity-meta-key">{zoneReg.key}</span>
+                          <span class="entity-meta-val" data-testid="zone-reglement-millesime"
+                            >{zoneReg.value}</span
+                          >
                         {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{zoneSourceLabel(zone)}</span>
