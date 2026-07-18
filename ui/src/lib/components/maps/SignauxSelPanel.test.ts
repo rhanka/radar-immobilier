@@ -682,3 +682,95 @@ describe("SignauxSelPanel — m8 source de la zone", () => {
     expect(queryByText(/Source non ouvrable/)).not.toBeNull();
   });
 });
+
+// ── m6 — axe millésime du zonage (fiche + sélecteur masqué mono-cohorte) ──────
+
+describe("SignauxSelPanel — m6 millésime du zonage", () => {
+  /** Zones avec millésime + n° de règlement PAR ZONE (axe millésime). */
+  function zonesWithMillesime(
+    entries: Array<{ code: string; millesime?: string | null; numero?: string | null }>,
+  ): GeoZonesResponse {
+    const base = makeZonesResponse(entries.map((e) => e.code));
+    entries.forEach((e, i) => {
+      const props = base.featureCollection.features[i]!.properties;
+      if (e.millesime !== undefined) props.reglementMillesime = e.millesime;
+      if (e.numero !== undefined) props.reglementNumero = e.numero;
+    });
+    return base;
+  }
+
+  it("fiche zone : affiche « Millésime · règl. » quand geo le sert, SANS écraser le Type de source (m8)", async () => {
+    const { getByText, queryByText, getByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithMillesime([
+          { code: "CO-939", millesime: "2008", numero: "2008-102" },
+        ]),
+      },
+    });
+    await fireEvent.click(getByText("CO-939", { selector: ".sel-entity-label" }));
+    // Ligne millésime visible (valeur combinée « 2008 · règl. 2008-102 »).
+    expect(getByTestId("zone-reglement-millesime").textContent).toContain("2008");
+    expect(getByTestId("zone-reglement-millesime").textContent).toContain("règl. 2008-102");
+    // m8 non régressé : la ligne « Type de source » reste présente.
+    expect(queryByText("Type de source")).not.toBeNull();
+  });
+
+  it("fiche zone : aucune ligne millésime fabriquée quand geo ne sert rien", async () => {
+    const { getByText, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-431"]),
+      },
+    });
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("zone-reglement-millesime")).toBeNull();
+  });
+
+  it("sélecteur MASQUÉ tant qu'une seule cohorte est servie (MT = tout 2008)", () => {
+    const { queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithMillesime([
+          { code: "CO-939", millesime: "2008", numero: "2008-102" },
+          { code: "H-431", millesime: "2008", numero: "2008-102" },
+        ]),
+      },
+    });
+    expect(queryByTestId("signaux-zone-millesime-select")).toBeNull();
+  });
+
+  it("sélecteur VISIBLE dès ≥ 2 millésimes ; choisir un millésime restreint la liste + le compteur N/M", async () => {
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zonesWithMillesime([
+          { code: "H-2008", millesime: "2008", numero: "2008-102" },
+          { code: "H-2020", millesime: "2020", numero: "2020-07" },
+          { code: "C-2020", millesime: "2020", numero: "2020-07" },
+        ]),
+      },
+    });
+
+    const select = getByTestId("signaux-zone-millesime-select").querySelector("select");
+    expect(select).not.toBeNull();
+
+    // Sélectionne le millésime 2008 (exclusif) → seule H-2008 reste listée ; la
+    // couche de type est restreinte au millésime (compteur du header 1/1 :
+    // les chips de type reflètent millesimeFilteredZones, pas les 3 zones).
+    await fireEvent.change(select!, { target: { value: "2008" } });
+    expect(queryByText("H-2008", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("H-2020", { selector: ".sel-entity-label" })).toBeNull();
+    expect(queryByText("C-2020", { selector: ".sel-entity-label" })).toBeNull();
+    expect(getByTestId("signaux-zone-filter-count").textContent).toBe("1/1");
+
+    // Retour « Tous les millésimes » → toutes les zones reviennent (3/3).
+    await fireEvent.change(select!, { target: { value: "__all__" } });
+    expect(queryByText("H-2020", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(getByTestId("signaux-zone-filter-count").textContent).toBe("3/3");
+  });
+});
