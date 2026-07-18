@@ -84,14 +84,14 @@ describe("parseCollectionId", () => {
   });
 });
 
-// ─── Store local prioritaire ─────────────────────────────────────────────────
-describe("store local prioritaire", () => {
-  it("sert les features locales et n'appelle PAS le proxy", async () => {
+// ─── Store local prioritaire (lots + zonage sous `pg`) ───────────────────────
+describe("store local prioritaire (lots + zonage sous pg)", () => {
+  it("lots : sert les features locales et n'appelle PAS le proxy", async () => {
     const { fn, calls } = makeOkFetch();
     const localResolver: LocalCollectionResolver = async () => LOCAL_FC;
     const app = geoCollectionsRoute({ localResolver, fetchImpl: fn });
 
-    const res = await app.request("/api/geo/collections/qc-zonage-delson/items?limit=10");
+    const res = await app.request("/api/geo/collections/qc-lots-delson/items?limit=10");
     expect(res.status).toBe(200);
     const body = (await res.json()) as {
       type: string;
@@ -102,6 +102,120 @@ describe("store local prioritaire", () => {
     expect(body.features).toHaveLength(1);
     expect(body.numberReturned).toBe(1);
     expect(calls).toHaveLength(0); // aucun proxy
+  });
+
+  it("zonage sous GEO_ZONES_SOURCE=pg : store local prioritaire, aucun live geo", async () => {
+    const { fn, calls } = makeOkFetch();
+    const localResolver: LocalCollectionResolver = async () => LOCAL_FC;
+    const app = geoCollectionsRoute({ localResolver, fetchImpl: fn, zonesSource: "pg" });
+
+    const res = await app.request("/api/geo/collections/qc-zonage-delson/items?limit=10");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { features: unknown[] };
+    expect(body.features).toHaveLength(1);
+    expect(calls).toHaveLength(0); // pg → store local, jamais le live geo
+  });
+});
+
+// ─── Zonage live-first (GEO_ZONES_SOURCE=live, défaut) ────────────────────────
+describe("zonage live-first (GEO_ZONES_SOURCE=live, défaut)", () => {
+  it("sert le LIVE GEO en priorité même quand le PG store-local a des zones (fraîcheur Sutton)", async () => {
+    // PG store-local = cohorte PÉRIMÉE (P-1 arcgis) ; live geo = cohorte à jour.
+    const stalePg = {
+      type: "FeatureCollection" as const,
+      features: [
+        {
+          type: "Feature" as const,
+          geometry: { type: "Point", coordinates: [-72.6, 45.1] },
+          properties: { featureKind: "zone", zoneCode: "P-1", citySlug: "sutton" },
+        },
+      ],
+    };
+    const liveGeo = {
+      type: "FeatureCollection",
+      numberMatched: 2,
+      numberReturned: 2,
+      features: [
+        {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-72.61, 45.11] },
+          properties: { zone_code: "RUR-3", reglement_millesime: 2018, reglement_numero: "2018-45" },
+        },
+        {
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [-72.62, 45.12] },
+          properties: { zone_code: "CONS-1" },
+        },
+      ],
+    };
+    const localResolver: LocalCollectionResolver = async () => stalePg;
+    const { fn, calls } = makeOkFetch(liveGeo);
+    const app = geoCollectionsRoute({
+      localResolver,
+      fetchImpl: fn,
+      baseUrl: "https://geo.example",
+    });
+
+    const res = await app.request("/api/geo/collections/qc-zonage-sutton/items?limit=3000");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
+    // Live geo servi (2 zones RUR/CONS) ; le PG périmé n'est JAMAIS rendu.
+    expect(body.features).toHaveLength(2);
+    expect(body.features.map((f) => f.properties["zone_code"])).toEqual(["RUR-3", "CONS-1"]);
+    expect(JSON.stringify(body)).not.toContain("P-1");
+    // Le live geo a bien été appelé (priorité), pas seulement en fallback.
+    expect(calls.some((u) => u.includes("/collections/qc-zonage-sutton/items"))).toBe(true);
+  });
+
+  it("fallback PG store-local quand le live geo répond 404", async () => {
+    const localResolver: LocalCollectionResolver = async () => LOCAL_FC;
+    const app = geoCollectionsRoute({
+      localResolver,
+      fetchImpl: makeFailFetch(404),
+      baseUrl: "https://geo.example",
+    });
+    const res = await app.request("/api/geo/collections/qc-zonage-delson/items");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { features: unknown[] };
+    expect(body.features).toHaveLength(1); // PG servi en repli propre
+  });
+
+  it("fallback PG store-local quand le live geo est injoignable (réseau)", async () => {
+    const localResolver: LocalCollectionResolver = async () => LOCAL_FC;
+    const app = geoCollectionsRoute({
+      localResolver,
+      fetchImpl: makeThrowFetch(),
+      baseUrl: "https://geo.example",
+    });
+    const res = await app.request("/api/geo/collections/qc-zonage-delson/items");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { features: unknown[] };
+    expect(body.features).toHaveLength(1);
+  });
+
+  it("live geo 404 ET PG vide → 404 honnête (collection réellement absente)", async () => {
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: makeFailFetch(404),
+    });
+    const res = await app.request("/api/geo/collections/qc-zonage-inconnue/items");
+    expect(res.status).toBe(404);
+    const body = (await res.json()) as { error: string };
+    expect(body.error).toBe("collection_not_found");
+  });
+
+  it("met en cache le zonage live : 2 requêtes identiques → 1 seul fetch geo", async () => {
+    const { fn, calls } = makeOkFetch();
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: fn,
+      baseUrl: "https://geo.example",
+    });
+    await app.request("/api/geo/collections/qc-zonage-delson/items?limit=3000");
+    await app.request("/api/geo/collections/qc-zonage-delson/items?limit=3000");
+    expect(calls.filter((u) => u.includes("qc-zonage-delson"))).toHaveLength(1);
   });
 });
 
