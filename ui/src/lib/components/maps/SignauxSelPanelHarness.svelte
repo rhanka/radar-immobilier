@@ -32,6 +32,7 @@
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
   export let detailError: string | null = null;
+  export let vivierBMode = false;
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
@@ -67,6 +68,7 @@
   {selectedCity}
   {detailNodes}
   {detailError}
+  {vivierBMode}
   {selectionState}
   {zonesResponse}
   {lotsResponse}
