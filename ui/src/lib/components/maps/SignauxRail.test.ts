@@ -163,16 +163,16 @@ describe("SignauxRail — tabs A / B", () => {
     expect(container.textContent).toMatch(/1\s+signal/);
   });
 
-  it("shows B's three axes all toggleable (defaults Z✓ R✓ P✗), none locked (m1.4)", async () => {
+  it("direct/reload B key vivier-v2 defaults its three axes to Z✓ R✓ P✓, none locked", async () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "vivier-v2" },
     });
     const boxes = toggleBoxes(container);
     expect(boxes).toHaveLength(3);
-    // Zonage ✓, Résidentiel ✓, Précoce ✗ — et AUCUNE case verrouillée/grisée.
+    // `vivier-v2` is a mode key: it infers the current B default, including Précoce.
     expect(boxes[0]!.checked).toBe(true);
     expect(boxes[1]!.checked).toBe(true);
-    expect(boxes[2]!.checked).toBe(false);
+    expect(boxes[2]!.checked).toBe(true);
     expect(boxes.every((box) => box.disabled)).toBe(false);
     expect(boxes.some((box) => box.disabled)).toBe(false);
     expect(container.textContent).toContain("Zonage");
@@ -192,12 +192,12 @@ describe("SignauxRail — tabs A / B", () => {
       },
     });
     const boxes = toggleBoxes(container);
-    // Décocher « Résidentiel » (2e case) → vivier-v2|-r.
+    // Décocher « Résidentiel » (2e case) → vivier-v2|-r|p (Précoce remains explicitly checked).
     await fireEvent.click(boxes[1]!);
-    expect(calls.at(-1)).toBe("vivier-v2|-r");
-    // Puis décocher « Zonage » (1re case) → vivier-v2|-z|-r.
+    expect(calls.at(-1)).toBe("vivier-v2|-r|p");
+    // Puis décocher « Zonage » (1re case) → vivier-v2|-z|-r|p.
     await fireEvent.click(toggleBoxes(container)[0]!);
-    expect(calls.at(-1)).toBe("vivier-v2|-z|-r");
+    expect(calls.at(-1)).toBe("vivier-v2|-z|-r|p");
   });
 
   it("restricts B to precoce stages when the axis is checked", async () => {
@@ -209,10 +209,15 @@ describe("SignauxRail — tabs A / B", () => {
         onFilterChange: (key: string) => calls.push(key),
       },
     });
-    // B par défaut : qualified = 2.
+    // B direct/reload default is already Précoce: stageCounts précoce = 1.
+    expect(container.textContent).toMatch(/1\s+signal/);
+
+    // Explicitly uncheck Précoce → the live key preserves that session intent.
+    await fireEvent.click(toggleBoxes(container)[2]!);
+    expect(calls.at(-1)).toBe("vivier-v2|-p");
     expect(container.textContent).toMatch(/2\s+signaux/);
 
-    // Cocher « Précoce » → vivier-v2|p → stageCounts précoce = 1.
+    // Check it again → vivier-v2|p.
     await fireEvent.click(toggleBoxes(container)[2]!);
     expect(calls.at(-1)).toBe("vivier-v2|p");
     expect(container.textContent).toMatch(/1\s+signal/);
