@@ -8,6 +8,10 @@ import type {
   LotFeatureCollection,
 } from "./lots-client.js";
 import {
+  geometryBounds,
+  type LngLatBoundsTuple,
+} from "./geometry-bounds.js";
+import {
   DIMMED_SELECTION_OPACITY,
   FULL_SELECTION_OPACITY,
   type SelectionBucketState,
@@ -603,4 +607,26 @@ export function decorateSelectedFlag<
       },
     })) as C["features"],
   };
+}
+
+/**
+ * m4 — bbox WGS-84 du LOT ciblé par un clic carte. Résout le lot par
+ * (`citySlug`, `noLot`) dans la collection affichée, puis calcule sa bbox.
+ * `fallbackCitySlug` couvre les features sans `citySlug` explicite (ville
+ * active). Renvoie `null` si le lot est absent ou dépourvu de géométrie
+ * exploitable : l'appelant NE bouge alors PAS la caméra — on ne refit JAMAIS
+ * sur la zone parente, on reste au niveau lot.
+ */
+export function findLotBounds(
+  lots: LotFeatureCollection,
+  citySlug: string,
+  noLot: string,
+  fallbackCitySlug: string | null = null,
+): LngLatBoundsTuple | null {
+  const lot = lots.features.find(
+    (feature) =>
+      feature.properties.noLot === noLot &&
+      (feature.properties.citySlug ?? fallbackCitySlug ?? null) === citySlug,
+  );
+  return geometryBounds((lot?.geometry ?? null) as GeoJsonGeometry | null);
 }
