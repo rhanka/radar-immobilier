@@ -967,7 +967,12 @@
 
 <svelte:window onkeydown={handleMeasureKeydown} />
 
-<div class="relative h-full w-full overflow-hidden">
+<div
+  class="relative h-full w-full overflow-hidden"
+  data-testid="geo-city-map-base"
+  data-zone-labels-visible={showZoneLabels}
+  data-lot-labels-visible={showLotLabels}
+>
   <div bind:this={mapContainer} class="absolute inset-0"></div>
 
   <!-- ── Contrôles carte (haut-droit) : outil « mesurer une distance » ────── -->
