@@ -118,21 +118,22 @@ describe("Vivier A / B view contract", () => {
   });
 
   it("composes the B key from its three axes (opaque namespace, back-compatible)", () => {
-    // Défaut Zonage ✓ Résidentiel ✓ Précoce ✗ = la clé historique `vivier-v2`.
-    expect(keyForVivierB({ z: true, r: true, p: false })).toBe("vivier-v2");
-    // Le seul axe précoce reste la clé historique `vivier-v2|p`.
+    // `vivier-v2` remains the persisted mode key. On direct/reload it now infers
+    // the product default (Précoce ✓); explicit live combinations keep their intent.
+    expect(keyForVivierB({ z: true, r: true, p: false })).toBe("vivier-v2|-p");
+    expect(bAxesFromVivierKey("vivier-v2")).toEqual({ z: true, r: true, p: true });
+    // The explicit precoce axis stays `vivier-v2|p`.
     expect(keyForVivierB({ z: true, r: true, p: true })).toBe("vivier-v2|p");
     // Décocher un axe ajoute un jeton de relâchement, toujours dans le namespace B.
-    expect(keyForVivierB({ z: true, r: false, p: false })).toBe("vivier-v2|-r");
-    expect(keyForVivierB({ z: false, r: true, p: false })).toBe("vivier-v2|-z");
+    expect(keyForVivierB({ z: true, r: false, p: false })).toBe("vivier-v2|-r|-p");
+    expect(keyForVivierB({ z: false, r: true, p: false })).toBe("vivier-v2|-z|-p");
     expect(keyForVivierB({ z: false, r: false, p: true })).toBe("vivier-v2|-z|-r|p");
     // Toutes ces clés relèvent bien du mode B.
-    for (const key of ["vivier-v2", "vivier-v2|p", "vivier-v2|-r", "vivier-v2|-z|-r|p"]) {
+    for (const key of ["vivier-v2", "vivier-v2|p", "vivier-v2|-r|-p", "vivier-v2|-z|-r|p"]) {
       expect(modeFromSubsetKey(key)).toBe("b");
     }
     // Round-trip clé → axes → clé.
     for (const axes of [
-      { z: true, r: true, p: false },
       { z: true, r: true, p: true },
       { z: true, r: false, p: false },
       { z: false, r: true, p: true },
@@ -183,9 +184,9 @@ describe("Vivier A / B view contract", () => {
       node("q-projet", true, false, true, classification("oui", "oui", null, "rezonage", "projet_reglement")),
       node("q-adoption", true, false, false, classification("oui", "oui", null, "rezonage", "adoption")),
     ];
-    // vivier-v2 = tout le qualifié.
+    // vivier-v2 is the canonical mode key and now applies the default Précoce axis.
     expect(projectNodesForVivierKey(nodes, null, "vivier-v2").nodes.map((n) => n.id))
-      .toEqual(["q-avis", "q-projet", "q-adoption"]);
+      .toEqual(["q-avis", "q-projet"]);
     // vivier-v2|p = qualifié ∩ précoce (avis_motion / projet_reglement).
     expect(projectNodesForVivierKey(nodes, null, "vivier-v2|p").nodes.map((n) => n.id))
       .toEqual(["q-avis", "q-projet"]);
@@ -289,7 +290,7 @@ describe("Vivier A / B view contract", () => {
     // Une clé A absente des comptes bulk n'invente rien → 0 (la ville ne saute pas).
     expect(countForVivierCity(entry, "m|p")).toBe(0);
     // B = qualified ; B précoce = somme des étapes précoces de stageCounts.
-    expect(countForVivierCity(entry, "vivier-v2")).toBe(12);
+    expect(countForVivierCity(entry, "vivier-v2")).toBe(9);
     expect(countForVivierCity(entry, "vivier-v2|p")).toBe(9);
     // Une ville sans comptes v2 n'invente pas un vivier.
     expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "vivier-v2")).toBe(0);
@@ -333,8 +334,14 @@ describe("Vivier A / B view contract", () => {
     });
     // B : précoce coché survit à la navigation ville (le bug : il se décochait).
     expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "vivier-v2|p")).toBe("vivier-v2|p");
-    // B : axe relâché (résidentiel décoché) survit aussi.
+    // B : après une désactivation explicite de Précoce, la clé live reste la
+    // clé canonique. Le rail possède encore l'axe session et ne le redérive pas
+    // tant que cette clé initiale n'a pas changé (couvert au rendu navigateur).
+    expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "vivier-v2")).toBe("vivier-v2");
+    // B : axe relâché (résidentiel décoché) survit aussi; its explicit suffix
+    // preserves the absence of `p`.
     expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "vivier-v2|-r")).toBe("vivier-v2|-r");
+    expect(bAxesFromVivierKey("vivier-v2|-r")).toMatchObject({ p: false });
     // A : une sous-sélection d'axes (multi 4+ décoché) survit de même.
     expect(reconcileVivierRouteSubset(route(["z", "m", "p"]), "z|p")).toBe("z|p");
     // Un VRAI changement de mode (deep-link A→B) repart du défaut du tab B.
