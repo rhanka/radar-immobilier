@@ -8,6 +8,10 @@
    * exclusion composition the parent uses for `filteredDetailNodes`. Lets a
    * component test exercise the rail-checkbox → visible-count loop (m1.4/m1.7)
    * end-to-end through real Svelte reactivity.
+   *
+   * m1.7 — Also mirrors `selectedCityLiveCount` (SignauxMapView) so a test can
+   * assert the RAIL BADGE for `selectedSlug` tracks `visible.length` (axes +
+   * exclusions), not the static bulk count from `entries`.
    */
   import SignauxRail from "./SignauxRail.svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
@@ -22,6 +26,8 @@
   export let entries: CityMapEntry[] = [];
   export let detailNodes: GraphSignalNode[] = [];
   export let initialSubsetKey = "vivier-v2";
+  /** Ville sélectionnée dont le badge du rail doit suivre `visible.length`. */
+  export let selectedSlug: string | null = null;
 
   let activeKey = initialSubsetKey;
   let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
@@ -40,6 +46,10 @@
     projectNodesForVivierKey(detailNodes, null, activeKey).nodes,
     exclusions,
   );
+
+  // Parity with SignauxMapView.selectedCityLiveCount: available as soon as a
+  // city is selected (this harness has no async loading state to guard).
+  $: selectedCityLiveCount = selectedSlug !== null ? visible.length : null;
 </script>
 
 <span data-testid="visible-count">{visible.length}</span>
@@ -47,6 +57,8 @@
   {entries}
   {initialSubsetKey}
   {exclusions}
+  {selectedSlug}
+  {selectedCityLiveCount}
   onFilterChange={handleFilterChange}
   onExclusionsChange={handleExclusionsChange}
 />

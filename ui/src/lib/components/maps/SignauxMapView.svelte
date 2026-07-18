@@ -576,6 +576,24 @@
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
       : null
   );
+
+  /**
+   * m1.7 — Compte LIVE de la ville sélectionnée, transmis au rail pour que son
+   * badge cesse d'ignorer les filtres client (axes A/B, exclusions B, plage de
+   * dates) : `filteredDetailNodes` EST déjà ce pipeline complet, c'est
+   * exactement ce que voit l'utilisateur dans le panneau droit.
+   *
+   * `null` (repli sur le compte bulk du rail) tant que :
+   *  - aucune ville n'est sélectionnée ;
+   *  - le détail est en cours de chargement (`detailLoading` — pas de flash à
+   *    0/n·d le temps du fetch, cf. #378) ;
+   *  - la projection serveur est indisponible (`!detailProjection.available`) —
+   *    on ne substitue jamais un compte qu'on ne peut pas garantir exact.
+   */
+  $: selectedCityLiveCount =
+    selectedCity && !detailLoading && detailProjection.available
+      ? filteredDetailNodes.length
+      : null;
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
@@ -1789,6 +1807,7 @@
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
       {dateRange}
+      {selectedCityLiveCount}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
