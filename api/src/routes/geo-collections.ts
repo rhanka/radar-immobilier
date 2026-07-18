@@ -1,11 +1,26 @@
 /**
- * Route GET /api/geo/collections/:id/items — passthrough OGC avec priorité store local.
+ * Route GET /api/geo/collections/:id/items — passthrough OGC live geo / store local.
  *
  * Aligne l'architecture « immo = frontend, geo = data » : la carte immo consomme
  * les couches zonage/lots via le client OGC (`zones-client` / `lots-client`) qui
- * appelle `/api/geo/collections/<id>/items`. Deux sources possibles, dans cet ordre :
+ * appelle `/api/geo/collections/<id>/items`.
  *
- *  1. STORE LOCAL (priorité) — quand la collection a déjà été tirée dans Postgres
+ * ## Aiguillage de la source (zero-copy géo #73 lot 1)
+ *
+ * Le ZONAGE et les LOTS n'ont PAS le même ordre de priorité :
+ *
+ *  - ZONAGE, `GEO_ZONES_SOURCE=live` (DÉFAUT) — le rendu vient du LIVE GEO en
+ *    priorité (proxy OGC), le store-local PG n'étant plus qu'un FALLBACK sur
+ *    404/429/échec geo. Correctif de fraîcheur : on cesse de rendre la géométrie
+ *    de zonage périmée du PG (ex. Sutton `P-1/939 arcgis`) quand geo sert déjà la
+ *    cohorte à jour (95 zones `RUR-*, CONS-*, H-* geopdf-esri`). Un cache TTL borne
+ *    la charge sur geo. `GEO_ZONES_SOURCE=pg` restaure le store-local-first.
+ *  - LOTS (et ZONAGE sous `pg`) — inchangés, STORE-LOCAL-first (blast radius
+ *    borné), avec le fallback proxy ci-dessous.
+ *
+ * Deux sources, dans l'ordre du mode store-local-first :
+ *
+ *  1. STORE LOCAL — quand la collection a déjà été tirée dans Postgres
  *     (`zone_versions` / `lot_versions`, via `pull-geo-ogc`), on sert ces features
  *     telles quelles. Aucun appel réseau.
  *
@@ -79,6 +94,7 @@ import {
   type EnrichFeature,
   type ZoneIndex,
 } from "../services/geo/lot-zone-enrichment.js";
+import { resolveZonesSource, type ZonesSource } from "../services/geo/zones-source.js";
 
 /** Collection OGC parsée : nature (zonage|lots) + ville. */
 interface ParsedCollection {
@@ -104,6 +120,13 @@ export interface GeoCollectionsDeps {
   baseUrl?: string;
   /** Résolveur du store local injectable (défaut = lecture Postgres). */
   localResolver?: LocalCollectionResolver;
+  /**
+   * Source de géométrie du ZONAGE (zero-copy géo #73 lot 1). Défaut = env
+   * `GEO_ZONES_SOURCE` (`live` par défaut). En `live`, le zonage vient du live
+   * geo (proxy OGC) en priorité, PG store-local en fallback ; en `pg`, PG
+   * store-local reste primaire (rollback). N'affecte PAS les lots.
+   */
+  zonesSource?: ZonesSource;
 }
 
 /** Parse un collection-id `qc-zonage-<city>` ou `qc-lots-<city>`. null sinon. */
@@ -171,6 +194,85 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
       DEFAULT_OGC_BASE_URL
     ).replace(/\/$/, "");
 
+  const proxyUrlFor = (
+    id: string,
+    c: { req: { query(name: string): string | undefined } },
+  ): string =>
+    `${resolveBase()}/collections/${encodeURIComponent(id)}/items?${buildPassthroughQuery(c)}`;
+
+  // ── Fetch proxy server-side (résultat typé, ne jette jamais) ───────────────
+  type ProxyResult =
+    | { kind: "ok"; body: Record<string, unknown> & { features: unknown } }
+    | { kind: "notfound" }
+    | { kind: "unreachable"; detail: string }
+    | { kind: "error"; status: number }
+    | { kind: "bad_payload"; detail: string };
+
+  async function runProxyFetch(url: string): Promise<ProxyResult> {
+    let res: Response;
+    try {
+      res = await fetchImpl(url);
+    } catch (err) {
+      return { kind: "unreachable", detail: err instanceof Error ? err.message : String(err) };
+    }
+    if (res.status === 404) return { kind: "notfound" };
+    if (!res.ok) return { kind: "error", status: res.status };
+    try {
+      const body = (await res.json()) as Record<string, unknown> & { features: unknown };
+      return { kind: "ok", body };
+    } catch (err) {
+      return { kind: "bad_payload", detail: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  /** Mappe un échec proxy vers la réponse honnête (codes/statuts historiques). */
+  function proxyFailureResponse(
+    id: string,
+    result: ProxyResult,
+  ): { body: Record<string, unknown>; status: 404 | 502 } {
+    if (result.kind === "notfound")
+      return { body: { ok: false, error: "collection_not_found", collectionId: id }, status: 404 };
+    if (result.kind === "unreachable")
+      return {
+        body: { ok: false, error: "geo_proxy_unreachable", collectionId: id, detail: result.detail },
+        status: 502,
+      };
+    if (result.kind === "error")
+      return {
+        body: { ok: false, error: "geo_proxy_error", collectionId: id, status: result.status },
+        status: 502,
+      };
+    if (result.kind === "bad_payload")
+      return {
+        body: { ok: false, error: "geo_proxy_bad_payload", collectionId: id, detail: result.detail },
+        status: 502,
+      };
+    return { body: { ok: false, error: "geo_proxy_error", collectionId: id }, status: 502 };
+  }
+
+  // ── Cache TTL du zonage live (borne la charge sur geo, live-first) ──────────
+  // Ne met en cache QUE les réponses `ok` (jamais un échec transitoire), pour
+  // que le fallback PG reste réévalué à chaque indispo geo. Clé = URL complète.
+  const zonageLiveCache = new Map<
+    string,
+    { expiresAt: number; value: Promise<ProxyResult> }
+  >();
+
+  function proxyZonageLive(url: string): Promise<ProxyResult> {
+    const now = Date.now();
+    const cached = zonageLiveCache.get(url);
+    if (cached && cached.expiresAt > now) return cached.value;
+    if (zonageLiveCache.size >= ZONE_INDEX_CACHE_MAX) zonageLiveCache.clear();
+    const value = runProxyFetch(url);
+    zonageLiveCache.set(url, { expiresAt: now + ZONE_INDEX_TTL_MS, value });
+    void value
+      .then((r) => {
+        if (r.kind !== "ok") zonageLiveCache.delete(url);
+      })
+      .catch(() => zonageLiveCache.delete(url));
+    return value;
+  }
+
   // ── Index zonage par ville (cache TTL, promesse partagée anti-doublon) ─────
   const zoneIndexCache = new Map<
     string,
@@ -234,6 +336,22 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
     }
   }
 
+  /** Sert une FeatureCollection store-local (limitée), zonage tel quel / lots enrichis. */
+  async function serveLocal(
+    parsed: ParsedCollection,
+    local: GeoFeatureCollection,
+    rawLimit: string | undefined,
+  ) {
+    const limited = applyLimit(local, rawLimit);
+    const enriched = await enrichIfLots(parsed, { features: limited.features });
+    return {
+      type: "FeatureCollection" as const,
+      features: enriched.features,
+      numberMatched: local.features.length,
+      numberReturned: limited.features.length,
+    };
+  }
+
   app.get("/api/geo/collections/:id/items", async (c) => {
     const id = c.req.param("id");
     const parsed = parseCollectionId(id);
@@ -244,20 +362,41 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
       );
     }
 
-    // ── 1. Store local (priorité) ─────────────────────────────────────────────
+    const url = proxyUrlFor(id, c);
+
+    // ── ZONAGE live-first (GEO_ZONES_SOURCE=live, défaut) ─────────────────────
+    // Le rendu du zonage vient du LIVE GEO en priorité (correctif de fraîcheur
+    // #73 : plus jamais la géométrie zonage périmée du PG store-local quand geo
+    // sert la cohorte à jour). PG store-local reste un FALLBACK propre sur
+    // 404/429/échec. Cache TTL partagé pour borner la charge sur geo. Les LOTS
+    // et le mode `pg` gardent l'ordre historique (store-local d'abord) plus bas.
+    if (parsed.kind === "zonage" && resolveZonesSource(deps.zonesSource) === "live") {
+      const live = await proxyZonageLive(url);
+      if (live.kind === "ok") {
+        // Zonage servi tel quel — porte reglement_millesime/reglement_numero du
+        // live geo (bénéfice de bord m6-immo, absents du PG store-local).
+        return c.json(live.body);
+      }
+      // Live geo indisponible (404/429/5xx/réseau) → fallback store-local PG.
+      try {
+        const local = await localResolver(parsed);
+        if (local && local.features.length > 0) {
+          return c.json(await serveLocal(parsed, local, c.req.query("limit")));
+        }
+      } catch (err) {
+        const detail = err instanceof Error ? err.message : String(err);
+        c.header("x-geo-local-error", detail.slice(0, 120));
+      }
+      // Ni live geo ni PG → réponse honnête, alignée sur les codes/statuts existants.
+      const failure = proxyFailureResponse(id, live);
+      return c.json(failure.body, failure.status);
+    }
+
+    // ── 1. Store local (priorité) — lots, et zonage sous `pg` ─────────────────
     try {
       const local = await localResolver(parsed);
       if (local && local.features.length > 0) {
-        const limited = applyLimit(local, c.req.query("limit"));
-        const enriched = await enrichIfLots(parsed, {
-          features: limited.features,
-        });
-        return c.json({
-          type: "FeatureCollection",
-          features: enriched.features,
-          numberMatched: local.features.length,
-          numberReturned: limited.features.length,
-        });
+        return c.json(await serveLocal(parsed, local, c.req.query("limit")));
       }
     } catch (err) {
       // Store local indisponible (ex. PG down) : on n'échoue pas, on proxifie.
@@ -266,49 +405,14 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
     }
 
     // ── 2. Fallback proxy server-side vers l'API geo OGC ───────────────────────
-    const base = resolveBase();
-    const qs = buildPassthroughQuery(c);
-    const url = `${base}/collections/${encodeURIComponent(id)}/items?${qs}`;
-
-    let res: Response;
-    try {
-      res = await fetchImpl(url);
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : String(err);
-      return c.json(
-        { ok: false, error: "geo_proxy_unreachable", collectionId: id, detail },
-        502,
-      );
-    }
-
-    if (res.status === 404) {
-      // Collection réellement absente côté geo : 404 honnête (le client le gère).
-      return c.json(
-        { ok: false, error: "collection_not_found", collectionId: id },
-        404,
-      );
-    }
-    if (!res.ok) {
-      return c.json(
-        { ok: false, error: "geo_proxy_error", collectionId: id, status: res.status },
-        502,
-      );
-    }
-
-    let body: unknown;
-    try {
-      body = await res.json();
-    } catch (err) {
-      const detail = err instanceof Error ? err.message : String(err);
-      return c.json(
-        { ok: false, error: "geo_proxy_bad_payload", collectionId: id, detail },
-        502,
-      );
+    const result = await runProxyFetch(url);
+    if (result.kind !== "ok") {
+      const failure = proxyFailureResponse(id, result);
+      return c.json(failure.body, failure.status);
     }
 
     // FeatureCollection OGC : lots enrichis (zone + flags), zonage tel quel.
-    const fc = body as Record<string, unknown> & { features: unknown };
-    const enriched = await enrichIfLots(parsed, fc);
+    const enriched = await enrichIfLots(parsed, result.body);
     return c.json(enriched);
   });
 

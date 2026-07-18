@@ -5,6 +5,22 @@ import {
   type ZoneLotProvider,
 } from "./geo-zones.js";
 import type { ZoneLotInput } from "../services/geo/zones.js";
+import type { Database } from "../db/client.js";
+
+/**
+ * Stub DB drizzle-like : enregistre si `.select()` (donc la géométrie PG des
+ * zones) a été interrogé. `.select().from().where()` résout sur [] (0 zone).
+ */
+function makeSpyDb(): { db: Database; wasQueried: () => boolean } {
+  let queried = false;
+  const db = {
+    select: () => {
+      queried = true;
+      return { from: () => ({ where: async () => [] as unknown[] }) };
+    },
+  } as unknown as Database;
+  return { db, wasQueried: () => queried };
+}
 
 const LOT_GEOMETRY = {
   type: "Polygon",
@@ -149,6 +165,31 @@ describe("GET /api/geo/:city/zones — lot fallback", () => {
     expect(body.geometryStatus).toBe("missing");
     expect(body.zoneCount).toBe(0);
     expect(body.featureCollection.features).toHaveLength(0);
+  });
+});
+
+describe("GET /api/geo/:city/zones — source de géométrie (GEO_ZONES_SOURCE)", () => {
+  it("live (défaut) : ne source PAS la géométrie zonage du PG (db non interrogée)", async () => {
+    const { db, wasQueried } = makeSpyDb();
+    const app = geoZonesRoute({ db, zonesSource: "live" });
+
+    const res = await app.request("/api/geo/sutton/zones");
+    const body = (await res.json()) as { source: string; zoneCount: number };
+
+    expect(res.status).toBe(200);
+    // Sous live, la FORME des zones vient du live geo (route collection), pas du PG.
+    expect(wasQueried()).toBe(false);
+    expect(body.source).toBe("none");
+    expect(body.zoneCount).toBe(0);
+  });
+
+  it("pg : restaure la géométrie zonage PG comme source primaire (db interrogée)", async () => {
+    const { db, wasQueried } = makeSpyDb();
+    const app = geoZonesRoute({ db, zonesSource: "pg" });
+
+    const res = await app.request("/api/geo/sutton/zones");
+    expect(res.status).toBe(200);
+    expect(wasQueried()).toBe(true); // rollback : PG redevient la source des formes
   });
 });
 

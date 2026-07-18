@@ -189,16 +189,39 @@ describe("geoZonesResponseFromCollection", () => {
 
 // ── Résolution tiérée ─────────────────────────────────────────────────────────
 
-describe("loadSignauxZones — endpoint → collection → contour", () => {
-  it("endpoint avec zones → tier endpoint, la collection n'est PAS appelée", async () => {
-    const fetchCollection = vi.fn();
+describe("loadSignauxZones — collection (live geo) → endpoint → contour", () => {
+  it("collection live geo avec zones → tier collection, l'endpoint PG n'est PAS appelé", async () => {
+    const fetchEndpoint = vi.fn();
+    const load = await loadSignauxZones(CITY, {
+      fetchResolvedZones: fetchEndpoint,
+      fetchZonesCollection: vi.fn().mockResolvedValue(collectionOf(645)),
+    });
+    expect(load.tier).toBe("collection");
+    expect(load.response?.zoneCount).toBe(645);
+    expect(fetchEndpoint).not.toHaveBeenCalled();
+  });
+
+  it("priorité LIVE-FIRST : la collection live geo prime sur des zones d'endpoint PG (fraîcheur Sutton)", async () => {
+    // L'endpoint PG servirait des zones (cohorte périmée type P-1) ; la
+    // collection live geo sert la cohorte à jour → c'est ELLE qui est rendue,
+    // et l'endpoint PG n'est même pas interrogé.
+    const fetchEndpoint = vi.fn().mockResolvedValue(endpointWithZones());
+    const load = await loadSignauxZones(CITY, {
+      fetchResolvedZones: fetchEndpoint,
+      fetchZonesCollection: vi.fn().mockResolvedValue(collectionOf(95)),
+    });
+    expect(load.tier).toBe("collection");
+    expect(load.response?.zoneCount).toBe(95);
+    expect(fetchEndpoint).not.toHaveBeenCalled();
+  });
+
+  it("collection absente + endpoint avec zones → tier endpoint (fallback join/simulation)", async () => {
     const load = await loadSignauxZones(CITY, {
       fetchResolvedZones: vi.fn().mockResolvedValue(endpointWithZones()),
-      fetchZonesCollection: fetchCollection,
+      fetchZonesCollection: vi.fn().mockResolvedValue(missingCollection()),
     });
     expect(load.tier).toBe("endpoint");
     expect(load.response?.zoneCount).toBe(2);
-    expect(fetchCollection).not.toHaveBeenCalled();
   });
 
   it("endpoint vide (200, 0 zone) + collection 645 → VRAIES zones (tier collection), plus de contour", async () => {
@@ -258,11 +281,11 @@ describe("loadSignauxZones — endpoint → collection → contour", () => {
     expect(ZONES_COLLECTION_LIMIT).toBeGreaterThanOrEqual(2085);
   });
 
-  it("erreur endpoint NON-404 (réseau/timeout) → remonte telle quelle", async () => {
+  it("collection absente + erreur endpoint NON-404 (réseau/timeout) → remonte telle quelle", async () => {
     await expect(
       loadSignauxZones(CITY, {
         fetchResolvedZones: vi.fn().mockRejectedValue(new Error("geo-zones HTTP 502 for x")),
-        fetchZonesCollection: vi.fn(),
+        fetchZonesCollection: vi.fn().mockResolvedValue(missingCollection()),
       }),
     ).rejects.toThrow("HTTP 502");
   });
