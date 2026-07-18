@@ -30,14 +30,15 @@
   import type { TabItem } from "@sentropic/design-system-svelte";
   import {
     aFlagsFromKey,
-    B_PRECOCE_SUBSET_KEY,
+    bAxesFromVivierKey,
     countForVivierCity,
     DEFAULT_A_FLAGS,
+    DEFAULT_B_AXES,
     keyForVivierB,
     keyFromAFlags,
     modeFromSubsetKey,
-    sumVivierBCounts,
     type AFlags,
+    type BAxes,
     type VivierViewMode,
   } from "$lib/signals/vivier-view-mode.js";
   import {
@@ -106,20 +107,23 @@
   function aFlagsFor(key: string): AFlags {
     return modeFromSubsetKey(key) === "a" ? aFlagsFromKey(key) : { ...DEFAULT_A_FLAGS };
   }
+  function bAxesFor(key: string): BAxes {
+    return modeFromSubsetKey(key) === "b" ? bAxesFromVivierKey(key) : { ...DEFAULT_B_AXES };
+  }
   let activeMode: VivierViewMode = modeFromSubsetKey(initialSubsetKey);
   let aFlags: AFlags = aFlagsFor(initialSubsetKey);
-  let bPrecoce = initialSubsetKey === B_PRECOCE_SUBSET_KEY;
+  let bAxes: BAxes = bAxesFor(initialSubsetKey);
   let lastInitialKey = initialSubsetKey;
   $: if (initialSubsetKey !== lastInitialKey) {
     lastInitialKey = initialSubsetKey;
     activeMode = modeFromSubsetKey(initialSubsetKey);
     aFlags = aFlagsFor(initialSubsetKey);
-    bPrecoce = initialSubsetKey === B_PRECOCE_SUBSET_KEY;
+    bAxes = bAxesFor(initialSubsetKey);
   }
 
-  /** Clé LIVE composée : axes de A ou vivier v2 (± précoce). */
+  /** Clé LIVE composée : axes de A ou axes de B (zonage/résidentiel/précoce). */
   $: activeKey =
-    activeMode === "b" ? keyForVivierB(bPrecoce) : keyFromAFlags(aFlags);
+    activeMode === "b" ? keyForVivierB(bAxes) : keyFromAFlags(aFlags);
 
   /**
    * Change de tab : réinitialise la sous-sélection au défaut du nouveau tab.
@@ -131,9 +135,9 @@
     const next: VivierViewMode = value === "b" ? "b" : "a";
     activeMode = next;
     aFlags = { ...DEFAULT_A_FLAGS };
-    bPrecoce = false;
+    bAxes = { ...DEFAULT_B_AXES };
     onFilterChange(
-      next === "b" ? keyForVivierB(false) : keyFromAFlags(DEFAULT_A_FLAGS),
+      next === "b" ? keyForVivierB(DEFAULT_B_AXES) : keyFromAFlags(DEFAULT_A_FLAGS),
     );
   }
 
@@ -143,15 +147,15 @@
     onFilterChange(keyFromAFlags(aFlags));
   }
 
-  /** Coche/décoche « Précoce » en B : restreint aux étapes précoces. */
-  function togglePrecoce(checked: boolean): void {
-    bPrecoce = checked;
-    onFilterChange(keyForVivierB(bPrecoce));
+  /** Coche/décoche un axe de B (zonage/résidentiel/précoce) : recompose et propage. */
+  function toggleBAxis(patch: Partial<BAxes>): void {
+    bAxes = { ...bAxes, ...patch };
+    onFilterChange(keyForVivierB(bAxes));
   }
 
   const TAB_LABELS: Record<VivierViewMode, string> = {
-    a: "Vivier A · référence",
-    b: "Vivier B",
+    a: "Référence A",
+    b: "Nouveau B",
   };
 
   // ── Compteur actif par ville = compte bulk de la clé LIVE ──────────────────
@@ -235,21 +239,12 @@
   $: citiesWithSignals = totalSignals === null
     ? null
     : entries.filter((e) => (countFor(e, activeKey, dataUnavailable) ?? 0) > 0).length;
-
-  /**
-   * Les trois compteurs de B, jamais fondus en un total unique : le vivier
-   * qualifié, ce qui reste à confirmer, et ce que le serveur a exclu.
-   * Ils décrivent la CLASSIFICATION serveur — l'axe précoce et les exclusions
-   * d'affichage ne les déplacent pas (masquer/restreindre n'est pas reclasser).
-   */
-  $: countsB = dataUnavailable ? null : sumVivierBCounts(entries);
 </script>
 
 <!-- Panneaux de tab déclarés au NIVEAU RACINE (pas dans <RailSection>, sinon
      Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
 {#snippet panelA()}
   <div class="vivier-panel">
-    <p class="vivier-panel-hint">Combinez les axes du vivier de référence.</p>
     <div class="vivier-toggles">
       <Checkbox
         label="Zonage"
@@ -272,37 +267,31 @@
 
 {#snippet panelB()}
   <div class="vivier-panel">
-    <p class="vivier-panel-hint">zonage + résidentiel</p>
     <div class="vivier-toggles">
-      <!-- Zonage et Résidentiel DÉFINISSENT le vivier v2 qualifié : cochés,
-           non décochables (aucun compte bulk honnête pour d'autres combos). -->
-      <Checkbox label="Zonage" checked disabled />
-      <Checkbox label="Résidentiel" checked disabled />
+      <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
+           Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
+           d'affichage (lecture de la classification serveur, jamais une
+           reclassification). -->
+      <Checkbox
+        label="Zonage"
+        checked={bAxes.z}
+        onchange={(event) => toggleBAxis({ z: event.currentTarget.checked })}
+      />
+      <Checkbox
+        label="Résidentiel"
+        checked={bAxes.r}
+        onchange={(event) => toggleBAxis({ r: event.currentTarget.checked })}
+      />
       <Checkbox
         label="Précoce"
-        checked={bPrecoce}
-        onchange={(event) => togglePrecoce(event.currentTarget.checked)}
+        checked={bAxes.p}
+        onchange={(event) => toggleBAxis({ p: event.currentTarget.checked })}
       />
-    </div>
-
-    <!-- Les trois états de B, affichés ensemble : un total unique
-         masquerait ce qui reste à confirmer. -->
-    <div class="vivier-b-counts">
-      <span class="vivier-b-count">
-        <span class="rail-count-strong">{countsB?.qualified ?? "n/d"}</span> retenus
-      </span>
-      <span class="vivier-b-count">
-        <span class="rail-count-strong">{countsB?.residentialUnknown ?? "n/d"}</span> à confirmer
-      </span>
-      <span class="vivier-b-count">
-        <span class="rail-count-strong">{countsB?.excluded ?? "n/d"}</span> exclus
-      </span>
     </div>
 
     <div class="vivier-b-exclusions">
       <Checkbox
         label="Exclure PIIA sans projet résidentiel"
-        description="Un PIIA portant un projet résidentiel reste affiché."
         checked={exclusions.piiaSansProjetResidentiel}
         onchange={(event) =>
           setExclusion({ piiaSansProjetResidentiel: event.currentTarget.checked })}
@@ -338,18 +327,22 @@
          `{#key activeMode}` re-monte Tabs quand le TAB change (clic ou nav
          externe) pour resynchroniser l'onglet actif — mais PAS sur une simple
          recomposition d'axes (le mode ne change pas), qui garderait le focus. -->
-    {#key activeMode}
-      <Tabs
-        class="vivier-tabs"
-        label="Vivier"
-        activeValue={activeMode}
-        onchange={selectMode}
-        items={[
-          { value: "a", label: TAB_LABELS.a, content: panelA },
-          { value: "b", label: TAB_LABELS.b, content: panelB },
-        ]}
-      />
-    {/key}
+    <!-- Le wrapper porte les tokens DS de taille des onglets : ils cascadent
+         par variable CSS dans le composant Tabs (scoped, aucun override
+         d'interne). -->
+    <div class="vivier-tabs-wrap">
+      {#key activeMode}
+        <Tabs
+          label="Vivier"
+          activeValue={activeMode}
+          onchange={selectMode}
+          items={[
+            { value: "a", label: TAB_LABELS.a, content: panelA },
+            { value: "b", label: TAB_LABELS.b, content: panelB },
+          ]}
+        />
+      {/key}
+    </div>
   </RailSection>
 
   <!-- ── Section 2 : Villes (recherche + liste plate sélectionnable) ─────── -->
@@ -370,18 +363,21 @@
 </RailShell>
 
 <style>
+  /* ── Onglets vivier : taille STANDARD compacte du rail. Les tokens DS posés
+     sur le wrapper cascadent (variables CSS) dans le composant Tabs — zéro
+     override d'interne. Sans ça, les onglets héritent d'une fonte trop grande. ── */
+  .vivier-tabs-wrap {
+    --st-component-tabs-tabFontSize: var(--rail-fs-small, 0.8125rem);
+    --st-component-tabs-tabPaddingBlock: 0.5rem;
+    --st-component-tabs-tabPaddingInline: 0.25rem;
+  }
+
   /* ── Panneau d'un tab vivier ── */
   .vivier-panel {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.25rem 0.75rem 0.25rem;
-  }
-
-  .vivier-panel-hint {
-    margin: 0;
-    font-size: var(--rail-fs-small, 0.75rem);
-    color: var(--st-semantic-text-muted);
   }
 
   .vivier-toggles {
@@ -400,28 +396,11 @@
     font-size: var(--rail-fs-small, 0.75rem);
   }
 
-  /* ── Trois compteurs de B (retenus · à confirmer · exclus) ── */
-  .vivier-b-counts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: var(--rail-fs-small, 0.75rem);
-    color: var(--st-semantic-text-muted);
-  }
-
-  .vivier-b-count + .vivier-b-count::before {
-    content: "·";
-    margin-right: 0.5rem;
-    color: var(--st-semantic-border-subtle);
-  }
-
   /* ── Exclusions d'affichage de B ── */
   .vivier-b-exclusions {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    border-top: 1px solid var(--st-semantic-border-subtle);
-    padding-top: 0.5rem;
   }
 
   .vivier-b-exclusions :global(.st-choice) {
