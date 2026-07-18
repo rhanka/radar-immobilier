@@ -84,6 +84,20 @@
    */
   export let dateRange: SignalDateRange = defaultDateRange();
 
+  /**
+   * m1.7 — Compte LIVE de `selectedSlug`, calculé par le parent sur les mêmes
+   * nœuds détail que le panneau droit (`filteredDetailNodes.length` : axes +
+   * exclusions B + plage de dates). `null` tant que ce compte n'est pas
+   * disponible (aucune ville sélectionnée, détail en cours de chargement, ou
+   * projection serveur indisponible) → repli sur le compte bulk, comme avant.
+   *
+   * Portée VOLONTAIREMENT limitée à la ville sélectionnée : c'est la seule
+   * pour laquelle le détail nœud par nœud est chargé côté client ; les autres
+   * lignes du rail restent sur le compte bulk serveur (aucun fetch masqué par
+   * ville pour un badge).
+   */
+  export let selectedCityLiveCount: number | null = null;
+
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Appelé quand l'utilisateur sélectionne une ville dans le rail. */
   export let onSelectCity: (entry: CityMapEntry) => void = () => {};
@@ -175,16 +189,32 @@
   // ── Compteur actif par ville = compte bulk de la clé LIVE ──────────────────
   /**
    * Helper non-réactif : compte d'une ville pour la clé LIVE donnée.
-   * Le compte ne dépend PAS de la sélection : sélectionner une ville ne doit
-   * jamais faire varier (ni suspendre) son propre compte. Seul un échec de
-   * chargement (`unavailable`) rend le compte inconnu → `null` → badge « n/d ».
+   *
+   * Pour toute ville AUTRE que `selectedSlug`, le compte reste le bulk serveur :
+   * sélectionner une ville ne doit jamais faire varier (ni suspendre) le compte
+   * d'une AUTRE ville. Seul un échec de chargement (`unavailable`) rend le
+   * compte inconnu → `null` → badge « n/d ».
+   *
+   * m1.7 — Pour la ville SÉLECTIONNÉE, quand `liveCount` est disponible (le
+   * parent l'a calculé sur les mêmes nœuds détail que le panneau droit : axes
+   * + exclusions B + plage de dates), on l'utilise à la place du bulk : c'est
+   * le seul badge où le client a déjà le détail nœud par nœud, donc le seul
+   * qu'on peut faire correspondre EXACTEMENT à ce que l'utilisateur voit dans
+   * la liste. `liveCount` reste `null` pendant le chargement (le parent ne
+   * l'expose qu'une fois la projection disponible) → repli sur le bulk, sans
+   * jamais faire disparaître ni clignoter la ligne (cf. #378).
    */
   function countFor(
     entry: CityMapEntry,
     key: string,
     unavailable: boolean,
+    liveCount: number | null,
+    liveSlug: string | null,
   ): number | null {
     if (unavailable) return null;
+    if (liveCount !== null && liveSlug !== null && entry.municipality.slug === liveSlug) {
+      return liveCount;
+    }
     return countForVivierCity(entry, key);
   }
 
@@ -195,11 +225,14 @@
     .filter((e) => {
       const isSelected =
         selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return (countFor(e, activeKey, dataUnavailable) ?? 0) > 0 || isSelected;
+      return (
+        (countFor(e, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0 ||
+        isSelected
+      );
     })
     .sort((a, b) =>
-      (countFor(b, activeKey, dataUnavailable) ?? -1) -
-      (countFor(a, activeKey, dataUnavailable) ?? -1)
+      (countFor(b, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? -1) -
+      (countFor(a, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? -1)
     );
 
   /** Projection générique consommée par la liste partagée RailCityList. */
@@ -207,8 +240,10 @@
     entry: CityMapEntry,
     key: string,
     unavailable: boolean,
+    liveCount: number | null,
+    liveSlug: string | null,
   ): RailCityItem {
-    const activeCount = countFor(entry, key, unavailable);
+    const activeCount = countFor(entry, key, unavailable, liveCount, liveSlug);
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -228,7 +263,7 @@
   }
 
   $: railItems = sortedEntries.map((entry) =>
-    toRailItem(entry, activeKey, dataUnavailable)
+    toRailItem(entry, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug)
   );
 
   function handleSelectSlug(slug: string): void {
@@ -241,18 +276,24 @@
     key: string,
     currentEntries: CityMapEntry[],
     unavailable: boolean,
+    liveCount: number | null,
+    liveSlug: string | null,
   ): number | null {
     if (unavailable) return null;
-    const counts = currentEntries.map((entry) => countFor(entry, key, unavailable));
+    const counts = currentEntries.map((entry) =>
+      countFor(entry, key, unavailable, liveCount, liveSlug)
+    );
     return counts.some((count) => count === null)
       ? null
       : (counts as number[]).reduce((sum, count) => sum + count, 0);
   }
 
-  $: totalSignals = totalFor(activeKey, entries, dataUnavailable);
+  $: totalSignals = totalFor(activeKey, entries, dataUnavailable, selectedCityLiveCount, selectedSlug);
   $: citiesWithSignals = totalSignals === null
     ? null
-    : entries.filter((e) => (countFor(e, activeKey, dataUnavailable) ?? 0) > 0).length;
+    : entries.filter(
+        (e) => (countFor(e, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0,
+      ).length;
 </script>
 
 <!-- Panneaux de tab déclarés au NIVEAU RACINE (pas dans <RailSection>, sinon
