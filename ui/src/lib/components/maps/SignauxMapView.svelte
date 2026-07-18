@@ -21,6 +21,7 @@
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount } from "svelte";
+  import { Checkbox } from "@sentropic/design-system-svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
   import SignauxSelPanel from "$lib/components/maps/SignauxSelPanel.svelte";
@@ -102,6 +103,7 @@
     extractSignalLotRefs,
     extractSignalZoneRefs,
     fallbackZoneCode,
+    findLotBounds,
     opacityForSelectionKey,
     withCityFallbackZone,
     filterDimsProjection,
@@ -131,6 +133,11 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import {
+    defaultDateRange,
+    filterNodesByEtapeDate,
+    type SignalDateRange,
+  } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
     lotLineColorExpression,
@@ -164,8 +171,17 @@
   import {
     zoneKindFilterOpacity,
     DEFAULT_ZONE_KIND_FILTER,
+    ZONE_KIND_FILTER_DIMMED_OPACITY,
+    ZONE_KIND_FILTER_MATCH_OPACITY,
     type ZoneKindFilter,
   } from "$lib/maps/zone-kind-filter.js";
+  import {
+    zoneMillesimeFilterOpacity,
+    ZONE_MILLESIME_FILTER_DIMMED_OPACITY,
+    DEFAULT_ZONE_MILLESIME_FILTER,
+    type ZoneMillesimeFilter,
+  } from "$lib/maps/zone-millesime-filter.js";
+  import ZoneMillesimeSelect from "$lib/components/maps/ZoneMillesimeSelect.svelte";
   import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
   import {
     geometryBounds,
@@ -215,6 +231,17 @@
   const detailGuard = new RequestGuard();
   const geoGuard = new RequestGuard();
   let activeDocument: SignalDocRef | null = null;
+  // m7 / m8 — source documentaire générique ouverte dans le viewer partagé
+  // (règlement PDF, grille de zonage, source de zone). Distincte de
+  // `activeEvidence` (preuve d'un signal, avec navigation multi-signaux).
+  let activeSource:
+    | {
+        title: string;
+        sourceUrl: string | null;
+        rawRef: string | null;
+        page: number | null;
+      }
+    | null = null;
   let activeEvidence:
     | {
         title: string;
@@ -233,6 +260,33 @@
   }
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
 
+  // ── m5 — Libellés sur la carte (n° de lot / n° de zone) ───────────────────
+  // Toggles portés ICI (ils pilotent des couches symbol du socle) et bascu­lés
+  // depuis les légendes Lots / Zones. Défaut MASQUÉ (les aplats sont denses),
+  // mais PERSISTANT en session (localStorage) : une fois activé, l'affichage
+  // « par défaut en vue ville » tient au fil des villes et des rechargements.
+  const LOT_LABELS_LS_KEY = "signaux-show-lot-labels";
+  const ZONE_LABELS_LS_KEY = "signaux-show-zone-labels";
+  let showLotLabels = false;
+  let showZoneLabels = false;
+
+  function readLabelPref(key: string): boolean {
+    return typeof localStorage !== "undefined" && localStorage.getItem(key) === "1";
+  }
+  function persistLabelPref(key: string, value: boolean): void {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(key, value ? "1" : "0");
+    }
+  }
+  function setShowLotLabels(value: boolean): void {
+    showLotLabels = value;
+    persistLabelPref(LOT_LABELS_LS_KEY, value);
+  }
+  function setShowZoneLabels(value: boolean): void {
+    showZoneLabels = value;
+    persistLabelPref(ZONE_LABELS_LS_KEY, value);
+  }
+
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
@@ -250,16 +304,36 @@
    */
   let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
 
-  /** Les nœuds réellement affichés : projection de la clé LIVE, puis exclusions B. */
+  /**
+   * m2 — Plage de dates ACTIVE (défaut : 6 derniers mois). C'est le PREMIER
+   * filtre du pipeline d'affichage : il restreint la population de base sur
+   * `etape_date` AVANT la projection A/B et les exclusions. Lentille cliente,
+   * jamais une reclassification serveur. Partagée A/B (une seule plage).
+   */
+  let dateRange: SignalDateRange = defaultDateRange();
+
+  /**
+   * Les nœuds réellement affichés : plage de dates (première lentille), puis
+   * exclusions B.
+   *
+   * La PROJECTION reste calculée sur la population brute AUTHORITATIVE : en A par
+   * défaut (`z|m|p`), `projectLegacyVivierA` VALIDE le jeu contre les IDs exacts
+   * du serveur — date-filtrer en amont casserait ce contrat (jeu partiel → «
+   * projection indisponible »). La plage est donc la 1re lentille d'AFFICHAGE
+   * appliquée à cette population authoritative ; le résultat (date ∩ projection ∩
+   * exclusions) est identique à un date-puis-projection, sans casser la garde.
+   */
   function visibleNodesFor(
     nodes: GraphSignalNode[],
     authority: unknown,
     subsetKey: string,
     exclusions: VivierBExclusions,
+    range: SignalDateRange,
   ): GraphSignalNode[] {
     const mode = modeFromSubsetKey(subsetKey);
     const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
-    return mode === "b" ? applyVivierBExclusions(projected, exclusions) : projected;
+    const dated = filterNodesByEtapeDate(projected, range);
+    return mode === "b" ? applyVivierBExclusions(dated, exclusions) : dated;
   }
 
   function applyActiveSubsetKey(subsetKey: string): void {
@@ -278,6 +352,7 @@
         detailLegacyProjection,
         activeSubsetKey,
         vivierBExclusions,
+        dateRange,
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
@@ -289,6 +364,18 @@
   function handleExclusionsChange(next: VivierBExclusions): void {
     vivierBExclusions = next;
     reconcileToVisibleNodes();
+  }
+
+  /**
+   * m2 — Changement de plage de dates (preset ou plage custom). La plage étant
+   * le premier filtre du pipeline, on réconcilie la sélection aux nœuds encore
+   * visibles puis on repeint la carte. `dateRange` étant lu par le bloc réactif
+   * `filteredDetailNodes`, la liste du panneau et les aplats se recalculent.
+   */
+  function handleDateRangeChange(next: SignalDateRange): void {
+    dateRange = next;
+    reconcileToVisibleNodes();
+    updateGeoLayers();
   }
 
   /**
@@ -367,8 +454,22 @@
     zoneKindFilter = next;
   }
 
+  /**
+   * Filtre par MILLÉSIME de zonage (exclusif — un seul millésime à la fois).
+   * Défaut « tous » (`null`). Réinitialisé au changement de ville (selectCity)
+   * pour ne jamais estomper une nouvelle ville avec un millésime périmé.
+   */
+  let zoneMillesimeFilter: ZoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
+
+  function handleZoneMillesimeFilterChange(next: ZoneMillesimeFilter): void {
+    zoneMillesimeFilter = next;
+  }
+
   // Recalque la peinture quand un filtre données change (assignations ci-dessus).
-  $: if (mapReady && lotDataFilter && zoneKindFilter) {
+  // `zoneMillesimeFilter !== undefined` référence la variable (toujours vrai :
+  // string|null jamais undefined) pour que Svelte suive la dépendance SANS
+  // exiger une valeur truthy (null = « tous » est un état actif légitime).
+  $: if (mapReady && lotDataFilter && zoneKindFilter && zoneMillesimeFilter !== undefined) {
     updateGeoLayers();
   }
 
@@ -457,11 +558,19 @@
    * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
+  // m2 — La PLAGE DE DATES est la première lentille d'affichage : elle restreint
+  // la population projetée (authoritative) sur `etape_date` AVANT les exclusions
+  // B et le tri. Elle définit ainsi la population de base que les axes A/B et les
+  // exclusions affinent ensuite. Voir `visibleNodesFor` pour le contrat serveur.
+  $: dateScopedProjectionNodes = filterNodesByEtapeDate(
+    detailProjection.nodes,
+    dateRange,
+  );
   $: filteredDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
-        applyVivierBExclusions(detailProjection.nodes, vivierBExclusions),
+        applyVivierBExclusions(dateScopedProjectionNodes, vivierBExclusions),
       )
-    : detailProjection.nodes;
+    : dateScopedProjectionNodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -685,6 +794,15 @@
       )
     : [];
 
+  /**
+   * Base du sélecteur de millésime de la légende = TOUTES les zones servies
+   * (jamais filtrées) : le sélecteur se masque lui-même tant qu'il n'y a pas
+   * ≥ 2 millésimes (dégradé honnête, jamais mono-option).
+   */
+  $: zoneMillesimeLegendInput = (
+    zonesResponse?.featureCollection.features ?? []
+  ).map((f) => ({ reglementMillesime: f.properties.reglementMillesime ?? null }));
+
   /** flyTo sur le centroïde WGS-84 de la ville (MunicipalityT.lon/lat). */
   function flyToCity(entry: CityMapEntry): void {
     mapApi?.flyTo({
@@ -712,6 +830,22 @@
     }
     // Repli : zone sans géométrie → recentre sur la ville sélectionnée.
     if (selectedCity) flyToCity(selectedCity);
+  }
+
+  /**
+   * m4 — Cadre la caméra sur le LOT cliqué (clic carte). Sélectionner un autre
+   * lot AJUSTE au nouveau lot ; on ne refit JAMAIS sur la zone parente (rester
+   * au niveau lot). Lot sans géométrie exploitable → on NE bouge PAS la caméra
+   * (pas de repli vers la zone : le zoom reste stable au niveau lot).
+   */
+  function zoomToLot(citySlug: string, noLot: string): void {
+    const bounds = findLotBounds(
+      displayedLots,
+      citySlug,
+      noLot,
+      selectedCity?.municipality.slug ?? null,
+    );
+    if (bounds) mapApi?.fitMapToBounds(bounds);
   }
 
   /**
@@ -774,6 +908,7 @@
     );
     activeEvidence = transients.activeEvidence;
     activeDocument = transients.activeDocument;
+    activeSource = null;
     hoveredEvidenceSignalId = transients.hoveredEvidenceSignalId;
     if (syncUrl) {
       // Conserver le MODE actif (A/B) dans la nouvelle route ville. On persiste
@@ -791,6 +926,9 @@
     detailNodes = [];
     detailLegacyProjection = null;
     geoNotices = [];
+    // Millésime exclusif : un choix d'une ville précédente n'a aucun sens sur la
+    // nouvelle couche → retour à « tous » (dégradé honnête, jamais tout estompé).
+    zoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
       selectedKeys: [cityKey],
@@ -877,6 +1015,7 @@
     lotsResponse = null;
     activeDocument = null;
     activeEvidence = null;
+    activeSource = null;
     hoveredEvidenceSignalId = null;
     selectionState = createSelectionBucketState();
     updateGeoLayers();
@@ -967,10 +1106,37 @@
 
   function openDocument(ref: SignalDocRef): void {
     activeDocument = ref;
+    activeSource = null;
   }
 
   function closeDocument(): void {
     activeDocument = null;
+  }
+
+  /**
+   * m7 / m8 — ouvre une SOURCE documentaire générique dans le viewer partagé
+   * (SignalPdfOverlay) : règlement PDF, grille de zonage, source de zone. Le
+   * viewer décide seul PDF vs iframe selon l'URL. Un seul overlay à la fois :
+   * on referme la preuve signal + le doc overlay pour éviter l'empilement.
+   */
+  function openSource(payload: {
+    title: string;
+    sourceUrl: string | null;
+    rawRef?: string | null;
+    page?: number | null;
+  }): void {
+    activeSource = {
+      title: payload.title,
+      sourceUrl: payload.sourceUrl ?? null,
+      rawRef: payload.rawRef ?? null,
+      page: payload.page ?? null,
+    };
+    activeEvidence = null;
+    activeDocument = null;
+  }
+
+  function closeSource(): void {
+    activeSource = null;
   }
 
   function openEvidence(payload: {
@@ -997,8 +1163,9 @@
     // #91 — synchro bidirectionnelle : ouvrir/déplacer le viewer focalise AUSSI
     // la fiche correspondante à droite (elle se déplie + scrolle en miroir).
     syncRightPaneFocus(payload.node.id);
-    // Ferme le doc overlay si ouvert pour éviter deux overlays superposés
+    // Ferme le doc overlay + la source générique pour éviter deux overlays superposés
     activeDocument = null;
+    activeSource = null;
   }
 
   /**
@@ -1074,22 +1241,40 @@
     if (!wasSelected) {
       syncRouteForSelectionKey(key);
       // #12 — zoom sur la zone qu'on vient de sélectionner (pas au déselect).
-      zoomToSelectionKey(key);
+      // m4 — un clic carte sur un LOT ajuste la caméra AU lot cliqué (fitLot),
+      // jamais un refit sur la zone parente : sélectionner un autre lot reste
+      // au niveau lot.
+      zoomToSelectionKey(key, { fitLot: true });
     }
     updateGeoLayers();
   }
 
   /**
-   * #12 — Si la clé désigne une zone, cadre la caméra sur son étendue. Centralisé
+   * #12 / m4 — Cadre la caméra sur l'étendue de la clé sélectionnée. Centralisé
    * ici pour que tous les chemins de sélection de zone (clic carte, segmented
    * control « Zone », restauration d'URL) zooment de façon cohérente.
+   *
+   * Les LOTS ne sont cadrés que sur demande explicite (`fitLot`), càd un clic
+   * carte sur un lot (m4) : on ajuste alors la caméra AU lot cliqué. Les autres
+   * chemins de sélection de lot (auto-sélection du 1er lot d'une ville sans
+   * zones) ne zooment PAS, pour ne pas plonger dans un lot arbitraire à
+   * l'ouverture d'une ville.
    */
-  function zoomToSelectionKey(key: SelectionKey): void {
+  function zoomToSelectionKey(
+    key: SelectionKey,
+    options: { fitLot?: boolean } = {},
+  ): void {
     const parsed = parseKey(key);
-    if (!parsed || parsed.kind !== "zone") return;
+    if (!parsed || (parsed.kind !== "zone" && parsed.kind !== "lot")) return;
     const sep = parsed.id.indexOf("/");
     if (sep <= 0 || sep === parsed.id.length - 1) return;
-    zoomToZone(parsed.id.slice(0, sep), parsed.id.slice(sep + 1));
+    const citySlug = parsed.id.slice(0, sep);
+    const ref = parsed.id.slice(sep + 1);
+    if (parsed.kind === "zone") {
+      zoomToZone(citySlug, ref);
+    } else if (options.fitLot) {
+      zoomToLot(citySlug, ref);
+    }
   }
 
   async function applyGeoRoute(route: GeoRoute): Promise<void> {
@@ -1189,6 +1374,26 @@
   /** Zones contenant des lots 4+ quand le filtre données 4+/Priorité est actif. */
   const ZONE_4PLUS_HIGHLIGHT_OPACITY = 0.45;
 
+  /**
+   * Compose les opacités des filtres de zone TYPE (additif) et MILLÉSIME
+   * (exclusif). `null` = filtre inactif. Résultat :
+   *  - les deux inactifs → `null` (la hiérarchie d'opacité existante s'applique) ;
+   *  - au moins un actif → estompé si UN filtre actif écarte la zone, sinon
+   *    accentué (une zone doit passer TOUS les filtres actifs pour ressortir).
+   */
+  function composeZoneFilterOpacity(
+    kindOpacity: number | null,
+    millesimeOpacity: number | null,
+  ): number | null {
+    if (kindOpacity === null && millesimeOpacity === null) return null;
+    const dimmed =
+      kindOpacity === ZONE_KIND_FILTER_DIMMED_OPACITY ||
+      millesimeOpacity === ZONE_MILLESIME_FILTER_DIMMED_OPACITY;
+    return dimmed
+      ? ZONE_KIND_FILTER_DIMMED_OPACITY
+      : ZONE_KIND_FILTER_MATCH_OPACITY;
+  }
+
   function buildZoneOpacityExpression(
     zones = zonesResponse?.featureCollection.features ?? EMPTY_ZONES.features,
     signalZoneRefs: ReadonlySet<string> = focusedSignalZoneRefs,
@@ -1209,14 +1414,22 @@
       if (seenCodes.has(code)) continue;
       seenCodes.add(code);
       const key = zoneSelectionKey(zone);
-      // Filtre par TYPE de zone (en-tête accordéon Zones) : matchée accentuée,
-      // hors-filtre estompée mais visible — null quand le filtre est inactif.
+      // Filtres de zone (en-tête accordéon Zones) — matchée accentuée,
+      // hors-filtre estompée mais visible ; null quand le filtre est inactif.
+      // TYPE (additif) et MILLÉSIME (exclusif) se COMPOSENT : une zone n'est
+      // accentuée que si elle passe TOUS les filtres actifs ; estompée dès
+      // qu'un filtre actif l'écarte. Aucune zone n'est retirée de la carte.
       const kindOpacity = zoneKindFilterOpacity(
         zone.properties.kind ?? null,
         code,
         zoneKindFilter,
         zone.properties.affectation ?? null,
       );
+      const millesimeOpacity = zoneMillesimeFilterOpacity(
+        zone.properties.reglementMillesime ?? null,
+        zoneMillesimeFilter,
+      );
+      const filterOpacity = composeZoneFilterOpacity(kindOpacity, millesimeOpacity);
       let opacity: number;
       if (hasSignalFocus) {
         opacity = signalZoneRefs.has(code) ? 0.85 : 0.15;
@@ -1224,10 +1437,10 @@
         // C3 — la zone sélectionnée ressort (teinte accentuée), les autres
         // s'estompent ; l'exergue orange est portée par la couche highlight.
         opacity = geoKeys.has(key) ? 0.85 : 0.12;
-      } else if (kindOpacity !== null) {
+      } else if (filterOpacity !== null) {
         // Même mécanique que le filtre lots (#315) : la peinture est pilotée
-        // par le filtre, aucune zone n'est retirée de la carte.
-        opacity = kindOpacity;
+        // par le(s) filtre(s), aucune zone n'est retirée de la carte.
+        opacity = filterOpacity;
       } else if (fourPlusKeys.has(zoneRefComparableKey(code))) {
         opacity = ZONE_4PLUS_HIGHLIGHT_OPACITY;
       } else {
@@ -1549,6 +1762,9 @@
     if (initialSubsetKey !== activeSubsetKey) {
       applyActiveSubsetKey(initialSubsetKey);
     }
+    // m5 — restaurer les préférences d'affichage des libellés (persistance session).
+    showLotLabels = readLabelPref(LOT_LABELS_LS_KEY);
+    showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY);
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
@@ -1572,10 +1788,12 @@
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
+      {dateRange}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
+      onDateRangeChange={handleDateRangeChange}
     />
   </svelte:fragment>
 
@@ -1589,6 +1807,8 @@
     basemap="neutral-gray"
     {fillColorExpression}
     {fillOpacityExpression}
+    {showLotLabels}
+    {showZoneLabels}
     activeCitySlug={selectedCity?.municipality.slug ?? null}
     segments={buildGeoSegments(selectedCity, zonesResponse)}
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
@@ -1628,6 +1848,15 @@
             data-testid="map-legend-zonage"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
+            <!-- m6 — sélecteur de millésime (exclusif), masqué tant qu'un seul
+                 millésime est servi pour la ville (dégradé honnête). -->
+            <div class="mb-2">
+              <ZoneMillesimeSelect
+                zones={zoneMillesimeLegendInput}
+                filter={zoneMillesimeFilter}
+                onChange={handleZoneMillesimeFilterChange}
+              />
+            </div>
             <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
               {#each zoneLegendEntries as item (item.label)}
                 <li class="flex items-center gap-2 text-xs text-slate-600">
@@ -1636,6 +1865,14 @@
                 </li>
               {/each}
             </ul>
+            <!-- m5 — toggle DS : affiche/masque le n° de zone sur les aplats. -->
+            <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-zone-labels-toggle">
+              <Checkbox
+                label="N° de zone"
+                checked={showZoneLabels}
+                onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
+              />
+            </div>
           </div>
         {/if}
         <div
@@ -1651,6 +1888,14 @@
               </li>
             {/each}
           </ul>
+          <!-- m5 — toggle DS : affiche/masque le n° de lot sur les aplats. -->
+          <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-lot-labels-toggle">
+            <Checkbox
+              label="N° de lot"
+              checked={showLotLabels}
+              onchange={(event) => setShowLotLabels(event.currentTarget.checked)}
+            />
+          </div>
         </div>
       {/if}
     </svelte:fragment>
@@ -1710,6 +1955,18 @@
         onClose={closeEvidence}
       />
     {/if}
+    {#if activeSource}
+      <!-- m7 / m8 — viewer partagé pour une source générique (règlement PDF,
+           grille de zonage, source de zone). Pas de navigation multi-signaux :
+           navSignals vide → la rangée de nav du viewer reste masquée. -->
+      <SignalPdfOverlay
+        title={activeSource.title}
+        sourceUrl={activeSource.sourceUrl}
+        rawRef={activeSource.rawRef}
+        page={activeSource.page}
+        onClose={closeSource}
+      />
+    {/if}
   </GeoCityMapBase>
 
   <!-- ── SEL droit : contexte de sélection (Ville active + Signaux / Zones /
@@ -1734,10 +1991,13 @@
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}
       onZoneKindFilterChange={handleZoneKindFilterChange}
+      {zoneMillesimeFilter}
+      onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
+      onOpenSource={openSource}
       onRetryDetail={retryDetail}
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
