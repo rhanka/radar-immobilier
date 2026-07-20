@@ -76,6 +76,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -107,6 +108,24 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: nologin
           password: ${{ secrets.SCW_SECRET_KEY }}
+
+      # Mirror to GHCR alongside Scaleway (OVH-readiness C1): publishes the
+      # same images to ghcr.io/rhanka/<image> so they exist on a registry
+      # reachable from the future OVH cluster. This does NOT switch any
+      # manifest's `image:` field or the deploy job's target registry — that
+      # cutover is a separate, later PR once the GHCR images are confirmed
+      # and the package visibility is set to public. The mirror itself is a
+      # SEPARATE, non-fatal step below ("Mirror to GHCR") that copies the
+      # already-pushed Scaleway image without rebuilding — it never shares
+      # the main build-push-action call, so a GHCR failure (package not yet
+      # created, visibility, auth) can never break the Scaleway push the
+      # deploy job depends on.
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Image tags
         id: tags
@@ -140,6 +159,32 @@ jobs:
           provenance: false
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,scope=${{ matrix.service }},mode=max
+
+      # Best-effort GHCR mirror (OVH-readiness C1): copies the Scaleway image
+      # just pushed above to ghcr.io/rhanka/<image> via `docker buildx
+      # imagetools create` — a manifest copy, no rebuild. `continue-on-error:
+      # true` makes this step fully non-fatal: GHCR packages don't exist yet
+      # (first push creates them, default-private) and visibility isn't
+      # confirmed, so any failure here (auth, package creation, visibility)
+      # must never fail the job, the Scaleway push above, or the deploy job
+      # below. Each tag is mirrored independently so one failing tag doesn't
+      # skip the rest.
+      - name: Mirror to GHCR (best-effort)
+        continue-on-error: true
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -u
+          mirror() {
+            local src="$1" dst="$2"
+            docker buildx imagetools create --tag "$dst" "$src" \
+              || echo "::warning title=GHCR mirror failed::${dst} (source ${src})"
+          }
+          mirror "${IMAGE_PREFIX}/${{ matrix.image }}:${SHA}"    "ghcr.io/rhanka/${{ matrix.image }}:${SHA}"
+          mirror "${IMAGE_PREFIX}/${{ matrix.image }}:latest"    "ghcr.io/rhanka/${{ matrix.image }}:latest"
+          if [ -n "${{ inputs.tag }}" ]; then
+            mirror "${IMAGE_PREFIX}/${{ matrix.image }}:${{ inputs.tag }}" "ghcr.io/rhanka/${{ matrix.image }}:${{ inputs.tag }}"
+          fi
 
       - name: Summary
         run: |
