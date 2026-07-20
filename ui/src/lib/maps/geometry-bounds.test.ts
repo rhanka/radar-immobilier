@@ -3,6 +3,7 @@ import {
   geometryBounds,
   unionBounds,
   isDegenerateBounds,
+  boundsCenter,
   QUEBEC_PROVINCE_BOUNDS,
   type LngLatBoundsTuple,
 } from "./geometry-bounds.js";
@@ -152,5 +153,15 @@ describe("QUEBEC_PROVINCE_BOUNDS", () => {
   it("couvre l'étendue provinciale (sud-ouest → nord-est)", () => {
     expect(QUEBEC_PROVINCE_BOUNDS[0][0]).toBeLessThan(QUEBEC_PROVINCE_BOUNDS[1][0]);
     expect(QUEBEC_PROVINCE_BOUNDS[0][1]).toBeLessThan(QUEBEC_PROVINCE_BOUNDS[1][1]);
+  });
+});
+
+describe("boundsCenter", () => {
+  it("renvoie le centre de la bbox (cible du recentrage lot, zoom conservé)", () => {
+    const bounds: LngLatBoundsTuple = [
+      [-73.5, 45.25],
+      [-73.25, 45.75],
+    ];
+    expect(boundsCenter(bounds)).toEqual([-73.375, 45.5]);
   });
 });

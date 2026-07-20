@@ -84,7 +84,11 @@
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
-  import { resolveSelectionCameraTarget } from "$lib/maps/selection-camera.js";
+  import {
+    resolveSelectionCameraTarget,
+    type PreviousCameraLot,
+  } from "$lib/maps/selection-camera.js";
+  import { zoneCodeAtPoint } from "$lib/maps/zone-membership.js";
   import {
     buildGeoLevelNavigation,
     type GeoLevel,
@@ -186,6 +190,7 @@
   import { lotZoneCode } from "$lib/components/maps/lot-fiche-utils.js";
   import {
     geometryBounds,
+    boundsCenter,
     QUEBEC_PROVINCE_BOUNDS,
   } from "$lib/maps/geometry-bounds.js";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
@@ -260,6 +265,13 @@
     hoveredEvidenceSignalId = id;
   }
   let displayedLots: LotFeatureCollection = EMPTY_LOTS;
+
+  // Contrat caméra « lot suivant » — dernier LOT ciblé par une commande caméra
+  // (frame ou recentrage) + sa zone au moment de la commande. Alimente la
+  // décision selection-camera : reclic même lot = aucune commande ; autre lot
+  // même zone = recentrage zoom conservé ; autre zone = cadrage existant.
+  // Réinitialisé au changement de ville et au retour Province.
+  let cameraLot: PreviousCameraLot | null = null;
 
   // ── m5 / UAT — Libellés sur la carte (n° de zone / n° de lot) ─────────────
   // DEUX cases INDÉPENDANTES : n° de zone et n° de lot s'affichent/masquent
@@ -854,19 +866,60 @@
   }
 
   /**
-   * m4 — Cadre la caméra sur le LOT cliqué (clic carte). Sélectionner un autre
-   * lot AJUSTE au nouveau lot ; on ne refit JAMAIS sur la zone parente (rester
-   * au niveau lot). Lot sans géométrie exploitable → on NE bouge PAS la caméra
-   * (pas de repli vers la zone : le zoom reste stable au niveau lot).
+   * m4 — Commande caméra sur le LOT cliqué (clic carte OU clic liste), selon le
+   * mode décidé par selection-camera :
+   *  - `frame` (premier lot / lot d'une autre zone) : cadrage existant
+   *    (fitBounds — peut changer le zoom) ;
+   *  - `recenter` (autre lot de la même zone) : RECENTRE sur le centre du lot
+   *    EN GARDANT le zoom courant (easeTo — JAMAIS fitBounds).
+   * On ne refit JAMAIS sur la zone parente (rester au niveau lot). Lot sans
+   * géométrie exploitable → on NE bouge PAS la caméra (et on ne mémorise rien).
    */
-  function zoomToLot(citySlug: string, noLot: string): void {
+  function zoomToLot(
+    citySlug: string,
+    noLot: string,
+    mode: "frame" | "recenter",
+  ): void {
     const bounds = findLotBounds(
       displayedLots,
       citySlug,
       noLot,
       selectedCity?.municipality.slug ?? null,
     );
-    if (bounds) mapApi?.fitMapToBounds(bounds);
+    if (!bounds) return;
+    if (mode === "recenter") {
+      mapApi?.recenterKeepZoom(boundsCenter(bounds));
+    } else {
+      mapApi?.fitMapToBounds(bounds);
+    }
+    // Mémorise le lot ciblé + sa zone : base de la décision au prochain clic.
+    cameraLot = { citySlug, noLot, zoneCode: cameraZoneCodeForLot(citySlug, noLot) };
+  }
+
+  /**
+   * Zone d'appartenance d'un lot pour la décision caméra (clé COMPARABLE, pas
+   * d'affichage). Priorité au `zoneCode` joint par l'API (#314) ; repli
+   * GÉOMÉTRIQUE (centre du lot dans le polygone de zone) quand le join est
+   * absent. `null` = indéterminé — aucun code inventé, la décision retombe
+   * alors sur le recentrage (jamais de changement de zoom surprise).
+   */
+  function cameraZoneCodeForLot(citySlug: string, noLot: string): string | null {
+    const fallbackCity = selectedCity?.municipality.slug ?? null;
+    const lot = displayedLots.features.find(
+      (feature) =>
+        feature.properties.noLot === noLot &&
+        (feature.properties.citySlug ?? fallbackCity) === citySlug,
+    );
+    if (!lot) return null;
+    const joined = lotZoneCode(lot.properties);
+    if (joined) return zoneRefComparableKey(joined);
+    const bounds = geometryBounds(lot.geometry ?? null);
+    if (!bounds) return null;
+    const code = zoneCodeAtPoint(
+      zonesResponse?.featureCollection.features ?? null,
+      boundsCenter(bounds),
+    );
+    return code === null ? null : zoneRefComparableKey(code);
   }
 
   /**
@@ -947,6 +1000,9 @@
     detailNodes = [];
     detailLegacyProjection = null;
     geoNotices = [];
+    // Contrat « lot suivant » : changement de ville → plus de lot caméra de
+    // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
+    cameraLot = null;
     // Millésime exclusif : un choix d'une ville précédente n'a aucun sens sur la
     // nouvelle couche → retour à « tous » (dégradé honnête, jamais tout estompé).
     zoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
@@ -1039,6 +1095,9 @@
     activeSource = null;
     hoveredEvidenceSignalId = null;
     selectionState = createSelectionBucketState();
+    // Contrat « lot suivant » : retour Province → plus de lot caméra de
+    // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
+    cameraLot = null;
     updateGeoLayers();
     // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
     // au montage initial appelle clearSelection sans vouloir animer la carte
@@ -1109,11 +1168,12 @@
         selectionState = toggleExclusiveSelection(selectionState, key);
       }
       selectionState = setFocus(selectionState, key);
-      // m4 — un LOT sélectionné depuis le pane droit recadre la caméra sur lui
+      // m4 — un LOT sélectionné depuis le pane droit commande la caméra
       // (parité stricte avec le clic carte, cf. toggleMapSelection) : #383 ne
       // couvrait que le clic carte, si bien que sélectionner un 2e lot depuis
-      // la liste laissait le viewport sur le lot précédent. On cadre donc AU
-      // lot cliqué — jamais de repli zone/ville. Les zones gardent leur
+      // la liste laissait le viewport sur le lot précédent. La décision (contrat
+      // « lot suivant » : recentrage zoom conservé / cadrage / rien) vit dans
+      // selection-camera — jamais de repli zone/ville. Les zones gardent leur
       // comportement (leur cadrage pane reste piloté par les autres chemins).
       if (parseKey(key)?.kind === "lot") {
         zoomToSelectionKey(key, { fitLot: true });
@@ -1271,9 +1331,9 @@
     if (!wasSelected) {
       syncRouteForSelectionKey(key);
       // #12 — zoom sur la zone qu'on vient de sélectionner (pas au déselect).
-      // m4 — un clic carte sur un LOT ajuste la caméra AU lot cliqué (fitLot),
-      // jamais un refit sur la zone parente : sélectionner un autre lot reste
-      // au niveau lot.
+      // m4 — un clic carte sur un LOT commande la caméra (fitLot) selon le
+      // contrat « lot suivant » (selection-camera) : jamais un refit sur la
+      // zone parente, recentrage zoom conservé entre lots d'une même zone.
       zoomToSelectionKey(key, { fitLot: true });
     }
     updateGeoLayers();
@@ -1294,15 +1354,21 @@
     key: SelectionKey,
     options: { fitLot?: boolean } = {},
   ): void {
-    // Décision de cadrage factorisée (selection-camera.js) : zone → toujours ;
-    // lot → seulement sur sélection utilisateur (`fitLot`). Un 2e lot renvoie
-    // le lot lui-même, jamais un repli zone/ville (pas de reset de viewport).
-    const target = resolveSelectionCameraTarget(key, options);
+    // Décision de commande factorisée (selection-camera.js) : zone → toujours
+    // cadrée ; lot → seulement sur sélection utilisateur (`fitLot`), avec le
+    // contrat « lot suivant » : reclic même lot = aucune commande ; autre lot
+    // même zone = recentrage zoom conservé ; autre zone = cadrage existant.
+    // Jamais de repli zone/ville pour un lot (pas de reset de viewport).
+    const target = resolveSelectionCameraTarget(key, {
+      ...options,
+      previousLot: cameraLot,
+      zoneCodeForLot: cameraZoneCodeForLot,
+    });
     if (!target) return;
     if (target.kind === "zone") {
       zoomToZone(target.citySlug, target.code);
     } else {
-      zoomToLot(target.citySlug, target.noLot);
+      zoomToLot(target.citySlug, target.noLot, target.mode);
     }
   }
 
