@@ -32,7 +32,9 @@
 
   let searchQuery = "";
 
-  $: displayedItems = filterRailCityItems(items, searchQuery, maxItems);
+  // La ville sélectionnée est exemptée du PLAFOND (jamais coupée de la liste —
+  // garde #378) ; la recherche, filtre explicite de l'utilisateur, s'applique.
+  $: displayedItems = filterRailCityItems(items, searchQuery, maxItems, selectedSlug);
 </script>
 
 <!-- Recherche villes (Search DS fluid — remplit le rail) -->

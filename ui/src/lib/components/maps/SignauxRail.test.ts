@@ -360,3 +360,73 @@ describe("SignauxRail — liste plate de villes (sans accordéon signaux)", () =
     expect(valleyfield!.textContent).toContain("7");
   });
 });
+
+// ── #378 (régression m1.7) — stabilité de la ville sélectionnée ──────────────
+// Le compte LIVE (`selectedCityLiveCount`) ne participe JAMAIS au tri ni à
+// l'appartenance : la ligne sélectionnée garde sa position (tri bulk) et reste
+// listée même à 0. Le badge devient honnête : « live/bulk » quand la lentille
+// client (plage de dates, exclusions) masque une partie du bulk.
+
+function renderRailB(selectedSlug: string | null, selectedCityLiveCount: number | null) {
+  return render(SignauxRail, {
+    props: {
+      entries: [
+        cityEntry("notre-dame-du-bon-conseil--drummond", "Notre-Dame-du-Bon-Conseil", "Drummond", 4),
+        cityEntry("acton-vale", "Acton Vale", "Acton", 3),
+        cityEntry("roxton-falls", "Roxton Falls", "Acton", 2),
+      ],
+      selectedSlug,
+      initialSubsetKey: "vivier-v2",
+      selectedCityLiveCount,
+    },
+  });
+}
+
+function rowNames(container: HTMLElement): string[] {
+  return Array.from(container.querySelectorAll("button.rail-city-row .rail-row-label")).map(
+    (el) => el.childNodes[0]?.textContent?.trim() ?? "",
+  );
+}
+
+function badgeOf(container: HTMLElement, name: string): string {
+  const row = Array.from(container.querySelectorAll("button.rail-city-row")).find((r) =>
+    r.textContent?.includes(name),
+  );
+  expect(row).toBeDefined();
+  return row!.querySelector(".st-badge")?.textContent?.trim() ?? "";
+}
+
+describe("SignauxRail — la ville sélectionnée ne saute ni ne disparaît (#378)", () => {
+  it("tri par bulk STABLE : le compte live (1 < bulk 4) ne déplace pas la ligne", () => {
+    const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", 1);
+    expect(rowNames(container)).toEqual([
+      "Notre-Dame-du-Bon-Conseil",
+      "Acton Vale",
+      "Roxton Falls",
+    ]);
+  });
+
+  it("badge honnête « live/bulk » (1/4) quand la lentille client masque une partie du bulk", () => {
+    const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", 1);
+    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("1/4");
+    // Les autres villes restent au bulk sec.
+    expect(badgeOf(container, "Acton Vale")).toBe("3");
+  });
+
+  it("live 0 : la ligne reste listée, à sa place bulk, badge 0/4", () => {
+    const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", 0);
+    expect(rowNames(container)[0]).toBe("Notre-Dame-du-Bon-Conseil");
+    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("0/4");
+  });
+
+  it("live null (fetch en cours) : repli bulk sans dénominateur — aucun flash", () => {
+    const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", null);
+    expect(rowNames(container)[0]).toBe("Notre-Dame-du-Bon-Conseil");
+    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("4");
+  });
+
+  it("live = bulk : badge simple (pas de dénominateur superflu)", () => {
+    const { container } = renderRailB("notre-dame-du-bon-conseil--drummond", 4);
+    expect(badgeOf(container, "Notre-Dame-du-Bon-Conseil")).toBe("4");
+  });
+});
