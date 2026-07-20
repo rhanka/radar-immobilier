@@ -151,30 +151,33 @@ describe("m1.7 — the rail BADGE of the SELECTED city must track the visible li
       },
     });
 
-    function badgeRow(): HTMLElement {
+    function badgeText(): string {
       const row = Array.from(container.querySelectorAll("button.rail-city-row")).find((r) =>
         r.textContent?.includes("Westmount"),
       );
       expect(row).toBeDefined();
-      return row as HTMLElement;
+      const badge = (row as HTMLElement).querySelector(".st-badge");
+      expect(badge).not.toBeNull();
+      return badge!.textContent?.trim() ?? "";
     }
 
     // Défaut : 2 exclusions actives → seul le rezonage est visible (1), PAS le
-    // bulk serveur (3). La ligne du rail doit afficher "1", jamais "3".
+    // bulk serveur (3) affiché seul. Le badge HONNÊTE montre « affiché/bulk »
+    // (1/3) : ni « 3 » figé, ni « 1 » inexpliqué.
     expect(getByTestId("visible-count").textContent).toBe("1");
-    expect(badgeRow().textContent).toContain("1");
-    expect(badgeRow().textContent).not.toContain("3");
+    expect(badgeText()).toBe("1/3");
 
     const boxes = exclusionBoxes(container);
-    // Décocher « Exclure PIIA sans projet résidentiel » → 2, le badge SUIT.
+    // Décocher « Exclure PIIA sans projet résidentiel » → 2/3, le badge SUIT.
     await fireEvent.click(boxes[0]!);
     expect(getByTestId("visible-count").textContent).toBe("2");
-    expect(badgeRow().textContent).toContain("2");
+    expect(badgeText()).toBe("2/3");
 
     // Décocher « Exclure dérogations mineures » → 3, badge = bulk (convergence
-    // attendue : sans exclusion, le vivier v2 qualifié EST les 3 nœuds).
+    // attendue : sans exclusion, le vivier v2 qualifié EST les 3 nœuds — plus
+    // de dénominateur quand rien n'est masqué).
     await fireEvent.click(boxes[1]!);
     expect(getByTestId("visible-count").textContent).toBe("3");
-    expect(badgeRow().textContent).toContain("3");
+    expect(badgeText()).toBe("3");
   });
 });
