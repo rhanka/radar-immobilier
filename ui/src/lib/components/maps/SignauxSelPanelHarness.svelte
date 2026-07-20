@@ -35,6 +35,7 @@
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
+  export let unfilteredSignalCount = 0;
   export let detailError: string | null = null;
   export let vivierBMode = false;
   export let selectionState: SelectionBucketState = createSelectionBucketState();
@@ -84,6 +85,7 @@
 <SignauxSelPanel
   {selectedCity}
   {detailNodes}
+  {unfilteredSignalCount}
   {detailError}
   {vivierBMode}
   {selectionState}
