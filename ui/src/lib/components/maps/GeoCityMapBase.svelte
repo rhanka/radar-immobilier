@@ -59,6 +59,12 @@
       options?: { maxZoom?: number; duration?: number },
     ): void;
     /**
+     * Contrat « lot suivant » — RECENTRE la caméra sur un point EN GARDANT le
+     * zoom courant (`easeTo({ center, zoom: getZoom() })`). JAMAIS fitBounds :
+     * fitBounds change le zoom.
+     */
+    recenterKeepZoom(center: [number, number], options?: { duration?: number }): void;
+    /**
      * C9 — restaure le CADRAGE INITIAL (centre + zoom du primo-chargement),
      * capturé une fois la carte chargée. Retour Province / désélection.
      * Retourne false si aucun viewport initial n'a pu être capturé.
@@ -241,12 +247,28 @@
   }
 
   // ── Primitives caméra (exposées via l'API) ─────────────────────────────────
-  // m4 — miroir DOM (test-only, parité avec les miroirs de libellés) : dernière
-  // étendue passée à `fitMapToBounds`, signature W,S,E,N arrondie. C'est le
-  // SEUL signal DOM d'un cadrage caméra peint sur canvas WebGL, ce qui rend
-  // e2e-vérifiable le fait que sélectionner un 2e lot recadre bien SUR ce lot
-  // (et non un reset vers la zone/ville). Réassigné à chaque cadrage effectif.
-  let lastFitBounds: string | null = null;
+  // Miroirs DOM caméra (test-only, parité avec les miroirs de libellés) : la
+  // caméra est peinte sur canvas WebGL, ces attributs sont le SEUL signal DOM
+  // e2e-vérifiable des commandes caméra. Trois miroirs :
+  //  - data-camera-command-count : nombre TOTAL de commandes émises (permet
+  //    d'asserter « reclic sur le même lot = ZÉRO nouvelle commande ») ;
+  //  - data-last-camera-command : signature de la dernière commande
+  //    (`fit:W,S,E,N` | `recenter:lon,lat@zoom` | `fly:lon,lat@zoom` | `reset`),
+  //    coordonnées arrondies 4 décimales, zoom en précision pleine ;
+  //  - data-map-zoom : zoom courant (précision pleine), rafraîchi à chaque
+  //    `moveend` — permet l'égalité STRICTE avant/après un recentrage.
+  let cameraCommandCount = 0;
+  let lastCameraCommand: string | null = null;
+  let mapZoom: string | null = null;
+
+  function recordCameraCommand(signature: string): void {
+    cameraCommandCount += 1;
+    lastCameraCommand = signature;
+  }
+
+  function roundedLngLat(point: [number, number]): string {
+    return point.map((n) => n.toFixed(4)).join(",");
+  }
 
   function flyTo(options: {
     center: [number, number];
@@ -254,6 +276,9 @@
     duration: number;
   }): void {
     if (!mapInstance || !mapReady) return;
+    recordCameraCommand(
+      `fly:${roundedLngLat(options.center)}@${String(options.zoom)}`,
+    );
     (
       mapInstance as {
         flyTo: (o: {
@@ -283,14 +308,11 @@
     };
     const duration = options.duration ?? 600;
     // Miroir DOM du cadrage (test-only) : signature W,S,E,N arrondie.
-    lastFitBounds = [
-      bounds[0][0],
-      bounds[0][1],
-      bounds[1][0],
-      bounds[1][1],
-    ]
-      .map((n) => n.toFixed(4))
-      .join(",");
+    recordCameraCommand(
+      `fit:${[bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]]
+        .map((n) => n.toFixed(4))
+        .join(",")}`,
+    );
     if (isDegenerateBounds(bounds)) {
       m.flyTo({ center: bounds[0], zoom: 14, duration });
       return;
@@ -303,6 +325,30 @@
   }
 
   /**
+   * Contrat « lot suivant » — recentre la caméra sur `center` EN GARDANT le
+   * zoom courant : `easeTo({ center, zoom: getZoom() })`. JAMAIS fitBounds
+   * (fitBounds change le zoom). Le zoom est lu à l'émission et passé
+   * explicitement — la commande est donc auto-porteuse et vérifiable.
+   */
+  function recenterKeepZoom(
+    center: [number, number],
+    options: { duration?: number } = {},
+  ): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      easeTo: (o: {
+        center: [number, number];
+        zoom: number;
+        duration: number;
+      }) => void;
+      getZoom: () => number;
+    };
+    const zoom = m.getZoom();
+    recordCameraCommand(`recenter:${roundedLngLat(center)}@${String(zoom)}`);
+    m.easeTo({ center, zoom, duration: options.duration ?? 600 });
+  }
+
+  /**
    * C9 — restaure le cadrage du primo-chargement (même centre, même zoom).
    * No-op (false) si la carte n'est pas prête ou si rien n'a été capturé.
    */
@@ -310,6 +356,7 @@
     if (!mapInstance || !mapReady) return false;
     const initial = viewportMemory.initial();
     if (!initial) return false;
+    recordCameraCommand("reset");
     (
       mapInstance as {
         flyTo: (o: {
@@ -795,6 +842,7 @@
     return {
       flyTo,
       fitMapToBounds,
+      recenterKeepZoom,
       resetToInitialView,
       syncGeoLayers,
       getCityBoundary,
@@ -957,6 +1005,14 @@
           center: [center.lng, center.lat],
           zoom: m.getZoom(),
         });
+        // Miroir DOM du zoom courant (test-only) : posé au chargement puis
+        // rafraîchi en fin de mouvement caméra (moveend = fin d'animation
+        // flyTo/easeTo/fitBounds ET fin de geste utilisateur). Précision
+        // pleine : permet l'égalité STRICTE avant/après un recentrage.
+        mapZoom = String(m.getZoom());
+        m.on("moveend", () => {
+          mapZoom = String(m.getZoom());
+        });
         applyCitiesFillPaint();
         registerGeoLayerInteractions(m);
         registerMeasureInteractions(m);
@@ -988,7 +1044,9 @@
   data-testid="geo-city-map-base"
   data-zone-labels-visible={showZoneLabels}
   data-lot-labels-visible={showLotLabels}
-  data-last-fit-bounds={lastFitBounds}
+  data-camera-command-count={cameraCommandCount}
+  data-last-camera-command={lastCameraCommand}
+  data-map-zoom={mapZoom}
 >
   <div bind:this={mapContainer} class="absolute inset-0"></div>
 
