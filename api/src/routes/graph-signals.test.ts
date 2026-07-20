@@ -121,10 +121,45 @@ function makeNode(
   };
 }
 
+/**
+ * Store dont `head`/`get` NE RÉPONDENT JAMAIS (promesse pendante) : reproduit
+ * un S3 qui pend (ETIMEDOUT sans fin). Sert à prouver que le budget temps
+ * global rend la main — l'endpoint répond quand même, refs dégradées.
+ */
+class HangingStore extends MemoryStore {
+  override head(): Promise<ObjectInfo | null> {
+    return new Promise<ObjectInfo | null>(() => {});
+  }
+
+  override get(): Promise<Uint8Array> {
+    return new Promise<Uint8Array>(() => {});
+  }
+}
+
+/** Store qui COMPTE les accès par clé (preuve du cache par requête). */
+class CountingStore extends MemoryStore {
+  readonly headCalls = new Map<string, number>();
+  readonly getCalls = new Map<string, number>();
+
+  override async head(key: string): Promise<ObjectInfo | null> {
+    this.headCalls.set(key, (this.headCalls.get(key) ?? 0) + 1);
+    return super.head(key);
+  }
+
+  override async get(key: string): Promise<Uint8Array> {
+    this.getCalls.set(key, (this.getCalls.get(key) ?? 0) + 1);
+    return super.get(key);
+  }
+}
+
 // Minimal mock DB (never actually called — graph-store is mocked).
 const mockDb = {} as unknown as Database;
-const freshRoute = (store: ObjectStore = new MemoryStore()) =>
-  graphSignalsRoute({ db: mockDb, store });
+const freshRoute = (store: ObjectStore = new MemoryStore(), docEnrichmentBudgetMs?: number) =>
+  graphSignalsRoute({
+    db: mockDb,
+    store,
+    ...(docEnrichmentBudgetMs !== undefined ? { docEnrichmentBudgetMs } : {}),
+  });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tests
@@ -526,5 +561,125 @@ describe("GET /api/graph-signals/:city", () => {
     // Le nœud cassé est dégradé mais présent (rawRef conservé, pas de métadonnée).
     expect(ko.docRefs[0]!.rawRef).toBe(brokenRawRef);
     expect(ko.docRefs[0]!.contentType).toBeUndefined();
+  });
+
+  // ── Régression : incident « l'API signal ne répond pas » ─────────────────
+  // 66 rawRefs sans `.meta.json` en prod : l'ancien repli docSha listait tout
+  // le bucket (~20k objets) puis GETait chaque `.meta.json` (~50 min), lancé
+  // PAR NŒUD → l'endpoint per-city ne répondait jamais (timeout client 15 s).
+  it("never scans the bucket when a doc-ref's meta is missing (meta absent → degraded ref, zero store.list)", async () => {
+    const store = new MemoryStore();
+    await seedPdf(store); // le bucket contient d'autres `.meta.json` scannables
+    const listSpy = vi.spyOn(store, "list").mockImplementation(() => {
+      throw new Error("full bucket scan attempted — the incident regressed");
+    });
+
+    const orphanRawRef = "raw/proces-verbaux-plaisance/cas/0123456789abcdef.pdf";
+    const nodes = [
+      makeNode("sig-p1", "plaisance", "Signal", {
+        refs: [{ rawRef: orphanRawRef, excerpt: "Avis de motion." }],
+      }),
+      makeNode("sig-p2", "plaisance", "Signal", {
+        refs: [{ rawRef: orphanRawRef, excerpt: "Adoption du règlement." }],
+      }),
+    ];
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      nodes as unknown as ReturnType<typeof makeNode>[],
+    );
+
+    const res = await freshRoute(store).request("/api/graph-signals/plaisance");
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      nodes: Array<{ docRefs: Array<{ rawRef?: string; documentUrl?: string; contentType?: string }> }>;
+    };
+    // Refs dégradées mais servies : fallback rawRef→documentUrl, pas de méta.
+    expect(body.nodes).toHaveLength(2);
+    expect(body.nodes[0]!.docRefs[0]).toMatchObject({
+      rawRef: orphanRawRef,
+      documentUrl: `/api/documents/raw?rawRef=${encodeURIComponent(orphanRawRef)}`,
+    });
+    expect(body.nodes[0]!.docRefs[0]!.contentType).toBeUndefined();
+    // Preuve du fix : AUCUN scan du bucket, quel que soit le nombre de nœuds.
+    expect(listSpy).not.toHaveBeenCalled();
+  });
+
+  it("shares one S3 resolution across ALL nodes citing the same document (per-request cache, not per-node)", async () => {
+    const store = new CountingStore();
+    const record = await seedPdf(store);
+    const metaKey = rawMetaKey(record.storageKey);
+    const nodes = [
+      makeNode("sig-a", "drummondville", "Signal", {
+        refs: [{ rawRef: record.storageKey, excerpt: "Citation A." }],
+      }),
+      makeNode("sig-b", "drummondville", "Signal", {
+        refs: [{ rawRef: record.storageKey, excerpt: "Citation B." }],
+      }),
+      makeNode("sig-c", "drummondville", "Signal", {
+        refs: [{ rawRef: record.storageKey, excerpt: "Citation C." }],
+      }),
+    ];
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      nodes as unknown as ReturnType<typeof makeNode>[],
+    );
+
+    const res = await freshRoute(store).request("/api/graph-signals/drummondville");
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      nodes: Array<{ docRefs: Array<{ sourceUrl?: string; contentType?: string }> }>;
+    };
+    // Les 3 nœuds sont enrichis (chemin nominal intact)…
+    expect(body.nodes).toHaveLength(3);
+    for (const node of body.nodes) {
+      expect(node.docRefs[0]!.sourceUrl).toBe("https://drummondville.ca/pv/2026-05-12.pdf");
+      expect(node.docRefs[0]!.contentType).toBe("application/pdf");
+    }
+    // …avec UNE SEULE résolution S3 du document partagé (cache par requête ;
+    // le cache par nœud d'avant l'incident aurait fait 3 head + 3 get).
+    expect(store.headCalls.get(metaKey)).toBe(1);
+    expect(store.getCalls.get(metaKey)).toBe(1);
+  });
+
+  it("always responds within the doc-enrichment time budget even when S3 hangs forever", async () => {
+    const store = new HangingStore();
+    const nodes = [
+      makeNode("sig-h1", "plaisance", "Signal", {
+        refs: [{ rawRef: "raw/proces-verbaux-plaisance/cas/aaaa.pdf", excerpt: "Avis." }],
+      }),
+      makeNode("sig-h2", "plaisance", "Signal", {
+        refs: [{ rawRef: "raw/proces-verbaux-plaisance/cas/bbbb.pdf", excerpt: "Adoption." }],
+      }),
+    ];
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      nodes as unknown as ReturnType<typeof makeNode>[],
+    );
+
+    const startedAt = Date.now();
+    // Budget court pour le test (prod : DOC_ENRICHMENT_BUDGET_MS = 2 s).
+    const res = await freshRoute(store, 50).request("/api/graph-signals/plaisance");
+    const elapsedMs = Date.now() - startedAt;
+
+    // Avant le fix : la requête PENDAIT indéfiniment (S3 qui ne répond pas).
+    expect(res.status).toBe(200);
+    expect(elapsedMs).toBeLessThan(1_500);
+    const body = (await res.json()) as {
+      ok: boolean;
+      nodes: Array<{
+        id: string;
+        docRefs: Array<{ rawRef?: string; documentUrl?: string; excerpt?: string; contentType?: string }>;
+      }>;
+    };
+    expect(body.ok).toBe(true);
+    expect(body.nodes).toHaveLength(2);
+    // Les signaux sont servis SANS enrichissement doc (dégradation contrôlée) :
+    // excerpt conservé, fallback rawRef→documentUrl appliqué, pas de méta S3.
+    for (const node of body.nodes) {
+      const ref = node.docRefs[0]!;
+      expect(ref.rawRef).toMatch(/^raw\//u);
+      expect(ref.documentUrl).toBe(`/api/documents/raw?rawRef=${encodeURIComponent(ref.rawRef!)}`);
+      expect(ref.excerpt).toBeDefined();
+      expect(ref.contentType).toBeUndefined();
+    }
   });
 });

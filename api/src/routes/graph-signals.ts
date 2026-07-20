@@ -35,6 +35,13 @@ import {
 export interface GraphSignalsDeps {
   db: Database;
   store: ObjectStore;
+  /**
+   * Budget temps GLOBAL (ms) de l'enrichissement documentaire S3 pour UNE
+   * requête per-city. Passé ce budget, les refs restantes sont dégradées
+   * (servies sans métadonnée doc) au lieu de bloquer la réponse. Défaut :
+   * `DOC_ENRICHMENT_BUDGET_MS`. Surtout utile aux tests.
+   */
+  docEnrichmentBudgetMs?: number;
 }
 
 export interface GraphSignalDocRef {
@@ -259,6 +266,65 @@ function applyMetadata(ref: GraphSignalDocRef, meta: DocumentMetadata | null): G
   };
 }
 
+/** Budget temps GLOBAL par défaut (ms) de l'enrichissement doc d'UNE requête. */
+export const DOC_ENRICHMENT_BUDGET_MS = 2_000;
+
+/**
+ * Contexte d'enrichissement documentaire partagé PAR REQUÊTE (et non par
+ * nœud) — INCIDENT « l'API signal ne répond pas » :
+ * - `cache` : UNE résolution S3 par (rawRef, docSha) pour toute la ville. Un
+ *   cache par nœud relançait N résolutions parallèles du même document.
+ * - `deadlineAt`/`exceeded` : budget temps GLOBAL. Passé le budget, les refs
+ *   restantes sont dégradées (servies sans métadonnée doc) au lieu de bloquer
+ *   la réponse — l'endpoint répond TOUJOURS, même si S3 rame ou pend.
+ */
+interface DocEnrichmentContext {
+  readonly cache: Map<string, Promise<DocumentMetadata | null>>;
+  readonly deadlineAt: number;
+  exceeded: boolean;
+}
+
+function createDocEnrichmentContext(
+  budgetMs: number = DOC_ENRICHMENT_BUDGET_MS,
+): DocEnrichmentContext {
+  return { cache: new Map(), deadlineAt: Date.now() + budgetMs, exceeded: false };
+}
+
+const DOC_ENRICHMENT_TIMEOUT: unique symbol = Symbol("doc-enrichment-timeout");
+
+/**
+ * Attend `promise` au plus jusqu'à la deadline du contexte. Deadline atteinte
+ * → marque le budget dépassé et rend `null` (dégradation). La résolution
+ * abandonnée continue en arrière-plan mais ne peut pas produire de rejet non
+ * géré : son `catch` est attaché à la création (voir `enrichDocRefs`).
+ */
+async function awaitWithinBudget(
+  promise: Promise<DocumentMetadata | null>,
+  context: DocEnrichmentContext,
+): Promise<DocumentMetadata | null> {
+  const remainingMs = context.deadlineAt - Date.now();
+  if (remainingMs <= 0) {
+    context.exceeded = true;
+    return null;
+  }
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const result = await Promise.race([
+      promise,
+      new Promise<typeof DOC_ENRICHMENT_TIMEOUT>((resolve) => {
+        timer = setTimeout(() => resolve(DOC_ENRICHMENT_TIMEOUT), remainingMs);
+      }),
+    ]);
+    if (result === DOC_ENRICHMENT_TIMEOUT) {
+      context.exceeded = true;
+      return null;
+    }
+    return result;
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 /**
  * Enrichit chaque doc-ref avec ses métadonnées d'object store (S3), de manière
  * RÉSILIENTE PAR DOC-REF : si `findDocumentMetadata` jette pour UNE ref (objet
@@ -266,34 +332,38 @@ function applyMetadata(ref: GraphSignalDocRef, meta: DocumentMetadata | null): G
  * `applyMetadata(ref, null)` (fallback rawRef→documentUrl) au lieu de faire
  * rejeter tout le `Promise.all` — ce qui remontait en 500 « Signaux
  * indisponibles » pour toute la ville. L'échec est journalisé côté serveur.
+ *
+ * Le cache ET le budget temps vivent dans `context`, partagé par TOUS les
+ * nœuds d'une même requête (voir `DocEnrichmentContext`).
  */
 async function enrichDocRefs(
   store: ObjectStore,
   refs: readonly GraphSignalDocRef[],
+  context: DocEnrichmentContext,
   onError?: (ref: GraphSignalDocRef, error: unknown) => void,
 ): Promise<GraphSignalDocRef[]> {
-  const cache = new Map<string, Promise<DocumentMetadata | null>>();
-
   return Promise.all(
     refs.map(async (ref) => {
+      if (context.exceeded || Date.now() >= context.deadlineAt) {
+        context.exceeded = true;
+        return applyMetadata(ref, null);
+      }
       const key = `${ref.rawRef ?? ""}\u0000${ref.docSha}`;
-      if (!cache.has(key)) {
-        cache.set(
+      if (!context.cache.has(key)) {
+        context.cache.set(
           key,
           findDocumentMetadata(store, {
             ...(ref.rawRef !== undefined ? { rawRef: ref.rawRef } : {}),
             docSha: ref.docSha,
+          }).catch((error) => {
+            onError?.(ref, error);
+            // Dégradation best-effort : ref non enrichie (le fallback
+            // rawRef→documentUrl reste appliqué), jamais un rejet propagé.
+            return null;
           }),
         );
       }
-      try {
-        return applyMetadata(ref, await cache.get(key)!);
-      } catch (error) {
-        onError?.(ref, error);
-        // Dégradation best-effort : ref non enrichie (le fallback
-        // rawRef→documentUrl reste appliqué), jamais un rejet propagé.
-        return applyMetadata(ref, null);
-      }
+      return applyMetadata(ref, await awaitWithinBudget(context.cache.get(key)!, context));
     }),
   );
 }
@@ -357,12 +427,14 @@ function buildSignalCard(
 async function toGraphSignalCard(
   store: ObjectStore,
   node: Awaited<ReturnType<typeof getSignalNodesForCity>>[number],
+  context: DocEnrichmentContext,
   citySlug?: string,
 ): Promise<GraphSignalCard> {
   const props = (node.props ?? {}) as Record<string, unknown>;
   const docRefs = await enrichDocRefs(
     store,
     extractDocRefs(props, node.sourceRef),
+    context,
     (ref, error) => {
       console.error(
         `[graph-signals] doc-ref enrichment failed (city=${citySlug ?? node.citySlug ?? "?"} node=${node.id} ref=${ref.rawRef ?? ref.docSha}):`,
@@ -781,9 +853,12 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
     }
     // Résilience PAR NŒUD : un nœud dont la construction échoue est dégradé
     // (carte sans enrichissement S3) plutôt que de faire tomber toute la ville.
+    // Le contexte d'enrichissement (cache + budget temps) est PAR REQUÊTE :
+    // tous les nœuds partagent les résolutions S3 et le même budget global.
+    const enrichment = createDocEnrichmentContext(deps.docEnrichmentBudgetMs);
     const mapped = await Promise.all(
       nodes.map((n) =>
-        toGraphSignalCard(deps.store, n, city).catch((error) => {
+        toGraphSignalCard(deps.store, n, enrichment, city).catch((error) => {
           console.error(
             `[graph-signals] signal card build failed (city=${city} node=${n.id}):`,
             error,
@@ -792,6 +867,11 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
         }),
       ),
     );
+    if (enrichment.exceeded) {
+      console.warn(
+        `[graph-signals] doc enrichment budget exceeded (city=${city}, nodes=${nodes.length}): responded with degraded doc refs`,
+      );
+    }
     const legacyProjection = buildLegacyZmpProjection(
       mapped.map((node) => node.legacySubset),
     );
