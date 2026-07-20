@@ -84,6 +84,7 @@
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
+  import { resolveSelectionCameraTarget } from "$lib/maps/selection-camera.js";
   import {
     buildGeoLevelNavigation,
     type GeoLevel,
@@ -1108,6 +1109,15 @@
         selectionState = toggleExclusiveSelection(selectionState, key);
       }
       selectionState = setFocus(selectionState, key);
+      // m4 — un LOT sélectionné depuis le pane droit recadre la caméra sur lui
+      // (parité stricte avec le clic carte, cf. toggleMapSelection) : #383 ne
+      // couvrait que le clic carte, si bien que sélectionner un 2e lot depuis
+      // la liste laissait le viewport sur le lot précédent. On cadre donc AU
+      // lot cliqué — jamais de repli zone/ville. Les zones gardent leur
+      // comportement (leur cadrage pane reste piloté par les autres chemins).
+      if (parseKey(key)?.kind === "lot") {
+        zoomToSelectionKey(key, { fitLot: true });
+      }
     }
     syncRouteForSelectionKey(key);
     updateGeoLayers();
@@ -1284,16 +1294,15 @@
     key: SelectionKey,
     options: { fitLot?: boolean } = {},
   ): void {
-    const parsed = parseKey(key);
-    if (!parsed || (parsed.kind !== "zone" && parsed.kind !== "lot")) return;
-    const sep = parsed.id.indexOf("/");
-    if (sep <= 0 || sep === parsed.id.length - 1) return;
-    const citySlug = parsed.id.slice(0, sep);
-    const ref = parsed.id.slice(sep + 1);
-    if (parsed.kind === "zone") {
-      zoomToZone(citySlug, ref);
-    } else if (options.fitLot) {
-      zoomToLot(citySlug, ref);
+    // Décision de cadrage factorisée (selection-camera.js) : zone → toujours ;
+    // lot → seulement sur sélection utilisateur (`fitLot`). Un 2e lot renvoie
+    // le lot lui-même, jamais un repli zone/ville (pas de reset de viewport).
+    const target = resolveSelectionCameraTarget(key, options);
+    if (!target) return;
+    if (target.kind === "zone") {
+      zoomToZone(target.citySlug, target.code);
+    } else {
+      zoomToLot(target.citySlug, target.noLot);
     }
   }
 
