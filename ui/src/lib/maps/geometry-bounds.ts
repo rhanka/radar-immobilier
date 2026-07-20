@@ -133,3 +133,14 @@ export function unionBounds(
 export function isDegenerateBounds(bounds: LngLatBoundsTuple): boolean {
   return bounds[0][0] === bounds[1][0] && bounds[0][1] === bounds[1][1];
 }
+
+/**
+ * Centre d'une bbox WGS-84 — cible du RECENTRAGE caméra sur un lot (contrat
+ * « lot suivant » : easeTo sur le centre du lot, zoom conservé).
+ */
+export function boundsCenter(bounds: LngLatBoundsTuple): [number, number] {
+  return [
+    (bounds[0][0] + bounds[1][0]) / 2,
+    (bounds[0][1] + bounds[1][1]) / 2,
+  ];
+}
