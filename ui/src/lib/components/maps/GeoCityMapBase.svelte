@@ -241,6 +241,13 @@
   }
 
   // ── Primitives caméra (exposées via l'API) ─────────────────────────────────
+  // m4 — miroir DOM (test-only, parité avec les miroirs de libellés) : dernière
+  // étendue passée à `fitMapToBounds`, signature W,S,E,N arrondie. C'est le
+  // SEUL signal DOM d'un cadrage caméra peint sur canvas WebGL, ce qui rend
+  // e2e-vérifiable le fait que sélectionner un 2e lot recadre bien SUR ce lot
+  // (et non un reset vers la zone/ville). Réassigné à chaque cadrage effectif.
+  let lastFitBounds: string | null = null;
+
   function flyTo(options: {
     center: [number, number];
     zoom: number;
@@ -275,6 +282,15 @@
       }) => void;
     };
     const duration = options.duration ?? 600;
+    // Miroir DOM du cadrage (test-only) : signature W,S,E,N arrondie.
+    lastFitBounds = [
+      bounds[0][0],
+      bounds[0][1],
+      bounds[1][0],
+      bounds[1][1],
+    ]
+      .map((n) => n.toFixed(4))
+      .join(",");
     if (isDegenerateBounds(bounds)) {
       m.flyTo({ center: bounds[0], zoom: 14, duration });
       return;
@@ -972,6 +988,7 @@
   data-testid="geo-city-map-base"
   data-zone-labels-visible={showZoneLabels}
   data-lot-labels-visible={showLotLabels}
+  data-last-fit-bounds={lastFitBounds}
 >
   <div bind:this={mapContainer} class="absolute inset-0"></div>
 

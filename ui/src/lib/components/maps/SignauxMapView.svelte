@@ -84,6 +84,13 @@
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
+  import { resolveSelectionCameraTarget } from "$lib/maps/selection-camera.js";
+  import {
+    type LegendLabelMode,
+    resolveLegendLabelMode,
+    migrateLegacyLegendLabelKeys,
+    persistLegendLabelMode,
+  } from "$lib/maps/legend-label-mode.js";
   import {
     buildGeoLevelNavigation,
     type GeoLevel,
@@ -268,20 +275,17 @@
   // AFFICHÉ (retour UAT round2 : « parfait pour les numéros de zone, coche
   // par défaut »). PERSISTANT en session (localStorage) : le choix tient au
   // fil des villes et des rechargements.
-  type LegendLabelMode = "zone" | "lot";
-  const LEGEND_LABEL_MODE_LS_KEY = "signaux-legend-label-mode";
+  // Défaut = ZONE ; résolution + migration du legacy-state factorisées dans
+  // legend-label-mode.js (testées : les anciennes clés « deux cases » ne
+  // réimposent JAMAIS masqué/lot au 1er chargement).
   let legendLabelMode: LegendLabelMode = "zone";
   $: showZoneLabels = legendLabelMode === "zone";
   $: showLotLabels = legendLabelMode === "lot";
 
-  function readLegendLabelModePref(): LegendLabelMode {
-    if (typeof localStorage === "undefined") return "zone";
-    return localStorage.getItem(LEGEND_LABEL_MODE_LS_KEY) === "lot" ? "lot" : "zone";
-  }
   function setLegendLabelMode(mode: LegendLabelMode): void {
     legendLabelMode = mode;
     if (typeof localStorage !== "undefined") {
-      localStorage.setItem(LEGEND_LABEL_MODE_LS_KEY, mode);
+      persistLegendLabelMode(localStorage, mode);
     }
   }
 
@@ -1104,6 +1108,15 @@
         selectionState = toggleExclusiveSelection(selectionState, key);
       }
       selectionState = setFocus(selectionState, key);
+      // m4 — un LOT sélectionné depuis le pane droit recadre la caméra sur lui
+      // (parité stricte avec le clic carte, cf. toggleMapSelection) : #383 ne
+      // couvrait que le clic carte, si bien que sélectionner un 2e lot depuis
+      // la liste laissait le viewport sur le lot précédent. On cadre donc AU
+      // lot cliqué — jamais de repli zone/ville. Les zones gardent leur
+      // comportement (leur cadrage pane reste piloté par les autres chemins).
+      if (parseKey(key)?.kind === "lot") {
+        zoomToSelectionKey(key, { fitLot: true });
+      }
     }
     syncRouteForSelectionKey(key);
     updateGeoLayers();
@@ -1280,16 +1293,15 @@
     key: SelectionKey,
     options: { fitLot?: boolean } = {},
   ): void {
-    const parsed = parseKey(key);
-    if (!parsed || (parsed.kind !== "zone" && parsed.kind !== "lot")) return;
-    const sep = parsed.id.indexOf("/");
-    if (sep <= 0 || sep === parsed.id.length - 1) return;
-    const citySlug = parsed.id.slice(0, sep);
-    const ref = parsed.id.slice(sep + 1);
-    if (parsed.kind === "zone") {
-      zoomToZone(citySlug, ref);
-    } else if (options.fitLot) {
-      zoomToLot(citySlug, ref);
+    // Décision de cadrage factorisée (selection-camera.js) : zone → toujours ;
+    // lot → seulement sur sélection utilisateur (`fitLot`). Un 2e lot renvoie
+    // le lot lui-même, jamais un repli zone/ville (pas de reset de viewport).
+    const target = resolveSelectionCameraTarget(key, options);
+    if (!target) return;
+    if (target.kind === "zone") {
+      zoomToZone(target.citySlug, target.code);
+    } else {
+      zoomToLot(target.citySlug, target.noLot);
     }
   }
 
@@ -1779,8 +1791,13 @@
       applyActiveSubsetKey(initialSubsetKey);
     }
     // m5 / UAT round2 — restaurer la préférence d'affichage des libellés
-    // (persistance session). Défaut = zone si rien de persisté.
-    legendLabelMode = readLegendLabelModePref();
+    // (persistance session). Défaut = ZONE si rien de persisté. On purge
+    // d'abord le legacy-state « deux cases » (jamais relu, mais on évite de
+    // laisser traîner des clés périmées).
+    if (typeof localStorage !== "undefined") {
+      migrateLegacyLegendLabelKeys(localStorage);
+      legendLabelMode = resolveLegendLabelMode(localStorage);
+    }
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
