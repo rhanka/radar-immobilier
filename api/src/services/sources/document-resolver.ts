@@ -74,38 +74,28 @@ export async function loadDocumentMetadata(
   };
 }
 
+/**
+ * Resolves a document's metadata by rawRef ONLY — direct `.meta.json` lookup,
+ * O(1) object-store calls, no bucket scan.
+ *
+ * INCIDENT "signal API never responds": the former docSha fallback listed the
+ * whole bucket (`store.list("raw/")`, ~20k keys) then GET'ed every
+ * `.meta.json` sequentially (~50 min) as soon as ONE rawRef was missing its
+ * `.meta.json` in S3. Launched per node by the per-city route, the endpoint
+ * never answered. The fallback is REMOVED: a missing meta now degrades to
+ * `null` (the ref is served without document metadata, the endpoint always
+ * responds). Any future docSha lookup MUST be strictly bounded (time budget
+ * or iteration cap) — never an unbounded full scan.
+ *
+ * `params.docSha` is kept in the signature for call-site compatibility but is
+ * deliberately NOT used as a lookup key anymore.
+ */
 export async function findDocumentMetadata(
   store: ObjectStore,
   params: { rawRef?: string; docSha?: string },
 ): Promise<DocumentMetadata | null> {
-  if (params.rawRef) {
-    const byRawRef = await loadDocumentMetadata(store, params.rawRef);
-    if (byRawRef) return byRawRef;
-  }
-
-  if (!params.docSha || !store.list) return null;
-
-  const metaKeys = (await store.list(RAW_PREFIX))
-    .filter((key) => key.endsWith(META_SUFFIX))
-    .sort();
-  for (const metaKey of metaKeys) {
-    const parsed = RawDocumentRecordSchema.safeParse(tryParseJson(await store.get(metaKey)));
-    if (!parsed.success) continue;
-    if (parsed.data.sha256 !== params.docSha) continue;
-    return {
-      rawRef: parsed.data.storageKey,
-      docSha: parsed.data.sha256,
-      sourceUrl: parsed.data.sourceUrl,
-      contentType: parsed.data.contentType,
-      fetchedAt: parsed.data.fetchedAt,
-      ...(parsed.data.title !== undefined ? { title: parsed.data.title } : {}),
-      ...(parsed.data.publishedAt !== undefined
-        ? { publishedAt: parsed.data.publishedAt }
-        : {}),
-    };
-  }
-
-  return null;
+  if (!params.rawRef) return null;
+  return loadDocumentMetadata(store, params.rawRef);
 }
 
 export async function resolveRawContentType(

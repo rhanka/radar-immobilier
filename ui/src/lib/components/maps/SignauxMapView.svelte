@@ -1998,6 +1998,7 @@
     <SignauxSelPanel
       {selectedCity}
       detailNodes={filteredDetailNodes}
+      unfilteredSignalCount={detailNodes.length}
       {detailLoading}
       detailError={effectiveDetailError}
       {zonesLoading}

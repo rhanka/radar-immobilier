@@ -185,6 +185,36 @@ describe("SignauxSelPanel — clic signal → fiche détail", () => {
     expect(container.textContent).not.toContain("Aucun signal indexé");
   });
 
+  // Mode 2 — la ville A des signaux mais la plage de dates les masque tous :
+  // l'état vide ne doit PAS prétendre que rien n'est indexé.
+  it("distingue « aucun signal dans la plage » de « aucun signal indexé »", () => {
+    const { container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        unfilteredSignalCount: 3,
+      },
+    });
+
+    expect(container.textContent).toContain(
+      "Aucun signal dans la plage de dates sélectionnée.",
+    );
+    expect(container.textContent).not.toContain("Aucun signal indexé");
+  });
+
+  it("garde « aucun signal indexé » quand la ville n'a réellement rien", () => {
+    const { container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        unfilteredSignalCount: 0,
+      },
+    });
+
+    expect(container.textContent).toContain("Aucun signal indexé pour cette ville.");
+    expect(container.textContent).not.toContain("dans la plage de dates");
+  });
+
   it("ouvre la fiche du 1er signal au clic (description + Evidence + bouton source)", async () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: NODES },
