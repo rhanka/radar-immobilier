@@ -104,6 +104,14 @@
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
+  /**
+   * Nombre de signaux de la ville AVANT les lentilles d'affichage client
+   * (plage de dates, exclusions B) : `detailNodes` arrive DÉJÀ filtré du
+   * parent. Permet de distinguer « ville sans signal indexé » (0 partout) de
+   * « aucun signal dans la plage sélectionnée » (des signaux existent, tous
+   * masqués par la plage de dates / les filtres).
+   */
+  export let unfilteredSignalCount = 0;
   export let detailLoading = false;
   export let detailError: string | null = null;
   // Waiters PAR COUCHE : zones et lots ont chacun leur propre état
@@ -942,7 +950,13 @@
           {:else if detailError}
             <p class="sel-empty">Projection des signaux indisponible.</p>
           {:else if filteredDetailNodes.length === 0}
-            <p class="sel-empty">Aucun signal indexé pour cette ville.</p>
+            <!-- Des signaux existent mais la plage de dates / les filtres les
+                 masquent tous : ne pas prétendre que la ville n'a rien d'indexé. -->
+            <p class="sel-empty">
+              {unfilteredSignalCount > 0
+                ? "Aucun signal dans la plage de dates sélectionnée."
+                : "Aucun signal indexé pour cette ville."}
+            </p>
           {:else}
             {#each filteredDetailNodes as node (node.id)}
               {@const key = signalKey(node)}
