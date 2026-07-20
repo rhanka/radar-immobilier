@@ -188,7 +188,29 @@
 
   // ── Compteur actif par ville = compte bulk de la clé LIVE ──────────────────
   /**
-   * Helper non-réactif : compte d'une ville pour la clé LIVE donnée.
+   * Compte BULK serveur d'une ville pour la clé LIVE donnée (`null` seulement
+   * si les données sont indisponibles → badge « n/d »).
+   *
+   * C'est le SEUL compte admis pour l'APPARTENANCE et le TRI de la liste : il
+   * ne varie ni pendant un fetch détail ni avec les lentilles client (axes,
+   * exclusions B, plage de dates), donc une ligne — sélectionnée ou non — ne
+   * saute jamais de position et n'est jamais éjectée par la coupe au plafond
+   * (régression #378 : le compte live de la ville sélectionnée participait au
+   * tri → re-tri en bas + coupe au plafond dès la fin du fetch).
+   */
+  function bulkCountFor(
+    entry: CityMapEntry,
+    key: string,
+    unavailable: boolean,
+  ): number | null {
+    if (unavailable) return null;
+    return countForVivierCity(entry, key);
+  }
+
+  /**
+   * Helper non-réactif : compte AFFICHÉ d'une ville pour la clé LIVE donnée.
+   * Réservé aux BADGES et aux compteurs agrégés de l'en-tête — jamais au tri
+   * ni au filtre d'appartenance (cf. `bulkCountFor`).
    *
    * Pour toute ville AUTRE que `selectedSlug`, le compte reste le bulk serveur :
    * sélectionner une ville ne doit jamais faire varier (ni suspendre) le compte
@@ -221,21 +243,29 @@
   // ── Liste de villes (la recherche + le plafond vivent dans RailCityList) ──
   // #5 — garder la ville sélectionnée même si son compte pour le filtre actif
   // est 0 (elle reste visible/désélectionnable dans le rail).
+  // #378 — appartenance et TRI par compte BULK uniquement : le compte live de
+  // la ville sélectionnée ne participe JAMAIS à l'ordre (sinon sa ligne saute
+  // ou disparaît à la fin du fetch détail).
   $: sortedEntries = entries
     .filter((e) => {
       const isSelected =
         selectedSlug !== null && e.municipality.slug === selectedSlug;
-      return (
-        (countFor(e, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? 0) > 0 ||
-        isSelected
-      );
+      return (bulkCountFor(e, activeKey, dataUnavailable) ?? 0) > 0 || isSelected;
     })
     .sort((a, b) =>
-      (countFor(b, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? -1) -
-      (countFor(a, activeKey, dataUnavailable, selectedCityLiveCount, selectedSlug) ?? -1)
+      (bulkCountFor(b, activeKey, dataUnavailable) ?? -1) -
+      (bulkCountFor(a, activeKey, dataUnavailable) ?? -1)
     );
 
-  /** Projection générique consommée par la liste partagée RailCityList. */
+  /**
+   * Projection générique consommée par la liste partagée RailCityList.
+   *
+   * Badge de la ville SÉLECTIONNÉE quand son compte live est plus étroit que le
+   * bulk : « live/bulk » (ex. « 1/4 ») — le compte affiché reste honnête sans
+   * jamais laisser croire que des signaux ont disparu. Un live ≥ bulk (axes
+   * relâchés au-delà du compte serveur) s'affiche seul : le bulk n'est plus un
+   * dénominateur signifiant.
+   */
   function toRailItem(
     entry: CityMapEntry,
     key: string,
@@ -243,7 +273,10 @@
     liveCount: number | null,
     liveSlug: string | null,
   ): RailCityItem {
+    const bulkCount = bulkCountFor(entry, key, unavailable);
     const activeCount = countFor(entry, key, unavailable, liveCount, liveSlug);
+    const isNarrowedLive =
+      activeCount !== null && bulkCount !== null && activeCount < bulkCount;
     return {
       slug: entry.municipality.slug,
       name: entry.municipality.name,
@@ -252,6 +285,12 @@
       badge:
         activeCount === null
           ? { label: "n/d", tone: "neutral" }
+          : isNarrowedLive
+          ? {
+              label: `${activeCount}/${bulkCount}`,
+              tone: activeCount > 0 ? "warning" : "neutral",
+              ariaLabel: `${activeCount} signaux affichés sur ${bulkCount} au total`,
+            }
           : activeCount > 0
           ? {
               label: String(activeCount),

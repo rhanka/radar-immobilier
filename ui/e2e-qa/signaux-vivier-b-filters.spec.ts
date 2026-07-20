@@ -179,20 +179,23 @@ test.describe("Signaux — tab Vivier B (rendu réel)", () => {
   test("2 — le badge de la ville SÉLECTIONNÉE suit les exclusions, jamais le bulk figé", async ({
     page,
   }) => {
+    const badge = cityRow(page, "Westmount").locator(".st-badge");
     await cityRow(page, "Westmount").click();
 
-    // Défaut : les 2 exclusions actives → seul le rezonage visible (1).
-    // Le bulk serveur (vivierV2Counts.qualified = 3) ne doit PLUS être affiché
-    // sur la ligne une fois la ville sélectionnée : c'est le bug « Westmount 5 ».
-    await expect(cityRow(page, "Westmount")).toContainText("1");
-    await expect(cityRow(page, "Westmount")).not.toContainText("3");
+    // Défaut : les 2 exclusions actives → seul le rezonage visible (1). Le
+    // bulk serveur (vivierV2Counts.qualified = 3) ne doit PLUS être affiché
+    // SEUL une fois la ville sélectionnée (bug « Westmount 5 ») : le badge
+    // HONNÊTE montre « affiché/bulk » (1/3), jamais un « 3 » figé ni un « 1 »
+    // inexpliqué.
+    await expect(badge).toHaveText("1/3");
 
     await checkbox(page, "Exclure PIIA sans projet résidentiel").uncheck();
-    await expect(cityRow(page, "Westmount")).toContainText("2");
+    await expect(badge).toHaveText("2/3");
 
     await checkbox(page, "Exclure dérogations mineures").uncheck();
-    // Sans aucune exclusion, le badge converge vers le bulk (3 = 3 nœuds qualifiés).
-    await expect(cityRow(page, "Westmount")).toContainText("3");
+    // Sans aucune exclusion, le badge converge vers le bulk (3 = 3 nœuds
+    // qualifiés) — plus de dénominateur quand rien n'est masqué.
+    await expect(badge).toHaveText("3");
   });
 
   test("3 — un axe basculé (Précoce décoché) persiste au clic d'une autre ville", async ({
