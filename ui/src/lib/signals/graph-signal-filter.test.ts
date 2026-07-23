@@ -182,6 +182,22 @@ describe("nodeMatchesSubset", () => {
     expect(nodeMatchesSubset(plainNode, "p")).toBe(false);
   });
 
+  it("keeps the server legacy early-stage decision when a B-prime annotation is empty", () => {
+    const emptyAnnotation = makeNode({
+      id: "legacy-empty-annotation",
+      label: "Avis de motion — annotation vide",
+      props: { category: "rezonage", etape: "" },
+      legacySubset: {
+        version: "legacy-zmp-v1",
+        signalId: "legacy-empty-annotation",
+        flags: { z: true, m: true, p: true },
+      },
+    });
+
+    // A's server contract derives precocity from the label when `etape` is empty.
+    expect(nodeMatchesSubset(emptyAnnotation, "z|p")).toBe(true);
+  });
+
   it('"r" → masque le bruit non résidentiel, garde résidentiel + indéterminé', () => {
     const residentiel = makeNode({ label: "Rezonage résidentiel" });
     const industriel = makeNode({ label: "Parc industriel" });
