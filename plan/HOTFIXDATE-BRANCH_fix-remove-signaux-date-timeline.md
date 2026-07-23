@@ -38,6 +38,6 @@ Remove the Signaux date range controls and their client-side filtering pipeline 
   - [x] Delete date-only component, utility, harness, and tests.
   - [x] Add regressions for both tabs and dated/undated signals.
 
-- [ ] **Lot 2 — Verify and publish**
+- [x] **Lot 2 — Verify and publish**
   - [x] Run focused UI tests, typecheck, and diff check.
-  - [ ] Commit, push, open a PR, and verify CI.
+  - [x] Commit, push, open a PR, and verify CI.
