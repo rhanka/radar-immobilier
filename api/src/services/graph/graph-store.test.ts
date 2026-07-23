@@ -140,6 +140,77 @@ describe("Coaticook immutable legacy projection", () => {
   });
 });
 
+describe("B-prime residential-axis counts", () => {
+  it("preserves legacy z|m|p counts while excluding commercial noise only from r", () => {
+    const rows = [
+      {
+        id: "early",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Avis de motion — projet résidentiel",
+        etapeAnnote: "avis_motion",
+        props: { properties: { category: "rezonage", etape: "avis_motion" } },
+        sourceRef: null,
+      },
+      {
+        id: "invalid-annotation",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Avis de motion — annotation invalide",
+        etapeAnnote: "",
+        props: { properties: { category: "rezonage", etape: "" } },
+        sourceRef: null,
+      },
+      {
+        id: "industrial",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Densification du parc industriel",
+        etapeAnnote: "avis_motion",
+        props: { properties: { category: "rezonage", etape: "avis_motion" } },
+        sourceRef: null,
+      },
+      {
+        id: "regional-pole",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Pôle commercial régional — projet résidentiel",
+        etapeAnnote: "avis_motion",
+        props: {
+          properties: { category: "rezonage", etape: "avis_motion" },
+          extrait: "Pôle commercial régional",
+        },
+        sourceRef: "pv-42",
+      },
+    ];
+
+    const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
+
+    expect(aggregate.signalCount).toBe(4);
+    // Legacy A is immutable: commercial/industrial records stay in z|m|p.
+    expect(aggregate.subsetCounts[""]).toBe(4);
+    expect(aggregate.subsetCounts["z"]).toBe(4);
+    expect(aggregate.subsetCounts["p"]).toBe(4);
+    expect(aggregate.subsetCounts["z|p"]).toBe(4);
+    // B′ exclusion applies to B's shared classification and to r intersections.
+    expect(aggregate.subsetCounts["r"]).toBe(2);
+    expect(aggregate.subsetCounts["z|r"]).toBe(2);
+    expect(aggregate.subsetCounts["p|r"]).toBe(2);
+    expect(aggregate.subsetCounts["z|p|r"]).toBe(2);
+    expect(aggregate.vivierV2Counts).toMatchObject({
+      qualified: 1,
+      excludedByReason: { non_residentiel_franc: 2 },
+      total: 4,
+    });
+    // Empty annotations keep A's historic fallback to label-derived precocity.
+    expect(isPrecoceSignal("", "Avis de motion — annotation invalide", null)).toBe(true);
+  });
+});
+
 describe("buildEdgeRow", () => {
   it("maps graphify link to DB edge row", () => {
     const link: GraphifyLink = {
@@ -1091,7 +1162,7 @@ describe("isPrecoceSignal", () => {
   it("fallback sur deriveEtape quand etapeAnnote est null", () => {
     expect(isPrecoceSignal(null, "avis de motion séance du 5 mars", null)).toBe(true);
   });
-  it("fallback sur deriveEtape quand etapeAnnote est vide", () => {
+  it("falls back to label-derived precocity for an empty annotation (legacy A contract)", () => {
     expect(isPrecoceSignal("", "projet de règlement 2025", null)).toBe(true);
   });
   it("retourne false si ni annotation ni mots-clés précoces", () => {
