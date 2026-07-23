@@ -4,9 +4,8 @@
  * Vérifie :
  *   1. nodeIsZonage : DesignationEvent → toujours zonage ; Signal avec
  *      catégorie dans ZONAGE_CATEGORIES → zonage ; Signal sans catégorie → non.
- *   2. nodeMatchesSubset : key="" → tout passe ; "z" → seulement zonage ;
- *      "z|p" → intersection ; "p" → tout passe
- *      (heuristique non masquante).
+ *   2. nodeMatchesSubset : key="" → no B-prime exclusion ; "z" → zonage ;
+ *      "z|p" → intersection ; "p" → étape précoce.
  *   3. filterNodesBySubset : même référence si key="" ; filtre correct sinon.
  *
  * Aucun docker, aucune API, aucun composant Svelte.
@@ -16,6 +15,7 @@ import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   nodeIsZonage,
   nodeIsResidentielPertinent,
+  nodeBPrimeClassification,
   nodeMatchesSubset,
   filterNodesBySubset,
 } from "./graph-signal-filter.js";
@@ -168,9 +168,18 @@ describe("nodeMatchesSubset", () => {
     expect(nodeMatchesSubset(zonageNode, "z|m")).toBe(true);
   });
 
-  it('"p" → tout passe (heuristique non masquante)', () => {
-    expect(nodeMatchesSubset(plainNode, "p")).toBe(true);
-    expect(nodeMatchesSubset(zonageNode, "p")).toBe(true);
+  it('"p" → garde seulement les étapes précoces, avec annotation prioritaire', () => {
+    const annotated = makeNode({
+      label: "Adoption du règlement",
+      props: { etape: "avis_motion" },
+    });
+    const invalid = makeNode({
+      label: "Avis de motion",
+      props: { etape: "instrument: refonte" },
+    });
+    expect(nodeMatchesSubset(annotated, "p")).toBe(true);
+    expect(nodeMatchesSubset(invalid, "p")).toBe(false);
+    expect(nodeMatchesSubset(plainNode, "p")).toBe(false);
   });
 
   it('"r" → masque le bruit non résidentiel, garde résidentiel + indéterminé', () => {
@@ -192,10 +201,35 @@ describe("nodeMatchesSubset", () => {
     expect(nodeMatchesSubset(zonageResidentiel, "z|r")).toBe(true);
   });
 
-  it('"z|p" → zonage uniquement, car p est non masquant côté client', () => {
-    expect(nodeMatchesSubset(deNode, "z|p")).toBe(true);
-    expect(nodeMatchesSubset(zonageNode, "z|p")).toBe(true);
+  it('"z|p" → intersection zonage et étape précoce', () => {
+    const earlyDesignation = makeNode({ type: "DesignationEvent", props: { etape: "avis_motion" } });
+    const earlyZonage = makeNode({ props: { category: "rezonage", etape: "projet_reglement" } });
+    expect(nodeMatchesSubset(earlyDesignation, "z|p")).toBe(true);
+    expect(nodeMatchesSubset(earlyZonage, "z|p")).toBe(true);
     expect(nodeMatchesSubset(plainNode, "z|p")).toBe(false);
+  });
+
+  it("excludes commercial/industrial signals and regional commercial poles from B while retaining their classification", () => {
+    const industrial = makeNode({
+      label: "Densification du parc industriel",
+      props: { category: "rezonage", etape: "avis_motion" },
+    });
+    const regionalPole = makeNode({
+      label: "Pôle commercial régional — projet résidentiel",
+      props: { category: "rezonage", etape: "avis_motion", extrait: "Pôle commercial régional" },
+      sourceRef: "pv-42",
+    });
+    // A legacy z|m|p stays unchanged; B′ exclusions apply only to axis r.
+    expect(nodeMatchesSubset(regionalPole, "")).toBe(true);
+    expect(nodeMatchesSubset(industrial, "z|p")).toBe(true);
+    expect(nodeMatchesSubset(regionalPole, "z|p")).toBe(true);
+    expect(nodeMatchesSubset(industrial, "z|p|r")).toBe(false);
+    expect(nodeMatchesSubset(regionalPole, "z|p|r")).toBe(false);
+    expect(nodeBPrimeClassification(regionalPole)).toMatchObject({
+      residentiel: "non",
+      exclusionReason: "pole_commercial_regional",
+      provenance: { extrait: "Pôle commercial régional", source: "pv-42" },
+    });
   });
 });
 
@@ -203,9 +237,9 @@ describe("nodeMatchesSubset", () => {
 
 describe("filterNodesBySubset", () => {
   const nodes: GraphSignalNode[] = [
-    signalWithCategory("rezonage"),
+    makeNode({ props: { category: "rezonage", etape: "avis_motion" } }),
     makeNode({ id: "n2", props: { category: "vente" } }),
-    makeNode({ id: "n4", props: { category: "rezonage", nb_unites_max: 8 } }),
+    makeNode({ id: "n4", props: { category: "rezonage", nb_unites_max: 8, etape: "avis_motion" } }),
   ];
 
   it('key="" → retourne le même tableau (même référence)', () => {
@@ -225,7 +259,7 @@ describe("filterNodesBySubset", () => {
     expect(result).toHaveLength(nodes.length);
   });
 
-  it('"z|p" → garde les nœuds zonage, p restant non masquant', () => {
+  it('"z|p" → garde les nœuds zonage aux étapes précoces', () => {
     const result = filterNodesBySubset(nodes, "z|p");
     expect(result).toHaveLength(2);
     expect(result.map((n) => n.id)).toContain("test-node");
