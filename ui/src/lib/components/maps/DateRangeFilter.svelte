@@ -106,13 +106,4 @@
     padding: 0;
   }
 
-  /* Presets compacts, cohérents avec la densité du rail. */
-  .date-range-filter :global(.st-button) {
-    --st-component-button-fontSize: var(--rail-fs-small, 0.75rem);
-  }
-
-  .date-range-filter :global(.st-datepicker),
-  .date-range-filter :global(.st-field) {
-    --st-component-datepicker-fontSize: var(--rail-fs-small, 0.75rem);
-  }
 </style>
