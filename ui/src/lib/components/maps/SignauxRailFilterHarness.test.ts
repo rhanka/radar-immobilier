@@ -56,6 +56,19 @@ function axisBoxes(container: HTMLElement): HTMLInputElement[] {
 }
 
 describe("Vivier B filter pipeline — rail toggles change the visible count", () => {
+  it("keeps old and undated signals when the other B filters admit them", () => {
+    const detailNodes = [
+      node("old", "rezonage", { props: { etape_date: "2020-01-01" } }),
+      node("recent", "rezonage", { props: { etape_date: "2026-07-20" } }),
+      node("undated", "rezonage"),
+    ];
+    const { getByTestId } = render(Harness, {
+      props: { detailNodes, initialSubsetKey: "vivier-v2" },
+    });
+
+    expect(getByTestId("visible-count").textContent).toBe("3");
+  });
+
   it("m1.7 — unchecking each exclusion re-reveals the hidden signals", async () => {
     const detailNodes = [
       node("rezonage-qualifie", "rezonage"),
