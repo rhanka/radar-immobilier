@@ -18,6 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
+import { classifyBPrime } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -1354,15 +1355,19 @@ export function classifyGraphNodeLegacyZmp(
 /**
  * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
  *
- * Préfère le champ annoté `etape` (v2.1) quand présent dans
- * props->'properties'->>'etape'. Sinon fallback sur deriveEtape(label, description).
+ * Une annotation explicite est prioritaire. Une annotation malformée reste
+ * `inconnu`, au lieu d'être silencieusement remplacée par une inférence texte.
  */
 export function isPrecoceSignal(
   etapeAnnote: string | null | undefined,
   label: string | null | undefined,
   description: string | null | undefined,
 ): boolean {
-  const etape = (etapeAnnote?.trim() || undefined) ?? deriveEtape(label, description);
+  const etape = classifyBPrime({
+    etapeAnnotation: etapeAnnote,
+    label,
+    description,
+  }).etape;
   return etape === "avis_motion" || etape === "projet_reglement";
 }
 
@@ -1410,6 +1415,7 @@ export function aggregateGraphSignalProjectionRows(
     subsetCounts: Record<SubsetKey, number>;
     signals: VivierSignalInput[];
     legacySignals: VivierSignalInput[];
+    bPrimeEligibleSignals: VivierSignalInput[];
   }>();
 
   for (const row of rows) {
@@ -1420,11 +1426,12 @@ export function aggregateGraphSignalProjectionRows(
         subsetCounts: emptySubsetCounts(),
         signals: [],
         legacySignals: [],
+        bPrimeEligibleSignals: [],
       });
     }
     const entry = byCity.get(row.citySlug)!;
     entry.signalCount += 1;
-    entry.signals.push({
+    const signal: VivierSignalInput = {
       id: row.id,
       type: row.type,
       category: row.category ?? null,
@@ -1435,8 +1442,21 @@ export function aggregateGraphSignalProjectionRows(
       intensite: row.intensite ?? null,
       props: row.props,
       sourceRef: row.sourceRef,
-    });
+    };
+    entry.signals.push(signal);
+
+    // Legacy A (z|m|p) is derived from the full projection. B′ only gates
+    // the new residential axis `r`; it must not rewrite legacy membership.
     entry.legacySignals.push(extractLegacyZmpInput(row));
+    const bPrimeEligible = classifyBPrime({
+      category: row.category ?? null,
+      label: row.label,
+      description: row.description ?? null,
+      etapeAnnotation: row.etapeAnnote ?? null,
+      props: row.props as Record<string, unknown>,
+      sourceRef: row.sourceRef,
+    }).exclusionReason === null;
+    if (bPrimeEligible) entry.bPrimeEligibleSignals.push(signal);
   }
 
   return Array.from(byCity.entries()).map(([citySlug, data]) => {
@@ -1445,9 +1465,9 @@ export function aggregateGraphSignalProjectionRows(
       data.subsetCounts[key] = legacySubsetCounts[key];
     }
 
-    // Preserve the existing r intersections while keeping the z|m|p rail
-    // exactly equal to computeLegacySubsetCounts on this same input.
-    for (const signal of data.signals) {
+    // B-prime exclusions gate the active legacy subsets and r intersections;
+    // vivier_v2 remains computed from the complete source projection below.
+    for (const signal of data.bPrimeEligibleSignals) {
       const r = isResidentielPertinent(
         signal.category ?? signal.etape,
         signal.label ?? null,

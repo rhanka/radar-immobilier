@@ -140,6 +140,58 @@ describe("Coaticook immutable legacy projection", () => {
   });
 });
 
+describe("B-prime residential-axis counts", () => {
+  it("preserves legacy z|m|p counts while excluding commercial noise only from r", () => {
+    const rows = [
+      {
+        id: "early",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Avis de motion — projet résidentiel",
+        etapeAnnote: "avis_motion",
+        props: { properties: { category: "rezonage", etape: "avis_motion" } },
+        sourceRef: null,
+      },
+      {
+        id: "invalid-annotation",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Avis de motion — annotation invalide",
+        etapeAnnote: "",
+        props: { properties: { category: "rezonage", etape: "" } },
+        sourceRef: null,
+      },
+      {
+        id: "industrial",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Densification du parc industriel",
+        etapeAnnote: "avis_motion",
+        props: { properties: { category: "rezonage", etape: "avis_motion" } },
+        sourceRef: null,
+      },
+    ];
+
+    const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
+
+    expect(aggregate.signalCount).toBe(3);
+    // Legacy A is immutable: commercial/industrial records stay in z|m|p.
+    expect(aggregate.subsetCounts[""]).toBe(3);
+    expect(aggregate.subsetCounts["z"]).toBe(3);
+    expect(aggregate.subsetCounts["p"]).toBe(2);
+    expect(aggregate.subsetCounts["z|p"]).toBe(2);
+    // B′ exclusion is observable only through the new `r` axis.
+    expect(aggregate.subsetCounts["r"]).toBe(2);
+    expect(aggregate.subsetCounts["z|r"]).toBe(2);
+    expect(aggregate.subsetCounts["p|r"]).toBe(1);
+    expect(aggregate.subsetCounts["z|p|r"]).toBe(1);
+    expect(aggregate.vivierV2Counts.total).toBe(3);
+  });
+});
+
 describe("buildEdgeRow", () => {
   it("maps graphify link to DB edge row", () => {
     const link: GraphifyLink = {
@@ -1091,8 +1143,8 @@ describe("isPrecoceSignal", () => {
   it("fallback sur deriveEtape quand etapeAnnote est null", () => {
     expect(isPrecoceSignal(null, "avis de motion séance du 5 mars", null)).toBe(true);
   });
-  it("fallback sur deriveEtape quand etapeAnnote est vide", () => {
-    expect(isPrecoceSignal("", "projet de règlement 2025", null)).toBe(true);
+  it("audite une annotation vide au lieu d'inférer une étape", () => {
+    expect(isPrecoceSignal("", "projet de règlement 2025", null)).toBe(false);
   });
   it("retourne false si ni annotation ni mots-clés précoces", () => {
     expect(isPrecoceSignal(null, "adoption du règlement 456", null)).toBe(false);
