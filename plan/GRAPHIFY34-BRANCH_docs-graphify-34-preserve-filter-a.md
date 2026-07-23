@@ -38,6 +38,7 @@ Record the Graphify 3.4 release gate that preserves the legacy Filter A (`z|m|p`
 
 - [x] `review` — addendum claims were checked against `SPEC_EVOL_FILTRAGE_VIVIER_v2.md`: the two modes, shadow projection, atomic cutover, replay gap, and 3.x/v2.x numbering gap are accurately represented.
 - [x] `policy` — PR #406 audit at `88d189be61da04b227c94fd602d20f53046eb5cb` identified this missing branch plan and a French PR title; this plan is the first correction and the title is handled in Lot 2.
+- [x] `BRGRAPHIFY34-EX1` — Reason: make the Filter A preservation gate a canonical Graphify 3.4 merge gate; impact: add a normative reference only in `docs/spec/SPEC_EVOL_FILTRAGE_VIVIER_v2.md`; rollback: remove that reference while retaining the consensus addendum.
 
 ## Orchestration Mode (AI-selected)
 
@@ -65,6 +66,8 @@ Record the Graphify 3.4 release gate that preserves the legacy Filter A (`z|m|p`
   - [x] Confirm PR #406 originally changed only the consensus addendum (+67/-0) and has no comments, reviews, or review threads.
   - [x] Confirm CI run `30005229974` and Branch policy run `30005229866` succeeded on `88d189be61da04b227c94fd602d20f53046eb5cb`.
   - [x] Add this branch plan to satisfy the mandatory scoped-plan policy.
+  - [x] Declare `BRGRAPHIFY34-EX1` before adding the canonical normative reference to the Filter A addendum.
+  - [x] Link the canonical Graphify 3.4 section to the addendum and prohibit cutover until its Filter A gate is green.
   - [x] Commit and push this plan through the existing branch as `4bddac0702d4b52fb970569eec347bad52bdefd2`.
   - [x] Retitle PR #406 in English: `docs(graphify): make legacy A preservation blocking in 3.4`.
   - [ ] Recheck the new-SHA CI, branch-policy result, and required approval before merge.
