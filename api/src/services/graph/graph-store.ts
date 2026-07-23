@@ -1364,9 +1364,9 @@ export function isPrecoceSignal(
   description: string | null | undefined,
 ): boolean {
   const etape = classifyBPrime({
-    etapeAnnotation: etapeAnnote,
-    label,
-    description,
+    etapeAnnotation: etapeAnnote ?? null,
+    label: label ?? null,
+    description: description ?? null,
   }).etape;
   return etape === "avis_motion" || etape === "projet_reglement";
 }
