@@ -6,10 +6,11 @@
  * Drives the real SignauxRail UI through a harness that mirrors the parent's
  * displayed-list pipeline (projection → date lens → B exclusions).
  */
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import Harness from "./SignauxRailDateFilterHarness.svelte";
 import SignauxRail from "./SignauxRail.svelte";
+import DateRangeFilter from "./DateRangeFilter.svelte";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 
 afterEach(() => cleanup());
@@ -42,15 +43,16 @@ function datedNode(id: string, monthsAgo: number): GraphSignalNode {
 }
 
 /**
- * Preset buttons of the (single) active-panel DateRangeFilter. Only the presets
- * carry `aria-pressed`; the DatePicker trigger button does not — so this scopes
- * cleanly to the segmented presets.
+ * Only the segmented presets carry `aria-pressed`; the DatePicker trigger does
+ * not. This selects the accessible control state without coupling to DS markup.
  */
 function presetButtons(container: HTMLElement): HTMLButtonElement[] {
+  const group = container.querySelector<HTMLElement>(
+    '[role="group"][aria-label="Plage de dates"]',
+  );
+  if (!group) throw new Error("date range group not found");
   return Array.from(
-    container.querySelectorAll<HTMLButtonElement>(
-      ".date-range-filter button[aria-pressed]",
-    ),
+    group.querySelectorAll<HTMLButtonElement>("button[aria-pressed]"),
   );
 }
 function presetByLabel(container: HTMLElement, label: string): HTMLButtonElement {
@@ -115,6 +117,27 @@ describe("m2 — DateRangeFilter reduces the displayed list", () => {
 });
 
 describe("m2 — DateRangeFilter parity across A and B panels", () => {
+  it("exposes labelled DS controls and emits a preset range from an open range", async () => {
+    const onChange = vi.fn();
+    const { container } = render(DateRangeFilter, {
+      props: { value: { start: null, end: null }, onChange },
+    });
+
+    expect(container.querySelector('[aria-label="Plage de dates"]')).not.toBeNull();
+    expect(presetButtons(container)).toHaveLength(3);
+    expect(presetByLabel(container, "3 mois").getAttribute("aria-pressed")).toBe("false");
+    expect(presetByLabel(container, "6 mois").getAttribute("aria-pressed")).toBe("false");
+    expect(presetByLabel(container, "12 mois").getAttribute("aria-pressed")).toBe("false");
+
+    await fireEvent.click(presetByLabel(container, "6 mois"));
+
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(onChange.mock.calls[0][0]).toMatchObject({
+      start: expect.any(Date),
+      end: expect.any(Date),
+    });
+  });
+
   it("renders the same 3/6/12 presets in panel A", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [], initialSubsetKey: "z|m|p" },
