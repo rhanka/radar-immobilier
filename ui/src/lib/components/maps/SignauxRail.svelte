@@ -26,8 +26,8 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, Tabs } from "@sentropic/design-system-svelte";
-  import type { TabItem } from "@sentropic/design-system-svelte";
+  import { Checkbox, DatePicker, Tabs } from "@sentropic/design-system-svelte";
+  import type { DatePickerRange } from "@sentropic/design-system-svelte";
   import {
     aFlagsFromKey,
     bAxesFromVivierKey,
@@ -45,6 +45,11 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import {
+    defaultDateRange,
+    sameRange,
+    type SignalDateRange,
+  } from "$lib/signals/signal-date-filter.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -72,6 +77,9 @@
   /** Exclusions d'affichage de la vue B (cochées par défaut, décochables). */
   export let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
 
+  /** Parent-owned display lens shared by both Vivier tabs. */
+  export let dateRange: SignalDateRange = defaultDateRange();
+
   /**
    * m1.7 — Compte LIVE de `selectedSlug`, calculé par le parent sur les mêmes
    * nœuds détail que le panneau droit (`filteredDetailNodes.length` : axes +
@@ -95,6 +103,19 @@
   export let onFilterChange: (subsetKey: string) => void = () => {};
   /** Appelé quand une exclusion d'affichage de B est cochée/décochée. */
   export let onExclusionsChange: (next: VivierBExclusions) => void = () => {};
+  /** Called when the canonical DS temporal control changes its range. */
+  export let onDateRangeChange: (next: SignalDateRange) => void = () => {};
+
+  const today = new Date();
+  let lastDateRange: SignalDateRange = dateRange;
+  let pickedDateRange: DatePickerRange = { start: dateRange.start, end: dateRange.end };
+  $: if (!sameRange(dateRange, lastDateRange)) {
+    lastDateRange = dateRange;
+    pickedDateRange = { start: dateRange.start, end: dateRange.end };
+  }
+  $: if (!sameRange(pickedDateRange, dateRange)) {
+    onDateRangeChange({ start: pickedDateRange.start, end: pickedDateRange.end });
+  }
 
   function setExclusion(patch: Partial<VivierBExclusions>): void {
     exclusions = { ...exclusions, ...patch };
@@ -325,6 +346,15 @@
      Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
 {#snippet panelA()}
   <div class="vivier-panel">
+    <DatePicker
+      mode="range"
+      size="sm"
+      locale="fr-CA"
+      max={today}
+      label="Période des signaux"
+      placeholder="Choisir une période"
+      bind:value={pickedDateRange}
+    />
     <div class="vivier-toggles">
       <Checkbox
         label="Zonage"
@@ -347,6 +377,15 @@
 
 {#snippet panelB()}
   <div class="vivier-panel">
+    <DatePicker
+      mode="range"
+      size="sm"
+      locale="fr-CA"
+      max={today}
+      label="Période des signaux"
+      placeholder="Choisir une période"
+      bind:value={pickedDateRange}
+    />
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
