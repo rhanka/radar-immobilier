@@ -138,6 +138,11 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
+  import {
+    defaultDateRange,
+    filterNodesByEtapeDate,
+    type SignalDateRange,
+  } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
     lotLineColorExpression,
@@ -313,9 +318,11 @@
    * serveur ni les compteurs : elles ne font que masquer.
    */
   let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
+  let dateRange: SignalDateRange = defaultDateRange();
 
   /**
-   * Les nœuds réellement affichés : projection A/B, puis exclusions B.
+   * Visible nodes retain the server-authoritative A/B projection and apply the
+   * temporal lens only to its display result.
    *
    * La PROJECTION reste calculée sur la population brute AUTHORITATIVE : en A par
    * défaut (`z|m|p`), `projectLegacyVivierA` VALIDE le jeu contre les IDs exacts
@@ -326,10 +333,12 @@
     authority: unknown,
     subsetKey: string,
     exclusions: VivierBExclusions,
+    range: SignalDateRange,
   ): GraphSignalNode[] {
     const mode = modeFromSubsetKey(subsetKey);
     const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
-    return mode === "b" ? applyVivierBExclusions(projected, exclusions) : projected;
+    const dated = filterNodesByEtapeDate(projected, range);
+    return mode === "b" ? applyVivierBExclusions(dated, exclusions) : dated;
   }
 
   function applyActiveSubsetKey(subsetKey: string): void {
@@ -348,6 +357,7 @@
         detailLegacyProjection,
         activeSubsetKey,
         vivierBExclusions,
+        dateRange,
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
@@ -359,6 +369,12 @@
   function handleExclusionsChange(next: VivierBExclusions): void {
     vivierBExclusions = next;
     reconcileToVisibleNodes();
+  }
+
+  function handleDateRangeChange(next: SignalDateRange): void {
+    dateRange = next;
+    reconcileToVisibleNodes();
+    updateGeoLayers();
   }
 
   /**
@@ -531,8 +547,9 @@
     activeSubsetKey,
   );
   /**
-   * La liste affichée = la projection de la clé LIVE, puis (en B seulement) les
-   * exclusions d'affichage PUIS le tri déterministe `compareVivier`. Le retrait
+   * La liste affichée = la projection de la clé LIVE, puis la lentille
+   * temporelle, puis (en B seulement) les exclusions d'affichage et le tri
+   * déterministe `compareVivier`. Le retrait
    * du garde-fou `m` de A est compensé par la sous-sélection d'axes, sans jamais
    * reclasser un signal.
    *
@@ -541,11 +558,12 @@
    * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
+  $: dateScopedProjectionNodes = filterNodesByEtapeDate(detailProjection.nodes, dateRange);
   $: filteredDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
-        applyVivierBExclusions(detailProjection.nodes, vivierBExclusions),
+        applyVivierBExclusions(dateScopedProjectionNodes, vivierBExclusions),
       )
-    : detailProjection.nodes;
+    : dateScopedProjectionNodes;
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
@@ -1844,11 +1862,13 @@
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
+      {dateRange}
       {selectedCityLiveCount}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
+      onDateRangeChange={handleDateRangeChange}
     />
   </svelte:fragment>
 
