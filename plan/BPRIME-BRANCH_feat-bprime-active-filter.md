@@ -50,6 +50,7 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - Rollback: revert the isolated B′ overlay in `vivier-v2.ts` and its tests; no schema, migration, or client state changes are involved.
 - UI projection/counter regression: `make test-ui SCOPE=src/lib/signals/vivier-view-mode.test.ts API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` passed (18 tests).
 - Typecheck: `make typecheck API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` completed without TypeScript errors.
+- Focused API-test limitation: `make test-api SCOPE=src/services/graph/graph-store.test.ts API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` reaches the isolated test-stack dependency bootstrap but returns after image setup, before observable `npm ci`, migration, or Vitest output. It is unverified locally; PR Quality gates are authoritative.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** — the correction is one type-safe call-site normalization on the existing PR branch.
