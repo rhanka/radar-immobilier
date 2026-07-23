@@ -14,6 +14,7 @@ import {
   RequestTimeoutError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from "$lib/net/fetch-with-timeout.js";
+import type { BPrimeClassification } from "@radar/domain";
 
 export type EvidenceMissingField =
   | "description"
@@ -515,6 +516,7 @@ export interface GraphSignalNode {
   description?: string | null;
   publishedAt?: string | null;
   docRefs?: SignalDocRef[];
+  bPrime?: BPrimeClassification;
   props: Record<string, unknown>;
   evidence?: SignalEvidence;
   /**

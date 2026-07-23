@@ -7,6 +7,7 @@ import {
   isZonageSignal,
 } from "./graph-store.js";
 import {
+  classifyBPrime,
   countVivierClassifications,
   vivierV2Schema,
   type VivierCounts,
@@ -286,6 +287,43 @@ function exclusionFor(
   return null;
 }
 
+/**
+ * B′ adds a stricter residential exclusion without creating a second B
+ * projection. Existing Vivier-v2 exclusions remain authoritative because they
+ * retain their more specific reason; B′ only supplies the otherwise-missing
+ * exclusion for a record that Vivier-v2 still considers eligible.
+ */
+function applyBPrimeExclusion(
+  classification: VivierV2,
+  signal: VivierSignalInput,
+): VivierV2 {
+  if (classification.exclusion_reason !== null) return classification;
+
+  const bPrime = classifyBPrime({
+    category: signal.category ?? null,
+    label: signal.label ?? null,
+    description: signal.description ?? null,
+    etapeAnnotation: signal.etape ?? null,
+    props: record(signal.props),
+    sourceRef: signal.sourceRef ?? null,
+  });
+  if (bPrime.exclusionReason === null) return classification;
+
+  return vivierV2Schema.parse({
+    ...classification,
+    residentiel: {
+      valeur: "non",
+      source: "classifyBPrime",
+      confiance: 0.9,
+    },
+    // B's established wire contract has no B′-specific reason. Keep B′'s
+    // detailed reason on the graph card and map its exclusion to B's existing
+    // non-residential bucket, consumed by the projection and bulk counters.
+    exclusion_reason: "non_residentiel_franc",
+    confiance: Math.max(classification.confiance, 0.9),
+  });
+}
+
 export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
   const records = graphRecords(signal);
   const category = signal.category ?? firstString(records, ["category"]);
@@ -326,7 +364,7 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
     provenance,
     confiance: Math.max(0, Math.min(1, confidence)),
   });
-  return classification;
+  return applyBPrimeExclusion(classification, signal);
 }
 
 export function computeVivierV2(
