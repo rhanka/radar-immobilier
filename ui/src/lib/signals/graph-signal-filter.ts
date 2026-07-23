@@ -117,6 +117,16 @@ export function nodeBPrimeClassification(node: GraphSignalNode): BPrimeClassific
   });
 }
 
+function legacyPrecoceFlag(node: GraphSignalNode): boolean | null {
+  const membership = node.legacySubset;
+  if (
+    membership?.version !== "legacy-zmp-v1" ||
+    membership.signalId !== node.id ||
+    typeof membership.flags?.p !== "boolean"
+  ) return null;
+  return membership.flags.p;
+}
+
 /**
  * Retourne true si le nœud passe le filtre défini par `subsetKey`.
  *
@@ -146,7 +156,11 @@ export function nodeMatchesSubset(
   if (flags.includes("r") && (
     bPrime.exclusionReason !== null || !nodeIsResidentielPertinent(node)
   )) return false;
-  if (flags.includes("p") && bPrime.etape !== "avis_motion" && bPrime.etape !== "projet_reglement") {
+  const isLegacyMode = !flags.includes("vivier-v2");
+  const isPrecoce = isLegacyMode
+    ? legacyPrecoceFlag(node) ?? (bPrime.etape === "avis_motion" || bPrime.etape === "projet_reglement")
+    : bPrime.etape === "avis_motion" || bPrime.etape === "projet_reglement";
+  if (flags.includes("p") && !isPrecoce) {
     return false;
   }
   return true;
