@@ -106,6 +106,21 @@ describe("SignauxRail — tabs A / B", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
+  it("does not render date-range controls in either A or B", async () => {
+    const { container } = renderRail();
+    const expectNoDateRangeControls = () => {
+      expect(container.querySelector('[aria-label="Plage de dates"]')).toBeNull();
+      expect(container.textContent).not.toContain("3 mois");
+      expect(container.textContent).not.toContain("6 mois");
+      expect(container.textContent).not.toContain("12 mois");
+      expect(container.textContent).not.toContain("Plage exacte");
+    };
+
+    expectNoDateRangeControls();
+    await fireEvent.click(getTabs(container)[1]!);
+    expectNoDateRangeControls();
+  });
+
   it("shows A's three combinable axes checked by default (z|m|p)", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
