@@ -64,6 +64,6 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - [x] Lot gate: `make typecheck API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` passed.
 
 - [ ] **Lot 2 — Publish and CI verification**
-  - [ ] Selectively stage only the call-site correction and this plan.
-  - [ ] Commit with `make commit`, push the existing branch, and inspect PR #405 checks.
+  - [x] Selectively stage only the call-site correction and this plan.
+  - [x] Commit with `make commit`, push the existing branch, and inspect PR #405 checks.
   - [ ] Confirm the Typecheck check is green; do not merge the PR.
