@@ -355,6 +355,35 @@ describe("GET /api/graph-signals/:city", () => {
     expect(body.nodes[0]!.props).toEqual({ reglement_number: "1234-56", zone_ref: "H-431" });
   });
 
+  it("returns the auditable B′ classification without mutating signal provenance", async () => {
+    const node = {
+      ...makeNode("sig-bprime", "drummondville", "Signal"),
+      sourceRef: "pv-42",
+      props: {
+        properties: {
+          category: "rezonage",
+          etape: "",
+          extrait: "Pôle commercial régional",
+        },
+      },
+      label: "Avis de motion — pôle commercial régional — projet résidentiel",
+    };
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as {
+      nodes: Array<{ props: Record<string, unknown>; bPrime: Record<string, unknown> }>;
+    };
+    expect(body.nodes[0]!.props).toEqual(node.props);
+    expect(body.nodes[0]!.bPrime).toMatchObject({
+      etape: "inconnu",
+      etapeAnnotation: { raw: "", valid: false },
+      exclusionReason: "pole_commercial_regional",
+      provenance: { extrait: "Pôle commercial régional", source: "pv-42" },
+      effetDensifiant: "inconnu",
+    });
+  });
+
   it("enriches node cards with description, citation, source PDF and document date", async () => {
     const store = new MemoryStore();
     const record = await seedPdf(store);
