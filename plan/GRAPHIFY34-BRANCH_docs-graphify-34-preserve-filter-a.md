@@ -65,8 +65,8 @@ Record the Graphify 3.4 release gate that preserves the legacy Filter A (`z|m|p`
   - [x] Confirm PR #406 originally changed only the consensus addendum (+67/-0) and has no comments, reviews, or review threads.
   - [x] Confirm CI run `30005229974` and Branch policy run `30005229866` succeeded on `88d189be61da04b227c94fd602d20f53046eb5cb`.
   - [x] Add this branch plan to satisfy the mandatory scoped-plan policy.
-  - [ ] Commit and push this plan through the existing branch.
-  - [ ] Retitle PR #406 in English: `docs(graphify): make legacy A preservation blocking in 3.4`.
+  - [x] Commit and push this plan through the existing branch as `4bddac0702d4b52fb970569eec347bad52bdefd2`.
+  - [x] Retitle PR #406 in English: `docs(graphify): make legacy A preservation blocking in 3.4`.
   - [ ] Recheck the new-SHA CI, branch-policy result, and required approval before merge.
 
 - [ ] **Lot 3 — Merge & close**
