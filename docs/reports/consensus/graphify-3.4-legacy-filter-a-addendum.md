@@ -35,8 +35,14 @@ change, or a UI interpretation.
    match each other.
 5. **Keep layers separate.** Graphify output, data projection, and UI
    presentation each receive their own receipt. The projection preserves the
-   legacy contract; the UI consumes it unchanged. Neither layer may recompute,
-   coerce, hide, reorder, or compensate for Filter A data.
+   legacy contract, and the UI receipt verifies that the unfiltered legacy
+   presentation consumes it unchanged. Graphify output and data projection may
+   not recompute, coerce, hide, reorder, or compensate for Filter A data.
+   User-controlled presentation lenses applied after the validated projection
+   are outside this invariant. In particular, the design-system temporal lens
+   is permitted in both A and B: it may narrow displayed nodes, display counts,
+   and map layers, but must not mutate the server-authoritative Filter A
+   projection, its counters or ordering, or its URL states.
 
 ## Cutover and rollback
 
