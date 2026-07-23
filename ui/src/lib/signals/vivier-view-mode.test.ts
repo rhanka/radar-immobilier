@@ -163,6 +163,54 @@ describe("Vivier A / B view contract", () => {
     expect(b.count).toBe(3);
   });
 
+  it("projects and counts the B-prime-normalized B payload", () => {
+    const regionalCommercialPole = node(
+      "regional-commercial-pole",
+      true,
+      true,
+      true,
+      classification("oui", "non", "non_residentiel_franc"),
+    );
+    regionalCommercialPole.bPrime = {
+      etape: "avis_motion",
+      residentiel: "non",
+      exclusionReason: "pole_commercial_regional",
+      provenance: { extrait: "Pôle commercial régional" },
+      effetDensifiant: "inconnu",
+    };
+
+    // The map/detail projection consumes the normalized server classification.
+    expect(projectNodesForVivierKey(
+      [regionalCommercialPole],
+      SUTTON_AUTHORITY,
+      "vivier-v2|-p",
+    )).toEqual({ available: true, count: 0, nodes: [] });
+    // The rail/map bulk counter reads the same active-B exclusion outcome.
+    expect(countForVivierCity({
+      subsetCounts: { "z|m|p": 1 },
+      vivierV2Counts: {
+        qualified: 0,
+        residentialUnknown: 0,
+        excludedByReason: {
+          non_residentiel_franc: 1,
+          piia_non_pertinent: 0,
+          hors_zonage: 0,
+          derogation_hors_sujet: 0,
+        },
+        stageCounts: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        total: 1,
+      },
+    }, "vivier-v2|-p")).toBe(0);
+  });
+
   it("projects A sub-selections by relaxing the composed axes", () => {
     // z|m|p (défaut) = la projection EXACTE validée par l'autorité serveur.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "z|m|p").nodes.map((n) => n.id))
