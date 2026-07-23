@@ -128,6 +128,31 @@ describe("server vivier_v2 computation", () => {
     expect(derogation.exclusion_reason).toBe("derogation_hors_sujet");
   });
 
+  it("routes B-prime commercial-regional exclusions through B without changing A", () => {
+    const regionalPole = signal({
+      id: "regional-pole",
+      category: "rezonage",
+      label: "Pôle commercial régional — projet résidentiel",
+      etape: "avis_motion",
+      nbUnitesMax: "8",
+      props: { extrait: "Pôle commercial régional", source_ref: "pv-42" },
+    });
+
+    const classification = classifyVivierSignal(regionalPole);
+    const counts = computeVivierV2([regionalPole]).counts;
+
+    // B′ must remove the regional commercial pole from B's qualification.
+    expect(classification.residentiel.valeur).toBe("non");
+    expect(classification.exclusion_reason).toBe("non_residentiel_franc");
+    expect(counts).toMatchObject({
+      qualified: 0,
+      excludedByReason: { non_residentiel_franc: 1 },
+      total: 1,
+    });
+    // The legacy A predicate is intentionally independent of B′.
+    expect(classifyLegacyZmpSignal(regionalPole).flags).toEqual({ z: true, m: true, p: true });
+  });
+
   it("computes v2 and legacy z|m|p counts from the same input", () => {
     const signals = [
       signal({ id: "qualified", category: "ppcmoi", nbUnitesMax: "8" }),

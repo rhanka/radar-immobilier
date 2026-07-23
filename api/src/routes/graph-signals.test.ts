@@ -372,7 +372,11 @@ describe("GET /api/graph-signals/:city", () => {
 
     const res = await freshRoute().request("/api/graph-signals/drummondville");
     const body = (await res.json()) as {
-      nodes: Array<{ props: Record<string, unknown>; bPrime: Record<string, unknown> }>;
+      nodes: Array<{
+        props: Record<string, unknown>;
+        bPrime: Record<string, unknown>;
+        classification: Record<string, unknown>;
+      }>;
     };
     expect(body.nodes[0]!.props).toEqual(node.props);
     expect(body.nodes[0]!.bPrime).toMatchObject({
@@ -381,6 +385,11 @@ describe("GET /api/graph-signals/:city", () => {
       exclusionReason: "pole_commercial_regional",
       provenance: { extrait: "Pôle commercial régional", source: "pv-42" },
       effetDensifiant: "inconnu",
+    });
+    // The same B′ exclusion is present on the active B wire classification.
+    expect(body.nodes[0]!.classification).toMatchObject({
+      residentiel: { valeur: "non", source: "classifyBPrime" },
+      exclusion_reason: "non_residentiel_franc",
     });
   });
 
