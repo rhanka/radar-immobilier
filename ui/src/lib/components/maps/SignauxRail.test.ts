@@ -1,6 +1,6 @@
 /** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, fireEvent, cleanup, getAllByRole } from "@testing-library/svelte";
+import { render, fireEvent, cleanup, getAllByRole, getByLabelText } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { VivierV2Counts } from "@radar/domain";
@@ -106,19 +106,19 @@ describe("SignauxRail — tabs A / B", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it("does not render date-range controls in either A or B", async () => {
+  it("renders the canonical temporal DatePicker in both A and B without retired presets", async () => {
     const { container } = renderRail();
-    const expectNoDateRangeControls = () => {
-      expect(container.querySelector('[aria-label="Plage de dates"]')).toBeNull();
+    const expectTemporalPicker = () => {
+      expect(container.textContent).toContain("Période des signaux");
+      expect(getByLabelText(container, "Période des signaux")).toBeInstanceOf(HTMLElement);
       expect(container.textContent).not.toContain("3 mois");
       expect(container.textContent).not.toContain("6 mois");
       expect(container.textContent).not.toContain("12 mois");
-      expect(container.textContent).not.toContain("Plage exacte");
     };
 
-    expectNoDateRangeControls();
+    expectTemporalPicker();
     await fireEvent.click(getTabs(container)[1]!);
-    expectNoDateRangeControls();
+    expectTemporalPicker();
   });
 
   it("shows A's three combinable axes checked by default (z|m|p)", () => {
