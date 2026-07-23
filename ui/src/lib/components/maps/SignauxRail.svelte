@@ -45,11 +45,6 @@
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
-  import {
-    defaultDateRange,
-    type SignalDateRange,
-  } from "$lib/signals/signal-date-filter.js";
-  import DateRangeFilter from "$lib/components/maps/DateRangeFilter.svelte";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
@@ -78,16 +73,9 @@
   export let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
 
   /**
-   * Plage de dates ACTIVE (défaut : 6 derniers mois). Portée par le parent (elle
-   * pilote la population de base de la carte + du détail) et rendue À
-   * L'IDENTIQUE dans les deux panneaux A/B pour garantir la parité.
-   */
-  export let dateRange: SignalDateRange = defaultDateRange();
-
-  /**
    * m1.7 — Compte LIVE de `selectedSlug`, calculé par le parent sur les mêmes
    * nœuds détail que le panneau droit (`filteredDetailNodes.length` : axes +
-   * exclusions B + plage de dates). `null` tant que ce compte n'est pas
+   * exclusions B). `null` tant que ce compte n'est pas
    * disponible (aucune ville sélectionnée, détail en cours de chargement, ou
    * projection serveur indisponible) → repli sur le compte bulk, comme avant.
    *
@@ -107,8 +95,6 @@
   export let onFilterChange: (subsetKey: string) => void = () => {};
   /** Appelé quand une exclusion d'affichage de B est cochée/décochée. */
   export let onExclusionsChange: (next: VivierBExclusions) => void = () => {};
-  /** Appelé quand la plage de dates change (preset ou plage custom). */
-  export let onDateRangeChange: (next: SignalDateRange) => void = () => {};
 
   function setExclusion(patch: Partial<VivierBExclusions>): void {
     exclusions = { ...exclusions, ...patch };
@@ -193,7 +179,7 @@
    *
    * C'est le SEUL compte admis pour l'APPARTENANCE et le TRI de la liste : il
    * ne varie ni pendant un fetch détail ni avec les lentilles client (axes,
-   * exclusions B, plage de dates), donc une ligne — sélectionnée ou non — ne
+   * exclusions B), donc une ligne — sélectionnée ou non — ne
    * saute jamais de position et n'est jamais éjectée par la coupe au plafond
    * (régression #378 : le compte live de la ville sélectionnée participait au
    * tri → re-tri en bas + coupe au plafond dès la fin du fetch).
@@ -219,7 +205,7 @@
    *
    * m1.7 — Pour la ville SÉLECTIONNÉE, quand `liveCount` est disponible (le
    * parent l'a calculé sur les mêmes nœuds détail que le panneau droit : axes
-   * + exclusions B + plage de dates), on l'utilise à la place du bulk : c'est
+   * + exclusions B), on l'utilise à la place du bulk : c'est
    * le seul badge où le client a déjà le détail nœud par nœud, donc le seul
    * qu'on peut faire correspondre EXACTEMENT à ce que l'utilisateur voit dans
    * la liste. `liveCount` reste `null` pendant le chargement (le parent ne
@@ -339,9 +325,6 @@
      Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
 {#snippet panelA()}
   <div class="vivier-panel">
-    <!-- m2 — PREMIER contrôle : plage de dates (population de base), au-dessus
-         de la ligne des axes. Miroir identique dans le panneau B. -->
-    <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
     <div class="vivier-toggles">
       <Checkbox
         label="Zonage"
@@ -364,9 +347,6 @@
 
 {#snippet panelB()}
   <div class="vivier-panel">
-    <!-- m2 — Miroir À L'IDENTIQUE du filtre de plage de dates du panneau A
-         (parité A/B) : premier contrôle, au-dessus des axes. -->
-    <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
