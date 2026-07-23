@@ -16,6 +16,7 @@
  */
 
 import { Hono } from "hono";
+import { classifyBPrime, type BPrimeClassification } from "@radar/domain";
 import {
   classifyGraphNodeLegacyZmp,
   classifyGraphNodeVivierV2,
@@ -79,6 +80,7 @@ export interface GraphSignalCard {
   evidence: SignalEvidence;
   classification: ReturnType<typeof classifyGraphNodeVivierV2>;
   legacySubset: ReturnType<typeof classifyGraphNodeLegacyZmp>;
+  bPrime: BPrimeClassification;
   props: Record<string, unknown>;
 }
 
@@ -86,6 +88,14 @@ function firstString(record: Record<string, unknown>, keys: readonly string[]): 
   for (const key of keys) {
     const value = record[key];
     if (typeof value === "string" && value.trim().length > 0) return value.trim();
+  }
+  return null;
+}
+
+function firstStringValue(record: Record<string, unknown>, keys: readonly string[]): string | null {
+  for (const key of keys) {
+    const value = record[key];
+    if (typeof value === "string") return value;
   }
   return null;
 }
@@ -389,12 +399,13 @@ function buildSignalCard(
     firstPublishedAt,
   );
   const properties = nestedProperties(props);
+  const description = nodeDescription(props);
   const classification = classifyGraphNodeVivierV2({
     id: node.id,
     type: node.type,
     category: firstString(properties, ["category"]) ?? firstString(props, ["category"]),
     label: node.label,
-    description: nodeDescription(props),
+    description,
     etapeAnnote: firstString(properties, ["etape"]) ?? firstString(props, ["etape"]),
     props,
     sourceRef: node.sourceRef,
@@ -406,6 +417,14 @@ function buildSignalCard(
     props,
     sourceRef: node.sourceRef,
   });
+  const bPrime = classifyBPrime({
+    category: firstString(properties, ["category"]) ?? firstString(props, ["category"]),
+    label: node.label,
+    description,
+    etapeAnnotation: firstStringValue(properties, ["etape"]) ?? firstStringValue(props, ["etape"]),
+    props,
+    sourceRef: node.sourceRef,
+  });
 
   return {
     id: node.id,
@@ -414,12 +433,13 @@ function buildSignalCard(
     citySlug: node.citySlug,
     sourceRef: node.sourceRef,
     createdAt: node.createdAt ? node.createdAt.toISOString() : null,
-    description: nodeDescription(props),
+    description,
     publishedAt: firstPublishedAt,
     docRefs,
     evidence,
     classification,
     legacySubset,
+    bPrime,
     props,
   };
 }

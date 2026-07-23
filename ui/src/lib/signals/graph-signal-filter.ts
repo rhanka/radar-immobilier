@@ -8,6 +8,7 @@
  * à partir des props du nœud.
  */
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
+import { classifyBPrime, type BPrimeClassification } from "@radar/domain";
 
 /** Miroir client des catégories de zonage (cf. ZONAGE_CATEGORIES serveur). */
 const ZONAGE_CATEGORIES_CLIENT = new Set([
@@ -98,15 +99,43 @@ export function nodeIsResidentielPertinent(node: GraphSignalNode): boolean {
   return true; // indéterminé → conservé
 }
 
+export function nodeBPrimeClassification(node: GraphSignalNode): BPrimeClassification {
+  if (node.bPrime) return node.bPrime;
+  const nested = nodeProps(node);
+  const category = typeof nested.category === "string" ? nested.category : null;
+  const etapeAnnotation = typeof nested.etape === "string" ? nested.etape : null;
+  const description = typeof node.description === "string"
+    ? node.description
+    : typeof nested.description === "string" ? nested.description : null;
+  return classifyBPrime({
+    category,
+    label: node.label,
+    description,
+    etapeAnnotation,
+    props: node.props,
+    sourceRef: node.sourceRef,
+  });
+}
+
+function legacyPrecoceFlag(node: GraphSignalNode): boolean | null {
+  const membership = node.legacySubset;
+  if (
+    membership?.version !== "legacy-zmp-v1" ||
+    membership.signalId !== node.id ||
+    typeof membership.flags?.p !== "boolean"
+  ) return null;
+  return membership.flags.p;
+}
+
 /**
  * Retourne true si le nœud passe le filtre défini par `subsetKey`.
  *
  * `subsetKey` est une clé combinant les axes actifs :
  *   ""     → aucun filtre, tout passe
  *   "z"    → zonage uniquement
- *   "p"    → signaux précoces (heuristique légère, ne masque pas)
+ *   "p"    → signaux précoces (annotation explicite prioritaire)
  *   "r"    → pertinence résidentielle (masque le bruit non résidentiel explicite)
- *   "z|p"  → intersection zonage ET signaux précoces (p reste non masquant)
+ *   "z|p"  → intersection zonage ET signaux précoces
  *   …etc.
  *
  * Les flags inconnus sont ignorés afin que d'anciennes clés persistées ne
@@ -116,14 +145,24 @@ export function nodeMatchesSubset(
   node: GraphSignalNode,
   subsetKey: string,
 ): boolean {
-  if (!subsetKey) return true;
-  const flags = subsetKey.split("|");
+  const flags = subsetKey ? subsetKey.split("|") : [];
+  const bPrime = nodeBPrimeClassification(node);
   if (flags.includes("z") && !nodeIsZonage(node)) return false;
-  // "r" (pertinence résidentielle) — retire UNIQUEMENT le bruit explicitement
-  // non résidentiel ; résidentiel + indéterminé passent (anti-faux-négatif).
-  if (flags.includes("r") && !nodeIsResidentielPertinent(node)) return false;
-  // "p" (précoce) — heuristique label/description trop complexe côté client,
-  // on retourne true pour ne pas masquer de signaux réels.
+  // B′ est l'implémentation de l'axe résidentiel `r`, pas une modification
+  // implicite des sous-ensembles legacy (z|m|p). Ainsi A conserve exactement
+  // ses membres lorsqu'il ne demande pas `r`.
+  // `r` retire le bruit explicitement non résidentiel et les pôles commerciaux
+  // régionaux; résidentiel + indéterminé passent (anti-faux-négatif).
+  if (flags.includes("r") && (
+    bPrime.exclusionReason !== null || !nodeIsResidentielPertinent(node)
+  )) return false;
+  const isLegacyMode = !flags.includes("vivier-v2");
+  const isPrecoce = isLegacyMode
+    ? legacyPrecoceFlag(node) ?? (bPrime.etape === "avis_motion" || bPrime.etape === "projet_reglement")
+    : bPrime.etape === "avis_motion" || bPrime.etape === "projet_reglement";
+  if (flags.includes("p") && !isPrecoce) {
+    return false;
+  }
   return true;
 }
 
@@ -135,6 +174,6 @@ export function filterNodesBySubset(
   nodes: GraphSignalNode[],
   subsetKey: string,
 ): GraphSignalNode[] {
-  if (!subsetKey) return nodes;
-  return nodes.filter((n) => nodeMatchesSubset(n, subsetKey));
+  const filtered = nodes.filter((n) => nodeMatchesSubset(n, subsetKey));
+  return filtered.length === nodes.length ? nodes : filtered;
 }
