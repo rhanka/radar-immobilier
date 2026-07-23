@@ -1355,19 +1355,16 @@ export function classifyGraphNodeLegacyZmp(
 /**
  * Détermine si l'étape d'un signal est « précoce » (avis_motion ou projet_reglement).
  *
- * Une annotation explicite est prioritaire. Une annotation malformée reste
- * `inconnu`, au lieu d'être silencieusement remplacée par une inférence texte.
+ * Preserve the legacy A predicate: prefer an annotated stage when present and
+ * otherwise derive it from the label/description. B′ has its own stage audit
+ * and must not change the persisted z|m|p membership contract.
  */
 export function isPrecoceSignal(
   etapeAnnote: string | null | undefined,
   label: string | null | undefined,
   description: string | null | undefined,
 ): boolean {
-  const etape = classifyBPrime({
-    etapeAnnotation: etapeAnnote ?? null,
-    label: label ?? null,
-    description: description ?? null,
-  }).etape;
+  const etape = (etapeAnnote?.trim() || undefined) ?? deriveEtape(label, description);
   return etape === "avis_motion" || etape === "projet_reglement";
 }
 
