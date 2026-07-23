@@ -173,22 +173,41 @@ describe("B-prime residential-axis counts", () => {
         props: { properties: { category: "rezonage", etape: "avis_motion" } },
         sourceRef: null,
       },
+      {
+        id: "regional-pole",
+        citySlug: "bprime",
+        type: "Signal",
+        category: "rezonage",
+        label: "Pôle commercial régional — projet résidentiel",
+        etapeAnnote: "avis_motion",
+        props: {
+          properties: { category: "rezonage", etape: "avis_motion" },
+          extrait: "Pôle commercial régional",
+        },
+        sourceRef: "pv-42",
+      },
     ];
 
     const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
 
-    expect(aggregate.signalCount).toBe(3);
+    expect(aggregate.signalCount).toBe(4);
     // Legacy A is immutable: commercial/industrial records stay in z|m|p.
-    expect(aggregate.subsetCounts[""]).toBe(3);
-    expect(aggregate.subsetCounts["z"]).toBe(3);
-    expect(aggregate.subsetCounts["p"]).toBe(2);
-    expect(aggregate.subsetCounts["z|p"]).toBe(2);
-    // B′ exclusion is observable only through the new `r` axis.
+    expect(aggregate.subsetCounts[""]).toBe(4);
+    expect(aggregate.subsetCounts["z"]).toBe(4);
+    expect(aggregate.subsetCounts["p"]).toBe(4);
+    expect(aggregate.subsetCounts["z|p"]).toBe(4);
+    // B′ exclusion applies to B's shared classification and to r intersections.
     expect(aggregate.subsetCounts["r"]).toBe(2);
     expect(aggregate.subsetCounts["z|r"]).toBe(2);
-    expect(aggregate.subsetCounts["p|r"]).toBe(1);
-    expect(aggregate.subsetCounts["z|p|r"]).toBe(1);
-    expect(aggregate.vivierV2Counts.total).toBe(3);
+    expect(aggregate.subsetCounts["p|r"]).toBe(2);
+    expect(aggregate.subsetCounts["z|p|r"]).toBe(2);
+    expect(aggregate.vivierV2Counts).toMatchObject({
+      qualified: 1,
+      excludedByReason: { non_residentiel_franc: 2 },
+      total: 4,
+    });
+    // Empty annotations keep A's historic fallback to label-derived precocity.
+    expect(isPrecoceSignal("", "Avis de motion — annotation invalide", null)).toBe(true);
   });
 });
 

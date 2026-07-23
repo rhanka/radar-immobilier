@@ -43,6 +43,11 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
 - Isolated environment: `API_PORT=8815`, `UI_PORT=5315`, `MAILDEV_UI_PORT=1115`, `ENV=test-bprime-active-filter`.
 - Local verification: the isolated full typecheck passed with zero TypeScript errors and seven existing Svelte warnings.
 - Scoped API-test evidence: the first `make test-api` attempt stopped in `npm ci` with `ENOTEMPTY` while removing `/workspace/ui/node_modules/pdfjs-dist`; it did not reach Vitest, and no Docker or Makefile change is in scope.
+- BPRIME-EX1 — permit the B′-to-active-B integration path:
+  - Paths: `api/src/services/graph/vivier-v2.ts`, `api/src/services/graph/vivier-v2.test.ts`, and `ui/src/lib/signals/vivier-view-mode.test.ts`.
+  - Rationale: the active B detail projection reads the server `vivier_v2` classification and the rail/map bulk counters read its counts. Applying the B′ exclusion in that shared classifier makes both consumers agree without a parallel UI filter; the UI regression test proves that the resulting server exclusion is respected by B's projection and counter.
+  - Impact: B excludes B′-identified commercial-regional and explicitly non-residential records from its qualified projection/counts; A's `z|m|p` membership remains calculated by the legacy predicate.
+  - Rollback: revert the isolated B′ overlay in `vivier-v2.ts` and its tests; no schema, migration, or client state changes are involved.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** — the correction is one type-safe call-site normalization on the existing PR branch.
@@ -67,3 +72,10 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - [x] Selectively stage only the call-site correction and this plan.
   - [x] Commit with `make commit`, push the existing branch, and inspect PR #405 checks.
   - [ ] Confirm the Typecheck check is green; do not merge the PR.
+
+- [ ] **Lot 3 — Route B′ through the active Vivier B contract**
+  - [x] Reproduced the disconnect: `classifyBPrime` is emitted on graph cards and gates only the unused `r` subsets, while active B reads `classification` / `vivierV2Counts`.
+  - [x] Declared `BPRIME-EX1` before touching the shared B classifier or its projection/counter test.
+  - [x] Apply B′ exclusions at the shared Vivier B classifier so detail projection and bulk counts consume the same result.
+  - [ ] Restore the pre-B′ legacy `p` predicate and add regression coverage for B projection/counts plus immutable A `z|m|p` membership.
+  - [ ] Lot gate: scoped API/UI tests, typecheck, lint, and branch scope verification in `ENV=test-bprime-active-filter`.
