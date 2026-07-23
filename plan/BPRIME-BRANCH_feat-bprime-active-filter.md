@@ -56,7 +56,8 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
 - [ ] **Multi-branch**
 
 ## UAT Management (in orchestration context)
-- UAT is not required: this correction has no observable UI behavior change.
+- B′ has observable active-B behavior: it changes the detail projection, map result, and rail counter for excluded signals.
+- Before merge, run focused root-checkout UAT on a city containing a B′-excluded signal (for example, a regional commercial pole): select active B and confirm the signal is absent from the map/detail projection and the rail counter reflects that exclusion.
 
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Baseline & constraints**

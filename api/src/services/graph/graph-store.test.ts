@@ -1162,8 +1162,8 @@ describe("isPrecoceSignal", () => {
   it("fallback sur deriveEtape quand etapeAnnote est null", () => {
     expect(isPrecoceSignal(null, "avis de motion séance du 5 mars", null)).toBe(true);
   });
-  it("audite une annotation vide au lieu d'inférer une étape", () => {
-    expect(isPrecoceSignal("", "projet de règlement 2025", null)).toBe(false);
+  it("falls back to label-derived precocity for an empty annotation (legacy A contract)", () => {
+    expect(isPrecoceSignal("", "projet de règlement 2025", null)).toBe(true);
   });
   it("retourne false si ni annotation ni mots-clés précoces", () => {
     expect(isPrecoceSignal(null, "adoption du règlement 456", null)).toBe(false);
