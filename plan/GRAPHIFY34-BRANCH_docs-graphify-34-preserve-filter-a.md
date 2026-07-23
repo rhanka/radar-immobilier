@@ -70,6 +70,7 @@ Record the Graphify 3.4 release gate that preserves the legacy Filter A (`z|m|p`
   - [x] Link the canonical Graphify 3.4 section to the addendum and prohibit cutover until its Filter A gate is green.
   - [x] Commit and push this plan through the existing branch as `4bddac0702d4b52fb970569eec347bad52bdefd2`.
   - [x] Retitle PR #406 in English: `docs(graphify): make legacy A preservation blocking in 3.4`.
+  - [x] Bound the Graphify invariant to the unfiltered legacy presentation and explicitly allow the post-projection design-system temporal lens in both A and B.
   - [ ] Recheck the new-SHA CI, branch-policy result, and required approval before merge.
 
 - [ ] **Lot 3 — Merge & close**
