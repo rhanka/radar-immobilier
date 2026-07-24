@@ -67,6 +67,11 @@ describe("classifyBPrime", () => {
     // Usage réellement mixte avec du logement : gardé (opportunité).
     expect(classifyBPrime({ label: "Zone d'usage mixte commercial et habitation" }))
       .toMatchObject({ residentiel: "oui", exclusionReason: null });
+    // An explicit conversion to residential use is strong evidence even without
+    // a unit count.
+    expect(classifyBPrime({
+      label: "Conversion d'un bâtiment commercial à usage résidentiel",
+    })).toMatchObject({ residentiel: "oui", exclusionReason: null });
     // Preuve FAIBLE seule (« densification commerciale ») NE sauve PAS : exclu.
     expect(classifyBPrime({ label: "Densification commerciale du secteur" }))
       .toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
@@ -77,15 +82,28 @@ describe("classifyBPrime", () => {
 
   it("R3 — le regex partagé matche toute la famille commercial/industriel", () => {
     for (const word of [
-      "commercial", "commerciale", "commerciales", "commerciaux",
+      "commerce", "commerces", "commercial", "commerciale", "commerciales", "commerciaux",
       "industriel", "industriels", "industrielle", "industrielles",
       "enseigne", "enseignes", "affichage", "affichages", "panneau-reclame",
     ]) {
       expect(FRANC_NON_RESIDENTIEL_RE.test(fold(word)), `doit matcher: ${word}`).toBe(true);
     }
+    for (const category of ["commerce", "commerces"]) {
+      expect(classifyBPrime({ category })).toMatchObject({
+        residentiel: "non",
+        exclusionReason: "non_residentiel_franc",
+      });
+    }
     // Faux amis à NE PAS exclure (pas de sur-blocage).
     for (const word of ["residentiel", "logement", "habitation", "densification", "lotissement"]) {
       expect(FRANC_NON_RESIDENTIEL_RE.test(fold(word)), `ne doit PAS matcher: ${word}`).toBe(false);
     }
+  });
+
+  it("does not treat a provenance-only excerpt as residential decision evidence", () => {
+    expect(classifyBPrime({
+      label: "Densification commerciale du secteur",
+      props: { extrait: "Conversion d'un bâtiment commercial à usage résidentiel" },
+    })).toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
   });
 });

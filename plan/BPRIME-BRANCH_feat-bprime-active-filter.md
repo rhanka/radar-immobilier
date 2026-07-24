@@ -60,6 +60,11 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - Rationale: the adverse review required (a) R3 residential-evidence precedence unified in one source (`classifyBPrime` ↔ `vivier-v2`), (b) rail↔panel parity for ALL B axes (z/r/p) — the rail previously only recomposed `p`, so the server counts gained a `stageCountsHorsZonage` breakdown that the rail sums when Zonage is unchecked, matching `projectComposedVivierB`, (c) an exhaustive 30-line partition (real committed source OR explicit QA-prod gap), and (d) a CIBLE/QA-prod contract status. These necessarily touch the counts contract, the B view counter, and the recette assets.
   - Impact: additive `stageCountsHorsZonage` field on `VivierV2Counts` (wire-additive, no invariant change); rail count for B now recomposes z; A's `z|m|p` and `classifyResidentielPertinence` remain byte-invariant (golden-tested). No schema/migration/client-state change.
   - Rollback: revert the counts field + rail recomposition + recette assets; A path is untouched so no legacy risk.
+- BPRIME-EX3 — permit the third adverse-review remediation (R3 evidence and DTO parity invariant):
+  - Paths: `packages/radar-domain/src/vivier/vivier-v2.ts`, `packages/radar-domain/src/signals/b-prime.ts`, `packages/radar-domain/src/signals/b-prime.test.ts`, `api/src/services/graph/vivier-v2.ts`, `api/src/services/graph/vivier-v2.test.ts`, `packages/radar-domain/src/vivier/counts.ts`, `packages/radar-domain/src/vivier/counts.test.ts`, `ui/src/lib/signals/vivier-view-mode.ts`, and `ui/src/lib/signals/vivier-view-mode.test.ts`.
+  - Rationale: the review proved that R3 did not recognize an explicit conversion to residential use, omitted the real Beloeil 1667-128 `Commerce` wording, and left the impossible DTO state `residentiel=non` with a null exclusion reason expressible. The fix passes the shared B′ classifier only the graph evidence already resolved by the server and rejects that state at the domain boundary; it also corrects the comments that describe the `r` axis and recomposable stage counters.
+  - Impact: R3 recognizes explicit conversion-to-residential-use phrasing while continuing to ignore provenance-only `props.extrait`; the server and rail/panel contract reject the only state that could split their `r` results. A's `classifyResidentielPertinence` and its markers are untouched.
+  - Rollback: revert the local evidence handoff, the domain schema refinement, and their unit tests; no migration, source fixture, or A-path change is involved.
 - Pre-existing note (NOT in scope, signalled only): `isZonageSignal` still uses annotated `etape` as a zonage fallback (`api/src/services/graph/graph-store.ts:1012`), which the spec discourages (`SPEC_EVOL_FILTRAGE_VIVIER_v2` §1). This fallback predates B′ and is deliberately left untouched here — flagged for a dedicated change, not folded into this branch.
 
 ## Orchestration Mode (AI-selected)
@@ -102,3 +107,10 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - [x] Exhaustive 30-line partition: `BPRIME_STEVE30_CONTRACT_CITIES` × real source / QA-prod gap (Coaticook ✓1 proven + ✓2 gap); Rosemère/SCB declared ✗0 NON-attainable côté immo → EN ATTENTE geo (no fabricated marker).
   - [x] Contract status → CIBLE / QA prod requise ville par ville (recette doc).
   - [x] Lot gate (local, hors Docker — poppler-utils breaks the container): domain + api graph + ui vivier/rail suites green; typecheck green. See Feedback Loop.
+
+- [ ] **Lot 5 — 3rd adverse review remediation (R3 evidence, DTO parity, comments)**
+  - [x] Read the v3 adverse-review report and reproduce its three R3/DTO counterexamples.
+  - [x] Recognize explicit commercial-to-residential-use conversions using only resolved decision evidence; keep provenance-only excerpts out of the predicate.
+  - [x] Exclude the real Beloeil 1667-128 `Commerce` signal and cover direct `classifyVivierSignal` counterexamples.
+  - [ ] Enforce `residentiel=non` implies a named exclusion reason and prove that the rail/panel divergence DTO is rejected.
+  - [ ] Align the `r` and `stageCounts` comments with the enforced invariant and run the scoped Make gates in `ENV=test-bprimefix`.
