@@ -43,6 +43,16 @@ describe("vivier_v2 named counts", () => {
         entree_vigueur: 0,
         inconnu: 0,
       },
+      // Aucun non-exclu hors périmètre zonage ici (le hors_zonage est exclu) → 0.
+      stageCountsHorsZonage: {
+        avis_motion: 0,
+        projet_reglement: 0,
+        consultation_publique: 0,
+        second_projet: 0,
+        adoption: 0,
+        entree_vigueur: 0,
+        inconnu: 0,
+      },
       total: 5,
     });
     expect(countsInvariant(counts)).toBe(true);
@@ -63,6 +73,30 @@ describe("vivier_v2 named counts", () => {
     expect(counts.residentialUnknown).toBe(1);
     expect(counts.stageCounts.projet_reglement).toBe(1);
     expect(counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement).toBe(1);
+    expect(countsInvariant(counts)).toBe(true);
+  });
+
+  it("ventile le non-exclu HORS zonage dans stageCountsHorsZonage (recomposable, axe Zonage)", () => {
+    // Non-exclu mais zonage=INDÉTERMINÉ (hors périmètre) : révélé quand l'axe
+    // Zonage est décoché côté UI. Il ne compte PAS dans stageCounts (périmètre
+    // zonage=oui) mais dans stageCountsHorsZonage — la somme des deux partitionne
+    // exactement (qualified + residentialUnknown), ce qui garantit la parité.
+    const horsZonageResidentiel = value({
+      zonage: { valeur: "indetermine", source: "test", confiance: 0 },
+      residentiel: { valeur: "oui", source: "test", confiance: 1 },
+      etape: "avis_motion",
+    });
+    const perimetre = value({ etape: "adoption" }); // zonage=oui, résidentiel=oui
+    const counts = countVivierClassifications([horsZonageResidentiel, perimetre]);
+    expect(counts.stageCounts.avis_motion).toBe(0);
+    expect(counts.stageCountsHorsZonage.avis_motion).toBe(1);
+    expect(counts.stageCounts.adoption).toBe(1);
+    // Zonage coché = périmètre (1) ; décoché = périmètre + hors-zonage (2).
+    const sumAll = (s: typeof counts.stageCounts) => Object.values(s).reduce((a, b) => a + b, 0);
+    expect(sumAll(counts.stageCounts)).toBe(1);
+    expect(sumAll(counts.stageCounts) + sumAll(counts.stageCountsHorsZonage)).toBe(
+      counts.qualified + counts.residentialUnknown,
+    );
     expect(countsInvariant(counts)).toBe(true);
   });
 
