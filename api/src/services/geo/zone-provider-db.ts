@@ -30,6 +30,7 @@ import { zoneVersions } from "../../db/schema.js";
 import type { ZoneVersionProvider } from "../../routes/geo-lots.js";
 import type { ZoneVersionInput, ZoneKind } from "../scoring/lot-potential.js";
 import type { GeoJsonGeometry, OfficialZoneInput } from "./zones.js";
+import { publicProvenanceFromEvidence } from "./provenance.js";
 
 // ─── Chargement index de zones par ville ──────────────────────────────────────
 
@@ -112,6 +113,9 @@ export async function officialZonesForCityFromDb(
       codeAffiche: zoneVersions.codeAffiche,
       kind: zoneVersions.kind,
       geomSource: zoneVersions.geomSource,
+      // JSONB evidence carries the same provenance envelopes as the OGC path;
+      // read it so the PG fallback surfaces proof/provenance too.
+      evidence: zoneVersions.evidence,
       geometry: sql<GeoJsonGeometry | null>`
         CASE
           WHEN ${zoneVersions.geom} IS NULL THEN NULL
@@ -133,6 +137,9 @@ export async function officialZonesForCityFromDb(
     label: row.kind,
     geometry: row.geometry,
     source: `db:${row.geomSource}`,
+    // Same positive, versioned validation as the OGC path — a leaky or
+    // truncated envelope yields nothing rather than passing through.
+    ...publicProvenanceFromEvidence(row.evidence),
   }));
 }
 

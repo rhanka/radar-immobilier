@@ -32,6 +32,7 @@ import {
   type GeoZonesResponse,
 } from "./geo-zones-client.js";
 import { fetchZones, type ZonesResponse } from "./zones-client.js";
+import { featureProof, zoneLotProvenance } from "./geo-provenance.js";
 
 /**
  * Limite de chargement de la collection OGC zonage. Dimensionnée pour couvrir
@@ -73,46 +74,57 @@ export function geoZonesResponseFromCollection(
   collection: ZonesResponse,
 ): GeoZonesResponse {
   const features: GeoZoneFeature[] = collection.featureCollection.features.map(
-    (feature) => ({
-      type: "Feature",
-      geometry: feature.geometry,
-      properties: {
-        code: feature.properties.code,
-        citySlug: feature.properties.citySlug ?? collection.citySlug,
-        geometryStatus: feature.geometry ? "official" : "missing",
-        confidence: feature.geometry ? 1 : 0,
-        source: "official-zone",
-        lotCount: 0,
-        lots: [],
-        // kind/affectation/grille transmis TELS QUELS quand la collection les
-        // expose — la teinte par famille (zone-kind-style, affectation en
-        // priorité) et la fiche zone les consomment.
-        ...(feature.properties.kind ? { kind: feature.properties.kind } : {}),
-        ...(feature.properties.affectation
-          ? { affectation: feature.properties.affectation }
-          : {}),
-        ...(feature.properties.grillePdfUrl
-          ? { grillePdfUrl: feature.properties.grillePdfUrl }
-          : {}),
-        // Millésime + n° de règlement porteur PAR ZONE (axe millésime) —
-        // transmis tels quels quand geo les sert ; jamais fabriqués.
-        ...(feature.properties.reglementMillesime
-          ? { reglementMillesime: feature.properties.reglementMillesime }
-          : {}),
-        ...(feature.properties.reglementNumero
-          ? { reglementNumero: feature.properties.reglementNumero }
-          : {}),
-        // Label lisible : le libellé d'affectation prime sur le code kind
-        // ("CO-939 — Conservation" plutôt que "CO-939 — CO").
-        ...(feature.properties.affectation || feature.properties.kind
-          ? {
-              label: `${feature.properties.code} — ${
-                feature.properties.affectation ?? feature.properties.kind
-              }`,
-            }
-          : {}),
-      },
-    }),
+    (feature) => {
+      // Preuve/provenance portées TELLES QUELLES sur le chemin OGC prioritaire
+      // (#NO-GO codex : ce chemin les perdait). Re-validées (schéma versionné)
+      // avant recopie — jamais reconstruites, jamais devinées.
+      const proof = featureProof(feature.properties.proof);
+      const provenance = zoneLotProvenance(
+        feature.properties.immo_zone_lot_provenance,
+      );
+      return {
+        type: "Feature",
+        geometry: feature.geometry,
+        properties: {
+          code: feature.properties.code,
+          citySlug: feature.properties.citySlug ?? collection.citySlug,
+          geometryStatus: feature.geometry ? "official" : "missing",
+          confidence: feature.geometry ? 1 : 0,
+          source: "official-zone",
+          lotCount: 0,
+          lots: [],
+          ...(proof ? { proof } : {}),
+          ...(provenance ? { immo_zone_lot_provenance: provenance } : {}),
+          // kind/affectation/grille transmis TELS QUELS quand la collection les
+          // expose — la teinte par famille (zone-kind-style, affectation en
+          // priorité) et la fiche zone les consomment.
+          ...(feature.properties.kind ? { kind: feature.properties.kind } : {}),
+          ...(feature.properties.affectation
+            ? { affectation: feature.properties.affectation }
+            : {}),
+          ...(feature.properties.grillePdfUrl
+            ? { grillePdfUrl: feature.properties.grillePdfUrl }
+            : {}),
+          // Millésime + n° de règlement porteur PAR ZONE (axe millésime) —
+          // transmis tels quels quand geo les sert ; jamais fabriqués.
+          ...(feature.properties.reglementMillesime
+            ? { reglementMillesime: feature.properties.reglementMillesime }
+            : {}),
+          ...(feature.properties.reglementNumero
+            ? { reglementNumero: feature.properties.reglementNumero }
+            : {}),
+          // Label lisible : le libellé d'affectation prime sur le code kind
+          // ("CO-939 — Conservation" plutôt que "CO-939 — CO").
+          ...(feature.properties.affectation || feature.properties.kind
+            ? {
+                label: `${feature.properties.code} — ${
+                  feature.properties.affectation ?? feature.properties.kind
+                }`,
+              }
+            : {}),
+        },
+      };
+    },
   );
   const hasGeometry = features.some((feature) => feature.geometry !== null);
   return {
