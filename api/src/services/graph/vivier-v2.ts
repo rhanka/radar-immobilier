@@ -340,17 +340,22 @@ function exclusionFor(
  */
 function applyBPrimeExclusion(
   classification: VivierV2,
-  signal: VivierSignalInput,
+  evidence: {
+    category: string | null;
+    label: string | null;
+    description: string | null;
+    etapeAnnotation: string | null;
+    sourceRef: string | null;
+  },
 ): VivierV2 {
   if (classification.exclusion_reason !== null) return classification;
 
   const bPrime = classifyBPrime({
-    category: signal.category ?? null,
-    label: signal.label ?? null,
-    description: signal.description ?? null,
-    etapeAnnotation: signal.etape ?? null,
-    props: record(signal.props),
-    sourceRef: signal.sourceRef ?? null,
+    category: evidence.category,
+    label: evidence.label,
+    description: evidence.description,
+    etapeAnnotation: evidence.etapeAnnotation,
+    sourceRef: evidence.sourceRef,
   });
   if (bPrime.exclusionReason === null) return classification;
 
@@ -375,6 +380,7 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
   const label = signal.label ?? firstString(records, ["label"]);
   const description = signal.description ?? firstString(records, ["description", "summary", "details"]);
   const etapeAnnote = signal.etape ?? firstString(records, ["etape"]);
+  const sourceRef = signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"]);
   const history = records.flatMap((candidate) => {
     const values = candidate.etapes_historique ?? candidate.etapesHistorique;
     return Array.isArray(values)
@@ -391,7 +397,8 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
   // R2 « refonte→oui » RETIRÉ : aucune détection de refonte ne force le
   // résidentiel. Une refonte reste `indéterminé` (sauf franc-non-résidentiel) et
   // remonte via le PÉRIMÈTRE permissif de la vue B (indéterminé gardé).
-  const residentiel = classificationFromResidentiel(category ?? etapeAnnote, label, description);
+  const residentielCategory = category ?? etapeAnnote;
+  const residentiel = classificationFromResidentiel(residentielCategory, label, description);
   const etapes = derivedEtapes(label, description, etapeAnnote, history);
   // R1 — l'étape ANNOTÉE fait autorité sur l'inférence texte : une annotation
   // valide (`projet_reglement`…) n'est jamais poussée plus tard par un mot-clé du
@@ -399,8 +406,8 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
   const annotatedEtape = toVivierEtape(etapeAnnote);
   const provenance = {
     extrait: firstString(records, ["extrait", "excerpt", "citation", "quote", "text"]) ?? "",
-    ...(signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"])
-      ? { source: signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"])! }
+    ...(sourceRef !== null
+      ? { source: sourceRef }
       : {}),
   };
   const confidence = firstNumber(records, ["confiance", "confidence", "confidence_score"])
@@ -416,7 +423,16 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
     provenance,
     confiance: Math.max(0, Math.min(1, confidence)),
   });
-  return applyBPrimeExclusion(classification, signal);
+  // R3 receives every field resolved for this decision (including nested refs),
+  // but never provenance.extrait: the wire contract defines it as audit context,
+  // not classification evidence.
+  return applyBPrimeExclusion(classification, {
+    category: residentielCategory,
+    label,
+    description,
+    etapeAnnotation: etapeAnnote,
+    sourceRef,
+  });
 }
 
 export function computeVivierV2(
