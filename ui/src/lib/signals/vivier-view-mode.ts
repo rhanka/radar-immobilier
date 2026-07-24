@@ -412,21 +412,30 @@ export function countForVivierCity(
   if (modeFromSubsetKey(subsetKey) === "b") {
     const counts = entry.vivierV2Counts;
     if (!counts) return 0;
-    // Le badge ville = le PÉRIMÈTRE serveur (zonage résidentiel, indéterminé
-    // GARDÉ) via `stageCounts` : somme des étapes précoces quand l'axe précoce est
-    // coché, sinon somme de TOUTES les étapes. `stageCounts` compte déjà le
-    // périmètre (qualifié + indéterminé) — masquer/élargir est une lentille
-    // d'affichage, jamais une reclassification.
-    const stages = counts.stageCounts;
-    return bAxesFromVivierKey(subsetKey).p
-      ? stages.avis_motion + stages.projet_reglement
-      : stages.avis_motion +
-          stages.projet_reglement +
-          stages.consultation_publique +
-          stages.second_projet +
-          stages.adoption +
-          stages.entree_vigueur +
-          stages.inconnu;
+    // PARITÉ rail↔panneau, TOUS axes B (z/r/p) — on RECOMPOSE côté rail exactement
+    // le filtre du panneau (`projectComposedVivierB`) à partir des compteurs
+    // serveur, sans reclassifier :
+    //   - axe Précoce (`p`) coché → somme des seules étapes précoces ;
+    //   - axe Zonage (`z`) coché (défaut) → `stageCounts` (périmètre zonage `oui`) ;
+    //     décoché → `stageCounts` + `stageCountsHorsZonage` (le hors-zonage
+    //     résidentiel non-franc révélé, comme le panneau qui lève l'exigence zonage).
+    //   - axe Résidentiel (`r`) est PERMISSIF (indéterminé gardé) : le franc-non-
+    //     résidentiel porte déjà une exclusion serveur, donc `r` est sans effet des
+    //     DEUX côtés (parité triviale, prouvée en test).
+    const axes = bAxesFromVivierKey(subsetKey);
+    const sumStages = (stages: typeof counts.stageCounts): number =>
+      axes.p
+        ? stages.avis_motion + stages.projet_reglement
+        : stages.avis_motion +
+            stages.projet_reglement +
+            stages.consultation_publique +
+            stages.second_projet +
+            stages.adoption +
+            stages.entree_vigueur +
+            stages.inconnu;
+    return axes.z
+      ? sumStages(counts.stageCounts)
+      : sumStages(counts.stageCounts) + sumStages(counts.stageCountsHorsZonage);
   }
   return entry.subsetCounts[subsetKey] ?? 0;
 }
