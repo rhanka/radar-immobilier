@@ -38,7 +38,24 @@ const COMMERCIAL_OR_INDUSTRIAL_CATEGORIES = new Set([
   "commercial", "commerce", "industriel", "industrie",
 ]);
 const RESIDENTIAL = /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement|multi-logement|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densification|duplex|triplex|quadruplex|plex|condominium|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte)\b/;
-const COMMERCIAL_OR_INDUSTRIAL = /\b(?:commercial(?:e)?s?|industriel(?:le)?s?|parc industriel|zone industrielle)\b/;
+
+/**
+ * Vocabulaire FRANC non-résidentiel (commercial / industriel / enseigne),
+ * SOURCE PARTAGÉE — texte NORMALISÉ (minuscule, sans accents). Réutilisé
+ * verbatim côté serveur (`graph-store.NON_RESIDENTIEL_MARKERS_RE`,
+ * `vivier-v2` R3) ET ici dans `classifyBPrime`, pour rester SYNCHRONISÉS.
+ *
+ * Le pluriel « commerciaux » (contre-exemple réel Lavaltrie, zone C-8 « usages
+ * commerciaux »), « commerciale(s) », « industriel(le)(s) » et les variantes
+ * d'affichage (enseigne, affichage, panneau-réclame) sont explicitement
+ * couverts — c'était le trou lexical R3 relevé en revue.
+ */
+export const FRANC_NON_RESIDENTIEL_SOURCE =
+  "commercia(?:ux|l(?:es?)?)|industriel(?:les?|s)?|centre commercial|parc industriel|zone industrielle|enseignes?|affichages?|panneaux?[- ]?reclames?";
+export const FRANC_NON_RESIDENTIEL_RE = new RegExp(`\\b(?:${FRANC_NON_RESIDENTIEL_SOURCE})\\b`);
+/** Pôle commercial régional — raison d'exclusion NOMMÉE (R4), source partagée. */
+export const REGIONAL_COMMERCIAL_POLE_RE = /\bpole commercial regional\b/;
+const COMMERCIAL_OR_INDUSTRIAL = FRANC_NON_RESIDENTIEL_RE;
 
 function fold(value: string): string {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -109,7 +126,7 @@ export function classifyBPrime(input: BPrimeSignalInput): BPrimeClassification {
   const commercialOrIndustrial =
     (category !== null && COMMERCIAL_OR_INDUSTRIAL_CATEGORIES.has(category)) ||
     COMMERCIAL_OR_INDUSTRIAL.test(text);
-  const regionalCommercialPole = /\bpole commercial regional\b/.test(text);
+  const regionalCommercialPole = REGIONAL_COMMERCIAL_POLE_RE.test(text);
   const residentiel = commercialOrIndustrial
     ? "non"
     : completeReform

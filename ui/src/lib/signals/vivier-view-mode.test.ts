@@ -157,10 +157,11 @@ describe("Vivier A / B view contract", () => {
     expect(SUTTON_RAW).toHaveLength(5);
     expect(a).toEqual({ available: true, count: 1, nodes: [SUTTON_RAW[0]] });
     expect(a.nodes.map((item) => item.id)).toEqual(["sutton-a"]);
-    // B = zonage oui ∩ résidentiel oui ∩ sans exclusion : ni le « à confirmer »
-    // ni l'exclu ne passent, et B ignore le gate multi4 de A.
-    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    expect(b.count).toBe(3);
+    // B = PÉRIMÈTRE « zonage résidentiel, indéterminé GARDÉ » : le « à confirmer »
+    // (sutton-m) PASSE, seul l'exclu serveur (sutton-raw) sort. B ignore le gate
+    // multi4 de A.
+    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    expect(b.count).toBe(4);
   });
 
   it("projects and counts the B-prime-normalized B payload", () => {
@@ -240,21 +241,23 @@ describe("Vivier A / B view contract", () => {
       .toEqual(["q-avis", "q-projet"]);
   });
 
-  it("relaxes B when the résidentiel or zonage axis is unchecked (m1.4)", () => {
+  it("garde l'indéterminé « à confirmer » dans le défaut B et n'écarte que l'exclu serveur (permissif)", () => {
     // SUTTON_RAW : sutton-m est « à confirmer » (résidentiel indéterminé, non
     // exclu), sutton-raw est exclu par le serveur (jamais montré).
-    // Défaut (zonage ✓ résidentiel ✓ précoce ✗) = le vivier qualifié.
+    // PÉRIMÈTRE PERMISSIF : le défaut GARDE désormais l'indéterminé (spec
+    // « indéterminé GARDÉ ») — sutton-m est DANS le défaut, sans gate.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    // Décocher « Résidentiel » (vivier-v2|-r) RELÂCHE l'exigence résidentiel :
-    // le « à confirmer » réapparaît, l'exclu serveur reste écarté.
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    // Décocher « Résidentiel » (vivier-v2|-r) : l'axe est déjà permissif → même
+    // set, l'exclu serveur reste écarté (jamais reclassé côté client).
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-r").nodes.map((n) => n.id))
       .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    // Décocher « Zonage » (vivier-v2|-z) : ici tous portent zonage oui → même set
-    // que le défaut, l'exclu serveur reste écarté.
+    // Décocher « Zonage » (vivier-v2|-z) : ici tous portent zonage oui → même set.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    // Décocher zonage ET résidentiel : tout le classifié non exclu par le serveur.
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    // L'exclu serveur (sutton-raw) n'apparaît JAMAIS, quels que soient les axes.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").nodes.map((n) => n.id))
+      .not.toContain("sutton-raw");
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(4);
     // Un axe B relâché n'invente aucune classification : sans classification → indispo.
     const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
@@ -301,8 +304,9 @@ describe("Vivier A / B view contract", () => {
     const validated = validateVivierProjectionAuthority(SUTTON_RAW, authority);
 
     // Une autorité A corrompue n'entraîne pas B, qui a sa propre source.
+    // B = périmètre permissif (qualifié + « à confirmer » indéterminé) = 4.
     expect(validated.a).toEqual({ available: false, count: null, nodes: [] });
-    expect(validated.b.count).toBe(3);
+    expect(validated.b.count).toBe(4);
   });
 
   it("reads A from subsetCounts (by composed key) and B from vivierV2Counts", () => {
@@ -350,6 +354,40 @@ describe("Vivier A / B view contract", () => {
       residentialUnknown: 80,
       excluded: 12,
     });
+  });
+
+  it("PARITÉ recette : le badge B lit le PÉRIMÈTRE précoce (indéterminé compris), pas seulement `qualified`", () => {
+    // Reproduit une ville « refonte » type Sutton : 2 signaux résidentiel=indéterminé
+    // à projet_reglement → qualified=0 mais stageCounts.projet_reglement=2. Le badge
+    // rail précoce DOIT valoir 2 (c'est ce que prouve la recette serveur B′).
+    const suttonLike = {
+      subsetCounts: { "z|m|p": 0 },
+      vivierV2Counts: {
+        qualified: 0,
+        residentialUnknown: 2,
+        excludedByReason: {
+          non_residentiel_franc: 0,
+          piia_non_pertinent: 0,
+          hors_zonage: 0,
+          derogation_hors_sujet: 0,
+        },
+        stageCounts: {
+          avis_motion: 0,
+          projet_reglement: 2,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        total: 2,
+      },
+    };
+    // Défaut (précoce) : ✓2 même si `qualified` = 0 — pas de gate refonte→oui.
+    expect(countForVivierCity(suttonLike, "vivier-v2")).toBe(2);
+    expect(countForVivierCity(suttonLike, "vivier-v2|p")).toBe(2);
+    // Précoce décoché : périmètre TOTAL (Σ stageCounts) = 2, jamais `qualified`=0.
+    expect(countForVivierCity(suttonLike, "vivier-v2|-p")).toBe(2);
   });
 
   it("resynchronizes route mode and keys route identity by A/B", () => {

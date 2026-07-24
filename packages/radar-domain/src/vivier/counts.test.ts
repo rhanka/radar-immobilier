@@ -13,7 +13,7 @@ const value = (overrides: Partial<VivierV2> = {}): VivierV2 =>
   });
 
 describe("vivier_v2 named counts", () => {
-  it("counts exclusions by reason and stages only for qualified signals", () => {
+  it("counts exclusions by reason and stages for the B-view perimeter (indéterminé GARDÉ)", () => {
     const counts = countVivierClassifications([
       value(),
       value({ residentiel: { valeur: "indetermine", source: "test", confiance: 0 } }),
@@ -31,10 +31,13 @@ describe("vivier_v2 named counts", () => {
         hors_zonage: 1,
         derogation_hors_sujet: 1,
       },
+      // Le signal résidentiel=indéterminé (zonage=oui, non exclu) est GARDÉ dans le
+      // périmètre de la vue B → il compte aussi dans stageCounts.consultation_publique
+      // (2 = qualifié + indéterminé), sans être compté dans `qualified`.
       stageCounts: {
         avis_motion: 0,
         projet_reglement: 0,
-        consultation_publique: 1,
+        consultation_publique: 2,
         second_projet: 0,
         adoption: 0,
         entree_vigueur: 0,
@@ -45,5 +48,34 @@ describe("vivier_v2 named counts", () => {
     expect(countsInvariant(counts)).toBe(true);
     expect(vivierCountsSchema.parse(counts)).toEqual(counts);
     expect(vivierCountsSchema.safeParse({ ...counts, total: 6 }).success).toBe(false);
+  });
+
+  it("garde l'indéterminé précoce dans stageCounts SANS le compter dans qualified (permissif, pas de gate)", () => {
+    // Reproduit une refonte réelle sans marqueur résidentiel : zonage=oui,
+    // résidentiel=indéterminé, étape précoce. Le badge rail précoce
+    // (avis_motion + projet_reglement) DOIT la voir, `qualified` NON.
+    const refonteIndeterminee = value({
+      residentiel: { valeur: "indetermine", source: "test", confiance: 0 },
+      etape: "projet_reglement",
+    });
+    const counts = countVivierClassifications([refonteIndeterminee]);
+    expect(counts.qualified).toBe(0);
+    expect(counts.residentialUnknown).toBe(1);
+    expect(counts.stageCounts.projet_reglement).toBe(1);
+    expect(counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement).toBe(1);
+    expect(countsInvariant(counts)).toBe(true);
+  });
+
+  it("exclut le franc-non-résidentiel du périmètre (n'entre pas dans stageCounts)", () => {
+    const commercialFranc = value({
+      residentiel: { valeur: "non", source: "test", confiance: 1 },
+      exclusion_reason: "non_residentiel_franc",
+      etape: "avis_motion",
+    });
+    const counts = countVivierClassifications([commercialFranc]);
+    expect(counts.qualified).toBe(0);
+    expect(counts.residentialUnknown).toBe(0);
+    expect(counts.excludedByReason.non_residentiel_franc).toBe(1);
+    expect(counts.stageCounts.avis_motion).toBe(0);
   });
 });
