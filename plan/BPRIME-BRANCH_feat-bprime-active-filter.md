@@ -51,6 +51,16 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
 - UI projection/counter regression: `make test-ui SCOPE=src/lib/signals/vivier-view-mode.test.ts API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` passed (18 tests).
 - Typecheck: `make typecheck API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` completed without TypeScript errors.
 - Focused API-test limitation: `make test-api SCOPE=src/services/graph/graph-store.test.ts API_PORT=8815 UI_PORT=5315 MAILDEV_UI_PORT=1115 ENV=test-bprime-active-filter` reaches the isolated test-stack dependency bootstrap but returns after image setup, before observable `npm ci`, migration, or Vitest output. It is unverified locally; PR Quality gates are authoritative.
+- BPRIME-EX2 — permit the B′ acceptance recette, the recomposable server counts, and the B rail/panel parity view (2nd adverse review remediation):
+  - Paths (beyond EX1):
+    - Recette (real fixtures + executable acceptance): `api/src/services/graph/bprime-recette.fixture.ts`, `api/src/services/graph/bprime-recette.test.ts`, `api/src/services/graph/sutton-legacy.fixture.ts`, `api/src/services/graph/coaticook-legacy.fixture.ts`.
+    - Counts (recomposable, all B axes): `packages/radar-domain/src/vivier/counts.ts`, `packages/radar-domain/src/vivier/counts.test.ts`.
+    - B view + rail/panel parity: `ui/src/lib/signals/vivier-view-mode.ts`, `ui/src/lib/components/maps/SignauxRail.test.ts`, `ui/src/lib/components/maps/SignauxRailFilterHarness.test.ts`, `ui/e2e-qa/signaux-vivier-b-filters.spec.ts`, `ui/e2e-qa/rail-selected-city-stability.spec.ts`.
+    - Contract doc: `docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md`.
+  - Rationale: the adverse review required (a) R3 residential-evidence precedence unified in one source (`classifyBPrime` ↔ `vivier-v2`), (b) rail↔panel parity for ALL B axes (z/r/p) — the rail previously only recomposed `p`, so the server counts gained a `stageCountsHorsZonage` breakdown that the rail sums when Zonage is unchecked, matching `projectComposedVivierB`, (c) an exhaustive 30-line partition (real committed source OR explicit QA-prod gap), and (d) a CIBLE/QA-prod contract status. These necessarily touch the counts contract, the B view counter, and the recette assets.
+  - Impact: additive `stageCountsHorsZonage` field on `VivierV2Counts` (wire-additive, no invariant change); rail count for B now recomposes z; A's `z|m|p` and `classifyResidentielPertinence` remain byte-invariant (golden-tested). No schema/migration/client-state change.
+  - Rollback: revert the counts field + rail recomposition + recette assets; A path is untouched so no legacy risk.
+- Pre-existing note (NOT in scope, signalled only): `isZonageSignal` still uses annotated `etape` as a zonage fallback (`api/src/services/graph/graph-store.ts:1012`), which the spec discourages (`SPEC_EVOL_FILTRAGE_VIVIER_v2` §1). This fallback predates B′ and is deliberately left untouched here — flagged for a dedicated change, not folded into this branch.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** — the correction is one type-safe call-site normalization on the existing PR branch.
@@ -83,3 +93,12 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - [x] Apply B′ exclusions at the shared Vivier B classifier so detail projection and bulk counts consume the same result.
   - [x] Restore the pre-B′ legacy `p` predicate and add regression coverage for B projection/counts plus immutable A `z|m|p` membership.
   - [ ] Lot gate: scoped API/UI tests, typecheck, lint, and branch scope verification in `ENV=test-bprime-active-filter`.
+
+- [ ] **Lot 4 — 2nd adverse review remediation (R3 precedence, parity, partition, CIBLE status)**
+  - [x] Declared `BPRIME-EX2` before touching counts / B view / recette / contract doc.
+  - [x] R3 unified in ONE decision source: residential-strong evidence wins over franc-non-résidentiel (`classifyBPrime` + shared `RESIDENTIEL_FORT_*`), so `applyBPrimeExclusion` no longer over-excludes conversions; Lavaltrie C-8 excluded, `commercial→résidentiel 12 log` + mixte kept (`classifyVivierSignal` tested).
+  - [x] Restored `classifyResidentielPertinence` to origin/main byte-for-byte (A path); golden invariance test pins the `commerciaux`/enseigne boundary (R3 lives only in B′).
+  - [x] Rail↔panel parity for ALL B axes: server counts recomposable via `stageCountsHorsZonage`; rail sums it when Zonage unchecked; 8-combo parity test on real `countVivierClassifications` output.
+  - [x] Exhaustive 30-line partition: `BPRIME_STEVE30_CONTRACT_CITIES` × real source / QA-prod gap (Coaticook ✓1 proven + ✓2 gap); Rosemère/SCB declared ✗0 NON-attainable côté immo → EN ATTENTE geo (no fabricated marker).
+  - [x] Contract status → CIBLE / QA prod requise ville par ville (recette doc).
+  - [x] Lot gate (local, hors Docker — poppler-utils breaks the container): domain + api graph + ui vivier/rail suites green; typecheck green. See Feedback Loop.
