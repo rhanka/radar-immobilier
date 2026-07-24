@@ -10,6 +10,7 @@ import {
   BPRIME_RECETTE_EXPECTATIONS,
   BPRIME_RECETTE_OFFLINE_GAPS,
   BPRIME_RECETTE_ROWS,
+  BPRIME_STEVE30_CONTRACT_CITIES,
 } from "./bprime-recette.fixture.js";
 import { SUTTON_LEGACY_GRAPH_NODES, SUTTON_A_IDS } from "./sutton-legacy.fixture.js";
 import type { VivierV2Counts } from "@radar/domain";
@@ -98,6 +99,36 @@ describe("Recette B′ × Steve-30 — villes PROUVABLES hors-ligne (nœuds rée
     expect(classification.residentiel.valeur).toBe("non");
     expect(classification.exclusion_reason).toBe("non_residentiel_franc");
   });
+
+  it("R3 serveur — la preuve résidentielle l'emporte : conversion commercial→résidentiel + mixte CONSERVÉS dans B", () => {
+    // Contre-preuve du bug relevé en revue : `classificationFromResidentiel`
+    // protège le logement, mais `applyBPrimeExclusion` re-classait via
+    // `classifyBPrime` (commercial prioritaire) et RÉÉCRASAIT le signal en exclu.
+    // Corrigé : la preuve FORTE (logements / usage mixte) l'emporte sur R3, donc
+    // ces signaux traversent TOUT le chemin serveur sans exclusion.
+    const conversion = classifyVivierSignal({
+      id: "conversion-commercial-vers-residentiel-12-log",
+      type: "Signal",
+      category: "rezonage",
+      label: "Rezonage de commercial à résidentiel — 12 logements",
+      description:
+        "Modification du zonage convertissant un secteur commercial en immeuble à logements de 12 unités.",
+      etape: "projet_reglement",
+    });
+    expect(conversion.residentiel.valeur).toBe("oui");
+    expect(conversion.exclusion_reason).toBeNull();
+
+    const mixte = classifyVivierSignal({
+      id: "usage-mixte-commercial-et-habitation",
+      type: "Signal",
+      category: "rezonage",
+      label: "Zone d'usage mixte commercial et habitation",
+      description: "Rezonage autorisant un usage mixte commercial et de l'habitation.",
+      etape: "avis_motion",
+    });
+    expect(mixte.residentiel.valeur).toBe("oui");
+    expect(mixte.exclusion_reason).toBeNull();
+  });
 });
 
 describe("Recette B′ × Steve-30 — HONNÊTETÉ : villes NON prouvables hors-ligne", () => {
@@ -126,15 +157,13 @@ describe("Recette B′ × Steve-30 — HONNÊTETÉ : villes NON prouvables hors-
 
   it("les villes non prouvables sont DÉCLARÉES et jamais fabriquées dans le calcul", () => {
     expect(BPRIME_RECETTE_OFFLINE_GAPS.length).toBeGreaterThan(0);
-    // Aucune ville « gap » n'est présente dans le calcul serveur (pas de fixture
-    // fabriquée pour la faire passer verte).
+    // Aucune ville « gap » sans source réelle n'est présente dans le calcul serveur
+    // (pas de fixture fabriquée pour la faire passer verte). Exception légitime :
+    // Coaticook a un nœud RÉEL (✓1) ; seul son ✓2 est un gap → on ne l'écarte pas.
+    const realSourced = new Set(BPRIME_RECETTE_EXPECTATIONS.map((e) => e.citySlug));
     for (const gap of BPRIME_RECETTE_OFFLINE_GAPS) {
-      // (comparaison souple : les labels composites listent plusieurs villes)
-      const slugs = gap.label
-        .toLowerCase()
-        .split("/")
-        .map((s) => s.trim().replace(/[’']/g, "").replace(/\s+/g, "-"));
-      for (const slug of slugs) {
+      for (const slug of gap.slugs) {
+        if (realSourced.has(slug)) continue;
         expect(byCity.has(slug), `ne doit PAS être dans le calcul: ${slug}`).toBe(false);
       }
     }
@@ -155,6 +184,44 @@ describe("Recette B′ × Steve-30 — HONNÊTETÉ : villes NON prouvables hors-
         BPRIME_RECETTE_OFFLINE_GAPS.some((g) => g.label === label),
         `≥6/10 non prouvable doit être déclarée: ${label}`,
       ).toBe(true);
+    }
+  });
+});
+
+describe("Recette B′ × Steve-30 — PARTITION EXHAUSTIVE des 30 lignes du contrat", () => {
+  const realSourced = new Set(
+    BPRIME_RECETTE_EXPECTATIONS.filter((e) => e.provableBPrime > 0).map((e) => e.citySlug),
+  );
+  const gapSlugs = new Set(BPRIME_RECETTE_OFFLINE_GAPS.flatMap((g) => [...g.slugs]));
+
+  it("le contrat compte EXACTEMENT 30 villes", () => {
+    expect(BPRIME_STEVE30_CONTRACT_CITIES.length).toBe(30);
+    // Slugs uniques (pas de doublon dans la liste canonique).
+    expect(new Set(BPRIME_STEVE30_CONTRACT_CITIES.map((c) => c.slug)).size).toBe(30);
+  });
+
+  it("CHAQUE ligne du contrat ⇒ SOURCE RÉELLE committée OU GAP QA-prod déclaré (aucune orpheline)", () => {
+    for (const city of BPRIME_STEVE30_CONTRACT_CITIES) {
+      expect(
+        realSourced.has(city.slug) || gapSlugs.has(city.slug),
+        `ville du contrat NI source réelle NI gap déclaré: ${city.slug}`,
+      ).toBe(true);
+    }
+  });
+
+  it("Coaticook : ✓1 PROUVÉ (source réelle) ET ✓2 déclaré en gap QA-prod (partition, cas double)", () => {
+    expect(realSourced.has("coaticook")).toBe(true);
+    expect(gapSlugs.has("coaticook")).toBe(true);
+    // Sutton est la seule ligne ENTIÈREMENT prouvable offline.
+    expect(BPRIME_RECETTE_EXPECTATIONS.find((e) => e.citySlug === "sutton")!.provable).toBe(true);
+  });
+
+  it("aucun gap fantôme : chaque slug de gap est bien une ville du contrat", () => {
+    const contractSlugs = new Set(BPRIME_STEVE30_CONTRACT_CITIES.map((c) => c.slug));
+    for (const gap of BPRIME_RECETTE_OFFLINE_GAPS) {
+      for (const slug of gap.slugs) {
+        expect(contractSlugs.has(slug), `gap hors contrat: ${slug}`).toBe(true);
+      }
     }
   });
 });
