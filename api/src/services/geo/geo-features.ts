@@ -13,6 +13,7 @@
 import { sql, and, eq, isNotNull, inArray } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { zoneVersions, lotVersions, geoResolutions, graphNodes } from "../../db/schema.js";
+import { publicProvenanceFromEvidence } from "./provenance.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types GeoJSON minimaux
@@ -50,6 +51,8 @@ export interface ZoneFeatureProperties {
   anticipation: string | null;
   geomSource: string;
   geomFetchedAt: string | null;
+  proof?: Record<string, unknown>;
+  immo_zone_lot_provenance?: Record<string, unknown>;
 }
 
 export interface LotFeatureProperties {
@@ -65,6 +68,8 @@ export interface LotFeatureProperties {
   category: string | null;
   geomSource: string;
   geomFetchedAt: string | null;
+  proof?: Record<string, unknown>;
+  immo_zone_lot_provenance?: Record<string, unknown>;
 }
 
 export interface OpportuniteFeatureProperties {
@@ -188,6 +193,7 @@ export async function getZoneFeatures(
       geomSource: zoneVersions.geomSource,
       geomFetchedAt: zoneVersions.geomFetchedAt,
       citySlug: zoneVersions.citySlug,
+      evidence: zoneVersions.evidence,
     })
     .from(zoneVersions)
     .where(
@@ -211,6 +217,7 @@ export async function getZoneFeatures(
       anticipation: res?.anticipation ?? null,
       geomSource: row.geomSource,
       geomFetchedAt: row.geomFetchedAt ? row.geomFetchedAt.toISOString() : null,
+      ...publicProvenanceFromEvidence(row.evidence),
     };
     return {
       type: "Feature" as const,
@@ -242,6 +249,7 @@ export async function getLotFeatures(
       geomSource: lotVersions.geomSource,
       geomFetchedAt: lotVersions.geomFetchedAt,
       citySlug: lotVersions.citySlug,
+      evidence: lotVersions.evidence,
     })
     .from(lotVersions)
     .where(
@@ -265,6 +273,7 @@ export async function getLotFeatures(
       category: null,
       geomSource: row.geomSource,
       geomFetchedAt: row.geomFetchedAt ? row.geomFetchedAt.toISOString() : null,
+      ...publicProvenanceFromEvidence(row.evidence),
     };
     return {
       type: "Feature" as const,
