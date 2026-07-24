@@ -13,6 +13,7 @@ import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
 function makeMunicipality(slug: string, name: string): MunicipalityT {
@@ -806,14 +807,14 @@ describe("SignauxSelPanel — m6 millésime du zonage", () => {
 });
 
 describe("SignauxSelPanel — audit des sources de zone", () => {
-  const labels: Record<string, string> = {
+  const labels: Record<GeometryProvenanceStatus, string> = {
     "historical-verified": "Vérifiée dans les dossiers historiques",
     "legacy-traceable": "Trace historique disponible",
     "candidate-needs-human-confirmation": "À confirmer par une personne",
     orphan: "Source de géométrie non reliée",
   };
 
-  function auditedZones(status: keyof typeof labels) {
+  function auditedZones(status: GeometryProvenanceStatus) {
     const response = makeZonesResponse(["H-431"]);
     response.featureCollection.features[0]!.properties.proof = {
       schema_version: "1.0",
@@ -834,8 +835,8 @@ describe("SignauxSelPanel — audit des sources de zone", () => {
     return response;
   }
 
-  it.each(Object.entries(labels))("affiche le statut %s", async (status, label) => {
-    const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: auditedZones(status as keyof typeof labels) } });
+  it.each(Object.entries(labels) as Array<[GeometryProvenanceStatus, string]>)("affiche le statut %s", async (status, label) => {
+    const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: auditedZones(status) } });
     await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
     expect(view.getByText(label)).not.toBeNull();
     expect(view.getByText("Source réglementaire indisponible")).not.toBeNull();
