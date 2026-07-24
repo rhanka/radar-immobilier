@@ -26,8 +26,7 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, DatePicker, Tabs } from "@sentropic/design-system-svelte";
-  import type { DatePickerRange } from "@sentropic/design-system-svelte";
+  import { Checkbox, Tabs, TimeRangePicker } from "@sentropic/design-system-svelte";
   import {
     aFlagsFromKey,
     bAxesFromVivierKey,
@@ -46,9 +45,10 @@
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
   import {
-    defaultDateRange,
-    sameRange,
-    type SignalDateRange,
+    defaultSignalTimeRange,
+    formatSignalTimeRange,
+    SIGNAL_TIME_RANGE_PRESETS,
+    type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import RailShell from "$lib/components/maps/RailShell.svelte";
   import RailSection from "$lib/components/maps/RailSection.svelte";
@@ -77,8 +77,8 @@
   /** Exclusions d'affichage de la vue B (cochées par défaut, décochables). */
   export let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
 
-  /** Parent-owned display lens shared by both Vivier tabs. */
-  export let dateRange: SignalDateRange = defaultDateRange();
+  /** Parent-owned DS temporal selection shared by both Vivier tabs. */
+  export let timeRange: SignalTimeRange = defaultSignalTimeRange();
 
   /**
    * m1.7 — Compte LIVE de `selectedSlug`, calculé par le parent sur les mêmes
@@ -104,17 +104,16 @@
   /** Appelé quand une exclusion d'affichage de B est cochée/décochée. */
   export let onExclusionsChange: (next: VivierBExclusions) => void = () => {};
   /** Called when the canonical DS temporal control changes its range. */
-  export let onDateRangeChange: (next: SignalDateRange) => void = () => {};
+  export let onTimeRangeChange: (next: SignalTimeRange) => void = () => {};
 
-  const today = new Date();
-  let lastDateRange: SignalDateRange = dateRange;
-  let pickedDateRange: DatePickerRange = { start: dateRange.start, end: dateRange.end };
-  $: if (!sameRange(dateRange, lastDateRange)) {
-    lastDateRange = dateRange;
-    pickedDateRange = { start: dateRange.start, end: dateRange.end };
-  }
-  $: if (!sameRange(pickedDateRange, dateRange)) {
-    onDateRangeChange({ start: pickedDateRange.start, end: pickedDateRange.end });
+  // The DS resolves presets when the user opens/selects them. Refresh the
+  // upper bound then, rather than pinning a long-lived rail to its mount time.
+  let timeRangeMax = Date.now();
+  function refreshTimeRangeMax(event: Event): void {
+    if (!(event.target instanceof Element) || !event.target.closest(".st-timeRangePicker")) {
+      return;
+    }
+    timeRangeMax = Date.now();
   }
 
   function setExclusion(patch: Partial<VivierBExclusions>): void {
@@ -342,18 +341,21 @@
       ).length;
 </script>
 
+<svelte:window onpointerdown={refreshTimeRangeMax} onkeydown={refreshTimeRangeMax} />
+
 <!-- Panneaux de tab déclarés au NIVEAU RACINE (pas dans <RailSection>, sinon
      Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
 {#snippet panelA()}
   <div class="vivier-panel">
-    <DatePicker
-      mode="range"
+    <TimeRangePicker
+      value={timeRange}
+      onChange={onTimeRangeChange}
+      presets={SIGNAL_TIME_RANGE_PRESETS}
       size="sm"
       locale="fr-CA"
-      max={today}
+      max={timeRangeMax}
       label="Période des signaux"
-      placeholder="Choisir une période"
-      bind:value={pickedDateRange}
+      formatRange={formatSignalTimeRange}
     />
     <div class="vivier-toggles">
       <Checkbox
@@ -377,14 +379,15 @@
 
 {#snippet panelB()}
   <div class="vivier-panel">
-    <DatePicker
-      mode="range"
+    <TimeRangePicker
+      value={timeRange}
+      onChange={onTimeRangeChange}
+      presets={SIGNAL_TIME_RANGE_PRESETS}
       size="sm"
       locale="fr-CA"
-      max={today}
+      max={timeRangeMax}
       label="Période des signaux"
-      placeholder="Choisir une période"
-      bind:value={pickedDateRange}
+      formatRange={formatSignalTimeRange}
     />
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts

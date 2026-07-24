@@ -1,6 +1,6 @@
 /** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, fireEvent, cleanup, getAllByRole, getByLabelText } from "@testing-library/svelte";
+import { render, fireEvent, cleanup, getAllByRole, getByRole } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { VivierV2Counts } from "@radar/domain";
@@ -106,19 +106,34 @@ describe("SignauxRail — tabs A / B", () => {
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it("renders the canonical temporal DatePicker in both A and B without retired presets", async () => {
+  it("renders the canonical New Relic-style DS time range picker in both A and B", async () => {
     const { container } = renderRail();
     const expectTemporalPicker = () => {
       expect(container.textContent).toContain("Période des signaux");
-      expect(getByLabelText(container, "Période des signaux")).toBeInstanceOf(HTMLElement);
-      expect(container.textContent).not.toContain("3 mois");
-      expect(container.textContent).not.toContain("6 mois");
-      expect(container.textContent).not.toContain("12 mois");
+      expect(container.querySelector(".st-timeRangePicker")).toBeInstanceOf(HTMLElement);
+      expect(container.querySelector(".st-datePicker")).toBeNull();
+      expect(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i })).toBeInstanceOf(HTMLButtonElement);
     };
 
     expectTemporalPicker();
     await fireEvent.click(getTabs(container)[1]!);
     expectTemporalPicker();
+  });
+
+  it("emits the selected DS relative period for the parent-owned A/B lens", async () => {
+    const onTimeRangeChange = vi.fn();
+    const { container, getByText } = render(SignauxRail, {
+      props: { entries: [], onTimeRangeChange },
+    });
+
+    await fireEvent.click(
+      getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }),
+    );
+    await fireEvent.click(getByText("3 derniers mois"));
+
+    expect(onTimeRangeChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: "relative", relative: "3mo" }),
+    );
   });
 
   it("shows A's three combinable axes checked by default (z|m|p)", () => {
