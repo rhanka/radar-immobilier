@@ -258,61 +258,163 @@ describe("fallback proxy geo (collection absente du store local)", () => {
   });
 });
 
-describe("provenance passthrough", () => {
+describe("provenance passthrough — additivité stricte (contrat §9.4)", () => {
   const statuses = [
     "historical-verified",
     "legacy-traceable",
     "candidate-needs-human-confirmation",
     "orphan",
-  ];
+  ] as const;
 
+  /** Provenance v1 CONFORME pour un statut de géométrie donné. */
+  function provenanceFor(status: (typeof statuses)[number]) {
+    const isHistorical = status === "historical-verified";
+    return {
+      contract: "immo-zone-lot-provenance/v1",
+      assessed_at: "2026-07-22T14:00:00Z",
+      lot_assignment_evidence: {
+        state: "recorded",
+        selected_zone: { collection: "qc-zonage-delson", feature_ref: null, code: "H-12" },
+        assignment_method: "area-majority",
+        dominant_fraction: 0.9,
+        multi_zone: false,
+        zone_codes: ["H-12"],
+        evidence_snapshot: "2026-06-21",
+        evidence_id: "lot-zone-ev-7d21",
+        reason_codes: [],
+      },
+      zone_geometry_provenance: {
+        status,
+        zone: { collection: "qc-zonage-delson", feature_ref: null, code: "H-12" },
+        public_source: isHistorical
+          ? {
+              url: "https://donnees.example.org/zonage.geojson",
+              type: "geojson-officiel",
+              method: "natif",
+              retrieved_at: "2026-06-21T09:00:00Z",
+              sha256: null,
+            }
+          : null,
+        verified_at: isHistorical ? "2026-07-22T13:50:00Z" : null,
+        evidence_id: isHistorical ? "geom-ev-a02e" : null,
+        reason_codes: status === "orphan" ? ["source-identity-unlinked"] : status === "candidate-needs-human-confirmation" ? ["needs-human-confirmation"] : [],
+      },
+      acquisition_v2_readiness: { state: "not-ready", checked_at: "2026-07-22T14:00:00Z", unmet_requirement_codes: ["missing-content-sha256"] },
+    };
+  }
+
+  /** Champs PRÉEXISTANTS (jointure) + proof — la donnée que le contrat protège. */
+  function baseProperties(index: number) {
+    return {
+      NO_LOT: `700000${index}`,
+      zone_code: "H-12",
+      code_zone: "H-12",
+      zone_codes: ["H-12"],
+      dominant_fraction: 0.9,
+      multi_zone: false,
+      assignment_method: "area-majority",
+      norms: { hauteur: "12 m", densite: null },
+      adresse: null,
+      proof: {
+        schema_version: "1.0",
+        status: index % 2 ? "partial" : "complete",
+        sources: {
+          geometry: { status: "available", artifact_uri: "https://geo.example/lots.geojson", upstream_uri: null },
+          regulation: { status: "unavailable", artifact_uri: null, upstream_uri: null },
+        },
+        zone: null,
+        gaps: ["regulation_source_unavailable"],
+      },
+    };
+  }
+
+  /** BASELINE : projection préexistante (proof, JAMAIS de provenance). */
+  function baselineLots() {
+    return {
+      type: "FeatureCollection",
+      features: statuses.map((_status, index) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-73.5 + index / 100, 45.4] },
+        properties: baseProperties(index),
+      })),
+    };
+  }
+
+  /** ENRICHI : baseline + l'enveloppe de provenance additive. */
   function auditedLots() {
     return {
       type: "FeatureCollection",
       features: statuses.map((status, index) => ({
         type: "Feature",
         geometry: { type: "Point", coordinates: [-73.5 + index / 100, 45.4] },
-        properties: {
-          NO_LOT: `700000${index}`,
-          code_zone: "H-12",
-          dominant_fraction: 0.9,
-          multi_zone: false,
-          assignment_method: "area-majority",
-          norms: { hauteur: "12 m" },
-          proof: { schema_version: "1.0", status: index % 2 ? "partial" : "complete", sources: {}, zone: null, gaps: [] },
-          immo_zone_lot_provenance: {
-            contract: "immo-zone-lot-provenance/v1",
-            zone_geometry_provenance: { status, public_source: null, reason_codes: status === "orphan" ? ["source-identity-unlinked"] : [] },
-            acquisition_v2_readiness: { state: "not-ready", unmet_requirement_codes: ["missing-content-sha256"] },
-          },
-        },
+        properties: { ...baseProperties(index), immo_zone_lot_provenance: provenanceFor(status) },
       })),
     };
   }
 
-  function withoutAudit(fc: ReturnType<typeof auditedLots>) {
-    return { ...fc, features: fc.features.map(({ properties, ...feature }) => {
-      const { proof: _proof, immo_zone_lot_provenance: _provenance, ...baseline } = properties;
-      return { ...feature, properties: baseline };
-    }) };
+  const emptyZones = { type: "FeatureCollection", features: [] };
+
+  async function serve(body: unknown) {
+    const app = geoCollectionsRoute({
+      localResolver: emptyLocal,
+      fetchImpl: makeCollectionsFetch({ lots: { status: 200, body }, zonage: { status: 200, body: emptyZones } }).fn,
+    });
+    return (await app.request("/api/geo/collections/qc-lots-delson/items").then((res) => res.json())) as {
+      features: Array<{ properties: Record<string, unknown> }>;
+    };
   }
 
-  it("keeps all statuses and leaves the existing lot projection unchanged", async () => {
-    const audited = auditedLots();
-    const zones = { type: "FeatureCollection", features: [] };
-    const auditedApp = geoCollectionsRoute({ localResolver: emptyLocal, fetchImpl: makeCollectionsFetch({ lots: { status: 200, body: audited }, zonage: { status: 200, body: zones } }).fn });
-    const baselineApp = geoCollectionsRoute({ localResolver: emptyLocal, fetchImpl: makeCollectionsFetch({ lots: { status: 200, body: withoutAudit(audited) }, zonage: { status: 200, body: zones } }).fn });
-    const [auditedBody, baselineBody] = await Promise.all([
-      auditedApp.request("/api/geo/collections/qc-lots-delson/items").then((res) => res.json()),
-      baselineApp.request("/api/geo/collections/qc-lots-delson/items").then((res) => res.json()),
-    ]) as Array<{ features: Array<{ properties: Record<string, unknown> }> }>;
+  it("porte les 4 statuts de provenance sans jamais toucher le rattachement enregistré", async () => {
+    const auditedBody = await serve(auditedLots());
+    expect(auditedBody.features).toHaveLength(4);
+    expect(
+      auditedBody.features.map(
+        (f) => (f.properties.immo_zone_lot_provenance as { zone_geometry_provenance: { status: string } }).zone_geometry_provenance.status,
+      ),
+    ).toEqual([...statuses]);
+  });
 
-    expect(auditedBody.features.map((feature) => feature.properties.immo_zone_lot_provenance as { zone_geometry_provenance: { status: string } })).toHaveLength(4);
-    expect(auditedBody.features.map((feature) => (feature.properties.immo_zone_lot_provenance as { zone_geometry_provenance: { status: string } }).zone_geometry_provenance.status)).toEqual(statuses);
-    expect(auditedBody.features.map(({ properties, ...feature }) => {
-      const { proof: _proof, immo_zone_lot_provenance: _provenance, ...baseline } = properties;
-      return { ...feature, properties: baseline };
-    })).toEqual(baselineBody.features);
+  it("en retirant SEULEMENT immo_zone_lot_provenance, la projection (proof inclus) est identique au baseline", async () => {
+    const [auditedBody, baselineBody] = await Promise.all([serve(auditedLots()), serve(baselineLots())]);
+
+    // Retire UNIQUEMENT la provenance (le contrat conserve proof).
+    const strippedOfProvenance = auditedBody.features.map(({ properties, ...feature }) => {
+      const { immo_zone_lot_provenance: _provenance, ...kept } = properties;
+      return { ...feature, properties: kept };
+    });
+    expect(strippedOfProvenance).toEqual(baselineBody.features);
+
+    // Identité explicite, champ par champ (contrat §9.4).
+    auditedBody.features.forEach((audited, i) => {
+      const base = baselineBody.features[i]!.properties;
+      const p = audited.properties;
+      expect(p.zone_code).toBe(base.zone_code);
+      expect(p.code_zone).toBe(base.code_zone);
+      expect(p.zone_codes).toEqual(base.zone_codes);
+      expect(p.dominant_fraction).toBe(base.dominant_fraction);
+      expect(p.multi_zone).toBe(base.multi_zone);
+      expect(p.assignment_method).toBe(base.assignment_method);
+      expect(p.norms).toEqual(base.norms);
+      expect(p.adresse).toBeNull(); // un null préexistant reste null
+      // proof PRÉSERVÉ à l'identique (jamais retiré par le sanitiseur).
+      expect(p.proof).toEqual(base.proof);
+      expect(p.proof).toBeDefined();
+    });
+  });
+
+  it("le sanitiseur ne retire JAMAIS un proof conforme, même si la provenance est frauduleuse", async () => {
+    // Un lot avec proof conforme + provenance qui fuit (clé interne) : proof
+    // conservé tel quel, provenance entièrement écartée.
+    const leaky = baselineLots();
+    (leaky.features[0]!.properties as Record<string, unknown>).immo_zone_lot_provenance = {
+      ...provenanceFor("orphan"),
+      raw_log: "internal-secret", // clé inconnue = fuite → enveloppe rejetée
+    };
+    const body = await serve(leaky);
+    const props = body.features[0]!.properties;
+    expect(props.proof).toEqual(baseProperties(0).proof); // proof intact
+    expect("immo_zone_lot_provenance" in props).toBe(false); // provenance écartée
+    expect(JSON.stringify(body)).not.toContain("internal-secret");
   });
 });
 
