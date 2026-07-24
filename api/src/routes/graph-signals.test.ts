@@ -387,8 +387,11 @@ describe("GET /api/graph-signals/:city", () => {
       effetDensifiant: "inconnu",
     });
     // The same B′ exclusion is present on the active B wire classification.
+    // R4 : le pôle commercial régional est désormais exclu par RAISON NOMMÉE dans
+    // le chemin résidentiel serveur (source auditable), sans changer valeur ni
+    // exclusion_reason.
     expect(body.nodes[0]!.classification).toMatchObject({
-      residentiel: { valeur: "non", source: "classifyBPrime" },
+      residentiel: { valeur: "non", source: "classifyBPrime:R4_pole_commercial_regional" },
       exclusion_reason: "non_residentiel_franc",
     });
   });
