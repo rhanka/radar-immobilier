@@ -1,4 +1,5 @@
 import type { GeoJsonGeometry } from "./cadastre-geojson-source.js";
+import type { FeatureProof, ImmoZoneLotProvenance } from "./geo-provenance.js";
 import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 export type GeoZoneResolutionStatus = "official" | "fallback" | "missing";
@@ -22,6 +23,10 @@ export interface GeoZoneProperties {
   lotCount: number;
   lots: GeoZoneLotRef[];
   label?: string;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  proof?: FeatureProof;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  immo_zone_lot_provenance?: ImmoZoneLotProvenance;
   /**
    * Famille/kind de la zone quand la source l'expose (ex. "habitation",
    * lettre canonique "H", code court geo "CO") — sert à la teinte des aplats
