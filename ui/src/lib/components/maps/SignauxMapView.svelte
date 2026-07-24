@@ -139,9 +139,12 @@
     type VivierBExclusions,
   } from "$lib/signals/vivier-b-display-filter.js";
   import {
-    defaultDateRange,
+    dateRangeFromSignalTimeRange,
+    defaultSignalTimeRange,
     filterNodesByEtapeDate,
+    normalizeSignalTimeRange,
     type SignalDateRange,
+    type SignalTimeRange,
   } from "$lib/signals/signal-date-filter.js";
   import { rankVivierBNodes } from "$lib/signals/vivier-b-ranking.js";
   import {
@@ -318,7 +321,8 @@
    * serveur ni les compteurs : elles ne font que masquer.
    */
   let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
-  let dateRange: SignalDateRange = defaultDateRange();
+  let timeRange: SignalTimeRange = defaultSignalTimeRange();
+  let dateRange: SignalDateRange = dateRangeFromSignalTimeRange(timeRange);
 
   /**
    * Visible nodes retain the server-authoritative A/B projection and apply the
@@ -371,8 +375,9 @@
     reconcileToVisibleNodes();
   }
 
-  function handleDateRangeChange(next: SignalDateRange): void {
-    dateRange = next;
+  function handleTimeRangeChange(next: SignalTimeRange): void {
+    timeRange = normalizeSignalTimeRange(next);
+    dateRange = dateRangeFromSignalTimeRange(timeRange);
     reconcileToVisibleNodes();
     updateGeoLayers();
   }
@@ -1862,13 +1867,13 @@
       dataUnavailable={loadError !== null}
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
-      {dateRange}
+      {timeRange}
       {selectedCityLiveCount}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
-      onDateRangeChange={handleDateRangeChange}
+      onTimeRangeChange={handleTimeRangeChange}
     />
   </svelte:fragment>
 

@@ -1,19 +1,115 @@
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
-/** Compatible with the design-system DatePicker range value. */
+const DAY_MS = 24 * 60 * 60 * 1_000;
+
+export interface SignalTimeRange {
+  mode: "relative" | "absolute";
+  relative?: string;
+  from: number;
+  to: number;
+}
+
+export interface SignalTimeRangePreset {
+  token: string;
+  label: string;
+  durationMs: number;
+}
+
+/**
+ * Domain labels for the canonical DS TimeRangePicker. Its preset resolver
+ * needs a duration, while Radar normalizes the selected range to calendar
+ * months below before it reaches the display lens.
+ */
+export const SIGNAL_TIME_RANGE_PRESETS: SignalTimeRangePreset[] = [
+  { token: "3mo", label: "3 derniers mois", durationMs: 90 * DAY_MS },
+  { token: "6mo", label: "6 derniers mois", durationMs: 180 * DAY_MS },
+  { token: "12mo", label: "12 derniers mois", durationMs: 365 * DAY_MS },
+];
+
+const MONTHS_BY_PRESET: Record<string, number> = {
+  "3mo": 3,
+  "6mo": 6,
+  "12mo": 12,
+};
+
+function calendarMonthsAgo(to: number, months: number): number {
+  const end = new Date(to);
+  const targetYear = end.getFullYear();
+  const targetMonth = end.getMonth() - months;
+  const lastDayOfTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+  return new Date(
+    targetYear,
+    targetMonth,
+    Math.min(end.getDate(), lastDayOfTargetMonth),
+    end.getHours(),
+    end.getMinutes(),
+    end.getSeconds(),
+    end.getMilliseconds(),
+  ).getTime();
+}
+
+function signalTimeRangeForPreset(token: string, to: number): SignalTimeRange | null {
+  const months = MONTHS_BY_PRESET[token];
+  if (!months) return null;
+
+  return {
+    mode: "relative",
+    relative: token,
+    from: calendarMonthsAgo(to, months),
+    to,
+  };
+}
+
+/** The Radar opens on its established six-calendar-month temporal lens. */
+export function defaultSignalTimeRange(now = Date.now()): SignalTimeRange {
+  return signalTimeRangeForPreset("6mo", now)!;
+}
+
+/**
+ * The DS resolves custom presets as a duration. Convert Radar's relative
+ * month presets to their calendar-month equivalent before filtering data.
+ */
+export function normalizeSignalTimeRange(
+  range: SignalTimeRange,
+  now = Date.now(),
+): SignalTimeRange {
+  if (range.mode !== "relative" || !range.relative) return range;
+  return signalTimeRangeForPreset(range.relative, now) ?? range;
+}
+
+/** Accessible trigger text for the DS New Relic-style time range picker. */
+export function formatSignalTimeRange(range: SignalTimeRange, locale: string): string {
+  if (range.mode === "relative" && range.relative) {
+    const preset = SIGNAL_TIME_RANGE_PRESETS.find(({ token }) => token === range.relative);
+    if (preset) return preset.label;
+  }
+
+  const formatter = new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return `${formatter.format(new Date(range.from))} – ${formatter.format(new Date(range.to))}`;
+}
+
+/** Internal date-only range consumed by the Signals projection lens. */
 export interface SignalDateRange {
   start: Date | null;
   end: Date | null;
 }
 
-/** The canonical DatePicker starts open, so the initial view stays unfiltered. */
-export function defaultDateRange(): SignalDateRange {
-  return { start: null, end: null };
+function localDate(timestamp: number): Date {
+  const source = new Date(timestamp);
+  return new Date(source.getFullYear(), source.getMonth(), source.getDate());
 }
 
-export function sameRange(a: SignalDateRange, b: SignalDateRange): boolean {
-  const timestamp = (date: Date | null): number | null => date?.getTime() ?? null;
-  return timestamp(a.start) === timestamp(b.start) && timestamp(a.end) === timestamp(b.end);
+/** Adapts the DS epoch range to inclusive local civil dates for graph data. */
+export function dateRangeFromSignalTimeRange(range: SignalTimeRange): SignalDateRange {
+  return { start: localDate(range.from), end: localDate(range.to) };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

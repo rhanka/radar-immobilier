@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
-  defaultDateRange,
+  dateRangeFromSignalTimeRange,
+  defaultSignalTimeRange,
   filterNodesByEtapeDate,
+  normalizeSignalTimeRange,
   signalEtapeDate,
 } from "./signal-date-filter.js";
 
@@ -19,10 +21,47 @@ function node(id: string, props: Record<string, unknown>): GraphSignalNode {
 }
 
 describe("signal date filter", () => {
-  it("should leave the initial temporal lens open", () => {
-    const range = defaultDateRange();
+  it("defaults to the established rolling six-calendar-month lens", () => {
+    const now = new Date(2026, 6, 23, 10, 30).getTime();
+    const range = defaultSignalTimeRange(now);
 
-    expect(range).toEqual({ start: null, end: null });
+    expect(range).toEqual({
+      mode: "relative",
+      relative: "6mo",
+      from: new Date(2026, 0, 23, 10, 30).getTime(),
+      to: now,
+    });
+  });
+
+  it("anchors a selected DS month preset to the selection instant", () => {
+    const staleTo = new Date(2026, 7, 31, 12, 0).getTime();
+    const selectedAt = new Date(2026, 8, 1, 9, 15).getTime();
+    const normalized = normalizeSignalTimeRange({
+      mode: "relative",
+      relative: "6mo",
+      from: staleTo - 180 * 24 * 60 * 60 * 1_000,
+      to: staleTo,
+    }, selectedAt);
+
+    expect(normalized).toEqual({
+      mode: "relative",
+      relative: "6mo",
+      from: new Date(2026, 2, 1, 9, 15).getTime(),
+      to: selectedAt,
+    });
+  });
+
+  it("adapts the DS epoch range to local civil dates", () => {
+    const range = dateRangeFromSignalTimeRange({
+      mode: "absolute",
+      from: new Date(2026, 5, 15, 14, 30).getTime(),
+      to: new Date(2026, 5, 16, 9, 15).getTime(),
+    });
+
+    expect(range).toEqual({
+      start: new Date(2026, 5, 15),
+      end: new Date(2026, 5, 16),
+    });
   });
 
   it("should read an etape date from graph properties", () => {
