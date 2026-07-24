@@ -1,0 +1,14 @@
+{
+  "_note": "FROZEN legacy Filter A baseline (UI layer) at pre-3.4 HEAD. Ordered member ids per URL subset state. Regression inputs, NOT to be regenerated. A change is NO-GO per the Filter A addendum. Note the legacy 'm' axis is IGNORED client-side (unknown flag) — it survives only as a server counter.",
+  "filterMembers": {
+    "": ["n1", "n2", "n3", "n4", "n5"],
+    "z": ["n1", "n3", "n4", "n5"],
+    "m": ["n1", "n2", "n3", "n4", "n5"],
+    "p": ["n1", "n4", "n5"],
+    "z|m": ["n1", "n3", "n4", "n5"],
+    "z|p": ["n1", "n4", "n5"],
+    "m|p": ["n1", "n4", "n5"],
+    "z|m|p": ["n1", "n4", "n5"],
+    "x|z": ["n1", "n3", "n4", "n5"]
+  }
+}
