@@ -258,6 +258,64 @@ describe("fallback proxy geo (collection absente du store local)", () => {
   });
 });
 
+describe("provenance passthrough", () => {
+  const statuses = [
+    "historical-verified",
+    "legacy-traceable",
+    "candidate-needs-human-confirmation",
+    "orphan",
+  ];
+
+  function auditedLots() {
+    return {
+      type: "FeatureCollection",
+      features: statuses.map((status, index) => ({
+        type: "Feature",
+        geometry: { type: "Point", coordinates: [-73.5 + index / 100, 45.4] },
+        properties: {
+          NO_LOT: `700000${index}`,
+          code_zone: "H-12",
+          dominant_fraction: 0.9,
+          multi_zone: false,
+          assignment_method: "area-majority",
+          norms: { hauteur: "12 m" },
+          proof: { schema_version: "1.0", status: index % 2 ? "partial" : "complete", sources: {}, zone: null, gaps: [] },
+          immo_zone_lot_provenance: {
+            contract: "immo-zone-lot-provenance/v1",
+            zone_geometry_provenance: { status, public_source: null, reason_codes: status === "orphan" ? ["source-identity-unlinked"] : [] },
+            acquisition_v2_readiness: { state: "not-ready", unmet_requirement_codes: ["missing-content-sha256"] },
+          },
+        },
+      })),
+    };
+  }
+
+  function withoutAudit(fc: ReturnType<typeof auditedLots>) {
+    return { ...fc, features: fc.features.map(({ properties, ...feature }) => {
+      const { proof: _proof, immo_zone_lot_provenance: _provenance, ...baseline } = properties;
+      return { ...feature, properties: baseline };
+    }) };
+  }
+
+  it("keeps all statuses and leaves the existing lot projection unchanged", async () => {
+    const audited = auditedLots();
+    const zones = { type: "FeatureCollection", features: [] };
+    const auditedApp = geoCollectionsRoute({ localResolver: emptyLocal, fetchImpl: makeCollectionsFetch({ lots: { status: 200, body: audited }, zonage: { status: 200, body: zones } }).fn });
+    const baselineApp = geoCollectionsRoute({ localResolver: emptyLocal, fetchImpl: makeCollectionsFetch({ lots: { status: 200, body: withoutAudit(audited) }, zonage: { status: 200, body: zones } }).fn });
+    const [auditedBody, baselineBody] = await Promise.all([
+      auditedApp.request("/api/geo/collections/qc-lots-delson/items").then((res) => res.json()),
+      baselineApp.request("/api/geo/collections/qc-lots-delson/items").then((res) => res.json()),
+    ]) as Array<{ features: Array<{ properties: Record<string, unknown> }> }>;
+
+    expect(auditedBody.features.map((feature) => feature.properties.immo_zone_lot_provenance as { zone_geometry_provenance: { status: string } })).toHaveLength(4);
+    expect(auditedBody.features.map((feature) => (feature.properties.immo_zone_lot_provenance as { zone_geometry_provenance: { status: string } }).zone_geometry_provenance.status)).toEqual(statuses);
+    expect(auditedBody.features.map(({ properties, ...feature }) => {
+      const { proof: _proof, immo_zone_lot_provenance: _provenance, ...baseline } = properties;
+      return { ...feature, properties: baseline };
+    })).toEqual(baselineBody.features);
+  });
+});
+
 // ─── Erreurs ─────────────────────────────────────────────────────────────────
 describe("erreurs", () => {
   it("erreur réseau geo → 502 honnête (pas de crash)", async () => {
