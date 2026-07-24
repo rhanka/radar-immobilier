@@ -18,7 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime, FRANC_NON_RESIDENTIEL_SOURCE } from "@radar/domain";
+import { classifyBPrime } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -1232,15 +1232,14 @@ const RESIDENTIEL_MARKERS_RE =
  * opportunité). `agricole` est inclus mais protégé par la même règle : une
  * exclusion CPTAQ « à des fins résidentielles » porte le marqueur résidentiel.
  */
-// Le segment commercial/industriel/enseigne vient de la SOURCE PARTAGÉE
-// `FRANC_NON_RESIDENTIEL_SOURCE` (@radar/domain) → sync garanti avec
-// `classifyBPrime` et le R3 de `vivier-v2`. Le pluriel « commerciaux » et les
-// variantes enseigne/affichage/panneau-réclame y sont couverts (trou R3 réel,
-// contre-exemple Lavaltrie C-8). Le reste (agricole/environnemental/riverain…)
-// reste propre au lexique résidentiel serveur.
-const NON_RESIDENTIEL_MARKERS_RE = new RegExp(
-  `\\b(?:${FRANC_NON_RESIDENTIEL_SOURCE}|camping|agricole|exploitation agricole|terres? agricoles?|environnement(?:al(?:e)?)?|milieux? humides?|zone inondable|plaine inondable|inondable|conservation|bande riveraine|riveraine|eolien(?:ne)?s?|minier(?:e)?s?|carriere|graviere|sabliere|entreposage|entrepot|stationnement)\\b`,
-);
+// Lexique résidentiel SERVEUR (axe A / `r`) — STRICTEMENT INDÉPENDANT du lexique
+// franc-non-résidentiel B′ (`FRANC_NON_RESIDENTIEL_SOURCE`). Ne PAS le fusionner
+// avec la source partagée B′ : `classifyResidentielPertinence` est l'axe
+// résidentiel de A et doit rester invariant (golden testé). Le durcissement R3
+// (« commerciaux », enseigne/affichage) vit UNIQUEMENT côté B′ (b-prime.ts +
+// vivier-v2.ts), jamais ici.
+const NON_RESIDENTIEL_MARKERS_RE =
+  /\b(?:industriel(?:le)?s?|parc industriel|zone industrielle|commercial(?:e)?s?|centre commercial|camping|agricole|exploitation agricole|terres? agricoles?|environnement(?:al(?:e)?)?|milieux? humides?|zone inondable|plaine inondable|inondable|conservation|bande riveraine|riveraine|eolien(?:ne)?s?|minier(?:e)?s?|carriere|graviere|sabliere|entreposage|entrepot|stationnement)\b/;
 
 /** Normalise un texte : minuscule + suppression des accents (é→e, è→e…). */
 function foldText(raw: string): string {
