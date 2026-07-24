@@ -756,3 +756,14 @@ describe("usage dominant (qc-zonage) → zone{usageDominant,usageDominantSource}
     expect(zone?.usageDominantSource).toBeUndefined();
   });
 });
+
+describe("enveloppes de provenance geo", () => {
+  it("conserve proof et immo_zone_lot_provenance sans les reformater", async () => {
+    const proof = { schema_version: "1.0", status: "partial", sources: {}, zone: null, gaps: ["regulation_source_unavailable"] };
+    const provenance = { contract: "immo-zone-lot-provenance/v1", acquisition_v2_readiness: { state: "not-ready", unmet_requirement_codes: ["missing-content-sha256"] } };
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ type: "FeatureCollection", features: [{ type: "Feature", geometry: null, properties: { NO_LOT: "P-1", proof, immo_zone_lot_provenance: provenance } }] }), { status: 200 }));
+    const response = await fetchLots("delson", { baseUrl: "" });
+    expect(response.featureCollection.features[0]!.properties.proof).toEqual(proof);
+    expect(response.featureCollection.features[0]!.properties.immo_zone_lot_provenance).toEqual(provenance);
+  });
+});

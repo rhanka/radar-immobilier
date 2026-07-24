@@ -315,3 +315,14 @@ describe("matchZonesToSignal", () => {
     expect(matched.map((z) => z.properties.code)).toEqual(["C-18"]);
   });
 });
+
+describe("enveloppes de provenance geo", () => {
+  it("conserve proof v2 et immo_zone_lot_provenance sans les reformater", async () => {
+    const proof = { schema_version: "2.0", geometry_source: { url: "https://ville.example/zonage.geojson" } };
+    const provenance = { contract: "immo-zone-lot-provenance/v1", zone_geometry_provenance: { status: "legacy-traceable", public_source: null } };
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ type: "FeatureCollection", features: [makeZonePolygon({ code: "H-12", proof, immo_zone_lot_provenance: provenance })] }), { status: 200 }));
+    const response = await fetchZones("delson", { baseUrl: "" });
+    expect(response.featureCollection.features[0]!.properties.proof).toEqual(proof);
+    expect(response.featureCollection.features[0]!.properties.immo_zone_lot_provenance).toEqual(provenance);
+  });
+});
