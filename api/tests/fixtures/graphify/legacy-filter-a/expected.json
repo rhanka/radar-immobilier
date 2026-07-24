@@ -1,0 +1,41 @@
+{
+  "_note": "FROZEN legacy Filter A baseline (server layer) at pre-3.4 HEAD. These are regression inputs, NOT examples to update after a run. A change here is NO-GO per docs/reports/consensus/graphify-3.4-legacy-filter-a-addendum.md unless the legacy z|m|p contract is deliberately and separately re-ratified.",
+  "memberships": {
+    "alpha-s1": { "z": true, "m": true, "p": true },
+    "alpha-s2": { "z": false, "m": false, "p": false },
+    "alpha-s3": { "z": true, "m": false, "p": false },
+    "alpha-s4": { "z": true, "m": true, "p": true },
+    "beta-s5": { "z": true, "m": false, "p": false },
+    "beta-s6": { "z": true, "m": true, "p": true },
+    "beta-s7": { "z": true, "m": false, "p": true },
+    "beta-s8": { "z": true, "m": true, "p": true }
+  },
+  "cities": {
+    "alpha": {
+      "subsetCounts": {
+        "": 4,
+        "z": 3,
+        "m": 2,
+        "p": 2,
+        "z|m": 2,
+        "z|p": 2,
+        "m|p": 2,
+        "z|m|p": 2
+      },
+      "aProjectionIds": ["alpha-s1", "alpha-s4"]
+    },
+    "beta": {
+      "subsetCounts": {
+        "": 4,
+        "z": 4,
+        "m": 2,
+        "p": 3,
+        "z|m": 2,
+        "z|p": 3,
+        "m|p": 2,
+        "z|m|p": 2
+      },
+      "aProjectionIds": ["beta-s6", "beta-s8"]
+    }
+  }
+}
