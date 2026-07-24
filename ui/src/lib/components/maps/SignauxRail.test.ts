@@ -1,6 +1,6 @@
 /** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, fireEvent, cleanup, getAllByRole, getByRole } from "@testing-library/svelte";
+import { render, fireEvent, cleanup, getAllByRole, getByRole, getByText } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { VivierV2Counts } from "@radar/domain";
@@ -111,6 +111,8 @@ describe("SignauxRail — tabs A / B", () => {
     const expectTemporalPicker = () => {
       expect(container.textContent).toContain("Période des signaux");
       expect(container.querySelector(".st-timeRangePicker")).toBeInstanceOf(HTMLElement);
+      expect(container.querySelector(".signals-time-range-picker-wrap")).toBeInstanceOf(HTMLElement);
+      expect(container.querySelector(".signals-time-range-picker")).toBeInstanceOf(HTMLElement);
       expect(container.querySelector(".st-datePicker")).toBeNull();
       expect(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i })).toBeInstanceOf(HTMLButtonElement);
     };
@@ -122,18 +124,66 @@ describe("SignauxRail — tabs A / B", () => {
 
   it("emits the selected DS relative period for the parent-owned A/B lens", async () => {
     const onTimeRangeChange = vi.fn();
-    const { container, getByText } = render(SignauxRail, {
+    const { container } = render(SignauxRail, {
       props: { entries: [], onTimeRangeChange },
     });
 
     await fireEvent.click(
       getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }),
     );
-    await fireEvent.click(getByText("3 derniers mois"));
+    await fireEvent.click(getByText(document.body, "3 derniers mois"));
 
     expect(onTimeRangeChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ mode: "relative", relative: "3mo" }),
     );
+  });
+
+  it("allows every relative period to be selected sequentially", async () => {
+    const onTimeRangeChange = vi.fn();
+    const { container } = render(SignauxRail, {
+      props: { entries: [], onTimeRangeChange },
+    });
+    const trigger = () =>
+      getByRole(container, "button", { name: /Période des signaux.*derniers mois/i });
+
+    for (const [label, relative] of [
+      ["3 derniers mois", "3mo"],
+      ["6 derniers mois", "6mo"],
+      ["12 derniers mois", "12mo"],
+    ] as const) {
+      await fireEvent.click(trigger());
+      await fireEvent.click(getByText(document.body, label));
+      expect(onTimeRangeChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ mode: "relative", relative }),
+      );
+    }
+  });
+
+  it("positions the opened temporal overlay from its trigger and refreshes it on scroll", async () => {
+    const { container } = renderRail();
+    const trigger = getByRole(container, "button", {
+      name: /Période des signaux.*6 derniers mois/i,
+    });
+    let triggerTop = 36;
+    vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(
+      () => new DOMRect(16, triggerTop, 400, 32),
+    );
+    const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    await fireEvent.click(trigger);
+    await nextFrame();
+
+    const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
+    expect(popover.parentElement).toBe(document.body);
+    expect(popover.style.position).toBe("fixed");
+    expect(popover.style.top).toBe("72px");
+    expect(popover.style.left).toBe("16px");
+
+    triggerTop = 84;
+    window.dispatchEvent(new Event("scroll"));
+    await nextFrame();
+
+    expect(popover.style.top).toBe("120px");
   });
 
   it("shows A's three combinable axes checked by default (z|m|p)", () => {
