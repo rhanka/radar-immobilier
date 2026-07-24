@@ -63,6 +63,17 @@ describe("normalizeZonesAndLots — official zones", () => {
     expect(json).not.toContain("Example Street");
     expect(json).not.toContain("Private Owner");
   });
+
+  it("preserves safe proof and provenance envelopes on an official zone", () => {
+    const proof = { schema_version: "2.0", geometry_source: { url: "https://ville.example/zonage.geojson" } };
+    const provenance = { contract: "immo-zone-lot-provenance/v1" };
+    const result = normalizeZonesAndLots({
+      citySlug: "delson",
+      officialZones: [{ code: "H-12", geometry: LOT_GEOMETRY, proof, immo_zone_lot_provenance: provenance }],
+    });
+    expect(result.featureCollection.features[0]!.properties.proof).toEqual(proof);
+    expect(result.featureCollection.features[0]!.properties.immo_zone_lot_provenance).toEqual(provenance);
+  });
 });
 
 describe("normalizeZonesAndLots — lot fallback", () => {
