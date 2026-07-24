@@ -293,8 +293,33 @@ describe("upsertLotBatch", () => {
     const queryMock = vi.fn().mockResolvedValue({ rows: [], rowCount: 0 });
     const client = { query: queryMock, release: vi.fn() };
     const pool = { connect: vi.fn().mockResolvedValue(client) } as unknown as pg.Pool;
-    const proof = { schema_version: "1.0", status: "complete", sources: {}, zone: null, gaps: [] };
-    const provenance = { contract: "immo-zone-lot-provenance/v1", acquisition_v2_readiness: { state: "not-ready", unmet_requirement_codes: [] } };
+    const proof = {
+      schema_version: "1.0",
+      status: "complete",
+      sources: {
+        geometry: { status: "available", artifact_uri: "https://geo.example/lots.geojson", upstream_uri: null },
+        regulation: { status: "unavailable", artifact_uri: null, upstream_uri: null },
+      },
+      zone: null,
+      gaps: [],
+    };
+    const provenance = {
+      contract: "immo-zone-lot-provenance/v1",
+      assessed_at: "2026-07-22T14:00:00Z",
+      lot_assignment_evidence: {
+        state: "unassigned",
+        selected_zone: null,
+        assignment_method: "unassigned",
+        dominant_fraction: null,
+        multi_zone: null,
+        zone_codes: null,
+        evidence_snapshot: null,
+        evidence_id: null,
+        reason_codes: ["no-selected-zone"],
+      },
+      zone_geometry_provenance: null,
+      acquisition_v2_readiness: { state: "not-ready", checked_at: null, unmet_requirement_codes: [] },
+    };
     await upsertLotBatch(makeMockDb(), pool, "delson", [{ ...makeFeature("4516943"), properties: { NO_LOT: "4516943", proof, immo_zone_lot_provenance: provenance } }]);
     await upsertZoneBatch(makeMockDb(), pool, "delson", "qc-zonage-delson", [{ ...makeZoneFeature("H-12"), properties: { CODE_MUN: "H-12", proof, immo_zone_lot_provenance: provenance } }]);
 
