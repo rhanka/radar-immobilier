@@ -116,6 +116,72 @@
     timeRangeMax = Date.now();
   }
 
+  /**
+   * The DS popover is inline, but computes document coordinates while its
+   * picker ancestor is positioned. Keep the DS control and portal its overlay
+   * to the document body once it opens, so the overlay is no longer clipped
+   * or overlaid by the rail and every preset receives pointer events.
+   */
+  function positionTimeRangePopover(node: HTMLElement): { destroy: () => void } {
+    let animationFrame: number | null = null;
+    let popover: HTMLElement | null = null;
+
+    function sync(): void {
+      const trigger = node.querySelector<HTMLButtonElement>(".st-timeRangePicker__trigger");
+      if (!trigger || !popover) return;
+
+      const triggerRect = trigger.getBoundingClientRect();
+      const popoverWidth = popover.getBoundingClientRect().width;
+      const viewportMargin = 8;
+      const gap = 4;
+      const left = Math.min(
+        Math.max(viewportMargin, triggerRect.left),
+        window.innerWidth - popoverWidth - viewportMargin,
+      );
+
+      popover.style.position = "fixed";
+      popover.style.top = `${triggerRect.bottom + gap}px`;
+      popover.style.left = `${left}px`;
+      popover.style.maxHeight = `${Math.max(
+        window.innerHeight - triggerRect.bottom - gap - viewportMargin,
+        160,
+      )}px`;
+      popover.style.maxWidth = "none";
+      popover.style.overflowX = "hidden";
+      popover.style.zIndex = "1000";
+    }
+
+    function scheduleSync(): void {
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(() => {
+        animationFrame = null;
+        sync();
+      });
+    }
+
+    const observer = new MutationObserver(() => {
+      const inlinePopover = node.querySelector<HTMLElement>(".st-timeRangePicker__popover");
+      if (!inlinePopover) return;
+      popover = inlinePopover;
+      popover.classList.add("signals-time-range-picker__portal");
+      document.body.append(popover);
+      scheduleSync();
+    });
+    observer.observe(node, { childList: true, subtree: true });
+    window.addEventListener("scroll", scheduleSync, true);
+    window.addEventListener("resize", scheduleSync);
+
+    return {
+      destroy: () => {
+        observer.disconnect();
+        window.removeEventListener("scroll", scheduleSync, true);
+        window.removeEventListener("resize", scheduleSync);
+        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+        popover?.remove();
+      },
+    };
+  }
+
   function setExclusion(patch: Partial<VivierBExclusions>): void {
     exclusions = { ...exclusions, ...patch };
     onExclusionsChange(exclusions);
@@ -347,16 +413,19 @@
      Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
 {#snippet panelA()}
   <div class="vivier-panel">
-    <TimeRangePicker
-      value={timeRange}
-      onChange={onTimeRangeChange}
-      presets={SIGNAL_TIME_RANGE_PRESETS}
-      size="sm"
-      locale="fr-CA"
-      max={timeRangeMax}
-      label="Période des signaux"
-      formatRange={formatSignalTimeRange}
-    />
+    <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
+      <TimeRangePicker
+        class="signals-time-range-picker"
+        value={timeRange}
+        onChange={onTimeRangeChange}
+        presets={SIGNAL_TIME_RANGE_PRESETS}
+        size="sm"
+        locale="fr-CA"
+        max={timeRangeMax}
+        label="Période des signaux"
+        formatRange={formatSignalTimeRange}
+      />
+    </div>
     <div class="vivier-toggles">
       <Checkbox
         label="Zonage"
@@ -379,16 +448,19 @@
 
 {#snippet panelB()}
   <div class="vivier-panel">
-    <TimeRangePicker
-      value={timeRange}
-      onChange={onTimeRangeChange}
-      presets={SIGNAL_TIME_RANGE_PRESETS}
-      size="sm"
-      locale="fr-CA"
-      max={timeRangeMax}
-      label="Période des signaux"
-      formatRange={formatSignalTimeRange}
-    />
+    <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
+      <TimeRangePicker
+        class="signals-time-range-picker"
+        value={timeRange}
+        onChange={onTimeRangeChange}
+        presets={SIGNAL_TIME_RANGE_PRESETS}
+        size="sm"
+        locale="fr-CA"
+        max={timeRangeMax}
+        label="Période des signaux"
+        formatRange={formatSignalTimeRange}
+      />
+    </div>
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
@@ -500,6 +572,27 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.25rem 0.75rem 0.25rem;
+  }
+
+  /* Keep the native DS trigger a single, compact rail field. The flexible
+     label makes the chevron consistently align with the right edge. */
+  .vivier-panel :global(.signals-time-range-picker) {
+    --st-component-field-labelTypography-size: var(--rail-fs-small, 0.75rem);
+    width: 100%;
+  }
+
+  .signals-time-range-picker-wrap {
+    width: 100%;
+  }
+
+  .vivier-panel :global(.signals-time-range-picker .st-timeRangePicker__trigger) {
+    width: 100%;
+  }
+
+  .vivier-panel :global(.signals-time-range-picker .st-timeRangePicker__triggerLabel) {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
   }
 
   .vivier-toggles {
