@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   vivierEtapeSchema,
   vivierExclusionReasonSchema,
+  vivierV2Schema,
   type VivierEtape,
   type VivierExclusionReason,
   type VivierV2,
@@ -31,13 +32,12 @@ export const vivierCountsSchema = z
     qualified: countSchema,
     residentialUnknown: countSchema,
     excludedByReason: vivierExcludedByReasonSchema,
-    // PÉRIMÈTRE de la vue B par étape : non-exclus ∧ zonage `oui` ∧ résidentiel
-    // NON-franc. C'est le compte du rail quand l'axe Zonage est COCHÉ (défaut).
+    // B-stage perimeter: records not excluded by the server with zonage `oui`.
+    // The schema guarantees that every residential `non` is already excluded,
+    // so the permissive `r` axis keeps confirmed and unknown residential use.
     stageCounts: vivierStageCountsSchema,
-    // Non-exclus HORS périmètre zonage (zonage `indéterminé`, résidentiel non-franc)
-    // par étape. RECOMPOSABLE : quand l'axe Zonage est DÉCOCHÉ, le rail somme
-    // `stageCounts` + `stageCountsHorsZonage` → même composition que le panneau
-    // (`projectComposedVivierB` sans l'exigence zonage). Parité prouvée en test.
+    // The same records outside zonage `oui`, bucketed by stage. When `z` is
+    // unchecked, rail and panel both combine this with stageCounts.
     stageCountsHorsZonage: vivierStageCountsSchema,
     total: countSchema,
   })
@@ -104,20 +104,17 @@ export function countVivierClassifications(
   };
 
   for (const classification of classifications) {
+    vivierV2Schema.parse(classification);
     if (classification.exclusion_reason !== null) {
       counts.excludedByReason[classification.exclusion_reason] += 1;
       continue;
     }
 
-    // PÉRIMÈTRE de la vue B = « zonage résidentiel, indéterminé GARDÉ »
-    // (SPEC_EVOL_FILTRAGE_VIVIER_v2 §9/§34) : zonage `oui` et résidentiel
-    // NON-franc (le franc-non-résidentiel porte déjà une exclusion, écartée
-    // ci-dessus). `stageCounts` compte CE périmètre par étape — c'est lui que
-    // lit le badge rail (`countForVivierCity`), donc une refonte
-    // `résidentiel=indéterminé` y remonte SANS gate « refonte→oui ». Les
-    // non-exclus HORS ce périmètre (zonage `indéterminé`) sont comptés à part
-    // dans `stageCountsHorsZonage` pour que le rail recompose l'axe Zonage
-    // décoché à l'identique du panneau (parité TOUS axes).
+    // stageCounts contains the server-eligible B perimeter: zonage `oui` and
+    // no exclusion. It includes residential `indetermine`, so reforms remain
+    // visible without a refonte-to-oui gate. stageCountsHorsZonage holds the
+    // same non-excluded records when `z` is relaxed; the two buckets let rail
+    // reproduce the panel without reclassification.
     const inPerimeter = classification.zonage.valeur === "oui";
     if (inPerimeter) {
       counts.stageCounts[classification.etape] += 1;

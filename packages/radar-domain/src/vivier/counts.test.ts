@@ -112,4 +112,17 @@ describe("vivier_v2 named counts", () => {
     expect(counts.excludedByReason.non_residentiel_franc).toBe(1);
     expect(counts.stageCounts.avis_motion).toBe(0);
   });
+
+  it("rejects the non-residential DTO that would split the rail and panel r axis", () => {
+    const invalid = {
+      ...value(),
+      residentiel: { valeur: "non", source: "test", confiance: 1 },
+      exclusion_reason: null,
+    } as VivierV2;
+
+    expect(vivierV2Schema.safeParse(invalid).success).toBe(false);
+    expect(() => countVivierClassifications([invalid])).toThrow(
+      "a non-residential classification must have an exclusion reason",
+    );
+  });
 });

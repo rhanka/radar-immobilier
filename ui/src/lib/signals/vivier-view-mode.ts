@@ -315,20 +315,19 @@ export function projectPrecoceVivierNodes(
 }
 
 /**
- * B avec sous-sélection : les trois axes DÉcochés relâchent le filtre.
+ * B with composed axes: unchecked axes relax their matching requirement.
  *
- * Base = les nœuds classifiés NON exclus par le serveur (`exclusion_reason ===
- * null`) — les nœuds « exclus » restent hors de B en toutes circonstances.
- * Sur cette base, chaque axe COCHÉ ajoute une exigence lue sur la classification
- * serveur : `z` → zonage `oui`, `r` → résidentiel `oui`, `p` → étape précoce.
+ * Base = nodes not excluded by the server (`exclusion_reason === null`); an
+ * excluded node remains outside B for every combination. On that base, `z`
+ * requires zonage `oui` and `p` an early stage. `r` is permissive: it retains
+ * residential `oui` and `indetermine`. The DTO schema requires every
+ * residential `non` to have an exclusion reason, so `r` never creates a
+ * separate rail-only population.
  *
- * Le défaut {z,r,p} = {✓,✓,✗} reproduit EXACTEMENT `projectQualifiedVivierNodes`
- * (le PÉRIMÈTRE de la vue B). L'axe `r` COCHÉ est PERMISSIF : il garde le
- * résidentiel `oui` ET l'indéterminé « à confirmer » (le franc-non-résidentiel
- * est déjà écarté par `exclusion_reason`). Décocher `z` révèle le hors-zonage
- * `oui` résidentiel : on RELIT des champs serveur, on n'en réécrit aucun. Un
- * seul nœud sans classification rend la projection indisponible plutôt que
- * partielle.
+ * The default {z,r,p} = {✓,✓,✗} reproduces `projectQualifiedVivierNodes`.
+ * Unchecking `z` reveals non-excluded records outside zonage `oui`; no client
+ * field is rewritten. One missing classification makes the projection
+ * unavailable rather than partial.
  */
 export function projectComposedVivierB(
   nodes: GraphSignalNode[],
@@ -341,9 +340,8 @@ export function projectComposedVivierB(
     const c = node.classification!;
     if (c.exclusion_reason !== null) return false;
     if (axes.z && c.zonage.valeur !== "oui") return false;
-    // Axe `r` PERMISSIF : « indéterminé GARDÉ » — seul le franc-non-résidentiel
-    // (résidentiel `non`) est écarté, l'indéterminé « à confirmer » passe. C'est
-    // ce qui fait remonter les refontes SANS gate « refonte→oui ».
+    // `r` keeps indeterminate residential evidence. A residential `non` is
+    // already excluded by the DTO invariant, preserving rail/panel parity.
     if (axes.r && c.residentiel.valeur === "non") return false;
     if (axes.p && !isPrecoceVivierNode(node)) return false;
     return true;
@@ -412,16 +410,10 @@ export function countForVivierCity(
   if (modeFromSubsetKey(subsetKey) === "b") {
     const counts = entry.vivierV2Counts;
     if (!counts) return 0;
-    // PARITÉ rail↔panneau, TOUS axes B (z/r/p) — on RECOMPOSE côté rail exactement
-    // le filtre du panneau (`projectComposedVivierB`) à partir des compteurs
-    // serveur, sans reclassifier :
-    //   - axe Précoce (`p`) coché → somme des seules étapes précoces ;
-    //   - axe Zonage (`z`) coché (défaut) → `stageCounts` (périmètre zonage `oui`) ;
-    //     décoché → `stageCounts` + `stageCountsHorsZonage` (le hors-zonage
-    //     résidentiel non-franc révélé, comme le panneau qui lève l'exigence zonage).
-    //   - axe Résidentiel (`r`) est PERMISSIF (indéterminé gardé) : le franc-non-
-    //     résidentiel porte déjà une exclusion serveur, donc `r` est sans effet des
-    //     DEUX côtés (parité triviale, prouvée en test).
+    // Rail/panel parity for every B axis comes from server counters, without
+    // reclassification: `p` selects early stages; `z` selects stageCounts or
+    // also stageCountsHorsZonage when relaxed; `r` retains confirmed and
+    // unknown residential use because the DTO excludes every residential `non`.
     const axes = bAxesFromVivierKey(subsetKey);
     const sumStages = (stages: typeof counts.stageCounts): number =>
       axes.p
