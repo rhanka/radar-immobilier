@@ -1,10 +1,31 @@
 # Recette de réception — Vivier B′ × éval Steve (30 villes)
 
-**Statut** : recette de réception VALIDÉE par l'owner (2026-07-24). C'est le **critère
-d'acceptation principal** de la sélection B′. B′ n'est « livré » que si cette recette est **verte**.
+**Statut** : **CIBLE — QA prod requise ville par ville.** Cette table est l'**attendu de
+réception** de la sélection B′, PAS une validation acquise. Elle ne peut PAS être déclarée
+« verte » hors-ligne : la validation finale se fait **ville par ville en QA prod** sur les
+données réelles servies par l'endpoint.
 
-**Principe** : ce qu'on a conçu doit être vérifié comme atteint. Cette table EST la recette.
-Aucune interprétation nouvelle : la colonne **B′ (cible)** est l'attendu de réception par ville.
+**Prouvable HORS-LIGNE aujourd'hui** (nœuds de graphe réels committés) :
+- **Sutton** (10/10) — la seule ligne ≥6/10 **entièrement** prouvable offline (✓2, refonte via
+  périmètre permissif, sans gate). Preuve exécutable : `api/src/services/graph/bprime-recette.test.ts`.
+- **Coaticook** — **✓1 prouvé** offline (1 nœud réel) ; le **✓2** du contrat (2ᵉ nœud en prod)
+  reste un **gap QA prod**.
+
+**Tout le reste = gap QA prod** (aucun nœud committé), déclaré explicitement et EXCLU des
+assertions vertes : voir `BPRIME_RECETTE_OFFLINE_GAPS` (partition exhaustive des 30 lignes,
+testée). **Anti-invention** : aucune donnée de ville n'est fabriquée pour « verdir » la table.
+
+**Cibles ✗0 NON atteignables côté immo — EN ATTENTE d'un marquage sémantique geo** :
+- **Rosemère** (✗0) : le vrai PV 801-71 est un *« Règlement de concordance … relatif au pôle
+  régional »* — **sans** marqueur franc-commercial ni « pôle **commercial** régional ». Le filtre
+  déterministe le classe honnêtement `indéterminé`. On **REFUSE de fabriquer** un marqueur pour
+  forcer ✗0 ; l'exclusion relève d'un **marquage sémantique geo** (pôle régional/commercial) à venir.
+- **Saint-Charles-Borromée** (✗0) : le pattern « zone résidentielle → commerciale » est prouvé
+  exclu au niveau lexical (`b-prime.test.ts`), mais **aucun texte de PV réel** de la ville n'est
+  committé et la distinction directionnelle fine relève du **marquage sémantique geo** → **EN ATTENTE geo**.
+
+**Principe** : ce qu'on a conçu doit être vérifié comme atteint — mais la vérification est une
+**QA prod par ville**, pas une déclaration offline. La colonne **B′ (cible)** est l'attendu, pas un acquis.
 
 ## Table de recette (A / B actuel / B′ cible)
 
@@ -41,17 +62,28 @@ Aucune interprétation nouvelle : la colonne **B′ (cible)** est l'attendu de r
 | 29 | Rimouski | bug | ✓1 | ✓2 | ✓1 | SPAR 328 log. + « pôle commercial régional » | R4 retire le « pôle » ; SPAR reste |
 | 30 | La Sarre | bug | ✓1 | ✓1 | ✓1 | CV-2 16 log., projet | rien |
 
-## Règle de recette (assertions de réception)
+## Règle de recette (assertions de réception — CIBLES, validées en QA prod)
 
-1. **Toutes les villes notées ≥6/10 sont présentes dans B′** — en particulier les **3× 10/10 refontes**
-   (Saint-Stanislas-de-Kostka, Sutton, Saint-Raphaël), aujourd'hui à **✗0 dans B actuel**.
-2. **Faux positifs exclus** : **Rosemère (2/10)** et **Saint-Charles-Borromée** (densification
-   *commerciale* lue comme résidentiel) → **✗0** via R3/R4.
+> Ces assertions sont l'**attendu de réception**. Sauf mention « prouvé offline », chacune est une
+> **CIBLE à valider en QA prod ville par ville** ; elle n'est PAS acquise hors-ligne.
+
+1. **Toutes les villes notées ≥6/10 doivent être présentes dans B′** — en particulier les **3× 10/10
+   refontes** (Saint-Stanislas-de-Kostka, Sutton, Saint-Raphaël). **Prouvé offline : Sutton (✓2)**
+   uniquement ; Saint-Stanislas, Saint-Raphaël et les autres ≥6/10 = **gap QA prod** (aucun nœud committé).
+2. **Faux positifs à exclure** : **Rosemère (2/10)** et **Saint-Charles-Borromée**. **Cible ✗0 NON
+   atteignable côté immo hors-ligne** : sur le PV réel, aucun marqueur franc-commercial → le filtre
+   déterministe classe honnêtement `indéterminé`. **On ne fabrique PAS** l'exclusion ; elle est **EN
+   ATTENTE d'un marquage sémantique geo** (pôle régional/commercial). Le pattern lexical
+   « résidentiel→commercial » est néanmoins prouvé exclu en unitaire (`b-prime.test.ts`).
 3. **Exceptions assumées, documentées** (restent dans B′ car la note basse tient au PROPRIÉTAIRE,
    axe S17/PII hors signal, pas au signal) : **Saint-Côme-Linière 3/10**, **Petite-Rivière-St-François 2/10**.
-4. **Synthèse cible** : parmi les villes notées ≥6/10, **B = 7/10 → B′ = 10/10**.
-5. Les comptes par ville de la colonne **B′ (cible)** sont l'attendu exact (ex. Saint-Stanislas ✓2,
-   Rimouski ✓1 après retrait du « pôle », Saint-Gilbert ✓2 via R1, etc.).
+4. **Synthèse cible** : parmi les villes notées ≥6/10, **B = 7/10 → B′ = 10/10** — **cible**, mesurée
+   en QA prod (offline, seule Sutton est prouvée).
+5. Les comptes par ville de la colonne **B′ (cible)** sont l'attendu de réception (ex. Saint-Stanislas ✓2,
+   Rimouski ✓1 après retrait du « pôle », Saint-Gilbert ✓2 via R1, etc.) — **à valider en QA prod**.
+6. **Partition exhaustive** : chacune des **30 lignes** a soit une **source réelle committée**
+   (Sutton ✓2, Coaticook ✓1), soit un **gap QA prod explicite** — testé
+   (`bprime-recette.test.ts`, `BPRIME_STEVE30_CONTRACT_CITIES` × `BPRIME_RECETTE_OFFLINE_GAPS`).
 
 ## Règles B′ (rappel — R1–R4)
 
@@ -60,7 +92,11 @@ Aucune interprétation nouvelle : la colonne **B′ (cible)** est l'attendu de r
 - **R2** — une **refonte complète** (rezonage/refonte) est **qualifiée** pour B′ (repêchée), pas
   éjectée sous prétexte de `résidentiel=indéterminé`. Un rezonage n'est pas filtré comme
   non-résidentiel par défaut. « Refonte détectée » = **rang, jamais porte** (cf. SPEC_EVOL_FILTRAGE_VIVIER_v2).
-- **R3** — la densification **commerciale/industrielle** franche est exclue (retire le faux positif
-  Saint-Charles-Borromée, Rosemère).
+- **R3** — la densification **commerciale/industrielle** franche est exclue **SI et seulement si**
+  aucune **preuve résidentielle FORTE** (logements/habitation/usage mixte/conversion « de commercial à
+  résidentiel ») n'est présente — la preuve forte l'emporte (source unique partagée `classifyBPrime` ↔
+  `vivier-v2`). Exclut lexicalement « usages commerciaux » (Lavaltrie C-8) et « densification
+  commerciale » nue ; **conserve** « commercial→résidentiel, 12 logements ». Pour **Rosemère /
+  Saint-Charles-Borromée**, le PV réel ne porte pas ce marqueur franc → ✗0 **EN ATTENTE geo** (cf. §2).
 - **R4** — le **pôle commercial régional** est exclu par raison nommée (retire le « pôle » de Rimouski,
   garde SPAR).
