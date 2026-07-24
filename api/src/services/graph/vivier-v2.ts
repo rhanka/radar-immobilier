@@ -1,4 +1,5 @@
 import {
+  RESIDENTIEL_CATEGORIES,
   ZONAGE_CATEGORIES,
   classifyResidentielPertinence,
   deriveEtape,
@@ -166,17 +167,84 @@ export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalI
   };
 }
 
+/**
+ * Marqueurs résidentiels FORTS (label + description, normalisés). « residentiel »
+ * et « densification » NUS en sont volontairement absents : ce sont des marqueurs
+ * FAIBLES qui apparaissent dans « densification commerciale » (Rosemère) et « zone
+ * résidentielle requalifiée en commerciale » (Saint-Charles-Borromée). Seul un
+ * marqueur FORT garde un signal franchement commercial dans B (usage réellement
+ * mixte avec du logement).
+ */
+const STRONG_RESIDENTIEL_MARKERS_RE =
+  /\b(?:habitations?|logements?|multi[- ]?logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|duplex|triplex|quadruplex|plex|condominiums?|maison de chambres|immeuble (?:residentiel|locatif|a logements))\b/;
+
+/** Marqueurs commerciaux/industriels francs (R3). */
+const FRANC_COMMERCIAL_MARKERS_RE =
+  /\b(?:commercial(?:e)?s?|centre commercial|industriel(?:le)?s?|parc industriel|zone industrielle)\b/;
+
+/** Pôle commercial régional — raison d'exclusion nommée (R4). */
+const REGIONAL_COMMERCIAL_POLE_RE = /\bpole commercial regional\b/;
+
+/**
+ * Catégories intrinsèquement résidentielles FORTES (densification exclue : faible).
+ * Construit paresseusement : `graph-store` et `vivier-v2` sont en dépendance
+ * circulaire, `RESIDENTIEL_CATEGORIES` n'est pas encore initialisé à l'évaluation
+ * du module (seulement au premier appel de classification).
+ */
+let strongResidentielCategories: Set<string> | null = null;
+function isStrongResidentielCategory(category: string): boolean {
+  if (strongResidentielCategories === null) {
+    strongResidentielCategories = new Set(
+      RESIDENTIEL_CATEGORIES.filter((value) => value !== "densification"),
+    );
+  }
+  return strongResidentielCategories.has(category);
+}
+
+/**
+ * Pertinence résidentielle du chemin B′ SERVEUR, lue par la vue B (counts.ts →
+ * `qualified` → `projectComposedVivierB`). Étend `classifyResidentielPertinence`
+ * (inchangée, encore lue par l'axe r de A) avec les règles de recette B′ :
+ *
+ *  - R4 : un « pôle commercial régional » est disqualifié par raison nommée —
+ *         rang, jamais porte — même s'il porte un marqueur résidentiel.
+ *  - R3 : une densification / affectation COMMERCIALE ou INDUSTRIELLE franche SANS
+ *         marqueur résidentiel FORT est non-résidentielle (sort Rosemère,
+ *         Saint-Charles-Borromée).
+ *  - R2 : une REFONTE complète est REPÊCHÉE (`oui`) au lieu de rester
+ *         `indéterminée` (les 3× refontes 10/10). « Refonte détectée = rang,
+ *         jamais porte » (SPEC_EVOL_FILTRAGE_VIVIER_v2).
+ *
+ * Ordre = R4 > R3 > pertinence explicite > R2 : une refonte franchement
+ * commerciale reste exclue (R3 prime sur R2, cf. Rosemère).
+ */
 function classificationFromResidentiel(
   category: string | null,
   label: string | null,
   description: string | null,
+  completeReform: boolean,
 ) {
+  const text = fold(`${label ?? ""} ${description ?? ""}`);
+  const hasStrongResidentiel =
+    STRONG_RESIDENTIEL_MARKERS_RE.test(text) ||
+    (category !== null && isStrongResidentielCategory(category));
+
+  if (REGIONAL_COMMERCIAL_POLE_RE.test(text)) {
+    return { valeur: "non" as const, source: "classifyBPrime:R4_pole_commercial_regional", confiance: 0.9 };
+  }
+  if (FRANC_COMMERCIAL_MARKERS_RE.test(text) && !hasStrongResidentiel) {
+    return { valeur: "non" as const, source: "classifyBPrime:R3_commercial_franc", confiance: 0.9 };
+  }
+
   const pertinence = classifyResidentielPertinence(category, label, description);
   if (pertinence === "residentiel") {
     return { valeur: "oui" as const, source: "classifyResidentielPertinence", confiance: 0.9 };
   }
   if (pertinence === "non_residentiel") {
     return { valeur: "non" as const, source: "classifyResidentielPertinence", confiance: 0.9 };
+  }
+  if (completeReform) {
+    return { valeur: "oui" as const, source: "classifyBPrime:R2_refonte_complete", confiance: 0.85 };
   }
   return { valeur: "indetermine" as const, source: "classifyResidentielPertinence", confiance: 0 };
 }
@@ -337,14 +405,26 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
       : [];
   });
   const zonage = classificationFromZonage(signal.type, category, etapeAnnote);
-  const residentiel = classificationFromResidentiel(category ?? etapeAnnote, label, description);
   const instrument = instrumentFromSignal(
     category,
     label,
     description,
     firstString(records, ["instrument"]),
   );
+  // R2 — « refonte complète » détectée (instrument OU texte). Parité avec la
+  // détection de classifyBPrime (une refonte portée par `category=rezonage` ne
+  // remonte pas en instrument=refonte, d'où le repli texte).
+  const foldedText = fold(`${label ?? ""} ${description ?? ""}`);
+  const completeReform =
+    instrument === "refonte" ||
+    /\brefonte\b/.test(foldedText) ||
+    /\brevision complete\b/.test(foldedText);
+  const residentiel = classificationFromResidentiel(category ?? etapeAnnote, label, description, completeReform);
   const etapes = derivedEtapes(label, description, etapeAnnote, history);
+  // R1 — l'étape ANNOTÉE fait autorité sur l'inférence texte : une annotation
+  // valide (`projet_reglement`…) n'est jamais poussée plus tard par un mot-clé du
+  // libellé (« Adoption des premiers projets… » → dérive Sutton vers `adoption`).
+  const annotatedEtape = toVivierEtape(etapeAnnote);
   const provenance = {
     extrait: firstString(records, ["extrait", "excerpt", "citation", "quote", "text"]) ?? "",
     ...(signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"])
@@ -358,7 +438,7 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
     residentiel,
     effet_densifiant: effectFromSignal(records),
     instrument,
-    etape: etapes.at(-1) ?? "inconnu",
+    etape: annotatedEtape ?? etapes.at(-1) ?? "inconnu",
     etapes_historique: etapes,
     exclusion_reason: exclusionFor(zonage, residentiel, instrument),
     provenance,
