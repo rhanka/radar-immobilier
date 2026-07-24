@@ -1,6 +1,6 @@
 # Graphify 3.4 replayable materializer — execution handoff
 
-Date: 2026-07-22  
+Date: 2026-07-22
 Scope: design handoff only. This document changes no production code, live
 specification, GEO data, object-store object, pointer, projection, or deployment.
 
@@ -339,4 +339,3 @@ worker mutates a candidate and falls back to a label; and
 extraction_to_v23_graph.js emits a variable timestamp. None meet this protocol.
 They can be retired or made unreachable only in the authorized implementation
 branch, after the replacement and its gates are proven.
-
