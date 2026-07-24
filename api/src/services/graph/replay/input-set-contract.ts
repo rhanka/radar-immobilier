@@ -19,6 +19,11 @@
  * and the pinned parser / prompt / model / ontology / materializer versions.
  * Parsed and LLM artifacts are versioned caches, never authority (D1.1).
  *
+ * PROVENANCE INVARIANT: a member's `rawSha256` and the `sourceManifestRef.sha256`
+ * it points at are the SAME digest of the SAME raw bytes, so the contract binds
+ * them (`rawSha256 === "sha256:" + sourceManifestRef.sha256`) instead of letting
+ * a member cite a manifest line that describes different bytes.
+ *
  * `inputsetHash` is DERIVED (it is the object key `graph-inputsets/{city}/
  * {inputsetHash}.json`), so it is NOT a field of the hashed body. There is a
  * SINGLE canonical entry point, {@link serializeCanonicalInputSet}, which
@@ -28,7 +33,7 @@
  * share one hash); go through this module.
  */
 import { z } from "zod";
-import { manifestKey } from "../../sources/run-manifest.js";
+import { manifestKey, type RunManifestEntry } from "../../sources/run-manifest.js";
 import { canonicalJson, sha256Of } from "./canonical-json.js";
 
 export const INPUTSET_SCHEMA_VERSION = "graphify-inputset/v1" as const;
@@ -75,6 +80,36 @@ export function sourceManifestObjectKey(ref: SourceManifestRef): string {
   return manifestKey(ref.source, ref.runId);
 }
 
+/**
+ * Content identity (`sha256:<hex>`) of a run-manifest entry digest.
+ *
+ * `RunManifestEntry.sha256` IS the SHA-256 of the raw bytes (run-manifest.ts),
+ * the same digest a member carries as `rawSha256`: only the prefix differs. So
+ * the two are not two independent hashes to be reconciled — they are ONE hash
+ * in two notations, and the contract below enforces exactly that.
+ */
+export function manifestContentIdentity(entrySha256: string): string {
+  return `sha256:${entrySha256}`;
+}
+
+/**
+ * Select the manifest LINE a ref points at, from the manifest JSONL bytes.
+ * Pure (the bytes are passed in — this module never fetches). Returns `null`
+ * when no line carries the ref's idempotency key: an unresolvable ref is a
+ * visible null, never a silently-tolerated dangling pointer.
+ */
+export function selectManifestEntry(
+  manifestJsonl: string,
+  ref: SourceManifestRef,
+): RunManifestEntry | null {
+  for (const line of manifestJsonl.split("\n")) {
+    if (line.trim() === "") continue;
+    const entry = JSON.parse(line) as RunManifestEntry;
+    if (entry.sha256 === ref.sha256) return entry;
+  }
+  return null;
+}
+
 /** One raw CAS member: an immutable input document resolved to bytes + hash. */
 export const rawCasMemberSchema = z
   .object({
@@ -91,7 +126,23 @@ export const rawCasMemberSchema = z
     /** Pointer to the source run-manifest entry this member came from. */
     sourceManifestRef: sourceManifestRefSchema,
   })
-  .strict();
+  .strict()
+  .superRefine((member, ctx) => {
+    // The member's raw digest and the manifest entry's idempotency key are the
+    // SAME sha256 of the SAME bytes. Accepting two different values would let a
+    // member claim provenance from a manifest line describing other bytes —
+    // an incoherent CAS provenance that no later replay could detect.
+    const expected = manifestContentIdentity(member.sourceManifestRef.sha256);
+    if (member.rawSha256 !== expected) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["rawSha256"],
+        message:
+          `rawSha256 must be the content identity of sourceManifestRef.sha256 ` +
+          `(expected ${expected}, got ${member.rawSha256})`,
+      });
+    }
+  });
 
 /** An explicit removal. Never a silent skip — a reason is mandatory (D1.2). */
 export const tombstoneSchema = z
