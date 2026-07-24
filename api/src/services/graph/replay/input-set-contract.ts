@@ -20,12 +20,16 @@
  * Parsed and LLM artifacts are versioned caches, never authority (D1.1).
  *
  * `inputsetHash` is DERIVED (it is the object key `graph-inputsets/{city}/
- * {inputsetHash}.json`), so it is NOT a field of the hashed body. Compute it
- * with {@link computeInputsetHash}, which canonicalizes membership order first
- * so a caller that supplies members in any order gets the same content identity.
+ * {inputsetHash}.json`), so it is NOT a field of the hashed body. There is a
+ * SINGLE canonical entry point, {@link serializeCanonicalInputSet}, which
+ * validates → normalizes (sorts membership) → serializes → hashes in one pass,
+ * so the persisted bytes are ALWAYS the exact bytes that were hashed. Never
+ * hand-serialize a parsed InputSet (that would let two byte-different artifacts
+ * share one hash); go through this module.
  */
 import { z } from "zod";
-import { canonicalHash, canonicalJson, sha256Of } from "./canonical-json.js";
+import { manifestKey } from "../../sources/run-manifest.js";
+import { canonicalJson, sha256Of } from "./canonical-json.js";
 
 export const INPUTSET_SCHEMA_VERSION = "graphify-inputset/v1" as const;
 
@@ -37,16 +41,39 @@ export const sha256Schema = z
 const nonEmpty = z.string().min(1);
 
 /**
- * Reference into a source run manifest entry (evidence provenance). The full
- * source manifest schema lives in api/src/services/sources/run-manifest.ts and
- * is reused as collection evidence — this is only the pointer the InputSet needs.
+ * Raw SHA-256 hex (no `sha256:` prefix) — the shape of `RunManifestEntry.sha256`,
+ * the per-entry idempotency key that identifies a document line inside a run
+ * manifest (`api/src/services/sources/run-manifest.ts`).
+ */
+export const manifestSha256Schema = z
+  .string()
+  .regex(/^[0-9a-f]{64}$/, "must be a 64-char lowercase hex run-manifest sha256");
+
+/**
+ * RESOLVABLE reference into an existing run manifest (evidence provenance).
+ *
+ * The real manifest lives at `runs/{source}/{runId}/manifest.jsonl`
+ * ({@link manifestKey}) — one JSON object per document — and an entry is
+ * identified there by its `sha256` idempotency key. So `{ source, runId }`
+ * resolve the manifest object and `sha256` selects the line: no invented
+ * `entryId`. {@link sourceManifestObjectKey} composes the real object key.
  */
 export const sourceManifestRefSchema = z
   .object({
+    source: nonEmpty,
     runId: nonEmpty,
-    entryId: nonEmpty,
+    sha256: manifestSha256Schema,
   })
   .strict();
+
+/**
+ * Object-storage key of the run manifest a {@link SourceManifestRef} points
+ * into. Pure — delegates to the real {@link manifestKey}, proving the ref
+ * resolves against the manifest that actually exists (no I/O, no fetch).
+ */
+export function sourceManifestObjectKey(ref: SourceManifestRef): string {
+  return manifestKey(ref.source, ref.runId);
+}
 
 /** One raw CAS member: an immutable input document resolved to bytes + hash. */
 export const rawCasMemberSchema = z
@@ -156,20 +183,10 @@ function firstDuplicate(keys: readonly string[]): string | null {
 /** Canonical hash of an EMPTY patch log — the default `patchLogHash`. */
 export const EMPTY_PATCH_LOG_HASH = sha256Of(canonicalJson([]));
 
-/** Validate `input` against the InputSet contract, throwing on any violation. */
-export function parseInputSet(input: unknown): InputSet {
-  return inputSetSchema.parse(input);
-}
-
-/** Non-throwing validation (Zod SafeParseReturnType). */
-export function safeParseInputSet(input: unknown) {
-  return inputSetSchema.safeParse(input);
-}
-
 /**
  * Return a structurally-identical InputSet with members and tombstones sorted
- * by `businessKey`. This is the canonical ordering used before hashing so that
- * `inputsetHash` is independent of the order a caller happened to assemble in.
+ * by `businessKey` — the canonical membership order used before serialization,
+ * so the content identity is independent of the order a caller assembled in.
  */
 export function canonicalizeInputSet(inputSet: InputSet): InputSet {
   const byBusinessKey = <T extends { businessKey: string }>(a: T, b: T): number =>
@@ -182,12 +199,53 @@ export function canonicalizeInputSet(inputSet: InputSet): InputSet {
 }
 
 /**
- * Derive the immutable `inputsetHash` (`sha256:<hex>`) for an InputSet.
- *
- * The input is validated and canonicalized (membership order normalized) before
- * hashing, so two InputSets with identical content but different member order
- * hash identically — the evidence identity the plan requires.
+ * Validate `input` and return it in CANONICAL form (membership sorted). Because
+ * the returned object is already canonical, serializing it yields exactly the
+ * bytes {@link serializeCanonicalInputSet} hashes — a parsed InputSet is never
+ * left in an unsorted state that a caller could persist with a divergent hash.
  */
-export function computeInputsetHash(inputSet: InputSet): string {
-  return canonicalHash(canonicalizeInputSet(inputSet));
+export function parseInputSet(input: unknown): InputSet {
+  return canonicalizeInputSet(inputSetSchema.parse(input));
+}
+
+/** Non-throwing validation; canonicalizes on success (same normalization as parse). */
+export function safeParseInputSet(input: unknown) {
+  const result = inputSetSchema.safeParse(input);
+  return result.success
+    ? { success: true as const, data: canonicalizeInputSet(result.data) }
+    : result;
+}
+
+/** Validated canonical InputSet plus the exact serialized bytes and their hash. */
+export interface SerializedInputSet {
+  /** Validated, canonicalized (membership-sorted) InputSet. */
+  inputSet: InputSet;
+  /** The canonical JSON string — the SAME bytes persisted and hashed. */
+  json: string;
+  /** `sha256:<hex>` content identity over `json`. */
+  inputsetHash: string;
+}
+
+/**
+ * SINGLE canonical entry point: validate → normalize → serialize → hash.
+ *
+ * Returns the canonical InputSet, its canonical JSON bytes, and the derived
+ * `inputsetHash` together, so the artifact a caller persists (`json`) and the
+ * key it stores it under (`inputsetHash`) can never disagree. Throws on any
+ * contract violation.
+ */
+export function serializeCanonicalInputSet(input: unknown): SerializedInputSet {
+  const inputSet = parseInputSet(input);
+  const json = canonicalJson(inputSet);
+  return { inputSet, json, inputsetHash: sha256Of(json) };
+}
+
+/**
+ * Derive the immutable `inputsetHash` (`sha256:<hex>`) for an InputSet. Validates
+ * and canonicalizes first (via {@link serializeCanonicalInputSet}), so two
+ * InputSets with identical content but different member order hash identically,
+ * and an invalid InputSet is rejected rather than silently hashed.
+ */
+export function computeInputsetHash(input: InputSet): string {
+  return serializeCanonicalInputSet(input).inputsetHash;
 }
