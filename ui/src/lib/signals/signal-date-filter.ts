@@ -85,13 +85,14 @@ export function formatSignalTimeRange(range: SignalTimeRange, locale: string): s
     if (preset) return preset.label;
   }
 
+  // The filter is date-based, so a time-of-day in the trigger only creates
+  // noise and makes the compact rail field overflow. `fr-CA` yields the
+  // familiar ISO-like local date format while other locales keep their own
+  // compact date order.
   const formatter = new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
   });
   return `${formatter.format(new Date(range.from))} – ${formatter.format(new Date(range.to))}`;
 }
