@@ -15,6 +15,7 @@ import {
   keyFromAFlags,
   reconcileVivierRouteSubset,
   modeFromSubsetKey,
+  projectComposedVivierB,
   projectNodesForVivierKey,
   projectNodesForVivierMode,
   reconcileVivierSelection,
@@ -27,6 +28,7 @@ import {
 } from "./vivier-view-mode.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
 import { normalizeGeoRouteState, type GeoRoute } from "$lib/router/geo-route.js";
+import { countVivierClassifications, type VivierV2, type VivierV2Counts } from "@radar/domain";
 
 type TriState = "oui" | "non" | "indetermine";
 
@@ -207,6 +209,15 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 1,
       },
     }, "vivier-v2|-p")).toBe(0);
@@ -330,6 +341,15 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 58,
       },
     };
@@ -380,6 +400,15 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 2,
       },
     };
@@ -388,6 +417,54 @@ describe("Vivier A / B view contract", () => {
     expect(countForVivierCity(suttonLike, "vivier-v2|p")).toBe(2);
     // Précoce décoché : périmètre TOTAL (Σ stageCounts) = 2, jamais `qualified`=0.
     expect(countForVivierCity(suttonLike, "vivier-v2|-p")).toBe(2);
+  });
+
+  it("PARITÉ rail↔panneau pour TOUS les axes B (z/r/p) — compteurs serveur recomposables", () => {
+    // Le rail lit les compteurs serveur (`countVivierClassifications`) ; le panneau
+    // filtre nœud par nœud (`projectComposedVivierB`). Sur le MÊME jeu de nœuds,
+    // les deux DOIVENT rendre la même composition pour les 8 combinaisons d'axes —
+    // c'était RÉFUTÉ (le rail ne comptait que selon `p`, jamais `z`).
+    const cls = (
+      zonage: TriState,
+      residentiel: TriState,
+      etape: string,
+      exclusion: string | null = null,
+    ) => classification(zonage, residentiel, exclusion, "rezonage", etape);
+
+    const nodes: GraphSignalNode[] = [
+      // périmètre (zonage oui), précoce, qualifié
+      node("n-perim-precoce", true, true, true, cls("oui", "oui", "avis_motion")),
+      // périmètre (zonage oui), tardif, indéterminé « à confirmer »
+      node("n-perim-tardif", true, false, false, cls("oui", "indetermine", "adoption")),
+      // HORS zonage (zonage indéterminé), précoce, résidentiel — révélé si z décoché
+      node("n-hors-precoce", false, true, false, cls("indetermine", "oui", "projet_reglement")),
+      // HORS zonage (zonage indéterminé), tardif, indéterminé — révélé si z décoché
+      node("n-hors-tardif", false, false, false, cls("indetermine", "indetermine", "consultation_publique")),
+      // franc-non-résidentiel : exclu serveur → jamais dans B (ni rail ni panneau)
+      node("n-exclu", false, false, false, cls("oui", "non", "avis_motion", "non_residentiel_franc")),
+    ];
+
+    const serverCounts: VivierV2Counts = countVivierClassifications(
+      nodes.map((n) => n.classification as unknown as VivierV2),
+    );
+    const entry = { subsetCounts: {}, vivierV2Counts: serverCounts };
+
+    for (const z of [true, false]) {
+      for (const r of [true, false]) {
+        for (const p of [true, false]) {
+          const axes = { z, r, p };
+          const key = keyForVivierB(axes);
+          const panel = projectComposedVivierB(nodes, axes).count;
+          const rail = countForVivierCity(entry, key);
+          expect(rail, `parité rail↔panneau échoue pour axes=${JSON.stringify(axes)} (clé ${key})`).toBe(panel);
+        }
+      }
+    }
+
+    // Sanity : le contre-exemple de la revue (axe Zonage décoché révèle le
+    // hors-zonage résidentiel) — 2 en périmètre, +2 hors-zonage = 4.
+    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(2);
+    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(4);
   });
 
   it("resynchronizes route mode and keys route identity by A/B", () => {

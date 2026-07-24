@@ -31,7 +31,14 @@ export const vivierCountsSchema = z
     qualified: countSchema,
     residentialUnknown: countSchema,
     excludedByReason: vivierExcludedByReasonSchema,
+    // PÉRIMÈTRE de la vue B par étape : non-exclus ∧ zonage `oui` ∧ résidentiel
+    // NON-franc. C'est le compte du rail quand l'axe Zonage est COCHÉ (défaut).
     stageCounts: vivierStageCountsSchema,
+    // Non-exclus HORS périmètre zonage (zonage `indéterminé`, résidentiel non-franc)
+    // par étape. RECOMPOSABLE : quand l'axe Zonage est DÉCOCHÉ, le rail somme
+    // `stageCounts` + `stageCountsHorsZonage` → même composition que le panneau
+    // (`projectComposedVivierB` sans l'exigence zonage). Parité prouvée en test.
+    stageCountsHorsZonage: vivierStageCountsSchema,
     total: countSchema,
   })
   .superRefine((counts, context) => {
@@ -92,6 +99,7 @@ export function countVivierClassifications(
     residentialUnknown: 0,
     excludedByReason: emptyExcludedByReason(),
     stageCounts: emptyStageCounts(),
+    stageCountsHorsZonage: emptyStageCounts(),
     total: classifications.length,
   };
 
@@ -106,12 +114,15 @@ export function countVivierClassifications(
     // NON-franc (le franc-non-résidentiel porte déjà une exclusion, écartée
     // ci-dessus). `stageCounts` compte CE périmètre par étape — c'est lui que
     // lit le badge rail (`countForVivierCity`), donc une refonte
-    // `résidentiel=indéterminé` y remonte SANS gate « refonte→oui ».
-    const inPerimeter =
-      classification.zonage.valeur === "oui" &&
-      classification.residentiel.valeur !== "non";
+    // `résidentiel=indéterminé` y remonte SANS gate « refonte→oui ». Les
+    // non-exclus HORS ce périmètre (zonage `indéterminé`) sont comptés à part
+    // dans `stageCountsHorsZonage` pour que le rail recompose l'axe Zonage
+    // décoché à l'identique du panneau (parité TOUS axes).
+    const inPerimeter = classification.zonage.valeur === "oui";
     if (inPerimeter) {
       counts.stageCounts[classification.etape] += 1;
+    } else {
+      counts.stageCountsHorsZonage[classification.etape] += 1;
     }
 
     // `qualified` reste STRICT (résidentiel confirmé `oui`) et `residentialUnknown`
