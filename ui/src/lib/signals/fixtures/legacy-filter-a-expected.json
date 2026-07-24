@@ -1,14 +1,14 @@
 {
-  "_note": "FROZEN legacy Filter A baseline (UI layer) at pre-3.4 HEAD. Ordered member ids per URL subset state. Regression inputs, NOT to be regenerated. A change is NO-GO per the Filter A addendum. Note the legacy 'm' axis is IGNORED client-side (unknown flag) — it survives only as a server counter.",
-  "filterMembers": {
-    "": ["n1", "n2", "n3", "n4", "n5"],
-    "z": ["n1", "n3", "n4", "n5"],
-    "m": ["n1", "n2", "n3", "n4", "n5"],
-    "p": ["n1", "n4", "n5"],
-    "z|m": ["n1", "n3", "n4", "n5"],
+  "_note": "FROZEN legacy Filter A baseline (UI DISPLAY path) at pre-3.4 HEAD. Freezes projectNodesForVivierKey / projectLegacyVivierA — the projection SignauxMapView actually renders (SignauxMapView.svelte:343 and :549) — NOT filterNodesBySubset, which is unused for the A display. 'authority' is the exact server legacyProjection (buildLegacyZmpProjection) that the client revalidates item-by-item; z|m|p is served through it, every other key composes from legacySubset.flags. Ordered member ids per subset key. Regression inputs, NOT to be regenerated. A change is NO-GO per the Filter A addendum.",
+  "authority": { "version": "legacy-zmp-v1", "a": { "count": 2, "signalIds": ["n1", "n5"] } },
+  "projectionMembers": {
+    "z|m|p": ["n1", "n5"],
+    "z|m": ["n1", "n5"],
     "z|p": ["n1", "n4", "n5"],
-    "m|p": ["n1", "n4", "n5"],
-    "z|m|p": ["n1", "n4", "n5"],
-    "x|z": ["n1", "n3", "n4", "n5"]
+    "m|p": ["n1", "n5"],
+    "z": ["n1", "n3", "n4", "n5"],
+    "m": ["n1", "n5"],
+    "p": ["n1", "n4", "n5"],
+    "": ["n1", "n2", "n3", "n4", "n5"]
   }
 }
