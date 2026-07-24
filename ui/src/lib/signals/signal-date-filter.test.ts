@@ -4,6 +4,7 @@ import {
   dateRangeFromSignalTimeRange,
   defaultSignalTimeRange,
   filterNodesByEtapeDate,
+  formatSignalTimeRange,
   normalizeSignalTimeRange,
   signalEtapeDate,
 } from "./signal-date-filter.js";
@@ -62,6 +63,16 @@ describe("signal date filter", () => {
       start: new Date(2026, 5, 15),
       end: new Date(2026, 5, 16),
     });
+  });
+
+  it("formats a custom range as compact local dates without times", () => {
+    const formatted = formatSignalTimeRange({
+      mode: "absolute",
+      from: new Date(2025, 6, 17, 8, 37).getTime(),
+      to: new Date(2025, 7, 28, 18, 5).getTime(),
+    }, "fr-CA");
+
+    expect(formatted).toBe("2025-07-17 – 2025-08-28");
   });
 
   it("should read an etape date from graph properties", () => {
