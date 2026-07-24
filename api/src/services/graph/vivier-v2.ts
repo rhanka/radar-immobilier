@@ -1,5 +1,4 @@
 import {
-  RESIDENTIEL_CATEGORIES,
   ZONAGE_CATEGORIES,
   classifyResidentielPertinence,
   deriveEtape,
@@ -12,6 +11,8 @@ import {
   countVivierClassifications,
   FRANC_NON_RESIDENTIEL_RE,
   REGIONAL_COMMERCIAL_POLE_RE,
+  RESIDENTIEL_FORT_CATEGORIES,
+  RESIDENTIEL_FORT_RE,
   vivierV2Schema,
   type VivierCounts,
   type VivierEtape,
@@ -169,37 +170,15 @@ export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalI
   };
 }
 
-/**
- * Marqueurs résidentiels FORTS (label + description, normalisés). « residentiel »
- * et « densification » NUS en sont volontairement absents : ce sont des marqueurs
- * FAIBLES qui apparaissent dans « densification commerciale » (Rosemère) et « zone
- * résidentielle requalifiée en commerciale » (Saint-Charles-Borromée). Seul un
- * marqueur FORT garde un signal franchement commercial dans B (usage réellement
- * mixte avec du logement).
- */
-const STRONG_RESIDENTIEL_MARKERS_RE =
-  /\b(?:habitations?|logements?|multi[- ]?logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|duplex|triplex|quadruplex|plex|condominiums?|maison de chambres|immeuble (?:residentiel|locatif|a logements))\b/;
-
-// R3 (`FRANC_NON_RESIDENTIEL_RE`) et R4 (`REGIONAL_COMMERCIAL_POLE_RE`) sont
-// importés de @radar/domain — SOURCE PARTAGÉE avec `classifyBPrime` et le
-// lexique serveur `NON_RESIDENTIEL_MARKERS_RE`, donc synchronisés (le trou
-// « commerciaux » est fermé en un seul endroit).
-
-/**
- * Catégories intrinsèquement résidentielles FORTES (densification exclue : faible).
- * Construit paresseusement : `graph-store` et `vivier-v2` sont en dépendance
- * circulaire, `RESIDENTIEL_CATEGORIES` n'est pas encore initialisé à l'évaluation
- * du module (seulement au premier appel de classification).
- */
-let strongResidentielCategories: Set<string> | null = null;
-function isStrongResidentielCategory(category: string): boolean {
-  if (strongResidentielCategories === null) {
-    strongResidentielCategories = new Set(
-      RESIDENTIEL_CATEGORIES.filter((value) => value !== "densification"),
-    );
-  }
-  return strongResidentielCategories.has(category);
-}
+// R3/R4 et la preuve résidentielle FORTE sont importés de @radar/domain — UNE
+// SEULE source de décision partagée avec `classifyBPrime` :
+//   - `FRANC_NON_RESIDENTIEL_RE` (R3, commercial/industriel/enseigne, « commerciaux »),
+//   - `REGIONAL_COMMERCIAL_POLE_RE` (R4, pôle commercial régional),
+//   - `RESIDENTIEL_FORT_RE` / `RESIDENTIEL_FORT_CATEGORIES` (preuve forte qui
+//     l'emporte : logements / habitation / usage mixte / conversion).
+// Le lexique résidentiel SERVEUR `NON_RESIDENTIEL_MARKERS_RE` (axe A / `r`) reste
+// STRICTEMENT indépendant (invariant golden) — il n'est PAS fusionné ici.
+const RESIDENTIEL_FORT_CATEGORIES_SET = new Set(RESIDENTIEL_FORT_CATEGORIES);
 
 /**
  * Pertinence résidentielle du chemin B′ SERVEUR, lue par la vue B (counts.ts →
@@ -227,8 +206,8 @@ function classificationFromResidentiel(
 ) {
   const text = fold(`${label ?? ""} ${description ?? ""}`);
   const hasStrongResidentiel =
-    STRONG_RESIDENTIEL_MARKERS_RE.test(text) ||
-    (category !== null && isStrongResidentielCategory(category));
+    RESIDENTIEL_FORT_RE.test(text) ||
+    (category !== null && RESIDENTIEL_FORT_CATEGORIES_SET.has(category));
 
   if (REGIONAL_COMMERCIAL_POLE_RE.test(text)) {
     return { valeur: "non" as const, source: "classifyBPrime:R4_pole_commercial_regional", confiance: 0.9 };

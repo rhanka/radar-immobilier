@@ -57,6 +57,29 @@ export const FRANC_NON_RESIDENTIEL_RE = new RegExp(`\\b(?:${FRANC_NON_RESIDENTIE
 export const REGIONAL_COMMERCIAL_POLE_RE = /\bpole commercial regional\b/;
 const COMMERCIAL_OR_INDUSTRIAL = FRANC_NON_RESIDENTIEL_RE;
 
+/**
+ * Preuve résidentielle FORTE — SOURCE PARTAGÉE (importée par `vivier-v2`
+ * `classificationFromResidentiel`), UNE SEULE source de décision pour R3.
+ * Marqueurs de logement CONCRETS + « usage mixte » + conversion explicite « à/en
+ * usage résidentiel ». « densification » et « résidentiel » NUS en sont
+ * volontairement absents : ils apparaissent dans « densification commerciale »
+ * (Rosemère) et « zone résidentielle requalifiée en commerciale »
+ * (Saint-Charles-Borromée) — une preuve FAIBLE ne doit PAS soustraire un signal
+ * franchement commercial à l'exclusion R3. La preuve FORTE, elle, l'emporte :
+ * une conversion « de commercial à résidentiel, 12 logements » reste dans B.
+ */
+export const RESIDENTIEL_FORT_SOURCE =
+  "habitations?|logements?|multi[- ]?logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|duplex|triplex|quadruplex|plex|condominiums?|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte";
+export const RESIDENTIEL_FORT_RE = new RegExp(`\\b(?:${RESIDENTIEL_FORT_SOURCE})\\b`);
+/**
+ * Catégories intrinsèquement résidentielles FORTES = `RESIDENTIAL_CATEGORIES`
+ * moins « densification » (marqueur faible). Partagé avec `vivier-v2`.
+ */
+export const RESIDENTIEL_FORT_CATEGORIES: readonly string[] = [
+  "developpement_residentiel", "logement", "logement_abordable", "habitation",
+];
+const RESIDENTIEL_FORT_CATEGORIES_SET = new Set(RESIDENTIEL_FORT_CATEGORIES);
+
 function fold(value: string): string {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
@@ -127,11 +150,24 @@ export function classifyBPrime(input: BPrimeSignalInput): BPrimeClassification {
     (category !== null && COMMERCIAL_OR_INDUSTRIAL_CATEGORIES.has(category)) ||
     COMMERCIAL_OR_INDUSTRIAL.test(text);
   const regionalCommercialPole = REGIONAL_COMMERCIAL_POLE_RE.test(text);
-  const residentiel = commercialOrIndustrial
+  // La preuve résidentielle FORTE l'emporte sur le franc-non-résidentiel :
+  // l'exclusion R3 ne s'applique QUE s'il n'y a AUCUN marqueur fort (logements /
+  // habitation / usage mixte / conversion vers du logement). Ainsi « rezonage de
+  // commercial à résidentiel, 12 logements » et l'usage mixte restent dans B,
+  // tandis que « usages commerciaux » (Lavaltrie C-8) et « densification
+  // commerciale » (preuve faible seule) restent exclus.
+  const hasStrongResidentiel =
+    RESIDENTIEL_FORT_RE.test(text) ||
+    (category !== null && RESIDENTIEL_FORT_CATEGORIES_SET.has(category));
+  const hasResidentiel =
+    hasStrongResidentiel ||
+    (category !== null && RESIDENTIAL_CATEGORIES.has(category)) ||
+    RESIDENTIAL.test(text);
+  const residentiel = commercialOrIndustrial && !hasStrongResidentiel
     ? "non"
     : completeReform
       ? "indetermine"
-      : (category !== null && RESIDENTIAL_CATEGORIES.has(category)) || RESIDENTIAL.test(text)
+      : hasResidentiel
         ? "oui"
         : "indetermine";
   const source = input.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"]);
