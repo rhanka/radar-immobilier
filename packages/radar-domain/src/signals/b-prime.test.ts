@@ -56,6 +56,25 @@ describe("classifyBPrime", () => {
     }
   });
 
+  it("R3 — la preuve résidentielle FORTE l'emporte sur le franc-non-résidentiel", () => {
+    // « de commercial à résidentiel, 12 logements » : commercial PRÉSENT mais
+    // preuve forte (logements) → reste dans B (residentiel oui, pas d'exclusion).
+    expect(classifyBPrime({
+      label: "Rezonage de commercial à résidentiel — 12 logements",
+      description: "Conversion d'un bâtiment commercial en immeuble à logements de 12 unités.",
+      etapeAnnotation: "projet_reglement",
+    })).toMatchObject({ residentiel: "oui", exclusionReason: null });
+    // Usage réellement mixte avec du logement : gardé (opportunité).
+    expect(classifyBPrime({ label: "Zone d'usage mixte commercial et habitation" }))
+      .toMatchObject({ residentiel: "oui", exclusionReason: null });
+    // Preuve FAIBLE seule (« densification commerciale ») NE sauve PAS : exclu.
+    expect(classifyBPrime({ label: "Densification commerciale du secteur" }))
+      .toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
+    // Franc commercial sans aucun logement (Lavaltrie C-8) : exclu.
+    expect(classifyBPrime({ label: "Autoriser certains usages commerciaux zone C-8" }))
+      .toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
+  });
+
   it("R3 — le regex partagé matche toute la famille commercial/industriel", () => {
     for (const word of [
       "commercial", "commerciale", "commerciales", "commerciaux",
