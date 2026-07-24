@@ -177,17 +177,19 @@ function hasVivierClassification(node: GraphSignalNode): boolean {
 }
 
 /**
- * Qualifié = la définition du contrat `countVivierClassifications` :
- * aucune raison d'exclusion ET zonage `oui` ET résidentiel `oui`.
- * Toute autre combinaison est « à confirmer » ou « exclus » — jamais masquée
- * en silence par une inférence client.
+ * Périmètre de la vue B = « zonage résidentiel, indéterminé GARDÉ »
+ * (SPEC_EVOL_FILTRAGE_VIVIER_v2 §9/§34) : aucune raison d'exclusion serveur, ET
+ * zonage `oui`, ET résidentiel NON-franc (`oui` OU `indéterminé`). C'est la même
+ * définition que le `stageCounts` serveur (`countVivierClassifications`) — un
+ * signal résidentiel « à confirmer » (indéterminé) est GARDÉ, jamais masqué en
+ * silence ; seul le franc-non-résidentiel (déjà porteur d'une exclusion) sort.
  */
 function isQualifiedVivierNode(node: GraphSignalNode): boolean {
   const classification = node.classification!;
   return (
     classification.exclusion_reason === null &&
     classification.zonage.valeur === "oui" &&
-    classification.residentiel.valeur === "oui"
+    classification.residentiel.valeur !== "non"
   );
 }
 
@@ -321,10 +323,12 @@ export function projectPrecoceVivierNodes(
  * serveur : `z` → zonage `oui`, `r` → résidentiel `oui`, `p` → étape précoce.
  *
  * Le défaut {z,r,p} = {✓,✓,✗} reproduit EXACTEMENT `projectQualifiedVivierNodes`
- * (le vivier v2 qualifié). Décocher `r` révèle le « à confirmer » (résidentiel
- * indéterminé), décocher `z` le hors-zonage `oui` résidentiel : on RELIT des
- * champs serveur, on n'en réécrit aucun. Un seul nœud sans classification rend
- * la projection indisponible plutôt que partielle.
+ * (le PÉRIMÈTRE de la vue B). L'axe `r` COCHÉ est PERMISSIF : il garde le
+ * résidentiel `oui` ET l'indéterminé « à confirmer » (le franc-non-résidentiel
+ * est déjà écarté par `exclusion_reason`). Décocher `z` révèle le hors-zonage
+ * `oui` résidentiel : on RELIT des champs serveur, on n'en réécrit aucun. Un
+ * seul nœud sans classification rend la projection indisponible plutôt que
+ * partielle.
  */
 export function projectComposedVivierB(
   nodes: GraphSignalNode[],
@@ -337,7 +341,10 @@ export function projectComposedVivierB(
     const c = node.classification!;
     if (c.exclusion_reason !== null) return false;
     if (axes.z && c.zonage.valeur !== "oui") return false;
-    if (axes.r && c.residentiel.valeur !== "oui") return false;
+    // Axe `r` PERMISSIF : « indéterminé GARDÉ » — seul le franc-non-résidentiel
+    // (résidentiel `non`) est écarté, l'indéterminé « à confirmer » passe. C'est
+    // ce qui fait remonter les refontes SANS gate « refonte→oui ».
+    if (axes.r && c.residentiel.valeur === "non") return false;
     if (axes.p && !isPrecoceVivierNode(node)) return false;
     return true;
   });
@@ -391,12 +398,12 @@ export function validateVivierProjectionAuthority(
  * `null` le temps du fetch, ce qui éjectait la ville du rail (tri à -1 sous
  * les villes à 0, puis coupe au plafond) avant son retour ~1 s plus tard.
  *
- * A lit `subsetCounts[clé]` (clé composée par les axes cochés), B lit
- * `vivierV2Counts.qualified` (ou, précoce coché, la somme des étapes précoces
- * de `stageCounts`) : les DEUX sortent de la même passe serveur
- * (`aggregateGraphSignalProjectionRows`) sur la même donnée. Toujours bulk :
- * `subsetCounts[clé]` (0 si absent) et `vivierV2Counts` ne sont jamais `null`
- * le temps d'un fetch, donc une ville ne « saute » jamais du rail (#378).
+ * A lit `subsetCounts[clé]` (clé composée par les axes cochés), B lit le
+ * PÉRIMÈTRE serveur `stageCounts` (somme de toutes les étapes, ou des seules
+ * étapes précoces quand l'axe est coché) : les DEUX sortent de la même passe
+ * serveur (`aggregateGraphSignalProjectionRows`) sur la même donnée. Toujours
+ * bulk : `subsetCounts[clé]` (0 si absent) et `vivierV2Counts` ne sont jamais
+ * `null` le temps d'un fetch, donc une ville ne « saute » jamais du rail (#378).
  */
 export function countForVivierCity(
   entry: VivierCityCountsEntry,
@@ -405,13 +412,21 @@ export function countForVivierCity(
   if (modeFromSubsetKey(subsetKey) === "b") {
     const counts = entry.vivierV2Counts;
     if (!counts) return 0;
-    // Le badge ville reste le compte SERVEUR : `qualified`, ou la somme des
-    // étapes précoces quand l'axe est coché. Relâcher zonage/résidentiel est une
-    // lentille d'affichage — elle ne déplace pas le compte serveur (parité avec
-    // l'axe précoce et les exclusions : masquer/élargir n'est pas reclasser).
+    // Le badge ville = le PÉRIMÈTRE serveur (zonage résidentiel, indéterminé
+    // GARDÉ) via `stageCounts` : somme des étapes précoces quand l'axe précoce est
+    // coché, sinon somme de TOUTES les étapes. `stageCounts` compte déjà le
+    // périmètre (qualifié + indéterminé) — masquer/élargir est une lentille
+    // d'affichage, jamais une reclassification.
+    const stages = counts.stageCounts;
     return bAxesFromVivierKey(subsetKey).p
-      ? counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement
-      : counts.qualified;
+      ? stages.avis_motion + stages.projet_reglement
+      : stages.avis_motion +
+          stages.projet_reglement +
+          stages.consultation_publique +
+          stages.second_projet +
+          stages.adoption +
+          stages.entree_vigueur +
+          stages.inconnu;
   }
   return entry.subsetCounts[subsetKey] ?? 0;
 }

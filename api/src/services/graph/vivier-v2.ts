@@ -10,6 +10,8 @@ import {
 import {
   classifyBPrime,
   countVivierClassifications,
+  FRANC_NON_RESIDENTIEL_RE,
+  REGIONAL_COMMERCIAL_POLE_RE,
   vivierV2Schema,
   type VivierCounts,
   type VivierEtape,
@@ -178,12 +180,10 @@ export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalI
 const STRONG_RESIDENTIEL_MARKERS_RE =
   /\b(?:habitations?|logements?|multi[- ]?logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|duplex|triplex|quadruplex|plex|condominiums?|maison de chambres|immeuble (?:residentiel|locatif|a logements))\b/;
 
-/** Marqueurs commerciaux/industriels francs (R3). */
-const FRANC_COMMERCIAL_MARKERS_RE =
-  /\b(?:commercial(?:e)?s?|centre commercial|industriel(?:le)?s?|parc industriel|zone industrielle)\b/;
-
-/** Pôle commercial régional — raison d'exclusion nommée (R4). */
-const REGIONAL_COMMERCIAL_POLE_RE = /\bpole commercial regional\b/;
+// R3 (`FRANC_NON_RESIDENTIEL_RE`) et R4 (`REGIONAL_COMMERCIAL_POLE_RE`) sont
+// importés de @radar/domain — SOURCE PARTAGÉE avec `classifyBPrime` et le
+// lexique serveur `NON_RESIDENTIEL_MARKERS_RE`, donc synchronisés (le trou
+// « commerciaux » est fermé en un seul endroit).
 
 /**
  * Catégories intrinsèquement résidentielles FORTES (densification exclue : faible).
@@ -203,26 +203,27 @@ function isStrongResidentielCategory(category: string): boolean {
 
 /**
  * Pertinence résidentielle du chemin B′ SERVEUR, lue par la vue B (counts.ts →
- * `qualified` → `projectComposedVivierB`). Étend `classifyResidentielPertinence`
+ * périmètre → `projectComposedVivierB`). Étend `classifyResidentielPertinence`
  * (inchangée, encore lue par l'axe r de A) avec les règles de recette B′ :
  *
- *  - R4 : un « pôle commercial régional » est disqualifié par raison nommée —
+ *  - R4 : un « pôle commercial régional » est disqualifié par raison NOMMÉE —
  *         rang, jamais porte — même s'il porte un marqueur résidentiel.
  *  - R3 : une densification / affectation COMMERCIALE ou INDUSTRIELLE franche SANS
  *         marqueur résidentiel FORT est non-résidentielle (sort Rosemère,
- *         Saint-Charles-Borromée).
- *  - R2 : une REFONTE complète est REPÊCHÉE (`oui`) au lieu de rester
- *         `indéterminée` (les 3× refontes 10/10). « Refonte détectée = rang,
- *         jamais porte » (SPEC_EVOL_FILTRAGE_VIVIER_v2).
+ *         Saint-Charles-Borromée, Lavaltrie C-8 « usages commerciaux »).
  *
- * Ordre = R4 > R3 > pertinence explicite > R2 : une refonte franchement
- * commerciale reste exclue (R3 prime sur R2, cf. Rosemère).
+ * R2 SUPPRIMÉ : une refonte N'EST PLUS forcée à `oui`. « Refonte détectée =
+ * RANG, JAMAIS porte » (SPEC_EVOL_FILTRAGE_VIVIER_v2 §37). Une refonte sans
+ * marqueur résidentiel reste donc `indéterminé` — et c'est le PÉRIMÈTRE
+ * permissif de la vue B (indéterminé GARDÉ, spec §9/§34, cf. counts.ts) qui la
+ * fait remonter, pas une porte « refonte→oui ».
+ *
+ * Ordre = R4 > R3 > pertinence explicite > indéterminé.
  */
 function classificationFromResidentiel(
   category: string | null,
   label: string | null,
   description: string | null,
-  completeReform: boolean,
 ) {
   const text = fold(`${label ?? ""} ${description ?? ""}`);
   const hasStrongResidentiel =
@@ -232,7 +233,7 @@ function classificationFromResidentiel(
   if (REGIONAL_COMMERCIAL_POLE_RE.test(text)) {
     return { valeur: "non" as const, source: "classifyBPrime:R4_pole_commercial_regional", confiance: 0.9 };
   }
-  if (FRANC_COMMERCIAL_MARKERS_RE.test(text) && !hasStrongResidentiel) {
+  if (FRANC_NON_RESIDENTIEL_RE.test(text) && !hasStrongResidentiel) {
     return { valeur: "non" as const, source: "classifyBPrime:R3_commercial_franc", confiance: 0.9 };
   }
 
@@ -242,9 +243,6 @@ function classificationFromResidentiel(
   }
   if (pertinence === "non_residentiel") {
     return { valeur: "non" as const, source: "classifyResidentielPertinence", confiance: 0.9 };
-  }
-  if (completeReform) {
-    return { valeur: "oui" as const, source: "classifyBPrime:R2_refonte_complete", confiance: 0.85 };
   }
   return { valeur: "indetermine" as const, source: "classifyResidentielPertinence", confiance: 0 };
 }
@@ -411,15 +409,10 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
     description,
     firstString(records, ["instrument"]),
   );
-  // R2 — « refonte complète » détectée (instrument OU texte). Parité avec la
-  // détection de classifyBPrime (une refonte portée par `category=rezonage` ne
-  // remonte pas en instrument=refonte, d'où le repli texte).
-  const foldedText = fold(`${label ?? ""} ${description ?? ""}`);
-  const completeReform =
-    instrument === "refonte" ||
-    /\brefonte\b/.test(foldedText) ||
-    /\brevision complete\b/.test(foldedText);
-  const residentiel = classificationFromResidentiel(category ?? etapeAnnote, label, description, completeReform);
+  // R2 « refonte→oui » RETIRÉ : aucune détection de refonte ne force le
+  // résidentiel. Une refonte reste `indéterminé` (sauf franc-non-résidentiel) et
+  // remonte via le PÉRIMÈTRE permissif de la vue B (indéterminé gardé).
+  const residentiel = classificationFromResidentiel(category ?? etapeAnnote, label, description);
   const etapes = derivedEtapes(label, description, etapeAnnote, history);
   // R1 — l'étape ANNOTÉE fait autorité sur l'inférence texte : une annotation
   // valide (`projet_reglement`…) n'est jamais poussée plus tard par un mot-clé du

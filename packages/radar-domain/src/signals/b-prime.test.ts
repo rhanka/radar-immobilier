@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { classifyBPrime } from "./b-prime.js";
+import { classifyBPrime, FRANC_NON_RESIDENTIEL_RE } from "./b-prime.js";
+
+/** Normalise comme le classifieur (minuscule + sans accents). */
+const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 describe("classifyBPrime", () => {
   it("uses an explicit stage annotation before text and audits an invalid annotation", () => {
@@ -27,5 +30,43 @@ describe("classifyBPrime", () => {
       exclusionReason: "pole_commercial_regional",
       provenance: { extrait: "Pôle commercial régional", source: "pv-42" },
     });
+  });
+
+  it("R3 — durcissement lexical : pluriel « commerciaux » et variantes enseigne/affichage exclus", () => {
+    // Contre-exemple RÉEL (packages/radar-sources/.../proces-verbaux-lavaltrie.fixture.ts) :
+    // « Règlement de zonage … aux fins d'autoriser certains usages commerciaux
+    // … dans les zones C 8 et C 168 ». Le pluriel -aux échappait au regex → il
+    // entrait à tort dans B. Il doit désormais être franc-non-résidentiel.
+    expect(classifyBPrime({
+      label: "Règlement de zonage — autoriser certains usages commerciaux zone C-8",
+      description: "Modification du zonage aux fins d'autoriser certains usages commerciaux.",
+      etapeAnnotation: "second_projet",
+    })).toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
+
+    for (const label of [
+      "Nouvelle grille commerciale zone C-8",
+      "Zones commerciales et de services",
+      "Règlement sur les enseignes commerciales",
+      "Modification des normes d'affichage",
+      "Panneau-réclame en bordure d'autoroute",
+    ]) {
+      const c = classifyBPrime({ label });
+      expect(c.residentiel, `attendu non-résidentiel: ${label}`).toBe("non");
+      expect(c.exclusionReason, `attendu exclusion: ${label}`).toBe("non_residentiel_franc");
+    }
+  });
+
+  it("R3 — le regex partagé matche toute la famille commercial/industriel", () => {
+    for (const word of [
+      "commercial", "commerciale", "commerciales", "commerciaux",
+      "industriel", "industriels", "industrielle", "industrielles",
+      "enseigne", "enseignes", "affichage", "affichages", "panneau-reclame",
+    ]) {
+      expect(FRANC_NON_RESIDENTIEL_RE.test(fold(word)), `doit matcher: ${word}`).toBe(true);
+    }
+    // Faux amis à NE PAS exclure (pas de sur-blocage).
+    for (const word of ["residentiel", "logement", "habitation", "densification", "lotissement"]) {
+      expect(FRANC_NON_RESIDENTIEL_RE.test(fold(word)), `ne doit PAS matcher: ${word}`).toBe(false);
+    }
   });
 });
