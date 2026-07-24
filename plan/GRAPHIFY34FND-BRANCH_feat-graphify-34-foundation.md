@@ -22,8 +22,11 @@ Make-driven gate.
 - **Allowed Paths (implementation scope)**:
   - `api/src/services/graph/replay/**` (InputSet contract + canonical JSON)
   - `api/src/services/graph/legacy-filter-a-golden.test.ts`
+  - `api/src/routes/legacy-filter-a-transport-golden.test.ts` (route payload
+    golden — a TEST file next to the route; the route itself stays forbidden)
   - `api/tests/fixtures/graphify/legacy-filter-a/**`
   - `ui/src/lib/signals/legacy-filter-a-golden.test.ts`
+  - `ui/src/lib/signals/legacy-filter-a-transport.test.ts`
   - `ui/src/lib/signals/fixtures/legacy-filter-a-*.json`
   - `scripts/graphify-legacy-a-gate.sh`
   - `docs/reports/consensus/**`, `docs/reports/geo-handoff/**`
@@ -49,9 +52,9 @@ Make-driven gate.
   does NOT add an `ORDER BY` (that is a runtime change, out of foundation scope);
   it documents the absence honestly and the goldens pin only deterministic
   in-memory order (input-preserving server-side, authority-driven client-side).
-- `attention` — commit-size note: the doc-restoration commits (`5f036a5`) exceed
-  150 lines because each restores a single large design artifact (one logical
-  change per file); corrective commits in this remediation stay atomic ≤150 lines.
+- `attention` — commit-size: the branch history was REBUILT so that every commit
+  stays ≤150 insertions, large design artifacts included (they land in successive
+  append-only slices, each a valid file).
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)
@@ -90,3 +93,12 @@ Make-driven gate.
   - [x] `git diff --check` clean; new docs in English; atomic commits ≤150 lines.
   - [x] Lot gate:
     - [x] `bash scripts/graphify-legacy-a-gate.sh ENV=test-graphify34foundation`
+
+- [x] **Lot 5 — Adversarial-review remediation (2nd round)**
+  - [x] Bind `rawSha256` to `sourceManifestRef.sha256` (one digest, two notations)
+        in the contract; negative test on a mismatch; `selectManifestEntry` proves
+        the selected manifest line also carries the member's `rawCasKey`.
+  - [x] Golden the REAL transport payload of `GET /api/graph-signals/:city` and
+        make the UI consume those bytes through `fetchGraphSignalDetail` +
+        `projectNodesForVivierKey` (nominal / empty / 404 / 5xx / corrupt).
+  - [x] Gate extended to the transport goldens; history rebuilt to ≤150-line commits.

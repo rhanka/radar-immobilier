@@ -170,11 +170,33 @@ golden (§4.2).
   - URL/mode normalization (`modeFromSubsetKey`, `subsetKeyForMode`,
     `initialVivierSubsetKey`, `keyFromAFlags`/`aFlagsFromKey` round-trip).
 
-### 4.3 Executable gate
-- `scripts/graphify-legacy-a-gate.sh` — runs both A goldens + the InputSet
-  contract via the OFFICIAL `make test-api` / `make test-ui` targets (Make-only /
-  Docker-first, no host `npx`); **exit ≠ 0** if any golden diverges. See the
-  command header in the script.
+### 4.3 Transport golden (route → UI)
+- Tests: `api/src/routes/legacy-filter-a-transport-golden.test.ts` (emitter) and
+  `ui/src/lib/signals/legacy-filter-a-transport.test.ts` (consumer).
+- Shared artifact: `api/tests/fixtures/graphify/legacy-filter-a/
+  route-transport.golden.json` — the payload `GET /api/graph-signals/:city`
+  REALLY serializes for the `alpha` corpus (read back from the response bytes),
+  plus its 404 payload. The UI test reads that same file across workspaces (one
+  contract, no second copy) and replays it through the real client
+  `fetchGraphSignalDetail` (stubbed `fetch`) and then through the view's own call
+  `projectNodesForVivierKey(nodes, legacyProjection, key)`.
+- Closes the gap §4.1/§4.2 leave open: both are layer-local, so a broken
+  `legacySubset` / `legacyProjection` mapping *between* them stayed green. It is
+  verified by mutation: renaming the served `legacySubset.signalId` turns the API
+  side red, and dropping `legacyProjection` in the client turns the UI side red
+  while the §4.2 golden still passes 25/25.
+- Also freezes, at that frontier: 404 → honest empty state (`ok:false`,
+  `legacyProjection:null`, `nodes:[]`) → unavailable projection; 5xx → error, never
+  a silently empty map; served authority corrupt (wrong order, over-claim) or
+  absent → fail-closed; served node membership dropped/mismatched → fail-closed;
+  empty city → available, count 0; and per-subset render counts equal to the
+  server golden `subsetCounts` (cross-layer parity).
+
+### 4.4 Executable gate
+- `scripts/graphify-legacy-a-gate.sh` — runs the three A goldens (server,
+  transport, UI display) + the InputSet contract via the OFFICIAL `make test-api`
+  / `make test-ui` targets (Make-only / Docker-first, no host `npx`);
+  **exit ≠ 0** if any golden diverges. See the command header in the script.
 
 ---
 
