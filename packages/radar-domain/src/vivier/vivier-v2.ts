@@ -56,17 +56,30 @@ export const vivierProvenanceSchema = z.object({
 });
 export type VivierProvenance = z.infer<typeof vivierProvenanceSchema>;
 
-export const vivierV2Schema = z.object({
-  zonage: vivierSignalSchema,
-  residentiel: vivierSignalSchema,
-  effet_densifiant: vivierEffetDensifiantSchema.default("inconnu"),
-  instrument: vivierInstrumentSchema,
-  etape: vivierEtapeSchema,
-  etapes_historique: z.array(vivierEtapeSchema).default([]),
-  exclusion_reason: vivierExclusionReasonSchema.nullable().default(null),
-  provenance: vivierProvenanceSchema.default({ extrait: "" }),
-  confiance: vivierConfidenceSchema,
-});
+export const vivierV2Schema = z
+  .object({
+    zonage: vivierSignalSchema,
+    residentiel: vivierSignalSchema,
+    effet_densifiant: vivierEffetDensifiantSchema.default("inconnu"),
+    instrument: vivierInstrumentSchema,
+    etape: vivierEtapeSchema,
+    etapes_historique: z.array(vivierEtapeSchema).default([]),
+    exclusion_reason: vivierExclusionReasonSchema.nullable().default(null),
+    provenance: vivierProvenanceSchema.default({ extrait: "" }),
+    confiance: vivierConfidenceSchema,
+  })
+  .superRefine((classification, context) => {
+    if (
+      classification.residentiel.valeur === "non" &&
+      classification.exclusion_reason === null
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["exclusion_reason"],
+        message: "a non-residential classification must have an exclusion reason",
+      });
+    }
+  });
 export type VivierV2 = z.infer<typeof vivierV2Schema>;
 export type VivierV2Classification = VivierV2;
 

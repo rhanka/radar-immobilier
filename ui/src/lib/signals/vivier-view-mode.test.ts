@@ -28,7 +28,12 @@ import {
 } from "./vivier-view-mode.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
 import { normalizeGeoRouteState, type GeoRoute } from "$lib/router/geo-route.js";
-import { countVivierClassifications, type VivierV2, type VivierV2Counts } from "@radar/domain";
+import {
+  countVivierClassifications,
+  vivierV2Schema,
+  type VivierV2,
+  type VivierV2Counts,
+} from "@radar/domain";
 
 type TriState = "oui" | "non" | "indetermine";
 
@@ -465,6 +470,24 @@ describe("Vivier A / B view contract", () => {
     // hors-zonage résidentiel) — 2 en périmètre, +2 hors-zonage = 4.
     expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(2);
     expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(4);
+  });
+
+  it("rejects the DTO that would diverge rail and panel on the r axis", () => {
+    const inconsistent = node(
+      "invalid-non-residential",
+      false,
+      false,
+      false,
+      classification("oui", "non", null),
+    );
+    const rawClassification = inconsistent.classification as unknown as VivierV2;
+
+    expect(projectComposedVivierB([inconsistent], { z: true, r: true, p: false }))
+      .toEqual({ available: true, count: 0, nodes: [] });
+    expect(vivierV2Schema.safeParse(rawClassification).success).toBe(false);
+    expect(() => countVivierClassifications([rawClassification])).toThrow(
+      "a non-residential classification must have an exclusion reason",
+    );
   });
 
   it("resynchronizes route mode and keys route identity by A/B", () => {

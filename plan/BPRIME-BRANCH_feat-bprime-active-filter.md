@@ -112,5 +112,6 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - [x] Read the v3 adverse-review report and reproduce its three R3/DTO counterexamples.
   - [x] Recognize explicit commercial-to-residential-use conversions using only resolved decision evidence; keep provenance-only excerpts out of the predicate.
   - [x] Exclude the real Beloeil 1667-128 `Commerce` signal and cover direct `classifyVivierSignal` counterexamples.
-  - [ ] Enforce `residentiel=non` implies a named exclusion reason and prove that the rail/panel divergence DTO is rejected.
-  - [ ] Align the `r` and `stageCounts` comments with the enforced invariant and run the scoped Make gates in `ENV=test-bprimefix`.
+  - [x] Enforce `residentiel=non` implies a named exclusion reason and prove that the rail/panel divergence DTO is rejected.
+  - [x] Align the `r` and `stageCounts` comments with the enforced invariant.
+  - [ ] Run the scoped Make gates in `ENV=test-bprimefix`.
