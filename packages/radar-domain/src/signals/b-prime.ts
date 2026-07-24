@@ -35,7 +35,7 @@ const RESIDENTIAL_CATEGORIES = new Set([
   "densification", "developpement_residentiel", "logement", "logement_abordable", "habitation",
 ]);
 const COMMERCIAL_OR_INDUSTRIAL_CATEGORIES = new Set([
-  "commercial", "commerce", "industriel", "industrie",
+  "commercial", "commerce", "commerces", "industriel", "industrie",
 ]);
 const RESIDENTIAL = /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement|multi-logement|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densification|duplex|triplex|quadruplex|plex|condominium|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte)\b/;
 
@@ -51,25 +51,21 @@ const RESIDENTIAL = /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement
  * couverts — c'était le trou lexical R3 relevé en revue.
  */
 export const FRANC_NON_RESIDENTIEL_SOURCE =
-  "commercia(?:ux|l(?:es?)?)|industriel(?:les?|s)?|centre commercial|parc industriel|zone industrielle|enseignes?|affichages?|panneaux?[- ]?reclames?";
+  "commerce(?:s)?|commercia(?:ux|l(?:es?)?)|industriel(?:les?|s)?|centre commercial|parc industriel|zone industrielle|enseignes?|affichages?|panneaux?[- ]?reclames?";
 export const FRANC_NON_RESIDENTIEL_RE = new RegExp(`\\b(?:${FRANC_NON_RESIDENTIEL_SOURCE})\\b`);
 /** Pôle commercial régional — raison d'exclusion NOMMÉE (R4), source partagée. */
 export const REGIONAL_COMMERCIAL_POLE_RE = /\bpole commercial regional\b/;
 const COMMERCIAL_OR_INDUSTRIAL = FRANC_NON_RESIDENTIEL_RE;
 
 /**
- * Preuve résidentielle FORTE — SOURCE PARTAGÉE (importée par `vivier-v2`
- * `classificationFromResidentiel`), UNE SEULE source de décision pour R3.
- * Marqueurs de logement CONCRETS + « usage mixte » + conversion explicite « à/en
- * usage résidentiel ». « densification » et « résidentiel » NUS en sont
- * volontairement absents : ils apparaissent dans « densification commerciale »
- * (Rosemère) et « zone résidentielle requalifiée en commerciale »
- * (Saint-Charles-Borromée) — une preuve FAIBLE ne doit PAS soustraire un signal
- * franchement commercial à l'exclusion R3. La preuve FORTE, elle, l'emporte :
- * une conversion « de commercial à résidentiel, 12 logements » reste dans B.
+ * Strong residential evidence shared with `vivier-v2` for the R3 decision.
+ * Concrete housing markers, mixed use, and explicit conversion to residential
+ * use override a frank commercial marker. Bare “densification” and
+ * “residential” remain deliberately weak: they occur in commercial-only
+ * phrases and must not rescue a signal without a real residential use.
  */
 export const RESIDENTIEL_FORT_SOURCE =
-  "habitations?|logements?|multi[- ]?logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|duplex|triplex|quadruplex|plex|condominiums?|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte";
+  "habitations?|logements?|multi[- ]?logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|duplex|triplex|quadruplex|plex|condominiums?|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte|(?:conversion|transformation|changement d usage|passage)[\\s\\S]{0,120}?\\b(?:vers|a|au|en|pour)\\s+(?:un\\s+)?(?:usage\\s+)?residentiel(?:le)?s?";
 export const RESIDENTIEL_FORT_RE = new RegExp(`\\b(?:${RESIDENTIEL_FORT_SOURCE})\\b`);
 /**
  * Catégories intrinsèquement résidentielles FORTES = `RESIDENTIAL_CATEGORIES`
