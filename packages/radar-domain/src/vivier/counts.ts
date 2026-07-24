@@ -101,16 +101,30 @@ export function countVivierClassifications(
       continue;
     }
 
-    const qualified =
+    // PÉRIMÈTRE de la vue B = « zonage résidentiel, indéterminé GARDÉ »
+    // (SPEC_EVOL_FILTRAGE_VIVIER_v2 §9/§34) : zonage `oui` et résidentiel
+    // NON-franc (le franc-non-résidentiel porte déjà une exclusion, écartée
+    // ci-dessus). `stageCounts` compte CE périmètre par étape — c'est lui que
+    // lit le badge rail (`countForVivierCity`), donc une refonte
+    // `résidentiel=indéterminé` y remonte SANS gate « refonte→oui ».
+    const inPerimeter =
       classification.zonage.valeur === "oui" &&
-      classification.residentiel.valeur === "oui";
-    if (!qualified) {
-      counts.residentialUnknown += 1;
-      continue;
+      classification.residentiel.valeur !== "non";
+    if (inPerimeter) {
+      counts.stageCounts[classification.etape] += 1;
     }
 
-    counts.qualified += 1;
-    counts.stageCounts[classification.etape] += 1;
+    // `qualified` reste STRICT (résidentiel confirmé `oui`) et `residentialUnknown`
+    // = l'indéterminé « à confirmer » : la partition (donc l'invariant
+    // total = qualified + residentialUnknown + excluded) est INCHANGÉE.
+    if (
+      classification.zonage.valeur === "oui" &&
+      classification.residentiel.valeur === "oui"
+    ) {
+      counts.qualified += 1;
+    } else {
+      counts.residentialUnknown += 1;
+    }
   }
 
   return vivierCountsSchema.parse(counts);
