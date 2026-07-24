@@ -1,0 +1,13 @@
+{
+  "_note": "FROZEN display projection obtained by replaying the API-frozen transport payload (api/tests/fixtures/graphify/legacy-filter-a/route-transport.golden.json) through fetchGraphSignalDetail + projectNodesForVivierKey, exactly as SignauxMapView does. Members are listed IN RENDER ORDER. A change here is NO-GO per docs/reports/consensus/graphify-3.4-legacy-filter-a-addendum.md.",
+  "projectionMembers": {
+    "": ["alpha-s1", "alpha-s2", "alpha-s3", "alpha-s4"],
+    "z": ["alpha-s1", "alpha-s3", "alpha-s4"],
+    "m": ["alpha-s1", "alpha-s4"],
+    "p": ["alpha-s1", "alpha-s4"],
+    "z|m": ["alpha-s1", "alpha-s4"],
+    "z|p": ["alpha-s1", "alpha-s4"],
+    "m|p": ["alpha-s1", "alpha-s4"],
+    "z|m|p": ["alpha-s1", "alpha-s4"]
+  }
+}
