@@ -25,6 +25,7 @@ import { z } from "zod";
 import {
   getGeoSourceInventory,
 } from "@radar/sources";
+import { publicProvenanceFromProperties } from "./provenance.js";
 
 // ─── Schémas GeoJSON minimaux ─────────────────────────────────────────────────
 
@@ -32,6 +33,8 @@ import {
 export const LotProperties = z.object({
   noLot: z.string(),
   citySlug: z.string().optional(),
+  proof: z.record(z.unknown()).optional(),
+  immo_zone_lot_provenance: z.record(z.unknown()).optional(),
 });
 export type LotPropertiesT = z.infer<typeof LotProperties>;
 
@@ -180,7 +183,7 @@ function normalizeFeature(
   return {
     type: "Feature" as const,
     geometry: typedGeom,
-    properties: { noLot, citySlug },
+    properties: { noLot, citySlug, ...publicProvenanceFromProperties(props) },
   };
 }
 
