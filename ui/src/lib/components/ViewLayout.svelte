@@ -15,6 +15,7 @@
   let rightDrawerOpen = false;
 
   onMount(() => {
+    if (typeof window.matchMedia !== "function") return;
     const mql = window.matchMedia("(max-width: 899px)");
     isCompact = mql.matches;
     const handler = (e: MediaQueryListEvent) => {
