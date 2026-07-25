@@ -1,4 +1,4 @@
-import type { VivierV2Counts } from "@radar/domain";
+import { isResidentialEligible, type VivierV2Counts } from "@radar/domain";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   parseKey,
@@ -319,9 +319,10 @@ export function projectPrecoceVivierNodes(
  *
  * Base = nodes not excluded by the server (`exclusion_reason === null`); an
  * excluded node remains outside B for every combination. On that base, `z`
- * requires zonage `oui`, `r` requires residential `oui` (excludes
- * `indetermine`), and `p` requires an early stage. Unchecking any axis
- * relaxes its filter without reclassification.
+ * requires zonage `oui`, `r` requires residential ELIGIBILITY (`oui`, or a
+ * rezoning/reform whose residential nature is simply unstated — a reform ranks,
+ * it never gates), and `p` requires an early stage. Unchecking any axis relaxes
+ * its filter without reclassification.
  *
  * One missing classification makes the projection unavailable rather than
  * partial.
@@ -337,7 +338,10 @@ export function projectComposedVivierB(
     const c = node.classification!;
     if (c.exclusion_reason !== null) return false;
     if (axes.z && c.zonage.valeur !== "oui") return false;
-    if (axes.r && c.residentiel.valeur !== "oui") return false;
+    // `r` reads the SHARED server predicate (isResidentialEligible), so this
+    // list and the rail badge can never diverge: residential `oui` and
+    // rezoning/reform left unstated are kept, explicit non-residential is not.
+    if (axes.r && !isResidentialEligible(c)) return false;
     if (axes.p && !isPrecoceVivierNode(node)) return false;
     return true;
   });
@@ -393,8 +397,9 @@ export function validateVivierProjectionAuthority(
  *
  * A lit `subsetCounts[clé]` (clé composée par les axes cochés). B recompose
  * les trois axes à partir des compteurs serveur : `r` sélectionne
- * `stageCountsResOui` (résidentiel confirmé) ou `stageCounts` (oui +
- * indéterminé), `z` ajoute le pendant hors-zonage quand décoché, `p`
+ * `stageCountsResEligible` (résidentiel `oui` + rezonage/refonte non précisé)
+ * ou `stageCounts` (tout indéterminé gardé), `z` ajoute le pendant
+ * hors-zonage quand décoché, `p`
  * restreint aux étapes précoces. Toujours bulk : `vivierV2Counts` n'est
  * jamais `null` le temps d'un fetch, donc une ville ne saute jamais du
  * rail (#378).
@@ -417,8 +422,8 @@ export function countForVivierCity(
             stages.adoption +
             stages.entree_vigueur +
             stages.inconnu;
-    const inZonage = axes.r ? counts.stageCountsResOui : counts.stageCounts;
-    const horsZonage = axes.r ? counts.stageCountsResOuiHorsZonage : counts.stageCountsHorsZonage;
+    const inZonage = axes.r ? counts.stageCountsResEligible : counts.stageCounts;
+    const horsZonage = axes.r ? counts.stageCountsResEligibleHorsZonage : counts.stageCountsHorsZonage;
     return axes.z ? sumStages(inZonage) : sumStages(inZonage) + sumStages(horsZonage);
   }
   return entry.subsetCounts[subsetKey] ?? 0;
