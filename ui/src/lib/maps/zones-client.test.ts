@@ -351,7 +351,7 @@ describe("enveloppes de provenance geo", () => {
         evidence_id: "legacy-geom-44c1",
         reason_codes: ["historical-verification-unavailable"],
       },
-      acquisition_v2_readiness: { state: "ready", checked_at: "2026-07-22T14:00:00Z", unmet_requirement_codes: [] },
+      acquisition_v2_readiness: { state: "not-ready", checked_at: "2026-07-22T14:00:00Z", unmet_requirement_codes: ["missing-canonical-public-source", "missing-retrieved-at", "missing-content-sha256"] },
     };
     vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ type: "FeatureCollection", features: [makeZonePolygon({ code: "H-12", proof, immo_zone_lot_provenance: provenance })] }), { status: 200 }));
     const response = await fetchZones("delson", { baseUrl: "" });
