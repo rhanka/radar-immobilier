@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   vivierEtapeSchema,
   vivierExclusionReasonSchema,
+  vivierV2Schema,
   type VivierEtape,
   type VivierExclusionReason,
   type VivierV2,
@@ -31,7 +32,13 @@ export const vivierCountsSchema = z
     qualified: countSchema,
     residentialUnknown: countSchema,
     excludedByReason: vivierExcludedByReasonSchema,
+    // B-stage perimeter: records not excluded by the server with zonage `oui`.
+    // The schema guarantees that every residential `non` is already excluded,
+    // so the permissive `r` axis keeps confirmed and unknown residential use.
     stageCounts: vivierStageCountsSchema,
+    // The same records outside zonage `oui`, bucketed by stage. When `z` is
+    // unchecked, rail and panel both combine this with stageCounts.
+    stageCountsHorsZonage: vivierStageCountsSchema,
     total: countSchema,
   })
   .superRefine((counts, context) => {
@@ -92,25 +99,40 @@ export function countVivierClassifications(
     residentialUnknown: 0,
     excludedByReason: emptyExcludedByReason(),
     stageCounts: emptyStageCounts(),
+    stageCountsHorsZonage: emptyStageCounts(),
     total: classifications.length,
   };
 
   for (const classification of classifications) {
+    vivierV2Schema.parse(classification);
     if (classification.exclusion_reason !== null) {
       counts.excludedByReason[classification.exclusion_reason] += 1;
       continue;
     }
 
-    const qualified =
-      classification.zonage.valeur === "oui" &&
-      classification.residentiel.valeur === "oui";
-    if (!qualified) {
-      counts.residentialUnknown += 1;
-      continue;
+    // stageCounts contains the server-eligible B perimeter: zonage `oui` and
+    // no exclusion. It includes residential `indetermine`, so reforms remain
+    // visible without a refonte-to-oui gate. stageCountsHorsZonage holds the
+    // same non-excluded records when `z` is relaxed; the two buckets let rail
+    // reproduce the panel without reclassification.
+    const inPerimeter = classification.zonage.valeur === "oui";
+    if (inPerimeter) {
+      counts.stageCounts[classification.etape] += 1;
+    } else {
+      counts.stageCountsHorsZonage[classification.etape] += 1;
     }
 
-    counts.qualified += 1;
-    counts.stageCounts[classification.etape] += 1;
+    // `qualified` reste STRICT (résidentiel confirmé `oui`) et `residentialUnknown`
+    // = l'indéterminé « à confirmer » : la partition (donc l'invariant
+    // total = qualified + residentialUnknown + excluded) est INCHANGÉE.
+    if (
+      classification.zonage.valeur === "oui" &&
+      classification.residentiel.valeur === "oui"
+    ) {
+      counts.qualified += 1;
+    } else {
+      counts.residentialUnknown += 1;
+    }
   }
 
   return vivierCountsSchema.parse(counts);

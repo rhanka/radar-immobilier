@@ -91,7 +91,7 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     expect(getByTestId("visible-count").textContent).toBe("3");
   });
 
-  it("m1.4 — unchecking the Résidentiel axis broadens the visible list", async () => {
+  it("m1.4 — le périmètre PERMISSIF garde l'indéterminé « à confirmer » dans le défaut B", async () => {
     const detailNodes = [
       node("qualifie", "rezonage", { residentiel: "oui" }),
       node("a-confirmer", "rezonage", { residentiel: "indetermine" }),
@@ -99,9 +99,11 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     const { container, getByTestId } = render(Harness, {
       props: { detailNodes, initialSubsetKey: "vivier-v2" },
     });
-    // Défaut : seul le qualifié (résidentiel oui) est montré.
-    expect(getByTestId("visible-count").textContent).toBe("1");
-    // Décocher « Résidentiel » (2e axe) → le « à confirmer » entre dans la liste.
+    // Défaut PERMISSIF : le qualifié ET le « à confirmer » (indéterminé GARDÉ,
+    // spec §9/§34) sont montrés — plus de gate qui masque l'indéterminé.
+    expect(getByTestId("visible-count").textContent).toBe("2");
+    // Décocher « Résidentiel » (2e axe) n'ajoute rien (l'axe est déjà permissif) :
+    // le compte reste stable, aucune reclassification.
     await fireEvent.click(axisBoxes(container)[1]!);
     expect(getByTestId("visible-count").textContent).toBe("2");
   });
@@ -120,6 +122,15 @@ function bulkVivierCounts(qualified: number): VivierV2Counts {
     },
     stageCounts: {
       avis_motion: qualified,
+      projet_reglement: 0,
+      consultation_publique: 0,
+      second_projet: 0,
+      adoption: 0,
+      entree_vigueur: 0,
+      inconnu: 0,
+    },
+    stageCountsHorsZonage: {
+      avis_motion: 0,
       projet_reglement: 0,
       consultation_publique: 0,
       second_projet: 0,

@@ -177,17 +177,19 @@ function hasVivierClassification(node: GraphSignalNode): boolean {
 }
 
 /**
- * Qualifié = la définition du contrat `countVivierClassifications` :
- * aucune raison d'exclusion ET zonage `oui` ET résidentiel `oui`.
- * Toute autre combinaison est « à confirmer » ou « exclus » — jamais masquée
- * en silence par une inférence client.
+ * Périmètre de la vue B = « zonage résidentiel, indéterminé GARDÉ »
+ * (SPEC_EVOL_FILTRAGE_VIVIER_v2 §9/§34) : aucune raison d'exclusion serveur, ET
+ * zonage `oui`, ET résidentiel NON-franc (`oui` OU `indéterminé`). C'est la même
+ * définition que le `stageCounts` serveur (`countVivierClassifications`) — un
+ * signal résidentiel « à confirmer » (indéterminé) est GARDÉ, jamais masqué en
+ * silence ; seul le franc-non-résidentiel (déjà porteur d'une exclusion) sort.
  */
 function isQualifiedVivierNode(node: GraphSignalNode): boolean {
   const classification = node.classification!;
   return (
     classification.exclusion_reason === null &&
     classification.zonage.valeur === "oui" &&
-    classification.residentiel.valeur === "oui"
+    classification.residentiel.valeur !== "non"
   );
 }
 
@@ -313,18 +315,19 @@ export function projectPrecoceVivierNodes(
 }
 
 /**
- * B avec sous-sélection : les trois axes DÉcochés relâchent le filtre.
+ * B with composed axes: unchecked axes relax their matching requirement.
  *
- * Base = les nœuds classifiés NON exclus par le serveur (`exclusion_reason ===
- * null`) — les nœuds « exclus » restent hors de B en toutes circonstances.
- * Sur cette base, chaque axe COCHÉ ajoute une exigence lue sur la classification
- * serveur : `z` → zonage `oui`, `r` → résidentiel `oui`, `p` → étape précoce.
+ * Base = nodes not excluded by the server (`exclusion_reason === null`); an
+ * excluded node remains outside B for every combination. On that base, `z`
+ * requires zonage `oui` and `p` an early stage. `r` is permissive: it retains
+ * residential `oui` and `indetermine`. The DTO schema requires every
+ * residential `non` to have an exclusion reason, so `r` never creates a
+ * separate rail-only population.
  *
- * Le défaut {z,r,p} = {✓,✓,✗} reproduit EXACTEMENT `projectQualifiedVivierNodes`
- * (le vivier v2 qualifié). Décocher `r` révèle le « à confirmer » (résidentiel
- * indéterminé), décocher `z` le hors-zonage `oui` résidentiel : on RELIT des
- * champs serveur, on n'en réécrit aucun. Un seul nœud sans classification rend
- * la projection indisponible plutôt que partielle.
+ * The default {z,r,p} = {✓,✓,✗} reproduces `projectQualifiedVivierNodes`.
+ * Unchecking `z` reveals non-excluded records outside zonage `oui`; no client
+ * field is rewritten. One missing classification makes the projection
+ * unavailable rather than partial.
  */
 export function projectComposedVivierB(
   nodes: GraphSignalNode[],
@@ -337,7 +340,9 @@ export function projectComposedVivierB(
     const c = node.classification!;
     if (c.exclusion_reason !== null) return false;
     if (axes.z && c.zonage.valeur !== "oui") return false;
-    if (axes.r && c.residentiel.valeur !== "oui") return false;
+    // `r` keeps indeterminate residential evidence. A residential `non` is
+    // already excluded by the DTO invariant, preserving rail/panel parity.
+    if (axes.r && c.residentiel.valeur === "non") return false;
     if (axes.p && !isPrecoceVivierNode(node)) return false;
     return true;
   });
@@ -391,12 +396,12 @@ export function validateVivierProjectionAuthority(
  * `null` le temps du fetch, ce qui éjectait la ville du rail (tri à -1 sous
  * les villes à 0, puis coupe au plafond) avant son retour ~1 s plus tard.
  *
- * A lit `subsetCounts[clé]` (clé composée par les axes cochés), B lit
- * `vivierV2Counts.qualified` (ou, précoce coché, la somme des étapes précoces
- * de `stageCounts`) : les DEUX sortent de la même passe serveur
- * (`aggregateGraphSignalProjectionRows`) sur la même donnée. Toujours bulk :
- * `subsetCounts[clé]` (0 si absent) et `vivierV2Counts` ne sont jamais `null`
- * le temps d'un fetch, donc une ville ne « saute » jamais du rail (#378).
+ * A lit `subsetCounts[clé]` (clé composée par les axes cochés), B lit le
+ * PÉRIMÈTRE serveur `stageCounts` (somme de toutes les étapes, ou des seules
+ * étapes précoces quand l'axe est coché) : les DEUX sortent de la même passe
+ * serveur (`aggregateGraphSignalProjectionRows`) sur la même donnée. Toujours
+ * bulk : `subsetCounts[clé]` (0 si absent) et `vivierV2Counts` ne sont jamais
+ * `null` le temps d'un fetch, donc une ville ne « saute » jamais du rail (#378).
  */
 export function countForVivierCity(
   entry: VivierCityCountsEntry,
@@ -405,13 +410,24 @@ export function countForVivierCity(
   if (modeFromSubsetKey(subsetKey) === "b") {
     const counts = entry.vivierV2Counts;
     if (!counts) return 0;
-    // Le badge ville reste le compte SERVEUR : `qualified`, ou la somme des
-    // étapes précoces quand l'axe est coché. Relâcher zonage/résidentiel est une
-    // lentille d'affichage — elle ne déplace pas le compte serveur (parité avec
-    // l'axe précoce et les exclusions : masquer/élargir n'est pas reclasser).
-    return bAxesFromVivierKey(subsetKey).p
-      ? counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement
-      : counts.qualified;
+    // Rail/panel parity for every B axis comes from server counters, without
+    // reclassification: `p` selects early stages; `z` selects stageCounts or
+    // also stageCountsHorsZonage when relaxed; `r` retains confirmed and
+    // unknown residential use because the DTO excludes every residential `non`.
+    const axes = bAxesFromVivierKey(subsetKey);
+    const sumStages = (stages: typeof counts.stageCounts): number =>
+      axes.p
+        ? stages.avis_motion + stages.projet_reglement
+        : stages.avis_motion +
+            stages.projet_reglement +
+            stages.consultation_publique +
+            stages.second_projet +
+            stages.adoption +
+            stages.entree_vigueur +
+            stages.inconnu;
+    return axes.z
+      ? sumStages(counts.stageCounts)
+      : sumStages(counts.stageCounts) + sumStages(counts.stageCountsHorsZonage);
   }
   return entry.subsetCounts[subsetKey] ?? 0;
 }
