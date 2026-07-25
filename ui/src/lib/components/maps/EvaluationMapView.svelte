@@ -1267,6 +1267,7 @@
               </p>
             </div>
 
+            <div class="overflow-x-auto">
             <table class="w-full text-xs">
               <thead>
                 <tr class="border-b border-slate-100">
@@ -1299,6 +1300,7 @@
                 {/each}
               </tbody>
             </table>
+            </div>
 
             <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between gap-3">
               <span class="text-sm font-semibold text-slate-700">Score global estimé</span>
