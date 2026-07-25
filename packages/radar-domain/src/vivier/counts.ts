@@ -33,12 +33,17 @@ export const vivierCountsSchema = z
     residentialUnknown: countSchema,
     excludedByReason: vivierExcludedByReasonSchema,
     // B-stage perimeter: records not excluded by the server with zonage `oui`.
-    // The schema guarantees that every residential `non` is already excluded,
-    // so the permissive `r` axis keeps confirmed and unknown residential use.
+    // Combines residential `oui` and `indetermine` (used when `r` is unchecked).
     stageCounts: vivierStageCountsSchema,
     // The same records outside zonage `oui`, bucketed by stage. When `z` is
     // unchecked, rail and panel both combine this with stageCounts.
     stageCountsHorsZonage: vivierStageCountsSchema,
+    // Residential-confirmed subset of stageCounts: zonage `oui`, residential
+    // `oui`, no exclusion. Used when the `r` axis is checked (strict mode).
+    stageCountsResOui: vivierStageCountsSchema,
+    // Residential-confirmed outside zonage `oui`. Combines with
+    // stageCountsResOui when both `z` unchecked and `r` checked.
+    stageCountsResOuiHorsZonage: vivierStageCountsSchema,
     total: countSchema,
   })
   .superRefine((counts, context) => {
@@ -100,6 +105,8 @@ export function countVivierClassifications(
     excludedByReason: emptyExcludedByReason(),
     stageCounts: emptyStageCounts(),
     stageCountsHorsZonage: emptyStageCounts(),
+    stageCountsResOui: emptyStageCounts(),
+    stageCountsResOuiHorsZonage: emptyStageCounts(),
     total: classifications.length,
   };
 
@@ -116,10 +123,13 @@ export function countVivierClassifications(
     // same non-excluded records when `z` is relaxed; the two buckets let rail
     // reproduce the panel without reclassification.
     const inPerimeter = classification.zonage.valeur === "oui";
+    const resOui = classification.residentiel.valeur === "oui";
     if (inPerimeter) {
       counts.stageCounts[classification.etape] += 1;
+      if (resOui) counts.stageCountsResOui[classification.etape] += 1;
     } else {
       counts.stageCountsHorsZonage[classification.etape] += 1;
+      if (resOui) counts.stageCountsResOuiHorsZonage[classification.etape] += 1;
     }
 
     // `qualified` reste STRICT (résidentiel confirmé `oui`) et `residentialUnknown`
