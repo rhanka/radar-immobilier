@@ -115,4 +115,12 @@ Restore the B-prime branch typecheck without broadening B-prime classification b
   - [x] Exclude the real Beloeil 1667-128 `Commerce` signal and cover direct `classifyVivierSignal` counterexamples.
   - [x] Enforce `residentiel=non` implies a named exclusion reason and prove that the rail/panel divergence DTO is rejected.
   - [x] Align the `r` and `stageCounts` comments with the enforced invariant.
-  - [ ] Run the scoped Make gates in `ENV=test-bprimefix`.
+  - [x] Run the scoped Make gates in `ENV=test-bprimefix`.
+  - Gate evidence (local, hors Docker):
+    - `vitest run packages/radar-domain/src/vivier/counts.test.ts packages/radar-domain/src/signals/b-prime.test.ts` → 11/11 ✓
+    - `vitest run api/src/services/graph/vivier-v2.test.ts api/src/services/graph/bprime-recette.test.ts` → 22/22 ✓
+    - `vitest run api/src/services/graph/graph-store.test.ts` → 93/93 ✓ (7 skip)
+    - `vitest run ui/.../vivier-view-mode.test.ts` → 21/21 ✓
+    - `tsc --noEmit -p api/tsconfig.json` → 0 errors ✓
+    - `tsc --noEmit -p packages/radar-domain/tsconfig.json` → 0 errors ✓
+    - A legacy path: zero non-comment diff vs `origin/main`, golden passes ✓
