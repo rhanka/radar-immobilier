@@ -48,6 +48,8 @@ function proofV1(status: Status) {
   };
 }
 
+const SHA256_HEX = "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
 /** Provenance v1 conforme pour un statut ; readiness variable (axes indépendants). */
 function provenance(status: Status) {
   const isHistorical = status === "historical-verified";
@@ -71,7 +73,9 @@ function provenance(status: Status) {
       zone: { collection: "qc-zonage-delson", feature_ref: null, code: "H-431" },
       public_source: isHistorical
         ? { url: "https://donnees.example.org/zonage.geojson", type: "geojson-officiel", method: "natif", retrieved_at: "2026-06-21T09:00:00Z", sha256: null }
-        : null,
+        : ready
+          ? { url: "https://donnees.example.org/zonage.geojson", type: "geojson-officiel", method: "natif", retrieved_at: "2026-06-21T09:00:00Z", sha256: SHA256_HEX }
+          : null,
       verified_at: isHistorical ? "2026-07-22T13:50:00Z" : null,
       evidence_id: isHistorical ? "geom-ev-a02e" : null,
       reason_codes: status === "orphan" ? ["source-identity-unlinked"] : status === "candidate-needs-human-confirmation" ? ["needs-human-confirmation"] : ready ? ["historical-verification-unavailable"] : [],
@@ -153,12 +157,12 @@ describe("chaîne lots OGC → fetchLots → LotFichePanel", () => {
     expect(view.getByTestId("fiche-geometry-source-link")).toBeTruthy();
   });
 
-  it("legacy-traceable + ready : dossier vérifiable, pas de source publique inventée", async () => {
+  it("legacy-traceable + ready : dossier vérifiable avec source publique (§5 prérequis)", async () => {
     stubFetch(ogcLotsBody({ zone_code: "H-431", proof: proofV1("legacy-traceable"), immo_zone_lot_provenance: provenance("legacy-traceable") }));
     const lot = (await fetchLots("delson", { baseUrl: "" })).featureCollection.features[0]!;
     const view = render(LotFichePanel, { props: { lot } });
     expect(view.getByText("Dossier vérifiable")).not.toBeNull();
-    expect(view.queryByTestId("fiche-geometry-source-link")).toBeNull();
+    expect(view.getByTestId("fiche-geometry-source-link")).toBeTruthy();
   });
 
   it("proof v2 : lien de source géométrique publiée porté sur le vrai chemin", async () => {
