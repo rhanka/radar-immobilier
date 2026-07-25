@@ -31,9 +31,8 @@ describe("vivier_v2 named counts", () => {
         hors_zonage: 1,
         derogation_hors_sujet: 1,
       },
-      // Le signal résidentiel=indéterminé (zonage=oui, non exclu) est GARDÉ dans le
-      // périmètre de la vue B → il compte aussi dans stageCounts.consultation_publique
-      // (2 = qualifié + indéterminé), sans être compté dans `qualified`.
+      // stageCounts = non-excluded, zonage=oui (oui+indéterminé combined).
+      // consultation_publique = 2 (1 qualified + 1 indéterminé).
       stageCounts: {
         avis_motion: 0,
         projet_reglement: 0,
@@ -43,8 +42,27 @@ describe("vivier_v2 named counts", () => {
         entree_vigueur: 0,
         inconnu: 0,
       },
-      // Aucun non-exclu hors périmètre zonage ici (le hors_zonage est exclu) → 0.
       stageCountsHorsZonage: {
+        avis_motion: 0,
+        projet_reglement: 0,
+        consultation_publique: 0,
+        second_projet: 0,
+        adoption: 0,
+        entree_vigueur: 0,
+        inconnu: 0,
+      },
+      // stageCountsResOui = only residential=oui within zonage=oui.
+      // 1 qualified signal at consultation_publique.
+      stageCountsResOui: {
+        avis_motion: 0,
+        projet_reglement: 0,
+        consultation_publique: 1,
+        second_projet: 0,
+        adoption: 0,
+        entree_vigueur: 0,
+        inconnu: 0,
+      },
+      stageCountsResOuiHorsZonage: {
         avis_motion: 0,
         projet_reglement: 0,
         consultation_publique: 0,
@@ -73,6 +91,8 @@ describe("vivier_v2 named counts", () => {
     expect(counts.residentialUnknown).toBe(1);
     expect(counts.stageCounts.projet_reglement).toBe(1);
     expect(counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement).toBe(1);
+    // stageCountsResOui excludes the indéterminé — the `r` axis can now filter.
+    expect(counts.stageCountsResOui.projet_reglement).toBe(0);
     expect(countsInvariant(counts)).toBe(true);
   });
 
@@ -91,7 +111,10 @@ describe("vivier_v2 named counts", () => {
     expect(counts.stageCounts.avis_motion).toBe(0);
     expect(counts.stageCountsHorsZonage.avis_motion).toBe(1);
     expect(counts.stageCounts.adoption).toBe(1);
-    // Zonage coché = périmètre (1) ; décoché = périmètre + hors-zonage (2).
+    // stageCountsResOui mirrors stageCounts for the residential=oui subset.
+    expect(counts.stageCountsResOui.adoption).toBe(1);
+    // horsZonage signal is residential=oui → counted in stageCountsResOuiHorsZonage.
+    expect(counts.stageCountsResOuiHorsZonage.avis_motion).toBe(1);
     const sumAll = (s: typeof counts.stageCounts) => Object.values(s).reduce((a, b) => a + b, 0);
     expect(sumAll(counts.stageCounts)).toBe(1);
     expect(sumAll(counts.stageCounts) + sumAll(counts.stageCountsHorsZonage)).toBe(
@@ -111,6 +134,7 @@ describe("vivier_v2 named counts", () => {
     expect(counts.residentialUnknown).toBe(0);
     expect(counts.excludedByReason.non_residentiel_franc).toBe(1);
     expect(counts.stageCounts.avis_motion).toBe(0);
+    expect(counts.stageCountsResOui.avis_motion).toBe(0);
   });
 
   it("rejects the non-residential DTO that would split the rail and panel r axis", () => {
