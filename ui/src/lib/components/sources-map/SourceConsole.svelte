@@ -358,7 +358,7 @@
         </span>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-y-auto">
+      <div class="min-h-0 flex-1 overflow-auto">
         <table class="w-full text-xs">
           <thead class="sticky top-0 z-10 bg-slate-100 text-slate-500">
             <tr>
