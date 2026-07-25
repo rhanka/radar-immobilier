@@ -1,4 +1,9 @@
 import type { GeoJsonGeometry } from "./cadastre-geojson-source.js";
+import {
+  sanitizeProvenanceProperties,
+  type FeatureProof,
+  type ImmoZoneLotProvenance,
+} from "./geo-provenance.js";
 import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 export type GeoZoneResolutionStatus = "official" | "fallback" | "missing";
@@ -22,6 +27,10 @@ export interface GeoZoneProperties {
   lotCount: number;
   lots: GeoZoneLotRef[];
   label?: string;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  proof?: FeatureProof;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  immo_zone_lot_provenance?: ImmoZoneLotProvenance;
   /**
    * Famille/kind de la zone quand la source l'expose (ex. "habitation",
    * lettre canonique "H", code court geo "CO") — sert à la teinte des aplats
@@ -97,6 +106,30 @@ export function resolveGeoZonesUrl(
   return `${base}${path}${qs ? `?${qs}` : ""}`;
 }
 
+/**
+ * Re-valide les enveloppes preuve/provenance d'une réponse `/api/geo/:city/zones`.
+ *
+ * Ce chemin de repli ne construit pas ses features (contrairement au chemin OGC
+ * prioritaire, `geoZonesResponseFromCollection`) : il désérialise un JSON. Il
+ * lui applique donc la MÊME validation positive versionnée avant que quoi que
+ * ce soit n'atteigne un composant — enveloppe non conforme écartée en entier,
+ * toutes les autres propriétés conservées telles quelles (non-blackout).
+ */
+export function sanitizeGeoZonesResponse(response: GeoZonesResponse): GeoZonesResponse {
+  const features = response?.featureCollection?.features;
+  if (!Array.isArray(features)) return response;
+  return {
+    ...response,
+    featureCollection: {
+      ...response.featureCollection,
+      features: features.map((feature): GeoZoneFeature => {
+        if (!feature || typeof feature.properties !== "object" || feature.properties === null) return feature;
+        return { ...feature, properties: sanitizeProvenanceProperties(feature.properties as unknown as Record<string, unknown>) as unknown as GeoZoneProperties };
+      }),
+    },
+  };
+}
+
 export async function fetchGeoZones(
   citySlug: string,
   opts: FetchGeoZonesOptions = {},
@@ -108,5 +141,5 @@ export async function fetchGeoZones(
   if (!res.ok) {
     throw new Error(`geo-zones HTTP ${res.status} for ${citySlug}`);
   }
-  return (await res.json()) as GeoZonesResponse;
+  return sanitizeGeoZonesResponse((await res.json()) as GeoZonesResponse);
 }

@@ -151,6 +151,10 @@ async function lotsForZoneFallback(
     citySlug,
     zoneCode: null,
     geometry: feature.geometry as GeoJsonGeometry | null,
+    ...(feature.properties.proof ? { proof: feature.properties.proof } : {}),
+    ...(feature.properties.immo_zone_lot_provenance
+      ? { immo_zone_lot_provenance: feature.properties.immo_zone_lot_provenance }
+      : {}),
   }));
 }
 
