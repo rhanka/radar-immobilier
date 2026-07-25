@@ -1099,7 +1099,7 @@
     >
       {#if segments.length > 0}
         <div
-          class="inline-flex w-fit overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
+          class="inline-flex w-fit flex-wrap overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
         >
           {#each segments as seg (seg.label)}
             <button

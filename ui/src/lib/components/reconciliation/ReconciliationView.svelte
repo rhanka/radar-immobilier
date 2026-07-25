@@ -467,7 +467,7 @@
           Aucune mention extraite.
         </div>
       {:else}
-        <div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
+        <div class="overflow-auto rounded-lg border border-slate-200 bg-white">
           <table class="w-full text-left text-sm">
             <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
