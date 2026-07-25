@@ -1,0 +1,72 @@
+[
+  {
+    "id": "n1",
+    "type": "Signal",
+    "label": "Rezonage avis de motion",
+    "citySlug": "delson",
+    "sourceRef": null,
+    "createdAt": null,
+    "props": { "properties": { "category": "rezonage", "etape": "avis_motion" } },
+    "legacySubset": {
+      "version": "legacy-zmp-v1",
+      "signalId": "n1",
+      "flags": { "z": true, "m": true, "p": true }
+    }
+  },
+  {
+    "id": "n2",
+    "type": "Signal",
+    "label": "Vente de terrain",
+    "citySlug": "delson",
+    "sourceRef": null,
+    "createdAt": null,
+    "props": { "properties": { "category": "vente" } },
+    "legacySubset": {
+      "version": "legacy-zmp-v1",
+      "signalId": "n2",
+      "flags": { "z": false, "m": false, "p": false }
+    }
+  },
+  {
+    "id": "n3",
+    "type": "DesignationEvent",
+    "label": "Adoption du reglement de zonage",
+    "citySlug": "delson",
+    "sourceRef": null,
+    "createdAt": null,
+    "props": { "properties": {} },
+    "legacySubset": {
+      "version": "legacy-zmp-v1",
+      "signalId": "n3",
+      "flags": { "z": true, "m": false, "p": false }
+    }
+  },
+  {
+    "id": "n4",
+    "type": "Signal",
+    "label": "Rezonage avis de motion sans unites",
+    "citySlug": "delson",
+    "sourceRef": null,
+    "createdAt": null,
+    "props": { "properties": { "category": "rezonage", "etape": "avis_motion" } },
+    "legacySubset": {
+      "version": "legacy-zmp-v1",
+      "signalId": "n4",
+      "flags": { "z": true, "m": false, "p": true }
+    }
+  },
+  {
+    "id": "n5",
+    "type": "Signal",
+    "label": "Densification avis de motion",
+    "citySlug": "delson",
+    "sourceRef": null,
+    "createdAt": null,
+    "props": { "properties": { "category": "densification", "etape": "avis_motion" } },
+    "legacySubset": {
+      "version": "legacy-zmp-v1",
+      "signalId": "n5",
+      "flags": { "z": true, "m": true, "p": true }
+    }
+  }
+]
