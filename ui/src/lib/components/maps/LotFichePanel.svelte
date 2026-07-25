@@ -54,6 +54,14 @@
     type ProspectMode,
     type PipelineStatus,
   } from "$lib/prospect/prospect-marks-client.js";
+  import {
+    assignmentStateLabel,
+    auditCodeLabel,
+    geometryProvenanceLabel,
+    proofStatusLabel,
+    publicAuditUrl,
+    readinessLabel,
+  } from "$lib/maps/geo-provenance.js";
 
   // ── Props ────────────────────────────────────────────────────────────────────
 
@@ -121,6 +129,13 @@
       ] as Array<[string, string | null | undefined]>)
     : []
   ).filter((row): row is [string, string] => row[1] != null);
+  $: proof = lot?.properties.proof;
+  $: provenance = lot?.properties.immo_zone_lot_provenance;
+  $: assignment = provenance?.lot_assignment_evidence;
+  $: geometryProvenance = provenance?.zone_geometry_provenance;
+  $: readiness = provenance?.acquisition_v2_readiness;
+  $: geometrySourceUrl = publicAuditUrl(geometryProvenance?.public_source?.url);
+  $: proofGeometrySourceUrl = publicAuditUrl(proof?.geometry_source?.url);
   // Libellé de source honnête selon le mode.
   $: sourceLabel = mode === "simulation"
     ? "Rôle d'évaluation 2022 · zonage municipal"
@@ -570,6 +585,73 @@
           </div>
         {/if}
       </section>
+
+      {#if proof || provenance}
+        <section aria-labelledby="section-audit" data-testid="fiche-audit">
+          <h3
+            id="section-audit"
+            class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+          >
+            Audit des sources
+          </h3>
+          <div class="space-y-3 rounded-lg border border-slate-100 bg-white px-3 py-2 text-sm">
+            {#if proof}
+              <div data-testid="fiche-proof">
+                <dl class="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <dt class="text-slate-500">État de la preuve</dt>
+                  <dd class="text-slate-700">{proofStatusLabel(proof.status)}</dd>
+                  <dt class="text-slate-500">Source géométrique</dt>
+                  <dd class="text-slate-700">{proof.sources?.geometry?.status === "available" ? "Disponible" : proof.sources?.geometry?.status === "unavailable" ? "Indisponible" : "Non indiquée"}</dd>
+                  <dt class="text-slate-500">Source réglementaire</dt>
+                  <dd class="text-slate-700">{proof.sources?.regulation?.status === "available" ? "Disponible" : proof.sources?.regulation?.status === "unavailable" ? "Indisponible" : "Non indiquée"}</dd>
+                  {#if proofGeometrySourceUrl}
+                    <dt class="text-slate-500">Source géométrique publiée</dt>
+                    <dd><a href={proofGeometrySourceUrl} target="_blank" rel="noopener noreferrer" class="text-teal-700 hover:underline" data-testid="fiche-proof-geometry-source-link">Consulter la source</a></dd>
+                  {/if}
+                </dl>
+                {#if proof.gaps?.length}
+                  <ul class="mt-2 space-y-1 text-xs text-slate-600" data-testid="fiche-proof-gaps">
+                    {#each proof.gaps as gap (gap)}
+                      <li>{auditCodeLabel(gap)}</li>
+                    {/each}
+                  </ul>
+                {/if}
+              </div>
+            {/if}
+
+            {#if provenance}
+              <div class="border-t border-slate-100 pt-2" data-testid="fiche-zone-lot-provenance">
+                <dl class="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <dt class="text-slate-500">Origine de la géométrie</dt>
+                  <dd class="text-slate-700">{geometryProvenanceLabel(geometryProvenance?.status)}</dd>
+                  {#if geometrySourceUrl}
+                    <dt class="text-slate-500">Source publique</dt>
+                    <dd><a href={geometrySourceUrl} target="_blank" rel="noopener noreferrer" class="text-teal-700 hover:underline" data-testid="fiche-geometry-source-link">Consulter la source</a></dd>
+                  {/if}
+                  <dt class="text-slate-500">Rattachement du lot</dt>
+                  <dd class="text-slate-700">{assignmentStateLabel(assignment?.state)}</dd>
+                  <dt class="text-slate-500">Zone sélectionnée</dt>
+                  <dd class="font-mono text-slate-700">{assignment?.selected_zone ? `${assignment.selected_zone.collection ?? "—"} · ${assignment.selected_zone.code ?? "—"}` : "—"}</dd>
+                  <dt class="text-slate-500">Méthode</dt>
+                  <dd class="text-slate-700">{assignment?.assignment_method ?? "Non indiquée"}</dd>
+                  <dt class="text-slate-500">Part dominante</dt>
+                  <dd class="text-slate-700">{assignment?.dominant_fraction == null ? "—" : `${(assignment.dominant_fraction * 100).toLocaleString("fr-CA", { maximumFractionDigits: 1 })} %`}</dd>
+                  <dt class="text-slate-500">Plusieurs zones</dt>
+                  <dd class="text-slate-700">{assignment?.multi_zone == null ? "Non indiqué" : assignment.multi_zone ? "Oui" : "Non"}</dd>
+                  <dt class="text-slate-500">État du dossier</dt>
+                  <dd class="text-slate-700">{readinessLabel(readiness?.state)}</dd>
+                </dl>
+                {#if geometryProvenance?.reason_codes?.length || readiness?.unmet_requirement_codes?.length}
+                  <ul class="mt-2 space-y-1 text-xs text-slate-600" data-testid="fiche-provenance-gaps">
+                    {#each geometryProvenance?.reason_codes ?? [] as code (code)}<li>{auditCodeLabel(code)}</li>{/each}
+                    {#each readiness?.unmet_requirement_codes ?? [] as code (code)}<li>{auditCodeLabel(code)}</li>{/each}
+                  </ul>
+                {/if}
+              </div>
+            {/if}
+          </div>
+        </section>
+      {/if}
 
       <!-- Section Marquage équipe + notes (CS-L3) ─────────────────────────── -->
       <section aria-labelledby="section-notes">

@@ -26,6 +26,12 @@
 // que dupliquée pour garantir que la couche zonage et l'extracteur de refs de
 // signal parlent EXACTEMENT le même langage de comparaison.
 import { zoneRefComparableKey } from "./signaux-map-geo.js";
+import {
+  featureProof,
+  zoneLotProvenance,
+  type FeatureProof,
+  type ImmoZoneLotProvenance,
+} from "./geo-provenance.js";
 import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 /** Properties d'une zone d'urbanisme (données publiques de zonage). */
@@ -34,6 +40,10 @@ export interface ZoneProperties {
   code: string;
   /** Slug de la ville porteuse de la zone. */
   citySlug?: string;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  proof?: FeatureProof;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  immo_zone_lot_provenance?: ImmoZoneLotProvenance;
   /**
    * Famille/catégorie de la zone quand l'API la fournit (ex. "habitation",
    * "commerce"). Candidats : kind, type, categorie, category. null si absent.
@@ -301,6 +311,8 @@ function normalizeOgcZoneFeature(feature: unknown, citySlug: string): ZoneFeatur
 }
 
 function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partial<ZoneProperties> {
+  const proof = featureProof(properties.proof);
+  const immoZoneLotProvenance = zoneLotProvenance(properties.immo_zone_lot_provenance);
   const kind = firstString([
     properties.kind,
     properties.type,
@@ -349,6 +361,8 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
   ]);
 
   return {
+    ...(proof ? { proof } : {}),
+    ...(immoZoneLotProvenance ? { immo_zone_lot_provenance: immoZoneLotProvenance } : {}),
     ...(kind !== null ? { kind } : {}),
     ...(affectation !== null ? { affectation } : {}),
     ...(usages !== undefined ? { usages } : {}),
