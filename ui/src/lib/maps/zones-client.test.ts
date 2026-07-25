@@ -315,3 +315,47 @@ describe("matchZonesToSignal", () => {
     expect(matched.map((z) => z.properties.code)).toEqual(["C-18"]);
   });
 });
+
+describe("enveloppes de provenance geo", () => {
+  it("conserve proof v2 et immo_zone_lot_provenance sans les reformater", async () => {
+    const proof = {
+      schema_version: "2.0",
+      geometry_source: {
+        url: "https://ville.example/zonage.geojson",
+        type: "geojson-officiel",
+        method: "natif",
+        reliability: "directe",
+        retrieved_at: "2026-06-21T09:00:00Z",
+        sha256: null,
+      },
+    };
+    const provenance = {
+      contract: "immo-zone-lot-provenance/v1",
+      assessed_at: "2026-07-22T14:00:00Z",
+      lot_assignment_evidence: {
+        state: "recorded",
+        selected_zone: { collection: "qc-zonage-delson", feature_ref: null, code: "H-12" },
+        assignment_method: "centroid-fallback",
+        dominant_fraction: null,
+        multi_zone: null,
+        zone_codes: ["H-12"],
+        evidence_snapshot: "2026-06-21",
+        evidence_id: "lot-zone-ev-99ba",
+        reason_codes: ["area-calculation-unavailable"],
+      },
+      zone_geometry_provenance: {
+        status: "legacy-traceable",
+        zone: { collection: "qc-zonage-delson", feature_ref: null, code: "H-12" },
+        public_source: null,
+        verified_at: null,
+        evidence_id: "legacy-geom-44c1",
+        reason_codes: ["historical-verification-unavailable"],
+      },
+      acquisition_v2_readiness: { state: "not-ready", checked_at: "2026-07-22T14:00:00Z", unmet_requirement_codes: ["missing-canonical-public-source", "missing-retrieved-at", "missing-content-sha256"] },
+    };
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ type: "FeatureCollection", features: [makeZonePolygon({ code: "H-12", proof, immo_zone_lot_provenance: provenance })] }), { status: 200 }));
+    const response = await fetchZones("delson", { baseUrl: "" });
+    expect(response.featureCollection.features[0]!.properties.proof).toEqual(proof);
+    expect(response.featureCollection.features[0]!.properties.immo_zone_lot_provenance).toEqual(provenance);
+  });
+});

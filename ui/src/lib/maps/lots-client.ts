@@ -14,12 +14,22 @@
  * Quand non disponible (endpoint non enrichi) : undefined.
  */
 import { resolveLotPotentialScore } from "./lot-potential-visual.js";
+import {
+  featureProof,
+  zoneLotProvenance,
+  type FeatureProof,
+  type ImmoZoneLotProvenance,
+} from "./geo-provenance.js";
 import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 /** Properties d'un lot cadastral (uniquement données publiques non-PII). */
 export interface LotProperties {
   noLot: string;
   citySlug?: string;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  proof?: FeatureProof;
+  /** Opaque geo envelope, preserved verbatim when supplied. */
+  immo_zone_lot_provenance?: ImmoZoneLotProvenance;
   /**
    * Score de potentiel par lot (0–10, échelle distincte du 0-5 T2 et du 0-100 legacy).
    * Calculé à partir de ZoneVersion.densiteLogHa, kind, usages, TOD.
@@ -464,6 +474,8 @@ function normalizeExistingLotFeature(feature: LotFeature, citySlug: string): Lot
 }
 
 function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial<LotProperties> {
+  const proof = featureProof(properties.proof);
+  const immoZoneLotProvenance = zoneLotProvenance(properties.immo_zone_lot_provenance);
   const potentialScore = firstNumber([
     properties.potentialScore,
     properties.potential_score,
@@ -562,6 +574,8 @@ function normalizeOgcLotProperties(properties: Record<string, unknown>): Partial
   });
 
   return {
+    ...(proof ? { proof } : {}),
+    ...(immoZoneLotProvenance ? { immo_zone_lot_provenance: immoZoneLotProvenance } : {}),
     potentialScore: scoreResolution.score,
     potentialScoreStatus: scoreResolution.status,
     potentialScoreSource: scoreResolution.source,

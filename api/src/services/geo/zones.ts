@@ -5,6 +5,8 @@
  * fallback and is explicitly marked as lower-confidence, never official.
  */
 
+import { publicProvenanceFromProperties } from "./provenance.js";
+
 export type GeometryStatus =
   | "official"
   | "lot-union-fallback"
@@ -29,6 +31,8 @@ export interface OfficialZoneInput {
   geometry?: GeoJsonGeometry | null;
   source?: string;
   confidence?: number;
+  proof?: Record<string, unknown>;
+  immo_zone_lot_provenance?: Record<string, unknown>;
 }
 
 export interface ZoneLotInput {
@@ -36,6 +40,8 @@ export interface ZoneLotInput {
   citySlug?: string;
   zoneCode?: string | null;
   geometry?: GeoJsonGeometry | null;
+  proof?: Record<string, unknown>;
+  immo_zone_lot_provenance?: Record<string, unknown>;
 }
 
 export interface NormalizedLotRef {
@@ -52,6 +58,8 @@ export interface NormalizedZoneProperties {
   lotCount: number;
   lots: NormalizedLotRef[];
   label?: string;
+  proof?: Record<string, unknown>;
+  immo_zone_lot_provenance?: Record<string, unknown>;
 }
 
 export interface NormalizedZoneFeature {
@@ -222,6 +230,10 @@ function officialFeatures(
         source: "official-zone",
         lotCount: lotGroup.length,
         lots: lotGroup.map((entry) => entry.ref),
+        ...publicProvenanceFromProperties({
+          proof: zone.proof,
+          immo_zone_lot_provenance: zone.immo_zone_lot_provenance,
+        }),
       },
     });
   }

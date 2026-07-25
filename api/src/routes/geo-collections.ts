@@ -95,6 +95,7 @@ import {
   type ZoneIndex,
 } from "../services/geo/lot-zone-enrichment.js";
 import { resolveZonesSource, type ZonesSource } from "../services/geo/zones-source.js";
+import { sanitizeFeatureProvenance } from "../services/geo/provenance.js";
 
 /** Collection OGC parsée : nature (zonage|lots) + ville. */
 interface ParsedCollection {
@@ -175,6 +176,19 @@ function applyLimit(fc: GeoFeatureCollection, rawLimit: string | undefined): Geo
   const limit = parseInt(rawLimit, 10);
   if (!Number.isFinite(limit) || limit <= 0 || fc.features.length <= limit) return fc;
   return { type: "FeatureCollection", features: fc.features.slice(0, limit) };
+}
+
+function sanitizeCollectionProvenance<T extends { features: unknown }>(collection: T): T {
+  if (!Array.isArray(collection.features)) return collection;
+  return {
+    ...collection,
+    features: collection.features.map((feature) => {
+      if (typeof feature !== "object" || feature === null) return feature;
+      const candidate = feature as { properties?: unknown };
+      if (typeof candidate.properties !== "object" || candidate.properties === null) return feature;
+      return { ...candidate, properties: sanitizeFeatureProvenance(candidate.properties as Record<string, unknown>) };
+    }),
+  } as T;
 }
 
 /** TTL du cache d'index zonage par ville (jointure lots↔zones). */
@@ -343,7 +357,7 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
     rawLimit: string | undefined,
   ) {
     const limited = applyLimit(local, rawLimit);
-    const enriched = await enrichIfLots(parsed, { features: limited.features });
+    const enriched = await enrichIfLots(parsed, sanitizeCollectionProvenance({ features: limited.features }));
     return {
       type: "FeatureCollection" as const,
       features: enriched.features,
@@ -375,7 +389,7 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
       if (live.kind === "ok") {
         // Zonage servi tel quel — porte reglement_millesime/reglement_numero du
         // live geo (bénéfice de bord m6-immo, absents du PG store-local).
-        return c.json(live.body);
+        return c.json(sanitizeCollectionProvenance(live.body));
       }
       // Live geo indisponible (404/429/5xx/réseau) → fallback store-local PG.
       try {
@@ -413,7 +427,7 @@ export function geoCollectionsRoute(deps: GeoCollectionsDeps = {}): Hono {
 
     // FeatureCollection OGC : lots enrichis (zone + flags), zonage tel quel.
     const enriched = await enrichIfLots(parsed, result.body);
-    return c.json(enriched);
+    return c.json(sanitizeCollectionProvenance(enriched));
   });
 
   return app;
