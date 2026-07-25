@@ -1,0 +1,105 @@
+[
+  {
+    "id": "alpha-s1",
+    "citySlug": "alpha",
+    "type": "Signal",
+    "label": "Rezonage avis de motion secteur nord",
+    "sourceRef": "pv-alpha-1",
+    "props": {
+      "properties": {
+        "category": "rezonage",
+        "nb_unites_max": "8",
+        "etape": "avis_motion"
+      }
+    }
+  },
+  {
+    "id": "alpha-s2",
+    "citySlug": "alpha",
+    "type": "Signal",
+    "label": "Vente de terrain municipal",
+    "sourceRef": "pv-alpha-2",
+    "props": {
+      "properties": {
+        "category": "vente",
+        "nb_unites_max": "2"
+      }
+    }
+  },
+  {
+    "id": "alpha-s3",
+    "citySlug": "alpha",
+    "type": "DesignationEvent",
+    "label": "Adoption du reglement de zonage 2025",
+    "sourceRef": "pv-alpha-3",
+    "props": {
+      "properties": {}
+    }
+  },
+  {
+    "id": "alpha-s4",
+    "citySlug": "alpha",
+    "type": "Signal",
+    "label": "Derogation mineure projet de reglement",
+    "sourceRef": "pv-alpha-4",
+    "props": {
+      "properties": {
+        "category": "derogation_mineure",
+        "intensite": "haute",
+        "etape": "projet_reglement"
+      }
+    }
+  },
+  {
+    "id": "beta-s5",
+    "citySlug": "beta",
+    "type": "Signal",
+    "label": "Derogation mineure lot 12",
+    "sourceRef": "pv-beta-5",
+    "props": {
+      "properties": {
+        "etape": "derogation_mineure"
+      }
+    }
+  },
+  {
+    "id": "beta-s6",
+    "citySlug": "beta",
+    "type": "Signal",
+    "label": "Avis de motion rezonage residentiel",
+    "sourceRef": "pv-beta-6",
+    "props": {
+      "properties": {
+        "category": "rezonage",
+        "nb_unites_max": "12"
+      }
+    }
+  },
+  {
+    "id": "beta-s7",
+    "citySlug": "beta",
+    "type": "Signal",
+    "label": "Rezonage avis de motion sans unites",
+    "sourceRef": "pv-beta-7",
+    "props": {
+      "properties": {
+        "category": "rezonage",
+        "etape": "avis_motion"
+      }
+    }
+  },
+  {
+    "id": "beta-s8",
+    "citySlug": "beta",
+    "type": "Signal",
+    "label": "Densification avis de motion",
+    "sourceRef": "pv-beta-8",
+    "props": {
+      "properties": {
+        "category": "densification",
+        "nb_unites_max": "4",
+        "etape": "avis_motion"
+      }
+    }
+  }
+]
