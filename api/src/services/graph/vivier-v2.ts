@@ -9,6 +9,10 @@ import {
 import {
   classifyBPrime,
   countVivierClassifications,
+  FRANC_NON_RESIDENTIEL_RE,
+  REGIONAL_COMMERCIAL_POLE_RE,
+  RESIDENTIEL_FORT_CATEGORIES,
+  RESIDENTIEL_FORT_RE,
   vivierV2Schema,
   type VivierCounts,
   type VivierEtape,
@@ -166,11 +170,52 @@ export function extractLegacyZmpInput(node: LegacyGraphNodeInput): VivierSignalI
   };
 }
 
+// R3/R4 et la preuve résidentielle FORTE sont importés de @radar/domain — UNE
+// SEULE source de décision partagée avec `classifyBPrime` :
+//   - `FRANC_NON_RESIDENTIEL_RE` (R3, commercial/industriel/enseigne, « commerciaux »),
+//   - `REGIONAL_COMMERCIAL_POLE_RE` (R4, pôle commercial régional),
+//   - `RESIDENTIEL_FORT_RE` / `RESIDENTIEL_FORT_CATEGORIES` (preuve forte qui
+//     l'emporte : logements / habitation / usage mixte / conversion).
+// Le lexique résidentiel SERVEUR `NON_RESIDENTIEL_MARKERS_RE` (axe A / `r`) reste
+// STRICTEMENT indépendant (invariant golden) — il n'est PAS fusionné ici.
+const RESIDENTIEL_FORT_CATEGORIES_SET = new Set(RESIDENTIEL_FORT_CATEGORIES);
+
+/**
+ * Pertinence résidentielle du chemin B′ SERVEUR, lue par la vue B (counts.ts →
+ * périmètre → `projectComposedVivierB`). Étend `classifyResidentielPertinence`
+ * (inchangée, encore lue par l'axe r de A) avec les règles de recette B′ :
+ *
+ *  - R4 : un « pôle commercial régional » est disqualifié par raison NOMMÉE —
+ *         rang, jamais porte — même s'il porte un marqueur résidentiel.
+ *  - R3 : une densification / affectation COMMERCIALE ou INDUSTRIELLE franche SANS
+ *         marqueur résidentiel FORT est non-résidentielle (sort Rosemère,
+ *         Saint-Charles-Borromée, Lavaltrie C-8 « usages commerciaux »).
+ *
+ * R2 SUPPRIMÉ : une refonte N'EST PLUS forcée à `oui`. « Refonte détectée =
+ * RANG, JAMAIS porte » (SPEC_EVOL_FILTRAGE_VIVIER_v2 §37). Une refonte sans
+ * marqueur résidentiel reste donc `indéterminé` — et c'est le PÉRIMÈTRE
+ * permissif de la vue B (indéterminé GARDÉ, spec §9/§34, cf. counts.ts) qui la
+ * fait remonter, pas une porte « refonte→oui ».
+ *
+ * Ordre = R4 > R3 > pertinence explicite > indéterminé.
+ */
 function classificationFromResidentiel(
   category: string | null,
   label: string | null,
   description: string | null,
 ) {
+  const text = fold(`${label ?? ""} ${description ?? ""}`);
+  const hasStrongResidentiel =
+    RESIDENTIEL_FORT_RE.test(text) ||
+    (category !== null && RESIDENTIEL_FORT_CATEGORIES_SET.has(category));
+
+  if (REGIONAL_COMMERCIAL_POLE_RE.test(text)) {
+    return { valeur: "non" as const, source: "classifyBPrime:R4_pole_commercial_regional", confiance: 0.9 };
+  }
+  if (FRANC_NON_RESIDENTIEL_RE.test(text) && !hasStrongResidentiel) {
+    return { valeur: "non" as const, source: "classifyBPrime:R3_commercial_franc", confiance: 0.9 };
+  }
+
   const pertinence = classifyResidentielPertinence(category, label, description);
   if (pertinence === "residentiel") {
     return { valeur: "oui" as const, source: "classifyResidentielPertinence", confiance: 0.9 };
@@ -295,17 +340,22 @@ function exclusionFor(
  */
 function applyBPrimeExclusion(
   classification: VivierV2,
-  signal: VivierSignalInput,
+  evidence: {
+    category: string | null;
+    label: string | null;
+    description: string | null;
+    etapeAnnotation: string | null;
+    sourceRef: string | null;
+  },
 ): VivierV2 {
   if (classification.exclusion_reason !== null) return classification;
 
   const bPrime = classifyBPrime({
-    category: signal.category ?? null,
-    label: signal.label ?? null,
-    description: signal.description ?? null,
-    etapeAnnotation: signal.etape ?? null,
-    props: record(signal.props),
-    sourceRef: signal.sourceRef ?? null,
+    category: evidence.category,
+    label: evidence.label,
+    description: evidence.description,
+    etapeAnnotation: evidence.etapeAnnotation,
+    sourceRef: evidence.sourceRef,
   });
   if (bPrime.exclusionReason === null) return classification;
 
@@ -330,6 +380,7 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
   const label = signal.label ?? firstString(records, ["label"]);
   const description = signal.description ?? firstString(records, ["description", "summary", "details"]);
   const etapeAnnote = signal.etape ?? firstString(records, ["etape"]);
+  const sourceRef = signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"]);
   const history = records.flatMap((candidate) => {
     const values = candidate.etapes_historique ?? candidate.etapesHistorique;
     return Array.isArray(values)
@@ -337,18 +388,26 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
       : [];
   });
   const zonage = classificationFromZonage(signal.type, category, etapeAnnote);
-  const residentiel = classificationFromResidentiel(category ?? etapeAnnote, label, description);
   const instrument = instrumentFromSignal(
     category,
     label,
     description,
     firstString(records, ["instrument"]),
   );
+  // R2 « refonte→oui » RETIRÉ : aucune détection de refonte ne force le
+  // résidentiel. Une refonte reste `indéterminé` (sauf franc-non-résidentiel) et
+  // remonte via le PÉRIMÈTRE permissif de la vue B (indéterminé gardé).
+  const residentielCategory = category ?? etapeAnnote;
+  const residentiel = classificationFromResidentiel(residentielCategory, label, description);
   const etapes = derivedEtapes(label, description, etapeAnnote, history);
+  // R1 — l'étape ANNOTÉE fait autorité sur l'inférence texte : une annotation
+  // valide (`projet_reglement`…) n'est jamais poussée plus tard par un mot-clé du
+  // libellé (« Adoption des premiers projets… » → dérive Sutton vers `adoption`).
+  const annotatedEtape = toVivierEtape(etapeAnnote);
   const provenance = {
     extrait: firstString(records, ["extrait", "excerpt", "citation", "quote", "text"]) ?? "",
-    ...(signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"])
-      ? { source: signal.sourceRef ?? firstString(records, ["sourceRef", "source_ref", "rawRef", "raw_ref"])! }
+    ...(sourceRef !== null
+      ? { source: sourceRef }
       : {}),
   };
   const confidence = firstNumber(records, ["confiance", "confidence", "confidence_score"])
@@ -358,13 +417,22 @@ export function classifyVivierSignal(signal: VivierSignalInput): VivierV2 {
     residentiel,
     effet_densifiant: effectFromSignal(records),
     instrument,
-    etape: etapes.at(-1) ?? "inconnu",
+    etape: annotatedEtape ?? etapes.at(-1) ?? "inconnu",
     etapes_historique: etapes,
     exclusion_reason: exclusionFor(zonage, residentiel, instrument),
     provenance,
     confiance: Math.max(0, Math.min(1, confidence)),
   });
-  return applyBPrimeExclusion(classification, signal);
+  // R3 receives every field resolved for this decision (including nested refs),
+  // but never provenance.extrait: the wire contract defines it as audit context,
+  // not classification evidence.
+  return applyBPrimeExclusion(classification, {
+    category: residentielCategory,
+    label,
+    description,
+    etapeAnnotation: etapeAnnote,
+    sourceRef,
+  });
 }
 
 export function computeVivierV2(
