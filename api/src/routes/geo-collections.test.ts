@@ -359,7 +359,8 @@ describe("provenance passthrough — additivité stricte (contrat §9.4)", () =>
       localResolver: emptyLocal,
       fetchImpl: makeCollectionsFetch({ lots: { status: 200, body }, zonage: { status: 200, body: emptyZones } }).fn,
     });
-    return (await app.request("/api/geo/collections/qc-lots-delson/items").then((res) => res.json())) as {
+    const res = await app.request("/api/geo/collections/qc-lots-delson/items");
+    return (await res.json()) as {
       features: Array<{ properties: Record<string, unknown> }>;
     };
   }
