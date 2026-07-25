@@ -103,6 +103,15 @@ function bulkCounts(qualified: number) {
       entree_vigueur: 0,
       inconnu: 0,
     },
+    stageCountsHorsZonage: {
+      avis_motion: 0,
+      projet_reglement: 0,
+      consultation_publique: 0,
+      second_projet: 0,
+      adoption: 0,
+      entree_vigueur: 0,
+      inconnu: 0,
+    },
     total: qualified,
   };
 }
