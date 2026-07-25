@@ -63,6 +63,43 @@ describe("normalizeZonesAndLots — official zones", () => {
     expect(json).not.toContain("Example Street");
     expect(json).not.toContain("Private Owner");
   });
+
+  it("preserves safe proof and provenance envelopes on an official zone", () => {
+    const proof = {
+      schema_version: "2.0",
+      geometry_source: {
+        url: "https://ville.example/zonage.geojson",
+        type: "geojson-officiel",
+        method: "natif",
+        reliability: "directe",
+        retrieved_at: "2026-06-21T09:00:00Z",
+        sha256: null,
+      },
+    };
+    const provenance = {
+      contract: "immo-zone-lot-provenance/v1",
+      assessed_at: "2026-07-22T14:00:00Z",
+      lot_assignment_evidence: {
+        state: "unassigned",
+        selected_zone: null,
+        assignment_method: "unassigned",
+        dominant_fraction: null,
+        multi_zone: null,
+        zone_codes: null,
+        evidence_snapshot: null,
+        evidence_id: null,
+        reason_codes: ["no-selected-zone"],
+      },
+      zone_geometry_provenance: null,
+      acquisition_v2_readiness: { state: "not-assessed", checked_at: null, unmet_requirement_codes: [] },
+    };
+    const result = normalizeZonesAndLots({
+      citySlug: "delson",
+      officialZones: [{ code: "H-12", geometry: LOT_GEOMETRY, proof, immo_zone_lot_provenance: provenance }],
+    });
+    expect(result.featureCollection.features[0]!.properties.proof).toEqual(proof);
+    expect(result.featureCollection.features[0]!.properties.immo_zone_lot_provenance).toEqual(provenance);
+  });
 });
 
 describe("normalizeZonesAndLots — lot fallback", () => {

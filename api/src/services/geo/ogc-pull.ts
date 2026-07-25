@@ -34,6 +34,7 @@
 import pg from "pg";
 import type { Database } from "../../db/client.js";
 import { normalizeZoneCode as normalizeZoneCodeUnified } from "./extract-refs.js";
+import { publicProvenanceFromProperties } from "./provenance.js";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -264,6 +265,11 @@ export async function upsertLotBatch(
 
       const canonId = lotCanonicalId(citySlug, noLotNorm);
       const rawRef = `ogc:${citySlug}:${noLotNorm}`;
+      const evidence = JSON.stringify([{
+        source: "ogc-api",
+        fetchedAt: now,
+        ...publicProvenanceFromProperties(feature.properties),
+      }]);
 
       // Vérifier l'existence d'une version courante (known_to IS NULL)
       const existing = await client.query<{ id: string }>(
@@ -279,9 +285,15 @@ export async function upsertLotBatch(
             `UPDATE lot_versions
              SET geom = ST_SetSRID(ST_GeomFromGeoJSON($1), 4326),
                  geom_source = 'ogc-api',
-                 raw_ref = $2
-             WHERE id = $3`,
-            [geomJson, rawRef, existing.rows[0]!.id],
+                 raw_ref = $2,
+                 evidence = $3::jsonb
+             WHERE id = $4`,
+            [geomJson, rawRef, evidence, existing.rows[0]!.id],
+          );
+        } else {
+          await client.query(
+            `UPDATE lot_versions SET evidence = $1::jsonb WHERE id = $2`,
+            [evidence, existing.rows[0]!.id],
           );
         }
         upserted++;
@@ -302,7 +314,7 @@ export async function upsertLotBatch(
               now,
               geomJson,
               rawRef,
-              JSON.stringify([{ source: "ogc-api", fetchedAt: now }]),
+              evidence,
             ],
           );
         } else {
@@ -320,7 +332,7 @@ export async function upsertLotBatch(
               today,
               now,
               rawRef,
-              JSON.stringify([{ source: "ogc-api", fetchedAt: now }]),
+              evidence,
             ],
           );
         }
@@ -447,6 +459,7 @@ export async function upsertZoneBatch(
         source: "ogc-api",
         collectionId,
         fetchedAt: now,
+        ...publicProvenanceFromProperties(feature.properties),
       };
       if (urlGrille) {
         evidenceEntry["urlGrille"] = String(urlGrille);
@@ -475,8 +488,8 @@ export async function upsertZoneBatch(
         } else {
           // Pas de géom mais on met à jour code_norm quand même
           await client.query(
-            `UPDATE zone_versions SET code_norm = $1 WHERE id = $2`,
-            [codeNorm, existing.rows[0]!.id],
+            `UPDATE zone_versions SET code_norm = $1, evidence = $2::jsonb WHERE id = $3`,
+            [codeNorm, JSON.stringify([evidenceEntry]), existing.rows[0]!.id],
           );
         }
         upserted++;

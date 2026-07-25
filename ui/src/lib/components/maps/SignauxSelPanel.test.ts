@@ -13,6 +13,7 @@ import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
+import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
 function makeMunicipality(slug: string, name: string): MunicipalityT {
@@ -802,5 +803,49 @@ describe("SignauxSelPanel — m6 millésime du zonage", () => {
     await fireEvent.change(select!, { target: { value: "__all__" } });
     expect(queryByText("H-2020", { selector: ".sel-entity-label" })).not.toBeNull();
     expect(getByTestId("signaux-zone-filter-count").textContent).toBe("3/3");
+  });
+});
+
+describe("SignauxSelPanel — audit des sources de zone", () => {
+  const labels: Record<GeometryProvenanceStatus, string> = {
+    "historical-verified": "Vérifiée dans les dossiers historiques",
+    "legacy-traceable": "Trace historique disponible",
+    "candidate-needs-human-confirmation": "À confirmer par une personne",
+    orphan: "Source de géométrie non reliée",
+  };
+
+  function auditedZones(status: GeometryProvenanceStatus) {
+    const response = makeZonesResponse(["H-431"]);
+    response.featureCollection.features[0]!.properties.proof = {
+      schema_version: "1.0",
+      status: status === "historical-verified" ? "complete" : "partial",
+      sources: {
+        geometry: { status: "available", artifact_uri: "https://geo.example/zone.geojson", upstream_uri: null },
+        regulation: { status: "unavailable", artifact_uri: null, upstream_uri: null },
+      },
+      zone: null,
+      gaps: ["regulation_source_unavailable"],
+    };
+    response.featureCollection.features[0]!.properties.immo_zone_lot_provenance = {
+      contract: "immo-zone-lot-provenance/v1",
+      lot_assignment_evidence: { state: "recorded", selected_zone: { collection: "qc-zonage-delson", code: "H-431" }, assignment_method: "area-majority", dominant_fraction: 0.94, multi_zone: false },
+      zone_geometry_provenance: { status, public_source: status === "historical-verified" ? { url: "https://ville.example/zonage.geojson" } : null, reason_codes: status === "orphan" ? ["source-identity-unlinked"] : [] },
+      acquisition_v2_readiness: { state: "not-ready", unmet_requirement_codes: ["missing-content-sha256"] },
+    };
+    return response;
+  }
+
+  it.each(Object.entries(labels) as Array<[GeometryProvenanceStatus, string]>)("affiche le statut %s", async (status, label) => {
+    const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: auditedZones(status) } });
+    await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(view.getByText(label)).not.toBeNull();
+    expect(view.getByText("Source réglementaire indisponible")).not.toBeNull();
+  });
+
+  it("n'invente pas de lien lorsque la source publique est nulle", async () => {
+    const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: auditedZones("candidate-needs-human-confirmation") } });
+    await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(view.queryByTestId("zone-geometry-source-link")).toBeNull();
+    expect(view.getByText("Empreinte du contenu indisponible")).not.toBeNull();
   });
 });
