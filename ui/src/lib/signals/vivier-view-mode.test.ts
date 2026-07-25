@@ -15,6 +15,7 @@ import {
   keyFromAFlags,
   reconcileVivierRouteSubset,
   modeFromSubsetKey,
+  projectComposedVivierB,
   projectNodesForVivierKey,
   projectNodesForVivierMode,
   reconcileVivierSelection,
@@ -27,6 +28,12 @@ import {
 } from "./vivier-view-mode.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
 import { normalizeGeoRouteState, type GeoRoute } from "$lib/router/geo-route.js";
+import {
+  countVivierClassifications,
+  vivierV2Schema,
+  type VivierV2,
+  type VivierV2Counts,
+} from "@radar/domain";
 
 type TriState = "oui" | "non" | "indetermine";
 
@@ -157,10 +164,11 @@ describe("Vivier A / B view contract", () => {
     expect(SUTTON_RAW).toHaveLength(5);
     expect(a).toEqual({ available: true, count: 1, nodes: [SUTTON_RAW[0]] });
     expect(a.nodes.map((item) => item.id)).toEqual(["sutton-a"]);
-    // B = zonage oui ∩ résidentiel oui ∩ sans exclusion : ni le « à confirmer »
-    // ni l'exclu ne passent, et B ignore le gate multi4 de A.
-    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    expect(b.count).toBe(3);
+    // B = PÉRIMÈTRE « zonage résidentiel, indéterminé GARDÉ » : le « à confirmer »
+    // (sutton-m) PASSE, seul l'exclu serveur (sutton-raw) sort. B ignore le gate
+    // multi4 de A.
+    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    expect(b.count).toBe(4);
   });
 
   it("projects and counts the B-prime-normalized B payload", () => {
@@ -206,6 +214,15 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 1,
       },
     }, "vivier-v2|-p")).toBe(0);
@@ -240,21 +257,23 @@ describe("Vivier A / B view contract", () => {
       .toEqual(["q-avis", "q-projet"]);
   });
 
-  it("relaxes B when the résidentiel or zonage axis is unchecked (m1.4)", () => {
+  it("garde l'indéterminé « à confirmer » dans le défaut B et n'écarte que l'exclu serveur (permissif)", () => {
     // SUTTON_RAW : sutton-m est « à confirmer » (résidentiel indéterminé, non
     // exclu), sutton-raw est exclu par le serveur (jamais montré).
-    // Défaut (zonage ✓ résidentiel ✓ précoce ✗) = le vivier qualifié.
+    // PÉRIMÈTRE PERMISSIF : le défaut GARDE désormais l'indéterminé (spec
+    // « indéterminé GARDÉ ») — sutton-m est DANS le défaut, sans gate.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    // Décocher « Résidentiel » (vivier-v2|-r) RELÂCHE l'exigence résidentiel :
-    // le « à confirmer » réapparaît, l'exclu serveur reste écarté.
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    // Décocher « Résidentiel » (vivier-v2|-r) : l'axe est déjà permissif → même
+    // set, l'exclu serveur reste écarté (jamais reclassé côté client).
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-r").nodes.map((n) => n.id))
       .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    // Décocher « Zonage » (vivier-v2|-z) : ici tous portent zonage oui → même set
-    // que le défaut, l'exclu serveur reste écarté.
+    // Décocher « Zonage » (vivier-v2|-z) : ici tous portent zonage oui → même set.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    // Décocher zonage ET résidentiel : tout le classifié non exclu par le serveur.
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
+    // L'exclu serveur (sutton-raw) n'apparaît JAMAIS, quels que soient les axes.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").nodes.map((n) => n.id))
+      .not.toContain("sutton-raw");
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(4);
     // Un axe B relâché n'invente aucune classification : sans classification → indispo.
     const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
@@ -301,8 +320,9 @@ describe("Vivier A / B view contract", () => {
     const validated = validateVivierProjectionAuthority(SUTTON_RAW, authority);
 
     // Une autorité A corrompue n'entraîne pas B, qui a sa propre source.
+    // B = périmètre permissif (qualifié + « à confirmer » indéterminé) = 4.
     expect(validated.a).toEqual({ available: false, count: null, nodes: [] });
-    expect(validated.b.count).toBe(3);
+    expect(validated.b.count).toBe(4);
   });
 
   it("reads A from subsetCounts (by composed key) and B from vivierV2Counts", () => {
@@ -323,6 +343,15 @@ describe("Vivier A / B view contract", () => {
           consultation_publique: 1,
           second_projet: 0,
           adoption: 2,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        stageCountsHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
           entree_vigueur: 0,
           inconnu: 0,
         },
@@ -350,6 +379,115 @@ describe("Vivier A / B view contract", () => {
       residentialUnknown: 80,
       excluded: 12,
     });
+  });
+
+  it("PARITÉ recette : le badge B lit le PÉRIMÈTRE précoce (indéterminé compris), pas seulement `qualified`", () => {
+    // Reproduit une ville « refonte » type Sutton : 2 signaux résidentiel=indéterminé
+    // à projet_reglement → qualified=0 mais stageCounts.projet_reglement=2. Le badge
+    // rail précoce DOIT valoir 2 (c'est ce que prouve la recette serveur B′).
+    const suttonLike = {
+      subsetCounts: { "z|m|p": 0 },
+      vivierV2Counts: {
+        qualified: 0,
+        residentialUnknown: 2,
+        excludedByReason: {
+          non_residentiel_franc: 0,
+          piia_non_pertinent: 0,
+          hors_zonage: 0,
+          derogation_hors_sujet: 0,
+        },
+        stageCounts: {
+          avis_motion: 0,
+          projet_reglement: 2,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        stageCountsHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        total: 2,
+      },
+    };
+    // Défaut (précoce) : ✓2 même si `qualified` = 0 — pas de gate refonte→oui.
+    expect(countForVivierCity(suttonLike, "vivier-v2")).toBe(2);
+    expect(countForVivierCity(suttonLike, "vivier-v2|p")).toBe(2);
+    // Précoce décoché : périmètre TOTAL (Σ stageCounts) = 2, jamais `qualified`=0.
+    expect(countForVivierCity(suttonLike, "vivier-v2|-p")).toBe(2);
+  });
+
+  it("PARITÉ rail↔panneau pour TOUS les axes B (z/r/p) — compteurs serveur recomposables", () => {
+    // Le rail lit les compteurs serveur (`countVivierClassifications`) ; le panneau
+    // filtre nœud par nœud (`projectComposedVivierB`). Sur le MÊME jeu de nœuds,
+    // les deux DOIVENT rendre la même composition pour les 8 combinaisons d'axes —
+    // c'était RÉFUTÉ (le rail ne comptait que selon `p`, jamais `z`).
+    const cls = (
+      zonage: TriState,
+      residentiel: TriState,
+      etape: string,
+      exclusion: string | null = null,
+    ) => classification(zonage, residentiel, exclusion, "rezonage", etape);
+
+    const nodes: GraphSignalNode[] = [
+      // périmètre (zonage oui), précoce, qualifié
+      node("n-perim-precoce", true, true, true, cls("oui", "oui", "avis_motion")),
+      // périmètre (zonage oui), tardif, indéterminé « à confirmer »
+      node("n-perim-tardif", true, false, false, cls("oui", "indetermine", "adoption")),
+      // HORS zonage (zonage indéterminé), précoce, résidentiel — révélé si z décoché
+      node("n-hors-precoce", false, true, false, cls("indetermine", "oui", "projet_reglement")),
+      // HORS zonage (zonage indéterminé), tardif, indéterminé — révélé si z décoché
+      node("n-hors-tardif", false, false, false, cls("indetermine", "indetermine", "consultation_publique")),
+      // franc-non-résidentiel : exclu serveur → jamais dans B (ni rail ni panneau)
+      node("n-exclu", false, false, false, cls("oui", "non", "avis_motion", "non_residentiel_franc")),
+    ];
+
+    const serverCounts: VivierV2Counts = countVivierClassifications(
+      nodes.map((n) => n.classification as unknown as VivierV2),
+    );
+    const entry = { subsetCounts: {}, vivierV2Counts: serverCounts };
+
+    for (const z of [true, false]) {
+      for (const r of [true, false]) {
+        for (const p of [true, false]) {
+          const axes = { z, r, p };
+          const key = keyForVivierB(axes);
+          const panel = projectComposedVivierB(nodes, axes).count;
+          const rail = countForVivierCity(entry, key);
+          expect(rail, `parité rail↔panneau échoue pour axes=${JSON.stringify(axes)} (clé ${key})`).toBe(panel);
+        }
+      }
+    }
+
+    // Sanity : le contre-exemple de la revue (axe Zonage décoché révèle le
+    // hors-zonage résidentiel) — 2 en périmètre, +2 hors-zonage = 4.
+    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(2);
+    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(4);
+  });
+
+  it("rejects the DTO that would diverge rail and panel on the r axis", () => {
+    const inconsistent = node(
+      "invalid-non-residential",
+      false,
+      false,
+      false,
+      classification("oui", "non", null),
+    );
+    const rawClassification = inconsistent.classification as unknown as VivierV2;
+
+    expect(projectComposedVivierB([inconsistent], { z: true, r: true, p: false }))
+      .toEqual({ available: true, count: 0, nodes: [] });
+    expect(vivierV2Schema.safeParse(rawClassification).success).toBe(false);
+    expect(() => countVivierClassifications([rawClassification])).toThrow(
+      "a non-residential classification must have an exclusion reason",
+    );
   });
 
   it("resynchronizes route mode and keys route identity by A/B", () => {

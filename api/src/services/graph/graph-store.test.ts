@@ -1245,6 +1245,39 @@ describe("classifyResidentielPertinence", () => {
     expect(classifyResidentielPertinence(null, "Complexe sportif municipal", null)).toBe("indetermine");
     expect(classifyResidentielPertinence(null, "Construction d'un triplex", null)).toBe("residentiel");
   });
+
+  it("GOLDEN — invariance A : classifyResidentielPertinence INCHANGÉE (le durcissement R3 vit UNIQUEMENT en B′)", () => {
+    // Ce golden PIN la frontière exacte du lexique SERVEUR (axe A / `r`) : il ne
+    // porte PAS le durcissement B′ (« commerciaux » pluriel, enseigne/affichage).
+    // Si un jour on refusionnait la source B′ dans ce chemin, ce golden casserait.
+    const golden: ReadonlyArray<[string | null, string | null, string | null, string]> = [
+      ["densification", null, null, "residentiel"],
+      ["logement_abordable", null, null, "residentiel"],
+      [null, "Rezonage résidentiel", null, "residentiel"],
+      [null, null, "Projet d'habitation multifamiliale", "residentiel"],
+      [null, "Immeuble à logements de 12 unités", null, "residentiel"],
+      [null, "Rezonage de commercial à résidentiel", null, "residentiel"],
+      [null, "Zone d'usage mixte commercial et habitation", null, "residentiel"],
+      [null, "Nouvelle zone commerciale", null, "non_residentiel"],
+      [null, "Agrandissement du parc industriel", null, "non_residentiel"],
+      [null, "Projet de camping municipal", null, "non_residentiel"],
+      [null, "Exploitation agricole", null, "non_residentiel"],
+      // FRONTIÈRE A : le pluriel « commerciaux » N'EST PAS matché par le lexique
+      // serveur (contrairement à B′) → reste `indetermine`. C'est l'invariance
+      // exacte exigée : R3 (« commerciaux ») ne fuit JAMAIS dans l'axe A.
+      [null, "Autoriser certains usages commerciaux zone C-8", null, "indetermine"],
+      [null, "Règlement sur les enseignes", null, "indetermine"],
+      [null, "Avis de motion 2025-11", null, "indetermine"],
+      [null, null, null, "indetermine"],
+      [null, "Complexe sportif municipal", null, "indetermine"],
+    ];
+    for (const [category, label, description, expected] of golden) {
+      expect(
+        classifyResidentielPertinence(category, label, description),
+        `golden A: category=${category} label=${label} desc=${description}`,
+      ).toBe(expected);
+    }
+  });
 });
 
 describe("isResidentielPertinent — prédicat de filtre (axe r)", () => {

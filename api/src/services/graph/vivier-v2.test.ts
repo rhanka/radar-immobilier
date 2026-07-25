@@ -7,6 +7,7 @@ import {
   extractLegacyZmpInput,
   type VivierSignalInput,
 } from "./vivier-v2.js";
+import { PV_BELOEIL_2026_02_TEXT } from "@radar/sources";
 
 const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput => ({
   id: "signal-1",
@@ -151,6 +152,58 @@ describe("server vivier_v2 computation", () => {
     });
     // The legacy A predicate is intentionally independent of B′.
     expect(classifyLegacyZmpSignal(regionalPole).flags).toEqual({ z: true, m: true, p: true });
+  });
+
+  it("uses resolved R3 evidence and excludes the real Beloeil 1667-128 Commerce signal", () => {
+    const conversion = classifyVivierSignal(signal({
+      category: "rezonage",
+      label: "Conversion d'un bâtiment commercial à usage résidentiel",
+      description: null,
+      etape: "avis_motion",
+    }));
+    expect(conversion.residentiel.valeur).toBe("oui");
+    expect(conversion.exclusion_reason).toBeNull();
+
+    const resolvedReference = classifyVivierSignal(signal({
+      category: null,
+      label: null,
+      description: null,
+      etape: "avis_motion",
+      props: {
+        refs: [{
+          category: "rezonage",
+          description: "Transformation d'un commerce en usage résidentiel",
+        }],
+      },
+    }));
+    expect(resolvedReference.residentiel.valeur).toBe("oui");
+    expect(resolvedReference.exclusion_reason).toBeNull();
+
+    const provenanceOnly = classifyVivierSignal(signal({
+      category: "rezonage",
+      label: "Densification commerciale du secteur",
+      description: null,
+      etape: "avis_motion",
+      props: { extrait: "Conversion d'un bâtiment commercial à usage résidentiel" },
+    }));
+    expect(provenanceOnly.residentiel.valeur).toBe("non");
+    expect(provenanceOnly.exclusion_reason).toBe("non_residentiel_franc");
+
+    const start = PV_BELOEIL_2026_02_TEXT.indexOf("2026-02-92");
+    const end = PV_BELOEIL_2026_02_TEXT.indexOf("2026-02-93", start);
+    const beloeil1667128 = PV_BELOEIL_2026_02_TEXT.slice(start, end);
+    expect(beloeil1667128).toContain("1667-128-2026");
+    expect(beloeil1667128).toContain("COMMERCE");
+
+    const beloeilCommercial = classifyVivierSignal(signal({
+      id: "beloeil-1667-128",
+      category: "rezonage",
+      label: beloeil1667128,
+      description: null,
+      etape: "avis_motion",
+    }));
+    expect(beloeilCommercial.residentiel.valeur).toBe("non");
+    expect(beloeilCommercial.exclusion_reason).toBe("non_residentiel_franc");
   });
 
   it("computes v2 and legacy z|m|p counts from the same input", () => {
