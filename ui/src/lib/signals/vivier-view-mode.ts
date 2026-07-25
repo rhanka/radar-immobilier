@@ -319,15 +319,12 @@ export function projectPrecoceVivierNodes(
  *
  * Base = nodes not excluded by the server (`exclusion_reason === null`); an
  * excluded node remains outside B for every combination. On that base, `z`
- * requires zonage `oui` and `p` an early stage. `r` is permissive: it retains
- * residential `oui` and `indetermine`. The DTO schema requires every
- * residential `non` to have an exclusion reason, so `r` never creates a
- * separate rail-only population.
+ * requires zonage `oui`, `r` requires residential `oui` (excludes
+ * `indetermine`), and `p` requires an early stage. Unchecking any axis
+ * relaxes its filter without reclassification.
  *
- * The default {z,r,p} = {✓,✓,✗} reproduces `projectQualifiedVivierNodes`.
- * Unchecking `z` reveals non-excluded records outside zonage `oui`; no client
- * field is rewritten. One missing classification makes the projection
- * unavailable rather than partial.
+ * One missing classification makes the projection unavailable rather than
+ * partial.
  */
 export function projectComposedVivierB(
   nodes: GraphSignalNode[],
@@ -340,9 +337,7 @@ export function projectComposedVivierB(
     const c = node.classification!;
     if (c.exclusion_reason !== null) return false;
     if (axes.z && c.zonage.valeur !== "oui") return false;
-    // `r` keeps indeterminate residential evidence. A residential `non` is
-    // already excluded by the DTO invariant, preserving rail/panel parity.
-    if (axes.r && c.residentiel.valeur === "non") return false;
+    if (axes.r && c.residentiel.valeur !== "oui") return false;
     if (axes.p && !isPrecoceVivierNode(node)) return false;
     return true;
   });
@@ -396,12 +391,13 @@ export function validateVivierProjectionAuthority(
  * `null` le temps du fetch, ce qui éjectait la ville du rail (tri à -1 sous
  * les villes à 0, puis coupe au plafond) avant son retour ~1 s plus tard.
  *
- * A lit `subsetCounts[clé]` (clé composée par les axes cochés), B lit le
- * PÉRIMÈTRE serveur `stageCounts` (somme de toutes les étapes, ou des seules
- * étapes précoces quand l'axe est coché) : les DEUX sortent de la même passe
- * serveur (`aggregateGraphSignalProjectionRows`) sur la même donnée. Toujours
- * bulk : `subsetCounts[clé]` (0 si absent) et `vivierV2Counts` ne sont jamais
- * `null` le temps d'un fetch, donc une ville ne « saute » jamais du rail (#378).
+ * A lit `subsetCounts[clé]` (clé composée par les axes cochés). B recompose
+ * les trois axes à partir des compteurs serveur : `r` sélectionne
+ * `stageCountsResOui` (résidentiel confirmé) ou `stageCounts` (oui +
+ * indéterminé), `z` ajoute le pendant hors-zonage quand décoché, `p`
+ * restreint aux étapes précoces. Toujours bulk : `vivierV2Counts` n'est
+ * jamais `null` le temps d'un fetch, donc une ville ne saute jamais du
+ * rail (#378).
  */
 export function countForVivierCity(
   entry: VivierCityCountsEntry,
@@ -410,10 +406,6 @@ export function countForVivierCity(
   if (modeFromSubsetKey(subsetKey) === "b") {
     const counts = entry.vivierV2Counts;
     if (!counts) return 0;
-    // Rail/panel parity for every B axis comes from server counters, without
-    // reclassification: `p` selects early stages; `z` selects stageCounts or
-    // also stageCountsHorsZonage when relaxed; `r` retains confirmed and
-    // unknown residential use because the DTO excludes every residential `non`.
     const axes = bAxesFromVivierKey(subsetKey);
     const sumStages = (stages: typeof counts.stageCounts): number =>
       axes.p
@@ -425,9 +417,9 @@ export function countForVivierCity(
             stages.adoption +
             stages.entree_vigueur +
             stages.inconnu;
-    return axes.z
-      ? sumStages(counts.stageCounts)
-      : sumStages(counts.stageCounts) + sumStages(counts.stageCountsHorsZonage);
+    const inZonage = axes.r ? counts.stageCountsResOui : counts.stageCounts;
+    const horsZonage = axes.r ? counts.stageCountsResOuiHorsZonage : counts.stageCountsHorsZonage;
+    return axes.z ? sumStages(inZonage) : sumStages(inZonage) + sumStages(horsZonage);
   }
   return entry.subsetCounts[subsetKey] ?? 0;
 }
