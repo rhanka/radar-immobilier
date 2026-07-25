@@ -1,5 +1,9 @@
 import type { GeoJsonGeometry } from "./cadastre-geojson-source.js";
-import type { FeatureProof, ImmoZoneLotProvenance } from "./geo-provenance.js";
+import {
+  sanitizeProvenanceProperties,
+  type FeatureProof,
+  type ImmoZoneLotProvenance,
+} from "./geo-provenance.js";
 import { fetchWithTimeout } from "$lib/net/fetch-with-timeout.js";
 
 export type GeoZoneResolutionStatus = "official" | "fallback" | "missing";
@@ -102,6 +106,31 @@ export function resolveGeoZonesUrl(
   return `${base}${path}${qs ? `?${qs}` : ""}`;
 }
 
+/**
+ * Re-valide les enveloppes preuve/provenance d'une réponse `/api/geo/:city/zones`.
+ *
+ * Ce chemin de repli ne construit pas ses features (contrairement au chemin OGC
+ * prioritaire, `geoZonesResponseFromCollection`) : il désérialise un JSON. Il
+ * lui applique donc la MÊME validation positive versionnée avant que quoi que
+ * ce soit n'atteigne un composant — enveloppe non conforme écartée en entier,
+ * toutes les autres propriétés conservées telles quelles (non-blackout).
+ */
+export function sanitizeGeoZonesResponse(response: GeoZonesResponse): GeoZonesResponse {
+  const features = response?.featureCollection?.features;
+  if (!Array.isArray(features)) return response;
+  return {
+    ...response,
+    featureCollection: {
+      ...response.featureCollection,
+      features: features.map((feature) =>
+        feature && typeof feature.properties === "object" && feature.properties !== null
+          ? { ...feature, properties: sanitizeProvenanceProperties(feature.properties) }
+          : feature,
+      ),
+    },
+  };
+}
+
 export async function fetchGeoZones(
   citySlug: string,
   opts: FetchGeoZonesOptions = {},
@@ -113,5 +142,5 @@ export async function fetchGeoZones(
   if (!res.ok) {
     throw new Error(`geo-zones HTTP ${res.status} for ${citySlug}`);
   }
-  return (await res.json()) as GeoZonesResponse;
+  return sanitizeGeoZonesResponse((await res.json()) as GeoZonesResponse);
 }
