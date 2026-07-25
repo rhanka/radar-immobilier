@@ -101,6 +101,14 @@
     type ReglementEntry,
   } from "$lib/maps/signaux-reglements.js";
   import { describeZoneSource } from "$lib/maps/zone-source.js";
+  import {
+    assignmentStateLabel,
+    auditCodeLabel,
+    geometryProvenanceLabel,
+    proofStatusLabel,
+    publicAuditUrl,
+    readinessLabel,
+  } from "$lib/maps/geo-provenance.js";
 
   export let selectedCity: CityMapEntry | null = null;
   export let detailNodes: GraphSignalNode[] = [];
@@ -1323,6 +1331,13 @@
                     {@const citing = signalsCitingZone(zone, detailNodes)}
                     {@const zoneSource = describeZoneSource(zone.properties)}
                     {@const zoneReg = zoneReglementRow(zone)}
+                    {@const proof = zone.properties.proof}
+                    {@const provenance = zone.properties.immo_zone_lot_provenance}
+                    {@const assignment = provenance?.lot_assignment_evidence}
+                    {@const geometryProvenance = provenance?.zone_geometry_provenance}
+                    {@const geometrySourceUrl = publicAuditUrl(geometryProvenance?.public_source?.url)}
+                    {@const proofGeometrySourceUrl = publicAuditUrl(proof?.geometry_source?.url)}
+                    {@const readiness = provenance?.acquisition_v2_readiness}
                     <div class="sel-entity-detail">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Code</span>
@@ -1354,6 +1369,40 @@
                         <span class="entity-meta-key">Lots liés</span>
                         <span class="entity-meta-val">{formatNumber(zoneLotCount(zone, lots))}</span>
                       </div>
+                      {#if proof || provenance}
+                        <div class="zone-audit" data-testid="zone-audit">
+                          <span class="doc-refs-label">Audit des sources</span>
+                          {#if proof}
+                            <div class="entity-meta" data-testid="zone-proof">
+                              <span class="entity-meta-key">État de la preuve</span><span class="entity-meta-val">{proofStatusLabel(proof.status)}</span>
+                              <span class="entity-meta-key">Source géométrique</span><span class="entity-meta-val">{proof.sources?.geometry?.status === "available" ? "Disponible" : proof.sources?.geometry?.status === "unavailable" ? "Indisponible" : "Non indiquée"}</span>
+                              <span class="entity-meta-key">Source réglementaire</span><span class="entity-meta-val">{proof.sources?.regulation?.status === "available" ? "Disponible" : proof.sources?.regulation?.status === "unavailable" ? "Indisponible" : "Non indiquée"}</span>
+                              {#if proofGeometrySourceUrl}<span class="entity-meta-key">Source géométrique publiée</span><a href={proofGeometrySourceUrl} target="_blank" rel="noopener noreferrer" class="entity-meta-val zone-audit-link" data-testid="zone-proof-geometry-source-link">Consulter la source</a>{/if}
+                            </div>
+                            {#if proof.gaps?.length}
+                              <ul class="zone-audit-gaps" data-testid="zone-proof-gaps">{#each proof.gaps as gap (gap)}<li>{auditCodeLabel(gap)}</li>{/each}</ul>
+                            {/if}
+                          {/if}
+                          {#if provenance}
+                            <div class="entity-meta" data-testid="zone-lot-provenance">
+                              <span class="entity-meta-key">Origine de la géométrie</span><span class="entity-meta-val">{geometryProvenanceLabel(geometryProvenance?.status)}</span>
+                              {#if geometrySourceUrl}<span class="entity-meta-key">Source publique</span><a href={geometrySourceUrl} target="_blank" rel="noopener noreferrer" class="entity-meta-val zone-audit-link" data-testid="zone-geometry-source-link">Consulter la source</a>{/if}
+                              <span class="entity-meta-key">Rattachement du lot</span><span class="entity-meta-val">{assignmentStateLabel(assignment?.state)}</span>
+                              <span class="entity-meta-key">Zone sélectionnée</span><span class="entity-meta-val">{assignment?.selected_zone ? `${assignment.selected_zone.collection ?? "—"} · ${assignment.selected_zone.code ?? "—"}` : "—"}</span>
+                              <span class="entity-meta-key">Méthode</span><span class="entity-meta-val">{assignment?.assignment_method ?? "Non indiquée"}</span>
+                              <span class="entity-meta-key">Part dominante</span><span class="entity-meta-val">{assignment?.dominant_fraction == null ? "—" : `${(assignment.dominant_fraction * 100).toLocaleString("fr-CA", { maximumFractionDigits: 1 })} %`}</span>
+                              <span class="entity-meta-key">Plusieurs zones</span><span class="entity-meta-val">{assignment?.multi_zone == null ? "Non indiqué" : assignment.multi_zone ? "Oui" : "Non"}</span>
+                              <span class="entity-meta-key">État du dossier</span><span class="entity-meta-val">{readinessLabel(readiness?.state)}</span>
+                            </div>
+                            {#if geometryProvenance?.reason_codes?.length || readiness?.unmet_requirement_codes?.length}
+                              <ul class="zone-audit-gaps" data-testid="zone-provenance-gaps">
+                                {#each geometryProvenance?.reason_codes ?? [] as code (code)}<li>{auditCodeLabel(code)}</li>{/each}
+                                {#each readiness?.unmet_requirement_codes ?? [] as code (code)}<li>{auditCodeLabel(code)}</li>{/each}
+                              </ul>
+                            {/if}
+                          {/if}
+                        </div>
+                      {/if}
                       <!-- m8.1 — source de la zone OUVRABLE dans le viewer
                            partagé : PDF si l'URL est un PDF, iframe sinon (le
                            viewer décide). Aujourd'hui seule la grille PDF est
@@ -2209,6 +2258,32 @@
     font-size: var(--signaux-fs-caption);
     font-style: italic;
     line-height: 1.35;
+  }
+
+  .zone-audit {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.55rem;
+    border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    padding-top: 0.5rem;
+  }
+
+  .zone-audit-gaps {
+    display: grid;
+    gap: 0.18rem;
+    margin: 0;
+    padding-left: 1rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-caption);
+  }
+
+  .zone-audit-link {
+    color: #0f766e;
+    text-decoration: none;
+  }
+
+  .zone-audit-link:hover {
+    text-decoration: underline;
   }
 
   /* m7 — ligne de règlement de l'accordéon Règlements. */

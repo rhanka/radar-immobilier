@@ -756,3 +756,39 @@ describe("usage dominant (qc-zonage) → zone{usageDominant,usageDominantSource}
     expect(zone?.usageDominantSource).toBeUndefined();
   });
 });
+
+describe("enveloppes de provenance geo", () => {
+  it("conserve proof et immo_zone_lot_provenance sans les reformater", async () => {
+    const proof = {
+      schema_version: "1.0",
+      status: "partial",
+      sources: {
+        geometry: { status: "available", artifact_uri: "https://geo.example/lots.geojson", upstream_uri: null },
+        regulation: { status: "unavailable", artifact_uri: null, upstream_uri: null },
+      },
+      zone: null,
+      gaps: ["regulation_source_unavailable"],
+    };
+    const provenance = {
+      contract: "immo-zone-lot-provenance/v1",
+      assessed_at: "2026-07-22T14:00:00Z",
+      lot_assignment_evidence: {
+        state: "recorded",
+        selected_zone: { collection: "qc-zonage-delson", feature_ref: null, code: "H-12" },
+        assignment_method: "area-majority",
+        dominant_fraction: 0.94,
+        multi_zone: false,
+        zone_codes: ["H-12"],
+        evidence_snapshot: "2026-06-21",
+        evidence_id: "lot-zone-ev-7d21",
+        reason_codes: [],
+      },
+      zone_geometry_provenance: null,
+      acquisition_v2_readiness: { state: "not-ready", checked_at: null, unmet_requirement_codes: ["missing-content-sha256"] },
+    };
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify({ type: "FeatureCollection", features: [{ type: "Feature", geometry: null, properties: { NO_LOT: "P-1", proof, immo_zone_lot_provenance: provenance } }] }), { status: 200 }));
+    const response = await fetchLots("delson", { baseUrl: "" });
+    expect(response.featureCollection.features[0]!.properties.proof).toEqual(proof);
+    expect(response.featureCollection.features[0]!.properties.immo_zone_lot_provenance).toEqual(provenance);
+  });
+});
