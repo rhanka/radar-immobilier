@@ -82,8 +82,12 @@ const SUTTON_RAW = [
   node("sutton-a", true, true, true),
   node("sutton-t", true, false, true),
   node("sutton-z", true, false, false),
-  // Résidentiel indéterminé → « à confirmer », donc hors de B.
+  // Rezonage dont le résidentiel n'est pas précisé : ÉLIGIBLE (une refonte
+  // redessine la grille de zonage, donc elle peut être résidentielle).
   node("sutton-m", false, true, false, classification("oui", "indetermine")),
+  // Dérogation mineure indéterminée : vraie inconnue, PAS éligible — c'est ce
+  // qui empêche l'axe `r` de redevenir un filtre qui ne filtre rien.
+  node("sutton-d", false, true, false, classification("oui", "indetermine", null, "derogation")),
   // Exclu par le serveur → hors de B.
   node("sutton-raw", false, false, false, classification("oui", "non", "non_residentiel_franc")),
 ];
@@ -161,13 +165,19 @@ describe("Vivier A / B view contract", () => {
     const a = projectNodesForVivierMode(SUTTON_RAW, SUTTON_AUTHORITY, "a");
     const b = projectNodesForVivierMode(SUTTON_RAW, SUTTON_AUTHORITY, "b");
 
-    expect(SUTTON_RAW).toHaveLength(5);
+    expect(SUTTON_RAW).toHaveLength(6);
     expect(a).toEqual({ available: true, count: 1, nodes: [SUTTON_RAW[0]] });
     expect(a.nodes.map((item) => item.id)).toEqual(["sutton-a"]);
-    // B default (r=true) = residential oui only. sutton-m (indéterminé) is
-    // filtered; it reappears when r is unchecked.
-    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    expect(b.count).toBe(3);
+    // B default (r=true) = residential ELIGIBLE: `oui` plus the rezoning left
+    // unstated (sutton-m). The indéterminé dérogation (sutton-d) stays out —
+    // it is a genuine unknown, not an unstated reform.
+    expect(b.nodes.map((item) => item.id)).toEqual([
+      "sutton-a",
+      "sutton-t",
+      "sutton-z",
+      "sutton-m",
+    ]);
+    expect(b.count).toBe(4);
   });
 
   it("projects and counts the B-prime-normalized B payload", () => {
@@ -222,7 +232,7 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
-        stageCountsResOui: {
+        stageCountsResEligible: {
           avis_motion: 0,
           projet_reglement: 0,
           consultation_publique: 0,
@@ -231,7 +241,7 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
-        stageCountsResOuiHorsZonage: {
+        stageCountsResEligibleHorsZonage: {
           avis_motion: 0,
           projet_reglement: 0,
           consultation_publique: 0,
@@ -256,7 +266,7 @@ describe("Vivier A / B view contract", () => {
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "z").nodes.map((n) => n.id))
       .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
     // Clé vide → aucun filtre → tous les signaux.
-    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "").count).toBe(5);
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "").count).toBe(6);
   });
 
   it("restricts B to precoce stages when the axis is checked", () => {
@@ -274,21 +284,22 @@ describe("Vivier A / B view contract", () => {
       .toEqual(["q-avis", "q-projet"]);
   });
 
-  it("r axis filters indéterminé when checked and relaxes when unchecked", () => {
-    // sutton-m is residential=indéterminé (not excluded). The r axis controls it.
-    // Default (r=true): only residential=oui — sutton-m is filtered.
+  it("r axis keeps unstated rezonings, still filters genuine unknowns, relaxes when unchecked", () => {
+    // sutton-m = rezoning, residential unstated → ELIGIBLE (R2: a reform ranks,
+    // it never gates). sutton-d = dérogation, residential unstated → genuine
+    // unknown, filtered. This pair is what keeps `r` an actual filter.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
-    // Uncheck r: indéterminé reappears (not reclassified, just unfiltered).
-    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-r").nodes.map((n) => n.id))
       .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    // Uncheck z (r still checked): same res=oui set (all happen to be zonage=oui).
+    // Uncheck r: every indéterminé reappears (not reclassified, just unfiltered).
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-r").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m", "sutton-d"]);
+    // Uncheck z (r still checked): same eligible set (all happen to be zonage=oui).
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
     // Uncheck both z and r: all non-excluded.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(4);
+      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m", "sutton-d"]);
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(5);
     // The server-excluded node never appears regardless of axes.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").nodes.map((n) => n.id))
       .not.toContain("sutton-raw");
@@ -337,9 +348,9 @@ describe("Vivier A / B view contract", () => {
     const validated = validateVivierProjectionAuthority(SUTTON_RAW, authority);
 
     // Une autorité A corrompue n'entraîne pas B, qui a sa propre source.
-    // B = périmètre permissif (qualifié + « à confirmer » indéterminé) = 4.
+    // B = périmètre permissif (qualifié + tout « à confirmer » indéterminé) = 5.
     expect(validated.a).toEqual({ available: false, count: null, nodes: [] });
-    expect(validated.b.count).toBe(4);
+    expect(validated.b.count).toBe(5);
   });
 
   it("reads A from subsetCounts (by composed key) and B from vivierV2Counts", () => {
@@ -372,7 +383,7 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
-        stageCountsResOui: {
+        stageCountsResEligible: {
           avis_motion: 5,
           projet_reglement: 1,
           consultation_publique: 1,
@@ -381,7 +392,7 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
-        stageCountsResOuiHorsZonage: {
+        stageCountsResEligibleHorsZonage: {
           avis_motion: 0,
           projet_reglement: 0,
           consultation_publique: 0,
@@ -400,7 +411,7 @@ describe("Vivier A / B view contract", () => {
     expect(countForVivierCity(entry, "z")).toBe(120);
     expect(countForVivierCity(entry, "")).toBe(200);
     expect(countForVivierCity(entry, "m|p")).toBe(0);
-    // B default (r=true, p=true): reads stageCountsResOui précoce = 5+1 = 6.
+    // B default (r=true, p=true): reads stageCountsResEligible précoce = 5+1 = 6.
     expect(countForVivierCity(entry, "vivier-v2")).toBe(6);
     expect(countForVivierCity(entry, "vivier-v2|p")).toBe(6);
     // B with r unchecked reads stageCounts précoce = 7+2 = 9.
@@ -449,7 +460,7 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
-        stageCountsResOui: {
+        stageCountsResEligible: {
           avis_motion: 0,
           projet_reglement: 0,
           consultation_publique: 0,
@@ -458,7 +469,7 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
-        stageCountsResOuiHorsZonage: {
+        stageCountsResEligibleHorsZonage: {
           avis_motion: 0,
           projet_reglement: 0,
           consultation_publique: 0,
@@ -520,11 +531,12 @@ describe("Vivier A / B view contract", () => {
       }
     }
 
-    // Sanity: r=true filters to residential=oui only.
-    // z=true,r=true,p=false → stageCountsResOui: only n-perim-precoce (am:1) → 1.
-    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(1);
-    // z=false,r=true,p=false → + stageCountsResOuiHorsZonage: n-hors-precoce (pr:1) → 2.
-    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(2);
+    // Sanity: r=true garde le résidentiel ÉLIGIBLE. Ici tous les nœuds sont des
+    // rezonages, donc leur indéterminé est « non précisé » et reste éligible.
+    // z=true,r=true,p=false → stageCountsResEligible: n-perim-precoce + n-perim-tardif → 2.
+    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(2);
+    // z=false,r=true,p=false → + stageCountsResEligibleHorsZonage: les 2 hors-zonage → 4.
+    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(4);
     // z=true,r=false,p=false → stageCounts: n-perim-precoce + n-perim-tardif → 2.
     expect(countForVivierCity(entry, keyForVivierB({ z: true, r: false, p: false }))).toBe(2);
     // z=false,r=false,p=false → all non-excluded → 4.

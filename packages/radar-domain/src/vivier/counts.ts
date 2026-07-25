@@ -38,12 +38,16 @@ export const vivierCountsSchema = z
     // The same records outside zonage `oui`, bucketed by stage. When `z` is
     // unchecked, rail and panel both combine this with stageCounts.
     stageCountsHorsZonage: vivierStageCountsSchema,
-    // Residential-confirmed subset of stageCounts: zonage `oui`, residential
-    // `oui`, no exclusion. Used when the `r` axis is checked (strict mode).
-    stageCountsResOui: vivierStageCountsSchema,
-    // Residential-confirmed outside zonage `oui`. Combines with
-    // stageCountsResOui when both `z` unchecked and `r` checked.
-    stageCountsResOuiHorsZonage: vivierStageCountsSchema,
+    // Residential-ELIGIBLE subset of stageCounts, used when the `r` axis is
+    // checked: zonage `oui`, no exclusion, and residential `oui` OR a complete
+    // rezoning/reform whose residential nature is simply not stated. A rezoning
+    // reshapes the zoning grid, so it CAN be residential — that is not the same
+    // epistemic state as "the minutes do not say" (R2: a reform ranks, it never
+    // gates). Only an explicit non-residential is filtered out here.
+    stageCountsResEligible: vivierStageCountsSchema,
+    // The same eligible records outside zonage `oui`. Combines with
+    // stageCountsResEligible when both `z` unchecked and `r` checked.
+    stageCountsResEligibleHorsZonage: vivierStageCountsSchema,
     total: countSchema,
   })
   .superRefine((counts, context) => {
@@ -96,6 +100,32 @@ export function countsInvariant(counts: VivierCounts): boolean {
 
 export const isVivierCountsInvariant = countsInvariant;
 
+/**
+ * Instruments whose residential nature is UNSTATED rather than unknown.
+ *
+ * A complete rezoning / regulatory reform rewrites the zoning grid, which
+ * necessarily includes residential zones — so `indetermine` here means "the
+ * minutes did not spell it out", not "this may well be non-residential". Any
+ * other instrument (minor derogation, PIIA, …) left at `indetermine` stays a
+ * genuine unknown and is NOT eligible.
+ */
+const RESIDENTIAL_ELIGIBLE_INSTRUMENTS: ReadonlySet<string> = new Set([
+  "rezonage",
+  "refonte",
+]);
+
+/**
+ * The `r` axis predicate — SINGLE source of truth shared by the server counters
+ * and the client projection, so the rail badge and the panel list can never
+ * diverge. Keeps residential `oui`, keeps a rezoning/reform whose residential
+ * nature is unstated, and filters out an explicit non-residential.
+ */
+export function isResidentialEligible(classification: VivierV2): boolean {
+  if (classification.residentiel.valeur === "oui") return true;
+  if (classification.residentiel.valeur === "non") return false;
+  return RESIDENTIAL_ELIGIBLE_INSTRUMENTS.has(classification.instrument);
+}
+
 export function countVivierClassifications(
   classifications: readonly VivierV2[],
 ): VivierCounts {
@@ -105,8 +135,8 @@ export function countVivierClassifications(
     excludedByReason: emptyExcludedByReason(),
     stageCounts: emptyStageCounts(),
     stageCountsHorsZonage: emptyStageCounts(),
-    stageCountsResOui: emptyStageCounts(),
-    stageCountsResOuiHorsZonage: emptyStageCounts(),
+    stageCountsResEligible: emptyStageCounts(),
+    stageCountsResEligibleHorsZonage: emptyStageCounts(),
     total: classifications.length,
   };
 
@@ -123,13 +153,13 @@ export function countVivierClassifications(
     // same non-excluded records when `z` is relaxed; the two buckets let rail
     // reproduce the panel without reclassification.
     const inPerimeter = classification.zonage.valeur === "oui";
-    const resOui = classification.residentiel.valeur === "oui";
+    const resEligible = isResidentialEligible(classification);
     if (inPerimeter) {
       counts.stageCounts[classification.etape] += 1;
-      if (resOui) counts.stageCountsResOui[classification.etape] += 1;
+      if (resEligible) counts.stageCountsResEligible[classification.etape] += 1;
     } else {
       counts.stageCountsHorsZonage[classification.etape] += 1;
-      if (resOui) counts.stageCountsResOuiHorsZonage[classification.etape] += 1;
+      if (resEligible) counts.stageCountsResEligibleHorsZonage[classification.etape] += 1;
     }
 
     // `qualified` reste STRICT (résidentiel confirmé `oui`) et `residentialUnknown`
