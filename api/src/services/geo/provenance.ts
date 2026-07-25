@@ -72,7 +72,7 @@ function ipv6Groups(host: string): number[] | null {
     const out: number[] = [];
     const pieces = part.split(":");
     for (let i = 0; i < pieces.length; i += 1) {
-      const piece = pieces[i];
+      const piece = pieces[i]!;
       if (/^[0-9a-f]{1,4}$/.test(piece)) {
         out.push(parseInt(piece, 16));
         continue;
@@ -81,17 +81,17 @@ function ipv6Groups(host: string): number[] | null {
       // embedded IPv4: it is only legal last, and it fills two groups.
       const quad = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(piece);
       if (!quad || i !== pieces.length - 1) return null;
-      const octets = quad.slice(1).map(Number);
+      const octets = [Number(quad[1]), Number(quad[2]), Number(quad[3]), Number(quad[4])];
       if (octets.some((octet) => octet > 255)) return null;
-      out.push((octets[0] << 8) | octets[1], (octets[2] << 8) | octets[3]);
+      out.push((octets[0]! << 8) | octets[1]!, (octets[2]! << 8) | octets[3]!);
       continue;
     }
     return out;
   };
-  const head = parseHalf(halves[0]);
+  const head = parseHalf(halves[0]!);
   if (head === null) return null;
   if (halves.length === 1) return head.length === 8 ? head : null;
-  const tail = parseHalf(halves[1]);
+  const tail = parseHalf(halves[1]!);
   if (tail === null) return null;
   if (head.length + tail.length > 7) return null; // `::` stands for ≥1 zero group
   return [...head, ...new Array(8 - head.length - tail.length).fill(0), ...tail];
@@ -107,17 +107,19 @@ function ipv6Groups(host: string): number[] | null {
  */
 function isGlobalUnicastIpv6(host: string): boolean {
   const groups = ipv6Groups(host);
-  if (groups === null) return false;
-  if ((groups[0] & 0xe000) !== 0x2000) return false;
-  if (groups[0] === 0x2001 && groups[1] === 0x0db8) return false;
-  if (groups[0] === 0x2002) return false;
+  if (groups === null || groups.length !== 8) return false;
+  const g0 = groups[0]!;
+  if ((g0 & 0xe000) !== 0x2000) return false;
+  if (g0 === 0x2001 && groups[1] === 0x0db8) return false;
+  if (g0 === 0x2002) return false;
   return true;
 }
 
 /** Public IPv4 only: every special-use / private / loopback block is refused. */
 function isPublicIpv4(octets: number[]): boolean {
-  if (octets.some((octet) => octet > 255)) return false;
-  const [a, b] = octets;
+  if (octets.length !== 4 || octets.some((octet) => octet > 255)) return false;
+  const a = octets[0]!;
+  const b = octets[1]!;
   if (a === 0 || a === 127 || a === 10) return false; // this-host, loopback, RFC1918
   if (a === 100 && b >= 64 && b <= 127) return false; // CGNAT 100.64.0.0/10
   if (a === 169 && b === 254) return false; // link-local

@@ -122,11 +122,10 @@ export function sanitizeGeoZonesResponse(response: GeoZonesResponse): GeoZonesRe
     ...response,
     featureCollection: {
       ...response.featureCollection,
-      features: features.map((feature) =>
-        feature && typeof feature.properties === "object" && feature.properties !== null
-          ? { ...feature, properties: sanitizeProvenanceProperties(feature.properties) }
-          : feature,
-      ),
+      features: features.map((feature): GeoZoneFeature => {
+        if (!feature || typeof feature.properties !== "object" || feature.properties === null) return feature;
+        return { ...feature, properties: sanitizeProvenanceProperties(feature.properties as unknown as Record<string, unknown>) as unknown as GeoZoneProperties };
+      }),
     },
   };
 }
