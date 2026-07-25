@@ -164,11 +164,10 @@ describe("Vivier A / B view contract", () => {
     expect(SUTTON_RAW).toHaveLength(5);
     expect(a).toEqual({ available: true, count: 1, nodes: [SUTTON_RAW[0]] });
     expect(a.nodes.map((item) => item.id)).toEqual(["sutton-a"]);
-    // B = PÉRIMÈTRE « zonage résidentiel, indéterminé GARDÉ » : le « à confirmer »
-    // (sutton-m) PASSE, seul l'exclu serveur (sutton-raw) sort. B ignore le gate
-    // multi4 de A.
-    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    expect(b.count).toBe(4);
+    // B default (r=true) = residential oui only. sutton-m (indéterminé) is
+    // filtered; it reappears when r is unchecked.
+    expect(b.nodes.map((item) => item.id)).toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    expect(b.count).toBe(3);
   });
 
   it("projects and counts the B-prime-normalized B payload", () => {
@@ -223,6 +222,24 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsResOui: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        stageCountsResOuiHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 1,
       },
     }, "vivier-v2|-p")).toBe(0);
@@ -257,25 +274,25 @@ describe("Vivier A / B view contract", () => {
       .toEqual(["q-avis", "q-projet"]);
   });
 
-  it("garde l'indéterminé « à confirmer » dans le défaut B et n'écarte que l'exclu serveur (permissif)", () => {
-    // SUTTON_RAW : sutton-m est « à confirmer » (résidentiel indéterminé, non
-    // exclu), sutton-raw est exclu par le serveur (jamais montré).
-    // PÉRIMÈTRE PERMISSIF : le défaut GARDE désormais l'indéterminé (spec
-    // « indéterminé GARDÉ ») — sutton-m est DANS le défaut, sans gate.
+  it("r axis filters indéterminé when checked and relaxes when unchecked", () => {
+    // sutton-m is residential=indéterminé (not excluded). The r axis controls it.
+    // Default (r=true): only residential=oui — sutton-m is filtered.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2").nodes.map((n) => n.id))
-      .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    // Décocher « Résidentiel » (vivier-v2|-r) : l'axe est déjà permissif → même
-    // set, l'exclu serveur reste écarté (jamais reclassé côté client).
+      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    // Uncheck r: indéterminé reappears (not reclassified, just unfiltered).
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-r").nodes.map((n) => n.id))
       .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    // Décocher « Zonage » (vivier-v2|-z) : ici tous portent zonage oui → même set.
+    // Uncheck z (r still checked): same res=oui set (all happen to be zonage=oui).
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z").nodes.map((n) => n.id))
+      .toEqual(["sutton-a", "sutton-t", "sutton-z"]);
+    // Uncheck both z and r: all non-excluded.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").nodes.map((n) => n.id))
       .toEqual(["sutton-a", "sutton-t", "sutton-z", "sutton-m"]);
-    // L'exclu serveur (sutton-raw) n'apparaît JAMAIS, quels que soient les axes.
+    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(4);
+    // The server-excluded node never appears regardless of axes.
     expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").nodes.map((n) => n.id))
       .not.toContain("sutton-raw");
-    expect(projectNodesForVivierKey(SUTTON_RAW, SUTTON_AUTHORITY, "vivier-v2|-z|-r").count).toBe(4);
-    // Un axe B relâché n'invente aucune classification : sans classification → indispo.
+    // Missing classification → unavailable (not partial).
     const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
     expect(projectNodesForVivierKey([unclassified], SUTTON_AUTHORITY, "vivier-v2|-r"))
       .toEqual({ available: false, count: null, nodes: [] });
@@ -355,25 +372,43 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsResOui: {
+          avis_motion: 5,
+          projet_reglement: 1,
+          consultation_publique: 1,
+          second_projet: 0,
+          adoption: 1,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        stageCountsResOuiHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 58,
       },
     };
 
-    // A lit la clé composée directement (défaut et sous-sélections).
+    // A reads the composed key directly (unchanged).
     expect(countForVivierCity(entry, "z|m|p")).toBe(3);
     expect(countForVivierCity(entry, "z|p")).toBe(88);
     expect(countForVivierCity(entry, "z")).toBe(120);
     expect(countForVivierCity(entry, "")).toBe(200);
-    // Une clé A absente des comptes bulk n'invente rien → 0 (la ville ne saute pas).
     expect(countForVivierCity(entry, "m|p")).toBe(0);
-    // B = qualified ; B précoce = somme des étapes précoces de stageCounts.
-    expect(countForVivierCity(entry, "vivier-v2")).toBe(9);
-    expect(countForVivierCity(entry, "vivier-v2|p")).toBe(9);
-    // Une ville sans comptes v2 n'invente pas un vivier.
+    // B default (r=true, p=true): reads stageCountsResOui précoce = 5+1 = 6.
+    expect(countForVivierCity(entry, "vivier-v2")).toBe(6);
+    expect(countForVivierCity(entry, "vivier-v2|p")).toBe(6);
+    // B with r unchecked reads stageCounts précoce = 7+2 = 9.
+    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: false, p: true }))).toBe(9);
+    // Null vivierV2Counts → 0.
     expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "vivier-v2")).toBe(0);
     expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts: null }, "vivier-v2|p")).toBe(0);
 
-    // Les trois compteurs restent séparés : aucun total ne les fond.
     expect(sumVivierBCounts([entry, entry])).toEqual({
       qualified: 24,
       residentialUnknown: 80,
@@ -381,10 +416,10 @@ describe("Vivier A / B view contract", () => {
     });
   });
 
-  it("PARITÉ recette : le badge B lit le PÉRIMÈTRE précoce (indéterminé compris), pas seulement `qualified`", () => {
-    // Reproduit une ville « refonte » type Sutton : 2 signaux résidentiel=indéterminé
-    // à projet_reglement → qualified=0 mais stageCounts.projet_reglement=2. Le badge
-    // rail précoce DOIT valoir 2 (c'est ce que prouve la recette serveur B′).
+  it("r axis separates confirmed residential from indéterminé in rail count", () => {
+    // Sutton-like city: 2 signals are residential=indéterminé (reforms).
+    // With r=true (default): they are filtered → count=0.
+    // With r=false: they reappear → count=2.
     const suttonLike = {
       subsetCounts: { "z|m|p": 0 },
       vivierV2Counts: {
@@ -414,14 +449,33 @@ describe("Vivier A / B view contract", () => {
           entree_vigueur: 0,
           inconnu: 0,
         },
+        stageCountsResOui: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
+        stageCountsResOuiHorsZonage: {
+          avis_motion: 0,
+          projet_reglement: 0,
+          consultation_publique: 0,
+          second_projet: 0,
+          adoption: 0,
+          entree_vigueur: 0,
+          inconnu: 0,
+        },
         total: 2,
       },
     };
-    // Défaut (précoce) : ✓2 même si `qualified` = 0 — pas de gate refonte→oui.
-    expect(countForVivierCity(suttonLike, "vivier-v2")).toBe(2);
-    expect(countForVivierCity(suttonLike, "vivier-v2|p")).toBe(2);
-    // Précoce décoché : périmètre TOTAL (Σ stageCounts) = 2, jamais `qualified`=0.
-    expect(countForVivierCity(suttonLike, "vivier-v2|-p")).toBe(2);
+    // Default (r=true, p=true): residential=oui only → 0.
+    expect(countForVivierCity(suttonLike, "vivier-v2")).toBe(0);
+    expect(countForVivierCity(suttonLike, "vivier-v2|p")).toBe(0);
+    // Uncheck r: indéterminé reappears → 2.
+    expect(countForVivierCity(suttonLike, keyForVivierB({ z: true, r: false, p: true }))).toBe(2);
+    expect(countForVivierCity(suttonLike, keyForVivierB({ z: true, r: false, p: false }))).toBe(2);
   });
 
   it("PARITÉ rail↔panneau pour TOUS les axes B (z/r/p) — compteurs serveur recomposables", () => {
@@ -466,10 +520,15 @@ describe("Vivier A / B view contract", () => {
       }
     }
 
-    // Sanity : le contre-exemple de la revue (axe Zonage décoché révèle le
-    // hors-zonage résidentiel) — 2 en périmètre, +2 hors-zonage = 4.
-    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(2);
-    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(4);
+    // Sanity: r=true filters to residential=oui only.
+    // z=true,r=true,p=false → stageCountsResOui: only n-perim-precoce (am:1) → 1.
+    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: true, p: false }))).toBe(1);
+    // z=false,r=true,p=false → + stageCountsResOuiHorsZonage: n-hors-precoce (pr:1) → 2.
+    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: true, p: false }))).toBe(2);
+    // z=true,r=false,p=false → stageCounts: n-perim-precoce + n-perim-tardif → 2.
+    expect(countForVivierCity(entry, keyForVivierB({ z: true, r: false, p: false }))).toBe(2);
+    // z=false,r=false,p=false → all non-excluded → 4.
+    expect(countForVivierCity(entry, keyForVivierB({ z: false, r: false, p: false }))).toBe(4);
   });
 
   it("rejects the DTO that would diverge rail and panel on the r axis", () => {
