@@ -91,19 +91,26 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     expect(getByTestId("visible-count").textContent).toBe("3");
   });
 
-  it("m1.4 — r axis filters indéterminé when checked and reveals it when unchecked", async () => {
+  it("m1.4 — r axis keeps unstated rezonings, filters genuine unknowns, reveals all when unchecked", async () => {
     const detailNodes = [
       node("qualifie", "rezonage", { residentiel: "oui" }),
+      // Rezonage au résidentiel non précisé → éligible (R2 : une refonte
+      // classe, elle ne barre jamais).
       node("a-confirmer", "rezonage", { residentiel: "indetermine" }),
+      // Instrument non-rezonage au résidentiel non précisé → vraie inconnue,
+      // reste filtrée : c'est ce qui garantit que `r` filtre encore quelque
+      // chose. (`autre` plutôt que `derogation` pour isoler l'axe `r` des
+      // exclusions par instrument du rail.)
+      node("inconnu-vrai", "autre", { residentiel: "indetermine" }),
     ];
     const { container, getByTestId } = render(Harness, {
       props: { detailNodes, initialSubsetKey: "vivier-v2" },
     });
-    // Default (r=true): only residential=oui shown.
-    expect(getByTestId("visible-count").textContent).toBe("1");
-    // Uncheck r: indéterminé reappears.
-    await fireEvent.click(axisBoxes(container)[1]!);
+    // Default (r=true): residential `oui` + rezonage non précisé.
     expect(getByTestId("visible-count").textContent).toBe("2");
+    // Uncheck r: every indéterminé reappears.
+    await fireEvent.click(axisBoxes(container)[1]!);
+    expect(getByTestId("visible-count").textContent).toBe("3");
   });
 });
 
@@ -136,7 +143,7 @@ function bulkVivierCounts(qualified: number): VivierV2Counts {
       entree_vigueur: 0,
       inconnu: 0,
     },
-    stageCountsResOui: {
+    stageCountsResEligible: {
       avis_motion: qualified,
       projet_reglement: 0,
       consultation_publique: 0,
@@ -145,7 +152,7 @@ function bulkVivierCounts(qualified: number): VivierV2Counts {
       entree_vigueur: 0,
       inconnu: 0,
     },
-    stageCountsResOuiHorsZonage: {
+    stageCountsResEligibleHorsZonage: {
       avis_motion: 0,
       projet_reglement: 0,
       consultation_publique: 0,

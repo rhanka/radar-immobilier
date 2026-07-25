@@ -42,7 +42,7 @@ function vivierCounts(
       entree_vigueur: 0,
       inconnu: 0,
     },
-    stageCountsResOui: {
+    stageCountsResEligible: {
       avis_motion: qualified,
       projet_reglement: 0,
       consultation_publique: 0,
@@ -52,7 +52,7 @@ function vivierCounts(
       inconnu: 0,
       ...stageCounts,
     },
-    stageCountsResOuiHorsZonage: {
+    stageCountsResEligibleHorsZonage: {
       avis_motion: 0,
       projet_reglement: 0,
       consultation_publique: 0,
