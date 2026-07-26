@@ -7,6 +7,7 @@ import {
   extractLegacyZmpInput,
   type VivierSignalInput,
 } from "./vivier-v2.js";
+import { classifyResidentielPertinence } from "./graph-store.js";
 import { PV_BELOEIL_2026_02_TEXT } from "@radar/sources";
 
 const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput => ({
@@ -17,6 +18,45 @@ const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput =
   description: "Consultation publique",
   etape: "consultation_publique",
   ...overrides,
+});
+
+describe("GUARD — axis r MUST NOT branch on completeReform (C1 kills recall: 170→91, Sutton LOST)", () => {
+  it("a refonte with no residential marker stays indeterminate on axis r", () => {
+    expect(classifyResidentielPertinence(
+      null,
+      "Refonte réglementaire complète — nouveau zonage",
+      "Adoption 1ers projets de règlement 358 (zonage), 362 (PPCMOI).",
+    )).toBe("indetermine");
+  });
+
+  it("Sutton verbatim: refonte réglementaire is NOT promoted to residentiel by axis r", () => {
+    expect(classifyResidentielPertinence(
+      null,
+      "Signal : refonte réglementaire complète Sutton — nouveau zonage et lotissement (2026)",
+      "Refonte totale du zonage (règlement 358)",
+    )).toBe("indetermine");
+  });
+
+  it("a refonte with a non-residential marker is still non_residentiel on axis r", () => {
+    expect(classifyResidentielPertinence(
+      null,
+      "Refonte industrielle complète",
+      "Refonte du parc industriel",
+    )).toBe("non_residentiel");
+  });
+
+  it("Rosemère stays OUT of B: the real PV pôle régional has no residential marker", () => {
+    const classification = classifyVivierSignal({
+      id: "rosemere-801-71",
+      type: "DesignationEvent",
+      category: null,
+      label: "801-71 - Règlement modifiant le Règlement de zonage 801 afin d'assurer la conformité au Règlement 24-02 de la MRC de Thérèse-De Blainville et aux Règlements 800-06 et 800-08 de la Ville de Rosemère relatifs au pôle régional - Règlement de concordance - Avis de motion",
+      description: "Avis de motion : règlement de concordance assurant la conformité au règlement 24-02 de la MRC relatif au pôle régional.",
+      etape: "avis_motion",
+    });
+    expect(classification.residentiel.valeur).toBe("indetermine");
+    expect(classification.exclusion_reason).toBeNull();
+  });
 });
 
 describe("server vivier_v2 computation", () => {
