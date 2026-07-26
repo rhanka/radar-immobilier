@@ -20,18 +20,6 @@ describe("classifyBPrime", () => {
     expect(classifyBPrime({ label: "Révision complète du règlement résidentiel" }))
       .toMatchObject({ residentiel: "indetermine", exclusionReason: null, effetDensifiant: "inconnu" });
     expect(classifyBPrime({ category: " REFONTE " })).toMatchObject({ residentiel: "indetermine" });
-    // Proximity ≤30 chars: "refonte réglementaire complète" (1 word gap) + residential marker
-    // → completeReform overrides residential to indetermine (not oui)
-    expect(classifyBPrime({
-      label: "Refonte réglementaire complète — 12 logements",
-    })).toMatchObject({ residentiel: "indetermine" });
-    // Synonym "totale": detected as refonte complète
-    expect(classifyBPrime({
-      label: "Refonte totale — immeuble résidentiel de 6 logements",
-    })).toMatchObject({ residentiel: "indetermine" });
-    // Adjacent still works
-    expect(classifyBPrime({ label: "Révision complète du règlement résidentiel" }))
-      .toMatchObject({ residentiel: "indetermine" });
     expect(classifyBPrime({ label: "Densification du parc industriel" }))
       .toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
     expect(classifyBPrime({ category: " Commercial " })).toMatchObject({ residentiel: "non" });

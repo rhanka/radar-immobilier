@@ -140,8 +140,7 @@ export function classifyBPrime(input: BPrimeSignalInput): BPrimeClassification {
   const annotated = annotationRaw === null ? null : normalizedEtape(annotationRaw);
   const text = fold(`${label ?? ""} ${description ?? ""}`);
   const instrument = firstString(records, ["instrument"]);
-  const completeReform = category === "refonte" ||
-    /\b(?:refonte|revision)\b[\s\S]{0,30}\b(?:complete|totale|globale|generale|integrale)\b/.test(text) ||
+  const completeReform = category === "refonte" || /\b(?:refonte|revision) complete\b/.test(text) ||
     instrument !== null && token(instrument) === "refonte";
   const commercialOrIndustrial =
     (category !== null && COMMERCIAL_OR_INDUSTRIAL_CATEGORIES.has(category)) ||
