@@ -66,13 +66,13 @@ const RESIDENTIEL_CATEGORIES_CLIENT = new Set([
 ]);
 
 const RESIDENTIEL_MARKERS_RE =
-  /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement|multi-logement|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densification|duplex|triplex|quadruplex|plex|condominium|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte)\b/;
+  /\b(?:residentiel(?:le)?s?|habitations?|logements?|multilogements?|multi-logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densifications?|duplex|triplex|quadruplex|plex|condominiums?|maisons? de chambres|immeubles? (?:residentiels?|locatifs?|a logements)|usages? mixtes?)\b/;
 
 const NON_RESIDENTIEL_MARKERS_RE =
   /\b(?:industriel(?:le)?s?|parc industriel|zone industrielle|commercial(?:e)?s?|centre commercial|camping|agricole|exploitation agricole|terres? agricoles?|environnement(?:al(?:e)?)?|milieux? humides?|zone inondable|plaine inondable|inondable|conservation|bande riveraine|riveraine|eolien(?:ne)?s?|minier(?:e)?s?|carriere|graviere|sabliere|entreposage|entrepot|stationnement)\b/;
 
 function foldText(raw: string): string {
-  return raw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return raw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['']/g, " ");
 }
 
 /**

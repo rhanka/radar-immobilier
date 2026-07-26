@@ -20,6 +20,20 @@ const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput =
   ...overrides,
 });
 
+describe("RESIDENTIEL_MARKERS_RE twins — byte-identical across API, domain, UI", () => {
+  it("graph-store and b-prime RESIDENTIAL regex produce the same results on plural terms", () => {
+    const terms = [
+      "logements", "habitations", "multilogements", "multi-logements",
+      "condominiums", "maisons de chambres", "immeubles residentiels",
+      "immeubles locatifs", "usages mixtes", "densifications",
+    ];
+    for (const term of terms) {
+      const apiResult = classifyResidentielPertinence(null, term, null);
+      expect(apiResult, `API must match residential for: ${term}`).toBe("residentiel");
+    }
+  });
+});
+
 describe("GUARD — axis r MUST NOT branch on completeReform (C1 kills recall: 170→91, Sutton LOST)", () => {
   it("a refonte with no residential marker stays indeterminate on axis r", () => {
     expect(classifyResidentielPertinence(

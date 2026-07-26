@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { classifyBPrime, FRANC_NON_RESIDENTIEL_RE } from "./b-prime.js";
 
-/** Normalise comme le classifieur (minuscule + sans accents). */
-const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+/** Normalise comme le classifieur (minuscule + sans accents + apostrophes). */
+const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['']/g, " ");
 
 describe("classifyBPrime", () => {
   it("uses an explicit stage annotation before text and audits an invalid annotation", () => {
@@ -117,5 +117,36 @@ describe("classifyBPrime", () => {
       label: "Densification commerciale du secteur",
       props: { extrait: "Conversion d'un bâtiment commercial à usage résidentiel" },
     })).toMatchObject({ residentiel: "non", exclusionReason: "non_residentiel_franc" });
+  });
+
+  it("C2 — plurals are detected as residential markers", () => {
+    for (const label of [
+      "PPCMOI — 6 logements multifamiliaux",
+      "Lotissement majeur 20 habitations",
+      "PPCMOI zone Hc-415 — multilogements > 12 unités",
+      "Construction multi-logements — 107, rue Thibault",
+      "Deux immeubles résidentiels de 6 étages",
+      "Condominiums de luxe en bord de lac",
+      "Projet de maisons de chambres — centre-ville",
+      "Trois immeubles locatifs de 8 logements",
+      "Nouvelle zone à usages mixtes — centre-ville",
+    ]) {
+      const c = classifyBPrime({ label });
+      expect(c.residentiel, `attendu oui: ${label}`).toBe("oui");
+    }
+  });
+
+  it("apostrophe normalization: plan d'urbanisme and changement d'usage trigger correctly", () => {
+    expect(classifyBPrime({
+      label: "Adoption nouveau plan d'urbanisme et règlements",
+    })).toMatchObject({ residentiel: "indetermine" });
+    expect(classifyBPrime({
+      label: "Changement d'usage industriel → résidentiel",
+      description: "Conversion d'un bâtiment à usage résidentiel",
+    })).toMatchObject({ residentiel: "oui" });
+    // Typographic apostrophe U+2019
+    expect(classifyBPrime({
+      label: "Plan d’urbanisme modifié",
+    })).toMatchObject({ residentiel: "indetermine" });
   });
 });

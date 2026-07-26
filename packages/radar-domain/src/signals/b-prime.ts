@@ -37,7 +37,7 @@ const RESIDENTIAL_CATEGORIES = new Set([
 const COMMERCIAL_OR_INDUSTRIAL_CATEGORIES = new Set([
   "commercial", "commerce", "commerces", "industriel", "industrie",
 ]);
-const RESIDENTIAL = /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement|multi-logement|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densification|duplex|triplex|quadruplex|plex|condominium|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte)\b/;
+const RESIDENTIAL = /\b(?:residentiel(?:le)?s?|habitations?|logements?|multilogements?|multi-logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densifications?|duplex|triplex|quadruplex|plex|condominiums?|maisons? de chambres|immeubles? (?:residentiels?|locatifs?|a logements)|usages? mixtes?)\b/;
 
 /**
  * Vocabulaire FRANC non-résidentiel (commercial / industriel / enseigne),
@@ -77,7 +77,7 @@ export const RESIDENTIEL_FORT_CATEGORIES: readonly string[] = [
 const RESIDENTIEL_FORT_CATEGORIES_SET = new Set(RESIDENTIEL_FORT_CATEGORIES);
 
 function fold(value: string): string {
-  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['\u2019]/g, " ");
 }
 
 function record(value: unknown): Record<string, unknown> {
