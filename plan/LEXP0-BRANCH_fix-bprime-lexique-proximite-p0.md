@@ -11,7 +11,7 @@ Correct the three defects established by the divergent double consensus while pr
 - [x] **Normalize apostrophes** — make all four production folds byte-identical for ASCII U+0027 and typographic U+2019.
 - [x] **Reorder instrumentFromSignal** — `refonte` remains before `ppcmoi`.
 - [x] **C2 plurals** — retain the nine plural residential markers.
-- [ ] **Verification** — record production trajectory, Steve 10/10, Rosemère OUT, golden A, parity, typecheck and lint.
+- [x] **Verification** — production replay 7,221 nodes / 724 cities: strict B 174 / 327; Steve 10/10; Rosemère 0/11; parity 0 across 724 × 8; golden A 9 API + 25 UI; lint 0. Repository-baseline typecheck remains blocked outside this lot (SignalPdfOverlay + immo-mcp deps).
 
 ## Allowed paths
 
