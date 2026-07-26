@@ -124,7 +124,7 @@ describe("classifyBPrime", () => {
     }
   });
 
-  it("apostrophe normalization: plan d'urbanisme and changement d'usage trigger correctly", () => {
+  it("normalizes ASCII apostrophes in decision evidence", () => {
     expect(classifyBPrime({
       label: "Adoption nouveau plan d'urbanisme et règlements",
     })).toMatchObject({ residentiel: "indetermine" });
@@ -132,9 +132,11 @@ describe("classifyBPrime", () => {
       label: "Changement d'usage industriel → résidentiel",
       description: "Conversion d'un bâtiment à usage résidentiel",
     })).toMatchObject({ residentiel: "oui" });
-    // Typographic apostrophe U+2019
+  });
+
+  it("normalizes a typographic apostrophe in commercial-to-residential evidence", () => {
     expect(classifyBPrime({
-      label: "Plan d’urbanisme modifié",
-    })).toMatchObject({ residentiel: "indetermine" });
+      label: "Changement d’usage — local commercial vers usage résidentiel",
+    })).toMatchObject({ residentiel: "oui", exclusionReason: null });
   });
 });

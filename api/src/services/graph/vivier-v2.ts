@@ -137,7 +137,7 @@ function firstNumber(records: readonly Record<string, unknown>[], keys: readonly
 }
 
 function fold(value: string): string {
-  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['']/g, " ");
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['’]/g, " ");
 }
 
 function token(value: string | null | undefined): string | null {
