@@ -305,10 +305,10 @@ function instrumentFromSignal(
   const candidate = token(explicit) ?? token(category);
   const text = fold(`${label ?? ""} ${description ?? ""}`);
   if (["rezonage", "modification_zonage", "changement_usage"].includes(candidate ?? "")) return "rezonage";
+  if (candidate === "refonte" || text.includes("refonte")) return "refonte";
   if (candidate === "ppcmoi" || text.includes("ppcmoi") || text.includes("projet particulier")) return "ppcmoi";
   if (candidate === "piia" || text.includes("piia")) return "piia";
   if (candidate === "derogation" || candidate === "derogation_mineure" || text.includes("derogation")) return "derogation";
-  if (candidate === "refonte" || text.includes("refonte")) return "refonte";
   if (candidate === "plan_urbanisme" || text.includes("plan d urbanisme")) return "plan_urbanisme";
   return "autre";
 }

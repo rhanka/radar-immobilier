@@ -59,6 +59,32 @@ describe("GUARD — axis r MUST NOT branch on completeReform (C1 kills recall: 1
   });
 });
 
+describe("instrumentFromSignal — refonte tested BEFORE ppcmoi", () => {
+  it("Sutton refonte event: description mentions PPCMOI but label says refonte → instrument=refonte", () => {
+    const classification = classifyVivierSignal({
+      id: "event-sutton-refonte-reglementaire-2026-05-27",
+      type: "DesignationEvent",
+      category: null,
+      label: "Refonte réglementaire complète — Sutton (séance extraordinaire 27 mai 2026)",
+      description: "Adoption 1ers projets règlements 358 (zonage), 359 (lotissement), 360 (construction), 361 (permis et certificats), 362 (PPCMOI), 363 (permis). Consultation publique 25 juin 2026.",
+      etape: "projet_reglement",
+    });
+    expect(classification.instrument).toBe("refonte");
+  });
+
+  it("a pure PPCMOI without refonte still gets instrument=ppcmoi", () => {
+    const classification = classifyVivierSignal({
+      id: "ppcmoi-pure",
+      type: "Signal",
+      category: "ppcmoi",
+      label: "PPCMOI — 12 logements",
+      description: "Projet particulier de construction",
+      etape: "avis_motion",
+    });
+    expect(classification.instrument).toBe("ppcmoi");
+  });
+});
+
 describe("server vivier_v2 computation", () => {
   it("reads legacy fields only from props.properties", () => {
     const input = extractLegacyZmpInput({
