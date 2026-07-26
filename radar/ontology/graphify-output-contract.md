@@ -17,6 +17,21 @@
 > enrichies, dates distinctes (`publishedAt`, `meetingDate`, `etape_date`) et
 > gates de non-régression des 33 détections prioritaires `z|m|p`. Voir §10.
 
+### Graphify 3.4 pass mapping (non-breaking)
+
+`graphify_pass: "3.4"` identifies the deterministic enrichment pass and does
+not replace the ontology line. Every output of this pass MUST retain
+`ontology_version: "2.3"`. The normative mapping is:
+
+| Enrichment pass | `ontology_version` | Enrichment source |
+|---|---|---|
+| `3.4` | **`2.3`** | existing `graph_nodes`, complete city snapshot |
+
+Pass 3.4 adds only compatible properties (`etape`, `instrument`,
+`effet_densifiant: "inconnu"`) and a companion manifest; it is not an ontology
+contract migration. `effet_densifiant` remains a placeholder until Geo's
+separate artifact is available.
+
 ---
 
 ## 1. Structure top-level du fichier `latest.json`
@@ -24,8 +39,9 @@
 ```json
 {
   "municipality":     "<slug-kebab-case>",
+  "graphify_pass":   "3.4",
   "generated_at":    "<ISO-8601>",
-  "ontology_version": "2.0",
+  "ontology_version": "2.3",
   "pv_count":        <entier>,
   "nodes":           [ ... ],
   "edges":           [ ... ]
