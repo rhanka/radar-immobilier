@@ -8,7 +8,7 @@ Correct the three defects established by the divergent double consensus while pr
 
 - [x] **Garde completeReform** — prevents axis `r` from branching on `completeReform`.
 - [x] **Remove proximity window** — restores adjacent `refonte|revision complete` matching; owner decision.
-- [ ] **Normalize apostrophes** — make all four production folds byte-identical for ASCII U+0027 and typographic U+2019.
+- [x] **Normalize apostrophes** — make all four production folds byte-identical for ASCII U+0027 and typographic U+2019.
 - [x] **Reorder instrumentFromSignal** — `refonte` remains before `ppcmoi`.
 - [x] **C2 plurals** — retain the nine plural residential markers.
 - [ ] **Verification** — record production trajectory, Steve 10/10, Rosemère OUT, golden A, parity, typecheck and lint.

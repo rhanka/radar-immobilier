@@ -8,6 +8,7 @@ import {
   type VivierSignalInput,
 } from "./vivier-v2.js";
 import { classifyResidentielPertinence } from "./graph-store.js";
+import { classifyBPrime } from "@radar/domain";
 import { PV_BELOEIL_2026_02_TEXT } from "@radar/sources";
 
 const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput => ({
@@ -96,6 +97,26 @@ describe("instrumentFromSignal — refonte tested BEFORE ppcmoi", () => {
       etape: "avis_motion",
     });
     expect(classification.instrument).toBe("ppcmoi");
+  });
+});
+
+describe("typographic apostrophe normalization", () => {
+  it("keeps B-prime and the Vivier server in agreement for a conversion", () => {
+    const label = "Changement d’usage — local commercial vers usage résidentiel";
+    const bPrime = classifyBPrime({ label });
+    const vivier = classifyVivierSignal(signal({
+      id: "apostrophe-commercial-to-residential",
+      category: "rezonage",
+      label,
+      description: null,
+      etape: "avis_motion",
+    }));
+
+    expect(bPrime).toMatchObject({ residentiel: "oui", exclusionReason: null });
+    expect(vivier).toMatchObject({
+      residentiel: { valeur: "oui" },
+      exclusion_reason: null,
+    });
   });
 });
 
