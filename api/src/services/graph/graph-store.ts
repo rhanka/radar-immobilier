@@ -1223,7 +1223,7 @@ const RESIDENTIEL_CATEGORIES_SET = new Set(RESIDENTIEL_CATEGORIES);
  * pour ne pas matcher « complexe »).
  */
 const RESIDENTIEL_MARKERS_RE =
-  /\b(?:residentiel(?:le)?s?|habitation|logement|multilogement|multi-logement|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densification|duplex|triplex|quadruplex|plex|condominium|maison de chambres|immeuble (?:residentiel|locatif|a logements)|usage mixte)\b/;
+  /\b(?:residentiel(?:le)?s?|habitations?|logements?|multilogements?|multi-logements?|multifamilial(?:e)?s?|bifamilial(?:e)?s?|trifamilial(?:e)?s?|unifamilial(?:e)?s?|plurifamilial(?:e)?s?|densifications?|duplex|triplex|quadruplex|plex|condominiums?|maisons? de chambres|immeubles? (?:residentiels?|locatifs?|a logements)|usages? mixtes?)\b/;
 
 /**
  * Marqueurs TEXTE non-résidentiels (bruit pour un développeur résidentiel). Ne
@@ -1241,12 +1241,13 @@ const RESIDENTIEL_MARKERS_RE =
 const NON_RESIDENTIEL_MARKERS_RE =
   /\b(?:industriel(?:le)?s?|parc industriel|zone industrielle|commercial(?:e)?s?|centre commercial|camping|agricole|exploitation agricole|terres? agricoles?|environnement(?:al(?:e)?)?|milieux? humides?|zone inondable|plaine inondable|inondable|conservation|bande riveraine|riveraine|eolien(?:ne)?s?|minier(?:e)?s?|carriere|graviere|sabliere|entreposage|entrepot|stationnement)\b/;
 
-/** Normalise un texte : minuscule + suppression des accents (é→e, è→e…). */
+/** Normalise un texte : minuscule + suppression des accents (é→e, è→e…) + apostrophes. */
 function foldText(raw: string): string {
   return raw
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/['']/g, " ");
 }
 
 /**
