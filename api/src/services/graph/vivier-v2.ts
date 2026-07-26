@@ -296,7 +296,12 @@ function derivedEtapes(
   ].filter((value): value is VivierEtape => values.has(value as VivierEtape));
 }
 
-function instrumentFromSignal(
+/**
+ * Single source of truth for the instrument classification used by Vivier B.
+ * The Graphify 3.4 materializer imports this exact function when persisting
+ * the classification; it must not maintain a second instrument lexicon.
+ */
+export function instrumentFromSignal(
   category: string | null,
   label: string | null,
   description: string | null,
