@@ -136,6 +136,9 @@ export const graphifyLinkSchema = z.preprocess(
  * silently ignored.
  */
 export const graphifyGraphSchema = z.object({
+  municipality: z.string().optional(),
+  ontology_version: z.enum(["2.0", "2.1", "2.2", "2.3"]).optional(),
+  graphify_pass: z.literal("3.4").optional(),
   nodes: z.array(graphifyNodeSchema),
   links: z.array(graphifyLinkSchema).optional(),
   edges: z.array(graphifyLinkSchema).optional(),
@@ -389,6 +392,61 @@ export function countCompleteSignals(
   return count;
 }
 
+export interface BusinessPropertyRegression {
+  citySlug: string;
+  nodeId: string;
+  missingKeys: string[];
+}
+
+type BusinessPropertySnapshotRow = {
+  id: string;
+  props: Record<string, unknown>;
+};
+
+function businessProperties(props: Record<string, unknown>): Record<string, unknown> {
+  const nested = props.properties;
+  return typeof nested === "object" && nested !== null && !Array.isArray(nested)
+    ? nested as Record<string, unknown>
+    : {};
+}
+
+function hasBusinessProperty(properties: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(properties, key) &&
+    properties[key] !== null && properties[key] !== undefined;
+}
+
+/**
+ * Find business keys present on the current city snapshot but absent from the
+ * candidate snapshot, one node at a time. All keys under `props.properties`
+ * are protected: this deliberately does not maintain a lossy allow-list.
+ *
+ * A missing node is treated as an empty property map, so a complete snapshot
+ * cannot silently delete a business-bearing node. Values `false`, `0`, empty
+ * strings, and empty arrays remain present; only an absent/null/undefined key
+ * is a regression.
+ */
+export function findMissingBusinessProperties(
+  beforeRows: readonly BusinessPropertySnapshotRow[],
+  afterRows: readonly BusinessPropertySnapshotRow[],
+  citySlug: string,
+): BusinessPropertyRegression[] {
+  const afterById = new Map(afterRows.map((row) => [row.id, row]));
+  const regressions: BusinessPropertyRegression[] = [];
+
+  for (const beforeRow of beforeRows) {
+    const before = businessProperties(beforeRow.props);
+    const after = businessProperties(afterById.get(beforeRow.id)?.props ?? {});
+    const missingKeys = Object.keys(before)
+      .filter((key) => hasBusinessProperty(before, key) && !hasBusinessProperty(after, key))
+      .sort();
+    if (missingKeys.length > 0) {
+      regressions.push({ citySlug, nodeId: beforeRow.id, missingKeys });
+    }
+  }
+
+  return regressions;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Service
 // ─────────────────────────────────────────────────────────────────────────────
@@ -505,7 +563,10 @@ export interface UpsertAtomicResult {
  *   2. SUPPRESSION des nœuds de cette `city_slug` ABSENTS du nouveau graphe ;
  *   3. SUPPRESSION des arêtes devenues pendantes (référençant un nœud qu'on vient
  *      de supprimer) et qui ne sont pas dans le nouveau graphe ;
- *   4. GATE DE COMPLÉTUDE : si le nombre de signaux « complets » (Signal/
+ *   4. GATE DE PROPRIÉTÉS MÉTIER : si une clé existante sous
+ *      `props.properties` disparaît pour un nœud, la ville est refusée avant
+ *      toute écriture ;
+ *   5. GATE DE COMPLÉTUDE : si le nombre de signaux « complets » (Signal/
  *      DesignationEvent avec ref citation+rawRef) APRÈS < AVANT, la transaction
  *      est ABORTÉE (rollback). On n'écrase JAMAIS une citation/rawRef présente
  *      par du vide ; en cas de régression on aborte la ville (le plus sûr).
@@ -558,14 +619,9 @@ export async function upsertGraphAtomic(
   // Compte des signaux complets AVANT projection (état PG actuel de la ville),
   // mesuré hors-transaction pour servir de référence au gate de non-régression.
   const beforeRows = await db
-    .select({ type: graphNodes.type, props: graphNodes.props })
+    .select({ id: graphNodes.id, type: graphNodes.type, props: graphNodes.props })
     .from(graphNodes)
-    .where(
-      and(
-        eq(graphNodes.citySlug, citySlug),
-        inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
-      ),
-    );
+    .where(eq(graphNodes.citySlug, citySlug));
   const completeBefore = countCompleteSignals(
     beforeRows.map((r) => ({
       type: r.type,
@@ -573,6 +629,24 @@ export async function upsertGraphAtomic(
     })),
     { ignoreProvisional: true },
   );
+
+  const propertyRegressions = findMissingBusinessProperties(
+    beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
+    nodeRows,
+    citySlug,
+  );
+  if (propertyRegressions.length > 0) {
+    const details = propertyRegressions
+      .map(({ nodeId, missingKeys }) => `${nodeId}: ${missingKeys.join(", ")}`)
+      .join("; ");
+    return {
+      ...result,
+      aborted: true,
+      reason:
+        `business-property regression for ${citySlug}: ` +
+        `existing keys would disappear (${details}); projection refused`,
+    };
+  }
 
   try {
     await db.transaction(async (tx) => {
