@@ -1247,7 +1247,7 @@ function foldText(raw: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
-    .replace(/['']/g, " ");
+    .replace(/['’]/g, " ");
 }
 
 /**

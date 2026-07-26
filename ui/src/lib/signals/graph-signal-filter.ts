@@ -72,7 +72,7 @@ const NON_RESIDENTIEL_MARKERS_RE =
   /\b(?:industriel(?:le)?s?|parc industriel|zone industrielle|commercial(?:e)?s?|centre commercial|camping|agricole|exploitation agricole|terres? agricoles?|environnement(?:al(?:e)?)?|milieux? humides?|zone inondable|plaine inondable|inondable|conservation|bande riveraine|riveraine|eolien(?:ne)?s?|minier(?:e)?s?|carriere|graviere|sabliere|entreposage|entrepot|stationnement)\b/;
 
 function foldText(raw: string): string {
-  return raw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['']/g, " ");
+  return raw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['’]/g, " ");
 }
 
 /**

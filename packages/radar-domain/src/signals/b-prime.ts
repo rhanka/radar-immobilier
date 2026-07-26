@@ -77,7 +77,7 @@ export const RESIDENTIEL_FORT_CATEGORIES: readonly string[] = [
 const RESIDENTIEL_FORT_CATEGORIES_SET = new Set(RESIDENTIEL_FORT_CATEGORIES);
 
 function fold(value: string): string {
-  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['\u2019]/g, " ");
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/['’]/g, " ");
 }
 
 function record(value: unknown): Record<string, unknown> {
