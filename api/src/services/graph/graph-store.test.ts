@@ -19,6 +19,7 @@ import {
   graphifyGraphSchema,
   upsertGraph,
   upsertGraphAtomic,
+  findMissingBusinessProperties,
   countCompleteSignals,
   isCompleteSignalProps,
   queryNeighbors,
@@ -109,6 +110,86 @@ describe("buildNodeRow", () => {
     const row = buildNodeRow(node, null);
     expect(row.type).toBe("concept");
     expect(row.citySlug).toBeNull();
+  });
+});
+
+describe("business-property preservation gate", () => {
+  const sutton39Keys = [
+    "code_zone",
+    "usage_permis",
+    "densite_max",
+    "hauteur_max",
+    "lotissement",
+    "frontage_min",
+    "profondeur_min",
+    "superficie_min",
+    "marges",
+    "reglement_url",
+    "reglement_numero",
+    "normes_pliees",
+    "usage_dominant",
+    "effet_densifiant",
+    "categorie_zone",
+    "classe_zone",
+    "affectation",
+    "sous_affectation",
+    "densite_min",
+    "unites_max",
+    "unites_min",
+    "etages_max",
+    "etages_min",
+    "stationnement_min",
+    "stationnement_max",
+    "emprise_max",
+    "verdissement_min",
+    "marge_avant",
+    "marge_arriere",
+    "marge_laterale",
+    "aire_verte",
+    "lotissement_permis",
+    "notes",
+    "source",
+    "source_url",
+    "snapshot",
+    "feature_id",
+    "municipalite",
+    "version",
+  ];
+  const baseline = {
+    id: "qc-zonage-saint-gervais:zone:1",
+    props: { properties: Object.fromEntries(sutton39Keys.map((key) => [key, `${key}-value`])) },
+  };
+  const reAcquired = {
+    id: baseline.id,
+    props: { properties: Object.fromEntries(sutton39Keys.slice(0, 9).map((key) => [key, `${key}-value`])) },
+  };
+
+  it("rejects the exact 39-property to 9-property regression", () => {
+    const missing = findMissingBusinessProperties([baseline], [reAcquired], "saint-gervais");
+
+    expect(Object.keys(baseline.props.properties)).toHaveLength(39);
+    expect(Object.keys(reAcquired.props.properties)).toHaveLength(9);
+    expect(missing).toEqual([
+      {
+        citySlug: "saint-gervais",
+        nodeId: baseline.id,
+        missingKeys: sutton39Keys.slice(9).sort(),
+      },
+    ]);
+    expect(missing[0]?.missingKeys).toEqual(expect.arrayContaining([
+      "reglement_url",
+      "reglement_numero",
+      "normes_pliees",
+      "usage_dominant",
+      "effet_densifiant",
+    ]));
+  });
+
+  it("allows additions and preserves keys whose values are false or zero", () => {
+    const before = [{ id: "signal:1", props: { properties: { keep: false, count: 0 } } }];
+    const after = [{ id: "signal:1", props: { properties: { keep: false, count: 0, added: "yes" } } }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
   });
 });
 
@@ -951,11 +1032,10 @@ describe("isMulti4Plus — dimension 4+ détection", () => {
 // 2. DB-bound tests — skipped when no POSTGRES_HOST env var
 // ─────────────────────────────────────────────────────────────────────────────
 
-// DB-bound tests only run when the orchestrator sets GRAPH_DB_TESTS=1, which
-// it does when Postgres is confirmed reachable (ENV=test-graphdb full stack).
-// This avoids false-positives when POSTGRES_HOST is set in container env but
-// the postgres service is not actually started (--no-deps mode).
-const DB_AVAILABLE = process.env.GRAPH_DB_TESTS === "1";
+// The explicit flag remains available for targeted integration runs. The
+// Make-driven test stack already starts Postgres and sets NODE_ENV=test, so
+// enable the DB tier there instead of silently skipping the atomic gate proof.
+const DB_AVAILABLE = process.env.GRAPH_DB_TESTS === "1" || process.env.NODE_ENV === "test";
 
 describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraph (integration)", () => {
   // These tests require a live Postgres with the graph_store migration applied.
@@ -1139,6 +1219,50 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraphAtomic (atomique + gate)", 
     expect(Array.isArray(props.refs)).toBe(true);
     expect(props.refs).toHaveLength(1);
     expect(isCompleteSignalProps(props)).toBe(true); // toujours complet
+
+    await cleanCity(db, city);
+  });
+
+  it("(c) exact 39→9 business-property regression → projection refused", async () => {
+    const db = await getDb();
+    const city = "__test_atomic_business_properties__";
+    await cleanCity(db, city);
+
+    const businessKeys = [
+      "code_zone", "usage_permis", "densite_max", "hauteur_max", "lotissement",
+      "frontage_min", "profondeur_min", "superficie_min", "marges", "reglement_url",
+      "reglement_numero", "normes_pliees", "usage_dominant", "effet_densifiant",
+      "categorie_zone", "classe_zone", "affectation", "sous_affectation", "densite_min",
+      "unites_max", "unites_min", "etages_max", "etages_min", "stationnement_min",
+      "stationnement_max", "emprise_max", "verdissement_min", "marge_avant", "marge_arriere",
+      "marge_laterale", "aire_verte", "lotissement_permis", "notes", "source", "source_url",
+      "snapshot", "feature_id", "municipalite", "version",
+    ];
+    const baselineProperties = Object.fromEntries(
+      businessKeys.map((key) => [key, `${key}-value`]),
+    );
+    const reducedProperties = Object.fromEntries(
+      businessKeys.slice(0, 9).map((key) => [key, `${key}-value`]),
+    );
+    const nodeId = `${city}:zone:1`;
+
+    const first = await upsertGraphAtomic(db, city, {
+      nodes: [{ id: nodeId, type: "Signal", label: "Zone", properties: baselineProperties }],
+    });
+    expect(first.aborted).toBe(false);
+
+    const reduced = await upsertGraphAtomic(db, city, {
+      nodes: [{ id: nodeId, type: "Signal", label: "Zone", properties: reducedProperties }],
+    });
+    expect(reduced.aborted).toBe(true);
+    expect(reduced.reason).toContain("business-property regression");
+    expect(reduced.reason).toContain("reglement_url");
+
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+    const [persisted] = await db.select().from(graphNodes).where(eq(graphNodes.id, nodeId));
+    const persistedProperties = ((persisted?.props ?? {}) as Record<string, unknown>).properties;
+    expect(Object.keys((persistedProperties ?? {}) as Record<string, unknown>)).toHaveLength(39);
 
     await cleanCity(db, city);
   });
