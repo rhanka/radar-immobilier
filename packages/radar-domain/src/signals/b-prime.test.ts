@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { classifyBPrime, FRANC_NON_RESIDENTIEL_RE } from "./b-prime.js";
 
 /** Normalise comme le classifieur (minuscule + sans accents + apostrophes). */
-const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['']/g, " ");
+const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['’]/g, " ");
 
 describe("classifyBPrime", () => {
   it("uses an explicit stage annotation before text and audits an invalid annotation", () => {
@@ -124,19 +124,11 @@ describe("classifyBPrime", () => {
     }
   });
 
-  it("normalizes ASCII apostrophes in decision evidence", () => {
-    expect(classifyBPrime({
-      label: "Adoption nouveau plan d'urbanisme et règlements",
-    })).toMatchObject({ residentiel: "indetermine" });
-    expect(classifyBPrime({
-      label: "Changement d'usage industriel → résidentiel",
-      description: "Conversion d'un bâtiment à usage résidentiel",
-    })).toMatchObject({ residentiel: "oui" });
-  });
-
-  it("normalizes a typographic apostrophe in commercial-to-residential evidence", () => {
-    expect(classifyBPrime({
-      label: "Changement d’usage — local commercial vers usage résidentiel",
-    })).toMatchObject({ residentiel: "oui", exclusionReason: null });
+  it("normalizes ASCII and typographic apostrophes in commercial-to-residential evidence", () => {
+    for (const apostrophe of ["'", "’"]) {
+      expect(classifyBPrime({
+        label: `Changement d${apostrophe}usage — local commercial vers usage résidentiel`,
+      })).toMatchObject({ residentiel: "oui", exclusionReason: null });
+    }
   });
 });

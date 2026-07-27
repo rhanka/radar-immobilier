@@ -74,7 +74,7 @@ describe("GUARD — axis r MUST NOT branch on completeReform (C1 kills recall: 1
   });
 });
 
-describe("instrumentFromSignal — refonte tested BEFORE ppcmoi", () => {
+describe("instrumentFromSignal — regulatory refonte tested BEFORE ppcmoi", () => {
   it("Sutton refonte event: description mentions PPCMOI but label says refonte → instrument=refonte", () => {
     const classification = classifyVivierSignal({
       id: "event-sutton-refonte-reglementaire-2026-05-27",
@@ -87,6 +87,18 @@ describe("instrumentFromSignal — refonte tested BEFORE ppcmoi", () => {
     expect(classification.instrument).toBe("refonte");
   });
 
+  it("Terrasse-Vaudreuil PIIA: architectural refonte remains a PIIA", () => {
+    const classification = classifyVivierSignal({
+      id: "signal-terrasse-vaudreuil-piia-43-5e-avenue",
+      type: "Signal",
+      category: "piia",
+      label: "PIIA — rénovation majeure et refonte architecturale",
+      description: null,
+      etape: "avis_motion",
+    });
+    expect(classification).toMatchObject({ instrument: "piia", etape: "inconnu" });
+  });
+
   it("a pure PPCMOI without refonte still gets instrument=ppcmoi", () => {
     const classification = classifyVivierSignal({
       id: "ppcmoi-pure",
@@ -97,6 +109,18 @@ describe("instrumentFromSignal — refonte tested BEFORE ppcmoi", () => {
       etape: "avis_motion",
     });
     expect(classification.instrument).toBe("ppcmoi");
+  });
+
+  it("classifies the real Amos plan d'urbanisme mention after apostrophe folding", () => {
+    const classification = classifyVivierSignal({
+      id: "amos-va1-81-plan-urbanisme",
+      type: "Signal",
+      category: null,
+      label: "Modification zonage parc industriel J.-E.-Therrien — Adoption VA1-81 (plan d'urbanisme) et VA1-82 (zonage)",
+      description: null,
+      etape: "adoption",
+    });
+    expect(classification.instrument).toBe("plan_urbanisme");
   });
 });
 

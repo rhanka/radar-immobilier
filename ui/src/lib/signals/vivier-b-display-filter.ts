@@ -38,10 +38,10 @@ export const DEFAULT_VIVIER_B_EXCLUSIONS: VivierBExclusions = {
  * plex) réellement cités.
  */
 const LOGEMENTS_CITES_RE =
-  /\b(?:logements?|multilogements?|multi-logements?|unites? d(?:e |')habitation|(?:du|tri|quadru|multi)plex|\bplex\b)\b/;
+  /\b(?:logements?|multilogements?|multi-logements?|unites? d(?:e\s+|\s+)habitation|(?:du|tri|quadru|multi)plex|\bplex\b)\b/;
 
 function foldText(raw: string): string {
-  return raw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return raw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/['’]/g, " ");
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

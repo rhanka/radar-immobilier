@@ -98,6 +98,15 @@ describe("vivier B — exclusions d'affichage", () => {
     expect(isHiddenByVivierBExclusions(BEDFORD_PIIA, DEFAULT_VIVIER_B_EXCLUSIONS)).toBe(false);
   });
 
+  it("recognizes cited housing units with ASCII and typographic apostrophes", () => {
+    for (const apostrophe of ["'", "’"]) {
+      const piia = node(`piia-unites-${apostrophe.codePointAt(0)}`, "piia", { category: "piia" });
+      piia.label = `PIIA — projet de 12 unités d${apostrophe}habitation`;
+      expect(hasResidentialProjectProof(piia)).toBe(true);
+      expect(isHiddenByVivierBExclusions(piia, DEFAULT_VIVIER_B_EXCLUSIONS)).toBe(false);
+    }
+  });
+
   it("badge « PIIA lié » uniquement sur un PIIA à preuve, jamais sur un rezonage", () => {
     expect(isPiiaLie(AUSTIN_PIIA)).toBe(true);
     expect(isPiiaLie(BEDFORD_PIIA)).toBe(true);
