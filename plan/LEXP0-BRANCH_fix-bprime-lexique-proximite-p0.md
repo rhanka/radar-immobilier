@@ -11,7 +11,10 @@ Correct the three defects established by the divergent double consensus while pr
 - [x] **Normalize apostrophes** — make all four production folds byte-identical for ASCII U+0027 and typographic U+2019.
 - [x] **Reorder instrumentFromSignal** — `refonte` remains before `ppcmoi`.
 - [x] **C2 plurals** — retain the nine plural residential markers.
-- [x] **Verification** — production replay 7,221 nodes / 724 cities: strict B 174 / 327; Steve 10/10; Rosemère 0/11; parity 0 across 724 × 8; golden A 9 API + 25 UI; lint 0. Repository-baseline typecheck remains blocked outside this lot (SignalPdfOverlay + immo-mcp deps).
+- [x] **Re-review correction #2** — text-only `refonte` is limited to regulatory/zoning reforms; the Terrasse-Vaudreuil PIIA remains `piia`, while Sutton remains `refonte`. The fifth UI fold and the sixth municipal-name fold normalize ASCII U+0027 and U+2019.
+- [x] **Apostrophe normalization impact accepted** — the production replay measured 50 `autre` → `plan_urbanisme` reclassifications; strict B remains 174 / 327. Cards change from “Instrument à préciser” to “Plan d'urbanisme” and their instrument sort key moves from 6 to 5, so they can rise only after the preceding ranking keys are tied.
+- [x] **Clean static gates** — `make install`, `make typecheck` (0 errors, 7 pre-existing Svelte warnings), and `make lint` exit 0 on `ENV=test-lexfix2` with dedicated ports.
+- [ ] **Stack and production replay** — rerun the API regressions, 724 × 8 parity, named corpus invariants, and the production trajectory in a serial clean stack.
 
 ## Allowed paths
 
@@ -24,6 +27,9 @@ Correct the three defects established by the divergent double consensus while pr
 - `api/src/services/graph/bprime-recette.fixture.ts` (si besoin)
 - `ui/src/lib/signals/graph-signal-filter.ts`
 - `ui/src/lib/signals/graph-signal-filter.test.ts`
+- `ui/src/lib/signals/vivier-b-display-filter.ts` (LEXP0-EX1: closes the fifth apostrophe fold; UI display-only impact; rollback is the two-file local diff)
+- `ui/src/lib/signals/vivier-b-display-filter.test.ts` (LEXP0-EX1: paired ASCII/U+2019 regression proof for the display fold)
+- `radar/data-prep/fetch-municipal-polygons.ts` (LEXP0-EX2: closes the repository scan's sixth apostrophe fold; municipal-slug normalization only; rollback is the one-line local diff)
 - `plan/LEXP0-BRANCH_fix-bprime-lexique-proximite-p0.md`
 
 ## Forbidden paths (INTOUCHABLES)

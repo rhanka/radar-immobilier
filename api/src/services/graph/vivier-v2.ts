@@ -296,6 +296,9 @@ function derivedEtapes(
   ].filter((value): value is VivierEtape => values.has(value as VivierEtape));
 }
 
+const REGULATORY_REFORM_RE =
+  /\brefonte\s+(?:reglementaire\b|(?:complete|totale?)\s+(?:du\s+)?(?:reglement|zonage)\b|(?:du|de la|de)\s+(?:reglementation|reglement|zonage)\b)/;
+
 function instrumentFromSignal(
   category: string | null,
   label: string | null,
@@ -305,7 +308,7 @@ function instrumentFromSignal(
   const candidate = token(explicit) ?? token(category);
   const text = fold(`${label ?? ""} ${description ?? ""}`);
   if (["rezonage", "modification_zonage", "changement_usage"].includes(candidate ?? "")) return "rezonage";
-  if (candidate === "refonte" || text.includes("refonte")) return "refonte";
+  if (candidate === "refonte" || REGULATORY_REFORM_RE.test(text)) return "refonte";
   if (candidate === "ppcmoi" || text.includes("ppcmoi") || text.includes("projet particulier")) return "ppcmoi";
   if (candidate === "piia" || text.includes("piia")) return "piia";
   if (candidate === "derogation" || candidate === "derogation_mineure" || text.includes("derogation")) return "derogation";
