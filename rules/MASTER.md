@@ -135,6 +135,7 @@ human baseline (e.g. a manual ChatGPT run) — for the demo or anywhere else.
 - `rules/security.md` — secrets, SAST, container scanning, vulnerability register.
 - `rules/sources.md` — radar-specific scraping etiquette and source adapter contract.
 - `rules/scoring.md` — radar-specific scoring transparency.
+- `rules/geo-immo-boundary.md` — geo/immo authority boundary, cross-project contract, withdrawal and cache rules.
 
 ## WARNING — Most-Violated Rules (review before any change)
 - VERIFY BRANCH before any work: `git branch --show-current` should NOT be `main`.
