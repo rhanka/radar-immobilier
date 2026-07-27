@@ -94,9 +94,44 @@ describe("instrumentFromSignal — regulatory refonte tested BEFORE ppcmoi", () 
       category: "piia",
       label: "PIIA — rénovation majeure et refonte architecturale",
       description: null,
-      etape: "avis_motion",
+      etape: "piia",
     });
     expect(classification).toMatchObject({ instrument: "piia", etape: "inconnu" });
+  });
+
+  it("retains the 15 regulatory refontes lost by the positive wording gate", () => {
+    const corpusReforms = [
+      ["event-brome-refonte-reglements-2026", "Introduction de normes dans la refonte des règlements"],
+      ["event-chibougamau-520-05", "Projet 520-05 - Refonte des plans et règlement d'urbanisme"],
+      ["event-chute-saint-philippe-refonte-reglementation-2026-04-13", "refonte réglementation urbanisme Chute-Saint-Philippe"],
+      ["event-dupuy-adoption-plan-urbanisme-2025-05-20", "Adoption refonte complète urbanisme Dupuy — Plan + 4 règlements"],
+      ["event-godbout-nouvreglementation-urbanisme-2025-06", "Refonte réglementation urbanisme — Godbout"],
+      ["event-gore-intention-rezonage-lots-5080562-5082612", "refonte règlements urbanisme Gore"],
+      ["event-gracefield-refonte-reglements-urb-2026-05-12", "Refonte complète règlements d'urbanisme Gracefield"],
+      ["event-ham-sud-refonte-reglementation-2026-01", "Refonte complète réglementation urbanisme Ham-Sud"],
+      ["event-hatley-refonte-urbanisme-sadd-2026", "Refonte complète outils planification/réglementation d'urbanisme"],
+      ["event-piedmont-adoption-reglements-urbanisme-2026-05-04", "Adoption complète refonte réglementation urbanistique"],
+      ["event-saint-jean-de-matha-zonage-604-adoption-2026-01-14", "refonte plan et règlements d'urbanisme Saint-Jean-de-Matha"],
+      ["event-saint-raphael-refonte-zonage-2026-244", "Refonte complète règlements d'urbanisme — premier projet zonage"],
+      ["event-vaudreuil-sur-le-lac-concordance-sadr3-2026", "Refonte plan d'urbanisme et des règlements d'urbanisme"],
+      ["signal-saint-polycarpe-refonte-zonage", "refonte complète réglementation d'urbanisme"],
+      ["signal-saint-sixte-refonte-urbanisme-fo2fo3", "refonte réglementation zones Fo-2/Fo-3 et milieu villageois"],
+    ] as const;
+
+    for (const [id, label] of corpusReforms) {
+      expect(classifyVivierSignal({ id, type: "DesignationEvent", label }).instrument, id).toBe("refonte");
+    }
+  });
+
+  it("excludes the other non-regulatory refonte found in the corpus", () => {
+    const classification = classifyVivierSignal({
+      id: "signal-lac-frontiere-services-souterrains-route-204",
+      type: "Signal",
+      label: "Refonte des services souterrains sous la route 204",
+      description: "Refonte des services souterrains sous la route 204",
+      etape: "avis_motion",
+    });
+    expect(classification.instrument).toBe("autre");
   });
 
   it("a pure PPCMOI without refonte still gets instrument=ppcmoi", () => {

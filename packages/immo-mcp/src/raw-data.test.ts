@@ -44,6 +44,11 @@ describe("raw-data helpers", () => {
     expect(citySlug("Trois-Rivières")).toBe("trois-rivieres");
   });
 
+  it("citySlug folds ASCII and typographic apostrophes to the same slug", () => {
+    expect(citySlug("L'Ange-Gardien")).toBe("lange-gardien");
+    expect(citySlug("L’Ange-Gardien")).toBe("lange-gardien");
+  });
+
   it("normalizeZoneCode mirrors the api normalisation", () => {
     expect(normalizeZoneCode("h-203")).toBe("H-203");
     expect(normalizeZoneCode("H – 203")).toBe("H-203");
