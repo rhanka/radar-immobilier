@@ -117,7 +117,7 @@ function normalizeName(name: string): string {
   const noAccents = [...nfd]
     .filter((c) => !/\p{M}/u.test(c))
     .join("");
-  const noApostrophe = noAccents.replace(/['']/g, "");
+  const noApostrophe = noAccents.replace(/['’]/g, "");
   const lower = noApostrophe.toLowerCase();
   return lower.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
