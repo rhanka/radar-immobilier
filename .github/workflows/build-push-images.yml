@@ -41,6 +41,28 @@ name: Build & push images
 # just-pinned sha back to `:latest`; applying it BEFORE means the following
 # set-image step is always the last word on which image tag actually runs.
 #
+# PRE-FLIGHT / TARGET CLUSTER (2026-07-28): the live tenant moved from Scaleway
+# Kapsule to OVH MKS (BHS5). The Scaleway node pool that hosted it HAS BEEN
+# DELETED, so there is no rollback target left there. The `deploy` job now runs
+# a BLOCKING pre-flight before the first mutating kubectl: it extracts the
+# apiserver HOST from the kubeconfig (`kubectl config view` without --raw, which
+# redacts credentials) and refuses to deploy unless it equals the expected host.
+# The check is POSITIVE (it requires the expected cluster; it does not blacklist
+# known-bad ones) — anything unforeseen is refused by construction.
+#
+# Expected host comes from the NON-SECRET repo variable
+# `EXPECTED_KUBE_APISERVER_HOST`:
+#   gh variable set EXPECTED_KUBE_APISERVER_HOST --body 'hlhedx.c1.bhs5.k8s.ovh.net'
+# If the variable is unset the job falls back to the OVH host hardcoded in the
+# step and emits a ::warning — so the guard is active by default and never
+# silently disabled. A cluster rebuild = update the variable (no code change).
+#
+# Why this exists: `KUBE_CONFIG_DATA` has not been rotated since 2026-06-22,
+# five weeks BEFORE the OVH cluster existed for this tenant, and a wrong-cluster
+# deploy is not necessarily loud — if the stale namespace still holds
+# Deployments scaled to 0, `kubectl set image` + `rollout status` both SUCCEED
+# instantly and the pipeline goes green while production is untouched.
+#
 # To roll back or deploy by hand, the same commands still work with a full
 # kubeconfig:
 #   kubectl -n radar-immobilier apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
@@ -239,8 +261,41 @@ jobs:
             printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
           fi
           chmod 600 "$HOME/.kube/config"
-          # Scoped SA can read deployments in this namespace; fail fast if not.
-          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui >/dev/null
+
+      # PRE-FLIGHT (2026-07-28) — see "PRE-FLIGHT / TARGET CLUSTER" in the file
+      # header. Blocking, POSITIVE check: it must run BEFORE the first mutating
+      # kubectl (apply / set image / rollout) so a wrong-cluster kubeconfig
+      # changes nothing at all. It is also the connectivity gate that used to
+      # live at the end of "Configure kubeconfig" (`get deploy radar-api
+      # radar-ui`) — moved here so the cluster IDENTITY is asserted before we
+      # talk to it.
+      - name: Pre-flight — assert target cluster
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-}"
+          if [ -z "$expected" ]; then
+            expected="$DEFAULT_HOST"
+            echo "::warning title=Pre-flight using built-in default::repo variable EXPECTED_KUBE_APISERVER_HOST is unset — falling back to ${DEFAULT_HOST}. Set it with: gh variable set EXPECTED_KUBE_APISERVER_HOST --body '<apiserver-host>'"
+          fi
+          # `kubectl config view` WITHOUT --raw redacts credentials
+          # (client-certificate-data, token, …). We read ONLY the host of the
+          # `server:` field — a cluster identifier, never a credential. The
+          # kubeconfig itself is never printed, echoed or uploaded.
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — deploy refused::kubeconfig targets '${host:-<none>}' but this repo deploys to '${expected}'. Nothing was applied. Rotate the KUBE_CONFIG_DATA secret (or fix the EXPECTED_KUBE_APISERVER_HOST repo variable) before retrying."
+            exit 1
+          fi
+          # Positive liveness proof ON the expected cluster: the two live-path
+          # Deployments must exist and be readable by the scoped SA.
+          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
 
       - name: Apply immo-mcp declarative config
         # MUST run before "Roll deployments to pushed sha": see the file header
