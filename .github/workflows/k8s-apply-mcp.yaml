@@ -47,7 +47,34 @@ jobs:
           mkdir -p "$HOME/.kube"
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
-          kubectl -n "$NAMESPACE" get deploy radar-api >/dev/null
+
+      # Same blocking pre-flight as build-push-images.yml (see its header,
+      # section "PRE-FLIGHT / TARGET CLUSTER"): this workflow mutates the live
+      # cluster with the SAME KUBE_CONFIG_DATA secret, so it needs the same
+      # guarantee. Runs BEFORE any apply/rollout.
+      - name: Pre-flight — assert target cluster
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-}"
+          if [ -z "$expected" ]; then
+            expected="$DEFAULT_HOST"
+            echo "::warning title=Pre-flight using built-in default::repo variable EXPECTED_KUBE_APISERVER_HOST is unset — falling back to ${DEFAULT_HOST}."
+          fi
+          # `kubectl config view` without --raw redacts credentials; only the
+          # apiserver host (a cluster identifier) is read and printed.
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — apply refused::kubeconfig targets '${host:-<none>}' but this repo deploys to '${expected}'. Nothing was applied."
+            exit 1
+          fi
+          kubectl -n "$NAMESPACE" get deploy radar-api -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
 
       - name: Apply immo-mcp manifests
         run: |
