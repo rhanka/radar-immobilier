@@ -352,12 +352,29 @@ const REFORM_URBAN_OBJECT =
  * d'urbanisme. C'est la borne que le lexique précédent n'avait pas.
  */
 const REFORM_GENERIC_OBJECT = "(?:reglementations?|reglements?|plans?)";
-/** « d'urbanisme », « de zonage », « de lotissement », « de construction ». */
-const REFORM_URBAN_QUALIFIER =
-  `\\s*(?:de\\s+|d${REFORM_APOSTROPHE}\\s*)${REFORM_URBAN_OBJECT}\\b`;
+/**
+ * Termes d'urbanisme admis comme QUALIFIANT d'un objet générique. Plus large
+ * que `REFORM_URBAN_OBJECT` d'un cran : « zone » qualifie (« réglementation
+ * zones Fo-2/Fo-3 ») sans porter seule la refonte — « refonte de la zone de
+ * collecte » n'est pas une refonte d'urbanisme.
+ */
+const REFORM_URBAN_QUALIFIER_TERM = `(?:${REFORM_URBAN_OBJECT}|zones?)`;
 /** Déterminants et prépositions admis devant un objet. */
 const REFORM_DETERMINER =
   `(?:de\\s+la\\s+|de\\s+l${REFORM_APOSTROPHE}\\s*|d${REFORM_APOSTROPHE}\\s*|du\\s+|des\\s+|de\\s+|aux?\\s+|les?\\s+|la\\s+)?`;
+/**
+ * « d'urbanisme », « de zonage », « de lotissement », « de construction » — et
+ * la même chose EN APPOSITION NUE, sans préposition : les PV écrivent « refonte
+ * réglementation urbanisme » (chute-saint-philippe) et « refonte réglementation
+ * zones » (saint-sixte) aussi bien que « refonte du règlement de zonage ».
+ *
+ * Le déterminant est optionnel, mais le TERME D'URBANISME reste obligatoire :
+ * c'est lui qui qualifie, jamais l'absence de préposition. « refonte
+ * réglementation animaux », « refonte règlement taxation », « refonte règlements
+ * municipaux » restent donc dehors, en apposition comme ailleurs.
+ */
+const REFORM_URBAN_QUALIFIER =
+  `\\s+${REFORM_DETERMINER}${REFORM_URBAN_QUALIFIER_TERM}\\b`;
 /** La coordination des PV : « et », « ou », « / », « , ». */
 const REFORM_CONJUNCTION = "(?:\\s*[,/]\\s*|\\s+(?:et|ou)\\s+)";
 const REFORM_ITEM_ANY = `${REFORM_DETERMINER}(?:${REFORM_URBAN_OBJECT}|${REFORM_GENERIC_OBJECT})`;
@@ -406,6 +423,19 @@ const REGULATORY_REFORM_TAIL_RE = new RegExp(
     ")",
 );
 const REFORM_OCCURRENCE_RE = /\brefontes?\b/g;
+/**
+ * Catégories structurées qui SONT une refonte. La base porte trois tokens
+ * distincts — `refonte`, `refonte_reglementation`,
+ * `refonte_reglementation_urbanisme` — et une égalité stricte à `refonte` en
+ * ratait deux : la règle « la catégorie structurée fait autorité » ne se
+ * déclenchait pas quand elle est PRÉFIXÉE.
+ *
+ * Le préfixe est BORNÉ, jamais un `includes` : une catégorie qui contient
+ * « refonte » sans commencer par elle (`piia_refonte_architecturale`) n'est pas
+ * une refonte. `token()` ayant déjà replié les espaces et tirets en `_`, la
+ * frontière est le `_` ou la fin de chaîne.
+ */
+const REFORM_CATEGORY_RE = /^refontes?(?:_|$)/;
 
 /**
  * Vrai dès qu'AU MOINS UNE occurrence de « refonte » porte une forme
@@ -448,7 +478,7 @@ export function instrumentFromSignal(
 
   // 1. Catégorie structurée — elle fait autorité, sans lire le texte.
   if (["rezonage", "modification_zonage", "changement_usage"].includes(candidate ?? "")) return "rezonage";
-  if (candidate === "refonte") return "refonte";
+  if (candidate !== null && REFORM_CATEGORY_RE.test(candidate)) return "refonte";
   if (candidate === "ppcmoi") return "ppcmoi";
   if (candidate === "piia") return "piia";
   if (candidate === "derogation" || candidate === "derogation_mineure") return "derogation";
