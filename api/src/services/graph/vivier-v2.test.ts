@@ -5,6 +5,8 @@ import {
   computeLegacySubsetCounts,
   computeVivierV2,
   extractLegacyZmpInput,
+  instrumentFromSignal,
+  isRegulatoryReform,
   type VivierSignalInput,
 } from "./vivier-v2.js";
 import { PV_BELOEIL_2026_02_TEXT } from "@radar/sources";
@@ -232,5 +234,100 @@ describe("server vivier_v2 computation", () => {
     expect(legacy[""]).toBe(3);
     expect(legacy.z).toBe(1);
     expect(legacy["z|m|p"]).toBe(0);
+  });
+});
+
+describe("instrument lexicon — refonte is a bounded positive list, read per occurrence", () => {
+  const instrumentOf = (label: string, description: string | null = null, category: string | null = null) =>
+    instrumentFromSignal(category, label, description, null);
+
+  // Défaut 1 — une occurrence non réglementaire ne doit JAMAIS masquer une
+  // occurrence réglementaire présente ailleurs dans le même texte.
+  it("keeps a regulatory refonte even when a non-regulatory « refonte » comes first", () => {
+    expect(
+      instrumentFromSignal(
+        "piia",
+        "PIIA — refonte architecturale",
+        "Refonte complète du règlement de zonage",
+        null,
+      ),
+    ).toBe("refonte");
+
+    const classification = classifyVivierSignal({
+      id: "mixed-refonte",
+      type: "DesignationEvent",
+      category: "piia",
+      label: "PIIA — refonte architecturale",
+      description: "Refonte complète du règlement de zonage",
+      etape: "projet_reglement",
+    });
+    expect(classification.instrument).toBe("refonte");
+    // L'instrument est la porte de l'axe résidentiel : `piia` sortirait le
+    // signal du vivier livré via `piia_non_pertinent`.
+    expect(classification.exclusion_reason).not.toBe("piia_non_pertinent");
+  });
+
+  // Sutton, texte réel : la refonte réglementaire porte le signal même quand
+  // le même PV cite un PPCMOI. `refonte` est testé avant `ppcmoi`.
+  it("keeps the real Sutton refonte ahead of a PPCMOI mentioned in the same PV", () => {
+    expect(
+      instrumentOf(
+        "Refonte réglementaire complète — Sutton (séance extraordinaire 27 mai 2026)",
+        "Adoption des premiers projets de règlements 358 à 363, dont le 362 (PPCMOI).",
+      ),
+    ).toBe("refonte");
+    expect(
+      instrumentOf(
+        "Signal : refonte totale Sutton",
+        "Refonte totale du zonage et du lotissement. Le 362 (PPCMOI) est adopté séparément.",
+      ),
+    ).toBe("refonte");
+  });
+
+  // Défaut 2 — « refonte » hors urbanisme n'entre pas dans le vivier.
+  it.each([
+    "Refonte du site Web municipal",
+    "Refonte du site internet de la Ville",
+    "Refonte organisationnelle",
+    "Refonte des infrastructures",
+    "Refonte de la grille tarifaire",
+    "Refonte architecturale",
+    "Refontes architecturales",
+    "Refonte des services souterrains",
+    "Refonte du service souterrain",
+    "Refonte totale du site Web municipal",
+  ])("does not read %s as an urbanism refonte", (label) => {
+    expect(instrumentOf(label)).toBe("autre");
+    expect(isRegulatoryReform(label.toLowerCase())).toBe(false);
+  });
+
+  // Recall — les formes réglementaires bornées, dont celles que l'adjacence
+  // stricte « refonte complete » ratait (Sutton).
+  it.each([
+    "Refonte réglementaire complète",
+    "Refonte totale",
+    "Refonte du règlement de zonage",
+    "Refonte de la réglementation d'urbanisme",
+    "Refonte du plan d'urbanisme",
+    "Refonte des règlements de lotissement",
+  ])("reads %s as a refonte", (label) => {
+    expect(instrumentOf(label)).toBe("refonte");
+  });
+
+  // Piège vérifié : une classe d'apostrophes saisie visuellement peut contenir
+  // deux fois la même apostrophe. Les deux codepoints sont testés en
+  // échappement explicite, jamais au rendu.
+  it("matches both apostrophe codepoints, asserted by escape not by glyph", () => {
+    const ASCII_APOSTROPHE = "'";
+    const TYPOGRAPHIC_APOSTROPHE = "’";
+    expect(ASCII_APOSTROPHE).not.toBe(TYPOGRAPHIC_APOSTROPHE);
+    expect(ASCII_APOSTROPHE.codePointAt(0)).toBe(0x27);
+    expect(TYPOGRAPHIC_APOSTROPHE.codePointAt(0)).toBe(0x2019);
+
+    for (const apostrophe of [ASCII_APOSTROPHE, TYPOGRAPHIC_APOSTROPHE]) {
+      expect(isRegulatoryReform(`refonte du plan d${apostrophe}urbanisme`)).toBe(true);
+      expect(isRegulatoryReform(`refonte de la reglementation d${apostrophe}urbanisme`)).toBe(true);
+      expect(isRegulatoryReform(`refonte de l${apostrophe}urbanisme`)).toBe(true);
+    }
   });
 });
