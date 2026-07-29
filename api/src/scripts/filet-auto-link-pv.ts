@@ -19,6 +19,13 @@
  * Sécurité : préserve toujours les refs/excerpts/docSha existants. Ne lie JAMAIS
  * quand le docSha est absent ou que le PDF n'existe pas (signale à la place).
  *
+ * Écriture canonique : `graph/<ville>/latest.json` n'est PAS écrit directement.
+ * Le script archive d'abord le préfixe `graph/<ville>/` puis publie via
+ * `writeCanonicalCityGraph`, qui refuse si l'objet a bougé depuis l'archive —
+ * sinon un run concurrent (phase A Graphify 3.4, gate v2.3) verrait sa version
+ * effacée sans trace. `S3ObjectStore.put()` rejette la clé canonique, donc ce
+ * chemin n'est pas contournable par inadvertance.
+ *
  * Usage :
  *   tsx src/scripts/filet-auto-link-pv.ts                 # dry-run, villes cibles
  *   tsx src/scripts/filet-auto-link-pv.ts --apply         # écrit S3 + PG
@@ -32,6 +39,11 @@ import { loadConfig, resolveGraphS3Config } from "../config.js";
 import { createLogger } from "../logger.js";
 import { createDb } from "../db/client.js";
 import { createScrapeS3Client, S3ObjectStore } from "../storage/s3-object-store.js";
+import { canonicalGraphKey } from "../storage/object-store.js";
+import {
+  archiveCityGraphPrefix,
+  writeCanonicalCityGraph,
+} from "../services/graph/canonical-graph-writer.js";
 import { upsertGraphAtomic } from "../services/graph/graph-store.js";
 
 const decoder = new TextDecoder();
@@ -223,13 +235,14 @@ async function main(): Promise<void> {
   const store = new S3ObjectStore(createScrapeS3Client(graphS3Config), graphS3Config.bucket);
   const { db, pool } = createDb(config);
 
+  const backupId = `filet-${new Date().toISOString().replaceAll(":", "-").replace(".", "-")}`;
   const outcomes: LinkOutcome[] = [];
   let citiesWritten = 0;
   let citiesReprojected = 0;
   let citiesAborted = 0;
 
   for (const city of targetCities) {
-    const key = `graph/${city}/latest.json`;
+    const key = canonicalGraphKey(city);
     let graphJson: Record<string, unknown>;
     try {
       const raw = await store.get(key);
@@ -261,9 +274,15 @@ async function main(): Promise<void> {
       continue;
     }
 
-    // Écriture S3 (source de vérité) puis reprojection PG atomique.
+    // Archive obligatoire du préfixe, PUIS écriture canonique gardée (refus si
+    // un autre writer a publié entre-temps), PUIS reprojection PG atomique.
     const body = encoder.encode(JSON.stringify(graphJson, null, 2));
-    await store.put(key, body, "application/json");
+    const archive = await archiveCityGraphPrefix(store, city, backupId);
+    await writeCanonicalCityGraph(store, { citySlug: city, body, archive });
+    logger.info(
+      { city, backupPrefix: archive.backup_prefix, objects: archive.object_count },
+      "filet: préfixe graphe archivé avant écriture canonique",
+    );
     citiesWritten++;
     logger.info({ city, linkedInCity, bytes: body.length }, "filet: latest.json mis à jour (S3)");
 

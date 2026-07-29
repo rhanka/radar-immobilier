@@ -63,9 +63,19 @@ describe.skipIf(!DB_AVAILABLE)("Graphify 3.4 test-city projection", () => {
         snapshotFromExistingCity(await subgraphForCity(db, city)),
         city,
       );
+      // `effet_densifiant` stays missing on all 48 nodes by decision: phase A
+      // no longer installs an `inconnu` placeholder, because a present
+      // placeholder would lock the field against the Geo artifact that will
+      // supply the real density effect. The counter is still asserted — the
+      // test measures the decided behaviour instead of ignoring the field.
       expect(after.stats.fields.effet_densifiant).toEqual({
-        before_missing: 0, after_present: 48, added_or_canonicalized: 0,
+        before_missing: 48, after_present: 0, added_or_canonicalized: 0,
       });
+      expect(after.snapshot.nodes.every((node) =>
+        !("effet_densifiant" in (node.properties as Record<string, unknown>))
+      )).toBe(true);
+      // The two fields phase A does write must survive the round-trip through
+      // Postgres and be idempotent on replay — that part is unchanged.
       expect(after.stats.fields.etape).toEqual({
         before_missing: 0, after_present: 48, added_or_canonicalized: 0,
       });

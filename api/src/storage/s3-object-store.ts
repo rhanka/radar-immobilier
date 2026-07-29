@@ -11,7 +11,27 @@ import {
 import type { AppConfig, ScrapeS3Config } from "../config.js";
 import { resolveScrapeS3Config } from "../config.js";
 import type { ProbeResult } from "../routes/health.js";
-import type { ObjectInfo, ObjectStore } from "./object-store.js";
+import { isCanonicalGraphKey, type ObjectInfo, type ObjectStore } from "./object-store.js";
+
+/** Thrown when an unguarded `put()` targets `graph/<city>/latest.json`. */
+export class CanonicalGraphWriteRefused extends Error {
+  readonly key: string;
+  constructor(key: string) {
+    super(
+      `refusing unguarded write to canonical graph key ${key}: this key is read as truth ` +
+        "by the projector and the replay, and overwriting it is irreversible. Write it " +
+        "through services/graph/canonical-graph-writer.ts (archive + expected-version check).",
+    );
+    this.name = "CanonicalGraphWriteRefused";
+    this.key = key;
+  }
+}
+
+/** Options for the guarded canonical write (see `putCanonicalGraph`). */
+export interface ConditionalPutOptions {
+  /** Expect the stored object to still carry this ETag; `null` = expect absent. */
+  ifMatch: string | null;
+}
 
 export class S3ObjectStore implements ObjectStore {
   private readonly client: S3Client;
@@ -22,20 +42,62 @@ export class S3ObjectStore implements ObjectStore {
     this.bucket = bucket;
   }
 
+  /**
+   * Write an object. Refuses `graph/<city>/latest.json`: that key is the
+   * canonical city snapshot and only the guarded writer may replace it. The
+   * refusal is deliberate — a guard carried by one caller protects nothing
+   * against the next caller, so it is carried by the write path instead.
+   */
   async put(
     key: string,
     body: Uint8Array | Buffer | string,
     contentType?: string,
   ): Promise<ObjectInfo> {
-    await this.client.send(
+    if (isCanonicalGraphKey(key)) throw new CanonicalGraphWriteRefused(key);
+    return this.putUnchecked(key, body, contentType);
+  }
+
+  private async putUnchecked(
+    key: string,
+    body: Uint8Array | Buffer | string,
+    contentType?: string,
+    conditions?: { IfMatch?: string; IfNoneMatch?: string },
+  ): Promise<ObjectInfo> {
+    const res = await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
         Body: body,
         ContentType: contentType,
+        ...(conditions ?? {}),
       }),
     );
-    return { key, contentType };
+    return { key, contentType, etag: res.ETag };
+  }
+
+  /**
+   * The only door through the canonical-key guard. Callers must supply the
+   * ETag they archived (`null` when the object did not exist), which is sent
+   * as a conditional `If-Match` / `If-None-Match` header so the backend
+   * rejects the write if another writer moved the object in between.
+   *
+   * LIMIT, declared: conditional writes on PUT are honoured by AWS S3 and by
+   * MinIO, but Scaleway's Object Storage support is not verified here. The
+   * caller therefore ALSO performs a HEAD re-check immediately before this
+   * call (`canonical-graph-writer.ts`). That pair narrows the race to the few
+   * milliseconds between HEAD and PUT when the header is ignored; it does not
+   * close it. Do not describe this as atomic.
+   */
+  async putCanonicalGraph(
+    key: string,
+    body: Uint8Array | Buffer | string,
+    contentType: string | undefined,
+    options: ConditionalPutOptions,
+  ): Promise<ObjectInfo> {
+    const conditions = options.ifMatch === null
+      ? { IfNoneMatch: "*" }
+      : { IfMatch: options.ifMatch };
+    return this.putUnchecked(key, body, contentType, conditions);
   }
 
   async get(key: string): Promise<Uint8Array> {
@@ -55,6 +117,7 @@ export class S3ObjectStore implements ObjectStore {
         key,
         size: res.ContentLength,
         contentType: res.ContentType,
+        etag: res.ETag,
       };
     } catch {
       return null;
