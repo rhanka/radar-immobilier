@@ -191,6 +191,26 @@ describe("business-property preservation gate", () => {
 
     expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
   });
+
+  it("rejects an informative value degraded to autre or an empty string", () => {
+    const before = [{
+      id: "signal:instrument",
+      props: { properties: { instrument: "reglement_zonage" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, [{
+      id: "signal:instrument",
+      props: { properties: { instrument: "autre" } },
+    }], "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "signal:instrument",
+      missingKeys: ["instrument"],
+    }]);
+    expect(findMissingBusinessProperties(before, [{
+      id: "signal:instrument",
+      props: { properties: { instrument: "" } },
+    }], "testville")).toHaveLength(1);
+  });
 });
 
 describe("Sutton immutable legacy projection", () => {

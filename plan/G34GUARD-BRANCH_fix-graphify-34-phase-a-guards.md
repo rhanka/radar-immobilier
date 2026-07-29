@@ -46,10 +46,10 @@ application, while retaining the existing dry-run default.
   - [x] Read the project rules, workflow, test rules, and Phase A writer/configuration.
   - [x] Confirmed that no S3 or production operation will be run.
 
-- [ ] **Lot 1 — Preserve existing business values**
-  - [ ] Guard `instrument` on absence only and remove the `effet_densifiant` placeholder write.
-  - [ ] Reject an informative business value degraded to `autre` or an empty string.
-  - [ ] Add focused regression tests and prove their pre-fix failure.
+- [x] **Lot 1 — Preserve existing business values**
+  - [x] Guard `instrument` on absence only and remove the `effet_densifiant` placeholder write.
+  - [x] Reject an informative business value degraded to `autre` or an empty string.
+  - [x] Add focused regression tests and prove their pre-fix failure.
 
 - [ ] **Lot 2 — Archive before apply**
   - [ ] Archive selected city prefixes and require a completion marker before canonical writes.
