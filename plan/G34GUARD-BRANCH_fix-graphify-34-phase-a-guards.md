@@ -114,3 +114,53 @@ application, while retaining the existing dry-run default.
         every key with its sha256 plus a digest over the inventory, a resume
         re-reads and re-hashes each archived object, and reusing a backup id
         aborts instead of overwriting an archive.
+
+## Review round 3 — three defects, demonstrated by execution
+
+- [x] **Lot 7 — Make the module's promise true**
+  - [x] **Defect 1 — the archive could record a version it had not read.**
+        `archiveCityGraphPrefix` did `get()` then a SEPARATE `head()`; a writer
+        publishing in between made the inventory hold V0's bytes under V1's
+        ETag, and the write-time check then compared the live ETag to that
+        recorded one, found them equal, and published V2 — V1 destroyed, archive
+        holding only V0. `ObjectStore.getWithEtag()` (implemented on
+        `S3ObjectStore` from `GetObjectCommand`'s own `ETag`) returns bytes and
+        version in ONE read; the archive, `canonicalMatchesBody` and the filet
+        read all use it. Test: `never records a version it did not read the
+        bytes of` — the review probe, a rival publishing on the read itself.
+  - [x] **Defect 2 — the protected window started at the archive, not at the
+        read.** The guard proved "nothing moved since the archive", never
+        "nothing moved since the read that produced this body". `filet` reads
+        `latest.json`, then does one S3 HEAD per Signal node — minutes — and
+        only then archives; phase A reads Postgres for all 724 cities before the
+        archive loop. A rival publishing in that interval was faithfully
+        archived, the ETags matched, and a body derived from stale input was
+        published over it: a silent lost update. `writeCanonicalCityGraph` now
+        REQUIRES a `CanonicalReadAnchor` captured at the source read
+        (`captureCanonicalReadAnchor` before `subgraphForCity` in phase A,
+        `readCanonicalCityGraph` in filet) and refuses on two counts: the object
+        moved since that read, or the archive does not cover the version the
+        write would destroy.
+  - [x] **Defect 3 — two thirds of the hardened gate guarded nothing.**
+        `DEGRADATION_SENSITIVE_KEYS` covers `effet_densifiant`, `etape`,
+        `instrument`, but the sentinel listed only `""` and `autre`. Only
+        `instrumentFromSignal()` returns `autre`; `deriveEtape()` and
+        `effectFromSignal()` return `inconnu`, so `etape: adoption → inconnu`
+        passed unnoticed — the original defect replayed on two keys of three.
+        The sentinel is now the union `"" | autre | inconnu`. No false positive:
+        a regression is only reported when the BEFORE value is informative, so a
+        node already unclassified is exempt on both sides, and `inconnu` is not
+        a `VivierInstrument` any more than `autre` is a `VivierEtape`. Adding it
+        in fact REMOVES a false positive (an already-`inconnu` node losing its
+        properties used to be reported as a regression).
+  - [x] Each fix has a test that fails BY BEHAVIOUR on the pre-fix code, checked
+        by reverting the production change alone and re-running: defect 1
+        `expected '"etag-2"' to be '"etag-1"'`, defect 2 `promise resolved
+        instead of rejecting` (the phase A apply published over the rival),
+        defect 3 `expected [] to deeply equal [{…}]`.
+  - [x] Out of scope by owner decision, unchanged and not worsened: no
+        restoration path, the two self-referencing resume commands,
+        `putCanonicalGraph()` public without archive, no `If-Match` preflight on
+        Scaleway, `archiveDigest` over-promising, streaming → batch, unbounded
+        archive cost, `graphify-34-snapshot.test.ts:42`'s name exceeding its
+        assertions.

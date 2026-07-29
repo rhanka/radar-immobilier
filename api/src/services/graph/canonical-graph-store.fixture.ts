@@ -7,7 +7,11 @@
  * honours `If-Match` / `If-None-Match` by rejecting a stale expectation. Every
  * write mints a new ETag, so a concurrent publication is observable.
  */
-import { isCanonicalGraphKey, type ObjectInfo } from "../../storage/object-store.js";
+import {
+  isCanonicalGraphKey,
+  type ObjectInfo,
+  type StoredObject,
+} from "../../storage/object-store.js";
 import { CanonicalGraphWriteRefused } from "../../storage/s3-object-store.js";
 import type { CanonicalGraphStore } from "./canonical-graph-writer.js";
 
@@ -24,6 +28,29 @@ export class FakeGraphStore implements CanonicalGraphStore {
   readonly objects = new Map<string, { body: Uint8Array; etag: string }>();
   readonly puts: string[] = [];
   private sequence = 0;
+  private readonly raceOnRead = new Map<string, Uint8Array | string>();
+
+  /**
+   * Arm a concurrent publisher: the next READ of `key` returns the bytes it
+   * found, and a rival writer publishes `body` immediately afterwards.
+   *
+   * This is the interleaving of the review probe. It is armed on the read
+   * itself — not on `get` or on `getWithEtag` specifically — so a reader that
+   * takes bytes and version in one call and a reader that takes them in two
+   * both meet the same rival, and only the first records a version that
+   * actually describes the bytes it holds.
+   */
+  publishOnNextReadOf(key: string, body: Uint8Array | string): void {
+    this.raceOnRead.set(key, body);
+  }
+
+  private runRaceFor(key: string): void {
+    const pending = this.raceOnRead.get(key);
+    if (pending === undefined) return;
+    this.raceOnRead.delete(key);
+    this.write(key, pending);
+    this.puts.pop();
+  }
 
   /** Pre-existing object: not counted as a write made by the code under test. */
   seed(key: string, body: string | Uint8Array): void {
@@ -50,7 +77,16 @@ export class FakeGraphStore implements CanonicalGraphStore {
   async get(key: string): Promise<Uint8Array> {
     const stored = this.objects.get(key);
     if (stored === undefined) throw new Error(`no such object: ${key}`);
+    this.runRaceFor(key);
     return stored.body;
+  }
+
+  async getWithEtag(key: string): Promise<StoredObject | null> {
+    const stored = this.objects.get(key);
+    if (stored === undefined) return null;
+    const served = { key, body: stored.body, etag: stored.etag };
+    this.runRaceFor(key);
+    return served;
   }
 
   async head(key: string): Promise<ObjectInfo | null> {

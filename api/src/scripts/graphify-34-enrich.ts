@@ -22,6 +22,7 @@
 import { loadConfig, resolveGraphS3Config } from "../config.js";
 import { createDb } from "../db/client.js";
 import { createLogger } from "../logger.js";
+import { captureCanonicalReadAnchor } from "../services/graph/canonical-graph-writer.js";
 import { subgraphForCity, upsertGraphAtomic } from "../services/graph/graph-store.js";
 import { enrichGraphify34Snapshot } from "../services/graph/graphify-34-enrichment.js";
 import {
@@ -57,6 +58,12 @@ async function main(): Promise<void> {
   try {
     const targets: Graphify34SnapshotTarget[] = [];
     for (const city of cities) {
+      // Anchor the protected window to the READ, not to the archive taken
+      // later: the snapshot below is derived from Postgres, and every minute
+      // between this read and the write is a minute in which another producer
+      // may publish `graph/<city>/latest.json`. Captured BEFORE the read so a
+      // publication concurrent with the read itself is caught too.
+      const readAnchor = await captureCanonicalReadAnchor(store, city);
       const existing = await subgraphForCity(db, city);
       if (existing.nodes.length === 0) {
         throw new Error(`no existing graph_nodes snapshot for ${city}`);
@@ -65,9 +72,9 @@ async function main(): Promise<void> {
       const base = snapshotFromExistingCity(existing);
       const { snapshot, stats } = enrichGraphify34Snapshot(base, city);
       const manifest = buildGraphify34Manifest(city, snapshot);
-      const summary = { city, apply, stats, manifest };
+      const summary = { city, apply, stats, manifest, readAnchor };
       logger.info(summary, "graphify-34-enrich: complete-city snapshot prepared");
-      targets.push({ municipality: city, snapshot, manifest });
+      targets.push({ municipality: city, snapshot, manifest, readAnchor });
     }
     if (!apply) return;
 
