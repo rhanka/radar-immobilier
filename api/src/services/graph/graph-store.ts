@@ -411,19 +411,25 @@ function businessProperties(props: Record<string, unknown>): Record<string, unkn
 }
 
 function hasBusinessProperty(properties: Record<string, unknown>, key: string): boolean {
-  return Object.prototype.hasOwnProperty.call(properties, key) &&
-    properties[key] !== null && properties[key] !== undefined;
+  if (!Object.prototype.hasOwnProperty.call(properties, key)) return false;
+  const value = properties[key];
+  if (value === null || value === undefined) return false;
+  if (typeof value !== "string") return true;
+  const normalized = value.trim().toLowerCase();
+  return normalized !== "" && normalized !== "autre";
 }
 
 /**
- * Find business keys present on the current city snapshot but absent from the
- * candidate snapshot, one node at a time. All keys under `props.properties`
- * are protected: this deliberately does not maintain a lossy allow-list.
+ * Find business values present on the current city snapshot but absent or
+ * degraded in the candidate snapshot, one node at a time. All keys under
+ * `props.properties` are protected: this deliberately does not maintain a
+ * lossy allow-list.
  *
  * A missing node is treated as an empty property map, so a complete snapshot
- * cannot silently delete a business-bearing node. Values `false`, `0`, empty
- * strings, and empty arrays remain present; only an absent/null/undefined key
- * is a regression.
+ * cannot silently delete a business-bearing node. Values `false`, `0`, and
+ * empty arrays remain present. An informative string degraded to `autre` or
+ * to an empty string is also a regression: it loses business information even
+ * though the physical key still exists.
  */
 export function findMissingBusinessProperties(
   beforeRows: readonly BusinessPropertySnapshotRow[],
@@ -644,7 +650,7 @@ export async function upsertGraphAtomic(
       aborted: true,
       reason:
         `business-property regression for ${citySlug}: ` +
-        `existing keys would disappear (${details}); projection refused`,
+        `existing values would disappear or degrade (${details}); projection refused`,
     };
   }
 
