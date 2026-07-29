@@ -51,10 +51,10 @@ application, while retaining the existing dry-run default.
   - [x] Reject an informative business value degraded to `autre` or an empty string.
   - [x] Add focused regression tests and prove their pre-fix failure.
 
-- [ ] **Lot 2 — Archive before apply**
-  - [ ] Archive selected city prefixes and require a completion marker before canonical writes.
-  - [ ] Wire the archive-before-write sequence into `--apply` without running it.
-  - [ ] Add a focused failure-path test and prove its pre-fix failure.
+- [x] **Lot 2 — Archive before apply**
+  - [x] Archive selected city prefixes and require a completion marker before canonical writes.
+  - [x] Wire the archive-before-write sequence into `--apply` without running it.
+  - [x] Add a focused failure-path test and prove its pre-fix failure.
 
 - [ ] **Lot 3 — Deliver**
   - [ ] Run focused Vitest directly, inspect the scope, commit, push, and open the PR.
