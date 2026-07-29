@@ -43,8 +43,20 @@ graph="s3://$BUCKET/graph/$CITY/latest.json"
 backup="s3://$BUCKET/graph/$CITY/history/pre-citation-grounding-${LANE}-${ts}.json"
 
 s5cmd --endpoint-url "$S3_URL" cp "$CAND" "$parsed" >>"$RUN/logs/publish-$CITY.log" 2>&1
-if s5cmd --endpoint-url "$S3_URL" ls "$graph" >>"$RUN/logs/publish-$CITY.log" 2>&1; then
+
+# Backup obligatoire avant d'écraser la clé canonique. `s5cmd ls` sort non-zéro
+# pour « objet absent » COMME pour une erreur réseau / d'autorisation : traiter
+# les deux comme « absent » publiait sans archive et détruisait la version
+# précédente. Toute sonde ambiguë arrête la publication (fail-closed).
+ls_out="$(s5cmd --endpoint-url "$S3_URL" ls "$graph" 2>&1)" && ls_rc=0 || ls_rc=$?
+printf '%s\n' "$ls_out" >>"$RUN/logs/publish-$CITY.log"
+if [ "$ls_rc" -eq 0 ]; then
   s5cmd --endpoint-url "$S3_URL" cp "$graph" "$backup" >>"$RUN/logs/publish-$CITY.log" 2>&1
+elif printf '%s' "$ls_out" | grep -qiE 'no object found|NoSuchKey|not found'; then
+  backup="(aucun: $graph absent)"
+else
+  echo "publish-citation-grounding: sonde backup ambiguë pour $graph — publication annulée" >&2
+  exit 1
 fi
 s5cmd --endpoint-url "$S3_URL" cp "$CAND" "$graph" >>"$RUN/logs/publish-$CITY.log" 2>&1
 jq -cn --arg city "$CITY" --arg backup "$backup" --arg graph "$graph" --arg parsed "$parsed" --arg ts "$ts" \

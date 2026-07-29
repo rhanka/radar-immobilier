@@ -75,11 +75,10 @@ function enrichNode(
   const description = node.description ?? stringValue(properties.description);
   const category = stringValue(properties.category);
 
-  if (!present(properties, "effet_densifiant")) {
-    fields.effet_densifiant.before_missing++;
-    nextProperties.effet_densifiant = "inconnu";
-    fields.effet_densifiant.added_or_canonicalized++;
-  }
+  if (!present(properties, "effet_densifiant")) fields.effet_densifiant.before_missing++;
+  // Do not install an `inconnu` placeholder: Vivier already defaults an
+  // absent value to `inconnu`, while a present placeholder would block the
+  // guarded Geo writer that will supply the real density effect.
   if (present(nextProperties, "effet_densifiant")) fields.effet_densifiant.after_present++;
 
   if (!present(properties, "etape")) {
@@ -95,8 +94,8 @@ function enrichNode(
     description,
     stringValue(properties.instrument),
   );
-  if (!present(properties, "instrument") || properties.instrument !== instrument) {
-    if (!present(properties, "instrument")) fields.instrument.before_missing++;
+  if (!present(properties, "instrument")) {
+    fields.instrument.before_missing++;
     nextProperties.instrument = instrument;
     fields.instrument.added_or_canonicalized++;
   }
@@ -107,8 +106,8 @@ function enrichNode(
 
 /**
  * Deterministically enrich an existing graph snapshot. This function never
- * reads raw documents and never derives a density effect: the only effect it
- * can add is the explicit `inconnu` placeholder for Geo's separate artifact.
+ * reads raw documents and never derives a density effect. A missing density
+ * effect remains missing until its dedicated Geo artifact supplies the value.
  */
 export function enrichGraphify34Snapshot(
   graph: GraphifyGraph,
