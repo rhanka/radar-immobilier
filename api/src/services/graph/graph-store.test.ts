@@ -192,7 +192,7 @@ describe("business-property preservation gate", () => {
     expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
   });
 
-  it("rejects an informative value degraded to autre or an empty string", () => {
+  it("rejects a classified value degraded to autre or an empty string", () => {
     const before = [{
       id: "signal:instrument",
       props: { properties: { instrument: "reglement_zonage" } },
@@ -210,6 +210,46 @@ describe("business-property preservation gate", () => {
       id: "signal:instrument",
       props: { properties: { instrument: "" } },
     }], "testville")).toHaveLength(1);
+    expect(findMissingBusinessProperties(before, [{
+      id: "signal:instrument",
+      props: { properties: { etape: "adoption", effet_densifiant: "autre" } },
+    }], "testville")[0]?.missingKeys).toEqual(["instrument"]);
+  });
+
+  // Counter-examples: the degradation rule must NOT fire outside the three
+  // classified keys, or a legitimate re-projection of a whole city is refused.
+  it("accepts a zone whose kind legitimately becomes autre (REC-137)", () => {
+    // `zoneKindOf("REC-137")` returns "autre" on purpose: REC is a real
+    // multi-letter family, and "autre" is a member of the ZoneKind enum. A
+    // re-acquisition that re-classifies H → autre loses no business value.
+    const before = [{
+      id: "qc-zonage-testville:zone:rec-137",
+      props: { properties: { code_affiche: "REC-137", kind: "H" } },
+    }];
+    const after = [{
+      id: "qc-zonage-testville:zone:rec-137",
+      props: { properties: { code_affiche: "REC-137", kind: "autre" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
+  });
+
+  it("accepts an intentional textual deletion outside the classified keys", () => {
+    const before = [{ id: "zone:1", props: { properties: { notes: "obsolète" } } }];
+    const after = [{ id: "zone:1", props: { properties: { notes: "" } } }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
+  });
+
+  it("still rejects any key that disappears entirely, classified or not", () => {
+    const before = [{ id: "zone:1", props: { properties: { notes: "obsolète", kind: "H" } } }];
+    const after = [{ id: "zone:1", props: { properties: { kind: "autre" } } }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "zone:1",
+      missingKeys: ["notes"],
+    }]);
   });
 });
 
