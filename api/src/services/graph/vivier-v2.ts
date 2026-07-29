@@ -297,9 +297,81 @@ function derivedEtapes(
 }
 
 /**
+ * Lexique « refonte » — liste POSITIVE bornée, évaluée PAR OCCURRENCE.
+ *
+ * Deux défauts distincts sont couverts simultanément :
+ *
+ * 1. PAR OCCURRENCE, jamais sur le texte entier. Un même signal peut porter
+ *    une occurrence non réglementaire ET une occurrence réglementaire :
+ *    libellé « PIIA — refonte architecturale » + description « Refonte
+ *    complète du règlement de zonage ». Un veto armé par la 1re occurrence
+ *    masquerait la 2e et sortirait du vivier un signal qui contient une vraie
+ *    refonte réglementaire. Chaque occurrence est donc jugée SEULE, sur la
+ *    queue de texte qui la suit ; aucune occurrence n'en invalide une autre.
+ *
+ * 2. Liste POSITIVE bornée, jamais `includes("refonte")`. Seules les formes
+ *    réglementaires d'urbanisme sont retenues. « refonte du site Web
+ *    municipal », « refonte organisationnelle », « refonte des
+ *    infrastructures », « refonte de la grille tarifaire », « refonte
+ *    architecturale », « refonte des services souterrains » ne matchent
+ *    aucune branche : ils restent hors vivier sans qu'aucune liste noire
+ *    n'ait à les énumérer.
+ *
+ * Le texte vient de `fold()` : minuscules + diacritiques retirés, mais
+ * l'apostrophe est CONSERVÉE telle quelle. La classe d'apostrophes est donc
+ * écrite en échappements explicites (U+0027 ASCII et U+2019 typographique),
+ * jamais au glyphe : une classe saisie visuellement peut contenir deux fois la
+ * même apostrophe — indiscernable à l'œil, et « d'urbanisme » ne matche alors
+ * jamais.
+ */
+const REFORM_APOSTROPHE = "[\\u0027\\u2019]";
+/** Objets réglementaires d'urbanisme admis après « refonte ». */
+const REFORM_SCOPE = `(?:reglementations?|reglements?|zonage|lotissement|(?:plans?\\s+d${REFORM_APOSTROPHE}\\s*)?urbanisme)`;
+/** Le même objet, précédé de sa préposition optionnelle (« du », « de la », « de l' », « des »). */
+const REFORM_SCOPE_PHRASE = `(?:de\\s+la\\s+|de\\s+l${REFORM_APOSTROPHE}\\s*|du\\s+|des\\s+|de\\s+)?${REFORM_SCOPE}`;
+/** Adjectifs d'ampleur : « refonte complète/totale/globale/intégrale/majeure ». */
+const REFORM_EXTENT =
+  "(?:complete?s?|totale?s?|totaux|globale?s?|globaux|integrale?s?|integraux|majeure?s?)";
+/**
+ * Formes réglementaires admises, ancrées sur le texte qui suit UNE occurrence
+ * de « refonte » :
+ *  - « refonte réglementaire [complète] »
+ *  - « refonte totale » / « refonte complète du règlement de zonage » —
+ *    l'adjectif d'ampleur seul n'est admis qu'en fin de segment ou suivi d'un
+ *    objet réglementaire, ce qui écarte « refonte totale du site Web »
+ *  - « refonte du règlement de zonage », « refonte de la réglementation
+ *    d'urbanisme », « refonte du plan d'urbanisme »
+ */
+const REGULATORY_REFORM_TAIL_RE = new RegExp(
+  "^\\s+(?:" +
+    "reglementaires?\\b" +
+    `|${REFORM_EXTENT}\\b(?=\\s*(?:[.,;:!?)\\]]|$)|\\s+${REFORM_SCOPE_PHRASE}\\b)` +
+    `|${REFORM_SCOPE_PHRASE}\\b` +
+    ")",
+);
+const REFORM_OCCURRENCE_RE = /\brefontes?\b/g;
+
+/**
+ * Vrai dès qu'AU MOINS UNE occurrence de « refonte » porte une forme
+ * réglementaire. `matchAll` clone la regex source, `lastIndex` n'est donc
+ * jamais partagé entre deux appels.
+ */
+export function isRegulatoryReform(text: string): boolean {
+  for (const occurrence of text.matchAll(REFORM_OCCURRENCE_RE)) {
+    const tail = text.slice((occurrence.index ?? 0) + occurrence[0].length);
+    if (REGULATORY_REFORM_TAIL_RE.test(tail)) return true;
+  }
+  return false;
+}
+
+/**
  * Single source of truth for the instrument classification used by Vivier B.
  * The Graphify 3.4 materializer imports this exact function when persisting
  * the classification; it must not maintain a second instrument lexicon.
+ *
+ * Ordre : `refonte` est testé AVANT `ppcmoi`/`piia`. Une refonte réglementaire
+ * est l'instrument porteur même quand le PV cite par ailleurs un PPCMOI (le
+ * « 362 (PPCMOI) » de Sutton) ou un PIIA.
  */
 export function instrumentFromSignal(
   category: string | null,
@@ -310,10 +382,10 @@ export function instrumentFromSignal(
   const candidate = token(explicit) ?? token(category);
   const text = fold(`${label ?? ""} ${description ?? ""}`);
   if (["rezonage", "modification_zonage", "changement_usage"].includes(candidate ?? "")) return "rezonage";
+  if (candidate === "refonte" || isRegulatoryReform(text)) return "refonte";
   if (candidate === "ppcmoi" || text.includes("ppcmoi") || text.includes("projet particulier")) return "ppcmoi";
   if (candidate === "piia" || text.includes("piia")) return "piia";
   if (candidate === "derogation" || candidate === "derogation_mineure" || text.includes("derogation")) return "derogation";
-  if (candidate === "refonte" || text.includes("refonte")) return "refonte";
   if (candidate === "plan_urbanisme" || text.includes("plan d urbanisme")) return "plan_urbanisme";
   return "autre";
 }
