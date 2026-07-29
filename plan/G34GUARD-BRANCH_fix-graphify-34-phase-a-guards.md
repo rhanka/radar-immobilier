@@ -56,5 +56,5 @@ application, while retaining the existing dry-run default.
   - [x] Wire the archive-before-write sequence into `--apply` without running it.
   - [x] Add a focused failure-path test and prove its pre-fix failure.
 
-- [ ] **Lot 3 — Deliver**
-  - [ ] Run focused Vitest directly, inspect the scope, commit, push, and open the PR.
+- [x] **Lot 3 — Deliver**
+  - [x] Run focused Vitest directly, inspect the scope, commit, push, and open the PR.
