@@ -424,14 +424,33 @@ function businessProperties(props: Record<string, unknown>): Record<string, unkn
  * intentionally cleared. A gate that blocks legitimate work is not a safer
  * gate: it is a gate someone disables during the first incident.
  *
- * For these three keys the sentinel is not a value anyone means: it is what
- * `instrumentFromSignal()` returns when it recognises nothing, which is
- * exactly how phase A crushed 13 informative `instrument` values.
+ * For these three keys the sentinel is not a value anyone means: it is what the
+ * classifier returns when it recognises nothing, which is exactly how phase A
+ * crushed 13 informative `instrument` values.
  */
 const DEGRADATION_SENSITIVE_KEYS = new Set(["effet_densifiant", "etape", "instrument"]);
 
-/** The uninformative fallbacks a classifier emits when it recognises nothing. */
-const DEGRADED_STRING_VALUES = new Set(["", "autre"]);
+/**
+ * The uninformative fallbacks a classifier emits when it recognises nothing.
+ *
+ * The set is the UNION of the three keys' fallbacks, because each classifier
+ * spells "I recognised nothing" differently:
+ *   - `instrumentFromSignal()` returns `"autre"` (`vivier-v2.ts`);
+ *   - `deriveEtape()` returns `"inconnu"` (below) — never `"autre"`, never `""`;
+ *   - `effectFromSignal()` returns `"inconnu"` (`vivier-v2.ts`), whose only
+ *     legitimate values are `densifie|reduit|stable|inconnu`.
+ * Listing only `""` and `"autre"` therefore left two keys out of three guarding
+ * nothing at all: `etape: "adoption" → "inconnu"` passed the gate unnoticed,
+ * which is the original defect replayed on the two other fields.
+ *
+ * The union creates no false positive on the keys it does not belong to:
+ * `"inconnu"` is not a `VivierInstrument` and `"autre"` is neither a
+ * `VivierEtape` nor an effect, so no producer can emit them there. And a
+ * degradation is only ever reported when the BEFORE value is informative — a
+ * node already sitting on `inconnu` reads as absent on both sides and is
+ * exempt, so re-running a projection over unclassified nodes stays silent.
+ */
+const DEGRADED_STRING_VALUES = new Set(["", "autre", "inconnu"]);
 
 function hasBusinessProperty(properties: Record<string, unknown>, key: string): boolean {
   if (!Object.prototype.hasOwnProperty.call(properties, key)) return false;
@@ -454,8 +473,9 @@ function hasBusinessProperty(properties: Record<string, unknown>, key: string): 
  * strings, and empty arrays remain present for every key outside
  * `DEGRADATION_SENSITIVE_KEYS`; only an absent/null/undefined key is a
  * regression there. On `effet_densifiant`, `etape` and `instrument`, an
- * informative string collapsed to `autre` or `""` is also a regression: the
- * key survives but the business information is gone.
+ * informative string collapsed to a classifier fallback (`""`, `autre`,
+ * `inconnu`) is also a regression: the key survives but the business
+ * information is gone.
  */
 export function findMissingBusinessProperties(
   beforeRows: readonly BusinessPropertySnapshotRow[],

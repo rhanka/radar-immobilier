@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { FakeGraphStore } from "./canonical-graph-store.fixture.js";
+import { captureCanonicalReadAnchor } from "./canonical-graph-writer.js";
 import type { Graphify34Snapshot } from "./graphify-34-enrichment.js";
 import {
   appliedMarkerKey,
@@ -12,14 +13,28 @@ import {
 
 const decoder = new TextDecoder();
 
-function targetFor(city: string, marker = "v2"): Graphify34SnapshotTarget {
+/**
+ * Build a target the way the producer does: the read anchor is captured at the
+ * moment the city's Postgres source is read, which here is this call.
+ */
+async function targetFor(
+  store: FakeGraphStore,
+  city: string,
+  marker = "v2",
+): Promise<Graphify34SnapshotTarget> {
+  const readAnchor = await captureCanonicalReadAnchor(store, city);
   const snapshot: Graphify34Snapshot = {
     municipality: city,
     graphify_pass: "3.4",
     ontology_version: "2.3",
     nodes: [{ id: `${city}:signal:${marker}`, type: "Signal", label: marker, properties: {} }],
   };
-  return { municipality: city, snapshot, manifest: buildGraphify34Manifest(city, snapshot) };
+  return {
+    municipality: city,
+    snapshot,
+    manifest: buildGraphify34Manifest(city, snapshot),
+    readAnchor,
+  };
 }
 
 describe("Graphify 3.4 S3 snapshot backup", () => {
@@ -27,10 +42,10 @@ describe("Graphify 3.4 S3 snapshot backup", () => {
     const project = vi.fn(async () => undefined);
     const store = new FakeGraphStore();
     store.seed("graph/witness/latest.json", '{"version":"V0"}');
-    vi.spyOn(store, "get").mockRejectedValue(new Error("backup source unavailable"));
+    vi.spyOn(store, "getWithEtag").mockRejectedValue(new Error("backup source unavailable"));
 
     await expect(
-      applyGraphify34Snapshots(store, [targetFor("witness")], "b1", project),
+      applyGraphify34Snapshots(store, [await targetFor(store, "witness")], "b1", project),
     ).rejects.toThrow("backup source unavailable");
 
     expect(decoder.decode(store.objects.get("graph/witness/latest.json")!.body))
@@ -54,7 +69,7 @@ describe("Graphify 3.4 S3 snapshot backup", () => {
 
     const report = await applyGraphify34Snapshots(
       store,
-      [targetFor("a"), targetFor("b")],
+      [await targetFor(store, "a"), await targetFor(store, "b")],
       "b1",
       async (target) => { order.push(`project:${target.municipality}`); },
     );
@@ -72,12 +87,35 @@ describe("Graphify 3.4 S3 snapshot backup", () => {
     ]);
   });
 
+  it("refuses to publish a snapshot derived from state read before a rival published", async () => {
+    // Phase A reads Postgres for all 724 cities, then archives them one by one:
+    // a city's archive can be taken minutes after its source was read. A rival
+    // publishing in that window is faithfully archived, so an archive-anchored
+    // check sees matching ETags and publishes anyway — losing the rival's
+    // version behind a snapshot derived from state that predates it.
+    const store = new FakeGraphStore();
+    store.seed("graph/a/latest.json", '{"version":"A0"}');
+    const target = await targetFor(store, "a");
+
+    await store.putCanonicalGraph("graph/a/latest.json", '{"version":"RIVAL"}', undefined, {
+      ifMatch: store.etagOf("graph/a/latest.json"),
+    });
+
+    const project = vi.fn(async () => undefined);
+    await expect(applyGraphify34Snapshots(store, [target], "b1", project))
+      .rejects.toThrow(Graphify34ApplyInterrupted);
+
+    expect(decoder.decode(await store.get("graph/a/latest.json"))).toBe('{"version":"RIVAL"}');
+    expect(project).not.toHaveBeenCalled();
+    expect(store.objects.has(appliedMarkerKey("b1", "a"))).toBe(false);
+  });
+
   it("refuses a second run under an already-used backup id", async () => {
     const store = new FakeGraphStore();
     store.seed("graph/a/latest.json", '{"version":"A0"}');
-    await applyGraphify34Snapshots(store, [targetFor("a")], "b1", async () => undefined);
+    await applyGraphify34Snapshots(store, [await targetFor(store, "a")], "b1", async () => undefined);
 
-    await expect(applyGraphify34Snapshots(store, [targetFor("a")], "b1", async () => undefined))
+    await expect(applyGraphify34Snapshots(store, [await targetFor(store, "a")], "b1", async () => undefined))
       .rejects.toThrow(/already used/);
   });
 });
@@ -93,7 +131,7 @@ describe("Graphify 3.4 apply is resumable, not atomic", () => {
     try {
       await applyGraphify34Snapshots(
         store,
-        [targetFor("a"), targetFor("b"), targetFor("c")],
+        [await targetFor(store, "a"), await targetFor(store, "b"), await targetFor(store, "c")],
         "b1",
         async (target) => {
           if (target.municipality === "b") throw new Error("projection blew up");
@@ -121,7 +159,7 @@ describe("Graphify 3.4 apply is resumable, not atomic", () => {
     const store = new FakeGraphStore();
     store.seed("graph/a/latest.json", '{"version":"A0"}');
     store.seed("graph/b/latest.json", '{"version":"B0"}');
-    const targets = [targetFor("a"), targetFor("b")];
+    const targets = [await targetFor(store, "a"), await targetFor(store, "b")];
 
     await applyGraphify34Snapshots(store, targets, "b1", async (target) => {
       if (target.municipality === "b") throw new Error("interrupted");
@@ -149,7 +187,7 @@ describe("Graphify 3.4 apply is resumable, not atomic", () => {
   it("refuses to resume over a version another writer published meanwhile", async () => {
     const store = new FakeGraphStore();
     store.seed("graph/a/latest.json", '{"version":"A0"}');
-    const targets = [targetFor("a")];
+    const targets = [await targetFor(store, "a")];
 
     await applyGraphify34Snapshots(store, targets, "b1", async () => {
       throw new Error("interrupted before the applied marker");
@@ -162,7 +200,7 @@ describe("Graphify 3.4 apply is resumable, not atomic", () => {
 
     await expect(
       applyGraphify34Snapshots(store, targets, "b1", async () => undefined, { resume: true }),
-    ).rejects.toThrow(/changed since it was archived/);
+    ).rejects.toThrow(/changed since it was read/);
     expect(decoder.decode(await store.get("graph/a/latest.json"))).toBe('{"version":"FILET"}');
   });
 
@@ -171,7 +209,7 @@ describe("Graphify 3.4 apply is resumable, not atomic", () => {
     store.seed("graph/a/latest.json", '{"version":"A0"}');
 
     await expect(
-      applyGraphify34Snapshots(store, [targetFor("a")], "never", async () => undefined, {
+      applyGraphify34Snapshots(store, [await targetFor(store, "a")], "never", async () => undefined, {
         resume: true,
       }),
     ).rejects.toThrow(/cannot resume/);

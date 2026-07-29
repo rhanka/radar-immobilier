@@ -4,6 +4,7 @@ import {
   canonicalMatchesBody,
   type CanonicalArchiveReceipt,
   type CanonicalGraphStore,
+  type CanonicalReadAnchor,
   CANONICAL_BACKUP_ROOT,
   readCityGraphArchive,
   verifyCityGraphArchive,
@@ -39,6 +40,18 @@ export interface Graphify34SnapshotTarget {
   municipality: string;
   snapshot: Graphify34Snapshot;
   manifest: Graphify34Manifest;
+  /**
+   * Version of `graph/<city>/latest.json` observed when this city's SOURCE was
+   * read from Postgres — captured by the producer, before `subgraphForCity`.
+   *
+   * Phase A reads Postgres for every city up front and only then starts the
+   * archive loop, so the interval between a city's read and its write is the
+   * whole run. Without this anchor the write would only prove that nothing
+   * moved since the archive, and a version published during that interval would
+   * be archived, match, and still be crushed by a snapshot derived from state
+   * read before it existed.
+   */
+  readAnchor: CanonicalReadAnchor;
 }
 
 /** Written once, before the first canonical byte, so a run can be resumed. */
@@ -221,8 +234,10 @@ async function readAppliedMarker(
  *      sha256 and a digest over the inventory, BEFORE any canonical byte moves;
  *   2. an apply plan is published so an interrupted run can be resumed;
  *   3. each city is published through the guarded canonical writer, which
- *      refuses if the object moved since it was archived, then projected, then
- *      marked applied.
+ *      refuses if the object moved since the target's `readAnchor` — the
+ *      version it had when this city's Postgres source was read — or if the
+ *      archive does not cover that version; then projected, then marked
+ *      applied.
  *
  * A fresh `backupId` refuses to touch an archive that already exists (an
  * archive is never silently overwritten). `resume: true` reuses the existing
@@ -306,6 +321,7 @@ export async function applyGraphify34Snapshots(
           citySlug: target.municipality,
           body,
           archive,
+          readAnchor: target.readAnchor,
         });
       }
       stage = "manifest-write";

@@ -11,7 +11,12 @@ import {
 import type { AppConfig, ScrapeS3Config } from "../config.js";
 import { resolveScrapeS3Config } from "../config.js";
 import type { ProbeResult } from "../routes/health.js";
-import { isCanonicalGraphKey, type ObjectInfo, type ObjectStore } from "./object-store.js";
+import {
+  isCanonicalGraphKey,
+  type ObjectInfo,
+  type ObjectStore,
+  type StoredObject,
+} from "./object-store.js";
 
 /** Thrown when an unguarded `put()` targets `graph/<city>/latest.json`. */
 export class CanonicalGraphWriteRefused extends Error {
@@ -106,6 +111,33 @@ export class S3ObjectStore implements ObjectStore {
     );
     if (!res.Body) throw new Error(`empty body for ${key}`);
     return res.Body.transformToByteArray();
+  }
+
+  /**
+   * Read bytes and the ETag of those exact bytes in ONE round trip.
+   *
+   * `GetObjectCommand` already returns the `ETag` of the version it served, so
+   * a second `head()` is not merely redundant: between the two calls another
+   * writer may publish, and the caller then holds version N-1's bytes labelled
+   * with version N's ETag. The canonical-graph archive used to do exactly that
+   * and would then let a guarded write erase a version it had never copied.
+   *
+   * Returns `null` when the key does not exist — an absent object is a state,
+   * not a failure, and the guarded writer distinguishes the two.
+   */
+  async getWithEtag(key: string): Promise<StoredObject | null> {
+    let res;
+    try {
+      res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+    } catch (error) {
+      const name = (error as { name?: string })?.name ?? "";
+      const status = (error as { $metadata?: { httpStatusCode?: number } })?.$metadata
+        ?.httpStatusCode;
+      if (name === "NoSuchKey" || name === "NotFound" || status === 404) return null;
+      throw error;
+    }
+    if (!res.Body) throw new Error(`empty body for ${key}`);
+    return { key, body: await res.Body.transformToByteArray(), etag: res.ETag ?? null };
   }
 
   async head(key: string): Promise<ObjectInfo | null> {
