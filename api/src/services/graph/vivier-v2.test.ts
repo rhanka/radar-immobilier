@@ -9,6 +9,7 @@ import {
   isRegulatoryReform,
   type VivierSignalInput,
 } from "./vivier-v2.js";
+import { isResidentialEligible } from "@radar/domain";
 import { PV_BELOEIL_2026_02_TEXT } from "@radar/sources";
 
 const signal = (overrides: Partial<VivierSignalInput> = {}): VivierSignalInput => ({
@@ -243,10 +244,17 @@ describe("instrument lexicon — refonte is a bounded positive list, read per oc
 
   // Défaut 1 — une occurrence non réglementaire ne doit JAMAIS masquer une
   // occurrence réglementaire présente ailleurs dans le même texte.
+  //
+  // Cas SYNTHÉTIQUE, déclaré comme tel : aucun nœud de cette forme n'existe
+  // dans les 7 221 nœuds de production. Il éprouve la lecture PAR OCCURRENCE,
+  // pas un phrasé observé. La catégorie structurée est volontairement ABSENTE :
+  // quand elle est renseignée (`category="piia"`) elle FAIT AUTORITÉ et
+  // l'emporte sur toute heuristique de texte libre — cf. le test
+  // « an explicit category outranks the free-text heuristics ».
   it("keeps a regulatory refonte even when a non-regulatory « refonte » comes first", () => {
     expect(
       instrumentFromSignal(
-        "piia",
+        null,
         "PIIA — refonte architecturale",
         "Refonte complète du règlement de zonage",
         null,
@@ -256,20 +264,30 @@ describe("instrument lexicon — refonte is a bounded positive list, read per oc
     const classification = classifyVivierSignal({
       id: "mixed-refonte",
       type: "DesignationEvent",
-      category: "piia",
       label: "PIIA — refonte architecturale",
       description: "Refonte complète du règlement de zonage",
       etape: "projet_reglement",
     });
     expect(classification.instrument).toBe("refonte");
-    // L'instrument est la porte de l'axe résidentiel : `piia` sortirait le
-    // signal du vivier livré via `piia_non_pertinent`.
-    expect(classification.exclusion_reason).not.toBe("piia_non_pertinent");
+    // La VRAIE porte de l'axe résidentiel est `isResidentialEligible`
+    // (`packages/radar-domain/src/vivier/counts.ts`), PAS `exclusion_reason` :
+    // `piia_non_pertinent` exige `residentiel.valeur === "non"` et ne se
+    // déclenche donc jamais ici. Sans objet résidentiel explicite le résidentiel
+    // reste `indetermine` et SEUL l'instrument décide de la sortie du vivier.
+    expect(classification.residentiel.valeur).toBe("indetermine");
+    expect(classification.exclusion_reason).toBeNull();
+    expect(isResidentialEligible(classification)).toBe(true);
+    expect(isResidentialEligible({ ...classification, instrument: "piia" })).toBe(false);
   });
 
-  // Sutton, texte réel : la refonte réglementaire porte le signal même quand
-  // le même PV cite un PPCMOI. `refonte` est testé avant `ppcmoi`.
-  it("keeps the real Sutton refonte ahead of a PPCMOI mentioned in the same PV", () => {
+  // Sutton. Le libellé et la description viennent de la fixture réelle
+  // `sutton-legacy.fixture.ts` — SAUF « , dont le 362 (PPCMOI). », qui est une
+  // SONDE SYNTHÉTIQUE ajoutée ici : la fixture porte « Adoption des premiers
+  // projets de règlements 358 à 363. », sans mention de PPCMOI. La sonde éprouve
+  // l'ordre `refonte` avant `ppcmoi` DANS le bloc heuristique (aucune catégorie
+  // structurée n'est fournie). Le basculement `ppcmoi → refonte` de Sutton est,
+  // lui, mesuré sur la base de production, pas sur cette fixture.
+  it("keeps the Sutton refonte ahead of a PPCMOI mentioned in the same PV", () => {
     expect(
       instrumentOf(
         "Refonte réglementaire complète — Sutton (séance extraordinaire 27 mai 2026)",
@@ -329,5 +347,126 @@ describe("instrument lexicon — refonte is a bounded positive list, read per oc
       expect(isRegulatoryReform(`refonte de la reglementation d${apostrophe}urbanisme`)).toBe(true);
       expect(isRegulatoryReform(`refonte de l${apostrophe}urbanisme`)).toBe(true);
     }
+  });
+});
+
+describe("instrument lexicon — recall on real production phrasings, bounded to urbanism", () => {
+  const instrumentOf = (label: string, description: string | null = null, category: string | null = null) =>
+    instrumentFromSignal(category, label, description, null);
+
+  // Les trois DesignationEvent de PRODUCTION que la liste positive faisait
+  // SORTIR du vivier (revue adverse sur les 7 221 nœuds, 724 villes). Un signal
+  // qui sort est plus grave qu'un signal qui n'entre pas : le propriétaire
+  // l'avait sous les yeux, il disparaît de son panneau.
+  it.each([
+    [
+      "event-chibougamau-520-05",
+      "Refonte des plans et règlement d'urbanisme",
+    ],
+    [
+      "event-hatley-refonte-urbanisme-sadd-2026",
+      "Refonte complète outils planification/réglementation d'urbanisme",
+    ],
+    [
+      "event-saint-jean-de-matha-zonage-604-adoption-2026-01-14",
+      "Adoption règlement de zonage 604 — refonte plan et règlements d'urbanisme",
+    ],
+  ])("keeps the production refonte %s in the vivier", (_id, label) => {
+    expect(instrumentOf(label)).toBe("refonte");
+  });
+
+  // Rappel LATENT : trois nœuds de production formulés « cadre réglementaire »
+  // ne survivaient que parce que `rezonage` gagnait avant dans leur texte. La
+  // prochaine ville formulée ainsi sans « rezonage » tombait silencieusement en
+  // `autre` — `reglements?\b` ne matche pas « réglementaire ».
+  it.each([
+    "Refonte du cadre réglementaire d'urbanisme", // hudson, saint-étienne-de-bolton
+    "Refonte cadre réglementaire complet", // val-des-bois
+  ])("reads %s as a refonte without relying on « rezonage »", (label) => {
+    expect(instrumentOf(label)).toBe("refonte");
+  });
+
+  // BORNE D'URBANISME. Un règlement municipal quelconque n'est pas une refonte
+  // d'urbanisme : l'objet doit être qualifié (zonage, lotissement, urbanisme,
+  // construction) ou être l'idiome de refonte d'ensemble (« réglementaire »,
+  // « cadre réglementaire »).
+  it.each([
+    "Refonte du règlement de taxation",
+    "Refonte de la réglementation sur les animaux",
+    "Refonte du règlement de régie interne du conseil",
+    "Refonte du règlement sur la gestion contractuelle",
+    "Refonte du règlement sur la sécurité incendie",
+    "Refonte des règlements municipaux",
+    "Refonte des règlements de la bibliothèque municipale",
+    "Refonte du règlement d'emprunt",
+  ])("does not read the municipal bylaw %s as an urbanism refonte", (label) => {
+    expect(instrumentOf(label)).toBe("autre");
+  });
+
+  // La ponctuation ne doit PAS tenir lieu de borne : ce qui écarte « refonte
+  // totale du site Web », c'est l'absence d'objet d'urbanisme, pas le fait que
+  // l'adjectif d'ampleur soit ou non suivi d'une virgule.
+  it.each([
+    "Refonte complète, en trois phases, du site Web municipal",
+    "Refonte totale, prévue en 2027, du site Internet",
+    "Refonte globale : la nouvelle image de marque de la Ville",
+  ])("does not let punctuation smuggle %s into the vivier", (label) => {
+    expect(instrumentOf(label)).toBe("autre");
+  });
+
+  // Séparateurs des PV — plus fréquents que le NBSP et jusqu'ici non couverts.
+  // Les caractères invisibles ou homographes sont écrits en ÉCHAPPEMENT, jamais
+  // au glyphe : tiret cadratin, tiret demi-cadratin et tiret insécable sont
+  // indiscernables à la relecture.
+  it.each([
+    ["em dash pair U+2014", "Refonte \u2014 complète \u2014 du règlement de zonage"],
+    ["colon", "Refonte : le règlement de zonage est remplacé"],
+    ["comma pair", "Refonte, complète, du règlement de zonage"],
+    ["en dash U+2013", "Refonte\u2013complète du règlement de zonage"],
+    ["non-breaking hyphen U+2011", "Refonte\u2011complète du règlement de zonage"],
+    ["NBSP U+00A0", "Refonte\u00a0du règlement de zonage"],
+  ])("reads a refonte across the %s separator", (_name, label) => {
+    expect(instrumentOf(label)).toBe("refonte");
+  });
+
+  // Une catégorie structurée fait autorité : un PPCMOI/PIIA/dérogation ponctuel
+  // dont le PV MENTIONNE une refonte en cours ne doit pas entrer dans le vivier
+  // sous une étiquette fausse. Les `candidate === …` explicites passent tous
+  // AVANT le bloc heuristique de texte libre.
+  it.each([
+    [
+      "ppcmoi",
+      "PPCMOI — 145 rue Principale",
+      "Autorisation du projet particulier, en concordance avec la refonte du règlement de zonage en cours.",
+      "ppcmoi",
+    ],
+    [
+      "piia",
+      "PIIA — 12 rue des Érables",
+      "Approbation des plans : la refonte du règlement de zonage est en cours.",
+      "piia",
+    ],
+    [
+      "derogation_mineure",
+      "Dérogation mineure — 4 rue du Parc",
+      "Marge latérale réduite, en attendant la refonte du règlement de zonage.",
+      "derogation",
+    ],
+  ])("lets the explicit category %s outrank the free-text refonte", (category, label, description, expected) => {
+    expect(instrumentOf(label, description, category)).toBe(expected);
+  });
+
+  // …et l'ordre interne du bloc heuristique reste inchangé : sans catégorie
+  // structurée, une refonte réglementaire porte le signal devant `ppcmoi`/`piia`.
+  it("keeps refonte ahead of ppcmoi/piia inside the free-text block", () => {
+    expect(
+      instrumentOf(
+        "Refonte du règlement de zonage",
+        "Le projet particulier (PPCMOI) 362 est adopté séparément.",
+      ),
+    ).toBe("refonte");
+    expect(
+      instrumentOf("Refonte du règlement de zonage", "PIIA cité en annexe."),
+    ).toBe("refonte");
   });
 });

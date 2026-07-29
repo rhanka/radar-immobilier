@@ -297,56 +297,112 @@ function derivedEtapes(
 }
 
 /**
- * Lexique « refonte » — liste POSITIVE bornée, évaluée PAR OCCURRENCE.
+ * Lexique « refonte » — liste POSITIVE bornée À L'URBANISME, lue PAR OCCURRENCE.
  *
- * Deux défauts distincts sont couverts simultanément :
+ * Trois propriétés tenues simultanément :
  *
- * 1. PAR OCCURRENCE, jamais sur le texte entier. Un même signal peut porter
- *    une occurrence non réglementaire ET une occurrence réglementaire :
- *    libellé « PIIA — refonte architecturale » + description « Refonte
- *    complète du règlement de zonage ». Un veto armé par la 1re occurrence
- *    masquerait la 2e et sortirait du vivier un signal qui contient une vraie
- *    refonte réglementaire. Chaque occurrence est donc jugée SEULE, sur la
- *    queue de texte qui la suit ; aucune occurrence n'en invalide une autre.
+ * 1. PAR OCCURRENCE, jamais sur le texte entier. Un même signal peut porter une
+ *    occurrence non réglementaire ET une occurrence réglementaire. Un veto armé
+ *    par la 1re occurrence masquerait la 2e. Chaque occurrence est donc jugée
+ *    SEULE, sur la queue de texte qui la suit ; aucune n'en invalide une autre.
  *
- * 2. Liste POSITIVE bornée, jamais `includes("refonte")`. Seules les formes
- *    réglementaires d'urbanisme sont retenues. « refonte du site Web
- *    municipal », « refonte organisationnelle », « refonte des
- *    infrastructures », « refonte de la grille tarifaire », « refonte
- *    architecturale », « refonte des services souterrains » ne matchent
- *    aucune branche : ils restent hors vivier sans qu'aucune liste noire
- *    n'ait à les énumérer.
+ * 2. BORNÉE À L'URBANISME, pas seulement au « réglementaire ». Un règlement
+ *    municipal quelconque n'est pas une refonte d'urbanisme : « refonte du
+ *    règlement de taxation », « … sur les animaux », « … de régie interne »,
+ *    « … sur la gestion contractuelle », « … sur la sécurité incendie »,
+ *    « refonte des règlements municipaux », « … de la bibliothèque
+ *    municipale », « refonte du règlement d'emprunt » restent DEHORS. Un objet
+ *    générique (règlement / réglementation / plan) ne porte la refonte que
+ *    QUALIFIÉ d'urbanisme (« de zonage », « de lotissement », « d'urbanisme »,
+ *    « de construction »). Restent aussi dehors, faute de tout objet
+ *    d'urbanisme : « refonte du site Web municipal », « refonte
+ *    organisationnelle », « refonte des infrastructures », « refonte de la
+ *    grille tarifaire », « refonte architecturale », « refonte des services
+ *    souterrains » — sans qu'aucune liste noire n'ait à les énumérer.
+ *
+ * 3. LA BORNE EST L'OBJET, PAS LA PONCTUATION. Les PV coordonnent (« refonte
+ *    des plans ET règlement d'urbanisme »), incisent (« refonte, complète, du
+ *    règlement de zonage »), tiretent (« refonte — complète — du règlement »)
+ *    et intercalent (« refonte complète des outils de planification/
+ *    réglementation d'urbanisme »). Ces formes sont admises, et pourtant
+ *    « refonte complète, en trois phases, du site Web municipal » ne l'est pas :
+ *    ce qui tranche est l'absence d'objet d'urbanisme, jamais la virgule.
  *
  * Le texte vient de `fold()` : minuscules + diacritiques retirés, mais
  * l'apostrophe est CONSERVÉE telle quelle. La classe d'apostrophes est donc
  * écrite en échappements explicites (U+0027 ASCII et U+2019 typographique),
  * jamais au glyphe : une classe saisie visuellement peut contenir deux fois la
  * même apostrophe — indiscernable à l'œil, et « d'urbanisme » ne matche alors
- * jamais.
+ * jamais. Même règle pour les tirets et l'espace insécable ci-dessous.
  */
 const REFORM_APOSTROPHE = "[\\u0027\\u2019]";
-/** Objets réglementaires d'urbanisme admis après « refonte ». */
-const REFORM_SCOPE = `(?:reglementations?|reglements?|zonage|lotissement|(?:plans?\\s+d${REFORM_APOSTROPHE}\\s*)?urbanisme)`;
-/** Le même objet, précédé de sa préposition optionnelle (« du », « de la », « de l' », « des »). */
-const REFORM_SCOPE_PHRASE = `(?:de\\s+la\\s+|de\\s+l${REFORM_APOSTROPHE}\\s*|du\\s+|des\\s+|de\\s+)?${REFORM_SCOPE}`;
+/**
+ * Séparateurs admis entre « refonte » et ce qu'elle porte, et à l'intérieur de
+ * la forme : espaces (`\s` couvre U+00A0 en JS), tirets U+2010..U+2015 et ASCII,
+ * deux-points, points-virgules, virgules.
+ */
+const REFORM_SEPARATOR = "[\\s\\u2010-\\u2015:;,\\-]+";
+/**
+ * Objets qui SONT d'urbanisme : ils portent la refonte sans autre qualifiant.
+ */
+const REFORM_URBAN_OBJECT =
+  `(?:zonage|lotissement|construction|piia|(?:plans?\\s+d${REFORM_APOSTROPHE}\\s*)?urbanisme)`;
+/**
+ * Objets réglementaires GÉNÉRIQUES : ils ne portent la refonte que qualifiés
+ * d'urbanisme. C'est la borne que le lexique précédent n'avait pas.
+ */
+const REFORM_GENERIC_OBJECT = "(?:reglementations?|reglements?|plans?)";
+/** « d'urbanisme », « de zonage », « de lotissement », « de construction ». */
+const REFORM_URBAN_QUALIFIER =
+  `\\s*(?:de\\s+|d${REFORM_APOSTROPHE}\\s*)${REFORM_URBAN_OBJECT}\\b`;
+/** Déterminants et prépositions admis devant un objet. */
+const REFORM_DETERMINER =
+  `(?:de\\s+la\\s+|de\\s+l${REFORM_APOSTROPHE}\\s*|d${REFORM_APOSTROPHE}\\s*|du\\s+|des\\s+|de\\s+|aux?\\s+|les?\\s+|la\\s+)?`;
+/** La coordination des PV : « et », « ou », « / », « , ». */
+const REFORM_CONJUNCTION = "(?:\\s*[,/]\\s*|\\s+(?:et|ou)\\s+)";
+const REFORM_ITEM_ANY = `${REFORM_DETERMINER}(?:${REFORM_URBAN_OBJECT}|${REFORM_GENERIC_OBJECT})`;
+const REFORM_ITEM_URBAN = `${REFORM_DETERMINER}${REFORM_URBAN_OBJECT}`;
+const REFORM_ITEM_GENERIC = `${REFORM_DETERMINER}${REFORM_GENERIC_OBJECT}`;
+/** Jusqu'à trois objets coordonnés avant celui qui décide. */
+const REFORM_ENUMERATION = `(?:${REFORM_ITEM_ANY}\\b${REFORM_CONJUNCTION}){0,3}`;
+/**
+ * Une énumération d'objets qui est d'urbanisme, soit parce qu'elle ATTEINT un
+ * objet d'urbanisme (« refonte totale du zonage et du lotissement »), soit
+ * parce qu'elle se termine sur un objet générique QUALIFIÉ (« refonte des plans
+ * et règlement d'urbanisme »).
+ */
+const REFORM_OBJECT_LIST =
+  `(?:${REFORM_ENUMERATION}${REFORM_ITEM_URBAN}\\b` +
+  `|${REFORM_ENUMERATION}${REFORM_ITEM_GENERIC}\\b${REFORM_URBAN_QUALIFIER})`;
 /** Adjectifs d'ampleur : « refonte complète/totale/globale/intégrale/majeure ». */
 const REFORM_EXTENT =
   "(?:complete?s?|totale?s?|totaux|globale?s?|globaux|integrale?s?|integraux|majeure?s?)";
 /**
- * Formes réglementaires admises, ancrées sur le texte qui suit UNE occurrence
- * de « refonte » :
- *  - « refonte réglementaire [complète] »
- *  - « refonte totale » / « refonte complète du règlement de zonage » —
- *    l'adjectif d'ampleur seul n'est admis qu'en fin de segment ou suivi d'un
- *    objet réglementaire, ce qui écarte « refonte totale du site Web »
- *  - « refonte du règlement de zonage », « refonte de la réglementation
- *    d'urbanisme », « refonte du plan d'urbanisme »
+ * Jusqu'à quatre mots quelconques entre l'adjectif d'ampleur et l'objet
+ * d'urbanisme : « refonte complète [des] outils [de] planification/
+ * réglementation d'urbanisme ». La borne reste l'objet, pas le remplissage.
+ */
+const REFORM_FILLER = "(?:[a-z0-9-]+[\\s/,;]+){0,4}";
+/**
+ * Fin de segment pour l'adjectif d'ampleur SEUL : fin de chaîne ou ponctuation
+ * FORTE. La virgule et le deux-points en sont exclus — sinon « refonte
+ * complète, en trois phases, du site Web municipal » passerait.
+ */
+const REFORM_SEGMENT_END = "\\s*(?:[.!?]|$)";
+/**
+ * Formes admises, ancrées sur le texte qui suit UNE occurrence de « refonte » :
+ *  - « refonte réglementaire », « refonte du cadre réglementaire [d'urbanisme] »
+ *    — l'idiome de refonte d'ENSEMBLE, qui ne vise pas un règlement nommé ;
+ *  - « refonte totale » (fin de segment) / « refonte complète du règlement de
+ *    zonage » (adjectif d'ampleur + objet d'urbanisme, remplissage toléré) ;
+ *  - « refonte du règlement de zonage », « refonte des plans et règlement
+ *    d'urbanisme », « refonte du plan d'urbanisme ».
  */
 const REGULATORY_REFORM_TAIL_RE = new RegExp(
-  "^\\s+(?:" +
-    "reglementaires?\\b" +
-    `|${REFORM_EXTENT}\\b(?=\\s*(?:[.,;:!?)\\]]|$)|\\s+${REFORM_SCOPE_PHRASE}\\b)` +
-    `|${REFORM_SCOPE_PHRASE}\\b` +
+  `^${REFORM_SEPARATOR}(?:` +
+    `${REFORM_DETERMINER}(?:cadres?\\s+)?reglementaires?\\b` +
+    `|${REFORM_EXTENT}\\b(?=${REFORM_SEGMENT_END}|${REFORM_SEPARATOR}${REFORM_FILLER}${REFORM_OBJECT_LIST})` +
+    `|${REFORM_OBJECT_LIST}` +
     ")",
 );
 const REFORM_OCCURRENCE_RE = /\brefontes?\b/g;
@@ -369,9 +425,17 @@ export function isRegulatoryReform(text: string): boolean {
  * The Graphify 3.4 materializer imports this exact function when persisting
  * the classification; it must not maintain a second instrument lexicon.
  *
- * Ordre : `refonte` est testé AVANT `ppcmoi`/`piia`. Une refonte réglementaire
- * est l'instrument porteur même quand le PV cite par ailleurs un PPCMOI (le
- * « 362 (PPCMOI) » de Sutton) ou un PIIA.
+ * DEUX réordonnancements distincts, à ne pas confondre :
+ *
+ * 1. La CATÉGORIE STRUCTURÉE fait autorité. Tous les `candidate === …` sont
+ *    testés AVANT toute heuristique de texte libre. Un PPCMOI, un PIIA ou une
+ *    dérogation ponctuels dont le PV se contente de MENTIONNER une refonte en
+ *    cours (« en concordance avec la refonte du règlement de zonage ») gardent
+ *    leur instrument : ils n'entrent pas dans le vivier sous une étiquette
+ *    fausse.
+ * 2. À l'INTÉRIEUR du bloc heuristique, `refonte` passe avant `ppcmoi`/`piia`.
+ *    Sans catégorie structurée, une refonte réglementaire porte le signal même
+ *    quand le même PV cite par ailleurs un PPCMOI ou un PIIA.
  */
 export function instrumentFromSignal(
   category: string | null,
@@ -381,12 +445,21 @@ export function instrumentFromSignal(
 ): VivierInstrument {
   const candidate = token(explicit) ?? token(category);
   const text = fold(`${label ?? ""} ${description ?? ""}`);
+
+  // 1. Catégorie structurée — elle fait autorité, sans lire le texte.
   if (["rezonage", "modification_zonage", "changement_usage"].includes(candidate ?? "")) return "rezonage";
-  if (candidate === "refonte" || isRegulatoryReform(text)) return "refonte";
-  if (candidate === "ppcmoi" || text.includes("ppcmoi") || text.includes("projet particulier")) return "ppcmoi";
-  if (candidate === "piia" || text.includes("piia")) return "piia";
-  if (candidate === "derogation" || candidate === "derogation_mineure" || text.includes("derogation")) return "derogation";
-  if (candidate === "plan_urbanisme" || text.includes("plan d urbanisme")) return "plan_urbanisme";
+  if (candidate === "refonte") return "refonte";
+  if (candidate === "ppcmoi") return "ppcmoi";
+  if (candidate === "piia") return "piia";
+  if (candidate === "derogation" || candidate === "derogation_mineure") return "derogation";
+  if (candidate === "plan_urbanisme") return "plan_urbanisme";
+
+  // 2. Heuristiques de texte libre, `refonte` en tête.
+  if (isRegulatoryReform(text)) return "refonte";
+  if (text.includes("ppcmoi") || text.includes("projet particulier")) return "ppcmoi";
+  if (text.includes("piia")) return "piia";
+  if (text.includes("derogation")) return "derogation";
+  if (text.includes("plan d urbanisme")) return "plan_urbanisme";
   return "autre";
 }
 
