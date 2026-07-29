@@ -21,6 +21,27 @@ export interface Graphify34Manifest {
   edge_count: number;
 }
 
+export interface Graphify34SnapshotStore {
+  list(prefix: string): Promise<string[]>;
+  get(key: string): Promise<Uint8Array>;
+  put(key: string, body: Uint8Array | string, contentType?: string): Promise<unknown>;
+}
+
+export interface Graphify34SnapshotTarget {
+  municipality: string;
+  snapshot: Graphify34Snapshot;
+  manifest: Graphify34Manifest;
+}
+
+export interface Graphify34BackupReceipt {
+  municipality: string;
+  source_prefix: string;
+  backup_prefix: string;
+  object_count: number;
+}
+
+const encoder = new TextEncoder();
+
 function record(value: unknown): Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? value as Record<string, unknown>
@@ -102,4 +123,94 @@ export function buildGraphify34Manifest(
     node_count: snapshot.nodes.length,
     edge_count: (snapshot.edges ?? []).length + (snapshot.links ?? []).length,
   };
+}
+
+function graphPrefix(municipality: string): string {
+  return `graph/${municipality}/`;
+}
+
+function backupPrefix(backupId: string, municipality: string): string {
+  return `graphify-34-backups/${backupId}/${graphPrefix(municipality)}`;
+}
+
+/** Copy all existing selected city prefixes before a Graphify 3.4 apply. */
+export async function backupGraphify34SnapshotPrefixes(
+  store: Graphify34SnapshotStore,
+  municipalities: readonly string[],
+  backupId: string,
+): Promise<Graphify34BackupReceipt[]> {
+  const receipts: Graphify34BackupReceipt[] = [];
+  const uniqueMunicipalities = [...new Set(municipalities)].sort();
+
+  for (const municipality of uniqueMunicipalities) {
+    const sourcePrefix = graphPrefix(municipality);
+    const destinationPrefix = backupPrefix(backupId, municipality);
+    const sourceKeys = (await store.list(sourcePrefix))
+      .filter((key) => key.startsWith(sourcePrefix))
+      .sort();
+
+    for (const sourceKey of sourceKeys) {
+      const contents = await store.get(sourceKey);
+      await store.put(
+        `${destinationPrefix}${sourceKey.slice(sourcePrefix.length)}`,
+        contents,
+        "application/json",
+      );
+    }
+
+    const receipt: Graphify34BackupReceipt = {
+      municipality,
+      source_prefix: sourcePrefix,
+      backup_prefix: destinationPrefix,
+      object_count: sourceKeys.length,
+    };
+    await store.put(
+      `${destinationPrefix}_backup-complete.json`,
+      encoder.encode(JSON.stringify(receipt)),
+      "application/json",
+    );
+    receipts.push(receipt);
+  }
+
+  return receipts;
+}
+
+async function writeGraphify34Snapshot(
+  store: Graphify34SnapshotStore,
+  target: Graphify34SnapshotTarget,
+): Promise<void> {
+  await store.put(
+    target.manifest.snapshot_key,
+    encoder.encode(JSON.stringify(target.snapshot)),
+    "application/json",
+  );
+  await store.put(
+    `graph/${target.municipality}/graphify-3.4.manifest.json`,
+    encoder.encode(JSON.stringify(target.manifest)),
+    "application/json",
+  );
+}
+
+/**
+ * Fail closed: all target prefixes finish copying to a timestamped archive
+ * before this function writes a canonical latest.json or projects anything.
+ */
+export async function applyGraphify34Snapshots(
+  store: Graphify34SnapshotStore,
+  targets: readonly Graphify34SnapshotTarget[],
+  backupId: string,
+  project: (target: Graphify34SnapshotTarget) => Promise<void>,
+): Promise<Graphify34BackupReceipt[]> {
+  const receipts = await backupGraphify34SnapshotPrefixes(
+    store,
+    targets.map((target) => target.municipality),
+    backupId,
+  );
+
+  for (const target of targets) {
+    await writeGraphify34Snapshot(store, target);
+    await project(target);
+  }
+
+  return receipts;
 }
