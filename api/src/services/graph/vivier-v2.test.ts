@@ -470,3 +470,98 @@ describe("instrument lexicon — recall on real production phrasings, bounded to
     ).toBe("refonte");
   });
 });
+
+describe("instrument lexicon — apposition and prefixed refonte categories", () => {
+  const instrumentOf = (label: string, description: string | null = null, category: string | null = null) =>
+    instrumentFromSignal(category, label, description, null);
+
+  // Recette sur les 7 221 nœuds de production : les DEUX dernières sorties.
+  // Textes RÉELS des nœuds, pas des paraphrases.
+
+  // chute-saint-philippe — six règlements d'urbanisme adoptés en bloc. Sortait
+  // parce que le qualifiant d'urbanisme exigeait « de » / « d' » : l'apposition
+  // nue « réglementation urbanisme » n'était pas reconnue.
+  it("keeps event-chute-saint-philippe-refonte-reglementation-2026-04-13 in the vivier", () => {
+    expect(
+      instrumentOf(
+        "Adoption groupée règlements 331 à 336-2026 — refonte réglementation urbanisme",
+        "Adoption groupée de 6 règlements d'urbanisme (331 à 336-2026) modifiant permis (137, 138), zonage (139), lotissement (140), construction (141)…",
+      ),
+    ).toBe("refonte");
+  });
+
+  // saint-sixte — DOUBLE cause, chacune testée SEULE pour qu'aucune ne masque
+  // l'autre : (1) la catégorie structurée `refonte_reglementation_urbanisme`
+  // n'était pas reconnue, le test étant une égalité stricte à `refonte` ;
+  // (2) « réglementation zones » n'avait aucun qualifiant reconnu.
+  it("keeps signal-saint-sixte-refonte-urbanisme-fo2fo3 in the vivier, on each cause alone", () => {
+    const label =
+      "Signal : refonte réglementation zones Fo-2/Fo-3 et milieu villageois (règlements 260-26 et 261-26)";
+
+    // Cause 1 seule — la catégorie structurée doit faire autorité même préfixée.
+    // Le libellé est neutralisé pour que seul le token puisse décider.
+    expect(instrumentOf("Signal saint-sixte", null, "refonte_reglementation_urbanisme")).toBe("refonte");
+
+    // Cause 2 seule — sans catégorie, l'apposition « réglementation zones » doit
+    // porter le signal.
+    expect(instrumentOf(label)).toBe("refonte");
+
+    // Le nœud réel, les deux causes réunies.
+    expect(instrumentOf(label, null, "refonte_reglementation_urbanisme")).toBe("refonte");
+  });
+
+  // La reconnaissance de la catégorie structurée est un PRÉFIXE borné, pas une
+  // égalité stricte ni un `includes`. Trois tokens `refonte_*` existent en base.
+  it.each([
+    "refonte",
+    "refontes",
+    "refonte_reglementation",
+    "refonte_reglementation_urbanisme",
+    "Refonte réglementation urbanisme", // `token()` replie et souligne les espaces
+  ])("reads the structured category %s as a refonte", (category) => {
+    expect(instrumentOf("Libellé sans marqueur", null, category)).toBe("refonte");
+  });
+
+  // …et le préfixe est BORNÉ : une catégorie qui CONTIENT « refonte » sans
+  // commencer par elle n'est pas une refonte, et les autres catégories
+  // structurées gardent leur reconnaissance.
+  it("keeps the refonte prefix bounded and the other categories intact", () => {
+    expect(instrumentOf("PIIA — 12 rue des Érables", null, "piia_refonte_architecturale")).toBe("piia");
+    expect(instrumentOf("Dérogation mineure — 4 rue du Parc", null, "derogation_mineure")).toBe("derogation");
+    expect(instrumentOf("PPCMOI — 145 rue Principale", null, "ppcmoi")).toBe("ppcmoi");
+    expect(instrumentOf("Modification de zonage", null, "modification_zonage")).toBe("rezonage");
+  });
+
+  // L'apposition est admise, mais c'est LE MOT D'URBANISME qui qualifie —
+  // jamais l'absence de préposition. La borne des huit familles municipales
+  // tient donc aussi en apposition nue.
+  it.each([
+    "Refonte réglementation urbanisme",
+    "Refonte règlement zonage",
+    "Refonte réglementation zones",
+    "Refonte règlements lotissement",
+  ])("reads the bare apposition %s as a refonte", (label) => {
+    expect(instrumentOf(label)).toBe("refonte");
+  });
+
+  it.each([
+    "Refonte réglementation animaux",
+    "Refonte règlement taxation",
+    "Refonte réglementation matières résiduelles",
+    "Refonte règlement emprunt",
+    "Refonte règlements municipaux",
+    "Refonte réglementation sécurité incendie",
+  ])("does not read the bare apposition %s as an urbanism refonte", (label) => {
+    expect(instrumentOf(label)).toBe("autre");
+  });
+
+  // Lac-Frontière — le SEUL vrai faux positif retiré par ce lot. Il doit rester
+  // dehors : la voirie n'est pas de l'urbanisme, en apposition comme ailleurs.
+  it.each([
+    "Refonte des services souterrains",
+    "Refonte services souterrains",
+    "Refonte réseau souterrain route 204",
+  ])("keeps the lac-frontière family %s out of the vivier", (label) => {
+    expect(instrumentOf(label)).toBe("autre");
+  });
+});

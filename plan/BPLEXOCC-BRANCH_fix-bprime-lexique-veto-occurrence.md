@@ -99,6 +99,71 @@ avec la refonte du règlement de zonage ») entrait dans le vivier sous une
   centrale du lot n'était donc démontrée par **aucun** test. La vraie porte est
   `isResidentialEligible` — le test l'appelle maintenant explicitement.
 
+## Ce que la recette sur les 7 221 nœuds a mesuré — et les 2 dernières pertes
+
+Mesure faite sur les **7 221 nœuds de production**. Contrôles de validité du
+pipeline : `classifyBPrime` sur `main` = **6 777 / 720 villes** (repère exact),
+et le rejeu `main → a15ce4e` retrouve les 12 bascules attendues.
+
+**Delta mesuré du lot** (après la correction de la borne d'urbanisme et de
+l'ordre) :
+
+| grandeur | valeur mesurée |
+|---|---|
+| entrants | **+7**, tous légitimes (godbout, ham-sud, la-minerve, saint-polycarpe, sutton, très-saint-rédempteur, havelock) |
+| sortants | **−3** |
+| axe résidentiel | **1 365 → 1 369** |
+| réordonnancement | **10 nœuds relabellisés, 0 mouvement de périmètre** — permuter entre `ppcmoi`/`piia`/`derogation` ne peut pas déplacer l'axe `r`, aucun des trois n'y étant éligible |
+| villes 10/10 | **conservées** ; Sutton passe de 1 à 2 signaux |
+| villes vidées | **0** |
+
+Les 3 régressions de la revue précédente (chibougamau, hatley,
+saint-jean-de-matha) sont **récupérées**, et Lac-Frontière **reste dehors** —
+seul vrai faux positif retiré, légitime.
+
+Restaient **2 vraies refontes d'urbanisme sorties**, corrigées ici.
+
+### P1 — `event-chute-saint-philippe-refonte-reglementation-2026-04-13`
+
+« Adoption groupée règlements 331 à 336-2026 — refonte **réglementation
+urbanisme** » / « Adoption groupée de 6 règlements d'urbanisme (331 à 336-2026)
+modifiant permis (137, 138), zonage (139), lotissement (140), construction
+(141)… ». Six règlements d'urbanisme : refonte incontestable.
+
+**Cause** : `REFORM_URBAN_QUALIFIER` exigeait `de ` ou `d'`. L'**apposition
+nue** « réglementation urbanisme » n'était pas reconnue.
+
+**Correction** : le déterminant devient optionnel dans le qualifiant. Le TERME
+D'URBANISME, lui, reste obligatoire — c'est lui qui qualifie, **jamais**
+l'absence de préposition. La borne des huit familles municipales tient donc à
+l'identique en apposition : « refonte réglementation animaux », « refonte
+règlement taxation », « refonte règlements municipaux » restent dehors, et
+« refonte services souterrains » (forme apposée de Lac-Frontière) aussi.
+
+### P2 — `signal-saint-sixte-refonte-urbanisme-fo2fo3`
+
+« Signal : refonte **réglementation zones** Fo-2/Fo-3 et milieu villageois
+(règlements 260-26 et 261-26) », `category = refonte_reglementation_urbanisme`.
+
+**Double cause, chacune suffisante :**
+
+1. **Défaut de la correction précédente elle-même.** Le test de catégorie
+   structurée était une **égalité stricte** `candidate === "refonte"`. La base
+   porte **trois** tokens `refonte_*` — `refonte_reglementation_urbanisme`
+   (×2) et `refonte_reglementation` (×1). La règle « la catégorie structurée
+   fait autorité », introduite au commit précédent, ne se déclenchait donc pas
+   pour eux : l'autorité était donnée, mais la catégorie n'était pas reconnue
+   quand elle est préfixée.
+2. « réglementation **zones** » n'avait aucun qualifiant reconnu (même cause
+   que P1, et `zone` n'était pas un terme d'urbanisme).
+
+**Correction** : `REFORM_CATEGORY_RE = /^refontes?(?:_|$)/` — un préfixe
+**borné**, jamais un `includes`. `piia_refonte_architecturale` n'est pas une
+refonte ; `derogation_mineure`, `ppcmoi`, `modification_zonage` gardent leur
+reconnaissance intacte. Et `zone(s)` est ajouté comme **qualifiant seulement**,
+pas comme objet porteur : « réglementation zones Fo-2 » qualifie, « refonte de
+la zone de collecte » ne porte pas.
+
 ## Décision
 
 **Liste POSITIVE bornée à l'urbanisme, lue PAR OCCURRENCE**, et **séparation
@@ -115,6 +180,12 @@ des deux ordres**.
   **qualifié** d'urbanisme (`REFORM_URBAN_QUALIFIER` : « d'urbanisme »,
   « de zonage », « de lotissement », « de construction »). C'est la borne
   absente du jet précédent (D2).
+- **Apposition.** Le qualifiant d'urbanisme est admis **avec ou sans**
+  préposition : « réglementation urbanisme », « règlement zonage »,
+  « réglementation zones » valent « du règlement de zonage ». `zone(s)` est
+  qualifiant sans être porteur.
+- **Catégorie structurée préfixée.** `REFORM_CATEGORY_RE = /^refontes?(?:_|$)/`
+  reconnaît les trois tokens `refonte_*` de la base, et rien d'autre.
 - **Coordination.** `REFORM_ENUMERATION` admet jusqu'à trois objets coordonnés
   par « et / ou / , / / » avant celui qui décide. C'est ce qui récupère
   chibougamau (« des plans **et** règlement d'urbanisme ») et
@@ -170,6 +241,9 @@ littéraux (D5).
       « cadre réglementaire », les 8 règlements municipaux hors urbanisme, les
       3 pièges de ponctuation, les 6 séparateurs, les 3 catégories structurées,
       et l'appel réel à `isResidentialEligible`.
+- [x] **LOT 4 — recette round 2** : apposition nue + catégories `refonte_*`
+      préfixées, sur les 2 dernières sorties mesurées (chute-saint-philippe,
+      saint-sixte). 21 cas ajoutés → **74 au total**.
 
 ## Portée
 
@@ -182,40 +256,55 @@ littéraux (D5).
 
 ## Vérification
 
-- `vitest run src/services/graph/vivier-v2.test.ts` → **53 passed** (27 de la
-  branche + 26 ajoutés).
-- **Rouge avant / vert après, mesuré** : les 26 tests ajoutés rejoués contre le
-  code de la branche AVANT correctif → **24 échouent**. Les 2 qui passaient
-  déjà sont déclarés comme garde-fous, pas comme preuves :
-  - `NBSP U+00A0` — la forme était déjà reconnue (D5) ;
-  - `keeps refonte ahead of ppcmoi/piia inside the free-text block` — non-
-    régression de l'ordre interne, conservé par le correctif.
-- `vitest run src/services/graph/` → 238 passed ; les 9 échecs restants sont
+- `vitest run src/services/graph/vivier-v2.test.ts` → **74 passed** (27 de la
+  branche + 26 au round 1 + 21 au round 2).
+- **Rouge avant / vert après, mesuré, aux deux rounds** :
+  - round 1 — les 26 tests ajoutés rejoués contre le code de la branche AVANT
+    correctif → **24 échouent**. Les 2 qui passaient déjà sont déclarés comme
+    garde-fous, pas comme preuves : `NBSP U+00A0` (la forme était déjà
+    reconnue, D5) et `keeps refonte ahead of ppcmoi/piia inside the free-text
+    block` (non-régression de l'ordre interne).
+  - round 2 — les 21 tests ajoutés rejoués contre le code d'`ab2b49b` →
+    **10 échouent** : les 2 nœuds de production, les 4 tokens `refonte_*`
+    préfixés, les 4 appositions d'urbanisme. Les 11 qui passaient déjà sont les
+    **garde-fous de non-régression** : les 6 familles municipales en apposition
+    nue, les 3 formes Lac-Frontière, `refonte` non préfixé et la borne du
+    préfixe. Ils prouvent que l'apposition ne rouvre RIEN.
+- `vitest run src/services/graph/` → 259 passed ; les 9 échecs restants sont
   les suites `DB-bound: … (integration)` (`getaddrinfo EAI_AGAIN postgres`),
   sans stack Docker par consigne.
-- `vitest run` (suite API complète) → **21 failed | 1456 passed**, contre
+- `vitest run` (suite API complète) → **21 failed | 1477 passed**, contre
   **21 failed | 1430 passed** sur la branche avant correctif : **exactement les
-  mêmes 21 échecs DB/integration**, +26 tests, aucune régression.
+  mêmes 21 échecs DB/integration**, +47 tests, aucune régression.
+- **Sonde jetable (non commitée)** : 38 phrasés hors tests, dont la forme
+  APPOSÉE de chaque famille exclue — « refonte règlement taxation », « refonte
+  services souterrains », « refonte site Web municipal », « refonte plans et
+  devis », « refonte plan communication », « refonte grille tarifaire ». Les
+  38 conformes. C'est la vérification que le discriminant est bien le mot
+  d'urbanisme, et non la présence d'une préposition.
 - `tsc --noEmit -p api/tsconfig.json` → exit 0.
 - `eslint api/src/services/graph/vivier-v2.ts api/src/services/graph/vivier-v2.test.ts` → exit 0.
 
 ## Reste ouvert (déclaré, non maquillé)
 
-- **Le delta sur la base de production n'est PAS mesuré par ce correctif.**
-  Aucun accès aux 7 221 nœuds depuis ce worktree : ni `rclone` ni credentials
-  S3, `mcp immo search_signals` renvoie 0 signal, et aucun stack Docker n'a été
-  démarré (consigne OOM). Les chiffres **+8 / −4** viennent de la revue
-  adverse, pas de ce lot. Ce qui est établi ici : les 3 pertes sont récupérées
-  et Lac-Frontière reste dehors — **sur les textes cités par la revue**, joués
-  comme tests. Le nouveau nombre de sortants n'est **pas** annoncé : la borne
-  d'urbanisme (D2) et l'autorité de la catégorie (D4) déplacent en plus un
-  nombre inconnu de nœuds, qu'aucune mesure faite ici ne chiffre. Une
-  re-mesure sur les 7 221 nœuds est **requise avant merge**.
+- **Le delta post-round-2 n'est pas re-mesuré par moi.** Le delta du tableau
+  ci-dessus (**+7 / −3**, résidentiel 1 365 → 1 369) a été mesuré par le
+  coordinateur sur les 7 221 nœuds à l'état `ab2b49b`. Je n'ai **aucun accès**
+  à cette base depuis ce worktree : ni `rclone` ni credentials S3, `mcp immo
+  search_signals` renvoie 0 signal, aucun stack Docker (consigne OOM). Ce que
+  j'établis pour le round 2 est **local** : les 2 textes réels des nœuds perdus
+  sont joués comme tests et passent, et 11 garde-fous + 38 sondes montrent
+  qu'aucune famille exclue ne rentre. **L'attendu, non vérifié par moi** :
+  −3 → **−1 sortant** (Lac-Frontière seul) et résidentiel 1 369 → **1 371**.
+  La re-mesure de recette sur les 7 221 nœuds est **requise avant merge**.
 - **Le texte exact de hatley n'a pas pu être relu à la source.** Le libellé
   cité par la revue est abrégé ; le lexique accepte les deux formulations
   plausibles (« complète outils planification/… » et « complète des outils de
   planification/… »), mais le test porte la forme citée, pas une forme vérifiée
   au nœud.
+- **`zone(s)` est qualifiant, pas porteur** — choix délibéré et borné. Une
+  forme « refonte des zones … » sans autre marqueur d'urbanisme resterait
+  `autre`. Aucun nœud de cette forme n'est connu ; le cas n'est pas instruit.
 - **Second lexique refonte, hors périmètre, NON corrigé** :
   `packages/radar-domain/src/signals/b-prime.ts:142-144` maintient
   `/\b(?:refonte|revision) complete\b/`, alors que le commentaire de
