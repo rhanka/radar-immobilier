@@ -1,8 +1,50 @@
+/**
+ * Bytes AND the version of those exact bytes, reported by a SINGLE read.
+ *
+ * A `get()` followed by a separate `head()` cannot produce this: another writer
+ * may publish between the two calls, and the pair then reports version N with
+ * the bytes of version N-1. Anything that records "these bytes are version X"
+ * — the canonical-graph archive above all — must read them together.
+ */
+export interface StoredObject {
+  key: string;
+  body: Uint8Array;
+  /** ETag carried by the same response as `body`; `null` when none was returned. */
+  etag: string | null;
+}
+
 /** A stored object's metadata returned by head/put. */
 export interface ObjectInfo {
   key: string;
   size?: number | undefined;
   contentType?: string | undefined;
+  /**
+   * Opaque server-side version of the stored bytes (S3 `ETag`), quotes
+   * included. Used by the canonical-graph writer to detect a concurrent
+   * overwrite between the moment an archive was taken and the moment the
+   * replacement is PUT. `undefined` when the backend did not return one.
+   */
+  etag?: string | undefined;
+}
+
+/**
+ * `graph/<city>/latest.json` — the single key the graph projector
+ * (`project-graph-from-s3.ts`) and the S3 replay read as truth for a city.
+ *
+ * Overwriting it is irreversible: the previous bytes are gone unless someone
+ * archived them first. Every writer of this key must therefore go through
+ * `services/graph/canonical-graph-writer.ts`, which archives the pre-image and
+ * refuses the write when the object moved under it. `S3ObjectStore.put()`
+ * enforces that by refusing this key outright — the guard lives on the write
+ * path, not in the goodwill of each caller.
+ */
+export function isCanonicalGraphKey(key: string): boolean {
+  return /^graph\/[^/]+\/latest\.json$/.test(key);
+}
+
+/** The canonical key for a city — never build this string by hand. */
+export function canonicalGraphKey(citySlug: string): string {
+  return `graph/${citySlug}/latest.json`;
 }
 
 /**
@@ -18,6 +60,14 @@ export interface ObjectStore {
   ): Promise<ObjectInfo>;
   get(key: string): Promise<Uint8Array>;
   head(key: string): Promise<ObjectInfo | null>;
+  /**
+   * Read bytes and their version in one call, or `null` when the key is absent.
+   *
+   * Optional on the general boundary — most callers only need the bytes — but
+   * REQUIRED of any store passed to `services/graph/canonical-graph-writer.ts`,
+   * which must not record an ETag it obtained from a second round trip.
+   */
+  getWithEtag?(key: string): Promise<StoredObject | null>;
   /**
    * List object keys under a prefix. Optional: only the real S3/MinIO store
    * and stores that back sharded aggregates (e.g. scrape-status `state/`)

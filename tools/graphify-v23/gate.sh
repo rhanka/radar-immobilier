@@ -162,13 +162,27 @@ if ! s5cmd --endpoint-url "$S3_URL" cp "$CANDIDATE" "$parsed_key" >>"$RUN_DIR/lo
   exit 1
 fi
 
-# 8b. Backup de l'existant si présent
-if s5cmd --endpoint-url "$S3_URL" ls "$graph_key" >>"$RUN_DIR/logs/gate-${CITY}.log" 2>&1; then
+# 8b. Backup obligatoire de l'existant.
+#
+# `s5cmd ls` sort non-zéro AUSSI BIEN pour « objet absent » que pour une erreur
+# réseau / d'autorisation. Traiter les deux comme « absent » publiait la clé
+# canonique sans archive alors qu'un objet existait bel et bien : l'ancienne
+# version était détruite sans copie. On distingue donc explicitement les deux,
+# et toute sonde ambiguë échoue AVANT la publication (fail-closed).
+ls_out="$(s5cmd --endpoint-url "$S3_URL" ls "$graph_key" 2>&1)" && ls_rc=0 || ls_rc=$?
+printf '%s\n' "$ls_out" >>"$RUN_DIR/logs/gate-${CITY}.log"
+if [ "$ls_rc" -eq 0 ]; then
   if ! s5cmd --endpoint-url "$S3_URL" cp "$graph_key" "$backup_key" >>"$RUN_DIR/logs/gate-${CITY}.log" 2>&1; then
     reason="publish_failed:backup"
     emit_status
     exit 1
   fi
+elif printf '%s' "$ls_out" | grep -qiE 'no object found|NoSuchKey|not found'; then
+  : # objet réellement absent : rien à archiver
+else
+  reason="publish_failed:backup_probe"
+  emit_status
+  exit 1
 fi
 
 # 8c. Publish final atomique
