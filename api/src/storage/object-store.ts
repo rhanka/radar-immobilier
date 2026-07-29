@@ -3,6 +3,33 @@ export interface ObjectInfo {
   key: string;
   size?: number | undefined;
   contentType?: string | undefined;
+  /**
+   * Opaque server-side version of the stored bytes (S3 `ETag`), quotes
+   * included. Used by the canonical-graph writer to detect a concurrent
+   * overwrite between the moment an archive was taken and the moment the
+   * replacement is PUT. `undefined` when the backend did not return one.
+   */
+  etag?: string | undefined;
+}
+
+/**
+ * `graph/<city>/latest.json` — the single key the graph projector
+ * (`project-graph-from-s3.ts`) and the S3 replay read as truth for a city.
+ *
+ * Overwriting it is irreversible: the previous bytes are gone unless someone
+ * archived them first. Every writer of this key must therefore go through
+ * `services/graph/canonical-graph-writer.ts`, which archives the pre-image and
+ * refuses the write when the object moved under it. `S3ObjectStore.put()`
+ * enforces that by refusing this key outright — the guard lives on the write
+ * path, not in the goodwill of each caller.
+ */
+export function isCanonicalGraphKey(key: string): boolean {
+  return /^graph\/[^/]+\/latest\.json$/.test(key);
+}
+
+/** The canonical key for a city — never build this string by hand. */
+export function canonicalGraphKey(citySlug: string): string {
+  return `graph/${citySlug}/latest.json`;
 }
 
 /**

@@ -6,9 +6,17 @@
  * command is dry-run by default; `--apply` is required before it writes S3 or
  * projects the snapshot back to Postgres.
  *
+ * `--apply` is not atomic — S3 has no multi-key transaction — but it is
+ * RESUMABLE: every city is archived before anything is written, and a city
+ * that completed leaves an `_applied/<city>.json` marker. If a run is
+ * interrupted, it prints the applied cities, the one city that may be
+ * half-written with the archive prefix to restore it from, and the exact
+ * `--resume` command to finish.
+ *
  * Usage:
  *   tsx src/scripts/graphify-34-enrich.ts city-slug
  *   tsx src/scripts/graphify-34-enrich.ts --apply city-slug
+ *   tsx src/scripts/graphify-34-enrich.ts --apply --backup-id=<id> --resume city-slug
  */
 
 import { loadConfig, resolveGraphS3Config } from "../config.js";
@@ -27,9 +35,14 @@ import { createScrapeS3Client, S3ObjectStore } from "../storage/s3-object-store.
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const apply = args.includes("--apply");
-  const cities = args.filter((arg) => arg !== "--apply");
+  const resume = args.includes("--resume");
+  const backupIdArg = args.find((arg) => arg.startsWith("--backup-id="))?.slice("--backup-id=".length);
+  const cities = args.filter((arg) => !arg.startsWith("--"));
   if (cities.length === 0) {
     throw new Error("graphify-34-enrich requires at least one city slug");
+  }
+  if (resume && !backupIdArg) {
+    throw new Error("--resume requires --backup-id=<id> of the interrupted run");
   }
 
   const config = loadConfig();
@@ -58,28 +71,48 @@ async function main(): Promise<void> {
     }
     if (!apply) return;
 
-    const backupId = new Date().toISOString().replaceAll(":", "-").replace(".", "-");
+    const backupId = backupIdArg
+      ?? new Date().toISOString().replaceAll(":", "-").replace(".", "-");
     logger.info(
-      { backupId, cities: targets.map((target) => target.municipality) },
+      { backupId, resume, cities: targets.map((target) => target.municipality) },
       "graphify-34-enrich: starting required pre-apply S3 backup",
     );
-    const backups = await applyGraphify34Snapshots(store, targets, backupId, async (target) => {
-      const result = await upsertGraphAtomic(db, target.municipality, target.snapshot);
-      if (result.aborted) {
-        throw new Error(
-          `projection refused for ${target.municipality}: ${result.reason ?? "unknown reason"}`,
+    const report = await applyGraphify34Snapshots(
+      store,
+      targets,
+      backupId,
+      async (target) => {
+        const result = await upsertGraphAtomic(db, target.municipality, target.snapshot);
+        if (result.aborted) {
+          throw new Error(
+            `projection refused for ${target.municipality}: ${result.reason ?? "unknown reason"}`,
+          );
+        }
+        logger.info(
+          {
+            city: target.municipality,
+            nodeCount: result.nodeCount,
+            edgeCount: result.edgeCount,
+          },
+          "graphify-34-enrich: snapshot projected",
         );
-      }
-      logger.info(
-        {
-          city: target.municipality,
-          nodeCount: result.nodeCount,
-          edgeCount: result.edgeCount,
-        },
-        "graphify-34-enrich: snapshot projected",
-      );
-    });
-    logger.info({ backupId, backups }, "graphify-34-enrich: pre-apply S3 backup complete");
+      },
+      { resume },
+    );
+    logger.info(
+      {
+        backupId,
+        applied: report.applied,
+        skipped: report.skipped_already_applied,
+        archives: report.archives.map((archive) => ({
+          city: archive.city,
+          backup_prefix: archive.backup_prefix,
+          object_count: archive.object_count,
+          digest: archive.digest,
+        })),
+      },
+      "graphify-34-enrich: apply complete",
+    );
   } finally {
     await pool.end();
   }
