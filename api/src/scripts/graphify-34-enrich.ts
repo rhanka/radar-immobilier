@@ -15,13 +15,14 @@ import { loadConfig, resolveGraphS3Config } from "../config.js";
 import { createDb } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import { subgraphForCity, upsertGraphAtomic } from "../services/graph/graph-store.js";
+import { enrichGraphify34Snapshot } from "../services/graph/graphify-34-enrichment.js";
 import {
-  enrichGraphify34Snapshot,
-} from "../services/graph/graphify-34-enrichment.js";
-import { buildGraphify34Manifest, snapshotFromExistingCity } from "../services/graph/graphify-34-snapshot.js";
+  applyGraphify34Snapshots,
+  buildGraphify34Manifest,
+  snapshotFromExistingCity,
+  type Graphify34SnapshotTarget,
+} from "../services/graph/graphify-34-snapshot.js";
 import { createScrapeS3Client, S3ObjectStore } from "../storage/s3-object-store.js";
-
-const encoder = new TextEncoder();
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -41,6 +42,7 @@ async function main(): Promise<void> {
   );
 
   try {
+    const targets: Graphify34SnapshotTarget[] = [];
     for (const city of cities) {
       const existing = await subgraphForCity(db, city);
       if (existing.nodes.length === 0) {
@@ -52,28 +54,32 @@ async function main(): Promise<void> {
       const manifest = buildGraphify34Manifest(city, snapshot);
       const summary = { city, apply, stats, manifest };
       logger.info(summary, "graphify-34-enrich: complete-city snapshot prepared");
-      if (!apply) continue;
+      targets.push({ municipality: city, snapshot, manifest });
+    }
+    if (!apply) return;
 
-      await store.put(
-        manifest.snapshot_key,
-        encoder.encode(JSON.stringify(snapshot)),
-        "application/json",
-      );
-      await store.put(
-        `graph/${city}/graphify-3.4.manifest.json`,
-        encoder.encode(JSON.stringify(manifest)),
-        "application/json",
-      );
-
-      const result = await upsertGraphAtomic(db, city, snapshot);
+    const backupId = new Date().toISOString().replaceAll(":", "-").replace(".", "-");
+    logger.info(
+      { backupId, cities: targets.map((target) => target.municipality) },
+      "graphify-34-enrich: starting required pre-apply S3 backup",
+    );
+    const backups = await applyGraphify34Snapshots(store, targets, backupId, async (target) => {
+      const result = await upsertGraphAtomic(db, target.municipality, target.snapshot);
       if (result.aborted) {
-        throw new Error(`projection refused for ${city}: ${result.reason ?? "unknown reason"}`);
+        throw new Error(
+          `projection refused for ${target.municipality}: ${result.reason ?? "unknown reason"}`,
+        );
       }
       logger.info(
-        { city, nodeCount: result.nodeCount, edgeCount: result.edgeCount },
+        {
+          city: target.municipality,
+          nodeCount: result.nodeCount,
+          edgeCount: result.edgeCount,
+        },
         "graphify-34-enrich: snapshot projected",
       );
-    }
+    });
+    logger.info({ backupId, backups }, "graphify-34-enrich: pre-apply S3 backup complete");
   } finally {
     await pool.end();
   }
