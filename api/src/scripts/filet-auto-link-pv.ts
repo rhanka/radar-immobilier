@@ -20,11 +20,16 @@
  * quand le docSha est absent ou que le PDF n'existe pas (signale à la place).
  *
  * Écriture canonique : `graph/<ville>/latest.json` n'est PAS écrit directement.
- * Le script archive d'abord le préfixe `graph/<ville>/` puis publie via
- * `writeCanonicalCityGraph`, qui refuse si l'objet a bougé depuis l'archive —
- * sinon un run concurrent (phase A Graphify 3.4, gate v2.3) verrait sa version
- * effacée sans trace. `S3ObjectStore.put()` rejette la clé canonique, donc ce
- * chemin n'est pas contournable par inadvertance.
+ * Le script lit le graphe et sa version EN UN SEUL APPEL
+ * (`readCanonicalCityGraph`), archive le préfixe `graph/<ville>/`, puis publie
+ * via `writeCanonicalCityGraph`, qui refuse si l'objet a bougé DEPUIS CETTE
+ * LECTURE — pas seulement depuis l'archive. L'écart compte : entre la lecture
+ * et l'archive, ce script fait un HEAD S3 par nœud Signal, soit des minutes. Un
+ * run concurrent (phase A Graphify 3.4, gate v2.3) publié dans cet intervalle
+ * serait correctement archivé, l'ETag concorderait, et sa version serait quand
+ * même écrasée par un corps dérivé d'une lecture périmée.
+ * `S3ObjectStore.put()` rejette la clé canonique, donc ce chemin n'est pas
+ * contournable par inadvertance.
  *
  * Usage :
  *   tsx src/scripts/filet-auto-link-pv.ts                 # dry-run, villes cibles
@@ -42,7 +47,9 @@ import { createScrapeS3Client, S3ObjectStore } from "../storage/s3-object-store.
 import { canonicalGraphKey } from "../storage/object-store.js";
 import {
   archiveCityGraphPrefix,
+  readCanonicalCityGraph,
   writeCanonicalCityGraph,
+  type CanonicalReadAnchor,
 } from "../services/graph/canonical-graph-writer.js";
 import { upsertGraphAtomic } from "../services/graph/graph-store.js";
 
@@ -244,9 +251,18 @@ async function main(): Promise<void> {
   for (const city of targetCities) {
     const key = canonicalGraphKey(city);
     let graphJson: Record<string, unknown>;
+    // Ancre de la fenêtre protégée : la version lue ICI, avec les octets dont
+    // dérive tout ce qui suit. Un seul appel — un get() puis un head() séparés
+    // rapporteraient une version qui n'est pas celle des octets en main.
+    let readAnchor: CanonicalReadAnchor;
     try {
-      const raw = await store.get(key);
-      graphJson = JSON.parse(decoder.decode(raw));
+      const read = await readCanonicalCityGraph(store, city);
+      if (read === null) {
+        logger.warn({ city, key }, "filet: latest.json absent, ville ignorée");
+        continue;
+      }
+      readAnchor = read.anchor;
+      graphJson = JSON.parse(decoder.decode(read.body));
     } catch (err) {
       logger.warn({ city, key, err: String(err) }, "filet: latest.json illisible, ville ignorée");
       continue;
@@ -275,10 +291,11 @@ async function main(): Promise<void> {
     }
 
     // Archive obligatoire du préfixe, PUIS écriture canonique gardée (refus si
-    // un autre writer a publié entre-temps), PUIS reprojection PG atomique.
+    // un autre writer a publié depuis la lecture ci-dessus, ou si l'archive ne
+    // couvre pas la version qu'on écraserait), PUIS reprojection PG atomique.
     const body = encoder.encode(JSON.stringify(graphJson, null, 2));
     const archive = await archiveCityGraphPrefix(store, city, backupId);
-    await writeCanonicalCityGraph(store, { citySlug: city, body, archive });
+    await writeCanonicalCityGraph(store, { citySlug: city, body, archive, readAnchor });
     logger.info(
       { city, backupPrefix: archive.backup_prefix, objects: archive.object_count },
       "filet: préfixe graphe archivé avant écriture canonique",
