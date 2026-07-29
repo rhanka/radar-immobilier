@@ -410,20 +410,72 @@ function businessProperties(props: Record<string, unknown>): Record<string, unkn
     : {};
 }
 
+/**
+ * The classified fields Graphify 3.4 phase A writes. ONLY these keys get the
+ * degradation check below.
+ *
+ * The check must not be universal. `autre` and `""` are legitimate DOMAIN
+ * VALUES elsewhere: `ZoneKind` includes `autre`
+ * (`packages/radar-domain/src/schemas/ontology/entities.ts`), and
+ * `zoneKindOf()` returns it on purpose for a real multi-letter family such as
+ * `REC-137` (`packages/radar-sources/src/sources/reglements-urbanisme-parser.ts`).
+ * A universal rule would refuse the projection of an entire city because one
+ * zone legitimately moved `H` → `autre`, or because a `notes` field was
+ * intentionally cleared. A gate that blocks legitimate work is not a safer
+ * gate: it is a gate someone disables during the first incident.
+ *
+ * For these three keys the sentinel is not a value anyone means: it is what the
+ * classifier returns when it recognises nothing, which is exactly how phase A
+ * crushed 13 informative `instrument` values.
+ */
+const DEGRADATION_SENSITIVE_KEYS = new Set(["effet_densifiant", "etape", "instrument"]);
+
+/**
+ * The uninformative fallbacks a classifier emits when it recognises nothing.
+ *
+ * The set is the UNION of the three keys' fallbacks, because each classifier
+ * spells "I recognised nothing" differently:
+ *   - `instrumentFromSignal()` returns `"autre"` (`vivier-v2.ts`);
+ *   - `deriveEtape()` returns `"inconnu"` (below) — never `"autre"`, never `""`;
+ *   - `effectFromSignal()` returns `"inconnu"` (`vivier-v2.ts`), whose only
+ *     legitimate values are `densifie|reduit|stable|inconnu`.
+ * Listing only `""` and `"autre"` therefore left two keys out of three guarding
+ * nothing at all: `etape: "adoption" → "inconnu"` passed the gate unnoticed,
+ * which is the original defect replayed on the two other fields.
+ *
+ * The union creates no false positive on the keys it does not belong to:
+ * `"inconnu"` is not a `VivierInstrument` and `"autre"` is neither a
+ * `VivierEtape` nor an effect, so no producer can emit them there. And a
+ * degradation is only ever reported when the BEFORE value is informative — a
+ * node already sitting on `inconnu` reads as absent on both sides and is
+ * exempt, so re-running a projection over unclassified nodes stays silent.
+ */
+const DEGRADED_STRING_VALUES = new Set(["", "autre", "inconnu"]);
+
 function hasBusinessProperty(properties: Record<string, unknown>, key: string): boolean {
-  return Object.prototype.hasOwnProperty.call(properties, key) &&
-    properties[key] !== null && properties[key] !== undefined;
+  if (!Object.prototype.hasOwnProperty.call(properties, key)) return false;
+  const value = properties[key];
+  if (value === null || value === undefined) return false;
+  if (!DEGRADATION_SENSITIVE_KEYS.has(key)) return true;
+  if (typeof value !== "string") return true;
+  return !DEGRADED_STRING_VALUES.has(value.trim().toLowerCase());
 }
 
 /**
- * Find business keys present on the current city snapshot but absent from the
- * candidate snapshot, one node at a time. All keys under `props.properties`
- * are protected: this deliberately does not maintain a lossy allow-list.
+ * Find business values present on the current city snapshot but absent — or,
+ * for the three classified keys above, degraded — in the candidate snapshot,
+ * one node at a time. Every key under `props.properties` stays protected
+ * against DISAPPEARING: this deliberately does not maintain a lossy allow-list
+ * for presence.
  *
  * A missing node is treated as an empty property map, so a complete snapshot
  * cannot silently delete a business-bearing node. Values `false`, `0`, empty
- * strings, and empty arrays remain present; only an absent/null/undefined key
- * is a regression.
+ * strings, and empty arrays remain present for every key outside
+ * `DEGRADATION_SENSITIVE_KEYS`; only an absent/null/undefined key is a
+ * regression there. On `effet_densifiant`, `etape` and `instrument`, an
+ * informative string collapsed to a classifier fallback (`""`, `autre`,
+ * `inconnu`) is also a regression: the key survives but the business
+ * information is gone.
  */
 export function findMissingBusinessProperties(
   beforeRows: readonly BusinessPropertySnapshotRow[],
@@ -644,7 +696,7 @@ export async function upsertGraphAtomic(
       aborted: true,
       reason:
         `business-property regression for ${citySlug}: ` +
-        `existing keys would disappear (${details}); projection refused`,
+        `existing values would disappear or degrade (${details}); projection refused`,
     };
   }
 

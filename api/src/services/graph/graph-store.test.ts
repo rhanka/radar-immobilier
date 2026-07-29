@@ -191,6 +191,159 @@ describe("business-property preservation gate", () => {
 
     expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
   });
+
+  it("rejects a classified value degraded to autre or an empty string", () => {
+    const before = [{
+      id: "signal:instrument",
+      props: { properties: { instrument: "reglement_zonage" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, [{
+      id: "signal:instrument",
+      props: { properties: { instrument: "autre" } },
+    }], "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "signal:instrument",
+      missingKeys: ["instrument"],
+    }]);
+    expect(findMissingBusinessProperties(before, [{
+      id: "signal:instrument",
+      props: { properties: { instrument: "" } },
+    }], "testville")).toHaveLength(1);
+    expect(findMissingBusinessProperties(before, [{
+      id: "signal:instrument",
+      props: { properties: { etape: "adoption", effet_densifiant: "autre" } },
+    }], "testville")[0]?.missingKeys).toEqual(["instrument"]);
+  });
+
+  it("rejects an etape collapsed to the classifier's own fallback", () => {
+    // `deriveEtape()` returns "inconnu" when it recognises nothing — never
+    // "autre", never "". A sentinel listing only "" and "autre" therefore
+    // guarded nothing at all on this key: this exact before/after used to
+    // return [].
+    const before = [{
+      id: "signal:etape",
+      props: { properties: { etape: "adoption" } },
+    }];
+    const after = [{
+      id: "signal:etape",
+      props: { properties: { etape: "inconnu" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "signal:etape",
+      missingKeys: ["etape"],
+    }]);
+  });
+
+  it("rejects an effet_densifiant collapsed to the classifier's own fallback", () => {
+    // `effectFromSignal()` returns "inconnu"; its only legitimate values are
+    // densifie | reduit | stable | inconnu. "autre" is not one of them, so the
+    // former sentinel could never fire here either.
+    const before = [{
+      id: "signal:effet",
+      props: { properties: { etape: "adoption", effet_densifiant: "densifie" } },
+    }];
+    const after = [{
+      id: "signal:effet",
+      props: { properties: { etape: "inconnu", effet_densifiant: "inconnu" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "signal:effet",
+      missingKeys: ["effet_densifiant", "etape"],
+    }]);
+  });
+
+  it("stays silent when a classified key was already uninformative", () => {
+    // The false-positive check on adding "inconnu": a node that is already
+    // unclassified reads as absent on BOTH sides, so re-projecting it — or
+    // finally classifying it — reports nothing. Only informative → fallback is
+    // a regression.
+    const unclassified = [{
+      id: "signal:1",
+      props: { properties: { etape: "inconnu", effet_densifiant: "inconnu", instrument: "autre" } },
+    }];
+    const stillUnclassified = [{
+      id: "signal:1",
+      props: { properties: { etape: "inconnu", effet_densifiant: "inconnu", instrument: "autre" } },
+    }];
+    const nowClassified = [{
+      id: "signal:1",
+      props: {
+        properties: { etape: "adoption", effet_densifiant: "densifie", instrument: "rezonage" },
+      },
+    }];
+
+    expect(findMissingBusinessProperties(unclassified, stillUnclassified, "testville")).toEqual([]);
+    expect(findMissingBusinessProperties(unclassified, nowClassified, "testville")).toEqual([]);
+    // An uninformative value that disappears altogether is not a loss either —
+    // there was nothing to lose. The node is exempt on both counts.
+    expect(findMissingBusinessProperties(unclassified, [{ id: "signal:1", props: {} }], "testville"))
+      .toEqual([]);
+  });
+
+  it("leaves the literal value inconnu alone outside the three classified keys", () => {
+    // The fallback list is the union of three classifiers' sentinels; it must
+    // not become a global blacklist of words. On any other key, "inconnu" is an
+    // ordinary string and only its disappearance is a regression.
+    const before = [{
+      id: "zone:1",
+      props: { properties: { statut: "actif", notes: "à vérifier" } },
+    }];
+    const after = [{
+      id: "zone:1",
+      props: { properties: { statut: "inconnu", notes: "inconnu" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
+    expect(findMissingBusinessProperties(before, [{
+      id: "zone:1",
+      props: { properties: { statut: "inconnu" } },
+    }], "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "zone:1",
+      missingKeys: ["notes"],
+    }]);
+  });
+
+  // Counter-examples: the degradation rule must NOT fire outside the three
+  // classified keys, or a legitimate re-projection of a whole city is refused.
+  it("accepts a zone whose kind legitimately becomes autre (REC-137)", () => {
+    // `zoneKindOf("REC-137")` returns "autre" on purpose: REC is a real
+    // multi-letter family, and "autre" is a member of the ZoneKind enum. A
+    // re-acquisition that re-classifies H → autre loses no business value.
+    const before = [{
+      id: "qc-zonage-testville:zone:rec-137",
+      props: { properties: { code_affiche: "REC-137", kind: "H" } },
+    }];
+    const after = [{
+      id: "qc-zonage-testville:zone:rec-137",
+      props: { properties: { code_affiche: "REC-137", kind: "autre" } },
+    }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
+  });
+
+  it("accepts an intentional textual deletion outside the classified keys", () => {
+    const before = [{ id: "zone:1", props: { properties: { notes: "obsolète" } } }];
+    const after = [{ id: "zone:1", props: { properties: { notes: "" } } }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([]);
+  });
+
+  it("still rejects any key that disappears entirely, classified or not", () => {
+    const before = [{ id: "zone:1", props: { properties: { notes: "obsolète", kind: "H" } } }];
+    const after = [{ id: "zone:1", props: { properties: { kind: "autre" } } }];
+
+    expect(findMissingBusinessProperties(before, after, "testville")).toEqual([{
+      citySlug: "testville",
+      nodeId: "zone:1",
+      missingKeys: ["notes"],
+    }]);
+  });
 });
 
 describe("Sutton immutable legacy projection", () => {
