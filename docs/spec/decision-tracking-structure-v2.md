@@ -2,7 +2,7 @@
 
 - **Date** : 2026-08-01
 - **Rôle** : architect (design/doc)
-- **Statut** : structure **validée par le propriétaire**, écriture Track **en attente de déblocage** (§7)
+- **Statut** : structure **validée par le propriétaire** et **appliquée** le 2026-08-01 (§7)
 - **Supersède** : `docs/spec/decision-tracking-structure-v1.md` §2 (6 WP) et §8 (taxonomie 29 sous-items)
 - **Track CLI de référence** : `@sentropic/track` **0.90.1**
 
@@ -157,7 +157,37 @@ les deux ont un foyer naturel par filiation.
 
 ---
 
-## 7. Blocage — écriture Track non effectuée
+## 7. Application — faite le 2026-08-01
+
+Le blocage décrit en §7bis a été tranché par le propriétaire (**option (a)**) puis levé. Séquence
+réellement exécutée, dans cet ordre :
+
+1. `chore(track)` — commit isolé des 9 événements en attente de la session geoproof (PR #420) ;
+2. création des **7 WP neufs** + `item assign-code WP1…WP9` sur les 9 racines ;
+3. création des **13 sous-WP** de WP3 / WP5 / WP8 (les trois WP neufs, sans substructure existante) ;
+4. `restructure apply` **plan 1 — 88 arêtes** (23 sous-WP v1 + 65 racines hors WP) ;
+5. `restructure apply` **plan 2 — 2 arêtes** (le WP geoproof, racine vide, niché sous WP4) ;
+6. retrait des 4 anciens WP renumérotés, une fois vidés : `assign-code` portant la correspondance
+   (`v1·WP3→WP4+WP5`, `v1·WP4→WP6`, `v1·WP5→WP7`, `v1·WP6→WP9`) puis `realize cancelled`.
+
+**Résultat vérifié** — `track validate` OK (785 événements, integrity + desync clean) · **0 orphelin** ·
+**aucun item d'origine perdu** (153/153) · 20 items créés · correspondance code↔titre exacte sur les 9 WP.
+
+### Deux résidus assumés
+
+- **`hors WP` affiche 7/16 et non 0.** Ce n'est **pas** du travail non rattaché : les 16 lignes sont des
+  **conteneurs intermédiaires** (≥ 1 enfant), et **toutes ont un ancêtre WP** (vérifié). C'est un
+  artefact d'affichage du CLI : `report/build.js:125` ne marque « représentés » que les **feuilles** de
+  l'arbre WP ; tout item ayant des enfants est descendu à travers, jamais compté comme feuille, et
+  retombe donc dans `outsideRollup`. Comportement préexistant du reporting, indépendant de cette
+  réorganisation. Le compte structurel réel est **0 item sans ancêtre WP** (contre 118 avant).
+- **Les titres des sous-items v1 gardent leur ancien préfixe** (`WP4.1 Vue Signaux…` sous WP6, etc.), et
+  le titre de WP2 reste « EXTRACTION — signaux & ontologie » là où la cible dit « annotation & ontologie ».
+  Les titres sont immuables (§4.3) : les corriger imposerait de recréer 29 items et de perdre leur
+  historique d'acceptance. Arbitrage retenu : **garder l'historique**, la hiérarchie et les codes faisant
+  foi. À reprendre si un retitrage arrive dans une version ultérieure du CLI.
+
+## 7bis. Blocage initial — résolu
 
 Au 2026-08-01, `.track/` du checkout principal porte **9 événements non commités** (journal à 658
 événements contre 649 sur `origin/main`), produits le **2026-07-24** par une **autre session** :
@@ -176,7 +206,7 @@ réorganisation sans embarquer ces 9 événements d'autrui** dans le même commi
 contrainte §4.2 : la `baseline` du plan épingle le journal, donc la question doit être tranchée
 **avant** de calculer le plan.
 
-**Décision demandée au propriétaire** — préco : **(a)**.
+**Décision rendue par le propriétaire le 2026-08-01 : option (a)** — appliquée (§7).
 
 - **(a) Recommandé** — commiter d'abord les 9 événements dans un commit séparé et honnête
   (`chore(track): commit des événements en attente de la session geoproof (PR #420)`), puis appliquer
