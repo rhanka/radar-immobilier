@@ -172,8 +172,24 @@ dump prod PG ; lots frais tirés de SCW. Vérité terrain = **gold-30 (verdict D
 prononce DUR sur le gold, MESURE + NOMME les divergences sur le silver.
 
 **Cohorte 167** : `docs/spec/reports/set-167-bprime.tsv` (priorityRank≤167, figée
-conducteur). ⚠️ slugs à normaliser vers `graph_nodes.city_slug` (tiret double MRC,
-apostrophes) avant gate — sinon villes silencieusement ratées.
+conducteur ; colonne autoritaire `graph_city_slug`). Vérité terrain =
+`docs/reports/recette/bprime-167.expected.json` (architect, PR #441, SHA
+`76660b45…`) : 6 gold (Steve verbatim) + 156 silver (proxy déterministe, calibré
+86,2 % / **FN=0** vs gold-30) + 5 no-graph (`in_bprime:null`).
+
+### Résultat cohorte 167 sur graphes FRAIS (SCW 2026-08-02)
+
+131 villes évaluables (signaux présents ; 31 cohorte sans signal = graphes
+vides/v2.2 à enrichir, 5 sans graphe) :
+
+| Provenance | GREEN | RED |
+|---|--:|--:|
+| **GOLD (verdict DUR)** | 5 | **1** — `sainte-catherine` (faux positif) |
+| **SILVER (mesure, proxy ~86 %)** | 125 | 0 |
+
+> La classif `main` concorde avec le golden sur **125/125 silver** et **5/6 gold**.
+> Seule divergence dure : `sainte-catherine` (déjà dans les 4 faux positifs du
+> gold-30 : neuville, preissac, sainte-catherine, stratford) = le reste-à-faire B′.
 
 `expected.json` = `{ "<slug>": {"in_bprime": true|false} }` : `true` = ville
 attendue DANS B′ (score ≥6) ; `false` = faux positif attendu DEHORS. Code retour

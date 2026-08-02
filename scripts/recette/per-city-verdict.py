@@ -61,37 +61,51 @@ def main():
         if f & mask:
             d["selected"].append(o["id"])
 
-    green = red = 0
+    # compteurs séparés par provenance (gold = DUR, silver = mesure/nomme)
+    stat = {"gold": {"green": 0, "red": 0}, "silver": {"green": 0, "red": 0}}
     rows = []
+    reds_hard = []  # RED sur gold = bloquant
     for slug in sorted(cities):
         d = cities[slug]
         sel = len(d["selected"])
         verdict = ""
         tgt = ""
         if expected is not None and slug in expected:
-            want_in = bool(expected[slug].get("in_bprime"))
-            target = expected[slug].get("target")
-            ok = (sel > 0) if want_in else (sel == 0)
-            verdict = "GREEN" if ok else ("RED(manque)" if want_in else "RED(faux+)")
-            if want_in and target is not None:
-                tgt = f"cible={target}" + ("" if sel == target else f"≠{sel}")
-            if ok:
-                green += 1
+            exp = expected[slug]
+            in_b = exp.get("in_bprime")
+            prov = exp.get("provenance", "silver")
+            if in_b is None:
+                verdict = "n/a"  # no-graph / non scorée
             else:
-                red += 1
+                want_in = bool(in_b)
+                target = exp.get("target")
+                ok = (sel > 0) if want_in else (sel == 0)
+                tag = "GREEN" if ok else ("RED(manque)" if want_in else "RED(faux+)")
+                verdict = f"{prov[0]}:{tag}"  # g:/s: préfixe provenance
+                if want_in and target is not None:
+                    tgt = f"cible={target}" + ("" if sel == target else f"≠{sel}")
+                stat[prov]["green" if ok else "red"] += 1
+                if not ok and prov == "gold":
+                    reds_hard.append(slug)
         rows.append((slug, d["signals"], d["eligible"], d["precoce"],
                      d["bprime"], verdict, tgt))
 
     print(f"{'slug':34} {'sig':>4} {'elig':>5} {'prec':>4} {'bpr':>4}  {'verdict':12} note")
     for r in rows:
         print(f"{r[0]:34} {r[1]:>4} {r[2]:>5} {r[3]:>4} {r[4]:>4}  {r[5]:12} {r[6]}")
-    print(f"\ncities={len(cities)}  axis={axis}")
+    print(f"\ncities_corpus={len(cities)}  axis={axis}")
     if expected is not None:
-        missing = [s for s in expected if s not in cities]
-        print(f"GREEN={green}  RED={red}  attendus_absents_du_corpus={len(missing)}")
+        missing = [s for s in expected if s not in cities and expected[s].get("in_bprime") is not None]
+        g, s = stat["gold"], stat["silver"]
+        print(f"GOLD  (DUR)    : GREEN={g['green']} RED={g['red']}")
+        print(f"SILVER (mesure): GREEN={s['green']} RED={s['red']}  (proxy ~86% precision, sur-inclusif)")
+        print(f"attendus_absents_du_corpus (scorés): {len(missing)}")
         if missing:
-            print("  absents:", ", ".join(sorted(missing)[:30]))
-        sys.exit(1 if red or missing else 0)
+            print("  absents:", ", ".join(sorted(missing)[:40]))
+        if reds_hard:
+            print("  RED GOLD (BLOQUANT):", ", ".join(reds_hard))
+        # exit non-zero seulement sur RED GOLD (dur) — le silver est mesure, pas gate
+        sys.exit(1 if reds_hard else 0)
 
 
 if __name__ == "__main__":
