@@ -29,9 +29,10 @@ unavailable criterion is never inferred from another; the data model keeps
    guarantee. If the archived proof cannot be resolved and hash-verified, the datum is
    not served and product copy is **“Non couvert”**; no guessed substitute is allowed
    (`docs/spec/geo-contracts/immo-zone-lot-provenance-api-20260722.md:194-206,389-412`).
-3. Product coverage copy is limited to **“Servi”**, **“Partiel”**, and **“Non couvert”**.
-   A disjoint zone/grid pair may add the neutral explanation **“grille non mappée”**;
-   it never displays an invented norm
+3. The neutral, derived product coverage vocabulary is limited to **“Servi”**, **“Partiel”**,
+   and **“Non couvert”**. It is not verbatim measurement-report wording, which uses
+   **“mappée”**, **“non mappée”**, and **“absente”**. A disjoint zone/grid pair may add
+   the neutral explanation **“grille non mappée”**; it never displays an invented norm
    (`docs/reports/coherence-zones-normes-focus30_2026-07.md:3-5,22,68-72`).
 4. At the geo boundary, `properties.proof` remains the passthrough
    `immo-feature-proof/v1` envelope. Public payloads use a stable `feature_ref`; raw S3
@@ -79,7 +80,8 @@ Filet’s PV-centric target and deep `zone → grid → lot` vertical
 - **(c) reconciliation — usable `zone → grid` chain.** Measure real code overlap as
   `|Z ∩ G| / |Z|`, where `Z` is the set of served zoning codes and `G` the set of codes
   carrying served standards. **PROPOSAL P10-T1:** pass at `≥ 50%`, the report’s existing
-  “OK” boundary; `|Z| = 0`, an absent grid, or 0% overlap cannot pass
+  “OK” boundary; this threshold is not frozen and remains pending OPEN-2. `|Z| = 0`, an
+  absent grid, or 0% overlap cannot pass
   (`docs/reports/coherence-zones-normes-focus30_2026-07.md:3-9,60-66`).
 - **(d) green recipe — measured coherence, never a promise.** Replay recomputes `Z`,
   `G`, their intersection, and the ratio from served records. Expected and rendered
