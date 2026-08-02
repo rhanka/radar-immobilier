@@ -34,15 +34,15 @@ describe("recette latest.json ≥prod (fix S3-régression)", () => {
 
         // métadonnées préservées de l'objet S3 existant (aucune invention)
         const meta = JSON.parse(readFileSync(join(S3META_DIR, `${slug}.json`), "utf8"));
+        const edges = snap.edges ?? [];
         const out = {
           ...meta,
           nodes: snap.nodes,
-          edges: snap.edges,
+          edges,
         };
         writeFileSync(join(OUT_DIR, `${slug}.latest.json`), JSON.stringify(out, null, 1), "utf8");
-        // eslint-disable-next-line no-console
         console.log(
-          `RECETTE_LATEST ${slug} nodes=${snap.nodes.length} edges=${snap.edges.length} ` +
+          `RECETTE_LATEST ${slug} nodes=${snap.nodes.length} edges=${edges.length} ` +
             `(S3 avant: nodes=${(meta.nodes ?? []).length})`,
         );
         expect(snap.nodes.length).toBeGreaterThan((meta.nodes ?? []).length);
