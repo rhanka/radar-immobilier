@@ -834,7 +834,7 @@ describe("SignauxSelPanel — m6 millésime du zonage", () => {
 
 describe("SignauxSelPanel — audit des sources de zone", () => {
   const labels: Record<GeometryProvenanceStatus, string> = {
-    "historical-verified": "Vérifiée dans les dossiers historiques",
+    "historical-verified": "Vérification déclarée par la source",
     "legacy-traceable": "Trace historique disponible",
     "candidate-needs-human-confirmation": "À confirmer par une personne",
     orphan: "Source de géométrie non reliée",
