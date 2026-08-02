@@ -11,7 +11,7 @@ import type { Graphify34EnrichmentStats, Graphify34FieldStats } from "../service
 setDefaultResultOrder("ipv4first");
 const DEFAULT_TSV = "docs/spec/reports/set-167-bprime.tsv";
 const DEFAULT_OUT_DIR = "scratch/graphify34-candidates";
-type Options = { tsv: string; outDir: string; limit: number | null };
+type Options = { tsv: string; outDir: string; limit: number | null; preenrich: boolean };
 type Set167Row = { graphCitySlug: string };
 type FieldName = keyof Graphify34EnrichmentStats["fields"];
 type FieldAggregate = Graphify34FieldStats;
@@ -22,13 +22,15 @@ type AggregateStats = {
   aborts: number; empty_cities: string[]; aborted_cities: { city: string; reason: string }[];
 };
 function parseArgs(argv: string[]): Options {
-  const options: Options = { tsv: DEFAULT_TSV, outDir: DEFAULT_OUT_DIR, limit: null };
+  const options: Options = { tsv: DEFAULT_TSV, outDir: DEFAULT_OUT_DIR, limit: null, preenrich: false };
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
     if (arg === "--tsv") {
       options.tsv = argv[++index] ?? "";
     } else if (arg === "--out-dir") {
       options.outDir = argv[++index] ?? "";
+    } else if (arg === "--emit-preenrich") {
+      options.preenrich = true;
     } else if (arg === "--limit") {
       const rawLimit = argv[++index] ?? "";
       const limit = Number(rawLimit);
@@ -95,17 +97,26 @@ function addCityStats(aggregate: AggregateStats, stats: Graphify34EnrichmentStat
   aggregate.instrument_added += stats.fields.instrument.added_or_canonicalized;
   aggregate.effet_densifiant_added += stats.fields.effet_densifiant.added_or_canonicalized;
 }
-async function emitCity(db: Parameters<typeof subgraphForCity>[0], city: string, outDir: string, aggregate: AggregateStats): Promise<void> {
+async function emitCity(db: Parameters<typeof subgraphForCity>[0], city: string, outDir: string, aggregate: AggregateStats, preenrich: boolean): Promise<void> {
   const existing = await subgraphForCity(db, city);
   if (existing.nodes.length === 0) {
     aggregate.empty_cities.push(city);
     return;
   }
-  const { snapshot, stats } = enrichGraphify34Snapshot(snapshotFromExistingCity(existing), city);
+  // base = projection PROD PG telle quelle (pré-enrichissement) ; snapshot = base + instrument/etape.
+  // Émettre les deux permet à recette un diff bit-fidèle intra-cluster (enrichi vs pré-enrichi,
+  // même instant/cluster), indépendant de toute baseline externe ou du cluster de recette.
+  const base = snapshotFromExistingCity(existing);
+  const { snapshot, stats } = enrichGraphify34Snapshot(base, city);
   addCityStats(aggregate, stats);
   const cityDir = resolve(outDir, city);
   await mkdir(cityDir, { recursive: true });
   await writeFile(resolve(cityDir, "latest.json"), `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+  if (preenrich) {
+    const preDir = resolve(outDir, "preenrich", city);
+    await mkdir(preDir, { recursive: true });
+    await writeFile(resolve(preDir, "latest.json"), `${JSON.stringify(base, null, 2)}\n`, "utf8");
+  }
   aggregate.emitted++;
 }
 async function main(): Promise<void> {
@@ -118,7 +129,7 @@ async function main(): Promise<void> {
   try {
     await mkdir(outDir, { recursive: true });
     for (const { graphCitySlug: city } of selectedRows) {
-      try { await emitCity(db, city, outDir, aggregate); }
+      try { await emitCity(db, city, outDir, aggregate, options.preenrich); }
       catch (error: unknown) {
         aggregate.aborts++;
         aggregate.aborted_cities.push({ city, reason: error instanceof Error ? error.message : String(error) });
