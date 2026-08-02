@@ -7,13 +7,13 @@
 # a `preenrich/<city>/latest.json`, so recette can diff enriched vs pre-enriched
 # bit-for-bit intra-cluster. It NEVER writes S3 or PG.
 #
-# S3 SINK — UNRESOLVED (TODO). The emit script has no S3/output-prefix flag (it
-# only writes a local --out-dir via fs), and the runtime image ships no S3 CLI
-# (only poppler-utils). So the /tmp/candidates tree (enriched + preenrich/) is
-# NOT yet shipped to S3 scratch/phaseA-candidates/<id>/. Rather than bolt on
-# fragile in-container plumbing, this Job produces the tree + prints the JSON
-# report to stdout (captured in the run-job logs); wiring the S3 upload is a
-# follow-up (see PR body). The emptyDir below just gives the script a writable
+# S3 SINK — via `--s3-prefix` (the emit script gained the flag in #447, reusing
+# the in-repo S3ObjectStore + resolveGraphS3Config; the guard only refuses the
+# canonical graph/<city>/latest.json key, so the scratch/ prefix is free). The
+# script uploads the whole /tmp/candidates tree (enriched `<city>/latest.json` +
+# `preenrich/<city>/latest.json`) to S3 `scratch/phaseA-candidates/<BACKUP_ID>/`
+# using the GRAPH_S3_* creds below; recette reads that prefix. The JSON report on
+# stdout includes `uploaded=<n>`. The emptyDir just gives the script a writable
 # /tmp/candidates.
 apiVersion: batch/v1
 kind: Job
@@ -53,8 +53,8 @@ spec:
               node dist/scripts/emit-graphify34-candidates.js \
                 --tsv /config/set-167.tsv \
                 --out-dir /tmp/candidates \
-                --emit-preenrich
-              # TODO(infra): S3 upload of /tmp/candidates — sink mechanism pending (see PR body)
+                --emit-preenrich \
+                --s3-prefix "scratch/phaseA-candidates/${BACKUP_ID:-manual}"
           volumeMounts:
             - name: set167
               mountPath: /config
@@ -67,6 +67,11 @@ spec:
           env:
             - name: NODE_OPTIONS
               value: "--max-old-space-size=400 --dns-result-order=ipv4first"
+            # Templated by run-job.yaml (sed __BACKUP_ID__). Empty ⇒ the command's
+            # 'manual' default prefix. Extraction passes the SAME backup_id it uses
+            # for the apply job so PASS-1 (emit) and PASS-2 (apply) correlate on S3.
+            - name: BACKUP_ID
+              value: "__BACKUP_ID__"
             - name: POSTGRES_USER
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
             - name: POSTGRES_PASSWORD
