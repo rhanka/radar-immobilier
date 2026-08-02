@@ -299,6 +299,43 @@ describe("SourceCoverageMap — sélection ville → drill zones", () => {
     );
   });
 
+  it("ville avec zones : légende « Zonage » VISIBLE et listant les types servis", async () => {
+    const { getByTestId } = renderView();
+    await fireEvent.click(getByTestId("stub-city-delson"));
+    await waitFor(() => expect(lastPaintedZones().features.length).toBe(2));
+
+    const legend = getByTestId("stub-legend");
+    expect(legend.textContent).toContain("Zonage");
+    // Les types réellement servis apparaissent (aucun « Non couvert »).
+    expect(legend.textContent).not.toContain("Non couvert");
+  });
+
+  it("ville SANS type de zone : légende reste VISIBLE en « Non couvert » (jamais escamotée)", async () => {
+    // Cette ville-là ne sert AUCUNE zone exploitable.
+    vi.mocked(loadSignauxZones).mockResolvedValueOnce({
+      tier: "collection" as const,
+      response: {
+        ok: true,
+        citySlug: "delson",
+        source: "official",
+        resolutionStatus: "official",
+        geometryStatus: "official",
+        zoneCount: 0,
+        warnings: [],
+        featureCollection: { type: "FeatureCollection", features: [] },
+      } as GeoZonesResponse,
+    });
+    const { getByTestId } = renderView();
+    await fireEvent.click(getByTestId("stub-city-delson"));
+
+    // Le bloc légende NE disparaît pas : il porte l'état explicite « Non couvert ».
+    await waitFor(() => {
+      const legend = getByTestId("stub-legend");
+      expect(legend.textContent).toContain("Zonage");
+      expect(legend.textContent).toContain("Non couvert");
+    });
+  });
+
   it("segment « Province » → désélection (drawer fermé) + dézoom initial", async () => {
     const { container, getByTestId } = renderView();
     await fireEvent.click(getByTestId("stub-city-delson"));
