@@ -893,8 +893,12 @@ export async function queryNeighbors(
 
 export interface Subgraph {
   citySlug: string;
-  nodes: (typeof graphNodes.$inferSelect)[];
-  edges: (typeof graphEdges.$inferSelect)[];
+  // `created_at` est OMIS volontairement : il n'est utilisé par aucun
+  // consommateur (nodeFromDb/edgeFromDb/routes/enrichment) et la colonne peut
+  // être absente sur certains déploiements (drift schema OVH). On ne
+  // sélectionne donc que les colonnes réellement lues.
+  nodes: Omit<typeof graphNodes.$inferSelect, "createdAt">[];
+  edges: Omit<typeof graphEdges.$inferSelect, "createdAt">[];
 }
 
 /**
@@ -906,7 +910,14 @@ export async function subgraphForCity(
   citySlug: string,
 ): Promise<Subgraph> {
   const nodes = await db
-    .select()
+    .select({
+      id: graphNodes.id,
+      type: graphNodes.type,
+      label: graphNodes.label,
+      citySlug: graphNodes.citySlug,
+      props: graphNodes.props,
+      sourceRef: graphNodes.sourceRef,
+    })
     .from(graphNodes)
     .where(eq(graphNodes.citySlug, citySlug));
 
@@ -919,7 +930,13 @@ export async function subgraphForCity(
   // Pull all edges where src is in the city set; filter dstId in application
   // layer (avoids a large IN clause for small graphs).
   const candidateEdges = await db
-    .select()
+    .select({
+      id: graphEdges.id,
+      srcId: graphEdges.srcId,
+      dstId: graphEdges.dstId,
+      kind: graphEdges.kind,
+      props: graphEdges.props,
+    })
     .from(graphEdges)
     .where(
       or(
