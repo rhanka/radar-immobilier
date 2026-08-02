@@ -65,6 +65,32 @@ function readSet167Rows(tsv: string): Set167Row[] {
   } else seen.add(row.graphCitySlug);
   return rows;
 }
+/**
+ * Déroule une erreur (drizzle enveloppe le vrai pg.DatabaseError dans `.cause`,
+ * son `.message` n'étant que « Failed query: <sql> ») et extrait tous les champs
+ * postgres utiles au diagnostic (code, detail, schema, table, column, routine…).
+ * Sans ça le rapport est AVEUGLE sur la vraie cause d'un abort (infra/cond 2026-08-02).
+ */
+function describeError(error: unknown): string {
+  const parts: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; current != null && depth < 5; depth++) {
+    if (current instanceof Error) {
+      parts.push(`${depth === 0 ? "" : "cause: "}${current.name}: ${current.message}`);
+      const pg = current as unknown as Record<string, unknown>;
+      for (const key of ["code", "detail", "hint", "severity", "schema", "table", "column", "dataType", "constraint", "routine", "position", "where"]) {
+        const value = pg[key];
+        if (typeof value === "string" && value !== "") parts.push(`${key}=${value}`);
+      }
+      current = (current as { cause?: unknown }).cause;
+    } else {
+      parts.push(`cause: ${String(current)}`);
+      break;
+    }
+  }
+  return parts.join(" | ");
+}
+
 function emptyFieldAggregate(): FieldAggregate {
   return { before_missing: 0, after_present: 0, added_or_canonicalized: 0 };
 }
@@ -128,14 +154,25 @@ async function main(): Promise<void> {
   const selectedRows = options.limit === null ? rows : rows.slice(0, options.limit);
   const outDir = resolve(options.outDir);
   const aggregate = createAggregateStats(selectedRows.length);
-  const { db, pool } = createDb(loadConfig());
+  const config = loadConfig();
+  // Confirme la cible DB réelle (host/port/db/user) — sans password. Écarte
+  // définitivement l'hypothèse « mauvais postgres » en la rendant observable.
+  process.stderr.write(
+    `emit DB target: host=${config.POSTGRES_HOST} port=${config.POSTGRES_PORT} db=${config.POSTGRES_DB} user=${config.POSTGRES_USER}\n`,
+  );
+  const { db, pool } = createDb(config);
   try {
     await mkdir(outDir, { recursive: true });
     for (const { graphCitySlug: city } of selectedRows) {
       try { await emitCity(db, city, outDir, aggregate, options.preenrich); }
       catch (error: unknown) {
         aggregate.aborts++;
-        aggregate.aborted_cities.push({ city, reason: error instanceof Error ? error.message : String(error) });
+        const reason = describeError(error);
+        aggregate.aborted_cities.push({ city, reason });
+        // Log stderr immédiat des 3 premiers aborts : le rapport JSON final peut
+        // être tronqué par `kubectl logs --tail`, mais ces lignes restent visibles
+        // et portent la VRAIE cause pg (err.cause), pas juste « Failed query ».
+        if (aggregate.aborts <= 3) process.stderr.write(`emit ABORT [${city}]: ${reason}\n`);
       }
     }
   } finally { await pool.end(); }
