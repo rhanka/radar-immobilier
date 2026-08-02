@@ -1,5 +1,13 @@
 # Décision-dossier — Structure de tracking stable v1
 
+> **⚠️ SUPERSÉDÉ le 2026-08-01 par [`decision-tracking-structure-v2.md`](./decision-tracking-structure-v2.md) (9 WP).**
+> La structure à 6 WP (§2) et la taxonomie figée des 29 sous-items (§8) ci-dessous **ne sont plus la
+> cible**. Motif : `WP3.4` (métriques) se confondait avec `graphify 3.4` (version d'annotation).
+> Règle de nommage v2 : une version porte toujours son artefact (`graphify v3.4`, `ontologie v2.2`),
+> jamais un numéro nu ; `WPx.y` ne désigne qu'un sous-WP.
+> Ce document reste la **référence historique** des identifiants Track v1 (§8), qui restent valides :
+> la réorganisation v2 change le **parent** des sous-items, pas leur identifiant.
+
 Date: 2026-06-28
 Auteur: conducteur radar-immobilier, synthèse double consensus (Claude Opus + Codex).
 Sources: `docs/spec/reports/tracking-structure-claude.md`, `docs/spec/reports/tracking-structure-codex.md`.
@@ -86,6 +94,11 @@ criteria:
 - Tout le reste (extraction autonome, gouvernance séparée, tags focus, Track source de vérité, needs_review) = **accord total**.
 
 ## 8. Taxonomie figée des sous-items WPx.y (v1) — 2026-06-28
+
+> **SUPERSÉDÉ (2026-08-01)** — la numérotation `WPx.y` de cette table suit la structure **v1 à 6 WP**.
+> Le remapping vers les 9 WP est en §3 de `decision-tracking-structure-v2.md` :
+> WP3.1/3.2/3.3 → **WP4.1/4.2/4.3** · WP3.4 → **WP5** (WP de plein droit) · WP4.* → **WP6.*** ·
+> WP5.* → **WP7.*** · WP6.* → **WP9.***. Les **ID Track ci-dessous restent valides** — seul le parent change.
 
 Niveau 2 de la structure : **29 sous-items** (`kind:chore`, créés DANS le workspace de leur WP
 parent — le reparent cross-workspace reste bloqué par l'invariant containment Track 0.19.2, donc le
