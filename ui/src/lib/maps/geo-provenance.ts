@@ -618,7 +618,7 @@ export function proofStatusLabel(status: FeatureProof["status"]): string {
 
 export function geometryProvenanceLabel(status: GeometryProvenanceStatus | undefined): string {
   switch (status) {
-    case "historical-verified": return "Vérifiée dans les dossiers historiques";
+    case "historical-verified": return "Vérification déclarée par la source";
     case "legacy-traceable": return "Trace historique disponible";
     case "candidate-needs-human-confirmation": return "À confirmer par une personne";
     case "orphan": return "Source de géométrie non reliée";
@@ -639,6 +639,17 @@ export function readinessLabel(state: ReadinessState): string {
   if (state === "not-assessed") return "Dossier non évalué";
   return "État non indiqué";
 }
+
+/**
+ * État affiché quand aucune enveloppe de preuve/provenance n'est rattachée à
+ * l'élément (absente, non servie, ou écartée par les gardes). Le bloc « Audit
+ * des sources » reste VISIBLE et porte cet état explicite : l'utilisateur
+ * distingue « pas de preuve pour cet élément » de « fonctionnalité absente ».
+ * Vocabulaire produit neutre (Servi / Partiel / Non couvert) — aucun jargon.
+ */
+export const AUDIT_NOT_COVERED_LABEL = "Non couvert";
+export const AUDIT_NOT_COVERED_HINT =
+  "Aucune source auditée n'est rattachée à cet élément.";
 
 /**
  * Libellé d'un code d'audit. Une valeur qui n'a pas la forme d'un code public
