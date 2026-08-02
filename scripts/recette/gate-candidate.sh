@@ -26,10 +26,31 @@ echo "== 1. snapshot d'appartenance du candidat =="
     npx vitest run src/services/graph/recette-membership-snapshot.prod.test.ts 2>&1 \
     | grep -E 'RECETTE_SNAPSHOT_TALLY|failed' | head -3 )
 
-echo "== 2. bascules candidat vs baseline (SORTANTS = hard-block) =="
+# Restreindre la baseline aux VILLES présentes dans le candidat : sinon les
+# villes hors-lot (présentes dans la baseline complète, absentes du candidat)
+# apparaîtraient à tort comme des SORTANTS. Le diff reste par id, mais borné
+# aux city_slug du lot.
+BASE_SUBSET="$WORK/baseline.subset.ndjson"
+python3 - "$CAND_SNAP" "$BASELINE" "$BASE_SUBSET" <<'PY'
+import sys, json
+cand, base, out = sys.argv[1], sys.argv[2], sys.argv[3]
+cities = set()
+for l in open(cand):
+    l = l.strip()
+    if l:
+        cities.add(json.loads(l).get("c"))
+with open(out, "w") as o:
+    for l in open(base):
+        s = l.strip()
+        if s and json.loads(s).get("c") in cities:
+            o.write(s + "\n")
+PY
+echo "   baseline restreinte à $(wc -l < "$BASE_SUBSET") lignes (villes du lot)"
+
+echo "== 2. bascules candidat vs baseline-du-lot (SORTANTS = hard-block) =="
 rc=0
 for axis in bprime precoce; do
-  out="$(python3 "$REPO/scripts/recette/diff-snap.py" "$BASELINE" "$CAND_SNAP" "$axis")"
+  out="$(python3 "$REPO/scripts/recette/diff-snap.py" "$BASE_SUBSET" "$CAND_SNAP" "$axis")"
   echo "$out"
   sort="$(printf '%s\n' "$out" | grep -oE 'SORTANTS \(1->0\): [0-9]+' | grep -oE '[0-9]+$')"
   [ "${sort:-0}" != "0" ] && rc=1
