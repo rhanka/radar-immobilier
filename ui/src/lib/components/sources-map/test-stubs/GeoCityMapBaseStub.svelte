@@ -118,7 +118,10 @@
     click-lot
   </button>
   {#if legend}
-    <div data-testid="stub-legend">{legend.title}</div>
+    <div data-testid="stub-legend">
+      {legend.title}
+      {#each legend.items as item (item.label)}<span data-testid="stub-legend-item">{item.label}</span>{/each}
+    </div>
   {/if}
   <slot name="overlay-top-left" />
   <slot name="overlay-bottom-left" />
