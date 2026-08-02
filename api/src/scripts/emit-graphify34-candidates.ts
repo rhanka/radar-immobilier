@@ -1,9 +1,10 @@
 /** Emit read-only Graphify 3.4 Phase A candidates from the local projection. */
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { resolve, sep } from "node:path";
 import { setDefaultResultOrder } from "node:dns";
-import { loadConfig } from "../config.js";
+import { loadConfig, resolveGraphS3Config } from "../config.js";
 import { createDb } from "../db/client.js";
+import { createScrapeS3Client, S3ObjectStore } from "../storage/s3-object-store.js";
 import { subgraphForCity } from "../services/graph/graph-store.js";
 import { enrichGraphify34Snapshot } from "../services/graph/graphify-34-enrichment.js";
 import { snapshotFromExistingCity } from "../services/graph/graphify-34-snapshot.js";
@@ -11,7 +12,7 @@ import type { Graphify34EnrichmentStats, Graphify34FieldStats } from "../service
 setDefaultResultOrder("ipv4first");
 const DEFAULT_TSV = "docs/spec/reports/set-167-bprime.tsv";
 const DEFAULT_OUT_DIR = "scratch/graphify34-candidates";
-type Options = { tsv: string; outDir: string; limit: number | null; preenrich: boolean };
+type Options = { tsv: string; outDir: string; limit: number | null; preenrich: boolean; s3Prefix: string | null };
 type Set167Row = { graphCitySlug: string };
 type FieldName = keyof Graphify34EnrichmentStats["fields"];
 type FieldAggregate = Graphify34FieldStats;
@@ -22,7 +23,7 @@ type AggregateStats = {
   aborts: number; empty_cities: string[]; aborted_cities: { city: string; reason: string }[];
 };
 function parseArgs(argv: string[]): Options {
-  const options: Options = { tsv: DEFAULT_TSV, outDir: DEFAULT_OUT_DIR, limit: null, preenrich: false };
+  const options: Options = { tsv: DEFAULT_TSV, outDir: DEFAULT_OUT_DIR, limit: null, preenrich: false, s3Prefix: null };
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
     if (arg === "--tsv") {
@@ -31,6 +32,8 @@ function parseArgs(argv: string[]): Options {
       options.outDir = argv[++index] ?? "";
     } else if (arg === "--emit-preenrich") {
       options.preenrich = true;
+    } else if (arg === "--s3-prefix") {
+      options.s3Prefix = (argv[++index] ?? "").replace(/\/+$/, "");
     } else if (arg === "--limit") {
       const rawLimit = argv[++index] ?? "";
       const limit = Number(rawLimit);
@@ -136,6 +139,21 @@ async function main(): Promise<void> {
       }
     }
   } finally { await pool.end(); }
+  // Sink S3 optionnel : le job K8s (fire-and-forget) n'a pas de CLI S3 ; on
+  // uploade le dossier via S3ObjectStore.put (la garde ne refuse QUE
+  // graph/<city>/latest.json ; le préfixe scratch/ est libre).
+  let uploaded = 0;
+  if (options.s3Prefix !== null) {
+    const s3Config = resolveGraphS3Config(loadConfig());
+    const store = new S3ObjectStore(createScrapeS3Client(s3Config), s3Config.bucket);
+    for (const entry of await readdir(outDir, { recursive: true })) {
+      if (!entry.endsWith("latest.json")) continue;
+      const key = `${options.s3Prefix}/${entry.split(sep).join("/")}`;
+      await store.put(key, await readFile(resolve(outDir, entry)), "application/json");
+      uploaded++;
+    }
+    process.stderr.write(`emit-graphify34-candidates: ${uploaded} fichiers uploadés vers s3://${s3Config.bucket}/${options.s3Prefix}/\n`);
+  }
   const missingOrAborted = [
     ...aggregate.empty_cities,
     ...aggregate.aborted_cities.map(({ city }) => city),
@@ -143,6 +161,8 @@ async function main(): Promise<void> {
   const report = {
     tsv: resolve(options.tsv),
     outDir,
+    s3Prefix: options.s3Prefix,
+    uploaded,
     graphVersion: "2.3",
     aggregateStats: aggregate,
     missingOrAborted,
