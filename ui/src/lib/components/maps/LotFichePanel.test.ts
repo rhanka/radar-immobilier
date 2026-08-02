@@ -5,7 +5,7 @@ import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
 import type { LotFeature } from "$lib/maps/lots-client.js";
 
 const labels: Record<GeometryProvenanceStatus, string> = {
-  "historical-verified": "Vérifiée dans les dossiers historiques",
+  "historical-verified": "Vérification déclarée par la source",
   "legacy-traceable": "Trace historique disponible",
   "candidate-needs-human-confirmation": "À confirmer par une personne",
   orphan: "Source de géométrie non reliée",
@@ -68,9 +68,12 @@ describe("LotFichePanel — audit des sources", () => {
     expect(view.getByText("Plusieurs zones")).not.toBeNull();
   });
 
-  it("does not add an audit block when no envelope is served", () => {
+  it("keeps the audit block visible with a « Non couvert » state when no envelope is served", () => {
     const view = render(LotFichePanel, { props: { lot: { type: "Feature", geometry: null, properties: { noLot: "6 057 912" } } } });
-    expect(view.queryByTestId("fiche-audit")).toBeNull();
+    // Le bloc reste VISIBLE (distinction « pas de preuve » vs « fonctionnalité absente »).
+    expect(view.getByTestId("fiche-audit")).toBeTruthy();
+    expect(view.getByTestId("fiche-audit-empty")).toBeTruthy();
+    expect(view.getByText("Non couvert")).not.toBeNull();
     expect(view.getByText("Informations de zonage non disponibles pour ce lot.")).not.toBeNull();
   });
 });
