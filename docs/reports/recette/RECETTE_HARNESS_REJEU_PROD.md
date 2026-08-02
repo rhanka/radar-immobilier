@@ -153,6 +153,22 @@ RECETTE_PG_NDJSON=<lot-proj.ndjson> RECETTE_SNAPSHOT_OUT=<lot-snap.ndjson> \
 python3 scripts/recette/per-city-verdict.py <lot-snap.ndjson> <expected.json> --axis bprime
 ```
 
+**Gate one-shot** (candidat → snapshot → diff SORTANTS/entrants vs baseline →
+verdict gold ; code retour ≠ 0 si sortant) :
+```bash
+RECETTE_BASELINE_SNAP=<baseline-main-snapshot.ndjson> \
+  scripts/recette/gate-candidate.sh <candidate-projection.ndjson> [gold-steve-30.expected.json]
+```
+Handoff extraction (confirmé conducteur) : par lot = (i) liste de slugs +
+(ii) graphes frais ré-uploadés à `graph/<slug>/latest.json` (SCW). Baseline =
+dump prod PG ; lots frais tirés de SCW. Vérité terrain = **gold-30 (verdict DUR)**
++ **silver-137 (proxy Steve calibré, étiqueté par provenance)** — recette
+prononce DUR sur le gold, MESURE + NOMME les divergences sur le silver.
+
+**Cohorte 167** : `docs/spec/reports/set-167-bprime.tsv` (priorityRank≤167, figée
+conducteur). ⚠️ slugs à normaliser vers `graph_nodes.city_slug` (tiret double MRC,
+apostrophes) avant gate — sinon villes silencieusement ratées.
+
 `expected.json` = `{ "<slug>": {"in_bprime": true|false} }` : `true` = ville
 attendue DANS B′ (score ≥6) ; `false` = faux positif attendu DEHORS. Code retour
 ≠ 0 s'il reste des RED (gate). **Débit** : rejeu pur des 724 villes = ~0,66 s ;
