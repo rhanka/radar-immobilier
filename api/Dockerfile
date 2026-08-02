@@ -72,6 +72,8 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/worker-live.ts'," \
   "    'api/src/scripts/populate-geo.ts'," \
   "    'api/src/scripts/pull-geo-ogc.ts'," \
+  "    'api/src/scripts/graphify-34-enrich.ts'," \
+  "    'api/src/scripts/emit-graphify34-candidates.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
   "  ]," \
