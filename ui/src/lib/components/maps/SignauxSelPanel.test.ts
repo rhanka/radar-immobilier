@@ -648,6 +648,29 @@ describe("SignauxSelPanel — m7 accordéon Règlements", () => {
     expect(calls[0]?.title).toBe("Règlement 1926-26");
   });
 
+  it("règlement sans source ouvrable → repli « Document source non relié » VISIBLE (testids e2e)", () => {
+    const noSrc: GraphSignalNode = {
+      id: "reg-nosrc",
+      type: "DesignationEvent",
+      label: "Signal citant un règlement sans source",
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: null,
+      props: { description: "x", reglement_number: "2020-99", zone_ref: "H-431" },
+    };
+    const { getByTestId, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [noSrc] },
+    });
+    // Le règlement reste AFFICHÉ (numéro visible)…
+    expect(getByTestId("reglement-row")).toBeTruthy();
+    expect(getByTestId("reglement-number").textContent).toContain("2020-99");
+    // …mais jamais un lien vers une source inexistante : repli honnête.
+    expect(queryByTestId("reglement-voir-pdf")).toBeNull();
+    expect(getByTestId("reglement-nosrc").textContent).toContain(
+      "Document source non relié",
+    );
+  });
+
   it("aucun règlement cité → état vide honnête (rien de fabriqué)", () => {
     const noReg: GraphSignalNode = {
       id: "no-reg",
@@ -748,8 +771,8 @@ describe("SignauxSelPanel — m6 millésime du zonage", () => {
     expect(queryByText("Type de source")).not.toBeNull();
   });
 
-  it("fiche zone : aucune ligne millésime fabriquée quand geo ne sert rien", async () => {
-    const { getByText, queryByTestId } = render(Harness, {
+  it("fiche zone : règlement « non renseigné » VISIBLE (jamais escamoté), aucune valeur fabriquée", async () => {
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
@@ -757,7 +780,10 @@ describe("SignauxSelPanel — m6 millésime du zonage", () => {
       },
     });
     await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    // Aucune valeur fabriquée…
     expect(queryByTestId("zone-reglement-millesime")).toBeNull();
+    // …mais le champ reste VISIBLE avec un repli honnête (parité LotFichePanel).
+    expect(getByTestId("zone-reglement-none").textContent).toContain("Règlement non renseigné");
   });
 
   it("sélecteur MASQUÉ tant qu'une seule cohorte est servie (MT = tout 2008)", () => {
