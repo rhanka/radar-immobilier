@@ -95,7 +95,13 @@ Rejeu sur le corpus figé, axe `resElig` (le net POSITIF masque des sortants) :
 - **Enseignement gate** : un correctif à net `+4` a bel et bien **retiré 3
   signaux réels** — invisible sans le diff par identifiant.
 
-## 5. Critères de recette — ENDOSSÉS avec architect (WP8.4 / spec B′ WP8.1 §7)
+## 5. Critères de recette — implémentation du contrat B′ §7
+
+> **Autorité du contrat** : `docs/spec/SPEC_CONTRAT_VIVIER_BPRIME_v1.md` §7 (figé
+> architect, SHA `77f959a0b759c35a34f7886e8510b72e71ba5b10`, PR #440) est la
+> **source unique**. Cette section §5 en est l'**implémentation canonique** :
+> `diff-snap.py` émet entrants+sortants (BP-22), `per-city-verdict.py` prononce
+> (BP-23, coverage lot 100%). Traçabilité T19/T20.
 
 Pour tout candidat modifiant le vivier B′ :
 1. **Garde-fou main [a]** : `main` DOIT valider 7221 nœuds / 724 villes / 6777
