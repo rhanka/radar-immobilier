@@ -5,7 +5,7 @@ Normative terms **MUST**, **MUST NOT**, **SHALL**, and **PASS** are acceptance r
 
 - **Status:** formal WP8.1 contract. WP8.1 is “Spec du vivier B′”; its implementation concerns are WP3.1 axes, WP3.2 instruments/lexicon, WP3.3 exclusions/residential eligibility, and WP3.4 counters/server-client parity (`docs/spec/decision-tracking-structure-v2.md:33-38`).
 - **Acceptance anchor:** the Steve-30 table was frozen at commit `0b90faf8ba48c4103f42b0e46a610eb28b746fb5`; its current operative status is **CIBLE — QA prod required city by city**, not an offline success claim (`docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md:3-16,65-86`). Commit `b33c25b87d479579a0f32398a6adef3e1f47245e` is not an anchor for B′.
-- **Measurement population:** the fixed production count is 7,221 `Signal` + `DesignationEvent` records (`docs/reports/analyse-vivier-b/corpus_contexte.md:1-3`). The rules below are city-independent and target all 167 owner-scope cities; the missing replay snapshot and 167-city manifest are OPEN-01.
+- **Measurement population:** the fixed production count is 7,221 `Signal` + `DesignationEvent` records (`docs/reports/analyse-vivier-b/corpus_contexte.md:1-3`). The complete replay baseline spans 724 cities, with the `classifyBPrime` marker at 6,777 records over 720 cities (`plan/BPLEXOCC-BRANCH_fix-bprime-lexique-veto-occurrence.md:34-35,102-106`). The rules below are city-independent and target all 167 owner-scope cities; the missing replay snapshot and 167-city manifest are OPEN-01.
 - **Scope:** classification, B′ membership, axes, instruments, lexicons, exclusions, named counters, legacy A continuity, parity, and acceptance. Acquisition completeness, geo joins, scoring, and code changes are outside this document except where they are explicit acceptance dependencies (`docs/spec/SPEC_EVOL_FILTRAGE_VIVIER_v2.md:41-49`).
 
 ## 1. Definition of the B′ pool
@@ -78,6 +78,8 @@ The mandatory partition is `total = qualified + residentialUnknown + Σ excluded
 
 Every replay produces a machine-readable result per criterion and per city: `PASS|FAIL|OPEN`, observed value, expected value, failing signal IDs, corpus identifier, code SHA, and timestamp. “Mechanically correct city” means BP-02 through BP-15 pass for all its rows; “B′ achieved city” additionally requires its applicable ground truth gate. No OPEN may be reported PASS.
 
+BP-22 and BP-23 apply to every candidate lot in the general 167-city cohort, not only Steve-30. This §7 is the sole contract authority; §5 of `feat/recette-rejeu-harness:docs/reports/recette/RECETTE_HARNESS_REJEU_PROD.md` is the canonical implementation. `scripts/recette/diff-snap.py` emits named entrants and outgoings, and `scripts/recette/per-city-verdict.py` pronounces the verdict.
+
 | ID | Atomic testable statement | Source | Method on the 7,221 replay | Acceptance threshold |
 |---|---|---|---|---|
 | BP-01 | Replay input is the fixed Signal+DesignationEvent population | T01 | validate type and count before classification | exactly 7,221; invalid type 0 |
@@ -99,12 +101,14 @@ Every replay produces a machine-readable result per criterion and per city: `PAS
 | BP-14 | Server = rail = panel for every axis composition | T13 | compare three counts per city for all 8 `z/r/p` combinations | mismatches 0 |
 | BP-15 | Legacy `z/m/p` is emitted in parallel and unchanged from its frozen baseline | T14,OPEN-10 | calculate legacy membership/count keys on the same rows and diff baseline | missing memberships 0; membership drift 0 |
 | BP-16a | Relaxing all axes reveals every non-excluded classification, including unknowns | T15 | compare `{z:false,r:false,p:false}` projection with the set `!E` | symmetric difference 0 |
-| BP-16b | Unknown density effect is not promoted by classification or ranking | T15b | for otherwise-identical rows, assert unknown stays labelled unknown and ranks after known `densifie` | promotions 0 |
+| BP-16b | Unknown density effect is never promoted to `densifie`; any stage/instrument/evidence ordering remains OPEN-09 | T15b,OPEN-09 | assert an unknown effect remains labelled unknown; do not assert an unresolved ranking order | promotions to `densifie` 0 |
 | BP-17 | Every known geo density effect carries proof, source, and vintage | T16,OPEN-12 | validate the owner-approved effect-evidence schema per known effect | evidence coverage 100% |
 | BP-18 | The live Steve-30 projection equals the frozen target column | T17,OPEN-04,OPEN-05,OPEN-13 | run the frozen metric on real endpoint data city by city | 30/30 exact; synthetic rows 0 |
 | BP-19 | Every Steve city rated at least 6/10 is present | T17 | count default B′ membership for the ten high-rated cities | 10/10 present |
 | BP-20 | Every Steve-30 row is backed by committed real data or an explicit QA-prod gap | T18 | set-partition the 30 canonical rows | orphan rows 0; fabricated fixtures 0 |
 | BP-21 | B′ is achieved over the complete owner scope | OPEN-01–OPEN-05,OPEN-12,OPEN-13 | require every manifest city mechanically correct plus its ground-truth gate | 167/167, with OPEN count 0 |
+| BP-22 | On the early ∩ residential-eligible ∩ zoning B′ axis, every outgoing signal blocks by default; only a named, proven false-positive correction is admitted, while every entrant is named and traced in non-blocking SOFT-REVIEW | T19 | diff candidate versus `main` membership per signal for each lot; reconcile every outgoing against the explicit correction ledger and emit the complete entrant list | uncorrected outgoings 0; otherwise FAIL; entrants have no blocking threshold |
+| BP-23 | Every candidate lot has a candidate-versus-`main` snapshot of B′ membership by signal | T20 | classify both versions for every signal in the lot and compare membership with `scripts/recette/diff-snap.py` | lot coverage 100%; missing or duplicate signal IDs 0; absent comparison FAIL |
 
 The BP-18 target vector, in canonical row order, is `2,2,2,4,1,2,2,3,2,2,0,1,0,3,0,3,2,0,2,2,2,0,0/0/1,3,2/2,2,2,0,1,1` (`api/src/services/graph/bprime-recette.fixture.ts:139-170`). Offline evidence can currently close only Sutton fully and Coaticook partially; all other claims remain QA gaps (`api/src/services/graph/bprime-recette.test.ts:41-84,134-188`).
 ## 8. Traceability matrix
@@ -131,6 +135,8 @@ The BP-18 target vector, in canonical row order, is `2,2,2,4,1,2,2,3,2,2,0,1,0,3
 | T16 | BP-17 | `docs/spec/SPEC_EVOL_FILTRAGE_VIVIER_v2.md:42-46` |
 | T17 | BP-18–BP-19 | `docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md:30-83`; anchor `0b90faf8ba48c4103f42b0e46a610eb28b746fb5` |
 | T18 | BP-20 | `api/src/services/graph/bprime-recette.test.ts:191-227` |
+| T19 | BP-22 | implementation: `feat/recette-rejeu-harness:docs/reports/recette/RECETTE_HARNESS_REJEU_PROD.md` §5; `scripts/recette/diff-snap.py`; `scripts/recette/per-city-verdict.py` |
+| T20 | BP-23 | implementation: `feat/recette-rejeu-harness:docs/reports/recette/RECETTE_HARNESS_REJEU_PROD.md` §5; `scripts/recette/diff-snap.py` |
 ## 9. OPEN — owner decisions required
 
 - **OPEN-01 — replay identity:** provide a versioned URI/path, schema, immutable hash, and row-cardinality rule for the 7,221 snapshot. The repo currently contains only the measured count and partial-strata description; those strata have 836 distinct IDs and 45 duplicates, so they are not the full replay (`docs/reports/analyse-vivier-b/README.md:14-31`; `plan/BPLEXOCC-BRANCH_fix-bprime-lexique-veto-occurrence.md:288-299`).
@@ -140,7 +146,7 @@ The BP-18 target vector, in canonical row order, is `2,2,2,4,1,2,2,3,2,2,0,1,0,3
 - **OPEN-05 — geo-dependent exclusions:** define the semantic geo field, provenance, and QA rule that make Rosemère and Saint-Charles-Borromée reach `0`; until then BP-18 is legitimately OPEN for those rows, never lexically fabricated (`docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md:18-25,73-77`).
 - **OPEN-06 — reason preservation:** decide whether `pole_commercial_regional` requires a dedicated wire/counter bucket or may continue to collapse into `non_residentiel_franc` (`api/src/services/graph/vivier-v2.ts:540-554`).
 - **OPEN-07 — dual reform lexicons:** decide whether the narrow private `completeReform` test in `b-prime.ts` must converge on the active bounded per-occurrence instrument lexicon; the divergence is explicitly recorded (`plan/BPLEXOCC-BRANCH_fix-bprime-lexique-veto-occurrence.md:308-312`).
-- **OPEN-08 — stage vocabulary:** decide how B′ card stages `accorde|refuse` map into the served/counter stage enum, which currently lacks both (`packages/radar-domain/src/signals/b-prime.ts:1-10`; `packages/radar-domain/src/vivier/vivier-v2.ts:25-34`).
+- **OPEN-08 — stage vocabulary:** decide how B′ card stages `accorde|refuse` map into the served/counter stage enum, which currently lacks both, and reconcile BPrimeEtape `consultation` with served VivierEtape `consultation_publique` (`packages/radar-domain/src/signals/b-prime.ts:1-10`; `packages/radar-domain/src/vivier/vivier-v2.ts:25-34`).
 - **OPEN-09 — ranking order:** resolve the conflict between normative `stage → instrument → evidence` and current `evidence → stage → instrument`; no order is invented here (`docs/spec/SPEC_EVOL_FILTRAGE_VIVIER_v2.md:15`; `packages/radar-domain/src/vivier/vivier-v2.ts:170-183`).
 - **OPEN-10 — legacy baseline:** freeze a full-corpus legacy membership artifact/hash; the repository only commits a Sutton golden, insufficient for BP-15 over 7,221 rows (`api/src/services/graph/bprime-recette.test.ts:229-243`).
 - **OPEN-11 — residential oracle:** expose a versioned predicate trace or pin a reference-output oracle for the private category sets/regex predicates used by BP-03–BP-05c; comparing `classifyBPrime` to itself is not acceptance (`packages/radar-domain/src/signals/b-prime.ts:34-77,131-168`).
