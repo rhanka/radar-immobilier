@@ -1192,9 +1192,9 @@
           {:else}
             {#each reglements as reg (reg.key)}
               <div class="sel-entity-bar">
-                <div class="reglement-row">
+                <div class="reglement-row" data-testid="reglement-row">
                   <div class="reglement-head">
-                    <code class="reglement-number">{reg.number}</code>
+                    <code class="reglement-number" data-testid="reglement-number">{reg.number}</code>
                     <span class="reglement-count">
                       {formatSignalCount(reg.signalCount)}
                     </span>
@@ -1219,6 +1219,7 @@
                       <button
                         type="button"
                         class="doc-ref-button"
+                        data-testid="reglement-voir-pdf"
                         on:click={() => openReglementSource(reg)}
                         title="Visualiser le document source du règlement"
                       >
@@ -1226,7 +1227,7 @@
                         Voir le PDF
                       </button>
                     {:else}
-                      <span class="reglement-nosrc">
+                      <span class="reglement-nosrc" data-testid="reglement-nosrc">
                         <FileX class="h-3.5 w-3.5" aria-hidden="true" />
                         Document source non relié
                       </span>
@@ -1235,6 +1236,7 @@
                       <button
                         type="button"
                         class="doc-ref-button"
+                        data-testid="reglement-grille-pdf"
                         on:click={() =>
                           openGrillePdf(url, `Grille de zonage — ${reg.number}`)}
                         title="Ouvrir la grille de zonage PDF"
@@ -1354,6 +1356,14 @@
                           <span class="entity-meta-key">{zoneReg.key}</span>
                           <span class="entity-meta-val" data-testid="zone-reglement-millesime"
                             >{zoneReg.value}</span
+                          >
+                        {:else}
+                          <!-- Repli honnête : le champ règlement reste VISIBLE
+                               plutôt que de disparaître (parité LotFichePanel
+                               « Règlement non renseigné »). -->
+                          <span class="entity-meta-key">Règlement</span>
+                          <span class="entity-meta-val entity-meta-val--missing" data-testid="zone-reglement-none"
+                            >Règlement non renseigné</span
                           >
                         {/if}
                         <span class="entity-meta-key">Source</span>
