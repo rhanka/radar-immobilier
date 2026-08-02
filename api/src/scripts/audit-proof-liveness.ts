@@ -24,6 +24,7 @@
  * Options : --format markdown|json (déf. markdown) · --out <path> (déf. stdout)
  *   · --concurrency N (déf. 16) · --timeout ms (déf. 12000) · --retries N (déf. 2)
  *   · --limit N (borne le nombre d'URL sondées — pilote) · --city <slug>
+ *   · --list-only (mode S3 : vérifie la connectivité + compte les villes, aucune sonde)
  */
 
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -45,6 +46,7 @@ interface Options {
   retries: number;
   limit: number | null;
   city: string | null;
+  listOnly: boolean;
 }
 
 /** Une URL de preuve distincte + provenance agrégée. */
@@ -79,6 +81,7 @@ function parseArgs(argv: string[]): Options {
     retries: 2,
     limit: null,
     city: null,
+    listOnly: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const v = argv[i]!;
@@ -101,6 +104,7 @@ function parseArgs(argv: string[]): Options {
       case "--retries": out.retries = Number(next()); break;
       case "--limit": out.limit = Number(next()); break;
       case "--city": out.city = next(); break;
+      case "--list-only": out.listOnly = true; break;
       default: throw new Error(`Unknown argument: ${v}`);
     }
   }
@@ -184,7 +188,7 @@ function readLocalGraphs(dir: string, cityFilter: string | null): Map<string, Pr
   return map;
 }
 
-async function readS3Graphs(cityFilter: string | null): Promise<Map<string, ProofUrl>> {
+async function readS3Graphs(cityFilter: string | null, listOnly: boolean): Promise<Map<string, ProofUrl>> {
   // Import paresseux : le mode --dir ne dépend jamais de @aws-sdk.
   const { S3Client, ListObjectsV2Command, GetObjectCommand } = await import("@aws-sdk/client-s3");
   const endpoint = process.env.GRAPH_S3_ENDPOINT ?? process.env.SCRAPE_S3_ENDPOINT ?? process.env.S3_ENDPOINT;
@@ -199,22 +203,26 @@ async function readS3Graphs(cityFilter: string | null): Promise<Map<string, Proo
   const map = new Map<string, ProofUrl>();
   let token: string | undefined;
   const keys: string[] = [];
+  process.stderr.write(`audit-proof-liveness: S3 listage graph/* (bucket=${bucket})…\n`);
   do {
     const res = await client.send(new ListObjectsV2Command({ Bucket: bucket, Prefix: "graph/", ContinuationToken: token }));
     for (const obj of res.Contents ?? []) if (obj.Key?.endsWith("/latest.json")) keys.push(obj.Key);
     token = res.IsTruncated ? res.NextContinuationToken : undefined;
   } while (token);
-  for (const key of keys) {
+  const targets = cityFilter ? keys.filter((k) => k.split("/")[1] === cityFilter) : keys;
+  process.stderr.write(`audit-proof-liveness: ${keys.length} villes sur S3 (${targets.length} ciblées)\n`);
+  if (listOnly) return map; // connectivité vérifiée, aucun téléchargement
+  let done = 0;
+  for (const key of targets) {
     const city = key.split("/")[1] ?? key;
-    if (cityFilter && city !== cityFilter) continue;
     try {
       const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
       const body = await res.Body?.transformToString();
-      if (!body) continue;
-      collectFromGraph(city, JSON.parse(body) as Dict, map);
+      if (body) collectFromGraph(city, JSON.parse(body) as Dict, map);
     } catch {
-      continue;
+      // ville illisible : ignorée (comme la projection)
     }
+    if (++done % 50 === 0) process.stderr.write(`audit-proof-liveness: ${done}/${targets.length} villes lues, ${map.size} URL distinctes\n`);
   }
   return map;
 }
@@ -336,7 +344,11 @@ async function main(): Promise<void> {
   const generatedAt = new Date().toISOString();
   const source = options.dir ? `local:${options.dir}/graph/*` : "s3:graph/*";
 
-  const urlMap = options.dir ? readLocalGraphs(options.dir, options.city) : await readS3Graphs(options.city);
+  const urlMap = options.dir ? readLocalGraphs(options.dir, options.city) : await readS3Graphs(options.city, options.listOnly);
+  if (options.listOnly && !options.dir) {
+    process.stderr.write(`audit-proof-liveness: --list-only → connectivité S3 OK, aucune sonde émise\n`);
+    return;
+  }
   let proofs = [...urlMap.values()];
   proofs.sort((a, b) => a.url.localeCompare(b.url)); // déterminisme
   if (options.limit !== null) proofs = proofs.slice(0, options.limit);
