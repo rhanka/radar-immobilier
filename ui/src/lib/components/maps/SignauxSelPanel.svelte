@@ -108,6 +108,8 @@
     proofStatusLabel,
     publicAuditUrl,
     readinessLabel,
+    AUDIT_NOT_COVERED_LABEL,
+    AUDIT_NOT_COVERED_HINT,
   } from "$lib/maps/geo-provenance.js";
 
   export let selectedCity: CityMapEntry | null = null;
@@ -1379,9 +1381,9 @@
                         <span class="entity-meta-key">Lots liés</span>
                         <span class="entity-meta-val">{formatNumber(zoneLotCount(zone, lots))}</span>
                       </div>
-                      {#if proof || provenance}
-                        <div class="zone-audit" data-testid="zone-audit">
-                          <span class="doc-refs-label">Audit des sources</span>
+                      <div class="zone-audit" data-testid="zone-audit">
+                        <span class="doc-refs-label">Audit des sources</span>
+                        {#if proof || provenance}
                           {#if proof}
                             <div class="entity-meta" data-testid="zone-proof">
                               <span class="entity-meta-key">État de la preuve</span><span class="entity-meta-val">{proofStatusLabel(proof.status)}</span>
@@ -1411,8 +1413,12 @@
                               </ul>
                             {/if}
                           {/if}
-                        </div>
-                      {/if}
+                        {:else}
+                          <p class="zone-audit-empty" data-testid="zone-audit-empty">
+                            <span class="zone-audit-empty-label">{AUDIT_NOT_COVERED_LABEL}</span> — {AUDIT_NOT_COVERED_HINT}
+                          </p>
+                        {/if}
+                      </div>
                       <!-- m8.1 — source de la zone OUVRABLE dans le viewer
                            partagé : PDF si l'URL est un PDF, iframe sinon (le
                            viewer décide). Aujourd'hui seule la grille PDF est
@@ -2285,6 +2291,18 @@
     padding-left: 1rem;
     color: var(--st-semantic-text-secondary, #475569);
     font-size: var(--signaux-fs-caption);
+  }
+
+  /* État « aucune enveloppe d'audit rattachée » : bloc VISIBLE, pas escamoté. */
+  .zone-audit-empty {
+    margin: 0;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-caption);
+  }
+
+  .zone-audit-empty-label {
+    font-weight: 600;
+    color: var(--st-semantic-text-primary, #334155);
   }
 
   .zone-audit-link {
