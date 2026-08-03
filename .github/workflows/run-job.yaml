@@ -26,8 +26,14 @@ on:
           - projection
           - graphify34-apply
           - graphify34-emit-candidates
+          - scrape
       backup_id:
         description: "Optional --backup-id for graphify34-apply (empty ⇒ date-based default phaseA-144-<UTC>)"
+        required: false
+        type: string
+        default: ""
+      scrape_cities:
+        description: "For job=scrape: space-separated city slugs to scrape (e.g. 'brossard')"
         required: false
         type: string
         default: ""
@@ -103,6 +109,9 @@ jobs:
               echo "file=deploy/k8s/38-graphify34-emit-candidates-job.yaml" >> "$GITHUB_OUTPUT"
               echo "configmap=deploy/k8s/38-graphify34-set167-configmap.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-graphify34-emit-candidates" >> "$GITHUB_OUTPUT" ;;
+            scrape)
+              echo "file=deploy/k8s/33b-scrape-cities-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-scrape-cities" >> "$GITHUB_OUTPUT" ;;
             *)
               echo "job inconnu"; exit 1 ;;
           esac
@@ -114,6 +123,7 @@ jobs:
           # User input — injected via env (never inline ${{ }} in the script) and
           # validated below before it touches sed.
           BACKUP_ID: ${{ github.event.inputs.backup_id }}
+          SCRAPE_CITIES: ${{ github.event.inputs.scrape_cities }}
           CONFIGMAP: ${{ steps.resolve.outputs.configmap }}
           MANIFEST: ${{ steps.resolve.outputs.file }}
           JOB_NAME: ${{ steps.resolve.outputs.name }}
@@ -123,6 +133,10 @@ jobs:
           if [ -n "${BACKUP_ID}" ] && ! printf '%s' "${BACKUP_ID}" | grep -Eq '^[A-Za-z0-9._-]+$'; then
             echo "::error title=Invalid backup_id::backup_id must match [A-Za-z0-9._-]+"; exit 1
           fi
+          # scrape_cities = space-separated slugs (safe token: slug chars + spaces).
+          if [ -n "${SCRAPE_CITIES}" ] && ! printf '%s' "${SCRAPE_CITIES}" | grep -Eq '^[A-Za-z0-9 ._-]+$'; then
+            echo "::error title=Invalid scrape_cities::scrape_cities must match [A-Za-z0-9 ._-]+"; exit 1
+          fi
           kubectl -n "$NAMESPACE" delete job "${JOB_NAME}" --ignore-not-found
           # ConfigMap(s) FIRST (the Job mounts them). apply is idempotent.
           if [ -n "${CONFIGMAP}" ]; then
@@ -131,7 +145,7 @@ jobs:
           # Template BACKUP_ID (placeholder only present in the apply manifest;
           # a no-op for every other job). Empty ⇒ the manifest's date-based
           # default phaseA-144-<UTC> kicks in.
-          sed "s/__BACKUP_ID__/${BACKUP_ID}/" "${MANIFEST}" \
+          sed -e "s/__BACKUP_ID__/${BACKUP_ID}/" -e "s/__SCRAPE_CITIES__/${SCRAPE_CITIES}/" "${MANIFEST}" \
             | kubectl -n "$NAMESPACE" apply -f -
 
       - name: Wait for completion
