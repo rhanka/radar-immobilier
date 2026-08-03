@@ -181,7 +181,7 @@ const FRENCH_MONTHS_PV: Record<string, string> = {
  * label PVs by month ("Mars 2025") with no day. A YYYY-MM string still sorts
  * and window-filters correctly (lexicographic ≥/≤ against YYYY-MM-DD bounds).
  */
-function extractIsoFromLabel(label: string): string {
+export function extractIsoFromLabel(label: string): string {
   const lower = label.toLowerCase();
 
   // 1. Full French date: "10 mars 2025" or ordinal "1er octobre 2025"

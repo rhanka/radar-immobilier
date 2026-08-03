@@ -9,10 +9,12 @@ import type {
   SourceAdapter,
 } from "../SourceAdapter.js";
 import {
+  extractIsoFromLabel,
   filterPvByWindow,
   parsePvIndex,
   PV_NON_DISPONIBLE,
 } from "./proces-verbaux-parser.js";
+import type { PvIndexItemT } from "./proces-verbaux-parser.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -32,6 +34,111 @@ const FETCH_TIMEOUT_MS = 15_000;
  * The spec mandates 6 months (≈183 days).
  */
 const DEFAULT_WINDOW_DAYS = 183;
+
+export type PvDiscoveryMode = "index" | "sitemap-driven";
+
+/** Decode the XML entities relevant to sitemap locations. */
+function decodeSitemapEntities(value: string): string {
+  return value.replace(/&amp;/g, "&").trim();
+}
+
+/** Parse same-site session pages from a static XML sitemap. */
+function parseSitemapSessionPages(
+  xml: string,
+  sitemapUrl: string,
+  pagePathPrefix: string,
+): PvIndexItemT[] {
+  const items: PvIndexItemT[] = [];
+  const seen = new Set<string>();
+  const sitemapOrigin = new URL(sitemapUrl).origin;
+  const urlBlockRe = /<url\b[^>]*>([\s\S]*?)<\/url>/gi;
+
+  for (const blockMatch of xml.matchAll(urlBlockRe)) {
+    const block = blockMatch[1] ?? "";
+    const locMatch = block.match(/<loc>\s*([^<]+?)\s*<\/loc>/i);
+    if (!locMatch?.[1]) continue;
+
+    let pageUrl: URL;
+    try {
+      pageUrl = new URL(decodeSitemapEntities(locMatch[1]), sitemapUrl);
+    } catch {
+      continue;
+    }
+    if (pageUrl.origin !== sitemapOrigin) continue;
+    if (!pageUrl.pathname.startsWith(pagePathPrefix)) continue;
+    if (seen.has(pageUrl.href)) continue;
+    seen.add(pageUrl.href);
+
+    const pageTitle =
+      decodeURIComponent(pageUrl.pathname.split("/").filter(Boolean).pop() ?? "")
+        .replace(/[-_]+/g, " ")
+        .trim() || pageUrl.href;
+    const slugDate = extractIsoFromLabel(pageTitle);
+    const lastmod = block.match(/<lastmod>\s*(\d{4}-\d{2}-\d{2})[^<]*<\/lastmod>/i);
+    const dateIso =
+      slugDate !== PV_NON_DISPONIBLE
+        ? slugDate
+        : lastmod?.[1] ?? PV_NON_DISPONIBLE;
+
+    items.push({
+      title: pageTitle,
+      url: pageUrl.href,
+      dateIso,
+      dateLabel: pageTitle,
+      docType: "document",
+    });
+  }
+
+  return items;
+}
+
+function resolveSessionDocumentHref(href: string, pageUrl: string): string | null {
+  const raw = href.replace(/&amp;/g, "&").trim();
+  if (!raw) return null;
+  try {
+    const resolved = new URL(raw, pageUrl);
+    if (resolved.protocol !== "http:" && resolved.protocol !== "https:") {
+      return null;
+    }
+    if (!/\.pdf(?:[?#]|$)/i.test(resolved.href)) return null;
+    resolved.hash = "";
+    return resolved.href;
+  } catch {
+    return null;
+  }
+}
+
+function isRatifiedPvUrl(url: string): boolean {
+  return /proces-verbal[^/?#]*ratifie\.pdf(?:[?#].*)?$/i.test(url);
+}
+
+function isLegacyAttachmentUrl(url: string): boolean {
+  return /attach_cmsUpload_[^/?#]+\.pdf(?:[?#].*)?$/i.test(url);
+}
+
+/** Extract one honest PV URL from a static WordPress council-session page. */
+function parseSitemapSessionPvUrl(html: string, pageUrl: string): string | null {
+  const links: string[] = [];
+  const anchorHrefRe = /<a\b[^>]*\bhref=["']([^"']+)["'][^>]*>/gi;
+  for (const match of html.matchAll(anchorHrefRe)) {
+    const url = resolveSessionDocumentHref(match[1] ?? "", pageUrl);
+    if (url) links.push(url);
+  }
+
+  const ratified = links.find(isRatifiedPvUrl);
+  if (ratified) return ratified;
+
+  // Legacy Brossard pages expose an agenda and a PV with opaque attachment
+  // names. The visible "Procès-verbal" label disambiguates the second link.
+  const labelledAttachmentRe =
+    /proc[eè]s[-\s]?verbal[\s\S]{0,1800}?<a\b[^>]*\bhref=["']([^"']+)["'][^>]*>/gi;
+  for (const match of html.matchAll(labelledAttachmentRe)) {
+    const url = resolveSessionDocumentHref(match[1] ?? "", pageUrl);
+    if (url && isLegacyAttachmentUrl(url)) return url;
+  }
+
+  return null;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Error type
@@ -84,6 +191,12 @@ export interface PvCityConfig {
   readonly citySlug: string;
   /** Public URL of the PV index page. */
   readonly pvIndexUrl: string;
+  /** Optional discovery variant; omitted means the existing flat-index mode. */
+  readonly discoveryMode?: PvDiscoveryMode;
+  /** Static XML sitemap used by the sitemap-driven discovery variant. */
+  readonly sitemapUrl?: string;
+  /** Session-page path prefix to keep from the sitemap; defaults to Brossard's FR path. */
+  readonly sitemapPagePathPrefix?: string;
   /** Source id, e.g. "proces-verbaux-saint-damase". */
   readonly sourceId: string;
 }
@@ -191,6 +304,27 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  private makeDocumentRef(
+    url: string,
+    title: string,
+    dateIso: string,
+    discoveredAt: IsoDateString,
+    metadata: Readonly<Record<string, unknown>> = {},
+    contentType = "application/pdf",
+  ): RawDocumentRef {
+    const hasDate = dateIso !== PV_NON_DISPONIBLE;
+    return {
+      sourceKind: this.kind,
+      city: this.city,
+      url,
+      discoveredAt,
+      title,
+      ...(hasDate ? { publishedAt: dateIso } : {}),
+      contentType,
+      metadata: { pvSourceId: this.config.sourceId, ...metadata },
+    };
   }
 
   // ── list() ─────────────────────────────────────────────────────────────────
