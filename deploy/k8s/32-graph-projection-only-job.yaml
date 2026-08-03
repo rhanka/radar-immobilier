@@ -44,7 +44,13 @@ spec:
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
-          command: ["node", "dist/scripts/project-graph-from-s3.js"]
+          # __PROJECT_CITIES__ = slugs espace-séparés (sed par run-job). Vide ⇒ toutes
+          # les villes (comportement par défaut préservé) ; ciblé ⇒ projection additive
+          # d'une ville (ex. acquisition brossard). sh -c pour splitter les slugs en argv.
+          command: ["sh", "-c"]
+          args:
+            - |
+              node dist/scripts/project-graph-from-s3.js __PROJECT_CITIES__
           envFrom:
             - configMapRef:
                 name: radar-api
