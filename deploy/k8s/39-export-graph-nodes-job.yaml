@@ -63,7 +63,10 @@ spec:
                 console.error('export DB target: host=' + process.env.POSTGRES_HOST + ' port=' + (process.env.POSTGRES_PORT || '5432') + ' db=' + process.env.POSTGRES_DB + ' user=' + process.env.POSTGRES_USER);
                 // (row_to_json(t))::text = Postgres' own JSON serialization (bit-match baseline).
                 // created_at EXCLUDED (absent on OVH graph_nodes; select * would fail).
-                const q = "select (row_to_json(t))::text as j from (select id, type, label, city_slug, props, source_ref from graph_nodes order by id) t";
+                // Filter = recette's baseline scope (Signal/DesignationEvent + city_slug not null)
+                // → exactly the 7221 rows / 724 cities she diffs against. Column order mirrors
+                // her baseline (id,type,city_slug,props,label,source_ref); source_file lives IN props.
+                const q = "select (row_to_json(t))::text as j from (select id, type, city_slug, props, label, source_ref from graph_nodes where type in ('Signal','DesignationEvent') and city_slug is not null order by id) t";
                 const res = await pool.query(q);
                 await pool.end();
                 const rows = res.rows.length;
@@ -79,7 +82,7 @@ spec:
                 });
                 await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: ndjson, ContentType: 'application/x-ndjson' }));
                 console.error('export: uploaded ' + rows + ' rows (' + ndjson.length + ' bytes) to s3://' + bucket + '/' + key);
-                process.stdout.write(JSON.stringify({ table: 'graph_nodes', rows: rows, bucket: bucket, key: key, note: 'row_to_json::text, created_at excluded, order by id' }) + '\n');
+                process.stdout.write(JSON.stringify({ table: 'graph_nodes', rows: rows, expected: 7221, bucket: bucket, key: key, note: "row_to_json::text; type in (Signal,DesignationEvent) and city_slug not null; created_at excluded; order by id" }) + '\n');
               })().catch((e) => { console.error('export FAILED: ' + (e && e.stack ? e.stack : e)); process.exit(1); });
           env:
             - name: NODE_OPTIONS
