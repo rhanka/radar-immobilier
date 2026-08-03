@@ -178,6 +178,16 @@ exhaustive tracée. »
   `lots-client.ts:27,436` `LotProperties.noLot`). Dénominateur « lots servis » =
   `numberMatched` exact (`lot-fields-coverage.ts:9,82`).
 
+**Population canonique (tranché conducteur + geo-archi) = (B) `OntoLot.noLot`**
+(entité/lot **SERVI**, couverture `qc-lots`). **COMPLET** = `OntoLot.noLot`
+présent + servi. **N-A** = attestation absence-source cadastre (voir
+`CONTRAT_ATTESTATION_ABSENCE_SOURCE`). **Mesuré via le dump entités Lot /
+`qc-lots`, PAS le dump `DesignationEvent`.** **(A) `no_lot@DesignationEvent`** =
+axe **événement** (assignation event → lot) → **KPI 12 (assignation) / recall**,
+**JAMAIS** mesuré sous 14 (dérive sémantique). **INVARIANT** : même population
+des 2 côtés (COMPLET / N-A / attestation), jamais de proxy. **HONNÊTETÉ** :
+`OntoLot` non peuplé sur la cohorte → **UNKNOWN**, jamais (A).
+
 ---
 
 ### KPI 15 — Surface (superficie réelle du lot)
@@ -351,25 +361,27 @@ Question : ces KPI ont-ils un **champ dans le graphe immo** ?
 
 ## §5 — OPEN (à trancher owner / geo-archi / conducteur)
 
-1. **⚠ SCOPE — CP (16) :** persister `codePostal` dans le graphe immo
-   (`OntoLot`/`OntoAdresse`) OU rester en consommation geo-servie `code_postal` ?
-   Le code seul ne tranche pas la cible de persistance. → **geo-archi/conducteur.**
+1. **✅ RÉSOLU (geo-archi/conducteur) — CP (16) :** **consommation geo-servie
+   confirmée** (`code_postal` sur `qc-lots-<slug>`) ; la **persistance immo**
+   (`OntoLot`/`OntoAdresse`) **n'est PAS requise** par le contrat.
 2. **⚠ SCOPE — TOD (18/19) :** confirmer que TOD reste **géo-spatial côté geo**
    (position de ce document, fondée sur `qc-tod-<slug>` +
    `geo-collections.ts:67-69`) et qu'immo n'a **pas** à peupler un champ TOD. Le
    code TRANCHE en ce sens ; confirmation owner requise pour figer.
-3. **Grille canonique absente :** `SPEC_PALIER_OWNERSHIP.md` §2 n'est pas dans ce
-   checkout ; le cadrage owner est repris via `SPEC_PALIER_RESOLUTION.md` §2/§3/§4
-   (geo-side). **Reconnecter** ce document à la grille canonique dès sa
-   disponibilité et vérifier l'alignement KPI par KPI.
-4. **KPI 7 COMPLET (Δ grille) :** aucun champ ne porte aujourd'hui le delta
-   ancien↔nouveau de grille (`effet_densifiant` reste `inconnu` en B′/Vivier).
-   Confirmer le porteur du calcul Δ grille (geo-side ? crosswalk ?) pour rendre
-   COMPLET atteignable.
-5. **Frontière §4 (14–17) — attestation d'absence-source :** confirmer la
-   **requête geo re-jouable** normée (rôle/cadastre/adresses) qui produit le
-   RÉSULTAT d'absence-source, pour que le triplet `{source,date,résultat}` immo
-   cite une source geo stable (contrat d'attestation geo↔immo).
+3. **✅ RÉSOLU (geo-archi/conducteur) — Grille canonique :** grille =
+   `SPEC_PALIER_OWNERSHIP.md` §2/§3 (**numérotation confirmée** ; immo produit
+   **14** + **`OntoAdresse` 17** ; **12,13,15,16,17,18,19** geo-servis). Le cadrage
+   owner reste relayé par `SPEC_PALIER_RESOLUTION.md` §2/§3/§4 (geo-side) tant que
+   la copie canonique n'est pas physiquement dans ce checkout.
+4. **✅ RÉSOLU (geo-archi/conducteur) — KPI 7 COMPLET (Δ grille) :** COMPLET =
+   artefact **`4a-delta-grille`** (delta ancien↔nouveau de la grille), **PAS** le
+   champ `effet_densifiant = inconnu` (défaut B′/Vivier, qui reste **UNKNOWN**).
+5. **✅ RÉSOLU par `CONTRAT_ATTESTATION_ABSENCE_SOURCE.md` — Frontière §4 (14–17),
+   attestation d'absence-source :** la forme de validité (source autoritaire +
+   requête re-jouable + résultat + date) est gravée dans
+   `docs/spec/CONTRAT_ATTESTATION_ABSENCE_SOURCE.md`. **TBD résiduel** : geo
+   (LOT/ZONES) append la **requête concrète exacte** + la **version dataset**
+   cadastre/rôle par KPI (n'altère pas la forme de validité).
 6. **Recall (20) :** le contrat `2335a7d` fige le dénominateur à **85** ; l'ODJ
    par muni doit exposer son dénominateur immo local pour distinguer N-A
    (dénominateur nul) d'UNKNOWN (non mesuré) au niveau cellule.
