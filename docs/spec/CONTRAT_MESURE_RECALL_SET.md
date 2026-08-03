@@ -124,7 +124,7 @@ The geo-side implementation and measurement reference is `docs/spec/SPEC_RECALL_
 | `zone_ref` null for 72/85 and excluded from matching | Geo/jointures answers; normative rule in §5 |
 | Precision and incoming-HARD zero-FP gate | Geo/jointures answers; crosswalk `b9c121d`, §6.1 |
 | `source_url_norm` normalization (7 rules) | Geo/jointures harness `acquisition/src/zoning-events-recall-gate.ts`, `normalizeSourceUrl` ~l.386-408, `VOLATILE` ~l.76-88 (supplied verbatim; source absent from this checkout) |
-| Jointures implementation SHA + definitive file:line | **TBD:** appended at the jointures setrecall worker commit without changing the formula or the 7 normalization rules |
+| Jointures implementation SHA + file:line | Harness SHA `c5b855c2` (lane/jointures): `setRecallFor` at `acquisition/src/zoning-events-recall-gate.ts:709` (helpers `setRecallGroupKey:677`, `canonicalizeImmoCategory:466`); `normalizeSourceUrl` at `:491` — implements this formula and the seven normalization rules verbatim |
 
 Minimum conformance vectors:
 
