@@ -27,7 +27,8 @@ metadata:
   labels:
     app.kubernetes.io/name: radar-immobilier
     app.kubernetes.io/part-of: sentropic
-    app.kubernetes.io/component: graphify34
+    # component: graph-projection (NOT graphify34) — see the pod-template note below.
+    app.kubernetes.io/component: graph-projection
 spec:
   backoffLimit: 0
   ttlSecondsAfterFinished: 3600
@@ -36,7 +37,12 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: radar-immobilier
-        app.kubernetes.io/component: graphify34
+        # component MUST be graph-projection (NOT graphify34): the postgres ingress
+        # NetworkPolicy `allow-graph-projection-to-postgres` (70-networkpolicy.yaml)
+        # only admits component:{api,graph-projection} on :5432. Under the namespace
+        # default-deny, a graphify34 pod is DROPPED → the pg Pool never connects →
+        # 3s connect-timeout → every city aborts. This job rewrites the projection.
+        app.kubernetes.io/component: graph-projection
     spec:
       restartPolicy: Never
       serviceAccountName: radar-app
