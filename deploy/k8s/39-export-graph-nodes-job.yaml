@@ -61,12 +61,29 @@ spec:
                   max: 2,
                 });
                 console.error('export DB target: host=' + process.env.POSTGRES_HOST + ' port=' + (process.env.POSTGRES_PORT || '5432') + ' db=' + process.env.POSTGRES_DB + ' user=' + process.env.POSTGRES_USER);
-                // (row_to_json(t))::text = Postgres' own JSON serialization (bit-match baseline).
-                // created_at EXCLUDED (absent on OVH graph_nodes; select * would fail).
-                // Filter = recette's baseline scope (Signal/DesignationEvent + city_slug not null)
-                // → exactly the 7221 rows / 724 cities she diffs against. Column order mirrors
-                // her baseline (id,type,city_slug,props,label,source_ref); source_file lives IN props.
-                const q = "select (row_to_json(t))::text as j from (select id, type, city_slug, props, label, source_ref from graph_nodes where type in ('Signal','DesignationEvent') and city_slug is not null order by id) t";
+                // EXACT projection recette attend (harnais listCitiesWithSignalNodes /
+                // GraphSignalProjectionRow) : clés camelCase + champs métier DÉRIVÉS de
+                // props->'properties' (etapeAnnote = ...->>'etape', peuplé par v3.4). Un
+                // row_to_json(graph_nodes) BRUT n'a pas etapeAnnote/citySlug en top-level →
+                // son gate precoce s'effondre → faux-RED. (row_to_json(t))::text = sérialisation
+                // native PG. created_at EXCLU (absent OVH, cf #450). Filtre = 7221/724.
+                const q = `select (row_to_json(t))::text as j from (
+                  select
+                    id,
+                    city_slug                              as "citySlug",
+                    type,
+                    props->'properties'->>'category'       as category,
+                    label,
+                    props->'properties'->>'nb_unites_max'  as "nbUnitesMax",
+                    props->'properties'->>'intensite'      as intensite,
+                    props->'properties'->>'description'    as description,
+                    props->'properties'->>'etape'          as "etapeAnnote",
+                    props,
+                    source_ref                             as "sourceRef"
+                  from graph_nodes
+                  where type in ('Signal','DesignationEvent') and city_slug is not null
+                  order by id
+                ) t`;
                 const res = await pool.query(q);
                 await pool.end();
                 const rows = res.rows.length;
@@ -82,7 +99,7 @@ spec:
                 });
                 await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: ndjson, ContentType: 'application/x-ndjson' }));
                 console.error('export: uploaded ' + rows + ' rows (' + ndjson.length + ' bytes) to s3://' + bucket + '/' + key);
-                process.stdout.write(JSON.stringify({ table: 'graph_nodes', rows: rows, expected: 7221, bucket: bucket, key: key, note: "row_to_json::text; type in (Signal,DesignationEvent) and city_slug not null; created_at excluded; order by id" }) + '\n');
+                process.stdout.write(JSON.stringify({ table: 'graph_nodes', rows: rows, expected: 7221, bucket: bucket, key: key, note: "projection listCitiesWithSignalNodes (camelCase: citySlug/etapeAnnote/…); type in (Signal,DesignationEvent) and city_slug not null; created_at excluded; order by id" }) + '\n');
               })().catch((e) => { console.error('export FAILED: ' + (e && e.stack ? e.stack : e)); process.exit(1); });
           env:
             - name: NODE_OPTIONS
