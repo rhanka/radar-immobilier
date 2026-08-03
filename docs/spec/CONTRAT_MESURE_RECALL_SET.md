@@ -79,6 +79,8 @@ In the constructed §2 example, precision is `81 / 1021 = 7.93%`, while recall r
 
 Precision is gated separately by the acceptance recipe before serving: incoming HARD events require **0 false positives**. This gate may block serving, but it MUST NOT alter recall's numerator, denominator, identity, type mapping, or grouping.
 
+**Recall and precision MUST be reported together.** The evaluation MUST NEVER surface recall alone; every recall figure MUST be accompanied by its precision and per-group `over_split`, so that geo over-split can never be hidden by omission (WP6 anti-gaming requirement, geo-archi).
+
 ## 5. Why null `zone_ref` is not a recall problem
 
 `zone_ref` is null for **72 of the 85** immo DesignationEvents. It is not a key field and is not consulted by this measure.
@@ -98,6 +100,8 @@ SET-RECALL (multiset) :
 ```
 
 Type semantics come exclusively from crosswalk commit `b9c121d689aede3574086f1fbfef1351e9ecd903`. This document does not amend that crosswalk or B′.
+
+The geo-side implementation and measurement reference is `docs/spec/SPEC_RECALL_MATCHING.md` (geo WP6, geo-archi), which cites this contract's frozen commit. That geo-side document is a reference and implementation aid; it is **not** a competing canonical definition. This contract is the single canonical SET-RECALL measurement authority; any change requires a new reviewed revision here.
 
 ## 7. Traceability and conformance vectors
 
