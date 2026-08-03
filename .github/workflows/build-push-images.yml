@@ -198,6 +198,14 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           provenance: false
+          # Stamp the short sha into the image (api/Dockerfile `ARG GIT_SHA`,
+          # placed LAST in the runtime stage so it never busts the cached COPY
+          # layers). The api process surfaces it on /livez + /health; the deploy
+          # job's "Assert served sha" step reads it back from the public URL to
+          # prove the rolled-out build is actually SERVED. The ui image ignores
+          # the arg (it declares no matching ARG) — harmless.
+          build-args: |
+            GIT_SHA=${{ steps.vars.outputs.sha }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,scope=${{ matrix.service }},mode=max
 
@@ -412,6 +420,50 @@ jobs:
             exit 1
           fi
           echo "post-deploy proof OK — ${host} is served by the deployed cluster (${lb_ip}); TLS serial ${sn_dns}"
+      # Post-deploy PROOF that the rolled-out sha is actually SERVED — not just
+      # that the ReplicaSet rolled. `rollout status` above goes green even
+      # against a stale/wrong cluster (see the pre-flight rationale in the file
+      # header: a namespace with Deployments scaled to 0 makes set-image +
+      # rollout succeed instantly while production is untouched). This step
+      # closes that gap on BOTH served surfaces, over the public URL with NO
+      # in-cluster access or credentials:
+      #   - /health       — the api/mcp build sha (api/Dockerfile ARG GIT_SHA);
+      #                      the UI nginx is the only api route it reverse-proxies
+      #                      publicly (`location = /health` -> radar-api/health).
+      #   - /build.json    — the ui BUNDLE build sha (ui/Dockerfile stamps
+      #                      dist/build.json; nginx serves it as a static file).
+      # Both must equal the sha this run pushed, or the deploy REDs.
+      - name: Assert served sha
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_ENDPOINT_HOST:-immo.sent-tech.ca}"
+          api_url="https://${host}/health"      # api/mcp sha (nginx -> radar-api/health)
+          ui_url="https://${host}/build.json"    # ui bundle sha (nginx static dist/build.json)
+          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url}"
+          # Reads .sha from the JSON body regardless of HTTP status (/health can
+          # be 503 on a db/objectStore blip while still serving the right build;
+          # /build.json falls back to index.html until the new ui pod is live —
+          # jq then yields empty, which just keeps us retrying).
+          fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
+          # Retry up to ~180s: even after `rollout status` returns, the ingress/LB
+          # needs a moment to route to the freshly-ready api AND ui pods.
+          deadline=$(( $(date +%s) + 180 ))
+          while :; do
+            api_sha="$(fetch_sha "$api_url")"
+            ui_sha="$(fetch_sha "$ui_url")"
+            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then
+              echo "served sha OK: api=${api_sha} ui=${ui_sha} — build ${SHA} is live at ${host}"
+              exit 0
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error title=Served sha mismatch::${host} serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' but this deploy pushed '${SHA}'. Rollout went green but the PUBLIC endpoint is NOT serving the new build (stale/wrong cluster, ingress cache, or unready pod). Do not trust this deploy."
+              exit 1
+            fi
+            sleep 10
+          done
 
       - name: Summary
         if: always()
