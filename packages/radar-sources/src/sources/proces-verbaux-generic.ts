@@ -341,6 +341,57 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     const discoveredAt: IsoDateString = this.now().toISOString();
     const { since, until } = this.isoWindow();
 
+    const sitemapDriven =
+      this.config.discoveryMode === "sitemap-driven" ||
+      Boolean(this.config.sitemapUrl);
+    if (sitemapDriven) {
+      const sitemapUrl = this.config.sitemapUrl;
+      if (!sitemapUrl) {
+        throw new PvSourceFetchError(
+          "parse",
+          "sitemap-driven discovery requires sitemapUrl",
+          this.config.pvIndexUrl,
+        );
+      }
+
+      const sitemapRes = await this.fetchWithTimeout(
+        sitemapUrl,
+        "application/xml,text/xml",
+      );
+      const sitemapXml = new TextDecoder("utf-8").decode(
+        new Uint8Array(await sitemapRes.arrayBuffer()),
+      );
+      const sessions = filterPvByWindow(
+        parseSitemapSessionPages(
+          sitemapXml,
+          sitemapUrl,
+          this.config.sitemapPagePathPrefix ?? "/conseil-municipal/",
+        ),
+        since,
+        until,
+      );
+
+      for (const session of sessions) {
+        if (opts.signal?.aborted) break;
+
+        const pageRes = await this.fetchWithTimeout(session.url, "text/html");
+        const pageHtml = new TextDecoder("utf-8").decode(
+          new Uint8Array(await pageRes.arrayBuffer()),
+        );
+        const pvUrl = parseSitemapSessionPvUrl(pageHtml, session.url);
+        if (!pvUrl) continue;
+
+        yield this.makeDocumentRef(
+          pvUrl,
+          `Procès-verbal — ${session.title}`,
+          session.dateIso,
+          discoveredAt,
+          { sessionUrl: session.url },
+        );
+      }
+      return;
+    }
+
     // 1. Fetch the index page. fetchWithTimeout throws PvSourceFetchError on
     //    failure; the RECUEIL job catches it — no wrapper needed here.
     const indexRes = await this.fetchWithTimeout(
@@ -360,20 +411,16 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     // 3. Yield one ref per PV in the window.
     for (const item of windowItems) {
       if (opts.signal?.aborted) break;
-      const hasDate = item.dateIso !== PV_NON_DISPONIBLE;
-      const ref: RawDocumentRef = {
-        sourceKind: this.kind,
-        city: this.city,
-        url: item.url,
+      yield this.makeDocumentRef(
+        item.url,
+        item.title,
+        item.dateIso,
         discoveredAt,
-        title: item.title,
-        ...(hasDate ? { publishedAt: item.dateIso } : {}),
-        contentType: item.url.toLowerCase().endsWith(".pdf")
+        {},
+        item.url.toLowerCase().endsWith(".pdf")
           ? "application/pdf"
           : "text/html",
-        metadata: { pvSourceId: this.config.sourceId },
-      };
-      yield ref;
+      );
     }
   }
 
@@ -1925,6 +1972,9 @@ export const COTE_SAINT_LUC_PV_CONFIG: PvCityConfig = {
 export const BROSSARD_PV_CONFIG: PvCityConfig = {
   citySlug: "brossard",
   pvIndexUrl: "https://brossard.ca/assemblees-du-conseil-municipal/",
+  discoveryMode: "sitemap-driven",
+  sitemapUrl: "https://brossard.ca/council-meeting-sitemap.xml",
+  sitemapPagePathPrefix: "/conseil-municipal/",
   sourceId: "proces-verbaux-brossard",
 };
 
