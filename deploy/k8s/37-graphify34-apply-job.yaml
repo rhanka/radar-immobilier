@@ -1,0 +1,117 @@
+# 37-graphify34-apply-job.yaml — Graphify v3.4 Phase A APPLY (PASS-2).
+#
+# One-shot Job that runs `graphify-34-enrich.js --apply` over the 144 Phase A
+# cities (from ConfigMap radar-graphify34-slugs, mounted at /config/slugs.txt).
+# The script reads the existing PG projection per city, enriches the snapshot
+# (etape / instrument / effet_densifiant), and — under --apply — takes a
+# REQUIRED S3 backup per city THEN upserts the snapshot back to PG atomically.
+# It is not a single S3 transaction but it IS resumable: each city is archived
+# before any write and leaves an `_applied/<city>.json` marker, so a re-run with
+# the same --backup-id and --resume finishes an interrupted batch.
+#
+# Fire it through the run-job CD channel (preferred — templates BACKUP_ID):
+#   gh workflow run run-job.yaml -f job=graphify34-apply -f backup_id=<id>
+# run-job.yaml sed-replaces the __BACKUP_ID__ placeholder below; when no
+# backup_id is supplied it becomes empty and the command's date-based default
+# (phaseA-144-<UTC>) kicks in. A raw `kubectl apply -f` of this file MUST go
+# through run-job (or a manual sed of __BACKUP_ID__) — see PR body.
+#
+# S3 wiring is graph-store aware (GRAPH_S3_* has priority in resolveGraphS3Config);
+# no extra plumbing is needed beyond the DB + S3 creds mirrored from the daily
+# projection CronJob (34-refresh-cronjob.yaml).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-graphify34-apply
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    # component: graph-projection (NOT graphify34) — see the pod-template note below.
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        # component MUST be graph-projection (NOT graphify34): the postgres ingress
+        # NetworkPolicy `allow-graph-projection-to-postgres` (70-networkpolicy.yaml)
+        # only admits component:{api,graph-projection} on :5432. Under the namespace
+        # default-deny, a graphify34 pod is DROPPED → the pg Pool never connects →
+        # 3s connect-timeout → every city aborts. This job rewrites the projection.
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      volumes:
+        - name: slugs
+          configMap:
+            name: radar-graphify34-slugs
+      containers:
+        - name: graphify34-apply
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["sh", "-c"]
+          args:
+            - |
+              node dist/scripts/graphify-34-enrich.js --apply \
+                --backup-id="${BACKUP_ID:-phaseA-144-$(date -u +%Y%m%dT%H%M%SZ)}" \
+                $(tr '\n' ' ' < /config/slugs.txt)
+          volumeMounts:
+            - name: slugs
+              mountPath: /config
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            # Templated by run-job.yaml (sed __BACKUP_ID__). Empty ⇒ the command's
+            # date-based default phaseA-144-<UTC> is used.
+            - name: BACKUP_ID
+              value: "__BACKUP_ID__"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=400 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # Graph store EXPLICIT (GRAPH_S3_* wins in resolveGraphS3Config) —
+            # guarantees bucket radar-immobilier-docs-pocs regardless of the
+            # optional scrape secret. Same wiring as 34-refresh-cronjob.yaml.
+            - name: GRAPH_S3_ENDPOINT
+              value: "https://s3.fr-par.scw.cloud"
+            - name: GRAPH_S3_BUCKET
+              value: "radar-immobilier-docs-pocs"
+            - name: GRAPH_S3_REGION
+              value: "fr-par"
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              value: "false"
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET, optional: true } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              value: "false"
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
