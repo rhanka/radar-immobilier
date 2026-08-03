@@ -31,13 +31,16 @@
 # NB : à 2 pods la mémoire NS est à 100% du quota → pas de marge pour un Job
 # pendant un surge 2-pods (sans objet pendant la démo, aucun job ne tourne).
 #
-# SEUIL CPU — subtilité assumée : averageUtilization est un % de la REQUEST CPU
-# (radar-api demande 100m, limite 500m). On vise ~300m d'usage moyen avant de
-# scaler (60% de la limite, marge avant le throttle 500m) → 300% de la request
-# 100m. C'est volontairement relatif à la request actuelle (non modifiée ici,
-# car changer la request redémarrerait le pod = PR séparée gatée). Un ajustement
-# de request réaliste (→ util % intuitif) est un durcissement ultérieur, hors
-# de cette PR additive-sans-restart.
+# SEUIL CPU — AverageValue (ABSOLU), PAS Utilization. poc-k8s a mesuré que la
+# request CPU LIVE de radar-api = 40m (drift : le manifeste 30-api.yaml dit
+# 100m mais le pod vif tourne à 40m, car le CD ne fait que `set-image` et ne
+# ré-applique jamais la request). averageUtilization serait un % de CETTE
+# request live → fragile : 300% × 40m = 120m (pas 300m), et si la request
+# repassait à 100m un jour, le seuil bougerait. AverageValue fixe un seuil
+# ABSOLU indépendant de la request : on scale le 2e pod quand radar-api dépasse
+# 300m de CPU moyen (~60% de la limite 500m, marge avant le throttle). 0 restart
+# (HPA seul, aucun changement du template). Aligner la request (→ intuitif) =
+# durcissement ultérieur qui, lui, redémarrerait le pod → PR séparée gatée.
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -59,9 +62,10 @@ spec:
       resource:
         name: cpu
         target:
-          type: Utilization
-          # 300% de la request 100m = ~300m d'usage moyen (60% de la limite 500m).
-          averageUtilization: 300
+          # Seuil ABSOLU (robuste au drift request 40m/100m — voir en-tête).
+          # Scale-up quand le CPU moyen/pod dépasse 300m (~60% de la limite 500m).
+          type: AverageValue
+          averageValue: 300m
   behavior:
     # Scale-up réactif (démo), scale-down prudent (évite le battement).
     scaleUp:
