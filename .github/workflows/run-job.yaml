@@ -28,6 +28,7 @@ on:
           - graphify34-emit-candidates
           - scrape
           - export-graph-nodes
+          - export-gt
       backup_id:
         description: "Optional --backup-id for graphify34-apply (empty ⇒ date-based default phaseA-144-<UTC>)"
         required: false
@@ -121,6 +122,10 @@ jobs:
             export-graph-nodes)
               echo "file=deploy/k8s/39-export-graph-nodes-job.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-export-graph-nodes" >> "$GITHUB_OUTPUT" ;;
+            export-gt)
+              echo "file=deploy/k8s/40-export-gt-designation-events-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "configmap=deploy/k8s/38-graphify34-set167-configmap.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-export-gt-designation-events" >> "$GITHUB_OUTPUT" ;;
             *)
               echo "job inconnu"; exit 1 ;;
           esac
