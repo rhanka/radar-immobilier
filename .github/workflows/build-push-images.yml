@@ -255,6 +255,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
+      # Lets the deployment-notification steps record a GitHub Deployment +
+      # success/failure status for this roll (auditable deploy history + served
+      # sha, no external secret). See "Create GitHub deployment" below.
+      deployments: write
     env:
       NAMESPACE: radar-immobilier
     steps:
@@ -323,6 +327,37 @@ jobs:
           # Deployments must exist and be readable by the scoped SA.
           kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
           echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
+
+      # Record a GitHub Deployment for this roll (env=production, ref=sha) —
+      # created only AFTER the pre-flight passes, so a wrong-cluster refusal
+      # never leaves a phantom "production deployment". The success/failure
+      # status is set at the end of the job (see the two steps after Summary),
+      # giving an auditable deploy history + served sha with NO external secret.
+      - name: Create GitHub deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              required_contexts: [],
+              auto_merge: false,
+              transient_environment: false,
+              production_environment: true,
+              description: 'CD build-push-images → radar-immobilier',
+            });
+            // A 202 (queued/merged-branch) response carries a message, not a
+            // deployment object — degrade gracefully so the roll is never blocked
+            // by the notification bookkeeping.
+            if (!dep.data || dep.data.id === undefined) {
+              core.warning(`createDeployment returned no id: ${dep.data && dep.data.message ? dep.data.message : 'unknown'}`);
+              core.setOutput('id', '');
+            } else {
+              core.setOutput('id', String(dep.data.id));
+            }
 
       - name: Apply immo-mcp declarative config
         # MUST run before "Roll deployments to pushed sha": see the file header
@@ -465,6 +500,29 @@ jobs:
             sleep 10
           done
 
+      # Both post-deploy proofs (TLS serial = right cluster, served sha = right
+      # build) passed → mark the GitHub Deployment success, with the public URL
+      # and the served sha. Guarded on the deployment id so it no-ops if the
+      # create step degraded (202) rather than failing the roll.
+      - name: Deployment status — success
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+        with:
+          script: |
+            const host = process.env.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'success',
+              environment_url: `https://${host}`,
+              description: `served sha ${process.env.SHA} verified live (pre-flight + TLS serial + served-sha)`,
+            });
+
       - name: Summary
         if: always()
         run: |
@@ -477,3 +535,23 @@ jobs:
             echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Any deploy-step failure (pre-flight, rollout, TLS serial, served sha) →
+      # mark the GitHub Deployment failure. `if: failure()` fires on any prior
+      # failure; the id guard skips it when the deployment was never created
+      # (e.g. pre-flight refused a wrong cluster before the create step).
+      - name: Deployment status — failure
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'failure',
+              description: `deploy ${process.env.SHA} failed (rollout OR post-deploy proof) — public path unverified`,
+            });
