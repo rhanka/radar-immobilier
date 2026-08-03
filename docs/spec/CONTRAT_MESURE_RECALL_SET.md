@@ -18,7 +18,17 @@ key(event) = (muni, source_url_norm, date_iso, crosswalked_type)
 
 The identity portion is exactly `(muni, source_url_norm, date_iso)`. All three serialized values MUST be present and equal. The matcher MUST NOT alias or case-fold municipalities, follow or rewrite URLs, apply date windows, infer missing values, or use fuzzy/text/entity matching.
 
-`source_url_norm` is the document identity: an upstream-prepared normalized URL aligned with `immo.source_url`. The measure compares that value exactly and performs no further normalization. It MUST NOT substitute `docSha`. Thus `doc` means `source_url_norm` combined with `muni` and `date_iso`, not a document hash.
+`source_url_norm` is the document identity: the normalized form of the event `source_url` (aligned with `immo.source_url`). **Both geo and immo MUST produce `source_url_norm` by applying EXACTLY the normalization below, then compare the results by exact string equality.** Any deviation diverges the measure. It MUST NOT substitute `docSha`. Thus `doc` means `source_url_norm` combined with `muni` and `date_iso`, not a document hash.
+
+Normalization, verbatim from the geo/jointures harness (`acquisition/src/zoning-events-recall-gate.ts`, `normalizeSourceUrl` ~l.386-408, `VOLATILE` set ~l.76-88; definitive file:line + harness SHA appended at the jointures setrecall commit — the logic below is stable):
+
+1. `trim`; empty string → `null`.
+2. `new URL(s)`; parse failure → `null` (absolute URL required).
+3. hostname → lowercase. NO `www` strip; NO http→https; scheme and port unchanged.
+4. pathname: strip trailing slashes (`/\/+$/`) only when its length > 1.
+5. query: drop every param whose lowercased name starts with `utm_` OR is in `VOLATILE` = {`fbclid`, `gclid`, `mc_cid`, `mc_eid`, `_ga`, `_gl`, `ref`, `source`, `download`, `cache`, `timestamp`, `ts`}; sort the remaining params by (name, then value) and re-append them.
+6. fragment (`#…`): kept, not stripped.
+7. return `url.toString()`; the match is exact string equality of this value.
 
 This is the measurement-field spelling of the crosswalk `b9c121d` §1 identity `(municipality, source_url, date)`: identity remains exact and only type is relaxed.
 
@@ -113,7 +123,8 @@ The geo-side implementation and measurement reference is `docs/spec/SPEC_RECALL_
 | Multiset counts and `min` aggregation | Geo/jointures formula in §6; normative formula in §2 |
 | `zone_ref` null for 72/85 and excluded from matching | Geo/jointures answers; normative rule in §5 |
 | Precision and incoming-HARD zero-FP gate | Geo/jointures answers; crosswalk `b9c121d`, §6.1 |
-| Jointures implementation | **TBD:** committed file:line + SHA to be appended without changing the formula |
+| `source_url_norm` normalization (7 rules) | Geo/jointures harness `acquisition/src/zoning-events-recall-gate.ts`, `normalizeSourceUrl` ~l.386-408, `VOLATILE` ~l.76-88 (supplied verbatim; source absent from this checkout) |
+| Jointures implementation SHA + definitive file:line | **TBD:** appended at the jointures setrecall worker commit without changing the formula or the 7 normalization rules |
 
 Minimum conformance vectors:
 
