@@ -58,10 +58,18 @@ INVALIDE → la cellule reste UNKNOWN.**
 Gabarit par cellule : `{ kpi, muni, source:{ dataset, version }, query, result, date }`.
 
 - **14 `noLot`** (immo produit l'entité `OntoLot` ; la source reste le cadastre) :
-  SOURCE = **cadastre du Québec** (Données Québec, millésime *X*) ; REQUÊTE =
-  lookup des lots cadastraux de la municipalité / de la parcelle → 0 lot /
-  aucun `NO_LOT` ; RÉSULTAT = l'ensemble vide/absent ; DATE = date de requête.
-  **COMPLET** = un `noLot` cadastre existe et est servi. (geo/LOT implémente.)
+  **Population canonique = (B) `OntoLot.noLot` SERVI** (couverture `qc-lots`),
+  tranché conducteur + geo-archi ; **mesurée via le dump entités Lot / `qc-lots`,
+  PAS le dump `DesignationEvent`.** SOURCE = **cadastre du Québec** (Données
+  Québec, millésime *X*) ; REQUÊTE = lookup des lots cadastraux de la
+  municipalité / de la parcelle → 0 lot / aucun `NO_LOT` ; RÉSULTAT =
+  l'ensemble vide/absent ; DATE = date de requête. **COMPLET** = un
+  `OntoLot.noLot` cadastre existe et est **servi**. **N-A** = absence-source
+  cadastre attestée via ce contrat. **(A) `no_lot@DesignationEvent`** (axe
+  événement → assignation) relève de **KPI 12**, **JAMAIS un proxy de 14**.
+  **INVARIANT** : COMPLET, N-A et attestation portent sur la **même
+  population (B)**, jamais de proxy. **HONNÊTETÉ** : `OntoLot`/`qc-lots` non
+  peuplé → **UNKNOWN**, jamais substitué par (A). (geo/LOT implémente.)
 - **15 surface / 16 code-postal / 17 adresse** (props geo-servies) : même gabarit
   contre le rôle/cadastre (« le rôle ne porte pas surface/CP/adresse pour ce
   lot »). geo **atteste** l'absence-source ; immo grave le **N-A SERVI** en
