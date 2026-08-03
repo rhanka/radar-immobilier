@@ -24,6 +24,13 @@ on:
           - mapper
           - snapshot
           - projection
+          - graphify34-apply
+          - graphify34-emit-candidates
+      backup_id:
+        description: "Optional --backup-id for graphify34-apply (empty ⇒ date-based default phaseA-144-<UTC>)"
+        required: false
+        type: string
+        default: ""
 
 concurrency:
   group: run-job-${{ github.event.inputs.job }}
@@ -88,6 +95,14 @@ jobs:
             projection)
               echo "file=deploy/k8s/32-graph-projection-only-job.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-graph-projection-only" >> "$GITHUB_OUTPUT" ;;
+            graphify34-apply)
+              echo "file=deploy/k8s/37-graphify34-apply-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "configmap=deploy/k8s/37-graphify34-slugs-configmap.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-graphify34-apply" >> "$GITHUB_OUTPUT" ;;
+            graphify34-emit-candidates)
+              echo "file=deploy/k8s/38-graphify34-emit-candidates-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "configmap=deploy/k8s/38-graphify34-set167-configmap.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-graphify34-emit-candidates" >> "$GITHUB_OUTPUT" ;;
             *)
               echo "job inconnu"; exit 1 ;;
           esac
@@ -95,22 +110,59 @@ jobs:
       # Jobs are immutable : on supprime une éventuelle instance précédente avant
       # de ré-appliquer (sinon `apply` échoue sur un Job terminé/existant).
       - name: Apply job (delete previous, then apply)
+        env:
+          # User input — injected via env (never inline ${{ }} in the script) and
+          # validated below before it touches sed.
+          BACKUP_ID: ${{ github.event.inputs.backup_id }}
+          CONFIGMAP: ${{ steps.resolve.outputs.configmap }}
+          MANIFEST: ${{ steps.resolve.outputs.file }}
+          JOB_NAME: ${{ steps.resolve.outputs.name }}
         run: |
-          kubectl -n "$NAMESPACE" delete job "${{ steps.resolve.outputs.name }}" --ignore-not-found
-          kubectl -n "$NAMESPACE" apply -f "${{ steps.resolve.outputs.file }}"
+          set -euo pipefail
+          # backup_id must be a safe token (used in a sed replacement + S3 prefix).
+          if [ -n "${BACKUP_ID}" ] && ! printf '%s' "${BACKUP_ID}" | grep -Eq '^[A-Za-z0-9._-]+$'; then
+            echo "::error title=Invalid backup_id::backup_id must match [A-Za-z0-9._-]+"; exit 1
+          fi
+          kubectl -n "$NAMESPACE" delete job "${JOB_NAME}" --ignore-not-found
+          # ConfigMap(s) FIRST (the Job mounts them). apply is idempotent.
+          if [ -n "${CONFIGMAP}" ]; then
+            kubectl -n "$NAMESPACE" apply -f "${CONFIGMAP}"
+          fi
+          # Template BACKUP_ID (placeholder only present in the apply manifest;
+          # a no-op for every other job). Empty ⇒ the manifest's date-based
+          # default phaseA-144-<UTC> kicks in.
+          sed "s/__BACKUP_ID__/${BACKUP_ID}/" "${MANIFEST}" \
+            | kubectl -n "$NAMESPACE" apply -f -
 
       - name: Wait for completion
         run: |
-          set +e
-          kubectl -n "$NAMESPACE" wait "job/${{ steps.resolve.outputs.name }}" \
-            --for=condition=complete --timeout=900s
-          RC=$?
-          if [ $RC -ne 0 ]; then
-            echo "::warning::job non 'complete' dans le délai — logs ci-dessous pour diagnostic"
-          fi
-          exit 0
+          set -eu
+          NAME="${{ steps.resolve.outputs.name }}"
+          # Poll the Job to a TERMINAL state (Complete OR Failed) with a deadline that
+          # EXCEEDS its activeDeadlineSeconds (jobs 37/38 use 3600s), so this workflow
+          # observes the REAL outcome instead of giving up early. A Job that FAILED must
+          # RED this run. Incident 2026-08-02 (PASS-1): the old `kubectl wait
+          # --timeout=900s; exit 0` reported a misleading SUCCESS while the emit job
+          # actually Failed at ~29m (S3 scratch left empty) — the exact "green but broken"
+          # trap. Now: succeeded ⇒ green; failed ⇒ red; neither by the deadline ⇒ red.
+          deadline=$(( $(date +%s) + 3900 ))
+          while :; do
+            succeeded="$(kubectl -n "$NAMESPACE" get job "$NAME" -o jsonpath='{.status.succeeded}' 2>/dev/null || echo '')"
+            failed="$(kubectl -n "$NAMESPACE" get job "$NAME" -o jsonpath='{.status.failed}' 2>/dev/null || echo '')"
+            if [ "${succeeded:-0}" = "1" ]; then
+              echo "job ${NAME} Complete"; exit 0
+            fi
+            if [ -n "${failed:-}" ] && [ "${failed:-0}" != "0" ]; then
+              echo "::error title=Job failed::${NAME} failed (status.failed=${failed}). See 'Job logs' below for the pod error."; exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error title=Job wait deadline::${NAME} did not reach a terminal state within 3900s. See 'Job logs'."; exit 1
+            fi
+            sleep 15
+          done
 
       - name: Job logs (diagnostic)
+        if: always()
         run: |
           kubectl -n "$NAMESPACE" logs "job/${{ steps.resolve.outputs.name }}" --tail=80 || true
           echo "--- status ---"
