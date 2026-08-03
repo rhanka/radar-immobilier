@@ -67,6 +67,22 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # GRAPH_S3 EXPLICITE vers Scaleway (le graph store canonique graph/<city>/latest.json
+            # vit sur radar-immobilier-docs-pocs, PAS le MinIO in-cluster). Sans ça,
+            # resolveGraphS3Config retombe sur l'endpoint MinIO (radar-minio) → ENOTFOUND et la
+            # ville est skipped (échec projection brossard 2026-08-03). Même correctif que emit/apply.
+            - name: GRAPH_S3_ENDPOINT
+              value: "https://s3.fr-par.scw.cloud"
+            - name: GRAPH_S3_BUCKET
+              value: "radar-immobilier-docs-pocs"
+            - name: GRAPH_S3_REGION
+              value: "fr-par"
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              value: "false"
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
             - name: SCRAPE_S3_ENDPOINT
               valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT, optional: true } }
             - name: SCRAPE_S3_BUCKET
