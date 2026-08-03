@@ -63,6 +63,25 @@ name: Build & push images
 # Deployments scaled to 0, `kubectl set image` + `rollout status` both SUCCEED
 # instantly and the pipeline goes green while production is untouched.
 #
+# POST-DEPLOY PROOF / PUBLIC PATH (2026-08-02): the pre-flight above proves the
+# KUBECONFIG targets the right cluster, but not that the public endpoint users
+# actually hit (immo.sent-tech.ca) still resolves to THAT cluster — a DNS/ingress
+# cutover can drift independently. The `deploy` job now ends with a BLOCKING
+# post-deploy proof by TLS certificate serial (poc-k8s recommendation, mirrors
+# transpose-cv / pokemon-cards): it compares the serial served via NORMAL DNS
+# resolution against the serial served when the connection is FORCED to the
+# target cluster's LoadBalancer IP (SNI preserved). Equal serials ⇒ public DNS
+# points at the cluster this run deployed to. This is RENEWAL-ROBUST by
+# construction: it never hardcodes a serial (which would break on every Let's
+# Encrypt renewal ~60d) — it compares live-vs-live. A code HTTP status
+# discriminates nothing (both clusters serve the same app); only the cert serial
+# does. Cert serials are public identifiers, never credentials — safe to print.
+# Both inputs are NON-SECRET repo variables (fallbacks hardcoded, guard never
+# silently off): `PUBLIC_ENDPOINT_HOST` (default immo.sent-tech.ca) and
+# `EXPECTED_OVH_LB_IP` (default 51.79.100.177, the OVH BHS5 Traefik LB).
+#   gh variable set PUBLIC_ENDPOINT_HOST --body 'immo.sent-tech.ca'
+#   gh variable set EXPECTED_OVH_LB_IP  --body '51.79.100.177'
+#
 # To roll back or deploy by hand, the same commands still work with a full
 # kubeconfig:
 #   kubectl -n radar-immobilier apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
@@ -236,6 +255,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
+      # Lets the deployment-notification steps record a GitHub Deployment +
+      # success/failure status for this roll (auditable deploy history + served
+      # sha, no external secret). See "Create GitHub deployment" below.
+      deployments: write
     env:
       NAMESPACE: radar-immobilier
     steps:
@@ -305,6 +328,37 @@ jobs:
           kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
           echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
 
+      # Record a GitHub Deployment for this roll (env=production, ref=sha) —
+      # created only AFTER the pre-flight passes, so a wrong-cluster refusal
+      # never leaves a phantom "production deployment". The success/failure
+      # status is set at the end of the job (see the two steps after Summary),
+      # giving an auditable deploy history + served sha with NO external secret.
+      - name: Create GitHub deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              required_contexts: [],
+              auto_merge: false,
+              transient_environment: false,
+              production_environment: true,
+              description: 'CD build-push-images → radar-immobilier',
+            });
+            // A 202 (queued/merged-branch) response carries a message, not a
+            // deployment object — degrade gracefully so the roll is never blocked
+            // by the notification bookkeeping.
+            if (!dep.data || dep.data.id === undefined) {
+              core.warning(`createDeployment returned no id: ${dep.data && dep.data.message ? dep.data.message : 'unknown'}`);
+              core.setOutput('id', '');
+            } else {
+              core.setOutput('id', String(dep.data.id));
+            }
+
       - name: Apply immo-mcp declarative config
         # MUST run before "Roll deployments to pushed sha": see the file header
         # ("CONFIG DURABILITY") for why the ordering (apply, then set-image)
@@ -362,6 +416,45 @@ jobs:
             fi
           fi
 
+      # POST-DEPLOY PROOF (2026-08-02) — see "POST-DEPLOY PROOF / PUBLIC PATH" in
+      # the file header. Blocking, renewal-robust, live-vs-live TLS serial compare:
+      # proves the public endpoint (immo.sent-tech.ca) is served by the SAME
+      # cluster this run just rolled. Runs AFTER the rollouts so it attests the
+      # freshly-deployed state; needs no kubeconfig (pure network). Cert serials
+      # are public identifiers — printing them leaks nothing.
+      - name: Post-deploy — prove public endpoint serves the deployed cluster (TLS serial)
+        env:
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_HOST:-immo.sent-tech.ca}"
+          lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
+          if [ -z "${PUBLIC_HOST:-}" ] || [ -z "${EXPECTED_LB_IP:-}" ]; then
+            echo "::warning title=Post-deploy proof using built-in defaults::set repo variables PUBLIC_ENDPOINT_HOST / EXPECTED_OVH_LB_IP to make the public-path guard explicit (falling back to ${host} / ${lb_ip})."
+          fi
+          # Read the cert serial for a given connect target, keeping the public
+          # SNI so the LB selects the same virtual host. `openssl x509 -serial`
+          # emits `serial=XXXX`; strip the label.
+          serial_of() {
+            echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null \
+              | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2
+          }
+          sn_dns="$(serial_of "$host")"
+          sn_lb="$(serial_of "$lb_ip")"
+          echo "public host      : ${host}"
+          echo "target LB IP     : ${lb_ip}"
+          echo "serial via DNS   : ${sn_dns:-<none>}"
+          echo "serial via LB IP : ${sn_lb:-<none>}"
+          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ]; then
+            echo "::error title=Post-deploy TLS proof — unreachable::could not read a cert serial (host=${host} lb=${lb_ip}). Rollouts succeeded but the PUBLIC path is UNVERIFIED — investigate before trusting this deploy."
+            exit 1
+          fi
+          if [ "$sn_dns" != "$sn_lb" ]; then
+            echo "::error title=Post-deploy TLS proof FAILED — public path drifted::DNS for ${host} does NOT serve the target LB ${lb_ip} (serial ${sn_dns} vs ${sn_lb}). The endpoint users hit is NOT the cluster this run deployed to. Fix DNS/ingress before trusting this deploy."
+            exit 1
+          fi
+          echo "post-deploy proof OK — ${host} is served by the deployed cluster (${lb_ip}); TLS serial ${sn_dns}"
       # Post-deploy PROOF that the rolled-out sha is actually SERVED — not just
       # that the ReplicaSet rolled. `rollout status` above goes green even
       # against a stale/wrong cluster (see the pre-flight rationale in the file
@@ -407,6 +500,29 @@ jobs:
             sleep 10
           done
 
+      # Both post-deploy proofs (TLS serial = right cluster, served sha = right
+      # build) passed → mark the GitHub Deployment success, with the public URL
+      # and the served sha. Guarded on the deployment id so it no-ops if the
+      # create step degraded (202) rather than failing the roll.
+      - name: Deployment status — success
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+        with:
+          script: |
+            const host = process.env.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'success',
+              environment_url: `https://${host}`,
+              description: `served sha ${process.env.SHA} verified live (pre-flight + TLS serial + served-sha)`,
+            });
+
       - name: Summary
         if: always()
         run: |
@@ -419,3 +535,23 @@ jobs:
             echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Any deploy-step failure (pre-flight, rollout, TLS serial, served sha) →
+      # mark the GitHub Deployment failure. `if: failure()` fires on any prior
+      # failure; the id guard skips it when the deployment was never created
+      # (e.g. pre-flight refused a wrong cluster before the create step).
+      - name: Deployment status — failure
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'failure',
+              description: `deploy ${process.env.SHA} failed (rollout OR post-deploy proof) — public path unverified`,
+            });
