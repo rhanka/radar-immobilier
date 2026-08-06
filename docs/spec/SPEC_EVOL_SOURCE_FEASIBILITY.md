@@ -11,6 +11,10 @@
   municipal/MRC, public geospatial, property/market, and socio-infrastructure
   source families. The branch now carries 34 spike notes under
   `packages/radar-sources/src/sources/_spikes/**`.
+- **2026-08-06**: Terrebonne PV discovery found a Cloudflare-protected
+  official index (HTTP 403 challenge) but four direct official PDF uploads
+  (2024-01-30, 2025-04-15, 2026-01-20, 2026-02-17) returned HTTP 200 and were
+  acquired with SHA-256 provenance.
 
 ## 1. Goal
 
@@ -54,6 +58,7 @@ This matrix is completed progressively from the spike notes in
 | ------ | ------ | ------ | ---------- | ---------- | -------------- | ------ | -------------- | ----- |
 | `avis-publics-valleyfield` | public/free | HTML + PDF | high | medium | direct change signal | 2-3 md | `build-now` | BR07 starting point: derogations, PPCMOI, zoning amendment notices, registers, referendum approvals. |
 | `seances-conseil-valleyfield` | public/free | HTML + PDF | high | medium | decision timeline | 3-5 md | `build-later` | Build after avis publics to link agenda/minutes evidence. |
+| `proces-verbaux-terrebonne` | public/free direct PDFs; index 403 challenge | PDF | medium via manifest | high | direct urbanism decisions | 3-5 md | `build-later` | Four recent official PDFs acquired; the official listing, sitemap, and REST endpoints are Cloudflare-protected, so discovery remains an operational gap. |
 | `videos-youtube-conseil-valleyfield` | public/free | HTML embeds/video | partial | high | early discussion signal | 5-8 md | `build-later` | Defer; transcripts/captions are uncertain and should not block BR07. |
 | `ppcmoi-valleyfield` | public/free | HTML + PDF | medium-high | medium | high-value weak signal | 3-4 md | `build-now` | Strong enrichment once avis/PDF extraction exists. |
 | `reglements-urbanisme-valleyfield` | public/free | HTML + PDF | medium-high | medium | regulatory context | 3-5 md | `build-now` | Same family as avis publics; needed to resolve bylaw references. |
