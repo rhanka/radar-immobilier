@@ -1,0 +1,12 @@
+{
+  "source_found": true,
+  "source_url_base": "https://terrebonne.ca/seances-du-conseil-municipal/",
+  "http_status": 403,
+  "scraped_pv_count": 4,
+  "signals": 4,
+  "desEvents": 4,
+  "desEventsWithSourceUrl": 4,
+  "sources": 4,
+  "gatePass": true,
+  "note": "Official listing, sitemap, and WordPress REST endpoints returned HTTP 403 with cf-mitigated: challenge; four direct official PDF URLs returned HTTP 200 and were stored under raw/proces-verbaux-terrebonne/cas/<sha>.pdf with sourceUrl sidecars. Graphify profile build processed the four raw PDFs; direct semantic extraction ran with graphify 0.17.1, profile validate-extraction passed, and the v2.3 gate published graph/terrebonne/latest.json. Every DesignationEvent carries properties.sourceUrl and properties.docSha. The index remains a discovery gap and must not be bypassed."
+}
