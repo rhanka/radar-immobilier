@@ -1,0 +1,19 @@
+version: 1
+profile:
+  path: ../../ontology/ontology-profile.yaml
+inputs:
+  corpus:
+    - raw
+  registries:
+    - municipalities.json
+    - cadastre.json
+    - adresses_qc.json
+dataprep:
+  pdf_ocr: auto
+  prefer_ocr_markdown: true
+  citation_minimum: page
+  preserve_source_structure: true
+outputs:
+  state_dir: .graphify
+  write_html: false
+  write_wiki: false
