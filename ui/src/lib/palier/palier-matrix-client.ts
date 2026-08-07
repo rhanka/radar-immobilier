@@ -21,6 +21,10 @@ import {
   type GraphSignalCityItem,
   type GraphSignalsByCityResponse,
 } from "$lib/signals/graph-signals-by-city-client.js";
+import {
+  B_SUBSET_KEY,
+  countForVivierCity,
+} from "$lib/signals/vivier-view-mode.js";
 import immoFallbackRaw from "./palier-immo-fallback.json";
 
 export type PalierCellStatus = "complete" | "incomplete" | "unknown" | "na";
@@ -150,19 +154,22 @@ function toCellStatus(value: string | null | undefined): PalierCellStatus {
   }
 }
 
-/** Somme des étapes du périmètre B servi (L1 inPerim) d'une ville. */
-export function cityBStageSum(item: GraphSignalCityItem): number {
-  const counts = item.vivierV2Counts;
-  if (!counts) return 0;
-  return Object.values(counts.stageCounts).reduce(
-    (acc, v) => acc + (typeof v === "number" ? v : 0),
-    0,
-  );
+/**
+ * Compte bulk B d'une ville — EXACTEMENT le prédicat de la vue Signaux : on
+ * réutilise `countForVivierCity` avec la clé B PAR DÉFAUT (« vivier-v2 » =
+ * zonage ∩ résidentiel-éligible, précoce), et non une somme brute de
+ * `stageCounts` (qui serait le périmètre L1 large, non résidentiel-éligible).
+ * Garantit par construction que le dénominateur de la matrice == ce que l'owner
+ * voit dans le rail Signaux (le 127/36 live). `countForVivierCity` garde
+ * `!vivierV2Counts → 0` (pas de throw sur réponse partielle).
+ */
+export function cityBCount(item: GraphSignalCityItem): number {
+  return countForVivierCity(item, B_SUBSET_KEY);
 }
 
-/** Ville B (périmètre servi L1) = au moins une étape zonage non exclue. */
+/** Ville B = compte bulk B > 0 (même prédicat que la vue Signaux). */
 export function cityIsB(item: GraphSignalCityItem): boolean {
-  return cityBStageSum(item) > 0;
+  return cityBCount(item) > 0;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -179,6 +186,7 @@ export interface BuildPalierMatrixLiveOptions {
   /** Injectable pour les tests ; défaut = fetch /api/graph-signals/by-city. */
   fetcher?: (opts: {
     dateFrom?: string | null;
+    dateTo?: string | null;
   }) => Promise<GraphSignalsByCityResponse>;
   /** « Maintenant » (fenêtres de récence) ; défaut = new Date(). */
   now?: Date;
@@ -199,10 +207,15 @@ export async function buildPalierMatrixLive(
   const now = opts.now ?? new Date();
   const subset = opts.subset ?? "B";
 
+  // Fenêtres de récence BORNÉES en haut à « maintenant » : un signal daté dans
+  // le FUTUR (séance de conseil planifiée) ne doit pas compter comme « récent »
+  // (sinon il tomberait dans lt3mo via une borne haute ouverte). Le « all »
+  // (dénominateur) reste non borné = all-time B, comme le rail Signaux.
+  const today = isoDaysBefore(now, 0);
   const [allResp, w3Resp, w6Resp] = await Promise.all([
     fetcher({}),
-    fetcher({ dateFrom: isoDaysBefore(now, RECENCY_LT3MO_DAYS) }),
-    fetcher({ dateFrom: isoDaysBefore(now, RECENCY_LT6MO_DAYS) }),
+    fetcher({ dateFrom: isoDaysBefore(now, RECENCY_LT3MO_DAYS), dateTo: today }),
+    fetcher({ dateFrom: isoDaysBefore(now, RECENCY_LT6MO_DAYS), dateTo: today }),
   ]);
 
   const bSlugSet = (r: GraphSignalsByCityResponse): Set<string> =>
