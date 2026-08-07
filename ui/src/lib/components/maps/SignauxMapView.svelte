@@ -378,6 +378,9 @@
   function handleTimeRangeChange(next: SignalTimeRange): void {
     timeRange = normalizeSignalTimeRange(next);
     dateRange = dateRangeFromSignalTimeRange(timeRange);
+    // #4 — re-charge les comptes BULK date-cohérents pour la nouvelle fenêtre
+    // (rail + badges de toutes les villes), pas seulement la lentille locale.
+    void load();
     reconcileToVisibleNodes();
     updateGeoLayers();
   }
@@ -1820,11 +1823,27 @@
   }
 
   // ── Chargement API ─────────────────────────────────────────────────────────
+  // #4 — borne date locale → ISO YYYY-MM-DD pour le serveur date-aware. null
+  // (fenêtre « Illimité ») → aucune borne envoyée (= all-time).
+  function toApiDate(d: Date | null): string | null {
+    if (!d) return null;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
   async function load() {
     loading = true;
     loadError = null;
     try {
-      const res = await fetchGraphSignalsByCity();
+      // #4 — les comptes BULK (rail + badges de TOUTES les villes) deviennent
+      // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
+      // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
+      const res = await fetchGraphSignalsByCity("", {
+        dateFrom: toApiDate(dateRange.start),
+        dateTo: toApiDate(dateRange.end),
+      });
       graphItems = res.cities;
     } catch (e) {
       console.warn("Signals by city load failed:", e);

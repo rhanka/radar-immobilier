@@ -20,7 +20,7 @@
    */
   import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { FileText, FileX, RefreshCw, X } from "@lucide/svelte";
+  import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -589,6 +589,33 @@
       evidence.rawObjectKey !== null ||
       evidence.sourceRef !== null
     );
+  }
+
+  /**
+   * #2a — URL PUBLIQUE cliquable de la preuve d'un signal (PDF municipal servi
+   * par /api/graph-signals). Garde anti-XSS MINIMALE : http/https uniquement
+   * (jamais javascript:/data:). N'utilise PAS publicAuditUrl, dont l'allowlist
+   * d'hosts FIXE rejette les 167 domaines municipaux — l'assouplir (+ repli
+   * archive S3 pour la liveness) est une garde de validité PARTAGÉE, traitée
+   * séparément avec architect+recette. La liveness n'est donc pas garantie ici.
+   */
+  function publicSourceHref(evidence: SignalEvidence): string | null {
+    const url = evidence.documentUrl ?? evidence.sourceUrl;
+    return typeof url === "string" && /^https?:\/\//i.test(url) ? url : null;
+  }
+
+  /**
+   * #2b(part1) — Repli ARCHIVE durable, SAME-ORIGIN : quand le doc a été scrapé
+   * (rawRef présent), il est servi par /api/documents/raw?rawRef=… (stream PDF,
+   * bucket radar-immobilier-docs — confirmé extraction). Utile quand l'URL
+   * municipale publique est absente (7 villes rawRef-only) OU morte (~48% de
+   * 404 non garantis par le contrat) : l'archive, elle, résout. Endpoint back
+   * existant — pur câblage UI, aucune garde de validité partagée touchée.
+   */
+  function archiveHref(evidence: SignalEvidence): string | null {
+    const rawRef = evidence.rawRef;
+    if (typeof rawRef !== "string" || rawRef === "") return null;
+    return `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}`;
   }
 
   function sourceButtonLabel(evidence: SignalEvidence): string {
@@ -1177,6 +1204,7 @@
 
                         <div class="source-action-row">
                           {#if hasSourceEvidence(evidence)}
+                            {@const proofHref = publicSourceHref(evidence)}
                             <button
                               type="button"
                               class="doc-ref-button"
@@ -1186,6 +1214,38 @@
                               <FileText class="h-3.5 w-3.5" aria-hidden="true" />
                               Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
                             </button>
+                            <!-- #2a — lien DIRECT vers le PDF source public (nouvel
+                                 onglet), en plus de l'overlay. Rendu seulement si
+                                 l'URL est http(s) (garde anti-XSS minimale). -->
+                            {#if proofHref}
+                              <a
+                                href={proofHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="doc-ref-button"
+                                data-testid="signal-proof-direct-link"
+                                title="Ouvrir la source PDF publique dans un nouvel onglet"
+                              >
+                                <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
+                                Ouvrir le PDF source
+                              </a>
+                            {/if}
+                            {@const archiveUrl = archiveHref(evidence)}
+                            {#if archiveUrl}
+                              <!-- #2b(part1) — copie d'archive durable (same-origin),
+                                   utile si la source publique est absente ou morte. -->
+                              <a
+                                href={archiveUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="doc-ref-button"
+                                data-testid="signal-proof-archive-link"
+                                title="Ouvrir la copie d'archive (durable) du PDF"
+                              >
+                                <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                                Ouvrir l'archive (PDF)
+                              </a>
+                            {/if}
                           {:else}
                             <!-- #94 — affichage HONNÊTE : pas de bouton mort muet (rond
                                  barré silencieux). Aucune source documentaire n'est
