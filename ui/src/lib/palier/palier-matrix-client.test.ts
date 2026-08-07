@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPalierMatrixLive,
-  cityBStageSum,
+  cityBCount,
   cityIsB,
   cityResolvedPct,
   kpiResolvedPct,
@@ -73,23 +73,35 @@ describe("palier-matrix/v1 — couche données", () => {
 });
 
 // ── Builder LIVE : scope B + dénominateur + récence depuis le fetch by-city ──
-function mkCity(slug: string, stageSum: number): GraphSignalCityItem {
+function emptyStages() {
+  return {
+    avis_motion: 0,
+    projet_reglement: 0,
+    consultation_publique: 0,
+    second_projet: 0,
+    adoption: 0,
+    entree_vigueur: 0,
+    inconnu: 0,
+  };
+}
+
+// Ville B au sens de la vue Signaux : `stageCountsResEligible` (zonage ∩
+// résidentiel-éligible) porte le compte précoce — c'est ce que lit le prédicat
+// B par défaut « vivier-v2 » (countForVivierCity).
+function mkCity(slug: string, bCount: number): GraphSignalCityItem {
   const item: GraphSignalCityItem = {
     citySlug: slug,
-    signalCount: stageSum,
+    signalCount: bCount,
     subsetCounts: {},
   };
-  if (stageSum > 0) {
+  if (bCount > 0) {
     item.vivierV2Counts = {
-      stageCounts: {
-        avis_motion: stageSum,
-        projet_reglement: 0,
-        consultation_publique: 0,
-        second_projet: 0,
-        adoption: 0,
-        entree_vigueur: 0,
-        inconnu: 0,
-      },
+      qualified: bCount,
+      residentialUnknown: 0,
+      stageCounts: { ...emptyStages(), avis_motion: bCount },
+      stageCountsHorsZonage: emptyStages(),
+      stageCountsResEligible: { ...emptyStages(), avis_motion: bCount },
+      stageCountsResEligibleHorsZonage: emptyStages(),
     } as unknown as GraphSignalCityItem["vivierV2Counts"];
   }
   return item;
@@ -99,11 +111,11 @@ function resp(cities: GraphSignalCityItem[]): GraphSignalsByCityResponse {
   return { ok: true, totalCount: cities.length, cities };
 }
 
-describe("cityIsB / cityBStageSum — périmètre B servi (somme des étapes)", () => {
-  it("B = somme(stageCounts) > 0 ; non-B sinon", () => {
-    expect(cityBStageSum(mkCity("a", 3))).toBe(3);
+describe("cityIsB / cityBCount — prédicat B = celui de la vue Signaux", () => {
+  it("B = compte bulk B (countForVivierCity, clé vivier-v2) > 0 ; non-B sinon", () => {
+    expect(cityBCount(mkCity("a", 3))).toBe(3);
     expect(cityIsB(mkCity("a", 3))).toBe(true);
-    expect(cityBStageSum(mkCity("z", 0))).toBe(0);
+    expect(cityBCount(mkCity("z", 0))).toBe(0);
     expect(cityIsB(mkCity("z", 0))).toBe(false);
   });
 });
@@ -112,7 +124,7 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
   const now = new Date("2026-08-07T00:00:00.000Z");
 
   // Mock du serveur date-aware : la fenêtre restreint les villes B.
-  function fetcher(opts: { dateFrom?: string | null }) {
+  function fetcher(opts: { dateFrom?: string | null; dateTo?: string | null }) {
     const all = resp([
       mkCity("westmount", 2), // B, priorité (réf. fallback)
       mkCity("ville-recente-6mo", 1), // B
