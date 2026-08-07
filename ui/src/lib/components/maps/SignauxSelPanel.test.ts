@@ -354,12 +354,37 @@ describe("SignauxSelPanel — #2a lien de preuve DIRECT (PDF public)", () => {
     expect(queryByTestId("signal-proof-direct-link")).toBeNull();
   });
 
-  it("rawRef seul (archive interne, URL relative) → pas de lien direct public", async () => {
-    const { getByText, queryByTestId } = render(Harness, {
+  it("rawRef seul → PAS de lien public, mais lien ARCHIVE durable same-origin (#2b)", async () => {
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-raw", { rawRef: "raw/proces-verbaux-delson/cas/abc.pdf" })] },
     });
     await fireEvent.click(getByText("sig-raw", { selector: ".sel-entity-label" }));
     expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+    const archive = getByTestId("signal-proof-archive-link");
+    expect(archive.getAttribute("href")).toBe(
+      "/api/documents/raw?rawRef=raw%2Fproces-verbaux-delson%2Fcas%2Fabc.pdf",
+    );
+  });
+
+  it("URL publique + rawRef → LES DEUX liens (source publique + archive durable)", async () => {
+    const { getByText, getByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [
+          sigWithProps("sig-both", {
+            sourceUrl: "https://terrebonne.ca/wp-content/uploads/pv.pdf",
+            rawRef: "raw/proces-verbaux-terrebonne/cas/xyz.pdf",
+          }),
+        ],
+      },
+    });
+    await fireEvent.click(getByText("sig-both", { selector: ".sel-entity-label" }));
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(
+      "https://terrebonne.ca/wp-content/uploads/pv.pdf",
+    );
+    expect(getByTestId("signal-proof-archive-link").getAttribute("href")).toContain(
+      "/api/documents/raw?rawRef=",
+    );
   });
 });
 
