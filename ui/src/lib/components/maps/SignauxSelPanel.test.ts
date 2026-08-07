@@ -561,6 +561,32 @@ function makeLot(noLot: string, extra: Record<string, unknown> = {}): LotFeature
   } as LotFeature;
 }
 
+describe("SignauxSelPanel — #3b(b) bucket Lots filtré ⊆ zone focusée", () => {
+  it("focus zone → seuls les lots de la zone listés ; hors focus → tous", async () => {
+    const zones = makeZonesResponse(["H-431", "C-02"]);
+    const lots = [
+      makeLot("100", { zoneCode: "H-431" }),
+      makeLot("200", { zoneCode: "C-02" }),
+    ];
+    const { getByText, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zones,
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+    // Vue ville (aucune zone focusée) : les DEUX lots sont listés (règle 3).
+    expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(getByText("200", { selector: ".sel-entity-label" })).not.toBeNull();
+
+    // Focus la zone H-431 → seuls ses lots (100) restent listés (règle 4).
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("200", { selector: ".sel-entity-label" })).toBeNull();
+  });
+});
+
 describe("SignauxSelPanel — accordéon LOTS : en-tête de filtre au-dessus de la liste", () => {
   const lots = [
     makeLot("100", { multifamilial4plus: true, superficieM2: 900 }),
