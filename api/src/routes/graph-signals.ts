@@ -7,6 +7,8 @@
  *
  * GET /api/graph-signals/by-city
  *   Returns aggregate signal counts per city.
+ *   Optional inclusive ISO-8601 query params: dateFrom/dateTo. A date-only
+ *   dateTo includes the full local calendar day; no params means all-time.
  *   Response: { ok: true, totalCount, cities: [{ citySlug, signalCount, subsetCounts }] }
  *
  * GET /api/graph-signals/:city
@@ -857,7 +859,17 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
 
   // GET /api/graph-signals/by-city
   app.get("/api/graph-signals/by-city", async (c) => {
-    const cities = await listCitiesWithSignalNodes(deps.db);
+    const dateFrom = c.req.query("dateFrom")?.trim() || undefined;
+    const dateTo = c.req.query("dateTo")?.trim() || undefined;
+    const dateRange = dateFrom || dateTo
+      ? {
+          ...(dateFrom ? { dateFrom } : {}),
+          ...(dateTo ? { dateTo } : {}),
+        }
+      : undefined;
+    const cities = dateRange
+      ? await listCitiesWithSignalNodes(deps.db, dateRange)
+      : await listCitiesWithSignalNodes(deps.db);
     const totalCount = cities.reduce((sum, city) => sum + city.signalCount, 0);
     return c.json({ ok: true, totalCount, cities });
   });
