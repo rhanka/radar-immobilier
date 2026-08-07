@@ -1,0 +1,149 @@
+# 40-export-gt-designation-events-job.yaml — REBUILD the per-muni DesignationEvent
+# ground-truth (GT) for the 167, in the FLAT natural-key schema geo-jointures'
+# frozen match key expects (source_url present), fixing the sourceUrl=NULL export
+# regression (2026-08-03: geo recall 0/1018 because the PG-dump-based GT dropped
+# source_url; the proven 6-city local handoff a5c0cf41 matched 70/85 BECAUSE it
+# carried source_url).
+#
+# Mechanism = the PROVEN mapping of api/src/scripts/export-designation-events.ts
+# (line 98: source_url = str(ref.sourceUrl, p.sourceUrl, ref.rawRef)). Reads the
+# S3 graph store graph/<city>/latest.json DIRECTLY (NOT Postgres — the URL lives on
+# the DesignationEvent's properties.sourceUrl / refs[0].sourceUrl, NOT on the Source
+# node, whose label is only the rawRef). Emits one flat NDJSON row per DesignationEvent
+# and uploads per-muni to S3 + a _manifest.json with the source_url fill rate.
+#
+# READ path only (S3 in + S3 out), NO Postgres → no netpol admission needed. The 167
+# graph_city_slug list comes from the mounted set167 configmap (single source of truth,
+# same as the emit job 38) — no transcription. Fire via:
+#   gh workflow run run-job.yaml -f job=export-gt
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-export-gt-designation-events
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      volumes:
+        - name: set167
+          configMap:
+            name: radar-graphify34-set167
+      containers:
+        - name: export-gt
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "-e"]
+          args:
+            - |
+              const fs = require('node:fs');
+              const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
+              const { setDefaultResultOrder } = require('node:dns');
+              setDefaultResultOrder('ipv4first');
+              const rec = (v) => (typeof v === 'object' && v !== null && !Array.isArray(v)) ? v : {};
+              const str = (...vs) => { for (const v of vs) if (typeof v === 'string' && v.trim()) return v.trim(); return null; };
+              const numOrNull = (...vs) => { for (const v of vs) if (typeof v === 'number' && Number.isFinite(v)) return v; return null; };
+              const streamToString = async (b) => { const chunks = []; for await (const c of b) chunks.push(Buffer.from(c)); return Buffer.concat(chunks).toString('utf8'); };
+              (async () => {
+                // 167 graph_city_slug from the mounted set167 TSV (col 4, fallback col 0/slug).
+                const tsv = fs.readFileSync('/config/set-167.tsv', 'utf8').split('\n');
+                const cities = [];
+                for (const line of tsv) {
+                  if (!line || line.startsWith('#') || line.startsWith('slug\t')) continue;
+                  const f = line.split('\t');
+                  const slug = (f[0] || '').trim();
+                  const gcs = (f[4] || '').trim();
+                  const city = gcs || slug;
+                  if (city) cities.push(city);
+                }
+                const bucket = process.env.GRAPH_S3_BUCKET;
+                const prefix = process.env.GT_S3_PREFIX || 'gt/designation-events-167-v2-20260803';
+                const s3 = new S3Client({ endpoint: process.env.GRAPH_S3_ENDPOINT, region: process.env.GRAPH_S3_REGION || 'fr-par', credentials: { accessKeyId: process.env.GRAPH_S3_ACCESS_KEY, secretAccessKey: process.env.GRAPH_S3_SECRET_KEY }, forcePathStyle: process.env.GRAPH_S3_FORCE_PATH_STYLE === 'true' });
+                const manifest = { source: 'graph/<graph_city_slug>/latest.json', prefix, contract: 'flat natural-key (city_slug,node_type,node_id,kind,label,date,etape,bylaw_numero,source_url,zone_ref,no_lot,docSha,page) — export-designation-events.ts', types: ['DesignationEvent'], perCity: {}, totals: { cities: cities.length, citiesWithGraph: 0, citiesAbsent: 0, events: 0, sourceUrlHttp: 0, sourceUrlAny: 0 } };
+                for (const city of cities) {
+                  let body;
+                  try {
+                    const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: `graph/${city}/latest.json` }));
+                    body = await streamToString(res.Body);
+                  } catch (e) {
+                    manifest.perCity[city] = { events: -1, note: 'ABSENT_S3' };
+                    manifest.totals.citiesAbsent++;
+                    continue;
+                  }
+                  const graph = rec(JSON.parse(body));
+                  const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
+                  const lines = [];
+                  let nn = 0, suHttp = 0, suAny = 0;
+                  for (const raw of nodes) {
+                    const node = rec(raw);
+                    if (String(node.type) !== 'DesignationEvent') continue;
+                    const p = rec(node.properties);
+                    const ref = Array.isArray(node.refs) ? rec(node.refs[0]) : {};
+                    const source_url = str(ref.sourceUrl, p.sourceUrl, ref.rawRef);
+                    const row = {
+                      city_slug: str(p.city, city),
+                      node_type: 'DesignationEvent',
+                      node_id: str(node.id),
+                      kind: str(p.kind, p.category),
+                      label: str(node.label),
+                      date: str(p.date, p.etape_date, p.seance_date),
+                      etape: str(p.etape),
+                      bylaw_numero: str(p.reglement_number, p.bylaw_numero),
+                      source_url,
+                      zone_ref: str(p.zone_ref),
+                      no_lot: str(p.no_lot),
+                      docSha: str(ref.docSha, p.docSha),
+                      page: numOrNull(ref.page, p.page),
+                    };
+                    lines.push(JSON.stringify(row));
+                    nn++;
+                    if (source_url) { suAny++; if (/^https?:\/\//.test(source_url)) suHttp++; }
+                  }
+                  const ndjson = lines.join('\n') + (lines.length ? '\n' : '');
+                  await s3.send(new PutObjectCommand({ Bucket: bucket, Key: `${prefix}/${city}.ndjson`, Body: ndjson, ContentType: 'application/x-ndjson' }));
+                  manifest.perCity[city] = { events: nn, sourceUrlHttp: suHttp, sourceUrlAny: suAny };
+                  manifest.totals.events += nn; manifest.totals.sourceUrlHttp += suHttp; manifest.totals.sourceUrlAny += suAny; manifest.totals.citiesWithGraph++;
+                }
+                await s3.send(new PutObjectCommand({ Bucket: bucket, Key: `${prefix}/_manifest.json`, Body: JSON.stringify(manifest, null, 2), ContentType: 'application/json' }));
+                console.error('GT export totals: ' + JSON.stringify(manifest.totals));
+                process.stdout.write(JSON.stringify({ bucket, prefix, ...manifest.totals }) + '\n');
+              })().catch((e) => { console.error('GT export FAILED: ' + (e && e.stack ? e.stack : e)); process.exit(1); });
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=400 --dns-result-order=ipv4first"
+            - name: GT_S3_PREFIX
+              value: "gt/designation-events-167-v2-20260803"
+            - name: GRAPH_S3_ENDPOINT
+              value: "https://s3.fr-par.scw.cloud"
+            - name: GRAPH_S3_BUCKET
+              value: "radar-immobilier-docs-pocs"
+            - name: GRAPH_S3_REGION
+              value: "fr-par"
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              value: "false"
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          volumeMounts:
+            - name: set167
+              mountPath: /config
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
