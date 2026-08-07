@@ -445,6 +445,75 @@ describe("B-prime residential-axis counts", () => {
   });
 });
 
+describe("server-side signal date windows", () => {
+  const datedSignal = (id: string, props: Record<string, unknown>) => ({
+    id,
+    citySlug: "date-city",
+    type: "Signal",
+    category: "rezonage",
+    label: "Avis de motion — projet résidentiel",
+    nbUnitesMax: "8",
+    intensite: null,
+    description: null,
+    etapeAnnote: "avis_motion",
+    props: {
+      ...props,
+      properties: {
+        category: "rezonage",
+        etape: "avis_motion",
+        nb_unites_max: "8",
+        ...(typeof props.properties === "object" && props.properties !== null
+          ? props.properties
+          : {}),
+      },
+    },
+    sourceRef: null,
+  });
+
+  it("filters every projection rail using the JSONB date-key precedence", () => {
+    const rows = [
+      datedSignal("nested-camel-in", { properties: { etapeDate: "2026-01-10" } }),
+      datedSignal("nested-snake-in", { properties: { etape_date: "2026-02-10" } }),
+      datedSignal("nested-meeting-in", {
+        properties: { meetingDate: "2026-03-31T23:59:59.999Z" },
+      }),
+      datedSignal("published-fallback-in", { publishedAt: "2026-02-20" }),
+      datedSignal("root-date-in", { meeting_date: "2026-03-01" }),
+      datedSignal("nested-out", { properties: { meeting_date: "2026-04-10" } }),
+      datedSignal("nested-document-out", { properties: { documentDate: "2026-04-10" } }),
+      datedSignal("nested-date-out", { properties: { date: "2026-04-10" } }),
+      datedSignal("no-date", {}),
+      datedSignal("invalid-date", { properties: { date: "not-a-date" } }),
+      datedSignal("nested-wins", {
+        properties: { etapeDate: "2025-12-01", date: "2026-02-01" },
+        date: "2026-02-01",
+      }),
+    ];
+
+    const aggregate = aggregateGraphSignalProjectionRows(rows, {
+      dateFrom: "2026-01-01",
+      dateTo: "2026-03-31",
+    })[0]!;
+
+    expect(aggregate.signalCount).toBe(5);
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(5);
+    expect(aggregate.vivierV2Counts).toMatchObject({ total: 5, qualified: 5 });
+  });
+
+  it("keeps all rows when no date window is supplied", () => {
+    const rows = [
+      datedSignal("dated", { properties: { date: "2025-01-01" } }),
+      datedSignal("undated", {}),
+    ];
+
+    const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
+
+    expect(aggregate.signalCount).toBe(2);
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(2);
+    expect(aggregate.vivierV2Counts.total).toBe(2);
+  });
+});
+
 describe("buildEdgeRow", () => {
   it("maps graphify link to DB edge row", () => {
     const link: GraphifyLink = {
