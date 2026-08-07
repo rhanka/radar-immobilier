@@ -427,7 +427,7 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
   };
 
   it("affiche zone (code), 4+ avec source, superficie formatée et TOD", async () => {
-    const { getByText, queryByText } = render(Harness, {
+    const { getByText, queryByText, queryAllByText } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
@@ -437,7 +437,9 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
 
     await fireEvent.click(getByText("5399042"));
 
-    expect(queryByText("H-431")).not.toBeNull();
+    // #3b(c) : le code zone apparaît légitimement 2× (pin « Lot actif » +
+    // détail inline) — les deux sont servis par geo, aucun n'est fabriqué.
+    expect(queryAllByText("H-431").length).toBeGreaterThan(0);
     expect(queryByText("Multifamilial 4+")).not.toBeNull();
     expect(queryByText("Oui · grille")).not.toBeNull();
     expect(queryByText("850 m²")).not.toBeNull();
@@ -584,6 +586,33 @@ describe("SignauxSelPanel — #3b(b) bucket Lots filtré ⊆ zone focusée", () 
     await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
     expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
     expect(queryByText("200", { selector: ".sel-entity-label" })).toBeNull();
+  });
+});
+
+describe("SignauxSelPanel — #3b(c) panneau « Lot actif » pinné", () => {
+  it("focus lot → panneau pinné (n° + superficie + détail dépliable) ; absent sinon", async () => {
+    const lots = [
+      makeLot("5399042", { zoneCode: "H-431", superficieM2: 850.4 }),
+    ];
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+    // Aucun panneau tant qu'aucun lot n'est focusé (dernier niveau du drill).
+    expect(queryByTestId("sel-lot-head")).toBeNull();
+
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+
+    // Panneau « Lot actif » pinné rendu (miroir de « Zone active »), avec le
+    // n° de lot, la superficie servie et le détail dépliable.
+    const head = getByTestId("sel-lot-head");
+    expect(head.textContent).toContain("Lot actif");
+    expect(head.textContent).toContain("5399042");
+    expect(head.textContent).toContain("Superficie");
+    expect(getByTestId("sel-lot-head-more")).toBeTruthy();
   });
 });
 
