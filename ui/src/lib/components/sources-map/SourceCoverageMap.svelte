@@ -206,10 +206,14 @@
       )
     : [];
 
+  // Ville sélectionnée sans type de zone servi : la légende reste VISIBLE en
+  // « Zonage : Non couvert » plutôt que de disparaître (même exigence que le
+  // bloc d'audit — l'utilisateur distingue « pas de zonage » d'« absence de
+  // fonctionnalité »). Vocabulaire neutre (Servi / Partiel / Non couvert).
   $: legend = selectedCity
     ? zoneLegendEntries.length > 0
       ? ({ title: "Zonage", items: zoneLegendEntries } as GeoMapLegend)
-      : null
+      : ({ title: "Zonage", items: [{ color: STATE_COLOR.absent, label: STATE_LABEL.absent }] } as GeoMapLegend)
     : coverageLegend;
 
   // ── Drill segmenté Province / Ville / Zone (logique partagée geo-drill) ────
