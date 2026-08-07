@@ -428,6 +428,11 @@
     const focused = lookup.find((zone) => zone.properties.code === code);
     return focused ? [focused, ...shown] : shown;
   }
+  // Objet de la zone focusée — alimente le panneau pinné « Zone active »
+  // (miroir de « Ville active ») affiché au-dessus des buckets.
+  $: focusedZone = focusedZoneCode
+    ? (visibleZones.find((zone) => zone.properties.code === focusedZoneCode) ?? null)
+    : null;
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
@@ -912,6 +917,39 @@
         {/if}
       </div>
     </div>
+
+    <!-- #3a — Panneau « Zone active » PINNÉ (miroir de « Ville active ») :
+         quand une zone est focusée, ses champs prioritaires restent visibles
+         au-dessus des buckets, le reste est dépliable. Données servies par
+         /api/geo/:city/zones (GeoZoneProperties). -->
+    {#if focusedZone}
+      {@const fzSource = describeZoneSource(focusedZone.properties)}
+      {@const fzReg = zoneReglementRow(focusedZone)}
+      {@const fzType = zoneTypeLabel(focusedZone)}
+      {@const fzLots = zoneLotCount(focusedZone, lots)}
+      <div class="sel-zone-head" data-testid="sel-zone-head">
+        <span class="sel-kicker" style="color: #7c3aed;">Zone active</span>
+        <h2 class="sel-zone-title">{focusedZone.properties.label ?? focusedZone.properties.code}</h2>
+        <p class="sel-city-meta">
+          <code>{focusedZone.properties.code}</code>{#if fzType} · {fzType}{/if}
+        </p>
+        <div class="sel-pill-row">
+          {#if fzReg}<Badge tone="info">{fzReg.value}</Badge>{/if}
+          <Badge tone="neutral">{fzSource.label}</Badge>
+          <Badge tone="neutral">Confiance {confidencePct(focusedZone.properties.confidence)}</Badge>
+          <Badge tone={fzLots > 0 ? "success" : "neutral"}>{formatNumber(fzLots)} lots liés</Badge>
+        </div>
+        <details class="sel-zone-more" data-testid="sel-zone-head-more">
+          <summary>Détail de la zone</summary>
+          <dl class="entity-meta">
+            <dt class="entity-meta-key">Provenance</dt>
+            <dd class="entity-meta-val">{zoneSourceLabel(focusedZone)}</dd>
+            <dt class="entity-meta-key">Géométrie servie</dt>
+            <dd class="entity-meta-val">{zoneGeometryLabel(focusedZone)}</dd>
+          </dl>
+        </details>
+      </div>
+    {/if}
 
     {#if detailError}
       <div class="sel-alert">
@@ -1782,6 +1820,36 @@
     font-size: var(--signaux-fs-body);
     color: var(--st-semantic-text-muted, #94a3b8);
     margin: 0.15rem 0 0.45rem;
+  }
+
+  /* #3a — Panneau « Zone active » pinné, miroir de .sel-city-head. */
+  .sel-zone-head {
+    padding: 0.6rem 0.85rem 0.7rem;
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    flex-shrink: 0;
+  }
+
+  .sel-zone-title {
+    font-size: var(--signaux-fs-title);
+    font-weight: 600;
+    color: var(--st-semantic-text-primary, #1e293b);
+    margin: 0.2rem 0 0.25rem;
+  }
+
+  .sel-zone-more {
+    margin-top: 0.5rem;
+    font-size: var(--signaux-fs-caption);
+  }
+
+  .sel-zone-more > summary {
+    cursor: pointer;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-weight: 600;
+  }
+
+  .sel-zone-more > .entity-meta {
+    margin-top: 0.4rem;
   }
 
   .sel-pill-row {
