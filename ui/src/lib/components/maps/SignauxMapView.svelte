@@ -76,6 +76,7 @@
   } from "$lib/net/fetch-with-timeout.js";
   import {
     createSelectionBucketState,
+    hasZoneSelection,
     makeKey,
     parseKey,
     setFocus,
@@ -935,6 +936,10 @@
   function handleLotClick(lot: { noLot: string; citySlug: string | null }): void {
     const citySlug = lot.citySlug ?? selectedCity?.municipality.slug;
     if (!citySlug) return;
+    // #3b — hiérarchie stricte Ville → Zone → Lot : un lot n'est SÉLECTIONNABLE
+    // qu'une fois une ZONE entrée (vue zone). En vue ville, les lots restent
+    // AFFICHÉS sur la carte mais VERROUILLÉS → clic ignoré (règles owner 1/2).
+    if (!hasZoneSelection(selectionState)) return;
     toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`));
   }
 
