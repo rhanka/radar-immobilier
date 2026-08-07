@@ -30,6 +30,7 @@
   let subset: PalierSubset = "B";
   $: matrix = matrixProvider(subset);
 
+  const SUBSETS: PalierSubset[] = ["A", "B"];
   const SUBSET_LABEL: Record<PalierSubset, string> = {
     A: "Palier 30",
     B: "167 villes",
@@ -73,7 +74,7 @@
 
   <!-- Toggle subset A / B -->
   <div class="palier-toggle" role="group" aria-label="Sous-ensemble" data-testid="palier-subset-toggle">
-    {#each ["A", "B"] as s (s)}
+    {#each SUBSETS as s (s)}
       <button
         type="button"
         class="palier-toggle-btn"
