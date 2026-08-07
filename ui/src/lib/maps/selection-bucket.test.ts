@@ -5,6 +5,7 @@ import {
   clearSelectionGroup,
   createSelectionBucketState,
   deriveOpacity,
+  hasZoneSelection,
   makeKey,
   parseKey,
   removeSelection,
@@ -28,6 +29,37 @@ describe("selection bucket keys", () => {
     expect(parseKey("lot")).toBeNull();
     expect(parseKey("unknown:abc")).toBeNull();
     expect(parseKey("lot:%E0%A4%A")).toBeNull();
+  });
+});
+
+describe("#3b hasZoneSelection — gate hiérarchie Ville→Zone→Lot", () => {
+  const cityKey = makeKey("municipality", "delson");
+  const zoneKey = makeKey("zone", "delson/H-431");
+  const lotKey = makeKey("lot", "delson/6057912");
+
+  it("aucune zone (vue ville) → false : lots verrouillés", () => {
+    expect(hasZoneSelection(createSelectionBucketState())).toBe(false);
+    // ville + lot sélectionnés mais AUCUNE zone → toujours false.
+    expect(
+      hasZoneSelection(createSelectionBucketState({ selectedKeys: [cityKey, lotKey] })),
+    ).toBe(false);
+  });
+
+  it("zone focusée → true : les lots deviennent sélectionnables", () => {
+    const state = setFocus(
+      createSelectionBucketState({ selectedKeys: [zoneKey] }),
+      zoneKey,
+    );
+    expect(hasZoneSelection(state)).toBe(true);
+  });
+
+  it("zone entrée puis lot focusé → true : on enchaîne les lots (règle owner)", () => {
+    // zone sélectionnée, focus déplacé sur un lot → la zone reste « entrée ».
+    const state = setFocus(
+      createSelectionBucketState({ selectedKeys: [zoneKey, lotKey] }),
+      lotKey,
+    );
+    expect(hasZoneSelection(state)).toBe(true);
   });
 });
 
