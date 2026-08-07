@@ -350,12 +350,25 @@
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
   $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
 
+  /**
+   * #3b(b) — En VUE ZONE (une zone focusée), le bucket Lots ne liste QUE les
+   * lots ⊆ zone focusée (règle owner 4). Hors focus zone (vue ville) : tous les
+   * lots restent listés (règle 3 — affichés partout ; seule la sélectionnabilité
+   * est gatée côté carte). Appartenance par code de zone (jointure #314).
+   */
+  $: zoneScopedLots = focusedZoneCode
+    ? filteredLots.filter(
+        (l) =>
+          (l.properties.zoneCode ?? l.properties.zone?.code ?? null) === focusedZoneCode,
+      )
+    : filteredLots;
+
   // ── Filtre LOTS (en-tête de l'accordéon Lots — eval-lot-filters réutilisé) ─
   $: lotFilterActive = !isDefaultEvalFilter(lotFilter);
   /** Lots listés = filtre signaux ∩ filtre lots. */
   $: evalFilteredLots = lotFilterActive
-    ? filteredLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
-    : filteredLots;
+    ? zoneScopedLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
+    : zoneScopedLots;
   /**
    * Compteur N/M de l'en-tête + bandeau : base = TOUS les lots chargés (comme
    * l'ex-panneau autonome), car le filtre peint TOUTE la couche carte — pas
@@ -392,7 +405,7 @@
   // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
   // sur un lot estompé de la carte), il est remonté en tête de liste — la
   // sélection carte → fiche n'est jamais cassée par un filtre.
-  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, filteredLots);
+  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, zoneScopedLots);
 
   function ensureFocusedLotVisible(
     shown: LotFeature[],
@@ -437,7 +450,10 @@
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
       : null;
-  $: lotTotalCount = filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
+  // #3b(b) — en vue zone, « M disponibles » = total des lots DE LA ZONE.
+  $: lotTotalCount = focusedZoneCode
+    ? zoneScopedLots.length
+    : filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
   /** Total de la LISTE affichée (filtre lots appliqué) — base du cap DOM 80. */
   $: lotListTotal = lotFilterActive ? evalFilteredLots.length : lotTotalCount;
   $: hiddenLotCount = Math.max(0, lotListTotal - visibleLots.length);
