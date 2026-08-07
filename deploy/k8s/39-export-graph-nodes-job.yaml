@@ -85,6 +85,15 @@ spec:
                   order by id
                 ) t`;
                 const res = await pool.query(q);
+                // DIAGNOSTIC (read-only, stdout/stderr only — NOT in the S3 dump): per-city
+                // per-TYPE counts for the 28 projection-gap munis recovered 2026-08-03. The S3
+                // dump filters type in (Signal,DesignationEvent); these 28 add 0 of those (row
+                // count stayed 7263 post-projection), so their nodes are Source/City/legacy. This
+                // GROUP BY surfaces the REAL type names to distinguish N-A (Source present +
+                // 0 DesEvent = graphify read docs, found 0) from stub/legacy (City-only = still gap).
+                const diagSlugs = ['beauharnois','la-presentation','lacolle','lepiphanie','lile-cadieux','mont-saint-gregoire','napierville','oka','rougemont','saint-antoine-sur-richelieu','saint-bernard-de-lacolle','saint-clet','saint-cyprien-de-napierville','saint-edouard','saint-etienne-de-beauharnois','saint-lambert','saint-lazare','saint-liguori','saint-placide','saint-roch-ouest','saint-sulpice','sainte-anne-de-sabrevois','sainte-madeleine','sainte-marie-madeleine','saint-barnabe-sud','terrebonne','tres-saint-sacrement','noyan'];
+                const diag = await pool.query("select city_slug, type, count(*)::int as n from graph_nodes where city_slug = any($1::text[]) group by city_slug, type order by city_slug, type", [diagSlugs]);
+                console.error('DIAG-TYPECOUNTS ' + JSON.stringify(diag.rows));
                 await pool.end();
                 const rows = res.rows.length;
                 const ndjson = res.rows.map((r) => r.j).join('\n') + (rows ? '\n' : '');
