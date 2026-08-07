@@ -20,7 +20,7 @@
    */
   import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { FileText, FileX, RefreshCw, X } from "@lucide/svelte";
+  import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -586,6 +586,19 @@
     );
   }
 
+  /**
+   * #2a — URL PUBLIQUE cliquable de la preuve d'un signal (PDF municipal servi
+   * par /api/graph-signals). Garde anti-XSS MINIMALE : http/https uniquement
+   * (jamais javascript:/data:). N'utilise PAS publicAuditUrl, dont l'allowlist
+   * d'hosts FIXE rejette les 167 domaines municipaux — l'assouplir (+ repli
+   * archive S3 pour la liveness) est une garde de validité PARTAGÉE, traitée
+   * séparément avec architect+recette. La liveness n'est donc pas garantie ici.
+   */
+  function publicSourceHref(evidence: SignalEvidence): string | null {
+    const url = evidence.documentUrl ?? evidence.sourceUrl;
+    return typeof url === "string" && /^https?:\/\//i.test(url) ? url : null;
+  }
+
   function sourceButtonLabel(evidence: SignalEvidence): string {
     if (evidence.documentUrl || evidence.sourceUrl) return "Voir PDF/source";
     if (hasSourceEvidence(evidence)) return "Voir provenance";
@@ -1139,6 +1152,7 @@
 
                         <div class="source-action-row">
                           {#if hasSourceEvidence(evidence)}
+                            {@const proofHref = publicSourceHref(evidence)}
                             <button
                               type="button"
                               class="doc-ref-button"
@@ -1148,6 +1162,22 @@
                               <FileText class="h-3.5 w-3.5" aria-hidden="true" />
                               Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
                             </button>
+                            <!-- #2a — lien DIRECT vers le PDF source public (nouvel
+                                 onglet), en plus de l'overlay. Rendu seulement si
+                                 l'URL est http(s) (garde anti-XSS minimale). -->
+                            {#if proofHref}
+                              <a
+                                href={proofHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="doc-ref-button"
+                                data-testid="signal-proof-direct-link"
+                                title="Ouvrir la source PDF publique dans un nouvel onglet"
+                              >
+                                <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
+                                Ouvrir le PDF source
+                              </a>
+                            {/if}
                           {:else}
                             <!-- #94 — affichage HONNÊTE : pas de bouton mort muet (rond
                                  barré silencieux). Aucune source documentaire n'est
