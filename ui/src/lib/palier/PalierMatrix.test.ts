@@ -59,7 +59,7 @@ describe("PalierMatrix — vue matrice live", () => {
   });
 
   it("priorité en TÊTE + copy de statut NEUTRE (aucun jargon 'unknown')", async () => {
-    const { findByTestId, getByTestId } = render(PalierMatrix, {
+    const { findByTestId } = render(PalierMatrix, {
       props: { matrixLoader: async () => cannedMatrix() },
     });
     const grid = await findByTestId("palier-grid");
