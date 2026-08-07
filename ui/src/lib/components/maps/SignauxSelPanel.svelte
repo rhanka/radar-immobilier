@@ -350,12 +350,25 @@
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
   $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
 
+  /**
+   * #3b(b) — En VUE ZONE (une zone focusée), le bucket Lots ne liste QUE les
+   * lots ⊆ zone focusée (règle owner 4). Hors focus zone (vue ville) : tous les
+   * lots restent listés (règle 3 — affichés partout ; seule la sélectionnabilité
+   * est gatée côté carte). Appartenance par code de zone (jointure #314).
+   */
+  $: zoneScopedLots = focusedZoneCode
+    ? filteredLots.filter(
+        (l) =>
+          (l.properties.zoneCode ?? l.properties.zone?.code ?? null) === focusedZoneCode,
+      )
+    : filteredLots;
+
   // ── Filtre LOTS (en-tête de l'accordéon Lots — eval-lot-filters réutilisé) ─
   $: lotFilterActive = !isDefaultEvalFilter(lotFilter);
   /** Lots listés = filtre signaux ∩ filtre lots. */
   $: evalFilteredLots = lotFilterActive
-    ? filteredLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
-    : filteredLots;
+    ? zoneScopedLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
+    : zoneScopedLots;
   /**
    * Compteur N/M de l'en-tête + bandeau : base = TOUS les lots chargés (comme
    * l'ex-panneau autonome), car le filtre peint TOUTE la couche carte — pas
@@ -392,7 +405,7 @@
   // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
   // sur un lot estompé de la carte), il est remonté en tête de liste — la
   // sélection carte → fiche n'est jamais cassée par un filtre.
-  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, filteredLots);
+  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, zoneScopedLots);
 
   function ensureFocusedLotVisible(
     shown: LotFeature[],
@@ -433,11 +446,23 @@
   $: focusedZone = focusedZoneCode
     ? (visibleZones.find((zone) => zone.properties.code === focusedZoneCode) ?? null)
     : null;
+  // #3b(c) — Objet du lot focusé — alimente le panneau pinné « Lot actif »
+  // (miroir de « Zone active » / « Ville active ») au-dessus des buckets. Le
+  // lot focusé est toujours dans visibleLots (ensureFocusedLotVisible), repli
+  // sur lots au cas où.
+  $: focusedLot = focusedLotNo
+    ? (visibleLots.find((l) => l.properties.noLot === focusedLotNo) ??
+        lots.find((l) => l.properties.noLot === focusedLotNo) ??
+        null)
+    : null;
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
       : null;
-  $: lotTotalCount = filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
+  // #3b(b) — en vue zone, « M disponibles » = total des lots DE LA ZONE.
+  $: lotTotalCount = focusedZoneCode
+    ? zoneScopedLots.length
+    : filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
   /** Total de la LISTE affichée (filtre lots appliqué) — base du cap DOM 80. */
   $: lotListTotal = lotFilterActive ? evalFilteredLots.length : lotTotalCount;
   $: hiddenLotCount = Math.max(0, lotListTotal - visibleLots.length);
@@ -973,6 +998,44 @@
             <dd class="entity-meta-val">{zoneSourceLabel(focusedZone)}</dd>
             <dt class="entity-meta-key">Géométrie servie</dt>
             <dd class="entity-meta-val">{zoneGeometryLabel(focusedZone)}</dd>
+          </dl>
+        </details>
+      </div>
+    {/if}
+
+    <!-- #3b(c) — Panneau « Lot actif » PINNÉ (miroir de « Zone active » /
+         « Ville active ») : dernier niveau du drill Ville→Zone→Lot. Quand un
+         lot est focusé (clic carte/liste, sélection débloquée en vue zone),
+         ses champs prioritaires restent visibles au-dessus des buckets ; le
+         reste est dépliable. Données servies par /api/geo/:city/lots. -->
+    {#if focusedLot}
+      {@const flZoneCode = lotZoneCode(focusedLot.properties)}
+      {@const flZoneKind = lotZoneKind(focusedLot)}
+      {@const flScore = lotScore(focusedLot)}
+      <div class="sel-lot-head" data-testid="sel-lot-head">
+        <span class="sel-kicker" style="color: #b45309;">Lot actif</span>
+        <h2 class="sel-lot-title">{focusedLot.properties.noLot}</h2>
+        <p class="sel-city-meta">
+          {#if flZoneCode}<code>{flZoneCode}</code>{/if}{#if flZoneKind} · {flZoneKind}{/if}
+        </p>
+        <div class="sel-pill-row">
+          <Badge tone="neutral">Superficie {formatArea(focusedLot.properties.superficieM2)}</Badge>
+          <Badge tone="neutral">Multifamilial 4+ : {lot4Plus(focusedLot)}</Badge>
+          <Badge tone={flScore ? "info" : "neutral"}>
+            {flScore ? `Potentiel ${flScore}` : "Potentiel non évalué"}
+          </Badge>
+        </div>
+        <details class="sel-lot-more" data-testid="sel-lot-head-more">
+          <summary>Détail du lot</summary>
+          <dl class="entity-meta">
+            <dt class="entity-meta-key">Adresse</dt>
+            <dd class="entity-meta-val">{focusedLot.properties.adresse ?? "—"}</dd>
+            <dt class="entity-meta-key">Code postal</dt>
+            <dd class="entity-meta-val">{formatPostalCode(focusedLot.properties.codePostal)}</dd>
+            <dt class="entity-meta-key">Façade</dt>
+            <dd class="entity-meta-val">{facadeDisplay(focusedLot)}</dd>
+            <dt class="entity-meta-key">Source</dt>
+            <dd class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</dd>
           </dl>
         </details>
       </div>
@@ -1909,6 +1972,36 @@
   }
 
   .sel-zone-more > .entity-meta {
+    margin-top: 0.4rem;
+  }
+
+  /* #3b(c) — Panneau « Lot actif » pinné, miroir de .sel-zone-head. */
+  .sel-lot-head {
+    padding: 0.6rem 0.85rem 0.7rem;
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    flex-shrink: 0;
+  }
+
+  .sel-lot-title {
+    font-size: var(--signaux-fs-title);
+    font-weight: 600;
+    color: var(--st-semantic-text-primary, #1e293b);
+    margin: 0.2rem 0 0.25rem;
+  }
+
+  .sel-lot-more {
+    margin-top: 0.5rem;
+    font-size: var(--signaux-fs-caption);
+  }
+
+  .sel-lot-more > summary {
+    cursor: pointer;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-weight: 600;
+  }
+
+  .sel-lot-more > .entity-meta {
     margin-top: 0.4rem;
   }
 
