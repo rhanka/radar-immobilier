@@ -319,6 +319,50 @@ function makeZonesResponse(codes: string[]): GeoZonesResponse {
   };
 }
 
+describe("SignauxSelPanel — #2a lien de preuve DIRECT (PDF public)", () => {
+  function sigWithProps(id: string, props: Record<string, unknown>): GraphSignalNode {
+    return {
+      id,
+      type: "DesignationEvent",
+      label: id,
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      description: "x",
+      publishedAt: "2026-05-19T12:00:00.000Z",
+      props: { description: "x", ...props },
+    };
+  }
+
+  it("URL https → lien direct « Ouvrir le PDF source » avec href réel (nouvel onglet)", async () => {
+    const url = "https://brossard.ca/app/uploads/2026/01/pv.pdf";
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-url", { sourceUrl: url })] },
+    });
+    await fireEvent.click(getByText("sig-url", { selector: ".sel-entity-label" }));
+    const link = getByTestId("signal-proof-direct-link");
+    expect(link.getAttribute("href")).toBe(url);
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+  });
+
+  it("URL non http(s) (javascript:) → AUCUN lien direct (garde anti-XSS)", async () => {
+    const { getByText, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-xss", { sourceUrl: "javascript:alert(1)" })] },
+    });
+    await fireEvent.click(getByText("sig-xss", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+  });
+
+  it("rawRef seul (archive interne, URL relative) → pas de lien direct public", async () => {
+    const { getByText, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-raw", { rawRef: "raw/proces-verbaux-delson/cas/abc.pdf" })] },
+    });
+    await fireEvent.click(getByText("sig-raw", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+  });
+});
+
 describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, score honnête)", () => {
   const enrichedLot: LotFeature = {
     type: "Feature",
