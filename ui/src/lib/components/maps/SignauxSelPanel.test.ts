@@ -319,6 +319,27 @@ function makeZonesResponse(codes: string[]): GeoZonesResponse {
   };
 }
 
+describe("SignauxSelPanel — #3a panneau « Zone active » pinné", () => {
+  it("focus zone → panneau pinné (code + type + pills + détail dépliable) ; absent sinon", async () => {
+    const zones = makeZonesResponse(["H-431"]);
+    zones.featureCollection.features[0]!.properties.kind = "habitation";
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones },
+    });
+    // Aucun panneau tant qu'aucune zone n'est focusée.
+    expect(queryByTestId("sel-zone-head")).toBeNull();
+
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+
+    // Panneau « Zone active » pinné rendu, avec le code + le détail dépliable.
+    const head = getByTestId("sel-zone-head");
+    expect(head.textContent).toContain("Zone active");
+    expect(head.textContent).toContain("H-431");
+    expect(head.textContent).toContain("lots liés");
+    expect(getByTestId("sel-zone-head-more")).toBeTruthy();
+  });
+});
+
 describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, score honnête)", () => {
   const enrichedLot: LotFeature = {
     type: "Feature",
