@@ -599,6 +599,20 @@
     return typeof url === "string" && /^https?:\/\//i.test(url) ? url : null;
   }
 
+  /**
+   * #2b(part1) — Repli ARCHIVE durable, SAME-ORIGIN : quand le doc a été scrapé
+   * (rawRef présent), il est servi par /api/documents/raw?rawRef=… (stream PDF,
+   * bucket radar-immobilier-docs — confirmé extraction). Utile quand l'URL
+   * municipale publique est absente (7 villes rawRef-only) OU morte (~48% de
+   * 404 non garantis par le contrat) : l'archive, elle, résout. Endpoint back
+   * existant — pur câblage UI, aucune garde de validité partagée touchée.
+   */
+  function archiveHref(evidence: SignalEvidence): string | null {
+    const rawRef = evidence.rawRef;
+    if (typeof rawRef !== "string" || rawRef === "") return null;
+    return `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}`;
+  }
+
   function sourceButtonLabel(evidence: SignalEvidence): string {
     if (evidence.documentUrl || evidence.sourceUrl) return "Voir PDF/source";
     if (hasSourceEvidence(evidence)) return "Voir provenance";
@@ -1176,6 +1190,22 @@
                               >
                                 <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
                                 Ouvrir le PDF source
+                              </a>
+                            {/if}
+                            {@const archiveUrl = archiveHref(evidence)}
+                            {#if archiveUrl}
+                              <!-- #2b(part1) — copie d'archive durable (same-origin),
+                                   utile si la source publique est absente ou morte. -->
+                              <a
+                                href={archiveUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="doc-ref-button"
+                                data-testid="signal-proof-archive-link"
+                                title="Ouvrir la copie d'archive (durable) du PDF"
+                              >
+                                <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                                Ouvrir l'archive (PDF)
                               </a>
                             {/if}
                           {:else}
