@@ -71,6 +71,23 @@ export function parseKey(key: string): ParsedSelectionKey | null {
   }
 }
 
+/**
+ * #3b — Une ZONE est-elle « entrée » dans le drill (focusée OU sélectionnée) ?
+ * Gate de la hiérarchie stricte Ville → Zone → Lot : un lot n'est
+ * SÉLECTIONNABLE que lorsqu'une zone est entrée (vue zone). En vue ville, les
+ * lots restent AFFICHÉS mais verrouillés. Reste vrai après avoir pin un lot
+ * (la zone demeure dans selectedKeys), donc on peut enchaîner des lots.
+ */
+export function hasZoneSelection(state: SelectionBucketState): boolean {
+  if (state.focusedKey !== null && state.focusedKey.startsWith("zone:")) {
+    return true;
+  }
+  for (const key of state.selectedKeys) {
+    if (key.startsWith("zone:")) return true;
+  }
+  return false;
+}
+
 export function createSelectionBucketState(
   init: {
     selectedKeys?: Iterable<SelectionKey>;
