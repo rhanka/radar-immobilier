@@ -75,6 +75,7 @@
     DEFAULT_REQUEST_TIMEOUT_MS,
   } from "$lib/net/fetch-with-timeout.js";
   import {
+    clearSelectionGroup,
     createSelectionBucketState,
     hasZoneSelection,
     makeKey,
@@ -457,12 +458,11 @@
     lotDataFilter = next;
   }
 
-  /** Filtre par TYPE de zone (chips additives — catégories de la légende). */
-  let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
-
-  function handleZoneKindFilterChange(next: ZoneKindFilter): void {
-    zoneKindFilter = next;
-  }
+  // Filtre par TYPE de zone : pilote UNIQUEMENT la peinture carte (opacité par
+  // type). Son en-tête interactif vivait dans le bucket Zones du panneau droit,
+  // retiré (01KZGM07 item 1) : le filtre reste donc à sa valeur par défaut
+  // (toutes catégories visibles), mais son câblage de peinture est conservé.
+  const zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
 
   /**
    * Filtre par MILLÉSIME de zonage (exclusif — un seul millésime à la fois).
@@ -633,13 +633,18 @@
     city: CityMapEntry | null,
   ): string {
     // Projection de l'état bucket vers la logique de drill PARTAGÉE (geo-drill,
-    // mutualisée avec la vue Sources/Couverture).
+    // mutualisée avec la vue Sources/Couverture). La vue Signaux ajoute le
+    // niveau LOT (drill Ville → Zone → Lot) : un lot focusé/sélectionné prime.
     const zoneSelected =
       state.focusedKey?.startsWith("zone:") ||
       [...state.selectedKeys].some((key) => key.startsWith("zone:"));
+    const lotSelected =
+      state.focusedKey?.startsWith("lot:") ||
+      [...state.selectedKeys].some((key) => key.startsWith("lot:"));
     return computeDrillLevel({
       hasSelectedCity: city !== null,
       hasZoneSelection: !!zoneSelected,
+      hasLotSelection: !!lotSelected,
     });
   }
 
@@ -774,18 +779,23 @@
   }
 
   /**
-   * Segments du drill Province / Ville / Zone (Zone grisée si non configurée).
-   * Fonction PURE évaluée dans le template (mêmes raisons que computeGeoLevel :
-   * un `$:` déclaré avant applyGeoRoute resterait périmé après un deep-link).
+   * Segments du drill Province / Ville / Zone / Lot (Zone grisée si non
+   * configurée ; Lot grisé tant qu'aucun lot n'est sélectionné). Fonction PURE
+   * évaluée dans le template (mêmes raisons que computeGeoLevel : un `$:`
+   * déclaré avant applyGeoRoute resterait périmé après un deep-link).
    */
   function buildGeoSegments(
     city: CityMapEntry | null,
     zonesRes: GeoZonesResponse | null,
+    state: SelectionBucketState,
   ): GeoSegment[] {
     // Segments du drill PARTAGÉS (geo-drill, mutualisés avec Sources/Couverture).
+    // La vue Signaux étend le fil avec le niveau LOT (drill jusqu'au lot).
     return buildDrillSegments({
       hasSelectedCity: city !== null,
       zonesConfigured: zonesConfigured(zonesRes),
+      includeLotLevel: true,
+      hasLotSelection: computeGeoLevel(state, city) === "Lot",
     });
   }
 
@@ -1119,10 +1129,14 @@
   }
 
   /**
-   * Clic sur le segmented-control Province / Ville / Zone.
+   * Clic sur le segmented-control Province / Ville / Zone / Lot.
    * Province → clearSelection (retour vue globale)
    * Ville → désélectionner les zones/lots mais conserver la ville sélectionnée
-   * Zone → sélectionner la première zone disponible (si zones configurées)
+   * Zone → revenir à la zone active (déselection du lot) si on vient du niveau
+   *        Lot ; sinon sélectionner la première zone disponible.
+   * Lot → aucune action directe : on n'y entre qu'en cliquant un lot (le
+   *        segment est actif quand un lot est focusé, no-op via la garde
+   *        `level === activeGeoLevel`).
    */
   function handleGeoLevelClick(level: string): void {
     // Niveau actif recalculé AU CLIC (jamais périmé — cf. computeGeoLevel).
@@ -1155,6 +1169,21 @@
       updateGeoLayers();
     } else if (level === "Zone") {
       if (!selectedCity) return;
+      // Retour depuis « Lot » : une zone est déjà active (drill Ville → Zone →
+      // Lot, la zone reste dans selectedKeys) → on Y REVIENT en effaçant la
+      // sélection lot et en refocalisant la zone, au lieu de sauter à la
+      // première zone. Cohérence stricte de la nav (déselection lot, zone active).
+      const activeZoneKey =
+        [...selectionState.selectedKeys].find((k) => k.startsWith("zone:")) ??
+        null;
+      if (activeZoneKey) {
+        selectionState = clearSelectionGroup(selectionState, "lot");
+        selectionState = setFocus(selectionState, activeZoneKey);
+        updateGeoLayers();
+        zoomToSelectionKey(activeZoneKey);
+        syncRouteForSelectionKey(activeZoneKey);
+        return;
+      }
       const zones = zonesResponse?.featureCollection.features ?? [];
       if (zones.length === 0) return; // zones non configurées — rien à faire
       const firstZone = zones[0];
@@ -1941,7 +1970,7 @@
     {showLotLabels}
     {showZoneLabels}
     activeCitySlug={selectedCity?.municipality.slug ?? null}
-    segments={buildGeoSegments(selectedCity, zonesResponse)}
+    segments={buildGeoSegments(selectedCity, zonesResponse, selectionState)}
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
     onSegmentClick={handleGeoLevelClick}
     onCityClick={handleCityClick}
@@ -2121,10 +2150,6 @@
       vivierBMode={activeViewMode === "b"}
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
-      {zoneKindFilter}
-      onZoneKindFilterChange={handleZoneKindFilterChange}
-      {zoneMillesimeFilter}
-      onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
