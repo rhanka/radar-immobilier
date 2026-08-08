@@ -386,6 +386,29 @@ describe("SignauxSelPanel — #2a lien de preuve DIRECT (PDF public)", () => {
       "/api/documents/raw?rawRef=",
     );
   });
+
+  // #2b — object-storage PUBLIC non signé (VPlus, sites muni) : source canonique
+  // légitime → lien direct cliquable (était rejeté par l'ancien garde s3).
+  it("#2b object-storage PUBLIC (VPlus s3) non signé → lien direct cliquable", async () => {
+    const url =
+      "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/pv.pdf";
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-s3", { sourceUrl: url })] },
+    });
+    await fireEvent.click(getByText("sig-s3", { selector: ".sel-entity-label" }));
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(url);
+  });
+
+  // #2b — URL S3 SIGNÉE : jamais exposée comme lien direct (garde signature).
+  it("#2b URL S3 signée (X-Amz-Signature) → AUCUN lien direct (jamais exposée)", async () => {
+    const signed =
+      "https://vplus-documents.s3.ca-central-1.amazonaws.com/x/pv.pdf?X-Amz-Signature=abc&X-Amz-Credential=AKIA";
+    const { getByText, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-signed", { sourceUrl: signed })] },
+    });
+    await fireEvent.click(getByText("sig-signed", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+  });
 });
 
 describe("SignauxSelPanel — #3a panneau « Zone active » pinné", () => {
