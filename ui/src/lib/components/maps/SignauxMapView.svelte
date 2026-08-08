@@ -280,6 +280,13 @@
   // Réinitialisé au changement de ville et au retour Province.
   let cameraLot: PreviousCameraLot | null = null;
 
+  // C1 — état du toggle ZOOM/UNZOOM du segment « Ville ». `true` = caméra
+  // cadrée sur la ville (état après un flyToCity) ; un clic « Ville » au niveau
+  // Ville bascule vers l'étendue province (`false`) et inversement, SANS
+  // désélectionner la ville. Remis à `true` à chaque flyToCity (sélection ville,
+  // redescente depuis zone/lot), à `false` au retour Province / désélection.
+  let villeZoomed = false;
+
   // ── m5 / UAT — Libellés sur la carte (n° de zone / n° de lot) ─────────────
   // DEUX cases INDÉPENDANTES : n° de zone et n° de lot s'affichent/masquent
   // séparément → on peut avoir zone SEUL, lot SEUL, les DEUX, ou AUCUN.
@@ -780,10 +787,15 @@
   }
 
   /**
-   * Segments du drill Province / Ville / Zone / Lot (Zone grisée si non
-   * configurée ; Lot grisé tant qu'aucun lot n'est sélectionné). Fonction PURE
-   * évaluée dans le template (mêmes raisons que computeGeoLevel : un `$:`
-   * déclaré avant applyGeoRoute resterait périmé après un deep-link).
+   * Segments du drill Province / Ville / Zone / Lot. Fonction PURE évaluée dans
+   * le template (mêmes raisons que computeGeoLevel : un `$:` déclaré avant
+   * applyGeoRoute resterait périmé après un deep-link).
+   *
+   * On FOURNIT `hasZoneSelection` : cela active la politique STRICTE (C1
+   * « Ville » grisé sans ville, C2 « Zone » grisé tant qu'aucune zone n'est
+   * active) — divergente du contrat historique de la vue Sources, qui l'omet.
+   * « Zone » reste actif au niveau Lot (la zone reste sélectionnée), permettant
+   * le retour Lot → Zone.
    */
   function buildGeoSegments(
     city: CityMapEntry | null,
@@ -797,7 +809,24 @@
       zonesConfigured: zonesConfigured(zonesRes),
       includeLotLevel: true,
       hasLotSelection: computeGeoLevel(state, city) === "Lot",
+      hasZoneSelection: hasZoneSelection(state),
     });
+  }
+
+  /**
+   * C3 — prédicat « lots interactifs » servi au socle : les lots ne sont
+   * cliquables/survolables QUE lorsqu'une zone est en scène, càd aux niveaux
+   * Zone (zone active) OU Lot (un lot est sélectionné, la zone reste active).
+   * Aux niveaux Province/Ville les lots restent VISIBLES mais PASSIFS — la
+   * cible de hit/survol est alors le polygone de ZONE. Évalué dans le template
+   * (comme computeGeoLevel : un `$:` déclaré avant applyGeoRoute serait périmé).
+   */
+  function lotsAreSelectable(
+    state: SelectionBucketState,
+    city: CityMapEntry | null,
+  ): boolean {
+    const level = computeGeoLevel(state, city);
+    return level === "Zone" || level === "Lot";
   }
 
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
@@ -987,7 +1016,10 @@
     // Restauration d'URL (deep-link /geo/city/…) : si une ville est déjà
     // sélectionnée quand la carte devient prête, le flyTo de selectCity est
     // parti dans le vide (mapApi encore null) — on cadre la ville maintenant.
-    if (selectedCity) flyToCity(selectedCity);
+    if (selectedCity) {
+      flyToCity(selectedCity);
+      villeZoomed = true; // C1 — deep-link ville : caméra en état zoomé
+    }
   }
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
@@ -1039,6 +1071,7 @@
 
     // flyTo sur la carte (centroïde de la ville)
     flyToCity(entry);
+    villeZoomed = true; // C1 — caméra cadrée sur la ville (état zoomé)
 
     // Les 3 couches partent EN PARALLÈLE, chacune avec son propre waiter et sa
     // propre garde anti-course : détail (panneau droit) + zones + lots.
@@ -1122,6 +1155,7 @@
     // Contrat « lot suivant » : retour Province → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
+    villeZoomed = false; // C1 — retour Province : caméra en état dézoomé
     updateGeoLayers();
     // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
     // au montage initial appelle clearSelection sans vouloir animer la carte
@@ -1131,10 +1165,12 @@
 
   /**
    * Clic sur le segmented-control Province / Ville / Zone / Lot.
-   * Province → clearSelection (retour vue globale)
-   * Ville → désélectionner les zones/lots mais conserver la ville sélectionnée
+   * Province → clearSelection (retour vue globale, dézoom)
+   * Ville → C1 : toggle ZOOM/UNZOOM caméra au niveau Ville, ou redescente
+   *        depuis Zone/Lot ; grisé sans ville (cf. handleVilleSegmentClick).
    * Zone → revenir à la zone active (déselection du lot) si on vient du niveau
-   *        Lot ; sinon sélectionner la première zone disponible.
+   *        Lot ; sinon sélectionner la première zone disponible. C2 : grisé
+   *        tant qu'aucune zone n'est active (on entre par clic de polygone).
    * Lot → aucune action directe : on n'y entre qu'en cliquant un lot (le
    *        segment est actif quand un lot est focusé, no-op via la garde
    *        `level === activeGeoLevel`).
@@ -1142,6 +1178,14 @@
   function handleGeoLevelClick(level: string): void {
     // Niveau actif recalculé AU CLIC (jamais périmé — cf. computeGeoLevel).
     const activeGeoLevel = computeGeoLevel(selectionState, selectedCity);
+    // C1 — « Ville » n'est pas un simple indicateur : au niveau Ville il
+    // bascule le CADRAGE caméra (ville ↔ province) et depuis une zone/lot il
+    // redescend au niveau Ville. On le traite AVANT le garde « déjà au niveau
+    // actif », qui neutraliserait le toggle.
+    if (level === "Ville") {
+      handleVilleSegmentClick(activeGeoLevel);
+      return;
+    }
     if (level === activeGeoLevel) return;
     if (level === "Province") {
       // Dézoom → vue province (bug #4). On REMET L'URL au niveau `region` (en
@@ -1163,11 +1207,6 @@
       // Filet local immédiat (au cas où la route n'aurait pas changé d'identité,
       // ex. déjà en region) : on garantit un état de base propre tout de suite.
       clearSelection();
-    } else if (level === "Ville") {
-      if (!selectedCity) return;
-      // Effacer toutes les sélections zone/lot, conserver la ville
-      selectionState = createSelectionBucketState();
-      updateGeoLayers();
     } else if (level === "Zone") {
       if (!selectedCity) return;
       // Retour depuis « Lot » : une zone est déjà active (drill Ville → Zone →
@@ -1191,6 +1230,34 @@
       const key = zoneSelectionKey(firstZone);
       selectBucketKey(key);
       syncRouteForSelectionKey(key);
+    }
+  }
+
+  /**
+   * C1 — Clic sur le segment « Ville » (grisé sans ville sélectionnée). Depuis
+   * une ZONE ou un LOT : redescend au niveau Ville (désélection zone/lot) et
+   * recadre la caméra sur la ville. Déjà au niveau Ville : bascule ZOOM/UNZOOM
+   * (cadrage ville ↔ étendue province) — la ville RESTE sélectionnée (le fil
+   * d'Ariane reste sur « Ville »).
+   */
+  function handleVilleSegmentClick(activeGeoLevel: string): void {
+    if (!selectedCity) return; // grisé (C1) — filet défensif
+    if (activeGeoLevel !== "Ville") {
+      // Redescente Zone/Lot → Ville : on efface la sélection zone/lot et on
+      // recadre sur la ville entière (état zoomé).
+      selectionState = createSelectionBucketState();
+      updateGeoLayers();
+      flyToCity(selectedCity);
+      villeZoomed = true;
+      return;
+    }
+    // Déjà au niveau Ville : toggle du cadrage caméra.
+    if (villeZoomed) {
+      flyToProvince();
+      villeZoomed = false;
+    } else {
+      flyToCity(selectedCity);
+      villeZoomed = true;
     }
   }
 
@@ -1973,6 +2040,7 @@
     activeCitySlug={selectedCity?.municipality.slug ?? null}
     segments={buildGeoSegments(selectedCity, zonesResponse, selectionState)}
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
+    lotsSelectable={lotsAreSelectable(selectionState, selectedCity)}
     onSegmentClick={handleGeoLevelClick}
     onCityClick={handleCityClick}
     onZoneClick={handleZoneClick}
