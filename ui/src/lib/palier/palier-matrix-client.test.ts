@@ -236,7 +236,7 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
         mkCoverageCity("westmount", {
           l4Zonage: { state: "verified", served: true, servedBy: "geo", freshness: "fresh" },
           l5Lots: { state: "declared", served: true, servedBy: "local", freshness: "partial" },
-          normes: { state: "declared", freshness: "partial", zoneCount: 4, zonesWithGrille: 4, zonesWithReglement: 2, zonesWithNormativeValues: 0 },
+          normes: { state: "declared", freshness: "partial", measured: true, zoneCount: 4, zonesWithGrille: 4, zonesWithReglement: 2, zonesWithNormativeValues: 0 },
           signals: { state: "verified", count: 10, withCitation: 10, priority: 3, freshness: "fresh" },
           l2Graph: { state: "verified", ontologyVersion: "2.3", freshness: "fresh" },
           lotFields: { state: "declared", freshness: "partial" },
@@ -255,12 +255,14 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
     expect(cell("kpi03")?.status).toBe("complete");
     expect(cell("kpi05")?.status).toBe("incomplete");
     expect(cell("kpi06")?.status).toBe("unknown");
-    // 11 URL-source : 10/10 signaux cités → complet, « dérivé à valider ».
+    // 11 URL-source : repli coverage-only proxy (withCitation 10/10 → complet),
+    // étiqueté « proxy citation (repli) » (fidèle = #2b offline, non câblé live).
     expect(cell("kpi11")?.status).toBe("complete");
-    expect(cell("kpi11")?.source).toBe("dérivé à valider");
-    // 08 provenance geo → complet ; 09 fraîcheur fresh → complet (dérivés).
+    expect(cell("kpi11")?.source).toBe("proxy citation (repli)");
+    // 08 provenance geo → complet ; 09 fraîcheur (l4Zonage) fresh → complet.
     expect(cell("kpi08")?.status).toBe("complete");
     expect(cell("kpi09")?.status).toBe("complete");
+    expect(cell("kpi09")?.source).toBe("fraîcheur");
     // TOD groupé 18/19 verified → complet.
     expect(cell("kpi18")?.status).toBe("complete");
     expect(cell("kpi19")?.status).toBe("complete");
@@ -297,8 +299,15 @@ describe("geoCellFor — mapping kpi_id → couche coverage (lock conducteur)", 
     expect(geoCellFor("kpi14", undefined)).toMatchObject({ status: "unknown", source: "structurel" });
   });
 
-  it("normes : repli sur l'état bulk quand les sous-comptes sont absents", () => {
+  it("GARDE anti-invention : normes NON mesuré (measured≠true) → à qualifier, jamais vert", () => {
+    // Même un état bulk 'verified' ne peint PAS 03/05/06 tant que la mesure lazy
+    // des grilles n'est pas chaude (correction recette) — pas de vert fabriqué.
     const city = mkCoverageCity("x", { normes: { state: "verified", freshness: "fresh" } });
-    expect(geoCellFor("kpi03", city).status).toBe("complete"); // pas de zonesWithGrille → normes.state
+    expect(geoCellFor("kpi03", city).status).toBe("unknown");
+    // Mesuré + grilles complètes → complet.
+    const measured = mkCoverageCity("y", {
+      normes: { state: "verified", freshness: "fresh", measured: true, zoneCount: 3, zonesWithGrille: 3 },
+    });
+    expect(geoCellFor("kpi03", measured).status).toBe("complete");
   });
 });
