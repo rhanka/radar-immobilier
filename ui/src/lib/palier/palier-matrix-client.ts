@@ -202,6 +202,20 @@ function freshnessToStatus(f: string | undefined): PalierCellStatus {
 }
 
 /**
+ * GARDE ANTI-INVENTION (recette) : les sous-dimensions normes (03/05/06)
+ * dépendent d'une MESURE LAZY des grilles. On ne peint un statut QUE si
+ * `normes.measured === true` ; sinon UNKNOWN honnête — JAMAIS un vert fabriqué
+ * depuis un état bulk non mesuré.
+ */
+function normesSubStatus(
+  city: CityCoverage,
+  withN: number | null | undefined,
+): PalierCellStatus {
+  if (city.normes.measured !== true) return "unknown";
+  return countStatus(withN, city.normes.zoneCount);
+}
+
+/**
  * Cellule d'un KPI GEO pour une ville, dérivée de sa couverture servie (bulk
  * /api/source/coverage). `city` absent (ville hors couverture ou fetch 401) →
  * « à qualifier » honnête. Cas spéciaux du lock :
@@ -229,33 +243,12 @@ export function geoCellFor(kpiId: string, city: CityCoverage | undefined): Palie
       return { kpiId, status: triToStatus(city.l4Zonage.state), source: cov };
     case "kpi02": // Cohérence-lot-zone
       return { kpiId, status: triToStatus(city.l5Lots.state), source: cov };
-    case "kpi03": // Normes-grille
-      return {
-        kpiId,
-        status:
-          city.normes.zonesWithGrille != null
-            ? countStatus(city.normes.zonesWithGrille, city.normes.zoneCount)
-            : triToStatus(city.normes.state),
-        source: cov,
-      };
-    case "kpi05": // Règlement
-      return {
-        kpiId,
-        status:
-          city.normes.zonesWithReglement != null
-            ? countStatus(city.normes.zonesWithReglement, city.normes.zoneCount)
-            : triToStatus(city.normes.state),
-        source: cov,
-      };
-    case "kpi06": // Usage-dom (valeurs normatives)
-      return {
-        kpiId,
-        status:
-          city.normes.zonesWithNormativeValues != null
-            ? countStatus(city.normes.zonesWithNormativeValues, city.normes.zoneCount)
-            : triToStatus(city.normes.state),
-        source: cov,
-      };
+    case "kpi03": // Normes-grille (garde mesure lazy)
+      return { kpiId, status: normesSubStatus(city, city.normes.zonesWithGrille), source: cov };
+    case "kpi05": // Règlement (garde mesure lazy)
+      return { kpiId, status: normesSubStatus(city, city.normes.zonesWithReglement), source: cov };
+    case "kpi06": // Usage-dom = usage ∈ valeurs normatives (garde mesure lazy)
+      return { kpiId, status: normesSubStatus(city, city.normes.zonesWithNormativeValues), source: cov };
     case "kpi08": // Prov-jointure (provenance du zonage servi)
       return {
         kpiId,
@@ -267,13 +260,16 @@ export function geoCellFor(kpiId: string, city: CityCoverage | undefined): Palie
               : "unknown",
         source: derive,
       };
-    case "kpi09": // Prov-qualité (proxy fraîcheur extraction)
-      return { kpiId, status: freshnessToStatus(city.l2Graph.freshness), source: derive };
-    case "kpi11": // URL-source (signaux à citation)
+    case "kpi09": // Prov-qualité = FRAÎCHEUR seule du zonage servi (blanc honnête
+      // sur le reste de la qualité de provenance — correction recette).
+      return { kpiId, status: freshnessToStatus(city.l4Zonage.freshness), source: "fraîcheur" };
+    case "kpi11": // URL-source — mesure FIDÈLE = #2b PROOF_URLS_SERVED (artefact
+      // offline recette, NON câblé dans la matrice live). Ici REPLI coverage-only
+      // = signals.withCitation, explicitement étiqueté proxy (correction recette).
       return {
         kpiId,
         status: countStatus(city.signals.withCitation, city.signals.count),
-        source: derive,
+        source: "proxy citation (repli)",
       };
     case "kpi12": // Immo-assign-lot-zone
       return { kpiId, status: triToStatus(city.l5Lots.state), source: cov };
