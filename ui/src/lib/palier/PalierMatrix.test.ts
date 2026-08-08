@@ -24,7 +24,9 @@ function row(
     cells: PALIER_KPIS_20.map((kpi) => ({
       kpiId: kpi.id,
       status: kpi.id === "kpi04" ? "complete" : "unknown",
-      source: kpi.id === "kpi04" ? "réf. hors-ligne" : null,
+      // kpi04 (PV) = live ; kpi20 (Recall) = réf. hors-ligne ; geo = null.
+      source:
+        kpi.id === "kpi04" ? "live" : kpi.id === "kpi20" ? "réf. hors-ligne" : null,
     })),
   };
 }
@@ -33,7 +35,7 @@ function cannedMatrix(): PalierMatrixType {
   return {
     contract: "palier-matrix/v1",
     subset: "B",
-    label: "dénominateur B live · KPI immo réf. hors-ligne",
+    label: "dénominateur B live · KPI 04 PV live · KPI 20 réf. hors-ligne",
     kpis: PALIER_KPIS_20,
     cities: [
       row("westmount", "Westmount", "lt3mo", true),
