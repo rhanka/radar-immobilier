@@ -165,13 +165,27 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
     expect(m.cities[0]?.citySlug).toBe("westmount");
     expect(m.cities[0]?.isPriority).toBe(true);
     expect(m.priorityCount).toBeGreaterThanOrEqual(1);
-    // kpi04 (PV) bindé depuis le fallback (westmount = complete) ; source réf.
+    // kpi04 (PV) = LIVE : westmount a des signaux servis (signalCount>0) →
+    // complet, provenance « live » (plus la réf. hors-ligne).
     const kpi4 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi04");
     expect(kpi4?.status).toBe("complete");
-    expect(kpi4?.source).toBe("réf. hors-ligne");
+    expect(kpi4?.source).toBe("live");
     // Une cellule geo (kpi01) reste « À qualifier » (mapping absent).
     const kpi1 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi01");
     expect(kpi1?.status).toBe("unknown");
+    // kpi20 (Recall) NON servi live → reste réf. hors-ligne (honnête).
+    const kpi20 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi20");
+    expect(kpi20?.source).toBe("réf. hors-ligne");
+  });
+
+  it("kpi04 LIVE corrige le stale : ville B absente du fallback → complet (live)", async () => {
+    const m = await buildPalierMatrixLive({ fetcher, now });
+    // ville-ancienne est B live (signalCount>0) mais hors artefact réf. →
+    // le live la marque « complet » (PV présent), pas « à qualifier » stale.
+    const row = m.cities.find((c) => c.citySlug === "ville-ancienne");
+    const kpi4 = row?.cells.find((c) => c.kpiId === "kpi04");
+    expect(kpi4?.status).toBe("complete");
+    expect(kpi4?.source).toBe("live");
   });
 
   it("chaque ligne a exactement 20 cellules (une par KPI)", async () => {
