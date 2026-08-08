@@ -17,6 +17,7 @@
  * est morte (le vrai risque à corriger).
  */
 
+/* global process, console, fetch, setTimeout, clearTimeout, AbortController */
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -87,7 +88,7 @@ async function probe(url, timeoutMs) {
       }
     }
     return { status: head.status, error: null };
-  } catch (e) {
+  } catch {
     // HEAD a échoué (réseau/timeout) → dernière chance en GET.
     try {
       return { status: (await attempt("GET")).status, error: null };
