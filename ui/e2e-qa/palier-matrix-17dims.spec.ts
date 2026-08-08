@@ -63,6 +63,7 @@ const COVERAGE = {
       normes: {
         state: "declared",
         freshness: "partial",
+        measured: true,
         zoneCount: 4,
         zonesWithGrille: 4,
         zonesWithReglement: 2,
@@ -108,7 +109,7 @@ test.describe("Matrice — 17 dims geo dérivées de coverage (chemin de rendu)"
     expect(await status("westmount", "kpi03")).toBe("complete");
     expect(await status("westmount", "kpi05")).toBe("incomplete");
     expect(await status("westmount", "kpi06")).toBe("unknown");
-    // URL-source : 10/10 signaux cités → complet (dérivé à valider).
+    // URL-source : repli coverage-only proxy (withCitation 10/10 → complet).
     expect(await status("westmount", "kpi11")).toBe("complete");
     // TOD groupé 18/19 verified → complet.
     expect(await status("westmount", "kpi18")).toBe("complete");
@@ -116,10 +117,10 @@ test.describe("Matrice — 17 dims geo dérivées de coverage (chemin de rendu)"
     // Structurels : 07 = N-A (jamais complete) ; 10 = à qualifier (en cours).
     expect(await status("westmount", "kpi07")).toBe("na");
     expect(await status("westmount", "kpi10")).toBe("unknown");
-    // Provenance des dérivés (transparence) : source « dérivé à valider ».
+    // Provenance transparente du repli #2b : source « proxy citation (repli) ».
     await expect(page.getByTestId("palier-cell-westmount-kpi11")).toHaveAttribute(
       "data-source",
-      "dérivé à valider",
+      "proxy citation (repli)",
     );
 
     // beloeil ABSENT de la couverture → cellule geo = à qualifier (couverture absente).
