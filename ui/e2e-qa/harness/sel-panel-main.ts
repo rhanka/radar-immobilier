@@ -59,6 +59,16 @@ const detailNodes: GraphSignalNode[] = [
   signal("sig-Rf51", "Refonte Rf51 — urbanisme", "Second signal du même PV (Rf51)."),
 ];
 
+// #2b — mode QA « preuve publique » : ?proof=public injecte une sourceUrl
+// object-storage PUBLIC (VPlus, re-autorisée par la whitelist signature-based)
+// sur le 1er signal → le lien de preuve DIRECT s'affiche (en plus de l'archive
+// rawRef). Sert à prouver le CLIC→OUVERTURE en vrai navigateur.
+const PUBLIC_PROOF_URL =
+  "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/pv.pdf";
+if (params.get("proof") === "public" && !withoutEvidence) {
+  detailNodes[0]!.props = { ...detailNodes[0]!.props, sourceUrl: PUBLIC_PROOF_URL };
+}
+
 const selectedCity: CityMapEntry = {
   municipality: {
     slug: "saint-frederic",
