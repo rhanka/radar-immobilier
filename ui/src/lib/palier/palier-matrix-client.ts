@@ -25,6 +25,12 @@ import {
   B_SUBSET_KEY,
   countForVivierCity,
 } from "$lib/signals/vivier-view-mode.js";
+import {
+  fetchSourceCoverage,
+  type CityCoverage,
+  type CoverageResponse,
+  type CoverageState,
+} from "$lib/sources/source-coverage-client.js";
 import immoFallbackRaw from "./palier-immo-fallback.json";
 
 export type PalierCellStatus = "complete" | "incomplete" | "unknown" | "na";
@@ -111,8 +117,8 @@ export function kpiResolvedPct(matrix: PalierMatrix, kpiId: string): number {
   return Math.round((complete / cells.length) * 100);
 }
 
-// ── 20 KPI (colonnes) — la maille geo. 2 immo bindées (kpi04/kpi20), les 17
-// geo restent « à qualifier » tant que le mapping KPI→couche n'est pas livré. ──
+// ── 20 KPI (colonnes) — la maille geo. 2 immo (kpi04 live / kpi20 réf.) + 17
+// dims geo dérivées du LIVE servi /api/source/coverage (mapping conducteur). ──
 const IMMO_KPI4_ID = "kpi04";
 const IMMO_KPI20_ID = "kpi20";
 
@@ -154,6 +160,136 @@ function toCellStatus(value: string | null | undefined): PalierCellStatus {
   }
 }
 
+// ── Cellules GEO depuis /api/source/coverage (17 dims servies) ────────────────
+// Mapping kpi_id → couche coverage VERROUILLÉ par le conducteur
+// (env 17dims-mapping-locked). Définitions = table VOLET B de
+// PRESCORE_167_ET_PROMESSES_GEO.md (lane recette). L'assignation def→couche est
+// la dérivation conducteur (validée recette). Les valeurs live par ville rendent
+// dans la session SSO de l'owner ; en build/test le fetch coverage est 401 →
+// couverture absente → cellules « à qualifier » honnêtes.
+
+const IMMO_KPI14_ID = "kpi14";
+
+/** Tri-état coverage → statut de cellule neutre. */
+function triToStatus(state: CoverageState): PalierCellStatus {
+  switch (state) {
+    case "verified":
+      return "complete";
+    case "declared":
+      return "incomplete";
+    case "absent":
+      return "unknown";
+  }
+}
+
+/**
+ * Statut dérivé d'un compte « X sur total » (sous-champ mesuré) : total absent
+ * → à qualifier ; 0 → à qualifier (absent) ; complet si X ≥ total ; sinon
+ * partiel. Sert aux sous-dimensions normes (grille/règlement/valeurs) et à la
+ * citation des signaux.
+ */
+function countStatus(withN: number | null | undefined, total: number | null | undefined): PalierCellStatus {
+  if (total == null || total <= 0 || withN == null) return "unknown";
+  if (withN <= 0) return "unknown";
+  return withN >= total ? "complete" : "incomplete";
+}
+
+/** Fraîcheur → statut (proxy provenance-qualité, best-effort). */
+function freshnessToStatus(f: string | undefined): PalierCellStatus {
+  if (f === "fresh") return "complete";
+  if (f === "partial") return "incomplete";
+  return "unknown";
+}
+
+/**
+ * Cellule d'un KPI GEO pour une ville, dérivée de sa couverture servie (bulk
+ * /api/source/coverage). `city` absent (ville hors couverture ou fetch 401) →
+ * « à qualifier » honnête. Cas spéciaux du lock :
+ *  - 07 (effet-densifiant) : N-A STRUCTUREL prouvé (0 avis + 0 cert MRC 137.3),
+ *    jamais complete, exclu du dénominateur % ;
+ *  - 10 (preuve-v2) : campagne longue → « en cours » (unknown honnête) ;
+ *  - 14 (ontolot) : chaîne B non peuplée → unknown honnête ;
+ *  - 08/09/11 : dérivés best-effort → source « dérivé à valider » (recette cc).
+ * Sous-dimensions normes (03/05/06) : compte mesuré si présent en bulk, sinon
+ * repli sur l'état bulk normes. Sous-champs lot (13/15/17/16) : repli sur l'état
+ * bulk lotFields (la discrimination par champ = endpoint lazy /lot-fields, à
+ * suivre — non servie en bulk).
+ */
+export function geoCellFor(kpiId: string, city: CityCoverage | undefined): PalierCell {
+  const absent: PalierCell = { kpiId, status: "unknown", source: "couverture absente" };
+  // Structurels : indépendants de la couverture servie.
+  if (kpiId === "kpi07") return { kpiId, status: "na", source: "structurel" };
+  if (kpiId === "kpi10") return { kpiId, status: "unknown", source: "en cours" };
+  if (kpiId === IMMO_KPI14_ID) return { kpiId, status: "unknown", source: "structurel" };
+  if (!city) return absent;
+  const cov = "coverage";
+  const derive = "dérivé à valider";
+  switch (kpiId) {
+    case "kpi01": // Zones-compl
+      return { kpiId, status: triToStatus(city.l4Zonage.state), source: cov };
+    case "kpi02": // Cohérence-lot-zone
+      return { kpiId, status: triToStatus(city.l5Lots.state), source: cov };
+    case "kpi03": // Normes-grille
+      return {
+        kpiId,
+        status:
+          city.normes.zonesWithGrille != null
+            ? countStatus(city.normes.zonesWithGrille, city.normes.zoneCount)
+            : triToStatus(city.normes.state),
+        source: cov,
+      };
+    case "kpi05": // Règlement
+      return {
+        kpiId,
+        status:
+          city.normes.zonesWithReglement != null
+            ? countStatus(city.normes.zonesWithReglement, city.normes.zoneCount)
+            : triToStatus(city.normes.state),
+        source: cov,
+      };
+    case "kpi06": // Usage-dom (valeurs normatives)
+      return {
+        kpiId,
+        status:
+          city.normes.zonesWithNormativeValues != null
+            ? countStatus(city.normes.zonesWithNormativeValues, city.normes.zoneCount)
+            : triToStatus(city.normes.state),
+        source: cov,
+      };
+    case "kpi08": // Prov-jointure (provenance du zonage servi)
+      return {
+        kpiId,
+        status:
+          city.l4Zonage.servedBy === "geo"
+            ? "complete"
+            : city.l4Zonage.servedBy === "local"
+              ? "incomplete"
+              : "unknown",
+        source: derive,
+      };
+    case "kpi09": // Prov-qualité (proxy fraîcheur extraction)
+      return { kpiId, status: freshnessToStatus(city.l2Graph.freshness), source: derive };
+    case "kpi11": // URL-source (signaux à citation)
+      return {
+        kpiId,
+        status: countStatus(city.signals.withCitation, city.signals.count),
+        source: derive,
+      };
+    case "kpi12": // Immo-assign-lot-zone
+      return { kpiId, status: triToStatus(city.l5Lots.state), source: cov };
+    case "kpi13": // Immo-normes-pliées (LOT_NORM)
+    case "kpi15": // Surface
+    case "kpi16": // Code-postal
+    case "kpi17": // Adresse
+      return { kpiId, status: triToStatus(city.lotFields?.state ?? "absent"), source: cov };
+    case "kpi18": // TOD
+    case "kpi19": // TOD (groupé 18/19)
+      return { kpiId, status: triToStatus(city.tod.state), source: cov };
+    default:
+      return absent;
+  }
+}
+
 /**
  * Compte bulk B d'une ville — EXACTEMENT le prédicat de la vue Signaux : on
  * réutilise `countForVivierCity` avec la clé B PAR DÉFAUT (« vivier-v2 » =
@@ -191,6 +327,12 @@ export interface BuildPalierMatrixLiveOptions {
   /** « Maintenant » (fenêtres de récence) ; défaut = new Date(). */
   now?: Date;
   subset?: PalierSubset;
+  /**
+   * Injectable pour les tests ; défaut = fetch /api/source/coverage. Sert les 17
+   * dims geo par ville. Un échec (401 build/test, réseau) → couverture absente
+   * → cellules geo « à qualifier » honnêtes (n'invalide PAS le scope B).
+   */
+  coverageFetcher?: () => Promise<CoverageResponse>;
 }
 
 /**
@@ -212,10 +354,17 @@ export async function buildPalierMatrixLive(
   // (sinon il tomberait dans lt3mo via une borne haute ouverte). Le « all »
   // (dénominateur) reste non borné = all-time B, comme le rail Signaux.
   const today = isoDaysBefore(now, 0);
-  const [allResp, w3Resp, w6Resp] = await Promise.all([
+  // Coverage (17 dims geo) fetché EN PARALLÈLE du scope B. Son échec (401
+  // build/test, réseau) ne doit PAS invalider la matrice : on retombe sur une
+  // couverture vide → cellules geo « à qualifier » honnêtes.
+  const coveragePromise = (opts.coverageFetcher ?? (() => fetchSourceCoverage()))().catch(
+    () => null as CoverageResponse | null,
+  );
+  const [allResp, w3Resp, w6Resp, coverage] = await Promise.all([
     fetcher({}),
     fetcher({ dateFrom: isoDaysBefore(now, RECENCY_LT3MO_DAYS), dateTo: today }),
     fetcher({ dateFrom: isoDaysBefore(now, RECENCY_LT6MO_DAYS), dateTo: today }),
+    coveragePromise,
   ]);
 
   const bSlugSet = (r: GraphSignalsByCityResponse): Set<string> =>
@@ -223,9 +372,13 @@ export async function buildPalierMatrixLive(
   const allB = allResp.cities.filter(cityIsB);
   const set3 = bSlugSet(w3Resp);
   const set6 = bSlugSet(w6Resp);
+  const coverageBySlug = new Map<string, CityCoverage>(
+    (coverage?.cities ?? []).map((c) => [c.citySlug, c]),
+  );
 
   const rows: PalierCityRow[] = allB.map((item) => {
     const fb = FALLBACK_BY_SLUG.get(item.citySlug);
+    const cov = coverageBySlug.get(item.citySlug);
     const recency: RecencyBand = set3.has(item.citySlug)
       ? "lt3mo"
       : set6.has(item.citySlug)
@@ -251,7 +404,10 @@ export async function buildPalierMatrixLive(
         // faux-live). À passer live si un endpoint sert le recall par ville.
         return { kpiId: kpi.id, status: toCellStatus(fb?.kpi20_recall), source: "réf. hors-ligne" };
       }
-      return { kpiId: kpi.id, status: "unknown", source: null };
+      // Les 17 dims geo = dérivées du LIVE servi /api/source/coverage (mapping
+      // verrouillé conducteur). Ville hors couverture (ou 401 build/test) →
+      // « à qualifier » honnête.
+      return geoCellFor(kpi.id, cov);
     });
     return {
       citySlug: item.citySlug,
@@ -279,7 +435,7 @@ export async function buildPalierMatrixLive(
   return {
     contract: "palier-matrix/v1",
     subset,
-    label: "dénominateur B live · KPI 04 PV live · KPI 20 réf. hors-ligne",
+    label: "dénominateur B live · 17 dims geo servies (coverage) · KPI 04 live · KPI 20 réf. hors-ligne",
     kpis: PALIER_KPIS_20,
     cities: rows,
     denominator: allB.length,
