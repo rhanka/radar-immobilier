@@ -14,13 +14,10 @@
  * (clé interne / URL privée) écartées sur le vrai chemin.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { render, fireEvent, cleanup } from "@testing-library/svelte";
+import { render, cleanup } from "@testing-library/svelte";
 import LotFichePanel from "$lib/components/maps/LotFichePanel.svelte";
-import Harness from "$lib/components/maps/SignauxSelPanelHarness.svelte";
 import { fetchLots } from "./lots-client.js";
 import { loadSignauxZones } from "./signaux-zones-loader.js";
-import type { CityMapEntry } from "./maps-data.js";
-import type { MunicipalityT } from "@radar/domain";
 
 type Status = "historical-verified" | "legacy-traceable" | "candidate-needs-human-confirmation" | "orphan";
 
@@ -109,15 +106,6 @@ function ogcZonesBody(properties: Record<string, unknown>) {
 
 function stubFetch(body: unknown) {
   vi.stubGlobal("fetch", async () => new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } }));
-}
-
-function makeCity(): CityMapEntry {
-  const municipality = {
-    slug: "delson", name: "Delson", mrc: "Roussillon", lat: 45.27, lon: -73.55,
-    population: 11000, distanceToMtlKm: 20, priorityRank: 12,
-    excluded: false, excludedReason: null, deprioritized: false,
-  } as MunicipalityT;
-  return { municipality, signalCount6m: 0, subsetCounts: {}, vivierV2Counts: null };
 }
 
 // ─── LOTS : OGC → fetchLots (DTO) → LotFichePanel ────────────────────────────
@@ -219,9 +207,13 @@ describe("chaîne lots OGC → fetchLots → LotFichePanel", () => {
   });
 });
 
-// ─── ZONES : OGC → loadSignauxZones → geoZonesResponseFromCollection → UI ─────
-
-describe("chaîne zones OGC (prioritaire) → loadSignauxZones → SignauxSelPanel", () => {
+// ─── ZONES : OGC → loadSignauxZones → geoZonesResponseFromCollection (data) ───
+// Le bucket Zones et son audit UI ont été RETIRÉS du panneau droit (01KZGM07
+// item 1). La chaîne preuve/provenance de zone se valide donc au niveau du
+// LOADER : l'enveloppe validée survit à geoZonesResponseFromCollection et les
+// fuites (clé interne / URL privée) sont écartées AVANT toute UI. (L'affichage
+// détaillé de l'audit de zone n'existe plus dans le panneau droit.)
+describe("chaîne zones OGC (prioritaire) → loadSignauxZones (data, non-blackout)", () => {
   async function loadZone(status: Status) {
     stubFetch(ogcZonesBody({ zone_code: "H-431", proof: proofV1(status), immo_zone_lot_provenance: provenance(status) }));
     const { response, tier } = await loadSignauxZones("delson", {});
@@ -231,33 +223,30 @@ describe("chaîne zones OGC (prioritaire) → loadSignauxZones → SignauxSelPan
   }
 
   it.each(Object.keys(PROVENANCE_LABEL) as Status[])(
-    "le chemin OGC porte l'audit de zone (%s) et ne masque jamais la zone (non-blackout)",
+    "le chemin OGC conserve l'enveloppe d'audit de zone (%s) sans masquer la zone",
     async (status) => {
       const zonesResponse = await loadZone(status);
-      // L'enveloppe validée a survécu à geoZonesResponseFromCollection.
       const props = zonesResponse.featureCollection.features[0]!.properties;
+      // L'enveloppe validée a survécu à geoZonesResponseFromCollection.
       expect(props.proof).toBeDefined();
       expect(props.immo_zone_lot_provenance).toBeDefined();
-
-      const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse } });
-      // La zone reste listée puis on ouvre sa fiche.
-      const label = view.getByText("H-431", { selector: ".sel-entity-label" });
-      await fireEvent.click(label);
-      expect(view.getByTestId("zone-audit")).toBeTruthy();
-      expect(view.getByText(PROVENANCE_LABEL[status])).not.toBeNull();
-      // NON-BLACKOUT : le code de zone reste affiché dans la fiche.
-      expect(view.getByText("H-431", { selector: ".sel-entity-label" })).not.toBeNull();
+      // NON-BLACKOUT : le code de zone reste servi.
+      expect(props.code).toBe("H-431");
     },
   );
 
-  it("historical-verified : lien source publique rendu depuis le chemin OGC", async () => {
+  it("historical-verified : la source publique de géométrie survit au chemin OGC", async () => {
     const zonesResponse = await loadZone("historical-verified");
-    const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse } });
-    await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
-    expect(view.getByTestId("zone-geometry-source-link")).toBeTruthy();
+    const props = zonesResponse.featureCollection.features[0]!.properties;
+    expect(props.immo_zone_lot_provenance?.zone_geometry_provenance?.status).toBe(
+      "historical-verified",
+    );
+    expect(
+      props.immo_zone_lot_provenance?.zone_geometry_provenance?.public_source,
+    ).not.toBeNull();
   });
 
-  it("fuite sur le chemin OGC : URL privée / clé interne écartées avant l'UI", async () => {
+  it("fuite sur le chemin OGC : URL privée / clé interne écartées AVANT l'UI (loader)", async () => {
     stubFetch(ogcZonesBody({
       zone_code: "H-431",
       proof: proofV1("legacy-traceable"),
@@ -268,10 +257,7 @@ describe("chaîne zones OGC (prioritaire) → loadSignauxZones → SignauxSelPan
     // proof conforme conservé ; provenance qui fuit ÉCARTÉE (non tout-ou-rien).
     expect(props.proof).toBeDefined();
     expect(props.immo_zone_lot_provenance).toBeUndefined();
-    const view = render(Harness, { props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: response! } });
-    await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
-    expect(view.container.innerHTML).not.toContain("secret-42");
-    // La zone reste servie et son proof reste auditée (non-blackout).
-    expect(view.getByTestId("zone-proof")).toBeTruthy();
+    // La fuite ne peut atteindre aucune UI puisqu'elle est retirée du DTO servi.
+    expect(JSON.stringify(response)).not.toContain("secret-42");
   });
 });
