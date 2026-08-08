@@ -20,7 +20,7 @@ function toGeoMode(mode: string | undefined): GeoMode {
   return mode === "data" ? "data" : "signal";
 }
 
-export type GeoLevel = "Province" | "Ville" | "Zone";
+export type GeoLevel = "Province" | "Ville" | "Zone" | "Lot";
 
 /**
  * Résolution du clic GÉOGRAPHIQUE sur un polygone LOT selon le niveau de drill

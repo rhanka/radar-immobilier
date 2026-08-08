@@ -25,7 +25,7 @@ export interface DrillSegment {
   ariaLabel?: string;
 }
 
-export type DrillLevel = "Province" | "Ville" | "Zone";
+export type DrillLevel = "Province" | "Ville" | "Zone" | "Lot";
 
 /** Une réponse zones est « configurée » si elle porte au moins une vraie zone. */
 export function zonesConfigured(
@@ -42,16 +42,25 @@ export function zonesConfigured(
 }
 
 /**
- * Segments du drill Province / Ville / Zone. « Zone » est grisé quand une
- * ville est sélectionnée mais que son zonage n'est pas configuré (l'état
- * Province laisse « Zone » actif : cliquer une ville reste le geste attendu).
+ * Segments du drill Province / Ville / Zone (+ Lot optionnel). « Zone » est
+ * grisé quand une ville est sélectionnée mais que son zonage n'est pas
+ * configuré (l'état Province laisse « Zone » actif : cliquer une ville reste
+ * le geste attendu).
+ *
+ * `includeLotLevel` ajoute un 4e segment « Lot » (drill Ville → Zone → Lot de
+ * la vue Signaux ; la vue Sources n'en veut pas, d'où l'option). Le segment
+ * « Lot » est grisé tant qu'aucun lot n'est sélectionné : on n'y entre qu'en
+ * cliquant un lot (carte/liste), jamais en cliquant le segment lui-même —
+ * miroir de « Zone » qui n'existe qu'une fois une ville en scène.
  */
 export function buildDrillSegments(input: {
   hasSelectedCity: boolean;
   zonesConfigured: boolean;
+  includeLotLevel?: boolean;
+  hasLotSelection?: boolean;
 }): DrillSegment[] {
   const zoneDisabled = input.hasSelectedCity && !input.zonesConfigured;
-  return [
+  const segments: DrillSegment[] = [
     { label: "Province" },
     { label: "Ville" },
     {
@@ -60,13 +69,24 @@ export function buildDrillSegments(input: {
       ariaLabel: zoneDisabled ? "Zone (zones non configurées)" : "Zone",
     },
   ];
+  if (input.includeLotLevel) {
+    const lotDisabled = !input.hasLotSelection;
+    segments.push({
+      label: "Lot",
+      disabled: lotDisabled,
+      ariaLabel: lotDisabled ? "Lot (sélectionnez un lot sur la carte)" : "Lot",
+    });
+  }
+  return segments;
 }
 
-/** Niveau géo ACTIF du drill : Zone > Ville > Province. */
+/** Niveau géo ACTIF du drill : Lot > Zone > Ville > Province. */
 export function computeDrillLevel(input: {
   hasSelectedCity: boolean;
   hasZoneSelection: boolean;
+  hasLotSelection?: boolean;
 }): DrillLevel {
+  if (input.hasLotSelection) return "Lot";
   if (input.hasZoneSelection) return "Zone";
   return input.hasSelectedCity ? "Ville" : "Province";
 }
