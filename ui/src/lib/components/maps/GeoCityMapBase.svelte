@@ -149,6 +149,16 @@
     citySlug: string | null;
     zoneCode: string | null;
   }) => void = () => {};
+  /**
+   * C3 — les lots sont-ils INTERACTIFS ? `true` (défaut, parité des autres
+   * consommateurs) : clic, survol (feature-state.hover) et curseur pointer
+   * actifs. `false` (vue Signaux hors zone/lot actif) : les lots restent
+   * VISIBLES mais PASSIFS (aucun de ces effets) ; les polygones ZONE
+   * redeviennent la cible de hit/survol (cf. l'ordre de pile piloté par
+   * `applyLayerOrder`). Lue RÉACTIVEMENT à l'appel des handlers (comme
+   * `measureActive`), jamais capturée à l'enregistrement.
+   */
+  export let lotsSelectable = true;
 
   // ── Props : drill segmenté + légende ───────────────────────────────────────
   /** Segments du drill (Province / Ville / Zone …). Vide ⇒ pas de control. */
@@ -408,6 +418,7 @@
     });
 
     m.on("click", "selected-lots-fill", (e) => {
+      if (!lotsSelectable) return; // C3 — lots passifs hors zone/lot actif
       if (measureActive) return; // mode mesure : les clics servent à mesurer
       const props = e.features?.[0]?.properties;
       const noLot = readString(props?.noLot);
@@ -431,10 +442,12 @@
       m.getCanvas().style.cursor = "";
     });
     m.on("mouseenter", "selected-lots-fill", () => {
+      if (!lotsSelectable) return; // C3 — pas de curseur pointer sur lot passif
       if (measureActive) return; // conserve le crosshair de mesure
       m.getCanvas().style.cursor = "pointer";
     });
     m.on("mouseleave", "selected-lots-fill", () => {
+      if (!lotsSelectable) return; // C3 — jamais posé, rien à restaurer
       if (measureActive) return;
       m.getCanvas().style.cursor = "";
     });
@@ -445,11 +458,21 @@
     // blanc → gris clair. Les LOTS priment visuellement : quand le curseur est
     // sur un lot, la zone en dessous n'est pas marquée survolée.
     registerHoverState("selected-zones-fill", "selected-zones");
-    registerHoverState("selected-lots-fill", "selected-lots");
+    // C3 — le survol des LOTS (feature-state.hover → highlight) n'est actif
+    // qu'en zone/lot : le prédicat est lu RÉACTIVEMENT à chaque mousemove.
+    registerHoverState("selected-lots-fill", "selected-lots", () => lotsSelectable);
   }
 
-  /** C6 — câble mousemove/mouseleave d'une couche vers feature-state.hover. */
-  function registerHoverState(layerId: string, sourceId: string): void {
+  /**
+   * C6 — câble mousemove/mouseleave d'une couche vers feature-state.hover.
+   * `isEnabled` (lu à chaque mousemove) permet de désactiver le survol d'une
+   * couche sans la désenregistrer (C3 : lots passifs hors zone/lot actif).
+   */
+  function registerHoverState(
+    layerId: string,
+    sourceId: string,
+    isEnabled: () => boolean = () => true,
+  ): void {
     const m = mapInstance as {
       on: (
         event: string,
@@ -458,6 +481,7 @@
       ) => void;
     };
     m.on("mousemove", layerId, (e) => {
+      if (!isEnabled()) return; // C3 — survol désactivé (couche passive)
       const id = e.features?.[0]?.id;
       if (id === undefined) return;
       if (hoveredFeatureIdBySource.get(sourceId) === id) return;
@@ -526,6 +550,56 @@
   // Bascule la visibilité des libellés quand les props changent (sans re-sync
   // complet des couches).
   $: if (mapReady) applyLabelVisibility(showLotLabels, showZoneLabels);
+
+  /**
+   * C3 — ordre de pile ZONES ↔ LOTS selon l'interactivité des lots.
+   *
+   * Les lots sont créés APRÈS les zones, donc AU-DESSUS : ils occultent le
+   * survol de zone (opacité accentuée) et l'exergue de zone. Hors zone/lot
+   * actif (`lotsSelectable = false`, lots passifs) on REMONTE les couches ZONE
+   * au-dessus des lots pour que le survol/l'exergue de zone soient VISIBLES et
+   * que la zone soit la cible de hit ; en zone/lot actif (`lotsSelectable =
+   * true`) on remet les lots au-dessus (comportement par défaut). Idempotent :
+   * `moveLayer(id)` sans `beforeId` renvoie la couche au sommet, donc l'ordre
+   * d'itération détermine la pile finale (dernier = sommet). Les libellés et le
+   * tracé de mesure restent au-dessus de tout.
+   */
+  function applyLayerOrder(lotsOnTop: boolean): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      moveLayer: (id: string) => void;
+    };
+    const zoneLayers = [
+      "selected-zones-fill",
+      "selected-zones-outline",
+      "selected-zones-highlight",
+    ];
+    const lotLayers = [
+      "selected-lots-fill",
+      "selected-lots-outline",
+      "selected-lots-highlight",
+    ];
+    const ordered = lotsOnTop
+      ? [...zoneLayers, ...lotLayers]
+      : [...lotLayers, ...zoneLayers];
+    for (const id of ordered) {
+      if (m.getLayer(id)) m.moveLayer(id);
+    }
+    // Les libellés restent lisibles au sommet des aplats/contours.
+    if (m.getLayer("selected-zones-label")) m.moveLayer("selected-zones-label");
+    if (m.getLayer("selected-lots-label")) m.moveLayer("selected-lots-label");
+    // Le tracé de mesure prime toujours.
+    ensureMeasureLayersOnTop();
+  }
+
+  // C3 — réordonne la pile quand l'interactivité des lots change SANS re-sync
+  // (idempotent). Purge aussi tout survol de lot resté « accroché » au passage
+  // en mode passif, pour ne pas figer un highlight de lot hors zone/lot actif.
+  $: if (mapReady) {
+    applyLayerOrder(lotsSelectable);
+    if (!lotsSelectable) clearHoverState("selected-lots");
+  }
 
   function syncGeoLayers(input: GeoLayersInput): void {
     if (!mapInstance || !mapReady) return;
@@ -703,8 +777,11 @@
       input.lotLineColor,
     );
 
-    // Les couches zone/lot viennent d'être (re)posées : la mesure reste dessus.
-    ensureMeasureLayersOnTop();
+    // Les couches zone/lot viennent d'être (re)posées : rétablit l'ordre de
+    // pile selon l'interactivité des lots (C3) — qui remet aussi la mesure au
+    // sommet — pour que le survol/l'exergue de zone du niveau ville ne soient
+    // pas occultés par les lots fraîchement ajoutés au-dessus.
+    applyLayerOrder(lotsSelectable);
   }
 
   // ── Outil mesure : mécanique carte ─────────────────────────────────────────
