@@ -612,30 +612,28 @@ describe("SignauxSelPanel — #3b(b) bucket Lots filtré ⊆ zone focusée", () 
   });
 });
 
-describe("SignauxSelPanel — #3b(c) panneau « Lot actif » pinné", () => {
-  it("focus lot → panneau pinné (n° + superficie + détail dépliable) ; absent sinon", async () => {
+describe("SignauxSelPanel — nav-drill 01KZEG78 : PAS de panneau « Lot actif »", () => {
+  it("focus lot → AUCUN pin « Lot actif » (spec owner) ; le lot reste dans sa fiche", async () => {
     const lots = [
       makeLot("5399042", { zoneCode: "H-431", superficieM2: 850.4 }),
     ];
-    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+    const { getByText, queryByTestId, queryByText } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
         lotsResponse: makeLotsResponse(lots),
       },
     });
-    // Aucun panneau tant qu'aucun lot n'est focusé (dernier niveau du drill).
+    // Spec owner (retrait de la vue « Lot actif ») : jamais de pin, même au focus.
     expect(queryByTestId("sel-lot-head")).toBeNull();
 
     await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
 
-    // Panneau « Lot actif » pinné rendu (miroir de « Zone active »), avec le
-    // n° de lot, la superficie servie et le détail dépliable.
-    const head = getByTestId("sel-lot-head");
-    expect(head.textContent).toContain("Lot actif");
-    expect(head.textContent).toContain("5399042");
-    expect(head.textContent).toContain("Superficie");
-    expect(getByTestId("sel-lot-head-more")).toBeTruthy();
+    // Toujours pas de pin « Lot actif » après focus (l'actif épinglé = Ville/Zone
+    // uniquement) ; le lot vit dans sa fiche/drawer, pas dans un header épinglé.
+    expect(queryByTestId("sel-lot-head")).toBeNull();
+    expect(queryByTestId("sel-lot-head-more")).toBeNull();
+    expect(queryByText("Lot actif")).toBeNull();
   });
 });
 

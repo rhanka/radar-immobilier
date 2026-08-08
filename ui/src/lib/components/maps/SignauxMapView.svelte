@@ -82,6 +82,7 @@
     setFocus,
     toggleExclusiveSelection,
     toggleSelection,
+    type BucketKind,
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
@@ -957,7 +958,11 @@
       return;
     }
     if (res.kind === "ignore") return; // vue ville sans zone dérivable → neutre
-    toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`));
+    // Vue zone : le lot s'ouvre (drawer) et la ZONE RESTE ACTIVE — exclusif
+    // ENTRE LOTS seulement (règle 3 owner : lot-à-lot libre dans la zone).
+    toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`), {
+      exclusiveKinds: ["lot"],
+    });
   }
 
   /**
@@ -1330,11 +1335,16 @@
     return makeKey("lot", `${citySlug}/${noLot}`);
   }
 
-  function toggleMapSelection(key: SelectionKey): void {
+  function toggleMapSelection(
+    key: SelectionKey,
+    opts: { exclusiveKinds?: readonly BucketKind[] } = {},
+  ): void {
     const wasSelected = selectionState.selectedKeys.has(key);
-    // C3 — sélection EXCLUSIVE : une seule zone OU un seul lot à la fois
-    // (sélectionner un lot désélectionne la zone et réciproquement).
-    selectionState = toggleExclusiveSelection(selectionState, key);
+    // C3 — sélection EXCLUSIVE (défaut zone+lot : une zone OU un lot). Le drill
+    // owner (nav 01KZEG78) passe `exclusiveKinds:["lot"]` pour un clic LOT en
+    // vue zone : le lot devient exclusif ENTRE LOTS mais la ZONE reste active
+    // (drawer + zone active, lot-à-lot libre).
+    selectionState = toggleExclusiveSelection(selectionState, key, opts.exclusiveKinds);
     selectionState = setFocus(selectionState, wasSelected ? null : key);
     if (!wasSelected) {
       syncRouteForSelectionKey(key);
