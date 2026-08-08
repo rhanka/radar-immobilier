@@ -42,9 +42,11 @@ Le chiffre décisif : **2868/2893 preuves ont un `rawRef`** → un lien public m
 
 ## Conclusion
 
-- **0 preuve morte mesurée** (25 orphelines + échantillon public = 100% 200).
-- **0 risque de 404 nu aujourd'hui.**
-- **2868/2893 (99,1%)** ont un repli archive same-origin toujours présent à côté du lien public.
+**Portée de la mesure (précise, à ne pas sur-lire)** : le fetch est **EXHAUSTIF sur le JEU À RISQUE** — les 25 orphelines (16 URLs uniques), seul vecteur possible de 404 nu — plus un **ÉCHANTILLON de 10/554** object-storage-public. Ce n'est **PAS** un balayage exhaustif des 2893 : les 2868 preuves avec repli archive ne sont pas toutes fetchées. Ce n'est pas nécessaire — leur risque de 404 nu est **borné par le repli archive** (`rawRef` → `/api/documents/raw`), donc non-critique (confirmé par recette).
+
+- **0 preuve morte sur le jeu à risque** (25 orphelines exhaustif = 100% 200) **+ échantillon public** (10/10 = 200). PAS « 0 morte sur 2893 ».
+- **0 risque de 404 nu aujourd'hui** : le seul vecteur (orpheline-sans-archive) est vérifié exhaustivement vivant.
+- **2868/2893 (99,1%)** ont un repli archive same-origin toujours présent à côté du lien public → même une mort future y retombe (jamais un 404 nu).
 - Invariant sécurité tenu (recette) : **0 URL signée exposée**.
 
 ## Recommandations (au conducteur — pour durcir au-delà du mesuré)
