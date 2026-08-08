@@ -971,7 +971,14 @@
 
   /** Clic aplat zone → bascule la sélection de zone. */
   function handleZoneClick(zone: { citySlug: string; code: string }): void {
-    toggleMapSelection(makeKey("zone", `${zone.citySlug}/${zone.code}`));
+    const zoneKey = makeKey("zone", `${zone.citySlug}/${zone.code}`);
+    // Nav-drill (01KZGM07) : un clic sur la zone DÉJÀ active ne la désélectionne
+    // PAS. En vue zone, MapLibre dispatche le clic à la couche zone ET à la
+    // couche lot ; sans cette garde, cliquer un lot À L'INTÉRIEUR de la zone
+    // active re-cliquait la zone → la désélectionnait. On sort d'une zone via le
+    // fil d'Ariane (Ville), pas par re-clic. Cliquer une AUTRE zone bascule.
+    if (selectionState.selectedKeys.has(zoneKey)) return;
+    toggleMapSelection(zoneKey);
   }
 
   /**
@@ -1272,10 +1279,14 @@
       selectionState = setFocus(selectionState, null);
     } else {
       // Clic sur un autre item → l'ajouter aux sélectionnés si absent, puis
-      // focaliser. C3 : zone/lot passent par la sélection EXCLUSIVE (une seule
-      // sélection géo à la fois) ; signaux/ville gardent la sélection multi.
+      // focaliser. Nav-drill (01KZGM07) : un LOT sélectionné depuis la LISTE
+      // garde la ZONE active (exclusif ENTRE LOTS seulement), parité avec le
+      // clic carte (handleLotClick) ; les autres kinds gardent l'exclusif géo
+      // par défaut (zone+lot).
       if (!selectionState.selectedKeys.has(key)) {
-        selectionState = toggleExclusiveSelection(selectionState, key);
+        const exclusiveKinds: readonly BucketKind[] | undefined =
+          parseKey(key)?.kind === "lot" ? ["lot"] : undefined;
+        selectionState = toggleExclusiveSelection(selectionState, key, exclusiveKinds);
       }
       selectionState = setFocus(selectionState, key);
       // m4 — un LOT sélectionné depuis le pane droit commande la caméra
