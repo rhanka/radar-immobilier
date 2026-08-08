@@ -4,6 +4,7 @@ import {
   cityBCount,
   cityIsB,
   cityResolvedPct,
+  geoCellFor,
   kpiResolvedPct,
   palierCellStatusLabel,
   proxyImmoPlaceholderMatrix,
@@ -14,6 +15,39 @@ import type {
   GraphSignalCityItem,
   GraphSignalsByCityResponse,
 } from "$lib/signals/graph-signals-by-city-client.js";
+import type {
+  CityCoverage,
+  CoverageResponse,
+} from "$lib/sources/source-coverage-client.js";
+
+// Couverture minimale injectable (17 dims geo). Défaut : tout « absent ».
+function mkCoverageCity(slug: string, over: Partial<CityCoverage> = {}): CityCoverage {
+  const geo = { state: "absent" as const, served: false, servedBy: null, freshness: "unknown" as const };
+  return {
+    citySlug: slug,
+    cityName: slug,
+    mrc: null,
+    priorityRank: null,
+    l1Raw: { state: "absent", count: 0, freshness: "unknown" },
+    l2Graph: { state: "absent", ontologyVersion: null, freshness: "unknown" },
+    signals: { state: "absent", count: 0, withCitation: 0, priority: 0, freshness: "unknown" },
+    l4Zonage: { ...geo },
+    normes: { state: "absent", freshness: "unknown" },
+    l5Lots: { ...geo },
+    tod: { ...geo },
+    worstStatus: "absent",
+    nextMarginalGain: null,
+    ...over,
+  };
+}
+function mkCoverage(cities: CityCoverage[]): CoverageResponse {
+  return {
+    generatedAt: "2026-08-08T00:00:00.000Z",
+    totals: { cities: cities.length, l1Raw: 0, l2Graph: 0, signals: 0, l4Zonage: 0, l5Lots: 0 },
+    cities,
+  };
+}
+const emptyCoverageFetcher = async (): Promise<CoverageResponse> => mkCoverage([]);
 
 describe("palier-matrix/v1 — couche données", () => {
   it("libellés de statut NEUTRES (aucun jargon interne)", () => {
@@ -143,7 +177,7 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
   }
 
   it("exclut les villes non-B ; dénominateur = nb villes B live", async () => {
-    const m = await buildPalierMatrixLive({ fetcher, now });
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: emptyCoverageFetcher });
     expect(m.denominator).toBe(3);
     expect(m.cities.map((c) => c.citySlug)).not.toContain("ville-non-b");
     expect(m.cities).toHaveLength(3);
@@ -151,7 +185,7 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
   });
 
   it("récence LIVE par ville + comptes de cohorte (lt3mo/lt6mo/all)", async () => {
-    const m = await buildPalierMatrixLive({ fetcher, now });
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: emptyCoverageFetcher });
     expect(m.recencyCounts).toEqual({ lt3mo: 1, lt6mo: 2, all: 3 });
     const byslug = new Map(m.cities.map((c) => [c.citySlug, c.recency]));
     expect(byslug.get("westmount")).toBe("lt3mo");
@@ -160,7 +194,7 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
   });
 
   it("priorité (réf. hors-ligne) en tête + cellule immo bindée depuis l'artefact", async () => {
-    const m = await buildPalierMatrixLive({ fetcher, now });
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: emptyCoverageFetcher });
     // westmount est priorité (fallback) → première ligne.
     expect(m.cities[0]?.citySlug).toBe("westmount");
     expect(m.cities[0]?.isPriority).toBe(true);
@@ -170,16 +204,18 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
     const kpi4 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi04");
     expect(kpi4?.status).toBe("complete");
     expect(kpi4?.source).toBe("live");
-    // Une cellule geo (kpi01) reste « À qualifier » (mapping absent).
+    // Une cellule geo (kpi01) = « À qualifier » : coverage vide (ville hors
+    // couverture) → à qualifier honnête, provenance « couverture absente ».
     const kpi1 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi01");
     expect(kpi1?.status).toBe("unknown");
+    expect(kpi1?.source).toBe("couverture absente");
     // kpi20 (Recall) NON servi live → reste réf. hors-ligne (honnête).
     const kpi20 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi20");
     expect(kpi20?.source).toBe("réf. hors-ligne");
   });
 
   it("kpi04 LIVE corrige le stale : ville B absente du fallback → complet (live)", async () => {
-    const m = await buildPalierMatrixLive({ fetcher, now });
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: emptyCoverageFetcher });
     // ville-ancienne est B live (signalCount>0) mais hors artefact réf. →
     // le live la marque « complet » (PV présent), pas « à qualifier » stale.
     const row = m.cities.find((c) => c.citySlug === "ville-ancienne");
@@ -189,8 +225,80 @@ describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
   });
 
   it("chaque ligne a exactement 20 cellules (une par KPI)", async () => {
-    const m = await buildPalierMatrixLive({ fetcher, now });
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: emptyCoverageFetcher });
     for (const row of m.cities) expect(row.cells).toHaveLength(20);
     expect(PALIER_KPIS_20).toHaveLength(20);
+  });
+
+  it("17 dims geo dérivées du LIVE coverage (mapping verrouillé) par ville", async () => {
+    const covFetcher = async () =>
+      mkCoverage([
+        mkCoverageCity("westmount", {
+          l4Zonage: { state: "verified", served: true, servedBy: "geo", freshness: "fresh" },
+          l5Lots: { state: "declared", served: true, servedBy: "local", freshness: "partial" },
+          normes: { state: "declared", freshness: "partial", zoneCount: 4, zonesWithGrille: 4, zonesWithReglement: 2, zonesWithNormativeValues: 0 },
+          signals: { state: "verified", count: 10, withCitation: 10, priority: 3, freshness: "fresh" },
+          l2Graph: { state: "verified", ontologyVersion: "2.3", freshness: "fresh" },
+          lotFields: { state: "declared", freshness: "partial" },
+          tod: { state: "verified", served: true, servedBy: "geo", freshness: "fresh" },
+        }),
+      ]);
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: covFetcher });
+    const row = m.cities.find((c) => c.citySlug === "westmount");
+    const cell = (id: string) => row?.cells.find((c) => c.kpiId === id);
+    // Direct coverage : zonage verified → complet ; lots declared → partiel.
+    expect(cell("kpi01")?.status).toBe("complete");
+    expect(cell("kpi01")?.source).toBe("coverage");
+    expect(cell("kpi02")?.status).toBe("incomplete");
+    // Sous-comptes normes : grille 4/4 → complet ; règlement 2/4 → partiel ;
+    // valeurs 0/4 → à qualifier.
+    expect(cell("kpi03")?.status).toBe("complete");
+    expect(cell("kpi05")?.status).toBe("incomplete");
+    expect(cell("kpi06")?.status).toBe("unknown");
+    // 11 URL-source : 10/10 signaux cités → complet, « dérivé à valider ».
+    expect(cell("kpi11")?.status).toBe("complete");
+    expect(cell("kpi11")?.source).toBe("dérivé à valider");
+    // 08 provenance geo → complet ; 09 fraîcheur fresh → complet (dérivés).
+    expect(cell("kpi08")?.status).toBe("complete");
+    expect(cell("kpi09")?.status).toBe("complete");
+    // TOD groupé 18/19 verified → complet.
+    expect(cell("kpi18")?.status).toBe("complete");
+    expect(cell("kpi19")?.status).toBe("complete");
+    // Structurels jamais complete : 07 = N-A ; 10 = en cours ; 14 = unknown.
+    expect(cell("kpi07")?.status).toBe("na");
+    expect(cell("kpi07")?.source).toBe("structurel");
+    expect(cell("kpi10")?.status).toBe("unknown");
+    expect(cell("kpi10")?.source).toBe("en cours");
+    expect(cell("kpi14")?.status).toBe("unknown");
+  });
+
+  it("échec du fetch coverage n'invalide PAS la matrice (geo → à qualifier)", async () => {
+    const failing = async (): Promise<CoverageResponse> => {
+      throw new Error("401");
+    };
+    const m = await buildPalierMatrixLive({ fetcher, now, coverageFetcher: failing });
+    expect(m.denominator).toBe(3); // scope B intact
+    const kpi1 = m.cities[0]?.cells.find((c) => c.kpiId === "kpi01");
+    expect(kpi1?.status).toBe("unknown");
+    expect(kpi1?.source).toBe("couverture absente");
+  });
+});
+
+describe("geoCellFor — mapping kpi_id → couche coverage (lock conducteur)", () => {
+  it("ville hors couverture → à qualifier honnête (couverture absente)", () => {
+    const c = geoCellFor("kpi01", undefined);
+    expect(c.status).toBe("unknown");
+    expect(c.source).toBe("couverture absente");
+  });
+
+  it("structurels 07/10/14 : jamais complete même sans couverture", () => {
+    expect(geoCellFor("kpi07", undefined)).toMatchObject({ status: "na", source: "structurel" });
+    expect(geoCellFor("kpi10", undefined)).toMatchObject({ status: "unknown", source: "en cours" });
+    expect(geoCellFor("kpi14", undefined)).toMatchObject({ status: "unknown", source: "structurel" });
+  });
+
+  it("normes : repli sur l'état bulk quand les sous-comptes sont absents", () => {
+    const city = mkCoverageCity("x", { normes: { state: "verified", freshness: "fresh" } });
+    expect(geoCellFor("kpi03", city).status).toBe("complete"); // pas de zonesWithGrille → normes.state
   });
 });
