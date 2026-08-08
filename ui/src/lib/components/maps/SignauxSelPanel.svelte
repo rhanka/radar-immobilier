@@ -446,15 +446,9 @@
   $: focusedZone = focusedZoneCode
     ? (visibleZones.find((zone) => zone.properties.code === focusedZoneCode) ?? null)
     : null;
-  // #3b(c) — Objet du lot focusé — alimente le panneau pinné « Lot actif »
-  // (miroir de « Zone active » / « Ville active ») au-dessus des buckets. Le
-  // lot focusé est toujours dans visibleLots (ensureFocusedLotVisible), repli
-  // sur lots au cas où.
-  $: focusedLot = focusedLotNo
-    ? (visibleLots.find((l) => l.properties.noLot === focusedLotNo) ??
-        lots.find((l) => l.properties.noLot === focusedLotNo) ??
-        null)
-    : null;
+  // Nav-drill 01KZEG78 (spec owner) : plus de panneau « Lot actif » épinglé →
+  // pas d'objet `focusedLot` dédié (le lot vit dans son drawer/fiche). Le focus
+  // de lot reste porté par `focusedLotNo` (sélection carte/liste) pour la fiche.
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
@@ -1004,43 +998,9 @@
       </div>
     {/if}
 
-    <!-- #3b(c) — Panneau « Lot actif » PINNÉ (miroir de « Zone active » /
-         « Ville active ») : dernier niveau du drill Ville→Zone→Lot. Quand un
-         lot est focusé (clic carte/liste, sélection débloquée en vue zone),
-         ses champs prioritaires restent visibles au-dessus des buckets ; le
-         reste est dépliable. Données servies par /api/geo/:city/lots. -->
-    {#if focusedLot}
-      {@const flZoneCode = lotZoneCode(focusedLot.properties)}
-      {@const flZoneKind = lotZoneKind(focusedLot)}
-      {@const flScore = lotScore(focusedLot)}
-      <div class="sel-lot-head" data-testid="sel-lot-head">
-        <span class="sel-kicker" style="color: #b45309;">Lot actif</span>
-        <h2 class="sel-lot-title">{focusedLot.properties.noLot}</h2>
-        <p class="sel-city-meta">
-          {#if flZoneCode}<code>{flZoneCode}</code>{/if}{#if flZoneKind} · {flZoneKind}{/if}
-        </p>
-        <div class="sel-pill-row">
-          <Badge tone="neutral">Superficie {formatArea(focusedLot.properties.superficieM2)}</Badge>
-          <Badge tone="neutral">Multifamilial 4+ : {lot4Plus(focusedLot)}</Badge>
-          <Badge tone={flScore ? "info" : "neutral"}>
-            {flScore ? `Potentiel ${flScore}` : "Potentiel non évalué"}
-          </Badge>
-        </div>
-        <details class="sel-lot-more" data-testid="sel-lot-head-more">
-          <summary>Détail du lot</summary>
-          <dl class="entity-meta">
-            <dt class="entity-meta-key">Adresse</dt>
-            <dd class="entity-meta-val">{focusedLot.properties.adresse ?? "—"}</dd>
-            <dt class="entity-meta-key">Code postal</dt>
-            <dd class="entity-meta-val">{formatPostalCode(focusedLot.properties.codePostal)}</dd>
-            <dt class="entity-meta-key">Façade</dt>
-            <dd class="entity-meta-val">{facadeDisplay(focusedLot)}</dd>
-            <dt class="entity-meta-key">Source</dt>
-            <dd class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</dd>
-          </dl>
-        </details>
-      </div>
-    {/if}
+    <!-- Nav-drill 01KZEG78 (spec owner validée) : PAS de panneau « Lot actif »
+         épinglé. L'actif épinglé = Ville OU Zone uniquement ; le lot s'ouvre
+         dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
 
     {#if detailError}
       <div class="sel-alert">
@@ -1973,36 +1933,6 @@
   }
 
   .sel-zone-more > .entity-meta {
-    margin-top: 0.4rem;
-  }
-
-  /* #3b(c) — Panneau « Lot actif » pinné, miroir de .sel-zone-head. */
-  .sel-lot-head {
-    padding: 0.6rem 0.85rem 0.7rem;
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-    flex-shrink: 0;
-  }
-
-  .sel-lot-title {
-    font-size: var(--signaux-fs-title);
-    font-weight: 600;
-    color: var(--st-semantic-text-primary, #1e293b);
-    margin: 0.2rem 0 0.25rem;
-  }
-
-  .sel-lot-more {
-    margin-top: 0.5rem;
-    font-size: var(--signaux-fs-caption);
-  }
-
-  .sel-lot-more > summary {
-    cursor: pointer;
-    color: var(--st-semantic-text-secondary, #475569);
-    font-weight: 600;
-  }
-
-  .sel-lot-more > .entity-meta {
     margin-top: 0.4rem;
   }
 
