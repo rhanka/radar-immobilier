@@ -92,6 +92,7 @@
   import { zoneCodeAtPoint } from "$lib/maps/zone-membership.js";
   import {
     buildGeoLevelNavigation,
+    resolveGeoLotClick,
     type GeoLevel,
   } from "$lib/maps/geo-level-navigation.js";
   import {
@@ -932,14 +933,30 @@
     toggleMapSelection(makeKey("zone", `${zone.citySlug}/${zone.code}`));
   }
 
-  /** Clic aplat lot → bascule la sélection de lot (repli ville sélectionnée). */
-  function handleLotClick(lot: { noLot: string; citySlug: string | null }): void {
+  /**
+   * Clic GÉOGRAPHIQUE aplat lot → règle 1 owner (nav-drill 01KZEG78) appliquée
+   * au CLIC CARTE (pas seulement à la liste/bucket) : en vue ZONE le lot se
+   * sélectionne ; en vue VILLE le clic RÉSOUT vers la ZONE contenante du lot
+   * (entrée en vue zone) au lieu de sauter au lot. `zoneCode` est servie par geo
+   * sur le lot (payload du socle).
+   */
+  function handleLotClick(lot: {
+    noLot: string;
+    citySlug: string | null;
+    zoneCode?: string | null;
+  }): void {
     const citySlug = lot.citySlug ?? selectedCity?.municipality.slug;
     if (!citySlug) return;
-    // #3b — hiérarchie stricte Ville → Zone → Lot : un lot n'est SÉLECTIONNABLE
-    // qu'une fois une ZONE entrée (vue zone). En vue ville, les lots restent
-    // AFFICHÉS sur la carte mais VERROUILLÉS → clic ignoré (règles owner 1/2).
-    if (!hasZoneSelection(selectionState)) return;
+    const res = resolveGeoLotClick({
+      hasZoneSelection: hasZoneSelection(selectionState),
+      zoneCode: lot.zoneCode ?? null,
+    });
+    if (res.kind === "enter-zone") {
+      // Vue ville : 1er clic du drill géographique → entre dans la zone du lot.
+      handleZoneClick({ citySlug, code: res.code });
+      return;
+    }
+    if (res.kind === "ignore") return; // vue ville sans zone dérivable → neutre
     toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`));
   }
 

@@ -22,6 +22,33 @@ function toGeoMode(mode: string | undefined): GeoMode {
 
 export type GeoLevel = "Province" | "Ville" | "Zone";
 
+/**
+ * Résolution du clic GÉOGRAPHIQUE sur un polygone LOT selon le niveau de drill
+ * (règle 1 owner — nav-drill 01KZEG78). Hiérarchie stricte Ville → Zone → Lot :
+ *  - VUE VILLE (aucune zone entrée) : un clic sur un LOT n'est PAS une sélection
+ *    de lot ; il RÉSOUT vers sa ZONE contenante (entrée en vue zone) → 1er clic
+ *    du drill géographique. Sans zone dérivable → aucune action (jamais une
+ *    sélection lot hors vue zone, jamais un clic mort qui « saute au lot »).
+ *  - VUE ZONE (zone entrée) : le lot devient sélectionnable → sélection lot.
+ * Corrige le bug carte : le clic géographique lot ne doit PAS aller direct au
+ * lot en vue ville (la garde LISTE/bucket seule ne couvrait pas la carte).
+ */
+export type GeoLotClickResolution =
+  | { kind: "select-lot" }
+  | { kind: "enter-zone"; code: string }
+  | { kind: "ignore" };
+
+export function resolveGeoLotClick(input: {
+  /** Une zone est-elle déjà entrée (vue zone) ? */
+  hasZoneSelection: boolean;
+  /** Zone contenante du lot cliqué (servie par geo : `zoneCode`), si connue. */
+  zoneCode: string | null;
+}): GeoLotClickResolution {
+  if (input.hasZoneSelection) return { kind: "select-lot" };
+  if (input.zoneCode) return { kind: "enter-zone", code: input.zoneCode };
+  return { kind: "ignore" };
+}
+
 export interface GeoLevelNavInput {
   /** Niveau cible cliqué dans le segmented-control. */
   target: GeoLevel;

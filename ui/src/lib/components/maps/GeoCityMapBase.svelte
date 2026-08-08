@@ -139,9 +139,16 @@
   /** Clic sur un aplat zone (couche `selected-zones-fill`). */
   export let onZoneClick: (zone: { citySlug: string; code: string }) => void =
     () => {};
-  /** Clic sur un aplat lot (couche `selected-lots-fill`). */
-  export let onLotClick: (lot: { noLot: string; citySlug: string | null }) => void =
-    () => {};
+  /**
+   * Clic sur un aplat lot (couche `selected-lots-fill`). Le payload porte la
+   * `zoneCode` contenante (servie par geo) pour que le consommateur applique la
+   * règle 1 (en vue ville, le clic lot RÉSOUT vers sa zone, pas de sélection lot).
+   */
+  export let onLotClick: (lot: {
+    noLot: string;
+    citySlug: string | null;
+    zoneCode: string | null;
+  }) => void = () => {};
 
   // ── Props : drill segmenté + légende ───────────────────────────────────────
   /** Segments du drill (Province / Ville / Zone …). Vide ⇒ pas de control. */
@@ -406,7 +413,13 @@
       const noLot = readString(props?.noLot);
       if (!noLot) return;
       e.originalEvent?.stopPropagation?.();
-      onLotClick({ noLot, citySlug: readString(props?.citySlug) });
+      // `zoneCode` (servie par geo sur le lot) permet la règle 1 côté conso :
+      // en vue ville, le clic lot résout vers sa zone contenante.
+      onLotClick({
+        noLot,
+        citySlug: readString(props?.citySlug),
+        zoneCode: readString(props?.zoneCode),
+      });
     });
 
     m.on("mouseenter", "selected-zones-fill", () => {
