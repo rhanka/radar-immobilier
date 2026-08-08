@@ -233,9 +233,22 @@ export async function buildPalierMatrixLive(
         : "older";
     const cells: PalierCell[] = PALIER_KPIS_20.map((kpi) => {
       if (kpi.id === IMMO_KPI4_ID) {
-        return { kpiId: kpi.id, status: toCellStatus(fb?.kpi4_pv), source: "réf. hors-ligne" };
+        // KPI 04 · PV = LIVE (décision owner) : présence d'un PV/désignation =
+        // la ville a des signaux servis (`signalCount` agrège Signal +
+        // DesignationEvent, cf. by-city). Toute ligne de la matrice est B
+        // (⊆ has-signal) → « complet » ici est la vérité live courante, et
+        // corrige les « à qualifier » stale de la réf. hors-ligne (mesure
+        // ~08-06) pour les villes qui ont des signaux MAINTENANT.
+        return {
+          kpiId: kpi.id,
+          status: item.signalCount > 0 ? "complete" : "unknown",
+          source: "live",
+        };
       }
       if (kpi.id === IMMO_KPI20_ID) {
+        // KPI 20 · Recall = PAS servi live (jointure émis-geo ↔ servi, absente
+        // de by-city). Reste la réf. hors-ligne, honnêtement étiquetée (pas de
+        // faux-live). À passer live si un endpoint sert le recall par ville.
         return { kpiId: kpi.id, status: toCellStatus(fb?.kpi20_recall), source: "réf. hors-ligne" };
       }
       return { kpiId: kpi.id, status: "unknown", source: null };
@@ -266,7 +279,7 @@ export async function buildPalierMatrixLive(
   return {
     contract: "palier-matrix/v1",
     subset,
-    label: "dénominateur B live · KPI immo réf. hors-ligne",
+    label: "dénominateur B live · KPI 04 PV live · KPI 20 réf. hors-ligne",
     kpis: PALIER_KPIS_20,
     cities: rows,
     denominator: allB.length,
