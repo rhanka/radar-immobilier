@@ -617,16 +617,17 @@
   }
 
   /**
-   * #2a — URL PUBLIQUE cliquable de la preuve d'un signal (PDF municipal servi
-   * par /api/graph-signals). Garde anti-XSS MINIMALE : http/https uniquement
-   * (jamais javascript:/data:). N'utilise PAS publicAuditUrl, dont l'allowlist
-   * d'hosts FIXE rejette les 167 domaines municipaux — l'assouplir (+ repli
-   * archive S3 pour la liveness) est une garde de validité PARTAGÉE, traitée
-   * séparément avec architect+recette. La liveness n'est donc pas garantie ici.
+   * #2b — URL PUBLIQUE cliquable de la preuve d'un signal, gardée par le contrat
+   * MESURÉ recette `isPublicCanonicalUrl` (via publicAuditUrl), désormais
+   * SIGNATURE-based : accepte host public http(s) NON signé, query/fragment
+   * bénins ET l'object-storage PUBLIC (VPlus, sites muni S3/OVH) ; REJETTE une
+   * URL signée / à credential, un host privé, un scheme non-http. L'archive
+   * interne (`s3://raw`/`rawRef`) passe, elle, par le viewer same-origin
+   * (archiveHref → /api/documents/raw), jamais une URL signée. Assouplissement
+   * co-signé recette+architect (garde de validité partagée).
    */
   function publicSourceHref(evidence: SignalEvidence): string | null {
-    const url = evidence.documentUrl ?? evidence.sourceUrl;
-    return typeof url === "string" && /^https?:\/\//i.test(url) ? url : null;
+    return publicAuditUrl(evidence.documentUrl ?? evidence.sourceUrl);
   }
 
   /**
