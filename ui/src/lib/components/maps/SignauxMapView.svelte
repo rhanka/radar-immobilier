@@ -458,11 +458,12 @@
     lotDataFilter = next;
   }
 
-  // Filtre par TYPE de zone : pilote UNIQUEMENT la peinture carte (opacité par
-  // type). Son en-tête interactif vivait dans le bucket Zones du panneau droit,
-  // retiré (01KZGM07 item 1) : le filtre reste donc à sa valeur par défaut
-  // (toutes catégories visibles), mais son câblage de peinture est conservé.
-  const zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+  /** Filtre par TYPE de zone (chips additives — catégories de la légende). */
+  let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+
+  function handleZoneKindFilterChange(next: ZoneKindFilter): void {
+    zoneKindFilter = next;
+  }
 
   /**
    * Filtre par MILLÉSIME de zonage (exclusif — un seul millésime à la fois).
@@ -2150,6 +2151,10 @@
       vivierBMode={activeViewMode === "b"}
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
+      {zoneKindFilter}
+      onZoneKindFilterChange={handleZoneKindFilterChange}
+      {zoneMillesimeFilter}
+      onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
