@@ -68,6 +68,38 @@ describe("buildDrillSegments", () => {
     });
     expect(segments[2].disabled).toBe(false);
   });
+
+  // 01KZGM07 item 4 — niveau Lot optionnel (vue Signaux : drill jusqu'au lot).
+  it("includeLotLevel → 4e segment « Lot », grisé tant qu'aucun lot n'est sélectionné", () => {
+    const segments = buildDrillSegments({
+      hasSelectedCity: true,
+      zonesConfigured: true,
+      includeLotLevel: true,
+    });
+    expect(segments.map((s) => s.label)).toEqual(["Province", "Ville", "Zone", "Lot"]);
+    expect(segments[3].disabled).toBe(true);
+    expect(segments[3].ariaLabel).toBe("Lot (sélectionnez un lot sur la carte)");
+  });
+
+  it("includeLotLevel + hasLotSelection → segment « Lot » actif", () => {
+    const segments = buildDrillSegments({
+      hasSelectedCity: true,
+      zonesConfigured: true,
+      includeLotLevel: true,
+      hasLotSelection: true,
+    });
+    expect(segments[3].disabled).toBe(false);
+    expect(segments[3].ariaLabel).toBe("Lot");
+  });
+
+  it("sans includeLotLevel → aucun segment « Lot » (parité vue Sources)", () => {
+    const segments = buildDrillSegments({
+      hasSelectedCity: true,
+      zonesConfigured: true,
+      hasLotSelection: true,
+    });
+    expect(segments.map((s) => s.label)).toEqual(["Province", "Ville", "Zone"]);
+  });
 });
 
 describe("computeDrillLevel", () => {
@@ -87,5 +119,16 @@ describe("computeDrillLevel", () => {
     expect(
       computeDrillLevel({ hasSelectedCity: false, hasZoneSelection: false }),
     ).toBe("Province");
+  });
+
+  // 01KZGM07 item 4 — un lot sélectionné prime sur la zone (drill le plus profond).
+  it("lot sélectionné → Lot (prime sur zone et ville)", () => {
+    expect(
+      computeDrillLevel({
+        hasSelectedCity: true,
+        hasZoneSelection: true,
+        hasLotSelection: true,
+      }),
+    ).toBe("Lot");
   });
 });
