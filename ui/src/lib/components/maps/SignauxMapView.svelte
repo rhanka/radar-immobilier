@@ -848,6 +848,18 @@
     return null;
   }
 
+  /**
+   * R1 — code de zone d'un lot AFFICHÉ (mêmes features que la carte : `zoneCode`
+   * cadastral joint par geo). Sert au guard liste (parité avec le clic carte, qui
+   * lit `props.zoneCode`). `null` si le lot n'est pas trouvé / sans zone.
+   */
+  function zoneCodeForDisplayedLot(noLot: string): string | null {
+    for (const lot of displayedLots.features) {
+      if (lot.properties?.noLot === noLot) return lotZoneCode(lot.properties);
+    }
+    return null;
+  }
+
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
   $: if (mapReady && filteredDetailNodes !== undefined) {
     updateGeoLayers();
@@ -1288,6 +1300,32 @@
   }
 
   function toggleBucketKey(key: SelectionKey): void {
+    // R1 (RÈGLE UNIQUE, parité carte/liste) — un lot n'est sélectionnable QUE si
+    // une zone est active ET le lot appartient à cette zone. Sinon (niveau ville
+    // OU lot hors zone active), cliquer un lot RÉSOUT vers SA zone (switch), jamais
+    // le lot. Miroir du guard carte (couche selected-lots-fill). On lit la zone du
+    // lot dans `displayedLots` (mêmes features que la carte : `zoneCode` cadastral).
+    const parsedClick = parseKey(key);
+    if (parsedClick?.kind === "lot") {
+      const separator = parsedClick.id.indexOf("/");
+      const noLot = separator > 0 ? parsedClick.id.slice(separator + 1) : "";
+      const active = activeZoneCodeFor(selectionState);
+      const lotZone = zoneCodeForDisplayedLot(noLot);
+      const citySlug = selectedCity?.municipality.slug ?? null;
+      if (lotZone && lotZone !== active) {
+        // hors zone active OU niveau ville : basculer vers la ZONE du lot (switch),
+        // jamais le lot.
+        if (citySlug) toggleBucketKey(makeKey("zone", `${citySlug}/${lotZone}`));
+        return;
+      }
+      if (!active) {
+        // niveau ville sans zone résoluble pour ce lot → ignorer (jamais de lot
+        // sélectionné hors d'une zone active).
+        return;
+      }
+      // lotZone === active (ou zone du lot inconnue MAIS une zone est active) →
+      // sélection normale du lot ci-dessous.
+    }
     // #9 fix — l'accordéon pilote le FOCUS (ouvre/ferme le détail), pas la
     // sélection multi. On bascule le focus : si l'item est déjà focusé on le
     // referme (null), sinon on le focalise (key). La sélection est assurée
@@ -2072,6 +2110,9 @@
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
     lotsSelectable={lotsAreSelectable(selectionState, selectedCity)}
     activeZoneCode={activeZoneCodeFor(selectionState)}
+    zoneHighlightColor={computeGeoLevel(selectionState, selectedCity) === "Lot"
+      ? "#9a3412"
+      : "#ff6d00"}
     onSegmentClick={handleGeoLevelClick}
     onCityClick={handleCityClick}
     onZoneClick={handleZoneClick}
