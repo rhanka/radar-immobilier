@@ -1,0 +1,400 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/docs/reports/"><title>Rapport de coûts immo &amp; geo — 2026-07-13 au 2026-08-09</title><style>
+@page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; line-height: 1.42; font-size: 10.5px; }
+h1 { font-size: 28px; line-height: 1.12; color: #0b1728; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 3px solid #2563eb; }
+h2 { font-size: 18px; color: #10203a; margin: 26px 0 10px; padding-top: 6px; border-top: 1px solid #d8dee9; break-after: avoid; }
+h3 { font-size: 13.5px; color: #1d3557; margin: 18px 0 8px; break-after: avoid; }
+h4 { font-size: 12px; margin: 14px 0 6px; break-after: avoid; }
+p { margin: 6px 0; }
+ul, ol { margin-top: 5px; padding-left: 20px; }
+li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 9px; break-inside: avoid; }
+th, td { border: 1px solid #cbd5e1; padding: 4px 5px; vertical-align: top; }
+th { background: #eef4ff; color: #10203a; font-weight: 700; }
+blockquote { border-left: 4px solid #93c5fd; background: #f8fbff; margin: 10px 0; padding: 8px 10px; color: #334155; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #f1f5f9; padding: 1px 3px; border-radius: 3px; font-size: 0.9em; }
+pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 6px; overflow: hidden; font-size: 8.5px; }
+img { display: block; max-width: 100%; max-height: 132mm; margin: 8px auto 16px; border: 1px solid #d7dde8; border-radius: 8px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12); break-inside: avoid; }
+hr { border: 0; border-top: 1px solid #d8dee9; margin: 18px 0; }
+strong { color: #0f172a; }
+a { color: #1d4ed8; text-decoration: none; }
+.cover-note { font-size: 10px; color: #64748b; margin-bottom: 18px; }
+</style></head><body><h1>Coûts immo &amp; geo — période 2026-07-13 → 2026-08-09 (28 j)</h1>
+<blockquote>
+<p><strong>Généré</strong> : 2026-08-09 (journée du 09/08 partielle). <strong>Change</strong> : USD→CAD 1,37 · EUR→CAD 1,617 <em>(inférés, identiques au rapport précédent)</em>.
+<strong>Statut des mesures</strong> : LLM = <strong>mesuré</strong> (sessions réelles <code>~/.claude</code> + <code>~/.codex</code> via <code>agent-stats</code>). Infra = <strong>estimé à partir de factures réelles et de mesures d&#39;usage</strong> : billing SCW et OVH mesurés, clés CPU/RAM instantanées, ventilation temporelle et fin de période OVH estimées.
+Rapport de coûts <strong>séparé</strong> du rapport de livraison. Le corps présente le <strong>facturable immo + geo</strong> ; la plateforme partagée reste un contexte de prorata, hors postes client.</p>
+</blockquote>
+<h2>Résumé exécutif — facturable immo + geo</h2>
+<table>
+<thead>
+<tr>
+<th>Poste</th>
+<th align="right">immo</th>
+<th align="right">geo</th>
+<th align="right"><strong>immo + geo</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(A) Infra k8s SCW→OVH <em>(estimé)</em></td>
+<td align="right">~8,94 CAD</td>
+<td align="right">~4,75 CAD</td>
+<td align="right"><strong>~13,69 CAD</strong></td>
+</tr>
+<tr>
+<td>(B) Abonnements IA / LLM (facturable ×1,15)</td>
+<td align="right">55,15 CAD</td>
+<td align="right">117,50 CAD</td>
+<td align="right"><strong>172,65 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>Total période (28 j)</strong></td>
+<td align="right"><strong>~64,09 CAD</strong></td>
+<td align="right"><strong>~122,25 CAD</strong></td>
+<td align="right"><strong>~186,34 CAD</strong></td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>geo consomme 32,05 Md tokens</strong>, contre <strong>14,75 Md</strong> pour immo, soit <strong>2,17×</strong> le volume immo ; le LLM geo représente 117,50 CAD facturables.</li>
+<li>Le LLM facturable immo + geo passe de <strong>82,02 à 172,65 CAD</strong> vs P−1, soit <strong>+111 % / ×2,11</strong>. Les deux fenêtres font 28 jours : la variation normalisée par jour est identique (2,93 → 6,17 CAD/j).</li>
+<li>La période couvre la bascule des workloads client <strong>SCW Kapsule → OVH MKS BHS5 le 28/07</strong>. La journée du 28/07 est rattachée à OVH afin de ne pas la compter deux fois.</li>
+</ul>
+<h2>1. (A) Coûts INFRA k8s — bascule SCW → OVH</h2>
+<p>Facture infra estimée par produit, nœuds partagés au prorata CPU/RAM + stockage block direct :</p>
+<table>
+<thead>
+<tr>
+<th>Sous-période</th>
+<th>Base de coût</th>
+<th align="right">immo</th>
+<th align="right">geo</th>
+<th align="right"><strong>immo + geo</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SCW, 13→27/07 (15 j)</td>
+<td>66,75 € de nœuds + PVC directs</td>
+<td align="right">~3,66 CAD</td>
+<td align="right">~2,53 CAD</td>
+<td align="right"><strong>~6,19 CAD</strong></td>
+</tr>
+<tr>
+<td>OVH, 28/07→09/08 (13 j)</td>
+<td>51,17 CAD de nœuds + PVC directs</td>
+<td align="right">~5,28 CAD</td>
+<td align="right">~2,22 CAD</td>
+<td align="right"><strong>~7,50 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>Total période</strong></td>
+<td></td>
+<td align="right"><strong>~8,94 CAD</strong></td>
+<td align="right"><strong>~4,75 CAD</strong></td>
+<td align="right"><strong>~13,69 CAD</strong></td>
+</tr>
+</tbody></table>
+<h3>1.1 Part SCW — 13→27/07</h3>
+<p>Le billing SCW réel de juillet expose <strong>137,95 € de nœuds</strong> pour le cluster partagé : <code>BASIC3-X4C-16G</code> 94,65 € + <code>BASIC3-X2C-8G</code> 43,30 €. La fenêtre client de 15 jours est lissée sur les 31 jours de juillet : <code>137,95 × 15/31 = 66,75 €</code> <em>(estimé)</em></p>
+<p>Le tenant client n&#39;est plus actif sur le contexte SCW courant ; aucune métrique historique au jour le jour n&#39;est disponible. La clé pré-bascule reprend donc le dernier instantané publié, <code>kubectl top</code> du <strong>12/07</strong> : <strong>immo 2,7 %</strong>, <strong>geo 2,0 %</strong>. Stockage direct : immo 10 Gi, geo 5 Gi, au tarif repris du rapport précédent (0,0949 €/Gi/mois).</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Nœuds (clé × 66,75 €)</th>
+<th align="right">Block direct</th>
+<th align="right"><strong>SCW CAD</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">2,7 % → 1,80 €</td>
+<td align="right">10 Gi → 0,46 €</td>
+<td align="right"><strong>~3,66</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">2,0 % → 1,34 €</td>
+<td align="right">5 Gi → 0,23 €</td>
+<td align="right"><strong>~2,53</strong></td>
+</tr>
+</tbody></table>
+<h3>1.2 Part OVH — 28/07→09/08</h3>
+<p>L&#39;API billing OVH mesure le nœud <code>b3-8</code> à <strong>0,082 CAD/h</strong>. Le pool possède <strong>2 nœuds</strong> sur la sous-période : <code>2 × 13 × 24 × 0,082 = 51,168 CAD</code> <em>(estimé à ce tarif réel ; le relevé août est en retard sur la fin de période)</em></p>
+<p>Mesure instantanée OVH du 09/08, <code>kubectl top pods -A</code> : <strong>177 mCPU / 3 833 MiB</strong>. Clé = moyenne de la part CPU et de la part RAM, identique à la méthode des rapports précédents.</p>
+<table>
+<thead>
+<tr>
+<th>Tenant (namespaces)</th>
+<th align="right">CPU</th>
+<th align="right">part CPU</th>
+<th align="right">RAM</th>
+<th align="right">part RAM</th>
+<th align="right"><strong>clé moyenne</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo (<code>radar-immobilier</code>)</td>
+<td align="right">10 m</td>
+<td align="right">5,65 %</td>
+<td align="right">534 Mi</td>
+<td align="right">13,93 %</td>
+<td align="right"><strong>9,79 %</strong></td>
+</tr>
+<tr>
+<td>geo (<code>geo</code>)</td>
+<td align="right">9 m</td>
+<td align="right">5,08 %</td>
+<td align="right">117 Mi</td>
+<td align="right">3,05 %</td>
+<td align="right"><strong>4,07 %</strong></td>
+</tr>
+<tr>
+<td><em>plateforme partagée (<code>sentropic*</code>, <code>h2a-mcp</code>)</em></td>
+<td align="right">20 m</td>
+<td align="right">11,30 %</td>
+<td align="right">507 Mi</td>
+<td align="right">13,23 %</td>
+<td align="right">12,26 %</td>
+</tr>
+<tr>
+<td><em>reste du cluster</em></td>
+<td align="right">138 m</td>
+<td align="right">77,97 %</td>
+<td align="right">2 675 Mi</td>
+<td align="right">69,79 %</td>
+<td align="right">73,88 %</td>
+</tr>
+</tbody></table>
+<p>Le billing OVH mesure le block classique à <strong>0,000088 CAD/GiB·h</strong>. Les PVC directs observés sont immo 10 Gi et geo 5 Gi.</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Nœuds (clé × 51,168 CAD)</th>
+<th align="right">Block direct</th>
+<th align="right"><strong>OVH CAD</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">9,79 % → 5,01</td>
+<td align="right">10 Gi → 0,27</td>
+<td align="right"><strong>~5,28</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">4,07 % → 2,08</td>
+<td align="right">5 Gi → 0,14</td>
+<td align="right"><strong>~2,22</strong></td>
+</tr>
+</tbody></table>
+<p>Le bucket OVH <code>sentropic-geo</code> représente 0,045 CAD en juillet et 0,051 CAD au relevé août : comme dans le rapport précédent, ce stockage objet inférieur à 0,10 CAD n&#39;est pas réparti dans le tableau.</p>
+<h2>2. (B) Abonnements IA / agents LLM (mesurés, <code>agent-stats</code>)</h2>
+<p>Abonnements mutualisés : <strong>2× Claude Max ×20 à 200 USD/mois + 1× ChatGPT Pro à 200 USD/mois</strong>. Prorata = tokens du compte rapportés à la capacité du forfait sur 28 jours ; marge facturable <strong>×1,15 sur le LLM uniquement</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th>claude (part capacité)</th>
+<th>codex (part capacité)</th>
+<th align="right">prorata USD</th>
+<th align="right">prorata CAD</th>
+<th align="right"><strong>facturable ×1,15</strong></th>
+<th align="right">temps interactif</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td>11,42 Md (8,2 %)</td>
+<td>3,32 Md (2,35 %)</td>
+<td align="right">35,01</td>
+<td align="right">47,96</td>
+<td align="right"><strong>55,15 CAD</strong></td>
+<td align="right">~4,3 h</td>
+</tr>
+<tr>
+<td>geo</td>
+<td>23,73 Md (17,0 %)</td>
+<td>8,32 Md (5,87 %)</td>
+<td align="right">74,58</td>
+<td align="right">102,17</td>
+<td align="right"><strong>117,50 CAD</strong></td>
+<td align="right">~40,6 h</td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td><strong>35,15 Md</strong></td>
+<td><strong>11,64 Md</strong></td>
+<td align="right"><strong>109,59</strong></td>
+<td align="right"><strong>150,13</strong></td>
+<td align="right"><strong>172,65 CAD</strong></td>
+<td align="right"><strong>~44,9 h</strong></td>
+</tr>
+</tbody></table>
+<p>Capacité commune mesurée sur 2026-05-04→2026-08-10 : <strong>Claude 34,81 Md/7 j · Codex 35,41 Md/7 j</strong>. Les trois runs (immo, geo, plateforme partagée) retournent exactement les mêmes dénominateurs.</p>
+<h2>3. Récapitulatif par produit × poste</h2>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">(A) Infra k8s</th>
+<th align="right">(B) LLM prorata CAD</th>
+<th align="right">(B) LLM facturable ×1,15</th>
+<th align="right"><strong>Total période</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">~8,94</td>
+<td align="right">47,96</td>
+<td align="right">55,15</td>
+<td align="right"><strong>~64,09 CAD</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">~4,75</td>
+<td align="right">102,17</td>
+<td align="right">117,50</td>
+<td align="right"><strong>~122,25 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td align="right"><strong>~13,69</strong></td>
+<td align="right"><strong>150,13</strong></td>
+<td align="right"><strong>172,65</strong></td>
+<td align="right"><strong>~186,34 CAD</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2>Annexe — méthodes, clés de répartition et réserves</h2>
+<blockquote>
+<p>Les coûts partagés sont ventilés au prorata de l&#39;usage réel mesuré. Seuls <strong>immo</strong> et <strong>geo</strong> sont des postes client. La plateforme partagée est mesurée pour contextualiser le prorata, mais reste hors facture client.</p>
+</blockquote>
+<h3>A.1 Frontière de migration et clé infra</h3>
+<ul>
+<li><strong>SCW</strong> : 2026-07-13 00:00 → 2026-07-27 23:59, soit 15 jours.</li>
+<li><strong>OVH</strong> : 2026-07-28 00:00 → 2026-08-09 23:59, soit 13 jours.</li>
+<li>La date de cutover du brief est le 28/07. Ce jour est attribué à OVH : 15 + 13 = <strong>28 jours</strong>, sans double comptage.</li>
+<li>Le cluster SCW résiduel reste actif pour <code>matchid-prod</code>, hors périmètre client. Les workloads immo/geo ont basculé sur OVH ; le nœud général SCW a été retiré après la migration.</li>
+<li>Une clé instantanée CPU/RAM est un proxy de la période : instantané publié du 12/07 pour SCW, instantané live du 09/08 pour OVH.</li>
+</ul>
+<h3>A.2 Dérivation des factures cloud</h3>
+<p><strong>SCW</strong> — source : <code>scw billing consumption list project-id=09ac728a-e3b9-4a5b-9749-664b0f147c70 billing-period=2026-07</code> :</p>
+<ul>
+<li>nœuds juillet : 94,65 € (<code>BASIC3-X4C-16G</code>) + 43,30 € (<code>BASIC3-X2C-8G</code>) = <strong>137,95 € mesurés</strong> ;</li>
+<li>pool de coût 15 j : 137,95 × 15/31 = <strong>66,75 € estimés</strong> ;</li>
+<li>PVC client : tarif 0,0949 €/Gi/mois repris du rapport précédent.</li>
+</ul>
+<p><strong>OVH</strong> — source : API <code>/cloud/project/{id}/usage/history</code> + <code>/usage/current</code> :</p>
+<ul>
+<li>juillet : <strong>35,0715 CAD mesurés</strong> pour tout le projet OVH, dont 29,4620 CAD de <code>b3-8</code> BHS5 ;</li>
+<li>août, dernier relevé au 07/08 11:00 UTC : <strong>17,1251 CAD mesurés</strong>, dont 14,5960 CAD pour 178 h de <code>b3-8</code> ;</li>
+<li>tarif effectif observé : 14,596 / 178 = <strong>0,082 CAD/h/nœud</strong> ;</li>
+<li>fin de période : extrapolation à 2 nœuds jusqu&#39;au 09/08 inclus, d&#39;où <strong>51,168 CAD de compute estimés</strong> sur la sous-période OVH ;</li>
+<li>block classique : <strong>0,000088 CAD/GiB·h mesuré</strong> dans le billing.</li>
+</ul>
+<h3>A.3 Recette LLM (<code>agent-stats</code>) — reproductible</h3>
+<p>Job : <code>packages/web/scripts/project-costs.mjs</code>, attribution par repo (<code>cwd</code> + <code>repoUrl</code>), depuis <code>/home/antoinefa/src/agent-stats</code> :</p>
+<pre><code class="language-bash">REPOS=radar-immobilier SINCE=2026-05-04 UNTIL=2026-08-10 \
+  WINDOWS=prev:2026-06-15..2026-07-12,cur:2026-07-13..2026-08-09 \
+  node packages/web/scripts/project-costs.mjs
+REPOS=geo,geo-quebec SINCE=2026-05-04 UNTIL=2026-08-10 \
+  WINDOWS=prev:2026-06-15..2026-07-12,cur:2026-07-13..2026-08-09 \
+  node packages/web/scripts/project-costs.mjs
+REPOS=sentropic,sent-tech,sent-tech-design-system,agent-stats,track,poc-k8s,h2a,harness,coordinate \
+  SINCE=2026-05-04 UNTIL=2026-08-10 \
+  WINDOWS=prev:2026-06-15..2026-07-12,cur:2026-07-13..2026-08-09 \
+  node packages/web/scripts/project-costs.mjs
+</code></pre>
+<ul>
+<li><strong>Capacité</strong> = pic de tokens sur fenêtre glissante 7 j des tokens globaux par fournisseur.</li>
+<li><strong>Prorata</strong> = <code>tokens_compte ÷ (capacité_pic7j × 28/7) × (forfait_mensuel × 28/30)</code>.</li>
+<li>Forfaits période : Claude <code>2 × 200 × 28/30 = 373,33 USD</code> ; Codex <code>200 × 28/30 = 186,67 USD</code>.</li>
+<li>Marge facturable : <strong>×1,15</strong>, LLM seulement. Change : <strong>1,37 CAD/USD</strong>.</li>
+</ul>
+<p><strong>Contrôle de reproduction publié — échec signalé, aucune correction cachée.</strong> La fenêtre publiée 2026-07-04→2026-07-11 a été relancée avec son horizon historique (<code>SINCE=2026-05-04</code>, <code>UNTIL=2026-07-12</code>). Résultat actuel : immo <strong>7,54 CAD</strong> vs <strong>5,27 CAD publié</strong> (+43,1 %) ; geo <strong>51,01 CAD</strong> vs <strong>50,14 CAD publié</strong> (+1,7 %). Le seuil demandé de 0,1 % n&#39;est donc <strong>pas satisfait</strong>. Le script n&#39;a pas changé depuis son commit d&#39;origine (<code>e5aebc5</code>, 2026-06-23) ; le corpus historique collecté et le pic Claude diffèrent aujourd&#39;hui. Par honnêteté, ce rapport n&#39;ajuste aucun chiffre pour forcer la concordance. P et P−1 sont calculées dans le <strong>même run courant</strong>, avec les mêmes dénominateurs, donc leur comparaison interne reste cohérente.</p>
+<h3>A.4 Contexte du prorata — plateforme partagée, hors postes client</h3>
+<table>
+<thead>
+<tr>
+<th>Poste</th>
+<th align="right">part plateforme partagée</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(A) Infra k8s <em>(estimé)</em></td>
+<td align="right">~21,7 CAD (clés SCW 3,2 % et OVH 12,26 %, block + stockage RWX direct)</td>
+</tr>
+<tr>
+<td>(B) LLM facturable ×1,15</td>
+<td align="right"><strong>152,70 CAD</strong> (31,31 Md Claude + 9,84 Md Codex ; prorata 132,78 CAD ; ~12,6 h interactives)</td>
+</tr>
+<tr>
+<td><strong>Total contexte plateforme</strong></td>
+<td align="right"><strong>~174,4 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Totaux LLM des trois comptes : <strong>325,35 CAD facturables</strong>. Répartition : immo 16,9 % · geo 36,1 % · plateforme 46,9 %. La plateforme partagée sert à construire et opérer les deux produits, mais n&#39;est pas une ligne client de ce rapport.</p>
+<h3>A.5 Comparaison P−1 — 2026-06-15→2026-07-12 (28 j)</h3>
+<p>Les deux fenêtres ont 28 jours. La normalisation par jour ne change donc pas les pourcentages.</p>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th align="right">facturable P−1</th>
+<th align="right">facturable P</th>
+<th align="right">CAD/j P−1 → P</th>
+<th align="right">Δ</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">23,38 CAD</td>
+<td align="right">55,15 CAD</td>
+<td align="right">0,84 → 1,97</td>
+<td align="right"><strong>+136 % / ×2,36</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">58,63 CAD</td>
+<td align="right">117,50 CAD</td>
+<td align="right">2,09 → 4,20</td>
+<td align="right"><strong>+100 % / ×2,00</strong></td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td align="right"><strong>82,02 CAD</strong></td>
+<td align="right"><strong>172,65 CAD</strong></td>
+<td align="right"><strong>2,93 → 6,17</strong></td>
+<td align="right"><strong>+111 % / ×2,11</strong></td>
+</tr>
+<tr>
+<td><em>plateforme partagée</em></td>
+<td align="right">50,09 CAD</td>
+<td align="right">152,70 CAD</td>
+<td align="right">1,79 → 5,45</td>
+<td align="right">+205 % / ×3,05</td>
+</tr>
+<tr>
+<td><em>Total 3 comptes</em></td>
+<td align="right">132,10 CAD</td>
+<td align="right">325,35 CAD</td>
+<td align="right">4,72 → 11,62</td>
+<td align="right">+146 % / ×2,46</td>
+</tr>
+</tbody></table>
+<p>Volumes P−1→P : immo 5,99→14,75 Md tokens (+146 %) ; geo 16,82→32,05 Md (+91 %). L&#39;infra n&#39;est pas comparée à P−1 : aucune facture homogène de 28 jours n&#39;a été publiée, et P contient une migration de fournisseur.</p>
+<h3>A.6 Hypothèses &amp; réserves — honnêteté des chiffres</h3>
+<ol>
+<li><strong>Mesuré</strong> : tokens et temps interactif du run <code>agent-stats</code> ; factures mensuelles SCW ; historiques de consommation OVH ; tarifs effectifs OVH ; nœuds, pods, PVC et usage CPU/RAM OVH au 09/08.</li>
+<li><strong>Estimé</strong> : lissage SCW de 15 jours, clé SCW reprise du 12/07, clé OVH instantanée comme proxy des 13 jours, coût OVH extrapolé après le dernier relevé du 07/08, taux de change.</li>
+<li><strong>Contrôle de reproduction non conforme</strong> : le recalcul d&#39;une fenêtre publiée dépasse 0,1 %. Les résultats courants sont mesurés, mais la stabilité historique du collecteur ne peut pas être revendiquée ce jour.</li>
+<li><strong>09/08 partiel</strong> : <code>agent-stats</code> et les sessions du jour sont arrêtés à l&#39;heure de génération ; le LLM de fin de journée est donc potentiellement sous-évalué. À l&#39;inverse, l&#39;infra OVH est extrapolée jusqu&#39;à la fin du 09/08.</li>
+<li><strong>Bascule SCW→OVH</strong> : la ventilation évite le double comptage du 28/07. Elle ne facture pas séparément la période technique de double-run avant/après cutover ; elle attribue le coût au fournisseur servant le tenant sur chaque sous-période.</li>
+<li><strong>Clé CPU/RAM</strong> : un instantané n&#39;est pas une moyenne temporelle. La forte part RAM immo au 09/08 (13,93 %) pousse sa clé OVH à 9,79 % ; un autre moment pourrait produire une autre ventilation.</li>
+<li><strong>Marge ×1,15 sur le LLM uniquement</strong> ; infra sans marge. USD→CAD 1,37 et EUR→CAD 1,617 sont repris du dernier rapport, non re-mesurés.</li>
+<li><strong>S3/registry/LB</strong> : non répartis dans le poste client, conformément au format précédent centré sur nœuds + stockage direct. Le S3 OVH geo mesuré est inférieur à 0,10 CAD sur les relevés consultés.</li>
+<li><strong>Double comptage tokens possible</strong> si une session porte un <code>cwd</code> d&#39;un compte et un <code>repoUrl</code> d&#39;un autre ; effet non quantifié. La plateforme partagée demeure hors facture client.</li>
+</ol>
+</body></html>
