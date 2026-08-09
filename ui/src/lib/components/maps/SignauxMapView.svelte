@@ -829,6 +829,25 @@
     return level === "Zone" || level === "Lot";
   }
 
+  /**
+   * R1 (01KZKFBC5BR2NB15BEEJ0AWQNG) — code de la ZONE ACTIVE servi au socle pour
+   * BORNER l'interactivité des lots : seuls les lots dont `zoneCode` vaut ce code
+   * sont sélectionnables/survolables ; un clic sur un lot hors de cette zone
+   * bascule vers SA zone (switch). `null` s'il n'y a pas de zone active (la
+   * couche lot est alors passive via `lotsAreSelectable`). Évalué dans le template
+   * (comme computeGeoLevel : un `$:` avant applyGeoRoute resterait périmé).
+   */
+  function activeZoneCodeFor(state: SelectionBucketState): string | null {
+    for (const key of state.selectedKeys) {
+      const parsed = parseKey(key);
+      if (parsed?.kind === "zone") {
+        const separatorIndex = parsed.id.indexOf("/");
+        return separatorIndex > 0 ? parsed.id.slice(separatorIndex + 1) : null;
+      }
+    }
+    return null;
+  }
+
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
   $: if (mapReady && filteredDetailNodes !== undefined) {
     updateGeoLayers();
@@ -2052,6 +2071,7 @@
     segments={buildGeoSegments(selectedCity, zonesResponse, selectionState)}
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
     lotsSelectable={lotsAreSelectable(selectionState, selectedCity)}
+    activeZoneCode={activeZoneCodeFor(selectionState)}
     onSegmentClick={handleGeoLevelClick}
     onCityClick={handleCityClick}
     onZoneClick={handleZoneClick}

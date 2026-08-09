@@ -160,6 +160,16 @@
    */
   export let lotsSelectable = true;
 
+  /**
+   * R1 (01KZKFBC5BR2NB15BEEJ0AWQNG) — code de la ZONE ACTIVE. Quand une zone est
+   * active, SEULS ses lots (`zoneCode === activeZoneCode`) sont sélectionnables /
+   * survolables comme lots ; un clic sur un lot HORS de la zone active laisse la
+   * couche zone sous-jacente sélectionner SA zone (= switch), comme au niveau
+   * ville. `null` ⇒ pas de bornage (niveau ville, où `lotsSelectable` est faux).
+   * Lue RÉACTIVEMENT dans les handlers (comme `lotsSelectable`).
+   */
+  export let activeZoneCode: string | null = null;
+
   // ── Props : drill segmenté + légende ───────────────────────────────────────
   /** Segments du drill (Province / Ville / Zone …). Vide ⇒ pas de control. */
   export let segments: GeoSegment[] = [];
@@ -171,6 +181,13 @@
   export let legend: GeoMapLegend | null = null;
   /** C3 — couleur de l'exergue des features sélectionnées (orange fluo). */
   export let selectionHighlightColor = "#ff6d00";
+  /**
+   * R2 (01KZKFBCBWEATSMHYP5ZPJHBM1) — couleur de l'exergue du LOT sélectionné,
+   * VISUELLEMENT DISTINCTE de l'exergue de zone (`selectionHighlightColor`, orange
+   * fluo). Défaut = brun / orange foncé, pour dissocier le contour du lot de celui
+   * de la zone active (l'owner les trouvait trop proches).
+   */
+  export let lotHighlightColor = "#9a3412";
 
   // ── Props : libellés sur les polygones (m5) ────────────────────────────────
   // Affiche le n° de lot / le n° de zone directement sur les aplats (couches
@@ -423,6 +440,11 @@
       const props = e.features?.[0]?.properties;
       const noLot = readString(props?.noLot);
       if (!noLot) return;
+      // R1 — sélection lot BORNÉE à la zone active : un lot HORS de la zone active
+      // n'est PAS sélectionnable comme lot ; on laisse le handler
+      // `selected-zones-fill` (couche zone SOUS le lot) sélectionner SA zone
+      // (= switch de zone active), exactement comme au niveau ville.
+      if (activeZoneCode && readString(props?.zoneCode) !== activeZoneCode) return;
       e.originalEvent?.stopPropagation?.();
       // `zoneCode` (servie par geo sur le lot) permet la règle 1 côté conso :
       // en vue ville, le clic lot résout vers sa zone contenante.
@@ -458,9 +480,16 @@
     // blanc → gris clair. Les LOTS priment visuellement : quand le curseur est
     // sur un lot, la zone en dessous n'est pas marquée survolée.
     registerHoverState("selected-zones-fill", "selected-zones");
-    // C3 — le survol des LOTS (feature-state.hover → highlight) n'est actif
-    // qu'en zone/lot : le prédicat est lu RÉACTIVEMENT à chaque mousemove.
-    registerHoverState("selected-lots-fill", "selected-lots", () => lotsSelectable);
+    // C3/R1 — le survol des LOTS (feature-state.hover → highlight) n'est actif
+    // qu'en zone/lot ET uniquement pour les lots DE LA ZONE ACTIVE (bornage R1) :
+    // le prédicat est lu RÉACTIVEMENT à chaque mousemove (par-feature).
+    registerHoverState(
+      "selected-lots-fill",
+      "selected-lots",
+      (f) =>
+        lotsSelectable &&
+        (!activeZoneCode || readString(f?.properties?.zoneCode) === activeZoneCode),
+    );
   }
 
   /**
@@ -471,17 +500,30 @@
   function registerHoverState(
     layerId: string,
     sourceId: string,
-    isEnabled: () => boolean = () => true,
+    isEnabled: (feature?: {
+      properties?: Record<string, unknown>;
+    }) => boolean = () => true,
   ): void {
     const m = mapInstance as {
       on: (
         event: string,
         layer: string,
-        handler: (e: { features?: Array<{ id?: number | string }> }) => void,
+        handler: (e: {
+          features?: Array<{
+            id?: number | string;
+            properties?: Record<string, unknown>;
+          }>;
+        }) => void,
       ) => void;
     };
     m.on("mousemove", layerId, (e) => {
-      if (!isEnabled()) return; // C3 — survol désactivé (couche passive)
+      // R1/C3 — survol lu par-feature : couche passive OU (pour les lots) lot hors
+      // zone active → on efface tout survol de CETTE source pour laisser la couche
+      // sous-jacente (zone) prendre le survol.
+      if (!isEnabled(e.features?.[0])) {
+        clearHoverState(sourceId);
+        return;
+      }
       const id = e.features?.[0]?.id;
       if (id === undefined) return;
       if (hoveredFeatureIdBySource.get(sourceId) === id) return;
@@ -704,7 +746,9 @@
         source: "selected-lots",
         filter: ["==", ["get", "isSelected"], true],
         paint: {
-          "line-color": selectionHighlightColor,
+          // R2 — exergue du lot DISTINCTE de la zone (brun/orange foncé ≠ orange
+          // fluo de la zone), pour dissocier les deux contours.
+          "line-color": lotHighlightColor,
           "line-width": 3,
           "line-opacity": 1,
         },
