@@ -10,6 +10,12 @@
     disabled?: boolean;
     /** `aria-label` optionnel (sinon `label`). */
     ariaLabel?: string;
+    /**
+     * R3 — segment SUR LE CHEMIN ACTIF (surligné). Permet de garder « Zone » ON
+     * quand un LOT est sélectionné (on voit les deux : zone active + lot). Si non
+     * fourni, le socle retombe sur `activeSegment === label` (niveau courant seul).
+     */
+    active?: boolean;
   }
 
   /** Légende paramétrable (overlay carte). `null` ⇒ pas de légende rendue. */
@@ -1295,16 +1301,17 @@
           class="inline-flex w-fit flex-wrap overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
         >
           {#each segments as seg (seg.label)}
+            {@const segActive = seg.active ?? activeSegment === seg.label}
             <button
               type="button"
               class={`px-2.5 py-1 font-semibold transition-colors ${
-                activeSegment === seg.label
+                segActive
                   ? "bg-slate-900 text-white"
                   : seg.disabled
                     ? "text-slate-300 cursor-not-allowed"
                     : "text-slate-600 hover:bg-slate-100 cursor-pointer"
               }`}
-              aria-pressed={activeSegment === seg.label}
+              aria-pressed={segActive}
               aria-label={seg.ariaLabel ?? seg.label}
               disabled={seg.disabled}
               onclick={() => onSegmentClick(seg.label)}
