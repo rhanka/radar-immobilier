@@ -107,7 +107,7 @@
    * `syncGeoLayers`.
    */
   import { onMount, onDestroy } from "svelte";
-  import { Ruler } from "@lucide/svelte";
+  import { Layers, Ruler } from "@lucide/svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import {
@@ -238,6 +238,9 @@
   const MEASURE_COLOR = "#2563eb";
   let measureActive = false;
   let measurePoints: LngLatTuple[] = [];
+  // Responsive (01KZKZ4B0Y0E3DFSHNE9TXGE50) — légendes bas-gauche REPLIÉES par
+  // défaut derrière une icône (gain de place, surtout sur mobile) ; tap = déplie.
+  let legendsOpen = false;
 
   $: measureTotalLabel = formatDistanceFr(totalDistanceMeters(measurePoints));
   $: measureSegmentLabel = formatDistanceFr(lastSegmentMeters(measurePoints));
@@ -1249,8 +1252,10 @@
 >
   <div bind:this={mapContainer} class="absolute inset-0"></div>
 
-  <!-- ── Contrôles carte (haut-droit) : outil « mesurer une distance » ────── -->
-  <div class="absolute right-3 top-3 z-10 flex flex-col items-end gap-2">
+  <!-- ── Contrôles carte (BAS-droit) : outil « mesurer une distance ». Décalé
+       AU-DESSUS de la bulle de chat (widget fixe bas-droit) via bottom-20 pour ne
+       pas la chevaucher ; `flex-col-reverse` → le panneau s'ouvre vers le HAUT. -->
+  <div class="absolute bottom-20 right-3 z-10 flex flex-col-reverse items-end gap-2">
     <button
       type="button"
       class="measure-toggle"
@@ -1293,18 +1298,21 @@
   </div>
 
   {#if segments.length > 0 || $$slots["overlay-top-left"]}
+    <!-- Responsive : sur mobile le fil d'Ariane est CENTRÉ horizontalement pour ne
+         pas être chevauché par les toggles de panes (haut-gauche/haut-droit) —
+         « Province » doit rester ENTIER. Desktop (sm+) : ancré à gauche comme avant. -->
     <div
-      class="absolute left-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] flex-col gap-2"
+      class="absolute left-1/2 top-3 z-10 flex max-w-[calc(100%-4.5rem)] -translate-x-1/2 flex-col items-center gap-2 sm:left-3 sm:max-w-[calc(100%-1.5rem)] sm:translate-x-0 sm:items-start"
     >
       {#if segments.length > 0}
         <div
-          class="inline-flex w-fit flex-wrap overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
+          class="inline-flex w-fit flex-nowrap overflow-hidden whitespace-nowrap rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
         >
           {#each segments as seg (seg.label)}
             {@const segActive = seg.active ?? activeSegment === seg.label}
             <button
               type="button"
-              class={`px-2.5 py-1 font-semibold transition-colors ${
+              class={`px-2 py-1 font-semibold transition-colors sm:px-2.5 ${
                 segActive
                   ? "bg-slate-900 text-white"
                   : seg.disabled
@@ -1328,32 +1336,51 @@
   <!-- C1 — légendes posées SUR LA CARTE par le consommateur (blocs multiples,
        ex. Zonage au-dessus de Lots) : slot bottom-left, complémentaire de la
        prop `legend` (vue Sources). -->
-  {#if $$slots["overlay-bottom-left"]}
-    <div class="absolute bottom-3 left-3 z-10 flex max-w-xs flex-col gap-2">
-      <slot name="overlay-bottom-left" />
-    </div>
-  {/if}
-
-  {#if legend}
-    <div
-      class="absolute bottom-3 left-3 z-10 max-w-xs rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
-    >
-      <p
-        class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400"
+  {#if $$slots["overlay-bottom-left"] || legend}
+    <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (Layers) ;
+         tap = déplie (gain de place, surtout mobile). Cible : légendes lot/zones
+         (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
+    <div class="absolute bottom-3 left-3 z-10 flex flex-col items-start gap-2">
+      <button
+        type="button"
+        class="legend-toggle"
+        class:legend-toggle-active={legendsOpen}
+        aria-pressed={legendsOpen}
+        aria-expanded={legendsOpen}
+        aria-label="Légende"
+        title="Légende"
+        data-testid="legend-toggle"
+        onclick={() => (legendsOpen = !legendsOpen)}
       >
-        {legend.title}
-      </p>
-      <ul class="space-y-1">
-        {#each legend.items as item (item.label)}
-          <li class="flex items-center gap-2 text-xs text-slate-600">
-            <span
-              class="h-3 w-3 rounded-sm border border-slate-300 shrink-0"
-              style="background-color: {item.color};"
-            ></span>
-            {item.label}
-          </li>
-        {/each}
-      </ul>
+        <Layers size={16} aria-hidden="true" />
+      </button>
+      {#if legendsOpen}
+        <div class="flex max-w-xs flex-col gap-2" data-testid="legend-panel">
+          <slot name="overlay-bottom-left" />
+          {#if legend}
+            <div
+              class="max-w-xs rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            >
+              <p
+                class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400"
+              >
+                {legend.title}
+              </p>
+              <ul class="space-y-1">
+                {#each legend.items as item (item.label)}
+                  <li class="flex items-center gap-2 text-xs text-slate-600">
+                    <span
+                      class="h-3 w-3 rounded-sm border border-slate-300 shrink-0"
+                      style="background-color: {item.color};"
+                    ></span>
+                    {item.label}
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/if}
+        </div>
+      {/if}
     </div>
   {/if}
 
@@ -1369,8 +1396,9 @@
 </div>
 
 <style>
-  /* Outil mesure — style DS (tokens --st-*, replis slate cohérents du repo). */
-  .measure-toggle {
+  /* Outil mesure + toggle légende — style DS (tokens --st-*, replis slate). */
+  .measure-toggle,
+  .legend-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1384,11 +1412,14 @@
     cursor: pointer;
     transition: background-color 120ms ease, color 120ms ease;
   }
-  .measure-toggle:hover {
+  .measure-toggle:hover,
+  .legend-toggle:hover {
     background: var(--st-semantic-surface-hover, #f1f5f9);
   }
   .measure-toggle-active,
-  .measure-toggle-active:hover {
+  .measure-toggle-active:hover,
+  .legend-toggle-active,
+  .legend-toggle-active:hover {
     background: var(--st-semantic-action-primary, #2563eb);
     border-color: var(--st-semantic-action-primary, #2563eb);
     color: var(--st-semantic-action-primaryText, #fff);
