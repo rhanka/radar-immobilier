@@ -63,7 +63,6 @@
     zoneRefComparableKey,
   } from "$lib/maps/signaux-map-geo.js";
   import {
-    evaluatedLotScore,
     facadeDisplay,
     formatArea,
     formatPostalCode,
@@ -743,15 +742,6 @@
     return `${Math.round(value * 100)} %`;
   }
 
-  /**
-   * Score de potentiel AFFICHABLE (« x.x/10 ») — null quand le score n'est pas
-   * évalué (`potentialScoreStatus: "unavailable"`) : on n'affiche jamais un
-   * « 0.0/10 » placeholder comme s'il était mesuré (copy « non évalué »).
-   */
-  function lotScore(lot: LotFeature): string | null {
-    const score = evaluatedLotScore(lot.properties);
-    return score !== null ? `${score.toFixed(1)}/10` : null;
-  }
 
   /**
    * Type de zone joint quand il est réellement précisé par la source.
@@ -1710,7 +1700,7 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{lot.properties.noLot}</span>
-                    <span class="sel-entity-type">{lotScore(lot) ?? "lot"}</span>
+                    <span class="sel-entity-type">lot</span>
                   </button>
                   {#if lotVisual.focused}
                     <!-- 01KZGM07 item 3 — clic lot → sa fiche se déplie INLINE
@@ -1818,12 +1808,6 @@
                             {value}
                           </span>
                         {/each}
-                        <span class="entity-meta-key">Potentiel</span>
-                        {#if lotScore(lot)}
-                          <span class="entity-meta-val">{lotScore(lot)}</span>
-                        {:else}
-                          <span class="entity-meta-val entity-meta-val--missing">non évalué</span>
-                        {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</span>
                         {#if lotsResponse?.collectionId}
