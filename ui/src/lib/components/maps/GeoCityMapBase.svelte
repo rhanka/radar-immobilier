@@ -1306,13 +1306,13 @@
     >
       {#if segments.length > 0}
         <div
-          class="inline-flex w-fit flex-wrap overflow-hidden rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
+          class="inline-flex w-fit flex-nowrap overflow-hidden whitespace-nowrap rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
         >
           {#each segments as seg (seg.label)}
             {@const segActive = seg.active ?? activeSegment === seg.label}
             <button
               type="button"
-              class={`px-2.5 py-1 font-semibold transition-colors ${
+              class={`px-2 py-1 font-semibold transition-colors sm:px-2.5 ${
                 segActive
                   ? "bg-slate-900 text-white"
                   : seg.disabled
