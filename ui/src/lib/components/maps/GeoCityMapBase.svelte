@@ -249,6 +249,13 @@
     originalEvent?: { stopPropagation?: () => void };
   };
 
+  // Événement du clic MAP-LEVEL (R1 — décideur unique zone/lot, cf.
+  // registerGeoLayerInteractions) : porte le point pixel pour queryRenderedFeatures.
+  type MapClickEvent = {
+    point: unknown;
+    originalEvent?: { stopPropagation?: () => void };
+  };
+
   function readString(value: unknown): string | null {
     return typeof value === "string" && value.trim().length > 0
       ? value.trim()
@@ -426,42 +433,67 @@
 
   // ── Couches spécialisées zone/lot (échafaudage paramétré) ──────────────────
   function registerGeoLayerInteractions(m: {
-    on: (
-      event: string,
-      layer: string,
-      handler: (e: MapLayerEvent) => void,
-    ) => void;
+    on: {
+      (event: string, layer: string, handler: (e: MapLayerEvent) => void): void;
+      (event: string, handler: (e: MapClickEvent) => void): void;
+    };
     getCanvas: () => HTMLCanvasElement;
+    getLayer: (id: string) => unknown;
   }): void {
-    m.on("click", "selected-zones-fill", (e) => {
+    // Accès à queryRenderedFeatures (typé PointLike côté maplibre) via cast local
+    // pour éviter le conflit de variance avec la signature étroite de `m`. On
+    // l'appelle comme MÉTHODE (`mq.queryRenderedFeatures(...)`) pour préserver le
+    // binding `this` : une extraction en const perdrait `this` → maplibre lit
+    // `this.style` → throw.
+    const mq = m as unknown as {
+      queryRenderedFeatures: (
+        point: unknown,
+        opts: { layers: string[] },
+      ) => Array<{
+        layer?: { id?: string };
+        properties?: Record<string, unknown>;
+      }>;
+    };
+    // R1 (RÈGLE UNIQUE, ZÉRO RACE) — UN SEUL décideur de clic carte pour zone/lot.
+    // Avant, deux handlers de layer distincts (`selected-zones-fill` +
+    // `selected-lots-fill`) se déclenchaient pour le MÊME clic quand un lot est
+    // au-dessus d'une zone : le handler ZONE posait `activeZoneCode` = zone du lot
+    // AVANT que le handler LOT lise son garde (flush réactif synchrone) → garde
+    // faussé → zone+lot ensemble au niveau ville. Ici on lit un SNAPSHOT de
+    // `activeZoneCode` AVANT toute mutation, puis on décide ATOMIQUEMENT via
+    // queryRenderedFeatures. Le clic ville (`cities-fill`) garde son handler dédié.
+    m.on("click", (e: MapClickEvent) => {
       if (measureActive) return; // mode mesure : les clics servent à mesurer
-      const props = e.features?.[0]?.properties;
-      const citySlug = readString(props?.citySlug);
-      const code = readString(props?.code);
-      if (!citySlug || !code) return;
-      e.originalEvent?.stopPropagation?.();
-      onZoneClick({ citySlug, code });
-    });
-
-    m.on("click", "selected-lots-fill", (e) => {
-      if (measureActive) return; // mode mesure : les clics servent à mesurer
-      const props = e.features?.[0]?.properties;
-      const noLot = readString(props?.noLot);
-      if (!noLot) return;
-      // R1 (RÈGLE UNIQUE) — un lot n'est sélectionnable QUE si une zone est ACTIVE
-      // ET le lot appartient à CETTE zone (`zoneCode === activeZoneCode`). Sinon
-      // — niveau ville (aucune zone active) OU lot hors de la zone active — on NE
-      // sélectionne PAS le lot : le handler `selected-zones-fill` (couche zone
-      // SOUS le lot) sélectionne SA zone (switch), jamais zone+lot ensemble.
-      if (!activeZoneCode || readString(props?.zoneCode) !== activeZoneCode) return;
-      e.originalEvent?.stopPropagation?.();
-      // `zoneCode` (servie par geo sur le lot) permet la règle 1 côté conso :
-      // en vue ville, le clic lot résout vers sa zone contenante.
-      onLotClick({
-        noLot,
-        citySlug: readString(props?.citySlug),
-        zoneCode: readString(props?.zoneCode),
-      });
+      const activeZoneSnapshot = activeZoneCode; // pré-clic, jamais la valeur mutée
+      const layers = ["selected-lots-fill", "selected-zones-fill"].filter((id) =>
+        m.getLayer(id),
+      );
+      if (layers.length === 0) return;
+      const feats = mq.queryRenderedFeatures(e.point, { layers });
+      const lotFeat = feats.find((f) => f.layer?.id === "selected-lots-fill");
+      const zoneFeat = feats.find((f) => f.layer?.id === "selected-zones-fill");
+      const noLot = readString(lotFeat?.properties?.noLot);
+      const lotZone = readString(lotFeat?.properties?.zoneCode);
+      // Lot sélectionnable ⟺ zone active (snapshot) ET lot DANS cette zone.
+      if (lotFeat && noLot && activeZoneSnapshot && lotZone === activeZoneSnapshot) {
+        e.originalEvent?.stopPropagation?.();
+        onLotClick({
+          noLot,
+          citySlug: readString(lotFeat.properties?.citySlug),
+          zoneCode: lotZone,
+        });
+        return;
+      }
+      // Sinon — niveau ville OU lot hors zone active — sélectionner la ZONE sous le
+      // curseur (switch), jamais le lot, jamais zone+lot.
+      if (zoneFeat) {
+        const citySlug = readString(zoneFeat.properties?.citySlug);
+        const code = readString(zoneFeat.properties?.code);
+        if (citySlug && code) {
+          e.originalEvent?.stopPropagation?.();
+          onZoneClick({ citySlug, code });
+        }
+      }
     });
 
     m.on("mouseenter", "selected-zones-fill", () => {
