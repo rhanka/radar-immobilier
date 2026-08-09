@@ -363,6 +363,48 @@
       )
     : filteredLots;
 
+  // ── 01KZGM07 item 2 — Signaux / Règlements RESTREINTS à la zone active ──────
+  /**
+   * Rattachement d'un SIGNAL à la zone active. « Rattaché » = le signal cite au
+   * moins une zone (extractSignalZoneRefs, clé comparable tiret ignoré). Contrat
+   * owner du scope zone du panneau droit (parité stricte avec zoneScopedLots) :
+   *  - aucune zone active (vue ville) → jamais de filtrage (tout affiché) ;
+   *  - signal SANS aucune zone citée → GARDÉ (exception impérative) ;
+   *  - signal citant des zones → gardé SEULEMENT s'il cite la zone active.
+   */
+  function signalMatchesActiveZone(
+    node: GraphSignalNode,
+    code: string | null,
+  ): boolean {
+    if (!code) return true;
+    const refs = extractSignalZoneRefs(node);
+    if (refs.length === 0) return true; // non-rattaché → gardé
+    const target = zoneRefComparableKey(code);
+    return refs.some((ref) => zoneRefComparableKey(ref) === target);
+  }
+  /**
+   * Rattachement d'un RÈGLEMENT à la zone active. « Rattaché » = l'entrée porte
+   * au moins un code de zone (dérivé des signaux le citant). Même exception : un
+   * règlement sans aucune zone est GARDÉ.
+   */
+  function reglementMatchesActiveZone(
+    entry: ReglementEntry,
+    code: string | null,
+  ): boolean {
+    if (!code) return true;
+    if (entry.zoneCodes.length === 0) return true; // non-rattaché → gardé
+    const target = zoneRefComparableKey(code);
+    return entry.zoneCodes.some((c) => zoneRefComparableKey(c) === target);
+  }
+  /** Signaux du panneau droit restreints à la zone active (ou tous hors focus). */
+  $: zoneScopedDetailNodes = focusedZoneCode
+    ? filteredDetailNodes.filter((n) => signalMatchesActiveZone(n, focusedZoneCode))
+    : filteredDetailNodes;
+  /** Règlements du panneau droit restreints à la zone active (même contrat). */
+  $: zoneScopedReglements = focusedZoneCode
+    ? reglements.filter((r) => reglementMatchesActiveZone(r, focusedZoneCode))
+    : reglements;
+
   // ── Filtre LOTS (en-tête de l'accordéon Lots — eval-lot-filters réutilisé) ─
   $: lotFilterActive = !isDefaultEvalFilter(lotFilter);
   /** Lots listés = filtre signaux ∩ filtre lots. */
@@ -446,15 +488,9 @@
   $: focusedZone = focusedZoneCode
     ? (visibleZones.find((zone) => zone.properties.code === focusedZoneCode) ?? null)
     : null;
-  // #3b(c) — Objet du lot focusé — alimente le panneau pinné « Lot actif »
-  // (miroir de « Zone active » / « Ville active ») au-dessus des buckets. Le
-  // lot focusé est toujours dans visibleLots (ensureFocusedLotVisible), repli
-  // sur lots au cas où.
-  $: focusedLot = focusedLotNo
-    ? (visibleLots.find((l) => l.properties.noLot === focusedLotNo) ??
-        lots.find((l) => l.properties.noLot === focusedLotNo) ??
-        null)
-    : null;
+  // Nav-drill 01KZEG78 (spec owner) : plus de panneau « Lot actif » épinglé →
+  // pas d'objet `focusedLot` dédié (le lot vit dans son drawer/fiche). Le focus
+  // de lot reste porté par `focusedLotNo` (sélection carte/liste) pour la fiche.
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
@@ -1004,43 +1040,9 @@
       </div>
     {/if}
 
-    <!-- #3b(c) — Panneau « Lot actif » PINNÉ (miroir de « Zone active » /
-         « Ville active ») : dernier niveau du drill Ville→Zone→Lot. Quand un
-         lot est focusé (clic carte/liste, sélection débloquée en vue zone),
-         ses champs prioritaires restent visibles au-dessus des buckets ; le
-         reste est dépliable. Données servies par /api/geo/:city/lots. -->
-    {#if focusedLot}
-      {@const flZoneCode = lotZoneCode(focusedLot.properties)}
-      {@const flZoneKind = lotZoneKind(focusedLot)}
-      {@const flScore = lotScore(focusedLot)}
-      <div class="sel-lot-head" data-testid="sel-lot-head">
-        <span class="sel-kicker" style="color: #b45309;">Lot actif</span>
-        <h2 class="sel-lot-title">{focusedLot.properties.noLot}</h2>
-        <p class="sel-city-meta">
-          {#if flZoneCode}<code>{flZoneCode}</code>{/if}{#if flZoneKind} · {flZoneKind}{/if}
-        </p>
-        <div class="sel-pill-row">
-          <Badge tone="neutral">Superficie {formatArea(focusedLot.properties.superficieM2)}</Badge>
-          <Badge tone="neutral">Multifamilial 4+ : {lot4Plus(focusedLot)}</Badge>
-          <Badge tone={flScore ? "info" : "neutral"}>
-            {flScore ? `Potentiel ${flScore}` : "Potentiel non évalué"}
-          </Badge>
-        </div>
-        <details class="sel-lot-more" data-testid="sel-lot-head-more">
-          <summary>Détail du lot</summary>
-          <dl class="entity-meta">
-            <dt class="entity-meta-key">Adresse</dt>
-            <dd class="entity-meta-val">{focusedLot.properties.adresse ?? "—"}</dd>
-            <dt class="entity-meta-key">Code postal</dt>
-            <dd class="entity-meta-val">{formatPostalCode(focusedLot.properties.codePostal)}</dd>
-            <dt class="entity-meta-key">Façade</dt>
-            <dd class="entity-meta-val">{facadeDisplay(focusedLot)}</dd>
-            <dt class="entity-meta-key">Source</dt>
-            <dd class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</dd>
-          </dl>
-        </details>
-      </div>
-    {/if}
+    <!-- Nav-drill 01KZEG78 (spec owner validée) : PAS de panneau « Lot actif »
+         épinglé. L'actif épinglé = Ville OU Zone uniquement ; le lot s'ouvre
+         dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
 
     {#if detailError}
       <div class="sel-alert">
@@ -1075,9 +1077,10 @@
       <details class="sel-bucket" bind:open={signalsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Signaux</span>
-          <!-- #6 : "–" pendant le chargement ; filtré/total si filtre actif -->
+          <!-- #6 : "–" pendant le chargement ; N/M quand la liste est restreinte
+               (zone active — 01KZGM07 item 2 — ou filtre subset). -->
           <span class="rail-row-count">
-            {#if detailLoading}–{:else if detailError}n/d{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
+            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
           </span>
         </summary>
         <div class="sel-entities" bind:this={entityListEl}>
@@ -1088,16 +1091,21 @@
             </div>
           {:else if detailError}
             <p class="sel-empty">Projection des signaux indisponible.</p>
-          {:else if filteredDetailNodes.length === 0}
-            <!-- Des signaux existent mais la plage de dates / les filtres les
-                 masquent tous : ne pas prétendre que la ville n'a rien d'indexé. -->
+          {:else if zoneScopedDetailNodes.length === 0}
+            <!-- Zone active sans signal rattaché, plage de dates qui masque tout,
+                 ou ville sans rien d'indexé : messages distincts (jamais
+                 prétendre que la ville n'a rien quand c'est le scope zone). -->
             <p class="sel-empty">
-              {unfilteredSignalCount > 0
-                ? "Aucun signal dans la plage de dates sélectionnée."
-                : "Aucun signal indexé pour cette ville."}
+              {#if focusedZoneCode && filteredDetailNodes.length > 0}
+                Aucun signal rattaché à la zone active.
+              {:else if unfilteredSignalCount > 0}
+                Aucun signal dans la plage de dates sélectionnée.
+              {:else}
+                Aucun signal indexé pour cette ville.
+              {/if}
             </p>
           {:else}
-            {#each filteredDetailNodes as node (node.id)}
+            {#each zoneScopedDetailNodes as node (node.id)}
               {@const key = signalKey(node)}
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
@@ -1339,8 +1347,9 @@
       <details class="sel-bucket" bind:open={reglementsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Règlements</span>
+          <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
           <span class="rail-row-count">
-            {detailLoading ? "–" : reglements.length}
+            {#if detailLoading}–{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
           </span>
         </summary>
         <div class="sel-entities">
@@ -1349,12 +1358,16 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement des règlements…</span>
             </div>
-          {:else if reglements.length === 0}
+          {:else if zoneScopedReglements.length === 0}
             <p class="sel-empty">
-              Aucun règlement cité par les signaux de cette ville.
+              {#if focusedZoneCode && reglements.length > 0}
+                Aucun règlement rattaché à la zone active.
+              {:else}
+                Aucun règlement cité par les signaux de cette ville.
+              {/if}
             </p>
           {:else}
-            {#each reglements as reg (reg.key)}
+            {#each zoneScopedReglements as reg (reg.key)}
               <div class="sel-entity-bar">
                 <div class="reglement-row">
                   <div class="reglement-head">
@@ -1700,12 +1713,15 @@
                     <span class="sel-entity-type">{lotScore(lot) ?? "lot"}</span>
                   </button>
                   {#if lotVisual.focused}
-                    <!-- Carte lot enrichie (#314) : zone (code, badge cliquable →
-                         détail zone), 4+, superficie, TOD/priorité si présents.
+                    <!-- 01KZGM07 item 3 — clic lot → sa fiche se déplie INLINE
+                         sous sa ligne, DANS la liste des lots (bucket Lots).
+                         Carte lot enrichie (#314) : zone (code, badge cliquable →
+                         détail zone), 4+, superficie, adresse, CP, façade, source.
                          Champs absents = « — » discret ; score non évalué =
-                         « non évalué », jamais « 0.0/10 ». -->
+                         « non évalué », jamais « 0.0/10 ». Un seul lot déplié à la
+                         fois (focus exclusif). -->
                     {@const lotZoneFeature = zoneFeatureForLot(lot, zones)}
-                    <div class="sel-entity-detail">
+                    <div class="sel-entity-detail" data-testid="sel-lot-drawer">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Lot</span>
                         <code class="entity-meta-val">{lot.properties.noLot}</code>
@@ -1973,36 +1989,6 @@
   }
 
   .sel-zone-more > .entity-meta {
-    margin-top: 0.4rem;
-  }
-
-  /* #3b(c) — Panneau « Lot actif » pinné, miroir de .sel-zone-head. */
-  .sel-lot-head {
-    padding: 0.6rem 0.85rem 0.7rem;
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    background: var(--st-semantic-surface-subtle, #f8fafc);
-    flex-shrink: 0;
-  }
-
-  .sel-lot-title {
-    font-size: var(--signaux-fs-title);
-    font-weight: 600;
-    color: var(--st-semantic-text-primary, #1e293b);
-    margin: 0.2rem 0 0.25rem;
-  }
-
-  .sel-lot-more {
-    margin-top: 0.5rem;
-    font-size: var(--signaux-fs-caption);
-  }
-
-  .sel-lot-more > summary {
-    cursor: pointer;
-    color: var(--st-semantic-text-secondary, #475569);
-    font-weight: 600;
-  }
-
-  .sel-lot-more > .entity-meta {
     margin-top: 0.4rem;
   }
 
