@@ -179,15 +179,24 @@
   export let onSegmentClick: (label: string) => void = () => {};
   /** Légende overlay paramétrable. `null` ⇒ aucune légende rendue par le socle. */
   export let legend: GeoMapLegend | null = null;
-  /** C3 — couleur de l'exergue des features sélectionnées (orange fluo). */
+  /**
+   * C3 — couleur d'exergue de sélection par défaut (orange fluo). Sert de base
+   * aux exergues zone/lot ci-dessous (rétro-compat des consommateurs Sources /
+   * Couverture qui ne pilotent pas les deux couleurs séparément).
+   */
   export let selectionHighlightColor = "#ff6d00";
   /**
-   * R2 (01KZKFBCBWEATSMHYP5ZPJHBM1) — couleur de l'exergue du LOT sélectionné,
-   * VISUELLEMENT DISTINCTE de l'exergue de zone (`selectionHighlightColor`, orange
-   * fluo). Défaut = brun / orange foncé, pour dissocier le contour du lot de celui
-   * de la zone active (l'owner les trouvait trop proches).
+   * R2 (01KZKFBCBWEATSMHYP5ZPJHBM1) — couleur de l'exergue du LOT sélectionné.
+   * Le LOT porte l'ORANGE ; c'est la ZONE qui vire au BRUN quand un lot est
+   * sélectionné (voir `zoneHighlightColor`). Défaut = `selectionHighlightColor`.
    */
-  export let lotHighlightColor = "#9a3412";
+  export let lotHighlightColor = selectionHighlightColor;
+  /**
+   * R2 — couleur de l'exergue de la ZONE active. ORANGE zone-seule ; le
+   * consommateur la passe en BRUN (#9a3412) DÈS QU'UN LOT est sélectionné → le lot
+   * prend l'orange, la zone le brun, contours dissociés. Défaut = orange.
+   */
+  export let zoneHighlightColor = selectionHighlightColor;
 
   // ── Props : libellés sur les polygones (m5) ────────────────────────────────
   // Affiche le n° de lot / le n° de zone directement sur les aplats (couches
@@ -435,16 +444,16 @@
     });
 
     m.on("click", "selected-lots-fill", (e) => {
-      if (!lotsSelectable) return; // C3 — lots passifs hors zone/lot actif
       if (measureActive) return; // mode mesure : les clics servent à mesurer
       const props = e.features?.[0]?.properties;
       const noLot = readString(props?.noLot);
       if (!noLot) return;
-      // R1 — sélection lot BORNÉE à la zone active : un lot HORS de la zone active
-      // n'est PAS sélectionnable comme lot ; on laisse le handler
-      // `selected-zones-fill` (couche zone SOUS le lot) sélectionner SA zone
-      // (= switch de zone active), exactement comme au niveau ville.
-      if (activeZoneCode && readString(props?.zoneCode) !== activeZoneCode) return;
+      // R1 (RÈGLE UNIQUE) — un lot n'est sélectionnable QUE si une zone est ACTIVE
+      // ET le lot appartient à CETTE zone (`zoneCode === activeZoneCode`). Sinon
+      // — niveau ville (aucune zone active) OU lot hors de la zone active — on NE
+      // sélectionne PAS le lot : le handler `selected-zones-fill` (couche zone
+      // SOUS le lot) sélectionne SA zone (switch), jamais zone+lot ensemble.
+      if (!activeZoneCode || readString(props?.zoneCode) !== activeZoneCode) return;
       e.originalEvent?.stopPropagation?.();
       // `zoneCode` (servie par geo sur le lot) permet la règle 1 côté conso :
       // en vue ville, le clic lot résout vers sa zone contenante.
@@ -486,9 +495,9 @@
     registerHoverState(
       "selected-lots-fill",
       "selected-lots",
-      (f) =>
-        lotsSelectable &&
-        (!activeZoneCode || readString(f?.properties?.zoneCode) === activeZoneCode),
+      // R1 (règle unique) — le survol lot (highlight) n'est actif QUE si une zone
+      // est active ET le lot y appartient ; sinon la zone sous-jacente se surligne.
+      (f) => !!activeZoneCode && readString(f?.properties?.zoneCode) === activeZoneCode,
     );
   }
 
@@ -643,6 +652,24 @@
     if (!lotsSelectable) clearHoverState("selected-lots");
   }
 
+  // R2 — met à jour RÉACTIVEMENT les couleurs d'exergue sans re-sync : la ZONE
+  // passe au brun (`zoneHighlightColor`) dès qu'un lot est sélectionné, le LOT
+  // garde l'orange (`lotHighlightColor`). Idempotent, no-op avant création couche.
+  function applyHighlightColors(zoneColor: string, lotColor: string): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      setPaintProperty: (layer: string, prop: string, value: unknown) => void;
+    };
+    if (m.getLayer("selected-zones-highlight")) {
+      m.setPaintProperty("selected-zones-highlight", "line-color", zoneColor);
+    }
+    if (m.getLayer("selected-lots-highlight")) {
+      m.setPaintProperty("selected-lots-highlight", "line-color", lotColor);
+    }
+  }
+  $: if (mapReady) applyHighlightColors(zoneHighlightColor, lotHighlightColor);
+
   function syncGeoLayers(input: GeoLayersInput): void {
     if (!mapInstance || !mapReady) return;
     const m = mapInstance as {
@@ -689,8 +716,8 @@
         },
       });
     }
-    // C3 — exergue ORANGE FLUO de la zone sélectionnée (contour épais, façon
-    // référence). Filtre data-driven sur la propriété décorée `isSelected`.
+    // C3/R2 — exergue de la zone sélectionnée (contour épais). Couleur portée par
+    // `zoneHighlightColor` : ORANGE zone-seule, BRUN quand un lot est sélectionné.
     if (!m.getLayer("selected-zones-highlight")) {
       m.addLayer({
         id: "selected-zones-highlight",
@@ -698,7 +725,7 @@
         source: "selected-zones",
         filter: ["==", ["get", "isSelected"], true],
         paint: {
-          "line-color": selectionHighlightColor,
+          "line-color": zoneHighlightColor,
           "line-width": 3.5,
           "line-opacity": 1,
         },
