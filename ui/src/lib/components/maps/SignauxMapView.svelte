@@ -804,13 +804,22 @@
   ): GeoSegment[] {
     // Segments du drill PARTAGÉS (geo-drill, mutualisés avec Sources/Couverture).
     // La vue Signaux étend le fil avec le niveau LOT (drill jusqu'au lot).
-    return buildDrillSegments({
+    const level = computeGeoLevel(state, city);
+    const segments = buildDrillSegments({
       hasSelectedCity: city !== null,
       zonesConfigured: zonesConfigured(zonesRes),
       includeLotLevel: true,
-      hasLotSelection: computeGeoLevel(state, city) === "Lot",
+      hasLotSelection: level === "Lot",
       hasZoneSelection: hasZoneSelection(state),
     });
+    // R3 — CHEMIN ACTIF surligné : le niveau courant ET la ZONE quand un LOT est
+    // sélectionné (un lot est toujours DANS une zone active) → on voit les DEUX,
+    // « Zone » reste ON avec « Lot ». Les autres niveaux gardent le highlight
+    // simple (niveau courant seul).
+    return segments.map((s) => ({
+      ...s,
+      active: s.label === level || (s.label === "Zone" && level === "Lot"),
+    }));
   }
 
   /**
