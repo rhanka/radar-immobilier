@@ -14,7 +14,22 @@ import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
+import {
+  createSelectionBucketState,
+  makeKey,
+  type SelectionBucketState,
+} from "$lib/maps/selection-bucket.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
+
+/**
+ * État de sélection avec une ZONE active (focusée), utilisé par les tests du
+ * scope zone (01KZGM07 item 2). Entrée « vue zone » par l'état pré-posé (parité
+ * avec le clic carte / le badge zone d'un lot / le clic d'une ligne de zone).
+ */
+function zoneFocusState(code: string, citySlug = "delson"): SelectionBucketState {
+  const key = makeKey("zone", `${citySlug}/${code}`);
+  return createSelectionBucketState({ focusedKey: key, selectedKeys: [key] });
+}
 
 function makeMunicipality(slug: string, name: string): MunicipalityT {
   return {
@@ -612,30 +627,28 @@ describe("SignauxSelPanel — #3b(b) bucket Lots filtré ⊆ zone focusée", () 
   });
 });
 
-describe("SignauxSelPanel — #3b(c) panneau « Lot actif » pinné", () => {
-  it("focus lot → panneau pinné (n° + superficie + détail dépliable) ; absent sinon", async () => {
+describe("SignauxSelPanel — nav-drill 01KZEG78 : PAS de panneau « Lot actif »", () => {
+  it("focus lot → AUCUN pin « Lot actif » (spec owner) ; le lot reste dans sa fiche", async () => {
     const lots = [
       makeLot("5399042", { zoneCode: "H-431", superficieM2: 850.4 }),
     ];
-    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+    const { getByText, queryByTestId, queryByText } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
         lotsResponse: makeLotsResponse(lots),
       },
     });
-    // Aucun panneau tant qu'aucun lot n'est focusé (dernier niveau du drill).
+    // Spec owner (retrait de la vue « Lot actif ») : jamais de pin, même au focus.
     expect(queryByTestId("sel-lot-head")).toBeNull();
 
     await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
 
-    // Panneau « Lot actif » pinné rendu (miroir de « Zone active »), avec le
-    // n° de lot, la superficie servie et le détail dépliable.
-    const head = getByTestId("sel-lot-head");
-    expect(head.textContent).toContain("Lot actif");
-    expect(head.textContent).toContain("5399042");
-    expect(head.textContent).toContain("Superficie");
-    expect(getByTestId("sel-lot-head-more")).toBeTruthy();
+    // Toujours pas de pin « Lot actif » après focus (l'actif épinglé = Ville/Zone
+    // uniquement) ; le lot vit dans sa fiche/drawer, pas dans un header épinglé.
+    expect(queryByTestId("sel-lot-head")).toBeNull();
+    expect(queryByTestId("sel-lot-head-more")).toBeNull();
+    expect(queryByText("Lot actif")).toBeNull();
   });
 });
 
@@ -1015,5 +1028,113 @@ describe("SignauxSelPanel — audit des sources de zone", () => {
     await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
     expect(view.queryByTestId("zone-geometry-source-link")).toBeNull();
     expect(view.getByText("Empreinte du contenu indisponible")).not.toBeNull();
+  });
+});
+
+// ── 01KZGM07 item 2 — Signaux / Règlements restreints à la ZONE ACTIVE ────────
+// Quand une zone est active, Signaux ET Règlements ne listent QUE les entités
+// rattachées à cette zone — EXCEPTION owner : les entités NON rattachées à une
+// zone (aucun code de zone) sont GARDÉES. Hors focus zone : liste complète.
+
+describe("SignauxSelPanel — item 2 : Signaux/Règlements ⊆ zone active + exception non-rattachés", () => {
+  function zsig(
+    id: string,
+    label: string,
+    props: Record<string, unknown>,
+  ): GraphSignalNode {
+    return {
+      id,
+      type: "DesignationEvent",
+      label,
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      publishedAt: "2026-05-19T12:00:00.000Z",
+      props: { description: "detail neutre", ...props },
+    };
+  }
+
+  // alpha rattaché à H-431 ; beta à C-02 (autre zone) ; gamma sans aucune zone.
+  const nodes: GraphSignalNode[] = [
+    zsig("z-alpha", "Signal alpha", { zone_ref: "H-431", reglement_number: "R-100" }),
+    zsig("z-beta", "Signal beta", { zone_ref: "C-02", reglement_number: "R-200" }),
+    zsig("z-gamma", "Signal gamma", { reglement_number: "R-300" }),
+  ];
+  const zones = makeZonesResponse(["H-431", "C-02"]);
+
+  it("vue ville (aucune zone active) : tous les signaux ET règlements listés", () => {
+    const { queryByText } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: nodes, zonesResponse: zones },
+    });
+    for (const label of ["Signal alpha", "Signal beta", "Signal gamma"]) {
+      expect(queryByText(label, { selector: ".sel-entity-label" })).not.toBeNull();
+    }
+    for (const reg of ["R-100", "R-200", "R-300"]) {
+      expect(queryByText(reg)).not.toBeNull();
+    }
+  });
+
+  it("zone H-431 active : signal rattaché H-431 + signal NON rattaché gardés ; autre zone exclue", () => {
+    const { queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: nodes,
+        zonesResponse: zones,
+        selectionState: zoneFocusState("H-431"),
+      },
+    });
+    // Rattaché à la zone active → gardé.
+    expect(queryByText("Signal alpha", { selector: ".sel-entity-label" })).not.toBeNull();
+    // Non rattaché à une zone → GARDÉ (exception impérative owner).
+    expect(queryByText("Signal gamma", { selector: ".sel-entity-label" })).not.toBeNull();
+    // Rattaché à une AUTRE zone (C-02) → exclu.
+    expect(queryByText("Signal beta", { selector: ".sel-entity-label" })).toBeNull();
+  });
+
+  it("zone H-431 active : règlement rattaché (R-100) + non rattaché (R-300) gardés ; R-200 exclu", () => {
+    const { queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: nodes,
+        zonesResponse: zones,
+        selectionState: zoneFocusState("H-431"),
+      },
+    });
+    expect(queryByText("R-100")).not.toBeNull(); // rattaché H-431
+    expect(queryByText("R-300")).not.toBeNull(); // non rattaché → gardé
+    expect(queryByText("R-200")).toBeNull(); // rattaché C-02 → exclu
+  });
+});
+
+// ── 01KZGM07 item 3 — fiche lot dépliée INLINE dans la liste des lots ─────────
+
+describe("SignauxSelPanel — item 3 : fiche lot inline (drawer sous la ligne)", () => {
+  const lot = makeLot("5399042", {
+    zoneCode: "H-431",
+    superficieM2: 850.4,
+    adresse: "10 rue Principale",
+    codePostal: "J5A",
+    multifamilial4plus: true,
+  });
+
+  it("clic lot → drawer inline (sel-lot-drawer) sous sa ligne, avec adresse + superficie", async () => {
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse([lot]),
+      },
+    });
+    // Avant le clic : aucune fiche lot dépliée.
+    expect(queryByTestId("sel-lot-drawer")).toBeNull();
+
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+
+    // La fiche se déplie INLINE (dans le bucket Lots), pas dans une vue séparée.
+    const drawer = getByTestId("sel-lot-drawer");
+    expect(drawer.textContent).toContain("10 rue Principale");
+    expect(drawer.textContent).toContain("850 m²");
+    // Preuve « inline » : le drawer est un enfant de la LIGNE du lot (sel-entity-bar).
+    expect(drawer.closest(".sel-entity-bar")).not.toBeNull();
   });
 });
