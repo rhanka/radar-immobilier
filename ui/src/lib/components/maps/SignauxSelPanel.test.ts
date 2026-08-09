@@ -485,24 +485,9 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
     expect(queryByText("Non")).not.toBeNull();
   });
 
-  it("score indisponible → « non évalué », JAMAIS « 0.0/10 » présenté comme mesuré", async () => {
-    const { getByText, queryByText } = render(Harness, {
-      props: {
-        selectedCity: makeCity(),
-        detailNodes: [],
-        lotsResponse: makeLotsResponse([enrichedLot]),
-      },
-    });
-
-    // Sous-titre de la rangée AVANT le clic : "lot", pas un faux score.
-    expect(queryByText("0.0/10")).toBeNull();
-
-    await fireEvent.click(getByText("5399042"));
-    expect(queryByText("non évalué")).not.toBeNull();
-    expect(queryByText("0.0/10")).toBeNull();
-  });
-
-  it("score évalué → affiché « x.x/10 »", () => {
+  it("potentiel RETIRÉ (owner) — ni sous-titre de rangée, ni champ « Potentiel » dans la fiche", async () => {
+    // Score « mesuré » côté données : il ne doit tout de même RIEN afficher —
+    // l'owner a jugé le score non fondé (aucune donnée geo-lot derrière).
     const scoredLot: LotFeature = {
       ...enrichedLot,
       properties: {
@@ -511,15 +496,24 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
         potentialScoreStatus: "scored",
       },
     };
-    const { queryAllByText } = render(Harness, {
+    const { getByText, queryByText, queryAllByText } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
         lotsResponse: makeLotsResponse([scoredLot]),
       },
     });
-    // Sous-titre de la rangée lot (visible sans clic).
-    expect(queryAllByText("7.5/10").length).toBeGreaterThan(0);
+    // Sous-titre de rangée = « lot » générique, jamais un score.
+    expect(queryAllByText("7.5/10").length).toBe(0);
+    expect(queryAllByText("lot").length).toBeGreaterThan(0);
+
+    await fireEvent.click(getByText("5399042"));
+    // Fiche dépliée : plus de ligne « Potentiel », ni « non évalué », ni « x.x/10 ».
+    expect(queryByText("Potentiel")).toBeNull();
+    expect(queryByText("non évalué")).toBeNull();
+    expect(queryByText("7.5/10")).toBeNull();
+    // Le reste de la fiche demeure (superficie servie par le lot enrichi).
+    expect(queryByText("Superficie")).not.toBeNull();
   });
 
   it("champs absents → « — » discret (zone/4+/superficie), TOD omis", async () => {
