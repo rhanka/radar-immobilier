@@ -113,6 +113,9 @@ export function geoZonesResponseFromCollection(
           ...(feature.properties.reglementNumero
             ? { reglementNumero: feature.properties.reglementNumero }
             : {}),
+          ...(feature.properties.reglementUrl
+            ? { reglementUrl: feature.properties.reglementUrl }
+            : {}),
           // Label lisible : le libellé d'affectation prime sur le code kind
           // ("CO-939 — Conservation" plutôt que "CO-939 — CO").
           ...(feature.properties.affectation || feature.properties.kind
