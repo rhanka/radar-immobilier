@@ -23,6 +23,7 @@ import type {
 } from "$lib/maps/geo-zones-client.js";
 import {
   extractSignalZoneRefs,
+  propRecords,
   zoneRefComparableKey,
 } from "$lib/maps/signaux-map-geo.js";
 
@@ -47,9 +48,17 @@ export interface ReglementEntry {
   evidenceNodeId: string | null;
 }
 
-/** Numéros de règlement portés par un nœud (tableau ou scalaire), dédupés. */
+/**
+ * Numéros de règlement portés par un nœud (tableau ou scalaire), dédupés.
+ *
+ * Lit AUX DEUX niveaux — `node.props` (top-level) ET `node.props.properties`
+ * (imbriqué) — via `propRecords`, car graphify range `reglement_number` sous
+ * `props.properties` sur la majorité des villes (154 concernées). Sans cette
+ * lecture imbriquée, le drawer Règlements restait vide alors que la donnée
+ * existe. C'est exactement le pattern déjà utilisé par `extractSignalZoneRefs`
+ * (source unique dans `signaux-map-geo`).
+ */
 export function readReglementNumbers(node: GraphSignalNode): string[] {
-  const props = node.props;
   const out: string[] = [];
   const seen = new Set<string>();
   const push = (value: unknown): void => {
@@ -62,16 +71,18 @@ export function readReglementNumbers(node: GraphSignalNode): string[] {
     seen.add(norm);
     out.push(str);
   };
-  for (const key of [
-    "reglement_number",
-    "reglementNumber",
-    "reglement_numero",
-    "bylaw",
-    "reglementNumbers",
-  ]) {
-    const value = props[key];
-    if (Array.isArray(value)) value.forEach(push);
-    else push(value);
+  for (const record of propRecords(node)) {
+    for (const key of [
+      "reglement_number",
+      "reglementNumber",
+      "reglement_numero",
+      "bylaw",
+      "reglementNumbers",
+    ]) {
+      const value = record[key];
+      if (Array.isArray(value)) value.forEach(push);
+      else push(value);
+    }
   }
   return out;
 }
