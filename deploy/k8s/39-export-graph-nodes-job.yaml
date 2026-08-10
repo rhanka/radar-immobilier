@@ -1,0 +1,141 @@
+# 39-export-graph-nodes-job.yaml — READ-ONLY export of the FULL graph_nodes table
+# (post-apply state) from the OVH Postgres to S3 as NDJSON, for recette's étape-4
+# non-regression re-validation of the 7221 (v3.4 Phase A).
+#
+# Why an inline node script (not a dist/ entrypoint): this is a one-shot dump that
+# reuses the image's already-bundled `pg` + `@aws-sdk/client-s3` — so it needs NO
+# image rebuild (manifest-only, ships via run-job delete+apply from the repo, same
+# fast path as the netpol relabel #453). It NEVER writes Postgres.
+#
+# Format = one NDJSON line per row = (row_to_json(t))::text, i.e. Postgres' OWN JSON
+# serialization (bit-faithful to recette's baseline dump). created_at is EXCLUDED
+# from the SELECT — the column is ABSENT on OVH graph_nodes (drizzle 0002 drift);
+# a `select *`/created_at would fail (cf. #450). Ordered by id for determinism.
+#
+# component MUST be graph-projection (NOT graphify34/anything else): the postgres
+# ingress NetworkPolicy `allow-graph-projection-to-postgres` (70-networkpolicy.yaml)
+# only admits component:{api,graph-projection} on :5432. A pod outside that set is
+# default-denied → the pg Pool never connects → 3s connect-timeout (the PASS-1
+# blocage, 2026-08-02). This job reads the projection.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-export-graph-nodes
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: export-graph-nodes
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "-e"]
+          args:
+            - |
+              const { Pool } = require('pg');
+              const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+              const { setDefaultResultOrder } = require('node:dns');
+              setDefaultResultOrder('ipv4first');
+              (async () => {
+                const pool = new Pool({
+                  host: process.env.POSTGRES_HOST,
+                  port: Number(process.env.POSTGRES_PORT) || 5432,
+                  user: process.env.POSTGRES_USER,
+                  password: process.env.POSTGRES_PASSWORD,
+                  database: process.env.POSTGRES_DB,
+                  connectionTimeoutMillis: 5000,
+                  max: 2,
+                });
+                console.error('export DB target: host=' + process.env.POSTGRES_HOST + ' port=' + (process.env.POSTGRES_PORT || '5432') + ' db=' + process.env.POSTGRES_DB + ' user=' + process.env.POSTGRES_USER);
+                // EXACT projection recette attend (harnais listCitiesWithSignalNodes /
+                // GraphSignalProjectionRow) : clés camelCase + champs métier DÉRIVÉS de
+                // props->'properties' (etapeAnnote = ...->>'etape', peuplé par v3.4). Un
+                // row_to_json(graph_nodes) BRUT n'a pas etapeAnnote/citySlug en top-level →
+                // son gate precoce s'effondre → faux-RED. (row_to_json(t))::text = sérialisation
+                // native PG. created_at EXCLU (absent OVH, cf #450). Filtre = 7221/724.
+                const q = `select (row_to_json(t))::text as j from (
+                  select
+                    id,
+                    city_slug                              as "citySlug",
+                    type,
+                    props->'properties'->>'category'       as category,
+                    label,
+                    props->'properties'->>'nb_unites_max'  as "nbUnitesMax",
+                    props->'properties'->>'intensite'      as intensite,
+                    props->'properties'->>'description'    as description,
+                    props->'properties'->>'etape'          as "etapeAnnote",
+                    props,
+                    source_ref                             as "sourceRef"
+                  from graph_nodes
+                  where type in ('Signal','DesignationEvent') and city_slug is not null
+                  order by id
+                ) t`;
+                const res = await pool.query(q);
+                // DIAGNOSTIC (read-only, stdout/stderr only — NOT in the S3 dump): per-city
+                // per-TYPE counts for the 28 projection-gap munis recovered 2026-08-03. The S3
+                // dump filters type in (Signal,DesignationEvent); these 28 add 0 of those (row
+                // count stayed 7263 post-projection), so their nodes are Source/City/legacy. This
+                // GROUP BY surfaces the REAL type names to distinguish N-A (Source present +
+                // 0 DesEvent = graphify read docs, found 0) from stub/legacy (City-only = still gap).
+                const diagSlugs = ['beauharnois','la-presentation','lacolle','lepiphanie','lile-cadieux','mont-saint-gregoire','napierville','oka','rougemont','saint-antoine-sur-richelieu','saint-bernard-de-lacolle','saint-clet','saint-cyprien-de-napierville','saint-edouard','saint-etienne-de-beauharnois','saint-lambert','saint-lazare','saint-liguori','saint-placide','saint-roch-ouest','saint-sulpice','sainte-anne-de-sabrevois','sainte-madeleine','sainte-marie-madeleine','saint-barnabe-sud','terrebonne','tres-saint-sacrement','noyan'];
+                const diag = await pool.query("select city_slug, type, count(*)::int as n from graph_nodes where city_slug = any($1::text[]) group by city_slug, type order by city_slug, type", [diagSlugs]);
+                console.error('DIAG-TYPECOUNTS ' + JSON.stringify(diag.rows));
+                await pool.end();
+                const rows = res.rows.length;
+                const ndjson = res.rows.map((r) => r.j).join('\n') + (rows ? '\n' : '');
+                console.error('export: graph_nodes rows = ' + rows);
+                const bucket = process.env.GRAPH_S3_BUCKET;
+                const key = (process.env.EXPORT_S3_PREFIX || 'scratch/postapply-graph-nodes') + '/graph_nodes.ndjson';
+                const s3 = new S3Client({
+                  endpoint: process.env.GRAPH_S3_ENDPOINT,
+                  region: process.env.GRAPH_S3_REGION || 'fr-par',
+                  credentials: { accessKeyId: process.env.GRAPH_S3_ACCESS_KEY, secretAccessKey: process.env.GRAPH_S3_SECRET_KEY },
+                  forcePathStyle: process.env.GRAPH_S3_FORCE_PATH_STYLE === 'true',
+                });
+                await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: ndjson, ContentType: 'application/x-ndjson' }));
+                console.error('export: uploaded ' + rows + ' rows (' + ndjson.length + ' bytes) to s3://' + bucket + '/' + key);
+                process.stdout.write(JSON.stringify({ table: 'graph_nodes', rows: rows, expected: 7221, bucket: bucket, key: key, note: "projection listCitiesWithSignalNodes (camelCase: citySlug/etapeAnnote/…); type in (Signal,DesignationEvent) and city_slug not null; created_at excluded; order by id" }) + '\n');
+              })().catch((e) => { console.error('export FAILED: ' + (e && e.stack ? e.stack : e)); process.exit(1); });
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=400 --dns-result-order=ipv4first"
+            - name: EXPORT_S3_PREFIX
+              value: "scratch/cohorte124-fresh-20260810"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: GRAPH_S3_ENDPOINT
+              value: "https://s3.fr-par.scw.cloud"
+            - name: GRAPH_S3_BUCKET
+              value: "radar-immobilier-docs-pocs"
+            - name: GRAPH_S3_REGION
+              value: "fr-par"
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              value: "false"
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
