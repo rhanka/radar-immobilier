@@ -178,6 +178,7 @@ describe("fetchZones", () => {
               zone_code: "CO-939",
               reglement_millesime: "2008",
               reglement_numero: "2008-102",
+              reglement_url: "https://ville.qc.ca/grille-co939.pdf",
             }),
             // Millésime servi en NOMBRE (coercition string) + variante de casse.
             makeZonePolygon({ zone_code: "H-431", Millesime: 2020, REGLEMENT_NUMERO: "2020-07" }),
@@ -192,12 +193,16 @@ describe("fetchZones", () => {
     const [co, h, c] = res.featureCollection.features;
     expect(co!.properties.reglementMillesime).toBe("2008");
     expect(co!.properties.reglementNumero).toBe("2008-102");
+    // Lien PUBLIC de la grille PDF servi par geo (jusqu'ici ignoré → lien éteint).
+    expect(co!.properties.reglementUrl).toBe("https://ville.qc.ca/grille-co939.pdf");
     // Nombre coercé en chaîne d'affichage.
     expect(h!.properties.reglementMillesime).toBe("2020");
     expect(h!.properties.reglementNumero).toBe("2020-07");
+    expect(h!.properties.reglementUrl).toBeUndefined();
     // Anti-invention : aucun champ posé quand la source ne sert rien.
     expect(c!.properties.reglementMillesime).toBeUndefined();
     expect(c!.properties.reglementNumero).toBeUndefined();
+    expect(c!.properties.reglementUrl).toBeUndefined();
   });
 
   it("drops features without any resolvable code (no false zone)", async () => {

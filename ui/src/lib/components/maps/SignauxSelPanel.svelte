@@ -1523,6 +1523,22 @@
                             >{zoneReg.value}</span
                           >
                         {/if}
+                        <!-- #3 — lien PUBLIC du règlement porteur (grille PDF geo
+                             ou source du graphe-signal) ; nouvel onglet. Rendu
+                             seulement quand une URL ouvrable est servie. -->
+                        {#if zone.properties.reglementUrl}
+                          <span class="entity-meta-key">Règlement (source)</span>
+                          <a
+                            class="entity-meta-val zone-audit-link"
+                            data-testid="zone-reglement-link"
+                            href={zone.properties.reglementUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Ouvrir le règlement (PDF public, nouvel onglet)"
+                          >
+                            Ouvrir le règlement
+                          </a>
+                        {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{zoneSourceLabel(zone)}</span>
                         <!-- m8.2 — type de source dérivé (recalage / GeoJSON dans
