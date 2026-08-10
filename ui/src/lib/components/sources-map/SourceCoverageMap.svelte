@@ -31,10 +31,8 @@
     type GeoMapLegend,
   } from "$lib/components/maps/GeoCityMapBase.svelte";
   import SourcesRail from "./SourcesRail.svelte";
-  import SourceScorecard from "./SourceScorecard.svelte";
   import {
     buildProvinceHeadline,
-    computeFocusScope,
     formatProvinceHeadline,
     type CityCoverage,
     type CoverageResponse,
@@ -150,7 +148,6 @@
   function handleScopeChange(next: CoverageScope): void {
     scope = next;
   }
-  $: focusScope = computeFocusScope(cities);
   // ── Sélection ville + zone (drill, parité Signaux) ─────────────────────────
   let selectedCity: CityCoverage | null = null;
   let selectedZoneCode: string | null = null;
@@ -642,19 +639,49 @@
     </svelte:fragment>
   </GeoCityMapBase>
 
-  <!-- ── DRAWER droit : scorecard de la ville sélectionnée ───────────────── -->
+  <!-- ── DRAWER droit : les mêmes 20 KPI que la matrice ───────────────────── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} {focusScope} onClose={() => clearSelection()} />
+      <div class="flex min-h-0 flex-1 flex-col" data-testid="coverage-kpi-panel">
+        <div class="flex items-start justify-between border-b border-slate-200 p-4">
+          <div>
+            <h2 class="font-semibold text-slate-900">{selectedCity.cityName}</h2>
+            <p class="text-xs text-slate-500">
+              {matrixRowBySlug.has(selectedCity.citySlug)
+                ? "Cohorte B′ live"
+                : "Hors cohorte B′ · dimensions geo servies seulement"}
+            </p>
+          </div>
+          <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-800" on:click={() => clearSelection()}>
+            Fermer
+          </button>
+        </div>
+        <div class="min-h-0 flex-1 overflow-auto p-3">
+          {#each PALIER_KPIS_20 as kpi (kpi.id)}
+            {@const cell = kpiCellForCity(selectedCity, kpi.id, matrixRowBySlug)}
+            <button
+              type="button"
+              class={`mb-1 flex w-full items-center gap-2 rounded border px-2 py-2 text-left text-xs ${activeKpiId === kpi.id ? "border-teal-400 bg-teal-50" : "border-slate-100 bg-white hover:bg-slate-50"}`}
+              aria-pressed={activeKpiId === kpi.id}
+              data-testid={`coverage-kpi-${kpi.id}`}
+              on:click={() => { activeKpiId = kpi.id; }}
+            >
+              <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style={`background-color: ${PALIER_CELL_COLOR[cell.status]}`}></span>
+              <span class="min-w-0 flex-1 font-medium text-slate-700">{kpi.label}</span>
+              <span class="shrink-0 text-slate-500">{palierCellStatusLabel(cell.status)}</span>
+            </button>
+          {/each}
+        </div>
+      </div>
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <div>
           <MapPin class="mx-auto mb-3 h-8 w-8 text-slate-300" aria-hidden="true" />
           <p class="text-sm text-slate-400">
-            Cliquez une ville pour voir le détail de sa couverture.
+            Cliquez une ville pour voir ses 20 KPI.
           </p>
           <p class="mt-2 text-xs text-slate-300">
-            Vert = servi · ambre = partiel · gris = non couvert.
+            Vert = complet · ambre = partiel · gris = à qualifier.
           </p>
         </div>
       </div>
