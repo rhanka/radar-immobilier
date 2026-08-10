@@ -59,6 +59,23 @@ describe("readReglementNumbers", () => {
     expect(readReglementNumbers(node("s", { reglement_number: "   " }))).toEqual([]);
     expect(readReglementNumbers(node("s", {}))).toEqual([]);
   });
+
+  it("lit reglement_number IMBRIQUÉ sous props.properties (rien au top-level)", () => {
+    // Régression #drawer-vide : graphify range reglement_number sous
+    // props.properties sur 154 villes (ex. delson → "756"). Sans lecture
+    // imbriquée, readReglementNumbers renvoyait [] → drawer Règlements vide.
+    expect(
+      readReglementNumbers(node("s", { properties: { reglement_number: "756" } })),
+    ).toEqual(["756"]);
+  });
+
+  it("déduplique entre top-level et props.properties (même numéro)", () => {
+    expect(
+      readReglementNumbers(
+        node("s", { reglement_number: "756", properties: { reglement_number: "756" } }),
+      ),
+    ).toEqual(["756"]);
+  });
 });
 
 describe("normalizeReglementKey", () => {
