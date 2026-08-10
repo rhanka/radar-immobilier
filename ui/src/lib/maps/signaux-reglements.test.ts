@@ -1,8 +1,12 @@
 import { describe, it, expect } from "vitest";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
-import type { GeoZoneFeature } from "$lib/maps/geo-zones-client.js";
+import type {
+  GeoZoneFeature,
+  GeoZonesResponse,
+} from "$lib/maps/geo-zones-client.js";
 import {
   aggregateReglements,
+  enrichGeoZonesWithSignalReglements,
   normalizeReglementKey,
   readReglementNumbers,
 } from "./signaux-reglements.js";
@@ -121,5 +125,80 @@ describe("aggregateReglements", () => {
 
   it("ignore les signaux sans numéro de règlement (rien de fabriqué)", () => {
     expect(aggregateReglements([node("a", { zone_ref: "H-431" })], [])).toEqual([]);
+  });
+});
+
+function zonesResponse(features: GeoZoneFeature[]): GeoZonesResponse {
+  return {
+    ok: true,
+    citySlug: "delson",
+    source: "official",
+    resolutionStatus: "official",
+    geometryStatus: "official",
+    zoneCount: features.length,
+    warnings: [],
+    featureCollection: { type: "FeatureCollection", features },
+  };
+}
+
+describe("enrichGeoZonesWithSignalReglements", () => {
+  it("injecte le règlement du graphe-signal dans une zone que geo laisse muette", () => {
+    const response = zonesResponse([zone("H-315")]);
+    const enriched = enrichGeoZonesWithSignalReglements(response, [
+      node("e", {
+        zone_ref: "H-315",
+        reglement_number: "756",
+        sourceUrl: "https://ville.delson.qc.ca/pv.pdf",
+      }),
+    ]);
+    const p = enriched!.featureCollection.features[0].properties;
+    expect(p.reglementNumero).toBe("756");
+    expect(p.reglementUrl).toBe("https://ville.delson.qc.ca/pv.pdf");
+  });
+
+  it("LE GEO GAGNE : une zone qui porte déjà un numéro geo n'est jamais écrasée", () => {
+    const geoZone = zone("H-315");
+    geoZone.properties.reglementNumero = "901";
+    geoZone.properties.reglementUrl = "https://ville.delson.qc.ca/grille.pdf";
+    const enriched = enrichGeoZonesWithSignalReglements(zonesResponse([geoZone]), [
+      node("e", {
+        zone_ref: "H-315",
+        reglement_number: "756",
+        sourceUrl: "https://ville.delson.qc.ca/pv.pdf",
+      }),
+    ]);
+    const p = enriched!.featureCollection.features[0].properties;
+    expect(p.reglementNumero).toBe("901");
+    expect(p.reglementUrl).toBe("https://ville.delson.qc.ca/grille.pdf");
+  });
+
+  it("une zone sans match reste muette (reglementNumero absent — jamais deviné)", () => {
+    const enriched = enrichGeoZonesWithSignalReglements(zonesResponse([zone("Z-999")]), [
+      node("e", {
+        zone_ref: "H-315",
+        reglement_number: "756",
+        sourceUrl: "https://ville.delson.qc.ca/pv.pdf",
+      }),
+    ]);
+    expect(enriched!.featureCollection.features[0].properties.reglementNumero).toBeUndefined();
+  });
+
+  it("join tolérant au format (H315 ↔ H-315) via zoneRefComparableKey", () => {
+    const enriched = enrichGeoZonesWithSignalReglements(zonesResponse([zone("H-315")]), [
+      node("e", { zone_ref: "H315", reglement_number: "756", sourceUrl: "https://x/pv.pdf" }),
+    ]);
+    expect(enriched!.featureCollection.features[0].properties.reglementNumero).toBe("756");
+  });
+
+  it("renvoie la MÊME référence quand aucun règlement n'est dérivable (non destructif)", () => {
+    const response = zonesResponse([zone("H-315")]);
+    // Nœuds sans règlement rattachable → map vide → passe-plat.
+    expect(enrichGeoZonesWithSignalReglements(response, [node("e", { zone_ref: "H-315" })])).toBe(
+      response,
+    );
+  });
+
+  it("passe-plat sur une réponse null", () => {
+    expect(enrichGeoZonesWithSignalReglements(null, [])).toBeNull();
   });
 });
