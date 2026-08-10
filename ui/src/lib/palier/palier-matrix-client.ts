@@ -49,6 +49,23 @@ export function palierCellStatusLabel(status: PalierCellStatus): string {
   }
 }
 
+export const PALIER_CELL_COLOR: Record<PalierCellStatus, string> = {
+  complete: "#16a34a",
+  incomplete: "#f59e0b",
+  unknown: "#cbd5e1",
+  na: "#f8fafc",
+};
+
+export const PALIER_CELL_BADGE_TONE: Record<
+  PalierCellStatus,
+  "success" | "warning" | "neutral"
+> = {
+  complete: "success",
+  incomplete: "warning",
+  unknown: "neutral",
+  na: "neutral",
+};
+
 /** Sous-ensemble affiché : A = palier-30, B = cohorte B live. */
 export type PalierSubset = "A" | "B";
 
@@ -122,14 +139,32 @@ export function kpiResolvedPct(matrix: PalierMatrix, kpiId: string): number {
 const IMMO_KPI4_ID = "kpi04";
 const IMMO_KPI20_ID = "kpi20";
 
-export const PALIER_KPIS_20: PalierKpi[] = Array.from({ length: 20 }, (_, i) => {
-  const n = String(i + 1).padStart(2, "0");
-  const id = `kpi${n}`;
-  let label = `KPI ${n}`;
-  if (id === IMMO_KPI4_ID) label = "KPI 04 · PV";
-  if (id === IMMO_KPI20_ID) label = "KPI 20 · Recall";
-  return { id, label };
-});
+// TODO(API geo): replace this marker only when the contract publishes the KPI
+// definition; a guessed product label would be misleading.
+const GEO_KPI_CONTRACT_TODO = "(déf. KPI en attente contrat API geo)";
+
+export const PALIER_KPIS_20: PalierKpi[] = [
+  { id: "kpi01", label: "KPI 01 · Zonage" },
+  { id: "kpi02", label: "KPI 02 · Cohérence lot-zone" },
+  { id: "kpi03", label: `KPI 03 · ${GEO_KPI_CONTRACT_TODO}` },
+  { id: IMMO_KPI4_ID, label: "KPI 04 · PV" },
+  { id: "kpi05", label: `KPI 05 · ${GEO_KPI_CONTRACT_TODO}` },
+  { id: "kpi06", label: `KPI 06 · ${GEO_KPI_CONTRACT_TODO}` },
+  { id: "kpi07", label: `KPI 07 · ${GEO_KPI_CONTRACT_TODO}` },
+  { id: "kpi08", label: "KPI 08 · Provenance du zonage" },
+  { id: "kpi09", label: "KPI 09 · Fraîcheur du zonage" },
+  { id: "kpi10", label: `KPI 10 · ${GEO_KPI_CONTRACT_TODO}` },
+  { id: "kpi11", label: "KPI 11 · URL source" },
+  { id: "kpi12", label: "KPI 12 · Jointure lot-zone" },
+  { id: "kpi13", label: "KPI 13 · Champs lot · normes" },
+  { id: "kpi14", label: `KPI 14 · ${GEO_KPI_CONTRACT_TODO}` },
+  { id: "kpi15", label: "KPI 15 · Champs lot · superficie" },
+  { id: "kpi16", label: "KPI 16 · Champs lot · code postal" },
+  { id: "kpi17", label: "KPI 17 · Champs lot · adresse" },
+  { id: "kpi18", label: "KPI 18 · TOD" },
+  { id: "kpi19", label: "KPI 19 · TOD" },
+  { id: IMMO_KPI20_ID, label: "KPI 20 · Recall" },
+];
 
 // ── Fallback immo hors-ligne (réf. non autoritaire, artefact recette) ──
 interface ImmoFallbackCity {
@@ -446,12 +481,7 @@ export async function buildPalierMatrixLive(
  * « proxy immo geo-lot pending ». Sert au RENDU tant que le live n'est pas
  * disponible (ex. build/test sans session). Ce n'est PAS la matrice live.
  */
-const PROXY_KPIS: PalierKpi[] = [
-  { id: "kpi01", label: "KPI 01" },
-  { id: "kpi02", label: "KPI 02" },
-  { id: "kpi03", label: "KPI 03" },
-  { id: "kpi04", label: "KPI 04" },
-];
+const PROXY_KPIS: PalierKpi[] = PALIER_KPIS_20.slice(0, 4);
 
 const PROXY_CITIES: Array<{ slug: string; name: string; pattern: PalierCellStatus[] }> = [
   { slug: "lery", name: "Léry", pattern: ["complete", "incomplete", "unknown", "na"] },
