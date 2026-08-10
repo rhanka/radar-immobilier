@@ -96,6 +96,7 @@
     reglementSourceViewerTitle,
     type ReglementEntry,
   } from "$lib/maps/signaux-reglements.js";
+  import { zoneNormesFromLots } from "$lib/maps/zone-normes.js";
   import { describeZoneSource } from "$lib/maps/zone-source.js";
   import {
     assignmentStateLabel,
@@ -482,6 +483,11 @@
   $: focusedZone = focusedZoneCode
     ? (visibleZones.find((zone) => zone.properties.code === focusedZoneCode) ?? null)
     : null;
+  // Normes de zonage de la zone active (sous-section « Normes » du drawer
+  // « Règlement et Normes ») : remontées des lots de la zone (foldées par
+  // zone_code côté geo). served=false → copy neutre « non renseigné », jamais
+  // une valeur fabriquée (villes en source cadastrale sans grille).
+  $: zoneNormes = zoneNormesFromLots(focusedZoneCode, lots);
   // Nav-drill 01KZEG78 (spec owner) : plus de panneau « Lot actif » épinglé →
   // pas d'objet `focusedLot` dédié (le lot vit dans son drawer/fiche). Le focus
   // de lot reste porté par `focusedLotNo` (sélection carte/liste) pour la fiche.
@@ -1315,12 +1321,15 @@
         </div>
       </details>
 
-      <!-- m7 — RÈGLEMENTS : accordéon ENTRE Signaux et Zones. Dérivés des
-           signaux (numéro de règlement cité + zones + preuve). Le module ouvre
-           le PDF du règlement dans le viewer partagé (réutilisé). -->
+      <!-- RÈGLEMENT ET NORMES : accordéon unifié ENTRE Signaux et Zones.
+           RÈGLEMENTS (dérivés des signaux : numéro cité + zones + preuve ;
+           « Voir le PDF » ouvre la source dans le viewer partagé) + sous-section
+           NORMES (grille de zonage de la zone active : usage dominant, hauteurs,
+           densités, marges — remontés des lots de la zone, servis VERBATIM ou
+           « non renseigné », jamais fabriqués). -->
       <details class="sel-bucket" bind:open={reglementsBucketOpen}>
         <summary class="sel-bucket-head">
-          <span class="sel-bucket-name">Règlements</span>
+          <span class="sel-bucket-name">Règlement et Normes</span>
           <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
           <span class="rail-row-count">
             {#if detailLoading}–{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
@@ -1399,6 +1408,52 @@
               </div>
             {/each}
           {/if}
+
+          <!-- Sous-section NORMES (grille de zonage) de la zone active : usage
+               dominant + hauteurs / densités / marges, remontés des lots de la
+               zone (foldés par zone_code côté geo). Servis VERBATIM ou « non
+               renseigné » — jamais fabriqués. Hors zone active : invite neutre. -->
+          <div class="reglement-normes" data-testid="reglement-normes">
+            <span class="entity-meta-section"
+              >Normes de zonage{focusedZone
+                ? ` — zone ${focusedZone.properties.code}`
+                : ""}</span
+            >
+            {#if !focusedZoneCode}
+              <p class="sel-empty" data-testid="reglement-normes-hint">
+                Sélectionnez une zone pour afficher ses normes de zonage.
+              </p>
+            {:else if lotsLoading}
+              <div class="sel-loading">
+                <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
+                <span>Chargement des normes…</span>
+              </div>
+            {:else if zoneNormes.served}
+              <div class="entity-meta" data-testid="reglement-normes-grid">
+                <span class="entity-meta-key">Usage dominant</span>
+                <span
+                  class="entity-meta-val"
+                  class:entity-meta-val--missing={!zoneNormes.usageDominant}
+                >
+                  {zoneNormes.usageDominant ?? "non renseigné"}
+                </span>
+                {#each zoneNormes.rows as [label, value] (label)}
+                  <span class="entity-meta-key">{label}</span>
+                  <span
+                    class="entity-meta-val"
+                    class:entity-meta-val--missing={value === "—"}
+                  >
+                    {value === "—" ? "non renseigné" : value}
+                  </span>
+                {/each}
+              </div>
+            {:else}
+              <p class="sel-empty" data-testid="reglement-normes-empty">
+                Normes de zonage non renseignées pour cette zone (grille non
+                servie par la source).
+              </p>
+            {/if}
+          </div>
         </div>
       </details>
 
@@ -2555,6 +2610,18 @@
     color: var(--st-semantic-text-muted, #94a3b8);
     font-size: var(--signaux-fs-caption);
     font-style: italic;
+  }
+
+  /* Sous-section NORMES du drawer « Règlement et Normes » : séparée des
+     règlements par un filet, sans casser la grille entity-meta réutilisée. */
+  .reglement-normes {
+    margin-top: 0.55rem;
+    padding: 0.55rem 0.6rem 0.1rem;
+    border-top: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+  }
+
+  .reglement-normes > .entity-meta-section {
+    margin-top: 0;
   }
 
   /* Signaux citant la zone (fiche zone). */
