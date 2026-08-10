@@ -169,7 +169,9 @@
               {#each row.cells as cell (cell.kpiId)}
                 <td
                   class="palier-cell"
+                  data-testid={`palier-cell-${row.citySlug}-${cell.kpiId}`}
                   data-status={cell.status}
+                  data-source={cell.source ?? ""}
                   title={palierCellStatusLabel(cell.status)}
                   style="background: {CELL_BG[cell.status]}; color: {CELL_FG[cell.status]};"
                 >
