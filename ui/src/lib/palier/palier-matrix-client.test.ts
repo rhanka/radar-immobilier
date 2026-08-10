@@ -155,6 +155,19 @@ describe("cityIsB / cityBCount — prédicat B = celui de la vue Signaux", () =>
 });
 
 describe("buildPalierMatrixLive — scope/dénominateur/récence LIVE", () => {
+  it("publie 20 libellés fondés ou un TODO explicite pour le contrat geo manquant", () => {
+    expect(PALIER_KPIS_20).toHaveLength(20);
+    expect(PALIER_KPIS_20.every((kpi) => !/^KPI \d{2}$/.test(kpi.label))).toBe(true);
+    expect(PALIER_KPIS_20.find((kpi) => kpi.id === "kpi01")?.label).toBe("KPI 01 · Zonage");
+    expect(PALIER_KPIS_20.find((kpi) => kpi.id === "kpi04")?.label).toBe("KPI 04 · PV");
+    expect(PALIER_KPIS_20.find((kpi) => kpi.id === "kpi15")?.label).toContain("superficie");
+    for (const id of ["kpi03", "kpi05", "kpi06", "kpi07", "kpi10", "kpi14"]) {
+      expect(PALIER_KPIS_20.find((kpi) => kpi.id === id)?.label).toContain(
+        "(déf. KPI en attente contrat API geo)",
+      );
+    }
+  });
+
   const now = new Date("2026-08-07T00:00:00.000Z");
 
   // Mock du serveur date-aware : la fenêtre restreint les villes B.
