@@ -120,6 +120,7 @@
     CITY_FALLBACK_ZONE_PREFIX,
     FILTER_DIMMED_OPACITY,
   } from "$lib/maps/signaux-map-geo.js";
+  import { enrichGeoZonesWithSignalReglements } from "$lib/maps/signaux-reglements.js";
   import {
     withHoverNeutralTint,
     withHoverOpacityBoost,
@@ -607,6 +608,19 @@
       ? filteredDetailNodes.length
       : null;
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
+
+  /**
+   * #3 — Règlement PAR ZONE dans la fiche : on injecte dans l'objet zone le
+   * règlement SOURCÉ DU GRAPHE-SIGNAL (numéro + URL publique du PV), keyé par
+   * `zoneRefComparableKey`, quand geo ne sert pas déjà de numéro (le geo GAGNE).
+   * On repart des nœuds NON filtrés (`detailNodes`) : le règlement porteur d'une
+   * zone ne dépend pas du filtre de signaux actif. Passe-plat sans copie quand
+   * rien ne change (fonction non destructive).
+   */
+  $: enrichedZonesResponse = enrichGeoZonesWithSignalReglements(
+    zonesResponse,
+    detailNodes,
+  );
 
   /**
    * Les deux vues (A comme B) restreignent le jeu brut de signaux.
@@ -2293,7 +2307,7 @@
       {zonesError}
       {lotsLoading}
       {lotsError}
-      {zonesResponse}
+      zonesResponse={enrichedZonesResponse}
       {lotsResponse}
       {selectionState}
       activeSubsetKey=""
