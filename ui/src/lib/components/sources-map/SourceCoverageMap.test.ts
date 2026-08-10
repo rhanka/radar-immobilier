@@ -2,8 +2,7 @@
  * SourceCoverageMap — intégration de la vue Couverture avec le MÊME mode
  * d'interaction que Signaux (socle stubé, loader zones mocké) :
  *
- *   1. DRAWER droit = scorecard de couverture (SourceScorecard) de la ville
- *      sélectionnée — mêmes lignes PV · Signaux · Zones · Règlements & normes · Lots · TOD.
+ *   1. DRAWER droit + carte = les 20 nouveaux KPI de la matrice.
  *   2. Sélection ville (carte OU rail) → drill ZONES : chargement tiéré +
  *      peinture des aplats via le socle + segmented Province/Ville/Zone.
  *   3. Radio de PORTÉE (exclusif) → filtre la liste de villes ET la
@@ -49,6 +48,11 @@ import type {
   CoverageResponse,
   CoverageState,
 } from "$lib/sources/source-coverage-client.js";
+import {
+  PALIER_KPIS_20,
+  type PalierCellStatus,
+  type PalierMatrix,
+} from "$lib/palier/palier-matrix-client.js";
 
 afterEach(() => cleanup());
 beforeEach(() => {
@@ -169,6 +173,29 @@ const RESPONSE: CoverageResponse = {
   cities: CITIES,
 };
 
+const KPI1_STATUS: PalierCellStatus[] = [
+  "complete",
+  "incomplete",
+  "na",
+  "unknown",
+];
+const MATRIX: PalierMatrix = {
+  contract: "palier-matrix/v1",
+  subset: "B",
+  label: "cohorte B′ by-city",
+  kpis: PALIER_KPIS_20,
+  cities: CITIES.map((c, cityIndex) => ({
+    citySlug: c.citySlug,
+    cityName: c.cityName,
+    cells: PALIER_KPIS_20.map((kpi) => ({
+      kpiId: kpi.id,
+      status: kpi.id === "kpi01" ? KPI1_STATUS[cityIndex]! : "unknown",
+      source: "fixture",
+    })),
+  })),
+  denominator: CITIES.length,
+};
+
 function renderView() {
   return render(SourceCoverageMap, {
     props: {
@@ -177,6 +204,7 @@ function renderView() {
       loading: false,
       error: null,
       onReload: () => {},
+      matrixLoader: async () => MATRIX,
     },
   });
 }
@@ -193,52 +221,54 @@ function lastPaintedZones(): {
   return input.zones;
 }
 
-// ── 1. Drawer droit = scorecard couverture ────────────────────────────────────
+// ── 1. Carte + drawer = nouveaux KPI ─────────────────────────────────────────
 
-describe("SourceCoverageMap — drawer droit = carte de couverture", () => {
-  it("sans sélection : placeholder, AUCUNE scorecard", () => {
+describe("SourceCoverageMap — nouveaux KPI", () => {
+  it("colore la carte avec le KPI actif et expose les 20 vrais libellés", async () => {
+    const { getByTestId } = renderView();
+    await waitFor(() => {
+      expect(getByTestId("stub-legend").textContent).toContain("KPI 01 · Zonage");
+      const expr = JSON.parse(getByTestId("stub-map").dataset.fillColor ?? "null") as unknown[];
+      expect(expr).toContain("#16a34a");
+      expect(expr).toContain("#f59e0b");
+    });
+    const select = getByTestId("coverage-kpi-select") as HTMLSelectElement;
+    expect(select.options).toHaveLength(20);
+    expect(Array.from(select.options).every((option) => !/^KPI \d{2}$/.test(option.text))).toBe(true);
+    await fireEvent.change(select, { target: { value: "kpi15" } });
+    expect(getByTestId("stub-legend").textContent).toContain("Champs lot · superficie");
+  });
+
+  it("sans sélection : placeholder, AUCUN ancien panneau", () => {
     const { container } = renderView();
     expect(container.querySelector('[data-testid="source-scorecard"]')).toBeNull();
+    expect(container.querySelector('[data-testid="coverage-kpi-panel"]')).toBeNull();
     expect(container.textContent).toContain("Cliquez une ville");
   });
 
-  it("clic ville sur la CARTE → scorecard complète dans le drawer", async () => {
+  it("clic ville sur la CARTE → panneau des 20 KPI dans le drawer", async () => {
     const { container, getByTestId } = renderView();
     await fireEvent.click(getByTestId("stub-city-delson"));
 
-    const scorecard = container.querySelector('[data-testid="source-scorecard"]');
-    expect(scorecard).not.toBeNull();
-    // En-tête : nom + MRC + rang + badge tri-état de couverture.
-    expect(scorecard!.textContent).toContain("Delson");
-    expect(scorecard!.textContent).toContain("MRC-Delson");
-    expect(scorecard!.textContent).toContain("rang 12");
-    expect(scorecard!.textContent).toContain("Couverture");
-    expect(scorecard!.textContent).toContain("Partiel");
-    // Les lignes par couche (contenu EXACT du pane droit Sources).
-    for (const label of [
-      "PV collectés",
-      "Signaux extraits",
-      "Zones servies",
-      "Règlements & normes",
-      "Lots (cadastre)",
-      "Périmètres TOD",
-    ]) {
-      expect(scorecard!.textContent).toContain(label);
-    }
-    // Preuve signaux : « n signaux · n avec citation vérifiable ».
-    expect(scorecard!.textContent).toContain("2 avec citation vérifiable");
+    const panel = container.querySelector('[data-testid="coverage-kpi-panel"]');
+    expect(panel).not.toBeNull();
+    expect(panel!.textContent).toContain("Delson");
+    expect(panel!.querySelectorAll('[data-testid^="coverage-kpi-kpi"]')).toHaveLength(20);
+    expect(panel!.textContent).toContain("KPI 04 · PV");
+    expect(panel!.textContent).toContain("(déf. KPI en attente contrat API geo)");
+    expect(container.querySelector('[data-testid="source-scorecard"]')).toBeNull();
   });
 
-  it("clic ville dans le RAIL → même drawer scorecard", async () => {
+  it("clic ville dans le RAIL → même panneau KPI", async () => {
     const { container } = renderView();
     const delsonRow = Array.from(
       container.querySelectorAll<HTMLButtonElement>("button.rail-city-row"),
     ).find((r) => r.textContent?.includes("Delson"));
     expect(delsonRow).toBeDefined();
     await fireEvent.click(delsonRow!);
-    const scorecard = container.querySelector('[data-testid="source-scorecard"]');
-    expect(scorecard).not.toBeNull();
-    expect(scorecard!.textContent).toContain("Delson");
+    const panel = container.querySelector('[data-testid="coverage-kpi-panel"]');
+    expect(panel).not.toBeNull();
+    expect(panel!.textContent).toContain("Delson");
   });
 });
 
@@ -303,13 +333,13 @@ describe("SourceCoverageMap — sélection ville → drill zones", () => {
     const { container, getByTestId } = renderView();
     await fireEvent.click(getByTestId("stub-city-delson"));
     expect(
-      container.querySelector('[data-testid="source-scorecard"]'),
+      container.querySelector('[data-testid="coverage-kpi-panel"]'),
     ).not.toBeNull();
 
     await fireEvent.click(getByTestId("stub-segment-Province"));
 
     expect(
-      container.querySelector('[data-testid="source-scorecard"]'),
+      container.querySelector('[data-testid="coverage-kpi-panel"]'),
     ).toBeNull();
     expect(callsOf("resetToInitialView").length).toBeGreaterThan(0);
     expect(getByTestId("stub-segment-Province").dataset.active).toBe("true");
