@@ -538,7 +538,10 @@
     canvas.style.width = `${Math.floor(viewport.width)}px`;
     canvas.style.height = `${Math.floor(viewport.height)}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    await pdfPage.render({ canvasContext: ctx, viewport }).promise;
+    // #2 preuve — la version pdf.js requiert `canvas` dans RenderParameters (en
+    // plus de canvasContext) ; sans lui le rendu échoue/ne peint pas → « aucune
+    // preuve » (le viewer s'ouvrait sans afficher le PDF). `canvas` est en scope.
+    await pdfPage.render({ canvasContext: ctx, viewport, canvas }).promise;
     if (token !== renderToken) return;
 
     // ── Surlignage des passages cités (multi-signaux, #84) ───────────────────
