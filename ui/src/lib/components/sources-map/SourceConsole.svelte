@@ -14,6 +14,7 @@
   import { Terminal, RefreshCw, Search } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SourceScorecard from "./SourceScorecard.svelte";
+  import PalierMatrix from "$lib/palier/PalierMatrix.svelte";
   import {
     sortCitiesForConsole,
     formatProvinceHeadline,
@@ -336,8 +337,17 @@
     </div>
   </svelte:fragment>
 
-  <!-- ── Main : table tri-état par ville ──────────────────────────────────── -->
+  <!-- ── Main : matrice 20 KPI × 127 (B′ live) + table tri-état par ville ──── -->
   <div class="flex h-full flex-col bg-slate-50">
+    <!-- Livraison owner — la VRAIE matrice servie (20 KPI × 127 B′, dénominateur
+         live via /api/graph-signals/by-city + 17 dims geo via /api/source/coverage)
+         DANS Sources › Console. Bloc prominent en tête ; table tri-état dessous. -->
+    <div
+      class="max-h-[55%] shrink-0 overflow-auto border-b-4 border-slate-200"
+      data-testid="console-palier-matrix"
+    >
+      <PalierMatrix />
+    </div>
     {#if error}
       <div class="p-4">
         <Alert tone="error" title="Console indisponible" message={error} />
