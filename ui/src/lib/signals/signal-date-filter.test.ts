@@ -34,6 +34,30 @@ describe("signal date filter", () => {
     });
   });
 
+  it("« Illimité » (token all) : bornes nulles → tous les signaux, même sans date", () => {
+    const range = {
+      mode: "relative" as const,
+      relative: "all",
+      from: 0,
+      to: new Date(2026, 6, 1).getTime(),
+    };
+    const dateRange = dateRangeFromSignalTimeRange(range);
+    expect(dateRange).toEqual({ start: null, end: null });
+
+    const nodes = [
+      node("ancien", { etapeDate: "1990-01-01" }),
+      node("recent", { etapeDate: "2026-06-01" }),
+      node("sans-date", {}),
+    ];
+    expect(filterNodesByEtapeDate(nodes, dateRange).map((n) => n.id)).toEqual([
+      "ancien",
+      "recent",
+      "sans-date",
+    ]);
+    // Libellé DS produit bien « Illimité ».
+    expect(formatSignalTimeRange(range, "fr-CA")).toBe("Illimité");
+  });
+
   it("anchors a selected DS month preset to the selection instant", () => {
     const staleTo = new Date(2026, 7, 31, 12, 0).getTime();
     const selectedAt = new Date(2026, 8, 1, 9, 15).getTime();

@@ -6,6 +6,8 @@ import { describe, it, expect } from "vitest";
 import {
   extractDocRefs,
   extractSignalEvidence,
+  extractZoneReglements,
+  type GraphSignalNode,
 } from "./graph-signal-detail-client.js";
 
 describe("extractDocRefs", () => {
@@ -252,5 +254,111 @@ describe("extractSignalEvidence", () => {
     expect(evidence.completeness.missing).toContain("documentDate");
     expect(evidence.completeness.missing).toContain("page");
     expect(evidence.completeness.missing).toContain("bbox");
+  });
+});
+
+describe("extractZoneReglements", () => {
+  function designationEvent(
+    id: string,
+    properties: Record<string, unknown>,
+  ): GraphSignalNode {
+    return {
+      id,
+      type: "DesignationEvent",
+      label: id,
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: null,
+      props: { properties },
+    };
+  }
+
+  it("indexe un règlement par zoneRefComparableKey(zone_ref) quand le nœud porte les deux", () => {
+    const map = extractZoneReglements([
+      designationEvent("e1", {
+        zone_ref: "H-315",
+        reglement_number: "756",
+        sourceUrl: "https://ville.delson.qc.ca/pv.pdf",
+        date: "2026-04-14",
+      }),
+    ]);
+    // zoneRefComparableKey("H-315") === "H315" (tirets/espaces retirés).
+    expect(map.get("H315")).toEqual({
+      numero: "756",
+      url: "https://ville.delson.qc.ca/pv.pdf",
+      millesime: null,
+    });
+    expect([...map.keys()]).toEqual(["H315"]);
+  });
+
+  it("porte le millésime quand le nœud l'expose", () => {
+    const map = extractZoneReglements([
+      designationEvent("e1", {
+        zone_ref: "M-126",
+        reglement_number: "2008-102",
+        reglement_millesime: "2008",
+        sourceUrl: "https://ville.qc.ca/pv.pdf",
+      }),
+    ]);
+    expect(map.get("M126")).toEqual({
+      numero: "2008-102",
+      url: "https://ville.qc.ca/pv.pdf",
+      millesime: "2008",
+    });
+  });
+
+  it("url null quand le nœud n'expose aucune source PUBLIQUE (jamais un lien d'archive)", () => {
+    const map = extractZoneReglements([
+      designationEvent("e1", {
+        zone_ref: "H-315",
+        reglement_number: "756",
+        // rawRef seul (archive) → PAS de sourceUrl publique.
+        rawRef: "raw/proces-verbaux-delson/cas/abc.pdf",
+      }),
+    ]);
+    expect(map.get("H315")?.url).toBeNull();
+    expect(map.get("H315")?.numero).toBe("756");
+  });
+
+  it("n'invente AUCUN lien quand zone_ref et reglement_number sont sur des nœuds disjoints (cas Delson)", () => {
+    const map = extractZoneReglements([
+      // Lotissement : porte une zone mais AUCUN règlement.
+      designationEvent("lotissement", { zone_ref: "H-315", sourceUrl: "https://x/pv.pdf" }),
+      // Adoption : porte un règlement mais AUCUNE zone structurée.
+      designationEvent("adoption-756", { reglement_number: "756", sourceUrl: "https://x/pv.pdf" }),
+    ]);
+    expect(map.size).toBe(0);
+  });
+
+  it("sur collision, garde le règlement le PLUS RÉCENT par date d'événement", () => {
+    const map = extractZoneReglements([
+      designationEvent("old", {
+        zone_ref: "H-315",
+        reglement_number: "700",
+        sourceUrl: "https://x/old.pdf",
+        date: "2025-01-01",
+      }),
+      designationEvent("new", {
+        zone_ref: "H-315",
+        reglement_number: "756",
+        sourceUrl: "https://x/new.pdf",
+        date: "2026-04-14",
+      }),
+    ]);
+    expect(map.get("H315")?.numero).toBe("756");
+    expect(map.get("H315")?.url).toBe("https://x/new.pdf");
+  });
+
+  it("ignore les nœuds Signal (rattachement réservé aux DesignationEvent)", () => {
+    const signalNode: GraphSignalNode = {
+      id: "s1",
+      type: "Signal",
+      label: "s1",
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: null,
+      props: { properties: { zone_ref: "H-315", reglement_number: "756" } },
+    };
+    expect(extractZoneReglements([signalNode]).size).toBe(0);
   });
 });

@@ -20,7 +20,7 @@
    */
   import { tick } from "svelte";
   import { Alert, Badge } from "@sentropic/design-system-svelte";
-  import { FileText, FileX, RefreshCw, X } from "@lucide/svelte";
+  import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
     extractDocRefs,
@@ -63,7 +63,6 @@
     zoneRefComparableKey,
   } from "$lib/maps/signaux-map-geo.js";
   import {
-    evaluatedLotScore,
     facadeDisplay,
     formatArea,
     formatPostalCode,
@@ -108,6 +107,8 @@
     proofStatusLabel,
     publicAuditUrl,
     readinessLabel,
+    AUDIT_NOT_COVERED_LABEL,
+    AUDIT_NOT_COVERED_HINT,
   } from "$lib/maps/geo-provenance.js";
 
   export let selectedCity: CityMapEntry | null = null;
@@ -348,12 +349,67 @@
   /** Lots filtrés : uniquement ceux liés aux signaux filtrés (si filtre actif et résultats). */
   $: filteredLots = filteredLotNoSet ? lots.filter((l) => filteredLotNoSet!.has(l.properties.noLot)) : lots;
 
+  /**
+   * #3b(b) — En VUE ZONE (une zone focusée), le bucket Lots ne liste QUE les
+   * lots ⊆ zone focusée (règle owner 4). Hors focus zone (vue ville) : tous les
+   * lots restent listés (règle 3 — affichés partout ; seule la sélectionnabilité
+   * est gatée côté carte). Appartenance par code de zone (jointure #314).
+   */
+  $: zoneScopedLots = focusedZoneCode
+    ? filteredLots.filter(
+        (l) =>
+          (l.properties.zoneCode ?? l.properties.zone?.code ?? null) === focusedZoneCode,
+      )
+    : filteredLots;
+
+  // ── 01KZGM07 item 2 — Signaux / Règlements RESTREINTS à la zone active ──────
+  /**
+   * Rattachement d'un SIGNAL à la zone active. « Rattaché » = le signal cite au
+   * moins une zone (extractSignalZoneRefs, clé comparable tiret ignoré). Contrat
+   * owner du scope zone du panneau droit (parité stricte avec zoneScopedLots) :
+   *  - aucune zone active (vue ville) → jamais de filtrage (tout affiché) ;
+   *  - signal SANS aucune zone citée → GARDÉ (exception impérative) ;
+   *  - signal citant des zones → gardé SEULEMENT s'il cite la zone active.
+   */
+  function signalMatchesActiveZone(
+    node: GraphSignalNode,
+    code: string | null,
+  ): boolean {
+    if (!code) return true;
+    const refs = extractSignalZoneRefs(node);
+    if (refs.length === 0) return true; // non-rattaché → gardé
+    const target = zoneRefComparableKey(code);
+    return refs.some((ref) => zoneRefComparableKey(ref) === target);
+  }
+  /**
+   * Rattachement d'un RÈGLEMENT à la zone active. « Rattaché » = l'entrée porte
+   * au moins un code de zone (dérivé des signaux le citant). Même exception : un
+   * règlement sans aucune zone est GARDÉ.
+   */
+  function reglementMatchesActiveZone(
+    entry: ReglementEntry,
+    code: string | null,
+  ): boolean {
+    if (!code) return true;
+    if (entry.zoneCodes.length === 0) return true; // non-rattaché → gardé
+    const target = zoneRefComparableKey(code);
+    return entry.zoneCodes.some((c) => zoneRefComparableKey(c) === target);
+  }
+  /** Signaux du panneau droit restreints à la zone active (ou tous hors focus). */
+  $: zoneScopedDetailNodes = focusedZoneCode
+    ? filteredDetailNodes.filter((n) => signalMatchesActiveZone(n, focusedZoneCode))
+    : filteredDetailNodes;
+  /** Règlements du panneau droit restreints à la zone active (même contrat). */
+  $: zoneScopedReglements = focusedZoneCode
+    ? reglements.filter((r) => reglementMatchesActiveZone(r, focusedZoneCode))
+    : reglements;
+
   // ── Filtre LOTS (en-tête de l'accordéon Lots — eval-lot-filters réutilisé) ─
   $: lotFilterActive = !isDefaultEvalFilter(lotFilter);
   /** Lots listés = filtre signaux ∩ filtre lots. */
   $: evalFilteredLots = lotFilterActive
-    ? filteredLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
-    : filteredLots;
+    ? zoneScopedLots.filter((l) => lotMatchesEvalFilter(l.properties, lotFilter))
+    : zoneScopedLots;
   /**
    * Compteur N/M de l'en-tête + bandeau : base = TOUS les lots chargés (comme
    * l'ex-panneau autonome), car le filtre peint TOUTE la couche carte — pas
@@ -390,7 +446,7 @@
   // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
   // sur un lot estompé de la carte), il est remonté en tête de liste — la
   // sélection carte → fiche n'est jamais cassée par un filtre.
-  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, filteredLots);
+  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, zoneScopedLots);
 
   function ensureFocusedLotVisible(
     shown: LotFeature[],
@@ -426,11 +482,22 @@
     const focused = lookup.find((zone) => zone.properties.code === code);
     return focused ? [focused, ...shown] : shown;
   }
+  // Objet de la zone focusée — alimente le panneau pinné « Zone active »
+  // (miroir de « Ville active ») affiché au-dessus des buckets.
+  $: focusedZone = focusedZoneCode
+    ? (visibleZones.find((zone) => zone.properties.code === focusedZoneCode) ?? null)
+    : null;
+  // Nav-drill 01KZEG78 (spec owner) : plus de panneau « Lot actif » épinglé →
+  // pas d'objet `focusedLot` dédié (le lot vit dans son drawer/fiche). Le focus
+  // de lot reste porté par `focusedLotNo` (sélection carte/liste) pour la fiche.
   $: zonesUnavailableReason =
     zonesResponse?.warnings.includes("geo-collection-not-configured")
       ? "Zones non configurées dans l'API geo."
       : null;
-  $: lotTotalCount = filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
+  // #3b(b) — en vue zone, « M disponibles » = total des lots DE LA ZONE.
+  $: lotTotalCount = focusedZoneCode
+    ? zoneScopedLots.length
+    : filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
   /** Total de la LISTE affichée (filtre lots appliqué) — base du cap DOM 80. */
   $: lotListTotal = lotFilterActive ? evalFilteredLots.length : lotTotalCount;
   $: hiddenLotCount = Math.max(0, lotListTotal - visibleLots.length);
@@ -584,6 +651,34 @@
     );
   }
 
+  /**
+   * #2b — URL PUBLIQUE cliquable de la preuve d'un signal, gardée par le contrat
+   * MESURÉ recette `isPublicCanonicalUrl` (via publicAuditUrl), désormais
+   * SIGNATURE-based : accepte host public http(s) NON signé, query/fragment
+   * bénins ET l'object-storage PUBLIC (VPlus, sites muni S3/OVH) ; REJETTE une
+   * URL signée / à credential, un host privé, un scheme non-http. L'archive
+   * interne (`s3://raw`/`rawRef`) passe, elle, par le viewer same-origin
+   * (archiveHref → /api/documents/raw), jamais une URL signée. Assouplissement
+   * co-signé recette+architect (garde de validité partagée).
+   */
+  function publicSourceHref(evidence: SignalEvidence): string | null {
+    return publicAuditUrl(evidence.documentUrl ?? evidence.sourceUrl);
+  }
+
+  /**
+   * #2b(part1) — Repli ARCHIVE durable, SAME-ORIGIN : quand le doc a été scrapé
+   * (rawRef présent), il est servi par /api/documents/raw?rawRef=… (stream PDF,
+   * bucket radar-immobilier-docs — confirmé extraction). Utile quand l'URL
+   * municipale publique est absente (7 villes rawRef-only) OU morte (~48% de
+   * 404 non garantis par le contrat) : l'archive, elle, résout. Endpoint back
+   * existant — pur câblage UI, aucune garde de validité partagée touchée.
+   */
+  function archiveHref(evidence: SignalEvidence): string | null {
+    const rawRef = evidence.rawRef;
+    if (typeof rawRef !== "string" || rawRef === "") return null;
+    return `/api/documents/raw?rawRef=${encodeURIComponent(rawRef)}`;
+  }
+
   function sourceButtonLabel(evidence: SignalEvidence): string {
     if (evidence.documentUrl || evidence.sourceUrl) return "Voir PDF/source";
     if (hasSourceEvidence(evidence)) return "Voir provenance";
@@ -647,15 +742,6 @@
     return `${Math.round(value * 100)} %`;
   }
 
-  /**
-   * Score de potentiel AFFICHABLE (« x.x/10 ») — null quand le score n'est pas
-   * évalué (`potentialScoreStatus: "unavailable"`) : on n'affiche jamais un
-   * « 0.0/10 » placeholder comme s'il était mesuré (copy « non évalué »).
-   */
-  function lotScore(lot: LotFeature): string | null {
-    const score = evaluatedLotScore(lot.properties);
-    return score !== null ? `${score.toFixed(1)}/10` : null;
-  }
 
   /**
    * Type de zone joint quand il est réellement précisé par la source.
@@ -911,6 +997,43 @@
       </div>
     </div>
 
+    <!-- #3a — Panneau « Zone active » PINNÉ (miroir de « Ville active ») :
+         quand une zone est focusée, ses champs prioritaires restent visibles
+         au-dessus des buckets, le reste est dépliable. Données servies par
+         /api/geo/:city/zones (GeoZoneProperties). -->
+    {#if focusedZone}
+      {@const fzSource = describeZoneSource(focusedZone.properties)}
+      {@const fzReg = zoneReglementRow(focusedZone)}
+      {@const fzType = zoneTypeLabel(focusedZone)}
+      {@const fzLots = zoneLotCount(focusedZone, lots)}
+      <div class="sel-zone-head" data-testid="sel-zone-head">
+        <span class="sel-kicker" style="color: #7c3aed;">Zone active</span>
+        <h2 class="sel-zone-title">{focusedZone.properties.label ?? focusedZone.properties.code}</h2>
+        <p class="sel-city-meta">
+          <code>{focusedZone.properties.code}</code>{#if fzType} · {fzType}{/if}
+        </p>
+        <div class="sel-pill-row">
+          {#if fzReg}<Badge tone="info">{fzReg.value}</Badge>{/if}
+          <Badge tone="neutral">{fzSource.label}</Badge>
+          <Badge tone="neutral">Confiance {confidencePct(focusedZone.properties.confidence)}</Badge>
+          <Badge tone={fzLots > 0 ? "success" : "neutral"}>{formatNumber(fzLots)} lots liés</Badge>
+        </div>
+        <details class="sel-zone-more" data-testid="sel-zone-head-more">
+          <summary>Détail de la zone</summary>
+          <dl class="entity-meta">
+            <dt class="entity-meta-key">Provenance</dt>
+            <dd class="entity-meta-val">{zoneSourceLabel(focusedZone)}</dd>
+            <dt class="entity-meta-key">Géométrie servie</dt>
+            <dd class="entity-meta-val">{zoneGeometryLabel(focusedZone)}</dd>
+          </dl>
+        </details>
+      </div>
+    {/if}
+
+    <!-- Nav-drill 01KZEG78 (spec owner validée) : PAS de panneau « Lot actif »
+         épinglé. L'actif épinglé = Ville OU Zone uniquement ; le lot s'ouvre
+         dans son DRAWER (fiche ci-dessous), jamais un header « Lot actif ». -->
+
     {#if detailError}
       <div class="sel-alert">
         <Alert tone="error" title="Signaux indisponibles" message={detailError} />
@@ -944,9 +1067,10 @@
       <details class="sel-bucket" bind:open={signalsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Signaux</span>
-          <!-- #6 : "–" pendant le chargement ; filtré/total si filtre actif -->
+          <!-- #6 : "–" pendant le chargement ; N/M quand la liste est restreinte
+               (zone active — 01KZGM07 item 2 — ou filtre subset). -->
           <span class="rail-row-count">
-            {#if detailLoading}–{:else if detailError}n/d{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
+            {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
           </span>
         </summary>
         <div class="sel-entities" bind:this={entityListEl}>
@@ -957,16 +1081,21 @@
             </div>
           {:else if detailError}
             <p class="sel-empty">Projection des signaux indisponible.</p>
-          {:else if filteredDetailNodes.length === 0}
-            <!-- Des signaux existent mais la plage de dates / les filtres les
-                 masquent tous : ne pas prétendre que la ville n'a rien d'indexé. -->
+          {:else if zoneScopedDetailNodes.length === 0}
+            <!-- Zone active sans signal rattaché, plage de dates qui masque tout,
+                 ou ville sans rien d'indexé : messages distincts (jamais
+                 prétendre que la ville n'a rien quand c'est le scope zone). -->
             <p class="sel-empty">
-              {unfilteredSignalCount > 0
-                ? "Aucun signal dans la plage de dates sélectionnée."
-                : "Aucun signal indexé pour cette ville."}
+              {#if focusedZoneCode && filteredDetailNodes.length > 0}
+                Aucun signal rattaché à la zone active.
+              {:else if unfilteredSignalCount > 0}
+                Aucun signal dans la plage de dates sélectionnée.
+              {:else}
+                Aucun signal indexé pour cette ville.
+              {/if}
             </p>
           {:else}
-            {#each filteredDetailNodes as node (node.id)}
+            {#each zoneScopedDetailNodes as node (node.id)}
               {@const key = signalKey(node)}
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
@@ -1137,6 +1266,7 @@
 
                         <div class="source-action-row">
                           {#if hasSourceEvidence(evidence)}
+                            {@const proofHref = publicSourceHref(evidence)}
                             <button
                               type="button"
                               class="doc-ref-button"
@@ -1146,6 +1276,38 @@
                               <FileText class="h-3.5 w-3.5" aria-hidden="true" />
                               Voir la preuve{evidence.page !== null ? ` · p.${evidence.page}` : ""}
                             </button>
+                            <!-- #2a — lien DIRECT vers le PDF source public (nouvel
+                                 onglet), en plus de l'overlay. Rendu seulement si
+                                 l'URL est http(s) (garde anti-XSS minimale). -->
+                            {#if proofHref}
+                              <a
+                                href={proofHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="doc-ref-button"
+                                data-testid="signal-proof-direct-link"
+                                title="Ouvrir la source PDF publique dans un nouvel onglet"
+                              >
+                                <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
+                                Ouvrir le PDF source
+                              </a>
+                            {/if}
+                            {@const archiveUrl = archiveHref(evidence)}
+                            {#if archiveUrl}
+                              <!-- #2b(part1) — copie d'archive durable (same-origin),
+                                   utile si la source publique est absente ou morte. -->
+                              <a
+                                href={archiveUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="doc-ref-button"
+                                data-testid="signal-proof-archive-link"
+                                title="Ouvrir la copie d'archive (durable) du PDF"
+                              >
+                                <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                                Ouvrir l'archive (PDF)
+                              </a>
+                            {/if}
                           {:else}
                             <!-- #94 — affichage HONNÊTE : pas de bouton mort muet (rond
                                  barré silencieux). Aucune source documentaire n'est
@@ -1175,8 +1337,9 @@
       <details class="sel-bucket" bind:open={reglementsBucketOpen}>
         <summary class="sel-bucket-head">
           <span class="sel-bucket-name">Règlements</span>
+          <!-- 01KZGM07 item 2 : N/M quand la liste est restreinte à la zone active. -->
           <span class="rail-row-count">
-            {detailLoading ? "–" : reglements.length}
+            {#if detailLoading}–{:else if focusedZoneCode}{zoneScopedReglements.length}/{reglements.length}{:else}{reglements.length}{/if}
           </span>
         </summary>
         <div class="sel-entities">
@@ -1185,12 +1348,16 @@
               <RefreshCw class="h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Chargement des règlements…</span>
             </div>
-          {:else if reglements.length === 0}
+          {:else if zoneScopedReglements.length === 0}
             <p class="sel-empty">
-              Aucun règlement cité par les signaux de cette ville.
+              {#if focusedZoneCode && reglements.length > 0}
+                Aucun règlement rattaché à la zone active.
+              {:else}
+                Aucun règlement cité par les signaux de cette ville.
+              {/if}
             </p>
           {:else}
-            {#each reglements as reg (reg.key)}
+            {#each zoneScopedReglements as reg (reg.key)}
               <div class="sel-entity-bar">
                 <div class="reglement-row">
                   <div class="reglement-head">
@@ -1356,6 +1523,22 @@
                             >{zoneReg.value}</span
                           >
                         {/if}
+                        <!-- #3 — lien PUBLIC du règlement porteur (grille PDF geo
+                             ou source du graphe-signal) ; nouvel onglet. Rendu
+                             seulement quand une URL ouvrable est servie. -->
+                        {#if zone.properties.reglementUrl}
+                          <span class="entity-meta-key">Règlement (source)</span>
+                          <a
+                            class="entity-meta-val zone-audit-link"
+                            data-testid="zone-reglement-link"
+                            href={zone.properties.reglementUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Ouvrir le règlement (PDF public, nouvel onglet)"
+                          >
+                            Ouvrir le règlement
+                          </a>
+                        {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{zoneSourceLabel(zone)}</span>
                         <!-- m8.2 — type de source dérivé (recalage / GeoJSON dans
@@ -1369,9 +1552,9 @@
                         <span class="entity-meta-key">Lots liés</span>
                         <span class="entity-meta-val">{formatNumber(zoneLotCount(zone, lots))}</span>
                       </div>
-                      {#if proof || provenance}
-                        <div class="zone-audit" data-testid="zone-audit">
-                          <span class="doc-refs-label">Audit des sources</span>
+                      <div class="zone-audit" data-testid="zone-audit">
+                        <span class="doc-refs-label">Audit des sources</span>
+                        {#if proof || provenance}
                           {#if proof}
                             <div class="entity-meta" data-testid="zone-proof">
                               <span class="entity-meta-key">État de la preuve</span><span class="entity-meta-val">{proofStatusLabel(proof.status)}</span>
@@ -1401,8 +1584,12 @@
                               </ul>
                             {/if}
                           {/if}
-                        </div>
-                      {/if}
+                        {:else}
+                          <p class="zone-audit-empty" data-testid="zone-audit-empty">
+                            <span class="zone-audit-empty-label">{AUDIT_NOT_COVERED_LABEL}</span> — {AUDIT_NOT_COVERED_HINT}
+                          </p>
+                        {/if}
+                      </div>
                       <!-- m8.1 — source de la zone OUVRABLE dans le viewer
                            partagé : PDF si l'URL est un PDF, iframe sinon (le
                            viewer décide). Aujourd'hui seule la grille PDF est
@@ -1529,15 +1716,18 @@
                     on:click={() => toggleEntity(key)}
                   >
                     <span class="sel-entity-label">{lot.properties.noLot}</span>
-                    <span class="sel-entity-type">{lotScore(lot) ?? "lot"}</span>
+                    <span class="sel-entity-type">lot</span>
                   </button>
                   {#if lotVisual.focused}
-                    <!-- Carte lot enrichie (#314) : zone (code, badge cliquable →
-                         détail zone), 4+, superficie, TOD/priorité si présents.
+                    <!-- 01KZGM07 item 3 — clic lot → sa fiche se déplie INLINE
+                         sous sa ligne, DANS la liste des lots (bucket Lots).
+                         Carte lot enrichie (#314) : zone (code, badge cliquable →
+                         détail zone), 4+, superficie, adresse, CP, façade, source.
                          Champs absents = « — » discret ; score non évalué =
-                         « non évalué », jamais « 0.0/10 ». -->
+                         « non évalué », jamais « 0.0/10 ». Un seul lot déplié à la
+                         fois (focus exclusif). -->
                     {@const lotZoneFeature = zoneFeatureForLot(lot, zones)}
-                    <div class="sel-entity-detail">
+                    <div class="sel-entity-detail" data-testid="sel-lot-drawer">
                       <div class="entity-meta">
                         <span class="entity-meta-key">Lot</span>
                         <code class="entity-meta-val">{lot.properties.noLot}</code>
@@ -1634,12 +1824,6 @@
                             {value}
                           </span>
                         {/each}
-                        <span class="entity-meta-key">Potentiel</span>
-                        {#if lotScore(lot)}
-                          <span class="entity-meta-val">{lotScore(lot)}</span>
-                        {:else}
-                          <span class="entity-meta-val entity-meta-val--missing">non évalué</span>
-                        {/if}
                         <span class="entity-meta-key">Source</span>
                         <span class="entity-meta-val">{lotsResponse?.source ?? "inconnue"}</span>
                         {#if lotsResponse?.collectionId}
@@ -1776,6 +1960,36 @@
     font-size: var(--signaux-fs-body);
     color: var(--st-semantic-text-muted, #94a3b8);
     margin: 0.15rem 0 0.45rem;
+  }
+
+  /* #3a — Panneau « Zone active » pinné, miroir de .sel-city-head. */
+  .sel-zone-head {
+    padding: 0.6rem 0.85rem 0.7rem;
+    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    flex-shrink: 0;
+  }
+
+  .sel-zone-title {
+    font-size: var(--signaux-fs-title);
+    font-weight: 600;
+    color: var(--st-semantic-text-primary, #1e293b);
+    margin: 0.2rem 0 0.25rem;
+  }
+
+  .sel-zone-more {
+    margin-top: 0.5rem;
+    font-size: var(--signaux-fs-caption);
+  }
+
+  .sel-zone-more > summary {
+    cursor: pointer;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-weight: 600;
+  }
+
+  .sel-zone-more > .entity-meta {
+    margin-top: 0.4rem;
   }
 
   .sel-pill-row {
@@ -2275,6 +2489,18 @@
     padding-left: 1rem;
     color: var(--st-semantic-text-secondary, #475569);
     font-size: var(--signaux-fs-caption);
+  }
+
+  /* État « aucune enveloppe d'audit rattachée » : bloc VISIBLE, pas escamoté. */
+  .zone-audit-empty {
+    margin: 0;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--signaux-fs-caption);
+  }
+
+  .zone-audit-empty-label {
+    font-weight: 600;
+    color: var(--st-semantic-text-primary, #334155);
   }
 
   .zone-audit-link {

@@ -72,6 +72,8 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/worker-live.ts'," \
   "    'api/src/scripts/populate-geo.ts'," \
   "    'api/src/scripts/pull-geo-ogc.ts'," \
+  "    'api/src/scripts/graphify-34-enrich.ts'," \
+  "    'api/src/scripts/emit-graphify34-candidates.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
   "  ]," \
@@ -134,6 +136,16 @@ COPY --from=build /workspace/packages/immo-mcp/dist ./packages/immo-mcp/dist
 COPY --from=build /workspace/api/drizzle ./api/drizzle
 # Fixtures simulation CS-L6 (JSON lus depuis le disque à la première requête)
 COPY --from=build /workspace/api/src/services/geo/fixtures ./api/fixtures
+# Deployed build identity (short git sha). The CI build passes it
+# (`--build-arg GIT_SHA=<sha>`, see build-push-images.yml) and the running
+# process surfaces it on /livez and /health (the latter is the only API route
+# the UI nginx proxies publicly), so the CD deploy job can PROVE the rolled-out
+# sha is actually SERVED — `kubectl rollout status` alone goes green even
+# against a stale/wrong cluster (see the pre-flight rationale below). Defaults
+# to "unknown" for local builds without the arg. Placed LAST in the stage so a
+# new sha only rebuilds this tiny ENV layer, never the cached COPY layers above.
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
 USER radar
 EXPOSE 3000
 CMD ["node", "api/dist/index.js"]

@@ -1,0 +1,79 @@
+# 33b-scrape-cities-job.yaml — TARGETED live scrape of specific PV cities.
+#
+# Same worker as 33-scrape-job.yaml (dist/scripts/worker-live.js) but scoped to
+# an explicit city list via run-job's __SCRAPE_CITIES__ placeholder (space-
+# separated slugs, sed-substituted like __BACKUP_ID__). Used to ACQUIRE a city
+# that has a working source adapter but was never scraped (e.g. brossard, for the
+# 167×20 0-unknown target). With LIVE_SCRAPE_EXPLOIT=1 the worker also PARSES the
+# raw PVs (pdftotext) and projects DesignationEvents into the per-city
+# project-state — the input the graph projection then consumes.
+#
+# READ path only for Postgres: this job writes S3 (raw/, parsed/, runs/,
+# ontology/<city>/project-state.json) and does NOT touch Postgres, so it needs no
+# postgres NetworkPolicy admission (component: scrape, like 33). Fire via:
+#   gh workflow run run-job.yaml -f job=scrape -f scrape_cities="brossard"
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-scrape-cities
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: scrape
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: scrape
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: scrape
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          # __SCRAPE_CITIES__ = space-separated slugs, sed-substituted by run-job.
+          # sh -c so the slugs split into separate argv for worker-live.js.
+          command: ["sh", "-c"]
+          args:
+            - |
+              node dist/scripts/worker-live.js __SCRAPE_CITIES__
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            # PARSE+EXPLOIT after RECUEIL (pdftotext → project-state).
+            - name: LIVE_SCRAPE_EXPLOIT
+              value: "1"
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # SCRAPE_S3 EXPLICITE vers Scaleway (bucket scrape = radar-immobilier-docs-pocs,
+            # même que raw/proces-verbaux-<city>/cas/). Le secret radar-scrape-s3-credentials
+            # est ABSENT sur OVH → le worker retombait sur l'endpoint MinIO in-cluster
+            # (radar-immobilier-docs.radar-minio, virtual-hosted) → ENOTFOUND (échec 2026-08-03).
+            # Creds depuis radar-s3-credentials (le secret Scaleway qui marche pour emit/apply).
+            - name: SCRAPE_S3_ENDPOINT
+              value: "https://s3.fr-par.scw.cloud"
+            - name: SCRAPE_S3_BUCKET
+              value: "radar-immobilier-docs-pocs"
+            - name: SCRAPE_S3_REGION
+              value: "fr-par"
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              value: "false"
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 250m, memory: 384Mi }

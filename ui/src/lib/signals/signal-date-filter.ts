@@ -24,6 +24,10 @@ export const SIGNAL_TIME_RANGE_PRESETS: SignalTimeRangePreset[] = [
   { token: "3mo", label: "3 derniers mois", durationMs: 90 * DAY_MS },
   { token: "6mo", label: "6 derniers mois", durationMs: 180 * DAY_MS },
   { token: "12mo", label: "12 derniers mois", durationMs: 365 * DAY_MS },
+  // « Illimité » — aucune borne temporelle. La durée nourrit seulement le
+  // résolveur du picker DS ; le filtrage réel passe par des bornes NULLES
+  // (dateRangeFromSignalTimeRange), qu'isWithinRange traite comme ±∞.
+  { token: "all", label: "Illimité", durationMs: 100 * 365 * DAY_MS },
 ];
 
 const MONTHS_BY_PRESET: Record<string, number> = {
@@ -110,6 +114,10 @@ function localDate(timestamp: number): Date {
 
 /** Adapts the DS epoch range to inclusive local civil dates for graph data. */
 export function dateRangeFromSignalTimeRange(range: SignalTimeRange): SignalDateRange {
+  // Preset « Illimité » : aucune borne (isWithinRange lit null comme ±∞).
+  if (range.mode === "relative" && range.relative === "all") {
+    return { start: null, end: null };
+  }
   return { start: localDate(range.from), end: localDate(range.to) };
 }
 

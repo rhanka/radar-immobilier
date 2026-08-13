@@ -9,11 +9,10 @@
    *     (« Focus QA : 4 villes » / « Villes à signaux précoces » / « Toutes »
    *     — coverage-scope) au lieu des 3 cases à cocher de Signaux. La portée
    *     remplace l'ancien toggle « Province (1104) / Focus 30 » de la carte ;
-   *   - le DRAWER droit : scorecard de couverture de la ville sélectionnée
-   *     (SourceScorecard — PV · signaux · zones · normes · lots · TOD) au lieu
-   *     des accordéons Signaux/Zones/Lots ;
-   *   - la SÉMANTIQUE de coloration : tri-état honnête Servi / Partiel /
-   *     Non couvert (D2 : jamais un score 0-100, jamais de vert fabriqué).
+   *   - le DRAWER droit : les mêmes 20 KPI que la matrice, avec le statut et la
+   *     provenance live par ville ;
+   *   - la SÉMANTIQUE de coloration : KPI sélectionné, avec les statuts honnêtes
+   *     Complet / Partiel / À qualifier / N-A (jamais de vert fabriqué).
    *
    * Drill au clic ville (parité Signaux) : sélection + cadrage caméra sur le
    * contour + chargement des ZONES (résolution tiérée signaux-zones-loader,
@@ -23,6 +22,7 @@
    * La VUE ne porte que les données + expressions métier ; toute la mécanique
    * carto (MapLibre, caméra, échafaudage des couches) vit dans le socle.
    */
+  import { onMount } from "svelte";
   import { Alert } from "@sentropic/design-system-svelte";
   import { MapPin } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -31,17 +31,21 @@
     type GeoMapLegend,
   } from "$lib/components/maps/GeoCityMapBase.svelte";
   import SourcesRail from "./SourcesRail.svelte";
-  import SourceScorecard from "./SourceScorecard.svelte";
   import {
-    buildFillColorExpression,
-    computeFocusScope,
     buildProvinceHeadline,
     formatProvinceHeadline,
-    STATE_COLOR,
-    STATE_LABEL,
     type CityCoverage,
     type CoverageResponse,
   } from "$lib/sources/source-coverage-client.js";
+  import {
+    buildPalierMatrixLive,
+    geoCellFor,
+    palierCellStatusLabel,
+    PALIER_CELL_COLOR,
+    PALIER_KPIS_20,
+    type PalierCell,
+    type PalierMatrix,
+  } from "$lib/palier/palier-matrix-client.js";
   import {
     buildScopeOpacityExpression,
     DEFAULT_COVERAGE_SCOPE,
@@ -104,6 +108,35 @@
   export let loading = false;
   export let error: string | null = null;
   export let onReload: () => void = () => {};
+  export let matrixLoader: () => Promise<PalierMatrix> = () =>
+    buildPalierMatrixLive();
+
+  let matrix: PalierMatrix | null = null;
+  let matrixLoading = true;
+  let matrixError: string | null = null;
+  let activeKpiId = PALIER_KPIS_20[0]!.id;
+
+  async function loadMatrix(): Promise<void> {
+    matrixLoading = true;
+    matrixError = null;
+    try {
+      matrix = await matrixLoader();
+    } catch (e) {
+      matrix = null;
+      matrixError = e instanceof Error ? e.message : "KPI indisponibles";
+    } finally {
+      matrixLoading = false;
+    }
+  }
+
+  function reloadAll(): void {
+    onReload();
+    void loadMatrix();
+  }
+
+  onMount(() => {
+    void loadMatrix();
+  });
 
   // ── Carte (socle) ──────────────────────────────────────────────────────────
   let mapApi: GeoCityMapApi | null = null;
@@ -115,11 +148,6 @@
   function handleScopeChange(next: CoverageScope): void {
     scope = next;
   }
-  // Périmètre « Villes à signaux précoces » (signaux prioritaires z∩m∩p — ni
-  // priorityRank ≤ 30, ni top 30 par volume) : partagé par la portée focus30
-  // (coverage-scope) et le badge « Signaux précoces » du drawer.
-  $: focusScope = computeFocusScope(cities);
-
   // ── Sélection ville + zone (drill, parité Signaux) ─────────────────────────
   let selectedCity: CityCoverage | null = null;
   let selectedZoneCode: string | null = null;
@@ -135,6 +163,23 @@
   $: {
     cityBySlug.clear();
     for (const c of cities) cityBySlug.set(c.citySlug, c);
+  }
+
+  $: matrixRowBySlug = new Map(
+    (matrix?.cities ?? []).map((row) => [row.citySlug, row]),
+  );
+  $: activeKpi =
+    PALIER_KPIS_20.find((kpi) => kpi.id === activeKpiId) ?? PALIER_KPIS_20[0]!;
+
+  function kpiCellForCity(
+    city: CityCoverage,
+    kpiId: string,
+    rows: Map<string, PalierMatrix["cities"][number]>,
+  ): PalierCell {
+    return rows
+      .get(city.citySlug)
+      ?.cells.find((cell) => cell.kpiId === kpiId) ??
+      geoCellFor(kpiId, city);
   }
 
   function syntheticAbsentCity(slug: string): CityCoverage {
@@ -158,11 +203,16 @@
   }
 
   // ── Expressions choroplèthe ────────────────────────────────────────────────
-  // Couleur = pire statut honnête (sémantique COUVERTURE, propre à Sources).
+  // Couleur = statut du NOUVEAU KPI actif. Une ligne B′ reprend la cellule de
+  // la matrice live ; hors B′, geoCellFor ne dérive que les dimensions servies.
   // Opacité : sans sélection → la PORTÉE active surligne ses villes (le reste
   // atténué) ; ville sélectionnée → aplats quasi transparents (les zones du
   // drill se lisent — parité Signaux 0.06 / 0.1 / 0.08).
-  $: fillColorExpression = buildFillColorExpression(cities);
+  $: fillColorExpression = buildKpiFillColorExpression(
+    cities,
+    activeKpiId,
+    matrixRowBySlug,
+  );
   $: fillOpacityExpression = (selectedCity
     ? buildSelectedCityOpacityExpression(cities, selectedCity.citySlug)
     : buildScopeOpacityExpression(cities, scope)) as
@@ -182,15 +232,35 @@
     return expr as ExpressionSpecification;
   }
 
+  function buildKpiFillColorExpression(
+    all: CityCoverage[],
+    kpiId: string,
+    rows: Map<string, PalierMatrix["cities"][number]>,
+  ): ExpressionSpecification {
+    const expr: unknown[] = ["match", ["get", "citySlug"]];
+    if (all.length === 0) {
+      expr.push("__aucune-ville__", PALIER_CELL_COLOR.unknown);
+    }
+    for (const city of all) {
+      expr.push(
+        city.citySlug,
+        PALIER_CELL_COLOR[kpiCellForCity(city, kpiId, rows).status],
+      );
+    }
+    expr.push(PALIER_CELL_COLOR.unknown);
+    return expr as ExpressionSpecification;
+  }
+
   // ── Légende (overlay socle) : couverture au niveau province, zonage drillé ─
-  const coverageLegend: GeoMapLegend = {
-    title: "Couverture par ville",
+  $: kpiLegend = {
+    title: activeKpi.label,
     items: [
-      { color: STATE_COLOR.verified, label: STATE_LABEL.verified },
-      { color: STATE_COLOR.declared, label: STATE_LABEL.declared },
-      { color: STATE_COLOR.absent, label: STATE_LABEL.absent },
+      { color: PALIER_CELL_COLOR.complete, label: palierCellStatusLabel("complete") },
+      { color: PALIER_CELL_COLOR.incomplete, label: palierCellStatusLabel("incomplete") },
+      { color: PALIER_CELL_COLOR.unknown, label: palierCellStatusLabel("unknown") },
+      { color: PALIER_CELL_COLOR.na, label: palierCellStatusLabel("na") },
     ],
-  };
+  } as GeoMapLegend;
 
   /** Kinds réellement présents dans les zones de la ville active. */
   $: zoneLegendEntries = selectedCity
@@ -210,7 +280,7 @@
     ? zoneLegendEntries.length > 0
       ? ({ title: "Zonage", items: zoneLegendEntries } as GeoMapLegend)
       : null
-    : coverageLegend;
+    : kpiLegend;
 
   // ── Drill segmenté Province / Ville / Zone (logique partagée geo-drill) ────
   $: geoSegments = buildDrillSegments({
@@ -484,15 +554,23 @@
         <Alert tone="error" title="Couverture indisponible" message={error} />
       </div>
     {/if}
+    {#if matrixError}
+      <div class="p-4">
+        <Alert tone="warning" title="Cohorte B′ indisponible" message={matrixError} />
+      </div>
+    {/if}
     <SourcesRail
       {cities}
       selectedSlug={selectedCity?.citySlug ?? null}
       {loading}
       dataUnavailable={error !== null}
+      kpiRows={matrix?.cities ?? []}
+      {activeKpiId}
+      activeKpiLabel={activeKpi.label}
       {scope}
       onScopeChange={handleScopeChange}
       onSelectCity={handleRailSelect}
-      onRefresh={onReload}
+      onRefresh={reloadAll}
     />
   </svelte:fragment>
 
@@ -512,6 +590,22 @@
     onReady={handleMapReady}
   >
     <svelte:fragment slot="overlay-top-left">
+      <div class="max-w-md rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-sm">
+        <label for="coverage-kpi-select" class="mb-1 block font-semibold text-slate-700">
+          KPI de couverture
+        </label>
+        <select
+          id="coverage-kpi-select"
+          data-testid="coverage-kpi-select"
+          bind:value={activeKpiId}
+          class="w-full rounded border border-slate-200 bg-white px-2 py-1 text-slate-700"
+        >
+          {#each PALIER_KPIS_20 as kpi (kpi.id)}
+            <option value={kpi.id}>{kpi.label}</option>
+          {/each}
+        </select>
+        {#if matrixLoading}<p class="mt-1 text-slate-400">Chargement de la cohorte B′…</p>{/if}
+      </div>
       {#if !selectedCity && headline}
         <div
           class="max-w-md rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-sm"
@@ -545,19 +639,49 @@
     </svelte:fragment>
   </GeoCityMapBase>
 
-  <!-- ── DRAWER droit : scorecard couverture de la ville sélectionnée (D6) ── -->
+  <!-- ── DRAWER droit : les mêmes 20 KPI que la matrice ───────────────────── -->
   <svelte:fragment slot="sel">
     {#if selectedCity}
-      <SourceScorecard city={selectedCity} {focusScope} onClose={() => clearSelection()} />
+      <div class="flex min-h-0 flex-1 flex-col" data-testid="coverage-kpi-panel">
+        <div class="flex items-start justify-between border-b border-slate-200 p-4">
+          <div>
+            <h2 class="font-semibold text-slate-900">{selectedCity.cityName}</h2>
+            <p class="text-xs text-slate-500">
+              {matrixRowBySlug.has(selectedCity.citySlug)
+                ? "Cohorte B′ live"
+                : "Hors cohorte B′ · dimensions geo servies seulement"}
+            </p>
+          </div>
+          <button type="button" class="text-xs font-semibold text-slate-500 hover:text-slate-800" on:click={() => clearSelection()}>
+            Fermer
+          </button>
+        </div>
+        <div class="min-h-0 flex-1 overflow-auto p-3">
+          {#each PALIER_KPIS_20 as kpi (kpi.id)}
+            {@const cell = kpiCellForCity(selectedCity, kpi.id, matrixRowBySlug)}
+            <button
+              type="button"
+              class={`mb-1 flex w-full items-center gap-2 rounded border px-2 py-2 text-left text-xs ${activeKpiId === kpi.id ? "border-teal-400 bg-teal-50" : "border-slate-100 bg-white hover:bg-slate-50"}`}
+              aria-pressed={activeKpiId === kpi.id}
+              data-testid={`coverage-kpi-${kpi.id}`}
+              on:click={() => { activeKpiId = kpi.id; }}
+            >
+              <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style={`background-color: ${PALIER_CELL_COLOR[cell.status]}`}></span>
+              <span class="min-w-0 flex-1 font-medium text-slate-700">{kpi.label}</span>
+              <span class="shrink-0 text-slate-500">{palierCellStatusLabel(cell.status)}</span>
+            </button>
+          {/each}
+        </div>
+      </div>
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <div>
           <MapPin class="mx-auto mb-3 h-8 w-8 text-slate-300" aria-hidden="true" />
           <p class="text-sm text-slate-400">
-            Cliquez une ville pour voir le détail de sa couverture.
+            Cliquez une ville pour voir ses 20 KPI.
           </p>
           <p class="mt-2 text-xs text-slate-300">
-            Vert = servi · ambre = partiel · gris = non couvert.
+            Vert = complet · ambre = partiel · gris = à qualifier.
           </p>
         </div>
       </div>

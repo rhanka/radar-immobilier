@@ -170,6 +170,21 @@ beforeEach(() => {
 });
 
 describe("GET /api/graph-signals/by-city", () => {
+  it("forwards optional date window query params to the graph store", async () => {
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+
+    const app = freshRoute();
+    const res = await app.request(
+      "/api/graph-signals/by-city?dateFrom=2026-01-01&dateTo=2026-03-31",
+    );
+
+    expect(res.status).toBe(200);
+    expect(listCitiesWithSignalNodes).toHaveBeenCalledWith(mockDb, {
+      dateFrom: "2026-01-01",
+      dateTo: "2026-03-31",
+    });
+  });
+
   it("returns ok:true with empty cities when no signal nodes exist", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
 
@@ -185,6 +200,7 @@ describe("GET /api/graph-signals/by-city", () => {
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(0);
     expect(body.cities).toEqual([]);
+    expect(listCitiesWithSignalNodes).toHaveBeenCalledWith(mockDb);
   });
 
   it("returns city list with legacy subset counts and v2 named counters", async () => {
