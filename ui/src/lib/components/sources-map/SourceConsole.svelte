@@ -14,6 +14,11 @@
   import { Terminal, RefreshCw, Search } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SourceScorecard from "./SourceScorecard.svelte";
+  import PalierMatrix from "$lib/palier/PalierMatrix.svelte";
+  import {
+    buildPalierMatrixLive,
+    type PalierMatrix as PalierMatrixData,
+  } from "$lib/palier/palier-matrix-client.js";
   import {
     sortCitiesForConsole,
     formatProvinceHeadline,
@@ -36,8 +41,13 @@
   export let loading = false;
   export let error: string | null = null;
   export let onReload: () => void = () => {};
+  export let initialView: "palier" | "legacy" = "palier";
+  export let matrixLoader: () => Promise<PalierMatrixData> = () =>
+    buildPalierMatrixLive();
 
   type Filter = "actives" | "all" | CoverageState;
+  type ConsoleView = "palier" | "legacy";
+  let consoleView: ConsoleView = initialView;
   let filter: Filter = "actives";
   let query = "";
   let selectedCity: CityCoverage | null = null;
@@ -231,6 +241,11 @@
     selectedCity = null;
   }
 
+  function selectConsoleView(view: ConsoleView): void {
+    consoleView = view;
+    if (view === "palier") closeSelectedCity();
+  }
+
   function handleCityKeydown(event: KeyboardEvent, city: CityCoverage): void {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
@@ -275,7 +290,34 @@
       </button>
     </div>
 
-    {#if headline}
+    <div class="border-b border-slate-100 px-4 py-3">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Affichage</p>
+      <div
+        class="inline-flex overflow-hidden rounded border border-slate-200 bg-white text-xs shadow-sm"
+        role="group"
+        aria-label="Matrice affichée"
+        data-testid="console-view-toggle"
+      >
+        <button
+          type="button"
+          class={`px-2.5 py-1 font-semibold transition-colors ${consoleView === "palier" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+          aria-pressed={consoleView === "palier"}
+          on:click={() => selectConsoleView("palier")}
+        >
+          Nouvelle matrice
+        </button>
+        <button
+          type="button"
+          class={`px-2.5 py-1 font-semibold transition-colors ${consoleView === "legacy" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+          aria-pressed={consoleView === "legacy"}
+          on:click={() => selectConsoleView("legacy")}
+        >
+          Ancienne couverture
+        </button>
+      </div>
+    </div>
+
+    {#if consoleView === "legacy" && headline}
       <div class="border-b border-slate-100 px-4 py-3" data-testid="console-totals">
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
           Province ({headline.cities})
@@ -290,6 +332,7 @@
 
     <!-- Périmètre Province / Villes à signaux précoces — même control segmenté
          que la carte Couverture (intitulés identiques), mais en FILTRE de lignes. -->
+    {#if consoleView === "legacy"}
     <div class="border-b border-slate-100 px-4 py-3">
       <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Périmètre</p>
       <div
@@ -334,11 +377,16 @@
         {/each}
       </div>
     </div>
+    {/if}
   </svelte:fragment>
 
-  <!-- ── Main : table tri-état par ville ──────────────────────────────────── -->
+  <!-- ── Main : une seule des deux matrices à la fois ─────────────────────── -->
   <div class="flex h-full flex-col bg-slate-50">
-    {#if error}
+    {#if consoleView === "palier"}
+      <div class="min-h-0 flex-1 overflow-auto" data-testid="console-palier-matrix">
+        <PalierMatrix {matrixLoader} />
+      </div>
+    {:else if error}
       <div class="p-4">
         <Alert tone="error" title="Console indisponible" message={error} />
       </div>
@@ -358,7 +406,7 @@
         </span>
       </div>
 
-      <div class="min-h-0 flex-1 overflow-auto">
+      <div class="min-h-0 flex-1 overflow-auto" data-testid="console-legacy-matrix">
         <table class="w-full text-xs">
           <thead class="sticky top-0 z-10 bg-slate-100 text-slate-500">
             <tr>
@@ -463,7 +511,7 @@
 
   <!-- ── Panneau droit : scorecard détaillée ──────────────────────────────── -->
   <svelte:fragment slot="sel">
-    {#if selectedCity}
+    {#if consoleView === "legacy" && selectedCity}
       <SourceScorecard
         city={selectedCity}
         {focusScope}
@@ -473,7 +521,9 @@
     {:else}
       <div class="flex flex-1 items-center justify-center p-6 text-center">
         <p class="text-sm text-slate-400">
-          {headlineText || "Sélectionnez une ville pour le détail de sa couverture."}
+          {consoleView === "palier"
+            ? "La nouvelle matrice est affichée seule."
+            : headlineText || "Sélectionnez une ville pour le détail de sa couverture."}
         </p>
       </div>
     {/if}

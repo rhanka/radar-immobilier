@@ -30,6 +30,15 @@ COPY ui ui
 # échoue en image (« Could not resolve …/report.md?raw »).
 COPY docs/spec/reports/study-2026-07 docs/spec/reports/study-2026-07
 RUN npm run build --workspace=ui
+# Stamp the served bundle with its build identity (short git sha), fed by the CI
+# build's `--build-arg GIT_SHA=<sha>`. nginx serves ui/dist as static files
+# (`location / { try_files $uri ... }`), so /build.json is publicly readable and
+# the CD deploy job can PROVE the SERVED ui bundle is the one this run built —
+# `kubectl rollout status` only proves the ReplicaSet rolled, not what nginx
+# serves. Placed AFTER `npm run build` so a new sha only re-runs this tiny echo
+# layer, never the cached vite build above. Defaults to "unknown" locally.
+ARG GIT_SHA=unknown
+RUN printf '{"sha":"%s"}\n' "$GIT_SHA" > ui/dist/build.json
 
 # Unprivileged nginx (listens on 8080, matches deploy/k8s/50-ui.yaml). The
 # baked conf is a sane default; the K8s Deployment mounts the radar-ui-nginx

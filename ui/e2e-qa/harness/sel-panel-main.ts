@@ -59,6 +59,16 @@ const detailNodes: GraphSignalNode[] = [
   signal("sig-Rf51", "Refonte Rf51 — urbanisme", "Second signal du même PV (Rf51)."),
 ];
 
+// #2b — mode QA « preuve publique » : ?proof=public injecte une sourceUrl
+// object-storage PUBLIC (VPlus, re-autorisée par la whitelist signature-based)
+// sur le 1er signal → le lien de preuve DIRECT s'affiche (en plus de l'archive
+// rawRef). Sert à prouver le CLIC→OUVERTURE en vrai navigateur.
+const PUBLIC_PROOF_URL =
+  "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/pv.pdf";
+if (params.get("proof") === "public" && !withoutEvidence) {
+  detailNodes[0]!.props = { ...detailNodes[0]!.props, sourceUrl: PUBLIC_PROOF_URL };
+}
+
 const selectedCity: CityMapEntry = {
   municipality: {
     slug: "saint-frederic",
@@ -95,12 +105,67 @@ function toggleBucketKey(key: SelectionKey): void {
   }
 }
 
-mount(SignauxSelPanel, {
-  target,
-  props: {
-    selectedCity,
-    detailNodes,
-    selectionState,
-    onToggleKey: toggleBucketKey,
-  },
-});
+// #3 — mode QA « règlement par zone » : ?fixture=zone-reglement monte le panneau
+// avec une zone Delson H-315 focalisée qui porte un `reglementNumero` + une
+// `reglementUrl` PUBLIQUE (état enrichi consommé par la fiche : geo 901 + grille
+// PDF, ou source du graphe-signal). Prouve le rendu « Règl. … » + lien « Ouvrir
+// le règlement » en vrai navigateur. Sans le param : comportement historique #84.
+if (params.get("fixture") === "zone-reglement") {
+  const citySlug = "delson";
+  const reglementUrl =
+    "https://ville.delson.qc.ca/wp-content/uploads/2025/01/Grilles-Web-09092022.pdf";
+  const zoneFeature = {
+    type: "Feature" as const,
+    geometry: null,
+    properties: {
+      code: "H-315",
+      citySlug,
+      geometryStatus: "official" as const,
+      confidence: 1,
+      source: "official-zone" as const,
+      lotCount: 17,
+      lots: [],
+      kind: "residential",
+      reglementNumero: "901",
+      reglementUrl,
+    },
+  };
+  const zonesResponse = {
+    ok: true,
+    citySlug,
+    source: "official" as const,
+    resolutionStatus: "official" as const,
+    geometryStatus: "official" as const,
+    zoneCount: 1,
+    warnings: [] as string[],
+    featureCollection: { type: "FeatureCollection" as const, features: [zoneFeature] },
+  };
+  const zoneCity: CityMapEntry = {
+    ...selectedCity,
+    municipality: { ...selectedCity.municipality, slug: citySlug, name: "Delson" },
+  };
+  const zoneFocusKey = makeKey("zone", `${citySlug}/H-315`) as SelectionKey;
+  let zoneState: SelectionBucketState = createSelectionBucketState();
+  zoneState = toggleSelection(zoneState, zoneFocusKey);
+  zoneState = setFocus(zoneState, zoneFocusKey);
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity: zoneCity,
+      detailNodes: [],
+      zonesResponse,
+      selectionState: zoneState,
+      onToggleKey: toggleBucketKey,
+    },
+  });
+} else {
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity,
+      detailNodes,
+      selectionState,
+      onToggleKey: toggleBucketKey,
+    },
+  });
+}

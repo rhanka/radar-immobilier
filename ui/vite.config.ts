@@ -29,6 +29,9 @@ const harnessInput = qaHarness
       "geo-level": fileURLToPath(
         new URL("./e2e-qa/harness/geo-level.html", import.meta.url),
       ),
+      "navdrill-lotclick": fileURLToPath(
+        new URL("./e2e-qa/harness/navdrill-lotclick.html", import.meta.url),
+      ),
       "sel-panel": fileURLToPath(
         new URL("./e2e-qa/harness/sel-panel.html", import.meta.url),
       ),
