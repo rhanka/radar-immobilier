@@ -304,7 +304,10 @@ export async function getOpportuniteFeatures(
       label: graphNodes.label,
       citySlug: graphNodes.citySlug,
       sourceRef: graphNodes.sourceRef,
-      createdAt: graphNodes.createdAt,
+      // `created_at` volontairement PAS sélectionné : la prod OVH n'a pas cette
+      // colonne sur graph_nodes (drift, cf #468 + mémoire ovh-schema-drift-
+      // created-at) → un SELECT created_at y 500e et casse la carte opportunités
+      // (qui sert etape/etape_date v3.4). etape/etape_date restent inchangés.
       category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
       etape: sql<string | null>`${graphNodes.props}->'properties'->>'etape'`,
       etapeDate: sql<string | null>`${graphNodes.props}->'properties'->>'etape_date'`,
@@ -332,9 +335,10 @@ export async function getOpportuniteFeatures(
       citySlug: row.citySlug ?? citySlug,
       category: row.category,
       etape: row.etape,
-      date:
-        row.etapeDate ??
-        (row.createdAt ? row.createdAt.toISOString().slice(0, 10) : null),
+      // etape_date (v3.4) reste la source de date ; le repli createdAt est retiré
+      // (colonne absente OVH — voir le SELECT ci-dessus). Quand etape_date manque,
+      // date=null (dégradation acceptable ; createdAt n'existait pas sur OVH).
+      date: row.etapeDate ?? null,
       sourceRef: row.sourceRef,
     };
 

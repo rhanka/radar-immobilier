@@ -61,6 +61,8 @@
     proofStatusLabel,
     publicAuditUrl,
     readinessLabel,
+    AUDIT_NOT_COVERED_LABEL,
+    AUDIT_NOT_COVERED_HINT,
   } from "$lib/maps/geo-provenance.js";
 
   // ── Props ────────────────────────────────────────────────────────────────────
@@ -586,14 +588,14 @@
         {/if}
       </section>
 
-      {#if proof || provenance}
-        <section aria-labelledby="section-audit" data-testid="fiche-audit">
-          <h3
-            id="section-audit"
-            class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
-          >
-            Audit des sources
-          </h3>
+      <section aria-labelledby="section-audit" data-testid="fiche-audit">
+        <h3
+          id="section-audit"
+          class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+        >
+          Audit des sources
+        </h3>
+        {#if proof || provenance}
           <div class="space-y-3 rounded-lg border border-slate-100 bg-white px-3 py-2 text-sm">
             {#if proof}
               <div data-testid="fiche-proof">
@@ -650,8 +652,16 @@
               </div>
             {/if}
           </div>
-        </section>
-      {/if}
+        {:else}
+          <div
+            class="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-500"
+            data-testid="fiche-audit-empty"
+          >
+            <Info class="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
+            <p><span class="font-semibold text-slate-600">{AUDIT_NOT_COVERED_LABEL}</span> — {AUDIT_NOT_COVERED_HINT}</p>
+          </div>
+        {/if}
+      </section>
 
       <!-- Section Marquage équipe + notes (CS-L3) ─────────────────────────── -->
       <section aria-labelledby="section-notes">

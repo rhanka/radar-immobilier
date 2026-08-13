@@ -893,8 +893,12 @@ export async function queryNeighbors(
 
 export interface Subgraph {
   citySlug: string;
-  nodes: (typeof graphNodes.$inferSelect)[];
-  edges: (typeof graphEdges.$inferSelect)[];
+  // `created_at` est OMIS volontairement : il n'est utilisé par aucun
+  // consommateur (nodeFromDb/edgeFromDb/routes/enrichment) et la colonne peut
+  // être absente sur certains déploiements (drift schema OVH). On ne
+  // sélectionne donc que les colonnes réellement lues.
+  nodes: Omit<typeof graphNodes.$inferSelect, "createdAt">[];
+  edges: Omit<typeof graphEdges.$inferSelect, "createdAt">[];
 }
 
 /**
@@ -906,7 +910,14 @@ export async function subgraphForCity(
   citySlug: string,
 ): Promise<Subgraph> {
   const nodes = await db
-    .select()
+    .select({
+      id: graphNodes.id,
+      type: graphNodes.type,
+      label: graphNodes.label,
+      citySlug: graphNodes.citySlug,
+      props: graphNodes.props,
+      sourceRef: graphNodes.sourceRef,
+    })
     .from(graphNodes)
     .where(eq(graphNodes.citySlug, citySlug));
 
@@ -919,7 +930,13 @@ export async function subgraphForCity(
   // Pull all edges where src is in the city set; filter dstId in application
   // layer (avoids a large IN clause for small graphs).
   const candidateEdges = await db
-    .select()
+    .select({
+      id: graphEdges.id,
+      srcId: graphEdges.srcId,
+      dstId: graphEdges.dstId,
+      kind: graphEdges.kind,
+      props: graphEdges.props,
+    })
     .from(graphEdges)
     .where(
       or(
@@ -1522,6 +1539,89 @@ export interface GraphSignalProjectionRow {
   sourceRef: string | null;
 }
 
+export interface GraphSignalDateRange {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+const SIGNAL_DATE_KEYS = [
+  "etapeDate",
+  "etape_date",
+  "meetingDate",
+  "meeting_date",
+  "documentDate",
+  "date",
+] as const;
+
+function signalRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function parseServerSignalDate(value: string): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    const parsed = new Date(year, month - 1, day);
+    return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+      ? parsed
+      : null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseServerSignalBoundary(value: string, endOfDay: boolean): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!dateOnly) return parseServerSignalDate(value);
+
+  const year = Number(dateOnly[1]);
+  const month = Number(dateOnly[2]);
+  const day = Number(dateOnly[3]);
+  const parsed = new Date(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+  return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+    ? parsed
+    : null;
+}
+
+/**
+ * Server mirror of the client signal date lens. Keep the key list and
+ * properties-before-root precedence synchronized with signal-date-filter.ts.
+ * graph_nodes has no created_at column on OVH, so the only server fallback is
+ * props.publishedAt; createdAt is intentionally unavailable and treated as null.
+ */
+export function serverSignalEtapeDate(props: unknown): Date | null {
+  const root = signalRecord(props);
+  const nested = signalRecord(root.properties);
+  for (const record of [nested, root]) {
+    for (const key of SIGNAL_DATE_KEYS) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim() !== "") return parseServerSignalDate(value);
+    }
+  }
+
+  const publishedAt = root.publishedAt;
+  return typeof publishedAt === "string" && publishedAt.trim() !== ""
+    ? parseServerSignalDate(publishedAt)
+    : null;
+}
+
+function isSignalInDateRange(props: unknown, range?: GraphSignalDateRange): boolean {
+  if (!range?.dateFrom && !range?.dateTo) return true;
+
+  const date = serverSignalEtapeDate(props);
+  // A bounded window cannot place a row with no extractable, parseable date.
+  if (!date) return false;
+
+  const lower = range.dateFrom ? parseServerSignalBoundary(range.dateFrom, false) : null;
+  const upper = range.dateTo ? parseServerSignalBoundary(range.dateTo, true) : null;
+  return (!lower || date >= lower) && (!upper || date <= upper);
+}
+
 export interface CitySignalCounts {
   citySlug: string;
   signalCount: number;
@@ -1532,6 +1632,7 @@ export interface CitySignalCounts {
 /** Aggregate one projection in both rails. Pure so A/B parity is testable. */
 export function aggregateGraphSignalProjectionRows(
   rows: readonly GraphSignalProjectionRow[],
+  dateRange?: GraphSignalDateRange,
 ): CitySignalCounts[] {
   function emptySubsetCounts(): Record<SubsetKey, number> {
     const out = {} as Record<SubsetKey, number>;
@@ -1549,6 +1650,7 @@ export function aggregateGraphSignalProjectionRows(
 
   for (const row of rows) {
     if (!row.citySlug) continue;
+    if (!isSignalInDateRange(row.props, dateRange)) continue;
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
@@ -1625,6 +1727,7 @@ export function aggregateGraphSignalProjectionRows(
 
 export async function listCitiesWithSignalNodes(
   db: Database,
+  dateRange?: GraphSignalDateRange,
 ): Promise<CitySignalCounts[]> {
   // One row per individual signal node (no count grouping in SQL) so both
   // contracts are derived from the same source projection.
@@ -1650,7 +1753,7 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  return aggregateGraphSignalProjectionRows(rows);
+  return aggregateGraphSignalProjectionRows(rows, dateRange);
 }
 
 /**

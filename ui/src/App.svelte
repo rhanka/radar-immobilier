@@ -23,6 +23,7 @@
   import LoginView from "$lib/components/auth/LoginView.svelte";
   import AdminView from "$lib/components/admin/AdminView.svelte";
   import RapportView from "$lib/components/rapport/RapportView.svelte";
+  import PalierMatrix from "$lib/palier/PalierMatrix.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
@@ -244,6 +245,11 @@
       {:else if activeView === "kanban"}
         <!-- WP6 — Kanban WorkPackages (projection 4 niveaux) -->
         <KanbanView />
+      {:else if activeView === "matrice"}
+        <!-- #1/#1b — Matrice de suivi villes × KPI (palier-matrix/v1). Route
+             discrète #/matrice (hors nav principale strict-3). Scaffold :
+             placeholder « proxy immo geo-lot pending » jusqu'au hand geo. -->
+        <PalierMatrix />
       <!-- G3 — Vue Géo (zones + lots + opportunités) -->
       {:else if activeView === "geo"}
         <GeoView />
