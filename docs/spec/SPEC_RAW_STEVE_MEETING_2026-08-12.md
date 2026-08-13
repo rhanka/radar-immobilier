@@ -48,7 +48,7 @@ Create an MCP feedback endpoint. The MCP must proactively surface missing data a
 
 ### 3.1 Signal evidence regression
 
-Trace and restore the useful signal/PDF association previously displayed in the Signal right pane. Do not reintroduce unrelated `effet_densifiant` behavior as a substitute. Preserve evidence provenance and distinguish a source document from a regulation or zoning-grid PDF.
+Trace and restore the useful signal/PDF association previously displayed in the Signal right pane. Do not reintroduce unrelated field behavior as a substitute. Preserve evidence provenance and distinguish a source document from a regulation or zoning-grid PDF.
 
 ### 3.2 Search
 
