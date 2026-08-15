@@ -1,4 +1,4 @@
-# RAW meeting specification — Steve — 2026-08-12
+# RAW specification — revue owner — 2026-08-12
 
 > Status: raw owner input, recorded as initial intent. This is not an implementation contract. Architecture, privacy, authorization, data retention, and production rollout decisions remain to be specified and reviewed.
 
