@@ -8,8 +8,8 @@
 > (c) mois fait/à faire ; (d) depuis le début fait + reste à faire. Les **WP sont stables**, les **todos
 > internes progressent**.
 > **Sources** : `track report/query --format json` (111 items), `.track/events.jsonl` (437 events),
-> `docs/spec/data-division-immo-geo.md` (RACI), specs Steve (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`,
-> `SPEC_CONTROLE_PARITE_VILLES_STEVE.md`, `SPEC_EVOL_PROCESS_E2E.md`, `SPEC_REORIENTATION_GRAND_FILET.md`,
+> `docs/spec/data-division-immo-geo.md` (RACI), specs Steve (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`,
+> `SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`, `SPEC_EVOL_PROCESS_E2E.md`, `SPEC_REORIENTATION_GRAND_FILET.md`,
 > `SPEC_EVOL_VERTICAL_SLICE_VALLEYFIELD.md`), `api/src/services/track/track-reader.ts`,
 > `ui/src/lib/backlog/*`.
 

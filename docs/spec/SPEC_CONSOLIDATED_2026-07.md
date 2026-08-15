@@ -474,7 +474,7 @@ en priorité). Côté produit, filtre TOD + colorisation **déjà câblés**, s'
 ## 4. Vues produit
 
 Référentiel autoritaire : **4 vues, zéro nouvel écran**, toutes câblées sur l'API réelle
-(`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`). Socle carto partagé **`GeoCityMapBase`** extrait, mémoire de
+(`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`). Socle carto partagé **`GeoCityMapBase`** extrait, mémoire de
 viewport (`viewport-memory.ts`) entre navigations.
 
 > ⚠️ **Correctif de cadrage (nav réelle).** La barre de nav DS (`TopNav`) n'expose que **3 items** :
@@ -532,7 +532,7 @@ L1+L2+L4+L5** (L3/L6/L7 → V2, jointures coûteuses).
   humain avant sortie externe** — responsabilité OACIQ/Loi 25), **pas un 5ᵉ écran**.
 
 **Parité « carte de référence » concurrent** = l'**outil de Steve** (prospection foncière manuelle,
-Leaflet + Firestore, 4 villes hardcodées). Décision (2026-06-11, `SPEC_CONTROLE_PARITE_VILLES_STEVE.md`)
+Leaflet + Firestore, 4 villes hardcodées). Décision (2026-06-11, `SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`)
 : importer son corpus en **table de contrôle golden isolée** (`ControlLot`/`ControlMark`, clé
 `(citySlug, NO_LOT)`), **jamais** dans le store opérationnel, puis **mesurer la parité**. 4 villes golden
 (**delson** 3213 lots, **sainte-catherine** 5615 + 5253 marques d'équipe, **saint-constant** 11261,
@@ -542,7 +542,7 @@ ne le nourrit jamais). **17/17 features du concurrent mappées** sur les 4 vues,
 (JSON monolithe→API paginée ; Firestore sans auth→backend+auth ; hardcode→data-driven ; état d'URL
 `?ville&view&zoom&filtres&lot&signal`).
 
-**Cartographie tranchée** (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md §8`) : **MapLibre GL** pour lots/zones
+**Cartographie tranchée** (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md §8`) : **MapLibre GL** pour lots/zones
 (WebGL, style data-driven, ~11k polygones/ville) ; **SVG conservé** à la maille Québec
 (Signaux/Sources). Leaflet écarté ; PMTiles différé (arrive avec le zero-copy geo).
 
@@ -684,8 +684,8 @@ gates déterministes, citations obligatoires, mesures reproductibles, limites do
 - `cadrage-zones-lots-acquisition.md`, `cadrage-extraction-zones-pdf.md` — méthodes d'acquisition geo.
 - `cadrage-geo-integration-mapper.md` + `wp3-mapper-recall-2026-06-28.md` — mapper #74 (design + mesure).
 - `data-division-immo-geo.md` + `decision-proprietaires-lots-geo-loi25.md` (27 juin) — split immo/geo + Loi 25.
-- `SPEC_EVOL_SOURCE_VIEW.md` (D1-D7), `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`,
-  `SPEC_CONTROLE_PARITE_VILLES_STEVE.md` — vues produit + parité.
+- `SPEC_EVOL_SOURCE_VIEW.md` (D1-D7), `SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`,
+  `SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md` — vues produit + parité.
 - `SPEC_PERSISTENCE_S3_FIRST.md` — persistance. `mcp/*` — connecteur MCP.
 - `SPEC_INTENT_GEO_NAVIGATION_SELECTION.md`, `SPEC_INTENT_REDESIGN_SELECTION_BUCKETS.md` — navigation/UX.
 - Rapports WP : `wp1-data-state.md`, `wp3-33-anomalies.md`, `wp4-produit-coverage.md`, `wp5-plateforme.md`,

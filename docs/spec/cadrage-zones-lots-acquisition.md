@@ -268,7 +268,7 @@ opportuniste piloté par les chiffres de S3.
 - Schéma inventaire (à étendre + migrer vers `geo`) :
   `packages/radar-sources/src/geo/geo-source-inventory.ts` + `.data.ts`.
 - Carte de Steve (méthode d'acquisition zones/lots semi-manuelle, schéma lot, grilles PDF) :
-  `docs/spec/input/carte-steve/README.md` + `tech/ARCHITECTURE.md`.
+  `docs/spec/input/carte-user-review/README.md` + `tech/ARCHITECTURE.md`.
 - Modèle métier temporel cible : `docs/spec/SPEC_INTENT_DATA_MODEL_ZONING_LOTS.md`.
 - Réorientation « grand filet » (cadre stratégique zonage-centrique) :
   `docs/spec/SPEC_REORIENTATION_GRAND_FILET.md`.

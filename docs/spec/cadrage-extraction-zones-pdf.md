@@ -46,7 +46,7 @@
 
 ### 1.2 La référence Steve (le geste à automatiser)
 
-- `docs/spec/input/carte-steve/README.md` + `tech/ARCHITECTURE.md` : pour Delson/Saint-Constant,
+- `docs/spec/input/carte-user-review/README.md` + `tech/ARCHITECTURE.md` : pour Delson/Saint-Constant,
   le zonage a été **numérisé en amont** (déjà vectoriel) ; pour **Sainte-Catherine**, les
   **193 zones ont été dessinées à la main** dans `editeur-zones.html` (Leaflet.draw) à partir
   des **plans de zonage PDF + grilles par préfixe H/C/I/M/P**, puis exportées en GeoJSON

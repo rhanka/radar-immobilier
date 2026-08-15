@@ -125,11 +125,11 @@ fait   à-faire   attendus   dropped   décisions pending
 **[OBSERVÉ]** `/home/antoinefa/src/radar-immobilier/docs/spec/input/PROCESS.md` décrit le pipeline cible: les signaux réglementaires créent des hypothèses, l'ancrage foncier les relie aux lots, les contraintes filtrent, puis marché/contexte/scoring priorisent (`PROCESS.md`, lignes 13-18). Les phases détaillées sont Signal, Ancrage foncier, Contraintes, Enrichissement marché, Contexte stratégique, Scoring (`PROCESS.md`, lignes 43-99).  
 **[OBSERVÉ]** Le même fichier impose que chaque score pointe vers une preuve, une date et une source (`PROCESS.md`, lignes 168-172), et que les PDF municipaux soient lus par OCR/LLM tout en conservant l'extrait source et la page (`PROCESS.md`, lignes 230-252).  
 **[OBSERVÉ]** `/home/antoinefa/src/radar-immobilier/docs/spec/SPEC_REORIENTATION_GRAND_FILET.md` pivote vers un radar multi-villes, centré PV et carte-first: changement de zonage depuis procès-verbaux, avis de motion, grand filet, carte ville-zone-lot (`SPEC_REORIENTATION_GRAND_FILET.md`, lignes 8-34).  
-**[OBSERVÉ]** `/home/antoinefa/src/radar-immobilier/docs/spec/input/carte-steve/README.md` décrit l'outil Steve comme une plateforme de prospection foncière: lots cadastraux, rôle 2022, zonage 4+, TOD, marques d'équipe, notes, pastilles réglementaires et exports CSV (`README.md`, lignes 8-17).  
-**[OBSERVÉ]** Le corpus Steve couvre 4 villes et 27 279 lots: Delson, Sainte-Catherine, Saint-Constant, Candiac (`README.md`, lignes 20-30; `SPEC_CONTROLE_PARITE_VILLES_STEVE.md`, lignes 36-51).  
-**[OBSERVÉ]** `/home/antoinefa/src/radar-immobilier/docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` dit que tout Steve doit s'intégrer aux quatre vues radar existantes: Signaux, Opportunités, Évaluation, Sources (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, lignes 1-6 et 25-33).  
-**[OBSERVÉ]** Cette spec liste 17 features Steve couvertes par les vues radar, dont carte lots/zonage/TOD, fiche lot, marques, export CSV, filtres, pastilles depuis PV, couches environnementales, recherche, batch, auth/sync, code postal, éditeur zonage, mobile et dashboard multi-villes (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, lignes 328-350).  
-**[OBSERVÉ]** La table de contrôle Steve est un dataset de référence isolé, jamais le store opérationnel, pour mesurer la parité entre Steve et le pipeline radar (`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`, lignes 6-13 et 28-35).  
+**[OBSERVÉ]** `/home/antoinefa/src/radar-immobilier/docs/spec/input/carte-user-review/README.md` décrit l'outil Steve comme une plateforme de prospection foncière: lots cadastraux, rôle 2022, zonage 4+, TOD, marques d'équipe, notes, pastilles réglementaires et exports CSV (`README.md`, lignes 8-17).  
+**[OBSERVÉ]** Le corpus Steve couvre 4 villes et 27 279 lots: Delson, Sainte-Catherine, Saint-Constant, Candiac (`README.md`, lignes 20-30; `SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`, lignes 36-51).  
+**[OBSERVÉ]** `/home/antoinefa/src/radar-immobilier/docs/spec/SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` dit que tout Steve doit s'intégrer aux quatre vues radar existantes: Signaux, Opportunités, Évaluation, Sources (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`, lignes 1-6 et 25-33).  
+**[OBSERVÉ]** Cette spec liste 17 features Steve couvertes par les vues radar, dont carte lots/zonage/TOD, fiche lot, marques, export CSV, filtres, pastilles depuis PV, couches environnementales, recherche, batch, auth/sync, code postal, éditeur zonage, mobile et dashboard multi-villes (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`, lignes 328-350).  
+**[OBSERVÉ]** La table de contrôle Steve est un dataset de référence isolé, jamais le store opérationnel, pour mesurer la parité entre Steve et le pipeline radar (`SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`, lignes 6-13 et 28-35).  
 **[OBSERVÉ]** La frontière immo/geo est déjà cadrée: `geo` doit porter les données géo génériques, cadastre, zonage, contraintes, registre municipalités, rôle/adresses en acquisition, OCR/géoréférencement de plans PDF; `immo` garde PV, détection sémantique, mapper, ontologie, scoring, signaux/opportunités et scraping dur Obscura (`data-division-immo-geo.md`, lignes 15-40 et 79-109).
 
 ### Ce que la structure doit porter
@@ -161,7 +161,7 @@ fait   à-faire   attendus   dropped   décisions pending
 **Draft owner:** niveaux 1/2/3: signaux x PDF; signaux x PDF x zones x geo; signaux x zones x grid x lots.
 
 **[JUGEMENT]** L'intention est correcte, mais les niveaux sont des critères de maturité, pas des WPs. Si le sommet est `level1/level2/level3`, il bougera dès que la preuve avance.  
-**[OBSERVÉ]** Les specs imposent bien une chaîne signal/PV -> zone -> lot -> opportunité avec preuve et PDF (`PROCESS.md`, lignes 43-99 et 230-252; `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, lignes 201-219 et 354-371).  
+**[OBSERVÉ]** Les specs imposent bien une chaîne signal/PV -> zone -> lot -> opportunité avec preuve et PDF (`PROCESS.md`, lignes 43-99 et 230-252; `SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`, lignes 201-219 et 354-371).  
 **[PROPOSITION]** Garder un seul WP durable `WP-REC - Réconciliation E2E et preuve`, avec des critères internes L1/L2/L3. L1/L2/L3 deviennent des checklist de complétude et des focus reports, pas des parents permanents.
 
 ### WP3 IMMO FUNCTIONAL
@@ -169,7 +169,7 @@ fait   à-faire   attendus   dropped   décisions pending
 **Draft owner:** niveaux Québec, ville, zone, lot, transverse PDF; filtering views, bucket functions, CS-L tests.
 
 **[JUGEMENT]** Ce WP confond la hiérarchie de navigation, les vues produit, le scoring et la preuve PDF. La navigation Québec/ville/zone/lot est stable comme expérience, mais PDF/preuve doit rester dans la chaîne de vérité E2E, sinon le produit peut paraître fini sans être prouvé.  
-**[OBSERVÉ]** Les quatre vues officielles sont Signaux, Opportunités, Évaluation, Sources (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, lignes 35-47), et Steve doit y être couvert sans nouvel écran (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, lignes 328-350).  
+**[OBSERVÉ]** Les quatre vues officielles sont Signaux, Opportunités, Évaluation, Sources (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`, lignes 35-47), et Steve doit y être couvert sans nouvel écran (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`, lignes 328-350).  
 **[PROPOSITION]** Renommer et recentrer en `WP-PROD - Expérience radar client`: vues, filtres, buckets, marques, exports, URL state, DS/app shell. La preuve PDF transverse sort vers `WP-REC`; les données géo sortent vers `WP-GEO`.
 
 ### WP4 INFRA
@@ -186,7 +186,7 @@ fait   à-faire   attendus   dropped   décisions pending
 **[OBSERVÉ]** Le workspace `evdoc-branch-feat-evidence-doc-cards` regroupe 8 DONE autour des cartes documentaires et de l'overlay PDF; le draft ne dit pas si cela relève d'E2E preuve, UI produit ou infra.  
 **[OBSERVÉ]** Les items `wp6-platform` concernent explicitement Backlog <-> Track; le draft WP4 les absorberait sans distinguer source de vérité Track et projection UI.  
 **[OBSERVÉ]** Les items `frontA-data` mélangent PV à garder immo et zonage/rôle à déléguer geo; le draft WP1 ne force pas cette séparation.  
-**[OBSERVÉ]** Les items `CS-L*` et `CS-P*` sont des lots d'intégration Steve (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, lignes 706-780), pas des WPs de long terme.  
+**[OBSERVÉ]** Les items `CS-L*` et `CS-P*` sont des lots d'intégration Steve (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`, lignes 706-780), pas des WPs de long terme.  
 **[PROPOSITION]** La migration doit donc être par préoccupation durable et non par préfixe historique.
 
 ## 5. Structure cible: tableau des WP
