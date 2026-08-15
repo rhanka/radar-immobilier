@@ -635,7 +635,7 @@ mais ne remplacent pas les captures de vraies tuiles 3D.
 ### D1 — Fournisseur de l'imagerie 3D
 
 - **Préférence produit** : rendu Google Earth / Google Photorealistic 3D Tiles.
-- **Décidé (owner 2026-08-14)** : un spike comparatif chiffré est autorisé entre
+- **Orientation owner (2026-08-14), à ratifier APRÈS double revue geo + geo-archi** : un spike comparatif chiffré est autorisé entre
   Google direct, Cesium, MapTiler et des tuiles auto-hébergées, sans engagement
   de dépense. Cette autorisation n'emporte aucun choix de fournisseur.
 - **Arbitrage restant** : choisir sur preuves entre les quatre voies comparées.
@@ -645,7 +645,7 @@ mais ne remplacent pas les captures de vraies tuiles 3D.
 
 ### D2 — Règle combinée de bascule
 
-- **Décidé (owner 2026-08-14)** : règle combinée avec entrée en 3D à
+- **Orientation owner (2026-08-14), à ratifier APRÈS double revue geo + geo-archi** : règle combinée avec entrée en 3D à
   **`z >= 14,0` ou sur sélection sémantique d'une zone**. Sans sélection de
   zone, la sortie par zoom reste `z <= 13,5`; la branche sémantique ne modifie
   pas silencieusement le zoom ni la caméra.
@@ -658,7 +658,7 @@ mais ne remplacent pas les captures de vraies tuiles 3D.
 
 ### D3 — Moteur de rendu
 
-- **Décidé (owner 2026-08-14)** : le même spike comparatif chiffré est autorisé
+- **Orientation owner (2026-08-14), à ratifier APRÈS double revue geo + geo-archi** : le même spike comparatif chiffré est autorisé
   sur les voies Google direct, Cesium, MapTiler et auto-hébergée, sans
   engagement de dépense. Il instruit le choix du moteur sans le préjuger.
 - **Google Maps JS 3D** : proximité de l'expérience préférée, moteur parallèle
@@ -742,7 +742,7 @@ AC-03, pas laissée comme une inconnue d'implémentation.
 
 ### D10 — Développement parallèle + point de synchronisation d'intégration
 
-**Décidé (owner 2026-08-14)** : le développement 3D avance en parallèle de P05
+**Orientation owner (2026-08-14), à ratifier APRÈS double revue geo + geo-archi** : le développement 3D avance en parallèle de P05
 (`feat/map-basemap-controls`). Le fond satellite 2D, son fournisseur D8 et le
 seam commun livrés par P05 restent les prérequis fonctionnels du mode Imagerie
 2D, du repli gracieux et de l'acceptation du parcours 2D↔3D complet. AC-00 est

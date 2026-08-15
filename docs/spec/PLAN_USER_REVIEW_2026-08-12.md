@@ -329,7 +329,7 @@ Rattaché à la vague **P05** (`feat/map-basemap-controls`). Spec dédiée :
 `SPEC_EVOL_3D_MAPS_2026-08-14.md` ; dossier de décision :
 `reports/DOSSIER_DECISION_3D_MAPS_2026-08-14.md`. Revue Fable 5 = PRÊTE-AVEC-RÉSERVES.
 
-**Décisions owner (2026-08-14) :**
+**Orientations owner (2026-08-14) — à ratifier APRÈS la double revue geo + geo-archi (+ design-system) :**
 - **Capitalisation** : les vues cartographiques (dont la 3D) sont capitalisées en
   **modules UI du design system (`sent-tech-design-system`), validés par geo** (le DS porte
   les modules, geo valide la correction géo/domaine + contrat data, immo consomme). Architecture
