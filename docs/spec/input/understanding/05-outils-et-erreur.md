@@ -6,7 +6,7 @@
 
 ## Capture 60 — Éditeur de zones (`editeur-zones.html`)
 
-![](../carte-steve/screens/60-editeur-zones-stecatherine.png)
+![](../carte-user-review/screens/60-editeur-zones-stecatherine.png)
 
 **Ce que montre la vue Steve.** Outil **séparé** de **numérisation manuelle du zonage**. Fond de carte
 clair avec les **lots en filigrane gris** (Sainte-Catherine). En haut à gauche, une **barre d'outils
@@ -39,7 +39,7 @@ polygone de zonage**. **Gain** : versionné + traçable (vs `localStorage` perdu
 
 ## Capture 61 — Écran d'erreur (ville inexistante)
 
-![](../carte-steve/screens/61-erreur-ville-inexistante.png)
+![](../carte-user-review/screens/61-erreur-ville-inexistante.png)
 
 **Ce que montre la vue Steve.** Page sur fond bleu nuit, centrée : un **spinner** (anneau partiel
 vert) au-dessus d'un message **« ❌ Erreur »** et, en sous-titre, **« Fichier introuvable :

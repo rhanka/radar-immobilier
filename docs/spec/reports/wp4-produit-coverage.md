@@ -30,7 +30,7 @@ la stack est requise : `make demo` / `make up ENV=…` puis `localhost:5301`.
 
 ## Partie 2 — Couverture des 17 features Steve (S-1..S-17)
 
-Source : `docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` (détail §2 lignes 200-323, table §3
+Source : `docs/spec/SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` (détail §2 lignes 200-323, table §3
 lignes 328-350, table items track §10 lignes 767-794). Statut Track lu via `track_query`
 (baseline `f678149`).
 

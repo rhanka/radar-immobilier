@@ -6,7 +6,7 @@
 
 ## Capture 00 — Dashboard / index
 
-![](../carte-steve/screens/00-index-dashboard.png)
+![](../carte-user-review/screens/00-index-dashboard.png)
 
 **Ce que montre la vue Steve.** Page d'accueil sur fond clair. En-tête bleu nuit avec un logo carte
 et le titre **« Plateforme d'analyse immobilière »**, sous-titre « Rive-Sud de Montréal · Québec ».
@@ -21,7 +21,7 @@ cadastrales : MERN Québec ».
 ville (README §A : grille de cartes-villes, badge ✅ Disponible / ⏳ En préparation).
 
 **Notre couverture.** **Vue Sources** (`SourcesMapView.svelte` + `CityDetailPanel.svelte`).
-`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §2 **S-17** est explicite : *« le dashboard de villes de
+`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §2 **S-17** est explicite : *« le dashboard de villes de
 Steve **est notre vue Sources** »* — villes coloriées par **maturité de recueil**
 (`CityMaturitySummary`, statut par source todo/identified/scraped/graphified), enrichie du statut
 par couche attendue par Steve (lots / zonage / TOD). **Comment on le reproduit** : là où Steve a un
@@ -41,7 +41,7 @@ par source au lieu d'un « Disponible » qui masque les couches manquantes (cf. 
 
 ## Capture 01 — Recherche de ville (filtre live)
 
-![](../carte-steve/screens/01-index-recherche-filtre.png)
+![](../carte-user-review/screens/01-index-recherche-filtre.png)
 
 **Ce que montre la vue Steve.** Même dashboard, mais l'utilisateur a tapé **« saint »** dans la
 barre de recherche. La grille s'est **filtrée en direct** : il ne reste que **Sainte-Catherine** et

@@ -8,9 +8,9 @@
 > revoyez ça »**.
 >
 > **Lecture seule sur les specs.** Ce dossier ne modifie aucune spec ni aucun code ; il **cite** ses
-> preuves : la rétrodoc [`../carte-steve/README.md`](../carte-steve/README.md) (inventaire des
-> features **S-1..S-17**) et l'archi [`../carte-steve/tech/ARCHITECTURE.md`](../carte-steve/tech/ARCHITECTURE.md),
-> et la spec d'intégration **mergée** [`../../SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`](../../SPEC_EVOL_INTEGRATION_CARTE_STEVE.md)
+> preuves : la rétrodoc [`../carte-user-review/README.md`](../carte-user-review/README.md) (inventaire des
+> features **S-1..S-17**) et l'archi [`../carte-user-review/tech/ARCHITECTURE.md`](../carte-user-review/tech/ARCHITECTURE.md),
+> et la spec d'intégration **mergée** [`../../SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`](../../SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md)
 > (mapping feature→écran, §2 S-1..S-17, `ProspectMark`, source TOD A13, décision MapLibre) avec les
 > specs d'écran référencées : [`../../SPEC_EVOL_SOCLE_STATES_SCORING.md`](../../SPEC_EVOL_SOCLE_STATES_SCORING.md),
 > [`../../SPEC_EVOL_OPPORTUNITES_T2.md`](../../SPEC_EVOL_OPPORTUNITES_T2.md),
@@ -44,11 +44,11 @@ nom de fichier). Les vues sont regroupées par contexte, dans un fichier par gro
 > pilotée par le **score de potentiel par lot** (dérivé `ZoneVersion.densiteLogHa`/usages ∩ TOD ∩
 > pré-filtres physiques, calculable sur 100 % des lots), **distinct** du **score T2 de dossier** 0-5
 > (`OpportunityDossier`, qui n'existe qu'à la maille dossier, né d'un signal). Voir
-> `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §2 S-1 et `SPEC_EVOL_SOCLE_STATES_SCORING.md` §3.1/§3.3.
+> `SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §2 S-1 et `SPEC_EVOL_SOCLE_STATES_SCORING.md` §3.1/§3.3.
 
 ## Nos 4 vues radar (cibles d'intégration — aucun nouvel écran)
 
-La thèse d'intégration (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §0) : l'outil de Steve est une
+La thèse d'intégration (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §0) : l'outil de Steve est une
 **prospection foncière manuelle** sur **4 villes hardcodées** ; le radar **automatise le même
 geste** sur ~150 villes. **Tout** ce que fait Steve tombe dans l'une des **4 vues déjà prévues** :
 
@@ -98,7 +98,7 @@ geste** sur ~150 villes. **Tout** ce que fait Steve tombe dans l'une des **4 vue
 
 - **30 / 30** captures décrites et appariées à au moins une feature S-N + une section de spec.
 - **17 / 17** features S-1..S-17 de Steve adressées par la spec d'intégration (+ S-1b panneau stats),
-  **0 nouvel écran** (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §3, couverture 17/17).
+  **0 nouvel écran** (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §3, couverture 17/17).
 - Statuts par **vue** (capture) :
 
 | Statut | Nb vues | Captures |

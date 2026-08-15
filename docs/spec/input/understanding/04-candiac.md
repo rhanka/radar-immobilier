@@ -11,7 +11,7 @@ il montre ce qui se passe quand des couches **manquent** — exactement le scén
 
 ## Capture 50 — Vue globale
 
-![](../carte-steve/screens/50-candiac-vue-globale.png)
+![](../carte-user-review/screens/50-candiac-vue-globale.png)
 
 **Ce que montre la vue Steve.** Carte de Candiac. Panneau stats à droite : **7 190** Lots total ·
 **0** Zones 4+ logements · **0** Dans périmètre TOD · **0** ⭐ Priorité max. Sur la carte : **tous les
