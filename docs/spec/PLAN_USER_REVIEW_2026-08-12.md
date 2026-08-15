@@ -322,3 +322,27 @@ Chaque `done` doit référencer PR, merge SHA, résultat `make`, preuve d’acce
 10. Promotion d’une couche utilisateur : copie canonique revue et versionnée vs changement de statut en place — cette dernière option compromettrait la séparation demandée.
 
 Ces points doivent rester visibles jusqu’aux décisions propriétaires; ils ne doivent pas être lissés par consensus.
+
+## Addendum conducteur — 2026-08-14 : vue 3D & capitalisation modules design system (autour de P05)
+
+Rattaché à la vague **P05** (`feat/map-basemap-controls`). Spec dédiée :
+`SPEC_EVOL_3D_MAPS_2026-08-14.md` ; dossier de décision :
+`reports/DOSSIER_DECISION_3D_MAPS_2026-08-14.md`. Revue Fable 5 = PRÊTE-AVEC-RÉSERVES.
+
+**Décisions owner (2026-08-14) :**
+- **Capitalisation** : les vues cartographiques (dont la 3D) sont capitalisées en
+  **modules UI du design system (`sent-tech-design-system`), validés par geo** (le DS porte
+  les modules, geo valide la correction géo/domaine + contrat data, immo consomme). Architecture
+  détaillée déléguée à un **complément de proposition design-system + geo** (revu geo-archi + 5.6 Sol
+  + Fable 5). `@sentropic/geo-ui-svelte` = point de départ, statut geo-vs-DS ouvert.
+- **Vue 3D niveau zone** : rendu photoréaliste type Google Earth en vue zone, satellite 2D au-dessus.
+  **Déclencheur = règle combinée** (seuil zoom z≥14 OU sélection sémantique de zone).
+- **Spike comparatif autorisé** (Google direct vs Cesium vs MapTiler vs self-hosted, chiffré, sans
+  engagement de dépense) pour trancher fournisseur/moteur/clé.
+- **Séquencement** : la 3D se développe **en parallèle de P05** ; le fond satellite 2D livré par P05
+  reste le prérequis fonctionnel du repli 2D et du mode imagerie → **point de synchronisation
+  d'intégration**, pas un bloqueur amont du chantier 3D.
+
+**Décisions restées ouvertes** : D8 (fournisseur du fond satellite 2D, dans P05), D9 (choroplèthe
+municipal + aplats de lots en mode imagerie). **Revue en cours** : geo-cond + geo-archi (dossier +
+contrat) et lane design-system (proposition de capitalisation).
