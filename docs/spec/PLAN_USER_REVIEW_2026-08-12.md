@@ -329,19 +329,21 @@ Rattaché à la vague **P05** (`feat/map-basemap-controls`). Spec dédiée :
 `SPEC_EVOL_3D_MAPS_2026-08-14.md` ; dossier de décision :
 `reports/DOSSIER_DECISION_3D_MAPS_2026-08-14.md`. Revue Fable 5 = PRÊTE-AVEC-RÉSERVES.
 
-**Orientations owner (2026-08-14) — à ratifier APRÈS la double revue geo + geo-archi (+ design-system) :**
-- **Capitalisation** : les vues cartographiques (dont la 3D) sont capitalisées en
-  **modules UI du design system (`sent-tech-design-system`), validés par geo** (le DS porte
-  les modules, geo valide la correction géo/domaine + contrat data, immo consomme). Architecture
-  détaillée déléguée à un **complément de proposition design-system + geo** (revu geo-archi + 5.6 Sol
-  + Fable 5). `@sentropic/geo-ui-svelte` = point de départ, statut geo-vs-DS ouvert.
+**Décisions ratifiées (owner, APRÈS double revue modèle Sol+Fable — 2026-08-15)** ; vérification
+domaine geo + geo-archi en cours (faisabilité). Détail : `reports/DOSSIER_DECISION_3D_MAPS_2026-08-14.md` §9.
+- **Capitalisation (G)** : **module cartographique GEO-OWNED, DS-compliant** (renverse l'orientation
+  initiale DS-owned). Geo = runtime géospatial ; design system = chrome (tokens/thèmes/contrôles/a11y) ;
+  immo = adaptateur métier mince. Base = `@sentropic/geo-ui-svelte` étendu après audit (dérive ^0.1.1 vs 0.5.0).
 - **Vue 3D niveau zone** : rendu photoréaliste type Google Earth en vue zone, satellite 2D au-dessus.
-  **Déclencheur = règle combinée** (seuil zoom z≥14 OU sélection sémantique de zone).
-- **Spike comparatif autorisé** (Google direct vs Cesium vs MapTiler vs self-hosted, chiffré, sans
-  engagement de dépense) pour trancher fournisseur/moteur/clé.
-- **Séquencement** : la 3D se développe **en parallèle de P05** ; le fond satellite 2D livré par P05
-  reste le prérequis fonctionnel du repli 2D et du mode imagerie → **point de synchronisation
-  d'intégration**, pas un bloqueur amont du chantier 3D.
+  **Déclencheur = règle combinée + plancher** (z≥14 OU zone sélectionnée cadrée à échelle significative ;
+  dézoom franc → retour 2D, annotation conservée).
+- **Spike autorisé** : fournisseurs **Google Photorealistic 3D Tiles, Cesium ion, self-hosted/open**
+  (MapTiler écarté), structuré source × renderer × diffusion, timeboxé, élimination anticipée couverture/licence.
+- **Séquencement** : **parallélisme à 2 portes** (contrat de seam v1 renderer-neutral gelé avant intégration
+  UI ; sync finale sur fond satellite 2D réel + seam P05 ; **P05 prioritaire** sur contention).
+- **Périmètre 1re livraison (D5)** : **route geo incluse**, build **délégué à une passe 5.6 Sol max**.
+- **D6** mesure 3D vraie (risque d'implémentation à cadrer) · **D8** fond satellite 2D au spike ·
+  **D9** retirer choroplèthe/aplats non sélectionnés en imagerie.
 
 **Décisions restées ouvertes** : D8 (fournisseur du fond satellite 2D, dans P05), D9 (choroplèthe
 municipal + aplats de lots en mode imagerie). **Revue en cours** : geo-cond + geo-archi (dossier +

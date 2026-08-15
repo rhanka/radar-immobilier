@@ -48,3 +48,27 @@ Les 4 décisions ci-dessus (question dédiée). La revue geo/geo-archi raffine l
 - **D2 — Déclencheur** : **règle combinée** (seuil zoom z≥14 OU sélection sémantique de zone), calibrée sur échantillon urbain/rural.
 - **D1+D3 — Spike** : **autorisé** (comparatif chiffré, sans engagement de dépense).
 - **Séquencement** : **3D EN PARALLÈLE de P05** (choix owner). Couplage assumé : le repli 2D + le mode imagerie s'intègrent quand P05 livre le fond satellite 2D + le seam de contrôles ; le travail 3D avance en parallèle, le point d'intégration se synchronise à l'atterrissage de P05.
+
+## 9. DÉCISIONS RATIFIÉES (owner, APRÈS double revue modèle — 2026-08-15)
+
+> Double revue modèle **Sol xhigh + Fable 5** = convergentes, **RATIFIER AVEC AJUSTEMENTS**.
+> Vérification **domaine geo + geo-archi** en cours (faisabilité : état réel `@sentropic/geo-ui-svelte`
+> 0.1.x→0.5.0, abstraction moteur des couches, `geo-core` caméra/zoom normalisés, collision `GeoMap`).
+
+- **G — Résidence** : **module cartographique GEO-OWNED, DS-compliant** (renverse l'orientation §8 « DS-owned »).
+  Geo = runtime géospatial (CRS/projection, caméra, adaptateurs renderer 2D/3D, couches, picking, attribution,
+  exactitude) ; DS = chrome (tokens/thèmes/contrôles/a11y) ; immo = adaptateur métier mince. Base = `@sentropic/geo-ui-svelte`
+  étendu après audit ; **dérive de version ^0.1.1 (app) vs 0.5.0 (source)** = premier test de crédibilité.
+- **D5 — Périmètre 1re livraison** : **route geo INCLUSE** ; réduction de risque = **build délégué à une passe 5.6 Sol max**.
+- **Séquencement** : **parallélisme à 2 portes** — porte 1 = gel d'un contrat de seam v1 renderer-neutral avant toute intégration UI ;
+  porte 2 = sync finale sur fond satellite 2D réel + seam P05 ; dev fournisseur-spécifique après spike + G ;
+  **priorité P05** sur contention de ressources ; acceptation intégrée gated par P05/D8.
+- **D2 — Déclencheur** : règle combinée **+ plancher** (la branche « zone sélectionnée » ne maintient la 3D que si la zone reste
+  cadrée à une échelle significative ; dézoom franc → retour 2D, annotation conservée). Calibration urbain/rural avant gel.
+- **D1/D3 — Spike autorisé** ; fournisseurs = **Google Photorealistic 3D Tiles, Cesium ion, self-hosted/open** ;
+  structuré source × renderer × diffusion ; élimination anticipée couverture/licence ; timeboxé ; scénario fournisseur commun D8+D1.
+- **D8 — Fond satellite 2D** : décidé au spike (échéance dans P05, repli si satellite indisponible).
+- **D9 — Retirer** en imagerie : masquer choroplèthe + aplats de lots non sélectionnés, garder contour/libellé de la cible ;
+  final sur premières captures réelles.
+- **D6 — Mesure 3D vraie** (choix owner) ; note : les 2 revues recommandaient désactiver/projeter au sol pour éviter l'ambiguïté →
+  **risque d'implémentation à cadrer**, pas à retrancher.
