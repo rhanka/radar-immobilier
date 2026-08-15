@@ -38,8 +38,13 @@ Tout est réversible à ce stade : spec + spike, aucune dépendance ni dépense 
 ## 7. Attendu de l'owner
 Les 4 décisions ci-dessus (question dédiée). La revue geo/geo-archi raffine le contrat du module geo, pas ces choix produit.
 
-## 8. DÉCISIONS OWNER PRISES (2026-08-14)
-- **G — Capitalisation** : cible = **modules du DESIGN SYSTEM (sent-tech-design-system), VALIDÉS PAR GEO** (et non un module geo-owned). Le DS porte les modules UI carto ; geo valide (correction géo/domaine) + contrat data geo ; immo consomme. `@sentropic/geo-ui-svelte` = point de départ, statut geo-vs-DS à trancher.
+## 8. ORIENTATIONS OWNER (2026-08-14) — à RATIFIER APRÈS la double revue
+
+> Process : la **décision finale** (dossier / question via l'outil) est prise **APRÈS** la
+> double revue geo + geo-archi (+ design-system + passes Sol/Fable). Les points ci-dessous sont
+> des **orientations owner** = input à challenger par les relecteurs, pas des décisions figées.
+
+- **G — Capitalisation** : orientation = **modules du DESIGN SYSTEM (sent-tech-design-system), VALIDÉS PAR GEO** (et non un module geo-owned). Le DS porte les modules UI carto ; geo valide (correction géo/domaine) + contrat data geo ; immo consomme. `@sentropic/geo-ui-svelte` = point de départ, statut geo-vs-DS à trancher.
 - **D2 — Déclencheur** : **règle combinée** (seuil zoom z≥14 OU sélection sémantique de zone), calibrée sur échantillon urbain/rural.
 - **D1+D3 — Spike** : **autorisé** (comparatif chiffré, sans engagement de dépense).
 - **Séquencement** : **3D EN PARALLÈLE de P05** (choix owner). Couplage assumé : le repli 2D + le mode imagerie s'intègrent quand P05 livre le fond satellite 2D + le seam de contrôles ; le travail 3D avance en parallèle, le point d'intégration se synchronise à l'atterrissage de P05.
