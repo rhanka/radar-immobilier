@@ -179,8 +179,8 @@ moteur. Aucune logique ville en dur ailleurs.
 ### 2.4 Priorité de villes — points de contrôle « parité Steve » en TÊTE et en PROFONDEUR
 
 > Amendement (2026-06-11) découlant de la décision produit tranchée en
-> `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §6.2 et spécifiée dans
-> [`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`](SPEC_CONTROLE_PARITE_VILLES_STEVE.md).
+> `SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §6.2 et spécifiée dans
+> [`SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`](SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md).
 
 Jusqu'ici le plan ne portait **aucune** notion de priorité **par ville** ni de « profondeur » de
 collecte (priorisation par **source** au §5, ville unique Valleyfield §2.1). On l'introduit : les
@@ -189,7 +189,7 @@ Roussillon / CMM) deviennent des **points de contrôle de parité** et passent *
 en **scrape profond** (toutes les sources : rôle, cadastre, zonage/PV, zones, TOD), **avant**
 Valleyfield et le grand filet. **Objectif explicite : reproduire la donnée de référence de Steve et
 mesurer la parité** (couverture + flags + delta de score —
-[`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`](SPEC_CONTROLE_PARITE_VILLES_STEVE.md) §4).
+[`SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`](SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md) §4).
 
 **Où marquer « contrôle-parité / deep » (config) — deux annotations ajoutées au `CityProfile`
 (§2.3)** :
@@ -208,11 +208,11 @@ Soit, par ville de contrôle :
 n'est pas atteinte (priorité de scrape, pas de logique métier en dur — toujours via `CityProfile`).
 **Codes MAMH** : la rétrodoc Steve ne les fournit pas ; ils sont **à résoudre** au remplissage de
 `codeMamh` (anti-invention — on ne les fabrique pas ;
-`SPEC_CONTROLE_PARITE_VILLES_STEVE.md` §1). **Sources templées** : les bindings municipaux
+`SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md` §1). **Sources templées** : les bindings municipaux
 (`*-valleyfield`) sont instanciés par ville via `CityProfile.sources` (§2.1/§2.3) ; le **gap polygone
 de zone** (§6) reste le manque structurant, avec fallback éditeur manuel (S-14 de l'intégration
 carte). La source **TOD A13 `aires-tod-pmad-cmm`** (à ajouter au §1.A, cf.
-`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §4.0) couvre les 4 villes (toutes CMM).
+`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §4.0) couvre les 4 villes (toutes CMM).
 
 ---
 

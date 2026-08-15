@@ -11,7 +11,7 @@ dans le JSON observé. Aucune marque d'équipe → donnée brute.
 
 ## Capture 40 — Vue globale
 
-![](../carte-steve/screens/40-stconstant-vue-globale.png)
+![](../carte-user-review/screens/40-stconstant-vue-globale.png)
 
 **Ce que montre la vue Steve.** Carte de Saint-Constant. Panneau stats à droite : **11 261** Lots
 total · **642** Zones 4+ logements · **5 287** Dans périmètre TOD · **0** ⭐ Priorité max. Sur la
@@ -38,7 +38,7 @@ PMTiles différé (`INTEGRATION` §5 / §8.2).
 
 ## Capture 41 — Filtre TOD
 
-![](../carte-steve/screens/41-stconstant-filtre-tod.png)
+![](../carte-user-review/screens/41-stconstant-filtre-tod.png)
 
 **Ce que montre la vue Steve.** Le filtre **🔵 TOD** est actif : ne restent affichés que les lots
 **dans les deux périmètres TOD** (les deux disques bleus), le reste de la ville est masqué. Panneau
@@ -58,7 +58,7 @@ Filtre exclusif, comme Steve.
 
 ## Capture 42 — Fiche lot avec rôle complet
 
-![](../carte-steve/screens/42-stconstant-fiche-lot-role-complet.png)
+![](../carte-user-review/screens/42-stconstant-fiche-lot-role-complet.png)
 
 **Ce que montre la vue Steve.** Un lot est cliqué (surligné **orange** dans une **zone verte 4+**).
 La fiche à droite montre un **rôle d'évaluation détaillé** : n° de lot (ex. 6256755), adresse (ex.

@@ -12,7 +12,7 @@ n'est pas couverte par un périmètre TOD dans le JSON), donc **0 priorité max*
 
 ## Capture 10 — Vue globale
 
-![](../carte-steve/screens/10-stecatherine-vue-globale.png)
+![](../carte-user-review/screens/10-stecatherine-vue-globale.png)
 
 **Ce que montre la vue Steve.** Carte de toute la ville. Une **grande masse de lots rouges**
 (« non retenu » — la donnée d'équipe réelle) au centre, sur fond de plan clair (CARTO light), avec
@@ -43,7 +43,7 @@ développement »** : **5 615** Lots total, **868** Zones 4+ logements, **0** Da
 
 ## Capture 11 — Recherche d'adresse
 
-![](../carte-steve/screens/11-stecatherine-recherche-adresse.png)
+![](../carte-user-review/screens/11-stecatherine-recherche-adresse.png)
 
 **Ce que montre la vue Steve.** Même vue, mais le panneau gauche affiche un **dropdown de
 résultats** sous la barre de recherche (plusieurs lignes « Route 132 … » avec des pictos). C'est la
@@ -64,7 +64,7 @@ Steve. **Gain** : la sélection (lot/zone) est reflétée dans l'**état d'URL**
 
 ## Capture 12 — Fiche lot (zoom 18, mini-fiche)
 
-![](../carte-steve/screens/12-stecatherine-fiche-lot-zoom18.png)
+![](../carte-user-review/screens/12-stecatherine-fiche-lot-zoom18.png)
 
 **Ce que montre la vue Steve.** Zoom rapproché : un lot est **sélectionné et surligné orange** au
 milieu des lots rouges, et le panneau droit a basculé du mode stats vers la **fiche du lot** (n° de
@@ -83,7 +83,7 @@ zone, etc. (détaillé en capture 13). Le surlignage orange = lot sélectionné,
 
 ## Capture 13 — Fiche lot (panneau complet) — la vue de référence
 
-![](../carte-steve/screens/13-stecatherine-fiche-lot-panneau.png)
+![](../carte-user-review/screens/13-stecatherine-fiche-lot-panneau.png)
 
 **Ce que montre la vue Steve.** Le panneau droit en mode fiche, très lisible. De haut en bas :
 - En-tête « 🏙️ Outil de développement », sous-titre **« Ville de Sainte-Catherine · Règlement
@@ -130,7 +130,7 @@ de l'infra CS-P3 (auth) — en maquette il reste `simulation`.
 
 ## Capture 14 — Labels de zones (zoom 15)
 
-![](../carte-steve/screens/14-stecatherine-zoom15-labels-zones.png)
+![](../carte-user-review/screens/14-stecatherine-zoom15-labels-zones.png)
 
 **Ce que montre la vue Steve.** Vue intermédiaire : sur les lots, des **étiquettes permanentes de
 codes de zone** apparaissent (M-660 et voisines), visibles à partir du zoom ≥ 14. Le panneau fiche
@@ -150,7 +150,7 @@ par la lib choisie. (Reste à brancher sur le zonage extrait réel ; en maquette
 
 ## Capture 15 — Numéros civiques (zoom ≥ 15)
 
-![](../carte-steve/screens/15-stecatherine-numeros-civiques.png)
+![](../carte-user-review/screens/15-stecatherine-numeros-civiques.png)
 
 **Ce que montre la vue Steve.** Même secteur, encore plus zoomé : des **numéros civiques** s'affichent
 au centroïde des lots (en plus des codes de zone). Fiche lot toujours ouverte.
@@ -169,7 +169,7 @@ zone (capture 14) qui ne dépendent que du code de zone.
 
 ## Capture 16 — Filtre « 4+ logements »
 
-![](../carte-steve/screens/16-stecatherine-filtre-4plus.png)
+![](../carte-user-review/screens/16-stecatherine-filtre-4plus.png)
 
 **Ce que montre la vue Steve.** Dans le panneau gauche « Zonage / Potentiel », le filtre **🟢 4+**
 est actif : seuls les lots des **zones 4+ logements** restent affichés (les autres sont masqués /
@@ -190,7 +190,7 @@ substrat livrés.
 
 ## Capture 17 — Filtre « Non retenus » (donnée d'équipe réelle)
 
-![](../carte-steve/screens/17-stecatherine-filtre-non-retenus-donnees-equipe.png)
+![](../carte-user-review/screens/17-stecatherine-filtre-non-retenus-donnees-equipe.png)
 
 **Ce que montre la vue Steve.** Le filtre **❌ Non retenus** est actif : on voit la **masse réelle
 des lots rouges** triés par l'équipe (c'est la donnée Firestore : 5 043 lots non retenus à
@@ -212,7 +212,7 @@ démarrer la maquette avec l'historique réel — **laissée à l'utilisateur**.
 
 ## Capture 18 — Filtre « À lettre »
 
-![](../carte-steve/screens/18-stecatherine-filtre-lettres.png)
+![](../carte-user-review/screens/18-stecatherine-filtre-lettres.png)
 
 **Ce que montre la vue Steve.** Le filtre **✉️ À lettre** est actif : la carte se **vide presque
 entièrement** (les lots non concernés disparaissent), ne laissant qu'un **sous-ensemble** de lots —
@@ -232,7 +232,7 @@ colonne vide (dépendance **non bloquante** corrigée en revue Fable5, `INTEGRAT
 
 ## Capture 19 — Filtre usage « Vacant » + superficie min
 
-![](../carte-steve/screens/19-stecatherine-filtre-usage-vacant-min1000m2.png)
+![](../carte-user-review/screens/19-stecatherine-filtre-usage-vacant-min1000m2.png)
 
 **Ce que montre la vue Steve.** Combinaison de filtres : dans « 🏗️ Usage actuel », **Vacant** est
 coché (filtre additif) et le **slider de superficie minimale** est poussé (~1 000 m²). Résultat : la
@@ -256,7 +256,7 @@ superficie min (slider)**.
 
 ## Capture 20 — Couches environnementales (milieux humides + zones inondables)
 
-![](../carte-steve/screens/20-stecatherine-couches-env-humides-inondables.png)
+![](../carte-user-review/screens/20-stecatherine-couches-env-humides-inondables.png)
 
 **Ce que montre la vue Steve.** Sur la carte, en plus des lots rouges, un **overlay bleu/cyan** en
 bas (milieux humides MELCC et zones inondables BDZI), activé via les toggles de couches
@@ -279,7 +279,7 @@ P0.
 
 ## Capture 21 — Vue satellite
 
-![](../carte-steve/screens/21-stecatherine-vue-satellite.png)
+![](../carte-user-review/screens/21-stecatherine-vue-satellite.png)
 
 **Ce que montre la vue Steve.** Le fond de carte est passé en **imagerie satellite** (Esri World
 Imagery) : on voit le bâti réel, les rues, et par-dessus les **lots rouges** semi-transparents + un
@@ -298,7 +298,7 @@ simple toggle de fond. (Reste dans CS-P1 côté planning, mais sans verrou de do
 
 ## Capture 22 — Zones agricoles CPTAQ
 
-![](../carte-steve/screens/22-stecatherine-zones-agricoles-cptaq.png)
+![](../carte-user-review/screens/22-stecatherine-zones-agricoles-cptaq.png)
 
 **Ce que montre la vue Steve.** Couche **CPTAQ** (zones agricoles protégées) activée en overlay WMS,
 sur les lots. Visuellement proche de la vue globale (la zone agricole borde la ville). Fiche ouverte.
@@ -317,7 +317,7 @@ ici la couche **nourrit aussi le score**, donc elle attend le pipeline de scorin
 
 ## Capture 23 — Modal « Pastille » (annotation réglementaire)
 
-![](../carte-steve/screens/23-stecatherine-modal-pastille.png)
+![](../carte-user-review/screens/23-stecatherine-modal-pastille.png)
 
 **Ce que montre la vue Steve.** Une **modal « 📍 Pastille »** ouverte au centre. Rangée de boutons de
 **catégorie** : **⚡ PPCMOI** (sélectionné), **📋 Dérogation mineure**, **🗺️ Changement de zonage**,
@@ -348,7 +348,7 @@ gain** = automatiser sur ~150 villes ce que Steve fait à la main (1 seule pasti
 
 ## Capture 24 — Sélection multiple (en cours)
 
-![](../carte-steve/screens/24-stecatherine-selection-multiple.png)
+![](../carte-user-review/screens/24-stecatherine-selection-multiple.png)
 
 **Ce que montre la vue Steve.** Mode sélection multiple activé : parmi les lots rouges, **quelques
 lots passent en surbrillance bleu/cyan** (sélectionnés clic-à-clic). Fiche / panneau à droite.
@@ -365,7 +365,7 @@ clic-à-clic d'un ensemble de `lotId`, en vue d'un statut batch (S-3) ou d'un ex
 
 ## Capture 25 — Multi-sélection (3 lots) + actions batch
 
-![](../carte-steve/screens/25-stecatherine-multi-select-3lots-actions-batch.png)
+![](../carte-user-review/screens/25-stecatherine-multi-select-3lots-actions-batch.png)
 
 **Ce que montre la vue Steve.** **3 lots** sont sélectionnés (surlignés bleu) et une barre / des
 **actions batch** apparaissent (appliquer une marque aux 3, ou exporter la sélection en CSV).
@@ -383,7 +383,7 @@ ensemble de S-4). **S-15** (`INTEGRATION` §2 S-15) est le cas « toute une zone
 
 ## Capture 26 — Panneau de filtres réduit (collapsé) + « EN DIRECT »
 
-![](../carte-steve/screens/26-stecatherine-panneau-filtres-reduit.png)
+![](../carte-user-review/screens/26-stecatherine-panneau-filtres-reduit.png)
 
 **Ce que montre la vue Steve.** Le panneau gauche « Filtres & Outils » est **replié** (réduit à son
 en-tête), libérant la carte. Un badge vert **« EN DIRECT »** indique que la **synchronisation
@@ -407,7 +407,7 @@ ouvert sans auth (`INTEGRATION` §5).
 
 ## Capture 27 — Mobile 390×844 (header + FAB)
 
-![](../carte-steve/screens/27-stecatherine-mobile-390x844.png)
+![](../carte-user-review/screens/27-stecatherine-mobile-390x844.png)
 
 **Ce que montre la vue Steve.** Vue **mobile** (portrait étroit). En haut : un en-tête compact
 **« 🔍 Filtres & Outils »** avec le badge **« EN DIRECT »** et une flèche d'ouverture. La carte
@@ -428,7 +428,7 @@ côté radar la carte lots passe à **MapLibre**, `INTEGRATION` §8.)
 
 ## Capture 28 — Mobile : fiche lot en bottom-sheet
 
-![](../carte-steve/screens/28-stecatherine-mobile-fiche-lot-bottomsheet.png)
+![](../carte-user-review/screens/28-stecatherine-mobile-fiche-lot-bottomsheet.png)
 
 **Ce que montre la vue Steve.** Toujours en mobile, la **fiche lot** est ouverte en **feuille basse
 (bottom-sheet, ~55 vh)** qui remonte du bas : on y retrouve exactement les champs de la capture 13

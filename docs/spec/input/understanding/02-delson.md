@@ -12,7 +12,7 @@ Delson est la ville **la plus riche** de l'outil : zonage + **périmètre TOD** 
 
 ## Capture 30 — Vue globale (TOD + boundary)
 
-![](../carte-steve/screens/30-delson-vue-globale-tod-boundary.png)
+![](../carte-user-review/screens/30-delson-vue-globale-tod-boundary.png)
 
 **Ce que montre la vue Steve.** Carte de Delson avec, à droite, le panneau stats : **3 171** Lots
 total · **278** Zones 4+ logements · **1 443** Dans périmètre TOD · **130** ⭐ Priorité max (4+ &
@@ -50,7 +50,7 @@ grilles.
 
 ## Capture 31 — Filtre priorité (4+ ∩ TOD)
 
-![](../carte-steve/screens/31-delson-filtre-priorite-4plus-tod.png)
+![](../carte-user-review/screens/31-delson-filtre-priorite-4plus-tod.png)
 
 **Ce que montre la vue Steve.** Le filtre **⭐ Priorité** est actif : la carte ne montre plus que les
 **130 lots « priorité max »** (en orange), tous situés à l'intersection des zones 4+ et du périmètre
@@ -70,7 +70,7 @@ priorités de référence** de Steve (calibration, `INTEGRATION` §6.3) — c'es
 
 ## Capture 32 — Fiche lot avec bannière « Opportunité prioritaire »
 
-![](../carte-steve/screens/32-delson-fiche-lot-priorite-banniere.png)
+![](../carte-user-review/screens/32-delson-fiche-lot-priorite-banniere.png)
 
 **Ce que montre la vue Steve.** Un lot priorité est cliqué. La fiche à droite affiche en haut une
 **bannière orange « ⭐ Opportunité prioritaire — Zone 4+ dans périmètre TOD »**, puis les boutons de
