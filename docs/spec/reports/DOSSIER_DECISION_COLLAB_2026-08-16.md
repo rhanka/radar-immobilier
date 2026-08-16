@@ -68,7 +68,8 @@ Grounding = source réelle `@sentropic/comments` 0.1.0.
   `data:{purgedIds, reason?}`) ; enveloppe `redactedFields:['content']` si redacted (pass-through).
 
 ## 6. Topologie — choix owner T1 + reframe s-archi + gate factuel i-arch (2026-08-16)
-- **Owner** : **T1 (store Sentropic partagé)** — préférence, sous la framing « réutiliser Sentropic ».
+- **T1 (store Sentropic partagé)** = **recommandation CONDUCTEUR initiale, ERRONÉE** (sous la framing « réutiliser Sentropic »).
+  ⚠️ PAS une préférence owner — l'owner a précisément demandé **T2**. Attribution corrigée 2026-08-16.
 - **Reframe s-archi (dé-conflation)** : le **package `@sentropic/comments` v0.2.0** (contrat + types + events + ref) est l'unité
   de réuse — **partagé DANS TOUS LES CAS**. « Réutiliser Sentropic / pas de système parallèle » (O5) est **satisfait en T1 ET en T2**
   (même contrat package). T1 vs T2 = **uniquement la topologie du STORE PHYSIQUE**, déterminée par le **déploiement immo** :
@@ -91,4 +92,9 @@ Grounding = source réelle `@sentropic/comments` 0.1.0.
   `api/drizzle`, entry `api/src/db/migrate.ts`, Job `radar-db-migrate`). **E1 Radar = adapter PG COMPLET + migration Drizzle de
   la table `comments` immo** (PAS un adaptateur mince). **Greenfield** : `@sentropic/comments` pas encore dépendance, aucune
   table `comments` → E1 = add dep + migration Drizzle + câbler l'adapter PG sur `radar-postgres`.
-- **Re-surface owner** : T2 confirmé par la TOPOLOGIE (pas préférence). Réf : deploy/k8s/{00-namespace,20-postgres-postgis,30-api,70-networkpolicy,36-db-migrate-job}.yaml.
+- **T2 ACTÉ par l'owner** (2026-08-16). Historique honnête : **T1 était ma recommandation conducteur erronée** (malentendu « sentropic
+  app = DB partagée ») ; i-arch l'a corrigée par la topologie ; l'owner avait demandé T2 et l'a acté. T2 = fait topologique.
+  Réf : deploy/k8s/{00-namespace,20-postgres-postgis,30-api,70-networkpolicy,36-db-migrate-job}.yaml.
+- **Note Sentropic (s-archi, n'affecte pas la gate Radar)** : `api/` Sentropic consomme DÉJÀ `@sentropic/comments` (monorepo single-version)
+  → le bump 0.2.0 (delete→soft, breaking) rend les comments de Sentropic soft-delete aussi (O1 package-wide). s-archi le surface à SON
+  owner en routant le build v0.2.0 (reco = oui). **Gate Radar inchangée = `@sentropic/comments@0.2.0` publié npm.**
