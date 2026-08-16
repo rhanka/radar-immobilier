@@ -64,3 +64,20 @@ récupération des données de production vers la preprod (pas un one-shot).
   self-extract) ; assainissement = contrat spec ; chargement preprod = poc-k8s. Réutiliser l'acquis
   recette/replay existant plutôt que réinventer.
 - Nourrit directement les « fixtures production-shaped nettoyées » exigées par §5.2 (tests de migration).
+
+### 6.2 Relevé cluster poc-k8s (2026-08-16, lecture seule OVH BHS)
+Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
+- **Tier joint = NetworkPolicy** `allow-radar-api-to-geo` (ns geo) : `radar-api` → `geo-api` **TCP 8787**,
+  sens **immo→geo**. geo n'appelle pas immo. C'est le point de jonction (pas une variable d'env).
+- **35b CLOS** : `radar-immobilier` a **0 CronJob** sur le cluster vivant → `radar-populate-geo-daily`
+  n'a **jamais été appliqué**. Risque de manifeste latent seulement (jamais en `:latest`, sinon `:sha` +
+  kustomization). geo = 5 CronJobs `geo-pv-backlog-*` **tous suspendus**. Corrige la lecture « actif quotidien ».
+- **Cycle de capture geo** = Jobs `geo-capture-*` créés **hors cluster** (pas de CronJob, run-stamp) →
+  le cycle §6.1 se modélise comme un **déclencheur externe idempotent** (run-stamp = clé) écrivant dans un
+  **bucket preprod assaini résident BHS**.
+- **Preprod** : **aucun ns `geo-preprod` / `radar-immobilier-preprod`** n'existe (seul `sentropic-preprod`).
+  Pose des ns **HELD** : gel design geo-archi + **GO owner** (aucune création sans gate) — poc-k8s pose en
+  fenêtre au GO conducteur.
+- **Loi 25 (3 signaux → critères d'acceptation du cycle assaini)** : (a) images registre fr-par (miroir BHS ?) ;
+  (b) région du bucket `sentropic-geo` à confirmer → bucket résident BHS assaini ; (c) egress email TEM
+  Scaleway → router vers `radar-maildev`, jamais la clé TEM prod en preprod.
