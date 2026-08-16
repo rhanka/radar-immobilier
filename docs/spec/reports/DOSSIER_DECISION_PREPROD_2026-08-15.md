@@ -160,3 +160,19 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
 - **PIÈGE 3 — redirects multiples** : `OAUTH_CLIENT_REDIRECT_URIS` = liste séparée par virgules ; si la preprod expose plusieurs hosts (app + api),
   **tous** doivent y figurer ; le script refuse non-`https://` / `localhost` / `127.0.0.1` ; un redirect non listé → `redirect_uri_mismatch` au 1er login.
 - **Exécution** : dès la callback, auth remplit + relit + remonte le packet à **son conducteur** pour le GO d'écriture IdP prod (accès PII). Pas sauté.
+
+### 8.4 Callback URL livrée + résolution des 3 pièges (poc-k8s — 2026-08-16)
+- **CALLBACK URL preprod** (https absolu, unique) : **`https://immo-preprod.sent-tech.ca/api/v1/auth/oauth/callback`**. Host unique UI+API
+  (comme prod `immo.sent-tech.ca` → `immo-preprod.sent-tech.ca`), **un seul redirect**. poc-k8s a déjà patché `SENTROPIC_OAUTH_REDIRECT_URI`
+  dans ses 2 configMaps preprod (radar-sentropic-auth + radar-api) + corrigé un reliquat pointant encore le host PROD. Il mettra
+  `SENTROPIC_OAUTH_CLIENT_ID=radar-immobilier-preprod` quand le packet sera live.
+- **Piège 1 (secret 1×/2×)** — poc-k8s applique MAIS refuse le chat pour le clair. **Question ouverte de canal d'appariement** : (a) poc-k8s
+  écrit le secret dans son Secret k8s `radar-sentropic-auth/SENTROPIC_OAUTH_CLIENT_SECRET` et le script d'enregistrement auth **le lit
+  in-cluster** (⚠️ exige un accès OVH à auth — or auth a dit n'avoir aucun credential cluster) ; (b) auth génère à l'enregistrement et **dépose
+  le clair dans le ns preprod** via `kubectl create secret`/patch (namespace en toutes lettres). poc-k8s penche (a). → **à trancher entre auth + poc-k8s**
+  (probable : poc-k8s, qui a l'accès cluster, EXÉCUTE le script avec le packet auth + le GO conducteur auth ; secret généré une fois côté cluster).
+- **Piège 2** — poc-k8s n'a **pas encore d'ingress public preprod** (délibéré : PII en-cluster only tant que l'accès n'est pas verrouillé). À la
+  pose de l'ingress+forward-auth (étape gatée DNS + client live), il exclura `/api/v1/auth/oauth/callback` (et `/oauth2/*`).
+- **Piège 3** — un seul host preprod → une seule URL. Host api distinct éventuel → il listera tous, https only.
+- **Geste sûr tenu** : tout via `kubectl -n radar-immobilier-preprod` explicite, jamais `make k8s-bundle-secret`. Login preprod fail-closed en
+  attendant (PII verrouillée, pas urgent). Enregistrement IdP prod gaté sur le GO conducteur d'auth.
