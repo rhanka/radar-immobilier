@@ -312,7 +312,7 @@
     return countForVivierCity(entry, key);
   }
 
-  // ── Liste de villes (la recherche + le plafond vivent dans RailCityList) ──
+  // ── Liste de villes (la recherche vit dans RailCityList — liste complète) ──
   // #5 — garder la ville sélectionnée même si son compte pour le filtre actif
   // est 0 (elle reste visible/désélectionnable dans le rail).
   // #378 — appartenance et TRI par compte BULK uniquement : le compte live de
