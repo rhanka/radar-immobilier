@@ -91,3 +91,16 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
   **déclencheur externe idempotent** (run-stamp) → **bucket BHS assaini** ; critères **Loi 25** (miroir registre fr-par,
   région bucket → BHS, egress email → `radar-maildev` jamais la clé TEM prod). **Spec de cadrage formelle cross-repo à
   produire au retour du gateway** (passe 5.6 Sol) — double revue déjà acquise (geo-archi + poc-k8s convergents).
+
+## 8. CORRECTION owner 2026-08-16 — preprod = données PROD FULL, PAS d'assainissement + GO preprod minimal
+- **Données preprod = SNAPSHOT PROD FULL, SANS assainissement** (owner). Raison : l'assainissement **casse le rejeu /
+  la reproductibilité** — on ne peut pas rejouer un bug prod sur des données modifiées. **⇒ annule le « assainissement
+  OBLIGATOIRE » de §6.1** (le cycle §6.1 charge la donnée prod telle quelle).
+- **La PII reste RÉELLE** en preprod → l'isolation se fait au niveau **ENVIRONNEMENT, pas de la donnée** :
+  - accès preprod **verrouillé comme la prod** (mêmes restrictions — la preprod contient de la vraie PII, Loi 25 gérée par
+    le contrôle d'accès, pas par la mutation) ;
+  - **aucun egress réel** : email → `radar-maildev` (jamais la clé TEM prod), pas de paiement/SMS/notif réels ;
+  - **aucune écriture vers la prod** (sens unique) ; **secrets preprod distincts** de la prod.
+- **GO PREPROD MINIMAL (conducteur → poc-k8s, 2026-08-16)** : poser un ns preprod isolé + DB + secrets + déployer les
+  images `:sha` existantes, chargées d'un **snapshot prod FULL** (extraction = lane extraction, jamais self-extract OVH).
+  On l'évolue vers le tier joint (immo↔geo-preprod) ensuite. Rework faible sur un ns.
