@@ -1132,3 +1132,149 @@ describe("SignauxSelPanel — item 3 : fiche lot inline (drawer sous la ligne)",
     expect(drawer.closest(".sel-entity-bar")).not.toBeNull();
   });
 });
+
+// ── P04 (spec owner §3.2) — Recherche des ZONES et des LOTS ───────────────────
+// Recherche d'usabilité équivalente à celle des villes (rail gauche) : matching
+// insensible casse/accents, RANKING (exact > préfixe > sous-chaîne), navigation
+// clavier (↑/↓ + Entrée sélectionne), état des résultats + état vide honnête.
+
+describe("SignauxSelPanel — P04 recherche ZONES", () => {
+  /** Codes de zone rendus, dans l'ordre du DOM (détail signaux/lots vides). */
+  function zoneLabels(container: HTMLElement): string[] {
+    return Array.from(container.querySelectorAll(".sel-entity-label")).map(
+      (el) => el.textContent?.trim() ?? "",
+    );
+  }
+
+  it("filtre + classe les zones (exact > préfixe), casse-insensible ; écarte les non-correspondances", async () => {
+    const { container, getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315", "H-320", "A-16", "H-3"]),
+      },
+    });
+
+    await fireEvent.input(getByTestId("zone-search-input"), {
+      target: { value: "h-3" },
+    });
+
+    // A-16 (aucune correspondance) écartée ; ranking : exact H-3 en tête, puis
+    // les préfixes dans l'ordre d'entrée.
+    expect(queryByText("A-16", { selector: ".sel-entity-label" })).toBeNull();
+    expect(zoneLabels(container)).toEqual(["H-3", "H-315", "H-320"]);
+    // État des résultats explicite.
+    expect(getByTestId("zone-search-count").textContent).toContain("3 résultats");
+  });
+
+  it("aucune correspondance → état vide honnête « Aucune zone trouvée »", async () => {
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315", "H-320"]),
+      },
+    });
+
+    await fireEvent.input(getByTestId("zone-search-input"), {
+      target: { value: "ZZZ" },
+    });
+    expect(queryByText("Aucune zone trouvée.")).not.toBeNull();
+    // Aucun résultat fabriqué.
+    expect(queryByText("H-315", { selector: ".sel-entity-label" })).toBeNull();
+  });
+
+  it("navigation clavier : ↓ active le 1er résultat, Entrée le sélectionne", async () => {
+    const { getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315", "H-320"]),
+      },
+    });
+    const input = getByTestId("zone-search-input");
+    await fireEvent.input(input, { target: { value: "h-3" } });
+
+    // Aucune zone active tant que ↓ n'a pas déplacé le curseur.
+    expect(queryByTestId("sel-zone-head")).toBeNull();
+
+    await fireEvent.keyDown(input, { key: "ArrowDown" });
+    await fireEvent.keyDown(input, { key: "Enter" });
+
+    // Entrée sélectionne le 1er résultat (H-315) → panneau « Zone active ».
+    const head = getByTestId("sel-zone-head");
+    expect(head.textContent).toContain("H-315");
+  });
+});
+
+describe("SignauxSelPanel — P04 recherche LOTS", () => {
+  it("filtre les lots par n° (préfixe) et par adresse (sous-libellé) ; compteur de résultats", async () => {
+    const lots = [
+      makeLot("5399042", { adresse: "10 rue Principale" }),
+      makeLot("5399100"),
+      makeLot("6001234"),
+    ];
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+
+    // Préfixe sur le n° de lot (commun à 5399042 et 5399100, pas à 6001234).
+    await fireEvent.input(getByTestId("lot-search-input"), {
+      target: { value: "5399" },
+    });
+    expect(queryByText("5399042", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("5399100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("6001234", { selector: ".sel-entity-label" })).toBeNull();
+    expect(getByTestId("lot-search-count").textContent).toContain("2 résultats");
+
+    // Sous-libellé : recherche par adresse (accents/casse indifférents).
+    await fireEvent.input(getByTestId("lot-search-input"), {
+      target: { value: "principale" },
+    });
+    expect(queryByText("5399042", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("5399100", { selector: ".sel-entity-label" })).toBeNull();
+  });
+
+  it("aucune correspondance → état vide honnête « Aucun lot trouvé »", async () => {
+    const lots = [makeLot("5399042"), makeLot("5399100")];
+    const { getByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+    await fireEvent.input(getByTestId("lot-search-input"), {
+      target: { value: "999999" },
+    });
+    expect(queryByText("Aucun lot trouvé.")).not.toBeNull();
+  });
+
+  it("navigation clavier : ↓ puis Entrée ouvre la fiche du 1er lot résultat", async () => {
+    const lots = [
+      makeLot("5399042", { adresse: "10 rue Principale", superficieM2: 850.4 }),
+      makeLot("5399100"),
+    ];
+    const { getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+    const input = getByTestId("lot-search-input");
+    await fireEvent.input(input, { target: { value: "53990" } });
+
+    expect(queryByTestId("sel-lot-drawer")).toBeNull();
+    await fireEvent.keyDown(input, { key: "ArrowDown" });
+    await fireEvent.keyDown(input, { key: "Enter" });
+
+    // Entrée → fiche du 1er lot résultat (5399042) dépliée inline.
+    const drawer = getByTestId("sel-lot-drawer");
+    expect(drawer.textContent).toContain("10 rue Principale");
+  });
+});
