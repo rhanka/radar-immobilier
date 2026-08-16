@@ -66,3 +66,15 @@ Grounding = source réelle `@sentropic/comments` 0.1.0.
   AND deleted_at < cutoff)`).
 - **Événements** : réutiliser `'deleted'` (soft-delete, `data:{tombstone}`, wire-compat) + ajouter `'purged'` (1×/thread,
   `data:{purgedIds, reason?}`) ; enveloppe `redactedFields:['content']` si redacted (pass-through).
+
+## 6. Topologie — choix owner T1 + reframe s-archi + gate factuel i-arch (2026-08-16)
+- **Owner** : **T1 (store Sentropic partagé)** — préférence, sous la framing « réutiliser Sentropic ».
+- **Reframe s-archi (dé-conflation)** : le **package `@sentropic/comments` v0.2.0** (contrat + types + events + ref) est l'unité
+  de réuse — **partagé DANS TOUS LES CAS**. « Réutiliser Sentropic / pas de système parallèle » (O5) est **satisfait en T1 ET en T2**
+  (même contrat package). T1 vs T2 = **uniquement la topologie du STORE PHYSIQUE**, déterminée par le **déploiement immo** :
+  - **immo co-déployé avec `api/` Sentropic (même DB)** → **T1 propre** (isolation workspace/tenant déjà en place → pas de régression) ;
+  - **immo = service/DB séparé** → **T2 sur le même contrat** (T1 imposerait des lectures/écritures comment cross-service = latence + couplage).
+- **Gate FACTUEL = i-arch** (connaît le déploiement immo) : si immo co-déployé même DB → T1 tenu ; si immo service séparé → **T2 est le
+  choix technique** (toujours réuse-compliant, même contrat) et je **RE-SURFACE à l'owner** (son T1 était une préférence sous la framing
+  réuse, pas une contrainte de déploiement).
+- **Invariant dans les deux cas** : package v0.2.0 identique, `builder ≠ reviewer`, O1 tenu.
