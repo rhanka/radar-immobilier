@@ -10,16 +10,16 @@
 > 4 villes de Steve deviennent des **points de contrôle**. Conséquence directe : on **priorise le
 > scrape EN PROFONDEUR** de ces 4 villes pour reproduire la donnée de Steve et pouvoir la *diffّer*.
 > Cette décision **résout l'encadré « DÉCISION EN ATTENTE »** de
-> [`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`](SPEC_EVOL_INTEGRATION_CARTE_STEVE.md) §6.2.
+> [`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`](SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md) §6.2.
 >
 > Entrées :
-> - Corpus Steve : [`input/carte-steve/README.md`](input/carte-steve/README.md) (features + données
->   d'usage), [`input/carte-steve/tech/ARCHITECTURE.md`](input/carte-steve/tech/ARCHITECTURE.md)
->   (schéma JSON + Firestore), [`input/carte-steve/tech/analyse-donnees.json`](input/carte-steve/tech/analyse-donnees.json)
->   (compteurs réels par ville), [`input/carte-steve/tech/cities.json`](input/carte-steve/tech/cities.json)
+> - Corpus Steve : [`input/carte-user-review/README.md`](input/carte-user-review/README.md) (features + données
+>   d'usage), [`input/carte-user-review/tech/ARCHITECTURE.md`](input/carte-user-review/tech/ARCHITECTURE.md)
+>   (schéma JSON + Firestore), [`input/carte-user-review/tech/analyse-donnees.json`](input/carte-user-review/tech/analyse-donnees.json)
+>   (compteurs réels par ville), [`input/carte-user-review/tech/cities.json`](input/carte-user-review/tech/cities.json)
 >   (index des 4 villes).
 > - Data model : [`SPEC_DESIGN_DATA_MODEL.md`](SPEC_DESIGN_DATA_MODEL.md) (entités load-bearing).
-> - Intégration carte : [`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`](SPEC_EVOL_INTEGRATION_CARTE_STEVE.md)
+> - Intégration carte : [`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md`](SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md)
 >   (§4.1 `ProspectMark`, §6 maquette, §6.2 mapping JSON→radar, §6.2.1 garde-fou).
 > - Scoring / états : [`SPEC_EVOL_SOCLE_STATES_SCORING.md`](SPEC_EVOL_SOCLE_STATES_SCORING.md)
 >   (score de potentiel par lot, pré-filtres §2.1, frontière réel §2.7, `non-disponible` §3.4.0).
@@ -35,8 +35,8 @@ La parité **mesure** le pipeline ; elle ne le **nourrit jamais** (séparation s
 
 ## 1. Les 4 villes de contrôle (golden cities)
 
-Slugs exacts (source [`input/carte-steve/tech/cities.json`](input/carte-steve/tech/cities.json) +
-[`tech/analyse-donnees.json`](input/carte-steve/tech/analyse-donnees.json)) — **toutes Roussillon /
+Slugs exacts (source [`input/carte-user-review/tech/cities.json`](input/carte-user-review/tech/cities.json) +
+[`tech/analyse-donnees.json`](input/carte-user-review/tech/analyse-donnees.json)) — **toutes Roussillon /
 CMM, Montérégie Rive-Sud** :
 
 | Ville (slug) | Lots | Zones | TOD | Marques équipe (Firestore) | Couverture data Steve |
@@ -47,7 +47,7 @@ CMM, Montérégie Rive-Sud** :
 | `candiac` | 7 190 | 0 | 0 | aucune | **brut** : lots + rôle seuls, **aucun zonage ni TOD** (zones-json → 404) ; 9 lots 4+ |
 
 Total : **27 279 lots** (README §Vue d'ensemble). Les compteurs `n_4plus`/`n_tod`/`n_prio` par ville
-viennent de [`analyse-donnees.json`](input/carte-steve/tech/analyse-donnees.json) (vérité Steve, sert
+viennent de [`analyse-donnees.json`](input/carte-user-review/tech/analyse-donnees.json) (vérité Steve, sert
 de **cible de calibration** §4).
 
 > **Codes MAMH non disponibles dans le corpus** : la rétrodoc Steve **ne porte pas** les codes
@@ -127,7 +127,7 @@ interface ControlMark {
 
 > **Note vocabulaire** : `ControlMark.status` reprend les **5 libellés bruts de Steve**
 > (`non-retenu`, `lettre`…) — il ne **mappe pas** sur les `ProspectMark.status` radar
-> (`écarté`, `lettre-envoyée`… — `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §4.1). La table de contrôle
+> (`écarté`, `lettre-envoyée`… — `SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §4.1). La table de contrôle
 > conserve la **sémantique d'origine** (c'est une *référence*, pas une projection radar). Le mapping
 > de libellés est appliqué **seulement** dans le rapport de parité, à des fins de comparaison (§4.3).
 
@@ -330,13 +330,13 @@ Valleyfield et le reste du backlog (`SPEC_PLAN_SCRAPING.md` §5) tant que la par
   GeoJSON WGS84 — `ARCHITECTURE.md` §fin). Schéma `{meta, lots, zones, tod, boundary}` + 22 propriétés
   de lot (§Propriétés d'un lot, ARCHITECTURE).
 - **Mapping → `ControlLot`** : la table de §2.1 (chaque champ `← <champ JSON Steve>`). Réutilise la
-  **normalisation `NO_LOT`** de `SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §6.2 (espaces ôtés).
+  **normalisation `NO_LOT`** de `SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §6.2 (espaces ôtés).
 - **Pas de PII** : les JSON ne contiennent que cadastre + rôle public + adresse, **aucun propriétaire**
   (§6.1 EVOL). **Pas de code postal** par lot (cache Firestore non exporté, §6.3 EVOL) →
   `ControlLot` n'a pas de code postal (cohérent avec la fiche maquette vide).
 - **Stockage** : fixtures S3 `fixtures/carte-steve-control/<slug>.json`
   (`SPEC_PERSISTENCE_S3_FIRST.md` §layout `fixtures/`), **non committé** (volumétrie). Distinct du
-  substrat de **maquette** CS-L6 (`fixtures/carte-steve/<slug>.json`, §6.1 EVOL) : même corpus,
+  substrat de **maquette** CS-L6 (`fixtures/carte-user-review/<slug>.json`, §6.1 EVOL) : même corpus,
   **deux usages** (démo UX vs contrôle de parité).
 
 ### 6.3 Garde-fous d'import
@@ -368,16 +368,16 @@ Valleyfield et le reste du backlog (`SPEC_PLAN_SCRAPING.md` §5) tant que la par
 > `query`/`validate`/`canevas`… — pas de verbe de **création** d'item). Les items ci-dessous sont
 > donc **listés ici** (et non créés via l'outil), à graner sous la racine **« Réorientation Grand
 > filet »** (`01KTQP5EHKKMM5TSD4ZSE3CFZ2`, workspace `reorientation`), aux côtés des lots
-> `CS-L1…CS-P3` existants (`SPEC_EVOL_INTEGRATION_CARTE_STEVE.md` §9.1). À créer dès qu'un verbe
+> `CS-L1…CS-P3` existants (`SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md` §9.1). À créer dès qu'un verbe
 > `track` d'écriture est disponible.
 
 | Item (proposé) | Titre | Priorité | Réf | Dépendances |
 |---|---|---|---|---|
-| **CP-1** | Import **contrôle** : `ControlLot`/`ControlMark` depuis JSON Netlify (4 villes) + export Steve pour les marques | P0-contrôle | `docs/spec/SPEC_CONTROLE_PARITE_VILLES_STEVE.md §2/§6` | ⟂ CS-L6 (même corpus, usage distinct) |
-| **CP-2** | **Scrape profond** des 4 villes (rôle A5 + cadastre A6 + zonage A2/B2 + zones + TOD A13) ; `CityProfile.controlParity/scrapeDepth` | P0-contrôle | `docs/spec/SPEC_CONTROLE_PARITE_VILLES_STEVE.md §5` + `SPEC_PLAN_SCRAPING.md §2.4` | dépend de A13 (§4.0 EVOL) ; gap polygone (§6 plan) |
-| **CP-3** | **Rapport de parité** par ville (couverture + flags + delta score) — diffable, lecture seule | P0-contrôle | `docs/spec/SPEC_CONTROLE_PARITE_VILLES_STEVE.md §4` | dépend de **CP-1 + CP-2** (réf + pipeline pour diffّer) |
+| **CP-1** | Import **contrôle** : `ControlLot`/`ControlMark` depuis JSON Netlify (4 villes) + export Steve pour les marques | P0-contrôle | `docs/spec/SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md §2/§6` | ⟂ CS-L6 (même corpus, usage distinct) |
+| **CP-2** | **Scrape profond** des 4 villes (rôle A5 + cadastre A6 + zonage A2/B2 + zones + TOD A13) ; `CityProfile.controlParity/scrapeDepth` | P0-contrôle | `docs/spec/SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md §5` + `SPEC_PLAN_SCRAPING.md §2.4` | dépend de A13 (§4.0 EVOL) ; gap polygone (§6 plan) |
+| **CP-3** | **Rapport de parité** par ville (couverture + flags + delta score) — diffable, lecture seule | P0-contrôle | `docs/spec/SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md §4` | dépend de **CP-1 + CP-2** (réf + pipeline pour diffّer) |
 
-Chaque item portera `body: "ref docs/spec/SPEC_CONTROLE_PARITE_VILLES_STEVE.md §…"`. Parenté :
+Chaque item portera `body: "ref docs/spec/SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md §…"`. Parenté :
 enfants de la racine `01KTQP5EHKKMM5TSD4ZSE3CFZ2` (workspace `reorientation`), comme `CS-L*`.
 
 ## 8. Récapitulatif
