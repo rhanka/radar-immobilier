@@ -36,3 +36,14 @@ preuves (tant qu'ouvert, la non-falsifiabilité reste un objectif) · autorité 
 - Exécution 35b (suspend live) — i-infra au réveil.
 - Séquence S00 (geler → autorité externe → drainer runs → fermer refs → épingler le live → merger →
   prouver → rouvrir) — après levée des blocages externes.
+
+## 6. Décision cross-repo — PREPROD JOINTE SYNCHRONISÉE (owner 2026-08-15)
+La preprod n'est PAS immo-seule : un **tier preprod cross-repo unique** (immo + geo + poc-k8s).
+- **immo-preprod consomme geo-preprod** (données servies : zones, règlements, couches) — jamais geo-prod.
+- **Promotion coordonnée** ; **un seul `PREPROD_ACCEPTANCE` cross-repo** prouvant le produit de bout en bout.
+- Implique un design manquant : **geo n'a pas de preprod de serving** aujourd'hui → à concevoir (geo-cond) ;
+  et la **topologie du tier joint** (namespaces, isolation, câblage immo-preprod↔geo-preprod, promotion
+  coordonnée) → poc-k8s.
+- **Suite** : co-design geo-cond + poc-k8s → spec de cadrage cross-repo → double revue → dossier de décision
+  du modèle de sync détaillé (contrat de données preprod, ordre de promotion, acceptation conjointe).
+  La spec preprod immo actuelle reste valide comme volet Radar de ce tier.
