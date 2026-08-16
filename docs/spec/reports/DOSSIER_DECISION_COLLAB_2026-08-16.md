@@ -45,3 +45,24 @@ Grounding = source réelle `@sentropic/comments` 0.1.0.
   (mapping `record/recordType` + visibilité injectée + follow host-side ; **ne ré-implémente PAS** delete/tombstone).
 - **Gate chain** : **Sentropic publie `comments v0.2.0`** → **E1 Radar** (adaptateur PG + migration + adaptateur mince) contre ce contrat.
   `builder ≠ reviewer`. Bump gate package (`npm view @sentropic/comments version` puis `0.2.0` strictement >). Révisions/edit append-only = v0.3.0.
+
+## 5. Build v0.2.0, migration SQL, événements, et FLAG DE FRONTIÈRE (s-archi 2026-08-16)
+- **Build/publication `comments v0.2.0` = Sentropic-side confirmé** (`packages/comments` Sentropic-owned, PAS immo).
+  s-archi possède le SPEC figé + porte la re-review indépendante ; **relaie la version npm publiée** ; gate =
+  `npm view @sentropic/comments version == 0.2.0`. Pas de date. **E1 Radar reste gaté dessus.**
+- **⚠️ FLAG DE FRONTIÈRE (à confirmer avant de scoper E1)** : la table `comments` + son adapter PG vivent dans le
+  **`api/` PARTAGÉ de Sentropic**. Deux topologies, qui changent qui écrit la migration :
+  - **(T1) Radar réutilise le store comments partagé Sentropic** → soft-delete PG + migration = **travail Sentropic `api/`**
+    (partagé, honore O1 pour TOUS les consommateurs) ; **E1 Radar = adaptateur MINCE seul** (record/recordType + visibilité +
+    follow). Cohérent avec « réutiliser Sentropic, pas de système parallèle » (O5) + multi-tenant/IdP Sentropic. Implication :
+    les `prospect_*` migrent vers le store partagé (cross-service).
+  - **(T2) Radar a son PROPRE store comments** (service/DB immo) → E1 Radar possède l'adaptateur PG + migration (gate-chain §4 tient).
+    Plus de séparation, risque de duplication de modèle.
+  - **Topologie owner-gated** ; faisabilité T1 (migration `prospect_*` cross-service, latence, couplage) à confirmer par **i-arch**.
+- **Migration SQL (esquisse, table réelle `comments` : `workspace_id`/`created_by`/`content`/ts sans tz, 1 fichier)** :
+  `ADD deleted_at ts · deleted_by text FK users(id) ON DELETE SET NULL · body_disposition text CHECK IN ('retained','redacted') ·
+  deleted_reason text` + index partiel `(workspace_id, deleted_at) WHERE deleted_at IS NOT NULL`. `delete()` = **UPDATE** (idempotent
+  `AND deleted_at IS NULL`, `content=''` si redacted) ; `purge()` = **DELETE thread-atomique** (`HAVING bool_and(deleted_at NOT NULL
+  AND deleted_at < cutoff)`).
+- **Événements** : réutiliser `'deleted'` (soft-delete, `data:{tombstone}`, wire-compat) + ajouter `'purged'` (1×/thread,
+  `data:{purgedIds, reason?}`) ; enveloppe `redactedFields:['content']` si redacted (pass-through).
