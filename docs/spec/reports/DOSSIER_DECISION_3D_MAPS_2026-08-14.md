@@ -72,3 +72,25 @@ Les 4 décisions ci-dessus (question dédiée). La revue geo/geo-archi raffine l
   final sur premières captures réelles.
 - **D6 — Mesure 3D vraie** (choix owner) ; note : les 2 revues recommandaient désactiver/projeter au sol pour éviter l'ambiguïté →
   **risque d'implémentation à cadrer**, pas à retrancher.
+
+## 10. Mise à jour post-revue domaine geo-archi (2026-08-15)
+Réf (worktree geo `/.lanes/archi/docs/spec/`) : `REVUE_D06_D07_GEO_2026-08-15.md` (fdc3f40b),
+`SPEC_GEO_MAP_ENGINE.md` (ADR-0025, 2fc76754), `CHIFFRAGE_MOTEUR_CARTO_2026-08-15.md` (7338fda8).
+- **Moteur = B (renderer-neutre-v1)** — pivot owner tranché via la conduite geo-cond. Confirme la face
+  runtime de « geo propriétaire du module carto ». **Le gel du seam reste HELD** (conduite geo-cond→owner,
+  gel après démo 3D verte) — non touché ici.
+- **`zone_ref_canon_v1` — flag « clé inventée » RÉSOLU** : geo sert DÉJÀ la clé exacte
+  `{city_slug, zone_ref_canon_v1, reglement_number}` (SPEC_GEO_SERVED_CONTRACT §2, manifeste + SHA). La revue
+  Fable 3D la voyait « absente » car invisible depuis le repo immo. Contrat geo réel et verrouillé → note
+  anti-invention immo corrigée.
+- **Raffinement no-reparent (DS sign-off)** : invariant à 2 niveaux — **host container stable sur TOUTE
+  transition** (y.c. switch renderer), mais **le canvas interne PEUT être remplacé au switch 2D↔3D** (contexte
+  WebGL non transférable maplibre↔Cesium/deck) ; le moteur **round-trip l'état** (sélection/caméra/viewport)
+  sans remount visible. Ma contrainte C2 est honorée dans l'esprit.
+- **D06 (§3 plan) = VALIDABLE AVEC RÉSERVES** : geo sert déjà la clé + partitions fermées 1106 + garde
+  homonyme + blocage collision. Réserves à graver côté immo (D03) : homonyme `usage_dominant` geo≠signal ·
+  `proof` structurel ≠ preuve v2 · MCP = surface Radar · G01 = association règlement servie.
+- **D07 (warden BDZI/GRHQ/CPTAQ) = AUDIT À PRODUIRE** (surface environnementale neuve, sous disciplines v1).
+- **Dissents owner-gated** : #7 (geo sert l'explicite-avec-preuve, ne préjuge pas de l'UX immo) et #3 (couche
+  utilisateur = fork non tranché G03 ; environnementale = canonique geo). **Présentation owner portée par
+  geo-cond** (surface unique) ; le volet immo lui est transmis, pas de double-escalade.
