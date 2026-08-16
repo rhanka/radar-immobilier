@@ -118,3 +118,24 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
   restaure, ne self-extract pas).
 - **DÉPENDANCE OAuth** : sans client OAuth preprod dédié, le login preprod est **fail-closed** (PII inaccessible — acceptable au départ pour
   verrouiller la PII). À suivre : enregistrer un **client OAuth preprod dédié** (lane auth), **jamais réutiliser le client prod**.
+
+### 8.2 Packet OAuth preprod (lane auth — 2026-08-16)
+- **Ratifié** : client dédié, jamais le client prod (une compromission preprod ne doit pas fuiter la crédential prod ; ajouter des
+  redirect URIs preprod au client prod couple la prod vers un host de moindre confiance). **Fail-closed = bon défaut**, à garder.
+- **CORRECTION (bloquante)** : Traefik + forward-auth = client **CONFIDENTIEL serveur** → `token_endpoint_auth_method=client_secret_basic`
+  avec un **vrai secret généré** (PAS public+PKCE `token_auth=none`, qui donnerait un client sans secret devant de la PII).
+- **Enregistrement via le script qui SHIPPE dans l'image prod** (PR #497 mergée : `dist/scripts/oauth-register-client.js`, plus de SQL
+  manuel) — `npm run oauth:register-client:dist` avec : `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_NAME="… (preprod)"`,
+  `OAUTH_CLIENT_REDIRECT_URIS=<https absolu, le script refuse http/localhost>`, `OAUTH_CLIENT_SCOPES=openid,profile,email`,
+  `OAUTH_CLIENT_TOKEN_AUTH=client_secret_basic`, `OAUTH_CLIENT_SECRET=<fort ; seul le sha256 est stocké, le clair jamais persisté>`.
+  Upsert idempotent sur `client_id`. Pas de `OAUTH_CLIENT_RESOURCE_INDICATORS` (absent = default-deny RFC 8707). **Le clair du secret vit
+  dans le Secret k8s de notre ns, JAMAIS en messagerie.**
+- **auth NE PEUT PAS l'enregistrer seul** : `auth.sent-tech.ca` = IdP PROD → écrire un client = **écriture prod** ; auth n'a aucun credential
+  cluster (refuse tout override KUBECONFIG) et une écriture IdP prod ouvrant l'accès à de la PII passe par **son conducteur** (pas pair-à-pair).
+  auth remonte la demande dans sa lane (bon circuit, pas un refus).
+- **3 INPUTS À FOURNIR (sinon packet non figeable)** : (1) **URL callback preprod exacte** (scheme+host+path) — de **poc-k8s** ; (2) **tenant**
+  (`oauth_clients.tenant_id` défaut `'sentropic'` ; si immo = tenant distinct, la ligne doit le porter) — **owner/i-arch** ; (3) **`client_id`**
+  (durable, atterrit dans la config Traefik) — **owner valide**. ETA packet relu < 1h après les 3 inputs ; exécution = accès poc-k8s + GO conducteur auth.
+- **⚠️ VIGILANCE poc-k8s** : `K8S_NAMESPACE ?= sentropic` dans le Makefile = **PROD** ; `make k8s-bundle-secret` **réécrit le Secret `sentropic-api`
+  EN ENTIER** depuis `.env` (toute clé absente → chaîne vide en PROD). Pour poser un secret dans le ns preprod : `kubectl patch --type=merge`
+  ciblé, **namespace écrit en toutes lettres**, JAMAIS cette cible make.
