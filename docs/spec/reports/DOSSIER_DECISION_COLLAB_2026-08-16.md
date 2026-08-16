@@ -78,3 +78,17 @@ Grounding = source réelle `@sentropic/comments` 0.1.0.
   choix technique** (toujours réuse-compliant, même contrat) et je **RE-SURFACE à l'owner** (son T1 était une préférence sous la framing
   réuse, pas une contrainte de déploiement).
 - **Invariant dans les deux cas** : package v0.2.0 identique, `builder ≠ reviewer`, O1 tenu.
+
+## 7. TOPOLOGIE TRANCHÉE — **T2 CONFIRMÉ par i-arch (fait de déploiement, pas préférence)** — 2026-08-16
+- **immo = service + DB SÉPARÉS → T1 structurellement non réalisable** (percerait l'isolation tenant). Preuves (deploy/k8s) :
+  ns propre `radar-immobilier` (00-namespace) ; Postgres propre `radar-postgres` StatefulSet DANS ce ns (20-postgres-postgis) ;
+  api `POSTGRES_HOST: radar-postgres` seul (30-api) ; **default-deny** + netpol intra-namespace uniquement, **aucun egress vers
+  `api/`/DB Sentropic** (70-networkpolicy) ; seul partage Sentropic = **AUTH OIDC** (80-auth), PAS le store de données.
+- **Correction du malentendu T1** : « sentropic app » = **tenance plateforme** (label `part-of: sentropic` + auth déléguée),
+  **PAS une DB applicative partagée**. C'est la source de la préférence T1 owner → à lever explicitement.
+- **Ce que ça fige** : store `comments` = **table PROPRE dans `radar-postgres`** (DB immo), **adapter PG immo**, sur le MÊME
+  contrat package `@sentropic/comments` v0.2.0 (réuse OK, orthogonale à la localisation). **Migration = côté Radar** (Drizzle,
+  `api/drizzle`, entry `api/src/db/migrate.ts`, Job `radar-db-migrate`). **E1 Radar = adapter PG COMPLET + migration Drizzle de
+  la table `comments` immo** (PAS un adaptateur mince). **Greenfield** : `@sentropic/comments` pas encore dépendance, aucune
+  table `comments` → E1 = add dep + migration Drizzle + câbler l'adapter PG sur `radar-postgres`.
+- **Re-surface owner** : T2 confirmé par la TOPOLOGIE (pas préférence). Réf : deploy/k8s/{00-namespace,20-postgres-postgis,30-api,70-networkpolicy,36-db-migrate-job}.yaml.
