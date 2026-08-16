@@ -97,6 +97,7 @@
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
   import {
     aggregateReglements,
+    reglementSourceViewerTitle,
     type ReglementEntry,
   } from "$lib/maps/signaux-reglements.js";
   import { describeZoneSource } from "$lib/maps/zone-source.js";
@@ -893,16 +894,18 @@
   }
 
   /**
-   * Visualise le PDF/source d'un règlement : on ouvre la SOURCE documentaire du
-   * signal représentatif (le PV/document qui porte la citation du règlement)
-   * dans le viewer partagé. rawRef same-origin en priorité (rendu PDF fiable).
+   * Visualise la SOURCE d'un règlement : on ouvre le PROCÈS-VERBAL du signal
+   * représentatif (le document qui CITE le règlement) dans le viewer partagé —
+   * PAS le texte du règlement lui-même (non modélisé). Le titre l'affiche
+   * EXPLICITEMENT comme un PV source (§3.1) : jamais présenté comme si le PV était
+   * le PDF du règlement. rawRef same-origin en priorité (rendu PDF fiable).
    */
   function openReglementSource(entry: ReglementEntry): void {
     const node = reglementEvidenceNode(entry);
     if (!node) return;
     const evidence = signalEvidence(node);
     onOpenSource({
-      title: `Règlement ${entry.number}`,
+      title: reglementSourceViewerTitle(entry.number),
       sourceUrl: evidence.documentUrl ?? evidence.sourceUrl,
       rawRef: evidence.rawRef,
       page: evidence.page,
@@ -1387,10 +1390,10 @@
                         type="button"
                         class="doc-ref-button"
                         on:click={() => openReglementSource(reg)}
-                        title="Visualiser le document source du règlement"
+                        title="Ouvrir le procès-verbal source qui cite ce règlement (pas le texte du règlement)"
                       >
                         <FileText class="h-3.5 w-3.5" aria-hidden="true" />
-                        Voir le PDF
+                        Voir le PV source
                       </button>
                     {:else}
                       <span class="reglement-nosrc">
