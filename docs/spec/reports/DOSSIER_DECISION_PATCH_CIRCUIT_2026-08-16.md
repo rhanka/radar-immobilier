@@ -26,6 +26,15 @@ schéma dans un patch — sinon c'est une vague). Pour geo, le patch données do
 servi figé** (SPEC_GEO_SERVED_CONTRACT) et repasser par le cycle de service (manifeste versionné + haché),
 pas une écriture ad-hoc.
 
+### 2.1 Volet geo patch-données iso-modèle (angle geo-cond, 2026-08-16)
+Un patch-données geo = un **RE-RUN CIBLÉ du cycle servi** pour le champ/slug corrigé, **jamais un write ad-hoc**. Invariants :
+1. **Anti-invention** : la correction porte une VRAIE source/preuve (`reglement_numero` faux → le vrai numéro depuis la source règlement, jamais deviné ; zone erronée → géométrie prouvée). Zéro valeur inventée.
+2. **Cycle servi via primitives sanctionnées** : `putServedZoneAdditive` (provenance additive / géométrie inchangée) ou `putServedZoneGeojson` (nouvelle géométrie + preuve v2) ; re-stamp provenance MÊME passe ; **backup de l'ancien** (`_replaced/`, réversible — cf. boischatel). Jamais `putBytes`/`deleteObject` ad-hoc sur clé servie.
+3. **Contrat figé** : reste dans `SPEC_GEO_SERVED_CONTRACT` (iso-modèle = 0 changement de schéma) ; sinon = évolution, pas patch.
+4. **Partition/hash** : le patch = un NOUVEL état servi (pas une mutation) → manifeste re-versionné + re-haché ; partition reste **FERMÉE** (le hash reflète l'état corrigé). Pas de casse.
+5. **Preprod-verify + gate humain** : preuve de rendu du fix sur la **preprod-serving** (SPEC_GEO_PREPROD_SERVING) → gate prod HUMAIN (pas d'auto, respecte S00).
+- **Volet détaillé** (schéma primitives + séquence preprod→prod) = co-design **geo-archi** (owns `SPEC_GEO_SERVED_CONTRACT` + preprod-serving), intégré à la spec circuit patch au démarrage (Sol au retour gateway).
+
 ## 3. Relation au break-glass
 - **Patch** = voie **standing** rapide et gated (régressions courantes).
 - **Break-glass** = **urgence** exceptionnelle (incident), procédure tracée distincte.
