@@ -47,3 +47,20 @@ La preprod n'est PAS immo-seule : un **tier preprod cross-repo unique** (immo + 
 - **Suite** : co-design geo-cond + poc-k8s → spec de cadrage cross-repo → double revue → dossier de décision
   du modèle de sync détaillé (contrat de données preprod, ordre de promotion, acceptation conjointe).
   La spec preprod immo actuelle reste valide comme volet Radar de ce tier.
+
+### 6.1 Cycle de récupération des données de prod (owner 2026-08-15)
+La preprod doit rester FIDÈLE dans le temps : prévoir un **cycle récurrent, contrôlé et assaini** de
+récupération des données de production vers la preprod (pas un one-shot).
+- **Sources** : PG prod immo (signaux, lots, prospect_*, account_*) + serving prod geo (S3 normalized /
+  graph projection / règlements / zones).
+- **Assainissement OBLIGATOIRE (Loi 25)** : anonymiser/retirer la PII (prospect_contacts, access_log,
+  identités) avant tout chargement en preprod ; « production-shaped » ≠ « données prod réelles ».
+- **Sens unique STRICT** : lecture prod → écriture preprod uniquement ; **aucun** chemin d'écriture vers
+  la prod depuis ce cycle (cohérent avec le gate S00).
+- **Cadence + fraîcheur** : périodique (watermark de fraîcheur preprod), rejouable, idempotent.
+- **Cross-repo synchronisé** : immo-preprod et geo-preprod rafraîchis de façon COHÉRENTE (même point de
+  cohérence) pour que la jointure immo↔geo tienne en preprod.
+- **Propriété** : extraction prod = infra/extraction (mon kubectl ne voit pas l'OVH prod → jamais
+  self-extract) ; assainissement = contrat spec ; chargement preprod = poc-k8s. Réutiliser l'acquis
+  recette/replay existant plutôt que réinventer.
+- Nourrit directement les « fixtures production-shaped nettoyées » exigées par §5.2 (tests de migration).
