@@ -99,7 +99,10 @@ Réf (worktree geo `/.lanes/archi/docs/spec/`) : `REVUE_D06_D07_GEO_2026-08-15.m
 - **GEL RATIFIÉ @`79fab3fd` sur main** : `SPEC_GEO_MAP_ENGINE §1` = contrat moteur v1 **gelé** + **ADR-0026**
   (gate 3D vert vérifié `b67eb222`). Le HOLD appartenait à geo-cond→owner ; il est maintenant **levé/ratifié**.
 - **Package types-first `@sentropic/geo-map-engine`** (contrat en code, posé par geo-archi) = **référence stable**
-  pour le mock + la planification de la migration immo. geo-cond remonte le SHA du package.
+  pour le mock + la planification de la migration immo. **Sur main @`7c335672`** (contrat §1.3 gelé matérialisé,
+  CI verte). Surface = encodings / layers / basemap / viewport (§1.5.1) ; dépend de `@sentropic/geo-core ^0.5.0`.
+  **Conso cross-repo réelle (repo immo)** = attend la **publication npm** du package (geo-archi) → version publiée à relayer.
+  Phase 0 geo en cours (réconciliateur W1 + W2–W10) ; **rien côté immo avant le 1er moteur exécutable**.
 - **Migration immo** (fetch-out C3 de `GeoCityMapApi` + adoption du composant canonique) = **planifiable contre le
   contrat gelé**, exécutée **sur le 1er moteur exécutable geo** (Phase 0, cap 74–118 p-j). Séquence : moteur geo +
   lots DS (L1–L6, gatés go owner DS) → migration immo. Rien côté immo avant un moteur exécutable.
