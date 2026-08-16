@@ -9,6 +9,7 @@ import {
   enrichGeoZonesWithSignalReglements,
   normalizeReglementKey,
   readReglementNumbers,
+  reglementSourceViewerTitle,
 } from "./signaux-reglements.js";
 
 function node(id: string, props: Record<string, unknown>): GraphSignalNode {
@@ -217,5 +218,37 @@ describe("enrichGeoZonesWithSignalReglements", () => {
 
   it("passe-plat sur une réponse null", () => {
     expect(enrichGeoZonesWithSignalReglements(null, [])).toBeNull();
+  });
+});
+
+describe("reglementSourceViewerTitle — §3.1 : distinguer le PV source du PDF du règlement", () => {
+  // Le drawer Règlements ouvre, dans le viewer partagé, la SOURCE documentaire du
+  // signal représentatif : le PROCÈS-VERBAL qui CITE le règlement — jamais le
+  // texte du règlement lui-même (aucun PDF de règlement n'est modélisé, seul le
+  // PV du signal et, à part, la grille de zonage le sont). Le titre du viewer
+  // doit le dire explicitement, sinon on substitue le PV au règlement (régression
+  // introduite par le drawer Règlements, commit 069e82b).
+  it("étiquette le document ouvert comme le PV SOURCE, pas comme le PDF du règlement", () => {
+    const entries = aggregateReglements([
+      node("evt", {
+        reglement_number: "2021-45",
+        zone_ref: "H-315",
+        rawRef: "raw/pv-delson/cas/abc.pdf",
+        sourceUrl: "https://ville.delson.qc.ca/pv.pdf",
+        page: 24,
+      }),
+    ]);
+    expect(entries).toHaveLength(1);
+    const entry = entries[0];
+    // La « source » d'un règlement EST le PV du signal représentatif (rawRef).
+    expect(entry.evidenceNodeId).toBe("evt");
+
+    const title = reglementSourceViewerTitle(entry.number);
+    // Distinction exacte : le titre marque un PV / une source, pas le règlement.
+    expect(title).toMatch(/PV|proc[eè]s-verbal|source/i);
+    // Régression 069e82b : ne JAMAIS présenter le PV comme s'il était le règlement.
+    expect(title).not.toBe(`Règlement ${entry.number}`);
+    // Traçabilité : le numéro de règlement reste visible dans le titre.
+    expect(title).toContain("2021-45");
   });
 });
