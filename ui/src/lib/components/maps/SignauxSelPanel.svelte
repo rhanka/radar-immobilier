@@ -19,7 +19,12 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Alert, Badge } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
+  import {
+    rankBySearch,
+    nextActiveIndex,
+    type SearchableText,
+  } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
@@ -442,11 +447,20 @@
     const sep = parsed.id.indexOf("/");
     return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
   })();
+  // ── P04 — Recherche TEXTE des lots (locale, vue seule : ne repeint pas la
+  //    carte, ne refetch pas). Sœur de la recherche ville : matching insensible
+  //    casse/accents + ranking (exact > préfixe > sous-chaîne) sur le n° de lot,
+  //    l'adresse en sous-libellé. Appliquée AVANT le cap DOM pour chercher dans
+  //    TOUT l'ensemble filtré (delson : 3330 lots), pas seulement les 80 rendus.
+  let lotSearchQuery = "";
+  let lotActiveIndex = -1;
+  $: lotSearchActive = lotSearchQuery.trim().length > 0;
+  $: searchedEvalLots = rankBySearch(evalFilteredLots, lotSearchQuery, lotSearchText);
   // Cap DOM à 80 fiches, mais le lot FOCUSÉ (clic carte, C4) est TOUJOURS
   // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
   // sur un lot estompé de la carte), il est remonté en tête de liste — la
   // sélection carte → fiche n'est jamais cassée par un filtre.
-  $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, zoneScopedLots);
+  $: visibleLots = ensureFocusedLotVisible(searchedEvalLots, focusedLotNo, zoneScopedLots);
 
   function ensureFocusedLotVisible(
     shown: LotFeature[],
@@ -473,6 +487,14 @@
   })();
   $: visibleZones = ensureFocusedZoneVisible(filteredZones, focusedZoneCode, subsetFilteredZones);
 
+  // ── P04 — Recherche TEXTE des zones (locale, vue seule). Code de zone comme
+  //    libellé principal, label de zone en sous-libellé ; matching + ranking
+  //    mutualisés avec les lots (entity-search). Requête vide → liste inchangée.
+  let zoneSearchQuery = "";
+  let zoneActiveIndex = -1;
+  $: zoneSearchActive = zoneSearchQuery.trim().length > 0;
+  $: searchedZones = rankBySearch(visibleZones, zoneSearchQuery, zoneSearchText);
+
   function ensureFocusedZoneVisible(
     shown: GeoZoneFeature[],
     code: string | null,
@@ -498,8 +520,17 @@
   $: lotTotalCount = focusedZoneCode
     ? zoneScopedLots.length
     : filteredLotNoSet ? filteredLots.length : (lotsResponse?.numberMatched ?? lots.length);
-  /** Total de la LISTE affichée (filtre lots appliqué) — base du cap DOM 80. */
-  $: lotListTotal = lotFilterActive ? evalFilteredLots.length : lotTotalCount;
+  /**
+   * Total de la LISTE affichée (filtre lots + recherche appliqués) — base du
+   * cap DOM 80 et du bandeau « N affichés sur M ». Sous recherche active, la
+   * base est l'ensemble RECHERCHÉ (sinon le bandeau annoncerait des lots
+   * « masqués » qui sont en réalité écartés par la requête).
+   */
+  $: lotListTotal = lotSearchActive
+    ? searchedEvalLots.length
+    : lotFilterActive
+      ? evalFilteredLots.length
+      : lotTotalCount;
   $: hiddenLotCount = Math.max(0, lotListTotal - visibleLots.length);
   $: lotsUnavailableReason =
     lotsResponse && !lotsResponse.ok
@@ -526,6 +557,95 @@
     const citySlug = lot.properties.citySlug ?? selectedCity?.municipality.slug;
     if (!citySlug) return null;
     return safeKey("lot", `${citySlug}/${lot.properties.noLot}`);
+  }
+
+  // ── P04 — Projections recherchables (libellé principal + sous-libellé) ──────
+  function zoneSearchText(zone: GeoZoneFeature): SearchableText {
+    return { text: zone.properties.code, subtext: zone.properties.label ?? null };
+  }
+  function lotSearchText(lot: LotFeature): SearchableText {
+    return { text: lot.properties.noLot, subtext: lot.properties.adresse ?? null };
+  }
+
+  // ── P04 — Réinitialise l'index actif clavier dès que la requête change (un
+  //    index figé pointerait une ligne écartée par la nouvelle requête). ──
+  let lastZoneQuery = "";
+  $: if (zoneSearchQuery !== lastZoneQuery) {
+    lastZoneQuery = zoneSearchQuery;
+    zoneActiveIndex = -1;
+  }
+  let lastLotQuery = "";
+  $: if (lotSearchQuery !== lastLotQuery) {
+    lastLotQuery = lotSearchQuery;
+    lotActiveIndex = -1;
+  }
+
+  /**
+   * P04 — Navigation clavier COMMUNE d'un champ de recherche : ↑/↓ déplacent
+   * l'index actif (en boucle) dans `results`, Entrée SÉLECTIONNE l'item actif
+   * (jamais un item hors résultats), Échap efface la requête. Générique →
+   * réutilisé à l'identique par les zones et les lots.
+   */
+  function handleSearchKeydown<T>(
+    event: KeyboardEvent,
+    results: T[],
+    activeIndex: number,
+    setActive: (index: number) => void,
+    onEnter: (item: T) => void,
+    onEscape: () => void,
+  ): void {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActive(nextActiveIndex(activeIndex, 1, results.length));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActive(nextActiveIndex(activeIndex, -1, results.length));
+    } else if (event.key === "Enter") {
+      if (activeIndex >= 0 && activeIndex < results.length) {
+        event.preventDefault();
+        onEnter(results[activeIndex]);
+      }
+    } else if (event.key === "Escape") {
+      onEscape();
+    }
+  }
+
+  function onZoneSearchKeydown(event: KeyboardEvent): void {
+    handleSearchKeydown(
+      event,
+      searchedZones,
+      zoneActiveIndex,
+      (index) => (zoneActiveIndex = index),
+      (zone) => {
+        const key = zoneKey(zone);
+        if (!key) return;
+        zonesBucketOpen = true;
+        toggleEntity(key);
+      },
+      () => {
+        zoneSearchQuery = "";
+        zoneActiveIndex = -1;
+      },
+    );
+  }
+
+  function onLotSearchKeydown(event: KeyboardEvent): void {
+    handleSearchKeydown(
+      event,
+      visibleLots,
+      lotActiveIndex,
+      (index) => (lotActiveIndex = index),
+      (lot) => {
+        const key = lotKey(lot);
+        if (!key) return;
+        lotsBucketOpen = true;
+        toggleEntity(key);
+      },
+      () => {
+        lotSearchQuery = "";
+        lotActiveIndex = -1;
+      },
+    );
   }
 
   // `state` is passed explicitly (not read from the closure) so that
@@ -1453,6 +1573,25 @@
           {:else if zones.length === 0}
             <p class="sel-empty">Aucune zone géométrique disponible.</p>
           {:else}
+            <!-- P04 — Recherche des ZONES (parité UX/tokens avec la recherche
+                 ville du rail gauche : même composant DS Search). Nav clavier
+                 ↑/↓ + Entrée portée par le wrapper (keydown remonte de l'input). -->
+            <div class="sel-search">
+              <Search
+                size="sm"
+                fluid
+                placeholder="Rechercher une zone…"
+                bind:value={zoneSearchQuery}
+                aria-label="Rechercher une zone"
+                data-testid="zone-search-input"
+                onkeydown={onZoneSearchKeydown}
+              />
+              {#if zoneSearchActive}
+                <span class="sel-search-count" data-testid="zone-search-count">
+                  {searchedZones.length} résultat{searchedZones.length !== 1 ? "s" : ""}
+                </span>
+              {/if}
+            </div>
             <!-- En-tête de filtre par TYPE de zone — AU-DESSUS de la liste,
                  visible quand l'accordéon est ouvert. Rendu même quand le
                  filtre vide la liste (sinon impossible de le désactiver). -->
@@ -1464,17 +1603,21 @@
               millesimeFilter={zoneMillesimeFilter}
               onMillesimeChange={onZoneMillesimeFilterChange}
             />
-            {#if visibleZones.length === 0}
+            {#if searchedZones.length === 0}
               <p class="sel-empty">
-                {zoneKindFilterActive || zoneMillesimeFilterActive
-                  ? "Aucune zone du filtre sélectionné."
-                  : "Aucune zone liée aux signaux du filtre actif."}
+                {#if zoneSearchActive}
+                  Aucune zone trouvée.
+                {:else if zoneKindFilterActive || zoneMillesimeFilterActive}
+                  Aucune zone du filtre sélectionné.
+                {:else}
+                  Aucune zone liée aux signaux du filtre actif.
+                {/if}
               </p>
             {:else}
             {#if zonesResponse?.warnings.includes("lot-union-fallback-is-visual-only")}
               <p class="sel-warning">Fallback visuel : les zones sont dérivées de groupes de lots.</p>
             {/if}
-            {#each visibleZones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
+            {#each searchedZones as zone, zoneIndex (`${zone.properties.citySlug}-${zone.properties.code}`)}
               {@const key = zoneKey(zone)}
               {#if key}
                 {@const zoneVisual = visual(selectionState, key)}
@@ -1482,6 +1625,7 @@
                   <button
                     type="button"
                     class="sel-entity-head"
+                    class:sel-entity-head--active={zoneIndex === zoneActiveIndex}
                     class:sel-entity-head--selected={zoneVisual.selected}
                     class:sel-entity-head--focused={zoneVisual.focused}
                     class:sel-entity-head--dimmed={zoneVisual.dimmed}
@@ -1685,6 +1829,26 @@
           {:else if lots.length === 0}
             <p class="sel-empty">Aucun lot retourné par la collection geo.</p>
           {:else}
+            <!-- P04 — Recherche des LOTS (parité UX/tokens avec la recherche
+                 ville : même composant DS Search). Cherche dans TOUT l'ensemble
+                 filtré (n° de lot + adresse), avant le cap DOM. Nav clavier idem
+                 zones (↑/↓ + Entrée) portée par le wrapper. -->
+            <div class="sel-search">
+              <Search
+                size="sm"
+                fluid
+                placeholder="Rechercher un lot…"
+                bind:value={lotSearchQuery}
+                aria-label="Rechercher un lot"
+                data-testid="lot-search-input"
+                onkeydown={onLotSearchKeydown}
+              />
+              {#if lotSearchActive}
+                <span class="sel-search-count" data-testid="lot-search-count">
+                  {formatNumber(lotListTotal)} résultat{lotListTotal !== 1 ? "s" : ""}
+                </span>
+              {/if}
+            </div>
             <!-- En-tête de filtre LOTS (eval-lot-filters réutilisé) — AU-DESSUS
                  de la liste, visible quand l'accordéon est ouvert. Rendu même
                  quand le filtre vide la liste (pour pouvoir le désactiver).
@@ -1695,14 +1859,20 @@
               onChange={onLotFilterChange}
             />
             {#if visibleLots.length === 0}
-              <p class="sel-empty">Aucun lot ne correspond aux filtres actifs.</p>
+              <p class="sel-empty">
+                {#if lotSearchActive}
+                  Aucun lot trouvé.
+                {:else}
+                  Aucun lot ne correspond aux filtres actifs.
+                {/if}
+              </p>
             {:else}
             {#if hiddenLotCount > 0}
               <p class="sel-warning">
                 {formatNumber(visibleLots.length)} lots affichés sur {formatNumber(lotListTotal)} disponibles.
               </p>
             {/if}
-            {#each visibleLots as lot (lot.properties.noLot)}
+            {#each visibleLots as lot, lotIndex (lot.properties.noLot)}
               {@const key = lotKey(lot)}
               {#if key}
                 {@const lotVisual = visual(selectionState, key)}
@@ -1710,6 +1880,7 @@
                   <button
                     type="button"
                     class="sel-entity-head"
+                    class:sel-entity-head--active={lotIndex === lotActiveIndex}
                     class:sel-entity-head--selected={lotVisual.selected}
                     class:sel-entity-head--focused={lotVisual.focused}
                     class:sel-entity-head--dimmed={lotVisual.dimmed}
@@ -2067,6 +2238,27 @@
 
   .sel-entities {
     padding: 0.25rem 0 0.5rem;
+  }
+
+  /* P04 — champ de recherche d'un accordéon (zones/lots) : mêmes marges que le
+     rail ville ; le compteur de résultats sous le champ = état des résultats. */
+  .sel-search {
+    padding: 0.4rem 0.85rem 0.2rem;
+  }
+
+  .sel-search-count {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+  }
+
+  /* P04 — ligne ACTIVE de la navigation clavier (curseur ↑/↓ dans les
+     résultats), distincte de l'état sélectionné/focusé. */
+  .sel-entity-head--active {
+    background: var(--st-semantic-surface-subtle, #f1f5f9);
+    outline: 1px dashed #14b8a6;
+    outline-offset: -1px;
   }
 
   .sel-entity-bar {
