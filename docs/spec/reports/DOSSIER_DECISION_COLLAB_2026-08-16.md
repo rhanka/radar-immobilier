@@ -26,3 +26,22 @@ Grounding = source réelle `@sentropic/comments` 0.1.0.
 - **Tout chemin delete/archive ATTEND `comments v0.2.0`** — Radar ne doit PAS hard-delete via le package actuel.
 - ⇒ **E1 Radar dépend de `@sentropic/comments v0.2.0`**. `builder ≠ reviewer` (re-review indépendante avant merge).
 - Suite : demander à s-archi le **contrat de types v0.2.0** (shape tombstone + signature `purge()`), puis cadrer E1 Radar.
+
+## 4. Contrat de types `@sentropic/comments` v0.2.0 — FIGÉ (réf E1 Radar, s-archi 2026-08-16)
+- **`CommentTombstone`** : `deletedAt` (ISO), `deletedBy` (`CommentAuthor` opaque, pas de join user),
+  `bodyDisposition: 'retained'` (défaut O1, body conservé, ligne marquée supprimée) `| 'redacted'`
+  (placeholder ; original non récupérable côté package), `reason?` (tag hôte). `Comment.tombstone?` présent ⇔ soft-deleted.
+- **`delete()` devient SOFT (BREAKING)** : `delete(tenant, id, by, opts?) → Promise<Comment>` (était `void`) ;
+  pose le tombstone, **préserve la ligne** (thread + ancre root + summary survivent) ; idempotent ; ne retire JAMAIS la ligne.
+- **`purge()` = seul hard-remove, host-gated, THREAD-ATOMIQUE** : `purge(tenant, {olderThan, targetKind?, reason?})` ;
+  n'opère que sur des lignes DÉJÀ tombstonées `deletedAt < olderThan` ; un thread n'est purgé que si TOUTES ses lignes
+  sont éligibles (partiel = skippé → invariant no-orphan tenu même à la purge). Package ne décide ni rétention ni authz.
+- **Queries/summary tombstone-aware** : `includeTombstoned?` (défaut true) ; summary `rootMessage`/`lastMessage`
+  tombstone-aware ; `tombstonedCount?` ; `messageCount` = lignes live. **Événements** : `comment.tombstoned` / `comment.purged`.
+- **LAYERING** : (i) **package `@sentropic/comments` v0.2.0** = contrat `CommentStore` (delete→soft + purge) + `types.ts`
+  (+`CommentTombstone`) + **ref in-memory** + events → **construit/publié côté Sentropic** ; (ii) **Radar `api/`** = adaptateur
+  **Postgres** `CommentStore` (UPDATE colonnes tombstone au lieu de DELETE ; `purge` = DELETE thread-atomique) **+ 1 migration**
+  (`deleted_at`/`deleted_by`/`body_disposition`/`reason`) → **volet E1 Radar** ; (iii) **Radar immo** = adaptateur mince
+  (mapping `record/recordType` + visibilité injectée + follow host-side ; **ne ré-implémente PAS** delete/tombstone).
+- **Gate chain** : **Sentropic publie `comments v0.2.0`** → **E1 Radar** (adaptateur PG + migration + adaptateur mince) contre ce contrat.
+  `builder ≠ reviewer`. Bump gate package (`npm view @sentropic/comments version` puis `0.2.0` strictement >). Révisions/edit append-only = v0.3.0.
