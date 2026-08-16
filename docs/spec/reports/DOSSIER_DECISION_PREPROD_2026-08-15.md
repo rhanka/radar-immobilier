@@ -176,3 +176,22 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
 - **Piège 3** — un seul host preprod → une seule URL. Host api distinct éventuel → il listera tous, https only.
 - **Geste sûr tenu** : tout via `kubectl -n radar-immobilier-preprod` explicite, jamais `make k8s-bundle-secret`. Login preprod fail-closed en
   attendant (PII verrouillée, pas urgent). Enregistrement IdP prod gaté sur le GO conducteur d'auth.
+
+### 8.5 Runbook d'exécution OAuth (auth — 2026-08-16)
+- **Montage = (c)** (ni (a) ni (b)) : **poc-k8s détient les DEUX accès et fait les DEUX écritures avec la MÊME valeur** — le Secret dans le ns
+  `radar-immobilier-preprod`, la ligne `oauth_clients` depuis un pod du ns **sentropic** (c'est là que vit la base IdP). (a) est impossible même
+  avec accès : un pod ne lit pas un Secret d'un autre namespace sans RBAC inexistant.
+- **PRÉCONDITION BLOQUANTE à vérifier AVANT** : `npm run oauth:register-client:dist` n'existe que depuis **PR #497** (mergée aujourd'hui). Le repli
+  tsx `oauth:register-client` ne marche pas en prod (tsx = devDep, `npm prune --omit=dev`). Vérif : **`kubectl -n sentropic exec <api-pod> -- ls dist/scripts/`**
+  → si `oauth-register-client.js` présent = jouable ; sinon **repli SQL** (ne PAS redéployer la prod juste pour ça).
+- **⚠️ PIÈGE HASH (coûte une soirée)** : le hash doit porter sur EXACTEMENT les octets que le RP présentera. Le script fait
+  `sha256(secret.trim())`. Donc **`printf '%s' "$SECRET" | sha256sum`** (correct) — **JAMAIS `echo "$SECRET" | sha256sum`** (ajoute `\n` →
+  hash différent → `invalid_client`, indiscernable d'un mauvais client_id). Le Secret k8s ne doit porter **aucun newline final**
+  (`kubectl create secret --from-literal` n'en ajoute pas ; un heredoc mal fermé si). Clair haché = clair présenté, à l'octet près.
+- **Repli SQL** (si image périmée) — client CONFIDENTIEL : `INSERT INTO oauth_clients (id='client-radar-immobilier-preprod',
+  client_id='radar-immobilier-preprod', client_secret_hash='<sha256 hex du clair>', name='Radar Immobilier (preprod)',
+  redirect_uris={https://immo-preprod.sent-tech.ca/api/v1/auth/oauth/callback}, allowed_scopes={openid,profile,email},
+  grant_types={authorization_code}, response_types={code}, token_endpoint_auth_method='client_secret_basic', require_pkce=true,
+  resource_indicators='{}') ON CONFLICT (client_id) DO UPDATE …` (tenant_id non passé ⇒ défaut sentropic).
+- **GO** : auth remonte l'ensemble à **son conducteur** pour le GO d'écriture IdP prod ; auth ne l'accorde pas seul, ma validation ne le remplace
+  pas. Fail-closed tient pendant ce temps (PII verrouillée) → rien d'urgent.
