@@ -4,14 +4,14 @@
    * Signaux ↔ Sources (extraite de SignauxRail, iso-rendu : mêmes classes
    * `rail-city-list` / `rail-city-row` / `rail-city-row--active`).
    *
-   * Recherche DS intégrée (nom/sous-libellé) + plafond d'affichage
-   * (rail-city-items). Cliquer une ligne remonte le slug à la vue — la
-   * sélection, le vol carto et le détail restent la POLITIQUE de la vue.
+   * Recherche DS intégrée (nom/sous-libellé) sur la liste COMPLÈTE — aucun
+   * plafond d'affichage (P02 : la recherche ne révèle rien que la liste
+   * cache). Cliquer une ligne remonte le slug à la vue — la sélection, le vol
+   * carto et le détail restent la POLITIQUE de la vue.
    */
   import { Search, Badge } from "@sentropic/design-system-svelte";
   import {
     filterRailCityItems,
-    RAIL_CITY_LIST_MAX,
     type RailCityItem,
   } from "$lib/maps/rail-city-items.js";
 
@@ -23,8 +23,6 @@
   export let loading = false;
   /** Données indisponibles : état vide honnête, pas un faux zéro. */
   export let dataUnavailable = false;
-  /** Plafond d'affichage. */
-  export let maxItems = RAIL_CITY_LIST_MAX;
   /** Message d'état vide (hors recherche/indisponibilité). */
   export let emptyLabel = "Aucune donnée disponible";
   /** Appelé au clic d'une ligne ville. */
@@ -32,9 +30,12 @@
 
   let searchQuery = "";
 
-  // La ville sélectionnée est exemptée du PLAFOND (jamais coupée de la liste —
-  // garde #378) ; la recherche, filtre explicite de l'utilisateur, s'applique.
-  $: displayedItems = filterRailCityItems(items, searchQuery, maxItems, selectedSlug);
+  // Liste COMPLÈTE (aucun plafond — P02) : toute ville trouvable par la
+  // recherche est présente dans la liste non filtrée. Seule la RECHERCHE
+  // restreint l'affichage (filtre explicite de l'utilisateur). La ville
+  // sélectionnée reste donc toujours listée hors recherche (garde #378),
+  // portée par les items fournis par la vue.
+  $: displayedItems = filterRailCityItems(items, searchQuery);
 </script>
 
 <!-- Recherche villes (Search DS fluid — remplit le rail) -->
