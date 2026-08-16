@@ -6,10 +6,10 @@
 > cartographiques. Travail de SPEC + PLAN uniquement (aucun code applicatif).
 >
 > Entrées :
-> - Rétrodoc exhaustive de l'outil de Steve : [`input/carte-steve/README.md`](input/carte-steve/README.md)
->   + archi [`input/carte-steve/tech/ARCHITECTURE.md`](input/carte-steve/tech/ARCHITECTURE.md)
->   + schéma data [`input/carte-steve/tech/analyse-donnees.json`](input/carte-steve/tech/analyse-donnees.json)
->   + index villes [`input/carte-steve/tech/cities.json`](input/carte-steve/tech/cities.json).
+> - Rétrodoc exhaustive de l'outil de Steve : [`input/carte-user-review/README.md`](input/carte-user-review/README.md)
+>   + archi [`input/carte-user-review/tech/ARCHITECTURE.md`](input/carte-user-review/tech/ARCHITECTURE.md)
+>   + schéma data [`input/carte-user-review/tech/analyse-donnees.json`](input/carte-user-review/tech/analyse-donnees.json)
+>   + index villes [`input/carte-user-review/tech/cities.json`](input/carte-user-review/tech/cities.json).
 > - Cadrage radar : [`SPEC_REORIENTATION_GRAND_FILET.md`](SPEC_REORIENTATION_GRAND_FILET.md) (vues WP A.1).
 > - Modèle de données : [`SPEC_DESIGN_DATA_MODEL.md`](SPEC_DESIGN_DATA_MODEL.md),
 >   [`SPEC_ONTOLOGY_DATA_MODEL.md`](SPEC_ONTOLOGY_DATA_MODEL.md),
@@ -495,17 +495,17 @@ comme **fixture de maquette** (mode `simulation`, jamais mélangé au réel — 
 
 ### 6.1 Récupération du JSON (les données ne sont pas dans la rétrodoc, mais téléchargeables)
 - Index des villes : `https://thriving-kleicha-89b7ef.netlify.app/data/cities.json`
-  (= [`input/carte-steve/tech/cities.json`](input/carte-steve/tech/cities.json), 4 villes `ready`).
+  (= [`input/carte-user-review/tech/cities.json`](input/carte-user-review/tech/cities.json), 4 villes `ready`).
 - Données par ville (6–24 Mo, GeoJSON WGS84) :
   `https://thriving-kleicha-89b7ef.netlify.app/data/<slug>.json` pour
   `delson`, `sainte-catherine`, `saint-constant`, `candiac`
   (cf. `ARCHITECTURE.md` §fin : « téléchargeables `…/data/<slug>.json` »).
 - Zones dessinées (Sainte-Catherine) : `…/data/sainte-catherine-zones.json`.
 - Schéma effectif déjà documenté : `{meta, lots, zones, tod, boundary}` + 22 propriétés de lot
-  (voir [`tech/analyse-donnees.json`](input/carte-steve/tech/analyse-donnees.json) pour les
+  (voir [`tech/analyse-donnees.json`](input/carte-user-review/tech/analyse-donnees.json) pour les
   `sample_lot` réels et les compteurs par ville).
 - **Méthode** : un petit job de fixture (mode dev) `curl`/fetch + validation Zod → stockage en
-  **fixtures S3** `fixtures/carte-steve/<slug>.json` (`SPEC_PERSISTENCE_S3_FIRST.md` §layout
+  **fixtures S3** `fixtures/carte-user-review/<slug>.json` (`SPEC_PERSISTENCE_S3_FIRST.md` §layout
   `fixtures/`). Pas committé en git (volumétrie). Pas de PII (les JSON de Steve ne contiennent que
   cadastre + rôle public + adresse, aucun nom de propriétaire).
 
@@ -555,7 +555,7 @@ comme **fixture de maquette** (mode `simulation`, jamais mélangé au réel — 
 >    *d'équipe* portant `who`/`role`, **aucune PII de tiers / propriétaire**), conservées **en
 >    contrôle** — **jamais re-publiées** dans le flux opérationnel.
 >
-> La spec dédiée **`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`** porte le détail (modèle table de
+> La spec dédiée **`SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`** porte le détail (modèle table de
 > contrôle, métrique de parité diffable par ville, mécanisme d'import, priorité deep des 4 villes,
 > items track). Le **substrat cadastre/rôle/zonage** de la maquette (§6.2 table de mapping
 > ci-dessus, `mode:"simulation"`) reste le socle de démo CS-L6 ; la **table de contrôle** est un
@@ -564,7 +564,7 @@ comme **fixture de maquette** (mode `simulation`, jamais mélangé au réel — 
 #### 6.2.1 Garde-fou — table de contrôle ≠ store opérationnel (suite de la décision)
 
 La table de contrôle (`ControlLot`/`ControlMark`, détaillée dans
-[`SPEC_CONTROLE_PARITE_VILLES_STEVE.md`](SPEC_CONTROLE_PARITE_VILLES_STEVE.md)) est **strictement
+[`SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md`](SPEC_CONTROLE_PARITE_VILLES_USER_REVIEW.md)) est **strictement
 séparée** du store opérationnel et **ne touche pas** au détecteur :
 
 - **Pas de pollution `ProspectMark`** : les marques d'équipe de Steve (`non-retenu` → 5 043,
@@ -707,7 +707,7 @@ et P2 S-14. Ce choix **ne crée pas d'écran**, il outille les écrans existants
 
 Les lots d'intégration sont créés dans le workspace track **`reorientation`**, parentés sous la
 racine **« Réorientation Grand filet »** (`01KTQP5EHKKMM5TSD4ZSE3CFZ2`), aux côtés des lots L1–L6
-existants. Chaque lot porte `body: "ref docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md …"`.
+existants. Chaque lot porte `body: "ref docs/spec/SPEC_EVOL_INTEGRATION_CARTE_USER_REVIEW.md …"`.
 
 ### 9.1 Ordre d'exécution (amendé revue Fable5)
 
