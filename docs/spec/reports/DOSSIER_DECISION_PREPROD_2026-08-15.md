@@ -139,3 +139,7 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
 - **⚠️ VIGILANCE poc-k8s** : `K8S_NAMESPACE ?= sentropic` dans le Makefile = **PROD** ; `make k8s-bundle-secret` **réécrit le Secret `sentropic-api`
   EN ENTIER** depuis `.env` (toute clé absente → chaîne vide en PROD). Pour poser un secret dans le ns preprod : `kubectl patch --type=merge`
   ciblé, **namespace écrit en toutes lettres**, JAMAIS cette cible make.
+- **INPUTS OWNER RÉSOLUS (2026-08-16)** : (2) **tenant = `sentropic`** — l'OAuth immo est **déjà sous `sentropic`** (client_id prod
+  `radar-immobilier` @ IdP sentropic) ; j'avais mal présenté « immo tenant distinct » : c'est le **déploiement/DB** immo qui est séparé
+  (i-arch), PAS le tenant IdP OAuth. Corrigé. (3) **`client_id = radar-immobilier-preprod`** (= client_id prod `radar-immobilier` +
+  suffixe `-preprod`). **Reste (1)** : URL callback preprod exacte → **poc-k8s** (demandée).
