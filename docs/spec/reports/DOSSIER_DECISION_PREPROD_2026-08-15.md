@@ -104,3 +104,17 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
 - **GO PREPROD MINIMAL (conducteur → poc-k8s, 2026-08-16)** : poser un ns preprod isolé + DB + secrets + déployer les
   images `:sha` existantes, chargées d'un **snapshot prod FULL** (extraction = lane extraction, jamais self-extract OVH).
   On l'évolue vers le tier joint (immo↔geo-preprod) ensuite. Rework faible sur un ns.
+
+### 8.1 Exécution (poc-k8s, GO owner DIRECT — 2026-08-16)
+- **Gouvernance** : poc-k8s a **refusé mon GO relayé** (anti-blanchiment de permission : création ns/DB/secrets + réplication PII prod
+  RÉELLE = décision data-protection exigeant le GO **direct** de l'owner). ✅ **Bonne posture.** L'owner a donné le **GO direct** dans la
+  session poc-k8s (« preprod complet avec PII prod »).
+- **En construction** : ns `radar-immobilier-preprod` + ResourceQuota + NetworkPolicies default-deny → **secrets DISTINCTS générés à neuf**
+  (zéro copie prod, pas de clé TEM prod, SMTP→`radar-maildev`) → StatefulSets postgres/minio → Deployments api/ui/mcp/maildev/obscura sur
+  `:a132d4a`. **Dry-run serveur avant chaque apply.**
+- **Footprint** : snapshot ≈ **1.2 GB** (PG réel) ; +175m CPU / 566Mi req. **⚠️ Capacité tendue** : 2 nœuds, ~409m CPU libres → preprod tient
+  mais laisse ~230m ; un burst/HPA exigerait un **3e nœud**. ResourceQuota (cap 1600m/2304Mi) pour ne jamais affamer la prod.
+- **ETA** : env vide ~5 min ; complet avec données prod ~20–40 min, **gaté sur la livraison du snapshot par la lane extraction** (poc-k8s
+  restaure, ne self-extract pas).
+- **DÉPENDANCE OAuth** : sans client OAuth preprod dédié, le login preprod est **fail-closed** (PII inaccessible — acceptable au départ pour
+  verrouiller la PII). À suivre : enregistrer un **client OAuth preprod dédié** (lane auth), **jamais réutiliser le client prod**.
