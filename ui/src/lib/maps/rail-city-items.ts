@@ -35,37 +35,32 @@ export interface RailCityItem {
   badge: RailCityBadge;
 }
 
-/** Plafond d'affichage de la liste (parité SignauxRail historique). */
-export const RAIL_CITY_LIST_MAX = 60;
-
 /**
- * Filtre par recherche (nom OU sous-libellé, insensible à la casse) puis
- * plafonne à `max` lignes. Requête vide → items tels quels (plafonnés).
+ * Filtre par recherche (nom OU sous-libellé, insensible à la casse).
+ * Requête vide → items tels quels.
  *
- * `keepSlug` (ville SÉLECTIONNÉE) est EXEMPTÉE du plafond : la coupe au
- * plafond était le mécanisme d'éjection du bug #378 (ville sélectionnée triée
- * en bas → coupée du rail). Elle reste soumise à la RECHERCHE : une requête
- * qui l'écarte est un filtre explicite de l'utilisateur, pas un artefact de
- * tri/fetch.
+ * AUCUN plafond d'affichage (P02) : la liste NON filtrée doit contenir TOUTE
+ * ville que la recherche peut faire apparaître. Un plafond « top N » (60,
+ * hérité de SignauxRail où la liste est pré-filtrée aux villes à signaux)
+ * appliqué à la liste provinciale complète de la vue Couverture masquait
+ * silencieusement toute ville au-delà du rang de coupe (ex. Saint-Stanislas,
+ * priorityRank 477, non exclue/non dépriorisée) : invisible dans la liste,
+ * pourtant trouvable par la recherche — incohérence recherche ↔ liste. Le
+ * corps du rail est déjà scrollable (RailShell) et porte donc la liste
+ * entière. Ce même plafond était aussi le mécanisme d'éjection de la ville
+ * sélectionnée (#378) ; sans plafond, une ville n'est absente que si la
+ * RECHERCHE l'écarte — un filtre explicite de l'utilisateur, jamais un
+ * artefact de coupe/tri.
  */
 export function filterRailCityItems(
   items: RailCityItem[],
   query: string,
-  max = RAIL_CITY_LIST_MAX,
-  keepSlug: string | null = null,
 ): RailCityItem[] {
   const q = query.trim().toLowerCase();
-  const matched = q
-    ? items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(q) ||
-          (item.sublabel ?? "").toLowerCase().includes(q),
-      )
-    : items;
-  const capped = matched.slice(0, max);
-  if (keepSlug !== null && !capped.some((item) => item.slug === keepSlug)) {
-    const kept = matched.find((item) => item.slug === keepSlug);
-    if (kept) capped.push(kept);
-  }
-  return capped;
+  if (!q) return items;
+  return items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(q) ||
+      (item.sublabel ?? "").toLowerCase().includes(q),
+  );
 }
