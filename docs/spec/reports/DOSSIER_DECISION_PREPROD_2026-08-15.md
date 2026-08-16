@@ -195,3 +195,14 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
   resource_indicators='{}') ON CONFLICT (client_id) DO UPDATE …` (tenant_id non passé ⇒ défaut sentropic).
 - **GO** : auth remonte l'ensemble à **son conducteur** pour le GO d'écriture IdP prod ; auth ne l'accorde pas seul, ma validation ne le remplace
   pas. Fail-closed tient pendant ce temps (PII verrouillée) → rien d'urgent.
+
+### 8.6 Précondition satisfaite + double gate d'exécution (poc-k8s — 2026-08-16)
+- **PR #497 DÉPLOYÉE en prod** : `oauth-register-client.js` (+ `.map`) **présent** dans le pod api prod (`api-…:main`). ⇒ **voie script jouable,
+  PAS de repli SQL, PAS de redéploiement prod.** (Le pod auth-idp n'a pas le script — working dir différent, même image ; on utilise le pod api.)
+- **Montage (c) confirmé** : poc-k8s génère la valeur **une fois** (zéro newline), l'écrit dans son Secret preprod
+  `radar-sentropic-auth/SENTROPIC_OAUTH_CLIENT_SECRET` (`kubectl -n radar-immobilier-preprod`), et lance le script depuis un pod du ns **sentropic**
+  avec `OAUTH_CLIENT_SECRET` = la MÊME valeur. Piège hash tenu (`printf '%s'`, jamais `echo`).
+- **⛔ DOUBLE GATE de gouvernance (posée par poc-k8s, correcte)** : l'exécution = une **ÉCRITURE dans l'IdP PROD** (INSERT `oauth_clients`, ns
+  sentropic) via exec dans un pod prod. Exige **DEUX feux** : (1) **GO du conducteur d'auth** (auth le remonte) ET (2) **GO DIRECT de l'owner dans
+  la session poc-k8s** (un GO relayé ne suffit pas). Dès le (1), poc-k8s demande le (2) et exécute dans la foulée. D'ici là : fail-closed, PII
+  verrouillée, rien à faire.
