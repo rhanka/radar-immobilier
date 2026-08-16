@@ -143,3 +143,20 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
   `radar-immobilier` @ IdP sentropic) ; j'avais mal présenté « immo tenant distinct » : c'est le **déploiement/DB** immo qui est séparé
   (i-arch), PAS le tenant IdP OAuth. Corrigé. (3) **`client_id = radar-immobilier-preprod`** (= client_id prod `radar-immobilier` +
   suffixe `-preprod`). **Reste (1)** : URL callback preprod exacte → **poc-k8s** (demandée).
+
+### 8.3 Packet OAuth FIGÉ + garde SQL + 3 pièges déploiement (auth — 2026-08-16)
+- **Packet (seule la callback manque)** : `OAUTH_CLIENT_ID=radar-immobilier-preprod` · `OAUTH_CLIENT_NAME="Radar Immobilier (preprod)"` ·
+  `OAUTH_CLIENT_REDIRECT_URIS=<callback poc-k8s>` · `OAUTH_CLIENT_SCOPES=openid,profile,email` · `OAUTH_CLIENT_TOKEN_AUTH=client_secret_basic`
+  · `OAUTH_CLIENT_SECRET=<généré cluster-side, cf piège 1>` · `npm run oauth:register-client:dist`. Ligne `id` = `client-radar-immobilier-preprod`
+  (préfixe script) ; `tenant_id` non passé ⇒ défaut `sentropic` ; upsert idempotent sur `client_id`, rejouable.
+- **Garde SQL à l'exécution** (auth ne voit pas le repo immo — prend ma vérif `radar-immobilier`@sentropic comme la mienne, à confirmer sur la vraie donnée) :
+  `SELECT client_id, tenant_id, token_endpoint_auth_method FROM oauth_clients WHERE client_id='radar-immobilier';` → si `tenant_id='sentropic'`,
+  confirmé ; si rien, **STOP avant d'écrire**.
+- **PIÈGE 1 — secret généré 2× = `invalid_client`** : l'IdP ne stocke que le **sha256** ; générer la valeur **UNE fois** et l'utiliser **DEUX fois**
+  (Secret k8s du ns preprod que le RP présente + `OAUTH_CLIENT_SECRET` à l'enregistrement). Ordre sûr : générer dans le pod → poser le Secret →
+  enregistrer avec la même valeur → oublier le clair. `SECRET_ENCRYPTION_KEY` **n'intervient pas** (haché, pas chiffré).
+- **PIÈGE 2 — callback protégée par sa propre protection = boucle infinie** : si le forward-auth Traefik couvre `/` sur tout le host, le chemin de
+  callback (et `/oauth2/*` selon impl) doit être **EXCLU** de la règle. À cadrer avec poc-k8s en même temps que l'URL.
+- **PIÈGE 3 — redirects multiples** : `OAUTH_CLIENT_REDIRECT_URIS` = liste séparée par virgules ; si la preprod expose plusieurs hosts (app + api),
+  **tous** doivent y figurer ; le script refuse non-`https://` / `localhost` / `127.0.0.1` ; un redirect non listé → `redirect_uri_mismatch` au 1er login.
+- **Exécution** : dès la callback, auth remplit + relit + remonte le packet à **son conducteur** pour le GO d'écriture IdP prod (accès PII). Pas sauté.
