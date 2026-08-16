@@ -81,3 +81,13 @@ Réf : `tmp/handoff/geo-immo-preprod/topologie-tier-joint-35b.md`.
 - **Loi 25 (3 signaux → critères d'acceptation du cycle assaini)** : (a) images registre fr-par (miroir BHS ?) ;
   (b) région du bucket `sentropic-geo` à confirmer → bucket résident BHS assaini ; (c) egress email TEM
   Scaleway → router vers `radar-maildev`, jamais la clé TEM prod en preprod.
+
+## 7. Décisions owner ratifiées 2026-08-16 (double revue cross-repo complète : geo-archi + poc-k8s)
+- **Création namespaces preprod (`geo-preprod` + `radar-immobilier-preprod`)** : **GO conditionné au gel design geo-archi** ;
+  poc-k8s pose en fenêtre au GO conducteur (aucune création avant le gel).
+- **Manifeste 35b `radar-populate-geo-daily`** (latent, jamais appliqué) : **épingler `:sha` + réintégrer kustomization**
+  si le populate reste utile ; sinon bascule vers le cycle déclencheur-externe idempotent. Fin du piège dormant.
+- **Modèle de sync RATIFIÉ** : tier joint = immo-preprod(`radar-api`) → geo-preprod(`geo-api` TCP 8787) ; cycle data =
+  **déclencheur externe idempotent** (run-stamp) → **bucket BHS assaini** ; critères **Loi 25** (miroir registre fr-par,
+  région bucket → BHS, egress email → `radar-maildev` jamais la clé TEM prod). **Spec de cadrage formelle cross-repo à
+  produire au retour du gateway** (passe 5.6 Sol) — double revue déjà acquise (geo-archi + poc-k8s convergents).
