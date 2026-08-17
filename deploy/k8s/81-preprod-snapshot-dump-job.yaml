@@ -8,8 +8,8 @@
 #   - LIT la DB prod radar-postgres en READ-ONLY via pg_dump -Fc (--no-owner --no-privileges).
 #     N'écrit JAMAIS la prod.
 #   - STREAM pg_dump | age : le CLAIR (PII) ne se matérialise JAMAIS sur disque — seul le ciphertext
-#     `dump.age` existe. Chiffrement age MULTI-DESTINATAIRES A+B+C (clés PUBLIQUES ; clés privées
-#     jamais dans le job — A chez le restore poc-k8s, B/C secours owner).
+#     `dump.age` existe. Chiffrement age MULTI-DESTINATAIRES {A, interim-B} (clés PUBLIQUES ; clés
+#     privées jamais dans le job — A_priv chez le restore poc-k8s, interim-B_priv détenu ops poc-k8s).
 #   - UPLOAD le ciphertext → OVH Object Storage région BHS (résidence Canada), bucket
 #     radar-preprod-snapshot. AUCUNE sortie PII hors BHS, AUCUN fichier clair.
 #   - Sens unique strict prod→preprod. Le preprod n'écrit jamais vers la prod.
@@ -21,13 +21,15 @@
 #                least-privilege : lit, has_table_privilege(INSERT)=false ; ≠ compte applicatif).
 # Creds cible  = secret `preprod-snapshot-upload` (WRITE put-only scopé bucket, minté JIT au dispatch).
 # Clé signature= secret `preprod-snapshot-signer` (privée ; publique épinglée restore ; minté JIT).
-# Params non-secrets (S3 endpoint/bucket/region/addressing + recipients age A/B/C + signer-id/ttl) =
-#                ConfigMap `radar-preprod-snapshot-params` (OWNER-CONTRÔLÉE poc-k8s ; B/C patchés au GO).
+# Params non-secrets (S3 endpoint/bucket/region/addressing + recipients age A + interim-B + signer-id/ttl) =
+#                ConfigMap `radar-preprod-snapshot-params` (OWNER-CONTRÔLÉE poc-k8s ; interim-B patché par poc-k8s).
 # I10 : RADAR full-dump SÛR — manifeste EXCLUDE ~vide vérifié (aucune table clés/secrets/tokens/
 #       sessions ; auth déléguée IdP Sentropic). Pas de --exclude-table pour radar.
 #
-# ⚠️ B/C = placeholders EN ATTENTE de la ratification du schéma de clés (double-revue + owner).
-#    Le PR n'est ouvert qu'APRÈS ratification (B_pub/C_pub réels) + GO dump conducteur.
+# Set destinataires FINAL = 2 {A (ops restore), interim-B} — pivot OVH Secret Manager + recouvrement
+#    op (ancre EXCLUE du chiffrement pour ne pas dégrader la confidentialité PII : age = protégé au
+#    niveau du destinataire le plus faible). Dispatch gaté : RE-GATE #515 (count 3→2) + IP s3.bhs
+#    re-résolue (poc-k8s) + GO dump conducteur.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -78,10 +80,10 @@ spec:
               export PGPASSWORD="$POSTGRES_PASSWORD"
               KEY="radar-prod-$(date -u +%Y%m%dT%H%M%SZ).dump.age"
               # 1) STREAM pg_dump | age → ciphertext (aucun clair sur disque). Rôle SELECT-only.
-              echo "stream: pg_dump -Fc PROD (SELECT-only) | age (A+B+C) -> /work/dump.age"
+              echo "stream: pg_dump -Fc PROD (SELECT-only) | age (A+interim-B) -> /work/dump.age"
               pg_dump -Fc --no-owner --no-privileges \
                   -h "$POSTGRES_HOST" -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-                | age -r "$AGE_RECIPIENT_A" -r "$AGE_RECIPIENT_B" -r "$AGE_RECIPIENT_C" \
+                | age -r "$AGE_RECIPIENT_A" -r "$AGE_RECIPIENT_B" \
                       -o /work/dump.age
               # 2) SIGNATURE authenticité (ssh-keygen -Y sign, namespace 'file') → dump.age.sig
               install -m600 /sign/signer /tmp/signer
@@ -108,9 +110,11 @@ spec:
               valueFrom: { secretKeyRef: { name: preprod-snapshot-upload, key: AWS_ACCESS_KEY_ID } }
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom: { secretKeyRef: { name: preprod-snapshot-upload, key: AWS_SECRET_ACCESS_KEY } }
-            # --- params NON-secrets (résidence-critiques + recipients age A/B/C) :
+            # --- params NON-secrets (résidence-critiques + recipients age A + interim-B) :
             #     ConfigMap `radar-preprod-snapshot-params` OWNER-CONTRÔLÉE (poc-k8s), lue en clair
-            #     par le gate i-cond. AGE_RECIPIENT_B/C = __SET_AT_GO__ patchés par poc-k8s au GO. ---
+            #     par le gate i-cond. Set FINAL = 2 destinataires {A (ops restore), interim-B} —
+            #     l'ancre de recouvrement est EXCLUE (sécurité PII : un artefact age est protégé au
+            #     niveau de son destinataire le plus faible). AGE_RECIPIENT_B = interim-B_pub (patché poc-k8s). ---
             - name: S3_ENDPOINT
               valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: S3_ENDPOINT } }
             - name: S3_BUCKET
@@ -123,8 +127,6 @@ spec:
               valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: AGE_RECIPIENT_A } }
             - name: AGE_RECIPIENT_B
               valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: AGE_RECIPIENT_B } }
-            - name: AGE_RECIPIENT_C
-              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: AGE_RECIPIENT_C } }
           volumeMounts:
             - { name: work, mountPath: /work }
             - { name: signer, mountPath: /sign, readOnly: true }
