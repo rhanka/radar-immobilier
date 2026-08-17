@@ -3,16 +3,16 @@
  *
  * On vérifie que le client CONSOMME `compareVivier`/`rankVivier` du domaine
  * (même ordre, aucun tri maison), que la raison est en copy NEUTRE lisible, et
- * que l'abstention D10 tient : `effet_densifiant === "inconnu"` → « à qualifier ».
+ * que la bulle d'étape (`signalStageLabel`) marche en TOUT mode avec un repli
+ * honnête (aucune étape inventée quand l'annotation est absente).
  */
 import { describe, expect, it } from "vitest";
 import { rankVivier, type VivierV2 } from "@radar/domain";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
-  isEffetDensifiantUnknown,
   rankVivierBNodes,
+  signalStageLabel,
   toVivierSortable,
-  vivierEffetDensifiantLabel,
   vivierRankReasonLabel,
 } from "./vivier-b-ranking.js";
 
@@ -115,16 +115,54 @@ describe("vivierRankReasonLabel — raison NEUTRE lisible", () => {
   });
 });
 
-describe("vivierEffetDensifiantLabel — abstention honnête D10", () => {
-  it("« inconnu » → « à qualifier », jamais une valeur inventée ni favorable", () => {
-    const cls = classification({ effet_densifiant: "inconnu" });
-    expect(isEffetDensifiantUnknown(cls)).toBe(true);
-    expect(vivierEffetDensifiantLabel(cls)).toBe("à qualifier");
+describe("signalStageLabel — bulle « instrument, étape » en TOUT mode", () => {
+  function bareNode(
+    id: string,
+    props: Record<string, unknown>,
+  ): GraphSignalNode {
+    return {
+      id,
+      type: "DesignationEvent",
+      label: id,
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: null,
+      publishedAt: null,
+      props,
+    };
+  }
+
+  it("classification posée → forme validée « Instrument, étape »", () => {
+    expect(
+      signalStageLabel(node("s", classification({ instrument: "rezonage", etape: "avis_motion" }))),
+    ).toBe("Rezonage, avis de motion");
   });
 
-  it("rend les effets MESURÉS en copy neutre (densifiant / réduction / sans effet)", () => {
-    expect(vivierEffetDensifiantLabel(classification({ effet_densifiant: "densifie" }))).toBe("densifiant");
-    expect(vivierEffetDensifiantLabel(classification({ effet_densifiant: "reduit" }))).toBe("réduction de densité");
-    expect(vivierEffetDensifiantLabel(classification({ effet_densifiant: "stable" }))).toBe("sans effet sur la densité");
+  it("étape inconnue (classification) → repli honnête : AUCUNE bulle", () => {
+    expect(signalStageLabel(node("s", classification({ etape: "inconnu" })))).toBeNull();
+  });
+
+  it("hors vivier v2 → reconstruite depuis props.etape + props.instrument (même forme)", () => {
+    expect(
+      signalStageLabel(bareNode("s", { etape: "avis_motion", instrument: "rezonage" })),
+    ).toBe("Rezonage, avis de motion");
+  });
+
+  it("hors vivier v2, vocabulaire graphify élargi (consultation → consultation publique)", () => {
+    expect(
+      signalStageLabel(bareNode("s", { etape: "consultation", instrument: "ppcmoi" })),
+    ).toBe("PPCMOI, consultation publique");
+  });
+
+  it("instrument absent/`autre` → étape seule, capitalisée (jamais « Instrument à préciser »)", () => {
+    expect(signalStageLabel(bareNode("s", { etape: "adoption" }))).toBe("Adoption");
+    expect(signalStageLabel(bareNode("s", { etape: "adoption", instrument: "autre" }))).toBe(
+      "Adoption",
+    );
+  });
+
+  it("étape absente OU inconnue (hors vivier v2) → repli honnête : AUCUNE bulle", () => {
+    expect(signalStageLabel(bareNode("s", {}))).toBeNull();
+    expect(signalStageLabel(bareNode("s", { etape: "inconnu", instrument: "rezonage" }))).toBeNull();
   });
 });
