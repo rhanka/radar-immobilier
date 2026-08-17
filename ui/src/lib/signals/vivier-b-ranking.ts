@@ -8,17 +8,18 @@
  *
  * Il fournit deux choses au panneau :
  *   1. l'ORDRE des signaux B (le mur de ~914 signaux devient une liste triée) ;
- *   2. la RAISON du rang en copy produit NEUTRE (instrument + étape), plus le
- *      statut d'effet densifiant — jamais `rankReason` brut (technique).
+ *   2. la RAISON du rang / la BULLE d'étape en copy produit NEUTRE
+ *      (instrument + étape) — jamais `rankReason` brut (technique).
  *
- * Invariant anti-invention D10 : `effet_densifiant === "inconnu"` s'affiche
- * « à qualifier », jamais une valeur inventée, jamais traité comme favorable.
+ * `signalStageLabel` fournit cette bulle d'étape en TOUT mode (pas seulement en
+ * vivier B) : classification posée → forme validée ; sinon reconstruite depuis
+ * `props.etape`/`props.instrument`. Étape inconnue/absente → aucune bulle (repli
+ * honnête : jamais une étape inventée).
  */
 
 import {
   compareVivier,
   type VivierV2,
-  type VivierEffetDensifiant,
   type VivierEtape,
   type VivierInstrument,
   type VivierSortable,
@@ -98,18 +99,6 @@ const ETAPE_LABELS: Record<VivierEtape, string> = {
 };
 
 /**
- * Statut d'effet densifiant, copy NEUTRE. L'abstention `inconnu` → « à
- * qualifier » est l'invariant anti-invention D10 : jamais une valeur inventée,
- * jamais présentée comme favorable.
- */
-const EFFET_DENSIFIANT_LABELS: Record<VivierEffetDensifiant, string> = {
-  densifie: "densifiant",
-  stable: "sans effet sur la densité",
-  reduit: "réduction de densité",
-  inconnu: "à qualifier",
-};
-
-/**
  * Raison du rang, en langage métier NEUTRE : « instrument, étape ».
  * Ex. « Refonte, projet de règlement » / « PPCMOI, avis de motion » /
  * « Dérogation, entrée en vigueur ». C'est ce qui explique POURQUOI un signal
@@ -122,13 +111,55 @@ export function vivierRankReasonLabel(classification: VivierV2): string {
 }
 
 /**
- * Statut d'effet densifiant affichable (« à qualifier » quand inconnu).
+ * Étapes telles qu'elles arrivent dans `node.props.etape` HORS vivier v2
+ * (annotation graphify), vocabulaire plus large que `VivierEtape` : ajoute
+ * `consultation`, `accorde`, `refuse`. `inconnu`/absent est volontairement
+ * hors table → aucune bulle (repli honnête : jamais d'étape inventée).
  */
-export function vivierEffetDensifiantLabel(classification: VivierV2): string {
-  return EFFET_DENSIFIANT_LABELS[classification.effet_densifiant];
+const SIGNAL_STAGE_LABELS: Record<string, string> = {
+  avis_motion: "avis de motion",
+  projet_reglement: "projet de règlement",
+  consultation_publique: "consultation publique",
+  consultation: "consultation publique",
+  second_projet: "second projet",
+  adoption: "adoption",
+  entree_vigueur: "entrée en vigueur",
+  accorde: "accordé",
+  refuse: "refusé",
+};
+
+function stringProp(props: Record<string, unknown>, key: string): string | null {
+  const value = props[key];
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
 
-/** L'effet densifiant est-il inconnu (→ abstention « à qualifier ») ? */
-export function isEffetDensifiantUnknown(classification: VivierV2): boolean {
-  return classification.effet_densifiant === "inconnu";
+function capitalizeFirst(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
+ * Bulle d'ÉTAPE d'un signal, forme « Instrument, étape » (ex. « Rezonage, avis
+ * de motion »), affichable en TOUT mode — c'est le sous-libellé de la carte
+ * signal :
+ *   - classification vivier v2 posée → forme validée `vivierRankReasonLabel`,
+ *     sauf étape `inconnu` (→ aucune bulle) ;
+ *   - sinon (hors vivier v2) → reconstruite depuis `props.etape` +
+ *     `props.instrument` (vocabulaire graphify), même forme.
+ * Étape inconnue/absente → `null` : la carte n'affiche AUCUNE bulle (repli
+ * honnête, jamais une étape inventée). Instrument absent/`autre` → étape seule.
+ */
+export function signalStageLabel(node: GraphSignalNode): string | null {
+  if (node.classification) {
+    if (node.classification.etape === "inconnu") return null;
+    return vivierRankReasonLabel(node.classification);
+  }
+  const stageToken = stringProp(node.props, "etape");
+  const stageLabel = stageToken ? SIGNAL_STAGE_LABELS[stageToken] : undefined;
+  if (!stageLabel) return null;
+  const instrumentToken = stringProp(node.props, "instrument");
+  const instrumentLabel =
+    instrumentToken && instrumentToken !== "autre" && instrumentToken in INSTRUMENT_LABELS
+      ? INSTRUMENT_LABELS[instrumentToken as VivierInstrument]
+      : undefined;
+  return instrumentLabel ? `${instrumentLabel}, ${stageLabel}` : capitalizeFirst(stageLabel);
 }
