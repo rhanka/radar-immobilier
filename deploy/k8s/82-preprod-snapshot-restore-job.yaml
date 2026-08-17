@@ -7,9 +7,9 @@
 #   - MOINDRE PRIVILÈGE : pg_restore en rôle NON-superuser `radar_restore` (=> pas de pg_execute_server_program
 #     => COPY FROM PROGRAM refusé). Setup scratch (superuser) ne traite AUCUN contenu non-fiable.
 #   - ZÉRO PLAINTEXT DISQUE : /work = tmpfs (RAM) ; seul le CHIFFRÉ y transite ; age -d | pg_restore streamé.
-# POINT OUVERT (finalisé au run réel avec le vrai dump) : maniement postgis/`spatial_ref_sys`
-#   (extension pré-créée => spatial_ref_sys pré-rempli ; à exclure du restore pour éviter le conflit PK —
-#   filtre exact confirmé sur le dump réel via `pg_restore -l`).
+# NOTE RUNTIME (traitée) : rootfs read-only → HOME=/work + /tmp tmpfs writable (aws-cli/psql écrivent HOME/tmp).
+# POINT OUVERT (finalisé au run réel) : maniement postgis/`spatial_ref_sys` (extension pré-créée => table
+#   pré-remplie => à exclure du restore, conflit PK ; filtre exact confirmé via `pg_restore -l` sur le vrai dump).
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -22,6 +22,8 @@ data:
     : "${S3_ENDPOINT:?}"; : "${S3_BUCKET:?}"; : "${DUMP_KEY:?}"; : "${EXPECTED_SHA256:?}"
     : "${PGHOST:?}"; : "${SU_USER:?}"; : "${SU_PASS:?}"
     RESTORE_PASS="$(openssl rand -hex 24)"        # mot de passe hors argv (heredoc/env uniquement)
+    export HOME=/work                             # aws-cli/psql écrivent dans HOME (rootfs read-only)
+    aws configure set default.s3.addressing_style path   # path-style OVH-S3
 
     # (0) DOWNLOAD ciphertext + signature (read-cred scopé get/list)
     aws --endpoint-url "$S3_ENDPOINT" s3 cp "s3://$S3_BUCKET/$DUMP_KEY"     /work/dump.age
@@ -63,6 +65,7 @@ data:
     [ "${CNT:-0}" -gt 0 ] || { echo "ÉCHEC: 0 nodes restaurés"; exit 1; }
 
     # (6) BASCULE ATOMIQUE (apps à 0 réplica => aucune connexion). Échec en cours => cible intacte.
+    #     radar_pre_restore = ancienne DB conservée pour rollback ; drop après validation (note runtime #3).
     psql -h "$PGHOST" -U "$SU_USER" -d postgres -v ON_ERROR_STOP=1 <<SQL
       SELECT pg_terminate_backend(pid) FROM pg_stat_activity
         WHERE datname IN ('radar','radar_scratch') AND pid <> pg_backend_pid();
@@ -95,6 +98,7 @@ spec:
             capabilities: {drop: ["ALL"]}
           env:
             - {name: S3_ENDPOINT, value: "https://s3.bhs.io.cloud.ovh.net"}
+            - {name: HOME, value: "/work"}                    # rootfs read-only → HOME writable (aws/psql)
             - {name: S3_BUCKET,   value: "radar-preprod-snapshot"}
             - {name: DUMP_KEY,        value: "__SET_AT_RESTORE__"}   # nom d'objet, remonté hors-bande par extraction
             - {name: EXPECTED_SHA256, value: "__SET_AT_RESTORE__"}   # sha256 ciphertext, pinné hors-bande
@@ -105,11 +109,13 @@ spec:
             - {name: SU_PASS, valueFrom: {secretKeyRef: {name: radar-db-credentials, key: POSTGRES_PASSWORD}}}
           volumeMounts:
             - {name: work,   mountPath: /work}
+            - {name: tmp,    mountPath: /tmp}
             - {name: keys,   mountPath: /keys,   readOnly: true}
             - {name: trust,  mountPath: /trust,  readOnly: true}
             - {name: script, mountPath: /script, readOnly: true}
       volumes:
         - {name: work,   emptyDir: {medium: Memory}}   # tmpfs : uniquement du CHIFFRÉ
+        - {name: tmp,    emptyDir: {medium: Memory}}   # /tmp writable (aws-cli temp) sous rootfs read-only
         - {name: keys,   secret: {secretName: radar-restore-age-key, defaultMode: 0400}}
         - {name: trust,  configMap: {name: radar-snapshot-allowed-signers}}
         - {name: script, configMap: {name: radar-restore-script, defaultMode: 0555}}
