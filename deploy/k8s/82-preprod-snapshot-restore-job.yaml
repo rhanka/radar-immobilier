@@ -1,0 +1,115 @@
+# RESTORE (poc-k8s) — instance radar du pattern « snapshot PII prod→preprod ».
+# Symétrique de #515 (dump) : déchiffre de la VRAIE PII + pg_restore → PR gaté (revue + gate.sh).
+# INVARIANTS (I2/I4/I5) :
+#   - VERIFY-BEFORE-USE : signature d'envoyeur vérifiée AVANT tout usage (fail-closed).
+#   - ORDRE STRICT : (1) verify signature → (2) check sha256 → (3) age -d → (4) pg_restore en DB scratch
+#     → (5) vérif(count) → (6) bascule atomique (rename). Rien après une étape échouée (set -Eeuo pipefail).
+#   - MOINDRE PRIVILÈGE : pg_restore en rôle NON-superuser `radar_restore` (=> pas de pg_execute_server_program
+#     => COPY FROM PROGRAM refusé). Setup scratch (superuser) ne traite AUCUN contenu non-fiable.
+#   - ZÉRO PLAINTEXT DISQUE : /work = tmpfs (RAM) ; seul le CHIFFRÉ y transite ; age -d | pg_restore streamé.
+# POINT OUVERT (finalisé au run réel avec le vrai dump) : maniement postgis/`spatial_ref_sys`
+#   (extension pré-créée => spatial_ref_sys pré-rempli ; à exclure du restore pour éviter le conflit PK —
+#   filtre exact confirmé sur le dump réel via `pg_restore -l`).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-restore-script
+  namespace: radar-immobilier-preprod
+data:
+  restore.sh: |
+    #!/usr/bin/env bash
+    set -Eeuo pipefail
+    : "${S3_ENDPOINT:?}"; : "${S3_BUCKET:?}"; : "${DUMP_KEY:?}"; : "${EXPECTED_SHA256:?}"
+    : "${PGHOST:?}"; : "${SU_USER:?}"; : "${SU_PASS:?}"
+    RESTORE_PASS="$(openssl rand -hex 24)"        # mot de passe hors argv (heredoc/env uniquement)
+
+    # (0) DOWNLOAD ciphertext + signature (read-cred scopé get/list)
+    aws --endpoint-url "$S3_ENDPOINT" s3 cp "s3://$S3_BUCKET/$DUMP_KEY"     /work/dump.age
+    aws --endpoint-url "$S3_ENDPOINT" s3 cp "s3://$S3_BUCKET/$DUMP_KEY.sig" /work/dump.age.sig
+
+    # (1) SIGNATURE — AVANT tout usage. Échec => set -e stoppe, ZÉRO déchiffrement/restore.
+    ssh-keygen -Y verify -f /trust/allowed_signers -I preprod-snapshot-signer-radar \
+      -n file -s /work/dump.age.sig < /work/dump.age
+    echo "[1/6] signature envoyeur VÉRIFIÉE"
+
+    # (2) SHA256 pinné hors-bande — AVANT age -d (défense en profondeur intégrité).
+    echo "${EXPECTED_SHA256}  /work/dump.age" | sha256sum -c -
+    echo "[2/6] sha256 ciphertext VÉRIFIÉ"
+
+    # setup scratch (superuser ; ne traite PAS l'artefact) : DB + rôle NON-superuser + extension
+    export PGPASSWORD="$SU_PASS"
+    psql -h "$PGHOST" -U "$SU_USER" -d postgres -v ON_ERROR_STOP=1 <<SQL
+      DROP DATABASE IF EXISTS radar_scratch;
+      CREATE DATABASE radar_scratch;
+      DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='radar_restore')
+        THEN CREATE ROLE radar_restore LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION; END IF; END \$\$;
+      ALTER ROLE radar_restore PASSWORD '${RESTORE_PASS}';
+      -- radar_restore : NOSUPERUSER + jamais membre de pg_execute_server_program => COPY FROM PROGRAM refusé.
+      GRANT ALL ON DATABASE radar_scratch TO radar_restore;
+    SQL
+    psql -h "$PGHOST" -U "$SU_USER" -d radar_scratch -v ON_ERROR_STOP=1 \
+      -c "CREATE EXTENSION IF NOT EXISTS postgis; GRANT ALL ON SCHEMA public TO radar_restore;"
+
+    # (3)+(4) DÉCHIFFRER puis RESTAURER en NON-superuser — plaintext en pipe, JAMAIS sur disque.
+    #   (spatial_ref_sys : cf POINT OUVERT — le filtre exact sera figé au run avec `pg_restore -l`.)
+    age -d -i /keys/restore.key /work/dump.age \
+      | PGPASSWORD="$RESTORE_PASS" pg_restore -h "$PGHOST" -U radar_restore \
+          --no-owner --no-privileges --no-acl -d radar_scratch
+    echo "[3-4/6] déchiffré + restauré (rôle non-superuser)"
+
+    # (5) VÉRIF identité (non-régression) AVANT bascule.
+    CNT=$(psql -h "$PGHOST" -U "$SU_USER" -d radar_scratch -tAc "SELECT count(*) FROM graph_nodes")
+    echo "[5/6] radar_scratch.graph_nodes=$CNT"
+    [ "${CNT:-0}" -gt 0 ] || { echo "ÉCHEC: 0 nodes restaurés"; exit 1; }
+
+    # (6) BASCULE ATOMIQUE (apps à 0 réplica => aucune connexion). Échec en cours => cible intacte.
+    psql -h "$PGHOST" -U "$SU_USER" -d postgres -v ON_ERROR_STOP=1 <<SQL
+      SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+        WHERE datname IN ('radar','radar_scratch') AND pid <> pg_backend_pid();
+      ALTER DATABASE radar RENAME TO radar_pre_restore;
+      ALTER DATABASE radar_scratch RENAME TO radar;
+    SQL
+    echo "[6/6] BASCULE OK — radar = données restaurées ; radar_pre_restore = ancienne (droppable). Scale apps→1."
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-preprod-snapshot-restore
+  namespace: radar-immobilier-preprod
+  labels: {app.kubernetes.io/part-of: preprod-snapshot-pattern, app: preprod-snapshot-restore}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels: {app: preprod-snapshot-restore}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app            # porte radar-registry-pull (pull image pattern)
+      containers:
+        - name: restore
+          image: rg.fr-par.scw.cloud/radar-immobilier/snapshot-tools@sha256:b89e91283c3df6cfe5b3ab89979a89b98a73d0bae3f3441554223109ca87891c
+          command: ["bash","/script/restore.sh"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          env:
+            - {name: S3_ENDPOINT, value: "https://s3.bhs.io.cloud.ovh.net"}
+            - {name: S3_BUCKET,   value: "radar-preprod-snapshot"}
+            - {name: DUMP_KEY,        value: "__SET_AT_RESTORE__"}   # nom d'objet, remonté hors-bande par extraction
+            - {name: EXPECTED_SHA256, value: "__SET_AT_RESTORE__"}   # sha256 ciphertext, pinné hors-bande
+            - {name: PGHOST, value: "radar-postgres"}
+            - {name: AWS_ACCESS_KEY_ID,     valueFrom: {secretKeyRef: {name: preprod-snapshot-read, key: AWS_ACCESS_KEY_ID}}}
+            - {name: AWS_SECRET_ACCESS_KEY, valueFrom: {secretKeyRef: {name: preprod-snapshot-read, key: AWS_SECRET_ACCESS_KEY}}}
+            - {name: SU_USER, valueFrom: {secretKeyRef: {name: radar-db-credentials, key: POSTGRES_USER}}}
+            - {name: SU_PASS, valueFrom: {secretKeyRef: {name: radar-db-credentials, key: POSTGRES_PASSWORD}}}
+          volumeMounts:
+            - {name: work,   mountPath: /work}
+            - {name: keys,   mountPath: /keys,   readOnly: true}
+            - {name: trust,  mountPath: /trust,  readOnly: true}
+            - {name: script, mountPath: /script, readOnly: true}
+      volumes:
+        - {name: work,   emptyDir: {medium: Memory}}   # tmpfs : uniquement du CHIFFRÉ
+        - {name: keys,   secret: {secretName: radar-restore-age-key, defaultMode: 0400}}
+        - {name: trust,  configMap: {name: radar-snapshot-allowed-signers}}
+        - {name: script, configMap: {name: radar-restore-script, defaultMode: 0555}}
