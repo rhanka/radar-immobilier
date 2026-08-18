@@ -39,11 +39,7 @@
     isPiiaLie,
     PIIA_LIE_BADGE,
   } from "$lib/signals/vivier-b-display-filter.js";
-  import {
-    isEffetDensifiantUnknown,
-    vivierEffetDensifiantLabel,
-    vivierRankReasonLabel,
-  } from "$lib/signals/vivier-b-ranking.js";
+  import { signalStageLabel } from "$lib/signals/vivier-b-ranking.js";
   import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import type {
     GeoZoneFeature,
@@ -140,12 +136,10 @@
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   /** #3 — Clé de filtre active (ex. "z", "z|m", "") propagée depuis SignauxMapView. */
   export let activeSubsetKey = "";
-  /**
-   * Vue B (vivier v2) active : la liste des signaux est TRIÉE par le comparateur
-   * déterministe du domaine (côté parent), et chaque fiche porte sa RAISON de
-   * rang + le statut d'effet densifiant. En A, aucun de ces éléments n'est rendu.
-   */
-  export let vivierBMode = false;
+  // Vue B (vivier v2) : la liste des signaux est TRIÉE côté parent (comparateur
+  // déterministe du domaine). La carte signal, elle, est INDÉPENDANTE du mode —
+  // sa bulle d'étape (« instrument, étape ») se déduit de la classification ou,
+  // à défaut, de props.etape/instrument. Le panneau n'a donc plus besoin du flag.
   // ── Filtres DONNÉES par accordéon (état PORTÉ PAR LE PARENT : il pilote la
   // peinture carte — zéro refetch ; il persiste quand l'accordéon se ferme). ──
   /** Filtre lots (catégorie/usages/superficie) — en-tête de l'accordéon Lots. */
@@ -734,11 +728,6 @@
     return count.toLocaleString("fr-CA");
   }
 
-  function nodeTypeLabel(type: string): string {
-    if (type === "DesignationEvent") return "Événement de désignation";
-    return type;
-  }
-
   function signalEvidence(node: GraphSignalNode): SignalEvidence {
     return extractSignalEvidence(node);
   }
@@ -1222,6 +1211,7 @@
               {@const key = signalKey(node)}
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
+                {@const stageLabel = signalStageLabel(node)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1255,27 +1245,18 @@
                         {PIIA_LIE_BADGE}
                       </span>
                     {/if}
-                    <span class="sel-entity-type">{nodeTypeLabel(node.type)}</span>
-                  </button>
-
-                  {#if vivierBMode && node.classification}
-                    <!-- Vue B : POURQUOI ce signal est à ce rang. Copy NEUTRE
-                         (instrument + étape), lisible sans ouvrir la fiche. Le
-                         statut d'effet densifiant est HONNÊTE : « à qualifier »
-                         quand inconnu (invariant D10), jamais une valeur
-                         inventée ni présentée comme favorable. -->
-                    <div class="signal-rank-row">
-                      <span class="signal-rank-reason">
-                        {vivierRankReasonLabel(node.classification)}
+                    <!-- Sous-libellé de la carte signal : BULLE d'étape compacte
+                         (« instrument, étape », ex. « Rezonage, avis de motion »).
+                         Rendue en TOUT mode, source = classification vivier v2 si
+                         posée, sinon props.etape/instrument. Étape inconnue →
+                         aucune bulle (repli honnête). L'effet densifiant N'EST
+                         PLUS affiché (pas encore détecté de façon fiable). -->
+                    {#if stageLabel}
+                      <span class="signal-stage-badge" data-testid="signal-stage-badge">
+                        {stageLabel}
                       </span>
-                      <Badge
-                        tone={isEffetDensifiantUnknown(node.classification) ? "neutral" : "info"}
-                        size="sm"
-                      >
-                        Effet densifiant : {vivierEffetDensifiantLabel(node.classification)}
-                      </Badge>
-                    </div>
-                  {/if}
+                    {/if}
+                  </button>
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
@@ -2392,20 +2373,23 @@
     white-space: nowrap;
   }
 
-  /* Vue B : ligne « raison du rang » sous le libellé du signal. Discrète,
-     toujours visible (pas besoin d'ouvrir la fiche pour savoir pourquoi). */
-  .signal-rank-row {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-    padding: 0.1rem 0.85rem 0.35rem 0.85rem;
-  }
-
-  .signal-rank-reason {
+  /* Bulle d'ÉTAPE du signal (remplace l'ancien sous-titre « type »). Compacte,
+     ton NEUTRE (tokens DS, cohérente avec les autres pills) : elle situe le
+     signal dans son parcours réglementaire (« instrument, étape »), sans jamais
+     qualifier un effet densifiant. */
+  .signal-stage-badge {
+    align-self: flex-start;
+    max-width: 100%;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f1f5f9);
     color: var(--st-semantic-text-secondary, #475569);
     font-size: var(--signaux-fs-caption);
     font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .entity-summary {
