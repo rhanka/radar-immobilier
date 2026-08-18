@@ -206,6 +206,86 @@ if (params.get("fixture") === "p01-preuve") {
       onToggleKey: toggleBucketKey,
     },
   });
+} else if (params.get("fixture") === "p04-search") {
+  // P04 (spec owner §3.2) — recherche des ZONES et des LOTS : monte le panneau
+  // Delson avec de nombreuses zones (dont plusieurs H-3xx) + des lots avec
+  // adresse, pour prouver le filtrage/ranking et l'état vide en vrai navigateur.
+  const citySlug = "delson";
+  const zoneCodes = [
+    "A-16",
+    "C-186",
+    "H-305",
+    "H-310",
+    "H-315",
+    "H-320",
+    "H-330",
+    "H-431",
+    "P-12",
+  ];
+  const zonesResponse = {
+    ok: true,
+    citySlug,
+    source: "official" as const,
+    resolutionStatus: "official" as const,
+    geometryStatus: "official" as const,
+    zoneCount: zoneCodes.length,
+    warnings: [] as string[],
+    featureCollection: {
+      type: "FeatureCollection" as const,
+      features: zoneCodes.map((code) => ({
+        type: "Feature" as const,
+        geometry: null,
+        properties: {
+          code,
+          citySlug,
+          geometryStatus: "official" as const,
+          confidence: 1,
+          source: "official-zone" as const,
+          lotCount: 0,
+          lots: [] as string[],
+        },
+      })),
+    },
+  };
+  const lotDefs: Array<[string, string]> = [
+    ["5399042", "10 rue Principale"],
+    ["5399043", "12 rue Principale"],
+    ["5399100", "3 avenue des Érables"],
+    ["5401220", "55 rue Saint-Georges"],
+    ["6001234", "8 montée Sainte-Thérèse"],
+    ["6001999", "210 boulevard Georges-Gagné"],
+  ];
+  const lotsResponse = {
+    ok: true,
+    citySlug,
+    source: "donnees-quebec" as const,
+    collectionId: "qc-lots-delson",
+    numberMatched: lotDefs.length,
+    numberReturned: lotDefs.length,
+    featureCollection: {
+      type: "FeatureCollection" as const,
+      features: lotDefs.map(([noLot, adresse]) => ({
+        type: "Feature" as const,
+        geometry: null,
+        properties: { noLot, citySlug, adresse },
+      })),
+    },
+  };
+  const searchCity: CityMapEntry = {
+    ...selectedCity,
+    municipality: { ...selectedCity.municipality, slug: citySlug, name: "Delson" },
+  };
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity: searchCity,
+      detailNodes: [],
+      zonesResponse,
+      lotsResponse,
+      selectionState: createSelectionBucketState(),
+      onToggleKey: toggleBucketKey,
+    },
+  });
 } else {
   mount(SignauxSelPanel, {
     target,
