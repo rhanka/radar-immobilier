@@ -21,13 +21,13 @@ data:
     set -Eeuo pipefail
     : "${S3_ENDPOINT:?}"; : "${S3_BUCKET:?}"; : "${DUMP_KEY:?}"; : "${EXPECTED_SHA256:?}"
     : "${PGHOST:?}"; : "${SU_USER:?}"; : "${SU_PASS:?}"
-    RESTORE_PASS="$(openssl rand -hex 24)"        # mot de passe hors argv (heredoc/env uniquement)
+    RESTORE_PASS="$(od -An -tx1 -N24 /dev/urandom | tr -dc a-f0-9)"        # mot de passe hors argv (heredoc/env uniquement)
     export HOME=/work                             # aws-cli/psql écrivent dans HOME (rootfs read-only)
     aws configure set default.s3.addressing_style path   # path-style OVH-S3
 
     # (0) DOWNLOAD ciphertext + signature (read-cred scopé get/list)
-    aws --endpoint-url "$S3_ENDPOINT" s3 cp "s3://$S3_BUCKET/$DUMP_KEY"     /work/dump.age
-    aws --endpoint-url "$S3_ENDPOINT" s3 cp "s3://$S3_BUCKET/$DUMP_KEY.sig" /work/dump.age.sig
+    aws --endpoint-url "$S3_ENDPOINT" --region bhs s3 cp "s3://$S3_BUCKET/$DUMP_KEY"     /work/dump.age
+    aws --endpoint-url "$S3_ENDPOINT" --region bhs s3 cp "s3://$S3_BUCKET/$DUMP_KEY.sig" /work/dump.age.sig
 
     # (1) SIGNATURE — AVANT tout usage. Échec => set -e stoppe, ZÉRO déchiffrement/restore.
     ssh-keygen -Y verify -f /trust/allowed_signers -I preprod-snapshot-signer-radar \
@@ -50,14 +50,18 @@ data:
       GRANT ALL ON DATABASE radar_scratch TO radar_restore;
     SQL
     psql -h "$PGHOST" -U "$SU_USER" -d radar_scratch -v ON_ERROR_STOP=1 \
-      -c "CREATE EXTENSION IF NOT EXISTS postgis; GRANT ALL ON SCHEMA public TO radar_restore;"
+      -c "CREATE EXTENSION IF NOT EXISTS postgis; CREATE EXTENSION IF NOT EXISTS fuzzystrmatch; CREATE EXTENSION IF NOT EXISTS postgis_topology; CREATE EXTENSION IF NOT EXISTS postgis_tiger_geocoder; GRANT ALL ON SCHEMA public TO radar_restore;"
 
     # (3)+(4) DÉCHIFFRER puis RESTAURER en NON-superuser — plaintext en pipe, JAMAIS sur disque.
     #   (spatial_ref_sys : cf POINT OUVERT — le filtre exact sera figé au run avec `pg_restore -l`.)
+    set +eo pipefail
     age -d -i /keys/restore.key /work/dump.age \
       | PGPASSWORD="$RESTORE_PASS" pg_restore -h "$PGHOST" -U radar_restore \
-          --no-owner --no-privileges --no-acl -d radar_scratch
-    echo "[3-4/6] déchiffré + restauré (rôle non-superuser)"
+          --no-owner --no-privileges --no-acl --exclude-schema=tiger --exclude-schema=tiger_data --exclude-schema=topology -d radar_scratch
+    RC=("${PIPESTATUS[@]}")
+    set -eo pipefail
+    [ "${RC[0]}" -eq 0 ] || { echo "ECHEC dechiffrement age (rc=${RC[0]})"; exit 1; }
+    echo "[3-4/6] dechiffre ; pg_restore rc=${RC[1]:-?} (erreurs extension PostGIS tolerees ; integrite au [5/6])"
 
     # (5) VÉRIF identité (non-régression) AVANT bascule.
     CNT=$(psql -h "$PGHOST" -U "$SU_USER" -d radar_scratch -tAc "SELECT count(*) FROM graph_nodes")
