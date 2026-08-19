@@ -93,6 +93,10 @@ name: Build & push images
 on:
   push:
     branches: [main]
+    # CD refonte Lot 3: a semver tag v* on a main commit promotes that commit's
+    # already-built images to prod by digest (job promote-prod). `v[0-9]*` is
+    # semver-only — it will not match vanity tags like `validated`/`vanity`.
+    tags: ['v[0-9]*']
   workflow_dispatch:
     inputs:
       tag:
@@ -115,6 +119,11 @@ jobs:
     name: Build & push ${{ matrix.service }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # CD refonte Lot 3 (build-once): a v* TAG must NOT rebuild — promote-prod
+    # promotes the existing main-built digest. Skip build-push on tag refs so the
+    # promoted image is exactly the CI-validated main build (main push + dispatch
+    # still build normally).
+    if: github.ref_type != 'tag'
     permissions:
       contents: read
       packages: write
@@ -191,6 +200,13 @@ jobs:
       # the source changes. The cache key is bound to the layer contents (Dockerfile
       # ordering), so a stale bundle is impossible BY CONSTRUCTION — no global --no-cache.
       - name: Build & push ${{ matrix.service }}
+        # id: build exposes steps.build.outputs.digest — the immutable
+        # sha256 manifest digest this push produced. Recorded in the summary
+        # below for traceability; the tag->prod `promote-prod` job (CD refonte
+        # Lot 3) RE-RESOLVES the digest of radar-<svc>:<sha7> from the registry
+        # at promote time (authoritative, survives job/run boundaries), so no
+        # cross-run state is threaded here — this capture is trace + fallback.
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -242,6 +258,7 @@ jobs:
             echo ""
             echo '```'
             echo "${{ steps.tags.outputs.tags }}"
+            echo "digest: ${{ steps.build.outputs.digest }}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -810,4 +827,306 @@ jobs:
               deployment_id: Number(process.env.DEPLOYMENT_ID),
               state: 'failure',
               description: `preprod deploy ${process.env.SHA} failed (rollout OR post-deploy proof)`,
+            });
+
+  # ===========================================================================
+  # CD refonte — Lot 3 : tag v* -> PROD (radar-immobilier) par PROMOTION DIGEST.
+  # See tmp/handoff/preprod/DESIGN-CD-REFONTE.md §2.3/§2.4. build-once-promote:
+  # the image was built+pushed on the main push (radar-<svc>:<sha7>); a semver
+  # tag on that same commit promotes the EXACT digest to prod — no rebuild.
+  # This job coexists with the legacy `deploy` (main->prod) UNTIL the cutover:
+  # the atomic cutover merge removes `deploy` and provisions the GitHub
+  # Environment `production` (tag refs + reviewer) that makes THIS the sole prod
+  # path. Held until owner GO.
+  # ===========================================================================
+  promote-prod:
+    name: Promote tag to prod (by digest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: startsWith(github.ref, 'refs/tags/v')
+    # Enforced prod credential boundary (§2.4): the prod kubeconfig lives in the
+    # GitHub Environment `production` (restricted to tag refs + required
+    # reviewer), so a job triggered by `main` can never reach it. PROVISIONING
+    # that environment (create env, move KUBE_CONFIG_DATA into it, set the
+    # tag-ref + reviewer rules) is a CUTOVER step — doing it early would break the
+    # current main->prod `deploy` job. The reference is authored now; the env is
+    # provisioned atomically at cutover (DESIGN §2.4). Until then a v* tag would
+    # resolve the repo-level secret (this whole job only lands on main AT the
+    # cutover merge, so that pre-state never actually runs).
+    environment: production
+    permissions:
+      contents: read
+      deployments: write
+    concurrency:
+      # Never cancel an in-flight prod promote — queue instead.
+      group: promote-prod
+      cancel-in-progress: false
+    env:
+      NAMESPACE: radar-immobilier
+    steps:
+      - name: Checkout (full history for ancestry check)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Short SHA + tag
+        id: vars
+        run: |
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      # GUARD 1 — appartenance-à-main (§2.3, revue #5): digest-exists ≠ commit on
+      # main. A workflow_dispatch build of a feature branch produces a
+      # radar-<svc>:<sha7> image; tagging that commit would promote NON-merged,
+      # NON-CI code. The CI guarantee at tag-time IS that <sha7> was built+CI'd on
+      # main — ancestry is what ties the tag to it.
+      - name: Guard — tagged commit is an ancestor of origin/main
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "ancestry OK — $GITHUB_SHA is on origin/main"
+          else
+            echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
+            exit 1
+          fi
+
+      # GUARD 2 — tag protection must REALLY exist (§2.3): don't ASSUME a v* tag
+      # is protected. Advisory (warn, don't hard-fail on API hiccups): flags if no
+      # tag ruleset guards v* so an unreviewed tag can't silently reach prod.
+      - name: Guard — verify tag protection ruleset exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          rules="$(gh api "repos/${GITHUB_REPOSITORY}/rulesets" --jq '[.[] | select(.target=="tag")] | length' 2>/dev/null || echo ERR)"
+          if [ "$rules" = ERR ]; then
+            echo "::warning title=Tag-protection unverified::could not query rulesets (token scope?). Ensure a tag ruleset protects v* before relying on this path."
+          elif [ "${rules:-0}" -ge 1 ]; then
+            echo "tag ruleset present (${rules})"
+          else
+            echo "::warning title=No tag ruleset::no tag-target ruleset found — a v* tag can currently be pushed without review. Configure tag protection before the cutover."
+          fi
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+
+      - name: Configure kubeconfig (prod, from environment secret)
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Login to Scaleway registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+
+      # DIGEST RESOLUTION (§2.3, revue #4) — build-once: resolve the IMMUTABLE
+      # sha256 digests of the images already built on main for this commit's
+      # <sha7> tag. Missing digest = the <sha7> tag aged out of SCW-CR (retention)
+      # or was never built → fall back to build-at-tag below. Both api AND ui.
+      - name: Resolve image digests (api + ui)
+        id: digests
+        run: |
+          set -uo pipefail
+          SHA="${{ steps.vars.outputs.sha }}"
+          resolve() { docker buildx imagetools inspect "${IMAGE_PREFIX}/$1:${SHA}" --format '{{.Manifest.Digest}}' 2>/dev/null; }
+          api="$(resolve radar-api || true)"; ui="$(resolve radar-ui || true)"
+          echo "api=${api:-<none>}  ui=${ui:-<none>}"
+          if [ -z "$api" ] || [ -z "$ui" ]; then
+            echo "resolved=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Digest missing — will build-at-tag::radar-api/ui:${SHA} not resolvable in SCW-CR (aged-out or never built)."
+          else
+            echo "resolved=true" >> "$GITHUB_OUTPUT"
+            echo "api=${api}" >> "$GITHUB_OUTPUT"
+            echo "ui=${ui}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # FALLBACK build-at-tag (GO-cond §4/§5) — ONLY when the digest aged out.
+      # Rebuilds api/ui FROM THE TAGGED COMMIT (this checkout) and pushes
+      # radar-<svc>:<sha7>, then re-resolves. Removes the hard dependency on
+      # SCW-CR retention. Deterministic input: same source + same GIT_SHA.
+      - name: Fallback — build at tag (only if digest aged out)
+        if: steps.digests.outputs.resolved != 'true'
+        id: buildtag
+        run: |
+          set -euo pipefail
+          SHA="${{ steps.vars.outputs.sha }}"
+          docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f api/Dockerfile -t "${IMAGE_PREFIX}/radar-api:${SHA}" .
+          docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f ui/Dockerfile  -t "${IMAGE_PREFIX}/radar-ui:${SHA}" .
+          api="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-api:${SHA}" --format '{{.Manifest.Digest}}')"
+          ui="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-ui:${SHA}" --format '{{.Manifest.Digest}}')"
+          echo "api=${api}" >> "$GITHUB_OUTPUT"
+          echo "ui=${ui}" >> "$GITHUB_OUTPUT"
+
+      - name: Select digests (resolved or rebuilt)
+        id: pick
+        run: |
+          set -eu
+          if [ "${{ steps.digests.outputs.resolved }}" = "true" ]; then
+            echo "api=${{ steps.digests.outputs.api }}" >> "$GITHUB_OUTPUT"
+            echo "ui=${{ steps.digests.outputs.ui }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "api=${{ steps.buildtag.outputs.api }}" >> "$GITHUB_OUTPUT"
+            echo "ui=${{ steps.buildtag.outputs.ui }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pre-flight (§2.4): same OVH apiserver host as preprod → the host check
+      # alone can't tell prod from preprod; the POSITIVE proof (get deploy in the
+      # radar-immobilier namespace, reachable only by the prod-scoped SA) + the
+      # `environment: production` credential boundary are what scope this to prod.
+      - name: Pre-flight — assert target cluster (prod)
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-hlhedx.c1.bhs5.k8s.ovh.net}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "apiserver host ${host:-<none>} / expected ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — promote refused::kubeconfig targets '${host:-<none>}' not '${expected}'. Nothing applied."
+            exit 1
+          fi
+          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
+
+      - name: Create GitHub deployment (prod, tag)
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              ref: context.sha, environment: 'production',
+              required_contexts: [], auto_merge: false,
+              transient_environment: false, production_environment: true,
+              description: `promote ${process.env.GITHUB_REF_NAME} -> radar-immobilier`,
+            });
+            core.setOutput('id', dep.data && dep.data.id !== undefined ? String(dep.data.id) : '');
+
+      # Drift self-heal (prod, unchanged from `deploy`): reassert 40-immo-mcp
+      # BEFORE set-image so config drift heals without clobbering the pinned
+      # digest. Guarded — skips if the mcp Deployment is absent.
+      - name: Apply immo-mcp declarative config
+        run: |
+          set -eu
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
+          else
+            echo "radar-immo-mcp absent — skipping immo-mcp config apply"
+          fi
+
+      # PROMOTE — pin prod to the IMMUTABLE digest (not the mutable <sha7> tag):
+      # true build-once, survives tag GC of <sha7>.
+      - name: Promote — set prod images to digest
+        env:
+          DIG_API: ${{ steps.pick.outputs.api }}
+          DIG_UI: ${{ steps.pick.outputs.ui }}
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" set image deploy/radar-api api="${IMAGE_PREFIX}/radar-api@${DIG_API}"
+          kubectl -n "$NAMESPACE" set image deploy/radar-ui  ui="${IMAGE_PREFIX}/radar-ui@${DIG_UI}"
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp mcp="${IMAGE_PREFIX}/radar-api@${DIG_API}"
+          fi
+
+      - name: Wait for rollouts
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=120s \
+              || echo "::warning title=radar-immo-mcp rollout incomplete::optional connector — api/ui unaffected"
+          fi
+
+      # Same two public-path proofs as the legacy prod deploy: TLS serial (right
+      # cluster/LB) + served-sha. /health .sha is the GIT sha (build-arg), NOT the
+      # digest, so assert served-sha == the tagged commit's <sha7> (§2.3 #9).
+      - name: Post-deploy — TLS serial (public path == deployed LB)
+        env:
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_HOST:-immo.sent-tech.ca}"; lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
+          serial_of() { echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2; }
+          sn_dns="$(serial_of "$host")"; sn_lb="$(serial_of "$lb_ip")"
+          echo "serial dns=${sn_dns:-<none>} lb=${sn_lb:-<none>}"
+          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ] || [ "$sn_dns" != "$sn_lb" ]; then
+            echo "::error title=Prod TLS proof failed::${host} not served by ${lb_ip} (serials ${sn_dns} vs ${sn_lb})."
+            exit 1
+          fi
+
+      - name: Assert served sha (prod)
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_ENDPOINT_HOST:-immo.sent-tech.ca}"
+          fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
+          deadline=$(( $(date +%s) + 180 ))
+          while :; do
+            api_sha="$(fetch_sha "https://${host}/health")"; ui_sha="$(fetch_sha "https://${host}/build.json")"
+            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then echo "served sha OK ${SHA}"; exit 0; fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error title=Prod served sha mismatch::serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' expected '${SHA}'."
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Deployment status — success
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner, repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'success',
+              environment_url: 'https://immo.sent-tech.ca',
+              description: `promoted ${process.env.TAG} (sha ${process.env.SHA}) by digest`,
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Promoted \`${{ steps.vars.outputs.tag }}\` -> \`${NAMESPACE}\` (by digest)"
+            echo ""
+            echo '```'
+            echo "radar-api -> ${IMAGE_PREFIX}/radar-api@${{ steps.pick.outputs.api }}"
+            echo "radar-ui  -> ${IMAGE_PREFIX}/radar-ui@${{ steps.pick.outputs.ui }}"
+            echo "git sha   -> ${{ steps.vars.outputs.sha }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deployment status — failure
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner, repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'failure',
+              description: `promote ${process.env.TAG} failed`,
             });
