@@ -267,9 +267,17 @@ jobs:
     needs: build-push
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Only roll the live cluster on pushes to main. PRs / feature-branch
+    # LEGACY main->prod. Only rolls prod on pushes to main; PRs / feature-branch
     # dispatches build & push images but never deploy.
-    if: github.ref == 'refs/heads/main'
+    # CUTOVER SWITCH (CD refonte): this legacy path is DISARMED by the SAME
+    # variable that ARMS preprod-first — `vars.PREPROD_CD_ENABLED == 'true'`.
+    # So one atomic flip (`gh variable set PREPROD_CD_ENABLED true`) swaps the
+    # prod path from `main->prod` (this job) to `main->preprod` + `tag->prod`
+    # (deploy-preprod + promote-prod) with NO 2-path window, and an instant
+    # rollback (`--body false`/unset restores this job). While the var is unset
+    # (default), main->prod keeps working exactly as before merge — so this PR
+    # is safe to merge ahead of the owner cutover GO; the GO is the var flip.
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED != 'true'
     permissions:
       contents: read
       # Lets the deployment-notification steps record a GitHub Deployment +
