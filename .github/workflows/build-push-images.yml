@@ -555,3 +555,259 @@ jobs:
               state: 'failure',
               description: `deploy ${process.env.SHA} failed (rollout OR post-deploy proof) — public path unverified`,
             });
+
+  # ===========================================================================
+  # CD refonte — Lot 2 : main -> PREPROD (radar-immobilier-preprod).
+  # See tmp/handoff/preprod/DESIGN-CD-REFONTE.md. Mirrors the `deploy` job above
+  # (main -> prod) STEP-FOR-STEP so the eventual tag->prod cutover (Lot 4) is a
+  # small refactor, with these DELIBERATE deltas:
+  #   - namespace radar-immobilier-preprod + preprod-scoped SA kubeconfig
+  #     (secret KUBE_CONFIG_DATA_PREPROD, exported by poc-k8s from
+  #     deploy/k8s/11-ci-deployer-preprod-rbac.yaml);
+  #   - NO "Apply immo-mcp declarative config" step (DESIGN §2.8 — drift
+  #     self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
+  #     and the preprod deployer Role is deployments-only, it cannot apply a
+  #     ConfigMap); and no radar-immo-mcp roll (preprod has no MCP connector);
+  #   - the GitHub Deployment is recorded as environment=preprod (transient),
+  #     never production.
+  # Runs ALONGSIDE the legacy `deploy` job (main -> prod) until the tag->prod
+  # cutover (Lot 4, owner GO S00 removes the prod-on-main path). Same-host caveat:
+  # prod & preprod share BOTH the OVH apiserver host AND the OVH LB IP, so the
+  # pre-flight host check and the TLS-serial proof cannot tell the two apart —
+  # the SA namespace scope is the real deploy frontier (DESIGN §2.4), and the
+  # served-sha assert on the PREPROD URL is what proves the preprod build.
+  # ===========================================================================
+  deploy-preprod:
+    name: Deploy to preprod cluster
+    needs: build-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only roll preprod on pushes to main. PRs / feature-branch dispatches build
+    # & push images but never deploy.
+    # ARMING SWITCH (decouples merge from activation): this job stays SKIPPED
+    # until the repo variable PREPROD_CD_ENABLED == 'true'. poc-k8s flips it ON
+    # only AFTER it has (1) applied deploy/k8s/11-ci-deployer-preprod-rbac.yaml
+    # and (2) created the KUBE_CONFIG_DATA_PREPROD secret — so merging this PR
+    # can never red a main push against a not-yet-provisioned preprod deployer.
+    # (`gh variable set PREPROD_CD_ENABLED --body true`.) Variables are allowed
+    # in `if:`; secrets are not — hence a variable, not the secret itself.
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      NAMESPACE: radar-immobilier-preprod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: vars
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+
+      - name: Configure kubeconfig (preprod)
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          # Accept the secret in either raw YAML or base64-encoded form.
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      # PRE-FLIGHT — identical guard to prod, but the positive proof runs in the
+      # PREPROD namespace. prod & preprod share the OVH apiserver host, so the
+      # host check alone cannot distinguish them: the SA (namespace-scoped) being
+      # able to `get deploy radar-api radar-ui` INSIDE radar-immobilier-preprod is
+      # the real frontier (DESIGN §2.4). The kubeconfig is never printed.
+      - name: Pre-flight — assert target cluster + preprod namespace
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-}"
+          if [ -z "$expected" ]; then
+            expected="$DEFAULT_HOST"
+            echo "::warning title=Pre-flight using built-in default::repo variable EXPECTED_KUBE_APISERVER_HOST is unset — falling back to ${DEFAULT_HOST}."
+          fi
+          # `kubectl config view` WITHOUT --raw redacts credentials; we read ONLY
+          # the apiserver host (a cluster id, never a credential).
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — deploy refused::kubeconfig targets '${host:-<none>}' but this repo deploys to '${expected}'. Nothing was applied."
+            exit 1
+          fi
+          # Positive proof ON the preprod namespace: the preprod-scoped SA must
+          # see the two live deployments. Reachable only by that SA => env-frontier.
+          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
+
+      - name: Create GitHub deployment (preprod)
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'preprod',
+              required_contexts: [],
+              auto_merge: false,
+              transient_environment: true,
+              production_environment: false,
+              description: 'CD build-push-images → radar-immobilier-preprod',
+            });
+            if (!dep.data || dep.data.id === undefined) {
+              core.warning(`createDeployment returned no id: ${dep.data && dep.data.message ? dep.data.message : 'unknown'}`);
+              core.setOutput('id', '');
+            } else {
+              core.setOutput('id', String(dep.data.id));
+            }
+
+      # NOTE: NO "Apply immo-mcp declarative config" here (DESIGN §2.8) — drift
+      # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
+      # and the preprod deployer Role cannot apply ConfigMaps/Services.
+      - name: Roll preprod deployments to pushed sha
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" set image deploy/radar-api \
+            api="${IMAGE_PREFIX}/radar-api:${SHA}"
+          kubectl -n "$NAMESPACE" set image deploy/radar-ui \
+            ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
+
+      - name: Wait for rollouts
+        run: |
+          set -eu
+          # radar-api and radar-ui are the preprod live path: their rollout MUST
+          # succeed, so a failure here reds the preprod deploy.
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+
+      # POST-DEPLOY PROOF (TLS serial) — proves the preprod public endpoint is
+      # served by the OVH LB. prod & preprod share the LB IP, so this attests
+      # preprod DNS -> LB (NOT prod-vs-preprod); the served-sha step below is what
+      # proves the preprod BUILD. Pure network, no kubeconfig. Cert serials are
+      # public identifiers — printing them leaks nothing.
+      - name: Post-deploy — prove preprod endpoint serves the deployed LB (TLS serial)
+        env:
+          PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_HOST:-preprod.immo.sent-tech.ca}"
+          lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
+          if [ -z "${PUBLIC_HOST:-}" ] || [ -z "${EXPECTED_LB_IP:-}" ]; then
+            echo "::warning title=Preprod post-deploy proof using built-in defaults::set repo variables PREPROD_ENDPOINT_HOST / EXPECTED_OVH_LB_IP to make the preprod public-path guard explicit (falling back to ${host} / ${lb_ip})."
+          fi
+          serial_of() {
+            echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null \
+              | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2
+          }
+          sn_dns="$(serial_of "$host")"
+          sn_lb="$(serial_of "$lb_ip")"
+          echo "preprod host     : ${host}"
+          echo "target LB IP     : ${lb_ip}"
+          echo "serial via DNS   : ${sn_dns:-<none>}"
+          echo "serial via LB IP : ${sn_lb:-<none>}"
+          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ]; then
+            echo "::error title=Preprod post-deploy TLS proof — unreachable::could not read a cert serial (host=${host} lb=${lb_ip}). Rollouts succeeded but the preprod PUBLIC path is UNVERIFIED."
+            exit 1
+          fi
+          if [ "$sn_dns" != "$sn_lb" ]; then
+            echo "::error title=Preprod post-deploy TLS proof FAILED::DNS for ${host} does NOT serve the target LB ${lb_ip} (serial ${sn_dns} vs ${sn_lb})."
+            exit 1
+          fi
+          echo "post-deploy proof OK — ${host} is served by the LB (${lb_ip}); TLS serial ${sn_dns}"
+
+      # Served-sha proof on the PREPROD URL — the real preprod frontier on the
+      # public path. /health (api sha) AND /build.json (ui bundle sha) must equal
+      # the sha this run pushed, or the deploy REDs. Closes the silent-no-op gap
+      # (wrong ns / scaled-to-0 makes set-image + rollout succeed instantly).
+      - name: Assert served sha (preprod)
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+          PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+        run: |
+          set -euo pipefail
+          host="${PREPROD_ENDPOINT_HOST:-preprod.immo.sent-tech.ca}"
+          api_url="https://${host}/health"      # api/mcp sha (nginx -> radar-api/health)
+          ui_url="https://${host}/build.json"    # ui bundle sha (nginx static dist/build.json)
+          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url}"
+          fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
+          deadline=$(( $(date +%s) + 180 ))
+          while :; do
+            api_sha="$(fetch_sha "$api_url")"
+            ui_sha="$(fetch_sha "$ui_url")"
+            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then
+              echo "served sha OK: api=${api_sha} ui=${ui_sha} — build ${SHA} is live at ${host}"
+              exit 0
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error title=Preprod served sha mismatch::${host} serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' but this deploy pushed '${SHA}'. Rollout went green but the preprod endpoint is NOT serving the new build."
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Deployment status — success (preprod)
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+        with:
+          script: |
+            const host = process.env.PREPROD_ENDPOINT_HOST || 'preprod.immo.sent-tech.ca';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'success',
+              environment_url: `https://${host}`,
+              description: `preprod served sha ${process.env.SHA} verified live (pre-flight + TLS serial + served-sha)`,
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          SHA="${{ steps.vars.outputs.sha }}"
+          {
+            echo "### Deployed to \`${NAMESPACE}\` (preprod)"
+            echo ""
+            echo '```'
+            echo "deploy/radar-api -> ${IMAGE_PREFIX}/radar-api:${SHA}"
+            echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Deployment status — failure (preprod)
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'failure',
+              description: `preprod deploy ${process.env.SHA} failed (rollout OR post-deploy proof)`,
+            });
