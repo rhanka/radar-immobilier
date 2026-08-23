@@ -127,7 +127,7 @@ describe("SignauxSelPanel — badge PIIA lié", () => {
   });
 });
 
-describe("SignauxSelPanel — vue B : raison de rang + effet densifiant honnête", () => {
+describe("SignauxSelPanel — carte signal : bulle d'étape, sans effet densifiant", () => {
   function bNode(
     id: string,
     label: string,
@@ -138,50 +138,68 @@ describe("SignauxSelPanel — vue B : raison de rang + effet densifiant honnête
     return signal;
   }
 
-  it("affiche la raison NEUTRE (instrument + étape) par signal en mode B", () => {
+  it("bulle « instrument, étape » depuis la classification vivier v2", () => {
     const refonte = bNode("sig-refonte", "Refonte réglementaire secteur centre", {
       ...piiaClassification(),
       instrument: "refonte",
       etape: "projet_reglement",
     } as GraphSignalNode["classification"]);
 
-    const { container } = render(Harness, {
+    const { getByTestId, container } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [refonte],
-        vivierBMode: true,
       },
     });
 
-    expect(container.textContent).toContain("Refonte, projet de règlement");
-    // Copy neutre : aucun jargon interne exposé.
+    // La bulle d'étape porte la forme validée « Instrument, étape ».
+    expect(getByTestId("signal-stage-badge").textContent).toContain("Refonte, projet de règlement");
+    // Copy neutre : aucun jargon interne, aucun jeton brut d'étape.
     expect(container.textContent).not.toContain("bucket");
     expect(container.textContent).not.toContain("projet_reglement");
+    // Ancien sous-titre « type » (Événement de désignation) retiré.
+    expect(container.textContent).not.toContain("Événement de désignation");
   });
 
-  it("effet densifiant inconnu → « à qualifier » (jamais une valeur inventée)", () => {
+  // Retrait RÉEL (pas masqué) : le nœud CLASSIFIÉ est exactement celui qui, avant,
+  // rendait le pavé « signal-rank-row » + le badge « Effet densifiant » en vue B.
+  // Il ne doit PLUS rien afficher de tel, dans aucun mode — la bulle le remplace.
+  it("l'effet densifiant N'EST PLUS rendu (retiré du DOM), remplacé par la bulle d'étape", () => {
     const inconnu = bNode("sig-inconnu", "Rezonage H-431", piiaClassification());
-    const { container } = render(Harness, {
+    const { container, getByTestId } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [inconnu],
-        vivierBMode: true,
       },
     });
-    expect(container.textContent).toContain("Effet densifiant : à qualifier");
-  });
-
-  it("mode A (vivierBMode=false) : NI raison NI effet densifiant rendus", () => {
-    const node = bNode("sig-a", "Avis de motion règlement zonage H-431", piiaClassification());
-    const { container } = render(Harness, {
-      props: {
-        selectedCity: makeCity(),
-        detailNodes: [node],
-        vivierBMode: false,
-      },
-    });
+    // Retrait RÉEL : ni le badge « Effet densifiant » ni l'ancien pavé.
     expect(container.textContent).not.toContain("Effet densifiant");
     expect(container.textContent).not.toContain("à qualifier");
+    expect(container.querySelector(".signal-rank-row")).toBeNull();
+    // La bulle d'étape la remplace (piia + avis de motion).
+    expect(getByTestId("signal-stage-badge").textContent).toContain("PIIA, avis de motion");
+  });
+
+  it("SANS classification : bulle reconstruite depuis props.etape + props.instrument, sans effet densifiant", () => {
+    const node = makeSignal("sig-props", "Rezonage secteur nord", "Signal annoté.");
+    node.props = { ...node.props, etape: "avis_motion", instrument: "rezonage" };
+    const { getByTestId, container } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    expect(getByTestId("signal-stage-badge").textContent).toContain("Rezonage, avis de motion");
+    // Chemin hors vivier v2 : aucun effet densifiant, aucun pavé de rang.
+    expect(container.textContent).not.toContain("Effet densifiant");
+    expect(container.querySelector(".signal-rank-row")).toBeNull();
+  });
+
+  it("étape inconnue → repli honnête : AUCUNE bulle inventée", () => {
+    const node = makeSignal("sig-noetape", "Signal sans étape", "Aucune étape annotée.");
+    // props sans etape ; aucune classification.
+    const { queryByTestId, container } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    expect(queryByTestId("signal-stage-badge")).toBeNull();
+    expect(container.textContent).not.toContain("Effet densifiant");
   });
 });
 
