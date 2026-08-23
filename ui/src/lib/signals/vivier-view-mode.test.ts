@@ -561,23 +561,28 @@ describe("Vivier A / B view contract", () => {
     );
   });
 
-  it("resynchronizes route mode and keys route identity by A/B", () => {
+  it("migrates every route/stored subset to B — the A rail is retired (BR14-EX1)", () => {
     const route = (subset: string[]): GeoRoute => ({
       level: "city",
       citySlug: "sutton",
       state: normalizeGeoRouteState({ filters: { subset } }),
     });
-    expect(routeSubsetKey(route(["z", "m", "p"]))).toBe("z|m|p");
+    // Any deep-linked subset — the legacy A vocabulary included — resolves to B.
+    expect(routeSubsetKey(route(["z", "m", "p"]))).toBe("vivier-v2");
     expect(routeSubsetKey(route(["vivier-v2"]))).toBe("vivier-v2");
     expect(routeSubsetKey(route([]))).toBeNull();
-    expect(routeSubsetKey(route(["z"]))).toBe("z|m|p");
-    // Une vieille URL/préférence z|p retombe sur A, jamais sur B.
-    expect(routeSubsetKey(route(["z", "p"]))).toBe("z|m|p");
-    expect(reconcileVivierRouteSubset(route([]), "z|p")).toBe("z|m|p");
-    expect(initialVivierSubsetKey(route([]), "z|p")).toBe("z|m|p");
+    expect(routeSubsetKey(route(["z"]))).toBe("vivier-v2");
+    // Une vieille URL/préférence A (z|p, z|m|p) migre vers B, jamais un blanc.
+    expect(routeSubsetKey(route(["z", "p"]))).toBe("vivier-v2");
+    expect(reconcileVivierRouteSubset(route([]), "z|p")).toBe("vivier-v2");
+    // CRITIQUE — clé A persistée (localStorage) → atterrit sur B.
+    expect(initialVivierSubsetKey(route([]), "z|p")).toBe("vivier-v2");
+    expect(initialVivierSubsetKey(route([]), A_SUBSET_KEY)).toBe("vivier-v2");
     expect(initialVivierSubsetKey(route([]), "vivier-v2")).toBe("vivier-v2");
-    expect(initialVivierSubsetKey(null, null)).toBe(A_SUBSET_KEY);
-    expect(vivierRouteKey(route(["z", "m", "p"]))).not.toBe(vivierRouteKey(route(["vivier-v2"])));
+    // CRITIQUE — défaut vierge (aucune route, aucun stockage) = B.
+    expect(initialVivierSubsetKey(null, null)).toBe(B_SUBSET_KEY);
+    // Un lien A et un lien B désignent désormais la MÊME vue (B) → même identité.
+    expect(vivierRouteKey(route(["z", "m", "p"]))).toBe(vivierRouteKey(route(["vivier-v2"])));
   });
 
   it("preserves the LIVE sub-selection across a same-mode city navigation (m1.8)", () => {
@@ -599,8 +604,8 @@ describe("Vivier A / B view contract", () => {
     // preserves the absence of `p`.
     expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "vivier-v2|-r")).toBe("vivier-v2|-r");
     expect(bAxesFromVivierKey("vivier-v2|-r")).toMatchObject({ p: false });
-    // A : une sous-sélection d'axes (multi 4+ décoché) survit de même.
-    expect(reconcileVivierRouteSubset(route(["z", "m", "p"]), "z|p")).toBe("z|p");
+    // Une route A legacy migre vers B (le rail A est retiré) — aucune survie A.
+    expect(reconcileVivierRouteSubset(route(["z", "m", "p"]), "z|p")).toBe("vivier-v2");
     // Un VRAI changement de mode (deep-link A→B) repart du défaut du tab B.
     expect(reconcileVivierRouteSubset(route(["vivier-v2"]), "z|p")).toBe("vivier-v2");
   });
