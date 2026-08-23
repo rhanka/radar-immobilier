@@ -816,17 +816,20 @@ describe("SignauxSelPanel — accordéon ZONES : filtre par TYPE de zone", () =>
 // ── m7 — accordéon Règlements (entre Signaux et Zones) ───────────────────────
 
 describe("SignauxSelPanel — m7 accordéon Règlements", () => {
-  it("liste le règlement cité par les signaux (numéro + bouton PDF)", () => {
+  it("liste le règlement cité par les signaux (numéro + bouton PV source)", () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: NODES },
     });
     expect(getByText("Règlements")).not.toBeNull();
     // NODES citent tous « 1926-26 » → une entrée de règlement.
     expect(queryByText("1926-26")).not.toBeNull();
-    expect(queryByText("Voir le PDF")).not.toBeNull();
+    // §3.1 : le bouton indique EXPLICITEMENT qu'il ouvre le PV source (pas
+    // « le PDF » du règlement, qui n'existe pas ici).
+    expect(queryByText("Voir le PV source")).not.toBeNull();
+    expect(queryByText("Voir le PDF")).toBeNull();
   });
 
-  it("« Voir le PDF » appelle onOpenSource (titre = « Règlement <numéro> »)", async () => {
+  it("« Voir le PV source » ouvre le PV, étiqueté comme SOURCE, pas comme le règlement (§3.1)", async () => {
     const calls: Array<{ title: string; sourceUrl: string | null }> = [];
     const { getByText } = render(Harness, {
       props: {
@@ -836,9 +839,15 @@ describe("SignauxSelPanel — m7 accordéon Règlements", () => {
           calls.push(p),
       },
     });
-    await fireEvent.click(getByText("Voir le PDF"));
+    await fireEvent.click(getByText("Voir le PV source"));
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.title).toBe("Règlement 1926-26");
+    const title = calls[0]?.title ?? "";
+    // Sans substitution : le document ouvert est le PROCÈS-VERBAL source qui cite
+    // le règlement — jamais présenté comme s'il était le PDF du règlement.
+    expect(title).toMatch(/PV|source/i);
+    expect(title).not.toBe("Règlement 1926-26");
+    // Traçabilité : le numéro de règlement reste dans le titre.
+    expect(title).toContain("1926-26");
   });
 
   it("aucun règlement cité → état vide honnête (rien de fabriqué)", () => {
