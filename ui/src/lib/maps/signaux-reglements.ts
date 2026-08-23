@@ -49,6 +49,25 @@ export interface ReglementEntry {
 }
 
 /**
+ * Titre EXACT du document ouvert depuis le drawer Règlements dans le viewer
+ * partagé. Ce document N'EST PAS le PDF du règlement lui-même : aucun texte de
+ * règlement n'est modélisé ici. C'est le PROCÈS-VERBAL source du signal
+ * représentatif — celui qui CITE ce règlement (cf. `ReglementEntry.evidenceNodeId`).
+ *
+ * Le titre doit donc marquer explicitement « PV source », distinct :
+ *   (a) de la preuve d'un signal (fiche Signaux, « Voir la preuve »),
+ *   (b) du PDF de règlement (non disponible),
+ *   (c) de la grille de zonage (« Grille de zonage — … »).
+ *
+ * Sans ce marquage, le PV serait présenté comme s'il était le règlement — la
+ * substitution que la spec §3.1 interdit (« distinguish a source document from
+ * a regulation or zoning-grid PDF »).
+ */
+export function reglementSourceViewerTitle(number: string): string {
+  return `PV source — règlement ${number}`;
+}
+
+/**
  * Numéros de règlement portés par un nœud (tableau ou scalaire), dédupés.
  *
  * Lit AUX DEUX niveaux — `node.props` (top-level) ET `node.props.properties`
