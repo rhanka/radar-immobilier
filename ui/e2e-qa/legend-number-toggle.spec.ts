@@ -25,7 +25,19 @@ const BY_CITY_RESPONSE = {
     {
       citySlug: CITY_SLUG,
       signalCount: 2,
+      // vivierV2Counts précoce > 0 : le rail (vue B unique par défaut) lit
+      // vivierV2Counts ; sans lui la ville serait masquée (compte 0).
       subsetCounts: { "": 2, z: 2, "z|m|p": 2 },
+      vivierV2Counts: {
+        qualified: 2,
+        residentialUnknown: 0,
+        excludedByReason: { non_residentiel_franc: 0, piia_non_pertinent: 0, hors_zonage: 0, derogation_hors_sujet: 0 },
+        stageCounts: { avis_motion: 2, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
+        stageCountsHorsZonage: { avis_motion: 0, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
+        stageCountsResEligible: { avis_motion: 2, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
+        stageCountsResEligibleHorsZonage: { avis_motion: 0, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 },
+        total: 2,
+      },
     },
   ],
 };

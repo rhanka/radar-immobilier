@@ -172,10 +172,8 @@ test.describe("Signaux — tab Vivier B (rendu réel)", () => {
   test.beforeEach(async ({ page }) => {
     await mockSignauxApi(page);
     await page.goto("/#/signaux");
-    // Tab A par défaut lit `subsetCounts["z|m|p"]` (non peuplé par la fixture,
-    // seul le vivier v2 de B l'est) : basculer en B AVANT d'attendre les
-    // lignes du rail, qui ne comptent que sur `vivierV2Counts`.
-    await page.getByRole("tab", { name: "Nouveau B" }).click();
+    // Le vivier B est désormais la vue UNIQUE par défaut (bandeau à onglets
+    // retiré) : les lignes du rail lisent directement `vivierV2Counts`.
     await cityRows(page).first().waitFor({ state: "visible", timeout: 15_000 });
   });
 
@@ -218,12 +216,8 @@ test.describe("Signaux — tab Vivier B (rendu réel)", () => {
     await expect(cityRow(page, "Salaberry-de-Valleyfield")).toHaveClass(
       /rail-city-row--active/,
     );
-    // Le mode reste B et l'axe décoché survit à la navigation ville
+    // La vue B (unique) et l'axe décoché survivent à la navigation ville
     // (reconcileVivierRouteSubset : même mode ⇒ clé LIVE conservée).
-    await expect(page.getByRole("tab", { name: "Nouveau B" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
     await expect(checkbox(page, "Précoce")).not.toBeChecked();
   });
 });
