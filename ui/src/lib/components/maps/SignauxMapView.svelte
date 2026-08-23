@@ -2313,7 +2313,6 @@
       {lotsResponse}
       {selectionState}
       activeSubsetKey=""
-      vivierBMode={activeViewMode === "b"}
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}

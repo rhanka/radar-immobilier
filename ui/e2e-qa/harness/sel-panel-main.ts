@@ -158,6 +158,42 @@ if (params.get("fixture") === "zone-reglement") {
       onToggleKey: toggleBucketKey,
     },
   });
+} else if (params.get("fixture") === "etape") {
+  // P05 — preuve de rendu de la CARTE SIGNAL : titre + BULLE d'étape compacte,
+  // SANS pavé highlight, SANS effet densifiant. Deux SOURCES d'étape couvertes,
+  // pour prouver que la bulle marche en TOUT mode :
+  //   - node A : classification vivier v2 posée → « Rezonage, avis de motion » ;
+  //   - node B : hors vivier v2, props.etape/instrument → « PPCMOI, consultation
+  //     publique ».
+  const stageNodes: GraphSignalNode[] = [
+    signal("sig-rezonage", "Avis de motion — rezonage secteur centre H-431", "Signal de rezonage."),
+    signal("sig-ppcmoi", "Consultation publique — PPCMOI impasse Renard", "Signal PPCMOI."),
+  ];
+  stageNodes[0]!.classification = {
+    zonage: { valeur: "oui", source: "pv", confiance: 0.95 },
+    residentiel: { valeur: "oui", source: "pv", confiance: 0.9 },
+    effet_densifiant: "inconnu",
+    instrument: "rezonage",
+    etape: "avis_motion",
+    etapes_historique: ["avis_motion"],
+    exclusion_reason: null,
+    provenance: { extrait: "" },
+    confiance: 0.9,
+  } as unknown as GraphSignalNode["classification"];
+  stageNodes[1]!.props = {
+    ...stageNodes[1]!.props,
+    etape: "consultation",
+    instrument: "ppcmoi",
+  };
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity,
+      detailNodes: stageNodes,
+      selectionState: createSelectionBucketState(),
+      onToggleKey: toggleBucketKey,
+    },
+  });
 } else {
   mount(SignauxSelPanel, {
     target,
