@@ -110,7 +110,55 @@ function toggleBucketKey(key: SelectionKey): void {
 // `reglementUrl` PUBLIQUE (état enrichi consommé par la fiche : geo 901 + grille
 // PDF, ou source du graphe-signal). Prouve le rendu « Règl. … » + lien « Ouvrir
 // le règlement » en vrai navigateur. Sans le param : comportement historique #84.
-if (params.get("fixture") === "zone-reglement") {
+if (params.get("fixture") === "p01-preuve") {
+  // P01 (§3.1) — signal Delson AVEC preuve source (PV) qui CITE un règlement.
+  // Prouve la distinction : bloc « Preuve » du signal (Voir la preuve / Ouvrir
+  // le PDF source) vs drawer « Règlements » (Voir le PV source), même viewer.
+  const pvUrl =
+    "https://ville.delson.qc.ca/wp-content/uploads/2026/05/2026-04-14-ordinaire-20h.pdf";
+  const delsonSignal: GraphSignalNode = {
+    id: "signal-delson-lotissement-principale",
+    type: "DesignationEvent",
+    label:
+      "Demande approbation lotissement 74 rue Principale Sud — zone H-315 (Delson)",
+    citySlug: "delson",
+    sourceRef: null,
+    createdAt: "2026-04-14T12:00:00.000Z",
+    description:
+      "Demande d'approbation d'un projet de lotissement (lot 6 630 672, zone H-315).",
+    publishedAt: "2026-04-14T12:00:00.000Z",
+    props: {
+      description:
+        "Demande d'approbation d'un projet de lotissement (lot 6 630 672, zone H-315).",
+      reglement_number: "1926-26",
+      zone_ref: "H-315",
+      rawRef:
+        "raw/proces-verbaux-delson/cas/8c9df817e1b45cdcd449709093cd9bbc10da0e4ccf6553b70daefe95d2e1a1e4.pdf",
+      sourceUrl: pvUrl,
+      documentUrl: pvUrl,
+      page: 24,
+      citation:
+        "CONSIDÉRANT que le Service de l'aménagement du territoire a reçu une demande relative à un projet de lotissement pour le lot 6 630 672 au 74, rue Principale Sud.",
+    },
+  };
+  const delsonCity: CityMapEntry = {
+    ...selectedCity,
+    municipality: { ...selectedCity.municipality, slug: "delson", name: "Delson" },
+  };
+  const focusKey = makeKey("signal", delsonSignal.id) as SelectionKey;
+  let p01State: SelectionBucketState = createSelectionBucketState();
+  p01State = toggleSelection(p01State, focusKey);
+  p01State = setFocus(p01State, focusKey);
+  mount(SignauxSelPanel, {
+    target,
+    props: {
+      selectedCity: delsonCity,
+      detailNodes: [delsonSignal],
+      selectionState: p01State,
+      onToggleKey: toggleBucketKey,
+    },
+  });
+} else if (params.get("fixture") === "zone-reglement") {
   const citySlug = "delson";
   const reglementUrl =
     "https://ville.delson.qc.ca/wp-content/uploads/2025/01/Grilles-Web-09092022.pdf";
