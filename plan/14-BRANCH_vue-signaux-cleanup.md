@@ -79,6 +79,7 @@ First exercise of the preprod→prod promotion flow, gated by i-cond (no self-me
 - `acknowledge` (owner via i-cond) — precision LOCKED: remove the whole "Référence A / Nouveau B" tab band; `panelB` renders directly; add test "no A-B tab/band, panelB visible immediately". Scope LOCKED to Lot A + #514 only.
 - `acknowledge` (i-cond) — GO Lot A; tag `ref-a-last-valid bd3320d` approved.
 - `BR14-EX1` (GRANTED by i-cond) — `vivier-view-mode.ts` migration edits (default + legacy-A → B; deep-link A→B coercion). Reason: returning users must land on B, never blank. Impact: mode-persistence entry points only, A-projection kept. Rollback: revert file + `git tag ref-a-last-valid bd3320d`.
+- `BR14-EX2` (GRANTED by i-cond) — `ui/e2e-qa/**` : the tab-band removal's own Playwright coverage still drove the removed tab / A axis (consensus-review MAJOR finding). Fold the fix (drop tab clicks; adapt the rail-filter harness to B; ensure fixture cities carry `vivierV2Counts` so they stay rail-visible under the B default). Reason: a complete tab-band removal includes its e2e specs; leaving them broken = incomplete removal. e2e-qa is OUT of the CI gate (vite-preview Playwright, not `make`), so this does not affect the merge gate. Impact: `ui/e2e-qa/*.spec.ts` + `ui/e2e-qa/harness/*`. Rollback: revert those files.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + lots** (Lot A new code; Lot B = fold existing #514; Lot A2 conditional). Single branch, i-cond-gated promotion; no self-merge.
