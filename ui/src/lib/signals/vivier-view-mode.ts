@@ -458,8 +458,12 @@ export function sumVivierBCounts(
 export function routeSubsetKey(route: GeoRoute): string | null {
   const values = route.state.filters["subset"];
   if (!values || values.length === 0) return null;
-  const raw = values.join("|");
-  return subsetKeyForMode(modeFromSubsetKey(raw));
+  // The A rail is retired: any deep-linked subset — including the legacy A
+  // vocabulary (`z|m|p`, `z|p`, …) — resolves to the sole B mode. `modeFromSubsetKey`
+  // still DETECTS A keys downstream (the projection safety net), only this
+  // URL→mode resolution is coerced so a bookmarked A link lands on B, never a
+  // removed view.
+  return B_SUBSET_KEY;
 }
 
 export function initialVivierSubsetKey(
@@ -468,8 +472,12 @@ export function initialVivierSubsetKey(
 ): string {
   const explicit = route ? routeSubsetKey(route) : null;
   if (explicit !== null) return explicit;
-  const stored = storedSubsetKey?.trim();
-  return stored ? subsetKeyForMode(modeFromSubsetKey(stored)) : A_SUBSET_KEY;
+  // The A rail is retired: a fresh default AND any persisted legacy key (the old
+  // A default `z|m|p`, a residual `z|p`, …) both migrate to B — a returning user
+  // never lands on a removed A view or a blank rail. `storedSubsetKey` is read
+  // only to keep the call site stable; every non-route path now resolves to B.
+  void storedSubsetKey;
+  return B_SUBSET_KEY;
 }
 
 export function reconcileVivierRouteSubset(
@@ -478,7 +486,10 @@ export function reconcileVivierRouteSubset(
 ): string {
   const routeKey = routeSubsetKey(route);
   if (routeKey === null) {
-    return subsetKeyForMode(modeFromSubsetKey(currentSubsetKey));
+    // No subset on the route → collapse the live sub-selection to the sole B
+    // mode default. A residual A `currentSubsetKey` coerces to B too — the rail
+    // is gone, so no key ever normalizes back to an A default.
+    return B_SUBSET_KEY;
   }
   // La route ne porte QUE la clé de MODE (la sous-sélection LIVE — axes A
   // décochés, axes B relâchés / précoce — n'est jamais persistée). Une simple

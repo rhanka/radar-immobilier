@@ -126,7 +126,7 @@
     withHoverOpacityBoost,
   } from "$lib/maps/hover-paint.js";
   import {
-    A_SUBSET_KEY,
+    B_SUBSET_KEY,
     clearVivierCityTransientState,
     countForVivierCity,
     initialVivierSubsetKey,
@@ -323,8 +323,10 @@
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
-  // ── Projection globale A / B ─────────────────────────────────────────────
-  const FILTER_DEFAULT: string = A_SUBSET_KEY;
+  // ── Projection globale du vivier B ───────────────────────────────────────
+  // Défaut B : le rail « Référence A » est retiré. La migration d'une clé A
+  // persistée/deep-linkée → B vit dans `initialVivierSubsetKey` (subsetKeyFromRoute).
+  const FILTER_DEFAULT: string = B_SUBSET_KEY;
   const FILTER_LS_KEY = "signaux-filter-subset";
   let activeSubsetKey: string = FILTER_DEFAULT;
 
@@ -2311,7 +2313,6 @@
       {lotsResponse}
       {selectionState}
       activeSubsetKey=""
-      vivierBMode={activeViewMode === "b"}
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}

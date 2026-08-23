@@ -1,6 +1,6 @@
 <script lang="ts">
   /**
-   * Harnais QA du SignauxRail (cases de filtre z/m/p) en ISOLATION — bug #3.
+   * Harnais QA du SignauxRail (cases d'axes du vivier B) en ISOLATION — bug #3.
    *
    * Reproduit le câblage parent réel : `initialSubsetKey` est piloté ici comme
    * le ferait SignauxMapView (qui recalcule activeSubsetKey au onMount/reload),
@@ -12,16 +12,17 @@
    */
   import SignauxRail from "../../src/lib/components/maps/SignauxRail.svelte";
 
-  let initialSubsetKey = "z|m|p";
+  let initialSubsetKey = "vivier-v2";
   let emitted: string[] = [];
 
   function onFilterChange(key: string): void {
     emitted = [...emitted, key];
   }
 
-  // Simule le parent qui restaure le filtre depuis l'URL au reload (ex. "z|m").
+  // Simule le parent qui restaure le filtre depuis l'URL au reload : ici la clé
+  // B avec Précoce relâché ("vivier-v2|-p") → l'axe Précoce doit se DÉCOCHER.
   function simulateReloadRestore(): void {
-    initialSubsetKey = "z|m";
+    initialSubsetKey = "vivier-v2|-p";
   }
 </script>
 
