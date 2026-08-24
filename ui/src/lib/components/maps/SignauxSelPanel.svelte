@@ -1323,7 +1323,7 @@
 
       <!-- RÈGLEMENT ET NORMES : accordéon unifié ENTRE Signaux et Zones.
            RÈGLEMENTS (dérivés des signaux : numéro cité + zones + preuve ;
-           « Voir le PDF » ouvre la source dans le viewer partagé) + sous-section
+           « Voir le PV source » ouvre la source dans le viewer partagé) + sous-section
            NORMES (grille de zonage de la zone active : usage dominant, hauteurs,
            densités, marges — remontés des lots de la zone, servis VERBATIM ou
            « non renseigné », jamais fabriqués). -->
