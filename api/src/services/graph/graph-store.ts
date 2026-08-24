@@ -230,6 +230,76 @@ export function buildEdgeRow(link: GraphifyLink): EdgeRow {
   };
 }
 
+/** Served-surface node types whose per-event source lived on the `derived_from` edge (dropped by
+ * the pre-materialization projection → phantom). */
+const SEVERED_SOURCE_TYPES = new Set(["Signal", "DesignationEvent"]);
+
+function refDocShas(refs: unknown): string[] {
+  if (!Array.isArray(refs)) return [];
+  const out: string[] = [];
+  for (const r of refs) {
+    if (r && typeof r === "object") {
+      const d = (r as Record<string, unknown>).docSha;
+      if (typeof d === "string" && d.length > 0) out.push(d);
+    }
+  }
+  return out;
+}
+
+/** A node already carries a servable source iff sourceRef, a source-bearing prop, or a
+ * docSha-bearing props.refs entry is present (mirrors graph-signals hasPdfLink inputs). */
+function nodeRowHasSource(row: NodeRow): boolean {
+  if (row.sourceRef) return true;
+  const p = row.props as Record<string, unknown>;
+  if (refDocShas(p.refs).length > 0) return true;
+  const pp = (p.properties ?? {}) as Record<string, unknown>;
+  for (const k of ["sourceUrl", "source_url", "rawRef", "docSha", "source_storage_key", "sourceRef"]) {
+    const v = pp[k];
+    if (typeof v === "string" && v.length > 0) return true;
+  }
+  return refDocShas(pp.refs).length > 0;
+}
+
+/**
+ * Re-materialize the severed per-event source onto served Signal|DesignationEvent nodes.
+ *
+ * Root cause (measured): the projection keeps only Signal|DesignationEvent nodes and drops the
+ * Bylaw anchor + `derived_from` edges — but the source PV docSha lives on the EDGE `refs`, so the
+ * served node loses it → `hasPdfLink=false` = "phantom" signal with no source PDF. This copies the
+ * docSha the graph EXPLICITLY asserts on a node's outgoing edges into the served node
+ * (`sourceRef` + `props.refs`), so the source survives projection and phantoms cannot recur.
+ *
+ * Conservative by design: only the graph's own `derived_from` edge refs are used (no date/text
+ * inference — that stays a verified data-side remediation), so no source is ever invented.
+ * Idempotent: nodes that already carry a source are left untouched.
+ */
+export function materializeSeveredSources(
+  nodeRows: NodeRow[],
+  links: GraphifyLink[],
+  _rawNodes: GraphifyNode[],
+): { materialized: number } {
+  const edgeShasBySrc = new Map<string, string[]>();
+  for (const l of links) {
+    const shas = refDocShas((l as { refs?: unknown }).refs);
+    if (shas.length === 0) continue;
+    const arr = edgeShasBySrc.get(l.source) ?? [];
+    arr.push(...shas);
+    edgeShasBySrc.set(l.source, arr);
+  }
+  let materialized = 0;
+  for (const row of nodeRows) {
+    if (!SEVERED_SOURCE_TYPES.has(row.type)) continue;
+    if (nodeRowHasSource(row)) continue;
+    const docSha = (edgeShasBySrc.get(row.id) ?? []).find((s) => s.length > 0);
+    if (!docSha) continue;
+    row.sourceRef = row.sourceRef ?? docSha;
+    const existing = Array.isArray(row.props.refs) ? row.props.refs : [];
+    row.props.refs = mergeRefs(existing, [{ docSha, linkSource: "projection-materialize-severed" }]);
+    materialized++;
+  }
+  return { materialized };
+}
+
 function mergeRefs(a: unknown, b: unknown): unknown {
   if (!Array.isArray(a) && !Array.isArray(b)) return b ?? a;
 
@@ -762,6 +832,10 @@ export async function upsertGraphAtomic(
 
   const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
   const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
+  // Re-materialize the per-event source docSha the projection would otherwise sever (it lives on
+  // the derived_from edge refs, and the Bylaw anchor + edges are dropped) → served node keeps its
+  // source, so hasPdfLink stays true and phantoms cannot recur. Conservative: edge-asserted only.
+  materializeSeveredSources(nodeRows, links, parsed.nodes);
   const newNodeIds = nodeRows.map((r) => r.id);
 
   // Cas cross-city : upsert pur, aucune suppression (impossible de scoper sûrement).

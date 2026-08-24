@@ -15,6 +15,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildNodeRow,
   buildEdgeRow,
+  materializeSeveredSources,
   mergeEdgeRows,
   graphifyGraphSchema,
   upsertGraph,
@@ -946,6 +947,62 @@ describe("buildEdgeRow — idempotency key", () => {
     const r1 = buildEdgeRow(link);
     const r2 = buildEdgeRow(link);
     expect(`${r1.srcId}|${r1.dstId}|${r1.kind}`).toBe(`${r2.srcId}|${r2.dstId}|${r2.kind}`);
+  });
+});
+
+describe("materializeSeveredSources — re-attach the source dropped by projection", () => {
+  const bylawLink: GraphifyLink = {
+    source: "event-x-adoption-026-511",
+    target: "bylaw-x-026-511",
+    type: "derived_from",
+    refs: [{ docSha: "SHA_PV" }],
+  };
+
+  it("copies the derived_from edge docSha onto a phantom Signal (sourceRef + props.refs)", () => {
+    const rows = [buildNodeRow({ id: "event-x-adoption-026-511", label: "Adoption 026-511", type: "Signal" })];
+    const { materialized } = materializeSeveredSources(rows, [bylawLink], []);
+    expect(materialized).toBe(1);
+    expect(rows[0]!.sourceRef).toBe("SHA_PV");
+    expect(rows[0]!.props.refs).toEqual([
+      { docSha: "SHA_PV", linkSource: "projection-materialize-severed" },
+    ]);
+  });
+
+  it("is idempotent — a node that already carries a source is left untouched", () => {
+    const rows = [
+      buildNodeRow({
+        id: "event-x-adoption-026-511",
+        label: "Adoption 026-511",
+        type: "Signal",
+        source_file: "PRE_EXISTING",
+      }),
+    ];
+    const { materialized } = materializeSeveredSources(rows, [bylawLink], []);
+    expect(materialized).toBe(0);
+    expect(rows[0]!.sourceRef).toBe("PRE_EXISTING");
+  });
+
+  it("only touches Signal|DesignationEvent — never a Bylaw/Source node", () => {
+    const rows = [buildNodeRow({ id: "bylaw-x-026-511", label: "Règlement 026-511", type: "Bylaw" })];
+    const { materialized } = materializeSeveredSources(
+      rows,
+      [{ source: "bylaw-x-026-511", target: "source-x", type: "cites", refs: [{ docSha: "SHA_PV" }] }],
+      [],
+    );
+    expect(materialized).toBe(0);
+    expect(rows[0]!.sourceRef).toBeNull();
+  });
+
+  it("leaves a phantom untouched when no edge carries a docSha (data-side remediation, not invented)", () => {
+    const rows = [buildNodeRow({ id: "event-x-piia-0007", label: "PIIA — 853 chemin Rhéaume", type: "DesignationEvent" })];
+    const { materialized } = materializeSeveredSources(
+      rows,
+      [{ source: "event-x-piia-0007", target: "bylaw-x", type: "derived_from" }],
+      [],
+    );
+    expect(materialized).toBe(0);
+    expect(rows[0]!.sourceRef).toBeNull();
+    expect(rows[0]!.props.refs).toBeUndefined();
   });
 });
 
