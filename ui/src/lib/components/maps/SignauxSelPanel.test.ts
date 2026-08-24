@@ -813,14 +813,14 @@ describe("SignauxSelPanel — accordéon ZONES : filtre par TYPE de zone", () =>
   });
 });
 
-// ── m7 — accordéon Règlements (entre Signaux et Zones) ───────────────────────
+// ── m7 — accordéon Règlement et Normes (entre Signaux et Zones) ──────────────
 
-describe("SignauxSelPanel — m7 accordéon Règlements", () => {
+describe("SignauxSelPanel — m7 accordéon Règlement et Normes", () => {
   it("liste le règlement cité par les signaux (numéro + bouton PV source)", () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: NODES },
     });
-    expect(getByText("Règlements")).not.toBeNull();
+    expect(getByText("Règlement et Normes")).not.toBeNull();
     // NODES citent tous « 1926-26 » → une entrée de règlement.
     expect(queryByText("1926-26")).not.toBeNull();
     // §3.1 : le bouton indique EXPLICITEMENT qu'il ouvre le PV source (pas
@@ -863,7 +863,7 @@ describe("SignauxSelPanel — m7 accordéon Règlements", () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: [noReg] },
     });
-    expect(getByText("Règlements")).not.toBeNull();
+    expect(getByText("Règlement et Normes")).not.toBeNull();
     expect(
       queryByText("Aucun règlement cité par les signaux de cette ville."),
     ).not.toBeNull();
