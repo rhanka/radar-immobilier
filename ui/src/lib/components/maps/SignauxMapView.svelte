@@ -1621,6 +1621,43 @@
     zoomToSelectionKey(key);
   }
 
+  /**
+   * Surface un hit de la recherche INTRA-VILLE (SignauxSelPanel) sur la carte
+   * (caméra + surlignage) ET le détail. Traitement DISTINCT de `toggleBucketKey`
+   * (raison pour laquelle la recherche a son propre callback) :
+   *  - ZONE → `selectBucketKey` : sélection exclusive + focus + pan sur la zone.
+   *  - LOT  → le guard R1 (dans `toggleBucketKey`) REFUSE de sélectionner un lot
+   *    tant que SA zone n'est pas active. On DRILLE donc : on résout la zone du
+   *    lot (`zoneCodeForDisplayedLot`) et on l'active D'ABORD (`selectBucketKey`
+   *    → pan zone), PUIS on sélectionne le lot (`toggleBucketKey` → lot dans la
+   *    zone active → pan lot avec `fitLot`). Si la zone du lot est introuvable,
+   *    repli sur `toggleBucketKey` seul (qui basculera lui-même vers la zone).
+   */
+  function selectFromSearch(key: SelectionKey): void {
+    const parsed = parseKey(key);
+    if (!parsed) return;
+    if (parsed.kind === "zone") {
+      selectBucketKey(key);
+      return;
+    }
+    if (parsed.kind === "lot") {
+      const separator = parsed.id.indexOf("/");
+      const noLot = separator > 0 ? parsed.id.slice(separator + 1) : "";
+      const lotZone = noLot ? zoneCodeForDisplayedLot(noLot) : null;
+      const citySlug = selectedCity?.municipality.slug ?? null;
+      if (lotZone && citySlug) {
+        // R1 : activer + paner la ZONE du lot d'abord (sans quoi toggleBucketKey
+        // basculerait vers la zone et RETOURNERAIT sans sélectionner le lot),
+        // puis sélectionner le lot (désormais dans la zone active).
+        selectBucketKey(makeKey("zone", `${citySlug}/${lotZone}`));
+        toggleBucketKey(key);
+        return;
+      }
+      // Zone du lot introuvable → repli : toggleBucketKey bascule vers la zone.
+      toggleBucketKey(key);
+    }
+  }
+
   function applyPendingRouteZone(): void {
     if (!pendingRouteZoneKey || !selectedCity || !zonesResponse) return;
     const citySlug = selectedCity.municipality.slug;
@@ -2321,6 +2358,7 @@
       onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
+      onSearchSelect={selectFromSearch}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
       onOpenSource={openSource}
