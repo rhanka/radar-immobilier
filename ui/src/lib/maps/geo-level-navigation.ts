@@ -49,6 +49,37 @@ export function resolveGeoLotClick(input: {
   return { kind: "ignore" };
 }
 
+/**
+ * Résolution du clic LISTE (rangée lot du panneau droit → `toggleBucketKey`)
+ * selon le guard R1 — plus STRICT que `resolveGeoLotClick` (clic carte) : un lot
+ * n'est sélectionnable QUE si SA zone est l'active. Sinon :
+ *  - zone du lot connue ET ≠ active (niveau ville inclus) → BASCULER vers cette
+ *    zone (switch), jamais le lot ;
+ *  - niveau ville sans zone résoluble → ignorer (jamais de lot hors zone active) ;
+ *  - zone du lot inconnue MAIS une zone est active → sélection lot (parité clic
+ *    carte en vue zone).
+ * Fonction PURE — miroir exact de la logique inline de
+ * `SignauxMapView.toggleBucketKey`, qui la CONSOMME (couverture chemin de prod).
+ */
+export type LotListClickResolution =
+  | { kind: "select-lot" }
+  | { kind: "switch-zone"; code: string }
+  | { kind: "ignore" };
+
+export function resolveLotListClickR1(input: {
+  /** Zone active courante (première zone sélectionnée), `null` au niveau ville. */
+  activeZoneCode: string | null;
+  /** Zone contenante du lot cliqué (servie par geo : `zoneCode`), si connue. */
+  lotZoneCode: string | null;
+}): LotListClickResolution {
+  const { activeZoneCode, lotZoneCode } = input;
+  if (lotZoneCode && lotZoneCode !== activeZoneCode) {
+    return { kind: "switch-zone", code: lotZoneCode };
+  }
+  if (!activeZoneCode) return { kind: "ignore" };
+  return { kind: "select-lot" };
+}
+
 export interface GeoLevelNavInput {
   /** Niveau cible cliqué dans le segmented-control. */
   target: GeoLevel;
