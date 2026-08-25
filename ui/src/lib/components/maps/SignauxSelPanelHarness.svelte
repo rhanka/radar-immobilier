@@ -54,9 +54,6 @@
     rawRef?: string | null;
     page?: number | null;
   }) => void = () => {};
-  // Recherche intra-ville unifiée (zones + lots) — passe-plat du callback pour
-  // que les tests observent la clé de sélection remontée.
-  export let onSearchSelect: (key: SelectionKey) => void = () => {};
 
   function handleLotFilterChange(next: EvalLotFilter): void {
     lotFilter = next;
@@ -100,5 +97,4 @@
   onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
   onToggleKey={toggleBucketKey}
   {onOpenSource}
-  {onSearchSelect}
 />
