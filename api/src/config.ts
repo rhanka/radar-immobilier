@@ -74,6 +74,42 @@ const envSchema = z.object({
     .transform((v) => (v === undefined ? undefined : v === "true")),
 
   /**
+   * immo→geo document repoint (zero-copy PV cutover) — see
+   * `services/sources/document-resolver.mapToGeoKey` and `routes/documents.ts`.
+   *
+   * OFF by default ("0"): `/api/documents/raw` keeps resolving PV PDFs from the
+   * immo scrape store → main store, byte-for-byte the current behaviour. Set to
+   * "1" ONLY once geo actually holds every `raw/pv-index/cas/<sha>.pdf` object;
+   * the api then rewrites each immo PV CAS key to its geo twin and serves the
+   * bytes from the geo bucket in strictly READ-ONLY mode (zero-copy: the immo
+   * api reads geo, writes nothing there, copies no file). Config-only cutover,
+   * reversible by flipping this back to "0".
+   */
+  GEO_DOCUMENTS_REPOINT: z
+    .enum(["0", "1"])
+    .default("0")
+    .transform((v) => v === "1"),
+  /**
+   * Dedicated, read-only geo document store. These values NEVER inherit the
+   * immo S3_* / SCRAPE_S3_* config: geo is a distinct bucket reached with its
+   * OWN read-only credentials. When GEO_DOCUMENTS_REPOINT=1 every field below is
+   * required and `resolveGeoDocumentsS3Config` fails fast if one is missing (it
+   * refuses to silently fall back to an immo bucket / write key). NEVER commit a
+   * real secret.
+   */
+  GEO_DOCUMENTS_S3_ENDPOINT: optStr(z.string().url()),
+  GEO_DOCUMENTS_S3_REGION: optStr(z.string().min(1)),
+  GEO_DOCUMENTS_S3_BUCKET: optStr(z.string().min(1)),
+  GEO_DOCUMENTS_S3_ACCESS_KEY: optStr(z.string().min(1)),
+  GEO_DOCUMENTS_S3_SECRET_KEY: optStr(z.string().min(1)),
+  GEO_DOCUMENTS_S3_FORCE_PATH_STYLE: z
+    .preprocess(
+      (v) => (v === "" ? undefined : v),
+      z.enum(["true", "false"]).optional(),
+    )
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+
+  /**
    * Shared secret that gates the reconciliation-studio WRITE route
    * (POST /api/ontology/:city/patch). Optional: when unset, the write route is
    * disabled and every patch is refused with 401 (fail-closed — the studio stays
@@ -223,6 +259,37 @@ export function resolveGraphS3Config(config: AppConfig): ScrapeS3Config {
     secretKey: config.GRAPH_S3_SECRET_KEY ?? scrape.secretKey,
     forcePathStyle:
       config.GRAPH_S3_FORCE_PATH_STYLE ?? scrape.forcePathStyle,
+  };
+}
+
+/** Effective config for the read-only geo document store (same shape as S3). */
+export type GeoDocumentsS3Config = ScrapeS3Config;
+
+/**
+ * Resolve the isolated geo-document reader config for the immo→geo repoint.
+ *
+ * Unlike the graph/scrape resolvers, this one performs NO implicit fallback to
+ * the immo S3_* / SCRAPE_S3_* values: geo is a separate bucket reached with its
+ * own read-only credentials, and silently borrowing an immo endpoint/bucket or a
+ * write key would defeat the zero-copy, read-only contract. Every field is
+ * therefore mandatory and a missing one throws — this resolver is only ever
+ * called when GEO_DOCUMENTS_REPOINT=1 (see index.ts), so a gap is a real
+ * misconfiguration that must fail fast rather than degrade to immo.
+ */
+export function resolveGeoDocumentsS3Config(
+  config: AppConfig,
+): GeoDocumentsS3Config {
+  const required = (name: string, value: string | undefined): string => {
+    if (value !== undefined) return value;
+    throw new Error(`${name} is required when GEO_DOCUMENTS_REPOINT=1`);
+  };
+  return {
+    endpoint: required("GEO_DOCUMENTS_S3_ENDPOINT", config.GEO_DOCUMENTS_S3_ENDPOINT),
+    region: required("GEO_DOCUMENTS_S3_REGION", config.GEO_DOCUMENTS_S3_REGION),
+    bucket: required("GEO_DOCUMENTS_S3_BUCKET", config.GEO_DOCUMENTS_S3_BUCKET),
+    accessKey: required("GEO_DOCUMENTS_S3_ACCESS_KEY", config.GEO_DOCUMENTS_S3_ACCESS_KEY),
+    secretKey: required("GEO_DOCUMENTS_S3_SECRET_KEY", config.GEO_DOCUMENTS_S3_SECRET_KEY),
+    forcePathStyle: config.GEO_DOCUMENTS_S3_FORCE_PATH_STYLE ?? true,
   };
 }
 

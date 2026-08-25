@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { S3ObjectStore } from "./s3-object-store.js";
+import { S3ObjectReader, S3ObjectStore } from "./s3-object-store.js";
 
 /**
  * These two tests deliberately import nothing that is new, so they run against
@@ -86,5 +86,60 @@ describe("canonical graph key guard on the write path", () => {
     await store.put("raw/sutton/proces-verbaux/cas/abc.pdf", new Uint8Array([1]));
 
     expect(sent).toHaveLength(3);
+  });
+});
+
+describe("S3ObjectReader — read-only geo document capability", () => {
+  it("exposes ONLY get/head and issues only GET/HEAD commands (no write/list/create API)", async () => {
+    const sent: string[] = [];
+    const client = {
+      send: async (input: unknown) => {
+        const name = (input as { constructor: { name: string } }).constructor.name;
+        sent.push(name);
+        return name === "GetObjectCommand"
+          ? { Body: { transformToByteArray: async () => new Uint8Array([1, 2]) } }
+          : { ContentType: "application/pdf", ContentLength: 2, ETag: '"v1"' };
+      },
+    };
+    const reader = new S3ObjectReader(client as never, "sentropic-geo");
+
+    const head = await reader.head("raw/pv-index/cas/a.pdf");
+    const bytes = await reader.get("raw/pv-index/cas/a.pdf");
+
+    expect(head).toMatchObject({ contentType: "application/pdf" });
+    expect(bytes).toEqual(new Uint8Array([1, 2]));
+    expect(sent).toEqual(["HeadObjectCommand", "GetObjectCommand"]);
+    // The type is the guarantee: no mutating/enumerating method exists.
+    expect("put" in reader).toBe(false);
+    expect("list" in reader).toBe(false);
+    expect("ensureBucket" in reader).toBe(false);
+  });
+
+  it("head returns null for a genuinely absent object", async () => {
+    const reader = new S3ObjectReader(
+      {
+        send: async () => {
+          throw Object.assign(new Error("nope"), { name: "NotFound" });
+        },
+      } as never,
+      "sentropic-geo",
+    );
+
+    expect(await reader.head("raw/pv-index/cas/missing.pdf")).toBeNull();
+  });
+
+  it("head PROPAGATES a real access failure instead of masking it as a 404", async () => {
+    const reader = new S3ObjectReader(
+      {
+        send: async () => {
+          throw Object.assign(new Error("denied"), { name: "AccessDenied" });
+        },
+      } as never,
+      "sentropic-geo",
+    );
+
+    await expect(reader.head("raw/pv-index/cas/denied.pdf")).rejects.toThrow(
+      "denied",
+    );
   });
 });

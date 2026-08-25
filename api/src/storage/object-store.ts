@@ -48,18 +48,28 @@ export function canonicalGraphKey(citySlug: string): string {
 }
 
 /**
+ * Read-only view over an object store: fetch bytes and probe existence, nothing
+ * more. A consumer that holds only an `ObjectReader` cannot write, copy, create,
+ * or list — the type itself is the guarantee. This is the capability the immo→geo
+ * document repoint hands to the resolver: it READS the PV bytes that live in the
+ * geo bucket and can do nothing else to it (zero-copy, strictly read-only).
+ */
+export interface ObjectReader {
+  get(key: string): Promise<Uint8Array>;
+  head(key: string): Promise<ObjectInfo | null>;
+}
+
+/**
  * Storage boundary for raw source documents. Backed by S3 (Scaleway) in
  * prod and MinIO locally. Adapters live behind this interface so the rest
  * of the code never talks to a concrete SDK.
  */
-export interface ObjectStore {
+export interface ObjectStore extends ObjectReader {
   put(
     key: string,
     body: Uint8Array | Buffer | string,
     contentType?: string,
   ): Promise<ObjectInfo>;
-  get(key: string): Promise<Uint8Array>;
-  head(key: string): Promise<ObjectInfo | null>;
   /**
    * Read bytes and their version in one call, or `null` when the key is absent.
    *
