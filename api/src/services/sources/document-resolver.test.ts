@@ -86,9 +86,28 @@ describe("mapToGeoKey", () => {
     },
   );
 
-  it("is idempotent: an already-geo key maps to itself", () => {
-    const geoKey = `raw/pv-index/cas/${sha}.pdf`;
-    expect(mapToGeoKey(geoKey)).toBe(geoKey);
+  // Extension is PRESERVED, not forced to `.pdf`: geo keys the real file type.
+  it.each(["pdf", "docx", "doc", "odt", "rtf"])(
+    "preserves the real .%s extension across the rewrite",
+    (ext) => {
+      expect(
+        mapToGeoKey(`raw/proces-verbaux-ange-gardien/cas/${sha}.${ext}`),
+      ).toBe(`raw/pv-index/cas/${sha}.${ext}`);
+    },
+  );
+
+  it.each(["pdf", "docx"])(
+    "is idempotent: an already-geo .%s key maps to itself",
+    (ext) => {
+      const geoKey = `raw/pv-index/cas/${sha}.${ext}`;
+      expect(mapToGeoKey(geoKey)).toBe(geoKey);
+    },
+  );
+
+  it("never injects a sha256: prefix — the 64-hex digest is copied verbatim", () => {
+    const out = mapToGeoKey(`raw/proces-verbaux-quebec/cas/${sha}.pdf`);
+    expect(out).toBe(`raw/pv-index/cas/${sha}.pdf`);
+    expect(out).not.toContain("sha256:");
   });
 
   it.each([
@@ -100,6 +119,11 @@ describe("mapToGeoKey", () => {
     ["uppercase sha", `raw/proces-verbaux-testville/cas/${"A".repeat(64)}.pdf`],
     // wrong extension casing
     ["uppercase extension", `raw/proces-verbaux-testville/cas/${sha}.PDF`],
+    // immo-internal artifacts under the same prefix: NOT geo documents, so they
+    // return null (→ served from the immo legacy stores, never 404'd on geo).
+    ["unknown-type .bin (immo docx download)", `raw/proces-verbaux-ange-gardien/cas/${sha}.bin`],
+    ["extracted text .txt", `raw/proces-verbaux-testville/cas/${sha}.txt`],
+    ["Office-viewer .html", `raw/proces-verbaux-ange-gardien/cas/${sha}.html`],
     // metadata sidecar, never the served payload
     ["meta sidecar", `raw/proces-verbaux-testville/cas/${sha}.pdf.meta.json`],
     // empty city segment
