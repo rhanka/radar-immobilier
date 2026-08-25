@@ -95,6 +95,7 @@
   import {
     buildGeoLevelNavigation,
     resolveGeoLotClick,
+    resolveLotListClickR1,
     type GeoLevel,
   } from "$lib/maps/geo-level-navigation.js";
   import {
@@ -1326,30 +1327,31 @@
 
   function toggleBucketKey(key: SelectionKey): void {
     // R1 (RÈGLE UNIQUE, parité carte/liste) — un lot n'est sélectionnable QUE si
-    // une zone est active ET le lot appartient à cette zone. Sinon (niveau ville
-    // OU lot hors zone active), cliquer un lot RÉSOUT vers SA zone (switch), jamais
-    // le lot. Miroir du guard carte (couche selected-lots-fill). On lit la zone du
-    // lot dans `displayedLots` (mêmes features que la carte : `zoneCode` cadastral).
+    // une zone est active ET le lot appartient à cette zone. La DÉCISION est
+    // déléguée à `resolveLotListClickR1` (pure, testée) ; on n'exécute ici que
+    // l'effet. On lit la zone du lot dans `displayedLots` (mêmes features que la
+    // carte : `zoneCode` cadastral).
     const parsedClick = parseKey(key);
     if (parsedClick?.kind === "lot") {
       const separator = parsedClick.id.indexOf("/");
       const noLot = separator > 0 ? parsedClick.id.slice(separator + 1) : "";
-      const active = activeZoneCodeFor(selectionState);
-      const lotZone = zoneCodeForDisplayedLot(noLot);
-      const citySlug = selectedCity?.municipality.slug ?? null;
-      if (lotZone && lotZone !== active) {
+      const action = resolveLotListClickR1({
+        activeZoneCode: activeZoneCodeFor(selectionState),
+        lotZoneCode: zoneCodeForDisplayedLot(noLot),
+      });
+      if (action.kind === "switch-zone") {
         // hors zone active OU niveau ville : basculer vers la ZONE du lot (switch),
         // jamais le lot.
-        if (citySlug) toggleBucketKey(makeKey("zone", `${citySlug}/${lotZone}`));
+        const citySlug = selectedCity?.municipality.slug ?? null;
+        if (citySlug) toggleBucketKey(makeKey("zone", `${citySlug}/${action.code}`));
         return;
       }
-      if (!active) {
+      if (action.kind === "ignore") {
         // niveau ville sans zone résoluble pour ce lot → ignorer (jamais de lot
         // sélectionné hors d'une zone active).
         return;
       }
-      // lotZone === active (ou zone du lot inconnue MAIS une zone est active) →
-      // sélection normale du lot ci-dessous.
+      // action.kind === "select-lot" → sélection normale du lot ci-dessous.
     }
     // #9 fix — l'accordéon pilote le FOCUS (ouvre/ferme le détail), pas la
     // sélection multi. On bascule le focus : si l'item est déjà focusé on le
@@ -1619,43 +1621,6 @@
     // #12 — cadrage caméra sur la zone (segmented control « Zone », restauration
     // d'URL /geo/zone/...). No-op si la clé n'est pas une zone.
     zoomToSelectionKey(key);
-  }
-
-  /**
-   * Surface un hit de la recherche INTRA-VILLE (SignauxSelPanel) sur la carte
-   * (caméra + surlignage) ET le détail. Traitement DISTINCT de `toggleBucketKey`
-   * (raison pour laquelle la recherche a son propre callback) :
-   *  - ZONE → `selectBucketKey` : sélection exclusive + focus + pan sur la zone.
-   *  - LOT  → le guard R1 (dans `toggleBucketKey`) REFUSE de sélectionner un lot
-   *    tant que SA zone n'est pas active. On DRILLE donc : on résout la zone du
-   *    lot (`zoneCodeForDisplayedLot`) et on l'active D'ABORD (`selectBucketKey`
-   *    → pan zone), PUIS on sélectionne le lot (`toggleBucketKey` → lot dans la
-   *    zone active → pan lot avec `fitLot`). Si la zone du lot est introuvable,
-   *    repli sur `toggleBucketKey` seul (qui basculera lui-même vers la zone).
-   */
-  function selectFromSearch(key: SelectionKey): void {
-    const parsed = parseKey(key);
-    if (!parsed) return;
-    if (parsed.kind === "zone") {
-      selectBucketKey(key);
-      return;
-    }
-    if (parsed.kind === "lot") {
-      const separator = parsed.id.indexOf("/");
-      const noLot = separator > 0 ? parsed.id.slice(separator + 1) : "";
-      const lotZone = noLot ? zoneCodeForDisplayedLot(noLot) : null;
-      const citySlug = selectedCity?.municipality.slug ?? null;
-      if (lotZone && citySlug) {
-        // R1 : activer + paner la ZONE du lot d'abord (sans quoi toggleBucketKey
-        // basculerait vers la zone et RETOURNERAIT sans sélectionner le lot),
-        // puis sélectionner le lot (désormais dans la zone active).
-        selectBucketKey(makeKey("zone", `${citySlug}/${lotZone}`));
-        toggleBucketKey(key);
-        return;
-      }
-      // Zone du lot introuvable → repli : toggleBucketKey bascule vers la zone.
-      toggleBucketKey(key);
-    }
   }
 
   function applyPendingRouteZone(): void {
@@ -2358,7 +2323,6 @@
       onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
       onClear={() => clearSelection()}
       onToggleKey={toggleBucketKey}
-      onSearchSelect={selectFromSearch}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
       onOpenSource={openSource}
