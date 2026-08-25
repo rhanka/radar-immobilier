@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "esnext",
+    "baseUrl": "../..",
+    "paths": { "$lib/*": ["ui/src/lib/*"] },
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "skipLibCheck": true,
+    "strict": false
+  }
+}
