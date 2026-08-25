@@ -8,34 +8,65 @@ const META_SUFFIX = ".meta.json";
 /**
  * immo→geo document repoint — pure, O(1) CAS-key prefix rewrite (NO bucket scan).
  *
- * The immo RECUEIL pipeline stores each procès-verbal PDF under a content-addressed
- * key `raw/proces-verbaux-<city>/cas/<sha256>.pdf`. geo holds the byte-identical
- * document under `raw/pv-index/cas/<sha256>.pdf` — same sha256 (both keys are the
- * sha256 of the exact same bytes), so the map is a single prefix rewrite that
- * carries the hash across unchanged. It is a string operation with constant cost:
- * NEVER a `list`/scan of the bucket (that unbounded fallback caused the "signal API
- * never responds" incident — see findDocumentMetadata below).
+ * The immo RECUEIL pipeline stores each procès-verbal document under a
+ * content-addressed key `raw/proces-verbaux-<city>/cas/<sha256>.<ext>`. geo holds
+ * the byte-identical document under `raw/pv-index/cas/<sha256>.<ext>` — SAME bare
+ * 64-hex sha256 of the exact same bytes (no `sha256:` prefix on either side) and,
+ * per the geo writer's contract (`acquisition/src/pv-couverture-municipale.ts`,
+ * `CAS_PREFIX="raw/pv-index/cas/"`), the SAME real file extension. So the map is a
+ * single prefix rewrite that carries BOTH the hash AND the extension across
+ * unchanged. It is a constant-cost string operation: NEVER a `list`/scan of the
+ * bucket (that unbounded fallback caused the "signal API never responds" incident
+ * — see findDocumentMetadata below).
+ *
+ * Extension is PRESERVED, not hardcoded — geo keys the real file type (`.pdf`,
+ * `.docx`, …), so forcing `.pdf` would 404 the non-PDF documents. The rewrite is
+ * bounded to legitimate DOCUMENT payload extensions (`DOC_EXTS`): immo-internal
+ * artifacts written under the same prefix (extracted text `.txt`, index `.html`,
+ * unknown-type `.bin`) are deliberately NOT mapped — they return `null` here and
+ * keep resolving on the immo legacy stores rather than 404-ing against a geo key
+ * that does not exist.
  *
  * Contract, enforced by the regexes below:
- *  - `raw/proces-verbaux-<city>/cas/<64-hex>.pdf` → `raw/pv-index/cas/<64-hex>.pdf`
- *  - an already-geo key `raw/pv-index/cas/<64-hex>.pdf` maps to itself (idempotent)
- *  - anything else (non-PV source, non-`.pdf`, `.meta.json` sidecar, non-64-hex or
- *    uppercase sha, empty city, nested/traversal path) returns `null` — the mapper
- *    NEVER fabricates a geo key it cannot derive from the exact CAS contract.
+ *  - `raw/proces-verbaux-<city>/cas/<64-hex>.<docext>` → `raw/pv-index/cas/<64-hex>.<docext>`
+ *  - an already-geo key `raw/pv-index/cas/<64-hex>.<docext>` maps to itself (idempotent)
+ *  - anything else (non-PV source, non-document ext, `.meta.json` sidecar,
+ *    non-64-hex or uppercase sha, empty city, nested/traversal path) returns
+ *    `null` — the mapper NEVER fabricates a geo key it cannot derive from the
+ *    exact CAS contract.
+ *
+ * KNOWN GAP (docx): immo derives its key extension from the fetched content-type
+ * via `extForContentType`, which has NO docx case — a `.docx` PV is therefore
+ * keyed `<sha>.bin` (direct download) or `<sha>.html` (Office-viewer entry) in
+ * immo, NOT `<sha>.docx`. geo keys the same document by its REAL extension
+ * (`<sha>.docx`). A pure key rewrite cannot bridge that: `.bin`/`.html` are not
+ * document exts here, so those PVs stay on immo (no 404). Fully repointing docx
+ * needs the extension conventions aligned at the data layer (immo emitting the
+ * real ext, or the resolver recovering it from the doc), which is out of scope
+ * for an O(1) key rewrite.
  */
 const GEO_PV_CAS_PREFIX = "raw/pv-index/cas/";
-/** A content-addressed PV object: lowercase sha256 hex + the `.pdf` extension. */
-const CAS_PDF = "([a-f0-9]{64}\\.pdf)";
-/** An immo PV CAS key: `raw/proces-verbaux-<city-slug>/cas/<sha>.pdf`. */
+/**
+ * Legitimate document payload extensions geo mirrors by their REAL file type.
+ * PDFs are the majority; docx/doc/odt/rtf cover the office-document PVs. NOT
+ * included: `.bin`/`.html`/`.txt`/`.json`/`.xml` — those are immo-internal or
+ * intermediate artifacts, never a geo `raw/pv-index/cas/` document.
+ */
+const DOC_EXTS = "pdf|docx|doc|odt|rtf";
+/** A content-addressed document object: lowercase sha256 hex + a document ext. */
+const CAS_DOC = `([a-f0-9]{64}\\.(?:${DOC_EXTS}))`;
+/** An immo PV CAS key: `raw/proces-verbaux-<city-slug>/cas/<sha>.<docext>`. */
 const IMMO_PV_CAS_KEY = new RegExp(
-  `^raw/proces-verbaux-[a-z0-9]+(?:-[a-z0-9]+)*/cas/${CAS_PDF}$`,
+  `^raw/proces-verbaux-[a-z0-9]+(?:-[a-z0-9]+)*/cas/${CAS_DOC}$`,
 );
-/** An already-canonical geo PV CAS key: `raw/pv-index/cas/<sha>.pdf`. */
-const GEO_PV_CAS_KEY = new RegExp(`^${GEO_PV_CAS_PREFIX}${CAS_PDF}$`);
+/** An already-canonical geo PV CAS key: `raw/pv-index/cas/<sha>.<docext>`. */
+const GEO_PV_CAS_KEY = new RegExp(`^${GEO_PV_CAS_PREFIX}${CAS_DOC}$`);
 
 export function mapToGeoKey(key: string): string | null {
   if (GEO_PV_CAS_KEY.test(key)) return key; // idempotent: already a geo key
   const match = IMMO_PV_CAS_KEY.exec(key);
+  // match[1] is the verbatim `<64-hex>.<ext>` tail of the immo key: the sha and
+  // the real extension are copied across unchanged (no `sha256:` prefix added).
   return match?.[1] ? `${GEO_PV_CAS_PREFIX}${match[1]}` : null;
 }
 

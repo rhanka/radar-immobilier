@@ -234,6 +234,58 @@ describe("GET /api/documents/raw", () => {
     expect(geoHead).not.toHaveBeenCalled();
   });
 
+  it("flag ON: serves a mapped .docx PV STRICTLY from geo, preserving the extension", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    const immoDocxKey = `raw/proces-verbaux-ange-gardien/cas/${REPOINT_SHA}.docx`;
+    const geoDocxKey = `raw/pv-index/cas/${REPOINT_SHA}.docx`;
+    await geoDocumentsReader.put(geoDocxKey, "geo docx bytes", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    const geoGet = vi.spyOn(geoDocumentsReader, "get");
+    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(immoDocxKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("geo docx bytes");
+    expect(geoGet).toHaveBeenCalledWith(geoDocxKey);
+    expect(scrapeHead).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: an immo-internal artifact ext (docx stored as .bin) is NOT repointed — served from immo, never 404'd on geo", async () => {
+    // KNOWN GAP: immo keys a docx PV as `<sha>.bin` (extForContentType has no docx
+    // case), so it is not a geo document ext → mapToGeoKey returns null and the
+    // resolver falls through to the immo legacy stores rather than missing on geo.
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    const immoBinKey = `raw/proces-verbaux-ange-gardien/cas/${REPOINT_SHA}.bin`;
+    await scrapeStore.put(immoBinKey, "immo docx-as-bin bytes", "application/octet-stream");
+    const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(immoBinKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("immo docx-as-bin bytes");
+    expect(geoHead).not.toHaveBeenCalled();
+  });
+
   it("refuses to build the route when repoint is on but no geo reader is wired", () => {
     expect(() =>
       documentsRoute({
