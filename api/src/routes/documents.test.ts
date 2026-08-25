@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 
 import { documentsRoute } from "./documents.js";
@@ -132,5 +132,115 @@ describe("GET /api/documents/raw", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("application/pdf");
     expect(await res.text()).toBe("%PDF-1.4");
+  });
+
+  // ── immo→geo repoint (zero-copy, read-only) ─────────────────────────────
+  const REPOINT_SHA = "b".repeat(64);
+  const IMMO_PV_KEY = `raw/proces-verbaux-saint-frederic/cas/${REPOINT_SHA}.pdf`;
+  const GEO_PV_KEY = `raw/pv-index/cas/${REPOINT_SHA}.pdf`;
+
+  it("flag OFF: serves the PV from the immo scrape store and never touches geo", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    await scrapeStore.put(IMMO_PV_KEY, "immo bytes", "application/pdf");
+    await geoDocumentsReader.put(GEO_PV_KEY, "geo bytes", "application/pdf");
+    const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: false,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("immo bytes");
+    expect(geoHead).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: serves a mapped PV STRICTLY from geo, never reading the immo stores", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    // Stale immo copy present — must be ignored once the cutover is on.
+    await scrapeStore.put(IMMO_PV_KEY, "stale immo bytes", "application/pdf");
+    await geoDocumentsReader.put(GEO_PV_KEY, "geo bytes", "application/pdf");
+    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    const mainHead = vi.spyOn(store, "head");
+    const geoGet = vi.spyOn(geoDocumentsReader, "get");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("geo bytes");
+    expect(geoGet).toHaveBeenCalledWith(GEO_PV_KEY);
+    expect(scrapeHead).not.toHaveBeenCalled();
+    expect(mainHead).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: a geo miss is a 404 with NO fallback to the stale immo copy", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    await scrapeStore.put(IMMO_PV_KEY, "stale immo bytes", "application/pdf");
+    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(404);
+    expect(scrapeHead).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: an unmapped (non-PV) key still resolves via the legacy immo stores", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    const nonPvKey = `raw/avis-publics-testville/cas/${REPOINT_SHA}.pdf`;
+    await scrapeStore.put(nonPvKey, "legacy bytes", "application/pdf");
+    const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(nonPvKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("legacy bytes");
+    expect(geoHead).not.toHaveBeenCalled();
+  });
+
+  it("refuses to build the route when repoint is on but no geo reader is wired", () => {
+    expect(() =>
+      documentsRoute({
+        store: new MemoryStore(),
+        scrapeStore: new MemoryStore(),
+        geoDocumentsRepoint: true,
+      }),
+    ).toThrow(/geoDocumentsReader is required/);
   });
 });

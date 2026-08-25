@@ -16,6 +16,7 @@ import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 import {
   findDocumentMetadata,
   loadDocumentMetadata,
+  mapToGeoKey,
   resolveRawContentType,
 } from "./document-resolver.js";
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
@@ -65,6 +66,54 @@ async function seedRecord(store: MemoryStore) {
   await store.put(rawMetaKey(record.storageKey), JSON.stringify(record));
   return record;
 }
+
+// ── immo→geo repoint: pure O(1) CAS-key rewrite (NEVER a bucket scan) ──────
+describe("mapToGeoKey", () => {
+  const sha = "a".repeat(64);
+
+  it.each([
+    "plaisance",
+    "saint-frederic",
+    "salaberry-de-valleyfield",
+    "sainte-catherine-de-la-jacques-cartier",
+    "quebec",
+  ])(
+    "rewrites the immo PV CAS prefix for %s to the geo key, carrying the sha unchanged",
+    (city) => {
+      expect(mapToGeoKey(`raw/proces-verbaux-${city}/cas/${sha}.pdf`)).toBe(
+        `raw/pv-index/cas/${sha}.pdf`,
+      );
+    },
+  );
+
+  it("is idempotent: an already-geo key maps to itself", () => {
+    const geoKey = `raw/pv-index/cas/${sha}.pdf`;
+    expect(mapToGeoKey(geoKey)).toBe(geoKey);
+  });
+
+  it.each([
+    // non-PV source — not covered by the PV CAS contract
+    ["non-PV source", `raw/avis-publics-testville/cas/${sha}.pdf`],
+    // sha too short / not 64 hex
+    ["short sha", "raw/proces-verbaux-testville/cas/deadbeef.pdf"],
+    // uppercase hex is not a canonical CAS digest
+    ["uppercase sha", `raw/proces-verbaux-testville/cas/${"A".repeat(64)}.pdf`],
+    // wrong extension casing
+    ["uppercase extension", `raw/proces-verbaux-testville/cas/${sha}.PDF`],
+    // metadata sidecar, never the served payload
+    ["meta sidecar", `raw/proces-verbaux-testville/cas/${sha}.pdf.meta.json`],
+    // empty city segment
+    ["empty city", `raw/proces-verbaux-/cas/${sha}.pdf`],
+    // nested path under cas/
+    ["nested path", `raw/proces-verbaux-testville/cas/nested/${sha}.pdf`],
+    // traversal attempt
+    ["traversal", `raw/proces-verbaux-testville/cas/../${sha}.pdf`],
+    // not even a raw/ key
+    ["non-raw key", `proces-verbaux-testville/cas/${sha}.pdf`],
+  ])("does not fabricate a geo key for a %s (returns null)", (_label, key) => {
+    expect(mapToGeoKey(key)).toBeNull();
+  });
+});
 
 describe("findDocumentMetadata", () => {
   it("resolves metadata by rawRef when the .meta.json is present (nominal path unchanged)", async () => {
