@@ -54,9 +54,6 @@
     rawRef?: string | null;
     page?: number | null;
   }) => void = () => {};
-  // Recherche intra-ville unifiée (zones + lots) — passe-plat du callback pour
-  // que les tests observent la clé de sélection remontée.
-  export let onSearchSelect: (key: SelectionKey) => void = () => {};
 
   function handleLotFilterChange(next: EvalLotFilter): void {
     lotFilter = next;
@@ -70,7 +67,10 @@
     zoneMillesimeFilter = next;
   }
 
-  // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic).
+  // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic). Le guard R1
+  // (lot sélectionnable seulement si sa zone est active) vit côté prod dans
+  // `resolveLotListClickR1` (geo-level-navigation) et est couvert par son test
+  // unitaire (chemin de prod) ; ce mirror garde la logique focus/sélection.
   function toggleBucketKey(key: SelectionKey): void {
     const isFocused = selectionState.focusedKey === key;
     if (isFocused) {
@@ -100,5 +100,4 @@
   onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
   onToggleKey={toggleBucketKey}
   {onOpenSource}
-  {onSearchSelect}
 />
