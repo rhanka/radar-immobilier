@@ -1232,4 +1232,51 @@ describe("SignauxSelPanel — recherche par section zone/lot", () => {
     expect(labelsFor(container, "lot")).toEqual([]);
     expect(getByTestId("lot-search-empty")).toBeTruthy();
   });
+
+  it("F1 — la recherche lot trouve un lot AU-DELÀ du cap DOM (jamais bornée par le cap)", async () => {
+    // 85 lots > cap DOM (80) : le 85e n'est PAS rendu hors recherche, mais la
+    // recherche DOIT le trouver — le cap ne s'applique qu'à l'AFFICHAGE, jamais
+    // à la recherche (régression corrigée + parité villes/P02).
+    const many = Array.from({ length: 85 }, (_, i) => makeLot(String(5000 + i)));
+    const { getByTestId, container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315"]),
+        lotsResponse: makeLotsResponse(many),
+      },
+    });
+    // Hors recherche : liste plafonnée → le 85e lot (5084) n'est PAS rendu.
+    expect(labelsFor(container, "lot")).not.toContain("5084");
+    expect(labelsFor(container, "lot").length).toBeLessThanOrEqual(80);
+    // Recherche : le lot au-delà du cap est trouvé.
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "5084" } });
+    expect(labelsFor(container, "lot")).toContain("5084");
+  });
+
+  it("clic sur un résultat de recherche lot (zone active) → déplie la fiche du lot", async () => {
+    // La recherche par section ne surface PAS un dropdown : elle filtre la LISTE ;
+    // cliquer un résultat = cliquer la ligne du lot (sélection existante). Avec la
+    // zone active (précondition R1 de prod), le clic sélectionne → fiche inline.
+    const { getByTestId, getByText, container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315"]),
+        lotsResponse: makeLotsResponse([
+          makeLot("5399042", {
+            zoneCode: "H-315",
+            adresse: "10 rue Principale",
+            superficieM2: 850.4,
+          }),
+          makeLot("6100001", { zoneCode: "H-315" }),
+        ]),
+        selectionState: zoneFocusState("H-315"),
+      },
+    });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "5399042" } });
+    expect(labelsFor(container, "lot")).toEqual(["5399042"]);
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+    expect(getByTestId("sel-lot-drawer")).toBeTruthy();
+  });
 });

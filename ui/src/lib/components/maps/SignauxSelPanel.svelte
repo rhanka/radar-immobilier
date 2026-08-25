@@ -439,10 +439,12 @@
     const sep = parsed.id.indexOf("/");
     return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
   })();
-  // Cap DOM à 80 fiches, mais le lot FOCUSÉ (clic carte, C4) est TOUJOURS
-  // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
-  // sur un lot estompé de la carte), il est remonté en tête de liste — la
-  // sélection carte → fiche n'est jamais cassée par un filtre.
+  // Plafond DOM de la liste lots de NAVIGATION : le lot FOCUSÉ reste TOUJOURS
+  // rendu (s'il dépasse le cap OU est écarté par le filtre lots, il est remonté
+  // en tête — la sélection carte → fiche n'est jamais cassée par un filtre). La
+  // RECHERCHE lot n'est PAS bornée par ce cap (couverture P02, cf. plus bas :
+  // elle porte sur l'ensemble complet, le cap ne s'applique qu'à l'affichage).
+  const LOT_LIST_CAP = 80;
   $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, zoneScopedLots);
 
   function ensureFocusedLotVisible(
@@ -450,7 +452,7 @@
     noLot: string | null,
     lookup: LotFeature[] = shown,
   ): LotFeature[] {
-    const capped = shown.slice(0, 80);
+    const capped = shown.slice(0, LOT_LIST_CAP);
     if (!noLot || capped.some((lot) => lot.properties.noLot === noLot)) {
       return capped;
     }
@@ -533,32 +535,43 @@
   // ── Recherche PAR SECTION (façon rail villes gauche) ───────────────────────
   // Chaque section (Zones, Lots) porte SON PROPRE champ DS Search en tête,
   // filtrant UNIQUEMENT sa liste — parité stricte avec le rail villes
-  // (filterRailCityItems). Moteur mutualisé entity-search (rankBySearch) :
-  // requête vide → liste INCHANGÉE (ordre/cap métier préservé) ; sinon filtre +
-  // classe par pertinence. Cliquer une ligne conserve le comportement de
-  // sélection existant du panneau (toggleEntity → focus/caméra) ; aucune clé
-  // n'est remontée séparément. Consomme les zones/lots DÉJÀ chargés côté client
-  // — aucune ré-extraction géo.
+  // (filterRailCityItems). Moteur mutualisé entity-search (rankBySearch).
+  //
+  // COUVERTURE (P02) : la recherche porte sur l'ensemble COMPLET de la ville,
+  // JAMAIS le sous-ensemble affiché (plafonné/filtré). Sinon un lot au-delà du
+  // cap DOM (LOT_LIST_CAP) ou une zone écartée par un filtre serait introuvable
+  // — la recherche ne doit rien cacher que la liste peut montrer (parité villes ;
+  // parité aussi avec l'ancienne recherche unifiée, qui classait zones/lots
+  // complets). Base zones = TOUTES les zones de la ville ; base lots = lots de la
+  // zone focusée si une zone est active, sinon TOUS les lots. L'AFFICHAGE des
+  // résultats lot est plafonné APRÈS le ranking (jamais la recherche).
+  // Requête vide → liste de NAVIGATION inchangée (visibleZones/visibleLots).
+  // Cliquer une ligne conserve le comportement de sélection existant du panneau
+  // (toggleEntity → focus/caméra) ; aucune clé n'est remontée séparément.
   //
   // SCOPE : intra-ville UNIQUEMENT. La recherche CROSS-VILLE (taper un n° de lot
   // et sauter vers la ville qui le porte) est HORS scope — elle nécessite un
   // index global lot/zone que geo ne sert pas encore (évolution geo aval).
   let zoneSearchQuery = "";
   let lotSearchQuery = "";
+  $: zoneSearchActive = zoneSearchQuery.trim().length > 0;
   $: lotSearchActive = lotSearchQuery.trim().length > 0;
 
-  // Listes RENDUES = listes visibles (post-filtres métier) filtrées par la
-  // recherche de LEUR section : zone → code (+ label en sous-libellé),
-  // lot → n° (+ adresse en sous-libellé). Requête vide → liste inchangée
-  // (rankBySearch renvoie `visibleZones`/`visibleLots` tels quels).
-  $: displayedZones = rankBySearch(visibleZones, zoneSearchQuery, (zone) => ({
-    text: zone.properties.code,
-    subtext: zone.properties.label ?? null,
-  }));
-  $: displayedLots = rankBySearch(visibleLots, lotSearchQuery, (lot) => ({
-    text: lot.properties.noLot,
-    subtext: lot.properties.adresse ?? null,
-  }));
+  $: displayedZones = zoneSearchActive
+    ? rankBySearch(zones, zoneSearchQuery, (zone) => ({
+        text: zone.properties.code,
+        subtext: zone.properties.label ?? null,
+      }))
+    : visibleZones;
+  // Base de la recherche lot = ensemble complet (jamais plafonné) : lots de la
+  // zone focusée si une zone est active, sinon tous les lots de la ville.
+  $: lotSearchScope = focusedZoneCode ? zoneScopedLots : lots;
+  $: displayedLots = lotSearchActive
+    ? rankBySearch(lotSearchScope, lotSearchQuery, (lot) => ({
+        text: lot.properties.noLot,
+        subtext: lot.properties.adresse ?? null,
+      })).slice(0, LOT_LIST_CAP)
+    : visibleLots;
 
   // `state` is passed explicitly (not read from the closure) so that
   // `selectionState` appears textually in each `{@const … = visual(selectionState, key)}`
