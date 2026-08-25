@@ -1,9 +1,43 @@
 import { RawDocumentRecordSchema, rawMetaKey } from "@radar/sources";
 
-import type { ObjectStore } from "../../storage/object-store.js";
+import type { ObjectReader } from "../../storage/object-store.js";
 
 const RAW_PREFIX = "raw/";
 const META_SUFFIX = ".meta.json";
+
+/**
+ * immo→geo document repoint — pure, O(1) CAS-key prefix rewrite (NO bucket scan).
+ *
+ * The immo RECUEIL pipeline stores each procès-verbal PDF under a content-addressed
+ * key `raw/proces-verbaux-<city>/cas/<sha256>.pdf`. geo holds the byte-identical
+ * document under `raw/pv-index/cas/<sha256>.pdf` — same sha256 (both keys are the
+ * sha256 of the exact same bytes), so the map is a single prefix rewrite that
+ * carries the hash across unchanged. It is a string operation with constant cost:
+ * NEVER a `list`/scan of the bucket (that unbounded fallback caused the "signal API
+ * never responds" incident — see findDocumentMetadata below).
+ *
+ * Contract, enforced by the regexes below:
+ *  - `raw/proces-verbaux-<city>/cas/<64-hex>.pdf` → `raw/pv-index/cas/<64-hex>.pdf`
+ *  - an already-geo key `raw/pv-index/cas/<64-hex>.pdf` maps to itself (idempotent)
+ *  - anything else (non-PV source, non-`.pdf`, `.meta.json` sidecar, non-64-hex or
+ *    uppercase sha, empty city, nested/traversal path) returns `null` — the mapper
+ *    NEVER fabricates a geo key it cannot derive from the exact CAS contract.
+ */
+const GEO_PV_CAS_PREFIX = "raw/pv-index/cas/";
+/** A content-addressed PV object: lowercase sha256 hex + the `.pdf` extension. */
+const CAS_PDF = "([a-f0-9]{64}\\.pdf)";
+/** An immo PV CAS key: `raw/proces-verbaux-<city-slug>/cas/<sha>.pdf`. */
+const IMMO_PV_CAS_KEY = new RegExp(
+  `^raw/proces-verbaux-[a-z0-9]+(?:-[a-z0-9]+)*/cas/${CAS_PDF}$`,
+);
+/** An already-canonical geo PV CAS key: `raw/pv-index/cas/<sha>.pdf`. */
+const GEO_PV_CAS_KEY = new RegExp(`^${GEO_PV_CAS_PREFIX}${CAS_PDF}$`);
+
+export function mapToGeoKey(key: string): string | null {
+  if (GEO_PV_CAS_KEY.test(key)) return key; // idempotent: already a geo key
+  const match = IMMO_PV_CAS_KEY.exec(key);
+  return match?.[1] ? `${GEO_PV_CAS_PREFIX}${match[1]}` : null;
+}
 
 export interface DocumentMetadata {
   readonly rawRef: string;
@@ -48,7 +82,7 @@ export function apiDocumentUrl(rawRef: string): string {
 }
 
 export async function loadDocumentMetadata(
-  store: ObjectStore,
+  store: ObjectReader,
   rawRef: string,
 ): Promise<DocumentMetadata | null> {
   const normalizedRawRef = normalizeRawRef(rawRef);
@@ -91,7 +125,7 @@ export async function loadDocumentMetadata(
  * deliberately NOT used as a lookup key anymore.
  */
 export async function findDocumentMetadata(
-  store: ObjectStore,
+  store: ObjectReader,
   params: { rawRef?: string; docSha?: string },
 ): Promise<DocumentMetadata | null> {
   if (!params.rawRef) return null;
@@ -99,7 +133,7 @@ export async function findDocumentMetadata(
 }
 
 export async function resolveRawContentType(
-  store: ObjectStore,
+  store: ObjectReader,
   rawRef: string,
 ): Promise<string> {
   const head = await store.head(rawRef);
