@@ -30,6 +30,11 @@
  *   → stdout : "N signaux · M villes", les 5 ancres, puis la liste de slugs triée.
  *   Sort en code 2 si les 5 ancres ne matchent PAS (garde anti-dérive : la fidélité est vérifiée, pas supposée).
  */
+/* eslint-disable @typescript-eslint/no-explicit-any --
+ * Script de reproduction : pont entre les enregistrements NDJSON dynamiques du dump et les
+ * fonctions de production typées. Les `any` sont exactement la frontière JSON→fonction-typée
+ * (cast au bord). Le comportement est vérifié par ancres (sort en code 2 si mismatch), donc on
+ * ne re-dérive pas les types structurels ici ; typecheck reste vert. */
 import { readFileSync } from "node:fs";
 import { classifyVivierSignal } from "../../api/src/services/graph/vivier-v2.ts";
 import { projectComposedVivierB, DEFAULT_B_AXES } from "../../ui/src/lib/signals/vivier-view-mode.ts";

@@ -19,6 +19,10 @@
 | **127** | **reproduction** de ce rail depuis le dump 2026-08-06 (dates nulles gardées) — **+3 vs owner** = vintage dump 4 j + `now` exact du screenshot ; **5/5 ancres OK** | ✅ ce fichier |
 | **167** | `set-167-bprime.tsv` — cohorte **palier/PV** autoritaire, dans `main` | ✅ (main) |
 
+> ℹ️ **`now=2026-08-10`** (dans le TSV/METHOD) = **paramètre NOW délibéré** de la reproduction (la borne
+> de fenêtre du screenshot owner), PAS un timestamp de génération ni un skew d'horloge. C'est le `now`
+> passé en argument pour rejouer la fenêtre 6-mois telle que l'owner la voyait.
+
 Le **124 exact** n'existe sur aucun artefact committé (seulement compte + 5 ancres). Si une décision exige
 la liste-124 exacte → **escalade owner** (export UI authentifiée, ou ratification de ce 127-repro comme proxy
 accepté). geo-cond n'en a PAS besoin pour Model A L1 (qui se key sur set-167).
