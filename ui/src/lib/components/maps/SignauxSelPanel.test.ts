@@ -18,7 +18,6 @@ import {
   createSelectionBucketState,
   makeKey,
   type SelectionBucketState,
-  type SelectionKey,
 } from "$lib/maps/selection-bucket.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
@@ -1161,110 +1160,123 @@ describe("SignauxSelPanel — item 3 : fiche lot inline (drawer sous la ligne)",
   });
 });
 
-// ── Recherche INTRA-VILLE unifiée zone/lot (haut du panneau droit) ────────────
-// Un seul champ DS Search scope à la ville active : classe zones (code) + lots
-// (noLot) dans une liste combinée ; sélectionner une ligne remonte la clé au
-// parent (onSearchSelect) qui surface le hit sur la carte. Scope intra-ville
-// uniquement (cross-ville = HORS scope, cf. commentaire composant).
+// ── Recherche PAR SECTION zone / lot (façon rail villes) ──────────────────────
+// Chaque section (Zones, Lots) porte SON PROPRE champ DS Search en tête, filtrant
+// UNIQUEMENT sa liste (parité stricte avec le rail villes / filterRailCityItems).
+// Cliquer une ligne conserve le comportement de sélection existant du panneau
+// (aucun onSearchSelect). Scope intra-ville (cross-ville = HORS scope).
 
-describe("SignauxSelPanel — recherche unifiée zone/lot intra-ville", () => {
+describe("SignauxSelPanel — recherche par section zone/lot", () => {
   const zones = makeZonesResponse(["H-315", "C-186"]);
   const searchLots = makeLotsResponse([
     makeLot("5399042", { adresse: "10 rue Principale" }),
     makeLot("6100001", { adresse: "5 avenue des Pins" }),
   ]);
+  const baseProps = () => ({
+    selectedCity: makeCity(),
+    detailNodes: [],
+    zonesResponse: zones,
+    lotsResponse: searchLots,
+  });
+  // Libellés des LIGNES rendues, par section (clé d'entité préfixée zone:/lot:).
+  const labelsFor = (c: HTMLElement, kind: "zone" | "lot") =>
+    Array.from(
+      c.querySelectorAll<HTMLElement>(`[data-entity-key^="${kind}:"] .sel-entity-label`),
+    ).map((el) => el.textContent?.trim());
 
-  it("ville sélectionnée → le champ de recherche est rendu", () => {
-    const { getByTestId } = render(Harness, {
-      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones, lotsResponse: searchLots },
-    });
-    expect(getByTestId("lot-zone-search-input")).toBeTruthy();
+  it("chaque section rend son propre champ de recherche (zone ET lot)", () => {
+    const { getByTestId } = render(Harness, { props: baseProps() });
+    expect(getByTestId("zone-search-input")).toBeTruthy();
+    expect(getByTestId("lot-search-input")).toBeTruthy();
   });
 
-  it("requête vide → aucune liste de résultats parasites", () => {
-    const { queryByTestId } = render(Harness, {
-      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones, lotsResponse: searchLots },
-    });
-    expect(queryByTestId("lot-zone-search-results")).toBeNull();
+  it("requête vide → les deux listes complètes (aucun filtrage parasite)", () => {
+    const { container } = render(Harness, { props: baseProps() });
+    expect(labelsFor(container, "zone")).toEqual(["H-315", "C-186"]);
+    expect(labelsFor(container, "lot")).toEqual(["5399042", "6100001"]);
   });
 
-  it("taper un code de zone (H-31) classe/affiche la zone correspondante", async () => {
-    const { getByTestId, getAllByTestId } = render(Harness, {
-      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones, lotsResponse: searchLots },
-    });
-    await fireEvent.input(getByTestId("lot-zone-search-input"), {
-      target: { value: "H-31" },
-    });
-    const rows = getAllByTestId("lot-zone-search-row");
-    expect(rows).toHaveLength(1);
-    expect(rows[0]!.getAttribute("data-kind")).toBe("zone");
-    expect(rows[0]!.textContent).toContain("H-315");
+  it("recherche ZONE (H-31) filtre UNIQUEMENT la liste des zones", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("zone-search-input"), { target: { value: "H-31" } });
+    expect(labelsFor(container, "zone")).toEqual(["H-315"]);
+    // Les lots restent INTACTS (la recherche zone ne touche pas leur section).
+    expect(labelsFor(container, "lot")).toEqual(["5399042", "6100001"]);
   });
 
-  it("taper un n° de lot (53990) affiche le lot correspondant (adresse en sous-libellé)", async () => {
-    const { getByTestId, getAllByTestId } = render(Harness, {
-      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones, lotsResponse: searchLots },
-    });
-    await fireEvent.input(getByTestId("lot-zone-search-input"), {
-      target: { value: "53990" },
-    });
-    const rows = getAllByTestId("lot-zone-search-row");
-    expect(rows).toHaveLength(1);
-    expect(rows[0]!.getAttribute("data-kind")).toBe("lot");
-    expect(rows[0]!.textContent).toContain("5399042");
-    expect(rows[0]!.textContent).toContain("10 rue Principale");
+  it("recherche LOT (6100) filtre UNIQUEMENT la liste des lots", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "6100" } });
+    expect(labelsFor(container, "lot")).toEqual(["6100001"]);
+    // Les zones restent INTACTES.
+    expect(labelsFor(container, "zone")).toEqual(["H-315", "C-186"]);
   });
 
-  it("sélectionner une ZONE au clavier (↓ puis Entrée) remonte makeKey(zone) + efface la requête", async () => {
-    const keys: SelectionKey[] = [];
-    const { getByTestId, queryByTestId } = render(Harness, {
+  it("recherche lot par ADRESSE (sous-libellé) — « Principale » → 5399042", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "Principale" } });
+    expect(labelsFor(container, "lot")).toEqual(["5399042"]);
+  });
+
+  it("zone sans correspondance → état vide explicite, liste lots intacte", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("zone-search-input"), { target: { value: "zzz" } });
+    expect(labelsFor(container, "zone")).toEqual([]);
+    expect(getByTestId("zone-search-empty")).toBeTruthy();
+    expect(labelsFor(container, "lot")).toEqual(["5399042", "6100001"]);
+  });
+
+  it("lot sans correspondance → état vide explicite", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "zzz" } });
+    expect(labelsFor(container, "lot")).toEqual([]);
+    expect(getByTestId("lot-search-empty")).toBeTruthy();
+  });
+
+  it("F1 — la recherche lot trouve un lot AU-DELÀ du cap DOM (jamais bornée par le cap)", async () => {
+    // 85 lots > cap DOM (80) : le 85e n'est PAS rendu hors recherche, mais la
+    // recherche DOIT le trouver — le cap ne s'applique qu'à l'AFFICHAGE, jamais
+    // à la recherche (régression corrigée + parité villes/P02).
+    const many = Array.from({ length: 85 }, (_, i) => makeLot(String(5000 + i)));
+    const { getByTestId, container } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
-        zonesResponse: zones,
-        lotsResponse: searchLots,
-        onSearchSelect: (key: SelectionKey) => keys.push(key),
+        zonesResponse: makeZonesResponse(["H-315"]),
+        lotsResponse: makeLotsResponse(many),
       },
     });
-    const input = getByTestId("lot-zone-search-input") as HTMLInputElement;
-    await fireEvent.input(input, { target: { value: "C-18" } });
-    await fireEvent.keyDown(input, { key: "ArrowDown" });
-    await fireEvent.keyDown(input, { key: "Enter" });
-
-    expect(keys).toEqual([makeKey("zone", "delson/C-186")]);
-    // La requête est effacée après sélection (dropdown refermé, champ vidé).
-    expect(input.value).toBe("");
-    expect(queryByTestId("lot-zone-search-results")).toBeNull();
+    // Hors recherche : liste plafonnée → le 85e lot (5084) n'est PAS rendu.
+    expect(labelsFor(container, "lot")).not.toContain("5084");
+    expect(labelsFor(container, "lot").length).toBeLessThanOrEqual(80);
+    // Recherche : le lot au-delà du cap est trouvé.
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "5084" } });
+    expect(labelsFor(container, "lot")).toContain("5084");
   });
 
-  it("sélectionner un LOT au clic remonte makeKey(lot) + efface la requête", async () => {
-    const keys: SelectionKey[] = [];
-    const { getByTestId, getAllByTestId, queryByTestId } = render(Harness, {
+  it("clic sur un résultat de recherche lot (zone active) → déplie la fiche du lot", async () => {
+    // La recherche par section ne surface PAS un dropdown : elle filtre la LISTE ;
+    // cliquer un résultat = cliquer la ligne du lot (sélection existante). Avec la
+    // zone active (précondition R1 de prod), le clic sélectionne → fiche inline.
+    const { getByTestId, getByText, container } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
-        zonesResponse: zones,
-        lotsResponse: searchLots,
-        onSearchSelect: (key: SelectionKey) => keys.push(key),
+        zonesResponse: makeZonesResponse(["H-315"]),
+        lotsResponse: makeLotsResponse([
+          makeLot("5399042", {
+            zoneCode: "H-315",
+            adresse: "10 rue Principale",
+            superficieM2: 850.4,
+          }),
+          makeLot("6100001", { zoneCode: "H-315" }),
+        ]),
+        selectionState: zoneFocusState("H-315"),
       },
     });
-    const input = getByTestId("lot-zone-search-input") as HTMLInputElement;
-    await fireEvent.input(input, { target: { value: "6100001" } });
-    await fireEvent.click(getAllByTestId("lot-zone-search-row")[0]!);
-
-    expect(keys).toEqual([makeKey("lot", "delson/6100001")]);
-    expect(input.value).toBe("");
-    expect(queryByTestId("lot-zone-search-results")).toBeNull();
-  });
-
-  it("requête sans correspondance → état vide honnête, aucun résultat fabriqué", async () => {
-    const { getByTestId, queryAllByTestId } = render(Harness, {
-      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones, lotsResponse: searchLots },
-    });
-    await fireEvent.input(getByTestId("lot-zone-search-input"), {
-      target: { value: "zzz-introuvable" },
-    });
-    expect(queryAllByTestId("lot-zone-search-row")).toHaveLength(0);
-    expect(getByTestId("lot-zone-search-empty")).toBeTruthy();
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "5399042" } });
+    expect(labelsFor(container, "lot")).toEqual(["5399042"]);
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+    expect(getByTestId("sel-lot-drawer")).toBeTruthy();
   });
 });

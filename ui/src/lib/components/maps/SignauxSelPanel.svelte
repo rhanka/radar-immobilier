@@ -20,11 +20,7 @@
    */
   import { tick } from "svelte";
   import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
-  import {
-    rankBySearch,
-    nextActiveIndex,
-    type SearchableText,
-  } from "$lib/maps/entity-search.js";
+  import { rankBySearch } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
   import {
@@ -155,13 +151,6 @@
     () => {};
   export let onClear: () => void = () => {};
   export let onToggleKey: (key: SelectionKey) => void = () => {};
-  /**
-   * Recherche INTRA-VILLE unifiée (zones + lots de la ville active) : remonte la
-   * clé de la ligne sélectionnée au parent, qui la SURFACE sur la carte (caméra
-   * + surlignage) — traitement DISTINCT de `onToggleKey` (le parent doit driller
-   * un lot vers sa zone active avant de le sélectionner, cf. SignauxMapView).
-   */
-  export let onSearchSelect: (key: SelectionKey) => void = () => {};
   /** « Réessayer » — recharge le détail signaux (couche panneau droit). */
   export let onRetryDetail: () => void = () => {};
   /** « Réessayer » — recharge les couches géo (zones + lots). */
@@ -450,10 +439,12 @@
     const sep = parsed.id.indexOf("/");
     return sep > 0 && sep < parsed.id.length - 1 ? parsed.id.slice(sep + 1) : null;
   })();
-  // Cap DOM à 80 fiches, mais le lot FOCUSÉ (clic carte, C4) est TOUJOURS
-  // rendu : s'il dépasse le cap OU s'il est écarté par le filtre lots (clic
-  // sur un lot estompé de la carte), il est remonté en tête de liste — la
-  // sélection carte → fiche n'est jamais cassée par un filtre.
+  // Plafond DOM de la liste lots de NAVIGATION : le lot FOCUSÉ reste TOUJOURS
+  // rendu (s'il dépasse le cap OU est écarté par le filtre lots, il est remonté
+  // en tête — la sélection carte → fiche n'est jamais cassée par un filtre). La
+  // RECHERCHE lot n'est PAS bornée par ce cap (couverture P02, cf. plus bas :
+  // elle porte sur l'ensemble complet, le cap ne s'applique qu'à l'affichage).
+  const LOT_LIST_CAP = 80;
   $: visibleLots = ensureFocusedLotVisible(evalFilteredLots, focusedLotNo, zoneScopedLots);
 
   function ensureFocusedLotVisible(
@@ -461,7 +452,7 @@
     noLot: string | null,
     lookup: LotFeature[] = shown,
   ): LotFeature[] {
-    const capped = shown.slice(0, 80);
+    const capped = shown.slice(0, LOT_LIST_CAP);
     if (!noLot || capped.some((lot) => lot.properties.noLot === noLot)) {
       return capped;
     }
@@ -541,115 +532,46 @@
     return safeKey("lot", `${citySlug}/${lot.properties.noLot}`);
   }
 
-  // ── Recherche INTRA-VILLE unifiée (zones + lots de la ville active) ─────────
-  // Un seul champ DS Search en tête de panneau : les ZONES (code, label en
-  // sous-libellé) et les LOTS (n° de lot, adresse en sous-libellé) de la ville
-  // sont projetés dans UNE liste combinée classée par pertinence (entity-search,
-  // mutualisé avec le rail villes). Sélectionner une ligne remonte sa clé au
-  // parent via `onSearchSelect` (surfaçage carte). Consomme les zones/lots DÉJÀ
-  // chargés côté client — aucune ré-extraction géo.
+  // ── Recherche PAR SECTION (façon rail villes gauche) ───────────────────────
+  // Chaque section (Zones, Lots) porte SON PROPRE champ DS Search en tête,
+  // filtrant UNIQUEMENT sa liste — parité stricte avec le rail villes
+  // (filterRailCityItems). Moteur mutualisé entity-search (rankBySearch).
+  //
+  // COUVERTURE (P02) : la recherche porte sur l'ensemble COMPLET de la ville,
+  // JAMAIS le sous-ensemble affiché (plafonné/filtré). Sinon un lot au-delà du
+  // cap DOM (LOT_LIST_CAP) ou une zone écartée par un filtre serait introuvable
+  // — la recherche ne doit rien cacher que la liste peut montrer (parité villes ;
+  // parité aussi avec l'ancienne recherche unifiée, qui classait zones/lots
+  // complets). Base zones = TOUTES les zones de la ville ; base lots = lots de la
+  // zone focusée si une zone est active, sinon TOUS les lots. L'AFFICHAGE des
+  // résultats lot est plafonné APRÈS le ranking (jamais la recherche).
+  // Requête vide → liste de NAVIGATION inchangée (visibleZones/visibleLots).
+  // Cliquer une ligne conserve le comportement de sélection existant du panneau
+  // (toggleEntity → focus/caméra) ; aucune clé n'est remontée séparément.
   //
   // SCOPE : intra-ville UNIQUEMENT. La recherche CROSS-VILLE (taper un n° de lot
   // et sauter vers la ville qui le porte) est HORS scope — elle nécessite un
   // index global lot/zone que geo ne sert pas encore (évolution geo aval).
-  type SearchEntryKind = "zone" | "lot";
-  interface SearchEntry {
-    kind: SearchEntryKind;
-    key: SelectionKey;
-    /** Libellé principal recherché (code de zone / n° de lot). */
-    label: string;
-    /** Sous-libellé (label de zone / adresse du lot), null si non servi. */
-    subtext: string | null;
-  }
+  let zoneSearchQuery = "";
+  let lotSearchQuery = "";
+  $: zoneSearchActive = zoneSearchQuery.trim().length > 0;
+  $: lotSearchActive = lotSearchQuery.trim().length > 0;
 
-  let searchQuery = "";
-  let searchActiveIndex = -1;
-  $: searchActive = searchQuery.trim().length > 0;
-
-  /**
-   * Entités recherchables de la ville active — zones PUIS lots, chacune projetée
-   * en { libellé, sous-libellé } + sa clé de sélection. Une entité sans clé
-   * constructible (id vide) est écartée (aucun résultat fabriqué).
-   */
-  $: searchEntries = buildSearchEntries(zones, lots);
-
-  function buildSearchEntries(
-    zoneList: GeoZoneFeature[],
-    lotList: LotFeature[],
-  ): SearchEntry[] {
-    const entries: SearchEntry[] = [];
-    for (const zone of zoneList) {
-      const key = zoneKey(zone);
-      if (key) {
-        entries.push({
-          kind: "zone",
-          key,
-          label: zone.properties.code,
-          subtext: zone.properties.label ?? null,
-        });
-      }
-    }
-    for (const lot of lotList) {
-      const key = lotKey(lot);
-      if (key) {
-        entries.push({
-          kind: "lot",
-          key,
-          label: lot.properties.noLot,
-          subtext: lot.properties.adresse ?? null,
-        });
-      }
-    }
-    return entries;
-  }
-
-  function searchEntryText(entry: SearchEntry): SearchableText {
-    return { text: entry.label, subtext: entry.subtext };
-  }
-
-  // Requête vide → AUCUN résultat affiché (dropdown masqué) : la liste combinée
-  // n'apparaît que sous saisie ; on ne classe donc l'ensemble que si actif.
-  $: searchResults = searchActive
-    ? rankBySearch(searchEntries, searchQuery, searchEntryText)
-    : [];
-
-  // Réinitialise l'index actif clavier dès que la requête change (un index figé
-  // pointerait une ligne écartée par la nouvelle requête).
-  let lastSearchQuery = "";
-  $: if (searchQuery !== lastSearchQuery) {
-    lastSearchQuery = searchQuery;
-    searchActiveIndex = -1;
-  }
-
-  /** Sélectionne une entrée : remonte la clé au parent, puis efface la requête. */
-  function selectSearchEntry(entry: SearchEntry): void {
-    onSearchSelect(entry.key);
-    searchQuery = "";
-    searchActiveIndex = -1;
-  }
-
-  /**
-   * Navigation clavier du champ de recherche : ↑/↓ déplacent l'index actif (en
-   * boucle via `nextActiveIndex`), Entrée sélectionne l'entrée active (jamais
-   * hors résultats), Échap efface la requête.
-   */
-  function onSearchKeydown(event: KeyboardEvent): void {
-    if (event.key === "ArrowDown") {
-      event.preventDefault();
-      searchActiveIndex = nextActiveIndex(searchActiveIndex, 1, searchResults.length);
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      searchActiveIndex = nextActiveIndex(searchActiveIndex, -1, searchResults.length);
-    } else if (event.key === "Enter") {
-      if (searchActiveIndex >= 0 && searchActiveIndex < searchResults.length) {
-        event.preventDefault();
-        selectSearchEntry(searchResults[searchActiveIndex]!);
-      }
-    } else if (event.key === "Escape") {
-      searchQuery = "";
-      searchActiveIndex = -1;
-    }
-  }
+  $: displayedZones = zoneSearchActive
+    ? rankBySearch(zones, zoneSearchQuery, (zone) => ({
+        text: zone.properties.code,
+        subtext: zone.properties.label ?? null,
+      }))
+    : visibleZones;
+  // Base de la recherche lot = ensemble complet (jamais plafonné) : lots de la
+  // zone focusée si une zone est active, sinon tous les lots de la ville.
+  $: lotSearchScope = focusedZoneCode ? zoneScopedLots : lots;
+  $: displayedLots = lotSearchActive
+    ? rankBySearch(lotSearchScope, lotSearchQuery, (lot) => ({
+        text: lot.properties.noLot,
+        subtext: lot.properties.adresse ?? null,
+      })).slice(0, LOT_LIST_CAP)
+    : visibleLots;
 
   // `state` is passed explicitly (not read from the closure) so that
   // `selectionState` appears textually in each `{@const … = visual(selectionState, key)}`
@@ -1115,57 +1037,6 @@
           </Badge>
         {/if}
       </div>
-    </div>
-
-    <!-- Recherche INTRA-VILLE unifiée (zones + lots de la ville active) — un
-         seul champ DS Search en tête de panneau. Classement mutualisé
-         (entity-search) ; sélectionner une ligne remonte sa clé au parent
-         (onSearchSelect) qui surface le hit sur la carte. HORS scope : la
-         recherche cross-ville (cf. commentaire du bloc script). -->
-    <div class="sel-search">
-      <Search
-        size="sm"
-        placeholder="Rechercher une zone ou un lot…"
-        bind:value={searchQuery}
-        aria-label="Rechercher une zone ou un lot dans la ville"
-        data-testid="lot-zone-search-input"
-        onkeydown={onSearchKeydown}
-      />
-      {#if searchActive}
-        {#if searchResults.length === 0}
-          <p class="sel-search-empty" data-testid="lot-zone-search-empty">
-            Aucune zone ni lot trouvé.
-          </p>
-        {:else}
-          <ul
-            class="sel-search-results"
-            role="listbox"
-            data-testid="lot-zone-search-results"
-          >
-            {#each searchResults as entry, index (entry.key)}
-              <li>
-                <button
-                  type="button"
-                  class="sel-search-row"
-                  class:is-active={index === searchActiveIndex}
-                  data-testid="lot-zone-search-row"
-                  data-kind={entry.kind}
-                  on:click={() => selectSearchEntry(entry)}
-                  on:mouseenter={() => (searchActiveIndex = index)}
-                >
-                  <span class="sel-search-kind sel-search-kind--{entry.kind}">
-                    {entry.kind === "zone" ? "Zone" : "Lot"}
-                  </span>
-                  <span class="sel-search-label">{entry.label}</span>
-                  {#if entry.subtext}
-                    <span class="sel-search-subtext">{entry.subtext}</span>
-                  {/if}
-                </button>
-              </li>
-            {/each}
-          </ul>
-        {/if}
-      {/if}
     </div>
 
     <!-- #3a — Panneau « Zone active » PINNÉ (miroir de « Ville active ») :
@@ -1683,10 +1554,25 @@
                   : "Aucune zone liée aux signaux du filtre actif."}
               </p>
             {:else}
+            <!-- Recherche PAR SECTION (zones) — champ DS Search en tête de la
+                 liste, filtre UNIQUEMENT les zones (façon rail villes). -->
+            <div class="sel-section-search">
+              <Search
+                size="sm"
+                placeholder="Rechercher une zone…"
+                bind:value={zoneSearchQuery}
+                aria-label="Rechercher une zone"
+                data-testid="zone-search-input"
+                class="w-full"
+              />
+            </div>
             {#if zonesResponse?.warnings.includes("lot-union-fallback-is-visual-only")}
               <p class="sel-warning">Fallback visuel : les zones sont dérivées de groupes de lots.</p>
             {/if}
-            {#each visibleZones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
+            {#if displayedZones.length === 0}
+              <p class="sel-empty" data-testid="zone-search-empty">Aucune zone trouvée.</p>
+            {:else}
+            {#each displayedZones as zone (`${zone.properties.citySlug}-${zone.properties.code}`)}
               {@const key = zoneKey(zone)}
               {#if key}
                 {@const zoneVisual = visual(selectionState, key)}
@@ -1860,6 +1746,7 @@
               {/if}
             {/each}
             {/if}
+            {/if}
           {/if}
         </div>
       </details>
@@ -1909,12 +1796,27 @@
             {#if visibleLots.length === 0}
               <p class="sel-empty">Aucun lot ne correspond aux filtres actifs.</p>
             {:else}
-            {#if hiddenLotCount > 0}
+            <!-- Recherche PAR SECTION (lots) — champ DS Search en tête de la
+                 liste, filtre UNIQUEMENT les lots (façon rail villes). -->
+            <div class="sel-section-search">
+              <Search
+                size="sm"
+                placeholder="Rechercher un lot…"
+                bind:value={lotSearchQuery}
+                aria-label="Rechercher un lot"
+                data-testid="lot-search-input"
+                class="w-full"
+              />
+            </div>
+            {#if hiddenLotCount > 0 && !lotSearchActive}
               <p class="sel-warning">
                 {formatNumber(visibleLots.length)} lots affichés sur {formatNumber(lotListTotal)} disponibles.
               </p>
             {/if}
-            {#each visibleLots as lot (lot.properties.noLot)}
+            {#if displayedLots.length === 0}
+              <p class="sel-empty" data-testid="lot-search-empty">Aucun lot trouvé.</p>
+            {:else}
+            {#each displayedLots as lot (lot.properties.noLot)}
               {@const key = lotKey(lot)}
               {#if key}
                 {@const lotVisual = visual(selectionState, key)}
@@ -2049,6 +1951,7 @@
               {/if}
             {/each}
             {/if}
+            {/if}
           {/if}
         </div>
       </details>
@@ -2174,83 +2077,10 @@
     margin: 0.15rem 0 0.45rem;
   }
 
-  /* Recherche INTRA-VILLE unifiée (zone/lot) — en tête de panneau. */
-  .sel-search {
-    padding: 0.55rem 0.85rem 0.6rem;
-    border-bottom: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    flex-shrink: 0;
-  }
-
-  .sel-search-empty {
-    margin: 0.5rem 0 0;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: var(--signaux-fs-small);
-    font-style: italic;
-  }
-
-  .sel-search-results {
-    list-style: none;
-    margin: 0.4rem 0 0;
-    padding: 0;
-    max-height: 15rem;
-    overflow-y: auto;
-    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
-    border-radius: var(--st-radius-sm, 4px);
-    background: var(--st-semantic-surface-default, #ffffff);
-  }
-
-  .sel-search-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.4rem;
-    width: 100%;
-    padding: 0.35rem 0.55rem;
-    border: 0;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    font-size: var(--signaux-fs-body);
-    color: var(--st-semantic-text-primary, #1e293b);
-  }
-
-  .sel-search-row:hover,
-  .sel-search-row.is-active {
-    background: var(--st-semantic-surface-subtle, #f1f5f9);
-  }
-
-  .sel-search-kind {
-    flex: 0 0 auto;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-size: var(--signaux-fs-overline);
-    font-weight: 700;
-    padding: 0.05rem 0.3rem;
-    border-radius: var(--st-radius-sm, 4px);
-    color: var(--st-semantic-text-secondary, #475569);
-    background: var(--st-semantic-surface-subtle, #f1f5f9);
-  }
-
-  .sel-search-kind--zone {
-    color: #0f766e;
-  }
-
-  .sel-search-kind--lot {
-    color: #1d4ed8;
-  }
-
-  .sel-search-label {
-    flex: 0 0 auto;
-    font-weight: 600;
-  }
-
-  .sel-search-subtext {
-    flex: 1 1 auto;
-    min-width: 0;
-    color: var(--st-semantic-text-muted, #94a3b8);
-    font-size: var(--signaux-fs-caption);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  /* Recherche PAR SECTION (zone/lot) — champ DS Search en tête de chaque liste
+     (miroir du champ villes du rail gauche). */
+  .sel-section-search {
+    padding: 0.5rem 0.85rem 0.55rem;
   }
 
   /* #3a — Panneau « Zone active » pinné, miroir de .sel-city-head. */
