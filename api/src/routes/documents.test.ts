@@ -371,15 +371,11 @@ describe("GET /api/documents/raw", () => {
     // not turn a served document into a 404.
     const store = new MemoryStore();
     const scrapeStore = new MemoryStore();
-    let headCalls = 0;
     const geoDocumentsReader = {
+      // Every head hits but carries no content type, so resolveRawContentType
+      // falls through to the sidecar (whose get throws below).
       async head(key: string): Promise<ObjectInfo | null> {
-        headCalls += 1;
-        // 1st head = route existence probe (hit). 2nd head = inside
-        // resolveRawContentType: report no content type so it tries the sidecar.
-        return headCalls === 1
-          ? { key, size: 8, contentType: undefined }
-          : { key, size: 8, contentType: undefined };
+        return { key, size: 8, contentType: undefined };
       },
       async get(key: string): Promise<Uint8Array> {
         // payload get succeeds; a sidecar get (.meta.json) throws NoSuchKey
@@ -403,6 +399,39 @@ describe("GET /api/documents/raw", () => {
     expect(res.status).toBe(200);
     // Content type degraded to the .pdf key extension, document still served.
     expect(res.headers.get("content-type")).toBe("application/pdf");
+  });
+
+  it("flag ON: a NON-missing content-type sidecar fault (AccessDenied) propagates, not masked as 200", async () => {
+    // The selective catch degrades only on a genuine MISS; a real fault while
+    // resolving the content type must surface (fail-loud), not be swallowed.
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = {
+      async head(key: string): Promise<ObjectInfo | null> {
+        return { key, size: 8, contentType: undefined };
+      },
+      async get(key: string): Promise<Uint8Array> {
+        if (key.endsWith(".meta.json")) {
+          throw Object.assign(new Error("denied"), {
+            name: "AccessDenied",
+            $metadata: { httpStatusCode: 403 },
+          });
+        }
+        return new TextEncoder().encode("%PDF geo");
+      },
+    };
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(500);
   });
 
   it("refuses to build the route when repoint is on but no geo reader is wired", () => {

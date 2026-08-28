@@ -66,21 +66,6 @@ const app = createApp({
   tem,
 });
 
-// Fail-closed geo cutover: verify the read-only geo bucket is actually
-// reachable at boot. A mistyped bucket / bad endpoint would otherwise surface
-// as a plain document 404 for every PV (S3 HEAD cannot always name a missing
-// bucket), silently breaking the cutover. Crash instead — k8s restarts the pod
-// and the misconfiguration is loud in the logs.
-if (geoDocumentsReader) {
-  void geoDocumentsReader.assertBucketReachable().catch((e) => {
-    logger.error(
-      { err: String(e), bucket: config.GEO_DOCUMENTS_S3_BUCKET },
-      "geo documents bucket UNREACHABLE at startup — repoint cutover cannot serve; refusing to run",
-    );
-    process.exit(1);
-  });
-}
-
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.
 void objectStore
   .ensureBucket()
