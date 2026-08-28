@@ -55,9 +55,16 @@ const GEO_PV_CAS_PREFIX = "raw/pv-index/cas/";
 const DOC_EXTS = "pdf|docx|doc|odt|rtf";
 /** A content-addressed document object: lowercase sha256 hex + a document ext. */
 const CAS_DOC = `([a-f0-9]{64}\\.(?:${DOC_EXTS}))`;
-/** An immo PV CAS key: `raw/proces-verbaux-<city-slug>/cas/<sha>.<docext>`. */
+/**
+ * An immo PV CAS key: `raw/proces-verbaux-<city-slug>/cas/<sha>.<docext>`.
+ * The city slug is a source id that joins municipality and MRC with a DOUBLE
+ * hyphen (24 real ids, e.g. `saint-stanislas--des-chenaux`,
+ * `notre-dame-du-bon-conseil--drummond--2`), so segments are separated by one
+ * OR MORE hyphens — `-+` — while start/end stay alphanumeric (no leading/
+ * trailing hyphen, no `/`, no `.` — traversal/nesting still rejected).
+ */
 const IMMO_PV_CAS_KEY = new RegExp(
-  `^raw/proces-verbaux-[a-z0-9]+(?:-[a-z0-9]+)*/cas/${CAS_DOC}$`,
+  `^raw/proces-verbaux-[a-z0-9]+(?:-+[a-z0-9]+)*/cas/${CAS_DOC}$`,
 );
 /** An already-canonical geo PV CAS key: `raw/pv-index/cas/<sha>.<docext>`. */
 const GEO_PV_CAS_KEY = new RegExp(`^${GEO_PV_CAS_PREFIX}${CAS_DOC}$`);
@@ -163,6 +170,26 @@ export async function findDocumentMetadata(
   return loadDocumentMetadata(store, params.rawRef);
 }
 
+/**
+ * Content type inferred from a CAS key's real extension. Geo `raw/pv-index/cas/`
+ * objects carry the true file type in the key but need not have an S3
+ * `Content-Type` nor a `.meta.json` sidecar, so a `.pdf` key must still be
+ * served as `application/pdf` (not `application/octet-stream`, which makes the
+ * browser download instead of inline-view the PV).
+ */
+const EXT_CONTENT_TYPE: Record<string, string> = {
+  pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  doc: "application/msword",
+  odt: "application/vnd.oasis.opendocument.text",
+  rtf: "application/rtf",
+};
+
+function contentTypeFromKey(key: string): string | undefined {
+  const ext = key.slice(key.lastIndexOf(".") + 1).toLowerCase();
+  return EXT_CONTENT_TYPE[ext];
+}
+
 export async function resolveRawContentType(
   store: ObjectReader,
   rawRef: string,
@@ -170,5 +197,9 @@ export async function resolveRawContentType(
   const head = await store.head(rawRef);
   if (head?.contentType) return head.contentType;
   const meta = await loadDocumentMetadata(store, rawRef);
-  return meta?.contentType ?? "application/octet-stream";
+  return (
+    meta?.contentType ??
+    contentTypeFromKey(rawRef) ??
+    "application/octet-stream"
+  );
 }

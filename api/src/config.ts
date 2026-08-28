@@ -283,13 +283,23 @@ export function resolveGeoDocumentsS3Config(
     if (value !== undefined) return value;
     throw new Error(`${name} is required when GEO_DOCUMENTS_REPOINT=1`);
   };
+  // force-path-style is required too: its default differs per backend (MinIO
+  // needs true, OVH virtual-hosted `sentropic-geo` needs false), so a silent
+  // default would misroute geo reads. All SIX fields fail closed.
+  const requiredBool = (name: string, value: boolean | undefined): boolean => {
+    if (value !== undefined) return value;
+    throw new Error(`${name} is required when GEO_DOCUMENTS_REPOINT=1`);
+  };
   return {
     endpoint: required("GEO_DOCUMENTS_S3_ENDPOINT", config.GEO_DOCUMENTS_S3_ENDPOINT),
     region: required("GEO_DOCUMENTS_S3_REGION", config.GEO_DOCUMENTS_S3_REGION),
     bucket: required("GEO_DOCUMENTS_S3_BUCKET", config.GEO_DOCUMENTS_S3_BUCKET),
     accessKey: required("GEO_DOCUMENTS_S3_ACCESS_KEY", config.GEO_DOCUMENTS_S3_ACCESS_KEY),
     secretKey: required("GEO_DOCUMENTS_S3_SECRET_KEY", config.GEO_DOCUMENTS_S3_SECRET_KEY),
-    forcePathStyle: config.GEO_DOCUMENTS_S3_FORCE_PATH_STYLE ?? true,
+    forcePathStyle: requiredBool(
+      "GEO_DOCUMENTS_S3_FORCE_PATH_STYLE",
+      config.GEO_DOCUMENTS_S3_FORCE_PATH_STYLE,
+    ),
   };
 }
 

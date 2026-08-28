@@ -86,6 +86,25 @@ describe("mapToGeoKey", () => {
     },
   );
 
+  // City source ids join municipality and MRC with a DOUBLE hyphen (24 real
+  // ids). These MUST repoint too — rejecting them silently keeps 24 cities
+  // (incl. saint-stanislas--des-chenaux, a UAT city) served from immo at
+  // REPOINT=1, making the cutover silently partial.
+  it.each([
+    "saint-stanislas--des-chenaux",
+    "bedford--brome-missisquoi",
+    "notre-dame-du-bon-conseil--drummond--2",
+    "stanstead--memphremagog--2",
+    "valcourt--le-val-saint-francois",
+  ])(
+    "repoints a double-hyphen municipality--MRC slug (%s)",
+    (city) => {
+      expect(mapToGeoKey(`raw/proces-verbaux-${city}/cas/${sha}.pdf`)).toBe(
+        `raw/pv-index/cas/${sha}.pdf`,
+      );
+    },
+  );
+
   // Extension is PRESERVED, not forced to `.pdf`: geo keys the real file type.
   it.each(["pdf", "docx", "doc", "odt", "rtf"])(
     "preserves the real .%s extension across the rewrite",
@@ -128,6 +147,10 @@ describe("mapToGeoKey", () => {
     ["meta sidecar", `raw/proces-verbaux-testville/cas/${sha}.pdf.meta.json`],
     // empty city segment
     ["empty city", `raw/proces-verbaux-/cas/${sha}.pdf`],
+    // the double-hyphen relaxation must NOT accept a leading/trailing hyphen
+    // (start/end stay alphanumeric — no slug looks like this)
+    ["leading-hyphen city", `raw/proces-verbaux--testville/cas/${sha}.pdf`],
+    ["trailing-hyphen city", `raw/proces-verbaux-testville-/cas/${sha}.pdf`],
     // nested path under cas/
     ["nested path", `raw/proces-verbaux-testville/cas/nested/${sha}.pdf`],
     // traversal attempt
@@ -229,10 +252,23 @@ describe("resolveRawContentType", () => {
     expect(await resolveRawContentType(store, record.storageKey)).toBe("application/pdf");
   });
 
-  it("degrades to application/octet-stream when nothing is known", async () => {
+  it("infers the content type from a known extension when head+meta are silent (geo CAS has no sidecar)", async () => {
+    const store = new MemoryStore();
+    // A geo raw/pv-index/cas/<sha>.pdf that has neither an S3 Content-Type nor a
+    // .meta.json sidecar must still serve as application/pdf so the browser
+    // inline-views the PV instead of downloading an octet-stream.
+    const geoPdf = `raw/pv-index/cas/${"a".repeat(64)}.pdf`;
+    expect(await resolveRawContentType(store, geoPdf)).toBe("application/pdf");
+    const geoDocx = `raw/pv-index/cas/${"a".repeat(64)}.docx`;
+    expect(await resolveRawContentType(store, geoDocx)).toBe(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+  });
+
+  it("degrades to application/octet-stream when nothing is known and the ext is unrecognized", async () => {
     const store = new MemoryStore();
 
-    expect(await resolveRawContentType(store, "raw/unknown/cas/na.pdf")).toBe(
+    expect(await resolveRawContentType(store, "raw/unknown/cas/na.xyz")).toBe(
       "application/octet-stream",
     );
   });

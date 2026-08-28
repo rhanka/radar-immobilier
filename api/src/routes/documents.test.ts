@@ -286,6 +286,85 @@ describe("GET /api/documents/raw", () => {
     expect(geoHead).not.toHaveBeenCalled();
   });
 
+  it("flag ON: a double-hyphen municipality--MRC PV (saint-stanislas--des-chenaux) repoints to geo", async () => {
+    // Regression for the silent-partial-cutover defect: 24 real source ids join
+    // municipality and MRC with `--`. Before the fix mapToGeoKey returned null
+    // for these and they were served from immo even at REPOINT=1.
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    const immoKey = `raw/proces-verbaux-saint-stanislas--des-chenaux/cas/${REPOINT_SHA}.pdf`;
+    const geoKey = `raw/pv-index/cas/${REPOINT_SHA}.pdf`;
+    await geoDocumentsReader.put(geoKey, "geo bytes", "application/pdf");
+    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(immoKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("geo bytes");
+    expect(scrapeHead).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: a geo PV with no stored Content-Type is served as application/pdf from its .pdf key", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    // put WITHOUT a content type → head().contentType is undefined and there is
+    // no .meta.json sidecar; the .pdf extension must still drive the header.
+    await geoDocumentsReader.put(GEO_PV_KEY, "%PDF geo");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+  });
+
+  it("flag ON: an object that vanishes between HEAD and GET is a 404, not a 500", async () => {
+    // TOCTOU on an otherwise immutable CAS object: head confirms, then get finds
+    // it gone. That is a genuine document_not_found, not an internal error.
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = {
+      async head(key: string): Promise<ObjectInfo | null> {
+        return { key, size: 8, contentType: "application/pdf" };
+      },
+      async get(key: string): Promise<Uint8Array> {
+        throw Object.assign(new Error(`gone ${key}`), { name: "NoSuchKey" });
+      },
+    };
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(404);
+    await expect(res.json()).resolves.toMatchObject({
+      error: "document_not_found",
+    });
+  });
+
   it("refuses to build the route when repoint is on but no geo reader is wired", () => {
     expect(() =>
       documentsRoute({
