@@ -196,7 +196,10 @@ export async function resolveRawContentType(
 ): Promise<string> {
   const head = await store.head(rawRef);
   if (head?.contentType) return head.contentType;
-  const meta = await loadDocumentMetadata(store, rawRef);
+  // A sidecar that vanishes between its own head and get (TOCTOU) must not throw
+  // here: content type is best-effort, the payload was already served. Degrade
+  // to the key extension / default instead.
+  const meta = await loadDocumentMetadata(store, rawRef).catch(() => null);
   return (
     meta?.contentType ??
     contentTypeFromKey(rawRef) ??
