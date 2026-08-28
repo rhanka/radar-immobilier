@@ -365,6 +365,46 @@ describe("GET /api/documents/raw", () => {
     });
   });
 
+  it("flag ON: a content-type resolution fault does NOT 404 a document whose bytes were fetched", async () => {
+    // The 404-on-missing catch must be scoped to the payload GET only. Here the
+    // payload GET succeeds; a later fault while resolving the content type must
+    // not turn a served document into a 404.
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    let headCalls = 0;
+    const geoDocumentsReader = {
+      async head(key: string): Promise<ObjectInfo | null> {
+        headCalls += 1;
+        // 1st head = route existence probe (hit). 2nd head = inside
+        // resolveRawContentType: report no content type so it tries the sidecar.
+        return headCalls === 1
+          ? { key, size: 8, contentType: undefined }
+          : { key, size: 8, contentType: undefined };
+      },
+      async get(key: string): Promise<Uint8Array> {
+        // payload get succeeds; a sidecar get (.meta.json) throws NoSuchKey
+        if (key.endsWith(".meta.json")) {
+          throw Object.assign(new Error(`gone ${key}`), { name: "NoSuchKey" });
+        }
+        return new TextEncoder().encode("%PDF geo");
+      },
+    };
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}`,
+    );
+
+    expect(res.status).toBe(200);
+    // Content type degraded to the .pdf key extension, document still served.
+    expect(res.headers.get("content-type")).toBe("application/pdf");
+  });
+
   it("refuses to build the route when repoint is on but no geo reader is wired", () => {
     expect(() =>
       documentsRoute({
