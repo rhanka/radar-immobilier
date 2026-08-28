@@ -142,4 +142,25 @@ describe("S3ObjectReader — read-only geo document capability", () => {
       "denied",
     );
   });
+
+  it("head PROPAGATES a mistyped-bucket fault (NoSuchBucket is 404 but NOT a document miss)", async () => {
+    // A NoSuchBucket (e.g. bucket `sentropic-ge0`) comes back as HTTP 404. It
+    // must surface as an error, not be masked as "document_not_found" for every
+    // PV — that would hide the whole cutover being broken.
+    const reader = new S3ObjectReader(
+      {
+        send: async () => {
+          throw Object.assign(new Error("no such bucket"), {
+            name: "NoSuchBucket",
+            $metadata: { httpStatusCode: 404 },
+          });
+        },
+      } as never,
+      "sentropic-ge0",
+    );
+
+    await expect(reader.head("raw/pv-index/cas/a.pdf")).rejects.toThrow(
+      "no such bucket",
+    );
+  });
 });

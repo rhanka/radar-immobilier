@@ -19,9 +19,22 @@ import {
   type StoredObject,
 } from "./object-store.js";
 
-/** Whether an S3 error means "object absent" (vs. a real access/network fault). */
-function isMissingObjectError(error: unknown): boolean {
+/**
+ * Bucket-/config-level S3 faults that are ALSO HTTP 404 but must NEVER be read
+ * as "object absent": a mistyped bucket (`NoSuchBucket`) or a region/endpoint
+ * redirect would otherwise be masked as an ordinary document miss and hide the
+ * cutover being broken. These propagate as errors instead of degrading to null.
+ */
+const S3_CONFIG_FAULTS = new Set([
+  "NoSuchBucket",
+  "PermanentRedirect",
+  "AuthorizationHeaderMalformed",
+]);
+
+/** Whether an S3 error means "object absent" (vs. a real access/config fault). */
+export function isMissingObjectError(error: unknown): boolean {
   const name = (error as { name?: string })?.name ?? "";
+  if (S3_CONFIG_FAULTS.has(name)) return false;
   const status = (error as { $metadata?: { httpStatusCode?: number } })?.$metadata
     ?.httpStatusCode;
   return name === "NoSuchKey" || name === "NotFound" || status === 404;

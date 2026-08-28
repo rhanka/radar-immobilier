@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import type { ObjectReader, ObjectStore } from "../storage/object-store.js";
+import { isMissingObjectError } from "../storage/s3-object-store.js";
 import {
   mapToGeoKey,
   normalizeRawRef,
@@ -78,10 +79,22 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
       return c.json({ ok: false, error: "document_not_found" }, 404);
     }
 
-    const [bytes, contentType] = await Promise.all([
-      resolved.reader.get(resolved.key),
-      resolveRawContentType(resolved.reader, resolved.key),
-    ]);
+    // The object existed at HEAD; if it vanishes before GET (a rare TOCTOU on
+    // an otherwise immutable CAS object), that is a genuine 404, not a 500. Any
+    // other GET fault (access/config/network) still propagates — fail loud.
+    let bytes: Uint8Array;
+    let contentType: string;
+    try {
+      [bytes, contentType] = await Promise.all([
+        resolved.reader.get(resolved.key),
+        resolveRawContentType(resolved.reader, resolved.key),
+      ]);
+    } catch (error) {
+      if (isMissingObjectError(error)) {
+        return c.json({ ok: false, error: "document_not_found" }, 404);
+      }
+      throw error;
+    }
 
     return new Response(bytes, {
       headers: {
