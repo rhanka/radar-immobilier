@@ -242,19 +242,6 @@ export class S3ObjectReader implements ObjectReader {
     private readonly bucket: string,
   ) {}
 
-  /**
-   * Boot-time reachability probe for the geo bucket (read-only: HeadBucket).
-   * A per-object HEAD cannot reliably distinguish "wrong bucket" from "missing
-   * key" (S3 HEAD returns a body-less generic 404, so `NoSuchBucket` may not be
-   * named), which would let a mistyped bucket masquerade as an ordinary
-   * document 404 for EVERY PV. This check runs once at startup when
-   * GEO_DOCUMENTS_REPOINT=1 and throws if the bucket is not reachable, turning a
-   * broken cutover into a loud fail-closed boot error instead of silent 404s.
-   */
-  async assertBucketReachable(): Promise<void> {
-    await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
-  }
-
   async get(key: string): Promise<Uint8Array> {
     const res = await this.client.send(
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
