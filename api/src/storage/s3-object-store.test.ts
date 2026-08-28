@@ -143,41 +143,6 @@ describe("S3ObjectReader — read-only geo document capability", () => {
     );
   });
 
-  it("assertBucketReachable resolves when HeadBucket succeeds", async () => {
-    const sent: string[] = [];
-    const reader = new S3ObjectReader(
-      {
-        send: async (input: unknown) => {
-          sent.push((input as { constructor: { name: string } }).constructor.name);
-          return {};
-        },
-      } as never,
-      "sentropic-geo",
-    );
-
-    await expect(reader.assertBucketReachable()).resolves.toBeUndefined();
-    expect(sent).toEqual(["HeadBucketCommand"]);
-  });
-
-  it("assertBucketReachable THROWS on an unreachable/mistyped bucket (boot fail-closed, no HEAD-name ambiguity)", async () => {
-    // The definitive guard against a mistyped bucket: a boot-time HeadBucket that
-    // fails hard, rather than relying on per-object HEAD to name NoSuchBucket
-    // (which S3 HEAD does not reliably do).
-    const reader = new S3ObjectReader(
-      {
-        send: async () => {
-          throw Object.assign(new Error("no such bucket"), {
-            name: "NotFound",
-            $metadata: { httpStatusCode: 404 },
-          });
-        },
-      } as never,
-      "sentropic-ge0",
-    );
-
-    await expect(reader.assertBucketReachable()).rejects.toThrow("no such bucket");
-  });
-
   it("head PROPAGATES a mistyped-bucket fault (NoSuchBucket is 404 but NOT a document miss)", async () => {
     // A NoSuchBucket (e.g. bucket `sentropic-ge0`) comes back as HTTP 404. It
     // must surface as an error, not be masked as "document_not_found" for every

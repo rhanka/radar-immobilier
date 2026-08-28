@@ -1,4 +1,5 @@
 import { RawDocumentRecordSchema, rawMetaKey } from "@radar/sources";
+import { isMissingObjectError } from "../../storage/s3-object-store.js";
 
 import type { ObjectReader } from "../../storage/object-store.js";
 
@@ -198,8 +199,12 @@ export async function resolveRawContentType(
   if (head?.contentType) return head.contentType;
   // A sidecar that vanishes between its own head and get (TOCTOU) must not throw
   // here: content type is best-effort, the payload was already served. Degrade
-  // to the key extension / default instead.
-  const meta = await loadDocumentMetadata(store, rawRef).catch(() => null);
+  // to the key extension / default on a genuine MISS only — a real fault
+  // (access/config/network) still propagates so it is not silently masked.
+  const meta = await loadDocumentMetadata(store, rawRef).catch((e) => {
+    if (isMissingObjectError(e)) return null;
+    throw e;
+  });
   return (
     meta?.contentType ??
     contentTypeFromKey(rawRef) ??
