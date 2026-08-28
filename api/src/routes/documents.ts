@@ -79,22 +79,21 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
       return c.json({ ok: false, error: "document_not_found" }, 404);
     }
 
-    // The object existed at HEAD; if it vanishes before GET (a rare TOCTOU on
-    // an otherwise immutable CAS object), that is a genuine 404, not a 500. Any
-    // other GET fault (access/config/network) still propagates — fail loud.
+    // The PAYLOAD object existed at HEAD; if it vanishes before GET (a rare
+    // TOCTOU on an otherwise immutable CAS object), that is a genuine 404, not a
+    // 500. The catch is scoped to the payload GET ONLY — a miss while resolving
+    // the content type (a sidecar TOCTOU) must NOT 404 a document whose bytes
+    // were fetched fine. Any non-missing GET fault still propagates — fail loud.
     let bytes: Uint8Array;
-    let contentType: string;
     try {
-      [bytes, contentType] = await Promise.all([
-        resolved.reader.get(resolved.key),
-        resolveRawContentType(resolved.reader, resolved.key),
-      ]);
+      bytes = await resolved.reader.get(resolved.key);
     } catch (error) {
       if (isMissingObjectError(error)) {
         return c.json({ ok: false, error: "document_not_found" }, 404);
       }
       throw error;
     }
+    const contentType = await resolveRawContentType(resolved.reader, resolved.key);
 
     return new Response(bytes, {
       headers: {
