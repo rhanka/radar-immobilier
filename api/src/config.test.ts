@@ -52,7 +52,9 @@ describe("loadConfig", () => {
       });
     });
 
-    it("defaults forcePathStyle to true when unset", () => {
+    it("requires forcePathStyle (its safe default differs per backend: MinIO true vs OVH false)", () => {
+      // All five other geo fields present, force-path-style omitted → fail closed
+      // rather than silently defaulting to a value wrong for the target backend.
       const config = loadConfig({
         ...BASE_ENV,
         GEO_DOCUMENTS_REPOINT: "1",
@@ -62,7 +64,23 @@ describe("loadConfig", () => {
         GEO_DOCUMENTS_S3_ACCESS_KEY: "geo-read-access",
         GEO_DOCUMENTS_S3_SECRET_KEY: "geo-read-secret",
       });
-      expect(resolveGeoDocumentsS3Config(config).forcePathStyle).toBe(true);
+      expect(() => resolveGeoDocumentsS3Config(config)).toThrow(
+        "GEO_DOCUMENTS_S3_FORCE_PATH_STYLE is required when GEO_DOCUMENTS_REPOINT=1",
+      );
+    });
+
+    it("carries forcePathStyle=false through for a virtual-hosted OVH bucket", () => {
+      const config = loadConfig({
+        ...BASE_ENV,
+        GEO_DOCUMENTS_REPOINT: "1",
+        GEO_DOCUMENTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net",
+        GEO_DOCUMENTS_S3_REGION: "bhs",
+        GEO_DOCUMENTS_S3_BUCKET: "sentropic-geo",
+        GEO_DOCUMENTS_S3_ACCESS_KEY: "geo-read-access",
+        GEO_DOCUMENTS_S3_SECRET_KEY: "geo-read-secret",
+        GEO_DOCUMENTS_S3_FORCE_PATH_STYLE: "false",
+      });
+      expect(resolveGeoDocumentsS3Config(config).forcePathStyle).toBe(false);
     });
 
     it("fails fast instead of inheriting immo config when the geo wiring is incomplete", () => {
