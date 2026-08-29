@@ -75,7 +75,7 @@ const envSchema = z.object({
 
   /**
    * immo→geo document repoint (zero-copy PV cutover) — see
-   * `services/sources/document-resolver.mapToGeoKey` and `routes/documents.ts`.
+   * `mapToGeoKey` in the source resolver and `routes/documents.ts`.
    *
    * OFF by default ("0"): `/api/documents/raw` keeps resolving PV PDFs from the
    * immo scrape store → main store, byte-for-byte the current behaviour. Set to
@@ -89,6 +89,9 @@ const envSchema = z.object({
     .enum(["0", "1"])
     .default("0")
     .transform((v) => v === "1"),
+  GEO_DOCUMENTS_INDEX_PATH: z
+    .string()
+    .default("work/coverage/geo-pv-cas-sha-slug-index.json"),
   /**
    * Dedicated, read-only geo document store. These values NEVER inherit the
    * immo S3_* / SCRAPE_S3_* config: geo is a distinct bucket reached with its
