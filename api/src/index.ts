@@ -3,6 +3,7 @@ import { createApp } from "./app.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
+import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
 import {
   createObjectStore,
   getGeoDocumentsReader,
@@ -25,6 +26,9 @@ const scrapeObjectStore = getScrapeObjectStore(config);
 // then required (resolveGeoDocumentsS3Config throws otherwise — no immo fallback).
 const geoDocumentsReader = config.GEO_DOCUMENTS_REPOINT
   ? getGeoDocumentsReader(config)
+  : undefined;
+const geoKeyIndex = config.GEO_DOCUMENTS_REPOINT
+  ? loadGeoKeyIndex(config.GEO_DOCUMENTS_INDEX_PATH)
   : undefined;
 logger.info(
   { geoDocumentsRepoint: config.GEO_DOCUMENTS_REPOINT },
@@ -60,6 +64,7 @@ const app = createApp({
   scrapeStore: scrapeObjectStore,
   geoDocumentsRepoint: config.GEO_DOCUMENTS_REPOINT,
   ...(geoDocumentsReader ? { geoDocumentsReader } : {}),
+  ...(geoKeyIndex ? { geoKeyIndex } : {}),
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
   auth,
