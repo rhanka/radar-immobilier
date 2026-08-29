@@ -136,8 +136,11 @@ describe("GET /api/documents/raw", () => {
 
   // ── immo→geo repoint (zero-copy, read-only) ─────────────────────────────
   const REPOINT_SHA = "b".repeat(64);
+  const URL_INDEX_SHA = "c".repeat(64);
+  const REPOINT_SOURCE_URL = "https://testville.qc.ca/pv/2026-05-12.pdf";
   const IMMO_PV_KEY = `raw/proces-verbaux-saint-frederic/cas/${REPOINT_SHA}.pdf`;
   const GEO_PV_KEY = `raw/pv-index/cas/${REPOINT_SHA}.pdf`;
+  const GEO_URL_PV_KEY = `raw/pv-index/cas/${URL_INDEX_SHA}.pdf`;
 
   it("flag OFF: serves the PV from the immo scrape store and never touches geo", async () => {
     const store = new MemoryStore();
@@ -190,17 +193,94 @@ describe("GET /api/documents/raw", () => {
     expect(mainHead).not.toHaveBeenCalled();
   });
 
-  it("flag ON: a geo miss is a 404 with NO fallback to the stale immo copy", async () => {
+  it("flag ON: falls back from a missing sha key to the URL-index geo key in order", async () => {
     const store = new MemoryStore();
     const scrapeStore = new MemoryStore();
     const geoDocumentsReader = new MemoryStore();
-    await scrapeStore.put(IMMO_PV_KEY, "stale immo bytes", "application/pdf");
-    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    await geoDocumentsReader.put(
+      GEO_URL_PV_KEY,
+      "geo URL-index bytes",
+      "application/pdf",
+    );
+    const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const geoGet = vi.spyOn(geoDocumentsReader, "get");
+    const geoKeyIndex = {
+      lookupByUrl: vi.fn((sourceUrl: string) =>
+        sourceUrl === REPOINT_SOURCE_URL ? GEO_URL_PV_KEY : null,
+      ),
+    };
     const app = documentsRoute({
       store,
       scrapeStore,
       geoDocumentsReader,
       geoDocumentsRepoint: true,
+      geoKeyIndex,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}&sourceUrl=${encodeURIComponent(REPOINT_SOURCE_URL)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("geo URL-index bytes");
+    expect(geoHead.mock.calls.slice(0, 2).map(([key]) => key)).toEqual([
+      GEO_PV_KEY,
+      GEO_URL_PV_KEY,
+    ]);
+    expect(geoGet).toHaveBeenCalledWith(GEO_URL_PV_KEY);
+    expect(geoKeyIndex.lookupByUrl).toHaveBeenCalledWith(REPOINT_SOURCE_URL);
+  });
+
+  it("flag ON: reads sourceUrl from the query and serves the URL-index geo key", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    await geoDocumentsReader.put(
+      GEO_URL_PV_KEY,
+      "geo query URL-index bytes",
+      "application/pdf",
+    );
+    const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const geoKeyIndex = {
+      lookupByUrl: vi.fn((sourceUrl: string) =>
+        sourceUrl === REPOINT_SOURCE_URL ? GEO_URL_PV_KEY : null,
+      ),
+    };
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+      geoKeyIndex,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}&sourceUrl=${encodeURIComponent(REPOINT_SOURCE_URL)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe("geo query URL-index bytes");
+    expect(geoHead).toHaveBeenCalledWith(GEO_URL_PV_KEY);
+    expect(geoKeyIndex.lookupByUrl).toHaveBeenCalledWith(REPOINT_SOURCE_URL);
+  });
+
+  it("flag ON: does not use the URL-index geo key without sourceUrl in the query", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    await geoDocumentsReader.put(
+      GEO_URL_PV_KEY,
+      "geo query URL-index bytes",
+      "application/pdf",
+    );
+    const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const geoKeyIndex = { lookupByUrl: vi.fn(() => GEO_URL_PV_KEY) };
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+      geoKeyIndex,
     });
 
     const res = await app.request(
@@ -208,7 +288,40 @@ describe("GET /api/documents/raw", () => {
     );
 
     expect(res.status).toBe(404);
+    expect(geoHead).toHaveBeenCalledTimes(1);
+    expect(geoHead).toHaveBeenCalledWith(GEO_PV_KEY);
+    expect(geoHead).not.toHaveBeenCalledWith(GEO_URL_PV_KEY);
+    expect(geoKeyIndex.lookupByUrl).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: sha and URL-index misses return 404 without touching immo", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    await scrapeStore.put(IMMO_PV_KEY, "stale immo bytes", "application/pdf");
+    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    const scrapeGet = vi.spyOn(scrapeStore, "get");
+    const mainHead = vi.spyOn(store, "head");
+    const mainGet = vi.spyOn(store, "get");
+    const geoKeyIndex = { lookupByUrl: vi.fn(() => null) };
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+      geoKeyIndex,
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(IMMO_PV_KEY)}&sourceUrl=${encodeURIComponent(REPOINT_SOURCE_URL)}`,
+    );
+
+    expect(res.status).toBe(404);
     expect(scrapeHead).not.toHaveBeenCalled();
+    expect(scrapeGet).not.toHaveBeenCalled();
+    expect(mainHead).not.toHaveBeenCalled();
+    expect(mainGet).not.toHaveBeenCalled();
+    expect(geoKeyIndex.lookupByUrl).toHaveBeenCalledWith(REPOINT_SOURCE_URL);
   });
 
   it("flag ON: an unmapped (non-PV) key still resolves via the legacy immo stores", async () => {
@@ -218,20 +331,23 @@ describe("GET /api/documents/raw", () => {
     const nonPvKey = `raw/avis-publics-testville/cas/${REPOINT_SHA}.pdf`;
     await scrapeStore.put(nonPvKey, "legacy bytes", "application/pdf");
     const geoHead = vi.spyOn(geoDocumentsReader, "head");
+    const geoKeyIndex = { lookupByUrl: vi.fn(() => GEO_URL_PV_KEY) };
     const app = documentsRoute({
       store,
       scrapeStore,
       geoDocumentsReader,
       geoDocumentsRepoint: true,
+      geoKeyIndex,
     });
 
     const res = await app.request(
-      `/api/documents/raw?rawRef=${encodeURIComponent(nonPvKey)}`,
+      `/api/documents/raw?rawRef=${encodeURIComponent(nonPvKey)}&sourceUrl=${encodeURIComponent(REPOINT_SOURCE_URL)}`,
     );
 
     expect(res.status).toBe(200);
     expect(await res.text()).toBe("legacy bytes");
     expect(geoHead).not.toHaveBeenCalled();
+    expect(geoKeyIndex.lookupByUrl).not.toHaveBeenCalled();
   });
 
   it("flag ON: serves a mapped .docx PV STRICTLY from geo, preserving the extension", async () => {
@@ -284,6 +400,47 @@ describe("GET /api/documents/raw", () => {
     expect(res.status).toBe(200);
     expect(await res.text()).toBe("immo docx-as-bin bytes");
     expect(geoHead).not.toHaveBeenCalled();
+  });
+
+  it("flag ON: a docx stored as .bin repoints through a URL-index hit", async () => {
+    const store = new MemoryStore();
+    const scrapeStore = new MemoryStore();
+    const geoDocumentsReader = new MemoryStore();
+    const immoBinKey = `raw/proces-verbaux-ange-gardien/cas/${REPOINT_SHA}.bin`;
+    const geoDocxKey = `raw/pv-index/cas/${URL_INDEX_SHA}.docx`;
+    await scrapeStore.put(
+      immoBinKey,
+      "stale immo docx-as-bin bytes",
+      "application/octet-stream",
+    );
+    await geoDocumentsReader.put(
+      geoDocxKey,
+      "geo docx bytes",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    const scrapeHead = vi.spyOn(scrapeStore, "head");
+    const scrapeGet = vi.spyOn(scrapeStore, "get");
+    const geoGet = vi.spyOn(geoDocumentsReader, "get");
+    const app = documentsRoute({
+      store,
+      scrapeStore,
+      geoDocumentsReader,
+      geoDocumentsRepoint: true,
+      geoKeyIndex: { lookupByUrl: () => geoDocxKey },
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(immoBinKey)}&sourceUrl=${encodeURIComponent(REPOINT_SOURCE_URL)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    expect(await res.text()).toBe("geo docx bytes");
+    expect(geoGet).toHaveBeenCalledWith(geoDocxKey);
+    expect(scrapeHead).not.toHaveBeenCalled();
+    expect(scrapeGet).not.toHaveBeenCalled();
   });
 
   it("flag ON: a double-hyphen municipality--MRC PV (saint-stanislas--des-chenaux) repoints to geo", async () => {
