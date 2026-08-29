@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { RawDocumentRecordSchema, rawMetaKey } from "@radar/sources";
 import { isMissingObjectError } from "../../storage/s3-object-store.js";
 
@@ -76,6 +77,119 @@ export function mapToGeoKey(key: string): string | null {
   // match[1] is the verbatim `<64-hex>.<ext>` tail of the immo key: the sha and
   // the real extension are copied across unchanged (no `sha256:` prefix added).
   return match?.[1] ? `${GEO_PV_CAS_PREFIX}${match[1]}` : null;
+}
+
+/**
+ * A PV CAS key with ANY lowercase extension (not just the geo doc exts): still
+ * `raw/proces-verbaux-<slug>/cas/<64hex>.<ext>`, so `.bin`/`.html` (the immo
+ * docx artifacts `mapToGeoKey` rejects) qualify, while non-PV sources, sidecars
+ * (`.pdf.meta.json` — the extra dots fail `[a-z0-9]+$`), uppercase sha and
+ * traversal do NOT. Gates whether a URL-index lookup may be attempted at all.
+ */
+const IMMO_PV_CAS_KEY_ANY_EXT = new RegExp(
+  `^raw/proces-verbaux-[a-z0-9]+(?:-+[a-z0-9]+)*/cas/[a-f0-9]{64}\\.[a-z0-9]+$`,
+);
+
+/**
+ * Frozen geo index contract (geo-socle PR #274). The RAW source url — the exact
+ * `sourceUrl` from immo's `.meta.json`, matched VERBATIM, never normalized —
+ * maps to the canonical geo CAS key. This resolves what `mapToGeoKey` cannot:
+ * the re-scrape divergence (same source url, geo sha ≠ immo sha) and the docx
+ * extension gap (immo `.bin`/`.html` → geo `.docx`). A url geo captured under
+ * ≥2 sha (`drift`) is fail-closed — `geo_cas_key` is null so the lookup returns
+ * null → a frank 404, never an ambiguous guess.
+ */
+export interface GeoIndexEntry {
+  readonly geo_cas_key: string | null;
+  readonly drift?: boolean;
+}
+
+export interface GeoKeyIndex {
+  /** Canonical geo CAS key for a raw source url; null = unknown or drift. */
+  lookupByUrl(sourceUrl: string): string | null;
+}
+
+interface GeoIndexDocument {
+  readonly resolve_by_source_url?: Record<string, GeoIndexEntry>;
+}
+
+/**
+ * Build an in-memory {@link GeoKeyIndex} from the frozen index JSON. Drift
+ * entries and null keys are dropped at load time, so `lookupByUrl` returns null
+ * for them (→ 404 franc). Lookup is an EXACT map hit — the url is never
+ * normalized, per the contract.
+ */
+export function parseGeoKeyIndex(json: unknown): GeoKeyIndex {
+  const table = (json as GeoIndexDocument | null)?.resolve_by_source_url ?? {};
+  const map = new Map<string, string>();
+  for (const [url, entry] of Object.entries(table)) {
+    if (entry && entry.drift !== true && typeof entry.geo_cas_key === "string") {
+      map.set(url, entry.geo_cas_key);
+    }
+  }
+  return {
+    lookupByUrl: (sourceUrl) => map.get(sourceUrl) ?? null,
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseGeoKeyIndexGuarded(
+  json: unknown,
+  path: string,
+): GeoKeyIndex | undefined {
+  if (!isRecord(json) || !isRecord(json.resolve_by_source_url)) {
+    console.warn(
+      `geo document URL index at ${path} has no valid "resolve_by_source_url" object; URL fallback disabled`,
+    );
+    return undefined;
+  }
+  return parseGeoKeyIndex(json);
+}
+
+/**
+ * Load the optional frozen geo source-url→CAS-key index from disk.
+ * Missing, unreadable, malformed, or invalid-shaped files disable URL fallback
+ * without preventing the API from starting, with one warning per load attempt.
+ */
+export function loadGeoKeyIndex(path: string): GeoKeyIndex | undefined {
+  try {
+    const json = JSON.parse(readFileSync(path, "utf8")) as unknown;
+    return parseGeoKeyIndexGuarded(json, path);
+  } catch (error) {
+    console.warn(
+      `Unable to load geo document URL index from ${path}: ${String(error)}`,
+    );
+    return undefined;
+  }
+}
+
+/**
+ * Candidate geo CAS keys for a PV rawRef, in priority order — PURE, no I/O:
+ *  1. `mapToGeoKey` (sha-preserving rewrite) — the majority where geo's bytes
+ *     carry immo's sha.
+ *  2. URL-index lookup — the re-scrape divergence and the docx `.bin`/`.html`
+ *     gap, only when a source url AND an index are supplied.
+ * The caller HEADs these against the geo reader in order; none existing → 404
+ * (fail-closed: still NO immo fallback for a PV key). A non-PV / non-CAS key
+ * yields `[]`, so the route keeps its untouched legacy behavior.
+ */
+export function geoKeyCandidates(
+  rawRef: string,
+  opts?: { sourceUrl?: string | null; index?: GeoKeyIndex | null },
+): string[] {
+  const out: string[] = [];
+  const shaKey = mapToGeoKey(rawRef);
+  if (shaKey) out.push(shaKey);
+  const sourceUrl = opts?.sourceUrl;
+  const index = opts?.index;
+  if (sourceUrl && index && IMMO_PV_CAS_KEY_ANY_EXT.test(rawRef)) {
+    const byUrl = index.lookupByUrl(sourceUrl);
+    if (byUrl && !out.includes(byUrl)) out.push(byUrl);
+  }
+  return out;
 }
 
 export interface DocumentMetadata {
