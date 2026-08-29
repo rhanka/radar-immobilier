@@ -20,7 +20,11 @@ const BASE_ENV: NodeJS.ProcessEnv = {
 describe("loadConfig", () => {
   describe("immo→geo document repoint", () => {
     it("is OFF by default and rejects a non-boolean toggle value", () => {
-      expect(loadConfig({ ...BASE_ENV }).GEO_DOCUMENTS_REPOINT).toBe(false);
+      const config = loadConfig({ ...BASE_ENV });
+      expect(config.GEO_DOCUMENTS_REPOINT).toBe(false);
+      expect(config.GEO_DOCUMENTS_INDEX_PATH).toBe(
+        "work/coverage/geo-pv-cas-sha-slug-index.json",
+      );
       expect(() =>
         loadConfig({ ...BASE_ENV, GEO_DOCUMENTS_REPOINT: "yes" }),
       ).toThrow();
