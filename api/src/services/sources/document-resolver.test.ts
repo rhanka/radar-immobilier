@@ -16,6 +16,7 @@ import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 import {
   findDocumentMetadata,
   loadDocumentMetadata,
+  mapToGeoKey,
   resolveRawContentType,
 } from "./document-resolver.js";
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
@@ -65,6 +66,101 @@ async function seedRecord(store: MemoryStore) {
   await store.put(rawMetaKey(record.storageKey), JSON.stringify(record));
   return record;
 }
+
+// ── immo→geo repoint: pure O(1) CAS-key rewrite (NEVER a bucket scan) ──────
+describe("mapToGeoKey", () => {
+  const sha = "a".repeat(64);
+
+  it.each([
+    "plaisance",
+    "saint-frederic",
+    "salaberry-de-valleyfield",
+    "sainte-catherine-de-la-jacques-cartier",
+    "quebec",
+  ])(
+    "rewrites the immo PV CAS prefix for %s to the geo key, carrying the sha unchanged",
+    (city) => {
+      expect(mapToGeoKey(`raw/proces-verbaux-${city}/cas/${sha}.pdf`)).toBe(
+        `raw/pv-index/cas/${sha}.pdf`,
+      );
+    },
+  );
+
+  // City source ids join municipality and MRC with a DOUBLE hyphen (24 real
+  // ids). These MUST repoint too — rejecting them silently keeps 24 cities
+  // (incl. saint-stanislas--des-chenaux, a UAT city) served from immo at
+  // REPOINT=1, making the cutover silently partial.
+  it.each([
+    "saint-stanislas--des-chenaux",
+    "bedford--brome-missisquoi",
+    "notre-dame-du-bon-conseil--drummond--2",
+    "stanstead--memphremagog--2",
+    "valcourt--le-val-saint-francois",
+  ])(
+    "repoints a double-hyphen municipality--MRC slug (%s)",
+    (city) => {
+      expect(mapToGeoKey(`raw/proces-verbaux-${city}/cas/${sha}.pdf`)).toBe(
+        `raw/pv-index/cas/${sha}.pdf`,
+      );
+    },
+  );
+
+  // Extension is PRESERVED, not forced to `.pdf`: geo keys the real file type.
+  it.each(["pdf", "docx", "doc", "odt", "rtf"])(
+    "preserves the real .%s extension across the rewrite",
+    (ext) => {
+      expect(
+        mapToGeoKey(`raw/proces-verbaux-ange-gardien/cas/${sha}.${ext}`),
+      ).toBe(`raw/pv-index/cas/${sha}.${ext}`);
+    },
+  );
+
+  it.each(["pdf", "docx"])(
+    "is idempotent: an already-geo .%s key maps to itself",
+    (ext) => {
+      const geoKey = `raw/pv-index/cas/${sha}.${ext}`;
+      expect(mapToGeoKey(geoKey)).toBe(geoKey);
+    },
+  );
+
+  it("never injects a sha256: prefix — the 64-hex digest is copied verbatim", () => {
+    const out = mapToGeoKey(`raw/proces-verbaux-quebec/cas/${sha}.pdf`);
+    expect(out).toBe(`raw/pv-index/cas/${sha}.pdf`);
+    expect(out).not.toContain("sha256:");
+  });
+
+  it.each([
+    // non-PV source — not covered by the PV CAS contract
+    ["non-PV source", `raw/avis-publics-testville/cas/${sha}.pdf`],
+    // sha too short / not 64 hex
+    ["short sha", "raw/proces-verbaux-testville/cas/deadbeef.pdf"],
+    // uppercase hex is not a canonical CAS digest
+    ["uppercase sha", `raw/proces-verbaux-testville/cas/${"A".repeat(64)}.pdf`],
+    // wrong extension casing
+    ["uppercase extension", `raw/proces-verbaux-testville/cas/${sha}.PDF`],
+    // immo-internal artifacts under the same prefix: NOT geo documents, so they
+    // return null (→ served from the immo legacy stores, never 404'd on geo).
+    ["unknown-type .bin (immo docx download)", `raw/proces-verbaux-ange-gardien/cas/${sha}.bin`],
+    ["extracted text .txt", `raw/proces-verbaux-testville/cas/${sha}.txt`],
+    ["Office-viewer .html", `raw/proces-verbaux-ange-gardien/cas/${sha}.html`],
+    // metadata sidecar, never the served payload
+    ["meta sidecar", `raw/proces-verbaux-testville/cas/${sha}.pdf.meta.json`],
+    // empty city segment
+    ["empty city", `raw/proces-verbaux-/cas/${sha}.pdf`],
+    // the double-hyphen relaxation must NOT accept a leading/trailing hyphen
+    // (start/end stay alphanumeric — no slug looks like this)
+    ["leading-hyphen city", `raw/proces-verbaux--testville/cas/${sha}.pdf`],
+    ["trailing-hyphen city", `raw/proces-verbaux-testville-/cas/${sha}.pdf`],
+    // nested path under cas/
+    ["nested path", `raw/proces-verbaux-testville/cas/nested/${sha}.pdf`],
+    // traversal attempt
+    ["traversal", `raw/proces-verbaux-testville/cas/../${sha}.pdf`],
+    // not even a raw/ key
+    ["non-raw key", `proces-verbaux-testville/cas/${sha}.pdf`],
+  ])("does not fabricate a geo key for a %s (returns null)", (_label, key) => {
+    expect(mapToGeoKey(key)).toBeNull();
+  });
+});
 
 describe("findDocumentMetadata", () => {
   it("resolves metadata by rawRef when the .meta.json is present (nominal path unchanged)", async () => {
@@ -156,10 +252,23 @@ describe("resolveRawContentType", () => {
     expect(await resolveRawContentType(store, record.storageKey)).toBe("application/pdf");
   });
 
-  it("degrades to application/octet-stream when nothing is known", async () => {
+  it("infers the content type from a known extension when head+meta are silent (geo CAS has no sidecar)", async () => {
+    const store = new MemoryStore();
+    // A geo raw/pv-index/cas/<sha>.pdf that has neither an S3 Content-Type nor a
+    // .meta.json sidecar must still serve as application/pdf so the browser
+    // inline-views the PV instead of downloading an octet-stream.
+    const geoPdf = `raw/pv-index/cas/${"a".repeat(64)}.pdf`;
+    expect(await resolveRawContentType(store, geoPdf)).toBe("application/pdf");
+    const geoDocx = `raw/pv-index/cas/${"a".repeat(64)}.docx`;
+    expect(await resolveRawContentType(store, geoDocx)).toBe(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+  });
+
+  it("degrades to application/octet-stream when nothing is known and the ext is unrecognized", async () => {
     const store = new MemoryStore();
 
-    expect(await resolveRawContentType(store, "raw/unknown/cas/na.pdf")).toBe(
+    expect(await resolveRawContentType(store, "raw/unknown/cas/na.xyz")).toBe(
       "application/octet-stream",
     );
   });

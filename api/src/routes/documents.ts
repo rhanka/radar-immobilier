@@ -1,7 +1,12 @@
 import { Hono } from "hono";
 
-import type { ObjectStore } from "../storage/object-store.js";
-import { normalizeRawRef, resolveRawContentType } from "../services/sources/document-resolver.js";
+import type { ObjectReader, ObjectStore } from "../storage/object-store.js";
+import { isMissingObjectError } from "../storage/s3-object-store.js";
+import {
+  mapToGeoKey,
+  normalizeRawRef,
+  resolveRawContentType,
+} from "../services/sources/document-resolver.js";
 
 export interface DocumentsDeps {
   store: ObjectStore;
@@ -13,15 +18,34 @@ export interface DocumentsDeps {
    * (tests/local without SCRAPE_S3_*), `store` handles everything.
    */
   scrapeStore?: ObjectStore;
+  /**
+   * immo→geo document repoint (default OFF). When `geoDocumentsRepoint` is true,
+   * a PV whose rawRef maps to a geo CAS key (`mapToGeoKey`) is served STRICTLY
+   * from `geoDocumentsReader` (read-only) instead of the immo stores — zero-copy,
+   * no fallback to immo on a geo miss (a miss is a genuine 404 for that cutover).
+   * A rawRef that does NOT map (non-PV docs, sidecars) still resolves through the
+   * legacy immo stores exactly as before, flag on or off.
+   */
+  geoDocumentsReader?: ObjectReader;
+  /** Master switch for the repoint; default false preserves the immo resolver. */
+  geoDocumentsRepoint?: boolean;
 }
 
 export function documentsRoute(deps: DocumentsDeps): Hono {
   const app = new Hono();
 
+  // Fail fast on an inconsistent wiring rather than silently degrading to immo
+  // when the operator intended the geo cutover.
+  if (deps.geoDocumentsRepoint && !deps.geoDocumentsReader) {
+    throw new Error(
+      "geoDocumentsReader is required when geoDocumentsRepoint is enabled",
+    );
+  }
+
   // CAS PV PDFs live in the scrape bucket; the metadata store is the fallback
   // (legacy objects + sidecars). Probe the scrape store first so the viewer can
   // actually fetch `raw/proces-verbaux-<city>/cas/<sha>.pdf`.
-  const stores: ObjectStore[] = deps.scrapeStore
+  const legacyStores: ObjectReader[] = deps.scrapeStore
     ? [deps.scrapeStore, deps.store]
     : [deps.store];
 
@@ -32,10 +56,22 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
       return c.json({ ok: false, error: "invalid_raw_ref" }, 400);
     }
 
-    let resolved: ObjectStore | null = null;
-    for (const store of stores) {
-      if (await store.head(normalizedRawRef)) {
-        resolved = store;
+    // When the repoint is on AND the rawRef is a PV CAS key, serve it ONLY from
+    // geo (zero-copy read-only, no immo fallback). Otherwise fall back to the
+    // legacy immo stores with the untouched rawRef.
+    const geoKey =
+      deps.geoDocumentsRepoint && deps.geoDocumentsReader
+        ? mapToGeoKey(normalizedRawRef)
+        : null;
+    const candidates: { reader: ObjectReader; key: string }[] =
+      geoKey && deps.geoDocumentsReader
+        ? [{ reader: deps.geoDocumentsReader, key: geoKey }]
+        : legacyStores.map((reader) => ({ reader, key: normalizedRawRef }));
+
+    let resolved: { reader: ObjectReader; key: string } | null = null;
+    for (const candidate of candidates) {
+      if (await candidate.reader.head(candidate.key)) {
+        resolved = candidate;
         break;
       }
     }
@@ -43,10 +79,21 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
       return c.json({ ok: false, error: "document_not_found" }, 404);
     }
 
-    const [bytes, contentType] = await Promise.all([
-      resolved.get(normalizedRawRef),
-      resolveRawContentType(resolved, normalizedRawRef),
-    ]);
+    // The PAYLOAD object existed at HEAD; if it vanishes before GET (a rare
+    // TOCTOU on an otherwise immutable CAS object), that is a genuine 404, not a
+    // 500. The catch is scoped to the payload GET ONLY — a miss while resolving
+    // the content type (a sidecar TOCTOU) must NOT 404 a document whose bytes
+    // were fetched fine. Any non-missing GET fault still propagates — fail loud.
+    let bytes: Uint8Array;
+    try {
+      bytes = await resolved.reader.get(resolved.key);
+    } catch (error) {
+      if (isMissingObjectError(error)) {
+        return c.json({ ok: false, error: "document_not_found" }, 404);
+      }
+      throw error;
+    }
+    const contentType = await resolveRawContentType(resolved.reader, resolved.key);
 
     return new Response(bytes, {
       headers: {

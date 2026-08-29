@@ -9,14 +9,36 @@ import {
   type S3ClientConfig,
 } from "@aws-sdk/client-s3";
 import type { AppConfig, ScrapeS3Config } from "../config.js";
-import { resolveScrapeS3Config } from "../config.js";
+import { resolveGeoDocumentsS3Config, resolveScrapeS3Config } from "../config.js";
 import type { ProbeResult } from "../routes/health.js";
 import {
   isCanonicalGraphKey,
   type ObjectInfo,
+  type ObjectReader,
   type ObjectStore,
   type StoredObject,
 } from "./object-store.js";
+
+/**
+ * Bucket-/config-level S3 faults that are ALSO HTTP 404 but must NEVER be read
+ * as "object absent": a mistyped bucket (`NoSuchBucket`) or a region/endpoint
+ * redirect would otherwise be masked as an ordinary document miss and hide the
+ * cutover being broken. These propagate as errors instead of degrading to null.
+ */
+const S3_CONFIG_FAULTS = new Set([
+  "NoSuchBucket",
+  "PermanentRedirect",
+  "AuthorizationHeaderMalformed",
+]);
+
+/** Whether an S3 error means "object absent" (vs. a real access/config fault). */
+export function isMissingObjectError(error: unknown): boolean {
+  const name = (error as { name?: string })?.name ?? "";
+  if (S3_CONFIG_FAULTS.has(name)) return false;
+  const status = (error as { $metadata?: { httpStatusCode?: number } })?.$metadata
+    ?.httpStatusCode;
+  return name === "NoSuchKey" || name === "NotFound" || status === 404;
+}
 
 /** Thrown when an unguarded `put()` targets `graph/<city>/latest.json`. */
 export class CanonicalGraphWriteRefused extends Error {
@@ -200,6 +222,60 @@ export class S3ObjectStore implements ObjectStore {
       }
     }
   }
+}
+
+/**
+ * Read-only S3 capability for the immo→geo document repoint. It exposes ONLY
+ * `get`/`head` (the `ObjectReader` boundary) — no `put`, `list`, `ensureBucket`,
+ * or any write/mutate/enumerate method exists on this class. That is the
+ * enforcement of zero-copy + read-only: the immo api physically cannot write to,
+ * copy within, or scan the geo bucket through this object.
+ *
+ * `head` returns `null` for a genuinely absent object but PROPAGATES any other
+ * failure (e.g. AccessDenied on a misconfigured read key): a silent null there
+ * would masquerade a credential/endpoint fault as a plain 404 and hide the
+ * cutover breaking.
+ */
+export class S3ObjectReader implements ObjectReader {
+  constructor(
+    private readonly client: S3Client,
+    private readonly bucket: string,
+  ) {}
+
+  async get(key: string): Promise<Uint8Array> {
+    const res = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
+    if (!res.Body) throw new Error(`empty body for ${key}`);
+    return res.Body.transformToByteArray();
+  }
+
+  async head(key: string): Promise<ObjectInfo | null> {
+    try {
+      const res = await this.client.send(
+        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+      );
+      return {
+        key,
+        size: res.ContentLength,
+        contentType: res.ContentType,
+        etag: res.ETag,
+      };
+    } catch (error) {
+      if (isMissingObjectError(error)) return null;
+      throw error;
+    }
+  }
+}
+
+/**
+ * Build the read-only geo document reader from a full AppConfig. Only called
+ * when GEO_DOCUMENTS_REPOINT=1; `resolveGeoDocumentsS3Config` throws if the
+ * dedicated GEO_DOCUMENTS_S3_* wiring is incomplete (no immo fallback).
+ */
+export function getGeoDocumentsReader(config: AppConfig): S3ObjectReader {
+  const geoConfig = resolveGeoDocumentsS3Config(config);
+  return new S3ObjectReader(createScrapeS3Client(geoConfig), geoConfig.bucket);
 }
 
 export function createS3Client(config: AppConfig): S3Client {
