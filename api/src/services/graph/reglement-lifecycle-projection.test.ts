@@ -5,7 +5,6 @@ import { projectZoningEvents, projectEvent, deriveStatut, stableUuid, typeLibell
 import {
   ZONAGE_FIXTURES,
   SM_2026_511_AVIS,
-  SM_2026_511_2E_PROJET,
   SM_2026_511_LIFECYCLE,
   SM_2026_509_PLAN_AVIS,
   SM_2025_492_2E_PROJET,
