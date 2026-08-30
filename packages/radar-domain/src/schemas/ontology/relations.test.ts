@@ -8,8 +8,8 @@ import {
 /** Tests for V1 relation types and relational projections (SPEC_ONTOLOGY §1.2, §4.2-4.3). */
 
 describe("OntoRelationType", () => {
-  it("lists the 25 v2.0 relation types (renames/valued_by supprimés, 9 ajouts)", () => {
-    expect(OntoRelationType.options).toHaveLength(25);
+  it("lists the 27 relation types (v2.0 = 25 + LOT 1 cycle de vie : lifecycle_predecessor, replaces)", () => {
+    expect(OntoRelationType.options).toHaveLength(27);
     expect(OntoRelationType.options).toContain("constrains"); // D2
     expect(OntoRelationType.options).toContain("targets_zone"); // intentions (D6)
     // Ajouts v2.0
@@ -22,6 +22,12 @@ describe("OntoRelationType", () => {
     expect(OntoRelationType.options).toContain("issued_for");
     expect(OntoRelationType.options).toContain("defines");
     expect(OntoRelationType.options).toContain("subject_of");
+    // Ajouts LOT 1 — cycle de vie règlement (contrat gelé 5f7ca0a9)
+    expect(OntoRelationType.options).toContain("lifecycle_predecessor");
+    expect(OntoRelationType.options).toContain("replaces");
+    // supersedes/amends CONSERVÉS (sémantiques alignées au contrat, enum inchangé)
+    expect(OntoRelationType.options).toContain("supersedes");
+    expect(OntoRelationType.options).toContain("amends");
     // Suppressions v2.0
     expect(OntoRelationType.options).not.toContain("valued_by");
     expect(OntoRelationType.options).not.toContain("renames");
@@ -101,8 +107,8 @@ describe("Non-dérive YAML → généré (#54)", () => {
     expect(generated).toEqual(fromYaml);
   });
 
-  it("le nombre de relations générées est 25 (v2.0)", async () => {
+  it("le nombre de relations générées est 27 (v2.0 25 + LOT 1 : lifecycle_predecessor, replaces)", async () => {
     const { OntoRelationType } = await import("./relations-generated.js");
-    expect(OntoRelationType.options).toHaveLength(25);
+    expect(OntoRelationType.options).toHaveLength(27);
   });
 });
