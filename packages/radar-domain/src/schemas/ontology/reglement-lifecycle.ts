@@ -64,8 +64,30 @@ export const OntoRelation = z.object({
 });
 export type OntoRelationT = z.infer<typeof OntoRelation>;
 
+// ── type_instrument — famille d'instrument réglementaire (contrat §10, owner (b)+plan surface-distincte) ──
+// geo émet `type_instrument: string|null` DÉCLARÉ-SOURCE verbatim (connu-ou-toléré §9), OU le littéral
+// "unknown" (titre absent/ambigu), OU null (legacy/non-peuplé). geo NE CLASSIFIE PAS ; immo consomme le
+// déclaré-source. z.string() (PAS z.enum) → §9 tolère-inconnu : une valeur hors set connu est
+// ignorée/bucketée par le consommateur, jamais un crash. Le set CONNU = KNOWN_TYPE_INSTRUMENTS
+// (routage : bylaw-family→contrainte ferme, plan-urbanisme→surface intention-grade distincte, case→par-cas).
+// ⚠ AXE INSTRUMENT, ORTHOGONAL AU RÉGIME : le régime (bylaw vs case) est document_type-driven, PAS
+// type_instrument — un règlement HABILITANT (« sur les dérogations mineures ») est un bylaw à cycle
+// complet portant type_instrument=derogation. D'où typeInstrument sur les DEUX nœuds (Bylaw + DesignationEvent).
+export const KNOWN_TYPE_INSTRUMENTS = [
+  "zonage",
+  "lotissement",
+  "construction",
+  "plan-urbanisme",
+  "piia",
+  "derogation",
+] as const;
+export type KnownTypeInstrument = (typeof KNOWN_TYPE_INSTRUMENTS)[number];
+
+/** Champ partagé type_instrument : string|null §9-tolérant (miroir exact de l'émission geo `type_instrument`). */
+const typeInstrumentField = z.string().nullable().default(null);
+
 // ── Champs de cycle de vie ajoutés aux nœuds (appliqués dans entities.ts) ─────
-/** DesignationEvent (avis/projet) : statut + cible + bitemporel + relations. */
+/** DesignationEvent (avis/projet) : statut + cible + bitemporel + relations + instrument. */
 export const designationLifecycleFields = {
   /** Statut de cycle DÉRIVÉ-immo (réutilise RegulatoryStageKind ; plus une annotation lâche). */
   statut: RegulatoryStageKind.nullable().default(null),
@@ -75,11 +97,15 @@ export const designationLifecycleFields = {
   temporal: TemporalSpan.nullable().default(null),
   /** Relations discriminées typées-immo (lifecycle_predecessor/replaces/amends/supersedes). */
   relations: z.array(OntoRelation).default([]),
+  /** Famille d'instrument (déclaré-source geo ou "unknown"/null ; §9-tolérant ; routage surface via KNOWN_TYPE_INSTRUMENTS). */
+  typeInstrument: typeInstrumentField,
 } as const;
 
-/** Bylaw (adoption/en_vigueur) : bitemporel + provenance en_vigueur + relations. */
+/** Bylaw (adoption/en_vigueur) : bitemporel + provenance en_vigueur + relations + instrument. */
 export const bylawLifecycleFields = {
   temporal: TemporalSpan.nullable().default(null),
   enVigueurProvenance: EnVigueurProvenance.nullable().default(null),
   relations: z.array(OntoRelation).default([]),
+  /** Famille d'instrument (déclaré-source geo ou "unknown"/null ; §9-tolérant ; ex. règlement habilitant type_instrument=derogation). */
+  typeInstrument: typeInstrumentField,
 } as const;
