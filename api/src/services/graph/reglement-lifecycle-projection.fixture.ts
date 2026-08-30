@@ -17,6 +17,7 @@ export const SM_2025_492_2E_PROJET: ZoningEventT = mockZoningEvent({
   event_id: "sm-2025-492-2e-projet",
   muni: "sainte-martine",
   document_type: "projet_reglement",
+  typeInstrument: "zonage",
   type: "second_projet",
   reglement_number: ["2025-492"],
   cible_reglement_numero: null,
@@ -39,6 +40,7 @@ export const SM_2025_492_ADOPTION: ZoningEventT = mockZoningEvent({
   event_id: "sm-2025-492-adoption",
   muni: "sainte-martine",
   document_type: "adoption",
+  typeInstrument: "zonage",
   reglement_number: ["2025-492"],
   cible_reglement_numero: null,
   bylaw_numero: "2025-492",
@@ -62,6 +64,7 @@ export const SM_2026_511_AVIS: ZoningEventT = mockZoningEvent({
   event_id: "sm-2026-511-avis",
   muni: "sainte-martine",
   document_type: "avis_motion",
+  typeInstrument: "zonage",
   reglement_number: [],
   cible_reglement_numero: "2026-511", // §1/§4 announced future n°
   libelles_relation: [
@@ -83,6 +86,7 @@ export const SM_2026_511_2E_PROJET: ZoningEventT = mockZoningEvent({
   event_id: "sm-2026-511-2e-projet",
   muni: "sainte-martine",
   document_type: "projet_reglement",
+  typeInstrument: "zonage",
   type: "second_projet",
   reglement_number: ["2026-511"],
   cible_reglement_numero: null,
@@ -106,6 +110,7 @@ export const COW_1841_52_ADOPTION: ZoningEventT = mockZoningEvent({
   event_id: "cow-1841-52-adoption",
   muni: "cowansville",
   document_type: "adoption",
+  typeInstrument: "zonage",
   reglement_number: ["1841-52-2026"],
   cible_reglement_numero: null,
   bylaw_numero: "1841-52-2026",
@@ -129,6 +134,7 @@ export const CAN_5000_076_SECOND_PROJET: ZoningEventT = mockZoningEvent({
   event_id: "can-5000-076-second-projet",
   muni: "candiac",
   document_type: "second_projet", // §9-tolerated unknown value
+  typeInstrument: "zonage",
   reglement_number: ["5000-076"],
   cible_reglement_numero: null,
   libelles_relation: [
@@ -152,6 +158,7 @@ export const SM_2026_509_PLAN_AVIS: ZoningEventT = mockZoningEvent({
   event_id: "sm-2026-509-plan-avis",
   muni: "sainte-martine",
   document_type: "avis_motion",
+  typeInstrument: "plan-urbanisme", // DISTINCT instrument axis — NOT zonage (anti-mislabel, D9/§10)
   reglement_number: [],
   cible_reglement_numero: "2026-509",
   libelles_relation: [

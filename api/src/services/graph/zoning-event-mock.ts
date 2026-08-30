@@ -53,6 +53,10 @@ export const ZoningEvent = z
     type: z.string().nullable().default(null),
     /** §1 — string (§9-tolerant): a value outside KNOWN_DOCUMENT_TYPES is passed through. */
     document_type: z.string().min(1),
+    /** §10 — instrument family DECLARED-SOURCE by geo (verbatim known-or-§9-tolerated value,
+     *  the literal "unknown", or null/legacy). immo CONSUMES it verbatim — never classifies.
+     *  Orthogonal to document_type (regime): a habilitant bylaw carries typeInstrument="derogation". */
+    typeInstrument: z.string().nullable().default(null),
     /** §1 — the numbers the event attests (LIST; refonte = N numbers). Empty on avis. */
     reglement_number: z.array(z.string().nullable()).default([]),
     /** §1/§4 — AVIS-ONLY: the announced future number (for avis→adoption correlation).
