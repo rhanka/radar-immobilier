@@ -1280,3 +1280,61 @@ describe("SignauxSelPanel — recherche par section zone/lot", () => {
     expect(getByTestId("sel-lot-drawer")).toBeTruthy();
   });
 });
+
+// ── P01 — garde de non-régression du panneau PREUVE signal (drawer droit) ─────
+// La régression du 12/08 (association document/PDF perdue, preuve substituée par
+// l'effet densifiant, source/règlement/grille confondus) est DÉJÀ corrigée sur
+// main : 7e7bc0e « le drawer Règlements n'usurpe plus le PV » + #514 (bulle
+// d'étape qui REMPLACE l'effet densifiant sans toucher la preuve). Ces tests
+// VERROUILLENT les 4 critères owner comme garde de non-régression (verts sur la
+// base courante, aucun fix fantôme) :
+//   1. association document/PDF exposée (lien « Ouvrir le PDF source ») ;
+//   2. provenance visible (bouton « Voir la preuve » / overlay) ;
+//   3. AUCUNE substitution par l'étape : bulle d'étape ET preuve COEXISTENT ;
+//   4. source / règlement / grille distingués → déjà gardé par les tests m7
+//      (« Voir le PV source » étiqueté SOURCE, pas règlement) + drawer normes.
+describe("SignauxSelPanel — P01 garde preuve signal (non-régression)", () => {
+  it("critères 1+2 — signal avec source PDF : association document/PDF + provenance rendues", async () => {
+    const node = makeSignal(
+      "sig-p01-preuve",
+      "Avis de motion règlement zonage H-431",
+      "Signal porteur d'une source documentaire.",
+    );
+    node.props = { ...node.props, sourceUrl: "https://exemple.gouv.qc.ca/pv/2026-05.pdf" };
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    await fireEvent.click(
+      getByText("Avis de motion règlement zonage H-431", { selector: ".sel-entity-label" }),
+    );
+    // Association document/PDF (lien direct) + provenance (bouton preuve/overlay).
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(
+      "https://exemple.gouv.qc.ca/pv/2026-05.pdf",
+    );
+    expect(getByText(/Voir la preuve/)).toBeTruthy();
+  });
+
+  it("critère 3 — étape ET source : la bulle d'étape ne SUBSTITUE pas la preuve (les deux rendus)", async () => {
+    const node = makeSignal(
+      "sig-p01-preuve-etape",
+      "Avis de motion règlement zonage H-431",
+      "Signal avec preuve ET classification d'étape.",
+    );
+    node.classification = piiaClassification(); // instrument piia + étape avis_motion → bulle d'étape
+    node.props = { ...node.props, sourceUrl: "https://exemple.gouv.qc.ca/pv/2026-05.pdf" };
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    // Bulle d'étape présente dans la carte (l'étape est rendue).
+    expect(getByTestId("signal-stage-badge")).toBeTruthy();
+    await fireEvent.click(
+      getByText("Avis de motion règlement zonage H-431", { selector: ".sel-entity-label" }),
+    );
+    // La PREUVE coexiste avec la bulle : ni l'une ni l'autre n'est substituée —
+    // la classification d'étape ne remplace JAMAIS l'association document/PDF.
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(
+      "https://exemple.gouv.qc.ca/pv/2026-05.pdf",
+    );
+    expect(getByTestId("signal-stage-badge")).toBeTruthy();
+  });
+});
