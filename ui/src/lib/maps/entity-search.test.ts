@@ -6,7 +6,9 @@
  * et l'arithmétique de la navigation clavier (↑/↓).
  */
 import { describe, it, expect } from "vitest";
+import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
 import {
+  canonicalRank,
   normalizeSearch,
   matchRank,
   rankBySearch,
@@ -105,6 +107,63 @@ describe("rankBySearch — filtrage + classement", () => {
   it("insensible à la casse et aux accents sur toute la liste", () => {
     const items = rows(["a", "CO-939", "Québec Nord"], ["b", "H-1", "Sud"]);
     expect(rankBySearch(items, "quebec", accessor).map((r) => r.id)).toEqual(["a"]);
+  });
+});
+
+describe("rankBySearch — clés canoniques zone/lot", () => {
+  const canonicalAccessor = (r: Row): SearchableText => ({
+    text: r.code,
+    subtext: r.label,
+    searchKey: zoneSearchKey(r.code),
+  });
+
+  it("matche H101 avec H-101 en exact normalisé", () => {
+    const items = rows(["zone", "H-101"]);
+    const queryKey = zoneSearchKey("H101");
+
+    expect(canonicalRank(zoneSearchKey(items[0].code), queryKey)).toBe(0);
+    expect(rankBySearch(items, "H101", canonicalAccessor, queryKey)).toEqual(items);
+  });
+
+  it("conserve tous les candidats verbatim many-to-one dans leur ordre stable", () => {
+    const items = rows(["first", "H-101"], ["second", "H-10-1"]);
+
+    expect(
+      rankBySearch(items, "H101", canonicalAccessor, zoneSearchKey("H101")).map(
+        (r) => r.code,
+      ),
+    ).toEqual(["H-101", "H-10-1"]);
+  });
+
+  it("matche H10 avec H-101 en préfixe canonique", () => {
+    const items = rows(["zone", "H-101"]);
+    const queryKey = zoneSearchKey("H10");
+
+    expect(canonicalRank(zoneSearchKey(items[0].code), queryKey)).toBe(1);
+    expect(rankBySearch(items, "H10", canonicalAccessor, queryKey)).toEqual(items);
+  });
+
+  it("matche un lot sans séparateurs en exact puis en préfixe", () => {
+    const items = rows(["lot", "6 057 912"]);
+    const lotAccessor = (r: Row): SearchableText => ({
+      text: r.code,
+      searchKey: normalizeLotKey(r.code),
+    });
+
+    expect(
+      rankBySearch(items, "6057912", lotAccessor, normalizeLotKey("6057912")),
+    ).toEqual(items);
+    expect(rankBySearch(items, "605", lotAccessor, normalizeLotKey("605"))).toEqual(
+      items,
+    );
+  });
+
+  it("ne fabrique aucun match fuzzy sur la clé canonique", () => {
+    const items = rows(["zone", "H-101"]);
+
+    expect(
+      rankBySearch(items, "H201", canonicalAccessor, zoneSearchKey("H201")),
+    ).toEqual([]);
   });
 });
 
