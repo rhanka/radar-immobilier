@@ -282,3 +282,59 @@ describe("en_vigueur 3-states + suspensive gate + abrogation — LOT 6", () => {
     expect(deriveStatut(abrog).statut).toBeNull(); // abrogation is not a statut, and NEVER "abandonne"
   });
 });
+
+/** LOT 7 — statut refinement (i-arch correction A): a document_type-less event that carries a
+ *  regulatory signal via `type` SURVIVES as a node (never dropped). */
+describe("statut refinement — suspensive-stage node + case-marker survival — LOT 7", () => {
+  // NEGATIVE (mandatory): a registre-referendaire is a KNOWN stage -> node with statut=the stage,
+  // NOT dropped, NOT N-A/null.
+  it("registre-referendaire (document_type=null) -> DesignationEvent, statut=registre-referendaire (NOT N-A/null)", () => {
+    const registre = mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [] });
+    expect(deriveStatut(registre)).toEqual({ statut: "registre-referendaire", flagged: false });
+    const p = projectEvent(registre);
+    if (p?.kind !== "designation-event") throw new Error("expected designation-event (registre not dropped)");
+    expect(p.node.subtype).toBe("registre-referendaire");
+    expect(p.node.statut).toBe("registre-referendaire");
+  });
+
+  // NEGATIVE (mandatory): a case-marker survives as a node (subtype ppcmoi/minor-variance, statut N-A), never dropped.
+  it("case-marker (derogation-mineure) -> DesignationEvent, subtype=minor-variance, statut=N-A(null), NOT dropped", () => {
+    const dero = mockZoningEvent({ muni: "v", document_type: null, type: "derogation-mineure", typeInstrument: "derogation", reglement_number: [] });
+    expect(deriveStatut(dero)).toEqual({ statut: null, flagged: false }); // N-A proven, not flagged
+    const p = projectEvent(dero);
+    if (p?.kind !== "designation-event") throw new Error("expected designation-event (case-marker not dropped)");
+    expect(p.node.subtype).toBe("minor-variance");
+    expect(p.node.statut).toBeNull();
+  });
+
+  it("ppcmoi -> DesignationEvent, subtype=ppcmoi, statut=N-A(null)", () => {
+    const p = projectEvent(mockZoningEvent({ muni: "v", document_type: null, type: "ppcmoi", typeInstrument: "derogation", reglement_number: [] }));
+    if (p?.kind !== "designation-event") throw new Error("expected designation-event");
+    expect(p.node.subtype).toBe("ppcmoi");
+    expect(p.node.statut).toBeNull();
+  });
+
+  // Rule B: a registre attaches to its single co-séance bylaw (uncertain+flagged, never a fabricated n°).
+  it("registre attaches to the single co-séance bylaw (lifecycle_predecessor, uncertain+flagged)", () => {
+    const at = { producer: "mock", source_span: "", source_url: "https://ville.test/pv/reg.pdf", as_of_date: null, sha256: "0".repeat(64), retrieved_at: "2026-06-10T00:00:00.000Z" };
+    const adoption = mockZoningEvent({ muni: "v", document_type: "adoption", reglement_number: ["500"], bylaw_numero: "500", date_iso: "2026-06-01", provenance: at });
+    const registre = mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [], date_iso: "2026-06-01", provenance: at });
+    const nodes = projectZoningEvents([adoption, registre]);
+    const bylaw = nodes.find((n) => n.kind === "bylaw" && n.node.numero === "500")!;
+    const reg = nodes.find((n) => n.kind === "designation-event" && n.node.subtype === "registre-referendaire")!;
+    const link = bylaw.node.relations.find((r) => "nodeId" in r.target && r.target.nodeId === reg.node.id);
+    expect(link).toMatchObject({ relationType: "lifecycle_predecessor", typingConfidence: "uncertain", flagged: true });
+  });
+
+  // Rule B: several co-séance bylaws -> UNKNOWN attachment (don't guess which).
+  it("several co-séance bylaws -> registre NOT attached (UNKNOWN, never guessed)", () => {
+    const at = { producer: "mock", source_span: "", source_url: "https://ville.test/pv/multi.pdf", as_of_date: null, sha256: "0".repeat(64), retrieved_at: "2026-06-10T00:00:00.000Z" };
+    const a1 = mockZoningEvent({ muni: "v", document_type: "adoption", reglement_number: ["600"], bylaw_numero: "600", date_iso: "2026-06-01", provenance: at });
+    const a2 = mockZoningEvent({ muni: "v", document_type: "adoption", reglement_number: ["601"], bylaw_numero: "601", date_iso: "2026-06-01", provenance: at });
+    const registre = mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [], date_iso: "2026-06-01", provenance: at });
+    const nodes = projectZoningEvents([a1, a2, registre]);
+    const reg = nodes.find((n) => n.kind === "designation-event" && n.node.subtype === "registre-referendaire")!;
+    const attached = nodes.some((n) => n.kind === "bylaw" && n.node.relations.some((r) => "nodeId" in r.target && r.target.nodeId === reg.node.id));
+    expect(attached).toBe(false); // UNKNOWN attachment: never guess which bylaw
+  });
+});
