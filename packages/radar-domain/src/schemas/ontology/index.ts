@@ -3,6 +3,7 @@
  * Barrel for the V1 node set, dated-relation projections, and CityProfile.
  */
 export * from "./geo.js";
+export * from "./reglement-lifecycle.js";
 export * from "./entities.js";
 export * from "./relations.js";
 export * from "./city-profile.js";

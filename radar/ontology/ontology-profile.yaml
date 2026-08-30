@@ -395,7 +395,31 @@ relation_types:
   supersedes:
     source: DesignationEvent
     target: DesignationEvent
-    description: Cet événement remplace/révise un événement antérieur.
+    description: >
+      Révision/correction MÊME-étape (version++) d'un événement antérieur (contrat
+      gelé v2.1, INCHANGÉ). NE traverse PAS les étapes du cycle de vie — pour le
+      chaînage inter-étapes, voir lifecycle_predecessor.
+
+  # ── Cycle de vie règlement (LOT 1, contrat gelé 5f7ca0a9 §3.1) ─────────────
+  lifecycle_predecessor:
+    source: [DesignationEvent, Bylaw]
+    target: [DesignationEvent, Bylaw]
+    description: >
+      Chaînage INTRA-règlement du cycle de vie (avis_motion → projet_reglement →
+      adoption → entree_vigueur) : lie une étape à son prédécesseur immédiat du
+      MÊME numéro. Reconstruit par immo sur (n° + ordre-des-stages), jamais l'ordre
+      d'émission. Supersession bitemporelle (validTo du prédécesseur fermé).
+      Best-effort : cible annoncée != adoptée -> pending/UNKNOWN, jamais forcé.
+
+  replaces:
+    source: Bylaw
+    target: Bylaw
+    requires_evidence: true
+    description: >
+      Remplacement CROSS-règlement TOTAL (« abroge et remplace le règlement <n°> »).
+      Distinct de amends (modification, base vivante) : replaces = la base est
+      remplacée. Keep-history (jamais delete). Typé par immo depuis le libellé
+      verbatim ; libellé peu clair -> UNKNOWN, jamais deviné.
 
   targets_zone:
     source: DesignationEvent
