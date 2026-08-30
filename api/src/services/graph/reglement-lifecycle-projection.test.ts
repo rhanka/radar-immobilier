@@ -208,3 +208,27 @@ describe("predecessor + bitemporal + replaces close-guard — LOT 4", () => {
     expect(base.node.temporal?.validTo).toBeNull();
   });
 });
+
+/** LOT 5 — #534 fold: typeInstrument passthrough (§10). geo declares it (verbatim-or-null);
+ *  immo carries it as-is and NEVER classifies. Orthogonal to document_type (regime). */
+describe("typeInstrument passthrough (§10) — LOT 5", () => {
+  it("carries the geo-declared instrument family VERBATIM onto the projected node (bylaw + event)", () => {
+    expect(projectEvent(COW_1841_52_ADOPTION)?.node.typeInstrument).toBe("zonage");
+    expect(projectEvent(SM_2025_492_2E_PROJET)?.node.typeInstrument).toBe("zonage");
+  });
+
+  // ANTI-MISLABEL (D9): the plan event IS projected, but carries its DISTINCT instrument
+  // (plan-urbanisme) — never silently typed as a zonage change.
+  it("plan-mislabel (2026-509) projects with typeInstrument=plan-urbanisme, NOT zonage", () => {
+    const p = projectEvent(SM_2026_509_PLAN_AVIS);
+    expect(p?.node.typeInstrument).toBe("plan-urbanisme");
+    expect(p?.node.typeInstrument).not.toBe("zonage");
+  });
+
+  it("an unknown/absent instrument passes through as-is (immo never classifies, §9-tolerant)", () => {
+    const unknownInstr = mockZoningEvent({ muni: "x", document_type: "adoption", reglement_number: ["7"], bylaw_numero: "7", typeInstrument: "unknown" });
+    expect(projectEvent(unknownInstr)?.node.typeInstrument).toBe("unknown");
+    const nullInstr = mockZoningEvent({ muni: "x", document_type: "adoption", reglement_number: ["8"], bylaw_numero: "8" });
+    expect(projectEvent(nullInstr)?.node.typeInstrument).toBeNull();
+  });
+});

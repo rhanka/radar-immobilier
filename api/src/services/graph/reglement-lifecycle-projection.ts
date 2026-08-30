@@ -15,8 +15,9 @@ import type { ZoningEventT } from "./zoning-event-mock.js";
  * (statut / relations / en_vigueur / bitemporal) per frozen contract `5f7ca0a9`.
  * Anti-invention: verbatim-or-unknown; nothing fabricated or inferred.
  *
- * Lot 2 scope: node creation (D3) + statut (D4). Relations (D5), predecessor+bitemporal
- * (D6/D8), and en_vigueur (D7) are layered by later lots onto the nodes created here.
+ * Layered by lot onto the nodes created here: node+statut (D3/D4), relations (D5),
+ * predecessor+bitemporal (D6/D8), typeInstrument passthrough (§10), en_vigueur (D7).
+ * typeInstrument is DECLARED-SOURCE by geo and carried VERBATIM (immo never classifies).
  */
 
 export type ProjectedNode =
@@ -30,7 +31,7 @@ export function stableUuid(seed: string): string {
   // format 32 hex chars as a uuid, stamping version 5 + RFC-4122 variant nibbles
   return (
     `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-` +
-    `${((parseInt(h[16], 16) & 0x3) | 0x8).toString(16)}${h.slice(17, 20)}-${h.slice(20, 32)}`
+    `${((parseInt(h.charAt(16), 16) & 0x3) | 0x8).toString(16)}${h.slice(17, 20)}-${h.slice(20, 32)}`
   );
 }
 
@@ -102,13 +103,13 @@ const ANY_REGLEMENT_RE = new RegExp(REGLEMENT_N, "i");
 
 /** Type a single verbatim libellé into a discriminated relation, or null if no base n° is named. */
 export function typeLibelle(libelle: string): OntoRelationT | null {
-  const rep = libelle.match(REPLACES_RE);
-  if (rep) return { relationType: "replaces", target: { reglementNumero: rep[1] }, fromLibelle: libelle, typingConfidence: "certain", flagged: false };
-  const am = libelle.match(AMENDS_RE);
-  if (am) return { relationType: "amends", target: { reglementNumero: am[1] }, fromLibelle: libelle, typingConfidence: "certain", flagged: false };
+  const repN = libelle.match(REPLACES_RE)?.[1];
+  if (repN) return { relationType: "replaces", target: { reglementNumero: repN }, fromLibelle: libelle, typingConfidence: "certain", flagged: false };
+  const amN = libelle.match(AMENDS_RE)?.[1];
+  if (amN) return { relationType: "amends", target: { reglementNumero: amN }, fromLibelle: libelle, typingConfidence: "certain", flagged: false };
   // A base n° is named but with no certain verb -> AMBIGUOUS: replaces + flagged (NEVER auto-amends).
-  const any = libelle.match(ANY_REGLEMENT_RE);
-  if (any) return { relationType: "replaces", target: { reglementNumero: any[1] }, fromLibelle: libelle, typingConfidence: "uncertain", flagged: true };
+  const anyN = libelle.match(ANY_REGLEMENT_RE)?.[1];
+  if (anyN) return { relationType: "replaces", target: { reglementNumero: anyN }, fromLibelle: libelle, typingConfidence: "uncertain", flagged: true };
   return null;
 }
 
@@ -141,6 +142,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       temporal: null,
       enVigueurProvenance: null,
       relations: typeRelations(ev),
+      typeInstrument: ev.typeInstrument, // §10 — verbatim passthrough (immo never classifies)
     };
     return { kind: "bylaw", node };
   }
@@ -159,6 +161,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       cibleReglementNumero: cible,
       temporal: null,
       relations: typeRelations(ev),
+      typeInstrument: ev.typeInstrument, // §10 — verbatim passthrough (immo never classifies)
     };
     return { kind: "designation-event", node };
   }
@@ -225,7 +228,9 @@ export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
       (a, b) => stageOrder(a.ev) - stageOrder(b.ev) || (a.ev.date_iso ?? "").localeCompare(b.ev.date_iso ?? ""),
     );
     for (let i = 1; i < chain.length; i++) {
-      const pred = chain[i - 1].p, succ = chain[i].p;
+      const predItem = chain[i - 1], succItem = chain[i];
+      if (!predItem || !succItem) continue;
+      const pred = predItem.p, succ = succItem.p;
       if (pred.node.id === succ.node.id) continue;
       const edge = `${succ.node.id}<-${pred.node.id}`;
       if (!linkedEdges.has(edge)) {
