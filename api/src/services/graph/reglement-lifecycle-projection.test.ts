@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ZoningEvent, mockZoningEvent } from "./zoning-event-mock.js";
-import { projectZoningEvents, projectEvent, deriveStatut, stableUuid, typeLibelle, typeRelations } from "./reglement-lifecycle-projection.js";
+import { projectZoningEvents, projectEvent, deriveStatut, stableUuid, typeLibelle, typeRelations, type ProjectedNode } from "./reglement-lifecycle-projection.js";
 import {
   ZONAGE_FIXTURES,
   SM_2026_511_AVIS,
@@ -230,5 +230,55 @@ describe("typeInstrument passthrough (§10) — LOT 5", () => {
     expect(projectEvent(unknownInstr)?.node.typeInstrument).toBe("unknown");
     const nullInstr = mockZoningEvent({ muni: "x", document_type: "adoption", reglement_number: ["8"], bylaw_numero: "8" });
     expect(projectEvent(nullInstr)?.node.typeInstrument).toBeNull();
+  });
+});
+
+/** LOT 6 — en_vigueur 3-states (D7, §2.1) + suspensive gate (B) + abrogation. Synthetic mocks
+ *  exercise each derivation branch (real corpus stays in the fixture module). */
+describe("en_vigueur 3-states + suspensive gate + abrogation — LOT 6", () => {
+  const SESSION = "https://ville.test/pv/2026-06.pdf";
+  const atSession = { producer: "mock", source_span: "", source_url: SESSION, as_of_date: null, sha256: "0".repeat(64), retrieved_at: "2026-06-10T00:00:00.000Z" };
+  const adoption = (numero: string) =>
+    mockZoningEvent({ muni: "v", document_type: "adoption", reglement_number: [numero], bylaw_numero: numero, date_iso: "2026-06-01", provenance: atSession });
+  const bylawOf = (nodes: ProjectedNode[], numero: string) => {
+    const n = nodes.find((x) => x.kind === "bylaw" && x.node.numero === numero);
+    if (n?.kind !== "bylaw") throw new Error(`expected bylaw ${numero}`);
+    return n.node;
+  };
+
+  it("a served entree_en_vigueur date -> enVigueurProvenance=verbatim + validFrom = the en_vigueur date", () => {
+    const env = mockZoningEvent({ muni: "v", document_type: "entree_en_vigueur", reglement_number: ["400"], date_iso: "2026-07-15" });
+    const b = bylawOf(projectZoningEvents([adoption("400"), env]), "400");
+    expect(b.enVigueurProvenance).toBe("verbatim");
+    expect(b.temporal?.validFrom).toBe("2026-07-15");
+  });
+
+  it("entree_en_vigueur carrying a stated legal trigger (declencheur) -> derived (source-stated, served date)", () => {
+    const env = mockZoningEvent({ muni: "v", document_type: "entree_en_vigueur", reglement_number: ["410"], date_iso: "2026-08-01", declencheur_type: "certificat_mrc", declencheur_date_verbatim: "2026-07-20" });
+    const b = bylawOf(projectZoningEvents([adoption("410"), env]), "410");
+    expect(b.enVigueurProvenance).toBe("derived");
+  });
+
+  // NEGATIVE (mandatory): no served en_vigueur date -> unknown (NEVER a fabricated date / delay table).
+  it("adoption with NO entree_en_vigueur -> enVigueurProvenance=unknown (delay-absent, not derived)", () => {
+    const b = bylawOf(projectZoningEvents([adoption("420")]), "420");
+    expect(b.enVigueurProvenance).toBe("unknown");
+  });
+
+  // NEGATIVE (mandatory): an unresolved co-séance suspensive keeps the bylaw OUT of force.
+  it("registre-referendaire co-séance (unresolved, document_type=null) -> en_vigueur=UNKNOWN, never in-force", () => {
+    const registre = mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [], date_iso: "2026-06-01", provenance: atSession });
+    const b = bylawOf(projectZoningEvents([adoption("430"), registre]), "430");
+    expect(b.enVigueurProvenance).toBe("unknown");
+  });
+
+  // NEGATIVE (mandatory): abrogation closes the base validTo but is NEVER statut "abandonne".
+  it("abrogation closes the abrogated bylaw's validTo at the repeal date (NOT statut abandonne)", () => {
+    const base = mockZoningEvent({ muni: "v", document_type: "adoption", reglement_number: ["800"], bylaw_numero: "800", date_iso: "2020-01-01" });
+    const abrog = mockZoningEvent({ muni: "v", document_type: "abrogation", reglement_number: ["950"], date_iso: "2026-09-01", libelles_relation: ["Règlement 950 abroge et remplace le règlement numéro 800"] });
+    const nodes = projectZoningEvents([base, abrog]);
+    expect(bylawOf(nodes, "800").temporal?.validTo).toBe("2026-09-01");
+    expect(nodes.every((n) => !("statut" in n.node) || n.node.statut !== "abandonne")).toBe(true);
+    expect(deriveStatut(abrog).statut).toBeNull(); // abrogation is not a statut, and NEVER "abandonne"
   });
 });
