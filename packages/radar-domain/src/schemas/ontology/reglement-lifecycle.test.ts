@@ -4,6 +4,7 @@ import {
   EnVigueurProvenance,
   OntoRelation,
   KNOWN_RELATION_TYPES,
+  KNOWN_TYPE_INSTRUMENTS,
 } from "./reglement-lifecycle.js";
 import { OntoRelationType } from "./relations-generated.js";
 import { OntoDesignationEvent, OntoBylaw } from "./entities.js";
@@ -158,5 +159,55 @@ describe("Wiring LOT 1 sur les nœuds (défauts sûrs = rétro-compatible)", () 
     expect(b.temporal).toBeNull();
     expect(b.enVigueurProvenance).toBeNull();
     expect(b.relations).toEqual([]);
+  });
+});
+
+describe("typeInstrument (contrat §10 — famille d'instrument, §9-tolérant, axe orthogonal au régime)", () => {
+  it("KNOWN_TYPE_INSTRUMENTS = le wire geo exact", () => {
+    expect([...KNOWN_TYPE_INSTRUMENTS]).toEqual([
+      "zonage", "lotissement", "construction", "plan-urbanisme", "piia", "derogation",
+    ]);
+  });
+  it("OntoDesignationEvent : accepte une valeur CONNUE (déclaré-source)", () => {
+    const e = OntoDesignationEvent.parse({
+      id: UUID, citySlug: "la-minerve", subtype: "avis-motion",
+      typeInstrument: "zonage", rawRef: RAW, recon,
+    });
+    expect(e.typeInstrument).toBe("zonage");
+  });
+  it("TOLÈRE une valeur INCONNUE (§9 : string quelconque, jamais un crash — le consommateur bucketera)", () => {
+    const e = OntoDesignationEvent.parse({
+      id: UUID, citySlug: "x", subtype: "rezoning",
+      typeInstrument: "amenagement-ecologique-futur", rawRef: RAW, recon,
+    });
+    expect(e.typeInstrument).toBe("amenagement-ecologique-futur");
+    expect([...KNOWN_TYPE_INSTRUMENTS]).not.toContain(e.typeInstrument); // hors set connu → ignoré/bucketé
+  });
+  it('accepte le littéral "unknown" (titre source absent/ambigu) ET null (legacy/non-peuplé)', () => {
+    const a = OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "rezoning", typeInstrument: "unknown", rawRef: RAW, recon });
+    expect(a.typeInstrument).toBe("unknown");
+    const b = OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "rezoning", typeInstrument: null, rawRef: RAW, recon });
+    expect(b.typeInstrument).toBeNull();
+  });
+  it("défaut = null quand omis (rétro-compat, safe-default)", () => {
+    const e = OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "rezoning", rawRef: RAW, recon });
+    expect(e.typeInstrument).toBeNull();
+  });
+  it("REJETTE un non-string (miroir validateZoningEvent : string-ou-null seulement)", () => {
+    expect(() =>
+      OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "rezoning", typeInstrument: 3, rawRef: RAW, recon }),
+    ).toThrow();
+  });
+  it("OntoBylaw porte AUSSI typeInstrument (axe orthogonal : règlement habilitant = bylaw + type_instrument=derogation)", () => {
+    const b = OntoBylaw.parse({
+      id: UUID, citySlug: "la-minerve", numero: "R-2024-derog",
+      typeInstrument: "derogation", rawRef: RAW, recon,
+    });
+    // Régime bylaw (numero présent) ET instrument derogation coexistent — type_instrument ne force pas le régime.
+    expect(b.typeInstrument).toBe("derogation");
+  });
+  it("OntoBylaw : défaut null quand omis (rétro-compat)", () => {
+    const b = OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "1", rawRef: RAW, recon });
+    expect(b.typeInstrument).toBeNull();
   });
 });
