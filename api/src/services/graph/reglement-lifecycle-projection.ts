@@ -98,10 +98,13 @@ function reconOf(ev: ZoningEventT, canonicalId: string) {
   };
 }
 
-/** rawRef (§4.6) = the raw-document backing ref. From the emission we carry the source url
- *  (the S3 key is not on the ZoningEvent surface); never empty (schema requires min 1). */
+/** rawRef (§4.6) = the raw-document backing ref (source url; the S3 key is not on the ZoningEvent
+ *  surface). MUST be non-empty (OntoNode.rawRef is min 1): both source_url and url_pdf are
+ *  z.string().url() so this holds, but we fail LOUD rather than emit a schema-invalid node. */
 function rawRefOf(ev: ZoningEventT): string {
-  return ev.provenance.source_url || ev.url_pdf;
+  const ref = ev.provenance.source_url || ev.url_pdf;
+  if (!ref) throw new Error(`rawRefOf: empty rawRef for event ${ev.event_id} (source_url and url_pdf both empty)`);
+  return ref;
 }
 
 // ── D5 — relation typing (SAFETY-CRITICAL) ────────────────────────────────────
@@ -212,9 +215,6 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
 // ── D6 lifecycle_predecessor (n° intersection) + D8 bitemporal + D5 close-guard + D7 en_vigueur ────
 const PREMIER = new Set(["premier_projet", "1er-projet", "1er_projet"]);
 const SECOND = new Set(["second_projet", "2e-projet", "2e_projet"]);
-/** §2.1 — the 4 cycle suspensives (emitted document_type=null, type=<suspensive>). Any UNRESOLVED
- *  one co-séance keeps a candidate bylaw OUT of force (en_vigueur gate B) — a registre SUSPENDS. */
-const SUSPENSIVE_TYPES = new Set(["registre-referendaire", "retrait", "echec-referendaire", "refus-mrc"]);
 
 /** Legal stage order for predecessor chaining (§5): avis < projet(1er<2e) < adopté < en_vigueur. */
 function stageOrder(ev: ZoningEventT): number {
@@ -242,8 +242,8 @@ function predecessorRelation(predId: string): OntoRelationT {
 /**
  * Project a batch of ZoningEvents to lifecycle nodes: per-event creation/typing (Lot 2/3)
  * then a correlation pass — lifecycle_predecessor by n° intersection (D6), bitemporal
- * validFrom/validTo (D8), en_vigueur 3-states + suspensive gate (D7/§2.1), the D5 close-guard,
- * and abrogation closure. entree_en_vigueur/abrogation update/close existing bylaws (no own node).
+ * validFrom/validTo (D8), en_vigueur 3-states (D7/§2.1), the D5 close-guard, abrogation closure,
+ * and Rule-B séance attachment. entree_en_vigueur/abrogation update/close existing bylaws (no own node).
  */
 export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
   const projected = events
@@ -256,11 +256,12 @@ export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
     if (ev.date_iso)
       p.node.temporal = { validFrom: ev.date_iso, validTo: null, knownFrom: ev.provenance.retrieved_at, knownTo: null };
 
-  // D7 — en_vigueur 3-states (§2.1). Per Bylaw, enVigueurProvenance is derived from a SERVED
-  // entree_en_vigueur (verbatim; derived when the source states the legal trigger) — NEVER a
-  // fabricated date, NO hardcoded delay table. Gate B: an UNRESOLVED co-séance suspensive
-  // (registre-referendaire/…) keeps the bylaw OUT of force (unknown) even at typeInstrument=unknown —
-  // a registre SUSPENDS; in-force is asserted only by a served entree_en_vigueur.
+  // D7 — en_vigueur 3-states (§2.1). Per Bylaw, enVigueurProvenance is derived ONLY from a SERVED
+  // entree_en_vigueur: verbatim (date served directly) | derived (the source states the legal
+  // trigger) | unknown. In-force is asserted ONLY by a served date — a served entree_en_vigueur
+  // IMPLIES any cycle suspensive (registre-referendaire) already resolved (the bylaw came into
+  // force), so env wins; else unknown. NEVER in-force without a served date; NO fabricated date,
+  // NO hardcoded delay table. (A suspensive still surfaces as a Lot-7 node + Rule-B séance edge.)
   for (const { ev, p } of projected) {
     if (p.kind !== "bylaw") continue;
     const numeros = lineageNumeros(ev);
@@ -268,13 +269,9 @@ export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
       (e) => e.document_type === "entree_en_vigueur" && !!e.date_iso &&
         e.reglement_number.some((n) => n != null && numeros.includes(n)),
     );
-    const suspensiveUnresolved =
-      !env && events.some((e) => e.type != null && SUSPENSIVE_TYPES.has(e.type) && rawRefOf(e) === rawRefOf(ev));
-    p.node.enVigueurProvenance = suspensiveUnresolved
-      ? "unknown" // gate B: never in-force under an unresolved suspensive
-      : env
-        ? env.declencheur_type ? "derived" : "verbatim" // served date; derived iff the source states the legal trigger
-        : "unknown"; // no served en_vigueur date -> never fabricated (no delay table)
+    p.node.enVigueurProvenance = env
+      ? env.declencheur_type ? "derived" : "verbatim" // served date; derived iff the source states the legal trigger
+      : "unknown"; // no served en_vigueur date -> never fabricated (no delay table)
     if (env?.date_iso && p.node.temporal)
       p.node.temporal = { ...p.node.temporal, validFrom: env.date_iso }; // in-force date = the served en_vigueur date
   }
