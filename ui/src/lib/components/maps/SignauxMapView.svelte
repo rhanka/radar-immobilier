@@ -31,6 +31,8 @@
     type GeoCityMapApi,
     type GeoSegment,
   } from "$lib/components/maps/GeoCityMapBase.svelte";
+  import SignauxGeoEngineCanvas from "$lib/components/maps/SignauxGeoEngineCanvas.svelte";
+  import { GEO3D_ENGINE_ENABLED } from "$lib/maps/geo-engine-flag.js";
   import {
     buildCityMapEntries,
     type CityMapEntry,
@@ -202,6 +204,12 @@
     boundsCenter,
     QUEBEC_PROVINCE_BOUNDS,
   } from "$lib/maps/geometry-bounds.js";
+  import type {
+    BasemapSpec,
+    GeoLayerSpec,
+    GeoViewport,
+    MountGeoMap,
+  } from "@sentropic/geo-map-engine";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   const EMPTY_ZONES: GeoZoneFeatureCollection = {
@@ -212,8 +220,26 @@
     type: "FeatureCollection",
     features: [],
   };
+  const GEO_ENGINE_BASEMAP: BasemapSpec = {
+    kind: "raster",
+    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+    attribution: "© OpenStreetMap contributors",
+    saturation: -1,
+  };
+  const GEO_ENGINE_VIEWPORT: GeoViewport = {
+    center: [-73.5, 45.7],
+    zoom: 7,
+    bearing: 0,
+    pitch: 0,
+  };
+  const GEO_ENGINE_TOKEN_ROLES = ["semantic-data-category1"] as const;
+
+  const pendingGeoEngineMount: MountGeoMap<HTMLElement> = () => {
+    throw new Error("Le mount geo-engine attend le go de la Porte 2.");
+  };
 
   export let geoRoute: GeoRoute | null = null;
+  export let geoEngineMount: MountGeoMap<HTMLElement> = pendingGeoEngineMount;
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
@@ -552,6 +578,29 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
+  $: geoEngineLayers = GEO3D_ENGINE_ENABLED ? ([
+    {
+      id: "radar-immo/signaux/municipalities",
+      kind: "points",
+      data: {
+        type: "FeatureCollection",
+        features: allEntries.map((entry) => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [entry.municipality.lon, entry.municipality.lat],
+          },
+          properties: {
+            citySlug: entry.municipality.slug,
+            signalCount: countForVivierCity(entry, activeSubsetKey),
+          },
+        })),
+      },
+      color: { by: "constant", token: "semantic-data-category1" },
+      radius: { by: "constant", value: 6 },
+      interactivity: { idField: "citySlug", hover: true, select: true },
+    },
+  ] satisfies readonly GeoLayerSpec[]) : [];
   $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
   /**
    * Clé de MODE dérivée (z|m|p / vivier-v2) : c'est ELLE qu'on persiste et qu'on
@@ -2126,6 +2175,15 @@
     l'init MapLibre, le drill segmenté, la caméra et l'échafaudage zone/lot ;
     cette vue ne pilote que les données + expressions métier. Iso-comportement.
   -->
+  {#if GEO3D_ENGINE_ENABLED}
+  <SignauxGeoEngineCanvas
+    mount={geoEngineMount}
+    basemap={GEO_ENGINE_BASEMAP}
+    layers={geoEngineLayers}
+    viewport={GEO_ENGINE_VIEWPORT}
+    tokenRoles={GEO_ENGINE_TOKEN_ROLES}
+  />
+  {:else}
   <GeoCityMapBase
     basemap="neutral-gray"
     {fillColorExpression}
@@ -2296,6 +2354,7 @@
       />
     {/if}
   </GeoCityMapBase>
+  {/if}
 
   <!-- ── SEL droit : contexte de sélection (Ville active + Signaux / Zones /
        Lots). Les filtres DONNÉES vivent en EN-TÊTE des accordéons Zones et
