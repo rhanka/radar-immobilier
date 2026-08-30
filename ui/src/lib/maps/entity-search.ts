@@ -17,6 +17,8 @@ export interface SearchableText {
   text: string;
   /** Sous-libellé optionnel (ex. libellé de zone, adresse du lot). */
   subtext?: string | null;
+  /** Clé canonique de recherche calculée par l'appelant selon l'entité. */
+  searchKey?: string | null;
 }
 
 /** Minuscule + suppression des diacritiques + trim (comparaison stable). */
@@ -48,6 +50,17 @@ export function matchRank(
   return -1;
 }
 
+/** Rang exact/préfixe d'une clé canonique ; aucune sous-chaîne ni fuzzy. */
+export function canonicalRank(
+  itemKey: string | null | undefined,
+  queryKey: string | undefined,
+): number {
+  if (!itemKey || !queryKey) return -1;
+  if (itemKey === queryKey) return 0;
+  if (itemKey.startsWith(queryKey)) return 1;
+  return -1;
+}
+
 /**
  * Filtre + classe `items` par `query` via `accessor`. Requête vide/espaces →
  * `items` renvoyé tel quel. Sinon : ne garde que les correspondances, triées
@@ -57,13 +70,16 @@ export function rankBySearch<T>(
   items: readonly T[],
   query: string,
   accessor: (item: T) => SearchableText,
+  queryKey?: string,
 ): T[] {
   const qNorm = normalizeSearch(query);
   if (qNorm.length === 0) return items.slice();
   const ranked: Array<{ item: T; rank: number; index: number }> = [];
   items.forEach((item, index) => {
-    const { text, subtext } = accessor(item);
-    const rank = matchRank(text, subtext, qNorm);
+    const { text, subtext, searchKey } = accessor(item);
+    const textRank = matchRank(text, subtext, qNorm);
+    const keyRank = canonicalRank(searchKey, queryKey);
+    const rank = textRank < 0 ? keyRank : keyRank < 0 ? textRank : Math.min(textRank, keyRank);
     if (rank >= 0) ranked.push({ item, rank, index });
   });
   ranked.sort((a, b) => (a.rank !== b.rank ? a.rank - b.rank : a.index - b.index));
