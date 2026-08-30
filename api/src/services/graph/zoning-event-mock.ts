@@ -51,8 +51,10 @@ export const ZoningEvent = z
     bylaw_numero: z.string().nullable().default(null),
     /** Content type (incl. the 4 suspensive: registre-referendaire/retrait/echec-referendaire/refus-mrc). */
     type: z.string().nullable().default(null),
-    /** §1 — string (§9-tolerant): a value outside KNOWN_DOCUMENT_TYPES is passed through. */
-    document_type: z.string().min(1),
+    /** §1 — string (§9-tolerant): a value outside KNOWN_DOCUMENT_TYPES is passed through.
+     *  NULLABLE: a cycle suspensive (registre-referendaire/…) is emitted document_type=null,
+     *  type=<suspensive> (the regime is carried by `type`, not document_type). */
+    document_type: z.string().min(1).nullable(),
     /** §10 — instrument family DECLARED-SOURCE by geo (verbatim known-or-§9-tolerated value,
      *  the literal "unknown", or null/legacy). immo CONSUMES it verbatim — never classifies.
      *  Orthogonal to document_type (regime): a habilitant bylaw carries typeInstrument="derogation". */
@@ -80,6 +82,7 @@ export const ZoningEvent = z
     (e) =>
       e.cible_reglement_numero === null ||
       e.document_type === "avis_motion" ||
+      e.document_type === null || // §9-unknown-like: not constrained (a suspensive carries no cible anyway)
       !(KNOWN_DOCUMENT_TYPES as readonly string[]).includes(e.document_type),
     { message: "cible_reglement_numero is avis_motion-only (§1/§4)", path: ["cible_reglement_numero"] },
   );
@@ -89,7 +92,7 @@ export type ZoningEventT = z.infer<typeof ZoningEvent>;
  *  Parses through the schema so fixtures can never drift from the emitted contract. */
 export function mockZoningEvent(overrides: Partial<ZoningEventT> & Pick<ZoningEventT, "muni" | "document_type">): ZoningEventT {
   const base = {
-    event_id: `mock:${overrides.muni}:${overrides.document_type}:${overrides.event_id ?? Math.random().toString(36).slice(2)}`,
+    event_id: `mock:${overrides.muni}:${overrides.document_type ?? "none"}:${overrides.event_id ?? Math.random().toString(36).slice(2)}`,
     url_pdf: "https://example.invalid/pv.pdf",
     extrait_brut: "",
     provenance: {
