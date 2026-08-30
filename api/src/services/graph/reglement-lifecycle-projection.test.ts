@@ -5,9 +5,11 @@ import {
   ZONAGE_FIXTURES,
   SM_2026_511_AVIS,
   SM_2026_511_2E_PROJET,
+  SM_2026_511_LIFECYCLE,
   SM_2026_509_PLAN_AVIS,
   SM_2025_492_2E_PROJET,
   SM_2025_492_ADOPTION,
+  SM_2025_492_LIFECYCLE,
   COW_1841_52_ADOPTION,
   CAN_5000_076_SECOND_PROJET,
 } from "./reglement-lifecycle-projection.fixture.js";
@@ -160,5 +162,49 @@ describe("relation typing (libellé verbatim -> replaces/amends) — LOT 3", () 
     if (p?.kind !== "bylaw") throw new Error("expected bylaw");
     expect(p.node.relations).toHaveLength(1);
     expect(p.node.relations[0]).toMatchObject({ relationType: "amends", target: { reglementNumero: "1841" } });
+  });
+});
+
+/** LOT 4 — lifecycle_predecessor (n° intersection, D6) + bitemporal (D8) + D5 close-guard. */
+describe("predecessor + bitemporal + replaces close-guard — LOT 4", () => {
+  it("2e-projet -> adoption: adoption gets lifecycle_predecessor, 2e-projet validTo closes at adoption validFrom", () => {
+    const nodes = projectZoningEvents(SM_2025_492_LIFECYCLE);
+    const projet = nodes.find((n) => n.kind === "designation-event")!;
+    const adoption = nodes.find((n) => n.kind === "bylaw")!;
+    expect(
+      adoption.node.relations.some(
+        (r) => r.relationType === "lifecycle_predecessor" && "nodeId" in r.target && r.target.nodeId === projet.node.id,
+      ),
+    ).toBe(true);
+    expect(projet.node.temporal?.validTo).toBe(adoption.node.temporal?.validFrom);
+  });
+
+  it("avis -> 2e-projet: chained by stage order (not emission order), avis validTo closes at successor", () => {
+    const nodes = projectZoningEvents(SM_2026_511_LIFECYCLE);
+    const avis = nodes.find((n) => n.kind === "designation-event" && n.node.subtype === "avis-motion")!;
+    const projet = nodes.find((n) => n.kind === "designation-event" && n.node.subtype === "projet-reglement")!;
+    expect(
+      projet.node.relations.some((r) => r.relationType === "lifecycle_predecessor" && "nodeId" in r.target && r.target.nodeId === avis.node.id),
+    ).toBe(true);
+    expect(avis.node.temporal?.validTo).toBe(projet.node.temporal?.validFrom);
+  });
+
+  const baseBylaw = mockZoningEvent({ muni: "t", document_type: "adoption", reglement_number: ["100"], bylaw_numero: "100", date_iso: "2020-01-01", libelles_relation: [] });
+  const certReplacer = mockZoningEvent({ muni: "t", document_type: "adoption", reglement_number: ["200"], bylaw_numero: "200", date_iso: "2026-05-01", libelles_relation: ["Règlement 200 abroge et remplace le règlement numéro 100"] });
+  const uncReplacer = mockZoningEvent({ muni: "t", document_type: "adoption", reglement_number: ["300"], bylaw_numero: "300", date_iso: "2026-05-01", libelles_relation: ["Règlement 300 concernant le règlement numéro 100"] });
+
+  it("a CERTAIN replaces closes the base bylaw's validTo (at the replacing node's validFrom)", () => {
+    const nodes = projectZoningEvents([baseBylaw, certReplacer]);
+    const base = nodes.find((n) => n.kind === "bylaw" && n.node.numero === "100")!;
+    expect(base.node.temporal?.validTo).toBe("2026-05-01");
+  });
+
+  // NEGATIVE (mandatory): an uncertain/flagged replaces NEVER closes the base (no silent kill).
+  it("an UNCERTAIN/flagged replaces does NOT close the base's validTo", () => {
+    const rel = projectZoningEvents([uncReplacer]).find((n) => n.kind === "bylaw" && n.node.numero === "300")!;
+    expect(rel.node.relations[0]).toMatchObject({ relationType: "replaces", typingConfidence: "uncertain", flagged: true });
+    const nodes = projectZoningEvents([baseBylaw, uncReplacer]);
+    const base = nodes.find((n) => n.kind === "bylaw" && n.node.numero === "100")!;
+    expect(base.node.temporal?.validTo).toBeNull();
   });
 });

@@ -167,7 +167,87 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
   return null;
 }
 
-/** Project a batch of ZoningEvents to lifecycle nodes (Lot 2: creation + statut). */
+// ── D6 lifecycle_predecessor (n° intersection) + D8 bitemporal + D5 close-guard ────
+const PREMIER = new Set(["premier_projet", "1er-projet", "1er_projet"]);
+const SECOND = new Set(["second_projet", "2e-projet", "2e_projet"]);
+
+/** Legal stage order for predecessor chaining (§5): avis < projet(1er<2e) < adopté < en_vigueur. */
+function stageOrder(ev: ZoningEventT): number {
+  const dt = ev.document_type;
+  if (dt === "avis_motion") return 0;
+  if (PREMIER.has(dt) || (dt === "projet_reglement" && PREMIER.has(ev.type ?? ""))) return 1;
+  if (SECOND.has(dt) || (dt === "projet_reglement" && SECOND.has(ev.type ?? ""))) return 2;
+  if (dt === "projet_reglement") return 1;
+  if (dt === "adoption") return 3;
+  if (dt === "entree_en_vigueur") return 4;
+  return 99;
+}
+
+/** Lineage keys an event belongs to. avis: the announced cible; projet/adoption/en_vigueur:
+ *  the reglement_number LIST (refonte = several -> the event joins each -> §5 intersection). */
+function lineageNumeros(ev: ZoningEventT): string[] {
+  if (ev.document_type === "avis_motion") return ev.cible_reglement_numero ? [ev.cible_reglement_numero] : [];
+  return ev.reglement_number.filter((n): n is string => n != null);
+}
+
+function predecessorRelation(predId: string): OntoRelationT {
+  return { relationType: "lifecycle_predecessor", target: { nodeId: predId }, fromLibelle: null, typingConfidence: "certain", flagged: false };
+}
+
+/**
+ * Project a batch of ZoningEvents to lifecycle nodes: per-event creation/typing (Lot 2/3)
+ * then a correlation pass — lifecycle_predecessor by n° intersection (D6), bitemporal
+ * validFrom/validTo (D8), and the D5 close-guard.
+ */
 export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
-  return events.map(projectEvent).filter((n): n is ProjectedNode => n !== null);
+  const projected = events
+    .map((ev) => ({ ev, p: projectEvent(ev) }))
+    .filter((x): x is { ev: ZoningEventT; p: ProjectedNode } => x.p !== null);
+
+  // D8 — validFrom is the VERBATIM date_iso; validTo opens null, closed by a successor below.
+  // No date -> no temporal (verbatim-or-unknown; a validFrom is never fabricated).
+  for (const { ev, p } of projected)
+    if (ev.date_iso)
+      p.node.temporal = { validFrom: ev.date_iso, validTo: null, knownFrom: ev.provenance.retrieved_at, knownTo: null };
+
+  // D6 — within each lineage, chain by stage order; close each predecessor's validTo at the
+  // successor's validFrom. An event in several lineages (refonte) links in each (intersection).
+  const byNumero = new Map<string, { ev: ZoningEventT; p: ProjectedNode }[]>();
+  for (const item of projected)
+    for (const n of lineageNumeros(item.ev)) {
+      const arr = byNumero.get(n) ?? [];
+      arr.push(item);
+      byNumero.set(n, arr);
+    }
+  const linkedEdges = new Set<string>();
+  for (const arr of byNumero.values()) {
+    const chain = [...arr].sort(
+      (a, b) => stageOrder(a.ev) - stageOrder(b.ev) || (a.ev.date_iso ?? "").localeCompare(b.ev.date_iso ?? ""),
+    );
+    for (let i = 1; i < chain.length; i++) {
+      const pred = chain[i - 1].p, succ = chain[i].p;
+      if (pred.node.id === succ.node.id) continue;
+      const edge = `${succ.node.id}<-${pred.node.id}`;
+      if (!linkedEdges.has(edge)) {
+        succ.node.relations.push(predecessorRelation(pred.node.id));
+        linkedEdges.add(edge);
+      }
+      if (pred.node.temporal && succ.node.temporal?.validFrom)
+        pred.node.temporal = { ...pred.node.temporal, validTo: succ.node.temporal.validFrom };
+    }
+  }
+
+  // D5 close-guard — ONLY a CERTAIN replaces closes the target base's validTo. An uncertain/
+  // flagged replaces NEVER closes it (a live reglement is never silently killed; flag -> review).
+  const bylawByNumero = new Map<string, ProjectedNode>();
+  for (const { p } of projected) if (p.kind === "bylaw" && p.node.numero) bylawByNumero.set(p.node.numero, p);
+  for (const { p } of projected)
+    for (const r of p.node.relations)
+      if (r.relationType === "replaces" && r.typingConfidence === "certain" && "reglementNumero" in r.target) {
+        const base = bylawByNumero.get(r.target.reglementNumero);
+        if (base?.node.temporal && p.node.temporal?.validFrom)
+          base.node.temporal = { ...base.node.temporal, validTo: p.node.temporal.validFrom };
+      }
+
+  return projected.map((x) => x.p);
 }
