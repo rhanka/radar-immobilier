@@ -36,6 +36,8 @@
  * (données cadastrales/foncières publiques). Aucun nom de propriétaire n'est extrait.
  */
 
+import { normalizeLotKey, normalizeZoneCode, zoneSearchKey } from "@radar/domain";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /** Un code de zone extrait du texte libre. */
@@ -193,45 +195,15 @@ function trimStreetTail(name: string): string {
 }
 
 // ─── Normalisation ────────────────────────────────────────────────────────────
+// Impl canonique déplacée dans `@radar/domain` (src/geo/normalize.ts) : source
+// UNIQUE partagée api + ui, pour que le front et le back convergent sur la même
+// normalisation déterministe (matches non-divergents). Ré-exportée ici pour les
+// consommateurs existants (extract-refs, ogc-pull, resolve-refs, populate-geo…).
 
-/**
- * Normalise un code de zone (UNIQUE source de vérité — utilisée par extract-refs ET ogc-pull).
- *
- * Règles :
- * - Majuscules
- * - Remplacement des tirets demi-cadratins (–, —) par des tirets ASCII (-)
- * - Suppression du suffixe secteur entre parenthèses (ex. `(VLO)`, `(SAT)`)
- * - Suppression de tous les espaces restants
- *
- * Exemples :
- *   "H34-327 (VLO)" -> "H34-327"
- *   "h-431"         -> "H-431"
- *   "RU1302"        -> "RU1302"
- *   "H 34-327"      -> "H34-327"
- *   "H–431"         -> "H-431"     (demi-cadratin unicode)
- *   null / undefined -> ""
- *
- * @param raw - Valeur brute (string ou unknown depuis les propriétés OGC)
- */
-export function normalizeZoneCode(raw: unknown): string {
-  return String(raw ?? "")
-    .toUpperCase()
-    .replace(/[–—]/g, "-")
-    .replace(/\s*\([A-Z0-9]{2,8}\)\s*/g, "")
-    .replace(/\s+/g, "");
-}
+export { normalizeZoneCode, zoneSearchKey, normalizeLotKey };
 
-/**
- * Normalise un numéro de lot cadastral :
- * - Suppression de tous les espaces et caractères non-numériques
- *
- * Exemples :
- *   "6 057 912" -> "6057912"
- *   "6057912"   -> "6057912"
- */
-export function normalizeLotRef(raw: string): string {
-  return raw.replace(/[^0-9]/g, "");
-}
+/** @deprecated Alias de compat — préférer `normalizeLotKey` (`@radar/domain`). */
+export const normalizeLotRef = normalizeLotKey;
 
 /** Normalisation des types de voie vers une forme canonique. */
 const STREET_TYPE_CANON: Record<string, string> = {
