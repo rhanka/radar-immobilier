@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ZoningEvent, mockZoningEvent } from "./zoning-event-mock.js";
-import { projectZoningEvents, projectEvent, deriveStatut, stableUuid } from "./reglement-lifecycle-projection.js";
+import { projectZoningEvents, projectEvent, deriveStatut, stableUuid, typeLibelle, typeRelations } from "./reglement-lifecycle-projection.js";
 import {
   ZONAGE_FIXTURES,
   SM_2026_511_AVIS,
@@ -119,5 +119,46 @@ describe("projection: node creation + statut — LOT 2", () => {
     const nodes = projectZoningEvents(ZONAGE_FIXTURES);
     expect(nodes.length).toBe(ZONAGE_FIXTURES.length);
     expect(nodes.filter((n) => n.kind === "bylaw").length).toBe(2); // SM 2025-492 adoption + COW adoption
+  });
+});
+
+/** LOT 3 — relation typing (D5, safety-critical). */
+describe("relation typing (libellé verbatim -> replaces/amends) — LOT 3", () => {
+  it("'modifiant le Règlement de zonage numéro X' -> amends(X) certain, base n° from the libellé", () => {
+    const r = typeLibelle("Adoption du Règlement numéro 2025-492 modifiant le Règlement de zonage numéro 2019-342");
+    expect(r).not.toBeNull();
+    expect(r?.relationType).toBe("amends");
+    expect(r?.target).toEqual({ reglementNumero: "2019-342" }); // the BASE, not the subject 2025-492
+    expect(r?.typingConfidence).toBe("certain");
+    expect(r?.flagged).toBe(false);
+  });
+
+  it("'abroge et remplace le règlement numéro X' -> replaces(X) certain", () => {
+    const r = typeLibelle("QUE le règlement 900 abroge et remplace le règlement numéro 764");
+    expect(r?.relationType).toBe("replaces");
+    expect(r?.target).toEqual({ reglementNumero: "764" });
+    expect(r?.typingConfidence).toBe("certain");
+  });
+
+  // NEGATIVE (mandatory): an ambiguous libellé is NEVER auto-typed amends.
+  it("ambiguous libellé (base n° named, no certain verb) -> replaces + uncertain + FLAGGED, NEVER amends", () => {
+    const r = typeLibelle("Résolution concernant le règlement numéro 150-49");
+    expect(r?.relationType).toBe("replaces"); // fallback label, not amends
+    expect(r?.relationType).not.toBe("amends");
+    expect(r?.typingConfidence).toBe("uncertain");
+    expect(r?.flagged).toBe(true);
+  });
+
+  // ANTI-INVENTION: a bare "le Règlement de zonage" (no base n°) yields NO fabricated target.
+  it("no base n° named (candiac zone-creation) -> NO relation (never fabricate a target)", () => {
+    expect(typeLibelle("Règlement 5000-076 modifiant le Règlement de zonage afin de créer la zone P-447")).toBeNull();
+    expect(typeRelations(CAN_5000_076_SECOND_PROJET)).toEqual([]);
+  });
+
+  it("typed relations are wired onto the projected node", () => {
+    const p = projectEvent(COW_1841_52_ADOPTION);
+    if (p?.kind !== "bylaw") throw new Error("expected bylaw");
+    expect(p.node.relations).toHaveLength(1);
+    expect(p.node.relations[0]).toMatchObject({ relationType: "amends", target: { reglementNumero: "1841" } });
   });
 });
