@@ -147,7 +147,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
     return { kind: "bylaw", node };
   }
 
-  if (DESIGNATION_DOC_TYPES(ev.document_type)) {
+  if (DESIGNATION_DOC_TYPES(ev.document_type ?? "")) {
     const subtype = ev.document_type === "avis_motion" ? "avis-motion" : "projet-reglement";
     const node: OntoDesignationEventT = {
       id: stableUuid(ev.event_id),
@@ -170,13 +170,16 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
   return null;
 }
 
-// ── D6 lifecycle_predecessor (n° intersection) + D8 bitemporal + D5 close-guard ────
+// ── D6 lifecycle_predecessor (n° intersection) + D8 bitemporal + D5 close-guard + D7 en_vigueur ────
 const PREMIER = new Set(["premier_projet", "1er-projet", "1er_projet"]);
 const SECOND = new Set(["second_projet", "2e-projet", "2e_projet"]);
+/** §2.1 — the 4 cycle suspensives (emitted document_type=null, type=<suspensive>). Any UNRESOLVED
+ *  one co-séance keeps a candidate bylaw OUT of force (en_vigueur gate B) — a registre SUSPENDS. */
+const SUSPENSIVE_TYPES = new Set(["registre-referendaire", "retrait", "echec-referendaire", "refus-mrc"]);
 
 /** Legal stage order for predecessor chaining (§5): avis < projet(1er<2e) < adopté < en_vigueur. */
 function stageOrder(ev: ZoningEventT): number {
-  const dt = ev.document_type;
+  const dt = ev.document_type ?? "";
   if (dt === "avis_motion") return 0;
   if (PREMIER.has(dt) || (dt === "projet_reglement" && PREMIER.has(ev.type ?? ""))) return 1;
   if (SECOND.has(dt) || (dt === "projet_reglement" && SECOND.has(ev.type ?? ""))) return 2;
@@ -200,7 +203,8 @@ function predecessorRelation(predId: string): OntoRelationT {
 /**
  * Project a batch of ZoningEvents to lifecycle nodes: per-event creation/typing (Lot 2/3)
  * then a correlation pass — lifecycle_predecessor by n° intersection (D6), bitemporal
- * validFrom/validTo (D8), and the D5 close-guard.
+ * validFrom/validTo (D8), en_vigueur 3-states + suspensive gate (D7/§2.1), the D5 close-guard,
+ * and abrogation closure. entree_en_vigueur/abrogation update/close existing bylaws (no own node).
  */
 export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
   const projected = events
@@ -212,6 +216,29 @@ export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
   for (const { ev, p } of projected)
     if (ev.date_iso)
       p.node.temporal = { validFrom: ev.date_iso, validTo: null, knownFrom: ev.provenance.retrieved_at, knownTo: null };
+
+  // D7 — en_vigueur 3-states (§2.1). Per Bylaw, enVigueurProvenance is derived from a SERVED
+  // entree_en_vigueur (verbatim; derived when the source states the legal trigger) — NEVER a
+  // fabricated date, NO hardcoded delay table. Gate B: an UNRESOLVED co-séance suspensive
+  // (registre-referendaire/…) keeps the bylaw OUT of force (unknown) even at typeInstrument=unknown —
+  // a registre SUSPENDS; in-force is asserted only by a served entree_en_vigueur.
+  for (const { ev, p } of projected) {
+    if (p.kind !== "bylaw") continue;
+    const numeros = lineageNumeros(ev);
+    const env = events.find(
+      (e) => e.document_type === "entree_en_vigueur" && !!e.date_iso &&
+        e.reglement_number.some((n) => n != null && numeros.includes(n)),
+    );
+    const suspensiveUnresolved =
+      !env && events.some((e) => e.type != null && SUSPENSIVE_TYPES.has(e.type) && rawRefOf(e) === rawRefOf(ev));
+    p.node.enVigueurProvenance = suspensiveUnresolved
+      ? "unknown" // gate B: never in-force under an unresolved suspensive
+      : env
+        ? env.declencheur_type ? "derived" : "verbatim" // served date; derived iff the source states the legal trigger
+        : "unknown"; // no served en_vigueur date -> never fabricated (no delay table)
+    if (env?.date_iso && p.node.temporal)
+      p.node.temporal = { ...p.node.temporal, validFrom: env.date_iso }; // in-force date = the served en_vigueur date
+  }
 
   // D6 — within each lineage, chain by stage order; close each predecessor's validTo at the
   // successor's validFrom. An event in several lineages (refonte) links in each (intersection).
@@ -253,6 +280,17 @@ export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
         if (base?.node.temporal && p.node.temporal?.validFrom)
           base.node.temporal = { ...base.node.temporal, validTo: p.node.temporal.validFrom };
       }
+
+  // D7 — abrogation closes the abrogated bylaw's validTo at the repeal date. It is a REPLACES
+  // relation (repealer -> repealed), NEVER a statut "abandonne" (a repealed live bylaw is not an
+  // abandoned project). An abrogation event creates no node; it closes the named base here.
+  for (const ev of events)
+    if (ev.document_type === "abrogation" && ev.date_iso)
+      for (const r of typeRelations(ev))
+        if (r.relationType === "replaces" && "reglementNumero" in r.target) {
+          const base = bylawByNumero.get(r.target.reglementNumero);
+          if (base?.node.temporal) base.node.temporal = { ...base.node.temporal, validTo: ev.date_iso };
+        }
 
   return projected.map((x) => x.p);
 }
