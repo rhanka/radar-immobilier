@@ -111,6 +111,10 @@ export function normalizeReglementKey(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, "");
 }
 
+export function isReglementAvisOnly(etapes: ReadonlySet<string>): boolean {
+  return etapes.size > 0 && [...etapes].every((etape) => etape === "avis_motion");
+}
+
 /** Une preuve est ouvrable si elle porte une source documentaire (rawRef/URL). */
 function evidenceOpenable(evidence: SignalEvidence): boolean {
   return (
@@ -124,6 +128,7 @@ interface MutableEntry extends ReglementEntry {
   _seenZone: Set<string>;
   _seenGrille: Set<string>;
   _hasRawEvidence: boolean;
+  _etapes: Set<string>;
 }
 
 /**
@@ -156,6 +161,13 @@ export function aggregateReglements(
     const evidence = extractSignalEvidence(node);
     const openable = evidenceOpenable(evidence);
     const hasRaw = evidence.rawRef !== null;
+    const etapes = propRecords(node)
+      .map((record) => record.etape)
+      .filter(
+        (etape): etape is string =>
+          typeof etape === "string" && etape.trim().length > 0,
+      )
+      .map((etape) => etape.trim().toLowerCase());
 
     for (const number of numbers) {
       const key = normalizeReglementKey(number);
@@ -172,10 +184,12 @@ export function aggregateReglements(
           _seenZone: new Set(),
           _seenGrille: new Set(),
           _hasRawEvidence: false,
+          _etapes: new Set(),
         };
         byKey.set(key, entry);
         order.push(key);
       }
+      for (const etape of etapes) entry._etapes.add(etape);
       if (!entry.signalNodeIds.includes(node.id)) {
         entry.signalNodeIds.push(node.id);
         entry.signalCount += 1;
@@ -204,18 +218,20 @@ export function aggregateReglements(
     }
   }
 
-  const entries: ReglementEntry[] = order.map((key) => {
-    const entry = byKey.get(key)!;
-    return {
-      number: entry.number,
-      key: entry.key,
-      signalCount: entry.signalCount,
-      signalNodeIds: entry.signalNodeIds,
-      zoneCodes: entry.zoneCodes,
-      grillePdfUrls: entry.grillePdfUrls,
-      evidenceNodeId: entry.evidenceNodeId,
-    };
-  });
+  const entries: ReglementEntry[] = order
+    .filter((key) => !isReglementAvisOnly(byKey.get(key)!._etapes))
+    .map((key) => {
+      const entry = byKey.get(key)!;
+      return {
+        number: entry.number,
+        key: entry.key,
+        signalCount: entry.signalCount,
+        signalNodeIds: entry.signalNodeIds,
+        zoneCodes: entry.zoneCodes,
+        grillePdfUrls: entry.grillePdfUrls,
+        evidenceNodeId: entry.evidenceNodeId,
+      };
+    });
   entries.sort(
     (a, b) =>
       b.signalCount - a.signalCount || a.number.localeCompare(b.number, "fr"),
