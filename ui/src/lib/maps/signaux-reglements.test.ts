@@ -7,6 +7,7 @@ import type {
 import {
   aggregateReglements,
   enrichGeoZonesWithSignalReglements,
+  isReglementAvisOnly,
   normalizeReglementKey,
   readReglementNumbers,
   reglementSourceViewerTitle,
@@ -86,7 +87,80 @@ describe("normalizeReglementKey", () => {
   });
 });
 
+describe("isReglementAvisOnly", () => {
+  it("conserve un règlement sans étape connue", () => {
+    expect(isReglementAvisOnly(new Set())).toBe(false);
+  });
+
+  it("identifie un agrégat contenant uniquement avis_motion", () => {
+    expect(isReglementAvisOnly(new Set(["avis_motion"]))).toBe(true);
+  });
+
+  it("conserve un agrégat contenant une autre étape", () => {
+    expect(isReglementAvisOnly(new Set(["avis_motion", "premier_projet"]))).toBe(
+      false,
+    );
+    expect(isReglementAvisOnly(new Set(["piia"]))).toBe(false);
+  });
+});
+
 describe("aggregateReglements", () => {
+  it("retire les numéros avis-only après agrégation sans sur-supprimer", () => {
+    const avisOnlyNumbers = [
+      "025-500",
+      "026-508",
+      "026-509",
+      "026-510",
+      "026-502",
+    ];
+    const nodes = [
+      ...avisOnlyNumbers.map((number, index) =>
+        node(`avis-${index}`, {
+          properties: { etape: "avis_motion", reglement_number: number },
+        }),
+      ),
+      node("adoption", {
+        properties: { etape: "adoption", reglement_number: "Controle 100" },
+      }),
+      node("premier-controle", {
+        properties: {
+          etape: "premier_projet",
+          reglement_number: "Controle 100",
+        },
+      }),
+      node("mixte-avis-1", {
+        properties: { etape: "avis_motion", reglement_number: "MiXtE 200" },
+      }),
+      node("mixte-avis-2", {
+        properties: { etape: "avis_motion", reglement_number: "mixte 200" },
+      }),
+      node("mixte-projet", {
+        properties: {
+          etape: "premier_projet",
+          reglement_number: "MIXTE 200",
+        },
+      }),
+      node("sans-etape", {
+        properties: { reglement_number: "Sans Etape 300" },
+      }),
+      node("piia", {
+        properties: { etape: "piia", reglement_number: "PIIA 400" },
+      }),
+    ];
+
+    const numbers = aggregateReglements(nodes).map((entry) => entry.number);
+
+    expect(numbers.filter((number) => avisOnlyNumbers.includes(number))).toEqual([]);
+    expect(numbers).toEqual(
+      expect.arrayContaining([
+        "Controle 100",
+        "MiXtE 200",
+        "Sans Etape 300",
+        "PIIA 400",
+      ]),
+    );
+  });
+
   it("groupe par numéro, compte les signaux et collecte les zones citées", () => {
     const nodes = [
       node("a", { reglement_number: "2021-45", zone_ref: "H-431" }),
