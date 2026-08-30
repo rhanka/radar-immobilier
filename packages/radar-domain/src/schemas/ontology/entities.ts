@@ -3,6 +3,7 @@ import { isoDateSchema } from "../common.js";
 import { EvidenceItem } from "../opportunity.js";
 import { ReconBridge } from "../provenance.js";
 import { geoFields } from "./geo.js";
+import { designationLifecycleFields, bylawLifecycleFields } from "./reglement-lifecycle.js";
 
 /**
  * V1 canonical node-set Zod schemas (SPEC_ONTOLOGY §1.1 D4): Municipality, Zone,
@@ -78,6 +79,10 @@ export const OntoBylaw = z.object({
   rawRef,
   recon: ReconBridge,
   evidence,
+  // LOT 1 — bitemporel + en_vigueur 3-états (verbatim/derived/unknown, anti-invention) + relations α
+  // (replaces/amends/lifecycle_predecessor). `amendsBylawId` CONSERVÉ (vue dérivée back-compat) ;
+  // la canonique devient relations[relationType="amends"].
+  ...bylawLifecycleFields,
 });
 export type OntoBylawT = z.infer<typeof OntoBylaw>;
 
@@ -96,6 +101,12 @@ export const DesignationEventSubtype = z.enum([
   "minor-variance",
   "intention", // weak signal: "the city is open to densifying this sector" (D6)
   "precedent", // a PPCMOI invoked as a regulatory precedent (D6)
+  // LOT 1 — étapes précoces du cycle de vie règlement : chaque étape est un nœud
+  // DISTINCT (contrat 5f7ca0a9 §3.1) ; un Bylaw n'est créé QU'À l'adoption. Le
+  // statut fin est porté par `statut` (réutilise RegulatoryStageKind). Tiret pour
+  // rester cohérent avec les subtypes/stages existants (lot-subdivision, avis-motion).
+  "avis-motion",      // étape 1 : avis de motion
+  "projet-reglement", // étape 2 : projet de règlement (1er / 2e projet)
 ]);
 export type DesignationEventSubtypeT = z.infer<typeof DesignationEventSubtype>;
 export const OntoDesignationEvent = z.object({
@@ -107,6 +118,9 @@ export const OntoDesignationEvent = z.object({
   rawRef,
   recon: ReconBridge,
   evidence,
+  // LOT 1 — cycle de vie règlement (contrat gelé 5f7ca0a9) : statut (RegulatoryStageKind),
+  // cibleReglementNumero (corrélation cross-stage), temporal (bitemporel), relations α discriminées.
+  ...designationLifecycleFields,
 });
 export type OntoDesignationEventT = z.infer<typeof OntoDesignationEvent>;
 

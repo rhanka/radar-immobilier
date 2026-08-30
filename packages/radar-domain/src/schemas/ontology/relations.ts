@@ -2,6 +2,7 @@ import { z } from "zod";
 import { isoDateSchema } from "../common.js";
 import { EvidenceItem } from "../opportunity.js";
 import { ConstraintKind, ConstraintConfidence } from "./entities.js";
+import { RegulatoryStageKind, RegulatoryStageOutcome } from "./reglement-lifecycle.js";
 
 /**
  * V2.0 relation types (SPEC_ONTOLOGY §1.2) et projections relationnelles
@@ -21,19 +22,11 @@ export type { OntoRelationTypeT } from "./relations-generated.js";
 // RegulatoryStage — projection relationnelle du cycle de vie légal d'un Bylaw
 // (§4.2). En V1 ce n'est PAS un nœud graphify ; HAS_STAGE est un FK edge.
 // ─────────────────────────────────────────────────────────────────────────────
-export const RegulatoryStageKind = z.enum([
-  "avis-motion",
-  "1er-projet",
-  "consultation-publique",
-  "2e-projet",
-  "registre-referendaire",
-  "adopte",
-  "entree-vigueur",
-  "abandonne",
-]);
-export type RegulatoryStageKindT = z.infer<typeof RegulatoryStageKind>;
-export const RegulatoryStageOutcome = z.enum(["passed", "failed", "pending", "non-disponible"]);
-export type RegulatoryStageOutcomeT = z.infer<typeof RegulatoryStageOutcome>;
+// RegulatoryStageKind/Outcome sont DÉFINIS dans reglement-lifecycle.ts (réutilisés
+// comme `statut` de nœud dans entities.ts sans cycle d'import) ; importés ci-dessus
+// + ré-exportés ici pour back-compat (consommateurs historiques importaient d'ici).
+export { RegulatoryStageKind, RegulatoryStageOutcome } from "./reglement-lifecycle.js";
+export type { RegulatoryStageKindT, RegulatoryStageOutcomeT } from "./reglement-lifecycle.js";
 export const RegulatoryStage = z.object({
   id: z.string().uuid(),
   /** HAS_STAGE = FK relational vers le Bylaw (§4.2). */
