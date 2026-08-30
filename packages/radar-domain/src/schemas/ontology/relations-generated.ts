@@ -6,7 +6,7 @@
 
 import { z } from "zod";
 
-/** Les 25 types de relations canoniques v2.0 du profil graphify (§1.2 / §8.1). */
+/** Les 27 types de relations canoniques v2.0 du profil graphify (§1.2 / §8.1). */
 export const OntoRelationType = z.enum([
   // ── Localisation ──────────────────────────────────────────────────────────
   "located_in",
@@ -25,6 +25,9 @@ export const OntoRelationType = z.enum([
   "targets_lot",
   "raises_signal",
   "concerns",
+  // ── Cycle de vie règlement (LOT 1) ────────────────────────────────────────
+  "lifecycle_predecessor",
+  "replaces",
   // ── Lots ──────────────────────────────────────────────────────────────────
   "assigned_zone",
   "issued_for",
@@ -57,6 +60,8 @@ export const YAML_RELATION_KEYS: readonly string[] = [
   "merges",
   "subdivides",
   "supersedes",
+  "lifecycle_predecessor",
+  "replaces",
   "targets_zone",
   "targets_lot",
   "raises_signal",
