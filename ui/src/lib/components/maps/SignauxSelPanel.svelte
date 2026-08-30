@@ -20,6 +20,7 @@
    */
   import { tick } from "svelte";
   import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
+  import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
   import type { CityMapEntry } from "$lib/maps/maps-data.js";
@@ -558,19 +559,31 @@
   $: lotSearchActive = lotSearchQuery.trim().length > 0;
 
   $: displayedZones = zoneSearchActive
-    ? rankBySearch(zones, zoneSearchQuery, (zone) => ({
-        text: zone.properties.code,
-        subtext: zone.properties.label ?? null,
-      }))
+    ? rankBySearch(
+        zones,
+        zoneSearchQuery,
+        (zone) => ({
+          text: zone.properties.code,
+          subtext: zone.properties.label ?? null,
+          searchKey: zoneSearchKey(zone.properties.code),
+        }),
+        zoneSearchKey(zoneSearchQuery),
+      )
     : visibleZones;
   // Base de la recherche lot = ensemble complet (jamais plafonné) : lots de la
   // zone focusée si une zone est active, sinon tous les lots de la ville.
   $: lotSearchScope = focusedZoneCode ? zoneScopedLots : lots;
   $: displayedLots = lotSearchActive
-    ? rankBySearch(lotSearchScope, lotSearchQuery, (lot) => ({
-        text: lot.properties.noLot,
-        subtext: lot.properties.adresse ?? null,
-      })).slice(0, LOT_LIST_CAP)
+    ? rankBySearch(
+        lotSearchScope,
+        lotSearchQuery,
+        (lot) => ({
+          text: lot.properties.noLot,
+          subtext: lot.properties.adresse ?? null,
+          searchKey: normalizeLotKey(lot.properties.noLot),
+        }),
+        normalizeLotKey(lotSearchQuery),
+      ).slice(0, LOT_LIST_CAP)
     : visibleLots;
 
   // `state` is passed explicitly (not read from the closure) so that
