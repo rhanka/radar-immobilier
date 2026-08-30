@@ -73,3 +73,57 @@ describe("normalizeLotKey — lot cadastral (digits-only, défensif)", () => {
     expect(normalizeLotKey(undefined)).toBe("");
   });
 });
+
+// ── Régression corpus 8d3d8b9b (geo-zones — 873 munis de zonage SERVIS) ──────
+// Codes bruts DISTINCTS mesurés en collision sur la couche servie : un norm()
+// naïf strip-all les fusionnerait à tort. normalizeZoneCode (IDENTITÉ) DOIT les
+// garder distincts. Source autoritaire : geo lane/zones
+// work/coverage/zones-zonecode-norm-collision-20260825.{json,md}.
+describe("normalizeZoneCode — régression corpus 8d3d8b9b (munis HARMFUL : ne PAS fusionner)", () => {
+  const harmful: Array<[string, string, string]> = [
+    ["H-103-1", "H-1031", "drummondville"],
+    ["C1-8", "C18", "lanoraie"],
+    ["R1-6", "R16", "lanoraie"],
+    ["HA-1-2", "HA-12", "franklin"],
+    ["Af-1-1", "Af-11", "hinchinbrooke"],
+    ["C-1-1", "C-11", "mont-saint-hilaire"],
+    ["A1-1", "A11", "saint-ambroise-de-kildare"],
+    ["A2-1", "A21", "saint-ambroise-de-kildare"],
+    ["Ra1-1", "Ra11", "sainte-clotilde"],
+    ["Ra1-3", "Ra13", "sainte-clotilde"],
+    ["Ra-1-4", "Ra14", "sainte-clotilde"],
+    ["Ra1-6", "Ra16", "sainte-clotilde"],
+    ["H-1.3", "H-13", "saint-joseph-de-beauce"],
+    ["H-1.4", "H-14", "saint-joseph-de-beauce"],
+    ["3.1-H", "31-H", "saint-narcisse-de-beaurivage"],
+    ["5.1 R", "51 R", "amqui"],
+    ["P-1", "P1", "ascot-corner"],
+    ["RU*-65", "RU-65", "cote-saint-luc"],
+    ["A-01", "A-Î01", "saint-aime-du-lac-des-iles"],
+    ["A-02", "A-Î02", "saint-aime-du-lac-des-iles"],
+    ["01 (AGF)", "01 AGF)", "saint-donat / saint-joseph-de-lepage"],
+  ];
+  for (const [a, b, muni] of harmful) {
+    it(`${muni} : "${a}" ≠ "${b}"`, () => {
+      expect(normalizeZoneCode(a)).not.toBe(normalizeZoneCode(b));
+    });
+  }
+});
+
+// MAY-SAFELY-MERGE : la couche RECHERCHE fusionne (recall) ; l'identité départage
+// ensuite via l'ensemble des candidats raw verbatim côté UI (design i-arch).
+describe("zoneSearchKey — régression corpus 8d3d8b9b (recall : fusion sûre)", () => {
+  const mayMerge: Array<[string, string]> = [
+    ["H-101", "H101"],
+    ["A-1", "A1"],
+    ["Inst1", "INST1"],
+    ["Rc8", "RC8"],
+    ["74 - ZR", "74-ZR"],
+  ];
+  for (const [a, b] of mayMerge) {
+    it(`"${a}" ≡ "${b}" en recherche`, () => {
+      expect(zoneSearchKey(a)).toBe(zoneSearchKey(b));
+      expect(zoneSearchKey(a)).not.toBe("");
+    });
+  }
+});
