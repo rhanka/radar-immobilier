@@ -4,6 +4,7 @@ import {
   type RegulatoryStageKindT,
   type OntoDesignationEventT,
   type OntoBylawT,
+  type OntoRelationT,
 } from "@radar/domain";
 import type { ZoningEventT } from "./zoning-event-mock.js";
 
@@ -87,6 +88,35 @@ function rawRefOf(ev: ZoningEventT): string {
   return ev.provenance.source_url || ev.url_pdf;
 }
 
+// ── D5 — relation typing (SAFETY-CRITICAL) ────────────────────────────────────
+// geo emits libellés VERBATIM; immo TYPES the relation. replaces (TOTAL, "abroge et
+// remplace") vs amends (MODIFICATION, "modifiant", base stays alive) is safety-critical.
+// The target n° is the BASE reglement named AFTER the verb, and only when it is stated as
+// "règlement (de X)? numéro <n°>" (a bare "le Règlement de zonage" names no base → no target,
+// no fabrication). Ambiguity NEVER auto-amends: it falls back to replaces + flagged (a live
+// reglement is never silently killed nor a modification fabricated; the flag drives review).
+const REGLEMENT_N = "(?:r[eè]glement)(?:\\s+de\\s+\\w+)?\\s+(?:num[ée]ro|n[o°])\\s*([0-9][\\w-]*)";
+const REPLACES_RE = new RegExp(`(?:abroge\\w*\\s+et\\s+remplace|abrogeant\\s+et\\s+rempla\\w+|remplace\\w*)\\s+(?:le\\s+)?${REGLEMENT_N}`, "i");
+const AMENDS_RE = new RegExp(`(?:modifiant|modification\\s+au|modifie|amend\\w+)\\s+(?:le\\s+)?${REGLEMENT_N}`, "i");
+const ANY_REGLEMENT_RE = new RegExp(REGLEMENT_N, "i");
+
+/** Type a single verbatim libellé into a discriminated relation, or null if no base n° is named. */
+export function typeLibelle(libelle: string): OntoRelationT | null {
+  const rep = libelle.match(REPLACES_RE);
+  if (rep) return { relationType: "replaces", target: { reglementNumero: rep[1] }, fromLibelle: libelle, typingConfidence: "certain", flagged: false };
+  const am = libelle.match(AMENDS_RE);
+  if (am) return { relationType: "amends", target: { reglementNumero: am[1] }, fromLibelle: libelle, typingConfidence: "certain", flagged: false };
+  // A base n° is named but with no certain verb -> AMBIGUOUS: replaces + flagged (NEVER auto-amends).
+  const any = libelle.match(ANY_REGLEMENT_RE);
+  if (any) return { relationType: "replaces", target: { reglementNumero: any[1] }, fromLibelle: libelle, typingConfidence: "uncertain", flagged: true };
+  return null;
+}
+
+/** Type all of an event's verbatim libellés into α-relations (D5). */
+export function typeRelations(ev: ZoningEventT): OntoRelationT[] {
+  return ev.libelles_relation.map(typeLibelle).filter((r): r is OntoRelationT => r !== null);
+}
+
 /**
  * Lot 2 — create the lifecycle node for an event and stamp statut + cible (avis-only).
  * Relations/temporal/en_vigueur default empty/null here; later lots enrich them.
@@ -110,7 +140,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       evidence: [],
       temporal: null,
       enVigueurProvenance: null,
-      relations: [],
+      relations: typeRelations(ev),
     };
     return { kind: "bylaw", node };
   }
@@ -128,7 +158,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       statut,
       cibleReglementNumero: cible,
       temporal: null,
-      relations: [],
+      relations: typeRelations(ev),
     };
     return { kind: "designation-event", node };
   }
