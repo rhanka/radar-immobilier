@@ -43,6 +43,15 @@ export function stableUuid(seed: string): string {
  * -> null (NEVER inferred). `abrogation` is NOT a statut (handled as a replaces relation
  * + validTo closure in a later lot).
  */
+// i-arch correction A — a document_type-less event can still carry a KNOWN lifecycle stage or a
+// case-marker via `type` (geo emits suspensives/case events as document_type=null, type=<x>).
+// STAGE_SUBTYPE members (#535) are BOTH a RegulatoryStageKind (statut) and a DesignationEventSubtype
+// (subtype); CASE_MARKER_SUBTYPE members are DesignationEventSubtype only (statut = N-A).
+const STAGE_SUBTYPE = (t: string | null): "registre-referendaire" | "consultation-publique" | null =>
+  t === "registre-referendaire" || t === "consultation-publique" ? t : null;
+const CASE_MARKER_SUBTYPE = (t: string | null): "ppcmoi" | "minor-variance" | null =>
+  t === "ppcmoi" ? "ppcmoi" : t === "derogation-mineure" || t === "derogation" || t === "minor-variance" ? "minor-variance" : null;
+
 export function deriveStatut(ev: ZoningEventT): { statut: RegulatoryStageKindT | null; flagged: boolean } {
   const dt = ev.document_type;
   const is1er = (v: string | null) => v === "premier_projet" || v === "1er-projet" || v === "1er_projet";
@@ -60,7 +69,13 @@ export function deriveStatut(ev: ZoningEventT): { statut: RegulatoryStageKindT |
     // generic projet with no premier/second qualifier: unknown fine stage -> flag, don't guess.
     return { statut: null, flagged: true };
   }
-  // §9 unknown document_type with no projet/adoption meaning -> null + flagged (never inferred).
+  // i-arch correction A — no regime from document_type: consult `type`. A procedural stage
+  // (registre-referendaire/consultation-publique) is a KNOWN lifecycle stage -> that statut; a
+  // case-marker (derogation/ppcmoi) is N-A (no cycle), NOT flagged; else truly-unknown + flagged.
+  const stage = STAGE_SUBTYPE(ev.type);
+  if (stage) return { statut: stage, flagged: false };
+  if (CASE_MARKER_SUBTYPE(ev.type)) return { statut: null, flagged: false };
+  // §9 truly-unknown (no document_type regime, no known type) -> null + flagged (never inferred).
   return { statut: null, flagged: true };
 }
 
@@ -166,7 +181,31 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
     return { kind: "designation-event", node };
   }
 
-  // entree_en_vigueur / abrogation / content types: no node created in this lot.
+  // i-arch correction A — a document_type-less event that still carries a regulatory signal via
+  // `type` SURVIVES as a DesignationEvent (never a silent drop = converse anti-invention):
+  //  · a procedural stage (registre-referendaire/consultation-publique) -> subtype=statut=the stage;
+  //  · a case-marker (ppcmoi/derogation) -> subtype ppcmoi/minor-variance, statut N-A (null).
+  const stageSub = STAGE_SUBTYPE(ev.type);
+  const caseSub = CASE_MARKER_SUBTYPE(ev.type);
+  if (stageSub || caseSub) {
+    const node: OntoDesignationEventT = {
+      id: stableUuid(ev.event_id),
+      citySlug: ev.muni,
+      subtype: (stageSub ?? caseSub)!, // literal unions, both ⊂ DesignationEventSubtype
+      occurredOn: ev.date_iso,
+      rawRef: rawRefOf(ev),
+      recon: reconOf(ev, `event::${ev.muni}::${ev.event_id}`),
+      evidence: [],
+      statut, // stage -> the stage (rule A); case-marker -> null (N-A)
+      cibleReglementNumero: null,
+      temporal: null,
+      relations: typeRelations(ev),
+      typeInstrument: ev.typeInstrument, // §10 — verbatim passthrough
+    };
+    return { kind: "designation-event", node };
+  }
+
+  // entree_en_vigueur / abrogation / truly-unknown content: no node created.
   return null;
 }
 
@@ -291,6 +330,18 @@ export function projectZoningEvents(events: ZoningEventT[]): ProjectedNode[] {
           const base = bylawByNumero.get(r.target.reglementNumero);
           if (base?.node.temporal) base.node.temporal = { ...base.node.temporal, validTo: ev.date_iso };
         }
+
+  // Rule B (i-arch) — a procedural-stage node (registre-referendaire/consultation-publique) carries
+  // NO n°; attach it to its bylaw by SHARED rawRef (same séance), uncertain+flagged (séance-context,
+  // not n°-verified). Exactly 1 co-séance bylaw -> link; several -> UNKNOWN attachment (never guess
+  // which); 0 -> float (kept verbatim, unattached). Never invent a n°.
+  for (const s of projected) {
+    if (s.p.kind !== "designation-event" || STAGE_SUBTYPE(s.ev.type) === null) continue;
+    const cands = projected.filter((x) => x.p.kind === "bylaw" && rawRefOf(x.ev) === rawRefOf(s.ev));
+    const bylaw = cands.length === 1 ? cands[0] : undefined;
+    if (bylaw)
+      bylaw.p.node.relations.push({ relationType: "lifecycle_predecessor", target: { nodeId: s.p.node.id }, fromLibelle: null, typingConfidence: "uncertain", flagged: true });
+  }
 
   return projected.map((x) => x.p);
 }
