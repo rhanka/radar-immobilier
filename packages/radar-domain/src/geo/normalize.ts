@@ -17,11 +17,13 @@
  * Préserve les tirets — ils portent du sens (H-431 ≠ H431 ; H-10-1 ≠ H-101).
  * - Majuscules
  * - Tirets demi-cadratins (–, —) → tiret ASCII (-)
- * - Suppression du suffixe secteur entre parenthèses (ex. `(VLO)`, `(SAT)`)
+ * - Suffixe secteur parenthésé : parenthèses ÉQUILIBRÉES retirées mais CONTENU
+ *   conservé (`(AGF)` → `AGF`) — le suffixe distingue des zones réelles (mesuré
+ *   geo-zones 29a14334 : `02 (AGF)` ≠ `02 (RCT)`) ; ne PAS blanket-stripper.
  * - Suppression de tous les espaces restants
  *
  * Exemples :
- *   "H34-327 (VLO)"  -> "H34-327"
+ *   "H34-327 (VLO)"  -> "H34-327VLO"
  *   "h-431"          -> "H-431"
  *   "H–431"          -> "H-431"   (demi-cadratin unicode)
  *   "H 34-327"       -> "H34-327"
@@ -33,7 +35,11 @@ export function normalizeZoneCode(raw: unknown): string {
   return String(raw ?? "")
     .toUpperCase()
     .replace(/[–—]/g, "-")
-    .replace(/\s*\([A-Z0-9]{2,8}\)\s*/g, "")
+    // Suffixe secteur parenthésé : GARDER le contenu alnum (distingueur mesuré —
+    // geo-zones record 29a14334 : `02 (AGF)` ≠ `02 (RCT)`), retirer seulement les
+    // parenthèses ÉQUILIBRÉES. Un blanket-strip `\(…\)` était NON injectif (16
+    // fusions fausses). L'équilibré préserve le malformé `01 AGF)` ≠ `01 (AGF)`.
+    .replace(/\(([A-Z0-9]{2,8})\)/g, "$1")
     .replace(/\s+/g, "");
 }
 

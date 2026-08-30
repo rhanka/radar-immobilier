@@ -25,8 +25,10 @@ describe("normalizeZoneCode — IDENTITÉ zone (hyphen-preserving)", () => {
     expect(normalizeZoneCode("H—431")).toBe("H-431");
   });
 
-  it("retire les suffixes secteur parenthésés (XX)", () => {
-    expect(normalizeZoneCode("H34-327 (VLO)")).toBe("H34-327");
+  it("suffixe secteur : parenthèses retirées, CONTENU conservé (distingueur — corpus 29a14334)", () => {
+    expect(normalizeZoneCode("H34-327 (VLO)")).toBe("H34-327VLO");
+    // Le suffixe DISTINGUE des zones réelles → ne PAS blanket-stripper (non injectif).
+    expect(normalizeZoneCode("02 (AGF)")).not.toBe(normalizeZoneCode("02 (RCT)"));
   });
 
   it("null / undefined → \"\"", () => {
@@ -42,8 +44,8 @@ describe("zoneSearchKey — RECHERCHE zone (strip-all, dérivée de la canonique
     expect(zoneSearchKey("H-101")).toBe(zoneSearchKey("H101"));
   });
 
-  it("dérivée de la canonique (parens retirés d'abord, casse normalisée)", () => {
-    expect(zoneSearchKey("h-101 (VLO)")).toBe("H101");
+  it("dérivée de la canonique (casse normalisée, contenu suffixe en alnum)", () => {
+    expect(zoneSearchKey("h-101 (VLO)")).toBe("H101VLO");
   });
 
   it("multi-segment : sur-match assumé en recherche (départagé par candidats+verbatim côté UI)", () => {
@@ -102,6 +104,14 @@ describe("normalizeZoneCode — régression corpus 8d3d8b9b (munis HARMFUL : ne 
     ["A-01", "A-Î01", "saint-aime-du-lac-des-iles"],
     ["A-02", "A-Î02", "saint-aime-du-lac-des-iles"],
     ["01 (AGF)", "01 AGF)", "saint-donat / saint-joseph-de-lepage"],
+    // Suffixe secteur parenthésé = distingueur (geo-zones 29a14334) : le blanket-strip
+    // fusionnait à tort ces zones distinctes → contenu du suffixe conservé.
+    ["02 (AGF)", "02 (RCT)", "la-redemption"],
+    ["34 (CSV)", "34 (HBF)", "la-redemption"],
+    ["35 (AGF)", "35 (MTF)", "padoue"],
+    ["01 (AGF)", "01 (FRT)", "saint-donat--la-mitis"],
+    ["02 (AGC)", "02 (AGF)", "saint-donat--la-mitis"],
+    ["02 (AGC)", "02 (VLG)", "saint-joseph-de-lepage"],
   ];
   for (const [a, b, muni] of harmful) {
     it(`${muni} : "${a}" ≠ "${b}"`, () => {
