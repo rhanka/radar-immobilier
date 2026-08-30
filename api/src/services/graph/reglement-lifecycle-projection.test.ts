@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { OntoBylaw, OntoDesignationEvent } from "@radar/domain";
 import { ZoningEvent, mockZoningEvent } from "./zoning-event-mock.js";
 import { projectZoningEvents, projectEvent, deriveStatut, stableUuid, typeLibelle, typeRelations, type ProjectedNode } from "./reglement-lifecycle-projection.js";
 import {
@@ -265,11 +266,21 @@ describe("en_vigueur 3-states + suspensive gate + abrogation — LOT 6", () => {
     expect(b.enVigueurProvenance).toBe("unknown");
   });
 
-  // NEGATIVE (mandatory): an unresolved co-séance suspensive keeps the bylaw OUT of force.
-  it("registre-referendaire co-séance (unresolved, document_type=null) -> en_vigueur=UNKNOWN, never in-force", () => {
+  // A bylaw with NO served entree_en_vigueur is never in-force -> unknown. The invariant holds
+  // whether or not a registre event is present: in-force is asserted ONLY by a served date.
+  it("no served entree_en_vigueur -> en_vigueur=UNKNOWN, even with a registre event present", () => {
     const registre = mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [], date_iso: "2026-06-01", provenance: atSession });
     const b = bylawOf(projectZoningEvents([adoption("430"), registre]), "430");
     expect(b.enVigueurProvenance).toBe("unknown");
+  });
+
+  // A served entree_en_vigueur WINS (a served date implies any suspensive resolved) -> verbatim,
+  // even when a registre event is present in the batch. Exercises the D7 semantics (not the no-env default).
+  it("a served entree_en_vigueur wins over a present registre (resolved) -> verbatim", () => {
+    const registre = mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [], date_iso: "2026-05-01", provenance: atSession });
+    const env = mockZoningEvent({ muni: "v", document_type: "entree_en_vigueur", reglement_number: ["440"], date_iso: "2026-07-15" });
+    const b = bylawOf(projectZoningEvents([adoption("440"), registre, env]), "440");
+    expect(b.enVigueurProvenance).toBe("verbatim");
   });
 
   // NEGATIVE (mandatory): abrogation closes the base validTo but is NEVER statut "abandonne".
@@ -336,5 +347,28 @@ describe("statut refinement — suspensive-stage node + case-marker survival —
     const reg = nodes.find((n) => n.kind === "designation-event" && n.node.subtype === "registre-referendaire")!;
     const attached = nodes.some((n) => n.kind === "bylaw" && n.node.relations.some((r) => "nodeId" in r.target && r.target.nodeId === reg.node.id));
     expect(attached).toBe(false); // UNKNOWN attachment: never guess which bylaw
+  });
+});
+
+/** Gate #2 (i-cond/i-arch) — every projected node must conform to the ONTOLOGY SCHEMA (contract
+ *  core `5f7ca0a9`), not just per-field assertions. Catches an out-of-shape node a field check
+ *  would miss: malformed uuid (stableUuid), empty rawRef, off-shape relation, invalid subtype/statut. */
+describe("output nodes conform to the ontology schema (contract core) — gate #2", () => {
+  it("every projected node parses via OntoBylaw / OntoDesignationEvent", () => {
+    const events = [
+      ...ZONAGE_FIXTURES,
+      SM_2026_509_PLAN_AVIS,
+      mockZoningEvent({ muni: "v", document_type: "entree_en_vigueur", reglement_number: ["9001"], date_iso: "2026-07-15" }),
+      mockZoningEvent({ muni: "v", document_type: "abrogation", reglement_number: ["9100"], date_iso: "2026-09-01", libelles_relation: ["Règlement 9100 abroge et remplace le règlement numéro 9001"] }),
+      mockZoningEvent({ muni: "v", document_type: null, type: "registre-referendaire", reglement_number: [] }),
+      mockZoningEvent({ muni: "v", document_type: null, type: "ppcmoi", typeInstrument: "derogation", reglement_number: [] }),
+      mockZoningEvent({ muni: "v", document_type: null, type: "derogation-mineure", typeInstrument: "derogation", reglement_number: [] }),
+    ];
+    const nodes = projectZoningEvents(events);
+    expect(nodes.length).toBeGreaterThan(ZONAGE_FIXTURES.length);
+    for (const n of nodes) {
+      if (n.kind === "bylaw") expect(() => OntoBylaw.parse(n.node)).not.toThrow();
+      else expect(() => OntoDesignationEvent.parse(n.node)).not.toThrow();
+    }
   });
 });
