@@ -107,6 +107,14 @@ export const DesignationEventSubtype = z.enum([
   // rester cohérent avec les subtypes/stages existants (lot-subdivision, avis-motion).
   "avis-motion",      // étape 1 : avis de motion
   "projet-reglement", // étape 2 : projet de règlement (1er / 2e projet)
+  // Étapes procédurales pré-adoption émises comme nœuds DISTINCTS FLOTTANTS : un
+  // suspensif/consultation peut ne NOMMER AUCUN n° dans son span (attachement au
+  // Bylaw par CONTEXTE-DE-SÉANCE, incertain) → il ne peut PAS être un RegulatoryStage
+  // (dont bylawId FK est obligatoire) ; c'est donc un DesignationEvent qui flotte,
+  // avec une relation `uncertain` vers le Bylaw une fois corrélé. Le statut fin reste
+  // porté par `statut` (RegulatoryStageKind ; = même valeur ici).
+  "consultation-publique", // consultation publique sur le projet
+  "registre-referendaire", // registre référendaire (suspensif ; alimente le gate en_vigueur §2.1)
 ]);
 export type DesignationEventSubtypeT = z.infer<typeof DesignationEventSubtype>;
 export const OntoDesignationEvent = z.object({

@@ -130,6 +130,26 @@ describe("OntoDesignationEvent (subtypes incl. intention/precedent)", () => {
       OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "demolition", rawRef: RAW, recon }),
     ).toThrow();
   });
+  it("parses the suspensive procedural stages (registre-referendaire / consultation-publique) as floating nodes", () => {
+    // Un suspensif sans n° dans le span ne peut pas être un RegulatoryStage (bylawId FK
+    // obligatoire) → il flotte comme DesignationEvent + relation uncertain vers le Bylaw.
+    const r = OntoDesignationEvent.parse({
+      id: UUID,
+      citySlug: "sainte-martine",
+      subtype: "registre-referendaire",
+      rawRef: RAW,
+      recon: { ...recon, canonicalId: "event::ste-martine::registre-2025-02-03" },
+    });
+    expect(r.subtype).toBe("registre-referendaire");
+    const c = OntoDesignationEvent.parse({
+      id: UUID,
+      citySlug: "x",
+      subtype: "consultation-publique",
+      rawRef: RAW,
+      recon: { ...recon, canonicalId: "event::x::consultation" },
+    });
+    expect(c.subtype).toBe("consultation-publique");
+  });
 });
 
 describe("OntoConstraint (source-backed, citation mandatory)", () => {
