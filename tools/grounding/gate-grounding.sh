@@ -80,18 +80,59 @@ fi
 # Tout noeud-cible portant un docSha DOIT avoir une citation verbatim non vide.
 cited_targets=$(jq '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and ((.properties.citation//"")|length>0))] | length' "$CANDIDATE" 2>/dev/null || echo 0)
 docsha_targets=$(jq '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and ((.properties.docSha//"")|length>0))] | length' "$CANDIDATE" 2>/dev/null || echo 0)
-uncited_with_sha=$(jq '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and ((.properties.docSha//"")|length>0) and ((.properties.citation//"")|length==0))] | length' "$CANDIDATE" 2>/dev/null || echo 0)
+# Baseline-relatif (Option A, i-cond 2026-08-30) : ne bloquer que les docSha-sans-citation NOUVEAUX
+# (présents en grounded, absents du baseline). Un docSha-sans-citation PRÉ-EXISTANT dans le baseline est
+# une lacune de données, PAS une invention du grounding (build-grounded ne stampe JAMAIS un docSha sans
+# citation) → toléré, 0 régression (déjà servi ainsi). Le check garde son rôle anti-bug : si build-grounded
+# introduit un docSha-sans-citation NOUVEAU (bug), c'est bloqué.
+grounded_bad=$(jq -c '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and ((.properties.docSha//"")|length>0) and ((.properties.citation//"")|length==0)) | .id]' "$CANDIDATE" 2>/dev/null || echo '[]')
+baseline_hadsha=$(jq -c '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and (((.properties.docSha//"")|length>0) or (any((.refs//[])[]?; (.docSha//"")|length>0)))) | .id]' "$BASELINE" 2>/dev/null || echo '[]')
+new_bad=$(jq -n --argjson g "$grounded_bad" --argjson b "$baseline_hadsha" '($g - $b)' 2>/dev/null || echo '[]')
+new_bad_n=$(jq -n --argjson x "$new_bad" '$x|length' 2>/dev/null || echo 0)
+uncited_with_sha=$(jq -n --argjson x "$grounded_bad" '$x|length' 2>/dev/null || echo 0)
 
 if [ "${cited_targets:-0}" -eq 0 ]; then
   log "BLOCKED 7bis: aucune citation verbatim (docsha=$docsha_targets)"
   emit_blocked "no_verbatim_citation_docsha${docsha_targets}"; exit 1
 fi
+if [ "${new_bad_n:-0}" -gt 0 ]; then
+  log "BLOCKED 7bis: $new_bad_n NOUVEAUX docSha-sans-citation introduits par grounding: $new_bad"
+  emit_blocked "new_uncited_targets_with_docsha_${new_bad_n}"; exit 1
+fi
 if [ "${uncited_with_sha:-0}" -gt 0 ]; then
-  log "BLOCKED 7bis: $uncited_with_sha/$docsha_targets cibles avec docSha sans citation"
-  emit_blocked "uncited_targets_with_docsha_${uncited_with_sha}of${docsha_targets}"; exit 1
+  log "7bis: $uncited_with_sha docSha-sans-citation PRÉ-EXISTANTS baseline tolérés (Option A, 0 régression)"
 fi
 
-log "7bis OK ($cited_targets citations verbatim) → délègue au gate canonique"
+# ── Anti-régression (garde i-arch (b)) : un nœud CITÉ dans le baseline (props.citation OU refs[].excerpt,
+#    def officielle withCitation) NE DOIT JAMAIS devenir non-cité dans le grounded. Bloque tout clobber
+#    d'une citation servie. (Complète la K2 de k8s au niveau gate-host.) ──
+base_cited_ids=$(jq -c '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and (((.properties.citation//"")|length>0) or (any((.refs//[])[]?; (.excerpt//"")|length>0)))) | .id]' "$BASELINE" 2>/dev/null || echo '[]')
+grounded_cited_ids=$(jq -c '[.nodes[] | select((.type=="Signal" or .type=="DesignationEvent") and (((.properties.citation//"")|length>0) or (any((.refs//[])[]?; (.excerpt//"")|length>0)))) | .id]' "$CANDIDATE" 2>/dev/null || echo '[]')
+regressed=$(jq -n --argjson b "$base_cited_ids" --argjson g "$grounded_cited_ids" '($b - $g)' 2>/dev/null || echo '[]')
+regressed_n=$(jq -n --argjson x "$regressed" '$x|length' 2>/dev/null || echo 0)
+if [ "${regressed_n:-0}" -gt 0 ]; then
+  log "BLOCKED 7bis: RÉGRESSION — $regressed_n nœud(s) cité(s)-baseline devenu(s) non-cité(s): $regressed"
+  emit_blocked "regression_baseline_cited_uncited_${regressed_n}"; exit 1
+fi
 
-# ── Délégation au gate canonique (shape/préservation/refs + publish SCW) ──────
+log "7bis OK ($cited_targets citations verbatim)"
+
+# ── Mode CHECK_ONLY (text-split, modèle b) : le 7bis tourne sur le HOST, mais le PUBLISH est fait par
+#    le pod in-cluster (k8s STAGE 3). On valide 7bis (fail-closed déjà fait ci-dessus) et on SORT 0
+#    SANS publier. k8s ne publie QUE le grounded.v23.json 7bis-passant que le host lui rend. ──
+if [ -n "${CHECK_ONLY:-}" ]; then
+  log "CHECK_ONLY : 7bis validé, publish délégué au pod in-cluster (k8s STAGE 3)"
+  exit 0
+fi
+
+# ── 2-bucket (préprod-safe) : le PUBLISH doit viser le PUBLISH bucket (OVH préprod-graph), JAMAIS le
+#    READ bucket (SCW -pocs / prod). Le gate canonique publie vers SCRAPE_S3_BUCKET/ENDPOINT avec AWS_*.
+#    On surcharge ces variables ICI (wrapper grounding) avec les valeurs PUBLISH → gate.sh partagé
+#    INCHANGÉ. Fallback SCRAPE_S3_*/AWS_* = mode single-bucket (dev/legacy) : comportement identique. ──
+export SCRAPE_S3_BUCKET="${PUBLISH_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"
+export SCRAPE_S3_ENDPOINT="${PUBLISH_S3_ENDPOINT:-${SCRAPE_S3_ENDPOINT:-}}"
+export AWS_ACCESS_KEY_ID="${PUBLISH_AWS_ACCESS_KEY_ID:-${AWS_ACCESS_KEY_ID:-}}"
+export AWS_SECRET_ACCESS_KEY="${PUBLISH_AWS_SECRET_ACCESS_KEY:-${AWS_SECRET_ACCESS_KEY:-}}"
+
+# ── Délégation au gate canonique (shape/préservation/refs + publish → PUBLISH_BUCKET préprod) ──
 exec bash "$CANON_GATE" "$CITY" "$CANDIDATE" "$BASELINE" "$RUN_DIR" "$LANE_ID"
