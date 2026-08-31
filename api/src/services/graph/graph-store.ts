@@ -500,11 +500,17 @@ export function findMissingBusinessProperties(
   beforeRows: readonly BusinessPropertySnapshotRow[],
   afterRows: readonly BusinessPropertySnapshotRow[],
   citySlug: string,
+  intendedRemovals: ReadonlySet<string> = new Set(),
 ): BusinessPropertyRegression[] {
   const afterById = new Map(afterRows.map((row) => [row.id, row]));
   const regressions: BusinessPropertyRegression[] = [];
 
   for (const beforeRow of beforeRows) {
+    // A removal-only reprojection deletes some nodes ON PURPOSE (e.g.
+    // purge-avis-bylaws). For those the disappearance of every business key is
+    // intended, not a silent regression — skip them. The anti-silent-deletion
+    // guard stays armed for EVERY other node (accidental drop / drift → abort).
+    if (intendedRemovals.has(beforeRow.id)) continue;
     const before = businessProperties(beforeRow.props);
     const after = businessProperties(afterById.get(beforeRow.id)?.props ?? {});
     const missingKeys = Object.keys(before)
@@ -658,6 +664,13 @@ export async function upsertGraphAtomic(
   db: Database,
   citySlug: string | null,
   graphJson: unknown,
+  /**
+   * Node ids this projection deletes ON PURPOSE (removal-only tools such as
+   * purge-avis-bylaws). They are exempt from the business-property-regression
+   * guard — their disappearance is intended, not a silent data loss. Every
+   * OTHER node stays guarded. Default empty = current strict behaviour.
+   */
+  intendedRemovals: ReadonlySet<string> = new Set(),
 ): Promise<UpsertAtomicResult> {
   const parsed = graphifyGraphSchema.parse(graphJson);
   const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
@@ -705,6 +718,7 @@ export async function upsertGraphAtomic(
     beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
     nodeRows,
     citySlug,
+    intendedRemovals,
   );
   if (propertyRegressions.length > 0) {
     const details = propertyRegressions
