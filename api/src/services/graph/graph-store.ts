@@ -18,7 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime } from "@radar/domain";
+import { classifyBPrime, deriveRegulatoryStatus, type RegulatoryStageKindT } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -171,11 +171,30 @@ export interface EdgeRow {
 /** Build a DB-shaped node row from a graphify node. */
 export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): NodeRow {
   const { id, label, file_type, type: nodeType, source_file, community, community_name, status, description, refs, properties } = node;
+  // v1: file_type; v2: type; fallback: "concept"
+  const type = file_type ?? nodeType ?? "concept";
+  // LOT 1 serving (D-INT/D1/D2, P2) — persist the DERIVED regulatoryStatus at MATÉRIALISATION,
+  // recomputed at every write from the authoritative statut/etape via THE single classifier
+  // `deriveRegulatoryStatus`. Source de vérité DATA (lue par les consommateurs, pas re-dérivée
+  // serve-time). Co-localisé avec `etape` dans `props.properties` (lecture symétrique
+  // `props->'properties'->>'regulatoryStatus'` + couvert par le guard no-disparition
+  // DEGRADATION_SENSITIVE_KEYS) ; jamais clobbé par une ré-extraction raw car RE-CALCULÉ ici à
+  // chaque matérialisation (le spread écrase toute valeur stale).
+  const rawProps = (properties ?? undefined) as Record<string, unknown> | undefined;
+  const etape = (rawProps?.etape ?? null) as string | null;
+  const statut = (rawProps?.statut ?? null) as RegulatoryStageKindT | null;
+  // Gate anti-invention : QUE les nœuds portant un STADE (`etape` ou `statut`) — la classification
+  // se DÉRIVE du stade, donc sans stade il n'y a rien à dériver. Un nœud non-règlement (Zone/Lot/
+  // Concept) ou un nœud incomplet sans stade ne reçoit jamais un `regulatoryStatus` spurieux (le
+  // consommateur applique le fallback anticipation-conservateur à la lecture d'un champ absent).
+  const isLifecycle = etape != null || statut != null;
+  const enrichedProperties = isLifecycle
+    ? { ...(rawProps ?? {}), regulatoryStatus: deriveRegulatoryStatus({ statut, etape }) }
+    : properties;
   return {
     id,
     label,
-    // v1: file_type; v2: type; fallback: "concept"
-    type: file_type ?? nodeType ?? "concept",
+    type,
     citySlug: citySlug ?? null,
     sourceRef: source_file ?? null,
     props: {
@@ -186,7 +205,7 @@ export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): Node
       ...(status !== undefined ? { status } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(refs !== undefined ? { refs } : {}),
-      ...(properties !== undefined ? { properties } : {}),
+      ...(enrichedProperties !== undefined ? { properties: enrichedProperties } : {}),
     },
   };
 }
