@@ -86,6 +86,17 @@ export type KnownTypeInstrument = (typeof KNOWN_TYPE_INSTRUMENTS)[number];
 /** Champ partagé type_instrument : string|null §9-tolérant (miroir exact de l'émission geo `type_instrument`). */
 const typeInstrumentField = z.string().nullable().default(null);
 
+// ── regulatoryStatus — axe FERME vs ANTICIPATION dérivé-immo (LOT 1 serving, invariant §3) ───────────
+// DÉRIVÉ par immo (PAS émis geo) via `deriveRegulatoryStatus` = source UNIQUE de classification (D1) :
+// firm iff statut ∈ {adopte, entree-vigueur} ; sinon anticipation. PERSISTÉ à la matérialisation
+// (`upsertGraphAtomic`) = source unique de vérité DATA, lue par TOUS les consommateurs (0 re-classification
+// serve-time = la cause racine de « 026-508 »). `null` = legacy non-dérivé → le consommateur applique le
+// fallback anticipation-conservateur (JAMAIS firm sans preuve). Binaire (pas de 3e bucket) :
+// abrogé = firm + `temporal.validTo` fermé ; abandonné = anticipation + `statut=abandonne`.
+export const RegulatoryStatus = z.enum(["firm", "anticipation"]);
+export type RegulatoryStatusT = z.infer<typeof RegulatoryStatus>;
+const regulatoryStatusField = RegulatoryStatus.nullable().default(null);
+
 // ── Champs de cycle de vie ajoutés aux nœuds (appliqués dans entities.ts) ─────
 /** DesignationEvent (avis/projet) : statut + cible + bitemporel + relations + instrument. */
 export const designationLifecycleFields = {
@@ -99,6 +110,8 @@ export const designationLifecycleFields = {
   relations: z.array(OntoRelation).default([]),
   /** Famille d'instrument (déclaré-source geo ou "unknown"/null ; §9-tolérant ; routage surface via KNOWN_TYPE_INSTRUMENTS). */
   typeInstrument: typeInstrumentField,
+  /** Ferme vs anticipation DÉRIVÉ-immo (firm iff statut adopté/en-vigueur ; null=legacy→fallback anticipation à la lecture). */
+  regulatoryStatus: regulatoryStatusField,
 } as const;
 
 /** Bylaw (adoption/en_vigueur) : bitemporel + provenance en_vigueur + relations + instrument. */
@@ -108,4 +121,6 @@ export const bylawLifecycleFields = {
   relations: z.array(OntoRelation).default([]),
   /** Famille d'instrument (déclaré-source geo ou "unknown"/null ; §9-tolérant ; ex. règlement habilitant type_instrument=derogation). */
   typeInstrument: typeInstrumentField,
+  /** Ferme vs anticipation DÉRIVÉ-immo (firm iff statut adopté/en-vigueur ; null=legacy→fallback anticipation à la lecture). */
+  regulatoryStatus: regulatoryStatusField,
 } as const;
