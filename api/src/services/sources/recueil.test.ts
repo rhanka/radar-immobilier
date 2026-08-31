@@ -41,6 +41,7 @@ class MemoryStore implements ObjectStore {
 function fakeAdapter(
   body: string,
   refOverrides: Partial<RawDocumentRef> = {},
+  text?: string,
 ): SourceAdapter {
   const ref: RawDocumentRef = {
     sourceKind: "avis-publics",
@@ -55,8 +56,11 @@ function fakeAdapter(
     city: "testville",
     url: ref.url,
     fetchedAt: "2026-06-08T09:30:00.000Z",
-    contentType: "text/html",
+    // A `.text` payload models a binary (PDF) doc whose adapter attached the
+    // pdftotext projection — stored beside the binary at the companion textKey.
+    contentType: text !== undefined ? "application/pdf" : "text/html",
     body: new TextEncoder().encode(body),
+    ...(text !== undefined ? { text } : {}),
     provenance: {
       adapterVersion: "1.0.0",
       userAgent: "radar/test",
@@ -102,6 +106,80 @@ describe("runRecueil — raw bytes + sidecar meta.json", () => {
     expect(meta.sha256).toBe(rec.sha256);
     expect(meta.storageKey).toBe(rec.storageKey);
     expect(meta.sourceUrl).toBe("https://testville.qc.ca/avis");
+  });
+
+  it("persists the parseable text at <storageKey>.txt when the adapter attaches RawDocument.text (PDF)", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueil(
+      "reglements-urbanisme-testville",
+      fakeAdapter(
+        "%PDF-1.7 …binary…",
+        {},
+        "Règlement 999-01 concernant le zonage",
+      ),
+      store,
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+
+    const rec = out.records[0]!;
+    // The binary body stays the canonical, openable evidence (drawer rawRef).
+    expect(store.objects.has(rec.storageKey)).toBe(true);
+    // The parseable text lands at the companion textKey (EXPLOITATION reads it).
+    expect(rec.textKey).toBe(`${rec.storageKey}.txt`);
+    expect(store.objects.has(rec.textKey!)).toBe(true);
+    expect(
+      new TextDecoder().decode(store.objects.get(rec.textKey!)!),
+    ).toBe("Règlement 999-01 concernant le zonage");
+  });
+
+  it("attaches NO textKey for a text source (no RawDocument.text) — body IS the parseable substrate", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueil(
+      "avis-publics-testville",
+      fakeAdapter("<html>avis 2026-58</html>"),
+      store,
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.records[0]!.textKey).toBeUndefined();
+  });
+
+  it("BACK-FILLS the textKey on a re-run whose binary already exists (dedup) — text persisted even when the body is 'seen'", async () => {
+    const store = new MemoryStore();
+    const adapter = fakeAdapter(
+      "%PDF-1.7 …binary…",
+      {},
+      "Règlement 999-01 concernant le zonage",
+    );
+    // 1st run stored binary + text.
+    const first = await runRecueil(
+      "reglements-urbanisme-testville",
+      adapter,
+      store,
+    );
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    const rec = first.records[0]!;
+
+    // Simulate a PRIOR run (pre-fix) that stored ONLY the binary: drop the text
+    // object, keep the deduped binary.
+    store.objects.delete(rec.textKey!);
+    expect(store.objects.has(rec.storageKey)).toBe(true);
+    expect(store.objects.has(rec.textKey!)).toBe(false);
+
+    // Re-run: the binary is deduped ("seen") but the text MUST be back-filled,
+    // else EXPLOITATION would read record.textKey on an absent object.
+    const second = await runRecueil(
+      "reglements-urbanisme-testville",
+      adapter,
+      store,
+    );
+    expect(second.ok).toBe(true);
+    expect(store.objects.has(rec.textKey!)).toBe(true);
+    expect(
+      new TextDecoder().decode(store.objects.get(rec.textKey!)!),
+    ).toBe("Règlement 999-01 concernant le zonage");
   });
 
   it("persists source listing title and publishedAt in sidecar metadata", async () => {
