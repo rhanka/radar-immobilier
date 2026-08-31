@@ -37,6 +37,6 @@ Replace the evidence viewer's single-page canvas with continuous multi-page scro
   - [x] Add component tests with a mocked five-page PDF document.
   - [x] Dimension every page slot and render only the visible page window.
   - [x] Preserve citation, navigation, zoom, hover, performance, and document-reset invariants.
-- [ ] **Final gate**
+- [x] **Final gate**
   - [x] Run install, typecheck, lint, UI tests, and build with `ENV=p10lota`.
-  - [ ] Commit, push, and open a PR without merging.
+  - [x] Commit, push, and open PR #539 without merging; i-cond remains required.
