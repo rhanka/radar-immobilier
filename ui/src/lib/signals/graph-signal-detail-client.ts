@@ -520,6 +520,7 @@ export interface GraphSignalNode {
   createdAt: string | null;
   description?: string | null;
   publishedAt?: string | null;
+  etape?: string | null;
   docRefs?: SignalDocRef[];
   bPrime?: BPrimeClassification;
   props: Record<string, unknown>;
