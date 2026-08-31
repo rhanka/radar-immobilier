@@ -745,4 +745,59 @@ describe("GET /api/graph-signals/:city", () => {
       expect(ref.contentType).toBeUndefined();
     }
   });
+
+  // ── A.3b (LOT 1 serving, R5) : etape + regulatoryStatus servis en 1re-classe ──
+  // Chaque carte porte l'axe MARQUAGE (firm/anticipation) LU via readRegulatoryStatus
+  // (champ persisté A.2 sinon fallback legacy) + l'etape verbatim (matériau hide-72 UI).
+  it("serves etape + regulatoryStatus=firm for an adopted DesignationEvent (etape=adoption)", async () => {
+    const node = makeNode("evt-adopt", "drummondville", "DesignationEvent", {
+      properties: { etape: "adoption", reglement_number: "2026-100" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as {
+      nodes: Array<{ etape: string | null; regulatoryStatus: string }>;
+    };
+    expect(res.status).toBe(200);
+    expect(body.nodes[0]!.etape).toBe("adoption");
+    expect(body.nodes[0]!.regulatoryStatus).toBe("firm");
+  });
+
+  it("serves regulatoryStatus=anticipation for an avis node (etape=avis_motion, projet inclus)", async () => {
+    const node = makeNode("evt-avis", "drummondville", "DesignationEvent", {
+      properties: { etape: "avis_motion", reglement_number: "2026-101" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
+    expect(body.nodes[0]!.etape).toBe("avis_motion");
+    expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
+  });
+
+  it("READS the PERSISTED regulatoryStatus as-is — no serve-time re-classification (A.2 field wins)", async () => {
+    // Champ persisté "firm" servi tel quel MÊME si l'etape brut suggérerait anticipation :
+    // preuve que le serving LIT (locus unique) et ne re-classifie pas (cause racine 026-508).
+    const node = makeNode("evt-persist", "drummondville", "DesignationEvent", {
+      properties: { etape: "avis_motion", regulatoryStatus: "firm" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: Array<{ regulatoryStatus: string }> };
+    expect(body.nodes[0]!.regulatoryStatus).toBe("firm");
+  });
+
+  it("falls back to anticipation for a legacy node with no etape/statut/regulatoryStatus (fail-safe)", async () => {
+    const node = makeNode("sig-legacy", "drummondville", "Signal", {
+      properties: { category: "rezonage" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
+    expect(body.nodes[0]!.etape).toBeNull();
+    expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
+  });
 });

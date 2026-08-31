@@ -16,6 +16,7 @@
 
 import { writeFileSync } from "node:fs";
 import { setDefaultResultOrder } from "node:dns";
+import { readRegulatoryStatus, type RegulatoryStageKindT } from "@radar/domain";
 
 setDefaultResultOrder("ipv4first");
 
@@ -86,6 +87,11 @@ async function main(): Promise<void> {
       const p = rec(node.properties);
       const ref = Array.isArray(node.refs) ? rec(node.refs[0]) : {};
       const zone_ref = str(p.zone_ref);
+      // R5 (A.3d) : regulatoryStatus SERVI dans l'export (axe MARQUAGE) — LU via le
+      // locus unique readRegulatoryStatus (champ persisté A.2 sinon fallback legacy
+      // depuis statut/etape), jamais re-classifié. Le recall gate downstream voit
+      // ferme vs anticipation par clé naturelle.
+      const rawReg = str(p.regulatoryStatus);
       const row = {
         city_slug: str(p.city, city),
         node_type: str(node.type),
@@ -94,6 +100,11 @@ async function main(): Promise<void> {
         label: str(node.label),
         date: str(p.date, p.etape_date, p.seance_date),
         etape: str(p.etape),
+        regulatoryStatus: readRegulatoryStatus({
+          regulatoryStatus: rawReg === "firm" || rawReg === "anticipation" ? rawReg : null,
+          statut: str(p.statut) as RegulatoryStageKindT | null,
+          etape: str(p.etape),
+        }),
         bylaw_numero: str(p.reglement_number, p.bylaw_numero),
         source_url: str(ref.sourceUrl, p.sourceUrl, ref.rawRef),
         zone_ref,

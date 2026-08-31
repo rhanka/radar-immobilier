@@ -97,6 +97,53 @@ export const RegulatoryStatus = z.enum(["firm", "anticipation"]);
 export type RegulatoryStatusT = z.infer<typeof RegulatoryStatus>;
 const regulatoryStatusField = RegulatoryStatus.nullable().default(null);
 
+/** D1/D2 (LOT 1 serving invariant §3) — LE classifieur UNIQUE ferme/anticipation. Appelé à la
+ *  matérialisation (`upsertGraphAtomic`) pour PERSISTER `regulatoryStatus`, et réutilisé (MÊME fn)
+ *  comme fallback serve-time pour un nœud legacy sans champ — jamais une re-dérivation indépendante.
+ *  Ordre de preuve : `statut` (LOT 1.b autoritatif) → sinon `etape` legacy structuré → JAMAIS un
+ *  mot-clé. Aucune preuve (statut ET etape absents) → `anticipation` FAIL-SAFE (jamais firm sans
+ *  preuve = anti-invention). Binaire : un bylaw abrogé reste firm (statut adopté/en-vigueur) avec
+ *  `temporal.validTo` fermé ; abandonné = anticipation (statut=abandonne). */
+const FIRM_STATUTS: ReadonlySet<RegulatoryStageKindT> = new Set(["adopte", "entree-vigueur"]);
+const FIRM_ETAPES: ReadonlySet<string> = new Set(["adoption", "entree_vigueur"]);
+export function deriveRegulatoryStatus(input: {
+  statut?: RegulatoryStageKindT | null;
+  etape?: string | null;
+}): RegulatoryStatusT {
+  if (input.statut != null) return FIRM_STATUTS.has(input.statut) ? "firm" : "anticipation";
+  if (input.etape != null) return FIRM_ETAPES.has(input.etape) ? "firm" : "anticipation";
+  return "anticipation";
+}
+
+/** LOCUS DE LECTURE UNIQUE (LOT 1 serving, R5) — chaque consommateur (graph-signals,
+ *  geo-features, vivier, export, MCP) LIT le regulatoryStatus d'un nœud PAR ICI :
+ *  le champ PERSISTÉ (`props.properties.regulatoryStatus`, écrit à la matérialisation
+ *  par `buildNodeRow`) s'il est présent, sinon le fallback `deriveRegulatoryStatus`
+ *  pour un nœud LEGACY sans champ — JAMAIS une re-classification indépendante
+ *  (la cause racine de « 026-508 »). `null`/absent + aucune preuve → anticipation
+ *  fail-safe (jamais firm sans preuve). */
+export function readRegulatoryStatus(input: {
+  regulatoryStatus?: RegulatoryStatusT | null;
+  statut?: RegulatoryStageKindT | null;
+  etape?: string | null;
+}): RegulatoryStatusT {
+  if (input.regulatoryStatus != null) return input.regulatoryStatus;
+  return deriveRegulatoryStatus({ statut: input.statut ?? null, etape: input.etape ?? null });
+}
+
+/** AGRÈGE le regulatoryStatus de PLUSIEURS nœuds partageant une même CIBLE (n° de
+ *  règlement, ou zone) : FERME dès qu'AU MOINS UN nœud est ferme, sinon anticipation.
+ *  Résout l'invariant REVERSE (i-arch) : un nœud-Bylaw adopté SANS stade direct
+ *  (→ anticipation fail-safe isolé) hérite du ferme de son nœud-adoption frère via
+ *  l'agrégat — sinon un règlement adopté s'afficherait anticipation (reverse-bug
+ *  geo-categories V2). Ensemble vide (ou tout-null) → anticipation (fail-safe,
+ *  jamais firm sans preuve). Miroir exact de l'agrégation avis-only PAR règlement. */
+export function aggregateRegulatoryStatus(
+  statuses: readonly (RegulatoryStatusT | null | undefined)[],
+): RegulatoryStatusT {
+  return statuses.some((s) => s === "firm") ? "firm" : "anticipation";
+}
+
 // ── Champs de cycle de vie ajoutés aux nœuds (appliqués dans entities.ts) ─────
 /** DesignationEvent (avis/projet) : statut + cible + bitemporel + relations + instrument. */
 export const designationLifecycleFields = {
