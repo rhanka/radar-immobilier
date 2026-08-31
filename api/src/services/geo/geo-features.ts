@@ -139,7 +139,7 @@ function parseGeom(raw: string | null | undefined): GeoJsonGeometry | null {
 /**
  * Résolutions géo par zone (canonical_id → { signalCount, category dominante, anticipation }).
  */
-async function buildZoneResolutionMap(
+export async function buildZoneResolutionMap(
   db: Database,
   citySlug: string,
 ): Promise<
