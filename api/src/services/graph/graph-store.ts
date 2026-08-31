@@ -1269,11 +1269,20 @@ export function deriveEtape(
     .replace(/[̀-ͯ]/g, "");
 
   // ── Ordre de test : du plus précoce au plus tardif ──────────────────────
-  // 1. avis de motion
-  if (text.includes("avis de motion") || text.includes("avis d motion")) {
-    return "avis_motion";
-  }
-  // 2. second projet (testé avant « projet » pour éviter la collision)
+  // §3-CRITICAL ordering (W2). An "avis de motion" appearing in the text is NOT
+  // enough to classify a resolution as avis_motion: a combined "avis + dépôt du
+  // projet" or an "adoption du (premier) projet" resolution IS at the projet
+  // stage, and a recital may merely RECALL a past avis ("avis de motion a été
+  // donné"). So (a) only an ACTIVE avis (not the past-tense recital) is the avis
+  // act; (b) concrete ACT stages take precedence over a bare avis; (c) a bare
+  // active avis CONSERVATIVELY stays avis_motion — never promoted to `adoption`
+  // on the FUTURE reference "présenté pour adoption lors d'une séance
+  // subséquente" (that promotion = the 026-508 avis-served-firm bug).
+  const hasActiveAvis =
+    (text.includes("avis de motion") || text.includes("avis d motion")) &&
+    !text.includes("avis de motion a ete donne");
+
+  // 1. second projet (tested before « projet » to avoid the collision).
   if (
     text.includes("second projet") ||
     text.includes("2e projet") ||
@@ -1281,14 +1290,30 @@ export function deriveEtape(
   ) {
     return "second_projet";
   }
-  // 3. premier projet / projet de règlement / projet du règlement
+  // 2. premier projet / adoption-dépôt d'un projet → projet_reglement. The ACT of
+  //    ADOPTING or DEPOSITING a projet (NOT the final règlement adoption, and NOT
+  //    a pure avis's future "présenté pour adoption").
   if (
     text.includes("premier projet") ||
     text.includes("1er projet") ||
     text.includes("projet de reglement") ||
-    text.includes("projet du reglement")
+    text.includes("projet du reglement") ||
+    text.includes("adoption du projet") ||
+    text.includes("adopte le projet") ||
+    text.includes("depot du projet") ||
+    text.includes("depose le projet")
   ) {
     return "projet_reglement";
+  }
+  // 3. §3 CONSERVATIVE GUARD (BEFORE consultation/vigueur/adoption): once no
+  //    concrete projet ACT above matched, an ACTIVE avis de motion STAYS
+  //    avis_motion. An active avis is NEVER itself en-vigueur / à-consultation
+  //    (mutually exclusive stages), so an INCIDENTAL "en vigueur" (e.g. « … le
+  //    Règlement 0651 [actuellement] en vigueur » — the EXISTING règlement being
+  //    modified) or a FUTURE "adoption"/"consultation" must NOT promote it to
+  //    firm. Closes the last 026-508 residual path.
+  if (hasActiveAvis) {
+    return "avis_motion";
   }
   // 4. consultation publique
   if (text.includes("consultation")) {
@@ -1302,7 +1327,8 @@ export function deriveEtape(
   ) {
     return "entree_vigueur";
   }
-  // 6. adoption / adopté
+  // 6. adoption / adopté (the final règlement adoption — reached only when the
+  //    resolution is NOT a pure active avis)
   if (
     text.includes("adoption") ||
     text.includes("adopte") ||
