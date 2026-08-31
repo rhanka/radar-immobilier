@@ -100,15 +100,16 @@ describe("seedPvCity — Saint-Constant (POSITIF : zonage réel 1926-26/1927-26)
     expect(combined.includes("1926-26") || combined.includes("1927-26")).toBe(true);
   });
 
-  it("au moins un Bylaw canonique (règlement 1926-26 ou 1927-26)", () => {
-    const bylaws = result.exploitation.state.canonicals.filter(
-      (c) => c.type === "Bylaw",
-    );
-    const labels = bylaws.map((b) => b.label);
-    const hasRealBylaw = labels.some(
-      (l) => l.includes("1926-26") || l.includes("1927-26"),
-    );
-    expect(hasRealBylaw).toBe(true);
+  it("Lot B (spec D-A) : un avis PV ne produit AUCUN Bylaw canonique (le n° = cible du DesignationEvent, pas un règlement ferme)", () => {
+    // Cause-SOURCE de « 026-508 » corrigée : l'avis de motion n'émet plus de Bylaw.
+    // 1926-26/1927-26 vivent sur le DesignationEvent avis_motion ; le Bylaw ne
+    // viendra qu'à l'ADOPTION (source avis-publics / règlement d'urbanisme).
+    const labels = result.exploitation.state.canonicals
+      .filter((c) => c.type === "Bylaw")
+      .map((b) => b.label)
+      .join(" ");
+    expect(labels).not.toContain("1926-26");
+    expect(labels).not.toContain("1927-26");
   });
 
   it("le project-state de saint-constant est persisté dans le store", () => {
@@ -116,7 +117,7 @@ describe("seedPvCity — Saint-Constant (POSITIF : zonage réel 1926-26/1927-26)
     expect(store.objects.has(result.stateKey)).toBe(true);
   });
 
-  it("les mentions contiennent les bylaw réels", () => {
+  it("les mentions portent le n° de règlement réel (sur le DesignationEvent avis, plus sur un Bylaw)", () => {
     const mentionTerms = result.exploitation.state.mentions
       .flatMap((m) => m.normalized_terms);
     expect(mentionTerms).toContain("1926-26");
