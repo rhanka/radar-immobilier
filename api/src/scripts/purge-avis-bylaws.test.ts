@@ -79,13 +79,30 @@ describe("planCityPurge — ASSERT-vs-oracle (fail-safe HALT, jamais wrong-remov
   });
 });
 
-describe("planCityPurge — pré-flight (a) sibling DesignationEvent belt-and-suspenders", () => {
-  it("avis-only via Signal SEUL (0 DesignationEvent) → SKIP + flag (ne perd pas l'avis canonique)", () => {
+describe("planCityPurge — pré-flight (a) sibling avis_motion (Signal|DesignationEvent)", () => {
+  it("avis-only via Signal(avis_motion) SEUL (0 DE) → RETIRÉ (relax : le Signal porte l'avis non-zonage)", () => {
+    // Les 11 exceptions (avis non-zonage : plan-urbanisme, contrainte-ferroviaire…)
+    // n'ont pas de DE — l'avis vit dans un Signal(avis_motion). consumer-safety :
+    // graph-signals/geo-features/export/MCP servent {Signal,DesignationEvent}, PAS
+    // Bylaw → retirer le Bylaw ghost ne retire rien du serving, le Signal survit.
     const graph = { nodes: [bylaw("bylaw-x-325", "325"), signal("signal-x-325", "325", "avis_motion")] };
     const plan = planCityPurge(graph, "x", ["bylaw-x-325"]);
-    expect(plan.assertOk).toBe(true); // dérivé==oracle (avis-only), mais…
-    expect(plan.removed).toEqual([]); // …pas de DE frère → skip
-    expect(plan.skipped).toEqual([{ nodeId: "bylaw-x-325", reason: "no-sibling-avis-DesignationEvent" }]);
+    expect(plan.assertOk).toBe(true);
+    expect(plan.removed).toEqual(["bylaw-x-325"]); // Signal = sibling avis_motion valide
+    expect(plan.skipped).toEqual([]);
+    expect(plan.changed).toBe(true);
+    expect(ids(plan)).not.toContain("bylaw-x-325");
+    expect(ids(plan)).toContain("signal-x-325"); // avis conservé via le Signal
+  });
+
+  it("avis-only SANS aucun frère avis_motion (ni Signal ni DE) → SKIP (ne perd pas la seule rep)", () => {
+    // Cas dégénéré : l'etape avis_motion ne vient que du Bylaw lui-même → aucun nœud
+    // survivant ne porterait l'avis → on NE retire PAS (belt-and-suspenders).
+    const graph = { nodes: [bylaw("bylaw-x-325", "325", "avis_motion")] };
+    const plan = planCityPurge(graph, "x", ["bylaw-x-325"]);
+    expect(plan.assertOk).toBe(true);
+    expect(plan.removed).toEqual([]);
+    expect(plan.skipped).toEqual([{ nodeId: "bylaw-x-325", reason: "no-sibling-avis-node" }]);
     expect(plan.changed).toBe(false);
   });
 });
