@@ -26,6 +26,12 @@ import {
   propRecords,
   zoneRefComparableKey,
 } from "$lib/maps/signaux-map-geo.js";
+import {
+  isReglementAvisOnly,
+  REGLEMENT_STAGES_FERMES,
+} from "@radar/domain";
+
+export { isReglementAvisOnly, REGLEMENT_STAGES_FERMES };
 
 export interface ReglementEntry {
   /** Numéro de règlement affiché VERBATIM (ex. "2008-102", "1926-26"). */
@@ -120,22 +126,6 @@ export function readNodeEtape(node: GraphSignalNode): string | null {
     }
   }
   return null;
-}
-
-const REGLEMENT_STAGES_FERMES = new Set([
-  "premier_projet",
-  "second_projet",
-  "projet_reglement",
-  "consultation_publique",
-  "adoption",
-  "entree_vigueur",
-]);
-
-export function isReglementAvisOnly(etapes: ReadonlySet<string>): boolean {
-  if (!etapes.has("avis_motion")) return false;
-  if (etapes.has("inconnu")) return false;
-  for (const e of etapes) if (REGLEMENT_STAGES_FERMES.has(e)) return false;
-  return true;
 }
 
 /** Une preuve est ouvrable si elle porte une source documentaire (rawRef/URL). */
