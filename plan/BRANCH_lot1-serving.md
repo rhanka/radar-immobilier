@@ -18,7 +18,7 @@ Invariant §3 : **UNE seule dérivation ferme/anticipation (`deriveRegulatorySta
 - [x] **Lot A.2 — persist @ matérialisation (P2)** : `graph-store`/`buildNodeRow` appelle `deriveRegulatoryStatus({statut, etape})` → persiste `props.properties.regulatoryStatus` (gate `etape!=null || statut!=null` ; PAS dans DEGRADATION_SENSITIVE_KEYS car dérivé/recomputé ; fail-safe déplacé au READ consommateur). Commit `75d4f9e`, 117/117. Findings validés i-arch.
 - [~] **Lot A.3 — sérialiser (R5)** : `regulatoryStatus`+`etape` dans le payload de graph-signals + geo-features + vivier-v2 + export-designation-events + MCP tools. ⚠ invariant REVERSE (i-arch) : agréger PAR règlement/zone (firm iff ≥1 nœud firm) via helper partagé.
   - [x] **A.3a — helpers partagés `@radar/domain` (single-source R5)** : `readRegulatoryStatus` (locus lecture UNIQUE : champ persisté sinon fallback deriveRegulatoryStatus legacy) + `aggregateRegulatoryStatus` (firm iff ≥1 nœud firm ; résout reverse-bug). 7 tests, typecheck OK.
-  - [ ] **A.3b** — graph-signals.ts : `regulatoryStatus`+`etape` en champs 1re-classe du `GraphSignalCard` (via readRegulatoryStatus).
+  - [x] **A.3b** — graph-signals.ts : `regulatoryStatus`+`etape` en champs 1re-classe du `GraphSignalCard` (via readRegulatoryStatus ; champ persisté LU tel quel, jamais re-classifié). 4 tests, graph-signals 19/19, make typecheck green.
   - [ ] **A.3c** — geo-features.ts : opportunité (per-node) + zone-map (agrégat via aggregateRegulatoryStatus, locus reverse-bug `anticipation=etapes[0]`).
   - [ ] **A.3d** — vivier-v2.ts + export-designation-events.ts + immo-mcp/*.
 - [ ] **Lot A.4 — UI (D3, owner P4 = CACHER les AVIS-ONLY)** : ⚠ **2 mécanismes SÉPARÉS (i-arch/i-cond catch anti-sur-hide)** :
