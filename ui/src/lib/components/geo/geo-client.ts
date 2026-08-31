@@ -7,6 +7,11 @@
  * Loi 25 : aucune PII dans la réponse.
  */
 
+import {
+  readRegulatoryStatus,
+  type RegulatoryStatusT,
+} from "@radar/domain";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Types réponse API
 // ─────────────────────────────────────────────────────────────────────────────
@@ -23,20 +28,40 @@ export interface GeoCitiesResponse {
   cities: GeoCityInfo[];
 }
 
-export interface GeoFeatureCollection {
+export interface GeoFeatureCollection<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+> {
   type: "FeatureCollection";
-  features: GeoJsonFeature[];
+  features: GeoJsonFeature<TProperties>[];
 }
 
-export interface GeoJsonFeature {
+export interface GeoJsonFeature<
+  TProperties extends Record<string, unknown> = Record<string, unknown>,
+> {
   type: "Feature";
   geometry: GeoJsonGeometry | null;
-  properties: Record<string, unknown>;
+  properties: TProperties;
 }
 
 export interface GeoJsonGeometry {
   type: string;
   coordinates: unknown;
+}
+
+export interface GeoRegulatoryFeatureProperties extends Record<string, unknown> {
+  regulatoryStatus: RegulatoryStatusT | null;
+  regulatoryMarking?: "Ferme" | "Anticipation";
+}
+
+export interface GeoZoneFeatureProperties extends GeoRegulatoryFeatureProperties {
+  featureKind: "zone";
+  anticipation: string | null;
+}
+
+export interface GeoOpportuniteFeatureProperties extends GeoRegulatoryFeatureProperties {
+  featureKind: "opportunite";
+  etape: string | null;
+  regulatoryStatus: RegulatoryStatusT;
 }
 
 export interface GeoFeaturesResponse {
@@ -45,9 +70,45 @@ export interface GeoFeaturesResponse {
   zoneCount: number;
   lotCount: number;
   opportuniteCount: number;
-  zones: GeoFeatureCollection;
+  zones: GeoFeatureCollection<GeoZoneFeatureProperties>;
   lots: GeoFeatureCollection;
-  opportunites: GeoFeatureCollection;
+  opportunites: GeoFeatureCollection<GeoOpportuniteFeatureProperties>;
+}
+
+const REGULATORY_MARKING_LABELS: Record<
+  RegulatoryStatusT,
+  "Ferme" | "Anticipation"
+> = {
+  firm: "Ferme",
+  anticipation: "Anticipation",
+};
+
+/**
+ * Prépare les features consommées par GeoView. Le marquage lit exclusivement
+ * le regulatoryStatus servi ; l'étape reste un axe de détail indépendant.
+ */
+export function buildGeoViewFeatures(response: GeoFeaturesResponse): GeoJsonFeature[] {
+  const mark = <T extends GeoRegulatoryFeatureProperties>(
+    feature: GeoJsonFeature<T>,
+  ): GeoJsonFeature<T> => {
+    if (feature.properties.regulatoryStatus === null) return feature;
+    const status = readRegulatoryStatus({
+      regulatoryStatus: feature.properties.regulatoryStatus,
+    });
+    return {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        regulatoryMarking: REGULATORY_MARKING_LABELS[status],
+      },
+    };
+  };
+
+  return [
+    ...response.zones.features.map(mark),
+    ...response.lots.features,
+    ...response.opportunites.features.map(mark),
+  ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
