@@ -111,8 +111,20 @@ export function normalizeReglementKey(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, "");
 }
 
+const REGLEMENT_STAGES_FERMES = new Set([
+  "premier_projet",
+  "second_projet",
+  "projet_reglement",
+  "consultation_publique",
+  "adoption",
+  "entree_vigueur",
+]);
+
 export function isReglementAvisOnly(etapes: ReadonlySet<string>): boolean {
-  return etapes.size > 0 && [...etapes].every((etape) => etape === "avis_motion");
+  if (!etapes.has("avis_motion")) return false;
+  if (etapes.has("inconnu")) return false;
+  for (const e of etapes) if (REGLEMENT_STAGES_FERMES.has(e)) return false;
+  return true;
 }
 
 /** Une preuve est ouvrable si elle porte une source documentaire (rawRef/URL). */
