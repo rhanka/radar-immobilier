@@ -109,6 +109,7 @@
   } from "@lucide/svelte";
   import {
     findCitationInPage,
+    findTextOccurrenceInPage,
     itemsOverlappingRanges,
   } from "$lib/signals/pdf-citation-match.js";
   import type {
@@ -122,6 +123,14 @@
     pagesInWindow,
     type PageVisibility,
   } from "$lib/signals/pdf-page-window.js";
+  import {
+    buildTextIndex,
+    findMatches,
+    nextMatchIndex,
+    prevMatchIndex,
+    type PdfTextIndex,
+    type PdfTextMatch,
+  } from "$lib/signals/pdf-text-search.js";
 
   export let title = "Document source";
   export let sourceUrl: string | null = null;
@@ -411,6 +420,22 @@
   let loading = false;
   let loadError: string | null = null;
 
+  type PdfTextContent = Awaited<
+    ReturnType<import("pdfjs-dist").PDFPageProxy["getTextContent"]>
+  >;
+
+  // Recherche plein-texte : index construit au premier submit, puis conservé
+  // pour les requêtes et navigations suivantes du MÊME document.
+  let searchQuery = "";
+  let appliedSearchQuery = "";
+  let searchMatches: PdfTextMatch[] = [];
+  let activeSearchMatchIndex = -1;
+  let searchPending = false;
+  let searchRequestToken = 0;
+  let pageTextIndex: PdfTextIndex | null = null;
+  let pageTextIndexPromise: Promise<PdfTextIndex> | null = null;
+  const pageTextContentPromises = new Map<number, Promise<PdfTextContent>>();
+
   type PageSlot = {
     pageNumber: number;
     baseWidth: number;
@@ -567,6 +592,123 @@
     pageSlotEls.get(clamped)?.scrollIntoView({ behavior, block: "start" });
   }
 
+  function resetDocumentSearch(): void {
+    searchRequestToken++;
+    searchQuery = "";
+    appliedSearchQuery = "";
+    searchMatches = [];
+    activeSearchMatchIndex = -1;
+    searchPending = false;
+    pageTextIndex = null;
+    pageTextIndexPromise = null;
+    pageTextContentPromises.clear();
+  }
+
+  function pageTextFromContent(content: PdfTextContent): string {
+    return content.items
+      .map((item) => (typeof (item as { str?: unknown }).str === "string"
+        ? (item as { str: string }).str
+        : ""))
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  function getPageTextContent(
+    pageNumber: number,
+    pdfPage: import("pdfjs-dist").PDFPageProxy,
+  ): Promise<PdfTextContent> {
+    const cached = pageTextContentPromises.get(pageNumber);
+    if (cached) return cached;
+    const promise = pdfPage.getTextContent();
+    pageTextContentPromises.set(pageNumber, promise);
+    promise.catch(() => {
+      if (pageTextContentPromises.get(pageNumber) === promise)
+        pageTextContentPromises.delete(pageNumber);
+    });
+    return promise;
+  }
+
+  function ensurePageTextIndex(): Promise<PdfTextIndex> {
+    if (pageTextIndex) return Promise.resolve(pageTextIndex);
+    if (pageTextIndexPromise) return pageTextIndexPromise;
+    const doc = pdfDoc;
+    if (!doc) return Promise.resolve(new Map());
+
+    const promise = (async () => {
+      const entries = await Promise.all(
+        Array.from({ length: doc.numPages }, async (_, index) => {
+          const pageNumber = index + 1;
+          const pdfPage = await doc.getPage(pageNumber);
+          const content = await getPageTextContent(pageNumber, pdfPage);
+          return [pageNumber, pageTextFromContent(content)] as const;
+        }),
+      );
+      const index = buildTextIndex(new Map(entries));
+      if (doc === pdfDoc) pageTextIndex = index;
+      return index;
+    })();
+    pageTextIndexPromise = promise;
+    void promise.then(
+      () => {
+        if (pageTextIndexPromise === promise) pageTextIndexPromise = null;
+      },
+      () => {
+        if (pageTextIndexPromise === promise) pageTextIndexPromise = null;
+      },
+    );
+    return promise;
+  }
+
+  function clearSearchResults(): void {
+    searchRequestToken++;
+    appliedSearchQuery = "";
+    searchMatches = [];
+    activeSearchMatchIndex = -1;
+    searchPending = false;
+    rerenderWindow();
+  }
+
+  function handleSearchInput(): void {
+    if (!searchQuery.trim()) clearSearchResults();
+  }
+
+  async function runSearch(): Promise<void> {
+    const query = searchQuery.trim();
+    if (!query || !pdfDoc) {
+      clearSearchResults();
+      return;
+    }
+    const request = ++searchRequestToken;
+    searchPending = true;
+    try {
+      const index = await ensurePageTextIndex();
+      if (request !== searchRequestToken) return;
+      appliedSearchQuery = query;
+      searchMatches = findMatches(index, query);
+      activeSearchMatchIndex = searchMatches.length > 0 ? 0 : -1;
+      if (activeSearchMatchIndex >= 0) await goToSearchMatch(activeSearchMatchIndex);
+      else rerenderWindow();
+    } finally {
+      if (request === searchRequestToken) searchPending = false;
+    }
+  }
+
+  async function goToSearchMatch(index: number): Promise<void> {
+    const match = searchMatches[index];
+    if (!match) return;
+    activeSearchMatchIndex = index;
+    await scrollToPage(match.page, "smooth");
+    schedulePageRender(match.page);
+  }
+
+  function searchNext(): void {
+    void goToSearchMatch(nextMatchIndex(activeSearchMatchIndex, searchMatches.length));
+  }
+
+  function searchPrev(): void {
+    void goToSearchMatch(prevMatchIndex(activeSearchMatchIndex, searchMatches.length));
+  }
+
   function handleViewerScroll(): void {
     if (scrollFrame !== null) return;
     scrollFrame = requestAnimationFrame(() => {
@@ -596,6 +738,7 @@
 
   async function loadPdf(url: string): Promise<void> {
     const token = ++loadToken;
+    resetDocumentSearch();
     resetPageStack();
     const startedAt =
       typeof performance !== "undefined" ? performance.now() : 0;
@@ -738,6 +881,7 @@
       // la page de SA référence. Sans ce garde, la voie texte re-surlignait à
       // CHAQUE page un passage générique → faux positifs (bug #83). On le
       // conserve signal par signal en mode multi.
+      let textContent: PdfTextContent | null = null;
       const onBboxPage = pageNumber === (page ?? pageNumber);
       if (bbox && signals.length === 0 && onBboxPage) {
         // bbox fourni en fractions [x0, y0, x1, y1] de la page → rectangle.
@@ -759,7 +903,7 @@
             (!hideOutOfFilter || s.inFilter !== false),
         );
         if (targets.length > 0) {
-          const content = await pdfPage.getTextContent();
+          textContent = await getPageTextContent(pageNumber, pdfPage);
           if (token !== pageRenderTokens.get(pageNumber)) return;
           let drewCurrent = false;
           // Dessine les AUTRES d'abord, le COURANT en dernier → au-dessus.
@@ -769,7 +913,7 @@
           for (const sig of ordered) {
             const drew = drawTextHighlight(
               layer,
-              content,
+              textContent,
               viewport,
               renderScale,
               sig,
@@ -780,6 +924,31 @@
           if (pageNumber === currentPage)
             queueScrollToHighlight(layer, drewCurrent ? "current" : null);
         }
+      }
+      const searchMatch = searchMatches[activeSearchMatchIndex];
+      if (searchMatch?.page === pageNumber && appliedSearchQuery) {
+        textContent ??= await getPageTextContent(pageNumber, pdfPage);
+        if (token !== pageRenderTokens.get(pageNumber)) return;
+        const occurrence = searchMatches
+          .slice(0, activeSearchMatchIndex)
+          .filter((match) => match.page === pageNumber).length;
+        const drewSearch = drawTextHighlight(
+          layer,
+          textContent,
+          viewport,
+          renderScale,
+          {
+            id: "pdf-search",
+            label: "",
+            excerpt: appliedSearchQuery,
+            page: pageNumber,
+            color: "#0ea5e9",
+            current: false,
+          },
+          occurrence,
+        );
+        if (drewSearch && pageNumber === currentPage)
+          queueScrollToHighlight(layer, "search");
       }
       // #86 — réapplique la pulsation du hover externe après recréation des marques.
       applyExternalHover(hoveredSignalId);
@@ -870,10 +1039,6 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  type PdfTextContent = Awaited<
-    ReturnType<import("pdfjs-dist").PDFPageProxy["getTextContent"]>
-  >;
-
   /**
    * Surligne UN signal sur la page courante. Retourne true si au moins une
    * marque a été dessinée. La couche texte (`content`) est chargée une seule
@@ -885,6 +1050,7 @@
     viewport: { width: number; height: number; transform: number[] },
     renderScale: number,
     signal: OverlaySignal,
+    searchOccurrence?: number,
   ): boolean {
     if (!signal.excerpt) return false;
     // Concatène le texte de la page + garde, pour chaque item, son offset.
@@ -907,7 +1073,10 @@
       pageText += " ";
     }
 
-    const match = findCitationInPage(pageText, signal.excerpt);
+    const isSearch = searchOccurrence !== undefined;
+    const match = isSearch
+      ? findTextOccurrenceInPage(pageText, signal.excerpt, searchOccurrence)
+      : findCitationInPage(pageText, signal.excerpt);
     if (!match) return false;
 
     // Surligne tout item qui chevauche AU MOINS une plage du match. La citation
@@ -935,17 +1104,19 @@
       const width = Math.max(item.width * renderScale, 4);
       const inFilter = signal.inFilter !== false;
       const mark = document.createElement("div");
-      mark.className = signal.current
-        ? "pdf-hl pdf-hl--current"
-        : inFilter
-          ? "pdf-hl"
-          : "pdf-hl pdf-hl--out";
-      mark.dataset.signalId = signal.id;
+      mark.className = isSearch
+        ? "pdf-search-hl"
+        : signal.current
+          ? "pdf-hl pdf-hl--current"
+          : inFilter
+            ? "pdf-hl"
+            : "pdf-hl pdf-hl--out";
+      if (!isSearch) mark.dataset.signalId = signal.id;
       mark.style.left = `${tx}px`;
       mark.style.top = `${ty - fontHeight}px`;
       mark.style.width = `${width}px`;
       mark.style.height = `${fontHeight * 1.15}px`;
-      applyHighlightColor(mark, signal.color, signal.current, inFilter);
+      applyHighlightColor(mark, signal.color, isSearch || signal.current, inFilter);
       layer.appendChild(mark);
       if (!firstMark) firstMark = mark;
       drewOne = true;
@@ -954,7 +1125,7 @@
     // Badge ID en surimpression, ancré au coin haut-gauche du 1er rectangle.
     // Affiché seulement quand un libellé est fourni (mode multi #84) — en mode
     // mono LOT 1 le libellé est vide, on n'ajoute pas de badge (non-régression).
-    if (drewOne && firstMark && signal.label.trim().length > 0) {
+    if (!isSearch && drewOne && firstMark && signal.label.trim().length > 0) {
       const inFilter = signal.inFilter !== false;
       const badge = document.createElement("span");
       // #4 — badge PLEIN pour les dans-filtre (couleur signal), badge CREUX
@@ -1007,13 +1178,15 @@
 
   function queueScrollToHighlight(
     layer: HTMLDivElement,
-    prefer: "current" | null,
+    prefer: "current" | "search" | null,
   ): void {
     requestAnimationFrame(() => {
       const target =
-        (prefer === "current"
-          ? (layer.querySelector(".pdf-hl--current") as HTMLElement | null)
-          : null) ?? (layer.querySelector(".pdf-hl") as HTMLElement | null);
+        (prefer === "search"
+          ? (layer.querySelector(".pdf-search-hl") as HTMLElement | null)
+          : prefer === "current"
+            ? (layer.querySelector(".pdf-hl--current") as HTMLElement | null)
+            : null) ?? (layer.querySelector(".pdf-hl") as HTMLElement | null);
       if (target && viewerScrollEl) {
         const slot = layer.closest<HTMLElement>(".pdf-page-slot");
         const top = (slot?.offsetTop ?? 0) + target.offsetTop - viewerScrollEl.clientHeight / 3;
@@ -1153,6 +1326,7 @@
     // (worker fermé) → crash à la prochaine ouverture du même rawRef. La
     // mémoire est bornée par l'éviction LRU du cache.
     loadToken++;
+    resetDocumentSearch();
     resetPageStack();
     resizeObserver?.disconnect();
     resizeObserver = null;
@@ -1320,6 +1494,52 @@
           </button>
         </div>
       {/if}
+
+      <form
+        class="pdf-text-search"
+        role="search"
+        aria-label="Recherche plein-texte dans le document"
+        on:submit|preventDefault={runSearch}
+      >
+        <Search class="h-3.5 w-3.5" aria-hidden="true" />
+        <input
+          type="search"
+          bind:value={searchQuery}
+          on:input={handleSearchInput}
+          placeholder="Rechercher…"
+          aria-label="Rechercher dans le document"
+          disabled={!pdfDoc}
+        />
+        <button
+          type="submit"
+          class="pdf-search-submit"
+          aria-label="Lancer la recherche"
+          disabled={!pdfDoc || searchPending || !searchQuery.trim()}
+        >
+          {searchPending ? "…" : "OK"}
+        </button>
+        <span class="pdf-search-counter" aria-live="polite">
+          {activeSearchMatchIndex >= 0 ? activeSearchMatchIndex + 1 : 0}/{searchMatches.length}
+        </span>
+        <button
+          type="button"
+          class="pdf-search-nav"
+          on:click={searchPrev}
+          disabled={searchMatches.length === 0}
+          aria-label="Résultat précédent"
+        >
+          <ChevronLeft class="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          class="pdf-search-nav"
+          on:click={searchNext}
+          disabled={searchMatches.length === 0}
+          aria-label="Résultat suivant"
+        >
+          <ChevronRight class="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </form>
 
       <span class="pdf-nav-spacer"></span>
 
@@ -1692,6 +1912,56 @@
     flex: 1;
   }
 
+  .pdf-text-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    height: 1.9rem;
+    padding-left: 0.45rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-muted, #64748b);
+  }
+
+  .pdf-text-search input {
+    width: 8.5rem;
+    min-width: 4rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.72rem;
+  }
+
+  .pdf-search-submit,
+  .pdf-search-nav {
+    display: inline-flex;
+    height: 1.55rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .pdf-search-submit:disabled,
+  .pdf-search-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .pdf-search-counter {
+    min-width: 2.3rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
   .pdf-nav-toggle {
     display: inline-flex;
     align-items: center;
@@ -2006,12 +2276,18 @@
     pointer-events: none;
   }
 
-  .pdf-text-layer :global(.pdf-hl) {
+  .pdf-text-layer :global(.pdf-hl),
+  .pdf-text-layer :global(.pdf-search-hl) {
     position: absolute;
     /* La couleur (background/outline) est appliquée en inline par signal pour
        le multi-signaux (#84) — chaque signal a sa teinte. */
     mix-blend-mode: multiply;
     border-radius: 2px;
+  }
+
+  .pdf-text-layer :global(.pdf-search-hl) {
+    z-index: 6;
+    mix-blend-mode: multiply;
   }
 
   /* Le surlignage du signal COURANT passe au-dessus des autres. */
