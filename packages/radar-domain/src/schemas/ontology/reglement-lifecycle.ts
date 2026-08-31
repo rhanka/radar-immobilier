@@ -144,6 +144,39 @@ export function aggregateRegulatoryStatus(
   return statuses.some((s) => s === "firm") ? "firm" : "anticipation";
 }
 
+// ── Axe HIDE avis-only (LOT 1, prédicat SINGLE-SOURCE UI+serving) ─────────────
+// DISTINCT de l'axe MARQUAGE `regulatoryStatus` (firm/anticipation) : ici on détecte
+// un règlement dont l'ensemble des étapes servies de ses nœuds tient à l'AVIS DE
+// MOTION et ne va JAMAIS plus loin (drawer HIDE, owner P4). ⚠ `REGLEMENT_STAGES_FERMES`
+// = TOUT stade réel au-delà de l'avis (projet→en-vigueur) et n'est PAS le même set que
+// `FIRM_ETAPES` (regulatoryStatus = {adoption, entree_vigueur} seulement) : un
+// `projet_reglement` FERME l'avis-only (le règlement progresse → on le MONTRE) sans
+// être « firm » (il reste anticipation au marquage). Prédicat remonté VERBATIM depuis
+// l'UI (vues A.4a `signaux-reglements.ts`) pour être consommé single-source par l'UI
+// ET le serving (0 drift structurel — aujourd'hui la règle vit des deux côtés).
+export const REGLEMENT_STAGES_FERMES: ReadonlySet<string> = new Set([
+  "premier_projet",
+  "second_projet",
+  "projet_reglement",
+  "consultation_publique",
+  "adoption",
+  "entree_vigueur",
+]);
+
+/** Un règlement est « avis-only » (candidat HIDE-drawer, owner P4) SSI, sur l'ensemble
+ *  des `etapes` servies (AUTORITATIVES, lowercase) de ses nœuds agrégées PAR règlement :
+ *  `avis_motion` est présent, AUCUN stade réel au-delà (`REGLEMENT_STAGES_FERMES`)
+ *  n'apparaît, et `inconnu` est absent (un stade inconnu interdit de conclure avis-only
+ *  — anti-invention). Re-drivé du `etape` servi, JAMAIS d'un keyword. ⚠ N'est PAS
+ *  `regulatoryStatus=anticipation` (qui inclut le projet-stage MONTRÉ) : règle SÉPARÉE
+ *  du hide. Miroir exact de la règle vues A.4a (single-source). */
+export function isReglementAvisOnly(etapes: ReadonlySet<string>): boolean {
+  if (!etapes.has("avis_motion")) return false;
+  if (etapes.has("inconnu")) return false;
+  for (const e of etapes) if (REGLEMENT_STAGES_FERMES.has(e)) return false;
+  return true;
+}
+
 // ── Champs de cycle de vie ajoutés aux nœuds (appliqués dans entities.ts) ─────
 /** DesignationEvent (avis/projet) : statut + cible + bitemporel + relations + instrument. */
 export const designationLifecycleFields = {
