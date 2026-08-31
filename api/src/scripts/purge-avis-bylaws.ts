@@ -45,10 +45,14 @@ import { createDb } from "../db/client.js";
 import { createScrapeS3Client, S3ObjectStore } from "../storage/s3-object-store.js";
 import {
   archiveCityGraphPrefix,
+  captureCanonicalReadAnchor,
   readCanonicalCityGraph,
   writeCanonicalCityGraph,
+  type CanonicalGraphStore,
+  type CanonicalReadAnchor,
 } from "../services/graph/canonical-graph-writer.js";
-import { upsertGraphAtomic } from "../services/graph/graph-store.js";
+import { subgraphForCity, upsertGraphAtomic } from "../services/graph/graph-store.js";
+import { snapshotFromExistingCity } from "../services/graph/graphify-34-snapshot.js";
 
 // ── Helpers PURS (extraction props / n° A1-safe / etape) ──────────────────────
 
@@ -254,9 +258,49 @@ const DEFAULT_ORACLE_PATH = resolve(
   "../services/graph/__fixtures__/avis-only-72.tsv",
 );
 
+/**
+ * Charge le graph d'une ville + l'ancre de version (write-guard concurrent).
+ * Deux sources :
+ *  - défaut (S3) : `graph/<city>/latest.json` (la vérité canonique).
+ *  - `--heal` : reconstruit le graph DEPUIS PG (`subgraphForCity` +
+ *    `snapshotFromExistingCity`) pour les villes en drift PG>latest.json où le
+ *    latest.json est stale (rawRef/sourceUrl null) : reprojeter depuis lui
+ *    régresserait les survivants. On lit la vérité enrichie (PG), on purge, on
+ *    ré-écrit latest.json depuis PG-minus-Bylaw (drift soigné) ; le reproject
+ *    PG-vs-PG-minus-Bylaw est lossless (survivants identiques) + #551 exempte le
+ *    Bylaw retiré. Mirroite le round-trip graphify-34 phase A.
+ *
+ * ⚠ En `--heal`, le CONTENU vient de PG mais l'`readAnchor` est capturé sur le
+ * latest.json COURANT (`captureCanonicalReadAnchor`) : il protège l'écriture S3
+ * contre un write concurrent, pas le contenu. Retourne `null` si pas de source
+ * (S3 absent / PG vide).
+ */
+export async function loadCityGraph(opts: {
+  heal: boolean;
+  store: CanonicalGraphStore;
+  db: Parameters<typeof subgraphForCity>[0];
+  city: string;
+}): Promise<{ graph: Record<string, unknown>; readAnchor: CanonicalReadAnchor } | null> {
+  const { heal, store, db, city } = opts;
+  if (heal) {
+    const readAnchor = await captureCanonicalReadAnchor(store, city);
+    const existing = await subgraphForCity(db, city);
+    if (existing.nodes.length === 0) return null;
+    return {
+      graph: snapshotFromExistingCity(existing) as unknown as Record<string, unknown>,
+      readAnchor,
+    };
+  }
+  const read = await readCanonicalCityGraph(store, city);
+  if (read === null) return null;
+  const graph = JSON.parse(new TextDecoder().decode(read.body)) as Record<string, unknown>;
+  return { graph, readAnchor: read.anchor };
+}
+
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const apply = args.includes("--apply");
+  const heal = args.includes("--heal");
   const oracleIdx = args.indexOf("--oracle");
   const oraclePath = oracleIdx >= 0 ? (args[oracleIdx + 1] ?? "") : DEFAULT_ORACLE_PATH;
   const cities = args.filter(
@@ -285,38 +329,40 @@ async function main(): Promise<void> {
   const backupId = `purge-avis-bylaws-${new Date().toISOString().replaceAll(":", "-").replace(".", "-")}`;
 
   logger.info(
-    { bucket: graphS3Config.bucket, apply, cities: targetCities.length, mode: apply ? "APPLY" : "DRY-RUN" },
-    "purge-avis-bylaws: démarrage (removal-only latest.json + reproject inline)",
+    {
+      bucket: graphS3Config.bucket,
+      apply,
+      heal,
+      cities: targetCities.length,
+      mode: apply ? "APPLY" : "DRY-RUN",
+      source: heal ? "PG (--heal)" : "S3 latest.json",
+    },
+    "purge-avis-bylaws: démarrage (removal-only + reproject inline)",
   );
 
   let removedTotal = 0;
   let halted = 0;
   let reprojected = 0;
   let aborted = 0;
-  const decoder = new TextDecoder();
   const encoder = new TextEncoder();
 
   for (const city of targetCities) {
     const oracleIds = oracleByCity.get(city) ?? [];
-    let read: Awaited<ReturnType<typeof readCanonicalCityGraph>>;
+    let loaded: Awaited<ReturnType<typeof loadCityGraph>>;
     try {
-      read = await readCanonicalCityGraph(store, city);
+      loaded = await loadCityGraph({ heal, store, db, city });
     } catch (err) {
-      logger.warn({ city, err: String(err) }, "purge: latest.json illisible, ville ignorée");
+      logger.warn({ city, err: String(err) }, "purge: graph source illisible/invalide, ville ignorée");
       continue;
     }
-    if (read === null) {
-      logger.warn({ city }, "purge: latest.json absent, ville ignorée");
+    if (loaded === null) {
+      logger.warn(
+        { city },
+        heal ? "purge --heal: PG vide pour la ville, ignorée" : "purge: latest.json absent, ville ignorée",
+      );
       continue;
     }
-
-    let graph: Record<string, unknown>;
-    try {
-      graph = JSON.parse(decoder.decode(read.body)) as Record<string, unknown>;
-    } catch (err) {
-      logger.warn({ city, err: String(err) }, "purge: latest.json JSON invalide, ville ignorée");
-      continue;
-    }
+    const { graph, readAnchor } = loaded;
 
     const plan = planCityPurge(graph, city, oracleIds);
 
@@ -349,7 +395,7 @@ async function main(): Promise<void> {
     // APPLY — ordre filet : archive → writeCanonicalCityGraph (gardé) → upsertGraphAtomic (inline).
     const body = encoder.encode(JSON.stringify(plan.nextGraph, null, 2));
     const archive = await archiveCityGraphPrefix(store, city, backupId);
-    await writeCanonicalCityGraph(store, { citySlug: city, body, archive, readAnchor: read.anchor });
+    await writeCanonicalCityGraph(store, { citySlug: city, body, archive, readAnchor });
     logger.info({ city, backupPrefix: archive.backup_prefix, objects: archive.object_count }, "purge: préfixe archivé + latest.json écrit (S3)");
     removedTotal += plan.removed.length;
 
