@@ -23,6 +23,12 @@ export interface MockSignal {
   city: string;
   type: string;
   etape: string;
+  /** Ferme vs anticipation SERVI par l'API (axe MARQUAGE, R5) — LU tel quel depuis
+   *  la carte graph-signals, jamais re-classifié côté MCP : le classifieur unique
+   *  (`deriveRegulatoryStatus`) vit côté serveur, le MCP consomme le champ servi
+   *  (pas de dép `@radar/domain` = découplage volontaire). "anticipation" = fail-safe
+   *  quand l'API ne sert pas le champ (jamais firm sans preuve servie). */
+  regulatoryStatus: "firm" | "anticipation";
   etape_date: string;
   reglement_number: string;
   zone_ref: string;
@@ -107,6 +113,7 @@ export const MOCK_SIGNALS: MockSignal[] = [
     city: "longueuil",
     type: "modification_zonage",
     etape: "avis_motion",
+    regulatoryStatus: "anticipation",
     etape_date: "2026-04-14",
     reglement_number: "CO-2026-1187",
     zone_ref: "H-203",
@@ -120,6 +127,7 @@ export const MOCK_SIGNALS: MockSignal[] = [
     city: "longueuil",
     type: "usage_conditionnel",
     etape: "adoption",
+    regulatoryStatus: "firm",
     etape_date: "2026-05-12",
     reglement_number: "USC-2026-044",
     zone_ref: "C-101",
@@ -133,6 +141,7 @@ export const MOCK_SIGNALS: MockSignal[] = [
     city: "valleyfield",
     type: "plan_amenagement",
     etape: "consultation",
+    regulatoryStatus: "anticipation",
     etape_date: "2026-03-02",
     reglement_number: "PPU-2026-007",
     zone_ref: "H-410",

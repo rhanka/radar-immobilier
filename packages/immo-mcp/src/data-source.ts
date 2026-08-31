@@ -176,6 +176,8 @@ interface ApiGraphSignalNode {
   description?: string | null;
   publishedAt?: string | null;
   docRefs?: ApiGraphSignalDocRef[];
+  /** Axe MARQUAGE servi en 1re-classe par graph-signals (A.3b) — LU tel quel. */
+  regulatoryStatus?: "firm" | "anticipation";
   props?: Record<string, unknown>;
 }
 interface ApiGraphSignalsResponse {
@@ -216,6 +218,10 @@ export function toMockSignal(node: ApiGraphSignalNode, fallbackCity: string): Mo
     // graph node type ("Signal" / "DesignationEvent").
     type: firstStr(p["category"], node.type),
     etape: firstStr(p["etape"]),
+    // R5 (A.3d) : regulatoryStatus LU tel quel depuis la carte servie (A.3b) —
+    // aucune re-classification côté MCP. "anticipation" = fail-safe si l'API ne
+    // sert pas le champ (jamais firm sans preuve servie).
+    regulatoryStatus: node.regulatoryStatus ?? "anticipation",
     etape_date: firstStr(p["etape_date"], p["date"], node.publishedAt),
     reglement_number: firstStr(p["reglement_number"]),
     zone_ref: firstStr(p["zone_ref"], p["zone"]),

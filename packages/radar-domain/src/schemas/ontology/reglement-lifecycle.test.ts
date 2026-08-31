@@ -6,6 +6,9 @@ import {
   KNOWN_RELATION_TYPES,
   KNOWN_TYPE_INSTRUMENTS,
   RegulatoryStatus,
+  deriveRegulatoryStatus,
+  readRegulatoryStatus,
+  aggregateRegulatoryStatus,
 } from "./reglement-lifecycle.js";
 import { OntoRelationType } from "./relations-generated.js";
 import { OntoDesignationEvent, OntoBylaw } from "./entities.js";
@@ -236,5 +239,69 @@ describe("regulatoryStatus (LOT 1 serving — axe firm/anticipation dérivé-imm
     const b = OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "1", regulatoryStatus: "firm", rawRef: RAW, recon });
     expect(b.regulatoryStatus).toBe("firm");
     expect(OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "2", rawRef: RAW, recon }).regulatoryStatus).toBeNull();
+  });
+});
+
+describe("deriveRegulatoryStatus (LOT 1 serving — LE classifieur UNIQUE, D1/D2, invariant §3)", () => {
+  it("firm iff statut ∈ {adopte, entree-vigueur} (D1)", () => {
+    expect(deriveRegulatoryStatus({ statut: "adopte" })).toBe("firm");
+    expect(deriveRegulatoryStatus({ statut: "entree-vigueur" })).toBe("firm");
+  });
+  it("toute autre étape (avis/projet/consultation/registre) = anticipation", () => {
+    for (const s of ["avis-motion", "1er-projet", "consultation-publique", "2e-projet", "registre-referendaire"] as const)
+      expect(deriveRegulatoryStatus({ statut: s })).toBe("anticipation");
+  });
+  it("abandonne = anticipation (état terminal, jamais firm)", () => {
+    expect(deriveRegulatoryStatus({ statut: "abandonne" })).toBe("anticipation");
+  });
+  it("D2 fallback legacy : sans statut, dérive de l'etape structuré (adoption/entree_vigueur → firm ; jamais keyword)", () => {
+    expect(deriveRegulatoryStatus({ etape: "adoption" })).toBe("firm");
+    expect(deriveRegulatoryStatus({ etape: "entree_vigueur" })).toBe("firm");
+    expect(deriveRegulatoryStatus({ etape: "avis_motion" })).toBe("anticipation");
+  });
+  it("statut PRIME sur etape (source autoritative > legacy)", () => {
+    expect(deriveRegulatoryStatus({ statut: "avis-motion", etape: "adoption" })).toBe("anticipation");
+  });
+  // NÉGATIF (anti-invention, LE garde) : aucune preuve → anticipation fail-safe, JAMAIS firm.
+  it("aucune preuve (statut ET etape absents/null) → anticipation FAIL-SAFE (jamais firm sans preuve)", () => {
+    expect(deriveRegulatoryStatus({})).toBe("anticipation");
+    expect(deriveRegulatoryStatus({ statut: null, etape: null })).toBe("anticipation");
+  });
+});
+
+describe("readRegulatoryStatus (LOT 1 serving — LOCUS DE LECTURE UNIQUE, R5)", () => {
+  it("rend le champ PERSISTÉ tel quel quand il est présent (pas de re-dérivation)", () => {
+    // Le champ persisté PRIME même si l'etape brut le contredirait : on LIT, on ne re-classifie pas.
+    expect(readRegulatoryStatus({ regulatoryStatus: "firm", etape: "avis_motion" })).toBe("firm");
+    expect(readRegulatoryStatus({ regulatoryStatus: "anticipation", statut: "adopte" })).toBe("anticipation");
+  });
+  it("nœud LEGACY sans champ → fallback deriveRegulatoryStatus (MÊME fn, pas un classifieur indépendant)", () => {
+    expect(readRegulatoryStatus({ regulatoryStatus: null, statut: "adopte" })).toBe("firm");
+    expect(readRegulatoryStatus({ etape: "adoption" })).toBe("firm");
+    expect(readRegulatoryStatus({ etape: "avis_motion" })).toBe("anticipation");
+  });
+  it("champ absent ET aucune preuve → anticipation FAIL-SAFE (jamais firm sans preuve)", () => {
+    expect(readRegulatoryStatus({})).toBe("anticipation");
+    expect(readRegulatoryStatus({ regulatoryStatus: null, statut: null, etape: null })).toBe("anticipation");
+  });
+});
+
+describe("aggregateRegulatoryStatus (LOT 1 serving — invariant REVERSE, agrégat PAR cible)", () => {
+  it("FERME dès qu'AU MOINS UN nœud est ferme (l'adoption prime sur l'avis frère)", () => {
+    expect(aggregateRegulatoryStatus(["anticipation", "firm"])).toBe("firm");
+    expect(aggregateRegulatoryStatus(["firm"])).toBe("firm");
+  });
+  // REVERSE-bug (i-arch) : un règlement adopté dont le nœud-Bylaw n'a pas de stade direct
+  // (→ anticipation isolé/null) hérite du ferme de son nœud-adoption via l'agrégat.
+  it("nœud-Bylaw sans stade (null) + nœud-adoption ferme → l'agrégat est FERME (pas de reverse-bug)", () => {
+    expect(aggregateRegulatoryStatus([null, "firm"])).toBe("firm");
+    expect(aggregateRegulatoryStatus([undefined, "firm", "anticipation"])).toBe("firm");
+  });
+  it("aucun nœud ferme (que des anticipations) → anticipation", () => {
+    expect(aggregateRegulatoryStatus(["anticipation", "anticipation"])).toBe("anticipation");
+  });
+  it("ensemble vide ou tout-null → anticipation FAIL-SAFE (jamais firm sans preuve)", () => {
+    expect(aggregateRegulatoryStatus([])).toBe("anticipation");
+    expect(aggregateRegulatoryStatus([null, undefined])).toBe("anticipation");
   });
 });
