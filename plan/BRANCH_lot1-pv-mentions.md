@@ -19,9 +19,9 @@ Spec D-A TRANCHÉ (`SPEC_EVOL_AVIS_MOTION_CYCLE_VIE.md`) : **un avis de motion =
 - Consommateurs actuels du **Bylaw-from-avis** émis par pv-mentions (qui casse si on le retire ?) : grep type "Bylaw" côté mentions/graphify + tests. Retirer proprement (0 régression).
 
 ## Lot-based plan (test-first)
-- [ ] **B.0 — explorer recon layer** (mentions→nodes, merge-par-terme, avis→adoption link) + consommateurs Bylaw-from-avis. Mesurer.
-- [ ] **B.1 — retrait Bylaw-from-avis** : pv-mentions n'émet PLUS de Bylaw pour les `reglementNumbers` d'avis-contexte ; seul le **DesignationEvent (avis_motion)** est émis, portant `reglementNumbers` (cible) + `zoneRefs`. (Bylaw = émis ailleurs, à l'adoption — hors ce PR.)
-- [ ] **B.2 — 3 tests recon BLOQUANTS (R6)** : (a) merge multi-source → 1 DesignationEvent par cible-n° (normalized_terms/reglementNumbers) ; (b) chaîne avis→adoption liée (l'avis DesignationEvent référence l'adoption par cible-n°/lifecycle_predecessor quand l'adoption existe) ; (c) **0 double-émission** (un avis émet le DesignationEvent SEUL, plus jamais Bylaw+DesignationEvent pour le même n°).
+- [x] **B.0 — explorer recon layer** : `pvMentions`←`mentions.ts:334`(extractMentions) ; recon `reconcile.ts` merge SAME-TYPE par `type::city::term` (Bylaw/DesignationEvent ne fusionnent PAS entre eux) ; DesignationEvent consommé `signals.ts`. Bylaw-from-avis (pv-mentions l.65) distinct des Bylaws avis-publics/règlement-urbanisme (mentions.ts l.150/275, hors scope). Chaîne avis→adoption = couche graphify `reglement-lifecycle-projection.ts` (Lot A), pas la couche mention. AUCUN consommateur test dépend du Bylaw-from-avis (130 tests exploitation verts après retrait).
+- [x] **B.1 — retrait Bylaw-from-avis** : pv-mentions n'émet PLUS de Bylaw (boucle l.62-70 retirée) ; seul le **DesignationEvent (avis_motion)** émis, portant `reglementNumbers` (cible) + `zoneRefs`. Header + docstring maj. mentions.test.ts 45/45.
+- [~] **B.2 — 3 tests recon BLOQUANTS (R6)** : (c) ✅ **0 double-émission** (Saint-Constant + Saint-Damase : avis → 0 Bylaw, n° uniquement sur le DesignationEvent). (a) ⏳ merge multi-source → 1 DesignationEvent par cible-n° (reconcile same-type). (b) ⏳ substrat lien avis→adoption (DesignationEvent porte reglementNumbers=cible ; Bylaw d'adoption même n° = liable downstream).
 - [ ] **Final gate** : `make lint`+typecheck+test-api (down -v) → PR SÉPARÉE → i-arch #1 + i-cond #2. NE PAS self-merge.
 
 ## Feedback Loop
