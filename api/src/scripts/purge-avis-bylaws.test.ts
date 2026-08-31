@@ -55,6 +55,36 @@ describe("planCityPurge — remove-safe (avis-only : Bylaw + DesignationEvent fr
   });
 });
 
+describe("planCityPurge — survivor preservation (re-serialization lossless sur les survivants)", () => {
+  // i-cond verify>trust : le reproject (upsertGraphAtomic) exempte le Bylaw
+  // supprimé via `intendedRemovals`, mais la garde reste armée pour les
+  // survivants. Il faut donc que la purge ne MUTE aucun survivant — sinon une
+  // business-property informative dégradée sur un survivant aborterait quand même.
+  it("garde les nœuds survivants IDENTIQUES (clés sensibles etape/instrument/effet non dégradées)", () => {
+    const survivor: N = {
+      id: "event-x-avis-325",
+      type: "DesignationEvent",
+      properties: {
+        cibleReglementNumero: "325-2026",
+        etape: "avis_motion",
+        instrument: "rezonage",
+        effet_densifiant: "densifie",
+      },
+    };
+    const graph = {
+      nodes: [bylaw("bylaw-x-325", "325-2026"), survivor, signal("signal-x-325", "325-2026")],
+    };
+    const plan = planCityPurge(graph, "x", ["bylaw-x-325"]);
+    expect(plan.removed).toEqual(["bylaw-x-325"]);
+    // Survivant préservé property-for-property → la garde de non-régression ne
+    // peut PAS fire dessus au reproject (elle ne fire que sur le retrait intentionnel).
+    expect((plan.nextGraph.nodes as N[]).find((n) => n.id === "event-x-avis-325")).toEqual(survivor);
+    expect((plan.nextGraph.nodes as N[]).find((n) => n.id === "signal-x-325")).toEqual(
+      signal("signal-x-325", "325-2026"),
+    );
+  });
+});
+
 describe("planCityPurge — ASSERT-vs-oracle (fail-safe HALT, jamais wrong-removal)", () => {
   it("un avis-Bylaw présent HORS oracle → HALT (0 removal, graphe intact)", () => {
     const graph = {

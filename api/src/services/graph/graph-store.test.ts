@@ -365,6 +365,55 @@ describe("business-property preservation gate", () => {
       missingKeys: ["notes"],
     }]);
   });
+
+  // ── intendedRemovals — removal-only reprojections (purge-avis-bylaws) ─────────
+  // The anti-silent-deletion rule treats a whole node absent from `after` as an
+  // empty prop map → all its business keys read as missing → regression. That is
+  // correct for an ACCIDENTAL drop, but a removal-only tool deletes nodes ON
+  // PURPOSE. `intendedRemovals` exempts exactly those nodeIds; the guard stays
+  // armed for every other node.
+  it("flags a business-bearing node that disappears entirely (anti-silent-deletion base case)", () => {
+    // saint-ours reproduction: deleting a Bylaw with business props aborts by
+    // default (no intendedRemovals) — its numero/stage/municipality vanish.
+    const before = [{
+      id: "bylaw-x-326-2026",
+      props: { properties: { numero: "326-2026", stage: "avis", municipality: "x" } },
+    }];
+    const after: { id: string; props: Record<string, unknown> }[] = [];
+    expect(findMissingBusinessProperties(before, after, "x")).toEqual([{
+      citySlug: "x",
+      nodeId: "bylaw-x-326-2026",
+      missingKeys: ["municipality", "numero", "stage"],
+    }]);
+  });
+
+  it("exempts a node listed in intendedRemovals from the disappearance check", () => {
+    const before = [{
+      id: "bylaw-x-326-2026",
+      props: { properties: { numero: "326-2026", stage: "avis", municipality: "x" } },
+    }];
+    const after: { id: string; props: Record<string, unknown> }[] = [];
+    expect(
+      findMissingBusinessProperties(before, after, "x", new Set(["bylaw-x-326-2026"])),
+    ).toEqual([]);
+  });
+
+  it("keeps the guard armed for a disappearing node NOT in intendedRemovals", () => {
+    // Only the explicitly-intended node is exempt; a different node dropping its
+    // business props is still a regression (accidental-drop / drift protection).
+    const before = [
+      { id: "bylaw-x-326-2026", props: { properties: { numero: "326-2026", stage: "avis" } } },
+      { id: "bylaw-x-999-2020", props: { properties: { numero: "999-2020", stage: "adopte" } } },
+    ];
+    const after: { id: string; props: Record<string, unknown> }[] = [];
+    expect(
+      findMissingBusinessProperties(before, after, "x", new Set(["bylaw-x-326-2026"])),
+    ).toEqual([{
+      citySlug: "x",
+      nodeId: "bylaw-x-999-2020",
+      missingKeys: ["numero", "stage"],
+    }]);
+  });
 });
 
 describe("Sutton immutable legacy projection", () => {

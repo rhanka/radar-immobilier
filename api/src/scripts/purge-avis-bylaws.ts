@@ -353,7 +353,12 @@ async function main(): Promise<void> {
     logger.info({ city, backupPrefix: archive.backup_prefix, objects: archive.object_count }, "purge: préfixe archivé + latest.json écrit (S3)");
     removedTotal += plan.removed.length;
 
-    const result = await upsertGraphAtomic(db, city, plan.nextGraph);
+    // `plan.removed` = the avis-Bylaws this purge deletes ON PURPOSE. Declaring
+    // them as intended removals exempts them from upsertGraphAtomic's
+    // business-property-regression guard (which otherwise treats a deleted
+    // business-bearing node as silent data loss and aborts). Every OTHER node
+    // stays guarded — an unexpected drop still aborts.
+    const result = await upsertGraphAtomic(db, city, plan.nextGraph, new Set(plan.removed));
     if (result.aborted) {
       aborted++;
       logger.error({ city, reason: result.reason }, "purge: REPROJECTION ABORTÉE (anormal — investiguer)");
