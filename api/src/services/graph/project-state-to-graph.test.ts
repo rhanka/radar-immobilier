@@ -435,3 +435,45 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraph with projectStateToGraph o
     expect(r1.edgeCount).toBe(r2.edgeCount);
   });
 });
+
+describe("projectStateToGraph — reglement-node enrichment (properties + openable refs)", () => {
+  it("carries a canonical's properties + docRefs onto the graphify node", () => {
+    const canonical = makeCanonical(
+      "bylaw::test-city::450-02",
+      "Bylaw",
+      "Règlement 450-02",
+      {
+        evidenceRefs: ["raw/reglements-urbanisme-valleyfield/cas/abc.pdf"],
+        properties: { reglement_number: "450-02", etape: "entree_vigueur" },
+        docRefs: [
+          {
+            rawRef: "raw/reglements-urbanisme-valleyfield/cas/abc.pdf",
+            excerpt: "Règlement 450-02 concernant le plan d'urbanisme",
+          },
+        ],
+      },
+    );
+    const graph = projectStateToGraph(makeState([canonical], []));
+    const node = graph.nodes.find((n) => n.id === "bylaw::test-city::450-02");
+    expect(node?.properties).toEqual({
+      reglement_number: "450-02",
+      etape: "entree_vigueur",
+    });
+    expect(node?.refs).toEqual([
+      {
+        rawRef: "raw/reglements-urbanisme-valleyfield/cas/abc.pdf",
+        excerpt: "Règlement 450-02 concernant le plan d'urbanisme",
+      },
+    ]);
+  });
+
+  it("leaves a canonical without properties/docRefs thin (no properties, no refs)", () => {
+    const canonical = makeCanonical("zone::test-city::h-1", "Zone", "H-1", {
+      evidenceRefs: ["raw/regl/x.pdf"],
+    });
+    const graph = projectStateToGraph(makeState([canonical], []));
+    const node = graph.nodes.find((n) => n.id === "zone::test-city::h-1");
+    expect(node?.properties).toBeUndefined();
+    expect(node?.refs).toBeUndefined();
+  });
+});
