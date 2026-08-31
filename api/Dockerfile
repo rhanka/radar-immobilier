@@ -138,6 +138,15 @@ COPY --from=build /workspace/packages/immo-mcp/dist ./packages/immo-mcp/dist
 COPY --from=build /workspace/api/drizzle ./api/drizzle
 # Fixtures simulation CS-L6 (JSON lus depuis le disque à la première requête)
 COPY --from=build /workspace/api/src/services/geo/fixtures ./api/fixtures
+# Shared ontology profile — the exploitation reconciler (reconcile.ts
+# loadRadarProfile) reads it at RUNTIME. The esbuild bundle flattens the module
+# depth (api/dist/index.js + api/dist/scripts/*.js sit shallower than
+# api/src/services/exploitation/…), so the source-relative `..×4` no longer
+# lands on the repo root inside the image. RADAR_ONTOLOGY_PROFILE_PATH points
+# both the api deploy and every Job entrypoint at this copy (COPY'd from the
+# build context, not the build stage, which does not ship radar/).
+COPY radar/ontology ./radar/ontology
+ENV RADAR_ONTOLOGY_PROFILE_PATH=/workspace/radar/ontology/ontology-profile.yaml
 # Deployed build identity (short git sha). The CI build passes it
 # (`--build-arg GIT_SHA=<sha>`, see build-push-images.yml) and the running
 # process surfaces it on /livez and /health (the latter is the only API route
