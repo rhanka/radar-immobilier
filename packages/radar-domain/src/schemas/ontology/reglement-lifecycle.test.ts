@@ -6,6 +6,7 @@ import {
   KNOWN_RELATION_TYPES,
   KNOWN_TYPE_INSTRUMENTS,
   RegulatoryStatus,
+  deriveRegulatoryStatus,
 } from "./reglement-lifecycle.js";
 import { OntoRelationType } from "./relations-generated.js";
 import { OntoDesignationEvent, OntoBylaw } from "./entities.js";
@@ -236,5 +237,32 @@ describe("regulatoryStatus (LOT 1 serving — axe firm/anticipation dérivé-imm
     const b = OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "1", regulatoryStatus: "firm", rawRef: RAW, recon });
     expect(b.regulatoryStatus).toBe("firm");
     expect(OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "2", rawRef: RAW, recon }).regulatoryStatus).toBeNull();
+  });
+});
+
+describe("deriveRegulatoryStatus (LOT 1 serving — LE classifieur UNIQUE, D1/D2, invariant §3)", () => {
+  it("firm iff statut ∈ {adopte, entree-vigueur} (D1)", () => {
+    expect(deriveRegulatoryStatus({ statut: "adopte" })).toBe("firm");
+    expect(deriveRegulatoryStatus({ statut: "entree-vigueur" })).toBe("firm");
+  });
+  it("toute autre étape (avis/projet/consultation/registre) = anticipation", () => {
+    for (const s of ["avis-motion", "1er-projet", "consultation-publique", "2e-projet", "registre-referendaire"] as const)
+      expect(deriveRegulatoryStatus({ statut: s })).toBe("anticipation");
+  });
+  it("abandonne = anticipation (état terminal, jamais firm)", () => {
+    expect(deriveRegulatoryStatus({ statut: "abandonne" })).toBe("anticipation");
+  });
+  it("D2 fallback legacy : sans statut, dérive de l'etape structuré (adoption/entree_vigueur → firm ; jamais keyword)", () => {
+    expect(deriveRegulatoryStatus({ etape: "adoption" })).toBe("firm");
+    expect(deriveRegulatoryStatus({ etape: "entree_vigueur" })).toBe("firm");
+    expect(deriveRegulatoryStatus({ etape: "avis_motion" })).toBe("anticipation");
+  });
+  it("statut PRIME sur etape (source autoritative > legacy)", () => {
+    expect(deriveRegulatoryStatus({ statut: "avis-motion", etape: "adoption" })).toBe("anticipation");
+  });
+  // NÉGATIF (anti-invention, LE garde) : aucune preuve → anticipation fail-safe, JAMAIS firm.
+  it("aucune preuve (statut ET etape absents/null) → anticipation FAIL-SAFE (jamais firm sans preuve)", () => {
+    expect(deriveRegulatoryStatus({})).toBe("anticipation");
+    expect(deriveRegulatoryStatus({ statut: null, etape: null })).toBe("anticipation");
   });
 });

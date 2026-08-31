@@ -97,6 +97,24 @@ export const RegulatoryStatus = z.enum(["firm", "anticipation"]);
 export type RegulatoryStatusT = z.infer<typeof RegulatoryStatus>;
 const regulatoryStatusField = RegulatoryStatus.nullable().default(null);
 
+/** D1/D2 (LOT 1 serving invariant §3) — LE classifieur UNIQUE ferme/anticipation. Appelé à la
+ *  matérialisation (`upsertGraphAtomic`) pour PERSISTER `regulatoryStatus`, et réutilisé (MÊME fn)
+ *  comme fallback serve-time pour un nœud legacy sans champ — jamais une re-dérivation indépendante.
+ *  Ordre de preuve : `statut` (LOT 1.b autoritatif) → sinon `etape` legacy structuré → JAMAIS un
+ *  mot-clé. Aucune preuve (statut ET etape absents) → `anticipation` FAIL-SAFE (jamais firm sans
+ *  preuve = anti-invention). Binaire : un bylaw abrogé reste firm (statut adopté/en-vigueur) avec
+ *  `temporal.validTo` fermé ; abandonné = anticipation (statut=abandonne). */
+const FIRM_STATUTS: ReadonlySet<RegulatoryStageKindT> = new Set(["adopte", "entree-vigueur"]);
+const FIRM_ETAPES: ReadonlySet<string> = new Set(["adoption", "entree_vigueur"]);
+export function deriveRegulatoryStatus(input: {
+  statut?: RegulatoryStageKindT | null;
+  etape?: string | null;
+}): RegulatoryStatusT {
+  if (input.statut != null) return FIRM_STATUTS.has(input.statut) ? "firm" : "anticipation";
+  if (input.etape != null) return FIRM_ETAPES.has(input.etape) ? "firm" : "anticipation";
+  return "anticipation";
+}
+
 // ── Champs de cycle de vie ajoutés aux nœuds (appliqués dans entities.ts) ─────
 /** DesignationEvent (avis/projet) : statut + cible + bitemporel + relations + instrument. */
 export const designationLifecycleFields = {
