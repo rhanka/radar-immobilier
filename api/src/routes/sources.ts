@@ -2,7 +2,10 @@ import {
   AVIS_PUBLICS_BEAUHARNOIS_CITY,
   AVIS_PUBLICS_CITY,
   AVIS_PUBLICS_SOURCE_ID,
+  REGLEMENTS_URBANISME_CITY,
+  REGLEMENTS_URBANISME_SOURCE_ID,
   createAvisPublicsValleyfieldAdapter,
+  createReglementsUrbanismeValleyfieldAdapter,
   createRoleEvaluationMamhAdapter,
   roleSourceId,
   type SourceAdapter,
@@ -34,6 +37,8 @@ const ROLE_MAMH_BEAUHARNOIS = "70022";
  */
 const ADAPTERS: Record<string, () => SourceAdapter> = {
   [AVIS_PUBLICS_SOURCE_ID]: () => createAvisPublicsValleyfieldAdapter(),
+  [REGLEMENTS_URBANISME_SOURCE_ID]: () =>
+    createReglementsUrbanismeValleyfieldAdapter(),
   [roleSourceId(ROLE_MAMH_VALLEYFIELD)]: () =>
     createRoleEvaluationMamhAdapter({
       codeMamh: ROLE_MAMH_VALLEYFIELD,
@@ -49,6 +54,7 @@ const ADAPTERS: Record<string, () => SourceAdapter> = {
 /** City scope per source id (per-city graphify project, D1). */
 const SOURCE_CITY: Record<string, string> = {
   [AVIS_PUBLICS_SOURCE_ID]: AVIS_PUBLICS_CITY,
+  [REGLEMENTS_URBANISME_SOURCE_ID]: REGLEMENTS_URBANISME_CITY,
   [roleSourceId(ROLE_MAMH_VALLEYFIELD)]: AVIS_PUBLICS_CITY,
   [roleSourceId(ROLE_MAMH_BEAUHARNOIS)]: AVIS_PUBLICS_BEAUHARNOIS_CITY,
 };
