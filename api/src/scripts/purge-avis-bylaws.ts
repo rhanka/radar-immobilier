@@ -5,8 +5,9 @@
  * DEUX nœuds pour un même n° — un `Bylaw` (faux règlement ferme) ET un
  * `DesignationEvent(avis_motion)`. Lot B (#544) a stoppé la SOURCE, mais les
  * anciens avis-Bylaws PERSISTENT dans `graph/<city>/latest.json` (upsertGraph était
- * additif) → 026-508 survit NODE-LEVEL + parité agrégée faussement verte. Le
- * DesignationEvent frère est DÉJÀ présent ⟹ le fix = REMOVAL-ONLY (0 re-exploit).
+ * additif) → 026-508 survit NODE-LEVEL + parité agrégée faussement verte. Un
+ * nœud frère `avis_motion` (Signal si l'avis est non-zonage, DesignationEvent si
+ * zonage) est DÉJÀ présent ⟹ le fix = REMOVAL-ONLY (0 re-exploit).
  *
  * MÉCANISME (modèle `filet-auto-link-pv`, latest.json = graphe IMMO complet, PAS
  * de geo dans graph_nodes) : par ville → `readCanonicalCityGraph` → retirer les
@@ -22,8 +23,10 @@
  *  - ASSERT : {avis-Bylaws dérivés-live} == {oracle-Bylaws ENCORE PRÉSENTS} ; mismatch
  *    ⟹ **HALT ville** (0 removal) — fail-safe sur HALT, jamais sur wrong-removal.
  *    (Comparer à l'oracle-PRÉSENT rend l'outil IDEMPOTENT : re-run → dérivé=[]==présent=[].)
- *  - pré-flight belt-and-suspenders : chaque cible a un DesignationEvent frère
- *    `avis_motion` (pas juste un Signal) → sinon SKIP+flag (ne perd pas l'avis canonique).
+ *  - pré-flight belt-and-suspenders : chaque cible a un nœud frère `avis_motion`
+ *    (Signal OU DesignationEvent) qui survivra au retrait — un avis non-zonage
+ *    survit en Signal (consumer-safety : SIGNAL_NODE_TYPES={Signal,DesignationEvent},
+ *    Bylaw non-servi) → sinon SKIP+flag (ne perd pas la représentation de l'avis).
  *
  * PROD-SAFETY : dry-run par défaut / `--apply` ; isolé par-ville ; idempotent ;
  * archive obligatoire. L'écriture (préprod S3 + reproject PG) = exécutée par k8s ;
@@ -116,7 +119,7 @@ export interface CityPurgePlan {
 interface Group {
   etapes: Set<string>;
   bylawIds: string[];
-  hasAvisMotionDE: boolean;
+  hasAvisMotionSibling: boolean;
 }
 
 /**
@@ -144,7 +147,7 @@ export function planCityPurge(
     if (key === null) continue;
     let g = byNumero.get(key);
     if (g === undefined) {
-      g = { etapes: new Set(), bylawIds: [], hasAvisMotionDE: false };
+      g = { etapes: new Set(), bylawIds: [], hasAvisMotionSibling: false };
       byNumero.set(key, g);
     }
     const et = nodeEtape(n);
@@ -152,7 +155,12 @@ export function planCityPurge(
     const type = typeof n.type === "string" ? n.type : "";
     const id = typeof n.id === "string" ? n.id : null;
     if (type === "Bylaw" && id !== null) g.bylawIds.push(id);
-    if (type === "DesignationEvent" && et === "avis_motion") g.hasAvisMotionDE = true;
+    // relax (consumer-safety, #546) : un Signal(avis_motion) est une représentation
+    // survivante valide au même titre qu'un DesignationEvent — un avis non-zonage
+    // est porté par un Signal (jamais un DE). Retirer le Bylaw ghost ne perd rien.
+    if ((type === "DesignationEvent" || type === "Signal") && et === "avis_motion") {
+      g.hasAvisMotionSibling = true;
+    }
   }
 
   // DERIVE-LIVE : les Bylaw des groupes avis-only (prédicat single-source #546).
@@ -186,13 +194,14 @@ export function planCityPurge(
     };
   }
 
-  // PRÉ-FLIGHT (a) belt-and-suspenders : chaque cible a un DesignationEvent frère avis_motion.
+  // PRÉ-FLIGHT (a) belt-and-suspenders : chaque cible a un nœud frère avis_motion
+  // (Signal OU DesignationEvent) qui survivra au retrait du Bylaw ghost.
   const toRemove = new Set<string>();
   const skipped: { nodeId: string; reason: string }[] = [];
   for (const bid of derivedBylawIds) {
     const g = groupOfBylaw.get(bid)!;
-    if (!g.hasAvisMotionDE) {
-      skipped.push({ nodeId: bid, reason: "no-sibling-avis-DesignationEvent" });
+    if (!g.hasAvisMotionSibling) {
+      skipped.push({ nodeId: bid, reason: "no-sibling-avis-node" });
       continue;
     }
     toRemove.add(bid);
@@ -321,7 +330,7 @@ async function main(): Promise<void> {
     }
 
     if (plan.skipped.length > 0) {
-      logger.warn({ city, skipped: plan.skipped }, "purge: cibles SKIP (pas de DesignationEvent frère avis_motion)");
+      logger.warn({ city, skipped: plan.skipped }, "purge: cibles SKIP (pas de nœud frère avis_motion Signal|DesignationEvent)");
     }
 
     if (!plan.changed) {
