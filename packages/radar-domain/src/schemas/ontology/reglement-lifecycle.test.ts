@@ -5,6 +5,7 @@ import {
   OntoRelation,
   KNOWN_RELATION_TYPES,
   KNOWN_TYPE_INSTRUMENTS,
+  RegulatoryStatus,
 } from "./reglement-lifecycle.js";
 import { OntoRelationType } from "./relations-generated.js";
 import { OntoDesignationEvent, OntoBylaw } from "./entities.js";
@@ -209,5 +210,31 @@ describe("typeInstrument (contrat §10 — famille d'instrument, §9-tolérant, 
   it("OntoBylaw : défaut null quand omis (rétro-compat)", () => {
     const b = OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "1", rawRef: RAW, recon });
     expect(b.typeInstrument).toBeNull();
+  });
+});
+
+describe("regulatoryStatus (LOT 1 serving — axe firm/anticipation dérivé-immo, invariant §3)", () => {
+  it("enum binaire {firm, anticipation} (pas de 3e bucket, D1)", () => {
+    expect(RegulatoryStatus.options).toEqual(["firm", "anticipation"]);
+  });
+  it("OntoDesignationEvent : accepte firm / anticipation / null", () => {
+    const base = { id: UUID, citySlug: "x", subtype: "avis-motion", rawRef: RAW, recon } as const;
+    expect(OntoDesignationEvent.parse({ ...base, regulatoryStatus: "anticipation" }).regulatoryStatus).toBe("anticipation");
+    expect(OntoDesignationEvent.parse({ ...base, regulatoryStatus: "firm" }).regulatoryStatus).toBe("firm");
+    expect(OntoDesignationEvent.parse({ ...base, regulatoryStatus: null }).regulatoryStatus).toBeNull();
+  });
+  it("défaut = null quand omis (legacy non-dérivé → fallback anticipation à la lecture ; rétro-compat)", () => {
+    const e = OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "rezoning", rawRef: RAW, recon });
+    expect(e.regulatoryStatus).toBeNull();
+  });
+  it("REJETTE un 3e état (binaire strict — pas de firm déguisé)", () => {
+    expect(() =>
+      OntoDesignationEvent.parse({ id: UUID, citySlug: "x", subtype: "rezoning", regulatoryStatus: "pending", rawRef: RAW, recon }),
+    ).toThrow();
+  });
+  it("OntoBylaw porte AUSSI regulatoryStatus (firm ; abrogé = firm + temporal.validTo fermé)", () => {
+    const b = OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "1", regulatoryStatus: "firm", rawRef: RAW, recon });
+    expect(b.regulatoryStatus).toBe("firm");
+    expect(OntoBylaw.parse({ id: UUID, citySlug: "x", numero: "2", rawRef: RAW, recon }).regulatoryStatus).toBeNull();
   });
 });
