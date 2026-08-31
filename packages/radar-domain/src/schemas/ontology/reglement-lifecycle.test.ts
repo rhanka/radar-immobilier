@@ -9,6 +9,8 @@ import {
   deriveRegulatoryStatus,
   readRegulatoryStatus,
   aggregateRegulatoryStatus,
+  isReglementAvisOnly,
+  REGLEMENT_STAGES_FERMES,
 } from "./reglement-lifecycle.js";
 import { OntoRelationType } from "./relations-generated.js";
 import { OntoDesignationEvent, OntoBylaw } from "./entities.js";
@@ -303,5 +305,46 @@ describe("aggregateRegulatoryStatus (LOT 1 serving — invariant REVERSE, agrég
   it("ensemble vide ou tout-null → anticipation FAIL-SAFE (jamais firm sans preuve)", () => {
     expect(aggregateRegulatoryStatus([])).toBe("anticipation");
     expect(aggregateRegulatoryStatus([null, undefined])).toBe("anticipation");
+  });
+});
+
+describe("isReglementAvisOnly (LOT 1 — axe HIDE avis-only, single-source UI+serving)", () => {
+  const set = (...e: string[]) => new Set(e);
+
+  it("avis_motion SEUL → avis-only (candidat HIDE-drawer, owner P4)", () => {
+    expect(isReglementAvisOnly(set("avis_motion"))).toBe(true);
+  });
+  it("un stade réel au-delà de l'avis FERME l'avis-only (montré) : projet/consultation/adoption/en-vigueur", () => {
+    expect(isReglementAvisOnly(set("avis_motion", "premier_projet"))).toBe(false);
+    expect(isReglementAvisOnly(set("avis_motion", "projet_reglement"))).toBe(false);
+    expect(isReglementAvisOnly(set("avis_motion", "second_projet"))).toBe(false);
+    expect(isReglementAvisOnly(set("avis_motion", "consultation_publique"))).toBe(false);
+    expect(isReglementAvisOnly(set("avis_motion", "adoption"))).toBe(false);
+    expect(isReglementAvisOnly(set("avis_motion", "entree_vigueur"))).toBe(false);
+  });
+  it("`inconnu` présent → PAS avis-only (anti-invention : un stade inconnu interdit de conclure)", () => {
+    expect(isReglementAvisOnly(set("avis_motion", "inconnu"))).toBe(false);
+  });
+  it("sans avis_motion → PAS avis-only (ensemble vide inclus)", () => {
+    expect(isReglementAvisOnly(set("projet_reglement"))).toBe(false);
+    expect(isReglementAvisOnly(set())).toBe(false);
+  });
+  it("REGLEMENT_STAGES_FERMES = les 6 stades réels au-delà de l'avis (verbatim vues A.4a)", () => {
+    expect([...REGLEMENT_STAGES_FERMES].sort()).toEqual([
+      "adoption",
+      "consultation_publique",
+      "entree_vigueur",
+      "premier_projet",
+      "projet_reglement",
+      "second_projet",
+    ]);
+  });
+  // AXES DISTINCTS (i-arch/i-cond) : le HIDE (avis-only) ≠ le MARQUAGE (regulatoryStatus).
+  it("axe HIDE ≠ axe MARQUAGE : projet_reglement n'est PAS avis-only (montré) mais reste anticipation", () => {
+    expect(isReglementAvisOnly(set("avis_motion", "projet_reglement"))).toBe(false); // montré
+    expect(deriveRegulatoryStatus({ etape: "projet_reglement" })).toBe("anticipation"); // anticipation
+    // Réciproque : une adoption est firm (marquage) ET montrée (pas avis-only).
+    expect(deriveRegulatoryStatus({ etape: "adoption" })).toBe("firm");
+    expect(isReglementAvisOnly(set("avis_motion", "adoption"))).toBe(false);
   });
 });
