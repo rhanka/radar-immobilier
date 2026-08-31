@@ -54,6 +54,14 @@ export const RawDocumentRecordSchema = z.object({
   fetchedAt: z.string().datetime(),
   /** Object-storage key under which the raw bytes live (`raw/<source>/<Y>/<M>/<D>/<sha>.<ext>`). */
   storageKey: z.string().min(1),
+  /**
+   * Companion key holding the PARSEABLE text extracted from a binary payload
+   * (e.g. a PDF's pdftotext output), `<storageKey>.txt`. Present only when the
+   * adapter attached `RawDocument.text`. EXPLOITATION reads THIS (not the binary
+   * body) so it reconciles on real legal text; the binary `storageKey` stays the
+   * canonical, openable evidence (the reglement drawer's rawRef).
+   */
+  textKey: z.string().min(1).optional(),
   /** MIME type of the stored payload. */
   contentType: z.string().min(1),
   /** End-to-end provenance. */
@@ -121,6 +129,15 @@ export function rawMetaKey(storageKey: string): string {
 }
 
 /**
+ * Companion PARSEABLE-text key for a binary CAS raw object:
+ * `<storageKey>` → `….txt`. Holds the adapter's extracted text (pdftotext) so
+ * EXPLOITATION reconciles on real text instead of decoding the binary body.
+ */
+export function rawTextKey(storageKey: string): string {
+  return `${storageKey}.txt`;
+}
+
+/**
  * Build a validated `RawDocumentRecord` from raw bytes + fetch context. Computes
  * the sha256, the idempotent id and the canonical storage key. Does NOT perform
  * any I/O — the caller is responsible for putting the bytes in object storage
@@ -132,6 +149,10 @@ export function buildRawDocumentRecord(input: {
   title?: string;
   publishedAt?: string;
   body: Uint8Array;
+  /** Parseable text extracted from a binary body (pdftotext); when present, the
+   *  record carries a `textKey` and the RECUEIL persists the text beside the
+   *  binary so EXPLOITATION reconciles on real text (not the decoded binary). */
+  text?: string;
   fetchedAt: string;
   contentType: string;
   provenance: RawDocumentRecordProvenance;
@@ -151,6 +172,7 @@ export function buildRawDocumentRecord(input: {
     sha256,
     fetchedAt: input.fetchedAt,
     storageKey,
+    ...(input.text !== undefined ? { textKey: rawTextKey(storageKey) } : {}),
     contentType: input.contentType,
     provenance: input.provenance,
     bytesLen: input.body.byteLength,

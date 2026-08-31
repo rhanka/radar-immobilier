@@ -105,6 +105,7 @@ export async function runRecueil(
         ...(raw.ref.title !== undefined ? { title: raw.ref.title } : {}),
         ...(raw.ref.publishedAt !== undefined ? { publishedAt: raw.ref.publishedAt } : {}),
         body: raw.body,
+        ...(raw.text !== undefined ? { text: raw.text } : {}),
         fetchedAt: raw.fetchedAt,
         contentType: raw.contentType,
         provenance: {
@@ -124,6 +125,21 @@ export async function runRecueil(
       const status: RunManifestEntry["status"] = existing ? "seen" : "new";
       if (!existing) {
         await store.put(record.storageKey, raw.body, record.contentType);
+      }
+
+      // Persist the parseable text (pdftotext) BESIDE the binary body so
+      // EXPLOITATION reconciles on real text — the binary stays the canonical,
+      // openable evidence (classify:13-17 / RawDocument.text intent). Gated on the
+      // TEXTKEY's OWN head-check (not the binary's `existing`): a re-run whose
+      // binary already exists (content-dedup) must still BACK-FILL the text when
+      // it is missing — otherwise `record.textKey` is set but the object is absent
+      // and EXPLOITATION reads a void. Idempotent.
+      if (
+        record.textKey !== undefined &&
+        raw.text !== undefined &&
+        !(await store.head(record.textKey))
+      ) {
+        await store.put(record.textKey, raw.text, "text/plain; charset=utf-8");
       }
 
       // Sidecar meta.json (RawDocumentRecord) so each CAS object is
