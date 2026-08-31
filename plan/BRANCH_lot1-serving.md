@@ -36,6 +36,10 @@ Invariant §3 : **UNE seule dérivation ferme/anticipation (`deriveRegulatorySta
 - [ ] **Final gate** : `make lint`+typecheck+test-api (down -v) → PR → **i-arch #1** (3 tests recon, check-archi 2-faces, locus persist P2, Lot C gaté P4) + **i-cond #2**. NE PAS self-merge.
 - **Découpage PR (i-cond)** : **Lot A (A.1→A.5) = 1 PR cohérente** (gate i-arch#1 + i-cond#2). **Lot B et Lot C = PR SÉPARÉES** (rester reviewable). Ne pas mélanger A/B/C dans une même PR.
 
+## Baselines cross-cutting mises à jour (conséquences INTENTIONNELLES du serving — à revoir au gate)
+- **golden transport** `tests/fixtures/graphify/legacy-filter-a/route-transport.golden.json` : +`etape`+`regulatoryStatus` par nœud (A.3b les sert sur GraphSignalCard). Divergence VOULUE + gate#1-approuvée (pas une régression silencieuse). Vérifié : golden 4/4 + UI-consumer `ui/.../legacy-filter-a-transport.test.ts` 18/18 (tolère les champs ajoutés).
+- **graphify-34 idempotence** `graphify-34-enrichment.integration.test.ts` : la projection dérive+persiste `regulatoryStatus` (A.2) → l'ancien `after==before` cassait ; remplacé par un check POINT-FIXE (re-projeter `after` = no-op) + assert marquage stable. Plus rigoureux. 15/15 pg.
+
 ## Feedback Loop
 - D-B (geo `document_type` contract) = frontière geo-cond/geo-archi V34 (pending).
 - Base worktree off #540 branch (48e376e) ; rebase onto main post-#540-merge.
