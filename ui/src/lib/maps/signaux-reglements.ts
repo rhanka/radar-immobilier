@@ -111,6 +111,17 @@ export function normalizeReglementKey(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, "");
 }
 
+/** Étape servie en 1re-classe, avec repli sur les props des anciens payloads. */
+export function readNodeEtape(node: GraphSignalNode): string | null {
+  const values = [node.etape, ...propRecords(node).map((record) => record.etape)];
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim().toLowerCase();
+    }
+  }
+  return null;
+}
+
 const REGLEMENT_STAGES_FERMES = new Set([
   "premier_projet",
   "second_projet",
@@ -173,13 +184,7 @@ export function aggregateReglements(
     const evidence = extractSignalEvidence(node);
     const openable = evidenceOpenable(evidence);
     const hasRaw = evidence.rawRef !== null;
-    const etapes = propRecords(node)
-      .map((record) => record.etape)
-      .filter(
-        (etape): etape is string =>
-          typeof etape === "string" && etape.trim().length > 0,
-      )
-      .map((etape) => etape.trim().toLowerCase());
+    const etape = readNodeEtape(node);
 
     for (const number of numbers) {
       const key = normalizeReglementKey(number);
@@ -201,7 +206,7 @@ export function aggregateReglements(
         byKey.set(key, entry);
         order.push(key);
       }
-      for (const etape of etapes) entry._etapes.add(etape);
+      if (etape !== null) entry._etapes.add(etape);
       if (!entry.signalNodeIds.includes(node.id)) {
         entry.signalNodeIds.push(node.id);
         entry.signalCount += 1;
