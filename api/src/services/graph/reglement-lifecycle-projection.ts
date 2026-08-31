@@ -160,6 +160,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       enVigueurProvenance: null,
       relations: typeRelations(ev),
       typeInstrument: ev.typeInstrument, // §10 — verbatim passthrough (immo never classifies)
+      regulatoryStatus: null, // Lot A step-0 (#540 socle) ; deriveRegulatoryStatus(statut) le remplit en Lot A
     };
     return { kind: "bylaw", node };
   }
@@ -179,6 +180,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       temporal: null,
       relations: typeRelations(ev),
       typeInstrument: ev.typeInstrument, // §10 — verbatim passthrough (immo never classifies)
+      regulatoryStatus: null, // Lot A step-0 (#540 socle) ; deriveRegulatoryStatus(statut) le remplit en Lot A
     };
     return { kind: "designation-event", node };
   }
@@ -203,6 +205,7 @@ export function projectEvent(ev: ZoningEventT): ProjectedNode | null {
       temporal: null,
       relations: typeRelations(ev),
       typeInstrument: ev.typeInstrument, // §10 — verbatim passthrough
+      regulatoryStatus: null, // Lot A step-0 (#540 socle) ; deriveRegulatoryStatus(statut) le remplit en Lot A
     };
     return { kind: "designation-event", node };
   }
