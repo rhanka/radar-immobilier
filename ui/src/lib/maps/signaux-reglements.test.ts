@@ -9,6 +9,7 @@ import {
   enrichGeoZonesWithSignalReglements,
   isReglementAvisOnly,
   normalizeReglementKey,
+  readNodeEtape,
   readReglementNumbers,
   reglementSourceViewerTitle,
 } from "./signaux-reglements.js";
@@ -23,6 +24,16 @@ function node(id: string, props: Record<string, unknown>): GraphSignalNode {
     createdAt: null,
     props,
   };
+}
+
+type ServedNode = GraphSignalNode & { etape: string | null };
+
+function servedNode(
+  id: string,
+  props: Record<string, unknown>,
+  etape: string | null,
+): ServedNode {
+  return { ...node(id, props), etape };
 }
 
 function zone(code: string, grillePdfUrl?: string): GeoZoneFeature {
@@ -87,6 +98,22 @@ describe("normalizeReglementKey", () => {
   });
 });
 
+describe("readNodeEtape — D5 drawer lit sans re-classifier", () => {
+  it("lit node.etape servi en priorité sur le fallback legacy", () => {
+    const served = servedNode(
+      "avis de motion dans le libellé",
+      { properties: { etape: "avis_motion" } },
+      "  AdOpTiOn ",
+    );
+
+    expect(readNodeEtape(served)).toBe("adoption");
+  });
+
+  it("n'invente aucune étape depuis le libellé quand le servi et le legacy sont absents", () => {
+    expect(readNodeEtape(node("Adoption du règlement 2026-100", {}))).toBeNull();
+  });
+});
+
 describe("isReglementAvisOnly", () => {
   it.each([
     [["avis_motion"]],
@@ -116,6 +143,55 @@ describe("isReglementAvisOnly", () => {
 });
 
 describe("aggregateReglements", () => {
+  it("re-drive hide-72 depuis node.etape servi sans sur-filtrer les contrôles", () => {
+    const steMartineAvisOnly = [
+      "025-500",
+      "026-508",
+      "026-509",
+      "026-510",
+      "026-502",
+    ];
+    const nodes = [
+      ...steMartineAvisOnly.map((number, index) =>
+        servedNode(
+          `ste-martine-${index}`,
+          { properties: { reglement_number: number } },
+          "avis_motion",
+        ),
+      ),
+      servedNode(
+        "barnston-avis",
+        { properties: { reglement_number: "328-2026" } },
+        "avis_motion",
+      ),
+      servedNode(
+        "barnston-piia",
+        { properties: { reglement_number: "328-2026" } },
+        "piia",
+      ),
+      servedNode("adoption", { reglement_number: "Adoption 100" }, "adoption"),
+      servedNode("premier", { reglement_number: "Premier 200" }, "premier_projet"),
+      servedNode("mix-avis", { reglement_number: "Mixte 300" }, "avis_motion"),
+      servedNode("mix-premier", { reglement_number: "Mixte 300" }, "premier_projet"),
+      node("sans-etape", { reglement_number: "Sans Etape 400" }),
+      servedNode("piia-seul", { reglement_number: "PIIA 500" }, "piia"),
+    ];
+
+    const numbers = aggregateReglements(nodes).map((entry) => entry.number);
+
+    expect(numbers.filter((number) => steMartineAvisOnly.includes(number))).toEqual([]);
+    expect(numbers).not.toContain("328-2026");
+    expect(numbers).toEqual(
+      expect.arrayContaining([
+        "Adoption 100",
+        "Premier 200",
+        "Mixte 300",
+        "Sans Etape 400",
+        "PIIA 500",
+      ]),
+    );
+  });
+
   it("applies Rule A after aggregation without over-removing", () => {
     const avisOnlyNumbers = [
       "025-500",
