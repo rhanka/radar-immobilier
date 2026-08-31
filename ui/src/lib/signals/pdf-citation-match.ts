@@ -109,6 +109,34 @@ function buildSkeletonIndex(raw: string): { skeleton: string; map: number[] } {
   return { skeleton: chars.join(""), map };
 }
 
+/**
+ * Localise une occurrence exacte pour la recherche plein-texte du viewer.
+ * Le résultat partage le contrat de plages de `findCitationInPage`, mais accepte
+ * les requêtes courtes et permet de viser la nième occurrence d'une même page.
+ */
+export function findTextOccurrenceInPage(
+  pageText: string,
+  query: string,
+  occurrence = 0,
+): CitationMatch | null {
+  const { skeleton, map } = buildSkeletonIndex(pageText);
+  const needle = buildSkeletonIndex(query).skeleton;
+  if (!needle || occurrence < 0) return null;
+
+  let position = -1;
+  let from = 0;
+  for (let index = 0; index <= occurrence; index++) {
+    position = skeleton.indexOf(needle, from);
+    if (position < 0) return null;
+    from = position + needle.length;
+  }
+  const range = {
+    start: map[position]!,
+    end: map[position + needle.length - 1]! + 1,
+  };
+  return { ...range, coverage: 1, ranges: [range] };
+}
+
 /** Squelette d'une suite de mots normalisés (mêmes règles que la page). */
 function wordsSkeleton(words: readonly string[], from: number, to: number): string {
   return words.slice(from, to).join("").replace(/-/gu, "");

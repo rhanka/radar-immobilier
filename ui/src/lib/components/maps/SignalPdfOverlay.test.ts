@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const pdfMocks = vi.hoisted(() => ({
   getDocument: vi.fn(),
   renderedPages: [] as number[],
+  textContentPages: [] as number[],
 }));
 
 vi.mock("pdfjs-dist", () => ({
@@ -33,7 +34,7 @@ function rect(top: number, bottom: number): DOMRect {
   };
 }
 
-function mockFivePageDocument() {
+function mockFivePageDocument(pageTexts?: string[]) {
   const pages = Array.from({ length: 5 }, (_, index) => {
     const pageNumber = index + 1;
     return {
@@ -46,16 +47,21 @@ function mockFivePageDocument() {
         pdfMocks.renderedPages.push(pageNumber);
         return { promise: Promise.resolve(), cancel: vi.fn() };
       }),
-      getTextContent: vi.fn(async () => ({
-        items: [
-          {
-            str: "Signal target text for residential densification project",
+      getTextContent: vi.fn(async () => {
+        pdfMocks.textContentPages.push(pageNumber);
+        return {
+          items: [
+            {
+              str:
+                pageTexts?.[index] ??
+                "Signal target text for residential densification project",
             transform: [1, 0, 0, 12, 40, 700],
             width: 120,
             height: 12,
-          },
-        ],
-      })),
+            },
+          ],
+        };
+      }),
     };
   });
   return {
@@ -79,6 +85,7 @@ function setVisiblePage(container: HTMLElement, visiblePage: number): void {
 
 beforeEach(() => {
   pdfMocks.renderedPages.length = 0;
+  pdfMocks.textContentPages.length = 0;
   pdfMocks.getDocument.mockImplementation(() => ({
     promise: Promise.resolve(mockFivePageDocument()),
   }));
@@ -231,5 +238,84 @@ describe("SignalPdfOverlay continuous page stack", () => {
     expect(
       container.querySelectorAll('.pdf-page-slot[data-page-number="1"] .pdf-hl'),
     ).toHaveLength(0);
+  });
+});
+
+describe("SignalPdfOverlay recherche plein-texte", () => {
+  const pageTexts = [
+    "Introduction municipale",
+    "Citation signal complète pour le projet terme recherché",
+    "Délibération sans résultat",
+    "Autre terme inscrit au procès-verbal",
+    "Fin du document",
+  ];
+
+  it("indexe paresseusement toutes les pages puis navigue entre les résultats", async () => {
+    pdfMocks.getDocument.mockImplementationOnce(() => ({
+      promise: Promise.resolve(mockFivePageDocument(pageTexts)),
+    }));
+    const { container, getByRole, getByText } = render(SignalPdfOverlay, {
+      props: { rawRef: "raw/test/search-navigation.pdf" },
+    });
+    await waitFor(() =>
+      expect(container.querySelectorAll(".pdf-page-slot")).toHaveLength(5),
+    );
+    expect(pdfMocks.textContentPages).toEqual([]);
+
+    const input = getByRole("searchbox", { name: "Rechercher dans le document" });
+    await fireEvent.input(input, { target: { value: "terme" } });
+    await fireEvent.click(getByRole("button", { name: "Lancer la recherche" }));
+
+    await waitFor(() => expect(getByText("1/2")).toBeTruthy());
+    expect(pdfMocks.textContentPages.sort()).toEqual([1, 2, 3, 4, 5]);
+    expect(
+      scrollIntoView.mock.instances.some(
+        (element) => (element as HTMLElement).dataset.pageNumber === "2",
+      ),
+    ).toBe(true);
+
+    await fireEvent.click(getByRole("button", { name: "Résultat suivant" }));
+    await waitFor(() => expect(getByText("2/2")).toBeTruthy());
+    expect(pdfMocks.textContentPages).toHaveLength(5);
+    expect(
+      scrollIntoView.mock.instances.some(
+        (element) => (element as HTMLElement).dataset.pageNumber === "4",
+      ),
+    ).toBe(true);
+  });
+
+  it("garde le highlight de recherche distinct puis le retire à l'effacement", async () => {
+    pdfMocks.getDocument.mockImplementationOnce(() => ({
+      promise: Promise.resolve(mockFivePageDocument(pageTexts)),
+    }));
+    const { container, getByRole } = render(SignalPdfOverlay, {
+      props: {
+        rawRef: "raw/test/search-highlight.pdf",
+        page: 2,
+        signals: [{
+          id: "sig-2",
+          label: "S2",
+          excerpt: "Citation signal complète pour le projet terme recherché",
+          page: 2,
+          color: "#eab308",
+          current: true,
+        }],
+      },
+    });
+    await waitFor(() =>
+      expect(container.querySelectorAll(".pdf-page-slot")).toHaveLength(5),
+    );
+    const input = getByRole("searchbox", { name: "Rechercher dans le document" });
+    await fireEvent.input(input, { target: { value: "terme" } });
+    await fireEvent.click(getByRole("button", { name: "Lancer la recherche" }));
+
+    await waitFor(() => {
+      expect(container.querySelector('.pdf-hl[data-signal-id="sig-2"]')).toBeTruthy();
+      expect(container.querySelector(".pdf-search-hl")).toBeTruthy();
+    });
+
+    await fireEvent.input(input, { target: { value: "" } });
+    await waitFor(() => expect(container.querySelector(".pdf-search-hl")).toBeNull());
+    expect(container.querySelector('.pdf-hl[data-signal-id="sig-2"]')).toBeTruthy();
   });
 });
