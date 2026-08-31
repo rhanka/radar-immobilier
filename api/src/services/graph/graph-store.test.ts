@@ -111,6 +111,27 @@ describe("buildNodeRow", () => {
     expect(row.type).toBe("concept");
     expect(row.citySlug).toBeNull();
   });
+
+  // LOT 1 serving (A.2) — persist the DERIVED regulatoryStatus at materialisation (props.properties,
+  // recomputed here = single source of truth). firm iff statut/etape adopté/en-vigueur ; sinon
+  // anticipation ; aucune preuve → anticipation FAIL-SAFE ; nœud non-règlement → ABSENT (gate).
+  const props = (row: ReturnType<typeof buildNodeRow>) =>
+    ((row.props as Record<string, unknown>).properties ?? {}) as Record<string, unknown>;
+  it("LOT 1 serving — a lifecycle node with etape adoption/entree_vigueur → regulatoryStatus=firm", () => {
+    expect(props(buildNodeRow({ id: "b1", label: "R", type: "Bylaw", properties: { etape: "adoption" } } as GraphifyNode, "x")).regulatoryStatus).toBe("firm");
+    expect(props(buildNodeRow({ id: "b2", label: "R", type: "Bylaw", properties: { etape: "entree_vigueur" } } as GraphifyNode, "x")).regulatoryStatus).toBe("firm");
+  });
+  it("LOT 1 serving — an avis/projet lifecycle node → regulatoryStatus=anticipation", () => {
+    expect(props(buildNodeRow({ id: "e1", label: "A", type: "DesignationEvent", properties: { etape: "avis_motion" } } as GraphifyNode, "x")).regulatoryStatus).toBe("anticipation");
+    expect(props(buildNodeRow({ id: "e2", label: "P", type: "Signal", properties: { etape: "projet_reglement" } } as GraphifyNode, "x")).regulatoryStatus).toBe("anticipation");
+  });
+  it("LOT 1 serving — a node WITHOUT a stage (no etape/statut) → NO regulatoryStatus persisted (fail-safe = anticipation applied at consumer READ of an absent field)", () => {
+    expect(props(buildNodeRow({ id: "b3", label: "R", type: "Bylaw" } as GraphifyNode, "x")).regulatoryStatus).toBeUndefined();
+  });
+  it("LOT 1 serving — a NON-lifecycle node (concept/zone, no etape) gets NO regulatoryStatus (anti-invention gate)", () => {
+    expect(props(buildNodeRow({ id: "z1", label: "Zone", file_type: "concept", properties: { code_zone: "H-1" } } as GraphifyNode, "x")).regulatoryStatus).toBeUndefined();
+    expect(props(buildNodeRow({ id: "z2", label: "Zone" } as GraphifyNode, "x")).regulatoryStatus).toBeUndefined();
+  });
 });
 
 describe("business-property preservation gate", () => {
