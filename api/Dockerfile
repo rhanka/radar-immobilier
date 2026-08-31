@@ -71,6 +71,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
   "    'api/src/scripts/purge-avis-bylaws.ts'," \
   "    'api/src/scripts/worker-live.ts'," \
+  "    'api/src/scripts/collect-exploit-source.ts'," \
   "    'api/src/scripts/populate-geo.ts'," \
   "    'api/src/scripts/pull-geo-ogc.ts'," \
   "    'api/src/scripts/graphify-34-enrich.ts'," \
