@@ -88,24 +88,35 @@ describe("normalizeReglementKey", () => {
 });
 
 describe("isReglementAvisOnly", () => {
-  it("conserve un règlement sans étape connue", () => {
-    expect(isReglementAvisOnly(new Set())).toBe(false);
+  it.each([
+    [["avis_motion"]],
+    [["avis_motion", "piia"]],
+    [["avis_motion", "derogation_mineure"]],
+    [["avis_motion", "ppcmoi"]],
+    [["avis_motion", "usage_conditionnel"]],
+    [["avis_motion", "accorde"]],
+  ])("removes stages %j", (stages) => {
+    expect(isReglementAvisOnly(new Set(stages))).toBe(true);
   });
 
-  it("identifie un agrégat contenant uniquement avis_motion", () => {
-    expect(isReglementAvisOnly(new Set(["avis_motion"]))).toBe(true);
-  });
-
-  it("conserve un agrégat contenant une autre étape", () => {
-    expect(isReglementAvisOnly(new Set(["avis_motion", "premier_projet"]))).toBe(
-      false,
-    );
-    expect(isReglementAvisOnly(new Set(["piia"]))).toBe(false);
+  it.each([
+    [["piia"]],
+    [["derogation_mineure"]],
+    [[]],
+    [["avis_motion", "adoption"]],
+    [["avis_motion", "premier_projet"]],
+    [["avis_motion", "second_projet"]],
+    [["avis_motion", "projet_reglement"]],
+    [["avis_motion", "consultation_publique"]],
+    [["avis_motion", "entree_vigueur"]],
+    [["avis_motion", "inconnu"]],
+  ])("keeps stages %j", (stages) => {
+    expect(isReglementAvisOnly(new Set(stages))).toBe(false);
   });
 });
 
 describe("aggregateReglements", () => {
-  it("retire les numéros avis-only après agrégation sans sur-supprimer", () => {
+  it("applies Rule A after aggregation without over-removing", () => {
     const avisOnlyNumbers = [
       "025-500",
       "026-508",
@@ -119,25 +130,25 @@ describe("aggregateReglements", () => {
           properties: { etape: "avis_motion", reglement_number: number },
         }),
       ),
-      node("adoption", {
-        properties: { etape: "adoption", reglement_number: "Controle 100" },
+      node("barnston-avis", {
+        properties: { etape: "avis_motion", reglement_number: "328-2026" },
       }),
-      node("premier-controle", {
+      node("barnston-piia", {
+        properties: { etape: "piia", reglement_number: "328-2026" },
+      }),
+      node("closed-avis", {
+        properties: { etape: "avis_motion", reglement_number: "FeRmE 100" },
+      }),
+      node("closed-adoption", {
+        properties: { etape: "adoption", reglement_number: "ferme 100" },
+      }),
+      node("unknown-avis", {
+        properties: { etape: "avis_motion", reglement_number: "InCoNnU 200" },
+      }),
+      node("unknown-stage", {
         properties: {
-          etape: "premier_projet",
-          reglement_number: "Controle 100",
-        },
-      }),
-      node("mixte-avis-1", {
-        properties: { etape: "avis_motion", reglement_number: "MiXtE 200" },
-      }),
-      node("mixte-avis-2", {
-        properties: { etape: "avis_motion", reglement_number: "mixte 200" },
-      }),
-      node("mixte-projet", {
-        properties: {
-          etape: "premier_projet",
-          reglement_number: "MIXTE 200",
+          etape: "inconnu",
+          reglement_number: "inconnu 200",
         },
       }),
       node("sans-etape", {
@@ -151,10 +162,11 @@ describe("aggregateReglements", () => {
     const numbers = aggregateReglements(nodes).map((entry) => entry.number);
 
     expect(numbers.filter((number) => avisOnlyNumbers.includes(number))).toEqual([]);
+    expect(numbers).not.toContain("328-2026");
     expect(numbers).toEqual(
       expect.arrayContaining([
-        "Controle 100",
-        "MiXtE 200",
+        "FeRmE 100",
+        "InCoNnU 200",
         "Sans Etape 300",
         "PIIA 400",
       ]),
