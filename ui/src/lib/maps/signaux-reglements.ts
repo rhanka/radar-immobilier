@@ -27,8 +27,12 @@ import {
   zoneRefComparableKey,
 } from "$lib/maps/signaux-map-geo.js";
 import {
+  aggregateRegulatoryStatus,
   isReglementAvisOnly,
+  readRegulatoryStatus,
   REGLEMENT_STAGES_FERMES,
+  RegulatoryStageKind,
+  type RegulatoryStatusT,
 } from "@radar/domain";
 
 export { isReglementAvisOnly, REGLEMENT_STAGES_FERMES };
@@ -46,6 +50,8 @@ export interface ReglementEntry {
   zoneCodes: string[];
   /** URLs de grille de zonage PDF des zones liées (dédup). */
   grillePdfUrls: string[];
+  /** Statut réglementaire agrégé : ferme si au moins un nœud est ferme. */
+  regulatoryStatus: RegulatoryStatusT;
   /**
    * Signal représentatif porteur d'une source documentaire OUVRABLE (rawRef
    * en priorité — rendu PDF same-origin — sinon documentUrl/sourceUrl). null
@@ -128,6 +134,16 @@ export function readNodeEtape(node: GraphSignalNode): string | null {
   return null;
 }
 
+/** Statut de cycle secondaire, validé par le contrat domaine. */
+function readNodeStatut(node: GraphSignalNode) {
+  const values = propRecords(node).flatMap((record) => [record.statut, record.status]);
+  for (const value of values) {
+    const parsed = RegulatoryStageKind.safeParse(value);
+    if (parsed.success) return parsed.data;
+  }
+  return null;
+}
+
 /** Une preuve est ouvrable si elle porte une source documentaire (rawRef/URL). */
 function evidenceOpenable(evidence: SignalEvidence): boolean {
   return (
@@ -137,11 +153,11 @@ function evidenceOpenable(evidence: SignalEvidence): boolean {
   );
 }
 
-interface MutableEntry extends ReglementEntry {
+interface MutableEntry extends Omit<ReglementEntry, "regulatoryStatus"> {
   _seenZone: Set<string>;
   _seenGrille: Set<string>;
   _hasRawEvidence: boolean;
-  _etapes: Set<string>;
+  _regulatoryStatuses: RegulatoryStatusT[];
 }
 
 /**
@@ -175,6 +191,11 @@ export function aggregateReglements(
     const openable = evidenceOpenable(evidence);
     const hasRaw = evidence.rawRef !== null;
     const etape = readNodeEtape(node);
+    const regulatoryStatus = readRegulatoryStatus({
+      regulatoryStatus: node.regulatoryStatus,
+      statut: readNodeStatut(node),
+      etape,
+    });
 
     for (const number of numbers) {
       const key = normalizeReglementKey(number);
@@ -191,12 +212,12 @@ export function aggregateReglements(
           _seenZone: new Set(),
           _seenGrille: new Set(),
           _hasRawEvidence: false,
-          _etapes: new Set(),
+          _regulatoryStatuses: [],
         };
         byKey.set(key, entry);
         order.push(key);
       }
-      if (etape !== null) entry._etapes.add(etape);
+      entry._regulatoryStatuses.push(regulatoryStatus);
       if (!entry.signalNodeIds.includes(node.id)) {
         entry.signalNodeIds.push(node.id);
         entry.signalCount += 1;
@@ -226,7 +247,10 @@ export function aggregateReglements(
   }
 
   const entries: ReglementEntry[] = order
-    .filter((key) => !isReglementAvisOnly(byKey.get(key)!._etapes))
+    .filter(
+      (key) =>
+        aggregateRegulatoryStatus(byKey.get(key)!._regulatoryStatuses) === "firm",
+    )
     .map((key) => {
       const entry = byKey.get(key)!;
       return {
@@ -236,6 +260,7 @@ export function aggregateReglements(
         signalNodeIds: entry.signalNodeIds,
         zoneCodes: entry.zoneCodes,
         grillePdfUrls: entry.grillePdfUrls,
+        regulatoryStatus: aggregateRegulatoryStatus(entry._regulatoryStatuses),
         evidenceNodeId: entry.evidenceNodeId,
       };
     });
