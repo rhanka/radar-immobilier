@@ -70,6 +70,7 @@ function makeSignal(
     createdAt: "2026-05-19T12:00:00.000Z",
     description,
     publishedAt: "2026-05-19T12:00:00.000Z",
+    regulatoryStatus: "firm",
     props: {
       description,
       reglement_number: "1926-26",
@@ -1071,6 +1072,7 @@ describe("SignauxSelPanel — item 2 : Signaux/Règlements ⊆ zone active + exc
       sourceRef: null,
       createdAt: "2026-05-19T12:00:00.000Z",
       publishedAt: "2026-05-19T12:00:00.000Z",
+      regulatoryStatus: "firm",
       props: { description: "detail neutre", ...props },
     };
   }
