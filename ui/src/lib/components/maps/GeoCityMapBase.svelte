@@ -1340,7 +1340,7 @@
     <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (Layers) ;
          tap = déplie (gain de place, surtout mobile). Cible : légendes lot/zones
          (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
-    <div class="absolute bottom-3 left-3 z-10 flex flex-col items-start gap-2">
+    <div class="absolute bottom-20 left-3 z-10 flex flex-col items-start gap-2">
       <button
         type="button"
         class="legend-toggle"
