@@ -43,9 +43,11 @@ async function mockPdf(page: Page): Promise<void> {
 /** Rectangles des marques de surlignage relatifs au canvas rendu. */
 async function highlightRects(page: Page) {
   return page.evaluate(() => {
-    const canvas = document.querySelector(".pdf-canvas-stage canvas");
+    const canvas = document.querySelector('.pdf-page-slot[data-page-number="2"] canvas');
     const cRect = canvas?.getBoundingClientRect();
-    const marks = Array.from(document.querySelectorAll(".pdf-text-layer .pdf-hl"));
+    const marks = Array.from(
+      document.querySelectorAll('.pdf-page-slot[data-page-number="2"] .pdf-hl'),
+    );
     return {
       canvas: cRect
         ? { width: cRect.width, height: cRect.height }
@@ -88,7 +90,7 @@ test.describe("SignalPdfOverlay — surlignage citation (LOT 1)", () => {
     // fit-width : le canvas occupe une large part de la largeur du scroller.
     const fit = await page.evaluate(() => {
       const scroll = document.querySelector(".pdf-canvas-scroll");
-      const canvas = document.querySelector(".pdf-canvas-stage canvas");
+      const canvas = document.querySelector('.pdf-page-slot[data-page-number="2"] canvas');
       if (!scroll || !canvas) return null;
       return {
         scrollW: scroll.clientWidth,
@@ -193,17 +195,21 @@ test.describe("SignalPdfOverlay — surlignage citation (LOT 1)", () => {
     // Va en page 1 (amorce générique « ATTENDU QUE la municipalite » partagée) :
     // ZÉRO surlignage (le garde de page + matcher durci l'interdisent).
     await page.getByRole("button", { name: "Page précédente" }).click();
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 1");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 1");
     await page.waitForTimeout(300);
-    expect(await page.locator(".pdf-text-layer .pdf-hl").count()).toBe(0);
+    expect(
+      await page.locator('.pdf-page-slot[data-page-number="1"] .pdf-hl').count(),
+    ).toBe(0);
     await page.screenshot({ path: `${SHOT_DIR}/pdf-v2-83-other-page1-clean.png` });
 
     // Va en page 3 (même amorce) : ZÉRO surlignage également.
     await page.getByRole("button", { name: "Page suivante" }).click();
     await page.getByRole("button", { name: "Page suivante" }).click();
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 3");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 3");
     await page.waitForTimeout(300);
-    expect(await page.locator(".pdf-text-layer .pdf-hl").count()).toBe(0);
+    expect(
+      await page.locator('.pdf-page-slot[data-page-number="3"] .pdf-hl').count(),
+    ).toBe(0);
     await page.screenshot({ path: `${SHOT_DIR}/pdf-v2-83-other-page3-clean.png` });
   });
 

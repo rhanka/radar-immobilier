@@ -185,18 +185,44 @@ function isPublicHost(hostname: string): boolean {
   return true;
 }
 
-/** S3 / object-storage / minio host (never a public geometry source). */
-function isStorageHost(hostname: string): boolean {
-  const host = stripBrackets(hostname.toLowerCase());
-  if (host.includes("minio")) return true;
-  if (/(^|\.)s3[.-]/.test(host)) return true;
-  if (host.endsWith(".r2.cloudflarestorage.com")) return true;
-  if (host.includes(".digitaloceanspaces.")) return true;
-  if (host.includes("scw.cloud") && host.includes("s3")) return true;
+/**
+ * #2b — Marqueurs de SIGNATURE / CREDENTIAL dans la query (URL S3 signée ou
+ * pré-signée). Le garde de preuve publique est SIGNATURE-based, PAS
+ * query-presence : une query bénigne (sélection de doc ; le proxy d'archive
+ * porte lui-même `?rawRef=`) est légitime ; seuls ces noms de paramètres
+ * trahissent une URL signée qui expire et peut fuiter un secret → à router via
+ * le viewer d'archive same-origin, jamais exposée telle quelle. Mesuré recette :
+ * 0/2893 sourceUrl signée ; garde préventive.
+ */
+const SIGNED_QUERY_PARAMS = new Set([
+  "x-amz-algorithm",
+  "x-amz-credential",
+  "x-amz-signature",
+  "x-amz-date",
+  "x-amz-expires",
+  "x-amz-signedheaders",
+  "x-amz-security-token",
+  "signature",
+  "awsaccesskeyid",
+  "policy",
+  "token",
+]);
+function hasSignedOrCredentialQuery(url: URL): boolean {
+  for (const key of url.searchParams.keys()) {
+    if (SIGNED_QUERY_PARAMS.has(key.toLowerCase())) return true;
+  }
   return false;
 }
 
-/** A public, canonical HTTP(S) URL: no credentials/query/fragment, public host. */
+/**
+ * A public, canonical HTTP(S) URL used as clickable proof (#2b, contrat mesuré
+ * recette) : host public, http(s), NON signée / sans credential. Query et
+ * fragment BÉNINS (sélection de doc) sont AUTORISÉS ; l'object-storage PUBLIC
+ * non-signé (VPlus, sites muni S3/OVH) est une source canonique légitime — le
+ * discriminant est scheme + signature, PAS le pattern d'hostname `s3`. Les hosts
+ * privés/loopback/RFC1918 (anti-SSRF) et les URL signées restent rejetés ; une
+ * archive interne `s3://raw/...` (scheme non-http) est routée via le viewer.
+ */
 export function isPublicCanonicalUrl(value: unknown): value is string {
   if (typeof value !== "string") return false;
   if (value.length > 2048) return false;
@@ -212,10 +238,9 @@ export function isPublicCanonicalUrl(value: unknown): value is string {
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") return false;
   if (url.username || url.password) return false;
-  if (url.search || url.hash) return false;
+  if (hasSignedOrCredentialQuery(url)) return false;
   if (!url.hostname) return false;
   if (!isPublicHost(url.hostname)) return false;
-  if (isStorageHost(url.hostname)) return false;
   return true;
 }
 
@@ -618,7 +643,7 @@ export function proofStatusLabel(status: FeatureProof["status"]): string {
 
 export function geometryProvenanceLabel(status: GeometryProvenanceStatus | undefined): string {
   switch (status) {
-    case "historical-verified": return "Vérifiée dans les dossiers historiques";
+    case "historical-verified": return "Vérification déclarée par la source";
     case "legacy-traceable": return "Trace historique disponible";
     case "candidate-needs-human-confirmation": return "À confirmer par une personne";
     case "orphan": return "Source de géométrie non reliée";
@@ -639,6 +664,17 @@ export function readinessLabel(state: ReadinessState): string {
   if (state === "not-assessed") return "Dossier non évalué";
   return "État non indiqué";
 }
+
+/**
+ * État affiché quand aucune enveloppe de preuve/provenance n'est rattachée à
+ * l'élément (absente, non servie, ou écartée par les gardes). Le bloc « Audit
+ * des sources » reste VISIBLE et porte cet état explicite : l'utilisateur
+ * distingue « pas de preuve pour cet élément » de « fonctionnalité absente ».
+ * Vocabulaire produit neutre (Servi / Partiel / Non couvert) — aucun jargon.
+ */
+export const AUDIT_NOT_COVERED_LABEL = "Non couvert";
+export const AUDIT_NOT_COVERED_HINT =
+  "Aucune source auditée n'est rattachée à cet élément.";
 
 /**
  * Libellé d'un code d'audit. Une valeur qui n'a pas la forme d'un code public

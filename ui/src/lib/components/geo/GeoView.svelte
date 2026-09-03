@@ -21,6 +21,7 @@
   import {
     fetchGeoCities,
     fetchGeoFeatures,
+    buildGeoViewFeatures,
     type GeoCityInfo,
   } from "./geo-client.js";
   import {
@@ -84,11 +85,7 @@
 
       // Fusionner les 3 collections en une seule FeatureCollection
       // GeoMap rend polygones (zones/lots) + points (opportunités) dans la même couche
-      const allFeatures: Feature[] = [
-        ...res.zones.features,
-        ...res.lots.features,
-        ...res.opportunites.features,
-      ] as Feature[];
+      const allFeatures = buildGeoViewFeatures(res) as Feature[];
 
       if (allFeatures.length > 0) {
         unifiedFeatures = {

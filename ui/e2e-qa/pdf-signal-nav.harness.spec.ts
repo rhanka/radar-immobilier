@@ -137,8 +137,8 @@ async function setScenario(
 }
 
 async function waitRendered(page: Page): Promise<void> {
-  await expect(page.locator(".pdf-canvas-stage")).toBeVisible({ timeout: 15_000 });
-  await expect(page.locator(".pdf-canvas-stage.is-loading")).toHaveCount(0, {
+  await expect(page.locator('.pdf-page-slot[data-rendered="true"]').first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator(".pdf-page-stack.is-loading")).toHaveCount(0, {
     timeout: 15_000,
   });
   await expect(page.locator(".pdf-loading")).toHaveCount(0, { timeout: 15_000 });
@@ -370,9 +370,9 @@ test.describe("SignalPdfOverlay — navigation par signal (#91/#86/#4)", () => {
 
     // Le doc s'ouvre sur la page 2 (page du signal courant A16). On descend
     // à la page 1 via « Page précédente » (les surlignages restent page 2).
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 2");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 2");
     await page.getByRole("button", { name: "Page précédente" }).click();
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 1");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 1");
 
     // Hover externe d'A16 (page 2) depuis la page 1 → toast d'ancrage.
     await setScenario(page, { hoveredSignalId: "sig-A16" });
@@ -383,6 +383,6 @@ test.describe("SignalPdfOverlay — navigation par signal (#91/#86/#4)", () => {
 
     // Clic sur le toast → va à la page 2.
     await toast.click();
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 2");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 2");
   });
 });

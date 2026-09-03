@@ -24,6 +24,7 @@ import {
   MOCK_DOCUMENTS,
   MOCK_LOT_FEATURES,
   MOCK_ZONE_FEATURES,
+  MOCK_ZONING_EVENT_FEATURES,
   type MockGeoFeature,
 } from "./mocks.js";
 
@@ -110,13 +111,173 @@ export interface PvPdfResult {
   note?: string;
 }
 
-/** Contract of the raw-data provider behind the 4 representation tools. */
+export interface GetReglementProvenanceArgs {
+  city: string;
+  /**
+   * Code de zone — ACCEPTÉ mais no-op pour la provenance : geo stampe les 8
+   * champs MUNI-UNIFORMES (identiques sur chaque feature de la grille). Réservé
+   * au lien events (tool #2 `query_zoning_events`).
+   */
+  zone?: string | undefined;
+}
+
+/**
+ * Provenance du règlement de zonage servie par geo (`qc-zonage-norms-<slug>`,
+ * feature-level, muni-uniforme). Passthrough VERBATIM du registre curé : champ
+ * absent = `null`, JAMAIS deviné/dérivé. Le breadcrumb interne `_source_url`
+ * n'est JAMAIS lu ni exposé — seul `reglement_url` est l'URL publique.
+ */
+export interface ReglementProvenanceResult {
+  found: boolean;
+  city: string;
+  reglement_url: string | null;
+  reglement_numero: string | null;
+  reglement_millesime: string | null;
+  reglement_page_source: string | null;
+  reglement_ancien_numero: string | null;
+  reglement_ancien_millesime: string | null;
+  reglement_ancien_source: string | null;
+  has_ancien: boolean | null;
+  note?: string;
+}
+
+/**
+ * Lit les 8 champs de provenance d'une feature `qc-zonage-norms`, VERBATIM-or-null
+ * (anti-invention : absent/vide → `null`, jamais dérivé ; `_source_url` jamais lu ni
+ * exposé — seul `reglement_url` est public).
+ */
+export function reglementProvenanceFromFeature(
+  city: string,
+  props: Record<string, unknown>,
+): ReglementProvenanceResult {
+  const str = (key: string): string | null => {
+    const v = props[key];
+    return typeof v === "string" && v.trim().length > 0 ? v : null;
+  };
+  return {
+    found: true,
+    city,
+    reglement_url: str("reglement_url"),
+    reglement_numero: str("reglement_numero"),
+    reglement_millesime: str("reglement_millesime"),
+    reglement_page_source: str("reglement_page_source"),
+    reglement_ancien_numero: str("reglement_ancien_numero"),
+    reglement_ancien_millesime: str("reglement_ancien_millesime"),
+    reglement_ancien_source: str("reglement_ancien_source"),
+    has_ancien:
+      typeof props["has_ancien"] === "boolean" ? (props["has_ancien"] as boolean) : null,
+  };
+}
+
+/** Provenance « non servie » (grille de normes absente) — tous champs null. */
+export function notFoundReglementProvenance(city: string, note: string): ReglementProvenanceResult {
+  return {
+    found: false,
+    city,
+    reglement_url: null,
+    reglement_numero: null,
+    reglement_millesime: null,
+    reglement_page_source: null,
+    reglement_ancien_numero: null,
+    reglement_ancien_millesime: null,
+    reglement_ancien_source: null,
+    has_ancien: null,
+    note,
+  };
+}
+
+/** Borne haute par défaut sur les events (comptes par-muni petits — cf. contrat §2). */
+export const ZONING_EVENTS_DEFAULT_LIMIT = 200;
+
+export interface QueryZoningEventsArgs {
+  city: string;
+  /** Filtre : events dont `zone_codes_resolus[].zone_code` == ce code (exact). */
+  zoneCode?: string | undefined;
+  /** Filtre : `document_type` == cette valeur (exact ; avis_motion|projet_reglement|adoption|…). */
+  documentType?: string | undefined;
+  /** Filtre : `decision_state` == cette valeur (exact ; planned|decided). */
+  decisionState?: string | undefined;
+  /** Borne haute (défaut ZONING_EVENTS_DEFAULT_LIMIT). */
+  limit?: number | undefined;
+}
+
+export interface ZoningEventsResult {
+  city: string;
+  count: number;
+  /**
+   * Events de cycle de vie zonage (`qc-zoning-events`, §2), VERBATIM : chaque event
+   * = `feature.properties` SANS les clés internes préfixées `_` (breadcrumbs de
+   * capture). Anti-invention : AUCUN champ dérivé/ajouté — la relation typée
+   * (replaces/amends) et le `lifecycle_stage` sont dérivés AILLEURS (geo ne les
+   * émet jamais). `decision_state` reste tel-quel (planned ≠ decided).
+   */
+  events: Record<string, unknown>[];
+  numberMatched: number | null;
+  truncated: boolean;
+  note?: string;
+}
+
+/** Retire les clés internes préfixées `_` (breadcrumbs ; ex. `_source_url`). */
+function stripInternalKeys(props: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(props)) {
+    if (!key.startsWith("_")) out[key] = value;
+  }
+  return out;
+}
+
+/** Match client-side d'un event contre les filtres (exact-match ; zone via zone_codes_resolus). */
+function zoningEventMatches(
+  props: Record<string, unknown>,
+  args: QueryZoningEventsArgs,
+): boolean {
+  if (args.documentType !== undefined && props["document_type"] !== args.documentType) {
+    return false;
+  }
+  if (args.decisionState !== undefined && props["decision_state"] !== args.decisionState) {
+    return false;
+  }
+  if (args.zoneCode !== undefined) {
+    const resolved = props["zone_codes_resolus"];
+    const codes = Array.isArray(resolved)
+      ? resolved.map((z) =>
+          typeof z === "object" && z !== null ? (z as Record<string, unknown>)["zone_code"] : null,
+        )
+      : [];
+    if (!codes.includes(args.zoneCode)) return false;
+  }
+  return true;
+}
+
+/** Applique filtres + strip `_` sur une page d'events → ZoningEventsResult. */
+function zoningEventsFrom(
+  city: string,
+  features: readonly GeoFeature[],
+  numberMatched: number | null,
+  args: QueryZoningEventsArgs,
+): ZoningEventsResult {
+  const limit = args.limit ?? ZONING_EVENTS_DEFAULT_LIMIT;
+  const matched = features.filter((f) => zoningEventMatches(f.properties ?? {}, args));
+  const kept = matched.slice(0, limit);
+  const events = kept.map((f) => stripInternalKeys(f.properties ?? {}));
+  return {
+    city,
+    count: events.length,
+    events,
+    numberMatched,
+    truncated: matched.length > kept.length,
+  };
+}
+
+/** Contract of the raw-data provider behind the representation tools. */
 export interface RawDataSource {
   readonly mode: "mock" | "http";
   getZonesGeojson(args: GetZonesGeojsonArgs): Promise<RawFeatureCollectionResult>;
   getLotsGeojson(args: GetLotsGeojsonArgs): Promise<RawFeatureCollectionResult>;
   getGrillePdf(args: GetGrillePdfArgs): Promise<GrillePdfResult>;
   getPvPdf(args: GetPvPdfArgs): Promise<PvPdfResult>;
+  getReglementProvenance(args: GetReglementProvenanceArgs): Promise<ReglementProvenanceResult>;
+  queryZoningEvents(args: QueryZoningEventsArgs): Promise<ZoningEventsResult>;
 }
 
 // ── Shared pure helpers (used by BOTH impls, so tests cover the real path) ──
@@ -369,6 +530,31 @@ export class MockRawDataSource implements RawDataSource {
       note: "mode mock: URL illustrative (aucun réseau)",
     };
   }
+
+  async getReglementProvenance(
+    args: GetReglementProvenanceArgs,
+  ): Promise<ReglementProvenanceResult> {
+    const slug = citySlug(args.city);
+    // Muni-uniforme : la provenance est identique sur chaque feature → 1re feature.
+    const feature = this.cityFeatures(MOCK_ZONE_FEATURES, args.city)[0];
+    if (!feature) {
+      return notFoundReglementProvenance(
+        slug,
+        "mode mock: aucune grille de zonage pour cette ville",
+      );
+    }
+    const result = reglementProvenanceFromFeature(slug, feature.properties ?? {});
+    result.note = "mode mock: fixtures déterministes (aucun réseau)";
+    return result;
+  }
+
+  async queryZoningEvents(args: QueryZoningEventsArgs): Promise<ZoningEventsResult> {
+    const slug = citySlug(args.city);
+    const all = this.cityFeatures(MOCK_ZONING_EVENT_FEATURES, args.city);
+    const result = zoningEventsFrom(slug, all, all.length, args);
+    result.note = "mode mock: fixtures déterministes (aucun réseau)";
+    return result;
+  }
 }
 
 // ── HTTP implementation (radar API passthrough OGC + proof-viewer route) ───
@@ -536,6 +722,55 @@ export class HttpRawDataSource implements RawDataSource {
     const city = parsePvCity(args.rawRef);
     if (city) result.city = city;
     return result;
+  }
+
+  async getReglementProvenance(
+    args: GetReglementProvenanceArgs,
+  ): Promise<ReglementProvenanceResult> {
+    const slug = citySlug(args.city);
+    // Provenance muni-uniforme (stampée à l'identique sur chaque feature) → 1 suffit.
+    let page: { features: GeoFeature[]; numberMatched: number | null };
+    try {
+      page = await this.fetchItems(`qc-zonage-norms-${slug}`, 1);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("collection_not_found:")) {
+        return notFoundReglementProvenance(
+          slug,
+          "grille de normes non publiée pour cette ville (qc-zonage-norms absent)",
+        );
+      }
+      throw err;
+    }
+    const feature = page.features[0];
+    if (!feature) {
+      return notFoundReglementProvenance(
+        slug,
+        "collection qc-zonage-norms vide pour cette ville",
+      );
+    }
+    return reglementProvenanceFromFeature(slug, feature.properties ?? {});
+  }
+
+  async queryZoningEvents(args: QueryZoningEventsArgs): Promise<ZoningEventsResult> {
+    const slug = citySlug(args.city);
+    const limit = args.limit ?? ZONING_EVENTS_DEFAULT_LIMIT;
+    let page: { features: GeoFeature[]; numberMatched: number | null };
+    try {
+      page = await this.fetchItems(`qc-zoning-events-${slug}`, limit);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("collection_not_found:")) {
+        return {
+          city: slug,
+          count: 0,
+          events: [],
+          numberMatched: 0,
+          truncated: false,
+          note: "aucun event de zonage servi pour cette ville (qc-zoning-events absent)",
+        };
+      }
+      throw err;
+    }
+    return zoningEventsFrom(slug, page.features, page.numberMatched, args);
   }
 }
 

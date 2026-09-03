@@ -115,11 +115,28 @@ function normalizedEtape(value: string): BPrimeEtape | null {
   return ETAPES.has(normalized as BPrimeEtape) ? normalized as BPrimeEtape : null;
 }
 
-function deriveEtape(label: string | null | undefined, description: string | null | undefined): BPrimeEtape {
+// EXPORTED for the cross-impl SYNC test (W2): this MUST stay behaviourally
+// identical to `deriveEtape` in api graph-store.ts (which sets the graph node's
+// `etape` → `regulatoryStatus`). Two divergeable copies feeding firmness is a
+// latent §3 risk — the sync test asserts identical output on every case; the
+// durable fix (extract a single shared helper, like `deriveRegulatoryStatus`)
+// is tracked as a §3-hardening follow-up.
+export function deriveEtape(label: string | null | undefined, description: string | null | undefined): BPrimeEtape {
   const text = fold(`${label ?? ""} ${description ?? ""}`);
-  if (text.includes("avis de motion") || text.includes("avis d motion")) return "avis_motion";
+  // §3-CRITICAL (W2): only an ACTIVE avis (not the past-tense recital "avis de
+  // motion a été donné") is the avis act; concrete ACT stages take precedence
+  // over a bare avis; a bare active avis CONSERVATIVELY stays avis_motion —
+  // never promoted to adoption on the FUTURE "présenté pour adoption
+  // subséquente" (= the 026-508 avis-served-firm bug).
+  const hasActiveAvis =
+    (text.includes("avis de motion") || text.includes("avis d motion")) &&
+    !text.includes("avis de motion a ete donne");
   if (text.includes("second projet") || text.includes("2e projet") || text.includes("deuxieme projet")) return "second_projet";
-  if (text.includes("premier projet") || text.includes("1er projet") || text.includes("projet de reglement") || text.includes("projet du reglement")) return "projet_reglement";
+  if (text.includes("premier projet") || text.includes("1er projet") || text.includes("projet de reglement") || text.includes("projet du reglement") || text.includes("adoption du projet") || text.includes("adopte le projet") || text.includes("depot du projet") || text.includes("depose le projet")) return "projet_reglement";
+  // §3 GUARD before consultation/vigueur: an active avis is never itself
+  // en-vigueur/à-consultation, so an INCIDENTAL "en vigueur" (the EXISTING
+  // règlement being modified) or a future stage must not promote it to firm.
+  if (hasActiveAvis) return "avis_motion";
   if (text.includes("consultation")) return "consultation";
   if (text.includes("entree en vigueur") || text.includes("entre en vigueur") || text.includes("en vigueur")) return "entree_vigueur";
   if (text.includes("adoption") || text.includes("adopte") || text.includes("adoptee")) return "adoption";

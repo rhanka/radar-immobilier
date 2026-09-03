@@ -1,0 +1,186 @@
+# ConfigMap — SET-167 B' TSV for the graphify v3.4 Phase A EMIT job (PASS-1).
+# Consumed by deploy/k8s/38-graphify34-emit-candidates-job.yaml, mounted at
+# /config/set-167.tsv. docs/ is NOT in the runtime image, so the emit script's
+# --tsv input must be provided this way. Generated verbatim from
+# docs/spec/reports/set-167-bprime.tsv (#436, canonical SET-167 B').
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-graphify34-set167
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graphify34
+data:
+  set-167.tsv: |
+    # SET 167 B′ canonique — priorityRank<=167 (figé conducteur 2026-08-02, source wp1-atome-par-ville.tsv)
+    # graph_city_slug = city_slug AUTORITAIRE (préfixe S3 graph/ = graph_nodes.city_slug, tiret double MRC). match=exact|normalized|UNMATCHED.
+    slug	name	priorityRank	graph_version	graph_city_slug	match
+    westmount	Westmount	1	2.3	westmount	exact
+    saint-lambert	Saint-Lambert	2	2.3	saint-lambert	exact
+    hampstead	Hampstead	3	2.3	hampstead	exact
+    mont-royal	Mont-Royal	4	2.3	mont-royal	exact
+    montreal-ouest	Montréal-Ouest	5	2.3	montreal-ouest	exact
+    cote-saint-luc	Côte-Saint-Luc	6	2.3	cote-saint-luc	exact
+    longueuil	Longueuil	7	2.3	longueuil	exact
+    brossard	Brossard	8	none		UNMATCHED
+    sainte-catherine	Sainte-Catherine	9	2.3	sainte-catherine	exact
+    la-prairie	La Prairie	10	2.3	la-prairie	exact
+    delson	Delson	11	2.3	delson	exact
+    candiac	Candiac	12	2.3	candiac	exact
+    montreal-est	Montréal-Est	13	2.3	montreal-est	exact
+    boucherville	Boucherville	14	2.3	boucherville	exact
+    dorval	Dorval	15	2.3	dorval	exact
+    lile-dorval	L'Île-Dorval	16	none		UNMATCHED
+    saint-constant	Saint-Constant	17	2.2	saint-constant	exact
+    saint-bruno-de-montarville	Saint-Bruno-de-Montarville	18	2.3	saint-bruno-de-montarville	exact
+    carignan	Carignan	19	2.3	carignan	exact
+    dollard-des-ormeaux	Dollard-Des Ormeaux	20	2.3	dollard-des-ormeaux	exact
+    pointe-claire	Pointe-Claire	21	2.3	pointe-claire	exact
+    saint-philippe	Saint-Philippe	22	2.2	saint-philippe	exact
+    saint-mathieu	Saint-Mathieu	23	2.3	saint-mathieu	exact
+    chateauguay	Châteauguay	24	2.3	chateauguay	exact
+    sainte-julie	Sainte-Julie	25	2.3	sainte-julie	exact
+    saint-basile-le-grand	Saint-Basile-le-Grand	26	2.3	saint-basile-le-grand	exact
+    chambly	Chambly	27	2.3	chambly	exact
+    rosemere	Rosemère	28	2.3	rosemere	exact
+    varennes	Varennes	29	2.3	varennes	exact
+    kirkland	Kirkland	30	none		UNMATCHED
+    bois-des-filion	Bois-des-Filion	31	2.3	bois-des-filion	exact
+    saint-isidore-roussillon	Saint-Isidore	32	2.3	saint-isidore--roussillon	normalized
+    beaconsfield	Beaconsfield	33	2.3	beaconsfield	exact
+    lorraine	Lorraine	34	2.3	lorraine	exact
+    lery	Léry	35	2.3	lery	exact
+    mercier	Mercier	36	2.3	mercier	exact
+    charlemagne	Charlemagne	37	2.3	charlemagne	exact
+    boisbriand	Boisbriand	38	2.3	boisbriand	exact
+    deux-montagnes	Deux-Montagnes	39	2.3	deux-montagnes	exact
+    mcmasterville	McMasterville	40	2.3	mcmasterville	exact
+    sainte-therese	Sainte-Thérèse	41	2.3	sainte-therese	exact
+    saint-mathias-sur-richelieu	Saint-Mathias-sur-Richelieu	42	2.3	saint-mathias-sur-richelieu	exact
+    saint-mathieu-de-beloeil	Saint-Mathieu-de-Beloeil	43	2.3	saint-mathieu-de-beloeil	exact
+    saint-amable	Saint-Amable	44	2.3	saint-amable	exact
+    terrebonne	Terrebonne	45	2.3	terrebonne	exact
+    saint-remi	Saint-Rémi	46	2.3	saint-remi	exact
+    otterburn-park	Otterburn Park	47	2.3	otterburn-park	exact
+    saint-jacques-le-mineur	Saint-Jacques-le-Mineur	48	2.3	saint-jacques-le-mineur	exact
+    richelieu	Richelieu	49	2.3	richelieu	exact
+    beloeil	Beloeil	50	2.3	beloeil	exact
+    baie-durfe	Baie-D'Urfé	51	2.3	baie-durfe	exact
+    sainte-marthe-sur-le-lac	Sainte-Marthe-sur-le-Lac	52	2.2	sainte-marthe-sur-le-lac	exact
+    saint-jean-sur-richelieu	Saint-Jean-sur-Richelieu	53	2.3	saint-jean-sur-richelieu	exact
+    mascouche	Mascouche	54	2.3	mascouche	exact
+    saint-eustache	Saint-Eustache	55	2.3	saint-eustache	exact
+    notre-dame-de-lile-perrot	Notre-Dame-de-l'Île-Perrot	56	2.3	notre-dame-de-lile-perrot	exact
+    repentigny	Repentigny	57	2.3	repentigny	exact
+    saint-edouard	Saint-Édouard	58	2.3	saint-edouard	exact
+    sainte-anne-de-bellevue	Sainte-Anne-de-Bellevue	59	2.3	sainte-anne-de-bellevue	exact
+    saint-michel	Saint-Michel	60	2.2	saint-michel	exact
+    blainville	Blainville	61	2.3	blainville	exact
+    pointe-calumet	Pointe-Calumet	62	2.3	pointe-calumet	exact
+    mont-saint-hilaire	Mont-Saint-Hilaire	63	2.3	mont-saint-hilaire	exact
+    senneville	Senneville	64	2.3	senneville	exact
+    marieville	Marieville	65	none		UNMATCHED
+    lile-perrot	L'Île-Perrot	66	2.3	lile-perrot	exact
+    vercheres	Verchères	67	2.3	vercheres	exact
+    saint-marc-sur-richelieu	Saint-Marc-sur-Richelieu	68	2.3	saint-marc-sur-richelieu	exact
+    sainte-martine	Sainte-Martine	69	2.2	sainte-martine	exact
+    beauharnois	Beauharnois	70	2.3	beauharnois	exact
+    sainte-anne-des-plaines	Sainte-Anne-des-Plaines	71	2.3	sainte-anne-des-plaines	exact
+    saint-urbain-premier	Saint-Urbain-Premier	72	2.3	saint-urbain-premier	exact
+    terrasse-vaudreuil	Terrasse-Vaudreuil	73	2.3	terrasse-vaudreuil	exact
+    saint-joseph-du-lac	Saint-Joseph-du-Lac	74	2.3	saint-joseph-du-lac	exact
+    saint-jean-baptiste	Saint-Jean-Baptiste	75	2.3	saint-jean-baptiste	exact
+    pincourt	Pincourt	76	2.3	pincourt	exact
+    calixa-lavallee	Calixa-Lavallée	77	2.3	calixa-lavallee	exact
+    lile-cadieux	L'Île-Cadieux	78	2.3	lile-cadieux	exact
+    pointe-des-cascades	Pointe-des-Cascades	79	2.3	pointe-des-cascades	exact
+    saint-charles-sur-richelieu	Saint-Charles-sur-Richelieu	80	2.3	saint-charles-sur-richelieu	exact
+    napierville	Napierville	81	2.3	napierville	exact
+    vaudreuil-sur-le-lac	Vaudreuil-sur-le-Lac	82	2.3	vaudreuil-sur-le-lac	exact
+    saint-blaise-sur-richelieu	Saint-Blaise-sur-Richelieu	83	2.3	saint-blaise-sur-richelieu	exact
+    mont-saint-gregoire	Mont-Saint-Grégoire	84	2.3	mont-saint-gregoire	exact
+    sainte-madeleine	Sainte-Madeleine	85	2.3	sainte-madeleine	exact
+    saint-cyprien-de-napierville	Saint-Cyprien-de-Napierville	86	2.3	saint-cyprien-de-napierville	exact
+    saint-patrice-de-sherrington	Saint-Patrice-de-Sherrington	87	2.3	saint-patrice-de-sherrington	exact
+    saint-roch-de-lachigan	Saint-Roch-de-l'Achigan	88	2.2	saint-roch-de-lachigan	exact
+    sainte-angele-de-monnoir	Sainte-Angèle-de-Monnoir	89	2.3	sainte-angele-de-monnoir	exact
+    lepiphanie	L'Épiphanie	90	2.3	lepiphanie	exact
+    oka	Oka	91	2.3	oka	exact
+    sainte-marie-madeleine	Sainte-Marie-Madeleine	92	2.3	sainte-marie-madeleine	exact
+    saint-etienne-de-beauharnois	Saint-Étienne-de-Beauharnois	93	2.3	saint-etienne-de-beauharnois	exact
+    sainte-clotilde	Sainte-Clotilde	94	2.2	sainte-clotilde	exact
+    vaudreuil-dorion	Vaudreuil-Dorion	95	2.2	vaudreuil-dorion	exact
+    rougemont	Rougemont	96	2.3	rougemont	exact
+    saint-roch-ouest	Saint-Roch-Ouest	97	2.3	saint-roch-ouest	exact
+    saint-sulpice	Saint-Sulpice	98	2.3	saint-sulpice	exact
+    lassomption	L'Assomption	99	2.3	lassomption	exact
+    howick	Howick	100	2.3	howick	exact
+    mirabel	Mirabel	101	2.3	mirabel	exact
+    sainte-anne-de-sabrevois	Sainte-Anne-de-Sabrevois	102	2.3	sainte-anne-de-sabrevois	exact
+    saint-lin-laurentides	Saint-Lin-Laurentides	103	2.2	saint-lin-laurentides	exact
+    saint-damase-les-maskoutains	Saint-Damase	104	2.3	saint-damase--les-maskoutains	normalized
+    saint-antoine-sur-richelieu	Saint-Antoine-sur-Richelieu	105	2.3	saint-antoine-sur-richelieu	exact
+    saint-denis-sur-richelieu	Saint-Denis-sur-Richelieu	106	2.3	saint-denis-sur-richelieu	exact
+    tres-saint-sacrement	Très-Saint-Sacrement	107	2.3	tres-saint-sacrement	exact
+    la-presentation	La Présentation	108	2.3	la-presentation	exact
+    sainte-brigide-diberville	Sainte-Brigide-d'Iberville	109	2.2	sainte-brigide-diberville	exact
+    les-cedres	Les Cèdres	110	2.3	les-cedres	exact
+    saint-esprit	Saint-Esprit	111	2.2	saint-esprit	exact
+    saint-valentin	Saint-Valentin	112	2.2	saint-valentin	exact
+    sainte-sophie	Sainte-Sophie	113	2.2	sainte-sophie	exact
+    hudson	Hudson	114	2.3	hudson	exact
+    saint-alexandre	Saint-Alexandre	115	2.2	saint-alexandre	exact
+    saint-chrysostome	Saint-Chrysostome	116	2.3	saint-chrysostome	exact
+    hemmingford-les-jardins-de-napierville	Hemmingford	117	2.3	hemmingford--les-jardins-de-napierville	normalized
+    saint-cesaire	Saint-Césaire	118	2.2	saint-cesaire	exact
+    saint-paul-de-lile-aux-noix	Saint-Paul-de-l'Île-aux-Noix	119	2.2	saint-paul-de-lile-aux-noix	exact
+    saint-louis-de-gonzague-beauharnois-salaberry	Saint-Louis-de-Gonzague	120	2.3	saint-louis-de-gonzague--beauharnois-salaberry	normalized
+    salaberry-de-valleyfield	Salaberry-de-Valleyfield	121	2.3	salaberry-de-valleyfield	exact
+    saint-lazare	Saint-Lazare	122	2.3	saint-lazare	exact
+    saint-bernard-de-lacolle	Saint-Bernard-de-Lacolle	123	2.3	saint-bernard-de-lacolle	exact
+    saint-alexis	Saint-Alexis	124	2.3	saint-alexis	exact
+    sainte-marie-salome	Sainte-Marie-Salomé	125	2.3	sainte-marie-salome	exact
+    lavaltrie	Lavaltrie	126	2.3	lavaltrie	exact
+    contrecoeur	Contrecoeur	127	2.3	contrecoeur	exact
+    henryville	Henryville	128	2.3	henryville	exact
+    saint-jerome	Saint-Jérôme	129	2.3	saint-jerome	exact
+    saint-placide	Saint-Placide	130	2.3	saint-placide	exact
+    saint-jacques	Saint-Jacques	131	2.3	saint-jacques	exact
+    hemmingford-les-jardins-de-napierville-2	Hemmingford	132	2.3	hemmingford--les-jardins-de-napierville--2	normalized
+    saint-colomban	Saint-Colomban	133	2.3	saint-colomban	exact
+    saint-hyacinthe	Saint-Hyacinthe	134	2.2	saint-hyacinthe	exact
+    lacolle	Lacolle	135	2.3	lacolle	exact
+    saint-sebastien-le-haut-richelieu	Saint-Sébastien	136	2.3	saint-sebastien--le-haut-richelieu	normalized
+    saint-paul	Saint-Paul	137	2.3	saint-paul	exact
+    saint-pie	Saint-Pie	138	2.3	saint-pie	exact
+    havelock	Havelock	139	2.3	havelock	exact
+    sainte-sabine-brome-missisquoi	Sainte-Sabine	140	2.2	sainte-sabine--brome-missisquoi	normalized
+    saint-bernard-de-michaudville	Saint-Bernard-de-Michaudville	141	2.3	saint-bernard-de-michaudville	exact
+    crabtree	Crabtree	142	2.3	crabtree	exact
+    coteau-du-lac	Coteau-du-Lac	143	2.3	coteau-du-lac	exact
+    sainte-julienne	Sainte-Julienne	144	2.3	sainte-julienne	exact
+    farnham	Farnham	145	2.3	farnham	exact
+    saint-paul-dabbotsford	Saint-Paul-d'Abbotsford	146	2.3	saint-paul-dabbotsford	exact
+    saint-clet	Saint-Clet	147	2.3	saint-clet	exact
+    saint-roch-de-richelieu	Saint-Roch-de-Richelieu	148	2.3	saint-roch-de-richelieu	exact
+    saint-jude	Saint-Jude	149	2.3	saint-jude	exact
+    noyan	Noyan	150	2.3	noyan	exact
+    ormstown	Ormstown	151	2.3	ormstown	exact
+    ange-gardien	Ange-Gardien	152	2.3	ange-gardien	exact
+    saint-ours	Saint-Ours	153	2.3	saint-ours	exact
+    prevost	Prévost	154	2.3	prevost	exact
+    saint-stanislas-de-kostka	Saint-Stanislas-de-Kostka	155	2.3	saint-stanislas-de-kostka	exact
+    saint-calixte	Saint-Calixte	156	2.3	saint-calixte	exact
+    saint-barnabe-sud	Saint-Barnabé-Sud	157	2.3	saint-barnabe-sud	exact
+    notre-dame-de-stanbridge	Notre-Dame-de-Stanbridge	158	none		UNMATCHED
+    franklin	Franklin	159	2.3	franklin	exact
+    saint-pierre	Saint-Pierre	160	2.3	saint-pierre	exact
+    saint-liguori	Saint-Liguori	161	2.3	saint-liguori	exact
+    saint-hippolyte	Saint-Hippolyte	162	2.3	saint-hippolyte	exact
+    venise-en-quebec	Venise-en-Québec	163	2.3	venise-en-quebec	exact
+    clarenceville	Clarenceville	164	2.3	clarenceville	exact
+    joliette	Joliette	165	2.3	joliette	exact
+    les-coteaux	Les Coteaux	166	2.3	les-coteaux	exact
+    saint-dominique	Saint-Dominique	167	2.3	saint-dominique	exact

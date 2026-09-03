@@ -75,6 +75,19 @@ export function projectStateToGraph(state: OntologyProjectState): GraphifyGraph 
       label: c.label,
       file_type: nodeType(c.type),
       source_file: c.evidenceRefs[0] ?? undefined,
+      // Carry the reconciled structured properties (e.g. a Bylaw's
+      // reglement_number + etape → buildNodeRow derives regulatoryStatus) and
+      // openable document refs (the drawer reads props.refs). Both ABSENT when
+      // the canonical carried none (anti-invention — thin nodes stay thin).
+      ...(c.properties ? { properties: c.properties } : {}),
+      ...(c.docRefs && c.docRefs.length > 0
+        ? {
+            refs: c.docRefs.map((r): Record<string, unknown> => ({
+              rawRef: r.rawRef,
+              ...(r.excerpt !== undefined ? { excerpt: r.excerpt } : {}),
+            })),
+          }
+        : {}),
     });
   }
 

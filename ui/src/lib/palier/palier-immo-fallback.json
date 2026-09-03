@@ -1,0 +1,1176 @@
+{
+  "contract": "palier-immo-fallback/v1",
+  "note": "Fallback OFFLINE (référence recette v3, dump 08-03) : kpi4 PV + kpi20 recall + isPriority par ville. Le SCOPE B / dénominateur / récence viennent du LIVE by-city, PAS d ici (cf. lock conducteur matrix-clientside-live).",
+  "source": "dump prod OVH 7298",
+  "cities": [
+    {
+      "citySlug": "westmount",
+      "cityName": "Westmount",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "saint-lambert",
+      "cityName": "Saint-Lambert",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "hampstead",
+      "cityName": "Hampstead",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "mont-royal",
+      "cityName": "Mont-Royal",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "montreal-ouest",
+      "cityName": "Montréal-Ouest",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "cote-saint-luc",
+      "cityName": "Côte-Saint-Luc",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "longueuil",
+      "cityName": "Longueuil",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "brossard",
+      "cityName": "Brossard",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "sainte-catherine",
+      "cityName": "Sainte-Catherine",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "la-prairie",
+      "cityName": "La Prairie",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "delson",
+      "cityName": "Delson",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "candiac",
+      "cityName": "Candiac",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "montreal-est",
+      "cityName": "Montréal-Est",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "boucherville",
+      "cityName": "Boucherville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "dorval",
+      "cityName": "Dorval",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "lile-dorval",
+      "cityName": "L'Île-Dorval",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "saint-constant",
+      "cityName": "Saint-Constant",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "saint-bruno-de-montarville",
+      "cityName": "Saint-Bruno-de-Montarville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "carignan",
+      "cityName": "Carignan",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "dollard-des-ormeaux",
+      "cityName": "Dollard-Des Ormeaux",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "pointe-claire",
+      "cityName": "Pointe-Claire",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "saint-philippe",
+      "cityName": "Saint-Philippe",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "saint-mathieu",
+      "cityName": "Saint-Mathieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "chateauguay",
+      "cityName": "Châteauguay",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "sainte-julie",
+      "cityName": "Sainte-Julie",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "saint-basile-le-grand",
+      "cityName": "Saint-Basile-le-Grand",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "chambly",
+      "cityName": "Chambly",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "rosemere",
+      "cityName": "Rosemère",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "varennes",
+      "cityName": "Varennes",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "kirkland",
+      "cityName": "Kirkland",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": true
+    },
+    {
+      "citySlug": "bois-des-filion",
+      "cityName": "Bois-des-Filion",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-isidore-roussillon",
+      "cityName": "Saint-Isidore",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "beaconsfield",
+      "cityName": "Beaconsfield",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lorraine",
+      "cityName": "Lorraine",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lery",
+      "cityName": "Léry",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "mercier",
+      "cityName": "Mercier",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "charlemagne",
+      "cityName": "Charlemagne",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "boisbriand",
+      "cityName": "Boisbriand",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "deux-montagnes",
+      "cityName": "Deux-Montagnes",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "mcmasterville",
+      "cityName": "McMasterville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-therese",
+      "cityName": "Sainte-Thérèse",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-mathias-sur-richelieu",
+      "cityName": "Saint-Mathias-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-mathieu-de-beloeil",
+      "cityName": "Saint-Mathieu-de-Beloeil",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "complete",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-amable",
+      "cityName": "Saint-Amable",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "terrebonne",
+      "cityName": "Terrebonne",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-remi",
+      "cityName": "Saint-Rémi",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "otterburn-park",
+      "cityName": "Otterburn Park",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-jacques-le-mineur",
+      "cityName": "Saint-Jacques-le-Mineur",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "richelieu",
+      "cityName": "Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "beloeil",
+      "cityName": "Beloeil",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "baie-durfe",
+      "cityName": "Baie-D'Urfé",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-marthe-sur-le-lac",
+      "cityName": "Sainte-Marthe-sur-le-Lac",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-jean-sur-richelieu",
+      "cityName": "Saint-Jean-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "mascouche",
+      "cityName": "Mascouche",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-eustache",
+      "cityName": "Saint-Eustache",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "complete",
+      "isPriority": false
+    },
+    {
+      "citySlug": "notre-dame-de-lile-perrot",
+      "cityName": "Notre-Dame-de-l'Île-Perrot",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "repentigny",
+      "cityName": "Repentigny",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-edouard",
+      "cityName": "Saint-Édouard",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-anne-de-bellevue",
+      "cityName": "Sainte-Anne-de-Bellevue",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-michel",
+      "cityName": "Saint-Michel",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "blainville",
+      "cityName": "Blainville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "pointe-calumet",
+      "cityName": "Pointe-Calumet",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "mont-saint-hilaire",
+      "cityName": "Mont-Saint-Hilaire",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "senneville",
+      "cityName": "Senneville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "marieville",
+      "cityName": "Marieville",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lile-perrot",
+      "cityName": "L'Île-Perrot",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "vercheres",
+      "cityName": "Verchères",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-marc-sur-richelieu",
+      "cityName": "Saint-Marc-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-martine",
+      "cityName": "Sainte-Martine",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "beauharnois",
+      "cityName": "Beauharnois",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-anne-des-plaines",
+      "cityName": "Sainte-Anne-des-Plaines",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-urbain-premier",
+      "cityName": "Saint-Urbain-Premier",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "terrasse-vaudreuil",
+      "cityName": "Terrasse-Vaudreuil",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-joseph-du-lac",
+      "cityName": "Saint-Joseph-du-Lac",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-jean-baptiste",
+      "cityName": "Saint-Jean-Baptiste",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "pincourt",
+      "cityName": "Pincourt",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "calixa-lavallee",
+      "cityName": "Calixa-Lavallée",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lile-cadieux",
+      "cityName": "L'Île-Cadieux",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "pointe-des-cascades",
+      "cityName": "Pointe-des-Cascades",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-charles-sur-richelieu",
+      "cityName": "Saint-Charles-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "napierville",
+      "cityName": "Napierville",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "vaudreuil-sur-le-lac",
+      "cityName": "Vaudreuil-sur-le-Lac",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-blaise-sur-richelieu",
+      "cityName": "Saint-Blaise-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "mont-saint-gregoire",
+      "cityName": "Mont-Saint-Grégoire",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-madeleine",
+      "cityName": "Sainte-Madeleine",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-cyprien-de-napierville",
+      "cityName": "Saint-Cyprien-de-Napierville",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-patrice-de-sherrington",
+      "cityName": "Saint-Patrice-de-Sherrington",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-roch-de-lachigan",
+      "cityName": "Saint-Roch-de-l'Achigan",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-angele-de-monnoir",
+      "cityName": "Sainte-Angèle-de-Monnoir",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lepiphanie",
+      "cityName": "L'Épiphanie",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "oka",
+      "cityName": "Oka",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-marie-madeleine",
+      "cityName": "Sainte-Marie-Madeleine",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-etienne-de-beauharnois",
+      "cityName": "Saint-Étienne-de-Beauharnois",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-clotilde",
+      "cityName": "Sainte-Clotilde",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "vaudreuil-dorion",
+      "cityName": "Vaudreuil-Dorion",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "rougemont",
+      "cityName": "Rougemont",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-roch-ouest",
+      "cityName": "Saint-Roch-Ouest",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-sulpice",
+      "cityName": "Saint-Sulpice",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lassomption",
+      "cityName": "L'Assomption",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "howick",
+      "cityName": "Howick",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "mirabel",
+      "cityName": "Mirabel",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-anne-de-sabrevois",
+      "cityName": "Sainte-Anne-de-Sabrevois",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-lin-laurentides",
+      "cityName": "Saint-Lin-Laurentides",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-damase-les-maskoutains",
+      "cityName": "Saint-Damase",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-antoine-sur-richelieu",
+      "cityName": "Saint-Antoine-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-denis-sur-richelieu",
+      "cityName": "Saint-Denis-sur-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "tres-saint-sacrement",
+      "cityName": "Très-Saint-Sacrement",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "la-presentation",
+      "cityName": "La Présentation",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-brigide-diberville",
+      "cityName": "Sainte-Brigide-d'Iberville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "les-cedres",
+      "cityName": "Les Cèdres",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-esprit",
+      "cityName": "Saint-Esprit",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-valentin",
+      "cityName": "Saint-Valentin",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-sophie",
+      "cityName": "Sainte-Sophie",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "hudson",
+      "cityName": "Hudson",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-alexandre",
+      "cityName": "Saint-Alexandre",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-chrysostome",
+      "cityName": "Saint-Chrysostome",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "hemmingford-les-jardins-de-napierville",
+      "cityName": "Hemmingford",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-cesaire",
+      "cityName": "Saint-Césaire",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-paul-de-lile-aux-noix",
+      "cityName": "Saint-Paul-de-l'Île-aux-Noix",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-louis-de-gonzague-beauharnois-salaberry",
+      "cityName": "Saint-Louis-de-Gonzague",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "salaberry-de-valleyfield",
+      "cityName": "Salaberry-de-Valleyfield",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-lazare",
+      "cityName": "Saint-Lazare",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-bernard-de-lacolle",
+      "cityName": "Saint-Bernard-de-Lacolle",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-alexis",
+      "cityName": "Saint-Alexis",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-marie-salome",
+      "cityName": "Sainte-Marie-Salomé",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lavaltrie",
+      "cityName": "Lavaltrie",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "contrecoeur",
+      "cityName": "Contrecoeur",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "henryville",
+      "cityName": "Henryville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-jerome",
+      "cityName": "Saint-Jérôme",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-placide",
+      "cityName": "Saint-Placide",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-jacques",
+      "cityName": "Saint-Jacques",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "hemmingford-les-jardins-de-napierville-2",
+      "cityName": "Hemmingford",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-colomban",
+      "cityName": "Saint-Colomban",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-hyacinthe",
+      "cityName": "Saint-Hyacinthe",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "lacolle",
+      "cityName": "Lacolle",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-sebastien-le-haut-richelieu",
+      "cityName": "Saint-Sébastien",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-paul",
+      "cityName": "Saint-Paul",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-pie",
+      "cityName": "Saint-Pie",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "havelock",
+      "cityName": "Havelock",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-sabine-brome-missisquoi",
+      "cityName": "Sainte-Sabine",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-bernard-de-michaudville",
+      "cityName": "Saint-Bernard-de-Michaudville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "crabtree",
+      "cityName": "Crabtree",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "coteau-du-lac",
+      "cityName": "Coteau-du-Lac",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "sainte-julienne",
+      "cityName": "Sainte-Julienne",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "farnham",
+      "cityName": "Farnham",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-paul-dabbotsford",
+      "cityName": "Saint-Paul-d'Abbotsford",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-clet",
+      "cityName": "Saint-Clet",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-roch-de-richelieu",
+      "cityName": "Saint-Roch-de-Richelieu",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-jude",
+      "cityName": "Saint-Jude",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "noyan",
+      "cityName": "Noyan",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "ormstown",
+      "cityName": "Ormstown",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "ange-gardien",
+      "cityName": "Ange-Gardien",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-ours",
+      "cityName": "Saint-Ours",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "prevost",
+      "cityName": "Prévost",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-stanislas-de-kostka",
+      "cityName": "Saint-Stanislas-de-Kostka",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-calixte",
+      "cityName": "Saint-Calixte",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-barnabe-sud",
+      "cityName": "Saint-Barnabé-Sud",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "notre-dame-de-stanbridge",
+      "cityName": "Notre-Dame-de-Stanbridge",
+      "kpi4_pv": "unknown",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "franklin",
+      "cityName": "Franklin",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-pierre",
+      "cityName": "Saint-Pierre",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-liguori",
+      "cityName": "Saint-Liguori",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-hippolyte",
+      "cityName": "Saint-Hippolyte",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "venise-en-quebec",
+      "cityName": "Venise-en-Québec",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "clarenceville",
+      "cityName": "Clarenceville",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "joliette",
+      "cityName": "Joliette",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "les-coteaux",
+      "cityName": "Les Coteaux",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    },
+    {
+      "citySlug": "saint-dominique",
+      "cityName": "Saint-Dominique",
+      "kpi4_pv": "complete",
+      "kpi20_recall": "unknown",
+      "isPriority": false
+    }
+  ]
+}
