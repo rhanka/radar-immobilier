@@ -750,6 +750,7 @@ jobs:
       # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
       # and the preprod deployer Role cannot apply ConfigMaps/Services.
       - name: Roll preprod deployments to pushed sha
+        id: roll
         env:
           SHA: ${{ steps.vars.outputs.sha }}
         run: |
@@ -864,6 +865,33 @@ jobs:
             echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # ROLLBACK-ON-FAILED-RELEASE (§1(b), ruling i-infra) — IMAGE-ONLY, AUTO,
+      # scoped to a DEPLOYMENT-HEALTH failure. Runs only when the job is failing
+      # AND the `roll` step was reached (steps.roll.conclusion != 'skipped') — a
+      # failure BEFORE the roll (checkout, kubeconfig, pre-flight, backup)
+      # deployed nothing, so there is nothing to roll back and this stays skipped.
+      # `rollout undo` re-pins the N-1 image (0 new RBAC — the deployer already
+      # has deployments/patch). Guards G1 (previous revision exists), G2 (rollout
+      # Ready + served health-check; never claim success on a broken state), G3
+      # (log landed image) and B3/B5 (loud surfacing, one-shot fail-loud) live in
+      # deploy/ci/rollback-release.sh. ARMED only when ROLLBACK_ON_FAILURE_ENABLED
+      # == 'true' (decouple merge from activation).
+      #
+      # MIGRATION SEAM (links §1a+§1b+§2): image-rollback is safe only under
+      # backward-compatible (expand-contract/additive) migrations. A release with
+      # a BREAKING migration is caught by the served health-check and fail-loud →
+      # the correct recovery is the OWNER-GATED DB-restore (§1a backup), NOT this
+      # step (which never touches the DB).
+      - name: Rollback preprod on failed release (image-only)
+        if: ${{ failure() && steps.roll.conclusion != 'skipped' && vars.ROLLBACK_ON_FAILURE_ENABLED == 'true' }}
+        env:
+          NAMESPACE: ${{ env.NAMESPACE }}
+          ROLLBACK_ENV: preprod
+          DEPLOYMENTS: radar-api radar-ui
+          PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST || 'preprod.immo.sent-tech.ca' }}
+          FAILED_REF: ${{ steps.vars.outputs.sha }}
+        run: bash deploy/ci/rollback-release.sh
 
       - name: Deployment status — failure (preprod)
         if: failure() && steps.deployment.outputs.id != ''
@@ -1118,6 +1146,7 @@ jobs:
       # PROMOTE — pin prod to the IMMUTABLE digest (not the mutable <sha7> tag):
       # true build-once, survives tag GC of <sha7>.
       - name: Promote — set prod images to digest
+        id: promote
         env:
           DIG_API: ${{ steps.pick.outputs.api }}
           DIG_UI: ${{ steps.pick.outputs.ui }}
@@ -1204,6 +1233,23 @@ jobs:
             echo "git sha   -> ${{ steps.vars.outputs.sha }}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # ROLLBACK-ON-FAILED-RELEASE (§1(b)) — PROD, PREPARED BUT DISARMED. Same
+      # image-only auto-rollback as preprod, scoped to a promote-health failure
+      # (steps.promote.conclusion != 'skipped'). Owner-gated + SEPARATE arming:
+      # stays SKIPPED until ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' (default
+      # off). Authored now so the call is ready; arming is a deliberate owner step
+      # at the prod cutover, never a side effect of this merge. Same migration
+      # seam as preprod (breaking migration → owner-gated DB-restore, not this).
+      - name: Rollback prod on failed promote (image-only)
+        if: ${{ failure() && steps.promote.conclusion != 'skipped' && vars.ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' }}
+        env:
+          NAMESPACE: ${{ env.NAMESPACE }}
+          ROLLBACK_ENV: prod
+          DEPLOYMENTS: radar-api radar-ui
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca' }}
+          FAILED_REF: ${{ steps.vars.outputs.sha }}
+        run: bash deploy/ci/rollback-release.sh
 
       - name: Deployment status — failure
         if: failure() && steps.deployment.outputs.id != ''
