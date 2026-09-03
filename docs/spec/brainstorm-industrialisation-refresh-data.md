@@ -85,7 +85,7 @@ EXPLOITATION      API immo /api/signals, /api/ontology/:city → UI Svelte
 
 **Fichiers de référence** (chemins absolus) :
 - Scrape : `api/src/scripts/worker-live.ts`, `api/src/services/sources/{recueil,exploit-scrape,live-scrape,run-manifest}.ts`
-- Config villes : `packages/radar-sources/src/sources/proces-verbaux-generic.ts` (`ALL_PV_CITIES`, ~549 entrées)
+- Config villes : `packages/radar-sources/src/sources/proces-verbaux-generic.ts` (`ALL_PV_CITIES`, 563 entrées — config-count)
 - Projection : `api/src/scripts/project-graph-from-s3.ts` + `deploy/k8s/31-graph-projection-job.yaml`
 - Graphify (contrat) : `radar/ontology/graphify-output-contract.md`, `radar/ontology/regraphify-directive.md`, `docs/spec/etape-anticipation-delegation.md`
 - Storage/config : `api/src/config.ts` (résolution `S3_*` → `SCRAPE_S3_*` → `GRAPH_S3_*`), `api/src/storage/s3-object-store.ts`
@@ -121,7 +121,7 @@ EXPLOITATION      API immo /api/signals, /api/ontology/:city → UI Svelte
 | --- | --- | --- | --- |
 | **D1** | **Projection PG cassée en prod** | 🔴 Bloquant | `api/Dockerfile` ne bundle que `src/index.ts` (esbuild) et le runtime ne copie que `api/dist` ; `dist/scripts/project-graph-from-s3.js` **n'existe jamais dans l'image** → job k8s `MODULE_NOT_FOUND`. |
 | **D2** | **Scrape jamais automatisé** | 🔴 Bloquant | Aucun Job/CronJob scrape dans `deploy/k8s/**`. Tout passe par `make worker-live` sur un poste. → 0 refresh sans humain. |
-| **D3** | **Graphify = compte Claude humain partagé** | 🟠 Fort | Le seul maillon agentique dépend d'un compte saturable (limites session ET hebdo). 549 villes × re-graphify = saturation garantie. |
+| **D3** | **Graphify = compte Claude humain partagé** | 🟠 Fort | Le seul maillon agentique dépend d'un compte saturable (limites session ET hebdo). ~1007 villes couvertes (data/projection) × re-graphify = saturation garantie. |
 | **D4** | **Orchestration 100 % manuelle (h2a texte)** | 🟠 Fort | Pas de file de travail, pas de déclencheur, pas de reprise auto. Chaque re-dispatch = re-brief entier (perte de contexte). |
 | **D5** | **Reprise non industrialisée** | 🟠 Fort | Re-scrape/re-graphify total = action artisanale par tranches alpha (lots A–L / M–Z), gates jq copiés à la main. |
 | **D6** | **Observabilité faible** | 🟡 Moyen | `make conductor-report` lit des cases à cocher dans des `.md`. Pas de vue « N villes fraîches / M en retard / K en échec ». |
@@ -284,7 +284,7 @@ Reprendre = **recalculer `désiré − présent`** (réconciliation, `SPEC_PERSI
 | **Récurrent** | détecter nouveaux PV | **quotidien** (cron) | CronJob scrape → manifeste nouveauté → file graphify delta |
 | **Approfondissement** | bump ontologie / re-prompt | à la demande (chat) | reprise totale (filtre `ontologyVersion`) |
 
-> Le scrape déterministe peut tourner **quotidiennement sur les 549 villes** sans LLM
+> Le scrape déterministe peut tourner **quotidiennement sur les ~528 villes config-only** (563 configs `ALL_PV_CITIES` − 35 fixtures) sans LLM
 > (coût ≈ bande passante + pdftotext). Seul **graphify du delta** consomme du LLM. Bien
 > séparer les deux cadences = clé de l'anti-saturation.
 
@@ -439,7 +439,7 @@ toute seule, anti-sature, reprend après crash, projette quand vert.*
 | Risque | Impact | Mitigation |
 | --- | --- | --- |
 | Spike `@sentropic/flow`/h2a déçoit (surface pré-1.0) | Vague B glisse | Vague A indépendante ; fallback runner maison (cf. `SPEC_EVOL_SCAFFOLDING` qui prévoit déjà l'impl maison) |
-| Bump ontologie pendant reprise totale | 549 graphify d'un coup → saturation | quotas + file persistante + backoff (§4.4) ; étaler sur N jours |
+| Bump ontologie pendant reprise totale | ~1007 graphify d'un coup (reprise totale sur la couverture data) → saturation | quotas + file persistante + backoff (§4.4) ; étaler sur N jours |
 | Schéma PG dupliqué immo/data | double source de vérité | binaire de projection unique (image immo) |
 | Scrapers fragiles (SPA/403, cf. mémoire S-Z) | nouveauté non captée | hors scope refresh ; tracké séparément (Playwright+OCR) ; le refresh n'aggrave pas |
 | geo glisse dans la collecte par accident | brouille la frontière | règle : geo = exploitation (immo) sauf pré-calcul batch explicite |
