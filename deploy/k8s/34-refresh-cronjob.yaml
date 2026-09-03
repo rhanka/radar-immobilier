@@ -65,8 +65,13 @@ spec:
           serviceAccountName: radar-app
           containers:
             - name: scrape
+              # image tag is OVERRIDDEN at release by the Kustomize `images:`
+              # transformer in deploy/k8s/refresh-cronjobs/ (CI pins the SAME
+              # immutable digest as the deployed release). This base tag is a
+              # bootstrap default only — the CronJobs must be applied via the
+              # refresh-cronjobs overlay, never with :latest live (§6).
               image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
-              imagePullPolicy: Always
+              imagePullPolicy: IfNotPresent
               workingDir: /workspace/api
               command: ["node", "dist/scripts/worker-live.js"]
               envFrom:
@@ -137,8 +142,13 @@ spec:
           serviceAccountName: radar-app
           containers:
             - name: project-graph
+              # image tag is OVERRIDDEN at release by the Kustomize `images:`
+              # transformer in deploy/k8s/refresh-cronjobs/ (CI pins the SAME
+              # immutable digest as the deployed release). This base tag is a
+              # bootstrap default only — the CronJobs must be applied via the
+              # refresh-cronjobs overlay, never with :latest live (§6).
               image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
-              imagePullPolicy: Always
+              imagePullPolicy: IfNotPresent
               workingDir: /workspace/api
               command: ["node", "dist/scripts/project-graph-from-s3.js"]
               envFrom:
