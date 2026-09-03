@@ -30,12 +30,13 @@ describe("chat map-contextuel — câblage source", () => {
     expect(host).toContain("chatToggleNonce");
   });
 
-  it("GeoCityMapBase : bouton chat opt-in dans le cluster + suppression liée au montage", () => {
+  it("GeoCityMapBase : bouton chat opt-in dans le cluster + suppression ref-comptée au montage", () => {
     expect(socle).toContain("export let showChatToggle");
     expect(socle).toContain('data-testid="chat-toggle"');
     expect(socle).toContain("requestChatToggle");
-    expect(socle).toMatch(/showChatToggle\)\s*chatBubbleSuppressed\.set\(true\)/);
-    expect(socle).toMatch(/showChatToggle\)\s*chatBubbleSuppressed\.set\(false\)/);
+    // Suppression ref-comptée acquise au mount, libérée au unmount (R1).
+    expect(socle).toMatch(/releaseChatTrigger\s*=\s*acquireChatTrigger\(\)/);
+    expect(socle).toContain("releaseChatTrigger?.()");
   });
 
   it("SignauxMapView (vue carte principale) active le bouton chat du socle", () => {
