@@ -55,20 +55,30 @@ ALTER TABLE prospect_notes
   ADD COLUMN target_type prospect_note_target NOT NULL DEFAULT 'lot',  -- ← 0 backfill : l'existant devient 'lot'
   ADD COLUMN signal_id   UUID REFERENCES signals(id) ON DELETE SET NULL,  -- ancre signal (jamais CASCADE — cf. §3.1)
   ADD COLUMN tenant_id   TEXT NOT NULL DEFAULT 'default',  -- scoping forward-looking, INERTE (cf. §3.3)
-  ADD COLUMN updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),  -- édition in-place (cf. §4)
-  ADD COLUMN deleted_at  TIMESTAMPTZ;                          -- soft-delete (NULL = actif)
+  ADD COLUMN updated_at  TIMESTAMPTZ,   -- NULL = jamais éditée (cf. §4) ; SET par l'édition
+  ADD COLUMN deleted_at  TIMESTAMPTZ;   -- soft-delete (NULL = actif)
 
 -- `no_lot`/`city_slug` deviennent conditionnels selon target_type (cf. CHECK).
 ALTER TABLE prospect_notes ALTER COLUMN no_lot    DROP NOT NULL;
 ALTER TABLE prospect_notes ALTER COLUMN city_slug DROP NOT NULL;
 
 -- Cohérence ancre ↔ target_type :
---   lot    → no_lot + city_slug NOT NULL ; signal_id NULL
---   signal → signal_id NOT NULL (au create) ; no_lot/city_slug OPTIONNELS (contexte géo si résolu)
+--   lot    → no_lot + city_slug NOT NULL
+--   signal → branche INCONDITIONNELLE (voir CORRECTNESS)
+--
+-- CORRECTNESS (revue faisabilité extraction — MUST-FIX) : la branche 'signal' NE
+-- DOIT PAS exiger `signal_id` NON NULL dans le CHECK. Sinon `ON DELETE SET NULL`
+-- (§3.1), au moment où le signal est supprimé/ré-ingéré, produit la ligne
+-- (target_type='signal', signal_id NULL, no_lot NULL) qui **violerait** ce CHECK →
+-- Postgres évalue le CHECK sur l'UPDATE cascadé → `check_violation` → le DELETE du
+-- signal ÉCHOUE **et** la note ne survit pas : exactement l'inverse de la durabilité
+-- §3.1. La règle « signal_id présent AU CREATE » est donc **APPLICATIVE** (zod/
+-- service, §6/§7), PAS un CHECK. La branche 'signal' reste inconditionnelle → le
+-- SET NULL ne viole jamais → durabilité préservée.
 ALTER TABLE prospect_notes ADD CONSTRAINT chk_prospect_notes_anchor CHECK (
-  (target_type = 'lot'    AND no_lot IS NOT NULL AND city_slug IS NOT NULL)
+  (target_type = 'lot' AND no_lot IS NOT NULL AND city_slug IS NOT NULL)
   OR
-  (target_type = 'signal' AND (signal_id IS NOT NULL OR no_lot IS NOT NULL))
+  (target_type = 'signal')
 );
 
 CREATE INDEX prospect_notes_signal_idx ON prospect_notes (signal_id);
@@ -102,7 +112,8 @@ Garantie par `chk_prospect_notes_anchor` (§2). `target_type='zone'` **n'existe 
 
 **Décision : édition IN-PLACE (`updated_at`) + suppression SOFT (`deleted_at`).** (Confirmée owner/i-cond.)
 
-- **Édition** : `UPDATE prospect_notes SET body=…, updated_at=NOW() WHERE id=…` (author-only). `created_at` immuable ; `updated_at` avance.
+- **Édition** : `UPDATE prospect_notes SET body=…, updated_at=NOW() WHERE id=…` (author-only). `created_at` immuable.
+- **Convention « éditée »** (revue faisabilité) : une note est *éditée* **ssi `updated_at IS NOT NULL`**. `updated_at` est **nullable, DEFAULT NULL** — les notes 0005 existantes gardent `updated_at NULL` → **jamais marquées éditées**, **sans backfill**. (Ce choix atteint l'objectif de la revue mieux que `updated_at > created_at` : avec un `DEFAULT NOW()`, l'existant aurait `updated_at` = date de migration `>` `created_at` et paraîtrait édité.)
 - **Suppression** : `UPDATE … SET deleted_at=NOW()` (author-only). Jamais de DELETE physique. Lecture filtre `deleted_at IS NULL`.
 
 ### Justification (pourquoi PAS la chaîne `supersedes` des tables sœurs)
@@ -137,6 +148,7 @@ const createNoteSchema = z.discriminatedUnion("target_type", [
              no_lot: z.string().optional(), city_slug: z.string().optional(), ...noteBase }),
 ]);
 ```
+- **`signal_id`-au-create = enforcement ICI** : le `z.string().uuid()` **requis** sur la branche `signal` du schéma est le **point unique** qui garantit qu'une note signal naît avec une ancre — **pas** le CHECK DB (§2 CORRECTNESS : le CHECK est inconditionnel pour ne pas casser `SET NULL`).
 - `author_id` = session user (`resolveAuthorId`). **En prod, un `author_id` de body est ignoré/interdit** (cf. §7 — durcissement de l'override dev-only).
 - `tenant_id` **non exposé** au client (toujours `'default'` server-side).
 - Réponse `201 { ok, note }` avec `note.author` (id + nom).
@@ -174,3 +186,5 @@ L'existant `resolveAuthorId(c, deps, body.authorId)` accepte un `author_id` de b
 | D4 | Zones **différées** | owner |
 | A | Mono-client : scoping forward-looking **inerte**, pas de multi-tenant réel, pas de table clients/FK | i-cond (mesuré : `account_users` plat) |
 | i-arch | Édition in-place + soft-delete (vs supersede-chain) ; ancre signal `SET NULL` (durabilité) | ce contrat (§3.1, §4) |
+| MUST-FIX | CHECK branche `signal` **inconditionnelle** (`signal_id`-au-create = règle service, pas CHECK) — sinon `SET NULL` viole le CHECK, DELETE signal échoue, note ne survit pas | revue faisabilité extraction (§2, §6.1) |
+| fix | `updated_at` **nullable** ; « éditée » = `updated_at IS NOT NULL` — 0 backfill, l'existant 0005 non marqué édité | revue faisabilité extraction (§4) |
