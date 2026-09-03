@@ -251,6 +251,16 @@ export const MOCK_ZONE_FEATURES: MockGeoFeature[] = [
       DENSITE: 35,
       URL_GRILLE: "https://longueuil.example/grilles/H-203.pdf",
       kind: "H",
+      // Provenance règlement (qc-zonage-norms, muni-uniforme) — fixture pour
+      // get_reglement_provenance. `_source_url` volontairement absent (jamais exposé).
+      reglement_url: "https://longueuil.example/reglements/CO-2016-1187.pdf",
+      reglement_numero: "CO-2016-1187",
+      reglement_millesime: "2016",
+      reglement_page_source: "12",
+      reglement_ancien_numero: "CO-2009-500",
+      reglement_ancien_source: "https://longueuil.example/reglements/CO-2009-500.pdf",
+      has_ancien: true,
+      _source_url: "https://interne.capture/breadcrumb-ne-jamais-exposer",
     },
   },
   {
