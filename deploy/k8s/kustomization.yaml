@@ -46,7 +46,12 @@ resources:
   - 30-api.yaml
   # 31/32/33 = Jobs one-shot (projection, projection-only, scrape) appliqués À LA
   # MAIN par le conducteur (kubectl apply -f), pas dans le bundle permanent.
-  - 34-refresh-cronjob.yaml
+  # 34-refresh-cronjob.yaml = OVERLAY-MANAGED-ONLY (§6 image-pin). Retiré d'ici
+  # EXPRÈS : ce bundle principal n'a pas d'images-transformer, donc un
+  # `apply -k deploy/k8s` rendrait les 2 CronJobs en `:latest` et REVERTERAIT le
+  # pin @digest posé par l'overlay `refresh-cronjobs/`. Les CronJobs sont
+  # créés + pinnés UNIQUEMENT par la CI via `kustomize build … refresh-cronjobs`
+  # (le grant batch/cronjobs inclut `create` pour le 1er apply). Ne PAS re-lister.
   - 35-consistency-snapshot-cronjob.yaml
   - 35-obscura.yaml
   - 40-maildev.yaml
