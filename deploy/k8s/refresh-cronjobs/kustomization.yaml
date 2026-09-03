@@ -1,0 +1,39 @@
+# refresh-cronjobs — dedicated Kustomize overlay for the §6 image-pin (ruling
+# i-infra). It bundles ONLY the two refresh CronJobs and adds an `images:`
+# transformer so CI can pin them to the SAME immutable image the release
+# deployed — without ever `apply -k deploy/k8s` (the full bundle, which would
+# re-apply postgres/api/ui/minio with prod side-effects).
+#
+# RELEASE-EPHEMERAL PIN (no commit-back, mirrors promote-prod): the CD job
+# resolves NOTHING new — it REUSES the identity it already pinned the
+# Deployments to (prod: the @sha256 digest from promote-prod; preprod diag: the
+# :<sha> tag deploy-preprod uses) and runs, in the CI run only:
+#
+#   cd deploy/k8s/refresh-cronjobs
+#   kustomize edit set image \
+#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api@<digest>
+#   kustomize build --load-restrictor LoadRestrictionsNone . | kubectl apply -f -
+#
+# NB command: `kubectl apply -k` can NOT be used here — the base CronJob lives
+# one dir up (`../34-refresh-cronjob.yaml`) and kustomize's default load-restrictor
+# forbids a parent-dir resource. `kustomize build --load-restrictor
+# LoadRestrictionsNone` is the standard escape and still emits ONLY the two
+# CronJobs (the overlay's sole resources) — never the full bundle.
+#
+# The `newTag` below is a FAIL-LOUD placeholder: building/applying this overlay
+# WITHOUT the `kustomize edit set image` step yields an unpullable tag (not
+# :latest), so an un-pinned apply fails visibly instead of silently running stale
+# code.
+#
+# NB RBAC: `kubectl apply` of a CronJob needs batch/cronjobs {get,create,patch};
+# the CD SA has batch/jobs (from §1a #572) but NOT batch/cronjobs — that delta
+# grant is an OWNER activation gesture, not in this PR (the SA never self-grants).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../34-refresh-cronjob.yaml
+
+images:
+  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api
+    newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
