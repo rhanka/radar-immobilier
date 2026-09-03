@@ -834,6 +834,41 @@ jobs:
             sleep 10
           done
 
+      # §6 REFRESH DIAG (preprod) — one-shot Job proving the PINNED image
+      # refreshes WITHOUT OOM against preprod, BEFORE the suspended prod CronJobs
+      # are ever touched. REUSES the preprod release identity (:<sha> — no 2nd
+      # resolution) + batch/jobs (§1a #572, 0 new RBAC). DISARMED by default
+      # (REFRESH_DIAG_ENABLED); i-infra arms it and scales the Job's city args for
+      # the OOM measurement (default is a bounded 1-city smoke). prod suspend:true
+      # is untouched. No pods/log grant → failure surfaces via the poll, not logs.
+      - name: Refresh diag Job (preprod, image-pin validation)
+        if: ${{ vars.REFRESH_DIAG_ENABLED == 'true' }}
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+          cd deploy/k8s/refresh-diag
+          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:${SHA}
+          kubectl -n "$NAMESPACE" delete job radar-refresh-diag --ignore-not-found
+          kustomize build . | kubectl -n "$NAMESPACE" apply -f -
+          echo "diag Job applied (radar-api:${SHA}); polling for completion…"
+          deadline=$(( $(date +%s) + 1800 ))
+          while :; do
+            s="$(kubectl -n "$NAMESPACE" get job radar-refresh-diag -o jsonpath='{.status.succeeded}' 2>/dev/null || true)"
+            f="$(kubectl -n "$NAMESPACE" get job radar-refresh-diag -o jsonpath='{.status.failed}' 2>/dev/null || true)"
+            if [ "${s:-0}" = "1" ]; then echo "diag OK — pinned image refresh completed in ${NAMESPACE}"; exit 0; fi
+            if [ "${f:-0}" != "" ] && [ "${f:-0}" -ge 1 ] 2>/dev/null; then
+              echo "::error title=Refresh diag FAILED::radar-refresh-diag failed in ${NAMESPACE} (pinned radar-api:${SHA}) — check OOM/boot. Prod CronJobs untouched (suspend:true)."
+              exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error title=Refresh diag timeout::radar-refresh-diag did not complete in 1800s."; exit 1; fi
+            sleep 15
+          done
+
       - name: Deployment status — success (preprod)
         if: success() && steps.deployment.outputs.id != ''
         uses: actions/github-script@v7
@@ -1204,6 +1239,31 @@ jobs:
             fi
             sleep 10
           done
+
+      # §6 REFRESH CRONJOB IMAGE-PIN (prod) — pin the (suspended) refresh
+      # CronJobs to the SAME immutable digest this promote just deployed
+      # (REUSES steps.pick.outputs.api — no 2nd resolution), applying ONLY the two
+      # CronJobs via the refresh-cronjobs overlay. They STAY `suspend: true`: this
+      # fixes the stale-`:latest` root cause only; un-suspend is a SEPARATE owner
+      # gesture after the preprod diag PASS. DISARMED by default
+      # (REFRESH_CRONJOB_PIN_ENABLED) AND requires the owner-granted batch/cronjobs
+      # RBAC (not in this PR — the SA never self-grants). `kubectl apply -k` can't
+      # be used (base is ../34) → `kustomize build --load-restrictor
+      # LoadRestrictionsNone` emits only the 2 CronJobs.
+      - name: Pin refresh CronJobs to release digest (prod)
+        if: ${{ success() && vars.REFRESH_CRONJOB_PIN_ENABLED == 'true' }}
+        env:
+          DIG_API: ${{ steps.pick.outputs.api }}
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+          cd deploy/k8s/refresh-cronjobs
+          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api@${DIG_API}
+          kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
+          echo "pinned refresh CronJobs → radar-api@${DIG_API} (still suspend:true; unsuspend = separate owner gesture)"
 
       - name: Deployment status — success
         if: success() && steps.deployment.outputs.id != ''
