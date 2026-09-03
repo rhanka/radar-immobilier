@@ -131,6 +131,38 @@ describe("MockRawDataSource", () => {
     const miss = await mock.getPvPdf({ rawRef: "doc-inconnu" });
     expect(miss.found).toBe(false);
   });
+
+  it("getReglementProvenance lit les 8 champs verbatim + n'expose jamais _source_url", async () => {
+    const res = await mock.getReglementProvenance({ city: "longueuil" });
+    expect(res.found).toBe(true);
+    expect(res.reglement_numero).toBe("CO-2016-1187");
+    expect(res.reglement_millesime).toBe("2016");
+    expect(res.reglement_url).toBe("https://longueuil.example/reglements/CO-2016-1187.pdf");
+    expect(res.reglement_ancien_numero).toBe("CO-2009-500");
+    expect(res.has_ancien).toBe(true);
+    expect(res.reglement_ancien_millesime).toBeNull(); // absent → null (v1)
+    expect(res).not.toHaveProperty("_source_url"); // breadcrumb interne jamais exposé
+  });
+
+  it("getReglementProvenance: ville sans provenance servie → champs null (found=true)", async () => {
+    const res = await mock.getReglementProvenance({ city: "valleyfield" });
+    expect(res.found).toBe(true);
+    expect(res.reglement_numero).toBeNull();
+    expect(res.reglement_url).toBeNull();
+    expect(res.has_ancien).toBeNull();
+  });
+
+  it("getReglementProvenance: ville inconnue → found=false", async () => {
+    const res = await mock.getReglementProvenance({ city: "ville-fantome" });
+    expect(res.found).toBe(false);
+    expect(res.reglement_numero).toBeNull();
+  });
+
+  it("getReglementProvenance: zone_code no-op (provenance muni-uniforme)", async () => {
+    const base = await mock.getReglementProvenance({ city: "longueuil" });
+    const withZone = await mock.getReglementProvenance({ city: "longueuil", zone: "C-999" });
+    expect(withZone.reglement_numero).toBe(base.reglement_numero);
+  });
 });
 
 describe("HttpRawDataSource", () => {
@@ -272,6 +304,38 @@ describe("HttpRawDataSource", () => {
       rawRef: "raw/proces-verbaux-x/cas/nope.pdf",
     });
     expect(res.found).toBe(false);
+  });
+
+  it("getReglementProvenance fetches qc-zonage-norms (limit=1) + mappe les 8 champs verbatim", async () => {
+    const feat = feature({
+      reglement_numero: "CO-2016-1187",
+      reglement_millesime: "2016",
+      reglement_page_source: "12",
+      reglement_url: "https://ex/regl.pdf",
+      has_ancien: false,
+      _source_url: "https://interne/breadcrumb",
+    });
+    const fetchImpl = vi.fn(async () => fcResponse([feat], { numberMatched: 40 }));
+    const res = await source(fetchImpl as unknown as typeof fetch).getReglementProvenance({
+      city: "Longueuil",
+    });
+    const url = String((fetchImpl.mock.calls[0] as unknown[])[0]);
+    expect(url).toContain(`${BASE}/api/geo/collections/qc-zonage-norms-longueuil/items`);
+    expect(url).toContain("limit=1");
+    expect(res.found).toBe(true);
+    expect(res.reglement_numero).toBe("CO-2016-1187");
+    expect(res.reglement_url).toBe("https://ex/regl.pdf");
+    expect(res.has_ancien).toBe(false);
+    expect(res).not.toHaveProperty("_source_url");
+  });
+
+  it("getReglementProvenance: 404 (grille non publiée) → found=false, jamais throw", async () => {
+    const fetchImpl = vi.fn(async () => new Response("not found", { status: 404 }));
+    const res = await source(fetchImpl as unknown as typeof fetch).getReglementProvenance({
+      city: "ville-x",
+    });
+    expect(res.found).toBe(false);
+    expect(res.note ?? "").toContain("non publiée");
   });
 });
 
