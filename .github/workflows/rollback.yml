@@ -1,0 +1,101 @@
+name: Rollback release (manual)
+
+# MANUAL complement to the automatic on-failure rollback wired in
+# build-push-images.yml (§1(b), ruling i-infra). IMAGE-ONLY: reverts the
+# Deployments to their previous revision via `kubectl rollout undo` and asserts
+# health (see deploy/ci/rollback-release.sh — guards G1/G2/G3, loud, one-shot).
+# No new RBAC: `rollout undo` is a Deployment patch the CD ServiceAccounts
+# already hold. This NEVER touches the DB (a breaking migration needs the
+# owner-gated DB-restore from the §1a backup, not this).
+#
+# preprod is ungated (deliberate operator action). prod runs in the GitHub
+# `production` environment, so it inherits its reviewer gate (owner-gated).
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to roll back"
+        type: choice
+        options: [preprod, prod]
+        required: true
+      failed_ref:
+        description: "Short sha of the failed release (optional — enables the 'not still serving the failed build' assert)"
+        type: string
+        required: false
+      reason:
+        description: "Reason for the rollback (audit trail)"
+        type: string
+        required: true
+
+concurrency:
+  # Never run two rollbacks against the same environment at once.
+  group: rollback-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  rollback-preprod:
+    if: inputs.environment == 'preprod'
+    name: Rollback preprod (manual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Configure kubeconfig (preprod)
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+      - name: Rollback (image-only)
+        env:
+          NAMESPACE: radar-immobilier-preprod
+          ROLLBACK_ENV: preprod
+          DEPLOYMENTS: radar-api radar-ui
+          PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST || 'preprod.immo.sent-tech.ca' }}
+          FAILED_REF: ${{ inputs.failed_ref }}
+        run: |
+          echo "::warning title=Manual rollback (preprod)::reason: ${{ inputs.reason }}"
+          bash deploy/ci/rollback-release.sh
+
+  rollback-prod:
+    if: inputs.environment == 'prod'
+    name: Rollback prod (manual)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Inherits the `production` environment reviewer gate (owner-gated).
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+      - name: Configure kubeconfig (prod)
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+      - name: Rollback (image-only)
+        env:
+          NAMESPACE: radar-immobilier
+          ROLLBACK_ENV: prod
+          DEPLOYMENTS: radar-api radar-ui
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca' }}
+          FAILED_REF: ${{ inputs.failed_ref }}
+        run: |
+          echo "::warning title=Manual rollback (prod)::reason: ${{ inputs.reason }}"
+          bash deploy/ci/rollback-release.sh
