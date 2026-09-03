@@ -392,6 +392,48 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       ),
     ),
   );
+
+  server.registerTool(
+    "query_zoning_events",
+    {
+      title: "Query zoning lifecycle events",
+      description:
+        "Timeline des events de cycle de vie du zonage d'une ville (avis de motion, " +
+        "projets de règlement, adoptions, entrées en vigueur, dérogations, CPTAQ…) servis " +
+        "par geo. Filtres exacts optionnels : zone_code (events liés à cette zone via " +
+        "zone_codes_resolus), document_type (avis_motion|projet_reglement|adoption|" +
+        "entree_en_vigueur|abrogation), decision_state (planned|decided). Chaque event est " +
+        "renvoyé VERBATIM (§2 : document_type, decision_state, type_instrument, bylaw_numero, " +
+        "date_iso, zone_codes_resolus, libelles_relation, url_pdf, provenance…) ; les clés " +
+        "internes préfixées « _ » (breadcrumbs) ne sont jamais exposées. decision_state=planned " +
+        "n'est JAMAIS présenté comme adopté (planned ≠ decided). Read-only.",
+      inputSchema: {
+        muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+        zone_code: z
+          .string()
+          .optional()
+          .describe("Filtre : events liés à ce code de zone (exact, via zone_codes_resolus)"),
+        document_type: z
+          .string()
+          .optional()
+          .describe("Filtre exact : avis_motion|projet_reglement|adoption|entree_en_vigueur|abrogation"),
+        decision_state: z
+          .string()
+          .optional()
+          .describe("Filtre exact : planned|decided"),
+      },
+    },
+    guarded(ctx, "query_zoning_events", IMMO_SCOPES.read, async (args) =>
+      jsonResult(
+        await ctx.raw.queryZoningEvents({
+          city: args.muni_slug,
+          zoneCode: args.zone_code,
+          documentType: args.document_type,
+          decisionState: args.decision_state,
+        }),
+      ),
+    ),
+  );
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */
@@ -407,6 +449,7 @@ export const V0_TOOL_NAMES = [
 /** Names of the raw-data tools (zones/lots GeoJSON, grille & PV PDFs). */
 export const RAW_TOOL_NAMES = [
   "get_reglement_provenance",
+  "query_zoning_events",
   "get_zones_geojson",
   "get_lots_geojson",
   "get_grille_pdf",
