@@ -283,6 +283,61 @@ export const MOCK_ZONE_FEATURES: MockGeoFeature[] = [
   },
 ];
 
+/**
+ * Mock zoning-events (`qc-zoning-events`, §2) — fixture pour query_zoning_events.
+ * Couvre les axes lifecycle (document_type / decision_state) + `zone_codes_resolus`
+ * (filtre zone) + une clé interne `_source_url` (jamais exposée — testé).
+ */
+export const MOCK_ZONING_EVENT_FEATURES: MockGeoFeature[] = [
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.52, 45.53) },
+    properties: {
+      citySlug: "longueuil",
+      event_id: "evt-longueuil-001",
+      state: "active",
+      document_type: "avis_motion",
+      decision_state: "planned",
+      type_instrument: "zonage",
+      bylaw_numero: "CO-2026-1200",
+      date_iso: "2026-04-14",
+      zone_codes_resolus: [
+        { zone_code: "H-203", relation_type: "cite", score_confiance: 1.0, provenance: "exact_geom" },
+      ],
+      libelles_relation: ["modifie CO-2016-1187"],
+      url_pdf: "https://longueuil.example/pv/2026-04-14.pdf",
+      provenance: {
+        producer: "geo-wp3",
+        source_url: "https://longueuil.example/pv/2026-04-14.pdf",
+        as_of_date: "2026-04-15",
+      },
+      _source_url: "https://interne.capture/breadcrumb-ne-jamais-exposer",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.5, 45.51) },
+    properties: {
+      citySlug: "longueuil",
+      event_id: "evt-longueuil-002",
+      state: "active",
+      document_type: "adoption",
+      decision_state: "decided",
+      type_instrument: "zonage",
+      bylaw_numero: "CO-2026-1187",
+      date_iso: "2026-06-09",
+      zone_codes_resolus: [
+        { zone_code: "C-101", relation_type: "cite", score_confiance: 1.0, provenance: "exact_geom" },
+      ],
+      provenance: {
+        producer: "geo-wp3",
+        source_url: "https://longueuil.example/pv/2026-06-09.pdf",
+        as_of_date: "2026-06-10",
+      },
+    },
+  },
+];
+
 export const MOCK_LOT_FEATURES: MockGeoFeature[] = [
   {
     type: "Feature",

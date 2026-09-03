@@ -163,6 +163,44 @@ describe("MockRawDataSource", () => {
     const withZone = await mock.getReglementProvenance({ city: "longueuil", zone: "C-999" });
     expect(withZone.reglement_numero).toBe(base.reglement_numero);
   });
+
+  it("queryZoningEvents renvoie les events verbatim + strippe les clés internes (_source_url)", async () => {
+    const res = await mock.queryZoningEvents({ city: "longueuil" });
+    expect(res.count).toBe(2);
+    expect(res.events).toHaveLength(2);
+    const evt1 = res.events.find((e) => e["event_id"] === "evt-longueuil-001")!;
+    expect(evt1["document_type"]).toBe("avis_motion");
+    expect(evt1["decision_state"]).toBe("planned");
+    expect(evt1).not.toHaveProperty("_source_url"); // breadcrumb interne jamais exposé
+    // provenance.source_url reste public (§2) — seules les clés préfixées « _ » sont strippées.
+    expect(evt1["provenance"]).toMatchObject({ source_url: expect.any(String) });
+  });
+
+  it("queryZoningEvents: filtre document_type exact", async () => {
+    const res = await mock.queryZoningEvents({ city: "longueuil", documentType: "adoption" });
+    expect(res.count).toBe(1);
+    expect(res.events[0]!["event_id"]).toBe("evt-longueuil-002");
+  });
+
+  it("queryZoningEvents: filtre decision_state exact (planned ≠ decided)", async () => {
+    const planned = await mock.queryZoningEvents({ city: "longueuil", decisionState: "planned" });
+    expect(planned.events.map((e) => e["event_id"])).toEqual(["evt-longueuil-001"]);
+    const decided = await mock.queryZoningEvents({ city: "longueuil", decisionState: "decided" });
+    expect(decided.events.map((e) => e["event_id"])).toEqual(["evt-longueuil-002"]);
+  });
+
+  it("queryZoningEvents: filtre zone_code via zone_codes_resolus[].zone_code", async () => {
+    const hit = await mock.queryZoningEvents({ city: "longueuil", zoneCode: "H-203" });
+    expect(hit.events.map((e) => e["event_id"])).toEqual(["evt-longueuil-001"]);
+    const miss = await mock.queryZoningEvents({ city: "longueuil", zoneCode: "Z-000" });
+    expect(miss.count).toBe(0);
+  });
+
+  it("queryZoningEvents: ville inconnue → count 0", async () => {
+    const res = await mock.queryZoningEvents({ city: "ville-fantome" });
+    expect(res.count).toBe(0);
+    expect(res.events).toEqual([]);
+  });
 });
 
 describe("HttpRawDataSource", () => {
@@ -336,6 +374,68 @@ describe("HttpRawDataSource", () => {
     });
     expect(res.found).toBe(false);
     expect(res.note ?? "").toContain("non publiée");
+  });
+
+  it("queryZoningEvents hits qc-zoning-events passthrough, strippe les _-keys + reporte numberMatched", async () => {
+    const evt = feature({
+      event_id: "evt-1",
+      document_type: "avis_motion",
+      decision_state: "planned",
+      zone_codes_resolus: [{ zone_code: "H-203" }],
+      provenance: { source_url: "https://ex/pv.pdf" },
+      _source_url: "https://interne/breadcrumb",
+    });
+    const fetchImpl = vi.fn(async () => fcResponse([evt], { numberMatched: 12 }));
+    const res = await source(fetchImpl as unknown as typeof fetch).queryZoningEvents({
+      city: "Longueuil",
+    });
+    const url = String((fetchImpl.mock.calls[0] as unknown[])[0]);
+    expect(url).toContain(`${BASE}/api/geo/collections/qc-zoning-events-longueuil/items`);
+    expect(res.count).toBe(1);
+    expect(res.numberMatched).toBe(12);
+    expect(res.events[0]!["event_id"]).toBe("evt-1");
+    expect(res.events[0]!).not.toHaveProperty("_source_url");
+  });
+
+  it("queryZoningEvents: filtre client-side document_type / decision_state / zone_code (exact)", async () => {
+    const a = feature({
+      event_id: "a",
+      document_type: "avis_motion",
+      decision_state: "planned",
+      zone_codes_resolus: [{ zone_code: "H-203" }],
+    });
+    const b = feature({
+      event_id: "b",
+      document_type: "adoption",
+      decision_state: "decided",
+      zone_codes_resolus: [{ zone_code: "C-101" }],
+    });
+    const fetchImpl = vi.fn(async () => fcResponse([a, b], { numberMatched: 2 }));
+    const src = source(fetchImpl as unknown as typeof fetch);
+    expect((await src.queryZoningEvents({ city: "x", documentType: "adoption" })).events.map((e) => e["event_id"])).toEqual(["b"]);
+    expect((await src.queryZoningEvents({ city: "x", decisionState: "planned" })).events.map((e) => e["event_id"])).toEqual(["a"]);
+    expect((await src.queryZoningEvents({ city: "x", zoneCode: "C-101" })).events.map((e) => e["event_id"])).toEqual(["b"]);
+  });
+
+  it("queryZoningEvents: 404 (couche non servie) → count 0 + note, jamais throw", async () => {
+    const fetchImpl = vi.fn(async () => new Response("not found", { status: 404 }));
+    const res = await source(fetchImpl as unknown as typeof fetch).queryZoningEvents({
+      city: "ville-x",
+    });
+    expect(res.count).toBe(0);
+    expect(res.events).toEqual([]);
+    expect(res.note ?? "").toContain("qc-zoning-events absent");
+  });
+
+  it("queryZoningEvents: truncated quand matched > limit", async () => {
+    const evs = [feature({ event_id: "1" }), feature({ event_id: "2" }), feature({ event_id: "3" })];
+    const fetchImpl = vi.fn(async () => fcResponse(evs, { numberMatched: 3 }));
+    const res = await source(fetchImpl as unknown as typeof fetch).queryZoningEvents({
+      city: "x",
+      limit: 2,
+    });
+    expect(res.count).toBe(2);
+    expect(res.truncated).toBe(true);
   });
 });
 
