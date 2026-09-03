@@ -1,0 +1,22 @@
+# refresh-diag — Kustomize overlay for the one-shot PREPROD diag Job (§6, point
+# 4). Same pin mechanism as refresh-cronjobs but for the diag Job: CI REUSES the
+# preprod release identity (the :<sha> tag deploy-preprod already rolled — no 2nd
+# resolution) and applies ONLY this Job into radar-immobilier-preprod:
+#
+#   cd deploy/k8s/refresh-diag
+#   kustomize edit set image \
+#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#   kustomize build . | kubectl -n radar-immobilier-preprod apply -f -   # ONLY the diag Job
+#
+# (This overlay's resource is a SIBLING file, so no LoadRestrictionsNone is
+# needed here — unlike refresh-cronjobs which references ../34.)
+# The `newTag` placeholder is fail-loud (unpullable if applied un-edited).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - diag-refresh-job.yaml
+
+images:
+  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api
+    newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
