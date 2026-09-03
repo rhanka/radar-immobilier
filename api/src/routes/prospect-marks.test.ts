@@ -41,13 +41,37 @@ vi.mock("../services/prospect/marks-service.js", () => ({
   }),
   addNote: vi.fn().mockResolvedValue({
     id: "note-id-1",
+    targetType: "lot",
     noLot: "1234567",
     citySlug: "test-ville",
+    signalId: null,
     authorId: "22222222-2222-2222-2222-222222222222",
     body: "Premier contact pris",
     mode: "real",
+    tenantId: "default",
     createdAt: new Date("2024-01-01"),
+    updatedAt: null,
+    deletedAt: null,
   }),
+  editNote: vi.fn().mockResolvedValue({
+    status: "ok",
+    note: {
+      id: "note-id-1", targetType: "lot", noLot: "1234567", citySlug: "test-ville",
+      signalId: null, authorId: "22222222-2222-2222-2222-222222222222",
+      body: "édité", mode: "real", tenantId: "default",
+      createdAt: new Date("2024-01-01"), updatedAt: new Date("2024-01-02"), deletedAt: null,
+    },
+  }),
+  softDeleteNote: vi.fn().mockResolvedValue({
+    status: "ok",
+    note: {
+      id: "note-id-1", targetType: "lot", noLot: "1234567", citySlug: "test-ville",
+      signalId: null, authorId: "22222222-2222-2222-2222-222222222222",
+      body: "x", mode: "real", tenantId: "default",
+      createdAt: new Date("2024-01-01"), updatedAt: null, deletedAt: new Date("2024-01-03"),
+    },
+  }),
+  listNotes: vi.fn().mockResolvedValue([]),
   batchUpsertMarks: vi.fn().mockResolvedValue({
     created: 2,
     lots: [
@@ -244,54 +268,90 @@ describe("POST /api/v1/prospects/marks", () => {
   });
 });
 
-// ─── Tests POST /notes ────────────────────────────────────────────────────────
+// ─── Tests annotations /notes (§2 — create / edit / delete / list) ───────────
 
 describe("POST /api/v1/prospects/notes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("retourne 400 si body manquant", async () => {
+  it("retourne 400 si target_type manquant (union discriminée)", async () => {
     const app = makeApp();
     const res = await app.request("/api/v1/prospects/notes", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ no_lot: "1234567", city_slug: "test-ville", body: "x", authorId: _VALID_AUTHOR_ID }),
     });
     expect(res.status).toBe(400);
   });
 
-  it("crée une note (append-only) — 201", async () => {
+  it("crée une note lot — 201 + attribution", async () => {
     const { addNote } = await import("../services/prospect/marks-service.js");
     const app = makeApp();
     const res = await app.request("/api/v1/prospects/notes", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        noLot: "1234567",
-        citySlug: "test-ville",
+        target_type: "lot",
+        no_lot: "1234567",
+        city_slug: "test-ville",
         body: "Premier contact pris",
-        authorId: "22222222-2222-2222-2222-222222222222",
+        authorId: _VALID_AUTHOR_ID,
       }),
     });
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body.note.body).toBe("Premier contact pris");
-    expect(addNote).toHaveBeenCalledOnce();
+    expect(body.note.author).toBeDefined(); // attribution (§3.2)
+    expect(addNote).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ targetType: "lot", noLot: "1234567", citySlug: "test-ville" }),
+    );
   });
 
-  it("publie une frame SSE après ajout note", async () => {
+  it("crée une note signal — 201 (signal_id mappé)", async () => {
+    const { addNote } = await import("../services/prospect/marks-service.js");
+    const app = makeApp();
+    const res = await app.request("/api/v1/prospects/notes", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        target_type: "signal",
+        signal_id: "33333333-3333-3333-3333-333333333333",
+        body: "note signal",
+        authorId: _VALID_AUTHOR_ID,
+      }),
+    });
+    expect(res.status).toBe(201);
+    expect(addNote).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({ targetType: "signal", signalId: "33333333-3333-3333-3333-333333333333" }),
+    );
+  });
+
+  it("note signal sans signal_id → 400 (enforce applicatif)", async () => {
+    const app = makeApp();
+    const res = await app.request("/api/v1/prospects/notes", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ target_type: "signal", body: "x", authorId: _VALID_AUTHOR_ID }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("publie une frame SSE 'add'", async () => {
     const { publish } = await import("../services/chat/stream-bus.js");
     const app = makeApp();
     await app.request("/api/v1/prospects/notes", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        noLot: "1234567",
-        citySlug: "test-ville",
+        target_type: "lot",
+        no_lot: "1234567",
+        city_slug: "test-ville",
         body: "Deuxième note",
-        authorId: "22222222-2222-2222-2222-222222222222",
+        authorId: _VALID_AUTHOR_ID,
       }),
     });
     expect(publish).toHaveBeenCalledWith(
@@ -299,6 +359,119 @@ describe("POST /api/v1/prospects/notes", () => {
       "prospect:note",
       expect.objectContaining({ action: "add" }),
     );
+  });
+});
+
+describe("PATCH /api/v1/prospects/notes/:id — édition author-only", () => {
+  const NOTE_ID = "99999999-9999-9999-9999-999999999999";
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("édite (200) — action SSE 'edit'", async () => {
+    const { publish } = await import("../services/chat/stream-bus.js");
+    const app = makeApp();
+    const res = await app.request(`/api/v1/prospects/notes/${NOTE_ID}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body: "corrigé", authorId: _VALID_AUTHOR_ID }),
+    });
+    expect(res.status).toBe(200);
+    expect(publish).toHaveBeenCalledWith(
+      "prospect-marks",
+      "prospect:note",
+      expect.objectContaining({ action: "edit" }),
+    );
+  });
+
+  it("403 si un autre auteur édite (author-only)", async () => {
+    const { editNote } = await import("../services/prospect/marks-service.js");
+    (editNote as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ status: "forbidden" });
+    const app = makeApp();
+    const res = await app.request(`/api/v1/prospects/notes/${NOTE_ID}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body: "hack", authorId: "44444444-4444-4444-4444-444444444444" }),
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("404 si la note est absente/supprimée", async () => {
+    const { editNote } = await import("../services/prospect/marks-service.js");
+    (editNote as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ status: "not_found" });
+    const app = makeApp();
+    const res = await app.request(`/api/v1/prospects/notes/${NOTE_ID}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body: "x", authorId: _VALID_AUTHOR_ID }),
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("400 si id non-UUID", async () => {
+    const app = makeApp();
+    const res = await app.request("/api/v1/prospects/notes/not-a-uuid", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ body: "x", authorId: _VALID_AUTHOR_ID }),
+    });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("DELETE /api/v1/prospects/notes/:id — soft-delete author-only", () => {
+  const NOTE_ID = "99999999-9999-9999-9999-999999999999";
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("supprime (200) — action SSE 'delete'", async () => {
+    const { publish } = await import("../services/chat/stream-bus.js");
+    const app = makeApp();
+    const res = await app.request(`/api/v1/prospects/notes/${NOTE_ID}`, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ authorId: _VALID_AUTHOR_ID }),
+    });
+    expect(res.status).toBe(200);
+    expect(publish).toHaveBeenCalledWith(
+      "prospect-marks",
+      "prospect:note",
+      expect.objectContaining({ action: "delete" }),
+    );
+  });
+
+  it("403 si un autre auteur supprime", async () => {
+    const { softDeleteNote } = await import("../services/prospect/marks-service.js");
+    (softDeleteNote as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ status: "forbidden" });
+    const app = makeApp();
+    const res = await app.request(`/api/v1/prospects/notes/${NOTE_ID}`, {
+      method: "DELETE",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ authorId: "44444444-4444-4444-4444-444444444444" }),
+    });
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("GET /api/v1/prospects/notes — lecture unifiée", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("200 pour target_type=lot", async () => {
+    const app = makeApp();
+    const res = await app.request("/api/v1/prospects/notes?target_type=lot&no_lot=1234567&city_slug=test-ville");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.ok).toBe(true);
+    expect(Array.isArray(body.notes)).toBe(true);
+  });
+
+  it("400 pour query invalide (target_type manquant)", async () => {
+    const app = makeApp();
+    const res = await app.request("/api/v1/prospects/notes?no_lot=1234567");
+    expect(res.status).toBe(400);
   });
 });
 

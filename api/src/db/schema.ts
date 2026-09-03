@@ -408,6 +408,12 @@ export const prospectStatutEnum = pgEnum("prospect_statut", [
 export const prospectModeEnum = pgEnum("prospect_mode", ["real", "simulation"]);
 
 /**
+ * Ancre d'une annotation (§2, contrat i-arch#1) : `lot` (dénormalisé
+ * no_lot+city_slug) ou `signal` (signal_id, ON DELETE SET NULL). `zone` différé.
+ */
+export const prospectNoteTargetEnum = pgEnum("prospect_note_target", ["lot", "signal"]);
+
+/**
  * Marquages append-only par lot et par dimension.
  *
  * Un marquage n'écrase jamais l'existant : on insère une nouvelle ligne.
@@ -472,17 +478,27 @@ export const prospectMarks = pgTable(
 );
 
 /**
- * Notes append-only multi-auteurs par lot.
- * Jamais mises à jour : une nouvelle ligne par note.
- * Ancrées sur (no_lot, city_slug) — pas de FK bitemporale stricte.
+ * Annotations libres multi-auteurs (§2, contrat i-arch#1 amendé — Option A
+ * team-shared mono-client). Cutover 0011 ADDITIF de la table 0005 :
+ *   - Ancre `target_type` ∈ {lot (no_lot+city_slug), signal (signal_id SET NULL)}.
+ *   - Édition IN-PLACE (`updated_at` NULL = jamais éditée) + soft-delete
+ *     (`deleted_at` NULL = active) — plus de chaîne append-only (cf. contrat §4).
+ *   - `tenant_id` scoping forward-looking INERTE (mono-client, DEFAULT 'default').
+ *   - Attribution `author_id` toujours peuplée + visible en lecture.
+ * Authz (route) : lecture = tous approuvés ; mutation = author-only.
+ * Le CHECK d'ancre + l'index partiel actif vivent dans la migration 0011 SQL.
  */
 export const prospectNotes = pgTable(
   "prospect_notes",
   {
     id: uuid("id").primaryKey().defaultRandom(),
 
-    noLot: text("no_lot").notNull(),
-    citySlug: text("city_slug").notNull(),
+    // Ancre — target_type discrimine ; no_lot/city_slug conditionnels (CHECK 0011).
+    targetType: prospectNoteTargetEnum("target_type").notNull().default("lot"),
+    noLot: text("no_lot"),
+    citySlug: text("city_slug"),
+    // Ancre signal : UUID volatile → ON DELETE SET NULL (la note survit, §3.1).
+    signalId: uuid("signal_id").references(() => signals.id, { onDelete: "set null" }),
 
     authorId: uuid("author_id")
       .notNull()
@@ -492,11 +508,22 @@ export const prospectNotes = pgTable(
 
     mode: prospectModeEnum("mode").notNull().default("real"),
 
+    // Scoping forward-looking INERTE (mono-client, cf. contrat §3.3).
+    tenantId: text("tenant_id").notNull().default("default"),
+
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    // Édition in-place : NULL = jamais éditée, IS NOT NULL = éditée (0-backfill).
+    updatedAt: timestamp("updated_at", { withTimezone: true }),
+    // Soft-delete : NULL = active. Jamais de DELETE physique ; lecture filtre NULL.
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (t) => ({
     byLot: index("prospect_notes_lot_idx").on(t.noLot, t.citySlug),
     byAuthor: index("prospect_notes_author_idx").on(t.authorId),
+    bySignal: index("prospect_notes_signal_idx").on(t.signalId),
+    byTenant: index("prospect_notes_tenant_idx").on(t.tenantId),
+    // L'index partiel des notes actives vit dans la migration 0011 SQL :
+    // (tenant_id, deleted_at) WHERE deleted_at IS NULL
   }),
 );
 
