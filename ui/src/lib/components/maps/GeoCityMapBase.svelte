@@ -1252,10 +1252,10 @@
 >
   <div bind:this={mapContainer} class="absolute inset-0"></div>
 
-  <!-- ── Contrôles carte (BAS-droit) : outil « mesurer une distance ». Décalé
-       AU-DESSUS de la bulle de chat (widget fixe bas-droit) via bottom-20 pour ne
-       pas la chevaucher ; `flex-col-reverse` → le panneau s'ouvre vers le HAUT. -->
-  <div class="absolute bottom-20 right-3 z-10 flex flex-col-reverse items-end gap-2">
+  <!-- ── Contrôles carte (BAS-droit) : outil « mesurer une distance ». Mobile-first :
+       `bottom-20` en mobile (au-dessus de la bulle de chat bas-droit), `md:bottom-3`
+       en desktop (pas de vide bas) ; `flex-col-reverse` → le panneau s'ouvre vers le HAUT. -->
+  <div class="absolute bottom-20 md:bottom-3 right-3 z-10 flex flex-col-reverse items-end gap-2">
     <button
       type="button"
       class="measure-toggle"
@@ -1340,7 +1340,7 @@
     <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (Layers) ;
          tap = déplie (gain de place, surtout mobile). Cible : légendes lot/zones
          (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
-    <div class="absolute bottom-20 left-3 z-10 flex flex-col items-start gap-2">
+    <div class="absolute bottom-20 md:bottom-3 left-3 z-10 flex flex-col items-start gap-2">
       <button
         type="button"
         class="legend-toggle"
