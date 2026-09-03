@@ -2,9 +2,19 @@
 #
 # ServiceAccount + Role + RoleBinding namespace-scopés à `radar-immobilier-preprod`
 # pour le job CI `deploy-preprod` (main -> preprod). Least-privilege : il ne peut
-# QUE piloter les Deployments (get/list/watch/patch/update) et LIRE pods/replicasets
-# (pour `kubectl rollout status`). Il NE PEUT PAS lire de Secret, ni toucher un autre
-# namespace, ni la PROD (`radar-immobilier`).
+# QUE piloter les Deployments (get/list/watch/patch/update), LIRE pods/replicasets
+# (pour `kubectl rollout status`), et EXEC dans les pods (pods/exec create) pour le
+# BACKUP-BEFORE-RELEASE §1(a). Il ne peut toucher NI un autre namespace, NI la PROD
+# (`radar-immobilier`).
+#
+# SÉCURITÉ — portée réelle de pods/exec (à peser en co-val, §1(a)) : ce SA ne peut
+# PAS `get` un objet Secret. MAIS `pods/exec create` = shell dans n'importe quel pod
+# du namespace preprod, donc lecture de l'ENV injecté de ce pod — y compris les
+# valeurs issues de Secret montées en env (p.ex. `POSTGRES_PASSWORD` dans le pod
+# radar-postgres). C'est le prix assumé du backup-before-release ; il reste borné à
+# preprod (Role, jamais ClusterRole, jamais la prod) et n'est ARMÉ côté CI que quand
+# la variable `BACKUP_BEFORE_RELEASE_ENABLED == 'true'`. Le grant équivalent côté
+# PROD est un acte owner distinct, non inclus ici.
 #
 # ISOLATION (revue CD MUST-FIX #3) : prod et preprod partagent le MÊME apiserver OVH,
 # donc le pre-flight d'hôte ne distingue pas les envs — la SEULE frontière d'accès est
@@ -50,6 +60,15 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch"]
+  # BACKUP-BEFORE-RELEASE (§1(a)) : le job CD `deploy-preprod` exec `pg_dump` dans
+  # le pod radar-postgres AVANT le set-image (deploy/ci/db-backup.sh). `kubectl exec`
+  # = create sur la sous-ressource pods/exec. Borné à CE namespace preprod (Role, pas
+  # ClusterRole). Blast-radius (exec = shell dans le pod, dont accès DB / env-secrets)
+  # documenté dans l'en-tête ; grant preprod-only, co-validé i-infra, armé CI par
+  # BACKUP_BEFORE_RELEASE_ENABLED.
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

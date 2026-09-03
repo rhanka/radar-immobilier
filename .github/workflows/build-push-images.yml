@@ -702,6 +702,47 @@ jobs:
               core.setOutput('id', String(dep.data.id));
             }
 
+      # BACKUP-BEFORE-RELEASE (§1(a), spec i-infra) — take a FAIL-CLOSED pg_dump
+      # of the preprod DB to an EXTERNAL S3 bucket BEFORE rolling the image, so a
+      # failed backup ABORTS the release (no un-backed-up roll). The script
+      # (deploy/ci/db-backup.sh) exec's pg_dump in the radar-postgres pod, gzips
+      # on the runner, uploads via s5cmd, then prunes to BACKUP_RETAIN_COUNT.
+      #
+      # ARMING SWITCH (decouple merge from activation — same pattern as
+      # PREPROD_CD_ENABLED): both steps stay SKIPPED until the repo variable
+      # BACKUP_BEFORE_RELEASE_ENABLED == 'true'. The owner flips it ON only AFTER
+      # provisioning (1) the external bucket + RW-scoped cred (repo vars
+      # BACKUP_S3_BUCKET/ENDPOINT[/REGION] + secrets BACKUP_S3_ACCESS_KEY/
+      # BACKUP_S3_SECRET_KEY) and (2) the pods/exec RBAC on the preprod deployer
+      # SA (deploy/k8s/11-ci-deployer-preprod-rbac.yaml — the committed Role gains
+      # `pods/exec: create`, applied by poc-k8s). So merging this can NEVER red a
+      # main push against not-yet-provisioned backup infra. Once armed, the
+      # fail-closed gate is live: no preprod roll without a fresh backup.
+      - name: Install s5cmd
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          ver=2.2.2
+          url="https://github.com/peak/s5cmd/releases/download/v${ver}/s5cmd_${ver}_Linux-64bit.tar.gz"
+          tmp="$(mktemp -d)"
+          curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
+          sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
+          s5cmd version
+
+      - name: Backup DB before release (fail-closed)
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
+        env:
+          BACKUP_ENV: preprod
+          BACKUP_TAG: ${{ steps.vars.outputs.sha }}
+          NAMESPACE: ${{ env.NAMESPACE }}
+          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+          BACKUP_RETAIN_COUNT: ${{ vars.BACKUP_RETAIN_COUNT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
+        run: bash deploy/ci/db-backup.sh
+
       # NOTE: NO "Apply immo-mcp declarative config" here (DESIGN §2.8) — drift
       # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
       # and the preprod deployer Role cannot apply ConfigMaps/Services.
@@ -1034,6 +1075,41 @@ jobs:
           else
             echo "radar-immo-mcp absent — skipping immo-mcp config apply"
           fi
+
+      # BACKUP-BEFORE-RELEASE (§1(a)) — PROD, PREPARED BUT DISARMED. Same
+      # fail-closed pg_dump → external S3 as preprod, ahead of the digest
+      # set-image, so a failed prod backup aborts the promotion. OWNER-GATED and
+      # SEPARATE from preprod: it stays SKIPPED until the repo variable
+      # BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true' (default off), and prod also
+      # needs the pods/exec grant on the PROD deployer SA + prod bucket/cred —
+      # all owner-provisioned at the prod cutover. Authored now so the call is
+      # ready; arming is a deliberate, later owner step (never a side effect of
+      # this merge). Keys are env-scoped (BACKUP_ENV=prod) so prod and preprod
+      # backups never collide in a shared bucket.
+      - name: Install s5cmd
+        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          ver=2.2.2
+          url="https://github.com/peak/s5cmd/releases/download/v${ver}/s5cmd_${ver}_Linux-64bit.tar.gz"
+          tmp="$(mktemp -d)"
+          curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
+          sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
+          s5cmd version
+
+      - name: Backup DB before promote (fail-closed)
+        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
+        env:
+          BACKUP_ENV: prod
+          BACKUP_TAG: ${{ steps.vars.outputs.sha }}
+          NAMESPACE: ${{ env.NAMESPACE }}
+          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+          BACKUP_RETAIN_COUNT: ${{ vars.BACKUP_RETAIN_COUNT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
+        run: bash deploy/ci/db-backup.sh
 
       # PROMOTE — pin prod to the IMMUTABLE digest (not the mutable <sha7> tag):
       # true build-once, survives tag GC of <sha7>.
