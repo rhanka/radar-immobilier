@@ -124,4 +124,53 @@ describe("zoneNormesFromLots", () => {
     expect(result.usageDominant).toBe("résidentiel");
     expect(new Map(result.rows).get("Hauteur max")).toBe("10 m");
   });
+
+  it("provenance règlement servie (numéro/millésime/URL) → portée dans reglement (verbatim + lien)", () => {
+    const lots = [
+      makeLot({
+        noLot: "20",
+        zoneCode: "H-315",
+        zone: {
+          code: "H-315",
+          densiteLogHa: null,
+          reglementNumero: "2008-102",
+          reglementMillesime: 2008,
+          reglementUrl: "https://ex.qc.ca/regl/2008-102.pdf",
+        } as LotProperties["zone"],
+      }),
+    ];
+    const result = zoneNormesFromLots("H-315", lots);
+    expect(result.reglement).toEqual({
+      text: "Règl. 2008-102 (2008)",
+      url: "https://ex.qc.ca/regl/2008-102.pdf",
+    });
+  });
+
+  it("aucune provenance règlement servie → reglement null (jamais deviné)", () => {
+    const lots = [
+      makeLot({ noLot: "21", zoneCode: "H-315", normes: { hauteur: "10 m" } }),
+    ];
+    const result = zoneNormesFromLots("H-315", lots);
+    expect(result.reglement).toBeNull();
+  });
+
+  it("provenance sur un lot, normes sur un autre lot de la même zone → les deux remontés", () => {
+    const lots = [
+      makeLot({
+        noLot: "22",
+        zoneCode: "H-315",
+        zone: {
+          code: "H-315",
+          densiteLogHa: null,
+          reglementNumero: "1926-26",
+          reglementMillesime: null,
+          reglementUrl: null,
+        } as LotProperties["zone"],
+      }),
+      makeLot({ noLot: "23", zoneCode: "H-315", normes: { hauteur: "8 m" } }),
+    ];
+    const result = zoneNormesFromLots("H-315", lots);
+    expect(result.reglement).toEqual({ text: "Règl. 1926-26", url: null });
+    expect(new Map(result.rows).get("Hauteur max")).toBe("8 m");
+  });
 });
