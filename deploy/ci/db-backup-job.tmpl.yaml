@@ -1,0 +1,90 @@
+# =============================================================================
+# db-backup-job.tmpl.yaml — BACKUP-BEFORE-RELEASE Job (§1(a), ruling i-infra B′).
+#
+# A one-shot in-cluster Job that backs up the DB as a NETWORK CLIENT (pg_dump
+# -h radar-postgres), NOT via `kubectl exec`. Rendered per-run by
+# deploy/ci/run-db-backup.sh (envsubst) and applied by the CD job before the
+# release rolls. The CI ServiceAccount needs ONLY `batch/jobs` — no pods/exec,
+# no secret-read (least-privilege preserved; see deploy/k8s/11-…rbac.yaml).
+#
+#   initContainer `dump`  (postgres image): pg_dump -h svc → gzip → emptyDir,
+#                          creds from the in-cluster DB secret (secretKeyRef).
+#   container     `upload` (s5cmd image)  : s5cmd cp emptyDir → external S3,
+#                          creds from the in-cluster backup-S3 secret.
+#
+# FAIL-CLOSED: backoffLimit 0 + restartPolicy Never = one shot, no retry that
+# could mask a failure. The init MUST succeed for `upload` to run; any failure
+# fails the Job, which the runner's poll turns into a non-zero exit → the
+# release ABORTS (retention runs runner-side, S3-only).
+#
+# envsubst renders ONLY the placeholders listed in run-db-backup.sh; the
+# in-container $POSTGRES_USER / $POSTGRES_DB / $PGPASSWORD / $PGHOST references
+# are left literal (resolved at runtime from the pod env), never at render time.
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${JOB_NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-backup
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: db-backup
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: work
+          emptyDir: {}
+      initContainers:
+        - name: dump
+          image: ${DUMP_IMAGE}
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              echo "[dump] pg_dump -h ${PGHOST} db=$POSTGRES_DB user=$POSTGRES_USER"
+              pg_dump -h "$PGHOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+                --no-owner --no-privileges | gzip -c > /work/dump.sql.gz
+              [ -s /work/dump.sql.gz ] || { echo "[dump] ERROR empty dump"; exit 1; }
+              gzip -t /work/dump.sql.gz
+              gzip -dc /work/dump.sql.gz 2>/dev/null | head -n 8 > /work/head.txt || true
+              grep -q "PostgreSQL database dump" /work/head.txt \
+                || { echo "[dump] ERROR missing pg_dump header"; exit 1; }
+              echo "[dump] ok $(wc -c < /work/dump.sql.gz) bytes"
+          env:
+            - name: PGHOST
+              value: ${PGHOST}
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+      containers:
+        - name: upload
+          image: ${UPLOAD_IMAGE}
+          args:
+            - "--endpoint-url"
+            - "${BACKUP_S3_ENDPOINT}"
+            - "cp"
+            - "/work/dump.sql.gz"
+            - "s3://${BACKUP_S3_BUCKET}/${KEY}"
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_ACCESS_KEY } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_SECRET_KEY } }
+            - name: AWS_REGION
+              value: ${BACKUP_S3_REGION}
+          volumeMounts:
+            - { name: work, mountPath: /work }
