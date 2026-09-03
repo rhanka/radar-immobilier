@@ -2185,6 +2185,7 @@
   />
   {:else}
   <GeoCityMapBase
+    showChatToggle
     basemap="neutral-gray"
     {fillColorExpression}
     {fillOpacityExpression}
