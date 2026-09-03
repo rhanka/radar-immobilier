@@ -1,0 +1,57 @@
+# #2b — Balayage périodique de vivacité des preuves servies.
+#
+# Décision owner (« canonique + sweep ») : on garde la source publique canonique
+# en lien principal + l'archive à côté, ET un job planifié re-mesure la vivacité
+# et FLAGUE les URL mortes. Pas de repli auto-404 (CORS), pas de backend : ce
+# simple GitHub Action rejoue le fetch de vivacité sur un manifeste versionné.
+#
+# Le job ÉCHOUE (rouge, visible) SSI une preuve ORPHELINE (sans repli archive
+# same-origin) est morte — le seul cas de « 404 nu » servi. Une preuve publique
+# morte MAIS avec repli archive est signalée (warning), non bloquante.
+#
+# Manifeste : scripts/2b-proof-liveness/manifest.json (dérivé de recette
+# PROOF_URLS_SERVED ; à régénérer quand l'extraction servie change — voir le
+# README du dossier). Trigger : planifié + manuel, JAMAIS sur pull_request
+# (fetch réseau externe = hors du gate CI, pour ne pas rendre les PR flaky).
+
+name: "#2b proof liveness sweep"
+
+on:
+  schedule:
+    # Tous les lundis 07:00 UTC.
+    - cron: "0 7 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 2b-proof-liveness-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Balayage vivacité (#2b)
+        run: >-
+          node scripts/2b-proof-liveness/sweep.mjs
+          --out 2b-proof-liveness-report.json
+          --timeout 10000
+          --concurrency 8
+
+      - name: Rapport (artefact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 2b-proof-liveness-report
+          path: 2b-proof-liveness-report.json
+          if-no-files-found: warn

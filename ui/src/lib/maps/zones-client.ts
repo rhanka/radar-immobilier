@@ -79,6 +79,12 @@ export interface ZoneProperties {
    * reglement_number, reglementNumber. null si absent.
    */
   reglementNumero?: string | null;
+  /**
+   * Lien PUBLIC (grille PDF) du règlement de zonage porteur quand la source
+   * l'expose (ex. https://ville…/Grilles-Web-….pdf). Candidats hétérogènes :
+   * reglement_url, reglementUrl, REGLEMENT_URL, Reglement_Url. null si absent.
+   */
+  reglementUrl?: string | null;
 }
 
 export interface ZoneGeometry {
@@ -359,6 +365,14 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
     properties.reglement_number,
     properties.reglementNumber,
   ]);
+  // Lien PUBLIC du règlement porteur (grille PDF) — servi par geo mais jusqu'ici
+  // non lu → le lien « Ouvrir » de la fiche restait éteint. On le transmet.
+  const reglementUrl = firstString([
+    properties.reglement_url,
+    properties.reglementUrl,
+    properties.REGLEMENT_URL,
+    properties.Reglement_Url,
+  ]);
 
   return {
     ...(proof ? { proof } : {}),
@@ -369,6 +383,7 @@ function normalizeOgcZoneProperties(properties: Record<string, unknown>): Partia
     ...(grillePdfUrl !== null ? { grillePdfUrl } : {}),
     ...(reglementMillesime !== null ? { reglementMillesime } : {}),
     ...(reglementNumero !== null ? { reglementNumero } : {}),
+    ...(reglementUrl !== null ? { reglementUrl } : {}),
   };
 }
 

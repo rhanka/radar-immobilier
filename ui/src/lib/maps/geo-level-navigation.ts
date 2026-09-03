@@ -20,7 +20,65 @@ function toGeoMode(mode: string | undefined): GeoMode {
   return mode === "data" ? "data" : "signal";
 }
 
-export type GeoLevel = "Province" | "Ville" | "Zone";
+export type GeoLevel = "Province" | "Ville" | "Zone" | "Lot";
+
+/**
+ * Résolution du clic GÉOGRAPHIQUE sur un polygone LOT selon le niveau de drill
+ * (règle 1 owner — nav-drill 01KZEG78). Hiérarchie stricte Ville → Zone → Lot :
+ *  - VUE VILLE (aucune zone entrée) : un clic sur un LOT n'est PAS une sélection
+ *    de lot ; il RÉSOUT vers sa ZONE contenante (entrée en vue zone) → 1er clic
+ *    du drill géographique. Sans zone dérivable → aucune action (jamais une
+ *    sélection lot hors vue zone, jamais un clic mort qui « saute au lot »).
+ *  - VUE ZONE (zone entrée) : le lot devient sélectionnable → sélection lot.
+ * Corrige le bug carte : le clic géographique lot ne doit PAS aller direct au
+ * lot en vue ville (la garde LISTE/bucket seule ne couvrait pas la carte).
+ */
+export type GeoLotClickResolution =
+  | { kind: "select-lot" }
+  | { kind: "enter-zone"; code: string }
+  | { kind: "ignore" };
+
+export function resolveGeoLotClick(input: {
+  /** Une zone est-elle déjà entrée (vue zone) ? */
+  hasZoneSelection: boolean;
+  /** Zone contenante du lot cliqué (servie par geo : `zoneCode`), si connue. */
+  zoneCode: string | null;
+}): GeoLotClickResolution {
+  if (input.hasZoneSelection) return { kind: "select-lot" };
+  if (input.zoneCode) return { kind: "enter-zone", code: input.zoneCode };
+  return { kind: "ignore" };
+}
+
+/**
+ * Résolution du clic LISTE (rangée lot du panneau droit → `toggleBucketKey`)
+ * selon le guard R1 — plus STRICT que `resolveGeoLotClick` (clic carte) : un lot
+ * n'est sélectionnable QUE si SA zone est l'active. Sinon :
+ *  - zone du lot connue ET ≠ active (niveau ville inclus) → BASCULER vers cette
+ *    zone (switch), jamais le lot ;
+ *  - niveau ville sans zone résoluble → ignorer (jamais de lot hors zone active) ;
+ *  - zone du lot inconnue MAIS une zone est active → sélection lot (parité clic
+ *    carte en vue zone).
+ * Fonction PURE — miroir exact de la logique inline de
+ * `SignauxMapView.toggleBucketKey`, qui la CONSOMME (couverture chemin de prod).
+ */
+export type LotListClickResolution =
+  | { kind: "select-lot" }
+  | { kind: "switch-zone"; code: string }
+  | { kind: "ignore" };
+
+export function resolveLotListClickR1(input: {
+  /** Zone active courante (première zone sélectionnée), `null` au niveau ville. */
+  activeZoneCode: string | null;
+  /** Zone contenante du lot cliqué (servie par geo : `zoneCode`), si connue. */
+  lotZoneCode: string | null;
+}): LotListClickResolution {
+  const { activeZoneCode, lotZoneCode } = input;
+  if (lotZoneCode && lotZoneCode !== activeZoneCode) {
+    return { kind: "switch-zone", code: lotZoneCode };
+  }
+  if (!activeZoneCode) return { kind: "ignore" };
+  return { kind: "select-lot" };
+}
 
 export interface GeoLevelNavInput {
   /** Niveau cible cliqué dans le segmented-control. */

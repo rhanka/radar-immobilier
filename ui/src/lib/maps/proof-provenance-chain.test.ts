@@ -25,7 +25,7 @@ import type { MunicipalityT } from "@radar/domain";
 type Status = "historical-verified" | "legacy-traceable" | "candidate-needs-human-confirmation" | "orphan";
 
 const PROVENANCE_LABEL: Record<Status, string> = {
-  "historical-verified": "Vérifiée dans les dossiers historiques",
+  "historical-verified": "Vérification déclarée par la source",
   "legacy-traceable": "Trace historique disponible",
   "candidate-needs-human-confirmation": "À confirmer par une personne",
   orphan: "Source de géométrie non reliée",
@@ -176,13 +176,16 @@ describe("chaîne lots OGC → fetchLots → LotFichePanel", () => {
     expect(view.getByTestId("fiche-proof-geometry-source-link")).toBeTruthy();
   });
 
-  it("absence d'enveloppe : non évalué (aucun bloc audit), JAMAIS orphan, zone_code conservé", async () => {
+  it("absence d'enveloppe : bloc audit VISIBLE en état « Non couvert », JAMAIS orphan, zone_code conservé", async () => {
     stubFetch(ogcLotsBody({ zone_code: "H-431", normes: { hauteur: "12 m" } }));
     const lot = (await fetchLots("delson", { baseUrl: "" })).featureCollection.features[0]!;
     expect(lot.properties.proof).toBeUndefined();
     expect(lot.properties.immo_zone_lot_provenance).toBeUndefined();
     const view = render(LotFichePanel, { props: { lot } });
-    expect(view.queryByTestId("fiche-audit")).toBeNull();
+    // Le bloc reste présent (l'utilisateur distingue « pas de preuve » de « fonctionnalité absente »).
+    expect(view.getByTestId("fiche-audit")).toBeTruthy();
+    expect(view.getByTestId("fiche-audit-empty")).toBeTruthy();
+    expect(view.getByText("Non couvert")).not.toBeNull();
     expect(view.queryByText("Source de géométrie non reliée")).toBeNull(); // jamais orphan
     expect(view.getByTestId("fiche-zone-code").textContent).toContain("H-431");
   });
@@ -204,7 +207,9 @@ describe("chaîne lots OGC → fetchLots → LotFichePanel", () => {
     expect(lot.properties.proof).toBeUndefined();
     expect(lot.properties.immo_zone_lot_provenance).toBeUndefined();
     const view = render(LotFichePanel, { props: { lot } });
-    expect(view.queryByTestId("fiche-audit")).toBeNull();
+    // Enveloppes écartées → traitées comme « Non couvert », bloc VISIBLE, aucune fuite.
+    expect(view.getByTestId("fiche-audit")).toBeTruthy();
+    expect(view.getByTestId("fiche-audit-empty")).toBeTruthy();
     const html = view.container.innerHTML;
     expect(html).not.toContain("s3://");
     expect(html).not.toContain("minio");

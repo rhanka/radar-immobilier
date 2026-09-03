@@ -18,7 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime } from "@radar/domain";
+import { classifyBPrime, deriveRegulatoryStatus, type RegulatoryStageKindT } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -171,11 +171,30 @@ export interface EdgeRow {
 /** Build a DB-shaped node row from a graphify node. */
 export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): NodeRow {
   const { id, label, file_type, type: nodeType, source_file, community, community_name, status, description, refs, properties } = node;
+  // v1: file_type; v2: type; fallback: "concept"
+  const type = file_type ?? nodeType ?? "concept";
+  // LOT 1 serving (D-INT/D1/D2, P2) — persist the DERIVED regulatoryStatus at MATÉRIALISATION,
+  // recomputed at every write from the authoritative statut/etape via THE single classifier
+  // `deriveRegulatoryStatus`. Source de vérité DATA (lue par les consommateurs, pas re-dérivée
+  // serve-time). Co-localisé avec `etape` dans `props.properties` (lecture symétrique
+  // `props->'properties'->>'regulatoryStatus'` + couvert par le guard no-disparition
+  // DEGRADATION_SENSITIVE_KEYS) ; jamais clobbé par une ré-extraction raw car RE-CALCULÉ ici à
+  // chaque matérialisation (le spread écrase toute valeur stale).
+  const rawProps = (properties ?? undefined) as Record<string, unknown> | undefined;
+  const etape = (rawProps?.etape ?? null) as string | null;
+  const statut = (rawProps?.statut ?? null) as RegulatoryStageKindT | null;
+  // Gate anti-invention : QUE les nœuds portant un STADE (`etape` ou `statut`) — la classification
+  // se DÉRIVE du stade, donc sans stade il n'y a rien à dériver. Un nœud non-règlement (Zone/Lot/
+  // Concept) ou un nœud incomplet sans stade ne reçoit jamais un `regulatoryStatus` spurieux (le
+  // consommateur applique le fallback anticipation-conservateur à la lecture d'un champ absent).
+  const isLifecycle = etape != null || statut != null;
+  const enrichedProperties = isLifecycle
+    ? { ...(rawProps ?? {}), regulatoryStatus: deriveRegulatoryStatus({ statut, etape }) }
+    : properties;
   return {
     id,
     label,
-    // v1: file_type; v2: type; fallback: "concept"
-    type: file_type ?? nodeType ?? "concept",
+    type,
     citySlug: citySlug ?? null,
     sourceRef: source_file ?? null,
     props: {
@@ -186,7 +205,7 @@ export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): Node
       ...(status !== undefined ? { status } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(refs !== undefined ? { refs } : {}),
-      ...(properties !== undefined ? { properties } : {}),
+      ...(enrichedProperties !== undefined ? { properties: enrichedProperties } : {}),
     },
   };
 }
@@ -481,11 +500,17 @@ export function findMissingBusinessProperties(
   beforeRows: readonly BusinessPropertySnapshotRow[],
   afterRows: readonly BusinessPropertySnapshotRow[],
   citySlug: string,
+  intendedRemovals: ReadonlySet<string> = new Set(),
 ): BusinessPropertyRegression[] {
   const afterById = new Map(afterRows.map((row) => [row.id, row]));
   const regressions: BusinessPropertyRegression[] = [];
 
   for (const beforeRow of beforeRows) {
+    // A removal-only reprojection deletes some nodes ON PURPOSE (e.g.
+    // purge-avis-bylaws). For those the disappearance of every business key is
+    // intended, not a silent regression — skip them. The anti-silent-deletion
+    // guard stays armed for EVERY other node (accidental drop / drift → abort).
+    if (intendedRemovals.has(beforeRow.id)) continue;
     const before = businessProperties(beforeRow.props);
     const after = businessProperties(afterById.get(beforeRow.id)?.props ?? {});
     const missingKeys = Object.keys(before)
@@ -639,6 +664,13 @@ export async function upsertGraphAtomic(
   db: Database,
   citySlug: string | null,
   graphJson: unknown,
+  /**
+   * Node ids this projection deletes ON PURPOSE (removal-only tools such as
+   * purge-avis-bylaws). They are exempt from the business-property-regression
+   * guard — their disappearance is intended, not a silent data loss. Every
+   * OTHER node stays guarded. Default empty = current strict behaviour.
+   */
+  intendedRemovals: ReadonlySet<string> = new Set(),
 ): Promise<UpsertAtomicResult> {
   const parsed = graphifyGraphSchema.parse(graphJson);
   const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
@@ -686,6 +718,7 @@ export async function upsertGraphAtomic(
     beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
     nodeRows,
     citySlug,
+    intendedRemovals,
   );
   if (propertyRegressions.length > 0) {
     const details = propertyRegressions
@@ -893,8 +926,12 @@ export async function queryNeighbors(
 
 export interface Subgraph {
   citySlug: string;
-  nodes: (typeof graphNodes.$inferSelect)[];
-  edges: (typeof graphEdges.$inferSelect)[];
+  // `created_at` est OMIS volontairement : il n'est utilisé par aucun
+  // consommateur (nodeFromDb/edgeFromDb/routes/enrichment) et la colonne peut
+  // être absente sur certains déploiements (drift schema OVH). On ne
+  // sélectionne donc que les colonnes réellement lues.
+  nodes: Omit<typeof graphNodes.$inferSelect, "createdAt">[];
+  edges: Omit<typeof graphEdges.$inferSelect, "createdAt">[];
 }
 
 /**
@@ -906,7 +943,14 @@ export async function subgraphForCity(
   citySlug: string,
 ): Promise<Subgraph> {
   const nodes = await db
-    .select()
+    .select({
+      id: graphNodes.id,
+      type: graphNodes.type,
+      label: graphNodes.label,
+      citySlug: graphNodes.citySlug,
+      props: graphNodes.props,
+      sourceRef: graphNodes.sourceRef,
+    })
     .from(graphNodes)
     .where(eq(graphNodes.citySlug, citySlug));
 
@@ -919,7 +963,13 @@ export async function subgraphForCity(
   // Pull all edges where src is in the city set; filter dstId in application
   // layer (avoids a large IN clause for small graphs).
   const candidateEdges = await db
-    .select()
+    .select({
+      id: graphEdges.id,
+      srcId: graphEdges.srcId,
+      dstId: graphEdges.dstId,
+      kind: graphEdges.kind,
+      props: graphEdges.props,
+    })
     .from(graphEdges)
     .where(
       or(
@@ -1219,11 +1269,20 @@ export function deriveEtape(
     .replace(/[̀-ͯ]/g, "");
 
   // ── Ordre de test : du plus précoce au plus tardif ──────────────────────
-  // 1. avis de motion
-  if (text.includes("avis de motion") || text.includes("avis d motion")) {
-    return "avis_motion";
-  }
-  // 2. second projet (testé avant « projet » pour éviter la collision)
+  // §3-CRITICAL ordering (W2). An "avis de motion" appearing in the text is NOT
+  // enough to classify a resolution as avis_motion: a combined "avis + dépôt du
+  // projet" or an "adoption du (premier) projet" resolution IS at the projet
+  // stage, and a recital may merely RECALL a past avis ("avis de motion a été
+  // donné"). So (a) only an ACTIVE avis (not the past-tense recital) is the avis
+  // act; (b) concrete ACT stages take precedence over a bare avis; (c) a bare
+  // active avis CONSERVATIVELY stays avis_motion — never promoted to `adoption`
+  // on the FUTURE reference "présenté pour adoption lors d'une séance
+  // subséquente" (that promotion = the 026-508 avis-served-firm bug).
+  const hasActiveAvis =
+    (text.includes("avis de motion") || text.includes("avis d motion")) &&
+    !text.includes("avis de motion a ete donne");
+
+  // 1. second projet (tested before « projet » to avoid the collision).
   if (
     text.includes("second projet") ||
     text.includes("2e projet") ||
@@ -1231,14 +1290,30 @@ export function deriveEtape(
   ) {
     return "second_projet";
   }
-  // 3. premier projet / projet de règlement / projet du règlement
+  // 2. premier projet / adoption-dépôt d'un projet → projet_reglement. The ACT of
+  //    ADOPTING or DEPOSITING a projet (NOT the final règlement adoption, and NOT
+  //    a pure avis's future "présenté pour adoption").
   if (
     text.includes("premier projet") ||
     text.includes("1er projet") ||
     text.includes("projet de reglement") ||
-    text.includes("projet du reglement")
+    text.includes("projet du reglement") ||
+    text.includes("adoption du projet") ||
+    text.includes("adopte le projet") ||
+    text.includes("depot du projet") ||
+    text.includes("depose le projet")
   ) {
     return "projet_reglement";
+  }
+  // 3. §3 CONSERVATIVE GUARD (BEFORE consultation/vigueur/adoption): once no
+  //    concrete projet ACT above matched, an ACTIVE avis de motion STAYS
+  //    avis_motion. An active avis is NEVER itself en-vigueur / à-consultation
+  //    (mutually exclusive stages), so an INCIDENTAL "en vigueur" (e.g. « … le
+  //    Règlement 0651 [actuellement] en vigueur » — the EXISTING règlement being
+  //    modified) or a FUTURE "adoption"/"consultation" must NOT promote it to
+  //    firm. Closes the last 026-508 residual path.
+  if (hasActiveAvis) {
+    return "avis_motion";
   }
   // 4. consultation publique
   if (text.includes("consultation")) {
@@ -1252,7 +1327,8 @@ export function deriveEtape(
   ) {
     return "entree_vigueur";
   }
-  // 6. adoption / adopté
+  // 6. adoption / adopté (the final règlement adoption — reached only when the
+  //    resolution is NOT a pure active avis)
   if (
     text.includes("adoption") ||
     text.includes("adopte") ||
@@ -1522,6 +1598,89 @@ export interface GraphSignalProjectionRow {
   sourceRef: string | null;
 }
 
+export interface GraphSignalDateRange {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+const SIGNAL_DATE_KEYS = [
+  "etapeDate",
+  "etape_date",
+  "meetingDate",
+  "meeting_date",
+  "documentDate",
+  "date",
+] as const;
+
+function signalRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function parseServerSignalDate(value: string): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    const parsed = new Date(year, month - 1, day);
+    return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+      ? parsed
+      : null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseServerSignalBoundary(value: string, endOfDay: boolean): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!dateOnly) return parseServerSignalDate(value);
+
+  const year = Number(dateOnly[1]);
+  const month = Number(dateOnly[2]);
+  const day = Number(dateOnly[3]);
+  const parsed = new Date(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+  return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+    ? parsed
+    : null;
+}
+
+/**
+ * Server mirror of the client signal date lens. Keep the key list and
+ * properties-before-root precedence synchronized with signal-date-filter.ts.
+ * graph_nodes has no created_at column on OVH, so the only server fallback is
+ * props.publishedAt; createdAt is intentionally unavailable and treated as null.
+ */
+export function serverSignalEtapeDate(props: unknown): Date | null {
+  const root = signalRecord(props);
+  const nested = signalRecord(root.properties);
+  for (const record of [nested, root]) {
+    for (const key of SIGNAL_DATE_KEYS) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim() !== "") return parseServerSignalDate(value);
+    }
+  }
+
+  const publishedAt = root.publishedAt;
+  return typeof publishedAt === "string" && publishedAt.trim() !== ""
+    ? parseServerSignalDate(publishedAt)
+    : null;
+}
+
+function isSignalInDateRange(props: unknown, range?: GraphSignalDateRange): boolean {
+  if (!range?.dateFrom && !range?.dateTo) return true;
+
+  const date = serverSignalEtapeDate(props);
+  // A bounded window cannot place a row with no extractable, parseable date.
+  if (!date) return false;
+
+  const lower = range.dateFrom ? parseServerSignalBoundary(range.dateFrom, false) : null;
+  const upper = range.dateTo ? parseServerSignalBoundary(range.dateTo, true) : null;
+  return (!lower || date >= lower) && (!upper || date <= upper);
+}
+
 export interface CitySignalCounts {
   citySlug: string;
   signalCount: number;
@@ -1532,6 +1691,7 @@ export interface CitySignalCounts {
 /** Aggregate one projection in both rails. Pure so A/B parity is testable. */
 export function aggregateGraphSignalProjectionRows(
   rows: readonly GraphSignalProjectionRow[],
+  dateRange?: GraphSignalDateRange,
 ): CitySignalCounts[] {
   function emptySubsetCounts(): Record<SubsetKey, number> {
     const out = {} as Record<SubsetKey, number>;
@@ -1549,6 +1709,7 @@ export function aggregateGraphSignalProjectionRows(
 
   for (const row of rows) {
     if (!row.citySlug) continue;
+    if (!isSignalInDateRange(row.props, dateRange)) continue;
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
@@ -1625,6 +1786,7 @@ export function aggregateGraphSignalProjectionRows(
 
 export async function listCitiesWithSignalNodes(
   db: Database,
+  dateRange?: GraphSignalDateRange,
 ): Promise<CitySignalCounts[]> {
   // One row per individual signal node (no count grouping in SQL) so both
   // contracts are derived from the same source projection.
@@ -1650,7 +1812,7 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  return aggregateGraphSignalProjectionRows(rows);
+  return aggregateGraphSignalProjectionRows(rows, dateRange);
 }
 
 /**

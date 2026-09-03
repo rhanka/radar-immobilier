@@ -7,6 +7,8 @@
  *
  * GET /api/graph-signals/by-city
  *   Returns aggregate signal counts per city.
+ *   Optional inclusive ISO-8601 query params: dateFrom/dateTo. A date-only
+ *   dateTo includes the full local calendar day; no params means all-time.
  *   Response: { ok: true, totalCount, cities: [{ citySlug, signalCount, subsetCounts }] }
  *
  * GET /api/graph-signals/:city
@@ -16,7 +18,13 @@
  */
 
 import { Hono } from "hono";
-import { classifyBPrime, type BPrimeClassification } from "@radar/domain";
+import {
+  classifyBPrime,
+  readRegulatoryStatus,
+  type BPrimeClassification,
+  type RegulatoryStatusT,
+  type RegulatoryStageKindT,
+} from "@radar/domain";
 import {
   classifyGraphNodeLegacyZmp,
   classifyGraphNodeVivierV2,
@@ -81,6 +89,13 @@ export interface GraphSignalCard {
   classification: ReturnType<typeof classifyGraphNodeVivierV2>;
   legacySubset: ReturnType<typeof classifyGraphNodeLegacyZmp>;
   bPrime: BPrimeClassification;
+  /** Étape de cycle de vie SERVIE verbatim (props.properties.etape) — matériau du
+   *  re-drive hide-72 côté UI (vues A.4) et de l'agrégat PAR règlement/zone. */
+  etape: string | null;
+  /** Ferme vs anticipation SERVI (axe MARQUAGE, R5) : champ PERSISTÉ (A.2) LU tel
+   *  quel, sinon fallback `deriveRegulatoryStatus` legacy — jamais re-classifié ici.
+   *  N'est PAS le hide-72 (règle avis-only séparée re-drivée du `etape`). */
+  regulatoryStatus: RegulatoryStatusT;
   props: Record<string, unknown>;
 }
 
@@ -426,6 +441,18 @@ function buildSignalCard(
     sourceRef: node.sourceRef,
   });
 
+  // R5 (A.3b) : surface etape + regulatoryStatus en champs 1re-classe (LU via le
+  // locus unique readRegulatoryStatus : champ persisté A.2 sinon fallback legacy).
+  const etape = firstString(properties, ["etape"]) ?? firstString(props, ["etape"]);
+  const rawReg = firstString(properties, ["regulatoryStatus"]) ?? firstString(props, ["regulatoryStatus"]);
+  const regulatoryStatus = readRegulatoryStatus({
+    regulatoryStatus: rawReg === "firm" || rawReg === "anticipation" ? rawReg : null,
+    statut: (firstString(properties, ["statut"]) ?? firstString(props, ["statut"])) as
+      | RegulatoryStageKindT
+      | null,
+    etape,
+  });
+
   return {
     id: node.id,
     type: node.type,
@@ -440,6 +467,8 @@ function buildSignalCard(
     classification,
     legacySubset,
     bPrime,
+    etape,
+    regulatoryStatus,
     props,
   };
 }
@@ -857,7 +886,17 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
 
   // GET /api/graph-signals/by-city
   app.get("/api/graph-signals/by-city", async (c) => {
-    const cities = await listCitiesWithSignalNodes(deps.db);
+    const dateFrom = c.req.query("dateFrom")?.trim() || undefined;
+    const dateTo = c.req.query("dateTo")?.trim() || undefined;
+    const dateRange = dateFrom || dateTo
+      ? {
+          ...(dateFrom ? { dateFrom } : {}),
+          ...(dateTo ? { dateTo } : {}),
+        }
+      : undefined;
+    const cities = dateRange
+      ? await listCitiesWithSignalNodes(deps.db, dateRange)
+      : await listCitiesWithSignalNodes(deps.db);
     const totalCount = cities.reduce((sum, city) => sum + city.signalCount, 0);
     return c.json({ ok: true, totalCount, cities });
   });

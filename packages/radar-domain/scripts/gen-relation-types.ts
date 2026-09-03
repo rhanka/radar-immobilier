@@ -60,6 +60,10 @@ const categories: { comment: string; keys: string[] }[] = [
     keys: ["rezones", "splits", "merges", "subdivides", "supersedes", "targets_zone", "targets_lot", "raises_signal", "concerns"],
   },
   {
+    comment: "── Cycle de vie règlement (LOT 1) ────────────────────────────────────────",
+    keys: ["lifecycle_predecessor", "replaces"],
+  },
+  {
     comment: "── Lots ──────────────────────────────────────────────────────────────────",
     keys: ["assigned_zone", "issued_for", "subject_of"],
   },

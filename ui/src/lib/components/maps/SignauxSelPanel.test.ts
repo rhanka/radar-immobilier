@@ -14,7 +14,22 @@ import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 import type { GeometryProvenanceStatus } from "$lib/maps/geo-provenance.js";
+import {
+  createSelectionBucketState,
+  makeKey,
+  type SelectionBucketState,
+} from "$lib/maps/selection-bucket.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
+
+/**
+ * État de sélection avec une ZONE active (focusée), utilisé par les tests du
+ * scope zone (01KZGM07 item 2). Entrée « vue zone » par l'état pré-posé (parité
+ * avec le clic carte / le badge zone d'un lot / le clic d'une ligne de zone).
+ */
+function zoneFocusState(code: string, citySlug = "delson"): SelectionBucketState {
+  const key = makeKey("zone", `${citySlug}/${code}`);
+  return createSelectionBucketState({ focusedKey: key, selectedKeys: [key] });
+}
 
 function makeMunicipality(slug: string, name: string): MunicipalityT {
   return {
@@ -55,6 +70,7 @@ function makeSignal(
     createdAt: "2026-05-19T12:00:00.000Z",
     description,
     publishedAt: "2026-05-19T12:00:00.000Z",
+    regulatoryStatus: "firm",
     props: {
       description,
       reglement_number: "1926-26",
@@ -112,7 +128,7 @@ describe("SignauxSelPanel — badge PIIA lié", () => {
   });
 });
 
-describe("SignauxSelPanel — vue B : raison de rang + effet densifiant honnête", () => {
+describe("SignauxSelPanel — carte signal : bulle d'étape, sans effet densifiant", () => {
   function bNode(
     id: string,
     label: string,
@@ -123,50 +139,68 @@ describe("SignauxSelPanel — vue B : raison de rang + effet densifiant honnête
     return signal;
   }
 
-  it("affiche la raison NEUTRE (instrument + étape) par signal en mode B", () => {
+  it("bulle « instrument, étape » depuis la classification vivier v2", () => {
     const refonte = bNode("sig-refonte", "Refonte réglementaire secteur centre", {
       ...piiaClassification(),
       instrument: "refonte",
       etape: "projet_reglement",
     } as GraphSignalNode["classification"]);
 
-    const { container } = render(Harness, {
+    const { getByTestId, container } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [refonte],
-        vivierBMode: true,
       },
     });
 
-    expect(container.textContent).toContain("Refonte, projet de règlement");
-    // Copy neutre : aucun jargon interne exposé.
+    // La bulle d'étape porte la forme validée « Instrument, étape ».
+    expect(getByTestId("signal-stage-badge").textContent).toContain("Refonte, projet de règlement");
+    // Copy neutre : aucun jargon interne, aucun jeton brut d'étape.
     expect(container.textContent).not.toContain("bucket");
     expect(container.textContent).not.toContain("projet_reglement");
+    // Ancien sous-titre « type » (Événement de désignation) retiré.
+    expect(container.textContent).not.toContain("Événement de désignation");
   });
 
-  it("effet densifiant inconnu → « à qualifier » (jamais une valeur inventée)", () => {
+  // Retrait RÉEL (pas masqué) : le nœud CLASSIFIÉ est exactement celui qui, avant,
+  // rendait le pavé « signal-rank-row » + le badge « Effet densifiant » en vue B.
+  // Il ne doit PLUS rien afficher de tel, dans aucun mode — la bulle le remplace.
+  it("l'effet densifiant N'EST PLUS rendu (retiré du DOM), remplacé par la bulle d'étape", () => {
     const inconnu = bNode("sig-inconnu", "Rezonage H-431", piiaClassification());
-    const { container } = render(Harness, {
+    const { container, getByTestId } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [inconnu],
-        vivierBMode: true,
       },
     });
-    expect(container.textContent).toContain("Effet densifiant : à qualifier");
-  });
-
-  it("mode A (vivierBMode=false) : NI raison NI effet densifiant rendus", () => {
-    const node = bNode("sig-a", "Avis de motion règlement zonage H-431", piiaClassification());
-    const { container } = render(Harness, {
-      props: {
-        selectedCity: makeCity(),
-        detailNodes: [node],
-        vivierBMode: false,
-      },
-    });
+    // Retrait RÉEL : ni le badge « Effet densifiant » ni l'ancien pavé.
     expect(container.textContent).not.toContain("Effet densifiant");
     expect(container.textContent).not.toContain("à qualifier");
+    expect(container.querySelector(".signal-rank-row")).toBeNull();
+    // La bulle d'étape la remplace (piia + avis de motion).
+    expect(getByTestId("signal-stage-badge").textContent).toContain("PIIA, avis de motion");
+  });
+
+  it("SANS classification : bulle reconstruite depuis props.etape + props.instrument, sans effet densifiant", () => {
+    const node = makeSignal("sig-props", "Rezonage secteur nord", "Signal annoté.");
+    node.props = { ...node.props, etape: "avis_motion", instrument: "rezonage" };
+    const { getByTestId, container } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    expect(getByTestId("signal-stage-badge").textContent).toContain("Rezonage, avis de motion");
+    // Chemin hors vivier v2 : aucun effet densifiant, aucun pavé de rang.
+    expect(container.textContent).not.toContain("Effet densifiant");
+    expect(container.querySelector(".signal-rank-row")).toBeNull();
+  });
+
+  it("étape inconnue → repli honnête : AUCUNE bulle inventée", () => {
+    const node = makeSignal("sig-noetape", "Signal sans étape", "Aucune étape annotée.");
+    // props sans etape ; aucune classification.
+    const { queryByTestId, container } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    expect(queryByTestId("signal-stage-badge")).toBeNull();
+    expect(container.textContent).not.toContain("Effet densifiant");
   });
 });
 
@@ -319,6 +353,119 @@ function makeZonesResponse(codes: string[]): GeoZonesResponse {
   };
 }
 
+describe("SignauxSelPanel — #2a lien de preuve DIRECT (PDF public)", () => {
+  function sigWithProps(id: string, props: Record<string, unknown>): GraphSignalNode {
+    return {
+      id,
+      type: "DesignationEvent",
+      label: id,
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      description: "x",
+      publishedAt: "2026-05-19T12:00:00.000Z",
+      props: { description: "x", ...props },
+    };
+  }
+
+  it("URL https → lien direct « Ouvrir le PDF source » avec href réel (nouvel onglet)", async () => {
+    const url = "https://brossard.ca/app/uploads/2026/01/pv.pdf";
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-url", { sourceUrl: url })] },
+    });
+    await fireEvent.click(getByText("sig-url", { selector: ".sel-entity-label" }));
+    const link = getByTestId("signal-proof-direct-link");
+    expect(link.getAttribute("href")).toBe(url);
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+  });
+
+  it("URL non http(s) (javascript:) → AUCUN lien direct (garde anti-XSS)", async () => {
+    const { getByText, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-xss", { sourceUrl: "javascript:alert(1)" })] },
+    });
+    await fireEvent.click(getByText("sig-xss", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+  });
+
+  it("rawRef seul → PAS de lien public, mais lien ARCHIVE durable same-origin (#2b)", async () => {
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-raw", { rawRef: "raw/proces-verbaux-delson/cas/abc.pdf" })] },
+    });
+    await fireEvent.click(getByText("sig-raw", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+    const archive = getByTestId("signal-proof-archive-link");
+    expect(archive.getAttribute("href")).toBe(
+      "/api/documents/raw?rawRef=raw%2Fproces-verbaux-delson%2Fcas%2Fabc.pdf",
+    );
+  });
+
+  it("URL publique + rawRef → LES DEUX liens (source publique + archive durable)", async () => {
+    const { getByText, getByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [
+          sigWithProps("sig-both", {
+            sourceUrl: "https://terrebonne.ca/wp-content/uploads/pv.pdf",
+            rawRef: "raw/proces-verbaux-terrebonne/cas/xyz.pdf",
+          }),
+        ],
+      },
+    });
+    await fireEvent.click(getByText("sig-both", { selector: ".sel-entity-label" }));
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(
+      "https://terrebonne.ca/wp-content/uploads/pv.pdf",
+    );
+    expect(getByTestId("signal-proof-archive-link").getAttribute("href")).toContain(
+      "/api/documents/raw?rawRef=",
+    );
+  });
+
+  // #2b — object-storage PUBLIC non signé (VPlus, sites muni) : source canonique
+  // légitime → lien direct cliquable (était rejeté par l'ancien garde s3).
+  it("#2b object-storage PUBLIC (VPlus s3) non signé → lien direct cliquable", async () => {
+    const url =
+      "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/pv.pdf";
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-s3", { sourceUrl: url })] },
+    });
+    await fireEvent.click(getByText("sig-s3", { selector: ".sel-entity-label" }));
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(url);
+  });
+
+  // #2b — URL S3 SIGNÉE : jamais exposée comme lien direct (garde signature).
+  it("#2b URL S3 signée (X-Amz-Signature) → AUCUN lien direct (jamais exposée)", async () => {
+    const signed =
+      "https://vplus-documents.s3.ca-central-1.amazonaws.com/x/pv.pdf?X-Amz-Signature=abc&X-Amz-Credential=AKIA";
+    const { getByText, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [sigWithProps("sig-signed", { sourceUrl: signed })] },
+    });
+    await fireEvent.click(getByText("sig-signed", { selector: ".sel-entity-label" }));
+    expect(queryByTestId("signal-proof-direct-link")).toBeNull();
+  });
+});
+
+describe("SignauxSelPanel — #3a panneau « Zone active » pinné", () => {
+  it("focus zone → panneau pinné (code + type + pills + détail dépliable) ; absent sinon", async () => {
+    const zones = makeZonesResponse(["H-431"]);
+    zones.featureCollection.features[0]!.properties.kind = "habitation";
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [], zonesResponse: zones },
+    });
+    // Aucun panneau tant qu'aucune zone n'est focusée.
+    expect(queryByTestId("sel-zone-head")).toBeNull();
+
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+
+    // Panneau « Zone active » pinné rendu, avec le code + le détail dépliable.
+    const head = getByTestId("sel-zone-head");
+    expect(head.textContent).toContain("Zone active");
+    expect(head.textContent).toContain("H-431");
+    expect(head.textContent).toContain("lots liés");
+    expect(getByTestId("sel-zone-head-more")).toBeTruthy();
+  });
+});
+
 describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, score honnête)", () => {
   const enrichedLot: LotFeature = {
     type: "Feature",
@@ -337,7 +484,7 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
   };
 
   it("affiche zone (code), 4+ avec source, superficie formatée et TOD", async () => {
-    const { getByText, queryByText } = render(Harness, {
+    const { getByText, queryByText, queryAllByText } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
@@ -347,7 +494,9 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
 
     await fireEvent.click(getByText("5399042"));
 
-    expect(queryByText("H-431")).not.toBeNull();
+    // #3b(c) : le code zone apparaît légitimement 2× (pin « Lot actif » +
+    // détail inline) — les deux sont servis par geo, aucun n'est fabriqué.
+    expect(queryAllByText("H-431").length).toBeGreaterThan(0);
     expect(queryByText("Multifamilial 4+")).not.toBeNull();
     expect(queryByText("Oui · grille")).not.toBeNull();
     expect(queryByText("850 m²")).not.toBeNull();
@@ -355,24 +504,9 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
     expect(queryByText("Non")).not.toBeNull();
   });
 
-  it("score indisponible → « non évalué », JAMAIS « 0.0/10 » présenté comme mesuré", async () => {
-    const { getByText, queryByText } = render(Harness, {
-      props: {
-        selectedCity: makeCity(),
-        detailNodes: [],
-        lotsResponse: makeLotsResponse([enrichedLot]),
-      },
-    });
-
-    // Sous-titre de la rangée AVANT le clic : "lot", pas un faux score.
-    expect(queryByText("0.0/10")).toBeNull();
-
-    await fireEvent.click(getByText("5399042"));
-    expect(queryByText("non évalué")).not.toBeNull();
-    expect(queryByText("0.0/10")).toBeNull();
-  });
-
-  it("score évalué → affiché « x.x/10 »", () => {
+  it("potentiel RETIRÉ (owner) — ni sous-titre de rangée, ni champ « Potentiel » dans la fiche", async () => {
+    // Score « mesuré » côté données : il ne doit tout de même RIEN afficher —
+    // l'owner a jugé le score non fondé (aucune donnée geo-lot derrière).
     const scoredLot: LotFeature = {
       ...enrichedLot,
       properties: {
@@ -381,15 +515,24 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
         potentialScoreStatus: "scored",
       },
     };
-    const { queryAllByText } = render(Harness, {
+    const { getByText, queryByText, queryAllByText } = render(Harness, {
       props: {
         selectedCity: makeCity(),
         detailNodes: [],
         lotsResponse: makeLotsResponse([scoredLot]),
       },
     });
-    // Sous-titre de la rangée lot (visible sans clic).
-    expect(queryAllByText("7.5/10").length).toBeGreaterThan(0);
+    // Sous-titre de rangée = « lot » générique, jamais un score.
+    expect(queryAllByText("7.5/10").length).toBe(0);
+    expect(queryAllByText("lot").length).toBeGreaterThan(0);
+
+    await fireEvent.click(getByText("5399042"));
+    // Fiche dépliée : plus de ligne « Potentiel », ni « non évalué », ni « x.x/10 ».
+    expect(queryByText("Potentiel")).toBeNull();
+    expect(queryByText("non évalué")).toBeNull();
+    expect(queryByText("7.5/10")).toBeNull();
+    // Le reste de la fiche demeure (superficie servie par le lot enrichi).
+    expect(queryByText("Superficie")).not.toBeNull();
   });
 
   it("champs absents → « — » discret (zone/4+/superficie), TOD omis", async () => {
@@ -470,6 +613,57 @@ function makeLot(noLot: string, extra: Record<string, unknown> = {}): LotFeature
     properties: { noLot, citySlug: "delson", ...extra },
   } as LotFeature;
 }
+
+describe("SignauxSelPanel — #3b(b) bucket Lots filtré ⊆ zone focusée", () => {
+  it("focus zone → seuls les lots de la zone listés ; hors focus → tous", async () => {
+    const zones = makeZonesResponse(["H-431", "C-02"]);
+    const lots = [
+      makeLot("100", { zoneCode: "H-431" }),
+      makeLot("200", { zoneCode: "C-02" }),
+    ];
+    const { getByText, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: zones,
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+    // Vue ville (aucune zone focusée) : les DEUX lots sont listés (règle 3).
+    expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(getByText("200", { selector: ".sel-entity-label" })).not.toBeNull();
+
+    // Focus la zone H-431 → seuls ses lots (100) restent listés (règle 4).
+    await fireEvent.click(getByText("H-431", { selector: ".sel-entity-label" }));
+    expect(getByText("100", { selector: ".sel-entity-label" })).not.toBeNull();
+    expect(queryByText("200", { selector: ".sel-entity-label" })).toBeNull();
+  });
+});
+
+describe("SignauxSelPanel — nav-drill 01KZEG78 : PAS de panneau « Lot actif »", () => {
+  it("focus lot → AUCUN pin « Lot actif » (spec owner) ; le lot reste dans sa fiche", async () => {
+    const lots = [
+      makeLot("5399042", { zoneCode: "H-431", superficieM2: 850.4 }),
+    ];
+    const { getByText, queryByTestId, queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse(lots),
+      },
+    });
+    // Spec owner (retrait de la vue « Lot actif ») : jamais de pin, même au focus.
+    expect(queryByTestId("sel-lot-head")).toBeNull();
+
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+
+    // Toujours pas de pin « Lot actif » après focus (l'actif épinglé = Ville/Zone
+    // uniquement) ; le lot vit dans sa fiche/drawer, pas dans un header épinglé.
+    expect(queryByTestId("sel-lot-head")).toBeNull();
+    expect(queryByTestId("sel-lot-head-more")).toBeNull();
+    expect(queryByText("Lot actif")).toBeNull();
+  });
+});
 
 describe("SignauxSelPanel — accordéon LOTS : en-tête de filtre au-dessus de la liste", () => {
   const lots = [
@@ -620,20 +814,23 @@ describe("SignauxSelPanel — accordéon ZONES : filtre par TYPE de zone", () =>
   });
 });
 
-// ── m7 — accordéon Règlements (entre Signaux et Zones) ───────────────────────
+// ── m7 — accordéon Règlement et Normes (entre Signaux et Zones) ──────────────
 
-describe("SignauxSelPanel — m7 accordéon Règlements", () => {
-  it("liste le règlement cité par les signaux (numéro + bouton PDF)", () => {
+describe("SignauxSelPanel — m7 accordéon Règlement et Normes", () => {
+  it("liste le règlement cité par les signaux (numéro + bouton PV source)", () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: NODES },
     });
-    expect(getByText("Règlements")).not.toBeNull();
+    expect(getByText("Règlement et Normes")).not.toBeNull();
     // NODES citent tous « 1926-26 » → une entrée de règlement.
     expect(queryByText("1926-26")).not.toBeNull();
-    expect(queryByText("Voir le PDF")).not.toBeNull();
+    // §3.1 : le bouton indique EXPLICITEMENT qu'il ouvre le PV source (pas
+    // « le PDF » du règlement, qui n'existe pas ici).
+    expect(queryByText("Voir le PV source")).not.toBeNull();
+    expect(queryByText("Voir le PDF")).toBeNull();
   });
 
-  it("« Voir le PDF » appelle onOpenSource (titre = « Règlement <numéro> »)", async () => {
+  it("« Voir le PV source » ouvre le PV, étiqueté comme SOURCE, pas comme le règlement (§3.1)", async () => {
     const calls: Array<{ title: string; sourceUrl: string | null }> = [];
     const { getByText } = render(Harness, {
       props: {
@@ -643,9 +840,15 @@ describe("SignauxSelPanel — m7 accordéon Règlements", () => {
           calls.push(p),
       },
     });
-    await fireEvent.click(getByText("Voir le PDF"));
+    await fireEvent.click(getByText("Voir le PV source"));
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.title).toBe("Règlement 1926-26");
+    const title = calls[0]?.title ?? "";
+    // Sans substitution : le document ouvert est le PROCÈS-VERBAL source qui cite
+    // le règlement — jamais présenté comme s'il était le PDF du règlement.
+    expect(title).toMatch(/PV|source/i);
+    expect(title).not.toBe("Règlement 1926-26");
+    // Traçabilité : le numéro de règlement reste dans le titre.
+    expect(title).toContain("1926-26");
   });
 
   it("aucun règlement cité → état vide honnête (rien de fabriqué)", () => {
@@ -661,7 +864,7 @@ describe("SignauxSelPanel — m7 accordéon Règlements", () => {
     const { getByText, queryByText } = render(Harness, {
       props: { selectedCity: makeCity(), detailNodes: [noReg] },
     });
-    expect(getByText("Règlements")).not.toBeNull();
+    expect(getByText("Règlement et Normes")).not.toBeNull();
     expect(
       queryByText("Aucun règlement cité par les signaux de cette ville."),
     ).not.toBeNull();
@@ -808,7 +1011,7 @@ describe("SignauxSelPanel — m6 millésime du zonage", () => {
 
 describe("SignauxSelPanel — audit des sources de zone", () => {
   const labels: Record<GeometryProvenanceStatus, string> = {
-    "historical-verified": "Vérifiée dans les dossiers historiques",
+    "historical-verified": "Vérification déclarée par la source",
     "legacy-traceable": "Trace historique disponible",
     "candidate-needs-human-confirmation": "À confirmer par une personne",
     orphan: "Source de géométrie non reliée",
@@ -847,5 +1050,293 @@ describe("SignauxSelPanel — audit des sources de zone", () => {
     await fireEvent.click(view.getByText("H-431", { selector: ".sel-entity-label" }));
     expect(view.queryByTestId("zone-geometry-source-link")).toBeNull();
     expect(view.getByText("Empreinte du contenu indisponible")).not.toBeNull();
+  });
+});
+
+// ── 01KZGM07 item 2 — Signaux / Règlements restreints à la ZONE ACTIVE ────────
+// Quand une zone est active, Signaux ET Règlements ne listent QUE les entités
+// rattachées à cette zone — EXCEPTION owner : les entités NON rattachées à une
+// zone (aucun code de zone) sont GARDÉES. Hors focus zone : liste complète.
+
+describe("SignauxSelPanel — item 2 : Signaux/Règlements ⊆ zone active + exception non-rattachés", () => {
+  function zsig(
+    id: string,
+    label: string,
+    props: Record<string, unknown>,
+  ): GraphSignalNode {
+    return {
+      id,
+      type: "DesignationEvent",
+      label,
+      citySlug: "delson",
+      sourceRef: null,
+      createdAt: "2026-05-19T12:00:00.000Z",
+      publishedAt: "2026-05-19T12:00:00.000Z",
+      regulatoryStatus: "firm",
+      props: { description: "detail neutre", ...props },
+    };
+  }
+
+  // alpha rattaché à H-431 ; beta à C-02 (autre zone) ; gamma sans aucune zone.
+  const nodes: GraphSignalNode[] = [
+    zsig("z-alpha", "Signal alpha", { zone_ref: "H-431", reglement_number: "R-100" }),
+    zsig("z-beta", "Signal beta", { zone_ref: "C-02", reglement_number: "R-200" }),
+    zsig("z-gamma", "Signal gamma", { reglement_number: "R-300" }),
+  ];
+  const zones = makeZonesResponse(["H-431", "C-02"]);
+
+  it("vue ville (aucune zone active) : tous les signaux ET règlements listés", () => {
+    const { queryByText } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: nodes, zonesResponse: zones },
+    });
+    for (const label of ["Signal alpha", "Signal beta", "Signal gamma"]) {
+      expect(queryByText(label, { selector: ".sel-entity-label" })).not.toBeNull();
+    }
+    for (const reg of ["R-100", "R-200", "R-300"]) {
+      expect(queryByText(reg)).not.toBeNull();
+    }
+  });
+
+  it("zone H-431 active : signal rattaché H-431 + signal NON rattaché gardés ; autre zone exclue", () => {
+    const { queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: nodes,
+        zonesResponse: zones,
+        selectionState: zoneFocusState("H-431"),
+      },
+    });
+    // Rattaché à la zone active → gardé.
+    expect(queryByText("Signal alpha", { selector: ".sel-entity-label" })).not.toBeNull();
+    // Non rattaché à une zone → GARDÉ (exception impérative owner).
+    expect(queryByText("Signal gamma", { selector: ".sel-entity-label" })).not.toBeNull();
+    // Rattaché à une AUTRE zone (C-02) → exclu.
+    expect(queryByText("Signal beta", { selector: ".sel-entity-label" })).toBeNull();
+  });
+
+  it("zone H-431 active : règlement rattaché (R-100) + non rattaché (R-300) gardés ; R-200 exclu", () => {
+    const { queryByText } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: nodes,
+        zonesResponse: zones,
+        selectionState: zoneFocusState("H-431"),
+      },
+    });
+    expect(queryByText("R-100")).not.toBeNull(); // rattaché H-431
+    expect(queryByText("R-300")).not.toBeNull(); // non rattaché → gardé
+    expect(queryByText("R-200")).toBeNull(); // rattaché C-02 → exclu
+  });
+});
+
+// ── 01KZGM07 item 3 — fiche lot dépliée INLINE dans la liste des lots ─────────
+
+describe("SignauxSelPanel — item 3 : fiche lot inline (drawer sous la ligne)", () => {
+  const lot = makeLot("5399042", {
+    zoneCode: "H-431",
+    superficieM2: 850.4,
+    adresse: "10 rue Principale",
+    codePostal: "J5A",
+    multifamilial4plus: true,
+  });
+
+  it("clic lot → drawer inline (sel-lot-drawer) sous sa ligne, avec adresse + superficie", async () => {
+    const { getByText, getByTestId, queryByTestId } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        lotsResponse: makeLotsResponse([lot]),
+      },
+    });
+    // Avant le clic : aucune fiche lot dépliée.
+    expect(queryByTestId("sel-lot-drawer")).toBeNull();
+
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+
+    // La fiche se déplie INLINE (dans le bucket Lots), pas dans une vue séparée.
+    const drawer = getByTestId("sel-lot-drawer");
+    expect(drawer.textContent).toContain("10 rue Principale");
+    expect(drawer.textContent).toContain("850 m²");
+    // Preuve « inline » : le drawer est un enfant de la LIGNE du lot (sel-entity-bar).
+    expect(drawer.closest(".sel-entity-bar")).not.toBeNull();
+  });
+});
+
+// ── Recherche PAR SECTION zone / lot (façon rail villes) ──────────────────────
+// Chaque section (Zones, Lots) porte SON PROPRE champ DS Search en tête, filtrant
+// UNIQUEMENT sa liste (parité stricte avec le rail villes / filterRailCityItems).
+// Cliquer une ligne conserve le comportement de sélection existant du panneau
+// (aucun onSearchSelect). Scope intra-ville (cross-ville = HORS scope).
+
+describe("SignauxSelPanel — recherche par section zone/lot", () => {
+  const zones = makeZonesResponse(["H-315", "C-186"]);
+  const searchLots = makeLotsResponse([
+    makeLot("5399042", { adresse: "10 rue Principale" }),
+    makeLot("6100001", { adresse: "5 avenue des Pins" }),
+  ]);
+  const baseProps = () => ({
+    selectedCity: makeCity(),
+    detailNodes: [],
+    zonesResponse: zones,
+    lotsResponse: searchLots,
+  });
+  // Libellés des LIGNES rendues, par section (clé d'entité préfixée zone:/lot:).
+  const labelsFor = (c: HTMLElement, kind: "zone" | "lot") =>
+    Array.from(
+      c.querySelectorAll<HTMLElement>(`[data-entity-key^="${kind}:"] .sel-entity-label`),
+    ).map((el) => el.textContent?.trim());
+
+  it("chaque section rend son propre champ de recherche (zone ET lot)", () => {
+    const { getByTestId } = render(Harness, { props: baseProps() });
+    expect(getByTestId("zone-search-input")).toBeTruthy();
+    expect(getByTestId("lot-search-input")).toBeTruthy();
+  });
+
+  it("requête vide → les deux listes complètes (aucun filtrage parasite)", () => {
+    const { container } = render(Harness, { props: baseProps() });
+    expect(labelsFor(container, "zone")).toEqual(["H-315", "C-186"]);
+    expect(labelsFor(container, "lot")).toEqual(["5399042", "6100001"]);
+  });
+
+  it("recherche ZONE (H-31) filtre UNIQUEMENT la liste des zones", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("zone-search-input"), { target: { value: "H-31" } });
+    expect(labelsFor(container, "zone")).toEqual(["H-315"]);
+    // Les lots restent INTACTS (la recherche zone ne touche pas leur section).
+    expect(labelsFor(container, "lot")).toEqual(["5399042", "6100001"]);
+  });
+
+  it("recherche LOT (6100) filtre UNIQUEMENT la liste des lots", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "6100" } });
+    expect(labelsFor(container, "lot")).toEqual(["6100001"]);
+    // Les zones restent INTACTES.
+    expect(labelsFor(container, "zone")).toEqual(["H-315", "C-186"]);
+  });
+
+  it("recherche lot par ADRESSE (sous-libellé) — « Principale » → 5399042", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "Principale" } });
+    expect(labelsFor(container, "lot")).toEqual(["5399042"]);
+  });
+
+  it("zone sans correspondance → état vide explicite, liste lots intacte", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("zone-search-input"), { target: { value: "zzz" } });
+    expect(labelsFor(container, "zone")).toEqual([]);
+    expect(getByTestId("zone-search-empty")).toBeTruthy();
+    expect(labelsFor(container, "lot")).toEqual(["5399042", "6100001"]);
+  });
+
+  it("lot sans correspondance → état vide explicite", async () => {
+    const { getByTestId, container } = render(Harness, { props: baseProps() });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "zzz" } });
+    expect(labelsFor(container, "lot")).toEqual([]);
+    expect(getByTestId("lot-search-empty")).toBeTruthy();
+  });
+
+  it("F1 — la recherche lot trouve un lot AU-DELÀ du cap DOM (jamais bornée par le cap)", async () => {
+    // 85 lots > cap DOM (80) : le 85e n'est PAS rendu hors recherche, mais la
+    // recherche DOIT le trouver — le cap ne s'applique qu'à l'AFFICHAGE, jamais
+    // à la recherche (régression corrigée + parité villes/P02).
+    const many = Array.from({ length: 85 }, (_, i) => makeLot(String(5000 + i)));
+    const { getByTestId, container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315"]),
+        lotsResponse: makeLotsResponse(many),
+      },
+    });
+    // Hors recherche : liste plafonnée → le 85e lot (5084) n'est PAS rendu.
+    expect(labelsFor(container, "lot")).not.toContain("5084");
+    expect(labelsFor(container, "lot").length).toBeLessThanOrEqual(80);
+    // Recherche : le lot au-delà du cap est trouvé.
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "5084" } });
+    expect(labelsFor(container, "lot")).toContain("5084");
+  });
+
+  it("clic sur un résultat de recherche lot (zone active) → déplie la fiche du lot", async () => {
+    // La recherche par section ne surface PAS un dropdown : elle filtre la LISTE ;
+    // cliquer un résultat = cliquer la ligne du lot (sélection existante). Avec la
+    // zone active (précondition R1 de prod), le clic sélectionne → fiche inline.
+    const { getByTestId, getByText, container } = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        zonesResponse: makeZonesResponse(["H-315"]),
+        lotsResponse: makeLotsResponse([
+          makeLot("5399042", {
+            zoneCode: "H-315",
+            adresse: "10 rue Principale",
+            superficieM2: 850.4,
+          }),
+          makeLot("6100001", { zoneCode: "H-315" }),
+        ]),
+        selectionState: zoneFocusState("H-315"),
+      },
+    });
+    await fireEvent.input(getByTestId("lot-search-input"), { target: { value: "5399042" } });
+    expect(labelsFor(container, "lot")).toEqual(["5399042"]);
+    await fireEvent.click(getByText("5399042", { selector: ".sel-entity-label" }));
+    expect(getByTestId("sel-lot-drawer")).toBeTruthy();
+  });
+});
+
+// ── P01 — garde de non-régression du panneau PREUVE signal (drawer droit) ─────
+// La régression du 12/08 (association document/PDF perdue, preuve substituée par
+// l'effet densifiant, source/règlement/grille confondus) est DÉJÀ corrigée sur
+// main : 7e7bc0e « le drawer Règlements n'usurpe plus le PV » + #514 (bulle
+// d'étape qui REMPLACE l'effet densifiant sans toucher la preuve). Ces tests
+// VERROUILLENT les 4 critères owner comme garde de non-régression (verts sur la
+// base courante, aucun fix fantôme) :
+//   1. association document/PDF exposée (lien « Ouvrir le PDF source ») ;
+//   2. provenance visible (bouton « Voir la preuve » / overlay) ;
+//   3. AUCUNE substitution par l'étape : bulle d'étape ET preuve COEXISTENT ;
+//   4. source / règlement / grille distingués → déjà gardé par les tests m7
+//      (« Voir le PV source » étiqueté SOURCE, pas règlement) + drawer normes.
+describe("SignauxSelPanel — P01 garde preuve signal (non-régression)", () => {
+  it("critères 1+2 — signal avec source PDF : association document/PDF + provenance rendues", async () => {
+    const node = makeSignal(
+      "sig-p01-preuve",
+      "Avis de motion règlement zonage H-431",
+      "Signal porteur d'une source documentaire.",
+    );
+    node.props = { ...node.props, sourceUrl: "https://exemple.gouv.qc.ca/pv/2026-05.pdf" };
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    await fireEvent.click(
+      getByText("Avis de motion règlement zonage H-431", { selector: ".sel-entity-label" }),
+    );
+    // Association document/PDF (lien direct) + provenance (bouton preuve/overlay).
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(
+      "https://exemple.gouv.qc.ca/pv/2026-05.pdf",
+    );
+    expect(getByText(/Voir la preuve/)).toBeTruthy();
+  });
+
+  it("critère 3 — étape ET source : la bulle d'étape ne SUBSTITUE pas la preuve (les deux rendus)", async () => {
+    const node = makeSignal(
+      "sig-p01-preuve-etape",
+      "Avis de motion règlement zonage H-431",
+      "Signal avec preuve ET classification d'étape.",
+    );
+    node.classification = piiaClassification(); // instrument piia + étape avis_motion → bulle d'étape
+    node.props = { ...node.props, sourceUrl: "https://exemple.gouv.qc.ca/pv/2026-05.pdf" };
+    const { getByText, getByTestId } = render(Harness, {
+      props: { selectedCity: makeCity(), detailNodes: [node] },
+    });
+    // Bulle d'étape présente dans la carte (l'étape est rendue).
+    expect(getByTestId("signal-stage-badge")).toBeTruthy();
+    await fireEvent.click(
+      getByText("Avis de motion règlement zonage H-431", { selector: ".sel-entity-label" }),
+    );
+    // La PREUVE coexiste avec la bulle : ni l'une ni l'autre n'est substituée —
+    // la classification d'étape ne remplace JAMAIS l'association document/PDF.
+    expect(getByTestId("signal-proof-direct-link").getAttribute("href")).toBe(
+      "https://exemple.gouv.qc.ca/pv/2026-05.pdf",
+    );
+    expect(getByTestId("signal-stage-badge")).toBeTruthy();
   });
 });

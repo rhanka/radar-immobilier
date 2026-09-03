@@ -1,0 +1,71 @@
+# CI DEPLOYER — PREPROD (Lot 1 de la refonte CD, cf tmp/handoff/preprod/DESIGN-CD-REFONTE.md §2.4).
+#
+# ServiceAccount + Role + RoleBinding namespace-scopés à `radar-immobilier-preprod`
+# pour le job CI `deploy-preprod` (main -> preprod). Least-privilege : il ne peut
+# QUE piloter les Deployments (get/list/watch/patch/update) et LIRE pods/replicasets
+# (pour `kubectl rollout status`). Il NE PEUT PAS lire de Secret, ni toucher un autre
+# namespace, ni la PROD (`radar-immobilier`).
+#
+# ISOLATION (revue CD MUST-FIX #3) : prod et preprod partagent le MÊME apiserver OVH,
+# donc le pre-flight d'hôte ne distingue pas les envs — la SEULE frontière d'accès est
+# ce scope SA+Role namespace-borné. Le kubeconfig prod est en outre porté par un
+# GitHub Environment `production` (refs tag + reviewer) ; ce SA preprod ne sert QUE le
+# chemin main->preprod.
+#
+# Ce manifest est COMMITÉ (gitops, reviewable) — contrairement au `radar-ci-deployer`
+# prod historique, créé out-of-band. APPLY = poc-k8s en fenêtre gatée. Le token de
+# cette SA est ensuite exporté en kubeconfig par poc-k8s puis stocké dans le secret
+# GitHub `KUBE_CONFIG_DATA_PREPROD` (jamais commité). N'est PAS dans kustomization.yaml
+# (prod) : c'est une ressource preprod-spécifique appliquée séparément.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-ci-deployer-preprod
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+    app.kubernetes.io/env: preprod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: radar-ci-deployer-preprod
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+    app.kubernetes.io/env: preprod
+rules:
+  # `kubectl set image` + `kubectl apply` d'un Deployment = get/list/watch/patch/update.
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  # `kubectl rollout status` lit le Deployment + ses ReplicaSets + Pods.
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: radar-ci-deployer-preprod
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+    app.kubernetes.io/env: preprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: radar-ci-deployer-preprod
+subjects:
+  - kind: ServiceAccount
+    name: radar-ci-deployer-preprod
+    namespace: radar-immobilier-preprod

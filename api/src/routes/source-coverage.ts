@@ -701,7 +701,14 @@ async function loadBulkAggregates(db: Database): Promise<{
     .select({
       citySlug: graphNodes.citySlug,
       nodeCount: sql<number>`count(*)::int`,
-      lastCreatedAt: sql<string | null>`max(${graphNodes.createdAt})`,
+      // OVH radar-postgres n'a PAS la colonne `created_at` sur graph_nodes
+      // (drift drizzle 0002 — déjà mordu #450/#452, qui ont OMIS created_at côté
+      // subgraphForCity). Un `max(created_at)` y jette "column does not exist" →
+      // 500 → la vue Source casse pour tout user AUTHENTIFIÉ. On renvoie `null`
+      // (freshness dégradée, déjà tolérée : lastCreatedAt est string|null partout
+      // en aval, via toIsoOrNull / `?? null`). À réactiver si created_at revient
+      // sur OVH (migration). Cf mémoire ovh-schema-drift-created-at.
+      lastCreatedAt: sql<string | null>`null`,
       ontologyVersion: sql<
         string | null
       >`max(${graphNodes.props} ->> 'ontology_version')`,
@@ -757,7 +764,14 @@ async function loadBulkAggregates(db: Database): Promise<{
           )
         )
       ))::int`,
-      lastCreatedAt: sql<string | null>`max(${graphNodes.createdAt})`,
+      // OVH radar-postgres n'a PAS la colonne `created_at` sur graph_nodes
+      // (drift drizzle 0002 — déjà mordu #450/#452, qui ont OMIS created_at côté
+      // subgraphForCity). Un `max(created_at)` y jette "column does not exist" →
+      // 500 → la vue Source casse pour tout user AUTHENTIFIÉ. On renvoie `null`
+      // (freshness dégradée, déjà tolérée : lastCreatedAt est string|null partout
+      // en aval, via toIsoOrNull / `?? null`). À réactiver si created_at revient
+      // sur OVH (migration). Cf mémoire ovh-schema-drift-created-at.
+      lastCreatedAt: sql<string | null>`null`,
     })
     .from(graphNodes)
     .where(
