@@ -10,6 +10,10 @@
     readDisplayMode,
     type ChatWidgetDisplayMode,
   } from "$lib/chat/chat-widget-layout";
+  import {
+    chatBubbleSuppressed,
+    chatToggleNonce,
+  } from "$lib/chat/chat-trigger";
 
   // Docked by default per the ÉV9 intent.
   let displayMode: ChatWidgetDisplayMode = "docked";
@@ -55,7 +59,21 @@
     mounted = true;
     publishLayout();
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    // Un hôte (p.ex. le cluster de contrôles carte) peut basculer le chat via
+    // requestChatToggle() : on ignore le replay initial de l'abonnement, puis on
+    // bascule le `isOpen` existant à chaque demande.
+    let firstToggleReplay = true;
+    const unsubToggle = chatToggleNonce.subscribe(() => {
+      if (firstToggleReplay) {
+        firstToggleReplay = false;
+        return;
+      }
+      toggleOpen();
+    });
+    return () => {
+      window.removeEventListener("resize", onResize);
+      unsubToggle();
+    };
   });
 </script>
 
@@ -91,12 +109,15 @@
 {/snippet}
 
 {#if mounted}
-  {#if !isOpen}
+  {#if !isOpen && !$chatBubbleSuppressed}
+    <!-- Bulle flottante globale : masquée quand un hôte fournit son propre
+         déclencheur (cluster carte) pour éviter le chevauchement avec la carte. -->
     <button
       class="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-blue-700 text-white shadow-lg transition hover:bg-blue-800"
       type="button"
       title="Ouvrir l'assistant radar"
       aria-label="Ouvrir l'assistant radar"
+      data-testid="chat-bubble-trigger"
       on:click={toggleOpen}
     >
       <MessageCircle class="h-5 w-5" aria-hidden="true" />

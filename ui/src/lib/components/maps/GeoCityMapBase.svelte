@@ -107,9 +107,14 @@
    * `syncGeoLayers`.
    */
   import { onMount, onDestroy } from "svelte";
-  import { Layers, Ruler } from "@lucide/svelte";
+  import { Layers, MessageCircle, Ruler } from "@lucide/svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
+  import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
+  import {
+    chatBubbleSuppressed,
+    requestChatToggle,
+  } from "$lib/chat/chat-trigger";
   import {
     buildMeasureLineData,
     buildMeasurePointsData,
@@ -216,6 +221,15 @@
   // ── Props : cycle de vie ───────────────────────────────────────────────────
   /** Appelé une fois la carte prête, avec l'API impérative du socle. */
   export let onReady: (api: GeoCityMapApi) => void = () => {};
+
+  /**
+   * Opt-in (défaut `false`) : rend un bouton chat carré dans le cluster de
+   * contrôles (motif map-contextuel) et masque la bulle flottante globale tant
+   * que la carte est montée → plus de chevauchement bas-droit. Seule la vue
+   * carte principale l'active ; les autres consommateurs du socle restent
+   * inchangés (aucun bouton, bulle globale intacte).
+   */
+  export let showChatToggle = false;
 
   // ── État MapLibre interne ──────────────────────────────────────────────────
   let mapContainer: HTMLDivElement;
@@ -1232,10 +1246,14 @@
       (mapInstance as { remove: () => void }).remove();
       mapInstance = null;
     }
+    if (showChatToggle) chatBubbleSuppressed.set(false);
   });
 
   onMount(() => {
     void initMap();
+    // Motif map-contextuel : tant que la carte fournit son propre déclencheur de
+    // chat (bouton du cluster), le `ChatWidgetHost` masque sa bulle flottante.
+    if (showChatToggle) chatBubbleSuppressed.set(true);
   });
 </script>
 
@@ -1294,6 +1312,25 @@
           </button>
         {/if}
       </div>
+    {/if}
+
+    {#if showChatToggle}
+      <!-- Assistant radar : icône carrée dans le cluster (motif map-contextuel),
+           câblée sur le toggle global via requestChatToggle() ; aria-pressed
+           reflète l'ouverture. La bulle flottante globale est masquée pendant ce
+           temps (cf. showChatToggle + chatBubbleSuppressed). -->
+      <button
+        type="button"
+        class="measure-toggle"
+        class:measure-toggle-active={$chatWidgetLayout?.isOpen ?? false}
+        aria-pressed={$chatWidgetLayout?.isOpen ?? false}
+        aria-label="Ouvrir l'assistant radar"
+        title="Assistant radar"
+        data-testid="chat-toggle"
+        onclick={requestChatToggle}
+      >
+        <MessageCircle size={16} aria-hidden="true" />
+      </button>
     {/if}
   </div>
 
