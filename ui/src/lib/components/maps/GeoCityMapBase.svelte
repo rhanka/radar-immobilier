@@ -112,7 +112,7 @@
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import {
-    chatBubbleSuppressed,
+    acquireChatTrigger,
     requestChatToggle,
   } from "$lib/chat/chat-trigger";
   import {
@@ -1241,19 +1241,24 @@
     }
   }
 
+  // Libération du déclencheur de chat ref-compté (cf. acquireChatTrigger).
+  let releaseChatTrigger: (() => void) | null = null;
+
   onDestroy(() => {
     if (mapInstance) {
       (mapInstance as { remove: () => void }).remove();
       mapInstance = null;
     }
-    if (showChatToggle) chatBubbleSuppressed.set(false);
+    releaseChatTrigger?.();
+    releaseChatTrigger = null;
   });
 
   onMount(() => {
     void initMap();
     // Motif map-contextuel : tant que la carte fournit son propre déclencheur de
     // chat (bouton du cluster), le `ChatWidgetHost` masque sa bulle flottante.
-    if (showChatToggle) chatBubbleSuppressed.set(true);
+    // Ref-compté ⇒ robuste aux transitions de route (mount-avant-destroy).
+    if (showChatToggle) releaseChatTrigger = acquireChatTrigger();
   });
 </script>
 
