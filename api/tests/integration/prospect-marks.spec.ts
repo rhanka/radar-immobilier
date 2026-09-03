@@ -19,10 +19,17 @@ import {
   prospectNotes,
   prospectContacts,
   prospectContactAccessLog,
+  sources,
+  ingestions,
+  documents,
+  signals,
 } from "../../src/db/schema.js";
 import {
   upsertMark,
   addNote,
+  editNote,
+  softDeleteNote,
+  listNotes,
   batchUpsertMarks,
 } from "../../src/services/prospect/marks-service.js";
 import { getActiveContactWithLog } from "../../src/services/prospect/contact-service.js";
@@ -41,7 +48,16 @@ let noLot: string;
 const citySlug = "integration-test-city";
 
 beforeEach(async () => {
-  // Nettoyer les données de test
+  // Nettoyer les données de test.
+  // Les notes ancrées signal (city_slug NULL) échappent au purge par citySlug :
+  // on purge d'abord les notes de l'auteur de test (FK author_id ON DELETE restrict).
+  const prevAuthors = await db
+    .select({ id: accountUsers.id })
+    .from(accountUsers)
+    .where(eq(accountUsers.email, "test-inc2@example.com"));
+  for (const a of prevAuthors) {
+    await db.delete(prospectNotes).where(eq(prospectNotes.authorId, a.id));
+  }
   await db.delete(prospectContactAccessLog);
   await db.delete(prospectContacts);
   await db.delete(prospectNotes).where(eq(prospectNotes.citySlug, citySlug));
@@ -333,5 +349,88 @@ describe("getActiveContactWithLog — journalisation Loi 25", () => {
     expect(logs).toHaveLength(1);
     expect(logs[0]?.accessorId).toBe(authorId);
     expect(logs[0]?.action).toBe("view");
+  });
+});
+
+// ─── Tests annotations §2 (target_type / cycle de vie / durabilité) ──────────
+
+describe("annotations §2 — target_type, édition/suppression, durabilité", () => {
+  it("0-backfill : une note lot (target_type par défaut) est lisible + attribuée", async () => {
+    await addNote(db, { targetType: "lot", noLot, citySlug, authorId, body: "Note lot", mode: "real" });
+    const notes = await listNotes(db, { targetType: "lot", noLot, citySlug });
+    expect(notes).toHaveLength(1);
+    expect(notes[0]?.body).toBe("Note lot");
+    expect(notes[0]?.targetType).toBe("lot");
+    expect(notes[0]?.authorId).toBe(authorId);
+    expect(notes[0]?.authorName).toBe("Test Inc2"); // attribution visible (§3.2)
+  });
+
+  it("ancre lot : no_lot/city_slug requis (CHECK chk_prospect_notes_anchor)", async () => {
+    await expect(
+      addNote(db, { targetType: "lot", noLot: null, citySlug: null, authorId, body: "sans ancre", mode: "real" }),
+    ).rejects.toThrow();
+  });
+
+  it("édition IN-PLACE author-only : l'auteur édite (updated_at avance), un autre → forbidden", async () => {
+    const note = await addNote(db, { targetType: "lot", noLot, citySlug, authorId, body: "v1", mode: "real" });
+    expect(note.updatedAt).toBeNull(); // jamais éditée
+
+    const edited = await editNote(db, note.id, authorId, "v2");
+    expect(edited.status).toBe("ok");
+    if (edited.status === "ok") {
+      expect(edited.note.body).toBe("v2");
+      expect(edited.note.updatedAt).not.toBeNull(); // éditée
+      expect(edited.note.createdAt.getTime()).toBe(note.createdAt.getTime()); // created_at immuable
+    }
+
+    // Autre auteur (même email de test, sub distinct) → forbidden (403)
+    const [other] = await db.insert(accountUsers).values({
+      sub: `test-inc2-other-${Date.now()}`, email: "test-inc2@example.com", name: "Other", status: "approved", isAdmin: false,
+    }).returning({ id: accountUsers.id });
+    const denied = await editNote(db, note.id, other!.id, "hack");
+    expect(denied.status).toBe("forbidden");
+  });
+
+  it("soft-delete author-only : suppression invisible en lecture ; un autre → forbidden", async () => {
+    const note = await addNote(db, { targetType: "lot", noLot, citySlug, authorId, body: "à supprimer", mode: "real" });
+
+    const [other] = await db.insert(accountUsers).values({
+      sub: `test-inc2-o2-${Date.now()}`, email: "test-inc2@example.com", name: "Other2", status: "approved", isAdmin: false,
+    }).returning({ id: accountUsers.id });
+    expect((await softDeleteNote(db, note.id, other!.id)).status).toBe("forbidden");
+
+    const del = await softDeleteNote(db, note.id, authorId);
+    expect(del.status).toBe("ok");
+
+    // Invisible en lecture (deleted_at IS NULL filtré)
+    expect(await listNotes(db, { targetType: "lot", noLot, citySlug })).toHaveLength(0);
+
+    // Ré-supprimer une note déjà supprimée → not_found
+    expect((await softDeleteNote(db, note.id, authorId)).status).toBe("not_found");
+  });
+
+  it("durabilité signal : ON DELETE SET NULL — supprimer le signal ne perd PAS la note (signal_id → NULL)", async () => {
+    // Fixture source → ingestion → document → signal.
+    const [src] = await db.insert(sources).values({ kind: "test", url: `https://test/${Date.now()}` }).returning({ id: sources.id });
+    const [ing] = await db.insert(ingestions).values({ sourceId: src!.id }).returning({ id: ingestions.id });
+    const [doc] = await db.insert(documents).values({ ingestionId: ing!.id, s3Key: `k/${Date.now()}`, sha256: "0".repeat(64) }).returning({ id: documents.id });
+    const [sig] = await db.insert(signals).values({ documentId: doc!.id, kind: "zonage", summary: "test signal" }).returning({ id: signals.id });
+
+    // Note ancrée signal SANS contexte lot (no_lot/city_slug NULL) — le cas exact
+    // du bug CHECK × SET NULL : la branche signal du CHECK est INCONDITIONNELLE.
+    const note = await addNote(db, { targetType: "signal", signalId: sig!.id, authorId, body: "note signal", mode: "real" });
+    expect(note.signalId).toBe(sig!.id);
+    expect(note.targetType).toBe("signal");
+
+    // Supprimer le signal → SET NULL ne doit ni violer le CHECK ni perdre la note.
+    await db.delete(signals).where(eq(signals.id, sig!.id));
+
+    const [survived] = await db.select().from(prospectNotes).where(eq(prospectNotes.id, note.id)).limit(1);
+    expect(survived).toBeTruthy();          // la note SURVIT
+    expect(survived?.signalId).toBeNull();  // dégradée en NULL, 0 perte (§3.1)
+
+    // Cleanup (la note est purgée au prochain beforeEach ; source cascade doc/ingestion).
+    await db.delete(prospectNotes).where(eq(prospectNotes.id, note.id));
+    await db.delete(sources).where(eq(sources.id, src!.id));
   });
 });
