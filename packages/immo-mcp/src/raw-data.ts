@@ -24,6 +24,7 @@ import {
   MOCK_DOCUMENTS,
   MOCK_LOT_FEATURES,
   MOCK_ZONE_FEATURES,
+  MOCK_ZONING_EVENT_FEATURES,
   type MockGeoFeature,
 } from "./mocks.js";
 
@@ -185,6 +186,89 @@ export function notFoundReglementProvenance(city: string, note: string): Regleme
   };
 }
 
+/** Borne haute par défaut sur les events (comptes par-muni petits — cf. contrat §2). */
+export const ZONING_EVENTS_DEFAULT_LIMIT = 200;
+
+export interface QueryZoningEventsArgs {
+  city: string;
+  /** Filtre : events dont `zone_codes_resolus[].zone_code` == ce code (exact). */
+  zoneCode?: string | undefined;
+  /** Filtre : `document_type` == cette valeur (exact ; avis_motion|projet_reglement|adoption|…). */
+  documentType?: string | undefined;
+  /** Filtre : `decision_state` == cette valeur (exact ; planned|decided). */
+  decisionState?: string | undefined;
+  /** Borne haute (défaut ZONING_EVENTS_DEFAULT_LIMIT). */
+  limit?: number | undefined;
+}
+
+export interface ZoningEventsResult {
+  city: string;
+  count: number;
+  /**
+   * Events de cycle de vie zonage (`qc-zoning-events`, §2), VERBATIM : chaque event
+   * = `feature.properties` SANS les clés internes préfixées `_` (breadcrumbs de
+   * capture). Anti-invention : AUCUN champ dérivé/ajouté — la relation typée
+   * (replaces/amends) et le `lifecycle_stage` sont dérivés AILLEURS (geo ne les
+   * émet jamais). `decision_state` reste tel-quel (planned ≠ decided).
+   */
+  events: Record<string, unknown>[];
+  numberMatched: number | null;
+  truncated: boolean;
+  note?: string;
+}
+
+/** Retire les clés internes préfixées `_` (breadcrumbs ; ex. `_source_url`). */
+function stripInternalKeys(props: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(props)) {
+    if (!key.startsWith("_")) out[key] = value;
+  }
+  return out;
+}
+
+/** Match client-side d'un event contre les filtres (exact-match ; zone via zone_codes_resolus). */
+function zoningEventMatches(
+  props: Record<string, unknown>,
+  args: QueryZoningEventsArgs,
+): boolean {
+  if (args.documentType !== undefined && props["document_type"] !== args.documentType) {
+    return false;
+  }
+  if (args.decisionState !== undefined && props["decision_state"] !== args.decisionState) {
+    return false;
+  }
+  if (args.zoneCode !== undefined) {
+    const resolved = props["zone_codes_resolus"];
+    const codes = Array.isArray(resolved)
+      ? resolved.map((z) =>
+          typeof z === "object" && z !== null ? (z as Record<string, unknown>)["zone_code"] : null,
+        )
+      : [];
+    if (!codes.includes(args.zoneCode)) return false;
+  }
+  return true;
+}
+
+/** Applique filtres + strip `_` sur une page d'events → ZoningEventsResult. */
+function zoningEventsFrom(
+  city: string,
+  features: readonly GeoFeature[],
+  numberMatched: number | null,
+  args: QueryZoningEventsArgs,
+): ZoningEventsResult {
+  const limit = args.limit ?? ZONING_EVENTS_DEFAULT_LIMIT;
+  const matched = features.filter((f) => zoningEventMatches(f.properties ?? {}, args));
+  const kept = matched.slice(0, limit);
+  const events = kept.map((f) => stripInternalKeys(f.properties ?? {}));
+  return {
+    city,
+    count: events.length,
+    events,
+    numberMatched,
+    truncated: matched.length > kept.length,
+  };
+}
+
 /** Contract of the raw-data provider behind the representation tools. */
 export interface RawDataSource {
   readonly mode: "mock" | "http";
@@ -193,6 +277,7 @@ export interface RawDataSource {
   getGrillePdf(args: GetGrillePdfArgs): Promise<GrillePdfResult>;
   getPvPdf(args: GetPvPdfArgs): Promise<PvPdfResult>;
   getReglementProvenance(args: GetReglementProvenanceArgs): Promise<ReglementProvenanceResult>;
+  queryZoningEvents(args: QueryZoningEventsArgs): Promise<ZoningEventsResult>;
 }
 
 // ── Shared pure helpers (used by BOTH impls, so tests cover the real path) ──
@@ -462,6 +547,14 @@ export class MockRawDataSource implements RawDataSource {
     result.note = "mode mock: fixtures déterministes (aucun réseau)";
     return result;
   }
+
+  async queryZoningEvents(args: QueryZoningEventsArgs): Promise<ZoningEventsResult> {
+    const slug = citySlug(args.city);
+    const all = this.cityFeatures(MOCK_ZONING_EVENT_FEATURES, args.city);
+    const result = zoningEventsFrom(slug, all, all.length, args);
+    result.note = "mode mock: fixtures déterministes (aucun réseau)";
+    return result;
+  }
 }
 
 // ── HTTP implementation (radar API passthrough OGC + proof-viewer route) ───
@@ -656,6 +749,28 @@ export class HttpRawDataSource implements RawDataSource {
       );
     }
     return reglementProvenanceFromFeature(slug, feature.properties ?? {});
+  }
+
+  async queryZoningEvents(args: QueryZoningEventsArgs): Promise<ZoningEventsResult> {
+    const slug = citySlug(args.city);
+    const limit = args.limit ?? ZONING_EVENTS_DEFAULT_LIMIT;
+    let page: { features: GeoFeature[]; numberMatched: number | null };
+    try {
+      page = await this.fetchItems(`qc-zoning-events-${slug}`, limit);
+    } catch (err) {
+      if (err instanceof Error && err.message.startsWith("collection_not_found:")) {
+        return {
+          city: slug,
+          count: 0,
+          events: [],
+          numberMatched: 0,
+          truncated: false,
+          note: "aucun event de zonage servi pour cette ville (qc-zoning-events absent)",
+        };
+      }
+      throw err;
+    }
+    return zoningEventsFrom(slug, page.features, page.numberMatched, args);
   }
 }
 
