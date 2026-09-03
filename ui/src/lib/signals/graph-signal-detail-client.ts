@@ -7,7 +7,7 @@
  * Anti-invention: returns 404 when no signal nodes exist for the city.
  */
 
-import type { VivierV2 } from "@radar/domain";
+import type { RegulatoryStatusT, VivierV2 } from "@radar/domain";
 
 import {
   fetchWithTimeout,
@@ -521,6 +521,7 @@ export interface GraphSignalNode {
   description?: string | null;
   publishedAt?: string | null;
   etape?: string | null;
+  regulatoryStatus?: RegulatoryStatusT | null;
   docRefs?: SignalDocRef[];
   bPrime?: BPrimeClassification;
   props: Record<string, unknown>;

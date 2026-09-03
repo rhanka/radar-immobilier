@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { RegulatoryStatusT } from "@radar/domain";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 import type {
   GeoZoneFeature,
@@ -14,7 +15,11 @@ import {
   reglementSourceViewerTitle,
 } from "./signaux-reglements.js";
 
-function node(id: string, props: Record<string, unknown>): GraphSignalNode {
+function node(
+  id: string,
+  props: Record<string, unknown>,
+  regulatoryStatus: RegulatoryStatusT | null = "firm",
+): GraphSignalNode {
   return {
     id,
     type: "DesignationEvent",
@@ -22,6 +27,7 @@ function node(id: string, props: Record<string, unknown>): GraphSignalNode {
     citySlug: "delson",
     sourceRef: null,
     createdAt: null,
+    regulatoryStatus,
     props,
   };
 }
@@ -32,8 +38,9 @@ function servedNode(
   id: string,
   props: Record<string, unknown>,
   etape: string | null,
+  regulatoryStatus: RegulatoryStatusT | null = null,
 ): ServedNode {
-  return { ...node(id, props), etape };
+  return { ...node(id, props, regulatoryStatus), etape };
 }
 
 function zone(code: string, grillePdfUrl?: string): GeoZoneFeature {
@@ -143,7 +150,7 @@ describe("isReglementAvisOnly", () => {
 });
 
 describe("aggregateReglements", () => {
-  it("re-drive hide-72 depuis node.etape servi sans sur-filtrer les contrôles", () => {
+  it("masque les statuts non-firm après lecture de node.etape", () => {
     const steMartineAvisOnly = [
       "025-500",
       "026-508",
@@ -181,18 +188,10 @@ describe("aggregateReglements", () => {
 
     expect(numbers.filter((number) => steMartineAvisOnly.includes(number))).toEqual([]);
     expect(numbers).not.toContain("328-2026");
-    expect(numbers).toEqual(
-      expect.arrayContaining([
-        "Adoption 100",
-        "Premier 200",
-        "Mixte 300",
-        "Sans Etape 400",
-        "PIIA 500",
-      ]),
-    );
+    expect(numbers).toEqual(["Adoption 100", "Sans Etape 400"]);
   });
 
-  it("applies Rule A after aggregation without over-removing", () => {
+  it("applique le fallback firm-only après agrégation des étapes legacy", () => {
     const avisOnlyNumbers = [
       "025-500",
       "026-508",
@@ -233,20 +232,82 @@ describe("aggregateReglements", () => {
       node("piia", {
         properties: { etape: "piia", reglement_number: "PIIA 400" },
       }),
-    ];
+    ].map((node) => ({ ...node, regulatoryStatus: null }));
 
     const numbers = aggregateReglements(nodes).map((entry) => entry.number);
 
     expect(numbers.filter((number) => avisOnlyNumbers.includes(number))).toEqual([]);
     expect(numbers).not.toContain("328-2026");
-    expect(numbers).toEqual(
-      expect.arrayContaining([
-        "FeRmE 100",
-        "InCoNnU 200",
-        "Sans Etape 300",
-        "PIIA 400",
-      ]),
-    );
+    expect(numbers).toEqual(["FeRmE 100"]);
+  });
+
+  it("montre un règlement adopté avec regulatoryStatus firm", () => {
+    const entries = aggregateReglements([
+      servedNode("adoption", { reglement_number: "2026-100" }, "adoption", "firm"),
+    ]);
+
+    expect(entries).toMatchObject([
+      { number: "2026-100", regulatoryStatus: "firm" },
+    ]);
+  });
+
+  it.each(["projet_reglement", "second_projet", "avis_motion"])(
+    "masque un règlement à l'étape %s",
+    (etape) => {
+      const entries = aggregateReglements([
+        servedNode(etape, { reglement_number: `REG-${etape}` }, etape, "anticipation"),
+      ]);
+
+      expect(entries).toEqual([]);
+    },
+  );
+
+  it("masque Brossard REG-362-46/49 quand tous ses nœuds sont en anticipation", () => {
+    const entries = aggregateReglements([
+      servedNode(
+        "brossard-projet",
+        { reglement_number: "REG-362-46/49" },
+        "projet_reglement",
+        "anticipation",
+      ),
+      servedNode(
+        "brossard-second",
+        { reglement_number: "REG-362-46/49" },
+        "second_projet",
+        "anticipation",
+      ),
+    ]);
+
+    expect(entries).toEqual([]);
+  });
+
+  it("masque uniformément les règlements non-firm des trois villes", () => {
+    const entries = aggregateReglements([
+      {
+        ...servedNode("ste-martine", { reglement_number: "026-508" }, "avis_motion", "anticipation"),
+        citySlug: "sainte-martine",
+      },
+      {
+        ...servedNode("st-bruno", { reglement_number: "URB-Z17" }, "second_projet", "anticipation"),
+        citySlug: "saint-bruno-de-montarville",
+      },
+      {
+        ...servedNode("brossard", { reglement_number: "REG-362-46" }, "projet_reglement", "anticipation"),
+        citySlug: "brossard",
+      },
+    ]);
+
+    expect(entries).toEqual([]);
+  });
+
+  it("dérive firm depuis adoption quand regulatoryStatus est null", () => {
+    const entries = aggregateReglements([
+      servedNode("legacy-adoption", { reglement_number: "2026-101" }, "adoption", null),
+    ]);
+
+    expect(entries).toMatchObject([
+      { number: "2026-101", regulatoryStatus: "firm" },
+    ]);
   });
 
   it("groupe par numéro, compte les signaux et collecte les zones citées", () => {
