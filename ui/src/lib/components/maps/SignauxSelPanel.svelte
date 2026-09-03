@@ -1503,6 +1503,30 @@
                     {value === "—" ? "non renseigné" : value}
                   </span>
                 {/each}
+                <!-- §7 LOT 1.b — provenance du règlement porteur de la norme
+                     (numéro/millésime + lien source), servie par geo via
+                     qc-zonage-norms et foldée sur le lot. Anti-invention : rendu
+                     UNIQUEMENT quand geo la sert (reglement != null). Miroir de la
+                     fiche Zones (lien « Ouvrir le règlement », nouvel onglet). -->
+                {#if zoneNormes.reglement}
+                  <span class="entity-meta-key">Règlement</span>
+                  {#if zoneNormes.reglement.url}
+                    <a
+                      class="entity-meta-val zone-audit-link"
+                      data-testid="reglement-normes-provenance-link"
+                      href={zoneNormes.reglement.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Ouvrir le règlement (PDF public, nouvel onglet)"
+                    >
+                      {zoneNormes.reglement.text}
+                    </a>
+                  {:else}
+                    <span class="entity-meta-val" data-testid="reglement-normes-provenance">
+                      {zoneNormes.reglement.text}
+                    </span>
+                  {/if}
+                {/if}
               </div>
             {:else}
               <p class="sel-empty" data-testid="reglement-normes-empty">

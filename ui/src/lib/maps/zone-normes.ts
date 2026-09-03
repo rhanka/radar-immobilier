@@ -22,7 +22,9 @@ import type { LotFeature, LotProperties } from "$lib/maps/lots-client.js";
 import {
   lotNormesRows,
   lotZoneCode,
+  reglementProvenance,
   usageDominantDisplay,
+  type ReglementProvenanceDisplay,
 } from "$lib/components/maps/lot-fiche-utils.js";
 import { zoneRefComparableKey } from "$lib/maps/signaux-map-geo.js";
 
@@ -33,6 +35,13 @@ export interface ZoneNormesDisplay {
   rows: Array<[string, string]>;
   /** true dès qu'au moins un champ (usage OU une norme) est réellement servi. */
   served: boolean;
+  /**
+   * Provenance affichable du règlement en vigueur porteur de la norme
+   * (`reglementProvenance` du lot représentatif de la zone), ou null si aucun
+   * lot de la zone ne porte de numéro/URL de règlement. Anti-invention : lu
+   * UNIQUEMENT du servi (`qc-zonage-norms-<slug>` foldé sur le lot), jamais deviné.
+   */
+  reglement: ReglementProvenanceDisplay | null;
 }
 
 function hasAnyNorme(
@@ -57,6 +66,7 @@ export function zoneNormesFromLots(
     usageDominant: null,
     rows: lotNormesRows(null),
     served: false,
+    reglement: null,
   };
   if (!zoneCode) return fallback;
   const key = zoneRefComparableKey(zoneCode);
@@ -67,6 +77,9 @@ export function zoneNormesFromLots(
   // norme (pour la grille). Séparés car un lot peut porter l'un sans l'autre.
   let usageZone: LotProperties["zone"] | null = null;
   let normes: LotProperties["normes"] | null = null;
+  // Lot représentatif porteur de la PROVENANCE règlement (numéro OU URL servi) —
+  // séparé car un lot peut porter l'usage/la grille sans provenance, ou l'inverse.
+  let reglementZone: LotProperties["zone"] | null = null;
   for (const lot of lots) {
     const code = lotZoneCode(lot.properties);
     if (!code || zoneRefComparableKey(code) !== key) continue;
@@ -76,11 +89,17 @@ export function zoneNormesFromLots(
     if (!normes && hasAnyNorme(lot.properties.normes)) {
       normes = lot.properties.normes ?? null;
     }
-    if (usageZone && normes) break;
+    if (
+      !reglementZone &&
+      (lot.properties.zone?.reglementNumero || lot.properties.zone?.reglementUrl)
+    ) {
+      reglementZone = lot.properties.zone ?? null;
+    }
+    if (usageZone && normes && reglementZone) break;
   }
 
   const usageDominant = usageDominantDisplay(usageZone);
   const rows = lotNormesRows(normes);
   const served = usageDominant !== null || rows.some(([, value]) => value !== "—");
-  return { usageDominant, rows, served };
+  return { usageDominant, rows, served, reglement: reglementProvenance(reglementZone) };
 }
