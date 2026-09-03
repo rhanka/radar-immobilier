@@ -493,7 +493,7 @@ export function extractSignalLotRefs(node: GraphSignalNode): string[] {
   return uniqueStrings(raw.flatMap((ref) => [ref, normalizeLotNoRef(ref)]));
 }
 
-function propRecords(node: GraphSignalNode): Record<string, unknown>[] {
+export function propRecords(node: GraphSignalNode): Record<string, unknown>[] {
   const props = node.props ?? {};
   const nested = props.properties;
   return typeof nested === "object" && nested !== null && !Array.isArray(nested)

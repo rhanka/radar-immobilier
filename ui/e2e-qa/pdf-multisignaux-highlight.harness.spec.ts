@@ -154,18 +154,24 @@ test.describe("SignalPdfOverlay — surlignage multi-signaux (LOT 2 #84)", () =>
 
     // Page 1 : ZÉRO marque (les 3 signaux ciblent la page 2).
     await page.getByRole("button", { name: "Page précédente" }).click();
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 1");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 1");
     await page.waitForTimeout(300);
-    expect(await page.locator(".pdf-text-layer .pdf-hl").count()).toBe(0);
-    expect(await page.locator(".pdf-text-layer .pdf-hl-badge").count()).toBe(0);
+    expect(
+      await page.locator('.pdf-page-slot[data-page-number="1"] .pdf-hl').count(),
+    ).toBe(0);
+    expect(
+      await page.locator('.pdf-page-slot[data-page-number="1"] .pdf-hl-badge').count(),
+    ).toBe(0);
     await page.screenshot({ path: `${SHOT_DIR}/pdf-v2-84-page1-clean.png` });
 
     // Page 3 : ZÉRO marque également.
     await page.getByRole("button", { name: "Page suivante" }).click();
     await page.getByRole("button", { name: "Page suivante" }).click();
-    await expect(page.locator(".pdf-overlay-meta")).toContainText("Page 3");
+    await expect(page.locator(".pdf-page-indicator")).toContainText("Page 3");
     await page.waitForTimeout(300);
-    expect(await page.locator(".pdf-text-layer .pdf-hl").count()).toBe(0);
+    expect(
+      await page.locator('.pdf-page-slot[data-page-number="3"] .pdf-hl').count(),
+    ).toBe(0);
     await page.screenshot({ path: `${SHOT_DIR}/pdf-v2-84-page3-clean.png` });
   });
 

@@ -4,12 +4,12 @@
    *
    * Composé sur les briques de rail PARTAGÉES (RailShell / RailSection /
    * RailCityList — mutualisées avec la vue Sources/Couverture) :
-   *   1. Section « Signaux » : deux TABS DS (Vivier A / Vivier B).
-   *      - Vivier A : trois axes COMBINABLES (Zonage · Multifamilial 4+ ·
-   *        Précoce), tous cochés par défaut → clé `z|m|p`. Décocher recompose
-   *        la clé et lit `subsetCounts[clé]` (mécanisme d'avant #376).
-   *      - Vivier B : le vivier v2 (zonage ∩ résidentiel), avec un axe Précoce
-   *        décoché par défaut + deux exclusions d'affichage.
+   *   1. Section « Signaux » : la vue UNIQUE « Nouveau B » (le vivier v2,
+   *      zonage ∩ résidentiel). Trois axes COMBINABLES (Zonage · Résidentiel ·
+   *      Précoce), tous cochés par défaut, + deux exclusions d'affichage. Plus
+   *      aucun bandeau à onglets ni pipeline « Référence A » : le panneau B est
+   *      rendu directement. La migration d'une clé A persistée → B vit dans
+   *      `vivier-view-mode.ts` (`initialVivierSubsetKey`).
    *   2. Section « Villes » : recherche + liste PLATE sélectionnable → flyTo.
    *      Cliquer une ville la sélectionne (highlight + ville active) ; ses
    *      signaux s'affichent à DROITE (SignauxSelPanel, bucket « Signaux »),
@@ -21,24 +21,19 @@
    *
    * Anti-invention : aucun appel API ici, tout par props.
    *
-   * Vague 1 DS (0.34.47+) : Tabs · Checkbox (desc+trailing) · Badge tonal ·
+   * Vague 1 DS (0.34.47+) : Checkbox (desc+trailing) · Badge tonal ·
    * StatusDot (tone) · Search fluid · Divider
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, Tabs, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { Checkbox, TimeRangePicker } from "@sentropic/design-system-svelte";
   import {
-    aFlagsFromKey,
+    B_SUBSET_KEY,
     bAxesFromVivierKey,
     countForVivierCity,
-    DEFAULT_A_FLAGS,
     DEFAULT_B_AXES,
     keyForVivierB,
-    keyFromAFlags,
-    modeFromSubsetKey,
-    type AFlags,
     type BAxes,
-    type VivierViewMode,
   } from "$lib/signals/vivier-view-mode.js";
   import {
     DEFAULT_VIVIER_B_EXCLUSIONS,
@@ -67,12 +62,13 @@
   export let dataUnavailable = false;
 
   /**
-   * Clé de MODE initiale (z|m|p ou vivier-v2), restaurée depuis l'URL au
-   * rechargement. Elle ne change QUE sur un changement de tab (ou une
-   * navigation externe) — jamais sur une simple recomposition d'axes : c'est
-   * ce qui permet à la sous-sélection LIVE de survivre au sein d'un tab.
+   * Clé de MODE initiale (toujours une clé B `vivier-v2*` après migration),
+   * restaurée depuis l'URL/localStorage au rechargement. Elle ne change que sur
+   * une navigation externe — jamais sur une simple recomposition d'axes : c'est
+   * ce qui permet à la sous-sélection LIVE de survivre. Une clé A résiduelle est
+   * dégradée vers le défaut B (filet de migration), jamais un panneau blanc.
    */
-  export let initialSubsetKey = "z|m|p";
+  export let initialSubsetKey: string = B_SUBSET_KEY;
 
   /** Exclusions d'affichage de la vue B (cochées par défaut, décochables). */
   export let exclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
@@ -198,65 +194,31 @@
     return "error";
   }
 
-  // ── État LIVE des tabs (owned by the rail) ────────────────────────────────
-  // Le tab + la sous-sélection vivent ICI. Le parent renvoie la clé LIVE
-  // composée via `initialSubsetKey` : on en DÉRIVE l'état (idempotent — renvoyer
-  // `z|p` re-produit exactement les mêmes axes, donc pas de boucle). Quand le
-  // parent COLLAPSE la clé (navigation/reload → défaut du tab), rail et carte
-  // restent synchrones : les deux repartent du même défaut (A = z|m|p).
-  function aFlagsFor(key: string): AFlags {
-    return modeFromSubsetKey(key) === "a" ? aFlagsFromKey(key) : { ...DEFAULT_A_FLAGS };
-  }
+  // ── État LIVE de la vue B (owned by the rail) ─────────────────────────────
+  // La sous-sélection d'axes B vit ICI. Le parent renvoie la clé LIVE composée
+  // via `initialSubsetKey` : on en DÉRIVE les axes (idempotent — renvoyer
+  // `vivier-v2|p` re-produit exactement les mêmes axes, donc pas de boucle).
+  // Quand le parent COLLAPSE la clé (navigation/reload → défaut B), rail et
+  // carte restent synchrones : les deux repartent du même défaut B. Une clé A
+  // résiduelle (hors namespace `vivier-v2`) est dégradée vers le défaut B.
   function bAxesFor(key: string): BAxes {
-    return modeFromSubsetKey(key) === "b" ? bAxesFromVivierKey(key) : { ...DEFAULT_B_AXES };
+    return key.startsWith(B_SUBSET_KEY) ? bAxesFromVivierKey(key) : { ...DEFAULT_B_AXES };
   }
-  let activeMode: VivierViewMode = modeFromSubsetKey(initialSubsetKey);
-  let aFlags: AFlags = aFlagsFor(initialSubsetKey);
   let bAxes: BAxes = bAxesFor(initialSubsetKey);
   let lastInitialKey = initialSubsetKey;
   $: if (initialSubsetKey !== lastInitialKey) {
     lastInitialKey = initialSubsetKey;
-    activeMode = modeFromSubsetKey(initialSubsetKey);
-    aFlags = aFlagsFor(initialSubsetKey);
     bAxes = bAxesFor(initialSubsetKey);
   }
 
-  /** Clé LIVE composée : axes de A ou axes de B (zonage/résidentiel/précoce). */
-  $: activeKey =
-    activeMode === "b" ? keyForVivierB(bAxes) : keyFromAFlags(aFlags);
-
-  /**
-   * Change de tab : réinitialise la sous-sélection au défaut du nouveau tab.
-   * Le param est `string | Event` pour satisfaire le typage de `Tabs.onchange`
-   * (qui s'intersecte avec l'attribut HTML `onchange`) ; Tabs passe la valeur
-   * du tab (chaîne), le repli défensif reste A.
-   */
-  function selectMode(value: string | Event): void {
-    const next: VivierViewMode = value === "b" ? "b" : "a";
-    activeMode = next;
-    aFlags = { ...DEFAULT_A_FLAGS };
-    bAxes = { ...DEFAULT_B_AXES };
-    onFilterChange(
-      next === "b" ? keyForVivierB(DEFAULT_B_AXES) : keyFromAFlags(DEFAULT_A_FLAGS),
-    );
-  }
-
-  /** Coche/décoche un axe de A : recompose la clé et propage. */
-  function toggleAFlag(patch: Partial<AFlags>): void {
-    aFlags = { ...aFlags, ...patch };
-    onFilterChange(keyFromAFlags(aFlags));
-  }
+  /** Clé LIVE composée des trois axes de B (zonage/résidentiel/précoce). */
+  $: activeKey = keyForVivierB(bAxes);
 
   /** Coche/décoche un axe de B (zonage/résidentiel/précoce) : recompose et propage. */
   function toggleBAxis(patch: Partial<BAxes>): void {
     bAxes = { ...bAxes, ...patch };
     onFilterChange(keyForVivierB(bAxes));
   }
-
-  const TAB_LABELS: Record<VivierViewMode, string> = {
-    a: "Référence A",
-    b: "Nouveau B",
-  };
 
   // ── Compteur actif par ville = compte bulk de la clé LIVE ──────────────────
   /**
@@ -312,7 +274,7 @@
     return countForVivierCity(entry, key);
   }
 
-  // ── Liste de villes (la recherche + le plafond vivent dans RailCityList) ──
+  // ── Liste de villes (la recherche vit dans RailCityList — liste complète) ──
   // #5 — garder la ville sélectionnée même si son compte pour le filtre actif
   // est 0 (elle reste visible/désélectionnable dans le rail).
   // #378 — appartenance et TRI par compte BULK uniquement : le compte live de
@@ -409,43 +371,9 @@
 
 <svelte:window onpointerdown={refreshTimeRangeMax} onkeydown={refreshTimeRangeMax} />
 
-<!-- Panneaux de tab déclarés au NIVEAU RACINE (pas dans <RailSection>, sinon
-     Svelte les passerait comme props de RailSection) puis rendus par Tabs. -->
-{#snippet panelA()}
-  <div class="vivier-panel">
-    <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
-      <TimeRangePicker
-        class="signals-time-range-picker"
-        value={timeRange}
-        onChange={onTimeRangeChange}
-        presets={SIGNAL_TIME_RANGE_PRESETS}
-        size="sm"
-        locale="fr-CA"
-        max={timeRangeMax}
-        label="Période des signaux"
-        formatRange={formatSignalTimeRange}
-      />
-    </div>
-    <div class="vivier-toggles">
-      <Checkbox
-        label="Zonage"
-        checked={aFlags.z}
-        onchange={(event) => toggleAFlag({ z: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Multifamilial 4+"
-        checked={aFlags.m}
-        onchange={(event) => toggleAFlag({ m: event.currentTarget.checked })}
-      />
-      <Checkbox
-        label="Précoce"
-        checked={aFlags.p}
-        onchange={(event) => toggleAFlag({ p: event.currentTarget.checked })}
-      />
-    </div>
-  </div>
-{/snippet}
-
+<!-- Le panneau B (checkboxes d'axes + exclusions) est déclaré au NIVEAU RACINE
+     (pas dans <RailSection>, sinon Svelte le passerait comme prop) puis rendu
+     directement dans la section « Signaux » — plus aucun onglet. -->
 {#snippet panelB()}
   <div class="vivier-panel">
     <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
@@ -514,29 +442,11 @@
     {/if}
   </svelte:fragment>
 
-  <!-- ── Section 1 : tabs Vivier A / Vivier B ────────────────────────────── -->
+  <!-- ── Section 1 : vue UNIQUE « Nouveau B » (plus de bandeau à onglets) ─── -->
   <RailSection label="Signaux">
-    <!-- Le panneau riche (checkboxes, compteurs) est rendu PAR le composant DS
-         Tabs via un snippet ; on ne réimplémente ni les onglets ni le panneau.
-         `{#key activeMode}` re-monte Tabs quand le TAB change (clic ou nav
-         externe) pour resynchroniser l'onglet actif — mais PAS sur une simple
-         recomposition d'axes (le mode ne change pas), qui garderait le focus. -->
-    <!-- Le wrapper porte les tokens DS de taille des onglets : ils cascadent
-         par variable CSS dans le composant Tabs (scoped, aucun override
-         d'interne). -->
-    <div class="vivier-tabs-wrap">
-      {#key activeMode}
-        <Tabs
-          label="Vivier"
-          activeValue={activeMode}
-          onchange={selectMode}
-          items={[
-            { value: "a", label: TAB_LABELS.a, content: panelA },
-            { value: "b", label: TAB_LABELS.b, content: panelB },
-          ]}
-        />
-      {/key}
-    </div>
+    <!-- Le panneau B est rendu DIRECTEMENT : plus de composant Tabs, plus de
+         switcher « Référence A / Nouveau B », plus d'en-tête d'onglet. -->
+    {@render panelB()}
   </RailSection>
 
   <!-- ── Section 2 : Villes (recherche + liste plate sélectionnable) ─────── -->
@@ -557,16 +467,7 @@
 </RailShell>
 
 <style>
-  /* ── Onglets vivier : taille STANDARD compacte du rail. Les tokens DS posés
-     sur le wrapper cascadent (variables CSS) dans le composant Tabs — zéro
-     override d'interne. Sans ça, les onglets héritent d'une fonte trop grande. ── */
-  .vivier-tabs-wrap {
-    --st-component-tabs-tabFontSize: var(--rail-fs-small, 0.8125rem);
-    --st-component-tabs-tabPaddingBlock: 0.5rem;
-    --st-component-tabs-tabPaddingInline: 0.25rem;
-  }
-
-  /* ── Panneau d'un tab vivier ── */
+  /* ── Panneau de la vue B ── */
   .vivier-panel {
     display: flex;
     flex-direction: column;

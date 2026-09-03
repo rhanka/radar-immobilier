@@ -3,8 +3,10 @@ import { createApp } from "./app.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
+import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
 import {
   createObjectStore,
+  getGeoDocumentsReader,
   getScrapeObjectStore,
   makeObjectStoreProbe,
 } from "./storage/s3-object-store.js";
@@ -18,6 +20,22 @@ const objectStore = createObjectStore(config);
 // Dedicated scraping-document store (SCW `radar-immobilier-docs` in production;
 // falls back to MinIO locally when SCRAPE_S3_* env vars are not set).
 const scrapeObjectStore = getScrapeObjectStore(config);
+
+// immo→geo document repoint (default OFF). Only when GEO_DOCUMENTS_REPOINT=1 do
+// we build the read-only geo reader; its dedicated GEO_DOCUMENTS_S3_* wiring is
+// then required (resolveGeoDocumentsS3Config throws otherwise — no immo fallback).
+const geoDocumentsReader = config.GEO_DOCUMENTS_REPOINT
+  ? getGeoDocumentsReader(config)
+  : undefined;
+const geoKeyIndex = config.GEO_DOCUMENTS_REPOINT
+  ? loadGeoKeyIndex(config.GEO_DOCUMENTS_INDEX_PATH)
+  : undefined;
+logger.info(
+  { geoDocumentsRepoint: config.GEO_DOCUMENTS_REPOINT },
+  config.GEO_DOCUMENTS_REPOINT
+    ? "immo→geo document repoint ENABLED (PV PDFs served read-only from geo)"
+    : "immo→geo document repoint disabled (PV PDFs served from immo store)",
+);
 
 // Resolve the OIDC relying-party config. `enabled` is false unless the
 // deployment injected the IdP wiring + secrets — local dev stays OPEN.
@@ -44,6 +62,9 @@ const app = createApp({
   checkObjectStore: makeObjectStoreProbe(objectStore),
   store: objectStore,
   scrapeStore: scrapeObjectStore,
+  geoDocumentsRepoint: config.GEO_DOCUMENTS_REPOINT,
+  ...(geoDocumentsReader ? { geoDocumentsReader } : {}),
+  ...(geoKeyIndex ? { geoKeyIndex } : {}),
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
   auth,

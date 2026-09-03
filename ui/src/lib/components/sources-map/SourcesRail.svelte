@@ -15,8 +15,8 @@
    *
    * La portée choisie filtre la liste de villes ET la coloration carte
    * (l'expression d'opacité vit dans la vue). Chaque ligne ville porte la
-   * pastille + le badge tri-état « Servi / Partiel / Non couvert » (couverture
-   * = sémantique de la vue Sources).
+   * pastille + le badge du KPI actif. Sans KPI fourni, le composant conserve sa
+   * sémantique tri-état historique pour ses autres consommateurs et ses tests.
    *
    * Anti-invention : aucun appel API ici, tout par props.
    */
@@ -25,6 +25,13 @@
   import RailSection from "$lib/components/maps/RailSection.svelte";
   import RailCityList from "$lib/components/maps/RailCityList.svelte";
   import type { RailCityItem } from "$lib/maps/rail-city-items.js";
+  import {
+    geoCellFor,
+    palierCellStatusLabel,
+    PALIER_CELL_BADGE_TONE,
+    PALIER_CELL_COLOR,
+    type PalierCityRow,
+  } from "$lib/palier/palier-matrix-client.js";
   import {
     colorForCity,
     computeFocusScope,
@@ -51,6 +58,9 @@
   export let dataUnavailable = false;
   /** Portée active (contrôlée par la vue — pilote liste ET carte). */
   export let scope: CoverageScope = "all";
+  export let kpiRows: PalierCityRow[] = [];
+  export let activeKpiId: string | null = null;
+  export let activeKpiLabel = "";
 
   // ── Callbacks ──────────────────────────────────────────────────────────────
   /** Changement de portée (radio EXCLUSIF). */
@@ -72,6 +82,19 @@
         (selectedSlug !== null && city.citySlug === selectedSlug),
     )
     .sort(compareCities);
+  $: kpiRowBySlug = new Map(kpiRows.map((row) => [row.citySlug, row]));
+
+  function activeCell(
+    city: CityCoverage,
+    kpiId: string | null,
+    rows: Map<string, PalierCityRow>,
+  ) {
+    if (kpiId === null) return null;
+    return rows
+      .get(city.citySlug)
+      ?.cells.find((cell) => cell.kpiId === kpiId) ??
+      geoCellFor(kpiId, city);
+  }
 
   /** Tri : priorityRank croissant (null en dernier), puis nom (fr). */
   function compareCities(a: CityCoverage, b: CityCoverage): number {
@@ -82,7 +105,27 @@
   }
 
   /** Projection générique consommée par la liste partagée RailCityList. */
-  function toRailItem(city: CityCoverage): RailCityItem {
+  function toRailItem(
+    city: CityCoverage,
+    kpiId: string | null,
+    kpiLabel: string,
+    rows: Map<string, PalierCityRow>,
+  ): RailCityItem {
+    const cell = activeCell(city, kpiId, rows);
+    if (cell) {
+      const label = palierCellStatusLabel(cell.status);
+      return {
+        slug: city.citySlug,
+        name: city.cityName,
+        sublabel: city.mrc ?? null,
+        dotColor: PALIER_CELL_COLOR[cell.status],
+        badge: {
+          label,
+          tone: PALIER_CELL_BADGE_TONE[cell.status],
+          ariaLabel: `${kpiLabel || kpiId} : ${label}`,
+        },
+      };
+    }
     return {
       slug: city.citySlug,
       name: city.cityName,
@@ -96,7 +139,9 @@
     };
   }
 
-  $: railItems = scopedCities.map(toRailItem);
+  $: railItems = scopedCities.map((city) =>
+    toRailItem(city, activeKpiId, activeKpiLabel, kpiRowBySlug),
+  );
 
   function handleSelectSlug(slug: string): void {
     const city = cities.find((c) => c.citySlug === slug);
@@ -106,6 +151,12 @@
   // ── Compteurs (synthèse + badges des portées) ──────────────────────────────
   $: scopedServed = scopedCities.filter((c) => c.worstStatus === "verified").length;
   $: scopedPartial = scopedCities.filter((c) => c.worstStatus === "declared").length;
+  $: scopedKpiComplete = scopedCities.filter(
+    (city) => activeCell(city, activeKpiId, kpiRowBySlug)?.status === "complete",
+  ).length;
+  $: scopedKpiPartial = scopedCities.filter(
+    (city) => activeCell(city, activeKpiId, kpiRowBySlug)?.status === "incomplete",
+  ).length;
   $: scopeCounts = Object.fromEntries(
     COVERAGE_SCOPE_OPTIONS.map((opt) => [
       opt.value,
@@ -124,8 +175,13 @@
     {:else}
       <span class="rail-count-strong">{scopedCities.length}</span>
       ville{scopedCities.length !== 1 ? "s" : ""}
-      · <span class="rail-count-strong">{scopedServed}</span> servie{scopedServed !== 1 ? "s" : ""}
-      · <span class="rail-count-strong">{scopedPartial}</span> partielle{scopedPartial !== 1 ? "s" : ""}
+      {#if activeKpiId}
+        · <span class="rail-count-strong">{scopedKpiComplete}</span> complète{scopedKpiComplete !== 1 ? "s" : ""}
+        · <span class="rail-count-strong">{scopedKpiPartial}</span> partielle{scopedKpiPartial !== 1 ? "s" : ""}
+      {:else}
+        · <span class="rail-count-strong">{scopedServed}</span> servie{scopedServed !== 1 ? "s" : ""}
+        · <span class="rail-count-strong">{scopedPartial}</span> partielle{scopedPartial !== 1 ? "s" : ""}
+      {/if}
     {/if}
   </svelte:fragment>
 

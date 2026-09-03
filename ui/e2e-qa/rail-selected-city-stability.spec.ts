@@ -190,9 +190,8 @@ function ndbcBadge(page: Page) {
 
 async function openVivierB(page: Page): Promise<void> {
   await page.goto("/#/signaux");
-  // Tab A lit subsetCounts["z|m|p"] (non peuplé) : basculer en B AVANT
-  // d'attendre les lignes — elles ne comptent que sur vivierV2Counts.
-  await page.getByRole("tab", { name: "Nouveau B" }).click();
+  // Le vivier B est la vue UNIQUE par défaut (bandeau à onglets retiré) : les
+  // lignes du rail lisent directement `vivierV2Counts`, sans bascule d'onglet.
   await cityRows(page).first().waitFor({ state: "visible", timeout: 15_000 });
 }
 

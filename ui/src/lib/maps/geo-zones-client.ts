@@ -52,6 +52,13 @@ export interface GeoZoneProperties {
   reglementMillesime?: string | null;
   /** Numéro du règlement de zonage porteur (ex. "2008-102") quand la source l'expose. */
   reglementNumero?: string | null;
+  /**
+   * Lien PUBLIC ouvrable du règlement porteur (grille PDF geo, ou `sourceUrl`
+   * publique du graphe-signal quand geo est muet) — nouvel onglet. `null`/absent
+   * quand aucune source ouvrable n'est disponible. JAMAIS un lien d'archive
+   * `/api/documents/raw`.
+   */
+  reglementUrl?: string | null;
   /** UI-derived : couleur résolue de l'aplat par kind (peinture MapLibre) — jamais persistée. */
   kindColor?: string;
   /** UI-derived : zone SÉLECTIONNÉE (exergue orange C3) — jamais persistée. */

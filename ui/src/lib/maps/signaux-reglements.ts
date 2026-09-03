@@ -13,14 +13,29 @@
  */
 import {
   extractSignalEvidence,
+  extractZoneReglements,
   type GraphSignalNode,
   type SignalEvidence,
 } from "$lib/signals/graph-signal-detail-client.js";
-import type { GeoZoneFeature } from "$lib/maps/geo-zones-client.js";
+import type {
+  GeoZoneFeature,
+  GeoZonesResponse,
+} from "$lib/maps/geo-zones-client.js";
 import {
   extractSignalZoneRefs,
+  propRecords,
   zoneRefComparableKey,
 } from "$lib/maps/signaux-map-geo.js";
+import {
+  aggregateRegulatoryStatus,
+  isReglementAvisOnly,
+  readRegulatoryStatus,
+  REGLEMENT_STAGES_FERMES,
+  RegulatoryStageKind,
+  type RegulatoryStatusT,
+} from "@radar/domain";
+
+export { isReglementAvisOnly, REGLEMENT_STAGES_FERMES };
 
 export interface ReglementEntry {
   /** Numéro de règlement affiché VERBATIM (ex. "2008-102", "1926-26"). */
@@ -35,6 +50,8 @@ export interface ReglementEntry {
   zoneCodes: string[];
   /** URLs de grille de zonage PDF des zones liées (dédup). */
   grillePdfUrls: string[];
+  /** Statut réglementaire agrégé : ferme si au moins un nœud est ferme. */
+  regulatoryStatus: RegulatoryStatusT;
   /**
    * Signal représentatif porteur d'une source documentaire OUVRABLE (rawRef
    * en priorité — rendu PDF same-origin — sinon documentUrl/sourceUrl). null
@@ -43,9 +60,36 @@ export interface ReglementEntry {
   evidenceNodeId: string | null;
 }
 
-/** Numéros de règlement portés par un nœud (tableau ou scalaire), dédupés. */
+/**
+ * Titre EXACT du document ouvert depuis le drawer Règlements dans le viewer
+ * partagé. Ce document N'EST PAS le PDF du règlement lui-même : aucun texte de
+ * règlement n'est modélisé ici. C'est le PROCÈS-VERBAL source du signal
+ * représentatif — celui qui CITE ce règlement (cf. `ReglementEntry.evidenceNodeId`).
+ *
+ * Le titre doit donc marquer explicitement « PV source », distinct :
+ *   (a) de la preuve d'un signal (fiche Signaux, « Voir la preuve »),
+ *   (b) du PDF de règlement (non disponible),
+ *   (c) de la grille de zonage (« Grille de zonage — … »).
+ *
+ * Sans ce marquage, le PV serait présenté comme s'il était le règlement — la
+ * substitution que la spec §3.1 interdit (« distinguish a source document from
+ * a regulation or zoning-grid PDF »).
+ */
+export function reglementSourceViewerTitle(number: string): string {
+  return `PV source — règlement ${number}`;
+}
+
+/**
+ * Numéros de règlement portés par un nœud (tableau ou scalaire), dédupés.
+ *
+ * Lit AUX DEUX niveaux — `node.props` (top-level) ET `node.props.properties`
+ * (imbriqué) — via `propRecords`, car graphify range `reglement_number` sous
+ * `props.properties` sur la majorité des villes (154 concernées). Sans cette
+ * lecture imbriquée, le drawer Règlements restait vide alors que la donnée
+ * existe. C'est exactement le pattern déjà utilisé par `extractSignalZoneRefs`
+ * (source unique dans `signaux-map-geo`).
+ */
 export function readReglementNumbers(node: GraphSignalNode): string[] {
-  const props = node.props;
   const out: string[] = [];
   const seen = new Set<string>();
   const push = (value: unknown): void => {
@@ -58,16 +102,18 @@ export function readReglementNumbers(node: GraphSignalNode): string[] {
     seen.add(norm);
     out.push(str);
   };
-  for (const key of [
-    "reglement_number",
-    "reglementNumber",
-    "reglement_numero",
-    "bylaw",
-    "reglementNumbers",
-  ]) {
-    const value = props[key];
-    if (Array.isArray(value)) value.forEach(push);
-    else push(value);
+  for (const record of propRecords(node)) {
+    for (const key of [
+      "reglement_number",
+      "reglementNumber",
+      "reglement_numero",
+      "bylaw",
+      "reglementNumbers",
+    ]) {
+      const value = record[key];
+      if (Array.isArray(value)) value.forEach(push);
+      else push(value);
+    }
   }
   return out;
 }
@@ -75,6 +121,27 @@ export function readReglementNumbers(node: GraphSignalNode): string[] {
 /** Clé de dédup d'un numéro de règlement : casse + espaces neutralisés. */
 export function normalizeReglementKey(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
+/** Étape servie en 1re-classe, avec repli sur les props des anciens payloads. */
+export function readNodeEtape(node: GraphSignalNode): string | null {
+  const values = [node.etape, ...propRecords(node).map((record) => record.etape)];
+  for (const value of values) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim().toLowerCase();
+    }
+  }
+  return null;
+}
+
+/** Statut de cycle secondaire, validé par le contrat domaine. */
+function readNodeStatut(node: GraphSignalNode) {
+  const values = propRecords(node).flatMap((record) => [record.statut, record.status]);
+  for (const value of values) {
+    const parsed = RegulatoryStageKind.safeParse(value);
+    if (parsed.success) return parsed.data;
+  }
+  return null;
 }
 
 /** Une preuve est ouvrable si elle porte une source documentaire (rawRef/URL). */
@@ -86,10 +153,11 @@ function evidenceOpenable(evidence: SignalEvidence): boolean {
   );
 }
 
-interface MutableEntry extends ReglementEntry {
+interface MutableEntry extends Omit<ReglementEntry, "regulatoryStatus"> {
   _seenZone: Set<string>;
   _seenGrille: Set<string>;
   _hasRawEvidence: boolean;
+  _regulatoryStatuses: RegulatoryStatusT[];
 }
 
 /**
@@ -122,6 +190,12 @@ export function aggregateReglements(
     const evidence = extractSignalEvidence(node);
     const openable = evidenceOpenable(evidence);
     const hasRaw = evidence.rawRef !== null;
+    const etape = readNodeEtape(node);
+    const regulatoryStatus = readRegulatoryStatus({
+      regulatoryStatus: node.regulatoryStatus,
+      statut: readNodeStatut(node),
+      etape,
+    });
 
     for (const number of numbers) {
       const key = normalizeReglementKey(number);
@@ -138,10 +212,12 @@ export function aggregateReglements(
           _seenZone: new Set(),
           _seenGrille: new Set(),
           _hasRawEvidence: false,
+          _regulatoryStatuses: [],
         };
         byKey.set(key, entry);
         order.push(key);
       }
+      entry._regulatoryStatuses.push(regulatoryStatus);
       if (!entry.signalNodeIds.includes(node.id)) {
         entry.signalNodeIds.push(node.id);
         entry.signalCount += 1;
@@ -170,21 +246,79 @@ export function aggregateReglements(
     }
   }
 
-  const entries: ReglementEntry[] = order.map((key) => {
-    const entry = byKey.get(key)!;
-    return {
-      number: entry.number,
-      key: entry.key,
-      signalCount: entry.signalCount,
-      signalNodeIds: entry.signalNodeIds,
-      zoneCodes: entry.zoneCodes,
-      grillePdfUrls: entry.grillePdfUrls,
-      evidenceNodeId: entry.evidenceNodeId,
-    };
-  });
+  const entries: ReglementEntry[] = order
+    .filter(
+      (key) =>
+        aggregateRegulatoryStatus(byKey.get(key)!._regulatoryStatuses) === "firm",
+    )
+    .map((key) => {
+      const entry = byKey.get(key)!;
+      return {
+        number: entry.number,
+        key: entry.key,
+        signalCount: entry.signalCount,
+        signalNodeIds: entry.signalNodeIds,
+        zoneCodes: entry.zoneCodes,
+        grillePdfUrls: entry.grillePdfUrls,
+        regulatoryStatus: aggregateRegulatoryStatus(entry._regulatoryStatuses),
+        evidenceNodeId: entry.evidenceNodeId,
+      };
+    });
   entries.sort(
     (a, b) =>
       b.signalCount - a.signalCount || a.number.localeCompare(b.number, "fr"),
   );
   return entries;
+}
+
+/**
+ * Injecte le règlement de zonage SOURCÉ DU GRAPHE-SIGNAL dans l'objet zone
+ * (`GeoZoneFeature.properties`), keyé par `zoneRefComparableKey(zone.code)`.
+ *
+ * Contrat (cf. `extractZoneReglements`) :
+ *   - LE GEO GAGNE : une zone qui porte déjà un `reglementNumero` servi par geo
+ *     n'est JAMAIS écrasée — le graphe-signal ne fait que combler les zones que
+ *     geo laisse muettes.
+ *   - Rattachement HONNÊTE : seules les zones qu'un nœud co-localise avec un
+ *     `reglement_number` (même-nœud) sont enrichies ; aucune zone sans match
+ *     n'est touchée (« Règlement non renseigné » préservé).
+ *   - `reglementUrl` = `sourceUrl` PUBLIQUE du nœud (nouvel onglet), jamais un
+ *     lien d'archive.
+ *
+ * Non destructif : renvoie la MÊME référence quand rien ne change (aucun
+ * règlement dérivable, ou toutes les zones déjà servies par geo).
+ */
+export function enrichGeoZonesWithSignalReglements(
+  response: GeoZonesResponse | null,
+  nodes: readonly GraphSignalNode[],
+): GeoZonesResponse | null {
+  if (!response) return response;
+  const byZoneKey = extractZoneReglements(nodes);
+  if (byZoneKey.size === 0) return response;
+
+  let changed = false;
+  const features = response.featureCollection.features.map((feature) => {
+    // Le geo gagne : numéro déjà servi → on ne touche pas.
+    if (feature.properties.reglementNumero) return feature;
+    const key = zoneRefComparableKey(feature.properties.code);
+    if (key.length === 0) return feature;
+    const reg = byZoneKey.get(key);
+    if (!reg) return feature;
+    changed = true;
+    return {
+      ...feature,
+      properties: {
+        ...feature.properties,
+        reglementNumero: reg.numero,
+        ...(reg.millesime !== null ? { reglementMillesime: reg.millesime } : {}),
+        ...(reg.url !== null ? { reglementUrl: reg.url } : {}),
+      },
+    };
+  });
+
+  if (!changed) return response;
+  return {
+    ...response,
+    featureCollection: { ...response.featureCollection, features },
+  };
 }

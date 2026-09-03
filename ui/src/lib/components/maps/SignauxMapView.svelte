@@ -31,6 +31,8 @@
     type GeoCityMapApi,
     type GeoSegment,
   } from "$lib/components/maps/GeoCityMapBase.svelte";
+  import SignauxGeoEngineCanvas from "$lib/components/maps/SignauxGeoEngineCanvas.svelte";
+  import { GEO3D_ENGINE_ENABLED } from "$lib/maps/geo-engine-flag.js";
   import {
     buildCityMapEntries,
     type CityMapEntry,
@@ -75,12 +77,15 @@
     DEFAULT_REQUEST_TIMEOUT_MS,
   } from "$lib/net/fetch-with-timeout.js";
   import {
+    clearSelectionGroup,
     createSelectionBucketState,
+    hasZoneSelection,
     makeKey,
     parseKey,
     setFocus,
     toggleExclusiveSelection,
     toggleSelection,
+    type BucketKind,
     type SelectionBucketState,
     type SelectionKey,
   } from "$lib/maps/selection-bucket.js";
@@ -91,6 +96,8 @@
   import { zoneCodeAtPoint } from "$lib/maps/zone-membership.js";
   import {
     buildGeoLevelNavigation,
+    resolveGeoLotClick,
+    resolveLotListClickR1,
     type GeoLevel,
   } from "$lib/maps/geo-level-navigation.js";
   import {
@@ -116,12 +123,13 @@
     CITY_FALLBACK_ZONE_PREFIX,
     FILTER_DIMMED_OPACITY,
   } from "$lib/maps/signaux-map-geo.js";
+  import { enrichGeoZonesWithSignalReglements } from "$lib/maps/signaux-reglements.js";
   import {
     withHoverNeutralTint,
     withHoverOpacityBoost,
   } from "$lib/maps/hover-paint.js";
   import {
-    A_SUBSET_KEY,
+    B_SUBSET_KEY,
     clearVivierCityTransientState,
     countForVivierCity,
     initialVivierSubsetKey,
@@ -196,6 +204,12 @@
     boundsCenter,
     QUEBEC_PROVINCE_BOUNDS,
   } from "$lib/maps/geometry-bounds.js";
+  import type {
+    BasemapSpec,
+    GeoLayerSpec,
+    GeoViewport,
+    MountGeoMap,
+  } from "@sentropic/geo-map-engine";
   import type { ExpressionSpecification } from "@maplibre/maplibre-gl-style-spec";
 
   const EMPTY_ZONES: GeoZoneFeatureCollection = {
@@ -206,8 +220,26 @@
     type: "FeatureCollection",
     features: [],
   };
+  const GEO_ENGINE_BASEMAP: BasemapSpec = {
+    kind: "raster",
+    tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+    attribution: "© OpenStreetMap contributors",
+    saturation: -1,
+  };
+  const GEO_ENGINE_VIEWPORT: GeoViewport = {
+    center: [-73.5, 45.7],
+    zoom: 7,
+    bearing: 0,
+    pitch: 0,
+  };
+  const GEO_ENGINE_TOKEN_ROLES = ["semantic-data-category1"] as const;
+
+  const pendingGeoEngineMount: MountGeoMap<HTMLElement> = () => {
+    throw new Error("Le mount geo-engine attend le go de la Porte 2.");
+  };
 
   export let geoRoute: GeoRoute | null = null;
+  export let geoEngineMount: MountGeoMap<HTMLElement> = pendingGeoEngineMount;
 
   // ── State ──────────────────────────────────────────────────────────────────
   let selectedCity: CityMapEntry | null = null;
@@ -276,6 +308,13 @@
   // Réinitialisé au changement de ville et au retour Province.
   let cameraLot: PreviousCameraLot | null = null;
 
+  // C1 — état du toggle ZOOM/UNZOOM du segment « Ville ». `true` = caméra
+  // cadrée sur la ville (état après un flyToCity) ; un clic « Ville » au niveau
+  // Ville bascule vers l'étendue province (`false`) et inversement, SANS
+  // désélectionner la ville. Remis à `true` à chaque flyToCity (sélection ville,
+  // redescente depuis zone/lot), à `false` au retour Province / désélection.
+  let villeZoomed = false;
+
   // ── m5 / UAT — Libellés sur la carte (n° de zone / n° de lot) ─────────────
   // DEUX cases INDÉPENDANTES : n° de zone et n° de lot s'affichent/masquent
   // séparément → on peut avoir zone SEUL, lot SEUL, les DEUX, ou AUCUN.
@@ -311,8 +350,10 @@
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
 
-  // ── Projection globale A / B ─────────────────────────────────────────────
-  const FILTER_DEFAULT: string = A_SUBSET_KEY;
+  // ── Projection globale du vivier B ───────────────────────────────────────
+  // Défaut B : le rail « Référence A » est retiré. La migration d'une clé A
+  // persistée/deep-linkée → B vit dans `initialVivierSubsetKey` (subsetKeyFromRoute).
+  const FILTER_DEFAULT: string = B_SUBSET_KEY;
   const FILTER_LS_KEY = "signaux-filter-subset";
   let activeSubsetKey: string = FILTER_DEFAULT;
 
@@ -378,6 +419,9 @@
   function handleTimeRangeChange(next: SignalTimeRange): void {
     timeRange = normalizeSignalTimeRange(next);
     dateRange = dateRangeFromSignalTimeRange(timeRange);
+    // #4 — re-charge les comptes BULK date-cohérents pour la nouvelle fenêtre
+    // (rail + badges de toutes les villes), pas seulement la lentille locale.
+    void load();
     reconcileToVisibleNodes();
     updateGeoLayers();
   }
@@ -534,6 +578,29 @@
 
   // ── Données réactives ──────────────────────────────────────────────────────
   $: allEntries = buildCityMapEntries(graphItems);
+  $: geoEngineLayers = GEO3D_ENGINE_ENABLED ? ([
+    {
+      id: "radar-immo/signaux/municipalities",
+      kind: "points",
+      data: {
+        type: "FeatureCollection",
+        features: allEntries.map((entry) => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [entry.municipality.lon, entry.municipality.lat],
+          },
+          properties: {
+            citySlug: entry.municipality.slug,
+            signalCount: countForVivierCity(entry, activeSubsetKey),
+          },
+        })),
+      },
+      color: { by: "constant", token: "semantic-data-category1" },
+      radius: { by: "constant", value: 6 },
+      interactivity: { idField: "citySlug", hover: true, select: true },
+    },
+  ] satisfies readonly GeoLayerSpec[]) : [];
   $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
   /**
    * Clé de MODE dérivée (z|m|p / vivier-v2) : c'est ELLE qu'on persiste et qu'on
@@ -595,6 +662,19 @@
   $: displayedLots = buildDisplayedLots(lotsResponse, zonesResponse, filteredDetailNodes);
 
   /**
+   * #3 — Règlement PAR ZONE dans la fiche : on injecte dans l'objet zone le
+   * règlement SOURCÉ DU GRAPHE-SIGNAL (numéro + URL publique du PV), keyé par
+   * `zoneRefComparableKey`, quand geo ne sert pas déjà de numéro (le geo GAGNE).
+   * On repart des nœuds NON filtrés (`detailNodes`) : le règlement porteur d'une
+   * zone ne dépend pas du filtre de signaux actif. Passe-plat sans copie quand
+   * rien ne change (fonction non destructive).
+   */
+  $: enrichedZonesResponse = enrichGeoZonesWithSignalReglements(
+    zonesResponse,
+    detailNodes,
+  );
+
+  /**
    * Les deux vues (A comme B) restreignent le jeu brut de signaux.
    * (Ne pas tester `includes("z")` : la clé de B n'est pas un jeu de flags.)
    */
@@ -627,13 +707,18 @@
     city: CityMapEntry | null,
   ): string {
     // Projection de l'état bucket vers la logique de drill PARTAGÉE (geo-drill,
-    // mutualisée avec la vue Sources/Couverture).
+    // mutualisée avec la vue Sources/Couverture). La vue Signaux ajoute le
+    // niveau LOT (drill Ville → Zone → Lot) : un lot focusé/sélectionné prime.
     const zoneSelected =
       state.focusedKey?.startsWith("zone:") ||
       [...state.selectedKeys].some((key) => key.startsWith("zone:"));
+    const lotSelected =
+      state.focusedKey?.startsWith("lot:") ||
+      [...state.selectedKeys].some((key) => key.startsWith("lot:"));
     return computeDrillLevel({
       hasSelectedCity: city !== null,
       hasZoneSelection: !!zoneSelected,
+      hasLotSelection: !!lotSelected,
     });
   }
 
@@ -768,19 +853,86 @@
   }
 
   /**
-   * Segments du drill Province / Ville / Zone (Zone grisée si non configurée).
-   * Fonction PURE évaluée dans le template (mêmes raisons que computeGeoLevel :
-   * un `$:` déclaré avant applyGeoRoute resterait périmé après un deep-link).
+   * Segments du drill Province / Ville / Zone / Lot. Fonction PURE évaluée dans
+   * le template (mêmes raisons que computeGeoLevel : un `$:` déclaré avant
+   * applyGeoRoute resterait périmé après un deep-link).
+   *
+   * On FOURNIT `hasZoneSelection` : cela active la politique STRICTE (C1
+   * « Ville » grisé sans ville, C2 « Zone » grisé tant qu'aucune zone n'est
+   * active) — divergente du contrat historique de la vue Sources, qui l'omet.
+   * « Zone » reste actif au niveau Lot (la zone reste sélectionnée), permettant
+   * le retour Lot → Zone.
    */
   function buildGeoSegments(
     city: CityMapEntry | null,
     zonesRes: GeoZonesResponse | null,
+    state: SelectionBucketState,
   ): GeoSegment[] {
     // Segments du drill PARTAGÉS (geo-drill, mutualisés avec Sources/Couverture).
-    return buildDrillSegments({
+    // La vue Signaux étend le fil avec le niveau LOT (drill jusqu'au lot).
+    const level = computeGeoLevel(state, city);
+    const segments = buildDrillSegments({
       hasSelectedCity: city !== null,
       zonesConfigured: zonesConfigured(zonesRes),
+      includeLotLevel: true,
+      hasLotSelection: level === "Lot",
+      hasZoneSelection: hasZoneSelection(state),
     });
+    // R3 — CHEMIN ACTIF surligné : le niveau courant ET la ZONE quand un LOT est
+    // sélectionné (un lot est toujours DANS une zone active) → on voit les DEUX,
+    // « Zone » reste ON avec « Lot ». Les autres niveaux gardent le highlight
+    // simple (niveau courant seul).
+    return segments.map((s) => ({
+      ...s,
+      active: s.label === level || (s.label === "Zone" && level === "Lot"),
+    }));
+  }
+
+  /**
+   * C3 — prédicat « lots interactifs » servi au socle : les lots ne sont
+   * cliquables/survolables QUE lorsqu'une zone est en scène, càd aux niveaux
+   * Zone (zone active) OU Lot (un lot est sélectionné, la zone reste active).
+   * Aux niveaux Province/Ville les lots restent VISIBLES mais PASSIFS — la
+   * cible de hit/survol est alors le polygone de ZONE. Évalué dans le template
+   * (comme computeGeoLevel : un `$:` déclaré avant applyGeoRoute serait périmé).
+   */
+  function lotsAreSelectable(
+    state: SelectionBucketState,
+    city: CityMapEntry | null,
+  ): boolean {
+    const level = computeGeoLevel(state, city);
+    return level === "Zone" || level === "Lot";
+  }
+
+  /**
+   * R1 (01KZKFBC5BR2NB15BEEJ0AWQNG) — code de la ZONE ACTIVE servi au socle pour
+   * BORNER l'interactivité des lots : seuls les lots dont `zoneCode` vaut ce code
+   * sont sélectionnables/survolables ; un clic sur un lot hors de cette zone
+   * bascule vers SA zone (switch). `null` s'il n'y a pas de zone active (la
+   * couche lot est alors passive via `lotsAreSelectable`). Évalué dans le template
+   * (comme computeGeoLevel : un `$:` avant applyGeoRoute resterait périmé).
+   */
+  function activeZoneCodeFor(state: SelectionBucketState): string | null {
+    for (const key of state.selectedKeys) {
+      const parsed = parseKey(key);
+      if (parsed?.kind === "zone") {
+        const separatorIndex = parsed.id.indexOf("/");
+        return separatorIndex > 0 ? parsed.id.slice(separatorIndex + 1) : null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * R1 — code de zone d'un lot AFFICHÉ (mêmes features que la carte : `zoneCode`
+   * cadastral joint par geo). Sert au guard liste (parité avec le clic carte, qui
+   * lit `props.zoneCode`). `null` si le lot n'est pas trouvé / sans zone.
+   */
+  function zoneCodeForDisplayedLot(noLot: string): string | null {
+    for (const lot of displayedLots.features) {
+      if (lot.properties?.noLot === noLot) return lotZoneCode(lot.properties);
+    }
+    return null;
   }
 
   // Met à jour les couches geo quand la carte ou les nœuds filtrés changent.
@@ -925,14 +1077,45 @@
 
   /** Clic aplat zone → bascule la sélection de zone. */
   function handleZoneClick(zone: { citySlug: string; code: string }): void {
-    toggleMapSelection(makeKey("zone", `${zone.citySlug}/${zone.code}`));
+    const zoneKey = makeKey("zone", `${zone.citySlug}/${zone.code}`);
+    // Nav-drill (01KZGM07) : un clic sur la zone DÉJÀ active ne la désélectionne
+    // PAS. En vue zone, MapLibre dispatche le clic à la couche zone ET à la
+    // couche lot ; sans cette garde, cliquer un lot À L'INTÉRIEUR de la zone
+    // active re-cliquait la zone → la désélectionnait. On sort d'une zone via le
+    // fil d'Ariane (Ville), pas par re-clic. Cliquer une AUTRE zone bascule.
+    if (selectionState.selectedKeys.has(zoneKey)) return;
+    toggleMapSelection(zoneKey);
   }
 
-  /** Clic aplat lot → bascule la sélection de lot (repli ville sélectionnée). */
-  function handleLotClick(lot: { noLot: string; citySlug: string | null }): void {
+  /**
+   * Clic GÉOGRAPHIQUE aplat lot → règle 1 owner (nav-drill 01KZEG78) appliquée
+   * au CLIC CARTE (pas seulement à la liste/bucket) : en vue ZONE le lot se
+   * sélectionne ; en vue VILLE le clic RÉSOUT vers la ZONE contenante du lot
+   * (entrée en vue zone) au lieu de sauter au lot. `zoneCode` est servie par geo
+   * sur le lot (payload du socle).
+   */
+  function handleLotClick(lot: {
+    noLot: string;
+    citySlug: string | null;
+    zoneCode?: string | null;
+  }): void {
     const citySlug = lot.citySlug ?? selectedCity?.municipality.slug;
     if (!citySlug) return;
-    toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`));
+    const res = resolveGeoLotClick({
+      hasZoneSelection: hasZoneSelection(selectionState),
+      zoneCode: lot.zoneCode ?? null,
+    });
+    if (res.kind === "enter-zone") {
+      // Vue ville : 1er clic du drill géographique → entre dans la zone du lot.
+      handleZoneClick({ citySlug, code: res.code });
+      return;
+    }
+    if (res.kind === "ignore") return; // vue ville sans zone dérivable → neutre
+    // Vue zone : le lot s'ouvre (drawer) et la ZONE RESTE ACTIVE — exclusif
+    // ENTRE LOTS seulement (règle 3 owner : lot-à-lot libre dans la zone).
+    toggleMapSelection(makeKey("lot", `${citySlug}/${lot.noLot}`), {
+      exclusiveKinds: ["lot"],
+    });
   }
 
   /**
@@ -946,7 +1129,10 @@
     // Restauration d'URL (deep-link /geo/city/…) : si une ville est déjà
     // sélectionnée quand la carte devient prête, le flyTo de selectCity est
     // parti dans le vide (mapApi encore null) — on cadre la ville maintenant.
-    if (selectedCity) flyToCity(selectedCity);
+    if (selectedCity) {
+      flyToCity(selectedCity);
+      villeZoomed = true; // C1 — deep-link ville : caméra en état zoomé
+    }
   }
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
@@ -998,6 +1184,7 @@
 
     // flyTo sur la carte (centroïde de la ville)
     flyToCity(entry);
+    villeZoomed = true; // C1 — caméra cadrée sur la ville (état zoomé)
 
     // Les 3 couches partent EN PARALLÈLE, chacune avec son propre waiter et sa
     // propre garde anti-course : détail (panneau droit) + zones + lots.
@@ -1081,6 +1268,7 @@
     // Contrat « lot suivant » : retour Province → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
+    villeZoomed = false; // C1 — retour Province : caméra en état dézoomé
     updateGeoLayers();
     // #13 — dézoom caméra vers l'échelle province. Optionnel : `applyGeoRoute`
     // au montage initial appelle clearSelection sans vouloir animer la carte
@@ -1089,14 +1277,28 @@
   }
 
   /**
-   * Clic sur le segmented-control Province / Ville / Zone.
-   * Province → clearSelection (retour vue globale)
-   * Ville → désélectionner les zones/lots mais conserver la ville sélectionnée
-   * Zone → sélectionner la première zone disponible (si zones configurées)
+   * Clic sur le segmented-control Province / Ville / Zone / Lot.
+   * Province → clearSelection (retour vue globale, dézoom)
+   * Ville → C1 : toggle ZOOM/UNZOOM caméra au niveau Ville, ou redescente
+   *        depuis Zone/Lot ; grisé sans ville (cf. handleVilleSegmentClick).
+   * Zone → revenir à la zone active (déselection du lot) si on vient du niveau
+   *        Lot ; sinon sélectionner la première zone disponible. C2 : grisé
+   *        tant qu'aucune zone n'est active (on entre par clic de polygone).
+   * Lot → aucune action directe : on n'y entre qu'en cliquant un lot (le
+   *        segment est actif quand un lot est focusé, no-op via la garde
+   *        `level === activeGeoLevel`).
    */
   function handleGeoLevelClick(level: string): void {
     // Niveau actif recalculé AU CLIC (jamais périmé — cf. computeGeoLevel).
     const activeGeoLevel = computeGeoLevel(selectionState, selectedCity);
+    // C1 — « Ville » n'est pas un simple indicateur : au niveau Ville il
+    // bascule le CADRAGE caméra (ville ↔ province) et depuis une zone/lot il
+    // redescend au niveau Ville. On le traite AVANT le garde « déjà au niveau
+    // actif », qui neutraliserait le toggle.
+    if (level === "Ville") {
+      handleVilleSegmentClick(activeGeoLevel);
+      return;
+    }
     if (level === activeGeoLevel) return;
     if (level === "Province") {
       // Dézoom → vue province (bug #4). On REMET L'URL au niveau `region` (en
@@ -1118,13 +1320,23 @@
       // Filet local immédiat (au cas où la route n'aurait pas changé d'identité,
       // ex. déjà en region) : on garantit un état de base propre tout de suite.
       clearSelection();
-    } else if (level === "Ville") {
-      if (!selectedCity) return;
-      // Effacer toutes les sélections zone/lot, conserver la ville
-      selectionState = createSelectionBucketState();
-      updateGeoLayers();
     } else if (level === "Zone") {
       if (!selectedCity) return;
+      // Retour depuis « Lot » : une zone est déjà active (drill Ville → Zone →
+      // Lot, la zone reste dans selectedKeys) → on Y REVIENT en effaçant la
+      // sélection lot et en refocalisant la zone, au lieu de sauter à la
+      // première zone. Cohérence stricte de la nav (déselection lot, zone active).
+      const activeZoneKey =
+        [...selectionState.selectedKeys].find((k) => k.startsWith("zone:")) ??
+        null;
+      if (activeZoneKey) {
+        selectionState = clearSelectionGroup(selectionState, "lot");
+        selectionState = setFocus(selectionState, activeZoneKey);
+        updateGeoLayers();
+        zoomToSelectionKey(activeZoneKey);
+        syncRouteForSelectionKey(activeZoneKey);
+        return;
+      }
       const zones = zonesResponse?.featureCollection.features ?? [];
       if (zones.length === 0) return; // zones non configurées — rien à faire
       const firstZone = zones[0];
@@ -1134,7 +1346,62 @@
     }
   }
 
+  /**
+   * C1 — Clic sur le segment « Ville » (grisé sans ville sélectionnée). Depuis
+   * une ZONE ou un LOT : redescend au niveau Ville (désélection zone/lot) et
+   * recadre la caméra sur la ville. Déjà au niveau Ville : bascule ZOOM/UNZOOM
+   * (cadrage ville ↔ étendue province) — la ville RESTE sélectionnée (le fil
+   * d'Ariane reste sur « Ville »).
+   */
+  function handleVilleSegmentClick(activeGeoLevel: string): void {
+    if (!selectedCity) return; // grisé (C1) — filet défensif
+    if (activeGeoLevel !== "Ville") {
+      // Redescente Zone/Lot → Ville : on efface la sélection zone/lot et on
+      // recadre sur la ville entière (état zoomé).
+      selectionState = createSelectionBucketState();
+      updateGeoLayers();
+      flyToCity(selectedCity);
+      villeZoomed = true;
+      return;
+    }
+    // Déjà au niveau Ville : toggle du cadrage caméra.
+    if (villeZoomed) {
+      flyToProvince();
+      villeZoomed = false;
+    } else {
+      flyToCity(selectedCity);
+      villeZoomed = true;
+    }
+  }
+
   function toggleBucketKey(key: SelectionKey): void {
+    // R1 (RÈGLE UNIQUE, parité carte/liste) — un lot n'est sélectionnable QUE si
+    // une zone est active ET le lot appartient à cette zone. La DÉCISION est
+    // déléguée à `resolveLotListClickR1` (pure, testée) ; on n'exécute ici que
+    // l'effet. On lit la zone du lot dans `displayedLots` (mêmes features que la
+    // carte : `zoneCode` cadastral).
+    const parsedClick = parseKey(key);
+    if (parsedClick?.kind === "lot") {
+      const separator = parsedClick.id.indexOf("/");
+      const noLot = separator > 0 ? parsedClick.id.slice(separator + 1) : "";
+      const action = resolveLotListClickR1({
+        activeZoneCode: activeZoneCodeFor(selectionState),
+        lotZoneCode: zoneCodeForDisplayedLot(noLot),
+      });
+      if (action.kind === "switch-zone") {
+        // hors zone active OU niveau ville : basculer vers la ZONE du lot (switch),
+        // jamais le lot.
+        const citySlug = selectedCity?.municipality.slug ?? null;
+        if (citySlug) toggleBucketKey(makeKey("zone", `${citySlug}/${action.code}`));
+        return;
+      }
+      if (action.kind === "ignore") {
+        // niveau ville sans zone résoluble pour ce lot → ignorer (jamais de lot
+        // sélectionné hors d'une zone active).
+        return;
+      }
+      // action.kind === "select-lot" → sélection normale du lot ci-dessous.
+    }
     // #9 fix — l'accordéon pilote le FOCUS (ouvre/ferme le détail), pas la
     // sélection multi. On bascule le focus : si l'item est déjà focusé on le
     // referme (null), sinon on le focalise (key). La sélection est assurée
@@ -1145,10 +1412,14 @@
       selectionState = setFocus(selectionState, null);
     } else {
       // Clic sur un autre item → l'ajouter aux sélectionnés si absent, puis
-      // focaliser. C3 : zone/lot passent par la sélection EXCLUSIVE (une seule
-      // sélection géo à la fois) ; signaux/ville gardent la sélection multi.
+      // focaliser. Nav-drill (01KZGM07) : un LOT sélectionné depuis la LISTE
+      // garde la ZONE active (exclusif ENTRE LOTS seulement), parité avec le
+      // clic carte (handleLotClick) ; les autres kinds gardent l'exclusif géo
+      // par défaut (zone+lot).
       if (!selectionState.selectedKeys.has(key)) {
-        selectionState = toggleExclusiveSelection(selectionState, key);
+        const exclusiveKinds: readonly BucketKind[] | undefined =
+          parseKey(key)?.kind === "lot" ? ["lot"] : undefined;
+        selectionState = toggleExclusiveSelection(selectionState, key, exclusiveKinds);
       }
       selectionState = setFocus(selectionState, key);
       // m4 — un LOT sélectionné depuis le pane droit commande la caméra
@@ -1305,11 +1576,16 @@
     return makeKey("lot", `${citySlug}/${noLot}`);
   }
 
-  function toggleMapSelection(key: SelectionKey): void {
+  function toggleMapSelection(
+    key: SelectionKey,
+    opts: { exclusiveKinds?: readonly BucketKind[] } = {},
+  ): void {
     const wasSelected = selectionState.selectedKeys.has(key);
-    // C3 — sélection EXCLUSIVE : une seule zone OU un seul lot à la fois
-    // (sélectionner un lot désélectionne la zone et réciproquement).
-    selectionState = toggleExclusiveSelection(selectionState, key);
+    // C3 — sélection EXCLUSIVE (défaut zone+lot : une zone OU un lot). Le drill
+    // owner (nav 01KZEG78) passe `exclusiveKinds:["lot"]` pour un clic LOT en
+    // vue zone : le lot devient exclusif ENTRE LOTS mais la ZONE reste active
+    // (drawer + zone active, lot-à-lot libre).
+    selectionState = toggleExclusiveSelection(selectionState, key, opts.exclusiveKinds);
     selectionState = setFocus(selectionState, wasSelected ? null : key);
     if (!wasSelected) {
       syncRouteForSelectionKey(key);
@@ -1820,11 +2096,27 @@
   }
 
   // ── Chargement API ─────────────────────────────────────────────────────────
+  // #4 — borne date locale → ISO YYYY-MM-DD pour le serveur date-aware. null
+  // (fenêtre « Illimité ») → aucune borne envoyée (= all-time).
+  function toApiDate(d: Date | null): string | null {
+    if (!d) return null;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
   async function load() {
     loading = true;
     loadError = null;
     try {
-      const res = await fetchGraphSignalsByCity();
+      // #4 — les comptes BULK (rail + badges de TOUTES les villes) deviennent
+      // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
+      // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
+      const res = await fetchGraphSignalsByCity("", {
+        dateFrom: toApiDate(dateRange.start),
+        dateTo: toApiDate(dateRange.end),
+      });
       graphItems = res.cities;
     } catch (e) {
       console.warn("Signals by city load failed:", e);
@@ -1883,15 +2175,30 @@
     l'init MapLibre, le drill segmenté, la caméra et l'échafaudage zone/lot ;
     cette vue ne pilote que les données + expressions métier. Iso-comportement.
   -->
+  {#if GEO3D_ENGINE_ENABLED}
+  <SignauxGeoEngineCanvas
+    mount={geoEngineMount}
+    basemap={GEO_ENGINE_BASEMAP}
+    layers={geoEngineLayers}
+    viewport={GEO_ENGINE_VIEWPORT}
+    tokenRoles={GEO_ENGINE_TOKEN_ROLES}
+  />
+  {:else}
   <GeoCityMapBase
+    showChatToggle
     basemap="neutral-gray"
     {fillColorExpression}
     {fillOpacityExpression}
     {showLotLabels}
     {showZoneLabels}
     activeCitySlug={selectedCity?.municipality.slug ?? null}
-    segments={buildGeoSegments(selectedCity, zonesResponse)}
+    segments={buildGeoSegments(selectedCity, zonesResponse, selectionState)}
     activeSegment={computeGeoLevel(selectionState, selectedCity)}
+    lotsSelectable={lotsAreSelectable(selectionState, selectedCity)}
+    activeZoneCode={activeZoneCodeFor(selectionState)}
+    zoneHighlightColor={computeGeoLevel(selectionState, selectedCity) === "Lot"
+      ? "#9a3412"
+      : "#ff6d00"}
     onSegmentClick={handleGeoLevelClick}
     onCityClick={handleCityClick}
     onZoneClick={handleZoneClick}
@@ -2048,6 +2355,7 @@
       />
     {/if}
   </GeoCityMapBase>
+  {/if}
 
   <!-- ── SEL droit : contexte de sélection (Ville active + Signaux / Zones /
        Lots). Les filtres DONNÉES vivent en EN-TÊTE des accordéons Zones et
@@ -2063,11 +2371,10 @@
       {zonesError}
       {lotsLoading}
       {lotsError}
-      {zonesResponse}
+      zonesResponse={enrichedZonesResponse}
       {lotsResponse}
       {selectionState}
       activeSubsetKey=""
-      vivierBMode={activeViewMode === "b"}
       lotFilter={lotDataFilter}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}
