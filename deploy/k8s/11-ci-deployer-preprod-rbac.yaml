@@ -3,18 +3,19 @@
 # ServiceAccount + Role + RoleBinding namespace-scopés à `radar-immobilier-preprod`
 # pour le job CI `deploy-preprod` (main -> preprod). Least-privilege : il ne peut
 # QUE piloter les Deployments (get/list/watch/patch/update), LIRE pods/replicasets
-# (pour `kubectl rollout status`), et EXEC dans les pods (pods/exec create) pour le
-# BACKUP-BEFORE-RELEASE §1(a). Il ne peut toucher NI un autre namespace, NI la PROD
-# (`radar-immobilier`).
+# (pour `kubectl rollout status`), et gérer des Jobs `batch/jobs`
+# (create/get/list/watch/delete) pour le BACKUP-BEFORE-RELEASE §1(a). Il ne peut
+# toucher NI un autre namespace, NI la PROD (`radar-immobilier`).
 #
-# SÉCURITÉ — portée réelle de pods/exec (à peser en co-val, §1(a)) : ce SA ne peut
-# PAS `get` un objet Secret. MAIS `pods/exec create` = shell dans n'importe quel pod
-# du namespace preprod, donc lecture de l'ENV injecté de ce pod — y compris les
-# valeurs issues de Secret montées en env (p.ex. `POSTGRES_PASSWORD` dans le pod
-# radar-postgres). C'est le prix assumé du backup-before-release ; il reste borné à
-# preprod (Role, jamais ClusterRole, jamais la prod) et n'est ARMÉ côté CI que quand
-# la variable `BACKUP_BEFORE_RELEASE_ENABLED == 'true'`. Le grant équivalent côté
-# PROD est un acte owner distinct, non inclus ici.
+# SÉCURITÉ — portée de `batch/jobs` (ruling i-infra B′, à peser en co-val §1(a)) :
+# ce SA ne peut PAS `get` un objet Secret NI `exec` dans un pod (0 pods/exec). Il
+# crée/supprime des Jobs ; c'est le Job lui-même (pas le SA CI) qui lit les creds DB
+# + S3 via `secretKeyRef` in-cluster. Le backup tourne donc EN CLUSTER en client
+# réseau (pg_dump -h radar-postgres), le runner CI ne touche jamais la DB. Grant
+# borné à preprod (Role, jamais ClusterRole, jamais la prod), 0 wildcard, et ARMÉ
+# côté CI seulement quand `BACKUP_BEFORE_RELEASE_ENABLED == 'true'`. Le grant
+# équivalent côté PROD est un acte owner distinct, non inclus ici. NB : pas de
+# `pods/log` → le runner ne peut pas `kubectl logs` le Job (logs visibles owner-side).
 #
 # ISOLATION (revue CD MUST-FIX #3) : prod et preprod partagent le MÊME apiserver OVH,
 # donc le pre-flight d'hôte ne distingue pas les envs — la SEULE frontière d'accès est
@@ -60,15 +61,16 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch"]
-  # BACKUP-BEFORE-RELEASE (§1(a)) : le job CD `deploy-preprod` exec `pg_dump` dans
-  # le pod radar-postgres AVANT le set-image (deploy/ci/db-backup.sh). `kubectl exec`
-  # = create sur la sous-ressource pods/exec. Borné à CE namespace preprod (Role, pas
-  # ClusterRole). Blast-radius (exec = shell dans le pod, dont accès DB / env-secrets)
-  # documenté dans l'en-tête ; grant preprod-only, co-validé i-infra, armé CI par
-  # BACKUP_BEFORE_RELEASE_ENABLED.
-  - apiGroups: [""]
-    resources: ["pods/exec"]
-    verbs: ["create"]
+  # BACKUP-BEFORE-RELEASE (§1(a), ruling i-infra B′) : le job CD `deploy-preprod`
+  # applique + poll un Job in-cluster qui dumpe la DB en client réseau AVANT le
+  # set-image (deploy/ci/run-db-backup.sh → deploy/ci/db-backup-job.tmpl.yaml).
+  # Least-privilege : create/get/list/watch/delete sur `batch/jobs` UNIQUEMENT — 0
+  # pods/exec, 0 secret-read (le Job lit les creds via secretKeyRef, pas le SA CI).
+  # Borné à CE namespace preprod (Role, pas ClusterRole), 0 wildcard, co-validé
+  # i-infra, armé CI par BACKUP_BEFORE_RELEASE_ENABLED.
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
