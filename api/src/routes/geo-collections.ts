@@ -31,8 +31,11 @@
  *     et on renvoie la FeatureCollection OGC telle quelle. Server-side => CORS-safe,
  *     pas de ré-ingestion, pas de Postgres requis.
  *
- * Seules les collections `qc-zonage-*` et `qc-lots-*` sont gérées (anti-SSRF :
- * le proxy ne sert que ce préfixe). Toute autre collection => 404 honnête.
+ * Seules les collections `qc-zonage-*`, `qc-lots-*` et `qc-zoning-events-*` sont
+ * gérées (anti-SSRF : le proxy ne sert que ces préfixes geo connus). Toute autre
+ * collection => 404 honnête. `qc-zoning-events-*` (events de cycle de vie zonage,
+ * couche geo-only) est servie DIRECTEMENT par le proxy geo-api (aucun store PG,
+ * aucun enrichissement) — cf. `makeDbLocalResolver` + le contrat SPEC_IMMO_MCP_REGLEMENT_EXPOSE §2.
  *
  * Erreurs réseau / geo indisponible => 502 honnête (jamais de crash).
  *
@@ -100,7 +103,7 @@ import { sanitizeFeatureProvenance } from "../services/geo/provenance.js";
 /** Collection OGC parsée : nature (zonage|lots) + ville. */
 interface ParsedCollection {
   collectionId: string;
-  kind: "zonage" | "lots";
+  kind: "zonage" | "lots" | "zoning-events";
   citySlug: string;
 }
 
@@ -130,8 +133,15 @@ export interface GeoCollectionsDeps {
   zonesSource?: ZonesSource;
 }
 
-/** Parse un collection-id `qc-zonage-<city>` ou `qc-lots-<city>`. null sinon. */
+/** Parse un collection-id `qc-zonage-<city>`, `qc-lots-<city>` ou `qc-zoning-events-<slug>`. null sinon. */
 export function parseCollectionId(id: string): ParsedCollection | null {
+  // ⚠ `qc-zoning-events-` AVANT `qc-zonage-` : préfixes distincts (zoning ≠ zonage),
+  // mais on garde l'ordre explicite pour éviter toute ambiguïté future.
+  if (id.startsWith("qc-zoning-events-")) {
+    const citySlug = id.slice("qc-zoning-events-".length);
+    if (!citySlug) return null;
+    return { collectionId: id, kind: "zoning-events", citySlug };
+  }
   if (id.startsWith("qc-zonage-")) {
     const citySlug = id.slice("qc-zonage-".length);
     if (!citySlug) return null;
@@ -149,6 +159,9 @@ export function parseCollectionId(id: string): ParsedCollection | null {
 function makeDbLocalResolver(db?: Database): LocalCollectionResolver {
   return async (parsed) => {
     if (!db) return null;
+    // qc-zoning-events : couche geo-only (aucun store PG local) → toujours servie
+    // par le proxy geo-api (StoreProvider dynamique). On saute le local.
+    if (parsed.kind === "zoning-events") return null;
     const fc =
       parsed.kind === "zonage"
         ? await getZoneFeatures(db, parsed.citySlug)
