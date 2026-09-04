@@ -122,6 +122,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe("SignalPdfOverlay — attribution carte masquée pendant l'ouverture", () => {
+  it("ajoute body.pdf-viewer-open au montage, le retire au démontage", () => {
+    expect(document.body.classList.contains("pdf-viewer-open")).toBe(false);
+    const view = render(SignalPdfOverlay, { props: { rawRef: "raw/test/attrib.pdf" } });
+    expect(document.body.classList.contains("pdf-viewer-open")).toBe(true);
+    view.unmount();
+    expect(document.body.classList.contains("pdf-viewer-open")).toBe(false);
+  });
+});
+
 describe("SignalPdfOverlay continuous page stack", () => {
   it("dimensions five slots while rendering only the page window", async () => {
     const { container } = render(SignalPdfOverlay, {
