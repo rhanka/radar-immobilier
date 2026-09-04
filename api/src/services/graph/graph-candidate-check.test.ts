@@ -110,3 +110,62 @@ describe("predictProjectionAbort — clean when both gates pass", () => {
     expect(r.reasons).toEqual([]);
   });
 });
+
+describe("predictProjectionAbort — real §7 pilot shape (extraction matrix, candidate c4065c46)", () => {
+  // Ground truth from extraction's pilot diag on Ste-Martine: PG carries
+  // reglement_number on 32 nodes = 16 DesignationEvent + 16 Signal (both
+  // modification_zonage), populated by a later zonage projection. The STALE
+  // candidate (June cache) carried it on 0/32, so projecting it would drop
+  // reglement_number on all 32 → the business-property-regression guard aborted
+  // the city (ok:0 / aborted:1). Matched by node id.
+  const N = 16;
+  const nodes = [
+    ...Array.from({ length: N }, (_, i) => ({ id: `event-ste-martine-zonage-${i}`, type: "DesignationEvent" })),
+    ...Array.from({ length: N }, (_, i) => ({ id: `signal-rezonage-ste-martine-${i}`, type: "Signal" })),
+  ];
+  // PG "before": 32/32 carry reglement_number (+ etape, per the matrix).
+  const before = nodes.map((n) => ({
+    id: n.id,
+    type: n.type,
+    props: { properties: { reglement_number: `R-${n.id}`, etape: "adoption" } },
+  }));
+
+  it("predicts abort for the STALE candidate that drops reglement_number on all 32 nodes", () => {
+    const staleCandidate = {
+      nodes: nodes.map((n) => ({ id: n.id, type: n.type, properties: { etape: "adoption" } })),
+    };
+    const r = predictProjectionAbort("sainte-martine", before, staleCandidate);
+    expect(r.wouldAbort).toBe(true);
+    expect(r.propertyRegressions).toHaveLength(2 * N); // 32
+    expect(r.propertyRegressions.every((reg) => reg.missingKeys.includes("reglement_number"))).toBe(true);
+  });
+
+  it("is clean for the RE-GROUNDED candidate that carries reglement_number (the fix) + adds citations", () => {
+    const freshCandidate = {
+      nodes: nodes.map((n) => ({
+        id: n.id,
+        type: n.type,
+        properties: { reglement_number: `R-${n.id}`, etape: "adoption" },
+        // grounding enrichment (citation) must NOT regress business-props
+        refs: [{ excerpt: "ADOPTION R-943", rawRef: `${n.id}.pdf` }],
+      })),
+    };
+    const r = predictProjectionAbort("sainte-martine", before, freshCandidate);
+    expect(r.wouldAbort).toBe(false);
+    expect(r.propertyRegressions).toEqual([]);
+  });
+
+  it("checks the guarded set GENERICALLY, not hardcoded Ste-Martine (effet_densifiant is 0 here but present on other cohort cities)", () => {
+    // The predictor inherits the guard's coverage of EVERY props.properties key,
+    // so a business-prop absent at Ste-Martine still aborts where it exists.
+    const beforeOther = [
+      { id: "sig:densif", type: "Signal", props: { properties: { effet_densifiant: "fort" } } },
+    ];
+    const candidateOther = { nodes: [{ id: "sig:densif", type: "Signal", properties: {} }] };
+    const r = predictProjectionAbort("other-city", beforeOther, candidateOther);
+    expect(r.wouldAbort).toBe(true);
+    expect(r.propertyRegressions).toEqual([
+      { citySlug: "other-city", nodeId: "sig:densif", missingKeys: ["effet_densifiant"] },
+    ]);
+  });
+});
