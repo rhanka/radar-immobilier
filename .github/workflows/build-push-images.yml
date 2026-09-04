@@ -137,6 +137,13 @@ jobs:
           - service: ui
             image: radar-ui
             dockerfile: ui/Dockerfile
+          # Grounding image (citations) — PUBLISH-ONLY (plan 4.4.3): the in-cluster
+          # Job pulls the host-staged candidate, hash-verifies it, and publishes to
+          # the preprod MinIO. No LLM / no mesh access / no pdftotext (all host-side).
+          # Built + pushed to SCW like radar-api for digest-pin.
+          - service: grounding
+            image: radar-grounding
+            dockerfile: deploy/grounding/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
