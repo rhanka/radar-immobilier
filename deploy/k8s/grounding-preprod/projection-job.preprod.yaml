@@ -1,0 +1,71 @@
+# projection-job (PREPROD, one-shot) — §7 pilot chain step 2/2.
+#
+# After the publish-only grounding Job writes graph/<city>/latest.json to the
+# preprod MinIO, THIS Job projects it into PG (upsertGraphAtomic) so the API
+# serves it. Chained after the publish Job in the grounding-preprod dispatch
+# (#590) → publish → project → PG populated.
+#
+# Rendered by the workflow (envsubst ${CITY} + ${PROJECTION_IMAGE}); applied to
+# radar-immobilier-preprod.
+#
+# ⚠ component label = `graph-projection` EXACTLY — it must match NP 71
+# (allow-graph-projection-to-minio) so this Job can read graph/ from
+# radar-minio:9000 (else minio's default-deny ingress drops it → PG stays empty).
+#
+# image = radar-api (project-graph-from-s3.js lives in api/dist/scripts, NOT the
+# radar-grounding image). command = POSITIONAL slug (the script reads
+# process.argv.slice(2) as slugs — NOT a --city flag).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: refresh-projection-${CITY}
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: project-graph
+          image: ${PROJECTION_IMAGE}
+          workingDir: /workspace/api
+          # POSITIONAL slug (not --city): projects ONLY this city's graph.
+          command: ["node", "dist/scripts/project-graph-from-s3.js", "${CITY}"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            # Graph store = preprod in-cluster MinIO (== app-store == grounding-publish).
+            - name: GRAPH_S3_ENDPOINT
+              value: "http://radar-minio:9000"
+            - name: GRAPH_S3_BUCKET
+              value: "radar-immobilier-docs-preprod"
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              value: "true"
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # PG write.
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
