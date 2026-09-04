@@ -5,9 +5,12 @@
 # QUE piloter les Deployments (get/list/watch/patch/update), LIRE pods/replicasets
 # (pour `kubectl rollout status`), gérer des Jobs `batch/jobs`
 # (create/get/list/watch/delete) pour le BACKUP-BEFORE-RELEASE §1(a) + le diag §6,
-# et gérer des CronJobs `batch/cronjobs` (create/get/list/watch/patch/update) pour
-# le déploiement + un-suspend du REFRESH §6 (preprod-only). Il ne peut toucher NI
-# un autre namespace, NI la PROD (`radar-immobilier`).
+# gérer des CronJobs `batch/cronjobs` (create/get/list/watch/patch/update) pour
+# le déploiement + un-suspend du REFRESH §6 (preprod-only), et gérer des
+# ConfigMaps `configmaps` (get/list/create/patch/update) pour le CD manifest-
+# reconcile (#608, le CM radar-ui-nginx généré hash-suffixé). Il ne peut toucher
+# NI un autre namespace, NI la PROD (`radar-immobilier`), NI le Namespace lui-même
+# (cluster-scoped, operator-owned — les labels PSS sont un acte poc-k8s).
 #
 # SÉCURITÉ — portée de `batch/jobs` (ruling i-infra B′, à peser en co-val §1(a)) :
 # ce SA ne peut PAS `get` un objet Secret NI `exec` dans un pod (0 pods/exec). Il
@@ -98,6 +101,17 @@ rules:
   - apiGroups: ["batch"]
     resources: ["cronjobs"]
     verbs: ["create", "get", "list", "watch", "patch", "update"]
+  # CD MANIFEST RECONCILE (#608 CM-roll) : le step deploy-preprod « Reconcile
+  # preprod manifests » applique le ConfigMap radar-ui-nginx GÉNÉRÉ (hash-suffix,
+  # deploy/k8s/kustomization.yaml configMapGenerator) AVANT le set-image, pour que
+  # le Deployment radar-ui roule sur la conf à jour (le CM live lag-git = cause du
+  # #608 ; `set image` seul ne roule pas sur un changement CM-only). Least-privilege :
+  # get/list/create/patch/update sur configmaps UNIQUEMENT — `create` car le nom
+  # hashé change à chaque contenu. Borné à CE namespace preprod, 0 wildcard. Le
+  # Namespace + ses labels PSS restent operator-owned (acte poc-k8s, hors ce SA).
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "create", "patch", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
