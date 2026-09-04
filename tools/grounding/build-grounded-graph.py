@@ -91,6 +91,46 @@ for n in g["nodes"]:
         p["description"] = n["label"]
     grounded_nodes += 1
 
+# --- PROPAGATION détection : ref source de l'ÉVÉNEMENT → SIGNAL raisé (raises_signal) ----------
+# Le PV de détection d'un signal rezonage vit sur le DesignationEvent (grounded via l'avis_motion) ;
+# le Signal raisé ne portait PAS sa propre ref → la carte du signal n'affichait pas son PV
+# (« aucune source documentaire reliée à ce signal »). On PROPAGE la ref de détection de l'événement
+# source sur le Signal cible (ADDITIF : l'événement garde SA ref), pour un modèle UNIFORME — comme
+# les signaux piia/dérogation qui portent déjà props.refs en direct. Owner : « le PV EST la citation
+# du signal ». Dedup par docSha (idempotent) ; ne touche pas un signal qui porte déjà ce docSha.
+propagated = 0
+for e in g.get("edges", []):
+    if (e.get("label") or e.get("type")) != "raises_signal":
+        continue
+    src = nodes.get(e.get("source"))   # DesignationEvent (porte la ref de détection)
+    tgt = nodes.get(e.get("target"))   # Signal (à enrichir)
+    if not src or not tgt or tgt.get("type") != "Signal":
+        continue
+    src_refs = [r for r in ((src.get("properties") or {}).get("refs") or []) if isinstance(r, dict) and r.get("docSha")]
+    if not src_refs:
+        continue
+    tp = tgt.setdefault("properties", {})
+    tgt_refs = list(tp.get("refs") or [])
+    have = {r.get("docSha") for r in tgt_refs if isinstance(r, dict) and r.get("docSha")}
+    added = False
+    for r in src_refs:
+        if r["docSha"] in have:
+            continue
+        propref = dict(r); propref["linkSource"] = "raises_signal-detection"
+        tgt_refs.append(propref); have.add(r["docSha"]); added = True
+    if not added:
+        continue
+    tp["refs"] = tgt_refs
+    tgt["refs"] = tgt_refs
+    first = tgt_refs[0]
+    # surface les champs streamables (legacy readers / carte) si le signal ne les portait pas
+    tp.setdefault("docSha", first.get("docSha"))
+    if not tp.get("citation") and first.get("excerpt"): tp["citation"] = first.get("excerpt")
+    if not tp.get("page") and first.get("page"): tp["page"] = first.get("page")
+    if not tp.get("sourceUrl") and first.get("sourceUrl"): tp["sourceUrl"] = first.get("sourceUrl")
+    if not tp.get("rawRef") and first.get("rawRef"): tp["rawRef"] = first.get("rawRef")
+    propagated += 1
+
 # --- fallback description sur nœuds sans docSha (non groundés) ---------------
 for n in g["nodes"]:
     if n["type"] not in ("DesignationEvent", "Signal"):
