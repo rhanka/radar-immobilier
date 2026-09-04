@@ -98,6 +98,14 @@ export interface RunLiveScrapeOptions {
    * non-fatal). Only used when `exploit`.
    */
   readonly db?: Database;
+  /**
+   * Optional per-city callback invoked with each `LiveScrapeCityRecap` AS it is
+   * produced (streamed), so a long all-cities run emits per-city progress instead
+   * of nothing until the final recap. Pure side-channel (logging): never affects
+   * control flow. It does NOT bound memory — the per-city working set (the raw PV
+   * bytes held in `records`) is unaffected; see the worker-live memory follow-up.
+   */
+  readonly onCity?: (recap: LiveScrapeCityRecap) => void;
 }
 
 /**
@@ -128,6 +136,27 @@ function resolveConfigs(
 }
 
 /**
+ * Sorted slugs of the config-only PV cities (scraped live — no `pvText` fixture),
+ * i.e. the exact set `runLiveScrape(undefined, …)` processes. Deterministic order
+ * so a `--chunk k/n` shard is stable across runs and jobs.
+ */
+export function configOnlyCitySlugs(): string[] {
+  return ALL_PV_CITIES.filter((c) => !c.pvText)
+    .map((c) => c.config.citySlug)
+    .sort();
+}
+
+/**
+ * The k-th (1-based) of `n` equal, contiguous shards of `all` (deterministic).
+ * Shard size = ceil(len/n); the trailing shard may be shorter or empty. Callers
+ * validate `1 <= k <= n` and `n >= 1`.
+ */
+export function citiesChunk(all: readonly string[], k: number, n: number): string[] {
+  const size = Math.ceil(all.length / n);
+  return all.slice((k - 1) * size, k * size);
+}
+
+/**
  * Scrape the requested (or all config-only) PV cities live and write to `store`.
  *
  * @param citySlugs Optional subset of city slugs; omit for all config-only.
@@ -149,10 +178,16 @@ export async function runLiveScrape(
     : undefined;
 
   const recap: LiveScrapeCityRecap[] = [];
+  // Collect the recap AND stream it per-city (observability): a long run emits
+  // progress as each city finishes instead of only at the end.
+  const pushRecap = (entry: LiveScrapeCityRecap): void => {
+    recap.push(entry);
+    options.onCity?.(entry);
+  };
 
   // Unknown slugs surface as honest errors rather than being silently dropped.
   for (const slug of unknown) {
-    recap.push({
+    pushRecap({
       city: slug,
       sourceId: "unknown",
       status: "error",
@@ -164,7 +199,7 @@ export async function runLiveScrape(
 
   for (const config of configs) {
     if (signal?.aborted) {
-      recap.push({
+      pushRecap({
         city: config.citySlug,
         sourceId: config.sourceId,
         status: "error",
@@ -187,7 +222,7 @@ export async function runLiveScrape(
     });
 
     if (!outcome.ok) {
-      recap.push({
+      pushRecap({
         city: config.citySlug,
         sourceId: config.sourceId,
         status: "error",
@@ -226,7 +261,7 @@ export async function runLiveScrape(
       }
     }
 
-    recap.push({
+    pushRecap({
       city: config.citySlug,
       sourceId: config.sourceId,
       status: anyNew ? "new" : "seen",
