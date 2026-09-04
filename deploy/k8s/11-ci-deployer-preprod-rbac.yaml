@@ -3,9 +3,11 @@
 # ServiceAccount + Role + RoleBinding namespace-scopés à `radar-immobilier-preprod`
 # pour le job CI `deploy-preprod` (main -> preprod). Least-privilege : il ne peut
 # QUE piloter les Deployments (get/list/watch/patch/update), LIRE pods/replicasets
-# (pour `kubectl rollout status`), et gérer des Jobs `batch/jobs`
-# (create/get/list/watch/delete) pour le BACKUP-BEFORE-RELEASE §1(a). Il ne peut
-# toucher NI un autre namespace, NI la PROD (`radar-immobilier`).
+# (pour `kubectl rollout status`), gérer des Jobs `batch/jobs`
+# (create/get/list/watch/delete) pour le BACKUP-BEFORE-RELEASE §1(a) + le diag §6,
+# et gérer des CronJobs `batch/cronjobs` (create/get/list/watch/patch/update) pour
+# le déploiement + un-suspend du REFRESH §6 (preprod-only). Il ne peut toucher NI
+# un autre namespace, NI la PROD (`radar-immobilier`).
 #
 # SÉCURITÉ — portée de `batch/jobs` (ruling i-infra B′, à peser en co-val §1(a)) :
 # ce SA ne peut PAS `get` un objet Secret NI `exec` dans un pod (0 pods/exec). Il
@@ -71,6 +73,16 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["create", "get", "list", "watch", "delete"]
+  # REFRESH CRONJOBS PREPROD (§6, preprod-only) : le step deploy-preprod « Deploy
+  # refresh CronJobs (preprod) » applique + un-suspend les 2 CronJobs de refresh
+  # dans radar-immobilier-preprod (overlay refresh-cronjobs, pinné + suspend:false).
+  # `kubectl apply` d'un CronJob = get/create/patch ; le suspend:false = patch ;
+  # list/watch pour la lecture. Toujours borné à CE namespace preprod, 0 wildcard,
+  # armé CI par REFRESH_CRONJOB_PREPROD_ENABLED. (batch/jobs seul ne suffit pas —
+  # CronJob est une ressource distincte.)
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["create", "get", "list", "watch", "patch", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
