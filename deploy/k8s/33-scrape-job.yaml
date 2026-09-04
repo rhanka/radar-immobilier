@@ -34,7 +34,7 @@ metadata:
 spec:
   # Le scrape touche le réseau (sites municipaux fragiles) : 1 relance tolérée.
   backoffLimit: 1
-  # Garde-fou : un run complet 549 villes peut être long ; coupe à 2 h.
+  # Garde-fou : un run complet ~528 villes config-only peut être long ; coupe à 2 h.
   activeDeadlineSeconds: 7200
   template:
     metadata:
