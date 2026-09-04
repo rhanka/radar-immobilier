@@ -88,6 +88,48 @@ llm_reserve() {  # 0 = slot réservé (appel autorisé) ; 1 = plafond atteint (n
   [ "${n:-999999}" -le "$MAX_LLM_CALLS" ]
 }
 
+# ── Discipline 429 codex (i-cond, NON-NÉGOCIABLE, prérequis wave cohorte) ─────
+# Le gateway NE protège PAS le pool codex sur 429 : proxy-openai = pass-through, 0 cool/rebind/backoff
+# (vérifié h-runtime en source ; markAccountExhausted n'existe que côté proxy-anthropic). Sans marquage
+# d'épuisement, le compte reste ÉLIGIBLE → un retry le re-sélectionne (round-robin) → re-429 → MARTÈLEMENT
+# du même compte (faux failover) qui dégrade codex POUR TOUTES LES LANES. ⇒ discipline CLIENT obligatoire:
+#   (a) concurrence=1 fleet-wide : flock sérialise CHAQUE codex exec (aucun 2e appel en vol).
+#   (b) 1er 429 = STOP DUR GLOBAL run-entier : flag partagé → 0 appel sur toute ville/docSha restant.
+#   (c) 0 retry auto sur 429 : classification de l'erreur AVANT tout re-essai.
+# FAIL-SAFE : le codex CLI n'expose PAS de façon garantie le status HTTP par-appel (surface 429 = source-gap
+# côté h-runtime). Défaut conservateur (CODEX_429_SURFACE_KNOWN!=1) = tout codex exit≠0 = POTENTIEL 429 →
+# stop-dur, 0 retry (un blip mesh transitoire stoppe le run = acceptable ; run resumable/caché ; « 1er 429
+# dégrade la flotte » domine). NB: exit0 + JSON vide = requête ABOUTIE (pas un rate-limit) → retry formatage
+# sûr conservé (la règle « 0 retry » vise le 429, pas un raté de format). Refinement futur : surface 429
+# confirmée (CODEX_429_SURFACE_KNOWN=1 + CODEX_429_PATTERN précis) ⇒ n'arrêter que sur signature réelle,
+# retry non-429 (500/502/timeout/réseau) ré-autorisé — voir la branche `else` de classification plus bas.
+# SPEC SURFACE 429 (h-runtime, source gateway proxy-openai.ts:1493-1502) :
+#   • SIGNAL FIABLE = HTTP 429 + `error.code`/`error.type` du BODY upstream propagé VERBATIM
+#     (`rate_limit_exceeded` | `insufficient_quota`) → discriminant du pattern ci-dessous.
+#   • retry-after + x-ratelimit-* NE SONT PAS propagés (drop, ≠ proxy-anthropic) ⇒ pas un signal ; avec
+#     start=1 + 1er-429=STOP-DUR il n'est pas requis (detect_retry_after reste best-effort pour le log seul).
+#   • Le 429 court-circuite AVANT la traduction codex→anthropic (pass-through) ⇒ pas d'attestation x-h2a sur l'erreur.
+#   • SURFACE CLI (exit/stderr/event --json, wrapper codex.mjs champs stderrMessage/message/phase) NON affirmée
+#     en source ⇒ à CONFIRMER EMPIRIQUEMENT au ramp concurrence-1 ; le fail-safe la rend sûre sans pré-caractérisation.
+CODEX_SERIAL_LOCK="${CODEX_SERIAL_LOCK:-${LLM_CALL_COUNTER_FILE}.codex-serial.lock}"
+CODEX_429_STOP_FLAG="${CODEX_429_STOP_FLAG:-${LLM_CALL_COUNTER_FILE}.codex-429-stop}"
+# error.code fiables (rate_limit_exceeded/insufficient_quota) + variantes larges ; retry-after RETIRÉ du
+# signal (droppé par le gateway ⇒ n'apparaît pas sur un vrai 429, éviter un faux positif).
+CODEX_429_PATTERN="${CODEX_429_PATTERN:-429|too many requests|rate.?limit|rate_limited|rate_limit_exceeded|insufficient_quota|resource_exhausted|quota|overloaded}"
+CODEX_429_SURFACE_KNOWN="${CODEX_429_SURFACE_KNOWN:-0}"
+CODEX_STOP=0
+codex_429_stopped() { [ -e "$CODEX_429_STOP_FLAG" ]; }
+set_codex_429_stop() {  # $1=sha $2=signature $3=retry-after — append atomique O_APPEND sur le flag partagé
+  { printf 'city=%s sha=%s sig=%s retry_after=%s ts=%s\n' \
+      "$CITY" "${1:-}" "${2:-}" "${3:-}" "$(date -u +%FT%TZ)" >> "$CODEX_429_STOP_FLAG"; } 2>/dev/null || true
+}
+detect_429() {  # echo le 1er token de signature rate-limit trouvé dans les fichiers passés, sinon vide
+  local hit; hit="$(grep -hioE "$CODEX_429_PATTERN" "$@" 2>/dev/null | head -1 || true)"; printf '%s' "$hit"
+}
+detect_retry_after() {  # echo une valeur retry-after (secondes) si présente, sinon vide
+  grep -hioE 'retry.?after[":= ]+[0-9]+' "$@" 2>/dev/null | grep -oE '[0-9]+' | head -1 || true
+}
+
 mkdir -p "$WORK_DIR/pdfs" "$WORK_DIR/txts" "$WORK_DIR/cites" "$WORK_DIR/meta"
 
 # ── 1. Mapper signaux → docSha via arêtes raises_signal ──────────────────────
@@ -325,25 +367,51 @@ while IFS= read -r sha; do
   # PAR-APPEL N'EST PAS exposé par le codex CLI (diagnostic mesuré : `--json` = events thread `type`/`thread_id`,
   # PAS les headers HTTP mesh type X-Sentropic-Served) → pas de preuve-luna grep-able ici. ⟹ item à confirmer
   # côté enrollment (lane mesh) : le codex host ne DOIT avoir aucun fallback OpenAI. `-m gpt-5.6-luna` = pin explicite.
+  # ── Pré-check 429 GLOBAL : si un 429 a déjà stoppé le run (n'importe quelle ville/lane) → 0 appel. ──
+  if codex_429_stopped; then
+    log "  [429-STOP] arrêt dur 429 global actif (voir $CODEX_429_STOP_FLAG) — 0 appel ($sha)"
+    CODEX_STOP=1; break
+  fi
   llm_ok=0
   for attempt in 1 2 3; do
+    if codex_429_stopped; then CODEX_STOP=1; break; fi
     if ! llm_reserve; then
       log "  [CAP] MAX_LLM_CALLS=$MAX_LLM_CALLS atteint — arrêt dur AVANT appel ($sha)"; CAP_REACHED=1; break
     fi
-    : > "$raw_resp"; : > "$events"
-    if timeout 360 codex exec -m "$CODEX_MODEL" -s read-only --skip-git-repo-check --ephemeral \
+    : > "$raw_resp"; : > "$events"; : > "$errf"
+    # (a) concurrence=1 fleet-wide : flock -x sur le lock partagé sérialise CHAQUE codex exec (fd 8).
+    rc=0
+    { flock -x 8; timeout 360 codex exec -m "$CODEX_MODEL" -s read-only --skip-git-repo-check --ephemeral \
          --color never --json -C "$WORK_DIR" --output-last-message "$raw_resp" - \
-         < "$prompt_file" > "$events" 2>"$errf"; then
+         < "$prompt_file" > "$events" 2>"$errf"; } 8>"$CODEX_SERIAL_LOCK" || rc=$?
+    if [ "$rc" = "0" ]; then
       if grep -q '{' "$raw_resp" 2>/dev/null && [ -s "$raw_resp" ]; then
         log "  [ok-llm] $sha: réponse codex+mesh OK"; llm_ok=1; break
       fi
-      log "  [retry-llm] $sha: tentative $attempt réponse vide/sans JSON"
+      # exit0 + JSON vide = requête ABOUTIE (pas un rate-limit) → retry formatage sûr (règle « 0 retry » = 429 only).
+      log "  [retry-llm] $sha: tentative $attempt réponse vide/sans JSON (exit0, pas un 429)"; continue
+    fi
+    # exit≠0 = chemin ERREUR HTTP codex → RISQUE POOL (429 pass-through NON protégé par le gateway).
+    sig="$(detect_429 "$errf" "$events" "$raw_resp")"
+    ra="$(detect_retry_after "$errf" "$events")"
+    if [ -n "$sig" ]; then
+      log "  [429] $sha: signature rate-limit ('$sig'${ra:+, retry-after=$ra}) → (b) STOP DUR global + (c) 0 retry"
+      set_codex_429_stop "$sha" "$sig" "$ra"; CODEX_STOP=1; break
+    elif [ "$CODEX_429_SURFACE_KNOWN" != "1" ]; then
+      # FAIL-SAFE (surface 429 non confirmée empiriquement) : tout exit≠0 = POTENTIEL 429 → stop-dur, 0 retry.
+      log "  [429-failsafe] $sha: codex exit=$rc non classé${ra:+ retry-after=$ra} → FAIL-SAFE stop-dur (surface 429 non confirmée), 0 retry"
+      set_codex_429_stop "$sha" "exit$rc" "$ra"; CODEX_STOP=1; break
     else
-      log "  [retry-llm] $sha: tentative $attempt codex/mesh timeout/erreur (fail-closed, 0 repli provider)"
+      # surface CONFIRMÉE + non-429 (500/502/timeout/réseau) → retry fail-closed autorisé (≤3).
+      log "  [retry-llm] $sha: tentative $attempt codex exit=$rc non-429 (surface connue) — retry fail-closed"; continue
     fi
   done
   if [ "$CAP_REACHED" = "1" ]; then
     log "Étape 4 STOPPÉE au plafond MAX_LLM_CALLS=$MAX_LLM_CALLS — nœuds restants non groundés (cost-gate cohorte)."
+    break
+  fi
+  if [ "${CODEX_STOP:-0}" = "1" ]; then
+    log "Étape 4 STOPPÉE — 429/erreur codex : arrêt dur anti-martèlement pool (run resumable/caché ; sha $sha non groundé)."
     break
   fi
   if [ "$llm_ok" = "1" ]; then
@@ -368,7 +436,7 @@ n = len(obj.get("results", [])); found = sum(1 for r in obj.get("results",[]) if
 print(f"[cites] {sha}: {found}/{n} trouvés")
 PYPARS
   else
-    log "  [WARN-llm] $sha: claude timeout/erreur"
+    log "  [WARN-llm] $sha: réponse vide après retries (non-429) → cites vides (7bis bloquera le nœud, pas de fausse citation)"
     echo '{"results":[]}' > "$cite_out"
   fi
 

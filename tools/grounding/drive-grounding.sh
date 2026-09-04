@@ -71,6 +71,10 @@ touch "$STATUS_FILE"
 export MAX_LLM_CALLS="${MAX_LLM_CALLS:-}"
 export LLM_CALL_COUNTER_FILE="$RUN_DIR/llm-call-count"
 printf '0' > "$LLM_CALL_COUNTER_FILE"
+# ── Discipline 429 codex (worker-grounding, prérequis wave) : purge d'un run précédent le flag STOP-DUR
+#    global + le lock de sérialisation concurrence-1 (le run_dir est neuf/horodaté ⇒ ceinture+bretelles).
+#    Le worker crée/écrit ${counter}.codex-429-stop au 1er 429 ; process_city + le worker s'y arrêtent. ──
+rm -f "${LLM_CALL_COUNTER_FILE}.codex-429-stop" "${LLM_CALL_COUNTER_FILE}.codex-serial.lock"
 
 log(){ echo "[drive $(date -u +%H:%M:%S)] $*" | tee -a "$RUN_DIR/run.log"; }
 
@@ -87,6 +91,10 @@ already_cited(){
 process_city(){
   local city="$1" lane="$2"
   local W="$RUN_DIR/workers/$city"; mkdir -p "$W"
+  # (b) STOP DUR 429 global : si un 429 a déjà stoppé le run, ne DÉMARRE aucune nouvelle ville (0 nouvel appel codex).
+  if [ -e "${LLM_CALL_COUNTER_FILE}.codex-429-stop" ]; then
+    log "[$lane/$city] SKIP — arrêt dur 429 global actif (anti-martèlement pool codex)"; return 0
+  fi
   if already_cited "$city"; then
     log "[$lane/$city] SKIP déjà cité sur SCW"; return 0
   fi
