@@ -30,6 +30,12 @@ vi.mock("$lib/collab/annotations-client.js", () => ({
   editAnnotation: vi.fn(async () => {}),
   deleteAnnotation: vi.fn(async () => {}),
 }));
+// §2 PR2 — SignalAnnotations s'abonne au flux SSE au mount ; on le neutralise
+// (aucun EventSource réel en jsdom).
+vi.mock("$lib/collab/prospect-notes-stream.js", () => ({
+  subscribeNoteFrames: () => () => {},
+  noteMatchesTarget: () => false,
+}));
 
 /**
  * État de sélection avec une ZONE active (focusée), utilisé par les tests du
