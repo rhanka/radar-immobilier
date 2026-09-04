@@ -45,7 +45,13 @@
     }
     const promise = (async () => {
       const pdfjs = await getPdfjs();
-      const task = pdfjs.getDocument({ url, isEvalSupported: false });
+      // isEvalSupported: false neutralise toute évaluation dynamique de chaînes JS.
+      // pdfjs-dist v4 n'embarque ni PDFScriptingManager ni couche interactive,
+      // ce qui prévient l'exécution d'actions scriptées malveillantes.
+      const task = pdfjs.getDocument({
+        url,
+        isEvalSupported: false,
+      });
       return task.promise;
     })();
     docCache.set(url, promise);
@@ -131,6 +137,7 @@
     type PdfTextIndex,
     type PdfTextMatch,
   } from "$lib/signals/pdf-text-search.js";
+  import { isPublicCanonicalUrl } from "$lib/maps/geo-provenance.js";
 
   export let title = "Document source";
   export let sourceUrl: string | null = null;
@@ -398,6 +405,23 @@
     const path = `/api/documents/raw?rawRef=${encodeURIComponent(ref)}`;
     return base ? `${base.replace(/\/$/, "")}${path}` : path;
   }
+  function isSafeIframeUrl(candidate: string): boolean {
+    if (candidate.startsWith("//")) return false;
+    if (candidate.startsWith("/")) {
+      return !candidate.startsWith("/\\");
+    }
+    try {
+      const currentOrigin = typeof window !== "undefined" ? window?.location?.origin : "";
+      if (currentOrigin) {
+        const parsed = new URL(candidate, currentOrigin);
+        if (parsed.origin === currentOrigin) return true;
+      }
+    } catch {
+      return false;
+    }
+    return isPublicCanonicalUrl(candidate);
+  }
+
   // Source RENDUE par pdf.js : préfère TOUJOURS la route interne /api/documents/raw
   // (via rawRef) au `sourceUrl` public. pdf.js récupère les octets par fetch/XHR :
   // l'URL publique de la ville (ex. https://vdmt.ca/…/PV.pdf) est cross-origin et
@@ -406,8 +430,12 @@
   // same-origin + authentifiée et sert les octets depuis le bucket (preuve prouvée
   // 200 application/pdf). Le `sourceUrl` public reste utilisé pour le lien « Ouvrir »
   // (balise <a href>, non soumise au CORS) plus bas.
-  $: resolvedSourceUrl =
+  $: rawResolvedUrl =
     (rawRef ? rawDocumentUrl(rawRef) : null) ?? sourceUrl;
+  $: resolvedSourceUrl =
+    rawResolvedUrl && isSafeIframeUrl(rawResolvedUrl) ? rawResolvedUrl : null;
+  $: safePublicSourceUrl =
+    sourceUrl && isPublicCanonicalUrl(sourceUrl) ? sourceUrl : null;
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
   $: isPdfSource = looksLikePdf(resolvedSourceUrl, rawRef, sourceRef);
 
@@ -1369,8 +1397,8 @@
       </div>
 
       <div class="pdf-overlay-actions" aria-label="Actions globales">
-        {#if sourceUrl}
-          <a class="pdf-open-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+        {#if safePublicSourceUrl}
+          <a class="pdf-open-link" href={safePublicSourceUrl} target="_blank" rel="noopener noreferrer">
             Ouvrir <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
           </a>
         {/if}
@@ -1687,8 +1715,13 @@
         {/if}
       </div>
     {:else if resolvedSourceUrl && !loadError}
-      <!-- Source non-PDF (HTML…) : aperçu direct en iframe, sans éditeur. -->
-      <iframe class="pdf-frame" title={title} src={resolvedSourceUrl}></iframe>
+      <!-- Source non-PDF (HTML…) : aperçu direct en iframe sandboxée, sans éditeur. -->
+      <iframe
+        class="pdf-frame"
+        title={title}
+        sandbox="allow-same-origin allow-scripts"
+        src={resolvedSourceUrl}
+      ></iframe>
     {:else if loadError}
       <!-- #94 cas (b) — PROBLÈME TEMPORAIRE : un document est attendu (rawRef /
            sourceRef présent) mais le fetch/render a échoué. On le dit clairement,
@@ -1706,8 +1739,8 @@
             <RefreshCw class="h-3.5 w-3.5" aria-hidden="true" />
             Réessayer
           </button>
-          {#if sourceUrl}
-            <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+          {#if safePublicSourceUrl}
+            <a href={safePublicSourceUrl} target="_blank" rel="noopener noreferrer">
               Ouvrir le document <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
             </a>
           {/if}
