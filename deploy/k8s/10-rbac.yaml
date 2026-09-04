@@ -17,3 +17,4 @@ metadata:
     app.kubernetes.io/component: app
 imagePullSecrets:
   - name: radar-registry-pull
+automountServiceAccountToken: false

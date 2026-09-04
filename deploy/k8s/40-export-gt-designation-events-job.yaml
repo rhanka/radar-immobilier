@@ -37,12 +37,25 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       volumes:
         - name: set167
           configMap:
             name: radar-graphify34-set167
       containers:
         - name: export-gt
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
