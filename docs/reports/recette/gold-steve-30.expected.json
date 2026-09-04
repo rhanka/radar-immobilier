@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "source": "docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md (colonne « B′ cible »)",
+    "verite_terrain": "GOLD — évaluation humaine Steve (30 villes). Anti-invention : verdict repris tel quel ; slugs résolus contre les dossiers graphes SCW réels.",
+    "axe": "bprime (précoce ∩ résidentiel-éligible ∩ zonage)",
+    "in_bprime": "true = ville attendue DANS B′ (Steve ≥ seuil / ✓N) ; false = faux positif attendu DEHORS (✗0)",
+    "target": "compte-cible Steve (informatif — mesuré sur la donnée de Steve ; le compte sur graphes frais peut différer légitimement). Le gate DUR = in_bprime (in/out).",
+    "ambigus_hors_gate_dur": [
+      "hemmingford--les-jardins-de-napierville / --2 : slug ambigu (3 doublons DB, verdict Steve 0/0/1) — à assainir, hors gate dur",
+      "notre-dame-de-lourdes--joliette : slug ambigu (Joliette vs L'Érable) — hors gate dur ; --lerable seul est gold ✓2"
+    ]
+  },
+  "saint-stanislas-de-kostka": {"in_bprime": true, "target": 2, "note": "refonte 451-2025 (précoce)"},
+  "sutton": {"in_bprime": true, "target": 2, "note": "refonte 358 (projet)"},
+  "saint-raphael": {"in_bprime": true, "target": 2, "note": "refonte 2026-244 (projet)"},
+  "saint-raymond": {"in_bprime": true, "target": 4, "note": "HC-13/14/15 rés=oui, projet"},
+  "saint-boniface": {"in_bprime": true, "target": 1, "note": "zone 317 rés=oui, projet"},
+  "coaticook": {"in_bprime": true, "target": 2, "note": "PPCMOI RD-104, 12 log."},
+  "saint-mathieu-de-beloeil": {"in_bprime": true, "target": 2, "note": "avis motion, logement abordable"},
+  "saint-amable": {"in_bprime": true, "target": 3, "note": "712-46/47, avis motion"},
+  "mont-saint-hilaire": {"in_bprime": true, "target": 2, "note": "S2 habitation dans B"},
+  "saint-gilbert": {"in_bprime": true, "target": 2, "note": "U-161 rés=oui + 2e avis motion"},
+  "neuville": {"in_bprime": false, "note": "CPTAQ agricole ; zone Pa-4 indét (souhaité <6)"},
+  "saint-come-liniere": {"in_bprime": true, "target": 1, "note": "dev résidentiel, avis motion"},
+  "rosemere": {"in_bprime": false, "note": "faux positif — densification commerciale lue résidentielle"},
+  "petite-riviere-saint-francois": {"in_bprime": true, "target": 3, "note": "densification U-24 multilog."},
+  "stratford": {"in_bprime": false, "note": "RU-13 indét (souhaité DEHORS)"},
+  "mont-tremblant": {"in_bprime": true, "target": 3, "note": "espaces naturels rés=oui + signal rue Léonard"},
+  "saint-frederic": {"in_bprime": true, "target": 2, "note": "densif zone Rf51"},
+  "saint-charles-borromee": {"in_bprime": false, "note": "faux positif — résidentiel→commercial (que Steve dénonce)"},
+  "sainte-cecile-de-milton": {"in_bprime": true, "target": 2, "note": "4-logements lot 6367606, projet"},
+  "cowansville": {"in_bprime": true, "target": 2, "note": "Rc-23 26 log."},
+  "champlain": {"in_bprime": true, "target": 2, "note": "Belvédère 64 terrains"},
+  "sainte-catherine": {"in_bprime": false, "note": "16 signaux ; seul qualifié = adoption ; reste indét"},
+  "plaisance": {"in_bprime": true, "target": 3, "note": "43-Rid bi/multifamiliale, projet"},
+  "notre-dame-de-lourdes--lerable": {"in_bprime": true, "target": 2, "note": "U-41 multifam. (L'Érable)"},
+  "chelsea": {"in_bprime": true, "target": 2, "note": "RES-CV-13/15 densif., projet"},
+  "alma": {"in_bprime": true, "target": 2, "note": "Beauvoir multifam. ; Cc11 exclus"},
+  "preissac": {"in_bprime": false, "note": "rezonage église indét ; dérog riveraine exclue"},
+  "rimouski": {"in_bprime": true, "target": 1, "note": "SPAR 328 log. (le « pôle commercial » retiré)"},
+  "la-sarre": {"in_bprime": true, "target": 1, "note": "CV-2 16 log., projet"}
+}

@@ -38,6 +38,8 @@ node_sha = {}
 for n in g["nodes"]:
     if n["type"] in ("DesignationEvent", "Signal"):
         ds = (n.get("properties") or {}).get("docSha")
+        if not ds:  # docSha peut vivre dans les refs niveau-nœud (nœuds re-propagation) et pas dans props
+            ds = next((r.get("docSha") for r in (n.get("refs") or []) if isinstance(r, dict) and r.get("docSha")), None)
         if ds: node_sha[n["id"]] = ds
 for e in g.get("edges", []):
     refs = [r for r in (e.get("refs") or []) if isinstance(r, dict)]
@@ -60,22 +62,26 @@ for n in g["nodes"]:
     ds = node_sha.get(n["id"])
     if not ds:
         continue
-    p["docSha"] = ds  # ensure node carries docSha (gate)
-    md = meta.get(ds, {})
     cit = cites.get(n["id"])
+    if not cit:
+        # ANTI-FABRICATION : LLM found:false (aucune citation verbatim trouvée) → on NE stampe PAS de docSha
+        # ni de ref sur ce nœud. Le gate 7bis exige docSha ⇒ citation ; un ancrage sans preuve textuelle
+        # serait bloqué (à raison) et bloquerait tout le batch. Le nœud reste NON-cité (0 docSha, 0 ref),
+        # comme dans le baseline — c'est le bon comportement anti-invention (jamais d'ancrage sans preuve).
+        continue
+    p["docSha"] = ds  # docSha stampé UNIQUEMENT quand une citation verbatim existe (aligné gate 7bis)
+    md = meta.get(ds, {})
     ref = {
         "docSha": ds,
         "rawRef": md.get("rawRef"),
         "sourceUrl": md.get("sourceUrl"),
+        "page": cit["page"],
+        "excerpt": cit["excerpt"],
+        "citation": cit["excerpt"],
     }
-    if cit:
-        ref["page"] = cit["page"]
-        ref["excerpt"] = cit["excerpt"]
-        ref["citation"] = cit["excerpt"]
-        # also surface verbatim on properties for legacy readers
-        p["citation"] = cit["excerpt"]
-        p["page"] = cit["page"]
-    # surface streamable fields on properties too
+    # surface verbatim + streamable fields sur properties (legacy readers)
+    p["citation"] = cit["excerpt"]
+    p["page"] = cit["page"]
     p["sourceUrl"] = md.get("sourceUrl")
     p["rawRef"] = md.get("rawRef")
     p["refs"] = [ref]

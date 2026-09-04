@@ -20,6 +20,7 @@
 import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
 import { render, cleanup, fireEvent, within } from "@testing-library/svelte";
 import SourceConsole from "./SourceConsole.svelte";
+import type { PalierMatrix } from "$lib/palier/palier-matrix-client.js";
 import type {
   CityCoverage,
   CityGrilles,
@@ -122,6 +123,7 @@ function renderConsole(cities = CITIES, generatedAt = RESPONSE.generatedAt) {
       loading: false,
       error: null,
       onReload: () => {},
+      initialView: "legacy",
     },
   });
 }
@@ -134,6 +136,66 @@ function listedCityNames(container: HTMLElement): string[] {
 }
 
 const SEG_FOCUS = "Villes à signaux précoces";
+const B_PRIME_MATRIX: PalierMatrix = {
+  contract: "palier-matrix/v1",
+  subset: "B",
+  label: "cohorte B′ by-city",
+  kpis: [],
+  cities: [
+    { citySlug: "mont-tremblant", cityName: "Mont-Tremblant", cells: [] },
+    { citySlug: "kirkland", cityName: "Kirkland", cells: [] },
+  ],
+  denominator: 2,
+};
+
+describe("SourceConsole — sélection exclusive de matrice", () => {
+  it("affiche la nouvelle matrice par défaut et bascule sans coexistence", async () => {
+    const view = render(SourceConsole, {
+      props: {
+        cities: CITIES,
+        response: RESPONSE,
+        loading: false,
+        error: null,
+        onReload: () => {},
+      },
+    });
+
+    expect(view.getByTestId("console-palier-matrix")).toBeTruthy();
+    expect(view.queryByTestId("console-legacy-matrix")).toBeNull();
+    expect(view.getByRole("button", { name: "Nouvelle matrice" }).getAttribute("aria-pressed")).toBe("true");
+
+    await fireEvent.click(view.getByRole("button", { name: "Ancienne couverture" }));
+    expect(view.queryByTestId("console-palier-matrix")).toBeNull();
+    expect(view.getByTestId("console-legacy-matrix")).toBeTruthy();
+
+    await fireEvent.click(view.getByRole("button", { name: "Nouvelle matrice" }));
+    expect(view.getByTestId("console-palier-matrix")).toBeTruthy();
+    expect(view.queryByTestId("console-legacy-matrix")).toBeNull();
+  });
+
+  it("garde la cohorte B′ indépendante de la PORTÉE de l'ancienne vue", async () => {
+    const view = render(SourceConsole, {
+      props: {
+        cities: CITIES,
+        response: RESPONSE,
+        loading: false,
+        error: null,
+        onReload: () => {},
+        matrixLoader: async () => B_PRIME_MATRIX,
+      },
+    });
+    expect(await view.findByTestId("palier-row-mont-tremblant")).toBeTruthy();
+    expect(view.getByTestId("palier-row-kirkland")).toBeTruthy();
+
+    await fireEvent.click(view.getByRole("button", { name: "Ancienne couverture" }));
+    await fireEvent.click(view.getByRole("button", { name: SEG_FOCUS }));
+    await fireEvent.click(view.getByRole("button", { name: "Nouvelle matrice" }));
+
+    expect(await view.findByTestId("palier-row-mont-tremblant")).toBeTruthy();
+    expect(view.getByTestId("palier-row-kirkland")).toBeTruthy();
+    expect(view.getByTestId("palier-denominator").textContent).toContain("2");
+  });
+});
 
 describe("SourceConsole — périmètre Province / Villes à signaux précoces", () => {
   it("défaut : Province — toutes les villes actives listées, segment Province pressé", () => {

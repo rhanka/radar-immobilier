@@ -1,0 +1,117 @@
+# refresh-cronjobs — Kustomize overlay that deploys the two refresh CronJobs to
+# PREPROD (radar-immobilier-preprod), pinned to the release image and
+# UN-SUSPENDED. §6 is PREPROD-ONLY (owner directive: the refresh runs on
+# preprod.immo.sent-tech.ca; no prod tag, no promote-prod path).
+#
+# It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
+# suspend:true — the prod-dormant default) into the preprod-active instance:
+#   - namespace -> radar-immobilier-preprod
+#   - suspend   -> false (the CronJobs RUN)
+#   - image     -> pinned by CI to the deploy-preprod release :<sha> (no :latest)
+#
+# Applied ONLY by the deploy-preprod "Deploy refresh CronJobs (preprod)" step, in
+# the CI run only (release-ephemeral pin, no commit-back):
+#   cd deploy/k8s/refresh-cronjobs
+#   kustomize edit set image \
+#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
+#   kustomize build --load-restrictor LoadRestrictionsNone . | kubectl apply -f -
+#
+# NB command: `kubectl apply -k` can NOT be used — the base CronJob lives one dir
+# up (../34) and kustomize's default load-restrictor forbids a parent-dir
+# resource. `kustomize build --load-restrictor LoadRestrictionsNone` still emits
+# ONLY the two CronJobs (never the full bundle).
+#
+# The `newTag` placeholder is FAIL-LOUD: building/applying this overlay WITHOUT
+# the `kustomize edit set image` step yields an unpullable tag (not :latest), so
+# an un-pinned apply fails visibly instead of silently running stale code.
+#
+# RBAC: applying + un-suspending CronJobs needs `batch/cronjobs` on the preprod
+# deployer SA (radar-ci-deployer-preprod) — added to
+# deploy/k8s/11-ci-deployer-preprod-rbac.yaml in this PR; the owner applies it
+# (owner-direct, the SA never self-grants). batch/jobs alone (§1a) is NOT enough.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier-preprod
+
+resources:
+  - ../34-refresh-cronjob.yaml
+
+images:
+  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api
+    newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+
+patches:
+  # §6 preprod is ACTIVE: un-suspend BOTH CronJobs (base 34 ships suspend:true,
+  # the prod-dormant default). `target: kind=CronJob` matches both.
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
+
+  # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
+  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. In PREPROD
+  # the graph store is the IN-CLUSTER MinIO `radar-minio:9000` /
+  # `radar-immobilier-docs-preprod` — the SAME store the app reads and the
+  # grounding publishes to. Override GRAPH_S3 to that MinIO so
+  # projection-read == app-store == grounding-publish (else citations break: the
+  # projection would read a different bucket). Creds stay radar-s3-credentials
+  # (= the MinIO creds); MinIO needs path-style. (i-infra co-vals endpoint/bucket/
+  # path-style.)
+  - target:
+      kind: CronJob
+      name: radar-refresh-projection
+    patch: |
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-projection
+      spec:
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: project-graph
+                    env:
+                      - name: GRAPH_S3_ENDPOINT
+                        value: http://radar-minio:9000
+                      - name: GRAPH_S3_BUCKET
+                        value: radar-immobilier-docs-preprod
+                      - name: GRAPH_S3_FORCE_PATH_STYLE
+                        value: "true"
+
+  # SCRAPE bucket/path-style alignment (i-infra) — same root cause as the
+  # projection GRAPH_S3: base 34 ships SCRAPE_S3_FORCE_PATH_STYLE=false (SCW, →
+  # virtual-host → ENOTFOUND on MinIO) + a mis-suffixed secret bucket
+  # (radar-immobilier-docs, no -preprod). Override SCRAPE_S3 to the preprod MinIO
+  # (path-style, docs-preprod) so the ongoing scrape writes raw/ to the SAME
+  # single preprod bucket the app + projection use. Mirrors the diag-fix (#592).
+  #
+  # JSON6902 index-replace (NOT strategic-merge): base 34's SCRAPE_S3_ENDPOINT/
+  # BUCKET are `valueFrom: secretKeyRef` — a strategic-merge `value:` would MERGE
+  # into an INVALID env with both value+valueFrom (kubectl rejects it). Replacing
+  # the whole entry by index yields a clean value-only env. Indices mirror base
+  # 34's scrape env order: ENDPOINT=4, BUCKET=5, FORCE_PATH_STYLE=9 (i-infra
+  # co-vals; if base 34's env order changes, these indices must follow).
+  - target:
+      kind: CronJob
+      name: radar-refresh-scrape
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/4
+        value:
+          name: SCRAPE_S3_ENDPOINT
+          value: "http://radar-minio:9000"
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/5
+        value:
+          name: SCRAPE_S3_BUCKET
+          value: "radar-immobilier-docs-preprod"
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/9
+        value:
+          name: SCRAPE_S3_FORCE_PATH_STYLE
+          value: "true"

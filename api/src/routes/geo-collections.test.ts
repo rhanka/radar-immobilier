@@ -78,9 +78,40 @@ describe("parseCollectionId", () => {
     });
   });
 
+  it("parse qc-zoning-events-<slug> (couche geo-only events), geo-slug double-tiret inclus", () => {
+    expect(parseCollectionId("qc-zoning-events-longueuil")).toEqual({
+      collectionId: "qc-zoning-events-longueuil",
+      kind: "zoning-events",
+      citySlug: "longueuil",
+    });
+    // geo-slug à double-tiret (ex. alias radar↔geo) → slug conservé verbatim.
+    expect(parseCollectionId("qc-zoning-events-saint-isidore--roussillon")).toEqual({
+      collectionId: "qc-zoning-events-saint-isidore--roussillon",
+      kind: "zoning-events",
+      citySlug: "saint-isidore--roussillon",
+    });
+  });
+
   it("rejette les collections hors préfixe (anti-SSRF)", () => {
     expect(parseCollectionId("foo-bar")).toBeNull();
     expect(parseCollectionId("qc-zonage-")).toBeNull();
+    expect(parseCollectionId("qc-zoning-events-")).toBeNull();
+  });
+});
+
+// ─── Zoning-events (couche geo-only → proxy direct, sans store PG ni enrichissement) ──
+describe("zoning-events (proxy geo-api direct)", () => {
+  it("qc-zoning-events : saute le store local et proxie la geo-api", async () => {
+    const { fn, calls } = makeOkFetch();
+    const localResolver: LocalCollectionResolver = async () => null; // couche geo-only
+    const app = geoCollectionsRoute({ localResolver, fetchImpl: fn });
+
+    const res = await app.request(
+      "/api/geo/collections/qc-zoning-events-longueuil/items?limit=200",
+    );
+    expect(res.status).toBe(200);
+    expect(calls).toHaveLength(1); // proxifié vers la geo-api (aucun store local)
+    expect(String(calls[0])).toContain("/collections/qc-zoning-events-longueuil/items");
   });
 });
 

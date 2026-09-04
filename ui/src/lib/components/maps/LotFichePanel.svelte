@@ -46,14 +46,18 @@
     activeMarketMark,
     activePipelineMark,
     createProspectMark,
-    createProspectNote,
     fetchProspectLotState,
     prospectStatusLabel,
     type ProspectMark,
-    type ProspectNote,
     type ProspectMode,
     type PipelineStatus,
   } from "$lib/prospect/prospect-marks-client.js";
+  // §2 (PR2) : notes d'équipe unifiées (endpoint `/api/v1/prospects/notes`,
+  // cible "lot") + temps réel SSE — réutilise les composants collab. Ouvert à
+  // tous les approuvés (serveur = autorité author-only), indépendant du gate
+  // `allowMarquage` qui ne garde plus que le marquage pipeline/marché.
+  import SignalAnnotations from "$lib/components/collab/SignalAnnotations.svelte";
+  import AnnotationBadge from "$lib/components/collab/AnnotationBadge.svelte";
   import {
     assignmentStateLabel,
     auditCodeLabel,
@@ -145,8 +149,9 @@
   let prospectLoading = false;
   let prospectError: string | null = null;
   let prospectMarks: ProspectMark[] = [];
-  let prospectNotes: ProspectNote[] = [];
   let prospectRequestKey = "";
+  /** Nombre d'annotations §2 (cible lot) — pilote le badge ambiant. */
+  let annotationCount = 0;
 
   $: citySlug = lot?.properties.citySlug ?? "";
   $: mapsUrl = lotCentroid
@@ -158,9 +163,6 @@
   $: drawerOpen = lot !== null;
   $: pipelineMark = activePipelineMark(prospectMarks);
   $: marketMark = activeMarketMark(prospectMarks);
-  $: latestNotes = [...prospectNotes]
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-    .slice(0, 3);
 
   $: {
     const key = noLot && citySlug ? `${citySlug}::${noLot}` : "";
@@ -170,7 +172,7 @@
     } else if (!key && prospectRequestKey) {
       prospectRequestKey = "";
       prospectMarks = [];
-      prospectNotes = [];
+      annotationCount = 0;
       prospectError = null;
       prospectLoading = false;
     }
@@ -198,11 +200,9 @@
       const state = await fetchProspectLotState(noLotValue, citySlugValue);
       if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
       prospectMarks = state.marks;
-      prospectNotes = state.notes;
     } catch (e) {
       if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
       prospectMarks = [];
-      prospectNotes = [];
       prospectError = e instanceof Error ? e.message : "Marquage indisponible";
     } finally {
       if (prospectRequestKey === `${citySlugValue}::${noLotValue}`) {
@@ -211,9 +211,9 @@
     }
   }
 
-  // ── Écriture marquage (append-only, gatée allowMarquage) ────────────────────
+  // ── Écriture marquage pipeline/marché (append-only, gatée allowMarquage) ────
+  // Les NOTES d'équipe sont désormais gérées par SignalAnnotations (§2 unifié).
   let prospectSaving = false;
-  let noteDraft = "";
 
   const PIPELINE_ACTIONS: Array<{ statut: PipelineStatus; label: string }> = [
     { statut: "favori", label: "Favori" },
@@ -250,21 +250,6 @@
     }
   }
 
-  async function submitNote(): Promise<void> {
-    const body = noteDraft.trim();
-    if (!allowMarquage || !body || !noLot || !citySlug || prospectSaving) return;
-    prospectSaving = true;
-    prospectError = null;
-    try {
-      await createProspectNote({ noLot, citySlug, body, mode, ...(lotVersionId ? { lotVersionId } : {}) });
-      noteDraft = "";
-      await loadProspectState(noLot, citySlug);
-    } catch (e) {
-      prospectError = e instanceof Error ? e.message : "Note échouée";
-    } finally {
-      prospectSaving = false;
-    }
-  }
 </script>
 
 {#if lot}
@@ -707,25 +692,7 @@
               {#if marketMark}
                 <Badge tone="warning" class="text-xs">Marché : {prospectStatusLabel(marketMark.statut)}</Badge>
               {/if}
-              <Badge tone="neutral" class="text-xs">{prospectNotes.length} note{prospectNotes.length !== 1 ? "s" : ""}</Badge>
             </div>
-
-            {#if latestNotes.length > 0}
-              <ul class="space-y-1.5" aria-label="Dernières notes équipe">
-                {#each latestNotes as note (note.id)}
-                  <li class="rounded-lg border border-slate-100 bg-white px-3 py-2 text-xs text-slate-600">
-                    <p class="whitespace-pre-wrap leading-snug">{note.body}</p>
-                    <p class="mt-1 text-[11px] text-slate-400">
-                      {new Date(note.createdAt).toLocaleString("fr-CA")} · {note.mode === "simulation" ? "simulation" : "réel"}
-                    </p>
-                  </li>
-                {/each}
-              </ul>
-            {:else}
-              <p class="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400 italic">
-                Aucune note pour ce lot.
-              </p>
-            {/if}
 
             {#if allowMarquage}
               <div class="space-y-2 border-t border-slate-100 pt-2" data-testid="fiche-prospect-edit">
@@ -751,35 +718,33 @@
                 </div>
                 {#if !lotVersionId}
                   <p class="text-[11px] text-slate-400 italic" data-testid="fiche-prospect-no-version">
-                    Statuts désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo. Les notes restent possibles.
+                    Statuts pipeline/marché désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo. Les notes d'équipe restent possibles ci-dessous.
                   </p>
                 {/if}
-                <div class="space-y-1">
-                  <textarea
-                    class="w-full resize-none rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-700 focus:border-teal-400 focus:outline-none"
-                    rows="2"
-                    placeholder="Ajouter une note d'équipe…"
-                    bind:value={noteDraft}
-                    disabled={prospectSaving}
-                    aria-label="Note d'équipe"
-                  ></textarea>
-                  <div class="flex justify-end">
-                    <button
-                      type="button"
-                      class="rounded-md bg-teal-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-40"
-                      disabled={!noteDraft.trim() || prospectSaving}
-                      on:click={submitNote}
-                    >
-                      {prospectSaving ? "Enregistrement…" : "Ajouter la note"}
-                    </button>
-                  </div>
-                </div>
               </div>
             {:else}
               <p class="text-xs text-slate-400" data-testid="fiche-prospect-readonly">
-                Édition réservée au poste de prospection.
+                Marquage pipeline/marché réservé au poste de prospection.
               </p>
             {/if}
+          </div>
+        {/if}
+
+        <!-- Notes d'équipe §2 (endpoint unifié + temps réel SSE) — ouvert à tous
+             les approuvés (serveur = autorité author-only ; édition/suppression
+             seulement sur ses propres notes). Indépendant du gate allowMarquage. -->
+        {#if citySlug && noLot}
+          <div class="mt-3 border-t border-slate-100 pt-3" data-testid="fiche-annotations">
+            <div class="mb-1.5 flex items-center gap-2">
+              <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                Notes d'équipe
+              </span>
+              <AnnotationBadge count={annotationCount} />
+            </div>
+            <SignalAnnotations
+              target={{ type: "lot", id: noLot, citySlug }}
+              onCount={(n) => (annotationCount = n)}
+            />
           </div>
         {/if}
       </section>

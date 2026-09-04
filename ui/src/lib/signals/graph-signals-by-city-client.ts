@@ -36,10 +36,28 @@ export interface GraphSignalsByCityResponse {
   cities: GraphSignalCityItem[];
 }
 
+/**
+ * Fenêtre date OPTIONNELLE (#4) : bornes ISO (YYYY-MM-DD) passées au serveur
+ * date-aware. Le serveur filtre subsetCounts/vivierV2Counts sur cette fenêtre
+ * (mêmes clés de date que la lentille signaux). ABSENTES = comportement
+ * all-time (rétro-compatible). « Illimité » = ne passer aucune borne.
+ */
+export interface GraphSignalsByCityOptions {
+  dateFrom?: string | null;
+  dateTo?: string | null;
+}
+
 export async function fetchGraphSignalsByCity(
   baseUrl = "",
+  opts: GraphSignalsByCityOptions = {},
 ): Promise<GraphSignalsByCityResponse> {
-  const res = await fetch(`${baseUrl}/api/graph-signals/by-city`);
+  const params = new URLSearchParams();
+  if (opts.dateFrom) params.set("dateFrom", opts.dateFrom);
+  if (opts.dateTo) params.set("dateTo", opts.dateTo);
+  const qs = params.toString();
+  const res = await fetch(
+    `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
+  );
   if (!res.ok) throw new Error(`graph-signals/by-city: ${res.status}`);
   return res.json();
 }

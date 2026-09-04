@@ -1,0 +1,74 @@
+# 55-radar-api-hpa.yaml — HorizontalPodAutoscaler pour radar-api (WP7.4 scale).
+#
+# But : la démo prod (immo.sent-tech.ca) doit tenir plusieurs spectateurs
+# simultanés sans latence. L'audit 7.4 a montré que le risque n'est PAS l'OOM
+# (heap V8 capé à 512MB sous la limite cgroup 768Mi, 0 OOMKilled historique)
+# mais la SATURATION CPU : radar-api sert des requêtes lourdes (source-coverage
+# agrège TOUS les graph_nodes ; getOpportuniteFeatures par ville) avec 500m de
+# limite CPU et UNE seule réplique. Sous N spectateurs concurrents → file
+# d'attente CPU → latence.
+#
+# radar-api est STATELESS (lit Postgres) → scaler horizontalement est sain.
+# min=1/max=2 : au repos on reste à 1 réplique (aucun surcoût) ; sous charge
+# CPU l'HPA ajoute 1 réplique. AJOUTER cet HPA ne redémarre PAS le pod vif (il
+# pilote juste le nombre de répliques ; le mode Recreate ne mord que sur un
+# changement de template, pas sur le nombre — confirmé poc-k8s).
+#
+# PRÉREQUIS : metrics-server présent sur OVH — CONFIRMÉ par poc-k8s
+# (apiservice v1beta1.metrics.k8s.io Available=True, deploy kube-system/
+# metrics-server ready 1/1). Usage radar-api au repos = 2m CPU / 54Mi (marge).
+#
+# ⚠️ MAX=2 ET PAS 3 — contrainte QUOTA du namespace (mesurée par poc-k8s) :
+#   limits.cpu    utilisé 1600m / plafond 2500m
+#   limits.memory utilisé 2304Mi / plafond 3072Mi (3Gi)
+#   radar-api/pod : 500m / 768Mi.
+#   → 2 pods : +500m (2100m OK) + 768Mi (3072Mi = pile le plafond, admis).
+#   → 3 pods : +1000m (2600m > 2500m REFUSÉ) + 1536Mi (3840Mi > 3072Mi REFUSÉ).
+# Un HPA max3 plafonnerait DE FAIT à 2 et le 3e pod serait refusé EN SILENCE
+# (FailedCreate, zéro alerte — le piège surge classique). Donc max2 = tient le
+# quota TEL QUEL, zéro mutation NS. Passer à max3 exigerait d'abord de relever
+# le quota radar (limits.cpu →3000m+, limits.memory →4Gi) = durcissement séparé.
+# NB : à 2 pods la mémoire NS est à 100% du quota → pas de marge pour un Job
+# pendant un surge 2-pods (sans objet pendant la démo, aucun job ne tourne).
+#
+# SEUIL CPU — AverageValue (ABSOLU), PAS Utilization. poc-k8s a mesuré que la
+# request CPU LIVE de radar-api = 40m (drift : le manifeste 30-api.yaml dit
+# 100m mais le pod vif tourne à 40m, car le CD ne fait que `set-image` et ne
+# ré-applique jamais la request). averageUtilization serait un % de CETTE
+# request live → fragile : 300% × 40m = 120m (pas 300m), et si la request
+# repassait à 100m un jour, le seuil bougerait. AverageValue fixe un seuil
+# ABSOLU indépendant de la request : on scale le 2e pod quand radar-api dépasse
+# 300m de CPU moyen (~60% de la limite 500m, marge avant le throttle). 0 restart
+# (HPA seul, aucun changement du template). Aligner la request (→ intuitif) =
+# durcissement ultérieur qui, lui, redémarrerait le pod → PR séparée gatée.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: radar-api
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: radar-api
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          # Seuil ABSOLU (robuste au drift request 40m/100m — voir en-tête).
+          # Scale-up quand le CPU moyen/pod dépasse 300m (~60% de la limite 500m).
+          type: AverageValue
+          averageValue: 300m
+  behavior:
+    # Scale-up réactif (démo), scale-down prudent (évite le battement).
+    scaleUp:
+      stabilizationWindowSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 300

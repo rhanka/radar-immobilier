@@ -33,8 +33,10 @@ describe("normalizeZoneCode", () => {
     expect(normalizeZoneCode("h-431")).toBe("H-431");
   });
 
-  it("supprime le suffixe (VLO)", () => {
-    expect(normalizeZoneCode("H34-327 (VLO)")).toBe("H34-327");
+  it("préserve le contenu du suffixe secteur (VLO) — distingueur (corpus 29a14334)", () => {
+    // Le suffixe secteur distingue de vraies zones (02 (AGF) ≠ 02 (RCT)) : parens
+    // équilibrées retirées mais contenu conservé → injectif sur 873 munis servis.
+    expect(normalizeZoneCode("H34-327 (VLO)")).toBe("H34-327VLO");
   });
 
   it("supprime les espaces restants", () => {

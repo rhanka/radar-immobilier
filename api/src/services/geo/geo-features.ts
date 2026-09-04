@@ -14,6 +14,30 @@ import { sql, and, eq, isNotNull, inArray } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { zoneVersions, lotVersions, geoResolutions, graphNodes } from "../../db/schema.js";
 import { publicProvenanceFromEvidence } from "./provenance.js";
+import {
+  readRegulatoryStatus,
+  aggregateRegulatoryStatus,
+  type RegulatoryStatusT,
+  type RegulatoryStageKindT,
+} from "@radar/domain";
+
+/** Lit le regulatoryStatus SERVI d'une ligne graph_node (locus unique R5) : champ
+ *  persisté `props.properties.regulatoryStatus` (A.2) sinon fallback legacy depuis
+ *  statut/etape — jamais une re-classification indépendante. */
+function rowRegulatoryStatus(row: {
+  regulatoryStatus: string | null;
+  statut: string | null;
+  etape: string | null;
+}): RegulatoryStatusT {
+  return readRegulatoryStatus({
+    regulatoryStatus:
+      row.regulatoryStatus === "firm" || row.regulatoryStatus === "anticipation"
+        ? row.regulatoryStatus
+        : null,
+    statut: row.statut as RegulatoryStageKindT | null,
+    etape: row.etape,
+  });
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types GeoJSON minimaux
@@ -49,6 +73,10 @@ export interface ZoneFeatureProperties {
   signalCount: number;
   category: string | null;
   anticipation: string | null;
+  /** Ferme vs anticipation AGRÉGÉ pour la zone (R5, invariant REVERSE) : ferme dès
+   *  qu'≥1 nœud rattaché est ferme (via aggregateRegulatoryStatus) — un nœud-Bylaw
+   *  adopté sans stade hérite du ferme de son adoption frère. `null` si aucun nœud. */
+  regulatoryStatus: RegulatoryStatusT | null;
   geomSource: string;
   geomFetchedAt: string | null;
   proof?: Record<string, unknown>;
@@ -80,6 +108,9 @@ export interface OpportuniteFeatureProperties {
   citySlug: string;
   category: string | null;
   etape: string | null;
+  /** Ferme vs anticipation SERVI par nœud (axe MARQUAGE, R5) : champ persisté A.2
+   *  LU tel quel sinon fallback legacy — jamais re-classifié. Pas le hide-72. */
+  regulatoryStatus: RegulatoryStatusT;
   date: string | null;
   sourceRef: string | null;
 }
@@ -108,13 +139,18 @@ function parseGeom(raw: string | null | undefined): GeoJsonGeometry | null {
 /**
  * Résolutions géo par zone (canonical_id → { signalCount, category dominante, anticipation }).
  */
-async function buildZoneResolutionMap(
+export async function buildZoneResolutionMap(
   db: Database,
   citySlug: string,
 ): Promise<
   Map<
     string,
-    { signalCount: number; category: string | null; anticipation: string | null }
+    {
+      signalCount: number;
+      category: string | null;
+      anticipation: string | null;
+      regulatoryStatus: RegulatoryStatusT | null;
+    }
   >
 > {
   const resRows = await db
@@ -138,6 +174,8 @@ async function buildZoneResolutionMap(
       id: graphNodes.id,
       category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
       etape: sql<string | null>`${graphNodes.props}->'properties'->>'etape'`,
+      statut: sql<string | null>`${graphNodes.props}->'properties'->>'statut'`,
+      regulatoryStatus: sql<string | null>`${graphNodes.props}->'properties'->>'regulatoryStatus'`,
     })
     .from(graphNodes)
     .where(inArray(graphNodes.id, nodeIds));
@@ -146,29 +184,40 @@ async function buildZoneResolutionMap(
 
   const byZone = new Map<
     string,
-    { signalCount: number; categories: string[]; etapes: string[] }
+    { signalCount: number; categories: string[]; etapes: string[]; regStatuses: RegulatoryStatusT[] }
   >();
 
   for (const res of resRows) {
     if (!byZone.has(res.targetId)) {
-      byZone.set(res.targetId, { signalCount: 0, categories: [], etapes: [] });
+      byZone.set(res.targetId, { signalCount: 0, categories: [], etapes: [], regStatuses: [] });
     }
     const entry = byZone.get(res.targetId)!;
     entry.signalCount += 1;
     const node = nodeMap.get(res.nodeId);
     if (node?.category) entry.categories.push(node.category);
     if (node?.etape) entry.etapes.push(node.etape);
+    // R5 invariant REVERSE : on collecte le regulatoryStatus SERVI (persisté sinon
+    // fallback legacy) de CHAQUE nœud rattaché à la zone pour l'agréger (firm dès
+    // qu'≥1 nœud firm) — l'adoption prime sur l'avis frère.
+    if (node) entry.regStatuses.push(rowRegulatoryStatus(node));
   }
 
   const result = new Map<
     string,
-    { signalCount: number; category: string | null; anticipation: string | null }
+    {
+      signalCount: number;
+      category: string | null;
+      anticipation: string | null;
+      regulatoryStatus: RegulatoryStatusT | null;
+    }
   >();
   for (const [zoneId, data] of byZone.entries()) {
     result.set(zoneId, {
       signalCount: data.signalCount,
       category: data.categories[0] ?? null,
       anticipation: data.etapes[0] ?? null,
+      regulatoryStatus:
+        data.regStatuses.length > 0 ? aggregateRegulatoryStatus(data.regStatuses) : null,
     });
   }
   return result;
@@ -215,6 +264,7 @@ export async function getZoneFeatures(
       signalCount: res?.signalCount ?? 0,
       category: res?.category ?? null,
       anticipation: res?.anticipation ?? null,
+      regulatoryStatus: res?.regulatoryStatus ?? null,
       geomSource: row.geomSource,
       geomFetchedAt: row.geomFetchedAt ? row.geomFetchedAt.toISOString() : null,
       ...publicProvenanceFromEvidence(row.evidence),
@@ -304,9 +354,14 @@ export async function getOpportuniteFeatures(
       label: graphNodes.label,
       citySlug: graphNodes.citySlug,
       sourceRef: graphNodes.sourceRef,
-      createdAt: graphNodes.createdAt,
+      // `created_at` volontairement PAS sélectionné : la prod OVH n'a pas cette
+      // colonne sur graph_nodes (drift, cf #468 + mémoire ovh-schema-drift-
+      // created-at) → un SELECT created_at y 500e et casse la carte opportunités
+      // (qui sert etape/etape_date v3.4). etape/etape_date restent inchangés.
       category: sql<string | null>`${graphNodes.props}->'properties'->>'category'`,
       etape: sql<string | null>`${graphNodes.props}->'properties'->>'etape'`,
+      statut: sql<string | null>`${graphNodes.props}->'properties'->>'statut'`,
+      regulatoryStatus: sql<string | null>`${graphNodes.props}->'properties'->>'regulatoryStatus'`,
       etapeDate: sql<string | null>`${graphNodes.props}->'properties'->>'etape_date'`,
       lat: sql<string | null>`${graphNodes.props}->'properties'->>'lat'`,
       lon: sql<string | null>`${graphNodes.props}->'properties'->>'lon'`,
@@ -332,9 +387,11 @@ export async function getOpportuniteFeatures(
       citySlug: row.citySlug ?? citySlug,
       category: row.category,
       etape: row.etape,
-      date:
-        row.etapeDate ??
-        (row.createdAt ? row.createdAt.toISOString().slice(0, 10) : null),
+      regulatoryStatus: rowRegulatoryStatus(row),
+      // etape_date (v3.4) reste la source de date ; le repli createdAt est retiré
+      // (colonne absente OVH — voir le SELECT ci-dessus). Quand etape_date manque,
+      // date=null (dégradation acceptable ; createdAt n'existait pas sur OVH).
+      date: row.etapeDate ?? null,
       sourceRef: row.sourceRef,
     };
 
