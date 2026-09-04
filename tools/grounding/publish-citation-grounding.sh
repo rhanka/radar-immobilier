@@ -7,14 +7,24 @@ CAND="${2:?candidate_json requis}"
 RUN="${3:?run_dir requis}"
 LANE="${4:-manual}"
 
-set -a
-source .env
-set +a
-export AWS_ACCESS_KEY_ID="${SCRAPE_S3_ACCESS_KEY}"
-export AWS_SECRET_ACCESS_KEY="${SCRAPE_S3_SECRET_KEY}"
-export AWS_REGION="${SCRAPE_S3_REGION}"
-S3_URL="${SCRAPE_S3_ENDPOINT}"
-BUCKET="${SCRAPE_S3_BUCKET}"
+# .env sourcé UNIQUEMENT s'il existe (dev/local) ; in-cluster les vars viennent des secretRef montés.
+if [ -f .env ]; then set -a; source .env; set +a; fi
+# ── Cible publish = PUBLISH_* (fallback SCRAPE_S3_*). Single-bucket est le mode NORMAL : le graph store
+#    graph/<city>/latest.json et les docs source raw/ partagent le bucket docs-pocs. La frontière de
+#    sûreté est le PRÉFIXE (garde plus bas au point d'écriture), PAS le nom du bucket. Fail-closed si
+#    une creds PUBLISH_* manque (rien ne tourne à moitié configuré → publish silencieux au mauvais endroit). ──
+PUBLISH_S3_ENDPOINT="${PUBLISH_S3_ENDPOINT:-${SCRAPE_S3_ENDPOINT:-}}"
+PUBLISH_S3_BUCKET="${PUBLISH_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"
+PUBLISH_AWS_ACCESS_KEY_ID="${PUBLISH_AWS_ACCESS_KEY_ID:-${SCRAPE_S3_ACCESS_KEY:-}}"
+PUBLISH_AWS_SECRET_ACCESS_KEY="${PUBLISH_AWS_SECRET_ACCESS_KEY:-${SCRAPE_S3_SECRET_KEY:-}}"
+for v in PUBLISH_S3_ENDPOINT PUBLISH_S3_BUCKET PUBLISH_AWS_ACCESS_KEY_ID PUBLISH_AWS_SECRET_ACCESS_KEY; do
+  [ -z "${!v:-}" ] && { echo "publish-citation-grounding: FAIL-CLOSED — $v vide (PUBLISH_* requis)." >&2; exit 2; }
+done
+export AWS_ACCESS_KEY_ID="$PUBLISH_AWS_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$PUBLISH_AWS_SECRET_ACCESS_KEY"
+export AWS_REGION="${SCRAPE_S3_REGION:-us-east-1}"
+S3_URL="$PUBLISH_S3_ENDPOINT"
+BUCKET="$PUBLISH_S3_BUCKET"
 mkdir -p "$RUN/logs" "$RUN/status"
 
 python3 - "$CAND" <<'PY'
@@ -41,6 +51,16 @@ ts="$(date -u +%Y%m%dT%H%M%SZ)"
 parsed="s3://$BUCKET/parsed/$CITY/grounding-citations/$LANE/latest.candidate.json"
 graph="s3://$BUCKET/graph/$CITY/latest.json"
 backup="s3://$BUCKET/graph/$CITY/history/pre-citation-grounding-${LANE}-${ts}.json"
+
+# ── FAIL-CLOSED prefix-safety : on n'écrit QUE dans les zones publish graph/ + parsed/ ; JAMAIS la
+#    zone READ (raw/proces-verbaux, .meta) — même bucket, préfixes disjoints. Allowlist POSITIVE :
+#    toute clé hors graph/|parsed/ arrête la publication AVANT le moindre cp. ──
+for _k in "$parsed" "$graph" "$backup"; do
+  case "${_k#s3://$BUCKET/}" in
+    graph/*|parsed/*) : ;;
+    *) echo "publish-citation-grounding: FAIL-CLOSED — clé hors zone d'écriture (graph/|parsed/), refuse d'approcher la zone READ raw/.meta : $_k" >&2; exit 2 ;;
+  esac
+done
 
 s5cmd --endpoint-url "$S3_URL" cp "$CAND" "$parsed" >>"$RUN/logs/publish-$CITY.log" 2>&1
 
