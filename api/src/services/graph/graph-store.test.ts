@@ -1639,6 +1639,62 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraph (integration)", () => {
     expect(subgraph.nodes).toHaveLength(0);
     expect(subgraph.edges).toHaveLength(0);
   });
+
+  it("citation-safety — re-upsert (worker-live freshness) NEVER regresses props.refs (union, dedup)", async () => {
+    const db = await getDb();
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+    const city = "test-refs-nonregress";
+    const nodeId = "event-adoption-026-511-refsafe";
+
+    // Deterministic start: drop any leftover from a prior run.
+    await db.delete(graphNodes).where(eq(graphNodes.id, nodeId));
+
+    // §521-ét conforming citation, as projection/materializeSeveredSources leaves it
+    // on the node (docSha + rawRef + page + excerpt + sourceUrl + linkSource).
+    const CITATION = {
+      docSha: "SHA_PV",
+      rawRef: "raw/proces-verbaux-sainte-martine/cas/SHA_PV.pdf",
+      page: 1,
+      excerpt: "Adoption 026-511 — sainte-martine 2026-05-12",
+      sourceUrl: "https://example.test/pv/SHA_PV.pdf",
+      linkSource: "projection-materialize-severed",
+    };
+
+    // 1) Materialized graph in PG: node bearing the citation.
+    await upsertGraph(db, city, {
+      nodes: [{ id: nodeId, label: "Adoption 026-511", type: "DesignationEvent", refs: [CITATION] }],
+      edges: [],
+    });
+
+    // 2) Fresh re-detection via the SAME pure-upsert path — same id, NO refs (the
+    //    materialized citation is projection-only, absent from detection output).
+    await upsertGraph(db, city, {
+      nodes: [{ id: nodeId, label: "Adoption 026-511 (re-détecté)", type: "DesignationEvent" }],
+      edges: [],
+    });
+
+    const [afterFresh] = await db.select().from(graphNodes).where(eq(graphNodes.id, nodeId));
+    const refsAfterFresh = (afterFresh!.props as { refs?: unknown[] }).refs ?? [];
+    // Citation preserved verbatim — all fields intact (excerpt, page, sourceUrl, linkSource, …).
+    expect(refsAfterFresh).toContainEqual(CITATION);
+    // …and the fresh detection fields DID update (freshness not blocked).
+    expect(afterFresh!.label).toBe("Adoption 026-511 (re-détecté)");
+
+    // 3) Re-upsert the SAME citation → union dedups, no duplicate.
+    await upsertGraph(db, city, {
+      nodes: [{ id: nodeId, label: "x", type: "DesignationEvent", refs: [CITATION] }],
+      edges: [],
+    });
+    const [afterDup] = await db.select().from(graphNodes).where(eq(graphNodes.id, nodeId));
+    const sameCitation = (
+      (afterDup!.props as { refs?: Array<Record<string, unknown>> }).refs ?? []
+    ).filter((r) => r.docSha === "SHA_PV" && r.rawRef === CITATION.rawRef);
+    expect(sameCitation).toHaveLength(1);
+
+    // Cleanup.
+    await db.delete(graphNodes).where(eq(graphNodes.id, nodeId));
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
