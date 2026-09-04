@@ -40,6 +40,21 @@ metadata:
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: ci-deployer
     app.kubernetes.io/env: preprod
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-app
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: app
+    app.kubernetes.io/env: preprod
+imagePullSecrets:
+  - name: radar-registry-pull
+automountServiceAccountToken: false
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

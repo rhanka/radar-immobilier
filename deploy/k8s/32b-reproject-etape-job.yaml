@@ -60,8 +60,21 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: project-graph
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:etape-1781485930
           imagePullPolicy: Always
           workingDir: /workspace/api
