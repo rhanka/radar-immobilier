@@ -59,3 +59,21 @@ resources:
   - 60-ingress.yaml
   - 70-networkpolicy.yaml
   - 80-auth.yaml
+
+# radar-ui-nginx conf — GENERATED (no longer an inline ConfigMap in 50-ui.yaml)
+# so the hash suffix rolls the radar-ui Deployment when the served conf changes
+# (fixes the #608 drift: the live CM lagged git; `set image` alone never rolled
+# on a CM-only change). SINGLE SOURCE for the in-cluster conf:
+# deploy/k8s/nginx/default.conf (direct proxy_pass — in-cluster the radar-api
+# Service DNS always exists; the compose/standalone lazy-resolver variant is
+# ui/nginx/default.conf, security headers kept in sync by
+# deploy/k8s/nginx/check-header-parity.sh). The preprod overlay
+# (deploy/overlays/preprod) INHERITS this generator (behavior:replace on a raw
+# base CM is rejected by kustomize, so the CM must be generator-managed here).
+# Prod only sees the hash-suffixed CM at a future `apply -k` of this base;
+# `set image` (the current prod path) does not apply manifests, so prod is
+# unaffected until then.
+configMapGenerator:
+  - name: radar-ui-nginx
+    files:
+      - default.conf=nginx/default.conf

@@ -759,6 +759,20 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
         run: bash deploy/ci/run-db-backup.sh
 
+      # RECONCILE MANIFESTS (CD refonte, targeted / option A) — apply the drifted
+      # DURABLES so preprod tracks git, not just images. Runs AFTER the fail-closed
+      # backup and BEFORE set-image (the pushed digest stays the final image; the
+      # set-image step below is last, so no flap back to the manifest image).
+      # Scoped to what the preprod deployer SA may touch: the generated
+      # radar-ui-nginx ConfigMap (#608), radar-api/radar-ui Deployments +
+      # radar-consistency-snapshot CronJob (#611). The Namespace PSS labels stay an
+      # operator act (k8s), and the env ConfigMaps + maildev/obscura Deployments
+      # are excluded (see deploy/ci/reconcile-preprod.sh header + PR follow-ups).
+      # Fail-closed: a failed ConfigMap apply exits BEFORE set-image, so radar-ui
+      # never rolls onto a Deployment referencing an absent ConfigMap.
+      - name: Reconcile preprod manifests (server-side apply — targeted)
+        run: bash deploy/ci/reconcile-preprod.sh
+
       # NOTE: NO "Apply immo-mcp declarative config" here (DESIGN §2.8) — drift
       # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
       # and the preprod deployer Role cannot apply ConfigMaps/Services.
