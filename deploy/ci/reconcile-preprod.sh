@@ -22,6 +22,14 @@
 # FAIL-CLOSED: the ConfigMap is applied FIRST; if the hash-suffixed
 # radar-ui-nginx CM cannot be created (`set -e`), the job exits BEFORE set-image,
 # so radar-ui never rolls onto a Deployment referencing an absent ConfigMap.
+#
+# SSA FIELD OWNERSHIP: this server-side apply (field-manager cd-preprod) takes
+# ownership of the fields it sets — requests/limits, securityContext, and the
+# Deployment `image`. GIT IS THE SOURCE OF TRUTH for those. The set-image step
+# that runs AFTER this reconcile patches `image` to the pushed digest (a
+# different manager, hence the --force-conflicts here on the next run); set-image
+# runs LAST, so the served image is always the pushed digest while
+# requests/limits/securityContext always track git.
 set -euo pipefail
 
 : "${NAMESPACE:?NAMESPACE must be set (radar-immobilier-preprod)}"
