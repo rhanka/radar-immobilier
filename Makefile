@@ -115,6 +115,10 @@ typecheck: ## TypeScript typecheck across the workspace
 lint: ## Lint across the workspace (ESLint flat config)
 	$(COMPOSE_RUN_API_NODEPS) npx eslint .
 
+.PHONY: audit
+audit: ## Run npm audit gate (fails on critical or high vulnerabilities)
+	npm audit --audit-level=critical
+
 .PHONY: format
 format: ## Auto-format (prettier / dprint, defined later)
 	@echo "[format] no formatter wired yet — placeholder for a later branch"
