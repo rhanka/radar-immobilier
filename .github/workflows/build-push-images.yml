@@ -870,6 +870,30 @@ jobs:
             sleep 15
           done
 
+      # §6 DEPLOY REFRESH CRONJOBS (preprod) — deploy + un-suspend the two refresh
+      # CronJobs in radar-immobilier-preprod, pinned to this release's :<sha>
+      # (reused, no 2nd resolution), via the refresh-cronjobs overlay
+      # (namespace->preprod + suspend:false). §6 is PREPROD-ONLY (owner directive;
+      # no prod path). Gated by REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner
+      # AFTER the diag PASS. Needs batch/cronjobs on the preprod deployer
+      # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, the CronJobs run
+      # nightly (03:17 scrape / 04:30 projection) → refresh on preprod.immo.
+      - name: Deploy refresh CronJobs (preprod)
+        if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' }}
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+          cd deploy/k8s/refresh-cronjobs
+          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:${SHA}
+          kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
+          echo "refresh CronJobs deployed to ${NAMESPACE} (radar-api:${SHA}, suspend:false):"
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-scrape radar-refresh-projection -o wide || true
+
       - name: Deployment status — success (preprod)
         if: success() && steps.deployment.outputs.id != ''
         uses: actions/github-script@v7
@@ -1241,31 +1265,10 @@ jobs:
             sleep 10
           done
 
-      # §6 REFRESH CRONJOB IMAGE-PIN (prod) — pin the (suspended) refresh
-      # CronJobs to the SAME immutable digest this promote just deployed
-      # (REUSES steps.pick.outputs.api — no 2nd resolution), applying ONLY the two
-      # CronJobs via the refresh-cronjobs overlay. They STAY `suspend: true`: this
-      # fixes the stale-`:latest` root cause only; un-suspend is a SEPARATE owner
-      # gesture after the preprod diag PASS. DISARMED by default
-      # (REFRESH_CRONJOB_PIN_ENABLED) AND requires the owner-granted batch/cronjobs
-      # RBAC (not in this PR — the SA never self-grants). `kubectl apply -k` can't
-      # be used (base is ../34) → `kustomize build --load-restrictor
-      # LoadRestrictionsNone` emits only the 2 CronJobs.
-      - name: Pin refresh CronJobs to release digest (prod)
-        if: ${{ success() && vars.REFRESH_CRONJOB_PIN_ENABLED == 'true' }}
-        env:
-          DIG_API: ${{ steps.pick.outputs.api }}
-        run: |
-          set -euo pipefail
-          kver=5.4.3
-          tmp="$(mktemp -d)"
-          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
-          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
-          cd deploy/k8s/refresh-cronjobs
-          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api@${DIG_API}
-          kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
-          echo "pinned refresh CronJobs → radar-api@${DIG_API} (still suspend:true; unsuspend = separate owner gesture)"
-
+      # NB §6 refresh is PREPROD-ONLY (owner directive) — there is deliberately NO
+      # prod CronJob-pin step here. The refresh CronJobs are deployed + un-suspended
+      # in radar-immobilier-preprod by the deploy-preprod "Deploy refresh CronJobs
+      # (preprod)" step; prod (this promote path) never carries them.
       - name: Deployment status — success
         if: success() && steps.deployment.outputs.id != ''
         uses: actions/github-script@v7
