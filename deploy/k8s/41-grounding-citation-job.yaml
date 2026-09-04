@@ -1,0 +1,109 @@
+# 41-grounding-citation-job.yaml — INERT SCAFFOLD — PUBLISH-ONLY (one city per Job).
+#
+# Publish-only model (plan 4.4.3, ruling i-cond after mesh WP14: no in-cluster mesh endpoint,
+# so the LLM is NOT moved in-pod). Split of responsibility:
+#   - HOST does the validated citation-grounding (codex -> llm-mesh -> luna, proven 29 live for
+#     Ste-Martine) under a HARD call-ceiling, then STAGES the grounded candidate +
+#     graph/<city>/latest.json.sha256 to SCW docs-pocs under prefix candidats/<city>/.
+#   - THIS pod is publish-only: pull the staged candidate (egress) + hash-verify (refuse any
+#     body whose SHA-256 differs) -> publish to MinIO docs-preprod graph/<city>/latest.json.
+#     The pod NEVER talks to the mesh/LLM ⇒ the mesh-access blocker disappears.
+#
+# Runs publish-verify-graph.sh for ONE city (env CITY). The dispatch (i-arch Lot 2) iterates
+# the cohort (radar-grounding-worklist), Ste-Martine first; the worklist also bounds the
+# host-grounding count (cost-gate).
+#
+# ── Pieces (sequenced by i-cond §7) ──
+#   1. [RESOLVED — i-infra, D-01=B] PUBLISH = in-cluster MinIO radar-minio:9000, bucket
+#      radar-immobilier-docs-preprod, prefix graph/. PRÉPROD-only ⇒ prod never touched. Creds
+#      reuse radar-s3-credentials. Dep D4: baseline graph seeded to MinIO first (same
+#      publish-verify-graph.sh, src_prefix=graph; me + i-infra).
+#   2. [RESOLVED — i-arch #589 a74a550] Runtime image: logical name `radar-grounding` (kustomize
+#      `images:` patch at dispatch). Publish-only = debian-slim + s5cmd + jq + python3, 0 LLM/mesh.
+#      Must bundle tools/grounding (incl. publish-verify-graph.sh from this PR) at /workspace —
+#      rebuild #589 after this reframe merges.
+#   3. [ROUTED — i-arch dispatch #590] PRÉPROD one-shot dispatch (run-job.yaml is prod-only): the CD
+#      applies this Job per city (injects CITY + patches the image tag via kustomize), gated environment.
+#      NB(NetworkPolicy): the pod MUST carry label app.kubernetes.io/component: grounding — i-arch's NP
+#      72-allow-grounding-to-minio (#590, 1d84249) admits ingress to minio:9000 FROM component=grounding.
+#      Wrong/absent label ⇒ the pod cannot reach MinIO to publish (same NP gate as the projection).
+#   4. [ME, next] Host grounding run + HARD call-ceiling (finite worklist + max-call counter + stop +
+#      manual kill) → stages candidate + .sha256 to docs-pocs candidats/<city>/ (a NEW prefix, never
+#      raw/; host-side RW creds). This is what feeds the SRC below.
+#
+# Safety: publish-verify-graph.sh is fail-closed — SHA mismatch (candidate vs sidecar, or DST
+# re-read vs source), missing creds, SRC==DST, or a non-graph/ DST key all abort before/without a
+# bad overwrite; non-destructive backup to graph/<city>/history/ before overwrite. READ
+# (docs-pocs) ≠ PUBLISH (MinIO docs-preprod).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-grounding-citations
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: grounding
+spec:
+  backoffLimit: 0             # i-cond spec — no auto-retry; publish-only is idempotent + resumable so a manual re-dispatch is safe
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 300  # publish-only = pull + hash-verify + push one JSON (fast)
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: grounding
+    spec:
+      restartPolicy: Never
+      # TODO(i-infra): SA in radar-immobilier-preprod with egress to SCW docs-pocs (read) + the
+      # in-cluster MinIO NetworkPolicy (write). No LLM egress needed (publish-only).
+      serviceAccountName: radar-app
+      containers:
+        - name: grounding-publish
+          # image = LOGICAL name, patched by kustomize `images:` at dispatch (i-arch). PUBLISH-ONLY:
+          # needs only s5cmd + coreutils + jq + tools/grounding. NEVER hardcode a tag here.
+          image: radar-grounding
+          imagePullPolicy: Always
+          workingDir: /workspace
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              # One city per Job: the dispatch injects CITY (e.g. CITY=sainte-martine — Ste-Martine first).
+              : "${CITY:?CITY env required — injected by the dispatch (e.g. sainte-martine)}"
+              echo "[grounding-publish] city=$CITY (publish-only: pull staged candidate → hash-verify → MinIO graph/)"
+              exec bash tools/grounding/publish-verify-graph.sh "$CITY" candidats /tmp/publish-run
+          env:
+            # city to publish — one city per Job. Injected/overridden by the dispatch (i-arch Lot 2);
+            # default = the proven first city (Ste-Martine, 29 citations).
+            - name: CITY
+              value: "sainte-martine"
+            # require the host-staged .sha256 sidecar (integrity of the staged candidate).
+            - name: REQUIRE_SIDECAR
+              value: "1"
+            # ── SRC = SCW docs-pocs, prefix candidats/ (host-staged candidate + .sha256). Read-only.
+            #    radar-scrape-s3-credentials is ABSENT on preprod (33b) → endpoint/bucket/region LITERAL +
+            #    SCW read creds from graph-copy-creds (SCW_AK/SCW_SK). secretKeyRef by KEY NAME only, no values. ──
+            - name: SRC_S3_ENDPOINT
+              value: "https://s3.fr-par.scw.cloud"
+            - name: SRC_S3_BUCKET
+              value: "radar-immobilier-docs-pocs"
+            - name: AWS_REGION
+              value: "fr-par"
+            - name: SRC_AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: graph-copy-creds, key: SCW_AK } }
+            - name: SRC_AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: graph-copy-creds, key: SCW_SK } }
+            # ── DST = in-cluster MinIO radar-minio:9000, bucket radar-immobilier-docs-preprod, prefix graph/.
+            #    PRÉPROD-only ⇒ prod jamais touchée. Creds = radar-s3-credentials (MinIO). READ≠PUBLISH. ──
+            - name: DST_S3_ENDPOINT
+              value: "http://radar-minio:9000"
+            - name: DST_S3_BUCKET
+              value: "radar-immobilier-docs-preprod"
+            - name: DST_AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: DST_AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
