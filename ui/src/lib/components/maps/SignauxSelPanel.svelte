@@ -93,6 +93,8 @@
   } from "$lib/maps/zone-millesime-filter.js";
   import LotFilterHeader from "$lib/components/maps/LotFilterHeader.svelte";
   import ZoneFilterHeader from "$lib/components/maps/ZoneFilterHeader.svelte";
+  import SignalAnnotations from "$lib/components/collab/SignalAnnotations.svelte";
+  import AnnotationBadge from "$lib/components/collab/AnnotationBadge.svelte";
   import {
     aggregateReglements,
     reglementSourceViewerTitle,
@@ -187,6 +189,8 @@
 
   // Conteneur scrollable des fiches (pour amener en vue la fiche cross-survolée).
   let entityListEl: HTMLDivElement | null = null;
+  // §2 — nombre de notes par signal (renseigné à l'ouverture de la fiche → badge).
+  let annotationCounts: Record<string, number> = {};
 
   // #86 — quand le viewer survole un badge, scrolle la fiche correspondante en
   // vue (sans la focaliser : on n'ouvre pas le détail, on signale juste). Le
@@ -1199,6 +1203,7 @@
                         {stageLabel}
                       </span>
                     {/if}
+                    <AnnotationBadge count={annotationCounts[node.id] ?? 0} />
                   </button>
 
                   {#if nodeVisual.focused}
@@ -1369,6 +1374,12 @@
                           {/if}
                         </div>
                       </div>
+                      <!-- §2 Domaine collaboratif : notes d'équipe sur ce signal,
+                           chargées à l'ouverture de la fiche (lazy). -->
+                      <SignalAnnotations
+                        target={{ type: "signal", id: node.id, citySlug: node.citySlug ?? "" }}
+                        onCount={(n) => (annotationCounts = { ...annotationCounts, [node.id]: n })}
+                      />
                     </div>
                   {/if}
                 </div>
