@@ -48,8 +48,16 @@ metadata:
     app.kubernetes.io/component: ui
 spec:
   replicas: 1
+  # RollingUpdate keeps >=1 replica up during a roll (never 0 pods on a failed
+  # new-pod create). radar-ui is stateless — its only volume is the radar-ui-nginx
+  # ConfigMap, and that CM is now hash-suffixed (generated in kustomization.yaml),
+  # so a conf change already rolls a fresh pod: Recreate is no longer needed for
+  # the mount. maxUnavailable:0 = never below 1; maxSurge:1 needs quota headroom.
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: radar-immobilier
