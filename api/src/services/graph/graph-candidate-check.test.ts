@@ -169,3 +169,26 @@ describe("predictProjectionAbort — real §7 pilot shape (extraction matrix, ca
     ]);
   });
 });
+
+describe("predictProjectionAbort — source-ref provenance gate (gate3, upgrade)", () => {
+  it("predicts abort when the candidate would DROP a node's source docSha (the PV-ref loss)", () => {
+    const before = [{ id: "sig:1", type: "Signal", props: { refs: [{ docSha: "SHA_PV" }] } }];
+    const candidate = { nodes: [{ id: "sig:1", type: "Signal", refs: [] as unknown[] }] };
+    const r = predictProjectionAbort("ste-martine", before, candidate);
+    expect(r.wouldAbort).toBe(true);
+    expect(r.sourceRefRegressions).toEqual([
+      { citySlug: "ste-martine", nodeId: "sig:1", missingDocShas: ["SHA_PV"] },
+    ]);
+    expect(r.reasons.some((m) => m.includes("source-ref provenance") && m.includes("SHA_PV"))).toBe(true);
+  });
+
+  it("no abort when the candidate PRESERVES the source docSha (additions allowed)", () => {
+    const before = [{ id: "sig:1", type: "Signal", props: { refs: [{ docSha: "SHA_PV" }] } }];
+    const candidate = {
+      nodes: [{ id: "sig:1", type: "Signal", refs: [{ docSha: "SHA_PV" }, { docSha: "SHA_GROUNDING", excerpt: "cited" }] }],
+    };
+    const r = predictProjectionAbort("x", before, candidate);
+    expect(r.wouldAbort).toBe(false);
+    expect(r.sourceRefRegressions).toEqual([]);
+  });
+});
