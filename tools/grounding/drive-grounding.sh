@@ -52,9 +52,13 @@ export AWS_REGION="${SCRAPE_S3_REGION:-us-east-1}"
 export AWS_ACCESS_KEY_ID="$PUBLISH_AWS_ACCESS_KEY_ID"
 export AWS_SECRET_ACCESS_KEY="$PUBLISH_AWS_SECRET_ACCESS_KEY"
 S3_URL="$PUBLISH_S3_ENDPOINT"; BUCKET="$PUBLISH_S3_BUCKET"
-# Mode : 2-bucket (prod-frontière OK) si READ≠PUBLISH ; sinon single-bucket (dev/local) — bruyant.
+# ── Frontière de sûreté = le PRÉFIXE, pas le nom du bucket. La garde dure vit au point d'ÉCRITURE
+#    (publish-citation-grounding + gate canonique n'écrivent QUE graph/ + parsed/, jamais la zone READ
+#    raw/proces-verbaux + .meta). READ==PUBLISH (single-bucket) est donc un mode LÉGITIME : le graph store
+#    et les docs source peuvent partager un bucket. Le fail-closed DUR reste sur les creds vides (boucle
+#    des 8 variables ci-dessus). ──
 if [ "$READ_S3_BUCKET" = "$PUBLISH_S3_BUCKET" ]; then
-  log_early(){ echo "[drive] ⚠ SINGLE-BUCKET (READ==PUBLISH=$PUBLISH_S3_BUCKET) — dev/local uniquement, PAS préprod-safe." >&2; }; log_early
+  echo "[drive] single-bucket (READ==PUBLISH=$PUBLISH_S3_BUCKET) — mode normal ; prefix-safety au point d'écriture (graph/ only)." >&2
 fi
 
 mkdir -p "$RUN_DIR/status" "$RUN_DIR/logs" "$RUN_DIR/workers" "$RUN_DIR/lanes"
