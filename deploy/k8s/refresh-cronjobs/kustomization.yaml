@@ -51,15 +51,16 @@ patches:
         path: /spec/suspend
         value: false
 
-  # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
-  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. In PREPROD
-  # the graph store is the IN-CLUSTER MinIO `radar-minio:9000` /
-  # `radar-immobilier-docs-preprod` — the SAME store the app reads and the
-  # grounding publishes to. Override GRAPH_S3 to that MinIO so
-  # projection-read == app-store == grounding-publish (else citations break: the
-  # projection would read a different bucket). Creds stay radar-s3-credentials
-  # (= the MinIO creds); MinIO needs path-style. (i-infra co-vals endpoint/bucket/
-  # path-style.)
+  # 1-STORE MIGRATION (SPEC step 4) — PREPROD projection reads SCW
+  # `radar-immobilier-docs-pocs` under the PREFIX `graph-preprod/`: the
+  # preprod-grounded graphs are isolated by prefix from the baseline `graph/` in
+  # the SAME store (kills the 3-bucket mismatch + the host-read gap of MinIO).
+  # base 34 already targets SCW docs-pocs for STANDARD/prod (prefix `graph/`,
+  # UNTOUCHED); this overlay only adds `GRAPH_S3_PREFIX=graph-preprod/` and swaps
+  # creds to `graph-copy-creds` (SCW_AK/SCW_SK) — in preprod `radar-s3-credentials`
+  # are the MinIO creds, so reading SCW needs the dedicated SCW secret. All env
+  # kinds (value/valueFrom) match base 34 → strategic-merge is valid (no JSON6902).
+  # ⚠ The CronJob needs host-external egress to SCW — i-infra confirms the egress NP.
   - target:
       kind: CronJob
       name: radar-refresh-projection
@@ -77,11 +78,19 @@ patches:
                   - name: project-graph
                     env:
                       - name: GRAPH_S3_ENDPOINT
-                        value: http://radar-minio:9000
+                        value: https://s3.fr-par.scw.cloud
+                      - name: GRAPH_S3_REGION
+                        value: fr-par
                       - name: GRAPH_S3_BUCKET
-                        value: radar-immobilier-docs-preprod
+                        value: radar-immobilier-docs-pocs
                       - name: GRAPH_S3_FORCE_PATH_STYLE
-                        value: "true"
+                        value: "false"
+                      - name: GRAPH_S3_PREFIX
+                        value: graph-preprod/
+                      - name: GRAPH_S3_ACCESS_KEY
+                        valueFrom: { secretKeyRef: { name: graph-copy-creds, key: SCW_AK } }
+                      - name: GRAPH_S3_SECRET_KEY
+                        valueFrom: { secretKeyRef: { name: graph-copy-creds, key: SCW_SK } }
 
   # SCRAPE bucket/path-style alignment (i-infra) — same root cause as the
   # projection GRAPH_S3: base 34 ships SCRAPE_S3_FORCE_PATH_STYLE=false (SCW, →
