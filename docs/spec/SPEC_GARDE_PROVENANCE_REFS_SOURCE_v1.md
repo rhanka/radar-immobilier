@@ -3,7 +3,7 @@
 > **Statut** : SPEC held pour gate i-cond + co-val recette (intégrité). **DESIGN uniquement — implémentation NON démarrée.**
 > **Auteur** : i-arch (graph-store). **Domaine** : `api/src/services/graph/graph-store.ts` (`upsertGraphAtomic` + gardes) et son miroir read-only `graph-candidate-check.ts` (#598).
 > **Déclencheur** : régression owner-constatée — les 4 signaux rezonage Ste-Martine ont **perdu leur ref PV source** après une projection grounding REPLACE, sans abort. Root-cause data = extraction.
-> **⚠️ Paramètre ouvert BLOQUANT l'implémentation** : le **champ exact** protégé (`props.refs` ? `sourceRef` ? `docRefs`/`docSha` ? `docSha` du DesEvent lié ?) est **à confirmer par la mesure extraction** avant tout code. Ce document conçoit la garde **indépendamment** de ce choix ; §5 l'isole.
+> **✅ CHAMP CONFIRMÉ (mesure extraction, v1.1)** : la provenance PV vit sur **3 loci** — `Signal.props.refs` (direct, cas PIIA/dérogation), `DesignationEvent.refs`/`docSha` + l'arête **`raises_signal.refs`** (cas rezonage via le hop, `Signal.props.refs=[]` aujourd'hui). Extraction PROPAGE additivement la ref sur `Signal.props.refs` des rezonage. La garde protège les **3 loci par-nœud ET par-arête**. §5 détaille.
 
 ## 0. Portée & non-goals
 
@@ -27,10 +27,11 @@
 
 ## 2. Invariant cible
 
-> Pour tout nœud présent **à la fois** dans l'état PG courant (avant) **et** dans le candidat (après), l'ensemble des **refs source identifiantes** de l'avant doit être **préservé** dans l'après. Une ref source présente avant et **absente après** = **régression de provenance** → **ville abortée** (rollback, 0 perte), sauf exemption intentionnelle.
+> Pour tout **nœud OU arête** présent **à la fois** dans l'état PG courant (avant) **et** dans le candidat (après), l'ensemble des **refs source identifiantes** de l'avant doit être **préservé** dans l'après. Une ref source présente avant et **absente après** = **régression de provenance** → **ville abortée** (rollback, 0 perte), sauf exemption intentionnelle.
 
-Formellement, par nœud `n ∈ before ∩ after` (match par `id`) et hors `intendedRemovals` :
-`sourceRefIdentities(before[n]) ⊆ sourceRefIdentities(after[n])`
+Formellement :
+- par nœud `n ∈ before ∩ after` (match par `id`), hors `intendedRemovals` : `sourceRefIdentities(before[n]) ⊆ sourceRefIdentities(after[n])` ;
+- par arête `e ∈ before ∩ after` (match clé naturelle `src_id+dst_id+kind`) : `sourceRefIdentities(before[e]) ⊆ sourceRefIdentities(after[e])`.
 
 - **Ajouts autorisés** : le candidat PEUT ajouter des refs (enrichissement, ex. une citation grounding) — seule la **disparition** d'une ref existante est une régression. (Même philosophie que gate1 : anti-disparition, pas anti-évolution.)
 - **Nœuds nouveaux** (absents de l'avant) : aucune contrainte (rien à préserver).
@@ -53,7 +54,19 @@ findMissingSourceRefs(
   - si `missing ≠ ∅` → pousser une régression.
 - Un nœud business-porteur qui **disparaît entièrement** (absent de l'après) est déjà couvert : ses refs sont toutes « missing » → régression (sauf `intendedRemovals`).
 
-Intégration dans `upsertGraphAtomic` : **gate3 en lecture seule AVANT la transaction** (comme gate1). Si `findMissingSourceRefs` non vide → `return { aborted: true, reason: "source-ref provenance regression for <city>: <nodeId>: <missingRefIds>; projection refused" }`. **NE throw PAS** (les autres villes continuent) — identique à gate1.
+**Volet ARÊTES** (nouveau vs gardes existantes) — fonction sœur :
+
+```
+findMissingSourceRefEdges(
+  beforeEdges, afterEdges, citySlug,
+): SourceRefRegression[]   // { citySlug, edgeKey, missingRefIds }
+```
+
+- `afterByKey = Map("src_id\0dst_id\0kind" → edge)`.
+- Pour chaque arête avant : `missing = sourceRefIdentities(before) \ sourceRefIdentities(after[key] ?? ∅)` ; si non vide → régression.
+- Les arêtes « avant » sont chargées read-only (comme les nœuds `beforeRows`), scopées à la ville (arêtes dont les deux extrémités sont des nœuds de la ville — cf `subgraphForCity`).
+
+Intégration dans `upsertGraphAtomic` : **gate3 en lecture seule AVANT la transaction** (comme gate1), volet nœuds + volet arêtes. Si l'un des deux est non vide → `return { aborted: true, reason: "source-ref provenance regression for <city>: <node|edge>: <missingRefIds>; projection refused" }`. **NE throw PAS** (les autres villes continuent) — identique à gate1.
 
 Ordre : gate1 (business-props) → **gate3 (provenance refs)** → transaction → gate2 (complétude, count). Toute garde qui fire → abort.
 
@@ -61,18 +74,23 @@ Ordre : gate1 (business-props) → **gate3 (provenance refs)** → transaction �
 
 `intendedRemovals: ReadonlySet<string>` (per-NŒUD, #551) exempte gate3 comme gate1 : un nœud dont le retrait/rotation de provenance est **voulu** (purge, correction de source) est passé dans `intendedRemovals` → gate3 le saute. **Note de conception** : `intendedRemovals` est per-nœud, pas per-ref ; si une **rotation de ref fine** (remplacer la ref A par la ref B sur un nœud conservé) devient un besoin réel, ce sera une extension séparée (`intendedRefRemovals` per-ref) — **hors de ce lot** (YAGNI tant que non mesuré).
 
-## 5. ⚠️ LE CHAMP À PROTÉGER — paramètre ouvert (mesure extraction requise)
+## 5. ✅ CHAMP CONFIRMÉ (mesure extraction) — les 3 loci de provenance
 
-`sourceRefIdentities(node)` doit renvoyer l'ensemble des **identifiants stables** des refs source d'un nœud. Le **choix du champ + de la clé d'identité** dépend de la structure réelle mesurée par extraction. Candidats :
+La provenance PV vit sur **3 loci** (mesure extraction) ; `sourceRefIdentities(node|edge)` les couvre tous :
 
-| Option | Identité | Pour | Contre |
-|---|---|---|---|
-| **A. `props.refs[].docSha`** | hash de contenu du document source | identité **stable** (même PV = même sha), robuste à la reformulation de la citation | suppose que chaque ref porte un `docSha` |
-| B. `props.refs[].rawRef` | clé objet S3 brute (le PV) | présent quand pas de docSha | une re-clé S3 romprait l'identité |
-| C. `sourceRef` (colonne nœud) | ref source unitaire du nœud | simple | 1 seule ref, insuffisant si multi-refs |
-| D. `docSha` du DesEvent lié (`raises_signal`) | provenance héritée | couvre le cas #600 | dépend de la topologie ; **écarté si le modèle = « PV propre du signal »** |
+| Locus | Porté par | Cas |
+|---|---|---|
+| **`Signal.props.refs[]`** | le nœud Signal, directement | PIIA / dérogation (aujourd'hui) ; rezonage **après** le fix extraction (propagation additive de la ref sur le Signal) |
+| **`DesignationEvent.props.refs[]` / `docSha`** | le nœud DesignationEvent | rezonage : l'event de zonage porte la ref PV + `docSha` |
+| **arête `raises_signal.props.refs[]`** | l'**ARÊTE** event→signal | rezonage via le hop (la provenance transite par l'arête) |
 
-**Recommandation provisoire (à confirmer)** : **Option A (`props.refs[].docSha`)** comme clé d'identité primaire, avec repli B (`rawRef`) quand `docSha` absent — c'est la provenance **content-stable** du nœud lui-même, cohérente avec le modèle owner « le PV EST la citation propre du signal ». **À VALIDER** par la mesure extraction (structure réelle des refs sur les 4 rezonage + le champ où vit la provenance PV) **avant implémentation**.
+**Clé d'identité** d'une ref : **`docSha`** (hash de contenu du document = identité content-stable), repli `rawRef` quand `docSha` absent. Deux refs sont « la même » ssi même `docSha` (ou même `rawRef` à défaut).
+
+**Conséquence de conception — gate3 couvre NŒUDS *ET* ARÊTES.** Les gardes existantes (gate1/gate2) ne touchent QUE les nœuds. Mais REPLACE supprime aussi les **arêtes** absentes du candidat (`upsertGraphAtomic` étapes 3-4) → une provenance portée par `raises_signal.refs` peut être effacée silencieusement. gate3 vérifie donc la préservation des refs source :
+- **par-nœud** (match `id`) — `Signal` + `DesignationEvent` (+ générique, cf Q2) ;
+- **par-arête** (match clé naturelle `src_id + dst_id + kind`) — au minimum `raises_signal`.
+
+**Note fix extraction (additif, non conflictuel)** : extraction propage la ref sur `Signal.props.refs` des rezonage. C'est un **AJOUT** → autorisé par l'invariant `before ⊆ after`. Après ce fix la carte lira `Signal.props.refs` en direct (source propre), et gate3 empêchera toute reprojection de la ré-effacer.
 
 ## 6. Upgrade #598 (cohort pre-flight)
 
@@ -89,11 +107,13 @@ Ordre : gate1 (business-props) → **gate3 (provenance refs)** → transaction �
 4. **Exemption** : nœud dans `intendedRemovals` → **pas d'abort** (retrait voulu).
 5. **#598** : les mêmes 4 cas prédits read-only sans écriture PG (miroir de gate3).
 
-## 8. Questions ouvertes (à clore avant/pendant l'implémentation)
+## 8. Questions
 
-- **Q1 (bloquante)** : le champ + la clé d'identité (§5) — mesure extraction.
-- **Q2** : périmètre des types de nœuds — gate3 sur TOUS les nœuds porteurs de refs (générique, comme gate1) ou restreint à `Signal`/`DesignationEvent` ? Défaut proposé : **générique** (toute provenance mérite protection), sauf contre-indication mesurée.
-- **Q3** : une ref « source » vs une ref « enrichissement grounding » sont-elles distinguables dans la structure ? Si oui, gate3 ne protège que les refs **source** (la citation grounding ajoutée n'est pas une provenance à figer). À clarifier avec extraction.
+- **Q1 (le champ) — ✅ CLOSE** : 3 loci confirmés (§5) — `Signal.props.refs` + `DesignationEvent.props.refs`/`docSha` + arête `raises_signal.props.refs` ; identité = `docSha` (repli `rawRef`).
+- **Q2 (périmètre types) — routée extraction** : gate3 générique (tous nœuds/arêtes porteurs de refs, comme gate1) ou restreint `Signal`/`DesignationEvent` + `raises_signal` ? Défaut proposé : **générique** (toute provenance mérite protection). En attente confirmation extraction.
+- **Q3 (source vs enrichissement) — routée extraction** : distinguer une ref **source** (PV, à figer) d'une ref **enrichissement grounding** (ajoutée) ? Sans distinction, l'invariant `before⊆after` reste sûr (il ne fige que ce qui existait ; les ajouts grounding restent libres). En attente extraction.
+
+> **Impl gate3 bloquée sur Q2/Q3** (i-cond : implémenter dès confirmation extraction). Q1 close permet de figer le design ; Q2/Q3 ne changent que le PÉRIMÈTRE (quels types), pas la mécanique.
 
 ---
 
