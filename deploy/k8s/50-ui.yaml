@@ -136,8 +136,21 @@ spec:
         app.kubernetes.io/component: ui
     spec:
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: ui
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           # radar-ui image (ui/Dockerfile): SPA bundle + nginx baked in, built
           # and pushed by CI to the SCW registry. This is the image that
           # actually serves the static SPA (the previous stock-nginx image had

@@ -63,8 +63,21 @@ spec:
         spec:
           restartPolicy: Never
           serviceAccountName: radar-app
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            fsGroup: 1001
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: scrape
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities:
+                  drop:
+                    - ALL
               # image tag is OVERRIDDEN at release by the Kustomize `images:`
               # transformer in deploy/k8s/refresh-cronjobs/ (CI pins the SAME
               # immutable digest as the deployed release). This base tag is a
@@ -140,8 +153,21 @@ spec:
         spec:
           restartPolicy: Never
           serviceAccountName: radar-app
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            fsGroup: 1001
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: project-graph
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: false
+                capabilities:
+                  drop:
+                    - ALL
               # image tag is OVERRIDDEN at release by the Kustomize `images:`
               # transformer in deploy/k8s/refresh-cronjobs/ (CI pins the SAME
               # immutable digest as the deployed release). This base tag is a
