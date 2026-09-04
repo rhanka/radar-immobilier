@@ -9,6 +9,7 @@
    * L'auteur est résolu serveur (session) ; l'édition/suppression est author-only
    * (403 côté serveur), et l'UI ne propose ces contrôles que sur ses propres notes.
    */
+  import { onMount, onDestroy } from "svelte";
   import EntityAnnotations from "./EntityAnnotations.svelte";
   import type { AnnotationTarget, EntityAnnotation } from "$lib/collab/annotation.js";
   import {
@@ -17,6 +18,7 @@
     editAnnotation,
     deleteAnnotation,
   } from "$lib/collab/annotations-client.js";
+  import { subscribeNoteFrames, noteMatchesTarget } from "$lib/collab/prospect-notes-stream.js";
   import { authStore } from "$lib/auth/auth-store.js";
 
   export let target: AnnotationTarget;
@@ -72,6 +74,21 @@
   const onAdd = (body: string): Promise<void> => mutate(() => createAnnotation(target, body));
   const onEdit = (id: string, body: string): Promise<void> => mutate(() => editAnnotation(id, body));
   const onDelete = (id: string): Promise<void> => mutate(() => deleteAnnotation(id));
+
+  // Temps réel (§2 PR2) : refetch quand une frame `prospect:note` concerne la
+  // cible affichée (add/edit/delete d'un coéquipier), pour les signaux ET les
+  // lots. Idempotent avec le refetch after-mutation. L'abonnement vit le temps
+  // du composant ; la cible est lue au moment de la frame (réactive).
+  let unsubscribe: (() => void) | null = null;
+  onMount(() => {
+    unsubscribe = subscribeNoteFrames((frame) => {
+      if (noteMatchesTarget(frame.note, target)) void reload(target);
+    });
+  });
+  onDestroy(() => {
+    unsubscribe?.();
+    unsubscribe = null;
+  });
 </script>
 
 <EntityAnnotations {notes} currentUserId={effectiveUserId} {canAnnotate} {busy} {error} {onAdd} {onEdit} {onDelete} />
