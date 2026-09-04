@@ -1,35 +1,38 @@
-# refresh-cronjobs — dedicated Kustomize overlay for the §6 image-pin (ruling
-# i-infra). It bundles ONLY the two refresh CronJobs and adds an `images:`
-# transformer so CI can pin them to the SAME immutable image the release
-# deployed — without ever `apply -k deploy/k8s` (the full bundle, which would
-# re-apply postgres/api/ui/minio with prod side-effects).
+# refresh-cronjobs — Kustomize overlay that deploys the two refresh CronJobs to
+# PREPROD (radar-immobilier-preprod), pinned to the release image and
+# UN-SUSPENDED. §6 is PREPROD-ONLY (owner directive: the refresh runs on
+# preprod.immo.sent-tech.ca; no prod tag, no promote-prod path).
 #
-# RELEASE-EPHEMERAL PIN (no commit-back, mirrors promote-prod): the CD job
-# resolves NOTHING new — it REUSES the identity it already pinned the
-# Deployments to (prod: the @sha256 digest from promote-prod; preprod diag: the
-# :<sha> tag deploy-preprod uses) and runs, in the CI run only:
+# It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
+# suspend:true — the prod-dormant default) into the preprod-active instance:
+#   - namespace -> radar-immobilier-preprod
+#   - suspend   -> false (the CronJobs RUN)
+#   - image     -> pinned by CI to the deploy-preprod release :<sha> (no :latest)
 #
+# Applied ONLY by the deploy-preprod "Deploy refresh CronJobs (preprod)" step, in
+# the CI run only (release-ephemeral pin, no commit-back):
 #   cd deploy/k8s/refresh-cronjobs
 #   kustomize edit set image \
-#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api@<digest>
+#     rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:<sha>
 #   kustomize build --load-restrictor LoadRestrictionsNone . | kubectl apply -f -
 #
-# NB command: `kubectl apply -k` can NOT be used here — the base CronJob lives
-# one dir up (`../34-refresh-cronjob.yaml`) and kustomize's default load-restrictor
-# forbids a parent-dir resource. `kustomize build --load-restrictor
-# LoadRestrictionsNone` is the standard escape and still emits ONLY the two
-# CronJobs (the overlay's sole resources) — never the full bundle.
+# NB command: `kubectl apply -k` can NOT be used — the base CronJob lives one dir
+# up (../34) and kustomize's default load-restrictor forbids a parent-dir
+# resource. `kustomize build --load-restrictor LoadRestrictionsNone` still emits
+# ONLY the two CronJobs (never the full bundle).
 #
-# The `newTag` below is a FAIL-LOUD placeholder: building/applying this overlay
-# WITHOUT the `kustomize edit set image` step yields an unpullable tag (not
-# :latest), so an un-pinned apply fails visibly instead of silently running stale
-# code.
+# The `newTag` placeholder is FAIL-LOUD: building/applying this overlay WITHOUT
+# the `kustomize edit set image` step yields an unpullable tag (not :latest), so
+# an un-pinned apply fails visibly instead of silently running stale code.
 #
-# NB RBAC: `kubectl apply` of a CronJob needs batch/cronjobs {get,create,patch};
-# the CD SA has batch/jobs (from §1a #572) but NOT batch/cronjobs — that delta
-# grant is an OWNER activation gesture, not in this PR (the SA never self-grants).
+# RBAC: applying + un-suspending CronJobs needs `batch/cronjobs` on the preprod
+# deployer SA (radar-ci-deployer-preprod) — added to
+# deploy/k8s/11-ci-deployer-preprod-rbac.yaml in this PR; the owner applies it
+# (owner-direct, the SA never self-grants). batch/jobs alone (§1a) is NOT enough.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+
+namespace: radar-immobilier-preprod
 
 resources:
   - ../34-refresh-cronjob.yaml
@@ -37,3 +40,45 @@ resources:
 images:
   - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api
     newTag: PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
+
+patches:
+  # §6 preprod is ACTIVE: un-suspend BOTH CronJobs (base 34 ships suspend:true,
+  # the prod-dormant default). `target: kind=CronJob` matches both.
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
+
+  # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
+  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. In PREPROD
+  # the graph store is the IN-CLUSTER MinIO `radar-minio:9000` /
+  # `radar-immobilier-docs-preprod` — the SAME store the app reads and the
+  # grounding publishes to. Override GRAPH_S3 to that MinIO so
+  # projection-read == app-store == grounding-publish (else citations break: the
+  # projection would read a different bucket). Creds stay radar-s3-credentials
+  # (= the MinIO creds); MinIO needs path-style. (i-infra co-vals endpoint/bucket/
+  # path-style.)
+  - target:
+      kind: CronJob
+      name: radar-refresh-projection
+    patch: |
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-projection
+      spec:
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: project-graph
+                    env:
+                      - name: GRAPH_S3_ENDPOINT
+                        value: http://radar-minio:9000
+                      - name: GRAPH_S3_BUCKET
+                        value: radar-immobilier-docs-preprod
+                      - name: GRAPH_S3_FORCE_PATH_STYLE
+                        value: "true"
