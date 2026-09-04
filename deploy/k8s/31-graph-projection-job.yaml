@@ -68,6 +68,12 @@ spec:
       initContainers:
         # ── Étape 1 : backfill tracking 0004 (AVANT migrate, idempotent) ──────
         - name: db-backfill-0004
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
@@ -89,6 +95,12 @@ spec:
             limits: { cpu: 150m, memory: 256Mi }
         # ── Étape 2 : migrations Drizzle ──────────────────────────────────────
         - name: db-migrate
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
           # migrate.js lit `migrationsFolder: "drizzle"` relatif au CWD → /workspace/api
