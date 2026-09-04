@@ -42,7 +42,7 @@ on:
         required: true
         default: graph
       expected_sha:
-        description: "Optional SHA-256 pin (extra out-of-band guard; sidecar check stays ON regardless)"
+        description: "SHA-256 of the candidate BODY (out-of-band pin). REQUIRED when dst_prefix=graph; optional for graph-preprod/parsed. Script's own sidecar check stays ON regardless."
         required: false
         default: ""
 
@@ -88,6 +88,11 @@ jobs:
             printf '%s' "$EXPECTED_SHA" | grep -Eiq '^[0-9a-f]{64}$' \
               || { echo "::error title=Invalid expected_sha::must be 64 hex chars"; exit 1; }
           fi
+          # #2a — écraser la baseline prod SERVIE (graph/) exige un pin dur out-of-band. expected_sha est
+          # OBLIGATOIRE quand dst_prefix=graph ; il reste optionnel pour graph-preprod/parsed (non servis en prod).
+          if [ "$DST_PREFIX" = "graph" ] && [ -z "$EXPECTED_SHA" ]; then
+            echo "::error title=expected_sha required::dst_prefix=graph overwrites the served prod baseline — expected_sha (sha256 of the candidate BODY) is mandatory."; exit 1
+          fi
           echo "inputs OK — city=$CITY dst_prefix=$DST_PREFIX expected_sha=${EXPECTED_SHA:+set}"
 
       - name: Assert SCW docs-pocs creds present (fail-closed)
@@ -100,13 +105,20 @@ jobs:
           [ -n "$SCW_SK" ] || { echo "::error title=Missing secret::SCW_DOCS_POCS_SECRET_KEY is empty — owner/i-arch must provision it (see workflow header)."; exit 1; }
           echo "SCW docs-pocs creds present."
 
-      - name: Install s5cmd
+      - name: Install s5cmd (sha256-pinned, verify-before-extract)
         run: |
           set -euo pipefail
           ver=2.2.2
-          url="https://github.com/peak/s5cmd/releases/download/v${ver}/s5cmd_${ver}_Linux-64bit.tar.gz"
+          tarball="s5cmd_${ver}_Linux-64bit.tar.gz"
+          # #1 supply-chain pin — sha256 autoritaire (peak/s5cmd v2.2.2, s5cmd_checksums.txt).
+          sha256="a15f83d2a6dc091e43b2a120f29f8f6c86d146c381766c0197ec75d7985af2b6"
+          url="https://github.com/peak/s5cmd/releases/download/v${ver}/${tarball}"
           tmp="$(mktemp -d)"
-          curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
+          # download DANS un fichier, VÉRIFIE le sha256 (fail-closed) AVANT extraction — jamais `curl | tar`
+          # (qui extrait avant de vérifier).
+          curl -fsSL "$url" -o "$tmp/$tarball"
+          echo "${sha256}  ${tmp}/${tarball}" | sha256sum -c -
+          tar -xz -C "$tmp" -f "$tmp/$tarball" s5cmd
           sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
           s5cmd version
 
@@ -120,16 +132,16 @@ jobs:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
         run: |
           set -euo pipefail
-          # Defense-in-depth: pin the staged candidate's sidecar to an operator-provided SHA BEFORE publish.
-          # This does NOT replace the script's own sidecar-vs-candidate check nor the DST re-read — it is an
-          # extra, out-of-band lock on the exact bytes about to be published.
-          sidecar="s3://${S3_BUCKET}/candidats/${CITY}/latest.json.sha256"
-          s5cmd --endpoint-url "$S3_ENDPOINT" cp "$sidecar" /tmp/expected.sidecar
-          got="$(awk '{print $1}' /tmp/expected.sidecar)"
+          # #2b Defense-in-depth: hash the candidate BODY (not the sidecar) and pin it to the operator-provided
+          # SHA-256 BEFORE publish — a TRUE independent pin (operator sha vs real bytes), not a re-read of the
+          # sidecar the script already checks. PRIMARY guarantee stays the script (body vs sidecar + DST re-read).
+          body="s3://${S3_BUCKET}/candidats/${CITY}/latest.json"
+          s5cmd --endpoint-url "$S3_ENDPOINT" cp "$body" /tmp/cand.body
+          got="$(sha256sum /tmp/cand.body | awk '{print $1}')"
           if [ "$got" != "$EXPECTED_SHA" ]; then
-            echo "::error title=EXPECTED_SHA mismatch::staged sidecar $got != EXPECTED_SHA $EXPECTED_SHA — nothing published."; exit 1
+            echo "::error title=EXPECTED_SHA mismatch::candidate body $got != EXPECTED_SHA $EXPECTED_SHA — nothing published."; exit 1
           fi
-          echo "EXPECTED_SHA guard OK ($got)"
+          echo "EXPECTED_SHA guard OK (body $got)"
 
       - name: Publish (hash-verified, fail-closed)
         env:
