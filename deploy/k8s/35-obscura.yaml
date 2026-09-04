@@ -24,8 +24,18 @@ spec:
         app.kubernetes.io/component: obscura
     spec:
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: obscura
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-obscura:latest
           imagePullPolicy: IfNotPresent
           ports:
