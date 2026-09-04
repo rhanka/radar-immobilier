@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { timingSafeEqual, createHash } from "node:crypto";
 
 import type { ObjectStore } from "../storage/object-store.js";
 import {
@@ -262,7 +263,14 @@ export function ontologyRoute(deps: OntologyDeps): Hono {
   app.post("/api/ontology/:city/patch", async (c) => {
     const expected = deps.ontologyWriteToken;
     const provided = c.req.header(WRITE_TOKEN_HEADER);
-    if (!expected || !provided || provided !== expected) {
+    const isValidToken = (() => {
+      if (!expected || !provided) return false;
+      const hashExpected = createHash("sha256").update(expected).digest();
+      const hashProvided = createHash("sha256").update(provided).digest();
+      return timingSafeEqual(hashExpected, hashProvided);
+    })();
+
+    if (!isValidToken) {
       return c.json(
         {
           ok: false,

@@ -110,12 +110,18 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
     }
     const contentType = await resolveRawContentType(resolved.reader, resolved.key);
 
-    return new Response(bytes, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "private, max-age=300",
-      },
-    });
+    const isPdf = contentType.toLowerCase().startsWith("application/pdf");
+    const headers: Record<string, string> = {
+      "Content-Type": contentType,
+      "Cache-Control": "private, max-age=300",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "sandbox; default-src 'none'",
+    };
+    if (!isPdf) {
+      headers["Content-Disposition"] = "attachment";
+    }
+
+    return new Response(bytes, { headers });
   });
 
   return app;
