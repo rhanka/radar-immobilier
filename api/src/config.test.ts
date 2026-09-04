@@ -3,6 +3,7 @@ import {
   loadConfig,
   resolveAuthConfig,
   resolveGeoDocumentsS3Config,
+  resolveGraphPrefix,
 } from "./config.js";
 
 // Minimal env that satisfies all required fields (no OIDC wiring).
@@ -16,6 +17,31 @@ const BASE_ENV: NodeJS.ProcessEnv = {
   S3_ACCESS_KEY: "minio",
   S3_SECRET_KEY: "minio",
 };
+
+describe("resolveGraphPrefix (1-store migration)", () => {
+  it("defaults to graph/ (baseline unchanged) when GRAPH_S3_PREFIX is unset", () => {
+    expect(resolveGraphPrefix(loadConfig({ ...BASE_ENV }))).toBe("graph/");
+  });
+
+  it("uses a configured preprod prefix", () => {
+    expect(resolveGraphPrefix(loadConfig({ ...BASE_ENV, GRAPH_S3_PREFIX: "graph-preprod/" }))).toBe(
+      "graph-preprod/",
+    );
+  });
+
+  it("normalizes to exactly one trailing slash", () => {
+    expect(resolveGraphPrefix(loadConfig({ ...BASE_ENV, GRAPH_S3_PREFIX: "graph-preprod" }))).toBe(
+      "graph-preprod/",
+    );
+    expect(resolveGraphPrefix(loadConfig({ ...BASE_ENV, GRAPH_S3_PREFIX: "graph-preprod///" }))).toBe(
+      "graph-preprod/",
+    );
+  });
+
+  it("falls back to graph/ for an empty prefix", () => {
+    expect(resolveGraphPrefix(loadConfig({ ...BASE_ENV, GRAPH_S3_PREFIX: "" }))).toBe("graph/");
+  });
+});
 
 describe("loadConfig", () => {
   describe("immo→geo document repoint", () => {
