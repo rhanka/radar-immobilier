@@ -524,6 +524,91 @@ export function findMissingBusinessProperties(
   return regressions;
 }
 
+export interface SourceRefRegression {
+  citySlug: string;
+  nodeId: string;
+  missingDocShas: string[];
+}
+
+/**
+ * A `generated://` rawRef marks a synthetic `gen_refs` placeholder (not a real
+ * PV) — excluded from provenance (Q3, spec §5).
+ */
+const GENERATED_REF_PREFIX = "generated://";
+
+/**
+ * Recover the source docSha embedded in a CAS raw-ref path
+ * (`raw/proces-verbaux-<city>/cas/<docSha>.pdf` → `<docSha>`). Used ONLY to fill
+ * the docSha when the ref's own `docSha` field is empty — never as an alternative
+ * identity key.
+ */
+function docShaFromRawRef(rawRef: string): string | null {
+  const m = rawRef.match(/\/cas\/([^/]+)\.[^/.]+$/);
+  return m ? m[1]! : null;
+}
+
+/**
+ * The set of REAL source docShas a node asserts under `props.refs`.
+ *
+ * Identity = **`docSha` alone** (SHA-256 of the source PV, content-stable) — NOT
+ * `(docSha, page)`: `page` is an intra-doc refinement the grounding legitimately
+ * upgrades (generic page-1 → precise page-10) for the SAME document, so keying on
+ * page would false-positive (spec §5, Q1). `rawRef` is read ONLY to recover a
+ * missing docSha from the CAS path. Refs whose `rawRef` is a `generated://`
+ * placeholder are excluded (Q3).
+ */
+function nodeDocShas(props: Record<string, unknown>): Set<string> {
+  const out = new Set<string>();
+  const refs = props.refs;
+  if (!Array.isArray(refs)) return out;
+  for (const item of refs) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const r = item as Record<string, unknown>;
+    const rawRef = typeof r.rawRef === "string" ? r.rawRef : null;
+    if (rawRef && rawRef.startsWith(GENERATED_REF_PREFIX)) continue;
+    let sha = typeof r.docSha === "string" && r.docSha.length > 0 ? r.docSha : null;
+    if (!sha && rawRef) sha = docShaFromRawRef(rawRef);
+    if (sha) out.add(sha);
+  }
+  return out;
+}
+
+/**
+ * gate3 — find the source docShas that a node carried BEFORE and that the
+ * candidate would DROP (per-node, match by id). A REPLACE projection rewrites
+ * `props.refs` per node; neither gate1 (business-properties) nor gate2
+ * (completeness COUNT) protects the IDENTITY of a node's source provenance, so a
+ * candidate that overwrites/omits a node's own PV docSha passes silently. This
+ * catches it: a docSha present before and absent after = provenance regression.
+ *
+ * Node-level and generic (every node bearing `props.refs`, like gate1). ADDITIONS
+ * are allowed (candidate may add refs — grounding enrichment) — only DISAPPEARANCE
+ * of an existing docSha is a regression. `intendedRemovals` exempts intentional
+ * removals per-node, as gate1.
+ */
+export function findMissingSourceRefs(
+  beforeRows: readonly BusinessPropertySnapshotRow[],
+  afterRows: readonly BusinessPropertySnapshotRow[],
+  citySlug: string,
+  intendedRemovals: ReadonlySet<string> = new Set(),
+): SourceRefRegression[] {
+  const afterById = new Map(afterRows.map((row) => [row.id, row]));
+  const regressions: SourceRefRegression[] = [];
+
+  for (const beforeRow of beforeRows) {
+    if (intendedRemovals.has(beforeRow.id)) continue;
+    const before = nodeDocShas(beforeRow.props);
+    if (before.size === 0) continue;
+    const after = nodeDocShas(afterById.get(beforeRow.id)?.props ?? {});
+    const missingDocShas = [...before].filter((sha) => !after.has(sha)).sort();
+    if (missingDocShas.length > 0) {
+      regressions.push({ citySlug, nodeId: beforeRow.id, missingDocShas });
+    }
+  }
+
+  return regressions;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Service
 // ─────────────────────────────────────────────────────────────────────────────
@@ -730,6 +815,29 @@ export async function upsertGraphAtomic(
       reason:
         `business-property regression for ${citySlug}: ` +
         `existing values would disappear or degrade (${details}); projection refused`,
+    };
+  }
+
+  // gate3 — SOURCE-REF PROVENANCE : REPLACE réécrit props.refs par-nœud ; ni gate1
+  // (business-props) ni gate2 (complétude COUNT) ne protègent l'IDENTITÉ de la
+  // provenance source (docSha du PV). Un candidat qui écrase/omet le docSha propre
+  // d'un nœud existant passerait silencieusement → provenance perdue. On aborte.
+  const sourceRefRegressions = findMissingSourceRefs(
+    beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
+    nodeRows,
+    citySlug,
+    intendedRemovals,
+  );
+  if (sourceRefRegressions.length > 0) {
+    const details = sourceRefRegressions
+      .map(({ nodeId, missingDocShas }) => `${nodeId}: ${missingDocShas.join(", ")}`)
+      .join("; ");
+    return {
+      ...result,
+      aborted: true,
+      reason:
+        `source-ref provenance regression for ${citySlug}: ` +
+        `existing source docSha(s) would disappear (${details}); projection refused`,
     };
   }
 
