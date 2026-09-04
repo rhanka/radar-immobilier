@@ -8,91 +8,17 @@
 # /usr/share/nginx/html AND a baked default.conf. The stock-nginx-only approach
 # served NO bundle (empty html root → blank page); this image fixes that.
 #
-# This ConfigMap is mounted over /etc/nginx/conf.d and WINS in-cluster, so it
-# is the authoritative proxy conf here: ops can tune it without rebuilding the
-# image. It can `proxy_pass http://radar-api:3000` directly because the
-# `radar-api` Service DNS always exists in the namespace. (The image's baked
-# default.conf resolves the upstream lazily instead, so the container also
-# boots standalone where the api may be absent — see ui/nginx/default.conf.)
+# The radar-ui-nginx ConfigMap is NO LONGER inline here: it is produced by the
+# base kustomization's configMapGenerator from deploy/k8s/nginx/default.conf
+# (hash-suffixed → a content change rolls this Deployment automatically, fixing
+# the #608 CM-drift where the live CM lagged git). That conf `proxy_pass
+# http://radar-api:3000` directly because the `radar-api` Service DNS always
+# exists in the namespace. (The image's baked default.conf resolves the upstream
+# lazily instead, so the container also boots standalone where the api may be
+# absent — see ui/nginx/default.conf, which keeps identical security headers.)
 #
 # The SPA is built with `VITE_API_BASE_URL` empty so it calls same-origin
 # /api/* (Makefile default), which nginx forwards to the api Service.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: radar-ui-nginx
-  namespace: radar-immobilier
-  labels:
-    app.kubernetes.io/name: radar-immobilier
-    app.kubernetes.io/part-of: sentropic
-    app.kubernetes.io/component: ui
-data:
-  default.conf: |
-    server {
-      listen 8080;
-      server_name _;
-      root /usr/share/nginx/html;
-      index index.html;
-
-      # Security headers & information disclosure mitigation
-      server_tokens off;
-      add_header X-Frame-Options "SAMEORIGIN" always;
-      add_header X-Content-Type-Options "nosniff" always;
-      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-      add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), clipboard-write=(self)" always;
-
-      # ES module assets (.mjs) — notably the pdf.js worker bundled by Vite as
-      # `pdf.worker.min-*.mjs`. nginx 1.27's stock mime.types maps .js but NOT
-      # .mjs, so .mjs falls back to application/octet-stream. pdf.js loads its
-      # worker with `new Worker(src, { type: "module" })`; browsers REJECT a
-      # module worker whose Content-Type is not a JavaScript MIME → the worker
-      # fails → pdf.js raises loadError → the "preuve non rendue" fallback. Map
-      # .mjs to a JavaScript MIME so the worker loads. (Same-origin, no CORS.)
-      location ~ \.mjs$ {
-        types { }
-        default_type text/javascript;
-      }
-
-      # SPA history fallback.
-      location / {
-        try_files $uri $uri/ /index.html;
-      }
-
-      # Same-origin API proxy to the radar api Service (incl. the sentropic
-      # OIDC callback /api/v1/auth/oauth/callback handled by the api RP glue).
-      # Same-origin proxy to geo OGC API for immo consumers.
-      # Only /api/geo/collections is owned by geo-api; radar-api owns the
-      # application-specific /api/geo/:city/zones routes.
-      location /api/geo/collections {
-        rewrite ^/api/geo/(.*)$ /$1 break;
-        proxy_pass http://geo-api.geo.svc.cluster.local;
-        proxy_set_header Host api.geo.sent-tech.ca;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-      }
-
-      location /api/geo/ {
-        proxy_pass http://radar-api:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-      }
-
-      location /api/ {
-        proxy_pass http://radar-api:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-      }
-
-      location = /health {
-        proxy_pass http://radar-api:3000/health;
-      }
-    }
----
 apiVersion: v1
 kind: Service
 metadata:
