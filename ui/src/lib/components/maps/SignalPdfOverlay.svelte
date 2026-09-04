@@ -460,6 +460,9 @@
   let activeSearchMatchIndex = -1;
   let searchPending = false;
   let searchRequestToken = 0;
+  // Réf de l'input recherche : cible du raccourci Ctrl/Cmd+F (focus la cellule
+  // plein-texte du viewer au lieu du find natif du navigateur).
+  let searchInputEl: HTMLInputElement | undefined;
   let pageTextIndex: PdfTextIndex | null = null;
   let pageTextIndexPromise: Promise<PdfTextIndex> | null = null;
   const pageTextContentPromises = new Map<number, Promise<PdfTextContent>>();
@@ -698,6 +701,17 @@
 
   function handleSearchInput(): void {
     if (!searchQuery.trim()) clearSearchResults();
+  }
+
+  /**
+   * Focus + sélectionne la cellule de recherche plein-texte du viewer. Cible du
+   * raccourci Ctrl/Cmd+F : l'owner attend d'atterrir dans CETTE cellule, pas dans
+   * le find natif du navigateur (qui ne cherche que le DOM, pas la couche-texte
+   * pdf.js). No-op silencieux tant que le document n'est pas chargé (input désactivé).
+   */
+  function focusDocumentSearch(): void {
+    searchInputEl?.focus();
+    searchInputEl?.select();
   }
 
   async function runSearch(): Promise<void> {
@@ -1288,6 +1302,11 @@
         return;
       }
       onClose();
+    } else if ((event.ctrlKey || event.metaKey) && (event.key === "f" || event.key === "F")) {
+      // Ctrl/Cmd+F : router vers la recherche plein-texte du viewer plutôt que le
+      // find natif du navigateur (bug viewer signalé owner).
+      event.preventDefault();
+      focusDocumentSearch();
     } else if (hasNav && (event.key === "PageUp" || event.altKey && event.key === "ArrowLeft")) {
       event.preventDefault();
       navPrevSignal();
@@ -1542,6 +1561,7 @@
         <Search class="h-3.5 w-3.5" aria-hidden="true" />
         <input
           type="search"
+          bind:this={searchInputEl}
           bind:value={searchQuery}
           on:input={handleSearchInput}
           placeholder="Rechercher…"
