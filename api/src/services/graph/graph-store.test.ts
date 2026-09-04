@@ -950,59 +950,175 @@ describe("buildEdgeRow — idempotency key", () => {
   });
 });
 
-describe("materializeSeveredSources — re-attach the source dropped by projection", () => {
-  const bylawLink: GraphifyLink = {
-    source: "event-x-adoption-026-511",
+describe("materializeSeveredSources — conforming cited-source ref (§521-ét)", () => {
+  // Baseline shape (extraction): the source lives on the event's derived_from edge
+  // refs[0] = {docSha, page:1}; the raises_signal (event→signal) edge is EMPTY, so
+  // the signal inherits from its raising event.
+  const derivedFrom = (
+    event: string,
+    docSha = "SHA_PV",
+    page: number | undefined = 1,
+  ): GraphifyLink => ({
+    source: event,
     target: "bylaw-x-026-511",
     type: "derived_from",
-    refs: [{ docSha: "SHA_PV" }],
-  };
+    refs: [page === undefined ? { docSha } : { docSha, page }],
+  });
+  const raises = (event: string, signal: string): GraphifyLink => ({
+    source: event,
+    target: signal,
+    type: "raises_signal",
+  });
 
-  it("copies the derived_from edge docSha onto a phantom Signal (sourceRef + props.refs)", () => {
-    const rows = [buildNodeRow({ id: "event-x-adoption-026-511", label: "Adoption 026-511", type: "Signal" })];
-    const { materialized } = materializeSeveredSources(rows, [bylawLink], []);
-    expect(materialized).toBe(1);
+  it("materializes a CONFORMING ref on a DesignationEvent (docSha+rawRef+page+excerpt=label)", () => {
+    const rows = [
+      buildNodeRow(
+        { id: "event-adoption-026-511", label: "Adoption 026-511 — sainte-martine 2026-05-12", type: "DesignationEvent" },
+        "sainte-martine",
+      ),
+    ];
+    materializeSeveredSources(rows, [derivedFrom("event-adoption-026-511")], []);
     expect(rows[0]!.sourceRef).toBe("SHA_PV");
     expect(rows[0]!.props.refs).toEqual([
-      { docSha: "SHA_PV", linkSource: "projection-materialize-severed" },
+      {
+        docSha: "SHA_PV",
+        rawRef: "raw/proces-verbaux-sainte-martine/cas/SHA_PV.pdf",
+        page: 1,
+        excerpt: "Adoption 026-511 — sainte-martine 2026-05-12",
+        linkSource: "projection-materialize-severed",
+      },
     ]);
   });
 
-  it("is idempotent — a node that already carries a source is left untouched", () => {
+  it("materializes a Signal from its RAISING event (raises_signal target), excerpt = event label", () => {
     const rows = [
-      buildNodeRow({
-        id: "event-x-adoption-026-511",
-        label: "Adoption 026-511",
-        type: "Signal",
-        source_file: "PRE_EXISTING",
-      }),
+      buildNodeRow(
+        { id: "event-zonage-0001", label: "Modification zonage règlement 026-511 — sainte-martine", type: "DesignationEvent" },
+        "sainte-martine",
+      ),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "sainte-martine"),
     ];
-    const { materialized } = materializeSeveredSources(rows, [bylawLink], []);
-    expect(materialized).toBe(0);
-    expect(rows[0]!.sourceRef).toBe("PRE_EXISTING");
-  });
-
-  it("only touches Signal|DesignationEvent — never a Bylaw/Source node", () => {
-    const rows = [buildNodeRow({ id: "bylaw-x-026-511", label: "Règlement 026-511", type: "Bylaw" })];
-    const { materialized } = materializeSeveredSources(
+    const r = materializeSeveredSources(
       rows,
-      [{ source: "bylaw-x-026-511", target: "source-x", type: "cites", refs: [{ docSha: "SHA_PV" }] }],
+      [derivedFrom("event-zonage-0001"), raises("event-zonage-0001", "signal-rezonage-0001")],
       [],
     );
-    expect(materialized).toBe(0);
-    expect(rows[0]!.sourceRef).toBeNull();
+    expect(r.raisedSignals).toBe(1);
+    expect(r.withSourcedEvent).toBe(1);
+    expect(r.materialized).toBe(1);
+    expect(rows.find((n) => n.id === "signal-rezonage-0001")!.props.refs).toEqual([
+      {
+        docSha: "SHA_PV",
+        rawRef: "raw/proces-verbaux-sainte-martine/cas/SHA_PV.pdf",
+        page: 1,
+        excerpt: "Modification zonage règlement 026-511 — sainte-martine",
+        linkSource: "projection-materialize-severed",
+      },
+    ]);
   });
 
-  it("leaves a phantom untouched when no edge carries a docSha (data-side remediation, not invented)", () => {
-    const rows = [buildNodeRow({ id: "event-x-piia-0007", label: "PIIA — 853 chemin Rhéaume", type: "DesignationEvent" })];
-    const { materialized } = materializeSeveredSources(
+  it("gate locator_without_page — NEVER fabricates a page (docSha but no page → skipped with reason)", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "Modification zonage", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const noPageEdge: GraphifyLink = {
+      source: "event-zonage-0001",
+      target: "bylaw-x",
+      type: "derived_from",
+      refs: [{ docSha: "SHA_PV" }], // docSha but NO page
+    };
+    const r = materializeSeveredSources(
       rows,
-      [{ source: "event-x-piia-0007", target: "bylaw-x", type: "derived_from" }],
+      [noPageEdge, raises("event-zonage-0001", "signal-rezonage-0001")],
       [],
     );
-    expect(materialized).toBe(0);
+    expect(r.materialized).toBe(0);
+    expect(r.skipped.locator_without_page).toBe(1);
+    expect(rows.find((n) => n.id === "signal-rezonage-0001")!.props.refs).toBeUndefined();
+  });
+
+  it("gate no_event_source — a raised signal whose event has no sourced edge", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "Modification zonage", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const r = materializeSeveredSources(rows, [raises("event-zonage-0001", "signal-rezonage-0001")], []);
+    expect(r.raisedSignals).toBe(1);
+    expect(r.withSourcedEvent).toBe(0);
+    expect(r.skipped.no_event_source).toBe(1);
+    expect(r.materialized).toBe(0);
+  });
+
+  it("gate evidence_absent — sourced edge + page but the event has no label", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("event-zonage-0001"), raises("event-zonage-0001", "signal-rezonage-0001")],
+      [],
+    );
+    expect(r.skipped.evidence_absent).toBe(1);
+    expect(r.materialized).toBe(0);
+  });
+
+  it("idempotent — a raised signal already carrying a source is left untouched (alreadySourced)", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "Modification zonage", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal", source_file: "PRE_EXISTING" }, "x"),
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("event-zonage-0001"), raises("event-zonage-0001", "signal-rezonage-0001")],
+      [],
+    );
+    expect(r.alreadySourced).toBe(1);
+    expect(r.materialized).toBe(0);
+    expect(rows.find((n) => n.id === "signal-rezonage-0001")!.sourceRef).toBe("PRE_EXISTING");
+  });
+
+  it("CLOSED ENUMERATION — raisedSignals == alreadySourced + materialized + Σskipped", () => {
+    const rows = [
+      buildNodeRow({ id: "ev1", label: "Modification zonage 1", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "sig1", label: "rezonage", type: "Signal" }, "x"), // materialized
+      buildNodeRow({ id: "ev2", label: "Modification zonage 2", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "sig2", label: "rezonage", type: "Signal", source_file: "HAS" }, "x"), // alreadySourced
+      buildNodeRow({ id: "sig3", label: "rezonage", type: "Signal" }, "x"), // no_event_source
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("ev1"), raises("ev1", "sig1"), derivedFrom("ev2"), raises("ev2", "sig2"), raises("ev3-missing", "sig3")],
+      [],
+    );
+    const sumSkipped =
+      r.skipped.no_event_source + r.skipped.locator_without_page + r.skipped.evidence_absent + r.skipped.other;
+    expect(r.raisedSignals).toBe(3);
+    expect(r.raisedSignals).toBe(r.alreadySourced + r.materialized + sumSkipped);
+  });
+
+  it("excludes generated:// placeholder edge refs (not a real PV → no usable source)", () => {
+    const rows = [
+      buildNodeRow({ id: "event-x", label: "e", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "sig-x", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const gen: GraphifyLink = {
+      source: "event-x",
+      target: "bylaw",
+      type: "derived_from",
+      refs: [{ docSha: "SHA", rawRef: "generated://node/x", page: 1 }],
+    };
+    const r = materializeSeveredSources(rows, [gen, raises("event-x", "sig-x")], []);
+    expect(r.skipped.no_event_source).toBe(1);
+    expect(r.materialized).toBe(0);
+  });
+
+  it("only touches Signal|DesignationEvent — never a Bylaw", () => {
+    const rows = [buildNodeRow({ id: "bylaw-x", label: "Règlement", type: "Bylaw" }, "x")];
+    const r = materializeSeveredSources(rows, [derivedFrom("bylaw-x")], []);
+    expect(r.materialized).toBe(0);
     expect(rows[0]!.sourceRef).toBeNull();
-    expect(rows[0]!.props.refs).toBeUndefined();
   });
 });
 
