@@ -28,7 +28,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // else (classification, projection, serialization) runs for real.
 vi.mock("../services/graph/graph-store.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../services/graph/graph-store.js")>();
-  return { ...actual, getSignalNodesForCity: vi.fn(), listCitiesWithSignalNodes: vi.fn() };
+  return {
+    ...actual,
+    getSignalNodesForCity: vi.fn(),
+    listCitiesWithSignalNodes: vi.fn(),
+    // The alpha corpus has no raises_signal links; keep the §7.6 post-pass a
+    // no-op so the frozen payload stays byte-for-byte unchanged (no citationFromEvent).
+    getRaisesSignalLinks: vi.fn().mockResolvedValue([]),
+  };
 });
 
 import { graphSignalsRoute } from "./graph-signals.js";

@@ -1833,3 +1833,30 @@ export async function getSignalNodesForCity(
       ),
     );
 }
+
+/**
+ * `raises_signal` links (DesignationEvent → Signal) restricted to a node-id set.
+ *
+ * READ-ONLY. Used by the graph-signals serving route (§7.6 cross-display) to
+ * inherit a rezonage event's citation onto the Signal it raises: the citation
+ * lives on the EVENT's props, but the served card is the SIGNAL, and the route
+ * does no edge join by default. Callers pass the ids already loaded for the city
+ * (Signal + DesignationEvent), so both endpoints are guaranteed in-scope; the
+ * `dstId` membership is re-checked in the app layer (mirrors `subgraphForCity`).
+ *
+ * Returns `{ eventId (src), signalId (dst) }` pairs — never mutates anything.
+ */
+export async function getRaisesSignalLinks(
+  db: Database,
+  nodeIds: readonly string[],
+): Promise<Array<{ eventId: string; signalId: string }>> {
+  if (nodeIds.length === 0) return [];
+  const idSet = new Set(nodeIds);
+  const rows = await db
+    .select({ srcId: graphEdges.srcId, dstId: graphEdges.dstId })
+    .from(graphEdges)
+    .where(and(eq(graphEdges.kind, "raises_signal"), inArray(graphEdges.srcId, [...idSet])));
+  return rows
+    .filter((r) => idSet.has(r.dstId))
+    .map((r) => ({ eventId: r.srcId, signalId: r.dstId }));
+}

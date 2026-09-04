@@ -12,7 +12,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 
-import { graphSignalsRoute } from "./graph-signals.js";
+import { graphSignalsRoute, citationFromEventEvidence } from "./graph-signals.js";
+import type { SignalEvidence } from "./graph-signals.js";
 import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 
@@ -23,6 +24,10 @@ vi.mock("../services/graph/graph-store.js", async (importOriginal) => {
     ...actual,
     listCitiesWithSignalNodes: vi.fn(),
     getSignalNodesForCity: vi.fn(),
+    // Default: no raises_signal links (post-pass is a no-op). Individual tests
+    // override with mockResolvedValueOnce. The implementation survives
+    // clearAllMocks (which only clears call history).
+    getRaisesSignalLinks: vi.fn().mockResolvedValue([]),
   };
 });
 
@@ -30,6 +35,7 @@ import {
   buildNodeRow,
   listCitiesWithSignalNodes,
   getSignalNodesForCity,
+  getRaisesSignalLinks,
 } from "../services/graph/graph-store.js";
 import {
   SUTTON_A_IDS,
@@ -799,5 +805,105 @@ describe("GET /api/graph-signals/:city", () => {
     const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
     expect(body.nodes[0]!.etape).toBeNull();
     expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
+  });
+});
+
+describe("§7.6 citationFromEvent — raises_signal cross-display", () => {
+  type CardLike = {
+    id: string;
+    type: string;
+    citationFromEvent?: {
+      eventId: string;
+      citation: string | null;
+      excerpt: string | null;
+      rawRef: string | null;
+    };
+    evidence: { citation: string | null; completeness: { hasCitationExcerpt: boolean } };
+  };
+
+  it("inherits the linked event's citation onto the rezonage signal (distinct field, own evidence untouched)", async () => {
+    const event = makeNode("evt-zonage-01", "sainte-martine", "DesignationEvent", {
+      refs: [{ excerpt: "ADOPTION 943", rawRef: "raw/pv/abc.pdf" }],
+    });
+    const signal = makeNode("sig-rezonage-01", "sainte-martine", "Signal", {
+      properties: { category: "rezonage" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      [event, signal] as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+    );
+    vi.mocked(getRaisesSignalLinks).mockResolvedValueOnce([
+      { eventId: "evt-zonage-01", signalId: "sig-rezonage-01" },
+    ]);
+
+    const res = await freshRoute().request("/api/graph-signals/sainte-martine");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { nodes: CardLike[] };
+    const sig = body.nodes.find((n) => n.id === "sig-rezonage-01")!;
+    const evt = body.nodes.find((n) => n.id === "evt-zonage-01")!;
+
+    // Signal INHERITS the event's citation via the distinct field.
+    expect(sig.citationFromEvent).toBeDefined();
+    expect(sig.citationFromEvent!.eventId).toBe("evt-zonage-01");
+    expect(sig.citationFromEvent!.citation).toBe("ADOPTION 943");
+    expect(sig.citationFromEvent!.rawRef).toBeTruthy();
+    // Anti-drift: the signal's OWN evidence/completeness is unchanged (no citation).
+    expect(sig.evidence.citation).toBeNull();
+    expect(sig.evidence.completeness.hasCitationExcerpt).toBe(false);
+    // The event keeps its own citation and has no inherited field (omitted, not null).
+    expect(evt.evidence.citation).toBe("ADOPTION 943");
+    expect(evt.citationFromEvent).toBeUndefined();
+  });
+
+  it("leaves citationFromEvent null when there is no raises_signal link", async () => {
+    const signal = makeNode("sig-lonely", "drummondville", "Signal");
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      [signal] as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+    );
+    // getRaisesSignalLinks defaults to [] (factory mock).
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: CardLike[] };
+    // Omitted (not null) when there is no linked event — frozen payload unchanged.
+    expect(body.nodes[0]!.citationFromEvent).toBeUndefined();
+  });
+
+  it("citationFromEventEvidence maps the event evidence, or returns null when the event has no citation", () => {
+    expect(
+      citationFromEventEvidence("evt-1", {
+        citation: "C",
+        excerpt: "E",
+        page: 3,
+        rawRef: "r",
+        refs: [{ docSha: "sha1" }],
+        documentUrl: "du",
+        sourceUrl: "su",
+      } as unknown as SignalEvidence),
+    ).toEqual({
+      eventId: "evt-1",
+      citation: "C",
+      excerpt: "E",
+      page: 3,
+      rawRef: "r",
+      docSha: "sha1",
+      documentUrl: "du",
+      sourceUrl: "su",
+    });
+
+    // No citation and no excerpt → nothing to inherit.
+    expect(
+      citationFromEventEvidence("evt-2", {
+        citation: null,
+        excerpt: null,
+        refs: [],
+      } as unknown as SignalEvidence),
+    ).toBeNull();
+
+    // Excerpt alone is enough to inherit.
+    expect(
+      citationFromEventEvidence("evt-3", {
+        citation: null,
+        excerpt: "only-excerpt",
+        refs: [],
+      } as unknown as SignalEvidence),
+    ).not.toBeNull();
   });
 });
