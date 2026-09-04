@@ -67,6 +67,27 @@ if ! command -v codex >/dev/null 2>&1; then
   err "codex CLI manquant (LLM STAGE2 = codex CLI + mesh + gpt-5.6-luna)"; exit 1
 fi
 
+# ── Plafond DUR d'appels LLM (cost-gate cohorte, i-cond) ──────────────────────
+# MAX_LLM_CALLS (env) = nombre MAX d'appels codex sur TOUT le run, compteur PARTAGÉ entre villes via
+# LLM_CALL_COUNTER_FILE (posé par drive-grounding). Vide/unset = illimité (runs host manuels, pilote).
+# Réservation ATOMIQUE (flock) AVANT chaque codex exec : si le slot réservé dépasse le cap → 0 appel,
+# arrêt dur. Le compteur seul tient le cap même en lanes parallèles (aucun appel au-delà de MAX).
+MAX_LLM_CALLS="${MAX_LLM_CALLS:-}"
+LLM_CALL_COUNTER_FILE="${LLM_CALL_COUNTER_FILE:-$WORK_DIR/llm-call-count}"
+CAP_REACHED=0
+llm_reserve() {  # 0 = slot réservé (appel autorisé) ; 1 = plafond atteint (ne PAS appeler)
+  [ -z "${MAX_LLM_CALLS:-}" ] && return 0
+  local n
+  # brace-group + fd9 redirect (flock à l'intérieur) : n persiste (pas un sous-shell). Verrou inter-process
+  # sur le .lock → réservation atomique même en lanes parallèles.
+  {
+    flock 9
+    n=$(cat "$LLM_CALL_COUNTER_FILE" 2>/dev/null || echo 0); n=$((n + 1))
+    printf '%s' "$n" > "$LLM_CALL_COUNTER_FILE"
+  } 9>"${LLM_CALL_COUNTER_FILE}.lock"
+  [ "${n:-999999}" -le "$MAX_LLM_CALLS" ]
+}
+
 mkdir -p "$WORK_DIR/pdfs" "$WORK_DIR/txts" "$WORK_DIR/cites" "$WORK_DIR/meta"
 
 # ── 1. Mapper signaux → docSha via arêtes raises_signal ──────────────────────
@@ -306,6 +327,9 @@ while IFS= read -r sha; do
   # côté enrollment (lane mesh) : le codex host ne DOIT avoir aucun fallback OpenAI. `-m gpt-5.6-luna` = pin explicite.
   llm_ok=0
   for attempt in 1 2 3; do
+    if ! llm_reserve; then
+      log "  [CAP] MAX_LLM_CALLS=$MAX_LLM_CALLS atteint — arrêt dur AVANT appel ($sha)"; CAP_REACHED=1; break
+    fi
     : > "$raw_resp"; : > "$events"
     if timeout 360 codex exec -m "$CODEX_MODEL" -s read-only --skip-git-repo-check --ephemeral \
          --color never --json -C "$WORK_DIR" --output-last-message "$raw_resp" - \
@@ -318,6 +342,10 @@ while IFS= read -r sha; do
       log "  [retry-llm] $sha: tentative $attempt codex/mesh timeout/erreur (fail-closed, 0 repli provider)"
     fi
   done
+  if [ "$CAP_REACHED" = "1" ]; then
+    log "Étape 4 STOPPÉE au plafond MAX_LLM_CALLS=$MAX_LLM_CALLS — nœuds restants non groundés (cost-gate cohorte)."
+    break
+  fi
   if [ "$llm_ok" = "1" ]; then
     python3 - "$sha" "$WORK_DIR" <<'PYPARS'
 import sys, json, re, pathlib
