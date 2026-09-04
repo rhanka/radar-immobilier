@@ -1,0 +1,123 @@
+# 41-grounding-worklist-configmap.yaml — the citation-grounding cohort worklist.
+#
+# 98 cities whose signals lack verbatim citations and whose graph carries docSha
+# targets the corrected Gate 7bis (baseline-relative, merged on main) can now
+# publish. sainte-martine is FIRST — it is the proven case (29 verbatim citations,
+# gate PASSES) so the very first in-cluster run validates the whole path on the
+# smallest, known-good blast radius before the rest of the cohort.
+#
+# This is the finite cohort that (a) bounds the HOST grounding run = the cost-gate (finite
+# worklist + hard call-ceiling), and (b) the dispatch (i-arch #590) iterates to fire the
+# per-city publish-only Job (env CITY), sainte-martine first. The per-city Job does NOT mount
+# this — it publishes the single CITY the dispatch injects (pull staged candidate → MinIO graph/).
+#
+# ~7 of the 98 are expected to stay BLOCKED as grounded_empty (genuine source-gaps
+# — no citable PV text); that is normal, not a failure.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-grounding-worklist
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/component: grounding
+data:
+  cohort.txt: |
+    sainte-martine
+    alma
+    auclair
+    baie-du-febvre
+    beaconsfield
+    blue-sea
+    bolton-ouest
+    brigham
+    cap-saint-ignace
+    champlain
+    cheneville
+    clarenceville
+    clermont-charlevoix-est
+    cote-saint-luc
+    deleage
+    dixville
+    duhamel
+    east-farnham
+    fassett
+    franklin
+    godmanchester
+    grande-vallee
+    grand-remous
+    hampden
+    havelock
+    lac-saint-paul
+    lascension
+    lassomption
+    lyster
+    maniwaki
+    montcerf-lytton
+    montreal-ouest
+    riviere-du-loup
+    roxton-pond
+    saint-aime
+    saint-aime-du-lac-des-iles
+    saint-alban
+    saint-alexandre
+    saint-ambroise
+    saint-anicet
+    saint-bruno-de-guigues
+    saint-camille
+    saint-cesaire
+    saint-chrysostome
+    saint-cleophas-de-brandon
+    saint-constant
+    saint-cyprien-riviere-du-loup
+    saint-damase-la-matapedia
+    saint-dominique-du-rosaire
+    saint-donat-la-mitis
+    sainte-beatrix
+    sainte-brigide-diberville
+    sainte-christine-dauvergne
+    sainte-clotilde
+    sainte-gertrude-manneville
+    sainte-helene-de-chester
+    sainte-helene-de-kamouraska
+    sainte-jeanne-darc-maria-chapdelaine
+    sainte-marguerite-du-lac-masson
+    sainte-marthe-sur-le-lac
+    sainte-petronille
+    sainte-sabine-brome-missisquoi
+    sainte-sophie
+    saint-esprit
+    saint-eugene
+    saint-eugene-de-ladriere
+    saint-fabien
+    saint-gabriel-de-valcartier
+    saint-guillaume
+    saint-hippolyte
+    saint-hyacinthe
+    saint-jacques
+    saint-jacques-de-leeds
+    saint-jean-sur-richelieu
+    saint-lazare-de-bellechasse
+    saint-lin-laurentides
+    saint-marc-de-figuery
+    saint-michel
+    saint-noel
+    saint-patrice-de-sherrington
+    saint-paul-de-lile-aux-noix
+    saint-paulin
+    saint-philibert
+    saint-philippe
+    saint-rene
+    saint-robert-bellarmin
+    saint-roch-de-lachigan
+    saint-simon-de-rimouski
+    saint-theodore-dacton
+    saint-valentin
+    sayabec
+    senneville
+    stoke
+    vaudreuil-dorion
+    victoriaville
+    waterloo
+    waterville
+    yamaska
