@@ -1,0 +1,38 @@
+# PREPROD overlay — the CD (build-push-images.yml, deploy-preprod) applies THIS
+# so the live preprod state tracks git (not just images). It fixes three drifts
+# that "kubectl set image" alone never reconciled:
+#   1. stale radar-ui-nginx ConfigMap (#608 headers not served) — the base's
+#      configMapGenerator hashes deploy/k8s/nginx/default.conf, so a content
+#      change rolls the radar-ui Deployment automatically; this overlay INHERITS
+#      that generator (it only retargets the namespace);
+#   2. missing securityContext on the durable workloads (#611) — reconciled by
+#      applying the base manifests;
+#   3. missing PSS labels on the namespace — the kustomize `namespace` transformer
+#      renames the base Namespace object to radar-immobilier-preprod and PRESERVES
+#      its pod-security.kubernetes.io/* labels (00-namespace.yaml).
+#
+# LOCATION: OUTSIDE deploy/k8s on purpose. An overlay nested INSIDE its base dir
+# (deploy/k8s/overlays/preprod referencing ../../) makes kustomize refuse with
+# "cycle detected: candidate root deploy/k8s contains visited root …/overlays".
+# Siting it at deploy/overlays/preprod referencing ../../k8s keeps base and
+# overlay in separate trees.
+#
+# The base (../../k8s) hardcodes namespace: radar-immobilier (PROD). This overlay
+# retargets EVERYTHING to radar-immobilier-preprod, so an accidental apply can
+# never hit prod. The base already EXCLUDES the one-shot Jobs (31/32/33) and the
+# refresh CronJobs (34, overlay-managed image-pin), so this overlay renders
+# durables only — no one-shot Job ("0 Job" is structural, no kind filter needed).
+#
+# ⚠ Build/apply with `--load-restrictor LoadRestrictionsNone`: `resources:
+# [../../k8s]` references a parent dir, which the default root-only restrictor
+# forbids. The CD renders with
+# `kustomize build --load-restrictor LoadRestrictionsNone deploy/overlays/preprod`
+# and pipes to `kubectl apply --server-side` (kubectl apply -k cannot pass the
+# restrictor flag) — same pattern as deploy/k8s/refresh-cronjobs.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier-preprod
+
+resources:
+  - ../../k8s
