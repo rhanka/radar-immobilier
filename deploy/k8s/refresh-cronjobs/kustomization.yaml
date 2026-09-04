@@ -82,3 +82,36 @@ patches:
                         value: radar-immobilier-docs-preprod
                       - name: GRAPH_S3_FORCE_PATH_STYLE
                         value: "true"
+
+  # SCRAPE bucket/path-style alignment (i-infra) — same root cause as the
+  # projection GRAPH_S3: base 34 ships SCRAPE_S3_FORCE_PATH_STYLE=false (SCW, →
+  # virtual-host → ENOTFOUND on MinIO) + a mis-suffixed secret bucket
+  # (radar-immobilier-docs, no -preprod). Override SCRAPE_S3 to the preprod MinIO
+  # (path-style, docs-preprod) so the ongoing scrape writes raw/ to the SAME
+  # single preprod bucket the app + projection use. Mirrors the diag-fix (#592).
+  #
+  # JSON6902 index-replace (NOT strategic-merge): base 34's SCRAPE_S3_ENDPOINT/
+  # BUCKET are `valueFrom: secretKeyRef` — a strategic-merge `value:` would MERGE
+  # into an INVALID env with both value+valueFrom (kubectl rejects it). Replacing
+  # the whole entry by index yields a clean value-only env. Indices mirror base
+  # 34's scrape env order: ENDPOINT=4, BUCKET=5, FORCE_PATH_STYLE=9 (i-infra
+  # co-vals; if base 34's env order changes, these indices must follow).
+  - target:
+      kind: CronJob
+      name: radar-refresh-scrape
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/4
+        value:
+          name: SCRAPE_S3_ENDPOINT
+          value: "http://radar-minio:9000"
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/5
+        value:
+          name: SCRAPE_S3_BUCKET
+          value: "radar-immobilier-docs-preprod"
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/containers/0/env/9
+        value:
+          name: SCRAPE_S3_FORCE_PATH_STYLE
+          value: "true"
