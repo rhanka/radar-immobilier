@@ -40,11 +40,25 @@ spec:
         app.kubernetes.io/component: db-backup
     spec:
       restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
       volumes:
         - name: work
           emptyDir: {}
       initContainers:
         - name: dump
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: ${DUMP_IMAGE}
           command: ["sh", "-c"]
           args:
@@ -72,6 +86,12 @@ spec:
             - { name: work, mountPath: /work }
       containers:
         - name: upload
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: ${UPLOAD_IMAGE}
           args:
             - "--endpoint-url"

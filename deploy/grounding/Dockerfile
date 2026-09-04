@@ -34,5 +34,12 @@ RUN curl -fsSL "https://github.com/peak/s5cmd/releases/download/v${S5CMD_VERSION
 WORKDIR /workspace
 COPY tools/grounding /workspace/tools/grounding
 
+RUN groupadd --system --gid 1001 grounding \
+ && useradd --system --uid 1001 --gid grounding --create-home --home-dir /home/grounding grounding \
+ && chown -R grounding:grounding /workspace
+
+USER grounding
+
 # No default ENTRYPOINT/CMD — the grounding-citation Job (41-…, extraction #588,
 # publish-only) sets the command (publish-citation-grounding.sh with a city).
+
