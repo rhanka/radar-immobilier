@@ -15,10 +15,14 @@
 # Env (required): SRC_S3_ENDPOINT SRC_S3_BUCKET SRC_AWS_ACCESS_KEY_ID SRC_AWS_SECRET_ACCESS_KEY
 #                 DST_S3_ENDPOINT DST_S3_BUCKET DST_AWS_ACCESS_KEY_ID DST_AWS_SECRET_ACCESS_KEY
 # Env (optional): AWS_REGION (default us-east-1) ; REQUIRE_SIDECAR=1 (fail if no .sha256 sidecar)
+#   DST_PREFIX (default graph) — DST key prefix. 1-store migration: preprod publishes to `graph-preprod`
+#     within the SAME docs-pocs bucket (isolation by PREFIX, the safety boundary). PERMIT-LIST fail-closed
+#     (graph|graph-preprod|parsed) — never raw/ (READ-only source PVs) nor any other prefix.
 set -euo pipefail
 CITY="${1:?city requis}"
 SRC_PREFIX="${2:-candidats}"
 RUN="${3:-/tmp/publish-verify}"
+DST_PREFIX="${DST_PREFIX:-graph}"
 
 for v in SRC_S3_ENDPOINT SRC_S3_BUCKET SRC_AWS_ACCESS_KEY_ID SRC_AWS_SECRET_ACCESS_KEY \
          DST_S3_ENDPOINT DST_S3_BUCKET DST_AWS_ACCESS_KEY_ID DST_AWS_SECRET_ACCESS_KEY; do
@@ -26,13 +30,20 @@ for v in SRC_S3_ENDPOINT SRC_S3_BUCKET SRC_AWS_ACCESS_KEY_ID SRC_AWS_SECRET_ACCE
 done
 export AWS_REGION="${AWS_REGION:-us-east-1}"
 
-# SRC != DST : on copie VERS un store distinct (docs-pocs -> MinIO préprod). Même store = suspect.
-if [ "$SRC_S3_ENDPOINT|$SRC_S3_BUCKET" = "$DST_S3_ENDPOINT|$DST_S3_BUCKET" ]; then
-  echo "publish-verify: FAIL-CLOSED — SRC==DST ($SRC_S3_BUCKET) : copie vers le même store refusée." >&2; exit 2
-fi
-# prefix-safety : côté DST on n'écrit QUE dans graph/ (jamais raw/proces-verbaux, .meta).
-DST_KEY="graph/$CITY/latest.json"
-case "$DST_KEY" in graph/*) : ;; *) echo "publish-verify: FAIL-CLOSED — DST hors graph/ : $DST_KEY" >&2; exit 2 ;; esac
+# prefix-safety = THE safety boundary (1-store: preprod-grounded coexists with baseline `graph/` + source
+# `raw/` in the SAME bucket, isolated only by prefix). PERMIT-LIST fail-closed — DST_PREFIX must be one of
+# graph|graph-preprod|parsed ; anything else (raw/, empty, typo) is REFUSED (not a denylist "all but raw/",
+# whose fail-open default would be the hole — recette gate).
+case "$DST_PREFIX" in
+  graph|graph-preprod|parsed) : ;;
+  *) echo "publish-verify: FAIL-CLOSED — DST_PREFIX hors permit-list (graph|graph-preprod|parsed) : '$DST_PREFIX'" >&2; exit 2 ;;
+esac
+DST_KEY="$DST_PREFIX/$CITY/latest.json"
+# belt-and-suspenders : la clé construite DOIT commencer par un préfixe permis (jamais raw/).
+case "$DST_KEY" in
+  graph/*|graph-preprod/*|parsed/*) : ;;
+  *) echo "publish-verify: FAIL-CLOSED — DST_KEY hors permit-list : $DST_KEY" >&2; exit 2 ;;
+esac
 
 mkdir -p "$RUN/logs"
 LOG="$RUN/logs/publish-$CITY.log"; : > "$LOG"
@@ -44,6 +55,12 @@ sha(){ sha256sum "$1" | awk '{print $1}'; }
 
 src_obj="s3://$SRC_S3_BUCKET/$SRC_PREFIX/$CITY/latest.json"
 dst_obj="s3://$DST_S3_BUCKET/$DST_KEY"
+# SRC != DST : refuse le SELF-OVERWRITE (même endpoint + MÊME objet lu==écrit). 1-store : même bucket +
+# préfixe DIFFÉRENT (candidats/ -> graph-preprod/) = LÉGITIME ; seul l'objet identique est refusé (≠ l'ancien
+# garde bucket-égalité, qui bloquait à tort le publish intra-docs-pocs du modèle 1-store).
+if [ "$SRC_S3_ENDPOINT|$src_obj" = "$DST_S3_ENDPOINT|$dst_obj" ]; then
+  echo "publish-verify: FAIL-CLOSED — SRC==DST self-overwrite ($dst_obj) refusé." >&2; exit 2
+fi
 
 # 1. Pull le candidat depuis SRC.
 if ! src cp "$src_obj" "$CAND" >>"$LOG" 2>&1 || [ ! -s "$CAND" ]; then
@@ -71,9 +88,9 @@ if dst cp "$dst_obj" "$CAND.dst" >>"$LOG" 2>&1 && [ -s "$CAND.dst" ]; then
     exit 0
   fi
   ts="$(date -u +%Y%m%dT%H%M%SZ)"
-  dst cp "$dst_obj" "s3://$DST_S3_BUCKET/graph/$CITY/history/pre-publish-${ts}.json" >>"$LOG" 2>&1 \
+  dst cp "$dst_obj" "s3://$DST_S3_BUCKET/$DST_PREFIX/$CITY/history/pre-publish-${ts}.json" >>"$LOG" 2>&1 \
     || { echo "publish-verify[$CITY]: FAIL-CLOSED — backup DST échoué, overwrite annulé" >&2; exit 1; }
-  backup="graph/$CITY/history/pre-publish-${ts}.json"
+  backup="$DST_PREFIX/$CITY/history/pre-publish-${ts}.json"
 fi
 
 # 4. Publish vers DST graph/ puis re-read -> vérifie SHA (intégrité transfert).
