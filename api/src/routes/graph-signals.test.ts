@@ -866,6 +866,30 @@ describe("§7.6 citationFromEvent — raises_signal cross-display", () => {
     expect(body.nodes[0]!.citationFromEvent).toBeUndefined();
   });
 
+  it("#3b observability — a lookup failure omits the field AND logs a server error (never a silent swallow)", async () => {
+    const signal = makeNode("sig-x", "drummondville", "Signal");
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      [signal] as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+    );
+    // Systematic lookup failure (e.g. DB down): the whole city loses inheritance.
+    vi.mocked(getRaisesSignalLinks).mockRejectedValueOnce(new Error("db down"));
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { ok: boolean; nodes: CardLike[] };
+
+    // Fail-soft: still 200, field simply absent…
+    expect(res.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.nodes[0]!.citationFromEvent).toBeUndefined();
+    // …but the error is OBSERVABLE (loud, not swallowed) — the acceptance criterion.
+    expect(errSpy).toHaveBeenCalledWith(
+      expect.stringContaining("raises_signal citation inherit FAILED"),
+      expect.anything(),
+    );
+    errSpy.mockRestore();
+  });
+
   it("citationFromEventEvidence maps the event evidence, or returns null when the event has no citation", () => {
     expect(
       citationFromEventEvidence("evt-1", {
