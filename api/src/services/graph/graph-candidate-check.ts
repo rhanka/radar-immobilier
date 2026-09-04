@@ -26,9 +26,11 @@ import {
   buildNodeRow,
   mergeNodeRows,
   findMissingBusinessProperties,
+  findMissingSourceRefs,
   countCompleteSignals,
   graphifyGraphSchema,
   type BusinessPropertyRegression,
+  type SourceRefRegression,
 } from "./graph-store.js";
 
 /** A single current-PG node snapshot row for the city under test. */
@@ -44,6 +46,8 @@ export interface CandidatePreflightResult {
   wouldAbort: boolean;
   /** Gate 1 findings: nodes whose business-properties would disappear/degrade. */
   propertyRegressions: BusinessPropertyRegression[];
+  /** Gate 3 findings: nodes whose source docSha (provenance) would disappear. */
+  sourceRefRegressions: SourceRefRegression[];
   /** Gate 2: complete signals in the current PG snapshot. */
   completeBefore: number;
   /** Gate 2: complete signals the candidate would leave (REPLACE → == candidate). */
@@ -88,6 +92,15 @@ export function predictProjectionAbort(
     intendedRemovals,
   );
 
+  // Gate 3 — source-ref provenance regression (upsertGraphAtomic, after gate1).
+  // Same call, same args: a node's existing source docSha must not disappear.
+  const sourceRefRegressions = findMissingSourceRefs(
+    beforeRows.map((row) => ({ id: row.id, props: row.props })),
+    nodeRows,
+    citySlug,
+    intendedRemovals,
+  );
+
   // Gate 2 — completeness regression (upsertGraphAtomic step 5). REPLACE makes
   // the post-projection city node set == the candidate, so completeAfter is
   // counted over the candidate directly. countCompleteSignals filters to
@@ -112,6 +125,15 @@ export function predictProjectionAbort(
         `disappear or degrade (${details})`,
     );
   }
+  if (sourceRefRegressions.length > 0) {
+    const details = sourceRefRegressions
+      .map(({ nodeId, missingDocShas }) => `${nodeId}: ${missingDocShas.join(", ")}`)
+      .join("; ");
+    reasons.push(
+      `source-ref provenance regression for ${citySlug}: existing source ` +
+        `docSha(s) would disappear (${details})`,
+    );
+  }
   if (completenessRegression) {
     reasons.push(
       `completeness regression for ${citySlug}: complete signals ` +
@@ -121,8 +143,12 @@ export function predictProjectionAbort(
 
   return {
     citySlug,
-    wouldAbort: propertyRegressions.length > 0 || completenessRegression,
+    wouldAbort:
+      propertyRegressions.length > 0 ||
+      sourceRefRegressions.length > 0 ||
+      completenessRegression,
     propertyRegressions,
+    sourceRefRegressions,
     completeBefore,
     completeAfter,
     completenessRegression,
