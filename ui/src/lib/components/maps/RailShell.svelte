@@ -87,7 +87,10 @@
     height: 100%;
     min-height: 0;
     overflow: hidden;
-    scrollbar-gutter: stable;
+    /* Pas de scrollbar-gutter ici : `.rail` a overflow:hidden et ne scrolle
+       jamais, donc réserver une gouttière n'affichait qu'une marge droite vide
+       — en double du gutter légitime de `.rail-body`. Le gutter stable (anti
+       saut de contenu quand la vraie scrollbar apparaît) vit sur `.rail-body`. */
   }
 
   .rail-head {
