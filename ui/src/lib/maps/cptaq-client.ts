@@ -4,8 +4,11 @@
  *   GET <BASE>/collections/ca-qc-constraints-<citySlug>/items?bbox=&limit=
  *
  * Miroir de `zones-client.ts` (même forme OGC-collections), MAIS :
- *  - base = geo OGC directe `VITE_GEO_OGC_BASE_URL` (pas le proxy immo-api
- *    `/api/geo` — 0 touche api/) ; unset → même-origine, dégrade en absence ;
+ *  - base = `VITE_GEO_OGC_BASE_URL` (host geo direct, CORS `*`) SI défini ;
+ *    sinon proxy same-origin `/api/geo/collections` (geo-api, 0 touche api/ —
+ *    comme le reste de l'app consomme geo). Le même-origine NU `/collections`
+ *    n'est PAS proxifié (SPA fallback → 200 text/html → erreur, pas d'absence),
+ *    donc le défaut est `/api/geo`, jamais la racine ;
  *  - collection per-ville `ca-qc-constraints-<slug>` (nommage réel geo-cond).
  *
  * Robustesse (identique à zones-client) :
@@ -75,8 +78,11 @@ export function cptaqCollectionId(citySlug: string): string {
 }
 
 export function resolveCptaqUrl(citySlug: string, opts: FetchCptaqOptions = {}): string {
+  // VITE_GEO_OGC_BASE_URL défini (host geo direct CORS *) → prioritaire ; sinon
+  // proxy same-origin `/api/geo` (geo-api). PAS la racine : `/collections` nu
+  // tombe dans le SPA fallback (200 text/html) → cptaqError, 0 couche rendue.
   const baseUrl = opts.baseUrl ?? import.meta.env.VITE_GEO_OGC_BASE_URL ?? "";
-  const base = baseUrl ? baseUrl.replace(/\/$/, "") : "";
+  const base = baseUrl ? baseUrl.replace(/\/$/, "") : "/api/geo";
   const path = `/collections/${encodeURIComponent(cptaqCollectionId(citySlug))}/items`;
   const params = new URLSearchParams();
   if (opts.limit !== undefined) params.set("limit", String(opts.limit));

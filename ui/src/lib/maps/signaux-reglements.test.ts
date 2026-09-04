@@ -7,6 +7,8 @@ import type {
 } from "$lib/maps/geo-zones-client.js";
 import {
   aggregateReglements,
+  applyDemoReglementPdfUrls,
+  DEMO_REGLEMENT_PDFS,
   enrichGeoZonesWithSignalReglements,
   isReglementAvisOnly,
   normalizeReglementKey,
@@ -59,6 +61,50 @@ function zone(code: string, grillePdfUrl?: string): GeoZoneFeature {
     },
   };
 }
+
+describe("applyDemoReglementPdfUrls (§7.1 démo link-only)", () => {
+  it("aggregateReglements pose reglementPdfUrl=null par défaut", () => {
+    const [entry] = aggregateReglements([node("s1", { reglement_number: "2019-342" })]);
+    expect(entry!.reglementPdfUrl).toBeNull();
+  });
+
+  it("attache le PDF municipal à une entrée EXISTANTE sans toucher le compte (Ste-Martine 2019-342)", () => {
+    const base = aggregateReglements([node("s1", { reglement_number: "2019-342" })]);
+    const out = applyDemoReglementPdfUrls(base, "sainte-martine");
+    const reg = out.find((r) => r.key === normalizeReglementKey("2019-342"));
+    expect(reg?.reglementPdfUrl).toBe(DEMO_REGLEMENT_PDFS["sainte-martine"]![0]!.pdfUrl);
+    expect(reg?.signalCount).toBe(1); // inchangé
+    expect(out).toHaveLength(1); // pas d'entrée en double
+  });
+
+  it("MATÉRIALISE une entrée firm quand le numéro n'est cité par aucun signal (Calixa-Lavallée 275)", () => {
+    const out = applyDemoReglementPdfUrls([], "calixa-lavallee");
+    expect(out).toHaveLength(1);
+    const reg = out[0]!;
+    expect(reg.number).toBe("275");
+    expect(reg.regulatoryStatus).toBe("firm");
+    expect(reg.signalCount).toBe(0);
+    expect(reg.evidenceNodeId).toBeNull();
+    expect(reg.reglementPdfUrl).toBe(DEMO_REGLEMENT_PDFS["calixa-lavallee"]![0]!.pdfUrl);
+  });
+
+  it("les 4 villes démo sont câblées (numéro + URL https)", () => {
+    for (const slug of ["sainte-martine", "calixa-lavallee", "richelieu", "saint-remi"]) {
+      const demos = DEMO_REGLEMENT_PDFS[slug];
+      expect(demos, slug).toBeDefined();
+      for (const d of demos!) {
+        expect(d.numero.length, slug).toBeGreaterThan(0);
+        expect(d.pdfUrl.startsWith("https://"), slug).toBe(true);
+      }
+    }
+  });
+
+  it("ville hors carte démo → référence INCHANGÉE (non destructif)", () => {
+    const base = aggregateReglements([node("s1", { reglement_number: "2019-342" })]);
+    expect(applyDemoReglementPdfUrls(base, "gotham")).toBe(base);
+    expect(applyDemoReglementPdfUrls(base, null)).toBe(base);
+  });
+});
 
 describe("readReglementNumbers", () => {
   it("lit un numéro scalaire (reglement_number)", () => {
