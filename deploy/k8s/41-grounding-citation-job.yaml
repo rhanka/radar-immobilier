@@ -105,5 +105,10 @@ spec:
             - name: DST_AWS_SECRET_ACCESS_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
           resources:
+            # publish-only = pull one ~140KB JSON + sha256 + s5cmd publish: I/O-bound, seconds of light CPU,
+            # small footprint. Right-sized from 500m/512Mi. cpu: 500m tripped preprod-cap on the pilot
+            # (1600+500=2100 > 2050). memory: 512Mi was the REAL cohort-parallelism cap (i-infra measured
+            # 768Mi mem-headroom / 512 = 1 concurrent grounding pod) — 256Mi → 3 concurrent, matching cpu
+            # (700m/200m). Requests unchanged (50m/128Mi). (peak to be confirmed by i-infra on the pilot pod.)
             requests: { cpu: 50m, memory: 128Mi }
-            limits: { cpu: 500m, memory: 512Mi }
+            limits: { cpu: 200m, memory: 256Mi }
