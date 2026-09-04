@@ -8,8 +8,18 @@
   export let onClose: () => void = () => {};
 
   function isSafeIframeUrl(candidate: string): boolean {
-    if (candidate.startsWith("/") || candidate.startsWith(window?.location?.origin ?? "")) {
-      return true;
+    if (candidate.startsWith("//")) return false;
+    if (candidate.startsWith("/")) {
+      return !candidate.startsWith("/\\");
+    }
+    try {
+      const currentOrigin = typeof window !== "undefined" ? window?.location?.origin : "";
+      if (currentOrigin) {
+        const parsed = new URL(candidate, currentOrigin);
+        if (parsed.origin === currentOrigin) return true;
+      }
+    } catch {
+      return false;
     }
     return isPublicCanonicalUrl(candidate);
   }

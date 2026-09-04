@@ -139,7 +139,7 @@ describe("GET /api/documents/raw", () => {
     expect(res.headers.get("content-disposition")).toBe("attachment");
   });
 
-  it("returns 413 Payload Too Large when document exceeds 50 MB", async () => {
+  it("returns 413 Payload Too Large when document exceeds 50 MB at HEAD", async () => {
     const store = new MemoryStore();
     const bigKey = "raw/testville/oversized.pdf";
     const app = documentsRoute({ store });
@@ -149,6 +149,28 @@ describe("GET /api/documents/raw", () => {
       size: 60 * 1024 * 1024,
       contentType: "application/pdf",
     });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(bigKey)}`,
+    );
+
+    expect(res.status).toBe(413);
+    const body = await res.json();
+    expect(body.error).toBe("payload_too_large");
+  });
+
+  it("returns 413 Payload Too Large when document exceeds 50 MB post-GET", async () => {
+    const store = new MemoryStore();
+    const bigKey = "raw/testville/oversized.pdf";
+    const app = documentsRoute({ store });
+    // Mock head reporting undefined size (or size within limit)
+    vi.spyOn(store, "head").mockResolvedValueOnce({
+      key: bigKey,
+      contentType: "application/pdf",
+    });
+    // Mock get returning bytes > 50MB
+    const oversizedBytes = new Uint8Array(51 * 1024 * 1024);
+    vi.spyOn(store, "get").mockResolvedValueOnce(oversizedBytes);
 
     const res = await app.request(
       `/api/documents/raw?rawRef=${encodeURIComponent(bigKey)}`,
