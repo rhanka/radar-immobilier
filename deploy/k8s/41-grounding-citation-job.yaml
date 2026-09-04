@@ -81,17 +81,19 @@ spec:
             # require the host-staged .sha256 sidecar (integrity of the staged candidate).
             - name: REQUIRE_SIDECAR
               value: "1"
-            # ── SRC = SCW docs-pocs, prefix candidats/ (host-staged grounded candidate + .sha256). Read-only. ──
+            # ── SRC = SCW docs-pocs, prefix candidats/ (host-staged candidate + .sha256). Read-only.
+            #    radar-scrape-s3-credentials is ABSENT on preprod (33b) → endpoint/bucket/region LITERAL +
+            #    SCW read creds from graph-copy-creds (SCW_AK/SCW_SK). secretKeyRef by KEY NAME only, no values. ──
             - name: SRC_S3_ENDPOINT
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ENDPOINT } }
+              value: "https://s3.fr-par.scw.cloud"
             - name: SRC_S3_BUCKET
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_BUCKET } }
-            - name: SRC_AWS_ACCESS_KEY_ID
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
-            - name: SRC_AWS_SECRET_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
+              value: "radar-immobilier-docs-pocs"
             - name: AWS_REGION
-              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION } }
+              value: "fr-par"
+            - name: SRC_AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: graph-copy-creds, key: SCW_AK } }
+            - name: SRC_AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: graph-copy-creds, key: SCW_SK } }
             # ── DST = in-cluster MinIO radar-minio:9000, bucket radar-immobilier-docs-preprod, prefix graph/.
             #    PRÉPROD-only ⇒ prod jamais touchée. Creds = radar-s3-credentials (MinIO). READ≠PUBLISH. ──
             - name: DST_S3_ENDPOINT
