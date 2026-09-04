@@ -1,0 +1,15 @@
+# Namespace-scoped ServiceAccount for preprod workloads (grounding, diag, etc.)
+# Disables automountServiceAccountToken in radar-immobilier-preprod.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-app
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: app
+    app.kubernetes.io/env: preprod
+imagePullSecrets:
+  - name: radar-registry-pull
+automountServiceAccountToken: false
