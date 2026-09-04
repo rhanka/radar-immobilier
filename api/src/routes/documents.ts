@@ -84,14 +84,26 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
     }
 
     let resolved: { reader: ObjectReader; key: string } | null = null;
+    let resolvedSize: number | undefined = undefined;
     for (const candidate of candidates) {
-      if (await candidate.reader.head(candidate.key)) {
+      const info = await candidate.reader.head(candidate.key);
+      if (info) {
         resolved = candidate;
+        resolvedSize = info.size;
         break;
       }
     }
     if (!resolved) {
       return c.json({ ok: false, error: "document_not_found" }, 404);
+    }
+
+    // DoS / Memory protection: limit maximum document size to 50 MiB.
+    const MAX_DOCUMENT_SIZE_BYTES = 50 * 1024 * 1024;
+    if (resolvedSize !== undefined && resolvedSize > MAX_DOCUMENT_SIZE_BYTES) {
+      return c.json(
+        { ok: false, error: "payload_too_large", message: "Document exceeds maximum size limit (50 MB)" },
+        413,
+      );
     }
 
     // The PAYLOAD object existed at HEAD; if it vanishes before GET (a rare
@@ -107,6 +119,12 @@ export function documentsRoute(deps: DocumentsDeps): Hono {
         return c.json({ ok: false, error: "document_not_found" }, 404);
       }
       throw error;
+    }
+    if (bytes.byteLength > MAX_DOCUMENT_SIZE_BYTES) {
+      return c.json(
+        { ok: false, error: "payload_too_large", message: "Document exceeds maximum size limit (50 MB)" },
+        413,
+      );
     }
     const contentType = await resolveRawContentType(resolved.reader, resolved.key);
 

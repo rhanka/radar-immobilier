@@ -139,6 +139,26 @@ describe("GET /api/documents/raw", () => {
     expect(res.headers.get("content-disposition")).toBe("attachment");
   });
 
+  it("returns 413 Payload Too Large when document exceeds 50 MB", async () => {
+    const store = new MemoryStore();
+    const bigKey = "raw/testville/oversized.pdf";
+    const app = documentsRoute({ store });
+    // Mock head reporting size > 50MB
+    vi.spyOn(store, "head").mockResolvedValueOnce({
+      key: bigKey,
+      size: 60 * 1024 * 1024,
+      contentType: "application/pdf",
+    });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(bigKey)}`,
+    );
+
+    expect(res.status).toBe(413);
+    const body = await res.json();
+    expect(body.error).toBe("payload_too_large");
+  });
+
   it("prefers the scrape store but falls back to the metadata store", async () => {
     const store = new MemoryStore();
     const scrapeStore = new MemoryStore();
