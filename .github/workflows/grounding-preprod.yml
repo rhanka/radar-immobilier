@@ -77,7 +77,11 @@ jobs:
             echo "::error title=Wrong cluster::kubeconfig targets '${host}', expected '${exp}'. Nothing applied."
             exit 1
           fi
-          kubectl -n "$NAMESPACE" get ns "$NAMESPACE" -o name >/dev/null || kubectl get ns "$NAMESPACE" -o name
+          # NS-scoped liveness — mirror build-push deploy-preprod's proven pre-flight:
+          # the deployer SA can read its own ns's deployments (radar-api is stable).
+          # NOT `get ns` (namespaces are cluster-scoped → Forbidden for the ns-scoped
+          # SA, and we must NOT grant it cluster scope).
+          kubectl -n "$NAMESPACE" get deploy radar-api -o name >/dev/null
 
       - name: Install kustomize
         run: |
