@@ -87,7 +87,7 @@
 </script>
 
 <script lang="ts">
-  import { onDestroy, tick } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import {
     ChevronLeft,
     ChevronRight,
@@ -109,6 +109,7 @@
   } from "@lucide/svelte";
   import {
     findCitationInPage,
+    findTextOccurrenceInPage,
     itemsOverlappingRanges,
   } from "$lib/signals/pdf-citation-match.js";
   import type {
@@ -117,6 +118,19 @@
     HoverCardData,
   } from "$lib/signals/pdf-overlay-signals.js";
   import { distinctDocCount } from "$lib/signals/pdf-overlay-signals.js";
+  import {
+    mostVisiblePage,
+    pagesInWindow,
+    type PageVisibility,
+  } from "$lib/signals/pdf-page-window.js";
+  import {
+    buildTextIndex,
+    findMatches,
+    nextMatchIndex,
+    prevMatchIndex,
+    type PdfTextIndex,
+    type PdfTextMatch,
+  } from "$lib/signals/pdf-text-search.js";
 
   export let title = "Document source";
   export let sourceUrl: string | null = null;
@@ -278,23 +292,24 @@
   })();
 
   function applyExternalHover(id: string | null): void {
-    if (typeof document === "undefined" || !textLayerEl) return;
-    // Retire toute pulsation précédente puis (ré)applique sur le signal courant.
-    for (const el of textLayerEl.querySelectorAll(".pdf-hl--pulse")) {
-      el.classList.remove("pdf-hl--pulse");
-    }
-    if (!id) return;
-    for (const el of textLayerEl.querySelectorAll<HTMLElement>(
-      `.pdf-hl[data-signal-id="${cssAttrEscape(id)}"]`,
-    )) {
-      el.classList.add("pdf-hl--pulse");
+    if (typeof document === "undefined") return;
+    for (const layer of textLayerEls.values()) {
+      for (const el of layer.querySelectorAll(".pdf-hl--pulse")) {
+        el.classList.remove("pdf-hl--pulse");
+      }
+      if (!id) continue;
+      for (const el of layer.querySelectorAll<HTMLElement>(
+        `.pdf-hl[data-signal-id="${cssAttrEscape(id)}"]`,
+      )) {
+        el.classList.add("pdf-hl--pulse");
+      }
     }
   }
 
   /** Va à la page d'un signal (clic sur le toast d'ancrage #86). */
   function goToSignalPage(targetPage: number): void {
     if (pdfDoc && targetPage >= 1 && targetPage <= numPages) {
-      void renderPage(targetPage);
+      void scrollToPage(targetPage, "smooth");
     }
   }
 
@@ -397,8 +412,6 @@
   $: isPdfSource = looksLikePdf(resolvedSourceUrl, rawRef, sourceRef);
 
   // ── État du viewer pdf.js ────────────────────────────────────────────────
-  let canvasEl: HTMLCanvasElement | null = null;
-  let textLayerEl: HTMLDivElement | null = null;
   let viewerScrollEl: HTMLDivElement | null = null;
 
   let pdfDoc: import("pdfjs-dist").PDFDocumentProxy | null = null;
@@ -406,10 +419,44 @@
   let currentPage = 1;
   let loading = false;
   let loadError: string | null = null;
-  let renderToken = 0;
 
-  // Token de LOAD distinct du renderToken (#89/#90). Le renderToken protège un
-  // rendu de page contre une navigation de page plus récente DANS le même doc.
+  type PdfTextContent = Awaited<
+    ReturnType<import("pdfjs-dist").PDFPageProxy["getTextContent"]>
+  >;
+
+  // Recherche plein-texte : index construit au premier submit, puis conservé
+  // pour les requêtes et navigations suivantes du MÊME document.
+  let searchQuery = "";
+  let appliedSearchQuery = "";
+  let searchMatches: PdfTextMatch[] = [];
+  let activeSearchMatchIndex = -1;
+  let searchPending = false;
+  let searchRequestToken = 0;
+  let pageTextIndex: PdfTextIndex | null = null;
+  let pageTextIndexPromise: Promise<PdfTextIndex> | null = null;
+  const pageTextContentPromises = new Map<number, Promise<PdfTextContent>>();
+
+  type PageSlot = {
+    pageNumber: number;
+    baseWidth: number;
+    baseHeight: number;
+    width: number;
+    height: number;
+  };
+  type PageRenderTask = { promise: Promise<void>; cancel: () => void };
+  const PAGE_WINDOW_RADIUS = 1;
+  let pageSlots: PageSlot[] = [];
+  let renderWindow = new Set<number>();
+  let renderedPages = new Set<number>();
+  const pageSlotEls = new Map<number, HTMLDivElement>();
+  const canvasEls = new Map<number, HTMLCanvasElement>();
+  const textLayerEls = new Map<number, HTMLDivElement>();
+  const pageRenderTokens = new Map<number, number>();
+  const pageRenderTasks = new Map<number, PageRenderTask>();
+  let scrollFrame: number | null = null;
+
+  // Token de LOAD distinct des tokens de rendu PAR SLOT (#89/#90). Ces derniers
+  // protègent les canvases fenêtrés contre navigation, zoom et démontage.
   // Le loadToken protège tout le pipeline d'OUVERTURE (fetch+parse+1er render)
   // contre un SWITCH de doc plus récent (A→B→C en rafale) : un chargement de A
   // qui se résout après que B a démarré ne doit RIEN peindre. Sans lui, le doc A
@@ -445,12 +492,254 @@
     return false;
   }
 
+  function registerPageSlot(node: HTMLDivElement, pageNumber: number) {
+    pageSlotEls.set(pageNumber, node);
+    return { destroy: () => pageSlotEls.delete(pageNumber) };
+  }
+
+  function registerCanvas(node: HTMLCanvasElement, pageNumber: number) {
+    canvasEls.set(pageNumber, node);
+    return { destroy: () => canvasEls.delete(pageNumber) };
+  }
+
+  function registerTextLayer(node: HTMLDivElement, pageNumber: number) {
+    textLayerEls.set(pageNumber, node);
+    return { destroy: () => textLayerEls.delete(pageNumber) };
+  }
+
+  function invalidatePageRender(pageNumber: number): number {
+    const token = (pageRenderTokens.get(pageNumber) ?? 0) + 1;
+    pageRenderTokens.set(pageNumber, token);
+    try {
+      pageRenderTasks.get(pageNumber)?.cancel();
+    } catch {
+      // A render may already be settled; the token remains the authority.
+    }
+    pageRenderTasks.delete(pageNumber);
+    return token;
+  }
+
+  function resetPageStack(): void {
+    for (const slot of pageSlots) invalidatePageRender(slot.pageNumber);
+    pageSlots = [];
+    renderWindow = new Set();
+    renderedPages = new Set();
+    pageSlotEls.clear();
+    canvasEls.clear();
+    textLayerEls.clear();
+    if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+    scrollFrame = null;
+  }
+
+  function updateSlotSizes(): void {
+    pageSlots = pageSlots.map((slot) => ({
+      ...slot,
+      width: slot.baseWidth * scale,
+      height: slot.baseHeight * scale,
+    }));
+  }
+
+  function fitBaseWidth(): number {
+    const widths = pageSlots.map((slot) => slot.baseWidth);
+    return widths.length > 0 ? Math.max(...widths) : 700;
+  }
+
+  function refreshScaledWindow(): void {
+    updateSlotSizes();
+    void tick().then(() => {
+      pageSlotEls.get(currentPage)?.scrollIntoView({ behavior: "auto", block: "start" });
+      rerenderWindow();
+    });
+  }
+
+  function schedulePageRender(pageNumber: number): void {
+    void renderPageSlot(pageNumber).catch((error) => {
+      if (
+        pageRenderTokens.has(pageNumber) &&
+        renderWindow.has(pageNumber) &&
+        (error as { name?: string }).name !== "RenderingCancelledException"
+      ) {
+        loadError = error instanceof Error ? error.message : String(error);
+      }
+    });
+  }
+
+  function setRenderWindow(center: number, render = true): void {
+    const next = new Set(pagesInWindow(center, numPages, PAGE_WINDOW_RADIUS));
+    for (const pageNumber of renderWindow) {
+      if (!next.has(pageNumber)) invalidatePageRender(pageNumber);
+    }
+    renderWindow = next;
+    renderedPages = new Set([...renderedPages].filter((pageNumber) => next.has(pageNumber)));
+    if (render) {
+      void tick().then(() => {
+        for (const pageNumber of next) {
+          if (!renderedPages.has(pageNumber)) schedulePageRender(pageNumber);
+        }
+      });
+    }
+  }
+
+  async function scrollToPage(
+    targetPage: number,
+    behavior: ScrollBehavior,
+  ): Promise<void> {
+    if (!pdfDoc || numPages < 1) return;
+    const clamped = Math.min(Math.max(targetPage, 1), numPages);
+    currentPage = clamped;
+    setRenderWindow(clamped);
+    await tick();
+    pageSlotEls.get(clamped)?.scrollIntoView({ behavior, block: "start" });
+  }
+
+  function resetDocumentSearch(): void {
+    searchRequestToken++;
+    searchQuery = "";
+    appliedSearchQuery = "";
+    searchMatches = [];
+    activeSearchMatchIndex = -1;
+    searchPending = false;
+    pageTextIndex = null;
+    pageTextIndexPromise = null;
+    pageTextContentPromises.clear();
+  }
+
+  function pageTextFromContent(content: PdfTextContent): string {
+    return content.items
+      .map((item) => (typeof (item as { str?: unknown }).str === "string"
+        ? (item as { str: string }).str
+        : ""))
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  function getPageTextContent(
+    pageNumber: number,
+    pdfPage: import("pdfjs-dist").PDFPageProxy,
+  ): Promise<PdfTextContent> {
+    const cached = pageTextContentPromises.get(pageNumber);
+    if (cached) return cached;
+    const promise = pdfPage.getTextContent();
+    pageTextContentPromises.set(pageNumber, promise);
+    promise.catch(() => {
+      if (pageTextContentPromises.get(pageNumber) === promise)
+        pageTextContentPromises.delete(pageNumber);
+    });
+    return promise;
+  }
+
+  function ensurePageTextIndex(): Promise<PdfTextIndex> {
+    if (pageTextIndex) return Promise.resolve(pageTextIndex);
+    if (pageTextIndexPromise) return pageTextIndexPromise;
+    const doc = pdfDoc;
+    if (!doc) return Promise.resolve(new Map());
+
+    const promise = (async () => {
+      const entries = await Promise.all(
+        Array.from({ length: doc.numPages }, async (_, index) => {
+          const pageNumber = index + 1;
+          const pdfPage = await doc.getPage(pageNumber);
+          const content = await getPageTextContent(pageNumber, pdfPage);
+          return [pageNumber, pageTextFromContent(content)] as const;
+        }),
+      );
+      const index = buildTextIndex(new Map(entries));
+      if (doc === pdfDoc) pageTextIndex = index;
+      return index;
+    })();
+    pageTextIndexPromise = promise;
+    void promise.then(
+      () => {
+        if (pageTextIndexPromise === promise) pageTextIndexPromise = null;
+      },
+      () => {
+        if (pageTextIndexPromise === promise) pageTextIndexPromise = null;
+      },
+    );
+    return promise;
+  }
+
+  function clearSearchResults(): void {
+    searchRequestToken++;
+    appliedSearchQuery = "";
+    searchMatches = [];
+    activeSearchMatchIndex = -1;
+    searchPending = false;
+    rerenderWindow();
+  }
+
+  function handleSearchInput(): void {
+    if (!searchQuery.trim()) clearSearchResults();
+  }
+
+  async function runSearch(): Promise<void> {
+    const query = searchQuery.trim();
+    if (!query || !pdfDoc) {
+      clearSearchResults();
+      return;
+    }
+    const request = ++searchRequestToken;
+    searchPending = true;
+    try {
+      const index = await ensurePageTextIndex();
+      if (request !== searchRequestToken) return;
+      appliedSearchQuery = query;
+      searchMatches = findMatches(index, query);
+      activeSearchMatchIndex = searchMatches.length > 0 ? 0 : -1;
+      if (activeSearchMatchIndex >= 0) await goToSearchMatch(activeSearchMatchIndex);
+      else rerenderWindow();
+    } finally {
+      if (request === searchRequestToken) searchPending = false;
+    }
+  }
+
+  async function goToSearchMatch(index: number): Promise<void> {
+    const match = searchMatches[index];
+    if (!match) return;
+    activeSearchMatchIndex = index;
+    await scrollToPage(match.page, "smooth");
+    schedulePageRender(match.page);
+  }
+
+  function searchNext(): void {
+    void goToSearchMatch(nextMatchIndex(activeSearchMatchIndex, searchMatches.length));
+  }
+
+  function searchPrev(): void {
+    void goToSearchMatch(prevMatchIndex(activeSearchMatchIndex, searchMatches.length));
+  }
+
+  function handleViewerScroll(): void {
+    if (scrollFrame !== null) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = null;
+      if (!viewerScrollEl || pageSlots.length === 0) return;
+      const viewport = viewerScrollEl.getBoundingClientRect();
+      const visibility: PageVisibility[] = pageSlots.flatMap((slot) => {
+        const element = pageSlotEls.get(slot.pageNumber);
+        if (!element) return [];
+        const rect = element.getBoundingClientRect();
+        return [{
+          page: slot.pageNumber,
+          visiblePixels: Math.max(
+            0,
+            Math.min(rect.bottom, viewport.bottom) - Math.max(rect.top, viewport.top),
+          ),
+          distanceFromViewportTop: Math.abs(rect.top - viewport.top),
+        }];
+      });
+      const visible = mostVisiblePage(visibility);
+      if (visible !== null && visible !== currentPage) {
+        currentPage = visible;
+        setRenderWindow(visible);
+      }
+    });
+  }
+
   async function loadPdf(url: string): Promise<void> {
     const token = ++loadToken;
-    // Invalide aussi tout RENDER en vol de l'ancien doc (zoom/pagination en
-    // cours) : un render déjà passé son garde `!pdfDoc` ne doit pas peindre
-    // l'ancien doc sur le canvas pendant le chargement du nouveau.
-    renderToken++;
+    resetDocumentSearch();
+    resetPageStack();
     const startedAt =
       typeof performance !== "undefined" ? performance.now() : 0;
 
@@ -478,13 +767,40 @@
       numPages = doc.numPages;
       const initial = page && page >= 1 && page <= numPages ? page : 1;
       currentPage = initial;
-      await renderPage(initial);
+      const dimensions = await Promise.all(
+        Array.from({ length: numPages }, async (_, index) => {
+          const pageNumber = index + 1;
+          const pdfPage = await doc.getPage(pageNumber);
+          const viewport = pdfPage.getViewport({ scale: 1 });
+          return { pageNumber, baseWidth: viewport.width, baseHeight: viewport.height };
+        }),
+      );
+      if (token !== loadToken) return;
+
+      fitWidthScale = computeFitWidth(
+        dimensions.length > 0
+          ? Math.max(...dimensions.map((slot) => slot.baseWidth))
+          : 700,
+      );
+      scale = userScale ?? fitWidthScale;
+      pageSlots = dimensions.map((slot) => ({
+        ...slot,
+        width: slot.baseWidth * scale,
+        height: slot.baseHeight * scale,
+      }));
+      setRenderWindow(initial, false);
+      await tick();
+      pageSlotEls.get(initial)?.scrollIntoView({ behavior: "auto", block: "start" });
+      await renderPageSlot(initial);
       if (token !== loadToken) return;
       attachResizeObserver();
 
       // #89 — mesure open→1ère page peinte, exposée pour la QA Playwright.
       if (typeof performance !== "undefined") {
         recordPerf(url, performance.now() - startedAt, fromCache);
+      }
+      for (const pageNumber of renderWindow) {
+        if (pageNumber !== initial) schedulePageRender(pageNumber);
       }
     } catch (err) {
       if (token !== loadToken) return; // erreur d'un load dépassé : on ignore
@@ -506,29 +822,28 @@
     const available = viewerScrollEl
       ? // padding interne du scroller (0.75rem de chaque côté ≈ 24px)
         Math.max(120, viewerScrollEl.clientWidth - 24)
-      : (canvasEl?.parentElement?.clientWidth ?? 700);
+      : 700;
     return Math.max(MIN_SCALE, Math.min(MAX_SCALE, available / baseWidth));
   }
 
-  async function renderPage(pageNumber: number): Promise<void> {
-    if (!pdfDoc) return;
-    const token = ++renderToken;
-    const clamped = Math.min(Math.max(pageNumber, 1), numPages || 1);
-    currentPage = clamped;
-    const pdfPage = await pdfDoc.getPage(clamped);
-    if (token !== renderToken) return; // une navigation plus récente a pris le pas
+  async function renderPageSlot(pageNumber: number): Promise<void> {
+    const doc = pdfDoc;
+    if (!doc || !renderWindow.has(pageNumber)) return;
+    const token = invalidatePageRender(pageNumber);
+    const renderScale = scale;
+    const pdfPage = await doc.getPage(pageNumber);
+    if (
+      token !== pageRenderTokens.get(pageNumber) ||
+      doc !== pdfDoc ||
+      !renderWindow.has(pageNumber)
+    ) return;
 
     await tick();
-    const canvas = canvasEl;
-    const layer = textLayerEl;
+    const canvas = canvasEls.get(pageNumber);
+    const layer = textLayerEls.get(pageNumber);
     if (!canvas) return;
 
-    // Échelle effective : zoom manuel (#85) ou fit-width (#81, défaut lisible).
-    const baseViewport = pdfPage.getViewport({ scale: 1 });
-    fitWidthScale = computeFitWidth(baseViewport.width);
-    const effectiveScale = userScale ?? fitWidthScale;
-    scale = effectiveScale; // expose pour le % de la toolbar
-    const viewport = pdfPage.getViewport({ scale: effectiveScale });
+    const viewport = pdfPage.getViewport({ scale: renderScale });
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -538,8 +853,22 @@
     canvas.style.width = `${Math.floor(viewport.width)}px`;
     canvas.style.height = `${Math.floor(viewport.height)}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    await pdfPage.render({ canvasContext: ctx, viewport }).promise;
-    if (token !== renderToken) return;
+    const renderTask = pdfPage.render({ canvasContext: ctx, viewport }) as PageRenderTask;
+    pageRenderTasks.set(pageNumber, renderTask);
+    try {
+      await renderTask.promise;
+    } catch (error) {
+      if (token !== pageRenderTokens.get(pageNumber)) return;
+      throw error;
+    } finally {
+      if (pageRenderTasks.get(pageNumber) === renderTask) pageRenderTasks.delete(pageNumber);
+    }
+    if (
+      token !== pageRenderTokens.get(pageNumber) ||
+      doc !== pdfDoc ||
+      !renderWindow.has(pageNumber)
+    ) return;
+    renderedPages = new Set(renderedPages).add(pageNumber);
 
     // ── Surlignage des passages cités (multi-signaux, #84) ───────────────────
     if (layer) {
@@ -552,24 +881,30 @@
       // la page de SA référence. Sans ce garde, la voie texte re-surlignait à
       // CHAQUE page un passage générique → faux positifs (bug #83). On le
       // conserve signal par signal en mode multi.
-      const onBboxPage = currentPage === (page ?? currentPage);
+      let textContent: PdfTextContent | null = null;
+      const onBboxPage = pageNumber === (page ?? pageNumber);
       if (bbox && signals.length === 0 && onBboxPage) {
         // bbox fourni en fractions [x0, y0, x1, y1] de la page → rectangle.
-        drawBboxHighlight(layer, viewport.width, viewport.height);
+        drawBboxHighlight(
+          layer,
+          viewport.width,
+          viewport.height,
+          pageNumber === currentPage,
+        );
       } else {
         // Pré-charge la couche texte UNE fois pour tous les signaux de la page.
         // #4 — quand `hideOutOfFilter` est actif, on EXCLUT les signaux
         // hors-filtre du rendu (ils ne sont ni surlignés ni badgés).
         const targets = effectiveSignals.filter(
           (s) =>
-            currentPage === (s.page ?? currentPage) &&
+            pageNumber === (s.page ?? pageNumber) &&
             s.excerpt !== null &&
             s.excerpt.trim().length > 0 &&
             (!hideOutOfFilter || s.inFilter !== false),
         );
         if (targets.length > 0) {
-          const content = await pdfPage.getTextContent();
-          if (token !== renderToken) return;
+          textContent = await getPageTextContent(pageNumber, pdfPage);
+          if (token !== pageRenderTokens.get(pageNumber)) return;
           let drewCurrent = false;
           // Dessine les AUTRES d'abord, le COURANT en dernier → au-dessus.
           const ordered = [...targets].sort(
@@ -578,25 +913,54 @@
           for (const sig of ordered) {
             const drew = drawTextHighlight(
               layer,
-              content,
+              textContent,
               viewport,
-              effectiveScale,
+              renderScale,
               sig,
             );
             if (drew && sig.current) drewCurrent = true;
           }
           // Centre le scroll sur le surlignage du signal courant en priorité.
-          queueScrollToHighlight(layer, drewCurrent ? "current" : null);
+          if (pageNumber === currentPage)
+            queueScrollToHighlight(layer, drewCurrent ? "current" : null);
         }
+      }
+      const searchMatch = searchMatches[activeSearchMatchIndex];
+      if (searchMatch?.page === pageNumber && appliedSearchQuery) {
+        textContent ??= await getPageTextContent(pageNumber, pdfPage);
+        if (token !== pageRenderTokens.get(pageNumber)) return;
+        const occurrence = searchMatches
+          .slice(0, activeSearchMatchIndex)
+          .filter((match) => match.page === pageNumber).length;
+        const drewSearch = drawTextHighlight(
+          layer,
+          textContent,
+          viewport,
+          renderScale,
+          {
+            id: "pdf-search",
+            label: "",
+            excerpt: appliedSearchQuery,
+            page: pageNumber,
+            color: "#0ea5e9",
+            current: false,
+          },
+          occurrence,
+        );
+        if (drewSearch && pageNumber === currentPage)
+          queueScrollToHighlight(layer, "search");
       }
       // #86 — réapplique la pulsation du hover externe après recréation des marques.
       applyExternalHover(hoveredSignalId);
     }
   }
 
-  /** Re-rend la page courante (utilisé par zoom + resize), sans changer de page. */
-  function rerenderCurrent(): void {
-    if (pdfDoc) void renderPage(currentPage);
+  /** Re-renders only the mounted page window after zoom or highlight changes. */
+  function rerenderWindow(): void {
+    if (!pdfDoc) return;
+    void tick().then(() => {
+      for (const pageNumber of renderWindow) schedulePageRender(pageNumber);
+    });
   }
 
   // ResizeObserver : en régime fit-width, recalcule l'échelle et re-rend
@@ -610,12 +974,21 @@
       const w = viewerScrollEl?.clientWidth ?? lastWidth;
       if (Math.abs(w - lastWidth) < 1) return; // bruit sub-pixel
       lastWidth = w;
-      rerenderCurrent();
+      const nextScale = computeFitWidth(fitBaseWidth());
+      if (Math.abs(nextScale - scale) < 0.001) return;
+      fitWidthScale = nextScale;
+      scale = nextScale;
+      refreshScaledWindow();
     });
     resizeObserver.observe(viewerScrollEl);
   }
 
-  function drawBboxHighlight(layer: HTMLDivElement, w: number, h: number): void {
+  function drawBboxHighlight(
+    layer: HTMLDivElement,
+    w: number,
+    h: number,
+    shouldScroll: boolean,
+  ): void {
     if (!bbox) return;
     const [x0, y0, x1, y1] = bbox;
     const mark = document.createElement("div");
@@ -626,7 +999,7 @@
     mark.style.height = `${Math.abs(y1 - y0) * h}px`;
     applyHighlightColor(mark, SINGLE_SIGNAL_COLOR, true);
     layer.appendChild(mark);
-    queueScrollToHighlight(layer, null);
+    if (shouldScroll) queueScrollToHighlight(layer, null);
   }
 
   // Teinte SLATE désaturée pour les signaux HORS-FILTRE (#4) : présents mais
@@ -666,10 +1039,6 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  type PdfTextContent = Awaited<
-    ReturnType<import("pdfjs-dist").PDFPageProxy["getTextContent"]>
-  >;
-
   /**
    * Surligne UN signal sur la page courante. Retourne true si au moins une
    * marque a été dessinée. La couche texte (`content`) est chargée une seule
@@ -681,6 +1050,7 @@
     viewport: { width: number; height: number; transform: number[] },
     renderScale: number,
     signal: OverlaySignal,
+    searchOccurrence?: number,
   ): boolean {
     if (!signal.excerpt) return false;
     // Concatène le texte de la page + garde, pour chaque item, son offset.
@@ -703,7 +1073,10 @@
       pageText += " ";
     }
 
-    const match = findCitationInPage(pageText, signal.excerpt);
+    const isSearch = searchOccurrence !== undefined;
+    const match = isSearch
+      ? findTextOccurrenceInPage(pageText, signal.excerpt, searchOccurrence)
+      : findCitationInPage(pageText, signal.excerpt);
     if (!match) return false;
 
     // Surligne tout item qui chevauche AU MOINS une plage du match. La citation
@@ -731,17 +1104,19 @@
       const width = Math.max(item.width * renderScale, 4);
       const inFilter = signal.inFilter !== false;
       const mark = document.createElement("div");
-      mark.className = signal.current
-        ? "pdf-hl pdf-hl--current"
-        : inFilter
-          ? "pdf-hl"
-          : "pdf-hl pdf-hl--out";
-      mark.dataset.signalId = signal.id;
+      mark.className = isSearch
+        ? "pdf-search-hl"
+        : signal.current
+          ? "pdf-hl pdf-hl--current"
+          : inFilter
+            ? "pdf-hl"
+            : "pdf-hl pdf-hl--out";
+      if (!isSearch) mark.dataset.signalId = signal.id;
       mark.style.left = `${tx}px`;
       mark.style.top = `${ty - fontHeight}px`;
       mark.style.width = `${width}px`;
       mark.style.height = `${fontHeight * 1.15}px`;
-      applyHighlightColor(mark, signal.color, signal.current, inFilter);
+      applyHighlightColor(mark, signal.color, isSearch || signal.current, inFilter);
       layer.appendChild(mark);
       if (!firstMark) firstMark = mark;
       drewOne = true;
@@ -750,7 +1125,7 @@
     // Badge ID en surimpression, ancré au coin haut-gauche du 1er rectangle.
     // Affiché seulement quand un libellé est fourni (mode multi #84) — en mode
     // mono LOT 1 le libellé est vide, on n'ajoute pas de badge (non-régression).
-    if (drewOne && firstMark && signal.label.trim().length > 0) {
+    if (!isSearch && drewOne && firstMark && signal.label.trim().length > 0) {
       const inFilter = signal.inFilter !== false;
       const badge = document.createElement("span");
       // #4 — badge PLEIN pour les dans-filtre (couleur signal), badge CREUX
@@ -803,15 +1178,18 @@
 
   function queueScrollToHighlight(
     layer: HTMLDivElement,
-    prefer: "current" | null,
+    prefer: "current" | "search" | null,
   ): void {
     requestAnimationFrame(() => {
       const target =
-        (prefer === "current"
-          ? (layer.querySelector(".pdf-hl--current") as HTMLElement | null)
-          : null) ?? (layer.querySelector(".pdf-hl") as HTMLElement | null);
+        (prefer === "search"
+          ? (layer.querySelector(".pdf-search-hl") as HTMLElement | null)
+          : prefer === "current"
+            ? (layer.querySelector(".pdf-hl--current") as HTMLElement | null)
+            : null) ?? (layer.querySelector(".pdf-hl") as HTMLElement | null);
       if (target && viewerScrollEl) {
-        const top = target.offsetTop - viewerScrollEl.clientHeight / 3;
+        const slot = layer.closest<HTMLElement>(".pdf-page-slot");
+        const top = (slot?.offsetTop ?? 0) + target.offsetTop - viewerScrollEl.clientHeight / 3;
         viewerScrollEl.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
       }
     });
@@ -830,10 +1208,10 @@
   }
 
   function goPrev(): void {
-    if (currentPage > 1) void renderPage(currentPage - 1);
+    if (currentPage > 1) void scrollToPage(currentPage - 1, "smooth");
   }
   function goNext(): void {
-    if (currentPage < numPages) void renderPage(currentPage + 1);
+    if (currentPage < numPages) void scrollToPage(currentPage + 1, "smooth");
   }
 
   // ── Zoom (#85) ─────────────────────────────────────────────────────────────
@@ -842,7 +1220,8 @@
     const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, next));
     if (userScale !== null && Math.abs(clamped - userScale) < 0.001) return;
     userScale = clamped;
-    rerenderCurrent();
+    scale = clamped;
+    refreshScaledWindow();
   }
   function zoomIn(): void {
     setUserScale((userScale ?? scale) + 0.2);
@@ -854,7 +1233,9 @@
   function resetZoom(): void {
     if (userScale === null) return;
     userScale = null;
-    rerenderCurrent();
+    fitWidthScale = computeFitWidth(fitBaseWidth());
+    scale = fitWidthScale;
+    refreshScaledWindow();
   }
   /**
    * Zoom molette : Ctrl+molette (ergonomie standard des viewers/cartes), pour
@@ -907,7 +1288,7 @@
   let lastHideOutOfFilter = hideOutOfFilter;
   $: if (hideOutOfFilter !== lastHideOutOfFilter) {
     lastHideOutOfFilter = hideOutOfFilter;
-    if (pdfDoc) void renderPage(currentPage);
+    rerenderWindow();
   }
 
   // #91 — navigation INTRA-PDF pilotée par le parent : quand la prop `page`
@@ -919,7 +1300,7 @@
   $: if (page !== lastPageProp) {
     lastPageProp = page;
     if (pdfDoc && page && page >= 1 && page <= numPages && page !== currentPage) {
-      void renderPage(page);
+      void scrollToPage(page, "smooth");
     }
   }
 
@@ -934,9 +1315,19 @@
     // Ne re-rend que si la page ne va PAS changer (sinon double rendu) : le bloc
     // `page` ci-dessus s'en charge quand la page diffère.
     if (pdfDoc && (!page || page === currentPage)) {
-      void renderPage(currentPage);
+      schedulePageRender(currentPage);
     }
   }
+
+  onMount(() => {
+    // Le viewer PDF couvre la carte (backdrop plein) → l'attribution MapLibre
+    // n'a pas à rester visible tant qu'il est ouvert (elle « pop » à l'ouverture,
+    // cf. bug owner). On la masque via une classe body, retirée au démontage ;
+    // jamais désactivée quand la carte est visible (viewer fermé). Cf. règle
+    // `:global(body.pdf-viewer-open .maplibregl-ctrl-attrib)`.
+    document.body.classList.add("pdf-viewer-open");
+    return () => document.body.classList.remove("pdf-viewer-open");
+  });
 
   onDestroy(() => {
     // Invalide tout rendu/chargement en vol. On NE détruit PLUS le doc : il
@@ -944,8 +1335,9 @@
     // réouverture. Le détruire ici rendrait le doc caché inutilisable
     // (worker fermé) → crash à la prochaine ouverture du même rawRef. La
     // mémoire est bornée par l'éviction LRU du cache.
-    renderToken++;
     loadToken++;
+    resetDocumentSearch();
+    resetPageStack();
     resizeObserver?.disconnect();
     resizeObserver = null;
     pdfDoc = null;
@@ -1113,6 +1505,52 @@
         </div>
       {/if}
 
+      <form
+        class="pdf-text-search"
+        role="search"
+        aria-label="Recherche plein-texte dans le document"
+        on:submit|preventDefault={runSearch}
+      >
+        <Search class="h-3.5 w-3.5" aria-hidden="true" />
+        <input
+          type="search"
+          bind:value={searchQuery}
+          on:input={handleSearchInput}
+          placeholder="Rechercher…"
+          aria-label="Rechercher dans le document"
+          disabled={!pdfDoc}
+        />
+        <button
+          type="submit"
+          class="pdf-search-submit"
+          aria-label="Lancer la recherche"
+          disabled={!pdfDoc || searchPending || !searchQuery.trim()}
+        >
+          {searchPending ? "…" : "OK"}
+        </button>
+        <span class="pdf-search-counter" aria-live="polite">
+          {activeSearchMatchIndex >= 0 ? activeSearchMatchIndex + 1 : 0}/{searchMatches.length}
+        </span>
+        <button
+          type="button"
+          class="pdf-search-nav"
+          on:click={searchPrev}
+          disabled={searchMatches.length === 0}
+          aria-label="Résultat précédent"
+        >
+          <ChevronLeft class="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          class="pdf-search-nav"
+          on:click={searchNext}
+          disabled={searchMatches.length === 0}
+          aria-label="Résultat suivant"
+        >
+          <ChevronRight class="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </form>
+
       <span class="pdf-nav-spacer"></span>
 
       {#if hasNav && currentNavSignal}
@@ -1122,16 +1560,16 @@
           class:pdf-nav-toggle--on={hideOutOfFilter}
           on:click={toggleHideOutOfFilter}
           aria-pressed={hideOutOfFilter}
-          title={hideOutOfFilter
+          aria-label={hideOutOfFilter
             ? "Afficher les signaux hors-filtre du document"
             : "Masquer les signaux hors-filtre du document"}
+          title="Hors filtre"
         >
           {#if hideOutOfFilter}
             <EyeOff class="h-3.5 w-3.5" aria-hidden="true" />
           {:else}
             <Eye class="h-3.5 w-3.5" aria-hidden="true" />
           {/if}
-          <span>Hors-filtre</span>
         </button>
       {/if}
     </div>
@@ -1194,14 +1632,34 @@
         bind:this={viewerScrollEl}
         aria-label="Aperçu du document source"
         on:wheel={handleWheel}
+        on:scroll={handleViewerScroll}
       >
         <!-- #90 — pendant le chargement (ouverture OU switch de doc), le stage
              est masqué (visibility:hidden, garde sa place) pour ne PAS laisser
              le canvas de l'ANCIEN doc visible sous le waiter. Le scroller reste
              monté (mesures fit-width + ResizeObserver). -->
-        <div class="pdf-canvas-stage" class:is-loading={loading}>
-          <canvas bind:this={canvasEl}></canvas>
-          <div class="pdf-text-layer" bind:this={textLayerEl} aria-hidden="true"></div>
+        <div class="pdf-page-stack" class:is-loading={loading}>
+          {#each pageSlots as slot (slot.pageNumber)}
+            <div
+              class="pdf-page-slot"
+              data-page-number={slot.pageNumber}
+              data-rendered={renderedPages.has(slot.pageNumber) ? "true" : "false"}
+              style:width={`${slot.width}px`}
+              style:height={`${slot.height}px`}
+              use:registerPageSlot={slot.pageNumber}
+            >
+              {#if renderWindow.has(slot.pageNumber)}
+                <div class="pdf-canvas-stage" class:is-loading={loading}>
+                  <canvas use:registerCanvas={slot.pageNumber}></canvas>
+                  <div
+                    class="pdf-text-layer"
+                    use:registerTextLayer={slot.pageNumber}
+                    aria-hidden="true"
+                  ></div>
+                </div>
+              {/if}
+            </div>
+          {/each}
         </div>
         {#if loading}
           <div class="pdf-loading" role="status" aria-live="polite">
@@ -1345,6 +1803,14 @@
 </div>
 
 <style>
+  /* Le viewer PDF couvre la carte → on masque l'attribution MapLibre pendant
+     qu'il est ouvert (le contrôle `maplibregl-ctrl-attrib` « pop » à l'ouverture,
+     par-dessus l'overlay). Elle réapparaît à la fermeture (classe body retirée) ;
+     JAMAIS désactivée quand la carte est visible → contrainte attribution OK. */
+  :global(body.pdf-viewer-open .maplibregl-ctrl-attrib) {
+    display: none !important;
+  }
+
   .pdf-overlay-backdrop {
     position: absolute;
     inset: 0;
@@ -1464,18 +1930,70 @@
     flex: 1;
   }
 
+  .pdf-text-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    height: 1.9rem;
+    padding-left: 0.45rem;
+    border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-default, #fff);
+    color: var(--st-semantic-text-muted, #64748b);
+  }
+
+  .pdf-text-search input {
+    width: 8.5rem;
+    min-width: 4rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-size: 0.72rem;
+  }
+
+  .pdf-search-submit,
+  .pdf-search-nav {
+    display: inline-flex;
+    height: 1.55rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.65rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .pdf-search-submit:disabled,
+  .pdf-search-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .pdf-search-counter {
+    min-width: 2.3rem;
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+
+  /* Toggle « hors-filtre » : bouton icône CARRÉ compact (l'icône œil seule ; le
+     libellé, qui débordait en bout de barre, est passé en tooltip/aria-label).
+     Dimensions calées sur les autres boutons de la barre PDF. */
   .pdf-nav-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    justify-content: center;
+    width: 1.7rem;
     height: 1.7rem;
-    padding: 0 0.55rem;
+    padding: 0;
     border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
     border-radius: var(--st-radius-sm, 4px);
     background: var(--st-semantic-surface-default, #fff);
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.7rem;
-    font-weight: 600;
     cursor: pointer;
   }
 
@@ -1734,12 +2252,27 @@
     background: var(--st-semantic-surface-sunken, #e2e8f0);
   }
 
-  .pdf-canvas-stage {
-    position: relative;
-    margin: 0 auto;
+  .pdf-page-stack {
+    display: flex;
     width: max-content;
-    max-width: 100%;
+    min-width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .pdf-page-slot {
+    position: relative;
+    flex: none;
+    overflow: hidden;
+    background: #fff;
     box-shadow: 0 2px 12px rgb(15 23 42 / 0.18);
+    scroll-margin-top: 0.75rem;
+  }
+
+  .pdf-canvas-stage {
+    position: absolute;
+    inset: 0;
   }
 
   .pdf-canvas-stage canvas {
@@ -1753,18 +2286,28 @@
     visibility: hidden;
   }
 
+  .pdf-page-stack.is-loading .pdf-page-slot {
+    visibility: hidden;
+  }
+
   .pdf-text-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
   }
 
-  .pdf-text-layer :global(.pdf-hl) {
+  .pdf-text-layer :global(.pdf-hl),
+  .pdf-text-layer :global(.pdf-search-hl) {
     position: absolute;
     /* La couleur (background/outline) est appliquée en inline par signal pour
        le multi-signaux (#84) — chaque signal a sa teinte. */
     mix-blend-mode: multiply;
     border-radius: 2px;
+  }
+
+  .pdf-text-layer :global(.pdf-search-hl) {
+    z-index: 6;
+    mix-blend-mode: multiply;
   }
 
   /* Le surlignage du signal COURANT passe au-dessus des autres. */

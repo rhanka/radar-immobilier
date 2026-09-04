@@ -1,0 +1,2227 @@
+{
+  "contract": "2b-proof-liveness-manifest/v1",
+  "source": "recette PROOF_URLS_SERVED.json (proofs[]) — recette-proof-urls-served/v1",
+  "source_note": "champ date/serve = dump7298 prod ~08-06 ; classif = isPublicCanonicalUrl servi b4b351dae",
+  "derived_at": "2026-08-08",
+  "refresh": "Régénérer depuis recette PROOF_URLS_SERVED.json quand l extraction servie change (scripts/2b-proof-liveness/README.md).",
+  "scope": "orphelines (hasArchive=false = seul vecteur 404-nu) + object-storage-public (#2b re-autorisées). Les clean-avec-archive ne sont pas balayés (repli same-origin borne leur risque).",
+  "counts": {
+    "total": 316,
+    "critical_no_archive": 16,
+    "monitored_object_storage": 300
+  },
+  "items": [
+    {
+      "sourceUrl": "https://brigham.ca/wp-content/uploads/PV-2025-12-22-.pdf",
+      "citySlug": "brigham",
+      "municipality": "brigham",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://brigham.ca/wp-content/uploads/PV-2026-03-03.pdf",
+      "citySlug": "brigham",
+      "municipality": "brigham",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "http://www.ilecadieux.ca/docs/fichiers_documents/342.pdf",
+      "citySlug": "lile-cadieux",
+      "municipality": "lile-cadieux",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "http://www.ilecadieux.ca/docs/fichiers_documents/344.pdf",
+      "citySlug": "lile-cadieux",
+      "municipality": "lile-cadieux",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.mmsg.ca/citoyens/informations/seance-d-information-ouverte-a-tous---zonage-terrain-eglise-et-presbytere",
+      "citySlug": "mont-saint-gregoire",
+      "municipality": "mont-saint-gregoire",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.mmsg.ca/municipalite/seances-du-conseil-municipal/ordre-du-jour",
+      "citySlug": "mont-saint-gregoire",
+      "municipality": "mont-saint-gregoire",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.mmsg.ca/municipalite/seances-du-conseil-municipal/proces-verbaux",
+      "citySlug": "mont-saint-gregoire",
+      "municipality": "mont-saint-gregoire",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.mmsg.ca/municipalite/seances-du-conseil-municipal/rediffusion-des-seances-du-conseil",
+      "citySlug": "mont-saint-gregoire",
+      "municipality": "mont-saint-gregoire",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://municipalite.oka.qc.ca/mairie/seances-publiques-du-conseil-municipal/",
+      "citySlug": "oka",
+      "municipality": "oka",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saintedouard.ca/municipalite/vie-democratique/seances-du-conseil",
+      "citySlug": "saint-edouard",
+      "municipality": "saint-edouard",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saint-lambert.ca/files/upload/cod_adm_2024_regl_2022-197_seances.pdf",
+      "citySlug": "saint-lambert",
+      "municipality": "saint-lambert",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saint-liguori.com/fichiersUpload/fichiers/20260604202540-img-9978.jpeg",
+      "citySlug": "saint-liguori",
+      "municipality": "saint-liguori",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saint-roch-ouest.ca/fichiersUpload/fichiers/20260324135317-01-2026.pdf",
+      "citySlug": "saint-roch-ouest",
+      "municipality": "saint-roch-ouest",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saint-roch-ouest.ca/fichiersUpload/fichiers/20260324135423-02-2026.pdf",
+      "citySlug": "saint-roch-ouest",
+      "municipality": "saint-roch-ouest",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saint-roch-ouest.ca/fichiersUpload/fichiers/20260430094737-03-2026.pdf",
+      "citySlug": "saint-roch-ouest",
+      "municipality": "saint-roch-ouest",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://www.saint-roch-ouest.ca/fichiersUpload/fichiers/20260520133710-04-2026.pdf",
+      "citySlug": "saint-roch-ouest",
+      "municipality": "saint-roch-ouest",
+      "hasArchive": false,
+      "subtype": "clean"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/2012-02-06-proces-verbal.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/2012-03-05-proces-verbal.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/2012-06-04-proces-verbal.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2013-02-04.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2013-06-03.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2013-09-09.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2014-02-03.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2014-05-05.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2014-06-02.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2014-10-06.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2014-11-03.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2014-12-01.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2015-01-12.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2015-03-02.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2015-06-01.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2015-08-10.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2015-10-05.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2015-12-07.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2016-04-04.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2018-03-05.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2018-07-09.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2018-08-13.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2018-09-10.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2018-10-01.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2019-04-01.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2019-12-02.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2020-02-03.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2020-03-02.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2021-07-05.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2021-09-13.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2021-10-04.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2021-12-06.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2022-05-02_A_18H_ASSEMBLEE_PUBLIQUE_DE_CONSULTATION.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2022-07-04.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PROCES-VERBAL_DU_2022-08-11_a_18h30.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PV%20ADOPTE%20SIGNE(2).pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/PVdocx.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/Proces-verbal_du_2024-01-15.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/baie-des-sables/_publication/fichiers/Proces-verbal_du_2024-05-06.pdf",
+      "citySlug": "baie-des-sables",
+      "municipality": "baie-des-sables",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2025-06-02%20PV%20sance%20ordinaire%20-%20Copie%20finale.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2025-07-07%20PV%20sance%20ordinaire%20-%20Copie%20finale.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2025-08-04%20PV%20sance%20ordinaire%20-%20Copie%20finale.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2025-09-02%20PV%20sance%20ordinaire.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2025-10-01%20PV%20sance%20ordinaire.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2026-03-02%20PV%20sance%20ordinaire.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/2026-04-07%20PV%20sance%20ordinaire(1).pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/PV%202024-08-05%20VERSION%20FINALE.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/PV%202024-12-02.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/PV%202025-05-05%20Projet%20final(1).pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/PV05-05-2014.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/batiscan/_publication/fichiers/PV07avr2014.pdf",
+      "citySlug": "batiscan",
+      "municipality": "batiscan",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/13-decembre-(seance-extraordinaire)-20-h.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/16-aout-(seance-reguliere).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/16-janvier-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/17-janvier-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/17-octobre-(seance-extraordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/18-janvier-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/1er-mai-(seance-ordinaire)(1).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/2-decembre-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/2-octobre-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/3-fevrier-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/3-juillet-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/3-mai-(seance-ordinaire)(1).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/3-octobre-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/4-mars-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/5-fevrier-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/6-mars-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/7-fevrier-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/7-novembre-(seance-ordinaire).pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%2019%20janvier%20rgulire%20-%20INTERNET.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%201er%20dcembre%20%20-%20rgulire%20INTERNET%20-%20Corrig.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%204%20mai%20rgulire%20-%20INTERNET.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%207%20avril%20-%20extraordinaire%20-%20Contribuables.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%20Aout%2011%20-%20rgulire%20avec%20correction%20INTERNET.pdf",
+      "citySlug": "beaupre",
+      "municipality": "beaupre",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/10-2017-02-octobre-2-2017.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/2017-01-11-Session-du-11-Janvier-2017.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/2022-03-10-seance-ordinaire.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/2022-10-13-seance-ordinaire-2.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/P-V-2014-07-09.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/P-V-2015-08-14.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/P-V-2015-09-09-entriner.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/PV-2016-05-11.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/PV-2016-08-10-entriner-2.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/sance-ordinaire-12-mai-2021-huis-clos.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/sance-ordinaire-17-aout-2021.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/boileau/_publication/fichiers/sance-ordinaire-20-janvier-2021-huis-clos.pdf",
+      "citySlug": "boileau",
+      "municipality": "boileau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20aot%202025_web.pdf",
+      "citySlug": "bowman",
+      "municipality": "bowman",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%2012%20mai%202026_WEB.pdf",
+      "citySlug": "bowman",
+      "municipality": "bowman",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/bowman/_publication/fichiers/PROCES%20VERBAL%20-%209%20septembre%202025_WEB.pdf",
+      "citySlug": "bowman",
+      "municipality": "bowman",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/20221219(1).pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/20221219.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2023-04-17.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2024-02-19.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2024-03-18.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2024-04-15.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2024-05-27.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2024-06-17.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2024-08-19.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-02-17.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-05-20.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-06-16.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-07-21(1).pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-08-25.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-09-15.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-10-02.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-11-17.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2025-12-15.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-01-19.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-02-16.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-03-16.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/2026-04-20.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/pv20201019.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_publication/fichiers/pv20201116.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/11_novembre__extraordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/15_juin.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/15_mars.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/16_juin__extraordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/17_d_cembre.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/1_d_cembre__extraordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/20_d_cembre__extraordinaire_et_ordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/20_juillet.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/20_octobre.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/21_d_cembre__ordinaire_et__extraordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/22_avril.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/22_janvier.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/22_mars.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/23_ao_t.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/23_octobre.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/24_f_vrier.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/24_janvier.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/25_ao_t.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/25_juin.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/26_ao_t.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/26_juin(1).pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/27_ao_t.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/27_juin(1).pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/28_avril.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/2_octobre.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/8_novembre__extraordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv-20150727.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv-20160329.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv-20160418-extraordinaire.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv-20160509-extraordinaire.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv-20160725.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv_20110718.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv_2012-03-19.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv_2012-06-18.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv_2013-01-28.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv_20150126.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/chibougamau/_structure/fichiers/pv_20150504__extraordinaire_.pdf",
+      "citySlug": "chibougamau",
+      "municipality": "chibougamau",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_evenements/fichiers/ODJ%20ordinaire%2013%20janvier%202026(3).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_evenements/fichiers/ODJ%20ordinaire%205%20mai%202026(2).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/01-12-janvier-2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/02-2-fvrier-2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/03-10-fvrier-2021-sance-extraordinaire(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/04-2-mars-2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/05-5-mai-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/07-6-avril-2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/08-7-juillet-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/09-4-mai-2021(2).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/11-8-juin-2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/12%20ODJ%20conseil%20du%202%20juin%202026.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/13-12-juillet-2021-sance-extraordinaire(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/13-Procs-verbal-du-12-juillet-2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/14-Procs-verbal-de-la-sance-du-6-juillet-2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/14-janvier-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/14_10aout_2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/15_14septembre_2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/16_5octobre_2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/1PV_11_janvier2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/1er-septembre-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2-juin-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-05-02-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-06-06-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-07-04-PV-1.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-08-08-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-09-05-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-10-03-PV-1.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-11-07-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-12-05-PV-1.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2023-12-18-PVordinaire-1.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-01-09-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-04-09-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-05-07-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-07-18-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-08-06-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-11-05-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-12-03-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/2024-12-16-PV.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/20_14_decembre_2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/3-mars-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/3PV_8_fevrier2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/5PV_8_mars2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/7-avril-2020(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/8PV_10_mai2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV%20ordinaire%201%20octobre%202025.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV%20ordinaire%202%20septembre%202025(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV%20ordinaire%202025-12-02.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV%20ordinaire%203%20fvrier%202026.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV%20ordinaire%205%20aot%202025(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV%20ordinaire%207%20avril%202026.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV-2-juillet-2024.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV-3-septembre-2024-ordinaire.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV-ordinaire-1-avril-2025.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV-ordinaire-14-janvier-2025.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV-ordinaire-4-mars-2025.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV-seance-ordinaire-4-fevrier-2025.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV_11-octobre-2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV_13_septembre2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV_27juin2023.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV_4_avril2023.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV_6_septembre2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/PV_7_fevrier2023.pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/Periode_questions_14-12-2021(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/dunham/_publication/fichiers/Proces-verbal-du-8-novembre2022(1).pdf",
+      "citySlug": "dunham",
+      "municipality": "dunham",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/grenville/_publication/fichiers/MAI(3).pdf",
+      "citySlug": "grenville",
+      "municipality": "grenville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/grenville/_publication/fichiers/PROCES-VERBAUX-2015.pdf",
+      "citySlug": "grenville",
+      "municipality": "grenville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/grenville/_publication/fichiers/PROCES-VERBAUX-2017.pdf",
+      "citySlug": "grenville",
+      "municipality": "grenville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/grenville/_publication/fichiers/PROCES-VERBAUX-2019.pdf",
+      "citySlug": "grenville",
+      "municipality": "grenville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/grenville/_publication/fichiers/PROCES-VERBAUX-2020.pdf",
+      "citySlug": "grenville",
+      "municipality": "grenville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/grenville/_publication/fichiers/PROCeS-VERBAUX-2018.pdf",
+      "citySlug": "grenville",
+      "municipality": "grenville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-11-mai-2021.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-12-septembre-2022.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-13-octobre-2020doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-14-septembre-2020.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-15-novembre-2021.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-16-juillet-2020.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-17-novembre-2022.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-1er-fevrier-2021.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-1er-mai-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-2-mai-2022.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-3-avril-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-3-juillet-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-5-juin-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-5-octobre-2020.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-6-avril-2021.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-6-decembre-2021.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-6-fevrier-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-6-mars-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-6-novembre-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-7-juin-2021.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-9-janvier-2023.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Proces-verbal-du-9-juin-2022.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal%20du%2010%20novembre%202025.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal%20du%2012%20janvier%202026.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-13-janvier-2020doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-16-avril-2019doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-1er-avril-2019.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-1er-juin-2020.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-1er-mai-2017.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-2-dcembre-2019.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-2-fvrier-2015.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-2-juillet-2019.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-2-septembre-2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-29-juin-2020doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-3-avril-2017.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-3-dcembre-2018doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-3-juin-2019doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-3-septembre-2019doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-30-mai-2016.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-4-aot-2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-4-fvrier-2019doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-4-mai-2015.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-4-mars-2019.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-4-novembre-2019(1).pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-5-dcembre-2016.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-7-dcembre-2015doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-7-juillet-2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/Procs-verbal-du-7-octobre-2019doc.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_13janvier2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_14janvier2013.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_17decembre2012.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_1octobre2013.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_21juin2010.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_24mars2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_2mai2011.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_3aout2009.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_3fevrier2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_3mars2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_4fevrier2013.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_4juin2012.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_5aout2013.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_5mars2012.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_5novembre2012.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_6fevrier2012.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_6juin2011.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_7avril2014.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_7mars2011.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_9janvier2012.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_9novembre2009.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/laurierville/_publication/fichiers/pv_novembre2011.pdf",
+      "citySlug": "laurierville",
+      "municipality": "laurierville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://ville-mont-joli-qc-ca.s3.bhs.io.cloud.ovh.net/2026/01/pv-so-19012026-vf.pdf",
+      "citySlug": "mont-joli",
+      "municipality": "mont-joli",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://saintamable-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/04/saint-amable-proces-verbal-seance-ordinaire-7-avril-2026.pdf",
+      "citySlug": "saint-amable",
+      "municipality": "saint-amable",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://saintamable-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/05/saint-amable-proces-verbal-seance-ordinaire-10-mars-2026.pdf",
+      "citySlug": "saint-amable",
+      "municipality": "saint-amable",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://saintamable-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/06/saint-amable-seance-ordinaire-5-mai-2026-proces-verbal.pdf",
+      "citySlug": "saint-amable",
+      "municipality": "saint-amable",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://saintbruno-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/01/pv-2026-01-20-1.pdf",
+      "citySlug": "saint-bruno-de-montarville",
+      "municipality": "saint-bruno-de-montarville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://saintbruno-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/02/odj-sc-2026-02-04-extraordinaire.pdf",
+      "citySlug": "saint-bruno-de-montarville",
+      "municipality": "saint-bruno-de-montarville",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://valdesmonts-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/01/cm-26-01-27.pdf",
+      "citySlug": "val-des-monts",
+      "municipality": "val-des-monts",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    },
+    {
+      "sourceUrl": "https://valdesmonts-site.s3.ca-central-1.amazonaws.com/wp-content/uploads/2026/02/ordre-du-jour-24-fevrier-2026.pdf",
+      "citySlug": "val-des-monts",
+      "municipality": "val-des-monts",
+      "hasArchive": true,
+      "subtype": "object-storage-public"
+    }
+  ]
+}

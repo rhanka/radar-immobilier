@@ -63,6 +63,25 @@ name: Build & push images
 # Deployments scaled to 0, `kubectl set image` + `rollout status` both SUCCEED
 # instantly and the pipeline goes green while production is untouched.
 #
+# POST-DEPLOY PROOF / PUBLIC PATH (2026-08-02): the pre-flight above proves the
+# KUBECONFIG targets the right cluster, but not that the public endpoint users
+# actually hit (immo.sent-tech.ca) still resolves to THAT cluster — a DNS/ingress
+# cutover can drift independently. The `deploy` job now ends with a BLOCKING
+# post-deploy proof by TLS certificate serial (poc-k8s recommendation, mirrors
+# transpose-cv / pokemon-cards): it compares the serial served via NORMAL DNS
+# resolution against the serial served when the connection is FORCED to the
+# target cluster's LoadBalancer IP (SNI preserved). Equal serials ⇒ public DNS
+# points at the cluster this run deployed to. This is RENEWAL-ROBUST by
+# construction: it never hardcodes a serial (which would break on every Let's
+# Encrypt renewal ~60d) — it compares live-vs-live. A code HTTP status
+# discriminates nothing (both clusters serve the same app); only the cert serial
+# does. Cert serials are public identifiers, never credentials — safe to print.
+# Both inputs are NON-SECRET repo variables (fallbacks hardcoded, guard never
+# silently off): `PUBLIC_ENDPOINT_HOST` (default immo.sent-tech.ca) and
+# `EXPECTED_OVH_LB_IP` (default 51.79.100.177, the OVH BHS5 Traefik LB).
+#   gh variable set PUBLIC_ENDPOINT_HOST --body 'immo.sent-tech.ca'
+#   gh variable set EXPECTED_OVH_LB_IP  --body '51.79.100.177'
+#
 # To roll back or deploy by hand, the same commands still work with a full
 # kubeconfig:
 #   kubectl -n radar-immobilier apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
@@ -74,6 +93,10 @@ name: Build & push images
 on:
   push:
     branches: [main]
+    # CD refonte Lot 3: a semver tag v* on a main commit promotes that commit's
+    # already-built images to prod by digest (job promote-prod). `v[0-9]*` is
+    # semver-only — it will not match vanity tags like `validated`/`vanity`.
+    tags: ['v[0-9]*']
   workflow_dispatch:
     inputs:
       tag:
@@ -96,6 +119,11 @@ jobs:
     name: Build & push ${{ matrix.service }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # CD refonte Lot 3 (build-once): a v* TAG must NOT rebuild — promote-prod
+    # promotes the existing main-built digest. Skip build-push on tag refs so the
+    # promoted image is exactly the CI-validated main build (main push + dispatch
+    # still build normally).
+    if: github.ref_type != 'tag'
     permissions:
       contents: read
       packages: write
@@ -109,6 +137,13 @@ jobs:
           - service: ui
             image: radar-ui
             dockerfile: ui/Dockerfile
+          # Grounding image (citations) — PUBLISH-ONLY (plan 4.4.3): the in-cluster
+          # Job pulls the host-staged candidate, hash-verifies it, and publishes to
+          # the preprod MinIO. No LLM / no mesh access / no pdftotext (all host-side).
+          # Built + pushed to SCW like radar-api for digest-pin.
+          - service: grounding
+            image: radar-grounding
+            dockerfile: deploy/grounding/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -172,6 +207,13 @@ jobs:
       # the source changes. The cache key is bound to the layer contents (Dockerfile
       # ordering), so a stale bundle is impossible BY CONSTRUCTION — no global --no-cache.
       - name: Build & push ${{ matrix.service }}
+        # id: build exposes steps.build.outputs.digest — the immutable
+        # sha256 manifest digest this push produced. Recorded in the summary
+        # below for traceability; the tag->prod `promote-prod` job (CD refonte
+        # Lot 3) RE-RESOLVES the digest of radar-<svc>:<sha7> from the registry
+        # at promote time (authoritative, survives job/run boundaries), so no
+        # cross-run state is threaded here — this capture is trace + fallback.
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -223,6 +265,7 @@ jobs:
             echo ""
             echo '```'
             echo "${{ steps.tags.outputs.tags }}"
+            echo "digest: ${{ steps.build.outputs.digest }}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -231,11 +274,23 @@ jobs:
     needs: build-push
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Only roll the live cluster on pushes to main. PRs / feature-branch
+    # LEGACY main->prod. Only rolls prod on pushes to main; PRs / feature-branch
     # dispatches build & push images but never deploy.
-    if: github.ref == 'refs/heads/main'
+    # CUTOVER SWITCH (CD refonte): this legacy path is DISARMED by the SAME
+    # variable that ARMS preprod-first — `vars.PREPROD_CD_ENABLED == 'true'`.
+    # So one atomic flip (`gh variable set PREPROD_CD_ENABLED true`) swaps the
+    # prod path from `main->prod` (this job) to `main->preprod` + `tag->prod`
+    # (deploy-preprod + promote-prod) with NO 2-path window, and an instant
+    # rollback (`--body false`/unset restores this job). While the var is unset
+    # (default), main->prod keeps working exactly as before merge — so this PR
+    # is safe to merge ahead of the owner cutover GO; the GO is the var flip.
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED != 'true'
     permissions:
       contents: read
+      # Lets the deployment-notification steps record a GitHub Deployment +
+      # success/failure status for this roll (auditable deploy history + served
+      # sha, no external secret). See "Create GitHub deployment" below.
+      deployments: write
     env:
       NAMESPACE: radar-immobilier
     steps:
@@ -305,6 +360,37 @@ jobs:
           kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
           echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
 
+      # Record a GitHub Deployment for this roll (env=production, ref=sha) —
+      # created only AFTER the pre-flight passes, so a wrong-cluster refusal
+      # never leaves a phantom "production deployment". The success/failure
+      # status is set at the end of the job (see the two steps after Summary),
+      # giving an auditable deploy history + served sha with NO external secret.
+      - name: Create GitHub deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              required_contexts: [],
+              auto_merge: false,
+              transient_environment: false,
+              production_environment: true,
+              description: 'CD build-push-images → radar-immobilier',
+            });
+            // A 202 (queued/merged-branch) response carries a message, not a
+            // deployment object — degrade gracefully so the roll is never blocked
+            // by the notification bookkeeping.
+            if (!dep.data || dep.data.id === undefined) {
+              core.warning(`createDeployment returned no id: ${dep.data && dep.data.message ? dep.data.message : 'unknown'}`);
+              core.setOutput('id', '');
+            } else {
+              core.setOutput('id', String(dep.data.id));
+            }
+
       - name: Apply immo-mcp declarative config
         # MUST run before "Roll deployments to pushed sha": see the file header
         # ("CONFIG DURABILITY") for why the ordering (apply, then set-image)
@@ -362,6 +448,45 @@ jobs:
             fi
           fi
 
+      # POST-DEPLOY PROOF (2026-08-02) — see "POST-DEPLOY PROOF / PUBLIC PATH" in
+      # the file header. Blocking, renewal-robust, live-vs-live TLS serial compare:
+      # proves the public endpoint (immo.sent-tech.ca) is served by the SAME
+      # cluster this run just rolled. Runs AFTER the rollouts so it attests the
+      # freshly-deployed state; needs no kubeconfig (pure network). Cert serials
+      # are public identifiers — printing them leaks nothing.
+      - name: Post-deploy — prove public endpoint serves the deployed cluster (TLS serial)
+        env:
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_HOST:-immo.sent-tech.ca}"
+          lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
+          if [ -z "${PUBLIC_HOST:-}" ] || [ -z "${EXPECTED_LB_IP:-}" ]; then
+            echo "::warning title=Post-deploy proof using built-in defaults::set repo variables PUBLIC_ENDPOINT_HOST / EXPECTED_OVH_LB_IP to make the public-path guard explicit (falling back to ${host} / ${lb_ip})."
+          fi
+          # Read the cert serial for a given connect target, keeping the public
+          # SNI so the LB selects the same virtual host. `openssl x509 -serial`
+          # emits `serial=XXXX`; strip the label.
+          serial_of() {
+            echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null \
+              | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2
+          }
+          sn_dns="$(serial_of "$host")"
+          sn_lb="$(serial_of "$lb_ip")"
+          echo "public host      : ${host}"
+          echo "target LB IP     : ${lb_ip}"
+          echo "serial via DNS   : ${sn_dns:-<none>}"
+          echo "serial via LB IP : ${sn_lb:-<none>}"
+          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ]; then
+            echo "::error title=Post-deploy TLS proof — unreachable::could not read a cert serial (host=${host} lb=${lb_ip}). Rollouts succeeded but the PUBLIC path is UNVERIFIED — investigate before trusting this deploy."
+            exit 1
+          fi
+          if [ "$sn_dns" != "$sn_lb" ]; then
+            echo "::error title=Post-deploy TLS proof FAILED — public path drifted::DNS for ${host} does NOT serve the target LB ${lb_ip} (serial ${sn_dns} vs ${sn_lb}). The endpoint users hit is NOT the cluster this run deployed to. Fix DNS/ingress before trusting this deploy."
+            exit 1
+          fi
+          echo "post-deploy proof OK — ${host} is served by the deployed cluster (${lb_ip}); TLS serial ${sn_dns}"
       # Post-deploy PROOF that the rolled-out sha is actually SERVED — not just
       # that the ReplicaSet rolled. `rollout status` above goes green even
       # against a stale/wrong cluster (see the pre-flight rationale in the file
@@ -407,6 +532,29 @@ jobs:
             sleep 10
           done
 
+      # Both post-deploy proofs (TLS serial = right cluster, served sha = right
+      # build) passed → mark the GitHub Deployment success, with the public URL
+      # and the served sha. Guarded on the deployment id so it no-ops if the
+      # create step degraded (202) rather than failing the roll.
+      - name: Deployment status — success
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+        with:
+          script: |
+            const host = process.env.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'success',
+              environment_url: `https://${host}`,
+              description: `served sha ${process.env.SHA} verified live (pre-flight + TLS serial + served-sha)`,
+            });
+
       - name: Summary
         if: always()
         run: |
@@ -419,3 +567,777 @@ jobs:
             echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Any deploy-step failure (pre-flight, rollout, TLS serial, served sha) →
+      # mark the GitHub Deployment failure. `if: failure()` fires on any prior
+      # failure; the id guard skips it when the deployment was never created
+      # (e.g. pre-flight refused a wrong cluster before the create step).
+      - name: Deployment status — failure
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'failure',
+              description: `deploy ${process.env.SHA} failed (rollout OR post-deploy proof) — public path unverified`,
+            });
+
+  # ===========================================================================
+  # CD refonte — Lot 2 : main -> PREPROD (radar-immobilier-preprod).
+  # See tmp/handoff/preprod/DESIGN-CD-REFONTE.md. Mirrors the `deploy` job above
+  # (main -> prod) STEP-FOR-STEP so the eventual tag->prod cutover (Lot 4) is a
+  # small refactor, with these DELIBERATE deltas:
+  #   - namespace radar-immobilier-preprod + preprod-scoped SA kubeconfig
+  #     (secret KUBE_CONFIG_DATA_PREPROD, exported by poc-k8s from
+  #     deploy/k8s/11-ci-deployer-preprod-rbac.yaml);
+  #   - NO "Apply immo-mcp declarative config" step (DESIGN §2.8 — drift
+  #     self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
+  #     and the preprod deployer Role is deployments-only, it cannot apply a
+  #     ConfigMap); and no radar-immo-mcp roll (preprod has no MCP connector);
+  #   - the GitHub Deployment is recorded as environment=preprod (transient),
+  #     never production.
+  # Runs ALONGSIDE the legacy `deploy` job (main -> prod) until the tag->prod
+  # cutover (Lot 4, owner GO S00 removes the prod-on-main path). Same-host caveat:
+  # prod & preprod share BOTH the OVH apiserver host AND the OVH LB IP, so the
+  # pre-flight host check and the TLS-serial proof cannot tell the two apart —
+  # the SA namespace scope is the real deploy frontier (DESIGN §2.4), and the
+  # served-sha assert on the PREPROD URL is what proves the preprod build.
+  # ===========================================================================
+  deploy-preprod:
+    name: Deploy to preprod cluster
+    needs: build-push
+    runs-on: ubuntu-latest
+    # 45min: the §6 "Refresh diag Job" step polls up to 1800s (30min) and the
+    # rollouts take ~6min + the post-deploy proofs ~3min — the old 10min timeout
+    # cancelled the JOB before the diag poll could finish (measured on #586/#592,
+    # ~10min15s each). Must exceed the diag poll deadline + the rollout/proof time.
+    # (A future scaled diag — full city set vs the delson smoke — may need both
+    # the poll deadline AND this timeout raised further; i-infra co-vals.)
+    timeout-minutes: 45
+    # Only roll preprod on pushes to main. PRs / feature-branch dispatches build
+    # & push images but never deploy.
+    # ARMING SWITCH (decouples merge from activation): this job stays SKIPPED
+    # until the repo variable PREPROD_CD_ENABLED == 'true'. poc-k8s flips it ON
+    # only AFTER it has (1) applied deploy/k8s/11-ci-deployer-preprod-rbac.yaml
+    # and (2) created the KUBE_CONFIG_DATA_PREPROD secret — so merging this PR
+    # can never red a main push against a not-yet-provisioned preprod deployer.
+    # (`gh variable set PREPROD_CD_ENABLED --body true`.) Variables are allowed
+    # in `if:`; secrets are not — hence a variable, not the secret itself.
+    if: github.ref == 'refs/heads/main' && vars.PREPROD_CD_ENABLED == 'true'
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      NAMESPACE: radar-immobilier-preprod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: vars
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+
+      - name: Configure kubeconfig (preprod)
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          # Accept the secret in either raw YAML or base64-encoded form.
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      # PRE-FLIGHT — identical guard to prod, but the positive proof runs in the
+      # PREPROD namespace. prod & preprod share the OVH apiserver host, so the
+      # host check alone cannot distinguish them: the SA (namespace-scoped) being
+      # able to `get deploy radar-api radar-ui` INSIDE radar-immobilier-preprod is
+      # the real frontier (DESIGN §2.4). The kubeconfig is never printed.
+      - name: Pre-flight — assert target cluster + preprod namespace
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-}"
+          if [ -z "$expected" ]; then
+            expected="$DEFAULT_HOST"
+            echo "::warning title=Pre-flight using built-in default::repo variable EXPECTED_KUBE_APISERVER_HOST is unset — falling back to ${DEFAULT_HOST}."
+          fi
+          # `kubectl config view` WITHOUT --raw redacts credentials; we read ONLY
+          # the apiserver host (a cluster id, never a credential).
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — deploy refused::kubeconfig targets '${host:-<none>}' but this repo deploys to '${expected}'. Nothing was applied."
+            exit 1
+          fi
+          # Positive proof ON the preprod namespace: the preprod-scoped SA must
+          # see the two live deployments. Reachable only by that SA => env-frontier.
+          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
+
+      - name: Create GitHub deployment (preprod)
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'preprod',
+              required_contexts: [],
+              auto_merge: false,
+              transient_environment: true,
+              production_environment: false,
+              description: 'CD build-push-images → radar-immobilier-preprod',
+            });
+            if (!dep.data || dep.data.id === undefined) {
+              core.warning(`createDeployment returned no id: ${dep.data && dep.data.message ? dep.data.message : 'unknown'}`);
+              core.setOutput('id', '');
+            } else {
+              core.setOutput('id', String(dep.data.id));
+            }
+
+      # BACKUP-BEFORE-RELEASE (§1(a), ruling i-infra B′) — take a FAIL-CLOSED
+      # pg_dump of the preprod DB to an EXTERNAL S3 bucket BEFORE rolling the
+      # image, so a failed backup ABORTS the release (no un-backed-up roll). The
+      # runner (deploy/ci/run-db-backup.sh) applies an in-cluster Job that dumps
+      # as a NETWORK CLIENT (pg_dump -h radar-postgres, NOT kubectl exec) and
+      # uploads via s5cmd, then polls it fail-closed; retention prunes runner-side
+      # (S3-only). The CI SA needs only `batch/jobs` — no pods/exec, no secret-read.
+      #
+      # ARMING SWITCH (decouple merge from activation — same pattern as
+      # PREPROD_CD_ENABLED): both steps stay SKIPPED until the repo variable
+      # BACKUP_BEFORE_RELEASE_ENABLED == 'true'. The owner flips it ON only AFTER
+      # provisioning (1) the external bucket + RW cred (repo vars BACKUP_S3_BUCKET/
+      # ENDPOINT[/REGION] + secrets BACKUP_S3_ACCESS_KEY/BACKUP_S3_SECRET_KEY for
+      # runner-side retention), (2) the in-cluster S3 secret radar-backup-s3-
+      # credentials the Job's upload container reads, and (3) the `batch/jobs` RBAC
+      # on the preprod deployer SA (deploy/k8s/11-ci-deployer-preprod-rbac.yaml).
+      # So merging this can NEVER red a main push against not-yet-provisioned
+      # backup infra. Once armed, the fail-closed gate is live: no preprod roll
+      # without a fresh backup.
+      - name: Install s5cmd
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          ver=2.2.2
+          url="https://github.com/peak/s5cmd/releases/download/v${ver}/s5cmd_${ver}_Linux-64bit.tar.gz"
+          tmp="$(mktemp -d)"
+          curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
+          sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
+          s5cmd version
+
+      - name: Backup DB before release (fail-closed)
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
+        env:
+          BACKUP_ENV: preprod
+          BACKUP_TAG: ${{ steps.vars.outputs.sha }}
+          NAMESPACE: ${{ env.NAMESPACE }}
+          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+          BACKUP_RETAIN_COUNT: ${{ vars.BACKUP_RETAIN_COUNT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
+        run: bash deploy/ci/run-db-backup.sh
+
+      # NOTE: NO "Apply immo-mcp declarative config" here (DESIGN §2.8) — drift
+      # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
+      # and the preprod deployer Role cannot apply ConfigMaps/Services.
+      - name: Roll preprod deployments to pushed sha
+        id: roll
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" set image deploy/radar-api \
+            api="${IMAGE_PREFIX}/radar-api:${SHA}"
+          kubectl -n "$NAMESPACE" set image deploy/radar-ui \
+            ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
+
+      - name: Wait for rollouts
+        run: |
+          set -eu
+          # radar-api and radar-ui are the preprod live path: their rollout MUST
+          # succeed, so a failure here reds the preprod deploy.
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+
+      # POST-DEPLOY PROOF (TLS serial) — proves the preprod public endpoint is
+      # served by the OVH LB. prod & preprod share the LB IP, so this attests
+      # preprod DNS -> LB (NOT prod-vs-preprod); the served-sha step below is what
+      # proves the preprod BUILD. Pure network, no kubeconfig. Cert serials are
+      # public identifiers — printing them leaks nothing.
+      - name: Post-deploy — prove preprod endpoint serves the deployed LB (TLS serial)
+        env:
+          PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_HOST:-preprod.immo.sent-tech.ca}"
+          lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
+          if [ -z "${PUBLIC_HOST:-}" ] || [ -z "${EXPECTED_LB_IP:-}" ]; then
+            echo "::warning title=Preprod post-deploy proof using built-in defaults::set repo variables PREPROD_ENDPOINT_HOST / EXPECTED_OVH_LB_IP to make the preprod public-path guard explicit (falling back to ${host} / ${lb_ip})."
+          fi
+          serial_of() {
+            echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null \
+              | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2
+          }
+          sn_dns="$(serial_of "$host")"
+          sn_lb="$(serial_of "$lb_ip")"
+          echo "preprod host     : ${host}"
+          echo "target LB IP     : ${lb_ip}"
+          echo "serial via DNS   : ${sn_dns:-<none>}"
+          echo "serial via LB IP : ${sn_lb:-<none>}"
+          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ]; then
+            echo "::error title=Preprod post-deploy TLS proof — unreachable::could not read a cert serial (host=${host} lb=${lb_ip}). Rollouts succeeded but the preprod PUBLIC path is UNVERIFIED."
+            exit 1
+          fi
+          if [ "$sn_dns" != "$sn_lb" ]; then
+            echo "::error title=Preprod post-deploy TLS proof FAILED::DNS for ${host} does NOT serve the target LB ${lb_ip} (serial ${sn_dns} vs ${sn_lb})."
+            exit 1
+          fi
+          echo "post-deploy proof OK — ${host} is served by the LB (${lb_ip}); TLS serial ${sn_dns}"
+
+      # Served-sha proof on the PREPROD URL — the real preprod frontier on the
+      # public path. /health (api sha) AND /build.json (ui bundle sha) must equal
+      # the sha this run pushed, or the deploy REDs. Closes the silent-no-op gap
+      # (wrong ns / scaled-to-0 makes set-image + rollout succeed instantly).
+      - name: Assert served sha (preprod)
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+          PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+        run: |
+          set -euo pipefail
+          host="${PREPROD_ENDPOINT_HOST:-preprod.immo.sent-tech.ca}"
+          api_url="https://${host}/health"      # api/mcp sha (nginx -> radar-api/health)
+          ui_url="https://${host}/build.json"    # ui bundle sha (nginx static dist/build.json)
+          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url}"
+          fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
+          deadline=$(( $(date +%s) + 180 ))
+          while :; do
+            api_sha="$(fetch_sha "$api_url")"
+            ui_sha="$(fetch_sha "$ui_url")"
+            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then
+              echo "served sha OK: api=${api_sha} ui=${ui_sha} — build ${SHA} is live at ${host}"
+              exit 0
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error title=Preprod served sha mismatch::${host} serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' but this deploy pushed '${SHA}'. Rollout went green but the preprod endpoint is NOT serving the new build."
+              exit 1
+            fi
+            sleep 10
+          done
+
+      # §6 REFRESH DIAG (preprod) — one-shot Job proving the PINNED image
+      # refreshes WITHOUT OOM against preprod, BEFORE the suspended prod CronJobs
+      # are ever touched. REUSES the preprod release identity (:<sha> — no 2nd
+      # resolution) + batch/jobs (§1a #572, 0 new RBAC). DISARMED by default
+      # (REFRESH_DIAG_ENABLED — an owner/operator flip); the Job's city args are
+      # scaled for the OOM measurement and i-infra co-vals the diag output
+      # (default is a bounded 1-city smoke). prod suspend:true
+      # is untouched. No pods/log grant → failure surfaces via the poll, not logs.
+      - name: Refresh diag Job (preprod, image-pin validation)
+        if: ${{ vars.REFRESH_DIAG_ENABLED == 'true' }}
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+          cd deploy/k8s/refresh-diag
+          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:${SHA}
+          kubectl -n "$NAMESPACE" delete job radar-refresh-diag --ignore-not-found
+          kustomize build . | kubectl -n "$NAMESPACE" apply -f -
+          echo "diag Job applied (radar-api:${SHA}); polling for completion…"
+          deadline=$(( $(date +%s) + 1800 ))
+          while :; do
+            s="$(kubectl -n "$NAMESPACE" get job radar-refresh-diag -o jsonpath='{.status.succeeded}' 2>/dev/null || true)"
+            f="$(kubectl -n "$NAMESPACE" get job radar-refresh-diag -o jsonpath='{.status.failed}' 2>/dev/null || true)"
+            if [ "${s:-0}" = "1" ]; then echo "diag OK — pinned image refresh completed in ${NAMESPACE}"; exit 0; fi
+            if [ "${f:-0}" != "" ] && [ "${f:-0}" -ge 1 ] 2>/dev/null; then
+              echo "::error title=Refresh diag FAILED::radar-refresh-diag failed in ${NAMESPACE} (pinned radar-api:${SHA}) — check OOM/boot. Prod CronJobs untouched (suspend:true)."
+              exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error title=Refresh diag timeout::radar-refresh-diag did not complete in 1800s."; exit 1; fi
+            sleep 15
+          done
+
+      # §6 DEPLOY REFRESH CRONJOBS (preprod) — deploy + un-suspend the two refresh
+      # CronJobs in radar-immobilier-preprod, pinned to this release's :<sha>
+      # (reused, no 2nd resolution), via the refresh-cronjobs overlay
+      # (namespace->preprod + suspend:false). §6 is PREPROD-ONLY (owner directive;
+      # no prod path). Gated by REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner
+      # AFTER the diag PASS. Needs batch/cronjobs on the preprod deployer
+      # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, the CronJobs run
+      # nightly (03:17 scrape / 04:30 projection) → refresh on preprod.immo.
+      - name: Deploy refresh CronJobs (preprod)
+        if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' }}
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+          cd deploy/k8s/refresh-cronjobs
+          kustomize edit set image rg.fr-par.scw.cloud/radar-immobilier/radar-api=rg.fr-par.scw.cloud/radar-immobilier/radar-api:${SHA}
+          kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
+          echo "refresh CronJobs deployed to ${NAMESPACE} (radar-api:${SHA}, suspend:false):"
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-scrape radar-refresh-projection -o wide || true
+
+      - name: Deployment status — success (preprod)
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+        with:
+          script: |
+            const host = process.env.PREPROD_ENDPOINT_HOST || 'preprod.immo.sent-tech.ca';
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'success',
+              environment_url: `https://${host}`,
+              description: `preprod served sha ${process.env.SHA} verified live (pre-flight + TLS serial + served-sha)`,
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          SHA="${{ steps.vars.outputs.sha }}"
+          {
+            echo "### Deployed to \`${NAMESPACE}\` (preprod)"
+            echo ""
+            echo '```'
+            echo "deploy/radar-api -> ${IMAGE_PREFIX}/radar-api:${SHA}"
+            echo "deploy/radar-ui  -> ${IMAGE_PREFIX}/radar-ui:${SHA}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ROLLBACK-ON-FAILED-RELEASE (§1(b), ruling i-infra) — IMAGE-ONLY, AUTO,
+      # scoped to a DEPLOYMENT-HEALTH failure. Runs only when the job is failing
+      # AND the `roll` step was reached (steps.roll.conclusion != 'skipped') — a
+      # failure BEFORE the roll (checkout, kubeconfig, pre-flight, backup)
+      # deployed nothing, so there is nothing to roll back and this stays skipped.
+      # `rollout undo` re-pins the N-1 image (0 new RBAC — the deployer already
+      # has deployments/patch). Guards G1 (previous revision exists), G2 (rollout
+      # Ready + served health-check; never claim success on a broken state), G3
+      # (log landed image) and B3/B5 (loud surfacing, one-shot fail-loud) live in
+      # deploy/ci/rollback-release.sh. ARMED only when ROLLBACK_ON_FAILURE_ENABLED
+      # == 'true' (decouple merge from activation).
+      #
+      # MIGRATION SEAM (links §1a+§1b+§2): image-rollback is safe only under
+      # backward-compatible (expand-contract/additive) migrations. A release with
+      # a BREAKING migration is caught by the served health-check and fail-loud →
+      # the correct recovery is the OWNER-GATED DB-restore (§1a backup), NOT this
+      # step (which never touches the DB).
+      - name: Rollback preprod on failed release (image-only)
+        if: ${{ failure() && steps.roll.conclusion != 'skipped' && vars.ROLLBACK_ON_FAILURE_ENABLED == 'true' }}
+        env:
+          NAMESPACE: ${{ env.NAMESPACE }}
+          ROLLBACK_ENV: preprod
+          DEPLOYMENTS: radar-api radar-ui
+          PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST || 'preprod.immo.sent-tech.ca' }}
+          FAILED_REF: ${{ steps.vars.outputs.sha }}
+        run: bash deploy/ci/rollback-release.sh
+
+      - name: Deployment status — failure (preprod)
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID),
+              state: 'failure',
+              description: `preprod deploy ${process.env.SHA} failed (rollout OR post-deploy proof)`,
+            });
+
+  # ===========================================================================
+  # CD refonte — Lot 3 : tag v* -> PROD (radar-immobilier) par PROMOTION DIGEST.
+  # See tmp/handoff/preprod/DESIGN-CD-REFONTE.md §2.3/§2.4. build-once-promote:
+  # the image was built+pushed on the main push (radar-<svc>:<sha7>); a semver
+  # tag on that same commit promotes the EXACT digest to prod — no rebuild.
+  # This job coexists with the legacy `deploy` (main->prod) UNTIL the cutover:
+  # the atomic cutover merge removes `deploy` and provisions the GitHub
+  # Environment `production` (tag refs + reviewer) that makes THIS the sole prod
+  # path. Held until owner GO.
+  # ===========================================================================
+  promote-prod:
+    name: Promote tag to prod (by digest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: startsWith(github.ref, 'refs/tags/v')
+    # Enforced prod credential boundary (§2.4): the prod kubeconfig lives in the
+    # GitHub Environment `production` (restricted to tag refs + required
+    # reviewer), so a job triggered by `main` can never reach it. PROVISIONING
+    # that environment (create env, move KUBE_CONFIG_DATA into it, set the
+    # tag-ref + reviewer rules) is a CUTOVER step — doing it early would break the
+    # current main->prod `deploy` job. The reference is authored now; the env is
+    # provisioned atomically at cutover (DESIGN §2.4). Until then a v* tag would
+    # resolve the repo-level secret (this whole job only lands on main AT the
+    # cutover merge, so that pre-state never actually runs).
+    environment: production
+    permissions:
+      contents: read
+      deployments: write
+    concurrency:
+      # Never cancel an in-flight prod promote — queue instead.
+      group: promote-prod
+      cancel-in-progress: false
+    env:
+      NAMESPACE: radar-immobilier
+    steps:
+      - name: Checkout (full history for ancestry check)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Short SHA + tag
+        id: vars
+        run: |
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      # GUARD 1 — appartenance-à-main (§2.3, revue #5): digest-exists ≠ commit on
+      # main. A workflow_dispatch build of a feature branch produces a
+      # radar-<svc>:<sha7> image; tagging that commit would promote NON-merged,
+      # NON-CI code. The CI guarantee at tag-time IS that <sha7> was built+CI'd on
+      # main — ancestry is what ties the tag to it.
+      - name: Guard — tagged commit is an ancestor of origin/main
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "ancestry OK — $GITHUB_SHA is on origin/main"
+          else
+            echo "::error title=Promote refused — tag not on main::commit $GITHUB_SHA (tag ${{ steps.vars.outputs.tag }}) is NOT an ancestor of origin/main. Only main-merged, CI-validated commits may reach prod."
+            exit 1
+          fi
+
+      # GUARD 2 — tag protection must REALLY exist (§2.3): don't ASSUME a v* tag
+      # is protected. Advisory (warn, don't hard-fail on API hiccups): flags if no
+      # tag ruleset guards v* so an unreviewed tag can't silently reach prod.
+      - name: Guard — verify tag protection ruleset exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          rules="$(gh api "repos/${GITHUB_REPOSITORY}/rulesets" --jq '[.[] | select(.target=="tag")] | length' 2>/dev/null || echo ERR)"
+          if [ "$rules" = ERR ]; then
+            echo "::warning title=Tag-protection unverified::could not query rulesets (token scope?). Ensure a tag ruleset protects v* before relying on this path."
+          elif [ "${rules:-0}" -ge 1 ]; then
+            echo "tag ruleset present (${rules})"
+          else
+            echo "::warning title=No tag ruleset::no tag-target ruleset found — a v* tag can currently be pushed without review. Configure tag protection before the cutover."
+          fi
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+
+      - name: Configure kubeconfig (prod, from environment secret)
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Login to Scaleway registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+
+      # DIGEST RESOLUTION (§2.3, revue #4) — build-once: resolve the IMMUTABLE
+      # sha256 digests of the images already built on main for this commit's
+      # <sha7> tag. Missing digest = the <sha7> tag aged out of SCW-CR (retention)
+      # or was never built → fall back to build-at-tag below. Both api AND ui.
+      - name: Resolve image digests (api + ui)
+        id: digests
+        run: |
+          set -uo pipefail
+          SHA="${{ steps.vars.outputs.sha }}"
+          resolve() { docker buildx imagetools inspect "${IMAGE_PREFIX}/$1:${SHA}" --format '{{.Manifest.Digest}}' 2>/dev/null; }
+          api="$(resolve radar-api || true)"; ui="$(resolve radar-ui || true)"
+          echo "api=${api:-<none>}  ui=${ui:-<none>}"
+          if [ -z "$api" ] || [ -z "$ui" ]; then
+            echo "resolved=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Digest missing — will build-at-tag::radar-api/ui:${SHA} not resolvable in SCW-CR (aged-out or never built)."
+          else
+            echo "resolved=true" >> "$GITHUB_OUTPUT"
+            echo "api=${api}" >> "$GITHUB_OUTPUT"
+            echo "ui=${ui}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # FALLBACK build-at-tag (GO-cond §4/§5) — ONLY when the digest aged out.
+      # Rebuilds api/ui FROM THE TAGGED COMMIT (this checkout) and pushes
+      # radar-<svc>:<sha7>, then re-resolves. Removes the hard dependency on
+      # SCW-CR retention. Deterministic input: same source + same GIT_SHA.
+      - name: Fallback — build at tag (only if digest aged out)
+        if: steps.digests.outputs.resolved != 'true'
+        id: buildtag
+        run: |
+          set -euo pipefail
+          SHA="${{ steps.vars.outputs.sha }}"
+          docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f api/Dockerfile -t "${IMAGE_PREFIX}/radar-api:${SHA}" .
+          docker buildx build --push --provenance=false --build-arg "GIT_SHA=${SHA}" -f ui/Dockerfile  -t "${IMAGE_PREFIX}/radar-ui:${SHA}" .
+          api="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-api:${SHA}" --format '{{.Manifest.Digest}}')"
+          ui="$(docker buildx imagetools inspect "${IMAGE_PREFIX}/radar-ui:${SHA}" --format '{{.Manifest.Digest}}')"
+          echo "api=${api}" >> "$GITHUB_OUTPUT"
+          echo "ui=${ui}" >> "$GITHUB_OUTPUT"
+
+      - name: Select digests (resolved or rebuilt)
+        id: pick
+        run: |
+          set -eu
+          if [ "${{ steps.digests.outputs.resolved }}" = "true" ]; then
+            echo "api=${{ steps.digests.outputs.api }}" >> "$GITHUB_OUTPUT"
+            echo "ui=${{ steps.digests.outputs.ui }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "api=${{ steps.buildtag.outputs.api }}" >> "$GITHUB_OUTPUT"
+            echo "ui=${{ steps.buildtag.outputs.ui }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pre-flight (§2.4): same OVH apiserver host as preprod → the host check
+      # alone can't tell prod from preprod; the POSITIVE proof (get deploy in the
+      # radar-immobilier namespace, reachable only by the prod-scoped SA) + the
+      # `environment: production` credential boundary are what scope this to prod.
+      - name: Pre-flight — assert target cluster (prod)
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-hlhedx.c1.bhs5.k8s.ovh.net}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "apiserver host ${host:-<none>} / expected ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — promote refused::kubeconfig targets '${host:-<none>}' not '${expected}'. Nothing applied."
+            exit 1
+          fi
+          kubectl -n "$NAMESPACE" get deploy radar-api radar-ui -o name
+
+      - name: Create GitHub deployment (prod, tag)
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dep = await github.rest.repos.createDeployment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              ref: context.sha, environment: 'production',
+              required_contexts: [], auto_merge: false,
+              transient_environment: false, production_environment: true,
+              description: `promote ${process.env.GITHUB_REF_NAME} -> radar-immobilier`,
+            });
+            core.setOutput('id', dep.data && dep.data.id !== undefined ? String(dep.data.id) : '');
+
+      # Drift self-heal (prod, unchanged from `deploy`): reassert 40-immo-mcp
+      # BEFORE set-image so config drift heals without clobbering the pinned
+      # digest. Guarded — skips if the mcp Deployment is absent.
+      - name: Apply immo-mcp declarative config
+        run: |
+          set -eu
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
+          else
+            echo "radar-immo-mcp absent — skipping immo-mcp config apply"
+          fi
+
+      # BACKUP-BEFORE-RELEASE (§1(a)) — PROD, PREPARED BUT DISARMED. Same
+      # fail-closed pg_dump → external S3 as preprod, ahead of the digest
+      # set-image, so a failed prod backup aborts the promotion. OWNER-GATED and
+      # SEPARATE from preprod: it stays SKIPPED until the repo variable
+      # BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true' (default off), and prod also
+      # needs the `batch/jobs` grant on the PROD deployer SA + the in-cluster
+      # radar-backup-s3-credentials secret + prod bucket/cred — all owner-
+      # provisioned at the prod cutover. Authored now so the call is ready; arming
+      # is a deliberate, later owner step (never a side effect of this merge).
+      # Keys are env-scoped (BACKUP_ENV=prod) so prod and preprod backups never
+      # collide in a shared bucket.
+      - name: Install s5cmd
+        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          ver=2.2.2
+          url="https://github.com/peak/s5cmd/releases/download/v${ver}/s5cmd_${ver}_Linux-64bit.tar.gz"
+          tmp="$(mktemp -d)"
+          curl -fsSL "$url" | tar -xz -C "$tmp" s5cmd
+          sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
+          s5cmd version
+
+      - name: Backup DB before promote (fail-closed)
+        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
+        env:
+          BACKUP_ENV: prod
+          BACKUP_TAG: ${{ steps.vars.outputs.sha }}
+          NAMESPACE: ${{ env.NAMESPACE }}
+          BACKUP_S3_BUCKET: ${{ vars.BACKUP_S3_BUCKET }}
+          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+          BACKUP_RETAIN_COUNT: ${{ vars.BACKUP_RETAIN_COUNT }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
+        run: bash deploy/ci/run-db-backup.sh
+
+      # PROMOTE — pin prod to the IMMUTABLE digest (not the mutable <sha7> tag):
+      # true build-once, survives tag GC of <sha7>.
+      - name: Promote — set prod images to digest
+        id: promote
+        env:
+          DIG_API: ${{ steps.pick.outputs.api }}
+          DIG_UI: ${{ steps.pick.outputs.ui }}
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" set image deploy/radar-api api="${IMAGE_PREFIX}/radar-api@${DIG_API}"
+          kubectl -n "$NAMESPACE" set image deploy/radar-ui  ui="${IMAGE_PREFIX}/radar-ui@${DIG_UI}"
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp mcp="${IMAGE_PREFIX}/radar-api@${DIG_API}"
+          fi
+
+      - name: Wait for rollouts
+        run: |
+          set -eu
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
+          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status deploy/radar-immo-mcp --timeout=120s \
+              || echo "::warning title=radar-immo-mcp rollout incomplete::optional connector — api/ui unaffected"
+          fi
+
+      # Same two public-path proofs as the legacy prod deploy: TLS serial (right
+      # cluster/LB) + served-sha. /health .sha is the GIT sha (build-arg), NOT the
+      # digest, so assert served-sha == the tagged commit's <sha7> (§2.3 #9).
+      - name: Post-deploy — TLS serial (public path == deployed LB)
+        env:
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+          EXPECTED_LB_IP: ${{ vars.EXPECTED_OVH_LB_IP }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_HOST:-immo.sent-tech.ca}"; lb_ip="${EXPECTED_LB_IP:-51.79.100.177}"
+          serial_of() { echo | openssl s_client -connect "$1:443" -servername "$host" 2>/dev/null | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2; }
+          sn_dns="$(serial_of "$host")"; sn_lb="$(serial_of "$lb_ip")"
+          echo "serial dns=${sn_dns:-<none>} lb=${sn_lb:-<none>}"
+          if [ -z "$sn_dns" ] || [ -z "$sn_lb" ] || [ "$sn_dns" != "$sn_lb" ]; then
+            echo "::error title=Prod TLS proof failed::${host} not served by ${lb_ip} (serials ${sn_dns} vs ${sn_lb})."
+            exit 1
+          fi
+
+      - name: Assert served sha (prod)
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+          PUBLIC_ENDPOINT_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST }}
+        run: |
+          set -euo pipefail
+          host="${PUBLIC_ENDPOINT_HOST:-immo.sent-tech.ca}"
+          fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
+          deadline=$(( $(date +%s) + 180 ))
+          while :; do
+            api_sha="$(fetch_sha "https://${host}/health")"; ui_sha="$(fetch_sha "https://${host}/build.json")"
+            if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then echo "served sha OK ${SHA}"; exit 0; fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then
+              echo "::error title=Prod served sha mismatch::serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' expected '${SHA}'."
+              exit 1
+            fi
+            sleep 10
+          done
+
+      # NB §6 refresh is PREPROD-ONLY (owner directive) — there is deliberately NO
+      # prod CronJob-pin step here. The refresh CronJobs are deployed + un-suspended
+      # in radar-immobilier-preprod by the deploy-preprod "Deploy refresh CronJobs
+      # (preprod)" step; prod (this promote path) never carries them.
+      - name: Deployment status — success
+        if: success() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          SHA: ${{ steps.vars.outputs.sha }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner, repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'success',
+              environment_url: 'https://immo.sent-tech.ca',
+              description: `promoted ${process.env.TAG} (sha ${process.env.SHA}) by digest`,
+            });
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Promoted \`${{ steps.vars.outputs.tag }}\` -> \`${NAMESPACE}\` (by digest)"
+            echo ""
+            echo '```'
+            echo "radar-api -> ${IMAGE_PREFIX}/radar-api@${{ steps.pick.outputs.api }}"
+            echo "radar-ui  -> ${IMAGE_PREFIX}/radar-ui@${{ steps.pick.outputs.ui }}"
+            echo "git sha   -> ${{ steps.vars.outputs.sha }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ROLLBACK-ON-FAILED-RELEASE (§1(b)) — PROD, PREPARED BUT DISARMED. Same
+      # image-only auto-rollback as preprod, scoped to a promote-health failure
+      # (steps.promote.conclusion != 'skipped'). Owner-gated + SEPARATE arming:
+      # stays SKIPPED until ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' (default
+      # off). Authored now so the call is ready; arming is a deliberate owner step
+      # at the prod cutover, never a side effect of this merge. Same migration
+      # seam as preprod (breaking migration → owner-gated DB-restore, not this).
+      - name: Rollback prod on failed promote (image-only)
+        if: ${{ failure() && steps.promote.conclusion != 'skipped' && vars.ROLLBACK_ON_FAILURE_PROD_ENABLED == 'true' }}
+        env:
+          NAMESPACE: ${{ env.NAMESPACE }}
+          ROLLBACK_ENV: prod
+          DEPLOYMENTS: radar-api radar-ui
+          PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca' }}
+          FAILED_REF: ${{ steps.vars.outputs.sha }}
+        run: bash deploy/ci/rollback-release.sh
+
+      - name: Deployment status — failure
+        if: failure() && steps.deployment.outputs.id != ''
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          TAG: ${{ steps.vars.outputs.tag }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner, repo: context.repo.repo,
+              deployment_id: Number(process.env.DEPLOYMENT_ID), state: 'failure',
+              description: `promote ${process.env.TAG} failed`,
+            });

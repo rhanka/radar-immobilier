@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * QA NAVIGATEUR — Bug #3 (persistance du filtre z/m/p au reload).
+ * QA NAVIGATEUR — Bug #3 (persistance du filtre du vivier B au reload).
  *
  * Deux défauts de câblage, prouvés au rendu réel :
  *
@@ -18,9 +18,11 @@ import { expect, test } from "@playwright/test";
 
 const HARNESS = "/e2e-qa/harness/rail-filter.html";
 
-// Le composant DS Checkbox : on cible l'input via le label associé.
+// Le composant DS Checkbox : on cible l'input via le label associé. `exact`
+// car l'axe « Résidentiel » partage une sous-chaîne avec l'exclusion « Exclure
+// PIIA sans projet résidentiel » (sinon violation du strict mode Playwright).
 function checkbox(page: import("@playwright/test").Page, label: string) {
-  return page.getByRole("checkbox", { name: label });
+  return page.getByRole("checkbox", { name: label, exact: true });
 }
 
 test.describe("SignauxRail — persistance filtre (rendu navigateur)", () => {
@@ -42,26 +44,26 @@ test.describe("SignauxRail — persistance filtre (rendu navigateur)", () => {
     await page.goto(HARNESS);
     await page.locator("#set-from-url").waitFor({ state: "visible" });
 
-    // État initial : défaut z|m|p → les 3 cases cochées.
-    await expect(checkbox(page, "Zonage uniquement")).toBeChecked();
-    await expect(checkbox(page, "Multifamilial 4+")).toBeChecked();
-    await expect(checkbox(page, "Signaux précoces")).toBeChecked();
+    // État initial : défaut vivier-v2 → les 3 axes B cochés.
+    await expect(checkbox(page, "Zonage")).toBeChecked();
+    await expect(checkbox(page, "Résidentiel")).toBeChecked();
+    await expect(checkbox(page, "Précoce")).toBeChecked();
 
-    // Le parent restaure depuis l'URL "z|m" (reload) : p doit se DÉCOCHER.
+    // Le parent restaure depuis l'URL "vivier-v2|-p" (reload) : Précoce se DÉCOCHE.
     await page.locator("#set-from-url").click();
-    await expect(page.locator("#current-initial")).toHaveText("z|m");
+    await expect(page.locator("#current-initial")).toHaveText("vivier-v2|-p");
 
-    await expect(checkbox(page, "Zonage uniquement")).toBeChecked();
-    await expect(checkbox(page, "Multifamilial 4+")).toBeChecked();
-    await expect(checkbox(page, "Signaux précoces")).not.toBeChecked();
+    await expect(checkbox(page, "Zonage")).toBeChecked();
+    await expect(checkbox(page, "Résidentiel")).toBeChecked();
+    await expect(checkbox(page, "Précoce")).not.toBeChecked();
   });
 
   test("propage la bonne clé au toggle utilisateur", async ({ page }) => {
     await page.goto(HARNESS);
-    await checkbox(page, "Signaux précoces").waitFor({ state: "visible" });
+    await checkbox(page, "Précoce").waitFor({ state: "visible" });
 
-    // Décoche « Signaux précoces » (p) depuis le défaut z|m|p → propage "z|m".
-    await checkbox(page, "Signaux précoces").click();
-    await expect(page.locator("#emitted-log")).toContainText("z|m");
+    // Décoche « Précoce » depuis le défaut vivier-v2 → propage "vivier-v2|-p".
+    await checkbox(page, "Précoce").click();
+    await expect(page.locator("#emitted-log")).toContainText("vivier-v2|-p");
   });
 });

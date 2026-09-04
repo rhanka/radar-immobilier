@@ -170,6 +170,21 @@ beforeEach(() => {
 });
 
 describe("GET /api/graph-signals/by-city", () => {
+  it("forwards optional date window query params to the graph store", async () => {
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+
+    const app = freshRoute();
+    const res = await app.request(
+      "/api/graph-signals/by-city?dateFrom=2026-01-01&dateTo=2026-03-31",
+    );
+
+    expect(res.status).toBe(200);
+    expect(listCitiesWithSignalNodes).toHaveBeenCalledWith(mockDb, {
+      dateFrom: "2026-01-01",
+      dateTo: "2026-03-31",
+    });
+  });
+
   it("returns ok:true with empty cities when no signal nodes exist", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
 
@@ -185,6 +200,7 @@ describe("GET /api/graph-signals/by-city", () => {
     expect(body.ok).toBe(true);
     expect(body.totalCount).toBe(0);
     expect(body.cities).toEqual([]);
+    expect(listCitiesWithSignalNodes).toHaveBeenCalledWith(mockDb);
   });
 
   it("returns city list with legacy subset counts and v2 named counters", async () => {
@@ -728,5 +744,60 @@ describe("GET /api/graph-signals/:city", () => {
       expect(ref.excerpt).toBeDefined();
       expect(ref.contentType).toBeUndefined();
     }
+  });
+
+  // ── A.3b (LOT 1 serving, R5) : etape + regulatoryStatus servis en 1re-classe ──
+  // Chaque carte porte l'axe MARQUAGE (firm/anticipation) LU via readRegulatoryStatus
+  // (champ persisté A.2 sinon fallback legacy) + l'etape verbatim (matériau hide-72 UI).
+  it("serves etape + regulatoryStatus=firm for an adopted DesignationEvent (etape=adoption)", async () => {
+    const node = makeNode("evt-adopt", "drummondville", "DesignationEvent", {
+      properties: { etape: "adoption", reglement_number: "2026-100" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as {
+      nodes: Array<{ etape: string | null; regulatoryStatus: string }>;
+    };
+    expect(res.status).toBe(200);
+    expect(body.nodes[0]!.etape).toBe("adoption");
+    expect(body.nodes[0]!.regulatoryStatus).toBe("firm");
+  });
+
+  it("serves regulatoryStatus=anticipation for an avis node (etape=avis_motion, projet inclus)", async () => {
+    const node = makeNode("evt-avis", "drummondville", "DesignationEvent", {
+      properties: { etape: "avis_motion", reglement_number: "2026-101" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
+    expect(body.nodes[0]!.etape).toBe("avis_motion");
+    expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
+  });
+
+  it("READS the PERSISTED regulatoryStatus as-is — no serve-time re-classification (A.2 field wins)", async () => {
+    // Champ persisté "firm" servi tel quel MÊME si l'etape brut suggérerait anticipation :
+    // preuve que le serving LIT (locus unique) et ne re-classifie pas (cause racine 026-508).
+    const node = makeNode("evt-persist", "drummondville", "DesignationEvent", {
+      properties: { etape: "avis_motion", regulatoryStatus: "firm" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: Array<{ regulatoryStatus: string }> };
+    expect(body.nodes[0]!.regulatoryStatus).toBe("firm");
+  });
+
+  it("falls back to anticipation for a legacy node with no etape/statut/regulatoryStatus (fail-safe)", async () => {
+    const node = makeNode("sig-legacy", "drummondville", "Signal", {
+      properties: { category: "rezonage" },
+    });
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([node] as unknown as ReturnType<typeof makeNode>[]);
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
+    expect(body.nodes[0]!.etape).toBeNull();
+    expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
   });
 });

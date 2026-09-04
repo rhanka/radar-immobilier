@@ -23,6 +23,12 @@ export interface MockSignal {
   city: string;
   type: string;
   etape: string;
+  /** Ferme vs anticipation SERVI par l'API (axe MARQUAGE, R5) — LU tel quel depuis
+   *  la carte graph-signals, jamais re-classifié côté MCP : le classifieur unique
+   *  (`deriveRegulatoryStatus`) vit côté serveur, le MCP consomme le champ servi
+   *  (pas de dép `@radar/domain` = découplage volontaire). "anticipation" = fail-safe
+   *  quand l'API ne sert pas le champ (jamais firm sans preuve servie). */
+  regulatoryStatus: "firm" | "anticipation";
   etape_date: string;
   reglement_number: string;
   zone_ref: string;
@@ -107,6 +113,7 @@ export const MOCK_SIGNALS: MockSignal[] = [
     city: "longueuil",
     type: "modification_zonage",
     etape: "avis_motion",
+    regulatoryStatus: "anticipation",
     etape_date: "2026-04-14",
     reglement_number: "CO-2026-1187",
     zone_ref: "H-203",
@@ -120,6 +127,7 @@ export const MOCK_SIGNALS: MockSignal[] = [
     city: "longueuil",
     type: "usage_conditionnel",
     etape: "adoption",
+    regulatoryStatus: "firm",
     etape_date: "2026-05-12",
     reglement_number: "USC-2026-044",
     zone_ref: "C-101",
@@ -133,6 +141,7 @@ export const MOCK_SIGNALS: MockSignal[] = [
     city: "valleyfield",
     type: "plan_amenagement",
     etape: "consultation",
+    regulatoryStatus: "anticipation",
     etape_date: "2026-03-02",
     reglement_number: "PPU-2026-007",
     zone_ref: "H-410",
@@ -242,6 +251,16 @@ export const MOCK_ZONE_FEATURES: MockGeoFeature[] = [
       DENSITE: 35,
       URL_GRILLE: "https://longueuil.example/grilles/H-203.pdf",
       kind: "H",
+      // Provenance règlement (qc-zonage-norms, muni-uniforme) — fixture pour
+      // get_reglement_provenance. `_source_url` volontairement absent (jamais exposé).
+      reglement_url: "https://longueuil.example/reglements/CO-2016-1187.pdf",
+      reglement_numero: "CO-2016-1187",
+      reglement_millesime: "2016",
+      reglement_page_source: "12",
+      reglement_ancien_numero: "CO-2009-500",
+      reglement_ancien_source: "https://longueuil.example/reglements/CO-2009-500.pdf",
+      has_ancien: true,
+      _source_url: "https://interne.capture/breadcrumb-ne-jamais-exposer",
     },
   },
   {
@@ -260,6 +279,61 @@ export const MOCK_ZONE_FEATURES: MockGeoFeature[] = [
       citySlug: "valleyfield",
       zone_code: "H-410",
       kind: "H",
+    },
+  },
+];
+
+/**
+ * Mock zoning-events (`qc-zoning-events`, §2) — fixture pour query_zoning_events.
+ * Couvre les axes lifecycle (document_type / decision_state) + `zone_codes_resolus`
+ * (filtre zone) + une clé interne `_source_url` (jamais exposée — testé).
+ */
+export const MOCK_ZONING_EVENT_FEATURES: MockGeoFeature[] = [
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.52, 45.53) },
+    properties: {
+      citySlug: "longueuil",
+      event_id: "evt-longueuil-001",
+      state: "active",
+      document_type: "avis_motion",
+      decision_state: "planned",
+      type_instrument: "zonage",
+      bylaw_numero: "CO-2026-1200",
+      date_iso: "2026-04-14",
+      zone_codes_resolus: [
+        { zone_code: "H-203", relation_type: "cite", score_confiance: 1.0, provenance: "exact_geom" },
+      ],
+      libelles_relation: ["modifie CO-2016-1187"],
+      url_pdf: "https://longueuil.example/pv/2026-04-14.pdf",
+      provenance: {
+        producer: "geo-wp3",
+        source_url: "https://longueuil.example/pv/2026-04-14.pdf",
+        as_of_date: "2026-04-15",
+      },
+      _source_url: "https://interne.capture/breadcrumb-ne-jamais-exposer",
+    },
+  },
+  {
+    type: "Feature",
+    geometry: { type: "Polygon", coordinates: square(-73.5, 45.51) },
+    properties: {
+      citySlug: "longueuil",
+      event_id: "evt-longueuil-002",
+      state: "active",
+      document_type: "adoption",
+      decision_state: "decided",
+      type_instrument: "zonage",
+      bylaw_numero: "CO-2026-1187",
+      date_iso: "2026-06-09",
+      zone_codes_resolus: [
+        { zone_code: "C-101", relation_type: "cite", score_confiance: 1.0, provenance: "exact_geom" },
+      ],
+      provenance: {
+        producer: "geo-wp3",
+        source_url: "https://longueuil.example/pv/2026-06-09.pdf",
+        as_of_date: "2026-06-10",
+      },
     },
   },
 ];

@@ -7,7 +7,7 @@
  * Anti-invention: returns 404 when no signal nodes exist for the city.
  */
 
-import type { VivierV2 } from "@radar/domain";
+import type { RegulatoryStatusT, VivierV2 } from "@radar/domain";
 
 import {
   fetchWithTimeout,
@@ -15,6 +15,11 @@ import {
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from "$lib/net/fetch-with-timeout.js";
 import type { BPrimeClassification } from "@radar/domain";
+// Normalisation d'appariement zone PARTAGÉE (même langage de comparaison que le
+// join signal↔zone et lot↔zone). Import de VALEUR ; l'arête inverse
+// (signaux-map-geo → ce module) est `import type` uniquement (effacée au
+// runtime), donc AUCUN cycle d'import réel.
+import { zoneRefComparableKey } from "$lib/maps/signaux-map-geo.js";
 
 export type EvidenceMissingField =
   | "description"
@@ -515,6 +520,8 @@ export interface GraphSignalNode {
   createdAt: string | null;
   description?: string | null;
   publishedAt?: string | null;
+  etape?: string | null;
+  regulatoryStatus?: RegulatoryStatusT | null;
   docRefs?: SignalDocRef[];
   bPrime?: BPrimeClassification;
   props: Record<string, unknown>;
@@ -580,4 +587,144 @@ export async function fetchGraphSignalDetail(
     }
     throw err;
   }
+}
+
+// ── Règlements rattachables à une zone (sourcés du graphe-signal) ─────────────
+
+/**
+ * Règlement de zonage rattaché à une zone, dérivé du graphe-signal.
+ *
+ * - `numero`   : numéro de règlement affiché VERBATIM (ex. "756", "901-43").
+ * - `url`      : source documentaire PUBLIQUE ouvrable en nouvel onglet (la
+ *                `sourceUrl` du PV). `null` si le nœud n'expose pas d'URL
+ *                publique. JAMAIS un lien d'archive `/api/documents/raw`.
+ * - `millesime`: année du règlement quand le nœud l'expose, sinon `null`
+ *                (aucune invention — pas de dérivation depuis le numéro).
+ */
+export interface ZoneReglement {
+  numero: string;
+  url: string | null;
+  millesime: string | null;
+}
+
+/** Enregistrements de props exploitables d'un nœud (racine + `properties` imbriqué). */
+function nodePropRecords(node: GraphSignalNode): Record<string, unknown>[] {
+  const records: Record<string, unknown>[] = [];
+  const props = node.props ?? {};
+  records.push(props);
+  const nested = props.properties;
+  if (typeof nested === "object" && nested !== null && !Array.isArray(nested)) {
+    records.push(nested as Record<string, unknown>);
+  }
+  return records;
+}
+
+/** Premier numéro de règlement porté par le nœud (scalaire ou 1er d'un tableau), sinon null. */
+function readNodeReglementNumber(node: GraphSignalNode): string | null {
+  const keys = ["reglement_number", "reglementNumber", "reglement_numero", "bylaw"];
+  for (const record of nodePropRecords(node)) {
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim().length > 0) return value.trim();
+      if (typeof value === "number" && Number.isFinite(value)) return String(value);
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (typeof item === "string" && item.trim().length > 0) return item.trim();
+          if (typeof item === "number" && Number.isFinite(item)) return String(item);
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Codes de zone STRUCTURÉS portés par le nœud (`zone_ref`/`zoneRef`, scalaire ou
+ * tableau). Anti-invention : on n'utilise QUE les champs structurés — jamais une
+ * zone devinée du texte libre — pour rattacher un règlement à une zone.
+ */
+function readNodeStructuredZoneRefs(node: GraphSignalNode): string[] {
+  const keys = ["zone_ref", "zoneRef", "zone_refs", "zones"];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  const push = (value: unknown): void => {
+    if (typeof value !== "string") return;
+    const trimmed = value.trim();
+    if (trimmed.length === 0 || seen.has(trimmed)) return;
+    seen.add(trimmed);
+    out.push(trimmed);
+  };
+  for (const record of nodePropRecords(node)) {
+    for (const key of keys) {
+      const value = record[key];
+      if (Array.isArray(value)) value.forEach(push);
+      else push(value);
+    }
+  }
+  return out;
+}
+
+/** Millésime (année) du règlement quand le nœud l'expose, sinon null. */
+function readNodeReglementMillesime(node: GraphSignalNode): string | null {
+  const keys = ["reglement_millesime", "reglementMillesime", "millesime"];
+  for (const record of nodePropRecords(node)) {
+    for (const key of keys) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim().length > 0) return value.trim();
+      if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    }
+  }
+  return null;
+}
+
+/** Date d'événement en epoch ms pour départager les collisions, ou -Infinity. */
+function eventDateEpoch(dateStr: string | null): number {
+  if (!dateStr) return -Infinity;
+  const t = Date.parse(dateStr);
+  return Number.isFinite(t) ? t : -Infinity;
+}
+
+/**
+ * Extrait, du détail signal, les RÈGLEMENTS rattachables à une zone, indexés par
+ * `zoneRefComparableKey(zone_ref)`.
+ *
+ * Mécanique (rattachement HONNÊTE, même-nœud) : un nœud `DesignationEvent` qui
+ * porte à la fois un `reglement_number` ET un `zone_ref` structuré rattache ce
+ * numéro (+ sa `sourceUrl` publique) à cette zone. Un nœud qui ne porte que l'un
+ * des deux n'engendre AUCUN rattachement — on n'invente jamais de lien
+ * zone↔règlement que le graphe ne co-localise pas sur le même nœud.
+ *
+ * Collision (plusieurs règlements pour une même zone) : on garde le plus RÉCENT
+ * par date d'événement ; à égalité/absence de date, le dernier rencontré gagne
+ * (ordre d'itération stable).
+ *
+ * URL : uniquement la `sourceUrl` PUBLIQUE du nœud (nouvel onglet) — jamais un
+ * lien d'archive `/api/documents/raw` (qui renvoie 404 document_not_found).
+ */
+export function extractZoneReglements(
+  nodes: readonly GraphSignalNode[],
+): Map<string, ZoneReglement> {
+  const byKey = new Map<string, ZoneReglement>();
+  const whenByKey = new Map<string, number>();
+  for (const node of nodes) {
+    if (node.type !== "DesignationEvent") continue;
+    const numero = readNodeReglementNumber(node);
+    if (!numero) continue;
+    const zoneRefs = readNodeStructuredZoneRefs(node);
+    if (zoneRefs.length === 0) continue;
+    const evidence = extractSignalEvidence(node);
+    const url = evidence.sourceUrl; // PUBLIC uniquement (jamais rawRef/archive)
+    const millesime = readNodeReglementMillesime(node);
+    const when = eventDateEpoch(evidence.documentDate);
+    for (const ref of zoneRefs) {
+      const key = zoneRefComparableKey(ref);
+      if (key.length === 0) continue;
+      const prevWhen = whenByKey.get(key);
+      if (prevWhen === undefined || when >= prevWhen) {
+        byKey.set(key, { numero, url, millesime });
+        whenByKey.set(key, when);
+      }
+    }
+  }
+  return byKey;
 }

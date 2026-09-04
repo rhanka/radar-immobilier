@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { loadConfig, resolveAuthConfig } from "./config.js";
+import {
+  loadConfig,
+  resolveAuthConfig,
+  resolveGeoDocumentsS3Config,
+} from "./config.js";
 
 // Minimal env that satisfies all required fields (no OIDC wiring).
 const BASE_ENV: NodeJS.ProcessEnv = {
@@ -14,6 +18,83 @@ const BASE_ENV: NodeJS.ProcessEnv = {
 };
 
 describe("loadConfig", () => {
+  describe("immo→geo document repoint", () => {
+    it("is OFF by default and rejects a non-boolean toggle value", () => {
+      const config = loadConfig({ ...BASE_ENV });
+      expect(config.GEO_DOCUMENTS_REPOINT).toBe(false);
+      expect(config.GEO_DOCUMENTS_INDEX_PATH).toBe(
+        "work/coverage/geo-pv-cas-sha-slug-index.json",
+      );
+      expect(() =>
+        loadConfig({ ...BASE_ENV, GEO_DOCUMENTS_REPOINT: "yes" }),
+      ).toThrow();
+    });
+
+    it("resolves the dedicated geo config from GEO_DOCUMENTS_S3_* only (no immo fallback)", () => {
+      const config = loadConfig({
+        ...BASE_ENV,
+        // Immo values are present but must NOT leak into the geo reader.
+        SCRAPE_S3_ENDPOINT: "http://immo-should-not-be-used:9000",
+        SCRAPE_S3_BUCKET: "radar-immobilier-docs",
+        GEO_DOCUMENTS_REPOINT: "1",
+        GEO_DOCUMENTS_S3_ENDPOINT: "https://s3.geo.example.test",
+        GEO_DOCUMENTS_S3_REGION: "bhs",
+        GEO_DOCUMENTS_S3_BUCKET: "sentropic-geo",
+        GEO_DOCUMENTS_S3_ACCESS_KEY: "geo-read-access",
+        GEO_DOCUMENTS_S3_SECRET_KEY: "geo-read-secret",
+        GEO_DOCUMENTS_S3_FORCE_PATH_STYLE: "true",
+      });
+
+      expect(config.GEO_DOCUMENTS_REPOINT).toBe(true);
+      expect(resolveGeoDocumentsS3Config(config)).toEqual({
+        endpoint: "https://s3.geo.example.test",
+        region: "bhs",
+        bucket: "sentropic-geo",
+        accessKey: "geo-read-access",
+        secretKey: "geo-read-secret",
+        forcePathStyle: true,
+      });
+    });
+
+    it("requires forcePathStyle (its safe default differs per backend: MinIO true vs OVH false)", () => {
+      // All five other geo fields present, force-path-style omitted → fail closed
+      // rather than silently defaulting to a value wrong for the target backend.
+      const config = loadConfig({
+        ...BASE_ENV,
+        GEO_DOCUMENTS_REPOINT: "1",
+        GEO_DOCUMENTS_S3_ENDPOINT: "https://s3.geo.example.test",
+        GEO_DOCUMENTS_S3_REGION: "bhs",
+        GEO_DOCUMENTS_S3_BUCKET: "sentropic-geo",
+        GEO_DOCUMENTS_S3_ACCESS_KEY: "geo-read-access",
+        GEO_DOCUMENTS_S3_SECRET_KEY: "geo-read-secret",
+      });
+      expect(() => resolveGeoDocumentsS3Config(config)).toThrow(
+        "GEO_DOCUMENTS_S3_FORCE_PATH_STYLE is required when GEO_DOCUMENTS_REPOINT=1",
+      );
+    });
+
+    it("carries forcePathStyle=false through for a virtual-hosted OVH bucket", () => {
+      const config = loadConfig({
+        ...BASE_ENV,
+        GEO_DOCUMENTS_REPOINT: "1",
+        GEO_DOCUMENTS_S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net",
+        GEO_DOCUMENTS_S3_REGION: "bhs",
+        GEO_DOCUMENTS_S3_BUCKET: "sentropic-geo",
+        GEO_DOCUMENTS_S3_ACCESS_KEY: "geo-read-access",
+        GEO_DOCUMENTS_S3_SECRET_KEY: "geo-read-secret",
+        GEO_DOCUMENTS_S3_FORCE_PATH_STYLE: "false",
+      });
+      expect(resolveGeoDocumentsS3Config(config).forcePathStyle).toBe(false);
+    });
+
+    it("fails fast instead of inheriting immo config when the geo wiring is incomplete", () => {
+      const config = loadConfig({ ...BASE_ENV, GEO_DOCUMENTS_REPOINT: "1" });
+      expect(() => resolveGeoDocumentsS3Config(config)).toThrow(
+        "GEO_DOCUMENTS_S3_ENDPOINT is required when GEO_DOCUMENTS_REPOINT=1",
+      );
+    });
+  });
+
   describe("OIDC disabled (variables absent)", () => {
     it("parses successfully when OIDC vars are undefined", () => {
       const cfg = loadConfig({ ...BASE_ENV });

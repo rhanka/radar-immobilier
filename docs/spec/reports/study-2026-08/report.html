@@ -1,0 +1,525 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/docs/spec/reports/study-2026-08/"><title>Rapport de livraison</title><style>
+@page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; line-height: 1.42; font-size: 10.5px; }
+h1 { font-size: 28px; line-height: 1.12; color: #0b1728; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 3px solid #2563eb; }
+h2 { font-size: 18px; color: #10203a; margin: 26px 0 10px; padding-top: 6px; border-top: 1px solid #d8dee9; break-after: avoid; }
+h3 { font-size: 13.5px; color: #1d3557; margin: 18px 0 8px; break-after: avoid; }
+h4 { font-size: 12px; margin: 14px 0 6px; break-after: avoid; }
+p { margin: 6px 0; }
+ul, ol { margin-top: 5px; padding-left: 20px; }
+li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 9px; break-inside: avoid; }
+th, td { border: 1px solid #cbd5e1; padding: 4px 5px; vertical-align: top; }
+th { background: #eef4ff; color: #10203a; font-weight: 700; }
+blockquote { border-left: 4px solid #93c5fd; background: #f8fbff; margin: 10px 0; padding: 8px 10px; color: #334155; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #f1f5f9; padding: 1px 3px; border-radius: 3px; font-size: 0.9em; }
+pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 6px; overflow: hidden; font-size: 8.5px; }
+img { display: block; max-width: 100%; max-height: 132mm; margin: 8px auto 16px; border: 1px solid #d7dde8; border-radius: 8px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12); break-inside: avoid; }
+hr { border: 0; border-top: 1px solid #d8dee9; margin: 18px 0; }
+strong { color: #0f172a; }
+a { color: #1d4ed8; text-decoration: none; }
+.cover-note { font-size: 10px; color: #64748b; margin-bottom: 18px; }
+</style></head><body><h1>Rapport d&#39;étude — Radar Immobilier</h1>
+<p>Période étudiée : 2026-07-13 → 2026-08-09<br>Statut : rapport de période final — périmètres IMMO et GEO.<br>Périmètre de mesure : livraisons de la fenêtre ; état Track, production IMMO et catalogue OGC
+GEO <strong>[effectif — mesures du 2026-08-09]</strong> ; photographie qualité GEO <strong>[effectif —
+2026-07-25]</strong>. Les métriques antérieures non remesurables sans accès authentifié sont conservées
+uniquement comme baselines datées.</p>
+<blockquote>
+<p><strong>Note de lecture — effectif vs projeté.</strong> Chaque chiffre est qualifié :
+<strong>[effectif]</strong> = mesuré réellement sur les données ou le code à une date donnée ;
+<strong>[projeté]</strong> = extrapolation crédible mais non encore réalisée ;
+<strong>[en attente]</strong> = dépend d&#39;une donnée ou d&#39;une livraison externe identifiée et demandée.
+Aucune métrique n&#39;est présentée comme acquise si elle ne l&#39;est pas. Les mesures reposent sur des
+commandes bornées et reproductibles, documentées en annexe.</p>
+</blockquote>
+<hr>
+<h2>Résumé exécutif</h2>
+<p>Le radar propose désormais une chaîne de décision lisible dans une même expérience :
+<strong>signal → preuve → zone → lot → décision client</strong>. L&#39;utilisateur part d&#39;un fait réglementaire,
+en vérifie le contexte, choisit une zone puis un lot en deux clics et conserve la zone active
+pendant l&#39;examen parcellaire. Le retrait du score « Potentiel x.x/10 », qui n&#39;était pas fondé sur
+les caractéristiques du lot, évite qu&#39;une précision d&#39;interface soit confondue avec une
+évaluation démontrée. La carte Signaux est aussi utilisable sur petit écran : fil centré sur une
+ligne, légendes repliées et outil de mesure accessible.</p>
+<p>Cette expérience n&#39;est crédible que si les couches GEO qui la portent sont qualifiées. La
+présence canonique mesurée atteint <strong>29/30</strong> villes Focus et <strong>868/1104</strong> villes provinciales en
+zonage, <strong>30/30</strong> et <strong>1102/1104</strong> en lots, ainsi que <strong>29/30</strong> et <strong>596/1104</strong> pour les
+collections de normes <strong>[effectif — API GEO, 2026-08-09]</strong>. Ces nombres attestent une couche
+servie, pas sa complétude réglementaire, son bon millésime ni sa preuve exacte.</p>
+<blockquote>
+<p><strong>Deux bancs E2E, deux questions différentes.</strong></p>
+<ul>
+<li><strong>Couverture : Focus 30 vs Province ≈1104.</strong> Le banc vérifie si les couches nécessaires sont
+présentes. Les deux périmètres restent distincts et ne sont jamais additionnés. Ses limites
+principales sont la qualité variable des grilles et de leur millésime, l&#39;absence de données
+de propriétaire gouvernées et l&#39;écart entre présence d&#39;une collection et complétude réelle.</li>
+<li><strong>Profondeur : ~33 témoins vs &gt;5000 ville×signal.</strong> Les <strong>~33 opportunités témoins
+[effectif — banc de référence]</strong> éprouvent la chaîne signal → document → zone → grille → lot ;
+<strong>&gt;5000 couples ville×signal [projeté]</strong> en représentent l&#39;échelle visée. Ses limites sont la
+provenance exacte encore incomplète et le rappel/précision signal↔zone non remesuré sur toute
+la fenêtre.</li>
+</ul>
+</blockquote>
+<h3>Acquis effectifs</h3>
+<ol>
+<li><strong>Une navigation client continue.</strong> Le parcours ville → zone → lot garde la zone active au
+clic sur le lot et présente les deux contextes dans la sélection <strong>[effectif — code fusionné
+et build servi vérifié]</strong>.</li>
+<li><strong>Une décision plus honnête.</strong> Le score parcellaire « Potentiel x.x/10 » a été retiré faute de
+fondement démontré sur le lot <strong>[effectif — code fusionné]</strong>.</li>
+<li><strong>Une carte Signaux adaptée au mobile.</strong> Le fil de navigation, les légendes et la mesure ont
+été réorganisés pour les petits écrans <strong>[effectif — code fusionné et build servi vérifié]</strong>.</li>
+<li><strong>Un substrat GEO largement servi.</strong> Le Focus 30 dispose des lots pour 30 villes et du zonage
+pour 29 ; les lots sont présents pour 1102 des 1104 municipalités cibles <strong>[effectif — API
+GEO, 2026-08-09]</strong>.</li>
+<li><strong>Une chaîne de vérité mieux bornée.</strong> Les contrats d&#39;extraction protègent davantage les
+propriétés métier, la provenance et la séparation entre candidat et publication
+<strong>[effectif — code et tests fusionnés]</strong>.</li>
+<li><strong>Un flux assistant mieux aligné.</strong> Le connecteur MCP lit le même flux de signaux réels que
+l&#39;application sous l&#39;identité de l&#39;utilisateur <strong>[effectif — code et tests fusionnés]</strong>.</li>
+</ol>
+<h3>Limites assumées</h3>
+<table>
+<thead>
+<tr>
+<th>Limite</th>
+<th>Banc principalement touché</th>
+<th>Lecture correcte</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qualité variable des grilles et de leur millésime</td>
+<td>Couverture</td>
+<td>Une collection de normes présente ne prouve pas que chaque norme est complète, en vigueur et rattachée au bon lot.</td>
+</tr>
+<tr>
+<td>Provenance exacte encore incomplète</td>
+<td>Profondeur</td>
+<td>La jointure de provenance existe largement, mais la preuve exacte v2 reste non évaluée ou incomplète à l&#39;échelle du portefeuille.</td>
+</tr>
+<tr>
+<td>Rappel/précision signal↔zone non remesuré sur la fenêtre</td>
+<td>Profondeur</td>
+<td>La dernière baseline comparable demeure datée du 2026-06-29 ; aucun gain de période n&#39;est revendiqué.</td>
+</tr>
+<tr>
+<td>PV, signaux et citations non remesurés sur la production authentifiée</td>
+<td>Les deux</td>
+<td>Les valeurs de juillet restent des baselines datées, avec TODO de remesure ; aucun chiffre courant n&#39;est inféré.</td>
+</tr>
+<tr>
+<td>Aucune donnée de propriétaire livrée</td>
+<td>Couverture</td>
+<td>Acquisition, base légale et gouvernance restent <strong>[en attente]</strong>.</td>
+</tr>
+<tr>
+<td>Présence d&#39;une collection ≠ complétude réglementaire</td>
+<td>Couverture</td>
+<td>Les comptes OGC mesurent la présence canonique, pas le contenu, la fraîcheur ou la valeur juridique.</td>
+</tr>
+<tr>
+<td>~33 témoins ≠ généralisation</td>
+<td>Profondeur</td>
+<td>L&#39;échelle <strong>&gt;5000 ville×signal</strong> demeure <strong>[projeté]</strong>.</td>
+</tr>
+</tbody></table>
+<h3>Chiffres clés — deux périmètres : <strong>Focus 30</strong> vs <strong>Province ≈1104</strong></h3>
+<p>Les couches restent distinctes : le PV est le substrat documentaire ; un signal est une
+extraction ; le zonage et les lots sont des géométries servies ; la grille porte les normes ; la
+réconciliation et la preuve relient ces couches. Le tableau ne les additionne jamais.</p>
+<table>
+<thead>
+<tr>
+<th>Couche (finalité)</th>
+<th align="right"><strong>Focus 30</strong></th>
+<th align="right"><strong>Province ≈1104</strong></th>
+<th>Statut</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PV scrapés</strong> — substrat documentaire</td>
+<td align="right"><strong>27/30</strong></td>
+<td align="right"><strong>~1007/1104</strong></td>
+<td><strong>[effectif — baseline 2026-07-02, hors fenêtre]</strong> ; à remesurer</td>
+</tr>
+<tr>
+<td><strong>Signaux extraits</strong> — faits réglementaires</td>
+<td align="right"><strong>25/30</strong></td>
+<td align="right"><strong>978/1104</strong></td>
+<td><strong>[effectif — baseline 2026-07-02, hors fenêtre]</strong> ; à remesurer</td>
+</tr>
+<tr>
+<td><strong>Signaux à citation vérifiable</strong></td>
+<td align="right"><strong>56/70</strong></td>
+<td align="right">—</td>
+<td><strong>[effectif — baseline 2026-07-02, hors fenêtre]</strong> ; à remesurer, cible 100 %</td>
+</tr>
+<tr>
+<td><strong>Zonage servi</strong> — collection canonique présente</td>
+<td align="right"><strong>29/30</strong></td>
+<td align="right"><strong>868/1104</strong></td>
+<td><strong>[effectif — API GEO 2026-08-09]</strong> ; présence, pas complétude</td>
+</tr>
+<tr>
+<td><strong>Grilles/normes servies</strong> — collection canonique présente</td>
+<td align="right"><strong>29/30</strong></td>
+<td align="right"><strong>596/1104</strong></td>
+<td><strong>[effectif — API GEO 2026-08-09]</strong> ; qualité et millésime à qualifier</td>
+</tr>
+<tr>
+<td><strong>Lots servis</strong> — collection canonique présente</td>
+<td align="right"><strong>30/30</strong></td>
+<td align="right"><strong>1102/1104</strong></td>
+<td><strong>[effectif — API GEO 2026-08-09]</strong> ; <code>austin</code> et <code>saint-marc-du-lac-long</code> absents</td>
+</tr>
+<tr>
+<td><strong>Signaux désignant une zone</strong></td>
+<td align="right"><strong>14/30</strong></td>
+<td align="right">—</td>
+<td><strong>[effectif — baseline 2026-07-02, hors fenêtre]</strong> ; à remesurer</td>
+</tr>
+<tr>
+<td><strong>Consistance signal↔zone — rappel</strong></td>
+<td align="right"><strong>~60 %</strong> (28/47)</td>
+<td align="right"><strong>59,2 %</strong> (71/120, 55 villes)</td>
+<td><strong>[effectif — dernière mesure 2026-06-29, hors fenêtre]</strong> ; à remesurer</td>
+</tr>
+<tr>
+<td><strong>Données nominatives</strong></td>
+<td align="right">—</td>
+<td align="right">—</td>
+<td><strong>[en attente]</strong> — acquisition et gouvernance non livrées</td>
+</tr>
+<tr>
+<td><strong>Aires TOD</strong></td>
+<td align="right">à mesurer sur la cohorte canonique</td>
+<td align="right"><strong>4/39</strong> cas applicables complets</td>
+<td><strong>[effectif — snapshot GEO 2026-07-25]</strong> ; reliquat <strong>[en attente]</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Attention au vocabulaire GEO.</strong> Certains artefacts du dépôt GEO emploient aussi le nom
+<code>focus30</code> pour une cohorte de recette différente. Tous les chiffres « Focus 30 » de ce rapport
+utilisent exclusivement la cohorte canonique Radar : <code>priorityRank &lt;= 30</code>, villes non
+exclues.</p>
+</blockquote>
+<blockquote>
+<p><strong>TODO — remesure authentifiée.</strong> Mesurer PV, signaux, citations et références de zone depuis
+la production avec un jeton de rapport non consigné dans le dépôt. Tant que ce jeton n&#39;est pas
+disponible, conserver les baselines datées ci-dessus.</p>
+</blockquote>
+<blockquote>
+<p><strong>TODO — recette signal↔zone.</strong> Mesurer rappel et précision sur un même snapshot servi avec la
+commande Track/Make ratifiée pour WP5. Aucun target <code>make</code> canonique n&#39;étant exposé dans la
+baseline courante, ne pas substituer un script ad hoc à cette recette.</p>
+</blockquote>
+<hr>
+<h1>1 — IMMO : une expérience client navigable</h1>
+<h2>1.A — De la zone au lot sans perdre le contexte</h2>
+<p>La navigation ferme un problème d&#39;usage central : lorsqu&#39;un utilisateur choisit une zone puis un
+lot, la zone ne disparaît plus du contexte. Deux gestes lisibles suffisent — sélectionner la
+zone, puis le lot — et le panneau conserve les deux niveaux d&#39;information. La carte devient le
+point de jonction visible entre le zonage GEO et l&#39;objet parcellaire <strong>[effectif — PR #499
+fusionnée, build servi vérifié]</strong>.</p>
+<p><img src="screenshots/r3-strict-zone-lot.png" alt="Zone et lot sélectionnés, contexte de zone conservé"></p>
+<p><em>Recette de la navigation en deux clics : le lot est sélectionné à l&#39;intérieur de la zone, dont
+le contour et le contexte restent actifs. Cette capture de la séquence de recette précède le
+retrait distinct du score « Potentiel », documenté ci-dessous.</em></p>
+<p>Cette évolution s&#39;inscrit dans les quatre surfaces du radar :</p>
+<ul>
+<li><strong>Signaux</strong> : carte et liste reliées aux signaux réels, filtres simplifiés et navigation
+responsive ;</li>
+<li><strong>Sources</strong> : console et matrice de couverture, avec décomptes restrictifs préservés ;</li>
+<li><strong>Évaluation</strong> : navigation zone/lot, fiches de preuve et affichage des données disponibles ;</li>
+<li><strong>Opportunités</strong> : vivier et filtre B′ séparant classification, validation et usage client.</li>
+</ul>
+<p>Ces changements sont <strong>[effectif — code fusionné dans la fenêtre]</strong>. Leur recette fonctionnelle
+exhaustive reste <strong>[projeté]</strong> ; le WP5 Recette est à <strong>1/9 (11 %) [effectif — mesure Track du
+2026-08-09]</strong>.</p>
+<h2>1.B — Retirer un signal de décision non fondé</h2>
+<p><img src="screenshots/no-potentiel-drawer.png" alt="Fiche lot sans score de potentiel"></p>
+<p><em>Fiche lot après retrait du score non fondé : les attributs disponibles et les normes de zonage
+restent visibles, sans note synthétique artificielle.</em></p>
+<p>Le retrait du score « Potentiel x.x/10 » ferme une dette de confiance : un nombre précis ne doit
+pas suggérer une évaluation parcellaire lorsque ses composantes ne sont pas établies. Le produit
+gagne ici par une règle simple : <strong>ce qui n&#39;est pas fondé n&#39;est pas affiché comme décision</strong>
+<strong>[effectif — PR #500 fusionnée]</strong>.</p>
+<p>Cette règle rejoint la méthode du rapport : une donnée présente reste distincte d&#39;une donnée
+complète ; une projection reste <strong>[projeté]</strong> ; une dépendance externe reste <strong>[en attente]</strong>.</p>
+<h2>1.C — Carte Signaux utilisable sur petit écran</h2>
+<table>
+<thead>
+<tr>
+<th>Commandes repliées</th>
+<th>Légende ouverte</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><img src="screenshots/mob-1-default.png" alt="Carte Signaux mobile, commandes repliées"></td>
+<td><img src="screenshots/mob-2-legend-open.png" alt="Carte Signaux mobile, légende ouverte"></td>
+</tr>
+<tr>
+<td><em>Fil Province → Ville → Zone → Lot centré ; mesure en bas à droite.</em></td>
+<td><em>La légende des signaux s&#39;ouvre à la demande.</em></td>
+</tr>
+</tbody></table>
+<p>La carte conserve son fil de navigation sur une seule ligne, centre l&#39;étape active, replie les
+légendes derrière une icône et maintient l&#39;outil de mesure en bas à droite. L&#39;information demeure
+accessible sans recouvrir en permanence la carte <strong>[effectif — PR #501 fusionnée]</strong>.</p>
+<h2>1.D — Même flux de données dans l&#39;application et l&#39;assistant</h2>
+<p>Le connecteur MCP interroge <code>GET /api/graph-signals/:city</code>, le même flux que l&#39;application,
+sous l&#39;identité de l&#39;utilisateur. Cette livraison ferme le risque de présenter dans l&#39;assistant
+un jeu de signaux différent de celui vu dans le radar <strong>[effectif — PR #371 et #372 fusionnées,
+code et tests]</strong>.</p>
+<blockquote>
+<p><strong>TODO — parité authentifiée.</strong> Avec un compte de recette, vérifier qu&#39;une même ville retourne
+le même ensemble d&#39;identifiants de signaux dans l&#39;application et par <code>search_signals</code>. Cette
+mesure exige un jeton utilisateur et ne doit pas être simulée avec des fixtures.</p>
+</blockquote>
+<h2>1.E — Provenance du comportement servi</h2>
+<p>Les trois évolutions d&#39;interface correspondent aux PR #499, #500 et #501. Le fichier
+<code>build.json</code> de la production retourne le SHA court <code>e27baeb</code>, associé à la dernière de ces
+livraisons <strong>[effectif — mesure du 2026-08-09]</strong>. Cette provenance relie le comportement visible
+à une révision précise ; elle ne remplace ni la recette E2E authentifiée sur toutes les vues ni
+la remesure des données protégées.</p>
+<hr>
+<h1>2 — GEO : données, extraction et preuve</h1>
+<p>La contribution GEO de la période ne se résume pas à davantage de collections. Elle rend plus
+explicites trois états auparavant faciles à confondre : <strong>servi</strong>, <strong>réconcilié</strong> et <strong>prouvé</strong>.</p>
+<h2>2.1 — Couverture servie : zonage, lots et normes</h2>
+<p>La mesure exacte par slug canonique sur l&#39;API GEO donne :</p>
+<table>
+<thead>
+<tr>
+<th>Couche (finalité)</th>
+<th align="right"><strong>Focus 30</strong></th>
+<th align="right"><strong>Province ≈1104</strong></th>
+<th>Statut</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Zonage — trouver la géométrie d&#39;une zone</td>
+<td align="right"><strong>29/30</strong></td>
+<td align="right"><strong>868/1104</strong></td>
+<td><strong>[effectif — 2026-08-09]</strong></td>
+</tr>
+<tr>
+<td>Lots — localiser la parcelle</td>
+<td align="right"><strong>30/30</strong></td>
+<td align="right"><strong>1102/1104</strong></td>
+<td><strong>[effectif — 2026-08-09]</strong></td>
+</tr>
+<tr>
+<td>Normes — disposer d&#39;une collection canonique</td>
+<td align="right"><strong>29/30</strong></td>
+<td align="right"><strong>596/1104</strong></td>
+<td><strong>[effectif — 2026-08-09]</strong> ; contenu à recetter</td>
+</tr>
+</tbody></table>
+<p>Cette couverture permet au produit de demander des couches cohérentes par ville. Elle ne permet
+pas encore d&#39;affirmer qu&#39;une norme est la bonne norme en vigueur pour chaque lot. Le niveau de
+lecture est donc : <strong>capacité de service acquise, qualité réglementaire encore hétérogène</strong>.</p>
+<p>La photographie portefeuille GEO du 25 juillet complète la présence par une mesure de qualité
+sur son univers opérationnel propre de <strong>1106 municipalités</strong> :</p>
+<ul>
+<li>zonage classé complet pour <strong>868/1106</strong>, incomplet pour <strong>195/1106</strong> et inconnu pour
+<strong>43/1106 [effectif]</strong> ;</li>
+<li>consistance lot↔zone classée complète pour <strong>713/1106</strong>, incomplète pour <strong>121/1106</strong> et
+inconnue pour <strong>272/1106 [effectif]</strong> ; sur <strong>864</strong> municipalités auditables, le taux pondéré
+d&#39;incohérence est <strong>4,34 % [effectif]</strong> ;</li>
+<li>normes classées complètes pour <strong>502/1106</strong>, incomplètes pour <strong>290/1106</strong> et inconnues pour
+<strong>314/1106 [effectif]</strong> ;</li>
+<li>provenance zone avec jointure exacte pour <strong>868/1106 [effectif]</strong>, mais preuve exacte v2
+complète pour <strong>0/1106 [effectif]</strong>.</li>
+</ul>
+<p>Le dénominateur 1106 appartient à ce snapshot GEO. Il n&#39;est jamais additionné ni substitué au
+périmètre client ≈1104 ; il sert à qualifier la profondeur de la donnée.</p>
+<h2>2.2 — Extraction : durcir la chaîne de vérité</h2>
+<blockquote>
+<p><strong>Encadré — finalité v2.3 → v3.4.</strong> La v2.3 impose qu&#39;un signal publiable soit relié à une
+citation vérifiable. La fondation v3.4 vise à rendre la provenance rejouable, à préserver les
+propriétés métier au fil des transformations et à séparer une sortie candidate de son
+application. Ces garanties existent dans le code et les tests <strong>[effectif]</strong> ; leur
+généralisation à la province reste <strong>[projeté]</strong>.</p>
+</blockquote>
+<p>Le cas Brossard a produit un graphe <code>MATCHED</code> avec <strong>23 événements</strong> stockés dans S3
+<strong>[effectif — livraison du 2026-08-07]</strong>. Ce cas confirme la capacité sur un exemple borné ; il
+ne suffit pas à réviser les totaux de signaux, qui n&#39;ont pas été remesurés sous authentification.</p>
+<h2>2.3 — Réconciliation et preuve : le chantier déterminant</h2>
+<p>La chaîne de valeur doit répondre à cinq questions : quel signal, dans quel document et à quel
+passage, pour quelle zone, avec quelle grille, et sur quel lot ? La période a renforcé les
+contrats de provenance, les événements de désignation et les contrôles de publication. Elle n&#39;a
+pas encore produit une nouvelle mesure comparable du rappel et de la précision à l&#39;échelle de la
+fenêtre.</p>
+<p>La dernière référence signal↔zone reste donc datée du 29 juin : <strong>71/120 = 59,2 %</strong> sur 55 villes
+et <strong>~60 %</strong> sur le proxy Focus <strong>[effectif — hors fenêtre]</strong>. La photographie du 25 juillet
+montre en parallèle que la preuve exacte v2 n&#39;est encore complète pour aucune municipalité du
+portefeuille GEO. Ce zéro qualifie un contrôle non satisfait ou non évalué ; il ne signifie pas
+« aucune donnée utile ».</p>
+<p>Le volume servi n&#39;est donc plus le seul goulot. Pour franchir le banc de profondeur, il faut
+mesurer la correspondance signal↔zone sur un snapshot stable, vérifier la citation et le
+millésime, puis démontrer le rattachement zone → grille → lot sur les témoins avant de généraliser.</p>
+<h2>2.4 — Limites GEO et dépendances attendues</h2>
+<ul>
+<li><code>lile-dorval</code> ne possède pas de collection canonique de zonage ni de normes
+<strong>[effectif — 2026-08-09]</strong>.</li>
+<li><code>austin</code> et <code>saint-marc-du-lac-long</code> ne possèdent pas de collection canonique de lots
+<strong>[effectif — 2026-08-09]</strong>.</li>
+<li>Les normes présentes doivent encore être qualifiées par source, millésime, zone et verbatim ;
+leur généralisation prouvée est <strong>[projeté]</strong>.</li>
+<li>La provenance exacte reste incomplète malgré la présence de jointures ; elle doit être
+contrôlée à la valeur, pas seulement au niveau de la collection <strong>[projeté]</strong>.</li>
+<li>Les propriétaires ne sont ni collectés ni affichés ; base légale, source et gouvernance sont
+<strong>[en attente]</strong>.</li>
+<li>Le snapshot GEO classe <strong>39</strong> municipalités comme applicables au TOD et <strong>4/39</strong> comme
+complètes <strong>[effectif — 2026-07-25]</strong>. Le reliquat et la correspondance avec les villes de
+référence restent <strong>[en attente]</strong>.</li>
+</ul>
+<hr>
+<h1>3 — Avancement et lecture de la période</h1>
+<p>Le Track est la colonne vertébrale du décompte. Le programme porte <strong>92 éléments faits sur 176,
+soit 52 % [effectif — mesure du 2026-08-09]</strong>. Les workpackages les plus directement liés au
+présent rapport montrent des maturités différentes :</p>
+<table>
+<thead>
+<tr>
+<th>Workpackage</th>
+<th>Finalité</th>
+<th align="right">Avancement cumulé</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>WP1 — DATA</td>
+<td>Sources et substrat</td>
+<td align="right"><strong>17/22 (77 %) [effectif]</strong></td>
+</tr>
+<tr>
+<td>WP2 — EXTRACTION</td>
+<td>Signaux et ontologie</td>
+<td align="right"><strong>9/19 (47 %) [effectif]</strong></td>
+</tr>
+<tr>
+<td>WP4 — RÉCONCILIATION &amp; PREUVE</td>
+<td>Signal, zone, citation, lot</td>
+<td align="right"><strong>14/21 (67 %) [effectif]</strong></td>
+</tr>
+<tr>
+<td>WP5 — RECETTE</td>
+<td>Mesure et parité avec la référence</td>
+<td align="right"><strong>1/9 (11 %) [effectif]</strong></td>
+</tr>
+<tr>
+<td>WP6 — PRODUIT</td>
+<td>Application radar client</td>
+<td align="right"><strong>21/44 (48 %) [effectif]</strong></td>
+</tr>
+<tr>
+<td>WP7 — PLATEFORME &amp; DÉPLOIEMENT</td>
+<td>Service et CD</td>
+<td align="right"><strong>16/25 (64 %) [effectif]</strong></td>
+</tr>
+</tbody></table>
+<p>Ces ratios sont cumulatifs et ne constituent pas un débit de la période. La fenêtre contient
+<strong>256 des 800 événements Track [effectif]</strong>. Elle compte aussi <strong>95 PR fusionnées dans Radar
+[effectif]</strong> et <strong>1668 commits sur <code>geo/origin/main</code> [effectif]</strong>. Ces volumes établissent la
+provenance de l&#39;activité ; ils ne mesurent pas la valeur client, décrite par les capacités et les
+limites ci-dessus.</p>
+<hr>
+<h1>4 — Acquis, limites et feuille de route</h1>
+<h2>4.1 — Ce que la période permet d&#39;affirmer</h2>
+<ul>
+<li>Le client peut parcourir une ville, une zone puis un lot en conservant le contexte de zone
+<strong>[effectif]</strong>.</li>
+<li>Le produit retire un score non fondé et rend plus honnête l&#39;information présentée
+<strong>[effectif]</strong>.</li>
+<li>La carte Signaux conserve ses fonctions principales sur petit écran <strong>[effectif]</strong>.</li>
+<li>Le banc Focus 30 dispose des lots pour 30 villes et du zonage pour 29
+<strong>[effectif — présence canonique]</strong>.</li>
+<li>La fondation d&#39;extraction protège mieux les propriétés métier et la provenance
+<strong>[effectif — code et tests]</strong>.</li>
+<li>La qualité GEO peut être décrite sans confondre couverture, complétude, réconciliation et
+preuve <strong>[effectif — snapshot 2026-07-25]</strong>.</li>
+</ul>
+<h2>4.2 — Ce que la période ne permet pas encore d&#39;affirmer</h2>
+<ul>
+<li>que 868 collections de zonage sont toutes complètes, du bon millésime et juridiquement
+prouvées ;</li>
+<li>que les baselines PV, signaux et citations de juillet ont progressé d&#39;un nombre donné ;</li>
+<li>que le rappel ou la précision signal↔zone a progressé à périmètre comparable ;</li>
+<li>que les ~33 témoins <strong>[effectif — banc de référence]</strong> sont généralisés à
+<strong>&gt;5000 ville×signal [projeté]</strong> ;</li>
+<li>que des données de propriétaires sont disponibles ou gouvernées ;</li>
+<li>que la parité fonctionnelle et de données est recettée sur toute la surface client.</li>
+</ul>
+<h2>4.3 — Priorités proposées pour la période suivante</h2>
+<ol>
+<li><strong>Recetter la chaîne de preuve.</strong> Ratifier la commande Track/Make de rappel et précision, puis
+mesurer Focus 30 et Province séparément <strong>[projeté]</strong>.</li>
+<li><strong>Requalifier les couches servies.</strong> Pour zonage et normes : source, millésime, complétude,
+code de zone et preuve exacte v2 <strong>[projeté]</strong>.</li>
+<li><strong>Remesurer PV, signaux et citations sous authentification.</strong> Publier une photographie datée
+et faire de 100 % de citations vérifiables un gate <strong>[projeté]</strong>.</li>
+<li><strong>Recetter l&#39;expérience produit.</strong> Parcours mobile et bureau, zone persistante, lot, Sources,
+Évaluation, Opportunités et parité MCP <strong>[projeté]</strong>.</li>
+<li><strong>Conserver les dépendances explicites.</strong> Les propriétaires restent <strong>[en attente]</strong> ; pour le
+TOD, qualifier les <strong>4/39</strong> cas complets puis maintenir le reliquat <strong>[en attente]</strong> tant que
+source et livraison ne sont pas acquises.</li>
+</ol>
+<hr>
+<h1>Conclusion</h1>
+<p>Sur la période, Radar Immobilier a gagné en <strong>crédibilité d&#39;usage</strong> : la chaîne
+signal → preuve → zone → lot devient une expérience client réellement navigable, l&#39;interface
+retire une note parcellaire non justifiée et la carte reste praticable sur mobile. La donnée GEO
+est servie beaucoup plus largement qu&#39;elle n&#39;est encore prouvée, mais cette différence est
+désormais nommée et mesurable.</p>
+<p>La suite ne consiste donc pas à présenter le volume comme une fin. Elle consiste à fermer la
+recette sur les ~33 témoins <strong>[effectif — banc de référence]</strong>, puis à démontrer la
+généralisation vers <strong>&gt;5000 ville×signal [projeté]</strong> avec les mêmes exigences de citation, de
+zone, de grille, de lot, de provenance et de millésime.</p>
+<hr>
+<h1>Annexes — métriques citées, provenance et commandes</h1>
+<h2>A. Track</h2>
+<p>Commandes de lecture du journal partagé :</p>
+<pre><code class="language-bash">track report
+track report --wp
+track report --decisions
+track report --since 2026-07-13 --until 2026-08-09 --wp --decisions --format json
+</code></pre>
+<p>Résultats cités : baseline <code>43c873e0d2cf</code>, <strong>92/176</strong>, neuf workpackages, <strong>256/800</strong>
+événements dans la fenêtre et aucune décision structurée en attente
+<strong>[effectif — 2026-08-09]</strong>.</p>
+<h2>B. Livraisons Radar et production</h2>
+<pre><code class="language-bash">gh pr list --repo rhanka/radar-immobilier --state merged --search &#39;merged:2026-07-12..2026-08-10&#39; --limit 200 --json number,mergedAt,mergeCommit,title
+gh pr view 499 --repo rhanka/radar-immobilier --json number,title,mergedAt,mergeCommit
+gh pr view 500 --repo rhanka/radar-immobilier --json number,title,mergedAt,mergeCommit
+gh pr view 501 --repo rhanka/radar-immobilier --json number,title,mergedAt,mergeCommit
+curl -fsSL https://immo.sent-tech.ca/build.json
+</code></pre>
+<p>Le décompte de <strong>95 PR [effectif]</strong> utilise les timestamps <code>mergedAt</code> bornés à la journée de
+Toronto : du <code>2026-07-13T04:00:00Z</code> au <code>2026-08-10T03:59:59.999Z</code>.</p>
+<h2>C. Couverture GEO</h2>
+<p>Source de la cohorte :
+<code>packages/radar-sources/src/geo/municipalities.qc.json</code>. La mesure correspond exactement le slug
+canonique aux collections <code>qc-zonage-&lt;slug&gt;</code>, <code>qc-lots-&lt;slug&gt;</code> et
+<code>qc-zonage-norms-&lt;slug&gt;</code>.</p>
+<p>Le filtre Focus doit impérativement être :</p>
+<pre><code class="language-jq">select(.excluded != true and .priorityRank != null and .priorityRank &lt;= 30)
+</code></pre>
+<p>Le test explicite de <code>null</code> évite d&#39;inclure Montréal et Laval par coercition <code>jq</code>. Résultats
+<strong>[effectif — 2026-08-09]</strong> : <strong>3883 collections</strong> au total ; zonage <strong>29/30</strong> et
+<strong>868/1104</strong> ; lots <strong>30/30</strong> et <strong>1102/1104</strong> ; normes canoniques présentes <strong>29/30</strong> et
+<strong>596/1104</strong>.</p>
+<h2>D. Qualité GEO et historique</h2>
+<p>Photographie qualité et historique cités :</p>
+<pre><code class="language-bash">git -C /home/antoinefa/src/geo show origin/main:work/coverage/portfolio-report-history/20260725.json
+git -C /home/antoinefa/src/geo rev-list --count --since=&#39;2026-07-13 00:00:00 -0400&#39; --until=&#39;2026-08-10 00:00:00 -0400&#39; origin/main
+</code></pre>
+<p>Le snapshot qualité utilise un univers GEO de 1106 municipalités. Ses ratios restent attachés à
+ce dénominateur et ne sont jamais additionnés aux valeurs du périmètre Radar ≈1104.</p>
+<h2>E. Baselines conservées hors fenêtre</h2>
+<p>Les valeurs PV, signaux, citations, signal↔zone et parité « 4+ » proviennent du rapport du
+2 juillet : <code>docs/spec/reports/study-2026-07/report.md</code>. Elles servent uniquement de
+comparaison datée et ne constituent pas des livraisons acquises entre le 13 juillet et le
+9 août.</p>
+</body></html>

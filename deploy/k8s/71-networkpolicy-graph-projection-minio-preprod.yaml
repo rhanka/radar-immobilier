@@ -1,0 +1,45 @@
+# allow-graph-projection-to-minio (PREPROD) — §6/citations BLOCKER fix (i-infra,
+# measured at cert-ro).
+#
+# radar-minio (ClusterIP:9000) sits under a default-deny ingress with a
+# restrictive allow-list: only `component: api` (allow-api-to-minio) and
+# snapshot-dump may reach it. The refresh-projection CronJob runs as
+# `component: graph-projection`, so it reads GRAPH_S3 from radar-minio:9000 but
+# minio's ingress NP DROPS it → the projection can't read the graph →
+# graph/<city>/latest.json never lands in PG → the API (which CAN read minio)
+# serves EMPTY. This policy is the missing ingress rule.
+#
+# Modeled on allow-api-to-minio (ingress ON minio, port 9000) + the
+# graph-projection selector from allow-graph-projection-to-postgres. PREPROD ns
+# only (§6 is preprod-only; the prod refresh CronJobs are dormant).
+#
+# APPLICATION: owner-direct (like deploy/k8s/11-…rbac.yaml) — the CI deployer SA
+# has no networkpolicies grant, and NP is cluster-security config. NOT applied by
+# the CD; NOT in any kustomization. Owner runs, on hlhedx:
+#   kubectl apply -f deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml
+# i-infra co-vals (selectors + ns + that it unblocks projection→minio:9000).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-graph-projection-to-minio
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: minio
+spec:
+  # Ingress ON the minio pod(s).
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: minio
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: graph-projection
+      ports:
+        - protocol: TCP
+          port: 9000

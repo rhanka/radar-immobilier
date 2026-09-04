@@ -9,6 +9,7 @@ import { describe, it, expect } from "vitest";
 import {
   normalizeForMatch,
   findCitationInPage,
+  findTextOccurrenceInPage,
   itemsOverlappingRanges,
 } from "./pdf-citation-match.js";
 
@@ -51,6 +52,15 @@ describe("findCitationInPage — match exact", () => {
     const pageText = "Le nœud du problème concerne le cœur du règlement.";
     const match = findCitationInPage(pageText, "le noeud du probleme concerne le coeur");
     expect(match).not.toBeNull();
+  });
+});
+
+describe("findTextOccurrenceInPage — recherche plein-texte", () => {
+  it("localise une occurrence courte normalisée et sélectionne la suivante", () => {
+    const pageText = "Terme initial, puis TÉRME final";
+    const match = findTextOccurrenceInPage(pageText, "terme", 1);
+    expect(match).not.toBeNull();
+    expect(pageText.slice(match!.start, match!.end)).toBe("TÉRME");
   });
 });
 

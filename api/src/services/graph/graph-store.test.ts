@@ -15,11 +15,13 @@ import { describe, it, expect } from "vitest";
 import {
   buildNodeRow,
   buildEdgeRow,
+  materializeSeveredSources,
   mergeEdgeRows,
   graphifyGraphSchema,
   upsertGraph,
   upsertGraphAtomic,
   findMissingBusinessProperties,
+  findMissingSourceRefs,
   countCompleteSignals,
   isCompleteSignalProps,
   queryNeighbors,
@@ -110,6 +112,27 @@ describe("buildNodeRow", () => {
     const row = buildNodeRow(node, null);
     expect(row.type).toBe("concept");
     expect(row.citySlug).toBeNull();
+  });
+
+  // LOT 1 serving (A.2) — persist the DERIVED regulatoryStatus at materialisation (props.properties,
+  // recomputed here = single source of truth). firm iff statut/etape adopté/en-vigueur ; sinon
+  // anticipation ; aucune preuve → anticipation FAIL-SAFE ; nœud non-règlement → ABSENT (gate).
+  const props = (row: ReturnType<typeof buildNodeRow>) =>
+    ((row.props as Record<string, unknown>).properties ?? {}) as Record<string, unknown>;
+  it("LOT 1 serving — a lifecycle node with etape adoption/entree_vigueur → regulatoryStatus=firm", () => {
+    expect(props(buildNodeRow({ id: "b1", label: "R", type: "Bylaw", properties: { etape: "adoption" } } as GraphifyNode, "x")).regulatoryStatus).toBe("firm");
+    expect(props(buildNodeRow({ id: "b2", label: "R", type: "Bylaw", properties: { etape: "entree_vigueur" } } as GraphifyNode, "x")).regulatoryStatus).toBe("firm");
+  });
+  it("LOT 1 serving — an avis/projet lifecycle node → regulatoryStatus=anticipation", () => {
+    expect(props(buildNodeRow({ id: "e1", label: "A", type: "DesignationEvent", properties: { etape: "avis_motion" } } as GraphifyNode, "x")).regulatoryStatus).toBe("anticipation");
+    expect(props(buildNodeRow({ id: "e2", label: "P", type: "Signal", properties: { etape: "projet_reglement" } } as GraphifyNode, "x")).regulatoryStatus).toBe("anticipation");
+  });
+  it("LOT 1 serving — a node WITHOUT a stage (no etape/statut) → NO regulatoryStatus persisted (fail-safe = anticipation applied at consumer READ of an absent field)", () => {
+    expect(props(buildNodeRow({ id: "b3", label: "R", type: "Bylaw" } as GraphifyNode, "x")).regulatoryStatus).toBeUndefined();
+  });
+  it("LOT 1 serving — a NON-lifecycle node (concept/zone, no etape) gets NO regulatoryStatus (anti-invention gate)", () => {
+    expect(props(buildNodeRow({ id: "z1", label: "Zone", file_type: "concept", properties: { code_zone: "H-1" } } as GraphifyNode, "x")).regulatoryStatus).toBeUndefined();
+    expect(props(buildNodeRow({ id: "z2", label: "Zone" } as GraphifyNode, "x")).regulatoryStatus).toBeUndefined();
   });
 });
 
@@ -344,6 +367,121 @@ describe("business-property preservation gate", () => {
       missingKeys: ["notes"],
     }]);
   });
+
+  // ── intendedRemovals — removal-only reprojections (purge-avis-bylaws) ─────────
+  // The anti-silent-deletion rule treats a whole node absent from `after` as an
+  // empty prop map → all its business keys read as missing → regression. That is
+  // correct for an ACCIDENTAL drop, but a removal-only tool deletes nodes ON
+  // PURPOSE. `intendedRemovals` exempts exactly those nodeIds; the guard stays
+  // armed for every other node.
+  it("flags a business-bearing node that disappears entirely (anti-silent-deletion base case)", () => {
+    // saint-ours reproduction: deleting a Bylaw with business props aborts by
+    // default (no intendedRemovals) — its numero/stage/municipality vanish.
+    const before = [{
+      id: "bylaw-x-326-2026",
+      props: { properties: { numero: "326-2026", stage: "avis", municipality: "x" } },
+    }];
+    const after: { id: string; props: Record<string, unknown> }[] = [];
+    expect(findMissingBusinessProperties(before, after, "x")).toEqual([{
+      citySlug: "x",
+      nodeId: "bylaw-x-326-2026",
+      missingKeys: ["municipality", "numero", "stage"],
+    }]);
+  });
+
+  it("exempts a node listed in intendedRemovals from the disappearance check", () => {
+    const before = [{
+      id: "bylaw-x-326-2026",
+      props: { properties: { numero: "326-2026", stage: "avis", municipality: "x" } },
+    }];
+    const after: { id: string; props: Record<string, unknown> }[] = [];
+    expect(
+      findMissingBusinessProperties(before, after, "x", new Set(["bylaw-x-326-2026"])),
+    ).toEqual([]);
+  });
+
+  it("keeps the guard armed for a disappearing node NOT in intendedRemovals", () => {
+    // Only the explicitly-intended node is exempt; a different node dropping its
+    // business props is still a regression (accidental-drop / drift protection).
+    const before = [
+      { id: "bylaw-x-326-2026", props: { properties: { numero: "326-2026", stage: "avis" } } },
+      { id: "bylaw-x-999-2020", props: { properties: { numero: "999-2020", stage: "adopte" } } },
+    ];
+    const after: { id: string; props: Record<string, unknown> }[] = [];
+    expect(
+      findMissingBusinessProperties(before, after, "x", new Set(["bylaw-x-326-2026"])),
+    ).toEqual([{
+      citySlug: "x",
+      nodeId: "bylaw-x-999-2020",
+      missingKeys: ["numero", "stage"],
+    }]);
+  });
+});
+
+describe("source-ref provenance gate (gate3) — findMissingSourceRefs", () => {
+  const withRefs = (id: string, refs: unknown[]) => ({ id, props: { refs } });
+
+  it("no regression when the candidate preserves the node's source docSha", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("flags a node whose source docSha would DISAPPEAR (the PV-ref loss)", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "ste-martine")).toEqual([
+      { citySlug: "ste-martine", nodeId: "sig:1", missingDocShas: ["SHA_PV"] },
+    ]);
+  });
+
+  it("flags a count-preserving SWAP that gate2 misses (PV docSha replaced by another complete ref)", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV", excerpt: "x" }])];
+    // same node, ref swapped to a DIFFERENT docSha — the "complete" count is
+    // preserved (gate2 blind), but the PV provenance is lost.
+    const after = [withRefs("sig:1", [{ docSha: "SHA_OTHER", excerpt: "y" }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([
+      { citySlug: "x", nodeId: "sig:1", missingDocShas: ["SHA_PV"] },
+    ]);
+  });
+
+  it("allows ADDITIONS — keeping the source and adding a grounding ref does not regress", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [{ docSha: "SHA_PV" }, { docSha: "SHA_GROUNDING", excerpt: "cited" }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("exempts a node listed in intendedRemovals", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x", new Set(["sig:1"]))).toEqual([]);
+  });
+
+  it("recovers the docSha from the CAS rawRef path when the docSha field is absent", () => {
+    const before = [withRefs("sig:1", [{ rawRef: "raw/proces-verbaux-x/cas/SHA_FROM_PATH.pdf" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([
+      { citySlug: "x", nodeId: "sig:1", missingDocShas: ["SHA_FROM_PATH"] },
+    ]);
+  });
+
+  it("excludes generated:// placeholder refs (gen_refs are not real provenance)", () => {
+    const before = [withRefs("sig:1", [{ rawRef: "generated://gen_refs/whatever" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("keys on docSha ALONE, not (docSha, page) — a page refinement for the same doc is not a regression", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV", page: 1 }])];
+    const after = [withRefs("sig:1", [{ docSha: "SHA_PV", page: 10 }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("ignores nodes that carried no source ref before (nothing to protect)", () => {
+    const before = [withRefs("sig:1", [])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
 });
 
 describe("Sutton immutable legacy projection", () => {
@@ -442,6 +580,75 @@ describe("B-prime residential-axis counts", () => {
     });
     // Empty annotations keep A's historic fallback to label-derived precocity.
     expect(isPrecoceSignal("", "Avis de motion — annotation invalide", null)).toBe(true);
+  });
+});
+
+describe("server-side signal date windows", () => {
+  const datedSignal = (id: string, props: Record<string, unknown>) => ({
+    id,
+    citySlug: "date-city",
+    type: "Signal",
+    category: "rezonage",
+    label: "Avis de motion — projet résidentiel",
+    nbUnitesMax: "8",
+    intensite: null,
+    description: null,
+    etapeAnnote: "avis_motion",
+    props: {
+      ...props,
+      properties: {
+        category: "rezonage",
+        etape: "avis_motion",
+        nb_unites_max: "8",
+        ...(typeof props.properties === "object" && props.properties !== null
+          ? props.properties
+          : {}),
+      },
+    },
+    sourceRef: null,
+  });
+
+  it("filters every projection rail using the JSONB date-key precedence", () => {
+    const rows = [
+      datedSignal("nested-camel-in", { properties: { etapeDate: "2026-01-10" } }),
+      datedSignal("nested-snake-in", { properties: { etape_date: "2026-02-10" } }),
+      datedSignal("nested-meeting-in", {
+        properties: { meetingDate: "2026-03-31T23:59:59.999Z" },
+      }),
+      datedSignal("published-fallback-in", { publishedAt: "2026-02-20" }),
+      datedSignal("root-date-in", { meeting_date: "2026-03-01" }),
+      datedSignal("nested-out", { properties: { meeting_date: "2026-04-10" } }),
+      datedSignal("nested-document-out", { properties: { documentDate: "2026-04-10" } }),
+      datedSignal("nested-date-out", { properties: { date: "2026-04-10" } }),
+      datedSignal("no-date", {}),
+      datedSignal("invalid-date", { properties: { date: "not-a-date" } }),
+      datedSignal("nested-wins", {
+        properties: { etapeDate: "2025-12-01", date: "2026-02-01" },
+        date: "2026-02-01",
+      }),
+    ];
+
+    const aggregate = aggregateGraphSignalProjectionRows(rows, {
+      dateFrom: "2026-01-01",
+      dateTo: "2026-03-31",
+    })[0]!;
+
+    expect(aggregate.signalCount).toBe(5);
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(5);
+    expect(aggregate.vivierV2Counts).toMatchObject({ total: 5, qualified: 5 });
+  });
+
+  it("keeps all rows when no date window is supplied", () => {
+    const rows = [
+      datedSignal("dated", { properties: { date: "2025-01-01" } }),
+      datedSignal("undated", {}),
+    ];
+
+    const aggregate = aggregateGraphSignalProjectionRows(rows)[0]!;
+
+    expect(aggregate.signalCount).toBe(2);
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(2);
+    expect(aggregate.vivierV2Counts.total).toBe(2);
   });
 });
 
@@ -740,6 +947,178 @@ describe("buildEdgeRow — idempotency key", () => {
     const r1 = buildEdgeRow(link);
     const r2 = buildEdgeRow(link);
     expect(`${r1.srcId}|${r1.dstId}|${r1.kind}`).toBe(`${r2.srcId}|${r2.dstId}|${r2.kind}`);
+  });
+});
+
+describe("materializeSeveredSources — conforming cited-source ref (§521-ét)", () => {
+  // Baseline shape (extraction): the source lives on the event's derived_from edge
+  // refs[0] = {docSha, page:1}; the raises_signal (event→signal) edge is EMPTY, so
+  // the signal inherits from its raising event.
+  const derivedFrom = (
+    event: string,
+    docSha = "SHA_PV",
+    page: number | undefined = 1,
+  ): GraphifyLink => ({
+    source: event,
+    target: "bylaw-x-026-511",
+    type: "derived_from",
+    refs: [page === undefined ? { docSha } : { docSha, page }],
+  });
+  const raises = (event: string, signal: string): GraphifyLink => ({
+    source: event,
+    target: signal,
+    type: "raises_signal",
+  });
+
+  it("materializes a CONFORMING ref on a DesignationEvent (docSha+rawRef+page+excerpt=label)", () => {
+    const rows = [
+      buildNodeRow(
+        { id: "event-adoption-026-511", label: "Adoption 026-511 — sainte-martine 2026-05-12", type: "DesignationEvent" },
+        "sainte-martine",
+      ),
+    ];
+    materializeSeveredSources(rows, [derivedFrom("event-adoption-026-511")], []);
+    expect(rows[0]!.sourceRef).toBe("SHA_PV");
+    expect(rows[0]!.props.refs).toEqual([
+      {
+        docSha: "SHA_PV",
+        rawRef: "raw/proces-verbaux-sainte-martine/cas/SHA_PV.pdf",
+        page: 1,
+        excerpt: "Adoption 026-511 — sainte-martine 2026-05-12",
+        linkSource: "projection-materialize-severed",
+      },
+    ]);
+  });
+
+  it("materializes a Signal from its RAISING event (raises_signal target), excerpt = event label", () => {
+    const rows = [
+      buildNodeRow(
+        { id: "event-zonage-0001", label: "Modification zonage règlement 026-511 — sainte-martine", type: "DesignationEvent" },
+        "sainte-martine",
+      ),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "sainte-martine"),
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("event-zonage-0001"), raises("event-zonage-0001", "signal-rezonage-0001")],
+      [],
+    );
+    expect(r.raisedSignals).toBe(1);
+    expect(r.withSourcedEvent).toBe(1);
+    expect(r.materialized).toBe(1);
+    expect(rows.find((n) => n.id === "signal-rezonage-0001")!.props.refs).toEqual([
+      {
+        docSha: "SHA_PV",
+        rawRef: "raw/proces-verbaux-sainte-martine/cas/SHA_PV.pdf",
+        page: 1,
+        excerpt: "Modification zonage règlement 026-511 — sainte-martine",
+        linkSource: "projection-materialize-severed",
+      },
+    ]);
+  });
+
+  it("gate locator_without_page — NEVER fabricates a page (docSha but no page → skipped with reason)", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "Modification zonage", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const noPageEdge: GraphifyLink = {
+      source: "event-zonage-0001",
+      target: "bylaw-x",
+      type: "derived_from",
+      refs: [{ docSha: "SHA_PV" }], // docSha but NO page
+    };
+    const r = materializeSeveredSources(
+      rows,
+      [noPageEdge, raises("event-zonage-0001", "signal-rezonage-0001")],
+      [],
+    );
+    expect(r.materialized).toBe(0);
+    expect(r.skipped.locator_without_page).toBe(1);
+    expect(rows.find((n) => n.id === "signal-rezonage-0001")!.props.refs).toBeUndefined();
+  });
+
+  it("gate no_event_source — a raised signal whose event has no sourced edge", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "Modification zonage", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const r = materializeSeveredSources(rows, [raises("event-zonage-0001", "signal-rezonage-0001")], []);
+    expect(r.raisedSignals).toBe(1);
+    expect(r.withSourcedEvent).toBe(0);
+    expect(r.skipped.no_event_source).toBe(1);
+    expect(r.materialized).toBe(0);
+  });
+
+  it("gate evidence_absent — sourced edge + page but the event has no label", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("event-zonage-0001"), raises("event-zonage-0001", "signal-rezonage-0001")],
+      [],
+    );
+    expect(r.skipped.evidence_absent).toBe(1);
+    expect(r.materialized).toBe(0);
+  });
+
+  it("idempotent — a raised signal already carrying a source is left untouched (alreadySourced)", () => {
+    const rows = [
+      buildNodeRow({ id: "event-zonage-0001", label: "Modification zonage", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "signal-rezonage-0001", label: "rezonage", type: "Signal", source_file: "PRE_EXISTING" }, "x"),
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("event-zonage-0001"), raises("event-zonage-0001", "signal-rezonage-0001")],
+      [],
+    );
+    expect(r.alreadySourced).toBe(1);
+    expect(r.materialized).toBe(0);
+    expect(rows.find((n) => n.id === "signal-rezonage-0001")!.sourceRef).toBe("PRE_EXISTING");
+  });
+
+  it("CLOSED ENUMERATION — raisedSignals == alreadySourced + materialized + Σskipped", () => {
+    const rows = [
+      buildNodeRow({ id: "ev1", label: "Modification zonage 1", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "sig1", label: "rezonage", type: "Signal" }, "x"), // materialized
+      buildNodeRow({ id: "ev2", label: "Modification zonage 2", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "sig2", label: "rezonage", type: "Signal", source_file: "HAS" }, "x"), // alreadySourced
+      buildNodeRow({ id: "sig3", label: "rezonage", type: "Signal" }, "x"), // no_event_source
+    ];
+    const r = materializeSeveredSources(
+      rows,
+      [derivedFrom("ev1"), raises("ev1", "sig1"), derivedFrom("ev2"), raises("ev2", "sig2"), raises("ev3-missing", "sig3")],
+      [],
+    );
+    const sumSkipped =
+      r.skipped.no_event_source + r.skipped.locator_without_page + r.skipped.evidence_absent + r.skipped.other;
+    expect(r.raisedSignals).toBe(3);
+    expect(r.raisedSignals).toBe(r.alreadySourced + r.materialized + sumSkipped);
+  });
+
+  it("excludes generated:// placeholder edge refs (not a real PV → no usable source)", () => {
+    const rows = [
+      buildNodeRow({ id: "event-x", label: "e", type: "DesignationEvent" }, "x"),
+      buildNodeRow({ id: "sig-x", label: "rezonage", type: "Signal" }, "x"),
+    ];
+    const gen: GraphifyLink = {
+      source: "event-x",
+      target: "bylaw",
+      type: "derived_from",
+      refs: [{ docSha: "SHA", rawRef: "generated://node/x", page: 1 }],
+    };
+    const r = materializeSeveredSources(rows, [gen, raises("event-x", "sig-x")], []);
+    expect(r.skipped.no_event_source).toBe(1);
+    expect(r.materialized).toBe(0);
+  });
+
+  it("only touches Signal|DesignationEvent — never a Bylaw", () => {
+    const rows = [buildNodeRow({ id: "bylaw-x", label: "Règlement", type: "Bylaw" }, "x")];
+    const r = materializeSeveredSources(rows, [derivedFrom("bylaw-x")], []);
+    expect(r.materialized).toBe(0);
+    expect(rows[0]!.sourceRef).toBeNull();
   });
 });
 

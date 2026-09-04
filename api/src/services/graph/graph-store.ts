@@ -18,7 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime } from "@radar/domain";
+import { classifyBPrime, deriveRegulatoryStatus, type RegulatoryStageKindT } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -171,11 +171,30 @@ export interface EdgeRow {
 /** Build a DB-shaped node row from a graphify node. */
 export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): NodeRow {
   const { id, label, file_type, type: nodeType, source_file, community, community_name, status, description, refs, properties } = node;
+  // v1: file_type; v2: type; fallback: "concept"
+  const type = file_type ?? nodeType ?? "concept";
+  // LOT 1 serving (D-INT/D1/D2, P2) — persist the DERIVED regulatoryStatus at MATÉRIALISATION,
+  // recomputed at every write from the authoritative statut/etape via THE single classifier
+  // `deriveRegulatoryStatus`. Source de vérité DATA (lue par les consommateurs, pas re-dérivée
+  // serve-time). Co-localisé avec `etape` dans `props.properties` (lecture symétrique
+  // `props->'properties'->>'regulatoryStatus'` + couvert par le guard no-disparition
+  // DEGRADATION_SENSITIVE_KEYS) ; jamais clobbé par une ré-extraction raw car RE-CALCULÉ ici à
+  // chaque matérialisation (le spread écrase toute valeur stale).
+  const rawProps = (properties ?? undefined) as Record<string, unknown> | undefined;
+  const etape = (rawProps?.etape ?? null) as string | null;
+  const statut = (rawProps?.statut ?? null) as RegulatoryStageKindT | null;
+  // Gate anti-invention : QUE les nœuds portant un STADE (`etape` ou `statut`) — la classification
+  // se DÉRIVE du stade, donc sans stade il n'y a rien à dériver. Un nœud non-règlement (Zone/Lot/
+  // Concept) ou un nœud incomplet sans stade ne reçoit jamais un `regulatoryStatus` spurieux (le
+  // consommateur applique le fallback anticipation-conservateur à la lecture d'un champ absent).
+  const isLifecycle = etape != null || statut != null;
+  const enrichedProperties = isLifecycle
+    ? { ...(rawProps ?? {}), regulatoryStatus: deriveRegulatoryStatus({ statut, etape }) }
+    : properties;
   return {
     id,
     label,
-    // v1: file_type; v2: type; fallback: "concept"
-    type: file_type ?? nodeType ?? "concept",
+    type,
     citySlug: citySlug ?? null,
     sourceRef: source_file ?? null,
     props: {
@@ -186,7 +205,7 @@ export function buildNodeRow(node: GraphifyNode, citySlug?: string | null): Node
       ...(status !== undefined ? { status } : {}),
       ...(description !== undefined ? { description } : {}),
       ...(refs !== undefined ? { refs } : {}),
-      ...(properties !== undefined ? { properties } : {}),
+      ...(enrichedProperties !== undefined ? { properties: enrichedProperties } : {}),
     },
   };
 }
@@ -209,6 +228,210 @@ export function buildEdgeRow(link: GraphifyLink): EdgeRow {
       ...(properties !== undefined ? { properties } : {}),
     },
   };
+}
+
+/** Served-surface node types whose per-event source lived on the `derived_from` edge (dropped by
+ * the pre-materialization projection → phantom). */
+const SEVERED_SOURCE_TYPES = new Set(["Signal", "DesignationEvent"]);
+
+function refDocShas(refs: unknown): string[] {
+  if (!Array.isArray(refs)) return [];
+  const out: string[] = [];
+  for (const r of refs) {
+    if (r && typeof r === "object") {
+      const d = (r as Record<string, unknown>).docSha;
+      if (typeof d === "string" && d.length > 0) out.push(d);
+    }
+  }
+  return out;
+}
+
+/** A node already carries a servable source iff sourceRef, a source-bearing prop, or a
+ * docSha-bearing props.refs entry is present (mirrors graph-signals hasPdfLink inputs). */
+function nodeRowHasSource(row: NodeRow): boolean {
+  if (row.sourceRef) return true;
+  const p = row.props as Record<string, unknown>;
+  if (refDocShas(p.refs).length > 0) return true;
+  const pp = (p.properties ?? {}) as Record<string, unknown>;
+  for (const k of ["sourceUrl", "source_url", "rawRef", "docSha", "source_storage_key", "sourceRef"]) {
+    const v = pp[k];
+    if (typeof v === "string" && v.length > 0) return true;
+  }
+  return refDocShas(pp.refs).length > 0;
+}
+
+const MATERIALIZE_LINK_SOURCE = "projection-materialize-severed";
+const RAISES_SIGNAL_KIND = "raises_signal";
+/** Edges whose refs[0] carries the served node's own source locator. */
+const EVENT_SOURCE_KINDS = new Set(["derived_from", "supports"]);
+
+/** The edge kind (v1 `relation` wins, else v2 `type`), mirroring buildEdgeRow. */
+function edgeKind(l: GraphifyLink): string | undefined {
+  return l.relation ?? l.type;
+}
+
+/**
+ * The first usable source locator an edge asserts on refs[0]: a real docSha
+ * (never a `generated://` placeholder) with its 1-based page (null when the ref
+ * carries no valid page — the caller then skips WITH a reason, never fabricates).
+ */
+function firstEdgeSourceRef(refs: unknown): { docSha: string; page: number | null } | null {
+  if (!Array.isArray(refs)) return null;
+  for (const r of refs) {
+    if (!r || typeof r !== "object" || Array.isArray(r)) continue;
+    const rec = r as Record<string, unknown>;
+    const docSha = rec.docSha;
+    if (typeof docSha !== "string" || docSha.length === 0) continue;
+    const rawRef = rec.rawRef;
+    if (typeof rawRef === "string" && rawRef.startsWith("generated://")) continue;
+    const page =
+      typeof rec.page === "number" && Number.isInteger(rec.page) && rec.page >= 1 ? rec.page : null;
+    return { docSha, page };
+  }
+  return null;
+}
+
+/**
+ * CLOSED-ENUMERATION outcome of the severed-source materialization (§521-ét gates
+ * b/c/d): every raised Signal is accounted for exactly once —
+ * `raisedSignals === alreadySourced + materialized + skipped.{no_event_source +
+ * locator_without_page + evidence_absent + other}`. Emitted even at zero so
+ * "ran, nothing to do" is distinguishable from "step never ran".
+ */
+export interface SourceMaterializationResult {
+  /** Denominator: served Signals that are the target of ≥1 raises_signal edge. */
+  raisedSignals: number;
+  /** Denominator: raised Signals whose raising event carries a source docSha. */
+  withSourcedEvent: number;
+  /** Raised Signals already carrying their own source (idempotent skip). */
+  alreadySourced: number;
+  /** Raised Signals given a CONFORMING ref (docSha+page+evidence → validateCitedSourceRef ok). */
+  materialized: number;
+  /** Why a raised Signal was NOT materialized (closed set). */
+  skipped: {
+    no_event_source: number;
+    locator_without_page: number;
+    evidence_absent: number;
+    other: number;
+  };
+}
+
+/**
+ * Re-materialize the severed per-event source onto served Signal|DesignationEvent
+ * nodes as a CONFORMING cited-source ref (`docSha` + `rawRef` + `page` +
+ * evidence-text `excerpt`) so the shared viewer's `validateCitedSourceRef` accepts
+ * it (locator≥1 AND page AND evidence≥1) — a locator-only ref is rejected and the
+ * node stays a phantom that the viewer never renders (the owner bug).
+ *
+ * Source mapping (measured on the docs-pocs baseline, extraction):
+ *  - a DesignationEvent's source lives on ITS OWN edges — `derived_from`
+ *    (event→bylaw) or `supports` (source→event), refs[0] = {docSha, page:1};
+ *    evidence = the event's own `label`.
+ *  - a Signal's source is INHERITED from the event that `raises_signal → it` (that
+ *    edge is EMPTY at baseline): the raising event's docSha+page, and the raising
+ *    event's `label` as evidence-text.
+ *
+ * `page:1` is the honest generic seance-document page (baseline), NOT invented —
+ * the grounding refines it to the exact resolution page + verbatim excerpt
+ * (additive). NEVER fabricates: a missing docSha or page → the node is skipped
+ * WITH a reason (closed enumeration), never a made-up locator. Idempotent: a node
+ * already carrying a source is left untouched.
+ */
+export function materializeSeveredSources(
+  nodeRows: NodeRow[],
+  links: GraphifyLink[],
+  _rawNodes: GraphifyNode[],
+): SourceMaterializationResult {
+  // Each node's own source locator (from its derived_from/supports edges) + the
+  // signal→raising-event map (raises_signal edges).
+  const eventSource = new Map<string, { docSha: string; page: number | null }>();
+  const raisingEventBySignal = new Map<string, string>();
+  for (const l of links) {
+    const kind = edgeKind(l);
+    if (kind === RAISES_SIGNAL_KIND) {
+      raisingEventBySignal.set(l.target, l.source);
+      continue;
+    }
+    if (!kind || !EVENT_SOURCE_KINDS.has(kind)) continue;
+    const ref = firstEdgeSourceRef((l as { refs?: unknown }).refs);
+    if (!ref) continue;
+    // derived_from: the EVENT is the source endpoint; supports: the event is the target.
+    const eventId = kind === "supports" ? l.target : l.source;
+    if (!eventSource.has(eventId)) eventSource.set(eventId, ref);
+  }
+
+  const labelById = new Map<string, string>();
+  for (const row of nodeRows) {
+    if (typeof row.label === "string" && row.label.trim().length > 0) {
+      labelById.set(row.id, row.label.trim());
+    }
+  }
+
+  const result: SourceMaterializationResult = {
+    raisedSignals: 0,
+    withSourcedEvent: 0,
+    alreadySourced: 0,
+    materialized: 0,
+    skipped: { no_event_source: 0, locator_without_page: 0, evidence_absent: 0, other: 0 },
+  };
+
+  for (const row of nodeRows) {
+    if (!SEVERED_SOURCE_TYPES.has(row.type)) continue;
+
+    // Resolve the (source, evidence-text) this served node should carry.
+    let src: { docSha: string; page: number | null } | undefined;
+    let excerpt: string | undefined;
+    let isRaisedSignal = false;
+    if (row.type === "Signal" && raisingEventBySignal.has(row.id)) {
+      isRaisedSignal = true;
+      const eventId = raisingEventBySignal.get(row.id)!;
+      src = eventSource.get(eventId);
+      excerpt = labelById.get(eventId);
+    } else if (row.type === "DesignationEvent") {
+      src = eventSource.get(row.id);
+      excerpt = labelById.get(row.id);
+    } else {
+      continue; // a Signal not raised by an event: outside the severed-source scope
+    }
+
+    if (isRaisedSignal) {
+      result.raisedSignals++;
+      if (src?.docSha) result.withSourcedEvent++;
+    }
+    if (nodeRowHasSource(row)) {
+      if (isRaisedSignal) result.alreadySourced++;
+      continue;
+    }
+    if (!src || !src.docSha) {
+      if (isRaisedSignal) result.skipped.no_event_source++;
+      continue;
+    }
+    if (src.page === null) {
+      if (isRaisedSignal) result.skipped.locator_without_page++;
+      continue; // never fabricate a page
+    }
+    const evidence = typeof excerpt === "string" && excerpt.trim().length > 0 ? excerpt.trim() : null;
+    if (!evidence) {
+      if (isRaisedSignal) result.skipped.evidence_absent++;
+      continue;
+    }
+
+    // CONFORMING ref — matches the validated ok=true template exactly.
+    const city = row.citySlug ?? "";
+    const conformingRef = {
+      docSha: src.docSha,
+      rawRef: `raw/proces-verbaux-${city}/cas/${src.docSha}.pdf`,
+      page: src.page,
+      excerpt: evidence,
+      linkSource: MATERIALIZE_LINK_SOURCE,
+    };
+    row.sourceRef = row.sourceRef ?? src.docSha;
+    const existing = Array.isArray(row.props.refs) ? row.props.refs : [];
+    row.props.refs = mergeRefs(existing, [conformingRef]);
+    if (isRaisedSignal) result.materialized++;
+  }
+
+  return result;
 }
 
 function mergeRefs(a: unknown, b: unknown): unknown {
@@ -481,11 +704,17 @@ export function findMissingBusinessProperties(
   beforeRows: readonly BusinessPropertySnapshotRow[],
   afterRows: readonly BusinessPropertySnapshotRow[],
   citySlug: string,
+  intendedRemovals: ReadonlySet<string> = new Set(),
 ): BusinessPropertyRegression[] {
   const afterById = new Map(afterRows.map((row) => [row.id, row]));
   const regressions: BusinessPropertyRegression[] = [];
 
   for (const beforeRow of beforeRows) {
+    // A removal-only reprojection deletes some nodes ON PURPOSE (e.g.
+    // purge-avis-bylaws). For those the disappearance of every business key is
+    // intended, not a silent regression — skip them. The anti-silent-deletion
+    // guard stays armed for EVERY other node (accidental drop / drift → abort).
+    if (intendedRemovals.has(beforeRow.id)) continue;
     const before = businessProperties(beforeRow.props);
     const after = businessProperties(afterById.get(beforeRow.id)?.props ?? {});
     const missingKeys = Object.keys(before)
@@ -493,6 +722,91 @@ export function findMissingBusinessProperties(
       .sort();
     if (missingKeys.length > 0) {
       regressions.push({ citySlug, nodeId: beforeRow.id, missingKeys });
+    }
+  }
+
+  return regressions;
+}
+
+export interface SourceRefRegression {
+  citySlug: string;
+  nodeId: string;
+  missingDocShas: string[];
+}
+
+/**
+ * A `generated://` rawRef marks a synthetic `gen_refs` placeholder (not a real
+ * PV) — excluded from provenance (Q3, spec §5).
+ */
+const GENERATED_REF_PREFIX = "generated://";
+
+/**
+ * Recover the source docSha embedded in a CAS raw-ref path
+ * (`raw/proces-verbaux-<city>/cas/<docSha>.pdf` → `<docSha>`). Used ONLY to fill
+ * the docSha when the ref's own `docSha` field is empty — never as an alternative
+ * identity key.
+ */
+function docShaFromRawRef(rawRef: string): string | null {
+  const m = rawRef.match(/\/cas\/([^/]+)\.[^/.]+$/);
+  return m ? m[1]! : null;
+}
+
+/**
+ * The set of REAL source docShas a node asserts under `props.refs`.
+ *
+ * Identity = **`docSha` alone** (SHA-256 of the source PV, content-stable) — NOT
+ * `(docSha, page)`: `page` is an intra-doc refinement the grounding legitimately
+ * upgrades (generic page-1 → precise page-10) for the SAME document, so keying on
+ * page would false-positive (spec §5, Q1). `rawRef` is read ONLY to recover a
+ * missing docSha from the CAS path. Refs whose `rawRef` is a `generated://`
+ * placeholder are excluded (Q3).
+ */
+function nodeDocShas(props: Record<string, unknown>): Set<string> {
+  const out = new Set<string>();
+  const refs = props.refs;
+  if (!Array.isArray(refs)) return out;
+  for (const item of refs) {
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const r = item as Record<string, unknown>;
+    const rawRef = typeof r.rawRef === "string" ? r.rawRef : null;
+    if (rawRef && rawRef.startsWith(GENERATED_REF_PREFIX)) continue;
+    let sha = typeof r.docSha === "string" && r.docSha.length > 0 ? r.docSha : null;
+    if (!sha && rawRef) sha = docShaFromRawRef(rawRef);
+    if (sha) out.add(sha);
+  }
+  return out;
+}
+
+/**
+ * gate3 — find the source docShas that a node carried BEFORE and that the
+ * candidate would DROP (per-node, match by id). A REPLACE projection rewrites
+ * `props.refs` per node; neither gate1 (business-properties) nor gate2
+ * (completeness COUNT) protects the IDENTITY of a node's source provenance, so a
+ * candidate that overwrites/omits a node's own PV docSha passes silently. This
+ * catches it: a docSha present before and absent after = provenance regression.
+ *
+ * Node-level and generic (every node bearing `props.refs`, like gate1). ADDITIONS
+ * are allowed (candidate may add refs — grounding enrichment) — only DISAPPEARANCE
+ * of an existing docSha is a regression. `intendedRemovals` exempts intentional
+ * removals per-node, as gate1.
+ */
+export function findMissingSourceRefs(
+  beforeRows: readonly BusinessPropertySnapshotRow[],
+  afterRows: readonly BusinessPropertySnapshotRow[],
+  citySlug: string,
+  intendedRemovals: ReadonlySet<string> = new Set(),
+): SourceRefRegression[] {
+  const afterById = new Map(afterRows.map((row) => [row.id, row]));
+  const regressions: SourceRefRegression[] = [];
+
+  for (const beforeRow of beforeRows) {
+    if (intendedRemovals.has(beforeRow.id)) continue;
+    const before = nodeDocShas(beforeRow.props);
+    if (before.size === 0) continue;
+    const after = nodeDocShas(afterById.get(beforeRow.id)?.props ?? {});
+    const missingDocShas = [...before].filter((sha) => !after.has(sha)).sort();
+    if (missingDocShas.length > 0) {
+      regressions.push({ citySlug, nodeId: beforeRow.id, missingDocShas });
     }
   }
 
@@ -639,12 +953,31 @@ export async function upsertGraphAtomic(
   db: Database,
   citySlug: string | null,
   graphJson: unknown,
+  /**
+   * Node ids this projection deletes ON PURPOSE (removal-only tools such as
+   * purge-avis-bylaws). They are exempt from the business-property-regression
+   * guard — their disappearance is intended, not a silent data loss. Every
+   * OTHER node stays guarded. Default empty = current strict behaviour.
+   */
+  intendedRemovals: ReadonlySet<string> = new Set(),
 ): Promise<UpsertAtomicResult> {
   const parsed = graphifyGraphSchema.parse(graphJson);
   const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
 
   const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
   const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
+  // Re-materialize the per-event source the projection would otherwise sever onto served nodes as
+  // a CONFORMING cited-source ref (docSha+page+evidence) → hasPdfLink stays true, phantoms cannot
+  // recur, and the ref passes validateCitedSourceRef. §521-ét observability (gates b/c/d): emit the
+  // denominators + closed-enumeration shrinkage counter UNCONDITIONALLY (even at zero) so "ran, 0 to
+  // do" ≠ "step never ran"; a high `materialized` rate signals a graphify producer gap to fix upstream.
+  const severedSource = materializeSeveredSources(nodeRows, links, parsed.nodes);
+  console.info(
+    `[graph-store] severed-source materialization ${citySlug ?? "(cross-city)"}: ` +
+      `raisedSignals=${severedSource.raisedSignals} withSourcedEvent=${severedSource.withSourcedEvent} ` +
+      `alreadySourced=${severedSource.alreadySourced} materialized=${severedSource.materialized} ` +
+      `skipped=${JSON.stringify(severedSource.skipped)}`,
+  );
   const newNodeIds = nodeRows.map((r) => r.id);
 
   // Cas cross-city : upsert pur, aucune suppression (impossible de scoper sûrement).
@@ -686,6 +1019,7 @@ export async function upsertGraphAtomic(
     beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
     nodeRows,
     citySlug,
+    intendedRemovals,
   );
   if (propertyRegressions.length > 0) {
     const details = propertyRegressions
@@ -697,6 +1031,29 @@ export async function upsertGraphAtomic(
       reason:
         `business-property regression for ${citySlug}: ` +
         `existing values would disappear or degrade (${details}); projection refused`,
+    };
+  }
+
+  // gate3 — SOURCE-REF PROVENANCE : REPLACE réécrit props.refs par-nœud ; ni gate1
+  // (business-props) ni gate2 (complétude COUNT) ne protègent l'IDENTITÉ de la
+  // provenance source (docSha du PV). Un candidat qui écrase/omet le docSha propre
+  // d'un nœud existant passerait silencieusement → provenance perdue. On aborte.
+  const sourceRefRegressions = findMissingSourceRefs(
+    beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
+    nodeRows,
+    citySlug,
+    intendedRemovals,
+  );
+  if (sourceRefRegressions.length > 0) {
+    const details = sourceRefRegressions
+      .map(({ nodeId, missingDocShas }) => `${nodeId}: ${missingDocShas.join(", ")}`)
+      .join("; ");
+    return {
+      ...result,
+      aborted: true,
+      reason:
+        `source-ref provenance regression for ${citySlug}: ` +
+        `existing source docSha(s) would disappear (${details}); projection refused`,
     };
   }
 
@@ -1236,11 +1593,20 @@ export function deriveEtape(
     .replace(/[̀-ͯ]/g, "");
 
   // ── Ordre de test : du plus précoce au plus tardif ──────────────────────
-  // 1. avis de motion
-  if (text.includes("avis de motion") || text.includes("avis d motion")) {
-    return "avis_motion";
-  }
-  // 2. second projet (testé avant « projet » pour éviter la collision)
+  // §3-CRITICAL ordering (W2). An "avis de motion" appearing in the text is NOT
+  // enough to classify a resolution as avis_motion: a combined "avis + dépôt du
+  // projet" or an "adoption du (premier) projet" resolution IS at the projet
+  // stage, and a recital may merely RECALL a past avis ("avis de motion a été
+  // donné"). So (a) only an ACTIVE avis (not the past-tense recital) is the avis
+  // act; (b) concrete ACT stages take precedence over a bare avis; (c) a bare
+  // active avis CONSERVATIVELY stays avis_motion — never promoted to `adoption`
+  // on the FUTURE reference "présenté pour adoption lors d'une séance
+  // subséquente" (that promotion = the 026-508 avis-served-firm bug).
+  const hasActiveAvis =
+    (text.includes("avis de motion") || text.includes("avis d motion")) &&
+    !text.includes("avis de motion a ete donne");
+
+  // 1. second projet (tested before « projet » to avoid the collision).
   if (
     text.includes("second projet") ||
     text.includes("2e projet") ||
@@ -1248,14 +1614,30 @@ export function deriveEtape(
   ) {
     return "second_projet";
   }
-  // 3. premier projet / projet de règlement / projet du règlement
+  // 2. premier projet / adoption-dépôt d'un projet → projet_reglement. The ACT of
+  //    ADOPTING or DEPOSITING a projet (NOT the final règlement adoption, and NOT
+  //    a pure avis's future "présenté pour adoption").
   if (
     text.includes("premier projet") ||
     text.includes("1er projet") ||
     text.includes("projet de reglement") ||
-    text.includes("projet du reglement")
+    text.includes("projet du reglement") ||
+    text.includes("adoption du projet") ||
+    text.includes("adopte le projet") ||
+    text.includes("depot du projet") ||
+    text.includes("depose le projet")
   ) {
     return "projet_reglement";
+  }
+  // 3. §3 CONSERVATIVE GUARD (BEFORE consultation/vigueur/adoption): once no
+  //    concrete projet ACT above matched, an ACTIVE avis de motion STAYS
+  //    avis_motion. An active avis is NEVER itself en-vigueur / à-consultation
+  //    (mutually exclusive stages), so an INCIDENTAL "en vigueur" (e.g. « … le
+  //    Règlement 0651 [actuellement] en vigueur » — the EXISTING règlement being
+  //    modified) or a FUTURE "adoption"/"consultation" must NOT promote it to
+  //    firm. Closes the last 026-508 residual path.
+  if (hasActiveAvis) {
+    return "avis_motion";
   }
   // 4. consultation publique
   if (text.includes("consultation")) {
@@ -1269,7 +1651,8 @@ export function deriveEtape(
   ) {
     return "entree_vigueur";
   }
-  // 6. adoption / adopté
+  // 6. adoption / adopté (the final règlement adoption — reached only when the
+  //    resolution is NOT a pure active avis)
   if (
     text.includes("adoption") ||
     text.includes("adopte") ||
@@ -1539,6 +1922,89 @@ export interface GraphSignalProjectionRow {
   sourceRef: string | null;
 }
 
+export interface GraphSignalDateRange {
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+const SIGNAL_DATE_KEYS = [
+  "etapeDate",
+  "etape_date",
+  "meetingDate",
+  "meeting_date",
+  "documentDate",
+  "date",
+] as const;
+
+function signalRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function parseServerSignalDate(value: string): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    const parsed = new Date(year, month - 1, day);
+    return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+      ? parsed
+      : null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseServerSignalBoundary(value: string, endOfDay: boolean): Date | null {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!dateOnly) return parseServerSignalDate(value);
+
+  const year = Number(dateOnly[1]);
+  const month = Number(dateOnly[2]);
+  const day = Number(dateOnly[3]);
+  const parsed = new Date(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+  return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
+    ? parsed
+    : null;
+}
+
+/**
+ * Server mirror of the client signal date lens. Keep the key list and
+ * properties-before-root precedence synchronized with signal-date-filter.ts.
+ * graph_nodes has no created_at column on OVH, so the only server fallback is
+ * props.publishedAt; createdAt is intentionally unavailable and treated as null.
+ */
+export function serverSignalEtapeDate(props: unknown): Date | null {
+  const root = signalRecord(props);
+  const nested = signalRecord(root.properties);
+  for (const record of [nested, root]) {
+    for (const key of SIGNAL_DATE_KEYS) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim() !== "") return parseServerSignalDate(value);
+    }
+  }
+
+  const publishedAt = root.publishedAt;
+  return typeof publishedAt === "string" && publishedAt.trim() !== ""
+    ? parseServerSignalDate(publishedAt)
+    : null;
+}
+
+function isSignalInDateRange(props: unknown, range?: GraphSignalDateRange): boolean {
+  if (!range?.dateFrom && !range?.dateTo) return true;
+
+  const date = serverSignalEtapeDate(props);
+  // A bounded window cannot place a row with no extractable, parseable date.
+  if (!date) return false;
+
+  const lower = range.dateFrom ? parseServerSignalBoundary(range.dateFrom, false) : null;
+  const upper = range.dateTo ? parseServerSignalBoundary(range.dateTo, true) : null;
+  return (!lower || date >= lower) && (!upper || date <= upper);
+}
+
 export interface CitySignalCounts {
   citySlug: string;
   signalCount: number;
@@ -1549,6 +2015,7 @@ export interface CitySignalCounts {
 /** Aggregate one projection in both rails. Pure so A/B parity is testable. */
 export function aggregateGraphSignalProjectionRows(
   rows: readonly GraphSignalProjectionRow[],
+  dateRange?: GraphSignalDateRange,
 ): CitySignalCounts[] {
   function emptySubsetCounts(): Record<SubsetKey, number> {
     const out = {} as Record<SubsetKey, number>;
@@ -1566,6 +2033,7 @@ export function aggregateGraphSignalProjectionRows(
 
   for (const row of rows) {
     if (!row.citySlug) continue;
+    if (!isSignalInDateRange(row.props, dateRange)) continue;
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
@@ -1642,6 +2110,7 @@ export function aggregateGraphSignalProjectionRows(
 
 export async function listCitiesWithSignalNodes(
   db: Database,
+  dateRange?: GraphSignalDateRange,
 ): Promise<CitySignalCounts[]> {
   // One row per individual signal node (no count grouping in SQL) so both
   // contracts are derived from the same source projection.
@@ -1667,7 +2136,7 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  return aggregateGraphSignalProjectionRows(rows);
+  return aggregateGraphSignalProjectionRows(rows, dateRange);
 }
 
 /**

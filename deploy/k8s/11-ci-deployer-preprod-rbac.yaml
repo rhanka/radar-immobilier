@@ -1,0 +1,104 @@
+# CI DEPLOYER — PREPROD (Lot 1 de la refonte CD, cf tmp/handoff/preprod/DESIGN-CD-REFONTE.md §2.4).
+#
+# ServiceAccount + Role + RoleBinding namespace-scopés à `radar-immobilier-preprod`
+# pour le job CI `deploy-preprod` (main -> preprod). Least-privilege : il ne peut
+# QUE piloter les Deployments (get/list/watch/patch/update), LIRE pods/replicasets
+# (pour `kubectl rollout status`), gérer des Jobs `batch/jobs`
+# (create/get/list/watch/delete) pour le BACKUP-BEFORE-RELEASE §1(a) + le diag §6,
+# et gérer des CronJobs `batch/cronjobs` (create/get/list/watch/patch/update) pour
+# le déploiement + un-suspend du REFRESH §6 (preprod-only). Il ne peut toucher NI
+# un autre namespace, NI la PROD (`radar-immobilier`).
+#
+# SÉCURITÉ — portée de `batch/jobs` (ruling i-infra B′, à peser en co-val §1(a)) :
+# ce SA ne peut PAS `get` un objet Secret NI `exec` dans un pod (0 pods/exec). Il
+# crée/supprime des Jobs ; c'est le Job lui-même (pas le SA CI) qui lit les creds DB
+# + S3 via `secretKeyRef` in-cluster. Le backup tourne donc EN CLUSTER en client
+# réseau (pg_dump -h radar-postgres), le runner CI ne touche jamais la DB. Grant
+# borné à preprod (Role, jamais ClusterRole, jamais la prod), 0 wildcard, et ARMÉ
+# côté CI seulement quand `BACKUP_BEFORE_RELEASE_ENABLED == 'true'`. Le grant
+# équivalent côté PROD est un acte owner distinct, non inclus ici. NB : pas de
+# `pods/log` → le runner ne peut pas `kubectl logs` le Job (logs visibles owner-side).
+#
+# ISOLATION (revue CD MUST-FIX #3) : prod et preprod partagent le MÊME apiserver OVH,
+# donc le pre-flight d'hôte ne distingue pas les envs — la SEULE frontière d'accès est
+# ce scope SA+Role namespace-borné. Le kubeconfig prod est en outre porté par un
+# GitHub Environment `production` (refs tag + reviewer) ; ce SA preprod ne sert QUE le
+# chemin main->preprod.
+#
+# Ce manifest est COMMITÉ (gitops, reviewable) — contrairement au `radar-ci-deployer`
+# prod historique, créé out-of-band. APPLY = poc-k8s en fenêtre gatée. Le token de
+# cette SA est ensuite exporté en kubeconfig par poc-k8s puis stocké dans le secret
+# GitHub `KUBE_CONFIG_DATA_PREPROD` (jamais commité). N'est PAS dans kustomization.yaml
+# (prod) : c'est une ressource preprod-spécifique appliquée séparément.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-ci-deployer-preprod
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+    app.kubernetes.io/env: preprod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: radar-ci-deployer-preprod
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+    app.kubernetes.io/env: preprod
+rules:
+  # `kubectl set image` + `kubectl apply` d'un Deployment = get/list/watch/patch/update.
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  # `kubectl rollout status` lit le Deployment + ses ReplicaSets + Pods.
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  # BACKUP-BEFORE-RELEASE (§1(a), ruling i-infra B′) : le job CD `deploy-preprod`
+  # applique + poll un Job in-cluster qui dumpe la DB en client réseau AVANT le
+  # set-image (deploy/ci/run-db-backup.sh → deploy/ci/db-backup-job.tmpl.yaml).
+  # Least-privilege : create/get/list/watch/delete sur `batch/jobs` UNIQUEMENT — 0
+  # pods/exec, 0 secret-read (le Job lit les creds via secretKeyRef, pas le SA CI).
+  # Borné à CE namespace preprod (Role, pas ClusterRole), 0 wildcard, co-validé
+  # i-infra, armé CI par BACKUP_BEFORE_RELEASE_ENABLED.
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  # REFRESH CRONJOBS PREPROD (§6, preprod-only) : le step deploy-preprod « Deploy
+  # refresh CronJobs (preprod) » applique + un-suspend les 2 CronJobs de refresh
+  # dans radar-immobilier-preprod (overlay refresh-cronjobs, pinné + suspend:false).
+  # `kubectl apply` d'un CronJob = get/create/patch ; le suspend:false = patch ;
+  # list/watch pour la lecture. Toujours borné à CE namespace preprod, 0 wildcard,
+  # armé CI par REFRESH_CRONJOB_PREPROD_ENABLED. (batch/jobs seul ne suffit pas —
+  # CronJob est une ressource distincte.)
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["create", "get", "list", "watch", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: radar-ci-deployer-preprod
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+    app.kubernetes.io/env: preprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: radar-ci-deployer-preprod
+subjects:
+  - kind: ServiceAccount
+    name: radar-ci-deployer-preprod
+    namespace: radar-immobilier-preprod
