@@ -30,6 +30,7 @@ import {
   classifyGraphNodeVivierV2,
   buildLegacyZmpProjection,
   getSignalNodesForCity,
+  getRaisesSignalLinks,
   listCitiesWithSignalNodes,
 } from "../services/graph/graph-store.js";
 import type { Database } from "../db/client.js";
@@ -97,6 +98,31 @@ export interface GraphSignalCard {
    *  N'est PAS le hide-72 (règle avis-only séparée re-drivée du `etape`). */
   regulatoryStatus: RegulatoryStatusT;
   props: Record<string, unknown>;
+  /**
+   * §7.6 cross-display — citation INHERITED from the DesignationEvent that
+   * `raises_signal` → this signal (rezonage). The citation lives on the EVENT's
+   * props, not the signal's, so the viewer would otherwise show "Citation
+   * MANQUANT" on the signal. Kept as a DISTINCT field (never merged into
+   * `evidence`) so the signal's OWN evidence/completeness stays unchanged and
+   * provenance is explicit via `eventId`. OMITTED entirely when no linked event
+   * carries a citation, so the frozen /api/graph-signals payload for signals
+   * without an inherited citation is byte-for-byte unchanged (present ⇒ always a
+   * non-null CitationFromEvent).
+   */
+  citationFromEvent?: CitationFromEvent;
+}
+
+/** Citation inherited from the linked DesignationEvent (§7.6, provenance-explicit). */
+export interface CitationFromEvent {
+  /** The DesignationEvent node id that raises this signal (provenance). */
+  eventId: string;
+  citation: string | null;
+  excerpt: string | null;
+  page: number | null;
+  rawRef: string | null;
+  docSha: string | null;
+  documentUrl: string | null;
+  sourceUrl: string | null;
 }
 
 function firstString(record: Record<string, unknown>, keys: readonly string[]): string | null {
@@ -470,6 +496,34 @@ function buildSignalCard(
     etape,
     regulatoryStatus,
     props,
+    // citationFromEvent is OMITTED here; the /:city route sets it ONLY when the
+    // raises_signal join yields an inherited citation (§7.6) — so cards without
+    // one keep the frozen payload shape.
+  };
+}
+
+/**
+ * Derive the CitationFromEvent field for a signal from the served evidence of
+ * the DesignationEvent that raises it. Returns null when the event carries no
+ * citation/excerpt (nothing to inherit) — the signal card then keeps its default
+ * null. Pure: the event's evidence is already resolved by the same buildEvidence
+ * path, so the inherited citation is, by construction, the one served on the
+ * event (recette integrity: served == certified-on-event).
+ */
+export function citationFromEventEvidence(
+  eventId: string,
+  eventEvidence: SignalEvidence,
+): CitationFromEvent | null {
+  if (eventEvidence.citation === null && eventEvidence.excerpt === null) return null;
+  return {
+    eventId,
+    citation: eventEvidence.citation,
+    excerpt: eventEvidence.excerpt,
+    page: eventEvidence.page,
+    rawRef: eventEvidence.rawRef,
+    docSha: eventEvidence.refs[0]?.docSha ?? null,
+    documentUrl: eventEvidence.documentUrl,
+    sourceUrl: eventEvidence.sourceUrl,
   };
 }
 
@@ -931,6 +985,37 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
         `[graph-signals] doc enrichment budget exceeded (city=${city}, nodes=${nodes.length}): responded with degraded doc refs`,
       );
     }
+
+    // §7.6 cross-display — inherit each signal's citation from the
+    // DesignationEvent that raises_signal → it (rezonage: the citation lives on
+    // the event, but the served card is the signal). Distinct field, so the
+    // signal's OWN evidence/completeness is untouched. Best-effort read-only edge
+    // lookup: a failure degrades citationFromEvent to null, never a 5xx.
+    try {
+      const links = await getRaisesSignalLinks(deps.db, nodes.map((n) => n.id));
+      if (links.length > 0) {
+        const eventEvidenceById = new Map(
+          mapped
+            .filter((card) => card.type === "DesignationEvent")
+            .map((card) => [card.id, card.evidence] as const),
+        );
+        const eventBySignal = new Map(links.map((l) => [l.signalId, l.eventId]));
+        for (const card of mapped) {
+          const eventId = eventBySignal.get(card.id);
+          if (eventId === undefined) continue;
+          const eventEvidence = eventEvidenceById.get(eventId);
+          if (!eventEvidence) continue;
+          const inherited = citationFromEventEvidence(eventId, eventEvidence);
+          if (inherited) card.citationFromEvent = inherited;
+        }
+      }
+    } catch (error) {
+      console.warn(
+        `[graph-signals] raises_signal citation inherit failed (city=${city}):`,
+        error,
+      );
+    }
+
     const legacyProjection = buildLegacyZmpProjection(
       mapped.map((node) => node.legacySubset),
     );
