@@ -1,0 +1,119 @@
+name: Grounding citations (preprod, one-shot)
+
+# One-shot PREPROD dispatch of the grounding-citation Job (§citations, Lot 2).
+# Mirrors deploy-preprod's auth/gating (KUBE_CONFIG_DATA_PREPROD + PREPROD_CD_ENABLED).
+# MANUAL only. Applies the extraction-owned Job (deploy/k8s/41-grounding-citation-
+# job.yaml, #588) to radar-immobilier-preprod, pinned to the grounding image
+# (radar-grounding) for ONE city, then polls fail-loud.
+#
+# CONTRACT with #588 (routed to extraction): the Job uses the logical image
+# `radar-grounding` (rewritten by the grounding-preprod overlay), reads env
+# `CITY` (value `${CITY}`, envsubst'd here), and lands in radar-immobilier-preprod.
+#
+# PREREQ (separate, owner/extraction+i-infra, gated D-01): the baseline seed
+# (graph/<city>/latest.json on the preprod MinIO) must exist for the grounding to
+# have nodes to ground — NOT provisioned by this workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      city:
+        description: "City slug to ground (→ env CITY in the Job)"
+        required: true
+        default: sainte-martine
+      image_tag:
+        description: "grounding image tag (optional; default = main HEAD short sha)"
+        required: false
+
+concurrency:
+  group: grounding-preprod-${{ inputs.city }}
+  cancel-in-progress: false
+
+env:
+  IMAGE_PREFIX: rg.fr-par.scw.cloud/radar-immobilier
+  NAMESPACE: radar-immobilier-preprod
+
+jobs:
+  grounding-preprod:
+    name: Ground ${{ inputs.city }} (preprod)
+    if: vars.PREPROD_CD_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: vars
+        run: echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: v1.31.0
+
+      - name: Configure kubeconfig (preprod)
+        env:
+          KUBE_CONFIG_DATA_PREPROD: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PREPROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      # Pre-flight (mirror deploy-preprod): assert the kubeconfig targets the
+      # expected hlhedx apiserver AND the preprod ns is reachable, BEFORE applying.
+      - name: Pre-flight — assert preprod cluster + namespace
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          exp="${EXPECTED_KUBE_APISERVER_HOST:-hlhedx.c1.bhs5.k8s.ovh.net}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "apiserver ${host} / expected ${exp}"
+          if [ "$host" != "$exp" ]; then
+            echo "::error title=Wrong cluster::kubeconfig targets '${host}', expected '${exp}'. Nothing applied."
+            exit 1
+          fi
+          kubectl -n "$NAMESPACE" get ns "$NAMESPACE" -o name >/dev/null || kubectl get ns "$NAMESPACE" -o name
+
+      - name: Install kustomize
+        run: |
+          set -euo pipefail
+          kver=5.4.3
+          tmp="$(mktemp -d)"
+          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
+          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
+
+      - name: Apply grounding Job (preprod) + poll fail-loud
+        env:
+          CITY: ${{ inputs.city }}
+          TAG: ${{ inputs.image_tag || steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          cd deploy/k8s/grounding-preprod
+          kustomize edit set image "radar-grounding=${IMAGE_PREFIX}/radar-grounding:${TAG}"
+          echo "grounding image → ${IMAGE_PREFIX}/radar-grounding:${TAG} ; city=${CITY}"
+          rendered="$(mktemp)"
+          kustomize build --load-restrictor LoadRestrictionsNone . | CITY="$CITY" envsubst '${CITY}' > "$rendered"
+          # Capture the Job name from the render (contract-agnostic — no hardcoded
+          # name), replace any prior run of it, apply, then poll fail-loud.
+          job="$(kubectl create --dry-run=client -o jsonpath='{.metadata.name}' -f "$rendered" 2>/dev/null || true)"
+          [ -n "$job" ] || { echo "::error title=Grounding Job invalid::could not read metadata.name from the rendered Job (check #588 contract)."; exit 1; }
+          kubectl -n "$NAMESPACE" delete job "$job" --ignore-not-found
+          kubectl -n "$NAMESPACE" apply -f "$rendered"
+          echo "applied job/${job}; polling…"
+          deadline=$(( $(date +%s) + 2400 ))
+          while :; do
+            s="$(kubectl -n "$NAMESPACE" get job "$job" -o jsonpath='{.status.succeeded}' 2>/dev/null || true)"
+            f="$(kubectl -n "$NAMESPACE" get job "$job" -o jsonpath='{.status.failed}' 2>/dev/null || true)"
+            if [ "${s:-0}" = "1" ]; then echo "grounding OK — job/${job} completed for city ${CITY}"; exit 0; fi
+            if [ "${f:-0}" != "" ] && [ "${f:-0}" -ge 1 ] 2>/dev/null; then
+              echo "::error title=Grounding FAILED::job/${job} failed (city ${CITY}, image radar-grounding:${TAG})."
+              exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error title=Grounding timeout::job/${job} did not complete in 2400s."; exit 1; fi
+            sleep 20
+          done

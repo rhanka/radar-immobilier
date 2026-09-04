@@ -1,0 +1,36 @@
+# grounding-preprod — Kustomize overlay that pins the grounding image for the
+# one-shot PREPROD grounding-citation Job dispatch (§citations, Lot 2).
+#
+# It bundles ONLY the extraction-owned Job (../41-grounding-citation-job.yaml,
+# #588) and adds an `images:` transformer so the dispatch workflow pins the
+# grounding image to the release tag (radar-grounding:<sha>), mirroring the
+# diag/refresh overlays.
+#
+# CONTRACT with #588 (41-grounding-citation-job.yaml, extraction):
+#   - the Job's container image is the LOGICAL name `radar-grounding` (bare) —
+#     this transformer rewrites it to the real SCW image + tag;
+#   - the Job reads the target city from env `CITY` whose value is the literal
+#     `${CITY}` — the workflow envsubst's it at apply time;
+#   - namespace radar-immobilier-preprod (set here).
+#
+# Applied by .github/workflows/grounding-preprod.yml only, in the CI run:
+#   cd deploy/k8s/grounding-preprod
+#   kustomize edit set image radar-grounding=rg.fr-par.scw.cloud/radar-immobilier/radar-grounding:<sha>
+#   kustomize build --load-restrictor LoadRestrictionsNone . \
+#     | CITY=<city> envsubst '${CITY}' | kubectl -n radar-immobilier-preprod apply -f -
+#
+# NB: `kubectl apply -k` can't reference ../41 (load-restrictor) → `kustomize
+# build --load-restrictor LoadRestrictionsNone`. The `newTag` placeholder is
+# FAIL-LOUD (unpullable if applied without `kustomize edit set image`).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: radar-immobilier-preprod
+
+resources:
+  - ../41-grounding-citation-job.yaml
+
+images:
+  - name: radar-grounding
+    newName: rg.fr-par.scw.cloud/radar-immobilier/radar-grounding
+    newTag: PINNED-BY-CI-AT-DISPATCH-DO-NOT-APPLY-UNEDITED
