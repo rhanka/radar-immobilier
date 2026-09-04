@@ -32,3 +32,11 @@ metadata:
     # boundary documented in the README).
     sentropic.dev/tenant: radar-immobilier
     sentropic.dev/workspace: radar-immobilier
+    # Pod Security Standards (PSS)
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: latest
+
