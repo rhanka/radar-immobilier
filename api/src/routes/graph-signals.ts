@@ -1010,8 +1010,16 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
         }
       }
     } catch (error) {
-      console.warn(
-        `[graph-signals] raises_signal citation inherit failed (city=${city}):`,
+      // §7.6 #3b (observability) — omit-when-null conflates "no linked event"
+      // (legitimate, silent) with "lookup errored" (this branch). A SYSTEMATIC
+      // failure here (e.g. getRaisesSignalLinks/buildEvidence throwing for every
+      // city) would silently drop ALL inherited citations, so this must be a LOUD
+      // error signal — NOT a silent swallow and NOT a soft `warn` (which reads as
+      // an expected degradation like the doc-enrichment budget). The response
+      // still degrades to omitted citationFromEvent (never a 5xx).
+      console.error(
+        `[graph-signals] raises_signal citation inherit FAILED (city=${city}, ` +
+          `nodes=${nodes.length}): inherited citations omitted for this city`,
         error,
       );
     }
