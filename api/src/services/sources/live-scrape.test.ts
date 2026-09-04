@@ -26,7 +26,7 @@ import {
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import { projectStateKey } from "../exploitation/project-state.js";
-import { runLiveScrape } from "./live-scrape.js";
+import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // In-memory object store (patron recueil.test.ts)
@@ -271,5 +271,64 @@ describe("runLiveScrape — exploit: true (PARSE + signaux réels)", () => {
 
     expect(recap[0]!.signals).toBeUndefined();
     expect(store.objects.has(projectStateKey(recap[0]!.city))).toBe(false);
+  });
+});
+
+describe("configOnlyCitySlugs / citiesChunk — --chunk sharding (b)", () => {
+  it("configOnlyCitySlugs is the sorted, deduped config-only set (no pvText fixtures)", () => {
+    const slugs = configOnlyCitySlugs();
+    const expected = ALL_PV_CITIES.filter((c) => !c.pvText)
+      .map((c) => c.config.citySlug)
+      .sort();
+    expect(slugs).toEqual(expected);
+    expect([...slugs].sort()).toEqual(slugs); // already sorted
+    expect(new Set(slugs).size).toBe(slugs.length); // no duplicates
+    // A pvText-fixture city is never in the live-scraped set.
+    const fixtureCity = ALL_PV_CITIES.find((c) => c.pvText)?.config.citySlug;
+    if (fixtureCity) expect(slugs).not.toContain(fixtureCity);
+  });
+
+  it("partitions into n disjoint, in-order shards that reassemble to the whole list", () => {
+    const all = ["a", "b", "c", "d", "e"];
+    const shards = [1, 2, 3].map((k) => citiesChunk(all, k, 3)); // size = ceil(5/3) = 2
+    expect(shards).toEqual([["a", "b"], ["c", "d"], ["e"]]);
+    expect(shards.flat()).toEqual(all); // no overlap, no gap, order preserved
+  });
+
+  it("handles a trailing empty shard when n > length", () => {
+    const all = ["a", "b"]; // size = ceil(2/3) = 1 → [a] [b] []
+    expect(citiesChunk(all, 1, 3)).toEqual(["a"]);
+    expect(citiesChunk(all, 2, 3)).toEqual(["b"]);
+    expect(citiesChunk(all, 3, 3)).toEqual([]);
+  });
+
+  it("n=1 returns the whole list", () => {
+    expect(citiesChunk(["a", "b", "c"], 1, 1)).toEqual(["a", "b", "c"]);
+  });
+
+  it("real config-only shards (chunk 1/n..n/n) reassemble to configOnlyCitySlugs()", () => {
+    const all = configOnlyCitySlugs();
+    const n = 5;
+    const reassembled = Array.from({ length: n }, (_, i) => citiesChunk(all, i + 1, n)).flat();
+    expect(reassembled).toEqual(all);
+  });
+});
+
+describe("runLiveScrape — onCity streaming (a, observability)", () => {
+  it("invokes onCity once per recap entry, in order, before returning", async () => {
+    const store = new MemoryStore();
+    const slugs = configOnlySlugs(3);
+    const fetch = fakeFetchForSlugs(slugs, "PV bytes — onCity");
+
+    const streamed: string[] = [];
+    const recap = await runLiveScrape(slugs, {
+      store,
+      fetch,
+      onCity: (r) => streamed.push(r.city),
+    });
+
+    // Streamed set + order match the returned recap exactly (per-city, not at the end).
+    expect(streamed).toEqual(recap.map((r) => r.city));
+    expect(streamed).toHaveLength(recap.length);
   });
 });
