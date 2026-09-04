@@ -45,7 +45,11 @@
     }
     const promise = (async () => {
       const pdfjs = await getPdfjs();
-      const task = pdfjs.getDocument({ url, isEvalSupported: false });
+      const task = pdfjs.getDocument({
+        url,
+        isEvalSupported: false,
+        enableScripting: false,
+      } as Parameters<typeof pdfjs.getDocument>[0]);
       return task.promise;
     })();
     docCache.set(url, promise);
