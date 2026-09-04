@@ -613,6 +613,24 @@
    * B restreint aux précoces si l'axe est coché. `z|m|p` reste la projection
    * EXACTE validée par l'autorité serveur (aucune régression du vivier).
    */
+  // §7.6 — un nœud « porte une citation vérifiée » s'il expose un extrait OU un
+  // PDF/raw (evidence servie par l'api : PIIA/DesEvent/dérogation cités directs).
+  function nodeHasVerifiedCitation(node: GraphSignalNode): boolean {
+    const ev = extractSignalEvidence(node);
+    return ev.citation !== null || ev.rawRef !== null;
+  }
+  // Union dédupliquée : set vivier trié + porteurs de citation absents (ordre
+  // préservé — les porteurs viennent après le set vivier trié).
+  function mergeCitationCarriers(
+    gated: GraphSignalNode[],
+    carriers: GraphSignalNode[],
+  ): GraphSignalNode[] {
+    if (carriers.length === 0) return gated;
+    const present = new Set(gated.map((n) => n.id));
+    const extra = carriers.filter((n) => !present.has(n.id));
+    return extra.length > 0 ? [...gated, ...extra] : gated;
+  }
+
   $: detailProjection = projectNodesForVivierKey(
     detailNodes,
     detailLegacyProjection,
@@ -631,11 +649,24 @@
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
   $: dateScopedProjectionNodes = filterNodesByEtapeDate(detailProjection.nodes, dateRange);
-  $: filteredDetailNodes = activeViewMode === "b"
+  // Set vivier « précoce » trié (INCHANGÉ : classification + axes + exclusions B).
+  $: gatedDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
         applyVivierBExclusions(dateScopedProjectionNodes, vivierBExclusions),
       )
     : dateScopedProjectionNodes;
+  // §7.6 — laissez-passer citation : surface les nœuds portant une citation
+  // VÉRIFIÉE (excerpt ou PDF) — PIIA / DesignationEvent / dérogation cités
+  // DIRECTEMENT — même écartés par les gates vivier (exclusions B, axe `p`
+  // tardif, axe `r` indéterminé), pour matérialiser TOUTES les citations owner
+  // (deliver-the-ask §7.6). vivier-v2 (classification + compteurs bulk serveur)
+  // reste INCHANGÉ : include d'AFFICHAGE seul, borné à la MÊME fenêtre
+  // temporelle, dédupliqué, ajouté APRÈS le set vivier trié.
+  $: citationCarrierNodes = filterNodesByEtapeDate(
+    detailNodes.filter(nodeHasVerifiedCitation),
+    dateRange,
+  );
+  $: filteredDetailNodes = mergeCitationCarriers(gatedDetailNodes, citationCarrierNodes);
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
       ? "Projection du vivier indisponible (contrat serveur incompatible)."
