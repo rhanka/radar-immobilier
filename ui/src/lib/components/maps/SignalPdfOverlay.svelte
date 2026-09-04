@@ -45,11 +45,13 @@
     }
     const promise = (async () => {
       const pdfjs = await getPdfjs();
+      // isEvalSupported: false neutralise toute évaluation dynamique de chaînes JS.
+      // pdfjs-dist v4 n'embarque ni PDFScriptingManager ni couche interactive,
+      // ce qui prévient l'exécution d'actions scriptées malveillantes.
       const task = pdfjs.getDocument({
         url,
         isEvalSupported: false,
-        enableScripting: false,
-      } as Parameters<typeof pdfjs.getDocument>[0]);
+      });
       return task.promise;
     })();
     docCache.set(url, promise);
@@ -135,6 +137,7 @@
     type PdfTextIndex,
     type PdfTextMatch,
   } from "$lib/signals/pdf-text-search.js";
+  import { isPublicCanonicalUrl } from "$lib/maps/geo-provenance.js";
 
   export let title = "Document source";
   export let sourceUrl: string | null = null;
@@ -402,6 +405,13 @@
     const path = `/api/documents/raw?rawRef=${encodeURIComponent(ref)}`;
     return base ? `${base.replace(/\/$/, "")}${path}` : path;
   }
+  function isSafeIframeUrl(candidate: string): boolean {
+    if (candidate.startsWith("/") || candidate.startsWith(window?.location?.origin ?? "")) {
+      return true;
+    }
+    return isPublicCanonicalUrl(candidate);
+  }
+
   // Source RENDUE par pdf.js : préfère TOUJOURS la route interne /api/documents/raw
   // (via rawRef) au `sourceUrl` public. pdf.js récupère les octets par fetch/XHR :
   // l'URL publique de la ville (ex. https://vdmt.ca/…/PV.pdf) est cross-origin et
@@ -410,8 +420,10 @@
   // same-origin + authentifiée et sert les octets depuis le bucket (preuve prouvée
   // 200 application/pdf). Le `sourceUrl` public reste utilisé pour le lien « Ouvrir »
   // (balise <a href>, non soumise au CORS) plus bas.
-  $: resolvedSourceUrl =
+  $: rawResolvedUrl =
     (rawRef ? rawDocumentUrl(rawRef) : null) ?? sourceUrl;
+  $: resolvedSourceUrl =
+    rawResolvedUrl && isSafeIframeUrl(rawResolvedUrl) ? rawResolvedUrl : null;
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
   $: isPdfSource = looksLikePdf(resolvedSourceUrl, rawRef, sourceRef);
 
@@ -1691,8 +1703,13 @@
         {/if}
       </div>
     {:else if resolvedSourceUrl && !loadError}
-      <!-- Source non-PDF (HTML…) : aperçu direct en iframe, sans éditeur. -->
-      <iframe class="pdf-frame" title={title} src={resolvedSourceUrl}></iframe>
+      <!-- Source non-PDF (HTML…) : aperçu direct en iframe sandboxée, sans éditeur. -->
+      <iframe
+        class="pdf-frame"
+        title={title}
+        sandbox="allow-same-origin allow-scripts"
+        src={resolvedSourceUrl}
+      ></iframe>
     {:else if loadError}
       <!-- #94 cas (b) — PROBLÈME TEMPORAIRE : un document est attendu (rawRef /
            sourceRef présent) mais le fetch/render a échoué. On le dit clairement,
