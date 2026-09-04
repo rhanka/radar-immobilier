@@ -78,6 +78,12 @@
     resetToInitialView(options?: { duration?: number }): boolean;
     /** (Re)peint les couches zone/lot à partir des données + expressions fournies. */
     syncGeoLayers(input: GeoLayersInput): void;
+    /**
+     * (Re)peint l'overlay CPTAQ (aplat « zone agricole protégée ») SOUS les
+     * couches zone/lot. Une FeatureCollection vide masque l'overlay — jamais de
+     * removeLayer/removeSource (additif strict, aucune course de teardown).
+     */
+    setCptaqData(features: GeoJsonFeatureCollectionLike): void;
     /** Géométrie du contour municipal mis en cache au chargement (ou `null`). */
     getCityBoundary(slug: string): GeoJsonGeometry | null;
     /** `true` si un contour municipal est en cache pour ce slug. */
@@ -672,9 +678,13 @@
       "selected-lots-outline",
       "selected-lots-highlight",
     ];
+    // Overlay CPTAQ toujours SOUS zones/lots : itéré EN PREMIER → `moveLayer` le
+    // renvoie au sommet, puis zones/lots repassent au-dessus (dernier = sommet).
+    // Position déterministe quel que soit l'ordre de création (toggle tardif).
+    const cptaqLayers = ["cptaq-fill", "cptaq-outline"];
     const ordered = lotsOnTop
-      ? [...zoneLayers, ...lotLayers]
-      : [...lotLayers, ...zoneLayers];
+      ? [...cptaqLayers, ...zoneLayers, ...lotLayers]
+      : [...cptaqLayers, ...lotLayers, ...zoneLayers];
     for (const id of ordered) {
       if (m.getLayer(id)) m.moveLayer(id);
     }
@@ -710,6 +720,49 @@
     }
   }
   $: if (mapReady) applyHighlightColors(zoneHighlightColor, lotHighlightColor);
+
+  /** Couleur de l'aplat CPTAQ (vert agricole) — constante socle documentée. */
+  const CPTAQ_FILL_COLOR = "#65a30d";
+
+  /**
+   * Overlay CPTAQ « zone agricole protégée » : idiome create-if-absent puis
+   * `setData` (jamais removeLayer/removeSource → additif strict, aucune course
+   * de teardown). Une FeatureCollection vide masque l'overlay. Rendu SOUS les
+   * couches zone/lot via `applyLayerOrder`.
+   */
+  function setCptaqData(features: GeoJsonFeatureCollectionLike): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      getSource: (id: string) => { setData?: (data: unknown) => void } | undefined;
+      addSource: (id: string, source: unknown) => void;
+      addLayer: (layer: unknown) => void;
+    };
+    const src = m.getSource("cptaq");
+    if (src?.setData) {
+      src.setData(features);
+    } else if (!src) {
+      m.addSource("cptaq", { type: "geojson", data: features });
+    }
+    if (!m.getLayer("cptaq-fill")) {
+      m.addLayer({
+        id: "cptaq-fill",
+        type: "fill",
+        source: "cptaq",
+        paint: { "fill-color": CPTAQ_FILL_COLOR, "fill-opacity": 0.25 },
+      });
+    }
+    if (!m.getLayer("cptaq-outline")) {
+      m.addLayer({
+        id: "cptaq-outline",
+        type: "line",
+        source: "cptaq",
+        paint: { "line-color": CPTAQ_FILL_COLOR, "line-width": 1, "line-opacity": 0.7 },
+      });
+    }
+    // Garantit l'ordre CPTAQ-sous-zones/lots même si le toggle arrive tard.
+    applyLayerOrder(lotsSelectable);
+  }
 
   function syncGeoLayers(input: GeoLayersInput): void {
     if (!mapInstance || !mapReady) return;
@@ -1047,6 +1100,7 @@
       recenterKeepZoom,
       resetToInitialView,
       syncGeoLayers,
+      setCptaqData,
       getCityBoundary,
       hasCityBoundary,
       get themeElement() {

@@ -71,6 +71,10 @@
     type LotFeatureCollection,
     type LotsResponse,
   } from "$lib/maps/lots-client.js";
+  import {
+    fetchCptaqConstraints,
+    type CptaqFeatureCollection,
+  } from "$lib/maps/cptaq-client.js";
   import { RequestGuard } from "$lib/net/request-guard.js";
   import {
     isAbortError,
@@ -263,6 +267,16 @@
   let geoNotices: string[] = [];
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
+  // §9 CPTAQ « zone agricole protégée » — overlay TOGGLEABLE (couche propre,
+  // état d'absence/erreur VISIBLE, jamais de disparition muette). Fetch per-ville
+  // (collection `ca-qc-constraints-<slug>` déjà per-ville → bbox omis).
+  const EMPTY_CPTAQ: CptaqFeatureCollection = { type: "FeatureCollection", features: [] };
+  const CPTAQ_LS_KEY = "signaux-cptaq-enabled";
+  const CPTAQ_LIMIT = 2000;
+  let cptaqEnabled = false;
+  let cptaqLoading = false;
+  let cptaqError: string | null = null;
+  let cptaqAbsent = false;
 
   // ── Gardes anti-course (dernière requête gagne) ───────────────────────────
   // Deux ressources distinctes, superséd­ées ATOMIQUEMENT au changement de
@@ -271,6 +285,9 @@
   // (AbortController) — elle ne peint jamais la mauvaise ville.
   const detailGuard = new RequestGuard();
   const geoGuard = new RequestGuard();
+  // Garde dédiée CPTAQ : supersède ses propres requêtes (toggle/ville) sans
+  // toucher aux baux zones/lots (couche indépendante).
+  const cptaqGuard = new RequestGuard();
   let activeDocument: SignalDocRef | null = null;
   // m7 / m8 — source documentaire générique ouverte dans le viewer partagé
   // (règlement PDF, grille de zonage, source de zone). Distincte de
@@ -342,6 +359,64 @@
   function setShowZoneLabels(value: boolean): void {
     showZoneLabels = value;
     persistLabelPref(ZONE_LABELS_LS_KEY, value);
+  }
+
+  // ── §9 CPTAQ : toggle + chargement (état d'absence/erreur VISIBLE) ──────────
+  function setCptaqEnabled(value: boolean): void {
+    cptaqEnabled = value;
+    persistLabelPref(CPTAQ_LS_KEY, value);
+    if (value) {
+      if (selectedCity) void loadCptaq(selectedCity.municipality.slug);
+    } else {
+      clearCptaq();
+    }
+  }
+
+  /**
+   * Charge l'overlay CPTAQ d'une ville (fetch per-ville, bbox omis : la
+   * collection `ca-qc-constraints-<slug>` est déjà per-ville). Garde dédiée
+   * anti-course. 404 → absence VISIBLE (jamais muet) ; erreur → état visible.
+   */
+  async function loadCptaq(citySlug: string): Promise<void> {
+    const lease = cptaqGuard.lease();
+    cptaqLoading = true;
+    cptaqError = null;
+    cptaqAbsent = false;
+    let fc: CptaqFeatureCollection = EMPTY_CPTAQ;
+    try {
+      const res = await fetchCptaqConstraints(citySlug, {
+        limit: CPTAQ_LIMIT,
+        signal: lease.signal,
+      });
+      if (!lease.isCurrent()) return;
+      if (res.absent) {
+        cptaqAbsent = true;
+      } else {
+        fc = res.featureCollection;
+      }
+    } catch (err) {
+      if (!lease.isCurrent() || isAbortError(err)) return;
+      console.warn("CPTAQ load failed:", err);
+      cptaqError = "Zone agricole protégée indisponible.";
+    } finally {
+      if (lease.isCurrent()) {
+        cptaqLoading = false;
+        mapApi?.setCptaqData(fc);
+      }
+    }
+  }
+
+  function clearCptaq(): void {
+    cptaqGuard.cancel();
+    cptaqLoading = false;
+    cptaqError = null;
+    cptaqAbsent = false;
+    mapApi?.setCptaqData(EMPTY_CPTAQ);
+  }
+
+  /** « Réessayer » de l'overlay CPTAQ (recharge la seule couche agricole). */
+  function retryCptaq(): void {
+    if (cptaqEnabled && selectedCity) void loadCptaq(selectedCity.municipality.slug);
   }
 
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
@@ -1166,6 +1241,8 @@
       flyToCity(selectedCity);
       villeZoomed = true; // C1 — deep-link ville : caméra en état zoomé
     }
+    // Deep-link : la carte devient prête APRÈS selectCity → (re)charge CPTAQ si activé.
+    if (cptaqEnabled && selectedCity) void loadCptaq(selectedCity.municipality.slug);
   }
 
   // ── Ville sélectionnée ─────────────────────────────────────────────────────
@@ -1223,6 +1300,7 @@
     // propre garde anti-course : détail (panneau droit) + zones + lots.
     void loadDetailForCity(entry.municipality.slug);
     void loadGeoForCity(entry.municipality.slug);
+    if (cptaqEnabled) void loadCptaq(entry.municipality.slug);
   }
 
   /**
@@ -1280,6 +1358,7 @@
     // en retard ne repeindra la carte après « Fermer ».
     detailGuard.cancel();
     geoGuard.cancel();
+    cptaqGuard.cancel();
     selectedCity = null;
     pendingRouteZoneKey = null;
     detailNodes = [];
@@ -1297,6 +1376,12 @@
     activeEvidence = null;
     activeSource = null;
     hoveredEvidenceSignalId = null;
+    // CPTAQ : retour Province → couche vidée (état préservé : cptaqEnabled reste ;
+    // la prochaine ville rechargera si activé). Jamais de disparition muette.
+    cptaqLoading = false;
+    cptaqError = null;
+    cptaqAbsent = false;
+    mapApi?.setCptaqData(EMPTY_CPTAQ);
     selectionState = createSelectionBucketState();
     // Contrat « lot suivant » : retour Province → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
@@ -2169,6 +2254,7 @@
     // session). Défaut si rien de persisté : n° de zone AFFICHÉ, n° de lot masqué.
     showLotLabels = readLabelPref(LOT_LABELS_LS_KEY, false);
     showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY, true);
+    cptaqEnabled = readLabelPref(CPTAQ_LS_KEY, false);
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
@@ -2316,11 +2402,25 @@
             />
           </div>
         </div>
+        <!-- §9 — overlay CPTAQ « zone agricole protégée » (couche OGC, toggle). -->
+        <div
+          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+          data-testid="map-legend-cptaq"
+        >
+          <div class="flex items-center gap-2" data-testid="legend-cptaq-toggle">
+            <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: #65a30d;"></span>
+            <Checkbox
+              label="Zone agricole protégée (CPTAQ)"
+              checked={cptaqEnabled}
+              onchange={(event) => setCptaqEnabled(event.currentTarget.checked)}
+            />
+          </div>
+        </div>
       {/if}
     </svelte:fragment>
 
     <svelte:fragment slot="overlay-top-left">
-      {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0)}
+      {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0 || cptaqLoading || cptaqError || cptaqAbsent)}
         <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
           <!-- Waiter PAR COUCHE : chacune affiche son propre état. -->
           {#if zonesLoading}
@@ -2345,6 +2445,19 @@
           {#each geoNotices as notice (notice)}
             <p class="m-0 text-slate-600">{notice}</p>
           {/each}
+          <!-- §9 CPTAQ : état d'absence/erreur/chargement VISIBLE (jamais muet). -->
+          {#if cptaqLoading}
+            <p class="m-0 font-semibold text-slate-500">Chargement de la zone agricole…</p>
+          {/if}
+          {#if cptaqError}
+            <p class="m-0 flex items-center gap-2 text-amber-700">
+              <span>Zone agricole protégée indisponible.</span>
+              <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryCptaq}>Réessayer</button>
+            </p>
+          {/if}
+          {#if cptaqAbsent}
+            <p class="m-0 text-slate-600">Zone agricole protégée non disponible pour cette ville.</p>
+          {/if}
         </div>
       {/if}
     </svelte:fragment>
