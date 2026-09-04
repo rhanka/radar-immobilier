@@ -606,7 +606,13 @@ jobs:
     name: Deploy to preprod cluster
     needs: build-push
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 45min: the §6 "Refresh diag Job" step polls up to 1800s (30min) and the
+    # rollouts take ~6min + the post-deploy proofs ~3min — the old 10min timeout
+    # cancelled the JOB before the diag poll could finish (measured on #586/#592,
+    # ~10min15s each). Must exceed the diag poll deadline + the rollout/proof time.
+    # (A future scaled diag — full city set vs the delson smoke — may need both
+    # the poll deadline AND this timeout raised further; i-infra co-vals.)
+    timeout-minutes: 45
     # Only roll preprod on pushes to main. PRs / feature-branch dispatches build
     # & push images but never deploy.
     # ARMING SWITCH (decouples merge from activation): this job stays SKIPPED
