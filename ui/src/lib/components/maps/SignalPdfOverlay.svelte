@@ -434,6 +434,8 @@
     (rawRef ? rawDocumentUrl(rawRef) : null) ?? sourceUrl;
   $: resolvedSourceUrl =
     rawResolvedUrl && isSafeIframeUrl(rawResolvedUrl) ? rawResolvedUrl : null;
+  $: safePublicSourceUrl =
+    sourceUrl && isPublicCanonicalUrl(sourceUrl) ? sourceUrl : null;
   $: fallbackRef = rawRef ?? rawObjectKey ?? sourceRef;
   $: isPdfSource = looksLikePdf(resolvedSourceUrl, rawRef, sourceRef);
 
@@ -1395,8 +1397,8 @@
       </div>
 
       <div class="pdf-overlay-actions" aria-label="Actions globales">
-        {#if sourceUrl}
-          <a class="pdf-open-link" href={sourceUrl} target="_blank" rel="noopener noreferrer">
+        {#if safePublicSourceUrl}
+          <a class="pdf-open-link" href={safePublicSourceUrl} target="_blank" rel="noopener noreferrer">
             Ouvrir <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
           </a>
         {/if}
@@ -1737,8 +1739,8 @@
             <RefreshCw class="h-3.5 w-3.5" aria-hidden="true" />
             Réessayer
           </button>
-          {#if sourceUrl}
-            <a href={sourceUrl} target="_blank" rel="noopener noreferrer">
+          {#if safePublicSourceUrl}
+            <a href={safePublicSourceUrl} target="_blank" rel="noopener noreferrer">
               Ouvrir le document <ExternalLink class="h-3.5 w-3.5" aria-hidden="true" />
             </a>
           {/if}
