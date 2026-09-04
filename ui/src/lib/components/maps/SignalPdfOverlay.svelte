@@ -1560,16 +1560,16 @@
           class:pdf-nav-toggle--on={hideOutOfFilter}
           on:click={toggleHideOutOfFilter}
           aria-pressed={hideOutOfFilter}
-          title={hideOutOfFilter
+          aria-label={hideOutOfFilter
             ? "Afficher les signaux hors-filtre du document"
             : "Masquer les signaux hors-filtre du document"}
+          title="Hors filtre"
         >
           {#if hideOutOfFilter}
             <EyeOff class="h-3.5 w-3.5" aria-hidden="true" />
           {:else}
             <Eye class="h-3.5 w-3.5" aria-hidden="true" />
           {/if}
-          <span>Hors-filtre</span>
         </button>
       {/if}
     </div>
@@ -1980,18 +1980,20 @@
     text-align: center;
   }
 
+  /* Toggle « hors-filtre » : bouton icône CARRÉ compact (l'icône œil seule ; le
+     libellé, qui débordait en bout de barre, est passé en tooltip/aria-label).
+     Dimensions calées sur les autres boutons de la barre PDF. */
   .pdf-nav-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    justify-content: center;
+    width: 1.7rem;
     height: 1.7rem;
-    padding: 0 0.55rem;
+    padding: 0;
     border: 1px solid var(--st-semantic-border-subtle, #cbd5e1);
     border-radius: var(--st-radius-sm, 4px);
     background: var(--st-semantic-surface-default, #fff);
     color: var(--st-semantic-text-secondary, #475569);
-    font-size: 0.7rem;
-    font-weight: 600;
     cursor: pointer;
   }
 
