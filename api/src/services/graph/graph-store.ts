@@ -863,7 +863,34 @@ export async function upsertGraph(
         set: {
           label: sql`excluded.label`,
           type: sql`excluded.type`,
-          props: sql`excluded.props`,
+          // Citation-safety — the worker-live FRESHNESS path (exploitation.ts →
+          // this PURE upsert) has NONE of upsertGraphAtomic's gates (gate3 /
+          // materializeSeveredSources / completeness). A wholesale
+          // `props = excluded.props` would DROP an existing node's provenance refs
+          // (e.g. the projection-materialized citations) when a fresh re-detection
+          // re-emits the same node id with fewer/no refs. Instead: take the fresh
+          // detection's props but keep `props.refs` NON-REGRESSING — union
+          // existing ∪ incoming, deduped. When the existing node has no refs,
+          // behave exactly as before (take excluded.props verbatim). Legitimate ref
+          // removal remains the projection path's job (upsertGraphAtomic + gate3
+          // intendedRemovals), never this freshness upsert.
+          props: sql`
+            CASE
+              WHEN coalesce(${graphNodes.props} -> 'refs', '[]'::jsonb) = '[]'::jsonb
+                THEN excluded.props
+              ELSE jsonb_set(
+                excluded.props,
+                '{refs}',
+                (
+                  SELECT coalesce(jsonb_agg(DISTINCT e), '[]'::jsonb)
+                  FROM jsonb_array_elements(
+                    (${graphNodes.props} -> 'refs')
+                      || coalesce(excluded.props -> 'refs', '[]'::jsonb)
+                  ) AS e
+                )
+              )
+            END
+          `,
           sourceRef: sql`excluded.source_ref`,
         },
       });
