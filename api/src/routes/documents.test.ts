@@ -116,7 +116,27 @@ describe("GET /api/documents/raw", () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("application/pdf");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(res.headers.get("content-security-policy")).toBe("sandbox; default-src 'none'");
+    expect(res.headers.get("content-disposition")).toBeNull();
     expect(await res.text()).toBe("%PDF-1.4 cas");
+  });
+
+  it("adds Content-Disposition attachment for non-PDF files", async () => {
+    const store = new MemoryStore();
+    const htmlKey = "raw/testville/sample.html";
+    await store.put(htmlKey, "<html><body>malicious</body></html>", "text/html");
+    const app = documentsRoute({ store });
+
+    const res = await app.request(
+      `/api/documents/raw?rawRef=${encodeURIComponent(htmlKey)}`,
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("text/html");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(res.headers.get("content-security-policy")).toBe("sandbox; default-src 'none'");
+    expect(res.headers.get("content-disposition")).toBe("attachment");
   });
 
   it("prefers the scrape store but falls back to the metadata store", async () => {
