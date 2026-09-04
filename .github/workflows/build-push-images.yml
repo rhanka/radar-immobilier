@@ -137,6 +137,12 @@ jobs:
           - service: ui
             image: radar-ui
             dockerfile: ui/Dockerfile
+          # Grounding image (citations) — SKELETON (LLM stage TBD, i-infra). Built
+          # + pushed to SCW like radar-api so it exists for digest-pin, but the
+          # grounding Job stays INERT until the LLM is finalized + i-infra-certified.
+          - service: grounding
+            image: radar-grounding
+            dockerfile: deploy/grounding/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
