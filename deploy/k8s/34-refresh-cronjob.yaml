@@ -4,7 +4,8 @@
 # et SPEC_PERSISTENCE_S3_FIRST §6 « SCW Serverless Jobs + Cron quotidien ») :
 #
 #   A. radar-refresh-scrape  (QUOTIDIEN, 03:17 UTC)
-#      scrape + parse + exploit déterministe des 549 villes → raw/ parsed/
+#      scrape + parse + exploit déterministe des ~528 villes config-only → raw/ parsed/
+#      (sur 563 configs ALL_PV_CITIES − 35 fixtures ; couverture data actuelle ~1007)
 #      ontology/ sur SCW. AUCUN LLM. HEAD-skip CAS → ne capte que le NOUVEAU.
 #      C'est le moteur du « refresh des nouveaux PV tout seul » de la Vague A.
 #
