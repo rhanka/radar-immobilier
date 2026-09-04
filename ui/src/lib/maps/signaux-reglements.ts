@@ -58,6 +58,12 @@ export interface ReglementEntry {
    * quand aucun signal citant n'expose de source ouvrable.
    */
   evidenceNodeId: string | null;
+  /**
+   * §7.1 — URL du PDF du RÈGLEMENT lui-même (source municipale, lien direct).
+   * DISTINCT du PV source (`evidenceNodeId`) et de la grille de zonage
+   * (`grillePdfUrls`). `null` quand aucun PDF de règlement n'est connu.
+   */
+  reglementPdfUrl: string | null;
 }
 
 /**
@@ -209,6 +215,7 @@ export function aggregateReglements(
           zoneCodes: [],
           grillePdfUrls: [],
           evidenceNodeId: null,
+          reglementPdfUrl: null,
           _seenZone: new Set(),
           _seenGrille: new Set(),
           _hasRawEvidence: false,
@@ -262,6 +269,7 @@ export function aggregateReglements(
         grillePdfUrls: entry.grillePdfUrls,
         regulatoryStatus: aggregateRegulatoryStatus(entry._regulatoryStatuses),
         evidenceNodeId: entry.evidenceNodeId,
+        reglementPdfUrl: null,
       };
     });
   entries.sort(
@@ -269,6 +277,92 @@ export function aggregateReglements(
       b.signalCount - a.signalCount || a.number.localeCompare(b.number, "fr"),
   );
   return entries;
+}
+
+/** §7.1 démo — un règlement de zonage municipal (numéro + PDF source direct). */
+export interface DemoReglementPdf {
+  numero: string;
+  pdfUrl: string;
+}
+
+/**
+ * §7.1 DÉMO — liens PDF de règlement par ville, source municipale LIVE
+ * (URLs vérifiées 200/PDF par geo-cond). C'est un **LINK-ONLY** vers le PDF
+ * publié par la municipalité : ce N'EST PAS la version geo-servie stable
+ * (capture CAS + provenance sha256), qui viendra ensuite (owner-gated). L'UI le
+ * marque explicitement « source municipale · démo ». Numéros + URLs fournis
+ * VERBATIM (NE RIEN INVENTER). 4 villes de la démo.
+ */
+export const DEMO_REGLEMENT_PDFS: Record<string, DemoReglementPdf[]> = {
+  "sainte-martine": [
+    {
+      numero: "2019-342",
+      pdfUrl:
+        "https://sainte-martine.ca/wp-content/uploads/2020/10/2019-342-Reglement-zonage.pdf",
+    },
+  ],
+  "calixa-lavallee": [
+    {
+      numero: "275",
+      pdfUrl:
+        "https://calixa-lavallee.ca/wp-content/uploads/2025/03/Dct3uN-275-Reg.-Zonage-Version-administrative-6-juillet-2021-002.pdf",
+    },
+  ],
+  richelieu: [
+    {
+      numero: "14-R-186",
+      pdfUrl:
+        "https://ville.richelieu.qc.ca/wp-content/uploads/2025/04/Reglement-urbanisme-14-R-186-complet.pdf",
+    },
+  ],
+  "saint-remi": [
+    {
+      numero: "V654-2017-00",
+      pdfUrl:
+        "https://www.saint-remi.ca/wp-content/uploads/2026/03/En-vigueur-Reglement-de-zonage-V654-2017-00-V654-2025-32.pdf",
+    },
+  ],
+};
+
+/**
+ * §7.1 démo — attache le PDF municipal (link-only) aux règlements d'une ville.
+ * - Entrée EXISTANTE (numéro déjà cité par un signal, ex. Ste-Martine 2019-342)
+ *   → on ne fait qu'ajouter `reglementPdfUrl` (le compte/les signaux inchangés).
+ * - Entrée ABSENTE (villes sans nœud immo portant le numéro) → on MATÉRIALISE
+ *   une entrée `firm` (règlement EN VIGUEUR) avec numéro + PDF, sans PV source.
+ * Ville hors carte démo → renvoie la MÊME référence (non destructif).
+ */
+export function applyDemoReglementPdfUrls(
+  entries: ReglementEntry[],
+  citySlug: string | null | undefined,
+): ReglementEntry[] {
+  const demos = citySlug ? DEMO_REGLEMENT_PDFS[citySlug] : undefined;
+  if (!demos || demos.length === 0) return entries;
+  const out = entries.map((entry) => ({ ...entry }));
+  const byKey = new Map(out.map((entry) => [entry.key, entry] as const));
+  for (const demo of demos) {
+    const key = normalizeReglementKey(demo.numero);
+    if (key.length === 0) continue;
+    const existing = byKey.get(key);
+    if (existing) {
+      existing.reglementPdfUrl = demo.pdfUrl;
+    } else {
+      const created: ReglementEntry = {
+        number: demo.numero,
+        key,
+        signalCount: 0,
+        signalNodeIds: [],
+        zoneCodes: [],
+        grillePdfUrls: [],
+        regulatoryStatus: "firm",
+        evidenceNodeId: null,
+        reglementPdfUrl: demo.pdfUrl,
+      };
+      out.push(created);
+      byKey.set(key, created);
+    }
+  }
+  return out;
 }
 
 /**
