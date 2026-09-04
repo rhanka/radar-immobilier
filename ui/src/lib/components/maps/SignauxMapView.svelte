@@ -660,12 +660,14 @@
   // DIRECTEMENT — même écartés par les gates vivier (exclusions B, axe `p`
   // tardif, axe `r` indéterminé), pour matérialiser TOUTES les citations owner
   // (deliver-the-ask §7.6). vivier-v2 (classification + compteurs bulk serveur)
-  // reste INCHANGÉ : include d'AFFICHAGE seul, borné à la MÊME fenêtre
-  // temporelle, dédupliqué, ajouté APRÈS le set vivier trié.
-  $: citationCarrierNodes = filterNodesByEtapeDate(
-    detailNodes.filter(nodeHasVerifiedCitation),
-    dateRange,
-  );
+  // reste INCHANGÉ : include d'AFFICHAGE seul, dédupliqué, ajouté APRÈS le set
+  // vivier trié.
+  // ⚠ PAS de date-scoping des porteurs : les citations pilote (docs 2025-12 …
+  // 2026-03) précèdent souvent la fenêtre « 6 mois » ET leur `etape_date` peut
+  // être absent (PIIA / DesignationEvent) → `filterNodesByEtapeDate` les
+  // éliminait TOUTES (bucket restait à 4). On les surface QUEL QUE SOIT le
+  // millésime ; la lentille temporelle ne s'applique qu'au set vivier « précoce ».
+  $: citationCarrierNodes = detailNodes.filter(nodeHasVerifiedCitation);
   $: filteredDetailNodes = mergeCitationCarriers(gatedDetailNodes, citationCarrierNodes);
   $: effectiveDetailError = detailError ?? (
     !detailLoading && detailNodes.length > 0 && !detailProjection.available
