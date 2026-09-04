@@ -36,8 +36,21 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: project-graph
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: ${PROJECTION_IMAGE}
           workingDir: /workspace/api
           # POSITIONAL slug (not --city): projects ONLY this city's graph.
