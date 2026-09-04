@@ -192,6 +192,38 @@ describe("POST /api/ontology/:city/patch (write-core, token-gated)", () => {
     expect(res.status).toBe(401);
   });
 
+  it("401s on token of different length without throwing", async () => {
+    const store = new MemoryStore();
+    await seedReconcilable(store);
+    const app = ontologyRoute({ store, ontologyWriteToken: TOKEN });
+    const res = await app.request(`/api/ontology/${CITY}/patch`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-radar-write-token": "short" },
+      body: JSON.stringify({
+        op: "reject_match",
+        aId: "mention:lot:4193751",
+        bId: "mention:lot:4193751-avis",
+      }),
+    });
+    expect(res.status).toBe(401);
+  });
+
+  it("401s on empty string write token header", async () => {
+    const store = new MemoryStore();
+    await seedReconcilable(store);
+    const app = ontologyRoute({ store, ontologyWriteToken: TOKEN });
+    const res = await app.request(`/api/ontology/${CITY}/patch`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-radar-write-token": "" },
+      body: JSON.stringify({
+        op: "reject_match",
+        aId: "mention:lot:4193751",
+        bId: "mention:lot:4193751-avis",
+      }),
+    });
+    expect(res.status).toBe(401);
+  });
+
   it("401s when no write token is configured (fail-closed)", async () => {
     const store = new MemoryStore();
     await seedReconcilable(store);

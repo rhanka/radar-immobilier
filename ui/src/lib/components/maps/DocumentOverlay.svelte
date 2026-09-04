@@ -2,10 +2,30 @@
   import { ExternalLink, X } from "@lucide/svelte";
   import type { SignalDocRef } from "$lib/signals/graph-signal-detail-client.js";
 
+  import { isPublicCanonicalUrl } from "$lib/maps/geo-provenance.js";
+
   export let documentRef: SignalDocRef | null = null;
   export let onClose: () => void = () => {};
 
-  $: source = documentRef?.documentUrl ?? documentRef?.sourceUrl ?? null;
+  function isSafeIframeUrl(candidate: string): boolean {
+    if (candidate.startsWith("//")) return false;
+    if (candidate.startsWith("/")) {
+      return !candidate.startsWith("/\\");
+    }
+    try {
+      const currentOrigin = typeof window !== "undefined" ? window?.location?.origin : "";
+      if (currentOrigin) {
+        const parsed = new URL(candidate, currentOrigin);
+        if (parsed.origin === currentOrigin) return true;
+      }
+    } catch {
+      return false;
+    }
+    return isPublicCanonicalUrl(candidate);
+  }
+
+  $: rawCandidate = documentRef?.documentUrl ?? documentRef?.sourceUrl ?? null;
+  $: source = rawCandidate && isSafeIframeUrl(rawCandidate) ? rawCandidate : null;
   $: pageSuffix =
     source && documentRef?.page !== undefined && !source.includes("#")
       ? `#page=${documentRef.page}`
@@ -57,6 +77,7 @@
       <iframe
         class="doc-overlay-frame"
         title="Document source"
+        sandbox="allow-same-origin allow-scripts"
         src={iframeSrc}
       ></iframe>
     {:else}

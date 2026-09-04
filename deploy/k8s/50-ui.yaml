@@ -34,6 +34,13 @@ data:
       root /usr/share/nginx/html;
       index index.html;
 
+      # Security headers & information disclosure mitigation
+      server_tokens off;
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), clipboard-write=(self)" always;
+
       # ES module assets (.mjs) — notably the pdf.js worker bundled by Vite as
       # `pdf.worker.min-*.mjs`. nginx 1.27's stock mime.types maps .js but NOT
       # .mjs, so .mjs falls back to application/octet-stream. pdf.js loads its

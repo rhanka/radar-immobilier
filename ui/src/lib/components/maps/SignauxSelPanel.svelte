@@ -97,6 +97,7 @@
   import AnnotationBadge from "$lib/components/collab/AnnotationBadge.svelte";
   import {
     aggregateReglements,
+    applyDemoReglementPdfUrls,
     reglementSourceViewerTitle,
     type ReglementEntry,
   } from "$lib/maps/signaux-reglements.js";
@@ -251,7 +252,12 @@
    * liées. Aucun endpoint dédié ne sert une liste de règlements par ville (cf.
    * note PR) : on ne fabrique rien, on agrège ce qui est déjà servi.
    */
-  $: reglements = aggregateReglements(filteredDetailNodes, zones);
+  // §7.1 démo : après agrégation depuis les signaux, on attache/matérialise les
+  // PDF de règlement municipaux (link-only) des 4 villes démo (selon le slug ville).
+  $: reglements = applyDemoReglementPdfUrls(
+    aggregateReglements(filteredDetailNodes, zones),
+    selectedCity?.municipality?.slug ?? null,
+  );
 
   function dedupeZonesByCode(zoneFeatures: GeoZoneFeature[]): GeoZoneFeature[] {
     const seen = new Set<string>();
@@ -1458,6 +1464,22 @@
                         <FileX class="h-3.5 w-3.5" aria-hidden="true" />
                         Document source non relié
                       </span>
+                    {/if}
+                    {#if reg.reglementPdfUrl}
+                      <!-- §7.1 démo : PDF du RÈGLEMENT (source municipale, lien
+                           direct). Distinct du PV source. Marqué « démo » : la
+                           version geo-servie stable (CAS + provenance) suivra. -->
+                      <a
+                        class="doc-ref-button reglement-pdf-link"
+                        href={reg.reglementPdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Ouvrir le PDF du règlement publié par la municipalité (lien direct — démo). La version sourcée geo (CAS + provenance) viendra ensuite."
+                      >
+                        <FileText class="h-3.5 w-3.5" aria-hidden="true" />
+                        Voir le PDF du règlement
+                        <span class="reglement-pdf-demo">source municipale · démo</span>
+                      </a>
                     {/if}
                     {#each reg.grillePdfUrls as url (url)}
                       <button
@@ -2740,6 +2762,19 @@
     color: var(--st-semantic-text-muted, #94a3b8);
     font-size: var(--signaux-fs-caption);
     font-style: italic;
+  }
+
+  /* §7.1 démo — marqueur « source municipale · démo » sur le lien PDF règlement,
+     pour distinguer visiblement du PDF geo-servi stable (à venir). */
+  .reglement-pdf-demo {
+    margin-left: 0.35rem;
+    padding: 0 0.3rem;
+    border-radius: 0.25rem;
+    background: var(--st-semantic-surface-muted, #f1f5f9);
+    color: var(--st-semantic-text-muted, #94a3b8);
+    font-size: var(--signaux-fs-caption);
+    font-style: italic;
+    white-space: nowrap;
   }
 
   /* Sous-section NORMES du drawer « Règlement et Normes » : séparée des
