@@ -18,3 +18,4 @@ metadata:
 imagePullSecrets:
   - name: radar-registry-pull
 automountServiceAccountToken: false
+

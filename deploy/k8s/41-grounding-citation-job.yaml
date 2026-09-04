@@ -58,8 +58,21 @@ spec:
       # TODO(i-infra): SA in radar-immobilier-preprod with egress to SCW docs-pocs (read) + the
       # in-cluster MinIO NetworkPolicy (write). No LLM egress needed (publish-only).
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: grounding-publish
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           # image = LOGICAL name, patched by kustomize `images:` at dispatch (i-arch). PUBLISH-ONLY:
           # needs only s5cmd + coreutils + jq + tools/grounding. NEVER hardcode a tag here.
           image: radar-grounding
