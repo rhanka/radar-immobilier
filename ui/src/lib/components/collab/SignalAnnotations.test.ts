@@ -13,6 +13,24 @@ vi.mock("$lib/collab/annotations-client.js", () => ({
   deleteAnnotation: vi.fn(),
 }));
 
+// Mock du flux SSE : capture le handler de frame passé par onMount, garde le
+// vrai `noteMatchesTarget` (logique de match signal/lot).
+const streamMock = vi.hoisted(() => ({ handlers: [] as Array<(f: unknown) => void> }));
+vi.mock("$lib/collab/prospect-notes-stream.js", () => ({
+  subscribeNoteFrames: (onFrame: (f: unknown) => void) => {
+    streamMock.handlers.push(onFrame);
+    return () => {};
+  },
+  noteMatchesTarget: (
+    note: { targetType: string; signalId?: string; noLot?: string; citySlug?: string },
+    target: { type: string; id: string; citySlug: string },
+  ): boolean =>
+    note.targetType === target.type &&
+    (target.type === "signal"
+      ? note.signalId === target.id
+      : note.noLot === target.id && note.citySlug === target.citySlug),
+}));
+
 import SignalAnnotations from "./SignalAnnotations.svelte";
 import { listAnnotations, createAnnotation } from "$lib/collab/annotations-client.js";
 import type { AnnotationTarget, EntityAnnotation } from "$lib/collab/annotation.js";
@@ -28,6 +46,7 @@ const NOTES: EntityAnnotation[] = [
 afterEach(() => cleanup());
 beforeEach(() => {
   vi.clearAllMocks();
+  streamMock.handlers.length = 0;
   list.mockResolvedValue(NOTES);
   create.mockResolvedValue(undefined);
 });
@@ -52,5 +71,26 @@ describe("SignalAnnotations (container)", () => {
     const onCount = vi.fn();
     render(SignalAnnotations, { props: { target: TARGET, currentUserId: "me", onCount } });
     await waitFor(() => expect(onCount).toHaveBeenCalledWith(1));
+  });
+
+  it("temps réel : une frame prospect:note concernant la cible déclenche un refetch", async () => {
+    render(SignalAnnotations, { props: { target: TARGET, currentUserId: "me" } });
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(1));
+    expect(streamMock.handlers).toHaveLength(1);
+
+    // frame d'un coéquipier sur CE signal → refetch
+    streamMock.handlers[0]!({ action: "add", note: { id: "n2", targetType: "signal", signalId: "sig-1" } });
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+  });
+
+  it("temps réel : une frame concernant une AUTRE cible est ignorée (pas de refetch)", async () => {
+    render(SignalAnnotations, { props: { target: TARGET, currentUserId: "me" } });
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(1));
+
+    streamMock.handlers[0]!({ action: "add", note: { id: "x", targetType: "signal", signalId: "autre-signal" } });
+    streamMock.handlers[0]!({ action: "add", note: { id: "y", targetType: "lot", noLot: "1234567", citySlug: "delson" } });
+    // laisse une microtâche s'écouler : aucun refetch supplémentaire
+    await Promise.resolve();
+    expect(list).toHaveBeenCalledTimes(1);
   });
 });
