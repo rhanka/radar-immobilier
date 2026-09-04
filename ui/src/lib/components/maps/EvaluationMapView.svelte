@@ -281,6 +281,12 @@
   // ET avortées (signal). Chaque couche garde son propre waiter/erreur : l'échec
   // de l'une n'affecte pas l'affichage des autres. Timeout borné côté clients.
   const evalGuard = new RequestGuard();
+  // Gardes DÉDIÉES aux sections rechargeables indépendamment : un reload de
+  // section mint SON propre bail (n'avorte ni n'invalide les baux des autres
+  // couches, contrairement au bail partagé evalGuard). Le changement de ville
+  // supersède quand même chaque garde (selectEvalCity mint tous les baux).
+  const lotsGuard = new RequestGuard();
+  const zonageGuard = new RequestGuard();
 
   async function loadProspectMarks(citySlug: string, lease: RequestLease): Promise<void> {
     prospectMarksLoading = true;
@@ -369,10 +375,22 @@
     resetEvalFilter();
     // Supersède TOUTE requête en vol de la ville précédente.
     const lease = evalGuard.lease();
-    void loadLots(city.slug, lease);
-    void loadZonage(city.slug, lease);
+    void loadLots(city.slug, lotsGuard.lease());
+    void loadZonage(city.slug, zonageGuard.lease());
     void loadProspectMarks(city.slug, lease);
     void loadZones(city.slug, lease);
+  }
+
+  // ── Reload par section (déclenché par les warnings compacts d'entête) ───────
+  /** Recharge UNIQUEMENT la couche lots (bail dédié → n'affecte pas les autres). */
+  function reloadLots(): void {
+    if (!selectedEvalCity) return;
+    void loadLots(selectedEvalCity.slug, lotsGuard.lease());
+  }
+  /** Recharge UNIQUEMENT la couche des changements de zonage. */
+  function reloadZonage(): void {
+    if (!selectedEvalCity) return;
+    void loadZonage(selectedEvalCity.slug, zonageGuard.lease());
   }
 
   // ── Sélection automatique de la 1re ville lors du changement de filtre ────
@@ -863,11 +881,31 @@
 
           <!-- ── Colonne gauche : Changements de zonage ───────────────────── -->
           <div class="flex-1 min-w-0 p-4" data-testid="zonage-panel">
-            <div class="flex items-center gap-2 mb-3">
-              <FileText class="h-4 w-4 text-amber-500 shrink-0" aria-hidden="true" />
-              <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Changements de zonage
-              </span>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2 min-w-0">
+                <FileText class="h-4 w-4 text-amber-500 shrink-0" aria-hidden="true" />
+                <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Changements de zonage
+                </span>
+              </div>
+              {#if zonageError}
+                <div class="flex items-center gap-1 shrink-0" data-testid="zonage-warning">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-600" title={zonageError}>
+                    <AlertCircle class="h-3.5 w-3.5" aria-hidden="true" />
+                    n/d
+                  </span>
+                  <button
+                    type="button"
+                    class="rounded p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                    on:click={reloadZonage}
+                    aria-label="Recharger les changements de zonage"
+                    title="Recharger"
+                    data-testid="zonage-reload"
+                  >
+                    <RefreshCw class="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+              {/if}
             </div>
 
             {#if zonageLoading}
@@ -876,11 +914,9 @@
                 Chargement…
               </div>
             {:else if zonageError}
-              <Alert
-                tone="warning"
-                title="Données de zonage non disponibles"
-                message={zonageError}
-              />
+              <p class="text-xs text-slate-400" data-testid="zonage-error-inline">
+                {zonageError} Utilisez ↻ dans l'en-tête pour réessayer.
+              </p>
             {:else if !hasZonage}
               <div class="rounded-lg border border-slate-100 bg-slate-50 p-3 text-center" data-testid="zonage-empty">
                 <p class="text-xs text-slate-400">Aucun changement de zonage disponible.</p>
@@ -940,6 +976,23 @@
                 <span class="text-xs text-slate-400">
                   {filteredPolygonFeatures.length}/{polygonFeatures.length} lot{polygonFeatures.length !== 1 ? "s" : ""} · {isCarteSteve ? "Steve" : "CC-BY"}
                 </span>
+              {:else if lotsError}
+                <div class="flex items-center gap-1 shrink-0" data-testid="lots-warning">
+                  <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-600" title={lotsError}>
+                    <AlertCircle class="h-3.5 w-3.5" aria-hidden="true" />
+                    n/d
+                  </span>
+                  <button
+                    type="button"
+                    class="rounded p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                    on:click={reloadLots}
+                    aria-label="Recharger les lots"
+                    title="Recharger"
+                    data-testid="lots-reload"
+                  >
+                    <RefreshCw class="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </div>
               {/if}
             </div>
 
@@ -1069,13 +1122,9 @@
               </div>
 
             {:else if lotsError}
-              <div class="px-4 pb-4">
-                <Alert
-                  tone="warning"
-                  title="Données de lots non disponibles"
-                  message={lotsError}
-                />
-              </div>
+              <p class="px-4 pb-4 text-xs text-slate-400" data-testid="lots-error-inline">
+                {lotsError} Utilisez ↻ dans l'en-tête pour réessayer.
+              </p>
 
             {:else if !hasLots}
               <div class="px-4 pb-4" data-testid="lots-empty">
