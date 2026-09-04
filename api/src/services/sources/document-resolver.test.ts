@@ -10,12 +10,19 @@
  * Anti-régression : le chemin NOMINAL (meta présent) reste inchangé.
  */
 
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, it, expect, vi } from "vitest";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 
 import {
   findDocumentMetadata,
+  geoKeyCandidates,
+  loadGeoKeyIndex,
   loadDocumentMetadata,
+  mapToGeoKey,
+  parseGeoKeyIndex,
   resolveRawContentType,
 } from "./document-resolver.js";
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
@@ -65,6 +72,238 @@ async function seedRecord(store: MemoryStore) {
   await store.put(rawMetaKey(record.storageKey), JSON.stringify(record));
   return record;
 }
+
+// ── immo→geo repoint: pure O(1) CAS-key rewrite (NEVER a bucket scan) ──────
+describe("mapToGeoKey", () => {
+  const sha = "a".repeat(64);
+
+  it.each([
+    "plaisance",
+    "saint-frederic",
+    "salaberry-de-valleyfield",
+    "sainte-catherine-de-la-jacques-cartier",
+    "quebec",
+  ])(
+    "rewrites the immo PV CAS prefix for %s to the geo key, carrying the sha unchanged",
+    (city) => {
+      expect(mapToGeoKey(`raw/proces-verbaux-${city}/cas/${sha}.pdf`)).toBe(
+        `raw/pv-index/cas/${sha}.pdf`,
+      );
+    },
+  );
+
+  // City source ids join municipality and MRC with a DOUBLE hyphen (24 real
+  // ids). These MUST repoint too — rejecting them silently keeps 24 cities
+  // (incl. saint-stanislas--des-chenaux, a UAT city) served from immo at
+  // REPOINT=1, making the cutover silently partial.
+  it.each([
+    "saint-stanislas--des-chenaux",
+    "bedford--brome-missisquoi",
+    "notre-dame-du-bon-conseil--drummond--2",
+    "stanstead--memphremagog--2",
+    "valcourt--le-val-saint-francois",
+  ])(
+    "repoints a double-hyphen municipality--MRC slug (%s)",
+    (city) => {
+      expect(mapToGeoKey(`raw/proces-verbaux-${city}/cas/${sha}.pdf`)).toBe(
+        `raw/pv-index/cas/${sha}.pdf`,
+      );
+    },
+  );
+
+  // Extension is PRESERVED, not forced to `.pdf`: geo keys the real file type.
+  it.each(["pdf", "docx", "doc", "odt", "rtf"])(
+    "preserves the real .%s extension across the rewrite",
+    (ext) => {
+      expect(
+        mapToGeoKey(`raw/proces-verbaux-ange-gardien/cas/${sha}.${ext}`),
+      ).toBe(`raw/pv-index/cas/${sha}.${ext}`);
+    },
+  );
+
+  it.each(["pdf", "docx"])(
+    "is idempotent: an already-geo .%s key maps to itself",
+    (ext) => {
+      const geoKey = `raw/pv-index/cas/${sha}.${ext}`;
+      expect(mapToGeoKey(geoKey)).toBe(geoKey);
+    },
+  );
+
+  it("never injects a sha256: prefix — the 64-hex digest is copied verbatim", () => {
+    const out = mapToGeoKey(`raw/proces-verbaux-quebec/cas/${sha}.pdf`);
+    expect(out).toBe(`raw/pv-index/cas/${sha}.pdf`);
+    expect(out).not.toContain("sha256:");
+  });
+
+  it.each([
+    // non-PV source — not covered by the PV CAS contract
+    ["non-PV source", `raw/avis-publics-testville/cas/${sha}.pdf`],
+    // sha too short / not 64 hex
+    ["short sha", "raw/proces-verbaux-testville/cas/deadbeef.pdf"],
+    // uppercase hex is not a canonical CAS digest
+    ["uppercase sha", `raw/proces-verbaux-testville/cas/${"A".repeat(64)}.pdf`],
+    // wrong extension casing
+    ["uppercase extension", `raw/proces-verbaux-testville/cas/${sha}.PDF`],
+    // immo-internal artifacts under the same prefix: NOT geo documents, so they
+    // return null (→ served from the immo legacy stores, never 404'd on geo).
+    ["unknown-type .bin (immo docx download)", `raw/proces-verbaux-ange-gardien/cas/${sha}.bin`],
+    ["extracted text .txt", `raw/proces-verbaux-testville/cas/${sha}.txt`],
+    ["Office-viewer .html", `raw/proces-verbaux-ange-gardien/cas/${sha}.html`],
+    // metadata sidecar, never the served payload
+    ["meta sidecar", `raw/proces-verbaux-testville/cas/${sha}.pdf.meta.json`],
+    // empty city segment
+    ["empty city", `raw/proces-verbaux-/cas/${sha}.pdf`],
+    // the double-hyphen relaxation must NOT accept a leading/trailing hyphen
+    // (start/end stay alphanumeric — no slug looks like this)
+    ["leading-hyphen city", `raw/proces-verbaux--testville/cas/${sha}.pdf`],
+    ["trailing-hyphen city", `raw/proces-verbaux-testville-/cas/${sha}.pdf`],
+    // nested path under cas/
+    ["nested path", `raw/proces-verbaux-testville/cas/nested/${sha}.pdf`],
+    // traversal attempt
+    ["traversal", `raw/proces-verbaux-testville/cas/../${sha}.pdf`],
+    // not even a raw/ key
+    ["non-raw key", `proces-verbaux-testville/cas/${sha}.pdf`],
+  ])("does not fabricate a geo key for a %s (returns null)", (_label, key) => {
+    expect(mapToGeoKey(key)).toBeNull();
+  });
+});
+
+describe("parseGeoKeyIndex", () => {
+  const sourceUrl = "https://testville.qc.ca/pv/2026-05-12.pdf";
+  const geoKey = `raw/pv-index/cas/${"b".repeat(64)}.pdf`;
+
+  it("drops drift and null entries and returns null for an absent URL", () => {
+    const index = parseGeoKeyIndex({
+      resolve_by_source_url: {
+        [sourceUrl]: { geo_cas_key: geoKey, drift: false },
+        "https://testville.qc.ca/pv/drift.pdf": {
+          geo_cas_key: `raw/pv-index/cas/${"c".repeat(64)}.pdf`,
+          drift: true,
+        },
+        "https://testville.qc.ca/pv/null.pdf": { geo_cas_key: null },
+      },
+    });
+
+    expect(index.lookupByUrl(sourceUrl)).toBe(geoKey);
+    expect(index.lookupByUrl("https://testville.qc.ca/pv/drift.pdf")).toBeNull();
+    expect(index.lookupByUrl("https://testville.qc.ca/pv/null.pdf")).toBeNull();
+    expect(index.lookupByUrl("https://testville.qc.ca/pv/absent.pdf")).toBeNull();
+  });
+
+  it("matches the raw source URL exactly without normalizing a trailing slash", () => {
+    const index = parseGeoKeyIndex({
+      resolve_by_source_url: { [sourceUrl]: { geo_cas_key: geoKey } },
+    });
+
+    expect(index.lookupByUrl(sourceUrl)).toBe(geoKey);
+    expect(index.lookupByUrl(`${sourceUrl}/`)).toBeNull();
+  });
+});
+
+describe("loadGeoKeyIndex", () => {
+  const sourceUrl = "https://testville.qc.ca/pv/2026-05-12.pdf";
+  const geoKey = `raw/pv-index/cas/${"f".repeat(64)}.pdf`;
+
+  it("returns undefined without throwing and warns once when the file is absent", () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "radar-geo-index-missing-"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      expect(loadGeoKeyIndex(join(tempDir, "absent.json"))).toBeUndefined();
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("loads a valid temporary index and resolves its exact source URL", () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "radar-geo-index-valid-"));
+    const indexPath = join(tempDir, "index.json");
+    try {
+      writeFileSync(
+        indexPath,
+        JSON.stringify({
+          resolve_by_source_url: {
+            [sourceUrl]: { geo_cas_key: geoKey, drift: false },
+          },
+        }),
+      );
+
+      const index = loadGeoKeyIndex(indexPath);
+
+      expect(index).toBeDefined();
+      expect(index?.lookupByUrl(sourceUrl)).toBe(geoKey);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns undefined and warns once when the parsed JSON has an invalid shape", () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "radar-geo-index-shape-"));
+    const indexPath = join(tempDir, "index.json");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      writeFileSync(indexPath, "[]");
+
+      expect(loadGeoKeyIndex(indexPath)).toBeUndefined();
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(
+        `geo document URL index at ${indexPath} has no valid "resolve_by_source_url" object; URL fallback disabled`,
+      );
+    } finally {
+      warn.mockRestore();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("geoKeyCandidates", () => {
+  const immoSha = "d".repeat(64);
+  const urlSha = "e".repeat(64);
+  const sourceUrl = "https://testville.qc.ca/pv/2026-05-12.pdf";
+  const immoPdfKey = `raw/proces-verbaux-testville/cas/${immoSha}.pdf`;
+  const shaGeoKey = `raw/pv-index/cas/${immoSha}.pdf`;
+  const urlGeoKey = `raw/pv-index/cas/${urlSha}.pdf`;
+  const urlIndex = parseGeoKeyIndex({
+    resolve_by_source_url: { [sourceUrl]: { geo_cas_key: urlGeoKey } },
+  });
+
+  it("returns the sha-preserving candidate for a mappable PDF", () => {
+    expect(geoKeyCandidates(immoPdfKey)).toEqual([shaGeoKey]);
+  });
+
+  it("orders a distinct URL-index key after the sha-preserving candidate", () => {
+    expect(
+      geoKeyCandidates(immoPdfKey, { sourceUrl, index: urlIndex }),
+    ).toEqual([shaGeoKey, urlGeoKey]);
+  });
+
+  it("uses a URL-index hit for a non-mappable PV .bin key", () => {
+    const immoBinKey = `raw/proces-verbaux-testville/cas/${immoSha}.bin`;
+
+    expect(
+      geoKeyCandidates(immoBinKey, { sourceUrl, index: urlIndex }),
+    ).toEqual([urlGeoKey]);
+  });
+
+  it("returns no candidate for a non-PV key even when the URL index hits", () => {
+    const nonPvKey = `raw/avis-publics-testville/cas/${immoSha}.pdf`;
+
+    expect(
+      geoKeyCandidates(nonPvKey, { sourceUrl, index: urlIndex }),
+    ).toEqual([]);
+  });
+
+  it("does not duplicate the URL-index key when it equals the sha candidate", () => {
+    const sameKeyIndex = parseGeoKeyIndex({
+      resolve_by_source_url: { [sourceUrl]: { geo_cas_key: shaGeoKey } },
+    });
+
+    expect(
+      geoKeyCandidates(immoPdfKey, { sourceUrl, index: sameKeyIndex }),
+    ).toEqual([shaGeoKey]);
+  });
+});
 
 describe("findDocumentMetadata", () => {
   it("resolves metadata by rawRef when the .meta.json is present (nominal path unchanged)", async () => {
@@ -156,10 +395,23 @@ describe("resolveRawContentType", () => {
     expect(await resolveRawContentType(store, record.storageKey)).toBe("application/pdf");
   });
 
-  it("degrades to application/octet-stream when nothing is known", async () => {
+  it("infers the content type from a known extension when head+meta are silent (geo CAS has no sidecar)", async () => {
+    const store = new MemoryStore();
+    // A geo raw/pv-index/cas/<sha>.pdf that has neither an S3 Content-Type nor a
+    // .meta.json sidecar must still serve as application/pdf so the browser
+    // inline-views the PV instead of downloading an octet-stream.
+    const geoPdf = `raw/pv-index/cas/${"a".repeat(64)}.pdf`;
+    expect(await resolveRawContentType(store, geoPdf)).toBe("application/pdf");
+    const geoDocx = `raw/pv-index/cas/${"a".repeat(64)}.docx`;
+    expect(await resolveRawContentType(store, geoDocx)).toBe(
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+  });
+
+  it("degrades to application/octet-stream when nothing is known and the ext is unrecognized", async () => {
     const store = new MemoryStore();
 
-    expect(await resolveRawContentType(store, "raw/unknown/cas/na.pdf")).toBe(
+    expect(await resolveRawContentType(store, "raw/unknown/cas/na.xyz")).toBe(
       "application/octet-stream",
     );
   });

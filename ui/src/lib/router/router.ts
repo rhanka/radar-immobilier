@@ -53,6 +53,8 @@ const VALID_VIEWS = new Set<string>([
   "rapport",
   // WP6 — Kanban WorkPackages (projection 4 niveaux)
   "kanban",
+  // #1/#1b — Matrice de suivi villes × KPI (route discrète #/matrice)
+  "matrice",
   // G3 — Vue géo intégration
   "geo",
   "carte-signaux",

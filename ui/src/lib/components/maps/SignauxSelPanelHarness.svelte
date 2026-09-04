@@ -37,7 +37,6 @@
   export let detailNodes: GraphSignalNode[] = [];
   export let unfilteredSignalCount = 0;
   export let detailError: string | null = null;
-  export let vivierBMode = false;
   export let selectionState: SelectionBucketState = createSelectionBucketState();
   export let zonesResponse: GeoZonesResponse | null = null;
   export let lotsResponse: LotsResponse | null = null;
@@ -68,7 +67,10 @@
     zoneMillesimeFilter = next;
   }
 
-  // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic).
+  // Mirror of SignauxMapView.toggleBucketKey (#9 accordion logic). Le guard R1
+  // (lot sélectionnable seulement si sa zone est active) vit côté prod dans
+  // `resolveLotListClickR1` (geo-level-navigation) et est couvert par son test
+  // unitaire (chemin de prod) ; ce mirror garde la logique focus/sélection.
   function toggleBucketKey(key: SelectionKey): void {
     const isFocused = selectionState.focusedKey === key;
     if (isFocused) {
@@ -87,7 +89,6 @@
   {detailNodes}
   {unfilteredSignalCount}
   {detailError}
-  {vivierBMode}
   {selectionState}
   {zonesResponse}
   {lotsResponse}

@@ -61,7 +61,7 @@ test.describe("SignalPdfOverlay — rendu pdf.js (navigateur)", () => {
     // Le canvas a réellement été peint par pdf.js (dimensions du MediaBox du PDF
     // fixture = 300x200 → preuve que le worker a décodé et rendu la page).
     const canvasBox = await page
-      .locator(".pdf-canvas-stage canvas")
+      .locator('.pdf-page-slot[data-page-number="1"] canvas')
       .boundingBox();
     expect(canvasBox?.width ?? 0).toBeGreaterThan(0);
     expect(canvasBox?.height ?? 0).toBeGreaterThan(0);

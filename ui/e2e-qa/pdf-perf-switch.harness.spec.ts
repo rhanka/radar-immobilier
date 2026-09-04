@@ -86,10 +86,10 @@ async function readPerf(page: Page): Promise<PerfMark[]> {
 
 async function waitRendered(page: Page): Promise<void> {
   // Rendu = stage visible (non masqué) ET waiter disparu.
-  await expect(page.locator(".pdf-canvas-stage")).toBeVisible({
+  await expect(page.locator('.pdf-page-slot[data-rendered="true"]').first()).toBeVisible({
     timeout: 15_000,
   });
-  await expect(page.locator(".pdf-canvas-stage.is-loading")).toHaveCount(0, {
+  await expect(page.locator(".pdf-page-stack.is-loading")).toHaveCount(0, {
     timeout: 15_000,
   });
   await expect(page.locator(".pdf-loading")).toHaveCount(0, { timeout: 15_000 });
@@ -116,7 +116,7 @@ test.describe("SignalPdfOverlay — perf chargement (#89) + waiter switch (#90)"
     // Pendant le chargement de B : waiter affiché + stage masqué (pas le canvas
     // de A visible dessous) → preuve du reset franc #90.
     await expect(page.locator(".pdf-loading")).toBeVisible({ timeout: 5_000 });
-    await expect(page.locator(".pdf-canvas-stage.is-loading")).toHaveCount(1, {
+    await expect(page.locator(".pdf-page-stack.is-loading")).toHaveCount(1, {
       timeout: 5_000,
     });
     // Pendant le chargement, la toolbar pager/zoom du doc A a disparu (pdfDoc

@@ -1,6 +1,6 @@
 /** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, fireEvent, cleanup, getAllByRole, getByRole, getByText } from "@testing-library/svelte";
+import { render, fireEvent, cleanup, getByRole, getByText } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { VivierV2Counts } from "@radar/domain";
@@ -65,7 +65,7 @@ function vivierCounts(
   };
 }
 
-function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) => void) {
+function renderRail(initialSubsetKey = "vivier-v2", onFilterChange?: (key: string) => void) {
   return render(SignauxRail, {
     props: {
       entries: [],
@@ -75,12 +75,7 @@ function renderRail(initialSubsetKey = "z|m|p", onFilterChange?: (key: string) =
   });
 }
 
-function getTabs(container: HTMLElement): [HTMLButtonElement, HTMLButtonElement] {
-  const tabs = getAllByRole(container, "tab") as HTMLButtonElement[];
-  return [tabs[0]!, tabs[1]!];
-}
-
-/** Les checkboxes du panneau de tab actif (axes du vivier). */
+/** Les checkboxes du panneau de vivier B (axes zonage/résidentiel/précoce). */
 function toggleBoxes(container: HTMLElement): HTMLInputElement[] {
   return Array.from(
     container.querySelectorAll<HTMLInputElement>(".vivier-toggles input[type=checkbox]"),
@@ -102,52 +97,58 @@ const SUTTON: CityMapEntry = {
   vivierV2Counts: vivierCounts(2, 7, 3, { avis_motion: 1, adoption: 1 }),
 };
 
-describe("SignauxRail — tabs A / B", () => {
-  it("offers A and B as tabs, A active by default, no retired transition mode", () => {
+describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
+  it("ne rend AUCUN bandeau à onglets A-B : panelB visible d'emblée", () => {
     const { container } = renderRail();
-    const [a, b] = getTabs(container);
-    expect(a.textContent).toContain("Référence A");
-    expect(b.textContent).toContain("Nouveau B");
-    expect(a.getAttribute("aria-selected")).toBe("true");
-    expect(b.getAttribute("aria-selected")).toBe("false");
-    expect(container.textContent).not.toContain("Transition vers B");
-    expect(container.textContent).not.toContain("non final");
+    // Plus aucun onglet/switcher : ni role=tab, ni les libellés A/B retirés.
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(0);
+    expect(container.querySelector(".vivier-tabs-wrap")).toBeNull();
+    expect(container.textContent).not.toContain("Référence A");
+    expect(container.textContent).not.toContain("Nouveau B");
+    // Le panneau B est rendu directement (axes + exclusions B présents).
+    expect(container.querySelector(".vivier-b-exclusions")).not.toBeNull();
+    expect(container.textContent).toContain("Résidentiel");
+    expect(container.textContent).toContain("Exclure PIIA sans projet résidentiel");
   });
 
-  it("defaults an empty or invalid key to tab A", () => {
-    const { container } = renderRail("");
-    const [a, b] = getTabs(container);
-    expect(a.getAttribute("aria-selected")).toBe("true");
-    expect(b.getAttribute("aria-selected")).toBe("false");
+  it("défaut vierge = B (trois axes B cochés, aucun axe A « Multifamilial 4+ »)", () => {
+    const { container } = renderRail();
+    const boxes = toggleBoxes(container);
+    expect(boxes).toHaveLength(3);
+    expect(boxes.every((box) => box.checked)).toBe(true);
+    expect(container.textContent).toContain("Zonage");
+    expect(container.textContent).toContain("Résidentiel");
+    expect(container.textContent).toContain("Précoce");
+    // Plus aucun axe du pipeline A retiré.
+    expect(container.textContent).not.toContain("Multifamilial 4+");
   });
 
-  it("resolves the retired z|p key to tab A, never B", () => {
-    const { container } = renderRail("z|p");
-    const [a, b] = getTabs(container);
-    expect(a.getAttribute("aria-selected")).toBe("true");
-    expect(b.getAttribute("aria-selected")).toBe("false");
+  it("une clé A résiduelle (z|m|p) dégrade vers le défaut B — jamais un panneau blanc", () => {
+    const { container } = renderRail("z|m|p");
+    // Le rail reçoit une clé A résiduelle mais rend la vue B par défaut.
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(0);
+    expect(container.querySelector(".vivier-b-exclusions")).not.toBeNull();
+    const boxes = toggleBoxes(container);
+    expect(boxes).toHaveLength(3);
+    expect(boxes.every((box) => box.checked)).toBe(true);
+    expect(container.textContent).toContain("Résidentiel");
+    expect(container.textContent).not.toContain("Multifamilial 4+");
   });
 
   it("does not emit a filter change on mount", () => {
     const spy = vi.fn();
-    renderRail("z|m|p", spy);
+    renderRail("vivier-v2", spy);
     expect(spy).not.toHaveBeenCalled();
   });
 
-  it("renders the canonical New Relic-style DS time range picker in both A and B", async () => {
+  it("renders the canonical New Relic-style DS time range picker in the B view", () => {
     const { container } = renderRail();
-    const expectTemporalPicker = () => {
-      expect(container.textContent).toContain("Période des signaux");
-      expect(container.querySelector(".st-timeRangePicker")).toBeInstanceOf(HTMLElement);
-      expect(container.querySelector(".signals-time-range-picker-wrap")).toBeInstanceOf(HTMLElement);
-      expect(container.querySelector(".signals-time-range-picker")).toBeInstanceOf(HTMLElement);
-      expect(container.querySelector(".st-datePicker")).toBeNull();
-      expect(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i })).toBeInstanceOf(HTMLButtonElement);
-    };
-
-    expectTemporalPicker();
-    await fireEvent.click(getTabs(container)[1]!);
-    expectTemporalPicker();
+    expect(container.textContent).toContain("Période des signaux");
+    expect(container.querySelector(".st-timeRangePicker")).toBeInstanceOf(HTMLElement);
+    expect(container.querySelector(".signals-time-range-picker-wrap")).toBeInstanceOf(HTMLElement);
+    expect(container.querySelector(".signals-time-range-picker")).toBeInstanceOf(HTMLElement);
+    expect(container.querySelector(".st-datePicker")).toBeNull();
+    expect(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i })).toBeInstanceOf(HTMLButtonElement);
   });
 
   it("emits the selected DS relative period for the parent-owned A/B lens", async () => {
@@ -212,63 +213,6 @@ describe("SignauxRail — tabs A / B", () => {
     await nextFrame();
 
     expect(popover.style.top).toBe("120px");
-  });
-
-  it("shows A's three combinable axes checked by default (z|m|p)", () => {
-    const { container } = render(SignauxRail, {
-      props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
-    });
-    const boxes = toggleBoxes(container);
-    expect(boxes).toHaveLength(3);
-    expect(boxes.every((box) => box.checked)).toBe(true);
-    expect(container.textContent).toContain("Zonage");
-    expect(container.textContent).toContain("Multifamilial 4+");
-    expect(container.textContent).toContain("Précoce");
-    // m1.1 : le texte d'aide « Combinez les axes… » a été retiré.
-    expect(container.textContent).not.toContain("Combinez les axes du vivier de référence");
-    // Défaut A = subsetCounts["z|m|p"] = 1.
-    expect(container.textContent).toMatch(/1\s+signal/);
-  });
-
-  it("recomposes the A key when an axis is unchecked and reads subsetCounts", async () => {
-    const calls: string[] = [];
-    const { container } = render(SignauxRail, {
-      props: {
-        entries: [SUTTON],
-        initialSubsetKey: "z|m|p",
-        onFilterChange: (key: string) => calls.push(key),
-      },
-    });
-    // Décocher « Multifamilial 4+ » → z|p → subsetCounts["z|p"] = 2.
-    const boxes = toggleBoxes(container);
-    await fireEvent.click(boxes[1]!);
-    expect(calls.at(-1)).toBe("z|p");
-    expect(container.textContent).toMatch(/2\s+signaux/);
-
-    // Puis décocher « Précoce » aussi → z → subsetCounts["z"] = 5.
-    await fireEvent.click(toggleBoxes(container)[2]!);
-    expect(calls.at(-1)).toBe("z");
-    expect(container.textContent).toMatch(/5\s+signaux/);
-  });
-
-  it("switches to B on the tab and counts precoce stages (m1 default Précoce✓)", async () => {
-    const calls: string[] = [];
-    const { container } = render(SignauxRail, {
-      props: {
-        entries: [SUTTON],
-        initialSubsetKey: "z|m|p",
-        onFilterChange: (key: string) => calls.push(key),
-      },
-    });
-    // A : subsetCounts["z|m|p"] = 1.
-    expect(container.textContent).toMatch(/1\s+signal/);
-
-    await fireEvent.click(getTabs(container)[1]);
-
-    // m1 : le défaut B est désormais Zonage✓ Résidentiel✓ Précoce✓ → "vivier-v2|p".
-    expect(calls).toEqual(["vivier-v2|p"]);
-    // B précoce : stageCounts.avis_motion + projet_reglement = 1 + 0 = 1.
-    expect(container.textContent).toMatch(/1\s+signal/);
   });
 
   it("direct/reload B key vivier-v2 defaults its three axes to Z✓ R✓ P✓, none locked", async () => {
@@ -369,14 +313,6 @@ describe("SignauxRail — tabs A / B", () => {
     ]);
   });
 
-  it("hides the B-only panel while A is active", () => {
-    const { container } = render(SignauxRail, {
-      props: { entries: [SUTTON], initialSubsetKey: "z|m|p" },
-    });
-    expect(container.querySelector(".vivier-b-exclusions")).toBeNull();
-    expect(container.textContent).not.toContain("Exclure PIIA sans projet résidentiel");
-  });
-
   it("shows unavailable badges instead of aggregate zeros after a load error", () => {
     const { container } = render(SignauxRail, {
       props: { entries: [], dataUnavailable: true },
@@ -418,7 +354,7 @@ function renderRailWithCities(selectedSlug: string | null, onSelectCity?: (e: Ci
         cityEntry("beauharnois", "Beauharnois", "MRC-Test-B", 3),
       ],
       selectedSlug,
-      initialSubsetKey: "z|m|p",
+      initialSubsetKey: "vivier-v2",
       onSelectCity: onSelectCity ?? (() => {}),
     },
   });

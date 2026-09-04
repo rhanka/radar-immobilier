@@ -14,8 +14,10 @@
  *     corrupt (wrong version / count / order / unknown id / over-claim);
  *   - fail-closed behaviour when a node's membership is corrupt/absent;
  *   - the empty-city case (no nodes) yielding an available, count-0 projection;
- *   - the URL-state normalization the addendum requires (default A = z|m|p and
- *     invalid/partial legacy keys collapse to the A mode default).
+ *   - the URL-state MIGRATION now in force (the A rail is RETIRED: the fresh
+ *     default and any persisted/partial legacy A key resolve to the B mode key).
+ *     The A projection machinery below stays as the migration safety net; its
+ *     membership/order/fail-closed contract is still frozen here.
  *
  * If any frozen membership/order/fail-closed/URL-state changes, this test FAILS
  * — a release NO-GO under
@@ -175,10 +177,12 @@ describe("legacy Filter A golden (UI display path) — URL-state normalization",
     expect(keyFromAFlags({ z: false, m: false, p: false })).toBe("");
   });
 
-  it("initial subset defaults to z|m|p and normalizes a partial legacy key to the A default", () => {
-    expect(initialVivierSubsetKey(null, null)).toBe("z|m|p");
-    // A stored partial legacy key is not sticky — it collapses to the A mode key.
-    expect(initialVivierSubsetKey(null, "z|p")).toBe("z|m|p");
+  it("initial subset migrates the default and any legacy A key to B (A rail retired)", () => {
+    // The A rail is retired: a fresh default lands on B, never the old z|m|p.
+    expect(initialVivierSubsetKey(null, null)).toBe("vivier-v2");
+    // A stored legacy A key (partial or full) migrates to B — never a blank rail.
+    expect(initialVivierSubsetKey(null, "z|p")).toBe("vivier-v2");
+    expect(initialVivierSubsetKey(null, A_SUBSET_KEY)).toBe("vivier-v2");
     // A stored B mode key is preserved as the B default.
     expect(initialVivierSubsetKey(null, "vivier-v2")).toBe("vivier-v2");
   });

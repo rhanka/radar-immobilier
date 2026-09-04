@@ -19,20 +19,63 @@ REPO="$(cd "$SCRIPT_DIR/../.." && pwd)"
 WORKER="$SCRIPT_DIR/worker-grounding.sh"
 GATE="$SCRIPT_DIR/gate-grounding.sh"
 
-set -a; source "$REPO/.env"; set +a
-export AWS_ACCESS_KEY_ID="${SCRAPE_S3_ACCESS_KEY}"
-export AWS_SECRET_ACCESS_KEY="${SCRAPE_S3_SECRET_KEY}"
-export AWS_REGION="${SCRAPE_S3_REGION}"
-export SCRAPE_S3_ENDPOINT SCRAPE_S3_BUCKET
-S3_URL="$SCRAPE_S3_ENDPOINT"; BUCKET="$SCRAPE_S3_BUCKET"
+# ── 2-bucket split (préprod-safe, IN-CLUSTER) ─────────────────────────────────
+# Modèle d'exécution = IN-CLUSTER : PAS de `.env` host (extraction de secrets host refusée). Les
+# variables viennent de 2 secretRef montés en env dans le pod :
+#   READ_*    ← secretRef `radar-s3-credentials`      (SCW -pocs, RO : raw PVs + .meta.json sidecars)
+#   PUBLISH_* ← secretRef `radar-graph-s3-credentials` (OVH préprod : graph/<city>/latest.json)
+# READ est STRICTEMENT RO (worker seulement) ; 0 write vers READ_BUCKET ni vers le prod-graph.
+# Le `.env` host n'est sourcé QUE s'il existe (dev/local) — jamais requis in-cluster.
+[ -f "$REPO/.env" ] && { set -a; source "$REPO/.env"; set +a; }
+# Résolution (fallback SCRAPE_S3_* = mode single-bucket dev/local uniquement).
+READ_S3_ENDPOINT="${READ_S3_ENDPOINT:-${SCRAPE_S3_ENDPOINT:-}}"
+READ_S3_BUCKET="${READ_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"
+READ_AWS_ACCESS_KEY_ID="${READ_AWS_ACCESS_KEY_ID:-${SCRAPE_S3_ACCESS_KEY:-}}"
+READ_AWS_SECRET_ACCESS_KEY="${READ_AWS_SECRET_ACCESS_KEY:-${SCRAPE_S3_SECRET_KEY:-}}"
+PUBLISH_S3_ENDPOINT="${PUBLISH_S3_ENDPOINT:-${SCRAPE_S3_ENDPOINT:-}}"
+PUBLISH_S3_BUCKET="${PUBLISH_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"
+PUBLISH_AWS_ACCESS_KEY_ID="${PUBLISH_AWS_ACCESS_KEY_ID:-${SCRAPE_S3_ACCESS_KEY:-}}"
+PUBLISH_AWS_SECRET_ACCESS_KEY="${PUBLISH_AWS_SECRET_ACCESS_KEY:-${SCRAPE_S3_SECRET_KEY:-}}"
+# ── FAIL-CLOSED sur LES DEUX buckets : rien ne tourne à moitié configuré (sinon publish silencieux
+#    au mauvais endroit). Refuse si UNE des 8 variables est vide. ──
+for v in READ_S3_ENDPOINT READ_S3_BUCKET READ_AWS_ACCESS_KEY_ID READ_AWS_SECRET_ACCESS_KEY \
+         PUBLISH_S3_ENDPOINT PUBLISH_S3_BUCKET PUBLISH_AWS_ACCESS_KEY_ID PUBLISH_AWS_SECRET_ACCESS_KEY; do
+  if [ -z "${!v:-}" ]; then
+    echo "[drive] FAIL-CLOSED: variable $v vide — READ_* + PUBLISH_* requis (2 secretRef in-cluster)." >&2
+    exit 2
+  fi
+done
+export READ_S3_ENDPOINT READ_S3_BUCKET READ_AWS_ACCESS_KEY_ID READ_AWS_SECRET_ACCESS_KEY
+export PUBLISH_S3_ENDPOINT PUBLISH_S3_BUCKET PUBLISH_AWS_ACCESS_KEY_ID PUBLISH_AWS_SECRET_ACCESS_KEY
+export AWS_REGION="${SCRAPE_S3_REGION:-us-east-1}"
+# Le drive lit le BASELINE graph (fetch/backup/already_cited) depuis PUBLISH (préprod) → creds PUBLISH.
+export AWS_ACCESS_KEY_ID="$PUBLISH_AWS_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$PUBLISH_AWS_SECRET_ACCESS_KEY"
+S3_URL="$PUBLISH_S3_ENDPOINT"; BUCKET="$PUBLISH_S3_BUCKET"
+# ── Frontière de sûreté = le PRÉFIXE, pas le nom du bucket. La garde dure vit au point d'ÉCRITURE
+#    (publish-citation-grounding + gate canonique n'écrivent QUE graph/ + parsed/, jamais la zone READ
+#    raw/proces-verbaux + .meta). READ==PUBLISH (single-bucket) est donc un mode LÉGITIME : le graph store
+#    et les docs source peuvent partager un bucket. Le fail-closed DUR reste sur les creds vides (boucle
+#    des 8 variables ci-dessus). ──
+if [ "$READ_S3_BUCKET" = "$PUBLISH_S3_BUCKET" ]; then
+  echo "[drive] single-bucket (READ==PUBLISH=$PUBLISH_S3_BUCKET) — mode normal ; prefix-safety au point d'écriture (graph/ only)." >&2
+fi
 
 mkdir -p "$RUN_DIR/status" "$RUN_DIR/logs" "$RUN_DIR/workers" "$RUN_DIR/lanes"
 STATUS_FILE="$RUN_DIR/status/central.jsonl"
 touch "$STATUS_FILE"
 
+# ── Plafond DUR d'appels LLM, PARTAGÉ entre toutes les villes/lanes du run (cost-gate cohorte, i-cond).
+#    MAX_LLM_CALLS vide/unset = illimité (pilote 1 ville / runs host manuels). Le worker réserve chaque
+#    appel codex de façon atomique (flock) contre ce compteur → 0 appel au-delà du cap (arrêt dur net). ──
+export MAX_LLM_CALLS="${MAX_LLM_CALLS:-}"
+export LLM_CALL_COUNTER_FILE="$RUN_DIR/llm-call-count"
+printf '0' > "$LLM_CALL_COUNTER_FILE"
+
 log(){ echo "[drive $(date -u +%H:%M:%S)] $*" | tee -a "$RUN_DIR/run.log"; }
 
-# already cited on SCW ?
+# already cited in PUBLISH (préprod graph) ? — DOIT lire PUBLISH_BUCKET, PAS prod : sinon on skippe
+# des villes selon l'état PROD → villes non-groundées-en-préprod sautées silencieusement (i-arch).
 already_cited(){
   local city="$1"
   local n

@@ -40,7 +40,10 @@ interface BuildDataQualitySummaryInput {
 }
 
 interface GraphSnapshot {
-  nodes: { id: string; type: string; createdAt: Date }[];
+  // `createdAt` retiré : la prod OVH n'a pas cette colonne sur graph_nodes
+  // (drift, cf ovh-schema-drift-created-at) → la sélectionner 500e
+  // /api/data-quality/:city. La freshness du graph dégrade en conséquence.
+  nodes: { id: string; type: string }[];
   edges: { srcId: string; dstId: string }[];
 }
 
@@ -117,7 +120,6 @@ async function loadDbSnapshot(
     .select({
       id: graphNodes.id,
       type: graphNodes.type,
-      createdAt: graphNodes.createdAt,
     })
     .from(graphNodes)
     .where(eq(graphNodes.citySlug, citySlug));
@@ -210,7 +212,11 @@ function summarizeOntology(
   nowDate: Date,
   staleAfterMs: number,
 ): DataQualityOntologySummaryT {
-  const lastObservedAt = latestIso(graph.nodes.map((node) => node.createdAt));
+  // La freshness du graph venait de max(node.createdAt) — colonne absente sur
+  // OVH (drift, cf le SELECT de loadDbSnapshot). lastObservedAt dégrade à null
+  // → freshnessFor(null) = "unknown" (jamais "stale" à tort). À restaurer si
+  // created_at revient sur OVH (migration 0002).
+  const lastObservedAt: string | null = null;
   const freshness = freshnessFor(lastObservedAt, nowDate, staleAfterMs);
   const counts = {
     nodes: graph.nodes.length,

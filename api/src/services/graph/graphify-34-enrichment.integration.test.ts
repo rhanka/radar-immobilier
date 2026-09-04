@@ -82,7 +82,22 @@ describe.skipIf(!DB_AVAILABLE)("Graphify 3.4 test-city projection", () => {
       expect(after.stats.fields.instrument).toEqual({
         before_missing: 0, after_present: 48, added_or_canonicalized: 0,
       });
-      expect(JSON.stringify(after.snapshot)).toBe(JSON.stringify(before.snapshot));
+      // LOT 1 serving (A.2) — la projection DÉRIVE + PERSISTE `regulatoryStatus` sur les
+      // nœuds à `etape` (avis_motion/projet_reglement → anticipation, jamais keyword). Le
+      // round-trip AJOUTE donc ce champ dérivé UNE fois : `before.snapshot` (enrichi mais
+      // pas encore re-projeté) ne le porte pas, `after.snapshot` oui. L'idempotence se
+      // vérifie au POINT FIXE (plus rigoureux que before==after) : re-projeter
+      // `after.snapshot` ne change plus rien, et le marquage dérivé est stable.
+      expect(after.snapshot.nodes.every((node) =>
+        (node.properties as Record<string, unknown>).regulatoryStatus === "anticipation"
+      )).toBe(true);
+      const reprojected = await upsertGraphAtomic(db, city, after.snapshot);
+      expect(reprojected.aborted).toBe(false);
+      const after2 = enrichGraphify34Snapshot(
+        snapshotFromExistingCity(await subgraphForCity(db, city)),
+        city,
+      );
+      expect(JSON.stringify(after2.snapshot)).toBe(JSON.stringify(after.snapshot));
     } finally {
       await clean();
     }

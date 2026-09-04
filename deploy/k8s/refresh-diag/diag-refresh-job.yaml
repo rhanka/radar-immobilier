@@ -1,0 +1,84 @@
+# diag-refresh-job — one-shot PREPROD diagnostic for the §6 image-pin (ruling
+# i-infra, point 4). NOT a CronJob, NOT prod: a single Job in
+# radar-immobilier-preprod that runs the refresh scrape entrypoint with the
+# PINNED release image against the preprod DB/S3, so we prove — BEFORE touching
+# the suspended prod CronJobs — that (i) the pinned image boots + refreshes,
+# (ii) the (eventually widened) city set is processed WITHOUT OOM, (iii) the run
+# completes. It is a `batch/jobs` resource → reuses the §1a (#572) grant, 0 new
+# RBAC. The image is pinned by the refresh-diag overlay's `images:` transformer
+# (CI sets the preprod release identity — the :<sha> tag deploy-preprod uses).
+#
+# MEMORY MEASUREMENT (point 4): resources mirror the CronJob (256Mi limit) ON
+# PURPOSE — the diag must reveal whether 256Mi survives the widened scale. An OOM
+# here is the signal to bump the CronJob resources (coordinate with extraction on
+# the widened count — pin×widen×resources land together, point 7).
+#
+# CITY SET: parameterised. Default is a BOUNDED smoke (LIVE_SCRAPE_LIMIT=2, one
+# city) so an un-parameterised apply is safe (point 5: subset/1-city first). The
+# city args are scaled to the full/widened set for the OOM measurement once the
+# widen (decoupled → extraction) lands; i-infra CO-VALS the diag output (boots +
+# refreshes + no OOM). suspend:true on the prod CronJobs stays throughout;
+# nothing here touches prod.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-refresh-diag
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: refresh-diag
+spec:
+  backoffLimit: 0            # one-shot; a retry would mask an OOM/failure
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: refresh-diag
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      containers:
+        - name: scrape-diag
+          image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          # Bounded smoke by default (one city). The args/env are scaled to the
+          # widened set for the OOM measurement; i-infra co-vals the diag output.
+          command: ["node", "dist/scripts/worker-live.js", "delson"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: LIVE_SCRAPE_EXPLOIT
+              value: "1"
+            - name: LIVE_SCRAPE_LIMIT
+              value: "2"
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_SECRET_KEY } }
+            # PREPROD MinIO (path-style), explicit — overrides the SCW-oriented
+            # secret-fallback so the scrape hits radar-minio:9000/<bucket> (path-
+            # style) instead of the virtual-hosted <bucket>.radar-minio (ENOTFOUND).
+            - name: SCRAPE_S3_ENDPOINT
+              value: "http://radar-minio:9000"
+            - name: SCRAPE_S3_BUCKET
+              value: "radar-immobilier-docs-preprod"
+            - name: SCRAPE_S3_REGION
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_REGION, optional: true } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY, optional: true } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY, optional: true } }
+            # MinIO REQUIRES path-style (was "false" = SCW-oriented → virtual-host
+            # → ENOTFOUND on radar-minio). i-infra measured root cause.
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              value: "true"
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }
