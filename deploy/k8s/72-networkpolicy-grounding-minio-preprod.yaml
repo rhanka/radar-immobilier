@@ -12,8 +12,9 @@
 # NP's `from` selector must match it — align at co-val.
 #
 # Modeled on 71-…/allow-api-to-minio (ingress on minio, port 9000). PREPROD ns
-# only. APPLICATION = owner-direct (like 71-… + 11-rbac.yaml); NOT the CD deployer
-# (no networkpolicies grant); not in any kustomization:
+# only. APPLICATION = out-of-band by k8s in cluster-admin (like 71-… + the RBAC;
+# routed by i-cond, applied before the Job) — NOT the CD deployer (no
+# networkpolicies grant) and NOT the owner directly; not in any kustomization:
 #   kubectl apply -f deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml
 # i-infra co-vals (selectors + ns); extraction confirms the component label.
 apiVersion: networking.k8s.io/v1
