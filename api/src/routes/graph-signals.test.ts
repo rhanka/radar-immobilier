@@ -890,6 +890,29 @@ describe("§7.6 citationFromEvent — raises_signal cross-display", () => {
     errSpy.mockRestore();
   });
 
+  it("#3b companion — the LEGITIMATE empty case (no linked event) logs ZERO error (anti-cry-wolf)", async () => {
+    const signal = makeNode("sig-quiet", "drummondville", "Signal");
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+      [signal] as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+    );
+    // No links: the fail-soft catch is never reached, so the post-pass must stay
+    // silent — an absent field here is legitimate, not an error.
+    vi.mocked(getRaisesSignalLinks).mockResolvedValueOnce([]);
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await freshRoute().request("/api/graph-signals/drummondville");
+    const body = (await res.json()) as { nodes: CardLike[] };
+
+    expect(res.status).toBe(200);
+    expect(body.nodes[0]!.citationFromEvent).toBeUndefined();
+    // The §7.6 post-pass emitted NO error for a legitimate empty (no cry-wolf).
+    const cfeErrors = errSpy.mock.calls.filter(
+      (args) => typeof args[0] === "string" && args[0].includes("raises_signal citation inherit"),
+    );
+    expect(cfeErrors).toEqual([]);
+    errSpy.mockRestore();
+  });
+
   it("citationFromEventEvidence maps the event evidence, or returns null when the event has no citation", () => {
     expect(
       citationFromEventEvidence("evt-1", {
