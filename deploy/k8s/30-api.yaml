@@ -87,8 +87,17 @@ metadata:
     app.kubernetes.io/component: api
 spec:
   replicas: 1
+  # RollingUpdate keeps >=1 replica up during a roll: on a failed new-pod create
+  # (e.g. a transient quota pinch) the old pod is NOT torn down first, so the
+  # service never drops to 0. maxUnavailable:0 = never below 1 running; maxSurge:1
+  # = at most 1 extra pod (needs quota headroom for the surge). radar-api is
+  # stateless (network to postgres/minio, no RWO PVC / hostPort) so two versions
+  # may briefly coexist. (Was Recreate — a conservative single-replica default.)
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app.kubernetes.io/name: radar-immobilier
