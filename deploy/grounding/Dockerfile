@@ -1,48 +1,38 @@
-# Grounding image (citations pipeline) — a DEDICATED image for the
-# grounding-citation Job. radar-api:latest CANNOT run the grounding (it ships
-# only node + poppler; it lacks python3 / s5cmd / jq / an LLM-CLI). Built + pushed
-# to the SCW registry like radar-api, and pinned by digest at deploy.
+# Grounding image (citations pipeline) — PUBLISH-ONLY (plan 4.4.3, ruling
+# WP14/i-infra). There is no in-cluster llm-mesh endpoint (budget not applied), so
+# the pod does NOT call an LLM. The validated grounding runs on the HOST, which
+# stages a candidate; the IN-CLUSTER Job only: pulls the candidate, hash-verifies
+# it, and publishes it to the preprod MinIO (graph/<city>/latest.json). So the
+# image needs NO LLM-CLI, NO mesh access, NO pdftotext, NO node graphify tooling —
+# only the publish runtimes.
 #
-# Base node:24-bookworm-slim (matches api/Dockerfile) — the grounding pipeline
-# needs BOTH node (tools/graphify-v23/*.js) AND python3 (tools/grounding/*.py),
-# plus jq + poppler-utils (pdftotext) + s5cmd (S3 read raw PDFs / publish graph).
+# radar-api:latest still can't do this (it lacks python3/s5cmd/jq), hence a
+# dedicated image, built + pushed to the SCW registry like radar-api.
 #
-# ⚠ LLM STAGE — TBD (i-infra architecture ruling, NOT finalized here). The
-# grounding STAGE2 LLM is host-side today (codex CLI -> llm-mesh -> gpt-5.6-luna).
-# Whether the PREPROD Job runs the LLM IN the pod (→ an LLM-CLI installed here +
-# mesh access) or calls out to llm-mesh is an i-infra decision. This is a
-# SKELETON: it installs the deterministic POD runtimes only and leaves the
-# LLM-CLI deliberately UNSET (a missing/wrong LLM tool must not ship silently).
-# i-infra certifies the runtimes before any de-INERT; the LLM line is finalized
-# in a follow-up once i-infra rules.
-FROM node:24-bookworm-slim
+# Measured deps of tools/grounding/publish-citation-grounding.sh: s5cmd (pull +
+# publish), jq, python3 (candidate JSON). hash-verify = sha256sum (coreutils, in
+# base) / python3 hashlib. debian-slim base (no node needed → leaner than the
+# api's node base).
+FROM debian:bookworm-slim
 
-# Deterministic pod runtimes (least-tools): python3 (grounding *.py), jq,
-# poppler-utils (pdftotext), ca-certificates + curl (s5cmd fetch). node is in the
-# base image (graphify-v23 *.js). i-infra certifies these runtimes.
+# Publish-only runtimes (least-tools): python3 + jq (candidate JSON), sha256sum
+# (coreutils, base) for hash-verify, ca-certificates + curl (s5cmd fetch).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      python3 python3-venv jq poppler-utils ca-certificates curl \
+      python3 jq ca-certificates curl \
  && rm -rf /var/lib/apt/lists/*
 
-# s5cmd (pinned) — S3 read (raw PDFs) + publish (grounded graph → MinIO/SCW).
+# s5cmd (pinned) — pull the host-staged candidate + publish the grounded graph
+# to the preprod MinIO.
 ARG S5CMD_VERSION=2.2.2
 RUN curl -fsSL "https://github.com/peak/s5cmd/releases/download/v${S5CMD_VERSION}/s5cmd_${S5CMD_VERSION}_Linux-64bit.tar.gz" \
       | tar -xz -C /usr/local/bin s5cmd \
  && s5cmd version
 
-# ── LLM-CLI: PLACEHOLDER (i-infra to finalize) ────────────────────────────────
-# If the preprod Job runs the LLM IN-POD, install the chosen CLI here, e.g.:
-#   RUN <install the chosen LLM-CLI>   # <-- TBD i-infra: which CLI + llm-mesh access
-# Left UNSET on purpose (see header). Do NOT de-INERT the grounding Job until this
-# is finalized + i-infra-certified.
-
-# Grounding + graphify-v23 tooling (bash + node + python). Build context = repo
-# root so these paths resolve.
+# The grounding publish tooling (pull + hash-verify + publish). tools/graphify-v23
+# and the LLM/pdftotext stages are HOST-side (not in this publish-only image).
 WORKDIR /workspace
-COPY tools/grounding    /workspace/tools/grounding
-COPY tools/graphify-v23 /workspace/tools/graphify-v23
+COPY tools/grounding /workspace/tools/grounding
 
-# No default ENTRYPOINT/CMD — the grounding Job (41-grounding-citation-job.yaml,
-# authored by extraction #588) sets the command (e.g. drive-grounding.sh with a
-# city arg).
+# No default ENTRYPOINT/CMD — the grounding-citation Job (41-…, extraction #588,
+# publish-only) sets the command (publish-citation-grounding.sh with a city).
