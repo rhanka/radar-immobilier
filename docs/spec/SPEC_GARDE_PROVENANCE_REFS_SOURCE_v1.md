@@ -3,7 +3,7 @@
 > **Statut** : SPEC held pour gate i-cond + co-val recette (intégrité). **DESIGN uniquement — implémentation NON démarrée.**
 > **Auteur** : i-arch (graph-store). **Domaine** : `api/src/services/graph/graph-store.ts` (`upsertGraphAtomic` + gardes) et son miroir read-only `graph-candidate-check.ts` (#598).
 > **Déclencheur** : régression owner-constatée — les 4 signaux rezonage Ste-Martine ont **perdu leur ref PV source** après une projection grounding REPLACE, sans abort. Root-cause data = extraction.
-> **✅ CHAMP CONFIRMÉ (mesure extraction, v1.1)** : la provenance PV vit sur **3 loci** — `Signal.props.refs` (direct, cas PIIA/dérogation), `DesignationEvent.refs`/`docSha` + l'arête **`raises_signal.refs`** (cas rezonage via le hop, `Signal.props.refs=[]` aujourd'hui). Extraction PROPAGE additivement la ref sur `Signal.props.refs` des rezonage. La garde protège les **3 loci par-nœud ET par-arête**. §5 détaille.
+> **✅ CHAMP CONFIRMÉ (mesure extraction, v1.2)** : provenance = **`docSha` SEUL** (content-stable, pas `(docSha,page)`), garde **node-level générique** sur `node.props.refs`, exclusion `rawRef ~ ^generated://`. La provenance vit à l'origine sur 3 loci (`Signal.props.refs` direct ; `DesignationEvent.refs`/`docSha` ; arête `raises_signal.refs`), mais #521 **matérialise** les refs d'arête SUR le nœud → gate3 reste **node-level** (pas de check per-arête). §5 détaille.
 
 ## 0. Portée & non-goals
 
@@ -27,11 +27,12 @@
 
 ## 2. Invariant cible
 
-> Pour tout **nœud OU arête** présent **à la fois** dans l'état PG courant (avant) **et** dans le candidat (après), l'ensemble des **refs source identifiantes** de l'avant doit être **préservé** dans l'après. Une ref source présente avant et **absente après** = **régression de provenance** → **ville abortée** (rollback, 0 perte), sauf exemption intentionnelle.
+> Pour tout **nœud** présent **à la fois** dans l'état PG courant (avant) **et** dans le candidat (après), l'ensemble des **docSha source** de l'avant doit être **préservé** dans l'après. Un docSha présent avant et **absent après** = **régression de provenance** → **ville abortée** (rollback, 0 perte), sauf exemption intentionnelle.
 
-Formellement :
-- par nœud `n ∈ before ∩ after` (match par `id`), hors `intendedRemovals` : `sourceRefIdentities(before[n]) ⊆ sourceRefIdentities(after[n])` ;
-- par arête `e ∈ before ∩ after` (match clé naturelle `src_id+dst_id+kind`) : `sourceRefIdentities(before[e]) ⊆ sourceRefIdentities(after[e])`.
+Formellement, par **nœud** `n ∈ before ∩ after` (match par `id`), hors `intendedRemovals` :
+`docShas(before[n]) ⊆ docShas(after[n])`
+
+> **NIVEAU NŒUD uniquement** (Q2, extraction) : la surface servie = `node.props.refs`. Les refs d'**arête** `raises_signal` sont la *source* de la matérialisation #521 (qui copie leur docSha SUR le nœud) — pas la surface gardée. #521 (matérialisation) **+** gate3 (protection nœud) protègent donc la provenance d'arête **indirectement**, sans check per-arête.
 
 - **Ajouts autorisés** : le candidat PEUT ajouter des refs (enrichissement, ex. une citation grounding) — seule la **disparition** d'une ref existante est une régression. (Même philosophie que gate1 : anti-disparition, pas anti-évolution.)
 - **Nœuds nouveaux** (absents de l'avant) : aucune contrainte (rien à préserver).
@@ -45,28 +46,17 @@ Nouvelle fonction pure exportée, sur le modèle de `findMissingBusinessProperti
 findMissingSourceRefs(
   beforeRows, afterRows, citySlug,
   intendedRemovals = ∅,
-): SourceRefRegression[]   // { citySlug, nodeId, missingRefIds: string[] }
+): SourceRefRegression[]   // { citySlug, nodeId, missingDocShas: string[] }
 ```
 
+- `nodeDocShas(row)` = ensemble des `docSha` des refs sous `props.refs` (repli : extraire le sha du `rawRef` `raw/proces-verbaux-<city>/cas/<docSha>.pdf` quand le champ `docSha` est vide), **EXCLUANT** toute ref dont `rawRef` commence par `generated://` (placeholders `gen_refs`, pas un vrai PV — Q3).
 - Construit `afterById = Map(after.id → after)`.
 - Pour chaque `beforeRow` (skip si `intendedRemovals.has(id)`) :
-  - `missing = sourceRefIdentities(before) \ sourceRefIdentities(after[id] ?? ∅)`
+  - `missing = nodeDocShas(before) \ nodeDocShas(after[id] ?? ∅)`
   - si `missing ≠ ∅` → pousser une régression.
-- Un nœud business-porteur qui **disparaît entièrement** (absent de l'après) est déjà couvert : ses refs sont toutes « missing » → régression (sauf `intendedRemovals`).
+- **Générique** : tout nœud porteur de `props.refs` (miroir gate1), pas de restriction de type (Q2). Un nœud porteur de docSha qui **disparaît entièrement** est déjà couvert (tous ses docSha « missing »), sauf `intendedRemovals`.
 
-**Volet ARÊTES** (nouveau vs gardes existantes) — fonction sœur :
-
-```
-findMissingSourceRefEdges(
-  beforeEdges, afterEdges, citySlug,
-): SourceRefRegression[]   // { citySlug, edgeKey, missingRefIds }
-```
-
-- `afterByKey = Map("src_id\0dst_id\0kind" → edge)`.
-- Pour chaque arête avant : `missing = sourceRefIdentities(before) \ sourceRefIdentities(after[key] ?? ∅)` ; si non vide → régression.
-- Les arêtes « avant » sont chargées read-only (comme les nœuds `beforeRows`), scopées à la ville (arêtes dont les deux extrémités sont des nœuds de la ville — cf `subgraphForCity`).
-
-Intégration dans `upsertGraphAtomic` : **gate3 en lecture seule AVANT la transaction** (comme gate1), volet nœuds + volet arêtes. Si l'un des deux est non vide → `return { aborted: true, reason: "source-ref provenance regression for <city>: <node|edge>: <missingRefIds>; projection refused" }`. **NE throw PAS** (les autres villes continuent) — identique à gate1.
+Intégration dans `upsertGraphAtomic` : **gate3 en lecture seule AVANT la transaction** (comme gate1). Si non vide → `return { aborted: true, reason: "source-ref provenance regression for <city>: <nodeId>: <missingDocShas>; projection refused" }`. **NE throw PAS** (les autres villes continuent) — identique à gate1.
 
 Ordre : gate1 (business-props) → **gate3 (provenance refs)** → transaction → gate2 (complétude, count). Toute garde qui fire → abort.
 
@@ -84,11 +74,11 @@ La provenance PV vit sur **3 loci** (mesure extraction) ; `sourceRefIdentities(n
 | **`DesignationEvent.props.refs[]` / `docSha`** | le nœud DesignationEvent | rezonage : l'event de zonage porte la ref PV + `docSha` |
 | **arête `raises_signal.props.refs[]`** | l'**ARÊTE** event→signal | rezonage via le hop (la provenance transite par l'arête) |
 
-**Clé d'identité** d'une ref : **`docSha`** (hash de contenu du document = identité content-stable), repli `rawRef` quand `docSha` absent. Deux refs sont « la même » ssi même `docSha` (ou même `rawRef` à défaut).
+**Clé d'identité (Q1)** : **`docSha` SEUL** (SHA-256 du PV, content-stable). **PAS `(docSha, page)`** — `page` est un raffinement intra-doc que le grounding remplace légitimement (page-1 générique → page-10 précise) pour le MÊME docSha ; l'inclure ferait un **faux-positif abort**. `rawRef` sert **uniquement** à EXTRAIRE le docSha du chemin (`…/cas/<docSha>.pdf`) quand le champ `docSha` est vide — pas comme clé alternative.
 
-**Conséquence de conception — gate3 couvre NŒUDS *ET* ARÊTES.** Les gardes existantes (gate1/gate2) ne touchent QUE les nœuds. Mais REPLACE supprime aussi les **arêtes** absentes du candidat (`upsertGraphAtomic` étapes 3-4) → une provenance portée par `raises_signal.refs` peut être effacée silencieusement. gate3 vérifie donc la préservation des refs source :
-- **par-nœud** (match `id`) — `Signal` + `DesignationEvent` (+ générique, cf Q2) ;
-- **par-arête** (match clé naturelle `src_id + dst_id + kind`) — au minimum `raises_signal`.
+**Exclusion (Q3)** : une ref dont `rawRef ~ ^generated://` (placeholder `gen_refs`, pas un vrai PV) est **exclue** (pas une provenance à figer). Toute autre ref à docSha réel = provenance → figée, **y compris** les refs matérialisées #521 (`linkSource: projection-materialize-severed`).
+
+**Niveau NŒUD (Q2)** : gate3 est **node-level** (surface servie = `node.props.refs`), **générique** sur tous les nœuds porteurs de refs. La provenance d'ARÊTE (`raises_signal.refs`) est protégée **indirectement** via #521 (matérialisation edge→node) + gate3-nœud — **pas** de check per-arête (cf §2).
 
 **Note fix extraction (additif, non conflictuel)** : extraction propage la ref sur `Signal.props.refs` des rezonage. C'est un **AJOUT** → autorisé par l'invariant `before ⊆ after`. Après ce fix la carte lira `Signal.props.refs` en direct (source propre), et gate3 empêchera toute reprojection de la ré-effacer.
 
@@ -109,11 +99,11 @@ La provenance PV vit sur **3 loci** (mesure extraction) ; `sourceRefIdentities(n
 
 ## 8. Questions
 
-- **Q1 (le champ) — ✅ CLOSE** : 3 loci confirmés (§5) — `Signal.props.refs` + `DesignationEvent.props.refs`/`docSha` + arête `raises_signal.props.refs` ; identité = `docSha` (repli `rawRef`).
-- **Q2 (périmètre types) — routée extraction** : gate3 générique (tous nœuds/arêtes porteurs de refs, comme gate1) ou restreint `Signal`/`DesignationEvent` + `raises_signal` ? Défaut proposé : **générique** (toute provenance mérite protection). En attente confirmation extraction.
-- **Q3 (source vs enrichissement) — routée extraction** : distinguer une ref **source** (PV, à figer) d'une ref **enrichissement grounding** (ajoutée) ? Sans distinction, l'invariant `before⊆after` reste sûr (il ne fige que ce qui existait ; les ajouts grounding restent libres). En attente extraction.
+- **Q1 (clé d'identité) — ✅ CLOSE (extraction)** : **`docSha` SEUL** (content-stable), PAS `(docSha,page)` ; `rawRef` seulement pour extraire le docSha du chemin si vide (§5).
+- **Q2 (périmètre) — ✅ CLOSE (extraction)** : **générique, node-level** — tous nœuds porteurs de `props.refs` ; les refs d'arête = source de matérialisation #521, pas la surface gardée (§5).
+- **Q3 (source vs enrichissement) — ✅ CLOSE (extraction)** : figer TOUTE ref à docSha réel (y compris #521 `projection-materialize-severed`) ; **seule exclusion** = `rawRef ~ ^generated://` (§5).
 
-> **Impl gate3 bloquée sur Q2/Q3** (i-cond : implémenter dès confirmation extraction). Q1 close permet de figer le design ; Q2/Q3 ne changent que le PÉRIMÈTRE (quels types), pas la mécanique.
+> **✅ Impl gate3 DÉBLOQUÉE** (Q1/Q2/Q3 confirmées par extraction). Implémentation held-for-gate + co-val recette (lot de code séparé).
 
 ---
 
