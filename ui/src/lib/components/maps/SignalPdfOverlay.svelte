@@ -87,7 +87,7 @@
 </script>
 
 <script lang="ts">
-  import { onDestroy, tick } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import {
     ChevronLeft,
     ChevronRight,
@@ -1319,6 +1319,16 @@
     }
   }
 
+  onMount(() => {
+    // Le viewer PDF couvre la carte (backdrop plein) → l'attribution MapLibre
+    // n'a pas à rester visible tant qu'il est ouvert (elle « pop » à l'ouverture,
+    // cf. bug owner). On la masque via une classe body, retirée au démontage ;
+    // jamais désactivée quand la carte est visible (viewer fermé). Cf. règle
+    // `:global(body.pdf-viewer-open .maplibregl-ctrl-attrib)`.
+    document.body.classList.add("pdf-viewer-open");
+    return () => document.body.classList.remove("pdf-viewer-open");
+  });
+
   onDestroy(() => {
     // Invalide tout rendu/chargement en vol. On NE détruit PLUS le doc : il
     // appartient désormais au cache module-level (#89c) et peut servir une
@@ -1793,6 +1803,14 @@
 </div>
 
 <style>
+  /* Le viewer PDF couvre la carte → on masque l'attribution MapLibre pendant
+     qu'il est ouvert (le contrôle `maplibregl-ctrl-attrib` « pop » à l'ouverture,
+     par-dessus l'overlay). Elle réapparaît à la fermeture (classe body retirée) ;
+     JAMAIS désactivée quand la carte est visible → contrainte attribution OK. */
+  :global(body.pdf-viewer-open .maplibregl-ctrl-attrib) {
+    display: none !important;
+  }
+
   .pdf-overlay-backdrop {
     position: absolute;
     inset: 0;
