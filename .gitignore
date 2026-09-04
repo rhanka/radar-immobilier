@@ -67,6 +67,12 @@ data/
 *.kubeconfig
 kubeconfig*
 
+# Kubernetes secret manifests (never commit real credentials; keep secrets.example.yaml)
+deploy/k8s/secrets.yaml
+deploy/k8s/*-secret.yaml
+deploy/k8s/*-secrets.yaml
+!deploy/k8s/secrets.example.yaml
+
 # Compiled obscura binary cache (we use docker)
 obscura-bin/
 
