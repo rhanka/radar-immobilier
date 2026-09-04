@@ -23,9 +23,11 @@ describe("cptaqCollectionId", () => {
 });
 
 describe("resolveCptaqUrl", () => {
-  it("returns the direct OGC path (no /api/geo proxy) when no baseUrl", () => {
+  it("routes to the same-origin /api/geo/collections proxy when no baseUrl", () => {
+    // VITE_GEO_OGC_BASE_URL unset en préprod : le même-origine nu `/collections`
+    // n'est pas proxifié (SPA fallback) → on DOIT passer par /api/geo/collections.
     expect(resolveCptaqUrl("warden", { baseUrl: "" })).toBe(
-      "/collections/ca-qc-constraints-warden/items",
+      "/api/geo/collections/ca-qc-constraints-warden/items",
     );
   });
 
