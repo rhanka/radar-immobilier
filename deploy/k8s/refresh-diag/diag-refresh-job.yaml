@@ -14,10 +14,11 @@
 # the widened count — pin×widen×resources land together, point 7).
 #
 # CITY SET: parameterised. Default is a BOUNDED smoke (LIVE_SCRAPE_LIMIT=2, one
-# city) so an un-parameterised apply is safe (point 5: subset/1-city first).
-# i-infra widens the args/removes the limit to run the full/widened set once the
-# widen (decoupled → extraction) lands. suspend:true on the prod CronJobs stays
-# throughout; nothing here touches prod.
+# city) so an un-parameterised apply is safe (point 5: subset/1-city first). The
+# city args are scaled to the full/widened set for the OOM measurement once the
+# widen (decoupled → extraction) lands; i-infra CO-VALS the diag output (boots +
+# refreshes + no OOM). suspend:true on the prod CronJobs stays throughout;
+# nothing here touches prod.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -44,8 +45,8 @@ spec:
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: IfNotPresent
           workingDir: /workspace/api
-          # Bounded smoke by default (one city). i-infra overrides args/env to
-          # scale to the widened set for the OOM measurement.
+          # Bounded smoke by default (one city). The args/env are scaled to the
+          # widened set for the OOM measurement; i-infra co-vals the diag output.
           command: ["node", "dist/scripts/worker-live.js", "delson"]
           envFrom:
             - configMapRef:
