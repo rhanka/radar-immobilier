@@ -50,3 +50,35 @@ patches:
       - op: replace
         path: /spec/suspend
         value: false
+
+  # CITATIONS/BUCKET ALIGNMENT (i-infra) — the projection CronJob's base 34
+  # hardcodes GRAPH_S3 on the SCW bucket `radar-immobilier-docs-pocs`. In PREPROD
+  # the graph store is the IN-CLUSTER MinIO `radar-minio:9000` /
+  # `radar-immobilier-docs-preprod` — the SAME store the app reads and the
+  # grounding publishes to. Override GRAPH_S3 to that MinIO so
+  # projection-read == app-store == grounding-publish (else citations break: the
+  # projection would read a different bucket). Creds stay radar-s3-credentials
+  # (= the MinIO creds); MinIO needs path-style. (i-infra co-vals endpoint/bucket/
+  # path-style.)
+  - target:
+      kind: CronJob
+      name: radar-refresh-projection
+    patch: |
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-projection
+      spec:
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: project-graph
+                    env:
+                      - name: GRAPH_S3_ENDPOINT
+                        value: http://radar-minio:9000
+                      - name: GRAPH_S3_BUCKET
+                        value: radar-immobilier-docs-preprod
+                      - name: GRAPH_S3_FORCE_PATH_STYLE
+                        value: "true"
