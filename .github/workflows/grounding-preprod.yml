@@ -117,3 +117,38 @@ jobs:
             if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error title=Grounding timeout::job/${job} did not complete in 2400s."; exit 1; fi
             sleep 20
           done
+
+      # §7 CHAIN step 2/2 — after the publish-only Job wrote graph/<city>/latest.json
+      # to MinIO, project it into PG (else PG stays empty → API serves nothing).
+      # Runs only if the publish step above succeeded (set -e chain). Uses the
+      # radar-api image (project-graph-from-s3 lives there, not radar-grounding),
+      # component graph-projection (matches NP 71 → can read minio:9000), positional
+      # slug (the script reads argv, not --city).
+      - name: Project grounded graph → PG (preprod) + poll fail-loud
+        env:
+          CITY: ${{ inputs.city }}
+          TAG: ${{ inputs.image_tag || steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          export PROJECTION_IMAGE="${IMAGE_PREFIX}/radar-api:${TAG}"
+          echo "projection image → ${PROJECTION_IMAGE} ; city=${CITY}"
+          rendered="$(mktemp)"
+          CITY="$CITY" PROJECTION_IMAGE="$PROJECTION_IMAGE" \
+            envsubst '${CITY} ${PROJECTION_IMAGE}' < deploy/k8s/grounding-preprod/projection-job.preprod.yaml > "$rendered"
+          job="$(kubectl create --dry-run=client -o jsonpath='{.metadata.name}' -f "$rendered" 2>/dev/null || true)"
+          [ -n "$job" ] || { echo "::error title=Projection Job invalid::could not read metadata.name from the rendered projection Job."; exit 1; }
+          kubectl -n "$NAMESPACE" delete job "$job" --ignore-not-found
+          kubectl -n "$NAMESPACE" apply -f "$rendered"
+          echo "applied projection job/${job} (radar-api:${TAG}, city ${CITY}); polling…"
+          deadline=$(( $(date +%s) + 1800 ))
+          while :; do
+            s="$(kubectl -n "$NAMESPACE" get job "$job" -o jsonpath='{.status.succeeded}' 2>/dev/null || true)"
+            f="$(kubectl -n "$NAMESPACE" get job "$job" -o jsonpath='{.status.failed}' 2>/dev/null || true)"
+            if [ "${s:-0}" = "1" ]; then echo "projection OK — job/${job} completed; PG populated for ${CITY}"; exit 0; fi
+            if [ "${f:-0}" != "" ] && [ "${f:-0}" -ge 1 ] 2>/dev/null; then
+              echo "::error title=Projection FAILED::job/${job} failed (city ${CITY}, radar-api:${TAG}) — check GRAPH_S3/PG."
+              exit 1
+            fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then echo "::error title=Projection timeout::job/${job} did not complete in 1800s."; exit 1; fi
+            sleep 20
+          done
