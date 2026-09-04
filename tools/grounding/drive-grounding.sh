@@ -65,6 +65,13 @@ mkdir -p "$RUN_DIR/status" "$RUN_DIR/logs" "$RUN_DIR/workers" "$RUN_DIR/lanes"
 STATUS_FILE="$RUN_DIR/status/central.jsonl"
 touch "$STATUS_FILE"
 
+# ── Plafond DUR d'appels LLM, PARTAGÉ entre toutes les villes/lanes du run (cost-gate cohorte, i-cond).
+#    MAX_LLM_CALLS vide/unset = illimité (pilote 1 ville / runs host manuels). Le worker réserve chaque
+#    appel codex de façon atomique (flock) contre ce compteur → 0 appel au-delà du cap (arrêt dur net). ──
+export MAX_LLM_CALLS="${MAX_LLM_CALLS:-}"
+export LLM_CALL_COUNTER_FILE="$RUN_DIR/llm-call-count"
+printf '0' > "$LLM_CALL_COUNTER_FILE"
+
 log(){ echo "[drive $(date -u +%H:%M:%S)] $*" | tee -a "$RUN_DIR/run.log"; }
 
 # already cited in PUBLISH (préprod graph) ? — DOIT lire PUBLISH_BUCKET, PAS prod : sinon on skippe
