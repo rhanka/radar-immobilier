@@ -58,6 +58,13 @@ spec:
     spec:
       restartPolicy: Never
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       initContainers:
         # ── Étape 1 : backfill tracking 0004 (AVANT migrate, idempotent) ──────
         - name: db-backfill-0004
@@ -110,6 +117,12 @@ spec:
       # ── Étape 3 : projection SCW → PG ────────────────────────────────────
       containers:
         - name: project-graph
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           image: rg.fr-par.scw.cloud/radar-immobilier/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api

@@ -101,8 +101,21 @@ spec:
         app.kubernetes.io/component: api
     spec:
       serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           # :latest (comme radar-immo-mcp) — un tag FIGÉ ici faisait reverter
           # radar-api sur une vieille image à chaque `kubectl apply` du workflow
           # k8s-apply-mcp, annulant le `set image` du CD (pod bloqué pré-#326,
