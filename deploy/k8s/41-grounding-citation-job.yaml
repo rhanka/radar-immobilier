@@ -24,6 +24,9 @@
 #      rebuild #589 after this reframe merges.
 #   3. [ROUTED — i-arch dispatch #590] PRÉPROD one-shot dispatch (run-job.yaml is prod-only): the CD
 #      applies this Job per city (injects CITY + patches the image tag via kustomize), gated environment.
+#      NB(NetworkPolicy): the pod MUST carry label app.kubernetes.io/component: grounding — i-arch's NP
+#      72-allow-grounding-to-minio (#590, 1d84249) admits ingress to minio:9000 FROM component=grounding.
+#      Wrong/absent label ⇒ the pod cannot reach MinIO to publish (same NP gate as the projection).
 #   4. [ME, next] Host grounding run + HARD call-ceiling (finite worklist + max-call counter + stop +
 #      manual kill) → stages candidate + .sha256 to docs-pocs candidats/<city>/ (a NEW prefix, never
 #      raw/; host-side RW creds). This is what feeds the SRC below.
@@ -40,7 +43,7 @@ metadata:
   labels:
     app.kubernetes.io/name: radar-immobilier
     app.kubernetes.io/part-of: sentropic
-    app.kubernetes.io/component: grounding-publish
+    app.kubernetes.io/component: grounding
 spec:
   backoffLimit: 0             # i-cond spec — no auto-retry; publish-only is idempotent + resumable so a manual re-dispatch is safe
   ttlSecondsAfterFinished: 3600
@@ -49,7 +52,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: radar-immobilier
-        app.kubernetes.io/component: grounding-publish
+        app.kubernetes.io/component: grounding
     spec:
       restartPolicy: Never
       # TODO(i-infra): SA in radar-immobilier-preprod with egress to SCW docs-pocs (read) + the
