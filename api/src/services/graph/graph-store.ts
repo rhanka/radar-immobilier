@@ -230,6 +230,210 @@ export function buildEdgeRow(link: GraphifyLink): EdgeRow {
   };
 }
 
+/** Served-surface node types whose per-event source lived on the `derived_from` edge (dropped by
+ * the pre-materialization projection → phantom). */
+const SEVERED_SOURCE_TYPES = new Set(["Signal", "DesignationEvent"]);
+
+function refDocShas(refs: unknown): string[] {
+  if (!Array.isArray(refs)) return [];
+  const out: string[] = [];
+  for (const r of refs) {
+    if (r && typeof r === "object") {
+      const d = (r as Record<string, unknown>).docSha;
+      if (typeof d === "string" && d.length > 0) out.push(d);
+    }
+  }
+  return out;
+}
+
+/** A node already carries a servable source iff sourceRef, a source-bearing prop, or a
+ * docSha-bearing props.refs entry is present (mirrors graph-signals hasPdfLink inputs). */
+function nodeRowHasSource(row: NodeRow): boolean {
+  if (row.sourceRef) return true;
+  const p = row.props as Record<string, unknown>;
+  if (refDocShas(p.refs).length > 0) return true;
+  const pp = (p.properties ?? {}) as Record<string, unknown>;
+  for (const k of ["sourceUrl", "source_url", "rawRef", "docSha", "source_storage_key", "sourceRef"]) {
+    const v = pp[k];
+    if (typeof v === "string" && v.length > 0) return true;
+  }
+  return refDocShas(pp.refs).length > 0;
+}
+
+const MATERIALIZE_LINK_SOURCE = "projection-materialize-severed";
+const RAISES_SIGNAL_KIND = "raises_signal";
+/** Edges whose refs[0] carries the served node's own source locator. */
+const EVENT_SOURCE_KINDS = new Set(["derived_from", "supports"]);
+
+/** The edge kind (v1 `relation` wins, else v2 `type`), mirroring buildEdgeRow. */
+function edgeKind(l: GraphifyLink): string | undefined {
+  return l.relation ?? l.type;
+}
+
+/**
+ * The first usable source locator an edge asserts on refs[0]: a real docSha
+ * (never a `generated://` placeholder) with its 1-based page (null when the ref
+ * carries no valid page — the caller then skips WITH a reason, never fabricates).
+ */
+function firstEdgeSourceRef(refs: unknown): { docSha: string; page: number | null } | null {
+  if (!Array.isArray(refs)) return null;
+  for (const r of refs) {
+    if (!r || typeof r !== "object" || Array.isArray(r)) continue;
+    const rec = r as Record<string, unknown>;
+    const docSha = rec.docSha;
+    if (typeof docSha !== "string" || docSha.length === 0) continue;
+    const rawRef = rec.rawRef;
+    if (typeof rawRef === "string" && rawRef.startsWith("generated://")) continue;
+    const page =
+      typeof rec.page === "number" && Number.isInteger(rec.page) && rec.page >= 1 ? rec.page : null;
+    return { docSha, page };
+  }
+  return null;
+}
+
+/**
+ * CLOSED-ENUMERATION outcome of the severed-source materialization (§521-ét gates
+ * b/c/d): every raised Signal is accounted for exactly once —
+ * `raisedSignals === alreadySourced + materialized + skipped.{no_event_source +
+ * locator_without_page + evidence_absent + other}`. Emitted even at zero so
+ * "ran, nothing to do" is distinguishable from "step never ran".
+ */
+export interface SourceMaterializationResult {
+  /** Denominator: served Signals that are the target of ≥1 raises_signal edge. */
+  raisedSignals: number;
+  /** Denominator: raised Signals whose raising event carries a source docSha. */
+  withSourcedEvent: number;
+  /** Raised Signals already carrying their own source (idempotent skip). */
+  alreadySourced: number;
+  /** Raised Signals given a CONFORMING ref (docSha+page+evidence → validateCitedSourceRef ok). */
+  materialized: number;
+  /** Why a raised Signal was NOT materialized (closed set). */
+  skipped: {
+    no_event_source: number;
+    locator_without_page: number;
+    evidence_absent: number;
+    other: number;
+  };
+}
+
+/**
+ * Re-materialize the severed per-event source onto served Signal|DesignationEvent
+ * nodes as a CONFORMING cited-source ref (`docSha` + `rawRef` + `page` +
+ * evidence-text `excerpt`) so the shared viewer's `validateCitedSourceRef` accepts
+ * it (locator≥1 AND page AND evidence≥1) — a locator-only ref is rejected and the
+ * node stays a phantom that the viewer never renders (the owner bug).
+ *
+ * Source mapping (measured on the docs-pocs baseline, extraction):
+ *  - a DesignationEvent's source lives on ITS OWN edges — `derived_from`
+ *    (event→bylaw) or `supports` (source→event), refs[0] = {docSha, page:1};
+ *    evidence = the event's own `label`.
+ *  - a Signal's source is INHERITED from the event that `raises_signal → it` (that
+ *    edge is EMPTY at baseline): the raising event's docSha+page, and the raising
+ *    event's `label` as evidence-text.
+ *
+ * `page:1` is the honest generic seance-document page (baseline), NOT invented —
+ * the grounding refines it to the exact resolution page + verbatim excerpt
+ * (additive). NEVER fabricates: a missing docSha or page → the node is skipped
+ * WITH a reason (closed enumeration), never a made-up locator. Idempotent: a node
+ * already carrying a source is left untouched.
+ */
+export function materializeSeveredSources(
+  nodeRows: NodeRow[],
+  links: GraphifyLink[],
+  _rawNodes: GraphifyNode[],
+): SourceMaterializationResult {
+  // Each node's own source locator (from its derived_from/supports edges) + the
+  // signal→raising-event map (raises_signal edges).
+  const eventSource = new Map<string, { docSha: string; page: number | null }>();
+  const raisingEventBySignal = new Map<string, string>();
+  for (const l of links) {
+    const kind = edgeKind(l);
+    if (kind === RAISES_SIGNAL_KIND) {
+      raisingEventBySignal.set(l.target, l.source);
+      continue;
+    }
+    if (!kind || !EVENT_SOURCE_KINDS.has(kind)) continue;
+    const ref = firstEdgeSourceRef((l as { refs?: unknown }).refs);
+    if (!ref) continue;
+    // derived_from: the EVENT is the source endpoint; supports: the event is the target.
+    const eventId = kind === "supports" ? l.target : l.source;
+    if (!eventSource.has(eventId)) eventSource.set(eventId, ref);
+  }
+
+  const labelById = new Map<string, string>();
+  for (const row of nodeRows) {
+    if (typeof row.label === "string" && row.label.trim().length > 0) {
+      labelById.set(row.id, row.label.trim());
+    }
+  }
+
+  const result: SourceMaterializationResult = {
+    raisedSignals: 0,
+    withSourcedEvent: 0,
+    alreadySourced: 0,
+    materialized: 0,
+    skipped: { no_event_source: 0, locator_without_page: 0, evidence_absent: 0, other: 0 },
+  };
+
+  for (const row of nodeRows) {
+    if (!SEVERED_SOURCE_TYPES.has(row.type)) continue;
+
+    // Resolve the (source, evidence-text) this served node should carry.
+    let src: { docSha: string; page: number | null } | undefined;
+    let excerpt: string | undefined;
+    let isRaisedSignal = false;
+    if (row.type === "Signal" && raisingEventBySignal.has(row.id)) {
+      isRaisedSignal = true;
+      const eventId = raisingEventBySignal.get(row.id)!;
+      src = eventSource.get(eventId);
+      excerpt = labelById.get(eventId);
+    } else if (row.type === "DesignationEvent") {
+      src = eventSource.get(row.id);
+      excerpt = labelById.get(row.id);
+    } else {
+      continue; // a Signal not raised by an event: outside the severed-source scope
+    }
+
+    if (isRaisedSignal) {
+      result.raisedSignals++;
+      if (src?.docSha) result.withSourcedEvent++;
+    }
+    if (nodeRowHasSource(row)) {
+      if (isRaisedSignal) result.alreadySourced++;
+      continue;
+    }
+    if (!src || !src.docSha) {
+      if (isRaisedSignal) result.skipped.no_event_source++;
+      continue;
+    }
+    if (src.page === null) {
+      if (isRaisedSignal) result.skipped.locator_without_page++;
+      continue; // never fabricate a page
+    }
+    const evidence = typeof excerpt === "string" && excerpt.trim().length > 0 ? excerpt.trim() : null;
+    if (!evidence) {
+      if (isRaisedSignal) result.skipped.evidence_absent++;
+      continue;
+    }
+
+    // CONFORMING ref — matches the validated ok=true template exactly.
+    const city = row.citySlug ?? "";
+    const conformingRef = {
+      docSha: src.docSha,
+      rawRef: `raw/proces-verbaux-${city}/cas/${src.docSha}.pdf`,
+      page: src.page,
+      excerpt: evidence,
+      linkSource: MATERIALIZE_LINK_SOURCE,
+    };
+    row.sourceRef = row.sourceRef ?? src.docSha;
+    const existing = Array.isArray(row.props.refs) ? row.props.refs : [];
+    row.props.refs = mergeRefs(existing, [conformingRef]);
+    if (isRaisedSignal) result.materialized++;
+  }
+
+  return result;
+}
+
 function mergeRefs(a: unknown, b: unknown): unknown {
   if (!Array.isArray(a) && !Array.isArray(b)) return b ?? a;
 
@@ -762,6 +966,18 @@ export async function upsertGraphAtomic(
 
   const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
   const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
+  // Re-materialize the per-event source the projection would otherwise sever onto served nodes as
+  // a CONFORMING cited-source ref (docSha+page+evidence) → hasPdfLink stays true, phantoms cannot
+  // recur, and the ref passes validateCitedSourceRef. §521-ét observability (gates b/c/d): emit the
+  // denominators + closed-enumeration shrinkage counter UNCONDITIONALLY (even at zero) so "ran, 0 to
+  // do" ≠ "step never ran"; a high `materialized` rate signals a graphify producer gap to fix upstream.
+  const severedSource = materializeSeveredSources(nodeRows, links, parsed.nodes);
+  console.info(
+    `[graph-store] severed-source materialization ${citySlug ?? "(cross-city)"}: ` +
+      `raisedSignals=${severedSource.raisedSignals} withSourcedEvent=${severedSource.withSourcedEvent} ` +
+      `alreadySourced=${severedSource.alreadySourced} materialized=${severedSource.materialized} ` +
+      `skipped=${JSON.stringify(severedSource.skipped)}`,
+  );
   const newNodeIds = nodeRows.map((r) => r.id);
 
   // Cas cross-city : upsert pur, aucune suppression (impossible de scoper sûrement).
