@@ -20,6 +20,7 @@ import {
   upsertGraph,
   upsertGraphAtomic,
   findMissingBusinessProperties,
+  findMissingSourceRefs,
   countCompleteSignals,
   isCompleteSignalProps,
   queryNeighbors,
@@ -413,6 +414,72 @@ describe("business-property preservation gate", () => {
       nodeId: "bylaw-x-999-2020",
       missingKeys: ["numero", "stage"],
     }]);
+  });
+});
+
+describe("source-ref provenance gate (gate3) — findMissingSourceRefs", () => {
+  const withRefs = (id: string, refs: unknown[]) => ({ id, props: { refs } });
+
+  it("no regression when the candidate preserves the node's source docSha", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("flags a node whose source docSha would DISAPPEAR (the PV-ref loss)", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "ste-martine")).toEqual([
+      { citySlug: "ste-martine", nodeId: "sig:1", missingDocShas: ["SHA_PV"] },
+    ]);
+  });
+
+  it("flags a count-preserving SWAP that gate2 misses (PV docSha replaced by another complete ref)", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV", excerpt: "x" }])];
+    // same node, ref swapped to a DIFFERENT docSha — the "complete" count is
+    // preserved (gate2 blind), but the PV provenance is lost.
+    const after = [withRefs("sig:1", [{ docSha: "SHA_OTHER", excerpt: "y" }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([
+      { citySlug: "x", nodeId: "sig:1", missingDocShas: ["SHA_PV"] },
+    ]);
+  });
+
+  it("allows ADDITIONS — keeping the source and adding a grounding ref does not regress", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [{ docSha: "SHA_PV" }, { docSha: "SHA_GROUNDING", excerpt: "cited" }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("exempts a node listed in intendedRemovals", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x", new Set(["sig:1"]))).toEqual([]);
+  });
+
+  it("recovers the docSha from the CAS rawRef path when the docSha field is absent", () => {
+    const before = [withRefs("sig:1", [{ rawRef: "raw/proces-verbaux-x/cas/SHA_FROM_PATH.pdf" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([
+      { citySlug: "x", nodeId: "sig:1", missingDocShas: ["SHA_FROM_PATH"] },
+    ]);
+  });
+
+  it("excludes generated:// placeholder refs (gen_refs are not real provenance)", () => {
+    const before = [withRefs("sig:1", [{ rawRef: "generated://gen_refs/whatever" }])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("keys on docSha ALONE, not (docSha, page) — a page refinement for the same doc is not a regression", () => {
+    const before = [withRefs("sig:1", [{ docSha: "SHA_PV", page: 1 }])];
+    const after = [withRefs("sig:1", [{ docSha: "SHA_PV", page: 10 }])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+
+  it("ignores nodes that carried no source ref before (nothing to protect)", () => {
+    const before = [withRefs("sig:1", [])];
+    const after = [withRefs("sig:1", [])];
+    expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
   });
 });
 
