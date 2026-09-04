@@ -1,0 +1,166 @@
+name: Grounding publish (prod, SCW docs-pocs, GH-runner)
+
+# One-shot PROD publish of a host-staged grounded candidate, intra-docs-pocs:
+#   candidats/<city>/latest.json  ->  <dst_prefix>/<city>/latest.json   (SAME bucket radar-immobilier-docs-pocs)
+# hash-verified + fail-closed, via tools/grounding/publish-verify-graph.sh (guard-relax authored by
+# extraction in #609, extrait ici comme ACTE-1 mergeable). MANUAL only (workflow_dispatch).
+#
+# ── WHY A GH-RUNNER, NOT A K8S JOB (ruling i-arch) ──
+# Both SRC and DST are SCW docs-pocs (external S3), NOT the in-cluster MinIO. So the publish needs
+# NO cluster access at all: it runs entirely on the GitHub Actions runner with s5cmd + SCW creds.
+# ⇒ ZERO prod-cluster exposure (no kubeconfig, no kubectl, no prod namespace touched). This is the
+# safest execution-location and is the CHOSEN mechanism. EXEC-LOCATION is flagged to i-arch below.
+#   Alternative (NOT used): a k8s Job in ns radar-immobilier mirroring 41-grounding-citation-job.yaml,
+#   DST=docs-pocs graph/, creds from an in-cluster secret (graph-copy-creds / radar-scrape-s3-credentials).
+#   Tradeoff: it would run inside the PROD namespace (blast radius) for no benefit, since the publish is
+#   pure SCW-to-SCW S3. i-arch to rule if a cluster-side execution is ever preferred.
+#
+# ── FLAG i-arch/owner — REQUIRED SCW ACTIONS SECRETS (not provisioned yet) ──
+# The runner needs an S3 access-key-id + secret-key pair SCOPED to radar-immobilier-docs-pocs
+# (READ candidats/ + WRITE <dst_prefix>/). The repo currently exposes NO such pair to Actions:
+#   - secrets.SCW_SECRET_KEY is the SCW *registry* password (nologin) — NOT an S3 access-key-id pair ;
+#   - secrets.BACKUP_S3_ACCESS_KEY/SECRET_KEY are scoped to the DB-backup bucket — MUST NOT be assumed
+#     to reach docs-pocs.
+# ⇒ Owner/i-arch action (do NOT invent): create an SCW Object Storage scoped access key on
+#   radar-immobilier-docs-pocs and add it as repo secrets SCW_DOCS_POCS_ACCESS_KEY /
+#   SCW_DOCS_POCS_SECRET_KEY. This workflow FAILS-CLOSED (below) if either is empty.
+#
+# ── ARMING (owner) ──
+# Prod-side, owner-gated + DISARMED by default (mirrors BACKUP_BEFORE_RELEASE_PROD_ENABLED): stays
+# SKIPPED until the repo VARIABLE GROUNDING_PUBLISH_PROD_ENABLED == 'true'. Arming is a deliberate,
+# separate owner step — never a side effect of merging this PR.
+
+on:
+  workflow_dispatch:
+    inputs:
+      city:
+        description: "City slug to publish (candidats/<city> -> <dst_prefix>/<city>)"
+        required: true
+        default: sainte-martine
+      dst_prefix:
+        description: "DST key prefix (permit-list graph|graph-preprod|parsed; prod = graph)"
+        required: true
+        default: graph
+      expected_sha:
+        description: "SHA-256 of the candidate BODY (out-of-band pin). REQUIRED when dst_prefix=graph; optional for graph-preprod/parsed. Script's own sidecar check stays ON regardless."
+        required: false
+        default: ""
+
+concurrency:
+  # never two prod publishes of the same city+prefix at once.
+  group: grounding-publish-prod-${{ inputs.city }}-${{ inputs.dst_prefix }}
+  cancel-in-progress: false
+
+env:
+  # SRC and DST are the SAME SCW bucket — the guard-relax (SRC != DST full-object-path, permit-list)
+  # is what makes an intra-docs-pocs publish legitimate.
+  S3_ENDPOINT: https://s3.fr-par.scw.cloud
+  S3_BUCKET: radar-immobilier-docs-pocs
+  S3_REGION: fr-par
+
+jobs:
+  publish:
+    name: Publish ${{ inputs.city }} -> ${{ inputs.dst_prefix }}/ (prod docs-pocs)
+    # DISARMED by default — owner arms via repo variable (see header).
+    if: vars.GROUNDING_PUBLISH_PROD_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate inputs (fail-closed)
+        env:
+          CITY: ${{ inputs.city }}
+          DST_PREFIX: ${{ inputs.dst_prefix }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          # city = a single slug (defense-in-depth; the script also builds keys from it).
+          printf '%s' "$CITY" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
+            || { echo "::error title=Invalid city::'$CITY' must match [a-z0-9-]+"; exit 1; }
+          # dst_prefix permit-list — mirror the script's fail-closed permit-list (graph|graph-preprod|parsed).
+          case "$DST_PREFIX" in
+            graph|graph-preprod|parsed) : ;;
+            *) echo "::error title=Invalid dst_prefix::'$DST_PREFIX' not in permit-list graph|graph-preprod|parsed"; exit 1 ;;
+          esac
+          # expected_sha, if provided, must look like a sha256 hex.
+          if [ -n "$EXPECTED_SHA" ]; then
+            printf '%s' "$EXPECTED_SHA" | grep -Eiq '^[0-9a-f]{64}$' \
+              || { echo "::error title=Invalid expected_sha::must be 64 hex chars"; exit 1; }
+          fi
+          # #2a — écraser la baseline prod SERVIE (graph/) exige un pin dur out-of-band. expected_sha est
+          # OBLIGATOIRE quand dst_prefix=graph ; il reste optionnel pour graph-preprod/parsed (non servis en prod).
+          if [ "$DST_PREFIX" = "graph" ] && [ -z "$EXPECTED_SHA" ]; then
+            echo "::error title=expected_sha required::dst_prefix=graph overwrites the served prod baseline — expected_sha (sha256 of the candidate BODY) is mandatory."; exit 1
+          fi
+          echo "inputs OK — city=$CITY dst_prefix=$DST_PREFIX expected_sha=${EXPECTED_SHA:+set}"
+
+      - name: Assert SCW docs-pocs creds present (fail-closed)
+        env:
+          SCW_AK: ${{ secrets.SCW_DOCS_POCS_ACCESS_KEY }}
+          SCW_SK: ${{ secrets.SCW_DOCS_POCS_SECRET_KEY }}
+        run: |
+          set -euo pipefail
+          [ -n "$SCW_AK" ] || { echo "::error title=Missing secret::SCW_DOCS_POCS_ACCESS_KEY is empty — owner/i-arch must provision it (see workflow header)."; exit 1; }
+          [ -n "$SCW_SK" ] || { echo "::error title=Missing secret::SCW_DOCS_POCS_SECRET_KEY is empty — owner/i-arch must provision it (see workflow header)."; exit 1; }
+          echo "SCW docs-pocs creds present."
+
+      - name: Install s5cmd (sha256-pinned, verify-before-extract)
+        run: |
+          set -euo pipefail
+          ver=2.2.2
+          tarball="s5cmd_${ver}_Linux-64bit.tar.gz"
+          # #1 supply-chain pin — sha256 autoritaire (peak/s5cmd v2.2.2, s5cmd_checksums.txt).
+          sha256="a15f83d2a6dc091e43b2a120f29f8f6c86d146c381766c0197ec75d7985af2b6"
+          url="https://github.com/peak/s5cmd/releases/download/v${ver}/${tarball}"
+          tmp="$(mktemp -d)"
+          # download DANS un fichier, VÉRIFIE le sha256 (fail-closed) AVANT extraction — jamais `curl | tar`
+          # (qui extrait avant de vérifier).
+          curl -fsSL "$url" -o "$tmp/$tarball"
+          echo "${sha256}  ${tmp}/${tarball}" | sha256sum -c -
+          tar -xz -C "$tmp" -f "$tmp/$tarball" s5cmd
+          sudo install -m 0755 "$tmp/s5cmd" /usr/local/bin/s5cmd
+          s5cmd version
+
+      - name: EXPECTED_SHA out-of-band pre-check (extra guard)
+        if: ${{ inputs.expected_sha != '' }}
+        env:
+          CITY: ${{ inputs.city }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.SCW_DOCS_POCS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_DOCS_POCS_SECRET_KEY }}
+          AWS_REGION: ${{ env.S3_REGION }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          set -euo pipefail
+          # #2b Defense-in-depth: hash the candidate BODY (not the sidecar) and pin it to the operator-provided
+          # SHA-256 BEFORE publish — a TRUE independent pin (operator sha vs real bytes), not a re-read of the
+          # sidecar the script already checks. PRIMARY guarantee stays the script (body vs sidecar + DST re-read).
+          body="s3://${S3_BUCKET}/candidats/${CITY}/latest.json"
+          s5cmd --endpoint-url "$S3_ENDPOINT" cp "$body" /tmp/cand.body
+          got="$(sha256sum /tmp/cand.body | awk '{print $1}')"
+          if [ "$got" != "$EXPECTED_SHA" ]; then
+            echo "::error title=EXPECTED_SHA mismatch::candidate body $got != EXPECTED_SHA $EXPECTED_SHA — nothing published."; exit 1
+          fi
+          echo "EXPECTED_SHA guard OK (body $got)"
+
+      - name: Publish (hash-verified, fail-closed)
+        env:
+          CITY: ${{ inputs.city }}
+          # SRC = docs-pocs candidats/ ; DST = docs-pocs <dst_prefix>/ — SAME bucket, different prefix.
+          SRC_S3_ENDPOINT: ${{ env.S3_ENDPOINT }}
+          SRC_S3_BUCKET: ${{ env.S3_BUCKET }}
+          SRC_AWS_ACCESS_KEY_ID: ${{ secrets.SCW_DOCS_POCS_ACCESS_KEY }}
+          SRC_AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_DOCS_POCS_SECRET_KEY }}
+          DST_S3_ENDPOINT: ${{ env.S3_ENDPOINT }}
+          DST_S3_BUCKET: ${{ env.S3_BUCKET }}
+          DST_AWS_ACCESS_KEY_ID: ${{ secrets.SCW_DOCS_POCS_ACCESS_KEY }}
+          DST_AWS_SECRET_ACCESS_KEY: ${{ secrets.SCW_DOCS_POCS_SECRET_KEY }}
+          AWS_REGION: ${{ env.S3_REGION }}
+          DST_PREFIX: ${{ inputs.dst_prefix }}
+          REQUIRE_SIDECAR: "1"
+        run: |
+          set -euo pipefail
+          echo "publish: candidats/${CITY}/latest.json -> ${DST_PREFIX}/${CITY}/latest.json @ ${S3_BUCKET}"
+          bash tools/grounding/publish-verify-graph.sh "$CITY" candidats "$RUNNER_TEMP/publish-run"
+          echo "--- manifest ---"
+          cat "$RUNNER_TEMP/publish-run/manifest.jsonl" || true
