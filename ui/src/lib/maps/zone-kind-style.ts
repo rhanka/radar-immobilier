@@ -6,15 +6,15 @@
  *
  * Parité concurrente (vue Signaux) : les zones ne sont plus des contours gris
  * uniformes mais des aplats doux distincts par famille, sous les lots colorés
- * par flags. Le kind est résolu de façon TOLÉRANTE :
+ * par flags. La famille est résolue à partir des SEULES données source
+ * (directive owner — aucune famille hallucinée) :
  *   1. libellé `affectation` de la source quand présent — le plus fiable
  *      (« Conservation », « CV - Résidentielle de faible densité »…) ;
  *   2. sinon `kind` de la source : libellé (« habitation », « mixed-use »…),
  *      lettre canonique, ou code court de la taxonomie geo (« CO », « Rv »,
- *      « Af/b »… — `kindFromZoneCode`) ;
- *   3. sinon tokens du code de zone (H-431, CO-939… — `kindFromZoneCode`) ;
- *   4. sinon teinte neutre « Type non déterminé » (gris clair honnête,
- *      PAS blanc invisible) — aucune invention.
+ *      « Af/b »… — `kindFromZoneCode` sur le champ `kind` SOURCE) ;
+ *   3. sinon teinte neutre SANS libellé de catégorie — le token du CODE de zone
+ *      n'est JAMAIS dérivé en famille (« H-12 » reste le code réel, pas « H »).
  */
 
 import { kindFromZoneCode, type ZoneKind } from "./lot-potential-visual.js";
@@ -52,10 +52,12 @@ export const ZONE_KIND_STYLES: Record<Exclude<ZoneKind, "AUTRE">, ZoneKindStyle>
 };
 
 /**
- * Teinte neutre d'une zone au kind irrésolu — gris clair HONNÊTE (« Type non
- * déterminé ») : un aplat blanc est invisible sur fond de carte clair et se
- * confond avec « pas de zonage ». Token surface-hover (gris slate léger, même
- * fallback que le reste du repo), survol grisé plus franc (cf. hover-paint).
+ * Teinte neutre d'une zone au kind source irrésolu — gris clair discret : un
+ * aplat blanc est invisible sur fond de carte clair et se confond avec « pas de
+ * zonage ». Token surface-hover (gris slate léger, même fallback que le reste du
+ * repo), survol grisé plus franc (cf. hover-paint). NB : ce style n'a plus
+ * d'entrée de légende ni de chip — aucun libellé de catégorie pour une zone
+ * sans famille source (le vrai code de zone reste, lui, affiché).
  */
 export const ZONE_KIND_NEUTRAL: ZoneKindStyle = {
   token: "--st-semantic-surface-hover",
@@ -130,18 +132,21 @@ function kindFromLabel(label: string | null | undefined): StyledZoneKind | null 
 }
 
 /**
- * Résout le kind canonique d'une zone, dans l'ordre de fiabilité :
+ * Résout le kind canonique d'une zone à partir des SEULES données source
+ * (directive owner — aucune famille hallucinée) :
  *   1. libellé `affectation` (« Conservation » → CONS, « CV - Résidentielle
  *      de faible densité » → H…) ;
  *   2. `kind` source : lettre canonique (« H »), libellé (« habitation »,
  *      « mixed-use »), ou code court de la taxonomie geo (« CO », « Rv »,
- *      « Af/b » — `kindFromZoneCode`) ;
- *   3. tokens du code de zone (H-431 → H, CO-939 → CONS).
- * null si irrésolu (teinte neutre, aucune invention).
+ *      « Af/b » — `kindFromZoneCode` sur le champ `kind` SOURCE).
+ * Le token du CODE de zone n'est JAMAIS dérivé en famille : « H-12 » reste le
+ * code réel (identité de la zone), pas une famille « H » inventée. `_code` est
+ * conservé pour la signature des appelants mais n'entre plus dans la résolution.
+ * null si irrésolu ⇒ aplat neutre SANS libellé de catégorie (aucune invention).
  */
 export function canonicalZoneKind(
   kind: string | null | undefined,
-  code: string | null | undefined,
+  _code: string | null | undefined,
   affectation?: string | null,
 ): StyledZoneKind | null {
   const fromAffectation = kindFromLabel(affectation);
@@ -154,8 +159,7 @@ export function canonicalZoneKind(
     const fromKindCode = kindFromZoneCode(kind);
     if (fromKindCode !== null && fromKindCode !== "AUTRE") return fromKindCode;
   }
-  const fromCode = code ? kindFromZoneCode(code) : null;
-  return fromCode !== null && fromCode !== "AUTRE" ? fromCode : null;
+  return null;
 }
 
 /** Style (token/fallback/label) d'une zone — neutre si kind irrésolu. */
@@ -234,12 +238,13 @@ export function zoneKindLegend(
   zones: ReadonlyArray<{ kind?: string | null; code: string; affectation?: string | null }>,
   el?: Element | null,
 ): ZoneKindLegendEntry[] {
+  // Familles SOURCE présentes uniquement. Les zones au kind irrésolu (aplat
+  // neutre) n'ajoutent PLUS d'entrée « Type non déterminé » (directive owner :
+  // pas de catégorie inventée en légende).
   const seen = new Set<StyledZoneKind>();
-  let hasNeutral = false;
   for (const zone of zones) {
     const canonical = canonicalZoneKind(zone.kind ?? null, zone.code, zone.affectation ?? null);
     if (canonical) seen.add(canonical);
-    else hasNeutral = true;
   }
   const entries: ZoneKindLegendEntry[] = [];
   const emittedLabels = new Set<string>();
@@ -249,12 +254,6 @@ export function zoneKindLegend(
     if (!seen.has(kind) || emittedLabels.has(style.label)) continue;
     emittedLabels.add(style.label);
     entries.push({ color: resolveToken(style.token, style.fallback, el), label: style.label });
-  }
-  if (hasNeutral) {
-    entries.push({
-      color: resolveToken(ZONE_KIND_NEUTRAL.token, ZONE_KIND_NEUTRAL.fallback, el),
-      label: ZONE_KIND_NEUTRAL.label,
-    });
   }
   return entries;
 }

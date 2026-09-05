@@ -2340,6 +2340,9 @@
                 onChange={handleZoneMillesimeFilterChange}
               />
             </div>
+            <!-- Familles = attribut d'affectation SOURCE (directive owner), jamais
+                 l'identité de la zone (le vrai code reste sur l'aplat). -->
+            <p class="mb-1 text-[0.65rem] uppercase tracking-wide text-slate-400">Affectation (source)</p>
             <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
               {#each zoneLegendEntries as item (item.label)}
                 <li class="flex items-center gap-2 text-xs text-slate-600">

@@ -1,10 +1,10 @@
 /**
  * Tests de zone-kind-style — teinte des aplats de zone par kind (tokens DS).
  *
- * Données de référence : Salaberry-de-Valleyfield (645 zones live) porte
- * kind=null partout mais des codes préfixés (A-118, H-354, CONS-2, Cons-5,
- * i-93, REC-11, U-4, P-411, C-186…) — la résolution DOIT retomber sur le
- * préfixe du code, insensible à la casse.
+ * Directive owner : la famille est résolue à partir des SEULES données source
+ * (affectation / champ kind), JAMAIS dérivée du token du code de zone. Un code
+ * seul (kind=null) ne produit donc PAS de famille : « H-12 » reste le code réel
+ * de la zone (son identité), pas une famille « H » inventée.
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -19,20 +19,18 @@ import {
 import type { GeoZoneFeatureCollection } from "./geo-zones-client.js";
 
 describe("canonicalZoneKind", () => {
-  it("résout depuis le préfixe du code quand kind est absent (cas Salaberry)", () => {
-    expect(canonicalZoneKind(null, "A-118")).toBe("A");
-    expect(canonicalZoneKind(null, "H-354")).toBe("H");
-    expect(canonicalZoneKind(null, "C-186")).toBe("C");
-    expect(canonicalZoneKind(null, "I-31")).toBe("I");
-    expect(canonicalZoneKind(null, "P-411")).toBe("P");
-    expect(canonicalZoneKind(null, "U-4")).toBe("U");
-    expect(canonicalZoneKind(null, "REC-11")).toBe("REC");
-    expect(canonicalZoneKind(null, "CONS-2")).toBe("CONS");
-  });
-
-  it("est insensible à la casse du code (Cons-5, i-93 réels à Salaberry)", () => {
-    expect(canonicalZoneKind(null, "Cons-5")).toBe("CONS");
-    expect(canonicalZoneKind(null, "i-93")).toBe("I");
+  it("ne dérive PLUS la famille du code seul (directive owner) — code sans kind/affectation → null", () => {
+    // « H-12 » reste le code réel de la zone (identité), jamais réduit à « H ».
+    expect(canonicalZoneKind(null, "A-118")).toBeNull();
+    expect(canonicalZoneKind(null, "H-354")).toBeNull();
+    expect(canonicalZoneKind(null, "C-186")).toBeNull();
+    expect(canonicalZoneKind(null, "I-31")).toBeNull();
+    expect(canonicalZoneKind(null, "P-411")).toBeNull();
+    expect(canonicalZoneKind(null, "U-4")).toBeNull();
+    expect(canonicalZoneKind(null, "REC-11")).toBeNull();
+    expect(canonicalZoneKind(null, "CONS-2")).toBeNull();
+    expect(canonicalZoneKind(null, "Cons-5")).toBeNull();
+    expect(canonicalZoneKind(null, "i-93")).toBeNull();
   });
 
   it("résout depuis le libellé kind quand présent (variantes FR)", () => {
@@ -188,11 +186,11 @@ describe("canonicalZoneKind", () => {
     expect(canonicalZoneKind("forestry", null)).toBe("A");
   });
 
-  it("résout les codes de zone à préfixe secteur par leurs tokens (CV-RF, ST-TO, CO-939)", () => {
-    expect(canonicalZoneKind(null, "CO-939")).toBe("CONS");
-    expect(canonicalZoneKind(null, "CV-RF-2")).toBe("H");
-    expect(canonicalZoneKind(null, "ST-TO-1")).toBe("REC");
-    expect(canonicalZoneKind(null, "VA-P-3")).toBe("P");
+  it("un code de zone seul (même à préfixe secteur) ne dérive plus de famille → null", () => {
+    expect(canonicalZoneKind(null, "CO-939")).toBeNull();
+    expect(canonicalZoneKind(null, "CV-RF-2")).toBeNull();
+    expect(canonicalZoneKind(null, "ST-TO-1")).toBeNull();
+    expect(canonicalZoneKind(null, "VA-P-3")).toBeNull();
   });
 });
 
@@ -204,10 +202,12 @@ describe("zoneKindStyle / zoneKindColor", () => {
     expect(ZONE_KIND_NEUTRAL.token.startsWith("--st-semantic-")).toBe(true);
   });
 
-  it("retourne le fallback sent-tech hors DOM (H jaune, C rouge, A vert)", () => {
-    expect(zoneKindColor(null, "H-354", null)).toBe("#EDC948");
-    expect(zoneKindColor(null, "C-186", null)).toBe("#E15759");
-    expect(zoneKindColor(null, "A-118", null)).toBe("#59A14F");
+  it("retourne le fallback sent-tech hors DOM (H jaune, C rouge, A vert) — depuis le kind source", () => {
+    expect(zoneKindColor("habitation", null, null)).toBe("#EDC948");
+    expect(zoneKindColor("commerce", null, null)).toBe("#E15759");
+    expect(zoneKindColor("agricole", null, null)).toBe("#59A14F");
+    // Code seul (kind/affectation absents) → neutre : plus de dérivation par code.
+    expect(zoneKindColor(null, "H-354", null)).toBe(ZONE_KIND_NEUTRAL.fallback);
     expect(zoneKindColor(null, "fallback:x", null)).toBe(ZONE_KIND_NEUTRAL.fallback);
   });
 
@@ -219,7 +219,7 @@ describe("zoneKindStyle / zoneKindColor", () => {
     expect(zoneKindStyle("unknown", "ZZZ-1")).toBe(ZONE_KIND_NEUTRAL);
     expect(ZONE_KIND_NEUTRAL.label).toBe("Type non déterminé");
     // Un aplat blanc se confond avec « pas de zonage » sur fond clair (bug
-    // Mont-Tremblant) : le neutre doit être un gris clair honnête.
+    // Mont-Tremblant) : le neutre doit être un gris clair discret.
     expect(ZONE_KIND_NEUTRAL.fallback.toLowerCase()).not.toBe("#ffffff");
   });
 
@@ -232,14 +232,18 @@ describe("zoneKindStyle / zoneKindColor", () => {
 });
 
 describe("decorateZonesWithKindColor", () => {
-  function zonesFC(codes: string[]): GeoZoneFeatureCollection {
+  function zonesFC(
+    specs: Array<{ code: string; kind?: string | null; affectation?: string | null }>,
+  ): GeoZoneFeatureCollection {
     return {
       type: "FeatureCollection",
-      features: codes.map((code) => ({
+      features: specs.map(({ code, kind = null, affectation = null }) => ({
         type: "Feature",
         geometry: null,
         properties: {
           code,
+          ...(kind !== null ? { kind } : {}),
+          ...(affectation !== null ? { affectation } : {}),
           citySlug: "salaberry-de-valleyfield",
           geometryStatus: "official",
           confidence: 1,
@@ -251,14 +255,29 @@ describe("decorateZonesWithKindColor", () => {
     };
   }
 
-  it("décore chaque feature d'un kindColor résolu par kind", () => {
-    const decorated = decorateZonesWithKindColor(zonesFC(["H-1", "C-2", "4052"]), new Set(), null);
+  it("décore chaque feature d'un kindColor résolu par le kind source (code seul → neutre)", () => {
+    const decorated = decorateZonesWithKindColor(
+      zonesFC([
+        { code: "H-1", kind: "habitation" },
+        { code: "C-2", kind: "commerce" },
+        { code: "4052" }, // ni kind ni affectation source → neutre
+      ]),
+      new Set(),
+      null,
+    );
     const colors = decorated.features.map((f) => f.properties.kindColor);
     expect(colors).toEqual(["#EDC948", "#E15759", ZONE_KIND_NEUTRAL.fallback]);
   });
 
   it("supporte les codes DUPLIQUÉS (C-186 ×2 à Salaberry) : chaque polygone décoré", () => {
-    const decorated = decorateZonesWithKindColor(zonesFC(["C-186", "C-186"]), new Set(), null);
+    const decorated = decorateZonesWithKindColor(
+      zonesFC([
+        { code: "C-186", kind: "commerce" },
+        { code: "C-186", kind: "commerce" },
+      ]),
+      new Set(),
+      null,
+    );
     expect(decorated.features).toHaveLength(2);
     expect(decorated.features[0].properties.kindColor).toBe("#E15759");
     expect(decorated.features[1].properties.kindColor).toBe("#E15759");
@@ -266,7 +285,10 @@ describe("decorateZonesWithKindColor", () => {
 
   it("surligne en vert 4+ les zones du set highlight (filtre 4+/priorité actif)", () => {
     const decorated = decorateZonesWithKindColor(
-      zonesFC(["H-1", "H-2"]),
+      zonesFC([
+        { code: "H-1", kind: "habitation" },
+        { code: "H-2", kind: "habitation" },
+      ]),
       new Set(["H1"]), // forme comparable (tirets ignorés)
       null,
     );
@@ -275,22 +297,22 @@ describe("decorateZonesWithKindColor", () => {
   });
 
   it("ne mute pas les features d'origine", () => {
-    const source = zonesFC(["H-1"]);
+    const source = zonesFC([{ code: "H-1", kind: "habitation" }]);
     decorateZonesWithKindColor(source, new Set(), null);
     expect(source.features[0].properties.kindColor).toBeUndefined();
   });
 });
 
 describe("zoneKindLegend", () => {
-  it("liste uniquement les kinds présents, dédupliqués (profil Salaberry)", () => {
+  it("liste uniquement les familles SOURCE présentes, dédupliquées (aucune entrée neutre)", () => {
     const zones = [
-      { kind: null, code: "A-118" },
-      { kind: null, code: "H-354" },
-      { kind: null, code: "H-159" },
-      { kind: null, code: "C-186" },
-      { kind: null, code: "CONS-2" },
-      { kind: null, code: "REC-11" },
-      { kind: null, code: "4052" },
+      { kind: "agricole", code: "A-118" },
+      { kind: "habitation", code: "H-354" },
+      { kind: "habitation", code: "H-159" },
+      { kind: "commerce", code: "C-186" },
+      { kind: "Conservation", code: "CONS-2" },
+      { kind: "Récréation", code: "REC-11" },
+      { kind: null, code: "4052" }, // code seul, kind absent → PAS d'entrée
     ];
     const legend = zoneKindLegend(zones, null);
     const labels = legend.map((entry) => entry.label);
@@ -299,8 +321,9 @@ describe("zoneKindLegend", () => {
     expect(labels).toContain("Agricole");
     // CONS et REC fusionnés en une seule entrée (même teinte, même libellé).
     expect(labels.filter((l) => l === "Conservation / récréation")).toHaveLength(1);
-    // Kind irrésolu → entrée neutre unique en fin de liste.
-    expect(labels[labels.length - 1]).toBe(ZONE_KIND_NEUTRAL.label);
+    // Directive owner : une zone sans famille source n'ajoute PLUS d'entrée
+    // « Type non déterminé » (aucune catégorie inventée en légende).
+    expect(labels).not.toContain(ZONE_KIND_NEUTRAL.label);
     // Aucun kind absent (industriel/mixte non présents ici).
     expect(labels).not.toContain("Industriel");
     expect(labels).not.toContain("Mixte");
