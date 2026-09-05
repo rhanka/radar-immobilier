@@ -403,6 +403,16 @@ separates; cadastral renovation → **new id + a `supersedes` edge**, never in-p
 (vintage carried); a Lot with no cadastral number → `unknown`/deferred, never a fabricated
 surrogate (anti-invention).
 
+> **BUILD DEPENDENCY (tracked, geo-jointures).** The shared `lot::` canonicalizer does **not
+> exist as a lib export yet** — geo-jointures delivers it (code + test, in `packages/geo`)
+> **when the adapter is ready to consume it**, and only after the **id-format spec**
+> (cadastre_no + authority/namespace schema + vintage encoding) is written first
+> (anti-invention — no canonicalizer without the spec). The spec + canonicalizer are a
+> **geo-jointures/geo-cond deliverable**. This gates the **geo Lot-enrichment layer only**,
+> **not** the P0 orphan-fix: E4/E5's orphan self-heal operates on the existing `::`
+> `bylaw`/`event`/`signal`/`zone` nodes and is independent of `lot::` enrichment. immo pings
+> geo-jointures/geo-cond when the adapter's Lot path is ready.
+
 ### C.3 refs / provenance format, idempotence, S3 location
 
 - **refs**: same `Ref` shape as B.2 — `{docSha, rawRef, page?, excerpt?, linkSource:
