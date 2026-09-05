@@ -326,21 +326,34 @@ produced → unaffected. **Pre-work verify**: the enrichment is deterministic-fr
 and does not depend on PG-accumulated state; any such coupling is untangled inside E4.
 
 **OQ-D4 — the shell-writer fold (immo frames the code; i-infra owns deploy/RBAC).** The two
-shells publishing the canonical via `s5cmd` (`tools/graphify-v23/gate.sh:155`,
-`tools/grounding/publish-citation-grounding.sh:52`), bypassing the guarded writer
-(`canonical-graph-writer.ts:30-34`):
+shells publish the canonical via `s5cmd cp` (`tools/graphify-v23/gate.sh` `$graph_key`;
+`tools/grounding/publish-citation-grounding.sh` `$graph`), bypassing the guarded writer
+(`canonical-graph-writer.ts:30-34`). **Cred finding (i-infra):** both carry the **broad
+`SCRAPE_S3_*` cred** — the same one `worker-live` uses — but `worker-live` writes only
+`raw/`+`parsed/`+`ontology/`+PG, **never** the canonical, so the canonical-write on that
+cred is used **only** by this bypass ⇒ safe to remove.
 
-- **Code fold (immo)**: retarget their `s5cmd` PUT from `graph/<city>/latest.json` to
-  `layers/grounding/<city>/latest.json` — they become **layer producers**, not canonical
-  writers; remove the canonical PUT. E4 then consumes `layers/grounding/` and is the single
-  canonical writer (through the guarded writer).
-- **Deploy/RBAC (i-infra)**: revoke `canonical-write` from these shells' execution SA/cred,
-  re-scope to `layers/grounding`-write only — defense-in-depth (the S3 policy refuses the
-  canonical key even if the code regresses).
-- **Sequencing (HARD)**: the fold + the RBAC revoke land **before E5-at-scale** — else a
-  concurrent shell canonical-write clobbers during the atomic. This is the sole-writer
-  pre-condition, alongside i-infra's 3-layer guarantee (RBAC-exclusive canonical-write +
-  `pg_advisory_lock` exactly-1 mesh-wide + the existing CAS `If-Match`).
+- **Code fold (immo)** — in tandem, three changes per shell:
+  1. retarget the `s5cmd cp` target from `graph/<city>/latest.json` to
+     `layers/grounding/<city>/latest.json` — the shells become **layer producers**, not
+     canonical writers;
+  2. **remove** the canonical PUT and the `graph/<city>/history/…` pre-image backup (the
+     merge-step's guarded writer owns canonical archiving now);
+  3. **tighten `publish-citation-grounding.sh`'s fail-closed prefix whitelist** from
+     `graph/*|parsed/*` to `layers/grounding/*|parsed/*` — **critical**: the current
+     `graph/*` allows the canonical key, so the fail-closed does NOT block the bypass
+     (i-infra). After the fold the shell cannot even name a `graph/…` key.
+  E4 then consumes `layers/grounding/` and is the single canonical writer (guarded writer).
+- **Deploy/RBAC (i-infra, provider-side IAM; exec = k8s/owner gate)**: scope the
+  `SCRAPE_S3` cred's S3 policy to write `{raw/, parsed/, ontology/, layers/grounding/}` and
+  **DENY `graph/`**; only the dedicated **E5-writer SA** keeps `graph/` canonical-write.
+  Defense-in-depth: the policy refuses the canonical key even if the shell code regresses.
+  (Connects to the systemic broad-per-orchestrator-cred smell — same per-job least-priv
+  discipline as `geo-s3-credentials` LOT-1.)
+- **Sequencing (HARD)**: the code fold + the RBAC revoke land **before E5-at-scale** — else
+  a concurrent shell canonical-write clobbers during the atomic. Sole-writer pre-condition,
+  alongside i-infra's 3-layer guarantee (RBAC-exclusive canonical-write + `pg_advisory_lock`
+  exactly-1 mesh-wide + the existing CAS `If-Match`). Non-blocking until E5-at-scale.
 
 ---
 
