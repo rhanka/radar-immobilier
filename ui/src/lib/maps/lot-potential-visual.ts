@@ -75,12 +75,11 @@ function scoreFromFlags(properties: Readonly<Record<string, unknown>>): number |
 
 function scoreFromZone(properties: Readonly<Record<string, unknown>>): number | null {
   const zone = readZoneObject(properties.zone);
-  const zoneCode = firstString([
-    properties.zoneCode,
-    properties.zone_code,
-    typeof properties.zone === "string" ? properties.zone : null,
-  ]);
-  const kind = zone?.kind ?? kindFromZoneCode(zoneCode);
+  // §zones (directive owner) : le potentiel de zone n'est calculé QUE depuis le
+  // `kind` SOURCE du lot. Le token du code de zone n'est PLUS dérivé en famille
+  // — un lot sans kind source ⇒ score de zone `unknown` (null), jamais une
+  // densité fabriquée à partir d'un code (« H-12 »).
+  const kind = zone?.kind ?? null;
   if (kind === null) return null;
 
   const densiteLogHa = zone?.densiteLogHa ?? fallbackDensity(kind);
