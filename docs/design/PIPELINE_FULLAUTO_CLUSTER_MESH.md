@@ -45,7 +45,8 @@ re-piloter, §6/§9.1). Socle = **SPEC_LLM_CLUSTER_MESH #627** (draft à bâtir,
    2D live navigateur→Google (activation GO#2 owner-gated, budget-guardrail owner-manuel) ; 3D **hors
    scope full-auto** (track PHOTOREAL séparé, non-ratifiable) `[FAIT source=geo-archi §SD1]`.
 3. **Couches environnementales** : CPTAQ **servi** (4 villes préprod, agricole-only) ; BDZI (zones
-   inondables) + GRHQ (hydrographie) = **NOT_ACQUIRED**, **serving GATÉ** sur audit tier-2 (runner G02)
+   inondables) + GRHQ (hydrographie) = **NOT_ACQUIRED** ; **BDZI** ready/low-effort (621 polygones,
+   §7-style, PAS tier-2) ; **GRHQ** gaté design paged-vs-bulk (geo-archi)
    `[FAIT source=geo-zones (iii), immo §2]`.
 4. **Zones réglementaires en vigueur** : acquisition SIG geo (ArcGIS/WFS) → OGC servi ; **868/1106**
    collections servies, 238 absentes ; **zone_code = code bylaw RÉEL verbatim source** (jamais dérivé
@@ -145,6 +146,9 @@ geo A.1 (DAG-first) `[FAIT source=immo §3, geo-socle (ii)]`.
   vs mtime raw (récence scrape). Le source-gap fraîcheur (non-mesurable rétro) devient mesurable en avant
   `[FAIT source=k8s §4]`. **Rétention `raw/`** (PVC 40Gi ~64%) : politique archive cold-S3 / prune
   post-canonical-write nécessaire `[FAIT source=k8s §3]`.
+- **Netpol serving/writer cross-cluster PAR RÔLE** : default-deny préservé + allows par rôle (writer→PG +
+  MinIO-partagé en WRITE ; geo-api per-cluster→PG/S3 en READ) ; impl = identité service-mesh + mTLS si CNI
+  ClusterMesh, sinon ipBlock scopé. ⟨i-infra §10(b), geo-socle⟩
 
 ⟨i-infra, k8s, geo-socle, geo-archi⟩
 
@@ -175,7 +179,10 @@ entrées S3 par couche (worker-live n'en écrit aucune aujourd'hui) `[FAIT sourc
 garde (`canonical-graph-writer.ts:30-34`) ⟹ 3 écrivains, invariant sole-writer **VIOLÉ**. Fix : (code, immo)
 re-cibler leur PUT vers `layers/grounding/` → producteurs de couche ; (deploy/RBAC, i-infra) **révoquer**
 le canonical-write de leur SA. **À séquencer AVANT E5-at-scale** — sinon un write concurrent clobbe pendant
-l'atomic `[FAIT source=i-arch A1/B.9 OQ-D4, i-infra §11]`.
+l'atomic `[FAIT source=i-arch A1/B.9 OQ-D4, i-infra §11]`. **Catch whitelist** : la garde fail-closed de
+`publish-citation-grounding.sh` autorise `graph/*|parsed/*` — or `graph/*` INCLUT la clé canonical → le
+fail-closed NE bloque PAS le bypass ; le fold DOIT la resserrer à `layers/grounding/*|parsed/*` (+ retirer
+le PUT canonical et le backup `graph/*/history/`).
 
 **Garantie sole-writer mesh-wide = 3 couches (i-infra)** : (1) **RBAC** canonical-write exclusif au SA du
 merge+write ; (2) **`pg_advisory_lock`** sur le PG partagé (point de coordination cross-cluster) tenu pour
@@ -370,11 +377,11 @@ terme) · Job détection LLM (E2, câblé mesh) · Job grounding LLM (E3, stage 
 
 ## 11. CONTRADICTIONS / tensions inter-sections (non masquées)
 
-1. **Argo — statut divergent.** `⟨k8s⟩` (commit 9057f23) liste encore « Argo Workflows/Events vs
+1. **Argo — RÉSOLU (statut divergent, k8s périmé).** `⟨k8s⟩` (commit 9057f23) liste encore « Argo Workflows/Events vs
    CronJob-fan-out » en **question ouverte #1** et évoque « Argo Events / queue » pour l'event-driven v2.
    `⟨i-infra⟩`, `⟨geo-archi⟩`, `⟨immo⟩` : **Argo TRANCHÉ NON** (s3-dag D-moteur-1 ratifié). **Résolution
    retenue = Argo écarté** ; `⟨k8s⟩` prédate la ratification. *(Non-bloquant : simple péremption.)*
-2. **Projection S3→PG vs feed PG direct comme écrivain cible.** `⟨k8s⟩` §0/§1/§5 : le full-auto **bâtit sur
+2. **Projection S3→PG vs feed PG direct comme écrivain cible — RÉSOLU.** `⟨k8s⟩` §0/§1/§5 : le full-auto **bâtit sur
    le direct-PG-feed #629/#626 via le writer atomique**, « **PAS d'étage projection S3→PG** (input-starved,
    vestigial) ». `⟨i-arch⟩`/`⟨immo⟩`/`⟨i-infra⟩` : **E5 = `project-graph-from-s3` → `upsertGraphAtomic`**
    (le **script de projection réutilisé** à l'échelle, alimenté par E4), et le **feed direct est l'interim
@@ -382,10 +389,14 @@ terme) · Job détection LLM (E2, câblé mesh) · Job grounding LLM (E3, stage 
    destination ; les autres comme le pont à supprimer. **Réconciliation** : les deux décrivent le même
    dual-write P0 ; la cible canonique = E4→E5 (projection alimentée), pas le feed direct. À harmoniser dans
    la comm : le mot « projection » désigne le **script** E5 (conservé), pas la forme input-starved (retirée).
-3. **Décompte des orphelins legacy.** `⟨i-arch⟩`/CLEANUP = **10 234** orphelins Q1 / 479 villes ; `⟨k8s⟩` =
-   **~33k** orphelins `type-slug-ref` vs `type::slug::ref` (+ 953 nœuds « stub » servi-stale). Périmètres
-   probablement différents (Q1 supersédés vs total legacy dé-schéma) mais **non réconciliés** → `source-gap`
-   sur le chiffre exact ; le mécanisme de fix (intendedRemovals + garde purge 2-dimensions) est, lui, aligné.
+3. **Décompte des orphelins legacy — RÉCONCILIÉ (closure exacte, mesure k8s).** 33 077 nœuds legacy
+   `::`-less (total) = **10 234 Q1 orphelins-supersédés** (villes AYANT une projection `::` = la
+   cible-purge) + **21 823 Q2 coverage-gap** (0-`::`, canonique legacy-only → re-projeter/gouverner,
+   **PAS** des orphelins) + **1 020 `mention:`** (today, courants). 10 234+21 823+1 020 = 33 077 ✓. Donc
+   « orphelins » au sens PURGE = **10 234** ; le ~33k = la population legacy-scheme TOTALE (pas « tous
+   orphelins ») ; les 953 « stubs » = sous-ensemble de Q2 (0 removable, legacy-uncited à contenu réel), pas
+   un ajout. Cible delete réelle ⊆ 10 234, gatée props.properties + hasServableSource + couverture docSha.
+   **Pas un source-gap.** ⟨i-arch/immo, k8s⟩
 4. **Serving mesh — révision interne i-infra (résolue, pas une contradiction).** `⟨i-infra⟩` §7 penchait
    « single + mesh-routed », puis §10(a) **révise en per-cluster répliqué** (invariant data-déjà-partagée) ;
    `⟨geo-socle⟩` Q3 adopte per-cluster. **Convergé.** *(Signalé pour traçabilité du revirement.)*
