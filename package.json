@@ -24,6 +24,9 @@
     "vite": "^6.4.3",
     "@sentropic/geo-map-engine": {
       "@sentropic/geo-core": "0.6.0"
+    },
+    "officeparser": {
+      "pdfjs-dist": "npm:empty-npm-package@1.0.0"
     }
   },
   "scripts": {
