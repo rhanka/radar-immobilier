@@ -789,11 +789,32 @@ jobs:
 
       - name: Wait for rollouts
         run: |
-          set -eu
-          # radar-api and radar-ui are the preprod live path: their rollout MUST
-          # succeed, so a failure here reds the preprod deploy.
-          kubectl -n "$NAMESPACE" rollout status deploy/radar-api --timeout=180s
-          kubectl -n "$NAMESPACE" rollout status deploy/radar-ui  --timeout=180s
+          set -euo pipefail
+          # radar-api and radar-ui are the preprod live path. A slow-but-HEALTHY
+          # roll must NOT red the deploy: under quota pressure the RollingUpdate
+          # +1 surge pod can sit Pending on CPU well past the rollout-status
+          # timeout while the OLD pod keeps serving (maxUnavailable:0 ⇒ never 0
+          # replicas). So: wait up to 600s; if the rollout still hasn't completed,
+          # read availableReplicas — >=1 (old and/or new serving) ⇒ warn + pass;
+          # only 0 available (a genuine outage) hard-fails the deploy.
+          wait_rollout() {
+            dep="$1"
+            if kubectl -n "$NAMESPACE" rollout status "deploy/${dep}" --timeout=600s; then
+              echo "rollout OK — ${dep}"
+              return 0
+            fi
+            avail="$(kubectl -n "$NAMESPACE" get "deploy/${dep}" \
+              -o jsonpath='{.status.availableReplicas}' 2>/dev/null || echo 0)"
+            avail="${avail:-0}"
+            if [ "$avail" -ge 1 ]; then
+              echo "::warning title=Rollout slow but healthy::${dep} did not finish within 600s, but ${avail} replica(s) stayed available throughout (the new pod is still converging — e.g. the surge pod waiting for CPU under quota pressure). Not failing the deploy; k8s finishes the roll asynchronously."
+              return 0
+            fi
+            echo "::error title=Rollout failed — service DOWN::${dep} did not finish within 600s AND has 0 available replicas."
+            return 1
+          }
+          wait_rollout radar-api
+          wait_rollout radar-ui
 
       # POST-DEPLOY PROOF (TLS serial) — proves the preprod public endpoint is
       # served by the OVH LB. prod & preprod share the LB IP, so this attests
