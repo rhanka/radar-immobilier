@@ -803,14 +803,33 @@ jobs:
               echo "rollout OK — ${dep}"
               return 0
             fi
-            avail="$(kubectl -n "$NAMESPACE" get "deploy/${dep}" \
-              -o jsonpath='{.status.availableReplicas}' 2>/dev/null || echo 0)"
-            avail="${avail:-0}"
+            comp="${dep#radar-}"   # radar-api -> api, radar-ui -> ui
+            updated="$(kubectl -n "$NAMESPACE" get "deploy/${dep}" -o jsonpath='{.status.updatedReplicas}' 2>/dev/null || echo 0)"; updated="${updated:-0}"
+            desired="$(kubectl -n "$NAMESPACE" get "deploy/${dep}" -o jsonpath='{.spec.replicas}' 2>/dev/null || echo '?')"
+            avail="$(kubectl -n "$NAMESPACE" get "deploy/${dep}" -o jsonpath='{.status.availableReplicas}' 2>/dev/null || echo 0)"; avail="${avail:-0}"
+            echo "rollout timeout — ${dep}: updatedReplicas=${updated}/${desired}, availableReplicas=${avail}"
+            # HARD-FAIL if the NEW revision cannot become ready — otherwise
+            # availableReplicas>=1 (the OLD pod still serving STALE code) would
+            # silently pass. Inspect NOT-READY pods only (a ready old pod is
+            # excluded); a terminal/stuck container reason ⇒ broken new pod, while
+            # a Pending pod (Unschedulable / no CPU) has no such reason ⇒ the #620
+            # slow-but-healthy case.
+            bad="$(kubectl -n "$NAMESPACE" get pods -l "app.kubernetes.io/component=${comp}" -o json 2>/dev/null \
+              | jq -r '.items[]
+                  | select([.status.containerStatuses[]? | select(.ready == true)] | length == 0)
+                  | .status.containerStatuses[]?
+                  | (.state.waiting.reason // ""), (.lastState.terminated.reason // "")' \
+              | grep -Ew 'CrashLoopBackOff|ImagePullBackOff|ErrImagePull|InvalidImageName|CreateContainerError|OOMKilled|Error' \
+              | sort -u | paste -sd, - || true)"
+            if [ -n "$bad" ]; then
+              echo "::error title=Rollout failed — new pod unhealthy::${dep}: the new revision cannot become ready [${bad}] — the old pod would keep serving STALE code. updatedReplicas=${updated}/${desired}."
+              return 1
+            fi
             if [ "$avail" -ge 1 ]; then
-              echo "::warning title=Rollout slow but healthy::${dep} did not finish within 600s, but ${avail} replica(s) stayed available throughout (the new pod is still converging — e.g. the surge pod waiting for CPU under quota pressure). Not failing the deploy; k8s finishes the roll asynchronously."
+              echo "::warning title=Rollout slow but healthy::${dep} did not finish within 600s, but ${avail} replica(s) stayed available and no crash/imagepull/OOM on any pod (the new pod is Pending — e.g. Unschedulable / waiting for CPU under quota). Not failing; k8s finishes the roll asynchronously. updatedReplicas=${updated}/${desired}."
               return 0
             fi
-            echo "::error title=Rollout failed — service DOWN::${dep} did not finish within 600s AND has 0 available replicas."
+            echo "::error title=Rollout failed — service DOWN::${dep}: 0 available replicas after 600s. updatedReplicas=${updated}/${desired}."
             return 1
           }
           wait_rollout radar-api
