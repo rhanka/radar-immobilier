@@ -79,6 +79,40 @@ describe("buildRawDocumentRecord", () => {
     expect(rec.provenance.viaObscura).toBe(false);
   });
 
+  // STREAMING INVARIANT (worker-live memory): a RawDocumentRecord is a metadata
+  // row and MUST NOT carry the raw bytes. `buildRawDocumentRecord` consumes
+  // `input.body` only to compute `sha256` + `bytesLen`; the bytes live in S3
+  // under `storageKey` and EXPLOITATION re-reads them per-doc. If a future
+  // refactor added a `body` field (or switched the schema to `.passthrough()`),
+  // whole-city byte retention would silently return and the all-cities run's
+  // memory would accumulate instead of plateauing. This guard fails loudly if
+  // that regresses — do NOT "fix" it by reintroducing `body` on the record.
+  it("does not carry raw bytes: record has no `body` key (streaming invariant)", () => {
+    const rec = buildRawDocumentRecord({
+      source: "avis-publics-valleyfield",
+      sourceUrl: "https://www.ville.valleyfield.qc.ca/avis-publics",
+      body,
+      fetchedAt: "2026-06-08T09:30:00.000Z",
+      contentType: "text/html; charset=utf-8",
+      provenance: PROVENANCE,
+    });
+
+    // No `body` (raw bytes) on the record — the bytes stay in S3 only.
+    expect(Object.keys(rec)).not.toContain("body");
+    expect((rec as unknown as { body?: unknown }).body).toBeUndefined();
+
+    // The byte payload's identity/size IS captured (as metadata, not bytes):
+    // bytesLen matches the source length, sha256 is a valid digest, and the
+    // storageKey that points at the S3 bytes is present.
+    expect(rec.bytesLen).toBe(body.byteLength);
+    expect(rec.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(rec.sha256).toBe(sha256Hex(body));
+    expect(rec.storageKey).toBe(
+      `raw/avis-publics-valleyfield/cas/${rec.sha256}.html`,
+    );
+    expect(rec.storageKey.length).toBeGreaterThan(0);
+  });
+
   it("is idempotent: byte-identical content yields the same id + key", () => {
     const a = buildRawDocumentRecord({
       source: "avis-publics-valleyfield",
