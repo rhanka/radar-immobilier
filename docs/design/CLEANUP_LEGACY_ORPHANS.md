@@ -46,6 +46,11 @@ For each `citySlug` in `has_new` (cities with ≥1 `::` node):
    `intendedRemovals` and record it as **uncovered-legacy** → a partial-re-projection
    signal (see §5, feeds the coverage-gap/item-2 workstream, e.g. the `lac-frontiere`
    658-node outlier).
+   Coverage is at the **docSha/rawRef level** — the anti-data-loss invariant: a source PV
+   is preserved iff the `::` projection carries the same docSha. **Page/excerpt fidelity**
+   (same page, verbatim text) is a *separate citation-quality* concern, **not** a purge
+   blocker (recette adjudicates it apart if wanted) — losing a page-anchor does not lose
+   the source, so it does not gate the purge.
 3. **Purge** = call `upsertGraphAtomic(db, C, cProjection, intendedRemovals = safePurgeIds)`.
    `intendedRemovals` exempts those ids from gate1 (business-props) and gate3 (source-refs),
    so the atomic's step-3 deletes them **without aborting**. **gate2 (completeness) is NOT
