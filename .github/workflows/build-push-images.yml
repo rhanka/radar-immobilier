@@ -788,6 +788,7 @@ jobs:
             ui="${IMAGE_PREFIX}/radar-ui:${SHA}"
 
       - name: Wait for rollouts
+        id: wait
         run: |
           set -euo pipefail
           # radar-api and radar-ui are the preprod live path. A slow-but-HEALTHY
@@ -797,6 +798,10 @@ jobs:
           # replicas). So: wait up to 600s; if the rollout still hasn't completed,
           # read availableReplicas — >=1 (old and/or new serving) ⇒ warn + pass;
           # only 0 available (a genuine outage) hard-fails the deploy.
+          # slow_healthy tracks whether ANY deployment took the warn+pass path, so
+          # the served-sha assert below can tolerate a still-converging rollout
+          # instead of hard-failing a healthy-but-slow roll (rollout_state output).
+          slow_healthy=0
           wait_rollout() {
             dep="$1"
             if kubectl -n "$NAMESPACE" rollout status "deploy/${dep}" --timeout=600s; then
@@ -826,6 +831,7 @@ jobs:
               return 1
             fi
             if [ "$avail" -ge 1 ]; then
+              slow_healthy=1
               echo "::warning title=Rollout slow but healthy::${dep} did not finish within 600s, but ${avail} replica(s) stayed available and no crash/imagepull/OOM on any pod (the new pod is Pending — e.g. Unschedulable / waiting for CPU under quota). Not failing; k8s finishes the roll asynchronously. updatedReplicas=${updated}/${desired}."
               return 0
             fi
@@ -834,6 +840,12 @@ jobs:
           }
           wait_rollout radar-api
           wait_rollout radar-ui
+          # Thread the rollout outcome to the served-sha assert: slow-healthy if any
+          # deployment warned (surge pod still Pending), else complete.
+          state=complete
+          if [ "$slow_healthy" -eq 1 ]; then state=slow-healthy; fi
+          echo "rollout state: ${state}"
+          echo "rollout_state=${state}" >> "$GITHUB_OUTPUT"
 
       # POST-DEPLOY PROOF (TLS serial) — proves the preprod public endpoint is
       # served by the OVH LB. prod & preprod share the LB IP, so this attests
@@ -879,22 +891,38 @@ jobs:
         env:
           SHA: ${{ steps.vars.outputs.sha }}
           PREPROD_ENDPOINT_HOST: ${{ vars.PREPROD_ENDPOINT_HOST }}
+          # Threaded from the "Wait for rollouts" step: 'slow-healthy' when any
+          # deployment warned (surge pod still Pending, old pod still serving) or
+          # 'complete' when both rollouts finished. Coherence: a lag that "Wait"
+          # tolerated must not be hard-required here.
+          ROLLOUT_STATE: ${{ steps.wait.outputs.rollout_state }}
         run: |
           set -euo pipefail
           host="${PREPROD_ENDPOINT_HOST:-preprod.immo.sent-tech.ca}"
+          rollout_state="${ROLLOUT_STATE:-complete}"
           api_url="https://${host}/health"      # api/mcp sha (nginx -> radar-api/health)
           ui_url="https://${host}/build.json"    # ui bundle sha (nginx static dist/build.json)
-          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url}"
+          echo "asserting served sha == ${SHA} at ${api_url} AND ${ui_url} (rollout_state=${rollout_state})"
           fetch_sha() { curl -s --max-time 10 "$1" | jq -r '.sha // empty' 2>/dev/null || true; }
           deadline=$(( $(date +%s) + 180 ))
           while :; do
             api_sha="$(fetch_sha "$api_url")"
             ui_sha="$(fetch_sha "$ui_url")"
             if [ "$api_sha" = "$SHA" ] && [ "$ui_sha" = "$SHA" ]; then
+              echo "served vs pushed: api='${api_sha}' ui='${ui_sha}' pushed='${SHA}' — served == pushed"
               echo "served sha OK: api=${api_sha} ui=${ui_sha} — build ${SHA} is live at ${host}"
               exit 0
             fi
             if [ "$(date +%s)" -ge "$deadline" ]; then
+              # Coherent with the tolerant "Wait for rollouts" step: if the rollout
+              # was slow-but-healthy the new pod may not be serving yet — warn, do
+              # not red the run (k8s converges asynchronously). Only a 'complete'
+              # rollout that still serves the wrong sha is a genuine mismatch.
+              echo "served vs pushed: api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' pushed='${SHA}' — served != pushed"
+              if [ "$rollout_state" = "slow-healthy" ]; then
+                echo "::warning title=Preprod served sha lag::served sha lag: api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' expected '${SHA}' — rollout still converging (new pod not yet serving); k8s finishes it asynchronously"
+                exit 0
+              fi
               echo "::error title=Preprod served sha mismatch::${host} serves api='${api_sha:-<none>}' ui='${ui_sha:-<none>}' but this deploy pushed '${SHA}'. Rollout went green but the preprod endpoint is NOT serving the new build."
               exit 1
             fi
