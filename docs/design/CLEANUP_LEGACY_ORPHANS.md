@@ -102,14 +102,20 @@ user-facing concern, not fixed by this cleanup.
     grand-remous 2073, chibougamau 2016, lyster 1924, baie-des-sables 1610, laurierville
     1575, dunham 1101…). Config-active cities stuck in June → **the material freshness
     item**. Fix = re-project (`worker-live --reexploit` when raw is in S3, else re-scrape).
-    Several are **grounded-real** (real citations, old) → re-projection PRESERVES them
-    (gate3 / content-coverage), never deletes.
+    Their PG state is normal (stale) detection — a fresh re-projection reproduces and
+    supersedes it (content-covered); the content-coverage gate still protects any docSha a
+    fresh re-projection would not re-carry.
   - **DROPPED: 487 cities / 7,621 nodes** (thin, ~16/city) — out-of-config munis → owner
-    governance (serve/archive/purge; Option B hides them, preserving grounded-real).
+    governance (serve/archive/purge; Option B hides them, preserving the published-grounded
+    flagship sainte-martine).
   - **SERVED-STALE (user-facing)**: 320 cities / 4,158 Signal/DE nodes surfaced by the
-    reader (in-config 32c/2,389n; dropped 288c/1,769n). True "unintentional stale" is
-    smaller — exclude sainte-martine (canonical) + grounded-real (grand-remous/lyster… =
-    old-but-real → re-project, don't hide); recette adjudicates the exact `grounded ∩ 320`.
+    reader (in-config 32c/2,389n; dropped 288c/1,769n). Net **unintentional stale = 319**
+    (320 − sainte-martine, the only **published-grounded** city — `graph/latest.json`=1, and
+    itself out-of-config). Caveat: 302/320 have `props.refs` (docSha citations) = the
+    **normal** projected state (r4 detection cites its PV), **not** grounding — do NOT
+    subtract it. The **18 contentless** (Signal/DE with no refs) are stubs → a separate
+    **data-quality** item (non-grounding). recette's certified grounded cohort are
+    staged/held candidates never projected to preprod → they do not reduce the 320.
 - **Distinct-slug puzzle** (recette): **1010** distinct `city_slug` (479 Q1 + 530 Q2 + 1
   `mention:`-only slug) vs 528 config → ~482 extra — accumulated historical munis and/or
   renamed slugs (a dedup / slug-identity question, geo/scoping territory), to elucidate
@@ -138,16 +144,22 @@ Options (owner/serving decision — designed, not chosen here):
 - **Option C — timestamp freshness**: serve only nodes/cities projected within N days
   (needs a reliable projected-at; heavier, not required if B suffices).
 
-**Recommendation**: Option **B**, refined to `has-:: OR grounded-real` per city — one
+**Recommendation**: Option **B**, refined to `has-:: OR published-grounded` per city — one
 predicate, per-city, non-destructive.
 
-**PRESERVE GROUNDED-REAL (a correctness constraint).** A naive `has-::`-only predicate
-would hide **grounded-real** cities that are still legacy-only (0 `::`) — e.g. grand-remous
-(322 real citations) and lyster (392), which are grounded-in-PG but not yet re-projected.
-Hiding them would suppress **real** data. So the predicate must serve a city when it has a
-`::` projection **OR** carries real citations (a Signal/DesignationEvent node with a real
-docSha in `props.refs`). "grounded" here means *has real refs in PG*, which is distinct
-from *has `graph/latest.json`* (only sainte-martine in preprod) and from *canonical Q2*.
+**Don't hide the published-grounded flagship.** A `has-::`-only predicate would hide every
+legacy-only (0 `::`) city, including the one **published-grounded** city — sainte-martine
+(`graph/latest.json` present; it is also out-of-config, see §7). That is intentional
+canonical data. So serve a city when it has a `::` projection **OR** is published-grounded
+(`graph/latest.json` present).
+
+**NOT keyed on `refs>0`.** 302/320 served-stale cities have `props.refs` (docSha citations)
+— but that is the **normal projected-graph state** (r4 detection cites its source PV), not
+grounding; keying preservation on `refs>0` would serve ~everything and defeat the filter.
+The stale in-config cities (grand-remous, lyster: real June citations, but OLD) are
+correctly hidden by Option B *until re-projected* — the coupling (re-project in-config
+first) then restores them fresh with `::`. Their staged/held grounding candidates (recette's
+cohort, never projected to preprod) are unaffected by a preprod serving filter.
 
 **HARD COUPLING (mandatory ordering — a correctness constraint, not a nicety).** Option B
 alone would make the **in-config cities that have no `::` yet DISAPPEAR** from the feed
