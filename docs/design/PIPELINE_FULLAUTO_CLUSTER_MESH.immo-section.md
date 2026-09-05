@@ -346,7 +346,10 @@ shells publishing the canonical via `s5cmd` (`tools/graphify-v23/gate.sh:155`,
 
 ## C. Deliverable 2 — geo→graph feeding CONTRACT
 
-> **PROPOSED — pending geo-cond co-sign.** immo proposes the seam so geo's three lanes
+> **CO-SIGN STATUS**: OQ-G1/G2 (geo-jointures) + OQ-G3/G4 (geo-zones) **co-signed, ratified
+> geo-cond**. The **consolidated** geo co-sign (complete node-type-ownership map + layer
+> versioning across lanes) is pending the **geo-archi extraction-contract semver** (last
+> piece, driven by geo-cond). immo proposes the seam so geo's three lanes
 > (satellite / env / zones) feed the canonical merge (E4). Grounded against existing code.
 >
 > **Ratified frontier (backbone §8, `geo:SPEC_GEO_ENV_CONSTRAINTS_S9.md §1`): geo =
