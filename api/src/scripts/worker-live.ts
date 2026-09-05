@@ -10,7 +10,21 @@
  *   tsx src/scripts/worker-live.ts                 # all config-only cities
  *   tsx src/scripts/worker-live.ts carignan delson # a subset
  *   tsx src/scripts/worker-live.ts --chunk 2/5     # shard 2 of 5 (batch launch)
+ *   tsx src/scripts/worker-live.ts --reexploit     # replay exploitation, NO scrape
  *   LIVE_SCRAPE_LIMIT=2 tsx src/scripts/worker-live.ts carignan
+ *
+ * PG FEED: when EXPLOITATION runs (either `LIVE_SCRAPE_EXPLOIT=1` or
+ * `--reexploit`), the worker builds a Drizzle DB handle and threads it into the
+ * exploitation graph-feed so the per-city graph is upserted into Postgres
+ * (`upsertGraph`, provenance-preserving union). The handle is FAIL-LOUD: a
+ * connectivity ping runs first and the process exits(1) if Postgres is
+ * unreachable — a requested exploit/reexploit run must never silently skip PG.
+ *
+ * `--reexploit` runs EXPLOITATION from ALREADY-STORED raw/parsed (no network
+ * scrape): for each requested city it reconstructs the stored records from the
+ * object store and replays PARSE + EXPLOITATION + the PG feed. It composes with a
+ * slug list / `--chunk`. Because reexploit is pointless without PG, it always
+ * builds the DB handle (same fail-loud contract as an exploit run).
  *
  * Env:
  *   LIVE_SCRAPE_LIMIT    optional per-city cap on the number of docs collected.
@@ -19,10 +33,13 @@
  *                        + project the real DesignationEvents into the per-city
  *                        project-state (`ontology/{city}/project-state.json`),
  *                        i.e. the key the Signaux view reads. Off by default.
+ *                        Ignored when `--reexploit` is passed (reexploit already
+ *                        implies exploitation).
  */
 import { isPdftotextAvailable } from "@radar/sources";
 
 import { loadConfig } from "../config.js";
+import { createDb, type DbHandle } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "../services/sources/live-scrape.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
@@ -35,23 +52,31 @@ import { getScrapeObjectStore } from "../storage/s3-object-store.js";
  *                                     the full config-only list (batch launching:
  *                                     N parallel jobs run --chunk 1/N … N/N).
  * `--chunk` and an explicit slug list are mutually exclusive. On a malformed
- * `--chunk` we exit(2) rather than silently scraping the wrong set.
+ * `--chunk` we exit(2) rather than silently scraping the wrong set. `--reexploit`
+ * is an independent flag that composes with either selection (slug list or
+ * `--chunk`); it flips the run into no-scrape replay mode.
  */
-function resolveTargets(): { slugs: string[] | undefined; label: string } {
+function resolveTargets(): {
+  slugs: string[] | undefined;
+  label: string;
+  reexploit: boolean;
+} {
   const args = process.argv.slice(2);
   const positional: string[] = [];
   let chunkSpec: string | undefined;
+  let reexploit = false;
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
     if (a === "--chunk") chunkSpec = args[++i];
     else if (a.startsWith("--chunk=")) chunkSpec = a.slice("--chunk=".length);
+    else if (a === "--reexploit") reexploit = true;
     else positional.push(a);
   }
 
   if (chunkSpec === undefined) {
     return positional.length > 0
-      ? { slugs: positional, label: `${positional.length} city(ies)` }
-      : { slugs: undefined, label: "all-config-only" };
+      ? { slugs: positional, label: `${positional.length} city(ies)`, reexploit }
+      : { slugs: undefined, label: "all-config-only", reexploit };
   }
 
   if (positional.length > 0) {
@@ -71,22 +96,30 @@ function resolveTargets(): { slugs: string[] | undefined; label: string } {
   }
   const all = configOnlyCitySlugs();
   const slugs = citiesChunk(all, k, n);
-  return { slugs, label: `chunk ${k}/${n} (${slugs.length}/${all.length} cities)` };
+  return {
+    slugs,
+    label: `chunk ${k}/${n} (${slugs.length}/${all.length} cities)`,
+    reexploit,
+  };
 }
 
-async function main(): Promise<void> {
+async function main(): Promise<number> {
   const config = loadConfig();
   const logger = createLogger(config.LOG_LEVEL);
   const store = getScrapeObjectStore(config);
 
-  const { slugs, label } = resolveTargets();
+  const { slugs, label, reexploit } = resolveTargets();
   const limitEnv = process.env.LIVE_SCRAPE_LIMIT;
   const limit = limitEnv ? Number.parseInt(limitEnv, 10) : undefined;
   const exploitEnv = (process.env.LIVE_SCRAPE_EXPLOIT ?? "").toLowerCase();
-  const exploit = exploitEnv === "1" || exploitEnv === "true";
+  // `--reexploit` implies exploitation; a plain exploit run is opt-in via env.
+  const exploit = reexploit || exploitEnv === "1" || exploitEnv === "true";
+  // The PG feed is wired whenever EXPLOITATION runs (exploit OR reexploit): the
+  // graph-feed only fires when `runExploitation` receives a `db` handle.
+  const wantDb = exploit || reexploit;
 
   logger.info(
-    { cities: label, limit, exploit },
+    { cities: label, limit, exploit, reexploit },
     "worker-live: starting live PV scrape",
   );
 
@@ -104,38 +137,78 @@ async function main(): Promise<void> {
     );
   }
 
-  const recap = await runLiveScrape(slugs, {
-    store,
-    ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
-    ...(exploit ? { exploit: true } : {}),
-    // Stream per-city progress AS each city finishes — no more "0 lines until the
-    // final recap" on a long all-cities run. (Observability only; it does not
-    // bound the per-city memory working set — see the memory follow-up.)
-    onCity: (r) =>
-      logger.info(
-        {
-          city: r.city,
-          status: r.status,
-          docs: r.count,
-          signals: r.signals,
-          error: r.error ?? r.exploitError,
-        },
-        `worker-live: ${r.city} → ${r.status}`,
-      ),
-  });
+  // PG FEED (Part 1): when EXPLOITATION runs, build the DB handle and thread it
+  // into the exploitation graph-feed so the per-city graph is upserted into
+  // Postgres. FAIL-LOUD: ping Postgres first; if it is unreachable, exit(1)
+  // rather than silently skipping the DB (the whole point of this run).
+  let handle: DbHandle | undefined;
+  try {
+    if (wantDb) {
+      handle = createDb(config);
+      try {
+        await handle.pool.query("select 1");
+      } catch (err) {
+        logger.error(
+          { err: err instanceof Error ? err.message : String(err) },
+          "worker-live: Postgres connectivity ping FAILED — refusing to run a " +
+            "PG-feed job that would silently skip the DB. Check POSTGRES_* config " +
+            "and that Postgres is reachable.",
+        );
+        return 1; // finally closes the pool, then main's caller exits(1)
+      }
+    }
 
-  const errors = recap.filter((r) => r.status === "error");
-  const newCount = recap.filter((r) => r.status === "new").length;
-  const seenCount = recap.filter((r) => r.status === "seen").length;
-  logger.info(
-    { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length },
-    "worker-live: done",
-  );
+    const recap = await runLiveScrape(slugs, {
+      store,
+      ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
+      ...(exploit ? { exploit: true } : {}),
+      ...(reexploit ? { reexploit: true } : {}),
+      ...(handle ? { db: handle.db } : {}),
+      // Stream per-city progress AS each city finishes — no more "0 lines until the
+      // final recap" on a long all-cities run. (Observability only; it does not
+      // bound the per-city memory working set — see the memory follow-up.)
+      onCity: (r) =>
+        logger.info(
+          {
+            city: r.city,
+            status: r.status,
+            docs: r.count,
+            signals: r.signals,
+            error: r.error ?? r.exploitError,
+          },
+          `worker-live: ${r.city} → ${r.status}`,
+        ),
+    });
 
-  process.exit(errors.length > 0 ? 1 : 0);
+    const errors = recap.filter((r) => r.status === "error");
+    const newCount = recap.filter((r) => r.status === "new").length;
+    const seenCount = recap.filter((r) => r.status === "seen").length;
+    // Cities whose exploitation ran to completion (signals projected, no
+    // exploit error) — i.e. those whose graph was fed to PG when a db was used.
+    const upserted = recap.filter(
+      (r) => r.signals !== undefined && r.exploitError === undefined,
+    ).length;
+
+    logger.info(
+      { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length },
+      "worker-live: done",
+    );
+    logger.info(
+      handle ? { upserted } : {},
+      handle ? `PG feed: ON (${upserted} cities upserted)` : "PG feed: OFF",
+    );
+
+    return errors.length > 0 ? 1 : 0;
+  } finally {
+    // Always release the pool (both success and error paths) so the process can
+    // exit cleanly instead of hanging on an open connection.
+    if (handle) await handle.pool.end();
+  }
 }
 
-main().catch((err) => {
-  console.error("worker-live: fatal", err);
-  process.exit(1);
-});
+main()
+  .then((code) => process.exit(code))
+  .catch((err) => {
+    console.error("worker-live: fatal", err);
+    process.exit(1);
+  });
