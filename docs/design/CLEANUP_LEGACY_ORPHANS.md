@@ -96,11 +96,20 @@ user-facing concern, not fixed by this cleanup.
 
 ## 7. Out of scope (flagged, not addressed here)
 
-- **Coverage-gap / item 2** (owner): 530 canonical legacy-only cities / 21,823 nodes —
-  serve/archive/purge/re-project policy. Some are **served stale** to users
-  (`listCitiesWithSignalNodes`, no config/freshness filter). Re-projection path for the
-  in-config subset (~93 error-source): `worker-live --reexploit <cities>` when raw is
-  present in S3, else a re-scrape.
+- **Coverage-gap / item 2** (owner) — measured (k8s RO), 530 legacy-only cities / 21,823
+  nodes, split:
+  - **IN-CONFIG DEBT: 43 cities / 14,202 nodes** (65% of the legacy mass; dense, ~330/city:
+    grand-remous 2073, chibougamau 2016, lyster 1924, baie-des-sables 1610, laurierville
+    1575, dunham 1101…). Config-active cities stuck in June → **the material freshness
+    item**. Fix = re-project (`worker-live --reexploit` when raw is in S3, else re-scrape).
+    Several are **grounded-real** (real citations, old) → re-projection PRESERVES them
+    (gate3 / content-coverage), never deletes.
+  - **DROPPED: 487 cities / 7,621 nodes** (thin, ~16/city) — out-of-config munis → owner
+    governance (serve/archive/purge; Option B hides them, preserving grounded-real).
+  - **SERVED-STALE (user-facing)**: 320 cities / 4,158 Signal/DE nodes surfaced by the
+    reader (in-config 32c/2,389n; dropped 288c/1,769n). True "unintentional stale" is
+    smaller — exclude sainte-martine (canonical) + grounded-real (grand-remous/lyster… =
+    old-but-real → re-project, don't hide); recette adjudicates the exact `grounded ∩ 320`.
 - **Distinct-slug puzzle** (recette): **1010** distinct `city_slug` (479 Q1 + 530 Q2 + 1
   `mention:`-only slug) vs 528 config → ~482 extra — accumulated historical munis and/or
   renamed slugs (a dedup / slug-identity question, geo/scoping territory), to elucidate
@@ -124,14 +133,21 @@ Options (owner/serving decision — designed, not chosen here):
   (`configOnlyCitySlugs()`). Hides out-of-config dropped cities. **Limit**: the in-config
   error-source (~93) are still served stale (they ARE in config, just un-re-projected).
 - **Option B — id-scheme freshness (has-`::` per city)**: serve a city only if it has a
-  `::` projection. Hides **all** Q2 (dropped + error-source) until re-projected. Simplest
-  per-city predicate; the in-config ~93 become *absent* rather than *stale-wrong* (arguably
-  better) pending re-projection.
+  `::` projection. Hides Q2 until re-projected; the in-config cities become *absent* rather
+  than *stale-wrong* (arguably better) pending re-projection.
 - **Option C — timestamp freshness**: serve only nodes/cities projected within N days
   (needs a reliable projected-at; heavier, not required if B suffices).
 
-**Recommendation**: Option **B** (has-`::` per city) as the reversible stopgap — one
+**Recommendation**: Option **B**, refined to `has-:: OR grounded-real` per city — one
 predicate, per-city, non-destructive.
+
+**PRESERVE GROUNDED-REAL (a correctness constraint).** A naive `has-::`-only predicate
+would hide **grounded-real** cities that are still legacy-only (0 `::`) — e.g. grand-remous
+(322 real citations) and lyster (392), which are grounded-in-PG but not yet re-projected.
+Hiding them would suppress **real** data. So the predicate must serve a city when it has a
+`::` projection **OR** carries real citations (a Signal/DesignationEvent node with a real
+docSha in `props.refs`). "grounded" here means *has real refs in PG*, which is distinct
+from *has `graph/latest.json`* (only sainte-martine in preprod) and from *canonical Q2*.
 
 **HARD COUPLING (mandatory ordering — a correctness constraint, not a nicety).** Option B
 alone would make the **in-config cities that have no `::` yet DISAPPEAR** from the feed
@@ -153,3 +169,42 @@ broken) is extraction's characterization.
 **Reversibility confirmed**: pure read-path predicate; no migration, no delete; toggled by
 config flag; instantly revertible. Orthogonal to §3 cleanup and to the coverage-gap
 re-projection.
+
+## 9. Root architecture finding — the atomic self-heal path is input-starved (owner archi-debt)
+
+**Measured (k8s RO)**: `graph/{city}/latest.json` exists for **1** city in docs-preprod
+(sainte-martine). `project-graph-from-s3` (the ATOMIC projection — `upsertGraphAtomic` +
+`materializeSeveredSources`, the path that WOULD delete severed/orphans) reads exactly that
+key (`project-graph-from-s3.ts:67,72`), and `graph/latest.json` is written **only by the
+grounding pipeline** (`emit-graphify34-candidates` / `filet-auto-link-pv` /
+`graphify-34-enrich`), never by worker-live. worker-live writes `parsed/` +
+`ontology/project-state.json` and feeds PG via `projectStateToGraph → upsertGraph` (**pure,
+additive**).
+
+**Why orphans accumulate**: the only **at-scale** PG path (worker-live, 528 cities) is pure
+additive — it cannot delete a superseded id. The **self-healing** path (atomic) is
+**input-starved** — it runs only at the grounded-cohort scale. So the two paths are NOT
+redundant (they carry *different graphs*: detection vs grounded/canonical), but the
+self-heal never runs at scale.
+
+**Why worker-live can't just switch to atomic**: its pure upsert is **deliberate** — an
+atomic REPLACE keyed on the detection projection would delete the grounding citations
+(`gate3` would in fact abort it). So self-heal-at-scale requires an at-scale **merged**
+canonical graph (detection + grounding), not a detection-only atomic feed.
+
+**Design position on the CronJob** (i-cond's 3 questions):
+1. **KEEP** `project-graph-from-s3` — it is the grounding re-assert, correctly scoped; not
+   vestigial, and it should *not* be the 528-detection path. **DROP** = no. The real
+   at-scale self-heal is a *separate* fix.
+2. The manual §3 cleanup is a **one-shot bridge** for the legacy id-scheme backlog (which
+   the atomic can't self-clear — gate-abort on legacy ids); once an at-scale merged-graph
+   atomic writer exists, it self-heals going forward and the cleanup is not recurring.
+3. Option B (§8) is a **transition stopgap only** — the structural fix (at-scale merged
+   atomic writer) makes it removable.
+
+**The archi-debt (for the owner board)**: produce the merged canonical `graph/{city}/latest.json`
+at scale and make an atomic projection the single at-scale PG writer → orphans resolved by
+construction, grounding preserved. This is the durable end-state; #626's direct pure feed
+was the correct interim (get PG fed) and would be retired by it. **Non-urgent, design-only;
+does not block the nightly scrape** (which feeds PG via worker-live, independent of the
+projection CronJob).
