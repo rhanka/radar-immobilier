@@ -46,7 +46,7 @@ partielle.
 |---|---|---|
 | A. SCRAPE | `worker-live --chunk k/N` sur N pods shardés | `--chunk` = découpe déterministe de la liste villes ; chaque shard reste à 3Gi (pic ville-dense). `--chunk` ≠ borneur mémoire. |
 | B. DÉTECTION/IA | repliée dans `worker-live` exploit (`LIVE_SCRAPE_EXPLOIT=1`) | à sortir en étage propre si l'IA devient lourde (budget mémoire/temps distinct). |
-| C. CANONICAL-WRITE | direct-PG-feed (#629) via le writer atomique i-arch | supersède le legacy juin de la ville en 1 tx (gate3, K2 fail-close pour groundé, baseline sainte-martine préservée). Porte `intendedRemovals` → évite la ré-accumulation des ~33k orphelins legacy `type-slug-ref` vs `type::slug::ref`. |
+| C. CANONICAL-WRITE | direct-PG-feed (#629) via le writer atomique i-arch | supersède le legacy juin de la ville en 1 tx (gate3, K2 fail-close pour groundé, baseline sainte-martine préservée). Porte `intendedRemovals` → évite la ré-accumulation d'orphelins legacy (schéma `type-slug-ref` vs `type::slug::ref` ; partition mesurée en §Garde purge — seuls 10 234/33 077 sont des orphelins purgeables). |
 
 - **Trigger** : CronJob pour la baseline périodique (nocturne) ; event-driven (Argo Events / queue de
   work-items per-ville) pour l'on-demand. Démarrer CronJob-orchestré fan-out (N Jobs shardés) pour le
@@ -86,8 +86,8 @@ partielle.
   saint-henri). Le sharding donne ça (un shard tombe, les autres finissent). `backoffLimit` + canonical-write
   idempotent (ON CONFLICT) = retry safe.
 - **Idempotence** : `worker-live --reexploit` + canonical-write = ON CONFLICT DO UPDATE. Re-runs safe. MAIS le
-  writer doit **superséder** le legacy (`intendedRemovals`), pas accumuler un 2e schéma d'id (cause des ~33k
-  orphelins).
+  writer doit **superséder** le legacy (`intendedRemovals`), pas accumuler un 2e schéma d'id (source des
+  orphelins Q1 supersédés — voir la partition mesurée en §Garde purge).
 - **KPI fraîcheur MESURABLE** : chaque run diffe son sha-set vs le baseline t0
   (`docs-preprod/baseline-shaset-20260905/raw-pdf-shaset.txt`, sha256 `be4a80f5…`, 19906 shas / 436 villes)
   → {nouveaux, disparus, inchangés} per-ville. Corroborer par `max(meetingDate)` per-ville (récence contenu)
@@ -115,6 +115,15 @@ baseline sainte-martine préservée). **Pas d'étage projection S3→PG** (input
 4. **Egress scrape** : ipBlock par site municipal (ingérable à 1000) vs proxy sortant mutualisé ? *(i-infra + k8s/ops)*
 
 ## Garde purge (transverse, mesuré cette session)
+
+**Partition mesurée du legacy-scheme (closure exacte, RO)** — « orphelins » ≠ le total legacy :
+
+> **33 077** nœuds legacy ::-less = **10 234** orphelins Q1 supersédés (villes AYANT une projection `::` →
+> purgeables, encore gatés) + **21 823** coverage-gap Q2 (0-`::`, canonique legacy-only → **préserver**,
+> re-projeter/re-scraper, PAS purger) + **1 020** `mention:` courants (today). `10 234 + 21 823 + 1 020 = 33 077`.
+
+Donc la cible-purge ⊆ **10 234** (jamais 33 077) ; les 21 823 Q2 sont du canonique à préserver ; les 953 « stub »
+sont un sous-ensemble de Q2 (pas un ajout), tous à contenu réel.
 
 Le servi-stale n'a **aucune cible de suppression** : les 953 nœuds « stub » (18 villes servi-stale sans
 `props.refs`) portent tous du contenu réglementaire réel dans `props.properties` (etape/etape_date/title/objet)
