@@ -30,6 +30,7 @@ import type { Database } from "../../db/client.js";
 import type { ObjectStore } from "../../storage/object-store.js";
 import {
   exploitScrapedCity,
+  exploitScrapedCityFromStore,
   type ExploitScrapeResult,
 } from "./exploit-scrape.js";
 import { runRecueilWithManifest } from "./recueil.js";
@@ -88,7 +89,24 @@ export interface RunLiveScrapeOptions {
    */
   readonly exploit?: boolean;
   /**
-   * PDF→text extractor injected into EXPLOITATION (only used when `exploit`).
+   * When true, run in REEXPLOIT mode: do NO network scrape at all. For each
+   * requested city, reconstruct the stored `RawDocumentRecord`s from the object
+   * store (the `*.meta.json` sidecars under `raw/proces-verbaux-<city>/cas/`) and
+   * replay PARSE + EXPLOITATION on them via `exploitScrapedCityFromStore`. Used
+   * to re-project already-collected raw into the per-city project-state AND feed
+   * PG (via `db`) without re-hitting the network (~2h45 of HEAD-skips avoided).
+   *
+   * Reexploit IMPLIES exploitation + the PG feed (it is pointless without `db`):
+   * the caller (worker-live) always pairs `reexploit: true` with a `db` handle.
+   * When set, this SUPERSEDES `exploit`/RECUEIL for every city: the adapter is
+   * never constructed, so the injected `fetch` is never called. Composes with a
+   * slug list / `--chunk` to select which cities to reexploit. Non-fatal per city:
+   * a failure to reload/exploit a city becomes a `status: "error"` recap entry.
+   */
+  readonly reexploit?: boolean;
+  /**
+   * PDF→text extractor injected into EXPLOITATION (used when `exploit` OR
+   * `reexploit`).
    * Defaults to `pdfToTextViaPoppler` (real poppler) in production; inject a mock
    * in tests. Absent poppler ⇒ a PDF yields empty text (0 signal, honest).
    */
@@ -160,22 +178,27 @@ export function citiesChunk(all: readonly string[], k: number, n: number): strin
  * Scrape the requested (or all config-only) PV cities live and write to `store`.
  *
  * @param citySlugs Optional subset of city slugs; omit for all config-only.
- * @param options   `{ store, fetch?, limit?, windowDays?, now?, signal?, exploit?, pdfToText?, db? }`.
+ * @param options   `{ store, fetch?, limit?, windowDays?, now?, signal?, exploit?, reexploit?, pdfToText?, db? }`.
+ *                  With `reexploit`, RECUEIL is skipped entirely: each city is
+ *                  re-exploited from its already-stored raw (no network).
  * @returns         One {@link LiveScrapeCityRecap} per city, in input order.
  */
 export async function runLiveScrape(
   citySlugs: readonly string[] | undefined,
   options: RunLiveScrapeOptions,
 ): Promise<LiveScrapeCityRecap[]> {
-  const { store, fetch, limit, windowDays, now, signal, exploit, db } = options;
+  const { store, fetch, limit, windowDays, now, signal, exploit, reexploit, db } =
+    options;
   const { configs, unknown } = resolveConfigs(citySlugs);
 
-  // Resolve the PDF→text extractor once (only used when `exploit`). Defaults to
-  // real poppler; tests inject a mock. A scrape source URL is not meaningful here
-  // (we extract from raw bytes), so a generic label is passed to the factory.
-  const pdfToText: PdfToText | undefined = exploit
-    ? (options.pdfToText ?? pdfToTextViaPoppler("live-scrape"))
-    : undefined;
+  // Resolve the PDF→text extractor once (used when `exploit` OR `reexploit`).
+  // Defaults to real poppler; tests inject a mock. A scrape source URL is not
+  // meaningful here (we extract from raw bytes), so a generic label is passed to
+  // the factory.
+  const pdfToText: PdfToText | undefined =
+    exploit || reexploit
+      ? (options.pdfToText ?? pdfToTextViaPoppler("live-scrape"))
+      : undefined;
 
   const recap: LiveScrapeCityRecap[] = [];
   // Collect the recap AND stream it per-city (observability): a long run emits
@@ -207,6 +230,40 @@ export async function runLiveScrape(
         count: 0,
         error: "aborted",
       });
+      continue;
+    }
+
+    // REEXPLOIT (no network): reconstruct the stored records from the object
+    // store and replay PARSE + EXPLOITATION (+ PG feed via `db`). The adapter is
+    // NEVER constructed here, so the injected `fetch` is never called. Non-fatal:
+    // a reload/exploit failure becomes a per-city `status: "error"` recap entry.
+    if (reexploit) {
+      try {
+        const result = await exploitScrapedCityFromStore(store, config.citySlug, {
+          ...(pdfToText !== undefined ? { pdfToText } : {}),
+          ...(now !== undefined ? { now } : {}),
+          ...(db !== undefined ? { db } : {}),
+        });
+        pushRecap({
+          city: config.citySlug,
+          sourceId: config.sourceId,
+          // No scrape ran: nothing new was written to raw CAS this run, so the
+          // aggregate scrape status is `seen` (the raw was already collected).
+          status: "seen",
+          casKeys: result.parsed.map((p) => p.rawRef),
+          count: result.parsed.length,
+          signals: result.designationEventCount,
+        });
+      } catch (e) {
+        pushRecap({
+          city: config.citySlug,
+          sourceId: config.sourceId,
+          status: "error",
+          casKeys: [],
+          count: 0,
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
       continue;
     }
 
