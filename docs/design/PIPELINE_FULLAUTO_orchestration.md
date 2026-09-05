@@ -18,12 +18,12 @@ Le full-auto ne tient que si TOUT l'état est en git + réconcilié (GitOps), ja
 3. **Marge rollout-surge** : à 350m standing il reste 50m ; un rollout maxUnavailable:0 coïncidant tripperait 400m (race nightly-vs-rollout). Politique de marge quota à intégrer (req.cpu +~100m) — mais **après** réconciliation git (sinon on empile du drift).
 4. **Multi-tenant** : node allocatable = 3×1840m=5520m PARTAGÉ (matchid/openerp/geo/sentropic…). Contrat de gouvernance : Σ(caps par tenant) ≤ allocatable, sans affamer les voisins. Un relèvement de quota namespace = décision shared-infra, pas lane-locale.
 
-## 3. Orchestration : CronJob self-driver vs Argo (open question)
-- **Convergence retenue** : *CronJob self-driver + reconcile desired-state* — un pilote qui réconcilie « quelles villes sont fraîches / à rafraîchir » plutôt qu'un cron qui re-scrape aveuglément tout. Réutilisable, footprint minimal, natif.
-- **Argo Workflows** : DAG, dépendances par étape, fan-out de sharding dynamique, retries, passage d'artefacts — mais +operator, +surface RBAC, +empreinte cross-tenant. **Son install cluster-wide est une décision d'ownership/SPOF (comme Traefik) → owner-direct, pas un call lane-local.**
+## 3. Orchestration : CronJob self-driver (+ contrôleur reconcile léger) — Argo ÉCARTÉ (s3-dag ratifié)
+- **Tranché (ratification s3-dag)** : Argo Workflows = **NON**. L'orchestration = *CronJob self-driver + reconcile desired-state* — un pilote qui réconcilie « quelles villes sont fraîches / à rafraîchir » plutôt qu'un cron qui re-scrape aveuglément tout. Réutilisable, footprint minimal, natif.
+- **Pourquoi pas Argo** : DAG / fan-out / retries séduisants, mais +operator, +surface RBAC, +empreinte cross-tenant (install cluster-wide = SPOF/ownership comme Traefik). Écarté par s3-dag au profit du CronJob-self-driver.
 - **Mon lean, étagé** :
-  - **P0 (quick-win, sans IA/mesh)** = CronJob-self-driver + reconcile suffit → E4 merge + E5 atomic-writer shippables MAINTENANT.
-  - **Phase mesh/LLM** (DAG, fan-out, llm-mesh en-cluster) = Argo (ou contrôleur léger) justifié, MAIS gaté sur ownership+footprint (qui possède Argo cluster-wide ?).
+  - **P0 (quick-win, sans IA/mesh)** = CronJob-self-driver + reconcile → E4 merge + E5 atomic-writer shippables MAINTENANT.
+  - **Phase reconcile/mesh** = si le SLA fraîcheur l'exige, un **contrôleur reconcile LÉGER** (contrôleur/CronJob maison event-driven, footprint contenu — **PAS Argo**). Le seul gate cross-tenant restant côté orchestration = **install cluster-mesh** (lié à la décision hosting owner).
 
 ## 4. Séquençage CD (le mécanisme apply-k, certifié #617)
 - La CD applique via `kustomize build --load-restrictor LoadRestrictionsNone <overlay> | kubectl apply -f -` (apply-k sur overlay ; **jamais** `apply -f deploy/`, jamais set-image-seul — c'était la cause racine de #617). Le full-auto DOIT passer par ce même chemin réconcilié (sinon on re-crée du drift SCRAPE_S3/quota).
@@ -53,8 +53,8 @@ Question frontière mesh, domaine ops :
 - **Certif sur OUTCOME mesuré, pas manifeste** : done + PG feed:ON + created_at + fraîcheur directement comptés — jamais Job=Complete ni « manifeste appliqué » (discipline mesure≠manifeste ; cf le SPOF = 2 pods sur 2 nodes MESURÉ, pas replicas:2 desired).
 
 ## 9. Open questions / gates (owner / cross-tenant)
-- Install Argo cluster-wide (ownership/SPOF) = owner-direct.
-- Install cluster-mesh + routing serving = owner-direct + joint geo-cond.
+- ~~Install Argo cluster-wide~~ = TRANCHÉ **NON** (ratification s3-dag).
+- Install cluster-mesh + routing serving = owner-direct + joint geo-cond — **le seul gate cross-tenant restant** (lié à la décision hosting).
 - Contrat de gouvernance quota (caps par tenant sous allocatable) = shared-infra/owner.
 - Policy egress scrape internet-large = revue sécu (auth).
 - Réconciliation quota preprod-cap live→git = pré-requis P0 (je confirme l'emplacement de mon read + route track [7dbf2a]).
