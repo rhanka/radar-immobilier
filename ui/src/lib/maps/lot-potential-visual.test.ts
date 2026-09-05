@@ -32,11 +32,14 @@ describe("resolveLotPotentialScore", () => {
     });
   });
 
-  it("derives a fallback from a generic zone code without city hardcode", () => {
+  it("a bare zone code (no source kind) is unavailable — no token derivation (owner directive)", () => {
+    // Le potentiel de zone n'est plus dérivé du token du code (« MxtV-4 ») :
+    // sans `kind` source, le score de zone est unknown → état explicite
+    // unavailable (jamais une densité fabriquée à partir du code).
     expect(resolveLotPotentialScore({ zoneCode: "MxtV-4" })).toMatchObject({
-      score: 3,
-      status: "fallback",
-      source: "zone",
+      score: 0,
+      status: "unavailable",
+      source: "none",
     });
   });
 

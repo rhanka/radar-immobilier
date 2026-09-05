@@ -11,21 +11,22 @@
  * - ZÉRO refetch : chaque changement ne fait que recalculer la peinture
  *   MapLibre (zones matchées accentuées, hors-filtre estompées mais
  *   toujours visibles) ;
- * - dégradé honnête : une zone au kind irrésolu appartient au groupe
- *   « Type non déterminé » — on n'invente pas de famille.
+ * - aucune famille inventée (directive owner) : une zone au kind SOURCE
+ *   irrésolu n'a PAS de chip ; elle reste visible (aplat neutre) et, filtre
+ *   actif, est simplement estompée comme non-matchée.
  */
 
 import {
   canonicalZoneKind,
   ZONE_KIND_STYLES,
-  ZONE_KIND_NEUTRAL,
   type StyledZoneKind,
 } from "./zone-kind-style.js";
 
 /**
  * Groupe de filtre = entrée de légende. CONS et REC partagent teinte ET
  * libellé (« Conservation / récréation ») → un seul groupe `CONS_REC`.
- * `UNRESOLVED` = zones au kind irrésolu (« Type non déterminé »).
+ * `UNRESOLVED` = zones au kind source irrésolu : SANS chip (aucun libellé de
+ * catégorie), gardé seulement comme cible interne du groupement/estompage.
  */
 export type ZoneKindGroupId =
   | "H"
@@ -54,7 +55,8 @@ export const ZONE_KIND_GROUPS: ReadonlyArray<ZoneKindGroup> = [
   { id: "A", label: ZONE_KIND_STYLES.A.label },
   { id: "CONS_REC", label: ZONE_KIND_STYLES.CONS.label },
   { id: "U", label: ZONE_KIND_STYLES.U.label },
-  { id: "UNRESOLVED", label: ZONE_KIND_NEUTRAL.label },
+  // Pas de groupe « Type non déterminé » : une zone sans famille source n'a pas
+  // de chip (directive owner) — le vrai code de zone reste son identité.
 ];
 
 /** Filtre TYPE de zone : groupes retenus (additif). Vide = toutes les zones. */
