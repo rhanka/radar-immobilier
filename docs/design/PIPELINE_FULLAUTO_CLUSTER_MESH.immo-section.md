@@ -13,17 +13,27 @@
 
 ## 0. TL;DR — the P0 quick-win (lead)
 
-**Two stages resolve the orphan debt AND de-starve the projection immediately — with no
-AI, no vision, no cluster-mesh, and no owner AI/mesh decision required.** They are the
-most profitable, least-blocked phase of the whole pipeline and are **independent of the
-LLM / satellite-vision / mesh layers** (those layer on later, above this backbone).
+**Stage labels in this section adopt the architect backbone verbatim** (backbone §3
+table): **E1** scrape+parse+exploit (`worker-live`, no direct PG feed) · **E2** LLM
+detection → detection sub-graph S3 · **E3** LLM grounding → citation refs S3 · **E4**
+canonical MERGE → `graph/<city>/latest.json` · **E5** atomic PG write (sole writer). immo
+**owns E4 + E5** (this Deliverable 1) and proposes the **geo seam into E4** (Deliverable
+2). E2/E3 sit at the mesh/LLM layer (item `01M197X0076A87ZS8KEVT426VF`) and feed E4.
+
+**E4 + E5 resolve the orphan debt AND de-starve the projection immediately — with no AI,
+no vision, no cluster-mesh, and no owner AI/mesh decision required.** They are the most
+profitable, least-blocked phase (backbone §9 **P0**) and are **independent of the LLM /
+satellite-vision / mesh layers** (E2/E3/geo layer on later, above this backbone).
 
 - **E4 — deterministic canonical MERGE (the gap to build).** Assemble
-  `graph/{city}/latest.json` = `MERGE(detection, grounding, geo)` from explicit S3 layer
-  inputs, deterministically and idempotently. This is the **missing piece**: today
+  `graph/{city}/latest.json` = `MERGE(detection, grounding, geo)` from explicit S3 inputs,
+  deterministically and idempotently. This is the **missing piece**: today
   `graphify-34-enrich` "phase A" re-projects the **already-in-PG (polluted)** state
   additively (`graphify-34-enrich.ts:67-73`, reads `subgraphForCity`) instead of merging
-  fresh detection + grounding. E4 replaces that back-read with a real merge.
+  fresh detection + grounding. E4 replaces that back-read with a real merge. **At P0, E4
+  runs deterministic-only**: it merges the existing deterministic detection sub-graph (E1
+  project-state) ∪ already-certified/published grounding candidates (0-scrape content) —
+  **no E2/E3 LLM, no mesh**.
 - **E5 — `upsertGraphAtomic` becomes the SOLE PG writer at scale.**
   `project-graph-from-s3` already reads the canonical and calls the atomic
   (`project-graph-from-s3.ts:64-76,124`); run it across the config-528. Because grounding
@@ -31,8 +41,10 @@ LLM / satellite-vision / mesh layers** (those layer on later, above this backbon
   docSha) and orphans **auto-resolve** (REPLACE + `step-3` delete).
 
 Net effect: orphans resolved by construction, grounding preserved, projection no longer
-input-starved (`CLEANUP §9`) — shippable before any AI/mesh work begins. Everything below
-details E4/E5 (Deliverable 1) and the geo layer's feed contract (Deliverable 2).
+input-starved (`CLEANUP §9`, backbone §6) — shippable before any AI/mesh work begins.
+Then **P1** adds E2 (LLM detection) and **P2** adds E3 (LLM grounding) as fresh inputs to
+the same E4; **P3** retires the interim direct PG feed (B.7). Everything below details
+E4/E5 (Deliverable 1) and the geo seam feeding E4 (Deliverable 2).
 
 ---
 
@@ -73,12 +85,15 @@ single owner; the shell writers are exactly the unguarded race the merge-step re
 
 ### B.1 Target end-state (the spine, unchanged)
 
-One **canonical merged graph** per city at `graph/{city}/latest.json` =
-`MERGE(detection, grounding, geo)`, and a **single ATOMIC PG writer**
-(`upsertGraphAtomic`, successor of `project-graph-from-s3`) run at the scale of the
-config-528 as the **only** PG writer. Because grounding is *inside* the canonical, the
-atomic REPLACE self-heals orphans (`step-3` orphan delete + `materializeSeveredSources`)
-**without** dropping grounding citations.
+In the backbone's 5-stage chain (E1→E5, §3), immo owns **E4** (the canonical MERGE) and
+**E5** (the atomic sole-writer). One **canonical merged graph** per city at
+`graph/{city}/latest.json` = `MERGE(detection, grounding, geo)` (E4), and a **single
+ATOMIC PG writer** (`upsertGraphAtomic`, via `project-graph-from-s3`) run at the scale of
+the config-528 as the **only** PG writer (E5). Because grounding is *inside* the canonical,
+the atomic REPLACE self-heals orphans (`step-3` orphan delete + `materializeSeveredSources`)
+**without** dropping grounding citations. Upstream, **E1** (deterministic scrape/exploit)
+and **E2** (LLM detection) supply the detection input; **E3** (LLM grounding) supplies the
+citation input.
 
 ### B.2 The canonical graph shape (measured, `graph-store.ts:44-145`)
 
@@ -153,16 +168,17 @@ per-layer S3 inputs (worker-live writes none today, A2).
    atomic `ON CONFLICT … SET label/type = excluded` (`:1103-1111`).
 
 **Layers → S3 prefixes** (proposed; each producer writes ONLY its own layer, never the
-canonical directly):
+canonical directly). Layers map to the backbone stages that produce them:
 
-| Layer | Producer | Proposed prefix |
-|---|---|---|
-| detection | `worker-live` (new S3 write) | `layers/detection/<city>/latest.json` |
-| grounding | graphify-34 phase A / citation-grounding / filet | `layers/grounding/<city>/latest.json` |
-| geo | geo-cond lanes (Deliverable 2) | `layers/geo/<city>/latest.json` |
-| **canonical (output)** | **merge-step only** | `graph/<city>/latest.json` |
+| Layer | Backbone stage(s) | Producer | Proposed prefix |
+|---|---|---|---|
+| detection (deterministic) | **E1** | `worker-live` (new S3 write; today writes only project-state, A2) | `layers/detection/<city>/latest.json` |
+| detection (LLM) | **E2** | `semantic-extract` in-cluster Job | folded into the detection layer, provenance-tagged `{kind:llm}` |
+| grounding | **E3** | worker-grounding / citation-grounding publisher | `layers/grounding/<city>/latest.json` |
+| geo | **E-geo seams** (§8) | via the geo→graph adapter (Deliverable 2) — geo never writes graph nodes | `layers/geo/<city>/latest.json` (adapter output) |
+| **canonical (output)** | **E4** | **merge-step only** | `graph/<city>/latest.json` |
 
-A single **merge-step** reads the three `layers/*/<city>/latest.json`, computes
+A single **merge-step** (E4) reads the `layers/*/<city>/latest.json`, computes
 `MERGE`, and writes the canonical **through the existing guarded writer**
 (`writeCanonicalCityGraph`, `canonical-graph-writer.ts:366-408` — read-anchor ETag +
 archive + `If-Match`). One writer ⇒ no producer races on the canonical key, and the
@@ -214,34 +230,43 @@ cProjection, intendedRemovals = safePurgeIds)` where `safePurgeIds` are legacy n
 **bridge**, not recurring: once the merged canonical + atomic-at-scale exist, self-heal is
 by construction and the bridge does not re-run (`CLEANUP §9`).
 
-### B.7 Migration / sequencing + rollback
+### B.7 Migration / sequencing + rollback (mapped to backbone phases)
 
-Ordering (each step independently shippable and reversible):
+Ordering (each step independently shippable and reversible), aligned to backbone §9:
 
-1. **E4 — build the merge-step + a detection S3 contribution.** Make `worker-live` write
-   its detection projection to `layers/detection/<city>/latest.json` (new; it writes none
-   today, A2). The merge-step assembles `graph/<city>/latest.json` from the layers via the
-   **existing** guarded writer (B.4). **KEEP** `worker-live`'s interim direct pure PG feed
-   (`#626`; opt-in on creds `#628/#629`) running in parallel (dual-write) so PG is never
-   starved. *Rollback*: stop the merge-step; the direct feed still maintains PG.
-2. **E5 — enable the atomic writer at scale** — run `upsertGraphAtomic`
-   (`graph-store.ts:979`) via `project-graph-from-s3` (already reads the canonical + lists
-   the whole `graph/` prefix, `project-graph-from-s3.ts:64-76,124`) across the config-528.
-   Grounding is in the merged input, so gate3 (`:793-814`) no longer aborts and orphans
-   auto-resolve (`step-3`, `:1132-1166`). *Rollback*: the atomic is idempotent and
-   gate-guarded — disable the CronJob; PG is unchanged by an aborted city.
-3. **Run the one-shot bridge** (B.6) to clear the legacy `-`-scheme backlog. *Rollback*:
+1. **P0 — E4 (deterministic) + E5.** Make `worker-live` write its deterministic detection
+   projection to `layers/detection/<city>/latest.json` (new; it writes none today, A2).
+   The merge-step (E4) assembles `graph/<city>/latest.json` from the deterministic
+   detection ∪ already-certified grounding candidates, via the **existing** guarded writer
+   (B.4). Enable E5 — `upsertGraphAtomic` (`graph-store.ts:979`) via `project-graph-from-s3`
+   (`:64-76,124`) across the config-528: grounding is in the merged input, so gate3
+   (`:793-814`) no longer aborts and orphans auto-resolve (`step-3`, `:1132-1166`).
+   **KEEP** `worker-live`'s interim direct pure PG feed (`#626`; opt-in on creds
+   `#628/#629`) running in parallel (dual-write) so PG is never starved. **No mesh.**
+   *Rollback*: stop the merge-step / disable the E5 CronJob; the direct feed still
+   maintains PG; the atomic is idempotent + gate-guarded (an aborted city leaves PG
+   unchanged).
+2. **One-shot legacy bridge** (B.6) — clear the legacy `-`-scheme backlog. *Rollback*:
    per-city transactional; archives exist (`graphify-34-backups/…`).
-4. **Retire the interim direct PG feed — LAST, and only after E4+E5 are live AND
-   validated.** Once the atomic-at-scale is the proven sole writer, `#626`'s direct pure
-   feed (correct for its time) is removed; `decidePgFeed`→`{feed:false}` becomes the
-   default (`pg-feed-decision.ts:40-52`). The interim `#626`/`#628`/`#629` direct feed is
-   the **bridge that must stay until then**. *Rollback*: re-enable the feed flag.
+3. **P1 — E2 (LLM detection) into E4.** Once the mesh gateway exists (backbone §4), the
+   in-cluster detection Job feeds a `{kind:llm}`-tagged detection sub-graph into the same
+   E4 merge — behind a flag, provider-key fallback. *Rollback*: flag off → E4 falls back
+   to deterministic detection (P0 behaviour).
+4. **P2 — E3 (LLM grounding) into E4.** In-cluster grounding generates fresh citation
+   refs into `layers/grounding/`, consumed by E4; host grounding stays as fallback.
+   *Rollback*: flag off → E4 uses already-published grounding.
+5. **P3 — retire the interim direct PG feed — LAST, only after E4+E5 (and the mesh path)
+   are live AND validated.** `#626`'s direct pure feed (correct for its time) is removed;
+   `decidePgFeed`→`{feed:false}` becomes the default (`pg-feed-decision.ts:40-52`). The
+   interim `#626`/`#628`/`#629` direct feed is the **bridge that must stay until then**
+   (backbone §6 condition, §10 line 3 — the second PG writer's removal is non-negotiable
+   for self-heal). *Rollback*: re-enable the feed flag.
 
 **Do not reorder E5 before E4** (the atomic would delete detection that has no canonical
-contribution yet), **do not run 3 before E5** (the bridge is a thin wrapper over the
-atomic path), and **do not retire the direct feed before step 4** (validated). Mirrors the
-hard-coupling ordering in `CLEANUP §8`.
+contribution yet), **do not run the bridge before E5** (it is a thin wrapper over the
+atomic path), and **do not retire the direct feed before P3** (validated). Mirrors the
+hard-coupling ordering in `CLEANUP §8`. Note: P0 does not depend on P1–P3 — the orphan +
+starvation fix ships first, without the mesh.
 
 ### B.8 Open questions — Deliverable 1 (for i-cond)
 
@@ -272,54 +297,66 @@ hard-coupling ordering in `CLEANUP §8`.
 ## C. Deliverable 2 — geo→graph feeding CONTRACT
 
 > **PROPOSED — pending geo-cond co-sign.** immo proposes the seam so geo's three lanes
-> (satellite / env / zones) feed the canonical merge (B.4). Grounded against existing
-> code; geo-cond owns node-type ownership and layer versioning.
+> (satellite / env / zones) feed the canonical merge (E4). Grounded against existing code.
+>
+> **Ratified frontier (backbone §8, `geo:SPEC_GEO_ENV_CONSTRAINTS_S9.md §1`): geo =
+> spatial-join + serve; geo NEVER writes `graph_nodes`; immo projects.** So this contract
+> has **two sides**: (a) **geo's side** = the *native served contract* geo already owns —
+> `ConstraintHit` (env), OGC features + zone codes/normes (zones), `BasemapSpec`/tiles
+> (satellite); (b) **immo's side** = a **geo→graph adapter** (a sub-step of E4, extending
+> the existing `run-geo-mapper.ts` + Job 35, `api/src/services/geo/run-geo-mapper.ts`,
+> `deploy/k8s/35-run-geo-mapper-job.yaml`) that reads the served contract and emits the
+> `::` nodes below into `layers/geo/`. The `::` scheme, node types and refs are therefore
+> **immo's projection output** (proposed here); what geo **co-signs** is the *source
+> side*: exposing the real règlement zone number, stable feature ids, and provenance in
+> its served payload so immo can key on them.
 
-### C.1 Node types + `::` id scheme geo emits
+### C.1 Node types + `::` id scheme (immo's geo→graph adapter emits into `layers/geo/`)
 
-Geo writes its contribution to `layers/geo/<city>/latest.json` (B.4), consumed by the
-merge-step. Node ids follow the `::` scheme (`reglement-lifecycle-projection.ts:157,176`
-= `bylaw::<muni>::<num>`, `event::<muni>::<event_id>`):
+The adapter emits under the `::` scheme (`reglement-lifecycle-projection.ts:157,176` =
+`bylaw::<muni>::<num>`, `event::<muni>::<event_id>`):
 
 - **Zone** — `zone::<muni>::<realNumber>` (or with a règlement year:
   `zone::<muni>::<year>::<realNumber>`, the shape **already used** in
   `provenance.ts:26` — `zone::salaberry::2026::H-609-4` — and recognized by
   `geo/priority-resolver.ts:148`). `realNumber` = the **règlement zone number** verbatim
-  (`H-609-4`), never a derived category.
-- **Lot** — geo does **not** mint new Lot ids; it **layers geo props onto existing
+  (`H-609-4`) taken from geo's served OGC codes, never a derived category.
+- **Lot** — the adapter does **not** mint new Lot ids; it **layers geo props onto existing
   detection Lot nodes** by their existing `::` id (C.2).
-- **Overlay** (env constraints) — a **distinct** node type, e.g.
+- **Overlay** (env `ConstraintHit`) — a **distinct** node type, e.g.
   `overlay::<layer>::<muni>::<featureId>` (`overlay::cptaq::…`,
   `overlay::milieux-humides::…`). Never a Zone node (C.4).
 
-**Edges** (geo → detection, provenance-carrying): `zone_of` (Lot → Zone), `within`
-(Lot/Zone → overlay feature), `governed_by` (Zone → `bylaw::…` when the règlement zone
-maps to a known bylaw). Edge key stays `(source, target, kind)`.
+**Edges** (provenance-carrying): `zone_of` (Lot → Zone), `within` (Lot/Zone → overlay
+feature — the geo `EXACT_GEOM` spatial-join result), `governed_by` (Zone → `bylaw::…`
+when the served zone maps to a known bylaw). Edge key stays `(source, target, kind)`.
 
 ### C.2 How geo props layer onto detection nodes
 
-A geo enrichment of an existing detection node (a Lot's zoning/satellite attributes) is
-emitted as the **same `::` id** the detection layer used, carrying only geo `properties`
-+ geo `refs`. The merge (B.4) unions it onto the detection base: `props.refs` union,
-geo-owned property keys layered over the base. Geo therefore **must reuse the detection
-id**, not mint a parallel one — an id it invents becomes a separate node, not an
-enrichment. (This is the id-collision open question OQ-G1.)
+A geo enrichment of an existing detection node (a Lot's zoning/satellite attributes, a
+lot∩constraint hit) is emitted by the adapter under the **same `::` id** the detection
+layer used, carrying only geo `properties` + geo `refs`. The merge (E4) unions it onto the
+detection base: `props.refs` union, geo-owned property keys layered over the base. The
+adapter therefore **must reuse the detection id** (the FOLD-LOT join key,
+`geo:zonage-acquisition-en-vigueur.md`), not mint a parallel one — an id it invents
+becomes a separate node, not an enrichment. (Id-collision open question OQ-G1.)
 
 ### C.3 refs / provenance format, idempotence, S3 location
 
 - **refs**: same `Ref` shape as B.2 — `{docSha, rawRef, page?, excerpt?, linkSource:
-  "geo-<layer>"}`. `docSha` = SHA-256 of the geo source document (satellite tile
-  manifest, zoning PDF, env dataset extract). This keeps geo refs first-class under
-  gate3's docSha identity (`graph-store.ts:764-778`) — a geo docSha is preserved across
-  re-projections exactly like a PV docSha.
-- **Idempotence / stable ids**: a geo re-run over the same source MUST produce the same
-  `::` ids and the same refs (deterministic, like `projectStateToGraph`,
-  `project-state-to-graph.ts:32`). Zone/overlay ids are keyed on the **real** feature
-  identifier (règlement number, cadastral id), never on a run timestamp.
-- **Where geo writes**: `layers/geo/<city>/latest.json` (one file per city per run,
-  latest wins). The merge-step is the only writer of `graph/<city>/latest.json`. Geo
-  never touches the canonical key (the guard `object-store.ts:83` enforces this for the
-  TS path).
+  "geo-<layer>"}`. `docSha` = SHA-256 of the geo source artefact **as served by geo**
+  (constraint dataset extract, OGC zoning feature set, tile manifest). This keeps geo refs
+  first-class under gate3's docSha identity (`graph-store.ts:764-778`) — a geo docSha is
+  preserved across re-projections exactly like a PV docSha. Geo must therefore surface a
+  stable content hash in its served contract (co-sign item).
+- **Idempotence / stable ids**: an adapter re-run over the same served contract MUST
+  produce the same `::` ids and refs (deterministic, like `projectStateToGraph`,
+  `project-state-to-graph.ts:32`). Zone/overlay ids key on the **real** feature identifier
+  (règlement number, cadastral id) geo serves, never on a run timestamp.
+- **Where the layer lands**: `layers/geo/<city>/latest.json` (adapter output; one file per
+  city per run, latest wins), consumed by E4. Geo's own serving location is unchanged —
+  geo does not write `layers/geo/` and never touches the canonical key (the guard
+  `object-store.ts:83` enforces the latter for the TS path).
 
 ### C.4 HARD CONSTRAINT (owner directive — encoded)
 
@@ -339,18 +376,25 @@ enrichment. (This is the id-collision open question OQ-G1.)
 
 ### C.5 Open questions — Deliverable 2 (for geo-cond)
 
-- **OQ-G1** Id collisions detection-vs-geo: when detection and geo both describe a Lot,
-  is the `::` id byte-identical? Who mints the canonical Lot id, and how does geo learn
-  it (read the detection layer, or a shared id-derivation helper)?
-- **OQ-G2** Node-type ownership: geo owns `zone::` / `overlay::`; detection owns
-  `bylaw::` / `event::` / `signal::`; who owns `lot::`? (Proposal: detection mints Lot,
-  geo enriches.)
-- **OQ-G3** Layer versioning: does `layers/geo/<city>/latest.json` carry a schema/version
-  (like `ontology_version`, `graph-store.ts:140`) so the merge-step can reject an
-  incompatible geo layer instead of silently merging it?
-- **OQ-G4** Zone→bylaw linkage: when a real règlement zone maps to a `bylaw::` node, does
-  geo emit the `governed_by` edge, or does the merge derive it from a shared ref? (Anti-
-  invention: only when a shared docSha exists, mirroring `project-state-to-graph.ts:158-178`.)
+- **OQ-G1** Id collisions detection-vs-geo: when detection and the geo→graph adapter both
+  describe a Lot, is the `::` id byte-identical? What is the shared FOLD-LOT key, and does
+  the adapter read the detection layer or a shared id-derivation helper to reuse it?
+- **OQ-G2** Adapter ownership + node-type split: immo owns the geo→graph adapter (extends
+  `run-geo-mapper.ts`); who runs it and when relative to E4 (a pre-step vs inside E4)?
+  Node-type split: adapter emits `zone::`/`overlay::`; detection owns
+  `bylaw::`/`event::`/`signal::`; who mints `lot::`? (Proposal: detection mints Lot,
+  adapter enriches.)
+- **OQ-G3** Served-contract provenance: can geo surface a **stable content hash** (docSha
+  equivalent) and the **real règlement zone number** in `ConstraintHit` / OGC codes so the
+  adapter keys on them (C.3, C.4)? Layer versioning: `layers/geo/<city>/latest.json`
+  carries a schema/version (like `ontology_version`, `graph-store.ts:140`) so E4 rejects
+  an incompatible geo layer instead of silently merging it.
+- **OQ-G4** Zone→bylaw linkage: does the adapter emit `governed_by`, or does E4 derive it
+  from a shared ref? (Anti-invention: only when a shared docSha exists, mirroring
+  `project-state-to-graph.ts:158-178`.)
+- **OQ-G5** Env serving gate: BDZI/GRHQ are serving-GATED on a tier-2 audit (runner G02,
+  `geo:SPEC_GEO_ENV_CONSTRAINTS_S9.md`); CPTAQ is served. Which overlays are contract-ready
+  now vs held, so E4 does not project an ungated constraint?
 
 ---
 
@@ -363,12 +407,21 @@ declared bypass) · OQ-D5 `materializeSeveredSources` placement vs the merge · 
 confirm no consumer depends on the current PG→S3 back-read once detection has its own
 S3 contribution.
 
-**Deliverable 2 (geo-cond):** OQ-G1 detection-vs-geo id collisions + who mints the Lot
-id · OQ-G2 node-type ownership (who owns `lot::`) · OQ-G3 geo layer schema versioning ·
-OQ-G4 Zone→bylaw edge ownership (emit vs derive, anti-invention).
+**Deliverable 2 (geo-cond):** OQ-G1 detection-vs-adapter id collisions + shared FOLD-LOT
+key · OQ-G2 geo→graph adapter ownership/placement + who mints `lot::` · OQ-G3 served-
+contract stable hash + real zone number + geo layer schema versioning · OQ-G4 Zone→bylaw
+edge ownership (emit vs derive) · OQ-G5 which env overlays are contract-ready vs audit-gated.
 
 **Cross-cutting flag**: the current grounding path derives the canonical FROM PG (A2) and
 two shell writers publish the canonical unguarded (A4). Both are resolved by the same
-move — a single merge-step writing the canonical through the guarded writer from explicit
-`layers/*` inputs. This is the load-bearing change; everything else in Deliverable 1
-sequences around it.
+move — a single E4 merge-step writing the canonical through the existing guarded writer
+from explicit `layers/*` inputs. This is the load-bearing change; everything else in
+Deliverable 1 sequences around it, and it is the P0 quick-win (backbone §9) that needs no
+mesh and no owner AI decision.
+
+**Deferred to backbone/owner (not immo's to resolve, flagged for i-cond):** the mesh
+pattern (cluster-mesh vs `sentropic-sentech`) and the inbound gateway contract that gate
+E2/E3 (backbone §4, §9 Q1–Q2); whether the interim direct PG feed is *removed* vs
+*flag-neutralised* at P3 (backbone §9 Q5); and whether the mesh is shared geo+immo
+(backbone §8 seam orchestration, §9 Q6). immo's P0 (E4+E5) is deliberately independent of
+all four.
