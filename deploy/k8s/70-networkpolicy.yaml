@@ -123,6 +123,40 @@ spec:
         - protocol: TCP
           port: 5432
 ---
+# ADDITIVE: let the nightly refresh scrape reach Postgres on :5432.
+#
+# The refresh scrape (34-refresh-cronjob.yaml, radar-refresh-scrape) runs with
+# `component: scrape`, not `component: api`. Since #629 wired its PG creds it
+# feeds Postgres directly, but the operator baseline
+# `allow-api-to-runtime-dependencies` only allows api -> postgres, so under the
+# namespace default-deny the scrape pod's DB pre-flight/upsert HANGS (the PG
+# guard fails closed). Mirror of `allow-graph-projection-to-postgres`, kept
+# narrowly scoped to scrape -> postgres:5432.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-scrape-to-postgres
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: postgres
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: scrape
+      ports:
+        - protocol: TCP
+          port: 5432
+---
 # ADDITIVE: let the api pod reach MinIO on :9000 (object storage).
 #
 # The api's /health probe (and every RECUEIL object PUT/GET) calls the S3 API on
