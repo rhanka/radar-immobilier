@@ -66,6 +66,16 @@ spec:
             # PARSE+EXPLOIT after RECUEIL (pdftotext → project-state).
             - name: LIVE_SCRAPE_EXPLOIT
               value: "1"
+            # Direct PG feed (design a): worker-live upserts the per-city graph into
+            # Postgres during EXPLOITATION. HOST/PORT come from the radar-api
+            # ConfigMap (envFrom); credentials from the DB secret. Absent → S3-only
+            # ("PG feed: OFF") — see api/src/scripts/pg-feed-decision.ts.
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
             - name: S3_ACCESS_KEY
               valueFrom: { secretKeyRef: { name: radar-s3-credentials, key: S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
