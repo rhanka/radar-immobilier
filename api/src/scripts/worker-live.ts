@@ -13,18 +13,21 @@
  *   tsx src/scripts/worker-live.ts --reexploit     # replay exploitation, NO scrape
  *   LIVE_SCRAPE_LIMIT=2 tsx src/scripts/worker-live.ts carignan
  *
- * PG FEED: when EXPLOITATION runs (either `LIVE_SCRAPE_EXPLOIT=1` or
- * `--reexploit`), the worker builds a Drizzle DB handle and threads it into the
- * exploitation graph-feed so the per-city graph is upserted into Postgres
- * (`upsertGraph`, provenance-preserving union). The handle is FAIL-LOUD: a
- * connectivity ping runs first and the process exits(1) if Postgres is
- * unreachable — a requested exploit/reexploit run must never silently skip PG.
- *
- * `--reexploit` runs EXPLOITATION from ALREADY-STORED raw/parsed (no network
- * scrape): for each requested city it reconstructs the stored records from the
- * object store and replays PARSE + EXPLOITATION + the PG feed. It composes with a
- * slug list / `--chunk`. Because reexploit is pointless without PG, it always
- * builds the DB handle (same fail-loud contract as an exploit run).
+ * PG FEED (opt-in on explicit credentials): the worker feeds Postgres directly
+ * from EXPLOITATION only when it is actually wired for it (see `decidePgFeed`):
+ *   - `--reexploit` ALWAYS feeds PG — its sole purpose is to (re)project stored
+ *     raw into Postgres — and is FAIL-LOUD: a connectivity ping runs first and
+ *     the process exits(1) if Postgres is unreachable.
+ *   - plain `LIVE_SCRAPE_EXPLOIT=1` feeds PG only when Postgres CREDENTIALS are
+ *     explicitly present in the environment (`POSTGRES_PASSWORD`, injected by a
+ *     job that wires the `radar-db-credentials` secret). When wired, the feed is
+ *     FAIL-LOUD too. When NOT wired — the boot/OOM diag and the 33/33b/34 scrape
+ *     jobs, which leave PG projection to the dedicated S3→PG step — the run does
+ *     NOT build a handle: it scrapes/exploits to S3 only and logs "PG feed: OFF"
+ *     with a warning. It must not be forced to reach a DB it was never given
+ *     credentials for (that is what broke the pinned-image diag pre-fix).
+ * When a handle IS built, the per-city graph is upserted via `upsertGraph`
+ * (provenance-preserving union).
  *
  * Env:
  *   LIVE_SCRAPE_LIMIT    optional per-city cap on the number of docs collected.
@@ -43,6 +46,7 @@ import { createDb, type DbHandle } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "../services/sources/live-scrape.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
+import { decidePgFeed } from "./pg-feed-decision.js";
 
 /**
  * Resolve which cities to scrape from argv:
@@ -114,12 +118,13 @@ async function main(): Promise<number> {
   const exploitEnv = (process.env.LIVE_SCRAPE_EXPLOIT ?? "").toLowerCase();
   // `--reexploit` implies exploitation; a plain exploit run is opt-in via env.
   const exploit = reexploit || exploitEnv === "1" || exploitEnv === "true";
-  // The PG feed is wired whenever EXPLOITATION runs (exploit OR reexploit): the
-  // graph-feed only fires when `runExploitation` receives a `db` handle.
-  const wantDb = exploit || reexploit;
+  // Decide whether to feed Postgres directly (and whether an unreachable DB is
+  // fatal): always for `--reexploit`, opt-in on explicit credentials for a plain
+  // exploit run, never otherwise. See `decidePgFeed`.
+  const pgFeed = decidePgFeed({ exploit, reexploit, env: process.env });
 
   logger.info(
-    { cities: label, limit, exploit, reexploit },
+    { cities: label, limit, exploit, reexploit, pgFeed: pgFeed.feed },
     "worker-live: starting live PV scrape",
   );
 
@@ -137,13 +142,16 @@ async function main(): Promise<number> {
     );
   }
 
-  // PG FEED (Part 1): when EXPLOITATION runs, build the DB handle and thread it
-  // into the exploitation graph-feed so the per-city graph is upserted into
-  // Postgres. FAIL-LOUD: ping Postgres first; if it is unreachable, exit(1)
-  // rather than silently skipping the DB (the whole point of this run).
+  // PG FEED: build the DB handle + fail-loud ping ONLY when we are actually wired
+  // to feed PG (see `decidePgFeed`). FAIL-LOUD: ping Postgres first; if it is
+  // unreachable, exit(1) rather than silently skipping a feed the caller asked
+  // for. When we are NOT wired (a plain exploit run with no DB credentials — the
+  // boot/OOM diag and the 33/33b/34 scrape jobs), do not build a handle: log a
+  // loud "PG feed: OFF" warning and run S3-only (the dedicated S3→PG projection
+  // step feeds PG for those). This is a visible decision, not a silent skip.
   let handle: DbHandle | undefined;
   try {
-    if (wantDb) {
+    if (pgFeed.feed) {
       handle = createDb(config);
       try {
         await handle.pool.query("select 1");
@@ -156,6 +164,13 @@ async function main(): Promise<number> {
         );
         return 1; // finally closes the pool, then main's caller exits(1)
       }
+    } else {
+      logger.warn(
+        { reason: pgFeed.reason },
+        "worker-live: PG feed OFF — EXPLOITATION will not write to Postgres " +
+          "directly (S3-only). Expected for a scrape/exploit job with no DB " +
+          "credentials wired; the dedicated S3→PG projection step feeds PG.",
+      );
     }
 
     const recap = await runLiveScrape(slugs, {
