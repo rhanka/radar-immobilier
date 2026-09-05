@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { isSatelliteBasemapEnabled, SAT_HOST_ALLOWLIST } from "./geo-sat-basemap.js";
+import {
+  isSatelliteBasemapEnabled,
+  resolveMintUrl,
+  SAT_HOST_ALLOWLIST,
+} from "./geo-sat-basemap.js";
 
 describe("isSatelliteBasemapEnabled — activation runtime par host (image unique)", () => {
   it("ON sur les hosts allowlistés (préprod + dev local)", () => {
@@ -27,5 +31,43 @@ describe("isSatelliteBasemapEnabled — activation runtime par host (image uniqu
   it("la prod n'est PAS dans l'allowlist (garde-fou)", () => {
     expect(SAT_HOST_ALLOWLIST.has("immo.sent-tech.ca")).toBe(false);
     expect(SAT_HOST_ALLOWLIST.has("preprod.immo.sent-tech.ca")).toBe(true);
+  });
+});
+
+describe("resolveMintUrl — dérivation runtime de la mint URL par host (image unique)", () => {
+  it("préprod (sans override) → mint préprod", () => {
+    expect(resolveMintUrl("preprod.immo.sent-tech.ca")).toBe(
+      "https://api.preprod.geo.sent-tech.ca/basemap/2d/session",
+    );
+  });
+
+  it("prod immo.sent-tech.ca (sans override) → mint prod", () => {
+    expect(resolveMintUrl("immo.sent-tech.ca")).toBe(
+      "https://api.geo.sent-tech.ca/basemap/2d/session",
+    );
+  });
+
+  it("override VITE_GEO_SAT_MINT_URL prioritaire → renvoyé tel quel quel que soit le host", () => {
+    expect(resolveMintUrl("immo.sent-tech.ca", "https://exemple.test/mint")).toBe(
+      "https://exemple.test/mint",
+    );
+    expect(
+      resolveMintUrl("preprod.immo.sent-tech.ca", "https://exemple.test/mint"),
+    ).toBe("https://exemple.test/mint");
+  });
+
+  it("localhost (dev) → mint préprod", () => {
+    expect(resolveMintUrl("localhost")).toBe(
+      "https://api.preprod.geo.sent-tech.ca/basemap/2d/session",
+    );
+  });
+
+  it("hostname absent (SSR/tests sans DOM, sans override) → mint préprod (fail-safe)", () => {
+    expect(resolveMintUrl(null)).toBe(
+      "https://api.preprod.geo.sent-tech.ca/basemap/2d/session",
+    );
+    expect(resolveMintUrl(undefined)).toBe(
+      "https://api.preprod.geo.sent-tech.ca/basemap/2d/session",
+    );
   });
 });
