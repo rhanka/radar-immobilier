@@ -19,7 +19,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   ALL_PV_CITIES,
+  buildRawDocumentRecord,
   PV_SAINT_DAMASE_2025_05_POSITIVE,
+  rawMetaKey,
   type PdfToText,
   type PvFetchLike,
 } from "@radar/sources";
@@ -35,7 +37,11 @@ import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.j
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
   putCount = 0;
-  async put(key: string, body: Uint8Array | Buffer | string): Promise<ObjectInfo> {
+  async put(
+    key: string,
+    body: Uint8Array | Buffer | string,
+    _contentType?: string,
+  ): Promise<ObjectInfo> {
     this.putCount += 1;
     const bytes =
       typeof body === "string" ? new TextEncoder().encode(body) : new Uint8Array(body);
@@ -50,6 +56,11 @@ class MemoryStore implements ObjectStore {
   async head(key: string): Promise<ObjectInfo | null> {
     const v = this.objects.get(key);
     return v ? { key, size: v.byteLength } : null;
+  }
+  // `list` is required by the REEXPLOIT path (loadScrapedPvRecords lists the
+  // per-city CAS prefix for `*.meta.json` sidecars).
+  async list(prefix: string): Promise<string[]> {
+    return [...this.objects.keys()].filter((k) => k.startsWith(prefix));
   }
 }
 
@@ -330,5 +341,245 @@ describe("runLiveScrape — onCity streaming (a, observability)", () => {
     // Streamed set + order match the returned recap exactly (per-city, not at the end).
     expect(streamed).toEqual(recap.map((r) => r.city));
     expect(streamed).toHaveLength(recap.length);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REEXPLOIT: replay EXPLOITATION from already-stored raw (no network scrape).
+// Seeds a city's raw PV (`raw/proces-verbaux-<city>/cas/<sha>.pdf` + sidecar
+// `.meta.json`) as RECUEIL would, then re-exploits from the store alone.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** pdftotext mock: any PV PDF → the real Saint-Damase positive text (règl. 38-41). */
+const zonagePdfToText: PdfToText = async () => PV_SAINT_DAMASE_2025_05_POSITIVE;
+
+/** Opaque PDF bytes (only extractable via the injected pdfToText). */
+function fakePdfBytes(marker: string): Uint8Array {
+  return new TextEncoder().encode(`%PDF-1.7\n%opaque-${marker}\n%%EOF`);
+}
+
+/**
+ * Seed a city's raw PV into the store exactly as RECUEIL would: the CAS bytes at
+ * `raw/proces-verbaux-<city>/cas/<sha>.pdf` + the sidecar `.meta.json` that
+ * `loadScrapedPvRecords` (the reexploit reader) parses back into a record.
+ */
+async function seedRawPvForCity(
+  store: MemoryStore,
+  citySlug: string,
+  marker: string,
+): Promise<void> {
+  const body = fakePdfBytes(marker);
+  const record = buildRawDocumentRecord({
+    source: `proces-verbaux-${citySlug}`,
+    sourceUrl: `https://ville.${citySlug}.qc.ca/pv/${marker}.pdf`,
+    body,
+    fetchedAt: "2026-06-10T00:00:00.000Z",
+    contentType: "application/pdf",
+    provenance: { version: "0.1.0", userAgent: "radar-test", viaObscura: false },
+  });
+  await store.put(record.storageKey, body, record.contentType);
+  await store.put(
+    rawMetaKey(record.storageKey),
+    JSON.stringify(record, null, 2),
+    "application/json",
+  );
+}
+
+/** A fetch that records if it was ever called and throws if it is (network guard). */
+function makeThrowingFetch(): { fetch: PvFetchLike; calls: () => number } {
+  let calls = 0;
+  const fetch: PvFetchLike = async () => {
+    calls += 1;
+    throw new Error("reexploit must not hit the network");
+  };
+  return { fetch, calls: () => calls };
+}
+
+describe("runLiveScrape — reexploit (replay from stored raw, NO scrape)", () => {
+  it("re-exploits a seen city from the store, projects signals, and NEVER calls fetch", async () => {
+    const [city] = configOnlySlugs(1);
+    const store = new MemoryStore();
+    await seedRawPvForCity(store, city!, "zonage");
+
+    const { fetch, calls } = makeThrowingFetch();
+
+    const recap = await runLiveScrape([city!], {
+      store,
+      fetch, // would throw if the adapter tried the network
+      reexploit: true,
+      pdfToText: zonagePdfToText,
+    });
+
+    // Network was never touched: reexploit builds no adapter.
+    expect(calls()).toBe(0);
+
+    const entry = recap[0]!;
+    expect(entry.city).toBe(city);
+    // Exploitation ran on the stored raw → the real DesignationEvent (38-41).
+    expect(entry.signals).toBe(1);
+    expect(entry.exploitError).toBeUndefined();
+    // The Signaux view reads exactly this key — reexploit wrote it.
+    expect(store.objects.has(projectStateKey(city!))).toBe(true);
+    // No scrape happened → no NEW raw CAS object beyond the seeded one.
+    expect(entry.status).toBe("seen");
+  });
+
+  it("a city with no stored raw re-exploits to 0 signal (honest, no crash, no network)", async () => {
+    const [city] = configOnlySlugs(1);
+    const store = new MemoryStore(); // nothing seeded
+    const { fetch, calls } = makeThrowingFetch();
+
+    const recap = await runLiveScrape([city!], {
+      store,
+      fetch,
+      reexploit: true,
+      pdfToText: zonagePdfToText,
+    });
+
+    expect(calls()).toBe(0);
+    expect(recap[0]!.signals).toBe(0);
+    expect(recap[0]!.exploitError).toBeUndefined();
+    expect(store.objects.has(projectStateKey(city!))).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DB-bound: the PG feed fires when a `db` handle is present (exploit + reexploit),
+// and a pre-existing provenance ref survives the reexploit upsert (#616 union).
+// Skipped unless the Make test stack is up (Postgres reachable, NODE_ENV=test).
+// ─────────────────────────────────────────────────────────────────────────────
+
+const DB_AVAILABLE = process.env.GRAPH_DB_TESTS === "1" || process.env.NODE_ENV === "test";
+
+describe.skipIf(!DB_AVAILABLE)("runLiveScrape — PG feed (DB-bound)", () => {
+  async function getDb() {
+    const { createDb } = await import("../../db/client.js");
+    const { loadConfig } = await import("../../config.js");
+    const config = loadConfig({
+      POSTGRES_HOST: process.env.POSTGRES_HOST ?? "postgres",
+      POSTGRES_PORT: process.env.POSTGRES_PORT ?? "5432",
+      POSTGRES_USER: process.env.POSTGRES_USER ?? "radar",
+      POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD ?? "changeme-dev-only",
+      POSTGRES_DB: process.env.POSTGRES_DB ?? "radar",
+    });
+    return createDb(config).db;
+  }
+
+  /** Purge every node (+ incident edge) of a test city for a deterministic start. */
+  async function cleanCity(
+    db: Awaited<ReturnType<typeof getDb>>,
+    city: string,
+  ): Promise<void> {
+    const { graphNodes, graphEdges } = await import("../../db/schema.js");
+    const { eq, inArray, or } = await import("drizzle-orm");
+    const ids = (
+      await db.select({ id: graphNodes.id }).from(graphNodes).where(eq(graphNodes.citySlug, city))
+    ).map((r) => r.id);
+    if (ids.length > 0) {
+      await db
+        .delete(graphEdges)
+        .where(or(inArray(graphEdges.srcId, ids), inArray(graphEdges.dstId, ids)));
+    }
+    await db.delete(graphNodes).where(eq(graphNodes.citySlug, city));
+  }
+
+  it("exploit + db upserts the city's graph into Postgres (the PG feed fires)", async () => {
+    const [city] = configOnlySlugs(1);
+    const db = await getDb();
+    await cleanCity(db, city!);
+
+    const store = new MemoryStore();
+    const fetch = fakeFetchForSlugs([city!], "PV bytes — zonage réel");
+
+    const recap = await runLiveScrape([city!], {
+      store,
+      fetch,
+      exploit: true,
+      pdfToText: zonagePdfToText,
+      db,
+    });
+    expect(recap[0]!.signals).toBe(1);
+
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+    const rows = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, city!));
+    // The graph feed wrote nodes for this city, incl. the DesignationEvent signal
+    // (projectStateToGraph lowercases the canonical type → DB type column).
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.some((r) => r.type === "designationevent")).toBe(true);
+
+    await cleanCity(db, city!);
+  });
+
+  it("reexploit + db upserts the graph WITHOUT any network call", async () => {
+    const [city] = configOnlySlugs(1);
+    const db = await getDb();
+    await cleanCity(db, city!);
+
+    const store = new MemoryStore();
+    await seedRawPvForCity(store, city!, "zonage");
+    const { fetch, calls } = makeThrowingFetch();
+
+    const recap = await runLiveScrape([city!], {
+      store,
+      fetch,
+      reexploit: true,
+      pdfToText: zonagePdfToText,
+      db,
+    });
+
+    expect(calls()).toBe(0);
+    expect(recap[0]!.signals).toBe(1);
+
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+    const rows = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, city!));
+    expect(rows.some((r) => r.type === "designationevent")).toBe(true);
+
+    await cleanCity(db, city!);
+  });
+
+  it("a pre-existing provenance ref survives the reexploit upsert (#616 union non-regression)", async () => {
+    const [city] = configOnlySlugs(1);
+    const db = await getDb();
+    await cleanCity(db, city!);
+
+    const store = new MemoryStore();
+    await seedRawPvForCity(store, city!, "zonage");
+    const { fetch } = makeThrowingFetch();
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+    const { upsertGraph } = await import("../graph/graph-store.js");
+
+    // 1) First reexploit → the DesignationEvent node lands in PG.
+    await runLiveScrape([city!], { store, fetch, reexploit: true, pdfToText: zonagePdfToText, db });
+    const [event] = (
+      await db.select().from(graphNodes).where(eq(graphNodes.citySlug, city!))
+    ).filter((r) => r.type === "designationevent");
+    expect(event).toBeDefined();
+
+    // 2) Attach a projection-materialized provenance citation to that node (as the
+    //    materialize step would), through the SAME provenance-preserving upsert.
+    const CITATION = {
+      docSha: "SHA_REEXPLOIT",
+      rawRef: `raw/proces-verbaux-${city}/cas/SHA_REEXPLOIT.pdf`,
+      page: 1,
+      excerpt: "Adoption règlement 38-41 — provenance ref",
+      linkSource: "projection-materialize-severed",
+    };
+    await upsertGraph(db, city!, {
+      nodes: [{ id: event!.id, label: event!.label, type: "designationevent", refs: [CITATION] }],
+      edges: [],
+    });
+
+    // 3) Reexploit AGAIN — the fresh detection re-emits the node with no refs. The
+    //    #616 union guard must keep the materialized citation.
+    await runLiveScrape([city!], { store, fetch, reexploit: true, pdfToText: zonagePdfToText, db });
+
+    const [after] = await db.select().from(graphNodes).where(eq(graphNodes.id, event!.id));
+    const refs = (after!.props as { refs?: Array<Record<string, unknown>> }).refs ?? [];
+    expect(refs).toContainEqual(CITATION);
+
+    await cleanCity(db, city!);
   });
 });
