@@ -116,7 +116,7 @@
   import { Layers, Ruler } from "@lucide/svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
-  import { isSatelliteBasemapEnabled } from "$lib/maps/geo-sat-basemap.js";
+  import { isSatelliteBasemapEnabled, resolveMintUrl } from "$lib/maps/geo-sat-basemap.js";
   import {
     buildMeasureLineData,
     buildMeasurePointsData,
@@ -1120,14 +1120,9 @@
   // per-viewport rendue dans le DOM.
   // Activation RUNTIME par allowlist de hosts (image CD unique préprod/prod →
   // un `VITE_` build-time ne peut pas différer) ; `VITE_GEO_SAT_BASEMAP=false`
-  // = kill-switch build. Cf. geo-sat-basemap.ts.
-  const SAT_BASEMAP_ENABLED = isSatelliteBasemapEnabled(
-    typeof location !== "undefined" ? location.hostname : null,
-    import.meta.env.VITE_GEO_SAT_BASEMAP === "false",
-  );
-  const SAT_MINT_URL =
-    (import.meta.env.VITE_GEO_SAT_MINT_URL as string | undefined) ??
-    "https://api.geo.sent-tech.ca/basemap/2d/session";
+  // = kill-switch build. Cf. geo-sat-basemap.ts. Enable + mint URL sont évalués
+  // PARESSEUSEMENT dans buildSatelliteBasemap() (post-mount) : au top-level du
+  // <script> (init/hydratation) `location.hostname` peut être falsy → OFF à tort.
 
   /** Sortie du seam satellite : source raster MapLibre + injecteurs de l'adapter. */
   interface SatelliteBasemap {
@@ -1155,10 +1150,19 @@
    * `null` si flag OFF ou toute erreur → l'appelant retombe sur OSM.
    */
   async function buildSatelliteBasemap(): Promise<SatelliteBasemap | null> {
-    if (!SAT_BASEMAP_ENABLED) return null;
+    // Lazy (post-mount) : `window.location.hostname` est fiable ici, contrairement
+    // à l'init/hydratation du <script> où il peut être falsy → OFF à tort.
+    const hostname =
+      typeof window !== "undefined" ? window.location.hostname : null;
+    const killSwitchOff = import.meta.env.VITE_GEO_SAT_BASEMAP === "false";
+    if (!isSatelliteBasemapEnabled(hostname, killSwitchOff)) return null;
+    const mintUrl = resolveMintUrl(
+      hostname,
+      import.meta.env.VITE_GEO_SAT_MINT_URL as string | undefined,
+    );
     try {
       const { createGoogle2dBasemapAdapter } = await import("@sentropic/geo-map-engine");
-      const adapter = await createGoogle2dBasemapAdapter({ mintUrl: SAT_MINT_URL });
+      const adapter = await createGoogle2dBasemapAdapter({ mintUrl });
       const spec = adapter.basemap as { source: unknown };
       const resolved = adapter.resolveRasterSource(spec.source as never);
       return {
