@@ -37,20 +37,29 @@ For each `citySlug` in `has_new` (cities with ≥1 `::` node):
 1. **Candidates** = nodes where `citySlug = C AND id NOT LIKE '%::%' AND id NOT LIKE 'mention:%'`.
    (This filter alone excludes Q2 by construction — a 0-`::` city is not in `has_new` —
    and excludes today's `mention:` nodes.)
-2. **Content-coverage precondition (recette's safety gate).** Let
-   `refs(N)` = the provenance ref-set of node `N` = the `docSha`/`rawRef` values in
-   `props->'refs'` (+ `source_ref`). A candidate legacy node `L` is **safe-purgeable**
-   only if `refs(L) ⊆ ⋃ refs(:: nodes of C)` — i.e. every source document cited by `L`
-   is still cited somewhere in `C`'s new `::` projection. Any `L` with a ref **absent**
-   from the `::` projection is **NOT purgeable** (data-loss): exclude it from
-   `intendedRemovals` and record it as **uncovered-legacy** → a partial-re-projection
-   signal (see §5, feeds the coverage-gap/item-2 workstream, e.g. the `lac-frontiere`
-   658-node outlier).
-   Coverage is at the **docSha/rawRef level** — the anti-data-loss invariant: a source PV
-   is preserved iff the `::` projection carries the same docSha. **Page/excerpt fidelity**
-   (same page, verbatim text) is a *separate citation-quality* concern, **not** a purge
-   blocker (recette adjudicates it apart if wanted) — losing a page-anchor does not lose
-   the source, so it does not gate the purge.
+2. **Content-coverage precondition (recette's safety gate) — TWO dimensions, both
+   required.** A candidate legacy node `L` is **safe-purgeable** only if BOTH hold for its
+   city `C`:
+   - **(i) source-ref coverage**: `refs(L) ⊆ ⋃ refs(:: nodes of C)`, where `refs(N)` is
+     extracted **schema-completely** — reuse `graph-store.ts:249-260 hasServableSource` +
+     `refDocShas`, which union the `source_ref` column, `props.refs[].docSha/rawRef`, the
+     legacy prop keys (`sourceUrl`/`source_url`/`rawRef`/`docSha`/`source_storage_key`/
+     `sourceRef`/`source_file`), and the v2 `refs: string[]` variant. **Never read
+     `props.refs` alone** — a legacy node storing its ref in `source_ref` or a legacy field
+     would falsely read `refs=∅` → false-safe → data-loss.
+   - **(ii) business-content coverage**: the real content in `props.properties` (`etape`,
+     `etape_date`, `title`, `objet`, `description`, `no_lot`, … — gate1's business keys) ⊆
+     the superseding `::` node. A node can have `refs=∅` AND real regulatory content
+     (measured: 953/953 served-stale "stub" nodes carry non-empty `props.properties`; the 3
+     in-config "stubs" grand-remous/lac-saint-paul/lyster = 808 nodes of real
+     `etape`+`etape_date` = **uncited legacy, not contentless**). Purging on refs-only would
+     lose that content.
+   Any `L` failing either dimension is **NOT purgeable**: exclude it from `intendedRemovals`
+   and record it as **uncovered-legacy** (a partial-re-projection / citation-gap signal,
+   §5; e.g. the `lac-frontiere` 658-node outlier). **Page/excerpt fidelity** (same page,
+   verbatim text) remains a *separate citation-quality* concern, not a purge blocker.
+   Consequence: the served-stale "stubs" have **zero** contentless nodes ⟹ **removable = 0**
+   there; the only purge-target is the Q1 legacy orphans, gated on both dimensions above.
 3. **Purge** = call `upsertGraphAtomic(db, C, cProjection, intendedRemovals = safePurgeIds)`.
    `intendedRemovals` exempts those ids from gate1 (business-props) and gate3 (source-refs),
    so the atomic's step-3 deletes them **without aborting**. **gate2 (completeness) is NOT
