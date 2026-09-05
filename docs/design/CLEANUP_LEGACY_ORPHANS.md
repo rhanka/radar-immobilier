@@ -126,10 +126,24 @@ Options (owner/serving decision — designed, not chosen here):
   (needs a reliable projected-at; heavier, not required if B suffices).
 
 **Recommendation**: Option **B** (has-`::` per city) as the reversible stopgap — one
-predicate, per-city, non-destructive — paired with the item-2 root fix (re-project the
-~93 via `worker-live --reexploit`). A stopgap that *hides* cities is not a substitute for
-re-projecting the in-config debt; it buys time and stops surfacing stale data. **Owner
-decides** whether to apply it (it reduces the coverage users see).
+predicate, per-city, non-destructive.
+
+**HARD COUPLING (mandatory ordering — a correctness constraint, not a nicety).** Option B
+alone would make the **in-config cities that have no `::` yet DISAPPEAR** from the feed
+(they have no `::` → the predicate hides them). That is a regression: a config-active city
+must never vanish. So the owner decision is a **coherent package**, applied in order:
+
+1. **Re-project the in-config-without-`::` cities** (`worker-live --reexploit <cities>`
+   when their raw is present in S3, else a re-scrape) → they gain a `::` projection.
+2. **Then apply Option B** → net effect: the feed shows the **fresh config-528**, drops
+   the ~484 out-of-config cities, and **no config city disappears**.
+
+Applying (2) before (1) is forbidden. A stopgap that *hides* cities is not a substitute
+for re-projecting the in-config debt. **Owner decides** the package (it reduces the
+coverage users see to the active config); execution held-for-gate. The exact
+in-config-without-`::` count (i-cond's ~46/~93) is produced by the config-split
+(Q2 ∩ `configOnlyCitySlugs()`); the re-projectable fraction (raw present vs source
+broken) is extraction's characterization.
 
 **Reversibility confirmed**: pure read-path predicate; no migration, no delete; toggled by
 config flag; instantly revertible. Orthogonal to §3 cleanup and to the coverage-gap
