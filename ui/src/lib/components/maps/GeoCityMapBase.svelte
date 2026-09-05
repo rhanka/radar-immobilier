@@ -116,6 +116,7 @@
   import { Layers, Ruler } from "@lucide/svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
+  import { isSatelliteBasemapEnabled } from "$lib/maps/geo-sat-basemap.js";
   import {
     buildMeasureLineData,
     buildMeasurePointsData,
@@ -1109,6 +1110,108 @@
     };
   }
 
+  // ── §5 — basemap satellite 2D (Google Map Tiles) ────────────────────────────
+  // OFF ⇒ fond OSM inchangé. ON ⇒ satellite via l'adapter geo-map-engine
+  // `createGoogle2dBasemapAdapter` (ADR-0025, zéro-copie : on SPREAD ses sorties
+  // — basemap/resolveRasterSource/transformRequest — sans jamais réimplémenter).
+  // Toute erreur (mint 503 pré-GO, session, réseau) → repli OSM (onError→OSM).
+  // Aucun secret côté client : session + clé restreinte vivent dans les closures
+  // de l'adapter (mint geo-api `VITE_GEO_SAT_MINT_URL`). Attribution DYNAMIQUE
+  // per-viewport rendue dans le DOM.
+  // Activation RUNTIME par allowlist de hosts (image CD unique préprod/prod →
+  // un `VITE_` build-time ne peut pas différer) ; `VITE_GEO_SAT_BASEMAP=false`
+  // = kill-switch build. Cf. geo-sat-basemap.ts.
+  const SAT_BASEMAP_ENABLED = isSatelliteBasemapEnabled(
+    typeof location !== "undefined" ? location.hostname : null,
+    import.meta.env.VITE_GEO_SAT_BASEMAP === "false",
+  );
+  const SAT_MINT_URL =
+    (import.meta.env.VITE_GEO_SAT_MINT_URL as string | undefined) ??
+    "https://api.geo.sent-tech.ca/basemap/2d/session";
+
+  /** Sortie du seam satellite : source raster MapLibre + injecteurs de l'adapter. */
+  interface SatelliteBasemap {
+    readonly tiles: string;
+    readonly tileSize: number;
+    readonly transformRequest: (
+      url: string,
+      resourceType?: string,
+    ) => { readonly url: string } | undefined;
+    readonly attributionResolver:
+      | ((viewport: {
+          center: readonly [number, number];
+          zoom: number;
+          bearing: number;
+          pitch: number;
+        }) => Promise<string>)
+      | null;
+  }
+
+  /**
+   * Construit le basemap satellite via l'adapter geo-map-engine quand le flag
+   * est ON. Zéro-copie : on lit `resolveRasterSource(basemap.source)` (template
+   * de tuiles SANS session/clé) + `options.transformRequest` (injection
+   * `?session=&key=` par tuile) + `attributionResolver` (copyright dynamique).
+   * `null` si flag OFF ou toute erreur → l'appelant retombe sur OSM.
+   */
+  async function buildSatelliteBasemap(): Promise<SatelliteBasemap | null> {
+    if (!SAT_BASEMAP_ENABLED) return null;
+    try {
+      const { createGoogle2dBasemapAdapter } = await import("@sentropic/geo-map-engine");
+      const adapter = await createGoogle2dBasemapAdapter({ mintUrl: SAT_MINT_URL });
+      const spec = adapter.basemap as { source: unknown };
+      const resolved = adapter.resolveRasterSource(spec.source as never);
+      return {
+        tiles: resolved.tileUrlTemplateBase,
+        tileSize: resolved.tileSize.width,
+        transformRequest: adapter.options.transformRequest,
+        attributionResolver: resolved.attributionResolver ?? null,
+      };
+    } catch (err) {
+      // onError → OSM : le satellite ne rend jamais partiellement / sans clé.
+      console.warn("§5 — basemap satellite indisponible, repli OSM:", err);
+      return null;
+    }
+  }
+
+  /**
+   * Attribution DYNAMIQUE du fond satellite, rendue dans le DOM (contrôle
+   * MapLibre bas-droite) et rafraîchie à chaque viewport (load + moveend) via
+   * le `attributionResolver` de l'adapter — condition geo-archi : jamais de
+   * tuiles sans copyright visible. En cas d'échec de résolution, on GARDE le
+   * dernier texte (on ne blanchit pas l'attribution).
+   */
+  function wireSatelliteAttribution(
+    map: import("maplibre-gl").Map,
+    resolver: (viewport: {
+      center: readonly [number, number];
+      zoom: number;
+      bearing: number;
+      pitch: number;
+    }) => Promise<string>,
+  ): void {
+    const el = document.createElement("div");
+    el.className = "maplibregl-ctrl maplibregl-ctrl-attrib geo-sat-attrib";
+    el.setAttribute("aria-label", "Attribution du fond satellite");
+    const update = async (): Promise<void> => {
+      try {
+        const c = map.getCenter();
+        el.textContent = await resolver({
+          center: [c.lng, c.lat],
+          zoom: map.getZoom(),
+          bearing: map.getBearing(),
+          pitch: map.getPitch(),
+        });
+      } catch {
+        /* garder le dernier copyright affiché — jamais de tuiles sans attribution */
+      }
+    };
+    map.addControl({ onAdd: () => el, onRemove: () => el.remove() });
+    map.on("load", () => void update());
+    map.on("moveend", () => void update());
+    void update();
+  }
+
   // ── Init MapLibre ──────────────────────────────────────────────────────────
   async function initMap(): Promise<void> {
     if (!mapContainer) return;
@@ -1117,7 +1220,9 @@
       // C10 — fond « neutral-gray » : aplat gris + raster OSM DÉSATURÉ
       // (saturation -1) et éclairci, pour faire ressortir zones/lots façon
       // carte de référence. Aucune dépendance tuiles supplémentaire.
-      const baseLayers =
+      // §5 — bascule satellite (flag ON) ; sinon (OFF ou erreur) fond OSM.
+      const sat = await buildSatelliteBasemap();
+      const osmBaseLayers =
         basemap === "neutral-gray"
           ? [
               {
@@ -1144,24 +1249,44 @@
                 paint: { "raster-opacity": 0.6 },
               },
             ];
+      // Sources : OSM toujours présente (repli), + sat-2d quand le flag est ON.
+      // L'attribution du sat reste vide ici : elle est DYNAMIQUE (per-viewport),
+      // injectée dans le DOM au load/moveend (cf. wireSatelliteAttribution).
+      const sources: Record<string, unknown> = {
+        "osm-tiles": {
+          type: "raster",
+          tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+          tileSize: 256,
+          attribution: "© OpenStreetMap contributors",
+        },
+      };
+      if (sat) {
+        sources["sat-2d"] = {
+          type: "raster",
+          tiles: [sat.tiles],
+          tileSize: sat.tileSize,
+          attribution: "",
+        };
+      }
+      const baseLayers = sat
+        ? [{ id: "sat-2d-background", type: "raster" as const, source: "sat-2d" }]
+        : osmBaseLayers;
       const m = new maplibre.Map({
         container: mapContainer,
         style: {
           version: 8,
-          sources: {
-            "osm-tiles": {
-              type: "raster",
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-              tileSize: 256,
-              attribution: "© OpenStreetMap contributors",
-            },
-          },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          sources: sources as any,
           layers: baseLayers,
         },
         center: INITIAL_CENTER,
         zoom: INITIAL_ZOOM,
         maxBounds: MAX_BOUNDS,
+        // Zéro-copie : injecteur per-tuile de l'adapter (session/clé) — présent
+        // seulement en mode satellite ; MapLibre passe chaque requête de tuile.
+        ...(sat ? { transformRequest: sat.transformRequest } : {}),
       });
+      if (sat?.attributionResolver) wireSatelliteAttribution(m, sat.attributionResolver);
 
       m.on("load", async () => {
         // Fetch GeoJSON polygones municipaux (asset statique servi par nginx)
