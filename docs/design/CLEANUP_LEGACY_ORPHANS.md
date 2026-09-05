@@ -144,22 +144,24 @@ Options (owner/serving decision — designed, not chosen here):
 - **Option C — timestamp freshness**: serve only nodes/cities projected within N days
   (needs a reliable projected-at; heavier, not required if B suffices).
 
-**Recommendation**: Option **B**, refined to `has-:: OR published-grounded` per city — one
-predicate, per-city, non-destructive.
+**Owner choice — present all three; do NOT hide real data by default** (locked owner
+framing). The served-stale has **no delete-target** (the 301 real-but-old are preserved and
+re-projected; the 18 contentless are a data-quality *investigate* item, §7). The only open
+question is the serving stopgap, and it is the owner's decision:
 
-**Don't hide the published-grounded flagship.** A `has-::`-only predicate would hide every
-legacy-only (0 `::`) city, including the one **published-grounded** city — sainte-martine
-(`graph/latest.json` present; it is also out-of-config, see §7). That is intentional
-canonical data. So serve a city when it has a `::` projection **OR** is published-grounded
-(`graph/latest.json` present).
+- **Option B — hide non-fresh** (`has-:: OR published-grounded` per city): freshness-first;
+  hides real-but-old until re-projected. Preserves the one published-grounded city
+  (sainte-martine, `graph/latest.json`, out-of-config). **Never keyed on `refs>0`** — 302/320
+  have refs (the *normal* projected state, r4 detection cites its PV), so `refs>0` would
+  serve ~everything and defeat the filter.
+- **Serve-all** — keep serving real-but-old: preserves coverage; may read as current.
+- **Option C — serve with a freshness badge/date**: neither hides real data nor implies
+  currency.
 
-**NOT keyed on `refs>0`.** 302/320 served-stale cities have `props.refs` (docSha citations)
-— but that is the **normal projected-graph state** (r4 detection cites its source PV), not
-grounding; keying preservation on `refs>0` would serve ~everything and defeat the filter.
-The stale in-config cities (grand-remous, lyster: real June citations, but OLD) are
-correctly hidden by Option B *until re-projected* — the coupling (re-project in-config
-first) then restores them fresh with `::`. Their staged/held grounding candidates (recette's
-cohort, never projected to preprod) are unaffected by a preprod serving filter.
+**Recommendation**: re-project the in-config aggressively **first** → shrinks whatever B
+would hide to only the dropped-not-yet-re-projected residual; for that residual the owner
+picks B (hide) / serve-all / C (badge). recette (content authority) favors **preserving real
+content**, so the default is NOT to hide real data — the owner chooses.
 
 **HARD COUPLING (mandatory ordering — a correctness constraint, not a nicety).** Option B
 alone would make the **in-config cities that have no `::` yet DISAPPEAR** from the feed
