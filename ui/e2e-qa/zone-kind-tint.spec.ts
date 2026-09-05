@@ -13,10 +13,10 @@ import { mockAuthenticated } from "./_helpers";
  * Comportement RENDU vérifié (pas de marqueurs de bundle) :
  *   1. zones mockées au profil Mont-Tremblant (kind=CO/affectation=Conservation,
  *      VP/Villégiature, CV-RF/Résidentielle, TO/Touristique) → la LÉGENDE
- *      zonage rend leurs familles (Conservation / récréation, Habitation…)
+ *      zonage rend leurs familles SOURCE (Conservation / récréation, Habitation…)
  *      avec des pastilles TEINTÉES, pas blanches ;
- *   2. une zone au kind vraiment inconnu → entrée « Type non déterminé » en
- *      GRIS CLAIR honnête (plus jamais blanc invisible).
+ *   2. une zone au kind SOURCE inconnu → aplat neutre SANS entrée de légende
+ *      (directive owner : aucune catégorie « Type non déterminé » inventée).
  *
  * Aucun docker : vite preview + routes /api mockées (même pattern que
  * sources-coverage.spec.ts, zones posées dans le contour réel de Delson pour
@@ -104,7 +104,7 @@ const TREMBLANT_PROFILE_ZONES = {
       zone("VP-101", "VP", "Villégiature paysagère", 0, 0.01),
       zone("CV-RF-1", "CV-RF", "CV - Résidentielle de faible densité", 0.014, 0.01),
       zone("TO-5", "TO", "Touristique", 0.028, 0),
-      // Zone au kind VRAIMENT inconnu → « Type non déterminé » gris clair.
+      // Zone au kind source VRAIMENT inconnu → aplat neutre, PAS d'entrée légende.
       zone("XY-9", "XY", null, 0.028, 0.01),
     ],
   },
@@ -161,7 +161,7 @@ const WHITE = "rgb(255, 255, 255)";
 test.use({ viewport: { width: 1600, height: 900 } });
 
 test.describe("Teinte de zone — taxonomie geo (kind 2 lettres + affectation)", () => {
-  test("zones kind=CO/affectation=Conservation → TEINTÉES (légende, pas blanches) ; inconnu → gris clair", async ({
+  test("zones kind=CO/affectation=Conservation → TEINTÉES (légende, pas blanches) ; inconnu → neutre sans entrée", async ({
     page,
   }, testInfo) => {
     await mockZonesApi(page);
@@ -175,24 +175,19 @@ test.describe("Teinte de zone — taxonomie geo (kind 2 lettres + affectation)",
     await expect(page.locator("li", { hasText: "Conservation / récréation" })).toBeVisible();
     // VP/Villégiature paysagère + CV-RF/Résidentielle → Habitation.
     await expect(page.locator("li", { hasText: "Habitation" })).toBeVisible();
-    // XY inconnu → dégradé honnête, jamais inventé.
-    await expect(page.locator("li", { hasText: "Type non déterminé" })).toBeVisible();
+    // XY = kind source inconnu → aplat NEUTRE sans entrée de légende (directive
+    // owner : aucune catégorie inventée, pas d'entrée « Type non déterminé »).
+    await expect(page.locator("li", { hasText: "Type non déterminé" })).toHaveCount(0);
     // AUCUNE famille fantôme (pas d'Industriel/Commercial dans la fixture).
     await expect(page.locator("li", { hasText: "Industriel" })).toHaveCount(0);
 
     // ── Pastilles TEINTÉES : plus jamais blanches ────────────────────────────
     const conservation = await chipColor(page, "Conservation / récréation");
     const habitation = await chipColor(page, "Habitation");
-    const neutral = await chipColor(page, "Type non déterminé");
     expect(conservation).not.toBe(WHITE);
     expect(habitation).not.toBe(WHITE);
     // Les familles portent des teintes DISTINCTES (catégorielles DS).
     expect(conservation).not.toBe(habitation);
-    // « Type non déterminé » = gris clair honnête (pas blanc invisible),
-    // distinct des familles teintées.
-    expect(neutral).not.toBe(WHITE);
-    expect(neutral).not.toBe(conservation);
-    expect(neutral).not.toBe(habitation);
 
     // ── Capture (maquette mockée au profil Mont-Tremblant) ───────────────────
     await page.waitForTimeout(3000); // laisse MapLibre peindre les aplats
