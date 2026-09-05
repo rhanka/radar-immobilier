@@ -33,3 +33,23 @@ export function isSatelliteBasemapEnabled(
   if (!hostname) return false;
   return SAT_HOST_ALLOWLIST.has(hostname);
 }
+
+/**
+ * Base mint geo dérivée du host au runtime (image CD unique préprod=prod ⇒
+ * un défaut build-time ne peut pas différer les deux).
+ * - prod `immo.sent-tech.ca` → `https://api.geo.sent-tech.ca`
+ * - tout le reste (préprod, dev local) → `https://api.preprod.geo.sent-tech.ca`
+ * `VITE_GEO_SAT_MINT_URL` (override) reste prioritaire et renvoyé tel quel.
+ */
+export function resolveMintUrl(
+  hostname: string | null | undefined,
+  overrideUrl?: string | null,
+): string {
+  if (overrideUrl) return overrideUrl;
+  // Prod immo.sent-tech.ca → mint prod ; tout le reste (préprod, dev local) → mint préprod.
+  const base =
+    hostname === "immo.sent-tech.ca"
+      ? "https://api.geo.sent-tech.ca"
+      : "https://api.preprod.geo.sent-tech.ca";
+  return `${base}/basemap/2d/session`;
+}
