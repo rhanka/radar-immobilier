@@ -292,6 +292,56 @@ starvation fix ships first, without the mesh.
   detection S3 contribution (step 1) removes that back-read — confirm no consumer depends
   on the PG→S3 direction (`subgraphForCity` in `graphify-34-enrich`, `emit-…`).
 
+### B.9 Resolutions — OQ-D3 / D5 / D6 + the D4 shell-writer fold (architect decisions)
+
+**OQ-D3 — props precedence = a FIXED per-key OWNERSHIP table, resolved in the merge-step**
+(never emergent from producer write-order). On a node-id collision across layers, E4:
+
+- `props.refs` → **UNION** across all layers (deduped, provenance-preserving, the `#616`
+  pattern `graph-store.ts:877-893`). No layer ever drops another layer's ref.
+- `props.properties` scalar keys → each layer OWNS a **disjoint** key-set; it wins on its
+  owned keys, and a non-owning layer **never** overrides or deletes another's owned key:
+  **detection** owns the regulatory-lifecycle keys (`etape`, `etape_date`, `instrument`,
+  `effet_densifiant`, …); **grounding** owns citation refinement (ref `page`/`excerpt`) and
+  touches only `refs`, not detection business props; **geo** owns geo props (zone
+  attributes, `constraint-hit`, zone `kind`), additive on Lot/Zone, never overriding a
+  detection key. This makes gate1 (`findMissingBusinessProperties`, `:703-729`) a free
+  correctness check — a merge that dropped/degraded an owned key aborts.
+- `label`, `type` → last-writer by **role precedence** (grounding/geo > detection base),
+  matching the atomic `ON CONFLICT … SET label/type = excluded` (`:1103-1111`).
+
+**OQ-D5 — `materializeSeveredSources` stays INSIDE the atomic (E5), post-merge.** It runs on
+the assembled merged `nodeRows` (`:1001`), is idempotent, and its counters are the
+producer-gap signal (`:1002`); a grounding layer that already carries the real cited source
+is `alreadySourced` (no double-materialization). Keeping it one post-merge step (not
+fragmented into producers) preserves a single severed-source authority.
+
+**OQ-D6 — the PG→S3 back-read is removed; the enrichment RELOCATES to a producer.** Today
+`graphify-34-enrich` derives the canonical FROM PG (`subgraphForCity`, the A2 inversion) and
+applies instrument/etape **classification** on it. In E4 the classification moves INTO the
+**detection producer** (or a deterministic classification sub-step of E4), computed from the
+detection input, not PG-accumulated state. Canonical consumers (`project-graph-from-s3`,
+`export-designation-events`, `filet`) read `graph/latest.json` regardless of how it was
+produced → unaffected. **Pre-work verify**: the enrichment is deterministic-from-detection
+and does not depend on PG-accumulated state; any such coupling is untangled inside E4.
+
+**OQ-D4 — the shell-writer fold (immo frames the code; i-infra owns deploy/RBAC).** The two
+shells publishing the canonical via `s5cmd` (`tools/graphify-v23/gate.sh:155`,
+`tools/grounding/publish-citation-grounding.sh:52`), bypassing the guarded writer
+(`canonical-graph-writer.ts:30-34`):
+
+- **Code fold (immo)**: retarget their `s5cmd` PUT from `graph/<city>/latest.json` to
+  `layers/grounding/<city>/latest.json` — they become **layer producers**, not canonical
+  writers; remove the canonical PUT. E4 then consumes `layers/grounding/` and is the single
+  canonical writer (through the guarded writer).
+- **Deploy/RBAC (i-infra)**: revoke `canonical-write` from these shells' execution SA/cred,
+  re-scope to `layers/grounding`-write only — defense-in-depth (the S3 policy refuses the
+  canonical key even if the code regresses).
+- **Sequencing (HARD)**: the fold + the RBAC revoke land **before E5-at-scale** — else a
+  concurrent shell canonical-write clobbers during the atomic. This is the sole-writer
+  pre-condition, alongside i-infra's 3-layer guarantee (RBAC-exclusive canonical-write +
+  `pg_advisory_lock` exactly-1 mesh-wide + the existing CAS `If-Match`).
+
 ---
 
 ## C. Deliverable 2 — geo→graph feeding CONTRACT
@@ -305,8 +355,9 @@ starvation fix ships first, without the mesh.
 > `ConstraintHit` (env), OGC features + zone codes/normes (zones), `BasemapSpec`/tiles
 > (satellite); (b) **immo's side** = a **geo→graph adapter** (a sub-step of E4, extending
 > the existing `run-geo-mapper.ts` + Job 35, `api/src/services/geo/run-geo-mapper.ts`,
-> `deploy/k8s/35-run-geo-mapper-job.yaml`) that reads the served contract and emits the
-> `::` nodes below into `layers/geo/`. The `::` scheme, node types and refs are therefore
+> `deploy/k8s/35-run-geo-mapper-job.yaml`) that reads geo's existing **`normalized/` S3
+> deposit + served contracts** (geo produces **no** new format — confirmed geo-cond) and
+> emits the `::` nodes below into `layers/geo/` (the immo-side intermediate consumed by E4). The `::` scheme, node types and refs are therefore
 > **immo's projection output** (proposed here); what geo **co-signs** is the *source
 > side*: exposing the real règlement zone number, stable feature ids, and provenance in
 > its served payload so immo can key on them.
@@ -333,13 +384,21 @@ when the served zone maps to a known bylaw). Edge key stays `(source, target, ki
 
 ### C.2 How geo props layer onto detection nodes
 
-A geo enrichment of an existing detection node (a Lot's zoning/satellite attributes, a
-lot∩constraint hit) is emitted by the adapter under the **same `::` id** the detection
-layer used, carrying only geo `properties` + geo `refs`. The merge (E4) unions it onto the
-detection base: `props.refs` union, geo-owned property keys layered over the base. The
-adapter therefore **must reuse the detection id** (the FOLD-LOT join key,
-`geo:zonage-acquisition-en-vigueur.md`), not mint a parallel one — an id it invents
-becomes a separate node, not an enrichment. (Id-collision open question OQ-G1.)
+**The Lot id is a NATURAL KEY, minted by no one** (geo-jointures resolution). It is
+`lot::<canon(cadastre_no, municipal/cadastre authority, vintage)>`, derived by a **single
+shared canonicalizer** (geo-jointures SSOT, sibling of `canonicalizeZoneCodeForJoin`,
+`packages/geo/src/zonage/lotZoneJoin.ts`). Both detection and the geo adapter derive the
+**same** id from the same natural key ⇒ **no minting race, no collision to detect** (same
+input → same id). A geo enrichment (a Lot's zoning/constraint attributes) is emitted under
+that **same `::` id**, carrying only geo `properties` + geo `refs`; the merge (E4) unions it
+onto the base (`props.refs` union, geo-owned keys layered, D3). Splitting authority: the
+**identity** (`lot::` canonicalizer + lot⋈zone semantics) is a **geo-jointures/geo-cond
+contract**; the **materialization** (the `graph_nodes` row) is immo/detection via the
+atomic writer — "detection mints" means **first-materialization under the geo-canonical
+id**, never a surrogate. Real cases: same number across cadastres → authority namespace
+separates; cadastral renovation → **new id + a `supersedes` edge**, never in-place mutation
+(vintage carried); a Lot with no cadastral number → `unknown`/deferred, never a fabricated
+surrogate (anti-invention).
 
 ### C.3 refs / provenance format, idempotence, S3 location
 
@@ -376,14 +435,15 @@ becomes a separate node, not an enrichment. (Id-collision open question OQ-G1.)
 
 ### C.5 Open questions — Deliverable 2 (for geo-cond)
 
-- **OQ-G1** Id collisions detection-vs-geo: when detection and the geo→graph adapter both
-  describe a Lot, is the `::` id byte-identical? What is the shared FOLD-LOT key, and does
-  the adapter read the detection layer or a shared id-derivation helper to reuse it?
-- **OQ-G2** Adapter ownership + node-type split: immo owns the geo→graph adapter (extends
-  `run-geo-mapper.ts`); who runs it and when relative to E4 (a pre-step vs inside E4)?
-  Node-type split: adapter emits `zone::`/`overlay::`; detection owns
-  `bylaw::`/`event::`/`signal::`; who mints `lot::`? (Proposal: detection mints Lot,
-  adapter enriches.)
+- **OQ-G1 — RESOLVED (geo-jointures).** The Lot id is a natural key
+  `lot::<canon(cadastre_no, authority, vintage)>` via geo-jointures' shared canonicalizer
+  (SSOT, `lotZoneJoin.ts`); detection and the adapter derive the **same** id ⇒ collision-free
+  by construction; renovation → new id + `supersedes` edge; source-gap → `unknown`/deferred
+  (C.2). *Remaining (immo/i-cond):* adapter run-placement — a pre-step vs inside E4.
+- **OQ-G2 — RESOLVED (geo-jointures + geo-cond).** `lot::` identity/semantics = a geo
+  contract (like `zone::`/`overlay::`); the `graph_nodes` row is materialized by immo via the
+  atomic writer — "detection mints" = first-materialization under the geo-canonical id, not a
+  surrogate. adapter emits `zone::`/`overlay::`; detection owns `bylaw::`/`event::`/`signal::`.
 - **OQ-G3** Served-contract provenance: can geo surface a **stable content hash** (docSha
   equivalent) and the **real règlement zone number** in `ConstraintHit` / OGC codes so the
   adapter keys on them (C.3, C.4)? Layer versioning: `layers/geo/<city>/latest.json`
