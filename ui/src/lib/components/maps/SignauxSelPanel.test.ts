@@ -341,6 +341,28 @@ function makeLotsResponse(features: LotFeature[]): LotsResponse {
   };
 }
 
+// Préfixe de code → `kind` d'AFFECTATION source (libellé FR). Depuis le retrait
+// de la dérivation par token de code (directive owner), la famille ne vient QUE
+// de la source : les fixtures portent donc un `kind` source pour exercer l'UI
+// famille (couleur/légende/chip/type). Un code sans préfixe connu reste SANS
+// kind source → zone neutre, sans chip ni type dérivé (comportement voulu).
+const FIXTURE_PREFIX_KIND: Record<string, string> = {
+  H: "Habitation",
+  C: "Commerce",
+  I: "industriel",
+  A: "agricole",
+  P: "public",
+  U: "utilité publique",
+  CONS: "Conservation",
+  REC: "Récréation",
+  M: "mixte",
+};
+
+function fixtureSourceKind(code: string): string | null {
+  const token = code.trim().toUpperCase().split(/[^A-Z]+/).filter(Boolean)[0] ?? "";
+  return FIXTURE_PREFIX_KIND[token] ?? null;
+}
+
 function makeZonesResponse(codes: string[]): GeoZonesResponse {
   return {
     ok: true,
@@ -352,19 +374,23 @@ function makeZonesResponse(codes: string[]): GeoZonesResponse {
     warnings: [],
     featureCollection: {
       type: "FeatureCollection",
-      features: codes.map((code) => ({
-        type: "Feature",
-        geometry: null,
-        properties: {
-          code,
-          citySlug: "delson",
-          geometryStatus: "official" as const,
-          confidence: 1,
-          source: "official-zone" as const,
-          lotCount: 0,
-          lots: [],
-        },
-      })),
+      features: codes.map((code) => {
+        const kind = fixtureSourceKind(code);
+        return {
+          type: "Feature" as const,
+          geometry: null,
+          properties: {
+            code,
+            ...(kind !== null ? { kind } : {}),
+            citySlug: "delson",
+            geometryStatus: "official" as const,
+            confidence: 1,
+            source: "official-zone" as const,
+            lotCount: 0,
+            lots: [],
+          },
+        };
+      }),
     },
   };
 }
@@ -482,7 +508,7 @@ describe("SignauxSelPanel — #3a panneau « Zone active » pinné", () => {
   });
 });
 
-describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, score honnête)", () => {
+describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, score factuel)", () => {
   const enrichedLot: LotFeature = {
     type: "Feature",
     geometry: null,
@@ -569,7 +595,7 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
     expect(queryByText("Périmètre TOD")).toBeNull();
   });
 
-  it("badge zone cliquable → ouvre le détail de la zone (type dérivé, signaux citants)", async () => {
+  it("badge zone cliquable → ouvre le détail de la zone (type = affectation source, signaux citants)", async () => {
     const { getByText, queryByText, getByTitle } = render(Harness, {
       props: {
         selectedCity: makeCity(),
@@ -585,9 +611,10 @@ describe("SignauxSelPanel — carte lot enrichie (zone, 4+, superficie, TOD, sco
     expect(badge.textContent).toContain("H-431");
 
     await fireEvent.click(badge);
-    // Détail zone ouvert : type dérivé du code (H- → Habitation) + section
-    // signaux. Sélecteur précisé : la chip « Habitation » de l'en-tête de
-    // filtre par type (accordéon Zones) porte le même libellé.
+    // Détail zone ouvert : type = affectation/kind SOURCE (la source sert
+    // kind=Habitation pour H-431), pas dérivé du code. Sélecteur précisé : la
+    // chip « Habitation » de l'en-tête de filtre par affectation source
+    // (accordéon Zones) porte le même libellé.
     expect(queryByText("Habitation", { selector: ".entity-meta-val" })).not.toBeNull();
     expect(queryByText("Signaux citant la zone")).not.toBeNull();
     expect(queryByText("Aucun signal ne cite cette zone.")).not.toBeNull();
