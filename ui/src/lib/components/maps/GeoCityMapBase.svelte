@@ -118,6 +118,12 @@
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import { isSatelliteBasemapEnabled, resolveMintUrl } from "$lib/maps/geo-sat-basemap.js";
   import {
+    zoneOverlayPaint,
+    ZONE_CASING_TOKEN,
+    ZONE_CASING_FALLBACK,
+  } from "$lib/maps/zone-overlay-style.js";
+  import { resolveMapColor } from "$lib/maps/score-color-scale.js";
+  import {
     buildMeasureLineData,
     buildMeasurePointsData,
     formatDistanceFr,
@@ -228,6 +234,11 @@
   let mapContainer: HTMLDivElement;
   let mapInstance: unknown = null;
   let mapReady = false;
+  // §5 2-modes — `true` quand le fond satellite est actif (host-allowlisté).
+  // Positionné dans initMap dès la résolution du basemap, AVANT la 1re pose des
+  // couches zone : conditionne le STYLE des overlays zone (aplats en plan vs
+  // contour+casing couleur-famille en satellite, cf. zoneOverlayPaint).
+  let satelliteActive = false;
   const cityBoundaryBySlug = new Map<string, GeoJsonGeometry>();
   // C9 — mémoire du cadrage initial (capturé au `load`, restauré à la demande).
   const viewportMemory = createViewportMemory();
@@ -671,6 +682,10 @@
     };
     const zoneLayers = [
       "selected-zones-fill",
+      // §5 2-modes — casing AVANT le contour → rendu DESSOUS (liseré sombre sous
+      // le trait famille). Présent seulement en satellite ; guard getLayer plus
+      // bas → no-op en plan (aucun impact sur l'ordre du mode plan).
+      "selected-zones-outline-casing",
       "selected-zones-outline",
       "selected-zones-highlight",
     ];
@@ -774,6 +789,7 @@
       addLayer: (layer: unknown) => void;
       setPaintProperty: (layer: string, prop: string, value: unknown) => void;
       setLayoutProperty: (layer: string, prop: string, value: unknown) => void;
+      getContainer: () => HTMLElement;
     };
 
     const { zones, lots } = input;
@@ -787,15 +803,51 @@
       // generateId : requis pour le feature-state hover (C6).
       m.addSource("selected-zones", { type: "geojson", data: zones, generateId: true });
     }
+    // §5 2-modes — style des overlays zone CONDITIONNÉ au fond. Valeurs INTERIM
+    // geo-archi §5 2-modes, pending ratif DS tokens + owner :
+    //  - PLAN : aplats (fill-opacity immo) + contour sombre fin — INCHANGÉ.
+    //  - SATELLITE : aplat fill-opacity 0 (fill-color famille conservée =
+    //    hit-area cliquable) + contour couleur-FAMILLE 2.25/1.0 + casing sombre
+    //    dessous, pour que l'imagerie transparaisse et que la MEANING passe au
+    //    contour. Boutons de switch = suite séparée (contrainte transformRequest).
+    // Casing : couleur RATIFIÉE DS (token de fondation theme-invariant), résolue
+    // depuis le conteneur monté sous le ThemeProvider comme les couleurs famille.
+    const casingColor = resolveMapColor(
+      ZONE_CASING_TOKEN,
+      ZONE_CASING_FALLBACK,
+      m.getContainer(),
+    );
+    const zonePaint = zoneOverlayPaint(
+      satelliteActive,
+      input.zoneFillColor,
+      input.zoneFillOpacity,
+      casingColor,
+    );
     if (!m.getLayer("selected-zones-fill")) {
       m.addLayer({
         id: "selected-zones-fill",
         type: "fill",
         source: "selected-zones",
         paint: {
-          "fill-color": input.zoneFillColor,
-          "fill-opacity": input.zoneFillOpacity,
+          "fill-color": zonePaint.fill["fill-color"],
+          "fill-opacity": zonePaint.fill["fill-opacity"],
           "fill-outline-color": "#0f172a",
+        },
+      });
+    }
+    // Casing (liseré sombre haut-contraste) posé JUSTE AVANT le contour famille
+    // → dessous. Uniquement en satellite : en plan, aucune couche ajoutée (mode
+    // plan strictement identique au socle). `applyLayerOrder` le range sous le
+    // contour (guard getLayer → no-op si absent en plan).
+    if (satelliteActive && !m.getLayer("selected-zones-outline-casing")) {
+      m.addLayer({
+        id: "selected-zones-outline-casing",
+        type: "line",
+        source: "selected-zones",
+        paint: {
+          "line-color": zonePaint.casing["line-color"],
+          "line-width": zonePaint.casing["line-width"],
+          "line-opacity": zonePaint.casing["line-opacity"],
         },
       });
     }
@@ -805,9 +857,9 @@
         type: "line",
         source: "selected-zones",
         paint: {
-          "line-color": "#0f172a",
-          "line-width": 1.25,
-          "line-opacity": 0.5,
+          "line-color": zonePaint.outline["line-color"],
+          "line-width": zonePaint.outline["line-width"],
+          "line-opacity": zonePaint.outline["line-opacity"],
         },
       });
     }
@@ -926,11 +978,40 @@
     // Garantit la cohérence visibilité ↔ props quand les couches préexistent.
     applyLabelVisibility(showLotLabels, showZoneLabels);
 
+    // §5 2-modes — ré-applique l'opacité d'aplat selon le mode. En PLAN,
+    // `zonePaint.fill["fill-opacity"]` === `input.zoneFillOpacity` (l'expression
+    // immo repassée telle quelle) → comportement STRICTEMENT identique au socle.
+    // En SATELLITE, opacité 0 (l'imagerie transparaît).
     m.setPaintProperty(
       "selected-zones-fill",
       "fill-opacity",
-      input.zoneFillOpacity,
+      zonePaint.fill["fill-opacity"],
     );
+    // En SATELLITE uniquement, la MEANING est portée par le contour couleur
+    // FAMILLE : ré-applique la teinte à l'aplat (hit-area) ET au contour au cas
+    // où la famille est recolorée entre deux syncs. En PLAN, on ne touche NI la
+    // fill-color NI la line-color à la sync (inchangé vs socle).
+    if (satelliteActive) {
+      m.setPaintProperty(
+        "selected-zones-fill",
+        "fill-color",
+        zonePaint.fill["fill-color"],
+      );
+      m.setPaintProperty(
+        "selected-zones-outline",
+        "line-color",
+        zonePaint.outline["line-color"],
+      );
+      // Casing : ré-applique la couleur token DS résolue (theme-invariant) si la
+      // couche préexiste (résolution robuste à un theme swap entre deux syncs).
+      if (m.getLayer("selected-zones-outline-casing")) {
+        m.setPaintProperty(
+          "selected-zones-outline-casing",
+          "line-color",
+          zonePaint.casing["line-color"],
+        );
+      }
+    }
     m.setPaintProperty("selected-lots-fill", "fill-color", input.lotFillColor);
     m.setPaintProperty(
       "selected-lots-fill",
@@ -1226,6 +1307,9 @@
       // carte de référence. Aucune dépendance tuiles supplémentaire.
       // §5 — bascule satellite (flag ON) ; sinon (OFF ou erreur) fond OSM.
       const sat = await buildSatelliteBasemap();
+      // §5 2-modes — mémorise le mode AVANT la 1re pose des couches zone : leur
+      // style (aplats vs contour) en dépend. `sat` truthy = satellite actif.
+      satelliteActive = !!sat;
       const osmBaseLayers =
         basemap === "neutral-gray"
           ? [
