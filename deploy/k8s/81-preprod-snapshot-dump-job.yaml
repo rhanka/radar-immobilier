@@ -1,0 +1,175 @@
+# 81-preprod-snapshot-dump-job.yaml — SNAPSHOT PROD FULL (PII réelle) → OVH Object Storage BHS.
+#
+# Cadre : DOSSIER_DECISION_PREPROD §8/§8.1 (GO owner DIRECT « preprod complet avec PII prod »,
+# 2026-08-16). preprod = snapshot prod FULL SANS assainissement (rejeu/repro — l'assainissement
+# casse le rejeu). Isolation au niveau ENVIRONNEMENT (accès verrouillé), pas de la donnée.
+#
+# CE JOB (in-cluster OVH prod ns radar-immobilier, dispatché via run-job.yaml APRÈS gate conducteur) :
+#   - LIT la DB prod radar-postgres en READ-ONLY via pg_dump -Fc (--no-owner --no-privileges).
+#     N'écrit JAMAIS la prod.
+#   - STREAM pg_dump | age : le CLAIR (PII) ne se matérialise JAMAIS sur disque — seul le ciphertext
+#     `dump.age` existe. Chiffrement age MULTI-DESTINATAIRES {A, interim-B} (clés PUBLIQUES ; clés
+#     privées jamais dans le job — A_priv chez le restore poc-k8s, interim-B_priv détenu ops poc-k8s).
+#   - UPLOAD le ciphertext → OVH Object Storage région BHS (résidence Canada), bucket
+#     radar-preprod-snapshot. AUCUNE sortie PII hors BHS, AUCUN fichier clair.
+#   - Sens unique strict prod→preprod. Le preprod n'écrit jamais vers la prod.
+#
+# Réseau : pod component=graph-projection → réutilise la netpol allow-graph-projection-to-postgres
+# (accès prod PG:5432). Egress OVH-S3/apk : pas de default-deny-egress (confirmé poc-k8s).
+#
+# Creds source = secret `radar-snapshot-source` (rôle Postgres SELECT-only dédié radar_snapshot_ro,
+#                least-privilege : lit, has_table_privilege(INSERT)=false ; ≠ compte applicatif).
+# Creds cible  = secret `preprod-snapshot-upload` (WRITE put-only scopé bucket, minté JIT au dispatch).
+# Clé signature= secret `preprod-snapshot-signer` (privée ; publique épinglée restore ; minté JIT).
+# Params non-secrets (S3 endpoint/bucket/region/addressing + recipients age A + interim-B + signer-id/ttl) =
+#                ConfigMap `radar-preprod-snapshot-params` (OWNER-CONTRÔLÉE poc-k8s ; interim-B patché par poc-k8s).
+# I10 : RADAR full-dump SÛR — manifeste EXCLUDE ~vide vérifié (aucune table clés/secrets/tokens/
+#       sessions ; auth déléguée IdP Sentropic). Pas de --exclude-table pour radar.
+#
+# Set destinataires FINAL = 2 {A (ops restore), interim-B} — pivot OVH Secret Manager + recouvrement
+#    op (ancre EXCLUE du chiffrement pour ne pas dégrader la confidentialité PII : age = protégé au
+#    niveau du destinataire le plus faible). Dispatch gaté : RE-GATE #515 (count 3→2) + IP s3.bhs
+#    re-résolue (poc-k8s) + GO dump conducteur.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-preprod-snapshot-dump
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: preprod-snapshot
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        # accès prod PG:5432 via la netpol existante allow-graph-projection-to-postgres
+        app.kubernetes.io/component: graph-projection
+        app: preprod-snapshot-dump
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      volumes:
+        # ne contient QUE le ciphertext dump.age (jamais de clair)
+        - name: work
+          emptyDir:
+            sizeLimit: 4Gi
+        # clé PRIVÉE de signature (secret posé JIT au dispatch par poc-k8s ; publique épinglée restore)
+        - name: signer
+          secret:
+            secretName: preprod-snapshot-signer
+            items:
+              - { key: signer, path: signer }
+            defaultMode: 0400
+      containers:
+        - name: dump-encrypt-upload
+          # image PATTERN baked+pinnée au DIGEST (pattern-owner poc-k8s) : pg_dump 16.14 / age 1.2.1 /
+          # aws-cli 2.15 / openssh / bash 5.2 — outillage FIGÉ, zéro apk/apt runtime. Pull couvert par
+          # le SA radar-app (radar-registry-pull). Egress restreint par le netpol (voir 2e doc ci-dessous).
+          image: rg.fr-par.scw.cloud/radar-immobilier/snapshot-tools@sha256:b89e91283c3df6cfe5b3ab89979a89b98a73d0bae3f3441554223109ca87891c
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+            - -ceu
+            - |
+              set -o pipefail   # si pg_dump échoue, le pipe échoue → pas d'upload d'un ciphertext partiel
+              export PGPASSWORD="$POSTGRES_PASSWORD"
+              KEY="radar-prod-$(date -u +%Y%m%dT%H%M%SZ).dump.age"
+              # 1) STREAM pg_dump | age → ciphertext (aucun clair sur disque). Rôle SELECT-only.
+              echo "stream: pg_dump -Fc PROD (SELECT-only) | age (A+interim-B) -> /work/dump.age"
+              pg_dump -Fc --no-owner --no-privileges \
+                  -h "$POSTGRES_HOST" -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+                | age -r "$AGE_RECIPIENT_A" -r "$AGE_RECIPIENT_B" \
+                      -o /work/dump.age
+              # 2) SIGNATURE authenticité (ssh-keygen -Y sign, namespace 'file') → dump.age.sig
+              install -m600 /sign/signer /tmp/signer
+              ssh-keygen -Y sign -f /tmp/signer -n file /work/dump.age
+              rm -f /tmp/signer   # clé privée de signature retirée du fs juste après usage
+              SZ=$(stat -c%s /work/dump.age); SHA=$(sha256sum /work/dump.age | cut -d' ' -f1)
+              echo "ciphertext=${SZ}B sha256=$SHA signé=/work/dump.age.sig ( zéro fichier clair )"
+              # 3) UPLOAD ciphertext + signature (bucket versionné, cred put-only)
+              aws --endpoint-url "$S3_ENDPOINT" --region "$AWS_REGION" s3 cp /work/dump.age     "s3://$S3_BUCKET/$KEY"
+              aws --endpoint-url "$S3_ENDPOINT" --region "$AWS_REGION" s3 cp /work/dump.age.sig "s3://$S3_BUCKET/$KEY.sig"
+              echo "DELIVERED key=$KEY size=${SZ} sha256=$SHA sig=$KEY.sig bucket=$S3_BUCKET endpoint=$S3_ENDPOINT"
+          env:
+            # --- source PROD : rôle Postgres SELECT-only dédié (radar_snapshot_ro), least-privilege ---
+            - name: POSTGRES_HOST
+              valueFrom: { secretKeyRef: { name: radar-snapshot-source, key: POSTGRES_HOST } }
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-snapshot-source, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-snapshot-source, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-snapshot-source, key: POSTGRES_DB } }
+            # --- cible OVH-S3 BHS : creds WRITE put-only (mintés JIT) en secretKeyRef seul ---
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: preprod-snapshot-upload, key: AWS_ACCESS_KEY_ID } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: preprod-snapshot-upload, key: AWS_SECRET_ACCESS_KEY } }
+            # --- params NON-secrets (résidence-critiques + recipients age A + interim-B) :
+            #     ConfigMap `radar-preprod-snapshot-params` OWNER-CONTRÔLÉE (poc-k8s), lue en clair
+            #     par le gate i-cond. Set FINAL = 2 destinataires {A (ops restore), interim-B} —
+            #     l'ancre de recouvrement est EXCLUE (sécurité PII : un artefact age est protégé au
+            #     niveau de son destinataire le plus faible). AGE_RECIPIENT_B = interim-B_pub (patché poc-k8s). ---
+            - name: S3_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: S3_ENDPOINT } }
+            - name: S3_BUCKET
+              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: S3_BUCKET } }
+            - name: AWS_REGION
+              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: S3_REGION } }
+            - name: AWS_S3_ADDRESSING_STYLE
+              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: S3_ADDRESSING_STYLE } }
+            - name: AGE_RECIPIENT_A
+              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: AGE_RECIPIENT_A } }
+            - name: AGE_RECIPIENT_B
+              valueFrom: { configMapKeyRef: { name: radar-preprod-snapshot-params, key: AGE_RECIPIENT_B } }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: signer, mountPath: /sign, readOnly: true }
+---
+# NetworkPolicy EGRESS (fournie par poc-k8s, pattern-owner) — I4/gate.
+# Sélectionne UNIQUEMENT le pod du job (app=preprod-snapshot-dump) ; autorise DNS + radar-postgres:5432
+# in-cluster + OVH-S3 BHS(443) ; tout le reste refusé → un apk/apt runtime serait IMPOSSIBLE (force
+# l'image pré-cuite au digest). Appliquée avec le Job (même `kubectl apply -f`).
+# NB : poc-k8s re-vérifie l'IP de s3.bhs au DISPATCH (OVH peut présenter d'autres IP) et met à jour.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-preprod-snapshot-dump
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/part-of: preprod-snapshot-pattern
+    owner: poc-k8s
+spec:
+  podSelector:
+    matchLabels:
+      app: preprod-snapshot-dump
+  policyTypes: [Egress]
+  egress:
+    # DNS (résolution du endpoint S3)
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    # PROD postgres source (in-cluster, même ns)
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: postgres
+              app.kubernetes.io/name: radar-immobilier
+      ports:
+        - {protocol: TCP, port: 5432}
+    # OVH Object Storage BHS (externe) — IP résolue de s3.bhs.io.cloud.ovh.net (re-vérifiée au dispatch).
+    - to:
+        - ipBlock:
+            cidr: 54.39.60.208/32
+      ports:
+        - {protocol: TCP, port: 443}
