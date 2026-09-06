@@ -23,7 +23,7 @@
     "svelte": "^5.0.0",
     "vite": "^6.4.3",
     "@sentropic/geo-map-engine": {
-      "@sentropic/geo-core": "0.6.0"
+      "@sentropic/geo-core": "0.6.1"
     },
     "officeparser": {
       "pdfjs-dist": "npm:empty-npm-package@1.0.0"
