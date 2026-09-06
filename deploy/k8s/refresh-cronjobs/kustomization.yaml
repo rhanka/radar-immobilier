@@ -120,6 +120,18 @@ patches:
   # 1 seule ville a graph/<ville>/latest.json en préprod), on ne la dimensionne
   # pas. Elle reste à la base (256Mi/96Mi, 150m/50m, heap200) ; seul son patch
   # GRAPH_S3 d'alignement bucket (ci-dessus) s'applique.
+  #
+  # NIGHTLY BACKOFF+DEADLINE (scrape) foldé dans le même patch :
+  #  - base 34 ship backoffLimit:1. worker-live exit 1 sur des source-errors
+  #    par-ville TOLÉRABLES (TOUJOURS présentes) APRÈS un done + upsert PG réussi
+  #    → avec backoffLimit:1 le scrape sortant complet (~110min) RE-tenterait
+  #    chaque nuit pour rien → backoffLimit:0 (aucun retry gaspilleur). Fix propre
+  #    = sémantique exit-code worker-live (source-errors ≠ job-failure), routé
+  #    i-arch côté app.
+  #  - activeDeadlineSeconds 7200→10800 : temps de run unique observé = 80–110min
+  #    sur les runs r4 et manual-0905 ; 7200s (120min) tombe DANS cette variance,
+  #    et backoffLimit:0 retire le filet retry → bump à 10800s (3h) pour qu'un run
+  #    un peu plus lent atteigne quand même done + feed PG avant la deadline.
   - target:
       kind: CronJob
       name: radar-refresh-scrape
@@ -131,6 +143,8 @@ patches:
       spec:
         jobTemplate:
           spec:
+            backoffLimit: 0
+            activeDeadlineSeconds: 10800
             template:
               spec:
                 containers:
