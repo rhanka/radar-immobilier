@@ -68,9 +68,11 @@
   } from "$lib/maps/signaux-zones-loader.js";
   import {
     fetchAllLots,
+    lotsCollectionId,
     type LotFeatureCollection,
     type LotsResponse,
   } from "$lib/maps/lots-client.js";
+  import { lotsEnabledFromSearch } from "$lib/maps/lots-url-toggle.js";
   import {
     fetchCptaqConstraints,
     type CptaqFeatureCollection,
@@ -267,6 +269,17 @@
   let geoNotices: string[] = [];
   let zonesResponse: GeoZonesResponse | null = null;
   let lotsResponse: LotsResponse | null = null;
+  // Deep-link ZONES-ONLY : quand `false`, `loadGeoForCity` NE full-fetch PAS les
+  // lots (skip complet du réseau). Lu UNE fois depuis l'URL à l'INIT du composant
+  // (`?lots=0|off|false|no` ou `?layers=zones`) — PAS dans onMount : le réactif
+  // `applyGeoRoute` (deep-link ville) déclenche `loadGeoForCity` AVANT onMount,
+  // donc la valeur doit être prête dès l'init. Même garde SSR (`typeof window`)
+  // que le pattern des préférences. Absent / autre valeur → lots activés (défaut
+  // inchangé). La couche ZONES reste chargée dans tous les cas.
+  let lotsEnabled =
+    typeof window === "undefined"
+      ? true
+      : lotsEnabledFromSearch(window.location.search);
   // §9 CPTAQ « zone agricole protégée » — overlay TOGGLEABLE (couche propre,
   // état d'absence/erreur VISIBLE, jamais de disparition muette). Fetch per-ville
   // (collection `ca-qc-constraints-<slug>` déjà per-ville → bbox omis).
@@ -2053,6 +2066,25 @@
   }
 
   /**
+   * État lots « désactivé » (deep-link zones-only) : réponse valide et VIDE, pas
+   * une erreur. `ok:true` + `source:"none"` → le panneau n'affiche pas « Lots non
+   * configurés » (réservé à `ok:false`) et `displayedLots` reste vide (aucun lot
+   * peint). lots-client n'expose pas de constructeur d'état vide dédié ; on le
+   * construit ici, calqué sur la forme `LotsResponse`.
+   */
+  function disabledLotsResponse(citySlug: string): LotsResponse {
+    return {
+      ok: true,
+      citySlug,
+      source: "none",
+      collectionId: lotsCollectionId(citySlug),
+      numberMatched: 0,
+      numberReturned: 0,
+      featureCollection: EMPTY_LOTS,
+    };
+  }
+
+  /**
    * Charge les couches géo (zones + lots) d'une ville.
    *
    * Chaque couche est une TÂCHE INDÉPENDANTE : son waiter (`zonesLoading` /
@@ -2134,6 +2166,18 @@
     // multi-pages fusionnée (fetchAllLots), peinte PROGRESSIVEMENT à chaque
     // page reçue. Garde anti-course inchangée (lease + AbortSignal).
     const lotsTask = (async () => {
+      // Deep-link ZONES-ONLY (`?lots=0`) : on N'appelle PAS fetchAllLots (skip
+      // complet du réseau, aucun fan-out). État lots vide propre + notice
+      // explicite ; les couches lots ne sont jamais peintes.
+      if (!lotsEnabled) {
+        if (!lease.isCurrent()) return;
+        lotsResponse = disabledLotsResponse(citySlug);
+        lotsLoading = false;
+        notices.push("Lots désactivés (zones-only via URL).");
+        publishNotices();
+        updateGeoLayers();
+        return;
+      }
       try {
         const value = await fetchAllLots(citySlug, {
           signal: lease.signal,
