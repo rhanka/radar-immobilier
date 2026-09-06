@@ -1,0 +1,196 @@
+/**
+ * SignauxMapView — deep-link ZONES-ONLY (`?lots=0`).
+ *
+ * Contrat vérifié (socle carto stubé, clients mockés — aucun WebGL, aucune API) :
+ *   (a) avec `?lots=0`, `loadGeoForCity` NE full-fetch PAS les lots (fetchAllLots
+ *       non appelé) tout en chargeant les ZONES (loadSignauxZones appelé) ;
+ *   (b) sans paramètre, `fetchAllLots` EST appelé (comportement par défaut
+ *       STRICTEMENT inchangé).
+ *
+ * Le deep-link ville est fourni via la prop `geoRoute` (city route) : le réactif
+ * `applyGeoRoute` → `selectCity` → `loadGeoForCity` s'enclenche dès que la liste
+ * de villes est prête (allEntries dérive de prioritizedCities, donc non vide).
+ * Le toggle lots est lu depuis `window.location.search` à l'init du composant.
+ */
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { render, cleanup, waitFor } from "@testing-library/svelte";
+import { buildCityMapEntries } from "$lib/maps/maps-data.js";
+import {
+  normalizeGeoRouteState,
+  type GeoRoute,
+} from "$lib/router/geo-route.js";
+import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
+
+// ── Socle carto stubé (maplibre indisponible en jsdom) ────────────────────────
+vi.mock("$lib/components/maps/GeoCityMapBase.svelte", async () => {
+  const stub = await import("./test-stubs/GeoCityMapBaseStub.svelte");
+  return { default: stub.default };
+});
+
+// ── Clients réseau mockés (aucun fetch réel) ──────────────────────────────────
+vi.mock("$lib/signals/graph-signals-by-city-client.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("$lib/signals/graph-signals-by-city-client.js")>();
+  return {
+    ...actual,
+    fetchGraphSignalsByCity: vi.fn(async () => ({ cities: [] })),
+  };
+});
+
+vi.mock("$lib/signals/graph-signal-detail-client.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("$lib/signals/graph-signal-detail-client.js")>();
+  return {
+    ...actual,
+    fetchGraphSignalDetail: vi.fn(async (citySlug: string) => ({
+      ok: true,
+      citySlug,
+      legacyProjection: null,
+      nodes: [],
+    })),
+  };
+});
+
+vi.mock("$lib/maps/signaux-zones-loader.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("$lib/maps/signaux-zones-loader.js")>();
+  return {
+    ...actual,
+    loadSignauxZones: vi.fn(async (citySlug: string) => ({
+      tier: "collection" as const,
+      response: fixtureZones(citySlug),
+    })),
+  };
+});
+
+vi.mock("$lib/maps/lots-client.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("$lib/maps/lots-client.js")>();
+  return {
+    ...actual,
+    fetchAllLots: vi.fn(async (citySlug: string) => ({
+      ok: true,
+      citySlug,
+      source: "donnees-quebec" as const,
+      collectionId: actual.lotsCollectionId(citySlug),
+      numberMatched: 0,
+      numberReturned: 0,
+      featureCollection: { type: "FeatureCollection" as const, features: [] },
+    })),
+  };
+});
+
+import SignauxMapView from "./SignauxMapView.svelte";
+import { fetchAllLots } from "$lib/maps/lots-client.js";
+import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
+
+/** Une zone réelle avec géométrie — le drill zones est alimenté. */
+function fixtureZones(citySlug: string): GeoZonesResponse {
+  return {
+    ok: true,
+    citySlug,
+    source: "official",
+    resolutionStatus: "official",
+    geometryStatus: "official",
+    zoneCount: 1,
+    warnings: [],
+    featureCollection: {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [-73.55, 45.37],
+                [-73.54, 45.37],
+                [-73.54, 45.38],
+                [-73.55, 45.38],
+                [-73.55, 45.37],
+              ],
+            ],
+          },
+          properties: {
+            code: "H-01",
+            citySlug,
+            geometryStatus: "official",
+            confidence: 1,
+            source: "official-zone",
+            lotCount: 0,
+            lots: [],
+            kind: "habitation",
+          },
+        },
+      ],
+    },
+  };
+}
+
+/** Slug d'une vraie ville priorisée (garantit la correspondance geoRoute↔entry). */
+const CITY_SLUG = buildCityMapEntries([])[0]!.municipality.slug;
+
+function cityRoute(): GeoRoute {
+  return {
+    level: "city",
+    citySlug: CITY_SLUG,
+    state: normalizeGeoRouteState({ mode: "signal" }),
+  };
+}
+
+/** Positionne `window.location.search` (lu à l'init du composant). */
+function setSearch(search: string): void {
+  window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}${search}`);
+}
+
+afterEach(() => {
+  cleanup();
+  setSearch("");
+});
+
+beforeEach(() => {
+  vi.mocked(fetchAllLots).mockClear();
+  vi.mocked(loadSignauxZones).mockClear();
+});
+
+describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
+  it("(a) ?lots=0 : fetchAllLots N'EST PAS appelé, les zones se chargent quand même", async () => {
+    setSearch("?lots=0");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    // Preuve que loadGeoForCity a bien tourné pour cette ville : les zones sont
+    // chargées. Les deux tâches (zones + lots) sont créées dans le MÊME corps de
+    // fonction : si les lots devaient être fetchés, fetchAllLots aurait déjà été
+    // appelé au moment où loadSignauxZones l'est. L'assertion est donc fiable.
+    await waitFor(() =>
+      expect(vi.mocked(loadSignauxZones)).toHaveBeenCalledWith(
+        CITY_SLUG,
+        expect.anything(),
+      ),
+    );
+    expect(vi.mocked(fetchAllLots)).not.toHaveBeenCalled();
+  });
+
+  it("(b) sans paramètre : fetchAllLots EST appelé (défaut inchangé)", async () => {
+    setSearch("");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    await waitFor(() =>
+      expect(vi.mocked(fetchAllLots)).toHaveBeenCalledWith(
+        CITY_SLUG,
+        expect.anything(),
+      ),
+    );
+    expect(vi.mocked(loadSignauxZones)).toHaveBeenCalled();
+  });
+
+  it("?layers=zones (alias) : fetchAllLots N'EST PAS appelé", async () => {
+    setSearch("?layers=zones");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    await waitFor(() =>
+      expect(vi.mocked(loadSignauxZones)).toHaveBeenCalled(),
+    );
+    expect(vi.mocked(fetchAllLots)).not.toHaveBeenCalled();
+  });
+});
