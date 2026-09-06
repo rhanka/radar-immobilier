@@ -67,6 +67,10 @@
     loadSignauxZones,
   } from "$lib/maps/signaux-zones-loader.js";
   import {
+    ZONE_COVERAGE_LAYER_ENABLED,
+    zoneCoverageLegend,
+  } from "$lib/maps/zone-coverage-overlay.js";
+  import {
     fetchAllLots,
     type LotFeatureCollection,
     type LotsResponse,
@@ -2359,6 +2363,27 @@
                 onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
               />
             </div>
+          </div>
+        {/if}
+        {#if ZONE_COVERAGE_LAYER_ENABLED}
+          {@const coverageLegend = zoneCoverageLegend()}
+          <!-- SQUELETTE couverture de preuve (désactivé par défaut) : point
+               d'accroche carte pour marquer « Non couvert » AU FIL des 167.
+               Flag OFF → aucun rendu en production ; activation + QA sur
+               donnée réelle uniquement (recette = critère de sortie). -->
+          <div
+            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            data-testid="map-legend-zone-coverage"
+          >
+            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{coverageLegend.title}</p>
+            <ul class="space-y-1">
+              {#each coverageLegend.items as item (item.label)}
+                <li class="flex items-center gap-2 text-xs text-slate-600">
+                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                  {item.label}
+                </li>
+              {/each}
+            </ul>
           </div>
         {/if}
         <div
