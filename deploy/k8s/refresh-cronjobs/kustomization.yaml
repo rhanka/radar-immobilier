@@ -122,16 +122,19 @@ patches:
   # GRAPH_S3 d'alignement bucket (ci-dessus) s'applique.
   #
   # NIGHTLY BACKOFF+DEADLINE (scrape) foldé dans le même patch :
-  #  - base 34 ship backoffLimit:1. worker-live exit 1 sur des source-errors
-  #    par-ville TOLÉRABLES (TOUJOURS présentes) APRÈS un done + upsert PG réussi
-  #    → avec backoffLimit:1 le scrape sortant complet (~110min) RE-tenterait
-  #    chaque nuit pour rien → backoffLimit:0 (aucun retry gaspilleur). Fix propre
-  #    = sémantique exit-code worker-live (source-errors ≠ job-failure), routé
-  #    i-arch côté app.
-  #  - activeDeadlineSeconds 7200→10800 : temps de run unique observé = 80–110min
-  #    sur les runs r4 et manual-0905 ; 7200s (120min) tombe DANS cette variance,
-  #    et backoffLimit:0 retire le filet retry → bump à 10800s (3h) pour qu'un run
-  #    un peu plus lent atteigne quand même done + feed PG avant la deadline.
+  #  - base 34 ship backoffLimit:1. L'interim backoffLimit:0 (#633) évitait un
+  #    RE-scrape nocturne gaspilleur quand worker-live sortait exit 1 sur des
+  #    source-errors par-ville TOLÉRABLES (APRÈS un done + upsert PG réussi). Ce
+  #    bug app est CORRIGÉ : le fix exit-code worker-live (#637, exit-code=
+  #    job-health : source-errors tolérables → exit 0 → Job=Complete) est mergé,
+  #    déployé ET run-validé sur la nightly (Job=Complete, 90/528 source-errors
+  #    tolérées) → on REVERT backoffLimit 0→1 : un seul retry ne se déclenche plus
+  #    que sur un échec transitoire GÉNUIN (blip S3/PG/réseau), plus sur des
+  #    source-errors par-ville tolérables. Le filet retry est restauré.
+  #  - activeDeadlineSeconds 7200→10800 CONSERVÉ : temps de run unique observé =
+  #    80–110min sur les runs r4 et manual-0905 ; 7200s (120min) tombe DANS cette
+  #    variance → deadline 10800s (3h) GARDÉE pour qu'un run un peu plus lent
+  #    atteigne quand même done + feed PG avant la deadline.
   - target:
       kind: CronJob
       name: radar-refresh-scrape
@@ -143,7 +146,7 @@ patches:
       spec:
         jobTemplate:
           spec:
-            backoffLimit: 0
+            backoffLimit: 1
             activeDeadlineSeconds: 10800
             template:
               spec:
