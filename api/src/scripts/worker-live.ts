@@ -29,6 +29,20 @@
  * When a handle IS built, the per-city graph is upserted via `upsertGraph`
  * (provenance-preserving union).
  *
+ * Exit code (JOB HEALTH, not per-city data-quality — see `assessJobHealth`):
+ *   0  the run's MACHINERY ran. Per-city source errors (a city unreachable / HTTP
+ *      4xx / fetch-failed) are a normal, expected data-quality event and are
+ *      TOLERATED; the idempotent PG feed still succeeded.
+ *   1  Postgres was unreachable on a PG-feed job (the `select 1` ping path), OR a
+ *      SYSTEMIC failure — either the RECUEIL axis (per-city fetch-error RATE
+ *      reached `LIVE_SCRAPE_MAX_ERROR_RATE`, default 0.9), or the EXPLOITATION
+ *      axis (pdftotext/poppler missing so every PV extracts to empty, or a PG
+ *      feed was expected yet 0 cities were upserted despite cities being fetched
+ *      — a broken exploitation / PG-write path).
+ * Two-tier WARN (both exit 0): a fetch-error rate ≥ `LIVE_SCRAPE_WARN_ERROR_RATE`
+ * (default 0.5) is logged as an ELEVATED, alertable degradation; a smaller handful
+ * of per-city errors is logged as NORMAL tolerated data-quality.
+ *
  * Env:
  *   LIVE_SCRAPE_LIMIT    optional per-city cap on the number of docs collected.
  *   LIVE_SCRAPE_EXPLOIT  when "1"/"true", also run EXPLOITATION after each
@@ -38,6 +52,14 @@
  *                        i.e. the key the Signaux view reads. Off by default.
  *                        Ignored when `--reexploit` is passed (reexploit already
  *                        implies exploitation).
+ *   LIVE_SCRAPE_MAX_ERROR_RATE
+ *                        float in (0,1]; the per-city fetch-error RATE at/above
+ *                        which the RECUEIL axis is a systemic failure and the run
+ *                        exits 1. Default 0.9. NaN / out-of-range falls back to 0.9.
+ *   LIVE_SCRAPE_WARN_ERROR_RATE
+ *                        float in (0,1]; the fetch-error RATE at/above which the run
+ *                        logs an ELEVATED (alertable) degradation warning while still
+ *                        exiting 0. Default 0.5. NaN / out-of-range falls back to 0.5.
  */
 import { isPdftotextAvailable } from "@radar/sources";
 
@@ -46,6 +68,7 @@ import { createDb, type DbHandle } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "../services/sources/live-scrape.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
+import { assessJobHealth } from "./job-health.js";
 import { decidePgFeed } from "./pg-feed-decision.js";
 
 /**
@@ -132,8 +155,10 @@ async function main(): Promise<number> {
   // (poppler). If the binary is missing the adapter silently yields "" → 0
   // signal on real PDFs. Surface that as a LOUD diagnostic instead of a silent
   // false-negative. We do not abort RECUEIL (raw capture still works); we warn
-  // so the empty-signal run is never mistaken for "no opportunities found".
-  if (exploit && !(await isPdftotextAvailable())) {
+  // so the empty-signal run is never mistaken for "no opportunities found". The
+  // captured boolean also drives the EXPLOITATION axis of the exit verdict below.
+  const pdftotextAvailable = exploit ? await isPdftotextAvailable() : true;
+  if (exploit && !pdftotextAvailable) {
     logger.error(
       { binary: "pdftotext", remedy: "install poppler-utils in this image" },
       "worker-live: pdftotext (poppler) NOT available — every PV PDF will " +
@@ -213,7 +238,62 @@ async function main(): Promise<number> {
       handle ? `PG feed: ON (${upserted} cities upserted)` : "PG feed: OFF",
     );
 
-    return errors.length > 0 ? 1 : 0;
+    // Exit code reflects JOB HEALTH across two axes (RECUEIL fetch rate +
+    // EXPLOITATION machinery), not per-city data-quality. Per-city source errors
+    // (unreachable / 4xx / fetch-failed) are TOLERATED; the Job is only failed on
+    // a SYSTEMIC failure. See `assessJobHealth`. Both thresholds are floats in
+    // (0,1]; a NaN / out-of-range env falls back to the safe default.
+    const parseRate = (raw: string | undefined, fallback: number): number => {
+      const n = Number.parseFloat(raw ?? "");
+      return Number.isFinite(n) && n > 0 && n <= 1 ? n : fallback;
+    };
+    const maxErrorRate = parseRate(process.env.LIVE_SCRAPE_MAX_ERROR_RATE, 0.9);
+    const elevatedWarnRate = parseRate(process.env.LIVE_SCRAPE_WARN_ERROR_RATE, 0.5);
+    const errorRate = recap.length > 0 ? errors.length / recap.length : 0;
+    const health = assessJobHealth({
+      errorCount: errors.length,
+      cityCount: recap.length,
+      maxErrorRate,
+      elevatedWarnRate,
+      exploitRequested: exploit,
+      feedExpected: pgFeed.feed,
+      upserted,
+      pdftotextAvailable,
+    });
+
+    if (health.code === 1) {
+      logger.error(
+        {
+          errorCount: errors.length,
+          errorRate,
+          maxErrorRate,
+          elevatedWarnRate,
+          upserted,
+          exploit,
+          feedExpected: pgFeed.feed,
+          pdftotextAvailable,
+          cities: errors.map((e) => e.city),
+        },
+        health.reason,
+      );
+    } else if (health.warn === "elevated") {
+      logger.warn(
+        {
+          errorCount: errors.length,
+          errorRate,
+          elevatedWarnRate,
+          cities: errors.map((e) => e.city),
+        },
+        health.reason,
+      );
+    } else if (health.warn === "normal") {
+      logger.warn(
+        { errorCount: errors.length, errorRate, cities: errors.map((e) => e.city) },
+        health.reason,
+      );
+    }
+
+    return health.code;
   } finally {
     // Always release the pool (both success and error paths) so the process can
     // exit cleanly instead of hanging on an open connection.
