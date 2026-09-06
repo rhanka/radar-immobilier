@@ -83,35 +83,87 @@ patches:
                       - name: GRAPH_S3_FORCE_PATH_STYLE
                         value: "true"
 
-  # SCRAPE bucket/path-style alignment (i-infra) — same root cause as the
-  # projection GRAPH_S3: base 34 ships SCRAPE_S3_FORCE_PATH_STYLE=false (SCW, →
-  # virtual-host → ENOTFOUND on MinIO) + a mis-suffixed secret bucket
-  # (radar-immobilier-docs, no -preprod). Override SCRAPE_S3 to the preprod MinIO
-  # (path-style, docs-preprod) so the ongoing scrape writes raw/ to the SAME
-  # single preprod bucket the app + projection use. Mirrors the diag-fix (#592).
+  # SCRAPE bucket/path-style alignment (i-infra) — base 34 ship SCRAPE_S3_ENDPOINT/
+  # BUCKET en `valueFrom: secretKeyRef` (héritage SCW) + SCRAPE_S3_FORCE_PATH_STYLE
+  # =false (SCW → virtual-host → ENOTFOUND sur MinIO). En PREPROD le store est le
+  # MinIO in-cluster `radar-minio:9000` / `radar-immobilier-docs-preprod`
+  # (path-style), le MÊME que l'app + la projection. On aligne SCRAPE_S3 dessus
+  # pour que le scrape écrive raw/ dans le bucket préprod unique.
   #
-  # JSON6902 index-replace (NOT strategic-merge): base 34's SCRAPE_S3_ENDPOINT/
-  # BUCKET are `valueFrom: secretKeyRef` — a strategic-merge `value:` would MERGE
-  # into an INVALID env with both value+valueFrom (kubectl rejects it). Replacing
-  # the whole entry by index yields a clean value-only env. Indices mirror base
-  # 34's scrape env order: ENDPOINT=4, BUCKET=5, FORCE_PATH_STYLE=9 (i-infra
-  # co-vals; if base 34's env order changes, these indices must follow).
+  # FIX du patch d'alignement (remplace l'ancien JSON6902 indices 4/5/9, devenu
+  # STALE depuis #629 qui a inséré POSTGRES_USER/PASSWORD/DB en 2-4 et décalé
+  # SCRAPE_S3_ENDPOINT à l'index 7 : l'ancien patch clobbait POSTGRES_DB(4) +
+  # S3_ACCESS_KEY(5), dupliquait ENDPOINT/BUCKET (value shadowé par le valueFrom
+  # base = last-wins → alignement ineffectif) et FORCE_PATH_STYLE "true"(9) shadowé
+  # par "false"(12) → path-style OFF).
+  #
+  # Mécanisme = strategic-merge PAR NOM (index-free) → robuste au ré-ordonnancement
+  # FUTUR de la base : aucun index à maintenir (c'était la cause racine du bug).
+  # `valueFrom: null` supprime le secretKeyRef de base pour rendre une entrée
+  # value-only propre (un `value:` seul créerait un env INVALIDE value+valueFrom,
+  # rejeté par kubectl — la raison du JSON6902 d'origine ; `valueFrom: null` lève
+  # cette contrainte). Rendu VÉRIFIÉ : ENDPOINT/BUCKET/FORCE_PATH_STYLE en value
+  # propre UNIQUE (0 doublon, 0 entrée value+valueFrom), path-style "true", et
+  # POSTGRES_DB / S3_ACCESS_KEY / SCRAPE_S3_REGION (secretKeyRef) INTACTS. NB : le
+  # strategic-merge ré-ordonne cosmétiquement l'env (entrées mergées en tête) —
+  # sémantiquement inerte, AUCUN nom dupliqué.
+  #
+  # NIGHTLY MEM+CPU BUMP (scrape) foldé dans le même patch :
+  #  - mémoire évidencée (saint-henri 199 docs OOM@512Mi, succès@3Gi au run r4) ;
+  #    heap 2560 < 3Gi ; requests 768Mi scheduling.
+  #  - CPU évidencé par le run r4 (radar-refresh-all-r4 : 528 villes en 80 min à
+  #    100m/500m, << deadline 7200s ; le 150m base throttlerait le scrape
+  #    séquentiel) → requests.cpu 100m / limits.cpu 500m. Tient dans le quota
+  #    préprod ACTUEL (co-check k8s) → 0 relèvement de quota namespace.
+  #
+  # PROJECTION : PAS de patch resources ici — sa mesure est MOOT (input-starved :
+  # 1 seule ville a graph/<ville>/latest.json en préprod), on ne la dimensionne
+  # pas. Elle reste à la base (256Mi/96Mi, 150m/50m, heap200) ; seul son patch
+  # GRAPH_S3 d'alignement bucket (ci-dessus) s'applique.
+  #
+  # NIGHTLY BACKOFF+DEADLINE (scrape) foldé dans le même patch :
+  #  - base 34 ship backoffLimit:1. worker-live exit 1 sur des source-errors
+  #    par-ville TOLÉRABLES (TOUJOURS présentes) APRÈS un done + upsert PG réussi
+  #    → avec backoffLimit:1 le scrape sortant complet (~110min) RE-tenterait
+  #    chaque nuit pour rien → backoffLimit:0 (aucun retry gaspilleur). Fix propre
+  #    = sémantique exit-code worker-live (source-errors ≠ job-failure), routé
+  #    i-arch côté app.
+  #  - activeDeadlineSeconds 7200→10800 : temps de run unique observé = 80–110min
+  #    sur les runs r4 et manual-0905 ; 7200s (120min) tombe DANS cette variance,
+  #    et backoffLimit:0 retire le filet retry → bump à 10800s (3h) pour qu'un run
+  #    un peu plus lent atteigne quand même done + feed PG avant la deadline.
   - target:
       kind: CronJob
       name: radar-refresh-scrape
     patch: |
-      - op: replace
-        path: /spec/jobTemplate/spec/template/spec/containers/0/env/4
-        value:
-          name: SCRAPE_S3_ENDPOINT
-          value: "http://radar-minio:9000"
-      - op: replace
-        path: /spec/jobTemplate/spec/template/spec/containers/0/env/5
-        value:
-          name: SCRAPE_S3_BUCKET
-          value: "radar-immobilier-docs-preprod"
-      - op: replace
-        path: /spec/jobTemplate/spec/template/spec/containers/0/env/9
-        value:
-          name: SCRAPE_S3_FORCE_PATH_STYLE
-          value: "true"
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: radar-refresh-scrape
+      spec:
+        jobTemplate:
+          spec:
+            backoffLimit: 0
+            activeDeadlineSeconds: 10800
+            template:
+              spec:
+                containers:
+                  - name: scrape
+                    env:
+                      - name: NODE_OPTIONS
+                        value: "--max-old-space-size=2560 --dns-result-order=ipv4first"
+                      - name: SCRAPE_S3_ENDPOINT
+                        value: "http://radar-minio:9000"
+                        valueFrom: null
+                      - name: SCRAPE_S3_BUCKET
+                        value: "radar-immobilier-docs-preprod"
+                        valueFrom: null
+                      - name: SCRAPE_S3_FORCE_PATH_STYLE
+                        value: "true"
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 768Mi
+                      limits:
+                        cpu: 500m
+                        memory: 3Gi
