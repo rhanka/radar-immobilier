@@ -226,6 +226,25 @@
   /** Affiche le n° de zone (`code`) au centre des aplats de zone. */
   export let showZoneLabels = false;
 
+  // ── Props : fond de carte (§5 2-modes) ─────────────────────────────────────
+  /**
+   * Mode de FOND : `'plan'` (défaut — aplats remplis sur OSM/neutral, STRICTEMENT
+   * le comportement d'avant §5) ou `'satellite'` (imagerie + overlays zone en
+   * contour/casing, cf. zoneOverlayPaint). `initMap` ne construit le fond
+   * satellite QUE si ce mode vaut `'satellite'` ; sinon `sat = null` → OSM.
+   * Contrainte MapLibre : `transformRequest` n'est PAS modifiable au runtime →
+   * un changement de mode APRÈS montage RÉ-INITIALISE la carte (viewport
+   * préservé), cf. le bloc réactif de ré-init plus bas.
+   */
+  export let basemapMode: "plan" | "satellite" = "plan";
+  /**
+   * Notifié quand le mode `'satellite'` était demandé mais que le fond satellite
+   * n'a pas pu être construit (mint indisponible / erreur) → repli OSM. Le mode
+   * NE retombe PAS sur plan (le consommateur reste en satellite et affiche une
+   * notice de repli). No-op par défaut.
+   */
+  export let onBasemapFallback: () => void = () => {};
+
   // ── Props : cycle de vie ───────────────────────────────────────────────────
   /** Appelé une fois la carte prête, avec l'API impérative du socle. */
   export let onReady: (api: GeoCityMapApi) => void = () => {};
@@ -247,6 +266,16 @@
   // couches zone : conditionne le STYLE des overlays zone (aplats en plan vs
   // contour+casing couleur-famille en satellite, cf. zoneOverlayPaint).
   let satelliteActive = false;
+  // §5 2-modes — mode avec lequel la carte COURANTE a été construite (capté au
+  // début d'`initMap`, AVANT tout `await`). Le bloc réactif de ré-init compare
+  // ce témoin à la prop `basemapMode` : quand ils divergent APRÈS montage, la
+  // carte est détruite puis reconstruite dans le nouveau mode (contrainte
+  // `transformRequest` non-runtime). Égal à `basemapMode` à l'init → aucune
+  // ré-init parasite au premier montage.
+  let builtBasemapMode: "plan" | "satellite" = basemapMode;
+  // Garde d'idempotence de la ré-init : interdit deux reconstructions
+  // concurrentes (une ré-init en vol ne doit pas en déclencher une seconde).
+  let reinitializing = false;
   const cityBoundaryBySlug = new Map<string, GeoJsonGeometry>();
   // C9 — mémoire du cadrage initial (capturé au `load`, restauré à la demande).
   const viewportMemory = createViewportMemory();
@@ -1314,18 +1343,37 @@
   }
 
   // ── Init MapLibre ──────────────────────────────────────────────────────────
-  async function initMap(): Promise<void> {
+  /**
+   * @param startView Viewport (centre/zoom) de départ. Fourni lors d'une
+   *   RÉ-INITIALISATION (switch de fond) pour PRÉSERVER le cadrage courant ;
+   *   absent au primo-chargement → cadrage Québec par défaut. Le cadrage INITIAL
+   *   mémorisé (viewportMemory) reste celui du tout premier montage (captureOnce
+   *   idempotent) : `resetToInitialView` continue de restituer le cadrage Québec.
+   */
+  async function initMap(
+    startView?: { center: [number, number]; zoom: number },
+  ): Promise<void> {
     if (!mapContainer) return;
+    // §5 2-modes — témoin du mode construit, posé AVANT tout `await` : le bloc
+    // réactif de ré-init ne verra pas de divergence pendant cette construction.
+    builtBasemapMode = basemapMode;
     try {
       const maplibre = (await import("maplibre-gl")).default;
       // C10 — fond « neutral-gray » : aplat gris + raster OSM DÉSATURÉ
       // (saturation -1) et éclairci, pour faire ressortir zones/lots façon
       // carte de référence. Aucune dépendance tuiles supplémentaire.
-      // §5 — bascule satellite (flag ON) ; sinon (OFF ou erreur) fond OSM.
-      const sat = await buildSatelliteBasemap();
+      // §5 2-modes — le fond satellite n'est construit QUE si le mode courant
+      // vaut `'satellite'` ; en `'plan'` (défaut) → `sat = null` → fond OSM +
+      // aplats REMPLIS (zoneOverlayPaint(false), inchangé).
+      const sat =
+        basemapMode === "satellite" ? await buildSatelliteBasemap() : null;
       // §5 2-modes — mémorise le mode AVANT la 1re pose des couches zone : leur
       // style (aplats vs contour) en dépend. `sat` truthy = satellite actif.
       satelliteActive = !!sat;
+      // §5 2-modes — cas (c) : satellite demandé mais fond indisponible (mint /
+      // erreur) → repli OSM SANS retomber sur plan. On notifie le consommateur
+      // (notice « imagerie indisponible ») ; les aplats restent remplis (sat null).
+      if (basemapMode === "satellite" && !sat) onBasemapFallback();
       const osmBaseLayers =
         basemap === "neutral-gray"
           ? [
@@ -1383,8 +1431,10 @@
           sources: sources as any,
           layers: baseLayers,
         },
-        center: INITIAL_CENTER,
-        zoom: INITIAL_ZOOM,
+        // §5 2-modes — ré-init : on repart du viewport COURANT (préservé) fourni
+        // par `reinitForBasemap` ; au primo-chargement, cadrage Québec par défaut.
+        center: startView?.center ?? INITIAL_CENTER,
+        zoom: startView?.zoom ?? INITIAL_ZOOM,
         maxBounds: MAX_BOUNDS,
         // Zéro-copie : injecteur per-tuile de l'adapter (session/clé) — présent
         // seulement en mode satellite ; MapLibre passe chaque requête de tuile.
@@ -1545,6 +1595,56 @@
     } catch (err) {
       console.error("MapLibre init error", err);
     }
+  }
+
+  /**
+   * §5 2-modes — RÉ-INITIALISATION de la carte au changement de `basemapMode`.
+   * Contrainte MapLibre : `transformRequest` (injection session/clé des tuiles
+   * satellite) n'est PAS modifiable au runtime → on détruit proprement la carte
+   * existante puis on relance `initMap` dans le nouveau mode. Le viewport
+   * COURANT (centre/zoom) est CAPTURÉ avant destruction et repassé à `initMap`
+   * (cadrage préservé). Le cadrage INITIAL mémorisé (viewportMemory) reste celui
+   * du primo-chargement. Idempotence : une ré-init en vol bloque les suivantes.
+   */
+  async function reinitForBasemap(): Promise<void> {
+    if (reinitializing) return;
+    reinitializing = true;
+    // Capture le viewport courant AVANT destruction (préservation du cadrage).
+    let startView: { center: [number, number]; zoom: number } | undefined;
+    if (mapInstance) {
+      const m = mapInstance as {
+        getCenter: () => { lng: number; lat: number };
+        getZoom: () => number;
+        remove: () => void;
+      };
+      try {
+        const c = m.getCenter();
+        startView = { center: [c.lng, c.lat], zoom: m.getZoom() };
+      } catch {
+        /* carte pas assez avancée pour lire le viewport → cadrage par défaut */
+      }
+    }
+    // Annule un repli-timeout en vol et remet les gardes de finalisation à zéro,
+    // puis détruit la carte existante (couches/handlers retirés par MapLibre).
+    if (readyFallbackTimer !== undefined) {
+      clearTimeout(readyFallbackTimer);
+      readyFallbackTimer = undefined;
+    }
+    mapReady = false;
+    mapSetupStarted = false;
+    if (mapInstance) {
+      (mapInstance as { remove: () => void }).remove();
+      mapInstance = null;
+    }
+    await initMap(startView);
+    reinitializing = false;
+  }
+
+  // §5 2-modes — déclencheur de ré-init : la prop `basemapMode` diverge du mode
+  // effectivement construit (`builtBasemapMode`) APRÈS que la carte soit prête.
+  // Gaté sur `mapReady` (jamais pendant le montage initial) + garde anti-course.
+  $: if (mapReady && basemapMode !== builtBasemapMode && !reinitializing) {
+    void reinitForBasemap();
   }
 
   onDestroy(() => {
