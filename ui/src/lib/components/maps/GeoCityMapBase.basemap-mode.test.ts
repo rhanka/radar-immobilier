@@ -176,6 +176,27 @@ describe("GeoCityMapBase — pilotage du fond par basemapMode", () => {
     );
   });
 
+  it("§5 R3 P1 — attributionControl:false : le contrôle d'attribution PAR DÉFAUT de MapLibre est EXCLU du constructeur (plan ET satellite)", async () => {
+    // Non-régression P1 : sans cette option, MapLibre injecte au coin bas-droit
+    // une bulle compacte « © OpenStreetMap contributors | MapLibre » + ▼ (reproduit
+    // en navigateur) LÀ où s'ouvre le menu Layers → l'owner la voyait au lieu du
+    // menu. On asserte l'option EFFECTIVEMENT passée au constructeur (pas la source).
+    render(GeoCityMapBase, { props: { fillColorExpression: FILL_COLOR } });
+    await flushMicrotasks();
+    expect(mapMocks.instances).toHaveLength(1);
+    expect(mapMocks.instances[0].options.attributionControl).toBe(false);
+
+    // Idem en satellite : l'exclusion vaut aussi (l'attribution satellite reste,
+    // elle, rendue par le contrôle custom `wireSatelliteAttribution`).
+    mapMocks.instances.length = 0;
+    cleanup();
+    render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, basemapMode: "satellite" },
+    });
+    await flushMicrotasks();
+    expect(mapMocks.instances[0].options.attributionControl).toBe(false);
+  });
+
   it("MODE 'satellite' : fond satellite construit (adapter appelé, transformRequest + source sat-2d)", async () => {
     render(GeoCityMapBase, {
       props: { fillColorExpression: FILL_COLOR, basemapMode: "satellite" },

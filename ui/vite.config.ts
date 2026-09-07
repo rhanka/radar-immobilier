@@ -47,6 +47,9 @@ const harnessInput = qaHarness
       "consistency-scorecard": fileURLToPath(
         new URL("./e2e-qa/harness/consistency-scorecard.html", import.meta.url),
       ),
+      "basemap-menu": fileURLToPath(
+        new URL("./e2e-qa/harness/basemap-menu.html", import.meta.url),
+      ),
     }
   : undefined;
 
