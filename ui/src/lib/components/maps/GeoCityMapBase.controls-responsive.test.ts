@@ -119,3 +119,40 @@ describe("GeoCityMapBase — contrôles bas (§5.1 R2) rangée uniforme + menu L
     expect(source).toContain('"bottom-right"');
   });
 });
+
+describe("GeoCityMapBase — §5 R3 P1+P3 : menu Layers s'ouvre (fixed) + attribution par défaut exclue", () => {
+  // P1 (attribution) — le contrôle d'attribution PAR DÉFAUT de MapLibre est exclu
+  // au constructeur (la bulle « © OpenStreetMap contributors | MapLibre » + ▼ qui
+  // s'affichait à la place du menu). Le comportement effectif (option passée au
+  // constructeur) est asserté dans GeoCityMapBase.basemap-mode.test.ts ; ici on
+  // verrouille aussi la SOURCE (aucune ré-introduction silencieuse).
+  it("P1 attribution — le constructeur MapLibre passe attributionControl:false", () => {
+    expect(source).toMatch(/attributionControl:\s*false/);
+  });
+
+  // P1+P3 (position) — le popover DS calcule des coordonnées VIEWPORT mais se pose
+  // en `absolute` : dans le conteneur de contrôles positionné, son offsetParent
+  // n'est PAS le body → panneau décalé hors-viewport (desktop = ne s'ouvre pas ;
+  // responsive = bas-droite + reflow/clignotement). Le fix force `position: fixed`
+  // via une classe passée au MenuPopover (coordonnées relatives au viewport,
+  // échappe au overflow-hidden de la racine, ancrage haut-gauche par les
+  // transforms DS top-end). Reproduit + corrigé en navigateur.
+  it("P1+P3 position — le MenuPopover porte la classe de recalage `geo-basemap-popover`", () => {
+    // La classe est passée à l'INSTANCE MenuPopover (bloc du popover, pas le trigger).
+    const popoverIdx = source.indexOf("<MenuPopover");
+    expect(popoverIdx).toBeGreaterThan(-1);
+    const popoverBlock = source.slice(popoverIdx, popoverIdx + 400);
+    expect(popoverBlock).toContain('class="geo-basemap-popover"');
+    // Et le placement vers le haut est conservé (contrat §4 R2).
+    expect(popoverBlock).toContain('placement="top-end"');
+  });
+
+  it("P1+P3 position — la règle CSS recale le panneau DS en position: fixed (spécificité double-classe)", () => {
+    // Sélecteur à double classe (0,2,0 > `.st-menuPopover` 0,1,0) → gagne sur le
+    // `position: absolute` du DS SANS `!important` et indépendamment de l'ordre
+    // d'injection des feuilles de style.
+    expect(source).toMatch(
+      /:global\(\.st-menuPopover\.geo-basemap-popover\)\s*\{[^}]*position:\s*fixed/,
+    );
+  });
+});
