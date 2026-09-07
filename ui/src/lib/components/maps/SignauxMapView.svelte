@@ -190,6 +190,7 @@
     decorateZonesWithKindColor,
     zoneKindLegend,
     ZONE_KIND_NEUTRAL,
+    ZONE_KIND_STYLES,
   } from "$lib/maps/zone-kind-style.js";
   import {
     zoneKindFilterOpacity,
@@ -485,6 +486,9 @@
     cptaqError = null;
     cptaqAbsent = false;
     mapApi?.setCptaqData(EMPTY_CPTAQ);
+    // §7 R2 — disable : retire l'emphase hover/focus (aucune requête au hover d'une
+    // entrée rayée ; l'aplat CPTAQ revient au repos, isolé à `cptaq-fill`).
+    mapApi?.setCptaqLegendEmphasis(false);
   }
 
   /** « Réessayer » de l'overlay CPTAQ (recharge la seule couche agricole). */
@@ -1126,6 +1130,40 @@
       )
     : [];
 
+  // §7 R2 — CPTAQ fusionné dans AFFECTATION (doublon owner de la famille
+  // « Agricole »). Libellé de référence + couleur = kind « A » de zone-kind-style
+  // (token DS `--st-semantic-data-category5`, repli `#59A14F`) : SEULE source de
+  // couleur CPTAQ (swatch), alignée sur le socle (fill/contour).
+  const AGRICOLE_FAMILY_LABEL = ZONE_KIND_STYLES.A.label;
+  const CPTAQ_LEGEND_LABEL = `${AGRICOLE_FAMILY_LABEL} (CPTAQ)`;
+  const cptaqLegendColor = resolveToken(
+    ZONE_KIND_STYLES.A.token,
+    ZONE_KIND_STYLES.A.fallback,
+    null,
+  );
+
+  /**
+   * §7 R2 — liste d'AFFECTATION affichée : la ligne visuelle « Agricole » devient
+   * « Agricole (CPTAQ) » et SERT de toggle de couche CPTAQ. Si aucune zone agricole
+   * n'est servie mais la couche CPTAQ est proposée (toujours, pour une ville
+   * sélectionnée), la ligne est AJOUTÉE en fin d'AFFECTATION. Les autres
+   * affectations gardent leur rendu statique (aucun toggle).
+   */
+  function buildAffectationLegend(
+    entries: { color: string; label: string }[],
+  ): { color: string; label: string; isCptaq: boolean }[] {
+    const mapped = entries.map((entry) =>
+      entry.label === AGRICOLE_FAMILY_LABEL
+        ? { color: cptaqLegendColor, label: CPTAQ_LEGEND_LABEL, isCptaq: true }
+        : { color: entry.color, label: entry.label, isCptaq: false },
+    );
+    if (!mapped.some((entry) => entry.isCptaq)) {
+      mapped.push({ color: cptaqLegendColor, label: CPTAQ_LEGEND_LABEL, isCptaq: true });
+    }
+    return mapped;
+  }
+  $: affectationLegendEntries = buildAffectationLegend(zoneLegendEntries);
+
   /**
    * Base du sélecteur de millésime de la légende = TOUTES les zones servies
    * (jamais filtrées) : le sélecteur se masque lui-même tant qu'il n'y a pas
@@ -1359,6 +1397,10 @@
       expandedKeys: [cityKey],
     });
 
+    // §7 R2 — changement de ville : retire une emphase CPTAQ éventuellement restée
+    // active (isolé à `cptaq-fill`, aucune autre surface touchée).
+    mapApi?.setCptaqLegendEmphasis(false);
+
     // flyTo sur la carte (centroïde de la ville)
     flyToCity(entry);
     villeZoomed = true; // C1 — caméra cadrée sur la ville (état zoomé)
@@ -1449,6 +1491,8 @@
     cptaqError = null;
     cptaqAbsent = false;
     mapApi?.setCptaqData(EMPTY_CPTAQ);
+    // §7 R2 — retour Province : retire toute emphase CPTAQ résiduelle.
+    mapApi?.setCptaqLegendEmphasis(false);
     selectionState = createSelectionBucketState();
     // Contrat « lot suivant » : retour Province → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
@@ -2448,40 +2492,73 @@
           </ul>
         </div>
       {:else}
-        {#if zoneLegendEntries.length > 0}
+        {#if affectationLegendEntries.length > 0}
           <div
             class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
             data-testid="map-legend-zonage"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
-            <!-- m6 — sélecteur de millésime (exclusif), masqué tant qu'un seul
-                 millésime est servi pour la ville (dégradé honnête). -->
-            <div class="mb-2">
-              <ZoneMillesimeSelect
-                zones={zoneMillesimeLegendInput}
-                filter={zoneMillesimeFilter}
-                onChange={handleZoneMillesimeFilterChange}
-              />
-            </div>
+            {#if zoneLegendEntries.length > 0}
+              <!-- m6 — sélecteur de millésime (exclusif), masqué tant qu'un seul
+                   millésime est servi pour la ville (dégradé honnête). -->
+              <div class="mb-2">
+                <ZoneMillesimeSelect
+                  zones={zoneMillesimeLegendInput}
+                  filter={zoneMillesimeFilter}
+                  onChange={handleZoneMillesimeFilterChange}
+                />
+              </div>
+            {/if}
             <!-- Familles = attribut d'affectation SOURCE (directive owner), jamais
-                 l'identité de la zone (le vrai code reste sur l'aplat). -->
+                 l'identité de la zone (le vrai code reste sur l'aplat). §7 R2 — la
+                 ligne « Agricole » devient « Agricole (CPTAQ) » et sert de TOGGLE de
+                 couche (rayée quand désactivée, emphase de `cptaq-fill` au hover). -->
             <p class="mb-1 text-[0.65rem] uppercase tracking-wide text-slate-400">Affectation (source)</p>
             <ul class="grid grid-cols-2 gap-x-3 gap-y-1">
-              {#each zoneLegendEntries as item (item.label)}
-                <li class="flex items-center gap-2 text-xs text-slate-600">
-                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
-                  {item.label}
-                </li>
+              {#each affectationLegendEntries as item (item.label)}
+                {#if item.isCptaq}
+                  <!-- §7 R2 — « Agricole (CPTAQ) » = toggle de couche. Le bouton
+                       hérite du style de la ligne d'affectation (preflight Tailwind :
+                       font/color inherit) : même `text-xs` et même gris que la li de
+                       référence, aucun nouveau px/gris. La rayure ne touche que
+                       `text-decoration-line` (utilitaire `line-through`), pas de case. -->
+                  <li class="flex text-xs text-slate-600">
+                    <button
+                      type="button"
+                      class="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left text-inherit"
+                      aria-pressed={cptaqEnabled}
+                      aria-label={cptaqEnabled
+                        ? `Masquer la couche environnementale ${CPTAQ_LEGEND_LABEL}`
+                        : `Afficher la couche environnementale ${CPTAQ_LEGEND_LABEL}`}
+                      data-testid="legend-cptaq-toggle"
+                      on:click={() => setCptaqEnabled(!cptaqEnabled)}
+                      on:pointerenter={() => mapApi?.setCptaqLegendEmphasis(true)}
+                      on:pointerleave={() => mapApi?.setCptaqLegendEmphasis(false)}
+                      on:focus={() => mapApi?.setCptaqLegendEmphasis(true)}
+                      on:blur={() => mapApi?.setCptaqLegendEmphasis(false)}
+                    >
+                      <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                      <span class:line-through={!cptaqEnabled}>{item.label}</span>
+                    </button>
+                  </li>
+                {:else}
+                  <li class="flex items-center gap-2 text-xs text-slate-600">
+                    <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                    {item.label}
+                  </li>
+                {/if}
               {/each}
             </ul>
-            <!-- Case DS indépendante : affiche/masque le n° de zone sur les aplats. -->
-            <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-zone-labels-toggle">
-              <Checkbox
-                label="N° de zone"
-                checked={showZoneLabels}
-                onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
-              />
-            </div>
+            {#if zoneLegendEntries.length > 0}
+              <!-- Case DS indépendante : affiche/masque le n° de zone sur les aplats. -->
+              <div class="mt-2 border-t border-slate-100 pt-2" data-testid="legend-zone-labels-toggle">
+                <Checkbox
+                  label="N° de zone"
+                  checked={showZoneLabels}
+                  onchange={(event) => setShowZoneLabels(event.currentTarget.checked)}
+                />
+              </div>
+            {/if}
           </div>
         {/if}
         <div
@@ -2506,20 +2583,9 @@
             />
           </div>
         </div>
-        <!-- §9 — overlay CPTAQ « zone agricole protégée » (couche OGC, toggle). -->
-        <div
-          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
-          data-testid="map-legend-cptaq"
-        >
-          <div class="flex items-center gap-2" data-testid="legend-cptaq-toggle">
-            <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: #65a30d;"></span>
-            <Checkbox
-              label="Zone agricole protégée (CPTAQ)"
-              checked={cptaqEnabled}
-              onchange={(event) => setCptaqEnabled(event.currentTarget.checked)}
-            />
-          </div>
-        </div>
+        <!-- §7 R2 — l'encadré autonome CPTAQ (`map-legend-cptaq`) + sa case à cocher
+             ont été RETIRÉS : « Agricole (CPTAQ) » vit désormais comme toggle de
+             couche SOUS AFFECTATION (ZONAGE), rayé quand désactivé. -->
       {/if}
     </svelte:fragment>
 
@@ -2549,18 +2615,19 @@
           {#each geoNotices as notice (notice)}
             <p class="m-0 text-slate-600">{notice}</p>
           {/each}
-          <!-- §9 CPTAQ : état d'absence/erreur/chargement VISIBLE (jamais muet). -->
+          <!-- §7 R2 CPTAQ : état d'absence/erreur/chargement VISIBLE (jamais muet),
+               libellés alignés sur « Agricole (CPTAQ) ». -->
           {#if cptaqLoading}
-            <p class="m-0 font-semibold text-slate-500">Chargement de la zone agricole…</p>
+            <p class="m-0 font-semibold text-slate-500">Chargement de la couche Agricole (CPTAQ)…</p>
           {/if}
           {#if cptaqError}
             <p class="m-0 flex items-center gap-2 text-amber-700">
-              <span>Zone agricole protégée indisponible.</span>
+              <span>Couche Agricole (CPTAQ) indisponible.</span>
               <button type="button" class="font-semibold underline hover:text-amber-900" on:click={retryCptaq}>Réessayer</button>
             </p>
           {/if}
           {#if cptaqAbsent}
-            <p class="m-0 text-slate-600">Zone agricole protégée non disponible pour cette ville.</p>
+            <p class="m-0 text-slate-600">Couche Agricole (CPTAQ) non disponible pour cette ville.</p>
           {/if}
         </div>
       {/if}

@@ -15,8 +15,11 @@
  *  - PAINT PAR MODE : `cities-fill.fill-opacity` = 0 en satellite, expression plan
  *    sinon ; `cities-outline` reprend l'expression couleur en satellite ;
  *  - §5.3 : refus du raster sans attribution résolvable → repli OSM ;
- *  - CONTRÔLE : groupe « Fond de carte » (boutons NATIFS a11y) rendu SSI
- *    `showBasemapControl`, clic → `onBasemapModeChange`.
+ *  - CONTRÔLE (§4 R2) : UN seul trigger « Fond de carte » (menu DS Layers) rendu
+ *    SSI `showBasemapControl`, ouvrant deux options radio Plan/Satellite ;
+ *    sélection → `onBasemapModeChange` ;
+ *  - EMPHASE CPTAQ (§7 R2) : `setCptaqLegendEmphasis` accentue `cptaq-fill` seul,
+ *    hover > repos, retour au repos (0 en satellite) à la sortie.
  *
  * Pur : maplibre-gl MOCKÉ (jamais monté en jsdom), l'adapter geo-map-engine et le
  * sélecteur d'allowlist satellite MOCKÉS, `fetch` stubé.
@@ -123,6 +126,18 @@ async function flushMicrotasks(): Promise<void> {
 function layerPaint(map: InstanceType<typeof mapMocks.FakeMap>, id: string): any {
   const call = map.addLayer.mock.calls.find((c) => (c[0] as any)?.id === id);
   return (call?.[0] as any)?.paint;
+}
+
+/** Dernière valeur posée par `setPaintProperty(id, prop, value)` (ou undefined). */
+function lastPaint(
+  map: InstanceType<typeof mapMocks.FakeMap>,
+  id: string,
+  prop: string,
+): any {
+  const calls = map.setPaintProperty.mock.calls.filter(
+    (c) => c[0] === id && c[1] === prop,
+  );
+  return calls.length ? calls[calls.length - 1][2] : undefined;
 }
 
 beforeEach(() => {
@@ -347,10 +362,44 @@ describe("GeoCityMapBase — §1/§6 invariant d'opacité sur zones / lots / CPT
     expect(layerPaint(map, "selected-lots-fill")["fill-opacity"]).toBe(0.4);
     expect(layerPaint(map, "cptaq-fill")["fill-opacity"]).toBe(0.25);
   });
+
+  // §7 R2 — EMPHASE hover/focus de « Agricole (CPTAQ) » : isolée à `cptaq-fill`.
+  // Le test asserte hover > repos (PAS un nombre exact — la valeur est un
+  // source-gap provisoire à ratifier owner) et le RETOUR au repos à la sortie.
+  it("EMPHASE (Plan) : setCptaqLegendEmphasis(true) → fill-opacity > repos ; (false) → repos", async () => {
+    const { map, api } = await mountAndReady("plan");
+    api.setCptaqData(EMPTY_FC);
+    const resting = layerPaint(map, "cptaq-fill")["fill-opacity"];
+    expect(resting).toBe(0.25);
+    // La couche existe désormais : `getLayer` doit la renvoyer truthy pour que
+    // `setPaintProperty` de l'emphase s'applique (le FakeMap renvoie undefined par défaut).
+    map.getLayer = vi.fn((id: string) => (id === "cptaq-fill" ? {} : undefined));
+
+    api.setCptaqLegendEmphasis(true);
+    expect(lastPaint(map, "cptaq-fill", "fill-opacity")).toBeGreaterThan(resting);
+
+    api.setCptaqLegendEmphasis(false);
+    expect(lastPaint(map, "cptaq-fill", "fill-opacity")).toBe(resting);
+  });
+
+  it("EMPHASE (Satellite) : repos 0, emphase > 0 (aplat temporaire), sortie retour 0", async () => {
+    const { map, api } = await mountAndReady("satellite");
+    api.setCptaqData(EMPTY_FC);
+    expect(layerPaint(map, "cptaq-fill")["fill-opacity"]).toBe(0);
+    map.getLayer = vi.fn((id: string) => (id === "cptaq-fill" ? {} : undefined));
+
+    api.setCptaqLegendEmphasis(true);
+    // Exception transitoire demandée : un aplat rend même en satellite.
+    expect(lastPaint(map, "cptaq-fill", "fill-opacity")).toBeGreaterThan(0);
+
+    api.setCptaqLegendEmphasis(false);
+    // Retour IMMÉDIAT à 0 en satellite (invariant #646 rétabli à la sortie).
+    expect(lastPaint(map, "cptaq-fill", "fill-opacity")).toBe(0);
+  });
 });
 
-describe("GeoCityMapBase — contrôle « Fond de carte » (§2 points 2/5)", () => {
-  it("showBasemapControl=true : groupe de boutons NATIFS a11y rendu, aria-pressed reflète le mode", async () => {
+describe("GeoCityMapBase — contrôle « Fond de carte » (§4 R2 : menu Layers)", () => {
+  it("showBasemapControl=true : UN seul trigger (aria-haspopup=menu) ouvre un menu à 2 options radio ; sélection → onBasemapModeChange", async () => {
     const onBasemapModeChange = vi.fn();
     render(GeoCityMapBase, {
       props: {
@@ -362,22 +411,31 @@ describe("GeoCityMapBase — contrôle « Fond de carte » (§2 points 2/5)", ()
     });
     await flushMicrotasks();
 
-    const group = screen.getByRole("group", { name: "Fond de carte" });
-    expect(group).toBeTruthy();
-    const planBtn = screen.getByRole("button", { name: "Afficher le plan" });
-    const satBtn = screen.getByRole("button", { name: "Afficher le satellite" });
-    // Boutons NATIFS (<button>), pas un onglet.
-    expect(planBtn.tagName).toBe("BUTTON");
-    expect(satBtn.tagName).toBe("BUTTON");
-    // aria-pressed reflète le mode courant (plan).
-    expect(planBtn.getAttribute("aria-pressed")).toBe("true");
-    expect(satBtn.getAttribute("aria-pressed")).toBe("false");
+    // UN seul déclencheur, pas deux boutons pressés (les deux boutons #646 ont disparu).
+    const trigger = screen.getByRole("button", { name: /Fond de carte/ });
+    expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByTestId("basemap-btn-plan")).toBeNull();
+    expect(screen.queryByTestId("basemap-btn-satellite")).toBeNull();
+    // Menu fermé au repos (le popover DS ne rend son contenu qu'à l'ouverture).
+    expect(screen.queryByRole("menuitemradio", { name: "Plan" })).toBeNull();
 
-    await fireEvent.click(satBtn);
+    await fireEvent.click(trigger);
+    await flushMicrotasks();
+
+    // Ouvert : deux options radio, l'ACTIVE (plan) est cochée ; aria-expanded suit.
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    const planOpt = screen.getByRole("menuitemradio", { name: "Plan" });
+    const satOpt = screen.getByRole("menuitemradio", { name: "Satellite" });
+    expect(planOpt.getAttribute("aria-checked")).toBe("true");
+    expect(satOpt.getAttribute("aria-checked")).toBe("false");
+
+    // Sélection Satellite → writer unique onBasemapModeChange (le socle ne persiste pas).
+    await fireEvent.click(satOpt);
     expect(onBasemapModeChange).toHaveBeenCalledWith("satellite");
   });
 
-  it("showBasemapControl=false (défaut) : aucun groupe Fond de carte (route plan-only)", async () => {
+  it("showBasemapControl=false (défaut) : aucun trigger Fond de carte (route plan-only)", async () => {
     render(GeoCityMapBase, {
       props: { fillColorExpression: FILL_COLOR },
     });
@@ -385,7 +443,7 @@ describe("GeoCityMapBase — contrôle « Fond de carte » (§2 points 2/5)", ()
 
     expect(screen.queryByTestId("basemap-control")).toBeNull();
     expect(
-      screen.queryByRole("button", { name: "Afficher le satellite" }),
+      screen.queryByRole("button", { name: /Fond de carte/ }),
     ).toBeNull();
   });
 });
