@@ -1,16 +1,22 @@
 /**
  * SignauxMapView — §5 2-modes : FOND de carte (PLAN défaut / SATELLITE switchable).
  *
- * Contrat vérifié (socle carto stubé — le stub reflète le mode reçu en
- * `data-basemap-mode` — clients réseau mockés, aucun WebGL/API) :
+ * §2 point 1/2 : le groupe Plan/Satellite a MIGRÉ hors de la vue (plus de
+ * ContentSwitcher haut-droit) vers les contrôles bas-droit du SOCLE. Ici le socle
+ * est stubé (maplibre indisponible en jsdom) ; le stub reflète le mode reçu en
+ * `data-basemap-mode`, le gating en `data-show-basemap-control`, et expose une
+ * DOUBLURE du groupe (boutons « Afficher le plan/satellite ») qui appelle
+ * `onBasemapModeChange` → permet de tester la PERSISTANCE de `setBasemap`. L'a11y
+ * des boutons NATIFS réels est couverte dans `GeoCityMapBase.basemap-mode.test.ts`.
+ *
+ * Contrat vérifié (clients réseau mockés, aucun WebGL/API) :
  *   (1) DÉFAUT sans localStorage → mode résolu 'plan' ;
- *   (2) localStorage 'satellite' + host PERMIS → mode résolu 'satellite' ;
- *   (3) GATING : ContentSwitcher rendu SSI le satellite est permis sur ce host
- *       (préprod/localhost) ; ABSENT sinon (prod plan-only) ;
- *   (4) setBasemap : un clic sur « Satellite » PERSISTE (localStorage) et change
- *       le mode transmis au socle (→ ré-init côté socle, testée unitairement) ;
- *   (5) PROD-HIDDEN (anti « satellite dangling ») : host NON-permis + localStorage
- *       'satellite' → mode COERCÉ 'plan' ET aucun switcher (retour plan possible).
+ *   (1b) clé ABSENTE ou valeur INCONNUE → 'plan' (Point 1, jamais de faux satellite) ;
+ *   (2) localStorage 'satellite' + host PERMIS → 'satellite' (préférence restaurée) ;
+ *   (3) HOST GATING : groupe Fond de carte passé au socle SSI satellite permis ;
+ *   (4) PERSISTENCE : clic « Satellite » (doublure socle) → localStorage + mode ;
+ *   (5) PROD-HIDDEN : host NON-permis + localStorage 'satellite' → COERCÉ 'plan' ;
+ *   (6) ABSENCE du switch haut-droit (l'ancien ContentSwitcher n'existe plus).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, waitFor, within } from "@testing-library/svelte";
@@ -59,6 +65,11 @@ function basemapMode(): string | null {
   return stub?.getAttribute("data-basemap-mode") ?? null;
 }
 
+function showBasemapControl(): string | null {
+  const stub = document.querySelector("[data-testid='stub-map']");
+  return stub?.getAttribute("data-show-basemap-control") ?? null;
+}
+
 beforeEach(() => {
   vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
   localStorage.clear();
@@ -77,45 +88,57 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     expect(basemapMode()).toBe("plan");
   });
 
-  it("(2) localStorage 'satellite' + host permis → mode 'satellite'", async () => {
+  it("(1b) clé ABSENTE / valeur INCONNUE → 'plan' (jamais de satellite fabriqué)", async () => {
+    localStorage.setItem(BASEMAP_LS_KEY, "bogus-value");
+    render(SignauxMapView);
+    await tick();
+    // Une valeur persistée non reconnue retombe sur Plan (Point 1).
+    expect(basemapMode()).toBe("plan");
+  });
+
+  it("(2) localStorage 'satellite' + host permis → 'satellite' (préférence restaurée)", async () => {
     localStorage.setItem(BASEMAP_LS_KEY, "satellite");
     render(SignauxMapView);
     await tick();
     expect(basemapMode()).toBe("satellite");
   });
 
-  it("(3) GATING : ContentSwitcher rendu si satellite permis", async () => {
+  it("(3) HOST GATING : groupe Fond de carte transmis au socle SSI satellite permis", async () => {
     vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
     render(SignauxMapView);
     await tick();
-    expect(document.querySelector("[data-testid='basemap-switcher']")).not.toBeNull();
+    // showBasemapControl={satelliteHostAllowed} → true, groupe rendu côté socle.
+    expect(showBasemapControl()).toBe("true");
+    expect(document.querySelector("[data-testid='basemap-control']")).not.toBeNull();
   });
 
-  it("(3) GATING : ContentSwitcher ABSENT si satellite non permis (prod plan-only)", async () => {
+  it("(3) HOST GATING : aucun groupe Fond de carte si satellite NON permis (prod plan-only)", async () => {
     vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(false);
     render(SignauxMapView);
     await tick();
-    expect(document.querySelector("[data-testid='basemap-switcher']")).toBeNull();
+    expect(showBasemapControl()).toBe("false");
+    expect(document.querySelector("[data-testid='basemap-control']")).toBeNull();
   });
 
-  it("(4) setBasemap : clic « Satellite » persiste en localStorage et change le mode", async () => {
+  it("(4) PERSISTENCE : clic « Satellite » persiste en localStorage et change le mode transmis", async () => {
     vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
     render(SignauxMapView);
     await tick();
     expect(basemapMode()).toBe("plan");
 
-    const switcher = document.querySelector(
-      "[data-testid='basemap-switcher']",
+    const group = document.querySelector(
+      "[data-testid='basemap-control']",
     ) as HTMLElement;
-    const satBtn = within(switcher).getByRole("tab", { name: "Satellite" });
+    const satBtn = within(group).getByRole("button", { name: "Afficher le satellite" });
     await fireEvent.click(satBtn);
     await tick();
 
+    // setBasemap (writer unique) persiste ET change la prop → ré-init socle.
     expect(localStorage.getItem(BASEMAP_LS_KEY)).toBe("satellite");
     await waitFor(() => expect(basemapMode()).toBe("satellite"));
   });
 
-  it("(5) PROD-HIDDEN : host non-permis + localStorage 'satellite' → coercion 'plan' + aucun switcher", async () => {
+  it("(5) PROD-HIDDEN : host non-permis + localStorage 'satellite' → coercion 'plan' + aucun groupe", async () => {
     vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(false);
     localStorage.setItem(BASEMAP_LS_KEY, "satellite");
     render(SignauxMapView);
@@ -123,7 +146,15 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
 
     // Mode COERCÉ plan (pas de satellite « dangling »)…
     expect(basemapMode()).toBe("plan");
-    // …et aucun switcher (sinon l'utilisateur resterait bloqué en satellite).
+    // …et aucun groupe de fond (sinon l'utilisateur resterait bloqué en satellite).
+    expect(document.querySelector("[data-testid='basemap-control']")).toBeNull();
+  });
+
+  it("(6) ABSENCE du switch haut-droit : l'ancien ContentSwitcher n'existe plus dans la vue", async () => {
+    vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
+    render(SignauxMapView);
+    await tick();
+    // Le sélecteur de fond haut-droit (ancien ContentSwitcher) a migré dans le socle.
     expect(document.querySelector("[data-testid='basemap-switcher']")).toBeNull();
   });
 });

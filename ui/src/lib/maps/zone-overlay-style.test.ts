@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   zoneOverlayPaint,
+  surfaceFillOpacity,
+  SAT_CITY_LINE_WIDTH,
   ZONE_OUTLINE_PLAN_COLOR,
   ZONE_OUTLINE_PLAN_WIDTH,
   ZONE_OUTLINE_PLAN_OPACITY,
@@ -91,6 +93,30 @@ describe("zoneOverlayPaint — casing color threadé depuis le token DS", () => 
     expect(ZONE_CASING_TOKEN).toBe("--st-foundation-color-slate-90");
     // Un token de fondation ne flippe pas en dark, contrairement à --st-semantic-*.
     expect(ZONE_CASING_TOKEN.startsWith("--st-foundation-")).toBe(true);
+  });
+});
+
+describe("surfaceFillOpacity — invariant §1 (généralisé à toutes les surfaces)", () => {
+  it("SATELLITE : retourne 0 quelle que soit l'opacité métier (aplats transparents)", () => {
+    expect(surfaceFillOpacity("satellite", 0.75)).toBe(0);
+    expect(surfaceFillOpacity("satellite", BASE_OPACITY)).toBe(0);
+    // Même une opacité faible (≤ 0.08) devient 0 : jamais de teinte résiduelle.
+    expect(surfaceFillOpacity("satellite", 0.06)).toBe(0);
+  });
+
+  it("PLAN : repasse l'opacité métier TELLE QUELLE (identité référentielle)", () => {
+    expect(surfaceFillOpacity("plan", 0.25)).toBe(0.25);
+    // L'expression opaque n'est jamais durcie ni enveloppée dans un `case`.
+    expect(surfaceFillOpacity("plan", BASE_OPACITY)).toBe(BASE_OPACITY);
+  });
+});
+
+describe("SAT_CITY_LINE_WIDTH — §3 source-gap (valeur PROVISOIRE)", () => {
+  it("est une largeur numérique positive alignée sur le contour zone satellite", () => {
+    expect(typeof SAT_CITY_LINE_WIDTH).toBe("number");
+    expect(SAT_CITY_LINE_WIDTH).toBeGreaterThan(0);
+    // Valeur provisoire = largeur du contour zone satellite (à figer en recette).
+    expect(SAT_CITY_LINE_WIDTH).toBe(ZONE_OUTLINE_SAT_WIDTH);
   });
 });
 
