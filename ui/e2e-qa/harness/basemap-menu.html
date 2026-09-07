@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QA harness — menu Fond de carte (§5 R3 P1+P3)</title>
+  </head>
+  <body style="margin: 0">
+    <!-- Hors flux (position:fixed) : le wrapper carte doit remplir EXACTEMENT le
+         viewport, sinon les contrôles ancrés en bas glissent sous le bord. Le
+         textContent reste lisible par Playwright (`toHaveText`). -->
+    <div
+      id="ready"
+      style="position: fixed; top: 0; left: 0; width: 0; height: 0; overflow: hidden; opacity: 0; pointer-events: none"
+    >
+      loading
+    </div>
+    <div id="harness-root"></div>
+    <script type="module" src="./basemap-menu-main.ts"></script>
+  </body>
+</html>

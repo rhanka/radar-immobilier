@@ -1757,6 +1757,20 @@
         : osmBaseLayers;
       const m = new maplibre.Map({
         container: mapContainer,
+        // §5 R3 P1 — EXCLUT le contrôle d'attribution PAR DÉFAUT de MapLibre.
+        // Sans cette option, MapLibre injecte un `AttributionControl` compact
+        // (`<details class="maplibregl-ctrl-attrib maplibregl-compact">` = bulle
+        // « © OpenStreetMap contributors | MapLibre » + ▼) au coin bas-droit, LÀ
+        // où s'ouvre le menu Layers : l'owner voyait cette bulle au lieu du menu.
+        // Reproduit et confirmé en navigateur (compact-show ouvert par défaut).
+        // NB satellite : l'attribution du fond satellite reste rendue DYNAMIQUEMENT
+        // par `wireSatelliteAttribution` (contrôle custom, copyright per-viewport) —
+        // cette exclusion ne touche QUE le contrôle par défaut (fond OSM/plan).
+        // source-gap (volet légal, à ratifier owner/i-cond) : en mode PLAN/OSM cette
+        // exclusion retire la mention « © OpenStreetMap contributors » visible ;
+        // la politique OSM demande une attribution — décision owner requise (ex.
+        // mention statique ailleurs) plutôt que blanchiment définitif ici.
+        attributionControl: false,
         style: {
           version: 8,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2091,6 +2105,7 @@
         placement="top-end"
         label="Fond de carte"
         closeOnEscape={false}
+        class="geo-basemap-popover"
       >
         <div
           class="basemap-menu"
@@ -2318,6 +2333,32 @@
   /* Ancre du trigger de fond : wrapper neutre (aucune marge) pour `MenuPopover`. */
   .map-control-anchor {
     display: inline-flex;
+  }
+  /* §5 R3 P1+P3 — RECALE le popover DS en `position: fixed`.
+     Le `MenuPopover` DS calcule sa position en coordonnées VIEWPORT
+     (`getBoundingClientRect()` + scroll) MAIS pose le panneau en
+     `position: absolute` : correct UNIQUEMENT si son offsetParent est le
+     `<body>` (origine 0,0). Ici le popover est un descendant du conteneur de
+     contrôles `.absolute … right-3` (positionné) → l'offsetParent devient CE
+     conteneur bas-droit, donc le panneau est décalé de l'offset du conteneur :
+     il part HORS-VIEWPORT en bas-droite (desktop = « le menu ne s'ouvre pas » ;
+     responsive = « bas-droite au lieu de haut-gauche » + reflow/clignotement,
+     le panneau hors-champ étirant la zone défilable). Reproduit en navigateur :
+     panneau à (top:1239,left:2334) en 1280×720, corrigé à (bottom:644,right:1268)
+     avec `fixed`. `position: fixed` ⇒ coordonnées relatives au VIEWPORT (offset
+     du conteneur annulé) et échappe au `overflow-hidden` de la racine ; les
+     transforms DS (`translate(-100%,-100%)` de `top-end`) ancrent alors le
+     panneau HAUT-GAUCHE, coin bas-droit au-dessus du trigger.
+     `!important` REQUIS : la règle DS `.st-menuPopover { position: absolute }`
+     est SCOPÉE par Svelte au build de l'app en `.st-menuPopover.svelte-<hash>`
+     (spécificité 0,2,0) — un simple sélecteur double-classe (0,2,0) FAIT MATCH
+     NUL et perd à l'ordre de cascade (vérifié en e2e : le panneau restait en
+     `absolute`, hors-viewport). `!important` l'emporte sur la règle scopée tierce
+     quels que soient hash/ordre. Bornage : routes carte plein-viewport, sans
+     scroll de page ni ancêtre `transform` (vérifié) — condition de validité de
+     `fixed`. */
+  :global(.st-menuPopover.geo-basemap-popover) {
+    position: fixed !important;
   }
   /* §4 R2 — menu « Fond de carte » (contenu du popover DS) : options radio. */
   .basemap-menu {
