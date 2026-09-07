@@ -59,14 +59,14 @@ describe("zoneOverlayPaint — mode SATELLITE (satelliteActive=true) [INTERIM]",
     expect(paint.outline["line-opacity"]).toBe(1);
   });
 
-  it("casing : liseré visible (couleur token DS résolue / 4 / 0.6) sous le contour famille", () => {
+  it("casing : liseré visible (couleur token DS résolue / 4 / 0.85) sous le contour famille", () => {
     // La couleur du casing est celle PASSÉE (résolue depuis le token DS), pas une
     // constante en dur : geo-owned pour width/opacity, DS-owned pour la couleur.
     expect(paint.casing["line-color"]).toBe(RESOLVED_CASING);
     expect(paint.casing["line-width"]).toBe(ZONE_CASING_SAT_WIDTH);
     expect(paint.casing["line-width"]).toBe(4);
     expect(paint.casing["line-opacity"]).toBe(ZONE_CASING_SAT_OPACITY);
-    expect(paint.casing["line-opacity"]).toBe(0.6);
+    expect(paint.casing["line-opacity"]).toBe(0.85);
   });
 });
 

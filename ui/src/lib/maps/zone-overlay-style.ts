@@ -35,7 +35,7 @@ export const ZONE_OUTLINE_SAT_OPACITY = 1;
 export const ZONE_CASING_TOKEN = "--st-foundation-color-slate-90";
 export const ZONE_CASING_FALLBACK = "#0f172a";
 export const ZONE_CASING_SAT_WIDTH = 4;
-export const ZONE_CASING_SAT_OPACITY = 0.6;
+export const ZONE_CASING_SAT_OPACITY = 0.85;
 
 /** Opacité de l'aplat zone en satellite : 0 (l'imagerie transparaît). */
 export const ZONE_FILL_SAT_OPACITY = 0;
