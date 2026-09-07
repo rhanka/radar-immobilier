@@ -113,12 +113,23 @@
    * `syncGeoLayers`.
    */
   import { onMount, onDestroy } from "svelte";
-  import { Layers, Ruler } from "@lucide/svelte";
+  // §2 point 4 — glyph légende = `ListTree` (lisibilité « légende »). `Map` est
+  // aliasé en `MapIcon` pour ne PAS masquer le constructeur JS `Map` utilisé dans
+  // ce fichier ; `Satellite` → `SatelliteIcon` par symétrie.
+  import {
+    ListTree,
+    Map as MapIcon,
+    Ruler,
+    Satellite as SatelliteIcon,
+  } from "@lucide/svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import { isSatelliteBasemapEnabled, resolveMintUrl } from "$lib/maps/geo-sat-basemap.js";
   import {
     zoneOverlayPaint,
+    surfaceFillOpacity,
+    SAT_CITY_LINE_WIDTH,
+    type SurfaceMode,
     ZONE_CASING_TOKEN,
     ZONE_CASING_FALLBACK,
   } from "$lib/maps/zone-overlay-style.js";
@@ -147,8 +158,9 @@
   /** Expression MapLibre `fill-opacity` de `cities-fill` (optionnelle). */
   export let fillOpacityExpression: ExpressionSpecification | number | undefined =
     undefined;
-  /** Couleur du contour des polygones villes. */
-  export let fillOutlineColor: string = "#94a3b8";
+  // §3 — le contour région vient UNIQUEMENT de la couche `cities-outline`
+  // (type:"line") ; le `fill-outline-color` redondant de `cities-fill` est retiré
+  // (et avec lui l'ancienne prop `fillOutlineColor`, qui ne le nourrissait plus).
 
   // ── Props : interactions ───────────────────────────────────────────────────
   /** Ville active : supprime le curseur « pointer » sur son polygone (parité). */
@@ -244,6 +256,20 @@
    * notice de repli). No-op par défaut.
    */
   export let onBasemapFallback: () => void = () => {};
+  /**
+   * §2 point 2 / §5.1 — affiche le groupe de contrôle « Fond de carte »
+   * (Plan / Satellite) dans les contrôles bas-droit. Le consommateur passe
+   * `showBasemapControl={satelliteHostAllowed}` (prod plan-only ⇒ `false` ⇒
+   * aucun groupe, pas de segmented-control dégénéré). Défaut `false` (routes
+   * Plan-seulement comme SourceCoverageMap : aucun contrôle de fond).
+   */
+  export let showBasemapControl = false;
+  /**
+   * §2 point 2 / §5.2 — writer UNIQUE de bascule du fond, appelé par les boutons
+   * Plan / Satellite du socle. Le consommateur y branche sa persistance
+   * (`setBasemap`) qui change la prop `basemapMode` → ré-initialisation du socle.
+   */
+  export let onBasemapModeChange: (mode: "plan" | "satellite") => void = () => {};
 
   // ── Props : cycle de vie ───────────────────────────────────────────────────
   /** Appelé une fois la carte prête, avec l'API impérative du socle. */
@@ -296,6 +322,23 @@
   // Responsive (01KZKZ4B0Y0E3DFSHNE9TXGE50) — légendes bas-gauche REPLIÉES par
   // défaut derrière une icône (gain de place, surtout sur mobile) ; tap = déplie.
   let legendsOpen = false;
+  // §2 point 7 — id stable du panneau légende pour `aria-controls` sur le bouton.
+  const LEGEND_PANEL_ID = "geo-map-legend-panel";
+
+  // §5.3 point 3 — état EFFECTIF du fond, distinct de l'intention `basemapMode` :
+  //  - `"satellite-2d"`     : l'imagerie satellite rend réellement ;
+  //  - `"fallback-map-2d"`  : satellite demandé mais repli OSM (mint indispo OU
+  //    erreur dure de tuile `sat-2d` attribuée à la source) ;
+  //  - `null`               : intention Plan (aucun repli à signaler).
+  let effectiveBasemap: "satellite-2d" | "fallback-map-2d" | null = null;
+  // §5.3 point 3/4 — garde anti-boucle : au PREMIER échec dur attribué à `sat-2d`,
+  // on reconstruit UNE fois sur OSM puis on NE retente plus automatiquement. Le
+  // bouton « Réessayer » remet ce garde à zéro et reconstruit satellite une fois.
+  let satelliteFailedForSession = false;
+  // Notice de repli (bloc role="status" aria-live="polite"). Vraie quand un repli
+  // a eu lieu alors que l'intention est satellite.
+  $: satelliteFallbackNotice =
+    basemapMode === "satellite" && effectiveBasemap === "fallback-map-2d";
 
   $: measureTotalLabel = formatDistanceFr(totalDistanceMeters(measurePoints));
   $: measureSegmentLabel = formatDistanceFr(lastSegmentMeters(measurePoints));
@@ -349,6 +392,13 @@
     }
   }
 
+  // §1 — mode de fond EFFECTIVEMENT rendu (satellite réel vs plan/repli OSM).
+  // Connu en TypeScript au montage/ré-montage : sert l'invariant `surfaceFillOpacity`
+  // et le basculement contour région (§3).
+  function currentSurfaceMode(): SurfaceMode {
+    return satelliteActive ? "satellite" : "plan";
+  }
+
   // ── Choroplèthe villes : application réactive de la peinture ───────────────
   function applyCitiesFillPaint(): void {
     if (!mapInstance || !mapReady) return;
@@ -357,9 +407,21 @@
       setPaintProperty: (layer: string, prop: string, value: unknown) => void;
     };
     if (!m.getLayer("cities-fill")) return;
+    const surfaceMode = currentSurfaceMode();
     m.setPaintProperty("cities-fill", "fill-color", fillColorExpression);
-    if (fillOpacityExpression !== undefined) {
-      m.setPaintProperty("cities-fill", "fill-opacity", fillOpacityExpression);
+    // §1/§3 — l'opacité d'aplat passe par l'invariant : 0 en satellite (l'imagerie
+    // transparaît), expression plan sinon. Toujours posée (défaut 1 hors expression).
+    m.setPaintProperty(
+      "cities-fill",
+      "fill-opacity",
+      surfaceFillOpacity(surfaceMode, fillOpacityExpression ?? 1),
+    );
+    // §3 — en satellite, la MEANING région passe au CONTOUR : `cities-outline`
+    // reprend l'EXPRESSION couleur du choroplèthe (= couleur de la légende). On la
+    // réapplique ici pour qu'un changement de filtre Signaux/KPI mette à jour le
+    // contour visible (et pas l'ancien aplat invisible). En plan, contour inchangé.
+    if (surfaceMode === "satellite" && m.getLayer("cities-outline")) {
+      m.setPaintProperty("cities-outline", "line-color", fillColorExpression);
     }
   }
 
@@ -784,6 +846,15 @@
 
   /** Couleur de l'aplat CPTAQ (vert agricole) — constante socle documentée. */
   const CPTAQ_FILL_COLOR = "#65a30d";
+  /**
+   * §3 — contour CPTAQ : token agricole DS existant (`--st-semantic-data-category5`,
+   * kind « A » de zone-kind-style), repli `#59A14F`. Remplace l'ancien hex isolé
+   * `#65a30d` du contour ; le contour vient ainsi du langage couleur du zonage.
+   */
+  const CPTAQ_OUTLINE_TOKEN = "--st-semantic-data-category5";
+  const CPTAQ_OUTLINE_FALLBACK = "#59A14F";
+  /** Opacité d'aplat CPTAQ en mode Plan (0 en satellite via `surfaceFillOpacity`). */
+  const CPTAQ_PLAN_FILL_OPACITY = 0.25;
 
   /**
    * Overlay CPTAQ « zone agricole protégée » : idiome create-if-absent puis
@@ -798,6 +869,8 @@
       getSource: (id: string) => { setData?: (data: unknown) => void } | undefined;
       addSource: (id: string, source: unknown) => void;
       addLayer: (layer: unknown) => void;
+      setPaintProperty: (layer: string, prop: string, value: unknown) => void;
+      getContainer: () => HTMLElement;
     };
     const src = m.getSource("cptaq");
     if (src?.setData) {
@@ -805,21 +878,36 @@
     } else if (!src) {
       m.addSource("cptaq", { type: "geojson", data: features });
     }
+    // §1/§5 — l'aplat CPTAQ suit l'invariant : 0 en satellite, 0.25 en plan. Le
+    // niveau sémantique ne contourne PAS la politique du fond.
+    const surfaceMode = currentSurfaceMode();
+    const cptaqFillOpacity = surfaceFillOpacity(surfaceMode, CPTAQ_PLAN_FILL_OPACITY);
+    // §3 — contour CPTAQ résolu depuis le token agricole DS (theme-invariant via
+    // repli hex si oklch/lab non parsable par MapLibre).
+    const cptaqOutlineColor = resolveMapColor(
+      CPTAQ_OUTLINE_TOKEN,
+      CPTAQ_OUTLINE_FALLBACK,
+      m.getContainer(),
+    );
     if (!m.getLayer("cptaq-fill")) {
       m.addLayer({
         id: "cptaq-fill",
         type: "fill",
         source: "cptaq",
-        paint: { "fill-color": CPTAQ_FILL_COLOR, "fill-opacity": 0.25 },
+        paint: { "fill-color": CPTAQ_FILL_COLOR, "fill-opacity": cptaqFillOpacity },
       });
+    } else {
+      m.setPaintProperty("cptaq-fill", "fill-opacity", cptaqFillOpacity);
     }
     if (!m.getLayer("cptaq-outline")) {
       m.addLayer({
         id: "cptaq-outline",
         type: "line",
         source: "cptaq",
-        paint: { "line-color": CPTAQ_FILL_COLOR, "line-width": 1, "line-opacity": 0.7 },
+        paint: { "line-color": cptaqOutlineColor, "line-width": 1, "line-opacity": 0.7 },
       });
+    } else {
+      m.setPaintProperty("cptaq-outline", "line-color", cptaqOutlineColor);
     }
     // Garantit l'ordre CPTAQ-sous-zones/lots même si le toggle arrive tard.
     applyLayerOrder(lotsSelectable);
@@ -838,6 +926,9 @@
     };
 
     const { zones, lots } = input;
+    // §1 — mode de fond effectif : pilote l'invariant d'opacité d'aplat de TOUTES
+    // les surfaces métier (zones, lots) et le style de contour lot en satellite.
+    const surfaceMode = currentSurfaceMode();
 
     const zoneSource = m.getSource("selected-zones");
     if (zoneSource?.setData) {
@@ -873,10 +964,11 @@
         id: "selected-zones-fill",
         type: "fill",
         source: "selected-zones",
+        // §3 — pas de `fill-outline-color` : le contour vient UNIQUEMENT de
+        // `selected-zones-outline` (type:"line"), pilotable par mode.
         paint: {
           "fill-color": zonePaint.fill["fill-color"],
           "fill-opacity": zonePaint.fill["fill-opacity"],
-          "fill-outline-color": "#0f172a",
         },
       });
     }
@@ -938,10 +1030,12 @@
         id: "selected-lots-fill",
         type: "fill",
         source: "selected-lots",
+        // §4 point 6 — pas de `fill-outline-color` blanc : il créait une seconde
+        // frontière non reliée à la légende. La maille cadastrale vient UNIQUEMENT
+        // de `selected-lots-outline`. L'opacité suit l'invariant (0 en satellite).
         paint: {
           "fill-color": input.lotFillColor,
-          "fill-opacity": input.lotFillOpacity,
-          "fill-outline-color": "#ffffff",
+          "fill-opacity": surfaceFillOpacity(surfaceMode, input.lotFillOpacity),
         },
       });
     }
@@ -950,10 +1044,14 @@
         id: "selected-lots-outline",
         type: "line",
         source: "selected-lots",
+        // §4 points 3-5 — en satellite, le contour porte la COULEUR DE LÉGENDE du
+        // lot (`input.lotFillColor` : signal/priorité/4+/TOD/neutre — la branche
+        // neutre est blanche, `LOT_NEUTRAL`), trait fin 0.4 opacité 1. En plan,
+        // `input.lotLineColor`, 0.4, 0.35 (inchangé).
         paint: {
-          "line-color": input.lotLineColor,
+          "line-color": surfaceMode === "satellite" ? input.lotFillColor : input.lotLineColor,
           "line-width": 0.4,
-          "line-opacity": 0.35,
+          "line-opacity": surfaceMode === "satellite" ? 1 : 0.35,
         },
       });
     }
@@ -1058,15 +1156,26 @@
       }
     }
     m.setPaintProperty("selected-lots-fill", "fill-color", input.lotFillColor);
+    // §6 point 6 — l'invariant enveloppe l'expression métier FINALE (sélection
+    // `isSelected→0.85` ET hover via `withHoverOpacityBoost` inclus) : en satellite
+    // l'aplat lot ne peut JAMAIS dépasser 0 ; en plan, l'opacité calculée est
+    // restaurée sans refetch métier.
     m.setPaintProperty(
       "selected-lots-fill",
       "fill-opacity",
-      input.lotFillOpacity,
+      surfaceFillOpacity(surfaceMode, input.lotFillOpacity),
     );
+    // §4 — contour lot dépendant du mode (couleur légende + opacité 1 en satellite,
+    // `input.lotLineColor` + 0.35 en plan). La largeur 0.4 est constante (création).
     m.setPaintProperty(
       "selected-lots-outline",
       "line-color",
-      input.lotLineColor,
+      surfaceMode === "satellite" ? input.lotFillColor : input.lotLineColor,
+    );
+    m.setPaintProperty(
+      "selected-lots-outline",
+      "line-opacity",
+      surfaceMode === "satellite" ? 1 : 0.35,
     );
 
     // Les couches zone/lot viennent d'être (re)posées : rétablit l'ordre de
@@ -1185,10 +1294,15 @@
     else enterMeasureMode();
   }
 
-  /** Échap = terminer la mesure (parité bouton / double-clic). */
+  /**
+   * Échap — §2 point 7 : ferme une mesure EN COURS (fige sans effacer) ET/OU la
+   * légende ouverte. N'efface jamais une mesure terminée (exitMeasureMode ne
+   * touche pas `measurePoints`).
+   */
   function handleMeasureKeydown(event: KeyboardEvent): void {
-    if (!measureActive || event.key !== "Escape") return;
-    exitMeasureMode();
+    if (event.key !== "Escape") return;
+    if (measureActive) exitMeasureMode();
+    if (legendsOpen) legendsOpen = false;
   }
 
   function addMeasurePoint(point: LngLatTuple): void {
@@ -1291,11 +1405,22 @@
       const adapter = await createGoogle2dBasemapAdapter({ mintUrl });
       const spec = adapter.basemap as { source: unknown };
       const resolved = adapter.resolveRasterSource(spec.source as never);
+      const attributionResolver = resolved.attributionResolver ?? null;
+      // §5.3 point 2 / source-gap LICENCE — JAMAIS de tuiles satellite sans mention
+      // légale : si l'adapter ne fournit pas une attribution résolvable, on REFUSE
+      // le raster et on replie sur OSM. Le correctif CONSOMME l'attribution fournie
+      // par l'adapter ; il n'écrit AUCUN libellé fournisseur (texte licence = SOURCE-GAP).
+      if (!attributionResolver) {
+        console.warn(
+          "§5 — adapter satellite sans attribution résolvable : repli OSM (pas de tuiles sans mention légale)",
+        );
+        return null;
+      }
       return {
         tiles: resolved.tileUrlTemplateBase,
         tileSize: resolved.tileSize.width,
         transformRequest: adapter.options.transformRequest,
-        attributionResolver: resolved.attributionResolver ?? null,
+        attributionResolver,
       };
     } catch (err) {
       // onError → OSM : le satellite ne rend jamais partiellement / sans clé.
@@ -1336,10 +1461,49 @@
         /* garder le dernier copyright affiché — jamais de tuiles sans attribution */
       }
     };
-    map.addControl({ onAdd: () => el, onRemove: () => el.remove() });
+    // §5.3 point 1 — position EXPLICITE bas-droite (bande d'attribution réservée).
+    map.addControl({ onAdd: () => el, onRemove: () => el.remove() }, "bottom-right");
     map.on("load", () => void update());
     map.on("moveend", () => void update());
     void update();
+  }
+
+  /**
+   * §5.3 point 5 — DISCRIMINATEUR d'erreur de tuile satellite. **SOURCE-GAP** : le
+   * champ exact qui attribue une `ErrorEvent` MapLibre à la source `sat-2d` n'est
+   * PAS confirmé sur capture réelle — on NE le DEVINE PAS depuis le texte du
+   * message. Best-effort STRUCTUREL (`e.sourceId === "sat-2d"`, repli `e.source.id`)
+   * à CONFIRMER par un test d'intégration qui capturera le payload réel d'une
+   * erreur de tuile avant de figer ce discriminateur.
+   */
+  function isSatelliteTileError(e: unknown): boolean {
+    const ev = e as { sourceId?: unknown; source?: { id?: unknown } } | null;
+    return ev?.sourceId === "sat-2d" || ev?.source?.id === "sat-2d";
+  }
+
+  /**
+   * §5.3 points 3-4 — repli OSM au PREMIER échec dur attribué à `sat-2d`, SANS
+   * boucle : marque la session (`satelliteFailedForSession`) puis reconstruit UNE
+   * fois sur OSM (initMap, guard ⇒ `sat = null`). initMap pose alors
+   * `effectiveBasemap = "fallback-map-2d"` + notifie `onBasemapFallback` ; le fond
+   * effectif devient plan ⇒ plus aucune erreur sat ne se redéclenche.
+   */
+  function handleMapError(e: unknown): void {
+    if (!satelliteActive || satelliteFailedForSession) return;
+    if (!isSatelliteTileError(e)) return;
+    satelliteFailedForSession = true;
+    void reinitForBasemap();
+  }
+
+  /**
+   * §5.3 point 4 — action EXPLICITE « Réessayer » : remet le garde de session à
+   * zéro et reconstruit satellite UNE fois (aucune reconstruction automatique).
+   */
+  function retrySatellite(): void {
+    if (!satelliteFailedForSession) return;
+    satelliteFailedForSession = false;
+    effectiveBasemap = null;
+    void reinitForBasemap();
   }
 
   // ── Init MapLibre ──────────────────────────────────────────────────────────
@@ -1365,14 +1529,26 @@
       // §5 2-modes — le fond satellite n'est construit QUE si le mode courant
       // vaut `'satellite'` ; en `'plan'` (défaut) → `sat = null` → fond OSM +
       // aplats REMPLIS (zoneOverlayPaint(false), inchangé).
+      // §5.3 — ne construit le satellite que si l'intention est satellite ET
+      // qu'aucun échec dur n'a été attribué à sat-2d pour cette session (garde
+      // anti-boucle : après un repli, on reste OSM jusqu'à un « Réessayer »).
       const sat =
-        basemapMode === "satellite" ? await buildSatelliteBasemap() : null;
+        basemapMode === "satellite" && !satelliteFailedForSession
+          ? await buildSatelliteBasemap()
+          : null;
       // §5 2-modes — mémorise le mode AVANT la 1re pose des couches zone : leur
       // style (aplats vs contour) en dépend. `sat` truthy = satellite actif.
       satelliteActive = !!sat;
+      // §5.3 — état EFFECTIF du fond : satellite rendu, repli, ou plan (null).
+      effectiveBasemap =
+        basemapMode === "satellite"
+          ? sat
+            ? "satellite-2d"
+            : "fallback-map-2d"
+          : null;
       // §5 2-modes — cas (c) : satellite demandé mais fond indisponible (mint /
-      // erreur) → repli OSM SANS retomber sur plan. On notifie le consommateur
-      // (notice « imagerie indisponible ») ; les aplats restent remplis (sat null).
+      // attribution absente / échec tuile) → repli OSM SANS retomber sur plan. On
+      // notifie le consommateur (notice de repli) ; les aplats restent remplis.
       if (basemapMode === "satellite" && !sat) onBasemapFallback();
       const osmBaseLayers =
         basemap === "neutral-gray"
@@ -1486,29 +1662,38 @@
             data: polygonsData as any,
           });
 
-          // Couche aplat fill choroplèthe (couleur/opacité pilotées par les props)
+          // §1/§3 — mode effectif connu ici (satelliteActive posé avant ce corps).
+          const surfaceMode = currentSurfaceMode();
+          // Couche aplat fill choroplèthe (couleur/opacité pilotées par les props).
+          // §3 — pas de `fill-outline-color` : le contour vient de `cities-outline`.
+          // L'opacité passe par l'invariant (0 en satellite ⇒ aucun aplat région).
           m.addLayer({
             id: "cities-fill",
             type: "fill",
             source: "cities-polygons",
             paint: {
               "fill-color": fillColorExpression,
-              ...(fillOpacityExpression !== undefined
-                ? { "fill-opacity": fillOpacityExpression }
-                : {}),
-              "fill-outline-color": fillOutlineColor,
+              // `surfaceFillOpacity` renvoie `unknown` (expression MapLibre opaque
+              // OU 0) : cast vers le type de paint attendu par MapLibre.
+              "fill-opacity": surfaceFillOpacity(
+                surfaceMode,
+                fillOpacityExpression ?? 1,
+              ) as ExpressionSpecification | number,
             },
           });
 
-          // Couche contour fill (plus visible)
+          // §3 — contour région. En PLAN : slate discret (#64748b / 0.5 / 0.4). En
+          // SATELLITE : le contour reprend l'EXPRESSION couleur du choroplèthe (=
+          // couleur de la légende région) et devient la MEANING ; largeur
+          // SAT_CITY_LINE_WIDTH (source-gap provisoire), opacité 1.
           m.addLayer({
             id: "cities-outline",
             type: "line",
             source: "cities-polygons",
             paint: {
-              "line-color": "#64748b", // slate-500
-              "line-width": 0.5,
-              "line-opacity": 0.4,
+              "line-color": surfaceMode === "satellite" ? fillColorExpression : "#64748b",
+              "line-width": surfaceMode === "satellite" ? SAT_CITY_LINE_WIDTH : 0.5,
+              "line-opacity": surfaceMode === "satellite" ? 1 : 0.4,
             },
           });
 
@@ -1581,6 +1766,9 @@
         onReady(buildApi());
       };
 
+      // §5.3 — écoute des erreurs : repli OSM au 1er échec dur attribué à `sat-2d`
+      // (discriminateur source-gap, cf. isSatelliteTileError). No-op hors satellite.
+      m.on("error", (e: unknown) => handleMapError(e));
       // Chemin nominal (primaire) : l'event `'load'` de MapLibre.
       m.on("load", () => void finalizeMapSetup());
       // Repli : si `'load'` ne fire pas dans le délai imparti (flap réseau, tuile
@@ -1680,22 +1868,65 @@
 >
   <div bind:this={mapContainer} class="absolute inset-0"></div>
 
-  <!-- ── Contrôles carte (BAS-droit) : outil « mesurer une distance ». Mobile-first :
-       `bottom-20` en mobile (au-dessus de la bulle de chat bas-droit), `md:bottom-3`
-       en desktop (pas de vide bas) ; `flex-col-reverse` → le panneau s'ouvre vers le HAUT. -->
-  <div class="absolute bottom-20 md:bottom-3 right-3 z-10 flex flex-col-reverse items-end gap-2">
-    <button
-      type="button"
-      class="measure-toggle"
-      class:measure-toggle-active={measureActive}
-      aria-pressed={measureActive}
-      aria-label="Mesurer une distance"
-      title="Mesurer une distance"
-      data-testid="measure-toggle"
-      onclick={toggleMeasureMode}
-    >
-      <Ruler size={16} aria-hidden="true" />
-    </button>
+  <!-- ── Contrôles carte (BAS-droit) : §5.1 — RANGÉE [Mesure | Fond de carte].
+       Mobile-first : `bottom-20` (au-dessus de la bulle de chat bas-droit),
+       `md:bottom-10` (2,5 rem réservés au-dessus de la bande d'attribution).
+       `flex-col-reverse` → les panneaux (mesure / indisponibilité) s'ouvrent vers
+       le HAUT, au-dessus de la rangée de boutons. -->
+  <div class="absolute bottom-20 md:bottom-10 right-3 z-10 flex flex-col-reverse items-end gap-2">
+    <!-- Rangée horizontale : Mesure (à GAUCHE), puis groupe Plan/Satellite. -->
+    <div class="flex flex-row items-center gap-2">
+      <button
+        type="button"
+        class="map-ctrl-btn"
+        class:map-ctrl-btn-active={measureActive}
+        aria-pressed={measureActive}
+        aria-label="Mesurer une distance"
+        title="Mesurer une distance"
+        data-testid="measure-toggle"
+        onclick={toggleMeasureMode}
+      >
+        <Ruler size={16} aria-hidden="true" />
+      </button>
+
+      <!-- §2 point 2/5 — groupe « Fond de carte » (Plan / Satellite) rendu SSI
+           `showBasemapControl` (host gating porté par le consommateur). Deux
+           boutons NATIFS (Entrée/Espace natifs), pas un onglet. -->
+      {#if showBasemapControl}
+        <div
+          class="basemap-group"
+          role="group"
+          aria-label="Fond de carte"
+          data-testid="basemap-control"
+          data-basemap-mode={basemapMode}
+        >
+          <button
+            type="button"
+            class="map-ctrl-btn"
+            class:map-ctrl-btn-active={basemapMode === "plan"}
+            aria-pressed={basemapMode === "plan"}
+            aria-label="Afficher le plan"
+            title="Plan"
+            data-testid="basemap-btn-plan"
+            onclick={() => onBasemapModeChange("plan")}
+          >
+            <MapIcon size={16} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="map-ctrl-btn"
+            class:map-ctrl-btn-active={basemapMode === "satellite"}
+            aria-pressed={basemapMode === "satellite"}
+            aria-label="Afficher le satellite"
+            title="Satellite"
+            data-testid="basemap-btn-satellite"
+            onclick={() => onBasemapModeChange("satellite")}
+          >
+            <SatelliteIcon size={16} aria-hidden="true" />
+          </button>
+        </div>
+      {/if}
+    </div>
 
     {#if measureActive || measurePoints.length > 0}
       <div class="measure-panel" data-testid="measure-panel">
@@ -1721,6 +1952,28 @@
             Effacer
           </button>
         {/if}
+      </div>
+    {/if}
+
+    <!-- §5.3 — repli OSM : satellite demandé mais indisponible (mint / attribution
+         absente / échec de tuile). Le mode d'INTENTION reste 'satellite' ; bloc
+         d'état annoncé aux lecteurs d'écran, action explicite « Réessayer ». -->
+    {#if satelliteFallbackNotice}
+      <div
+        class="basemap-fallback"
+        role="status"
+        aria-live="polite"
+        data-testid="basemap-fallback-notice"
+      >
+        <span class="basemap-fallback-text">Satellite indisponible — carte affichée.</span>
+        <button
+          type="button"
+          class="basemap-retry"
+          data-testid="basemap-retry"
+          onclick={retrySatellite}
+        >
+          Réessayer
+        </button>
       </div>
     {/if}
   </div>
@@ -1765,25 +2018,28 @@
        ex. Zonage au-dessus de Lots) : slot bottom-left, complémentaire de la
        prop `legend` (vue Sources). -->
   {#if $$slots["overlay-bottom-left"] || legend}
-    <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (Layers) ;
-         tap = déplie (gain de place, surtout mobile). Cible : légendes lot/zones
-         (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
-    <div class="absolute bottom-20 md:bottom-3 left-3 z-10 flex flex-col items-start gap-2">
+    <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (§2 point 4
+         = `ListTree`) ; tap = déplie. `flex-col-reverse` → le bouton reste en bas,
+         le panneau s'ouvre vers le HAUT (même ancrage `bottom-20 md:bottom-10` que
+         la rangée bas-droit → Légende et Mesure alignées). Cible : légendes
+         lot/zones (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
+    <div class="absolute bottom-20 md:bottom-10 left-3 z-10 flex flex-col-reverse items-start gap-2">
       <button
         type="button"
-        class="legend-toggle"
-        class:legend-toggle-active={legendsOpen}
+        class="map-ctrl-btn"
+        class:map-ctrl-btn-active={legendsOpen}
         aria-pressed={legendsOpen}
         aria-expanded={legendsOpen}
+        aria-controls={LEGEND_PANEL_ID}
         aria-label="Légende"
         title="Légende"
         data-testid="legend-toggle"
         onclick={() => (legendsOpen = !legendsOpen)}
       >
-        <Layers size={16} aria-hidden="true" />
+        <ListTree size={16} aria-hidden="true" />
       </button>
       {#if legendsOpen}
-        <div class="flex max-w-xs flex-col gap-2" data-testid="legend-panel">
+        <div id={LEGEND_PANEL_ID} class="flex max-w-xs flex-col gap-2" data-testid="legend-panel">
           <slot name="overlay-bottom-left" />
           {#if legend}
             <div
@@ -1824,9 +2080,9 @@
 </div>
 
 <style>
-  /* Outil mesure + toggle légende — style DS (tokens --st-*, replis slate). */
-  .measure-toggle,
-  .legend-toggle {
+  /* §5.1 — boutons de contrôle carte (Mesure, Fond de carte, Légende) : 32×32 px,
+     même bordure / rayon / focus / état actif, tokens DS (replis slate). */
+  .map-ctrl-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1840,17 +2096,56 @@
     cursor: pointer;
     transition: background-color 120ms ease, color 120ms ease;
   }
-  .measure-toggle:hover,
-  .legend-toggle:hover {
+  .map-ctrl-btn:hover {
     background: var(--st-semantic-surface-hover, #f1f5f9);
   }
-  .measure-toggle-active,
-  .measure-toggle-active:hover,
-  .legend-toggle-active,
-  .legend-toggle-active:hover {
+  .map-ctrl-btn-active,
+  .map-ctrl-btn-active:hover {
     background: var(--st-semantic-action-primary, #2563eb);
     border-color: var(--st-semantic-action-primary, #2563eb);
     color: var(--st-semantic-action-primaryText, #fff);
+  }
+  /* §2 point 6 — focus visible via le token DS bouton (repli 2px solid #2563eb). */
+  .map-ctrl-btn:focus-visible,
+  .basemap-retry:focus-visible {
+    outline: var(--st-component-button-anatomy-focus-outline, 2px solid #2563eb);
+    outline-offset: var(--st-component-button-anatomy-focus-outlineOffset, 2px);
+  }
+  /* §5.1 — groupe « Fond de carte » : deux boutons natifs jointifs. */
+  .basemap-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  /* §5.3 — notice de repli OSM (role="status" aria-live="polite"). */
+  .basemap-fallback {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 16rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-default, rgb(255 255 255 / 0.95));
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.1);
+    padding: 0.375rem 0.5rem;
+  }
+  .basemap-fallback-text {
+    font-size: var(--st-component-caption-fontSize, 0.6875rem);
+    color: var(--st-semantic-text-secondary, #475569);
+  }
+  .basemap-retry {
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+    color: var(--st-semantic-text-secondary, #475569);
+    font-size: var(--st-component-caption-fontSize, 0.6875rem);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .basemap-retry:hover {
+    background: var(--st-semantic-surface-hover, #f1f5f9);
   }
 
   .measure-panel {
