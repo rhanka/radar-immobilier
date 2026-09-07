@@ -17,11 +17,12 @@
   // satellite / coercition prod). Les autres props du socle (onBasemapFallback…)
   // sont ignorées au runtime (restProps) — inutile de les redéclarer ici.
   export let basemapMode: "plan" | "satellite" = "plan";
-  // §2 point 2 — le groupe Plan/Satellite vit désormais dans le SOCLE (ici stubé) :
-  // on REFLÈTE `showBasemapControl` en attribut DOM (host gating testable au niveau
-  // vue) et on expose le writer `onBasemapModeChange` via une doublure de boutons,
-  // pour tester la PERSISTANCE de `setBasemap`. L'a11y des boutons NATIFS réels est,
-  // elle, couverte dans GeoCityMapBase.basemap-mode.test.ts (socle réel).
+  // §4 R2 — le contrôle de fond (menu à UN trigger `Layers`) vit désormais dans le
+  // SOCLE (ici stubé) : on REFLÈTE `showBasemapControl` en attribut DOM (host gating
+  // testable au niveau vue) et on expose le writer `onBasemapModeChange` via une
+  // DOUBLURE du menu (trigger + deux options radio Plan/Satellite) pour tester la
+  // PERSISTANCE de `setBasemap`. L'a11y du menu NATIF réel (ouverture/clavier/ARIA)
+  // est couverte dans GeoCityMapBase.basemap-mode.test.ts (socle réel).
   export let showBasemapControl = false;
   export let onBasemapModeChange: (mode: "plan" | "satellite") => void = () => {};
 
@@ -34,6 +35,8 @@
     getCityBoundary: () => null,
     hasCityBoundary: () => false,
     setCptaqData: () => {},
+    // §7 R2 — doublure inerte de l'emphase CPTAQ (contrat de test préservé).
+    setCptaqLegendEmphasis: () => {},
     themeElement: null,
   };
 
@@ -46,23 +49,34 @@
   data-show-basemap-control={showBasemapControl}
 >
   {#if showBasemapControl}
-    <div role="group" aria-label="Fond de carte" data-testid="basemap-control">
+    <div data-testid="basemap-control">
       <button
         type="button"
-        aria-label="Afficher le plan"
-        aria-pressed={basemapMode === "plan"}
-        onclick={() => onBasemapModeChange("plan")}
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-label={`Fond de carte : ${basemapMode === "plan" ? "Plan" : "Satellite"}`}
+        data-testid="basemap-menu-trigger"
       >
-        Plan
+        Fond de carte
       </button>
-      <button
-        type="button"
-        aria-label="Afficher le satellite"
-        aria-pressed={basemapMode === "satellite"}
-        onclick={() => onBasemapModeChange("satellite")}
-      >
-        Satellite
-      </button>
+      <div role="menu" aria-label="Fond de carte">
+        <button
+          type="button"
+          role="menuitemradio"
+          aria-checked={basemapMode === "plan"}
+          onclick={() => onBasemapModeChange("plan")}
+        >
+          Plan
+        </button>
+        <button
+          type="button"
+          role="menuitemradio"
+          aria-checked={basemapMode === "satellite"}
+          onclick={() => onBasemapModeChange("satellite")}
+        >
+          Satellite
+        </button>
+      </div>
     </div>
   {/if}
   <slot name="overlay-top-left" />

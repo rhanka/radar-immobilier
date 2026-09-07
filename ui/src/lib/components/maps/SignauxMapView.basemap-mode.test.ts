@@ -129,8 +129,10 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     const group = document.querySelector(
       "[data-testid='basemap-control']",
     ) as HTMLElement;
-    const satBtn = within(group).getByRole("button", { name: "Afficher le satellite" });
-    await fireEvent.click(satBtn);
+    // §4 R2 — le contrôle de fond est un menu à un trigger : la doublure du socle
+    // expose deux options radio ; on sélectionne « Satellite ».
+    const satOpt = within(group).getByRole("menuitemradio", { name: "Satellite" });
+    await fireEvent.click(satOpt);
     await tick();
 
     // setBasemap (writer unique) persiste ET change la prop → ré-init socle.
@@ -156,5 +158,48 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     await tick();
     // Le sélecteur de fond haut-droit (ancien ContentSwitcher) a migré dans le socle.
     expect(document.querySelector("[data-testid='basemap-switcher']")).toBeNull();
+  });
+
+  // ── Point 1 (ITEM 1) : DÉFAUT Plan + persistance/rechargement dans les deux sens ──
+  it("(Point 1 b) sélection Satellite persiste et un rechargement restaure Satellite", async () => {
+    vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
+    const { unmount } = render(SignauxMapView);
+    await tick();
+    // Défaut du contrôle = Plan (clé absente).
+    expect(basemapMode()).toBe("plan");
+
+    const group = document.querySelector(
+      "[data-testid='basemap-control']",
+    ) as HTMLElement;
+    await fireEvent.click(within(group).getByRole("menuitemradio", { name: "Satellite" }));
+    await tick();
+    expect(localStorage.getItem(BASEMAP_LS_KEY)).toBe("satellite");
+
+    // « Rechargement » (jsdom) : un nouveau montage lit la préférence persistée.
+    unmount();
+    render(SignauxMapView);
+    await tick();
+    expect(basemapMode()).toBe("satellite");
+  });
+
+  it("(Point 1 c) sélection Plan persiste et un rechargement restaure Plan", async () => {
+    vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
+    localStorage.setItem(BASEMAP_LS_KEY, "satellite"); // départ Satellite (préférence)
+    const { unmount } = render(SignauxMapView);
+    await tick();
+    expect(basemapMode()).toBe("satellite");
+
+    const group = document.querySelector(
+      "[data-testid='basemap-control']",
+    ) as HTMLElement;
+    await fireEvent.click(within(group).getByRole("menuitemradio", { name: "Plan" }));
+    await tick();
+    expect(localStorage.getItem(BASEMAP_LS_KEY)).toBe("plan");
+
+    // « Rechargement » : la préférence Plan est restaurée (jamais de faux satellite).
+    unmount();
+    render(SignauxMapView);
+    await tick();
+    expect(basemapMode()).toBe("plan");
   });
 });
