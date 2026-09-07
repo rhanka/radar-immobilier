@@ -13,7 +13,7 @@
  * Le toggle lots est lu depuis `window.location.search` à l'init du composant.
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, cleanup, waitFor } from "@testing-library/svelte";
+import { render, cleanup, waitFor, screen, fireEvent } from "@testing-library/svelte";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import {
   normalizeGeoRouteState,
@@ -67,6 +67,21 @@ vi.mock("$lib/maps/signaux-zones-loader.js", async (importOriginal) => {
     loadSignauxZones: vi.fn(async (citySlug: string) => ({
       tier: "collection" as const,
       response: fixtureZones(citySlug),
+    })),
+  };
+});
+
+// §7 R2 — CPTAQ mocké : le clic sur le toggle « Agricole (CPTAQ) » déclenche
+// `loadCptaq` → on renvoie une absence propre (aucun fetch réel, aucun WebGL).
+vi.mock("$lib/maps/cptaq-client.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("$lib/maps/cptaq-client.js")>();
+  return {
+    ...actual,
+    fetchCptaqConstraints: vi.fn(async () => ({
+      ok: false,
+      absent: true,
+      featureCollection: { type: "FeatureCollection" as const, features: [] },
     })),
   };
 });
@@ -207,6 +222,38 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
   // les fetchs zones + lots exactement comme en plan ; le mode transmis au socle
   // reste 'satellite'. (Les assertions de PAINT par mode sont couvertes par le
   // socle — GeoCityMapBase.basemap-mode.test.ts — et l'e2e recette.)
+  // §7 R2 — refonte légende CPTAQ : encadré autonome retiré, « Agricole (CPTAQ) »
+  // devient un TOGGLE de couche sous AFFECTATION (rayé quand désactivé), qui persiste.
+  it("(§7) « Agricole (CPTAQ) » = toggle sous AFFECTATION (encadré autonome retiré), rayé puis persisté", async () => {
+    setSearch("");
+    localStorage.clear();
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    // Le toggle apparaît sous AFFECTATION une fois la ville sélectionnée.
+    const toggle = await screen.findByTestId("legend-cptaq-toggle");
+    expect(toggle.tagName).toBe("BUTTON");
+    expect(toggle.textContent).toContain("Agricole (CPTAQ)");
+    // L'encadré autonome + sa case à cocher ont disparu.
+    expect(screen.queryByTestId("map-legend-cptaq")).toBeNull();
+    // Désactivé par défaut → aria-pressed false + libellé RAYÉ (line-through seul).
+    expect(toggle.getAttribute("aria-pressed")).toBe("false");
+    expect(toggle.querySelector(".line-through")).not.toBeNull();
+
+    // Clic → activé + persisté ; la rayure disparaît.
+    await fireEvent.click(toggle);
+    await waitFor(() =>
+      expect(
+        screen.getByTestId("legend-cptaq-toggle").getAttribute("aria-pressed"),
+      ).toBe("true"),
+    );
+    // Persistance CPTAQ = "1"/"0" (readLabelPref/persistLabelPref, inchangé).
+    expect(localStorage.getItem("signaux-cptaq-enabled")).toBe("1");
+    expect(
+      screen.getByTestId("legend-cptaq-toggle").querySelector(".line-through"),
+    ).toBeNull();
+    localStorage.clear();
+  });
+
   it("(deux modes) préférence 'satellite' : le deep-link ville charge zones + lots (harness inchangé)", async () => {
     localStorage.setItem("signaux-basemap-mode", "satellite");
     setSearch("");
