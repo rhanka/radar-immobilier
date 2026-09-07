@@ -14,6 +14,9 @@
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, cleanup, waitFor, screen, fireEvent } from "@testing-library/svelte";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import {
   normalizeGeoRouteState,
@@ -272,5 +275,42 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     const stub = document.querySelector("[data-testid='stub-map']");
     expect(stub?.getAttribute("data-basemap-mode")).toBe("satellite");
     localStorage.clear();
+  });
+});
+
+/**
+ * §5 R2 point 2 — GUARD de câblage du DÉCLENCHEUR CHAT (lecture SOURCE).
+ *
+ * Le rendu réel du bouton passe par le slot terminal `controls-bottom-right-end`
+ * du VRAI socle GeoCityMapBase ; or les tests d'intégration ci-dessus stubent le
+ * socle (`GeoCityMapBaseStub`, qui n'expose pas ce slot) et maplibre est indispo
+ * en jsdom. On lit donc la SOURCE et on prouve que le câblage est en place ;
+ * l'interaction visuelle (position « tout à droite », ouverture) est couverte en
+ * e2e / recette owner. Pur : aucun composant monté, aucun réseau.
+ */
+describe("SignauxMapView — déclencheur chat (câblage source, store #564)", () => {
+  const HERE = dirname(fileURLToPath(import.meta.url));
+  const source = readFileSync(resolve(HERE, "./SignauxMapView.svelte"), "utf8");
+
+  it("remplit le slot terminal `controls-bottom-right-end` du socle", () => {
+    expect(source).toContain('slot="controls-bottom-right-end"');
+  });
+
+  it("bouton = IconButton DS carré (sm/secondary) + glyph lucide MessageSquare", () => {
+    expect(source).toContain("IconButton");
+    // Bulle DANS un carré : glyph rendu = <MessageSquare>, JAMAIS <MessageCircle>.
+    expect(source).toContain("<MessageSquare");
+    expect(source).not.toContain("<MessageCircle");
+    expect(source).toMatch(/size="sm"/);
+    expect(source).toMatch(/variant="secondary"/);
+  });
+
+  it("ARIA dialog + état ouvert reflété, clic → requestChatToggle (store #564)", () => {
+    expect(source).toContain('aria-haspopup="dialog"');
+    expect(source).toContain('aria-controls="chat-dock-dialog"');
+    expect(source).toContain("aria-expanded={chatOpen}");
+    expect(source).toContain("requestChatToggle()");
+    // L'état ouvert est LU depuis le layout publié par le dock (pas dupliqué).
+    expect(source).toContain("$chatWidgetLayout.isOpen");
   });
 });

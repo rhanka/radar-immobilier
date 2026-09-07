@@ -21,7 +21,15 @@
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount } from "svelte";
-  import { Checkbox } from "@sentropic/design-system-svelte";
+  import { Checkbox, IconButton } from "@sentropic/design-system-svelte";
+  // §5 R2 point 2 — déclencheur chat = bulle DANS un carré (glyph lucide
+  // `MessageSquare`, PAS `MessageCircle`). Le bouton vit dans la rangée de
+  // contrôles carte (slot terminal `controls-bottom-right-end` du socle) et
+  // pilote l'unique chat via le store #564 (`requestChatToggle`) ; l'état ouvert
+  // est lu depuis le layout publié par le dock (`chatWidgetLayout.isOpen`).
+  import { MessageSquare } from "@lucide/svelte";
+  import { requestChatToggle } from "$lib/chat/chat-trigger";
+  import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { isSatelliteBasemapEnabled } from "$lib/maps/geo-sat-basemap.js";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
@@ -292,6 +300,12 @@
   let cptaqLoading = false;
   let cptaqError: string | null = null;
   let cptaqAbsent = false;
+
+  // ── §5 R2 point 2 — état ouvert du chat (déclencheur carré de la rangée) ─────
+  // Reflète l'`isOpen` publié par le dock (chatWidgetLayout) → alimente
+  // `aria-expanded` du bouton chat. Lecture seule : l'ouverture/fermeture reste
+  // pilotée par le store #564 (`requestChatToggle`), jamais dupliquée ici.
+  $: chatOpen = $chatWidgetLayout.isOpen;
 
   // ── §5 2-modes — FOND de carte (PLAN par défaut / SATELLITE switchable) ──────
   // ADR-0033 — structure 2-modes. Défaut PLAN (aplats REMPLIS sur OSM/neutral,
@@ -2468,6 +2482,29 @@
     onLotClick={handleLotClick}
     onReady={handleMapReady}
   >
+    <!-- §5 R2 point 2 — DÉCLENCHEUR CHAT : dernier enfant de la rangée de
+         contrôles carte (slot terminal `controls-bottom-right-end` du socle) →
+         garanti « tout à droite ». IconButton DS carré (`size="sm"`,
+         `variant="secondary"`) + glyph lucide `MessageSquare` (bulle DANS un
+         carré). Clic → `requestChatToggle()` (store #564) pilote l'UNIQUE chat.
+         `aria-expanded` reflète l'état ouvert ; `aria-controls` cible le dialog
+         existant du dock (`chat-dock-dialog`). La bulle ronde locale est masquée
+         sur cette vue (suppression #564 posée par App.svelte). -->
+    <svelte:fragment slot="controls-bottom-right-end">
+      <IconButton
+        size="sm"
+        variant="secondary"
+        aria-haspopup="dialog"
+        aria-controls="chat-dock-dialog"
+        aria-expanded={chatOpen}
+        aria-label={chatOpen ? "Fermer la conversation" : "Ouvrir la conversation"}
+        data-testid="chat-toggle"
+        onclick={() => requestChatToggle()}
+      >
+        <MessageSquare size={18} aria-hidden="true" />
+      </IconButton>
+    </svelte:fragment>
+
     <!-- C1 — LÉGENDES SUR LA CARTE (comme la vue Sources), plus dans le rail.
          Ville active : bloc « Zonage » AU-DESSUS du bloc « Lots ». -->
     <svelte:fragment slot="overlay-bottom-left">

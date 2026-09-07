@@ -7,7 +7,11 @@
  * au déploiement préprod (owner/i-cond) — cf. option (b).
  */
 import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
-import { render, fireEvent, cleanup } from "@testing-library/svelte";
+import { render, fireEvent, cleanup, waitFor } from "@testing-library/svelte";
+import {
+  acquireChatTrigger,
+  requestChatToggle,
+} from "$lib/chat/chat-trigger";
 
 beforeAll(() => {
   if (typeof window !== "undefined" && !window.matchMedia) {
@@ -63,5 +67,46 @@ describe("ChatWidgetHost — migration ChatDock", () => {
     await fireEvent.click(getByLabelText("Ouvrir l'assistant radar"));
     // Par défaut docked → le bouton propose « Passer en fenetre flottante ».
     expect(getByLabelText("Passer en fenetre flottante")).toBeTruthy();
+  });
+});
+
+describe("ChatWidgetHost — pont hôte↔chat (store #564)", () => {
+  it("bulle ronde MASQUÉE quand un hôte fournit son déclencheur (chatBubbleSuppressed)", () => {
+    // Un hôte (ex. la rangée de contrôles carte) prend la main sur le déclencheur.
+    const release = acquireChatTrigger();
+    try {
+      const { queryByLabelText } = render(ChatWidgetHost);
+      // Aucune bulle ronde locale rendue → pas de DOUBLE déclencheur.
+      expect(queryByLabelText("Ouvrir l'assistant radar")).toBeNull();
+    } finally {
+      release(); // ne pas fuiter la suppression (store singleton ref-compté).
+    }
+  });
+
+  it("bulle ronde de nouveau rendue une fois le déclencheur hôte libéré", () => {
+    // Régression : la libération ref-comptée restaure la bulle par défaut.
+    const { getByLabelText } = render(ChatWidgetHost);
+    expect(getByLabelText("Ouvrir l'assistant radar")).toBeTruthy();
+  });
+
+  it("requestChatToggle ouvre puis ferme l'UNIQUE dialog via le toggle() du dock", async () => {
+    const { container } = render(ChatWidgetHost);
+    // Fermé au départ (hasOpenedOnce=false → aucun dialog monté).
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+
+    // Un bump du nonce = une demande de bascule → le dock s'ouvre.
+    requestChatToggle();
+    await waitFor(() => {
+      const dialog = container.querySelector('[role="dialog"]');
+      expect(dialog).not.toBeNull();
+      expect(dialog!.classList.contains("hidden")).toBe(false);
+    });
+
+    // Un second bump referme (dialog caché, pas démonté).
+    requestChatToggle();
+    await waitFor(() => {
+      const dialog = container.querySelector('[role="dialog"]');
+      expect(dialog!.classList.contains("hidden")).toBe(true);
+    });
   });
 });
