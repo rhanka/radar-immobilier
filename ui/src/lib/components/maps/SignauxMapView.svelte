@@ -21,7 +21,7 @@
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
   import { onMount } from "svelte";
-  import { Checkbox, ContentSwitcher } from "@sentropic/design-system-svelte";
+  import { Checkbox } from "@sentropic/design-system-svelte";
   import { isSatelliteBasemapEnabled } from "$lib/maps/geo-sat-basemap.js";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
   import SignauxRail from "$lib/components/maps/SignauxRail.svelte";
@@ -295,11 +295,12 @@
   // ── §5 2-modes — FOND de carte (PLAN par défaut / SATELLITE switchable) ──────
   // ADR-0033 — structure 2-modes. Défaut PLAN (aplats REMPLIS sur OSM/neutral,
   // comportement d'avant §5). Persisté en localStorage (garde SSR, même pattern
-  // que CPTAQ_LS_KEY). Le switch (ContentSwitcher DS) n'est rendu QUE si le
-  // satellite est PERMIS sur ce host (préprod/localhost) ; en prod → satellite
-  // OFF par construction → aucun switcher (plan-only). Un changement de mode
-  // RÉ-INITIALISE la carte côté socle (contrainte `transformRequest` non-runtime),
-  // viewport préservé.
+  // que CPTAQ_LS_KEY). §2 point 2 : le groupe Plan/Satellite vit désormais dans
+  // les contrôles bas-droit du SOCLE (GeoCityMapBase), rendu SSI le satellite est
+  // PERMIS sur ce host (`showBasemapControl={satelliteHostAllowed}`) ; en prod →
+  // satellite OFF par construction → aucun groupe (plan-only). Le socle rend aussi
+  // la notice de repli OSM (§5.3). Un changement de mode RÉ-INITIALISE la carte
+  // côté socle (contrainte `transformRequest` non-runtime), viewport préservé.
   const BASEMAP_LS_KEY = "signaux-basemap-mode";
   // Satellite permis sur ce host ? (runtime, même seam que buildSatelliteBasemap :
   // window.location.hostname + kill-switch build). Garde SSR → OFF hors navigateur.
@@ -331,18 +332,15 @@
     return stored === "satellite" ? "satellite" : "plan";
   }
   let basemapMode: "plan" | "satellite" = readInitialBasemapMode();
-  // Repli OSM signalé par le socle (cas (c) : satellite demandé, mint indisponible
-  // → OSM). Le mode RESTE 'satellite' ; on affiche seulement une notice de repli.
-  let satelliteFallbackActive = false;
 
   /**
-   * Bascule le fond de carte : met le mode + persiste + (via la prop passée au
-   * socle) déclenche la RÉ-INITIALISATION de la carte. Efface une éventuelle
-   * notice de repli précédente : la ré-init la reposera si le satellite échoue
-   * encore.
+   * §5.2 — writer UNIQUE de bascule du fond, branché sur `onBasemapModeChange` du
+   * socle : met le mode + persiste → la prop `basemapMode` change → le socle
+   * RÉ-INITIALISE la carte (viewport préservé). La notice de repli OSM (cas (c) :
+   * satellite demandé, mint/attribution/tuile indisponible) est rendue par le
+   * SOCLE (§5.3) ; cette vue ne porte plus d'état de repli.
    */
   function setBasemap(next: "plan" | "satellite"): void {
-    satelliteFallbackActive = false;
     basemapMode = next;
     if (typeof localStorage !== "undefined") {
       try {
@@ -351,11 +349,6 @@
         /* quota / mode privé — la préférence n'est simplement pas persistée */
       }
     }
-  }
-
-  /** Le socle a demandé le satellite mais est retombé sur OSM (mint indispo). */
-  function handleBasemapFallback(): void {
-    satelliteFallbackActive = true;
   }
 
   // ── Gardes anti-course (dernière requête gagne) ───────────────────────────
@@ -2411,7 +2404,8 @@
   <GeoCityMapBase
     basemap="neutral-gray"
     {basemapMode}
-    onBasemapFallback={handleBasemapFallback}
+    showBasemapControl={satelliteHostAllowed}
+    onBasemapModeChange={setBasemap}
     {fillColorExpression}
     {fillOpacityExpression}
     {showLotLabels}
@@ -2572,38 +2566,10 @@
       {/if}
     </svelte:fragment>
 
-    <!-- §5 2-modes — SWITCH de fond (ContentSwitcher DS, tokens/a11y groundés).
-         GATING (b) : rendu UNIQUEMENT si le satellite est permis sur ce host
-         (préprod/localhost). En prod → satellite OFF par construction → aucun
-         switcher (plan-only, pas de segmented-control dégénéré à 1 item). -->
-    {#if satelliteHostAllowed}
-      <div
-        class="absolute right-3 top-3 z-10 flex flex-col items-end gap-1"
-        data-testid="basemap-switcher"
-      >
-        <ContentSwitcher
-          value={basemapMode}
-          items={[
-            { value: "plan", label: "Plan" },
-            { value: "satellite", label: "Satellite" },
-          ]}
-          size="md"
-          label="Fond de carte"
-          onchange={(v) => setBasemap(v === "satellite" ? "satellite" : "plan")}
-        />
-        <!-- Cas (c) : satellite demandé mais indisponible (mint) → repli OSM. Le
-             mode reste 'satellite' ; on signale seulement le repli. -->
-        {#if satelliteFallbackActive}
-          <p
-            class="m-0 max-w-[16rem] rounded border border-amber-200 bg-white/95 px-2 py-1 text-xs text-amber-700 shadow-sm"
-            data-testid="basemap-fallback-notice"
-          >
-            Imagerie satellite indisponible — repli OSM.
-          </p>
-        {/if}
-      </div>
-    {/if}
-
+    <!-- §2 point 1 — le SWITCH de fond haut-droit (ancien ContentSwitcher) est
+         RETIRÉ : le groupe Plan/Satellite vit dans les contrôles bas-droit du
+         socle (`showBasemapControl`), et la notice de repli OSM dans le socle
+         (§5.3). Plus aucun sélecteur de fond en haut-droit. -->
     <DocumentOverlay documentRef={activeDocument} onClose={closeDocument} />
     {#if activeEvidence}
       <SignalPdfOverlay

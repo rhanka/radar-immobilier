@@ -27,6 +27,14 @@ vi.mock("$lib/components/maps/GeoCityMapBase.svelte", async () => {
   return { default: stub.default };
 });
 
+// ── Satellite PERMIS sur ce host (déterministe) : la préférence 'satellite' est
+// restaurée quel que soit le hostname jsdom (§6 — harness « dans les deux modes »).
+vi.mock("$lib/maps/geo-sat-basemap.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("$lib/maps/geo-sat-basemap.js")>();
+  return { ...actual, isSatelliteBasemapEnabled: () => true };
+});
+
 // ── Clients réseau mockés (aucun fetch réel) ──────────────────────────────────
 vi.mock("$lib/signals/graph-signals-by-city-client.js", async (importOriginal) => {
   const actual =
@@ -192,5 +200,30 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
       expect(vi.mocked(loadSignauxZones)).toHaveBeenCalled(),
     );
     expect(vi.mocked(fetchAllLots)).not.toHaveBeenCalled();
+  });
+
+  // §6 — harness « dans les deux modes » : le fond SATELLITE ne change rien au
+  // pipeline Région → Ville → Zone → Lot. La sélection ville (deep-link) pilote
+  // les fetchs zones + lots exactement comme en plan ; le mode transmis au socle
+  // reste 'satellite'. (Les assertions de PAINT par mode sont couvertes par le
+  // socle — GeoCityMapBase.basemap-mode.test.ts — et l'e2e recette.)
+  it("(deux modes) préférence 'satellite' : le deep-link ville charge zones + lots (harness inchangé)", async () => {
+    localStorage.setItem("signaux-basemap-mode", "satellite");
+    setSearch("");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+
+    await waitFor(() =>
+      expect(vi.mocked(fetchAllLots)).toHaveBeenCalledWith(
+        CITY_SLUG,
+        expect.anything(),
+      ),
+    );
+    expect(vi.mocked(loadSignauxZones)).toHaveBeenCalledWith(
+      CITY_SLUG,
+      expect.anything(),
+    );
+    const stub = document.querySelector("[data-testid='stub-map']");
+    expect(stub?.getAttribute("data-basemap-mode")).toBe("satellite");
+    localStorage.clear();
   });
 });
