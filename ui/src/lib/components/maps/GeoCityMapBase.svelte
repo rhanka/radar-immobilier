@@ -84,6 +84,14 @@
      * removeLayer/removeSource (additif strict, aucune course de teardown).
      */
     setCptaqData(features: GeoJsonFeatureCollectionLike): void;
+    /**
+     * §7 R2 — EMPHASE hover/focus de l'entrée de légende « Agricole (CPTAQ) » :
+     * `true` accentue l'opacité de l'aplat `cptaq-fill` UNIQUEMENT (aplat
+     * temporaire même en Satellite où le repos vaut 0) ; `false` revient à
+     * l'opacité de repos (0 en Satellite, valeur Plan sinon). Isolé à
+     * `cptaq-fill` : aucune autre surface, aucun changement de filtre zonage.
+     */
+    setCptaqLegendEmphasis(active: boolean): void;
     /** Géométrie du contour municipal mis en cache au chargement (ou `null`). */
     getCityBoundary(slug: string): GeoJsonGeometry | null;
     /** `true` si un contour municipal est en cache pour ce slug. */
@@ -112,16 +120,17 @@
    * calcule les expressions de couleur/opacité et les passe en props / via
    * `syncGeoLayers`.
    */
-  import { onMount, onDestroy } from "svelte";
-  // §2 point 4 — glyph légende = `ListTree` (lisibilité « légende »). `Map` est
-  // aliasé en `MapIcon` pour ne PAS masquer le constructeur JS `Map` utilisé dans
-  // ce fichier ; `Satellite` → `SatelliteIcon` par symétrie.
+  import { onMount, onDestroy, tick } from "svelte";
+  // §6 R2 — glyph légende = lucide `Map` (aliasé `MapIcon` pour ne PAS masquer le
+  // constructeur JS `Map` utilisé dans ce fichier). `ListTree` et `Satellite` sont
+  // retirés avec les deux boutons #646 ; le contrôle de fond est désormais un menu
+  // DS (un seul trigger lucide `Layers`, cf. §4 R2).
+  import { Map as MapIcon, Ruler } from "@lucide/svelte";
   import {
-    ListTree,
-    Map as MapIcon,
-    Ruler,
-    Satellite as SatelliteIcon,
-  } from "@lucide/svelte";
+    Icon,
+    MenuPopover,
+    MenuTriggerButton,
+  } from "@sentropic/design-system-svelte";
   import { isDegenerateBounds } from "$lib/maps/geometry-bounds.js";
   import { createViewportMemory } from "$lib/maps/viewport-memory.js";
   import { isSatelliteBasemapEnabled, resolveMintUrl } from "$lib/maps/geo-sat-basemap.js";
@@ -324,6 +333,19 @@
   let legendsOpen = false;
   // §2 point 7 — id stable du panneau légende pour `aria-controls` sur le bouton.
   const LEGEND_PANEL_ID = "geo-map-legend-panel";
+
+  // §4 R2 — menu « Fond de carte » : UN seul trigger lucide `Layers` (remplace les
+  // deux boutons #646), ouvrant un menu DS VERS LE HAUT (placement="top-end", vu la
+  // position bas-droit). Deux options radio Plan / Satellite (PLAN par défaut). Le
+  // popover DS gère clic-extérieur ; Échap est traité par `handleMeasureKeydown`
+  // (popover `closeOnEscape={false}`) pour fermer ET rendre le focus au trigger.
+  let basemapMenuOpen = false;
+  // Ancre du popover (span wrapper) : `MenuPopover.trigger` attend un élément HTML.
+  let basemapMenuAnchor: HTMLElement | null = null;
+  // Conteneur `role="menu"` (rendu seulement à l'ouverture) : sert la navigation
+  // clavier (flèches/Home/End) et la focalisation de l'option active.
+  let basemapMenuList: HTMLElement | null = null;
+  const BASEMAP_MENU_ID = "geo-map-basemap-menu";
 
   // §5.3 point 3 — état EFFECTIF du fond, distinct de l'intention `basemapMode` :
   //  - `"satellite-2d"`     : l'imagerie satellite rend réellement ;
@@ -844,17 +866,28 @@
   }
   $: if (mapReady) applyHighlightColors(zoneHighlightColor, lotHighlightColor);
 
-  /** Couleur de l'aplat CPTAQ (vert agricole) — constante socle documentée. */
-  const CPTAQ_FILL_COLOR = "#65a30d";
   /**
-   * §3 — contour CPTAQ : token agricole DS existant (`--st-semantic-data-category5`,
-   * kind « A » de zone-kind-style), repli `#59A14F`. Remplace l'ancien hex isolé
-   * `#65a30d` du contour ; le contour vient ainsi du langage couleur du zonage.
+   * §7 R2 — couleur CPTAQ = SEULE source token agricole DS
+   * (`--st-semantic-data-category5`, kind « A » de zone-kind-style), repli
+   * `#59A14F`. Sert le `fill-color` ET le `line-color` ; l'ancien hex isolé
+   * `#65a30d` de l'aplat est retiré (langage couleur unique du zonage).
    */
-  const CPTAQ_OUTLINE_TOKEN = "--st-semantic-data-category5";
-  const CPTAQ_OUTLINE_FALLBACK = "#59A14F";
+  const CPTAQ_COLOR_TOKEN = "--st-semantic-data-category5";
+  const CPTAQ_COLOR_FALLBACK = "#59A14F";
   /** Opacité d'aplat CPTAQ en mode Plan (0 en satellite via `surfaceFillOpacity`). */
   const CPTAQ_PLAN_FILL_OPACITY = 0.25;
+  /**
+   * §7 R2 — opacité d'aplat CPTAQ à l'EMPHASE (hover/focus de l'entrée de légende).
+   * Doit DÉPASSER le repos Plan (0.25) et rendre un aplat TEMPORAIRE même en
+   * Satellite (où le repos vaut 0). Le test de paint asserte hover > repos, PAS un
+   * nombre exact.
+   * source-gap: valeur provisoire à ratifier owner en recette.
+   */
+  const CPTAQ_HOVER_FILL_OPACITY = 0.5;
+  // §7 R2 — état d'emphase (hover/focus de « Agricole (CPTAQ) »). Isolé à
+  // `cptaq-fill`. Remis à false à chaque (ré)init de la carte (rebuild-fond, cf.
+  // `initMap`) ; la vue le remet aussi à false au disable / changement de ville.
+  let cptaqLegendEmphasized = false;
 
   /**
    * Overlay CPTAQ « zone agricole protégée » : idiome create-if-absent puis
@@ -878,15 +911,20 @@
     } else if (!src) {
       m.addSource("cptaq", { type: "geojson", data: features });
     }
-    // §1/§5 — l'aplat CPTAQ suit l'invariant : 0 en satellite, 0.25 en plan. Le
-    // niveau sémantique ne contourne PAS la politique du fond.
+    // §1/§5/§7 — l'aplat CPTAQ suit l'invariant au REPOS (0 en satellite, 0.25 en
+    // plan) ; à l'EMPHASE (hover/focus légende) il rend `CPTAQ_HOVER_FILL_OPACITY`
+    // (aplat temporaire même en satellite). Le niveau sémantique ne contourne PAS
+    // la politique du fond au repos.
     const surfaceMode = currentSurfaceMode();
-    const cptaqFillOpacity = surfaceFillOpacity(surfaceMode, CPTAQ_PLAN_FILL_OPACITY);
-    // §3 — contour CPTAQ résolu depuis le token agricole DS (theme-invariant via
-    // repli hex si oklch/lab non parsable par MapLibre).
-    const cptaqOutlineColor = resolveMapColor(
-      CPTAQ_OUTLINE_TOKEN,
-      CPTAQ_OUTLINE_FALLBACK,
+    const cptaqRestingOpacity = surfaceFillOpacity(surfaceMode, CPTAQ_PLAN_FILL_OPACITY);
+    const cptaqRenderedOpacity = cptaqLegendEmphasized
+      ? CPTAQ_HOVER_FILL_OPACITY
+      : cptaqRestingOpacity;
+    // §7 — couleur CPTAQ unique résolue depuis le token agricole DS (theme-invariant
+    // via repli hex si oklch/lab non parsable par MapLibre) : sert fill ET contour.
+    const cptaqColor = resolveMapColor(
+      CPTAQ_COLOR_TOKEN,
+      CPTAQ_COLOR_FALLBACK,
       m.getContainer(),
     );
     if (!m.getLayer("cptaq-fill")) {
@@ -894,23 +932,58 @@
         id: "cptaq-fill",
         type: "fill",
         source: "cptaq",
-        paint: { "fill-color": CPTAQ_FILL_COLOR, "fill-opacity": cptaqFillOpacity },
+        paint: { "fill-color": cptaqColor, "fill-opacity": cptaqRenderedOpacity },
       });
     } else {
-      m.setPaintProperty("cptaq-fill", "fill-opacity", cptaqFillOpacity);
+      m.setPaintProperty("cptaq-fill", "fill-color", cptaqColor);
+      m.setPaintProperty("cptaq-fill", "fill-opacity", cptaqRenderedOpacity);
     }
     if (!m.getLayer("cptaq-outline")) {
       m.addLayer({
         id: "cptaq-outline",
         type: "line",
         source: "cptaq",
-        paint: { "line-color": cptaqOutlineColor, "line-width": 1, "line-opacity": 0.7 },
+        paint: { "line-color": cptaqColor, "line-width": 1, "line-opacity": 0.7 },
       });
     } else {
-      m.setPaintProperty("cptaq-outline", "line-color", cptaqOutlineColor);
+      m.setPaintProperty("cptaq-outline", "line-color", cptaqColor);
     }
     // Garantit l'ordre CPTAQ-sous-zones/lots même si le toggle arrive tard.
     applyLayerOrder(lotsSelectable);
+  }
+
+  /**
+   * §7 R2 — (ré)applique l'opacité d'aplat CPTAQ selon repos/emphase. Isolé à
+   * `cptaq-fill` UNIQUEMENT : aucune autre surface, aucun changement de filtre
+   * zonage. No-op tant que la couche n'existe pas.
+   */
+  function applyCptaqFillOpacity(): void {
+    if (!mapInstance || !mapReady) return;
+    const m = mapInstance as {
+      getLayer: (id: string) => unknown;
+      setPaintProperty: (layer: string, prop: string, value: unknown) => void;
+    };
+    if (!m.getLayer("cptaq-fill")) return;
+    const restingOpacity = surfaceFillOpacity(
+      currentSurfaceMode(),
+      CPTAQ_PLAN_FILL_OPACITY,
+    );
+    const renderedOpacity = cptaqLegendEmphasized
+      ? CPTAQ_HOVER_FILL_OPACITY
+      : restingOpacity;
+    m.setPaintProperty("cptaq-fill", "fill-opacity", renderedOpacity);
+  }
+
+  /**
+   * §7 R2 — emphase de la SEULE couche `cptaq-fill` au hover/focus de son entrée
+   * de légende. `true` → aplat accentué (aplat temporaire même en satellite) ;
+   * `false` → retour à l'opacité de repos (0 en satellite, valeur plan sinon).
+   * Idempotent (aucun repaint si l'état ne change pas).
+   */
+  function setCptaqLegendEmphasis(active: boolean): void {
+    if (cptaqLegendEmphasized === active) return;
+    cptaqLegendEmphasized = active;
+    applyCptaqFillOpacity();
   }
 
   function syncGeoLayers(input: GeoLayersInput): void {
@@ -1303,6 +1376,85 @@
     if (event.key !== "Escape") return;
     if (measureActive) exitMeasureMode();
     if (legendsOpen) legendsOpen = false;
+    // §4.3 R2 — Échap ferme le menu de fond et REND le focus au trigger (le
+    // popover DS a `closeOnEscape={false}` → un seul point de traitement ici).
+    if (basemapMenuOpen) closeBasemapMenu(true);
+  }
+
+  // ── §4 R2 — menu « Fond de carte » : ouverture/fermeture + clavier/ARIA ──────
+  /** Boutons d'option (role="menuitemradio") présents dans le popover ouvert. */
+  function basemapOptionButtons(): HTMLButtonElement[] {
+    if (!basemapMenuList) return [];
+    return Array.from(
+      basemapMenuList.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]'),
+    );
+  }
+
+  /** Focalise l'option ACTIVE (aria-checked), sinon la première. */
+  function focusActiveBasemapOption(): void {
+    const items = basemapOptionButtons();
+    const active =
+      items.find((b) => b.getAttribute("aria-checked") === "true") ?? items[0];
+    active?.focus();
+  }
+
+  /** Rend le focus au bouton déclencheur (dans le span d'ancrage). */
+  function focusBasemapTrigger(): void {
+    basemapMenuAnchor?.querySelector("button")?.focus();
+  }
+
+  /** Ouvre le menu et focalise l'option active une fois le popover rendu. */
+  function openBasemapMenu(): void {
+    basemapMenuOpen = true;
+    void tick().then(() => focusActiveBasemapOption());
+  }
+
+  /** Ferme le menu ; `restoreFocus` rend le focus au trigger (Échap / sélection). */
+  function closeBasemapMenu(restoreFocus = false): void {
+    basemapMenuOpen = false;
+    if (restoreFocus) focusBasemapTrigger();
+  }
+
+  /** Clic / Entrée / Espace sur le trigger : bascule l'ouverture. */
+  function toggleBasemapMenu(): void {
+    if (basemapMenuOpen) closeBasemapMenu();
+    else openBasemapMenu();
+  }
+
+  /** Flèche bas / haut sur le trigger : ouvrir et focaliser l'option active. */
+  function handleBasemapTriggerKeydown(event: KeyboardEvent): void {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (!basemapMenuOpen) openBasemapMenu();
+      else focusActiveBasemapOption();
+    }
+  }
+
+  /** Navigation clavier DANS le menu : flèches en boucle, Home/End aux extrémités. */
+  function handleBasemapMenuKeydown(event: KeyboardEvent): void {
+    const items = basemapOptionButtons();
+    if (items.length === 0) return;
+    const current = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      items[(current + 1 + items.length) % items.length].focus();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      items[(current - 1 + items.length) % items.length].focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      items[0].focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      items[items.length - 1].focus();
+    }
+    // Entrée / Espace : activation NATIVE du <button> option → `selectBasemap`.
+  }
+
+  /** Sélection d'une option : writer UNIQUE `onBasemapModeChange`, ferme + focus. */
+  function selectBasemap(mode: "plan" | "satellite"): void {
+    onBasemapModeChange(mode);
+    closeBasemapMenu(true);
   }
 
   function addMeasurePoint(point: LngLatTuple): void {
@@ -1342,6 +1494,7 @@
       resetToInitialView,
       syncGeoLayers,
       setCptaqData,
+      setCptaqLegendEmphasis,
       getCityBoundary,
       hasCityBoundary,
       get themeElement() {
@@ -1521,6 +1674,9 @@
     // §5 2-modes — témoin du mode construit, posé AVANT tout `await` : le bloc
     // réactif de ré-init ne verra pas de divergence pendant cette construction.
     builtBasemapMode = basemapMode;
+    // §7 R2 — rebuild-fond OFF : une carte neuve repart SANS emphase CPTAQ (aplat
+    // au repos), l'emphase hover/focus étant transitoire.
+    cptaqLegendEmphasized = false;
     try {
       const maplibre = (await import("maplibre-gl")).default;
       // C10 — fond « neutral-gray » : aplat gris + raster OSM DÉSATURÉ
@@ -1874,8 +2030,11 @@
        `flex-col-reverse` → les panneaux (mesure / indisponibilité) s'ouvrent vers
        le HAUT, au-dessus de la rangée de boutons. -->
   <div class="absolute bottom-20 md:bottom-10 right-3 z-10 flex flex-col-reverse items-end gap-2">
-    <!-- Rangée horizontale : Mesure (à GAUCHE), puis groupe Plan/Satellite. -->
-    <div class="flex flex-row items-center gap-2">
+    <!-- §5.1 R2 — RANGÉE UNIFORME : chaque contrôle est un enfant DIRECT, un seul
+         gap (token `--st-spacing`, source-gap à ratifier owner en recette), aucune
+         marge horizontale par enfant, aucun gap imbriqué. Ordre : Mesure → Fond de
+         carte (Layers) → slot terminal `controls-bottom-right-end`. -->
+    <div class="map-control-row" data-testid="map-control-row">
       <button
         type="button"
         class="map-ctrl-btn"
@@ -1889,44 +2048,81 @@
         <Ruler size={16} aria-hidden="true" />
       </button>
 
-      <!-- §2 point 2/5 — groupe « Fond de carte » (Plan / Satellite) rendu SSI
-           `showBasemapControl` (host gating porté par le consommateur). Deux
-           boutons NATIFS (Entrée/Espace natifs), pas un onglet. -->
+      <!-- §4 R2 — contrôle de fond = UN seul trigger lucide `Layers` (rendu SSI
+           `showBasemapControl`, host gating porté par le consommateur) ouvrant un
+           menu DS vers le HAUT (placement="top-end"). L'ancre (span) lie le trigger
+           au popover DS ; les deux boutons #646 disparaissent. -->
       {#if showBasemapControl}
-        <div
-          class="basemap-group"
-          role="group"
-          aria-label="Fond de carte"
+        <span
+          class="map-control-anchor"
+          bind:this={basemapMenuAnchor}
           data-testid="basemap-control"
           data-basemap-mode={basemapMode}
         >
+          <MenuTriggerButton
+            aria-label={`Fond de carte : ${basemapMode === "plan" ? "Plan" : "Satellite"}`}
+            aria-controls={BASEMAP_MENU_ID}
+            expanded={basemapMenuOpen}
+            size="sm"
+            variant="secondary"
+            data-testid="basemap-menu-trigger"
+            onclick={toggleBasemapMenu}
+            onkeydown={handleBasemapTriggerKeydown}
+          >
+            <Icon name="layers" size={16} />
+          </MenuTriggerButton>
+        </span>
+      {/if}
+
+      <!-- §5.1 R2 — slot terminal VIDE (échafaudage) : le déclencheur chat sera
+           câblé par un lot coordonné ultérieur. Reste le DERNIER enfant de la
+           rangée → tout contrôle bas-droit-fin est garanti à droite. -->
+      <slot name="controls-bottom-right-end" />
+    </div>
+
+    <!-- §4 R2 — popover DS du menu de fond (rendu SSI `showBasemapControl`) : en
+         position ABSOLUE hors flux → n'affecte pas l'espacement de la rangée. Échap
+         est traité par `handleMeasureKeydown` (popover `closeOnEscape={false}`). -->
+    {#if showBasemapControl}
+      <MenuPopover
+        id={BASEMAP_MENU_ID}
+        bind:open={basemapMenuOpen}
+        trigger={basemapMenuAnchor}
+        placement="top-end"
+        label="Fond de carte"
+        closeOnEscape={false}
+      >
+        <div
+          class="basemap-menu"
+          role="menu"
+          aria-label="Fond de carte"
+          bind:this={basemapMenuList}
+          tabindex="-1"
+          onkeydown={handleBasemapMenuKeydown}
+        >
           <button
             type="button"
-            class="map-ctrl-btn"
-            class:map-ctrl-btn-active={basemapMode === "plan"}
-            aria-pressed={basemapMode === "plan"}
-            aria-label="Afficher le plan"
-            title="Plan"
-            data-testid="basemap-btn-plan"
-            onclick={() => onBasemapModeChange("plan")}
+            class="basemap-menu-item"
+            role="menuitemradio"
+            aria-checked={basemapMode === "plan"}
+            data-testid="basemap-option-plan"
+            onclick={() => selectBasemap("plan")}
           >
-            <MapIcon size={16} aria-hidden="true" />
+            Plan
           </button>
           <button
             type="button"
-            class="map-ctrl-btn"
-            class:map-ctrl-btn-active={basemapMode === "satellite"}
-            aria-pressed={basemapMode === "satellite"}
-            aria-label="Afficher le satellite"
-            title="Satellite"
-            data-testid="basemap-btn-satellite"
-            onclick={() => onBasemapModeChange("satellite")}
+            class="basemap-menu-item"
+            role="menuitemradio"
+            aria-checked={basemapMode === "satellite"}
+            data-testid="basemap-option-satellite"
+            onclick={() => selectBasemap("satellite")}
           >
-            <SatelliteIcon size={16} aria-hidden="true" />
+            Satellite
           </button>
         </div>
-      {/if}
-    </div>
+      </MenuPopover>
+    {/if}
 
     {#if measureActive || measurePoints.length > 0}
       <div class="measure-panel" data-testid="measure-panel">
@@ -2018,8 +2214,8 @@
        ex. Zonage au-dessus de Lots) : slot bottom-left, complémentaire de la
        prop `legend` (vue Sources). -->
   {#if $$slots["overlay-bottom-left"] || legend}
-    <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (§2 point 4
-         = `ListTree`) ; tap = déplie. `flex-col-reverse` → le bouton reste en bas,
+    <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (§6 R2 =
+         lucide `Map`) ; tap = déplie. `flex-col-reverse` → le bouton reste en bas,
          le panneau s'ouvre vers le HAUT (même ancrage `bottom-20 md:bottom-10` que
          la rangée bas-droit → Légende et Mesure alignées). Cible : légendes
          lot/zones (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
@@ -2036,7 +2232,7 @@
         data-testid="legend-toggle"
         onclick={() => (legendsOpen = !legendsOpen)}
       >
-        <ListTree size={16} aria-hidden="true" />
+        <MapIcon size={16} aria-hidden="true" />
       </button>
       {#if legendsOpen}
         <div id={LEGEND_PANEL_ID} class="flex max-w-xs flex-col gap-2" data-testid="legend-panel">
@@ -2111,11 +2307,47 @@
     outline: var(--st-component-button-anatomy-focus-outline, 2px solid #2563eb);
     outline-offset: var(--st-component-button-anatomy-focus-outlineOffset, 2px);
   }
-  /* §5.1 — groupe « Fond de carte » : deux boutons natifs jointifs. */
-  .basemap-group {
+  /* §5.1 R2 — RANGÉE de contrôles : UN seul gap (token spacing DS, source-gap à
+     ratifier). Chaque contrôle est un enfant direct ; aucune marge horizontale par
+     enfant, aucun gap imbriqué → intervalles ÉGAUX quel que soit le nombre. */
+  .map-control-row {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--st-spacing-2, 0.5rem);
+  }
+  /* Ancre du trigger de fond : wrapper neutre (aucune marge) pour `MenuPopover`. */
+  .map-control-anchor {
+    display: inline-flex;
+  }
+  /* §4 R2 — menu « Fond de carte » (contenu du popover DS) : options radio. */
+  .basemap-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 0.25rem;
+  }
+  .basemap-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    border: none;
+    border-radius: var(--st-component-menu-radius, 0.375rem);
+    background: transparent;
+    color: var(--st-component-menu-text, var(--st-semantic-text-primary, #0f172a));
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .basemap-menu-item:hover {
+    background: var(--st-component-control-hoverBackground, var(--st-semantic-surface-hover, #f1f5f9));
+  }
+  .basemap-menu-item[aria-checked="true"] {
+    background: var(--st-semantic-action-primary, #2563eb);
+    color: var(--st-semantic-action-primaryText, #fff);
+  }
+  .basemap-menu-item:focus-visible {
+    outline: var(--st-component-button-anatomy-focus-outline, 2px solid #2563eb);
+    outline-offset: var(--st-component-button-anatomy-focus-outlineOffset, -2px);
   }
   /* §5.3 — notice de repli OSM (role="status" aria-live="polite"). */
   .basemap-fallback {
