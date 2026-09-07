@@ -41,6 +41,46 @@ export const ZONE_CASING_SAT_OPACITY = 0.85;
 export const ZONE_FILL_SAT_OPACITY = 0;
 
 /**
+ * §3 point 1 (Région satellite) — largeur du contour `cities-outline` en mode
+ * satellite (le choroplèthe n'est plus rempli, la MEANING passe au contour).
+ *
+ * SOURCE-GAP : aucune valeur owner n'est présente dans les sources inspectées.
+ * Valeur PROVISOIRE alignée sur la largeur du contour zone satellite
+ * (`ZONE_OUTLINE_SAT_WIDTH` = 2.25) — à FIGER après capture réelle en recette.
+ * Ne pas traiter cette valeur comme finale.
+ */
+export const SAT_CITY_LINE_WIDTH = ZONE_OUTLINE_SAT_WIDTH;
+
+/**
+ * §1 — mode de fond EFFECTIVEMENT rendu (distinct de l'intention persistée
+ * `basemapMode`) : `"satellite"` quand le raster satellite est réellement actif,
+ * `"plan"` sinon — y compris pendant un repli OSM.
+ */
+export type SurfaceMode = "plan" | "satellite";
+
+/**
+ * §1 — INVARIANT UNIQUE d'opacité d'aplat métier selon le fond rendu.
+ *
+ * En `"satellite"`, TOUTE surface métier (choroplèthe région `cities-fill`,
+ * `selected-zones-fill`, `selected-lots-fill`, `cptaq-fill`) passe à
+ * `fill-opacity: 0` pour laisser transparaître l'imagerie ; en `"plan"`,
+ * l'opacité métier fournie par la vue est repassée TELLE QUELLE (jamais durcie).
+ *
+ * `planOpacity` peut être une expression MapLibre opaque : le mode effectif étant
+ * connu en TypeScript, on ne l'encapsule PAS dans une expression `case`
+ * artificielle — on retourne soit `0`, soit l'expression plan inchangée. Le
+ * consommateur DOIT envelopper le résultat métier FINAL (après
+ * `withHoverOpacityBoost` / sélection) pour qu'aucun hover/sélection ne
+ * réintroduise d'aplat en satellite.
+ */
+export function surfaceFillOpacity(
+  surfaceMode: SurfaceMode,
+  planOpacity: unknown,
+): unknown {
+  return surfaceMode === "satellite" ? ZONE_FILL_SAT_OPACITY : planOpacity;
+}
+
+/**
  * Peinture des 3 couches d'overlay zone (`selected-zones-fill`,
  * `selected-zones-outline-casing`, `selected-zones-outline`) selon le mode.
  * Les valeurs `unknown` sont des expressions MapLibre opaques (couleur famille,
@@ -85,13 +125,16 @@ export function zoneOverlayPaint(
   baseOpacityExpr: unknown,
   casingColor: string = ZONE_CASING_FALLBACK,
 ): ZoneOverlayPaint {
+  // §5 — la règle d'opacité d'aplat passe par l'invariant générique partagé
+  // (`surfaceFillOpacity`) : elle n'est plus spéciale à `selected-zones-fill`.
+  const surfaceMode: SurfaceMode = satelliteActive ? "satellite" : "plan";
   if (satelliteActive) {
     return {
       // Hit-area : `fill-color` famille CONSERVÉE, `fill-opacity` 0 → l'imagerie
       // transparaît sans perdre la cible de clic/hover.
       fill: {
         "fill-color": familyColorExpr,
-        "fill-opacity": ZONE_FILL_SAT_OPACITY,
+        "fill-opacity": surfaceFillOpacity(surfaceMode, baseOpacityExpr),
       },
       // MEANING portée par le contour famille épais.
       outline: {
@@ -107,11 +150,12 @@ export function zoneOverlayPaint(
       },
     };
   }
-  // Mode PLAN — STRICTEMENT identique au socle actuel.
+  // Mode PLAN — STRICTEMENT identique au socle actuel (l'invariant repasse
+  // l'expression métier telle quelle : `surfaceFillOpacity("plan", x) === x`).
   return {
     fill: {
       "fill-color": familyColorExpr,
-      "fill-opacity": baseOpacityExpr,
+      "fill-opacity": surfaceFillOpacity(surfaceMode, baseOpacityExpr),
     },
     outline: {
       "line-color": ZONE_OUTLINE_PLAN_COLOR,
