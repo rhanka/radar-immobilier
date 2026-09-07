@@ -89,6 +89,34 @@ describe("ChatWidgetHost — pont hôte↔chat (store #564)", () => {
     expect(getByLabelText("Ouvrir l'assistant radar")).toBeTruthy();
   });
 
+  it("la bulle ronde porte le testid `chat-bubble-trigger` (repère e2e stable)", () => {
+    const { getByTestId } = render(ChatWidgetHost);
+    expect(getByTestId("chat-bubble-trigger")).toBeTruthy();
+  });
+
+  it("hôte actif (carte) : chat FORCÉ ancré → bascule flottante MASQUÉE (fix #579)", async () => {
+    // Sur la vue carte (un hôte fournit le déclencheur), le chat doit rester
+    // ANCRÉ pour coexister avec le pane droit : la bascule « Passer en fenetre
+    // flottante » n'est PAS proposée (sinon l'utilisateur ré-introduirait la
+    // superposition #579).
+    const release = acquireChatTrigger();
+    try {
+      const { container, queryByLabelText } = render(ChatWidgetHost);
+      requestChatToggle();
+      await waitFor(() => {
+        const dialog = container.querySelector('[role="dialog"]');
+        expect(dialog).not.toBeNull();
+        expect(dialog!.classList.contains("hidden")).toBe(false);
+      });
+      // Ouvert, mais AUCUNE bascule ancré/flottant ; « Fermer le chat » présent.
+      expect(queryByLabelText("Passer en fenetre flottante")).toBeNull();
+      expect(queryByLabelText("Ancrer le chat")).toBeNull();
+      expect(queryByLabelText("Fermer le chat")).not.toBeNull();
+    } finally {
+      release();
+    }
+  });
+
   it("requestChatToggle ouvre puis ferme l'UNIQUE dialog via le toggle() du dock", async () => {
     const { container } = render(ChatWidgetHost);
     // Fermé au départ (hasOpenedOnce=false → aucun dialog monté).
