@@ -301,6 +301,11 @@
   // couches zone : conditionne le STYLE des overlays zone (aplats en plan vs
   // contour+casing couleur-famille en satellite, cf. zoneOverlayPaint).
   let satelliteActive = false;
+  // §5 R3 — texte d'attribution PROVIDER du fond satellite, résolu DYNAMIQUEMENT
+  // par viewport (cf. wireSatelliteAttribution) et rendu dans l'overlay léger
+  // contextuel (`data-attribution-layer="satellite"`). Vide = aucun provider
+  // résolu (plan / repli OSM → l'overlay affiche « © OpenStreetMap »).
+  let satelliteAttributionText = "";
   // §5 2-modes — mode avec lequel la carte COURANTE a été construite (capté au
   // début d'`initMap`, AVANT tout `await`). Le bloc réactif de ré-init compare
   // ce témoin à la prop `basemapMode` : quand ils divergent APRÈS montage, la
@@ -361,6 +366,14 @@
   // a eu lieu alors que l'intention est satellite.
   $: satelliteFallbackNotice =
     basemapMode === "satellite" && effectiveBasemap === "fallback-map-2d";
+
+  // §5 R3 — ATTRIBUTION contextuelle à la layer active : provider dynamique quand
+  // le satellite rend RÉELLEMENT et qu'un texte est résolu, sinon mention OSM
+  // (mode plan OU repli OSM). Pilote l'overlay léger hors-flux (cf. template + CSS
+  // `.map-attribution`), qui REMPLACE le contrôle d'attribution par défaut MapLibre
+  // (exclu) et RESTAURE la mention légale retirée en #648.
+  $: attributionIsSatellite =
+    satelliteActive && satelliteAttributionText.trim().length > 0;
 
   $: measureTotalLabel = formatDistanceFr(totalDistanceMeters(measurePoints));
   $: measureSegmentLabel = formatDistanceFr(lastSegmentMeters(measurePoints));
@@ -1583,11 +1596,14 @@
   }
 
   /**
-   * Attribution DYNAMIQUE du fond satellite, rendue dans le DOM (contrôle
-   * MapLibre bas-droite) et rafraîchie à chaque viewport (load + moveend) via
-   * le `attributionResolver` de l'adapter — condition geo-archi : jamais de
-   * tuiles sans copyright visible. En cas d'échec de résolution, on GARDE le
-   * dernier texte (on ne blanchit pas l'attribution).
+   * Attribution DYNAMIQUE du fond satellite, rafraîchie à chaque viewport
+   * (load + moveend) via le `attributionResolver` de l'adapter — condition
+   * geo-archi : jamais de tuiles sans copyright visible. §5 R3 : le texte résolu
+   * alimente désormais l'état `satelliteAttributionText`, RENDU par l'overlay
+   * léger contextuel (`.map-attribution`, `data-attribution-layer="satellite"`),
+   * PLUS de contrôle MapLibre séparé — l'attribution provider est intégrée au
+   * MÊME overlay que la mention OSM (owner : overlay unique, léger, contextuel).
+   * En cas d'échec de résolution on GARDE le dernier texte (jamais de blanchiment).
    */
   function wireSatelliteAttribution(
     map: import("maplibre-gl").Map,
@@ -1598,24 +1614,22 @@
       pitch: number;
     }) => Promise<string>,
   ): void {
-    const el = document.createElement("div");
-    el.className = "maplibregl-ctrl maplibregl-ctrl-attrib geo-sat-attrib";
-    el.setAttribute("aria-label", "Attribution du fond satellite");
     const update = async (): Promise<void> => {
       try {
         const c = map.getCenter();
-        el.textContent = await resolver({
+        const text = await resolver({
           center: [c.lng, c.lat],
           zoom: map.getZoom(),
           bearing: map.getBearing(),
           pitch: map.getPitch(),
         });
+        // Garder le dernier copyright si le resolver renvoie du vide (jamais de
+        // tuiles sans attribution). Assignation réactive → l'overlay se met à jour.
+        if (text && text.trim().length > 0) satelliteAttributionText = text;
       } catch {
         /* garder le dernier copyright affiché — jamais de tuiles sans attribution */
       }
     };
-    // §5.3 point 1 — position EXPLICITE bas-droite (bande d'attribution réservée).
-    map.addControl({ onAdd: () => el, onRemove: () => el.remove() }, "bottom-right");
     map.on("load", () => void update());
     map.on("moveend", () => void update());
     void update();
@@ -1695,6 +1709,9 @@
       // §5 2-modes — mémorise le mode AVANT la 1re pose des couches zone : leur
       // style (aplats vs contour) en dépend. `sat` truthy = satellite actif.
       satelliteActive = !!sat;
+      // §5 R3 — plan ou repli OSM : purge toute attribution provider résiduelle
+      // pour que l'overlay contextuel repasse à « © OpenStreetMap ».
+      if (!sat) satelliteAttributionText = "";
       // §5.3 — état EFFECTIF du fond : satellite rendu, repli, ou plan (null).
       effectiveBasemap =
         basemapMode === "satellite"
@@ -1762,14 +1779,13 @@
         // (`<details class="maplibregl-ctrl-attrib maplibregl-compact">` = bulle
         // « © OpenStreetMap contributors | MapLibre » + ▼) au coin bas-droit, LÀ
         // où s'ouvre le menu Layers : l'owner voyait cette bulle au lieu du menu.
-        // Reproduit et confirmé en navigateur (compact-show ouvert par défaut).
-        // NB satellite : l'attribution du fond satellite reste rendue DYNAMIQUEMENT
-        // par `wireSatelliteAttribution` (contrôle custom, copyright per-viewport) —
-        // cette exclusion ne touche QUE le contrôle par défaut (fond OSM/plan).
-        // source-gap (volet légal, à ratifier owner/i-cond) : en mode PLAN/OSM cette
-        // exclusion retire la mention « © OpenStreetMap contributors » visible ;
-        // la politique OSM demande une attribution — décision owner requise (ex.
-        // mention statique ailleurs) plutôt que blanchiment définitif ici.
+        // Confirmé au RUNTIME servi (obs. navigateur 390×844, WebGL actif) : avec
+        // cette option, le conteneur `maplibregl-ctrl-bottom-right` reste VIDE.
+        // §5 R3 — l'attribution légale N'EST PAS blanchie : elle est RESTAURÉE par
+        // l'overlay léger contextuel `.map-attribution` (owner-spec) — « © OpenStreetMap »
+        // en plan/repli OSM, texte PROVIDER dynamique en satellite (alimenté par
+        // `wireSatelliteAttribution`). Overlay hors-flux (position:absolute) → il ne
+        // prend AUCUN espace et ne décale rien, contrairement au contrôle par défaut.
         attributionControl: false,
         style: {
           version: 8,
@@ -2037,6 +2053,32 @@
   data-map-zoom={mapZoom}
 >
   <div bind:this={mapContainer} class="absolute inset-0"></div>
+
+  <!-- ── §5 R3 — ATTRIBUTION légale : overlay LÉGER, PETIT, CENTRÉ sur la bande de
+       contrôles bas, CONTEXTUEL à la layer active. Remplace le contrôle
+       d'attribution par défaut de MapLibre (exclu, `attributionControl:false`) et
+       RESTAURE la mention retirée en #648. `position:absolute` (cf. `.map-attribution`)
+       → hors-flux : NE prend PAS d'espace, NE décale RIEN. `pointer-events:none`
+       sur la pastille (le lien légal reste cliquable) → n'intercepte pas les
+       gestes carte. Texte : provider dynamique quand le satellite rend, sinon
+       « © OpenStreetMap » (plan / repli OSM). Valeurs fines de placement/taille =
+       source-gap owner-visual (cf. CSS). -->
+  <div
+    class="map-attribution"
+    data-testid="map-attribution"
+    data-attribution-layer={attributionIsSatellite ? "satellite" : "osm"}
+    aria-label="Attribution du fond de carte"
+  >
+    {#if attributionIsSatellite}
+      {satelliteAttributionText}
+    {:else}
+      ©&nbsp;<a
+        href="https://www.openstreetmap.org/copyright"
+        target="_blank"
+        rel="noopener noreferrer">OpenStreetMap</a
+      >
+    {/if}
+  </div>
 
   <!-- ── Contrôles carte (BAS-droit) : §5.1 — RANGÉE [Mesure | Fond de carte].
        Mobile-first : `bottom-20` (au-dessus de la bulle de chat bas-droit),
@@ -2333,6 +2375,42 @@
   /* Ancre du trigger de fond : wrapper neutre (aucune marge) pour `MenuPopover`. */
   .map-control-anchor {
     display: inline-flex;
+  }
+  /* §5 R3 — ATTRIBUTION légale : overlay PETIT, LÉGER (pastille translucide),
+     CENTRÉ sur la bande de contrôles bas, HORS-FLUX (`position:absolute`) → NE
+     décale RIEN et ne prend aucun espace dans la rangée. Aligné verticalement sur
+     la rangée de contrôles (`bottom-20` mobile / `md:bottom-10` desktop). Les
+     valeurs fines (taille exacte, position centrée précise, opacité, max-width) =
+     source-gap à figer owner-visual — choisies raisonnables et non décalantes. */
+  .map-attribution {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 5rem; /* = bottom-20 (mobile) — source-gap à figer owner-visual */
+    z-index: 10;
+    /* Bornage : ne chevauche ni les icônes bas-droite ni la bulle de chat. */
+    max-width: calc(100% - 7rem); /* source-gap à figer owner-visual */
+    padding: 0.0625rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.625rem; /* ~10px, petit — source-gap à figer owner-visual */
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--st-semantic-text-secondary, #475569);
+    background: rgb(255 255 255 / 0.72); /* léger — source-gap à figer owner-visual */
+    /* Ne capte pas les gestes carte ; le lien légal réactive pointer-events. */
+    pointer-events: none;
+  }
+  @media (min-width: 768px) {
+    .map-attribution {
+      bottom: 2.5rem; /* = md:bottom-10 (desktop) */
+    }
+  }
+  .map-attribution a {
+    color: inherit;
+    text-decoration: underline;
+    pointer-events: auto; /* lien légal OSM cliquable */
   }
   /* §5 R3 P1+P3 — RECALE le popover DS en `position: fixed`.
      Le `MenuPopover` DS calcule sa position en coordonnées VIEWPORT

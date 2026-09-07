@@ -20,7 +20,8 @@
  *   - le contrôle de fond est UN seul trigger DS `Layers` (menu vers le haut,
  *     `top-end`) à deux options radio, plus les deux boutons #646 (§4 R2) ;
  *   - le glyph de légende est lucide `Map` (`MapIcon`), plus `ListTree` (§6 R2) ;
- *   - l'attribution satellite est ajoutée en `"bottom-right"` (§5.3 point 1).
+ *   - §5 R3 : l'attribution est un overlay LÉGER contextuel hors-flux
+ *     (`.map-attribution`), plus AUCUN contrôle MapLibre `addControl` bas-droite.
  *
  * Pur : aucun Docker, aucune API, aucun composant Svelte monté — lecture fichier.
  */
@@ -115,8 +116,20 @@ describe("GeoCityMapBase — contrôles bas (§5.1 R2) rangée uniforme + menu L
     expect(source).not.toContain("Satellite as SatelliteIcon");
   });
 
-  it("l'attribution satellite est ancrée « bottom-right » (bande réservée §5.3)", () => {
-    expect(source).toContain('"bottom-right"');
+  it("§5 R3 — l'attribution est un overlay LÉGER contextuel hors-flux (plus de contrôle MapLibre bas-droite)", () => {
+    // L'attribution provider satellite n'est PLUS ajoutée via un contrôle MapLibre
+    // `map.addControl(…, "bottom-right")` : elle alimente le MÊME overlay léger que
+    // la mention OSM. On verrouille la structure cible (aucune ré-introduction).
+    expect(source).toContain('data-testid="map-attribution"');
+    expect(source).toContain("data-attribution-layer");
+    // Contextuel : mention OSM en plan/repli, texte provider dynamique en satellite.
+    expect(source).toContain("OpenStreetMap");
+    expect(source).toContain("satelliteAttributionText");
+    // Overlay HORS-FLUX : position:absolute → NE prend pas d'espace / NE décale rien.
+    expect(source).toMatch(/\.map-attribution\s*\{[^}]*position:\s*absolute/);
+    // Plus AUCUN `map.addControl(...)` (l'unique usage — attribution sat — a disparu).
+    expect(source).not.toContain(".addControl(");
+    expect(source).not.toContain('"bottom-right"');
   });
 });
 
