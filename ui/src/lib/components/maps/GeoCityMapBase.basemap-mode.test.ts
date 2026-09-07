@@ -187,7 +187,7 @@ describe("GeoCityMapBase — pilotage du fond par basemapMode", () => {
     expect(mapMocks.instances[0].options.attributionControl).toBe(false);
 
     // Idem en satellite : l'exclusion vaut aussi (l'attribution satellite reste,
-    // elle, rendue par le contrôle custom `wireSatelliteAttribution`).
+    // elle, rendue par l'overlay léger contextuel alimenté par `wireSatelliteAttribution`).
     mapMocks.instances.length = 0;
     cleanup();
     render(GeoCityMapBase, {
@@ -211,11 +211,38 @@ describe("GeoCityMapBase — pilotage du fond par basemapMode", () => {
     expect(opts.style.layers.some((l: any) => l.id === "sat-2d-background")).toBe(
       true,
     );
-    // §5.3 point 1 — l'attribution dynamique est ajoutée en bas-droite.
-    expect(mapMocks.instances[0].addControl).toHaveBeenCalledWith(
-      expect.anything(),
-      "bottom-right",
+    // §5 R3 — l'attribution PROVIDER dynamique n'est PLUS un contrôle MapLibre
+    // séparé : elle alimente l'overlay léger CONTEXTUEL (data-attribution-layer=
+    // satellite). Le resolver du mock renvoie « Imagerie © Fournisseur ».
+    mapMocks.instances[0].fire("load");
+    await flushMicrotasks();
+    await tick();
+    const attribution = screen.getByTestId("map-attribution");
+    expect(attribution.getAttribute("data-attribution-layer")).toBe("satellite");
+    expect(attribution.textContent).toContain("Imagerie © Fournisseur");
+    // Aucun contrôle MapLibre ajouté (plus d'attribution via addControl).
+    expect(mapMocks.instances[0].addControl).not.toHaveBeenCalled();
+  });
+
+  it("§5 R3 — MODE 'plan' : overlay d'attribution CONTEXTUEL « © OpenStreetMap » (mention légale restaurée, hors-flux)", async () => {
+    render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, basemapMode: "plan" },
+    });
+    await flushMicrotasks();
+    await tick();
+    const attribution = screen.getByTestId("map-attribution");
+    // Contextuel OSM en plan, mention légale présente, PAS le texte provider.
+    expect(attribution.getAttribute("data-attribution-layer")).toBe("osm");
+    // `\s` couvre l'espace insécable (&nbsp;, U+00A0) du séparateur « © OpenStreetMap ».
+    expect(attribution.textContent ?? "").toMatch(/©\s?OpenStreetMap/);
+    expect(attribution.textContent ?? "").not.toContain("Fournisseur");
+    // Lien légal vers la page de copyright OSM.
+    const link = attribution.querySelector("a");
+    expect(link?.getAttribute("href")).toBe(
+      "https://www.openstreetmap.org/copyright",
     );
+    // Overlay hors-flux : jamais ajouté comme contrôle MapLibre.
+    expect(mapMocks.instances[0].addControl).not.toHaveBeenCalled();
   });
 
   it("CAS (c) : satellite demandé mais mint indisponible → repli OSM + onBasemapFallback (mode NON retombé)", async () => {
