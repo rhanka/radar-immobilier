@@ -234,6 +234,14 @@
   let mapContainer: HTMLDivElement;
   let mapInstance: unknown = null;
   let mapReady = false;
+  // Résilience `load` — garde d'idempotence de la finalisation. Posé (SYNCHRONE,
+  // avant tout `await`) par `finalizeMapSetup` : empêche une double-exécution si
+  // l'event `'load'` de MapLibre ET le repli-timeout se déclenchent en course
+  // (sinon double `addSource` → throw « source already exists »).
+  let mapSetupStarted = false;
+  // Résilience `load` — handle du timeout de repli (annulé dès la finalisation ou
+  // au démontage). `undefined` tant qu'aucune carte n'est en cours d'init.
+  let readyFallbackTimer: ReturnType<typeof setTimeout> | undefined;
   // §5 2-modes — `true` quand le fond satellite est actif (host-allowlisté).
   // Positionné dans initMap dès la résolution du basemap, AVANT la 1re pose des
   // couches zone : conditionne le STYLE des overlays zone (aplats en plan vs
@@ -270,6 +278,14 @@
     [-85, 41],
     [-55, 63],
   ];
+
+  // Résilience `load` — repli si l'event `'load'` de MapLibre ne fire pas (flap
+  // réseau / requête de tuile avortée qui laisse `map.loaded()` en attente, ex.
+  // ERR_NETWORK_CHANGED sous navigateur partagé) : au bout de ce délai, on force
+  // la finalisation (pose des couches + `mapReady = true`) pour ne jamais laisser
+  // l'overlay « Chargement… » figé. 6 s = marge confortable au-delà du `load`
+  // nominal, sans laisser l'utilisateur devant un écran vide trop longtemps.
+  const MAP_READY_FALLBACK_MS = 6000;
 
   type MapLayerEvent = {
     features?: Array<{ properties?: Record<string, unknown> }>;
@@ -1376,7 +1392,22 @@
       });
       if (sat?.attributionResolver) wireSatelliteAttribution(m, sat.attributionResolver);
 
-      m.on("load", async () => {
+      // Résilience `load` — CORPS de finalisation EXTRAIT et IDEMPOTENT. Il est
+      // déclenché soit par l'event `'load'` de MapLibre (chemin nominal), soit
+      // par le repli-timeout si `'load'` ne fire jamais (flap réseau). Le garde
+      // synchrone en tête (`mapSetupStarted`, posé AVANT tout `await`) interdit
+      // toute double-exécution si les deux déclencheurs se croisent — sans lui,
+      // un second passage referait `addSource` → throw « source already exists ».
+      const finalizeMapSetup = async (): Promise<void> => {
+        if (mapSetupStarted) return;
+        mapSetupStarted = true;
+        // Finalisation engagée → annule le repli s'il est encore en vol (chemin
+        // nominal : le timeout ne fera jamais un second passage).
+        if (readyFallbackTimer !== undefined) {
+          clearTimeout(readyFallbackTimer);
+          readyFallbackTimer = undefined;
+        }
+
         // Fetch GeoJSON polygones municipaux (asset statique servi par nginx)
         let polygonsData: unknown = { type: "FeatureCollection", features: [] };
         try {
@@ -1391,80 +1422,92 @@
         }
         cacheCityBoundaries(polygonsData);
 
-        // Source GeoJSON polygones (aplats)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        m.addSource("cities-polygons", {
-          type: "geojson",
-          data: polygonsData as any,
-        });
+        // Pose des couches `cities-polygons` ENVELOPPÉE : sur le CHEMIN DE REPLI,
+        // le style peut ne pas être tout à fait prêt au moment du timeout →
+        // addSource/addLayer peuvent throw. On `console.warn` alors, MAIS on pose
+        // quand même `mapReady = true` plus bas (objectif = ne JAMAIS laisser
+        // l'overlay « Chargement… » figé). Les couches zones/lots sont, elles,
+        // posées par la sync réactive gatée sur `mapReady`.
+        try {
+          // Source GeoJSON polygones (aplats)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          m.addSource("cities-polygons", {
+            type: "geojson",
+            data: polygonsData as any,
+          });
 
-        // Couche aplat fill choroplèthe (couleur/opacité pilotées par les props)
-        m.addLayer({
-          id: "cities-fill",
-          type: "fill",
-          source: "cities-polygons",
-          paint: {
-            "fill-color": fillColorExpression,
-            ...(fillOpacityExpression !== undefined
-              ? { "fill-opacity": fillOpacityExpression }
-              : {}),
-            "fill-outline-color": fillOutlineColor,
-          },
-        });
+          // Couche aplat fill choroplèthe (couleur/opacité pilotées par les props)
+          m.addLayer({
+            id: "cities-fill",
+            type: "fill",
+            source: "cities-polygons",
+            paint: {
+              "fill-color": fillColorExpression,
+              ...(fillOpacityExpression !== undefined
+                ? { "fill-opacity": fillOpacityExpression }
+                : {}),
+              "fill-outline-color": fillOutlineColor,
+            },
+          });
 
-        // Couche contour fill (plus visible)
-        m.addLayer({
-          id: "cities-outline",
-          type: "line",
-          source: "cities-polygons",
-          paint: {
-            "line-color": "#64748b", // slate-500
-            "line-width": 0.5,
-            "line-opacity": 0.4,
-          },
-        });
+          // Couche contour fill (plus visible)
+          m.addLayer({
+            id: "cities-outline",
+            type: "line",
+            source: "cities-polygons",
+            paint: {
+              "line-color": "#64748b", // slate-500
+              "line-width": 0.5,
+              "line-opacity": 0.4,
+            },
+          });
 
-        // Couche labels sur les polygones
-        m.addLayer({
-          id: "cities-label",
-          type: "symbol",
-          source: "cities-polygons",
-          layout: {
-            "text-field": ["get", "name"],
-            "text-size": 11,
-            "text-anchor": "center",
-            "text-optional": true,
-          },
-          paint: {
-            "text-color": "#1e293b",
-            "text-halo-color": "#ffffff",
-            "text-halo-width": 1.5,
-          },
-        });
+          // Couche labels sur les polygones
+          m.addLayer({
+            id: "cities-label",
+            type: "symbol",
+            source: "cities-polygons",
+            layout: {
+              "text-field": ["get", "name"],
+              "text-size": 11,
+              "text-anchor": "center",
+              "text-optional": true,
+            },
+            paint: {
+              "text-color": "#1e293b",
+              "text-halo-color": "#ffffff",
+              "text-halo-width": 1.5,
+            },
+          });
 
-        // Interaction clic sur les aplats villes
-        m.on("click", "cities-fill", (e) => {
-          if (measureActive) return; // mode mesure : les clics servent à mesurer
-          const features = e.features;
-          if (!features || features.length === 0) return;
-          const props = features[0].properties as { citySlug?: string };
-          const citySlug = readString(props?.citySlug);
-          if (!citySlug) return;
-          onCityClick(citySlug);
-        });
+          // Interaction clic sur les aplats villes
+          m.on("click", "cities-fill", (e) => {
+            if (measureActive) return; // mode mesure : les clics servent à mesurer
+            const features = e.features;
+            if (!features || features.length === 0) return;
+            const props = features[0].properties as { citySlug?: string };
+            const citySlug = readString(props?.citySlug);
+            if (!citySlug) return;
+            onCityClick(citySlug);
+          });
 
-        m.on("mousemove", "cities-fill", (e) => {
-          if (measureActive) return; // conserve le crosshair de mesure
-          const props = e.features?.[0]?.properties as
-            | { citySlug?: string }
-            | undefined;
-          m.getCanvas().style.cursor =
-            activeCitySlug === props?.citySlug ? "" : "pointer";
-        });
-        m.on("mouseleave", "cities-fill", () => {
-          if (measureActive) return;
-          m.getCanvas().style.cursor = "";
-        });
+          m.on("mousemove", "cities-fill", (e) => {
+            if (measureActive) return; // conserve le crosshair de mesure
+            const props = e.features?.[0]?.properties as
+              | { citySlug?: string }
+              | undefined;
+            m.getCanvas().style.cursor =
+              activeCitySlug === props?.citySlug ? "" : "pointer";
+          });
+          m.on("mouseleave", "cities-fill", () => {
+            if (measureActive) return;
+            m.getCanvas().style.cursor = "";
+          });
+        } catch (err) {
+          // Repli : style pas tout à fait prêt → on n'a pas pu poser les couches
+          // villes, mais on lève quand même l'overlay (dégradation gracieuse).
+          console.warn("cities-polygons layer setup failed (repli load):", err);
+        }
 
         mapReady = true;
         // C9 — capture le cadrage du primo-chargement (restauré au retour
@@ -1486,7 +1529,17 @@
         registerGeoLayerInteractions(m);
         registerMeasureInteractions(m);
         onReady(buildApi());
-      });
+      };
+
+      // Chemin nominal (primaire) : l'event `'load'` de MapLibre.
+      m.on("load", () => void finalizeMapSetup());
+      // Repli : si `'load'` ne fire pas dans le délai imparti (flap réseau, tuile
+      // stuck, requête que `map.loaded()` attend et qui est avortée), on force la
+      // finalisation UNE SEULE fois — le garde d'idempotence côté finalizeMapSetup
+      // absorbe toute course avec un `'load'` tardif.
+      readyFallbackTimer = setTimeout(() => {
+        void finalizeMapSetup();
+      }, MAP_READY_FALLBACK_MS);
 
       mapInstance = m;
     } catch (err) {
@@ -1495,6 +1548,14 @@
   }
 
   onDestroy(() => {
+    // Résilience `load` — évite un fire du repli APRÈS démontage (fuite / accès à
+    // une carte déjà retirée). Remet aussi le garde à false pour une éventuelle
+    // ré-init propre.
+    if (readyFallbackTimer !== undefined) {
+      clearTimeout(readyFallbackTimer);
+      readyFallbackTimer = undefined;
+    }
+    mapSetupStarted = false;
     if (mapInstance) {
       (mapInstance as { remove: () => void }).remove();
       mapInstance = null;
