@@ -25,6 +25,7 @@
   import RapportView from "$lib/components/rapport/RapportView.svelte";
   import PalierMatrix from "$lib/palier/PalierMatrix.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
+  import { acquireChatTrigger } from "$lib/chat/chat-trigger";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
   import { authStore } from "$lib/auth/auth-store.js";
@@ -127,6 +128,27 @@
       ? chatLayout.dockWidthCss
       : "0px";
 
+  // ── §5 R2 point 2 — bulle de chat masquée sur la vue Signaux ────────────────
+  // Sur les routes Signaux, le déclencheur du chat est le bouton CARRÉ de la
+  // rangée de contrôles carte (SignauxMapView → slot socle) : on SUPPRIME donc la
+  // bulle ronde flottante globale pour ne pas avoir DEUX déclencheurs. Mécanisme
+  // UNIQUE : le store #564 (`acquireChatTrigger`, ref-compté → robuste aux
+  // transitions de route). Les AUTRES vues gardent la bulle actuelle inchangée.
+  let releaseChatBubble: (() => void) | undefined;
+  function syncChatBubbleSuppression(onSignaux: boolean): void {
+    if (onSignaux && !releaseChatBubble) {
+      releaseChatBubble = acquireChatTrigger();
+    } else if (!onSignaux && releaseChatBubble) {
+      releaseChatBubble();
+      releaseChatBubble = undefined;
+    }
+  }
+  // Dépend UNIQUEMENT de `activeView` (les seules vues qui montent SignauxMapView
+  // sont « signaux » et le deep-link legacy « carte-signaux » — cf. App template).
+  $: syncChatBubbleSuppression(
+    activeView === "signaux" || activeView === "carte-signaux",
+  );
+
   // ── Guard auth ────────────────────────────────────────────────────────────
   // Quand l'utilisateur n'est pas authentifié et que l'auth est activée, on
   // affiche une page de connexion STATIQUE (LoginView) — PAS de redirection
@@ -169,6 +191,8 @@
   onDestroy(() => {
     cleanupRouter?.();
     cleanupBetaShortcut?.();
+    // §5 R2 — libère la suppression de bulle #564 si App est détruit sur Signaux.
+    releaseChatBubble?.();
   });
 </script>
 
