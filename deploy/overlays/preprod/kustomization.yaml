@@ -3,8 +3,12 @@
 # that "kubectl set image" alone never reconciled:
 #   1. stale radar-ui-nginx ConfigMap (#608 headers not served) — the base's
 #      configMapGenerator hashes deploy/k8s/nginx/default.conf, so a content
-#      change rolls the radar-ui Deployment automatically; this overlay INHERITS
-#      that generator (it only retargets the namespace);
+#      change rolls the radar-ui Deployment automatically; this overlay now
+#      REPLACES that generator's default.conf (behavior: replace) with a preprod
+#      copy that repoints /api/geo/collections at geo-preprod (cross-tenant
+#      isolation vs the base's prod-pointing conf), so the generated CM still
+#      hash-rolls the radar-ui Deployment on content change but no longer serves
+#      the prod geo upstream;
 #   2. missing securityContext on the durable workloads (#611) — reconciled by
 #      applying the base manifests;
 #   3. missing PSS labels on the namespace — the kustomize `namespace` transformer
@@ -36,3 +40,9 @@ namespace: radar-immobilier-preprod
 
 resources:
   - ../../k8s
+
+configMapGenerator:
+  - name: radar-ui-nginx
+    behavior: replace
+    files:
+      - default.conf=nginx/default.conf
