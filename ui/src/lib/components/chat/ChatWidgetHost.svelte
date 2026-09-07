@@ -36,6 +36,17 @@
   // readDisplayMode/persistDisplayMode ; ChatDock le consomme + publie le layout.
   let displayMode: ChatWidgetDisplayMode = "docked";
   const isBrowser = typeof window !== "undefined";
+
+  // ── §5 R2 (fix #579) — COEXISTENCE avec le pane droit sur la vue carte ───────
+  // Quand un hôte fournit son propre déclencheur (`$chatBubbleSuppressed` = vue
+  // Signaux/carte), on FORCE le mode ANCRÉ (`docked`). Raison : seul le mode ancré
+  // réserve sa largeur (App.svelte `padding-right: dockWidthCss`) ⇒ le chat
+  // COEXISTE avec le pane droit (§3) au lieu de le RECOUVRIR ; le pane reste
+  // visible ET cliquable et le bouton carré de la rangée reste atteignable (donc
+  // re-clic = ferme). Le mode FLOTTANT, lui, se superpose (overlay bas-droit +
+  // backdrop) et masque le pane ET son propre déclencheur → régression #579.
+  // Hors carte (bulle), la préférence utilisateur `displayMode` reste intacte.
+  $: effectiveDisplayMode = $chatBubbleSuppressed ? "docked" : displayMode;
   // Instance ChatDock : close() (bouton header) et toggle() (déclencheur hôte
   // #564) sont appelés impérativement ; open() reste disponible mais inutilisé.
   let dock: ChatDockInstance | undefined;
@@ -79,6 +90,7 @@
       type="button"
       title="Ouvrir l'assistant radar"
       aria-label="Ouvrir l'assistant radar"
+      data-testid="chat-bubble-trigger"
       on:click={toggle}
     >
       <MessageCircle class="h-5 w-5" aria-hidden="true" />
@@ -90,19 +102,25 @@
   <div class="flex h-full min-h-0 flex-col bg-white">
     <div class="flex items-center justify-end border-b border-slate-200 px-2 py-1">
       <div class="flex items-center gap-1">
-        <button
-          class="flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-          type="button"
-          title={isDocked ? "Passer en fenetre flottante" : "Ancrer le chat"}
-          aria-label={isDocked ? "Passer en fenetre flottante" : "Ancrer le chat"}
-          on:click={() => setDisplayMode(isDocked ? "floating" : "docked")}
-        >
-          {#if isDocked}
-            <PanelBottom class="h-4 w-4" aria-hidden="true" />
-          {:else}
-            <PanelRight class="h-4 w-4" aria-hidden="true" />
-          {/if}
-        </button>
+        {#if !$chatBubbleSuppressed}
+          <!-- §5 R2 (fix #579) — la bascule ancré/flottant est MASQUÉE sur la vue
+               carte : le chat y est FORCÉ en ancré pour coexister avec le pane
+               droit (le flottant se superposerait + masquerait le déclencheur).
+               Hors carte, la bascule reste disponible (préférence utilisateur). -->
+          <button
+            class="flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            type="button"
+            title={isDocked ? "Passer en fenetre flottante" : "Ancrer le chat"}
+            aria-label={isDocked ? "Passer en fenetre flottante" : "Ancrer le chat"}
+            on:click={() => setDisplayMode(isDocked ? "floating" : "docked")}
+          >
+            {#if isDocked}
+              <PanelBottom class="h-4 w-4" aria-hidden="true" />
+            {:else}
+              <PanelRight class="h-4 w-4" aria-hidden="true" />
+            {/if}
+          </button>
+        {/if}
         <button
           class="flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-800"
           type="button"
@@ -128,7 +146,7 @@
 
 <ChatDock
   bind:this={dock}
-  {displayMode}
+  displayMode={effectiveDisplayMode}
   {isBrowser}
   onDisplayModeChange={setDisplayMode}
   dialogAriaLabel="Assistant radar"
