@@ -66,7 +66,22 @@ kustomize` at release time (the base is **copied into a tmpdir** so no
   <resolved digest>`).
 
 The step then polls the Job: `Complete` → proceed; `Failed` or 600 s timeout →
-`exit 1` (release aborts before set-image), dumping the last 80 log lines.
+`exit 1` (release aborts before set-image). The abort decision reads only `get
+job` conditions — it does **not** depend on pod logs, so it is robust in both
+voies.
+
+On failure the step also tries `kubectl logs job/<name> --tail=80` for inline
+debugging, but this is **best-effort and voie-dependent**:
+
+- **prod** (`promote-prod`) — the prod CI ServiceAccount has `pods/log`, so the
+  last 80 lines are dumped inline in the CI output.
+- **preprod** (`deploy-preprod`) — `11-ci-deployer-preprod-rbac` **deliberately
+  withholds `pods/log`** (least-priv: the runner cannot read Job pod logs), so the
+  `logs` call is a guarded `|| true` no-op (HTTP 403). A failed preprod migration
+  therefore dumps **no inline logs** in CI — the abort still fires correctly;
+  debug from the owner-side cluster logs. This is by design; do not grant the
+  preprod runner `pods/log` to get the inline dump, as that would weaken the
+  least-priv posture `11-ci-deployer-preprod-rbac` deliberately took.
 
 ## Helpers in this directory
 
