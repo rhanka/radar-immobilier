@@ -147,3 +147,10 @@ not by key name (a name sort of `<env>-<sha>-<ts>` is dominated by the random
 `<sha>`, so it is not time-ordered), and it excludes the current key — so the
 freshly-created pre-migration backup can never be pruned in the same run that
 made it.
+
+**Count contract:** `BACKUP_RETAIN_COUNT` is the number of **prior** backups
+kept; the current (pre-migration) backup is **always** kept in addition, so the
+store holds up to **N+1** objects per env at the peak (default `14` → up to `15`).
+The current backup is categorically the rollback point of the release being cut,
+so it is never counted against the retention budget — a deliberate one-object
+safety bias.
