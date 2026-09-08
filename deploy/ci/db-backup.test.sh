@@ -118,6 +118,25 @@ echo "$rmd" | grep -q 'preprod-t2-' && ok "retention: pruned t2"        || bad "
 echo "$rmd" | grep -q 'preprod-t3-' && bad "retention: t3 wrongly pruned" || ok "retention: kept t3"
 echo "$rmd" | grep -q 'preprod-t4-' && bad "retention: t4 wrongly pruned" || ok "retention: kept t4 (newest)"
 
+# 6b. retention orders CHRONOLOGICALLY (by S3 date), NOT lexically by name. Fixture
+#     whose name order (sha-dominated) is INVERTED vs the date order: the
+#     date-NEWEST backup (0004) sorts lexically FIRST, the date-OLDEST (zzz1) sorts
+#     lexically LAST. A lexical prune would delete 0004 (the newest!); the
+#     chronological prune must delete the date-oldest (zzz1, yyy2) and keep 0004.
+LS4B="$(printf '%s\n' \
+  '2024/01/01 00:00:00  10 preprod-zzz1-20240101T000000Z.sql.gz' \
+  '2024/02/01 00:00:00  10 preprod-yyy2-20240201T000000Z.sql.gz' \
+  '2024/03/01 00:00:00  10 preprod-b003-20240301T000000Z.sql.gz' \
+  '2024/04/01 00:00:00  10 preprod-0004-20240401T000000Z.sql.gz')"
+EXTRA="export FAKE_JOB_SUCCEEDED=1; export BACKUP_RETAIN_COUNT=2; export FAKE_S5_LS=$(printf '%q' "$LS4B")"
+run_case retention_chrono; code=$CODE
+eq "$code" 0 "retention_chrono: exit 0"
+rmd="$(rm_calls)"
+echo "$rmd" | grep -q 'preprod-zzz1-' && ok "retention_chrono: pruned date-oldest zzz1 (lexically LAST)" || bad "retention_chrono: zzz1 not pruned"
+echo "$rmd" | grep -q 'preprod-yyy2-' && ok "retention_chrono: pruned yyy2"                               || bad "retention_chrono: yyy2 not pruned"
+echo "$rmd" | grep -q 'preprod-b003-' && bad "retention_chrono: b003 wrongly pruned"                      || ok "retention_chrono: kept b003"
+echo "$rmd" | grep -q 'preprod-0004-' && bad "retention_chrono: 0004 (date-newest, lexically FIRST) WRONGLY pruned" || ok "retention_chrono: kept 0004 (date-newest, lexically first)"
+
 # 7. retention failure is NON-fatal (backup already landed).
 EXTRA='export FAKE_JOB_SUCCEEDED=1; export FAKE_S5_LS_MODE=fail'; run_case retention_nonfatal; code=$CODE
 eq "$code" 0 "retention failure does not red the release"

@@ -112,13 +112,27 @@ log "backup uploaded: s3://${BACKUP_S3_BUCKET}/${KEY}"
 prune() {
   local listing
   listing="$(s5cmd --endpoint-url "$BACKUP_S3_ENDPOINT" ls "s3://${BACKUP_S3_BUCKET}/${BACKUP_PREFIX}/${BACKUP_ENV}-" 2>/dev/null)" || return 1
-  local names total drop
-  names="$(printf '%s\n' "$listing" | awk 'NF{print $NF}' | sort)"
+  local cur names total drop
+  cur="${KEY##*/}"   # the backup we just created — it must NEVER be pruned.
+  # Order CHRONOLOGICALLY by the S3 object date/time — the first two columns of
+  # `s5cmd ls` (`YYYY/MM/DD HH:MM:SS`, whose lexical order IS chronological) — NOT
+  # by the object name: a name sort of <env>-<sha>-<ts> is dominated by the random
+  # <sha>, so it is not time-ordered and could rank a fresh low-sha backup among
+  # the "oldest" and delete the pre-migration rollback point right after creating
+  # it. Sort on the date/time key, then emit just the object name. Lines without
+  # the date/time+name shape are skipped (never counted, never pruned) —
+  # conservative: we never delete an object we cannot time-order.
+  names="$(printf '%s\n' "$listing" \
+    | awk 'NF>=3{print $1" "$2"\t"$NF}' \
+    | sort \
+    | cut -f2-)"
   total="$(printf '%s\n' "$names" | grep -c . || true)"
   [ "$total" -le "$BACKUP_RETAIN_COUNT" ] && { log "retention: ${total} ≤ ${BACKUP_RETAIN_COUNT}, nothing to prune"; return 0; }
   drop=$(( total - BACKUP_RETAIN_COUNT ))
-  log "retention: ${total} backups, keeping ${BACKUP_RETAIN_COUNT}, pruning ${drop} oldest"
-  printf '%s\n' "$names" | head -n "$drop" | while IFS= read -r name; do
+  log "retention: ${total} backups, keeping ${BACKUP_RETAIN_COUNT} newest, pruning ${drop} oldest (never the current backup)"
+  # Oldest `drop`, with the current key filtered out as a clock-skew belt so the
+  # just-created pre-migration backup can never be among the deletions.
+  printf '%s\n' "$names" | head -n "$drop" | grep -vF -- "$cur" | while IFS= read -r name; do
     [ -n "$name" ] || continue
     local obj="${name##*/}"
     s5cmd --endpoint-url "$BACKUP_S3_ENDPOINT" rm "s3://${BACKUP_S3_BUCKET}/${BACKUP_PREFIX}/${obj}" \
