@@ -2435,7 +2435,10 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 5rem; /* = bottom-20 (mobile, au-dessus de la rangée) — source-gap owner-visual */
+    bottom: 0.5rem; /* §5 R6 — au BORD BAS mobile ET desktop (~8px, owner-visual). L'ancien
+       5rem (au-dessus de l'ancienne rangée à bottom-20) n'a plus lieu d'être : les clusters
+       sont à bottom-3 → bande cohérente (légende bas-gauche · attribution bas-centre ·
+       mesure+layers bas-droite) mobile ET desktop. */
     z-index: 10;
     /* Bornage : ne chevauche ni les icônes bas-droite ni la bulle de chat. */
     max-width: calc(100% - 7rem); /* source-gap à figer owner-visual */
@@ -2451,15 +2454,10 @@
     /* Ne capte pas les gestes carte ; le lien légal réactive pointer-events. */
     pointer-events: none;
   }
-  @media (min-width: 768px) {
-    .map-attribution {
-      /* Desktop : au BORD BAS de la carte (owner-visual, 8 px). §5 R5 — les 2
-         clusters descendent à `md:bottom-3` (12 px) → l'attribution s'aligne juste
-         SOUS eux, formant la bande cohérente bas-gauche/bas-centre/bas-droite (bas
-         attribution 712 px vs bas clusters 708 px, mesuré). source-gap owner-visual. */
-      bottom: 0.5rem;
-    }
-  }
+  /* §5 R6 — `bottom` de `.map-attribution` désormais UNIFORME (0.5rem) mobile ET desktop
+     → l'ancien override `@media (min-width: 768px) { bottom: 0.5rem }` (R4/R5) est retiré
+     (redondant depuis que le mobile est aussi à 0.5rem). Bande cohérente : attribution
+     bas-centre à ~8px, sous les clusters à 12px (mesuré desktop : bas attr 712 / clusters 708). */
   .map-attribution a {
     color: inherit;
     text-decoration: underline;
