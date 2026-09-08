@@ -29,6 +29,13 @@ import { mockAuthenticated } from "./_helpers";
  * + le bouton chat sont montés au niveau RÉGION (aucune ville à sélectionner).
  */
 
+// Feature-flag chat (décision owner 2026-09-07) : DÉFAUT OFF. Ces specs vérifient
+// le comportement ACTIVÉ (déclencheur + coexistence pane droit) → elles ne sont
+// SIGNIFICATIVES que quand le chat est bâti ON. On les GATE sur le flag du build
+// e2e (`VITE_CHAT_ENABLED`, lu côté runner) : ON ⇒ elles tournent (vertes) ; OFF
+// (défaut) ⇒ SKIP (jamais rouge). L'état DÉSACTIVÉ est couvert par chat-disabled.spec.ts.
+const CHAT_ENABLED = process.env.VITE_CHAT_ENABLED === "true";
+
 const CITY_SLUG = "delson";
 
 const BY_CITY_RESPONSE = {
@@ -75,6 +82,7 @@ async function persistFloatingPreference(page: Page): Promise<void> {
 test.use({ viewport: { width: 1600, height: 900 } });
 
 test.describe("chat rangée carte — coexistence pane droit (fix #579)", () => {
+  test.skip(!CHAT_ENABLED, "chat désactivé par défaut (flag OFF) — décision owner 2026-09-07");
   test("(c)(d)(a) le bouton ouvre le chat ; bulle absente ; pane droit visible ET cliquable", async ({
     page,
   }) => {
@@ -160,6 +168,7 @@ test.describe("chat rangée carte — coexistence pane droit (fix #579)", () => 
  * CLIQUABLE au-dessus de l'overlay plein-écran.
  */
 test.describe("chat rangée carte — coexistence MOBILE du cluster (Layers) avec le chat docked (§5 R3 P2)", () => {
+  test.skip(!CHAT_ENABLED, "chat désactivé par défaut (flag OFF) — décision owner 2026-09-07");
   test.use({ viewport: { width: 390, height: 844 } });
 
   test("(P2) chat ouvert via le bouton carte → cluster Layers VISIBLE + CLIQUABLE (non recouvert par le chat plein-écran)", async ({
