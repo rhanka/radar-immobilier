@@ -36,8 +36,9 @@ for prod). Two consequences:
 - Migrate can never run without a fresh pre-migration backup preceding it — the
   shared gate is what guarantees the rollback point.
 - When the var is **not** `'true'`, the sequence above does **not** run: both
-  backup and migrate are **skipped** and the deploy proceeds straight to
-  set-image. For a release carrying a pending schema change (e.g. drizzle `0011`)
+  backup and migrate are **skipped** and the deploy proceeds through the rest of
+  its steps (reconcile / apply-mcp, then set-image) with no backup and no
+  migration. For a release carrying a pending schema change (e.g. drizzle `0011`)
   that rolls new code onto an **un-migrated** DB. This staged arming is by design
   — prod ships **disarmed until the cutover**, so merging never arms prod as a
   side effect — but the skip is **never silent**: a disarmed run emits a loud
@@ -56,17 +57,21 @@ release that carries a pending migration, so backup+migrate actually run.
 | `promote-prod` | tag `v*` | `radar-immobilier` | immutable **digest** | ✅ *(when armed)* | `BACKUP_BEFORE_RELEASE_PROD_ENABLED` |
 | `deploy` *(legacy)* | push `main` | `radar-immobilier` | `<sha7>` tag | ❌ **by design** | — |
 
-- **Preprod (`deploy-preprod`)** — armed by `PREPROD_CD_ENABLED == 'true'`. Every
-  push to `main` replays the migrations against preprod, which is the
-  test-before-prod check: a migration that would break prod fails here first.
+- **Preprod (`deploy-preprod`)** — gated by **two** switches: `PREPROD_CD_ENABLED
+  == 'true'` arms the preprod voie itself, and `BACKUP_BEFORE_RELEASE_ENABLED ==
+  'true'` arms backup+migrate within it. **When both are armed**, every push to
+  `main` replays the migrations against preprod — the test-before-prod check: a
+  migration that would break prod fails here first. (Voie armed but backup+migrate
+  disarmed → a push deploys preprod without running migrate; see the Arming
+  section above.)
 - **Prod (`promote-prod`)** — a `v*` tag promotes the already-built,
   already-preprod-tested artifact to prod **by immutable digest** (the `<sha7>`
   tag may have aged out of the registry). The migrate Job is pinned to that same
   digest, so the migration and the deployed code are byte-identical. The
   `radar-immo-mcp` drift-heal apply (which pins `radar-api:latest` with a
   `Recreate` strategy, so it rolls MCP pods onto new code) runs **after** migrate
-  and before set-image, so MCP never serves new code against an un-migrated
-  schema.
+  and before set-image, so MCP is not rolled onto new code before this release's
+  migrations are applied.
 - **Legacy `deploy` (main→prod)** — the pre-cutover direct path. Superseded by
   `deploy-preprod` + `promote-prod` once `PREPROD_CD_ENABLED` is set. It carries
   **no migrate step by design**: it is a void path that must not be the one that
@@ -102,8 +107,9 @@ not just abandoned by the poller, through two layers:
   poll) so the cluster self-terminates the pod with `DeadlineExceeded` → `Failed`
   *before* the CI times out, giving the poll a clean condition to abort on;
 - on either abort path the step also runs `kubectl delete job <name>
-  --ignore-not-found` before `exit 1`, so the in-cluster work is torn down
-  immediately even if self-termination lags.
+  --ignore-not-found` before `exit 1`, which requests deletion of the Job and its
+  pod so the in-cluster work is torn down even if self-termination lags (subject
+  to the pod's normal termination grace).
 
 On failure the step also tries `kubectl logs job/<name> --tail=80` for inline
 debugging, but this is **best-effort and voie-dependent**:

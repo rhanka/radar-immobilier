@@ -52,8 +52,10 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE="${TEMPLATE:-${HERE}/db-backup-job.tmpl.yaml}"
 [ -f "$TEMPLATE" ] || die "template not found: ${TEMPLATE}"
 
-TS_KEY="$(date -u +%Y%m%dT%H%M%SZ)"
-TS_NAME="$(date -u +%Y%m%d%H%M%S)"
+# Overridable only to make the retention/exclusion path deterministic under test
+# (a fixed current-key timestamp); unset in every real run, so the default holds.
+TS_KEY="${TS_KEY:-$(date -u +%Y%m%dT%H%M%SZ)}"
+TS_NAME="${TS_NAME:-$(date -u +%Y%m%d%H%M%S)}"
 export KEY="${BACKUP_PREFIX}/${BACKUP_ENV}-${BACKUP_TAG}-${TS_KEY}.sql.gz"
 export BACKUP_S3_BUCKET BACKUP_S3_ENDPOINT NAMESPACE
 # k8s object names are RFC1123: lowercase alnum + '-', <=63 chars.
@@ -112,27 +114,31 @@ log "backup uploaded: s3://${BACKUP_S3_BUCKET}/${KEY}"
 prune() {
   local listing
   listing="$(s5cmd --endpoint-url "$BACKUP_S3_ENDPOINT" ls "s3://${BACKUP_S3_BUCKET}/${BACKUP_PREFIX}/${BACKUP_ENV}-" 2>/dev/null)" || return 1
-  local cur names total drop
+  local cur candidates total drop
   cur="${KEY##*/}"   # the backup we just created — it must NEVER be pruned.
-  # Order CHRONOLOGICALLY by the S3 object date/time — the first two columns of
-  # `s5cmd ls` (`YYYY/MM/DD HH:MM:SS`, whose lexical order IS chronological) — NOT
-  # by the object name: a name sort of <env>-<sha>-<ts> is dominated by the random
-  # <sha>, so it is not time-ordered and could rank a fresh low-sha backup among
-  # the "oldest" and delete the pre-migration rollback point right after creating
-  # it. Sort on the date/time key, then emit just the object name. Lines without
-  # the date/time+name shape are skipped (never counted, never pruned) —
-  # conservative: we never delete an object we cannot time-order.
-  names="$(printf '%s\n' "$listing" \
-    | awk 'NF>=3{print $1" "$2"\t"$NF}' \
-    | sort \
+  # Build the prune CANDIDATE list = every OTHER backup, ordered CHRONOLOGICALLY by
+  # the S3 object date/time — the first two columns of `s5cmd ls`
+  # (`YYYY/MM/DD HH:MM:SS`, whose lexical order IS chronological) — NOT by object
+  # name: a name sort of <env>-<sha>-<ts> is dominated by the random <sha>, so it
+  # is not time-ordered and could rank a fresh low-sha backup among the "oldest".
+  # Three guards:
+  #   - the current key is excluded UP FRONT (not filtered after selection), so it
+  #     is never a deletion candidate under any clock skew AND the keep-count math
+  #     is exact (no off-by-one) — the current backup is always additionally kept;
+  #   - only lines whose first two fields are a real date+time are taken (a
+  #     non-date line is skipped, never counted, never pruned — we never delete an
+  #     object we cannot time-order);
+  #   - `LC_ALL=C sort` for a stable, locale-independent byte order.
+  candidates="$(printf '%s\n' "$listing" \
+    | awk 'NF>=3 && $1 ~ /^[0-9]{4}\/[0-9]{2}\/[0-9]{2}$/ && $2 ~ /^[0-9]{2}:[0-9]{2}:[0-9]{2}$/ {print $1" "$2"\t"$NF}' \
+    | { grep -vF -- "$cur" || :; } \
+    | LC_ALL=C sort \
     | cut -f2-)"
-  total="$(printf '%s\n' "$names" | grep -c . || true)"
-  [ "$total" -le "$BACKUP_RETAIN_COUNT" ] && { log "retention: ${total} ≤ ${BACKUP_RETAIN_COUNT}, nothing to prune"; return 0; }
+  total="$(printf '%s\n' "$candidates" | grep -c . || true)"
+  [ "$total" -le "$BACKUP_RETAIN_COUNT" ] && { log "retention: ${total} prior backups ≤ ${BACKUP_RETAIN_COUNT}, nothing to prune"; return 0; }
   drop=$(( total - BACKUP_RETAIN_COUNT ))
-  log "retention: ${total} backups, keeping ${BACKUP_RETAIN_COUNT} newest, pruning ${drop} oldest (never the current backup)"
-  # Oldest `drop`, with the current key filtered out as a clock-skew belt so the
-  # just-created pre-migration backup can never be among the deletions.
-  printf '%s\n' "$names" | head -n "$drop" | grep -vF -- "$cur" | while IFS= read -r name; do
+  log "retention: ${total} prior backups, keeping ${BACKUP_RETAIN_COUNT} newest, pruning ${drop} oldest (current backup always kept)"
+  printf '%s\n' "$candidates" | head -n "$drop" | while IFS= read -r name; do
     [ -n "$name" ] || continue
     local obj="${name##*/}"
     s5cmd --endpoint-url "$BACKUP_S3_ENDPOINT" rm "s3://${BACKUP_S3_BUCKET}/${BACKUP_PREFIX}/${obj}" \
