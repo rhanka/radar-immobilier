@@ -143,3 +143,58 @@ test.describe("chat rangée carte — coexistence pane droit (fix #579)", () => 
     await expect(page.getByTestId("chat-bubble-trigger")).toBeVisible();
   });
 });
+
+/**
+ * §5 R3 P2 — COEXISTENCE MOBILE du CLUSTER de contrôles carte avec le chat.
+ *
+ * En mobile (≤639px), chat-ui force le mode DOCKED et publie `dockWidthCss:"100vw"` :
+ * le dock rend alors un overlay PLEIN-ÉCRAN (`fixed inset z-50`, width 100vw) et
+ * App.svelte réservait `padding-right:100vw` (⇒ largeur de contenu 0, carte écrasée).
+ * Résultat AVANT-fix : ouvert via le bouton carré de la rangée, le chat RECOUVRE et
+ * pousse HORS-ÉCRAN le cluster (Layers + mesure + chat-toggle) → non-cliquable, donc
+ * plus moyen de changer de fond NI de refermer le chat via son déclencheur.
+ *
+ * Le rework #579 ne traitait QUE le pane droit (desktop, via `padding-right`). Ce
+ * test verrouille la coexistence du CLUSTER en mobile : le fix host (App.svelte ne
+ * réserve pas 100vw + z-index du cluster au-dessus du chat) le garde VISIBLE +
+ * CLIQUABLE au-dessus de l'overlay plein-écran.
+ */
+test.describe("chat rangée carte — coexistence MOBILE du cluster (Layers) avec le chat docked (§5 R3 P2)", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("(P2) chat ouvert via le bouton carte → cluster Layers VISIBLE + CLIQUABLE (non recouvert par le chat plein-écran)", async ({
+    page,
+  }) => {
+    await mockSignauxApi(page);
+    await persistFloatingPreference(page);
+    await page.goto("/#/signaux");
+
+    await expect(page.getByTestId("geo-city-map-base")).toBeVisible();
+
+    const chatToggle = page.getByTestId("chat-toggle");
+    // Host e2e 127.0.0.1 ∈ allowlist satellite ⇒ le trigger `Layers` du socle est rendu.
+    const mapLayers = page.getByTestId("map-layers-toggle");
+
+    await expect(chatToggle).toBeVisible();
+    await expect(chatToggle).toHaveAttribute("aria-expanded", "false");
+    // Cluster présent ET cliquable AVANT ouverture (état de référence).
+    await expect(mapLayers).toBeVisible();
+    await mapLayers.click({ trial: true });
+
+    // Ouverture via le bouton carré de la rangée → chat docked MOBILE plein-écran.
+    await chatToggle.click();
+    await expect(page.getByRole("button", { name: "Fermer le chat" })).toBeVisible();
+    await expect(chatToggle).toHaveAttribute("aria-expanded", "true");
+
+    // GATE P2 — chat plein-écran OUVERT : le cluster reste VISIBLE + CLIQUABLE
+    // (au-dessus de l'overlay z-50, dans l'emprise du viewport). `trial` prouve
+    // l'actionnabilité (pas d'interception par l'overlay chat, pas hors-écran) SANS
+    // ouvrir le menu de fond. AVANT le fix host : recouvert/hors-champ → échec.
+    await expect(mapLayers).toBeVisible();
+    await mapLayers.click({ trial: true });
+    // Le bouton chat lui-même (dernier enfant du cluster) reste atteignable → le
+    // re-clic pour FERMER reste possible (pas de « chat coincé ouvert » en mobile).
+    await expect(chatToggle).toBeVisible();
+    await chatToggle.click({ trial: true });
+  });
+});
