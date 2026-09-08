@@ -60,17 +60,19 @@ function controlContainer(sideAnchor: string, flexAnchor: string): string {
 }
 
 describe("GeoCityMapBase — contrôles bas (§5.1 R2) rangée uniforme + menu Layers + icône Map", () => {
-  it("le conteneur MESURE (droite) porte bottom-20 ET md:bottom-3, flex-col-reverse", () => {
+  it("le conteneur MESURE (droite) porte bottom-3 UNIFORME (mobile+desktop) + md:bottom-3, flex-col-reverse", () => {
     const div = controlContainer("right-3", "items-end");
-    expect(div).toContain("bottom-20"); // mobile préservé
+    expect(div).toContain("bottom-3"); // §5 R6 : ancrage bas UNIFORME 12px (mobile = desktop)
+    expect(div).not.toContain("bottom-20"); // §5 R6 : dégagement chat (80px) retiré — chat désactivé #651
     expect(div).toContain("md:bottom-3"); // §5 R5 desktop : ancré au bord bas (bande cohérente)
     expect(div).not.toContain("md:bottom-10"); // l'ancrage R4 (trop haut) a disparu
     expect(div).toContain("flex-col-reverse"); // panneaux ouverts vers le haut
   });
 
-  it("le conteneur LÉGENDE (gauche) porte bottom-20 ET md:bottom-3, flex-col-reverse", () => {
+  it("le conteneur LÉGENDE (gauche) porte bottom-3 UNIFORME (mobile+desktop) + md:bottom-3, flex-col-reverse", () => {
     const div = controlContainer("left-3", "items-start");
-    expect(div).toContain("bottom-20");
+    expect(div).toContain("bottom-3"); // §5 R6 : symétrique du cluster droit, uniforme 12px
+    expect(div).not.toContain("bottom-20"); // §5 R6 : dégagement chat retiré
     expect(div).toContain("md:bottom-3"); // §5 R5 : symétrique du cluster droit
     expect(div).not.toContain("md:bottom-10");
     expect(div).toContain("flex-col-reverse"); // bouton en bas, panneau au-dessus
