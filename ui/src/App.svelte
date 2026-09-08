@@ -221,8 +221,16 @@
   {:else if authState.user?.status === "rejected"}
     <RejectedView />
   {:else}
+    <!-- §5 R5 mobile — ancrage viewport du shell au PETIT viewport (`app-shell`,
+         cf. <style>). `h-screen` (=100vh) valait la hauteur GRAND viewport (barre
+         d'URL masquée) : en mobile barre AFFICHÉE la bande de contrôle bas
+         (clusters + attribution, ancrés `bottom-20` du bord bas de la carte)
+         tombait SUR la ligne de flottaison (mesuré : bas bande à 764 = fold 764,
+         clearance 0). `100svh` (petit viewport = barre visible) est STABLE — il
+         ne se recalcule pas quand la barre se masque, donc la bande ne bouge pas
+         (mesuré : clearance 80 constant, drift 0 vs 80 px sous `dvh`). -->
     <div
-      class="flex h-screen flex-col overflow-hidden transition-[padding] duration-200"
+      class="app-shell flex flex-col overflow-hidden transition-[padding] duration-200"
       style={`padding-right: ${dockPaddingCss};`}
     >
       <!-- Barre de navigation horizontale -->
@@ -306,3 +314,19 @@
     <ChatWidgetHost />
   {/if}
 </ThemeProvider>
+
+<style>
+  /* §5 R5 mobile — hauteur du shell principal.
+     Cascade fallback : `100vh` d'abord (navigateurs sans unités viewport
+     dynamiques), puis `100svh` (small viewport height) qui l'emporte quand il
+     est supporté. `svh` = hauteur AVEC la barre d'URL mobile visible : c'est la
+     plus PETITE hauteur, donc la bande de contrôle bas reste toujours visible,
+     et surtout STABLE — `svh` ne se recalcule pas quand la barre se masque
+     (contrairement à `dvh`, qui ferait glisser la bande de 80 px pendant le
+     scroll). Sur DESKTOP il n'y a pas de barre d'URL rétractable → svh = vh =
+     lvh = plein écran, donc aucun changement desktop. */
+  .app-shell {
+    height: 100vh;
+    height: 100svh;
+  }
+</style>
