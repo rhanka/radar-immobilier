@@ -2085,7 +2085,7 @@
        `md:bottom-10` (2,5 rem réservés au-dessus de la bande d'attribution).
        `flex-col-reverse` → les panneaux (mesure / indisponibilité) s'ouvrent vers
        le HAUT, au-dessus de la rangée de boutons. -->
-  <div class="absolute bottom-20 md:bottom-10 right-3 z-10 flex flex-col-reverse items-end gap-2">
+  <div class="map-control-cluster absolute bottom-20 md:bottom-10 right-3 z-10 flex flex-col-reverse items-end gap-2">
     <!-- §5.1 R2 — RANGÉE UNIFORME : chaque contrôle est un enfant DIRECT, un seul
          gap (token `--st-spacing`, source-gap à ratifier owner en recette), aucune
          marge horizontale par enfant, aucun gap imbriqué. Ordre : Mesure → Fond de
@@ -2115,18 +2115,25 @@
           data-testid="basemap-control"
           data-basemap-mode={basemapMode}
         >
-          <MenuTriggerButton
-            aria-label={`Fond de carte : ${basemapMode === "plan" ? "Plan" : "Satellite"}`}
-            aria-controls={BASEMAP_MENU_ID}
-            expanded={basemapMenuOpen}
-            size="sm"
-            variant="secondary"
-            data-testid="basemap-menu-trigger"
-            onclick={toggleBasemapMenu}
-            onkeydown={handleBasemapTriggerKeydown}
-          >
-            <Icon name="layers" size={16} />
-          </MenuTriggerButton>
+          <!-- §5 R3 P2 — hook e2e STABLE de l'icône Layers (testid ADDITIF :
+               `basemap-control` sur l'ancre + `basemap-menu-trigger` sur le bouton DS
+               sont CONSERVÉS). Sert l'assertion mobile « le cluster de contrôles carte
+               reste VISIBLE + CLIQUABLE quand le chat docked plein-écran est ouvert »
+               (coexistence du CLUSTER, pas seulement du pane droit traité par #579). -->
+          <span class="map-layers-toggle-hit" data-testid="map-layers-toggle">
+            <MenuTriggerButton
+              aria-label={`Fond de carte : ${basemapMode === "plan" ? "Plan" : "Satellite"}`}
+              aria-controls={BASEMAP_MENU_ID}
+              expanded={basemapMenuOpen}
+              size="sm"
+              variant="secondary"
+              data-testid="basemap-menu-trigger"
+              onclick={toggleBasemapMenu}
+              onkeydown={handleBasemapTriggerKeydown}
+            >
+              <Icon name="layers" size={16} />
+            </MenuTriggerButton>
+          </span>
         </span>
       {/if}
 
@@ -2375,6 +2382,25 @@
   /* Ancre du trigger de fond : wrapper neutre (aucune marge) pour `MenuPopover`. */
   .map-control-anchor {
     display: inline-flex;
+  }
+  /* §5 R3 P2 — enveloppe du hook e2e `map-layers-toggle` : boîte serrée sur le
+     bouton DS (aucun décalage de la rangée), cliquable/visible comme le bouton. */
+  .map-layers-toggle-hit {
+    display: inline-flex;
+  }
+  /* §5 R3 P2 — COEXISTENCE MOBILE du cluster de contrôles carte avec le chat.
+     En ≤639px, chat-ui force le docked et rend un overlay PLEIN-ÉCRAN (`fixed inset
+     z-50`, width 100vw). Le cluster (`absolute … z-10`) passait DESSOUS → recouvert /
+     non-cliquable (plus moyen de changer de fond NI de refermer le chat via son
+     déclencheur). On remonte le cluster AU-DESSUS de l'overlay (z-index 60 > 50)
+     UNIQUEMENT en mobile : desktop STRICTEMENT inchangé (le `z-10` inline reste la
+     base ; #579 et la coexistence du pane droit ne sont pas touchés). La spécificité
+     de la classe scopée Svelte (0,2,0) l'emporte sur `.z-10` (0,1,0) → aucun
+     `!important`. Aligné sur le breakpoint mobile de chat-ui (max-width:639px). */
+  @media (max-width: 639px) {
+    .map-control-cluster {
+      z-index: 60;
+    }
   }
   /* §5 R3 — ATTRIBUTION légale : overlay PETIT, LÉGER (pastille translucide),
      CENTRÉ sur la bande de contrôles bas, HORS-FLUX (`position:absolute`) → NE
