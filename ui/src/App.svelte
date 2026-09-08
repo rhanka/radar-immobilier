@@ -123,8 +123,18 @@
   // When the chat is docked + open, reserve space on the right so the demo
   // content is never hidden behind the panel.
   $: chatLayout = $chatWidgetLayout;
+  // §5 R3 P2 — en MOBILE (≤639px), chat-ui FORCE le mode docked et publie
+  // `dockWidthCss:"100vw"` : le dock rend un overlay PLEIN-ÉCRAN. Réserver 100vw
+  // ÉCRASE tout le contenu (padding-right:100vw ⇒ largeur de contenu 0) et pousse le
+  // cluster de contrôles carte HORS-ÉCRAN (mesuré x≈-30px). On NE réserve donc
+  // l'espace QUE lorsque le dock a une largeur PARTIELLE (desktop : 33vw/50vw) ; en
+  // plein-écran, la coexistence du cluster passe par son z-index (GeoCityMapBase,
+  // au-dessus de l'overlay z-50), pas par une réservation de largeur. Desktop (#579)
+  // inchangé : `dockWidthCss` y vaut 33vw/50vw ≠ 100vw → réservation identique.
   $: dockPaddingCss =
-    chatLayout.mode === "docked" && chatLayout.isOpen
+    chatLayout.mode === "docked" &&
+    chatLayout.isOpen &&
+    chatLayout.dockWidthCss !== "100vw"
       ? chatLayout.dockWidthCss
       : "0px";
 
