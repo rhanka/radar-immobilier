@@ -478,6 +478,27 @@ describe("GeoCityMapBase — contrôle « Fond de carte » (§4 R2 : menu Layers
     expect(planOpt.getAttribute("aria-checked")).toBe("true");
     expect(satOpt.getAttribute("aria-checked")).toBe("false");
 
+    // §5 R4 B — markup DS MENU-ROW : chaque option porte une colonne « coche »
+    // RÉSERVÉE (span `.basemap-menu__check`, `aria-hidden`, contenant le glyph
+    // lucide `Check`) + un label span (`.basemap-menu__label`). L'ACTIF n'est PAS
+    // un aplat de couleur : il se marque par la coche (rendue dans la colonne
+    // réservée) + le label weight 500. Le nom accessible reste le libellé SEUL (la
+    // coche est `aria-hidden`), d'où `getByRole(..., { name: "Plan" })` ci-dessus.
+    for (const opt of [planOpt, satOpt]) {
+      const check = opt.querySelector(".basemap-menu__check");
+      const label = opt.querySelector(".basemap-menu__label");
+      expect(check).not.toBeNull();
+      expect(check?.getAttribute("aria-hidden")).toBe("true");
+      expect(check?.querySelector("svg")).not.toBeNull(); // glyph lucide Check
+      expect(label).not.toBeNull();
+    }
+    expect(
+      planOpt.querySelector(".basemap-menu__label")?.textContent,
+    ).toBe("Plan");
+    expect(
+      satOpt.querySelector(".basemap-menu__label")?.textContent,
+    ).toBe("Satellite");
+
     // Sélection Satellite → writer unique onBasemapModeChange (le socle ne persiste pas).
     await fireEvent.click(satOpt);
     expect(onBasemapModeChange).toHaveBeenCalledWith("satellite");
