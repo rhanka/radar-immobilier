@@ -160,12 +160,14 @@ describe("GeoCityMapBase — §5 R3 P1+P3 : menu Layers s'ouvre (fixed) + attrib
     expect(popoverBlock).toContain('placement="top-end"');
   });
 
-  it("P1+P3 position — la règle CSS recale le panneau DS en position: fixed (spécificité double-classe)", () => {
-    // Sélecteur à double classe (0,2,0 > `.st-menuPopover` 0,1,0) → gagne sur le
-    // `position: absolute` du DS SANS `!important` et indépendamment de l'ordre
-    // d'injection des feuilles de style.
+  it("P1+P3 position — la règle CSS recale le panneau DS en position: fixed !important (la règle DS scopée fait match nul → !important requis)", () => {
+    // La règle DS `.st-menuPopover { position: absolute }` est scopée Svelte au
+    // build (`.st-menuPopover.svelte-<hash>`, spécificité 0,2,0). Le sélecteur à
+    // double classe `.st-menuPopover.geo-basemap-popover` (0,2,0) fait donc match
+    // NUL avec elle → `!important` EST nécessaire pour gagner la cascade (sinon la
+    // règle DS `position: absolute` l'emporte et le panneau reste hors-champ).
     expect(source).toMatch(
-      /:global\(\.st-menuPopover\.geo-basemap-popover\)\s*\{[^}]*position:\s*fixed/,
+      /:global\(\.st-menuPopover\.geo-basemap-popover\)\s*\{[^}]*position:\s*fixed\s*!important/,
     );
   });
 });
