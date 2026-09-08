@@ -1003,7 +1003,7 @@
   }
 </script>
 
-<div class="sel">
+<div class="sel" data-testid="signaux-sel-panel">
   <div class="sel-head">
     <span class="sel-kicker">Sélection</span>
     {#if selectedCity}

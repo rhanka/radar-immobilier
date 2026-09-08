@@ -25,6 +25,7 @@
   import RapportView from "$lib/components/rapport/RapportView.svelte";
   import PalierMatrix from "$lib/palier/PalierMatrix.svelte";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
+  import { acquireChatTrigger } from "$lib/chat/chat-trigger";
   import { setChatContext } from "$lib/chat/chat-context";
   import type { SignalT } from "@radar/domain";
   import { authStore } from "$lib/auth/auth-store.js";
@@ -122,10 +123,41 @@
   // When the chat is docked + open, reserve space on the right so the demo
   // content is never hidden behind the panel.
   $: chatLayout = $chatWidgetLayout;
+  // §5 R3 P2 — en MOBILE (≤639px), chat-ui FORCE le mode docked et publie
+  // `dockWidthCss:"100vw"` : le dock rend un overlay PLEIN-ÉCRAN. Réserver 100vw
+  // ÉCRASE tout le contenu (padding-right:100vw ⇒ largeur de contenu 0) et pousse le
+  // cluster de contrôles carte HORS-ÉCRAN (mesuré x≈-30px). On NE réserve donc
+  // l'espace QUE lorsque le dock a une largeur PARTIELLE (desktop : 33vw/50vw) ; en
+  // plein-écran, la coexistence du cluster passe par son z-index (GeoCityMapBase,
+  // au-dessus de l'overlay z-50), pas par une réservation de largeur. Desktop (#579)
+  // inchangé : `dockWidthCss` y vaut 33vw/50vw ≠ 100vw → réservation identique.
   $: dockPaddingCss =
-    chatLayout.mode === "docked" && chatLayout.isOpen
+    chatLayout.mode === "docked" &&
+    chatLayout.isOpen &&
+    chatLayout.dockWidthCss !== "100vw"
       ? chatLayout.dockWidthCss
       : "0px";
+
+  // ── §5 R2 point 2 — bulle de chat masquée sur la vue Signaux ────────────────
+  // Sur les routes Signaux, le déclencheur du chat est le bouton CARRÉ de la
+  // rangée de contrôles carte (SignauxMapView → slot socle) : on SUPPRIME donc la
+  // bulle ronde flottante globale pour ne pas avoir DEUX déclencheurs. Mécanisme
+  // UNIQUE : le store #564 (`acquireChatTrigger`, ref-compté → robuste aux
+  // transitions de route). Les AUTRES vues gardent la bulle actuelle inchangée.
+  let releaseChatBubble: (() => void) | undefined;
+  function syncChatBubbleSuppression(onSignaux: boolean): void {
+    if (onSignaux && !releaseChatBubble) {
+      releaseChatBubble = acquireChatTrigger();
+    } else if (!onSignaux && releaseChatBubble) {
+      releaseChatBubble();
+      releaseChatBubble = undefined;
+    }
+  }
+  // Dépend UNIQUEMENT de `activeView` (les seules vues qui montent SignauxMapView
+  // sont « signaux » et le deep-link legacy « carte-signaux » — cf. App template).
+  $: syncChatBubbleSuppression(
+    activeView === "signaux" || activeView === "carte-signaux",
+  );
 
   // ── Guard auth ────────────────────────────────────────────────────────────
   // Quand l'utilisateur n'est pas authentifié et que l'auth est activée, on
@@ -169,6 +201,8 @@
   onDestroy(() => {
     cleanupRouter?.();
     cleanupBetaShortcut?.();
+    // §5 R2 — libère la suppression de bulle #564 si App est détruit sur Signaux.
+    releaseChatBubble?.();
   });
 </script>
 
