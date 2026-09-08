@@ -31,6 +31,11 @@
     chatBubbleSuppressed,
     chatToggleNonce,
   } from "$lib/chat/chat-trigger";
+  // Feature-flag chat (décision owner 2026-09-07) : DÉFAUT OFF. Quand OFF, ce host
+  // ne rend RIEN (ni dock, ni dialog, ni bulle) → le chat est retiré de la vue.
+  // ON (VITE_CHAT_ENABLED="true") ré-active tout le chrome Lot 2, à l'identique.
+  import { isChatEnabled } from "$lib/chat/chat-feature";
+  const chatEnabled = isChatEnabled();
 
   // Ancré par défaut (ÉV9). `displayMode` reste piloté par l'hôte pour
   // readDisplayMode/persistDisplayMode ; ChatDock le consomme + publie le layout.
@@ -144,12 +149,18 @@
   </div>
 {/snippet}
 
-<ChatDock
-  bind:this={dock}
-  displayMode={effectiveDisplayMode}
-  {isBrowser}
-  onDisplayModeChange={setDisplayMode}
-  dialogAriaLabel="Assistant radar"
-  {renderBubble}
-  {renderContent}
-/>
+<!-- GATE (décision owner 2026-09-07) : chat DÉSACTIVÉ par défaut → aucun rendu
+     (bouton/bulle/widget absents). Le code Lot 2 ci-dessus est GARDÉ, seulement
+     gaté ici ; flag ON ré-active tout. App.svelte monte toujours ce host : quand
+     OFF il rend simplement rien (aucune modif d'App.svelte nécessaire). -->
+{#if chatEnabled}
+  <ChatDock
+    bind:this={dock}
+    displayMode={effectiveDisplayMode}
+    {isBrowser}
+    onDisplayModeChange={setDisplayMode}
+    dialogAriaLabel="Assistant radar"
+    {renderBubble}
+    {renderContent}
+  />
+{/if}
