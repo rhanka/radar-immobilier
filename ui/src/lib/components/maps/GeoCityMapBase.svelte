@@ -2081,11 +2081,18 @@
   </div>
 
   <!-- ── Contrôles carte (BAS-droit) : §5.1 — RANGÉE [Mesure | Fond de carte].
-       Mobile-first : `bottom-20` (au-dessus de la bulle de chat bas-droit),
-       `md:bottom-10` (2,5 rem réservés au-dessus de la bande d'attribution).
+       Mobile-first : `bottom-20` (au-dessus de la bulle de chat bas-droit).
+       §5 R5 — desktop : `md:bottom-3` (0.75 rem) ANCRE la rangée AU BORD BAS, juste
+       AU-DESSUS de l'attribution centrée (`.map-attribution`, desktop `bottom:0.5rem`)
+       SANS la recouvrir → BANDE COHÉRENTE (légende bas-gauche · mesure+layers
+       bas-droit · attribution bas-centre). R4 laissait la rangée à `md:bottom-10`
+       (2,5 rem = 40 px) alors que l'attribution était descendue à 8 px → icônes
+       flottant trop haut (owner : « décalé openstreetmap mais pas les icônes »).
+       Mesuré en repro chromium 1280×720 : bas rangée 708 px / bas attribution 712 px
+       (4 px au-dessus, aucun chevauchement bbox). Offset = source-gap owner-visual.
        `flex-col-reverse` → les panneaux (mesure / indisponibilité) s'ouvrent vers
        le HAUT, au-dessus de la rangée de boutons. -->
-  <div class="map-control-cluster absolute bottom-20 md:bottom-10 right-3 z-10 flex flex-col-reverse items-end gap-2">
+  <div class="map-control-cluster absolute bottom-20 md:bottom-3 right-3 z-10 flex flex-col-reverse items-end gap-2">
     <!-- §5.1 R2 — RANGÉE UNIFORME : chaque contrôle est un enfant DIRECT, un seul
          gap (token `--st-spacing`, source-gap à ratifier owner en recette), aucune
          marge horizontale par enfant, aucun gap imbriqué. Ordre : Mesure → Fond de
@@ -2286,10 +2293,12 @@
   {#if $$slots["overlay-bottom-left"] || legend}
     <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (§6 R2 =
          lucide `Map`) ; tap = déplie. `flex-col-reverse` → le bouton reste en bas,
-         le panneau s'ouvre vers le HAUT (même ancrage `bottom-20 md:bottom-10` que
-         la rangée bas-droit → Légende et Mesure alignées). Cible : légendes
-         lot/zones (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
-    <div class="absolute bottom-20 md:bottom-10 left-3 z-10 flex flex-col-reverse items-start gap-2">
+         le panneau s'ouvre vers le HAUT. §5 R5 — même ancrage `bottom-20 md:bottom-3`
+         que la rangée bas-droit → Légende (bas-gauche) et Mesure (bas-droit) restent
+         SYMÉTRIQUES et forment la BANDE COHÉRENTE avec l'attribution centrée
+         (desktop au bord bas, source-gap owner-visual). Cible : légendes lot/zones
+         (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
+    <div class="absolute bottom-20 md:bottom-3 left-3 z-10 flex flex-col-reverse items-start gap-2">
       <button
         type="button"
         class="map-ctrl-btn"
@@ -2442,8 +2451,10 @@
   }
   @media (min-width: 768px) {
     .map-attribution {
-      /* Desktop : au BORD BAS de la carte (owner-visual), sous la rangée de
-         contrôles (elle-même à md:bottom-10). source-gap à figer owner-visual. */
+      /* Desktop : au BORD BAS de la carte (owner-visual, 8 px). §5 R5 — les 2
+         clusters descendent à `md:bottom-3` (12 px) → l'attribution s'aligne juste
+         SOUS eux, formant la bande cohérente bas-gauche/bas-centre/bas-droite (bas
+         attribution 712 px vs bas clusters 708 px, mesuré). source-gap owner-visual. */
       bottom: 0.5rem;
     }
   }

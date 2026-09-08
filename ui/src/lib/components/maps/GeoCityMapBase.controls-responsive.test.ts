@@ -7,8 +7,9 @@
  * `SourceCoverageMap.test.ts`) ; son rendu réel est couvert par l'e2e. Ce guard
  * lit donc la SOURCE et prouve la structure DOM cible du §5.1 R2 :
  *   - les DEUX conteneurs bas partagent l'ancrage `bottom-20` (mobile, au-dessus
- *     de la bulle de chat) ET `md:bottom-10` (desktop, 2,5 rem au-dessus de
- *     l'attribution — remplace l'ancien `md:bottom-3`) ;
+ *     de la bulle de chat) ET `md:bottom-3` (§5 R5 desktop : ancré au BORD BAS,
+ *     juste au-dessus de l'attribution centrée → BANDE COHÉRENTE ; remplace le
+ *     `md:bottom-10` de R4 qui laissait les icônes flottant trop haut) ;
  *   - les deux passent en `flex-col-reverse` (panneaux ouverts vers le HAUT,
  *     boutons alignés sur la même ligne basse) ;
  *   - la RANGÉE `map-control-row` porte UN seul gap (token `--st-spacing`), aucun
@@ -59,19 +60,19 @@ function controlContainer(sideAnchor: string, flexAnchor: string): string {
 }
 
 describe("GeoCityMapBase — contrôles bas (§5.1 R2) rangée uniforme + menu Layers + icône Map", () => {
-  it("le conteneur MESURE (droite) porte bottom-20 ET md:bottom-10, flex-col-reverse", () => {
+  it("le conteneur MESURE (droite) porte bottom-20 ET md:bottom-3, flex-col-reverse", () => {
     const div = controlContainer("right-3", "items-end");
     expect(div).toContain("bottom-20"); // mobile préservé
-    expect(div).toContain("md:bottom-10"); // desktop : au-dessus de l'attribution
-    expect(div).not.toContain("md:bottom-3"); // l'ancien ancrage a disparu
+    expect(div).toContain("md:bottom-3"); // §5 R5 desktop : ancré au bord bas (bande cohérente)
+    expect(div).not.toContain("md:bottom-10"); // l'ancrage R4 (trop haut) a disparu
     expect(div).toContain("flex-col-reverse"); // panneaux ouverts vers le haut
   });
 
-  it("le conteneur LÉGENDE (gauche) porte bottom-20 ET md:bottom-10, flex-col-reverse", () => {
+  it("le conteneur LÉGENDE (gauche) porte bottom-20 ET md:bottom-3, flex-col-reverse", () => {
     const div = controlContainer("left-3", "items-start");
     expect(div).toContain("bottom-20");
-    expect(div).toContain("md:bottom-10");
-    expect(div).not.toContain("md:bottom-3");
+    expect(div).toContain("md:bottom-3"); // §5 R5 : symétrique du cluster droit
+    expect(div).not.toContain("md:bottom-10");
     expect(div).toContain("flex-col-reverse"); // bouton en bas, panneau au-dessus
   });
 
