@@ -100,3 +100,81 @@ for (const vp of [
     ).toBeLessThanOrEqual(2);
   });
 }
+
+/**
+ * §5 R4 B — les ITEMS du menu « Fond de carte » suivent les tokens DS MENU-ROW.
+ *
+ * Feedback owner : l'option ACTIVE s'affichait en « bleu plein basique » (aplat
+ * `background: action-primary` + texte blanc). La recette DS (groundée
+ * `Menu.svelte`) proscrit tout aplat de sélection (aucun token surface-selected
+ * au DS) : l'ACTIF se marque par un glyph lucide `Check` (accent
+ * `--st-semantic-action-primary`) dans une colonne RÉSERVÉE (Plan/Satellite
+ * alignés) + un label `--st-semantic-text-primary` weight 500. Surface PUREMENT
+ * DOM/CSS (indépendante de MapLibre/WebGL).
+ */
+test.describe("§5 R4 B — items du menu Fond de carte aux tokens DS menu-row", () => {
+  test("actif = coche (pas d'aplat bleu, texte NON blanc) ; inactif = coche masquée ; labels alignés", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(HARNESS);
+    await expect(page.locator("#ready")).toHaveText("ready");
+
+    await page.locator('[data-testid="basemap-menu-trigger"]').click();
+    const plan = page.locator('[data-testid="basemap-option-plan"]');
+    const sat = page.locator('[data-testid="basemap-option-satellite"]');
+    await expect(plan).toBeVisible();
+    await expect(sat).toBeVisible();
+    // Défaut mode = "plan" → Plan est l'option ACTIVE.
+    await expect(plan).toHaveAttribute("aria-checked", "true");
+    await expect(sat).toHaveAttribute("aria-checked", "false");
+
+    const probe = await page.evaluate(() => {
+      const plan = document.querySelector('[data-testid="basemap-option-plan"]') as HTMLElement;
+      const sat = document.querySelector('[data-testid="basemap-option-satellite"]') as HTMLElement;
+      const checkVis = (el: HTMLElement) => {
+        const c = el.querySelector(".basemap-menu__check") as HTMLElement | null;
+        return c ? getComputedStyle(c).visibility : "missing";
+      };
+      const labelX = (el: HTMLElement) => {
+        const l = el.querySelector(".basemap-menu__label") as HTMLElement | null;
+        return l ? Math.round(l.getBoundingClientRect().x) : NaN;
+      };
+      const labelWeight = (el: HTMLElement) => {
+        const l = el.querySelector(".basemap-menu__label") as HTMLElement | null;
+        return l ? getComputedStyle(l).fontWeight : "missing";
+      };
+      // Couleur ACTION-PRIMARY résolue par le thème (pour prouver que l'actif NE
+      // porte PAS cet aplat) via un élément-sonde.
+      const s = document.createElement("div");
+      s.style.background = "var(--st-semantic-action-primary)";
+      document.body.appendChild(s);
+      const actionPrimary = getComputedStyle(s).backgroundColor;
+      s.remove();
+      return {
+        planCheckVis: checkVis(plan),
+        satCheckVis: checkVis(sat),
+        planLabelX: labelX(plan),
+        satLabelX: labelX(sat),
+        planLabelWeight: labelWeight(plan),
+        satLabelWeight: labelWeight(sat),
+        planBg: getComputedStyle(plan).backgroundColor,
+        planColor: getComputedStyle(plan).color,
+        actionPrimary,
+      };
+    });
+
+    // ACTIF : coche VISIBLE ; INACTIF : coche MASQUÉE (colonne réservée → alignement).
+    expect(probe.planCheckVis, "coche de l'option active visible").toBe("visible");
+    expect(probe.satCheckVis, "coche de l'option inactive masquée").toBe("hidden");
+    // Colonne « coche » réservée → les DEUX labels démarrent au même x.
+    expect(Math.abs(probe.planLabelX - probe.satLabelX)).toBeLessThanOrEqual(1);
+    // Label actif en weight 500 ; inactif en poids normal.
+    expect(probe.planLabelWeight).toBe("500");
+    expect(["400", "normal"]).toContain(probe.satLabelWeight);
+    // PAS d'aplat « bleu plein » : le fond de l'actif N'EST PAS action-primary, et
+    // le texte N'EST PAS blanc (l'ancien aplat posait texte blanc sur fond bleu).
+    expect(probe.planBg, "actif sans aplat action-primary").not.toBe(probe.actionPrimary);
+    expect(probe.planColor, "texte de l'actif non blanc").not.toBe("rgb(255, 255, 255)");
+  });
+});
