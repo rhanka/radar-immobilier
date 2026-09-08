@@ -125,7 +125,7 @@
   // constructeur JS `Map` utilisé dans ce fichier). `ListTree` et `Satellite` sont
   // retirés avec les deux boutons #646 ; le contrôle de fond est désormais un menu
   // DS (un seul trigger lucide `Layers`, cf. §4 R2).
-  import { Map as MapIcon, Ruler } from "@lucide/svelte";
+  import { Check, Map as MapIcon, Ruler } from "@lucide/svelte";
   import {
     Icon,
     MenuPopover,
@@ -2166,23 +2166,29 @@
         >
           <button
             type="button"
-            class="basemap-menu-item"
+            class="basemap-menu__item"
             role="menuitemradio"
             aria-checked={basemapMode === "plan"}
             data-testid="basemap-option-plan"
             onclick={() => selectBasemap("plan")}
           >
-            Plan
+            <span class="basemap-menu__check" aria-hidden="true">
+              <Check size={16} strokeWidth={2} />
+            </span>
+            <span class="basemap-menu__label">Plan</span>
           </button>
           <button
             type="button"
-            class="basemap-menu-item"
+            class="basemap-menu__item"
             role="menuitemradio"
             aria-checked={basemapMode === "satellite"}
             data-testid="basemap-option-satellite"
             onclick={() => selectBasemap("satellite")}
           >
-            Satellite
+            <span class="basemap-menu__check" aria-hidden="true">
+              <Check size={16} strokeWidth={2} />
+            </span>
+            <span class="basemap-menu__label">Satellite</span>
           </button>
         </div>
       </MenuPopover>
@@ -2402,17 +2408,23 @@
       z-index: 60;
     }
   }
-  /* §5 R3 — ATTRIBUTION légale : overlay PETIT, LÉGER (pastille translucide),
-     CENTRÉ sur la bande de contrôles bas, HORS-FLUX (`position:absolute`) → NE
-     décale RIEN et ne prend aucun espace dans la rangée. Aligné verticalement sur
-     la rangée de contrôles (`bottom-20` mobile / `md:bottom-10` desktop). Les
-     valeurs fines (taille exacte, position centrée précise, opacité, max-width) =
-     source-gap à figer owner-visual — choisies raisonnables et non décalantes. */
+  /* §5 R3/R4 — ATTRIBUTION légale : overlay PETIT, LÉGER (pastille translucide),
+     CENTRÉ horizontalement, ANCRÉ EN BAS de la carte, HORS-FLUX
+     (`position:absolute`) → NE décale RIEN et ne prend aucun espace dans la rangée.
+     `position:absolute` (et NON `fixed`) : l'overlay suit la CARTE (socle
+     réutilisable, potentiellement non plein-viewport) et reste dans le contexte de
+     la racine — l'offsetParent EST la racine `.relative h-full w-full` (mesuré en
+     repro : plein-hauteur, l'ancrage `bottom` porte donc bien sur le BAS de la
+     carte, pas de piège offsetParent ici). §5 R4 — sur desktop l'overlay est
+     descendu au BORD BAS de la carte (owner : « trop haute » quand il flottait à
+     2.5rem, au niveau de la rangée de contrôles) ; il passe SOUS cette rangée.
+     Valeurs fines (offset bas exact, taille, opacité, max-width) = source-gap à
+     figer owner-visual. */
   .map-attribution {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 5rem; /* = bottom-20 (mobile) — source-gap à figer owner-visual */
+    bottom: 5rem; /* = bottom-20 (mobile, au-dessus de la rangée) — source-gap owner-visual */
     z-index: 10;
     /* Bornage : ne chevauche ni les icônes bas-droite ni la bulle de chat. */
     max-width: calc(100% - 7rem); /* source-gap à figer owner-visual */
@@ -2430,7 +2442,9 @@
   }
   @media (min-width: 768px) {
     .map-attribution {
-      bottom: 2.5rem; /* = md:bottom-10 (desktop) */
+      /* Desktop : au BORD BAS de la carte (owner-visual), sous la rangée de
+         contrôles (elle-même à md:bottom-10). source-gap à figer owner-visual. */
+      bottom: 0.5rem;
     }
   }
   .map-attribution a {
@@ -2464,35 +2478,58 @@
   :global(.st-menuPopover.geo-basemap-popover) {
     position: fixed !important;
   }
-  /* §4 R2 — menu « Fond de carte » (contenu du popover DS) : options radio. */
+  /* §5 R4 B — items du menu « Fond de carte » aux tokens DS MENU-ROW (recette
+     design-system, groundée `Menu.svelte`). Le PANNEAU (surface / bord / ombre /
+     rayon) est DÉJÀ porté par le popover DS (`.st-menuPopover`) : on ne pose ici que
+     le padding interne + la mise en page des lignes (aucun double-chrome). L'ACTIF
+     n'est JAMAIS un aplat de couleur (aucun token surface-selected au DS — c'est
+     l'ancien « bleu plein » retiré) : il se marque par le glyph lucide `Check`
+     (accent `--st-semantic-action-primary`) en tête d'une colonne RÉSERVÉE
+     (Plan/Satellite alignés) + le label en `--st-semantic-text-primary` weight 500. */
   .basemap-menu {
     display: flex;
     flex-direction: column;
-    padding: 0.25rem;
+    padding: var(--st-spacing-1, 0.25rem);
   }
-  .basemap-menu-item {
+  .basemap-menu__item {
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 0.375rem 0.75rem;
+    gap: var(--st-spacing-2, 0.5rem);
+    padding: var(--st-spacing-2, 0.5rem) var(--st-spacing-3, 0.75rem);
     border: none;
-    border-radius: var(--st-component-menu-radius, 0.375rem);
+    border-radius: var(--st-radius-sm, 0.25rem);
     background: transparent;
     color: var(--st-component-menu-text, var(--st-semantic-text-primary, #0f172a));
     font: inherit;
+    font-size: var(--st-component-menu-fontSize, 0.875rem);
     text-align: left;
     cursor: pointer;
   }
-  .basemap-menu-item:hover {
-    background: var(--st-component-control-hoverBackground, var(--st-semantic-surface-hover, #f1f5f9));
+  .basemap-menu__item:hover,
+  .basemap-menu__item:focus-visible {
+    background: var(
+      --st-component-control-hoverBackground,
+      var(--st-semantic-surface-subtle, #f8fafc)
+    );
+    outline: none;
   }
-  .basemap-menu-item[aria-checked="true"] {
-    background: var(--st-semantic-action-primary, #2563eb);
-    color: var(--st-semantic-action-primaryText, #fff);
+  /* Colonne « coche » RÉSERVÉE : le glyph (16px) est toujours dans le flux mais
+     masqué tant que la ligne n'est pas active → Plan et Satellite restent alignés. */
+  .basemap-menu__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    visibility: hidden;
+    color: var(--st-semantic-action-primary, #2563eb);
   }
-  .basemap-menu-item:focus-visible {
-    outline: var(--st-component-button-anatomy-focus-outline, 2px solid #2563eb);
-    outline-offset: var(--st-component-button-anatomy-focus-outlineOffset, -2px);
+  .basemap-menu__item[aria-checked="true"] .basemap-menu__check {
+    visibility: visible;
+  }
+  .basemap-menu__item[aria-checked="true"] .basemap-menu__label {
+    color: var(--st-semantic-text-primary, #0f172a);
+    font-weight: 500;
   }
   /* §5.3 — notice de repli OSM (role="status" aria-live="polite"). */
   .basemap-fallback {

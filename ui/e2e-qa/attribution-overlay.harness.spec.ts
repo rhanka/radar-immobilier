@@ -95,3 +95,48 @@ test.describe("§5 R3 — attribution overlay léger contextuel (390×844)", () 
     expect(box.y + box.height).toBeGreaterThanOrEqual(VIEWPORT.height - 1);
   });
 });
+
+/**
+ * §5 R4 A — ATTRIBUTION ANCRÉE EN BAS de la carte en DESKTOP.
+ *
+ * Feedback owner (img 32) : l'overlay flottait trop HAUT en desktop (au niveau de
+ * la rangée de contrôles, à 2.5rem) → il doit être EN BAS de la carte. Repro
+ * harness/debug (chaîne ViewLayout fidèle, 1280×720) : l'offsetParent EST la
+ * racine plein-hauteur `.relative h-full w-full` (PAS de piège offsetParent : le
+ * `bottom` porte bien sur le BAS de la carte) ; l'overlay était simplement ancré à
+ * 2.5rem. Fix : desktop ancré au BORD BAS (0.5rem), sous la rangée de contrôles.
+ * On mesure ici, en desktop, la distance overlay→bas-de-carte (faible) + le
+ * centrage horizontal + `position: absolute` (suit la CARTE, pas le viewport).
+ */
+test.describe("§5 R4 A — attribution ancrée EN BAS (desktop 1280×720)", () => {
+  const DESKTOP = { width: 1280, height: 720 };
+
+  test("overlay au bord BAS de la carte, centré, position absolue", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(HARNESS);
+    await expect(page.locator("#ready")).toHaveText("ready");
+    await page.waitForTimeout(300);
+
+    const overlay = page.locator('[data-testid="map-attribution"]');
+    const base = page.locator('[data-testid="geo-city-map-base"]');
+    await expect(overlay).toBeVisible();
+    await expect(overlay).toHaveCSS("position", "absolute");
+
+    const ob = await overlay.boundingBox();
+    const bb = await base.boundingBox();
+    if (!ob || !bb) throw new Error("bounding box manquante");
+
+    // ANCRÉ EN BAS : le bord bas de l'overlay est PROCHE du bord bas de la carte
+    // (≤ 24px), pas remonté au milieu ni au niveau de la rangée (~40px+).
+    const distFromMapBottom = bb.y + bb.height - (ob.y + ob.height);
+    expect(distFromMapBottom, "overlay proche du bas de la carte").toBeLessThanOrEqual(24);
+    expect(distFromMapBottom, "overlay au-dessus du bord bas (dans la carte)").toBeGreaterThanOrEqual(0);
+    // Dans la MOITIÉ BASSE de la carte (jamais au milieu vertical).
+    expect(ob.y).toBeGreaterThan(bb.y + bb.height / 2);
+
+    // Centré horizontalement sur la carte (± 4px).
+    const overlayCenter = ob.x + ob.width / 2;
+    const mapCenter = bb.x + bb.width / 2;
+    expect(Math.abs(overlayCenter - mapCenter)).toBeLessThanOrEqual(4);
+  });
+});
