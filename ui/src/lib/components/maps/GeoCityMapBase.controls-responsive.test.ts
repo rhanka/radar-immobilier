@@ -20,7 +20,8 @@
  *   - le contrôle de fond est UN seul trigger DS `Layers` (menu vers le haut,
  *     `top-end`) à deux options radio, plus les deux boutons #646 (§4 R2) ;
  *   - le glyph de légende est lucide `Map` (`MapIcon`), plus `ListTree` (§6 R2) ;
- *   - l'attribution satellite est ajoutée en `"bottom-right"` (§5.3 point 1).
+ *   - §5 R3 : l'attribution est un overlay LÉGER contextuel hors-flux
+ *     (`.map-attribution`), plus AUCUN contrôle MapLibre `addControl` bas-droite.
  *
  * Pur : aucun Docker, aucune API, aucun composant Svelte monté — lecture fichier.
  */
@@ -115,8 +116,20 @@ describe("GeoCityMapBase — contrôles bas (§5.1 R2) rangée uniforme + menu L
     expect(source).not.toContain("Satellite as SatelliteIcon");
   });
 
-  it("l'attribution satellite est ancrée « bottom-right » (bande réservée §5.3)", () => {
-    expect(source).toContain('"bottom-right"');
+  it("§5 R3 — l'attribution est un overlay LÉGER contextuel hors-flux (plus de contrôle MapLibre bas-droite)", () => {
+    // L'attribution provider satellite n'est PLUS ajoutée via un contrôle MapLibre
+    // `map.addControl(…, "bottom-right")` : elle alimente le MÊME overlay léger que
+    // la mention OSM. On verrouille la structure cible (aucune ré-introduction).
+    expect(source).toContain('data-testid="map-attribution"');
+    expect(source).toContain("data-attribution-layer");
+    // Contextuel : mention OSM en plan/repli, texte provider dynamique en satellite.
+    expect(source).toContain("OpenStreetMap");
+    expect(source).toContain("satelliteAttributionText");
+    // Overlay HORS-FLUX : position:absolute → NE prend pas d'espace / NE décale rien.
+    expect(source).toMatch(/\.map-attribution\s*\{[^}]*position:\s*absolute/);
+    // Plus AUCUN `map.addControl(...)` (l'unique usage — attribution sat — a disparu).
+    expect(source).not.toContain(".addControl(");
+    expect(source).not.toContain('"bottom-right"');
   });
 });
 
@@ -147,12 +160,14 @@ describe("GeoCityMapBase — §5 R3 P1+P3 : menu Layers s'ouvre (fixed) + attrib
     expect(popoverBlock).toContain('placement="top-end"');
   });
 
-  it("P1+P3 position — la règle CSS recale le panneau DS en position: fixed (spécificité double-classe)", () => {
-    // Sélecteur à double classe (0,2,0 > `.st-menuPopover` 0,1,0) → gagne sur le
-    // `position: absolute` du DS SANS `!important` et indépendamment de l'ordre
-    // d'injection des feuilles de style.
+  it("P1+P3 position — la règle CSS recale le panneau DS en position: fixed !important (la règle DS scopée fait match nul → !important requis)", () => {
+    // La règle DS `.st-menuPopover { position: absolute }` est scopée Svelte au
+    // build (`.st-menuPopover.svelte-<hash>`, spécificité 0,2,0). Le sélecteur à
+    // double classe `.st-menuPopover.geo-basemap-popover` (0,2,0) fait donc match
+    // NUL avec elle → `!important` EST nécessaire pour gagner la cascade (sinon la
+    // règle DS `position: absolute` l'emporte et le panneau reste hors-champ).
     expect(source).toMatch(
-      /:global\(\.st-menuPopover\.geo-basemap-popover\)\s*\{[^}]*position:\s*fixed/,
+      /:global\(\.st-menuPopover\.geo-basemap-popover\)\s*\{[^}]*position:\s*fixed\s*!important/,
     );
   });
 });
