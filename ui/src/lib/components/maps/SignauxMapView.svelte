@@ -29,6 +29,7 @@
   // est lu depuis le layout publié par le dock (`chatWidgetLayout.isOpen`).
   import { MessageSquare } from "@lucide/svelte";
   import { requestChatToggle } from "$lib/chat/chat-trigger";
+  import { isChatEnabled } from "$lib/chat/chat-feature";
   import { chatWidgetLayout } from "$lib/chat/chat-widget-layout";
   import { isSatelliteBasemapEnabled } from "$lib/maps/geo-sat-basemap.js";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -306,6 +307,10 @@
   // `aria-expanded` du bouton chat. Lecture seule : l'ouverture/fermeture reste
   // pilotée par le store #564 (`requestChatToggle`), jamais dupliquée ici.
   $: chatOpen = $chatWidgetLayout.isOpen;
+  // Feature-flag chat (décision owner 2026-09-07) : DÉFAUT OFF, gate le déclencheur.
+  // Constante build-time (VITE_CHAT_ENABLED) : OFF ⇒ le bouton n'est pas rendu ; le
+  // reste du câblage Lot 2 (store #564, ARIA, layout) est GARDÉ intact → réversible.
+  const chatEnabled = isChatEnabled();
 
   // ── §5 2-modes — FOND de carte (PLAN par défaut / SATELLITE switchable) ──────
   // ADR-0033 — structure 2-modes. Défaut PLAN (aplats REMPLIS sur OSM/neutral,
@@ -2491,18 +2496,23 @@
          existant du dock (`chat-dock-dialog`). La bulle ronde locale est masquée
          sur cette vue (suppression #564 posée par App.svelte). -->
     <svelte:fragment slot="controls-bottom-right-end">
-      <IconButton
-        size="sm"
-        variant="secondary"
-        aria-haspopup="dialog"
-        aria-controls="chat-dock-dialog"
-        aria-expanded={chatOpen}
-        aria-label={chatOpen ? "Fermer la conversation" : "Ouvrir la conversation"}
-        data-testid="chat-toggle"
-        onclick={() => requestChatToggle()}
-      >
-        <MessageSquare size={18} aria-hidden="true" />
-      </IconButton>
+      <!-- GATE (décision owner 2026-09-07) : le bouton n'est rendu que si le flag
+           chat est ON (`chatEnabled`) ; OFF (défaut) ⇒ ABSENT. Le fragment reste
+           présent (rien à afficher) et TOUT le câblage Lot 2 est GARDÉ → réversible. -->
+      {#if chatEnabled}
+        <IconButton
+          size="sm"
+          variant="secondary"
+          aria-haspopup="dialog"
+          aria-controls="chat-dock-dialog"
+          aria-expanded={chatOpen}
+          aria-label={chatOpen ? "Fermer la conversation" : "Ouvrir la conversation"}
+          data-testid="chat-toggle"
+          onclick={() => requestChatToggle()}
+        >
+          <MessageSquare size={18} aria-hidden="true" />
+        </IconButton>
+      {/if}
     </svelte:fragment>
 
     <!-- C1 — LÉGENDES SUR LA CARTE (comme la vue Sources), plus dans le rail.
