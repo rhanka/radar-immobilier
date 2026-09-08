@@ -2081,7 +2081,9 @@
   </div>
 
   <!-- ── Contrôles carte (BAS-droit) : §5.1 — RANGÉE [Mesure | Fond de carte].
-       Mobile-first : `bottom-20` (au-dessus de la bulle de chat bas-droit).
+       §5 R6 — `bottom-3` UNIFORME mobile+desktop (12 px). Le dégagement `bottom-20`
+       (80 px, ancien espace de la bulle de chat) n'a plus lieu d'être — chat désactivé
+       (#651) — d'où la « marge basse trop grande » responsive (owner [img 36]) : corrigée.
        §5 R5 — desktop : `md:bottom-3` (0.75 rem) ANCRE la rangée AU BORD BAS, juste
        AU-DESSUS de l'attribution centrée (`.map-attribution`, desktop `bottom:0.5rem`)
        SANS la recouvrir → BANDE COHÉRENTE (légende bas-gauche · mesure+layers
@@ -2092,7 +2094,7 @@
        (4 px au-dessus, aucun chevauchement bbox). Offset = source-gap owner-visual.
        `flex-col-reverse` → les panneaux (mesure / indisponibilité) s'ouvrent vers
        le HAUT, au-dessus de la rangée de boutons. -->
-  <div class="map-control-cluster absolute bottom-20 md:bottom-3 right-3 z-10 flex flex-col-reverse items-end gap-2">
+  <div class="map-control-cluster absolute bottom-3 md:bottom-3 right-3 z-10 flex flex-col-reverse items-end gap-2">
     <!-- §5.1 R2 — RANGÉE UNIFORME : chaque contrôle est un enfant DIRECT, un seul
          gap (token `--st-spacing`, source-gap à ratifier owner en recette), aucune
          marge horizontale par enfant, aucun gap imbriqué. Ordre : Mesure → Fond de
@@ -2293,12 +2295,12 @@
   {#if $$slots["overlay-bottom-left"] || legend}
     <!-- Responsive : légendes REPLIÉES par défaut derrière une icône (§6 R2 =
          lucide `Map`) ; tap = déplie. `flex-col-reverse` → le bouton reste en bas,
-         le panneau s'ouvre vers le HAUT. §5 R5 — même ancrage `bottom-20 md:bottom-3`
+         le panneau s'ouvre vers le HAUT. §5 R5/R6 — même ancrage `bottom-3 md:bottom-3` (uniforme 12px)
          que la rangée bas-droit → Légende (bas-gauche) et Mesure (bas-droit) restent
          SYMÉTRIQUES et forment la BANDE COHÉRENTE avec l'attribution centrée
          (desktop au bord bas, source-gap owner-visual). Cible : légendes lot/zones
          (slot overlay-bottom-left) + légende paramétrable (prop `legend`). -->
-    <div class="absolute bottom-20 md:bottom-3 left-3 z-10 flex flex-col-reverse items-start gap-2">
+    <div class="absolute bottom-3 md:bottom-3 left-3 z-10 flex flex-col-reverse items-start gap-2">
       <button
         type="button"
         class="map-ctrl-btn"
@@ -2433,7 +2435,10 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: 5rem; /* = bottom-20 (mobile, au-dessus de la rangée) — source-gap owner-visual */
+    bottom: 0.5rem; /* §5 R6 — au BORD BAS mobile ET desktop (~8px, owner-visual). L'ancien
+       5rem (au-dessus de l'ancienne rangée à bottom-20) n'a plus lieu d'être : les clusters
+       sont à bottom-3 → bande cohérente (légende bas-gauche · attribution bas-centre ·
+       mesure+layers bas-droite) mobile ET desktop. */
     z-index: 10;
     /* Bornage : ne chevauche ni les icônes bas-droite ni la bulle de chat. */
     max-width: calc(100% - 7rem); /* source-gap à figer owner-visual */
@@ -2449,15 +2454,10 @@
     /* Ne capte pas les gestes carte ; le lien légal réactive pointer-events. */
     pointer-events: none;
   }
-  @media (min-width: 768px) {
-    .map-attribution {
-      /* Desktop : au BORD BAS de la carte (owner-visual, 8 px). §5 R5 — les 2
-         clusters descendent à `md:bottom-3` (12 px) → l'attribution s'aligne juste
-         SOUS eux, formant la bande cohérente bas-gauche/bas-centre/bas-droite (bas
-         attribution 712 px vs bas clusters 708 px, mesuré). source-gap owner-visual. */
-      bottom: 0.5rem;
-    }
-  }
+  /* §5 R6 — `bottom` de `.map-attribution` désormais UNIFORME (0.5rem) mobile ET desktop
+     → l'ancien override `@media (min-width: 768px) { bottom: 0.5rem }` (R4/R5) est retiré
+     (redondant depuis que le mobile est aussi à 0.5rem). Bande cohérente : attribution
+     bas-centre à ~8px, sous les clusters à 12px (mesuré desktop : bas attr 712 / clusters 708). */
   .map-attribution a {
     color: inherit;
     text-decoration: underline;
