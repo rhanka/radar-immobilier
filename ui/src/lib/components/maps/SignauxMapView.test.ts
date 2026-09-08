@@ -313,4 +313,18 @@ describe("SignauxMapView — déclencheur chat (câblage source, store #564)", (
     // L'état ouvert est LU depuis le layout publié par le dock (pas dupliqué).
     expect(source).toContain("$chatWidgetLayout.isOpen");
   });
+
+  // ── GATE feature-flag (décision owner 2026-09-07) ──────────────────────────
+  // Le déclencheur (tout le câblage Lot 2 ci-dessus) est GARDÉ mais GATÉ par le
+  // flag chat : OFF par défaut ⇒ le bouton n'est pas rendu. Le rendu réel du slot
+  // n'est atteignable qu'avec le VRAI socle (stubé ici) → on prouve le GATE en
+  // source (parité avec les guards ci-dessus) ; l'ABSENCE réelle quand OFF est
+  // vérifiée en unit (ChatWidgetHost.test.ts, état OFF) et en e2e (chat-disabled).
+  it("le déclencheur chat est GATÉ par le feature-flag (isChatEnabled, défaut OFF)", () => {
+    // Helper flag importé + évalué (constante build-time locale).
+    expect(source).toContain('import { isChatEnabled } from "$lib/chat/chat-feature"');
+    expect(source).toContain("isChatEnabled()");
+    // Le bouton (IconButton chat) est rendu SOUS condition du flag.
+    expect(source).toMatch(/\{#if chatEnabled\}[\s\S]*?data-testid="chat-toggle"[\s\S]*?\{\/if\}/);
+  });
 });

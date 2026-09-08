@@ -6,12 +6,31 @@
  * (ChatDock l'utilise au mount). La parité VISUELLE « 0 changement » est vérifiée
  * au déploiement préprod (owner/i-cond) — cf. option (b).
  */
-import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import { render, fireEvent, cleanup, waitFor } from "@testing-library/svelte";
 import {
   acquireChatTrigger,
   requestChatToggle,
 } from "$lib/chat/chat-trigger";
+
+// Feature-flag chat (décision owner 2026-09-07) : DÉFAUT OFF → ce host ne rend
+// rien sans flag. Les tests de COMPORTEMENT ci-dessous vérifient l'état ACTIVÉ :
+// on force donc le flag ON (VITE_CHAT_ENABLED="true") avant chaque rendu. Un
+// describe dédié plus bas couvre l'état DÉSACTIVÉ (flag OFF ⇒ aucun rendu).
+beforeEach(() => {
+  vi.stubEnv("VITE_CHAT_ENABLED", "true");
+});
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 beforeAll(() => {
   if (typeof window !== "undefined" && !window.matchMedia) {
@@ -136,5 +155,40 @@ describe("ChatWidgetHost — pont hôte↔chat (store #564)", () => {
       const dialog = container.querySelector('[role="dialog"]');
       expect(dialog!.classList.contains("hidden")).toBe(true);
     });
+  });
+});
+
+describe("ChatWidgetHost — chat DÉSACTIVÉ (flag OFF, décision owner 2026-09-07)", () => {
+  // Flag OFF : ce host ne doit RIEN rendre — ni bulle, ni dialog, ni widget. Le
+  // code Lot 2 est GARDÉ (seulement gaté) → flag ON ré-active tout (couvert plus
+  // haut). On surcharge le flag global (mis à ON par le beforeEach) en OFF ici.
+  beforeEach(() => {
+    vi.stubEnv("VITE_CHAT_ENABLED", "false");
+  });
+
+  it("aucune bulle rendue (le déclencheur global est absent)", () => {
+    const { queryByLabelText, queryByTestId } = render(ChatWidgetHost);
+    expect(queryByLabelText("Ouvrir l'assistant radar")).toBeNull();
+    expect(queryByTestId("chat-bubble-trigger")).toBeNull();
+  });
+
+  it("aucun dialog / widget monté, même après une demande de bascule (#564)", async () => {
+    const { container, queryByTestId } = render(ChatWidgetHost);
+    // Un bump du nonce ne doit RIEN ouvrir : le dock n'est pas monté.
+    requestChatToggle();
+    await Promise.resolve();
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(queryByTestId("chat-widget-stub")).toBeNull();
+  });
+
+  it("aucun rendu même quand un hôte fournit son déclencheur (carte)", () => {
+    const release = acquireChatTrigger();
+    try {
+      const { container } = render(ChatWidgetHost);
+      expect(container.querySelector('[role="dialog"]')).toBeNull();
+      expect(container.textContent?.trim()).toBe("");
+    } finally {
+      release();
+    }
   });
 });
