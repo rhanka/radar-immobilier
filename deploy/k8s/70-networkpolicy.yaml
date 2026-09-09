@@ -227,3 +227,37 @@ spec:
       ports:
         - protocol: TCP
           port: 3000
+---
+# ADDITIVE: let the db-backup Job pod reach postgres on :5432.
+#
+# The backup-before-release CD step (deploy/ci/run-db-backup.sh → this Job) runs a
+# pg_dump from a pod labelled `component: db-backup`. Under default-deny, the
+# operator baseline opens {api,graph-projection} -> postgres:5432 but OMITS
+# db-backup, so pg_dump's connection is DROPPED (pg_isready: "no response") and
+# the backup fails fail-closed → the release aborts before migrate. This purely-
+# additive policy opens db-backup -> postgres:5432 so the pre-migration backup can
+# run. (Mirror of allow-graph-projection-to-postgres, scoped to db-backup.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backup-to-postgres
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: postgres
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+              app.kubernetes.io/component: db-backup
+      ports:
+        - protocol: TCP
+          port: 5432
