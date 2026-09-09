@@ -10,6 +10,13 @@ metadata:
 spec:
   backoffLimit: 1
   ttlSecondsAfterFinished: 3600
+  # Hard wall-clock cap on the whole Job (incl. the backoffLimit retry): the
+  # cluster self-terminates a migration that hangs (e.g. an ALTER/CREATE INDEX
+  # blocked on a lock) → the pod is killed and the request actually stops, not
+  # just the CI poller. Kept BELOW the CD migrate poll (600s) so the Job fails
+  # with DeadlineExceeded BEFORE the CI times out, giving the pipeline a clean
+  # `Failed` condition to abort on (the CD step also deletes the Job as a belt).
+  activeDeadlineSeconds: 540
   template:
     metadata:
       labels:

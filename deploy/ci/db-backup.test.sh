@@ -118,6 +118,42 @@ echo "$rmd" | grep -q 'preprod-t2-' && ok "retention: pruned t2"        || bad "
 echo "$rmd" | grep -q 'preprod-t3-' && bad "retention: t3 wrongly pruned" || ok "retention: kept t3"
 echo "$rmd" | grep -q 'preprod-t4-' && bad "retention: t4 wrongly pruned" || ok "retention: kept t4 (newest)"
 
+# 6b. retention orders CHRONOLOGICALLY (by S3 date), NOT lexically by name. Fixture
+#     whose name order (sha-dominated) is INVERTED vs the date order: the
+#     date-NEWEST backup (0004) sorts lexically FIRST, the date-OLDEST (zzz1) sorts
+#     lexically LAST. A lexical prune would delete 0004 (the newest!); the
+#     chronological prune must delete the date-oldest (zzz1, yyy2) and keep 0004.
+LS4B="$(printf '%s\n' \
+  '2024/01/01 00:00:00  10 preprod-zzz1-20240101T000000Z.sql.gz' \
+  '2024/02/01 00:00:00  10 preprod-yyy2-20240201T000000Z.sql.gz' \
+  '2024/03/01 00:00:00  10 preprod-b003-20240301T000000Z.sql.gz' \
+  '2024/04/01 00:00:00  10 preprod-0004-20240401T000000Z.sql.gz')"
+EXTRA="export FAKE_JOB_SUCCEEDED=1; export BACKUP_RETAIN_COUNT=2; export FAKE_S5_LS=$(printf '%q' "$LS4B")"
+run_case retention_chrono; code=$CODE
+eq "$code" 0 "retention_chrono: exit 0"
+rmd="$(rm_calls)"
+echo "$rmd" | grep -q 'preprod-zzz1-' && ok "retention_chrono: pruned date-oldest zzz1 (lexically LAST)" || bad "retention_chrono: zzz1 not pruned"
+echo "$rmd" | grep -q 'preprod-yyy2-' && ok "retention_chrono: pruned yyy2"                               || bad "retention_chrono: yyy2 not pruned"
+echo "$rmd" | grep -q 'preprod-b003-' && bad "retention_chrono: b003 wrongly pruned"                      || ok "retention_chrono: kept b003"
+echo "$rmd" | grep -q 'preprod-0004-' && bad "retention_chrono: 0004 (date-newest, lexically FIRST) WRONGLY pruned" || ok "retention_chrono: kept 0004 (date-newest, lexically first)"
+
+# 6c. the CURRENT backup is NEVER pruned, even if it sorts date-oldest (clock-skew
+#     belt). Pin the current key's timestamp (TS_KEY) so it is deterministic, then
+#     list it as the date-OLDEST object: without the up-front exclusion it would be
+#     the first to be dropped. It must survive; the oldest *other* backup is pruned.
+CUR_TS=20200101T000000Z   # BACKUP_TAG is abc1234 (run_case default) → cur = preprod-abc1234-<CUR_TS>
+LSCUR="$(printf '%s\n' \
+  "2020/01/01 00:00:00  10 preprod-abc1234-${CUR_TS}.sql.gz" \
+  '2024/02/01 00:00:00  10 preprod-t2-20240201T000000Z.sql.gz' \
+  '2024/03/01 00:00:00  10 preprod-t3-20240301T000000Z.sql.gz')"
+EXTRA="export FAKE_JOB_SUCCEEDED=1; export BACKUP_RETAIN_COUNT=1; export TS_KEY=${CUR_TS}; export FAKE_S5_LS=$(printf '%q' "$LSCUR")"
+run_case retention_excl_cur; code=$CODE
+eq "$code" 0 "retention_excl_cur: exit 0"
+rmd="$(rm_calls)"
+echo "$rmd" | grep -q "preprod-abc1234-${CUR_TS}" && bad "excl_cur: CURRENT key wrongly pruned (date-oldest)" || ok "excl_cur: current key kept despite sorting date-oldest"
+echo "$rmd" | grep -q 'preprod-t2-' && ok "excl_cur: pruned oldest OTHER backup t2" || bad "excl_cur: t2 not pruned"
+echo "$rmd" | grep -q 'preprod-t3-' && bad "excl_cur: t3 wrongly pruned" || ok "excl_cur: kept t3"
+
 # 7. retention failure is NON-fatal (backup already landed).
 EXTRA='export FAKE_JOB_SUCCEEDED=1; export FAKE_S5_LS_MODE=fail'; run_case retention_nonfatal; code=$CODE
 eq "$code" 0 "retention failure does not red the release"
