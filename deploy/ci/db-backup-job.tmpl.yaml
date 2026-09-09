@@ -60,7 +60,7 @@ spec:
               drop:
                 - ALL
           image: ${DUMP_IMAGE}
-          command: ["sh", "-c"]
+          command: ["bash", "-c"]
           args:
             - |
               set -euo pipefail
