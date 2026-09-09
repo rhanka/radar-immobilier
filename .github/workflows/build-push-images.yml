@@ -734,6 +734,17 @@ jobs:
       # So merging this can NEVER red a main push against not-yet-provisioned
       # backup infra. Once armed, the fail-closed gate is live: no preprod roll
       # without a fresh backup.
+      #
+      # LOUD-WARN when DISARMED (B1): backup AND migrate are both gated on this
+      # var, so when it is not 'true' this deploy rolls with NEITHER a
+      # pre-migration backup NOR the pending migrations applied — a schema-change
+      # release (e.g. drizzle 0011) would then serve new code on an un-migrated DB.
+      # The skip is by design (staged arming) but must never be silent.
+      - name: Warn if DB backup+migrate DISARMED (preprod)
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED != 'true'
+        run: |
+          echo "::warning title=DB backup+migrate DISARMED (preprod)::BACKUP_BEFORE_RELEASE_ENABLED is not 'true' — this deploy rolls WITHOUT a pre-migration backup AND WITHOUT applying pending migrations. Arm it for any schema-change release."
+
       - name: Install s5cmd
         if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
         run: |
@@ -758,6 +769,69 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
         run: bash deploy/ci/run-db-backup.sh
+
+      # MIGRATE DB (fail-closed) — AFTER the pre-migration backup, BEFORE set-image.
+      # Applies the drizzle migration Job (deploy/k8s/36-db-migrate-job.yaml) pinned
+      # to the EXACT image this path deploys (preprod: the pushed short-sha tag),
+      # waits for Job=Complete, and ABORTS the release before set-image if it fails
+      # or times out — the app never rolls onto an un-migrated DB. Idempotent
+      # (drizzle journal → an already-applied migration is a no-op), so preprod
+      # replays every migration each deploy = a test-before-prod. Gated on the SAME
+      # var as the backup so a migrate NEVER runs without a fresh pre-migration
+      # rollback point (order: backup → migrate → set-image → assert).
+      - name: Migrate DB before release (fail-closed)
+        if: vars.BACKUP_BEFORE_RELEASE_ENABLED == 'true'
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+        run: |
+          set -euo pipefail
+          : "${SHA:?SHA is empty — refusing to name/apply the migrate Job}"
+          JOB="radar-db-migrate-${SHA}"
+          tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+          cp deploy/k8s/36-db-migrate-job.yaml "$tmp/job.yaml"
+          # Overlay: pin the migrate image to the EXACT image this path deploys,
+          # scope it to this path's namespace, and give the immutable Job a per-sha
+          # name (avoids an apply collision on a re-deploy within ttlSecondsAfterFinished).
+          {
+            echo "apiVersion: kustomize.config.k8s.io/v1beta1"
+            echo "kind: Kustomization"
+            echo "resources: [job.yaml]"
+            echo "namespace: ${NAMESPACE}"
+            echo "nameSuffix: -${SHA}"
+            echo "images:"
+            echo "  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api"
+            echo "    newName: ${IMAGE_PREFIX}/radar-api"
+            echo "    newTag: \"${SHA}\""
+          } > "$tmp/kustomization.yaml"
+          kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found
+          kubectl kustomize "$tmp" | kubectl -n "$NAMESPACE" apply -f -
+          # Fail-closed poll: Complete=go, Failed=abort, timeout=abort — a broken
+          # migration stops the release BEFORE set-image.
+          deadline=$((SECONDS + 600))
+          while :; do
+            complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
+            failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
+            if [ "$complete" = "True" ]; then echo "db-migrate: Job $JOB Complete"; break; fi
+            if [ "$failed" = "True" ]; then
+              echo "::error title=DB migrate FAILED::$JOB — aborting release BEFORE set-image"
+              kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
+              # Backstop: kill the in-cluster Job so a hung migration (blocked
+              # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
+              # poller, not the pod. Pairs with the Job's activeDeadlineSeconds.
+              kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found || true
+              exit 1
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error title=DB migrate TIMEOUT::$JOB did not complete in 600s — aborting BEFORE set-image"
+              kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
+              # Backstop: kill the in-cluster Job so a hung migration (blocked
+              # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
+              # poller, not the pod. Pairs with the Job's activeDeadlineSeconds.
+              kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found || true
+              exit 1
+            fi
+            sleep 5
+          done
 
       # RECONCILE MANIFESTS (CD refonte, targeted / option A) — apply the drifted
       # DURABLES so preprod tracks git, not just images. Runs AFTER the fail-closed
@@ -1077,7 +1151,10 @@ jobs:
   promote-prod:
     name: Promote tag to prod (by digest)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 30 (was 15): the promotion now also runs the fail-closed backup (≤15m) and
+    # the DB migrate (≤10m poll) ahead of set-image, so 15m could time the job out
+    # mid-sequence.
+    timeout-minutes: 30
     if: startsWith(github.ref, 'refs/tags/v')
     # Enforced prod credential boundary (§2.4): the prod kubeconfig lives in the
     # GitHub Environment `production` (restricted to tag refs + required
@@ -1093,7 +1170,15 @@ jobs:
       contents: read
       deployments: write
     concurrency:
-      # Never cancel an in-flight prod promote — queue instead.
+      # Never cancel an in-flight prod promote — queue instead. This is
+      # load-bearing now that the promotion runs backup+migrate before set-image:
+      # cancel-in-progress would kill the CI step mid-migration without running the
+      # abort's delete-job, leaving an in-cluster Job (bounded only by the base
+      # activeDeadlineSeconds). Queueing keeps each promotion's backup→migrate→
+      # set-image sequence atomic. (Preprod, under the top-level cancel-in-progress:
+      # true group, CAN be cancelled mid-migrate; that is tolerated because the
+      # migrate Job self-terminates via activeDeadlineSeconds and drizzle is
+      # idempotent, so the next run replays cleanly.)
       group: promote-prod
       cancel-in-progress: false
     env:
@@ -1250,18 +1335,6 @@ jobs:
             });
             core.setOutput('id', dep.data && dep.data.id !== undefined ? String(dep.data.id) : '');
 
-      # Drift self-heal (prod, unchanged from `deploy`): reassert 40-immo-mcp
-      # BEFORE set-image so config drift heals without clobbering the pinned
-      # digest. Guarded — skips if the mcp Deployment is absent.
-      - name: Apply immo-mcp declarative config
-        run: |
-          set -eu
-          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
-            kubectl -n "$NAMESPACE" apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
-          else
-            echo "radar-immo-mcp absent — skipping immo-mcp config apply"
-          fi
-
       # BACKUP-BEFORE-RELEASE (§1(a)) — PROD, PREPARED BUT DISARMED. Same
       # fail-closed pg_dump → external S3 as preprod, ahead of the digest
       # set-image, so a failed prod backup aborts the promotion. OWNER-GATED and
@@ -1273,6 +1346,19 @@ jobs:
       # is a deliberate, later owner step (never a side effect of this merge).
       # Keys are env-scoped (BACKUP_ENV=prod) so prod and preprod backups never
       # collide in a shared bucket.
+      #
+      # LOUD-WARN when DISARMED (B1): backup AND migrate are both gated on this
+      # var. Prod is DISARMED by design until the cutover, so a `v*` promotion
+      # today rolls with NEITHER a pre-migration backup NOR the pending migrations
+      # applied — for a schema-change promotion (e.g. drizzle 0011) that serves new
+      # code on an un-migrated DB. Make the skip loud; arming stays a deliberate
+      # owner step (runbook: arm BACKUP_BEFORE_RELEASE_PROD_ENABLED before promoting
+      # a release that carries a pending migration).
+      - name: Warn if DB backup+migrate DISARMED (prod)
+        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED != 'true'
+        run: |
+          echo "::warning title=DB backup+migrate DISARMED (prod)::BACKUP_BEFORE_RELEASE_PROD_ENABLED is not 'true' — this promotion rolls WITHOUT a pre-migration backup AND WITHOUT applying pending migrations. Arm it before promoting any schema-change release."
+
       - name: Install s5cmd
         if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
         run: |
@@ -1297,6 +1383,82 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
         run: bash deploy/ci/run-db-backup.sh
+
+      # MIGRATE DB (fail-closed) — AFTER the pre-migration prod backup, BEFORE
+      # set-image. Same contract as preprod, but pinned to the IMMUTABLE DIGEST the
+      # promotion deploys (the <sha7> tag may have aged out of the registry, so prod
+      # uses the resolved digest — invariant: the migrate image == the exact image
+      # this path deploys). Fail-closed: a failed/timed-out migration ABORTS the
+      # promotion before set-image, so prod never rolls onto an un-migrated DB.
+      # Idempotent (drizzle journal). Order: backup → migrate → set-image → assert.
+      - name: Migrate DB before promote (fail-closed)
+        if: vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED == 'true'
+        env:
+          SHA: ${{ steps.vars.outputs.sha }}
+          DIG_API: ${{ steps.pick.outputs.api }}
+        run: |
+          set -euo pipefail
+          : "${SHA:?SHA is empty — refusing to name/apply the migrate Job}"
+          : "${DIG_API:?DIG_API is empty — refusing to pin the migrate image to an empty digest}"
+          JOB="radar-db-migrate-${SHA}"
+          tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+          cp deploy/k8s/36-db-migrate-job.yaml "$tmp/job.yaml"
+          # Overlay: pin the migrate image to the exact digest promoted to prod,
+          # scope it to the prod namespace, and give the immutable Job a per-sha name.
+          {
+            echo "apiVersion: kustomize.config.k8s.io/v1beta1"
+            echo "kind: Kustomization"
+            echo "resources: [job.yaml]"
+            echo "namespace: ${NAMESPACE}"
+            echo "nameSuffix: -${SHA}"
+            echo "images:"
+            echo "  - name: rg.fr-par.scw.cloud/radar-immobilier/radar-api"
+            echo "    newName: ${IMAGE_PREFIX}/radar-api"
+            echo "    digest: \"${DIG_API}\""
+          } > "$tmp/kustomization.yaml"
+          kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found
+          kubectl kustomize "$tmp" | kubectl -n "$NAMESPACE" apply -f -
+          # Fail-closed poll: Complete=go, Failed=abort, timeout=abort.
+          deadline=$((SECONDS + 600))
+          while :; do
+            complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
+            failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
+            if [ "$complete" = "True" ]; then echo "db-migrate: Job $JOB Complete"; break; fi
+            if [ "$failed" = "True" ]; then
+              echo "::error title=DB migrate FAILED (prod)::$JOB — aborting promotion BEFORE set-image"
+              kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
+              # Backstop: kill the in-cluster Job so a hung migration (blocked
+              # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
+              # poller, not the pod. Pairs with the Job's activeDeadlineSeconds.
+              kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found || true
+              exit 1
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error title=DB migrate TIMEOUT (prod)::$JOB did not complete in 600s — aborting BEFORE set-image"
+              kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
+              # Backstop: kill the in-cluster Job so a hung migration (blocked
+              # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
+              # poller, not the pod. Pairs with the Job's activeDeadlineSeconds.
+              kubectl -n "$NAMESPACE" delete job "$JOB" --ignore-not-found || true
+              exit 1
+            fi
+            sleep 5
+          done
+
+      # Drift self-heal (prod): reassert 40-immo-mcp declarative config. Moved to
+      # run AFTER the DB migrate (B2 fix): 40-immo-mcp pins `radar-api:latest` with
+      # a Recreate strategy, so applying it rolls the MCP pods onto the new code —
+      # that must happen only AFTER the schema is migrated, never before. Still
+      # BEFORE set-image, so the digest set-image below stays the last word and is
+      # not clobbered (l.40 constraint preserved). Guarded — skips if absent.
+      - name: Apply immo-mcp declarative config
+        run: |
+          set -eu
+          if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" apply -f deploy/k8s/40-immo-mcp-http-deploy.yaml
+          else
+            echo "radar-immo-mcp absent — skipping immo-mcp config apply"
+          fi
 
       # PROMOTE — pin prod to the IMMUTABLE digest (not the mutable <sha7> tag):
       # true build-once, survives tag GC of <sha7>.
