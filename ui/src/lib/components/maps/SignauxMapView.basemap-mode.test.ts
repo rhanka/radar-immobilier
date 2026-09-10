@@ -12,7 +12,7 @@
  * Contrat vérifié (clients réseau mockés, aucun WebGL/API) :
  *   (1) DÉFAUT sans localStorage → mode résolu 'plan' ;
  *   (1b) clé ABSENTE ou valeur INCONNUE → 'plan' (Point 1, jamais de faux satellite) ;
- *   (2) localStorage 'satellite' + host PERMIS → 'satellite' (préférence restaurée) ;
+ *   (2) localStorage 'satellite' + host PERMIS → 'plan' (défaut TOUJOURS plan, jamais restauré au chargement — exigence owner) ;
  *   (3) HOST GATING : groupe Fond de carte passé au socle SSI satellite permis ;
  *   (4) PERSISTENCE : clic « Satellite » (doublure socle) → localStorage + mode ;
  *   (5) PROD-HIDDEN : host NON-permis + localStorage 'satellite' → COERCÉ 'plan' ;
@@ -96,11 +96,13 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     expect(basemapMode()).toBe("plan");
   });
 
-  it("(2) localStorage 'satellite' + host permis → 'satellite' (préférence restaurée)", async () => {
+  it("(2) localStorage 'satellite' + host permis → 'plan' (défaut TOUJOURS plan, jamais restauré au chargement)", async () => {
     localStorage.setItem(BASEMAP_LS_KEY, "satellite");
     render(SignauxMapView);
     await tick();
-    expect(basemapMode()).toBe("satellite");
+    // Exigence owner : le défaut au (re)chargement est TOUJOURS Plan, même si
+    // le satellite a été choisi précédemment (pas de restauration comme défaut).
+    expect(basemapMode()).toBe("plan");
   });
 
   it("(3) HOST GATING : groupe Fond de carte transmis au socle SSI satellite permis", async () => {
