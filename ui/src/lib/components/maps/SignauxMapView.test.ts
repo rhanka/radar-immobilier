@@ -257,7 +257,7 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     localStorage.clear();
   });
 
-  it("(deux modes) préférence 'satellite' : le deep-link ville charge zones + lots (harness inchangé)", async () => {
+  it("(deux modes) préférence 'satellite' persistée : le mode défaut reste 'plan', le deep-link ville charge zones + lots (harness inchangé)", async () => {
     localStorage.setItem("signaux-basemap-mode", "satellite");
     setSearch("");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
@@ -272,8 +272,10 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
       CITY_SLUG,
       expect.anything(),
     );
+    // Exigence owner : défaut TOUJOURS Plan, même avec une préférence 'satellite'
+    // persistée (jamais restaurée comme défaut au chargement).
     const stub = document.querySelector("[data-testid='stub-map']");
-    expect(stub?.getAttribute("data-basemap-mode")).toBe("satellite");
+    expect(stub?.getAttribute("data-basemap-mode")).toBe("plan");
     localStorage.clear();
   });
 });
