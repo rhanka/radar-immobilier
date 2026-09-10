@@ -12,7 +12,7 @@
  * Contrat vérifié (clients réseau mockés, aucun WebGL/API) :
  *   (1) DÉFAUT sans localStorage → mode résolu 'plan' ;
  *   (1b) clé ABSENTE ou valeur INCONNUE → 'plan' (Point 1, jamais de faux satellite) ;
- *   (2) localStorage 'satellite' + host PERMIS → 'satellite' (préférence restaurée) ;
+ *   (2) localStorage 'satellite' + host PERMIS → 'plan' (défaut TOUJOURS plan, jamais restauré au chargement — exigence owner) ;
  *   (3) HOST GATING : groupe Fond de carte passé au socle SSI satellite permis ;
  *   (4) PERSISTENCE : clic « Satellite » (doublure socle) → localStorage + mode ;
  *   (5) PROD-HIDDEN : host NON-permis + localStorage 'satellite' → COERCÉ 'plan' ;
@@ -96,11 +96,13 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     expect(basemapMode()).toBe("plan");
   });
 
-  it("(2) localStorage 'satellite' + host permis → 'satellite' (préférence restaurée)", async () => {
+  it("(2) localStorage 'satellite' + host permis → 'plan' (défaut TOUJOURS plan, jamais restauré au chargement)", async () => {
     localStorage.setItem(BASEMAP_LS_KEY, "satellite");
     render(SignauxMapView);
     await tick();
-    expect(basemapMode()).toBe("satellite");
+    // Exigence owner : le défaut au (re)chargement est TOUJOURS Plan, même si
+    // le satellite a été choisi précédemment (pas de restauration comme défaut).
+    expect(basemapMode()).toBe("plan");
   });
 
   it("(3) HOST GATING : groupe Fond de carte transmis au socle SSI satellite permis", async () => {
@@ -160,8 +162,8 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     expect(document.querySelector("[data-testid='basemap-switcher']")).toBeNull();
   });
 
-  // ── Point 1 (ITEM 1) : DÉFAUT Plan + persistance/rechargement dans les deux sens ──
-  it("(Point 1 b) sélection Satellite persiste et un rechargement restaure Satellite", async () => {
+  // ── Point 1 (ITEM 1) : DÉFAUT Plan TOUJOURS au chargement ; satellite = choix par session ──
+  it("(Point 1 b) sélection Satellite s'applique EN SESSION mais un rechargement REVIENT au défaut Plan", async () => {
     vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
     const { unmount } = render(SignauxMapView);
     await tick();
@@ -173,30 +175,34 @@ describe("SignauxMapView — fond de carte (2-modes)", () => {
     ) as HTMLElement;
     await fireEvent.click(within(group).getByRole("menuitemradio", { name: "Satellite" }));
     await tick();
-    expect(localStorage.getItem(BASEMAP_LS_KEY)).toBe("satellite");
+    // Le satellite s'applique dans la session courante.
+    await waitFor(() => expect(basemapMode()).toBe("satellite"));
 
-    // « Rechargement » (jsdom) : un nouveau montage lit la préférence persistée.
+    // « Rechargement » (jsdom) : exigence owner — le défaut est TOUJOURS Plan,
+    // le satellite n'est PAS restauré au (re)chargement.
     unmount();
     render(SignauxMapView);
     await tick();
-    expect(basemapMode()).toBe("satellite");
+    expect(basemapMode()).toBe("plan");
   });
 
-  it("(Point 1 c) sélection Plan persiste et un rechargement restaure Plan", async () => {
+  it("(Point 1 c) un rechargement REVIENT à Plan même avec une préférence 'satellite' persistée", async () => {
     vi.mocked(isSatelliteBasemapEnabled).mockReturnValue(true);
-    localStorage.setItem(BASEMAP_LS_KEY, "satellite"); // départ Satellite (préférence)
+    localStorage.setItem(BASEMAP_LS_KEY, "satellite"); // préférence persistée (ex. session passée)
     const { unmount } = render(SignauxMapView);
     await tick();
-    expect(basemapMode()).toBe("satellite");
+    // Défaut TOUJOURS Plan (la préférence n'est plus restaurée comme défaut).
+    expect(basemapMode()).toBe("plan");
 
+    // Le satellite reste choisissable dans la session…
     const group = document.querySelector(
       "[data-testid='basemap-control']",
     ) as HTMLElement;
-    await fireEvent.click(within(group).getByRole("menuitemradio", { name: "Plan" }));
+    await fireEvent.click(within(group).getByRole("menuitemradio", { name: "Satellite" }));
     await tick();
-    expect(localStorage.getItem(BASEMAP_LS_KEY)).toBe("plan");
+    await waitFor(() => expect(basemapMode()).toBe("satellite"));
 
-    // « Rechargement » : la préférence Plan est restaurée (jamais de faux satellite).
+    // …mais un rechargement revient à Plan.
     unmount();
     render(SignauxMapView);
     await tick();

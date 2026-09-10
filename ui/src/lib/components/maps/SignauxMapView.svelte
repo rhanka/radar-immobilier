@@ -332,24 +332,15 @@
           import.meta.env.VITE_GEO_SAT_BASEMAP === "false",
         );
   /**
-   * Résolution EXPLICITE du mode initial : on ne restaure 'satellite' que si la
-   * valeur persistée vaut 'satellite' ET que le satellite est permis sur ce host.
-   * Host non-permis (prod / kill-switch) → TOUJOURS 'plan', quel que soit le
-   * localStorage — sinon on aurait un « satellite dangling » (mode satellite mais
-   * aucun switcher rendu → impossible de revenir à plan).
+   * Résolution du mode initial : **TOUJOURS 'plan' au chargement** (exigence
+   * owner — le défaut doit être Plan, jamais Satellite, quel que soit le host).
+   * Le satellite reste un choix PONCTUEL par session (bascule via le switcher) ;
+   * il n'est PLUS restauré comme défaut au (re)chargement, même s'il a été choisi
+   * précédemment. Un host non-permis (kill-switch) n'a de toute façon aucun
+   * switcher → 'plan' obligatoire (évite un « satellite dangling »).
    */
   function readInitialBasemapMode(): "plan" | "satellite" {
-    if (!satelliteHostAllowed) return "plan";
-    let stored: string | null = null;
-    try {
-      stored =
-        typeof localStorage === "undefined"
-          ? null
-          : localStorage.getItem(BASEMAP_LS_KEY);
-    } catch {
-      stored = null;
-    }
-    return stored === "satellite" ? "satellite" : "plan";
+    return "plan";
   }
   let basemapMode: "plan" | "satellite" = readInitialBasemapMode();
 
