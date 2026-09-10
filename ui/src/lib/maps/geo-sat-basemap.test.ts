@@ -12,8 +12,11 @@ describe("isSatelliteBasemapEnabled — activation runtime par host (image uniqu
     expect(isSatelliteBasemapEnabled("127.0.0.1", false)).toBe(true);
   });
 
-  it("OFF en prod (immo.sent-tech.ca) et tout host non listé", () => {
-    expect(isSatelliteBasemapEnabled("immo.sent-tech.ca", false)).toBe(false);
+  it("ON en prod (immo.sent-tech.ca) — activée une fois le mint geo prod + clé posés", () => {
+    expect(isSatelliteBasemapEnabled("immo.sent-tech.ca", false)).toBe(true);
+  });
+
+  it("OFF pour tout host non listé", () => {
     expect(isSatelliteBasemapEnabled("example.com", false)).toBe(false);
   });
 
@@ -28,8 +31,8 @@ describe("isSatelliteBasemapEnabled — activation runtime par host (image uniqu
     expect(isSatelliteBasemapEnabled("", false)).toBe(false);
   });
 
-  it("la prod n'est PAS dans l'allowlist (garde-fou)", () => {
-    expect(SAT_HOST_ALLOWLIST.has("immo.sent-tech.ca")).toBe(false);
+  it("prod + préprod sont dans l'allowlist ; kill-switch build reste le levier OFF", () => {
+    expect(SAT_HOST_ALLOWLIST.has("immo.sent-tech.ca")).toBe(true);
     expect(SAT_HOST_ALLOWLIST.has("preprod.immo.sent-tech.ca")).toBe(true);
   });
 });
