@@ -296,6 +296,18 @@
   // Résilience `load` — handle du timeout de repli (annulé dès la finalisation ou
   // au démontage). `undefined` tant qu'aucune carte n'est en cours d'init.
   let readyFallbackTimer: ReturnType<typeof setTimeout> | undefined;
+  // Résilience style-load — FILET DE RÉCUPÉRATION (onglet caché / canvas taille-nulle
+  // au montage → `'load'` jamais émis, ou canvas 0×0 devenu visible mais non repeint).
+  // `triggerFinalize` expose le corps de finalisation (closure locale d'`initMap`) au
+  // filet, qui le ré-invoque (idempotent via `mapSetupStarted`). Les écouteurs
+  // `visibilitychange` + `ResizeObserver` sont nettoyés au démontage ;
+  // `recoverIdleArmed` limite à UNE ré-écoute `once('idle')` en vol ;
+  // `citiesInteractionsBound` garantit que les handlers villes ne sont liés qu'une fois.
+  let triggerFinalize: (() => void) | undefined;
+  let recoverResizeObserver: ResizeObserver | undefined;
+  let recoverVisibilityHandler: (() => void) | undefined;
+  let recoverIdleArmed = false;
+  let citiesInteractionsBound = false;
   // §5 2-modes — `true` quand le fond satellite est actif (host-allowlisté).
   // Positionné dans initMap dès la résolution du basemap, AVANT la 1re pose des
   // couches zone : conditionne le STYLE des overlays zone (aplats en plan vs
@@ -463,6 +475,125 @@
   // Réapplique la peinture choroplèthe quand les expressions changent.
   $: if (mapReady && (fillColorExpression || fillOpacityExpression)) {
     applyCitiesFillPaint();
+  }
+
+  /**
+   * Pose IDEMPOTENTE des couches de base villes : source `cities-polygons` (aplats)
+   * + choroplèthe + contour + labels + interactions clic/survol. Chaque
+   * `addSource`/`addLayer` est gardé par `getSource`/`getLayer` et les handlers ne
+   * sont liés qu'UNE fois (`citiesInteractionsBound`) → l'appeler plusieurs fois ne
+   * double JAMAIS une source, une couche ou un écouteur. Extrait de la finalisation
+   * pour que le filet de récupération (onglet caché / canvas taille-nulle) puisse
+   * sûrement rejouer le même chemin. Enveloppée : sur un style pas tout à fait prêt
+   * (chemin de repli), `addSource`/`addLayer` peut throw → on `console.warn` sans
+   * jamais figer l'overlay « Chargement… » (les couches zones/lots restent posées
+   * par la sync réactive gatée sur `mapReady`).
+   */
+  function ensureBaseCityLayers(
+    m: import("maplibre-gl").Map,
+    polygonsData: unknown,
+  ): void {
+    try {
+      // Source GeoJSON polygones (aplats) — gardée : jamais de double addSource.
+      if (!m.getSource("cities-polygons")) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        m.addSource("cities-polygons", {
+          type: "geojson",
+          data: polygonsData as any,
+        });
+      }
+
+      // §1/§3 — mode effectif connu ici (satelliteActive posé avant ce corps).
+      const surfaceMode = currentSurfaceMode();
+      // Couche aplat fill choroplèthe (couleur/opacité pilotées par les props).
+      // §3 — pas de `fill-outline-color` : le contour vient de `cities-outline`.
+      // L'opacité passe par l'invariant (0 en satellite ⇒ aucun aplat région).
+      if (!m.getLayer("cities-fill")) {
+        m.addLayer({
+          id: "cities-fill",
+          type: "fill",
+          source: "cities-polygons",
+          paint: {
+            "fill-color": fillColorExpression,
+            // `surfaceFillOpacity` renvoie `unknown` (expression MapLibre opaque
+            // OU 0) : cast vers le type de paint attendu par MapLibre.
+            "fill-opacity": surfaceFillOpacity(
+              surfaceMode,
+              fillOpacityExpression ?? 1,
+            ) as ExpressionSpecification | number,
+          },
+        });
+      }
+
+      // §3 — contour région. En PLAN : slate discret (#64748b / 0.5 / 0.4). En
+      // SATELLITE : le contour reprend l'EXPRESSION couleur du choroplèthe (=
+      // couleur de la légende région) et devient la MEANING ; largeur
+      // SAT_CITY_LINE_WIDTH (source-gap provisoire), opacité 1.
+      if (!m.getLayer("cities-outline")) {
+        m.addLayer({
+          id: "cities-outline",
+          type: "line",
+          source: "cities-polygons",
+          paint: {
+            "line-color": surfaceMode === "satellite" ? fillColorExpression : "#64748b",
+            "line-width": surfaceMode === "satellite" ? SAT_CITY_LINE_WIDTH : 0.5,
+            "line-opacity": surfaceMode === "satellite" ? 1 : 0.4,
+          },
+        });
+      }
+
+      // Couche labels sur les polygones
+      if (!m.getLayer("cities-label")) {
+        m.addLayer({
+          id: "cities-label",
+          type: "symbol",
+          source: "cities-polygons",
+          layout: {
+            "text-field": ["get", "name"],
+            "text-size": 11,
+            "text-anchor": "center",
+            "text-optional": true,
+          },
+          paint: {
+            "text-color": "#1e293b",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1.5,
+          },
+        });
+      }
+
+      // Interactions clic/survol sur les aplats villes — liées UNE SEULE fois
+      // (re-pose idempotente : on ne ré-abonne jamais ces handlers).
+      if (!citiesInteractionsBound) {
+        citiesInteractionsBound = true;
+        m.on("click", "cities-fill", (e) => {
+          if (measureActive) return; // mode mesure : les clics servent à mesurer
+          const features = e.features;
+          if (!features || features.length === 0) return;
+          const props = features[0].properties as { citySlug?: string };
+          const citySlug = readString(props?.citySlug);
+          if (!citySlug) return;
+          onCityClick(citySlug);
+        });
+
+        m.on("mousemove", "cities-fill", (e) => {
+          if (measureActive) return; // conserve le crosshair de mesure
+          const props = e.features?.[0]?.properties as
+            | { citySlug?: string }
+            | undefined;
+          m.getCanvas().style.cursor =
+            activeCitySlug === props?.citySlug ? "" : "pointer";
+        });
+        m.on("mouseleave", "cities-fill", () => {
+          if (measureActive) return;
+          m.getCanvas().style.cursor = "";
+        });
+      }
+    } catch (err) {
+      // Repli : style pas tout à fait prêt → on n'a pas pu poser les couches
+      // villes, mais on lève quand même l'overlay (dégradation gracieuse).
+      console.warn("cities-polygons layer setup failed (repli load):", err);
+    }
   }
 
   // ── Primitives caméra (exposées via l'API) ─────────────────────────────────
@@ -1834,101 +1965,15 @@
         }
         cacheCityBoundaries(polygonsData);
 
-        // Pose des couches `cities-polygons` ENVELOPPÉE : sur le CHEMIN DE REPLI,
-        // le style peut ne pas être tout à fait prêt au moment du timeout →
-        // addSource/addLayer peuvent throw. On `console.warn` alors, MAIS on pose
-        // quand même `mapReady = true` plus bas (objectif = ne JAMAIS laisser
-        // l'overlay « Chargement… » figé). Les couches zones/lots sont, elles,
-        // posées par la sync réactive gatée sur `mapReady`.
-        try {
-          // Source GeoJSON polygones (aplats)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          m.addSource("cities-polygons", {
-            type: "geojson",
-            data: polygonsData as any,
-          });
-
-          // §1/§3 — mode effectif connu ici (satelliteActive posé avant ce corps).
-          const surfaceMode = currentSurfaceMode();
-          // Couche aplat fill choroplèthe (couleur/opacité pilotées par les props).
-          // §3 — pas de `fill-outline-color` : le contour vient de `cities-outline`.
-          // L'opacité passe par l'invariant (0 en satellite ⇒ aucun aplat région).
-          m.addLayer({
-            id: "cities-fill",
-            type: "fill",
-            source: "cities-polygons",
-            paint: {
-              "fill-color": fillColorExpression,
-              // `surfaceFillOpacity` renvoie `unknown` (expression MapLibre opaque
-              // OU 0) : cast vers le type de paint attendu par MapLibre.
-              "fill-opacity": surfaceFillOpacity(
-                surfaceMode,
-                fillOpacityExpression ?? 1,
-              ) as ExpressionSpecification | number,
-            },
-          });
-
-          // §3 — contour région. En PLAN : slate discret (#64748b / 0.5 / 0.4). En
-          // SATELLITE : le contour reprend l'EXPRESSION couleur du choroplèthe (=
-          // couleur de la légende région) et devient la MEANING ; largeur
-          // SAT_CITY_LINE_WIDTH (source-gap provisoire), opacité 1.
-          m.addLayer({
-            id: "cities-outline",
-            type: "line",
-            source: "cities-polygons",
-            paint: {
-              "line-color": surfaceMode === "satellite" ? fillColorExpression : "#64748b",
-              "line-width": surfaceMode === "satellite" ? SAT_CITY_LINE_WIDTH : 0.5,
-              "line-opacity": surfaceMode === "satellite" ? 1 : 0.4,
-            },
-          });
-
-          // Couche labels sur les polygones
-          m.addLayer({
-            id: "cities-label",
-            type: "symbol",
-            source: "cities-polygons",
-            layout: {
-              "text-field": ["get", "name"],
-              "text-size": 11,
-              "text-anchor": "center",
-              "text-optional": true,
-            },
-            paint: {
-              "text-color": "#1e293b",
-              "text-halo-color": "#ffffff",
-              "text-halo-width": 1.5,
-            },
-          });
-
-          // Interaction clic sur les aplats villes
-          m.on("click", "cities-fill", (e) => {
-            if (measureActive) return; // mode mesure : les clics servent à mesurer
-            const features = e.features;
-            if (!features || features.length === 0) return;
-            const props = features[0].properties as { citySlug?: string };
-            const citySlug = readString(props?.citySlug);
-            if (!citySlug) return;
-            onCityClick(citySlug);
-          });
-
-          m.on("mousemove", "cities-fill", (e) => {
-            if (measureActive) return; // conserve le crosshair de mesure
-            const props = e.features?.[0]?.properties as
-              | { citySlug?: string }
-              | undefined;
-            m.getCanvas().style.cursor =
-              activeCitySlug === props?.citySlug ? "" : "pointer";
-          });
-          m.on("mouseleave", "cities-fill", () => {
-            if (measureActive) return;
-            m.getCanvas().style.cursor = "";
-          });
-        } catch (err) {
-          // Repli : style pas tout à fait prêt → on n'a pas pu poser les couches
-          // villes, mais on lève quand même l'overlay (dégradation gracieuse).
-          console.warn("cities-polygons layer setup failed (repli load):", err);
-        }
+        // Pose des couches de base villes (source + choroplèthe/contour/labels +
+        // interactions) — IDEMPOTENTE (gardée par getSource/getLayer + liaison
+        // unique des handlers), donc sûre à rejouer depuis le filet de récupération
+        // (onglet caché / canvas taille-nulle). Enveloppée côté fonction : sur le
+        // CHEMIN DE REPLI le style peut ne pas être tout à fait prêt → addSource/
+        // addLayer throw, on `console.warn` MAIS on pose quand même `mapReady = true`
+        // plus bas (objectif = ne JAMAIS laisser l'overlay « Chargement… » figé).
+        // Les couches zones/lots sont posées par la sync réactive gatée sur `mapReady`.
+        ensureBaseCityLayers(m, polygonsData);
 
         mapReady = true;
         // C9 — capture le cadrage du primo-chargement (restauré au retour
@@ -1951,6 +1996,10 @@
         registerMeasureInteractions(m);
         onReady(buildApi());
       };
+      // Résilience style-load — expose le corps de finalisation (closure locale sur
+      // la carte courante) au filet de récupération, qui le ré-invoque quand le
+      // rendu a stallé. Idempotent via `mapSetupStarted`.
+      triggerFinalize = () => void finalizeMapSetup();
 
       // §5.3 — écoute des erreurs : repli OSM au 1er échec dur attribué à `sat-2d`
       // (discriminateur source-gap, cf. isSatelliteTileError). No-op hors satellite.
@@ -2006,6 +2055,12 @@
     }
     mapReady = false;
     mapSetupStarted = false;
+    // Résilience style-load — la carte est détruite : ses handlers villes et son
+    // déclencheur de finalisation deviennent caducs. On les remet à zéro pour que
+    // la carte NEUVE relie ses propres handlers et expose sa propre finalisation.
+    citiesInteractionsBound = false;
+    recoverIdleArmed = false;
+    triggerFinalize = undefined;
     if (mapInstance) {
       (mapInstance as { remove: () => void }).remove();
       mapInstance = null;
@@ -2021,6 +2076,83 @@
     void reinitForBasemap();
   }
 
+  /**
+   * Résilience style-load — FILET DE RÉCUPÉRATION. Déclenché quand le rendu a pu
+   * staller : l'onglet redevient visible (`visibilitychange`) ou le conteneur est
+   * (re)dimensionné (`ResizeObserver`). Deux pannes visées, mesurées en préprod :
+   *   1. canvas monté à taille nulle / onglet caché → l'event `'load'` de MapLibre
+   *      n'est jamais émis → `mapReady` resterait false → la sync réactive
+   *      early-return → couches jamais peintes ;
+   *   2. canvas 0×0 devenu visible mais NON repeint par MapLibre (framebuffer GL
+   *      resté à 0×0) → carte blanche.
+   * `resize()` corrige (2). (Re)déclencher la finalisation via `triggerFinalize` (le
+   * MÊME chemin que le handler `'load'` : pose des couches + `mapReady = true` +
+   * `onReady` → re-sync zones/lots/CPTAQ côté parent) corrige (1) ; elle n'est
+   * (re)tentée QUE style prêt (`isStyleLoaded()`) car `addSource` throw sinon. Si le
+   * style n'est pas encore chargé, on retente UNE fois au prochain `'idle'`. Sûr à
+   * appeler plusieurs fois : `resize` idempotent, finalisation gardée par
+   * `mapSetupStarted`, ré-écoute `'idle'` gardée par `recoverIdleArmed`, couches de
+   * base gardées par getSource/getLayer (cf. ensureBaseCityLayers).
+   */
+  function recoverMapRender(): void {
+    if (reinitializing) return;
+    const m = mapInstance as
+      | {
+          resize?: () => void;
+          isStyleLoaded?: () => boolean;
+          once?: (type: string, handler: () => void) => void;
+        }
+      | null;
+    if (!m) return;
+    try {
+      m.resize?.();
+    } catch {
+      /* carte pas assez avancée pour un resize → on retentera au prochain signal */
+    }
+    if (typeof m.isStyleLoaded === "function" && m.isStyleLoaded()) {
+      // Style prêt → (re)pose les couches via le chemin nominal (idempotent).
+      triggerFinalize?.();
+    } else if (!recoverIdleArmed && typeof m.once === "function") {
+      // Style pas encore prêt → retente UNE fois quand la carte devient `idle`.
+      recoverIdleArmed = true;
+      m.once("idle", () => {
+        recoverIdleArmed = false;
+        recoverMapRender();
+      });
+    }
+  }
+
+  /**
+   * Résilience style-load — arme les écouteurs de récupération UNE fois au montage :
+   * `visibilitychange` du document (l'onglet redevient visible) + un `ResizeObserver`
+   * sur le conteneur (canvas passé d'une taille nulle à une taille réelle). Les deux
+   * appellent `recoverMapRender`. Défensif si l'environnement n'expose pas ces API.
+   */
+  function setupRecoveryListeners(): void {
+    if (typeof document !== "undefined") {
+      recoverVisibilityHandler = () => {
+        if (document.visibilityState === "visible") recoverMapRender();
+      };
+      document.addEventListener("visibilitychange", recoverVisibilityHandler);
+    }
+    if (typeof ResizeObserver !== "undefined" && mapContainer) {
+      recoverResizeObserver = new ResizeObserver(() => recoverMapRender());
+      recoverResizeObserver.observe(mapContainer);
+    }
+  }
+
+  /** Résilience style-load — retire les écouteurs de récupération (anti-fuite). */
+  function teardownRecoveryListeners(): void {
+    if (recoverVisibilityHandler && typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", recoverVisibilityHandler);
+      recoverVisibilityHandler = undefined;
+    }
+    if (recoverResizeObserver) {
+      recoverResizeObserver.disconnect();
+      recoverResizeObserver = undefined;
+    }
+  }
+
   onDestroy(() => {
     // Résilience `load` — évite un fire du repli APRÈS démontage (fuite / accès à
     // une carte déjà retirée). Remet aussi le garde à false pour une éventuelle
@@ -2029,6 +2161,9 @@
       clearTimeout(readyFallbackTimer);
       readyFallbackTimer = undefined;
     }
+    // Résilience style-load — retire les écouteurs de récupération (anti-fuite).
+    teardownRecoveryListeners();
+    triggerFinalize = undefined;
     mapSetupStarted = false;
     if (mapInstance) {
       (mapInstance as { remove: () => void }).remove();
@@ -2038,6 +2173,9 @@
 
   onMount(() => {
     void initMap();
+    // Résilience style-load — arme le filet de récupération (onglet caché / canvas
+    // taille-nulle). Indépendant de l'init async : lit `mapInstance` paresseusement.
+    setupRecoveryListeners();
   });
 </script>
 
