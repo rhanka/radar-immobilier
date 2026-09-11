@@ -13,31 +13,31 @@ les listes ci-dessous regroupent les numéros par fichier.
 
 Résultat : **885 lignes**, classées sans double compte :
 
-- **A — 412** : résidus purs supprimés ou reformulés;
+- **A — 366** : résidus purs supprimés ou reformulés;
 - **B — 172** : ressources toujours nécessaires, remplacées seulement quand
   la cible a été vérifiée, sinon laissées en TODO (ou conservées sur décision
   owner : transport e-mail SCW TEM, voir B3);
-- **C — 301** : historique, émulation locale ou service encore opéré par k8s,
-  laissé intact.
+- **C — 347** : historique, émulation locale ou service encore opéré par k8s,
+  laissé intact (dont les manifests MinIO `25-minio.yaml` + netpols 71/72,
+  conservés jusqu'à la dernière étape de décom, voir « Séquencement — décom
+  MinIO »).
 
 Les fichiers binaires signalés par le balayage sont listés à la fin en C sans
 numéro de ligne et ne sont pas inclus dans les 885 lignes textuelles.
 
-## A — résidus supprimés ou neutralisés (412)
+## A — résidus supprimés ou neutralisés (366)
 
 Actions : suppression des manifests et scripts morts; retrait du login, miroir
 et secret de pull de l’ancien registre (le transport e-mail SCW TEM est
-CONSERVÉ, voir B3); suppression des fausses instructions courantes;
-terminologie fournisseur-neutre dans le code, les contrats et les documents
-actifs.
+CONSERVÉ, voir B3; les manifests MinIO `25-minio.yaml` + netpols 71/72 sont
+CONSERVÉS, voir « Séquencement — décom MinIO »); suppression des fausses
+instructions courantes; terminologie fournisseur-neutre dans le code, les
+contrats et les documents actifs.
 
 Fichiers supprimés :
 
 - `.github/workflows/grounding-publish-prod.yml`
-- `deploy/k8s/25-minio.yaml`
 - `deploy/k8s/32b-reproject-etape-job.yaml`
-- `deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml`
-- `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml`
 - `scripts/mount-scw.sh`
 - `scripts/umount-scw.sh`
 
@@ -78,7 +78,6 @@ Occurrences au commit de référence :
 - `deploy/grounding/Dockerfile:10`
 - `deploy/k8s/00-namespace.yaml:2,8`
 - `deploy/k8s/10-rbac.yaml:2`
-- `deploy/k8s/25-minio.yaml:1,2,3,5,6,7,8,12,17,21,33,38,40,45,51,55,56,65,67,70,75,80,87`
 - `deploy/k8s/30-api.yaml:3,4,31`
 - `deploy/k8s/31-graph-projection-job.yaml:1,14,23,129,158`
 - `deploy/k8s/32-graph-projection-only-job.yaml:5,83,84`
@@ -90,11 +89,8 @@ Occurrences au commit de référence :
 - `deploy/k8s/41-grounding-citation-job.yaml:7,31,37,58,97,99`
 - `deploy/k8s/50-ui.yaml:89`
 - `deploy/k8s/60-ingress.yaml:2`
-- `deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml:1,4,5,7,8,9,12,19,20,24,29,31,35`
-- `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml:1,4,5,14,18,23,28,33`
-- `deploy/k8s/README.md:4,16,40,200`
+- `deploy/k8s/README.md:4,16,200`
 - `deploy/k8s/grounding-preprod/kustomization.yaml:11`
-- `deploy/k8s/kustomization.yaml:45`
 - `deploy/k8s/refresh-cronjobs/kustomization.yaml:55,87,88`
 - `deploy/k8s/refresh-diag/diag-refresh-job.yaml:78,91`
 - `deploy/k8s/secrets.example.yaml:27,54,56,64,65,66,75,111`
@@ -236,7 +232,7 @@ qu’après validation owner de cette proposition.
   (paramètres non secrets associés) ; tant qu’elle n’est pas validée par
   l’owner, SCW TEM reste en place (B3).
 
-## C — occurrences conservées (301)
+## C — occurrences conservées (347)
 
 ### C1 — historique append-only ou rapports datés (141)
 
@@ -271,16 +267,19 @@ plans archivés ne sont pas des instructions d’exploitation courantes.
 - `plan/done/02-BRANCH_feat-api-skeleton-hono-postgres-s3.md:4,30,41,42,47,48,62,66,97,106,109,113`
 - `plan/done/06V-BRANCH_feat-vertical-slice-valleyfield.md:20`
 
-### C2 — émulation locale, tests et MinIO encore opéré par k8s (160)
+### C2 — émulation locale, tests et MinIO encore opéré par k8s (206)
 
 Ces occurrences sont soit nécessaires au développement/test isolé, soit liées
 au service encore présent dans le cluster et explicitement hors périmètre de
 cette branche. Elles ne constituent pas une valeur de remplacement OVH.
 
-Le manifeste applicatif `25-minio.yaml` est supprimé en A comme le demande
-explicitement le brief. Cette suppression dans le dépôt ne mute aucun objet du
-cluster. La règle `allow-api-to-minio` reste en C tant que l’API servie par
-`831cad2` utilise le service vivant géré par k8s.
+Les manifests MinIO (`25-minio.yaml`, netpols `71-*` et `72-*`, leur entrée
+`resources:` dans `deploy/k8s/kustomization.yaml` et la ligne du tableau
+`deploy/k8s/README.md`) sont CONSERVÉS à l’identique de `831cad2` (revert du
+2026-09-11, décision k8s + i-infra endossée conducteur) : MinIO est
+load-bearing et son retrait du git est la DERNIÈRE étape de la décom (voir
+« Séquencement — décom MinIO »). La règle `allow-api-to-minio` reste en C
+tant que l’API servie par `831cad2` utilise le service vivant géré par k8s.
 
 - `.claude/skills/ingest-test/SKILL.md:29,32`
 - `.env.example:11,14,15,20`
@@ -316,6 +315,7 @@ cluster. La règle `allow-api-to-minio` reste en C tant que l’API servie par
 - `api/src/storage/s3-object-store.ts:214,319`
 - `api/src/storage/scrape-store.test.ts:11,134,137,138,143,147,148,154,157,158,179,182,183,194,195,232`
 - `deploy/grounding/Dockerfile:5,26`
+- `deploy/k8s/25-minio.yaml:1,2,3,5,6,7,8,12,17,21,33,38,40,45,51,55,56,65,67,70,75,80,87`
 - `deploy/k8s/30-api.yaml:94`
 - `deploy/k8s/31-graph-projection-job.yaml:35`
 - `deploy/k8s/32-graph-projection-only-job.yaml:85`
@@ -324,6 +324,10 @@ cluster. La règle `allow-api-to-minio` reste en C tant que l’API servie par
 - `deploy/k8s/34-refresh-cronjob.yaml:115,116,220`
 - `deploy/k8s/41-grounding-citation-job.yaml:9,17,19,28,29,59,87,110,111,113`
 - `deploy/k8s/70-networkpolicy.yaml:98,126,129,130,131,133,134,138,143,148`
+- `deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml:1,4,5,7,8,9,12,19,20,24,29,31,35`
+- `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml:1,4,5,14,18,23,28,33`
+- `deploy/k8s/README.md:40`
+- `deploy/k8s/kustomization.yaml:45`
 - `deploy/k8s/41-grounding-worklist-configmap.yaml:12`
 - `deploy/k8s/grounding-preprod/projection-job.preprod.yaml:4,12,13,64,66`
 - `deploy/k8s/refresh-cronjobs/kustomization.yaml:56,58,61,80,89,159`
@@ -366,9 +370,20 @@ ligne textuelle ; le brief conducteur du 2026-09-11 en cite 27, écart de
 méthode de comptage, sans effet sur la règle ci-dessous).
 
 Décom gatée dans cet ordre : bucket OVH provisionné → objets migrés → clients
-repointés. Ne pas pruner avant. Le retrait de `deploy/k8s/25-minio.yaml` est la
+repointés. Ne pas pruner avant. Le retrait du serveur MinIO du git est la
 DERNIÈRE étape.
 
-État de cette branche : `deploy/k8s/25-minio.yaml` est actuellement supprimé en
-A (demande du brief initial). Cette suppression est à réconcilier avec le
-séquencement ci-dessus avant toute levée du hold de merge (PR #670, draft).
+Manifests conservés jusqu’à la dernière étape (revert du 2026-09-11, à
+l’identique de `831cad2`, comptés en C2) :
+
+- `deploy/k8s/25-minio.yaml` (StatefulSet + Service + PVC MinIO)
+- `deploy/k8s/71-networkpolicy-graph-projection-minio-preprod.yaml`
+- `deploy/k8s/72-networkpolicy-grounding-minio-preprod.yaml`
+- entrée `- 25-minio.yaml` dans `deploy/k8s/kustomization.yaml:45` (bundle
+  permanent ; sans elle, un `apply --prune` ou une re-provision retirerait le
+  MinIO load-bearing — drift git/runtime)
+- ligne `25-minio.yaml` du tableau `deploy/k8s/README.md:40`
+
+Retrait = future **PR B**, gatée bucket OVH (provisionné → objets migrés →
+clients repointés), hors périmètre de la PR #670. La PR #670 reste DRAFT
+(hold merge) tant que le séquencement n’est pas exécuté.

@@ -31,7 +31,7 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - `plan/NN-BRANCH_*.md` and `plan/done/**`
 - **Conditional Paths**:
   - Production storage endpoint, region, bucket, credentials, and mail provider require verified values from k8s/infra.
-  - MinIO decommissioning is gated: OVH bucket provisioned → objects migrated → clients repointed; the remaining `radar-minio` references are kept on purpose and `25-minio.yaml` removal is the LAST step (see inventory "Séquencement — décom MinIO"). This PR stays DRAFT (merge hold) until that sequencing is reconciled.
+  - MinIO decommissioning is gated: OVH bucket provisioned → objects migrated → clients repointed; the remaining `radar-minio` references are kept on purpose. The MinIO manifests (`25-minio.yaml`, network policies `71-*`/`72-*`, their `kustomization.yaml` entry) are RETAINED in this PR (reverted to `831cad2` on 2026-09-11); their removal is the LAST step, in a future PR B gated on the OVH bucket (see inventory "Séquencement — décom MinIO"). This PR stays DRAFT (merge hold).
 - **Exceptions**:
   - `ERADICATE-EX1`: `Makefile`, Compose files, workflows, and `rules/**` are explicitly in the owner-mandated residue sweep. Impact is limited to removing obsolete provider wiring; rollback is a revert of the affected commit.
 
@@ -54,7 +54,8 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - [x] Run the requested tracked-file inventory and verify the live OVH cluster evidence.
   - [x] Confirm GHCR package visibility and the successful build for `831cad2`.
 - [x] **Lot 1 — Remove dead infrastructure paths**
-  - [x] Delete provider-only workflows, mount helpers, one-shot manifests, and retired MinIO manifests/policies while preserving the live cluster MinIO network path.
+  - [x] Delete provider-only workflows, mount helpers and one-shot manifests while preserving the live cluster MinIO network path.
+  - [x] MinIO manifests (`25-minio.yaml`, network policies `71-*`/`72-*`, `kustomization.yaml` entry, README table row): RETAINED (k8s + i-infra sequencing, endorsed by the conductor 2026-09-11). The initial deletion was reverted to the `831cad2` state; removal is the LAST decom step, in a future PR B gated on the OVH bucket (provisioned → objects migrated → clients repointed).
   - [x] Transactional-email transport: RETAINED (owner decision 2026-09-11). The initial removal was reverted to the `831cad2` state (SCW TEM schema, resolver, mailer + tests, ConfigMap/secretKeyRef, example Secret); invitation-link log mode is unchanged from main. Removal deferred until i-infra proposes a replacement provider and the owner validates it.
 - [x] **Lot 2 — Replace verified image registry references**
   - [x] Make GHCR the build/push source of truth.
