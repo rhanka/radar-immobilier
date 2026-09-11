@@ -180,6 +180,14 @@ make k8s-validate K8S_VALIDATE_WITH_CLUSTER=1 KUBECONFIG=<path> ENV=<env>
 > `kubeconform` lands later, wire `kustomize build deploy/k8s | kubeconform`
 > into `k8s-validate` for full schema validation.
 
+## Production refresh CronJobs
+
+- Arm the CD step with `gh variable set REFRESH_CRONJOB_PROD_ENABLED --body true`.
+- It first applies on the next `v*` tag; the 03:17/04:30 UTC schedules stay outside, and must never overlap, the release backup window.
+- Disarm future applies by setting the variable to `false`; suspend already-deployed CronJobs with `suspend: true`.
+- The CronJobs scrape and parse/exploit deterministically, then project `graph/<city>/latest.json` from S3 into Postgres.
+- Capitalized `Signal` materialization remains owned by graphify v2.3 plus publication of `graph/<city>/latest.json`; these CronJobs do not replace it.
+
 ## Manual deploy (human, with cluster creds)
 
 `make deploy-k8s` is **prepare-only by default**: it validates and prints the

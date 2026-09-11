@@ -19,3 +19,40 @@ imagePullSecrets:
   - name: radar-registry-pull
 automountServiceAccountToken: false
 
+---
+# Additive least-privilege grant for the existing production CI deployer. The
+# `radar-ci-deployer` ServiceAccount is provisioned out-of-band; keeping refresh
+# permissions in a separate Role avoids replacing its existing deployment and
+# one-shot Job permissions.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: radar-ci-deployer-refresh-cronjobs
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+rules:
+  - apiGroups: ["batch"]
+    resources: ["cronjobs"]
+    verbs: ["get", "list", "create", "patch", "update"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: radar-ci-deployer-refresh-cronjobs
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: ci-deployer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: radar-ci-deployer-refresh-cronjobs
+subjects:
+  - kind: ServiceAccount
+    name: radar-ci-deployer
+    namespace: radar-immobilier
