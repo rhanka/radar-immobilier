@@ -14,9 +14,8 @@
  *   MxtV-N → mixte-villageois
  *   C-NNN  → commercial
  *   I-NNN  → industriel
- *   ID-NNN → industriel (Saint-Constant)
  *   P-NNN  → public/institutionnel
- *   CGS-N  → public (Saint-Constant)
+ *   CGS-N  → commercial (Saint-Constant: commerciale grande surface)
  *   "" / "N/D" → inconnu
  */
 
@@ -27,9 +26,9 @@ import type { ZoneKind } from "../../scoring/lot-potential.js";
 const ZONE_PREFIX_RULES: Array<{ re: RegExp; kind: SimulationZoneKind }> = [
   { re: /^(H|RM)-/i,             kind: "habitation"  },
   { re: /^(M|MS|MxtV)-/i,        kind: "mixte"       },
-  { re: /^C-/i,                   kind: "commercial"  },
-  { re: /^(I|ID)-/i,             kind: "industriel"  },
-  { re: /^(P|CGS)-/i,            kind: "public"      },
+  { re: /^(C|CGS)-/i,             kind: "commercial"  },
+  { re: /^I-/i,                   kind: "industriel"  },
+  { re: /^P-/i,                   kind: "public"      },
 ];
 
 /**

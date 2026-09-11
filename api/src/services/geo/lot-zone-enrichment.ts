@@ -21,7 +21,7 @@
  * ville) sont indexées une fois (bbox pré-calculées) et cachées côté route.
  *
  * ## Anti-invention
- *   - Zone introuvable → AUCUN champ zone/flag ajouté (absence honnête).
+ *   - Zone introuvable → AUCUN champ zone/flag ajouté (source-gap explicite).
  *   - `tod` : transmis UNIQUEMENT si la source lots le porte déjà
  *     (tod/in_tod/inTod). Jamais fabriqué (aucune donnée TOD live aujourd'hui).
  *   - `priorite` : présent UNIQUEMENT si `multifamilial4plus` ET `tod`
@@ -79,6 +79,8 @@ export interface ZoneIndexEntry {
   codeNorm: string;
   /** Kind canonique (SPEC_DESIGN_DATA_MODEL §1.1). */
   kind: ZoneKind;
+  /** Whether `kind` came from a source field or from the zone-code fallback. */
+  kindSource: "source" | "code";
   /** Densité RÉELLE (log/ha) si la source de zonage la porte ; null sinon. */
   densiteLogHa: number | null;
   /** Usages RÉELS si la source de zonage les porte ; [] sinon. */
@@ -191,11 +193,14 @@ function firstBoolean(values: readonly unknown[]): boolean | null {
 function canonicalZoneKind(
   props: Record<string, unknown>,
   code: string,
-): ZoneKind {
+): Pick<ZoneIndexEntry, "kind" | "kindSource"> {
   const rawKind = readString(props["kind"])?.toLowerCase() ?? null;
   const mapped = rawKind !== null ? OGC_KIND_TO_CANONICAL[rawKind] : undefined;
-  if (mapped) return mapped;
-  return canonicalKindFromSimKind(zoneKindFromCode(code));
+  if (mapped) return { kind: mapped, kindSource: "source" };
+  return {
+    kind: canonicalKindFromSimKind(zoneKindFromCode(code)),
+    kindSource: "code",
+  };
 }
 
 /** Usages réels : tableau de strings, ou string délimitée (";" / ","). */
@@ -287,7 +292,7 @@ export interface ZoneUsageDominant {
 
 /**
  * Usage dominant porté par les properties d'une zone (`qc-zonage-<slug>`).
- * Passthrough d'AFFICHAGE honnête : value/source null quand la source ne les
+ * Source-gap passthrough for display: value/source stay null when the source
  * porte pas — jamais une classification dérivée. Clés reconnues centralisées
  * dans normes-keys (source de vérité UNIQUE, réutilisée par l'index et le
  * payload lot servi au front).
@@ -359,7 +364,7 @@ function geometryBbox(geom: EnrichGeometry | null): Bbox | null {
  * Accepte les deux formes servies par la route :
  *   - store local PG (geo-features.ts : properties.zoneCode, …)
  *   - OGC live (properties.zone_code / ZONE / kind anglais / URL_GRILLE, …)
- * Les zones sans code exploitable sont ignorées (honnête).
+ * Les zones sans code exploitable sont ignorées (source-gap).
  */
 export function buildZoneIndex(fc: {
   features: EnrichFeature[];
@@ -393,10 +398,11 @@ export function buildZoneIndex(fc: {
     const normes = zoneNormes(props);
     const provenance = zoneReglementProvenance(props);
     const usageDominant = zoneUsageDominant(props);
+    const kindResolution = canonicalZoneKind(props, code);
     const entry: ZoneIndexEntry = {
       code,
       codeNorm,
-      kind: canonicalZoneKind(props, code),
+      ...kindResolution,
       densiteLogHa: normes.densiteLogHa,
       usages: normes.usages,
       grillePdfUrl: zoneGrillePdfUrl(props),
@@ -660,6 +666,7 @@ export function enrichLotFeatures(
       props["zone"] = {
         code: zone.code,
         kind: zone.kind,
+        kindSource: zone.kindSource,
         densiteLogHa: zone.densiteLogHa,
         usages: zone.usages,
         grillePdfUrl: zone.grillePdfUrl,
