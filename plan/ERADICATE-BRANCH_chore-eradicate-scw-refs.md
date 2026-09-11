@@ -51,9 +51,9 @@ Remove dead provider-specific infrastructure paths from the repository, switch c
   - [x] Create the isolated branch worktree from `origin/main` at `831cad2`.
   - [x] Run the requested tracked-file inventory and verify the live OVH cluster evidence.
   - [x] Confirm GHCR package visibility and the successful build for `831cad2`.
-- [ ] **Lot 1 — Remove dead infrastructure paths**
+- [x] **Lot 1 — Remove dead infrastructure paths**
   - [x] Delete provider-only workflows, mount helpers, one-shot manifests, and repository-owned MinIO manifests/policies.
-  - [ ] Remove the retired transactional-email transport while preserving invitation-link log mode.
+  - [x] Remove the retired transactional-email transport while preserving invitation-link log mode.
 - [ ] **Lot 2 — Replace verified image registry references**
   - [ ] Make GHCR the build/push source of truth.
   - [ ] Rewrite deploy image references to the verified public GHCR packages.
