@@ -69,6 +69,12 @@ if IFS=$'\t' read -r header_1 header_2 header_3 _rest < "$RERUN_TARGETS"; then
   fi
 fi
 
+mkdir -p "$RUN_DIR"
+exec 9> "$RUN_DIR/.runner.lock"
+if ! flock -n 9; then
+  echo "REFUS runner: another process holds the run directory lock." >&2
+  exit 1
+fi
 mkdir -p "$RUN_DIR/status" "$RUN_DIR/logs" "$RUN_DIR/workers" "$RUN_DIR/lanes"
 
 echo "=== Runner graphify v2.3 ==="

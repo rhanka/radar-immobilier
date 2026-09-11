@@ -58,6 +58,7 @@ Ingest the immutable 139-document CAS batch for 40 municipalities, merge fresh s
 - [ ] **Lot 3 — Runner and gates**
   - [x] Carry the immutable contract through runner, worker, gate, and metrics.
   - [x] Keep dry-run preflight and gate strictly read-only.
+  - [x] Lock each run directory against concurrent resumptions.
 - [ ] **Lot 4 — Qualification and delivery**
   - [ ] Run targeted static checks and the complete 40-city dry-run.
   - [ ] Record per-city results, exact calls, duration, errors, and verdict.
