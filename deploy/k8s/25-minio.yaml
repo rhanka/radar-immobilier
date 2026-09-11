@@ -53,7 +53,7 @@ spec:
       serviceAccountName: radar-app
       containers:
         - name: minio
-          image: minio/minio:latest
+          image: quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e  # digest exact en service (docker.io/minio/minio = 401 en pull anonyme depuis 2026-09-11 ; quay.io sert le même digest, vérifié 200)
           imagePullPolicy: IfNotPresent
           args: ["server", "/data", "--console-address", ":9001"]
           ports:
