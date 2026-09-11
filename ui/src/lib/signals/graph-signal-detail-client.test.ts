@@ -63,7 +63,7 @@ describe("extractDocRefs", () => {
         {
           docSha: "a74652366eeffeea",
           excerpt: "mineures aux règlements d'urbanisme",
-          rawRef: "/tmp/scw-docs/raw/proces-verbaux-saints-anges/cas/a74652366eeffeea.pdf",
+          rawRef: "/tmp/object-docs/raw/proces-verbaux-saints-anges/cas/a74652366eeffeea.pdf",
           page: 3,
         },
       ],

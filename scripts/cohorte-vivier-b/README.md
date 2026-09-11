@@ -35,6 +35,6 @@ accepté). geo-cond n'en a PAS besoin pour Model A L1 (qui se key sur set-167).
 - `tsconfig.json` — config tsx pour l'invocation.
 
 ## Provenance
-Dump prod-PG `graph_nodes` : `s3://radar-immobilier-docs-pocs/scratch/postbrossard-7263-20260803/graph_nodes.ndjson`
+Dump prod-PG `graph_nodes` : `s3://<verified-ovh-bucket>/scratch/postbrossard-7263-20260803/graph_nodes.ndjson`
 (export OVH read-only 2026-08-06, 7298 nœuds, sha256 `d9cb3cc6b9700caa1ba711d7fa204597e2db8be6b4002a764a7f386a43e57699`).
 Pour le 185·124 exact : rejouer ce script sur un dump frais (job 39-export OVH).
