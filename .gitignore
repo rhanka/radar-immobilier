@@ -41,7 +41,6 @@ Thumbs.db
 
 # Worktrees (repository-local ./tmp/<slug>, never system /tmp)
 tmp/
-.scw-mount
 
 # Test artifacts
 coverage/
@@ -61,8 +60,7 @@ data/
 *.dump
 *.pid
 
-# Scaleway / cloud creds
-.scw/
+# Cloud credentials
 .aws/
 *.kubeconfig
 kubeconfig*
