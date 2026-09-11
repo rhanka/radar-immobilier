@@ -1,0 +1,517 @@
+<!doctype html><html><head><meta charset="utf-8"><base href="file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/docs/reports/"><title>Enquête coûts immo & geo — août–septembre 2026</title><style>
+@page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+* { box-sizing: border-box; }
+body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; line-height: 1.42; font-size: 10.5px; }
+h1 { font-size: 28px; line-height: 1.12; color: #0b1728; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 3px solid #2563eb; }
+h2 { font-size: 18px; color: #10203a; margin: 26px 0 10px; padding-top: 6px; border-top: 1px solid #d8dee9; break-after: avoid; }
+h3 { font-size: 13.5px; color: #1d3557; margin: 18px 0 8px; break-after: avoid; }
+h4 { font-size: 12px; margin: 14px 0 6px; break-after: avoid; }
+p { margin: 6px 0; }
+ul, ol { margin-top: 5px; padding-left: 20px; }
+li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; font-size: 9px; break-inside: avoid; }
+th, td { border: 1px solid #cbd5e1; padding: 4px 5px; vertical-align: top; }
+th { background: #eef4ff; color: #10203a; font-weight: 700; }
+blockquote { border-left: 4px solid #93c5fd; background: #f8fbff; margin: 10px 0; padding: 8px 10px; color: #334155; }
+code { font-family: "SFMono-Regular", Consolas, monospace; background: #f1f5f9; padding: 1px 3px; border-radius: 3px; font-size: 0.9em; }
+pre { background: #0f172a; color: #e2e8f0; padding: 10px; border-radius: 6px; overflow: hidden; font-size: 8.5px; }
+img { display: block; max-width: 100%; max-height: 132mm; margin: 8px auto 16px; border: 1px solid #d7dde8; border-radius: 8px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12); break-inside: avoid; }
+hr { border: 0; border-top: 1px solid #d8dee9; margin: 18px 0; }
+strong { color: #0f172a; }
+a { color: #1d4ed8; text-decoration: none; }
+.cover-note { font-size: 10px; color: #64748b; margin-bottom: 18px; }
+table { break-inside: auto; } tr { break-inside: avoid; } thead { display: table-header-group; } td code { overflow-wrap: anywhere; } a { overflow-wrap: anywhere; }</style></head><body><h1>Coûts immo &amp; geo — août–septembre 2026</h1>
+<p><strong>Période : 2026-08-12 → 2026-09-10 inclus — 30 jours.</strong></p>
+<blockquote>
+<p><strong>Établi le 11 septembre 2026.</strong> Enquête séparée du rapport de livraison. Montants en CAD. <strong>Facturable calculé provisoire : ~260,78 CAD</strong>, dont LLM 214,70 CAD et infrastructure ~46,08 CAD. Tokens mesurés sur les journaux disponibles ; abonnements et change repris du dernier rapport (<em>inférés</em>) ; infrastructure estimée à partir de relevés OVH et d’un instantané CPU/RAM. <strong>Contrôle de reproduction historique non conforme au seuil de 0,1 %</strong> : voir A.5. Ces montants ne constituent pas une facture fournisseur par produit.</p>
+</blockquote>
+<h2>Résumé exécutif — facturable immo + geo</h2>
+<table>
+<thead>
+<tr>
+<th>Poste</th>
+<th align="right">immo</th>
+<th align="right">geo</th>
+<th align="right"><strong>immo + geo</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>(A) Infra k8s OVH, production + préproduction [estimé]</td>
+<td align="right">~40,27</td>
+<td align="right">~5,82</td>
+<td align="right"><strong>~46,08</strong></td>
+</tr>
+<tr>
+<td>(B) Abonnements IA / LLM, marge ×1,15 comprise</td>
+<td align="right">117,71</td>
+<td align="right">96,98</td>
+<td align="right"><strong>214,70</strong></td>
+</tr>
+<tr>
+<td><strong>Total période — provisoire</strong></td>
+<td align="right"><strong>~157,98 CAD</strong></td>
+<td align="right"><strong>~102,80 CAD</strong></td>
+<td align="right"><strong>~260,78 CAD</strong></td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>32,21 Md tokens immo</strong>, contre <strong>26,54 Md geo</strong>. Le volume immo vaut 1,21 fois le volume geo dans les sources accessibles. Les tokens de cache entrent dans ces volumes conformément à la méthode publiée.</li>
+<li>Le <strong>LLM par jour augmente de +16,1 %</strong> par rapport au montant P−1 publié : 6,17 → 7,16 CAD/j. La référence P−1 recalculée dans le même horizon donne +100,6 % ; cette divergence est explicitée, sans remplacement du montant publié.</li>
+<li>Le total incluant l’infrastructure passe de ~6,66 à ~8,69 CAD/j, soit <strong>+30,6 % [estimé]</strong>. La comparaison est limitée par les instantanés d’usage différents et l’ancienne période SCW→OVH.</li>
+<li>La préproduction immo pèse 21,43 % de la clé CPU/RAM au moment de la mesure. Il s’agit d’un instantané du 11 septembre, pas d’une moyenne du mois.</li>
+</ul>
+<h2>1. (A) Infrastructure Kubernetes — OVH</h2>
+<h3>1.1 Périmètre et relevés</h3>
+<p>La période étudiée est entièrement postérieure à la bascule SCW→OVH décrite dans le rapport précédent. Les workloads immo et geo actifs sont observés sur OVH ; le contexte kubectl par défaut est un résidu SCW sans pods immo/geo actifs dans la mesure. La ventilation utilise donc <strong>OVH avec les namespaces de production et préproduction</strong>. Les ressources d’autres produits restent hors facture client. [I1–I3]</p>
+<p>Le relevé OVH d’août expose <strong>122,448322 CAD de nœuds b3-8</strong> ; celui de septembre <strong>53,798241 CAD</strong>, arrêté au <strong>2026-09-11T15:00:13.063Z</strong>. Le total de projet, tous postes confondus, est respectivement <strong>144,141696 CAD</strong> et <strong>61,923526 CAD</strong> ; ces totaux ne sont pas facturés directement au client. [I2]</p>
+<table>
+<thead>
+<tr>
+<th>Composante</th>
+<th>Dérivation</th>
+<th align="right">Pool nœuds CAD</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12→31 août, 20 jours</td>
+<td>122,448322 × 20/31 ; lissage mensuel [estimé]</td>
+<td align="right">78,998917</td>
+</tr>
+<tr>
+<td>1→10 septembre, 10 jours</td>
+<td>53,798241 × 10/10,625151192 ; durée du 01/09 au dernier relevé [estimé]</td>
+<td align="right">50,632918</td>
+</tr>
+<tr>
+<td><strong>Pool période</strong></td>
+<td>Somme avant arrondi</td>
+<td align="right"><strong>129,631836</strong></td>
+</tr>
+</tbody></table>
+<p>Le lissage de septembre retire la fraction du 11 septembre incluse dans le relevé. La date de dernière mise à jour est utilisée comme borne du relevé ; un décalage de remontée de consommation reste possible. Cette méthode conserve le prorata des rapports précédents, sans supposer un nombre constant de nœuds malgré les changements de capacité.</p>
+<h3>1.2 Clé CPU/RAM réelle, instantanée</h3>
+<p>Commande : <code>timeout 30 kubectl … top pods -A</code>, accès OVH explicite. Total mesuré : <strong>319 mCPU et 6 021 MiB</strong>. La clé par namespace est <code>(CPU_namespace / CPU_total + RAM_namespace / RAM_total) / 2</code>. [I1]</p>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th align="right">CPU m</th>
+<th align="right">RAM MiB</th>
+<th align="right">Part CPU</th>
+<th align="right">Part RAM</th>
+<th align="right">Clé moyenne</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>radar-immobilier</td>
+<td align="right">12</td>
+<td align="right">652</td>
+<td align="right">3,76 %</td>
+<td align="right">10,83 %</td>
+<td align="right">7,30 %</td>
+</tr>
+<tr>
+<td>radar-immobilier-preprod</td>
+<td align="right">86</td>
+<td align="right">957</td>
+<td align="right">26,96 %</td>
+<td align="right">15,89 %</td>
+<td align="right">21,43 %</td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">8</td>
+<td align="right">110</td>
+<td align="right">2,51 %</td>
+<td align="right">1,83 %</td>
+<td align="right">2,17 %</td>
+</tr>
+<tr>
+<td>geo-preprod</td>
+<td align="right">1</td>
+<td align="right">231</td>
+<td align="right">0,31 %</td>
+<td align="right">3,84 %</td>
+<td align="right">2,08 %</td>
+</tr>
+<tr>
+<td><strong>immo, prod + préprod</strong></td>
+<td align="right">98</td>
+<td align="right">1 609</td>
+<td align="right">30,72 %</td>
+<td align="right">26,72 %</td>
+<td align="right"><strong>28,72 %</strong></td>
+</tr>
+<tr>
+<td><strong>geo, prod + préprod</strong></td>
+<td align="right">9</td>
+<td align="right">341</td>
+<td align="right">2,82 %</td>
+<td align="right">5,66 %</td>
+<td align="right"><strong>4,24 %</strong></td>
+</tr>
+</tbody></table>
+<h3>1.3 Stockage direct et allocation</h3>
+<p>Le tarif block classique est <strong>0,000088 CAD/GiB·h</strong>, re-mesuré par <code>5,55984 / 63180</code> dans le relevé OVH d’août et corroboré par septembre. Les PVC actuels sont mesurés, mais leur capacité passée n’est pas reconstituée heure par heure. [I2–I3]</p>
+<table>
+<thead>
+<tr>
+<th>Produit / environnement</th>
+<th>PVC observés</th>
+<th>Durée retenue</th>
+<th align="right">Coût block [estimé]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo prod</td>
+<td>MinIO 5 Gi + Postgres 5 Gi</td>
+<td>720 h</td>
+<td align="right">0,63 CAD</td>
+</tr>
+<tr>
+<td>immo préprod</td>
+<td>MinIO 40 Gi + Postgres 5 Gi</td>
+<td>606,038889 h, depuis création le 16/08 à 17:57:40Z</td>
+<td align="right">2,40 CAD</td>
+</tr>
+<tr>
+<td>geo prod</td>
+<td>PostGIS 5 Gi</td>
+<td>720 h</td>
+<td align="right">0,32 CAD</td>
+</tr>
+</tbody></table>
+<p><strong>Réserve importante :</strong> la capacité MinIO préprod de 40 Gi est appliquée à toute sa durée d’existence dans la fenêtre. Track documente une capacité antérieure plus petite et des redimensionnements début septembre ; le coût de stockage immo est donc une approximation susceptible de surestimer cette composante. Les clés CPU/RAM actuelles sont, elles aussi, extrapolées sur la période, y compris avant la création des préproductions. Leur historique exact est inconnu.</p>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Nœuds : clé × 129,63 CAD</th>
+<th align="right">Stockage direct</th>
+<th align="right"><strong>Infrastructure [estimé]</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">37,23</td>
+<td align="right">3,03</td>
+<td align="right"><strong>40,27 CAD</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">5,50</td>
+<td align="right">0,32</td>
+<td align="right"><strong>5,82 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>Total client</strong></td>
+<td align="right">42,73</td>
+<td align="right">3,35</td>
+<td align="right"><strong>46,08 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Conformément au périmètre précédent, S3, registry, load balancers et autres services ne sont pas répartis dans ce total centré sur nœuds + PVC. Leur coût ne vaut pas zéro. Les coûts du fournisseur de tuiles cartographiques ne sont pas couverts par cette enquête OVH + abonnements agents ; <strong>source-gap</strong> pour ce poste.</p>
+<h2>2. (B) Abonnements IA / agents LLM</h2>
+<p>Forfaits repris du dernier rapport : <strong>2 Claude Max ×20 à 200 USD/mois chacun + 1 ChatGPT Pro à 200 USD/mois</strong>. Forfaits actuels <strong><em>inférés</em></strong>, non re-vérifiés auprès des fournisseurs. Change <strong>1,37 CAD/USD</strong> et <strong>1,617 CAD/EUR</strong>, <em>inférés</em> ; l’EUR n’intervient pas dans le coût OVH de cette fenêtre. Marge <strong>×1,15 sur le LLM seulement</strong>. [C0]</p>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th>Claude, tokens / part capacité</th>
+<th>Codex, tokens / part capacité</th>
+<th align="right">Prorata USD</th>
+<th align="right">Prorata CAD</th>
+<th align="right"><strong>Facturable CAD ×1,15</strong></th>
+<th align="right">Attention estimée</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td>31,94 Md (18,59 %)</td>
+<td>0,27 Md (0,18 %)</td>
+<td align="right">74,72</td>
+<td align="right">102,36</td>
+<td align="right"><strong>117,71</strong></td>
+<td align="right">~0,5 h</td>
+</tr>
+<tr>
+<td>geo</td>
+<td>26,32 Md (15,32 %)</td>
+<td>0,22 Md (0,14 %)</td>
+<td align="right">61,56</td>
+<td align="right">84,33</td>
+<td align="right"><strong>96,98</strong></td>
+<td align="right">~0,3 h</td>
+</tr>
+<tr>
+<td><strong>immo + geo</strong></td>
+<td><strong>58,26 Md</strong></td>
+<td><strong>0,49 Md</strong></td>
+<td align="right"><strong>136,27</strong></td>
+<td align="right"><strong>186,69</strong></td>
+<td align="right"><strong>214,70</strong></td>
+<td align="right"><strong>~0,8 h</strong></td>
+</tr>
+</tbody></table>
+<p>Capacité commune mesurée sur <code>2026-05-04..2026-09-11</code> : <strong>Claude 40 092 898 291 tokens/7 j ; Codex 35 407 501 297 tokens/7 j</strong>. Les trois groupes utilisent exactement ces mêmes dénominateurs. Sur 30 jours, la formule alloue les forfaits de 400 USD pour Claude et 200 USD pour Codex. [C1–C3]</p>
+<p>Le temps d’attention est <strong>estimé</strong>, pas chronométré : le script affecte un temps forfaitaire aux messages humains selon leur longueur. Il n’est ni un total d’heures travaillées ni une mesure du temps machine. La consommation en tokens inclut les lectures de cache ; elle ne correspond pas à autant de nouveaux tokens facturés à l’unité.</p>
+<h2>3. Récapitulatif produit × poste</h2>
+<table>
+<thead>
+<tr>
+<th>Produit</th>
+<th align="right">Infra [estimé]</th>
+<th align="right">LLM prorata CAD</th>
+<th align="right">LLM facturable ×1,15</th>
+<th align="right"><strong>Total provisoire</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">~40,27</td>
+<td align="right">102,36</td>
+<td align="right">117,71</td>
+<td align="right"><strong>~157,98 CAD</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">~5,82</td>
+<td align="right">84,33</td>
+<td align="right">96,98</td>
+<td align="right"><strong>~102,80 CAD</strong></td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>~46,08</strong></td>
+<td align="right"><strong>186,69</strong></td>
+<td align="right"><strong>214,70</strong></td>
+<td align="right"><strong>~260,78 CAD</strong></td>
+</tr>
+</tbody></table>
+<p>Les totaux sont calculés avant arrondi ; l’addition de lignes affichées peut différer d’un centime.</p>
+<hr>
+<h2>Annexe — méthode, reproduction et limites</h2>
+<h3>A.1 Fenêtres et conventions</h3>
+<ul>
+<li><strong>P</strong> : 2026-08-12→2026-09-10 inclus, <strong>30 jours</strong>. <strong>P−1 publié</strong> : 2026-07-13→2026-08-09 inclus, <strong>28 jours</strong>. Les 10 et 11 août ne sont dans aucune de ces deux fenêtres.</li>
+<li>Agent-stats groupe les événements par date UTC ; l’infrastructure utilise aussi UTC. Le rapport de livraison suit les jours civils de Montréal (UTC−4). Ce décalage de bornes est explicite.</li>
+<li>Comptes : immo = <code>radar-immobilier</code> ; geo = <code>geo,geo-quebec</code> ; plateforme = groupe historique défini en A.3. La capacité reste globale, tous projets accessibles, pas seulement les trois groupes.</li>
+<li>Source LLM : journaux Claude et index Codex locaux accessibles au collecteur. Cursor, Gemini et d’éventuels journaux de sessions distantes non rapatriés sont <strong>non couverts</strong>. Les comptes gardent le périmètre du rapport précédent ; « plateforme » ne signifie pas une réaffectation automatique de tout repo nouveau.</li>
+</ul>
+<h3>A.2 Formules</h3>
+<pre><code class="language-text">capacité = maximum de la somme des tokens sur 7 jours glissants,
+           par fournisseur, sur SINCE..UNTIL
+prorata_USD = somme_fournisseurs[
+  tokens_compte / (capacité × jours/7)
+  × (places × 200 USD × jours/30)
+]
+LLM_facturable_CAD = prorata_USD × 1,37 × 1,15
+clé_infra = 0,5 × (CPU_compte/CPU_cluster + RAM_compte/RAM_cluster)
+infra_CAD = clé_infra × pool_nœuds + PVC_GiB × heures × tarif
+delta_normalisé = (P / 30) / (P_moins_1 / 28) - 1
+</code></pre>
+<p>Les heures de nœuds OVH corroborent environ 0,082 CAD/h. Le pool client est dérivé des consommations monétaires observées, et non d’une hypothèse de nœuds constants.</p>
+<h3>A.3 Recette agent-stats et exécution bornée</h3>
+<p>Script original <strong>inchangé</strong> : <code>/home/antoinefa/src/agent-stats/packages/web/scripts/project-costs.mjs</code>. SHA-256 : <code>7ce943597fe3186264f1e31b356d3ad6d2508cb7926ea9223a37242f447ef0e0</code>.</p>
+<pre><code class="language-text">SINCE=2026-05-04
+UNTIL=2026-09-11
+WINDOWS=prev:2026-07-13..2026-08-09,cur:2026-08-12..2026-09-10
+CLAUDE_SEATS=2 CODEX_SEATS=1 SEAT_USD=200 MARGIN=0.15 USDCAD=1.37
+REPOS (un run par groupe) :
+  radar-immobilier
+  geo,geo-quebec
+  sentropic,sent-tech,sent-tech-design-system,agent-stats,track,
+  poc-k8s,h2a,harness,coordinate
+</code></pre>
+<p>Les tentatives directes se sont arrêtées à <code>timeout 30</code> (code 124). Pour respecter cette limite sans tronquer la collecte, les <strong>parseurs installés d’agent-stats</strong> ont été exécutés sur l’inventaire des fichiers en lots disjoints et reprenables, chacun sous <code>timeout 30</code>. Le cache conserve les champs effectivement lus par le script de coûts et leur ordre par fichier. Les mêmes filtres mtime, dates d’événements et dates de création de sessions Codex sont reproduits. Un chargeur Node remplace uniquement l’itérateur de collecte par la relecture de ce cache ; <strong>attribution, pic glissant, formule et paramètres du script original restent inchangés</strong>. Cette adaptation d’exécution est consultable ; il ne s’agit pas d’un succès du run direct.</p>
+<p>Intermédiaires : <code>month-cache.mjs</code>, <code>month-cache-replay.mjs</code>, <code>month-cost-loader.mjs</code>, <code>month-costs.mjs</code>, tous sous <code>.remote/</code>. Inventaire figé : <code>month-evidence/cost-cache/index.json</code>. Sorties : <code>cost-immo-current.json</code>, <code>cost-geo-current.json</code>, <code>cost-platform-current.json</code>. La relecture des trois groupes a terminé avec code 0. Le cache facilite l’audit de cette exécution ; il ne rétablit pas un corpus historique disparu. <strong>Vérification indépendante (revue Fable 5.1) :</strong> un run direct du script original <strong>sans le plafond de 30 s</strong> (~3 min par groupe) reproduit ces montants <strong>à l’unité</strong> (immo courant et geo P−1), ce qui confirme le statut « mesuré » et montre que l’adaptation d’exécution est sans effet sur les résultats.</p>
+<p>Recette locale depuis ce workspace :</p>
+<pre><code class="language-text">make -f .remote/month-report.mk costs GROUP=immo ENV=report-month
+make -f .remote/month-report.mk costs GROUP=geo ENV=report-month
+make -f .remote/month-report.mk costs GROUP=platform ENV=report-month
+make -f .remote/month-report.mk costs GROUP=immo HORIZON=repro ENV=report-month
+make -f .remote/month-report.mk costs GROUP=geo HORIZON=repro ENV=report-month
+</code></pre>
+<h3>A.4 Comparaison normalisée à P−1</h3>
+<p><strong>Comparaison au rapport publié</strong> : les montants P−1 restent ceux effectivement publiés, sans les remplacer par un recalcul.</p>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th align="right">P−1 publié, 28 j</th>
+<th align="right">P, 30 j</th>
+<th align="right">CAD/j P−1 → P</th>
+<th align="right">Δ/j</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">55,15</td>
+<td align="right">117,71</td>
+<td align="right">1,97 → 3,92</td>
+<td align="right"><strong>+99,2 %</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">117,50</td>
+<td align="right">96,98</td>
+<td align="right">4,20 → 3,23</td>
+<td align="right"><strong>-23,0 %</strong></td>
+</tr>
+<tr>
+<td><strong>LLM client</strong></td>
+<td align="right"><strong>172,65</strong></td>
+<td align="right"><strong>214,70</strong></td>
+<td align="right"><strong>6,17 → 7,16</strong></td>
+<td align="right"><strong>+16,1 %</strong></td>
+</tr>
+<tr>
+<td>Total client avec infra [estimé]</td>
+<td align="right">~186,34</td>
+<td align="right">~260,78</td>
+<td align="right">~6,66 → ~8,69</td>
+<td align="right">+30,6 %</td>
+</tr>
+</tbody></table>
+<p><strong>Comparaison interne avec le même corpus et la même capacité courants</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th align="right">P−1 recalculé</th>
+<th align="right">P courant</th>
+<th align="right">CAD/j P−1 → P</th>
+<th align="right">Δ/j</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">48,10</td>
+<td align="right">117,71</td>
+<td align="right">1,72 → 3,92</td>
+<td align="right">+128,4 %</td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">51,77</td>
+<td align="right">96,98</td>
+<td align="right">1,85 → 3,23</td>
+<td align="right">+74,8 %</td>
+</tr>
+<tr>
+<td>Plateforme, hors facture client</td>
+<td align="right">134,19</td>
+<td align="right">113,30</td>
+<td align="right">4,79 → 3,78</td>
+<td align="right">-21,2 %</td>
+</tr>
+<tr>
+<td><strong>LLM client</strong></td>
+<td align="right"><strong>99,88</strong></td>
+<td align="right"><strong>214,70</strong></td>
+<td align="right"><strong>3,57 → 7,16</strong></td>
+<td align="right"><strong>+100,6 %</strong></td>
+</tr>
+</tbody></table>
+<p>La variation interne n’est pas interchangeable avec la variation au publié : la référence et l’horizon du pic changent. Le rapport P−1 avait aussi été produit avant la fin de sa dernière journée.</p>
+<h3>A.5 Contrôle de reproduction — seuil non satisfait</h3>
+<p>Le contrôle recalcule exactement <strong>2026-07-13→2026-08-09</strong>, avec l’horizon historique <code>SINCE=2026-05-04, UNTIL=2026-08-10</code>, les mêmes forfaits et le même change. [C4–C5]</p>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th align="right">Publié CAD</th>
+<th align="right">Recalcul horizon historique CAD</th>
+<th align="right">Écart relatif</th>
+<th>Seuil ≤0,1 %</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immo</td>
+<td align="right">55,15</td>
+<td align="right">59,33</td>
+<td align="right">+7,6 %</td>
+<td><strong>Non conforme</strong></td>
+</tr>
+<tr>
+<td>geo</td>
+<td align="right">117,50</td>
+<td align="right">61,18</td>
+<td align="right">-47,9 %</td>
+<td><strong>Non conforme</strong></td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>172,65</strong></td>
+<td align="right"><strong>120,51</strong></td>
+<td align="right"><strong>-30,2 %</strong></td>
+<td><strong>Non conforme</strong></td>
+</tr>
+</tbody></table>
+<p>Le rapport précédent indiquait un pic Claude de 34,81 Md/7 j ; le contrôle actuel à l’horizon historique retourne <strong>31,51 Md/7 j</strong>. Le volume Claude geo sur P−1 est désormais <strong>9,41 Md</strong>, contre <strong>23,73 Md</strong> arrondis au publié. Ces différences dépassent largement un arrondi. La cause précise entre évolution du corpus, disponibilité des journaux ou lecture installée est <strong>non vérifiée</strong> : aucune archive brute complète de l’ancien calcul n’a été identifiée parmi les sources de cette enquête. Le rapport ne compense pas cet écart et ne revendique pas la stabilité historique de la mesure.</p>
+<p><strong>Correctif recommandé, non exécuté :</strong> le responsable agent-stats doit conserver le corpus/les agrégats sources et les versions de parseurs pour chaque facture, puis expliquer les différences de volume et de dénominateur. Critère de clôture : reproduction de la fenêtre publiée à ≤0,1 % ou correction documentée du rapport de référence. Les montants courants restent <strong>provisoires</strong> tant que cette vérification est ouverte.</p>
+<h3>A.6 Plateforme partagée — contexte, hors facture client</h3>
+<table>
+<thead>
+<tr>
+<th>Compte</th>
+<th>Claude / part capacité</th>
+<th>Codex / part capacité</th>
+<th align="right">Prorata USD</th>
+<th align="right">Prorata CAD</th>
+<th align="right">Facturable théorique CAD</th>
+<th align="right">Attention estimée</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Plateforme</td>
+<td>26,99 Md (15,71 %)</td>
+<td>6,89 Md (4,54 %)</td>
+<td align="right">71,91</td>
+<td align="right">98,52</td>
+<td align="right"><strong>113,30</strong></td>
+<td align="right">~26,2 h</td>
+</tr>
+</tbody></table>
+<p>LLM théorique des trois comptes : <strong>327,99 CAD</strong>. La part plateforme de <strong>113,30 CAD</strong> n’est pas ajoutée à immo ou geo. Sa clé infra observée sur <code>sentropic*</code> et <code>h2a-mcp</code> est <strong>7,57 %</strong>, soit ~9,81 CAD de nœuds selon le même proxy. Le stockage plateforme n’est pas ventilé ici.</p>
+<h3>A.7 Sources et limites de lecture</h3>
+<p>Toutes les sorties ci-dessous sont sous <code>.remote/month-evidence/</code>, avec métadonnées de commande et horodatage ; <code>calculations.json</code> porte les résultats non arrondis.</p>
+<table>
+<thead>
+<tr>
+<th>Réf.</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>C0</td>
+<td><code>docs/reports/couts-2026-07-13_2026-08-09.md</code>, rapport publié et ses conventions</td>
+</tr>
+<tr>
+<td>C1 / C2 / C3</td>
+<td><code>cost-immo-current.json</code> / <code>cost-geo-current.json</code> / <code>cost-platform-current.json</code></td>
+</tr>
+<tr>
+<td>C4 / C5</td>
+<td><code>cost-immo-repro.json</code> / <code>cost-geo-repro.json</code></td>
+</tr>
+<tr>
+<td>I1</td>
+<td><code>ovh-admin-top-pods.txt</code>, clé recalculée dans <code>infra-calculation.json</code></td>
+</tr>
+<tr>
+<td>I2</td>
+<td><code>billing-RUN2_202608.json</code>, <code>billing-RUN2_202609.json</code>, <code>billing-current.json</code></td>
+</tr>
+<tr>
+<td>I3</td>
+<td><code>ovh-admin-pvcs.txt</code>, <code>ovh-admin-deployments.txt</code> et instantané Track</td>
+</tr>
+</tbody></table>
+<ul>
+<li>ovh-admin-top-pods.meta.json : début 2026-09-11T15:14:02.920Z, fin 2026-09-11T15:14:03.226Z.</li>
+<li>billing-RUN2_202608.meta.json : début 2026-09-11T15:13:50.026Z, fin 2026-09-11T15:13:50.662Z.</li>
+<li>billing-RUN2_202609.meta.json : début 2026-09-11T15:13:50.043Z, fin 2026-09-11T15:13:50.586Z.</li>
+</ul>
+<p><strong>Mesuré :</strong> tokens interprétés par les parseurs sur les fichiers accessibles, consommations monétaires retournées par OVH, usage CPU/RAM et PVC à l’instant indiqué. <strong>Calculé avec hypothèses :</strong> forfaits, change, marge, prorata capacité, durées lissées, allocation infra. <strong>Inconnu / non couvert :</strong> usage infra historique intégré, factures agents actuelles, exhaustivité des journaux distants, frais cartographiques, autres postes cloud exclus, éventuels chevauchements d’attribution cwd/repoUrl entre comptes. Aucun manque n’est assimilé à zéro.</p>
+</body></html>
