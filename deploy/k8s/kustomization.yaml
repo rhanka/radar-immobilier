@@ -42,6 +42,7 @@ resources:
   - 00-namespace.yaml
   - 10-rbac.yaml
   - 20-postgres-postgis.yaml
+  - 25-minio.yaml
   - 30-api.yaml
   # 31/32/33 = Jobs one-shot (projection, projection-only, scrape) appliqués À LA
   # MAIN par le conducteur (kubectl apply -f), pas dans le bundle permanent.
