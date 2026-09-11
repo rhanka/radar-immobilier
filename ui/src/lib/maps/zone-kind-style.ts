@@ -1,8 +1,8 @@
 /**
  * zone-kind-style — teinte des aplats de ZONE par kind (langage couleur du
  * zonage : résidentiel jaune, commercial rouge, industriel violet, agricole
- * vert…), dérivée des TOKENS catégoriels du design-system
- * (`--st-semantic-data-category1..8`) — aucune palette inventée.
+ * vert…), dérivée des tokens sémantiques du design-system. Les huit tokens
+ * catégoriels couvrent huit familles ; l'utilité publique emploie un neutre DS.
  *
  * Parité concurrente (vue Signaux) : les zones ne sont plus des contours gris
  * uniformes mais des aplats doux distincts par famille, sous les lots colorés
@@ -10,7 +10,7 @@
  *   1. libellé `affectation` de la source quand présent — le plus fiable
  *      (« Conservation », « CV - Résidentielle de faible densité »…) ;
  *   2. sinon `kind` de la source : libellé (« habitation », « mixed-use »…),
- *      lettre canonique, ou code court de la taxonomie geo (« CO », « Rv »,
+ *      lettre canonique, ou code court de la taxonomie geo (« CO », « Rec/f »,
  *      « Af/b »… — `kindFromZoneCode` sur le champ `kind` SOURCE) ;
  *   3. sinon code réel de la zone (« H-12 », « CO-939 »).
  * Le code reste l'identité affichée de la zone ; la famille pilote uniquement
@@ -34,9 +34,9 @@ export interface ZoneKindStyle {
 }
 
 /**
- * Teintes par kind canonique — tokens catégoriels DS (valeurs sent-tech en
- * fallback hors DOM). Choix aligné sur le langage couleur classique du
- * zonage municipal.
+ * Teintes par kind canonique — tokens sémantiques DS (valeurs sent-tech en
+ * fallback hors DOM). Choix aligné sur le langage couleur classique du zonage
+ * municipal, avec un neutre distinct pour la neuvième famille.
  */
 export const ZONE_KIND_STYLES: Record<Exclude<ZoneKind, "AUTRE">, ZoneKindStyle> = {
   H: { token: "--st-semantic-data-category6", fallback: "#EDC948", label: "Habitation" },
@@ -47,7 +47,7 @@ export const ZONE_KIND_STYLES: Record<Exclude<ZoneKind, "AUTRE">, ZoneKindStyle>
   A: { token: "--st-semantic-data-category5", fallback: "#59A14F", label: "Agricole" },
   CONS: { token: "--st-semantic-data-category4", fallback: "#76B7B2", label: "Conservation" },
   REC: { token: "--st-semantic-data-category8", fallback: "#FF9DA7", label: "Récréation / tourisme" },
-  U: { token: "--st-semantic-data-category8", fallback: "#FF9DA7", label: "Utilité publique" },
+  U: { token: "--st-semantic-text-muted", fallback: "#64748B", label: "Utilité publique" },
 };
 
 /**
@@ -135,7 +135,7 @@ function kindFromLabel(label: string | null | undefined): StyledZoneKind | null 
  *   1. libellé `affectation` (« Conservation » → CONS, « CV - Résidentielle
  *      de faible densité » → H…) ;
  *   2. `kind` source : lettre canonique (« H »), libellé (« habitation »,
- *      « mixed-use »), ou code court de la taxonomie geo (« CO », « Rv »,
+ *      « mixed-use »), ou code court de la taxonomie geo (« CO », « Rec/f »,
  *      « Af/b » — `kindFromZoneCode` sur le champ `kind`) ;
  *   3. code de zone (« H-431 » → H, « CO-939 » → CONS).
  * Le code reste inchangé comme identité. null si aucune famille ne correspond.
