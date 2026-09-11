@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# stage-candidate.sh — stage a host-grounded candidate to SCW docs-pocs candidats/<city>/ for the
+# stage-candidate.sh — stage a host-grounded candidate to object store configured bucket candidats/<city>/ for the
 # in-cluster publish-only Job to pull + hash-verify. Writes ONLY the candidats/ prefix (NEVER raw/,
 # NEVER graph/ — the graph/ publish is the in-cluster Job → MinIO docs-preprod). The staged .sha256
 # is the invariant recette certified and the Job hash-verifies (certify == published).
@@ -8,7 +8,7 @@
 # → in-cluster publish-only Job. Run this ONLY after recette's OK.
 #
 # Usage: stage-candidate.sh <city> <local_candidate.json>
-# Env (docs-pocs RW): SCRAPE_S3_ENDPOINT SCRAPE_S3_BUCKET SCRAPE_S3_ACCESS_KEY SCRAPE_S3_SECRET_KEY
+# Env (configured bucket RW): SCRAPE_S3_ENDPOINT SCRAPE_S3_BUCKET SCRAPE_S3_ACCESS_KEY SCRAPE_S3_SECRET_KEY
 #      (sources ./.env if present). Optional EXPECTED_SHA to assert the staged bytes == what recette got.
 set -euo pipefail
 CITY="${1:?city requis}"
@@ -16,7 +16,7 @@ CAND="${2:?local candidate json requis}"
 [ -s "$CAND" ] || { echo "stage-candidate: FAIL — candidat vide/absent: $CAND" >&2; exit 2; }
 [ -f .env ] && { set -a; source .env; set +a; }
 for v in SCRAPE_S3_ENDPOINT SCRAPE_S3_BUCKET SCRAPE_S3_ACCESS_KEY SCRAPE_S3_SECRET_KEY; do
-  [ -z "${!v:-}" ] && { echo "stage-candidate: FAIL-CLOSED — $v vide (docs-pocs RW requis)." >&2; exit 2; }
+  [ -z "${!v:-}" ] && { echo "stage-candidate: FAIL-CLOSED — $v vide (configured bucket RW requis)." >&2; exit 2; }
 done
 export AWS_ACCESS_KEY_ID="$SCRAPE_S3_ACCESS_KEY" AWS_SECRET_ACCESS_KEY="$SCRAPE_S3_SECRET_KEY"
 export AWS_REGION="${SCRAPE_S3_REGION:-us-east-1}"

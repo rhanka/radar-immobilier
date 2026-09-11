@@ -9,7 +9,7 @@ les résultats du pilote mont-tremblant.
 
 ## Pipeline (bout en bout)
 
-`docSha → PDF S3 → pdftotext → Sonnet 4.6 verbatim → inject properties.citation → gate → publish SCW`
+`docSha → PDF S3 → pdftotext → Sonnet 4.6 verbatim → inject properties.citation → gate → publish object store`
 
 1. **Map nœud→docSha** : `nodes-by-sha.json` — direct (`properties.docSha`) ou
    propagé via l'arête `raises_signal` du DesignationEvent parent. Aucune invention.
@@ -23,7 +23,7 @@ les résultats du pilote mont-tremblant.
    + scalaires `properties.citation/page/sourceUrl/rawRef`, purge les refs
    `generated://`/`synthetic`, bump `ontology_version`→`2.3`.
 6. **Gate + publish** : `gate-grounding.sh` (check 7bis, voir ci-dessous) qui
-   délègue au gate canonique `tools/graphify-v23/gate.sh` (publish atomique SCW +
+   délègue au gate canonique `tools/graphify-v23/gate.sh` (publish atomique object store +
    backup `graph/<city>/history/`).
 
 ## Scripts
@@ -36,7 +36,7 @@ les résultats du pilote mont-tremblant.
 - `gate-grounding.sh <city> <candidate> <baseline> <run_dir> <lane_id>` — wrapper
   de gate SPÉCIFIQUE au grounding (check 7bis → délègue au gate canonique).
 - `drive-grounding.sh <worklist> <run_dir> [n_lanes]` — pilote multi-villes
-  (faible concurrence, résumable via SCW), enchaîne worker → gate-grounding par ville.
+  (faible concurrence, résumable via object store), enchaîne worker → gate-grounding par ville.
 
 ## Garde-fous
 

@@ -15,7 +15,7 @@
 #    Le check vit donc ici, en local grounding uniquement.
 #
 # Flux : 7bis d'abord (refus rapide sans publish) → délègue au gate canonique
-#        (shape/header/préservation/refs grounded + publish atomique SCW).
+#        (shape/header/préservation/refs grounded + publish atomique object store).
 # Exit 0 si published, 1 sinon. Écrit une ligne JSONL blocked dans
 # $run_dir/status/central.jsonl en cas d'échec 7bis (même format que le gate).
 set -euo pipefail
@@ -126,7 +126,7 @@ if [ -n "${CHECK_ONLY:-}" ]; then
 fi
 
 # ── 2-bucket (préprod-safe) : le PUBLISH doit viser le PUBLISH bucket (OVH préprod-graph), JAMAIS le
-#    READ bucket (SCW -pocs / prod). Le gate canonique publie vers SCRAPE_S3_BUCKET/ENDPOINT avec AWS_*.
+#    READ bucket (object store  legacy bucket / prod). Le gate canonique publie vers SCRAPE_S3_BUCKET/ENDPOINT avec AWS_*.
 #    On surcharge ces variables ICI (wrapper grounding) avec les valeurs PUBLISH → gate.sh partagé
 #    INCHANGÉ. Fallback SCRAPE_S3_*/AWS_* = mode single-bucket (dev/legacy) : comportement identique. ──
 export SCRAPE_S3_BUCKET="${PUBLISH_S3_BUCKET:-${SCRAPE_S3_BUCKET:-}}"

@@ -34,7 +34,7 @@ echo "=== Preflight graphify v2.3 runner ==="
 echo "Root: $ROOT"
 echo ""
 
-# ── 1. SCW credentials ────────────────────────────────────────────────────────
+# ── 1. object store credentials ────────────────────────────────────────────────────────
 source "$ROOT/.env" 2>/dev/null || true
 export AWS_ACCESS_KEY_ID="${SCRAPE_S3_ACCESS_KEY:-}"
 export AWS_SECRET_ACCESS_KEY="${SCRAPE_S3_SECRET_KEY:-}"
@@ -43,9 +43,9 @@ S3_URL="${SCRAPE_S3_ENDPOINT:-}"
 BUCKET="${SCRAPE_S3_BUCKET:-}"
 
 if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] || [ -z "$S3_URL" ] || [ -z "$BUCKET" ]; then
-  check "SCW credentials" "MISSING (vérifie .env)"
+  check "object store credentials" "MISSING (vérifie .env)"
 else
-  check "SCW credentials" "OK"
+  check "object store credentials" "OK"
 fi
 
 # ── 2. s5cmd ─────────────────────────────────────────────────────────────────
@@ -55,22 +55,22 @@ else
   check "s5cmd" "NOT FOUND"
 fi
 
-# ── 3. SCW read ───────────────────────────────────────────────────────────────
+# ── 3. object store read ───────────────────────────────────────────────────────────────
 if s5cmd --endpoint-url "$S3_URL" ls "s3://$BUCKET/graph/" >/tmp/preflight-read.log 2>&1; then
   graph_count=$(wc -l < /tmp/preflight-read.log 2>/dev/null || echo 0)
-  check "SCW read (graph/)" "OK ($graph_count entrées)"
+  check "object store read (graph/)" "OK ($graph_count entrées)"
 else
-  check "SCW read (graph/)" "FAILED (voir /tmp/preflight-read.log)"
+  check "object store read (graph/)" "FAILED (voir /tmp/preflight-read.log)"
 fi
 
-# ── 4. SCW write ──────────────────────────────────────────────────────────────
+# ── 4. object store write ──────────────────────────────────────────────────────────────
 probe_key="s3://$BUCKET/_preflight-runner-probe-$(date +%s).txt"
 echo "preflight" > /tmp/preflight-probe.txt
 if s5cmd --endpoint-url "$S3_URL" cp /tmp/preflight-probe.txt "$probe_key" >/tmp/preflight-write.log 2>&1; then
   s5cmd --endpoint-url "$S3_URL" rm "$probe_key" >/dev/null 2>&1 || true
-  check "SCW write" "OK"
+  check "object store write" "OK"
 else
-  check "SCW write" "FAILED (voir /tmp/preflight-write.log)"
+  check "object store write" "FAILED (voir /tmp/preflight-write.log)"
 fi
 rm -f /tmp/preflight-probe.txt
 
@@ -141,7 +141,7 @@ if s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$DRY_CITY/latest.json"
     "$DRY_WORK/latest.old.json" > "$DRY_WORK/latest.v23.json" 2>/dev/null || true
 
   # S'assurer que description non vide sur tous les signaux pour ce test de forme
-  # (on modifie la copie locale, pas le SCW)
+  # (on modifie la copie locale, pas le object store)
   jq 'walk(if type == "object" and (.type == "Signal" or .type == "DesignationEvent") then .properties.description = (.properties.description // .label // "signal") else . end)' \
     "$DRY_WORK/latest.v23.json" > "$DRY_WORK/latest.v23.patched.json" 2>/dev/null && mv "$DRY_WORK/latest.v23.patched.json" "$DRY_WORK/latest.v23.json"
 
@@ -154,7 +154,7 @@ if s5cmd --endpoint-url "$S3_URL" cat "s3://$BUCKET/graph/$DRY_CITY/latest.json"
     check "dry-run publish chemin parsed/" "FAILED (voir /tmp/preflight-publish-dry.log)"
   fi
 else
-  check "dry-run publish chemin parsed/" "SKIPPED (impossible de lire $DRY_CITY depuis SCW)"
+  check "dry-run publish chemin parsed/" "SKIPPED (impossible de lire $DRY_CITY depuis object store)"
 fi
 
 # ── Résumé ───────────────────────────────────────────────────────────────────

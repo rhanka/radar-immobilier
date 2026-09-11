@@ -10,7 +10,7 @@ LANE="${4:-manual}"
 # .env sourcé UNIQUEMENT s'il existe (dev/local) ; in-cluster les vars viennent des secretRef montés.
 if [ -f .env ]; then set -a; source .env; set +a; fi
 # ── Cible publish = PUBLISH_* (fallback SCRAPE_S3_*). Single-bucket est le mode NORMAL : le graph store
-#    graph/<city>/latest.json et les docs source raw/ partagent le bucket docs-pocs. La frontière de
+#    graph/<city>/latest.json et les docs source raw/ partagent le bucket configured bucket. La frontière de
 #    sûreté est le PRÉFIXE (garde plus bas au point d'écriture), PAS le nom du bucket. Fail-closed si
 #    une creds PUBLISH_* manque (rien ne tourne à moitié configuré → publish silencieux au mauvais endroit). ──
 PUBLISH_S3_ENDPOINT="${PUBLISH_S3_ENDPOINT:-${SCRAPE_S3_ENDPOINT:-}}"

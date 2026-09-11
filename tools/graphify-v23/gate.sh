@@ -134,9 +134,9 @@ fi
 
 validatedExtraction=true
 
-# ── 8. Publish atomique SCW ───────────────────────────────────────────────────
+# ── 8. Publish atomique object store ───────────────────────────────────────────────────
 if [ -z "$S3_URL" ] || [ -z "$BUCKET" ]; then
-  reason="scw_config_missing"
+  reason="object_store_config_missing"
   emit_status
   exit 1
 fi
