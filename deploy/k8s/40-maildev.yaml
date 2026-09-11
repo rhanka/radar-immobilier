@@ -1,10 +1,9 @@
 # Maildev SMTP sink for radar (auth/notification mail in the POC; BR-09).
 # Brought in from draft PR #8 (deploy/k8s/maildev.yaml).
 #
-# Like sentropic (which does NOT deploy maildev and instead uses Scaleway TEM),
-# this is a POC convenience: human login itself is delegated to the sentropic
-# IdP (which owns magic-link mail), so radar's own outbound mail is minimal.
-# Swap MAILDEV_SMTP_HOST in 30-api.yaml for SCW TEM when leaving the POC.
+# This is a POC convenience: human login itself is delegated to the sentropic
+# IdP, so radar's own outbound mail is minimal. Invitation links are exposed by
+# the admin flow until a replacement delivery provider is selected.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
