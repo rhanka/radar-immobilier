@@ -91,7 +91,7 @@ node_types:
       citySlug:       { type: string, description: Alias legacy municipality }
       url:            { type: string, description: URL d'accès au document }
       sourceUrl:      { type: string, description: Alias legacy de url }
-      pdfPath:        { type: string, description: Chemin SCW vers le PDF }
+      pdfPath:        { type: string, description: Chemin object store vers le PDF }
       sourceKind:     { type: string, description: "Type de source : pv/reglement/avis/media" }
       sourceType:     { type: string, description: Alias legacy de sourceKind }
       format:         { type: string, description: "Format : pdf/video/html" }

@@ -16,7 +16,7 @@
 
 | Vague | Périmètre | Statut | Done quand |
 | --- | --- | --- | --- |
-| **A** | Réparer + cron-iser le DÉTERMINISTE *dans immo* (fix projection D1, jobs scrape/projection, CronJob) | **EN COURS — code livré dans cette PR** | Image build les 2+ entrypoints ; le conducteur peut reprojeter ~1000 graphes v2.1 SCW→PG sans erreur ; le refresh quotidien tourne sans humain |
+| **A** | Réparer + cron-iser le DÉTERMINISTE *dans immo* (fix projection D1, jobs scrape/projection, CronJob) | **EN COURS — code livré dans cette PR** | Image build les 2+ entrypoints ; le conducteur peut reprojeter ~1000 graphes v2.1 object store→PG sans erreur ; le refresh quotidien tourne sans humain |
 | **B** | Externaliser SEULEMENT graphify dans un workspace « data » sentropic, piloté chat (RemoteTrigger + conductor h2a + idempotence sidecar) | **DESIGN — spec dans cette PR** (impl ultérieure) | « re-graphifie tout en v2.2 » se dit dans un chat ; la file draine, anti-sature, reprend après crash, projette quand vert |
 | **C** | immo = frontend PUR (frontière S3 `graph/<city>/latest.json`) | **DESIGN — spec dans cette PR** (impl ultérieure) | immo ne possède plus aucune collecte/orchestration ; lecture seule du contrat S3/PG |
 
@@ -68,7 +68,7 @@ partout en `workingDir: /workspace/api` + `command: ["node", "dist/..."]`.
    connue). Réutilise le script déjà mergé `backfill-0004-tracking.ts`.
 2. **initContainer `db-migrate`** — migrations Drizzle (idempotent, CREATE IF NOT
    EXISTS), `workingDir: /workspace/api`.
-3. **conteneur `project-graph`** — lit `graph/<ville>/latest.json` (SCW) → upsert
+3. **conteneur `project-graph`** — lit `graph/<ville>/latest.json` (object store) → upsert
    PG (`ON CONFLICT`, idempotent).
 
 **Variante projection-seule** : `32-graph-projection-only-job.yaml` (NOUVEAU) —
@@ -85,9 +85,9 @@ conteneurs : `requests {cpu 50m, memory 96Mi}`, `limits {cpu 150m, memory 256Mi}
 
 | Manifeste | Type | Rôle | Cadence |
 | --- | --- | --- | --- |
-| `33-scrape-job.yaml` | Job one-shot | scrape+parse+exploit (worker-live, `LIVE_SCRAPE_EXPLOIT=1`) → `raw/ parsed/ ontology/` SCW. HEAD-skip CAS, S3-only, AUCUN LLM | à la demande |
+| `33-scrape-job.yaml` | Job one-shot | scrape+parse+exploit (worker-live, `LIVE_SCRAPE_EXPLOIT=1`) → `raw/ parsed/ ontology/` object store. HEAD-skip CAS, S3-only, AUCUN LLM | à la demande |
 | `34-refresh-cronjob.yaml` › `radar-refresh-scrape` | CronJob | idem en récurrent | **quotidien 03:17 UTC** |
-| `34-refresh-cronjob.yaml` › `radar-refresh-projection` | CronJob | projection SCW→PG (rattrape les graphes re-graphifiés hors-bande) | **quotidien 04:30 UTC** (après le scrape) |
+| `34-refresh-cronjob.yaml` › `radar-refresh-projection` | CronJob | projection object store→PG (rattrape les graphes re-graphifiés hors-bande) | **quotidien 04:30 UTC** (après le scrape) |
 
 **Cadences DÉCOUPLÉES** volontairement (brainstorm §4.1) : le scrape déterministe
 (gratuit) tourne tous les jours ; la projection suit. **graphify N'EST PAS
@@ -125,7 +125,7 @@ cohérent avec la convention préexistante du job 31.
   pour activer le refresh quotidien.
 - [ ] **Point ouvert egress NetworkPolicy** : les pods scrape/projection portent
   `component: scrape` / `component: graph-projection`, PAS `component: api`. Les
-  NetworkPolicies **egress** (vers PG, SCW, internet) sont owned par l'opérateur
+  NetworkPolicies **egress** (vers PG, object store, internet) sont owned par l'opérateur
   poc-k8s (baseline `allow-api-to-runtime-dependencies`, scope `component: api`).
   Le Job 31 préexistant tournait déjà sous `component: graph-projection` → on
   suppose l'egress autorisé/permissif côté opérateur. **À confirmer par le
@@ -189,7 +189,7 @@ d'abord) :
   | --- | --- | --- | --- | --- |
   | RT-1 | le chat appelle un endpoint HTTP `data` (token-gated) qui `enqueue` | simple, observable | un service `data` à exposer | **Cible** |
   | RT-2 | le chat écrit directement l'item de file sur S3 (creds scopés) | zéro service | couplage S3 au chat ; pas de validation | Transition / spike |
-  | RT-3 | broker (SCW Queues/NATS) | découplage fort | YAGNI en V1 (cf. SPEC_PERSISTENCE §6 « pas de file managée en v1 ») | ❌ |
+  | RT-3 | broker (object store Queues/NATS) | découplage fort | YAGNI en V1 (cf. SPEC_PERSISTENCE §6 « pas de file managée en v1 ») | ❌ |
   - **Préco : commencer RT-2 (spike, file = objets S3) → RT-1** quand le workspace
     data expose un service. La file S3 EST la file (réconciliation, pas de broker).
 

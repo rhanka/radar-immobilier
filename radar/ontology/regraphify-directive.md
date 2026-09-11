@@ -16,7 +16,7 @@ Toute ville nouvelle (après la migration) suit directement le chemin v2.0 dès 
 
 ---
 
-## 2. Layout SCW canonique
+## 2. Layout object store canonique
 
 ```
 raw/
@@ -79,7 +79,7 @@ Pour paralléliser le re-graphify sans collision, partition par initiale du slug
 | **immo**  | M → Z inclusive    | `slug[0] in [m,n,o,p,q,r,s,t,u,v,w,x,y,z]` |
 
 **Règle de normalisation du slug :** minuscules, sans accents, `-` comme séparateur,
-conformément aux slugs SCW existants (ex : `saint-constant`, `sainte-julie`).
+conformément aux slugs object store existants (ex : `saint-constant`, `sainte-julie`).
 
 **Note :** les villes sans initiale latine (chiffres, etc.) sont assignées à `immo`.
 
@@ -143,7 +143,7 @@ Toute ville créée après la migration est v2.0 nativement.
 
 ---
 
-## 7. Re-projection SCW → Postgres
+## 7. Re-projection object store → Postgres
 
 Après le re-graphify d'une ville (ou d'un lot de villes), re-projeter dans PG :
 
@@ -157,7 +157,7 @@ psql $DATABASE_URL <<'SQL'
   TRUNCATE graph_nodes, graph_edges CASCADE;
 SQL
 
-# Re-projeter depuis SCW
+# Re-projeter depuis object store
 tsx api/src/scripts/project-graph-from-s3.ts
 ```
 
@@ -174,7 +174,7 @@ Le script est **idempotent** (upsert ON CONFLICT) — safe à relancer.
 ### 7.3 Comportement du script
 
 `api/src/scripts/project-graph-from-s3.ts` :
-- Lit `graph/<slug>/latest.json` depuis SCW.
+- Lit `graph/<slug>/latest.json` depuis object store.
 - Skip si le JSON n'a pas de champ `nodes` (ex : les 60 villes ad-hoc non encore re-graphifiées).
 - Appelle `upsertGraph(db, citySlug, graphJson)`.
 
@@ -274,6 +274,6 @@ jq '.nodes[] | .id' graph/<slug>/latest.json | \
 
 - Contrat de sortie normatif : `radar/ontology/graphify-output-contract.md`
 - Ontologie v2.0 : `radar/ontology/ontology-profile.yaml`
-- Script de projection SCW→PG : `api/src/scripts/project-graph-from-s3.ts`
+- Script de projection object store→PG : `api/src/scripts/project-graph-from-s3.ts`
 - Tables PG : `graph_nodes`, `graph_edges` (upsert via `upsertGraph`)
 - Analyse empirique : `/tmp/onto-analyse/` (non commitée, référence de travail)
