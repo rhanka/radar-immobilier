@@ -165,7 +165,6 @@ function isStorageHost(hostname: string): boolean {
   if (/(^|\.)s3[.-]/.test(host)) return true; // s3.amazonaws.com, s3-eu…, foo.s3.bar
   if (host.endsWith(".r2.cloudflarestorage.com")) return true;
   if (host.includes(".digitaloceanspaces.")) return true;
-  if (host.includes("scw.cloud") && host.includes("s3")) return true;
   return false;
 }
 

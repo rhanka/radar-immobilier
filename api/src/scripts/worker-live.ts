@@ -2,7 +2,7 @@
  * worker-live — CLI entry point for the live PV scraper (WORKER LIVE, P1).
  *
  * Scrapes the config-only PV cities live and writes their raw documents to the
- * dedicated scraping object store (Scaleway in prod via SCRAPE_S3_*, MinIO
+ * dedicated scraping object store (managed object storage in prod via SCRAPE_S3_*, MinIO
  * locally). Real execution is left to the conductor; this is a thin wrapper
  * around `runLiveScrape` so it can be invoked from a Makefile target.
  *

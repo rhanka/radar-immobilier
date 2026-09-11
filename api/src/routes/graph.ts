@@ -77,7 +77,7 @@ export function graphRoute(deps: GraphDeps): Hono {
    *
    * Returns `{ ok: true, citySlug, nodes[], edges[] }` — always 200, even
    * when no nodes are stored yet (returns an empty graph rather than 404 so
-   * the UI can display "not ingested yet" gracefully and the SCW→PG projection
+   * the UI can display "not ingested yet" gracefully and the object store→PG projection
    * can confirm success via a simple 200 check).
    */
   app.get("/api/graph/:city", async (c) => {

@@ -26,7 +26,7 @@ export interface CiblageDeps {
   store: ObjectStore;
   /**
    * Optional dedicated store for raw scraped documents. When provided, RECUEIL
-   * writes raw bytes here (e.g. SCW `radar-immobilier-docs`) while ciblage plans,
+   * writes raw bytes here (e.g. object store `radar-immobilier-docs`) while ciblage plans,
    * jobs, and project-state remain on `store`. Absent ⇒ `store` handles all
    * (local-dev MinIO default).
    */

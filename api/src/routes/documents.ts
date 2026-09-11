@@ -13,7 +13,7 @@ export interface DocumentsDeps {
   store: ObjectStore;
   /**
    * Dedicated store for raw scraped documents (CAS PV PDFs live here:
-   * `radar-immobilier-docs` on SCW). The RECUEIL/scrape pipeline writes the
+   * `radar-immobilier-docs` on object store). The RECUEIL/scrape pipeline writes the
    * binary bytes under `raw/proces-verbaux-<city>/cas/<sha>.pdf` to THIS bucket,
    * NOT to `store` (which only holds raw-metadata + project state). When absent
    * (tests/local without SCRAPE_S3_*), `store` handles everything.

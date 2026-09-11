@@ -17,7 +17,7 @@ const logger = createLogger(config.LOG_LEVEL);
 const dbHandle = createDb(config);
 const objectStore = createObjectStore(config);
 
-// Dedicated scraping-document store (SCW `radar-immobilier-docs` in production;
+// Dedicated scraping-document store (object store `radar-immobilier-docs` in production;
 // falls back to MinIO locally when SCRAPE_S3_* env vars are not set).
 const scrapeObjectStore = getScrapeObjectStore(config);
 

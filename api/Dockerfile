@@ -52,7 +52,7 @@ RUN npm run typecheck --workspace=api
 # typecheck.
 RUN npm run typecheck --workspace=packages/immo-mcp
 # Bundle ALL runtime entrypoints, not just the API server. K8s Jobs/CronJobs
-# (deploy/k8s/3x-*.yaml) invoke the DB migrator, the SCW→PG graph projector, the
+# (deploy/k8s/3x-*.yaml) invoke the DB migrator, the object store→PG graph projector, the
 # 0004 tracking backfill, the live scraper, populate-geo and pull-geo-ogc as
 # standalone `node` processes.
 # esbuild with `outdir` + multiple `entryPoints` mirrors the source tree under
