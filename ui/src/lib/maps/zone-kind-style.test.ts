@@ -191,11 +191,19 @@ describe("canonicalZoneKind", () => {
 });
 
 describe("zoneKindStyle / zoneKindColor", () => {
-  it("chaque kind pointe un token catégoriel DS (aucune palette inventée)", () => {
+  it("chaque kind pointe un token sémantique DS", () => {
     for (const style of Object.values(ZONE_KIND_STYLES)) {
-      expect(style.token.startsWith("--st-semantic-data-category")).toBe(true);
+      expect(style.token.startsWith("--st-semantic-")).toBe(true);
     }
     expect(ZONE_KIND_NEUTRAL.token.startsWith("--st-semantic-")).toBe(true);
+  });
+
+  it("should keep every zoning family token and fallback color unique", () => {
+    const styles = Object.values(ZONE_KIND_STYLES);
+    expect(new Set(styles.map((style) => style.token)).size).toBe(styles.length);
+    expect(new Set(styles.map((style) => style.fallback.toLowerCase())).size).toBe(
+      styles.length,
+    );
   });
 
   it("should return token fallbacks for code-only zones outside the DOM", () => {
