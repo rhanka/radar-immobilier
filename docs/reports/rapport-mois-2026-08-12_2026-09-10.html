@@ -20,1297 +20,198 @@ hr { border: 0; border-top: 1px solid #d8dee9; margin: 18px 0; }
 strong { color: #0f172a; }
 a { color: #1d4ed8; text-decoration: none; }
 .cover-note { font-size: 10px; color: #64748b; margin-bottom: 18px; }
-table { break-inside: auto; } tr { break-inside: avoid; } thead { display: table-header-group; } td code { overflow-wrap: anywhere; } a { overflow-wrap: anywhere; }</style></head><body><h1>Rapport du mois — livraison immo &amp; geo</h1>
-<p><strong>Période : 12 août → 10 septembre 2026 inclus.</strong> État d’exploitation mesuré le <strong>11 septembre 2026</strong>, distingué de la clôture du mois. Rapport structuré sur les <strong>11 axes demandés</strong> : les dix demandes du 12 août et le Viewer PDF du 30 août. La section « Initial acceptance evidence » de la spécification constitue une grille de recette transverse, pas un axe supplémentaire.</p>
-<blockquote>
-<p><strong>Synthèse.</strong> Les <strong>132 merges immo</strong> et <strong>9 tags de release, de v1.0.0 à v1.2.5</strong>, sont vérifiés sur le premier parent de <code>origin/main</code>. La production publique sert <strong>831cad2 = v1.2.5</strong>, confirmé par <code>/build.json</code> et <code>/health</code>. La preuve signal, la recherche lots/zones, la liste Saint-Stanislas et la navigation/recherche PDF ont leurs changements intégrés à cette version. La collaboration complète, la 3D, la recette des KPI et la couverture environnementale restent partielles. <strong>Aucun pourcentage de livraison des 11 axes n’est déduit du nombre de merges.</strong> [G1–G3, L1]</p>
-</blockquote>
-<blockquote>
-<p><strong>Point critique — fraîcheur.</strong> Les deux CronJobs suspendus, dont la dernière planification remonte au 1er juillet, appartiennent au <strong>contexte Scaleway résiduel</strong>. Sur <strong>OVH préproduction</strong>, les deux CronJobs sont <strong>actifs</strong> et portent un dernier succès le 11 septembre ; <strong>aucun CronJob refresh n’est présent dans le namespace de production OVH</strong>. Cette correction du cadrage repose sur les mesures, sans transformer un succès de job en preuve de couverture. Pour <strong>Saint-Rémi</strong>, les quatre nœuds Source présents dans la base de production portent des dates allant jusqu’au <strong>19 mai 2026</strong> seulement. La fin du r4 manuel et sa promotion complète restent <strong>non tracées</strong>. [L2–L5, T2]</p>
-</blockquote>
-<h2>1. Lecture et périmètre des preuves</h2>
-<p>La fenêtre Git est explicitée en heure de Montréal : <code>2026-08-12T00:00:00-04:00</code> → <code>2026-09-10T23:59:59-04:00</code>. La commande reproduite est <code>git log origin/main --first-parent --since=2026-08-12 --until=2026-09-11</code> ; elle retourne l&#39;ensemble de 132 commits, tous avec plusieurs parents (un <code>--until=2026-09-10</code> nu en retourne 129, selon l&#39;heure d&#39;exécution). <code>origin/main</code> local et le SHA distant lu avec <code>git ls-remote</code> concordent à <strong>831cad2459b6a59fde790145af5c6cf9bb3f6b72</strong>. Les neuf tags ont été contrôlés ; un tag inclus dans l’historique démontre son contenu, pas à lui seul son déploiement. [G1–G2]</p>
-<p>Le journal Track du workspace est un état <strong>local</strong>, différent de celui committé sur <code>origin/main</code>. Sa dernière entrée est datée du <strong>5 septembre à 19:27:16.321Z</strong>. Le rapport opérationnel utilise le binaire global <strong>Track 0.94.3</strong>, en lecture seule, sans bootstrap. Les faits postérieurs à cette coupe viennent de Git ou des mesures d’exploitation ; ils ne sont pas présentés comme des acceptations enregistrées dans Track. [T1]</p>
-<p><strong>Vocabulaire :</strong> « livré » ci-dessous signifie que le changement visé est dans le code de la version actuellement servie. « Partiel » conserve les écarts de portée ou de recette. « N-A » signifie qu’aucun déploiement de cette capacité n’est démontré par les sources retenues. La présence de tests dans un merge n’est pas une nouvelle exécution de ces tests ; aucune recette fonctionnelle authentifiée n’a été rejouée pour ce rapport.</p>
-<h2>2. Livraison sur les 11 axes verrouillés</h2>
-<table>
-<thead>
-<tr>
-<th># · Axe</th>
-<th>Réalisé ce mois — capacité et preuve</th>
-<th>En prod / servi</th>
-<th>Gaps / à faire</th>
-<th>Décisions</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>1 · §1 Sûreté release &amp; pré-production</strong></td>
-<td>Séparer l’intégration en préprod et la promotion par tag ; sauvegarde avant release, rollback applicatif et migration dans le pipeline. PR <strong>#518, #572, #575, #656, #659</strong> ; Track <strong>01M062D1B0E6</strong>.</td>
-<td>Socle <strong>v1.0.0</strong>, compléments <strong>v1.2.0</strong>, inclus dans <strong>v1.2.5</strong>. Préprod OVH présente.</td>
-<td><strong>Partiel.</strong> Réunir les preuves de restauration, rollback de schéma, fixtures assainies et approbation humaine de chaque promotion ; leur réussite n’est pas déduite du pipeline.</td>
-<td>Préprod jointe immo/geo, autorisation prod distincte ; dossier préprod et décision Track <strong>01M0SW6QV672</strong> pour le circuit de patchs.</td>
-</tr>
-<tr>
-<td><strong>2 · §2 Domaine collaboratif — paniers/archive/annotations/chat-MCP</strong></td>
-<td>Notes/annotations lots et signaux : migration additive, édition par auteur, suppression logique, rendu et mises à jour SSE. PR <strong>#576, #581, #584</strong> ; Track <strong>01M062D1FQEN</strong>.</td>
-<td>Socle annotations dans <strong>v1.2.0</strong>, inclus <strong>v1.2.5</strong>. Chat désactivé par défaut via <strong>#651</strong>.</td>
-<td><strong>Partiel.</strong> Paniers privés/partagés, archive complète, fils/suivi, portée multi-tenant réelle et feedback MCP confirmé restent à démontrer. L’UI signal n’est pas validée par le seul schéma.</td>
-<td>Portée livrée <strong>mono-client partagée</strong> ; <code>tenant_id</code> inerte. Décision de réintégration chat subordonnée au panneau droit et à llm-mesh.</td>
-</tr>
-<tr>
-<td><strong>3 · §3 Right pane — preuve signal + recherche lots/zones</strong></td>
-<td>Distinguer le PV source du règlement, rétablir la preuve utile et chercher séparément dans lots/zones. PR <strong>#511, #526, #520, #523, #527, #530</strong> ; Track <strong>01M062D1KRRE</strong>.</td>
-<td>Preuve initiale <strong>v1.1.1</strong> ; recherche et corrections <strong>v1.2.0</strong>, inclus <strong>v1.2.5</strong>.</td>
-<td><strong>Livré pour le code demandé ; recette à tracer.</strong> Complétude des citations et rendu de chaque ville non garantis par ces corrections.</td>
-<td>Garder la distinction document de preuve / règlement / grille ; abandon de la barre unifiée au profit des sections.</td>
-</tr>
-<tr>
-<td><strong>4 · §4 Left pane — Saint-Stanislas</strong></td>
-<td>Retirer le plafond de liste qui faisait apparaître certaines villes seulement après recherche ; test de régression dans le merge. PR <strong>#512</strong>, SHA <strong>111c4a2</strong> ; Track <strong>01M062D1R8KA</strong>.</td>
-<td><strong>v1.1.1</strong>, inclus <strong>v1.2.5</strong>.</td>
-<td><strong>Livré ; Track en retard.</strong> Item encore <code>to-do</code>, acceptation <code>unknown</code> ; rattacher la preuve de rendu avant de déclarer la recette acquise.</td>
-<td>La recherche filtre la liste complète, elle ne compense plus une troncature.</td>
-</tr>
-<tr>
-<td><strong>5 · §5 Vue géo — 3D + carto geo</strong></td>
-<td>Contrat cartographique Geo et adaptateur immo ; contrôles regroupés, Plan/Satellite, récupération après changement de style, légende/familles. PR <strong>#528, #531, #561, #563, #640, #645–#649, #652–#655, #664–#667</strong> ; Track <strong>01M062D1WC6C</strong>.</td>
-<td>2D dans <strong>v1.2.0</strong> ; satellite autorisé en prod <strong>v1.2.2</strong> ; Plan par défaut <strong>v1.2.3</strong> ; légende <strong>v1.2.4/v1.2.5</strong>.</td>
-<td><strong>Partiel : 3D non activée.</strong> <code>GEO3D_ENGINE_ENABLED = false</code> à la coupe. Provenance des familles déduites de codes encore partielle selon les villes.</td>
-<td>Module Geo propriétaire, compatible DS ; génération de session tuiles côté navigateur. La décision légende reste <code>deferred</code> dans Track malgré le correctif servi.</td>
-</tr>
-<tr>
-<td><strong>6 · §6 Fraîcheur données / CronJob 1000+ villes</strong></td>
-<td>Chaîne préprod versionnée, orchestration des refresh, observabilité et alimentation PG du worker corrigée. PR <strong>#577, #580, #586, #619, #626, #628, #629, #633, #637, #638, #661</strong> ; Track <strong>01M062D20KCJ</strong>.</td>
-<td>Code embarqué jusqu’à <strong>v1.2.2</strong> ; <strong>refresh automatique de production : N-A</strong>. Préprod OVH active lors de la mesure.</td>
-<td><strong>Objectif non démontré.</strong> r4 arrêté dans le journal à <strong>160/528</strong> ; fin et promotion non tracées. Saint-Rémi : dernière date Source en base <strong>19/05</strong>.</td>
-<td>Distinguer scrape, exploitation PG, projection et promotion ; clôturer sur un résultat de couverture mesuré, pas sur <code>Complete</code>.</td>
-</tr>
-<tr>
-<td><strong>7 · §7 Règlements/normes Geo→Immo→MCP</strong></td>
-<td>Typage et cycle avis/projet/adoption, statut réglementaire dérivé à l’ingestion, provenance et exposition MCP. PR <strong>#509, #532, #540, #542, #556, #560, #568, #569, #570, #571, #615</strong> ; Track <strong>01M062D24T9Y</strong>.</td>
-<td>Intégration immo dans <strong>v1.2.0</strong>, incluse <strong>v1.2.5</strong> ; contrat Geo mergé séparément.</td>
-<td><strong>Partiel.</strong> Audit toutes villes, association signal→zone→règlement et preuve de rendu Sutton à rattacher. Une donnée communale ne prouve pas une relation par signal.</td>
-<td>Ratification du contrat LOT 1, décision <strong>01M1A07BZSH</strong> ; choix d’une dérivation commune, <strong>01M1ANHY4KFT</strong>.</td>
-</tr>
-<tr>
-<td><strong>8 · §8 KPI remediation</strong></td>
-<td>Geo a intégré des travaux de couverture des URL et de KPI règlements : PR <strong>geo #277, #282</strong>, SHAs <strong>ed87e639</strong>, <strong>a00e3709</strong>. Track <strong>01M062D290BV</strong> garde les exigences Immo ouvertes.</td>
-<td><strong>N-A pour la recette KPI Immo demandée.</strong> Support Geo intégré, sans preuve d’un KPI moyen Immo complet servi.</td>
-<td><strong>Partiel côté données ; restitution à faire.</strong> Définitions, dénominateurs, exclusions, date de mesure, confiance et moyenne restent à consolider. Snapshots de cohérence en base datés au plus tard du <strong>10/07</strong>.</td>
-<td>Aucune clôture spécifique du KPI moyen retrouvée au journal ; ne pas assimiler couverture de collecte et disponibilité utilisable.</td>
-</tr>
-<tr>
-<td><strong>9 · §9 Couches environnementales + user custom</strong></td>
-<td>Contrat <code>ConstraintHit</code>, chaîne CPTAQ Geo, métadonnées et couche cartographique conditionnelle côté Immo. PR <strong>geo #280, #302, #303, #306, #311</strong> et <strong>immo #591, #614</strong> ; Track <strong>01M062D2D7F1</strong>.</td>
-<td>Rendu CPTAQ embarqué dans <strong>v1.2.0</strong>, inclus <strong>v1.2.5</strong>, conditionné à la disponibilité de la collection.</td>
-<td><strong>Partiel.</strong> Pilote Warden avec preuve source/rendu, couverture des autres catégories, ajout MCP de couche utilisateur avec quota/partage/suppression : non démontrés de bout en bout.</td>
-<td>Contrat et priorité à l’audit ratifiés : <strong>01M1A0GDF3NR</strong>, autorisation de production de la source : <strong>01M1A75PEJDN</strong>.</td>
-</tr>
-<tr>
-<td><strong>10 · §10 Planification &amp; gouvernance</strong></td>
-<td>Spécification brute, premières entrées Track, organisation des neuf sujets sous WP, revues et dossiers ; <strong>#510</strong>, <strong>8b85003</strong>, <strong>e5993b4</strong>, événements locaux issus de <strong>3c2e9af</strong>.</td>
-<td><strong>N-A : organisation et documents.</strong> Spécification/entrée initiale mergées ; plans détaillés et plusieurs dossiers restent hors <code>origin/main</code>.</td>
-<td><strong>Partiel.</strong> Absence d’item §10 dédié ; plan de vagues convergé non mergé ; complétude des dépendances, acceptations et critères d’arrêt à réconcilier.</td>
-<td>Préprod distincte de l’autorisation prod ; orchestration H2A puis bascule vers outils natifs documentée le 05/09.</td>
-</tr>
-<tr>
-<td><strong>11 · Viewer PDF — scroll→page suivante + recherche plein-texte multipage</strong></td>
-<td>Navigation continue multipage et recherche avec index texte, occurrences, précédent/suivant. PR <strong>#539</strong> (<strong>393c653</strong>) et <strong>#541</strong> (<strong>24402e6</strong>), mergées le <strong>30/08</strong> ; Track <strong>01M1A7Y31JTC</strong>.</td>
-<td><strong>v1.2.0</strong>, inclus <strong>v1.2.5</strong>.</td>
-<td><strong>Livré ; Track en retard.</strong> Item hors WP, <code>to-do</code> / <code>unknown</code>. Recherche fondée sur la couche texte du PDF ; PDF image sans texte/OCR non couvert par cette preuve.</td>
-<td>Demande autonome du 30/08 ; ne pas la confondre avec la grille de recette §11 de la spécification du 12/08.</td>
-</tr>
-</tbody></table>
-<p>Les références PR ci-dessus désignent des merges vérifiés ; l’annexe donne leurs SHAs, dates et premiers tags contenant les changements. Les capacités présentées ne sont pas additionnées comme des unités de valeur comparables.</p>
-<h2>3. Ce que les versions rendent possible — et leurs limites</h2>
-<h3>Préparer et promouvoir une release</h3>
-<p>Le mois apporte une séparation concrète des environnements, puis enrichit le circuit par sauvegarde pré-release, migration dans le pipeline et rollback applicatif. La préproduction immo et geo existe sur OVH. En production, l’API, le MCP et l’UI ont chacun une réplique prête au moment du relevé ; le SHA public de l’API et de l’UI est contrôlé indépendamment. Cela justifie le constat de déploiement actuel. La configuration effective des approbateurs GitHub et le détail des autorisations de toutes les releases n’ont pas été interrogés : ils restent à joindre à la recette de sûreté. [G3, L1, L3]</p>
-<p>Les tâches de backup et de migration introduites par <strong>#572/#656/#659</strong> ne constituent pas, seules, un exercice de restauration réussi. Le rollback applicatif <strong>#575</strong> ne prouve pas un rollback de schéma. Ces exigences du 12 août restent donc des critères de recette distincts.</p>
-<h3>Lire une preuve et retrouver un objet</h3>
-<p><strong>#512</strong> supprime la limite d’affichage de la liste des villes ; le correctif embarque un test utilisant la liste réelle des municipalités. <strong>#511/#526</strong> traitent l’association de preuve dans le panneau signal. La recherche lots/zones passe par un premier champ commun, puis des entrées par section (<strong>#520/#523</strong>) et des corrections complémentaires (<strong>#527/#530</strong>). <strong>#539/#541</strong> complètent ce parcours par le défilement et la recherche dans plusieurs pages du même PDF. [G3]</p>
-<p>Ces changements sont contenus dans la version servie ; la qualité des documents, la présence d’une couche texte PDF et le rattachement des citations demeurent des propriétés des données. Une recherche sans résultat ne signifie pas que le document contient nécessairement aucun texte pertinent.</p>
-<h3>Collaborer : un premier périmètre, pas le domaine complet</h3>
-<p>La migration <strong>0011</strong> de <strong>#576</strong> vise <code>prospect_notes</code>, avec les cibles <code>lot</code> et <code>signal</code>, des colonnes d’édition et de suppression logique. Le champ <code>tenant_id = default</code> y est explicitement <strong>inerte</strong>, sans isolation multi-client active. Les éléments front et SSE suivent avec <strong>#581/#584</strong>. La recette de la note signal reste à relier au modèle de signaux effectivement servi : la table historique <code>signals</code> est vide dans les bases mesurées, alors que les signaux existent dans <code>graph_nodes</code>. Ce constat n’est pas une preuve de fonctionnement de la création d’annotation signal. [G3, L4]</p>
-<p>Le dossier initial envisageait une collaboration plus large et le modèle Sentropic ; la réalisation du mois ne suffit pas à déclarer livrés les paniers, le partage nominatif, l’archive avec politique commune, les fils de discussion, le suivi et le feedback MCP soumis à confirmation. Le chat a été intégré puis <strong>désactivé par défaut dans #651</strong> en attendant la reprise de son agencement et du backend llm-mesh. [G3, T2]</p>
-<h3>Cartographie : satellite 2D livré, activation 3D encore fermée</h3>
-<p>Le travail commun Geo→Immo matérialise le contrat du moteur et son adaptateur. Geo <strong>#206/#207</strong>, puis <strong>#349/#352/#354</strong>, apportent les interfaces et évolutions consommées côté immo. Le satellite 2D devient autorisé sur le domaine de production avec <strong>#664</strong>, puis <strong>#665</strong> impose le mode Plan au chargement. L’accès 3D reste fermé par <code>GEO3D_ENGINE_ENABLED = false</code> dans le code de <code>v1.2.5</code> ; il n’est pas présenté comme une capacité active. [G3, G4]</p>
-<p><strong>#666/#667</strong> restaurent la coloration et réduisent les déductions de familles sans source suffisante. La spécification mergée <code>SPEC_DEDUCTION_ZONAGE_CODE_FAMILLE.md</code> documente encore des correspondances partielles et une dépendance à une future famille de zone produite par Geo avec provenance municipale. La clôture du correctif d’affichage ne clôt donc pas la dette de provenance des familles. [G3]</p>
-<h2>4. §6 — fraîcheur, confrontation de Track à l’exploitation</h2>
-<h3>4.1 Deux contextes Kubernetes à ne pas confondre</h3>
-<table>
-<thead>
-<tr>
-<th>Contexte et namespace mesurés le 11/09</th>
-<th>Scrape <code>17 3 * * *</code></th>
-<th>Projection <code>30 4 * * *</code></th>
-<th>Portée du constat</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Scaleway résiduel, <code>radar-immobilier</code></td>
-<td><code>suspend=true</code> ; dernière planification <strong>01/07 03:17Z</strong></td>
-<td><code>suspend=true</code> ; dernière planification <strong>01/07 04:30Z</strong></td>
-<td>Environ 72 jours depuis la dernière planification ; aucun pod immo actif dans le relevé. Cette mesure ne décrit pas le service OVH actuel.</td>
-</tr>
-<tr>
-<td>OVH préprod, <code>radar-immobilier-preprod</code></td>
-<td><code>suspend=false</code> ; planifié <strong>11/09 03:17Z</strong> ; dernier succès <strong>05:32:48Z</strong></td>
-<td><code>suspend=false</code> ; planifié <strong>11/09 04:30Z</strong> ; dernier succès <strong>04:30:13Z</strong></td>
-<td>Automatisation préprod active à la mesure. Résultat de couverture documentaire non certifié.</td>
-</tr>
-<tr>
-<td>OVH production, <code>radar-immobilier</code></td>
-<td><strong>Aucun CronJob refresh présent</strong></td>
-<td><strong>Aucun CronJob refresh présent</strong></td>
-<td>Rafraîchissement quotidien de production non établi. Cela ne prouve pas l’absence de tout traitement externe.</td>
-</tr>
-</tbody></table>
-<p>La préprod possède aussi <code>radar-consistency-snapshot</code>, <strong>suspendu</strong>. Les deux CronJobs de refresh ont un TTL des Jobs de <strong>3600 secondes</strong> ; aucun Job refresh préprod n’est conservé dans l’inventaire du relevé. L’absence de ce Job ne démontre donc pas qu’il n’a jamais exécuté. Les dates de dernier succès subsistent sur les CronJobs. [L2–L3]</p>
-<p>La projection du 11 septembre a fini <strong>avant la fin du scrape du même jour</strong>. Ce séquencement mesuré mérite une vérification de cohérence entre sources et projection ; il ne démontre pas à lui seul un défaut, puisque l’alimentation PG du worker a évolué. [L3, #628/#629]</p>
-<h3>4.2 Historique documenté des traitements manuels</h3>
-<p>Le journal conserve une re-suspension en préprod le <strong>4 septembre</strong>, puis un échec r2 sur <strong>HTTP 507 / XMinioStorageFull</strong>, suivi de redimensionnements. Le r3 a parcouru <strong>528 villes</strong> avec <strong>351 nouvelles, 84 déjà vues, 93 erreurs</strong> et un <strong>code de sortie 1</strong>. Il ne faut donc pas le décrire comme une collecte complète réussie de 528 villes. Le même événement rapporte <strong>zéro alimentation PG</strong>, car le worker ne fournissait pas de handle DB au chemin d’exploitation. [T2 : événements <code>01M1QBDPV6WZC7NE3JGTA1P8NA</code>, <code>01M1QPGTBBR6D85CGFQRBHM4C3</code> ; extraction intégrale conservée]</p>
-<p>Les correctifs <strong>#626/#628/#629</strong> ajoutent/règlent l’alimentation PG et les paramètres nécessaires. Le dernier relevé r4 est celui de l’événement <strong>01M1RRYA9GA4CFVZ2VACQGXKY9</strong>, enregistré le <strong>05/09 à 12:33:22.735Z</strong> ; son titre annonce <strong>160/528 vers 12:35Z</strong> et son corps cite <strong>7 259 nœuds créés ce jour-là</strong> en préprod. Le décalage entre heure d’événement et heure annoncée est conservé comme approximation du compte rendu. <strong>Aucune entrée ultérieure de fin de r4 ni de promotion intégrale de ses données n’est présente dans l’instantané Track.</strong> Les succès automatiques observés le 11 septembre ne permettent pas de reconstruire cette fin manquante.</p>
-<h3>4.3 Dates réellement présentes dans les bases de service</h3>
-<p>Requêtes en transaction <strong>READ ONLY</strong>, <code>statement_timeout=10s</code>, chaque commande kubectl sous <code>timeout 30</code>. Les mesures ciblent les Postgres des namespaces OVH de production et préproduction. Le code de <code>api/src/routes/graph.ts</code> appelle <code>subgraphForCity(deps.db, city)</code> : il s’agit de la base du graphe de service, pas d’un répertoire de fichiers de collecte. [L4–L5, G3]</p>
-<table>
-<thead>
-<tr>
-<th>Indicateur mesuré</th>
-<th>Production OVH</th>
-<th>Préproduction OVH</th>
-<th>Interprétation exacte</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>graph_nodes</code>, total / villes distinctes</td>
-<td><strong>36 487 / 1 009</strong></td>
-<td><strong>60 035 / 1 012</strong></td>
-<td>Présence de nœuds, pas taux de couverture documentaire.</td>
-</tr>
-<tr>
-<td>Création la plus récente, tous types</td>
-<td><strong>10/09 15:35:19.103687Z</strong></td>
-<td><strong>11/09 05:32:41.732625Z</strong></td>
-<td>Date de création technique, pas date de document ni preuve de mise à jour de chaque ville.</td>
-</tr>
-<tr>
-<td>Type <code>Signal</code>, date maximale de création</td>
-<td><strong>06/08 23:50:53.113958Z</strong></td>
-<td><strong>06/08 23:50:53.113958Z</strong></td>
-<td>Les dates d’upsert et d’actualisation ne sont pas établies par <code>created_at</code>.</td>
-</tr>
-<tr>
-<td>Saint-Rémi, tous nœuds</td>
-<td><strong>16</strong>, création max <strong>19/06 20:56:57.500872Z</strong></td>
-<td>Même compte et même date maximale</td>
-<td>N’établit pas une lecture des dernières séances municipales.</td>
-</tr>
-<tr>
-<td>Saint-Rémi, dates des nœuds <code>Source</code></td>
-<td><strong>4 sources ; max 19/05/2026</strong></td>
-<td><strong>4 sources ; max 19/05/2026</strong></td>
-<td>Dates enregistrées : 16/03, 01/04, 20/04, 19/05. Dernier PV daté présent dans cette base : <strong>19 mai</strong>.</td>
-</tr>
-<tr>
-<td>Snapshots de cohérence, date maximale</td>
-<td><strong>10/07 19:35:09.933Z</strong></td>
-<td>Même date</td>
-<td>Pas une mesure de septembre.</td>
-</tr>
-</tbody></table>
-<p>L’extraction des dates de sources illustre un <strong>source-gap</strong> : les nouveaux nœuds de type <code>source</code> en minuscule n’exposent pas de date dans <code>props.properties.date</code> dans la requête retenue. Une date maximale provinciale unique n’est donc <strong>pas vérifiable sur tout le corpus</strong>. Des champs d’étape contiennent aussi une valeur future <strong>2944-01-01</strong> et un champ <code>date</code> comporte le gabarit <strong>AAAA-MM-JJ</strong> : prendre le maximum brut serait invalide. [L5]</p>
-<p>La route publique <code>/api/graph/saint-remi</code> répond <strong>401 sans authentification</strong>. Le contenu de base est mesuré, mais sa restitution à un utilisateur authentifié n’a pas été vérifiée ici. <strong>Conclusion §6 : le renouvellement quotidien complet demandé reste non démontré, malgré la reprise effective de l’automatisation préprod.</strong></p>
-<h2>5. §10 — ce que la gouvernance a produit face aux sept exigences</h2>
-<table>
-<thead>
-<tr>
-<th>Exigence du 12 août</th>
-<th>Production constatée</th>
-<th>État et reste à établir</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>1. Vagues indépendantes et parallélisables</strong></td>
-<td>Plans de vagues candidats, branches thématiques et merges identifiables. <code>PLAN_STEVE_WAVES_2026-08-12.md</code> existe au commit <strong>615007c</strong>.</td>
-<td><strong>Partiel.</strong> Ce plan est explicitement non convergé et <strong>hors <code>origin/main</code></strong>.</td>
-</tr>
-<tr>
-<td><strong>2. Passe Sol xhigh Immo + validation architecture Geo</strong></td>
-<td>Passe Sol tracée dans le plan ; dossier 3D avec revue Sol/Fable puis validation de domaine Geo ; contrats Geo distincts, notamment <strong>geo #187/#206/#278/#280</strong>.</td>
-<td><strong>Partiel à l’échelle du plan.</strong> Preuves par sujet, sans attestation globale de convergence de toutes les vagues.</td>
-</tr>
-<tr>
-<td><strong>3. Seconde revue Fable/Sol, désaccords conservés</strong></td>
-<td>Dossiers préprod, collaboration et 3D ; renversement explicite DS propriétaire → Geo propriétaire ; réserve sur la mesure 3D maintenue. Décision Track <strong>01M0V7YX7ZJ6</strong> (revue <strong>Sonnet-5.6/Fable-5</strong>, issue <code>go</code> option AB : mesures read-only avant fork docs) conserve les variantes de traitement documentaire.</td>
-<td><strong>Réalisé sur des dossiers ciblés ; partiel globalement.</strong> Rassembler le registre de désaccords et leurs clôtures.</td>
-</tr>
-<tr>
-<td><strong>4. Branches, dépendances, recette, responsables, gate prod</strong></td>
-<td>Neuf items §1–§9 rattachés aux WP ; ancrages, états et décisions ; workflow de promotion.</td>
-<td><strong>Partiel.</strong> §10 absent ; Viewer hors WP ; acceptations <code>unknown</code> sur les dix ancres retrouvées ; retards Track↔Git.</td>
-</tr>
-<tr>
-<td><strong>5. Plan convergé committé/revu, PR et merge commit</strong></td>
-<td>Spécification <strong>8b85003</strong>, entrée Track <strong>e5993b4</strong>, intégrées par <strong>a132d4a / #510</strong> ; les <strong>132 merges</strong> du mois respectent le constat de plusieurs parents.</td>
-<td><strong>Partiel.</strong> <code>PLAN_USER_REVIEW_2026-08-12.md</code>, committé à <strong>2427d8d</strong>, est lui aussi <strong>hors <code>origin/main</code></strong> et porte encore un statut candidat. Le plan convergé mergé n’est pas établi.</td>
-</tr>
-<tr>
-<td><strong>6. Boucle objective H2A, responsables, dépendances, cadence, arrêts</strong></td>
-<td>Track documente des lanes et une cadence de reprise de <strong>10 min</strong>, puis la panne H2A et le passage aux outils natifs le <strong>05/09</strong>, événement <strong>01M1RN38B7ZR01QPKGGV4AJWA0</strong>.</td>
-<td><strong>Partiel.</strong> Orchestration attestée ; boucle complète issue du plan convergé et critères d’arrêt couvrant tout le périmètre non établis.</td>
-</tr>
-<tr>
-<td><strong>7. Préprod / CI / merge ≠ permission prod</strong></td>
-<td>Circuit préprod et promotion par tag <strong>#518</strong>, dossiers de décision et contrôles de version servie.</td>
-<td><strong>Règle matérialisée dans le circuit ; audit d’autorisation partiel.</strong> Ne pas déduire les approbations effectives de la présence d’un tag ou du SHA public.</td>
-</tr>
-</tbody></table>
-<p><strong>Distinction Git importante :</strong> <strong>3c2e9af</strong>, qui inscrit les neuf sujets sous les WP, n’est <strong>pas ancêtre de <code>origin/main</code></strong>. Les événements existent dans le journal local conducteur ; ce travail de gouvernance n’est donc pas présenté comme une fusion du mois. Il en va de même des dossiers locaux de préprod, de collaboration et de 3D consultés : leur existence et leur contenu sont vérifiés, leur intégration à main ne l’est pas. [G5, T1–T2]</p>
-<h2>6. Fiabilisation Track — rapprochement et correctifs proposés</h2>
-<p>La commande <strong><code>track report --wp --decisions --format json</code></strong>, version <strong>0.94.3</strong>, confirme <strong><code>done=93</code>, <code>active=214</code>, <code>dropped=2</code>, <code>pct=43</code></strong>. Dans ce roll-up, <strong>214 est le dénominateur retenu</strong>, incluant les 93 réalisés : <strong>93/214 = 43,46 %</strong>, affiché 43 %. Cela ne signifie pas « 93 réalisés + 214 restants ». Ce roll-up de l’ensemble des WP n’est <strong>pas</strong> le taux de livraison des 11 axes. Coupe du journal : <strong>05/09 19:27:16.321Z</strong>. [T1]</p>
-<table>
-<thead>
-<tr>
-<th>Écart vérifié</th>
-<th>Correctif à appliquer par le writer Track</th>
-<th>Preuve / critère de clôture</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>§10 sans item dédié sous les WP</strong></td>
-<td>Créer l’item de gouvernance et rattacher ses sept exigences, avec responsable et preuves.</td>
-<td>Un point d’entrée durable relie plans, revues, cadence et autorisations ; pas une simple case « docs faites ».</td>
-</tr>
-<tr>
-<td><strong>Viewer PDF hors WP</strong> : <code>01M1A7Y31JTCB52CBPJSTDAMYV</code> n’a pas de <code>wpId</code></td>
-<td>Proposer son rattachement au WP de restitution/UI existant ; conserver son identité et l’historique du 30/08.</td>
-<td>Arbre WP réconcilié, sans duplication de l’item.</td>
-</tr>
-<tr>
-<td><strong>§4</strong> : <code>to-do</code> / <code>unknown</code>, alors que <strong>#512 → v1.1.1</strong></td>
-<td>Enregistrer la réalisation liée au merge et au tag ; joindre une recette de rendu distincte.</td>
-<td>Réalisation alignée à Git ; acceptation conservée inconnue jusqu’à preuve.</td>
-</tr>
-<tr>
-<td><strong>Viewer PDF</strong> : <code>to-do</code> / <code>unknown</code>, alors que <strong>#539/#541 → v1.2.0</strong></td>
-<td>Enregistrer les deux capacités livrées ; rattacher une recette défilement/recherche.</td>
-<td>Les résultats de recherche et la navigation multipage sont vérifiables sur un PDF de recette.</td>
-</tr>
-<tr>
-<td><strong>§3, §5, §7 et annotations §2</strong> : ancres haut niveau retardées par rapport aux merges</td>
-<td>Ajouter les livraisons précises, sans passer tout l’axe à terminé.</td>
-<td>Les gaps chat, 3D, couverture réglementaire et collaboration restent visibles.</td>
-</tr>
-<tr>
-<td><strong>§6</strong> : dernier r4 à 160/528 ; état de suspension incomplet et ambigu entre clusters</td>
-<td>Ajouter le contexte OVH/SCW, la reprise mesurée et les dates par base ; rechercher la clôture r4 et sa promotion.</td>
-<td>Résultat de couverture par ville, horodatage document, erreurs et preuve de promotion ; pas seulement statut du job.</td>
-</tr>
-<tr>
-<td><strong>Décision légende <code>01M1Q2JG25S7P8S1NMGAS582RM</code></strong> : <code>deferred</code> le 05/09, correctif servi <strong>#666/#667</strong> le 10/09</td>
-<td>Consigner la résolution effective avec les deux merges/tags ; réviser le dossier si la formulation du choix final diffère.</td>
-<td>Clôture du correctif d’affichage ; dette de provenance <code>zone_family</code> conservée séparément. Ne pas sélectionner automatiquement une lettre d’une ancienne version du dossier.</td>
-</tr>
-<tr>
-<td><strong>Gouvernance locale non intégrée</strong> : plan et inscription WP hors main</td>
-<td>Préparer l’intégration des événements/documents utiles dans le workflow du dépôt, en préservant le journal append-only.</td>
-<td>Preuve de conservation des événements et liens explicites aux plans convergés.</td>
-</tr>
-</tbody></table>
-<p><strong>Aucune mutation Track, aucun reparent et aucune approbation de production n’ont été réalisés pour produire ce rapport.</strong> Les correctifs ci-dessus constituent le rapprochement demandé, prêt à être exécuté par le responsable du suivi. L’état initial du workspace a été conservé.</p>
-<h2>7. Recette transverse — section 11 de la spécification du 12 août</h2>
-<table>
-<thead>
-<tr>
-<th>Critère de recette initial</th>
-<th>Preuve disponible dans cette enquête</th>
-<th>Conclusion</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Préprod existe + promotion autorisée humainement</td>
-<td>Préprod mesurée ; workflow/tag/SHA servis ; dossiers de gate</td>
-<td>Existence vérifiée ; autorisations de chaque release à joindre.</td>
-</tr>
-<tr>
-<td>Restauration backup et rollback migration testés</td>
-<td>Code backup/rollback/migration mergé</td>
-<td>Exercice complet et résultats non vérifiés.</td>
-</tr>
-<tr>
-<td>Données collaboratives cloisonnées et auditables</td>
-<td>Notes mono-client, auteur, suppression logique</td>
-<td>Portée multi-client initiale non couverte.</td>
-</tr>
-<tr>
-<td>Régressions panneaux droit/gauche avec preuve rendue</td>
-<td>Correctifs et tests présents dans les merges</td>
-<td>Code servi ; preuve rendue de recette à rattacher.</td>
-</tr>
-<tr>
-<td>Contrôles carte : comportement et accessibilité</td>
-<td>Changements et tests dans les PR ; satellite activé</td>
-<td>Recette complète non rejouée ; 3D désactivée.</td>
-</tr>
-<tr>
-<td>Saint-Rémi et refresh municipal : résultat mesuré</td>
-<td>Base prod avec sources jusqu’au 19/05 ; préprod active</td>
-<td>Objectif non démontré.</td>
-</tr>
-<tr>
-<td>Règlements : audit toutes villes + Sutton rendu en prod</td>
-<td>Contrat et code Geo/Immo/MCP intégrés</td>
-<td>Audit et rendu Sutton non vérifiés ici.</td>
-</tr>
-<tr>
-<td>KPI reproductibles</td>
-<td>Supports Geo ; snapshots de cohérence datés de juillet</td>
-<td>Recette KPI Immo et moyenne non établies.</td>
-</tr>
-<tr>
-<td>Pilote Warden environnemental avec provenance</td>
-<td>Contrat/autorisation Track et pipeline CPTAQ</td>
-<td>Preuve pilote complète non vérifiée.</td>
-</tr>
-<tr>
-<td>Couche MCP utilisateur reste privée à son propriétaire sauf promotion</td>
-<td>Exigence et décision de cadrage</td>
-<td>Fonctionnement de bout en bout non établi.</td>
-</tr>
-</tbody></table>
-<h2>8. Ce qui reste inconnu et suite utile</h2>
-<p>La fin du <strong>r4 manuel</strong>, les villes réellement couvertes à l’issue de ses traitements et l’éventuelle promotion de <strong>tout</strong> ce résultat demeurent inconnues. Des nœuds ont été créés plus tard en production ; cela ne suffit pas à les attribuer à r4. Une date maximale documentaire provinciale fiable manque, notamment pour les nouveaux types de sources ; le rendu authentifié de Saint-Rémi reste non vérifié.</p>
-<p>Les gates d’acceptation des axes restent à rapprocher des preuves fonctionnelles, en particulier restauration/rollback de schéma, collaboration signal, audit règlements Sutton/toutes villes, KPI moyen et pilote Warden. Les sous-parties non actives — chat et 3D — doivent conserver leur statut explicite. Le correctif de légende n’autorise pas à considérer la famille déduite comme une donnée réglementaire certifiée dans chaque ville.</p>
-<p><strong>Priorité proposée :</strong> fermer la boucle de mesure §6 par ville et par environnement, puis réconcilier les items livrés et la décision légende, avant de consolider la recette transverse. Pour chaque reprise, joindre la source, le responsable, la version servie et un critère observable ; ces recommandations ne créent pas de nouvelle décision dans Track.</p>
-<p>L’enquête financière est livrée séparément dans <strong><code>couts-2026-08-12_2026-09-10.{md,html,pdf}</code></strong>. Les volumes de commits et l’état des axes ne servent pas de clé de facturation.</p>
+table { break-inside: auto; } tr { break-inside: avoid; } thead { display: table-header-group; } td code { overflow-wrap: anywhere; } a { overflow-wrap: anywhere; }</style></head><body><h1>Rapport de livraison — 12 août → 10 septembre 2026</h1>
+<p><strong>Périmètre</strong> : plateforme Radar immobilier (immo) + socle géographique (geo).
+<strong>Méthode</strong> : tous les chiffres de ce rapport sont mesurés sur la fenêtre Montréal <code>2026-08-12T00:00:00-04:00</code> → <code>2026-09-10T23:59:59-04:00</code> : historique premier parent et tags de <code>origin/main</code>, PR mergées, journal Track local et état d&#39;exploitation relevé le 11 septembre. Les captures référencées dans <code>assets/2026-09/</code> documentent les parcours livrés ; leur intégration au rendu final est assurée séparément.</p>
 <hr>
-<h2>Annexe A — registre des sources reproductibles</h2>
-<p>Les intermédiaires sont conservés sous <strong><code>.remote/month-evidence/</code></strong> dans ce workspace. Les fichiers <code>.meta.json</code> associés donnent commande, début/fin et résultat. Les SHAs et empreintes sont rassemblés dans le manifeste de vérification des livrables.</p>
+<h2>1. Synthèse exécutive</h2>
+<p>Le mois livre un saut de produit visible : <strong>recherche directe de lots et de zones</strong>, <strong>viewer PDF multipage avec recherche</strong>, <strong>satellite 2D</strong>, <strong>légende de zonage restaurée avec déductions bornées</strong>, cycle de vie des règlements, provenance renforcée et premières notes collaboratives. La chaîne Geo progresse en parallèle sur les règlements, le CPTAQ, le moteur cartographique et plusieurs jointures municipales.</p>
+<p>La mesure Git donne <strong>132 PR immo mergées</strong> et <strong>9 releases</strong>, de <strong>v1.0.0 à v1.2.5</strong>. Côté geo, <strong>174 PR sont mergées</strong> et <strong>5 versions</strong> sont publiées, de <strong>v0.5.1 à v0.6.1</strong>. Le 11 septembre, les points publics <code>/build.json</code> et <code>/health</code> servent le SHA <strong>831cad2</strong>, soit <strong>v1.2.5</strong>.</p>
 <table>
 <thead>
 <tr>
-<th>Réf.</th>
-<th>Sources conservées / commande</th>
+<th>Volet</th>
+<th>Livré</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>G1</td>
-<td><code>git-first-parent.txt</code>, <code>git-first-parent-requested.txt</code>, <code>git-origin.txt</code>, <code>git-remote-main.txt</code> ; <code>git log origin/main --first-parent</code> aux bornes de la période</td>
+<td><strong>immo</strong></td>
+<td><strong>132 PR mergées</strong> ; recherche lots/zones, preuve PV→règlement, PDF multipage, satellite 2D, légende de zonage et déduction auditée, CPTAQ conditionnel, provenance réglementaire, notes lots/signaux</td>
 </tr>
 <tr>
-<td>G2</td>
-<td><code>git-tags.txt</code>, <code>merges-tags.json</code> ; objets des tags et test d’ascendance de chaque merge</td>
+<td><strong>geo</strong></td>
+<td><strong>174 PR mergées</strong> ; contrat et service des règlements, chaîne CPTAQ, moteur de carte et sessions de tuiles, résolution PV/zonage et nouvelles jointures municipales</td>
 </tr>
 <tr>
-<td>G3</td>
-<td><code>pr-*.diff</code>, <code>git-details.txt</code> ; <code>git diff &lt;merge&gt;^1 &lt;merge&gt;</code> et lectures de code <code>origin/main</code></td>
+<td><strong>prod</strong></td>
+<td><strong>9 releases immo</strong> ; production observée sur <strong>v1.2.5</strong> ; refresh automatique présent en préproduction, pas encore armé en production</td>
 </tr>
 <tr>
-<td>G4</td>
-<td><code>geo-first-parent.txt</code>, <code>geo-main.txt</code>, <code>geo-remote-main.txt</code> ; même méthode sur le dépôt Geo</td>
-</tr>
-<tr>
-<td>G5</td>
-<td><code>facts.txt</code>, <code>git-details.txt</code>, <code>doc-*.txt</code> ; contenu et ascendance des plans/dossiers locaux</td>
-</tr>
-<tr>
-<td>T1</td>
-<td><code>track-version.txt</code>, <code>track-report.txt</code>, <code>track-events.jsonl</code>, <code>git-track-events.txt</code> ; <code>track report --wp --decisions --format json</code></td>
-</tr>
-<tr>
-<td>T2</td>
-<td><code>track-selected.json</code>, <code>track-governance.txt</code>, <code>track-domain.txt</code> ; événements sélectionnés, avec IDs et dates</td>
-</tr>
-<tr>
-<td>L1</td>
-<td><code>prod-build.txt</code>, <code>prod-health.txt</code> et leurs métadonnées HTTP ; requêtes sous <code>timeout 30</code></td>
-</tr>
-<tr>
-<td>L2</td>
-<td><code>cronjobs.txt</code>, <code>pods.txt</code>, <code>top-pods.txt</code> : contexte Scaleway par défaut</td>
-</tr>
-<tr>
-<td>L3</td>
-<td><code>ovh-admin-cronjobs.txt</code>, <code>ovh-admin-jobs.txt</code>, <code>ovh-admin-deployments.txt</code>, <code>ovh-admin-pods.txt</code> : accès OVH explicite, commandes bornées</td>
-</tr>
-<tr>
-<td>L4</td>
-<td><code>radar-immobilier-freshness.txt</code>, <code>radar-immobilier-preprod-freshness.txt</code> ; SQL conservé dans <code>.remote/month-freshness.sql</code></td>
-</tr>
-<tr>
-<td>L5</td>
-<td><code>radar-immobilier-dates.txt</code>, <code>radar-immobilier-source-dates.txt</code> et équivalents préprod ; <code>prod-saint-remi.meta.json</code> ; requêtes dans <code>.remote/month-kube-query.mjs</code></td>
+<td><strong>suivi</strong></td>
+<td>Journal Track local arrêté au 5 septembre : <strong>119 événements</strong> dans la fenêtre, <strong>48 items créés</strong>, <strong>12 décisions</strong> et <strong>2 transitions distinctes vers done</strong> ; Git demeure la mesure de livraison après cette coupe</td>
 </tr>
 </tbody></table>
-<p>Les mesures postérieures à la coupe ne sont pas rétroactivement attribuées au mois : notamment les derniers succès CronJob du <strong>11 septembre</strong> et l’état actuel des bases. Les modifications de code sont datées par les merges de la fenêtre. Le rapport distingue les faits mesurés, le récit enregistré dans Track et les résultats de recette encore non vérifiés.</p>
-<h2>Annexe B — les neuf tags et leur contenu</h2>
-<p>La date ci-dessous est celle du tag annoté lorsqu’il existe ; pour un tag léger, c’est la date du commit cible, <strong>pas une date de création du tag déduite</strong>. Les neuf cibles sont dans la chaîne du premier parent de main. Le service actuel de v1.2.5 est prouvé séparément par HTTP.</p>
+<hr>
+<h2>2. Livraisons immo</h2>
+<p>Les livraisons principales sont regroupées ci-dessous. « En prod » signifie que le changement est contenu dans <strong>v1.2.5</strong>, version observée le 11 septembre ; cela ne remplace pas une recette ville par ville.</p>
 <table>
 <thead>
 <tr>
-<th>Tag</th>
-<th>Commit cible</th>
-<th>Date portée par la source</th>
-<th>Nature</th>
+<th>Chantier</th>
+<th>PR principales</th>
+<th>État prod (11 sept.)</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>v1.0.0</strong></td>
-<td>bd3320dbc8c0</td>
-<td>2026-08-19T20:01:54-04:00</td>
-<td>Tag léger : date du commit</td>
+<td><strong>Zonage — couleurs, légende et numéros</strong> : restauration des couleurs de familles ; affichage distinct du numéro de zone et du numéro de lot ; priorité aux valeurs de source, puis repli alphabétique audité ; les valeurs non résolues restent non résolues</td>
+<td>#632 (v1.2.0), #666 (v1.2.4), #667 (v1.2.5)</td>
+<td>En prod, v1.2.0 puis v1.2.4–v1.2.5</td>
 </tr>
 <tr>
-<td><strong>v1.1.0</strong></td>
-<td>07f6e2068e7f</td>
-<td>2026-08-22T23:40:24-04:00</td>
-<td>Tag annoté</td>
+<td><strong>Carte — satellite 2D</strong> : intégration du moteur Geo, stabilisation des changements de style, autorisation du domaine de tuiles en production et retour au fond Plan par défaut</td>
+<td>#640, #643, #645–#649, #652–#654, #664, #665</td>
+<td>En prod, v1.2.2–v1.2.3 ; 3D désactivée</td>
 </tr>
 <tr>
-<td><strong>v1.1.1</strong></td>
-<td>bc5fa15c76b6</td>
-<td>2026-08-23T20:52:47-04:00</td>
-<td>Tag annoté</td>
+<td><strong>Recherche et chaîne de preuve</strong> : recherche séparée dans lots et zones ; distinction entre PV source et règlement ; corrections du rattachement de preuve</td>
+<td>#511, #520, #523, #526, #527, #530</td>
+<td>En prod, v1.1.1–v1.2.0</td>
 </tr>
 <tr>
-<td><strong>v1.2.0</strong></td>
-<td>9ea5b74b6789</td>
-<td>2026-09-09T15:53:47-04:00</td>
-<td>Tag annoté</td>
+<td><strong>Viewer PDF</strong> : défilement continu entre pages et recherche plein texte dans tout le document, avec navigation entre occurrences</td>
+<td>#539, #541</td>
+<td>En prod, v1.2.0 ; dépend de la couche texte du PDF</td>
 </tr>
 <tr>
-<td><strong>v1.2.1</strong></td>
-<td>380357e3d878</td>
-<td>2026-09-10T07:22:05-04:00</td>
-<td>Tag annoté</td>
+<td><strong>Règlements et provenance</strong> : cycle avis/projet/adoption, statut dérivé à l&#39;ingestion, rattachement aux objets Geo, exposition MCP et garde-fous de citation</td>
+<td>#532, #540, #542, #556, #560, #568–#571, #588, #603, #606, #615, #616</td>
+<td>En prod, v1.2.0</td>
 </tr>
 <tr>
-<td><strong>v1.2.2</strong></td>
-<td>da093d1821cc</td>
-<td>2026-09-10T11:18:18-04:00</td>
-<td>Tag annoté</td>
+<td><strong>Contraintes CPTAQ</strong> : contrôle de couche et passage par le proxy OGC de production lorsque la collection municipale existe</td>
+<td>#591, #614</td>
+<td>En prod, v1.2.0 ; disponibilité variable selon la ville</td>
 </tr>
 <tr>
-<td><strong>v1.2.3</strong></td>
-<td>453ec46e19e5</td>
-<td>2026-09-10T18:04:34-04:00</td>
-<td>Tag annoté</td>
+<td><strong>Notes lots/signaux</strong> : migration additive, édition, suppression logique, interface et mise à jour SSE</td>
+<td>#576, #581, #584</td>
+<td>En prod, v1.2.0 ; périmètre mono-client, pas la collaboration complète</td>
 </tr>
 <tr>
-<td><strong>v1.2.4</strong></td>
-<td>73b0931538bb</td>
-<td>2026-09-10T21:30:32-04:00</td>
-<td>Tag léger : date du commit</td>
-</tr>
-<tr>
-<td><strong>v1.2.5</strong></td>
-<td>831cad2459b6</td>
-<td>2026-09-10T23:08:50-04:00</td>
-<td>Tag léger : date du commit</td>
-</tr>
-</tbody></table>
-<h2>Annexe C — registre exhaustif des merges immo du mois</h2>
-<p>Un merge apparaît une seule fois, sur le premier parent. La colonne « premier tag » signifie <strong>inclusion du changement dans ce tag</strong>, sans certifier séparément l’exploitation historique de chaque version. Les SHAs complets et parents sont dans <code>git-first-parent.txt</code> et <code>merges-tags.json</code>. Les titres techniques ne sont pas utilisés comme indicateur d’acceptation.</p>
-<table>
-<thead>
-<tr>
-<th>PR</th>
-<th>Date du merge, Montréal</th>
-<th>SHA</th>
-<th>Premier tag contenant le merge</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>#510</td>
-<td>2026-08-13 05:02</td>
-<td>a132d4a031bf</td>
-<td>v1.0.0</td>
-</tr>
-<tr>
-<td>#518</td>
-<td>2026-08-19 20:01</td>
-<td>bd3320dbc8c0</td>
-<td>v1.0.0</td>
-</tr>
-<tr>
-<td>#519</td>
-<td>2026-08-22 23:05</td>
-<td>07f6e2068e7f</td>
-<td>v1.1.0</td>
-</tr>
-<tr>
+<td><strong>Liste des municipalités</strong> : suppression du plafond qui masquait Saint-Stanislas-de-Kostka hors recherche</td>
 <td>#512</td>
-<td>2026-08-23 19:30</td>
-<td>111c4a2dfb64</td>
-<td>v1.1.1</td>
-</tr>
-<tr>
-<td>#511</td>
-<td>2026-08-23 19:40</td>
-<td>bc5fa15c76b6</td>
-<td>v1.1.1</td>
-</tr>
-<tr>
-<td>#509</td>
-<td>2026-08-23 21:37</td>
-<td>077ca6ee6ee8</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#520</td>
-<td>2026-08-23 22:08</td>
-<td>115da4dd682d</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#522</td>
-<td>2026-08-24 21:14</td>
-<td>55592f8e3070</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#523</td>
-<td>2026-08-25 06:26</td>
-<td>16b59587d100</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#524</td>
-<td>2026-08-29 07:35</td>
-<td>81429a812ae6</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#525</td>
-<td>2026-08-29 10:21</td>
-<td>3070f9e65a30</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#526</td>
-<td>2026-08-30 09:16</td>
-<td>45047b2232cf</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#528</td>
-<td>2026-08-30 09:53</td>
-<td>b5841c7e697b</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#527</td>
-<td>2026-08-30 13:40</td>
-<td>e655e660bc15</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#530</td>
-<td>2026-08-30 14:02</td>
-<td>8d221ab3c533</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#532</td>
-<td>2026-08-30 14:14</td>
-<td>172f7b579a16</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#531</td>
-<td>2026-08-30 14:31</td>
-<td>e77827b0fadc</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#533</td>
-<td>2026-08-30 15:37</td>
-<td>9fd6b94770f4</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#534</td>
-<td>2026-08-30 16:49</td>
-<td>123e1b1d7bb9</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#535</td>
-<td>2026-08-30 17:14</td>
-<td>ca8004a54a47</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#536</td>
-<td>2026-08-30 19:49</td>
-<td>fef3b723b8e9</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#537</td>
-<td>2026-08-30 20:13</td>
-<td>56bc810d9a1a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#538</td>
-<td>2026-08-30 20:48</td>
-<td>138c08015f18</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#540</td>
-<td>2026-08-30 21:22</td>
-<td>22e1062765d4</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#539</td>
-<td>2026-08-30 21:56</td>
-<td>393c653dbf9d</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#541</td>
-<td>2026-08-30 22:22</td>
-<td>24402e6953b6</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#542</td>
-<td>2026-08-31 00:27</td>
-<td>50f593107005</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#543</td>
-<td>2026-08-31 00:53</td>
-<td>bcc2af398761</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#544</td>
-<td>2026-08-31 01:23</td>
-<td>49a3469ab226</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#545</td>
-<td>2026-08-31 01:29</td>
-<td>6edc20b20240</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#546</td>
-<td>2026-08-31 01:45</td>
-<td>37a303027f97</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#547</td>
-<td>2026-08-31 02:03</td>
-<td>73ab540f43d1</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#548</td>
-<td>2026-08-31 02:48</td>
-<td>03f33b4ad97c</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#549</td>
-<td>2026-08-31 03:19</td>
-<td>f797a717d58a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#550</td>
-<td>2026-08-31 05:03</td>
-<td>546b191bcaa6</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#551</td>
-<td>2026-08-31 06:16</td>
-<td>1056e99112cf</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#552</td>
-<td>2026-08-31 08:01</td>
-<td>99a4dda54da9</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#553</td>
-<td>2026-08-31 13:37</td>
-<td>e04b41de056c</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#554</td>
-<td>2026-08-31 14:00</td>
-<td>0bc437d2de39</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#555</td>
-<td>2026-08-31 14:58</td>
-<td>9266d20a8c76</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#556</td>
-<td>2026-08-31 15:18</td>
-<td>8c549b62c18d</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#557</td>
-<td>2026-08-31 16:20</td>
-<td>5776aed746f8</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#558</td>
-<td>2026-08-31 17:34</td>
-<td>4c51ff62a393</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#559</td>
-<td>2026-08-31 18:44</td>
-<td>8878a0be235d</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#561</td>
-<td>2026-09-01 09:30</td>
-<td>496677c94dbf</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#560</td>
-<td>2026-09-02 21:12</td>
-<td>bb9281aca180</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#563</td>
-<td>2026-09-02 22:20</td>
-<td>1e4f81d2b721</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#564</td>
-<td>2026-09-02 22:56</td>
-<td>4e16eb63092e</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#568</td>
-<td>2026-09-03 09:44</td>
-<td>9dfef828f121</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#569</td>
-<td>2026-09-03 12:15</td>
-<td>e411e6a80517</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#570</td>
-<td>2026-09-03 13:50</td>
-<td>aafbd02f87b9</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#571</td>
-<td>2026-09-03 13:58</td>
-<td>b902dd4d8a28</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#437</td>
-<td>2026-09-03 14:45</td>
-<td>31ce7a2acc3d</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#572</td>
-<td>2026-09-03 16:41</td>
-<td>86eb7e44702a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#573</td>
-<td>2026-09-03 16:57</td>
-<td>992aa86d403d</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#575</td>
-<td>2026-09-03 17:06</td>
-<td>f77db67eddff</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#576</td>
-<td>2026-09-03 17:32</td>
-<td>4d712c076804</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#577</td>
-<td>2026-09-03 19:19</td>
-<td>7501e27b73b5</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#579</td>
-<td>2026-09-03 19:38</td>
-<td>d03dbd04766f</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#578</td>
-<td>2026-09-03 20:05</td>
-<td>12b93023ebae</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#581</td>
-<td>2026-09-03 20:55</td>
-<td>94645e28bc50</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#583</td>
-<td>2026-09-03 21:06</td>
-<td>3c61b929f9af</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#582</td>
-<td>2026-09-03 21:12</td>
-<td>958756f5828e</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#580</td>
-<td>2026-09-03 21:24</td>
-<td>9d65f567f46b</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#584</td>
-<td>2026-09-03 22:45</td>
-<td>3022c31d3938</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#585</td>
-<td>2026-09-03 23:32</td>
-<td>d891e3908433</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#587</td>
-<td>2026-09-04 00:12</td>
-<td>c7a03885b60b</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#586</td>
-<td>2026-09-04 00:39</td>
-<td>4c26be7ae384</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#592</td>
-<td>2026-09-04 01:28</td>
-<td>98c7ed48545a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#594</td>
-<td>2026-09-04 01:53</td>
-<td>dbd3047dda00</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#589</td>
-<td>2026-09-04 02:05</td>
-<td>2f8ead5e24b6</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#590</td>
-<td>2026-09-04 02:18</td>
-<td>0924c411bb36</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#588</td>
-<td>2026-09-04 02:34</td>
-<td>a8810fb28bec</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#596</td>
-<td>2026-09-04 02:55</td>
-<td>ed8843f5749a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#597</td>
-<td>2026-09-04 04:04</td>
-<td>0a797a21885a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#599</td>
-<td>2026-09-04 04:25</td>
-<td>6e354eb6c80b</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#601</td>
-<td>2026-09-04 04:58</td>
-<td>cd7cb9d10286</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#593</td>
-<td>2026-09-04 07:08</td>
-<td>0510bfad83b6</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#606</td>
-<td>2026-09-04 08:19</td>
-<td>41119a4e030c</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#591</td>
-<td>2026-09-04 08:31</td>
-<td>dd33e4100170</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#521</td>
-<td>2026-09-04 08:49</td>
-<td>aaedcd472e17</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#603</td>
-<td>2026-09-04 08:55</td>
-<td>9fa4f0c83b7f</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#613</td>
-<td>2026-09-04 13:38</td>
-<td>548e96951630</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#614</td>
-<td>2026-09-04 14:37</td>
-<td>0c51b244b50e</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#615</td>
-<td>2026-09-04 16:03</td>
-<td>922b9e56b09a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#607</td>
-<td>2026-09-04 16:43</td>
-<td>c09e64163c52</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#608</td>
-<td>2026-09-04 16:49</td>
-<td>e5cb0e45837a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#611</td>
-<td>2026-09-04 16:58</td>
-<td>ffd13df7c9b7</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#616</td>
-<td>2026-09-04 18:31</td>
-<td>336c7dd99497</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#617</td>
-<td>2026-09-04 19:33</td>
-<td>f1f1ba3e8aae</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#618</td>
-<td>2026-09-04 19:51</td>
-<td>eebb9559f84b</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#619</td>
-<td>2026-09-04 20:04</td>
-<td>aaf84dfedce1</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#620</td>
-<td>2026-09-04 20:12</td>
-<td>5fc3791f30f7</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#621</td>
-<td>2026-09-04 20:21</td>
-<td>32fab1efdec9</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#622</td>
-<td>2026-09-04 22:17</td>
-<td>ee85f6d97cd0</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#623</td>
-<td>2026-09-04 22:25</td>
-<td>1c8593290c9b</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#624</td>
-<td>2026-09-04 22:37</td>
-<td>1b6b3237499e</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#625</td>
-<td>2026-09-04 22:54</td>
-<td>737740d9404f</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#626</td>
-<td>2026-09-05 07:57</td>
-<td>d391ec040b08</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#628</td>
-<td>2026-09-05 08:22</td>
-<td>bcf2ef0b8871</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#629</td>
-<td>2026-09-05 08:32</td>
-<td>33e033cab7fb</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#630</td>
-<td>2026-09-05 08:47</td>
-<td>42ba441d7cf9</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#631</td>
-<td>2026-09-05 09:35</td>
-<td>fc02b5b396f0</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#632</td>
-<td>2026-09-05 10:13</td>
-<td>862c76448d34</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#635</td>
-<td>2026-09-05 14:41</td>
-<td>307dc7c5a79a</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#637</td>
-<td>2026-09-05 20:57</td>
-<td>baa5381872fa</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#633</td>
-<td>2026-09-05 21:09</td>
-<td>e31272876582</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#638</td>
-<td>2026-09-06 01:33</td>
-<td>29f0e21f72fe</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#639</td>
-<td>2026-09-06 09:39</td>
-<td>fca8438585d3</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#640</td>
-<td>2026-09-06 15:45</td>
-<td>b80320de3a46</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#641</td>
-<td>2026-09-06 19:04</td>
-<td>d59eeddca805</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#642</td>
-<td>2026-09-06 21:07</td>
-<td>74d1f5920472</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#643</td>
-<td>2026-09-06 21:24</td>
-<td>8a346aec15c4</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#644</td>
-<td>2026-09-07 07:38</td>
-<td>160925872d95</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#645</td>
-<td>2026-09-07 08:14</td>
-<td>f49e9b97a52f</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#646</td>
-<td>2026-09-07 12:47</td>
-<td>372ecf035feb</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#647</td>
-<td>2026-09-07 16:06</td>
-<td>a7c84e1e0618</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#648</td>
-<td>2026-09-07 18:20</td>
-<td>65e1e0a80ecb</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#649</td>
-<td>2026-09-07 20:08</td>
-<td>4efbaef639c8</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#650</td>
-<td>2026-09-07 20:36</td>
-<td>c5ee11357045</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#651</td>
-<td>2026-09-07 21:41</td>
-<td>93dcd84da892</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#652</td>
-<td>2026-09-07 22:14</td>
-<td>8208d3ed9ad4</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#653</td>
-<td>2026-09-08 09:08</td>
-<td>90a9dab0babf</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#654</td>
-<td>2026-09-08 11:15</td>
-<td>e3a110885f16</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#656</td>
-<td>2026-09-09 12:12</td>
-<td>8b7c67640a1c</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#659</td>
-<td>2026-09-09 15:43</td>
-<td>9ea5b74b6789</td>
-<td>v1.2.0</td>
-</tr>
-<tr>
-<td>#655</td>
-<td>2026-09-09 20:28</td>
-<td>380357e3d878</td>
-<td>v1.2.1</td>
-</tr>
-<tr>
-<td>#661</td>
-<td>2026-09-10 09:47</td>
-<td>260c8e1cf16e</td>
-<td>v1.2.2</td>
-</tr>
-<tr>
-<td>#664</td>
-<td>2026-09-10 11:18</td>
-<td>da093d1821cc</td>
-<td>v1.2.2</td>
-</tr>
-<tr>
-<td>#665</td>
-<td>2026-09-10 18:04</td>
-<td>453ec46e19e5</td>
-<td>v1.2.3</td>
-</tr>
-<tr>
-<td>#666</td>
-<td>2026-09-10 21:30</td>
-<td>73b0931538bb</td>
-<td>v1.2.4</td>
-</tr>
-<tr>
-<td>#667</td>
-<td>2026-09-10 23:08</td>
-<td>831cad2459b6</td>
-<td>v1.2.5</td>
+<td>En prod, v1.1.1</td>
 </tr>
 </tbody></table>
+<h3>Le zonage redevient lisible et traçable</h3>
+<p>Les PR <strong>#666/#667</strong> rétablissent la lecture couleur sans confondre trois notions : le numéro municipal de zone, le type déclaré par la source et la famille d&#39;usage utilisée pour la couleur. La déduction suit une précédence bornée — <code>affectation</code>, puis <code>kind</code>, puis code alphabétique audité — et ne transforme pas ce dernier repli en norme québécoise universelle.</p>
+<p><img src="assets/2026-09/signaux-zonage-couleurs.png" alt="Signaux et couleurs de zonage"></p>
+<p><em>Les signaux restent visibles dans leur contexte de zone ; les familles distinguées par la légende proviennent du contrat livré, pas d&#39;une correspondance libre ajoutée au rapport.</em></p>
+<p><img src="assets/2026-09/legende-zonage-sincere.png" alt="Légende de zonage — familles en clair, numéros de zone et de lot"></p>
+<p><em>La fiche sépare le numéro de zone, le numéro de lot et la famille d&#39;affichage. Les codes sans correspondance auditée ne sont pas forcés.</em></p>
+<p>Le relevé Track du 4 septembre quantifie le terrain : <code>zone_code</code> est servi pour <strong>868 municipalités</strong> sur <strong>871 collections</strong> examinées, dont <strong>727</strong> avec provenance de source citée et <strong>144</strong> avec un vrai numéro de zone mais une provenance encore incomplète. <code>usage_dominant</code> est dérivé pour <strong>710 municipalités</strong>. Les écarts de géométrie restent concentrés sur <strong>195 + 43 municipalités</strong> selon les deux catégories consignées dans la décision ; ils ne sont pas masqués par la légende.</p>
+<h3>Le fond satellite 2D complète le plan</h3>
+<p>La série <strong>#640, #643, #645–#649, #652–#654</strong> raccorde le moteur cartographique Geo à l&#39;application. <strong>#664</strong> autorise les tuiles en production et <strong>#665</strong> conserve Plan comme mode initial, afin que le satellite soit un choix explicite. La vue 3D reste désactivée dans la version servie.</p>
+<p><img src="assets/2026-09/satellite-2d.png" alt="Fond satellite 2D"></p>
+<h3>Retrouver un objet puis ouvrir sa preuve</h3>
+<p>La recherche lots/zones est livrée par <strong>#520/#523</strong>, puis consolidée par <strong>#527/#530</strong>. La preuve distingue désormais le PV ayant produit le signal du règlement applicable (<strong>#511/#526</strong>). Dans le document, <strong>#539/#541</strong> ajoutent le défilement multipage et la recherche avec occurrences précédente/suivante ; les PDF constitués uniquement d&#39;images restent hors de cette preuve faute d&#39;OCR.</p>
+<p><img src="assets/2026-09/recherche-lot-zone.png" alt="Recherche d'un lot ou d'une zone"></p>
+<p><img src="assets/2026-09/viewer-pdf.png" alt="Viewer PDF multipage et recherche"></p>
+<p>Les correctifs de provenance <strong>#568/#569/#588/#603/#606/#616</strong> ferment plusieurs chemins où une citation pouvait être affichée sans référence exploitable. Ils renforcent la chaîne de preuve ; ils ne démontrent pas que chaque municipalité publie des documents de qualité identique.</p>
+<hr>
+<h2>3. Livraisons geo</h2>
+<p>Geo totalise <strong>174 PR mergées</strong> sur le premier parent et cinq versions dans la période : <strong>v0.5.1, v0.5.2, v0.5.3, v0.6.0 et v0.6.1</strong>.</p>
+<p><strong>Principales voies livrées sur la période</strong> :</p>
+<ul>
+<li><strong>Règlements</strong> : mesure de couverture des URL, contrat de cycle de vie, KPI sur l&#39;univers de <strong>1 106 municipalités</strong>, émission des événements de zonage, état de décision et exposition MCP/service (#277, #278, #282, #283, #286, #294, #295, #325, #343).</li>
+<li><strong>Contraintes CPTAQ</strong> : normalisation, métadonnées de service, collections et garde-fous de publication (#280, #302, #303, #306, #307, #310–#312). À la coupe Track du 5 septembre, quatre municipalités servent effectivement cette couche — <strong>Coaticook, Saint-Stanislas-de-Kostka, Sutton et Warden</strong> — sous forme de MultiPolygons. BDZI et GRHQ sont raccordés mais pas encore servis.</li>
+<li><strong>Moteur cartographique</strong> : interfaces initiales, package 0.5.1, création des sessions de tuiles, service et adaptateurs jusqu&#39;à 0.6.1, puis activation de l&#39;overlay de production et RBAC (#206–#223, #297, #301, #330, #331, #333, #334, #337, #339, #341, #354, #368, #369).</li>
+<li><strong>Résolution PV et zonage</strong> : audit, remédiations et résolution CAS des événements pour mieux relier les documents aux municipalités et aux objets réglementaires (#255, #256, #258, #261–#264, #267, #272–#275).</li>
+<li><strong>Jointures municipales</strong> : travaux ciblés pour <strong>Amherst, Beaupré et Boischatel</strong>, avec leurs correctifs associés (#194, #196, #199, #201).</li>
+</ul>
+<p>Ces apports alimentent les parcours immo visibles au §2. Ils ne justifient pas d&#39;extrapoler une couverture provinciale aux couches encore servies sur un nombre limité de municipalités.</p>
+<hr>
+<h2>4. Déploiements et exploitation</h2>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Mesure (période)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Releases immo</td>
+<td><strong>9 tags</strong> : v1.0.0 (19 août), v1.1.0 (22 août), v1.1.1 (23 août), v1.2.0 (9 septembre), puis v1.2.1 à v1.2.5 (10 septembre)</td>
+</tr>
+<tr>
+<td>Production</td>
+<td><code>/build.json</code> et <code>/health</code> observés le 11 septembre sur <strong>831cad2 = v1.2.5</strong></td>
+</tr>
+<tr>
+<td>Préproduction</td>
+<td>Séparation préprod/prod, sauvegarde pré-release, rollback applicatif et migrations dans le pipeline (#518, #572, #575, #656, #659). Les CronJobs scrape/projection sont actifs et leur dernier succès observé date du 11 septembre. La finalisation de la migration <strong>SCW→OVH</strong> reste rattachée à ce chantier préprod : registry→GHCR, transfert vers les buckets OVH et décommissionnement de MinIO</td>
+</tr>
+<tr>
+<td>Fraîcheur production</td>
+<td>Aucun CronJob de refresh n&#39;est présent dans le namespace de production OVH au relevé : l&#39;actualisation automatique de production n&#39;est pas encore armée. Données servies en production au relevé du 11 septembre (requêtes bornées en lecture seule) : nœuds Signal, Zone, Lot et Bylaw créés au plus tard le <strong>6 août 2026</strong> ; nœuds réglementaires (<code>source</code>, <code>designationevent</code>) jusqu&#39;au 10 septembre ; dates de documents source au plus tard le <strong>16 juin 2026</strong>. Un premier refresh de production (scrape + détection des signaux, Job <code>radar-scrape</code>) a été déclenché le 11 septembre à 18:27Z via le workflow self-service <code>run-job</code> (option <code>scrape</code>, PR #669) ; son résultat est en cours de mesure</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>5. Action items de la dernière réunion — pointage</h2>
+<p>Le journal ne contient pas un procès-verbal unique et exhaustif. Le tableau reprend les directives owner explicitement datées du <strong>4 septembre</strong>, sans compléter les blancs par supposition.</p>
+<p>Légende : ✓ fait (preuve) · ◐ partiel/en cours · ☐ à faire</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Action</th>
+<th>État</th>
+<th>Preuve / commentaire</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Distinguer les vrais numéros de zone de la famille colorée et privilégier la lecture habitation</td>
+<td>✓</td>
+<td>Affichage corrigé et repli audité dans #632/#666/#667, servi en v1.2.5. La provenance municipale reste incomplète pour une partie des 144 jeux portant un vrai numéro.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Activer les deux choix de fond utiles : satellite et plan</td>
+<td>✓</td>
+<td>Satellite autorisé en production par #664 ; Plan remis par défaut par #665. La livraison est 2D, sans activation implicite de la 3D. Directive non retrouvée sous cette forme dans le journal Track au 4 septembre (source-gap) : la livraison est établie par Git, les items satellite tracés datent du 5 septembre (GO#2).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Ne pas faire du CPTAQ l&#39;unique réponse environnementale ; avancer aussi les couches inondation et autres contraintes</td>
+<td>◐</td>
+<td>CPTAQ est servi pour quatre municipalités à la coupe ; BDZI et GRHQ sont raccordés côté Geo mais pas servis. Extension et recette bout en bout à poursuivre.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Rendre la publication des citations autonome, sans action manuelle de l&#39;owner</td>
+<td>✓</td>
+<td>Le journal consigne le 4 septembre la création d&#39;une identité IAM dédiée, de sa politique, de sa clé et de la variable de publication. Aucune valeur secrète n&#39;est reproduite ici.</td>
+</tr>
+</tbody></table>
+<p><strong>Bilan : 3 faits, 1 partiel.</strong> Le reste porte sur l&#39;extension mesurée des contraintes environnementales, pas sur la reprise des parcours déjà livrés.</p>
+<hr>
+<h2>6. Prochaines étapes</h2>
+<p><strong>Attendu de Steve</strong> :</p>
+<ul>
+<li><strong>Valider les parcours de démonstration</strong> : recherche lot/zone, lecture de la famille et du vrai numéro de zone, bascule Plan/Satellite, ouverture du PV et recherche dans le PDF.</li>
+<li><strong>Qualifier les familles d&#39;usage</strong> : signaler les cas municipaux où le code affiché ou la couleur ne correspond pas au sens attendu, afin d&#39;étendre uniquement les correspondances vérifiables.</li>
+<li><strong>Prioriser les couches environnementales</strong> : ordonner inondation, hydrographie et autres contraintes après le pilote CPTAQ, à partir des villes de démonstration.</li>
+</ul>
+<p><strong>De notre côté</strong> :</p>
+<ul>
+<li><strong>Armer le refresh production</strong> : promouvoir le circuit scrape→projection avec métriques de couverture, critères d&#39;arrêt et preuve de fraîcheur ; un succès de CronJob ne remplacera pas la mesure des données servies.</li>
+<li><strong>Étendre les contraintes Geo</strong> : faire passer BDZI/GRHQ du raccordement au service, puis élargir la couverture CPTAQ au-delà des quatre municipalités mesurées.</li>
+<li><strong>Achever la provenance du zonage</strong> : réduire les villes sans géométrie ou sans source citée et conserver l&#39;état non résolu lorsqu&#39;aucune correspondance municipale n&#39;est démontrée.</li>
+<li><strong>Recetter la chaîne de release</strong> : joindre aux pipelines les preuves de restauration, de rollback de schéma et d&#39;approbation de promotion.</li>
+<li><strong>Finaliser le chantier préprod OVH</strong> : basculer le registry vers GHCR, transférer les objets requis dans les buckets OVH et retirer MinIO après validation.</li>
+<li><strong>Réconcilier Track avec Git</strong> : rattacher aux items les PR, versions et preuves visuelles livrées après la dernière coupe locale du 5 septembre.</li>
+</ul>
+<hr>
+<p><em>Rapport généré le 11 septembre 2026. Sources : historique premier parent et tags de <code>origin/main</code> pour <code>rhanka/radar-immobilier</code> et geo, références de PR mergées, journal Track local (<code>.track/events.jsonl</code>, dernière entrée le 5 septembre), points publics <code>/build.json</code> et <code>/health</code>, inventaire Kubernetes borné du 11 septembre, requêtes bornées en lecture seule sur la base de production (<code>radar-immobilier-freshness.txt</code>, <code>radar-immobilier-source-dates.txt</code>) et captures <code>docs/reports/assets/2026-09/</code>.</em></p>
 </body></html>
